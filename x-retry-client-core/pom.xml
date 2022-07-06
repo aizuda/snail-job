@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.x.retry</groupId>
+        <groupId>com.byteblogs</groupId>
         <artifactId>x-retry</artifactId>
         <version>${revision}</version>
         <relativePath>../pom.xml</relativePath>
@@ -54,7 +54,7 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.x.retry</groupId>
+            <groupId>com.byteblogs</groupId>
             <artifactId>x-retry-common-core</artifactId>
         </dependency>
         <dependency>
@@ -67,21 +67,24 @@
             <artifactId>netty-all</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.x.retry</groupId>
+            <groupId>com.byteblogs</groupId>
             <artifactId>x-retry-common-server-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.x.retry</groupId>
+            <groupId>com.byteblogs</groupId>
             <artifactId>x-retry-common-client-api</artifactId>
         </dependency>
     </dependencies>
 
     <distributionManagement>
         <repository>
-            <id>github</id>
-            <name>GitHub OWNER Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/byteblogs168/x-retry</url>
+            <id>rdc-releases</id>
+            <url>https://repo.rdc.aliyun.com/repository/69606-release-476gHC/</url>
         </repository>
+        <snapshotRepository>
+            <id>rdc-snapshots</id>
+            <url>https://repo.rdc.aliyun.com/repository/69606-snapshot-XnE7nN/</url>
+        </snapshotRepository>
     </distributionManagement>
 
     <build>

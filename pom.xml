@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
-    <groupId>com.x.retry</groupId>
+    <groupId>com.byteblogs</groupId>
     <artifactId>x-retry</artifactId>
     <version>${revision}</version>
     <name>x-retry</name>
@@ -21,7 +21,7 @@
         <java.version>1.8</java.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <revision>0.0.2.0</revision>
+        <revision>0.0.4.1</revision>
         <dingding-talk.version>1.0.0</dingding-talk.version>
         <feign.version>11.7</feign.version>
         <hibernate-validator.version>5.4.2.Final</hibernate-validator.version>
@@ -45,17 +45,17 @@
             </dependency>
 
             <dependency>
-                <groupId>com.x.retry</groupId>
+                <groupId>com.byteblogs</groupId>
                 <artifactId>x-retry-common-core</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
-                <groupId>com.x.retry</groupId>
+                <groupId>com.byteblogs</groupId>
                 <artifactId>x-retry-common-server-api</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
-                <groupId>com.x.retry</groupId>
+                <groupId>com.byteblogs</groupId>
                 <artifactId>x-retry-common-client-api</artifactId>
                 <version>${revision}</version>
             </dependency>
@@ -65,7 +65,7 @@
                 <version>5.7.21</version>
             </dependency>
             <dependency>
-                <groupId>com.x.retry</groupId>
+                <groupId>com.byteblogs</groupId>
                 <artifactId>x-retry-client-core</artifactId>
                 <version>${revision}</version>
             </dependency>
@@ -91,10 +91,13 @@
 
     <distributionManagement>
         <repository>
-            <id>github</id>
-            <name>GitHub OWNER Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/byteblogs168/x-retry</url>
+            <id>rdc-releases</id>
+            <url>https://repo.rdc.aliyun.com/repository/69606-release-476gHC/</url>
         </repository>
+        <snapshotRepository>
+            <id>rdc-snapshots</id>
+            <url>https://repo.rdc.aliyun.com/repository/69606-snapshot-XnE7nN/</url>
+        </snapshotRepository>
     </distributionManagement>
 
     <build>

@@ -36,7 +36,7 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.x.retry</groupId>
+            <groupId>com.byteblogs</groupId>
             <artifactId>x-retry-client-starter</artifactId>
             <version>0.0.2.0</version>
         </dependency>
