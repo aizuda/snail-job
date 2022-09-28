@@ -22,7 +22,7 @@ import java.util.Set;
  * @date : 2022-05-02 21:06
  */
 @Component
-@Order()
+@Order
 public class GroupVersionCache implements Lifecycle {
 
     public static ConfigDTO configDTO;

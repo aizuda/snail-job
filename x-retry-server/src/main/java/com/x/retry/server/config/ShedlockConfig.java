@@ -35,7 +35,7 @@ public class ShedlockConfig {
     @Bean
     public TaskScheduler scheduledExecutorService() {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
-        scheduler.setPoolSize(8);
+        scheduler.setPoolSize(2);
         scheduler.setThreadNamePrefix("x-retry-scheduled-thread-");
         return scheduler;
     }

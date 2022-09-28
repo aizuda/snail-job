@@ -11,7 +11,7 @@ import java.lang.annotation.*;
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Import({XRetryClientConfig.class, XRetryClientsRegistrar.class})
+@Import(XRetryClientsRegistrar.class)
 public @interface EnableXRetry {
 
     String group();
