@@ -29,7 +29,7 @@ public class TestExistsTransactionalRetryService {
     @Autowired
     private RemoteService remoteService;
 
-    @Retryable(scene = "testSimpleInsert", bizNo = "#name", localTimes = 3)
+    @Retryable(scene = "testSimpleInsert", bizNo = "#name", localTimes = 3, isThrowException = false)
     @Transactional
     public String testSimpleInsert(String name) {
 
@@ -50,7 +50,7 @@ public class TestExistsTransactionalRetryService {
         Result call = remoteService.call();
         System.out.println("-------------->"+call.getMessage());
         if (call.getStatus() == 0) {
-            throw new UnsupportedOperationException("调用远程失败");
+            throw new UnsupportedOperationException("调用远程失败" + school.getAddress());
         }
 
         return "testSimpleInsert"+school.getAddress();

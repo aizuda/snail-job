@@ -28,4 +28,5 @@ public class RetryerInfo {
     private final Class<? extends BizIdGenerate> bizIdGenerate;
     private final String bizNo;
     private final Class<? extends RetryMethod> retryMethod;
+    private final boolean isThrowException;
 }

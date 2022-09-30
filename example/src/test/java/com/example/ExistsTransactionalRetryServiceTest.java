@@ -39,7 +39,7 @@ public class ExistsTransactionalRetryServiceTest {
         Mockito.when(remoteService.call())
                 .thenReturn(new Result(0, "1"))
                 .thenReturn(new Result(0, "2"))
-                .thenReturn(new Result(0, "3"))
+                .thenReturn(new Result(1, "3"))
                 .thenReturn(new Result(0, "4"))
                 .thenReturn(new Result(0, "5"))
         ;
@@ -47,7 +47,7 @@ public class ExistsTransactionalRetryServiceTest {
             String s = testExistsTransactionalRetryService.testSimpleInsert(UUID.randomUUID().toString());
             System.out.println(s);
         } catch (Exception e) {
-            log.error("", e);
+            log.error("重试未成功", e);
         }
 
         Thread.sleep(90000);

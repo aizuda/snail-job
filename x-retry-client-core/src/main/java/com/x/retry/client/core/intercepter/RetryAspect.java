@@ -22,8 +22,9 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.PriorityOrdered;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.lang.reflect.Method;
@@ -39,6 +40,7 @@ import java.util.UUID;
 @Aspect
 @Component
 @Slf4j
+@Order(PriorityOrdered.HIGHEST_PRECEDENCE + 2)
 public class RetryAspect {
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -69,6 +71,7 @@ public class RetryAspect {
 
         Throwable throwable = null;
         Object result = null;
+        RetryerResultContext retryerResultContext;
         try {
             result = point.proceed();
         } catch (Throwable t) {
@@ -77,10 +80,20 @@ public class RetryAspect {
 
             LogUtils.debug("开始进行重试 aop [{}]", traceId);
             // 入口则开始处理重试
-            doHandlerRetry(point, traceId, retryable, executorClassName, methodEntrance, throwable);
+            retryerResultContext = doHandlerRetry(point, traceId, retryable, executorClassName, methodEntrance, throwable);
         }
 
         LogUtils.debug("aop 结果处理 traceId:[{}] result:[{}] ", traceId, result, throwable);
+
+        // 若是重试完成了, 则判断是否返回重试完成后的数据
+        if (Objects.nonNull(retryerResultContext)) {
+            // 重试成功直接返回结果 若注解配置了isThrowException=false 则不抛出异常
+            if (retryerResultContext.getRetryResultStatusEnum().getStatus().equals(RetryResultStatusEnum.SUCCESS.getStatus())
+            || !retryable.isThrowException()) {
+                return retryerResultContext.getResult();
+            }
+        }
+
         if (throwable != null) {
             throw throwable;
         } else {
@@ -89,7 +102,7 @@ public class RetryAspect {
 
     }
 
-    private void doHandlerRetry(ProceedingJoinPoint point, String traceId, Retryable retryable, String executorClassName, String methodEntrance, Throwable throwable) {
+    private RetryerResultContext doHandlerRetry(ProceedingJoinPoint point, String traceId, Retryable retryable, String executorClassName, String methodEntrance, Throwable throwable) {
 
         if (!RetrySiteSnapshot.isMethodEntrance(methodEntrance)
                 || RetrySiteSnapshot.isRunning()
@@ -106,27 +119,30 @@ public class RetryAspect {
                     RetrySiteSnapshot.isRetryFlow(),
                     RetrySiteSnapshot.isRetryForStatusCode()
             );
-            return;
+            return null;
         }
 
         if (!TransactionSynchronizationManager.isActualTransactionActive()) {
             // 无事务, 开启重试
-            openRetry(point, traceId, retryable, executorClassName, throwable);
-            return;
+            return openRetry(point, traceId, retryable, executorClassName, throwable);
         }
 
-        // 存在事物
-        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+//        final RetryerResultContext[] retryerResultContext = {null};
 
-            @Override
-            public void afterCompletion(int status) {
-                // 有事务开启重试
-                openRetry(point, traceId, retryable, executorClassName, throwable);
-            }
-        });
+        // 存在事物
+//        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+//
+//            @Override
+//            public void afterCompletion(int status) {
+//                // 有事务开启重试
+//                retryerResultContext[0] = openRetry(point, traceId, retryable, executorClassName, throwable);
+//            }
+//        });
+
+        return null;
     }
 
-    private void openRetry(ProceedingJoinPoint point, String traceId, Retryable retryable, String executorClassName, Throwable throwable) {
+    private RetryerResultContext openRetry(ProceedingJoinPoint point, String traceId, Retryable retryable, String executorClassName, Throwable throwable) {
 
         try {
 
@@ -136,6 +152,7 @@ public class RetryAspect {
                 LogUtils.debug("aop 结果成功 traceId:[{}] result:[{}]", traceId, context.getResult());
             }
 
+            return context;
         } catch (Exception e) {
             LogUtils.error("重试组件处理异常，{}", e);
 
@@ -145,6 +162,8 @@ public class RetryAspect {
         } finally {
             RetrySiteSnapshot.removeAll();
         }
+
+        return null;
     }
 
     private void sendMessage(Exception e) {

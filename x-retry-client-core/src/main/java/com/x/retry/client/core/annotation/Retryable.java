@@ -68,5 +68,16 @@ public @interface Retryable {
      */
     int localInterval() default 2;
 
+    /**
+     * 本地重试完成后是否抛出异常
+     * 如果不抛出异常，则调用需要重试方法的方法则感知不到异常信息
+     *
+     * 比如: A->B->C->D->E
+     * D需要重试 若配置D不抛异常,则A->B->C无法感知，若有事物则无法回滚
+     *
+     * @return true-抛出 false-不抛出
+     */
+    boolean isThrowException() default true;
+
 }
 

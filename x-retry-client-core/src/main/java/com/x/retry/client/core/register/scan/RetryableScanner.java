@@ -76,6 +76,7 @@ public class RetryableScanner implements Scanner, ApplicationContextAware {
         int localTimes = retryable.localTimes();
         int localInterval = retryable.localInterval();
         Class<? extends RetryMethod> retryMethod = retryable.retryMethod();
+        boolean throwException = retryable.isThrowException();
 
         return new RetryerInfo(retryable.scene(),
                 executorClassName,
@@ -88,7 +89,8 @@ public class RetryableScanner implements Scanner, ApplicationContextAware {
                 localInterval,
                 bizIdGenerate,
                 bizNo,
-                retryMethod
+                retryMethod,
+                throwException
         );
     }
 
