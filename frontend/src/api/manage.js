@@ -13,6 +13,7 @@ const api = {
   allGroupNameList: `/group/all/group-name/list`,
   retryTaskPage: '/retry-task/list',
   retryTaskById: '/retry-task/',
+  updateRetryTaskStatus: '/retry-task/status',
   retryTaskLogPage: '/retry-task-log/list',
   retryTaskLogById: '/retry-task-log/',
   retryDeadLetterPage: '/retry-dead-letter/list',
@@ -101,6 +102,14 @@ export function getRetryTaskById (id, parameter) {
     url: api.retryTaskById + id,
     method: 'get',
     params: parameter
+  })
+}
+
+export function updateRetryTaskStatus (data) {
+  return request({
+    url: api.updateRetryTaskStatus,
+    method: 'put',
+    data
   })
 }
 

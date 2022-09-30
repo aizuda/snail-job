@@ -47,7 +47,7 @@ public interface ConfigAccess {
      * @param notifyScene {@link NotifySceneEnum} 场景类型
      * @return {@link NotifyConfig} 场景配置
      */
-    NotifyConfig getNotifyConfigByGroupName(String groupName, Integer notifyScene);
+    List<NotifyConfig> getNotifyConfigByGroupName(String groupName, Integer notifyScene);
 
     /**
      * 获取通知配置

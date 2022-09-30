@@ -52,6 +52,8 @@ public class GroupConfigRequestVO {
     @Data
     public static class NotifyConfigVO {
 
+        private Long id;
+
         @NotNull(message = "通知类型不能为空")
         private Integer notifyType;
 

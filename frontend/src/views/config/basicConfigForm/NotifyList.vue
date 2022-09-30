@@ -260,11 +260,25 @@ export default {
   created () {
     const groupName = this.$route.query.groupName
     if (groupName) {
+      this.getNotifyConfigList(groupName)
+    }
+  },
+  methods: {
+    reset () {
+      this.formData = []
+      this.data = []
+      const groupName = this.$route.query.groupName
+      if (groupName) {
+        this.getNotifyConfigList(groupName)
+      }
+    },
+    getNotifyConfigList (groupName) {
       getNotifyConfigList({ groupName: groupName }).then(res => {
         res.data.map(record => {
           const { id, notifyType, notifyThreshold, notifyScene, description, notifyAttribute } = record
           this.data.push({
             key: id,
+            id: id,
             notifyType: notifyType.toString(),
             notifyThreshold: notifyThreshold,
             notifyScene: notifyScene.toString(),
@@ -275,18 +289,17 @@ export default {
           })
         })
       })
-    }
-  },
-  methods: {
+    },
     remove (delKey) {
       const delData = this.data.find(item => delKey === item.key)
-      const { key, notifyType, notifyThreshold, notifyAttribute, notifyScene, description } = delData
+      const { id, key, notifyType, notifyThreshold, notifyAttribute, notifyScene, description } = delData
       this.formData.push({
         key: key,
+        id: id,
         notifyType: notifyType,
         notifyThreshold: notifyThreshold,
         notifyScene: notifyScene,
-        notifyAttribute: notifyAttribute,
+        notifyAttribute: JSON.stringify(notifyAttribute),
         description: description,
         isDeleted: 1
       })
@@ -296,7 +309,7 @@ export default {
     },
     saveRow (record) {
       this.memberLoading = true
-      const { key, notifyType, notifyThreshold, notifyAttribute, notifyScene, description } = record
+      const { id, key, notifyType, notifyThreshold, notifyAttribute, notifyScene, description } = record
 
       if (!notifyType || !notifyScene || !notifyAttribute || !description || (this.notifyThresholdDisabled.includes(notifyScene) ? false : !notifyThreshold)) {
         this.memberLoading = false
@@ -306,8 +319,11 @@ export default {
 
       const target = this.formData.find(item => key === item.key)
       if (!target) {
+        console.log(target)
+        console.log(this.formData)
         this.formData.push({
           key: key,
+          id,
           notifyType: notifyType,
           notifyThreshold: notifyThreshold,
           notifyScene: notifyScene,

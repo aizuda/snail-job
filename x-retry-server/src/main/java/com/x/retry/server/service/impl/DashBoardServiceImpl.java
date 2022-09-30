@@ -46,8 +46,8 @@ public class DashBoardServiceImpl implements DashBoardService {
         TaskQuantityResponseVO taskQuantityResponseVO = new TaskQuantityResponseVO();
         taskQuantityResponseVO.setTotal(retryTaskLogMapper.countTaskTotal());
 
-        taskQuantityResponseVO.setFinish(retryTaskLogMapper.countTaskByRetryStatus(RetryStatusEnum.FINISH.getLevel()));
-        taskQuantityResponseVO.setMaxRetryCount(retryTaskLogMapper.countTaskByRetryStatus(RetryStatusEnum.MAX_RETRY_COUNT.getLevel()));
+        taskQuantityResponseVO.setFinish(retryTaskLogMapper.countTaskByRetryStatus(RetryStatusEnum.FINISH.getStatus()));
+        taskQuantityResponseVO.setMaxRetryCount(retryTaskLogMapper.countTaskByRetryStatus(RetryStatusEnum.MAX_RETRY_COUNT.getStatus()));
         taskQuantityResponseVO.setRunning(taskQuantityResponseVO.getTotal() - taskQuantityResponseVO.getFinish() - taskQuantityResponseVO.getMaxRetryCount());
 
         return taskQuantityResponseVO;
@@ -65,8 +65,8 @@ public class DashBoardServiceImpl implements DashBoardService {
         }
 
         Long success = retryTaskLogMapper.selectCount(new LambdaQueryWrapper<RetryTaskLog>()
-                .in(RetryTaskLog::getRetryStatus, RetryStatusEnum.MAX_RETRY_COUNT.getLevel(),
-                        RetryStatusEnum.FINISH.getLevel()));
+                .in(RetryTaskLog::getRetryStatus, RetryStatusEnum.MAX_RETRY_COUNT.getStatus(),
+                        RetryStatusEnum.FINISH.getStatus()));
         dispatchQuantityResponseVO.setSuccessPercent(BigDecimal.valueOf(success).divide(BigDecimal.valueOf(total), 2, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100)));
 
         return dispatchQuantityResponseVO;
@@ -122,7 +122,7 @@ public class DashBoardServiceImpl implements DashBoardService {
 
         List<DispatchQuantityResponseVO> totalDispatchQuantityResponseList = retryTaskLogMapper.lineDispatchQuantity(groupName, null, type, startDateTime, endDateTime);
 
-        List<DispatchQuantityResponseVO> successDispatchQuantityResponseList = retryTaskLogMapper.lineDispatchQuantity(groupName, RetryStatusEnum.FINISH.getLevel(), type, startDateTime, endDateTime);
+        List<DispatchQuantityResponseVO> successDispatchQuantityResponseList = retryTaskLogMapper.lineDispatchQuantity(groupName, RetryStatusEnum.FINISH.getStatus(), type, startDateTime, endDateTime);
         Map<String, DispatchQuantityResponseVO> successDispatchQuantityResponseVOMap = successDispatchQuantityResponseList.stream().collect(Collectors.toMap(DispatchQuantityResponseVO::getCreateDt, i -> i));
         for (DispatchQuantityResponseVO dispatchQuantityResponseVO : totalDispatchQuantityResponseList) {
 

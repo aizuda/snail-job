@@ -1,6 +1,9 @@
 package com.x.retry.common.core.enums;
 
 import lombok.Getter;
+import org.springframework.lang.NonNull;
+
+import java.util.Objects;
 
 /**
  * 重试状态终态枚举
@@ -24,12 +27,28 @@ public enum RetryStatusEnum {
     /**
      * 到达最大重试次数
      */
-    MAX_RETRY_COUNT(2);
+    MAX_RETRY_COUNT(2),
 
-    private final Integer level;
+    /**
+     * 暂停重试
+     */
+    SUSPEND(3);
 
-    RetryStatusEnum(int level) {
-        this.level = level;
+    private final Integer status;
+
+    RetryStatusEnum(int status) {
+        this.status = status;
+    }
+
+    public static RetryStatusEnum getByStatus(@NonNull Integer status) {
+
+        for (RetryStatusEnum value : RetryStatusEnum.values()) {
+            if (Objects.equals(value.status, status)) {
+                return value;
+            }
+        }
+
+        return null;
     }
 
 }

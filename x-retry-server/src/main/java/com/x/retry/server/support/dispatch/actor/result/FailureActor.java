@@ -13,8 +13,6 @@ import com.x.retry.server.persistence.mybatis.po.RetryTaskLog;
 import com.x.retry.server.persistence.mybatis.po.SceneConfig;
 import com.x.retry.server.persistence.support.ConfigAccess;
 import com.x.retry.server.persistence.support.RetryTaskAccess;
-import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -22,7 +20,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -61,7 +58,7 @@ public class FailureActor extends AbstractActor {
                     configAccess.getSceneConfigByGroupNameAndSceneName(retryTask.getGroupName(), retryTask.getSceneName());
 
             if (sceneConfig.getMaxRetryCount() <= retryTask.getRetryCount()) {
-                retryTask.setRetryStatus(RetryStatusEnum.MAX_RETRY_COUNT.getLevel());
+                retryTask.setRetryStatus(RetryStatusEnum.MAX_RETRY_COUNT.getStatus());
             }
 
             try {

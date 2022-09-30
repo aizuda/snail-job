@@ -26,7 +26,7 @@ CREATE TABLE `notify_config`
     `create_dt`        datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_dt`        datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_group_name_notify_scene` (`group_name`,`notify_scene`)
+    KEY `idx_group_name` (`group_name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='通知配置'
 ;
 
@@ -79,7 +79,6 @@ CREATE TABLE `retry_task_log`
     `executor_name`   varchar(512) NOT NULL DEFAULT '' COMMENT '执行器名称',
     `args_str`        text         NOT NULL COMMENT '执行方法参数',
     `ext_attrs`       text         NOT NULL COMMENT '扩展字段',
-    `next_trigger_at` datetime     NOT NULL COMMENT '下次触发时间',
     `retry_status`    tinyint(4) NOT NULL DEFAULT '0' COMMENT '重试状态 0、失败 1、成功',
     `create_dt`       datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_dt`       datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
@@ -88,7 +87,7 @@ CREATE TABLE `retry_task_log`
     KEY               `idx_group_name` (`group_name`),
     KEY               `idx_scene_name` (`scene_name`),
     KEY               `idx_retry_status` (`retry_status`),
-    KEY               `idx_biz_id` (`biz_id`),
+    KEY               `idx_biz_id` (`biz_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='重试日志表'
 ;
 

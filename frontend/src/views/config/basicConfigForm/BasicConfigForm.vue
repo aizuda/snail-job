@@ -97,10 +97,10 @@ export default {
             $notification['success']({
               message: res.message
             })
+            this.$refs.notify.reset()
           }
         })
       }).catch(() => {
-        console.log('333')
         const errors = Object.assign({}, groupConfig.form.getFieldsError())
         const tmp = { ...errors }
         this.errorList(tmp)

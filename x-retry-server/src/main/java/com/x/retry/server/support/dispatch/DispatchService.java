@@ -81,7 +81,7 @@ public class DispatchService implements Lifecycle {
             try {
                 List<GroupConfig> currentHostGroupList = getCurrentHostGroupList();
 
-                LogUtils.info("当前节点[{}] 分配的组:[{}]", HostUtils.getIp(), JsonUtil.toJsonString(currentHostGroupList));
+//                LogUtils.info("当前节点[{}] 分配的组:[{}]", HostUtils.getIp(), JsonUtil.toJsonString(currentHostGroupList));
                 if (!CollectionUtils.isEmpty(currentHostGroupList)) {
                     for (GroupConfig groupConfigContext : currentHostGroupList) {
                         produceScanActorTask(groupConfigContext);

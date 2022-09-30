@@ -46,7 +46,7 @@ public class ConfigAccessProcessor implements ConfigAccess {
     }
 
     @Override
-    public NotifyConfig getNotifyConfigByGroupName(String groupName, Integer notifyScene) {
+    public List<NotifyConfig> getNotifyConfigByGroupName(String groupName, Integer notifyScene) {
         return configAccess.getNotifyConfigByGroupName(groupName, notifyScene);
     }
 

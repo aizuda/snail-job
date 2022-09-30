@@ -226,6 +226,19 @@ export default {
     }
   },
   methods: {
+    reset () {
+      this.formData = []
+      this.data = []
+      const groupName = this.$route.query.groupName
+      if (groupName) {
+        this.fetch({
+            groupName: groupName,
+            size: 6,
+            page: 1
+          }
+        )
+      }
+    },
     handleTableChange (pagination, filters, sorter) {
       console.log(pagination)
       const pager = { ...this.pagination }

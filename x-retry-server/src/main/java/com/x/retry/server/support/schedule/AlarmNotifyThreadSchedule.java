@@ -18,10 +18,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Objects;
+import java.util.List;
 
 /**
  * @author: www.byteblogs.com
@@ -36,15 +37,13 @@ public class AlarmNotifyThreadSchedule {
             "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 重试失败数据监控</font>  </br>" +
                     "> 名称:{}  </br>" +
                     "> 时间窗口:{} ~ {}  </br>" +
-                    "> **共计:{}**  \n"
-            ;
+                    "> **共计:{}**  \n";
 
     private static String retryTaskMoreThresholdTextMessageFormatter =
             "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 重试数据监控</font>  </br>" +
                     "> 名称:{}  </br>" +
                     "> 时间:{}  </br>" +
-                    "> **共计:{}**  </br>"
-            ;
+                    "> **共计:{}**  </br>";
 
     @Autowired
     private RetryDeadLetterMapper retryDeadLetterMapper;
@@ -65,30 +64,29 @@ public class AlarmNotifyThreadSchedule {
         LogUtils.info("retryTaskMoreThreshold time[{}] ip:[{}]", LocalDateTime.now(), HostUtils.getIp());
 
         for (GroupConfig groupConfig : configAccess.getAllConfigGroupList()) {
-            NotifyConfig notifyConfig = configAccess.getNotifyConfigByGroupName(groupConfig.getGroupName(), NotifySceneEnum.MAX_RETRY.getNotifyScene());
-            if (Objects.isNull(notifyConfig)) {
+            List<NotifyConfig> notifyConfigs = configAccess.getNotifyConfigByGroupName(groupConfig.getGroupName(), NotifySceneEnum.MAX_RETRY.getNotifyScene());
+            if (CollectionUtils.isEmpty(notifyConfigs)) {
                 continue;
             }
 
-            int count = retryTaskMapper.countAllRetryTaskByRetryStatus(groupConfig.getGroupPartition(), RetryStatusEnum.RUNNING.getLevel());
-            if (count > notifyConfig.getNotifyThreshold()) {
-                // 预警
-                AlarmContext context = AlarmContext.build()
-                        .text(retryTaskMoreThresholdTextMessageFormatter,
-                                EnvironmentUtils.getActiveProfile(),
-                                groupConfig.getGroupName(),
-                                LocalDateTime.now().format(formatter),
-                                count)
-                        .title("组:[{}])重试数据过多", groupConfig.getGroupName())
-                        .notifyAttribute(notifyConfig.getNotifyAttribute());
+            int count = retryTaskMapper.countAllRetryTaskByRetryStatus(groupConfig.getGroupPartition(), RetryStatusEnum.RUNNING.getStatus());
+            for (NotifyConfig notifyConfig : notifyConfigs) {
+                if (count > notifyConfig.getNotifyThreshold()) {
+                    // 预警
+                    AlarmContext context = AlarmContext.build()
+                            .text(retryTaskMoreThresholdTextMessageFormatter,
+                                    EnvironmentUtils.getActiveProfile(),
+                                    groupConfig.getGroupName(),
+                                    LocalDateTime.now().format(formatter),
+                                    count)
+                            .title("组:[{}])重试数据过多", groupConfig.getGroupName())
+                            .notifyAttribute(notifyConfig.getNotifyAttribute());
 
-                Alarm<AlarmContext> alarmType = altinAlarmFactory.getAlarmType(notifyConfig.getNotifyType());
-                alarmType.asyncSendMessage(context);
-
+                    Alarm<AlarmContext> alarmType = altinAlarmFactory.getAlarmType(notifyConfig.getNotifyType());
+                    alarmType.asyncSendMessage(context);
+                }
             }
-
         }
-
     }
 
     /**
@@ -100,31 +98,32 @@ public class AlarmNotifyThreadSchedule {
         LogUtils.info("retryErrorMoreThreshold time[{}] ip:[{}]", LocalDateTime.now(), HostUtils.getIp());
 
         for (GroupConfig groupConfig : configAccess.getAllConfigGroupList()) {
-            NotifyConfig notifyConfig = configAccess.getNotifyConfigByGroupName(groupConfig.getGroupName(), NotifySceneEnum.MAX_RETRY_ERROR.getNotifyScene());
-            if (Objects.isNull(notifyConfig)) {
+            List<NotifyConfig> notifyConfigs = configAccess.getNotifyConfigByGroupName(groupConfig.getGroupName(), NotifySceneEnum.MAX_RETRY_ERROR.getNotifyScene());
+            if (CollectionUtils.isEmpty(notifyConfigs)) {
                 continue;
             }
 
             // x分钟内进入死信队列的数据量
             LocalDateTime now = LocalDateTime.now();
             int count = retryDeadLetterMapper.countRetryDeadLetterByCreateAt(now.minusMinutes(30), now, groupConfig.getGroupPartition());
-            if (count > notifyConfig.getNotifyThreshold()) {
-                // 预警
-                AlarmContext context = AlarmContext.build()
-                        .text(retryErrorMoreThresholdTextMessageFormatter,
-                                EnvironmentUtils.getActiveProfile(),
-                                groupConfig.getGroupName(),
-                                now.minusMinutes(30).format(formatter),
-                                now.format(formatter),
-                                count)
-                        .title("组:[{}] 环境重试失败数据监控", groupConfig.getGroupName())
-                        .notifyAttribute(notifyConfig.getNotifyAttribute());
 
-                Alarm<AlarmContext> alarmType = altinAlarmFactory.getAlarmType(notifyConfig.getNotifyType());
-                alarmType.asyncSendMessage(context);
+            for (NotifyConfig notifyConfig : notifyConfigs) {
+                if (count > notifyConfig.getNotifyThreshold()) {
+                    // 预警
+                    AlarmContext context = AlarmContext.build()
+                            .text(retryErrorMoreThresholdTextMessageFormatter,
+                                    EnvironmentUtils.getActiveProfile(),
+                                    groupConfig.getGroupName(),
+                                    now.minusMinutes(30).format(formatter),
+                                    now.format(formatter),
+                                    count)
+                            .title("组:[{}] 环境重试失败数据监控", groupConfig.getGroupName())
+                            .notifyAttribute(notifyConfig.getNotifyAttribute());
+
+                    Alarm<AlarmContext> alarmType = altinAlarmFactory.getAlarmType(notifyConfig.getNotifyType());
+                    alarmType.asyncSendMessage(context);
+                }
             }
         }
     }
-
-
 }

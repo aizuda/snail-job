@@ -39,7 +39,7 @@ public class MybatisConfigAccess extends AbstractConfigAccess {
     }
 
     @Override
-    public NotifyConfig getNotifyConfigByGroupName(String shardingGroupId, Integer notifyScene) {
+    public List<NotifyConfig> getNotifyConfigByGroupName(String shardingGroupId, Integer notifyScene) {
         return getByGroupIdAndNotifyScene(shardingGroupId, notifyScene);
     }
 

@@ -34,7 +34,7 @@ public class MybatisRetryTaskAccess extends AbstractRetryTaskAccess {
         setPartition(groupName);
         return retryTaskMapper.selectPage(new PageDTO<>(0, pageSize),
                 new LambdaQueryWrapper<RetryTask>()
-                        .eq(RetryTask::getRetryStatus, RetryStatusEnum.RUNNING.getLevel())
+                        .eq(RetryTask::getRetryStatus, RetryStatusEnum.RUNNING.getStatus())
                         .eq(RetryTask::getGroupName, groupName).ge(RetryTask::getCreateDt, lastAt)
                         .orderByAsc(RetryTask::getCreateDt)).getRecords();
     }

@@ -63,7 +63,7 @@
             v-decorator="[
               'groupPartition'
             ]"
-            :min="1"
+            :min="0"
             :max="10"
           />
         </a-form-item>

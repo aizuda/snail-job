@@ -227,49 +227,37 @@ public class GroupConfigServiceImpl implements GroupConfigService {
 
                 iterator.remove();
             }
-
-
         }
     }
 
     private void doUpdateNotifyConfig(GroupConfigRequestVO groupConfigRequestVO) {
         List<GroupConfigRequestVO.NotifyConfigVO> notifyList = groupConfigRequestVO.getNotifyList();
 
-        if (!CollectionUtils.isEmpty(notifyList)) {
+        if (CollectionUtils.isEmpty(notifyList)) {
+            return;
+        }
 
-            List<NotifyConfig> notifyConfigs = notifyConfigMapper.selectList(new LambdaQueryWrapper<NotifyConfig>()
-                    .eq(NotifyConfig::getGroupName, groupConfigRequestVO.getGroupName()));
-            Map<Integer, NotifyConfig> notifyConfigMap = notifyConfigs.stream().collect(Collectors.toMap(NotifyConfig::getNotifyScene, i -> i));
+        for (GroupConfigRequestVO.NotifyConfigVO notifyConfigVO : notifyList) {
 
-            Iterator<GroupConfigRequestVO.NotifyConfigVO> iterator = notifyList.iterator();
-
-            while (iterator.hasNext()) {
-
-                GroupConfigRequestVO.NotifyConfigVO notifyConfigVO = iterator.next();
-
-                NotifyConfig oldNotifyConfig = notifyConfigMap.get(notifyConfigVO.getNotifyScene());
-                NotifyConfig notifyConfig = notifyConfigConverter.convert(notifyConfigVO);
-                notifyConfig.setGroupName(groupConfigRequestVO.getGroupName());
-                notifyConfig.setCreateDt(LocalDateTime.now());
-                if (Objects.isNull(oldNotifyConfig)) {
-                    // insert
-                    doSaveNotifyConfig(groupConfigRequestVO.getGroupName(), notifyConfigVO);
-                } else if (notifyConfigVO.getIsDeleted() == 1) {
-                    Assert.isTrue(1 == notifyConfigMapper.deleteById(oldNotifyConfig.getId()),
-                            new XRetryServerException("删除通知配置失败 sceneConfig:[{}]", JsonUtil.toJsonString(oldNotifyConfig)));
-                } else {
-                    // update
-                    Assert.isTrue(1 == notifyConfigMapper.update(notifyConfig,
-                            new LambdaQueryWrapper<NotifyConfig>()
-                                    .eq(NotifyConfig::getGroupName, notifyConfig.getGroupName())
-                                    .eq(NotifyConfig::getNotifyScene, notifyConfig.getNotifyScene())),
-                            new XRetryServerException("插入通知配置失败 sceneConfig:[{}]", JsonUtil.toJsonString(notifyConfig)));
-                    notifyConfigMap.remove(notifyConfigVO.getNotifyScene());
-                }
-
-                iterator.remove();
+            NotifyConfig notifyConfig = notifyConfigConverter.convert(notifyConfigVO);
+            notifyConfig.setGroupName(groupConfigRequestVO.getGroupName());
+            notifyConfig.setCreateDt(LocalDateTime.now());
+            if (Objects.isNull(notifyConfigVO.getId())) {
+                // insert
+                doSaveNotifyConfig(groupConfigRequestVO.getGroupName(), notifyConfigVO);
+            } else if (Objects.nonNull(notifyConfigVO.getId()) && notifyConfigVO.getIsDeleted() == 1) {
+                // delete
+                Assert.isTrue(1 == notifyConfigMapper.deleteById(notifyConfigVO.getId()),
+                        new XRetryServerException("删除通知配置失败 sceneConfig:[{}]", JsonUtil.toJsonString(notifyConfigVO)));
+            } else {
+                // update
+                Assert.isTrue(1 == notifyConfigMapper.update(notifyConfig,
+                                new LambdaQueryWrapper<NotifyConfig>()
+                                        .eq(NotifyConfig::getId, notifyConfigVO.getId())
+                                        .eq(NotifyConfig::getGroupName, notifyConfig.getGroupName())
+                                        .eq(NotifyConfig::getNotifyScene, notifyConfig.getNotifyScene())),
+                        new XRetryServerException("更新通知配置失败 sceneConfig:[{}]", JsonUtil.toJsonString(notifyConfig)));
             }
-
         }
     }
 

@@ -27,7 +27,7 @@
           <template v-if="advanced">
             <a-col :md="8" :sm="24">
               <a-form-item label="业务编号">
-                <a-input v-model="queryParam.bizNo" placeholder="请输入业务编号"  allowClear/>
+                <a-input v-model="queryParam.bizNo" placeholder="请输入业务编号" allowClear/>
               </a-form-item>
             </a-col>
             <a-col :md="8" :sm="24">
@@ -79,6 +79,12 @@
         <template>
           <a @click="handleInfo(record)">详情</a>
           <a-divider type="vertical" />
+          <a @click="handleSuspend(record)" v-if="record.retryStatus === 0">暂停</a>
+          <a-divider type="vertical" v-if="record.retryStatus === 0"/>
+          <a @click="handleRecovery(record)" v-if="record.retryStatus === 3">恢复</a>
+          <a-divider type="vertical" v-if="record.retryStatus === 3"/>
+          <a @click="handleFinish(record)" v-if="record.retryStatus !== 1">完成</a>
+          <a-divider type="vertical" v-if="record.retryStatus !== 1"/>
         </template>
         <!--        <a-dropdown>-->
         <!--          <a class="ant-dropdown-link">-->
@@ -104,7 +110,7 @@ import ATextarea from 'ant-design-vue/es/input/TextArea'
 import AInput from 'ant-design-vue/es/input/Input'
 // 动态切换组件
 import Edit from '@/views/list/table/Edit'
-import { getAllGroupNameList, getRetryTaskPage, getSceneList } from '@/api/manage'
+import { getAllGroupNameList, getRetryTaskPage, getSceneList, updateRetryTaskStatus } from '@/api/manage'
 import { STable } from '@/components'
 import moment from 'moment'
 
@@ -128,7 +134,8 @@ export default {
       retryStatus: {
         '0': '重试中',
         '1': '重试完成',
-        '2': '最大次数'
+        '2': '最大次数',
+        '3': '暂停'
       },
       // 表头
       columns: [
@@ -229,6 +236,39 @@ export default {
     },
     handleEdit (record) {
 
+    },
+    handleSuspend (record) {
+      updateRetryTaskStatus({ id: record.id, groupName: record.groupName, retryStatus: 3 }).then(res => {
+        const { status } = res
+        if (status === 0) {
+          this.$message.error('暂停失败')
+        } else {
+          this.$refs.table.refresh(true)
+          this.$message.success('暂停成功')
+        }
+      })
+    },
+    handleRecovery (record) {
+      updateRetryTaskStatus({ id: record.id, groupName: record.groupName, retryStatus: 0 }).then(res => {
+        const { status } = res
+        if (status === 0) {
+          this.$message.error('恢复失败')
+        } else {
+          this.$refs.table.refresh(true)
+          this.$message.success('恢复成功')
+        }
+      })
+    },
+    handleFinish (record) {
+      updateRetryTaskStatus({ id: record.id, groupName: record.groupName, retryStatus: 1 }).then(res => {
+        const { status } = res
+        if (status === 0) {
+          this.$message.error('重试完成失败')
+        } else {
+          this.$refs.table.refresh(true)
+          this.$message.success('重试完成成功')
+        }
+      })
     }
 
   }

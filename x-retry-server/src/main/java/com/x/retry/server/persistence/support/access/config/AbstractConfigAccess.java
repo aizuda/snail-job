@@ -28,8 +28,8 @@ public abstract class AbstractConfigAccess implements ConfigAccess {
     @Autowired
     protected GroupConfigMapper groupConfigMapper;
 
-    protected NotifyConfig getByGroupIdAndNotifyScene(String groupName, Integer notifyScene) {
-        return notifyConfigMapper.selectOne(new LambdaQueryWrapper<NotifyConfig>().eq(NotifyConfig::getGroupName, groupName)
+    protected List<NotifyConfig> getByGroupIdAndNotifyScene(String groupName, Integer notifyScene) {
+        return notifyConfigMapper.selectList(new LambdaQueryWrapper<NotifyConfig>().eq(NotifyConfig::getGroupName, groupName)
                 .eq(NotifyConfig::getNotifyScene, notifyScene));
     }
 

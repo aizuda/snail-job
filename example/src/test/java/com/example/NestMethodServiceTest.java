@@ -35,7 +35,7 @@ public class NestMethodServiceTest {
         try {
             nestMethodService.testNestMethod();
         } catch (Exception e) {
-
+            System.out.println(e);
         }
 
         Thread.sleep(90000);

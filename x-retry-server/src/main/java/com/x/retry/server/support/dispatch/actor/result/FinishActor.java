@@ -11,8 +11,6 @@ import com.x.retry.server.persistence.mybatis.mapper.RetryTaskLogMapper;
 import com.x.retry.server.persistence.mybatis.po.RetryTask;
 import com.x.retry.server.persistence.mybatis.po.RetryTaskLog;
 import com.x.retry.server.persistence.support.RetryTaskAccess;
-import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -20,7 +18,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -50,7 +47,7 @@ public class FinishActor extends AbstractActor  {
         return receiveBuilder().match(RetryTask.class, retryTask->{
             LogUtils.info("FinishActor params:[{}]", retryTask);
 
-            retryTask.setRetryStatus(RetryStatusEnum.FINISH.getLevel());
+            retryTask.setRetryStatus(RetryStatusEnum.FINISH.getStatus());
 
             try {
                 retryTaskAccess.updateRetryTask(retryTask);

@@ -93,7 +93,7 @@ public class RetryServiceImpl implements RetryService {
         // 清除重试完成的数据
         clearFinishRetryData(groupId);
 
-        List<RetryTask> retryTasks = retryTaskAccess.listRetryTaskByRetryCount(groupId, RetryStatusEnum.MAX_RETRY_COUNT.getLevel());
+        List<RetryTask> retryTasks = retryTaskAccess.listRetryTaskByRetryCount(groupId, RetryStatusEnum.MAX_RETRY_COUNT.getStatus());
         if (CollectionUtils.isEmpty(retryTasks)) {
             return Boolean.TRUE;
         }
@@ -138,6 +138,6 @@ public class RetryServiceImpl implements RetryService {
      */
     private void clearFinishRetryData(String groupId) {
         // 将已经重试完成的数据删除
-        retryTaskAccess.deleteByDelayLevel(groupId, RetryStatusEnum.FINISH.getLevel());
+        retryTaskAccess.deleteByDelayLevel(groupId, RetryStatusEnum.FINISH.getStatus());
     }
 }
