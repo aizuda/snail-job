@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
  * @author: byteblogs
  * @date: 2019/09/30 17:02
  */
-@ControllerAdvice
+@ControllerAdvice(basePackages = {"com.x.retry.server", "com.x.retry.client.core"} )
 @Slf4j
 @ResponseBody
 public class RestExceptionHandler {
