@@ -17,7 +17,7 @@ public class NestMethodService {
     @Autowired
     private TestExistsTransactionalRetryService testExistsTransactionalRetryService;
 
-    @Retryable(scene = "testNestMethod")
+    @Retryable(scene = "testNestMethod" , isThrowException = false)
     @Transactional
     public void testNestMethod() {
         testExistsTransactionalRetryService.testSimpleInsert(UUID.randomUUID().toString());

@@ -38,7 +38,7 @@ public class TeacherController {
     }
 
     @GetMapping("test-status-code")
-    @Retryable(scene = "testStatusCode")
+    @Retryable(scene = "testStatusCode", isThrowException = false)
     public Result testStatusCode() {
         Result result = restTemplate.getForObject("http://127.0.0.1:8088/school/id", Result.class);
 
