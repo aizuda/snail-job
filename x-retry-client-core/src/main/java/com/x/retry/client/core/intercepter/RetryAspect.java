@@ -122,25 +122,7 @@ public class RetryAspect {
             return null;
         }
 
-        if (!TransactionSynchronizationManager.isActualTransactionActive()) {
-            // 无事务, 开启重试
-            return openRetry(point, traceId, retryable, executorClassName, throwable);
-        }
-
-//        final RetryerResultContext[] retryerResultContext = {null};
-
-        // 存在事物
-//        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-//
-//            @Override
-//            public void afterCompletion(int status) {
-//                // 有事务开启重试
-//                retryerResultContext[0] = openRetry(point, traceId, retryable, executorClassName, throwable);
-//            }
-//        });
-
-        return null;
-    }
+        return openRetry(point, traceId, retryable, executorClassName, throwable);    }
 
     private RetryerResultContext openRetry(ProceedingJoinPoint point, String traceId, Retryable retryable, String executorClassName, Throwable throwable) {
 
