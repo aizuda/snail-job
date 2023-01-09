@@ -13,6 +13,7 @@ public enum HeadersEnum {
     HOST_IP("host-ip"),
     HOST_PORT("host-port"),
     GROUP_NAME("group-name"),
+    CONTEXT_PATH("context-path"),
     REQUEST_ID("request-id"),
     VERSION("version"),
         ;

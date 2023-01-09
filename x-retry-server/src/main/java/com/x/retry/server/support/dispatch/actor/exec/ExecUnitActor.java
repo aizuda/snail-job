@@ -46,7 +46,7 @@ import java.util.concurrent.Callable;
 public class ExecUnitActor extends AbstractActor  {
 
     public static final String BEAN_NAME = "ExecUnitActor";
-    public static final String URL = "http://{0}:{1}/retry/dispatch/v1";
+    public static final String URL = "http://{0}:{1}/{2}/retry/dispatch/v1";
 
     @Autowired
     @Qualifier("bitSetIdempotentStrategyHandler")
@@ -118,7 +118,7 @@ public class ExecUnitActor extends AbstractActor  {
 
         HttpEntity<DispatchRetryDTO> requestEntity = new HttpEntity<>(dispatchRetryDTO, requestHeaders);
 
-        String format = MessageFormat.format(URL, serverNode.getHostIp(), serverNode.getHostPort().toString());
+        String format = MessageFormat.format(URL, serverNode.getHostIp(), serverNode.getHostPort().toString(), serverNode.getContextPath());
         Result result = restTemplate.postForObject(format, requestEntity, Result.class);
 
         if (1 != result.getStatus()  && StringUtils.isNotBlank(result.getMessage())) {

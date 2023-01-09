@@ -58,6 +58,7 @@ public class MybatisRetryTaskAccess extends AbstractRetryTaskAccess {
     @Override
     public int updateRetryTask(RetryTask retryTask) {
         setPartition(retryTask.getGroupName());
+        retryTask.setUpdateDt(LocalDateTime.now());
         return retryTaskMapper.updateById(retryTask);
     }
 

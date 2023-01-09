@@ -47,6 +47,7 @@ public class ClientRegisterHandler {
             String hostIp = headers.get(HeadersEnum.HOST_IP.getKey());
             Integer hostPort = headers.getInt(HeadersEnum.HOST_PORT.getKey());
             String groupName = headers.get(HeadersEnum.GROUP_NAME.getKey());
+            String contextPath = headers.get(HeadersEnum.CONTEXT_PATH.getKey());
 
             LocalDateTime endTime = LocalDateTime.now().plusSeconds(30);
             ServerNode serverNode = new ServerNode();
@@ -56,6 +57,7 @@ public class ClientRegisterHandler {
             serverNode.setHostIp(hostIp);
             serverNode.setExpireAt(endTime);
             serverNode.setCreateDt(LocalDateTime.now());
+            serverNode.setContextPath(contextPath);
             serverNode.setHostId(hostId);
 
             try {

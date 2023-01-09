@@ -18,16 +18,16 @@ import io.netty.handler.codec.http.*;
 import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
+import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
-import java.util.UUID;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -51,6 +51,7 @@ public class NettyHttpConnectClient implements Lifecycle, ApplicationContextAwar
 
         try {
             XRetryProperties xRetryProperties = applicationContext.getBean(XRetryProperties.class);
+
             XRetryProperties.ServerConfig server = xRetryProperties.getServer();
             final NettyHttpConnectClient thisClient = this;
             bootstrap.group(nioEventLoopGroup)
@@ -100,7 +101,7 @@ public class NettyHttpConnectClient implements Lifecycle, ApplicationContextAwar
         FullHttpRequest request = new DefaultFullHttpRequest(
                 HttpVersion.HTTP_1_0, method, url, Unpooled.wrappedBuffer(body.getBytes(StandardCharsets.UTF_8)));
 
-        Environment environment = SpringContext.applicationContext.getBean(Environment.class);
+        ServerProperties serverProperties =  SpringContext.applicationContext.getBean(ServerProperties.class);
 
         request.headers()
                 .set(HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON)
@@ -111,7 +112,8 @@ public class NettyHttpConnectClient implements Lifecycle, ApplicationContextAwar
                 .set(HeadersEnum.HOST_ID.getKey(), HOST_ID)
                 .set(HeadersEnum.HOST_IP.getKey(), HOST_IP)
                 .set(HeadersEnum.GROUP_NAME.getKey(), XRetryProperties.getGroup())
-                .set(HeadersEnum.HOST_PORT.getKey(), environment.getProperty("server.port", Integer.class))
+                .set(HeadersEnum.CONTEXT_PATH.getKey(), Optional.ofNullable(serverProperties.getServlet().getContextPath()).orElse("/"))
+                .set(HeadersEnum.HOST_PORT.getKey(), Optional.ofNullable(serverProperties.getPort()).orElse(8080))
                 .set(HeadersEnum.VERSION.getKey(), GroupVersionCache.getVersion())
         ;
 
