@@ -1,11 +1,13 @@
 package com.x.retry.server.support.dispatch.actor.result;
 
 import akka.actor.AbstractActor;
+import akka.actor.ActorRef;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.x.retry.common.core.enums.RetryStatusEnum;
 import com.x.retry.common.core.log.LogUtils;
 import com.x.retry.common.core.util.Assert;
+import com.x.retry.server.akka.ActorGenerator;
 import com.x.retry.server.exception.XRetryServerException;
 import com.x.retry.server.persistence.mybatis.mapper.RetryTaskLogMapper;
 import com.x.retry.server.persistence.mybatis.po.RetryTask;
@@ -51,10 +53,14 @@ public class FinishActor extends AbstractActor  {
 
             try {
                 retryTaskAccess.updateRetryTask(retryTask);
+
+                // 重试成功回调客户端
+                ActorRef actorRef = ActorGenerator.callbackRetryResultActor();
+                actorRef.tell(retryTask, actorRef);
             }catch (Exception e) {
                 LogUtils.error("更新重试任务失败", e);
             } finally {
-                // 更新DB状态
+
                 getContext().stop(getSelf());
 
                 // 记录重试日志

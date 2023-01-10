@@ -1,6 +1,7 @@
 package com.x.retry.client.core.retryer;
 
 import com.x.retry.client.core.BizIdGenerate;
+import com.x.retry.client.core.callback.RetryCompleteCallback;
 import com.x.retry.client.core.strategy.RetryMethod;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -29,4 +30,5 @@ public class RetryerInfo {
     private final String bizNo;
     private final Class<? extends RetryMethod> retryMethod;
     private final boolean isThrowException;
+    private final Class<? extends RetryCompleteCallback> retryCompleteCallback;
 }

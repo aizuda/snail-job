@@ -1,11 +1,13 @@
 package com.x.retry.server.support.dispatch.actor.result;
 
 import akka.actor.AbstractActor;
+import akka.actor.ActorRef;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.x.retry.common.core.enums.RetryStatusEnum;
 import com.x.retry.common.core.log.LogUtils;
 import com.x.retry.common.core.util.Assert;
+import com.x.retry.server.akka.ActorGenerator;
 import com.x.retry.server.exception.XRetryServerException;
 import com.x.retry.server.persistence.mybatis.mapper.RetryTaskLogMapper;
 import com.x.retry.server.persistence.mybatis.po.RetryTask;
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 重试完成执行器
@@ -57,12 +60,19 @@ public class FailureActor extends AbstractActor {
             SceneConfig sceneConfig =
                     configAccess.getSceneConfigByGroupNameAndSceneName(retryTask.getGroupName(), retryTask.getSceneName());
 
+            ActorRef actorRef = null;
             if (sceneConfig.getMaxRetryCount() <= retryTask.getRetryCount()) {
                 retryTask.setRetryStatus(RetryStatusEnum.MAX_RETRY_COUNT.getStatus());
+                actorRef = ActorGenerator.callbackRetryResultActor();
             }
 
             try {
                 retryTaskAccess.updateRetryTask(retryTask);
+
+                // 重试成功回调客户端
+                if (Objects.nonNull(actorRef)) {
+                    actorRef.tell(retryTask, actorRef);
+                }
             } catch (Exception e) {
                 LogUtils.error("更新重试任务失败", e);
             } finally {

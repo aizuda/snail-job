@@ -21,6 +21,7 @@ import com.x.retry.server.support.WaitStrategy;
 import com.x.retry.server.support.allocate.client.ClientLoadBalanceManager;
 import com.x.retry.server.support.context.MaxAttemptsPersistenceRetryContext;
 import com.x.retry.server.support.dispatch.DispatchService;
+import com.x.retry.server.support.handler.ClientNodeAllocateHandler;
 import com.x.retry.server.support.retry.RetryBuilder;
 import com.x.retry.server.support.retry.RetryExecutor;
 import com.x.retry.server.support.strategy.FilterStrategies;
@@ -63,7 +64,7 @@ public class ScanGroupActor extends AbstractActor {
     private ConfigAccess configAccess;
 
     @Autowired
-    private ServerNodeMapper serverNodeMapper;
+    private ClientNodeAllocateHandler clientNodeAllocateHandler;
 
     public static final String BEAN_NAME = "ScanGroupActor";
 
@@ -108,7 +109,7 @@ public class ScanGroupActor extends AbstractActor {
                 MaxAttemptsPersistenceRetryContext<Result<DispatchRetryResultDTO>> retryContext = new MaxAttemptsPersistenceRetryContext<>();
                 retryContext.setRetryTask(retryTask);
                 retryContext.setSceneBlacklist(configAccess.getBlacklist(groupName));
-                retryContext.setServerNode(getServerNode(retryTask));
+                retryContext.setServerNode(clientNodeAllocateHandler.getServerNode(retryTask));
 
                 RetryExecutor<Result<DispatchRetryResultDTO>> executor = RetryBuilder.<Result<DispatchRetryResultDTO>>newBuilder()
                         .withStopStrategy(StopStrategies.stopResultStatus())
@@ -152,23 +153,6 @@ public class ScanGroupActor extends AbstractActor {
         retryTask.setRetryCount(++retryCount);
     }
 
-    /**
-     * 获取分配的节点
-     */
-    public ServerNode getServerNode(RetryTask retryTask) {
-
-        GroupConfig groupConfig = configAccess.getGroupConfigByGroupName(retryTask.getGroupName());
-        List<ServerNode> serverNodes = serverNodeMapper.selectList(new LambdaQueryWrapper<ServerNode>().eq(ServerNode::getGroupName, retryTask.getGroupName()));
-
-        if (CollectionUtils.isEmpty(serverNodes)) {
-            return null;
-        }
-
-        ClientLoadBalance clientLoadBalanceRandom = ClientLoadBalanceManager.getClientLoadBalance(groupConfig.getRouteKey());
-
-        String hostIp = clientLoadBalanceRandom.route(retryTask.getGroupName(), new TreeSet<>(serverNodes.stream().map(ServerNode::getHostIp).collect(Collectors.toSet())));
-        return serverNodes.stream().filter(s -> s.getHostIp().equals(hostIp)).findFirst().get();
-    }
 
     private void productExecUnitActor(RetryExecutor<Result<DispatchRetryResultDTO>> retryExecutor) {
         String groupIdHash = retryExecutor.getRetryContext().getRetryTask().getGroupName();

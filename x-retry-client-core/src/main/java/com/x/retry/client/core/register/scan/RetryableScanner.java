@@ -3,6 +3,7 @@ package com.x.retry.client.core.register.scan;
 import com.x.retry.client.core.BizIdGenerate;
 import com.x.retry.client.core.annotation.Retryable;
 import com.x.retry.client.core.Scanner;
+import com.x.retry.client.core.callback.RetryCompleteCallback;
 import com.x.retry.client.core.retryer.RetryType;
 import com.x.retry.client.core.retryer.RetryerInfo;
 import com.x.retry.client.core.strategy.RetryMethod;
@@ -77,6 +78,7 @@ public class RetryableScanner implements Scanner, ApplicationContextAware {
         int localInterval = retryable.localInterval();
         Class<? extends RetryMethod> retryMethod = retryable.retryMethod();
         boolean throwException = retryable.isThrowException();
+        Class<? extends RetryCompleteCallback> retryCompleteCallback = retryable.retryCompleteCallback();
 
         return new RetryerInfo(retryable.scene(),
                 executorClassName,
@@ -90,7 +92,8 @@ public class RetryableScanner implements Scanner, ApplicationContextAware {
                 bizIdGenerate,
                 bizNo,
                 retryMethod,
-                throwException
+                throwException,
+                retryCompleteCallback
         );
     }
 

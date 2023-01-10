@@ -2,6 +2,8 @@ package com.x.retry.client.core.annotation;
 
 
 import com.x.retry.client.core.BizIdGenerate;
+import com.x.retry.client.core.callback.RetryCompleteCallback;
+import com.x.retry.client.core.callback.SimpleRetryCompleteCallback;
 import com.x.retry.client.core.generator.SimpleBizIdGenerate;
 import com.x.retry.client.core.retryer.RetryType;
 import com.x.retry.client.core.strategy.RetryAnnotationMethod;
@@ -52,6 +54,13 @@ public @interface Retryable {
      * @return
      */
     Class<? extends BizIdGenerate> bizId() default SimpleBizIdGenerate.class;
+
+    /**
+     * 服务端重试完成(重试成功、重试到达最大次数)回调客户端
+     *
+     * @return
+     */
+    Class<? extends RetryCompleteCallback> retryCompleteCallback() default SimpleRetryCompleteCallback.class;
 
     /**
      * bizNo spel表达式

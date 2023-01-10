@@ -3,6 +3,7 @@ package com.x.retry.server.akka;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import com.x.retry.common.core.context.SpringContext;
+import com.x.retry.server.support.dispatch.actor.callback.CallbackRetryResultActor;
 import com.x.retry.server.support.dispatch.actor.exec.ExecUnitActor;
 import com.x.retry.server.support.dispatch.actor.result.FailureActor;
 import com.x.retry.server.support.dispatch.actor.result.FinishActor;
@@ -44,6 +45,15 @@ public class ActorGenerator {
      */
     public static ActorRef noRetryActor() {
         return getDispatchResultActorSystem().actorOf(getSpringExtension().props(NoRetryActor.BEAN_NAME));
+    }
+
+    /**
+     * 不触发重试actor
+     *
+     * @return actor 引用
+     */
+    public static ActorRef callbackRetryResultActor() {
+        return getDispatchResultActorSystem().actorOf(getSpringExtension().props(CallbackRetryResultActor.BEAN_NAME));
     }
 
     /**
