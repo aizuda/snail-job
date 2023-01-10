@@ -115,7 +115,7 @@ CREATE TABLE `server_node`
     `group_name`   varchar(64) NOT NULL COMMENT '组名称',
     `host_id`      varchar(64) NOT NULL COMMENT '主机id',
     `host_ip`      varchar(64) NOT NULL COMMENT '机器ip',
-    `context_path` varchar(256) NOT NULL COMMENT '客户端上下文路径 server.servlet.context-path',
+    `context_path` varchar(256) NOT NULL DEFAULT '/' COMMENT '客户端上下文路径 server.servlet.context-path',
     `host_port`    int(16) NOT NULL COMMENT '机器端口',
     `expire_at`    datetime    NOT NULL COMMENT '过期时间',
     `node_type`    tinyint(4) NOT NULL COMMENT '节点类型 1、客户端 2、是服务端',

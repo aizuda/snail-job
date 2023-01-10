@@ -51,6 +51,7 @@ public class ServerRegisterNodeHandler implements Lifecycle {
         serverNode.setHostPort(systemProperties.getNettyPort());
         serverNode.setNodeType(NodeTypeEnum.SERVER.getType());
         serverNode.setCreateDt(LocalDateTime.now());
+        serverNode.setContextPath(StrUtil.EMPTY);
         serverRegisterNode.scheduleAtFixedRate(()->{
 
             try {
