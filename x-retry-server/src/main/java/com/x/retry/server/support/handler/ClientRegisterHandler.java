@@ -9,6 +9,7 @@ import com.x.retry.server.persistence.mybatis.mapper.ServerNodeMapper;
 import com.x.retry.server.persistence.mybatis.po.ServerNode;
 import com.x.retry.server.persistence.support.ConfigAccess;
 import io.netty.handler.codec.http.HttpHeaders;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -25,11 +26,12 @@ import java.util.concurrent.*;
  * @since 2.0
  */
 @Component
+@Slf4j
 public class ClientRegisterHandler {
 
     private ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(2, 5, 1, TimeUnit.SECONDS,
-            new LinkedBlockingQueue<>(500), r -> new Thread(r, "CLIENT REGISTER THREAD"), (r, executor) -> LogUtils.error("处理注册线程池已经超负荷运作"));
-    public static final String URL = "http://{0}:{1}/retry/sync/version/v1";
+            new LinkedBlockingQueue<>(500), r -> new Thread(r, "CLIENT REGISTER THREAD"), (r, executor) -> LogUtils.error(log, "处理注册线程池已经超负荷运作"));
+    public static final String URL = "http://{0}:{1}/{2}/retry/sync/version/v1";
 
     @Autowired
     private ServerNodeMapper serverNodeMapper;
@@ -63,30 +65,30 @@ public class ClientRegisterHandler {
             try {
                 int i = serverNodeMapper.insertOrUpdate(serverNode);
             } catch (Exception e) {
-                LogUtils.error("注册客户端失败", e);
+                LogUtils.error(log,"注册客户端失败", e);
             }
         });
 
     }
 
-    public void syncVersion(Integer clientVersion, String groupName, String hostIp, Integer hostPort) {
+    public void syncVersion(Integer clientVersion, String groupName, String hostIp, Integer hostPort, String contextPath) {
 
         threadPoolExecutor.execute(() -> {
             try {
                 Integer serverVersion = configAccess.getConfigVersion(groupName);
                 if (Objects.isNull(clientVersion) || !clientVersion.equals(serverVersion)) {
-                    LogUtils.info("客户端[{}]:[{}] 组:[{}] 版本号不一致clientVersion:[{}] serverVersion:[{}]",
+                    LogUtils.info(log,"客户端[{}]:[{}] 组:[{}] 版本号不一致clientVersion:[{}] serverVersion:[{}]",
                             hostIp, hostPort, clientVersion, serverVersion);
                     // 同步
                     ConfigDTO configDTO = configAccess.getConfigInfo(groupName);
-                    String format = MessageFormat.format(URL, hostIp, hostPort.toString());
+                    String format = MessageFormat.format(URL, hostIp, hostPort.toString(), contextPath);
                     Result result = restTemplate.postForObject(format, configDTO, Result.class);
-                    LogUtils.info("同步结果 [{}]", result);
+                    LogUtils.info(log,"同步结果 [{}]", result);
 
                 }
 
             } catch (Exception e) {
-                LogUtils.error("同步版本失败", e);
+                LogUtils.error(log,"同步版本失败", e);
             }
         });
 

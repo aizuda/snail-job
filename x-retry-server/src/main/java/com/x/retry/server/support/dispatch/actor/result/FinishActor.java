@@ -13,6 +13,7 @@ import com.x.retry.server.persistence.mybatis.mapper.RetryTaskLogMapper;
 import com.x.retry.server.persistence.mybatis.po.RetryTask;
 import com.x.retry.server.persistence.mybatis.po.RetryTaskLog;
 import com.x.retry.server.persistence.support.RetryTaskAccess;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -33,6 +34,7 @@ import java.util.List;
  */
 @Component("FinishActor")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+@Slf4j
 public class FinishActor extends AbstractActor  {
 
     public static final String BEAN_NAME = "FinishActor";
@@ -47,7 +49,7 @@ public class FinishActor extends AbstractActor  {
     @Override
     public Receive createReceive() {
         return receiveBuilder().match(RetryTask.class, retryTask->{
-            LogUtils.info("FinishActor params:[{}]", retryTask);
+            LogUtils.info(log, "FinishActor params:[{}]", retryTask);
 
             retryTask.setRetryStatus(RetryStatusEnum.FINISH.getStatus());
 
@@ -58,7 +60,7 @@ public class FinishActor extends AbstractActor  {
                 ActorRef actorRef = ActorGenerator.callbackRetryResultActor();
                 actorRef.tell(retryTask, actorRef);
             }catch (Exception e) {
-                LogUtils.error("更新重试任务失败", e);
+                LogUtils.error(log, "更新重试任务失败", e);
             } finally {
 
                 getContext().stop(getSelf());

@@ -15,6 +15,7 @@ import com.x.retry.server.persistence.mybatis.po.RetryTaskLog;
 import com.x.retry.server.persistence.mybatis.po.SceneConfig;
 import com.x.retry.server.persistence.support.ConfigAccess;
 import com.x.retry.server.persistence.support.RetryTaskAccess;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -36,6 +37,7 @@ import java.util.Objects;
  */
 @Component("FailureActor")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+@Slf4j
 public class FailureActor extends AbstractActor {
 
     public static final String BEAN_NAME = "FailureActor";
@@ -54,7 +56,7 @@ public class FailureActor extends AbstractActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder().match(RetryTask.class, retryTask -> {
-            LogUtils.info("FailureActor params:[{}]", retryTask);
+            LogUtils.info(log, "FailureActor params:[{}]", retryTask);
 
             // 超过最大等级
             SceneConfig sceneConfig =
@@ -74,7 +76,7 @@ public class FailureActor extends AbstractActor {
                     actorRef.tell(retryTask, actorRef);
                 }
             } catch (Exception e) {
-                LogUtils.error("更新重试任务失败", e);
+                LogUtils.error(log,"更新重试任务失败", e);
             } finally {
                 getContext().stop(getSelf());
 

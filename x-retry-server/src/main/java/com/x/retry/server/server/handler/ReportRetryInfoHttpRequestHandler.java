@@ -29,7 +29,6 @@ public class ReportRetryInfoHttpRequestHandler extends PostHttpRequestHandler {
     @Autowired
     private RetryService retryService;
 
-
     @Override
     public boolean supports(String uri) {
         return URI.equals(uri);
@@ -42,7 +41,7 @@ public class ReportRetryInfoHttpRequestHandler extends PostHttpRequestHandler {
 
     @Override
     public String doHandler(String content, UrlQuery urlQuery, HttpHeaders  headers) {
-        log.info("批量上报重试数据 content:[{}]", content);
+        LogUtils.info(log, "批量上报重试数据 content:[{}]", content);
 
         XRetryRequest retryRequest = JsonUtil.parseObject(content, XRetryRequest.class);
 
@@ -50,7 +49,7 @@ public class ReportRetryInfoHttpRequestHandler extends PostHttpRequestHandler {
             Boolean aBoolean = retryService.batchReportRetry(JsonUtil.parseList(JsonUtil.toJsonString(retryRequest.getArgs()), RetryTaskDTO.class));
             return JsonUtil.toJsonString(new NettyResult(StatusEnum.YES.getStatus(), "批量上报重试数据处理成功", aBoolean, retryRequest.getRequestId()));
         } catch (Exception e) {
-            LogUtils.error("批量上报重试数据失败", e);
+            LogUtils.error(log, "批量上报重试数据失败", e);
             return JsonUtil.toJsonString(new NettyResult(StatusEnum.YES.getStatus(), e.getMessage(), null, retryRequest.getRequestId()));
         }
     }

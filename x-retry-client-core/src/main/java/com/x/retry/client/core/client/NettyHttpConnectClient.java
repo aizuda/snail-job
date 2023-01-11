@@ -85,7 +85,7 @@ public class NettyHttpConnectClient implements Lifecycle, ApplicationContextAwar
     public static void connect(){
         channel = bootstrap.connect().addListener((ChannelFutureListener) future -> {
             if (future.cause() != null){
-                LogUtils.debug("operationComplete", future.cause());
+                LogUtils.debug(log,"operationComplete", future.cause());
             }
         }).channel();
     }
@@ -93,7 +93,7 @@ public class NettyHttpConnectClient implements Lifecycle, ApplicationContextAwar
     public static void send(HttpMethod method, String url, String body) throws InterruptedException {
 
         if (Objects.isNull(channel)) {
-            LogUtils.debug("channel is null");
+            LogUtils.debug(log,"channel is null");
             return;
         }
 

@@ -20,8 +20,7 @@ public class ClientRegisterHandlerTest {
     @Test
     public void syncVersion() {
 
-        clientRegisterHandler.syncVersion(null, "example_group", "127.0.0.1", 8089);
-        Thread.sleep(10000L);
+        clientRegisterHandler.syncVersion(null, "example_group", "127.0.0.1", 8089, "/");
 
     }
 

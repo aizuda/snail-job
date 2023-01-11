@@ -6,6 +6,7 @@ import com.x.retry.common.core.constant.SystemConstants;
 import com.x.retry.common.core.log.LogUtils;
 import com.x.retry.common.core.model.XRetryHeaders;
 import com.x.retry.common.core.util.JsonUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,6 +16,7 @@ import java.util.Objects;
  * @author: www.byteblogs.com
  * @date : 2022-05-17 09:01
  */
+@Slf4j
 public class RequestHeaderPlugins {
 
     private RequestHeaderPlugins() {
@@ -35,7 +37,7 @@ public class RequestHeaderPlugins {
             long callRemoteTime = System.currentTimeMillis();
             long entryMethodTime = RetrySiteSnapshot.getEntryMethodTime();
             long transmitTime = retryHeader.getDdl() - (callRemoteTime - entryMethodTime);
-            LogUtils.info("RPC传递header头 entryMethodTime:[{}] - callRemoteTime:[{}] = transmitTime:[{}]", entryMethodTime, callRemoteTime, transmitTime);
+            LogUtils.info(log, "RPC传递header头 entryMethodTime:[{}] - callRemoteTime:[{}] = transmitTime:[{}]", entryMethodTime, callRemoteTime, transmitTime);
             if (transmitTime > 0) {
                 retryHeader.setDdl(transmitTime);
             } else {

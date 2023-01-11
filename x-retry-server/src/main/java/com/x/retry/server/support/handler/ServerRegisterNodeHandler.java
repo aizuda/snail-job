@@ -10,6 +10,7 @@ import com.x.retry.server.config.SystemProperties;
 import com.x.retry.server.persistence.mybatis.mapper.ServerNodeMapper;
 import com.x.retry.server.persistence.mybatis.po.ServerNode;
 import com.x.retry.server.support.Lifecycle;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,6 +27,7 @@ import java.util.concurrent.TimeUnit;
  * @date : 2021-11-19 14:49
  */
 @Component
+@Slf4j
 public class ServerRegisterNodeHandler implements Lifecycle {
 
     @Autowired
@@ -58,7 +60,7 @@ public class ServerRegisterNodeHandler implements Lifecycle {
                 serverNode.setExpireAt(LocalDateTime.now().plusSeconds(DELAY_TIME));
                 serverNodeMapper.insertOrUpdate(serverNode);
             }catch (Exception e) {
-                LogUtils.error("服务端注册节点失败", e);
+                LogUtils.error(log,"服务端注册节点失败", e);
             }
 
         }, 1, DELAY_TIME / 2, TimeUnit.SECONDS);
@@ -67,12 +69,12 @@ public class ServerRegisterNodeHandler implements Lifecycle {
 
     @Override
     public void close() {
-        LogUtils.info("准备删除节点 [{}]", CURRENT_CID);
+        LogUtils.info(log, "准备删除节点 [{}]", CURRENT_CID);
         int i = serverNodeMapper.delete(new LambdaQueryWrapper<ServerNode>().eq(ServerNode::getHostId, CURRENT_CID));
         if (1 == i) {
-            LogUtils.info("删除节点 [{}]成功", CURRENT_CID);
+            LogUtils.info(log,"删除节点 [{}]成功", CURRENT_CID);
         } else {
-            LogUtils.info("删除节点 [{}]失败", CURRENT_CID);
+            LogUtils.info(log,"删除节点 [{}]失败", CURRENT_CID);
         }
 
     }

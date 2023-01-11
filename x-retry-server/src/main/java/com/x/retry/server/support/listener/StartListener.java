@@ -1,5 +1,6 @@
 package com.x.retry.server.support.listener;
 
+import com.x.retry.common.core.log.LogUtils;
 import com.x.retry.server.support.Lifecycle;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,7 @@ public class StartListener implements ApplicationListener<ContextRefreshedEvent>
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
-        log.info("X-RETRY-SERVER 启动");
+        LogUtils.info(log, "X-RETRY-SERVER 启动");
         lifecycleList.forEach(Lifecycle::start);
     }
 }

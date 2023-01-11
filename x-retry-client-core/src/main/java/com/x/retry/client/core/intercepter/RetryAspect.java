@@ -61,7 +61,7 @@ public class RetryAspect {
     public Object around(ProceedingJoinPoint point) throws Throwable {
         String traceId = UUID.randomUUID().toString();
 
-        LogUtils.debug("进入 aop [{}]", traceId);
+        LogUtils.debug(log,"进入 aop [{}]", traceId);
         Retryable retryable = getAnnotationParameter(point);
         String executorClassName = point.getTarget().getClass().getName();
         String methodEntrance = getMethodEntrance(retryable, executorClassName);
@@ -78,12 +78,12 @@ public class RetryAspect {
             throwable = t;
         } finally {
 
-            LogUtils.debug("开始进行重试 aop [{}]", traceId);
+            LogUtils.debug(log,"开始进行重试 aop [{}]", traceId);
             // 入口则开始处理重试
             retryerResultContext = doHandlerRetry(point, traceId, retryable, executorClassName, methodEntrance, throwable);
         }
 
-        LogUtils.debug("aop 结果处理 traceId:[{}] result:[{}] ", traceId, result, throwable);
+        LogUtils.debug(log,"aop 结果处理 traceId:[{}] result:[{}] ", traceId, result, throwable);
 
         // 若是重试完成了, 则判断是否返回重试完成后的数据
         if (Objects.nonNull(retryerResultContext)) {
@@ -112,7 +112,7 @@ public class RetryAspect {
                 // 下游响应不重试码，不开启重试
                 || RetrySiteSnapshot.isRetryForStatusCode()
         ) {
-            LogUtils.info("校验不通过不开启重试 methodEntrance:[{}] isRunning:[{}] throwable:[{}] isRetryFlow:[{}] isRetryForStatusCode:[{}]" ,
+            LogUtils.info(log, "校验不通过不开启重试 methodEntrance:[{}] isRunning:[{}] throwable:[{}] isRetryFlow:[{}] isRetryForStatusCode:[{}]" ,
                     !RetrySiteSnapshot.isMethodEntrance(methodEntrance),
                     RetrySiteSnapshot.isRunning(),
                     Objects.isNull(throwable),
@@ -129,14 +129,14 @@ public class RetryAspect {
         try {
 
             RetryerResultContext context = retryStrategy.openRetry(retryable.scene(), executorClassName, point.getArgs());
-            LogUtils.info("本地重试结果 message:[{}]", context);
+            LogUtils.info(log,"本地重试结果 message:[{}]", context);
             if (RetryResultStatusEnum.SUCCESS.getStatus().equals(context.getRetryResultStatusEnum().getStatus())) {
-                LogUtils.debug("aop 结果成功 traceId:[{}] result:[{}]", traceId, context.getResult());
+                LogUtils.debug(log, "aop 结果成功 traceId:[{}] result:[{}]", traceId, context.getResult());
             }
 
             return context;
         } catch (Exception e) {
-            LogUtils.error("重试组件处理异常，{}", e);
+            LogUtils.error(log,"重试组件处理异常，{}", e);
 
             // 预警
             sendMessage(e);
@@ -166,7 +166,7 @@ public class RetryAspect {
                 alarmType.asyncSendMessage(context);
             }
         } catch (Exception e1) {
-            LogUtils.error("客户端发送组件异常告警失败", e1);
+            LogUtils.error(log, "客户端发送组件异常告警失败", e1);
         }
 
     }

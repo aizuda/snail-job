@@ -1,14 +1,13 @@
 package com.x.retry.server.support.dispatch.actor.result;
 
 import akka.actor.AbstractActor;
-import cn.hutool.json.JSON;
 import com.x.retry.common.core.log.LogUtils;
-import com.x.retry.common.core.util.JsonUtil;
 import com.x.retry.server.persistence.mybatis.po.RetryTask;
 import com.x.retry.server.persistence.support.RetryTaskAccess;
 import com.x.retry.server.support.WaitStrategy;
 import com.x.retry.server.support.context.MaxAttemptsPersistenceRetryContext;
 import com.x.retry.server.support.retry.RetryExecutor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -23,6 +22,7 @@ import org.springframework.stereotype.Component;
  */
 @Component("NoRetryActor")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+@Slf4j
 public class NoRetryActor extends AbstractActor {
 
     public static final String BEAN_NAME = "NoRetryActor";
@@ -45,7 +45,7 @@ public class NoRetryActor extends AbstractActor {
             try {
                 retryTaskAccess.updateRetryTask(retryTask);
             }catch (Exception e) {
-                LogUtils.error("更新重试任务失败", e);
+                LogUtils.error(log,"更新重试任务失败", e);
             } finally {
                 // 更新DB状态
                 getContext().stop(getSelf());

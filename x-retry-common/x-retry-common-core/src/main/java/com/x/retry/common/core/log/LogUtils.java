@@ -2,6 +2,7 @@ package com.x.retry.common.core.log;
 
 import com.x.retry.common.core.context.SpringContext;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
 import org.springframework.core.env.Environment;
 
 /**
@@ -10,13 +11,12 @@ import org.springframework.core.env.Environment;
  * @author: www.byteblogs.com
  * @date : 2021-11-19 16:27
  */
-@Slf4j
 public class LogUtils {
 
     private LogUtils() {
     }
 
-    public static void debug(String format, Object... arguments) {
+    public static void debug(Logger log, String format, Object... arguments) {
 
         if (!getLogStatus()) {
             return;
@@ -26,7 +26,7 @@ public class LogUtils {
 
     }
 
-    public static void info(String format, Object... arguments) {
+    public static void info(Logger log, String format, Object... arguments) {
 
         if (!getLogStatus()) {
             return;
@@ -36,7 +36,7 @@ public class LogUtils {
 
     }
 
-    public static void error(String format, Object... arguments) {
+    public static void error(Logger log, String format, Object... arguments) {
         if (!getLogStatus()) {
             return;
         }
@@ -44,7 +44,7 @@ public class LogUtils {
         log.error(format, arguments);
     }
 
-    public static void error(String format, Throwable t) {
+    public static void error(Logger log, String format, Throwable t) {
 
         if (!getLogStatus()) {
             return;
@@ -53,7 +53,7 @@ public class LogUtils {
         log.error(format, t);
     }
 
-    public static void warn(String format, Object... arguments) {
+    public static void warn(Logger log, String format, Object... arguments) {
         if (!getLogStatus()) {
             return;
         }

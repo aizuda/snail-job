@@ -12,6 +12,7 @@ import com.x.retry.server.support.IdempotentStrategy;
 import com.x.retry.server.support.RetryContext;
 import com.x.retry.server.support.cache.CacheGroupRateLimiter;
 import com.x.retry.server.support.context.MaxAttemptsPersistenceRetryContext;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -23,6 +24,7 @@ import java.util.concurrent.TimeUnit;
  * @author: www.byteblogs.com
  * @date : 2021-11-30 10:03
  */
+@Slf4j
 public class FilterStrategies {
 
     private FilterStrategies() {
@@ -176,7 +178,7 @@ public class FilterStrategies {
 
             RateLimiter rateLimiter = CacheGroupRateLimiter.getRateLimiterByKey(serverNode.getHostId());
             if (Objects.nonNull(rateLimiter) && !rateLimiter.tryAcquire(100, TimeUnit.MILLISECONDS)) {
-                LogUtils.error("该POD:[{}]已到达最大限流阈值，本次重试不执行", serverNode.getHostId());
+                LogUtils.error(log, "该POD:[{}]已到达最大限流阈值，本次重试不执行", serverNode.getHostId());
                 return Boolean.FALSE;
             }
 

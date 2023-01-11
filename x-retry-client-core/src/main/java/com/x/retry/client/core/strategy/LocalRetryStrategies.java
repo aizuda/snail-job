@@ -12,7 +12,6 @@ import com.x.retry.client.core.retryer.RetryerInfo;
 import com.x.retry.client.core.retryer.RetryerResultContext;
 import com.x.retry.common.core.enums.RetryResultStatusEnum;
 import com.x.retry.common.core.log.LogUtils;
-import com.x.retry.common.core.model.XRetryHeaders;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -54,7 +53,7 @@ public class LocalRetryStrategies extends AbstractRetryStrategies {
     @Override
     protected Consumer<Object> doRetrySuccessConsumer(RetryerResultContext context) {
         return o -> {
-            LogUtils.debug("doRetrySuccessConsumer 重试成功");
+            LogUtils.debug(log, "doRetrySuccessConsumer 重试成功");
         };
     }
 
@@ -171,7 +170,7 @@ public class LocalRetryStrategies extends AbstractRetryStrategies {
                 return Collections.singletonList(new RetryListener() {
                     @Override
                     public <V> void onRetry(Attempt<V> attempt) {
-                        LogUtils.error("x-retry 本地重试，第[{}]次调度", attempt.getAttemptNumber());
+                        LogUtils.error(log,"x-retry 本地重试，第[{}]次调度", attempt.getAttemptNumber());
                     }
                 });
             }

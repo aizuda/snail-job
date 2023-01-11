@@ -36,7 +36,7 @@ public class HeaderAspect {
             // 标记进入方法的时间
             RetrySiteSnapshot.setEntryMethodTime(System.currentTimeMillis());
 
-            LogUtils.info("x-retry 拦截器 xRetry:[{}]", xRetry);
+            LogUtils.info(log, "x-retry 拦截器 xRetry:[{}]", xRetry);
             RetrySiteSnapshot.setRetryHeader(JsonUtil.parseObject(xRetry, XRetryHeaders.class));
         }
     }

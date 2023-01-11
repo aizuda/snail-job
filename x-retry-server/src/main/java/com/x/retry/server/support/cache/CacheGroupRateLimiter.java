@@ -6,6 +6,7 @@ import com.google.common.util.concurrent.RateLimiter;
 import com.x.retry.common.core.log.LogUtils;
 import com.x.retry.server.support.Lifecycle;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.TimeUnit;
@@ -19,6 +20,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Component
 @Data
+@Slf4j
 public class CacheGroupRateLimiter implements Lifecycle {
 
     private static Cache<String, RateLimiter> CACHE;
@@ -43,7 +45,7 @@ public class CacheGroupRateLimiter implements Lifecycle {
 
     @Override
     public void start() {
-        LogUtils.info("CacheGroupRateLimiter start");
+        LogUtils.info(log, "CacheGroupRateLimiter start");
         CACHE = CacheBuilder.newBuilder()
                 // 设置并发级别为cpu核心数
                 .concurrencyLevel(Runtime.getRuntime().availableProcessors())
@@ -52,6 +54,6 @@ public class CacheGroupRateLimiter implements Lifecycle {
 
     @Override
     public void close() {
-        LogUtils.info("CacheGroupRateLimiter stop");
+        LogUtils.info(log, "CacheGroupRateLimiter stop");
     }
 }

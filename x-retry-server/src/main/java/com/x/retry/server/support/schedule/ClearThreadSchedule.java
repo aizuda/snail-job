@@ -5,6 +5,7 @@ import com.x.retry.server.persistence.mybatis.mapper.ServerNodeMapper;
 import com.x.retry.server.persistence.support.ConfigAccess;
 import com.x.retry.server.service.RetryService;
 import com.x.retry.server.support.handler.ServerRegisterNodeHandler;
+import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -21,6 +22,7 @@ import java.util.Set;
  * @date : 2021-11-22 11:00
  */
 @Component
+@Slf4j
 public class ClearThreadSchedule {
 
     @Autowired
@@ -43,7 +45,7 @@ public class ClearThreadSchedule {
         try {
             serverNodeMapper.deleteByExpireAt(LocalDateTime.now().minusSeconds(ServerRegisterNodeHandler.DELAY_TIME * 2));
         } catch (Exception e) {
-            LogUtils.error("clearOfflineNode 失败", e);
+            LogUtils.error(log, "clearOfflineNode 失败", e);
         }
 
     }
@@ -63,7 +65,7 @@ public class ClearThreadSchedule {
             }
 
         } catch (Exception e) {
-            LogUtils.error("clearFinishAndMoveDeadLetterRetryTask 失败", e);
+            LogUtils.error(log, "clearFinishAndMoveDeadLetterRetryTask 失败", e);
         }
 
     }

@@ -23,6 +23,7 @@ import com.x.retry.common.core.util.JsonUtil;
 import com.x.retry.common.core.window.Listener;
 import com.x.retry.server.model.dto.ConfigDTO;
 import com.x.retry.server.model.dto.RetryTaskDTO;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -35,6 +36,7 @@ import java.util.concurrent.TimeUnit;
  * @author: www.byteblogs.com
  * @date : 2022-03-08 13:54
  */
+@Slf4j
 public class ReportListener implements Listener<RetryTaskDTO> {
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private static String reportErrorTextMessageFormatter =
@@ -53,7 +55,7 @@ public class ReportListener implements Listener<RetryTaskDTO> {
 
         try {
             retryExecutor.call(retryer, () -> {
-                LogUtils.info("批量上报");
+                LogUtils.info(log, "批量上报");
 
                 XRetryRequest xRetryRequest = new XRetryRequest(list);
                 ReportRetryInfoHttpRequestHandler requestHandler = SpringContext.getBeanByType(ReportRetryInfoHttpRequestHandler.class);
@@ -62,9 +64,9 @@ public class ReportListener implements Listener<RetryTaskDTO> {
 
                 return null;
             }, throwable -> {
-                LogUtils.info("上报重试后失败：{}", JsonUtil.toJsonString(list));
+                LogUtils.info(log,"上报重试后失败：{}", JsonUtil.toJsonString(list));
                 sendMessage(throwable);
-            }, o -> LogUtils.info("上报重试成功：{}", JsonUtil.toJsonString(list)));
+            }, o -> LogUtils.info(log,"上报重试成功：{}", JsonUtil.toJsonString(list)));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -94,11 +96,11 @@ public class ReportListener implements Listener<RetryTaskDTO> {
                     @Override
                     public <V> void onRetry(Attempt<V> attempt) {
                         if (attempt.hasResult()) {
-                            LogUtils.error("x-retry 上报成功，第[{}]次调度", attempt.getAttemptNumber());
+                            LogUtils.error(log,"x-retry 上报成功，第[{}]次调度", attempt.getAttemptNumber());
                         }
 
                         if (attempt.hasException()) {
-                            LogUtils.error("x-retry 上报失败，第[{}]次调度 ", attempt.getAttemptNumber(), attempt.getExceptionCause());
+                            LogUtils.error(log,"x-retry 上报失败，第[{}]次调度 ", attempt.getAttemptNumber(), attempt.getExceptionCause());
                         }
 
                     }
@@ -127,7 +129,7 @@ public class ReportListener implements Listener<RetryTaskDTO> {
                 alarmType.asyncSendMessage(context);
             }
         } catch (Exception e1) {
-            LogUtils.error("客户端发送组件异常告警失败", e1);
+            LogUtils.error(log, "客户端发送组件异常告警失败", e1);
         }
 
     }

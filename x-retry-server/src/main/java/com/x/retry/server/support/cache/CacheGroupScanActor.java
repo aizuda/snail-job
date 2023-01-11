@@ -6,6 +6,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.x.retry.server.support.Lifecycle;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Data
+@Slf4j
 public class CacheGroupScanActor implements Lifecycle {
 
     private static Cache<String, ActorRef> CACHE;
@@ -32,7 +34,7 @@ public class CacheGroupScanActor implements Lifecycle {
 
     @Override
     public void start() {
-        LogUtils.info("CacheGroupScanActor start");
+        LogUtils.info(log, "CacheGroupScanActor start");
         CACHE = CacheBuilder.newBuilder()
                 // 设置并发级别为cpu核心数
                 .concurrencyLevel(Runtime.getRuntime().availableProcessors())
@@ -41,6 +43,6 @@ public class CacheGroupScanActor implements Lifecycle {
 
     @Override
     public void close() {
-        LogUtils.info("CacheGroupScanActor stop");
+        LogUtils.info(log, "CacheGroupScanActor stop");
     }
 }

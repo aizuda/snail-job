@@ -19,6 +19,7 @@ import com.x.retry.server.support.Lifecycle;
 import com.x.retry.server.support.cache.CacheGroupRateLimiter;
 import com.x.retry.server.support.cache.CacheGroupScanActor;
 import com.x.retry.server.support.handler.ServerRegisterNodeHandler;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -38,6 +39,7 @@ import java.util.stream.Collectors;
  * @date : 2021-11-19 15:46
  */
 @Component
+@Slf4j
 public class DispatchService implements Lifecycle {
 
     /**
@@ -80,8 +82,6 @@ public class DispatchService implements Lifecycle {
 
             try {
                 List<GroupConfig> currentHostGroupList = getCurrentHostGroupList();
-
-//                LogUtils.info("当前节点[{}] 分配的组:[{}]", HostUtils.getIp(), JsonUtil.toJsonString(currentHostGroupList));
                 if (!CollectionUtils.isEmpty(currentHostGroupList)) {
                     for (GroupConfig groupConfigContext : currentHostGroupList) {
                         produceScanActorTask(groupConfigContext);
@@ -89,7 +89,7 @@ public class DispatchService implements Lifecycle {
                 }
 
             } catch (Exception e) {
-                LogUtils.error("分发异常", e);
+                LogUtils.error(log,"分发异常", e);
             }
 
 
@@ -150,9 +150,6 @@ public class DispatchService implements Lifecycle {
      * @return {@link  GroupConfig} 组上下文
      */
     private List<GroupConfig> getCurrentHostGroupList() {
-
-
-        // TODO 优化点，不能查询所有字段，先查询groupName，分配完成在进行，按照groupName查询组配置列表
         List<GroupConfig> prepareAllocateGroupConfig = configAccess.getAllOpenGroupConfig();
         if (CollectionUtils.isEmpty(prepareAllocateGroupConfig)) {
             return Collections.EMPTY_LIST;
@@ -161,7 +158,7 @@ public class DispatchService implements Lifecycle {
         List<ServerNode> serverNodes = serverNodeMapper.selectList(new LambdaQueryWrapper<ServerNode>().eq(ServerNode::getNodeType, NodeTypeEnum.SERVER.getType()));
 
         if (CollectionUtils.isEmpty(serverNodes)) {
-            LogUtils.error("服务端节点为空");
+            LogUtils.error(log, "服务端节点为空");
             return Collections.EMPTY_LIST;
         }
 

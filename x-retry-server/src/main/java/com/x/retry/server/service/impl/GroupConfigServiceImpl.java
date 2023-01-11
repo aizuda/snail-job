@@ -4,12 +4,9 @@ import cn.hutool.core.util.HashUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
-import com.x.retry.common.core.enums.NodeTypeEnum;
-import com.x.retry.common.core.enums.NotifySceneEnum;
 import com.x.retry.common.core.util.Assert;
 import com.x.retry.common.core.util.JsonUtil;
 import com.x.retry.server.exception.XRetryServerException;
-import com.x.retry.server.model.dto.ConfigDTO;
 import com.x.retry.server.persistence.mybatis.mapper.GroupConfigMapper;
 import com.x.retry.server.persistence.mybatis.mapper.NotifyConfigMapper;
 import com.x.retry.server.persistence.mybatis.mapper.SceneConfigMapper;
@@ -18,7 +15,6 @@ import com.x.retry.server.persistence.mybatis.po.GroupConfig;
 import com.x.retry.server.persistence.mybatis.po.NotifyConfig;
 import com.x.retry.server.persistence.mybatis.po.SceneConfig;
 import com.x.retry.server.persistence.mybatis.po.ServerNode;
-import com.x.retry.server.persistence.support.ConfigAccess;
 import com.x.retry.server.service.GroupConfigService;
 import com.x.retry.server.service.convert.GroupConfigConverter;
 import com.x.retry.server.service.convert.GroupConfigResponseVOConverter;
@@ -31,7 +27,6 @@ import com.x.retry.server.web.model.request.GroupConfigRequestVO;
 import com.x.retry.server.web.model.response.GroupConfigResponseVO;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -101,7 +96,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
         for (ServerNode serverNode : serverNodes) {
             clientRegisterHandler.syncVersion(null,
                     groupConfigRequestVO.getGroupName(), serverNode.getHostIp(),
-                    serverNode.getHostPort());
+                    serverNode.getHostPort(), serverNode.getContextPath());
         }
 
         return Boolean.TRUE;

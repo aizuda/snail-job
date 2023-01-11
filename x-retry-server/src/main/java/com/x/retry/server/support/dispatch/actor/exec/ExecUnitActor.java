@@ -18,6 +18,7 @@ import com.x.retry.server.persistence.mybatis.po.ServerNode;
 import com.x.retry.server.support.IdempotentStrategy;
 import com.x.retry.server.support.context.MaxAttemptsPersistenceRetryContext;
 import com.x.retry.server.support.retry.RetryExecutor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,7 @@ import java.util.concurrent.Callable;
  */
 @Component("ExecUnitActor")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+@Slf4j
 public class ExecUnitActor extends AbstractActor  {
 
     public static final String BEAN_NAME = "ExecUnitActor";
@@ -76,7 +78,7 @@ public class ExecUnitActor extends AbstractActor  {
                 }
 
             }catch (Exception e) {
-                LogUtils.error("回调客户端失败 retryTask:[{}]", JsonUtil.toJsonString(retryTask), e);
+                LogUtils.error(log, "回调客户端失败 retryTask:[{}]", JsonUtil.toJsonString(retryTask), e);
                 retryTaskLog.setErrorMessage(StringUtils.isBlank(e.getMessage()) ? StringUtils.EMPTY : e.getMessage());
             } finally {
 
@@ -132,7 +134,7 @@ public class ExecUnitActor extends AbstractActor  {
 
         }
 
-        LogUtils.info("请求客户端 response:[{}}] ", JsonUtil.toJsonString(result));
+        LogUtils.info(log, "请求客户端 response:[{}}] ", JsonUtil.toJsonString(result));
         return result;
 
     }

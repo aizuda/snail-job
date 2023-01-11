@@ -3,6 +3,7 @@ package com.x.retry.common.core.alarm;
 import cn.hutool.extra.mail.MailAccount;
 import com.x.retry.common.core.log.LogUtils;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.regex.Pattern;
  * @date : 2022-05-04 16:13
  */
 @Data
+@Slf4j
 public class EmailAttribute extends MailAccount {
 
     private static final String EMAIL_PATTERN = "^[A-Za-z0-9-._]+@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
@@ -32,7 +34,7 @@ public class EmailAttribute extends MailAccount {
                 continue;
             }
 
-            LogUtils.warn("邮箱地址: [{}] 地址有误", s);
+            LogUtils.warn(log, "邮箱地址: [{}] 地址有误", s);
 
         }
 

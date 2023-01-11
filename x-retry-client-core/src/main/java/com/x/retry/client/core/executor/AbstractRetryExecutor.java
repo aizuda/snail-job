@@ -7,6 +7,7 @@ import com.x.retry.client.core.strategy.RetryMethod;
 import com.x.retry.common.core.context.SpringContext;
 import com.x.retry.common.core.log.LogUtils;
 import com.x.retry.common.core.util.JsonUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Set;
@@ -15,6 +16,7 @@ import java.util.Set;
  * @author: www.byteblogs.com
  * @date : 2022-03-03 18:08
  */
+@Slf4j
 public abstract class AbstractRetryExecutor<BR, SR> implements RetryExecutor<BR, SR> {
 
     protected RetryerInfo retryerInfo;
@@ -28,11 +30,11 @@ public abstract class AbstractRetryExecutor<BR, SR> implements RetryExecutor<BR,
 
         Class<? extends RetryMethod> retryMethodClass = retryerInfo.getRetryMethod();
         if (retryMethodClass.isAssignableFrom(RetryAnnotationMethod.class)) {
-            LogUtils.info("执行注解重试方法：{},参数为：{}", retryMethodClass.getName(), JsonUtil.toJsonString(params));
+            LogUtils.info(log, "执行注解重试方法：{},参数为：{}", retryMethodClass.getName(), JsonUtil.toJsonString(params));
             RetryAnnotationMethod retryAnnotationMethod = new RetryAnnotationMethod(retryerInfo);
             return retryAnnotationMethod.doExecute(params);
         } else {
-            LogUtils.info("执行自定义重试方法：{},参数为：{}", retryMethodClass.getName(), JsonUtil.toJsonString(params));
+            LogUtils.info(log, "执行自定义重试方法：{},参数为：{}", retryMethodClass.getName(), JsonUtil.toJsonString(params));
             RetryMethod retryMethod = SpringContext.getBeanByType(retryMethodClass);
             return retryMethod.doExecute(params);
         }

@@ -41,7 +41,7 @@ public class ConfigHttpRequestHandler extends GetHttpRequestHandler {
     public Consumer<NettyResult> callable() {
         return nettyResult -> {
             if (Objects.isNull(nettyResult.getData())) {
-                LogUtils.error("获取配置结果为null");
+                LogUtils.error(log, "获取配置结果为null");
                 return;
             }
 

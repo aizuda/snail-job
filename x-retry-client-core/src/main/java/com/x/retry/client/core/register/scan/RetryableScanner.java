@@ -9,6 +9,7 @@ import com.x.retry.client.core.retryer.RetryerInfo;
 import com.x.retry.client.core.strategy.RetryMethod;
 import com.x.retry.common.core.context.SpringContext;
 import com.x.retry.common.core.log.LogUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -25,6 +26,7 @@ import java.util.*;
  * @date : 2022-03-03 16:55
  */
 @Component
+@Slf4j
 public class RetryableScanner implements Scanner, ApplicationContextAware {
 
     public ApplicationContext applicationContext;
@@ -46,7 +48,7 @@ public class RetryableScanner implements Scanner, ApplicationContextAware {
                 annotatedMethods = MethodIntrospector.selectMethods(bean.getClass(),
                         (MethodIntrospector.MetadataLookup<Retryable>) method -> AnnotatedElementUtils.findMergedAnnotation(method, Retryable.class));
             } catch (Throwable ex) {
-                LogUtils.error("{}重试信息加载报错：{}", beanDefinitionName, ex);
+                LogUtils.error(log, "{}重试信息加载报错：{}", beanDefinitionName, ex);
             }
             if (annotatedMethods == null || annotatedMethods.isEmpty()) {
                 continue;

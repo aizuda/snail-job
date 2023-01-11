@@ -4,12 +4,14 @@ import com.x.retry.common.core.log.LogUtils;
 import com.dingtalk.api.DefaultDingTalkClient;
 import com.dingtalk.api.DingTalkClient;
 import com.dingtalk.api.request.OapiRobotSendRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 
 /**
  * @author: www.byteblogs.com
  * @date : 2021-11-25 09:54
  */
+@Slf4j
 public class DingDingUtils {
     /**
      * 防止文本过长钉钉限流，目前最大为4000
@@ -61,7 +63,7 @@ public class DingDingUtils {
 
             return true;
         } catch (Exception e) {
-            LogUtils.error("dingDingProcessNotify", e);
+            LogUtils.error(log,"dingDingProcessNotify", e);
         }
 
         return false;

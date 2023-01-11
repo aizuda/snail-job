@@ -27,6 +27,7 @@ import com.x.retry.server.support.retry.RetryExecutor;
 import com.x.retry.server.support.strategy.FilterStrategies;
 import com.x.retry.server.support.strategy.StopStrategies;
 import com.x.retry.server.support.strategy.WaitStrategies;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -46,6 +47,7 @@ import java.util.stream.Collectors;
  */
 @Component("ScanGroupActor")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+@Slf4j
 public class ScanGroupActor extends AbstractActor {
 
     @Autowired
@@ -75,7 +77,7 @@ public class ScanGroupActor extends AbstractActor {
             try {
                 doScan(config);
             } catch (Exception e) {
-                LogUtils.error("数据扫描器处理异常 [{}]", config, e);
+                LogUtils.error(log, "数据扫描器处理异常 [{}]", config, e);
             }
 
         }).build();

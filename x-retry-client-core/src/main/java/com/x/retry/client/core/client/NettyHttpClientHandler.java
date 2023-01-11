@@ -16,7 +16,7 @@ import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.CharsetUtil;
-import org.springframework.core.env.Environment;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -25,6 +25,7 @@ import java.util.concurrent.TimeUnit;
  * @author: www.byteblogs.com
  * @date : 2022-03-07 18:30
  */
+@Slf4j
 public class NettyHttpClientHandler extends SimpleChannelInboundHandler<FullHttpResponse> {
 
     private static final String HOST_ID = UUID.randomUUID().toString().concat("_").concat(HostUtils.getIp());
@@ -42,7 +43,7 @@ public class NettyHttpClientHandler extends SimpleChannelInboundHandler<FullHttp
         String content = response.content().toString(CharsetUtil.UTF_8);
         HttpHeaders headers = response.headers();
 
-        LogUtils.info("接收服务端返回数据content:[{}],headers:[{}]", content, headers);
+        LogUtils.info(log, "接收服务端返回数据content:[{}],headers:[{}]", content, headers);
         NettyResult nettyResult = JsonUtil.parseObject(content, NettyResult.class);
         XRetryResponse.invoke(nettyResult.getRequestId(), nettyResult);
 
@@ -51,17 +52,17 @@ public class NettyHttpClientHandler extends SimpleChannelInboundHandler<FullHttp
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
         super.channelRegistered(ctx);
-        LogUtils.debug("channelRegistered");
+        LogUtils.debug(log, "channelRegistered");
     }
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
         super.channelUnregistered(ctx);
-        LogUtils.debug("channelUnregistered");
+        LogUtils.debug(log, "channelUnregistered");
         ctx.channel().eventLoop().schedule(() -> {
             XRetryProperties xRetryProperties = SpringContext.getBeanByType(XRetryProperties.class);
             XRetryProperties.ServerConfig server = xRetryProperties.getServer();
-            LogUtils.info("Reconnecting to:" + server.getHost() + ":" + server.getPort());
+            LogUtils.info(log, "Reconnecting to:" + server.getHost() + ":" + server.getPort());
             NettyHttpConnectClient.connect();
         }, 10, TimeUnit.SECONDS);
 
@@ -71,36 +72,36 @@ public class NettyHttpClientHandler extends SimpleChannelInboundHandler<FullHttp
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
-        LogUtils.debug("channelActive");
+        LogUtils.debug(log, "channelActive");
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
-        LogUtils.debug("channelInactive");
+        LogUtils.debug(log,"channelInactive");
     }
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
         super.channelReadComplete(ctx);
-        LogUtils.debug("channelReadComplete");
+        LogUtils.debug(log,"channelReadComplete");
     }
 
     @Override
     public void channelWritabilityChanged(ChannelHandlerContext ctx) throws Exception {
         super.channelWritabilityChanged(ctx);
-        LogUtils.debug("channelWritabilityChanged");
+        LogUtils.debug(log,"channelWritabilityChanged");
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        LogUtils.error("x-retry netty_http client exception", cause);
+        LogUtils.error(log,"x-retry netty_http client exception", cause);
         super.exceptionCaught(ctx, cause);
     }
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-        LogUtils.debug("userEventTriggered");
+        LogUtils.debug(log,"userEventTriggered");
         if (evt instanceof IdleStateEvent) {
 
             XRetryRequest xRetryRequest = new XRetryRequest("PING");

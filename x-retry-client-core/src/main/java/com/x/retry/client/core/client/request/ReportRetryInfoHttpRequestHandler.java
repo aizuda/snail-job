@@ -36,12 +36,7 @@ public class ReportRetryInfoHttpRequestHandler extends PostHttpRequestHandler {
 
     @Override
     public Consumer<NettyResult> callable() {
-        return new Consumer<NettyResult>() {
-            @Override
-            public void accept(NettyResult nettyResult) {
-                LogUtils.info("同步回调");
-            }
-        };
+        return nettyResult -> LogUtils.info(log, "同步回调");
     }
 
     @Override

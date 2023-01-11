@@ -3,6 +3,7 @@ package com.x.retry.client.core.client.response;
 import com.x.retry.common.core.log.LogUtils;
 import com.x.retry.common.core.model.XRetryRequest;
 import com.x.retry.common.core.model.NettyResult;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,6 +15,7 @@ import java.util.function.Consumer;
  * @date 2022-03-08
  * @since 2.0
  */
+@Slf4j
 public class XRetryResponse {
 
     private static final ConcurrentMap<String, Consumer<NettyResult>> responsePool = new ConcurrentHashMap<>();
@@ -29,14 +31,14 @@ public class XRetryResponse {
     public static void invoke(String requestId, NettyResult nettyResult) {
         Consumer<NettyResult> resultConsumer = responsePool.get(requestId);
         if (Objects.isNull(resultConsumer)) {
-            LogUtils.info("未发现 requestId:[{}] 的回调对象", requestId);
+            LogUtils.info(log, "未发现 requestId:[{}] 的回调对象", requestId);
             return;
         }
 
         try {
             resultConsumer.accept(nettyResult);
         } catch (Exception e) {
-            LogUtils.error("回调处理失败 requestId:[{}]",requestId, e );
+            LogUtils.error(log, "回调处理失败 requestId:[{}]",requestId, e );
         } finally {
             responsePool.remove(requestId);
         }

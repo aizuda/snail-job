@@ -52,7 +52,7 @@ public class ReportHandler implements Lifecycle {
     public Boolean report(String scene, String targetClassName, Object[] args) {
 
         if (RetrySiteSnapshot.getStage().equals(RetrySiteSnapshot.EnumStage.REMOTE.getStage())) {
-            LogUtils.info("已经上报成功，无需重复上报 scene:[{}] targetClassName:[{}] args:[{}]", scene, targetClassName, args);
+            LogUtils.info(log,"已经上报成功，无需重复上报 scene:[{}] targetClassName:[{}] args:[{}]", scene, targetClassName, args);
             return Boolean.TRUE;
         }
 
@@ -68,7 +68,7 @@ public class ReportHandler implements Lifecycle {
             Object p = new Object[]{scene, targetClassName, args, executorMethod.getName()};
             bizId = (String) ReflectionUtils.invokeMethod(method, generate, p);
         } catch (Exception exception) {
-            LogUtils.error("自定义id生成异常：{},{}", scene, args, exception);
+            LogUtils.error(log, "自定义id生成异常：{},{}", scene, args, exception);
             throw new XRetryClientException("bizId生成异常：{},{}", scene, args);
         }
 

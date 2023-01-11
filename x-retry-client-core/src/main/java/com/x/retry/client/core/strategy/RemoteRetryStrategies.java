@@ -10,6 +10,7 @@ import com.x.retry.client.core.retryer.RetryerInfo;
 import com.x.retry.client.core.retryer.RetryerResultContext;
 import com.x.retry.common.core.enums.RetryResultStatusEnum;
 import com.x.retry.common.core.log.LogUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -23,6 +24,7 @@ import java.util.function.Consumer;
  * @date : 2022-03-03 14:38
  */
 @Component
+@Slf4j
 public class RemoteRetryStrategies extends AbstractRetryStrategies {
 
     @Override
@@ -38,7 +40,7 @@ public class RemoteRetryStrategies extends AbstractRetryStrategies {
     @Override
     protected Consumer<Object> doRetrySuccessConsumer(RetryerResultContext context) {
         return o -> {
-            LogUtils.debug("RemoteRetryStrategies doRetrySuccessConsumer ");
+            LogUtils.debug(log, "RemoteRetryStrategies doRetrySuccessConsumer ");
         };
     }
 
@@ -71,7 +73,7 @@ public class RemoteRetryStrategies extends AbstractRetryStrategies {
     @Override
     protected Consumer<Throwable> doGetRetryErrorConsumer(RetryerInfo retryerInfo, Object[] params) {
         return throwable -> {
-            LogUtils.debug("RemoteRetryStrategies doGetRetryErrorConsumer ");
+            LogUtils.debug(log, "RemoteRetryStrategies doGetRetryErrorConsumer ");
         };
     }
 
@@ -104,11 +106,11 @@ public class RemoteRetryStrategies extends AbstractRetryStrategies {
                     @Override
                     public <V> void onRetry(Attempt<V> attempt) {
                         if (attempt.hasResult()) {
-                            LogUtils.error("x-retry 远程重试成功，第[{}]次调度", attempt.getAttemptNumber());
+                            LogUtils.error(log, "x-retry 远程重试成功，第[{}]次调度", attempt.getAttemptNumber());
                         }
 
                         if (attempt.hasException()) {
-                            LogUtils.error("x-retry 远程重试失败，第[{}]次调度 ", attempt.getAttemptNumber(), attempt.getExceptionCause());
+                            LogUtils.error(log, "x-retry 远程重试失败，第[{}]次调度 ", attempt.getAttemptNumber(), attempt.getExceptionCause());
                         }
 
                     }

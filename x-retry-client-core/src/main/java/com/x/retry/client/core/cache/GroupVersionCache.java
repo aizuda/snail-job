@@ -9,6 +9,7 @@ import com.x.retry.common.core.context.SpringContext;
 import com.x.retry.common.core.log.LogUtils;
 import com.x.retry.common.core.model.XRetryRequest;
 import com.x.retry.server.model.dto.ConfigDTO;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +24,7 @@ import java.util.Set;
  */
 @Component
 @Order
+@Slf4j
 public class GroupVersionCache implements Lifecycle {
 
     public static ConfigDTO configDTO;
@@ -66,7 +68,7 @@ public class GroupVersionCache implements Lifecycle {
                     new RequestParam()), configHttpRequestHandler.body(xRetryRequest));
 
         } catch (Exception e) {
-            LogUtils.error("同步版本失败", e);
+            LogUtils.error(log, "同步版本失败", e);
         }
     }
 

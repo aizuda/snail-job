@@ -13,6 +13,7 @@ import com.x.retry.server.persistence.mybatis.mapper.RetryTaskMapper;
 import com.x.retry.server.persistence.mybatis.po.GroupConfig;
 import com.x.retry.server.persistence.mybatis.po.NotifyConfig;
 import com.x.retry.server.persistence.support.ConfigAccess;
+import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -29,6 +30,7 @@ import java.util.List;
  * @date : 2021-11-24 14:58
  */
 @Component
+@Slf4j
 public class AlarmNotifyThreadSchedule {
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -61,7 +63,7 @@ public class AlarmNotifyThreadSchedule {
     @Scheduled(cron = "0 0/10 * * * ?")
     @SchedulerLock(name = "retryTaskMoreThreshold", lockAtMostFor = "PT10M", lockAtLeastFor = "PT10M")
     public void retryTaskMoreThreshold() {
-        LogUtils.info("retryTaskMoreThreshold time[{}] ip:[{}]", LocalDateTime.now(), HostUtils.getIp());
+        LogUtils.info(log, "retryTaskMoreThreshold time[{}] ip:[{}]", LocalDateTime.now(), HostUtils.getIp());
 
         for (GroupConfig groupConfig : configAccess.getAllConfigGroupList()) {
             List<NotifyConfig> notifyConfigs = configAccess.getNotifyConfigByGroupName(groupConfig.getGroupName(), NotifySceneEnum.MAX_RETRY.getNotifyScene());
@@ -95,7 +97,7 @@ public class AlarmNotifyThreadSchedule {
     @Scheduled(cron = "0 0/11 * * * ?")
     @SchedulerLock(name = "retryErrorMoreThreshold", lockAtMostFor = "PT11M", lockAtLeastFor = "PT11M")
     public void retryErrorMoreThreshold() {
-        LogUtils.info("retryErrorMoreThreshold time[{}] ip:[{}]", LocalDateTime.now(), HostUtils.getIp());
+        LogUtils.info(log, "retryErrorMoreThreshold time[{}] ip:[{}]", LocalDateTime.now(), HostUtils.getIp());
 
         for (GroupConfig groupConfig : configAccess.getAllConfigGroupList()) {
             List<NotifyConfig> notifyConfigs = configAccess.getNotifyConfigByGroupName(groupConfig.getGroupName(), NotifySceneEnum.MAX_RETRY_ERROR.getNotifyScene());
