@@ -29,7 +29,7 @@ https://www.byteblogs.com/chat
 <dependency>
     <groupId>com.x.retry</groupId>
     <artifactId>x-retry-client-starter</artifactId>
-    <version>0.0.4.0</version>
+    <version>最新版本</version>
 </dependency>
 ```
 
@@ -57,6 +57,7 @@ public class ExampleApplication {
         return "这是一个简单的异常方法";
     }
 ```
+
 ## Retryable 详解
 |属性|类型|必须指定|默认值|描述|
 |-|-|-|-|-|
@@ -66,6 +67,8 @@ public class ExampleApplication {
 | retryStrategy|RetryType|是|LOCAL_REMOTE|重试策略|
 | retryMethod|RetryMethod|是|RetryAnnotationMethod|重试处理入口|
 | bizId | BizIdGenerate |是| SimpleBizIdGenerate |自定义业务id，默认为hash(param),传入成员列表，全部拼接取hash|
+| retryCompleteCallback | RetryCompleteCallback |否| SimpleRetryCompleteCallback |服务端重试完成(重试成功、重试到达最大次数)回调客户端|
+| isThrowException|boolean|否|true| 本地重试完成后是否抛出异 |
 | bizNo |String|否|无| bizNo spel表达式|
 | localTimes |int|是|3| 本地重试次数 次数必须大于等于1|
 | localInterval |int|是|2| 本地重试间隔时间(s)|
