@@ -122,7 +122,8 @@ public class RetryAspect {
             return null;
         }
 
-        return openRetry(point, traceId, retryable, executorClassName, throwable);    }
+        return openRetry(point, traceId, retryable, executorClassName, throwable);
+    }
 
     private RetryerResultContext openRetry(ProceedingJoinPoint point, String traceId, Retryable retryable, String executorClassName, Throwable throwable) {
 

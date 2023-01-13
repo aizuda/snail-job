@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 /**
- * 重试对账系统启动监听器
+ * 系统启动监听器
  *
  * @author: www.byteblogs.com
  * @date : 2021-11-19 19:00

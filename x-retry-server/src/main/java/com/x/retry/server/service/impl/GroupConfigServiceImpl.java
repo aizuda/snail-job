@@ -26,6 +26,7 @@ import com.x.retry.server.web.model.request.GroupConfigQueryVO;
 import com.x.retry.server.web.model.request.GroupConfigRequestVO;
 import com.x.retry.server.web.model.response.GroupConfigResponseVO;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -84,7 +85,16 @@ public class GroupConfigServiceImpl implements GroupConfigService {
     @Transactional
     public Boolean updateGroup(GroupConfigRequestVO groupConfigRequestVO) {
 
-        Assert.isTrue(1 == groupConfigMapper.update(groupConfigConverter.convert(groupConfigRequestVO),
+        GroupConfig groupConfig = groupConfigMapper.selectOne(
+            new LambdaQueryWrapper<GroupConfig>().eq(GroupConfig::getGroupName, groupConfigRequestVO.getGroupName()));
+        if (Objects.isNull(groupConfig)) {
+            return false;
+        }
+
+        groupConfig.setVersion(groupConfig.getVersion() + 1);
+        BeanUtils.copyProperties(groupConfigRequestVO, groupConfig);
+
+        Assert.isTrue(1 == groupConfigMapper.update(groupConfig,
                 new LambdaUpdateWrapper<GroupConfig>().eq(GroupConfig::getGroupName, groupConfigRequestVO.getGroupName())),
                 new XRetryServerException("新增组异常异常 groupConfigVO[{}]", groupConfigRequestVO));
 

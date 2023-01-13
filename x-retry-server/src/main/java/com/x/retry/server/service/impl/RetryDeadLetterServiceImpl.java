@@ -1,5 +1,6 @@
 package com.x.retry.server.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.x.retry.common.core.util.Assert;
 import com.x.retry.server.config.RequestDataHelper;
@@ -47,11 +48,26 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
         PageDTO<RetryDeadLetter> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
 
         if (StringUtils.isBlank(queryVO.getGroupName()))  {
-            return  new PageResult<>(pageDTO, new ArrayList<>());
+            return new PageResult<>(pageDTO, new ArrayList<>());
+        }
+
+        LambdaQueryWrapper<RetryDeadLetter> retryDeadLetterLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        retryDeadLetterLambdaQueryWrapper.eq(RetryDeadLetter::getGroupName, queryVO.getGroupName());
+
+        if (StringUtils.isNotBlank(queryVO.getSceneName())) {
+            retryDeadLetterLambdaQueryWrapper.eq(RetryDeadLetter::getSceneName, queryVO.getSceneName());
+        }
+
+        if (StringUtils.isNotBlank(queryVO.getBizNo())) {
+            retryDeadLetterLambdaQueryWrapper.eq(RetryDeadLetter::getBizNo, queryVO.getBizNo());
+        }
+
+        if (StringUtils.isNotBlank(queryVO.getBizId())) {
+            retryDeadLetterLambdaQueryWrapper.eq(RetryDeadLetter::getBizId, queryVO.getBizId());
         }
 
         RequestDataHelper.setPartition(queryVO.getGroupName());
-        PageDTO<RetryDeadLetter> retryDeadLetterPageDTO = retryDeadLetterMapper.selectPage(pageDTO, null);
+        PageDTO<RetryDeadLetter> retryDeadLetterPageDTO = retryDeadLetterMapper.selectPage(pageDTO, retryDeadLetterLambdaQueryWrapper);
 
         return new PageResult<>(retryDeadLetterPageDTO,
                 retryDeadLetterResponseVOConverter.batchConvert(retryDeadLetterPageDTO.getRecords()));

@@ -31,7 +31,7 @@
             {{ retryTaskInfo.executorName }}
           </a-descriptions-item>
           <a-descriptions-item label="扩展参数" span="2">
-            {{ retryTaskInfo.bizNo }}
+            {{ retryTaskInfo.extAttrs }}
           </a-descriptions-item>
           <a-descriptions-item label="参数" span="3">
             {{ retryTaskInfo.argsStr }}
