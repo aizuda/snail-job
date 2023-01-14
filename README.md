@@ -25,7 +25,7 @@ https://www.byteblogs.com/chat
 <dependency>
     <groupId>com.x.retry</groupId>
     <artifactId>x-retry-client-starter</artifactId>
-    <version>0.0.0.1-SNAPSHOT</version>
+    <version>0.0.2.0</version>
 </dependency>
 ```
 
@@ -168,9 +168,33 @@ http://localhost:8080
 
 会出现登陆页面:
 
-![img.png](doc/images/login.png)
+![login.png](doc/images/login.png)
 
 输入用户名: admin, 密码: 123456
+
+## 仪表板
+仪表盘直观展示系统的任务量、调度量、在线节点展示等
+### 总任务量
+统计当前系统总的任务量
+#### 完成
+已经调度成功的异常数据
+#### 运行中
+处于调度中的异常数据
+#### 最大次数
+调度次数超过配置的最大执行次数的异常数据
+
+### 总调度量
+展示系统触发调度的总数量
+#### 失败
+包括调度客户端执行失败、调度超时等异常执行的数据
+
+#### 成功
+调用客户端执行重试成功的数据
+
+### 总在线机器
+
+![dashboard.png](doc/images/dashboard.png)
+
 
 ## 组配置
 通过`新建`按钮配置点开配置组、场景、通知界面
@@ -198,7 +222,7 @@ http://localhost:8080
 - 描述: 对场景进行描述
 - 操作: 新增-添加场景配置、删除-未提交则删除临时场景配置，已提交则删除数据库中的场景配置
 
-![goup_config.png](doc/images/scene_config.png)
+![goup_config.png](doc/images/group_list.png)
 
 ### 通知配置
 及时告知系统管理人员，系统运行状态，如出现大量重试的数据、或者大量重试失败的数据
@@ -246,14 +270,17 @@ http://localhost:8080
 - 业务编号: 根据业务编号精确搜索
 - 业务id: 根据业务id精确搜索
 
-![retry_dead_letter_list.png](doc/images/retry_dead_letter_list.png)
+#### 回滚
+死信队列数据迁移至重试任务重，并删除死信队列数据
+
+![retry_dead_letter_list.png](doc/images/retry_task_dead_letter.png)
 
 ### 用户列表
 搜索系统用户信息
 支持的搜索条件:
 - 用户名: 模糊搜索用户名
 
-![user_list.png](doc/images/user_list.png)
+![user_list.png](/doc/images/user_list.png)
 
 ### 新增用户
 为系统新增用户
