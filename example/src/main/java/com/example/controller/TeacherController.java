@@ -24,13 +24,23 @@ public class TeacherController {
     @Autowired
     private RestTemplate restTemplate;
 
-    @GetMapping
-//    @Retryable(scene = "testStatusCode")
-    public Result getTeacher() {
+    @GetMapping("test-ddl")
+    public Result testDDL() {
         Result result = restTemplate.getForObject("http://127.0.0.1:8088/school/id", Result.class);
         result = restTemplate.getForObject("http://127.0.0.1:8088/school/id", Result.class);
         result = restTemplate.getForObject("http://127.0.0.1:8088/school/id", Result.class);
         result = restTemplate.getForObject("http://127.0.0.1:8088/school/id", Result.class);
+
+        if (result.getStatus() == 0) {
+            throw new UnsupportedOperationException(result.getMessage());
+        }
+        return result;
+    }
+
+    @GetMapping("test-status-code")
+    @Retryable(scene = "testStatusCode")
+    public Result testStatusCode() {
+        Result result = restTemplate.getForObject("http://127.0.0.1:8088/school/id", Result.class);
 
         if (result.getStatus() == 0) {
             throw new UnsupportedOperationException(result.getMessage());
