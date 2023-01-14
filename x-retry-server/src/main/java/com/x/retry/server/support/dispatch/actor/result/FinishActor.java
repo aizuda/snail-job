@@ -2,6 +2,7 @@ package com.x.retry.server.support.dispatch.actor.result;
 
 import akka.actor.AbstractActor;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.x.retry.common.core.enums.RetryStatusEnum;
 import com.x.retry.common.core.log.LogUtils;
 import com.x.retry.common.core.util.Assert;
@@ -17,8 +18,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * 重试完成执行器
@@ -49,7 +52,6 @@ public class FinishActor extends AbstractActor  {
 
             retryTask.setRetryStatus(RetryStatusEnum.FINISH.getLevel());
 
-
             try {
                 retryTaskAccess.updateRetryTask(retryTask);
             }catch (Exception e) {
@@ -59,11 +61,18 @@ public class FinishActor extends AbstractActor  {
                 getContext().stop(getSelf());
 
                 // 记录重试日志
-                RetryTaskLog retryTaskLog = new RetryTaskLog();
-                retryTaskLog.setRetryStatus(retryTask.getRetryStatus());
-                Assert.isTrue(1 ==  retryTaskLogMapper.update(retryTaskLog,
-                        new LambdaQueryWrapper<RetryTaskLog>().eq(RetryTaskLog::getBizId, retryTask.getBizId())),
-                        new XRetryServerException("更新重试日志失败"));
+                PageDTO<RetryTaskLog> retryTaskLogPageDTO = retryTaskLogMapper.selectPage(new PageDTO<>(1, 1),
+                        new LambdaQueryWrapper<RetryTaskLog>()
+                                .eq(RetryTaskLog::getBizId, retryTask.getBizId())
+                                .orderByDesc(RetryTaskLog::getId));
+
+                List<RetryTaskLog> records = retryTaskLogPageDTO.getRecords();
+                if (!CollectionUtils.isEmpty(records)) {
+                    RetryTaskLog retryTaskLog = records.get(0);
+                    retryTaskLog.setRetryStatus(retryTask.getRetryStatus());
+                    Assert.isTrue(1 ==  retryTaskLogMapper.updateById(retryTaskLog),
+                            new XRetryServerException("更新重试日志失败"));
+                }
             }
 
 

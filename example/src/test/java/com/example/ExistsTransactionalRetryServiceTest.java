@@ -49,7 +49,6 @@ public class ExistsTransactionalRetryServiceTest {
             log.error("", e);
         }
 
-//        await().atLeast(1, TimeUnit.MINUTES);
         Thread.sleep(90000);
 
     }

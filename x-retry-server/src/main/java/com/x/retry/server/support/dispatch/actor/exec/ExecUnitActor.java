@@ -90,7 +90,12 @@ public class ExecUnitActor extends AbstractActor  {
 
             }catch (Exception e) {
                 LogUtils.error("回调客户端失败 retryTask:[{}]", JsonUtil.toJsonString(retryTask), e);
-                retryTaskLog.setErrorMessage(e.getMessage());
+                retryTaskLog.setErrorMessage(StringUtils.isBlank(e.getMessage()) ? StringUtils.EMPTY : e.getMessage());
+            } finally {
+
+                // 清除幂等标识位
+                idempotentStrategy.clear(retryTask.getGroupName(), retryTask.getId().intValue());
+                getContext().stop(getSelf());
 
                 // 记录重试日志
                 BeanUtils.copyProperties(retryTask, retryTaskLog);
@@ -98,11 +103,6 @@ public class ExecUnitActor extends AbstractActor  {
                 retryTaskLog.setId(null);
                 Assert.isTrue(1 ==  retryTaskLogMapper.insert(retryTaskLog),
                         new XRetryServerException("新增重试日志失败"));
-            } finally {
-
-                // 清除幂等标识位
-                idempotentStrategy.clear(retryTask.getGroupName(), retryTask.getId().intValue());
-                getContext().stop(getSelf());
 
             }
 

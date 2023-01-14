@@ -59,7 +59,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         if (loginRequired.required()) {
             // 执行认证
             if (token == null) {
-                throw new XRetryServerException("无效token");
+                throw new XRetryServerException("登陆过期，请重新登陆");
             }
 
             // 获取 token 中的 user id
