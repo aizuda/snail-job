@@ -187,11 +187,11 @@ http://localhost:8080
 展示系统触发调度的总数量
 #### 失败
 包括调度客户端执行失败、调度超时等异常执行的数据
-
 #### 成功
 调用客户端执行重试成功的数据
 
 ### 总在线机器
+实时展示当前活跃的客户端与服务端
 
 ![dashboard.png](doc/images/dashboard.png)
 
@@ -222,7 +222,7 @@ http://localhost:8080
 - 描述: 对场景进行描述
 - 操作: 新增-添加场景配置、删除-未提交则删除临时场景配置，已提交则删除数据库中的场景配置
 
-![goup_config.png](doc/images/group_list.png)
+![scene_config.png](doc/images/scene_config.png)
 
 ### 通知配置
 及时告知系统管理人员，系统运行状态，如出现大量重试的数据、或者大量重试失败的数据
