@@ -1,6 +1,7 @@
 package com.x.retry.server.persistence.support.access.config;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.x.retry.server.model.dto.ConfigDTO;
 import com.x.retry.server.persistence.mybatis.mapper.GroupConfigMapper;
 import com.x.retry.server.persistence.mybatis.mapper.NotifyConfigMapper;
 import com.x.retry.server.persistence.mybatis.mapper.SceneConfigMapper;
@@ -45,4 +46,13 @@ public abstract class AbstractConfigAccess implements ConfigAccess {
         return notifyConfigMapper.selectList(new LambdaQueryWrapper<NotifyConfig>().eq(NotifyConfig::getGroupName, groupName));
     }
 
+    @Override
+    public Integer getConfigVersion(String groupName) {
+        return null;
+    }
+
+    @Override
+    public ConfigDTO getConfigInfo(String groupName) {
+        return null;
+    }
 }

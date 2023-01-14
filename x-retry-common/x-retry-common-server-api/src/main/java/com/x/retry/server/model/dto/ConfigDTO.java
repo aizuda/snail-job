@@ -16,11 +16,6 @@ import java.util.Set;
 public class ConfigDTO {
 
     /**
-     * 组id
-     */
-    private String groupId;
-
-    /**
      * 场景
      */
     private List<Scene> sceneList;
@@ -34,6 +29,11 @@ public class ConfigDTO {
      * 场景黑名单
      */
     private Set<String> sceneBlacklist;
+
+    /**
+     * 版本号
+     */
+    private Integer version;
 
     @Data
     public static class Scene {
@@ -50,7 +50,7 @@ public class ConfigDTO {
         /**
          * 通知地址
          */
-        private String notifyAddress;
+        private String notifyAttribute;
 
         /**
          * 触发阈值

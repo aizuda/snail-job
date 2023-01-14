@@ -5,7 +5,7 @@
     <id column="id" jdbcType="BIGINT" property="id" />
     <result column="group_name" jdbcType="VARCHAR" property="groupName" />
     <result column="notify_type" jdbcType="TINYINT" property="notifyType" />
-    <result column="notify_address" jdbcType="VARCHAR" property="notifyAddress" />
+    <result column="notify_attribute" jdbcType="VARCHAR" property="notifyAttribute" />
     <result column="notify_threshold" jdbcType="TINYINT" property="notifyThreshold" />
     <result column="notify_scene" jdbcType="TINYINT" property="notifyScene" />
     <result column="description" jdbcType="VARCHAR" property="description" />
@@ -13,7 +13,7 @@
     <result column="update_dt" jdbcType="TIMESTAMP" property="updateDt" />
   </resultMap>
   <sql id="Base_Column_List">
-    id, group_name, notify_type, notify_address, notify_threshold, notify_scene, description,
+    id, group_name, notify_type, notify_attribute, notify_threshold, notify_scene, description,
     create_dt, update_dt
   </sql>
 

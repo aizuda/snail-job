@@ -6,7 +6,7 @@
       :pagination="false"
       :loading="memberLoading"
     >
-      <template v-for="(col, i) in ['notifyAddress', 'description']" :slot="col" slot-scope="text, record">
+      <template v-for="(col, i) in ['description']" :slot="col" slot-scope="text, record">
         <a-input
           :key="col"
           v-if="record.editable"
@@ -16,6 +16,19 @@
           @change="e => handleChange(e.target.value, record.key, col)"
         />
         <template v-else>{{ text }}</template>
+      </template>
+      <template slot="notifyAttribute" slot-scope="text, record">
+        <a-textarea
+          v-if="record.editable"
+          style="margin: -5px 0"
+          :value="parseJson(text, record)"
+          auto-size
+          :placeholder="notifyColumns.find(item => item.key === 'notifyAttribute').title"
+          @click="handleBlur(record)"
+        />
+        <template v-else>
+          <span v-html="parseJson(text, record).replaceAll(&quot;\r\n&quot;, &quot;</br>&quot;)"></span>
+        </template>
       </template>
       <template slot="notifyScene" slot-scope="text, record">
         <a-select
@@ -76,12 +89,101 @@
       </template>
     </a-table>
     <a-button style="width: 100%; margin-top: 16px; margin-bottom: 8px" type="dashed" icon="plus" @click="newMember">新增成员</a-button>
+
+    <a-modal :visible="visible" title="添加配置" @ok="handleOk" @cancel="handlerCancel" width="1000px">
+      <a-form :form="form" @submit="handleSubmit" :body-style="{padding: '0px 0px'}" v-bind="formItemLayout" >
+        <a-form-item
+          v-if="this.notifyTypeValue === '1'"
+          label="钉钉URL">
+          <a-input
+            placeholder="请输入钉钉URL"
+            v-decorator="[
+              'dingDingUrl',
+              {rules: [{ required: true, message: '请输入钉钉URL', whitespace: true}]}
+            ]" />
+        </a-form-item>
+        <a-form-item
+          v-if="this.notifyTypeValue === '2'"
+          label="用户名">
+          <a-input
+            placeholder="请输入用户名"
+            v-if="this.notifyTypeValue === '2'"
+            v-decorator="[
+              'user',
+              {rules: [{ required: true, message: '请输入用户名', whitespace: true}]}
+            ]" />
+        </a-form-item>
+        <a-form-item
+          v-if="this.notifyTypeValue === '2'"
+          label="密码">
+          <a-input
+            placeholder="请输入密码"
+            v-if="this.notifyTypeValue === '2'"
+            v-decorator="[
+              'pass',
+              {rules: [{ required: true, message: '请输入密码', whitespace: true}]}
+            ]"/>
+        </a-form-item>
+        <a-form-item
+          v-if="this.notifyTypeValue === '2'"
+          label="SMTP地址">
+          <a-input
+            placeholder="请输入邮件服务器的SMTP地址"
+            v-if="this.notifyTypeValue === '2'"
+            v-decorator="[
+              'host',
+              {rules: [{ required: true, message: '请输入邮件服务器的SMTP地址', whitespace: true}]}
+            ]"/>
+        </a-form-item>
+        <a-form-item
+          v-if="this.notifyTypeValue === '2'"
+          label="SMTP端口">
+          <a-input
+            v-if="this.notifyTypeValue === '2'"
+            placeholder="请输入邮件服务器的SMTP端口"
+            v-decorator="[
+              'port',
+              {rules: [{ required: true, message: '请输入邮件服务器的SMTP端口', whitespace: true}]}
+            ]"/>
+        </a-form-item>
+        <a-form-item
+          v-if="this.notifyTypeValue === '2'"
+          label="发件人">
+          <a-input
+            v-if="this.notifyTypeValue === '2'"
+            placeholder="请输入发件人"
+            v-decorator="[
+              'from',
+              {rules: [{ required: true, message: '请输入发件人', whitespace: true}]}
+            ]"/>
+        </a-form-item>
+        <a-form-item
+          v-if="this.notifyTypeValue === '2'"
+          label="收件人">
+          <a-input
+            v-if="this.notifyTypeValue === '2'"
+            placeholder="请输入收件人"
+            v-decorator="[
+              'tos',
+              {rules: [{ required: true, message: '请输入收件人', whitespace: true}]}
+            ]"/>
+        </a-form-item>
+        <a-form-item
+          :wrapper-col="{
+            xs: { span: 24, offset: 0 },
+            sm: { span: 16, offset: 8 },
+            lg: { span: 7 }
+          }">
+        </a-form-item>
+      </a-form>
+    </a-modal>
   </div>
 
 </template>
 
 <script>
 import { getNotifyConfigList } from '@/api/manage'
+import pick from 'lodash.pick'
 
 export default {
   name: 'NotifyList',
@@ -110,11 +212,11 @@ export default {
           scopedSlots: { customRender: 'notifyThreshold' }
         },
         {
-          title: '通知地址',
-          dataIndex: 'notifyAddress',
-          key: 'notifyAddress',
+          title: '配置属性',
+          dataIndex: 'notifyAttribute',
+          key: 'notifyAttribute',
           width: '25%',
-          scopedSlots: { customRender: 'notifyAddress' }
+          scopedSlots: { customRender: 'notifyAttribute' }
         },
         {
           title: '描述',
@@ -132,6 +234,11 @@ export default {
       data: [],
       formData: [],
       loading: false,
+      form: this.$form.createForm(this),
+      formItemLayout: {
+        labelCol: { lg: { span: 7 }, sm: { span: 7 } },
+        wrapperCol: { lg: { span: 10 }, sm: { span: 17 } }
+      },
       memberLoading: false,
       notifyScene: {
         '1': '重试数量超过阈值',
@@ -141,10 +248,13 @@ export default {
       },
       notifyType: {
         '1': '钉钉通知',
-        '2': '邮箱通知',
-        '3': '企业微信'
+        '2': '邮箱通知'
+        // '3': '企业微信'
       },
-      notifyThresholdDisabled: ['3', '4']
+      notifyThresholdDisabled: ['3', '4'],
+      visible: false,
+      key: '',
+      notifyTypeValue: '1'
     }
   },
   created () {
@@ -152,14 +262,14 @@ export default {
     if (groupName) {
       getNotifyConfigList({ groupName: groupName }).then(res => {
         res.data.map(record => {
-          const { id, notifyType, notifyThreshold, notifyScene, description, notifyAddress } = record
+          const { id, notifyType, notifyThreshold, notifyScene, description, notifyAttribute } = record
           this.data.push({
             key: id,
             notifyType: notifyType.toString(),
             notifyThreshold: notifyThreshold,
             notifyScene: notifyScene.toString(),
             description: description,
-            notifyAddress: notifyAddress,
+            notifyAttribute: JSON.parse(notifyAttribute),
             editable: false,
             isNew: false
           })
@@ -170,13 +280,13 @@ export default {
   methods: {
     remove (delKey) {
       const delData = this.data.find(item => delKey === item.key)
-      const { key, notifyType, notifyThreshold, notifyAddress, notifyScene, description } = delData
+      const { key, notifyType, notifyThreshold, notifyAttribute, notifyScene, description } = delData
       this.formData.push({
         key: key,
         notifyType: notifyType,
         notifyThreshold: notifyThreshold,
         notifyScene: notifyScene,
-        notifyAddress: notifyAddress,
+        notifyAttribute: notifyAttribute,
         description: description,
         isDeleted: 1
       })
@@ -186,9 +296,9 @@ export default {
     },
     saveRow (record) {
       this.memberLoading = true
-      const { key, notifyType, notifyThreshold, notifyAddress, notifyScene, description } = record
+      const { key, notifyType, notifyThreshold, notifyAttribute, notifyScene, description } = record
 
-      if (!notifyType || !notifyScene || !notifyAddress || !description || (this.notifyThresholdDisabled.includes(notifyScene) ? false : !notifyThreshold)) {
+      if (!notifyType || !notifyScene || !notifyAttribute || !description || (this.notifyThresholdDisabled.includes(notifyScene) ? false : !notifyThreshold)) {
         this.memberLoading = false
         this.$message.error('请填写完整成员信息。')
         return
@@ -201,7 +311,7 @@ export default {
           notifyType: notifyType,
           notifyThreshold: notifyThreshold,
           notifyScene: notifyScene,
-          notifyAddress: notifyAddress,
+          notifyAttribute: JSON.stringify(notifyAttribute),
           description: description,
           isDeleted: 0
         })
@@ -241,6 +351,53 @@ export default {
         this.data = newData
       }
     },
+    handleBlur (record) {
+      this.key = record.key
+      this.notifyTypeValue = record.notifyType
+      new Promise((resolve) => {
+        setTimeout(resolve, 1500)
+      }).then(() => {
+        const { form } = this
+        const formData = pick(record.notifyAttribute, ['dingDingUrl', 'user', 'pass', 'host', 'port', 'from', 'tos'])
+        console.log(formData)
+        form.setFieldsValue(formData)
+      })
+      this.visible = !this.visible
+    },
+    handleOk () {
+      this.form.validateFields((err, values) => {
+        if (!err) {
+          this.handleChange(values, this.key, 'notifyAttribute')
+          this.visible = false
+          this.key = ''
+        }
+      })
+    },
+    handleSubmit (e) {
+      e.preventDefault()
+    },
+    handlerCancel () {
+      this.visible = false
+    },
+    parseJson (text, record) {
+      if (!text) {
+        return null
+      }
+
+      let s =
+        '用户名:' + text['user'] + ';\r\n' +
+        '密码:' + text['pass'] + ';\r\n' +
+        'SMTP地址:' + text['host'] + ';\r\n' +
+        'SMTP端口:' + text['port'] + ';\r\n' +
+        '发件人:' + text['from'] + ';\r\n' +
+        '收件人:' + text['tos'] + ';'
+
+      if (record.notifyType === '1') {
+         s = '钉钉地址:' + text['dingDingUrl'] + ';'
+      }
+
+      return s
+    },
     newMember () {
       const length = this.data.length
       this.data.push({
@@ -248,11 +405,14 @@ export default {
         notifyType: '1',
         notifyScene: '1',
         notifyThreshold: null,
-        notifyAddress: '',
+        notifyAttribute: '',
         description: '',
         editable: true,
         isNew: true
       })
+
+      const { form } = this
+      form.resetFields()
     }
   }
 }

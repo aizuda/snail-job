@@ -2,6 +2,7 @@ package com.x.retry.client.core.client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.x.retry.client.core.RetryArgSerializer;
+import com.x.retry.client.core.cache.GroupVersionCache;
 import com.x.retry.client.core.cache.RetryerInfoCache;
 import com.x.retry.client.core.exception.XRetryClientException;
 import com.x.retry.client.core.intercepter.RetrySiteSnapshot;
@@ -12,15 +13,12 @@ import com.x.retry.client.core.strategy.RetryStrategy;
 import com.x.retry.client.model.DispatchRetryDTO;
 import com.x.retry.client.model.DispatchRetryResultDTO;
 import com.x.retry.common.core.enums.RetryResultStatusEnum;
-import com.x.retry.common.core.log.LogUtils;
 import com.x.retry.common.core.model.Result;
 import com.x.retry.common.core.util.JsonUtil;
+import com.x.retry.server.model.dto.ConfigDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Objects;
 
@@ -82,5 +80,14 @@ public class RetryEndPoint {
         }
 
         return new Result<>(executeRespDto);
+    }
+
+    /**
+     * 同步版本
+     */
+    @PostMapping("/sync/version/v1")
+    public Result syncVersion(@RequestBody ConfigDTO configDTO) {
+        GroupVersionCache.configDTO = configDTO;
+        return new Result();
     }
 }

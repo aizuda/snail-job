@@ -5,6 +5,7 @@ import com.x.retry.common.core.model.NettyResult;
 import com.x.retry.common.core.model.XRetryRequest;
 import com.x.retry.common.core.util.JsonUtil;
 import com.x.retry.server.support.handler.ClientRegisterHandler;
+import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +35,7 @@ public class BeatHttpRequestHandler extends GetHttpRequestHandler {
     }
 
     @Override
-    public String doHandler(String content, UrlQuery query) {
+    public String doHandler(String content, UrlQuery query, HttpHeaders headers) {
         log.info("心跳检查 content:[{}]", query.toString());
         XRetryRequest retryRequest = JsonUtil.parseObject(content, XRetryRequest.class);
        return JsonUtil.toJsonString(new NettyResult("PONG", retryRequest.getRequestId()));

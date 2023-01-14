@@ -55,8 +55,8 @@ public class GroupConfigRequestVO {
         @NotNull(message = "通知类型不能为空")
         private Integer notifyType;
 
-        @NotBlank(message = "通知地址不能为空")
-        private String notifyAddress;
+        @NotBlank(message = "通知属性不能为空")
+        private String notifyAttribute;
 
         @NotNull(message = "通知阈值不能为空")
         private Integer notifyThreshold;

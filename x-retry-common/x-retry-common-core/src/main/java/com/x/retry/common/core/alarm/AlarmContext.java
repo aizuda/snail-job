@@ -14,7 +14,7 @@ public class AlarmContext {
 
     private String title;
 
-    private String notifyAddress;
+    private String notifyAttribute;
 
     public AlarmContext text(String pattern, Object ...arguments) {
         this.text = MessageFormatter.arrayFormat(pattern, arguments).getMessage();
@@ -26,8 +26,8 @@ public class AlarmContext {
         return this;
     }
 
-    public AlarmContext notifyAddress(String notifyAddress) {
-        this.notifyAddress = notifyAddress;
+    public AlarmContext notifyAttribute(String notifyAttribute) {
+        this.notifyAttribute = notifyAttribute;
         return this;
     }
 

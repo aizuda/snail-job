@@ -2,6 +2,7 @@ package com.x.retry.server.server;
 
 import cn.hutool.core.net.url.UrlBuilder;
 import com.x.retry.common.core.context.SpringContext;
+import com.x.retry.common.core.enums.HeadersEnum;
 import com.x.retry.common.core.model.Result;
 import com.x.retry.common.core.util.JsonUtil;
 import com.x.retry.server.exception.XRetryServerException;
@@ -55,11 +56,18 @@ public class NettyHttpServerHandler extends SimpleChannelInboundHandler<FullHttp
         ClientRegisterHandler registerHandler = SpringContext.getBeanByType(ClientRegisterHandler.class);
         registerHandler.registerClient(headers);
 
+        Integer clientVersion = headers.getInt(HeadersEnum.VERSION.getKey());
+        String groupName = headers.get(HeadersEnum.GROUP_NAME.getKey());
+        String hostIp = headers.get(HeadersEnum.HOST_IP.getKey());
+        Integer hostPort = headers.getInt(HeadersEnum.HOST_PORT.getKey());
+
+        registerHandler.syncVersion(clientVersion, groupName, hostIp, hostPort);
+
         UrlBuilder builder = UrlBuilder.ofHttp(uri);
         Collection<HttpRequestHandler> httpRequestHandlers = SpringContext.applicationContext.getBeansOfType(HttpRequestHandler.class).values();
         for (HttpRequestHandler httpRequestHandler : httpRequestHandlers) {
             if (httpRequestHandler.supports(builder.getPathStr()) && method.name().equals(httpRequestHandler.method().name())) {
-              return httpRequestHandler.doHandler(content, builder);
+              return httpRequestHandler.doHandler(content, builder, headers);
             }
         }
 

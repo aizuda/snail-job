@@ -17,7 +17,7 @@ public class NotifyConfig implements Serializable {
 
     private Integer notifyType;
 
-    private String notifyAddress;
+    private String notifyAttribute;
 
     private Integer notifyThreshold;
 

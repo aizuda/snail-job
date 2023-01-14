@@ -1,6 +1,10 @@
 package com.x.retry.common.core.alarm.strategy;
 
+import cn.hutool.extra.mail.MailUtil;
+import com.x.retry.common.core.alarm.AlarmContext;
+import com.x.retry.common.core.alarm.EmailAttribute;
 import com.x.retry.common.core.enums.AlarmTypeEnum;
+import com.x.retry.common.core.util.JsonUtil;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -10,7 +14,7 @@ import java.util.List;
  * @date : 2021-11-25 09:20
  */
 @Component
-public class EmailAlarm extends AbstractAlarm {
+public class EmailAlarm extends AbstractAlarm<AlarmContext> {
 
     @Override
     public Integer getAlarmType() {
@@ -18,18 +22,30 @@ public class EmailAlarm extends AbstractAlarm {
     }
 
     @Override
-    public boolean asyncSendMessage(Object o) {
-        return false;
+    public boolean asyncSendMessage(AlarmContext alarmContext) {
+        threadPoolExecutor.execute(() -> syncSendMessage(alarmContext));
+        return true;
     }
 
     @Override
-    public boolean syncSendMessage(Object o) {
-        return false;
+    public boolean syncSendMessage(AlarmContext alarmContext) {
+
+        String notifyAttribute = alarmContext.getNotifyAttribute();
+        EmailAttribute emailAttribute = JsonUtil.parseObject(notifyAttribute, EmailAttribute.class);
+        emailAttribute.setAuth(true);
+        MailUtil.send(emailAttribute, emailAttribute.getTos(), alarmContext.getTitle(), alarmContext.getText(), false);
+
+        return true;
     }
 
     @Override
-    public boolean asyncSendMessage(List list) {
-        return false;
+    public boolean asyncSendMessage(List<AlarmContext> alarmContexts) {
+        for (AlarmContext alarmContext : alarmContexts) {
+            asyncSendMessage(alarmContext);
+        }
+
+        return Boolean.TRUE;
     }
+
 }
 

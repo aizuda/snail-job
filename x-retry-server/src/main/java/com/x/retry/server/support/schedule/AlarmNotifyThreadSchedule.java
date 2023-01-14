@@ -27,7 +27,6 @@ import java.util.Objects;
  * @date : 2021-11-24 14:58
  */
 @Component
-//todo SchedulerLock 增加一些pod信息,重新设计一下锁定时长
 public class AlarmNotifyThreadSchedule {
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -83,7 +82,7 @@ public class AlarmNotifyThreadSchedule {
                                 LocalDateTime.now().format(formatter),
                                 count)
                         .title("组:[{}])重试数据过多", groupConfig.getGroupName())
-                        .notifyAddress(notifyConfig.getNotifyAddress());
+                        .notifyAttribute(notifyConfig.getNotifyAttribute());
 
                 Alarm<AlarmContext> alarmType = altinAlarmFactory.getAlarmType(notifyConfig.getNotifyType());
                 alarmType.asyncSendMessage(context);
@@ -122,7 +121,7 @@ public class AlarmNotifyThreadSchedule {
                                 now.format(formatter),
                                 count)
                         .title("组:[{}] 环境重试失败数据监控", groupConfig.getGroupName())
-                        .notifyAddress(notifyConfig.getNotifyAddress());
+                        .notifyAttribute(notifyConfig.getNotifyAttribute());
 
                 Alarm<AlarmContext> alarmType = altinAlarmFactory.getAlarmType(notifyConfig.getNotifyType());
                 alarmType.asyncSendMessage(context);

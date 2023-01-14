@@ -14,6 +14,7 @@ public enum HeadersEnum {
     HOST_PORT("host-port"),
     GROUP_NAME("group-name"),
     REQUEST_ID("request-id"),
+    VERSION("version"),
         ;
 
     private final String key;

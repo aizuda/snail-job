@@ -9,6 +9,7 @@ import com.x.retry.common.core.util.JsonUtil;
 import com.x.retry.server.model.dto.RetryTaskDTO;
 import com.x.retry.server.service.RetryService;
 import com.x.retry.server.support.handler.ClientRegisterHandler;
+import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +41,7 @@ public class ReportRetryInfoHttpRequestHandler extends PostHttpRequestHandler {
     }
 
     @Override
-    public String doHandler(String content, UrlQuery urlQuery) {
+    public String doHandler(String content, UrlQuery urlQuery, HttpHeaders  headers) {
         log.info("批量上报重试数据 content:[{}]", content);
 
         XRetryRequest retryRequest = JsonUtil.parseObject(content, XRetryRequest.class);

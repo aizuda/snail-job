@@ -23,14 +23,14 @@ public class DingdingAlarm extends AbstractAlarm<AlarmContext> {
     public boolean asyncSendMessage(AlarmContext context) {
 
         threadPoolExecutor.execute(() ->
-                DingDingUtils.sendMessage(DingDingUtils.buildSendRequest(context.getTitle(), context.getText()), context.getNotifyAddress()));
+                DingDingUtils.sendMessage(DingDingUtils.buildSendRequest(context.getTitle(), context.getText()), context.getNotifyAttribute()));
 
         return true;
     }
 
     @Override
     public boolean syncSendMessage(AlarmContext context) {
-        return DingDingUtils.sendMessage(DingDingUtils.buildSendRequest(context.getTitle(), context.getText()), context.getNotifyAddress());
+        return DingDingUtils.sendMessage(DingDingUtils.buildSendRequest(context.getTitle(), context.getNotifyAttribute()), context.getNotifyAttribute());
     }
 
     @Override

@@ -3,14 +3,21 @@ package com.x.retry.server.support.handler;
 import com.x.retry.common.core.enums.HeadersEnum;
 import com.x.retry.common.core.enums.NodeTypeEnum;
 import com.x.retry.common.core.log.LogUtils;
+import com.x.retry.common.core.model.Result;
+import com.x.retry.server.model.dto.ConfigDTO;
 import com.x.retry.server.persistence.mybatis.mapper.ServerNodeMapper;
 import com.x.retry.server.persistence.mybatis.po.ServerNode;
+import com.x.retry.server.persistence.support.ConfigAccess;
 import io.netty.handler.codec.http.HttpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
+import java.text.MessageFormat;
 import java.time.LocalDateTime;
-import java.util.concurrent.CompletableFuture;
+import java.util.Objects;
+import java.util.concurrent.*;
 
 /**
  * @author www.byteblogs.com
@@ -20,12 +27,21 @@ import java.util.concurrent.CompletableFuture;
 @Component
 public class ClientRegisterHandler {
 
+    private ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(2, 5, 1, TimeUnit.SECONDS,
+            new LinkedBlockingQueue<>(500), r -> new Thread(r, "CLIENT REGISTER THREAD"), (r, executor) -> LogUtils.error("处理注册线程池已经超负荷运作"));
+    public static final String URL = "http://{0}:{1}/retry/sync/version/v1";
+
     @Autowired
     private ServerNodeMapper serverNodeMapper;
+    @Autowired
+    private RestTemplate restTemplate;
+    @Autowired
+    @Qualifier("configAccessProcessor")
+    private ConfigAccess configAccess;
 
     public void registerClient(HttpHeaders headers) {
 
-        CompletableFuture.runAsync(() -> {
+        threadPoolExecutor.execute(() -> {
 
             String hostId = headers.get(HeadersEnum.HOST_ID.getKey());
             String hostIp = headers.get(HeadersEnum.HOST_IP.getKey());
@@ -51,4 +67,26 @@ public class ClientRegisterHandler {
 
     }
 
+    public void syncVersion(Integer clientVersion, String groupName, String hostIp, Integer hostPort) {
+
+        threadPoolExecutor.execute(() -> {
+            try {
+                Integer serverVersion = configAccess.getConfigVersion(groupName);
+                if (Objects.isNull(clientVersion) || !clientVersion.equals(serverVersion)) {
+                    LogUtils.info("客户端[{}]:[{}] 组:[{}] 版本号不一致clientVersion:[{}] serverVersion:[{}]",
+                            hostIp, hostPort, clientVersion, serverVersion);
+                    // 同步
+                    ConfigDTO configDTO = configAccess.getConfigInfo(groupName);
+                    String format = MessageFormat.format(URL, hostIp, hostPort.toString());
+                    Result result = restTemplate.postForObject(format, configDTO, Result.class);
+                    LogUtils.info("同步结果 [{}]", result);
+
+                }
+
+            } catch (Exception e) {
+                LogUtils.error("同步版本失败", e);
+            }
+        });
+
+    }
 }

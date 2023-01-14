@@ -49,7 +49,6 @@ public class RemoteRetryStrategies extends AbstractRetryStrategies {
 
     @Override
     protected boolean preValidator(RetryerInfo retryerInfo, RetryerResultContext resultContext) {
-        // TODO 加入黑名单的静止重试
         if (RetrySiteSnapshot.isRunning()) {
             resultContext.setRetryResultStatusEnum(RetryResultStatusEnum.FAILURE);
             resultContext.setMessage("执行重试检验不通过 原因: 存在正在运行的重试任务");
@@ -72,7 +71,7 @@ public class RemoteRetryStrategies extends AbstractRetryStrategies {
     @Override
     protected Consumer<Throwable> doGetRetryErrorConsumer(RetryerInfo retryerInfo, Object[] params) {
         return throwable -> {
-            // TODO 记录失败信息，返回给服务端
+            LogUtils.debug("RemoteRetryStrategies doGetRetryErrorConsumer ");
         };
     }
 
@@ -117,6 +116,5 @@ public class RemoteRetryStrategies extends AbstractRetryStrategies {
             }
         };
     }
-
 
 }

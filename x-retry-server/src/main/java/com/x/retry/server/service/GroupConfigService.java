@@ -18,10 +18,6 @@ public interface GroupConfigService {
 
     Boolean updateGroup(GroupConfigRequestVO groupConfigRequestVO);
 
-    Integer getConfigVersion(String groupName);
-
-    ConfigDTO syncConfig(String groupName);
-
     PageResult<List<GroupConfigResponseVO>> getGroupConfigForPage(GroupConfigQueryVO queryVO);
 
     GroupConfigResponseVO getGroupConfigByGroupName(String groupName);

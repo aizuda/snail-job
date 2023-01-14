@@ -2,6 +2,7 @@ package com.x.retry.client.core.client;
 
 import cn.hutool.core.util.IdUtil;
 import com.x.retry.client.core.Lifecycle;
+import com.x.retry.client.core.cache.GroupVersionCache;
 import com.x.retry.client.core.config.XRetryProperties;
 import com.x.retry.common.core.context.SpringContext;
 import com.x.retry.common.core.enums.HeadersEnum;
@@ -16,10 +17,13 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -29,6 +33,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @Component
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class NettyHttpConnectClient implements Lifecycle {
 
     private static final String HOST_ID = IdUtil.simpleUUID();
@@ -82,6 +87,11 @@ public class NettyHttpConnectClient implements Lifecycle {
 
     public static void send(HttpMethod method, String url, String body) throws InterruptedException {
 
+        if (Objects.isNull(channel)) {
+            LogUtils.debug("channel is null");
+            return;
+        }
+
         // 配置HttpRequest的请求数据和一些配置信息
         FullHttpRequest request = new DefaultFullHttpRequest(
                 HttpVersion.HTTP_1_0, method, url, Unpooled.wrappedBuffer(body.getBytes(StandardCharsets.UTF_8)));
@@ -98,6 +108,7 @@ public class NettyHttpConnectClient implements Lifecycle {
                 .set(HeadersEnum.HOST_IP.getKey(), HOST_IP)
                 .set(HeadersEnum.GROUP_NAME.getKey(), XRetryProperties.getGroup())
                 .set(HeadersEnum.HOST_PORT.getKey(), environment.getProperty("server.port", Integer.class))
+                .set(HeadersEnum.VERSION.getKey(), GroupVersionCache.getVersion())
         ;
 
         //发送数据

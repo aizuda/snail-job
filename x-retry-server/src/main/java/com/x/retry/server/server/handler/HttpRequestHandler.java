@@ -1,6 +1,7 @@
 package com.x.retry.server.server.handler;
 
 import cn.hutool.core.net.url.UrlBuilder;
+import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 
 /**
@@ -13,6 +14,6 @@ public interface HttpRequestHandler {
 
     HttpMethod method();
 
-    String doHandler(String content, UrlBuilder urlBuilder);
+    String doHandler(String content, UrlBuilder urlBuilder, HttpHeaders headers);
 
 }

@@ -16,7 +16,7 @@ public class NotifyConfigResponseVO implements Serializable {
 
     private Integer notifyType;
 
-    private String notifyAddress;
+    private String notifyAttribute;
 
     private Integer notifyThreshold;
 
