@@ -8,15 +8,20 @@ import com.x.retry.server.persistence.mybatis.mapper.ServerNodeMapper;
 import com.x.retry.server.persistence.mybatis.po.RetryTaskLog;
 import com.x.retry.server.persistence.mybatis.po.ServerNode;
 import com.x.retry.server.service.DashBoardService;
+import com.x.retry.server.web.model.enums.DateTypeEnum;
 import com.x.retry.server.web.model.response.ActivePodQuantityResponseVO;
 import com.x.retry.server.web.model.response.DispatchQuantityResponseVO;
 import com.x.retry.server.web.model.response.SceneQuantityRankResponseVO;
 import com.x.retry.server.web.model.response.TaskQuantityResponseVO;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -79,20 +84,49 @@ public class DashBoardServiceImpl implements DashBoardService {
     }
 
     @Override
-    public List<SceneQuantityRankResponseVO> rankSceneQuantity(String groupName) {
-        return retryTaskLogMapper.rankSceneQuantity(groupName);
+    public List<SceneQuantityRankResponseVO> rankSceneQuantity(String groupName, String type, String startTime, String endTime) {
+        LocalDateTime startDateTime = LocalDateTime.now();
+        if (StringUtils.isNotBlank(startTime)) {
+            startDateTime = LocalDateTime.parse(startTime, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        }
+
+        LocalDateTime endDateTime = LocalDateTime.now();
+        if (StringUtils.isNotBlank(endTime)) {
+            endDateTime = LocalDateTime.parse(endTime, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        }
+
+        DateTypeEnum dateTypeEnum = DateTypeEnum.valueOf(type.toUpperCase());
+        startDateTime = dateTypeEnum.getStartTime().apply(startDateTime);
+        endDateTime = dateTypeEnum.getEndTime().apply(endDateTime);
+
+        return retryTaskLogMapper.rankSceneQuantity(groupName, startDateTime, endDateTime);
     }
 
     @Override
-    public List<DispatchQuantityResponseVO> lineDispatchQuantity(String groupName) {
+    public List<DispatchQuantityResponseVO> lineDispatchQuantity(String groupName, String type, String startTime, String endTime) {
 
-        List<DispatchQuantityResponseVO> totalDispatchQuantityResponseList = retryTaskLogMapper.lineDispatchQuantity(groupName, null);
+        DateTypeEnum dateTypeEnum = DateTypeEnum.valueOf(type.toUpperCase());
 
-        List<DispatchQuantityResponseVO> successDispatchQuantityResponseList = retryTaskLogMapper.lineDispatchQuantity(groupName, RetryStatusEnum.FINISH.getLevel());
-        Map<String, DispatchQuantityResponseVO> dispatchQuantityResponseVOMap = successDispatchQuantityResponseList.stream().collect(Collectors.toMap(DispatchQuantityResponseVO::getCreateDt, i -> i));
+        LocalDateTime startDateTime = LocalDateTime.now();
+        if (StringUtils.isNotBlank(startTime)) {
+            startDateTime = LocalDateTime.parse(startTime, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        }
+
+        LocalDateTime endDateTime = LocalDateTime.now();
+        if (StringUtils.isNotBlank(endTime)) {
+            endDateTime = LocalDateTime.parse(endTime, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        }
+
+        startDateTime = dateTypeEnum.getStartTime().apply(startDateTime);
+        endDateTime = dateTypeEnum.getEndTime().apply(endDateTime);
+
+        List<DispatchQuantityResponseVO> totalDispatchQuantityResponseList = retryTaskLogMapper.lineDispatchQuantity(groupName, null, type, startDateTime, endDateTime);
+
+        List<DispatchQuantityResponseVO> successDispatchQuantityResponseList = retryTaskLogMapper.lineDispatchQuantity(groupName, RetryStatusEnum.FINISH.getLevel(), type, startDateTime, endDateTime);
+        Map<String, DispatchQuantityResponseVO> successDispatchQuantityResponseVOMap = successDispatchQuantityResponseList.stream().collect(Collectors.toMap(DispatchQuantityResponseVO::getCreateDt, i -> i));
         for (DispatchQuantityResponseVO dispatchQuantityResponseVO : totalDispatchQuantityResponseList) {
 
-            DispatchQuantityResponseVO quantityResponseVO = dispatchQuantityResponseVOMap.get(dispatchQuantityResponseVO.getCreateDt());
+            DispatchQuantityResponseVO quantityResponseVO = successDispatchQuantityResponseVOMap.get(dispatchQuantityResponseVO.getCreateDt());
             if (Objects.isNull(dispatchQuantityResponseVO)) {
                 dispatchQuantityResponseVO.setSuccess(0L);
             } else {
@@ -103,6 +137,9 @@ public class DashBoardServiceImpl implements DashBoardService {
 
         }
 
-        return totalDispatchQuantityResponseList;
+        dateTypeEnum.getConsumer().accept(totalDispatchQuantityResponseList);
+
+        return totalDispatchQuantityResponseList.stream().sorted(Comparator.comparing(DispatchQuantityResponseVO::getCreateDt)).collect(Collectors.toList());
     }
+
 }

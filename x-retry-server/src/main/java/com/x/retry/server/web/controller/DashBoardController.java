@@ -46,14 +46,21 @@ public class DashBoardController {
     @LoginRequired
     @GetMapping("/scene/rank")
     public List<SceneQuantityRankResponseVO> rankSceneQuantity(@RequestParam(value = "groupName", required = false)
-                                                      String groupName) {
-        return dashBoardService.rankSceneQuantity(groupName);
+                                                                       String groupName,
+                                                               @RequestParam(value = "type") String type,
+                                                               @RequestParam(value = "startTime", required = false) String startTime,
+                                                               @RequestParam(value = "endTime", required = false) String endTime) {
+        return dashBoardService.rankSceneQuantity(groupName, type, startTime, endTime);
     }
 
-    @LoginRequired
+    //    @LoginRequired
     @GetMapping("/dispatch/line")
     public List<DispatchQuantityResponseVO> lineDispatchQuantity(@RequestParam(value = "groupName", required = false)
-                                                                       String groupName) {
-        return dashBoardService.lineDispatchQuantity(groupName);
+                                                                         String groupName,
+                                                                 @RequestParam(value = "type") String type,
+                                                                 @RequestParam(value = "startTime", required = false) String startTime,
+                                                                 @RequestParam(value = "endTime", required = false) String endTime
+    ) {
+        return dashBoardService.lineDispatchQuantity(groupName, type, startTime, endTime);
     }
 }

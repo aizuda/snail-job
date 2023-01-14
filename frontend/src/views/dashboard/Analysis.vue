@@ -51,13 +51,13 @@
         <a-tabs default-active-key="1" size="large" :tab-bar-style="{marginBottom: '24px', paddingLeft: '16px'}">
           <div class="extra-wrapper" slot="tabBarExtraContent">
             <div class="extra-item">
-              <a>{{ $t('dashboard.analysis.all-day') }}</a>
-              <a>{{ $t('dashboard.analysis.all-week') }}</a>
-              <a>{{ $t('dashboard.analysis.all-month') }}</a>
-              <a>{{ $t('dashboard.analysis.all-year') }}</a>
+              <a href="#" @click="dataHandler('day')">{{ $t('dashboard.analysis.all-day') }}</a>
+              <a href="#" @click="dataHandler('week')">{{ $t('dashboard.analysis.all-week') }}</a>
+              <a href="#" @click="dataHandler('month')">{{ $t('dashboard.analysis.all-month') }}</a>
+              <a href="#" @click="dataHandler('year')">{{ $t('dashboard.analysis.all-year') }}</a>
             </div>
             <div class="extra-item">
-              <a-range-picker :style="{width: '256px'}" />
+              <a-range-picker :style="{width: '256px'}" @change="dateChange" />
             </div>
             <a-select placeholder="请输入组名称" @change="value => handleChange(value)" :style="{width: '256px'}">
               <a-select-option v-for="item in groupNameList" :value="item" :key="item">{{ item }}</a-select-option>
@@ -66,10 +66,10 @@
           <a-tab-pane loading="true" :tab="$t('dashboard.analysis.sales')" key="1">
             <a-row>
               <a-col :xl="16" :lg="12" :md="12" :sm="24" :xs="24">
-                <g2-line/>
+                <g2-line ref="viewChart" />
               </a-col>
               <a-col :xl="8" :lg="12" :md="12" :sm="24" :xs="24">
-                <rank-list :title="$t('dashboard.analysis.sales-ranking')" :list="rankList"/>
+                <rank-list :title="$t('dashboard.analysis.sales-ranking')" :list="rankList" />
               </a-col>
             </a-row>
           </a-tab-pane>
@@ -80,7 +80,6 @@
 </template>
 
 <script>
-// import moment from 'moment'
 import {
   ChartCard,
   MiniArea,
@@ -132,12 +131,40 @@ export default {
       pieStyle: {
         stroke: '#fff',
         lineWidth: 1
-      }
+      },
+      value: ''
     }
   },
-  computed: {
-  },
+  computed: {},
   methods: {
+    dataHandler (type) {
+      this.$refs.viewChart.getLineDispatchQuantity(this.value, type)
+      this.getRankSceneQuantity(this.value, type)
+    },
+    handleChange (value) {
+      this.value = value
+      this.$refs.viewChart.getLineDispatchQuantity(value)
+      this.getRankSceneQuantity(this.value)
+    },
+    dateChange (date, dateString) {
+      this.$refs.viewChart.getLineDispatchQuantity('others', new Date(dateString[0]).getTime(), new Date(dateString[1]).getTime())
+      this.getRankSceneQuantity(this.value, new Date(dateString[0]).getTime(), new Date(dateString[1]).getTime())
+    },
+    getRankSceneQuantity (groupName, type = 'day', startTime, endTime) {
+      rankSceneQuantity({
+        'groupName': groupName,
+        'type': type,
+        'startTime': startTime,
+        'endTime': endTime
+      }).then(res => {
+        res.data.forEach(res => {
+          this.rankList.push({
+            name: res.groupName + '/' + res.sceneName,
+            total: res.total
+          })
+        })
+      })
+    }
   },
   created () {
     getAllGroupNameList().then(res => {
@@ -156,15 +183,6 @@ export default {
       this.countActivePodQuantity = res.data
     })
 
-    rankSceneQuantity().then(res => {
-      res.data.forEach(res => {
-        this.rankList.push({
-          name: res.groupName + '/' + res.sceneName,
-          total: res.total
-        })
-      })
-    })
-
     setTimeout(() => {
       this.loading = !this.loading
     }, 1000)
@@ -172,47 +190,49 @@ export default {
 }
 </script>
 
-<style lang="less" scoped>
-  .extra-wrapper {
-    line-height: 55px;
-    padding-right: 24px;
+<style lang='less' scoped>
+.extra-wrapper {
+  line-height: 55px;
+  padding-right: 24px;
 
-    .extra-item {
-      display: inline-block;
-      margin-right: 24px;
+  .extra-item {
+    display: inline-block;
+    margin-right: 24px;
 
-      a {
-        margin-left: 24px;
-      }
+    a {
+      margin-left: 24px;
     }
   }
+}
 
-  .antd-pro-pages-dashboard-analysis-twoColLayout {
+.antd-pro-pages-dashboard-analysis-twoColLayout {
+  position: relative;
+  display: flex;
+  display: block;
+  flex-flow: row wrap;
+}
+
+.antd-pro-pages-dashboard-analysis-salesCard {
+  height: calc(100% - 24px);
+
+  /deep/ .ant-card-head {
     position: relative;
-    display: flex;
-    display: block;
-    flex-flow: row wrap;
   }
+}
 
-  .antd-pro-pages-dashboard-analysis-salesCard {
-    height: calc(100% - 24px);
-    /deep/ .ant-card-head {
-      position: relative;
-    }
+.dashboard-analysis-iconGroup {
+  i {
+    margin-left: 16px;
+    color: rgba(0, 0, 0, .45);
+    cursor: pointer;
+    transition: color .32s;
+    color: black;
   }
+}
 
-  .dashboard-analysis-iconGroup {
-    i {
-      margin-left: 16px;
-      color: rgba(0,0,0,.45);
-      cursor: pointer;
-      transition: color .32s;
-      color: black;
-    }
-  }
-  .analysis-salesTypeRadio {
-    position: absolute;
-    right: 54px;
-    bottom: 12px;
-  }
+.analysis-salesTypeRadio {
+  position: absolute;
+  right: 54px;
+  bottom: 12px;
+}
 </style>

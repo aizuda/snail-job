@@ -7,6 +7,7 @@
 <script>
 import * as G2 from '@antv/g2'
 import { getLineDispatchQuantity } from '@/api/manage'
+
 const DataSet = require('@antv/data-set')
 
 export default {
@@ -22,8 +23,13 @@ export default {
     this.createView()
   },
   methods: {
-    getLineDispatchQuantity () {
-      getLineDispatchQuantity().then(res => {
+    getLineDispatchQuantity (groupName, type = 'day', startTime, endTime) {
+      getLineDispatchQuantity({
+        'groupName': groupName,
+        'type': type,
+        'startTime': startTime,
+        'endTime': endTime
+      }).then(res => {
         this.viewCharts(res.data)
       })
     },
@@ -36,7 +42,7 @@ export default {
         fields: ['success', 'fail'], // 展开字段集
         key: 'name',
         value: 'viewTotal',
-        retains: [ 'total', 'createDt' ]
+        retains: ['total', 'createDt']
       })
 
       console.log(dv.rows)

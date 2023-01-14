@@ -7,6 +7,7 @@ import com.x.retry.server.web.model.response.DispatchQuantityResponseVO;
 import com.x.retry.server.web.model.response.SceneQuantityRankResponseVO;
 import org.apache.ibatis.annotations.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface RetryTaskLogMapper extends BaseMapper<RetryTaskLog> {
@@ -19,9 +20,16 @@ public interface RetryTaskLogMapper extends BaseMapper<RetryTaskLog> {
 
     long countTaskByRetryStatus(@Param("retryStatus") Integer retryStatus);
 
-    List<SceneQuantityRankResponseVO> rankSceneQuantity(@Param("groupName") String groupName);
+    List<SceneQuantityRankResponseVO> rankSceneQuantity(@Param("groupName") String groupName,
+                                                        @Param("startTime")LocalDateTime startTime,
+                                                        @Param("endTime")LocalDateTime endTime
+                                                        );
 
     List<DispatchQuantityResponseVO> lineDispatchQuantity(@Param("groupName") String groupName,
-                                                          @Param("retryStatus") Integer retryStatus);
+                                                          @Param("retryStatus") Integer retryStatus,
+                                                          @Param("type") String type,
+                                                          @Param("startTime")LocalDateTime startTime,
+                                                          @Param("endTime")LocalDateTime endTime
+    );
 
 }

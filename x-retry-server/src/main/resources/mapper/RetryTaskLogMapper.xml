@@ -45,30 +45,52 @@
         from (
         select group_name, scene_name, biz_id, count(*)
         from retry_task_log
-        group by group_name, scene_name, biz_id) a
         <where>
             <if test="groupName != '' and groupName != null">
                 group_name = #{groupName}
             </if>
+            and create_dt >= #{startTime} and create_dt &lt;= #{endTime}
         </where>
+        group by group_name, scene_name, biz_id) a
         group by group_name, scene_name
         order by total desc;
     </select>
     <select id="lineDispatchQuantity"
             resultType="com.x.retry.server.web.model.response.DispatchQuantityResponseVO">
-        select distinct(create_dt), count(*) total
+        select
+        distinct(create_dt), count(*) total
         from (
-                 select group_name, scene_name, biz_id, DATE_FORMAT(create_dt, '%Y-%m-%d') as create_dt, count(*)
-                 from retry_task_log
-                 <where>
-                     <if test="groupName != '' and groupName != null">
-                         group_name = #{groupName}
-                     </if>
-                     <if test="retryStatus!=null ">
-                         retry_status = #{retryStatus}
-                     </if>
-                 </where>
-                 group by group_name, scene_name, biz_id, create_dt) a
+        select group_name, scene_name, biz_id,
+        <choose>
+            <when test="type == 'day'">
+                DATE_FORMAT(create_dt,'%H')
+            </when>
+            <when test="type == 'week'">
+                DATE_FORMAT(create_dt,'%Y-%m-%d')
+            </when>
+            <when test="type =='month'">
+                DATE_FORMAT(create_dt,'%Y-%m-%d')
+            </when>
+            <when test="type == 'year'">
+                DATE_FORMAT(create_dt,'%Y-%m')
+            </when>
+            <otherwise>
+                DATE_FORMAT(create_dt,'%Y-%m-%d')
+            </otherwise>
+        </choose>
+        as create_dt, count(*)
+        from retry_task_log
+        <where>
+            <if test="groupName != '' and groupName != null">
+                group_name = #{groupName}
+            </if>
+            <if test="retryStatus!=null ">
+               and retry_status = #{retryStatus}
+            </if>
+
+            and create_dt >= #{startTime} and create_dt &lt;= #{endTime}
+        </where>
+        group by group_name, scene_name, biz_id, create_dt) a
         group by create_dt
         order by total desc;
     </select>

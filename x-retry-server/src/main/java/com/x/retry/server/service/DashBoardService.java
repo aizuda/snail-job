@@ -19,8 +19,8 @@ public interface DashBoardService {
 
     ActivePodQuantityResponseVO countActivePod();
 
-    List<SceneQuantityRankResponseVO> rankSceneQuantity(String groupName);
+    List<SceneQuantityRankResponseVO> rankSceneQuantity(String groupName, String type, String startTime, String endTime);
 
-    List<DispatchQuantityResponseVO> lineDispatchQuantity(String groupName);
+    List<DispatchQuantityResponseVO> lineDispatchQuantity(String groupName, String type, String startTime, String endTime);
 
 }
