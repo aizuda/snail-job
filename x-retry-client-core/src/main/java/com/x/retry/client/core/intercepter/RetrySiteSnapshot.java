@@ -135,6 +135,9 @@ public class RetrySiteSnapshot {
         RETRY_CLASS_METHOD_ENTRANCE.remove();
         RETRY_STAGE.remove();
 
+        removeEntryMethodTime();
+        removeRetryHeader();
+        removeRetryStatusCode();
     }
 
     /**

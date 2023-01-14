@@ -12,6 +12,7 @@ import com.x.retry.client.core.strategy.RetryStrategy;
 import com.x.retry.client.model.DispatchRetryDTO;
 import com.x.retry.client.model.DispatchRetryResultDTO;
 import com.x.retry.common.core.enums.RetryResultStatusEnum;
+import com.x.retry.common.core.log.LogUtils;
 import com.x.retry.common.core.model.Result;
 import com.x.retry.common.core.util.JsonUtil;
 import org.springframework.beans.factory.annotation.Autowired;

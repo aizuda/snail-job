@@ -7,7 +7,7 @@
           <template>
             <a-col :md="8" :sm="24">
               <a-form-item label="组名称">
-                <a-input v-model="queryParam.groupName" placeholder="请输入组名称"/>
+                <a-input v-model="queryParam.groupName" placeholder="请输入组名称" allowClear/>
               </a-form-item>
             </a-col>
           </template>

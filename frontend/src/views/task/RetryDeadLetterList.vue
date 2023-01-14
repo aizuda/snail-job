@@ -12,7 +12,7 @@
           </a-col>
           <a-col :md="8" :sm="24">
             <a-form-item label="场景名称">
-              <a-select v-model="queryParam.sceneName" placeholder="请选择场景名称">
+              <a-select v-model="queryParam.sceneName" placeholder="请选择场景名称" allowClear>
                 <a-select-option v-for="item in sceneList" :value="item.sceneName" :key="item.sceneName"> {{ item.sceneName }}</a-select-option>
               </a-select>
             </a-form-item>
@@ -20,12 +20,12 @@
           <template v-if="advanced">
             <a-col :md="8" :sm="24">
               <a-form-item label="业务编号">
-                <a-input v-model="queryParam.bizNo" placeholder="请输入业务编号"/>
+                <a-input v-model="queryParam.bizNo" placeholder="请输入业务编号" allowClear/>
               </a-form-item>
             </a-col>
             <a-col :md="8" :sm="24">
               <a-form-item label="业务id">
-                <a-input v-model="queryParam.bizId" placeholder="请输入业务id"/>
+                <a-input v-model="queryParam.bizId" placeholder="请输入业务id" allowClear/>
               </a-form-item>
             </a-col>
           </template>

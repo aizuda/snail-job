@@ -69,6 +69,12 @@ public class HeaderAspect {
         HttpServletResponse response = attributes.getResponse();
         response.addHeader(SystemConstants.X_RETRY_STATUS_CODE_KEY, RetrySiteSnapshot.getRetryStatusCode());
 
+        // 服务端重试的在com.x.retry.client.core.client.RetryEndPoint 中进行清除threadLocal
+        if (Objects.nonNull(RetrySiteSnapshot.getStage()) && RetrySiteSnapshot.EnumStage.REMOTE.getStage() == RetrySiteSnapshot.getStage()) {
+            return;
+        }
+
+        // 这里清除是为了,非服务端直接触发的节点，需要清除 threadLocal里面的标记
         RetrySiteSnapshot.removeRetryHeader();
         RetrySiteSnapshot.removeRetryStatusCode();
         RetrySiteSnapshot.removeEntryMethodTime();

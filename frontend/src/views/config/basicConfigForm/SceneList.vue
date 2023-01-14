@@ -6,7 +6,7 @@
           <template>
             <a-col :md="8" :sm="24">
               <a-form-item label="场景名称">
-                <a-input v-model="queryParam.sceneName" placeholder="请输入场景名称"/>
+                <a-input v-model="queryParam.sceneName" placeholder="请输入场景名称" allowClear/>
               </a-form-item>
             </a-col>
           </template>

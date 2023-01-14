@@ -39,7 +39,7 @@ public class ExistsTransactionalRetryServiceTest {
         Mockito.when(remoteService.call())
                 .thenReturn(new Result(0, "1"))
                 .thenReturn(new Result(0, "2"))
-                .thenReturn(new Result(1, "3"))
+                .thenReturn(new Result(0, "3"))
                 .thenReturn(new Result(0, "4"))
                 .thenReturn(new Result(0, "5"))
         ;
@@ -89,7 +89,7 @@ public class ExistsTransactionalRetryServiceTest {
                 .thenReturn(new Result(0, "5"))
         ;
         try {
-            for (int i = 0; i < 100; i++) {
+            for (int i = 0; i < 400; i++) {
                 threadPoolExecutor.execute(() -> testExistsTransactionalRetryService.testSimpleInsert(UUID.randomUUID().toString()));
             }
         } catch (Exception e) {

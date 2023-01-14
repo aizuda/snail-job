@@ -18,4 +18,6 @@ public class RetryTaskQueryVO extends BaseQueryVO {
     private String bizNo;
 
     private String bizId;
+
+    private Integer retryStatus;
 }

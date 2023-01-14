@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author www.byteblogs.com
@@ -52,6 +53,9 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         }
         if (StringUtils.isNotBlank(queryVO.getBizId())) {
             retryTaskLambdaQueryWrapper.eq(RetryTask::getBizId, queryVO.getBizId());
+        }
+        if (Objects.nonNull(queryVO.getRetryStatus())) {
+            retryTaskLambdaQueryWrapper.eq(RetryTask::getRetryStatus, queryVO.getRetryStatus());
         }
 
         RequestDataHelper.setPartition(queryVO.getGroupName());
