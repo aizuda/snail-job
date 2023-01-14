@@ -2,6 +2,7 @@ package com.x.retry.server.support.dispatch.actor.exec;
 
 import akka.actor.AbstractActor;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.google.common.util.concurrent.RateLimiter;
 import com.x.retry.client.model.DispatchRetryDTO;
 import com.x.retry.client.model.DispatchRetryResultDTO;
 import com.x.retry.common.core.log.LogUtils;
@@ -19,6 +20,8 @@ import com.x.retry.server.persistence.support.ConfigAccess;
 import com.x.retry.server.support.ClientLoadBalance;
 import com.x.retry.server.support.IdempotentStrategy;
 import com.x.retry.server.support.allocate.client.ClientLoadBalanceManager;
+import com.x.retry.server.support.cache.CacheGroupRateLimiter;
+import com.x.retry.server.support.context.MaxAttemptsPersistenceRetryContext;
 import com.x.retry.server.support.retry.RetryExecutor;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -36,6 +39,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -55,20 +59,10 @@ public class ExecUnitActor extends AbstractActor  {
     @Autowired
     @Qualifier("bitSetIdempotentStrategyHandler")
     private IdempotentStrategy<String, Integer> idempotentStrategy;
-
     @Autowired
     private RetryTaskLogMapper retryTaskLogMapper;
-
-    @Autowired
-    private ServerNodeMapper serverNodeMapper;
-
     @Autowired
     private RestTemplate restTemplate;
-
-    @Autowired
-    @Qualifier("configAccessProcessor")
-    private ConfigAccess configAccess;
-
 
     @Override
     public Receive createReceive() {
@@ -77,13 +71,14 @@ public class ExecUnitActor extends AbstractActor  {
             RetryTaskLog retryTaskLog = new RetryTaskLog();
             retryTaskLog.setErrorMessage(StringUtils.EMPTY);
 
-            RetryTask retryTask = retryExecutor.getRetryContext().getRetryTask();
+            MaxAttemptsPersistenceRetryContext context = (MaxAttemptsPersistenceRetryContext) retryExecutor.getRetryContext();
+            RetryTask retryTask = context.getRetryTask();
+            ServerNode serverNode = context.getServerNode();
 
             try {
-                List<ServerNode> serverNodes = serverNodeMapper.selectList(new LambdaQueryWrapper<ServerNode>().eq(ServerNode::getGroupName, retryTask.getGroupName()));
 
-                if (!CollectionUtils.isEmpty(serverNodes)) {
-                    Object call = retryExecutor.call((Callable<Result<DispatchRetryResultDTO>>) () -> callClient(retryTask, retryTaskLog, serverNodes));
+                if (Objects.nonNull(serverNode)) {
+                    Object call = retryExecutor.call((Callable<Result<DispatchRetryResultDTO>>) () -> callClient(retryTask, retryTaskLog, serverNode));
                 } else {
                     retryTaskLog.setErrorMessage("暂无可用的客户端POD");
                 }
@@ -115,13 +110,7 @@ public class ExecUnitActor extends AbstractActor  {
      * @param retryTask {@link RetryTask} 需要重试的数据
      * @return 重试结果返回值
      */
-    private Result<DispatchRetryResultDTO> callClient(RetryTask retryTask, RetryTaskLog retryTaskLog, List<ServerNode> serverNodes) {
-
-        GroupConfig groupConfig = configAccess.getGroupConfigByGroupName(retryTask.getGroupName());
-        ClientLoadBalance clientLoadBalanceRandom = ClientLoadBalanceManager.getClientLoadBalance(groupConfig.getRouteKey());
-
-        String hostIp = clientLoadBalanceRandom.route(retryTask.getGroupName(), new TreeSet<>(serverNodes.stream().map(ServerNode::getHostIp).collect(Collectors.toSet())));
-        ServerNode serverNode = serverNodes.stream().filter(s -> s.getHostIp().equals(hostIp)).findFirst().get();
+    private Result<DispatchRetryResultDTO> callClient(RetryTask retryTask, RetryTaskLog retryTaskLog, ServerNode serverNode) {
 
         DispatchRetryDTO dispatchRetryDTO = new DispatchRetryDTO();
         dispatchRetryDTO.setBizId(retryTask.getBizId());

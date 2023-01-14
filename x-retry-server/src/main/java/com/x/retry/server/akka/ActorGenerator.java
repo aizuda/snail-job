@@ -6,6 +6,7 @@ import com.x.retry.common.core.context.SpringContext;
 import com.x.retry.server.support.dispatch.actor.exec.ExecUnitActor;
 import com.x.retry.server.support.dispatch.actor.result.FailureActor;
 import com.x.retry.server.support.dispatch.actor.result.FinishActor;
+import com.x.retry.server.support.dispatch.actor.result.NoRetryActor;
 import com.x.retry.server.support.dispatch.actor.scan.ScanGroupActor;
 
 /**
@@ -34,6 +35,15 @@ public class ActorGenerator {
      */
     public static ActorRef failureActor() {
         return getDispatchResultActorSystem().actorOf(getSpringExtension().props(FailureActor.BEAN_NAME));
+    }
+
+    /**
+     * 不触发重试actor
+     *
+     * @return actor 引用
+     */
+    public static ActorRef noRetryActor() {
+        return getDispatchResultActorSystem().actorOf(getSpringExtension().props(NoRetryActor.BEAN_NAME));
     }
 
     /**

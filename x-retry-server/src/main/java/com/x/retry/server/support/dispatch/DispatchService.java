@@ -2,18 +2,21 @@ package com.x.retry.server.support.dispatch;
 
 import akka.actor.ActorRef;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.google.common.util.concurrent.RateLimiter;
 import com.x.retry.common.core.enums.NodeTypeEnum;
 import com.x.retry.common.core.log.LogUtils;
 import com.x.retry.common.core.util.HostUtils;
 import com.google.common.cache.Cache;
 import com.x.retry.common.core.util.JsonUtil;
 import com.x.retry.server.akka.ActorGenerator;
+import com.x.retry.server.config.SystemProperties;
 import com.x.retry.server.support.allocate.server.AllocateMessageQueueConsistentHash;
 import com.x.retry.server.persistence.mybatis.mapper.ServerNodeMapper;
 import com.x.retry.server.persistence.mybatis.po.GroupConfig;
 import com.x.retry.server.persistence.mybatis.po.ServerNode;
 import com.x.retry.server.persistence.support.ConfigAccess;
 import com.x.retry.server.support.Lifecycle;
+import com.x.retry.server.support.cache.CacheGroupRateLimiter;
 import com.x.retry.server.support.cache.CacheGroupScanActor;
 import com.x.retry.server.support.handler.ServerRegisterNodeHandler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,6 +70,9 @@ public class DispatchService implements Lifecycle {
     @Qualifier("configAccessProcessor")
     private ConfigAccess configAccess;
 
+    @Autowired
+    private SystemProperties systemProperties;
+
     @Override
     public void start() {
 
@@ -77,9 +83,8 @@ public class DispatchService implements Lifecycle {
 
                 LogUtils.info("当前节点[{}] 分配的组:[{}]", HostUtils.getIp(), JsonUtil.toJsonString(currentHostGroupList));
                 if (!CollectionUtils.isEmpty(currentHostGroupList)) {
-                    Cache<String, ActorRef> actorRefCache = CacheGroupScanActor.getAll();
                     for (GroupConfig groupConfigContext : currentHostGroupList) {
-                        produceScanActorTask(actorRefCache, groupConfigContext);
+                        produceScanActorTask(groupConfigContext);
                     }
                 }
 
@@ -94,20 +99,51 @@ public class DispatchService implements Lifecycle {
     /**
      * 扫描任务生成器
      *
-     * @param actorRefCache 扫描任务actor缓存器
      * @param groupConfig {@link  GroupConfig} 组上下文
      */
-    private void produceScanActorTask(Cache<String, ActorRef> actorRefCache, GroupConfig groupConfig) {
+    private void produceScanActorTask(GroupConfig groupConfig) {
 
         String groupName = groupConfig.getGroupName();
+
+        ActorRef scanActorRef = cacheActorRef(groupName);
+
+        // 缓存按照
+        cacheRateLimiter(groupName);
+
+        // rebalance 和 group scan 流程合一
+        scanActorRef.tell(groupConfig, scanActorRef);
+    }
+
+    /**
+     * 缓存限流对象
+     */
+    private void cacheRateLimiter(String groupName) {
+        List<ServerNode> serverNodes = serverNodeMapper.selectList(new LambdaQueryWrapper<ServerNode>()
+                .eq(ServerNode::getGroupName, groupName));
+        Cache<String, RateLimiter> rateLimiterCache = CacheGroupRateLimiter.getAll();
+        for (ServerNode serverNode : serverNodes) {
+            RateLimiter rateLimiter = rateLimiterCache.getIfPresent(serverNode.getHostId());
+            if (Objects.isNull(rateLimiter)) {
+                rateLimiterCache.put(groupName, RateLimiter.create(systemProperties.getLimiter()));
+            }
+        }
+
+        rateLimiterCache.invalidateAll();
+
+    }
+
+    /**
+     * 缓存Actor对象
+     */
+    private ActorRef cacheActorRef(String groupName) {
+        Cache<String, ActorRef> actorRefCache = CacheGroupScanActor.getAll();
         ActorRef scanActorRef = actorRefCache.getIfPresent(groupName);
         if (Objects.isNull(scanActorRef)) {
             scanActorRef = ActorGenerator.scanGroupActor();
             // 缓存扫描器actor
             actorRefCache.put(groupName, scanActorRef);
         }
-        // rebalance 和 group scan 流程合一
-        scanActorRef.tell(groupConfig, scanActorRef);
+        return scanActorRef;
     }
 
     /**

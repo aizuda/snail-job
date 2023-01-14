@@ -1,6 +1,7 @@
 package com.x.retry.server.support.context;
 
 import com.x.retry.server.persistence.mybatis.po.RetryTask;
+import com.x.retry.server.persistence.mybatis.po.ServerNode;
 import com.x.retry.server.support.RetryContext;
 import com.x.retry.server.support.WaitStrategy;
 import lombok.Data;
@@ -35,6 +36,11 @@ public class MaxAttemptsPersistenceRetryContext<V> implements RetryContext<V> {
      * 目前处理关闭的场景
      */
     private Set<String> sceneBlacklist;
+
+    /**
+     * 需要调度的节点
+     */
+    private ServerNode serverNode;
 
     @Override
     public void setCallResult(V v) {

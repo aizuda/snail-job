@@ -2,18 +2,23 @@ package com.x.retry.server.support.dispatch.actor.scan;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.x.retry.common.core.log.LogUtils;
 import com.x.retry.client.model.DispatchRetryResultDTO;
 import com.x.retry.common.core.model.Result;
 import com.x.retry.server.akka.ActorGenerator;
 import com.x.retry.server.config.SystemProperties;
+import com.x.retry.server.persistence.mybatis.mapper.ServerNodeMapper;
 import com.x.retry.server.persistence.mybatis.po.GroupConfig;
 import com.x.retry.server.persistence.mybatis.po.RetryTask;
 import com.x.retry.server.persistence.mybatis.po.SceneConfig;
+import com.x.retry.server.persistence.mybatis.po.ServerNode;
 import com.x.retry.server.persistence.support.ConfigAccess;
 import com.x.retry.server.persistence.support.RetryTaskAccess;
+import com.x.retry.server.support.ClientLoadBalance;
 import com.x.retry.server.support.IdempotentStrategy;
 import com.x.retry.server.support.WaitStrategy;
+import com.x.retry.server.support.allocate.client.ClientLoadBalanceManager;
 import com.x.retry.server.support.context.MaxAttemptsPersistenceRetryContext;
 import com.x.retry.server.support.dispatch.DispatchService;
 import com.x.retry.server.support.retry.RetryBuilder;
@@ -30,6 +35,8 @@ import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 /**
  * @author www.byteblogs.com
@@ -54,6 +61,9 @@ public class ScanGroupActor extends AbstractActor {
     @Autowired
     @Qualifier("configAccessProcessor")
     private ConfigAccess configAccess;
+
+    @Autowired
+    private ServerNodeMapper serverNodeMapper;
 
     public static final String BEAN_NAME = "ScanGroupActor";
 
@@ -97,6 +107,7 @@ public class ScanGroupActor extends AbstractActor {
                 MaxAttemptsPersistenceRetryContext<Result<DispatchRetryResultDTO>> retryContext = new MaxAttemptsPersistenceRetryContext<>();
                 retryContext.setRetryTask(retryTask);
                 retryContext.setSceneBlacklist(configAccess.getBlacklist(groupName));
+                retryContext.setServerNode(getServerNode(retryTask));
 
                 RetryExecutor<Result<DispatchRetryResultDTO>> executor = RetryBuilder.<Result<DispatchRetryResultDTO>>newBuilder()
                         .withStopStrategy(StopStrategies.stopResultStatus())
@@ -104,11 +115,17 @@ public class ScanGroupActor extends AbstractActor {
                         .withFilterStrategy(FilterStrategies.delayLevelFilter())
                         .withFilterStrategy(FilterStrategies.bitSetIdempotentFilter(idempotentStrategy))
                         .withFilterStrategy(FilterStrategies.sceneBlackFilter())
-                        .withFilterStrategy(FilterStrategies.checkAliveClientPodFilterStrategies())
+                        .withFilterStrategy(FilterStrategies.checkAliveClientPodFilter())
+                        .withFilterStrategy(FilterStrategies.rateLimiterFilter())
                         .withRetryContext(retryContext)
                         .build();
 
                 if (!executor.filter()) {
+
+                    // 不触发重试
+                    ActorRef actorRef = ActorGenerator.noRetryActor();
+                    actorRef.tell(executor, actorRef);
+
                     continue;
                 }
 
@@ -137,6 +154,24 @@ public class ScanGroupActor extends AbstractActor {
     private void retryCountIncrement(RetryTask retryTask) {
         Integer retryCount = retryTask.getRetryCount();
         retryTask.setRetryCount(++retryCount);
+    }
+
+    /**
+     * 获取分配的节点
+     */
+    public ServerNode getServerNode(RetryTask retryTask) {
+
+        GroupConfig groupConfig = configAccess.getGroupConfigByGroupName(retryTask.getGroupName());
+        List<ServerNode> serverNodes = serverNodeMapper.selectList(new LambdaQueryWrapper<ServerNode>().eq(ServerNode::getGroupName, retryTask.getGroupName()));
+
+        if (CollectionUtils.isEmpty(serverNodes)) {
+            return null;
+        }
+
+        ClientLoadBalance clientLoadBalanceRandom = ClientLoadBalanceManager.getClientLoadBalance(groupConfig.getRouteKey());
+
+        String hostIp = clientLoadBalanceRandom.route(retryTask.getGroupName(), new TreeSet<>(serverNodes.stream().map(ServerNode::getHostIp).collect(Collectors.toSet())));
+        return serverNodes.stream().filter(s -> s.getHostIp().equals(hostIp)).findFirst().get();
     }
 
     private void productExecUnitActor(RetryExecutor<Result<DispatchRetryResultDTO>> retryExecutor) {

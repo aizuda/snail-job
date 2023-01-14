@@ -1,18 +1,21 @@
 package com.x.retry.server.support.strategy;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.google.common.util.concurrent.RateLimiter;
 import com.x.retry.common.core.context.SpringContext;
+import com.x.retry.common.core.log.LogUtils;
 import com.x.retry.server.persistence.mybatis.mapper.ServerNodeMapper;
 import com.x.retry.server.persistence.mybatis.po.RetryTask;
 import com.x.retry.server.persistence.mybatis.po.ServerNode;
 import com.x.retry.server.support.FilterStrategy;
 import com.x.retry.server.support.IdempotentStrategy;
 import com.x.retry.server.support.RetryContext;
+import com.x.retry.server.support.cache.CacheGroupRateLimiter;
 import com.x.retry.server.support.context.MaxAttemptsPersistenceRetryContext;
-import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 生成 {@link FilterStrategy} 实例.
@@ -57,13 +60,23 @@ public class FilterStrategies {
      *
      * @return {@link CheckAliveClientPodFilterStrategies} 客户端存活POD检查策略
      */
-    public static FilterStrategy checkAliveClientPodFilterStrategies() {
+    public static FilterStrategy checkAliveClientPodFilter() {
         return new CheckAliveClientPodFilterStrategies();
     }
 
     /**
-     * 延迟等级的过滤策略
+     * 检查分配的客户端是否达到限流阈值
      *
+     * @return {@link RateLimiterFilterStrategies} 检查分配的客户端是否达到限流阈值
+     */
+    public static FilterStrategy rateLimiterFilter() {
+        return new RateLimiterFilterStrategies();
+    }
+
+
+    /**
+     * 延迟等级的过滤策略
+     * <p>
      * 根据延迟等级的时间计算下次触发时间是否小于当前时间，满足则返回true 否则返回false
      */
     private static final class DelayLevelFilterStrategies implements FilterStrategy {
@@ -84,7 +97,7 @@ public class FilterStrategies {
 
     /**
      * 使用BitSet幂等的过滤策略
-     *
+     * <p>
      * 判断BitSet中是否存在，若存在则放回false 否则返回true
      */
     private static final class BitSetIdempotentFilterStrategies implements FilterStrategy {
@@ -92,7 +105,7 @@ public class FilterStrategies {
         private IdempotentStrategy<String, Integer> idempotentStrategy;
 
         public BitSetIdempotentFilterStrategies(IdempotentStrategy<String, Integer> idempotentStrategy) {
-           this.idempotentStrategy = idempotentStrategy;
+            this.idempotentStrategy = idempotentStrategy;
         }
 
         @Override
@@ -109,7 +122,7 @@ public class FilterStrategies {
 
     /**
      * 场景黑名单策略
-     *
+     * <p>
      * 如果重试的数据在黑名单中的则返回false 否则为true
      */
     private static final class SceneBlackFilterStrategies implements FilterStrategy {
@@ -134,11 +147,15 @@ public class FilterStrategies {
         @Override
         public boolean filter(RetryContext retryContext) {
             MaxAttemptsPersistenceRetryContext context = (MaxAttemptsPersistenceRetryContext) retryContext;
-            String groupName = context.getRetryTask().getGroupName();
-            ServerNodeMapper serverNodeMapper = SpringContext.getBeanByType(ServerNodeMapper.class);
-            List<ServerNode> serverNodes = serverNodeMapper.selectList(new LambdaQueryWrapper<ServerNode>().eq(ServerNode::getGroupName, groupName));
+            ServerNode serverNode = context.getServerNode();
 
-            return !CollectionUtils.isEmpty(serverNodes);
+            if (Objects.isNull(serverNode)) {
+                return false;
+            }
+
+            ServerNodeMapper serverNodeMapper = SpringContext.getBeanByType(ServerNodeMapper.class);
+
+            return 1 == serverNodeMapper.selectCount(new LambdaQueryWrapper<ServerNode>().eq(ServerNode::getHostId, serverNode.getHostId()));
         }
 
         @Override
@@ -147,6 +164,29 @@ public class FilterStrategies {
         }
     }
 
+    /**
+     * 检查是否存在存活的客户端POD
+     */
+    private static final class RateLimiterFilterStrategies implements FilterStrategy {
 
+        @Override
+        public boolean filter(RetryContext retryContext) {
+            MaxAttemptsPersistenceRetryContext context = (MaxAttemptsPersistenceRetryContext) retryContext;
+            ServerNode serverNode = context.getServerNode();
+
+            RateLimiter rateLimiter = CacheGroupRateLimiter.getRateLimiterByKey(serverNode.getHostId());
+            if (!rateLimiter.tryAcquire(1, TimeUnit.SECONDS)) {
+                LogUtils.error("该POD:[{}]已到达最大限流阈值，本次重试不执行", serverNode.getHostId());
+                return Boolean.FALSE;
+            }
+
+            return Boolean.TRUE;
+        }
+
+        @Override
+        public int order() {
+            return 4;
+        }
+    }
 
 }
