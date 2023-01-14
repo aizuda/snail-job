@@ -47,8 +47,6 @@ public class CacheGroupRateLimiter implements Lifecycle {
         CACHE = CacheBuilder.newBuilder()
                 // 设置并发级别为cpu核心数
                 .concurrencyLevel(Runtime.getRuntime().availableProcessors())
-                .expireAfterWrite(10, TimeUnit.SECONDS)
-                .expireAfterAccess(10, TimeUnit.SECONDS)
                 .build();
     }
 

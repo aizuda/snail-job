@@ -98,7 +98,6 @@ public class ExecUnitActor extends AbstractActor  {
                 retryTaskLog.setId(null);
                 Assert.isTrue(1 ==  retryTaskLogMapper.insert(retryTaskLog),
                         new XRetryServerException("新增重试日志失败"));
-
             }
 
         }).build();

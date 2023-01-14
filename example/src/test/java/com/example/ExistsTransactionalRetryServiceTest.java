@@ -79,7 +79,7 @@ public class ExistsTransactionalRetryServiceTest {
     @SneakyThrows
     @Test
     public void syncTestSimpleInsert() {
-        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(5, 10, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(10, 50, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
 
         Mockito.when(remoteService.call())
                 .thenReturn(new Result(0, "1"))
@@ -89,7 +89,7 @@ public class ExistsTransactionalRetryServiceTest {
                 .thenReturn(new Result(0, "5"))
         ;
         try {
-            for (int i = 0; i < 100; i++) {
+            for (int i = 0; i < 300; i++) {
                 threadPoolExecutor.execute(() -> testExistsTransactionalRetryService.testSimpleInsert(UUID.randomUUID().toString()));
             }
         } catch (Exception e) {

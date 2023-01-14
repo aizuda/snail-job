@@ -29,7 +29,7 @@ public class TestExistsTransactionalRetryService {
     @Autowired
     private RemoteService remoteService;
 
-    @Retryable(scene = "testSimpleInsert", bizNo = "#name", localTimes = 5)
+    @Retryable(scene = "testSimpleInsert", bizNo = "#name", localTimes = 3)
     @Transactional
     public String testSimpleInsert(String name) {
 

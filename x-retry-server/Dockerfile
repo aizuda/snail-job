@@ -1,5 +1,6 @@
 FROM openjdk:8-jdk-alpine
 MAINTAINER www.byteblogs.com
+LABEL server-name=x-retry-server
 
 ADD ./target/x-retry-server.jar x-retry-server.jar
 

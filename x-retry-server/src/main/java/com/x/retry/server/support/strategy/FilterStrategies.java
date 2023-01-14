@@ -175,7 +175,7 @@ public class FilterStrategies {
             ServerNode serverNode = context.getServerNode();
 
             RateLimiter rateLimiter = CacheGroupRateLimiter.getRateLimiterByKey(serverNode.getHostId());
-            if (!rateLimiter.tryAcquire(1, TimeUnit.SECONDS)) {
+            if (Objects.nonNull(rateLimiter) && !rateLimiter.tryAcquire(100, TimeUnit.MILLISECONDS)) {
                 LogUtils.error("该POD:[{}]已到达最大限流阈值，本次重试不执行", serverNode.getHostId());
                 return Boolean.FALSE;
             }

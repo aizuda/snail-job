@@ -124,11 +124,9 @@ public class DispatchService implements Lifecycle {
         for (ServerNode serverNode : serverNodes) {
             RateLimiter rateLimiter = rateLimiterCache.getIfPresent(serverNode.getHostId());
             if (Objects.isNull(rateLimiter)) {
-                rateLimiterCache.put(groupName, RateLimiter.create(systemProperties.getLimiter()));
+                rateLimiterCache.put(serverNode.getHostId(), RateLimiter.create(systemProperties.getLimiter()));
             }
         }
-
-        rateLimiterCache.invalidateAll();
 
     }
 
