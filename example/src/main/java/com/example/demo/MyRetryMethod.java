@@ -1,10 +1,7 @@
 package com.example.demo;
 
-import com.x.retry.client.core.client.request.BeatHttpRequestHandler;
 import com.x.retry.client.core.strategy.RetryMethod;
-import com.x.retry.common.core.model.Result;
 import com.x.retry.common.core.util.JsonUtil;
-import com.x.retry.server.model.dto.ConfigDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 

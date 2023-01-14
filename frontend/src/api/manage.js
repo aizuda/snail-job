@@ -24,10 +24,53 @@ const api = {
   notifyConfigList: '/notify-config/list',
   userPageList: '/user/page/list',
   saveUser: '/user',
-  systemUserByUserName: '/user/username/user-info'
+  systemUserByUserName: '/user/username/user-info',
+  countTask: '/dashboard/task/count',
+  countDispatch: '/dashboard/dispatch/count',
+  countActivePod: '/dashboard/active-pod/count',
+  rankSceneQuantity: '/dashboard/scene/rank',
+  lineDispatchQuantity: '/dashboard/dispatch/line'
+
 }
 
 export default api
+
+export function getLineDispatchQuantity (parameter) {
+  return request({
+    url: api.lineDispatchQuantity,
+    method: 'get',
+    params: parameter
+  })
+}
+
+export function rankSceneQuantity (parameter) {
+  return request({
+    url: api.rankSceneQuantity,
+    method: 'get',
+    params: parameter
+  })
+}
+
+export function countActivePod () {
+  return request({
+    url: api.countActivePod,
+    method: 'get'
+  })
+}
+
+export function countTask () {
+  return request({
+    url: api.countTask,
+    method: 'get'
+  })
+}
+
+export function countDispatch () {
+  return request({
+    url: api.countDispatch,
+    method: 'get'
+  })
+}
 
 export function getGroupConfigForPage (parameter) {
   return request({

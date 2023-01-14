@@ -19,7 +19,7 @@ import java.util.Objects;
 /**
  * RestTemplate 拦截器
  *
- * @author: shuguang.zhang
+ * @author: www.byteblogs.com
  * @date : 2022-04-17 15:22
  */
 public class ExampleClientHttpRequestInterceptor implements ClientHttpRequestInterceptor {

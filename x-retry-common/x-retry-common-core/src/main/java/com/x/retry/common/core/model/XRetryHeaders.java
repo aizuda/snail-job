@@ -5,7 +5,7 @@ import lombok.Data;
 /**
  * x-retry 请求头信息
  *
- * @author: shuguang.zhang
+ * @author: www.byteblogs.com
  * @date : 2022-04-16 22:20
  */
 @Data

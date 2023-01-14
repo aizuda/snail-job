@@ -74,6 +74,8 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
         RetryTask retryTask = new RetryTask();
         BeanUtils.copyProperties(retryDeadLetter, retryTask);
         retryTask.setNextTriggerAt(WaitStrategies.randomWait(1, TimeUnit.SECONDS, 60, TimeUnit.SECONDS).computeRetryTime(null));
+        retryTask.setCreateDt(LocalDateTime.now());
+        retryTask.setUpdateDt(LocalDateTime.now());
         RequestDataHelper.setPartition(groupName);
         Assert.isTrue(1 == retryTaskMapper.insert(retryTask), new XRetryServerException("新增重试任务失败"));
 

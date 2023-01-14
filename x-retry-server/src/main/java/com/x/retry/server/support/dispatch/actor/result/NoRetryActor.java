@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 /**
  * 不重试,只更新下次触发时间
  *
- * @author: shuguang.zhang
+ * @author: www.byteblogs.com
  * @date : 2022-04-14 16:11
  */
 @Component("NoRetryActor")

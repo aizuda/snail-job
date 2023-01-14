@@ -38,4 +38,4 @@ logging:
 
 x-retry:
   server:
-    host: 192.168.100.3
+    host: 127.0.0.1

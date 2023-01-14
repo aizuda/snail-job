@@ -86,7 +86,9 @@ CREATE TABLE `retry_task_log`
     `error_message`   text         NOT NULL COMMENT '异常信息',
     PRIMARY KEY (`id`),
     KEY               `idx_group_name` (`group_name`),
-    KEY               `idx_scene_name` (`scene_name`)
+    KEY               `idx_scene_name` (`scene_name`),
+    KEY               `idx_retry_status` (`retry_status`),
+    KEY               `idx_biz_id` (`biz_id`),
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='重试日志表'
 ;
 
