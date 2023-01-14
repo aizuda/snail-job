@@ -33,8 +33,13 @@ public enum DelayLevelEnum {
     _17(17, 3, ChronoUnit.HOURS),
     _18(18, 6, ChronoUnit.HOURS),
     _19(19, 12, ChronoUnit.HOURS),
-    _20(20, 24, ChronoUnit.HOURS),
-    _21(21, 48, ChronoUnit.HOURS),
+    _20(20, 18, ChronoUnit.HOURS),
+    _21(21, 24, ChronoUnit.HOURS),
+    _22(22, 30, ChronoUnit.HOURS),
+    _23(23, 34, ChronoUnit.HOURS),
+    _24(24, 40, ChronoUnit.HOURS),
+    _25(25, 46, ChronoUnit.HOURS),
+    _26(26, 50, ChronoUnit.HOURS),
     ;
 
     /**

@@ -70,9 +70,8 @@ public class LogUtils {
 
         try {
             Environment environment = SpringContext.applicationContext.getBean(Environment.class);
-            return environment.getProperty("flaky.retry.log.status", Boolean.class, Boolean.TRUE);
-        } catch (Exception e) {
-//            log.error("获取配置失败", e);
+            return environment.getProperty("x.retry.log.status", Boolean.class, Boolean.TRUE);
+        } catch (Exception ignored) {
         }
 
         return Boolean.TRUE;
