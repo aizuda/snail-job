@@ -114,12 +114,60 @@ x-retry:
   totalPartition: 32  # 重试和死信表的分区总数
 
 ```
+
 ##项目部署
+### 下载源码部署
+- 下载源码
+  ```
+   https://github.com/byteblogs168/x-retry.git
+  ```
+  
+- maven 打包镜像
+```
+maven clean install
+```
+
+- 修改配置
+```
+/x-retry-server/src/main/resources/application.yml
+```
+  
+- 启动
+```
+java -jar x-retry-server.jar
+```
+
+### docker 部署
+- 下载镜像
+  地址:  https://github.com/byteblogs168/x-retry/pkgs/container/x-retry-server
+  ```
+    docker pull ghcr.io/byteblogs168/x-retry-server:{最新版本}
+  ```
+
+- 创建容器并运行
+
+```
+/**
+* 如需自定义 mysql 等配置，可通过 "-e PARAMS" 指定，参数格式 PARAMS="--key1=value1  --key2=value2" ；
+* 配置项参考文件：/x-retry-server/src/main/resources/application.yml
+* 如需自定义 JVM内存参数 等配置，可通过 "-e JAVA_OPTS" 指定，参数格式 JAVA_OPTS="-Xmx512m" ；
+*/
+docker run \
+  -e PARAMS="--spring.datasource.username=root --spring.datasource.password=123456  --spring.datasource.url=jdbc:mysql://ip:3306/x_retry?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai " \
+  -p 8080:8080 \
+  -p 1788:1788 \
+  --name x-retry-server-1  \
+  -d registry.cn-shanghai.aliyuncs.com/byteblogs/x-retry:{最新版本}
+
+```
+
 如果你已经正确按照系统了，那么你可以输入
 ```
 http://localhost:8080
 ```
+
 会出现登陆页面:
+
 ![img.png](images/login.png)
 
 输入用户名: admin, 密码: 123456
@@ -153,7 +201,7 @@ http://localhost:8080
 ![goup_config.png](./images/scene_config.png)
 
 ### 通知配置
-通知是为了及时告知系统的管理人员，系统的状态，如 出现大量重试的数据、或者大量重试失败的数据
+及时告知系统管理人员，系统运行状态，如出现大量重试的数据、或者大量重试失败的数据
 
 - 通知类型: 钉钉通知、邮箱通知、企业微信通知
 - 通知场景: 
