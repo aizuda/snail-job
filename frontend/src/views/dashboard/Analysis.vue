@@ -157,6 +157,7 @@ export default {
         'startTime': startTime,
         'endTime': endTime
       }).then(res => {
+        this.rankList = []
         res.data.forEach(res => {
           this.rankList.push({
             name: res.groupName + '/' + res.sceneName,

@@ -35,7 +35,10 @@ export default {
     },
     viewCharts (viewRecords, type = 'day') {
       var ds = new DataSet()
-      console.log(this.lineDispatchQuantity)
+      console.log(viewRecords)
+      if (viewRecords === undefined || viewRecords === null) {
+        return
+      }
       var dv = ds.createView().source(viewRecords)
       dv.transform({
         type: 'fold',
