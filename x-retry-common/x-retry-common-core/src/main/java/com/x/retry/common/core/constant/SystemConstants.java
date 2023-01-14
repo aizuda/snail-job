@@ -7,8 +7,20 @@ package com.x.retry.common.core.constant;
 public class SystemConstants {
 
     /**
-     * 请求头
+     * 请求头 key
      */
-    public static final String X_RETRY_HEAD = "X-RETRY";
+    public static final String X_RETRY_HEAD_KEY = "X-RETRY";
+
+    /**
+     * 异常重试码 key
+     */
+    public static final String X_RETRY_STATUS_CODE_KEY = "X-RETRY-STATUS";
+
+    /**
+     * 异常重试码
+     */
+    public static final String X_RETRY_STATUS_CODE = "519";
+
+
 
 }

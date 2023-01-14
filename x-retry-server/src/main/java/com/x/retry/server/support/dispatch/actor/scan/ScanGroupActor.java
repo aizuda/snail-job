@@ -100,6 +100,7 @@ public class ScanGroupActor extends AbstractActor {
 
             DispatchService.LAST_AT_MAP.put(groupConfig.getGroupName(), list.get(list.size() - 1).getCreateDt());
 
+
             for (RetryTask retryTask : list) {
 
                 retryCountIncrement(retryTask);
@@ -121,11 +122,6 @@ public class ScanGroupActor extends AbstractActor {
                         .build();
 
                 if (!executor.filter()) {
-
-                    // 不触发重试
-                    ActorRef actorRef = ActorGenerator.noRetryActor();
-                    actorRef.tell(executor, actorRef);
-
                     continue;
                 }
 

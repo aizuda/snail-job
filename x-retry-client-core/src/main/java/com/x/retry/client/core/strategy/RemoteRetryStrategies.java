@@ -12,7 +12,6 @@ import com.x.retry.common.core.enums.RetryResultStatusEnum;
 import com.x.retry.common.core.log.LogUtils;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;

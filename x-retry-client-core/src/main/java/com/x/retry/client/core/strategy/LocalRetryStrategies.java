@@ -12,6 +12,7 @@ import com.x.retry.client.core.retryer.RetryerInfo;
 import com.x.retry.client.core.retryer.RetryerResultContext;
 import com.x.retry.common.core.enums.RetryResultStatusEnum;
 import com.x.retry.common.core.log.LogUtils;
+import com.x.retry.common.core.model.XRetryHeaders;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -70,6 +71,12 @@ public class LocalRetryStrategies extends AbstractRetryStrategies {
             return false;
         }
 
+        if (!RetrySiteSnapshot.isRetryForStatusCode()) {
+            resultContext.setRetryResultStatusEnum(RetryResultStatusEnum.FAILURE);
+            resultContext.setMessage("执行重试检验不通过 原因: 下游标志禁止重试");
+            return false;
+        }
+
         return true;
     }
 
@@ -106,7 +113,6 @@ public class LocalRetryStrategies extends AbstractRetryStrategies {
             // 如果是仅仅本地重试或本地_远程模式则先支持重试
             case ONLY_LOCAL:
             case LOCAL_REMOTE:
-
                 return () -> {
                     if (TransactionSynchronizationManager.isActualTransactionActive()) {
                         DefaultTransactionDefinition def = new DefaultTransactionDefinition();

@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.lang.reflect.Method;
 import java.util.Objects;
@@ -72,7 +71,14 @@ public class RetryAspect {
 
     private void doHandlerRetry(ProceedingJoinPoint point, String traceId, Retryable retryable, String executorClassName, String methodEntrance, Throwable throwable) {
 
-        if (!RetrySiteSnapshot.isMethodEntrance(methodEntrance) || RetrySiteSnapshot.isRunning()) {
+        if (!RetrySiteSnapshot.isMethodEntrance(methodEntrance)
+                || RetrySiteSnapshot.isRunning()
+                || Objects.isNull(throwable)
+                // 重试流量不开启重试
+                || RetrySiteSnapshot.isRetryFlow()
+                // 下游响应不重试码，不开启重试
+                || RetrySiteSnapshot.isRetryForStatusCode()
+        ) {
             return;
         }
 
@@ -93,11 +99,8 @@ public class RetryAspect {
         });
     }
 
-    private void openRetry(ProceedingJoinPoint point, String traceId, Retryable retryable, String executorClassName,  Throwable throwable) {
+    private void openRetry(ProceedingJoinPoint point, String traceId, Retryable retryable, String executorClassName, Throwable throwable) {
         try {
-            if (Objects.isNull(throwable)) {
-                return;
-            }
 
             RetryerResultContext context = retryStrategy.openRetry(retryable.scene(), executorClassName, point.getArgs());
             if (RetryResultStatusEnum.SUCCESS.getStatus().equals(context.getRetryResultStatusEnum().getStatus())) {

@@ -11,6 +11,7 @@ import com.x.retry.client.core.serializer.JacksonSerializer;
 import com.x.retry.client.core.strategy.RetryStrategy;
 import com.x.retry.client.model.DispatchRetryDTO;
 import com.x.retry.client.model.DispatchRetryResultDTO;
+import com.x.retry.common.core.enums.RetryResultStatusEnum;
 import com.x.retry.common.core.model.Result;
 import com.x.retry.common.core.util.JsonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,13 +59,23 @@ public class RetryEndPoint {
 
         try {
             RetryerResultContext retryerResultContext = retryStrategy.openRetry(executeReqDto.getScene(), executeReqDto.getExecutorName(), deSerialize);
-            executeRespDto.setStatusCode(retryerResultContext.getRetryResultStatusEnum().getStatus());
+
+            if (RetrySiteSnapshot.isRetryForStatusCode()) {
+                executeRespDto.setStatusCode(RetryResultStatusEnum.STOP.getStatus());
+
+                // TODO 需要标记是哪个系统不需要重试
+                executeRespDto.setExceptionMsg("下游标记不需要重试");
+            } else {
+                executeRespDto.setStatusCode(retryerResultContext.getRetryResultStatusEnum().getStatus());
+                executeRespDto.setExceptionMsg(retryerResultContext.getMessage());
+            }
+
             executeRespDto.setBizId(executeReqDto.getBizId());
             if (Objects.nonNull(retryerResultContext.getResult())) {
                 executeRespDto.setResultJson(JsonUtil.toJsonString(retryerResultContext.getResult()));
             }
 
-            executeRespDto.setExceptionMsg(retryerResultContext.getMessage());
+
         } finally {
             RetrySiteSnapshot.removeAll();
         }

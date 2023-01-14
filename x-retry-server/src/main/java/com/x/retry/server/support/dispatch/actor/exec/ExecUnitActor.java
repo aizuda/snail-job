@@ -112,7 +112,7 @@ public class ExecUnitActor extends AbstractActor  {
         HttpHeaders requestHeaders = new HttpHeaders();
         XRetryHeaders xRetryHeaders = new XRetryHeaders();
         xRetryHeaders.setXRetry(Boolean.TRUE);
-        requestHeaders.add(SystemConstants.X_RETRY_HEAD, JsonUtil.toJsonString(xRetryHeaders));
+        requestHeaders.add(SystemConstants.X_RETRY_HEAD_KEY, JsonUtil.toJsonString(xRetryHeaders));
 
         HttpEntity<DispatchRetryDTO> requestEntity = new HttpEntity<>(dispatchRetryDTO, requestHeaders);
 

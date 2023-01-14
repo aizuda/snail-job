@@ -51,7 +51,8 @@ public class StopStrategies {
             }
 
             Integer statusCode = data.getStatusCode();
-            return RetryResultStatusEnum.SUCCESS.getStatus().equals(RetryResultStatusEnum.getRetryResultStatusEnum(statusCode).getStatus());
+            Integer status = RetryResultStatusEnum.getRetryResultStatusEnum(statusCode).getStatus();
+            return RetryResultStatusEnum.SUCCESS.getStatus().equals(status) || RetryResultStatusEnum.STOP.getStatus().equals(status);
         }
     }
 

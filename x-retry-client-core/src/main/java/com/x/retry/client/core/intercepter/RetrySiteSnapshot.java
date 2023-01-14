@@ -1,5 +1,6 @@
 package com.x.retry.client.core.intercepter;
 
+import com.x.retry.common.core.constant.SystemConstants;
 import com.x.retry.common.core.model.XRetryHeaders;
 import lombok.Getter;
 
@@ -33,12 +34,22 @@ public class RetrySiteSnapshot {
      */
     private static final ThreadLocal<XRetryHeaders> RETRY_HEADER = new ThreadLocal<>();
 
+    /**
+     * 状态码
+     */
+    private static final ThreadLocal<String> RETRY_STATUS_CODE = new ThreadLocal<>();
+
+    /**
+     * 进入方法入口时间标记
+     */
+    private static final ThreadLocal<Long> ENTRY_METHOD_TIME = new ThreadLocal<>();
+
     public static Integer getStage() {
         return RETRY_STAGE.get();
     }
 
     public static void setStage(int stage) {
-       RETRY_STAGE.set(stage);
+        RETRY_STAGE.set(stage);
     }
 
     public static String getMethodEntrance() {
@@ -76,7 +87,7 @@ public class RetrySiteSnapshot {
     /**
      * 是否是重试流量
      */
-    public static boolean isRetryFlow(XRetryHeaders headers) {
+    public static boolean isRetryFlow() {
         XRetryHeaders retryHeader = getRetryHeader();
         if (Objects.nonNull(retryHeader)) {
             return retryHeader.isXRetry();
@@ -85,10 +96,47 @@ public class RetrySiteSnapshot {
         return false;
     }
 
+    public static String getRetryStatusCode() {
+        return RETRY_STATUS_CODE.get();
+    }
+
+    public static void setRetryStatusCode(String statusCode) {
+        RETRY_STATUS_CODE.set(statusCode);
+    }
+
+    public static boolean isRetryForStatusCode() {
+        return getRetryStatusCode().equals(SystemConstants.X_RETRY_STATUS_CODE);
+    }
+
+    public static Long getEntryMethodTime() {
+        return ENTRY_METHOD_TIME.get();
+    }
+
+    public static void setEntryMethodTime(long entryMethodTime) {
+        ENTRY_METHOD_TIME.set(entryMethodTime);
+    }
+
+    public static void removeEntryMethodTime() {
+        ENTRY_METHOD_TIME.remove();
+    }
+
+
+    public static void removeRetryHeader(){
+        RETRY_HEADER.remove();
+    }
+
+    public static void removeRetryStatusCode(){
+        RETRY_STATUS_CODE.remove();
+    }
+
     public static void removeAll() {
+
         RETRY_STATUS.remove();
         RETRY_CLASS_METHOD_ENTRANCE.remove();
         RETRY_STAGE.remove();
+        RETRY_HEADER.remove();
+        RETRY_STATUS_CODE.remove();
+
     }
 
     /**
@@ -109,6 +157,7 @@ public class RetrySiteSnapshot {
         ;
 
         private final int stage;
+
         EnumStage(int stage) {
             this.stage = stage;
         }
@@ -133,6 +182,7 @@ public class RetrySiteSnapshot {
         ;
 
         private final int status;
+
         EnumStatus(int status) {
             this.status = status;
         }
