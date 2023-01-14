@@ -1,0 +1,13 @@
+FROM openjdk:8-jdk-alpine
+MAINTAINER www.byteblogs.com
+
+ADD ./target/x-retry-server.jar x-retry-server.jar
+
+#对外暴漏的端口号
+EXPOSE 8080
+EXPOSE 1788
+
+WORKDIR /
+
+#开机启动
+ENTRYPOINT ["java","-jar","x-retry-server.jar"]

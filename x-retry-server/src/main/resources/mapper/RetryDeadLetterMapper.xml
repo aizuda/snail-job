@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.x.retry.server.persistence.mybatis.mapper.RetryDeadLetterMapper">
+  <resultMap id="BaseResultMap" type="com.x.retry.server.persistence.mybatis.po.RetryDeadLetter">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="group_name" jdbcType="VARCHAR" property="groupName" />
+    <result column="scene_name" jdbcType="VARCHAR" property="sceneName" />
+    <result column="biz_id" jdbcType="VARCHAR" property="bizId" />
+    <result column="biz_no" jdbcType="VARCHAR" property="bizNo" />
+    <result column="executor_name" jdbcType="VARCHAR" property="executorName" />
+    <result column="args_str" jdbcType="VARCHAR" property="argsStr" />
+    <result column="ext_attrs" jdbcType="VARCHAR" property="extAttrs" />
+    <result column="create_dt" jdbcType="TIMESTAMP" property="createDt" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, group_name, scene_name, biz_id, biz_no, executor_name, args_str, ext_attrs, create_dt
+  </sql>
+  <insert id="insertBatch">
+    insert into retry_dead_letter_${partition} (id, group_name, scene_name,
+                                              biz_id, biz_no, executor_name, args_str,
+                                              ext_attrs, create_dt
+    )
+    values
+          <foreach collection="retryDeadLetters" item="retryDeadLetter" separator=",">
+            (#{retryDeadLetter.id,jdbcType=BIGINT}, #{retryDeadLetter.groupName,jdbcType=VARCHAR}, #{retryDeadLetter.sceneName,jdbcType=VARCHAR},
+            #{retryDeadLetter.bizId,jdbcType=VARCHAR}, #{retryDeadLetter.bizNo,jdbcType=VARCHAR},  #{retryDeadLetter.executorName,jdbcType=VARCHAR}, #{retryDeadLetter.argsStr,jdbcType=VARCHAR},
+            #{retryDeadLetter.extAttrs,jdbcType=VARCHAR}, #{retryDeadLetter.createDt,jdbcType=TIMESTAMP})
+          </foreach>
+  </insert>
+  <select id="countRetryDeadLetterByCreateAt" resultType="int">
+    select
+      count(*)
+    from retry_dead_letter_${partition} where create_dt>= #{startTime} and create_dt &lt;=#{endTime}
+  </select>
+  <select id="searchAllByPage" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from retry_dead_letter_${partition};
+  </select>
+
+</mapper>

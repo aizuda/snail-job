@@ -1,0 +1,75 @@
+package com.x.retry.server.support.dispatch.actor.result;
+
+import akka.actor.AbstractActor;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.x.retry.common.core.enums.RetryStatusEnum;
+import com.x.retry.common.core.log.LogUtils;
+import com.x.retry.common.core.util.Assert;
+import com.x.retry.server.exception.XRetryServerException;
+import com.x.retry.server.persistence.mybatis.mapper.RetryTaskLogMapper;
+import com.x.retry.server.persistence.mybatis.po.RetryTask;
+import com.x.retry.server.persistence.mybatis.po.RetryTaskLog;
+import com.x.retry.server.persistence.support.RetryTaskAccess;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
+
+/**
+ * 重试完成执行器
+ * 1、更新重试任务
+ * 2、记录重试日志
+ *
+ * @author www.byteblogs.com
+ * @date 2021-10-30
+ * @since 2.0
+ */
+@Component("FinishActor")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+public class FinishActor extends AbstractActor  {
+
+    public static final String BEAN_NAME = "FinishActor";
+
+    @Autowired
+    @Qualifier("retryTaskAccessProcessor")
+    private RetryTaskAccess<RetryTask> retryTaskAccess;
+
+    @Autowired
+    private RetryTaskLogMapper retryTaskLogMapper;
+
+    @Override
+    public Receive createReceive() {
+        return receiveBuilder().match(RetryTask.class, retryTask->{
+            LogUtils.info("FinishActor params:[{}]", retryTask);
+
+            retryTask.setRetryStatus(RetryStatusEnum.FINISH.getLevel());
+
+            RetryTaskLog retryTaskLog = new RetryTaskLog();
+            retryTaskLog.setErrorMessage(StringUtils.EMPTY);
+
+            try {
+                retryTaskAccess.updateRetryTask(retryTask);
+            }catch (Exception e) {
+                LogUtils.error("更新重试任务失败", e);
+            } finally {
+                // 更新DB状态
+                getContext().stop(getSelf());
+
+                // 记录重试日志
+                BeanUtils.copyProperties(retryTask, retryTaskLog);
+                retryTaskLog.setCreateDt(LocalDateTime.now());
+                retryTaskLog.setId(null);
+                Assert.isTrue(1 ==  retryTaskLogMapper.insert(retryTaskLog),
+                        new XRetryServerException("新增重试日志失败"));
+            }
+
+
+        }).build();
+    }
+
+}
