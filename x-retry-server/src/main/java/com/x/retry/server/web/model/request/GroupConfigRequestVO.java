@@ -103,6 +103,14 @@ public class GroupConfigRequestVO {
         private String triggerInterval;
 
         /**
+         * Deadline Request 调用链超时 单位毫秒
+         * 默认值为 60*10*1000
+         */
+        @Max(message = "最大60000毫秒", value = 60000)
+        @Min(message = "最小100ms", value = 100)
+        private Long deadlineRequest;
+
+        /**
          * 是否删除
          */
         private Integer isDeleted;

@@ -28,6 +28,8 @@ public class SceneConfigResponseVO {
 
     private String description;
 
+    private Long deadlineRequest;
+
     private LocalDateTime createDt;
 
     private LocalDateTime updateDt;

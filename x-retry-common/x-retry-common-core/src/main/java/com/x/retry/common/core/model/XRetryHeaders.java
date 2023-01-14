@@ -24,5 +24,5 @@ public class XRetryHeaders {
     /**
      * 调用链超时时间 单位毫秒(ms)
      */
-    private long ddl = 60 * 10 * 1000;
+    private long ddl = 60000;
 }

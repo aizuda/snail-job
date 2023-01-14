@@ -19,7 +19,7 @@ CREATE TABLE `notify_config`
     `id`               bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
     `group_name`       varchar(64)  NOT NULL COMMENT '组名称',
     `notify_type`      tinyint(4) NOT NULL DEFAULT '0' COMMENT '通知类型 1、钉钉 2、邮件 3、企业微信',
-    `notify_attribute`   varchar(512) NOT NULL COMMENT '通知地址',
+    `notify_attribute` varchar(512) NOT NULL COMMENT '配置属性',
     `notify_threshold` int(11) NOT NULL DEFAULT '0' COMMENT '通知阈值',
     `notify_scene`     tinyint(4) NOT NULL DEFAULT '0' COMMENT '通知场景',
     `description`      varchar(256) NOT NULL DEFAULT '' COMMENT '描述',
@@ -101,6 +101,7 @@ CREATE TABLE `scene_config`
     `max_retry_count`  int(11) NOT NULL DEFAULT '5' COMMENT '最大重试次数',
     `back_off`         tinyint(4) NOT NULL DEFAULT '1' COMMENT '1、默认等级 2、固定间隔时间 3、CRON 表达式',
     `trigger_interval` varchar(16)  NOT NULL DEFAULT '' COMMENT '间隔时长',
+    `deadline_request`              bigint(20) unsigned NOT NULL DEFAULT '60000' COMMENT 'Deadline Request 调用链超时 单位毫秒',
     `description`      varchar(256) NOT NULL DEFAULT '' COMMENT '描述',
     `create_dt`        datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_dt`        datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
@@ -151,7 +152,8 @@ CREATE TABLE `system_user`
     UNIQUE KEY `uk_username` (`username`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='系统用户表';
 
-INSERT INTO x_retry.system_user (username, password, role) VALUES ('admin', 'cdf4a007e2b02a0c49fc9b7ccfbb8a10c644f635e1765dcf2a7ab794ddc7edac', 2);
+INSERT INTO x_retry.system_user (username, password, role)
+VALUES ('admin', 'cdf4a007e2b02a0c49fc9b7ccfbb8a10c644f635e1765dcf2a7ab794ddc7edac', 2);
 
 CREATE TABLE `system_user_permission`
 (

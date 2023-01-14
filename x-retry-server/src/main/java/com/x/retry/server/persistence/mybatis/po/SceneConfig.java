@@ -27,6 +27,8 @@ public class SceneConfig implements Serializable {
 
     private String description;
 
+    private Long deadlineRequest;
+
     private LocalDateTime createDt;
 
     private LocalDateTime updateDt;

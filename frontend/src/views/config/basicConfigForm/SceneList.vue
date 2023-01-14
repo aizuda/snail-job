@@ -75,6 +75,17 @@
           @change="value => handleChange(value, record.key, 'maxRetryCount')"/>
         <template v-else>{{ text }}</template>
       </template>
+      <template slot="deadlineRequest" slot-scope="text, record">
+        <a-input-number
+          v-if="record.editable"
+          :min="100"
+          :max="60000"
+          style="width: 100%;"
+          :value="text"
+          placeholder="调用链超时时间(毫秒)"
+          @change="value => handleChange(value, record.key, 'deadlineRequest')"/>
+        <template v-else>{{ text }}(毫秒)</template>
+      </template>
       <template slot="triggerInterval" slot-scope="text, record">
         <a-input
           v-if="record.editable"
@@ -84,7 +95,7 @@
           :disabled="data.find(item => item.key === record.key).backOff === '1'"
           @change="e => handleChange(e.target.value, record.key, 'triggerInterval')"
         />
-        <template v-else>{{ text }}</template>
+        <template v-else>{{ text }}(秒)</template>
       </template>
       <template slot="operation" slot-scope="text, record">
         <template v-if="record.editable">
@@ -138,7 +149,7 @@ export default {
           title: '场景状态',
           dataIndex: 'sceneStatus',
           key: 'sceneStatus',
-          width: '12%',
+          width: '10%',
           scopedSlots: { customRender: 'sceneStatus' }
         },
         {
@@ -156,17 +167,24 @@ export default {
           scopedSlots: { customRender: 'maxRetryCount' }
         },
         {
+          title: '调用链超时时间',
+          dataIndex: 'deadlineRequest',
+          key: 'deadlineRequest',
+          width: '15%',
+          scopedSlots: { customRender: 'deadlineRequest' }
+        },
+        {
           title: '间隔时间',
           dataIndex: 'triggerInterval',
           key: 'triggerInterval',
-          width: '12%',
+          width: '10%',
           scopedSlots: { customRender: 'triggerInterval' }
         },
         {
           title: '描述',
           dataIndex: 'description',
           key: 'description',
-          width: '25%',
+          width: '15%',
           scopedSlots: { customRender: 'description' }
         },
         {
@@ -237,7 +255,7 @@ export default {
         this.data = []
         res.data.map(record => {
           this.loading = false
-          const { id, sceneName, sceneStatus, maxRetryCount, backOff, triggerInterval, description } = record
+          const { id, sceneName, sceneStatus, maxRetryCount, backOff, triggerInterval, description, deadlineRequest } = record
           this.data.push({
             key: id,
             sceneName: sceneName,
@@ -246,6 +264,7 @@ export default {
             backOff: backOff.toString(),
             triggerInterval: triggerInterval,
             description: description,
+            deadlineRequest: deadlineRequest,
             editable: false,
             isNew: false
           })
@@ -262,7 +281,7 @@ export default {
     },
     remove (delKey) {
       const delData = this.data.find(item => item.key === delKey)
-      const { key, sceneName, sceneStatus, maxRetryCount, backOff, triggerInterval, description } = delData
+      const { key, sceneName, sceneStatus, maxRetryCount, backOff, triggerInterval, description, deadlineRequest } = delData
       this.formData.push({
         key: key,
         sceneName: sceneName,
@@ -270,6 +289,7 @@ export default {
         maxRetryCount: maxRetryCount,
         backOff: backOff,
         triggerInterval: triggerInterval,
+        deadlineRequest: deadlineRequest,
         description: description,
         isDeleted: 1
       })
@@ -279,7 +299,7 @@ export default {
     },
     saveRow (record) {
       this.memberLoading = true
-      const { key, sceneName, sceneStatus, maxRetryCount, backOff, triggerInterval, description } = record
+      const { key, sceneName, sceneStatus, maxRetryCount, backOff, triggerInterval, description, deadlineRequest } = record
       if (!sceneName || !sceneStatus || !maxRetryCount || !backOff || (backOff === '1' ? false : !triggerInterval)) {
         this.memberLoading = false
         this.$message.error('请填写完整成员信息。')
@@ -296,6 +316,7 @@ export default {
           backOff: backOff,
           triggerInterval: triggerInterval,
           description: description,
+          deadlineRequest: deadlineRequest,
           isDeleted: 0
         })
       }
@@ -354,6 +375,7 @@ export default {
         maxRetryCount: null,
         backOff: '1',
         triggerInterval: '',
+        deadlineRequest: '60000',
         description: '',
         editable: true,
         isNew: true
