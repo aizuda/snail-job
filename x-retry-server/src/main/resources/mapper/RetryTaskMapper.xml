@@ -21,7 +21,7 @@
     create_dt, update_dt
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
-    select 
+    select
     <include refid="Base_Column_List" />
     from retry_task_${partition}
     where id = #{id,jdbcType=BIGINT}
@@ -51,10 +51,10 @@
     <include refid="Base_Column_List" />
     from retry_task_${partition} where retry_status = #{retryStatus,jdbcType=TINYINT} limit 1000
   </select>
-  <select id="countAllRetryTask" resultType="int">
+  <select id="countAllRetryTaskByRetryStatus" resultType="int">
     select
     count(*)
-    from retry_task_${partition}
+    from retry_task_${partition} where retry_status = #{retryStatus}
   </select>
   <select id="selectRetryTaskByGroupIdAndSceneId" resultMap="BaseResultMap">
     select

@@ -4,6 +4,7 @@ import com.x.retry.common.core.alarm.Alarm;
 import com.x.retry.common.core.alarm.AlarmContext;
 import com.x.retry.common.core.alarm.AltinAlarmFactory;
 import com.x.retry.common.core.enums.NotifySceneEnum;
+import com.x.retry.common.core.enums.RetryStatusEnum;
 import com.x.retry.common.core.log.LogUtils;
 import com.x.retry.common.core.util.EnvironmentUtils;
 import com.x.retry.common.core.util.HostUtils;
@@ -69,7 +70,7 @@ public class AlarmNotifyThreadSchedule {
                 continue;
             }
 
-            int count = retryTaskMapper.countAllRetryTask(groupConfig.getGroupPartition());
+            int count = retryTaskMapper.countAllRetryTaskByRetryStatus(groupConfig.getGroupPartition(), RetryStatusEnum.RUNNING.getLevel());
             if (count > notifyConfig.getNotifyThreshold()) {
                 // 预警
                 AlarmContext context = AlarmContext.build()
