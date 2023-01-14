@@ -13,8 +13,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.util.UUID;
-
-import static org.awaitility.Awaitility.await;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author: www.byteblogs.com
@@ -72,6 +73,30 @@ public class ExistsTransactionalRetryServiceTest {
         }
 
         Thread.sleep(90000);
+
+    }
+
+    @SneakyThrows
+    @Test
+    public void syncTestSimpleInsert() {
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(5, 10, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
+
+        Mockito.when(remoteService.call())
+                .thenReturn(new Result(0, "1"))
+                .thenReturn(new Result(0, "2"))
+                .thenReturn(new Result(0, "3"))
+                .thenReturn(new Result(0, "4"))
+                .thenReturn(new Result(0, "5"))
+        ;
+        try {
+            for (int i = 0; i < 100; i++) {
+                threadPoolExecutor.execute(() -> testExistsTransactionalRetryService.testSimpleInsert(UUID.randomUUID().toString()));
+            }
+        } catch (Exception e) {
+            log.error("", e);
+        }
+
+        Thread.sleep(900000);
 
     }
 }

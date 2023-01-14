@@ -74,13 +74,13 @@ public class RetryAspect {
 
     private void doHandlerRetry(ProceedingJoinPoint point, String traceId, Retryable retryable, String executorClassName, String methodEntrance, Throwable throwable) {
 
-        if (!RetrySiteSnapshot.isMethodEntrance(methodEntrance) || RetrySiteSnapshot.isRunning() || Objects.isNull(throwable)) {
+        if (!RetrySiteSnapshot.isMethodEntrance(methodEntrance)) {
             return;
         }
 
         if (!TransactionSynchronizationManager.isActualTransactionActive()) {
             // 无事务, 开启重试
-            openRetry(point, traceId, retryable, executorClassName);
+            openRetry(point, traceId, retryable, executorClassName, throwable);
             return;
         }
 
@@ -89,17 +89,18 @@ public class RetryAspect {
 
             @Override
             public void afterCompletion(int status) {
-                if (STATUS_ROLLED_BACK == status) {
-
-                    // 有事务开启重试
-                    openRetry(point, traceId, retryable, executorClassName);
-                }
+                // 有事务开启重试
+                openRetry(point, traceId, retryable, executorClassName, throwable);
             }
         });
     }
 
-    private void openRetry(ProceedingJoinPoint point, String traceId, Retryable retryable, String executorClassName) {
+    private void openRetry(ProceedingJoinPoint point, String traceId, Retryable retryable, String executorClassName,  Throwable throwable) {
         try {
+            if (Objects.isNull(throwable) || RetrySiteSnapshot.isRunning()) {
+                return;
+            }
+
             RetryerResultContext context = retryStrategy.openRetry(retryable.scene(), executorClassName, point.getArgs());
             if (RetryResultStatusEnum.SUCCESS.getStatus().equals(context.getRetryResultStatusEnum().getStatus())) {
                 LogUtils.debug("aop 结果成功 traceId:[{}] result:[{}]", traceId, context.getResult());
