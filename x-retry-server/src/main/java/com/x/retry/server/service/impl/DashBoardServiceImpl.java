@@ -127,7 +127,7 @@ public class DashBoardServiceImpl implements DashBoardService {
         for (DispatchQuantityResponseVO dispatchQuantityResponseVO : totalDispatchQuantityResponseList) {
 
             DispatchQuantityResponseVO quantityResponseVO = successDispatchQuantityResponseVOMap.get(dispatchQuantityResponseVO.getCreateDt());
-            if (Objects.isNull(dispatchQuantityResponseVO)) {
+            if (Objects.isNull(quantityResponseVO)) {
                 dispatchQuantityResponseVO.setSuccess(0L);
             } else {
                 dispatchQuantityResponseVO.setSuccess(quantityResponseVO.getTotal());
