@@ -184,6 +184,8 @@ export default {
       this.countActivePodQuantity = res.data
     })
 
+    this.getRankSceneQuantity()
+
     setTimeout(() => {
       this.loading = !this.loading
     }, 1000)
