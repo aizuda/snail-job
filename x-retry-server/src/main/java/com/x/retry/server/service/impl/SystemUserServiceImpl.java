@@ -20,6 +20,7 @@ import com.x.retry.server.web.model.base.PageResult;
 import com.x.retry.server.web.model.request.SystemUserQueryVO;
 import com.x.retry.server.web.model.request.SystemUserRequestVO;
 import com.x.retry.server.web.model.response.SystemUserResponseVO;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -170,7 +171,13 @@ public class SystemUserServiceImpl implements SystemUserService {
     public PageResult<List<SystemUserResponseVO>> getSystemUserPageList(SystemUserQueryVO queryVO) {
         PageDTO<SystemUser> userPageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
 
-        userPageDTO = systemUserMapper.selectPage(userPageDTO, new LambdaQueryWrapper<>());
+        LambdaQueryWrapper<SystemUser> systemUserLambdaQueryWrapper = new LambdaQueryWrapper<>();
+
+        if (StringUtils.isNotBlank(queryVO.getUsername())) {
+            systemUserLambdaQueryWrapper.like(SystemUser::getUsername, "%" + queryVO.getUsername() + "%");
+        }
+
+        userPageDTO = systemUserMapper.selectPage(userPageDTO, systemUserLambdaQueryWrapper.orderByDesc(SystemUser::getId));
 
         List<SystemUserResponseVO> userResponseVOList = systemUserResponseVOConverter.batchConvert(userPageDTO.getRecords());
 
