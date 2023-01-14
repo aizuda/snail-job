@@ -1,6 +1,9 @@
 package com.x.retry.client.core.intercepter;
 
+import com.x.retry.common.core.model.XRetryHeaders;
 import lombok.Getter;
+
+import java.util.Objects;
 
 /**
  * 重试现场记录器
@@ -24,6 +27,11 @@ public class RetrySiteSnapshot {
      * 重试状态
      */
     private static final ThreadLocal<Integer> RETRY_STATUS = ThreadLocal.withInitial(EnumStatus.COMPLETE::getStatus);
+
+    /**
+     * 重试请求头
+     */
+    private static final ThreadLocal<XRetryHeaders> RETRY_HEADER = new ThreadLocal<>();
 
     public static Integer getStage() {
         return RETRY_STAGE.get();
@@ -55,6 +63,26 @@ public class RetrySiteSnapshot {
 
     public static boolean isRunning() {
         return EnumStatus.RUNNING.status == getStatus();
+    }
+
+    public static XRetryHeaders getRetryHeader() {
+        return RETRY_HEADER.get();
+    }
+
+    public static void setRetryHeader(XRetryHeaders headers) {
+        RETRY_HEADER.set(headers);
+    }
+
+    /**
+     * 是否是重试流量
+     */
+    public static boolean isRetryFlow(XRetryHeaders headers) {
+        XRetryHeaders retryHeader = getRetryHeader();
+        if (Objects.nonNull(retryHeader)) {
+            return retryHeader.isXRetry();
+        }
+
+        return false;
     }
 
     public static void removeAll() {

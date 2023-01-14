@@ -1,26 +1,20 @@
 package com.x.retry.server.support.dispatch.actor.exec;
 
 import akka.actor.AbstractActor;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.google.common.util.concurrent.RateLimiter;
 import com.x.retry.client.model.DispatchRetryDTO;
 import com.x.retry.client.model.DispatchRetryResultDTO;
+import com.x.retry.common.core.constant.SystemConstants;
 import com.x.retry.common.core.log.LogUtils;
 import com.x.retry.common.core.model.Result;
+import com.x.retry.common.core.model.XRetryHeaders;
 import com.x.retry.common.core.util.Assert;
 import com.x.retry.common.core.util.JsonUtil;
 import com.x.retry.server.exception.XRetryServerException;
 import com.x.retry.server.persistence.mybatis.mapper.RetryTaskLogMapper;
-import com.x.retry.server.persistence.mybatis.mapper.ServerNodeMapper;
-import com.x.retry.server.persistence.mybatis.po.GroupConfig;
 import com.x.retry.server.persistence.mybatis.po.RetryTask;
 import com.x.retry.server.persistence.mybatis.po.RetryTaskLog;
 import com.x.retry.server.persistence.mybatis.po.ServerNode;
-import com.x.retry.server.persistence.support.ConfigAccess;
-import com.x.retry.server.support.ClientLoadBalance;
 import com.x.retry.server.support.IdempotentStrategy;
-import com.x.retry.server.support.allocate.client.ClientLoadBalanceManager;
-import com.x.retry.server.support.cache.CacheGroupRateLimiter;
 import com.x.retry.server.support.context.MaxAttemptsPersistenceRetryContext;
 import com.x.retry.server.support.retry.RetryExecutor;
 import org.apache.commons.lang.StringUtils;
@@ -29,18 +23,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Objects;
-import java.util.TreeSet;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * 重试结果执行器
@@ -117,8 +108,16 @@ public class ExecUnitActor extends AbstractActor  {
         dispatchRetryDTO.setExecutorName(retryTask.getExecutorName());
         dispatchRetryDTO.setArgsStr(retryTask.getArgsStr());
 
+        // 设置header
+        HttpHeaders requestHeaders = new HttpHeaders();
+        XRetryHeaders xRetryHeaders = new XRetryHeaders();
+        xRetryHeaders.setXRetry(Boolean.TRUE);
+        requestHeaders.add(SystemConstants.X_RETRY_HEAD, JsonUtil.toJsonString(xRetryHeaders));
+
+        HttpEntity<DispatchRetryDTO> requestEntity = new HttpEntity<>(dispatchRetryDTO, requestHeaders);
+
         String format = MessageFormat.format(URL, serverNode.getHostIp(), serverNode.getHostPort().toString());
-        Result result = restTemplate.postForObject(format, dispatchRetryDTO, Result.class);
+        Result result = restTemplate.postForObject(format, requestEntity, Result.class);
 
         if (1 != result.getStatus()  && StringUtils.isNotBlank(result.getMessage())) {
             retryTaskLog.setErrorMessage(result.getMessage());
