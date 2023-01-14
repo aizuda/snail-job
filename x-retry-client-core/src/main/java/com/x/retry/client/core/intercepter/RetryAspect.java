@@ -1,12 +1,14 @@
 package com.x.retry.client.core.intercepter;
 
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSON;
 import com.x.retry.client.core.annotation.Retryable;
 import com.x.retry.client.core.exception.XRetryClientException;
 import com.x.retry.client.core.retryer.RetryerResultContext;
 import com.x.retry.client.core.strategy.RetryStrategy;
 import com.x.retry.common.core.enums.RetryResultStatusEnum;
 import com.x.retry.common.core.log.LogUtils;
+import com.x.retry.common.core.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -79,6 +81,13 @@ public class RetryAspect {
                 // 下游响应不重试码，不开启重试
                 || RetrySiteSnapshot.isRetryForStatusCode()
         ) {
+            LogUtils.info("校验不通过不开启重试 methodEntrance:[{}] isRunning:[{}] throwable:[{}] isRetryFlow:[{}] isRetryForStatusCode:[{}]" ,
+                    !RetrySiteSnapshot.isMethodEntrance(methodEntrance),
+                    RetrySiteSnapshot.isRunning(),
+                    Objects.isNull(throwable),
+                    RetrySiteSnapshot.isRetryFlow(),
+                    RetrySiteSnapshot.isRetryForStatusCode()
+            );
             return;
         }
 
@@ -103,6 +112,8 @@ public class RetryAspect {
         try {
 
             RetryerResultContext context = retryStrategy.openRetry(retryable.scene(), executorClassName, point.getArgs());
+            LogUtils.info("本地重试结果 message:[{}]", context);
+
             if (RetryResultStatusEnum.SUCCESS.getStatus().equals(context.getRetryResultStatusEnum().getStatus())) {
                 LogUtils.debug("aop 结果成功 traceId:[{}] result:[{}]", traceId, context.getResult());
             }

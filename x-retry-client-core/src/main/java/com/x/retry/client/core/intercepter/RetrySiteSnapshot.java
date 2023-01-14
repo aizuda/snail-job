@@ -105,7 +105,7 @@ public class RetrySiteSnapshot {
     }
 
     public static boolean isRetryForStatusCode() {
-        return getRetryStatusCode().equals(SystemConstants.X_RETRY_STATUS_CODE);
+        return Objects.nonNull(getRetryStatusCode()) && getRetryStatusCode().equals(SystemConstants.X_RETRY_STATUS_CODE);
     }
 
     public static Long getEntryMethodTime() {
@@ -134,8 +134,6 @@ public class RetrySiteSnapshot {
         RETRY_STATUS.remove();
         RETRY_CLASS_METHOD_ENTRANCE.remove();
         RETRY_STAGE.remove();
-        RETRY_HEADER.remove();
-        RETRY_STATUS_CODE.remove();
 
     }
 

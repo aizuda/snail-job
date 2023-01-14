@@ -6,7 +6,9 @@ import com.x.retry.common.core.model.XRetryHeaders;
 import com.x.retry.common.core.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
+import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.springframework.stereotype.Component;
@@ -17,17 +19,17 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.Objects;
 
 /**
+ * 请求头和响应头传递
+ *
  * @author: shuguang.zhang
  * @date : 2022-04-18 09:19
  */
-
 @Aspect
 @Component
 @Slf4j
 public class HeaderAspect {
 
-    @Before(value = "@within(org.springframework.web.bind.annotation.RestController)")
-    public void before(JoinPoint joinPoint){
+    public void before(){
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         String xRetry = attributes.getRequest().getHeader(SystemConstants.X_RETRY_HEAD_KEY);
         if (Objects.nonNull(xRetry)) {
@@ -39,8 +41,30 @@ public class HeaderAspect {
         }
     }
 
-    @AfterReturning(pointcut = "@within(org.springframework.web.bind.annotation.RestController)", returning = "o")
-    public void afterReturning(Object o) {
+    @Around(value = "@within(org.springframework.web.bind.annotation.RestController)")
+    public Object around(ProceedingJoinPoint point) throws Throwable {
+
+        before();
+
+        Throwable throwable = null;
+        Object result = null;
+        try {
+            result = point.proceed();
+        } catch (Throwable t) {
+            throwable = t;
+        } finally {
+            afterReturning();
+        }
+
+        if (throwable != null) {
+            throw throwable;
+        } else {
+            return result;
+        }
+    }
+
+    public void afterReturning() {
+
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         HttpServletResponse response = attributes.getResponse();
         response.addHeader(SystemConstants.X_RETRY_STATUS_CODE_KEY, RetrySiteSnapshot.getRetryStatusCode());

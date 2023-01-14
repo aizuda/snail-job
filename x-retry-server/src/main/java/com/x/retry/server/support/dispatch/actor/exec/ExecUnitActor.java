@@ -1,6 +1,7 @@
 package com.x.retry.server.support.dispatch.actor.exec;
 
 import akka.actor.AbstractActor;
+import cn.hutool.core.util.IdUtil;
 import com.x.retry.client.model.DispatchRetryDTO;
 import com.x.retry.client.model.DispatchRetryResultDTO;
 import com.x.retry.common.core.constant.SystemConstants;
@@ -112,6 +113,7 @@ public class ExecUnitActor extends AbstractActor  {
         HttpHeaders requestHeaders = new HttpHeaders();
         XRetryHeaders xRetryHeaders = new XRetryHeaders();
         xRetryHeaders.setXRetry(Boolean.TRUE);
+        xRetryHeaders.setXRetryId(IdUtil.simpleUUID());
         requestHeaders.add(SystemConstants.X_RETRY_HEAD_KEY, JsonUtil.toJsonString(xRetryHeaders));
 
         HttpEntity<DispatchRetryDTO> requestEntity = new HttpEntity<>(dispatchRetryDTO, requestHeaders);

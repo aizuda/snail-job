@@ -71,7 +71,7 @@ public class LocalRetryStrategies extends AbstractRetryStrategies {
             return false;
         }
 
-        if (!RetrySiteSnapshot.isRetryForStatusCode()) {
+        if (RetrySiteSnapshot.isRetryForStatusCode()) {
             resultContext.setRetryResultStatusEnum(RetryResultStatusEnum.FAILURE);
             resultContext.setMessage("执行重试检验不通过 原因: 下游标志禁止重试");
             return false;
