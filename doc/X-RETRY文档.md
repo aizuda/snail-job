@@ -73,4 +73,31 @@ public class ExampleApplication {
 doc/sql/x_retry.sql
 ```
 
+## 配置部署服务端调度平台
 
+### 组列表
+![group_list.png](./images/group_list.png)
+
+### 组配置
+![goup_config.png](./images/goup_config.png)
+
+### 场景配置
+![goup_config.png](./images/goup_config.png)
+
+### 通知配置
+![notify_config.png](images/notify_config.png)
+
+### 重试列表
+![retry_task_list.png](./images/retry_task_list.png)
+
+### 重试日志列表
+![retry_log_list.png](./images/retry_log_list.png)
+
+### 死信队列列表
+![retry_dead_letter_list.png](./images/retry_dead_letter_list.png)
+
+### 用户列表
+![user_list.png](./images/user_list.png)
+
+### 新增用户
+![user_add.png](./images/user_add.png)
