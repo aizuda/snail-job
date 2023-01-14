@@ -1,8 +1,8 @@
 export default {
   'user.login.userName': 'userName',
   'user.login.password': 'password',
-  'user.login.username.placeholder': 'Account: admin',
-  'user.login.password.placeholder': 'password: admin or ant.design',
+  'user.login.username.placeholder': 'Please enter the username',
+  'user.login.password.placeholder': 'Please enter the password',
   'user.login.message-invalid-credentials':
     'Invalid username or password',
   'user.login.message-invalid-verification-code': 'Invalid verification code',

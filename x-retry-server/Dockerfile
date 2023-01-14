@@ -9,5 +9,4 @@ EXPOSE 1788
 
 WORKDIR /
 
-#开机启动
-ENTRYPOINT ["java","-jar","x-retry-server.jar"]
+ENTRYPOINT ["sh","-c","java -jar $JAVA_OPTS /x-retry-server.jar $PARAMS"]

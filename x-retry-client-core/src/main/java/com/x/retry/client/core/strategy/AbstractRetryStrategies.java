@@ -93,7 +93,7 @@ public abstract class AbstractRetryStrategies implements RetryStrategy {
 
     private Consumer<Throwable> getRetryErrorConsumer(RetryerResultContext context, Object... params) {
         return throwable -> {
-
+            context.setThrowable(throwable);
             context.setMessage(throwable.getMessage());
 
             error(context);

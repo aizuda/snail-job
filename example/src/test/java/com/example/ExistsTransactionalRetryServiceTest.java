@@ -2,6 +2,7 @@ package com.example;
 
 import com.example.demo.RemoteService;
 import com.example.demo.TestExistsTransactionalRetryService;
+import com.example.demo.TestExistsTransactionalRetryService2;
 import com.x.retry.common.core.model.Result;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +28,8 @@ public class ExistsTransactionalRetryServiceTest {
     private TestExistsTransactionalRetryService testExistsTransactionalRetryService;
     @MockBean
     private RemoteService remoteService;
+    @Autowired
+    private TestExistsTransactionalRetryService2 testExistsTransactionalRetryService2;
 
     @SneakyThrows
     @Test
@@ -35,7 +38,7 @@ public class ExistsTransactionalRetryServiceTest {
         Mockito.when(remoteService.call())
                 .thenReturn(new Result(0, "1"))
                 .thenReturn(new Result(0, "2"))
-                .thenReturn(new Result(0, "3"))
+                .thenReturn(new Result(1, "3"))
                 .thenReturn(new Result(0, "4"))
                 .thenReturn(new Result(0, "5"))
         ;
@@ -47,6 +50,28 @@ public class ExistsTransactionalRetryServiceTest {
         }
 
 //        await().atLeast(1, TimeUnit.MINUTES);
+        Thread.sleep(90000);
+
+    }
+
+    @SneakyThrows
+    @Test
+    public void testSimpleUpdate() {
+
+        Mockito.when(remoteService.call())
+                .thenReturn(new Result(0, "1"))
+                .thenReturn(new Result(0, "2"))
+                .thenReturn(new Result(0, "3"))
+                .thenReturn(new Result(0, "4"))
+                .thenReturn(new Result(0, "5"))
+        ;
+        try {
+            String s = testExistsTransactionalRetryService2.testSimpleUpdate(243L);
+            System.out.println(s);
+        } catch (Exception e) {
+            log.error("", e);
+        }
+
         Thread.sleep(90000);
 
     }

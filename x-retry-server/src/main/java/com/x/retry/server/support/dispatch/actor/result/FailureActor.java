@@ -1,6 +1,7 @@
 package com.x.retry.server.support.dispatch.actor.result;
 
 import akka.actor.AbstractActor;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.x.retry.common.core.enums.RetryStatusEnum;
 import com.x.retry.common.core.log.LogUtils;
 import com.x.retry.common.core.util.Assert;
@@ -60,9 +61,6 @@ public class FailureActor extends AbstractActor {
                 retryTask.setRetryStatus(RetryStatusEnum.MAX_RETRY_COUNT.getLevel());
             }
 
-            RetryTaskLog retryTaskLog = new RetryTaskLog();
-            retryTaskLog.setErrorMessage(StringUtils.EMPTY);
-
             try {
                 retryTaskAccess.updateRetryTask(retryTask);
             } catch (Exception e) {
@@ -71,11 +69,11 @@ public class FailureActor extends AbstractActor {
                 getContext().stop(getSelf());
 
                 // 记录重试日志
-                BeanUtils.copyProperties(retryTask, retryTaskLog);
-                retryTaskLog.setCreateDt(LocalDateTime.now());
-                retryTaskLog.setId(null);
-                Assert.isTrue(1 ==  retryTaskLogMapper.insert(retryTaskLog),
-                        new XRetryServerException("新增重试日志失败"));
+                RetryTaskLog retryTaskLog = new RetryTaskLog();
+                retryTaskLog.setRetryStatus(retryTask.getRetryStatus());
+                Assert.isTrue(1 ==  retryTaskLogMapper.update(retryTaskLog,
+                        new LambdaQueryWrapper<RetryTaskLog>().eq(RetryTaskLog::getBizId, retryTask.getBizId())),
+                        new XRetryServerException("更新重试日志失败"));
             }
 
         }).build();

@@ -67,18 +67,74 @@ public class ExampleApplication {
 | localTimes |int|是|3| 本地重试次数 次数必须大于等于1|
 | localInterval |int|是|2| 本地重试间隔时间(s)|
 
-## 初始化数据库
+
+## 配置部署服务端调度平台
+### 初始化数据库
 数据库脚本位置
 ```
 doc/sql/x_retry.sql
 ```
 
-## 配置部署服务端调度平台
+### 系统配置
+```yaml
+spring:
+  datasource:
+    name: x_retry
+    url:  jdbc:mysql://localhost:3306/x_retry?useSSL=false&characterEncoding=utf8&useUnicode=true
+    username: root
+    password: root
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: com.mysql.jdbc.Driver
+    hikari:
+      connection-timeout: 30000
+      minimum-idle: 5
+      maximum-pool-size: 20
+      auto-commit: true
+      idle-timeout: 30000
+      pool-name: x_retry
+      max-lifetime: 1800000
+      connection-test-query: SELECT 1
+  resources:
+    static-locations: classpath:admin/
+mybatis-plus:
+  mapper-locations: classpath:/mapper/*.xml
+  typeAliasesPackage: com.x.retry.server.persistence.mybatis.po
+  global-config:
+    db-config:
+      field-strategy: NOT_EMPTY
+      capital-mode: false
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: true
+x-retry:
+  lastDays: 30 # 拉取重试数据的天数
+  retryPullPageSize: 100 # 拉取重试数据的每批次的大小
+  nettyPort: 1788  # 服务端netty端口
+  totalPartition: 32  # 重试和死信表的分区总数
 
-### 组列表
+```
+##项目部署
+如果你已经正确按照系统了，那么你可以输入
+```
+http://localhost:8080
+```
+会出现登陆页面:
+![img.png](images/login.png)
+
+输入用户名: admin, 密码: 123456
+
+## 组配置
+通过`新建`按钮配置点开配置组、场景、通知界面
 ![group_list.png](./images/group_list.png)
 
 ### 组配置
+组名称: 名称是数字、字母、下划线组合，最长64个字符长度
+状态: 开启/关闭, 通过状态开启或关闭组状态
+路由策略:
+描述: 
+知道分区 :
 ![goup_config.png](./images/goup_config.png)
 
 ### 场景配置

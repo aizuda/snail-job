@@ -1,6 +1,4 @@
 spring:
-  profiles:
-    active: dev
   datasource:
     name: x_retry
     url:  jdbc:mysql://localhost:3306/x_retry?useSSL=false&characterEncoding=utf8&useUnicode=true
@@ -32,6 +30,10 @@ mybatis-plus:
     map-underscore-to-camel-case: true
     cache-enabled: true
 
-
+x-retry:
+  lastDays: 30 # 拉取重试数据的天数
+  retryPullPageSize: 100 # 拉取重试数据的每批次的大小
+  nettyPort: 1788  # 服务端netty端口
+  totalPartition: 32  # 重试和死信表的分区总数
 
 

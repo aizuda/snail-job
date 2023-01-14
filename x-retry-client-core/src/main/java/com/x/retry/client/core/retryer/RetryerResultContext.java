@@ -18,4 +18,6 @@ public class RetryerResultContext {
 
     private String message;
 
+    private Throwable throwable;
+
 }

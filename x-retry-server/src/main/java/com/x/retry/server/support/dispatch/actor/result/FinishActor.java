@@ -49,8 +49,6 @@ public class FinishActor extends AbstractActor  {
 
             retryTask.setRetryStatus(RetryStatusEnum.FINISH.getLevel());
 
-            RetryTaskLog retryTaskLog = new RetryTaskLog();
-            retryTaskLog.setErrorMessage(StringUtils.EMPTY);
 
             try {
                 retryTaskAccess.updateRetryTask(retryTask);
@@ -61,11 +59,11 @@ public class FinishActor extends AbstractActor  {
                 getContext().stop(getSelf());
 
                 // 记录重试日志
-                BeanUtils.copyProperties(retryTask, retryTaskLog);
-                retryTaskLog.setCreateDt(LocalDateTime.now());
-                retryTaskLog.setId(null);
-                Assert.isTrue(1 ==  retryTaskLogMapper.insert(retryTaskLog),
-                        new XRetryServerException("新增重试日志失败"));
+                RetryTaskLog retryTaskLog = new RetryTaskLog();
+                retryTaskLog.setRetryStatus(retryTask.getRetryStatus());
+                Assert.isTrue(1 ==  retryTaskLogMapper.update(retryTaskLog,
+                        new LambdaQueryWrapper<RetryTaskLog>().eq(RetryTaskLog::getBizId, retryTask.getBizId())),
+                        new XRetryServerException("更新重试日志失败"));
             }
 
 

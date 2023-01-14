@@ -1,8 +1,8 @@
 export default {
   'user.login.userName': '用户名',
   'user.login.password': '密码',
-  'user.login.username.placeholder': '账户: admin',
-  'user.login.password.placeholder': '密码: admin or ant.design',
+  'user.login.username.placeholder': '请输入账号',
+  'user.login.password.placeholder': '请输入密码',
   'user.login.message-invalid-credentials': '账户或密码错误',
   'user.login.message-invalid-verification-code': '验证码错误',
   'user.login.tab-login-credentials': '账户密码登录',
