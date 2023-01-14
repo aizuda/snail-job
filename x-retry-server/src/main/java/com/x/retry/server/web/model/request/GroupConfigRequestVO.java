@@ -39,10 +39,14 @@ public class GroupConfigRequestVO {
      */
     private Integer routeKey;
 
-    @NotEmpty(groups = PostMapping.class)
+    /**
+     * 通知列表
+     */
     private List<NotifyConfigVO> notifyList;
 
-    @NotEmpty(groups = PostMapping.class)
+    /**
+     * 场景列表
+     */
     private List<SceneConfigVO> sceneList;
 
     @Data

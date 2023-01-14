@@ -67,7 +67,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
             try {
                 systemUser = JsonUtil.parseObject(JWT.decode(token).getAudience().get(0), SystemUser.class);
             } catch (JWTDecodeException j) {
-                throw new XRetryServerException("无效token");
+                throw new XRetryServerException("登陆过期，请重新登陆");
             }
 
             systemUser = systemUserMapper.selectOne(new LambdaQueryWrapper<SystemUser>().eq(SystemUser::getUsername, systemUser.getUsername()));
@@ -82,7 +82,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
             try {
                 jwtVerifier.verify(token);
             } catch (JWTVerificationException e) {
-                throw new XRetryServerException("无效token");
+                throw new XRetryServerException("登陆过期，请重新登陆");
             }
 
             RoleEnum role = loginRequired.role();
