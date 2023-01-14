@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 /**
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Component;
  * @date : 2022-02-16 18:03
  */
 @Component
+@Order(Ordered.HIGHEST_PRECEDENCE)
 @Slf4j
 public class SpringContext implements ApplicationContextAware {
 

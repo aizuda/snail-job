@@ -9,6 +9,9 @@ import com.x.retry.client.core.strategy.RetryMethod;
 import com.x.retry.common.core.context.SpringContext;
 import com.x.retry.common.core.log.LogUtils;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.stereotype.Component;
@@ -21,7 +24,9 @@ import java.util.*;
  * @date : 2022-03-03 16:55
  */
 @Component
-public class RetryableScanner implements Scanner {
+public class RetryableScanner implements Scanner, ApplicationContextAware {
+
+    public ApplicationContext applicationContext;
 
     @Override
     public List<RetryerInfo> doScan() {
@@ -31,9 +36,9 @@ public class RetryableScanner implements Scanner {
     private List<RetryerInfo> scanRetryAbleMethod() {
 
         List<RetryerInfo> retryerInfoList = new ArrayList<>();
-        String[] beanDefinitionNames = SpringContext.applicationContext.getBeanNamesForType(Object.class, false, true);
+        String[] beanDefinitionNames = applicationContext.getBeanNamesForType(Object.class, false, true);
         for (String beanDefinitionName : beanDefinitionNames) {
-            Object bean = SpringContext.applicationContext.getBean(beanDefinitionName);
+            Object bean = applicationContext.getBean(beanDefinitionName);
 
             Map<Method, Retryable> annotatedMethods = null;
             try {
@@ -87,4 +92,8 @@ public class RetryableScanner implements Scanner {
         );
     }
 
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+       this.applicationContext = applicationContext;
+    }
 }

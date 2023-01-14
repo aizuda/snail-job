@@ -19,7 +19,7 @@ import java.util.Objects;
  * @date : 2022-03-07 15:08
  * @date 2022/1/5 11:14 上午
  */
-@Component
+@Component("XRetryHessianSerializer")
 public class HessianSerializer implements RetryArgSerializer {
 
     @Override

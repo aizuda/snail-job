@@ -3,8 +3,8 @@ package com.x.retry.client.core.init;
 import com.x.retry.client.core.Lifecycle;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -17,13 +17,13 @@ import java.util.List;
  */
 @Component
 @Slf4j
-public class StartListener implements ApplicationListener<ContextRefreshedEvent> {
+public class StartListener implements ApplicationRunner {
 
     @Autowired
     private List<Lifecycle> lifecycleList;
 
     @Override
-    public void onApplicationEvent(ContextRefreshedEvent event) {
+    public void run(ApplicationArguments args) throws Exception {
         log.info("X-RETRY-CLIENT-RETRY 启动");
         lifecycleList.forEach(Lifecycle::start);
         log.info("X-RETRY-CLIENT-RETRY 启动成功");

@@ -17,6 +17,9 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
@@ -34,11 +37,12 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
-public class NettyHttpConnectClient implements Lifecycle {
+public class NettyHttpConnectClient implements Lifecycle, ApplicationContextAware {
 
     private static final String HOST_ID = IdUtil.simpleUUID();
     private static final String HOST_IP = HostUtils.getIp();
 
+    private ApplicationContext applicationContext;
     private static Channel channel;
     private static NioEventLoopGroup nioEventLoopGroup = new NioEventLoopGroup();
     private static Bootstrap bootstrap = new Bootstrap();
@@ -46,7 +50,7 @@ public class NettyHttpConnectClient implements Lifecycle {
     public void start() {
 
         try {
-            XRetryProperties xRetryProperties = SpringContext.getBeanByType(XRetryProperties.class);
+            XRetryProperties xRetryProperties = applicationContext.getBean(XRetryProperties.class);
             XRetryProperties.ServerConfig server = xRetryProperties.getServer();
             final NettyHttpConnectClient thisClient = this;
             bootstrap.group(nioEventLoopGroup)
@@ -116,4 +120,8 @@ public class NettyHttpConnectClient implements Lifecycle {
     }
 
 
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
+    }
 }

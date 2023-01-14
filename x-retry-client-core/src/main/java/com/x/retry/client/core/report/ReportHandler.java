@@ -31,11 +31,8 @@ import java.util.function.Function;
 public class ReportHandler implements Lifecycle {
 
     @Autowired
-    @Qualifier("jacksonSerializer")
+    @Qualifier("XRetryJacksonSerializer")
     private RetryArgSerializer retryArgSerializer;
-
-    @Autowired
-    private XRetryProperties xRetryProperties;
 
     private static SlidingWindow<RetryTaskDTO> slidingWindow;
 

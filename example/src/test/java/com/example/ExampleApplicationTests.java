@@ -1,7 +1,10 @@
 package com.example;
 
+//import com.example.client.DemoClient;
+import com.example.client.DemoClient;
 import com.example.mapper.SchoolMapper;
 import com.example.po.School;
+import com.x.retry.common.core.model.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +20,15 @@ public class ExampleApplicationTests {
 
     @Autowired
     private RestTemplate restTemplate;
+
+    @Autowired(required = false)
+    private DemoClient demoClient;
+
+    @Test
+    public void demoClient() {
+        Result s = demoClient.get();
+        System.out.println(s);
+    }
 
     @Test
     public void test() {
