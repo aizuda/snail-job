@@ -1,4 +1,6 @@
 spring:
+  profiles:
+    active: dev
   datasource:
     name: x_retry
     url:  jdbc:mysql://localhost:3306/x_retry?useSSL=false&characterEncoding=utf8&useUnicode=true

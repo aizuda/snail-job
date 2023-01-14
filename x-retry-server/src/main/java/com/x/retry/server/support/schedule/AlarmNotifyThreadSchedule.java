@@ -32,19 +32,17 @@ public class AlarmNotifyThreadSchedule {
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     private static String retryErrorMoreThresholdTextMessageFormatter =
-            "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 重试失败数据监控</font>  \r\n" +
-                    "> 名称:{}  \r\n" +
-                    "> ID:{}  \r\n" +
-                    "> 时间窗口:{} ~ {}  \r\n" +
+            "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 重试失败数据监控</font>  </br>" +
+                    "> 名称:{}  </br>" +
+                    "> 时间窗口:{} ~ {}  </br>" +
                     "> **共计:{}**  \n"
             ;
 
     private static String retryTaskMoreThresholdTextMessageFormatter =
-            "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 重试数据监控</font>  \r\n" +
-                    "> 名称:{}  \r\n" +
-                    "> ID:{}  \r\n" +
-                    "> 时间:{}  \r\n" +
-                    "> **共计:{}**  \n"
+            "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 重试数据监控</font>  </br>" +
+                    "> 名称:{}  </br>" +
+                    "> 时间:{}  </br>" +
+                    "> **共计:{}**  </br>"
             ;
 
     @Autowired
@@ -77,7 +75,6 @@ public class AlarmNotifyThreadSchedule {
                 AlarmContext context = AlarmContext.build()
                         .text(retryTaskMoreThresholdTextMessageFormatter,
                                 EnvironmentUtils.getActiveProfile(),
-                                groupConfig.getGroupName(),
                                 groupConfig.getGroupName(),
                                 LocalDateTime.now().format(formatter),
                                 count)
@@ -115,7 +112,6 @@ public class AlarmNotifyThreadSchedule {
                 AlarmContext context = AlarmContext.build()
                         .text(retryErrorMoreThresholdTextMessageFormatter,
                                 EnvironmentUtils.getActiveProfile(),
-                                groupConfig.getGroupName(),
                                 groupConfig.getGroupName(),
                                 now.minusMinutes(30).format(formatter),
                                 now.format(formatter),

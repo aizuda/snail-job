@@ -1,8 +1,10 @@
 package com.x.retry.common.core.alarm.strategy;
 
 import com.x.retry.common.core.alarm.AlarmContext;
+import com.x.retry.common.core.alarm.DingDingAttribute;
 import com.x.retry.common.core.enums.AlarmTypeEnum;
 import com.x.retry.common.core.util.DingDingUtils;
+import com.x.retry.common.core.util.JsonUtil;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -22,15 +24,17 @@ public class DingdingAlarm extends AbstractAlarm<AlarmContext> {
     @Override
     public boolean asyncSendMessage(AlarmContext context) {
 
+        DingDingAttribute dingDingAttribute = JsonUtil.parseObject(context.getNotifyAttribute(), DingDingAttribute.class);
         threadPoolExecutor.execute(() ->
-                DingDingUtils.sendMessage(DingDingUtils.buildSendRequest(context.getTitle(), context.getText()), context.getNotifyAttribute()));
+                DingDingUtils.sendMessage(DingDingUtils.buildSendRequest(context.getTitle(), context.getText()), dingDingAttribute.getDingDingUrl()));
 
         return true;
     }
 
     @Override
     public boolean syncSendMessage(AlarmContext context) {
-        return DingDingUtils.sendMessage(DingDingUtils.buildSendRequest(context.getTitle(), context.getNotifyAttribute()), context.getNotifyAttribute());
+        DingDingAttribute dingDingAttribute = JsonUtil.parseObject(context.getNotifyAttribute(), DingDingAttribute.class);
+        return DingDingUtils.sendMessage(DingDingUtils.buildSendRequest(context.getTitle(), context.getText()), dingDingAttribute.getDingDingUrl());
     }
 
     @Override

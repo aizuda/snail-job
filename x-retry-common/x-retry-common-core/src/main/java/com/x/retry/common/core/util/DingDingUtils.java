@@ -12,7 +12,7 @@ import org.springframework.util.StringUtils;
  */
 public class DingDingUtils {
     /**
-     * 防止文本过长钉钉限流，目前最大为200
+     * 防止文本过长钉钉限流，目前最大为4000
      *
      * @param text
      * @return
@@ -20,8 +20,8 @@ public class DingDingUtils {
     private static String subTextLength(String text) {
         int length = text.length();
 
-        if (length > 1024) {
-            return text.substring(0, 1024);
+        if (length > 4000) {
+            return text.substring(0, 4000);
         } else {
             return text;
         }

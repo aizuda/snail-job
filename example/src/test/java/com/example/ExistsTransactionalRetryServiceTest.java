@@ -89,7 +89,7 @@ public class ExistsTransactionalRetryServiceTest {
                 .thenReturn(new Result(0, "5"))
         ;
         try {
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 100; i++) {
                 threadPoolExecutor.execute(() -> testExistsTransactionalRetryService.testSimpleInsert(UUID.randomUUID().toString()));
             }
         } catch (Exception e) {
