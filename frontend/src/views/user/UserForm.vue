@@ -7,7 +7,7 @@
           v-decorator="['id']" />
       </a-form-item>
       <a-form-item
-        label="组名称">
+        label="用户名">
         <a-input
           placeholder="请输入用户名"
           v-decorator="[

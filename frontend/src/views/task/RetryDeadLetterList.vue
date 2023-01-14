@@ -19,7 +19,7 @@
           </a-col>
           <template v-if="advanced">
             <a-col :md="8" :sm="24">
-              <a-form-item label="调用业务编号">
+              <a-form-item label="业务编号">
                 <a-input v-model="queryParam.bizNo" placeholder="请输入业务编号"/>
               </a-form-item>
             </a-col>
