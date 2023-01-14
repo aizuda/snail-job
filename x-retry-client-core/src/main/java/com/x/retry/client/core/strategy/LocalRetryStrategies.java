@@ -97,7 +97,7 @@ public class LocalRetryStrategies extends AbstractRetryStrategies {
             log.info("内存重试完成且异常未被解决 scene:[{}]", retryerInfo.getScene());
             // 上报服务端异常
             if (RetryType.LOCAL_REMOTE.name().equals(retryerInfo.getRetryType().name())){
-                // TODO上报
+                // 上报
                 log.debug("上报 scene:[{}]", retryerInfo.getScene());
                 reportHandler.report(retryerInfo.getScene(), retryerInfo.getExecutorClassName(), params);
             }

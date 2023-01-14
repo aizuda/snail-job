@@ -9,18 +9,21 @@ import com.x.retry.client.core.exception.XRetryClientException;
 import com.x.retry.client.core.intercepter.RetrySiteSnapshot;
 import com.x.retry.client.core.retryer.RetryerInfo;
 import com.x.retry.client.core.spel.SPELParamFunction;
+import com.x.retry.client.core.window.RetryLeapArray;
 import com.x.retry.common.core.log.LogUtils;
-import com.x.retry.common.core.window.Listener;
-import com.x.retry.common.core.window.SlidingWindow;
+import com.x.retry.common.core.window.WindowWrap;
 import com.x.retry.server.model.dto.RetryTaskDTO;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Method;
-import java.time.temporal.ChronoUnit;
-import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 /**
@@ -28,13 +31,20 @@ import java.util.function.Function;
  * @date : 2022-03-08 09:24
  */
 @Component
+@Slf4j
 public class ReportHandler implements Lifecycle {
 
     @Autowired
     @Qualifier("XRetryJacksonSerializer")
     private RetryArgSerializer retryArgSerializer;
 
-    private static SlidingWindow<RetryTaskDTO> slidingWindow;
+    public static final int SAMPLE_COUNT = 10;
+
+    public static final int INTERVAL_IN_MS = 1000;
+
+    private static ScheduledExecutorService dispatchService = Executors.newSingleThreadScheduledExecutor(r -> new Thread(r, "DispatchService"));
+
+    public static RetryLeapArray slidingWindow = new RetryLeapArray(SAMPLE_COUNT, INTERVAL_IN_MS, new ReportListener());
 
     /**
      * 异步上报到服务端
@@ -50,7 +60,7 @@ public class ReportHandler implements Lifecycle {
         Method executorMethod = retryerInfo.getExecutorMethod();
 
         RetryTaskDTO retryTaskDTO = new RetryTaskDTO();
-        String bizId = null;
+        String bizId;
         try {
             Class<? extends BizIdGenerate> bizIdGenerate = retryerInfo.getBizIdGenerate();
             BizIdGenerate generate = bizIdGenerate.newInstance();
@@ -73,31 +83,21 @@ public class ReportHandler implements Lifecycle {
         Function<Object[], String> spelParamFunction = new SPELParamFunction(bizNoSpel, executorMethod);
         retryTaskDTO.setBizNo(spelParamFunction.apply(args));
 
-        slidingWindow.add(retryTaskDTO);
+        slidingWindow.currentWindow().value().add(retryTaskDTO);
 
         return true;
     }
 
     @Override
     public void start() {
+        dispatchService.scheduleAtFixedRate(() -> {
+            slidingWindow.currentWindow();
+        }, INTERVAL_IN_MS, INTERVAL_IN_MS / SAMPLE_COUNT, TimeUnit.MILLISECONDS);
 
-        Listener<RetryTaskDTO> reportListener = new ReportListener();
-
-        slidingWindow = SlidingWindow
-                .Builder
-                .<RetryTaskDTO>newBuilder()
-                .withTotalThreshold(50)
-                .withDuration(5, ChronoUnit.SECONDS)
-                .withListener(reportListener)
-                .build();
-        slidingWindow.start();
     }
 
     @Override
     public void close() {
-        if (Objects.nonNull(slidingWindow)) {
-            slidingWindow.end();
-        }
     }
 
 }
