@@ -23,7 +23,7 @@ export default {
   menu: {
     locale: true
   },
-  title: 'X-RETRY',
+  title: 'easy-retry',
   pwa: false,
   iconfontUrl: '',
   production: process.env.NODE_ENV === 'production' && process.env.VUE_APP_PREVIEW !== 'true'

@@ -36,6 +36,6 @@ mybatis-plus:
 logging:
   config: classpath:logback-boot.xml
 
-x-retry:
+easy-retry:
   server:
     host: 127.0.0.1

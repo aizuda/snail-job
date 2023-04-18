@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskMapper">
+  <resultMap id="BaseResultMap" type="com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="group_name" jdbcType="VARCHAR" property="groupName" />
+    <result column="scene_name" jdbcType="VARCHAR" property="sceneName" />
+    <result column="biz_id" jdbcType="VARCHAR" property="bizId" />
+    <result column="biz_no" jdbcType="VARCHAR" property="bizNo" />
+    <result column="executor_name" jdbcType="VARCHAR" property="executorName" />
+    <result column="args_str" jdbcType="VARCHAR" property="argsStr" />
+    <result column="ext_attrs" jdbcType="VARCHAR" property="extAttrs" />
+    <result column="next_trigger_at" jdbcType="TIMESTAMP" property="nextTriggerAt" />
+    <result column="retry_count" jdbcType="TINYINT" property="retryCount" />
+    <result column="retry_status" jdbcType="TINYINT" property="retryStatus" />
+    <result column="create_dt" jdbcType="TIMESTAMP" property="createDt" />
+    <result column="update_dt" jdbcType="TIMESTAMP" property="updateDt" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, group_name, scene_name, biz_id, biz_no, executor_name, args_str, ext_attrs, next_trigger_at, retry_count, retry_status,
+    create_dt, update_dt
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from retry_task_${partition}
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from retry_task_${partition}
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByRetryStatus">
+    delete from retry_task_${partition}
+    where retry_status = #{retryStatus,jdbcType=TINYINT}
+  </delete>
+  <delete id="deleteBatch">
+    delete from retry_task_${partition}
+    where id IN
+      <foreach collection="ids" item="id" separator="," open="(" close=")">
+        #{id}
+      </foreach>
+  </delete>
+  <select id="selectRetryTask" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from retry_task_${partition} where create_dt &gt;#{createDt,jdbcType=TIMESTAMP} and retry_status = 0 limit #{pageSize}
+  </select>
+  <select id="selectRetryTaskByRetryCount" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from retry_task_${partition} where retry_status = #{retryStatus,jdbcType=TINYINT} limit 1000
+  </select>
+  <select id="countAllRetryTaskByRetryStatus" resultType="int">
+    select
+    count(*)
+    from retry_task_${partition} where retry_status = #{retryStatus}
+  </select>
+  <select id="selectRetryTaskByGroupIdAndSceneId" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from retry_task_${partition} where biz_id = #{bizId,jdbcType=VARCHAR} AND  scene_id = #{sceneId,jdbcType=VARCHAR}
+  </select>
+  <select id="selectRetryTaskPage" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from retry_task_${partition}
+  </select>
+</mapper>

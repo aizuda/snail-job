@@ -9,19 +9,19 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
-    <groupId>com.byteblogs</groupId>
-    <artifactId>x-retry</artifactId>
+    <groupId>com.aizuda</groupId>
+    <artifactId>easy-retry</artifactId>
     <version>${revision}</version>
-    <name>x-retry</name>
+    <name>easy-retry</name>
     <packaging>pom</packaging>
 
-    <description>x-retry</description>
+    <description>easy-retry</description>
 
     <properties>
         <java.version>1.8</java.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <revision>0.0.4.2</revision>
+        <revision>1.0.0.0</revision>
         <dingding-talk.version>1.0.0</dingding-talk.version>
         <feign.version>11.7</feign.version>
         <hibernate-validator.version>5.4.2.Final</hibernate-validator.version>
@@ -29,10 +29,10 @@
     </properties>
 
     <modules>
-        <module>x-retry-client-core</module>
-        <module>x-retry-common</module>
-        <module>x-retry-server</module>
-        <module>x-retry-client-starter</module>
+        <module>easy-retry-client-core</module>
+        <module>easy-retry-common</module>
+        <module>easy-retry-server</module>
+        <module>easy-retry-client-starter</module>
     </modules>
 
     <dependencyManagement>
@@ -45,18 +45,18 @@
             </dependency>
 
             <dependency>
-                <groupId>com.byteblogs</groupId>
-                <artifactId>x-retry-common-core</artifactId>
+                <groupId>com.aizuda</groupId>
+                <artifactId>easy-retry-common-core</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
-                <groupId>com.byteblogs</groupId>
-                <artifactId>x-retry-common-server-api</artifactId>
+                <groupId>com.aizuda</groupId>
+                <artifactId>easy-retry-common-server-api</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
-                <groupId>com.byteblogs</groupId>
-                <artifactId>x-retry-common-client-api</artifactId>
+                <groupId>com.aizuda</groupId>
+                <artifactId>easy-retry-common-client-api</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
@@ -65,8 +65,8 @@
                 <version>5.7.21</version>
             </dependency>
             <dependency>
-                <groupId>com.byteblogs</groupId>
-                <artifactId>x-retry-client-core</artifactId>
+                <groupId>com.aizuda</groupId>
+                <artifactId>easy-retry-client-core</artifactId>
                 <version>${revision}</version>
             </dependency>
             <!-- dingding talk sdk -->
@@ -108,8 +108,8 @@
     </licenses>
 
     <scm>
-        <url>https://github.com/byteblogs168/x-retry</url>
-        <connection>https://github.com/byteblogs168/x-retry.git</connection>
+        <url>https://github.com/byteblogs168/easy-retry</url>
+        <connection>https://github.com/byteblogs168/easy-retry.git</connection>
         <developerConnection>https://github.com/byteblogs168</developerConnection>
     </scm>
 

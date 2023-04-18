@@ -36,8 +36,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.byteblogs</groupId>
-            <artifactId>x-retry-client-starter</artifactId>
+            <groupId>com.aizuda</groupId>
+            <artifactId>easy-retry-client-starter</artifactId>
             <version>0.0.4.2</version>
         </dependency>
         <dependency>
@@ -80,7 +80,7 @@
     </dependencies>
 
     <build>
-        <finalName>x-retry-example</finalName>
+        <finalName>easy-retry-example</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

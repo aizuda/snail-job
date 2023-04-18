@@ -1,0 +1,4 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+   com.aizuda.easy.retry.common.core.CommonCoreConfigure
+
+  

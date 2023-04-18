@@ -19,13 +19,13 @@ public class CodeGen {
                     builder.author("www.byteblogs.com") // 设置作者
                             .enableSwagger() // 开启 swagger 模式
                             .fileOverride() // 覆盖已生成文件
-                            .outputDir("/Users/zhangshuguang/x-retry/example/src/main/java"); // 指定输出目录
+                            .outputDir("/Users/zhangshuguang/easy-retry/example/src/main/java"); // 指定输出目录
                 })
                 .packageConfig(builder -> {
                     builder.parent("com.example") // 设置父包名
                             .moduleName("") // 设置父包模块名
                             .entity("po")
-                            .pathInfo(Collections.singletonMap(OutputFile.mapperXml, "/Users/zhangshuguang/x-retry/example/src/main/resources/mapper")); // 设置mapperXml生成路径
+                            .pathInfo(Collections.singletonMap(OutputFile.mapperXml, "/Users/zhangshuguang/easy-retry/example/src/main/resources/mapper")); // 设置mapperXml生成路径
                 })
                 .strategyConfig(builder -> {
                     builder.addInclude("school", "student", "teacher", "school_student_teacher") // 设置需要生成的表名

@@ -1,7 +1,7 @@
-## 《分布式异常重试服务平台 X-RETRY》
+## 《分布式异常重试服务平台 easy-retry》
 
 # 简介
-> X-RETRY 基于服务治理的思想我们开发了重试治理的功能，支持动态配置，接入方式基本无需入侵业务代码，并使用多种策略结合的方式在链路层面控制重试放大效应，兼顾易用性、灵活性、安全性的分布式异常重试服务平台
+> easy-retry 基于服务治理的思想我们开发了重试治理的功能，支持动态配置，接入方式基本无需入侵业务代码，并使用多种策略结合的方式在链路层面控制重试放大效应，兼顾易用性、灵活性、安全性的分布式异常重试服务平台
 
 # 后端管理系统预览
 地址: <http://x-retry.byteblogs.com>
@@ -29,14 +29,14 @@
 ## 添加依赖
 ```java
 <dependency>
-    <groupId>com.x.retry</groupId>
-    <artifactId>x-retry-client-starter</artifactId>
+    <groupId>com.aizuda</groupId>
+    <artifactId>easy-retry-client-starter</artifactId>
     <version>最新版本</version>
 </dependency>
 ```
 
 ## 配置
-添加注解开启X-RETRY功能
+添加注解开启easy-retry功能
 ```java
 @SpringBootApplication
 @EnableXRetry(group = "example_group")
@@ -87,7 +87,7 @@ doc/sql/x_retry.sql
 ```yaml
 spring:
   datasource:
-    name: x_retry
+    name: easy_retry
     url:  jdbc:mysql://localhost:3306/x_retry?useSSL=false&characterEncoding=utf8&useUnicode=true
     username: root
     password: root
@@ -99,7 +99,7 @@ spring:
       maximum-pool-size: 20
       auto-commit: true
       idle-timeout: 30000
-      pool-name: x_retry
+      pool-name: easy_retry
       max-lifetime: 1800000
       connection-test-query: SELECT 1
   resources:
@@ -116,7 +116,7 @@ mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true
     cache-enabled: true
-x-retry:
+easy-retry:
   lastDays: 30 # 拉取重试数据的天数
   retryPullPageSize: 100 # 拉取重试数据的每批次的大小
   nettyPort: 1788  # 服务端netty端口
@@ -128,7 +128,7 @@ x-retry:
 ### 下载源码部署
 - 下载源码
   ```
-   https://github.com/byteblogs168/x-retry.git
+   https://github.com/byteblogs168/easy-retry.git
   ```
   
 - maven 打包镜像
@@ -138,19 +138,19 @@ maven clean install
 
 - 修改配置
 ```
-/x-retry-server/src/main/resources/application.yml
+/easy-retry-server/src/main/resources/application.yml
 ```
   
 - 启动
 ```
-java -jar x-retry-server.jar
+java -jar easy-retry-server.jar
 ```
 
 ### docker 部署
 - 下载镜像
-  地址:  https://github.com/byteblogs168/x-retry/pkgs/container/x-retry-server
+  地址:  https://github.com/byteblogs168/easy-retry/pkgs/container/easy-retry-server
   ```
-    docker pull ghcr.io/byteblogs168/x-retry-server:{最新版本}
+    docker pull ghcr.io/byteblogs168/easy-retry-server:{最新版本}
   ```
 
 - 创建容器并运行
@@ -158,15 +158,15 @@ java -jar x-retry-server.jar
 ```
 /**
 * 如需自定义 mysql 等配置，可通过 "-e PARAMS" 指定，参数格式 PARAMS="--key1=value1  --key2=value2" ；
-* 配置项参考文件：/x-retry-server/src/main/resources/application.yml
+* 配置项参考文件：/easy-retry-server/src/main/resources/application.yml
 * 如需自定义 JVM内存参数 等配置，可通过 "-e JAVA_OPTS" 指定，参数格式 JAVA_OPTS="-Xmx512m" ；
 */
 docker run \
   -e PARAMS="--spring.datasource.username=root --spring.datasource.password=123456  --spring.datasource.url=jdbc:mysql://ip:3306/x_retry?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai " \
   -p 8080:8080 \
   -p 1788:1788 \
-  --name x-retry-server-1  \
-  -d registry.cn-shanghai.aliyuncs.com/byteblogs/x-retry:{最新版本}
+  --name easy-retry-server-1  \
+  -d registry.cn-shanghai.aliyuncs.com/byteblogs/easy-retry:{最新版本}
 
 ```
 
