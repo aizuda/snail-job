@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
  * @date : 2021-11-25 10:52
  */
 @Configuration
-@ComponentScan("com.x.retry.common.core.*")
+@ComponentScan("com.aizuda.easy.retry.common.core.*")
 public class CommonCoreConfigure {
 
 }

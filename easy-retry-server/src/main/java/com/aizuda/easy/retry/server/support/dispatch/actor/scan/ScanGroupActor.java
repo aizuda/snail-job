@@ -5,7 +5,7 @@ import akka.actor.ActorRef;
 import com.aizuda.easy.retry.server.support.strategy.FilterStrategies;
 import com.aizuda.easy.retry.server.support.strategy.StopStrategies;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
-import com.x.retry.client.model.DispatchRetryResultDTO;
+import com.aizuda.easy.retry.client.model.DispatchRetryResultDTO;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.server.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.config.SystemProperties;
@@ -20,7 +20,6 @@ import com.aizuda.easy.retry.server.support.context.MaxAttemptsPersistenceRetryC
 import com.aizuda.easy.retry.server.support.dispatch.DispatchService;
 import com.aizuda.easy.retry.server.support.handler.ClientNodeAllocateHandler;
 import com.aizuda.easy.retry.server.support.retry.RetryBuilder;
-import com.aizuda.easy.retry.server.support.retry.RetryExecutor;
 import com.aizuda.easy.retry.server.support.strategy.WaitStrategies;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
