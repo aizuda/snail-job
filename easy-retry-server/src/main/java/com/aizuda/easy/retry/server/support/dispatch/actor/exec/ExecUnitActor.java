@@ -2,8 +2,8 @@ package com.aizuda.easy.retry.server.support.dispatch.actor.exec;
 
 import akka.actor.AbstractActor;
 import cn.hutool.core.util.IdUtil;
-import com.x.retry.client.model.DispatchRetryDTO;
-import com.x.retry.client.model.DispatchRetryResultDTO;
+import com.aizuda.easy.retry.client.model.DispatchRetryDTO;
+import com.aizuda.easy.retry.client.model.DispatchRetryResultDTO;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.model.Result;

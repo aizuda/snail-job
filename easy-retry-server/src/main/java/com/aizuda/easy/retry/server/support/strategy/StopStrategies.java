@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.server.support.strategy;
 
-import com.x.retry.client.model.DispatchRetryResultDTO;
+import com.aizuda.easy.retry.client.model.DispatchRetryResultDTO;
 import com.aizuda.easy.retry.common.core.enums.RetryResultStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.common.core.model.Result;
@@ -45,8 +45,13 @@ public class StopStrategies {
                     (MaxAttemptsPersistenceRetryContext<Result<DispatchRetryResultDTO>>) retryContext;
 
             Result<DispatchRetryResultDTO> response = context.getCallResult();
+
+            if (Objects.isNull(response) || StatusEnum.YES.getStatus() != response.getStatus()) {
+                return Boolean.FALSE;
+            }
+
             DispatchRetryResultDTO data = response.getData();
-            if (StatusEnum.YES.getStatus() != response.getStatus() || Objects.isNull(data)) {
+            if (Objects.isNull(data)) {
                 return Boolean.FALSE;
             }
 

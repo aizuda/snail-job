@@ -6,6 +6,7 @@ import com.aizuda.easy.retry.server.support.FilterStrategy;
 import com.aizuda.easy.retry.server.support.RetryContext;
 import com.aizuda.easy.retry.server.support.StopStrategy;
 import com.aizuda.easy.retry.server.support.WaitStrategy;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -16,17 +17,18 @@ import java.util.concurrent.Callable;
  * @author: www.byteblogs.com
  * @date : 2021-11-29 18:57
  */
+@Slf4j
 public class RetryExecutor<V> {
 
-    private StopStrategy stopStrategy;
-    private WaitStrategy waitStrategy;
-    private List<FilterStrategy> filterStrategies;
-    private RetryContext<V> retryContext;
+    private final StopStrategy stopStrategy;
+    private final WaitStrategy waitStrategy;
+    private final List<FilterStrategy> filterStrategies;
+    private final RetryContext<V> retryContext;
 
     public RetryExecutor(StopStrategy stopStrategy,
                          WaitStrategy waitStrategy,
                          List<FilterStrategy> filterStrategies,
-                         RetryContext retryContext) {
+                         RetryContext<V> retryContext) {
         this.stopStrategy = stopStrategy;
         this.waitStrategy = waitStrategy;
         this.filterStrategies = filterStrategies;
@@ -37,8 +39,6 @@ public class RetryExecutor<V> {
 
         for (FilterStrategy filterStrategy : filterStrategies) {
             if (!filterStrategy.filter(retryContext)) {
-
-
                 return false;
             }
         }
@@ -55,8 +55,13 @@ public class RetryExecutor<V> {
      */
     public V call(Callable<V> callable) throws Exception {
 
-        // 调用重试
-        V call = callable.call();
+        // 这里调用客户端可能会出现网络异常
+        V call = null;
+        try {
+            call = callable.call();
+        } catch (Exception e) {
+            log.error("客户端执行失败: [{}]", retryContext.getRetryTask());
+        }
 
         retryContext.setCallResult(call);
 

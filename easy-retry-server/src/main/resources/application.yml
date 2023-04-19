@@ -2,7 +2,7 @@ spring:
   profiles:
     active: dev
   datasource:
-    name: x_retry
+    name: easy_retry
     url:  jdbc:mysql://localhost:3306/x_retry?useSSL=false&characterEncoding=utf8&useUnicode=true
     username: root
     password: root
@@ -17,11 +17,12 @@ spring:
       pool-name: x_retry
       max-lifetime: 1800000
       connection-test-query: SELECT 1
-  resources:
-    static-locations: classpath:admin/
+  web:
+    resources:
+      static-locations: classpath:admin/
 mybatis-plus:
   mapper-locations: classpath:/mapper/*.xml
-  typeAliasesPackage: com.x.retry.server.persistence.mybatis.po
+  typeAliasesPackage: com.aizuda.easy.retry.server.persistence.mybatis.po
   global-config:
     db-config:
       field-strategy: NOT_EMPTY
