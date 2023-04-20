@@ -7,14 +7,14 @@ spring:
     username: root
     password: root
     type: com.zaxxer.hikari.HikariDataSource
-    driver-class-name: com.mysql.jdbc.Driver
+    driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       connection-timeout: 30000
       minimum-idle: 5
       maximum-pool-size: 20
       auto-commit: true
       idle-timeout: 30000
-      pool-name: x_retry
+      pool-name: easy_retry
       max-lifetime: 1800000
       connection-test-query: SELECT 1
   web:
@@ -32,7 +32,8 @@ mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true
     cache-enabled: true
-
+logging:
+  config: classpath:logback-boot.xml
 easy-retry:
   lastDays: 30 # 拉取重试数据的天数
   retryPullPageSize: 100 # 拉取重试数据的每批次的大小

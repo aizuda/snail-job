@@ -25,7 +25,7 @@ public class StartListener implements ApplicationListener<ContextRefreshedEvent>
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
-        LogUtils.info(log, "easy-retry-SERVER 启动");
+        LogUtils.info(log, "EASY-RETRY-SERVER 启动");
         lifecycleList.forEach(Lifecycle::start);
     }
 }

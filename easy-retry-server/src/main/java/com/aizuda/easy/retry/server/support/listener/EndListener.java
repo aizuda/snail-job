@@ -25,7 +25,7 @@ public class EndListener implements ApplicationListener<ContextClosedEvent> {
 
     @Override
     public void onApplicationEvent(ContextClosedEvent event) {
-        LogUtils.info(log, "easy-retry-SERVER 停止");
+        LogUtils.info(log, "EASY-RETRY-SERVER 停止");
         lifecycleList.forEach(Lifecycle::close);
     }
 }
