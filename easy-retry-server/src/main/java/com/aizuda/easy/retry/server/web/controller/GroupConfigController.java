@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.server.web.controller;
 
+import com.aizuda.easy.retry.server.config.SystemProperties;
 import com.aizuda.easy.retry.server.service.GroupConfigService;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
 import com.aizuda.easy.retry.server.web.model.request.GroupConfigQueryVO;
@@ -23,6 +24,8 @@ public class GroupConfigController {
 
     @Autowired
     private GroupConfigService groupConfigService;
+    @Autowired
+    private SystemProperties systemProperties;
 
     @LoginRequired(role = RoleEnum.ADMIN)
     @PostMapping("")
@@ -53,5 +56,13 @@ public class GroupConfigController {
     public List<String> getAllGroupNameList() {
         return groupConfigService.getAllGroupNameList();
     }
+
+    @LoginRequired
+    @GetMapping("/partition")
+    public Integer getTotalPartition() {
+        // 组分区从0开始,所以是最大值减一
+        return systemProperties.getTotalPartition() - 1;
+    }
+
 
 }

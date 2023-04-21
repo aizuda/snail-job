@@ -64,7 +64,7 @@
               'groupPartition'
             ]"
             :min="0"
-            :max="10"
+            :max="maxGroupPartition"
           />
         </a-form-item>
       </a-col>
@@ -76,7 +76,7 @@
 </template>
 
 <script>
-import { getGroupConfigByGroupName } from '@/api/manage'
+import { getGroupConfigByGroupName, getTotalPartition } from '@/api/manage'
 import pick from 'lodash.pick'
 
 export default {
@@ -90,6 +90,7 @@ export default {
   data () {
     return {
       form: this.$form.createForm(this),
+      maxGroupPartition: 32,
       routeKey: {
         '1': '一致性hash算法',
         '2': '随机算法',
@@ -99,6 +100,10 @@ export default {
   },
   mounted () {
     this.$nextTick(() => {
+      getTotalPartition().then(res => {
+        this.maxGroupPartition = res.data
+      })
+
       const groupName = this.$route.query.groupName
       if (groupName) {
         getGroupConfigByGroupName(groupName).then(res => {

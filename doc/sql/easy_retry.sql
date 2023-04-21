@@ -152,7 +152,7 @@ CREATE TABLE `system_user`
     UNIQUE KEY `uk_username` (`username`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='系统用户表';
 
-INSERT INTO x_retry.system_user (username, password, role)
+INSERT INTO system_user (username, password, role)
 VALUES ('admin', 'cdf4a007e2b02a0c49fc9b7ccfbb8a10c644f635e1765dcf2a7ab794ddc7edac', 2);
 
 CREATE TABLE `system_user_permission`

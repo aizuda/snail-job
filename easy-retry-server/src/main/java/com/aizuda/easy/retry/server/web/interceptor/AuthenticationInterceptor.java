@@ -30,7 +30,7 @@ import java.util.Objects;
 @Configuration
 public class AuthenticationInterceptor implements HandlerInterceptor {
 
-    public static final String AUTHENTICATION = "easy-retry-AUTH";
+    public static final String AUTHENTICATION = "EASY-RETRY-AUTH";
 
     @Autowired
     private SystemUserMapper systemUserMapper;

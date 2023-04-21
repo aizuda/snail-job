@@ -30,11 +30,18 @@ const api = {
   countDispatch: '/dashboard/dispatch/count',
   countActivePod: '/dashboard/active-pod/count',
   rankSceneQuantity: '/dashboard/scene/rank',
-  lineDispatchQuantity: '/dashboard/dispatch/line'
-
+  lineDispatchQuantity: '/dashboard/dispatch/line',
+  totalPartition: '/group/partition'
 }
 
 export default api
+
+export function getTotalPartition () {
+  return request({
+    url: api.totalPartition,
+    method: 'get'
+  })
+}
 
 export function getLineDispatchQuantity (parameter) {
   return request({
