@@ -1,6 +1,6 @@
 package com.example;
 
-import com.x.retry.client.core.plugin.RequestHeaderPlugins;
+import com.aizuda.easy.retry.client.core.plugin.RequestHeaderPlugins;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 import org.springframework.stereotype.Component;

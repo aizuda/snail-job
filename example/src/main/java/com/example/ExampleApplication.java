@@ -1,6 +1,6 @@
 package com.example;
 
-import com.x.retry.client.starter.EnableXRetry;
+import com.aizuda.easy.retry.client.starter.EnableXRetry;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;

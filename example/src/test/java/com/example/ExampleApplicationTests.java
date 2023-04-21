@@ -1,12 +1,12 @@
 package com.example;
 
+import com.aizuda.easy.retry.client.core.report.ReportHandler;
+import com.aizuda.easy.retry.client.core.window.RetryLeapArray;
+import com.aizuda.easy.retry.common.core.model.Result;
+import com.aizuda.easy.retry.server.model.dto.RetryTaskDTO;
 import com.example.client.DemoClient;
 import com.example.mapper.SchoolMapper;
 import com.example.po.School;
-import com.x.retry.client.core.report.ReportHandler;
-import com.x.retry.client.core.window.RetryLeapArray;
-import com.x.retry.common.core.model.Result;
-import com.x.retry.server.model.dto.RetryTaskDTO;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
@@ -54,7 +54,7 @@ public class ExampleApplicationTests {
     @SneakyThrows
     @Test
     public void windows() {
-        
+
         for (int i = 0; i < 100000; i++) {
             int finalI = i;
             new Thread(() -> {

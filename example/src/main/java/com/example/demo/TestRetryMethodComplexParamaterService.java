@@ -1,10 +1,9 @@
 package com.example.demo;
 
+import com.aizuda.easy.retry.client.core.annotation.Retryable;
+import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.example.model.Dog;
 import com.example.model.Zoo;
-import com.x.retry.client.core.annotation.Retryable;
-import com.x.retry.client.core.retryer.RetryType;
-import com.x.retry.common.core.log.LogUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 

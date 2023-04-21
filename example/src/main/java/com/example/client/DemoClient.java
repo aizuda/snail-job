@@ -1,7 +1,6 @@
 package com.example.client;
 
-//import org.springframework.cloud.netflix.feign.FeignClient;
-import com.x.retry.common.core.model.Result;
+import com.aizuda.easy.retry.common.core.model.Result;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 

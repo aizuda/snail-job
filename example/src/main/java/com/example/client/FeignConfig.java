@@ -1,6 +1,6 @@
 package com.example.client;
 
-import com.x.retry.client.core.plugin.ResponseHeaderPlugins;
+import com.aizuda.easy.retry.client.core.plugin.ResponseHeaderPlugins;
 import feign.FeignException;
 import feign.Response;
 import feign.codec.DecodeException;

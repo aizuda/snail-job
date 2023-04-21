@@ -1,9 +1,9 @@
 package com.example;
 
+import com.aizuda.easy.retry.common.core.model.Result;
 import com.example.demo.RemoteService;
 import com.example.demo.TestExistsTransactionalRetryService;
 import com.example.demo.TestExistsTransactionalRetryService2;
-import com.x.retry.common.core.model.Result;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;

@@ -1,8 +1,8 @@
 package com.example;
 
+import com.aizuda.easy.retry.common.core.model.Result;
 import com.example.demo.NestMethodService;
 import com.example.demo.RemoteService;
-import com.x.retry.common.core.model.Result;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;

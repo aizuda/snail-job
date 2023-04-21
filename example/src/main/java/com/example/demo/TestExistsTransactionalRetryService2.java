@@ -1,12 +1,12 @@
 package com.example.demo;
 
+import com.aizuda.easy.retry.client.core.annotation.Retryable;
+import com.aizuda.easy.retry.common.core.model.Result;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.example.mapper.SchoolMapper;
 import com.example.mapper.StudentMapper;
 import com.example.po.School;
 import com.example.po.Student;
-import com.x.retry.client.core.annotation.Retryable;
-import com.x.retry.common.core.model.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;

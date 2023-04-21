@@ -1,7 +1,7 @@
 package com.example;
 
-import com.x.retry.client.core.plugin.RequestHeaderPlugins;
-import com.x.retry.client.core.plugin.ResponseHeaderPlugins;
+import com.aizuda.easy.retry.client.core.plugin.RequestHeaderPlugins;
+import com.aizuda.easy.retry.client.core.plugin.ResponseHeaderPlugins;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;

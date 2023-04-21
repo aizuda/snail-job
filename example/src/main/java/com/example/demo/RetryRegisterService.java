@@ -1,8 +1,7 @@
 package com.example.demo;
 
 import cn.hutool.core.lang.UUID;
-import com.x.retry.client.core.annotation.Retryable;
-import com.x.retry.client.core.retryer.RetryType;
+import com.aizuda.easy.retry.client.core.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 /**

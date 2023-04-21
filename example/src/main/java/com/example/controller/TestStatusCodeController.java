@@ -1,8 +1,8 @@
 package com.example.controller;
 
+import com.aizuda.easy.retry.client.core.annotation.Retryable;
+import com.aizuda.easy.retry.common.core.model.Result;
 import com.example.client.DemoClient;
-import com.x.retry.client.core.annotation.Retryable;
-import com.x.retry.common.core.model.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

@@ -1,7 +1,7 @@
 package com.example.demo;
 
-import com.x.retry.client.core.strategy.RetryMethod;
-import com.x.retry.common.core.util.JsonUtil;
+import com.aizuda.easy.retry.client.core.strategy.RetryMethod;
+import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 

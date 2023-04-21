@@ -1,6 +1,6 @@
 package com.example.demo;
 
-import com.x.retry.client.core.annotation.Retryable;
+import com.aizuda.easy.retry.client.core.annotation.Retryable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;

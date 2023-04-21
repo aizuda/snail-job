@@ -1,8 +1,8 @@
 package com.example.controller;
 
 
+import com.aizuda.easy.retry.common.core.annotation.OriginalControllerReturnValue;
 import com.example.demo.TestExistsTransactionalRetryService;
-import com.x.retry.common.core.annotation.OriginalControllerReturnValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

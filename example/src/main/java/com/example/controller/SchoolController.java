@@ -1,8 +1,8 @@
 package com.example.controller;
 
-import com.x.retry.client.core.intercepter.RetrySiteSnapshot;
-import com.x.retry.common.core.constant.SystemConstants;
-import com.x.retry.common.core.model.Result;
+import com.aizuda.easy.retry.client.core.intercepter.RetrySiteSnapshot;
+import com.aizuda.easy.retry.common.core.constant.SystemConstants;
+import com.aizuda.easy.retry.common.core.model.Result;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

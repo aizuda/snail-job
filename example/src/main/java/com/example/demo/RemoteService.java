@@ -1,6 +1,6 @@
 package com.example.demo;
 
-import com.x.retry.common.core.model.Result;
+import com.aizuda.easy.retry.common.core.model.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
