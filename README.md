@@ -41,8 +41,8 @@
 
 ## 相关链接
 - [字节跳动: 如何优雅地重试](https://juejin.cn/post/6914091859463634951)
-- [文档]()
-- [功能实例]()
+- [文档](http://easyretry.byteblogs.com/pages/a2f161/)
+- [功能实例](http://easyretry.byteblogs.com/pages/960e25/)
 ## 原理
 - [客户端原理剖析](https://gitee.com/aizuda/easy-retry/tree/dev/example)
 - [服务端原理剖析](https://gitee.com/aizuda/easy-retry/tree/dev/example)
