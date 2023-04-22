@@ -21,13 +21,15 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author jialiang.linjl
  * @author Eric Zhao
  * @author Carpenter Lee
+ *
+ * see https://github.com/alibaba/Sentinel/blob/master/sentinel-core/src/main/java/com/alibaba/csp/sentinel/slots/statistic/base/LeapArray.java
  */
 @Slf4j
 public abstract class LeapArray<T> {
 
-    protected int windowLengthInMs; // 窗口长度
-    protected int sampleCount; // 窗口数
-    protected int intervalInMs;  // 总时间间隔
+    protected int windowLengthInMs;
+    protected int sampleCount;
+    protected int intervalInMs;
     private double intervalInSecond;
 
     protected final AtomicReferenceArray<WindowWrap<T>> array;

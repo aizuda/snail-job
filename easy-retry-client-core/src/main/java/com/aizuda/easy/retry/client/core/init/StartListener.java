@@ -24,8 +24,8 @@ public class StartListener implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        log.info("easy-retry-CLIENT-RETRY 启动");
+        log.info("EASY-RETRY-CLIENT-RETRY 启动");
         lifecycleList.forEach(Lifecycle::start);
-        log.info("easy-retry-CLIENT-RETRY 启动成功");
+        log.info("EASY-RETRY-CLIENT-RETRY 启动成功");
     }
 }

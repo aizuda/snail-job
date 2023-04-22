@@ -10,11 +10,11 @@ import java.util.TimeZone;
 @SpringBootApplication
 @MapperScan("com.aizuda.easy.retry.server.persistence.mybatis.mapper")
 @EnableTransactionManagement(proxyTargetClass = true)
-public class XRetryServerApplication {
+public class EasyRetryServerApplication {
 
     public static void main(String[] args) {
         TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
-        SpringApplication.run(XRetryServerApplication.class, args);
+        SpringApplication.run(EasyRetryServerApplication.class, args);
     }
 
 }

@@ -24,8 +24,8 @@ public class EndListener implements ApplicationListener<ContextClosedEvent> {
 
     @Override
     public void onApplicationEvent(ContextClosedEvent event) {
-        log.info("easy-retry-CLIENT 关闭");
+        log.info("EASY-RETRY-CLIENT 关闭");
         lifecycleList.forEach(Lifecycle::close);
-        log.info("easy-retry-CLIENT 关闭成功");
+        log.info("EASY-RETRY-CLIENT 关闭成功");
     }
 }

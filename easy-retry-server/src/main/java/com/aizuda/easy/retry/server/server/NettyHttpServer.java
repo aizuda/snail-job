@@ -61,7 +61,7 @@ public class NettyHttpServer implements Runnable, Lifecycle {
             // bind
             ChannelFuture future = bootstrap.bind(systemProperties.getNettyPort()).sync();
 
-            log.info("------> easy-retry remoting server start success, nettype = {}, port = {}", NettyHttpServer.class.getName(), 1788);
+            log.info("------> easy-retry remoting server start success, nettype = {}, port = {}", NettyHttpServer.class.getName(), systemProperties.getNettyPort());
 
             future.channel().closeFuture().sync();
 

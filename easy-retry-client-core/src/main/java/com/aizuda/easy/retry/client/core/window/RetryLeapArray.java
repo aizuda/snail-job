@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
+ * 通过滑动窗口上报异常数据
+ *
  * @author: www.byteblogs.com
  * @date : 2022-05-28 15:07
  */
@@ -22,12 +24,6 @@ public class RetryLeapArray extends LeapArray<ConcurrentLinkedQueue<RetryTaskDTO
 
     protected List<Listener<RetryTaskDTO>> listenerList;
 
-    /**
-     * The total bucket count is: {@code sampleCount = intervalInMs / windowLengthInMs}.
-     *
-     * @param sampleCount  bucket count of the sliding window
-     * @param intervalInMs the total time interval of this {@link LeapArray} in milliseconds
-     */
     public RetryLeapArray(int sampleCount, int intervalInMs) {
         super(sampleCount, intervalInMs);
     }
