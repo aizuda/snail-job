@@ -22,8 +22,10 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.env.StandardEnvironment;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
@@ -39,8 +41,7 @@ import java.util.UUID;
 @Aspect
 @Component
 @Slf4j
-@Order(PriorityOrdered.HIGHEST_PRECEDENCE + 2)
-public class RetryAspect {
+public class RetryAspect implements Ordered {
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private static String retryErrorMoreThresholdTextMessageFormatter =
@@ -55,6 +56,8 @@ public class RetryAspect {
     private RetryStrategy retryStrategy;
     @Autowired
     private AltinAlarmFactory altinAlarmFactory;
+    @Autowired
+    private StandardEnvironment standardEnvironment;
 
     @Around("@annotation(com.aizuda.easy.retry.client.core.annotation.Retryable)")
     public Object around(ProceedingJoinPoint point) throws Throwable {
@@ -191,5 +194,12 @@ public class RetryAspect {
             throw new XRetryClientException("注解配置异常：[{}}", methodName);
         }
         return objMethod.getAnnotation(Retryable.class);
+    }
+
+    @Override
+    public int getOrder() {
+        String order = standardEnvironment
+            .getProperty("easy-retry.aop.order", String.valueOf(Ordered.HIGHEST_PRECEDENCE));
+        return Integer.parseInt(order);
     }
 }

@@ -15,9 +15,10 @@ import java.util.Base64;
 import java.util.Objects;
 
 /**
+ * Hessian序列化
+ *
  * @author: www.byteblogs.com
  * @date : 2022-03-07 15:08
- * @date 2022/1/5 11:14 上午
  */
 @Component("XRetryHessianSerializer")
 public class HessianSerializer implements RetryArgSerializer {

@@ -30,7 +30,7 @@ public class NestMethodServiceTest {
                 .thenReturn(new Result(0, "2"))
                 .thenReturn(new Result(0, "3"))
                 .thenReturn(new Result(0, "4"))
-                .thenReturn(new Result(0, "5"))
+                .thenReturn(new Result(1, "5"))
         ;
         try {
             nestMethodService.testNestMethod();

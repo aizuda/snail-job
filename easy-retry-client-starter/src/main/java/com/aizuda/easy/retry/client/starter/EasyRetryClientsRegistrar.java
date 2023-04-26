@@ -10,18 +10,21 @@ import org.springframework.core.type.AnnotationMetadata;
 import java.util.Map;
 
 /**
+ * Easy Retry 客户端注册器
+ *
  * @author: www.byteblogs.com
  * @date : 2022-03-04 18:44
  */
-public class XRetryClientsRegistrar implements ImportBeanDefinitionRegistrar, EnvironmentAware {
+public class EasyRetryClientsRegistrar implements ImportBeanDefinitionRegistrar, EnvironmentAware {
 
     private StandardEnvironment standardEnvironment;
 
     @Override
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
-        Map<String, Object> attrs = importingClassMetadata.getAnnotationAttributes(EnableXRetry.class.getName());
+        Map<String, Object> attrs = importingClassMetadata.getAnnotationAttributes(EnableEasyRetry.class.getName());
         Map<String, Object> systemEnvironment = standardEnvironment.getSystemProperties();
-        systemEnvironment.put("easy-retry.group", (String) attrs.get("group"));
+        systemEnvironment.put("easy-retry.group", attrs.get("group"));
+        systemEnvironment.put("easy-retry.aop.order", attrs.get("order"));
     }
 
     @Override

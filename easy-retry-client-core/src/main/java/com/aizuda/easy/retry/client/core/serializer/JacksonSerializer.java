@@ -11,6 +11,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
 /**
+ * Jackson序列化
+ *
  * @author: www.byteblogs.com
  * @date : 2022-03-07 15:08
  */

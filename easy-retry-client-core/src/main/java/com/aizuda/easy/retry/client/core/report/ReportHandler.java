@@ -25,6 +25,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 /**
+ * 上报服务端
+ *
  * @author: www.byteblogs.com
  * @date : 2022-03-08 09:24
  */

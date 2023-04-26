@@ -1,9 +1,11 @@
 package com.example.demo;
 
 import com.aizuda.easy.retry.client.core.annotation.Retryable;
+import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.example.mapper.SchoolMapper;
 import com.example.mapper.StudentMapper;
+import com.example.model.TransactionalEvent;
 import com.example.po.School;
 import com.example.po.Student;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +54,9 @@ public class TestExistsTransactionalRetryService {
         if (call.getStatus() == 0) {
             throw new UnsupportedOperationException("调用远程失败" + school.getAddress());
         }
+
+        TransactionalEvent<String> event = new TransactionalEvent<>("123");
+        SpringContext.applicationContext.publishEvent(event);
 
         return "testSimpleInsert"+school.getAddress();
     }
