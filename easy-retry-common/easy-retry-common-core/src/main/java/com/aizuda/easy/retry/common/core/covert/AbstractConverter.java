@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.common.core.covert;
 
-import com.aizuda.easy.retry.common.core.exception.XRetryCommonException;
+import com.aizuda.easy.retry.common.core.exception.EasyRetryCommonException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.CollectionUtils;
 
@@ -18,7 +18,7 @@ public abstract class AbstractConverter<S, T> implements Converter<S, T> {
         try {
             t = c.newInstance();
         } catch (Exception e) {
-            throw new XRetryCommonException("创建对象失败");
+            throw new EasyRetryCommonException("创建对象失败");
         }
 
         BeanUtils.copyProperties(s, t);

@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.client.core.plugin;
 
-import com.aizuda.easy.retry.client.core.exception.XRetryClientException;
+import com.aizuda.easy.retry.client.core.exception.EasyRetryClientException;
 import com.aizuda.easy.retry.client.core.intercepter.RetrySiteSnapshot;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
@@ -41,7 +41,7 @@ public class RequestHeaderPlugins {
             if (transmitTime > 0) {
                 retryHeader.setDdl(transmitTime);
             } else {
-                throw new XRetryClientException("调用链超时, 不在继续调用后面请求");
+                throw new EasyRetryClientException("调用链超时, 不在继续调用后面请求");
             }
 
             header.put(SystemConstants.X_RETRY_HEAD_KEY, JsonUtil.toJsonString(retryHeader));

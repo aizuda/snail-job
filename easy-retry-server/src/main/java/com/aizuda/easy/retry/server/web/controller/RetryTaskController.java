@@ -1,14 +1,18 @@
 package com.aizuda.easy.retry.server.web.controller;
 
+import com.aizuda.easy.retry.client.model.GenerateRetryBizIdDTO;
 import com.aizuda.easy.retry.server.service.RetryTaskService;
+import com.aizuda.easy.retry.server.web.annotation.LoginRequired;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
 import com.aizuda.easy.retry.server.web.model.request.RetryTaskQueryVO;
 import com.aizuda.easy.retry.server.web.model.request.RetryTaskRequestVO;
-import com.aizuda.easy.retry.server.web.annotation.LoginRequired;
+import com.aizuda.easy.retry.server.web.model.request.RetryTaskSaveRequestVO;
 import com.aizuda.easy.retry.server.web.model.response.RetryTaskResponseVO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,9 +22,10 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
+ * 重试数据管理接口
+ *
  * @author www.byteblogs.com
  * @date 2022-02-27
- * @since 2.0
  */
 @RestController
 @RequestMapping("/retry-task")
@@ -38,7 +43,7 @@ public class RetryTaskController {
     @LoginRequired
     @GetMapping("{id}")
     public RetryTaskResponseVO getRetryTaskById(@RequestParam("groupName") String groupName,
-                                                @PathVariable("id") Long id) {
+        @PathVariable("id") Long id) {
         return retryTaskService.getRetryTaskById(groupName, id);
     }
 
@@ -47,4 +52,17 @@ public class RetryTaskController {
     public int updateRetryTaskStatus(@RequestBody RetryTaskRequestVO retryTaskRequestVO) {
         return retryTaskService.updateRetryTaskStatus(retryTaskRequestVO);
     }
+
+    @LoginRequired
+    @PostMapping
+    public int saveRetryTask(@RequestBody @Validated RetryTaskSaveRequestVO retryTaskRequestVO) {
+        return retryTaskService.saveRetryTask(retryTaskRequestVO);
+    }
+
+    @LoginRequired
+    @PostMapping("/generate/biz-id")
+    public String bizIdGenerate(@RequestBody @Validated GenerateRetryBizIdDTO generateRetryBizIdDTO) {
+        return retryTaskService.bizIdGenerate(generateRetryBizIdDTO);
+    }
+
 }

@@ -3,7 +3,7 @@ package com.aizuda.easy.retry.client.core.intercepter;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.client.core.cache.GroupVersionCache;
 import com.aizuda.easy.retry.client.core.config.XRetryProperties;
-import com.aizuda.easy.retry.client.core.exception.XRetryClientException;
+import com.aizuda.easy.retry.client.core.exception.EasyRetryClientException;
 import com.aizuda.easy.retry.client.core.strategy.RetryStrategy;
 import com.aizuda.easy.retry.client.core.annotation.Retryable;
 import com.aizuda.easy.retry.client.core.retryer.RetryerResultContext;
@@ -23,8 +23,6 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.Ordered;
-import org.springframework.core.PriorityOrdered;
-import org.springframework.core.annotation.Order;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.stereotype.Component;
 
@@ -191,7 +189,7 @@ public class RetryAspect implements Ordered {
         try {
             objMethod = classTarget.getMethod(methodName, par);
         } catch (NoSuchMethodException e) {
-            throw new XRetryClientException("注解配置异常：[{}}", methodName);
+            throw new EasyRetryClientException("注解配置异常：[{}}", methodName);
         }
         return objMethod.getAnnotation(Retryable.class);
     }

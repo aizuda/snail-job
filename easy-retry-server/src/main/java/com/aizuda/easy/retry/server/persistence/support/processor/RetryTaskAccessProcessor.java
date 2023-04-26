@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.server.persistence.support.processor;
 
-import com.aizuda.easy.retry.server.exception.XRetryServerException;
+import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask;
 import com.aizuda.easy.retry.server.persistence.support.RetryTaskAccess;
 import com.aizuda.easy.retry.common.core.util.Assert;
@@ -49,7 +49,7 @@ public class RetryTaskAccessProcessor implements RetryTaskAccess<RetryTask> {
     @Override
     public int updateRetryTask(RetryTask retryTask) {
         Assert.isTrue(1 == retryTaskAccesses.updateRetryTask(retryTask),
-                new XRetryServerException("更新重试任务失败"));
+                new EasyRetryServerException("更新重试任务失败"));
 
         return 1;
     }

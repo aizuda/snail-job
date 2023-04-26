@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.server.server;
 
-import com.aizuda.easy.retry.server.exception.XRetryServerException;
+import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.config.SystemProperties;
 import com.aizuda.easy.retry.server.support.Lifecycle;
 import io.netty.bootstrap.ServerBootstrap;
@@ -38,7 +38,7 @@ public class NettyHttpServer implements Runnable, Lifecycle {
 
         ThreadPoolExecutor serverHandlerPool = new ThreadPoolExecutor(60, 300, 60L, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(2000), r -> new Thread(r, "easy-retry-serverHandlerPool-" + r.hashCode()), (r, executor) -> {
-            throw new XRetryServerException("easy-retry thread pool is EXHAUSTED!");
+            throw new EasyRetryServerException("easy-retry thread pool is EXHAUSTED!");
         });
 
         try {

@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.common.core.util;
 
-import com.aizuda.easy.retry.common.core.exception.XRetryCommonException;
+import com.aizuda.easy.retry.common.core.exception.EasyRetryCommonException;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -17,7 +17,7 @@ public class HostUtils {
         try {
             return InetAddress.getLocalHost().getHostAddress();
         } catch (UnknownHostException e) {
-            throw new XRetryCommonException("未获取HostAddress");
+            throw new EasyRetryCommonException("未获取HostAddress");
         }
 
     }

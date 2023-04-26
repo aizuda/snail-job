@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.common.core.enums;
 
-import com.aizuda.easy.retry.common.core.exception.XRetryCommonException;
+import com.aizuda.easy.retry.common.core.exception.EasyRetryCommonException;
 import lombok.Getter;
 
 import java.time.temporal.ChronoUnit;
@@ -77,7 +77,7 @@ public enum DelayLevelEnum {
             }
         }
 
-       throw new XRetryCommonException("level:[{}] 不存在", level);
+       throw new EasyRetryCommonException("level:[{}] 不存在", level);
     }
 
 }

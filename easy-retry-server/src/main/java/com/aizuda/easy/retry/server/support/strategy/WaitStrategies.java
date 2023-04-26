@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.server.support.strategy;
 
-import com.aizuda.easy.retry.server.exception.XRetryServerException;
+import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.SceneConfig;
 import com.aizuda.easy.retry.server.persistence.support.ConfigAccess;
@@ -188,7 +188,7 @@ public class WaitStrategies {
                 ZonedDateTime zdt = retryTask.getNextTriggerAt().atZone(ZoneOffset.ofHours(8));
                 nextValidTime = new CronExpression(sceneConfig.getTriggerInterval()).getNextValidTimeAfter(Date.from(zdt.toInstant()));
             } catch (ParseException e) {
-                throw new XRetryServerException("解析CRON表达式异常 [{}]", sceneConfig.getTriggerInterval(), e);
+                throw new EasyRetryServerException("解析CRON表达式异常 [{}]", sceneConfig.getTriggerInterval(), e);
             }
 
             return  LocalDateTime.ofEpochSecond( nextValidTime.getTime() / 1000,0, ZoneOffset.ofHours(8));

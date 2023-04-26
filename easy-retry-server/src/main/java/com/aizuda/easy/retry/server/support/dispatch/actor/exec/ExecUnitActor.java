@@ -10,7 +10,7 @@ import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.common.core.model.XRetryHeaders;
 import com.aizuda.easy.retry.common.core.util.Assert;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
-import com.aizuda.easy.retry.server.exception.XRetryServerException;
+import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskLogMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTaskLog;
@@ -91,7 +91,7 @@ public class ExecUnitActor extends AbstractActor  {
                 retryTaskLog.setCreateDt(LocalDateTime.now());
                 retryTaskLog.setId(null);
                 Assert.isTrue(1 ==  retryTaskLogMapper.insert(retryTaskLog),
-                        new XRetryServerException("新增重试日志失败"));
+                        new EasyRetryServerException("新增重试日志失败"));
             }
 
         }).build();

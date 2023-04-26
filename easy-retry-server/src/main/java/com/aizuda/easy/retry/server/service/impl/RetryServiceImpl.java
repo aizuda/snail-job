@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.server.service.impl;
 
-import com.aizuda.easy.retry.server.exception.XRetryServerException;
+import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.model.dto.RetryTaskDTO;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryDeadLetterMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskMapper;
@@ -10,6 +11,7 @@ import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.SceneConfig;
 import com.aizuda.easy.retry.server.persistence.support.ConfigAccess;
 import com.aizuda.easy.retry.server.persistence.support.RetryTaskAccess;
+import com.aizuda.easy.retry.server.support.strategy.WaitStrategies;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
 import com.aizuda.easy.retry.server.config.RequestDataHelper;
@@ -17,6 +19,8 @@ import com.aizuda.easy.retry.common.core.util.Assert;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.service.RetryService;
 import com.aizuda.easy.retry.server.service.convert.RetryTaskConverter;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -28,6 +32,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -37,6 +42,7 @@ import java.util.stream.Collectors;
  * @date : 2021-11-26 15:19
  */
 @Service
+@Slf4j
 public class RetryServiceImpl implements RetryService {
 
     @Autowired
@@ -55,10 +61,11 @@ public class RetryServiceImpl implements RetryService {
     @Transactional
     @Override
     public Boolean reportRetry(RetryTaskDTO retryTaskDTO) {
+        LogUtils.warn(log, "接收上报数据 [{}]", JsonUtil.toJsonString(retryTaskDTO));
 
         SceneConfig sceneConfig = configAccess.getSceneConfigByGroupNameAndSceneName(retryTaskDTO.getGroupName(), retryTaskDTO.getSceneName());
         if (Objects.isNull(sceneConfig)) {
-            throw new XRetryServerException("上报数据失败, 未查到场景配置 [{}]", retryTaskDTO);
+            throw new EasyRetryServerException("上报数据失败, 未查到场景配置 [{}]", retryTaskDTO);
         }
 
         RequestDataHelper.setPartition(retryTaskDTO.getGroupName());
@@ -67,15 +74,24 @@ public class RetryServiceImpl implements RetryService {
                 .eq(RetryTask::getBizId, retryTaskDTO.getBizId())
                 .eq(RetryTask::getGroupName, retryTaskDTO.getGroupName())
                 .eq(RetryTask::getSceneName, retryTaskDTO.getSceneName())
+                .eq(RetryTask::getRetryStatus, RetryStatusEnum.RUNNING.getStatus())
                 );
         if (0 < count) {
+            LogUtils.warn(log, "存在重试中的任务中断上报 [{}]", JsonUtil.toJsonString(retryTaskDTO));
             return Boolean.TRUE;
         }
 
-        RetryTaskConverter converter = new RetryTaskConverter();
-        RetryTask retryTask = converter.convert(retryTaskDTO);
+        RetryTask retryTask = RetryTaskConverter.INSTANCE.toRetryTask(retryTaskDTO);
+        retryTask.setCreateDt(LocalDateTime.now());
+        retryTask.setUpdateDt(LocalDateTime.now());
 
-        Assert.isTrue(1 ==  retryTaskAccess.saveRetryTask(retryTask), new XRetryServerException("上报数据失败"));
+        if (StringUtils.isBlank(retryTask.getExtAttrs())) {
+            retryTask.setExtAttrs(StringUtils.EMPTY);
+        }
+
+        retryTask.setNextTriggerAt(WaitStrategies.randomWait(1, TimeUnit.SECONDS, 60, TimeUnit.SECONDS).computeRetryTime(null));
+
+        Assert.isTrue(1 ==  retryTaskAccess.saveRetryTask(retryTask), new EasyRetryServerException("上报数据失败"));
         return Boolean.TRUE;
     }
 
@@ -124,11 +140,11 @@ public class RetryServiceImpl implements RetryService {
 
         GroupConfig groupConfig = configAccess.getGroupConfigByGroupName(groupName);
         Assert.isTrue(retryDeadLetters.size() == retryDeadLetterMapper.insertBatch(retryDeadLetters, groupConfig.getGroupPartition()),
-                new XRetryServerException("插入死信队列失败 [{}]" , JsonUtil.toJsonString(retryDeadLetters)));
+                new EasyRetryServerException("插入死信队列失败 [{}]" , JsonUtil.toJsonString(retryDeadLetters)));
 
         List<Long> ids = retryTasks.stream().map(RetryTask::getId).collect(Collectors.toList());
         Assert.isTrue(retryTasks.size() ==  retryTaskMapper.deleteBatch(ids, groupConfig.getGroupPartition()),
-                new XRetryServerException("删除重试数据失败 [{}]", JsonUtil.toJsonString(retryTasks)));
+                new EasyRetryServerException("删除重试数据失败 [{}]", JsonUtil.toJsonString(retryTasks)));
     }
 
     /**

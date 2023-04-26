@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.server.support.retry;
 
-import com.aizuda.easy.retry.server.exception.XRetryServerException;
+import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.support.FilterStrategy;
 import com.aizuda.easy.retry.server.support.RetryContext;
 import com.aizuda.easy.retry.server.support.StopStrategy;
@@ -53,15 +53,15 @@ public class RetryBuilder<V> {
     public RetryExecutor<V> build() {
 
         if (Objects.isNull(waitStrategy)) {
-            throw new XRetryServerException("waitStrategy 不能为null");
+            throw new EasyRetryServerException("waitStrategy 不能为null");
         }
 
         if (Objects.isNull(stopStrategy)) {
-            throw new XRetryServerException("stopStrategy 不能为null");
+            throw new EasyRetryServerException("stopStrategy 不能为null");
         }
 
         if (Objects.isNull(retryContext)) {
-            throw new XRetryServerException("retryContext 不能为null");
+            throw new EasyRetryServerException("retryContext 不能为null");
         }
 
         if (CollectionUtils.isEmpty(filterStrategies)) {

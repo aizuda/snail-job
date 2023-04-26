@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.common.core.util;
 
-import com.aizuda.easy.retry.common.core.exception.XRetryCommonException;
+import com.aizuda.easy.retry.common.core.exception.EasyRetryCommonException;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -177,7 +177,7 @@ public class JsonUtil {
             try {
                 return objectMapper.writeValueAsString(object);
             } catch (Exception e) {
-                throw new XRetryCommonException("对象转Json失败！", e);
+                throw new EasyRetryCommonException("对象转Json失败！", e);
             }
         }
 
@@ -192,7 +192,7 @@ public class JsonUtil {
             try {
                 return objectMapper.readValue(jsonString, clazz);
             } catch (Exception e) {
-                throw new XRetryCommonException("Json转对象失败", jsonString,  e);
+                throw new EasyRetryCommonException("Json转对象失败", jsonString,  e);
             }
         }
 
@@ -206,7 +206,7 @@ public class JsonUtil {
             try {
                 return objectMapper.readValue(jsonString, typeReference);
             } catch (Exception e) {
-                throw new XRetryCommonException("Json转对象失败！", e);
+                throw new EasyRetryCommonException("Json转对象失败！", e);
             }
         }
 
@@ -220,7 +220,7 @@ public class JsonUtil {
             try {
                 return objectMapper.readValue(jsonString, javaType);
             } catch (Exception e) {
-                throw new XRetryCommonException("Json转对象失败！", e);
+                throw new EasyRetryCommonException("Json转对象失败！", e);
             }
         }
 
@@ -233,7 +233,7 @@ public class JsonUtil {
             try {
                 return objectMapper.readTree(jsonString);
             } catch (Exception e) {
-                throw new XRetryCommonException("Json转对象失败！", e);
+                throw new EasyRetryCommonException("Json转对象失败！", e);
             }
         }
 
@@ -246,7 +246,7 @@ public class JsonUtil {
             try {
                 return objectMapper.readTree(jsonBytes);
             } catch (Exception e) {
-                throw new XRetryCommonException("Json转对象失败！", e);
+                throw new EasyRetryCommonException("Json转对象失败！", e);
             }
         }
 
@@ -259,7 +259,7 @@ public class JsonUtil {
             try {
                 return objectMapper.valueToTree(object);
             } catch (Exception e) {
-                throw new XRetryCommonException("Json转对象失败！", e);
+                throw new EasyRetryCommonException("Json转对象失败！", e);
             }
         }
     }

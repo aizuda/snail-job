@@ -50,7 +50,7 @@
       </a-form>
     </div>
     <div class="table-operator">
-      <!--      <a-button type="primary" icon="plus" @click="handleNew()">新增任务</a-button>-->
+      <a-button type="primary" icon="plus" @click="handleNew()">新增</a-button>
       <a-dropdown v-action:edit v-if="selectedRowKeys.length > 0">
         <a-menu slot="overlay">
           <a-menu-item key="1"><a-icon type="delete" />删除</a-menu-item>
@@ -72,8 +72,8 @@
       :alert="options.alert"
       :rowSelection="options.rowSelection"
     >
-      <span slot="serial" slot-scope="text, record, index">
-        {{ index + 1 }}
+      <span slot="serial" slot-scope="text, record">
+        {{ record.id }}
       </span>
       <span slot="action" slot-scope="text, record">
         <template>
@@ -86,21 +86,10 @@
           <a @click="handleFinish(record)" v-if="record.retryStatus !== 1">完成</a>
           <a-divider type="vertical" v-if="record.retryStatus !== 1"/>
         </template>
-        <!--        <a-dropdown>-->
-        <!--          <a class="ant-dropdown-link">-->
-        <!--            更多 <a-icon type="down" />-->
-        <!--          </a>-->
-        <!--          <a-menu slot="overlay">-->
-        <!--            <a-menu-item>-->
-        <!--              <a @click="handleInfo(record)">详情</a>-->
-        <!--            </a-menu-item>-->
-        <!--            <a-menu-item v-if="$auth('table.delete')">-->
-        <!--              <a href="javascript:;">删除</a>-->
-        <!--            </a-menu-item>-->
-        <!--          </a-menu>-->
-        <!--        </a-dropdown>-->
       </span>
     </s-table>
+
+    <SaveRetryTask ref="saveRetryTask"/>
   </a-card>
 </template>
 
@@ -113,6 +102,7 @@ import Edit from '@/views/list/table/Edit'
 import { getAllGroupNameList, getRetryTaskPage, getSceneList, updateRetryTaskStatus } from '@/api/manage'
 import { STable } from '@/components'
 import moment from 'moment'
+import SaveRetryTask from './form/SaveRetryTask'
 
 export default {
   name: 'RetryTask',
@@ -120,13 +110,15 @@ export default {
     AInput,
     ATextarea,
     Edit,
-    STable
+    STable,
+    SaveRetryTask
   },
   data () {
     return {
       currentComponet: 'List',
       record: '',
       mdl: {},
+      visible: false,
       // 高级搜索 展开/关闭
       advanced: false,
       // 查询参数
@@ -192,7 +184,6 @@ export default {
       ],
       // 加载数据方法 必须为 Promise 对象
       loadData: parameter => {
-        console.log('loadData.parameter', parameter)
         return getRetryTaskPage(Object.assign(parameter, this.queryParam))
           .then(res => {
             return res
@@ -221,7 +212,7 @@ export default {
   },
   methods: {
     handleNew () {
-      // this.$router.push('/form/basic-config')
+      this.$refs.saveRetryTask.isShow(true, null)
     },
     handleChange (value) {
       getSceneList({ 'groupName': value }).then(res => {
@@ -234,7 +225,7 @@ export default {
     handleInfo (record) {
       this.$router.push({ path: '/retry-task/info', query: { id: record.id, groupName: record.groupName } })
     },
-    handleEdit (record) {
+    handleOk (record) {
 
     },
     handleSuspend (record) {

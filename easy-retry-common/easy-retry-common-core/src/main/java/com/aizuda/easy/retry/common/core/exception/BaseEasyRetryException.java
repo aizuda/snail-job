@@ -8,33 +8,33 @@ import org.slf4j.helpers.MessageFormatter;
  * @author: www.byteblogs.com
  * @date : 2021-11-19 15:01
  */
-public class BaseXRetryException extends RuntimeException {
+public class BaseEasyRetryException extends RuntimeException {
 
-    public BaseXRetryException(String message) {
+    public BaseEasyRetryException(String message) {
         super(message);
     }
 
-    public BaseXRetryException(String message, Throwable cause) {
+    public BaseEasyRetryException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public BaseXRetryException(Throwable cause) {
+    public BaseEasyRetryException(Throwable cause) {
         super(cause);
     }
 
-    public BaseXRetryException(String message, Object ... arguments) {
+    public BaseEasyRetryException(String message, Object ... arguments) {
         this(message, getArguments(arguments), getThrowable(arguments));
     }
 
-    public BaseXRetryException(String message, Object[] arguments, Throwable cause) {
+    public BaseEasyRetryException(String message, Object[] arguments, Throwable cause) {
         super(MessageFormatter.arrayFormat(message, arguments).getMessage(), cause);
     }
 
-    public BaseXRetryException(String message, Object argument, Throwable cause) {
+    public BaseEasyRetryException(String message, Object argument, Throwable cause) {
         super(MessageFormatter.format(message, argument).getMessage(), cause);
     }
 
-    public BaseXRetryException(String message, Object argument) {
+    public BaseEasyRetryException(String message, Object argument) {
         super(MessageFormatter.format(message, argument).getMessage());
     }
 

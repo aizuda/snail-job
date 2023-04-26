@@ -5,7 +5,7 @@ import com.aizuda.easy.retry.client.core.RetryArgSerializer;
 import com.aizuda.easy.retry.client.core.config.XRetryProperties;
 import com.aizuda.easy.retry.client.core.Lifecycle;
 import com.aizuda.easy.retry.client.core.cache.RetryerInfoCache;
-import com.aizuda.easy.retry.client.core.exception.XRetryClientException;
+import com.aizuda.easy.retry.client.core.exception.EasyRetryClientException;
 import com.aizuda.easy.retry.client.core.intercepter.RetrySiteSnapshot;
 import com.aizuda.easy.retry.client.core.retryer.RetryerInfo;
 import com.aizuda.easy.retry.client.core.spel.SPELParamFunction;
@@ -69,7 +69,7 @@ public class ReportHandler implements Lifecycle {
             bizId = (String) ReflectionUtils.invokeMethod(method, generate, p);
         } catch (Exception exception) {
             LogUtils.error(log, "自定义id生成异常：{},{}", scene, args, exception);
-            throw new XRetryClientException("bizId生成异常：{},{}", scene, args);
+            throw new EasyRetryClientException("bizId生成异常：{},{}", scene, args);
         }
 
         String serialize = retryArgSerializer.serialize(args);

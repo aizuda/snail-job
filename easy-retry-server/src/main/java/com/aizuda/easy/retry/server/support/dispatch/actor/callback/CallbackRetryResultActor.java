@@ -45,7 +45,7 @@ public class CallbackRetryResultActor extends AbstractActor {
         return receiveBuilder().match(RetryTask.class, retryTask->{
 
             try {
-                ServerNode serverNode = clientNodeAllocateHandler.getServerNode(retryTask);
+                ServerNode serverNode = clientNodeAllocateHandler.getServerNode(retryTask.getGroupName());
                 if (Objects.isNull(serverNode)) {
                     LogUtils.warn(log, "暂无可用的客户端节点");
                     return;

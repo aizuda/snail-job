@@ -33,10 +33,10 @@ public class ClientNodeAllocateHandler {
     /**
      * 获取分配的节点
      */
-    public ServerNode getServerNode(RetryTask retryTask) {
+    public ServerNode getServerNode(String groupName) {
 
-        GroupConfig groupConfig = configAccess.getGroupConfigByGroupName(retryTask.getGroupName());
-        List<ServerNode> serverNodes = serverNodeMapper.selectList(new LambdaQueryWrapper<ServerNode>().eq(ServerNode::getGroupName, retryTask.getGroupName()));
+        GroupConfig groupConfig = configAccess.getGroupConfigByGroupName(groupName);
+        List<ServerNode> serverNodes = serverNodeMapper.selectList(new LambdaQueryWrapper<ServerNode>().eq(ServerNode::getGroupName, groupName));
 
         if (CollectionUtils.isEmpty(serverNodes)) {
             return null;
@@ -44,8 +44,10 @@ public class ClientNodeAllocateHandler {
 
         ClientLoadBalance clientLoadBalanceRandom = ClientLoadBalanceManager.getClientLoadBalance(groupConfig.getRouteKey());
 
-        String hostIp = clientLoadBalanceRandom.route(retryTask.getGroupName(), new TreeSet<>(serverNodes.stream().map(ServerNode::getHostIp).collect(Collectors.toSet())));
+        String hostIp = clientLoadBalanceRandom.route(groupName, new TreeSet<>(serverNodes.stream().map(ServerNode::getHostIp).collect(Collectors.toSet())));
         return serverNodes.stream().filter(s -> s.getHostIp().equals(hostIp)).findFirst().get();
     }
+
+
 
 }

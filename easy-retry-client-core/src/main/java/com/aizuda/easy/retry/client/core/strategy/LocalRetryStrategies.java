@@ -2,7 +2,7 @@ package com.aizuda.easy.retry.client.core.strategy;
 
 import com.aizuda.easy.retry.client.core.RetryExecutor;
 import com.aizuda.easy.retry.client.core.RetryExecutorParameter;
-import com.aizuda.easy.retry.client.core.exception.XRetryClientException;
+import com.aizuda.easy.retry.client.core.exception.EasyRetryClientException;
 import com.aizuda.easy.retry.client.core.intercepter.RetrySiteSnapshot;
 import com.aizuda.easy.retry.client.core.report.ReportHandler;
 import com.github.rholder.retry.*;
@@ -140,7 +140,7 @@ public class LocalRetryStrategies extends AbstractRetryStrategies {
                     return null;
                 };
             default:
-                throw new XRetryClientException("异常重试模式 [{}]", retryType.name());
+                throw new EasyRetryClientException("异常重试模式 [{}]", retryType.name());
         }
 
     }
