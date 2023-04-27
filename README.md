@@ -32,7 +32,7 @@
 > + 加密通讯，保障信息安全
 
 # 流量管理平台预览
-地址: <http://x-retry.byteblogs.com>
+地址: <http://preview.easyretry.com/>
 账号: admin
 密码: admin
 
