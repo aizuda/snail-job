@@ -1,7 +1,7 @@
 <template>
   <div>
-    <a-modal :visible="visible" title="分配" @ok="handleOk" @cancel="visible = false">
-      <a-form @submit="handleOk" :form="form" :body-style="{padding: '24px 32px'}" v-bind="formItemLayout">
+    <a-modal :visible="visible" title="新增任务" @ok="handleOk" @cancel="visible = false" width="800px">
+      <a-form @submit="handleOk" :form="form" v-bind="formItemLayout">
         <a-form-item
           label="组">
           <a-select
@@ -27,12 +27,55 @@
           </a-select>
         </a-form-item>
         <a-form-item
-          :wrapper-col="{
-            xs: { span: 24, offset: 0 },
-            sm: { span: 16, offset: 8 },
-            lg: { span: 7 }
-          }">
-        <!--          <a-button htmlType="submit" type="primary">提交</a-button>-->
+          label="执行器名称">
+          <a-input
+            v-decorator="[
+              'executorName',
+              {rules: [{ required: true, message: '请输入执行器名称'}]}
+            ]"
+            name="executorName"
+            placeholder="请输入执行器名称" />
+        </a-form-item>
+        <a-form-item
+          label="重试ID">
+          <a-input
+            v-decorator="[
+              'bizId',
+              {rules: [{ required: true, message: '请输入重试ID'}]}
+            ]"
+            name="bizNo"
+            placeholder="请输入业务编号" >
+            <a-tooltip slot="suffix" title="同一个场景下正在重试中的重试ID不能重复,若重复的重试ID在上报时会被幂等处理">
+              <a-icon type="info-circle" style="color: rgba(0,0,0,.45)" />
+            </a-tooltip>
+          </a-input>
+          <a-button type="primary" style="position: absolute;margin: 3px 10px">
+            生成
+          </a-button>
+        </a-form-item>
+        <a-form-item
+          label="业务编号">
+          <a-input
+            v-decorator="[
+              'bizNo',
+              {rules: [{ required: false, message: '请输入业务编号'}]}
+            ]"
+            name="bizNo"
+            placeholder="请输入业务编号" >
+            <a-tooltip slot="suffix" title="具有业务特征的编号比如订单号、物流编号等">
+              <a-icon type="info-circle" style="color: rgba(0,0,0,.45)" />
+            </a-tooltip>
+          </a-input>
+        </a-form-item>
+        <a-form-item
+          label="参数">
+          <a-textarea
+            rows="4"
+            placeholder="请输入参数"
+            v-decorator="[
+              'argsStr',
+              {rules: [{ required: true, message: '请输入参数'}]}
+            ]" />
         </a-form-item>
       </a-form>
     </a-modal>
@@ -44,7 +87,7 @@
 import { getAllGroupNameList, getSceneList } from '@/api/manage'
 
 export default {
-  name: 'savRetryTask',
+  name: 'SavRetryTask',
   props: {
   },
   data () {
@@ -52,8 +95,8 @@ export default {
       visible: false,
       form: this.$form.createForm(this),
       formItemLayout: {
-        labelCol: { lg: { span: 7 }, sm: { span: 7 } },
-        wrapperCol: { lg: { span: 10 }, sm: { span: 17 } }
+        labelCol: { lg: { span: 6 }, sm: { span: 7 } },
+        wrapperCol: { lg: { span: 14 }, sm: { span: 17 } }
       },
       groupNameList: [],
       sceneList: []
