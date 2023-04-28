@@ -16,11 +16,11 @@ import java.util.function.Consumer;
  * @since 2.0
  */
 @Slf4j
-public class XRetryResponse {
+public class EasyRetryResponse {
 
     private static final ConcurrentMap<String, Consumer<NettyResult>> responsePool = new ConcurrentHashMap<>();
 
-    public XRetryResponse(XRetryRequest retryRequest, Consumer<NettyResult> callable) {
+    public EasyRetryResponse(XRetryRequest retryRequest, Consumer<NettyResult> callable) {
         responsePool.put(retryRequest.getRequestId(), callable);
     }
 

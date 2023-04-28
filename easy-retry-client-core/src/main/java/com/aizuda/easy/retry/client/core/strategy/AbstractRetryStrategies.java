@@ -2,7 +2,7 @@ package com.aizuda.easy.retry.client.core.strategy;
 
 import com.aizuda.easy.retry.client.core.RetryExecutor;
 import com.aizuda.easy.retry.client.core.RetryExecutorParameter;
-import com.aizuda.easy.retry.client.core.event.XRetryListener;
+import com.aizuda.easy.retry.client.core.event.EasyRetryListener;
 import com.aizuda.easy.retry.client.core.intercepter.RetrySiteSnapshot;
 import com.github.rholder.retry.Retryer;
 import com.github.rholder.retry.StopStrategy;
@@ -27,7 +27,7 @@ import java.util.function.Consumer;
 public abstract class AbstractRetryStrategies implements RetryStrategy {
 
     @Autowired
-    private List<XRetryListener> XRetryListeners;
+    private List<EasyRetryListener> EasyRetryListeners;
 
     @Override
     public RetryerResultContext openRetry(String sceneName, String executorClassName, Object[] params) {
@@ -52,8 +52,8 @@ public abstract class AbstractRetryStrategies implements RetryStrategy {
         retryerResultContext.setRetryerInfo(retryerInfo);
 
         try {
-            for (XRetryListener XRetryListener : XRetryListeners) {
-                XRetryListener.beforeRetry(sceneName, executorClassName, params);
+            for (EasyRetryListener EasyRetryListener : EasyRetryListeners) {
+                EasyRetryListener.beforeRetry(sceneName, executorClassName, params);
             }
 
             Object result = retryExecutor.call(retryer, doGetCallable(retryExecutor, params), getRetryErrorConsumer(retryerResultContext, params), getRetrySuccessConsumer(retryerResultContext));
@@ -79,8 +79,8 @@ public abstract class AbstractRetryStrategies implements RetryStrategy {
             Object result = retryerResultContext.getResult();
             RetryerInfo retryerInfo = retryerResultContext.getRetryerInfo();
 
-            for (XRetryListener XRetryListener : XRetryListeners) {
-                XRetryListener.successOnRetry(result, retryerInfo.getScene(), retryerInfo.getExecutorClassName());
+            for (EasyRetryListener EasyRetryListener : EasyRetryListeners) {
+                EasyRetryListener.successOnRetry(result, retryerInfo.getScene(), retryerInfo.getExecutorClassName());
             }
 
             doRetrySuccessConsumer(retryerResultContext).accept(retryerResultContext);
@@ -99,8 +99,9 @@ public abstract class AbstractRetryStrategies implements RetryStrategy {
 
             RetryerInfo retryerInfo = context.getRetryerInfo();
             try {
-                for (XRetryListener XRetryListener : XRetryListeners) {
-                    XRetryListener.failureOnRetry(retryerInfo.getScene(), retryerInfo.getExecutorClassName(), throwable);
+                for (EasyRetryListener EasyRetryListener : EasyRetryListeners) {
+                    EasyRetryListener
+                        .failureOnRetry(retryerInfo.getScene(), retryerInfo.getExecutorClassName(), throwable);
                 }
             } catch (Exception e) {
                 log.error("失败监听者模式 处理失败 ", e);

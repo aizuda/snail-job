@@ -2,8 +2,8 @@ package com.aizuda.easy.retry.client.core.report;
 
 import com.aizuda.easy.retry.client.core.RetryExecutor;
 import com.aizuda.easy.retry.client.core.RetryExecutorParameter;
-import com.aizuda.easy.retry.client.core.client.response.XRetryResponse;
-import com.aizuda.easy.retry.client.core.config.XRetryProperties;
+import com.aizuda.easy.retry.client.core.client.response.EasyRetryResponse;
+import com.aizuda.easy.retry.client.core.config.EasyRetryProperties;
 import com.github.rholder.retry.*;
 import com.google.common.base.Predicate;
 import com.aizuda.easy.retry.client.core.cache.GroupVersionCache;
@@ -59,7 +59,7 @@ public class ReportListener implements Listener<RetryTaskDTO> {
 
                 XRetryRequest xRetryRequest = new XRetryRequest(list);
                 ReportRetryInfoHttpRequestHandler requestHandler = SpringContext.getBeanByType(ReportRetryInfoHttpRequestHandler.class);
-                XRetryResponse.cache(xRetryRequest, requestHandler.callable());
+                EasyRetryResponse.cache(xRetryRequest, requestHandler.callable());
                 NettyHttpConnectClient.send(requestHandler.method(), requestHandler.getHttpUrl(new RequestParam()), requestHandler.body(xRetryRequest));
 
                 return null;
@@ -118,10 +118,10 @@ public class ReportListener implements Listener<RetryTaskDTO> {
                 AlarmContext context = AlarmContext.build()
                         .text(reportErrorTextMessageFormatter,
                                 EnvironmentUtils.getActiveProfile(),
-                                XRetryProperties.getGroup(),
+                                EasyRetryProperties.getGroup(),
                                 LocalDateTime.now().format(formatter),
                                 e.getMessage())
-                        .title("上报异常:[{}]", XRetryProperties.getGroup())
+                        .title("上报异常:[{}]", EasyRetryProperties.getGroup())
                         .notifyAttribute(notifyAttribute.getNotifyAttribute());
 
                 AltinAlarmFactory altinAlarmFactory = SpringContext.getBeanByType(AltinAlarmFactory.class);

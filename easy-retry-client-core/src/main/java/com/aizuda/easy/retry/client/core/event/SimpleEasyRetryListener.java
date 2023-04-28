@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Slf4j
-public class SimpleXRetryListener implements XRetryListener {
+public class SimpleEasyRetryListener implements EasyRetryListener {
 
     @Override
     public void beforeRetry(String sceneName, String executorClassName, Object[] params) {

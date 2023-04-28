@@ -2,7 +2,7 @@ package com.aizuda.easy.retry.client.core.intercepter;
 
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.client.core.cache.GroupVersionCache;
-import com.aizuda.easy.retry.client.core.config.XRetryProperties;
+import com.aizuda.easy.retry.client.core.config.EasyRetryProperties;
 import com.aizuda.easy.retry.client.core.exception.EasyRetryClientException;
 import com.aizuda.easy.retry.client.core.strategy.RetryStrategy;
 import com.aizuda.easy.retry.client.core.annotation.Retryable;
@@ -157,10 +157,10 @@ public class RetryAspect implements Ordered {
                 AlarmContext context = AlarmContext.build()
                         .text(retryErrorMoreThresholdTextMessageFormatter,
                                 EnvironmentUtils.getActiveProfile(),
-                                XRetryProperties.getGroup(),
+                                EasyRetryProperties.getGroup(),
                                 LocalDateTime.now().format(formatter),
                                 e.getMessage())
-                        .title("重试组件异常:[{}]", XRetryProperties.getGroup())
+                        .title("重试组件异常:[{}]", EasyRetryProperties.getGroup())
                         .notifyAttribute(notifyAttribute.getNotifyAttribute());
 
                 Alarm<AlarmContext> alarmType = altinAlarmFactory.getAlarmType(notifyAttribute.getNotifyType());

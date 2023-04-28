@@ -17,7 +17,7 @@ import java.util.Objects;
 @ConfigurationProperties(prefix = "easy-retry")
 @Getter
 @Setter
-public class XRetryProperties {
+public class EasyRetryProperties {
 
     /**
      * 服务端对应的group
@@ -43,7 +43,7 @@ public class XRetryProperties {
     }
 
     public static String getGroup() {
-        XRetryProperties properties = SpringContext.applicationContext.getBean(XRetryProperties.class);
+        EasyRetryProperties properties = SpringContext.applicationContext.getBean(EasyRetryProperties.class);
         return Objects.requireNonNull(properties).group;
     }
 }

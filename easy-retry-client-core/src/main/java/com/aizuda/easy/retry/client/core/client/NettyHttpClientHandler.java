@@ -1,8 +1,8 @@
 package com.aizuda.easy.retry.client.core.client;
 
 import com.aizuda.easy.retry.client.core.client.request.BeatHttpRequestHandler;
-import com.aizuda.easy.retry.client.core.client.response.XRetryResponse;
-import com.aizuda.easy.retry.client.core.config.XRetryProperties;
+import com.aizuda.easy.retry.client.core.client.response.EasyRetryResponse;
+import com.aizuda.easy.retry.client.core.config.EasyRetryProperties;
 import com.aizuda.easy.retry.client.core.client.request.RequestParam;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
@@ -45,7 +45,7 @@ public class NettyHttpClientHandler extends SimpleChannelInboundHandler<FullHttp
 
         LogUtils.info(log, "接收服务端返回数据content:[{}],headers:[{}]", content, headers);
         NettyResult nettyResult = JsonUtil.parseObject(content, NettyResult.class);
-        XRetryResponse.invoke(nettyResult.getRequestId(), nettyResult);
+        EasyRetryResponse.invoke(nettyResult.getRequestId(), nettyResult);
 
     }
 
@@ -60,8 +60,8 @@ public class NettyHttpClientHandler extends SimpleChannelInboundHandler<FullHttp
         super.channelUnregistered(ctx);
         LogUtils.debug(log, "channelUnregistered");
         ctx.channel().eventLoop().schedule(() -> {
-            XRetryProperties xRetryProperties = SpringContext.getBeanByType(XRetryProperties.class);
-            XRetryProperties.ServerConfig server = xRetryProperties.getServer();
+            EasyRetryProperties easyRetryProperties = SpringContext.getBeanByType(EasyRetryProperties.class);
+            EasyRetryProperties.ServerConfig server = easyRetryProperties.getServer();
             LogUtils.info(log, "Reconnecting to:" + server.getHost() + ":" + server.getPort());
             NettyHttpConnectClient.connect();
         }, 10, TimeUnit.SECONDS);
@@ -107,7 +107,7 @@ public class NettyHttpClientHandler extends SimpleChannelInboundHandler<FullHttp
             XRetryRequest xRetryRequest = new XRetryRequest("PING");
 
             BeatHttpRequestHandler requestHandler = SpringContext.getBeanByType(BeatHttpRequestHandler.class);
-            XRetryResponse.cache(xRetryRequest, requestHandler.callable());
+            EasyRetryResponse.cache(xRetryRequest, requestHandler.callable());
 
             NettyHttpConnectClient.send(requestHandler.method(), requestHandler.getHttpUrl(new RequestParam()), requestHandler.body(xRetryRequest));   // beat N, close if fail(may throw error)
         } else {

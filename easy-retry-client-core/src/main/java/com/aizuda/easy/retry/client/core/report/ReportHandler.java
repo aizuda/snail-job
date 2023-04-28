@@ -2,7 +2,7 @@ package com.aizuda.easy.retry.client.core.report;
 
 import com.aizuda.easy.retry.client.core.BizIdGenerate;
 import com.aizuda.easy.retry.client.core.RetryArgSerializer;
-import com.aizuda.easy.retry.client.core.config.XRetryProperties;
+import com.aizuda.easy.retry.client.core.config.EasyRetryProperties;
 import com.aizuda.easy.retry.client.core.Lifecycle;
 import com.aizuda.easy.retry.client.core.cache.RetryerInfoCache;
 import com.aizuda.easy.retry.client.core.exception.EasyRetryClientException;
@@ -76,7 +76,7 @@ public class ReportHandler implements Lifecycle {
         retryTaskDTO.setBizId(bizId);
         retryTaskDTO.setExecutorName(targetClassName);
         retryTaskDTO.setArgsStr(serialize);
-        retryTaskDTO.setGroupName(XRetryProperties.getGroup());
+        retryTaskDTO.setGroupName(EasyRetryProperties.getGroup());
         retryTaskDTO.setSceneName(scene);
 
         String bizNoSpel = retryerInfo.getBizNo();

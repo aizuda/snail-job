@@ -2,7 +2,7 @@ package com.aizuda.easy.retry.client.core.client;
 
 import cn.hutool.core.util.IdUtil;
 import com.aizuda.easy.retry.client.core.cache.GroupVersionCache;
-import com.aizuda.easy.retry.client.core.config.XRetryProperties;
+import com.aizuda.easy.retry.client.core.config.EasyRetryProperties;
 import com.aizuda.easy.retry.client.core.Lifecycle;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.enums.HeadersEnum;
@@ -50,9 +50,9 @@ public class NettyHttpConnectClient implements Lifecycle, ApplicationContextAwar
     public void start() {
 
         try {
-            XRetryProperties xRetryProperties = applicationContext.getBean(XRetryProperties.class);
+            EasyRetryProperties easyRetryProperties = applicationContext.getBean(EasyRetryProperties.class);
 
-            XRetryProperties.ServerConfig server = xRetryProperties.getServer();
+            EasyRetryProperties.ServerConfig server = easyRetryProperties.getServer();
             final NettyHttpConnectClient thisClient = this;
             bootstrap.group(nioEventLoopGroup)
                     .channel(NioSocketChannel.class)
@@ -111,7 +111,7 @@ public class NettyHttpConnectClient implements Lifecycle, ApplicationContextAwar
                 .set(HttpHeaderNames.CONTENT_LENGTH, request.content().readableBytes())
                 .set(HeadersEnum.HOST_ID.getKey(), HOST_ID)
                 .set(HeadersEnum.HOST_IP.getKey(), HOST_IP)
-                .set(HeadersEnum.GROUP_NAME.getKey(), XRetryProperties.getGroup())
+                .set(HeadersEnum.GROUP_NAME.getKey(), EasyRetryProperties.getGroup())
                 .set(HeadersEnum.CONTEXT_PATH.getKey(), Optional.ofNullable(serverProperties.getServlet().getContextPath()).orElse("/"))
                 .set(HeadersEnum.HOST_PORT.getKey(), Optional.ofNullable(serverProperties.getPort()).orElse(8080))
                 .set(HeadersEnum.VERSION.getKey(), GroupVersionCache.getVersion())
