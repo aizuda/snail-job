@@ -17,6 +17,7 @@ import com.aizuda.easy.retry.common.core.enums.RetryResultStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.model.Result;
+import com.aizuda.easy.retry.common.core.util.Assert;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.model.dto.ConfigDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -37,6 +38,8 @@ import java.lang.reflect.Method;
 import java.util.Objects;
 
 /**
+ * 服务端调调用客户端进行重试流量下发、配置变更通知等操作
+ *
  * @author: www.byteblogs.com
  * @date : 2022-03-09 16:33
  */
@@ -137,19 +140,21 @@ public class RetryEndPoint {
     }
 
     /**
-     * 手动新增重试数据，模拟生成bizid
+     * 手动新增重试数据，模拟生成bizId
      *
      * @param generateRetryBizIdDTO 生成bizId模型
      * @return bizId
      */
     @PostMapping("/generate/biz-id")
-    public String bizIdGenerate(@RequestBody @Validated GenerateRetryBizIdDTO generateRetryBizIdDTO) {
+    public Result<String> bizIdGenerate(@RequestBody @Validated GenerateRetryBizIdDTO generateRetryBizIdDTO) {
 
         String scene = generateRetryBizIdDTO.getScene();
         String executorName = generateRetryBizIdDTO.getExecutorName();
         String argsStr = generateRetryBizIdDTO.getArgsStr();
 
         RetryerInfo retryerInfo = RetryerInfoCache.get(scene, executorName);
+        Assert.notNull(retryerInfo, ()-> new EasyRetryClientException("重试信息不存在 scene:[{}] executorName:[{}]", scene, executorName));
+
         Method executorMethod = retryerInfo.getExecutorMethod();
 
         RetryArgSerializer retryArgSerializer = new JacksonSerializer();
@@ -173,6 +178,6 @@ public class RetryEndPoint {
             throw new EasyRetryClientException("bizId生成异常：{},{}", scene, argsStr);
         }
 
-        return bizId;
+        return new Result<>(bizId);
     }
 }

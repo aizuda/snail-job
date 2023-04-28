@@ -76,7 +76,7 @@ public class FinishActor extends AbstractActor  {
                     RetryTaskLog retryTaskLog = records.get(0);
                     retryTaskLog.setRetryStatus(retryTask.getRetryStatus());
                     Assert.isTrue(1 ==  retryTaskLogMapper.updateById(retryTaskLog),
-                            new EasyRetryServerException("更新重试日志失败"));
+                        () -> new EasyRetryServerException("更新重试日志失败"));
                 }
             }
 

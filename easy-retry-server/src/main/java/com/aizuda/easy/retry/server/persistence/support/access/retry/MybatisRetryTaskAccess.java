@@ -67,7 +67,7 @@ public class MybatisRetryTaskAccess extends AbstractRetryTaskAccess {
 
         setPartition(retryTask.getGroupName());
         int i = retryTaskMapper.insert(retryTask);
-        Assert.isTrue(1 == i, new EasyRetryServerException("同步重试数据失败", JsonUtil.toJsonString(retryTask)));
+        Assert.isTrue(1 == i, () -> new EasyRetryServerException("同步重试数据失败", JsonUtil.toJsonString(retryTask)));
         return i;
     }
 

@@ -91,7 +91,7 @@ public class RetryServiceImpl implements RetryService {
 
         retryTask.setNextTriggerAt(WaitStrategies.randomWait(1, TimeUnit.SECONDS, 60, TimeUnit.SECONDS).computeRetryTime(null));
 
-        Assert.isTrue(1 ==  retryTaskAccess.saveRetryTask(retryTask), new EasyRetryServerException("上报数据失败"));
+        Assert.isTrue(1 ==  retryTaskAccess.saveRetryTask(retryTask), () ->  new EasyRetryServerException("上报数据失败"));
         return Boolean.TRUE;
     }
 
@@ -140,11 +140,11 @@ public class RetryServiceImpl implements RetryService {
 
         GroupConfig groupConfig = configAccess.getGroupConfigByGroupName(groupName);
         Assert.isTrue(retryDeadLetters.size() == retryDeadLetterMapper.insertBatch(retryDeadLetters, groupConfig.getGroupPartition()),
-                new EasyRetryServerException("插入死信队列失败 [{}]" , JsonUtil.toJsonString(retryDeadLetters)));
+            () -> new EasyRetryServerException("插入死信队列失败 [{}]" , JsonUtil.toJsonString(retryDeadLetters)));
 
         List<Long> ids = retryTasks.stream().map(RetryTask::getId).collect(Collectors.toList());
         Assert.isTrue(retryTasks.size() ==  retryTaskMapper.deleteBatch(ids, groupConfig.getGroupPartition()),
-                new EasyRetryServerException("删除重试数据失败 [{}]", JsonUtil.toJsonString(retryTasks)));
+            () ->  new EasyRetryServerException("删除重试数据失败 [{}]", JsonUtil.toJsonString(retryTasks)));
     }
 
     /**

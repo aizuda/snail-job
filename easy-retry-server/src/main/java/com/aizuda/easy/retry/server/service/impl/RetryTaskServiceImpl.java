@@ -1,30 +1,34 @@
 package com.aizuda.easy.retry.server.service.impl;
 
 import com.aizuda.easy.retry.client.model.GenerateRetryBizIdDTO;
+import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.common.core.util.Assert;
+import com.aizuda.easy.retry.server.config.RequestDataHelper;
 import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.ServerNode;
+import com.aizuda.easy.retry.server.service.RetryTaskService;
 import com.aizuda.easy.retry.server.service.convert.RetryTaskConverter;
+import com.aizuda.easy.retry.server.service.convert.RetryTaskResponseVOConverter;
 import com.aizuda.easy.retry.server.support.handler.ClientNodeAllocateHandler;
 import com.aizuda.easy.retry.server.support.strategy.WaitStrategies;
-import com.aizuda.easy.retry.server.web.model.request.RetryTaskSaveRequestVO;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
-import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
-import com.aizuda.easy.retry.server.config.RequestDataHelper;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
-import com.aizuda.easy.retry.server.service.RetryTaskService;
-import com.aizuda.easy.retry.server.service.convert.RetryTaskResponseVOConverter;
+import com.aizuda.easy.retry.server.web.model.request.GenerateRetryBizIdVO;
 import com.aizuda.easy.retry.server.web.model.request.RetryTaskQueryVO;
-import com.aizuda.easy.retry.server.web.model.request.RetryTaskRequestVO;
+import com.aizuda.easy.retry.server.web.model.request.RetryTaskUpdateStatusRequestVO;
+import com.aizuda.easy.retry.server.web.model.request.RetryTaskSaveRequestVO;
+import com.aizuda.easy.retry.server.web.model.request.RetryTaskUpdateExecutorNameRequestVO;
 import com.aizuda.easy.retry.server.web.model.response.RetryTaskResponseVO;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.text.MessageFormat;
@@ -82,8 +86,8 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         RequestDataHelper.setPartition(queryVO.getGroupName());
 
         retryTaskLambdaQueryWrapper.select(RetryTask::getId, RetryTask::getBizNo, RetryTask::getBizId,
-                RetryTask::getGroupName, RetryTask::getNextTriggerAt, RetryTask::getRetryCount,
-                RetryTask::getRetryStatus, RetryTask::getUpdateDt, RetryTask::getSceneName);
+            RetryTask::getGroupName, RetryTask::getNextTriggerAt, RetryTask::getRetryCount,
+            RetryTask::getRetryStatus, RetryTask::getUpdateDt, RetryTask::getSceneName);
         pageDTO = retryTaskMapper.selectPage(pageDTO, retryTaskLambdaQueryWrapper.orderByDesc(RetryTask::getCreateDt));
         return new PageResult<>(pageDTO, retryTaskResponseVOConverter.batchConvert(pageDTO.getRecords()));
     }
@@ -96,28 +100,29 @@ public class RetryTaskServiceImpl implements RetryTaskService {
     }
 
     @Override
-    public int updateRetryTaskStatus(RetryTaskRequestVO retryTaskRequestVO) {
+    public int updateRetryTaskStatus(RetryTaskUpdateStatusRequestVO retryTaskUpdateStatusRequestVO) {
 
-        RetryStatusEnum retryStatusEnum = RetryStatusEnum.getByStatus(retryTaskRequestVO.getRetryStatus());
+        RetryStatusEnum retryStatusEnum = RetryStatusEnum.getByStatus(retryTaskUpdateStatusRequestVO.getRetryStatus());
         if (Objects.isNull(retryStatusEnum)) {
             throw new EasyRetryServerException("重试状态错误");
         }
 
-        RequestDataHelper.setPartition(retryTaskRequestVO.getGroupName());
-        RetryTask retryTask = retryTaskMapper.selectById(retryTaskRequestVO.getId());
+        RequestDataHelper.setPartition(retryTaskUpdateStatusRequestVO.getGroupName());
+        RetryTask retryTask = retryTaskMapper.selectById(retryTaskUpdateStatusRequestVO.getId());
         if (Objects.isNull(retryTask)) {
             throw new EasyRetryServerException("未查询到重试任务");
         }
 
-        retryTask.setRetryStatus(retryTaskRequestVO.getRetryStatus());
-        retryTask.setGroupName(retryTaskRequestVO.getGroupName());
+        retryTask.setRetryStatus(retryTaskUpdateStatusRequestVO.getRetryStatus());
+        retryTask.setGroupName(retryTaskUpdateStatusRequestVO.getGroupName());
 
         // 若恢复重试则需要重新计算下次触发时间
         if (RetryStatusEnum.RUNNING.getStatus().equals(retryStatusEnum.getStatus())) {
-            retryTask.setNextTriggerAt(WaitStrategies.randomWait(1, TimeUnit.SECONDS, 60, TimeUnit.SECONDS).computeRetryTime(null));
+            retryTask.setNextTriggerAt(
+                WaitStrategies.randomWait(1, TimeUnit.SECONDS, 60, TimeUnit.SECONDS).computeRetryTime(null));
         }
 
-        RequestDataHelper.setPartition(retryTaskRequestVO.getGroupName());
+        RequestDataHelper.setPartition(retryTaskUpdateStatusRequestVO.getGroupName());
         return retryTaskMapper.updateById(retryTask);
     }
 
@@ -136,21 +141,57 @@ public class RetryTaskServiceImpl implements RetryTaskService {
             retryTask.setExtAttrs(StringUtils.EMPTY);
         }
 
-        retryTask.setNextTriggerAt(WaitStrategies.randomWait(1, TimeUnit.SECONDS, 60, TimeUnit.SECONDS).computeRetryTime(null));
+        retryTask.setNextTriggerAt(
+            WaitStrategies.randomWait(1, TimeUnit.SECONDS, 60, TimeUnit.SECONDS).computeRetryTime(null));
 
+        RequestDataHelper.setPartition(retryTaskRequestVO.getGroupName());
         return retryTaskMapper.insert(retryTask);
     }
 
     @Override
-    public String bizIdGenerate(final GenerateRetryBizIdDTO generateRetryBizIdDTO) {
-        ServerNode serverNode = clientNodeAllocateHandler.getServerNode(generateRetryBizIdDTO.getGroup());
+    public String bizIdGenerate(final GenerateRetryBizIdVO generateRetryBizIdVO) {
+        ServerNode serverNode = clientNodeAllocateHandler.getServerNode(generateRetryBizIdVO.getGroupName());
         Assert.notNull(serverNode, () -> new EasyRetryServerException("生成bizId失败: 不存在活跃的客户端节点"));
 
         // 委托客户端生成bizId
         String url = MessageFormat
             .format(URL, serverNode.getHostIp(), serverNode.getHostPort().toString(), serverNode.getContextPath());
+
+        GenerateRetryBizIdDTO generateRetryBizIdDTO = new GenerateRetryBizIdDTO();
+        generateRetryBizIdDTO.setGroup(generateRetryBizIdVO.getGroupName());
+        generateRetryBizIdDTO.setScene(generateRetryBizIdVO.getSceneName());
+        generateRetryBizIdDTO.setArgsStr(generateRetryBizIdVO.getArgsStr());
+        generateRetryBizIdDTO.setExecutorName(generateRetryBizIdVO.getExecutorName());
+
         HttpEntity<GenerateRetryBizIdDTO> requestEntity = new HttpEntity<>(generateRetryBizIdDTO);
         Result<String> result = restTemplate.postForObject(url, requestEntity, Result.class);
+
+        Assert.notNull(result, () -> new EasyRetryServerException("biz生成失败"));
+        Assert.isTrue(1 == result.getStatus(), () -> new EasyRetryServerException("biz生成失败:请确保参数与执行器名称正确"));
+
         return result.getData();
+    }
+
+    @Override
+    public int updateRetryTaskExecutorName(final RetryTaskUpdateExecutorNameRequestVO requestVO) {
+
+        RetryTask retryTask = new RetryTask();
+        retryTask.setExecutorName(requestVO.getExecutorName());
+        retryTask.setUpdateDt(LocalDateTime.now());
+        if (!CollectionUtils.isEmpty(requestVO.getIds())) {
+
+            // 根据重试数据id，更新执行器名称
+            RequestDataHelper.setPartition(requestVO.getGroupName());
+            return retryTaskMapper
+                .update(retryTask, new LambdaUpdateWrapper<RetryTask>().in(RetryTask::getId, requestVO.getIds()));
+        }
+
+        // 更新组下面的场景对应的执行器名称
+        RequestDataHelper.setPartition(requestVO.getGroupName());
+        return retryTaskMapper
+            .update(retryTask, new LambdaUpdateWrapper<RetryTask>()
+                .eq(RetryTask::getGroupName, requestVO.getGroupName())
+                .eq(RetryTask::getSceneName, requestVO.getSceneName())
+            );
     }
 }

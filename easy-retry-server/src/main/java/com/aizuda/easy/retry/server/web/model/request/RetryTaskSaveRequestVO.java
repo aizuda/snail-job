@@ -28,9 +28,9 @@ public class RetryTaskSaveRequestVO {
     private String sceneName;
 
     /**
-     * 重试ID(同一个场景下正在重试中的bizId不能重复)
+     * 业务id(同一个场景下正在重试中的bizId不能重复)
      */
-    @NotBlank(message = "重试ID不能为空")
+    @NotBlank(message = "业务id不能为空")
     private String bizId;
 
     /**

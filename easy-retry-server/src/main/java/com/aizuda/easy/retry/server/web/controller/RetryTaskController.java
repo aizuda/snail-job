@@ -1,12 +1,13 @@
 package com.aizuda.easy.retry.server.web.controller;
 
-import com.aizuda.easy.retry.client.model.GenerateRetryBizIdDTO;
 import com.aizuda.easy.retry.server.service.RetryTaskService;
 import com.aizuda.easy.retry.server.web.annotation.LoginRequired;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
+import com.aizuda.easy.retry.server.web.model.request.GenerateRetryBizIdVO;
 import com.aizuda.easy.retry.server.web.model.request.RetryTaskQueryVO;
-import com.aizuda.easy.retry.server.web.model.request.RetryTaskRequestVO;
+import com.aizuda.easy.retry.server.web.model.request.RetryTaskUpdateStatusRequestVO;
 import com.aizuda.easy.retry.server.web.model.request.RetryTaskSaveRequestVO;
+import com.aizuda.easy.retry.server.web.model.request.RetryTaskUpdateExecutorNameRequestVO;
 import com.aizuda.easy.retry.server.web.model.response.RetryTaskResponseVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -49,8 +50,8 @@ public class RetryTaskController {
 
     @LoginRequired
     @PutMapping("status")
-    public int updateRetryTaskStatus(@RequestBody RetryTaskRequestVO retryTaskRequestVO) {
-        return retryTaskService.updateRetryTaskStatus(retryTaskRequestVO);
+    public int updateRetryTaskStatus(@RequestBody RetryTaskUpdateStatusRequestVO retryTaskUpdateStatusRequestVO) {
+        return retryTaskService.updateRetryTaskStatus(retryTaskUpdateStatusRequestVO);
     }
 
     @LoginRequired
@@ -61,8 +62,13 @@ public class RetryTaskController {
 
     @LoginRequired
     @PostMapping("/generate/biz-id")
-    public String bizIdGenerate(@RequestBody @Validated GenerateRetryBizIdDTO generateRetryBizIdDTO) {
-        return retryTaskService.bizIdGenerate(generateRetryBizIdDTO);
+    public String bizIdGenerate(@RequestBody @Validated GenerateRetryBizIdVO generateRetryBizIdVO) {
+        return retryTaskService.bizIdGenerate(generateRetryBizIdVO);
     }
 
+    @LoginRequired
+    @PutMapping("/executor-name/batch")
+    public Integer updateRetryTaskExecutorName(@RequestBody @Validated RetryTaskUpdateExecutorNameRequestVO requestVO) {
+        return retryTaskService.updateRetryTaskExecutorName(requestVO);
+    }
 }

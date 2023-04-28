@@ -109,7 +109,7 @@ public class SystemUserServiceImpl implements SystemUserService {
         systemUser.setPassword(SecureUtil.sha256(requestVO.getPassword()));
         systemUser.setRole(requestVO.getRole());
 
-        Assert.isTrue(1 == systemUserMapper.insert(systemUser), new EasyRetryServerException("新增用户失败"));
+        Assert.isTrue(1 == systemUserMapper.insert(systemUser), () ->  new EasyRetryServerException("新增用户失败"));
 
         // 只添加为普通用户添加权限
         List<String> groupNameList = requestVO.getGroupNameList();
@@ -121,7 +121,7 @@ public class SystemUserServiceImpl implements SystemUserService {
             SystemUserPermission systemUserPermission = new SystemUserPermission();
             systemUserPermission.setSystemUserId(systemUser.getId());
             systemUserPermission.setGroupName(groupName);
-            Assert.isTrue(1 == systemUserPermissionMapper.insert(systemUserPermission), new EasyRetryServerException("新增用户权限失败"));
+            Assert.isTrue(1 == systemUserPermissionMapper.insert(systemUserPermission), () ->  new EasyRetryServerException("新增用户权限失败"));
         }
 
     }
@@ -148,7 +148,7 @@ public class SystemUserServiceImpl implements SystemUserService {
 
         systemUser.setRole(requestVO.getRole());
 
-        Assert.isTrue(1 == systemUserMapper.updateById(systemUser), new EasyRetryServerException("更新用户失败"));
+        Assert.isTrue(1 == systemUserMapper.updateById(systemUser), () ->  new EasyRetryServerException("更新用户失败"));
 
         // 只添加为普通用户添加权限
         List<String> groupNameList = requestVO.getGroupNameList();
@@ -163,7 +163,7 @@ public class SystemUserServiceImpl implements SystemUserService {
             SystemUserPermission systemUserPermission = new SystemUserPermission();
             systemUserPermission.setSystemUserId(systemUser.getId());
             systemUserPermission.setGroupName(groupName);
-            Assert.isTrue(1 == systemUserPermissionMapper.insert(systemUserPermission), new EasyRetryServerException("更新用户权限失败"));
+            Assert.isTrue(1 == systemUserPermissionMapper.insert(systemUserPermission), () ->  new EasyRetryServerException("更新用户权限失败"));
         }
     }
 

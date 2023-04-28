@@ -6,9 +6,4 @@ package com.aizuda.easy.retry.common.core.util;
  */
 public class Assert extends cn.hutool.core.lang.Assert {
 
-    public static <T extends RuntimeException> void isTrue(boolean expression, T e) {
-        if (!expression) {
-            throw e;
-        }
-    }
 }

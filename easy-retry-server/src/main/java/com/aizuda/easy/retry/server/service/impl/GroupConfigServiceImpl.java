@@ -69,7 +69,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
 
         Assert.isTrue(groupConfigMapper.selectCount(new LambdaQueryWrapper<GroupConfig>()
                         .eq(GroupConfig::getGroupName, groupConfigRequestVO.getGroupName())) == 0,
-                new EasyRetryServerException("GroupName已经存在 {}", groupConfigRequestVO.getGroupName()));
+            () ->  new EasyRetryServerException("GroupName已经存在 {}", groupConfigRequestVO.getGroupName()));
 
         doSaveGroupConfig(groupConfigRequestVO);
 
@@ -96,7 +96,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
 
         Assert.isTrue(1 == groupConfigMapper.update(groupConfig,
                 new LambdaUpdateWrapper<GroupConfig>().eq(GroupConfig::getGroupName, groupConfigRequestVO.getGroupName())),
-                new EasyRetryServerException("新增组异常异常 groupConfigVO[{}]", groupConfigRequestVO));
+            () -> new EasyRetryServerException("新增组异常异常 groupConfigVO[{}]", groupConfigRequestVO));
 
         doUpdateNotifyConfig(groupConfigRequestVO);
 
@@ -149,7 +149,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
             groupConfig.setGroupPartition(HashUtil.bkdrHash(groupConfigRequestVO.getGroupName()) % totalPartition);
         }
 
-        Assert.isTrue(1 == groupConfigMapper.insert(groupConfig), new EasyRetryServerException("新增组异常异常 groupConfigVO[{}]", groupConfigRequestVO));
+        Assert.isTrue(1 == groupConfigMapper.insert(groupConfig), () ->  new EasyRetryServerException("新增组异常异常 groupConfigVO[{}]", groupConfigRequestVO));
     }
 
     @Override
@@ -182,7 +182,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
         notifyConfig.setCreateDt(LocalDateTime.now());
 
         Assert.isTrue(1 == notifyConfigMapper.insert(notifyConfig),
-                new EasyRetryServerException("插入通知配置失败 sceneConfig:[{}]", JsonUtil.toJsonString(notifyConfig)));
+            () -> new EasyRetryServerException("插入通知配置失败 sceneConfig:[{}]", JsonUtil.toJsonString(notifyConfig)));
     }
 
     private void doSaveSceneConfig(List<GroupConfigRequestVO.SceneConfigVO> sceneList, String groupName) {
@@ -195,7 +195,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
                 sceneConfig.setGroupName(groupName);
 
                 Assert.isTrue(1 == sceneConfigMapper.insert(sceneConfig),
-                        new EasyRetryServerException("插入场景配置失败 sceneConfig:[{}]", JsonUtil.toJsonString(sceneConfig)));
+                    () -> new EasyRetryServerException("插入场景配置失败 sceneConfig:[{}]", JsonUtil.toJsonString(sceneConfig)));
             }
         }
     }
@@ -218,7 +218,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
                 } else if (sceneConfigVO.getIsDeleted() == 1) {
                     Assert.isTrue(
                             1 == sceneConfigMapper.deleteById(oldSceneConfig.getId()),
-                            new EasyRetryServerException("删除场景失败 [{}]", sceneConfigVO.getSceneName()));
+                        () -> new EasyRetryServerException("删除场景失败 [{}]", sceneConfigVO.getSceneName()));
                 } else {
                     SceneConfig sceneConfig = sceneConfigConverter.convert(sceneConfigVO);
                     sceneConfig.setGroupName(groupConfigRequestVO.getGroupName());
@@ -227,7 +227,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
                             new LambdaQueryWrapper<SceneConfig>()
                                     .eq(SceneConfig::getGroupName, sceneConfig.getGroupName())
                                     .eq(SceneConfig::getSceneName, sceneConfig.getSceneName())),
-                            new EasyRetryServerException("插入场景配置失败 sceneConfig:[{}]", JsonUtil.toJsonString(sceneConfig)));
+                        () -> new EasyRetryServerException("插入场景配置失败 sceneConfig:[{}]", JsonUtil.toJsonString(sceneConfig)));
                 }
 
                 iterator.remove();
@@ -253,7 +253,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
             } else if (Objects.nonNull(notifyConfigVO.getId()) && notifyConfigVO.getIsDeleted() == 1) {
                 // delete
                 Assert.isTrue(1 == notifyConfigMapper.deleteById(notifyConfigVO.getId()),
-                        new EasyRetryServerException("删除通知配置失败 sceneConfig:[{}]", JsonUtil.toJsonString(notifyConfigVO)));
+                    () -> new EasyRetryServerException("删除通知配置失败 sceneConfig:[{}]", JsonUtil.toJsonString(notifyConfigVO)));
             } else {
                 // update
                 Assert.isTrue(1 == notifyConfigMapper.update(notifyConfig,
@@ -261,7 +261,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
                                         .eq(NotifyConfig::getId, notifyConfigVO.getId())
                                         .eq(NotifyConfig::getGroupName, notifyConfig.getGroupName())
                                         .eq(NotifyConfig::getNotifyScene, notifyConfig.getNotifyScene())),
-                        new EasyRetryServerException("更新通知配置失败 sceneConfig:[{}]", JsonUtil.toJsonString(notifyConfig)));
+                    () -> new EasyRetryServerException("更新通知配置失败 sceneConfig:[{}]", JsonUtil.toJsonString(notifyConfig)));
             }
         }
     }

@@ -49,7 +49,7 @@ public class RetryTaskAccessProcessor implements RetryTaskAccess<RetryTask> {
     @Override
     public int updateRetryTask(RetryTask retryTask) {
         Assert.isTrue(1 == retryTaskAccesses.updateRetryTask(retryTask),
-                new EasyRetryServerException("更新重试任务失败"));
+            () -> new EasyRetryServerException("更新重试任务失败"));
 
         return 1;
     }
