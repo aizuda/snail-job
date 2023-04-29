@@ -13,6 +13,9 @@ const api = {
   allGroupNameList: `/group/all/group-name/list`,
   retryTaskPage: '/retry-task/list',
   retryTaskById: '/retry-task/',
+  saveRetryTask: '/retry-task',
+  bizIdGenerate: '/retry-task/generate/biz-id',
+  updateRetryTaskExecutorName: '/retry-task/executor-name/batch',
   updateRetryTaskStatus: '/retry-task/status',
   retryTaskLogPage: '/retry-task-log/list',
   retryTaskLogById: '/retry-task-log/',
@@ -35,6 +38,22 @@ const api = {
 }
 
 export default api
+
+export function bizIdGenerate (data) {
+  return request({
+    url: api.bizIdGenerate,
+    method: 'post',
+    data
+  })
+}
+
+export function saveRetryTask (data) {
+  return request({
+    url: api.saveRetryTask,
+    method: 'post',
+    data
+  })
+}
 
 export function getTotalPartition () {
   return request({

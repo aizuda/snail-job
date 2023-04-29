@@ -21,7 +21,7 @@
     -->
     <template v-slot:menuHeaderRender>
       <div>
-<!--        <logo-svg />-->
+        <!--        <logo-svg />-->
         <h1>{{ title }}</h1>
       </div>
     </template>
@@ -31,7 +31,7 @@
     <template v-slot:headerContentRender>
       <div>
         <a-tooltip title="刷新页面">
-          <a-icon type="reload" style="font-size: 18px;cursor: pointer;" @click="() => { $router.go(0)  }" />
+          <a-icon type="reload" style="font-size: 18px;cursor: pointer;" @click="() => { $router.go(0) }" />
         </a-tooltip>
       </div>
     </template>

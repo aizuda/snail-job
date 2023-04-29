@@ -46,7 +46,7 @@ public class RestExceptionHandler {
      */
     @ExceptionHandler({Exception.class})
     public Result onException(Exception ex) {
-        log.error("异常类 businessException,", ex);
+        log.error("异常类 onException,", ex);
         return new Result<String>(0, "系统异常");
     }
 

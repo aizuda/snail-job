@@ -1,9 +1,9 @@
 package com.aizuda.easy.retry.server.service.impl;
 
+import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.client.model.GenerateRetryBizIdDTO;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
 import com.aizuda.easy.retry.common.core.model.Result;
-import com.aizuda.easy.retry.common.core.util.Assert;
 import com.aizuda.easy.retry.server.config.RequestDataHelper;
 import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskMapper;
@@ -164,12 +164,12 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         generateRetryBizIdDTO.setExecutorName(generateRetryBizIdVO.getExecutorName());
 
         HttpEntity<GenerateRetryBizIdDTO> requestEntity = new HttpEntity<>(generateRetryBizIdDTO);
-        Result<String> result = restTemplate.postForObject(url, requestEntity, Result.class);
+        Result result = restTemplate.postForObject(url, requestEntity, Result.class);
 
         Assert.notNull(result, () -> new EasyRetryServerException("biz生成失败"));
         Assert.isTrue(1 == result.getStatus(), () -> new EasyRetryServerException("biz生成失败:请确保参数与执行器名称正确"));
 
-        return result.getData();
+        return (String) result.getData();
     }
 
     @Override

@@ -1,8 +1,7 @@
 package com.aizuda.easy.retry.server.web.model.request;
 
 import lombok.Data;
-
-import javax.validation.constraints.NotBlank;
+import org.hibernate.validator.constraints.NotBlank;
 
 /**
  * 生成bizId模型
@@ -27,12 +26,12 @@ public class GenerateRetryBizIdVO {
     /**
      * 执行参数
      */
-    @NotBlank(message = "参数 不能为空")
+    @NotBlank(message = "参数不能为空")
     private String argsStr;
 
     /**
      * 执行器名称
      */
-    @NotBlank(message = "executorName 不能为空")
+    @NotBlank(message = "执行器不能为空")
     private String executorName;
 }

@@ -51,7 +51,7 @@
     </div>
     <div class="table-operator">
       <a-button type="primary" icon="plus" @click="handleNew()">新增</a-button>
-      <a-dropdown v-action:edit v-if="selectedRowKeys.length > 0">
+      <a-dropdown v-if="selectedRowKeys.length > 0">
         <a-menu slot="overlay">
           <a-menu-item key="1"><a-icon type="delete" />删除</a-menu-item>
           <!-- lock | unlock -->
@@ -66,11 +66,12 @@
     <s-table
       ref="table"
       size="default"
-      rowKey="key"
+      :rowKey="(record) => record.id"
       :columns="columns"
       :data="loadData"
       :alert="options.alert"
       :rowSelection="options.rowSelection"
+      :scroll="{ x: 2000 }"
     >
       <span slot="serial" slot-scope="text, record">
         {{ record.id }}
@@ -132,9 +133,9 @@ export default {
       // 表头
       columns: [
         {
-          title: '#',
+          title: 'ID',
           scopedSlots: { customRender: 'serial' },
-          width: '5%'
+          fixed: 'left'
         },
         {
           title: '组名称',
@@ -177,6 +178,7 @@ export default {
         },
         {
           title: '操作',
+          fixed: 'right',
           dataIndex: 'action',
           width: '150px',
           scopedSlots: { customRender: 'action' }
@@ -208,6 +210,10 @@ export default {
   created () {
     getAllGroupNameList().then(res => {
       this.groupNameList = res.data
+      if (this.groupNameList !== null && this.groupNameList.length > 0) {
+        this.queryParam['groupName'] = this.groupNameList[0]
+        this.$refs.table.refresh(true)
+      }
     })
   },
   methods: {
@@ -260,8 +266,10 @@ export default {
           this.$message.success('重试完成成功')
         }
       })
+    },
+    refresh (v) {
+      this.$refs.table.refresh(true)
     }
-
   }
 }
 </script>

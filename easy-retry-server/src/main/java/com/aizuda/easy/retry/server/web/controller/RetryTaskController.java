@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.server.web.controller;
 
+import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.server.service.RetryTaskService;
 import com.aizuda.easy.retry.server.web.annotation.LoginRequired;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
@@ -62,8 +63,8 @@ public class RetryTaskController {
 
     @LoginRequired
     @PostMapping("/generate/biz-id")
-    public String bizIdGenerate(@RequestBody @Validated GenerateRetryBizIdVO generateRetryBizIdVO) {
-        return retryTaskService.bizIdGenerate(generateRetryBizIdVO);
+    public Result<String> bizIdGenerate(@RequestBody @Validated GenerateRetryBizIdVO generateRetryBizIdVO) {
+        return new Result<>(retryTaskService.bizIdGenerate(generateRetryBizIdVO));
     }
 
     @LoginRequired

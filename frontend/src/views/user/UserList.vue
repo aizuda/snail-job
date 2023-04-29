@@ -55,7 +55,7 @@
         <template>
           <a @click="handleEdit(record)">编辑</a>
           <a-divider type="vertical" />
-           <a href="javascript:;">删除</a>
+          <a href="javascript:;">删除</a>
         </template>
       </span>
     </s-table>

@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.client.core.client;
 
+import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.client.core.BizIdGenerate;
 import com.aizuda.easy.retry.client.core.RetryArgSerializer;
 import com.aizuda.easy.retry.client.core.cache.GroupVersionCache;
@@ -17,7 +18,6 @@ import com.aizuda.easy.retry.common.core.enums.RetryResultStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.model.Result;
-import com.aizuda.easy.retry.common.core.util.Assert;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.model.dto.ConfigDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -145,7 +145,7 @@ public class RetryEndPoint {
      * @param generateRetryBizIdDTO 生成bizId模型
      * @return bizId
      */
-    @PostMapping("/generate/biz-id")
+    @PostMapping("/generate/biz-id/v1")
     public Result<String> bizIdGenerate(@RequestBody @Validated GenerateRetryBizIdDTO generateRetryBizIdDTO) {
 
         String scene = generateRetryBizIdDTO.getScene();

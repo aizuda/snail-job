@@ -51,6 +51,7 @@
       :data="loadData"
       :alert="options.alert"
       :rowSelection="options.rowSelection"
+      :scroll="{ x: 2000 }"
     >
       <span slot="serial" slot-scope="text, record, index">
         {{ index + 1 }}
@@ -100,7 +101,8 @@ export default {
       columns: [
         {
           title: '#',
-          scopedSlots: { customRender: 'serial' }
+          scopedSlots: { customRender: 'serial' },
+          width: '50px'
         },
         {
           title: '组名称',
@@ -114,8 +116,7 @@ export default {
         },
         {
           title: '业务id',
-          dataIndex: 'bizId',
-          ellipsis: true
+          dataIndex: 'bizId'
         },
         {
           title: '业务编号',
@@ -129,8 +130,7 @@ export default {
         },
         {
           title: '失败原因',
-          dataIndex: 'errorMessage',
-          ellipsis: true
+          dataIndex: 'errorMessage'
         },
         {
           title: '触发时间',
@@ -142,6 +142,7 @@ export default {
         {
           title: '操作',
           dataIndex: 'action',
+          fixed: 'right',
           width: '150px',
           scopedSlots: { customRender: 'action' }
         }

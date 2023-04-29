@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.server.service.impl;
 
+import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.HashUtil;
 import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.GroupConfigMapper;
@@ -14,7 +15,6 @@ import com.aizuda.easy.retry.server.support.handler.ClientRegisterHandler;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
-import com.aizuda.easy.retry.common.core.util.Assert;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.service.GroupConfigService;
 import com.aizuda.easy.retry.server.service.convert.GroupConfigConverter;
