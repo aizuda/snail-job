@@ -42,8 +42,7 @@ CREATE TABLE `retry_dead_letter_0`
     `ext_attrs`     text         NOT NULL COMMENT '扩展字段',
     `create_dt`     datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     PRIMARY KEY (`id`),
-    KEY             `idx_group_name` (`group_name`) USING BTREE,
-    KEY             `idx_scene_name` (`scene_name`) USING BTREE,
+    KEY             `idx_group_name_scene_name` (`group_name`, `scene_name`),
     KEY             `idx_biz_id` (`biz_id`),
     KEY             `idx_biz_no` (`biz_no`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='重试死信队列'
@@ -65,7 +64,9 @@ CREATE TABLE `retry_task_0`
     `create_dt`       datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_dt`       datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_biz_id` (`biz_id`)
+    KEY             `idx_group_name_scene_name` (`group_name`, `scene_name`),
+    KEY             `idx_retry_status` (`retry_status`),
+    KEY             `idx_biz_id` (`biz_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='重试表'
 ;
 
@@ -84,8 +85,7 @@ CREATE TABLE `retry_task_log`
     `update_dt`     datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     `error_message` text         NOT NULL COMMENT '异常信息',
     PRIMARY KEY (`id`),
-    KEY             `idx_group_name` (`group_name`),
-    KEY             `idx_scene_name` (`scene_name`),
+    KEY             `idx_group_name_scene_name` (`group_name`, `scene_name`),
     KEY             `idx_retry_status` (`retry_status`),
     KEY             `idx_biz_id` (`biz_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='重试日志表'

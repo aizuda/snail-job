@@ -4,6 +4,7 @@ import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.server.service.RetryTaskService;
 import com.aizuda.easy.retry.server.web.annotation.LoginRequired;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
+import com.aizuda.easy.retry.server.web.model.request.BatchDeleteRetryTaskVO;
 import com.aizuda.easy.retry.server.web.model.request.GenerateRetryBizIdVO;
 import com.aizuda.easy.retry.server.web.model.request.RetryTaskQueryVO;
 import com.aizuda.easy.retry.server.web.model.request.RetryTaskUpdateStatusRequestVO;
@@ -12,6 +13,7 @@ import com.aizuda.easy.retry.server.web.model.request.RetryTaskUpdateExecutorNam
 import com.aizuda.easy.retry.server.web.model.response.RetryTaskResponseVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -68,8 +70,14 @@ public class RetryTaskController {
     }
 
     @LoginRequired
-    @PutMapping("/executor-name/batch")
+    @PutMapping("/batch")
     public Integer updateRetryTaskExecutorName(@RequestBody @Validated RetryTaskUpdateExecutorNameRequestVO requestVO) {
         return retryTaskService.updateRetryTaskExecutorName(requestVO);
+    }
+
+    @LoginRequired
+    @DeleteMapping("/batch")
+    public Integer deleteRetryTask(@RequestBody @Validated BatchDeleteRetryTaskVO requestVO) {
+        return retryTaskService.deleteRetryTask(requestVO);
     }
 }

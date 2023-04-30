@@ -8,13 +8,13 @@ import org.hibernate.validator.constraints.NotEmpty;
 import java.util.List;
 
 /**
- * 更新执行器名称
+ * 批量删除重试数据
  *
- * @author www.byteblogs.com
- * @date 2022-09-29
+ * @author: shuguang.zhang
+ * @date : 2023-04-30 22:30
  */
 @Data
-public class RetryTaskUpdateExecutorNameRequestVO {
+public class BatchDeleteRetryTaskVO {
 
     /**
      * 组名称
@@ -23,19 +23,8 @@ public class RetryTaskUpdateExecutorNameRequestVO {
     private String groupName;
 
     /**
-     * 执行器名称
-     */
-    private String executorName;
-
-    /**
-     * 重试状态 {@link RetryStatusEnum}
-     */
-    private Integer retryStatus;
-
-    /**
      * 重试表id
      */
     @NotEmpty(message = "至少选择一项")
     private List<Long> ids;
-
 }

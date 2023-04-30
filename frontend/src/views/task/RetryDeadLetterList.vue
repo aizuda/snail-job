@@ -53,8 +53,8 @@
       :rowSelection="options.rowSelection"
       :scroll="{ x: 2000 }"
     >
-      <span slot="serial" slot-scope="text, record, index">
-        {{ index + 1 }}
+      <span slot="serial" slot-scope="text, record">
+        {{ record.id }}
       </span>
       <span slot="action" slot-scope="text, record">
         <template>

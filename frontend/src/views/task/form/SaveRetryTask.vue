@@ -14,7 +14,7 @@
         <a-form-item label="场景名称">
           <a-select
             placeholder="请选择场景名称"
-            v-decorator="['sceneName', { rules: [{ required: true, message: '请选择场景名称' }] }]"          >
+            v-decorator="['sceneName', { rules: [{ required: true, message: '请选择场景名称' }] }]" >
             <a-select-option v-for="item in sceneList" :value="item.sceneName" :key="item.sceneName">
               {{ item.sceneName }}</a-select-option
             >
@@ -56,7 +56,7 @@
             v-decorator="['retryStatus', { rules: [{ required: true, message: '请选择重试状态' }] }]"
           >
             <a-select-option v-for="(value, key) in retryStatus" :value="key" :key="key"> {{ value }}</a-select-option>
-        </a-select>
+          </a-select>
         </a-form-item>
         <a-form-item label="参数">
           <a-textarea
@@ -105,7 +105,7 @@ export default {
             this.form.resetFields()
             this.$message.success('新增任务成功')
             this.visible = false
-            this.$emit('refresh', 1)
+            this.$emit('refreshTable', 1)
           })
         }
       })

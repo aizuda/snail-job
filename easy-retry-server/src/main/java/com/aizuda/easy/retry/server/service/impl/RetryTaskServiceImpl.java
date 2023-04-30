@@ -15,6 +15,7 @@ import com.aizuda.easy.retry.server.service.convert.RetryTaskResponseVOConverter
 import com.aizuda.easy.retry.server.support.handler.ClientNodeAllocateHandler;
 import com.aizuda.easy.retry.server.support.strategy.WaitStrategies;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
+import com.aizuda.easy.retry.server.web.model.request.BatchDeleteRetryTaskVO;
 import com.aizuda.easy.retry.server.web.model.request.GenerateRetryBizIdVO;
 import com.aizuda.easy.retry.server.web.model.request.RetryTaskQueryVO;
 import com.aizuda.easy.retry.server.web.model.request.RetryTaskUpdateStatusRequestVO;
@@ -177,21 +178,18 @@ public class RetryTaskServiceImpl implements RetryTaskService {
 
         RetryTask retryTask = new RetryTask();
         retryTask.setExecutorName(requestVO.getExecutorName());
+        retryTask.setRetryStatus(requestVO.getRetryStatus());
         retryTask.setUpdateDt(LocalDateTime.now());
-        if (!CollectionUtils.isEmpty(requestVO.getIds())) {
 
-            // 根据重试数据id，更新执行器名称
-            RequestDataHelper.setPartition(requestVO.getGroupName());
-            return retryTaskMapper
-                .update(retryTask, new LambdaUpdateWrapper<RetryTask>().in(RetryTask::getId, requestVO.getIds()));
-        }
-
-        // 更新组下面的场景对应的执行器名称
+        // 根据重试数据id，更新执行器名称
         RequestDataHelper.setPartition(requestVO.getGroupName());
         return retryTaskMapper
-            .update(retryTask, new LambdaUpdateWrapper<RetryTask>()
-                .eq(RetryTask::getGroupName, requestVO.getGroupName())
-                .eq(RetryTask::getSceneName, requestVO.getSceneName())
-            );
+            .update(retryTask, new LambdaUpdateWrapper<RetryTask>().in(RetryTask::getId, requestVO.getIds()));
+    }
+
+    @Override
+    public Integer deleteRetryTask(final BatchDeleteRetryTaskVO requestVO) {
+        RequestDataHelper.setPartition(requestVO.getGroupName());
+        return retryTaskMapper.deleteBatchIds(requestVO.getIds());
     }
 }

@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.server.service;
 
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
+import com.aizuda.easy.retry.server.web.model.request.BatchDeleteRetryTaskVO;
 import com.aizuda.easy.retry.server.web.model.request.GenerateRetryBizIdVO;
 import com.aizuda.easy.retry.server.web.model.request.RetryTaskQueryVO;
 import com.aizuda.easy.retry.server.web.model.request.RetryTaskUpdateStatusRequestVO;
@@ -59,4 +60,13 @@ public interface RetryTaskService {
      * @return 更新条数
      */
     int updateRetryTaskExecutorName(RetryTaskUpdateExecutorNameRequestVO requestVO);
+
+    /**
+     * 批量删除重试数据
+     *
+     * @param requestVO 批量删除重试数据
+     * @return
+     */
+    Integer deleteRetryTask(BatchDeleteRetryTaskVO requestVO);
+
 }

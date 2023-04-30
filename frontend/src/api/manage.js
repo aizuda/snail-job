@@ -15,7 +15,8 @@ const api = {
   retryTaskById: '/retry-task/',
   saveRetryTask: '/retry-task',
   bizIdGenerate: '/retry-task/generate/biz-id',
-  updateRetryTaskExecutorName: '/retry-task/executor-name/batch',
+  batchUpdate: '/retry-task/batch',
+  deleteRetryTask: '/retry-task/batch',
   updateRetryTaskStatus: '/retry-task/status',
   retryTaskLogPage: '/retry-task-log/list',
   retryTaskLogById: '/retry-task-log/',
@@ -38,6 +39,22 @@ const api = {
 }
 
 export default api
+
+export function batchDelete (data) {
+  return request({
+    url: api.deleteRetryTask,
+    method: 'delete',
+    data
+  })
+}
+
+export function batchUpdate (data) {
+  return request({
+    url: api.batchUpdate,
+    method: 'put',
+    data
+  })
+}
 
 export function bizIdGenerate (data) {
   return request({
