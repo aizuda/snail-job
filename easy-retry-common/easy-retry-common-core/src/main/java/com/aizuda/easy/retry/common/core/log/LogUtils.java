@@ -68,7 +68,7 @@ public class LogUtils {
     private static Boolean getLogStatus() {
 
         try {
-            Environment environment = SpringContext.applicationContext.getBean(Environment.class);
+            Environment environment = SpringContext.CONTEXT.getBean(Environment.class);
             return environment.getProperty("x.retry.log.status", Boolean.class, Boolean.TRUE);
         } catch (Exception ignored) {
         }

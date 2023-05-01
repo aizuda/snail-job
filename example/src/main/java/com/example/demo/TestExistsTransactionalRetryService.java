@@ -56,7 +56,7 @@ public class TestExistsTransactionalRetryService {
         }
 
         TransactionalEvent<String> event = new TransactionalEvent<>("123");
-        SpringContext.applicationContext.publishEvent(event);
+        SpringContext.CONTEXT.publishEvent(event);
 
         return "testSimpleInsert"+school.getAddress();
     }

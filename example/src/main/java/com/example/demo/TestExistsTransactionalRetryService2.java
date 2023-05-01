@@ -8,7 +8,6 @@ import com.example.mapper.SchoolMapper;
 import com.example.mapper.StudentMapper;
 import com.example.model.TransactionalEvent;
 import com.example.po.School;
-import com.example.po.Student;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,7 +50,7 @@ public class TestExistsTransactionalRetryService2 {
         }
 
         TransactionalEvent<String> event = new TransactionalEvent<>("123");
-        SpringContext.applicationContext.publishEvent(event);
+        SpringContext.CONTEXT.publishEvent(event);
 
         return "testSimpleInsert"+school.getAddress();
     }

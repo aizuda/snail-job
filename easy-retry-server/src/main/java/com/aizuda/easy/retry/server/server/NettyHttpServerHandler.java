@@ -62,7 +62,7 @@ public class NettyHttpServerHandler extends SimpleChannelInboundHandler<FullHttp
         registerHandler.syncVersion(clientVersion, groupName, hostIp, hostPort, contextPath);
 
         UrlBuilder builder = UrlBuilder.ofHttp(uri);
-        Collection<HttpRequestHandler> httpRequestHandlers = SpringContext.applicationContext.getBeansOfType(HttpRequestHandler.class).values();
+        Collection<HttpRequestHandler> httpRequestHandlers = SpringContext.CONTEXT.getBeansOfType(HttpRequestHandler.class).values();
         for (HttpRequestHandler httpRequestHandler : httpRequestHandlers) {
             if (httpRequestHandler.supports(builder.getPathStr()) && method.name().equals(httpRequestHandler.method().name())) {
               return httpRequestHandler.doHandler(content, builder, headers);

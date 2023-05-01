@@ -160,7 +160,7 @@ public class WaitStrategies {
         public LocalDateTime computeRetryTime(RetryContext retryContext) {
             MaxAttemptsPersistenceRetryContext context = (MaxAttemptsPersistenceRetryContext) retryContext;
             RetryTask retryTask = context.getRetryTask();
-            ConfigAccess configAccess = SpringContext.applicationContext.getBean("configAccessProcessor", ConfigAccess.class);
+            ConfigAccess configAccess = SpringContext.CONTEXT.getBean("configAccessProcessor", ConfigAccess.class);
 
             SceneConfig sceneConfig =
                     configAccess.getSceneConfigByGroupNameAndSceneName(retryTask.getGroupName(), retryTask.getSceneName());
@@ -178,7 +178,7 @@ public class WaitStrategies {
             MaxAttemptsPersistenceRetryContext context = (MaxAttemptsPersistenceRetryContext) retryContext;
             RetryTask retryTask = context.getRetryTask();
 
-            ConfigAccess configAccess = SpringContext.applicationContext.getBean(ConfigAccess.class);
+            ConfigAccess configAccess = SpringContext.CONTEXT.getBean(ConfigAccess.class);
 
             SceneConfig sceneConfig =
                     configAccess.getSceneConfigByGroupNameAndSceneName(retryTask.getGroupName(), retryTask.getSceneName());
@@ -222,7 +222,7 @@ public class WaitStrategies {
             if (Objects.nonNull(retryContext)) {
                 RetryTask retryTask = retryContext.getRetryTask();
 
-                ConfigAccess configAccess = SpringContext.applicationContext.getBean(ConfigAccess.class);
+                ConfigAccess configAccess = SpringContext.CONTEXT.getBean(ConfigAccess.class);
                 SceneConfig sceneConfig =
                         configAccess.getSceneConfigByGroupNameAndSceneName(retryTask.getGroupName(), retryTask.getSceneName());
 

@@ -101,7 +101,7 @@ public class NettyHttpConnectClient implements Lifecycle, ApplicationContextAwar
         FullHttpRequest request = new DefaultFullHttpRequest(
                 HttpVersion.HTTP_1_0, method, url, Unpooled.wrappedBuffer(body.getBytes(StandardCharsets.UTF_8)));
 
-        ServerProperties serverProperties =  SpringContext.applicationContext.getBean(ServerProperties.class);
+        ServerProperties serverProperties =  SpringContext.CONTEXT.getBean(ServerProperties.class);
 
         request.headers()
                 .set(HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON)
