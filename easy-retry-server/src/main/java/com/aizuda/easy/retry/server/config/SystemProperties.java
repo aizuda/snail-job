@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.server.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
 /**
@@ -10,7 +11,7 @@ import org.springframework.stereotype.Component;
  * @author: www.byteblogs.com
  * @date : 2021-12-21 10:19
  */
-@Component
+@Configuration
 @ConfigurationProperties(value = "easy-retry")
 @Data
 public class SystemProperties {
