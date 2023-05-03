@@ -4,7 +4,7 @@ import com.aizuda.easy.retry.client.core.exception.EasyRetryClientException;
 import com.aizuda.easy.retry.client.core.intercepter.RetrySiteSnapshot;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
-import com.aizuda.easy.retry.common.core.model.XRetryHeaders;
+import com.aizuda.easy.retry.common.core.model.EasyRetryHeaders;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,7 +30,7 @@ public class RequestHeaderPlugins {
     public static Map<String, String> requestHeader() {
 
         Map<String, String> header = new HashMap<>();
-        XRetryHeaders retryHeader = RetrySiteSnapshot.getRetryHeader();
+        EasyRetryHeaders retryHeader = RetrySiteSnapshot.getRetryHeader();
 
         // 传递请求头
         if (Objects.nonNull(retryHeader)) {
@@ -44,7 +44,7 @@ public class RequestHeaderPlugins {
                 throw new EasyRetryClientException("调用链超时, 不在继续调用后面请求");
             }
 
-            header.put(SystemConstants.X_RETRY_HEAD_KEY, JsonUtil.toJsonString(retryHeader));
+            header.put(SystemConstants.EASY_RETRY_HEAD_KEY, JsonUtil.toJsonString(retryHeader));
         }
 
         return header;

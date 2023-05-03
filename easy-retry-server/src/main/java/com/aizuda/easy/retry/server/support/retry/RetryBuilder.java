@@ -17,7 +17,7 @@ import java.util.*;
  */
 public class RetryBuilder<V> {
 
-    private StopStrategy stopStrategy;
+    private List<StopStrategy> stopStrategies;
     private WaitStrategy waitStrategy;
     private List<FilterStrategy> filterStrategies;
     private RetryContext<V> retryContext;
@@ -41,7 +41,11 @@ public class RetryBuilder<V> {
     }
 
     public RetryBuilder<V> withStopStrategy(StopStrategy stopStrategy) {
-        this.stopStrategy = stopStrategy;
+        if (CollectionUtils.isEmpty(stopStrategies)) {
+            stopStrategies = new ArrayList<>();
+        }
+
+        stopStrategies.add(stopStrategy);
         return this;
     }
 
@@ -56,12 +60,14 @@ public class RetryBuilder<V> {
             throw new EasyRetryServerException("waitStrategy 不能为null");
         }
 
-        if (Objects.isNull(stopStrategy)) {
-            throw new EasyRetryServerException("stopStrategy 不能为null");
-        }
-
         if (Objects.isNull(retryContext)) {
             throw new EasyRetryServerException("retryContext 不能为null");
+        }
+
+        if (CollectionUtils.isEmpty(stopStrategies)) {
+            stopStrategies = Collections.EMPTY_LIST;
+        } else {
+            stopStrategies.sort(Comparator.comparingInt(StopStrategy::order));
         }
 
         if (CollectionUtils.isEmpty(filterStrategies)) {
@@ -72,7 +78,7 @@ public class RetryBuilder<V> {
 
         retryContext.setWaitStrategy(waitStrategy);
 
-        return new RetryExecutor<V>(stopStrategy, waitStrategy, filterStrategies, retryContext);
+        return new RetryExecutor<V>(stopStrategies, waitStrategy, filterStrategies, retryContext);
     }
 
 }

@@ -8,7 +8,7 @@ import com.aizuda.easy.retry.client.model.DispatchRetryResultDTO;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.model.Result;
-import com.aizuda.easy.retry.common.core.model.XRetryHeaders;
+import com.aizuda.easy.retry.common.core.model.EasyRetryHeaders;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskLogMapper;
@@ -72,7 +72,10 @@ public class ExecUnitActor extends AbstractActor  {
             try {
 
                 if (Objects.nonNull(serverNode)) {
-                    Object call = retryExecutor.call((Callable<Result<DispatchRetryResultDTO>>) () -> callClient(retryTask, retryTaskLog, serverNode));
+                    retryExecutor.call((Callable<Result<DispatchRetryResultDTO>>) () -> callClient(retryTask, retryTaskLog, serverNode));
+                    if (context.hasException()) {
+                        retryTaskLog.setErrorMessage(context.getException().getMessage());
+                    }
                 } else {
                     retryTaskLog.setErrorMessage("暂无可用的客户端POD");
                 }
@@ -113,10 +116,10 @@ public class ExecUnitActor extends AbstractActor  {
 
         // 设置header
         HttpHeaders requestHeaders = new HttpHeaders();
-        XRetryHeaders xRetryHeaders = new XRetryHeaders();
-        xRetryHeaders.setXRetry(Boolean.TRUE);
-        xRetryHeaders.setXRetryId(IdUtil.simpleUUID());
-        requestHeaders.add(SystemConstants.X_RETRY_HEAD_KEY, JsonUtil.toJsonString(xRetryHeaders));
+        EasyRetryHeaders easyRetryHeaders = new EasyRetryHeaders();
+        easyRetryHeaders.setEasyRetry(Boolean.TRUE);
+        easyRetryHeaders.setEasyRetryId(IdUtil.simpleUUID());
+        requestHeaders.add(SystemConstants.EASY_RETRY_HEAD_KEY, JsonUtil.toJsonString(easyRetryHeaders));
 
         HttpEntity<DispatchRetryDTO> requestEntity = new HttpEntity<>(dispatchRetryDTO, requestHeaders);
 

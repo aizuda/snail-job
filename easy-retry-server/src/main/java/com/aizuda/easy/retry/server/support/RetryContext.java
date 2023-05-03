@@ -23,6 +23,20 @@ public interface RetryContext<V> {
     void setCallResult(V v);
 
     /**
+     * 调用客户端发生异常信息
+     *
+     * @param e 异常
+     */
+    void setException(Exception e);
+
+    /**
+     * 是否发生异常
+     *
+     * @return
+     */
+    boolean hasException();
+
+    /**
      * 等待策略
      *
      * @param waitStrategy {@link WaitStrategy} 等待策略

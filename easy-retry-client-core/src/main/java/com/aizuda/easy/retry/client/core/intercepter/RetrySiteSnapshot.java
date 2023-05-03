@@ -1,7 +1,7 @@
 package com.aizuda.easy.retry.client.core.intercepter;
 
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
-import com.aizuda.easy.retry.common.core.model.XRetryHeaders;
+import com.aizuda.easy.retry.common.core.model.EasyRetryHeaders;
 import lombok.Getter;
 
 import java.util.Objects;
@@ -32,7 +32,7 @@ public class RetrySiteSnapshot {
     /**
      * 重试请求头
      */
-    private static final ThreadLocal<XRetryHeaders> RETRY_HEADER = new ThreadLocal<>();
+    private static final ThreadLocal<EasyRetryHeaders> RETRY_HEADER = new ThreadLocal<>();
 
     /**
      * 状态码
@@ -76,11 +76,11 @@ public class RetrySiteSnapshot {
         return EnumStatus.RUNNING.status == getStatus();
     }
 
-    public static XRetryHeaders getRetryHeader() {
+    public static EasyRetryHeaders getRetryHeader() {
         return RETRY_HEADER.get();
     }
 
-    public static void setRetryHeader(XRetryHeaders headers) {
+    public static void setRetryHeader(EasyRetryHeaders headers) {
         RETRY_HEADER.set(headers);
     }
 
@@ -88,9 +88,9 @@ public class RetrySiteSnapshot {
      * 是否是重试流量
      */
     public static boolean isRetryFlow() {
-        XRetryHeaders retryHeader = getRetryHeader();
+        EasyRetryHeaders retryHeader = getRetryHeader();
         if (Objects.nonNull(retryHeader)) {
-            return retryHeader.isXRetry();
+            return retryHeader.isEasyRetry();
         }
 
         return false;
@@ -105,7 +105,7 @@ public class RetrySiteSnapshot {
     }
 
     public static boolean isRetryForStatusCode() {
-        return Objects.nonNull(getRetryStatusCode()) && getRetryStatusCode().equals(SystemConstants.X_RETRY_STATUS_CODE);
+        return Objects.nonNull(getRetryStatusCode()) && getRetryStatusCode().equals(SystemConstants.EASY_RETRY_STATUS_CODE);
     }
 
     public static Long getEntryMethodTime() {

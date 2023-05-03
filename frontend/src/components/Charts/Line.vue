@@ -35,7 +35,6 @@ export default {
     },
     viewCharts (viewRecords, type = 'day') {
       var ds = new DataSet()
-      console.log(viewRecords)
       if (viewRecords === undefined || viewRecords === null) {
         return
       }

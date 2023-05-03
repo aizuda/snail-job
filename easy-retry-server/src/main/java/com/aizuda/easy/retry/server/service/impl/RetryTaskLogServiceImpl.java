@@ -26,6 +26,7 @@ public class RetryTaskLogServiceImpl implements RetryTaskLogService {
     private RetryTaskLogMapper retryTaskLogMapper;
 
     private RetryTaskLogResponseVOConverter retryTaskLogResponseVOConverter = new RetryTaskLogResponseVOConverter();
+    
     @Override
     public PageResult<List<RetryTaskLogResponseVO>> getRetryTaskLogPage(RetryTaskLogQueryVO queryVO) {
 
@@ -46,7 +47,7 @@ public class RetryTaskLogServiceImpl implements RetryTaskLogService {
         }
 
         retryTaskLogLambdaQueryWrapper.select(RetryTaskLog::getGroupName, RetryTaskLog::getId, RetryTaskLog::getSceneName,
-                RetryTaskLog::getBizId, RetryTaskLog::getBizNo, RetryTaskLog::getErrorMessage, RetryTaskLog::getRetryStatus);
+                RetryTaskLog::getBizId, RetryTaskLog::getBizNo, RetryTaskLog::getErrorMessage, RetryTaskLog::getRetryStatus, RetryTaskLog::getCreateDt);
         PageDTO<RetryTaskLog> retryTaskLogPageDTO = retryTaskLogMapper.selectPage(pageDTO, retryTaskLogLambdaQueryWrapper.orderByDesc(RetryTaskLog::getCreateDt));
 
         return new PageResult<>(

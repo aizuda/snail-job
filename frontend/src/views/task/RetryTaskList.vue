@@ -110,7 +110,6 @@ import AInput from 'ant-design-vue/es/input/Input'
 import Edit from '@/views/list/table/Edit'
 import { getAllGroupNameList, getRetryTaskPage, getSceneList, updateRetryTaskStatus, batchDelete } from '@/api/manage'
 import { STable } from '@/components'
-import moment from 'moment'
 import SaveRetryTask from './form/SaveRetryTask'
 import BatchUpdateRetryTaskInfo from './form/BatchUpdateRetryTaskInfo'
 
@@ -167,8 +166,7 @@ export default {
         {
           title: '下次触发时间',
           dataIndex: 'nextTriggerAt',
-          needTotal: false,
-          customRender: (text) => moment(text).format('YYYY-MM-DD HH:mm:ss')
+          needTotal: false
         },
         {
           title: '重试次数',
@@ -183,8 +181,7 @@ export default {
         {
           title: '更新时间',
           dataIndex: 'updateDt',
-          sorter: true,
-          customRender: (text) => moment(text).format('YYYY-MM-DD HH:mm:ss')
+          sorter: true
         },
         {
           title: '操作',

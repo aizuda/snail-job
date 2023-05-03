@@ -9,17 +9,17 @@ import lombok.Data;
  * @date : 2022-04-16 22:20
  */
 @Data
-public class XRetryHeaders {
+public class EasyRetryHeaders {
 
     /**
      * 是否是重试流量
      */
-    private boolean xRetry;
+    private boolean easyRetry;
 
     /**
      * 重试下发的ID
      */
-    private String xRetryId;
+    private String easyRetryId;
 
     /**
      * 调用链超时时间 单位毫秒(ms)
