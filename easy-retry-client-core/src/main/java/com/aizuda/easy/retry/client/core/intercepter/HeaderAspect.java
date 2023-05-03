@@ -2,7 +2,7 @@ package com.aizuda.easy.retry.client.core.intercepter;
 
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
-import com.aizuda.easy.retry.common.core.model.XRetryHeaders;
+import com.aizuda.easy.retry.common.core.model.EasyRetryHeaders;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -28,13 +28,13 @@ public class HeaderAspect {
 
     public void before(){
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        String xRetry = attributes.getRequest().getHeader(SystemConstants.X_RETRY_HEAD_KEY);
+        String xRetry = attributes.getRequest().getHeader(SystemConstants.EASY_RETRY_HEAD_KEY);
         if (Objects.nonNull(xRetry)) {
             // 标记进入方法的时间
             RetrySiteSnapshot.setEntryMethodTime(System.currentTimeMillis());
 
             LogUtils.info(log, "easy-retry 拦截器 xRetry:[{}]", xRetry);
-            RetrySiteSnapshot.setRetryHeader(JsonUtil.parseObject(xRetry, XRetryHeaders.class));
+            RetrySiteSnapshot.setRetryHeader(JsonUtil.parseObject(xRetry, EasyRetryHeaders.class));
         }
     }
 
@@ -64,7 +64,7 @@ public class HeaderAspect {
 
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         HttpServletResponse response = attributes.getResponse();
-        response.addHeader(SystemConstants.X_RETRY_STATUS_CODE_KEY, RetrySiteSnapshot.getRetryStatusCode());
+        response.addHeader(SystemConstants.EASY_RETRY_STATUS_CODE_KEY, RetrySiteSnapshot.getRetryStatusCode());
 
         // 服务端重试的在com.x.retry.client.core.client.RetryEndPoint 中进行清除threadLocal
         if (Objects.nonNull(RetrySiteSnapshot.getStage()) && RetrySiteSnapshot.EnumStage.REMOTE.getStage() == RetrySiteSnapshot.getStage()) {

@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.server.server;
 
-import com.aizuda.easy.retry.server.exception.XRetryServerException;
+import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.config.SystemProperties;
 import com.aizuda.easy.retry.server.support.Lifecycle;
 import io.netty.bootstrap.ServerBootstrap;
@@ -28,6 +28,8 @@ import java.util.concurrent.*;
 @Slf4j
 public class NettyHttpServer implements Runnable, Lifecycle {
 
+    public static final int CPU_NUM = Runtime.getRuntime().availableProcessors();
+
     @Autowired
     private SystemProperties systemProperties;
 
@@ -36,9 +38,9 @@ public class NettyHttpServer implements Runnable, Lifecycle {
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
 
-        ThreadPoolExecutor serverHandlerPool = new ThreadPoolExecutor(60, 300, 60L, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(2000), r -> new Thread(r, "easy-retry-serverHandlerPool-" + r.hashCode()), (r, executor) -> {
-            throw new XRetryServerException("easy-retry thread pool is EXHAUSTED!");
+        ThreadPoolExecutor serverHandlerPool = new ThreadPoolExecutor(CPU_NUM + 1, 2 * CPU_NUM, 60L, TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>(2000), r -> new Thread(r, "easy-retry-server-handler-pool-" + r.hashCode()), (r, executor) -> {
+            throw new EasyRetryServerException("easy-retry thread pool is EXHAUSTED!");
         });
 
         try {
@@ -66,11 +68,9 @@ public class NettyHttpServer implements Runnable, Lifecycle {
             future.channel().closeFuture().sync();
 
         } catch (InterruptedException e) {
-            if (e instanceof InterruptedException) {
-                log.info("--------> easy-retry remoting server stop.");
-            } else {
-                log.error("--------> easy-retry remoting server error.", e);
-            }
+            log.info("--------> easy-retry remoting server stop.");
+        } catch (Exception e) {
+            log.error("--------> easy-retry remoting server error.", e);
         } finally {
 
             // stop

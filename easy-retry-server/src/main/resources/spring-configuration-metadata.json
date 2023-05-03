@@ -1,0 +1,18 @@
+{
+  "groups": [
+    {
+      "name": "easy-retry",
+      "type": "com.aizuda.easy.retry.server.config.SystemProperties",
+      "sourceType": "com.aizuda.easy.retry.server.config.SystemProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "easy-retry.server.last-days",
+      "type": "java.lang.Integer",
+      "defaultValue": "30",
+      "description": "服务端的地址，若服务端集群部署则此处配置域名",
+      "sourceType": "com.aizuda.easy.retry.server.config.SystemProperties"
+    }
+  ]
+}

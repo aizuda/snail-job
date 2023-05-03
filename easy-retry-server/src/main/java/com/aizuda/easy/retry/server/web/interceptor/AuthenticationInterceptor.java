@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.server.web.interceptor;
 
-import com.aizuda.easy.retry.server.exception.XRetryServerException;
+import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.SystemUserMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.SystemUser;
 import com.auth0.jwt.JWT;
@@ -24,8 +24,10 @@ import java.lang.reflect.Method;
 import java.util.Objects;
 
 /**
- * @Author:byteblogs
- * @Date:2018/09/27 12:52
+ * 系统登陆认证
+ *
+ * @author: byteblogs
+ * @date:2023-04-26 12:52
  */
 @Configuration
 public class AuthenticationInterceptor implements HandlerInterceptor {
@@ -56,7 +58,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         if (loginRequired.required()) {
             // 执行认证
             if (token == null) {
-                throw new XRetryServerException("登陆过期，请重新登陆");
+                throw new EasyRetryServerException("登陆过期，请重新登陆");
             }
 
             // 获取 token 中的 user id
@@ -64,12 +66,12 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
             try {
                 systemUser = JsonUtil.parseObject(JWT.decode(token).getAudience().get(0), SystemUser.class);
             } catch (JWTDecodeException j) {
-                throw new XRetryServerException("登陆过期，请重新登陆");
+                throw new EasyRetryServerException("登陆过期，请重新登陆");
             }
 
             systemUser = systemUserMapper.selectOne(new LambdaQueryWrapper<SystemUser>().eq(SystemUser::getUsername, systemUser.getUsername()));
             if (Objects.isNull(systemUser)) {
-                throw new XRetryServerException("{} 用户不存在", systemUser.getUsername());
+                throw new EasyRetryServerException("{} 用户不存在", systemUser.getUsername());
             }
 
             httpServletRequest.setAttribute("currentUser", systemUser);
@@ -79,7 +81,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
             try {
                 jwtVerifier.verify(token);
             } catch (JWTVerificationException e) {
-                throw new XRetryServerException("登陆过期，请重新登陆");
+                throw new EasyRetryServerException("登陆过期，请重新登陆");
             }
 
             RoleEnum role = loginRequired.role();
@@ -89,7 +91,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
 
             if (role == RoleEnum.ADMIN) {
                 if (role != RoleEnum.getEnumTypeMap().get(systemUser.getRole())) {
-                    throw new XRetryServerException("不具备访问权限");
+                    throw new EasyRetryServerException("不具备访问权限");
                 }
             }
 

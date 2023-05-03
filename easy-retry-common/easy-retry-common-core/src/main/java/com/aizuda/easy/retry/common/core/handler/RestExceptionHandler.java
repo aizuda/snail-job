@@ -1,7 +1,7 @@
 package com.aizuda.easy.retry.common.core.handler;
 
 import com.aizuda.easy.retry.common.core.exception.AbstractError;
-import com.aizuda.easy.retry.common.core.exception.BaseXRetryException;
+import com.aizuda.easy.retry.common.core.exception.BaseEasyRetryException;
 import com.aizuda.easy.retry.common.core.model.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.TypeMismatchException;
@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
  * @author: byteblogs
  * @date: 2019/09/30 17:02
  */
-@ControllerAdvice(basePackages = {"com.x.retry.server", "com.x.retry.client.core"} )
+@ControllerAdvice(basePackages = {"com.aizuda.easy.retry.client.core", "com.aizuda.easy.retry.server"} )
 @Slf4j
 @ResponseBody
 public class RestExceptionHandler {
@@ -46,8 +46,8 @@ public class RestExceptionHandler {
      */
     @ExceptionHandler({Exception.class})
     public Result onException(Exception ex) {
-        log.error("异常类 businessException,", ex);
-        return new Result<String>(0, ex.getMessage());
+        log.error("异常类 onException,", ex);
+        return new Result<String>(0, "系统异常");
     }
 
     /**
@@ -56,8 +56,8 @@ public class RestExceptionHandler {
      * @param ex
      * @return
      */
-    @ExceptionHandler({BaseXRetryException.class})
-    public Result onBusinessException(BaseXRetryException ex) {
+    @ExceptionHandler({BaseEasyRetryException.class})
+    public Result onBusinessException(BaseEasyRetryException ex) {
         log.error("异常类 businessException", ex);
         return new Result<String>(0, ex.getMessage());
     }
@@ -90,7 +90,7 @@ public class RestExceptionHandler {
                     .stream()
                     .map(ConstraintViolation::getMessage)
                     .collect(Collectors.joining(";"));
-            return new Result(0, e.getMessage());
+            return new Result(0, errorMessage);
         }
 
         return new Result<String>(0, e.getMessage());

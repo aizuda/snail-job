@@ -5,7 +5,9 @@ import com.aizuda.easy.retry.server.persistence.mybatis.po.ServerNode;
 import com.aizuda.easy.retry.server.support.RetryContext;
 import com.aizuda.easy.retry.server.support.WaitStrategy;
 import lombok.Data;
+import lombok.Getter;
 
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -15,12 +17,18 @@ import java.util.Set;
  * @date : 2021-11-29 18:32
  */
 @Data
+@Getter
 public class MaxAttemptsPersistenceRetryContext<V> implements RetryContext<V> {
 
     /**
      * 通知客户端回调结果
      */
     private V callResult;
+
+    /**
+     * 异常信息
+     */
+    private Exception exception;
 
     /**
      * 等待策略
@@ -45,5 +53,15 @@ public class MaxAttemptsPersistenceRetryContext<V> implements RetryContext<V> {
     @Override
     public void setCallResult(V v) {
         this.callResult = v;
+    }
+
+    @Override
+    public void setException(Exception e) {
+        this.exception = e;
+    }
+
+    @Override
+    public boolean hasException() {
+        return Objects.nonNull(exception);
     }
 }

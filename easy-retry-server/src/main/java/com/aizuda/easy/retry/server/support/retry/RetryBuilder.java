@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.server.support.retry;
 
-import com.aizuda.easy.retry.server.exception.XRetryServerException;
+import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.support.FilterStrategy;
 import com.aizuda.easy.retry.server.support.RetryContext;
 import com.aizuda.easy.retry.server.support.StopStrategy;
@@ -17,7 +17,7 @@ import java.util.*;
  */
 public class RetryBuilder<V> {
 
-    private StopStrategy stopStrategy;
+    private List<StopStrategy> stopStrategies;
     private WaitStrategy waitStrategy;
     private List<FilterStrategy> filterStrategies;
     private RetryContext<V> retryContext;
@@ -41,7 +41,11 @@ public class RetryBuilder<V> {
     }
 
     public RetryBuilder<V> withStopStrategy(StopStrategy stopStrategy) {
-        this.stopStrategy = stopStrategy;
+        if (CollectionUtils.isEmpty(stopStrategies)) {
+            stopStrategies = new ArrayList<>();
+        }
+
+        stopStrategies.add(stopStrategy);
         return this;
     }
 
@@ -53,15 +57,17 @@ public class RetryBuilder<V> {
     public RetryExecutor<V> build() {
 
         if (Objects.isNull(waitStrategy)) {
-            throw new XRetryServerException("waitStrategy 不能为null");
-        }
-
-        if (Objects.isNull(stopStrategy)) {
-            throw new XRetryServerException("stopStrategy 不能为null");
+            throw new EasyRetryServerException("waitStrategy 不能为null");
         }
 
         if (Objects.isNull(retryContext)) {
-            throw new XRetryServerException("retryContext 不能为null");
+            throw new EasyRetryServerException("retryContext 不能为null");
+        }
+
+        if (CollectionUtils.isEmpty(stopStrategies)) {
+            stopStrategies = Collections.EMPTY_LIST;
+        } else {
+            stopStrategies.sort(Comparator.comparingInt(StopStrategy::order));
         }
 
         if (CollectionUtils.isEmpty(filterStrategies)) {
@@ -72,7 +78,7 @@ public class RetryBuilder<V> {
 
         retryContext.setWaitStrategy(waitStrategy);
 
-        return new RetryExecutor<V>(stopStrategy, waitStrategy, filterStrategies, retryContext);
+        return new RetryExecutor<V>(stopStrategies, waitStrategy, filterStrategies, retryContext);
     }
 
 }

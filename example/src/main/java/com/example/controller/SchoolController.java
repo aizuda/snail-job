@@ -25,11 +25,11 @@ public class SchoolController {
     @GetMapping("/id")
     public Result getSchool(HttpServletRequest request, HttpServletResponse response) {
 
-        String header = request.getHeader(SystemConstants.X_RETRY_HEAD_KEY);
+        String header = request.getHeader(SystemConstants.EASY_RETRY_HEAD_KEY);
         System.out.println(header);
 
         if (RetrySiteSnapshot.isRetryFlow()) {
-            response.addHeader(SystemConstants.X_RETRY_STATUS_CODE_KEY, SystemConstants.X_RETRY_STATUS_CODE);
+            response.addHeader(SystemConstants.EASY_RETRY_STATUS_CODE_KEY, SystemConstants.EASY_RETRY_STATUS_CODE);
         }
 
         if (true) {

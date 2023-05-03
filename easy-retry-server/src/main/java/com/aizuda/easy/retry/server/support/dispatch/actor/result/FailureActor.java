@@ -2,13 +2,13 @@ package com.aizuda.easy.retry.server.support.dispatch.actor.result;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
+import cn.hutool.core.lang.Assert;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
-import com.aizuda.easy.retry.common.core.util.Assert;
 import com.aizuda.easy.retry.server.akka.ActorGenerator;
-import com.aizuda.easy.retry.server.exception.XRetryServerException;
+import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskLogMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTaskLog;
@@ -91,7 +91,7 @@ public class FailureActor extends AbstractActor {
                     RetryTaskLog retryTaskLog = records.get(0);
                     retryTaskLog.setRetryStatus(retryTask.getRetryStatus());
                     Assert.isTrue(1 ==  retryTaskLogMapper.updateById(retryTaskLog),
-                            new XRetryServerException("更新重试日志失败"));
+                        () -> new EasyRetryServerException("更新重试日志失败"));
                 }
 
             }

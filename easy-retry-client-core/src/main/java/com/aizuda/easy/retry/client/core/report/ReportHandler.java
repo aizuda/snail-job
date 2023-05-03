@@ -2,10 +2,10 @@ package com.aizuda.easy.retry.client.core.report;
 
 import com.aizuda.easy.retry.client.core.BizIdGenerate;
 import com.aizuda.easy.retry.client.core.RetryArgSerializer;
-import com.aizuda.easy.retry.client.core.config.XRetryProperties;
+import com.aizuda.easy.retry.client.core.config.EasyRetryProperties;
 import com.aizuda.easy.retry.client.core.Lifecycle;
 import com.aizuda.easy.retry.client.core.cache.RetryerInfoCache;
-import com.aizuda.easy.retry.client.core.exception.XRetryClientException;
+import com.aizuda.easy.retry.client.core.exception.EasyRetryClientException;
 import com.aizuda.easy.retry.client.core.intercepter.RetrySiteSnapshot;
 import com.aizuda.easy.retry.client.core.retryer.RetryerInfo;
 import com.aizuda.easy.retry.client.core.spel.SPELParamFunction;
@@ -25,6 +25,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 /**
+ * 上报服务端
+ *
  * @author: www.byteblogs.com
  * @date : 2022-03-08 09:24
  */
@@ -67,14 +69,14 @@ public class ReportHandler implements Lifecycle {
             bizId = (String) ReflectionUtils.invokeMethod(method, generate, p);
         } catch (Exception exception) {
             LogUtils.error(log, "自定义id生成异常：{},{}", scene, args, exception);
-            throw new XRetryClientException("bizId生成异常：{},{}", scene, args);
+            throw new EasyRetryClientException("bizId生成异常：{},{}", scene, args);
         }
 
         String serialize = retryArgSerializer.serialize(args);
         retryTaskDTO.setBizId(bizId);
         retryTaskDTO.setExecutorName(targetClassName);
         retryTaskDTO.setArgsStr(serialize);
-        retryTaskDTO.setGroupName(XRetryProperties.getGroup());
+        retryTaskDTO.setGroupName(EasyRetryProperties.getGroup());
         retryTaskDTO.setSceneName(scene);
 
         String bizNoSpel = retryerInfo.getBizNo();

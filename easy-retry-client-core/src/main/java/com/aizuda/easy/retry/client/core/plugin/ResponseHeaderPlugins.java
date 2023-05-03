@@ -23,8 +23,8 @@ public class ResponseHeaderPlugins {
     public static void responseHeader(Map<String, List<String>> header) {
 
         // 获取不重试标志
-        if (header.containsKey(SystemConstants.X_RETRY_STATUS_CODE_KEY)) {
-            List<String> statusCode = header.get(SystemConstants.X_RETRY_STATUS_CODE_KEY);
+        if (header.containsKey(SystemConstants.EASY_RETRY_STATUS_CODE_KEY)) {
+            List<String> statusCode = header.get(SystemConstants.EASY_RETRY_STATUS_CODE_KEY);
             RetrySiteSnapshot.setRetryStatusCode(statusCode.get(0));
         }
     }

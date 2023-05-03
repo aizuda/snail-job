@@ -6,9 +6,8 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "test:unit": "vue-cli-service test:unit",
-    "lint": "vue-cli-service lint",
-    "build:preview": "vue-cli-service build --mode preview",
-    "lint:nofix": "vue-cli-service lint --no-fix"
+    "lint": "eslint --fix --ext .js,.vue src",
+    "build:preview": "vue-cli-service build --mode preview"
   },
   "dependencies": {
     "@ant-design-vue/pro-layout": "^1.0.11",

@@ -2,7 +2,7 @@ package com.aizuda.easy.retry.client.core.cache;
 
 import com.aizuda.easy.retry.client.core.client.request.ConfigHttpRequestHandler;
 import com.aizuda.easy.retry.client.core.client.request.RequestParam;
-import com.aizuda.easy.retry.client.core.client.response.XRetryResponse;
+import com.aizuda.easy.retry.client.core.client.response.EasyRetryResponse;
 import com.aizuda.easy.retry.client.core.Lifecycle;
 import com.aizuda.easy.retry.client.core.client.NettyHttpConnectClient;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
@@ -63,7 +63,7 @@ public class GroupVersionCache implements Lifecycle {
             XRetryRequest xRetryRequest = new XRetryRequest(getVersion());
 
             ConfigHttpRequestHandler configHttpRequestHandler = SpringContext.getBeanByType(ConfigHttpRequestHandler.class);
-            XRetryResponse.cache(xRetryRequest, configHttpRequestHandler.callable());
+            EasyRetryResponse.cache(xRetryRequest, configHttpRequestHandler.callable());
             NettyHttpConnectClient.send(configHttpRequestHandler.method(), configHttpRequestHandler.getHttpUrl(
                     new RequestParam()), configHttpRequestHandler.body(xRetryRequest));
 

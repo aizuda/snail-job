@@ -5,7 +5,7 @@ spring:
     active: dev
   datasource:
     name: easy_retry
-    url:  jdbc:mysql://localhost:3306/x_retry?useSSL=false&characterEncoding=utf8&useUnicode=true
+    url:  jdbc:mysql://localhost:3306/easy_retry?useSSL=false&characterEncoding=utf8&useUnicode=true
     username: root
     password: root
     type: com.zaxxer.hikari.HikariDataSource
@@ -37,10 +37,10 @@ mybatis-plus:
 logging:
   config: classpath:logback-boot.xml
 easy-retry:
-  lastDays: 30 # 拉取重试数据的天数
-  retryPullPageSize: 100 # 拉取重试数据的每批次的大小
-  nettyPort: 1788  # 服务端netty端口
-  totalPartition: 32  # 重试和死信表的分区总数
-  limiter: 10
+  last-days: 30 # 拉取重试数据的天数
+  retry-pull-page-size: 100 # 拉取重试数据的每批次的大小
+  netty-port: 1788  # 服务端netty端口
+  total-partition: 2  # 重试和死信表的分区总数
+  limiter: 10 # 一个客户端每秒最多接收的重试数量指令
 
 

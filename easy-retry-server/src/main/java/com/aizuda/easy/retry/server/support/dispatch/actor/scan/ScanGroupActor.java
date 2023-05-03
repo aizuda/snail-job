@@ -104,9 +104,10 @@ public class ScanGroupActor extends AbstractActor {
                 MaxAttemptsPersistenceRetryContext<Result<DispatchRetryResultDTO>> retryContext = new MaxAttemptsPersistenceRetryContext<>();
                 retryContext.setRetryTask(retryTask);
                 retryContext.setSceneBlacklist(configAccess.getBlacklist(groupName));
-                retryContext.setServerNode(clientNodeAllocateHandler.getServerNode(retryTask));
+                retryContext.setServerNode(clientNodeAllocateHandler.getServerNode(retryTask.getGroupName()));
 
                 RetryExecutor<Result<DispatchRetryResultDTO>> executor = RetryBuilder.<Result<DispatchRetryResultDTO>>newBuilder()
+                        .withStopStrategy(StopStrategies.stopException())
                         .withStopStrategy(StopStrategies.stopResultStatus())
                         .withWaitStrategy(getWaitWaitStrategy(groupName, retryTask.getSceneName()))
                         .withFilterStrategy(FilterStrategies.delayLevelFilter())

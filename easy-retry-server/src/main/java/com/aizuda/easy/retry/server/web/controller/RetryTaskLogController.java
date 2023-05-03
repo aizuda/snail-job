@@ -14,9 +14,10 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
+ * 重试日志接口
+ *
  * @author www.byteblogs.com
  * @date 2022-02-27
- * @since 2.0
  */
 @RestController
 @RequestMapping("/retry-task-log")

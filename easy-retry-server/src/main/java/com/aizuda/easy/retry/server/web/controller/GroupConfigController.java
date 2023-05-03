@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
+ * 重试组接口
+ *
  * @author: www.byteblogs.com
  * @date : 2021-11-22 14:38
  */

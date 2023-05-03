@@ -1,7 +1,7 @@
 package com.aizuda.easy.retry.server.server;
 
 import cn.hutool.core.net.url.UrlBuilder;
-import com.aizuda.easy.retry.server.exception.XRetryServerException;
+import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.support.handler.ClientRegisterHandler;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.enums.HeadersEnum;
@@ -47,7 +47,7 @@ public class NettyHttpServerHandler extends SimpleChannelInboundHandler<FullHttp
     private String doProcess(ChannelHandlerContext channelHandlerContext, String uri, String content, HttpMethod method, HttpHeaders headers) {
 
         if (StringUtils.isBlank(uri)) {
-            throw new XRetryServerException("uri 不能为空");
+            throw new EasyRetryServerException("uri 不能为空");
         }
 
         ClientRegisterHandler registerHandler = SpringContext.getBeanByType(ClientRegisterHandler.class);
@@ -62,7 +62,7 @@ public class NettyHttpServerHandler extends SimpleChannelInboundHandler<FullHttp
         registerHandler.syncVersion(clientVersion, groupName, hostIp, hostPort, contextPath);
 
         UrlBuilder builder = UrlBuilder.ofHttp(uri);
-        Collection<HttpRequestHandler> httpRequestHandlers = SpringContext.applicationContext.getBeansOfType(HttpRequestHandler.class).values();
+        Collection<HttpRequestHandler> httpRequestHandlers = SpringContext.CONTEXT.getBeansOfType(HttpRequestHandler.class).values();
         for (HttpRequestHandler httpRequestHandler : httpRequestHandlers) {
             if (httpRequestHandler.supports(builder.getPathStr()) && method.name().equals(httpRequestHandler.method().name())) {
               return httpRequestHandler.doHandler(content, builder, headers);

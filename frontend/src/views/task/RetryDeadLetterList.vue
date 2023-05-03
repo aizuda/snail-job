@@ -51,9 +51,10 @@
       :data="loadData"
       :alert="options.alert"
       :rowSelection="options.rowSelection"
+      :scroll="{ x: 2000 }"
     >
-      <span slot="serial" slot-scope="text, record, index">
-        {{ index + 1 }}
+      <span slot="serial" slot-scope="text, record">
+        {{ record.id }}
       </span>
       <span slot="action" slot-scope="text, record">
         <template>
@@ -158,6 +159,7 @@ export default {
           title: '操作',
           dataIndex: 'action',
           width: '150px',
+          fixed: 'right',
           scopedSlots: { customRender: 'action' }
         }
       ],
@@ -188,6 +190,10 @@ export default {
   created () {
     getAllGroupNameList().then(res => {
       this.groupNameList = res.data
+      if (this.groupNameList !== null && this.groupNameList.length > 0) {
+        this.queryParam['groupName'] = this.groupNameList[0]
+        this.$refs.table.refresh(true)
+      }
     })
   },
   methods: {

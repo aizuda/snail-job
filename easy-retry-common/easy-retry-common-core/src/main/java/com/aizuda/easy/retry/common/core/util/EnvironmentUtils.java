@@ -11,7 +11,7 @@ import org.springframework.core.env.Environment;
  */
 public class EnvironmentUtils {
 
-    private static final Environment environment = SpringContext.applicationContext.getBean(Environment.class);
+    private static final Environment environment = SpringContext.CONTEXT.getBean(Environment.class);
     public static final String DEFAULT_ENV = "default ";
 
     /**
@@ -21,7 +21,7 @@ public class EnvironmentUtils {
      */
     private static Boolean getLogStatus() {
 
-        Environment environment = SpringContext.applicationContext.getBean(Environment.class);
+        Environment environment = SpringContext.CONTEXT.getBean(Environment.class);
         return environment.getProperty("flaky.retry.log.status", Boolean.class, Boolean.TRUE);
     }
 

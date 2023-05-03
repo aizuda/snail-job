@@ -1,8 +1,9 @@
 package com.aizuda.easy.retry.server.service.impl;
 
+import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
-import com.aizuda.easy.retry.server.exception.XRetryServerException;
+import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.SystemUserMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.SystemUserPermissionMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.SystemUser;
@@ -12,7 +13,6 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
-import com.aizuda.easy.retry.common.core.util.Assert;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.service.convert.SystemUserResponseVOConverter;
 import com.aizuda.easy.retry.server.web.annotation.RoleEnum;
@@ -56,11 +56,11 @@ public class SystemUserServiceImpl implements SystemUserService {
 
         SystemUser systemUser = systemUserMapper.selectOne(new LambdaQueryWrapper<SystemUser>().eq(SystemUser::getUsername, requestVO.getUsername()));
         if (Objects.isNull(systemUser)) {
-            throw new XRetryServerException("用户名或密码错误");
+            throw new EasyRetryServerException("用户名或密码错误");
         }
 
         if (SecureUtil.sha256(systemUser.getPassword()).equals(systemUser.getPassword())) {
-            throw new XRetryServerException("用户名或密码错误");
+            throw new EasyRetryServerException("用户名或密码错误");
         }
 
         String token = getToken(systemUser);
@@ -101,7 +101,7 @@ public class SystemUserServiceImpl implements SystemUserService {
     public void addUser(SystemUserRequestVO requestVO) {
         long count = systemUserMapper.selectCount(new LambdaQueryWrapper<SystemUser>().eq(SystemUser::getUsername, requestVO.getUsername()));
         if (count > 0) {
-            throw new XRetryServerException("该用户已存在");
+            throw new EasyRetryServerException("该用户已存在");
         }
 
         SystemUser systemUser = new SystemUser();
@@ -109,7 +109,7 @@ public class SystemUserServiceImpl implements SystemUserService {
         systemUser.setPassword(SecureUtil.sha256(requestVO.getPassword()));
         systemUser.setRole(requestVO.getRole());
 
-        Assert.isTrue(1 == systemUserMapper.insert(systemUser), new XRetryServerException("新增用户失败"));
+        Assert.isTrue(1 == systemUserMapper.insert(systemUser), () ->  new EasyRetryServerException("新增用户失败"));
 
         // 只添加为普通用户添加权限
         List<String> groupNameList = requestVO.getGroupNameList();
@@ -121,7 +121,7 @@ public class SystemUserServiceImpl implements SystemUserService {
             SystemUserPermission systemUserPermission = new SystemUserPermission();
             systemUserPermission.setSystemUserId(systemUser.getId());
             systemUserPermission.setGroupName(groupName);
-            Assert.isTrue(1 == systemUserPermissionMapper.insert(systemUserPermission), new XRetryServerException("新增用户权限失败"));
+            Assert.isTrue(1 == systemUserPermissionMapper.insert(systemUserPermission), () ->  new EasyRetryServerException("新增用户权限失败"));
         }
 
     }
@@ -131,13 +131,13 @@ public class SystemUserServiceImpl implements SystemUserService {
     public void update(SystemUserRequestVO requestVO) {
         SystemUser systemUser = systemUserMapper.selectOne(new LambdaQueryWrapper<SystemUser>().eq(SystemUser::getId, requestVO.getId()));
         if (Objects.isNull(systemUser)) {
-            throw new XRetryServerException("该用户不存在");
+            throw new EasyRetryServerException("该用户不存在");
         }
 
         if (!systemUser.getUsername().equals(requestVO.getUsername())) {
             long count = systemUserMapper.selectCount(new LambdaQueryWrapper<SystemUser>().eq(SystemUser::getUsername, requestVO.getUsername()));
             if (count > 0) {
-                throw new XRetryServerException("该用户已存在");
+                throw new EasyRetryServerException("该用户已存在");
             }
         }
 
@@ -148,7 +148,7 @@ public class SystemUserServiceImpl implements SystemUserService {
 
         systemUser.setRole(requestVO.getRole());
 
-        Assert.isTrue(1 == systemUserMapper.updateById(systemUser), new XRetryServerException("更新用户失败"));
+        Assert.isTrue(1 == systemUserMapper.updateById(systemUser), () ->  new EasyRetryServerException("更新用户失败"));
 
         // 只添加为普通用户添加权限
         List<String> groupNameList = requestVO.getGroupNameList();
@@ -163,7 +163,7 @@ public class SystemUserServiceImpl implements SystemUserService {
             SystemUserPermission systemUserPermission = new SystemUserPermission();
             systemUserPermission.setSystemUserId(systemUser.getId());
             systemUserPermission.setGroupName(groupName);
-            Assert.isTrue(1 == systemUserPermissionMapper.insert(systemUserPermission), new XRetryServerException("更新用户权限失败"));
+            Assert.isTrue(1 == systemUserPermissionMapper.insert(systemUserPermission), () ->  new EasyRetryServerException("更新用户权限失败"));
         }
     }
 
@@ -200,7 +200,7 @@ public class SystemUserServiceImpl implements SystemUserService {
     public SystemUserResponseVO getSystemUserByUserName(String username) {
         SystemUser systemUser = systemUserMapper.selectOne(new LambdaQueryWrapper<SystemUser>().eq(SystemUser::getUsername, username));
         if (Objects.isNull(systemUser)) {
-            throw new XRetryServerException("用户不存在");
+            throw new EasyRetryServerException("用户不存在");
         }
 
         return getUserInfo(systemUser);

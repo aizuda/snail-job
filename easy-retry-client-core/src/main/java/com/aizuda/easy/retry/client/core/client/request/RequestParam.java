@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.client.core.client.request;
 
-import com.aizuda.easy.retry.client.core.config.XRetryProperties;
+import com.aizuda.easy.retry.client.core.config.EasyRetryProperties;
 import lombok.Data;
 
 /**
@@ -14,6 +14,6 @@ public class RequestParam {
     private String groupName;
 
     public String getGroupName() {
-        return XRetryProperties.getGroup();
+        return EasyRetryProperties.getGroup();
     }
 }

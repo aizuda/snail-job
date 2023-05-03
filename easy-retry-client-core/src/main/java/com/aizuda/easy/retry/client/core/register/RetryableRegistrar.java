@@ -3,7 +3,7 @@ package com.aizuda.easy.retry.client.core.register;
 import com.aizuda.easy.retry.client.core.Lifecycle;
 import com.aizuda.easy.retry.client.core.Scanner;
 import com.aizuda.easy.retry.client.core.cache.RetryerInfoCache;
-import com.aizuda.easy.retry.client.core.exception.XRetryClientException;
+import com.aizuda.easy.retry.client.core.exception.EasyRetryClientException;
 import com.aizuda.easy.retry.client.core.retryer.RetryerInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -24,7 +24,7 @@ public class RetryableRegistrar implements Lifecycle {
     public void registerRetryHandler(RetryerInfo retryerInfo) {
 
         if (Objects.nonNull(RetryerInfoCache.get(retryerInfo.getScene(), retryerInfo.getExecutorClassName()))) {
-            throw new XRetryClientException("类:[{}]中已经存在场景:[{}]",  retryerInfo.getExecutorClassName(), retryerInfo.getScene());
+            throw new EasyRetryClientException("类:[{}]中已经存在场景:[{}]",  retryerInfo.getExecutorClassName(), retryerInfo.getScene());
         }
 
         RetryerInfoCache.put(retryerInfo);

@@ -49,9 +49,20 @@ public @interface Retryable {
     Class<? extends RetryMethod> retryMethod() default RetryAnnotationMethod.class;
 
     /**
-     * 自定义业务id，默认为hash(param),传入成员列表，全部拼接取hash
+     * 业务id生成器
+     * 同一个组的同一个场景下只会存在一个相同的bizId并且状态为'重试中'的任务, 若存在相同的则上报服务后会被幂等处理
+     * 比如:
+     * 组: AGroup
+     * 场景: BScene
+     * 时刻1: 上报一个异常 bizId: A1 状态为重试中
+     * 时刻2: 上报一个异常 bizId: A2 状态为重试中，可以上报成功，此时存在两个重试任务
+     * 时刻3: 上报一个异常 bizId: A1 不会新增一个重试任务，会被幂等处理
+     * 时刻4:  bizId: A1 重试完成, 状态为已完成
+     * 时刻5: 上报一个异常 bizId: A1 状态为重试中, 新增一条重试任务
+     **
+     * 默认的bizId生成器{@link SimpleBizIdGenerate} 对所有参数进行MD5
      *
-     * @return
+     * @return bizId
      */
     Class<? extends BizIdGenerate> bizId() default SimpleBizIdGenerate.class;
 
@@ -63,7 +74,9 @@ public @interface Retryable {
     Class<? extends RetryCompleteCallback> retryCompleteCallback() default SimpleRetryCompleteCallback.class;
 
     /**
-     * bizNo spel表达式
+     * 用于标识具有业务特点的值, 比如订单号、物流编号等，可以根据具体的业务场景生成，生成规则采用通用成熟的Spel表达式进行解析
+     *
+     * see: https://docs.spring.io/spring-framework/docs/5.0.0.M5/spring-framework-reference/html/expressions.html
      */
     String bizNo() default "";
 

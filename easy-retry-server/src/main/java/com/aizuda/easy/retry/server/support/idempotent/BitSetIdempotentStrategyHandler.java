@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.server.support.idempotent;
 
-import com.aizuda.easy.retry.server.exception.XRetryServerException;
+import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.support.IdempotentStrategy;
 import org.springframework.stereotype.Component;
 
@@ -39,7 +39,7 @@ public class BitSetIdempotentStrategyHandler implements IdempotentStrategy<Strin
 
     @Override
     public Integer get(String s) {
-        throw new XRetryServerException("不支持的操作");
+        throw new EasyRetryServerException("不支持的操作");
     }
 
     @Override

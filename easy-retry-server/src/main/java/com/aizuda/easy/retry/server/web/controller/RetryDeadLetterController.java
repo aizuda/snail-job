@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
+ * 死信队列接口
+ *
  * @author: www.byteblogs.com
  * @date : 2022-02-28 15:38
  */

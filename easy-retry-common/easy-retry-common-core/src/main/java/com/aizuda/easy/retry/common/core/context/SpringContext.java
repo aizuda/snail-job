@@ -17,21 +17,21 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class SpringContext implements ApplicationContextAware {
 
-    public static ApplicationContext applicationContext;
+    public static ApplicationContext CONTEXT;
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        SpringContext.applicationContext = applicationContext;
+        SpringContext.CONTEXT = applicationContext;
     }
 
     public static <T> T getBeanByType(Class<T> clazz) {
-        return applicationContext.getBean(clazz);
+        return CONTEXT.getBean(clazz);
     }
 
 
     public static synchronized <T> T getBean(String name) {
         try {
-            return (T) applicationContext.getBean(name);
+            return (T) CONTEXT.getBean(name);
         } catch (BeansException var2) {
             log.error(" BeanName:{} not exist，Exception => {}", name, var2.getMessage());
             return null;
@@ -40,7 +40,7 @@ public class SpringContext implements ApplicationContextAware {
 
     public static synchronized <T> T getBean(String name, Class<T> requiredType) {
         try {
-            return applicationContext.getBean(name, requiredType);
+            return CONTEXT.getBean(name, requiredType);
         } catch (BeansException | NullPointerException var3) {
             log.error(" BeanName:{} not exist，Exception => {}", name, var3.getMessage());
             return null;

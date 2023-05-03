@@ -9,7 +9,7 @@
         <div class="top">
           <div class="header">
             <a href="/">
-              <span class="title">easy-retry</span>
+              <span class="title">Easy-Retry</span>
             </a>
           </div>
           <div class="desc">

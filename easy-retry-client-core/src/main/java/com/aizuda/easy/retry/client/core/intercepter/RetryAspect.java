@@ -2,8 +2,8 @@ package com.aizuda.easy.retry.client.core.intercepter;
 
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.client.core.cache.GroupVersionCache;
-import com.aizuda.easy.retry.client.core.config.XRetryProperties;
-import com.aizuda.easy.retry.client.core.exception.XRetryClientException;
+import com.aizuda.easy.retry.client.core.config.EasyRetryProperties;
+import com.aizuda.easy.retry.client.core.exception.EasyRetryClientException;
 import com.aizuda.easy.retry.client.core.strategy.RetryStrategy;
 import com.aizuda.easy.retry.client.core.annotation.Retryable;
 import com.aizuda.easy.retry.client.core.retryer.RetryerResultContext;
@@ -22,8 +22,8 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.PriorityOrdered;
-import org.springframework.core.annotation.Order;
+import org.springframework.core.Ordered;
+import org.springframework.core.env.StandardEnvironment;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
@@ -39,8 +39,7 @@ import java.util.UUID;
 @Aspect
 @Component
 @Slf4j
-@Order(PriorityOrdered.HIGHEST_PRECEDENCE + 2)
-public class RetryAspect {
+public class RetryAspect implements Ordered {
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private static String retryErrorMoreThresholdTextMessageFormatter =
@@ -55,6 +54,8 @@ public class RetryAspect {
     private RetryStrategy retryStrategy;
     @Autowired
     private AltinAlarmFactory altinAlarmFactory;
+    @Autowired
+    private StandardEnvironment standardEnvironment;
 
     @Around("@annotation(com.aizuda.easy.retry.client.core.annotation.Retryable)")
     public Object around(ProceedingJoinPoint point) throws Throwable {
@@ -156,10 +157,10 @@ public class RetryAspect {
                 AlarmContext context = AlarmContext.build()
                         .text(retryErrorMoreThresholdTextMessageFormatter,
                                 EnvironmentUtils.getActiveProfile(),
-                                XRetryProperties.getGroup(),
+                                EasyRetryProperties.getGroup(),
                                 LocalDateTime.now().format(formatter),
                                 e.getMessage())
-                        .title("重试组件异常:[{}]", XRetryProperties.getGroup())
+                        .title("重试组件异常:[{}]", EasyRetryProperties.getGroup())
                         .notifyAttribute(notifyAttribute.getNotifyAttribute());
 
                 Alarm<AlarmContext> alarmType = altinAlarmFactory.getAlarmType(notifyAttribute.getNotifyType());
@@ -188,8 +189,15 @@ public class RetryAspect {
         try {
             objMethod = classTarget.getMethod(methodName, par);
         } catch (NoSuchMethodException e) {
-            throw new XRetryClientException("注解配置异常：[{}}", methodName);
+            throw new EasyRetryClientException("注解配置异常：[{}}", methodName);
         }
         return objMethod.getAnnotation(Retryable.class);
+    }
+
+    @Override
+    public int getOrder() {
+        String order = standardEnvironment
+            .getProperty("easy-retry.aop.order", String.valueOf(Ordered.HIGHEST_PRECEDENCE));
+        return Integer.parseInt(order);
     }
 }

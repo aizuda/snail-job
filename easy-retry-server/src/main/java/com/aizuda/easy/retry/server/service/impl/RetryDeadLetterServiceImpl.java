@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.server.service.impl;
 
-import com.aizuda.easy.retry.server.exception.XRetryServerException;
+import cn.hutool.core.lang.Assert;
+import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryDeadLetterMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryDeadLetter;
@@ -9,7 +10,6 @@ import com.aizuda.easy.retry.server.service.convert.RetryDeadLetterResponseVOCon
 import com.aizuda.easy.retry.server.support.strategy.WaitStrategies;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
-import com.aizuda.easy.retry.common.core.util.Assert;
 import com.aizuda.easy.retry.server.config.RequestDataHelper;
 import com.aizuda.easy.retry.server.service.RetryDeadLetterService;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
@@ -92,10 +92,10 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
         retryTask.setCreateDt(LocalDateTime.now());
         retryTask.setUpdateDt(LocalDateTime.now());
         RequestDataHelper.setPartition(groupName);
-        Assert.isTrue(1 == retryTaskMapper.insert(retryTask), new XRetryServerException("新增重试任务失败"));
+        Assert.isTrue(1 == retryTaskMapper.insert(retryTask), () -> new EasyRetryServerException("新增重试任务失败"));
 
         RequestDataHelper.setPartition(groupName);
-        Assert.isTrue(1 == retryDeadLetterMapper.deleteById(retryDeadLetter.getId()), new XRetryServerException("删除死信队列数据失败"));
+        Assert.isTrue(1 == retryDeadLetterMapper.deleteById(retryDeadLetter.getId()), () -> new EasyRetryServerException("删除死信队列数据失败"));
 
         return true;
     }

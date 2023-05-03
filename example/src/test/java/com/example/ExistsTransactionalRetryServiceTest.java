@@ -39,7 +39,7 @@ public class ExistsTransactionalRetryServiceTest {
         Mockito.when(remoteService.call())
                 .thenReturn(new Result(0, "1"))
                 .thenReturn(new Result(0, "2"))
-                .thenReturn(new Result(0, "3"))
+                .thenReturn(new Result(3, "3"))
                 .thenReturn(new Result(0, "4"))
                 .thenReturn(new Result(0, "5"))
         ;
@@ -63,10 +63,10 @@ public class ExistsTransactionalRetryServiceTest {
                 .thenReturn(new Result(0, "2"))
                 .thenReturn(new Result(0, "3"))
                 .thenReturn(new Result(0, "4"))
-                .thenReturn(new Result(0, "5"))
+                .thenReturn(new Result(1, "5"))
         ;
         try {
-            String s = testExistsTransactionalRetryService2.testSimpleUpdate(243L);
+            String s = testExistsTransactionalRetryService2.testSimpleUpdate(5651L);
             System.out.println(s);
         } catch (Exception e) {
             log.error("", e);
@@ -86,7 +86,7 @@ public class ExistsTransactionalRetryServiceTest {
                 .thenReturn(new Result(0, "2"))
                 .thenReturn(new Result(0, "3"))
                 .thenReturn(new Result(0, "4"))
-                .thenReturn(new Result(0, "5"))
+                .thenReturn(new Result(5, "5"))
         ;
         try {
             for (int i = 0; i < 1000; i++) {

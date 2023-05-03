@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.common.core.util;
 
-import com.aizuda.easy.retry.common.core.exception.XRetryCommonException;
+import com.aizuda.easy.retry.common.core.exception.EasyRetryCommonException;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -14,10 +14,12 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 /**
  * @author: byteblogs
@@ -107,6 +109,8 @@ public class JsonUtil {
      * 内部类，处理Json
      */
     public static class JsonMapper {
+        private static String YYYY_MM_DD_HH_MM_SS = "yyyy-MM-dd HH:mm:ss";
+        private static String YYYY_MM_DD = "yyyy-MM-dd";
 
         private static ObjectMapper objectMapper = jacksonObjectMapper();
 
@@ -114,6 +118,8 @@ public class JsonUtil {
 
             // 初始化全局Jackson 序列化工具
             ObjectMapper objectMapper = new ObjectMapper();
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(YYYY_MM_DD_HH_MM_SS);
+            DateTimeFormatter localDateFormatter = DateTimeFormatter.ofPattern(YYYY_MM_DD);
 
             // 忽略未知属性
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -129,27 +135,27 @@ public class JsonUtil {
             javaTimeModule.addSerializer(LocalDate.class, new JsonSerializer<LocalDate>() {
                 @Override
                 public void serialize(LocalDate localDate, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
-                    jsonGenerator.writeNumber(String.valueOf(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()));
+                    jsonGenerator.writeString(localDate.format(localDateFormatter));
                 }
             });
             javaTimeModule.addSerializer(LocalDateTime.class, new JsonSerializer<LocalDateTime>() {
                 @Override
                 public void serialize(LocalDateTime localDateTime, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
-                    jsonGenerator.writeNumber(String.valueOf(localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
+                    jsonGenerator.writeString(localDateTime.format(dateTimeFormatter));
                 }
             });
             javaTimeModule.addDeserializer(LocalDate.class, new JsonDeserializer<LocalDate>() {
                 @Override
                 public LocalDate deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
                     String value = jsonParser.getValueAsString();
-                    return StringUtils.isBlank(value) ? null : new Timestamp(Long.valueOf(value.trim())).toLocalDateTime().toLocalDate();
+                    return StringUtils.isBlank(value) ? null : LocalDateTime.parse(value, DateTimeFormatter.ofPattern(YYYY_MM_DD_HH_MM_SS)).toLocalDate();
                 }
             });
             javaTimeModule.addDeserializer(LocalDateTime.class, new JsonDeserializer<LocalDateTime>() {
                 @Override
                 public LocalDateTime deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
                     String value = jsonParser.getValueAsString();
-                    return StringUtils.isBlank(value) ? null : new Timestamp(Long.valueOf(value.trim())).toLocalDateTime();
+                    return StringUtils.isBlank(value) ? null : LocalDateTime.parse(value, DateTimeFormatter.ofPattern(YYYY_MM_DD_HH_MM_SS));
                 }
             });
 
@@ -177,7 +183,7 @@ public class JsonUtil {
             try {
                 return objectMapper.writeValueAsString(object);
             } catch (Exception e) {
-                throw new XRetryCommonException("对象转Json失败！", e);
+                throw new EasyRetryCommonException("对象转Json失败！", e);
             }
         }
 
@@ -192,7 +198,7 @@ public class JsonUtil {
             try {
                 return objectMapper.readValue(jsonString, clazz);
             } catch (Exception e) {
-                throw new XRetryCommonException("Json转对象失败", jsonString,  e);
+                throw new EasyRetryCommonException("Json转对象失败", jsonString,  e);
             }
         }
 
@@ -206,7 +212,7 @@ public class JsonUtil {
             try {
                 return objectMapper.readValue(jsonString, typeReference);
             } catch (Exception e) {
-                throw new XRetryCommonException("Json转对象失败！", e);
+                throw new EasyRetryCommonException("Json转对象失败！", e);
             }
         }
 
@@ -220,7 +226,7 @@ public class JsonUtil {
             try {
                 return objectMapper.readValue(jsonString, javaType);
             } catch (Exception e) {
-                throw new XRetryCommonException("Json转对象失败！", e);
+                throw new EasyRetryCommonException("Json转对象失败！", e);
             }
         }
 
@@ -233,7 +239,7 @@ public class JsonUtil {
             try {
                 return objectMapper.readTree(jsonString);
             } catch (Exception e) {
-                throw new XRetryCommonException("Json转对象失败！", e);
+                throw new EasyRetryCommonException("Json转对象失败！", e);
             }
         }
 
@@ -246,7 +252,7 @@ public class JsonUtil {
             try {
                 return objectMapper.readTree(jsonBytes);
             } catch (Exception e) {
-                throw new XRetryCommonException("Json转对象失败！", e);
+                throw new EasyRetryCommonException("Json转对象失败！", e);
             }
         }
 
@@ -259,7 +265,7 @@ public class JsonUtil {
             try {
                 return objectMapper.valueToTree(object);
             } catch (Exception e) {
-                throw new XRetryCommonException("Json转对象失败！", e);
+                throw new EasyRetryCommonException("Json转对象失败！", e);
             }
         }
     }
