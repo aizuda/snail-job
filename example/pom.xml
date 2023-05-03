@@ -11,7 +11,7 @@
 
     <groupId>com.example</groupId>
     <artifactId>example</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.1.0</version>
     <name>example</name>
     <description>Demo project for Spring Boot</description>
 
@@ -38,7 +38,7 @@
         <dependency>
             <groupId>com.aizuda</groupId>
             <artifactId>easy-retry-client-starter</artifactId>
-            <version>1.0.0</version>
+            <version>1.1.0</version>
         </dependency>
         <dependency>
             <groupId>com.baomidou</groupId>
