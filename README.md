@@ -54,7 +54,7 @@
 <dependency>
     <groupId>com.aizuda</groupId>
     <artifactId>easy-retry-client-starter</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
 </dependency>
 ```
 
