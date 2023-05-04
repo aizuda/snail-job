@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.client.core.register.scan;
 
-import com.aizuda.easy.retry.client.core.BizIdGenerate;
+import com.aizuda.easy.retry.client.core.IdempotentIdGenerate;
 import com.aizuda.easy.retry.client.core.Scanner;
 import com.aizuda.easy.retry.client.core.annotation.Retryable;
 import com.aizuda.easy.retry.client.core.callback.RetryCompleteCallback;
@@ -72,7 +72,7 @@ public class RetryableScanner implements Scanner, ApplicationContextAware {
 
         Class executorNotProxy = AopUtils.getTargetClass(executor);
         String executorClassName = executorNotProxy.getName();
-        Class<? extends BizIdGenerate> bizIdGenerate = retryable.bizId();
+        Class<? extends IdempotentIdGenerate> idempotentIdGenerate = retryable.idempotentId();
         String bizNo = retryable.bizNo();
         RetryType retryType = retryable.retryStrategy();
         int localTimes = retryable.localTimes();
@@ -90,7 +90,7 @@ public class RetryableScanner implements Scanner, ApplicationContextAware {
                 retryType,
                 localTimes,
                 localInterval,
-                bizIdGenerate,
+                idempotentIdGenerate,
                 bizNo,
                 retryMethod,
                 throwException,

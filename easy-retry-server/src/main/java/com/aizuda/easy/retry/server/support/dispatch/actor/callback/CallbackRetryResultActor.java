@@ -53,7 +53,7 @@ public class CallbackRetryResultActor extends AbstractActor {
 
                 // 回调参数
                 RetryCallbackDTO retryCallbackDTO = new RetryCallbackDTO();
-                retryCallbackDTO.setBizId(retryTask.getBizId());
+                retryCallbackDTO.setIdempotentId(retryTask.getIdempotentId());
                 retryCallbackDTO.setRetryStatus(retryTask.getRetryStatus());
                 retryCallbackDTO.setArgsStr(retryTask.getArgsStr());
                 retryCallbackDTO.setScene(retryTask.getSceneName());

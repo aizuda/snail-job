@@ -18,7 +18,7 @@ public class RetryTaskResponseVO {
 
     private String sceneName;
 
-    private String bizId;
+    private String idempotentId;
 
     private String bizNo;
 

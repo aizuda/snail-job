@@ -1,8 +1,8 @@
 package com.aizuda.easy.retry.client.core.annotation;
 
 
-import com.aizuda.easy.retry.client.core.BizIdGenerate;
-import com.aizuda.easy.retry.client.core.generator.SimpleBizIdGenerate;
+import com.aizuda.easy.retry.client.core.IdempotentIdGenerate;
+import com.aizuda.easy.retry.client.core.generator.SimpleIdempotentIdGenerate;
 import com.aizuda.easy.retry.client.core.strategy.RetryAnnotationMethod;
 import com.aizuda.easy.retry.client.core.callback.RetryCompleteCallback;
 import com.aizuda.easy.retry.client.core.callback.SimpleRetryCompleteCallback;
@@ -49,22 +49,22 @@ public @interface Retryable {
     Class<? extends RetryMethod> retryMethod() default RetryAnnotationMethod.class;
 
     /**
-     * 业务id生成器
-     * 同一个组的同一个场景下只会存在一个相同的bizId并且状态为'重试中'的任务, 若存在相同的则上报服务后会被幂等处理
+     * 幂等id生成器
+     * 同一个组的同一个场景下只会存在一个相同的idempotentId并且状态为'重试中'的任务, 若存在相同的则上报服务后会被幂等处理
      * 比如:
      * 组: AGroup
      * 场景: BScene
-     * 时刻1: 上报一个异常 bizId: A1 状态为重试中
-     * 时刻2: 上报一个异常 bizId: A2 状态为重试中，可以上报成功，此时存在两个重试任务
-     * 时刻3: 上报一个异常 bizId: A1 不会新增一个重试任务，会被幂等处理
-     * 时刻4:  bizId: A1 重试完成, 状态为已完成
-     * 时刻5: 上报一个异常 bizId: A1 状态为重试中, 新增一条重试任务
+     * 时刻1: 上报一个异常 idempotentId: A1 状态为重试中
+     * 时刻2: 上报一个异常 idempotentId: A2 状态为重试中，可以上报成功，此时存在两个重试任务
+     * 时刻3: 上报一个异常 idempotentId: A1 不会新增一个重试任务，会被幂等处理
+     * 时刻4:  idempotentId: A1 重试完成, 状态为已完成
+     * 时刻5: 上报一个异常 idempotentId: A1 状态为重试中, 新增一条重试任务
      **
-     * 默认的bizId生成器{@link SimpleBizIdGenerate} 对所有参数进行MD5
+     * 默认的idempotentId生成器{@link SimpleIdempotentIdGenerate} 对所有参数进行MD5
      *
-     * @return bizId
+     * @return idempotentId
      */
-    Class<? extends BizIdGenerate> bizId() default SimpleBizIdGenerate.class;
+    Class<? extends IdempotentIdGenerate> idempotentId() default SimpleIdempotentIdGenerate.class;
 
     /**
      * 服务端重试完成(重试成功、重试到达最大次数)回调客户端

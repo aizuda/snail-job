@@ -17,7 +17,7 @@ public class RetryTaskLog implements Serializable {
 
     private String sceneName;
 
-    private String bizId;
+    private String idempotentId;
 
     private String bizNo;
 

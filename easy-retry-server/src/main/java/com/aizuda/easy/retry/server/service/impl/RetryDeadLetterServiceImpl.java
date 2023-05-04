@@ -61,8 +61,8 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
             retryDeadLetterLambdaQueryWrapper.eq(RetryDeadLetter::getBizNo, queryVO.getBizNo());
         }
 
-        if (StringUtils.isNotBlank(queryVO.getBizId())) {
-            retryDeadLetterLambdaQueryWrapper.eq(RetryDeadLetter::getBizId, queryVO.getBizId());
+        if (StringUtils.isNotBlank(queryVO.getIdempotentId())) {
+            retryDeadLetterLambdaQueryWrapper.eq(RetryDeadLetter::getIdempotentId, queryVO.getIdempotentId());
         }
 
         RequestDataHelper.setPartition(queryVO.getGroupName());

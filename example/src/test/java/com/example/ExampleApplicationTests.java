@@ -59,7 +59,7 @@ public class ExampleApplicationTests {
             int finalI = i;
             new Thread(() -> {
                 RetryTaskDTO retryTaskDTO = new RetryTaskDTO();
-                retryTaskDTO.setBizId(finalI + "");
+                retryTaskDTO.setIdempotentId(finalI + "");
                 ConcurrentLinkedQueue<RetryTaskDTO> value = retryLeapArray.currentWindow().value();
                 value.add(retryTaskDTO);
             }).start();

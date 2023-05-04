@@ -5,7 +5,7 @@
     <id column="id" jdbcType="BIGINT" property="id" />
     <result column="group_name" jdbcType="VARCHAR" property="groupName" />
     <result column="scene_name" jdbcType="VARCHAR" property="sceneName" />
-    <result column="biz_id" jdbcType="VARCHAR" property="bizId" />
+    <result column="idempotent_id" jdbcType="VARCHAR" property="idempotentId" />
     <result column="biz_no" jdbcType="VARCHAR" property="bizNo" />
     <result column="executor_name" jdbcType="VARCHAR" property="executorName" />
     <result column="args_str" jdbcType="VARCHAR" property="argsStr" />
@@ -17,7 +17,7 @@
     <result column="update_dt" jdbcType="TIMESTAMP" property="updateDt" />
   </resultMap>
   <sql id="Base_Column_List">
-    id, group_name, scene_name, biz_id, biz_no, executor_name, args_str, ext_attrs, next_trigger_at, retry_count, retry_status,
+    id, group_name, scene_name, idempotent_id, biz_no, executor_name, args_str, ext_attrs, next_trigger_at, retry_count, retry_status,
     create_dt, update_dt
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
@@ -59,7 +59,7 @@
   <select id="selectRetryTaskByGroupIdAndSceneId" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />
-    from retry_task_${partition} where biz_id = #{bizId,jdbcType=VARCHAR} AND  scene_id = #{sceneId,jdbcType=VARCHAR}
+    from retry_task_${partition} where idempotent_id = #{idempotentId,jdbcType=VARCHAR} AND  scene_id = #{sceneId,jdbcType=VARCHAR}
   </select>
   <select id="selectRetryTaskPage" resultMap="BaseResultMap">
     select

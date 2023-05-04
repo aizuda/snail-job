@@ -26,7 +26,7 @@ public class RetryTaskLogServiceImpl implements RetryTaskLogService {
     private RetryTaskLogMapper retryTaskLogMapper;
 
     private RetryTaskLogResponseVOConverter retryTaskLogResponseVOConverter = new RetryTaskLogResponseVOConverter();
-    
+
     @Override
     public PageResult<List<RetryTaskLogResponseVO>> getRetryTaskLogPage(RetryTaskLogQueryVO queryVO) {
 
@@ -42,12 +42,12 @@ public class RetryTaskLogServiceImpl implements RetryTaskLogService {
         if (StringUtils.isNotBlank(queryVO.getBizNo())) {
             retryTaskLogLambdaQueryWrapper.eq(RetryTaskLog::getBizNo, queryVO.getBizNo());
         }
-        if (StringUtils.isNotBlank(queryVO.getBizId())) {
-            retryTaskLogLambdaQueryWrapper.eq(RetryTaskLog::getBizId, queryVO.getBizId());
+        if (StringUtils.isNotBlank(queryVO.getIdempotentId())) {
+            retryTaskLogLambdaQueryWrapper.eq(RetryTaskLog::getIdempotentId, queryVO.getIdempotentId());
         }
 
         retryTaskLogLambdaQueryWrapper.select(RetryTaskLog::getGroupName, RetryTaskLog::getId, RetryTaskLog::getSceneName,
-                RetryTaskLog::getBizId, RetryTaskLog::getBizNo, RetryTaskLog::getErrorMessage, RetryTaskLog::getRetryStatus, RetryTaskLog::getCreateDt);
+                RetryTaskLog::getIdempotentId, RetryTaskLog::getBizNo, RetryTaskLog::getErrorMessage, RetryTaskLog::getRetryStatus, RetryTaskLog::getCreateDt);
         PageDTO<RetryTaskLog> retryTaskLogPageDTO = retryTaskLogMapper.selectPage(pageDTO, retryTaskLogLambdaQueryWrapper.orderByDesc(RetryTaskLog::getCreateDt));
 
         return new PageResult<>(

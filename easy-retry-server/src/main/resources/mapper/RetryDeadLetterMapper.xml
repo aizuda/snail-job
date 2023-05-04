@@ -5,7 +5,7 @@
     <id column="id" jdbcType="BIGINT" property="id" />
     <result column="group_name" jdbcType="VARCHAR" property="groupName" />
     <result column="scene_name" jdbcType="VARCHAR" property="sceneName" />
-    <result column="biz_id" jdbcType="VARCHAR" property="bizId" />
+    <result column="idempotent_id" jdbcType="VARCHAR" property="idempotentId" />
     <result column="biz_no" jdbcType="VARCHAR" property="bizNo" />
     <result column="executor_name" jdbcType="VARCHAR" property="executorName" />
     <result column="args_str" jdbcType="VARCHAR" property="argsStr" />
@@ -13,17 +13,17 @@
     <result column="create_dt" jdbcType="TIMESTAMP" property="createDt" />
   </resultMap>
   <sql id="Base_Column_List">
-    id, group_name, scene_name, biz_id, biz_no, executor_name, args_str, ext_attrs, create_dt
+    id, group_name, scene_name, idempotent_id, biz_no, executor_name, args_str, ext_attrs, create_dt
   </sql>
   <insert id="insertBatch">
     insert into retry_dead_letter_${partition} (id, group_name, scene_name,
-                                              biz_id, biz_no, executor_name, args_str,
+    idempotent_id, biz_no, executor_name, args_str,
                                               ext_attrs, create_dt
     )
     values
           <foreach collection="retryDeadLetters" item="retryDeadLetter" separator=",">
             (#{retryDeadLetter.id,jdbcType=BIGINT}, #{retryDeadLetter.groupName,jdbcType=VARCHAR}, #{retryDeadLetter.sceneName,jdbcType=VARCHAR},
-            #{retryDeadLetter.bizId,jdbcType=VARCHAR}, #{retryDeadLetter.bizNo,jdbcType=VARCHAR},  #{retryDeadLetter.executorName,jdbcType=VARCHAR}, #{retryDeadLetter.argsStr,jdbcType=VARCHAR},
+            #{retryDeadLetter.idempotentId,jdbcType=VARCHAR}, #{retryDeadLetter.bizNo,jdbcType=VARCHAR},  #{retryDeadLetter.executorName,jdbcType=VARCHAR}, #{retryDeadLetter.argsStr,jdbcType=VARCHAR},
             #{retryDeadLetter.extAttrs,jdbcType=VARCHAR}, #{retryDeadLetter.createDt,jdbcType=TIMESTAMP})
           </foreach>
   </insert>

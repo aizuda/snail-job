@@ -14,7 +14,7 @@ const api = {
   retryTaskPage: '/retry-task/list',
   retryTaskById: '/retry-task/',
   saveRetryTask: '/retry-task',
-  bizIdGenerate: '/retry-task/generate/biz-id',
+  idempotentIdGenerate: '/retry-task/generate/idempotent-id',
   batchUpdate: '/retry-task/batch',
   deleteRetryTask: '/retry-task/batch',
   updateRetryTaskStatus: '/retry-task/status',
@@ -56,9 +56,9 @@ export function batchUpdate (data) {
   })
 }
 
-export function bizIdGenerate (data) {
+export function idempotentIdGenerate (data) {
   return request({
-    url: api.bizIdGenerate,
+    url: api.idempotentIdGenerate,
     method: 'post',
     data
   })

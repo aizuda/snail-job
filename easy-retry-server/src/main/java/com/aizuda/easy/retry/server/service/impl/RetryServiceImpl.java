@@ -71,7 +71,7 @@ public class RetryServiceImpl implements RetryService {
         RequestDataHelper.setPartition(retryTaskDTO.getGroupName());
         // 此处做幂等处理，避免客户端重复多次上报
         long count = retryTaskMapper.selectCount(new LambdaQueryWrapper<RetryTask>()
-                .eq(RetryTask::getBizId, retryTaskDTO.getBizId())
+                .eq(RetryTask::getIdempotentId, retryTaskDTO.getIdempotentId())
                 .eq(RetryTask::getGroupName, retryTaskDTO.getGroupName())
                 .eq(RetryTask::getSceneName, retryTaskDTO.getSceneName())
                 .eq(RetryTask::getRetryStatus, RetryStatusEnum.RUNNING.getStatus())

@@ -40,7 +40,7 @@
             </a-col>
             <a-col :md="8" :sm="24">
               <a-form-item label="业务id">
-                <a-input v-model="queryParam.bizId" placeholder="请输入业务id" allowClear />
+                <a-input v-model="queryParam.idempotentId" placeholder="请输入业务id" allowClear />
               </a-form-item>
             </a-col>
           </template>
@@ -156,8 +156,8 @@ export default {
           dataIndex: 'sceneName'
         },
         {
-          title: '业务id',
-          dataIndex: 'bizId'
+          title: '幂等id',
+          dataIndex: 'idempotentId'
         },
         {
           title: '业务编号',

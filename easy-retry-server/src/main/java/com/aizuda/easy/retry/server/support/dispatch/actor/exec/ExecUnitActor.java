@@ -109,7 +109,7 @@ public class ExecUnitActor extends AbstractActor  {
     private Result<DispatchRetryResultDTO> callClient(RetryTask retryTask, RetryTaskLog retryTaskLog, ServerNode serverNode) {
 
         DispatchRetryDTO dispatchRetryDTO = new DispatchRetryDTO();
-        dispatchRetryDTO.setBizId(retryTask.getBizId());
+        dispatchRetryDTO.setIdempotentId(retryTask.getIdempotentId());
         dispatchRetryDTO.setScene(retryTask.getSceneName());
         dispatchRetryDTO.setExecutorName(retryTask.getExecutorName());
         dispatchRetryDTO.setArgsStr(retryTask.getArgsStr());

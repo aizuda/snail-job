@@ -35,7 +35,7 @@ CREATE TABLE `retry_dead_letter_0`
     `id`            bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
     `group_name`    varchar(64)  NOT NULL COMMENT '组名称',
     `scene_name`    varchar(64)  NOT NULL COMMENT '场景id',
-    `biz_id`        varchar(64)  NOT NULL COMMENT '业务id',
+    `idempotent_id`        varchar(64)  NOT NULL COMMENT '幂等id',
     `biz_no`        varchar(64)  NOT NULL DEFAULT '' COMMENT '业务编号',
     `executor_name` varchar(512) NOT NULL DEFAULT '' COMMENT '执行器名称',
     `args_str`      text         NOT NULL COMMENT '执行方法参数',
@@ -43,7 +43,7 @@ CREATE TABLE `retry_dead_letter_0`
     `create_dt`     datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     PRIMARY KEY (`id`),
     KEY             `idx_group_name_scene_name` (`group_name`, `scene_name`),
-    KEY             `idx_biz_id` (`biz_id`),
+    KEY             `idx_idempotent_id` (`idempotent_id`),
     KEY             `idx_biz_no` (`biz_no`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='重试死信队列'
 ;
@@ -53,7 +53,7 @@ CREATE TABLE `retry_task_0`
     `id`              bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
     `group_name`      varchar(64)  NOT NULL COMMENT '组名称',
     `scene_name`      varchar(64)  NOT NULL COMMENT '场景名称',
-    `biz_id`          varchar(64)  NOT NULL COMMENT '业务id',
+    `idempotent_id`          varchar(64)  NOT NULL COMMENT '幂等id',
     `biz_no`          varchar(64)  NOT NULL DEFAULT '' COMMENT '业务编号',
     `executor_name`   varchar(512) NOT NULL DEFAULT '' COMMENT '执行器名称',
     `args_str`        text         NOT NULL COMMENT '执行方法参数',
@@ -66,7 +66,7 @@ CREATE TABLE `retry_task_0`
     PRIMARY KEY (`id`),
     KEY             `idx_group_name_scene_name` (`group_name`, `scene_name`),
     KEY             `idx_retry_status` (`retry_status`),
-    KEY             `idx_biz_id` (`biz_id`)
+    KEY             `idx_idempotent_id` (`idempotent_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='重试表'
 ;
 
@@ -75,7 +75,7 @@ CREATE TABLE `retry_task_log`
     `id`            bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
     `group_name`    varchar(64)  NOT NULL COMMENT '组名称',
     `scene_name`    varchar(64)  NOT NULL COMMENT '场景名称',
-    `biz_id`        varchar(64)  NOT NULL COMMENT '业务id',
+    `idempotent_id`        varchar(64)  NOT NULL COMMENT '幂等id',
     `biz_no`        varchar(64)  NOT NULL DEFAULT '' COMMENT '业务编号',
     `executor_name` varchar(512) NOT NULL DEFAULT '' COMMENT '执行器名称',
     `args_str`      text         NOT NULL COMMENT '执行方法参数',
@@ -87,7 +87,7 @@ CREATE TABLE `retry_task_log`
     PRIMARY KEY (`id`),
     KEY             `idx_group_name_scene_name` (`group_name`, `scene_name`),
     KEY             `idx_retry_status` (`retry_status`),
-    KEY             `idx_biz_id` (`biz_id`)
+    KEY             `idx_idempotent_id` (`idempotent_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='重试日志表'
 ;
 

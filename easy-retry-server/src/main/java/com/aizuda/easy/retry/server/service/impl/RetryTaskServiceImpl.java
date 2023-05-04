@@ -1,7 +1,7 @@
 package com.aizuda.easy.retry.server.service.impl;
 
 import cn.hutool.core.lang.Assert;
-import com.aizuda.easy.retry.client.model.GenerateRetryBizIdDTO;
+import com.aizuda.easy.retry.client.model.GenerateRetryIdempotentIdDTO;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.server.config.RequestDataHelper;
@@ -16,7 +16,7 @@ import com.aizuda.easy.retry.server.support.handler.ClientNodeAllocateHandler;
 import com.aizuda.easy.retry.server.support.strategy.WaitStrategies;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
 import com.aizuda.easy.retry.server.web.model.request.BatchDeleteRetryTaskVO;
-import com.aizuda.easy.retry.server.web.model.request.GenerateRetryBizIdVO;
+import com.aizuda.easy.retry.server.web.model.request.GenerateRetryIdempotentIdVO;
 import com.aizuda.easy.retry.server.web.model.request.RetryTaskQueryVO;
 import com.aizuda.easy.retry.server.web.model.request.RetryTaskUpdateStatusRequestVO;
 import com.aizuda.easy.retry.server.web.model.request.RetryTaskSaveRequestVO;
@@ -29,7 +29,6 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.text.MessageFormat;
@@ -77,8 +76,8 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         if (StringUtils.isNotBlank(queryVO.getBizNo())) {
             retryTaskLambdaQueryWrapper.eq(RetryTask::getBizNo, queryVO.getBizNo());
         }
-        if (StringUtils.isNotBlank(queryVO.getBizId())) {
-            retryTaskLambdaQueryWrapper.eq(RetryTask::getBizId, queryVO.getBizId());
+        if (StringUtils.isNotBlank(queryVO.getIdempotentId())) {
+            retryTaskLambdaQueryWrapper.eq(RetryTask::getIdempotentId, queryVO.getIdempotentId());
         }
         if (Objects.nonNull(queryVO.getRetryStatus())) {
             retryTaskLambdaQueryWrapper.eq(RetryTask::getRetryStatus, queryVO.getRetryStatus());
@@ -86,7 +85,7 @@ public class RetryTaskServiceImpl implements RetryTaskService {
 
         RequestDataHelper.setPartition(queryVO.getGroupName());
 
-        retryTaskLambdaQueryWrapper.select(RetryTask::getId, RetryTask::getBizNo, RetryTask::getBizId,
+        retryTaskLambdaQueryWrapper.select(RetryTask::getId, RetryTask::getBizNo, RetryTask::getIdempotentId,
             RetryTask::getGroupName, RetryTask::getNextTriggerAt, RetryTask::getRetryCount,
             RetryTask::getRetryStatus, RetryTask::getUpdateDt, RetryTask::getSceneName);
         pageDTO = retryTaskMapper.selectPage(pageDTO, retryTaskLambdaQueryWrapper.orderByDesc(RetryTask::getCreateDt));
@@ -150,25 +149,25 @@ public class RetryTaskServiceImpl implements RetryTaskService {
     }
 
     @Override
-    public String bizIdGenerate(final GenerateRetryBizIdVO generateRetryBizIdVO) {
-        ServerNode serverNode = clientNodeAllocateHandler.getServerNode(generateRetryBizIdVO.getGroupName());
-        Assert.notNull(serverNode, () -> new EasyRetryServerException("生成bizId失败: 不存在活跃的客户端节点"));
+    public String idempotentIdGenerate(final GenerateRetryIdempotentIdVO generateRetryIdempotentIdVO) {
+        ServerNode serverNode = clientNodeAllocateHandler.getServerNode(generateRetryIdempotentIdVO.getGroupName());
+        Assert.notNull(serverNode, () -> new EasyRetryServerException("生成idempotentId失败: 不存在活跃的客户端节点"));
 
-        // 委托客户端生成bizId
+        // 委托客户端生成idempotentId
         String url = MessageFormat
             .format(URL, serverNode.getHostIp(), serverNode.getHostPort().toString(), serverNode.getContextPath());
 
-        GenerateRetryBizIdDTO generateRetryBizIdDTO = new GenerateRetryBizIdDTO();
-        generateRetryBizIdDTO.setGroup(generateRetryBizIdVO.getGroupName());
-        generateRetryBizIdDTO.setScene(generateRetryBizIdVO.getSceneName());
-        generateRetryBizIdDTO.setArgsStr(generateRetryBizIdVO.getArgsStr());
-        generateRetryBizIdDTO.setExecutorName(generateRetryBizIdVO.getExecutorName());
+        GenerateRetryIdempotentIdDTO generateRetryIdempotentIdDTO = new GenerateRetryIdempotentIdDTO();
+        generateRetryIdempotentIdDTO.setGroup(generateRetryIdempotentIdVO.getGroupName());
+        generateRetryIdempotentIdDTO.setScene(generateRetryIdempotentIdVO.getSceneName());
+        generateRetryIdempotentIdDTO.setArgsStr(generateRetryIdempotentIdVO.getArgsStr());
+        generateRetryIdempotentIdDTO.setExecutorName(generateRetryIdempotentIdVO.getExecutorName());
 
-        HttpEntity<GenerateRetryBizIdDTO> requestEntity = new HttpEntity<>(generateRetryBizIdDTO);
+        HttpEntity<GenerateRetryIdempotentIdDTO> requestEntity = new HttpEntity<>(generateRetryIdempotentIdDTO);
         Result result = restTemplate.postForObject(url, requestEntity, Result.class);
 
-        Assert.notNull(result, () -> new EasyRetryServerException("biz生成失败"));
-        Assert.isTrue(1 == result.getStatus(), () -> new EasyRetryServerException("biz生成失败:请确保参数与执行器名称正确"));
+        Assert.notNull(result, () -> new EasyRetryServerException("idempotentId生成失败"));
+        Assert.isTrue(1 == result.getStatus(), () -> new EasyRetryServerException("idempotentId生成失败:请确保参数与执行器名称正确"));
 
         return (String) result.getData();
     }

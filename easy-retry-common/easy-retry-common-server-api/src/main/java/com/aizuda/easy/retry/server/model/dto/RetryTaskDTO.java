@@ -32,9 +32,9 @@ public class RetryTaskDTO implements Serializable {
     /**
      * 业务唯一id
      */
-    @NotBlank(message = "bizId 不能为空")
-    @Length(max = 64, message = "业务唯一id最长为64")
-    private String bizId;
+    @NotBlank(message = "idempotentId 不能为空")
+    @Length(max = 64, message = "幂等id最长为64")
+    private String idempotentId;
 
     /**
      * 执行器名称

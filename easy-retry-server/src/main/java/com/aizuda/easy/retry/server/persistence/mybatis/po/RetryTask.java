@@ -19,7 +19,7 @@ public class RetryTask implements Serializable {
 
     private String sceneName;
 
-    private String bizId;
+    private String idempotentId;
 
     private String bizNo;
 

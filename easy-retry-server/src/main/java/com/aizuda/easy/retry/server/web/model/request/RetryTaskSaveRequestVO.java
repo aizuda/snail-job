@@ -27,10 +27,10 @@ public class RetryTaskSaveRequestVO {
     private String sceneName;
 
     /**
-     * 业务id(同一个场景下正在重试中的bizId不能重复)
+     * 幂等id(同一个场景下正在重试中的idempotentId不能重复)
      */
-    @NotBlank(message = "业务id不能为空")
-    private String bizId;
+    @NotBlank(message = "幂等id不能为空")
+    private String idempotentId;
 
     /**
      * 业务编号

@@ -4,13 +4,13 @@ import lombok.Data;
 import org.hibernate.validator.constraints.NotBlank;
 
 /**
- * 生成bizId模型
+ * 生成idempotentId模型
  *
  * @auther www.byteblogs.com
  * @date 2022/03/25 10:06
  */
 @Data
-public class GenerateRetryBizIdVO {
+public class GenerateRetryIdempotentIdVO {
     /**
      * 组名称
      */
