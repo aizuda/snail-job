@@ -3,6 +3,7 @@
 <mapper namespace="com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskLogMapper">
     <resultMap id="BaseResultMap" type="com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTaskLog">
         <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="unique_id" jdbcType="VARCHAR" property="uniqueId"/>
         <result column="group_name" jdbcType="VARCHAR" property="groupName"/>
         <result column="scene_name" jdbcType="VARCHAR" property="sceneName"/>
         <result column="idempotent_id" jdbcType="VARCHAR" property="idempotentId"/>
@@ -15,8 +16,7 @@
         <result column="create_dt" jdbcType="TIMESTAMP" property="createDt"/>
     </resultMap>
     <sql id="Base_Column_List">
-        id
-        , group_name, scene_name, idempotent_id, biz_no, executor_name, args_str, ext_attrs, retry_status, error_message,
+        id, unique_id, group_name, scene_name, idempotent_id, biz_no, executor_name, args_str, ext_attrs, retry_status, error_message,
     create_dt
     </sql>
     <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">

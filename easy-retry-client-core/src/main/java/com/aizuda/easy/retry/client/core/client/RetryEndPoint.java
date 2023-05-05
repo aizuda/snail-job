@@ -88,6 +88,7 @@ public class RetryEndPoint {
             }
 
             executeRespDto.setIdempotentId(executeReqDto.getIdempotentId());
+            executeRespDto.setUniqueId(executeReqDto.getUniqueId());
             if (Objects.nonNull(retryerResultContext.getResult())) {
                 executeRespDto.setResultJson(JsonUtil.toJsonString(retryerResultContext.getResult()));
             }

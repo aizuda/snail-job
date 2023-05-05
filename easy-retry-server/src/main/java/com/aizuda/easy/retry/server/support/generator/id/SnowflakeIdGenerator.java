@@ -1,18 +1,23 @@
 package com.aizuda.easy.retry.server.support.generator.id;
 
+import cn.hutool.core.lang.Snowflake;
+import cn.hutool.core.util.IdUtil;
 import com.aizuda.easy.retry.common.core.enums.IdGeneratorMode;
 import com.aizuda.easy.retry.server.support.generator.IdGenerator;
 import org.springframework.stereotype.Component;
 
 /**
- * 雪花算法
+ * 使用hutool自带的雪花算法生成id
+ * 若出现时间回拨问题则直接报错 {@link Snowflake#tilNextMillis(long)}
  *
  * @author www.byteblogs.com
  * @date 2023-05-04
- * @since 2.0
+ * @since 1.2.0
  */
 @Component
 public class SnowflakeIdGenerator implements IdGenerator {
+
+    private static final Snowflake SNOWFLAKE = IdUtil.getSnowflake();
 
     @Override
     public boolean supports(int mode) {
@@ -21,6 +26,6 @@ public class SnowflakeIdGenerator implements IdGenerator {
 
     @Override
     public String idGenerator(String group) {
-        return null;
+        return SNOWFLAKE.nextIdStr();
     }
 }

@@ -19,4 +19,6 @@ public class DispatchRetryDTO {
     private String idempotentId;
     @NotBlank(message = "executorName 不能为空")
     private String executorName;
+    @NotBlank(message = "uniqueId 不能为空")
+    private String uniqueId;
 }

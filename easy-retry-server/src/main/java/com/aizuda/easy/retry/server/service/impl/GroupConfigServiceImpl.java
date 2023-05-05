@@ -6,10 +6,12 @@ import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.GroupConfigMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.NotifyConfigMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.SceneConfigMapper;
+import com.aizuda.easy.retry.server.persistence.mybatis.mapper.SequenceAllocMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.ServerNodeMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.GroupConfig;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.NotifyConfig;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.SceneConfig;
+import com.aizuda.easy.retry.server.persistence.mybatis.po.SequenceAlloc;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.ServerNode;
 import com.aizuda.easy.retry.server.support.handler.ClientRegisterHandler;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -38,8 +40,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
+ * CRUD 组、场景、通知
+ *
  * @author: www.byteblogs.com
  * @date : 2021-11-22 14:54
+ * @since 1.0.0
  */
 @Service
 public class GroupConfigServiceImpl implements GroupConfigService {
@@ -53,10 +58,14 @@ public class GroupConfigServiceImpl implements GroupConfigService {
     @Autowired
     private ServerNodeMapper serverNodeMapper;
     @Autowired
+    private SequenceAllocMapper sequenceAllocMapper;
+    @Autowired
     private ClientRegisterHandler clientRegisterHandler;
 
     @Value("${easy-retry.total-partition:32}")
     private Integer totalPartition;
+    @Value("${easy-retry.step:100}")
+    private Integer step;
 
     private GroupConfigConverter groupConfigConverter = new GroupConfigConverter();
     private NotifyConfigConverter notifyConfigConverter = new NotifyConfigConverter();
@@ -71,15 +80,32 @@ public class GroupConfigServiceImpl implements GroupConfigService {
                         .eq(GroupConfig::getGroupName, groupConfigRequestVO.getGroupName())) == 0,
             () ->  new EasyRetryServerException("GroupName已经存在 {}", groupConfigRequestVO.getGroupName()));
 
+        // 保存组配置
         doSaveGroupConfig(groupConfigRequestVO);
 
+        // 保存生成唯一id配置
+        doSaveSequenceAlloc(groupConfigRequestVO);
+
+        // 保存通知配置
         doSaveNotifyConfig(groupConfigRequestVO);
 
+        // 保存场景配置
         doSaveSceneConfig(groupConfigRequestVO.getSceneList(), groupConfigRequestVO.getGroupName());
 
         return Boolean.TRUE;
     }
 
+    /**
+     * 保存序号生成规则配置失败
+     * @param groupConfigRequestVO 组、场景、通知配置类
+     */
+    private void doSaveSequenceAlloc(final GroupConfigRequestVO groupConfigRequestVO) {
+        SequenceAlloc sequenceAlloc = new SequenceAlloc();
+        sequenceAlloc.setGroupName(groupConfigRequestVO.getGroupName());
+        sequenceAlloc.setStep(step);
+        sequenceAlloc.setUpdateDt(LocalDateTime.now());
+        Assert.isTrue(1 == sequenceAllocMapper.insert(sequenceAlloc), () -> new EasyRetryServerException("failed to save sequence generation rule configuration [{}].", groupConfigRequestVO.getGroupName()));
+    }
 
     @Override
     @Transactional
@@ -96,7 +122,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
 
         Assert.isTrue(1 == groupConfigMapper.update(groupConfig,
                 new LambdaUpdateWrapper<GroupConfig>().eq(GroupConfig::getGroupName, groupConfigRequestVO.getGroupName())),
-            () -> new EasyRetryServerException("新增组异常异常 groupConfigVO[{}]", groupConfigRequestVO));
+            () -> new EasyRetryServerException("exception occurred while adding group. groupConfigVO[{}]", groupConfigRequestVO));
 
         doUpdateNotifyConfig(groupConfigRequestVO);
 
@@ -182,7 +208,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
         notifyConfig.setCreateDt(LocalDateTime.now());
 
         Assert.isTrue(1 == notifyConfigMapper.insert(notifyConfig),
-            () -> new EasyRetryServerException("插入通知配置失败 sceneConfig:[{}]", JsonUtil.toJsonString(notifyConfig)));
+            () -> new EasyRetryServerException("failed to insert notify. sceneConfig:[{}]", JsonUtil.toJsonString(notifyConfig)));
     }
 
     private void doSaveSceneConfig(List<GroupConfigRequestVO.SceneConfigVO> sceneList, String groupName) {
@@ -195,7 +221,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
                 sceneConfig.setGroupName(groupName);
 
                 Assert.isTrue(1 == sceneConfigMapper.insert(sceneConfig),
-                    () -> new EasyRetryServerException("插入场景配置失败 sceneConfig:[{}]", JsonUtil.toJsonString(sceneConfig)));
+                    () -> new EasyRetryServerException("failed to insert scene. sceneConfig:[{}]", JsonUtil.toJsonString(sceneConfig)));
             }
         }
     }
@@ -218,7 +244,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
                 } else if (sceneConfigVO.getIsDeleted() == 1) {
                     Assert.isTrue(
                             1 == sceneConfigMapper.deleteById(oldSceneConfig.getId()),
-                        () -> new EasyRetryServerException("删除场景失败 [{}]", sceneConfigVO.getSceneName()));
+                        () -> new EasyRetryServerException("failed to delete scene. [{}]", sceneConfigVO.getSceneName()));
                 } else {
                     SceneConfig sceneConfig = sceneConfigConverter.convert(sceneConfigVO);
                     sceneConfig.setGroupName(groupConfigRequestVO.getGroupName());
@@ -227,7 +253,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
                             new LambdaQueryWrapper<SceneConfig>()
                                     .eq(SceneConfig::getGroupName, sceneConfig.getGroupName())
                                     .eq(SceneConfig::getSceneName, sceneConfig.getSceneName())),
-                        () -> new EasyRetryServerException("插入场景配置失败 sceneConfig:[{}]", JsonUtil.toJsonString(sceneConfig)));
+                        () -> new EasyRetryServerException("failed to update scene. sceneConfig:[{}]", JsonUtil.toJsonString(sceneConfig)));
                 }
 
                 iterator.remove();
@@ -253,7 +279,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
             } else if (Objects.nonNull(notifyConfigVO.getId()) && notifyConfigVO.getIsDeleted() == 1) {
                 // delete
                 Assert.isTrue(1 == notifyConfigMapper.deleteById(notifyConfigVO.getId()),
-                    () -> new EasyRetryServerException("删除通知配置失败 sceneConfig:[{}]", JsonUtil.toJsonString(notifyConfigVO)));
+                    () -> new EasyRetryServerException("failed to delete notify. sceneConfig:[{}]", JsonUtil.toJsonString(notifyConfigVO)));
             } else {
                 // update
                 Assert.isTrue(1 == notifyConfigMapper.update(notifyConfig,
@@ -261,7 +287,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
                                         .eq(NotifyConfig::getId, notifyConfigVO.getId())
                                         .eq(NotifyConfig::getGroupName, notifyConfig.getGroupName())
                                         .eq(NotifyConfig::getNotifyScene, notifyConfig.getNotifyScene())),
-                    () -> new EasyRetryServerException("更新通知配置失败 sceneConfig:[{}]", JsonUtil.toJsonString(notifyConfig)));
+                    () -> new EasyRetryServerException("failed to update notify. sceneConfig:[{}]", JsonUtil.toJsonString(notifyConfig)));
             }
         }
     }

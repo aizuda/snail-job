@@ -23,4 +23,6 @@ public class RetryCallbackDTO {
     private String executorName;
     @NotBlank(message = "retryStatus 不能为空")
     private Integer retryStatus;
+    @NotBlank(message = "uniqueId 不能为空")
+    private String uniqueId;
 }

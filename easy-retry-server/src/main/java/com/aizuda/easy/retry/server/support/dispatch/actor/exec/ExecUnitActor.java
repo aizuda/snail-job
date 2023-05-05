@@ -2,7 +2,6 @@ package com.aizuda.easy.retry.server.support.dispatch.actor.exec;
 
 import akka.actor.AbstractActor;
 import cn.hutool.core.lang.Assert;
-import cn.hutool.core.util.IdUtil;
 import com.aizuda.easy.retry.client.model.DispatchRetryDTO;
 import com.aizuda.easy.retry.client.model.DispatchRetryResultDTO;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
@@ -15,6 +14,7 @@ import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskLogMappe
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTaskLog;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.ServerNode;
+import com.aizuda.easy.retry.server.service.convert.RetryTaskLogConverter;
 import com.aizuda.easy.retry.server.support.IdempotentStrategy;
 import com.aizuda.easy.retry.server.support.context.MaxAttemptsPersistenceRetryContext;
 import com.aizuda.easy.retry.server.support.retry.RetryExecutor;
@@ -62,12 +62,12 @@ public class ExecUnitActor extends AbstractActor  {
     public Receive createReceive() {
         return receiveBuilder().match(RetryExecutor.class, retryExecutor -> {
 
-            RetryTaskLog retryTaskLog = new RetryTaskLog();
-            retryTaskLog.setErrorMessage(StringUtils.EMPTY);
-
             MaxAttemptsPersistenceRetryContext context = (MaxAttemptsPersistenceRetryContext) retryExecutor.getRetryContext();
             RetryTask retryTask = context.getRetryTask();
             ServerNode serverNode = context.getServerNode();
+
+            RetryTaskLog retryTaskLog = RetryTaskLogConverter.INSTANCE.toRetryTask(retryTask);
+            retryTaskLog.setErrorMessage(StringUtils.EMPTY);
 
             try {
 
@@ -90,7 +90,6 @@ public class ExecUnitActor extends AbstractActor  {
                 getContext().stop(getSelf());
 
                 // 记录重试日志
-                BeanUtils.copyProperties(retryTask, retryTaskLog);
                 retryTaskLog.setCreateDt(LocalDateTime.now());
                 retryTaskLog.setId(null);
                 Assert.isTrue(1 ==  retryTaskLogMapper.insert(retryTaskLog),
@@ -113,12 +112,13 @@ public class ExecUnitActor extends AbstractActor  {
         dispatchRetryDTO.setScene(retryTask.getSceneName());
         dispatchRetryDTO.setExecutorName(retryTask.getExecutorName());
         dispatchRetryDTO.setArgsStr(retryTask.getArgsStr());
+        dispatchRetryDTO.setUniqueId(retryTask.getUniqueId());
 
         // 设置header
         HttpHeaders requestHeaders = new HttpHeaders();
         EasyRetryHeaders easyRetryHeaders = new EasyRetryHeaders();
         easyRetryHeaders.setEasyRetry(Boolean.TRUE);
-        easyRetryHeaders.setEasyRetryId(IdUtil.simpleUUID());
+        easyRetryHeaders.setEasyRetryId(retryTask.getUniqueId());
         requestHeaders.add(SystemConstants.EASY_RETRY_HEAD_KEY, JsonUtil.toJsonString(easyRetryHeaders));
 
         HttpEntity<DispatchRetryDTO> requestEntity = new HttpEntity<>(dispatchRetryDTO, requestHeaders);

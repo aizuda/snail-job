@@ -13,4 +13,5 @@ public class DispatchRetryResultDTO {
     private Integer statusCode;
     private String idempotentId;
     private String exceptionMsg;
+    private String uniqueId;
 }
