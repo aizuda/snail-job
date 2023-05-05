@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.server.web.model.request;
 
+import com.aizuda.easy.retry.common.core.enums.IdGeneratorMode;
 import lombok.Data;
 import org.hibernate.validator.constraints.NotBlank;
 
@@ -38,6 +39,12 @@ public class GroupConfigRequestVO {
      * 路由策略
      */
     private Integer routeKey;
+
+    /**
+     * 唯一id生成模式
+     * {@link IdGeneratorMode}
+     */
+    private Integer idGeneratorMode;
 
     /**
      * 通知列表

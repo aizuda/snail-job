@@ -93,8 +93,7 @@ CREATE TABLE `retry_task_log`
     PRIMARY KEY (`id`),
     KEY             `idx_group_name_scene_name` (`group_name`, `scene_name`),
     KEY             `idx_retry_status` (`retry_status`),
-    KEY             `idx_idempotent_id` (`idempotent_id`),
-    UNIQUE KEY `uk_name_unique_id` (`group_name`, `unique_id`)
+    KEY             `idx_idempotent_id` (`idempotent_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='重试日志表'
 ;
 

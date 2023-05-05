@@ -97,8 +97,6 @@
 
 import ATextarea from 'ant-design-vue/es/input/TextArea'
 import AInput from 'ant-design-vue/es/input/Input'
-// 动态切换组件
-import Edit from '@/views/list/table/Edit'
 import { getAllGroupNameList, getRetryDeadLetterPage, getSceneList, rollbackRetryDeadLetter, deleteRetryDeadLetter } from '@/api/manage'
 
 import { STable } from '@/components'
@@ -109,7 +107,6 @@ export default {
   components: {
     AInput,
     ATextarea,
-    Edit,
     STable
   },
   data () {

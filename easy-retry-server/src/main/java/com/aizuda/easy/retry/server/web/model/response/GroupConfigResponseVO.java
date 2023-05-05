@@ -26,7 +26,11 @@ public class GroupConfigResponseVO {
 
     private String description;
 
-    private List<String> onlinePodList;
+    private Integer idGeneratorMode;
+
+    private String idGeneratorModeName;
+
+     private List<String> onlinePodList;
 
     private LocalDateTime createDt;
 

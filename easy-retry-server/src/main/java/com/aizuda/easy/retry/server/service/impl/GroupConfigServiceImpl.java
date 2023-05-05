@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.server.service.impl;
 
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.HashUtil;
+import com.aizuda.easy.retry.common.core.enums.IdGeneratorMode;
 import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.GroupConfigMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.NotifyConfigMapper;
@@ -70,7 +71,6 @@ public class GroupConfigServiceImpl implements GroupConfigService {
     private GroupConfigConverter groupConfigConverter = new GroupConfigConverter();
     private NotifyConfigConverter notifyConfigConverter = new NotifyConfigConverter();
     private SceneConfigConverter sceneConfigConverter = new SceneConfigConverter();
-    private GroupConfigResponseVOConverter groupConfigResponseVOConverter = new GroupConfigResponseVOConverter();
 
     @Override
     @Transactional
@@ -154,11 +154,14 @@ public class GroupConfigServiceImpl implements GroupConfigService {
 
         PageResult<List<GroupConfigResponseVO>> pageResult = new PageResult<>(groupConfigPageDTO.getCurrent(), groupConfigPageDTO.getSize(), groupConfigPageDTO.getTotal());
 
+        List<GroupConfigResponseVO> responseVOList = GroupConfigResponseVOConverter.INSTANCE.toGroupConfigResponseVO(records);
 
-        List<GroupConfigResponseVO> responseVOList = groupConfigResponseVOConverter.batchConvert(records);
         for (GroupConfigResponseVO groupConfigResponseVO : responseVOList) {
             List<ServerNode> serverNodes = serverNodeMapper.selectList(new LambdaQueryWrapper<ServerNode>().eq(ServerNode::getGroupName, groupConfigResponseVO.getGroupName()));
             groupConfigResponseVO.setOnlinePodList(serverNodes.stream().map(serverNode -> serverNode.getHostIp() + ":" + serverNode.getHostPort()).collect(Collectors.toList()));
+            Optional.ofNullable(IdGeneratorMode.modeOf(groupConfigResponseVO.getIdGeneratorMode())).ifPresent(idGeneratorMode -> {
+                groupConfigResponseVO.setIdGeneratorModeName(idGeneratorMode.getDesc());
+            });
         }
 
         pageResult.setData(responseVOList);
@@ -181,7 +184,14 @@ public class GroupConfigServiceImpl implements GroupConfigService {
     @Override
     public GroupConfigResponseVO getGroupConfigByGroupName(String groupName) {
         GroupConfig groupConfig = groupConfigMapper.selectOne(new LambdaQueryWrapper<GroupConfig>().eq(GroupConfig::getGroupName, groupName));
-        return groupConfigResponseVOConverter.convert(groupConfig);
+
+        GroupConfigResponseVO groupConfigResponseVO = GroupConfigResponseVOConverter.INSTANCE.toGroupConfigResponseVO(groupConfig);
+
+        Optional.ofNullable(IdGeneratorMode.modeOf(groupConfig.getIdGeneratorMode())).ifPresent(idGeneratorMode -> {
+            groupConfigResponseVO.setIdGeneratorModeName(idGeneratorMode.getDesc());
+        });
+
+        return groupConfigResponseVO;
     }
 
     @Override

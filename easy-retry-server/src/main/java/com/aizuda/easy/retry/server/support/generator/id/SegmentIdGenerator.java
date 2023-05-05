@@ -108,7 +108,7 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
             t.setDaemon(true);
             return t;
         });
-        service.scheduleWithFixedDelay(() -> updateCacheFromDb(), 60, 60, TimeUnit.SECONDS);
+        service.scheduleWithFixedDelay(this::updateCacheFromDb, 60, 60, TimeUnit.SECONDS);
     }
 
     private void updateCacheFromDb() {

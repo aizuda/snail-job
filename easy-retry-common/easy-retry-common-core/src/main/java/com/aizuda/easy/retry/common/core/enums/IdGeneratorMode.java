@@ -21,4 +21,14 @@ public enum IdGeneratorMode {
 
     private final String desc;
 
+    public static IdGeneratorMode modeOf(int mode) {
+        for (IdGeneratorMode value : IdGeneratorMode.values()) {
+            if (value.getMode() == mode) {
+                return value;
+            }
+        }
+
+        return null;
+    }
+
 }
