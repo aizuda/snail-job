@@ -103,6 +103,10 @@ export default {
           dataIndex: 'groupPartition',
           needTotal: true
         },
+         {
+          title: 'ID生成模式',
+          dataIndex: 'idGeneratorModeName'
+        },
         {
           title: '更新时间',
           dataIndex: 'updateDt',

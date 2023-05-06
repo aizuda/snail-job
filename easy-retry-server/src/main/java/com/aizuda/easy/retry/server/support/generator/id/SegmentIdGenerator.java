@@ -20,11 +20,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -173,7 +171,7 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
                     if (!buffer.isInitOk()) {
                         try {
                             updateSegmentFromDb(key, buffer.getCurrent());
-                            LogUtils.info(log, "Init buffer. Update leafkey {} {} from db", key, buffer.getCurrent());
+                            LogUtils.info(log, "Init buffer. Update key {} {} from db", key, buffer.getCurrent());
                             buffer.setInitOk(true);
                         } catch (Exception e) {
                             LogUtils.warn(log, "Init buffer {} exception", buffer.getCurrent(), e);
@@ -293,7 +291,7 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
             roll += 1;
             if(roll > 10000) {
                 try {
-                    TimeUnit.MILLISECONDS.sleep(2);
+                    TimeUnit.MILLISECONDS.sleep(20);
                     break;
                 } catch (InterruptedException e) {
                     LogUtils.warn(log,"Thread {} Interrupted",Thread.currentThread().getName());
