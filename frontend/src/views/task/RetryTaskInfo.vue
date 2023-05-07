@@ -4,17 +4,17 @@
       <div></div>
     </page-header-wrapper>
     <a-card :bordered="false">
-      <a-descriptions title="">
+      <a-descriptions title="" bordered>
         <a-descriptions-item label="组名称">
           {{ retryTaskInfo.groupName }}
         </a-descriptions-item>
         <a-descriptions-item label="场景名称">
           {{ retryTaskInfo.sceneName }}
         </a-descriptions-item>
-        <a-descriptions-item label="业务id" span="2">
+        <a-descriptions-item label="幂等id">
           {{ retryTaskInfo.idempotentId }}
         </a-descriptions-item>
-        <a-descriptions-item label="唯一id" span="2">
+        <a-descriptions-item label="唯一id">
           {{ retryTaskInfo.uniqueId }}
         </a-descriptions-item>
         <a-descriptions-item label="业务编号">
@@ -32,14 +32,14 @@
         <a-descriptions-item label="更新时间">
           {{ retryTaskInfo.updateDt }}
         </a-descriptions-item>
-        <a-descriptions-item label="执行器名称" span="2">
+        <a-descriptions-item label="执行器名称" span="3">
           {{ retryTaskInfo.executorName }}
-        </a-descriptions-item>
-        <a-descriptions-item label="扩展参数" span="2">
-          {{ retryTaskInfo.extAttrs }}
         </a-descriptions-item>
         <a-descriptions-item label="参数" span="3">
           {{ retryTaskInfo.argsStr }}
+        </a-descriptions-item>
+        <a-descriptions-item label="扩展参数" span="3">
+          {{ retryTaskInfo.extAttrs }}
         </a-descriptions-item>
       </a-descriptions>
     </a-card>

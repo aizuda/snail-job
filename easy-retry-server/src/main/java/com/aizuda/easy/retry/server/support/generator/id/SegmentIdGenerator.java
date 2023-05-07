@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -61,8 +63,10 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
      */
     private static final long SEGMENT_DURATION = 15 * 60 * 1000L;
 
+    private static final String TIME_FORMAT = "yyyyMMddHHmmss";
+
     private ThreadPoolExecutor service = new ThreadPoolExecutor(5, 10, 60L, TimeUnit.SECONDS,
-        new LinkedBlockingDeque<>(5000), new UpdateThreadFactory());
+            new LinkedBlockingDeque<>(5000), new UpdateThreadFactory());
 
     private volatile boolean initOK = false;
     private Map<String, SegmentBuffer> cache = new ConcurrentHashMap<>();
@@ -114,7 +118,7 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
         StopWatch sw = new Slf4JStopWatch();
         try {
             List<SequenceAlloc> sequenceAllocs = sequenceAllocMapper
-                .selectList(new LambdaQueryWrapper<SequenceAlloc>().select(SequenceAlloc::getGroupName));
+                    .selectList(new LambdaQueryWrapper<SequenceAlloc>().select(SequenceAlloc::getGroupName));
             if (CollectionUtils.isEmpty(sequenceAllocs)) {
                 return;
             }
@@ -125,9 +129,9 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
             Set<String> insertTagsSet = new HashSet<>(dbTags);
             Set<String> removeTagsSet = new HashSet<>(cacheTags);
             //db中新加的tags灌进cache
-            for(int i = 0; i < cacheTags.size(); i++){
+            for (int i = 0; i < cacheTags.size(); i++) {
                 String tmp = cacheTags.get(i);
-                if(insertTagsSet.contains(tmp)){
+                if (insertTagsSet.contains(tmp)) {
                     insertTagsSet.remove(tmp);
                 }
             }
@@ -142,9 +146,9 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
                 LogUtils.info(log, "Add tag {} from db to IdCache, SegmentBuffer {}", tag, buffer);
             }
             //cache中已失效的tags从cache删除
-            for(int i = 0; i < dbTags.size(); i++){
+            for (int i = 0; i < dbTags.size(); i++) {
                 String tmp = dbTags.get(i);
-                if(removeTagsSet.contains(tmp)){
+                if (removeTagsSet.contains(tmp)) {
                     removeTagsSet.remove(tmp);
                 }
             }
@@ -213,11 +217,11 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
             } else {
                 nextStep = nextStep / 2 >= buffer.getMinStep() ? nextStep / 2 : nextStep;
             }
-            LogUtils.info(log,"leafKey[{}], step[{}], duration[{}mins], nextStep[{}]", key, buffer.getStep(), String.format("%.2f",((double)duration / (1000 * 60))), nextStep);
+            LogUtils.info(log, "leafKey[{}], step[{}], duration[{}mins], nextStep[{}]", key, buffer.getStep(), String.format("%.2f", ((double) duration / (1000 * 60))), nextStep);
 
             sequenceAllocMapper.updateMaxIdByCustomStep(nextStep, key);
             sequenceAlloc = sequenceAllocMapper
-                .selectOne(new LambdaQueryWrapper<SequenceAlloc>().eq(SequenceAlloc::getGroupName, key));
+                    .selectOne(new LambdaQueryWrapper<SequenceAlloc>().eq(SequenceAlloc::getGroupName, key));
             buffer.setUpdateTimestamp(System.currentTimeMillis());
             buffer.setStep(nextStep);
             buffer.setMinStep(sequenceAlloc.getStep());//leafAlloc的step为DB中的step
@@ -242,7 +246,7 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
                         try {
                             updateSegmentFromDb(buffer.getKey(), next);
                             updateOk = true;
-                            LogUtils.info(log,"update segment {} from db {}", buffer.getKey(), next);
+                            LogUtils.info(log, "update segment {} from db {}", buffer.getKey(), next);
                         } catch (Exception e) {
                             LogUtils.warn(log, buffer.getKey() + " updateSegmentFromDb exception", e);
                         } finally {
@@ -276,7 +280,7 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
                     buffer.switchPos();
                     buffer.setNextReady(false);
                 } else {
-                    LogUtils.error(log,"Both two segments in {} are not ready!", buffer);
+                    LogUtils.error(log, "Both two segments in {} are not ready!", buffer);
                     return Long.toString(EXCEPTION_ID_TWO_SEGMENTS_ARE_NULL);
                 }
             } finally {
@@ -289,12 +293,12 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
         int roll = 0;
         while (buffer.getThreadRunning().get()) {
             roll += 1;
-            if(roll > 10000) {
+            if (roll > 10000) {
                 try {
                     TimeUnit.MILLISECONDS.sleep(20);
                     break;
                 } catch (InterruptedException e) {
-                    LogUtils.warn(log,"Thread {} Interrupted",Thread.currentThread().getName());
+                    LogUtils.warn(log, "Thread {} Interrupted", Thread.currentThread().getName());
                     break;
                 }
             }
@@ -308,7 +312,8 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
 
     @Override
     public String idGenerator(String group) {
-        return get(group);
+        String time = LocalDateTime.now().format(DateTimeFormatter.ofPattern(TIME_FORMAT));
+        return time.concat(get(group));
     }
 
 }
