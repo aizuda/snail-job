@@ -1,7 +1,7 @@
 package com.aizuda.easy.retry.client.core.client.response;
 
 import com.aizuda.easy.retry.common.core.log.LogUtils;
-import com.aizuda.easy.retry.common.core.model.XRetryRequest;
+import com.aizuda.easy.retry.common.core.model.EasyRetryRequest;
 import com.aizuda.easy.retry.common.core.model.NettyResult;
 import lombok.extern.slf4j.Slf4j;
 
@@ -20,11 +20,11 @@ public class EasyRetryResponse {
 
     private static final ConcurrentMap<String, Consumer<NettyResult>> responsePool = new ConcurrentHashMap<>();
 
-    public EasyRetryResponse(XRetryRequest retryRequest, Consumer<NettyResult> callable) {
+    public EasyRetryResponse(EasyRetryRequest retryRequest, Consumer<NettyResult> callable) {
         responsePool.put(retryRequest.getRequestId(), callable);
     }
 
-    public static void cache(XRetryRequest retryRequest, Consumer<NettyResult> callable) {
+    public static void cache(EasyRetryRequest retryRequest, Consumer<NettyResult> callable) {
         responsePool.put(retryRequest.getRequestId(), callable);
     }
 

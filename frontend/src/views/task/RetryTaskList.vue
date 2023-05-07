@@ -144,41 +144,54 @@ export default {
           fixed: 'left'
         },
         {
+          title: '唯一id',
+          dataIndex: 'uniqueId',
+          width: '8%'
+        },
+        {
           title: '组名称',
           dataIndex: 'groupName',
-          ellipsis: true
+          ellipsis: true,
+          width: '10%'
         },
         {
           title: '场景名称',
-          dataIndex: 'sceneName'
+          dataIndex: 'sceneName',
+          width: '10%'
         },
         {
           title: '幂等id',
-          dataIndex: 'idempotentId'
+          dataIndex: 'idempotentId',
+          width: '10%'
         },
         {
           title: '业务编号',
-          dataIndex: 'bizNo'
+          dataIndex: 'bizNo',
+          width: '10%'
         },
         {
           title: '下次触发时间',
           dataIndex: 'nextTriggerAt',
-          needTotal: false
+          needTotal: false,
+          width: '10%'
         },
         {
           title: '重试次数',
           dataIndex: 'retryCount',
-          sorter: true
+          sorter: true,
+          width: '10%'
         },
         {
           title: '重试状态',
           dataIndex: 'retryStatus',
-          customRender: (text) => this.retryStatus[text]
+          customRender: (text) => this.retryStatus[text],
+          width: '5%'
         },
         {
           title: '更新时间',
           dataIndex: 'updateDt',
-          sorter: true
+          sorter: true,
+          width: '10%'
         },
         {
           title: '操作',

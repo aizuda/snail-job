@@ -6,7 +6,7 @@ import com.aizuda.easy.retry.server.service.RetryService;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.model.NettyResult;
-import com.aizuda.easy.retry.common.core.model.XRetryRequest;
+import com.aizuda.easy.retry.common.core.model.EasyRetryRequest;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
@@ -42,7 +42,7 @@ public class ReportRetryInfoHttpRequestHandler extends PostHttpRequestHandler {
     public String doHandler(String content, UrlQuery urlQuery, HttpHeaders  headers) {
         LogUtils.info(log, "批量上报重试数据 content:[{}]", content);
 
-        XRetryRequest retryRequest = JsonUtil.parseObject(content, XRetryRequest.class);
+        EasyRetryRequest retryRequest = JsonUtil.parseObject(content, EasyRetryRequest.class);
 
         try {
             Boolean aBoolean = retryService.batchReportRetry(JsonUtil.parseList(JsonUtil.toJsonString(retryRequest.getArgs()), RetryTaskDTO.class));

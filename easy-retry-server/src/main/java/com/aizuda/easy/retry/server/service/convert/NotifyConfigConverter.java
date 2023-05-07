@@ -1,29 +1,22 @@
 package com.aizuda.easy.retry.server.service.convert;
 
 import com.aizuda.easy.retry.server.persistence.mybatis.po.NotifyConfig;
-import com.aizuda.easy.retry.common.core.covert.AbstractConverter;
 import com.aizuda.easy.retry.server.web.model.request.GroupConfigRequestVO;
+import org.mapstruct.Mapper;
+import org.mapstruct.factory.Mappers;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
  * @author: www.byteblogs.com
  * @date : 2021-11-26 13:43
  */
-public class NotifyConfigConverter extends AbstractConverter<GroupConfigRequestVO.NotifyConfigVO, NotifyConfig> {
+@Mapper
+public interface NotifyConfigConverter {
 
-    @Override
-    public NotifyConfig convert(GroupConfigRequestVO.NotifyConfigVO notifyConfigVO) {
+    NotifyConfigConverter INSTANCE = Mappers.getMapper(NotifyConfigConverter.class);
 
-        NotifyConfig notifyConfig = convert(notifyConfigVO, NotifyConfig.class);
-        notifyConfig.setUpdateDt(LocalDateTime.now());
+    NotifyConfig convert(GroupConfigRequestVO.NotifyConfigVO notifyConfigVO);
 
-        return notifyConfig;
-    }
-
-    @Override
-    public List<NotifyConfig> batchConvert(List<GroupConfigRequestVO.NotifyConfigVO> notifyConfigVOS) {
-        return null;
-    }
+    List<NotifyConfig> batchConvert(List<GroupConfigRequestVO.NotifyConfigVO> notifyConfigVOS);
 }

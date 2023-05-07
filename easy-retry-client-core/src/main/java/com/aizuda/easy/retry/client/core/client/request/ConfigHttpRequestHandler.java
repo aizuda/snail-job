@@ -5,7 +5,7 @@ import cn.hutool.core.net.url.UrlQuery;
 import com.aizuda.easy.retry.client.core.cache.GroupVersionCache;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.model.NettyResult;
-import com.aizuda.easy.retry.common.core.model.XRetryRequest;
+import com.aizuda.easy.retry.common.core.model.EasyRetryRequest;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.model.dto.ConfigDTO;
 import io.netty.handler.codec.http.HttpMethod;
@@ -50,7 +50,7 @@ public class ConfigHttpRequestHandler extends GetHttpRequestHandler {
     }
 
     @Override
-    public  String body(XRetryRequest retryRequest) {
+    public  String body(EasyRetryRequest retryRequest) {
         return JsonUtil.toJsonString(retryRequest);
     }
 }

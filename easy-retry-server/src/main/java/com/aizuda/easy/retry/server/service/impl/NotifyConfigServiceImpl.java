@@ -18,8 +18,6 @@ import java.util.List;
 @Service
 public class NotifyConfigServiceImpl implements NotifyConfigService {
 
-    private NotifyConfigResponseVOConverter notifyConfigResponseVOConverter = new NotifyConfigResponseVOConverter();
-
     @Autowired
     private NotifyConfigMapper notifyConfigMapper;
 
@@ -27,6 +25,6 @@ public class NotifyConfigServiceImpl implements NotifyConfigService {
     public List<NotifyConfigResponseVO> getNotifyConfigList(String groupName) {
         List<NotifyConfig> notifyConfigs = notifyConfigMapper.selectList(new LambdaQueryWrapper<NotifyConfig>()
                 .eq(NotifyConfig::getGroupName, groupName));
-        return notifyConfigResponseVOConverter.batchConvert(notifyConfigs);
+        return NotifyConfigResponseVOConverter.INSTANCE.batchConvert(notifyConfigs);
     }
 }

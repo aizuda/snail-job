@@ -1,0 +1,27 @@
+package com.aizuda.easy.retry.server.web.controller;
+
+import com.aizuda.easy.retry.common.core.model.Result;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+/**
+ * 系统信息
+ *
+ * @author www.byteblogs.com
+ * @date 2023-05-07
+ * @since 1.2.0
+ */
+@RestController
+@RequestMapping("/system")
+public class SystemInfoController {
+
+    @Value("${version:}")
+    private String version;
+
+    @GetMapping("version")
+    public Result<String> version() {
+        return new Result<>(version);
+    }
+}

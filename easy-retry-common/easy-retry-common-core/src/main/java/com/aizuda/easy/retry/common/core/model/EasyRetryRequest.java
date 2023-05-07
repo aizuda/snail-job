@@ -10,18 +10,18 @@ import java.util.UUID;
  * @since 2.0
  */
 @Data
-public class XRetryRequest {
+public class EasyRetryRequest {
 
    private String requestId;
 
    private Object args;
 
-   public XRetryRequest(Object args) {
+   public EasyRetryRequest(Object args) {
       this.args = args;
       this.requestId = generateRequestId();
    }
 
-   public XRetryRequest() {
+   public EasyRetryRequest() {
 
    }
 

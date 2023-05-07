@@ -1,10 +1,10 @@
 package com.aizuda.easy.retry.server.service.convert;
 
 import com.aizuda.easy.retry.server.persistence.mybatis.po.GroupConfig;
-import com.aizuda.easy.retry.common.core.covert.AbstractConverter;
 import com.aizuda.easy.retry.server.web.model.request.GroupConfigRequestVO;
+import org.mapstruct.Mapper;
+import org.mapstruct.factory.Mappers;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -13,19 +13,12 @@ import java.util.List;
  * @author: www.byteblogs.com
  * @date : 2021-11-26 13:55
  */
-public class GroupConfigConverter extends AbstractConverter<GroupConfigRequestVO, GroupConfig> {
+@Mapper
+public interface GroupConfigConverter {
 
-    @Override
-    public GroupConfig convert(GroupConfigRequestVO groupConfigRequestVO) {
+    GroupConfigConverter INSTANCE = Mappers.getMapper(GroupConfigConverter.class);
 
-        GroupConfig groupConfig = convert(groupConfigRequestVO, GroupConfig.class);
-        groupConfig.setUpdateDt(LocalDateTime.now());
+    GroupConfig convert(GroupConfigRequestVO groupConfigRequestVO);
 
-        return groupConfig;
-    }
-
-    @Override
-    public List<GroupConfig> batchConvert(List<GroupConfigRequestVO> groupConfigRequestVOS) {
-        return null;
-    }
+    List<GroupConfig> batchConvert(List<GroupConfigRequestVO> groupConfigRequestVOS);
 }

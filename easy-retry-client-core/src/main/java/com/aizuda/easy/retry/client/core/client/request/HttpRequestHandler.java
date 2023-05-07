@@ -1,7 +1,7 @@
 package com.aizuda.easy.retry.client.core.client.request;
 
 import com.aizuda.easy.retry.common.core.model.NettyResult;
-import com.aizuda.easy.retry.common.core.model.XRetryRequest;
+import com.aizuda.easy.retry.common.core.model.EasyRetryRequest;
 import io.netty.handler.codec.http.HttpMethod;
 
 import java.util.function.Consumer;
@@ -18,6 +18,6 @@ public interface HttpRequestHandler {
 
     Consumer<NettyResult> callable();
 
-     String body(XRetryRequest retryRequest);
+     String body(EasyRetryRequest retryRequest);
 
 }

@@ -55,8 +55,6 @@ public class RetryTaskServiceImpl implements RetryTaskService {
     @Autowired
     private ClientNodeAllocateHandler clientNodeAllocateHandler;
 
-    RetryTaskResponseVOConverter retryTaskResponseVOConverter = new RetryTaskResponseVOConverter();
-
     @Override
     public PageResult<List<RetryTaskResponseVO>> getRetryTaskPage(RetryTaskQueryVO queryVO) {
 
@@ -79,6 +77,9 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         if (StringUtils.isNotBlank(queryVO.getIdempotentId())) {
             retryTaskLambdaQueryWrapper.eq(RetryTask::getIdempotentId, queryVO.getIdempotentId());
         }
+        if (StringUtils.isNotBlank(queryVO.getUniqueId())) {
+            retryTaskLambdaQueryWrapper.eq(RetryTask::getUniqueId, queryVO.getUniqueId());
+        }
         if (Objects.nonNull(queryVO.getRetryStatus())) {
             retryTaskLambdaQueryWrapper.eq(RetryTask::getRetryStatus, queryVO.getRetryStatus());
         }
@@ -87,16 +88,15 @@ public class RetryTaskServiceImpl implements RetryTaskService {
 
         retryTaskLambdaQueryWrapper.select(RetryTask::getId, RetryTask::getBizNo, RetryTask::getIdempotentId,
             RetryTask::getGroupName, RetryTask::getNextTriggerAt, RetryTask::getRetryCount,
-            RetryTask::getRetryStatus, RetryTask::getUpdateDt, RetryTask::getSceneName);
+            RetryTask::getRetryStatus, RetryTask::getUpdateDt, RetryTask::getSceneName, RetryTask::getUniqueId);
         pageDTO = retryTaskMapper.selectPage(pageDTO, retryTaskLambdaQueryWrapper.orderByDesc(RetryTask::getCreateDt));
-        return new PageResult<>(pageDTO, retryTaskResponseVOConverter.batchConvert(pageDTO.getRecords()));
+        return new PageResult<>(pageDTO, RetryTaskResponseVOConverter.INSTANCE.toRetryTaskResponseVO(pageDTO.getRecords()));
     }
 
     @Override
     public RetryTaskResponseVO getRetryTaskById(String groupName, Long id) {
         RequestDataHelper.setPartition(groupName);
-        RetryTask retryTask = retryTaskMapper.selectById(id);
-        return retryTaskResponseVOConverter.convert(retryTask);
+        return RetryTaskResponseVOConverter.INSTANCE.toRetryTaskResponseVO(retryTaskMapper.selectById(id));
     }
 
     @Override

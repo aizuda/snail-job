@@ -14,6 +14,8 @@ public class RetryTaskResponseVO {
 
     private Long id;
 
+    private String uniqueId;
+
     private String groupName;
 
     private String sceneName;

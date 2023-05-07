@@ -1,7 +1,7 @@
 <template>
   <a-card :bordered="false">
     <div class="table-page-search-wrapper">
-      <a-form layout="inline">
+      <a-form layout="inline" v-if="showSearch">
         <a-row :gutter="48">
           <a-col :md="8" :sm="24">
             <a-form-item label="组名称">
@@ -41,7 +41,7 @@
           </a-col>
         </a-row>
       </a-form>
-    </div>
+    </div >
 
     <s-table
       ref="table"
@@ -81,6 +81,20 @@ export default {
     ATextarea,
     STable
   },
+  props: {
+    showSearch: {
+      type: Boolean,
+      default: true
+    }
+    // groupName: {
+    //   type: String,
+    //   default: ''
+    // },
+    // uniqueId: {
+    //   type: String,
+    //   default: ''
+    // }
+  },
   data () {
     return {
       record: '',
@@ -99,35 +113,46 @@ export default {
         {
           title: '#',
           scopedSlots: { customRender: 'serial' },
-          width: '50px'
+          width: '5%'
+        },
+        {
+          title: 'uniqueId',
+          dataIndex: 'uniqueId',
+          width: '5%'
         },
         {
           title: '组名称',
           dataIndex: 'groupName',
-          ellipsis: true
+          ellipsis: true,
+          width: '10%'
         },
         {
           title: '场景id',
           dataIndex: 'sceneName',
-          ellipsis: true
+          ellipsis: true,
+          width: '10%'
         },
         {
           title: '幂等id',
-          dataIndex: 'idempotentId'
+          dataIndex: 'idempotentId',
+          width: '10%'
         },
         {
           title: '业务编号',
           dataIndex: 'bizNo',
-          ellipsis: true
+          ellipsis: true,
+          width: '10%'
         },
         {
           title: '重试状态',
           dataIndex: 'retryStatus',
-          customRender: (text) => this.retryStatus[text]
+          customRender: (text) => this.retryStatus[text],
+          width: '5%'
         },
         {
           title: '失败原因',
-          dataIndex: 'errorMessage'
+          dataIndex: 'errorMessage',
+          width: '25%'
         },
         {
           title: '触发时间',
@@ -146,6 +171,11 @@ export default {
       ],
       // 加载数据方法 必须为 Promise 对象
       loadData: parameter => {
+        if (this.groupName !== '' && this.uniqueId !== '') {
+          parameter['groupName'] = this.groupName
+          parameter['uniqueId'] = this.uniqueId
+        }
+        console.log('this.uniqueId', this.uniqueId)
         console.log('loadData.parameter', parameter)
         return getRetryTaskLogPage(Object.assign(parameter, this.queryParam))
           .then(res => {
@@ -165,7 +195,9 @@ export default {
       },
       optionAlertShow: false,
       groupNameList: [],
-      sceneList: []
+      sceneList: [],
+      groupName: '',
+      uniqueId: ''
     }
   },
   created () {
@@ -176,6 +208,11 @@ export default {
   methods: {
     handleNew () {
       this.$router.push('/form/basic-config')
+    },
+    refreshTable (v) {
+      this.groupName = v.groupName
+      this.uniqueId = v.uniqueId
+      this.$refs.table.refresh(true)
     },
     handleChange (value) {
       getSceneList({ 'groupName': value }).then(res => {

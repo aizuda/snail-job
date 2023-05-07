@@ -1,27 +1,22 @@
 package com.aizuda.easy.retry.server.service.convert;
 
 import com.aizuda.easy.retry.server.persistence.mybatis.po.SceneConfig;
-import com.aizuda.easy.retry.common.core.covert.AbstractConverter;
 import com.aizuda.easy.retry.server.web.model.request.GroupConfigRequestVO;
+import org.mapstruct.Mapper;
+import org.mapstruct.factory.Mappers;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
  * @author: www.byteblogs.com
  * @date : 2021-11-26 13:49
  */
-public class SceneConfigConverter extends AbstractConverter<GroupConfigRequestVO.SceneConfigVO, SceneConfig> {
+@Mapper
+public interface SceneConfigConverter {
 
-    @Override
-    public SceneConfig convert(GroupConfigRequestVO.SceneConfigVO sceneConfigVO) {
-        SceneConfig sceneConfig = convert(sceneConfigVO, SceneConfig.class);
-        sceneConfig.setUpdateDt(LocalDateTime.now());
-        return sceneConfig;
-    }
+    SceneConfigConverter INSTANCE = Mappers.getMapper(SceneConfigConverter.class);
 
-    @Override
-    public List<SceneConfig> batchConvert(List<GroupConfigRequestVO.SceneConfigVO> sceneConfigVOS) {
-        return null;
-    }
+    SceneConfig convert(GroupConfigRequestVO.SceneConfigVO sceneConfigVO);
+
+    List<SceneConfig> batchConvert(List<GroupConfigRequestVO.SceneConfigVO> sceneConfigVOS);
 }

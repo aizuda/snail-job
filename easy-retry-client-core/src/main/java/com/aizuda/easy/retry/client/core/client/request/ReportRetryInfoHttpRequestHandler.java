@@ -4,7 +4,7 @@ import cn.hutool.core.net.url.UrlBuilder;
 import cn.hutool.core.net.url.UrlQuery;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.model.NettyResult;
-import com.aizuda.easy.retry.common.core.model.XRetryRequest;
+import com.aizuda.easy.retry.common.core.model.EasyRetryRequest;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import io.netty.handler.codec.http.HttpMethod;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +40,7 @@ public class ReportRetryInfoHttpRequestHandler extends PostHttpRequestHandler {
     }
 
     @Override
-    public  String body(XRetryRequest retryRequest) {
+    public  String body(EasyRetryRequest retryRequest) {
         return JsonUtil.toJsonString(retryRequest);
     }
 }

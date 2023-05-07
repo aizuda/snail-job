@@ -17,7 +17,7 @@ import com.aizuda.easy.retry.common.core.alarm.AltinAlarmFactory;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.enums.NotifySceneEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
-import com.aizuda.easy.retry.common.core.model.XRetryRequest;
+import com.aizuda.easy.retry.common.core.model.EasyRetryRequest;
 import com.aizuda.easy.retry.common.core.util.EnvironmentUtils;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.common.core.window.Listener;
@@ -57,10 +57,10 @@ public class ReportListener implements Listener<RetryTaskDTO> {
             retryExecutor.call(retryer, () -> {
                 LogUtils.info(log, "批量上报");
 
-                XRetryRequest xRetryRequest = new XRetryRequest(list);
+                EasyRetryRequest easyRetryRequest = new EasyRetryRequest(list);
                 ReportRetryInfoHttpRequestHandler requestHandler = SpringContext.getBeanByType(ReportRetryInfoHttpRequestHandler.class);
-                EasyRetryResponse.cache(xRetryRequest, requestHandler.callable());
-                NettyHttpConnectClient.send(requestHandler.method(), requestHandler.getHttpUrl(new RequestParam()), requestHandler.body(xRetryRequest));
+                EasyRetryResponse.cache(easyRetryRequest, requestHandler.callable());
+                NettyHttpConnectClient.send(requestHandler.method(), requestHandler.getHttpUrl(new RequestParam()), requestHandler.body(easyRetryRequest));
 
                 return null;
             }, throwable -> {

@@ -1,8 +1,9 @@
 package com.aizuda.easy.retry.server.service.convert;
 
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask;
-import com.aizuda.easy.retry.common.core.covert.AbstractConverter;
 import com.aizuda.easy.retry.server.web.model.response.RetryTaskResponseVO;
+import org.mapstruct.Mapper;
+import org.mapstruct.factory.Mappers;
 
 import java.util.List;
 
@@ -11,16 +12,12 @@ import java.util.List;
  * @date 2022-02-27
  * @since 2.0
  */
-public class RetryTaskResponseVOConverter extends AbstractConverter<RetryTask, RetryTaskResponseVO> {
+@Mapper
+public interface RetryTaskResponseVOConverter {
 
-    @Override
-    public RetryTaskResponseVO convert(RetryTask retryTask) {
-        RetryTaskResponseVO responseVO = convert(retryTask, RetryTaskResponseVO.class);
-        return responseVO;
-    }
+    RetryTaskResponseVOConverter INSTANCE = Mappers.getMapper(RetryTaskResponseVOConverter.class);
 
-    @Override
-    public List<RetryTaskResponseVO> batchConvert(List<RetryTask> retryTasks) {
-        return batchConvert(retryTasks, RetryTaskResponseVO.class);
-    }
+    RetryTaskResponseVO toRetryTaskResponseVO(RetryTask retryTask);
+
+    List<RetryTaskResponseVO> toRetryTaskResponseVO(List<RetryTask> retryTasks);
 }

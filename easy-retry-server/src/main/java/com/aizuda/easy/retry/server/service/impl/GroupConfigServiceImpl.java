@@ -68,10 +68,6 @@ public class GroupConfigServiceImpl implements GroupConfigService {
     @Value("${easy-retry.step:100}")
     private Integer step;
 
-    private GroupConfigConverter groupConfigConverter = new GroupConfigConverter();
-    private NotifyConfigConverter notifyConfigConverter = new NotifyConfigConverter();
-    private SceneConfigConverter sceneConfigConverter = new SceneConfigConverter();
-
     @Override
     @Transactional
     public Boolean addGroup(GroupConfigRequestVO groupConfigRequestVO) {
@@ -170,7 +166,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
     }
 
     private void doSaveGroupConfig(GroupConfigRequestVO groupConfigRequestVO) {
-        GroupConfig groupConfig = groupConfigConverter.convert(groupConfigRequestVO);
+        GroupConfig groupConfig = GroupConfigConverter.INSTANCE.convert(groupConfigRequestVO);
         groupConfig.setCreateDt(LocalDateTime.now());
         groupConfig.setVersion(1);
         groupConfig.setGroupName(groupConfigRequestVO.getGroupName());
@@ -213,7 +209,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
 
     private void doSaveNotifyConfig(String groupName, GroupConfigRequestVO.NotifyConfigVO notifyConfigVO) {
 
-        NotifyConfig notifyConfig = notifyConfigConverter.convert(notifyConfigVO);
+        NotifyConfig notifyConfig = NotifyConfigConverter.INSTANCE.convert(notifyConfigVO);
         notifyConfig.setGroupName(groupName);
         notifyConfig.setCreateDt(LocalDateTime.now());
 
@@ -226,7 +222,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
 
             for (GroupConfigRequestVO.SceneConfigVO sceneConfigVO : sceneList) {
 
-                SceneConfig sceneConfig = sceneConfigConverter.convert(sceneConfigVO);
+                SceneConfig sceneConfig = SceneConfigConverter.INSTANCE.convert(sceneConfigVO);
                 sceneConfig.setCreateDt(LocalDateTime.now());
                 sceneConfig.setGroupName(groupName);
 
@@ -256,7 +252,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
                             1 == sceneConfigMapper.deleteById(oldSceneConfig.getId()),
                         () -> new EasyRetryServerException("failed to delete scene. [{}]", sceneConfigVO.getSceneName()));
                 } else {
-                    SceneConfig sceneConfig = sceneConfigConverter.convert(sceneConfigVO);
+                    SceneConfig sceneConfig = SceneConfigConverter.INSTANCE.convert(sceneConfigVO);
                     sceneConfig.setGroupName(groupConfigRequestVO.getGroupName());
 
                     Assert.isTrue(1 == sceneConfigMapper.update(sceneConfig,
@@ -280,7 +276,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
 
         for (GroupConfigRequestVO.NotifyConfigVO notifyConfigVO : notifyList) {
 
-            NotifyConfig notifyConfig = notifyConfigConverter.convert(notifyConfigVO);
+            NotifyConfig notifyConfig = NotifyConfigConverter.INSTANCE.convert(notifyConfigVO);
             notifyConfig.setGroupName(groupConfigRequestVO.getGroupName());
             notifyConfig.setCreateDt(LocalDateTime.now());
             if (Objects.isNull(notifyConfigVO.getId())) {

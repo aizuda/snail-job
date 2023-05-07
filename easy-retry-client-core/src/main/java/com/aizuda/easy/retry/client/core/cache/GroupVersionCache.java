@@ -7,7 +7,7 @@ import com.aizuda.easy.retry.client.core.Lifecycle;
 import com.aizuda.easy.retry.client.core.client.NettyHttpConnectClient;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
-import com.aizuda.easy.retry.common.core.model.XRetryRequest;
+import com.aizuda.easy.retry.common.core.model.EasyRetryRequest;
 import com.aizuda.easy.retry.server.model.dto.ConfigDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
@@ -60,12 +60,12 @@ public class GroupVersionCache implements Lifecycle {
     public void start() {
 
         try {
-            XRetryRequest xRetryRequest = new XRetryRequest(getVersion());
+            EasyRetryRequest easyRetryRequest = new EasyRetryRequest(getVersion());
 
             ConfigHttpRequestHandler configHttpRequestHandler = SpringContext.getBeanByType(ConfigHttpRequestHandler.class);
-            EasyRetryResponse.cache(xRetryRequest, configHttpRequestHandler.callable());
+            EasyRetryResponse.cache(easyRetryRequest, configHttpRequestHandler.callable());
             NettyHttpConnectClient.send(configHttpRequestHandler.method(), configHttpRequestHandler.getHttpUrl(
-                    new RequestParam()), configHttpRequestHandler.body(xRetryRequest));
+                    new RequestParam()), configHttpRequestHandler.body(easyRetryRequest));
 
         } catch (Exception e) {
             LogUtils.error(log, "同步版本失败", e);

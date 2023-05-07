@@ -35,10 +35,18 @@ const api = {
   countActivePod: '/dashboard/active-pod/count',
   rankSceneQuantity: '/dashboard/scene/rank',
   lineDispatchQuantity: '/dashboard/dispatch/line',
-  totalPartition: '/group/partition'
+  totalPartition: '/group/partition',
+  systemVersion: '/system/version'
 }
 
 export default api
+
+export function systemVersion () {
+  return request({
+    url: api.systemVersion,
+    method: 'get'
+  })
+}
 
 export function batchDelete (data) {
   return request({

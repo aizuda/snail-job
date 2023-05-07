@@ -17,4 +17,6 @@ public class RetryTaskLogQueryVO extends BaseQueryVO {
     private String bizNo;
 
     private String idempotentId;
+
+    private String uniqueId;
 }

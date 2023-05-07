@@ -13,6 +13,8 @@ public class RetryTaskLogResponseVO {
 
     private Long id;
 
+    private String uniqueId;
+
     private String groupName;
 
     private String sceneName;

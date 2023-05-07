@@ -4,6 +4,7 @@ import com.aizuda.easy.retry.server.support.handler.ClientRegisterHandler;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 
 /**
@@ -19,7 +20,6 @@ public class ClientRegisterHandlerTest {
     @SneakyThrows
     @Test
     public void syncVersion() {
-
         clientRegisterHandler.syncVersion(null, "example_group", "127.0.0.1", 8089, "/");
 
     }
