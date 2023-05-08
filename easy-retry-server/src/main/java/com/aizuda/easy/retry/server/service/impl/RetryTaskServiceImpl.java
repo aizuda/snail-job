@@ -7,11 +7,14 @@ import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.server.config.RequestDataHelper;
 import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskMapper;
+import com.aizuda.easy.retry.server.persistence.mybatis.po.GroupConfig;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.ServerNode;
+import com.aizuda.easy.retry.server.persistence.support.ConfigAccess;
 import com.aizuda.easy.retry.server.service.RetryTaskService;
 import com.aizuda.easy.retry.server.service.convert.RetryTaskConverter;
 import com.aizuda.easy.retry.server.service.convert.RetryTaskResponseVOConverter;
+import com.aizuda.easy.retry.server.support.generator.IdGenerator;
 import com.aizuda.easy.retry.server.support.handler.ClientNodeAllocateHandler;
 import com.aizuda.easy.retry.server.support.strategy.WaitStrategies;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
@@ -27,6 +30,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -46,7 +50,7 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class RetryTaskServiceImpl implements RetryTaskService {
 
-    public static final String URL = "http://{0}:{1}/{2}/retry/generate/biz-id/v1";
+    public static final String URL = "http://{0}:{1}/{2}/retry/generate/idempotent-id/v1";
 
     @Autowired
     private RetryTaskMapper retryTaskMapper;
@@ -54,6 +58,12 @@ public class RetryTaskServiceImpl implements RetryTaskService {
     private RestTemplate restTemplate;
     @Autowired
     private ClientNodeAllocateHandler clientNodeAllocateHandler;
+    @Autowired
+    private List<IdGenerator> idGeneratorList;
+
+    @Autowired
+    @Qualifier("configAccessProcessor")
+    private ConfigAccess configAccess;
 
     @Override
     public PageResult<List<RetryTaskResponseVO>> getRetryTaskPage(RetryTaskQueryVO queryVO) {
@@ -143,7 +153,7 @@ public class RetryTaskServiceImpl implements RetryTaskService {
 
         retryTask.setNextTriggerAt(
             WaitStrategies.randomWait(1, TimeUnit.SECONDS, 60, TimeUnit.SECONDS).computeRetryTime(null));
-
+        retryTask.setUniqueId(getIdGenerator(retryTask.getGroupName()));
         RequestDataHelper.setPartition(retryTaskRequestVO.getGroupName());
         return retryTaskMapper.insert(retryTask);
     }
@@ -190,5 +200,23 @@ public class RetryTaskServiceImpl implements RetryTaskService {
     public Integer deleteRetryTask(final BatchDeleteRetryTaskVO requestVO) {
         RequestDataHelper.setPartition(requestVO.getGroupName());
         return retryTaskMapper.deleteBatchIds(requestVO.getIds());
+    }
+
+    /**
+     * 获取分布式id
+     *
+     * @param groupName 组id
+     * @return 分布式id
+     */
+    private String getIdGenerator(String groupName) {
+
+        GroupConfig groupConfig = configAccess.getGroupConfigByGroupName(groupName);
+        for (final IdGenerator idGenerator : idGeneratorList) {
+            if (idGenerator.supports(groupConfig.getIdGeneratorMode())) {
+                return idGenerator.idGenerator(groupName);
+            }
+        }
+
+        throw new EasyRetryServerException("id generator mode not configured. [{}]", groupName);
     }
 }
