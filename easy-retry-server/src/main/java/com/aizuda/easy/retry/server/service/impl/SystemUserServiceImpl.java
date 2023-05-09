@@ -44,8 +44,6 @@ public class SystemUserServiceImpl implements SystemUserService {
 
     public static final long EXPIRE_TIME = 3600 * 1000;
 
-    private SystemUserResponseVOConverter systemUserResponseVOConverter = new SystemUserResponseVOConverter();
-
     @Autowired
     private SystemUserMapper systemUserMapper;
     @Autowired
@@ -59,13 +57,13 @@ public class SystemUserServiceImpl implements SystemUserService {
             throw new EasyRetryServerException("用户名或密码错误");
         }
 
-        if (SecureUtil.sha256(systemUser.getPassword()).equals(systemUser.getPassword())) {
+        if (!SecureUtil.sha256(requestVO.getPassword()).equals(systemUser.getPassword())) {
             throw new EasyRetryServerException("用户名或密码错误");
         }
 
         String token = getToken(systemUser);
 
-        SystemUserResponseVO systemUserResponseVO = systemUserResponseVOConverter.convert(systemUser);
+        SystemUserResponseVO systemUserResponseVO = SystemUserResponseVOConverter.INSTANCE.convert(systemUser);
         systemUserResponseVO.setToken(token);
 
         if (RoleEnum.ADMIN.getRoleId().equals(systemUser.getRole())) {
@@ -82,7 +80,7 @@ public class SystemUserServiceImpl implements SystemUserService {
 
     @Override
     public SystemUserResponseVO getUserInfo(SystemUser systemUser) {
-        SystemUserResponseVO systemUserResponseVO = systemUserResponseVOConverter.convert(systemUser);
+        SystemUserResponseVO systemUserResponseVO = SystemUserResponseVOConverter.INSTANCE.convert(systemUser);
 
         if (RoleEnum.ADMIN.getRoleId().equals(systemUser.getRole())) {
             return systemUserResponseVO;
@@ -179,7 +177,7 @@ public class SystemUserServiceImpl implements SystemUserService {
 
         userPageDTO = systemUserMapper.selectPage(userPageDTO, systemUserLambdaQueryWrapper.orderByDesc(SystemUser::getId));
 
-        List<SystemUserResponseVO> userResponseVOList = systemUserResponseVOConverter.batchConvert(userPageDTO.getRecords());
+        List<SystemUserResponseVO> userResponseVOList = SystemUserResponseVOConverter.INSTANCE.batchConvert(userPageDTO.getRecords());
 
         userResponseVOList.stream()
                 .filter(systemUserResponseVO -> systemUserResponseVO.getRole().equals(RoleEnum.USER.getRoleId()))
@@ -212,7 +210,7 @@ public class SystemUserServiceImpl implements SystemUserService {
     private String getToken(SystemUser systemUser) {
         String sign = systemUser.getPassword();
         return JWT.create().withExpiresAt(new Date(System.currentTimeMillis() + EXPIRE_TIME))
-                .withAudience(JsonUtil.toJsonString(systemUserResponseVOConverter.convert(systemUser)))
+                .withAudience(JsonUtil.toJsonString(SystemUserResponseVOConverter.INSTANCE.convert(systemUser)))
                 .sign(Algorithm.HMAC256(sign));
     }
 }

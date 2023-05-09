@@ -27,17 +27,17 @@
             placeholder="请输入执行器名称"
           />
         </a-form-item>
-        <a-form-item label="重试ID">
+        <a-form-item label="幂等ID">
           <a-input
-            v-decorator="['bizId', { rules: [{ required: true, message: '请输入重试ID' }] }]"
-            name="bizId"
-            placeholder="请输入业务编号"
+            v-decorator="['idempotentId', { rules: [{ required: true, message: '请输入幂等ID' }] }]"
+            name="idempotentId"
+            placeholder="请输入幂等ID"
           >
-            <a-tooltip slot="suffix" title="同一个场景下正在重试中的重试ID不能重复,若重复的重试ID在上报时会被幂等处理">
+            <a-tooltip slot="suffix" title="同一个场景下正在重试中的幂等ID不能重复,若重复的幂等ID在上报时会被幂等处理">
               <a-icon type="info-circle" style="color: rgba(0, 0, 0, 0.45)" />
             </a-tooltip>
           </a-input>
-          <a-button type="primary" style="position: absolute; margin: 3px 10px" @click="bizIdGenerate"> 生成 </a-button>
+          <a-button type="primary" style="position: absolute; margin: 3px 10px" @click="idempotentIdGenerate"> 通过客户端生成 </a-button>
         </a-form-item>
         <a-form-item label="业务编号">
           <a-input
@@ -71,7 +71,7 @@
 </template>
 
 <script>
-import { getAllGroupNameList, getSceneList, saveRetryTask, bizIdGenerate } from '@/api/manage'
+import { getAllGroupNameList, getSceneList, saveRetryTask, idempotentIdGenerate } from '@/api/manage'
 
 export default {
   name: 'SavRetryTask',
@@ -121,15 +121,15 @@ export default {
         this.groupNameList = res.data
       })
     },
-    bizIdGenerate () {
+    idempotentIdGenerate () {
       const groupName = this.form.getFieldValue('groupName')
       const sceneName = this.form.getFieldValue('sceneName')
       const executorName = this.form.getFieldValue('executorName')
       const argsStr = this.form.getFieldValue('argsStr')
 
-      bizIdGenerate({ groupName, sceneName, executorName, argsStr }).then(res => {
+      idempotentIdGenerate({ groupName, sceneName, executorName, argsStr }).then(res => {
         this.form.setFieldsValue({
-          'bizId': res.data
+          'idempotentId': res.data
         })
       })
     }

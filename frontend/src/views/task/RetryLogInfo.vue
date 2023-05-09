@@ -1,44 +1,48 @@
 <template>
   <div>
-    <page-header-wrapper>
-      <a-card :bordered="false">
-        <a-descriptions title="">
-          <a-descriptions-item label="组名称">
-            {{ retryInfo.groupName }}
-          </a-descriptions-item>
-          <a-descriptions-item label="场景名称">
-            {{ retryInfo.sceneName }}
-          </a-descriptions-item>
-          <a-descriptions-item label="业务id" span="2">
-            {{ retryInfo.bizId }}
-          </a-descriptions-item>
-          <a-descriptions-item label="业务编号">
-            {{ retryInfo.bizNo }}
-          </a-descriptions-item>
-          <a-descriptions-item label="下次触发时间">
-            {{ parseDate(retryInfo.nextTriggerAt) }}
-          </a-descriptions-item>
-          <a-descriptions-item label="重试状态">
-            {{ retryStatus[retryInfo.retryStatus] }}
-          </a-descriptions-item>
-          <a-descriptions-item label="创建时间">
-            {{ parseDate( retryInfo.createDt) }}
-          </a-descriptions-item>
-          <a-descriptions-item label="执行器名称" span="3">
-            {{ retryInfo.executorName }}
-          </a-descriptions-item>
-          <a-descriptions-item label="扩展参数" span="3">
-            {{ retryInfo.bizNo }}
-          </a-descriptions-item>
-          <a-descriptions-item label="参数" span="3">
-            {{ retryInfo.argsStr }}
-          </a-descriptions-item>
-          <a-descriptions-item label="失败原因" span="3">
-            {{ retryInfo.errorMessage }}
-          </a-descriptions-item>
-        </a-descriptions>
-      </a-card>
+    <page-header-wrapper @back="() => $router.go(-1)" style='margin: -24px -1px 0'>
+      <div></div>
     </page-header-wrapper>
+    <a-card :bordered="false">
+      <a-descriptions title="" bordered>
+        <a-descriptions-item label="组名称">
+          {{ retryInfo.groupName }}
+        </a-descriptions-item>
+        <a-descriptions-item label="场景名称">
+          {{ retryInfo.sceneName }}
+        </a-descriptions-item>
+        <a-descriptions-item label="唯一id">
+          {{ retryInfo.uniqueId }}
+        </a-descriptions-item>
+        <a-descriptions-item label="幂等id" :span="2">
+          {{ retryInfo.idempotentId }}
+        </a-descriptions-item>
+        <a-descriptions-item label="业务编号">
+          {{ retryInfo.bizNo }}
+        </a-descriptions-item>
+        <a-descriptions-item label="下次触发时间">
+          {{ parseDate(retryInfo.nextTriggerAt) }}
+        </a-descriptions-item>
+        <a-descriptions-item label="执行时间">
+          {{ parseDate( retryInfo.createDt) }}
+        </a-descriptions-item>
+        <a-descriptions-item label="当前重试状态">
+          {{ retryStatus[retryInfo.retryStatus] }}
+        </a-descriptions-item>
+        <a-descriptions-item label="执行器名称" :span="3">
+          {{ retryInfo.executorName }}
+        </a-descriptions-item>
+        <a-descriptions-item label="参数" :span="3">
+          {{ retryInfo.argsStr }}
+        </a-descriptions-item>
+        <a-descriptions-item label="失败原因" :span="3">
+          {{ retryInfo.errorMessage }}
+        </a-descriptions-item>
+        <a-descriptions-item label="扩展参数" :span="3">
+          {{ retryInfo.extAttrs }}
+        </a-descriptions-item>
+      </a-descriptions>
+    </a-card>
   </div>
 </template>
 

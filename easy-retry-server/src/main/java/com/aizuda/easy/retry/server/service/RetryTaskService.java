@@ -2,7 +2,7 @@ package com.aizuda.easy.retry.server.service;
 
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
 import com.aizuda.easy.retry.server.web.model.request.BatchDeleteRetryTaskVO;
-import com.aizuda.easy.retry.server.web.model.request.GenerateRetryBizIdVO;
+import com.aizuda.easy.retry.server.web.model.request.GenerateRetryIdempotentIdVO;
 import com.aizuda.easy.retry.server.web.model.request.RetryTaskQueryVO;
 import com.aizuda.easy.retry.server.web.model.request.RetryTaskUpdateStatusRequestVO;
 import com.aizuda.easy.retry.server.web.model.request.RetryTaskSaveRequestVO;
@@ -46,12 +46,12 @@ public interface RetryTaskService {
     int saveRetryTask(RetryTaskSaveRequestVO retryTaskRequestVO);
 
     /**
-     * 委托客户端生成bizId
+     * 委托客户端生成idempotentId
      *
-     * @param generateRetryBizIdVO 生成bizId请求模型
+     * @param generateRetryIdempotentIdVO 生成idempotentId请求模型
      * @return
      */
-    String bizIdGenerate(GenerateRetryBizIdVO generateRetryBizIdVO);
+    String idempotentIdGenerate(GenerateRetryIdempotentIdVO generateRetryIdempotentIdVO);
 
     /**
      * 若客户端在变更了执行器,从而会导致执行重试任务时找不到执行器类，因此使用者可以在后端进行执行变更

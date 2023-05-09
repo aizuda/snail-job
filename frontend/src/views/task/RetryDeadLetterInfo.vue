@@ -10,7 +10,7 @@
             {{ retryDealLetterInfo.sceneName }}
           </a-descriptions-item>
           <a-descriptions-item label="业务id" span="2">
-            {{ retryDealLetterInfo.bizId }}
+            {{ retryDealLetterInfo.idempotentId }}
           </a-descriptions-item>
           <a-descriptions-item label="业务编号">
             {{ retryDealLetterInfo.bizNo }}

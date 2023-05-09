@@ -83,7 +83,7 @@ public class FailureActor extends AbstractActor {
                 // 记录重试日志
                 PageDTO<RetryTaskLog> retryTaskLogPageDTO = retryTaskLogMapper.selectPage(new PageDTO<>(1, 1),
                         new LambdaQueryWrapper<RetryTaskLog>()
-                                .eq(RetryTaskLog::getBizId, retryTask.getBizId())
+                                .eq(RetryTaskLog::getIdempotentId, retryTask.getIdempotentId())
                                 .orderByDesc(RetryTaskLog::getId));
 
                 List<RetryTaskLog> records = retryTaskLogPageDTO.getRecords();

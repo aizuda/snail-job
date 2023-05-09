@@ -1,14 +1,15 @@
 CREATE TABLE `group_config`
 (
-    `id`              bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `group_name`      varchar(64)  NOT NULL DEFAULT '' COMMENT '组名称',
-    `description`     varchar(256) NOT NULL COMMENT '组描述',
-    `group_status`    tinyint(4) NOT NULL DEFAULT '0' COMMENT '组状态 0、未启用 1、启用',
-    `version`         int(11) NOT NULL COMMENT '版本号',
-    `group_partition` int(11) NOT NULL COMMENT '分区',
-    `route_key`       tinyint(4) NOT NULL COMMENT '路由策略',
-    `create_dt`       datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_dt`       datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+    `id`                bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `group_name`        varchar(64)  NOT NULL DEFAULT '' COMMENT '组名称',
+    `description`       varchar(256) NOT NULL COMMENT '组描述',
+    `group_status`      tinyint(4) NOT NULL DEFAULT '0' COMMENT '组状态 0、未启用 1、启用',
+    `version`           int(11) NOT NULL COMMENT '版本号',
+    `group_partition`   int(11) NOT NULL COMMENT '分区',
+    `route_key`         tinyint(4) NOT NULL COMMENT '路由策略',
+    `id_generator_mode` tinyint(4) NOT NULL DEFAULT '1' COMMENT '唯一id生成模式 默认号段模式',
+    `create_dt`         datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_dt`         datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_name` (`group_name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='组配置'
@@ -33,9 +34,10 @@ CREATE TABLE `notify_config`
 CREATE TABLE `retry_dead_letter_0`
 (
     `id`            bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `unique_id`     varchar(64)  NOT NULL COMMENT '同组下id唯一',
     `group_name`    varchar(64)  NOT NULL COMMENT '组名称',
     `scene_name`    varchar(64)  NOT NULL COMMENT '场景id',
-    `biz_id`        varchar(64)  NOT NULL COMMENT '业务id',
+    `idempotent_id` varchar(64)  NOT NULL COMMENT '幂等id',
     `biz_no`        varchar(64)  NOT NULL DEFAULT '' COMMENT '业务编号',
     `executor_name` varchar(512) NOT NULL DEFAULT '' COMMENT '执行器名称',
     `args_str`      text         NOT NULL COMMENT '执行方法参数',
@@ -43,17 +45,19 @@ CREATE TABLE `retry_dead_letter_0`
     `create_dt`     datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     PRIMARY KEY (`id`),
     KEY             `idx_group_name_scene_name` (`group_name`, `scene_name`),
-    KEY             `idx_biz_id` (`biz_id`),
-    KEY             `idx_biz_no` (`biz_no`)
+    KEY             `idx_idempotent_id` (`idempotent_id`),
+    KEY             `idx_biz_no` (`biz_no`),
+    UNIQUE KEY `uk_name_unique_id` (`group_name`, `unique_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='重试死信队列'
 ;
 
 CREATE TABLE `retry_task_0`
 (
     `id`              bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `unique_id`       varchar(64)  NOT NULL COMMENT '同组下id唯一',
     `group_name`      varchar(64)  NOT NULL COMMENT '组名称',
     `scene_name`      varchar(64)  NOT NULL COMMENT '场景名称',
-    `biz_id`          varchar(64)  NOT NULL COMMENT '业务id',
+    `idempotent_id`   varchar(64)  NOT NULL COMMENT '幂等id',
     `biz_no`          varchar(64)  NOT NULL DEFAULT '' COMMENT '业务编号',
     `executor_name`   varchar(512) NOT NULL DEFAULT '' COMMENT '执行器名称',
     `args_str`        text         NOT NULL COMMENT '执行方法参数',
@@ -64,18 +68,21 @@ CREATE TABLE `retry_task_0`
     `create_dt`       datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_dt`       datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     PRIMARY KEY (`id`),
-    KEY             `idx_group_name_scene_name` (`group_name`, `scene_name`),
-    KEY             `idx_retry_status` (`retry_status`),
-    KEY             `idx_biz_id` (`biz_id`)
+    KEY               `idx_group_name_scene_name` (`group_name`, `scene_name`),
+    KEY               `idx_retry_status` (`retry_status`),
+    KEY               `idx_idempotent_id` (`idempotent_id`),
+    KEY               `idx_biz_no` (`biz_no`),
+    UNIQUE KEY `uk_name_unique_id` (`group_name`, `unique_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='重试表'
 ;
 
 CREATE TABLE `retry_task_log`
 (
     `id`            bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `unique_id`     varchar(64)  NOT NULL COMMENT '同组下id唯一',
     `group_name`    varchar(64)  NOT NULL COMMENT '组名称',
     `scene_name`    varchar(64)  NOT NULL COMMENT '场景名称',
-    `biz_id`        varchar(64)  NOT NULL COMMENT '业务id',
+    `idempotent_id` varchar(64)  NOT NULL COMMENT '幂等id',
     `biz_no`        varchar(64)  NOT NULL DEFAULT '' COMMENT '业务编号',
     `executor_name` varchar(512) NOT NULL DEFAULT '' COMMENT '执行器名称',
     `args_str`      text         NOT NULL COMMENT '执行方法参数',
@@ -87,7 +94,9 @@ CREATE TABLE `retry_task_log`
     PRIMARY KEY (`id`),
     KEY             `idx_group_name_scene_name` (`group_name`, `scene_name`),
     KEY             `idx_retry_status` (`retry_status`),
-    KEY             `idx_biz_id` (`biz_id`)
+    KEY             `idx_idempotent_id` (`idempotent_id`),
+    KEY             `idx_unique_id` (`unique_id`),
+    KEY             `idx_biz_no` (`biz_no`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='重试日志表'
 ;
 
@@ -112,15 +121,15 @@ CREATE TABLE `scene_config`
 CREATE TABLE `server_node`
 (
     `id`           bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `group_name`   varchar(64) NOT NULL COMMENT '组名称',
-    `host_id`      varchar(64) NOT NULL COMMENT '主机id',
-    `host_ip`      varchar(64) NOT NULL COMMENT '机器ip',
+    `group_name`   varchar(64)  NOT NULL COMMENT '组名称',
+    `host_id`      varchar(64)  NOT NULL COMMENT '主机id',
+    `host_ip`      varchar(64)  NOT NULL COMMENT '机器ip',
     `context_path` varchar(256) NOT NULL DEFAULT '/' COMMENT '客户端上下文路径 server.servlet.context-path',
     `host_port`    int(16) NOT NULL COMMENT '机器端口',
-    `expire_at`    datetime    NOT NULL COMMENT '过期时间',
+    `expire_at`    datetime     NOT NULL COMMENT '过期时间',
     `node_type`    tinyint(4) NOT NULL COMMENT '节点类型 1、客户端 2、是服务端',
-    `create_dt`    datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_dt`    datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+    `create_dt`    datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_dt`    datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_host_id_host_ip` (`host_id`,`host_ip`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='服务器节点'
@@ -152,8 +161,9 @@ CREATE TABLE `system_user`
     UNIQUE KEY `uk_username` (`username`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='系统用户表';
 
+-- pwd: admin
 INSERT INTO system_user (username, password, role)
-VALUES ('admin', 'cdf4a007e2b02a0c49fc9b7ccfbb8a10c644f635e1765dcf2a7ab794ddc7edac', 2);
+VALUES ('admin', '465c194afb65670f38322df087f0a9bb225cc257e43eb4ac5a0c98ef5b3173ac', 2);
 
 CREATE TABLE `system_user_permission`
 (
@@ -165,3 +175,14 @@ CREATE TABLE `system_user_permission`
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_group_name_system_user_id` (`group_name`, `system_user_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='系统用户权限表';
+
+CREATE TABLE `sequence_alloc`
+(
+    `id`         bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `group_name` varchar(64) NOT NULL DEFAULT '' COMMENT '组名称',
+    `max_id`     bigint(20) NOT NULL DEFAULT '1' COMMENT '最大id',
+    `step`       int(11) NOT NULL DEFAULT '100' COMMENT '步长',
+    `update_dt`  datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_group_name` (`group_name`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='号段模式序号ID分配表';

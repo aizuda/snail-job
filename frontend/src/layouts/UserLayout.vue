@@ -2,14 +2,15 @@
 
   <div id="userLayout" :class="['user-layout-wrapper', isMobile && 'mobile']">
     <div class="container">
-      <div class="user-layout-lang">
-        <select-lang class="select-lang-trigger" />
-      </div>
+      <!--      <div class="user-layout-lang">-->
+      <!--        <select-lang class="select-lang-trigger" />-->
+      <!--      </div>-->
       <div class="user-layout-content">
         <div class="top">
           <div class="header">
             <a href="/">
               <span class="title">Easy-Retry</span>
+              <span class="desc" style="font-size: 16px; font-weight: 600;">v{{ version }}</span>
             </a>
           </div>
           <div class="desc">
@@ -21,12 +22,12 @@
 
         <div class="footer">
           <div class="links">
-            <a href="_self">帮助</a>
-            <a href="_self">隐私</a>
-            <a href="_self">条款</a>
+            <a href="mailto:598092184@qq.com" target="_blank" style="margin: 10px"><icon-font style="fontSize: 20px" type="icon-youxiang" /></a>
+            <a href="https://github.com/aizuda/easy-retry" target="_blank" style="margin: 10px"><icon-font style="fontSize: 20px" type="icon-github2" /> </a>
+            <a href="https://gitee.com/aizuda/easy-retry" target="_blank" style="margin: 10px">   <icon-font style="fontSize: 20px" type="icon-GITEE" /></a>
           </div>
           <div class="copyright">
-            Copyright &copy; 2018 vueComponent
+            Copyright &copy; {{ year }} Easy-Retry   <span class="desc" style="font-size: 16px; font-weight: 600;">v{{ version }}</span>
           </div>
         </div>
       </div>
@@ -37,13 +38,29 @@
 <script>
 import { deviceMixin } from '@/store/device-mixin'
 import SelectLang from '@/components/SelectLang'
-
+import { Icon } from 'ant-design-vue'
+import { systemVersion } from '@/api/manage'
+const IconFont = Icon.createFromIconfontCN({
+  scriptUrl: '//at.alicdn.com/t/c/font_1460205_qu2antnauc.js'
+})
 export default {
   name: 'UserLayout',
+  data () {
+    return {
+      year: new Date().getFullYear(),
+      version: ''
+    }
+  },
   components: {
-    SelectLang
+    SelectLang,
+    IconFont
   },
   mixins: [deviceMixin],
+  created () {
+    systemVersion().then(res => {
+      this.version = res.data
+    })
+  },
   mounted () {
     document.body.classList.add('userLayout')
   },
@@ -71,7 +88,7 @@ export default {
     min-height: 100%;
     background: #f0f2f5 url(~@/assets/background.svg) no-repeat 50%;
     background-size: 100%;
-    //padding: 50px 0 84px;
+    padding: 10% 0 0% 0;
     position: relative;
 
     .user-layout-lang {

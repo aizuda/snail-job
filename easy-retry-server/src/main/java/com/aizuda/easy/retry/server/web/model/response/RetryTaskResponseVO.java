@@ -14,11 +14,13 @@ public class RetryTaskResponseVO {
 
     private Long id;
 
+    private String uniqueId;
+
     private String groupName;
 
     private String sceneName;
 
-    private String bizId;
+    private String idempotentId;
 
     private String bizNo;
 

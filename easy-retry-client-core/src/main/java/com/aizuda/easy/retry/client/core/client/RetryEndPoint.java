@@ -1,7 +1,7 @@
 package com.aizuda.easy.retry.client.core.client;
 
 import cn.hutool.core.lang.Assert;
-import com.aizuda.easy.retry.client.core.BizIdGenerate;
+import com.aizuda.easy.retry.client.core.IdempotentIdGenerate;
 import com.aizuda.easy.retry.client.core.RetryArgSerializer;
 import com.aizuda.easy.retry.client.core.cache.GroupVersionCache;
 import com.aizuda.easy.retry.client.core.cache.RetryerInfoCache;
@@ -12,7 +12,7 @@ import com.aizuda.easy.retry.client.core.retryer.RetryerInfo;
 import com.aizuda.easy.retry.client.core.retryer.RetryerResultContext;
 import com.aizuda.easy.retry.client.core.serializer.JacksonSerializer;
 import com.aizuda.easy.retry.client.core.strategy.RetryStrategy;
-import com.aizuda.easy.retry.client.model.GenerateRetryBizIdDTO;
+import com.aizuda.easy.retry.client.model.GenerateRetryIdempotentIdDTO;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.enums.RetryResultStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
@@ -87,7 +87,8 @@ public class RetryEndPoint {
                 executeRespDto.setExceptionMsg(retryerResultContext.getMessage());
             }
 
-            executeRespDto.setBizId(executeReqDto.getBizId());
+            executeRespDto.setIdempotentId(executeReqDto.getIdempotentId());
+            executeRespDto.setUniqueId(executeReqDto.getUniqueId());
             if (Objects.nonNull(retryerResultContext.getResult())) {
                 executeRespDto.setResultJson(JsonUtil.toJsonString(retryerResultContext.getResult()));
             }
@@ -140,17 +141,17 @@ public class RetryEndPoint {
     }
 
     /**
-     * 手动新增重试数据，模拟生成bizId
+     * 手动新增重试数据，模拟生成idempotentId
      *
-     * @param generateRetryBizIdDTO 生成bizId模型
-     * @return bizId
+     * @param generateRetryIdempotentIdDTO 生成idempotentId模型
+     * @return idempotentId
      */
-    @PostMapping("/generate/biz-id/v1")
-    public Result<String> bizIdGenerate(@RequestBody @Validated GenerateRetryBizIdDTO generateRetryBizIdDTO) {
+    @PostMapping("/generate/idempotent-id/v1")
+    public Result<String> idempotentIdGenerate(@RequestBody @Validated GenerateRetryIdempotentIdDTO generateRetryIdempotentIdDTO) {
 
-        String scene = generateRetryBizIdDTO.getScene();
-        String executorName = generateRetryBizIdDTO.getExecutorName();
-        String argsStr = generateRetryBizIdDTO.getArgsStr();
+        String scene = generateRetryIdempotentIdDTO.getScene();
+        String executorName = generateRetryIdempotentIdDTO.getExecutorName();
+        String argsStr = generateRetryIdempotentIdDTO.getArgsStr();
 
         RetryerInfo retryerInfo = RetryerInfoCache.get(scene, executorName);
         Assert.notNull(retryerInfo, ()-> new EasyRetryClientException("重试信息不存在 scene:[{}] executorName:[{}]", scene, executorName));
@@ -166,18 +167,18 @@ public class RetryEndPoint {
             throw new EasyRetryClientException("参数解析异常", e);
         }
 
-        String bizId;
+        String idempotentId;
         try {
-            Class<? extends BizIdGenerate> bizIdGenerate = retryerInfo.getBizIdGenerate();
-            BizIdGenerate generate = bizIdGenerate.newInstance();
-            Method method = bizIdGenerate.getMethod("idGenerate", Object[].class);
+            Class<? extends IdempotentIdGenerate> idempotentIdGenerate = retryerInfo.getIdempotentIdGenerate();
+            IdempotentIdGenerate generate = idempotentIdGenerate.newInstance();
+            Method method = idempotentIdGenerate.getMethod("idGenerate", Object[].class);
             Object p = new Object[]{scene, executorName, deSerialize, executorMethod.getName()};
-            bizId = (String) ReflectionUtils.invokeMethod(method, generate, p);
+            idempotentId = (String) ReflectionUtils.invokeMethod(method, generate, p);
         } catch (Exception exception) {
-            LogUtils.error(log, "自定义id生成异常：{},{}", scene, argsStr, exception);
-            throw new EasyRetryClientException("bizId生成异常：{},{}", scene, argsStr);
+            LogUtils.error(log, "幂等id生成异常：{},{}", scene, argsStr, exception);
+            throw new EasyRetryClientException("idempotentId生成异常：{},{}", scene, argsStr);
         }
 
-        return new Result<>(bizId);
+        return new Result<>(idempotentId);
     }
 }

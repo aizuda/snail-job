@@ -1,10 +1,8 @@
 package com.aizuda.easy.retry.server.web.model.request;
 
+import com.aizuda.easy.retry.common.core.enums.IdGeneratorMode;
 import lombok.Data;
 import org.hibernate.validator.constraints.NotBlank;
-import org.hibernate.validator.constraints.NotEmpty;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -12,8 +10,11 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
+ * 组、场景、通知配置类
+ *
  * @author: www.byteblogs.com
  * @date : 2021-11-22 13:45
+ * @since 1.0.0
  */
 @Data
 public class GroupConfigRequestVO {
@@ -38,6 +39,12 @@ public class GroupConfigRequestVO {
      * 路由策略
      */
     private Integer routeKey;
+
+    /**
+     * 唯一id生成模式
+     * {@link IdGeneratorMode}
+     */
+    private Integer idGeneratorMode;
 
     /**
      * 通知列表

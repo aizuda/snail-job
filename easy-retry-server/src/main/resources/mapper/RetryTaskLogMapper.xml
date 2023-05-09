@@ -3,9 +3,10 @@
 <mapper namespace="com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskLogMapper">
     <resultMap id="BaseResultMap" type="com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTaskLog">
         <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="unique_id" jdbcType="VARCHAR" property="uniqueId"/>
         <result column="group_name" jdbcType="VARCHAR" property="groupName"/>
         <result column="scene_name" jdbcType="VARCHAR" property="sceneName"/>
-        <result column="biz_id" jdbcType="VARCHAR" property="bizId"/>
+        <result column="idempotent_id" jdbcType="VARCHAR" property="idempotentId"/>
         <result column="biz_no" jdbcType="VARCHAR" property="bizNo"/>
         <result column="executor_name" jdbcType="VARCHAR" property="executorName"/>
         <result column="args_str" jdbcType="VARCHAR" property="argsStr"/>
@@ -15,8 +16,7 @@
         <result column="create_dt" jdbcType="TIMESTAMP" property="createDt"/>
     </resultMap>
     <sql id="Base_Column_List">
-        id
-        , group_name, scene_name, biz_id, biz_no, executor_name, args_str, ext_attrs, retry_status, error_message,
+        id, unique_id, group_name, scene_name, idempotent_id, biz_no, executor_name, args_str, ext_attrs, retry_status, error_message,
     create_dt
     </sql>
     <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
@@ -28,22 +28,22 @@
     <select id="countTaskTotal" resultType="java.lang.Long">
         select count(*)
         from (
-                 select group_name, scene_name, biz_id from retry_task_log group by group_name, scene_name, biz_id) a
+                 select group_name, scene_name, idempotent_id from retry_task_log group by group_name, scene_name, idempotent_id) a
     </select>
     <select id="countTaskByRetryStatus" resultType="java.lang.Long">
         select count(*)
         from (
-                 select group_name, scene_name, biz_id
+                 select group_name, scene_name, idempotent_id
                  from retry_task_log
                  where retry_status = #{retryStatus}
-                 group by group_name, scene_name, biz_id) a
+                 group by group_name, scene_name, idempotent_id) a
 
     </select>
     <select id="rankSceneQuantity"
             resultType="com.aizuda.easy.retry.server.web.model.response.SceneQuantityRankResponseVO">
         select group_name, scene_name, count(*) total
         from (
-        select group_name, scene_name, biz_id, count(*)
+        select group_name, scene_name, idempotent_id, count(*)
         from retry_task_log
         <where>
             <if test="groupName != '' and groupName != null">
@@ -51,7 +51,7 @@
             </if>
             and create_dt >= #{startTime} and create_dt &lt;= #{endTime}
         </where>
-        group by group_name, scene_name, biz_id) a
+        group by group_name, scene_name, idempotent_id) a
         group by group_name, scene_name
         order by total desc;
     </select>
@@ -60,7 +60,7 @@
         select
         distinct(create_dt), count(*) total
         from (
-        select group_name, scene_name, biz_id,
+        select group_name, scene_name, idempotent_id,
         <choose>
             <when test="type == 'day'">
                 DATE_FORMAT(create_dt,'%H')
@@ -90,7 +90,7 @@
 
             and create_dt >= #{startTime} and create_dt &lt;= #{endTime}
         </where>
-        group by group_name, scene_name, biz_id, create_dt) a
+        group by group_name, scene_name, idempotent_id, create_dt) a
         group by create_dt
         order by total desc;
     </select>

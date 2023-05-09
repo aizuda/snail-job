@@ -21,6 +21,8 @@ public class GroupConfig implements Serializable {
 
     private Integer routeKey;
 
+    private Integer idGeneratorMode;
+
     private Integer version;
 
     private String description;

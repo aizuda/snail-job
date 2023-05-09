@@ -34,11 +34,6 @@
             <artifactId>akka-actor-typed_2.13</artifactId>
             <version>2.8.0</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>ch.qos.logback</groupId>-->
-<!--            <artifactId>logback-classic</artifactId>-->
-<!--            <version>1.2.3</version>-->
-<!--        </dependency>-->
         <dependency>
             <groupId>com.typesafe.akka</groupId>
             <artifactId>akka-actor-testkit-typed_2.13</artifactId>
@@ -125,6 +120,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.perf4j</groupId>
+            <artifactId>perf4j</artifactId>
+            <version>0.9.16</version>
         </dependency>
     </dependencies>
 

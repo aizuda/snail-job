@@ -17,10 +17,12 @@ public class RetryCallbackDTO {
     private String scene;
     @NotBlank(message = "参数 不能为空")
     private String argsStr;
-    @NotBlank(message = "bizId 不能为空")
-    private String bizId;
+    @NotBlank(message = "idempotentId 不能为空")
+    private String idempotentId;
     @NotBlank(message = "executorName 不能为空")
     private String executorName;
     @NotBlank(message = "retryStatus 不能为空")
     private Integer retryStatus;
+    @NotBlank(message = "uniqueId 不能为空")
+    private String uniqueId;
 }

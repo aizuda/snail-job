@@ -25,8 +25,6 @@ public class SceneConfigServiceImpl implements SceneConfigService {
     @Autowired
     private SceneConfigMapper sceneConfigMapper;
 
-    private SceneConfigResponseVOConverter sceneConfigResponseVOConverter = new SceneConfigResponseVOConverter();
-
     @Override
     public PageResult<List<SceneConfigResponseVO>> getSceneConfigPageList(SceneConfigQueryVO queryVO) {
         PageDTO<SceneConfig> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
@@ -39,7 +37,7 @@ public class SceneConfigServiceImpl implements SceneConfigService {
         pageDTO = sceneConfigMapper.selectPage(pageDTO, sceneConfigLambdaQueryWrapper
                 .eq(SceneConfig::getGroupName, queryVO.getGroupName()).orderByDesc(SceneConfig::getCreateDt));
 
-        return new PageResult<>(pageDTO, sceneConfigResponseVOConverter.batchConvert(pageDTO.getRecords()));
+        return new PageResult<>(pageDTO, SceneConfigResponseVOConverter.INSTANCE.batchConvert(pageDTO.getRecords()));
 
     }
 
@@ -50,6 +48,6 @@ public class SceneConfigServiceImpl implements SceneConfigService {
                 .select(SceneConfig::getSceneName, SceneConfig::getDescription)
                 .eq(SceneConfig::getGroupName, groupName).orderByDesc(SceneConfig::getCreateDt));
 
-        return sceneConfigResponseVOConverter.batchConvert(sceneConfigs);
+        return SceneConfigResponseVOConverter.INSTANCE.batchConvert(sceneConfigs);
     }
 }

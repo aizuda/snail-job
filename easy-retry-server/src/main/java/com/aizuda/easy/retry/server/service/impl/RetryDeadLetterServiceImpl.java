@@ -39,8 +39,6 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
     @Autowired
     private RetryTaskMapper retryTaskMapper;
 
-    private RetryDeadLetterResponseVOConverter retryDeadLetterResponseVOConverter = new RetryDeadLetterResponseVOConverter();
-
     @Override
     public PageResult<List<RetryDeadLetterResponseVO>> getRetryDeadLetterPage(RetryDeadLetterQueryVO queryVO) {
 
@@ -61,15 +59,15 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
             retryDeadLetterLambdaQueryWrapper.eq(RetryDeadLetter::getBizNo, queryVO.getBizNo());
         }
 
-        if (StringUtils.isNotBlank(queryVO.getBizId())) {
-            retryDeadLetterLambdaQueryWrapper.eq(RetryDeadLetter::getBizId, queryVO.getBizId());
+        if (StringUtils.isNotBlank(queryVO.getIdempotentId())) {
+            retryDeadLetterLambdaQueryWrapper.eq(RetryDeadLetter::getIdempotentId, queryVO.getIdempotentId());
         }
 
         RequestDataHelper.setPartition(queryVO.getGroupName());
         PageDTO<RetryDeadLetter> retryDeadLetterPageDTO = retryDeadLetterMapper.selectPage(pageDTO, retryDeadLetterLambdaQueryWrapper);
 
         return new PageResult<>(retryDeadLetterPageDTO,
-                retryDeadLetterResponseVOConverter.batchConvert(retryDeadLetterPageDTO.getRecords()));
+                RetryDeadLetterResponseVOConverter.INSTANCE.batchConvert(retryDeadLetterPageDTO.getRecords()));
     }
 
     @Override
@@ -77,7 +75,7 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
         RequestDataHelper.setPartition(groupName);
 
         RetryDeadLetter retryDeadLetter = retryDeadLetterMapper.selectById(id);
-        return retryDeadLetterResponseVOConverter.convert(retryDeadLetter);
+        return RetryDeadLetterResponseVOConverter.INSTANCE.convert(retryDeadLetter);
     }
 
     @Override

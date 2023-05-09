@@ -3,7 +3,6 @@ package com.aizuda.easy.retry.server.config;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.stereotype.Component;
 
 /**
  * 系统配置
@@ -40,5 +39,11 @@ public class SystemProperties {
      * 一个客户端每秒最多接收的重试数量指令
      */
     private int limiter = 10;
+
+    /**
+     * 号段模式下步长配置
+     * 默认100
+     */
+    private int step = 100;
 
 }

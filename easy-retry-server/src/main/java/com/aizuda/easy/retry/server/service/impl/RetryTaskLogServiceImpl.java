@@ -25,8 +25,6 @@ public class RetryTaskLogServiceImpl implements RetryTaskLogService {
     @Autowired
     private RetryTaskLogMapper retryTaskLogMapper;
 
-    private RetryTaskLogResponseVOConverter retryTaskLogResponseVOConverter = new RetryTaskLogResponseVOConverter();
-    
     @Override
     public PageResult<List<RetryTaskLogResponseVO>> getRetryTaskLogPage(RetryTaskLogQueryVO queryVO) {
 
@@ -42,22 +40,26 @@ public class RetryTaskLogServiceImpl implements RetryTaskLogService {
         if (StringUtils.isNotBlank(queryVO.getBizNo())) {
             retryTaskLogLambdaQueryWrapper.eq(RetryTaskLog::getBizNo, queryVO.getBizNo());
         }
-        if (StringUtils.isNotBlank(queryVO.getBizId())) {
-            retryTaskLogLambdaQueryWrapper.eq(RetryTaskLog::getBizId, queryVO.getBizId());
+        if (StringUtils.isNotBlank(queryVO.getUniqueId())) {
+            retryTaskLogLambdaQueryWrapper.eq(RetryTaskLog::getUniqueId, queryVO.getUniqueId());
+        }
+        if (StringUtils.isNotBlank(queryVO.getIdempotentId())) {
+            retryTaskLogLambdaQueryWrapper.eq(RetryTaskLog::getIdempotentId, queryVO.getIdempotentId());
         }
 
         retryTaskLogLambdaQueryWrapper.select(RetryTaskLog::getGroupName, RetryTaskLog::getId, RetryTaskLog::getSceneName,
-                RetryTaskLog::getBizId, RetryTaskLog::getBizNo, RetryTaskLog::getErrorMessage, RetryTaskLog::getRetryStatus, RetryTaskLog::getCreateDt);
+                RetryTaskLog::getIdempotentId, RetryTaskLog::getBizNo, RetryTaskLog::getErrorMessage, RetryTaskLog::getRetryStatus,
+                RetryTaskLog::getCreateDt, RetryTaskLog::getUniqueId);
         PageDTO<RetryTaskLog> retryTaskLogPageDTO = retryTaskLogMapper.selectPage(pageDTO, retryTaskLogLambdaQueryWrapper.orderByDesc(RetryTaskLog::getCreateDt));
 
         return new PageResult<>(
                 retryTaskLogPageDTO,
-                retryTaskLogResponseVOConverter.batchConvert(retryTaskLogPageDTO.getRecords()));
+                RetryTaskLogResponseVOConverter.INSTANCE.batchConvert(retryTaskLogPageDTO.getRecords()));
     }
 
     @Override
     public RetryTaskLogResponseVO getRetryTaskLogById(Long id) {
         RetryTaskLog retryTaskLog = retryTaskLogMapper.selectById(id);
-        return retryTaskLogResponseVOConverter.convert(retryTaskLog);
+        return RetryTaskLogResponseVOConverter.INSTANCE.convert(retryTaskLog);
     }
 }

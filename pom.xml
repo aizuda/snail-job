@@ -21,10 +21,11 @@
         <java.version>1.8</java.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <revision>1.1.0</revision>
+        <revision>1.2.0</revision>
         <dingding-talk.version>1.0.0</dingding-talk.version>
         <hibernate-validator.version>5.4.2.Final</hibernate-validator.version>
         <netty-all.version>4.1.48.Final</netty-all.version>
+        <hutool-all.version>5.7.21</hutool-all.version>
     </properties>
 
     <modules>
@@ -61,7 +62,7 @@
             <dependency>
                 <groupId>cn.hutool</groupId>
                 <artifactId>hutool-all</artifactId>
-                <version>5.7.21</version>
+                <version>${hutool-all.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.aizuda</groupId>

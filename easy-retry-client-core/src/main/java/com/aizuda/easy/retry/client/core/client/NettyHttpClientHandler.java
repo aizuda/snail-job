@@ -7,7 +7,7 @@ import com.aizuda.easy.retry.client.core.client.request.RequestParam;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.model.NettyResult;
-import com.aizuda.easy.retry.common.core.model.XRetryRequest;
+import com.aizuda.easy.retry.common.core.model.EasyRetryRequest;
 import com.aizuda.easy.retry.common.core.util.HostUtils;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import io.netty.channel.ChannelHandlerContext;
@@ -104,12 +104,12 @@ public class NettyHttpClientHandler extends SimpleChannelInboundHandler<FullHttp
         LogUtils.debug(log,"userEventTriggered");
         if (evt instanceof IdleStateEvent) {
 
-            XRetryRequest xRetryRequest = new XRetryRequest("PING");
+            EasyRetryRequest easyRetryRequest = new EasyRetryRequest("PING");
 
             BeatHttpRequestHandler requestHandler = SpringContext.getBeanByType(BeatHttpRequestHandler.class);
-            EasyRetryResponse.cache(xRetryRequest, requestHandler.callable());
+            EasyRetryResponse.cache(easyRetryRequest, requestHandler.callable());
 
-            NettyHttpConnectClient.send(requestHandler.method(), requestHandler.getHttpUrl(new RequestParam()), requestHandler.body(xRetryRequest));   // beat N, close if fail(may throw error)
+            NettyHttpConnectClient.send(requestHandler.method(), requestHandler.getHttpUrl(new RequestParam()), requestHandler.body(easyRetryRequest));   // beat N, close if fail(may throw error)
         } else {
             super.userEventTriggered(ctx, evt);
         }

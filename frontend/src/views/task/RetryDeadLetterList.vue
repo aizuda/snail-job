@@ -25,7 +25,7 @@
             </a-col>
             <a-col :md="8" :sm="24">
               <a-form-item label="业务id">
-                <a-input v-model="queryParam.bizId" placeholder="请输入业务id" allowClear/>
+                <a-input v-model="queryParam.idempotentId" placeholder="请输入业务id" allowClear/>
               </a-form-item>
             </a-col>
           </template>
@@ -97,8 +97,6 @@
 
 import ATextarea from 'ant-design-vue/es/input/TextArea'
 import AInput from 'ant-design-vue/es/input/Input'
-// 动态切换组件
-import Edit from '@/views/list/table/Edit'
 import { getAllGroupNameList, getRetryDeadLetterPage, getSceneList, rollbackRetryDeadLetter, deleteRetryDeadLetter } from '@/api/manage'
 
 import { STable } from '@/components'
@@ -109,7 +107,6 @@ export default {
   components: {
     AInput,
     ATextarea,
-    Edit,
     STable
   },
   data () {
@@ -139,8 +136,8 @@ export default {
           ellipsis: true
         },
         {
-          title: '业务id',
-          dataIndex: 'bizId',
+          title: '幂等id',
+          dataIndex: 'idempotentId',
           ellipsis: true
         },
         {

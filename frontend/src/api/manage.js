@@ -14,7 +14,7 @@ const api = {
   retryTaskPage: '/retry-task/list',
   retryTaskById: '/retry-task/',
   saveRetryTask: '/retry-task',
-  bizIdGenerate: '/retry-task/generate/biz-id',
+  idempotentIdGenerate: '/retry-task/generate/idempotent-id',
   batchUpdate: '/retry-task/batch',
   deleteRetryTask: '/retry-task/batch',
   updateRetryTaskStatus: '/retry-task/status',
@@ -35,10 +35,18 @@ const api = {
   countActivePod: '/dashboard/active-pod/count',
   rankSceneQuantity: '/dashboard/scene/rank',
   lineDispatchQuantity: '/dashboard/dispatch/line',
-  totalPartition: '/group/partition'
+  totalPartition: '/group/partition',
+  systemVersion: '/system/version'
 }
 
 export default api
+
+export function systemVersion () {
+  return request({
+    url: api.systemVersion,
+    method: 'get'
+  })
+}
 
 export function batchDelete (data) {
   return request({
@@ -56,9 +64,9 @@ export function batchUpdate (data) {
   })
 }
 
-export function bizIdGenerate (data) {
+export function idempotentIdGenerate (data) {
   return request({
-    url: api.bizIdGenerate,
+    url: api.idempotentIdGenerate,
     method: 'post',
     data
   })

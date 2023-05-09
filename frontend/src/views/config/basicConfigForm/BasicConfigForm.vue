@@ -1,5 +1,8 @@
 <template>
-  <page-header-wrapper content="配置组、场景、通知配置">
+  <div>
+    <page-header-wrapper content="配置组、场景、通知配置" @back="() => $router.go(-1)" style='margin: -24px -1px 0'>
+      <div></div>
+    </page-header-wrapper>
     <a-card class="card" title="组配置" :bordered="false">
       <group-form ref="groupConfig" :showSubmit="false" />
     </a-card>
@@ -11,7 +14,7 @@
     </a-card>
 
     <!-- fixed footer toolbar -->
-    <footer-tool-bar :is-mobile="isMobile" :collapsed="sideCollapsed">
+    <footer-tool-bar :is-mobile="isMobile" :collapsed="sideCollapsed" style="width: 100%">
       <span class="popover-wrapper">
         <a-popover title="表单校验信息" overlayClassName="antd-pro-pages-forms-style-errorPopover" trigger="click" :getPopupContainer="trigger => trigger.parentNode">
           <template slot="content">
@@ -28,7 +31,8 @@
       </span>
       <a-button type="primary" @click="validate" :loading="loading">提交</a-button>
     </footer-tool-bar>
-  </page-header-wrapper>
+  </div>
+
 </template>
 
 <script>

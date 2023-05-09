@@ -5,7 +5,7 @@ import com.aizuda.easy.retry.server.model.dto.ConfigDTO;
 import com.aizuda.easy.retry.server.persistence.support.ConfigAccess;
 import com.aizuda.easy.retry.common.core.enums.HeadersEnum;
 import com.aizuda.easy.retry.common.core.model.NettyResult;
-import com.aizuda.easy.retry.common.core.model.XRetryRequest;
+import com.aizuda.easy.retry.common.core.model.EasyRetryRequest;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
@@ -41,7 +41,7 @@ public class ConfigHttpRequestHandler extends GetHttpRequestHandler {
     @Override
     public String doHandler(String content, UrlQuery urlQuery, HttpHeaders headers) {
         log.info("版本同步 content:[{}]", urlQuery.toString());
-        XRetryRequest retryRequest = JsonUtil.parseObject(content, XRetryRequest.class);
+        EasyRetryRequest retryRequest = JsonUtil.parseObject(content, EasyRetryRequest.class);
         String groupName = headers.get(HeadersEnum.GROUP_NAME.getKey());
         ConfigDTO configDTO = configAccess.getConfigInfo(groupName);
         return JsonUtil.toJsonString(new NettyResult(JsonUtil.toJsonString(configDTO), retryRequest.getRequestId()));

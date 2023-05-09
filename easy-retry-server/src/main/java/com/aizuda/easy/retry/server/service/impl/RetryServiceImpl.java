@@ -12,6 +12,7 @@ import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.SceneConfig;
 import com.aizuda.easy.retry.server.persistence.support.ConfigAccess;
 import com.aizuda.easy.retry.server.persistence.support.RetryTaskAccess;
+import com.aizuda.easy.retry.server.support.generator.IdGenerator;
 import com.aizuda.easy.retry.server.support.strategy.WaitStrategies;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
@@ -54,6 +55,9 @@ public class RetryServiceImpl implements RetryService {
     private ConfigAccess configAccess;
 
     @Autowired
+    private List<IdGenerator> idGeneratorList;
+
+    @Autowired
     private RetryTaskMapper retryTaskMapper;
     @Autowired
     private RetryDeadLetterMapper retryDeadLetterMapper;
@@ -61,27 +65,28 @@ public class RetryServiceImpl implements RetryService {
     @Transactional
     @Override
     public Boolean reportRetry(RetryTaskDTO retryTaskDTO) {
-        LogUtils.warn(log, "接收上报数据 [{}]", JsonUtil.toJsonString(retryTaskDTO));
+        LogUtils.warn(log, "received report data [{}]", JsonUtil.toJsonString(retryTaskDTO));
 
         SceneConfig sceneConfig = configAccess.getSceneConfigByGroupNameAndSceneName(retryTaskDTO.getGroupName(), retryTaskDTO.getSceneName());
         if (Objects.isNull(sceneConfig)) {
-            throw new EasyRetryServerException("上报数据失败, 未查到场景配置 [{}]", retryTaskDTO);
+            throw new EasyRetryServerException("failed to report data, no scene configuration found. groupName:[{}] sceneName:[{}]", retryTaskDTO.getGroupName(), retryTaskDTO.getSceneName());
         }
 
         RequestDataHelper.setPartition(retryTaskDTO.getGroupName());
         // 此处做幂等处理，避免客户端重复多次上报
         long count = retryTaskMapper.selectCount(new LambdaQueryWrapper<RetryTask>()
-                .eq(RetryTask::getBizId, retryTaskDTO.getBizId())
+                .eq(RetryTask::getIdempotentId, retryTaskDTO.getIdempotentId())
                 .eq(RetryTask::getGroupName, retryTaskDTO.getGroupName())
                 .eq(RetryTask::getSceneName, retryTaskDTO.getSceneName())
                 .eq(RetryTask::getRetryStatus, RetryStatusEnum.RUNNING.getStatus())
                 );
         if (0 < count) {
-            LogUtils.warn(log, "存在重试中的任务中断上报 [{}]", JsonUtil.toJsonString(retryTaskDTO));
+            LogUtils.warn(log, "interrupted reporting in retrying task. [{}]", JsonUtil.toJsonString(retryTaskDTO));
             return Boolean.TRUE;
         }
 
         RetryTask retryTask = RetryTaskConverter.INSTANCE.toRetryTask(retryTaskDTO);
+        retryTask.setUniqueId(getIdGenerator(retryTaskDTO.getGroupName()));
         retryTask.setCreateDt(LocalDateTime.now());
         retryTask.setUpdateDt(LocalDateTime.now());
 
@@ -91,7 +96,7 @@ public class RetryServiceImpl implements RetryService {
 
         retryTask.setNextTriggerAt(WaitStrategies.randomWait(1, TimeUnit.SECONDS, 60, TimeUnit.SECONDS).computeRetryTime(null));
 
-        Assert.isTrue(1 ==  retryTaskAccess.saveRetryTask(retryTask), () ->  new EasyRetryServerException("上报数据失败"));
+        Assert.isTrue(1 ==  retryTaskAccess.saveRetryTask(retryTask), () ->  new EasyRetryServerException("failed to report data"));
         return Boolean.TRUE;
     }
 
@@ -155,5 +160,23 @@ public class RetryServiceImpl implements RetryService {
     private void clearFinishRetryData(String groupId) {
         // 将已经重试完成的数据删除
         retryTaskAccess.deleteByDelayLevel(groupId, RetryStatusEnum.FINISH.getStatus());
+    }
+
+    /**
+     * 获取分布式id
+     *
+     * @param groupName 组id
+     * @return 分布式id
+     */
+    private String getIdGenerator(String groupName) {
+
+        GroupConfig groupConfig = configAccess.getGroupConfigByGroupName(groupName);
+        for (final IdGenerator idGenerator : idGeneratorList) {
+            if (idGenerator.supports(groupConfig.getIdGeneratorMode())) {
+                return idGenerator.idGenerator(groupName);
+            }
+        }
+
+        throw new EasyRetryServerException("id generator mode not configured. [{}]", groupName);
     }
 }

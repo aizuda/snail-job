@@ -5,7 +5,7 @@ import com.aizuda.easy.retry.server.service.RetryTaskService;
 import com.aizuda.easy.retry.server.web.annotation.LoginRequired;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
 import com.aizuda.easy.retry.server.web.model.request.BatchDeleteRetryTaskVO;
-import com.aizuda.easy.retry.server.web.model.request.GenerateRetryBizIdVO;
+import com.aizuda.easy.retry.server.web.model.request.GenerateRetryIdempotentIdVO;
 import com.aizuda.easy.retry.server.web.model.request.RetryTaskQueryVO;
 import com.aizuda.easy.retry.server.web.model.request.RetryTaskUpdateStatusRequestVO;
 import com.aizuda.easy.retry.server.web.model.request.RetryTaskSaveRequestVO;
@@ -64,9 +64,9 @@ public class RetryTaskController {
     }
 
     @LoginRequired
-    @PostMapping("/generate/biz-id")
-    public Result<String> bizIdGenerate(@RequestBody @Validated GenerateRetryBizIdVO generateRetryBizIdVO) {
-        return new Result<>(retryTaskService.bizIdGenerate(generateRetryBizIdVO));
+    @PostMapping("/generate/idempotent-id")
+    public Result<String> idempotentIdGenerate(@RequestBody @Validated GenerateRetryIdempotentIdVO generateRetryIdempotentIdVO) {
+        return new Result<>(retryTaskService.idempotentIdGenerate(generateRetryIdempotentIdVO));
     }
 
     @LoginRequired

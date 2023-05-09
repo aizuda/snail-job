@@ -1,53 +1,65 @@
 <template>
   <div>
-    <page-header-wrapper>
-      <a-card :bordered="false">
-        <a-descriptions title="">
-          <a-descriptions-item label="组名称">
-            {{ retryTaskInfo.groupName }}
-          </a-descriptions-item>
-          <a-descriptions-item label="场景名称">
-            {{ retryTaskInfo.sceneName }}
-          </a-descriptions-item>
-          <a-descriptions-item label="业务id" span="2">
-            {{ retryTaskInfo.bizId }}
-          </a-descriptions-item>
-          <a-descriptions-item label="业务编号">
-            {{ retryTaskInfo.bizNo }}
-          </a-descriptions-item>
-          <a-descriptions-item label="重试次数">
-            {{ retryTaskInfo.retryCount }}
-          </a-descriptions-item>
-          <a-descriptions-item label="重试状态">
-            {{ retryStatus[retryTaskInfo.retryStatus] }}
-          </a-descriptions-item>
-          <a-descriptions-item label="触发时间">
-            {{ parseDate( retryTaskInfo.createDt) }}
-          </a-descriptions-item>
-          <a-descriptions-item label="更新时间">
-            {{ parseDate(retryTaskInfo.updateDt) }}
-          </a-descriptions-item>
-          <a-descriptions-item label="执行器名称" span="2">
-            {{ retryTaskInfo.executorName }}
-          </a-descriptions-item>
-          <a-descriptions-item label="扩展参数" span="2">
-            {{ retryTaskInfo.extAttrs }}
-          </a-descriptions-item>
-          <a-descriptions-item label="参数" span="3">
-            {{ retryTaskInfo.argsStr }}
-          </a-descriptions-item>
-        </a-descriptions>
-      </a-card>
+    <page-header-wrapper @back="() => $router.go(-1)" style='margin: -24px -1px 0'>
+      <div></div>
     </page-header-wrapper>
+    <a-card :bordered="false">
+      <a-descriptions title="" bordered>
+        <a-descriptions-item label="组名称">
+          {{ retryTaskInfo.groupName }}
+        </a-descriptions-item>
+        <a-descriptions-item label="场景名称">
+          {{ retryTaskInfo.sceneName }}
+        </a-descriptions-item>
+        <a-descriptions-item label="幂等id">
+          {{ retryTaskInfo.idempotentId }}
+        </a-descriptions-item>
+        <a-descriptions-item label="唯一id">
+          {{ retryTaskInfo.uniqueId }}
+        </a-descriptions-item>
+        <a-descriptions-item label="业务编号">
+          {{ retryTaskInfo.bizNo }}
+        </a-descriptions-item>
+        <a-descriptions-item label="重试次数">
+          {{ retryTaskInfo.retryCount }}
+        </a-descriptions-item>
+        <a-descriptions-item label="重试状态">
+          {{ retryStatus[retryTaskInfo.retryStatus] }}
+        </a-descriptions-item>
+        <a-descriptions-item label="触发时间">
+          {{ retryTaskInfo.createDt }}
+        </a-descriptions-item>
+        <a-descriptions-item label="更新时间">
+          {{ retryTaskInfo.updateDt }}
+        </a-descriptions-item>
+        <a-descriptions-item label="执行器名称" span="3">
+          {{ retryTaskInfo.executorName }}
+        </a-descriptions-item>
+        <a-descriptions-item label="参数" span="3">
+          {{ retryTaskInfo.argsStr }}
+        </a-descriptions-item>
+        <a-descriptions-item label="扩展参数" span="3">
+          {{ retryTaskInfo.extAttrs }}
+        </a-descriptions-item>
+      </a-descriptions>
+    </a-card>
+    <div style='margin: 20px'></div>
+    <a-card title="日志列表" style="width: 100%">
+      <RetryLogList v-if="retryTaskInfo !== null" ref='retryLogListRef' :showSearch="false" :group-name="retryTaskInfo.groupName" :unique-id="retryTaskInfo.uniqueId"/>
+    </a-card>
   </div>
 </template>
 
 <script>
 import { getRetryTaskById } from '@/api/manage'
 import moment from 'moment'
+import RetryLogList from './RetryLogList'
 
 export default {
   name: 'RetryTaskInfo',
+  components: {
+    RetryLogList
+  },
   data () {
     return {
       retryTaskInfo: {},
@@ -64,7 +76,10 @@ export default {
     if (id && groupName) {
       getRetryTaskById(id, { 'groupName': groupName }).then(res => {
         this.retryTaskInfo = res.data
+        this.$refs.retryLogListRef.refreshTable(res.data)
       })
+    } else {
+      this.$router.push({ path: '/404' })
     }
   },
   methods: {

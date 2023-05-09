@@ -13,11 +13,13 @@ public class RetryDeadLetter implements Serializable {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
+    private String uniqueId;
+
     private String groupName;
 
     private String sceneName;
 
-    private String bizId;
+    private String idempotentId;
 
     private String bizNo;
 

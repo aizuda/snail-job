@@ -68,6 +68,19 @@
           />
         </a-form-item>
       </a-col>
+      <a-col :lg="3" :md="6" :sm="12">
+        <a-form-item
+          label="Id生成模式">
+          <a-select
+            placeholder="请选择Id生成模式"
+            v-decorator="[
+              'idGeneratorMode',
+              {rules: [{ required: true, message: '请选择Id生成模式'}]}
+            ]" >
+            <a-select-option :value="key" v-for="(value, key) in idGenMode" :key="key">{{ value }}</a-select-option>
+          </a-select>
+        </a-form-item>
+      </a-col>
     </a-row>
     <a-form-item v-if="showSubmit">
       <a-button htmlType="submit" >Submit</a-button>
@@ -95,6 +108,10 @@ export default {
         '1': '一致性hash算法',
         '2': '随机算法',
         '3': '最近最久未使用算法'
+      },
+      idGenMode: {
+        '1': '号段模式',
+        '2': '雪花算法'
       }
     }
   },
@@ -138,9 +155,11 @@ export default {
       new Promise((resolve) => {
         setTimeout(resolve, 1500)
       }).then(() => {
-        const formData = pick(data, ['id', 'groupName', 'routeKey', 'groupStatus', 'description', 'groupPartition'])
+        const formData = pick(data, ['id', 'groupName', 'routeKey', 'groupStatus', 'description', 'groupPartition', 'idGeneratorMode'])
         formData.groupStatus = formData.groupStatus.toString()
         formData.routeKey = formData.routeKey.toString()
+        formData.idGeneratorMode = formData.idGeneratorMode.toString()
+
         console.log('formData', formData)
         form.setFieldsValue(formData)
       })

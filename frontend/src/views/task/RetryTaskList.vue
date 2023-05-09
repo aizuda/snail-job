@@ -40,7 +40,7 @@
             </a-col>
             <a-col :md="8" :sm="24">
               <a-form-item label="业务id">
-                <a-input v-model="queryParam.bizId" placeholder="请输入业务id" allowClear />
+                <a-input v-model="queryParam.idempotentId" placeholder="请输入业务id" allowClear />
               </a-form-item>
             </a-col>
           </template>
@@ -106,8 +106,6 @@
 <script>
 import ATextarea from 'ant-design-vue/es/input/TextArea'
 import AInput from 'ant-design-vue/es/input/Input'
-// 动态切换组件
-import Edit from '@/views/list/table/Edit'
 import { getAllGroupNameList, getRetryTaskPage, getSceneList, updateRetryTaskStatus, batchDelete } from '@/api/manage'
 import { STable } from '@/components'
 import SaveRetryTask from './form/SaveRetryTask'
@@ -118,7 +116,6 @@ export default {
   components: {
     AInput,
     ATextarea,
-    Edit,
     STable,
     SaveRetryTask,
     BatchUpdateRetryTaskInfo
@@ -147,41 +144,54 @@ export default {
           fixed: 'left'
         },
         {
+          title: '唯一id',
+          dataIndex: 'uniqueId',
+          width: '8%'
+        },
+        {
           title: '组名称',
           dataIndex: 'groupName',
-          ellipsis: true
+          ellipsis: true,
+          width: '10%'
         },
         {
           title: '场景名称',
-          dataIndex: 'sceneName'
+          dataIndex: 'sceneName',
+          width: '10%'
         },
         {
-          title: '业务id',
-          dataIndex: 'bizId'
+          title: '幂等id',
+          dataIndex: 'idempotentId',
+          width: '10%'
         },
         {
           title: '业务编号',
-          dataIndex: 'bizNo'
+          dataIndex: 'bizNo',
+          width: '10%'
         },
         {
           title: '下次触发时间',
           dataIndex: 'nextTriggerAt',
-          needTotal: false
+          needTotal: false,
+          width: '10%'
         },
         {
           title: '重试次数',
           dataIndex: 'retryCount',
-          sorter: true
+          sorter: true,
+          width: '10%'
         },
         {
           title: '重试状态',
           dataIndex: 'retryStatus',
-          customRender: (text) => this.retryStatus[text]
+          customRender: (text) => this.retryStatus[text],
+          width: '5%'
         },
         {
           title: '更新时间',
           dataIndex: 'updateDt',
-          sorter: true
+          sorter: true,
+          width: '10%'
         },
         {
           title: '操作',

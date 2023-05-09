@@ -17,7 +17,7 @@ public class RetryDeadLetterResponseVO {
 
     private String sceneName;
 
-    private String bizId;
+    private String idempotentId;
 
     private String bizNo;
 

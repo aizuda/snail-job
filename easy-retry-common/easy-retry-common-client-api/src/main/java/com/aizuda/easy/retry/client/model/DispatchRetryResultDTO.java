@@ -11,6 +11,7 @@ import lombok.Data;
 public class DispatchRetryResultDTO {
     private String resultJson;
     private Integer statusCode;
-    private String bizId;
+    private String idempotentId;
     private String exceptionMsg;
+    private String uniqueId;
 }

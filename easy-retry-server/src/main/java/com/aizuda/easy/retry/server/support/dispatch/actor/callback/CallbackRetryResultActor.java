@@ -53,18 +53,19 @@ public class CallbackRetryResultActor extends AbstractActor {
 
                 // 回调参数
                 RetryCallbackDTO retryCallbackDTO = new RetryCallbackDTO();
-                retryCallbackDTO.setBizId(retryTask.getBizId());
+                retryCallbackDTO.setIdempotentId(retryTask.getIdempotentId());
                 retryCallbackDTO.setRetryStatus(retryTask.getRetryStatus());
                 retryCallbackDTO.setArgsStr(retryTask.getArgsStr());
                 retryCallbackDTO.setScene(retryTask.getSceneName());
                 retryCallbackDTO.setGroup(retryTask.getGroupName());
                 retryCallbackDTO.setExecutorName(retryTask.getExecutorName());
+                retryCallbackDTO.setUniqueId(retryTask.getUniqueId());
 
                 // 设置header
                 HttpHeaders requestHeaders = new HttpHeaders();
                 EasyRetryHeaders easyRetryHeaders = new EasyRetryHeaders();
                 easyRetryHeaders.setEasyRetry(Boolean.TRUE);
-                easyRetryHeaders.setEasyRetryId(IdUtil.simpleUUID());
+                easyRetryHeaders.setEasyRetryId(retryTask.getUniqueId());
                 requestHeaders.add(SystemConstants.EASY_RETRY_HEAD_KEY, JsonUtil.toJsonString(easyRetryHeaders));
 
                 HttpEntity<RetryCallbackDTO> requestEntity = new HttpEntity<>(retryCallbackDTO, requestHeaders);

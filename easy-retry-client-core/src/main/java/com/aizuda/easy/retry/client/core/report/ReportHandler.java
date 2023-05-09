@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.client.core.report;
 
-import com.aizuda.easy.retry.client.core.BizIdGenerate;
+import com.aizuda.easy.retry.client.core.IdempotentIdGenerate;
 import com.aizuda.easy.retry.client.core.RetryArgSerializer;
 import com.aizuda.easy.retry.client.core.config.EasyRetryProperties;
 import com.aizuda.easy.retry.client.core.Lifecycle;
@@ -60,20 +60,20 @@ public class ReportHandler implements Lifecycle {
         Method executorMethod = retryerInfo.getExecutorMethod();
 
         RetryTaskDTO retryTaskDTO = new RetryTaskDTO();
-        String bizId;
+        String idempotentId;
         try {
-            Class<? extends BizIdGenerate> bizIdGenerate = retryerInfo.getBizIdGenerate();
-            BizIdGenerate generate = bizIdGenerate.newInstance();
-            Method method = bizIdGenerate.getMethod("idGenerate", Object[].class);
+            Class<? extends IdempotentIdGenerate> idempotentIdGenerate = retryerInfo.getIdempotentIdGenerate();
+            IdempotentIdGenerate generate = idempotentIdGenerate.newInstance();
+            Method method = idempotentIdGenerate.getMethod("idGenerate", Object[].class);
             Object p = new Object[]{scene, targetClassName, args, executorMethod.getName()};
-            bizId = (String) ReflectionUtils.invokeMethod(method, generate, p);
+            idempotentId = (String) ReflectionUtils.invokeMethod(method, generate, p);
         } catch (Exception exception) {
-            LogUtils.error(log, "自定义id生成异常：{},{}", scene, args, exception);
-            throw new EasyRetryClientException("bizId生成异常：{},{}", scene, args);
+            LogUtils.error(log, "幂等id生成异常：{},{}", scene, args, exception);
+            throw new EasyRetryClientException("idempotentId生成异常：{},{}", scene, args);
         }
 
         String serialize = retryArgSerializer.serialize(args);
-        retryTaskDTO.setBizId(bizId);
+        retryTaskDTO.setIdempotentId(idempotentId);
         retryTaskDTO.setExecutorName(targetClassName);
         retryTaskDTO.setArgsStr(serialize);
         retryTaskDTO.setGroupName(EasyRetryProperties.getGroup());
