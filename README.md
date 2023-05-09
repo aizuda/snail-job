@@ -50,16 +50,8 @@
 ## 应用实例
 - [Spring-Boot](https://gitee.com/aizuda/easy-retry/tree/dev/example)
 
-```
-<dependency>
-    <groupId>com.aizuda</groupId>
-    <artifactId>easy-retry-client-starter</artifactId>
-    <version>1.1.0</version>
-</dependency>
-```
-
 ## 期望
 欢迎提出更好的意见，帮助完善 Easy-Retry
 
 ## 版权
-[GNU General Public License v3.0](https://gitee.com/aizuda/easy-retry/blob/0.0.4.3/LICENSE)
+[Apache-2.0](https://gitee.com/aizuda/easy-retry/blob/master/LICENSE)
