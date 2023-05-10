@@ -1,52 +1,36 @@
 package com.aizuda.easy.retry.client.core.annotation;
 
-
 import com.aizuda.easy.retry.client.core.IdempotentIdGenerate;
-import com.aizuda.easy.retry.client.core.generator.SimpleIdempotentIdGenerate;
-import com.aizuda.easy.retry.client.core.strategy.ExecutorAnnotationMethod;
-import com.aizuda.easy.retry.client.core.strategy.ExecutorMethod;
 import com.aizuda.easy.retry.client.core.callback.RetryCompleteCallback;
 import com.aizuda.easy.retry.client.core.callback.SimpleRetryCompleteCallback;
-import com.aizuda.easy.retry.client.core.retryer.RetryType;
+import com.aizuda.easy.retry.client.core.generator.SimpleIdempotentIdGenerate;
+import org.springframework.stereotype.Component;
 
-import java.lang.annotation.*;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * 重试接入入口
+ * 在使用手动生成重试任务时，通过ExecutorMethodRegister配置注册重试场景
  *
- * @author www.byteblogs.com
+ * @author: www.byteblogs.com
+ * @date : 2023-05-10 09:39
+ * @since 1.3.0
  */
-@Target(ElementType.METHOD)
+@Target({ElementType.TYPE, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
+@Inherited
 @Documented
-public @interface Retryable {
+@Component
+public @interface ExecutorMethodRegister {
 
     /**
      * 场景值
      */
     String scene();
-
-    /**
-     * 包含的异常
-     */
-    Class<? extends Throwable>[] include() default {};
-
-    /**
-     * 排除的异常
-     */
-    Class<? extends Throwable>[] exclude() default {};
-
-    /**
-     * 重试策略
-     */
-    RetryType retryStrategy() default RetryType.LOCAL_REMOTE;
-
-    /**
-     * 重试处理入口，默认为原方法
-     *
-     * @return
-     */
-    Class<? extends ExecutorMethod> retryMethod() default ExecutorAnnotationMethod.class;
 
     /**
      * 幂等id生成器
@@ -80,26 +64,4 @@ public @interface Retryable {
      */
     String bizNo() default "";
 
-    /**
-     * 本地重试次数 次数必须大于等于1
-     */
-    int localTimes() default 3;
-
-    /**
-     * 本地重试间隔时间(s)
-     */
-    int localInterval() default 2;
-
-    /**
-     * 本地重试完成后是否抛出异常
-     * 如果不抛出异常，则调用需要重试方法的方法则感知不到异常信息
-     *
-     * 比如: A->B->C->D->E
-     * D需要重试 若配置D不抛异常,则A->B->C无法感知，若有事物则无法回滚
-     *
-     * @return true-抛出 false-不抛出
-     */
-    boolean isThrowException() default true;
-
 }
-

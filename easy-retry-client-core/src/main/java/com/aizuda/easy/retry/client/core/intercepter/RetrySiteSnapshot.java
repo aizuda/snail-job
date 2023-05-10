@@ -60,6 +60,10 @@ public class RetrySiteSnapshot {
         RETRY_CLASS_METHOD_ENTRANCE.set(methodEntrance);
     }
 
+    public static void removeMethodEntrance() {
+        RETRY_CLASS_METHOD_ENTRANCE.remove();
+    }
+
     public static boolean isMethodEntrance(String methodEntrance) {
         return getMethodEntrance().equals(methodEntrance);
     }
@@ -120,7 +124,6 @@ public class RetrySiteSnapshot {
         ENTRY_METHOD_TIME.remove();
     }
 
-
     public static void removeRetryHeader(){
         RETRY_HEADER.remove();
     }
@@ -129,11 +132,19 @@ public class RetrySiteSnapshot {
         RETRY_STATUS_CODE.remove();
     }
 
+    public static void removeStage() {
+        RETRY_STAGE.remove();
+    }
+
+    public static void removeStatus() {
+        RETRY_STATUS.remove();
+    }
+
     public static void removeAll() {
 
-        RETRY_STATUS.remove();
-        RETRY_CLASS_METHOD_ENTRANCE.remove();
-        RETRY_STAGE.remove();
+        removeStatus();
+        removeMethodEntrance();
+        removeStage();
 
         removeEntryMethodTime();
         removeRetryHeader();

@@ -1,22 +1,22 @@
 package com.aizuda.easy.retry.server.support.dispatch;
 
 import akka.actor.ActorRef;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.google.common.util.concurrent.RateLimiter;
 import com.aizuda.easy.retry.common.core.enums.NodeTypeEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
-import com.google.common.cache.Cache;
 import com.aizuda.easy.retry.server.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.config.SystemProperties;
-import com.aizuda.easy.retry.server.support.allocate.server.AllocateMessageQueueConsistentHash;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.ServerNodeMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.GroupConfig;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.ServerNode;
 import com.aizuda.easy.retry.server.persistence.support.ConfigAccess;
 import com.aizuda.easy.retry.server.support.Lifecycle;
+import com.aizuda.easy.retry.server.support.allocate.server.AllocateMessageQueueConsistentHash;
 import com.aizuda.easy.retry.server.support.cache.CacheGroupRateLimiter;
 import com.aizuda.easy.retry.server.support.cache.CacheGroupScanActor;
 import com.aizuda.easy.retry.server.support.handler.ServerRegisterNodeHandler;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.google.common.cache.Cache;
+import com.google.common.util.concurrent.RateLimiter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -24,7 +24,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -40,16 +44,41 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DispatchService implements Lifecycle {
 
+    static class Solution {
+
+        public static void main(String[] args) {
+            System.out.println(canCompleteCircuit(new int[]{1,2,3,4,5}, new int[]{3,4,5,1,2}));
+        }
+
+        public static int canCompleteCircuit(int[] gas, int[] cost) {
+
+            int len = gas.length; // 加油站数量
+            int spare = 0; // 当前剩余汽油量
+            int minSpare = Integer.MAX_VALUE; // 最小剩余汽油量
+            int minIndex = 0; // 最小剩余汽油量对应的加油站索引
+
+            for (int i = 0; i < len; i++) {
+                spare += gas[i] - cost[i]; // 计算当前加油站的剩余汽油量
+                if (spare < minSpare) { // 如果当前剩余汽油量比最小剩余汽油量小
+                    minSpare = spare; // 更新最小剩余汽油量
+                    minIndex = i; // 更新最小剩余汽油量对应的加油站索引
+                }
+            }
+
+            return spare < 0 ? -1 : (minIndex + 1) % len; // 判断是否存在解，并返回结果
+        }
+    }
+
     /**
      * 分配器线程
      */
-    private final ScheduledExecutorService dispatchService = Executors.newSingleThreadScheduledExecutor(r -> new Thread(r,"DispatchService"));
+    private final ScheduledExecutorService dispatchService = Executors
+        .newSingleThreadScheduledExecutor(r -> new Thread(r, "DispatchService"));
 
     /**
      * 缓存待拉取数据的起点时间
-     *
-     * MAX_ID_MAP[key] = group 的 idHash
-     * MAX_ID_MAP[value] = retry_task的 create_at时间
+     * <p>
+     * MAX_ID_MAP[key] = group 的 idHash MAX_ID_MAP[value] = retry_task的 create_at时间
      */
     public static final Map<String, LocalDateTime> LAST_AT_MAP = new HashMap<>();
 
@@ -87,7 +116,7 @@ public class DispatchService implements Lifecycle {
                 }
 
             } catch (Exception e) {
-                LogUtils.error(log,"分发异常", e);
+                LogUtils.error(log, "分发异常", e);
             }
 
 
@@ -117,7 +146,7 @@ public class DispatchService implements Lifecycle {
      */
     private void cacheRateLimiter(String groupName) {
         List<ServerNode> serverNodes = serverNodeMapper.selectList(new LambdaQueryWrapper<ServerNode>()
-                .eq(ServerNode::getGroupName, groupName));
+            .eq(ServerNode::getGroupName, groupName));
         Cache<String, RateLimiter> rateLimiterCache = CacheGroupRateLimiter.getAll();
         for (ServerNode serverNode : serverNodes) {
             RateLimiter rateLimiter = rateLimiterCache.getIfPresent(serverNode.getHostId());
@@ -143,8 +172,8 @@ public class DispatchService implements Lifecycle {
     }
 
     /**
-     * 分配当前POD负责的组
-     *  RebalanceGroup
+     * 分配当前POD负责的组 RebalanceGroup
+     *
      * @return {@link  GroupConfig} 组上下文
      */
     private List<GroupConfig> getCurrentHostGroupList() {
@@ -153,7 +182,8 @@ public class DispatchService implements Lifecycle {
             return Collections.EMPTY_LIST;
         }
         //为了保证客户端分配算法的一致性,serverNodes 从数据库从数据获取
-        List<ServerNode> serverNodes = serverNodeMapper.selectList(new LambdaQueryWrapper<ServerNode>().eq(ServerNode::getNodeType, NodeTypeEnum.SERVER.getType()));
+        List<ServerNode> serverNodes = serverNodeMapper.selectList(
+            new LambdaQueryWrapper<ServerNode>().eq(ServerNode::getNodeType, NodeTypeEnum.SERVER.getType()));
 
         if (CollectionUtils.isEmpty(serverNodes)) {
             LogUtils.error(log, "服务端节点为空");
@@ -162,7 +192,8 @@ public class DispatchService implements Lifecycle {
 
         List<String> podIdList = serverNodes.stream().map(ServerNode::getHostId).collect(Collectors.toList());
 
-        return new AllocateMessageQueueConsistentHash().allocate(ServerRegisterNodeHandler.CURRENT_CID, prepareAllocateGroupConfig, podIdList);
+        return new AllocateMessageQueueConsistentHash()
+            .allocate(ServerRegisterNodeHandler.CURRENT_CID, prepareAllocateGroupConfig, podIdList);
     }
 
     @Override

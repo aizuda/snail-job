@@ -2,14 +2,13 @@ package com.aizuda.easy.retry.client.core.report;
 
 import com.aizuda.easy.retry.client.core.RetryExecutor;
 import com.aizuda.easy.retry.client.core.RetryExecutorParameter;
-import com.aizuda.easy.retry.client.core.client.response.EasyRetryResponse;
+import com.aizuda.easy.retry.client.core.client.NettyClient;
+import com.aizuda.easy.retry.client.core.client.proxy.RequestBuilder;
 import com.aizuda.easy.retry.client.core.config.EasyRetryProperties;
+import com.aizuda.easy.retry.common.core.model.NettyResult;
 import com.github.rholder.retry.*;
 import com.google.common.base.Predicate;
 import com.aizuda.easy.retry.client.core.cache.GroupVersionCache;
-import com.aizuda.easy.retry.client.core.client.NettyHttpConnectClient;
-import com.aizuda.easy.retry.client.core.client.request.ReportRetryInfoHttpRequestHandler;
-import com.aizuda.easy.retry.client.core.client.request.RequestParam;
 import com.aizuda.easy.retry.client.core.executor.GuavaRetryExecutor;
 import com.aizuda.easy.retry.common.core.alarm.Alarm;
 import com.aizuda.easy.retry.common.core.alarm.AlarmContext;
@@ -17,7 +16,6 @@ import com.aizuda.easy.retry.common.core.alarm.AltinAlarmFactory;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.enums.NotifySceneEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
-import com.aizuda.easy.retry.common.core.model.EasyRetryRequest;
 import com.aizuda.easy.retry.common.core.util.EnvironmentUtils;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.common.core.window.Listener;
@@ -33,8 +31,11 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * 批量异步上报
+ *
  * @author: www.byteblogs.com
  * @date : 2022-03-08 13:54
+ * @since 1.0.0
  */
 @Slf4j
 public class ReportListener implements Listener<RetryTaskDTO> {
@@ -46,6 +47,11 @@ public class ReportListener implements Listener<RetryTaskDTO> {
                     "> 异常:{}  \n"
             ;
 
+    private static final NettyClient CLIENT = RequestBuilder.<NettyClient, NettyResult>newBuilder()
+        .client(NettyClient.class)
+        .callback(nettyResult -> LogUtils.info(log, "Data report successfully requestId:[{}]", nettyResult.getRequestId())).build();
+
+
     @Override
     public void handler(List<RetryTaskDTO> list) {
         RetryExecutor<WaitStrategy, StopStrategy> retryExecutor =
@@ -55,18 +61,13 @@ public class ReportListener implements Listener<RetryTaskDTO> {
 
         try {
             retryExecutor.call(retryer, () -> {
-                LogUtils.info(log, "批量上报");
-
-                EasyRetryRequest easyRetryRequest = new EasyRetryRequest(list);
-                ReportRetryInfoHttpRequestHandler requestHandler = SpringContext.getBeanByType(ReportRetryInfoHttpRequestHandler.class);
-                EasyRetryResponse.cache(easyRetryRequest, requestHandler.callable());
-                NettyHttpConnectClient.send(requestHandler.method(), requestHandler.getHttpUrl(new RequestParam()), requestHandler.body(easyRetryRequest));
-
+                LogUtils.info(log, "Batch asynchronous reporting ...");
+                CLIENT.reportRetryInfo(list);
                 return null;
             }, throwable -> {
-                LogUtils.info(log,"上报重试后失败：{}", JsonUtil.toJsonString(list));
+                LogUtils.info(log,"Data report failed：{}", JsonUtil.toJsonString(list));
                 sendMessage(throwable);
-            }, o -> LogUtils.info(log,"上报重试成功：{}", JsonUtil.toJsonString(list)));
+            }, o -> LogUtils.info(log,"Data report successful retry：{}", JsonUtil.toJsonString(list)));
         } catch (Exception e) {
             e.printStackTrace();
         }

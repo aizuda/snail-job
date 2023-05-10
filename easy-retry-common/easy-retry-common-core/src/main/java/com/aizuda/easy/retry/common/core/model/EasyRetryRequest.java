@@ -14,9 +14,9 @@ public class EasyRetryRequest {
 
    private String requestId;
 
-   private Object args;
+   private Object[] args;
 
-   public EasyRetryRequest(Object args) {
+   public EasyRetryRequest(Object... args) {
       this.args = args;
       this.requestId = generateRequestId();
    }

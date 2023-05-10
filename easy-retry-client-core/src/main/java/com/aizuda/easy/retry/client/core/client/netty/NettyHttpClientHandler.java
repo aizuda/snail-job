@@ -1,14 +1,11 @@
-package com.aizuda.easy.retry.client.core.client;
+package com.aizuda.easy.retry.client.core.client.netty;
 
-import com.aizuda.easy.retry.client.core.client.request.BeatHttpRequestHandler;
-import com.aizuda.easy.retry.client.core.client.response.EasyRetryResponse;
+import com.aizuda.easy.retry.client.core.client.NettyClient;
+import com.aizuda.easy.retry.client.core.client.proxy.RequestBuilder;
 import com.aizuda.easy.retry.client.core.config.EasyRetryProperties;
-import com.aizuda.easy.retry.client.core.client.request.RequestParam;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.model.NettyResult;
-import com.aizuda.easy.retry.common.core.model.EasyRetryRequest;
-import com.aizuda.easy.retry.common.core.util.HostUtils;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -18,7 +15,6 @@ import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.CharsetUtil;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -28,24 +24,24 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class NettyHttpClientHandler extends SimpleChannelInboundHandler<FullHttpResponse> {
 
-    private static final String HOST_ID = UUID.randomUUID().toString().concat("_").concat(HostUtils.getIp());
-
-    private NettyHttpConnectClient nettyHttpConnectClient;
-
-    public NettyHttpClientHandler(NettyHttpConnectClient nettyHttpConnectClient) {
-        this.nettyHttpConnectClient = nettyHttpConnectClient;
+    private NettyClient client;
+    public NettyHttpClientHandler() {
+        client = RequestBuilder.<NettyClient, NettyResult>newBuilder()
+            .client(NettyClient.class)
+            .callback(nettyResult -> LogUtils.info(log,"heartbeat check requestId:[{}]", nettyResult.getRequestId()))
+            .build();
     }
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, FullHttpResponse msg) throws Exception {
 
-        FullHttpResponse response = (FullHttpResponse) msg;
+        FullHttpResponse response = msg;
         String content = response.content().toString(CharsetUtil.UTF_8);
         HttpHeaders headers = response.headers();
 
-        LogUtils.info(log, "接收服务端返回数据content:[{}],headers:[{}]", content, headers);
+        LogUtils.info(log, "Receive server data content:[{}], headers:[{}]", content, headers);
         NettyResult nettyResult = JsonUtil.parseObject(content, NettyResult.class);
-        EasyRetryResponse.invoke(nettyResult.getRequestId(), nettyResult);
+        RpcContext.invoke(nettyResult.getRequestId(), nettyResult);
 
     }
 
@@ -103,13 +99,7 @@ public class NettyHttpClientHandler extends SimpleChannelInboundHandler<FullHttp
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
         LogUtils.debug(log,"userEventTriggered");
         if (evt instanceof IdleStateEvent) {
-
-            EasyRetryRequest easyRetryRequest = new EasyRetryRequest("PING");
-
-            BeatHttpRequestHandler requestHandler = SpringContext.getBeanByType(BeatHttpRequestHandler.class);
-            EasyRetryResponse.cache(easyRetryRequest, requestHandler.callable());
-
-            NettyHttpConnectClient.send(requestHandler.method(), requestHandler.getHttpUrl(new RequestParam()), requestHandler.body(easyRetryRequest));   // beat N, close if fail(may throw error)
+            client.beat("PING");
         } else {
             super.userEventTriggered(ctx, evt);
         }

@@ -98,7 +98,7 @@ public class LocalRetryStrategies extends AbstractRetryStrategies {
             if (RetryType.LOCAL_REMOTE.name().equals(retryerInfo.getRetryType().name())){
                 // 上报
                 log.debug("上报 scene:[{}]", retryerInfo.getScene());
-                reportHandler.report(retryerInfo.getScene(), retryerInfo.getExecutorClassName(), params);
+                reportHandler.asyncReport(retryerInfo.getScene(), retryerInfo.getExecutorClassName(), params);
             }
         };
     }
@@ -135,7 +135,7 @@ public class LocalRetryStrategies extends AbstractRetryStrategies {
                 // 仅仅是远程重试则直接上报
                 log.debug("上报 scene:[{}]", retryerInfo.getScene());
                 return () -> {
-                    reportHandler.report(retryerInfo.getScene(), retryerInfo.getExecutorClassName(), params);
+                    reportHandler.asyncReport(retryerInfo.getScene(), retryerInfo.getExecutorClassName(), params);
                     RetrySiteSnapshot.setStage(RetrySiteSnapshot.EnumStage.REMOTE.getStage());
                     return null;
                 };

@@ -67,7 +67,7 @@ public class RetryEndPoint {
 
         Object[] deSerialize = null;
         try {
-            deSerialize = (Object[]) retryArgSerializer.deSerialize(executeReqDto.getArgsStr(), retryerInfo.getExecutor().getClass(), retryerInfo.getExecutorMethod());
+            deSerialize = (Object[]) retryArgSerializer.deSerialize(executeReqDto.getArgsStr(), retryerInfo.getExecutor().getClass(), retryerInfo.getMethod());
         } catch (JsonProcessingException e) {
             throw new EasyRetryClientException("参数解析异常", e);
         }
@@ -121,7 +121,7 @@ public class RetryEndPoint {
 
         Object[] deSerialize = null;
         try {
-            deSerialize = (Object[]) retryArgSerializer.deSerialize(callbackDTO.getArgsStr(), retryerInfo.getExecutor().getClass(), retryerInfo.getExecutorMethod());
+            deSerialize = (Object[]) retryArgSerializer.deSerialize(callbackDTO.getArgsStr(), retryerInfo.getExecutor().getClass(), retryerInfo.getMethod());
         } catch (JsonProcessingException e) {
             throw new EasyRetryClientException("参数解析异常", e);
         }
@@ -156,13 +156,13 @@ public class RetryEndPoint {
         RetryerInfo retryerInfo = RetryerInfoCache.get(scene, executorName);
         Assert.notNull(retryerInfo, ()-> new EasyRetryClientException("重试信息不存在 scene:[{}] executorName:[{}]", scene, executorName));
 
-        Method executorMethod = retryerInfo.getExecutorMethod();
+        Method executorMethod = retryerInfo.getMethod();
 
         RetryArgSerializer retryArgSerializer = new JacksonSerializer();
 
         Object[] deSerialize = null;
         try {
-            deSerialize = (Object[]) retryArgSerializer.deSerialize(argsStr, retryerInfo.getExecutor().getClass(), retryerInfo.getExecutorMethod());
+            deSerialize = (Object[]) retryArgSerializer.deSerialize(argsStr, retryerInfo.getExecutor().getClass(), retryerInfo.getMethod());
         } catch (JsonProcessingException e) {
             throw new EasyRetryClientException("参数解析异常", e);
         }

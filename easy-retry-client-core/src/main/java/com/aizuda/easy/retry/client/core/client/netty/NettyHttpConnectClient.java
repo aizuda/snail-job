@@ -1,4 +1,4 @@
-package com.aizuda.easy.retry.client.core.client;
+package com.aizuda.easy.retry.client.core.client.netty;
 
 import cn.hutool.core.util.IdUtil;
 import com.aizuda.easy.retry.client.core.cache.GroupVersionCache;
@@ -64,7 +64,7 @@ public class NettyHttpConnectClient implements Lifecycle, ApplicationContextAwar
                                     .addLast(new IdleStateHandler(0, 0, 30, TimeUnit.SECONDS))
                                     .addLast(new HttpClientCodec())
                                     .addLast(new HttpObjectAggregator(5 * 1024 * 1024))
-                                    .addLast(new NettyHttpClientHandler(thisClient));
+                                    .addLast(new NettyHttpClientHandler());
                         }
                     })
                     .option(ChannelOption.SO_KEEPALIVE, true)
@@ -73,7 +73,7 @@ public class NettyHttpConnectClient implements Lifecycle, ApplicationContextAwar
             channel = channelFuture.channel();
 
         } catch (Exception e) {
-            log.error("客户端发送异常", e);
+            log.error("Client start exception", e);
         }
     }
 
@@ -121,6 +121,36 @@ public class NettyHttpConnectClient implements Lifecycle, ApplicationContextAwar
         channel.writeAndFlush(request).sync();
     }
 
+    public static void sendSync(HttpMethod method, String url, String body) throws InterruptedException {
+
+        if (Objects.isNull(channel)) {
+            LogUtils.debug(log,"channel is null");
+            return;
+        }
+
+        // 配置HttpRequest的请求数据和一些配置信息
+        FullHttpRequest request = new DefaultFullHttpRequest(
+            HttpVersion.HTTP_1_0, method, url, Unpooled.wrappedBuffer(body.getBytes(StandardCharsets.UTF_8)));
+
+        ServerProperties serverProperties =  SpringContext.CONTEXT.getBean(ServerProperties.class);
+
+        request.headers()
+            .set(HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON)
+            //开启长连接
+            .set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE)
+            //设置传递请求内容的长度
+            .set(HttpHeaderNames.CONTENT_LENGTH, request.content().readableBytes())
+            .set(HeadersEnum.HOST_ID.getKey(), HOST_ID)
+            .set(HeadersEnum.HOST_IP.getKey(), HOST_IP)
+            .set(HeadersEnum.GROUP_NAME.getKey(), EasyRetryProperties.getGroup())
+            .set(HeadersEnum.CONTEXT_PATH.getKey(), Optional.ofNullable(serverProperties.getServlet().getContextPath()).orElse("/"))
+            .set(HeadersEnum.HOST_PORT.getKey(), Optional.ofNullable(serverProperties.getPort()).orElse(8080))
+            .set(HeadersEnum.VERSION.getKey(), GroupVersionCache.getVersion())
+        ;
+
+        //发送数据
+        channel.writeAndFlush(request).sync();
+    }
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {

@@ -1,13 +1,11 @@
 package com.aizuda.easy.retry.client.core.cache;
 
-import com.aizuda.easy.retry.client.core.client.request.ConfigHttpRequestHandler;
-import com.aizuda.easy.retry.client.core.client.request.RequestParam;
-import com.aizuda.easy.retry.client.core.client.response.EasyRetryResponse;
 import com.aizuda.easy.retry.client.core.Lifecycle;
-import com.aizuda.easy.retry.client.core.client.NettyHttpConnectClient;
-import com.aizuda.easy.retry.common.core.context.SpringContext;
+import com.aizuda.easy.retry.client.core.client.NettyClient;
+import com.aizuda.easy.retry.client.core.client.proxy.RequestBuilder;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
-import com.aizuda.easy.retry.common.core.model.EasyRetryRequest;
+import com.aizuda.easy.retry.common.core.model.NettyResult;
+import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.model.dto.ConfigDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
@@ -60,13 +58,18 @@ public class GroupVersionCache implements Lifecycle {
     public void start() {
 
         try {
-            EasyRetryRequest easyRetryRequest = new EasyRetryRequest(getVersion());
+            NettyClient client = RequestBuilder.<NettyClient, NettyResult>newBuilder()
+                .client(NettyClient.class)
+                .callback(nettyResult -> {
+                    if (Objects.isNull(nettyResult.getData())) {
+                        LogUtils.error(log, "获取配置结果为null");
+                        return;
+                    }
 
-            ConfigHttpRequestHandler configHttpRequestHandler = SpringContext.getBeanByType(ConfigHttpRequestHandler.class);
-            EasyRetryResponse.cache(easyRetryRequest, configHttpRequestHandler.callable());
-            NettyHttpConnectClient.send(configHttpRequestHandler.method(), configHttpRequestHandler.getHttpUrl(
-                    new RequestParam()), configHttpRequestHandler.body(easyRetryRequest));
-
+                    GroupVersionCache.configDTO = JsonUtil.parseObject(nettyResult.getData().toString(), ConfigDTO.class);
+                })
+                .build();
+            client.getConfig(0);
         } catch (Exception e) {
             LogUtils.error(log, "同步版本失败", e);
         }

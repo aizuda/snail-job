@@ -2,7 +2,11 @@ package com.example.demo;
 
 import cn.hutool.core.lang.UUID;
 import com.aizuda.easy.retry.client.core.annotation.Retryable;
+import com.aizuda.easy.retry.client.core.retryer.RetryType;
+import com.example.model.Cat;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * @author: www.byteblogs.com
@@ -14,8 +18,8 @@ public class RetryRegisterService {
     /**
      * 测试简单的异常情况
      */
-    @Retryable(scene = "errorMethod1", localTimes = 3)
-    public String errorMethod1(String name) {
+    @Retryable(scene = "errorMethod1")
+    public String errorMethod1(List<Cat> name) {
 
         double i = 1 / 0;
 

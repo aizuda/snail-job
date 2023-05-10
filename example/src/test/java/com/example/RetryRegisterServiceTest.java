@@ -1,6 +1,7 @@
 package com.example;
 
 import com.example.demo.RetryRegisterService;
+import com.example.model.Cat;
 import lombok.SneakyThrows;
 import org.apache.commons.lang.StringUtils;
 import org.awaitility.Awaitility;
@@ -8,6 +9,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -27,7 +30,11 @@ public class RetryRegisterServiceTest {
     public void errorMethod1() {
 
         try {
-            retryRegisterService.errorMethod1(UUID.randomUUID().toString());
+            List<Cat> list = new ArrayList<>();
+            Cat cat = new Cat();
+            cat.setName(UUID.randomUUID().toString());
+            list.add(cat);
+            retryRegisterService.errorMethod1(list);
         } catch (Exception e) {
         }
 

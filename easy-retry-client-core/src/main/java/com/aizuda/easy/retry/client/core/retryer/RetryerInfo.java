@@ -1,7 +1,7 @@
 package com.aizuda.easy.retry.client.core.retryer;
 
 import com.aizuda.easy.retry.client.core.IdempotentIdGenerate;
-import com.aizuda.easy.retry.client.core.strategy.RetryMethod;
+import com.aizuda.easy.retry.client.core.strategy.ExecutorMethod;
 import com.aizuda.easy.retry.client.core.callback.RetryCompleteCallback;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,13 +22,13 @@ public class RetryerInfo {
     private final Set<Class<? extends Throwable>> include;
     private final Set<Class<? extends Throwable>> exclude;
     private final Object executor;
-    private final Method executorMethod;
+    private final Method method;
     private final RetryType retryType;
     private final Integer localTimes;
     private final Integer localInterval;
     private final Class<? extends IdempotentIdGenerate> idempotentIdGenerate;
     private final String bizNo;
-    private final Class<? extends RetryMethod> retryMethod;
+    private final Class<? extends ExecutorMethod> executorMethod;
     private final boolean isThrowException;
     private final Class<? extends RetryCompleteCallback> retryCompleteCallback;
 }

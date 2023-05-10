@@ -6,7 +6,7 @@ import com.aizuda.easy.retry.client.core.annotation.Retryable;
 import com.aizuda.easy.retry.client.core.callback.RetryCompleteCallback;
 import com.aizuda.easy.retry.client.core.retryer.RetryType;
 import com.aizuda.easy.retry.client.core.retryer.RetryerInfo;
-import com.aizuda.easy.retry.client.core.strategy.RetryMethod;
+import com.aizuda.easy.retry.client.core.strategy.ExecutorMethod;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.aop.support.AopUtils;
@@ -77,7 +77,7 @@ public class RetryableScanner implements Scanner, ApplicationContextAware {
         RetryType retryType = retryable.retryStrategy();
         int localTimes = retryable.localTimes();
         int localInterval = retryable.localInterval();
-        Class<? extends RetryMethod> retryMethod = retryable.retryMethod();
+        Class<? extends ExecutorMethod> retryMethod = retryable.retryMethod();
         boolean throwException = retryable.isThrowException();
         Class<? extends RetryCompleteCallback> retryCompleteCallback = retryable.retryCompleteCallback();
 

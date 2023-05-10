@@ -1,9 +1,10 @@
 package com.example.demo;
 
-import com.aizuda.easy.retry.client.core.strategy.RetryMethod;
+import com.aizuda.easy.retry.client.core.strategy.ExecutorMethod;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+
 
 /**
  * @author: www.byteblogs.com
@@ -11,11 +12,11 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Slf4j
-public class MyRetryMethod implements RetryMethod {
+public class MyExecutorMethod implements ExecutorMethod {
 
     @Override
-    public Object doExecute(Object... params) {
-        log.info("测试自定义重试方法 MyRetryMethod params:[{}]", JsonUtil.toJsonString(params));
+    public Object doExecute(Object params) {
+        log.info("测试自定义重试方法 MyExecutorMethod params:[{}]", JsonUtil.toJsonString(params));
         return "测试成功";
     }
 

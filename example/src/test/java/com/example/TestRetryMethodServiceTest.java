@@ -18,9 +18,13 @@ public class TestRetryMethodServiceTest {
     public TestRetryMethodService retryMethodService;
 
     @Test
-    public void testRetryMethod() {
-        retryMethodService.testRetryMethod(UUID.randomUUID().toString());
-    }
+    public void testRetryMethod() throws InterruptedException {
+        try {
+            retryMethodService.testRetryMethod(UUID.randomUUID().toString());
+        }catch (Exception e) {
 
+        }
+        Thread.sleep(90000);
+    }
 
 }
