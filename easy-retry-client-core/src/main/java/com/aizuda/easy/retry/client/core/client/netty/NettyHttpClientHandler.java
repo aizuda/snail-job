@@ -25,11 +25,17 @@ import java.util.concurrent.TimeUnit;
 public class NettyHttpClientHandler extends SimpleChannelInboundHandler<FullHttpResponse> {
 
     private NettyClient client;
-    public NettyHttpClientHandler() {
+    private NettyHttpConnectClient nettyHttpConnectClient;
+
+    public NettyHttpClientHandler(NettyHttpConnectClient nettyHttpConnectClient) {
+
         client = RequestBuilder.<NettyClient, NettyResult>newBuilder()
             .client(NettyClient.class)
             .callback(nettyResult -> LogUtils.info(log,"heartbeat check requestId:[{}]", nettyResult.getRequestId()))
             .build();
+
+        this.nettyHttpConnectClient = nettyHttpConnectClient;
+
     }
 
     @Override
@@ -53,13 +59,14 @@ public class NettyHttpClientHandler extends SimpleChannelInboundHandler<FullHttp
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
-        super.channelUnregistered(ctx);
         LogUtils.debug(log, "channelUnregistered");
         ctx.channel().eventLoop().schedule(() -> {
-            EasyRetryProperties easyRetryProperties = SpringContext.getBeanByType(EasyRetryProperties.class);
-            EasyRetryProperties.ServerConfig server = easyRetryProperties.getServer();
-            LogUtils.info(log, "Reconnecting to:" + server.getHost() + ":" + server.getPort());
-            NettyHttpConnectClient.connect();
+            try {
+                nettyHttpConnectClient.reconnect();
+            } catch (Exception e) {
+                LogUtils.error(log, "reconnect error ", e);
+            }
+
         }, 10, TimeUnit.SECONDS);
 
 
@@ -91,7 +98,7 @@ public class NettyHttpClientHandler extends SimpleChannelInboundHandler<FullHttp
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        LogUtils.error(log,"easy-retry netty_http client exception", cause);
+        LogUtils.error(log,"easy-retry netty-http client exception", cause);
         super.exceptionCaught(ctx, cause);
     }
 

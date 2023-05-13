@@ -319,6 +319,19 @@ export default {
         return
       }
 
+      const regex = /^[A-Za-z0-9_]{1,64}$/
+      if (!regex.test(sceneName)) {
+        this.memberLoading = false
+        this.$message.error('场景名称: 仅支持长度为:1~64位字符.格式为:数字、字母、下划线。')
+        return
+      }
+
+      if (description.length > 256) {
+        this.memberLoading = false
+        this.$message.error('描述:  仅支持长度为:1~256位字符')
+        return
+      }
+
       const target = this.formData.find(item => key === item.key)
       if (!target) {
         this.formData.push({

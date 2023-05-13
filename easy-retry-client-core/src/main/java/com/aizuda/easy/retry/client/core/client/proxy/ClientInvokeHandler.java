@@ -3,7 +3,7 @@ package com.aizuda.easy.retry.client.core.client.proxy;
 import cn.hutool.core.date.StopWatch;
 import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.client.core.annotation.Mapping;
-import com.aizuda.easy.retry.client.core.client.netty.NettyHttpConnectClient;
+import com.aizuda.easy.retry.client.core.client.netty.NettyChannel;
 import com.aizuda.easy.retry.client.core.client.netty.RpcContext;
 import com.aizuda.easy.retry.client.core.exception.EasyRetryClientException;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
@@ -28,10 +28,10 @@ import java.util.function.Consumer;
 @Slf4j
 public class ClientInvokeHandler<R> implements InvocationHandler {
 
-    private Consumer<R> consumer;
-    private boolean async;
-    private long timeout;
-    private TimeUnit unit;
+    private final Consumer<R> consumer;
+    private final boolean async;
+    private final long timeout;
+    private final TimeUnit unit;
 
     public ClientInvokeHandler(boolean async, long timeout, TimeUnit unit, Consumer<R> consumer) {
         this.consumer = consumer;
@@ -46,26 +46,23 @@ public class ClientInvokeHandler<R> implements InvocationHandler {
         Mapping annotation = method.getAnnotation(Mapping.class);
         EasyRetryRequest easyRetryRequest = new EasyRetryRequest(args);
 
-        sw.start("request start " + easyRetryRequest.getRequestId());
+        sw.start("request start " + easyRetryRequest.getReqId());
 
         CompletableFuture<R> completableFuture = null;
         if (async) {
-            RpcContext.setCompletableFuture(easyRetryRequest.getRequestId(), consumer);
+            RpcContext.setCompletableFuture(easyRetryRequest.getReqId(), consumer);
         } else {
             completableFuture = new CompletableFuture<>();
-            RpcContext.setCompletableFuture(easyRetryRequest.getRequestId(), completableFuture);
+            RpcContext.setCompletableFuture(easyRetryRequest.getReqId(), completableFuture);
         }
 
         try {
-            NettyHttpConnectClient.send(HttpMethod.valueOf(annotation.method().name()), annotation.path(),
-                JsonUtil.toJsonString(easyRetryRequest));
-        } catch (Exception e) {
-            throw e;
+            NettyChannel.send(HttpMethod.valueOf(annotation.method().name()), annotation.path(), easyRetryRequest.toString());
         } finally {
             sw.stop();
         }
 
-        LogUtils.info(log,"request complete requestId:[{}] 耗时:[{}ms]", easyRetryRequest.getRequestId(), sw.getTotalTimeMillis());
+        LogUtils.info(log,"request complete requestId:[{}] 耗时:[{}ms]", easyRetryRequest.getReqId(), sw.getTotalTimeMillis());
         if (async) {
             return null;
         } else {

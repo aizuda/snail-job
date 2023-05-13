@@ -48,10 +48,10 @@ public class ReportRetryInfoHttpRequestHandler extends PostHttpRequestHandler {
             Object[] args = retryRequest.getArgs();
 
             Boolean aBoolean = retryService.batchReportRetry(JsonUtil.parseList(JsonUtil.toJsonString(args[0]), RetryTaskDTO.class));
-            return JsonUtil.toJsonString(new NettyResult(StatusEnum.YES.getStatus(), "批量上报重试数据处理成功", aBoolean, retryRequest.getRequestId()));
+            return JsonUtil.toJsonString(new NettyResult(StatusEnum.YES.getStatus(), "批量上报重试数据处理成功", aBoolean, retryRequest.getReqId()));
         } catch (Exception e) {
             LogUtils.error(log, "批量上报重试数据失败", e);
-            return JsonUtil.toJsonString(new NettyResult(StatusEnum.YES.getStatus(), e.getMessage(), null, retryRequest.getRequestId()));
+            return JsonUtil.toJsonString(new NettyResult(StatusEnum.YES.getStatus(), e.getMessage(), null, retryRequest.getReqId()));
         }
     }
 }

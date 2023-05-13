@@ -20,11 +20,11 @@ import java.util.function.Consumer;
 @Slf4j
 public class RpcContext {
 
-    private static final ConcurrentMap<String, CompletableFuture> COMPLETABLE_FUTURE = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<Long, CompletableFuture> COMPLETABLE_FUTURE = new ConcurrentHashMap<>();
 
-    private static final ConcurrentMap<String, Consumer> CALLBACK_CONSUMER = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<Long, Consumer> CALLBACK_CONSUMER = new ConcurrentHashMap<>();
 
-    public static void invoke(String requestId, NettyResult nettyResult) {
+    public static void invoke(Long requestId, NettyResult nettyResult) {
 
         try {
             // 同步请求同步返回
@@ -41,7 +41,7 @@ public class RpcContext {
 
     }
 
-    public static <R> void setCompletableFuture(String id, CompletableFuture<R> completableFuture, Consumer<R> callable) {
+    public static <R> void setCompletableFuture(long id, CompletableFuture<R> completableFuture, Consumer<R> callable) {
         if (Objects.nonNull(completableFuture)) {
             COMPLETABLE_FUTURE.put(id, completableFuture);
         }
@@ -52,19 +52,19 @@ public class RpcContext {
 
     }
 
-    public static <R> void setCompletableFuture(String id, Consumer<R> callable) {
+    public static <R> void setCompletableFuture(Long id, Consumer<R> callable) {
         setCompletableFuture(id, null, callable);
     }
 
-    public static <R> void setCompletableFuture(String id, CompletableFuture<R> completableFuture) {
+    public static <R> void setCompletableFuture(Long id, CompletableFuture<R> completableFuture) {
         setCompletableFuture(id, completableFuture, null);
     }
 
-    public static CompletableFuture<Object> getCompletableFuture(String id) {
+    public static CompletableFuture<Object> getCompletableFuture(Long id) {
         return COMPLETABLE_FUTURE.get(id);
     }
 
-    public static Consumer getConsumer(String id) {
+    public static Consumer getConsumer(Long id) {
         return CALLBACK_CONSUMER.get(id);
     }
 }

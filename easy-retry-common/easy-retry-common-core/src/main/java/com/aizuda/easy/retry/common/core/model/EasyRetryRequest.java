@@ -1,8 +1,10 @@
 package com.aizuda.easy.retry.common.core.model;
 
+import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import lombok.Data;
 
-import java.util.UUID;
+import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author www.byteblogs.com
@@ -12,21 +14,26 @@ import java.util.UUID;
 @Data
 public class EasyRetryRequest {
 
-   private String requestId;
+   private static final AtomicLong REQUEST_ID = new AtomicLong(0);
+
+   private long reqId;
 
    private Object[] args;
 
    public EasyRetryRequest(Object... args) {
       this.args = args;
-      this.requestId = generateRequestId();
+      this.reqId = newId();
+   }
+
+   private static long newId() {
+      return REQUEST_ID.getAndIncrement();
    }
 
    public EasyRetryRequest() {
-
    }
 
-   public String generateRequestId() {
-      return UUID.randomUUID().toString();
+   @Override
+   public String toString() {
+      return JsonUtil.toJsonString(this);
    }
-
 }

@@ -44,6 +44,6 @@ public class ConfigHttpRequestHandler extends GetHttpRequestHandler {
         EasyRetryRequest retryRequest = JsonUtil.parseObject(content, EasyRetryRequest.class);
         String groupName = headers.get(HeadersEnum.GROUP_NAME.getKey());
         ConfigDTO configDTO = configAccess.getConfigInfo(groupName);
-        return JsonUtil.toJsonString(new NettyResult(JsonUtil.toJsonString(configDTO), retryRequest.getRequestId()));
+        return JsonUtil.toJsonString(new NettyResult(JsonUtil.toJsonString(configDTO), retryRequest.getReqId()));
     }
 }

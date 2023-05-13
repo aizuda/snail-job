@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.server.server.handler;
 
 import cn.hutool.core.net.url.UrlQuery;
+import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.support.handler.ClientRegisterHandler;
 import com.aizuda.easy.retry.common.core.model.NettyResult;
 import com.aizuda.easy.retry.common.core.model.EasyRetryRequest;
@@ -36,8 +37,8 @@ public class BeatHttpRequestHandler extends GetHttpRequestHandler {
 
     @Override
     public String doHandler(String content, UrlQuery query, HttpHeaders headers) {
-        log.info("心跳检查 content:[{}]", query.toString());
+        LogUtils.info(log,"Beat check content:[{}]", content);
         EasyRetryRequest retryRequest = JsonUtil.parseObject(content, EasyRetryRequest.class);
-       return JsonUtil.toJsonString(new NettyResult("PONG", retryRequest.getRequestId()));
+       return JsonUtil.toJsonString(new NettyResult("PONG", retryRequest.getReqId()));
     }
 }

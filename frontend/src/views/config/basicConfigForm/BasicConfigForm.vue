@@ -102,6 +102,7 @@ export default {
               message: res.message
             })
             this.$refs.notify.reset()
+            this.$router.go(-1)
           }
         })
       }).catch(() => {

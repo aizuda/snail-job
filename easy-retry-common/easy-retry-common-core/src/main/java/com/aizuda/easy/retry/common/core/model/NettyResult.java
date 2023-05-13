@@ -9,9 +9,9 @@ import lombok.Data;
 @Data
 public class NettyResult extends Result<Object> {
 
-    private String requestId;
+    private long requestId;
 
-    public NettyResult(int status, String message, Object data, String requestId) {
+    public NettyResult(int status, String message, Object data, long requestId) {
         super(status, message, data);
         this.requestId = requestId;
     }
@@ -19,7 +19,7 @@ public class NettyResult extends Result<Object> {
     public NettyResult() {
     }
 
-    public NettyResult(Object data, String requestId) {
+    public NettyResult(Object data, long requestId) {
         super(data);
         this.requestId = requestId;
     }

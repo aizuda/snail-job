@@ -3,18 +3,21 @@
 
     <a-row class="form-row" :gutter="16">
       <a-col :lg="6" :md="12" :sm="24">
-        <a-form-item label="组名称">
+        <a-form-item hidden>
           <a-input
-            placeholder="请输入组名称"
             hidden
             v-decorator="[
               'id',
             ]" />
+        </a-form-item>
+        <a-form-item label="组名称">
           <a-input
             placeholder="请输入组名称"
+            :maxLength="64"
+            :disabled='this.id && this.id > 0'
             v-decorator="[
               'groupName',
-              {rules: [{ required: true, message: '请输入组名称', whitespace: true}]}
+              {rules: [{ required: true, message: '请输入组名称', whitespace: true},{required: true, max: 64, message: '最多支持64个字符！'}, {validator: validate}]}
             ]" />
         </a-form-item>
       </a-col>
@@ -49,6 +52,7 @@
         <a-form-item label="描述">
           <a-input
             placeholder="请输入描述"
+            :maxLength="256"
             v-decorator="[
               'description',
               {rules: [{ required: true, message: '请输入描述', whitespace: true}]}
@@ -142,9 +146,9 @@ export default {
       })
     },
     validate (rule, value, callback) {
-      const regex = /^user-(.*)$/
+      const regex = /^[A-Za-z0-9_]+$/
       if (!regex.test(value)) {
-        callback(new Error('需要以 user- 开头'))
+        callback(new Error('仅支持数字字母下划线'))
       }
       callback()
     },
@@ -159,6 +163,7 @@ export default {
         formData.groupStatus = formData.groupStatus.toString()
         formData.routeKey = formData.routeKey.toString()
         formData.idGeneratorMode = formData.idGeneratorMode.toString()
+        this.id = formData.id
 
         console.log('formData', formData)
         form.setFieldsValue(formData)
