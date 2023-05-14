@@ -5,8 +5,11 @@ import cn.hutool.core.net.url.UrlQuery;
 import io.netty.handler.codec.http.HttpHeaders;
 
 /**
+ * 处理POST请求
+ *
  * @author: www.byteblogs.com
  * @date : 2022-03-07 17:35
+ * @since 1.0.0
  */
 public abstract class PostHttpRequestHandler implements HttpRequestHandler {
 

@@ -1,26 +1,64 @@
 package com.aizuda.easy.retry.common.core.constant;
 
 /**
+ * 系统通用常量
+ *
  * @author: www.byteblogs.com
  * @date : 2022-04-17 10:47
+ * @since 1.0.0
  */
-public class SystemConstants {
+public interface SystemConstants {
 
     /**
      * 请求头 key
      */
-    public static final String EASY_RETRY_HEAD_KEY = "easy-retry";
+    String EASY_RETRY_HEAD_KEY = "easy-retry";
 
     /**
      * 异常重试码 key
      */
-    public static final String EASY_RETRY_STATUS_CODE_KEY = "easy-retry-status";
+    String EASY_RETRY_STATUS_CODE_KEY = "easy-retry-status";
 
     /**
      * 异常重试码
      */
-    public static final String EASY_RETRY_STATUS_CODE = "519";
+    String EASY_RETRY_STATUS_CODE = "519";
 
+    /**
+     * 心跳
+     */
+    interface BEAT {
+        /**
+         * PING
+         */
+        String PING = "PING";
 
+        /**
+         * PONG
+         */
+        String PONG = "PONG";
+    }
+
+    /**
+     * 请求路径
+     */
+    interface HTTP_PATH {
+
+        /**
+         * 心跳请求
+         */
+        String BEAT = "/beat";
+
+        /**
+         * 同步配置
+         */
+        String CONFIG = "/config";
+
+        /**
+         * 批量上报
+         */
+        String BATCH_REPORT = "/batch/report";
+
+    }
 
 }

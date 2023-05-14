@@ -3,6 +3,7 @@ package com.aizuda.easy.retry.client.core.client.netty;
 import com.aizuda.easy.retry.client.core.client.NettyClient;
 import com.aizuda.easy.retry.client.core.client.proxy.RequestBuilder;
 import com.aizuda.easy.retry.client.core.config.EasyRetryProperties;
+import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.model.NettyResult;
@@ -17,9 +18,14 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.TimeUnit;
 
+import static com.aizuda.easy.retry.common.core.constant.SystemConstants.BEAT.PING;
+
 /**
+ * netty 客户端处理器
+ *
  * @author: www.byteblogs.com
  * @date : 2022-03-07 18:30
+ * @since 1.0.0
  */
 @Slf4j
 public class NettyHttpClientHandler extends SimpleChannelInboundHandler<FullHttpResponse> {
@@ -106,7 +112,7 @@ public class NettyHttpClientHandler extends SimpleChannelInboundHandler<FullHttp
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
         LogUtils.debug(log,"userEventTriggered");
         if (evt instanceof IdleStateEvent) {
-            client.beat("PING");
+            client.beat(PING);
         } else {
             super.userEventTriggered(ctx, evt);
         }

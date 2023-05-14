@@ -13,6 +13,8 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.function.Consumer;
 
 /**
+ * 处理请求服务端时需要存储的中间值
+ *
  * @author: www.byteblogs.com
  * @date : 2023-05-12 09:05
  * @since 1.3.0

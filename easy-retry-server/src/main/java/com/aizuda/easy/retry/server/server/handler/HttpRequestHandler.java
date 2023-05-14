@@ -5,12 +5,15 @@ import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 
 /**
+ * 处理http请求
+ *
  * @author: www.byteblogs.com
  * @date : 2022-03-07 16:23
+ * @since 1.0.0
  */
 public interface HttpRequestHandler {
 
-    boolean supports(String uri);
+    boolean supports(String path);
 
     HttpMethod method();
 

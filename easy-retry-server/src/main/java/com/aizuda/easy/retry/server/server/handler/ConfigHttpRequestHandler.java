@@ -14,9 +14,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import static com.aizuda.easy.retry.common.core.constant.SystemConstants.HTTP_PATH.CONFIG;
+
 /**
  * @author: www.byteblogs.com
  * @date : 2022-03-07 16:29
+ * @since 1.0.0
  */
 @Component
 @Slf4j
@@ -26,11 +29,9 @@ public class ConfigHttpRequestHandler extends GetHttpRequestHandler {
     @Qualifier("configAccessProcessor")
     private ConfigAccess configAccess;
 
-    private static final String URI = "/config";
-
     @Override
-    public boolean supports(String uri) {
-        return URI.equals(uri);
+    public boolean supports(String path) {
+        return CONFIG.equals(path);
     }
 
     @Override
