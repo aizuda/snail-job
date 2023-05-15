@@ -27,7 +27,7 @@ import java.util.function.Consumer;
 public abstract class AbstractRetryStrategies implements RetryStrategy {
 
     @Autowired
-    private List<EasyRetryListener> EasyRetryListeners;
+    private List<EasyRetryListener> easyRetryListeners;
 
     @Override
     public RetryerResultContext openRetry(String sceneName, String executorClassName, Object[] params) {
@@ -52,7 +52,7 @@ public abstract class AbstractRetryStrategies implements RetryStrategy {
         retryerResultContext.setRetryerInfo(retryerInfo);
 
         try {
-            for (EasyRetryListener EasyRetryListener : EasyRetryListeners) {
+            for (EasyRetryListener EasyRetryListener : easyRetryListeners) {
                 EasyRetryListener.beforeRetry(sceneName, executorClassName, params);
             }
 
@@ -79,7 +79,7 @@ public abstract class AbstractRetryStrategies implements RetryStrategy {
             Object result = retryerResultContext.getResult();
             RetryerInfo retryerInfo = retryerResultContext.getRetryerInfo();
 
-            for (EasyRetryListener EasyRetryListener : EasyRetryListeners) {
+            for (EasyRetryListener EasyRetryListener : easyRetryListeners) {
                 EasyRetryListener.successOnRetry(result, retryerInfo.getScene(), retryerInfo.getExecutorClassName());
             }
 
@@ -99,7 +99,7 @@ public abstract class AbstractRetryStrategies implements RetryStrategy {
 
             RetryerInfo retryerInfo = context.getRetryerInfo();
             try {
-                for (EasyRetryListener EasyRetryListener : EasyRetryListeners) {
+                for (EasyRetryListener EasyRetryListener : easyRetryListeners) {
                     EasyRetryListener
                         .failureOnRetry(retryerInfo.getScene(), retryerInfo.getExecutorClassName(), throwable);
                 }

@@ -4,10 +4,12 @@ import com.aizuda.easy.retry.client.core.retryer.EasyRetryTemplate;
 import com.aizuda.easy.retry.client.core.retryer.RetryTaskTemplateBuilder;
 import com.example.demo.CustomAsyncCreateTask;
 import com.example.demo.CustomSyncCreateTask;
+import com.example.demo.NestMethodService;
 import com.example.model.Cat;
 import com.example.model.Zoo;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
@@ -19,6 +21,9 @@ import java.time.LocalDateTime;
 @SpringBootTest
 @Slf4j
 public class EasyRetryTemplateTest {
+
+    @Autowired
+    private NestMethodService nestMethodService;
 
     @Test
     public void generateAsyncTaskTest() throws InterruptedException {
@@ -52,4 +57,12 @@ public class EasyRetryTemplateTest {
         retryTemplate.executeRetry();
 
     }
+
+    @Test
+    public void testNestMethodForCustomSyncCreateTask() throws InterruptedException {
+        nestMethodService.testNestMethodForCustomSyncCreateTask();
+
+        Thread.sleep(90000);
+    }
+
 }

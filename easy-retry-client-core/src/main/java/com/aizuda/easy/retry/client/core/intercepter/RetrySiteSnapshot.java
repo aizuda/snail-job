@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.client.core.intercepter;
 
+import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.model.EasyRetryHeaders;
 import lombok.Getter;
@@ -65,6 +66,10 @@ public class RetrySiteSnapshot {
     }
 
     public static boolean isMethodEntrance(String methodEntrance) {
+        if (StrUtil.isBlank(getMethodEntrance())) {
+            return false;
+        }
+
         return getMethodEntrance().equals(methodEntrance);
     }
 
@@ -109,7 +114,8 @@ public class RetrySiteSnapshot {
     }
 
     public static boolean isRetryForStatusCode() {
-        return Objects.nonNull(getRetryStatusCode()) && getRetryStatusCode().equals(SystemConstants.EASY_RETRY_STATUS_CODE);
+        return Objects.nonNull(getRetryStatusCode()) && getRetryStatusCode()
+            .equals(SystemConstants.EASY_RETRY_STATUS_CODE);
     }
 
     public static Long getEntryMethodTime() {
@@ -124,11 +130,11 @@ public class RetrySiteSnapshot {
         ENTRY_METHOD_TIME.remove();
     }
 
-    public static void removeRetryHeader(){
+    public static void removeRetryHeader() {
         RETRY_HEADER.remove();
     }
 
-    public static void removeRetryStatusCode(){
+    public static void removeRetryStatusCode() {
         RETRY_STATUS_CODE.remove();
     }
 
@@ -166,6 +172,11 @@ public class RetrySiteSnapshot {
          * 远程重试阶段
          */
         REMOTE(2),
+
+        /**
+         * 手动提交数据
+         */
+        MANUAL_REPORT(3),
         ;
 
         private final int stage;

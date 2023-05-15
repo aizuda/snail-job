@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.client.core.retryer;
 
 import com.aizuda.easy.retry.client.core.strategy.ExecutorMethod;
 import com.aizuda.easy.retry.client.core.strategy.LocalRetryStrategies;
+import com.aizuda.easy.retry.client.core.strategy.ManualRetryStrategies;
 import com.aizuda.easy.retry.client.core.strategy.RetryStrategy;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 
@@ -41,7 +42,7 @@ public class RetryTaskTemplateBuilder {
         easyRetryTemplate.setParams(params);
         easyRetryTemplate.setExecutorMethodClass(executorMethodClass);
         easyRetryTemplate.setScene(scene);
-        RetryStrategy retryStrategy = SpringContext.getBeanByType(LocalRetryStrategies.class);
+        RetryStrategy retryStrategy = SpringContext.getBeanByType(ManualRetryStrategies.class);
         easyRetryTemplate.setRetryStrategy(retryStrategy);
         return easyRetryTemplate;
     }
