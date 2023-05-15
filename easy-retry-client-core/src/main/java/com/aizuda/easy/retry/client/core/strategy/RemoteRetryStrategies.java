@@ -20,8 +20,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 /**
+ * 执行远程重试
+ *
  * @author: www.byteblogs.com
  * @date : 2022-03-03 14:38
+ * @since 1.3.0
  */
 @Component
 @Slf4j

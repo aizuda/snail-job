@@ -4,6 +4,7 @@ import com.aizuda.easy.retry.client.core.RetryExecutor;
 import com.aizuda.easy.retry.client.core.RetryExecutorParameter;
 import com.aizuda.easy.retry.client.core.event.EasyRetryListener;
 import com.aizuda.easy.retry.client.core.intercepter.RetrySiteSnapshot;
+import com.aizuda.easy.retry.client.core.report.Report;
 import com.github.rholder.retry.Retryer;
 import com.github.rholder.retry.StopStrategy;
 import com.github.rholder.retry.WaitStrategy;
@@ -28,6 +29,9 @@ public abstract class AbstractRetryStrategies implements RetryStrategy {
 
     @Autowired
     private List<EasyRetryListener> easyRetryListeners;
+
+    @Autowired
+    private List<Report> reports;
 
     @Override
     public RetryerResultContext openRetry(String sceneName, String executorClassName, Object[] params) {
@@ -147,5 +151,21 @@ public abstract class AbstractRetryStrategies implements RetryStrategy {
         return false;
     }
 
+    /**
+     * 上报数据
+     *
+     * @param retryerInfo 定义重试场景的信息
+     * @param params 执行参数
+     */
+    protected boolean doReport(final RetryerInfo retryerInfo, final Object[] params) {
+
+        for (Report report : reports) {
+            if (report.supports(retryerInfo.isAsync())) {
+                return report.report(retryerInfo.getScene(), retryerInfo.getExecutorClassName(), params);
+            }
+        }
+
+        return Boolean.FALSE;
+    }
 
 }

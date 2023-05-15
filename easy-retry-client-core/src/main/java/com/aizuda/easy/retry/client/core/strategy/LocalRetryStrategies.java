@@ -4,7 +4,6 @@ import com.aizuda.easy.retry.client.core.RetryExecutor;
 import com.aizuda.easy.retry.client.core.RetryExecutorParameter;
 import com.aizuda.easy.retry.client.core.exception.EasyRetryClientException;
 import com.aizuda.easy.retry.client.core.intercepter.RetrySiteSnapshot;
-import com.aizuda.easy.retry.client.core.report.ReportHandler;
 import com.aizuda.easy.retry.client.core.retryer.RetryType;
 import com.aizuda.easy.retry.client.core.retryer.RetryerInfo;
 import com.aizuda.easy.retry.client.core.retryer.RetryerResultContext;
@@ -18,7 +17,6 @@ import com.github.rholder.retry.WaitStrategies;
 import com.github.rholder.retry.WaitStrategy;
 import com.google.common.base.Predicate;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -28,15 +26,15 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 /**
+ * 执行本地重试
+ *
  * @author: www.byteblogs.com
  * @date : 2022-03-03 14:38
+ * @since 1.3.0
  */
 @Component
 @Slf4j
 public class LocalRetryStrategies extends AbstractRetryStrategies {
-
-    @Autowired
-    private ReportHandler reportHandler;
 
     @Override
     public boolean supports(int stage, RetryType retryType) {
@@ -123,31 +121,6 @@ public class LocalRetryStrategies extends AbstractRetryStrategies {
                 throw new EasyRetryClientException("异常重试模式 [{}]", retryType.name());
         }
 
-    }
-
-    /**
-     * 上报数据
-     *
-     * @param retryerInfo 定义重试场景的信息
-     * @param params 执行参数
-     */
-    private void doReport(final RetryerInfo retryerInfo, final Object[] params) {
-
-        if (retryerInfo.isAsync()) {
-            if (retryerInfo.isForceReport()) {
-                reportHandler.asyncReportWithForce(retryerInfo.getScene(), retryerInfo.getExecutorClassName(), params);
-            } else {
-                reportHandler.asyncReport(retryerInfo.getScene(), retryerInfo.getExecutorClassName(), params);
-            }
-        } else {
-            if (retryerInfo.isForceReport()) {
-                reportHandler.syncReport(retryerInfo.getScene(), retryerInfo.getExecutorClassName(),
-                    params, retryerInfo.getTimeout(), retryerInfo.getUnit());
-            } else {
-                reportHandler.syncReport(retryerInfo.getScene(), retryerInfo.getExecutorClassName(),
-                    params, retryerInfo.getTimeout(), retryerInfo.getUnit());
-            }
-        }
     }
 
     @Override

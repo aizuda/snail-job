@@ -16,7 +16,7 @@ import java.lang.reflect.Type;
  * @author: www.byteblogs.com
  * @date : 2022-03-07 15:08
  */
-@Component("XRetryJacksonSerializer")
+@Component("easyRetryJacksonSerializer")
 public class JacksonSerializer implements RetryArgSerializer {
 
     @Override
