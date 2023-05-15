@@ -1,7 +1,9 @@
 package com.aizuda.easy.retry.client.core.executor;
 
+import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.client.core.RetryExecutorParameter;
 import com.aizuda.easy.retry.client.core.cache.RetryerInfoCache;
+import com.aizuda.easy.retry.client.core.exception.EasyRetryClientException;
 import com.github.rholder.retry.*;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -10,14 +12,18 @@ import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 
 /**
+ * Guava 重试执行器
+ *
  * @author: www.byteblogs.com
  * @date : 2022-03-03 18:07
+ * @since 1.3.0
  */
 @Slf4j
 public class GuavaRetryExecutor extends AbstractRetryExecutor<WaitStrategy, StopStrategy> {
 
     public GuavaRetryExecutor(String sceneName, String executorClassName) {
         retryerInfo = RetryerInfoCache.get(sceneName, executorClassName);
+        Assert.notNull(retryerInfo, () -> new EasyRetryClientException("retryerInfo is null sceneName:[{}] executorClassName:[{}]", sceneName, executorClassName));
     }
 
     public GuavaRetryExecutor() {

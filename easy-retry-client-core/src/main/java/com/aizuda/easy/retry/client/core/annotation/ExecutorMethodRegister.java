@@ -12,6 +12,7 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 在使用手动生成重试任务时，通过ExecutorMethodRegister配置注册重试场景
@@ -63,5 +64,33 @@ public @interface ExecutorMethodRegister {
      * see: https://docs.spring.io/spring-framework/docs/5.0.0.M5/spring-framework-reference/html/expressions.html
      */
     String bizNo() default "";
+
+    /**
+     * 异步上报数据到服务端
+     *
+     * @return boolean
+     */
+    boolean async() default true;
+
+    /**
+     * 是否强制上报数据到服务端
+     *
+     * @return boolean
+     */
+    boolean forceReport() default false;
+
+    /**
+     * 同步(async:false)上报数据需要配置超时时间
+     *
+     * @return 超时时间
+     */
+    long timeout() default 60 * 1000;
+
+    /**
+     * 超时时间单位
+     *
+     * @return TimeUnit
+     */
+    TimeUnit unit() default TimeUnit.MILLISECONDS;
 
 }

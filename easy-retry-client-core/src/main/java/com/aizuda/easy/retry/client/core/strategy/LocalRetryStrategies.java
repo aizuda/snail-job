@@ -37,8 +37,6 @@ public class LocalRetryStrategies extends AbstractRetryStrategies {
 
     @Autowired
     private ReportHandler reportHandler;
-    @Autowired(required = false)
-    private PlatformTransactionManager platformTransactionManager;
 
     @Override
     public boolean supports(int stage, RetryType retryType) {
@@ -112,30 +110,26 @@ public class LocalRetryStrategies extends AbstractRetryStrategies {
             // 如果是仅仅本地重试或本地_远程模式则先支持重试
             case ONLY_LOCAL:
             case LOCAL_REMOTE:
-                return () -> {
-                    if (TransactionSynchronizationManager.isActualTransactionActive()) {
-                        DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-                        def.setPropagationBehavior(TransactionDefinition.PROPAGATION_NOT_SUPPORTED);
-                        TransactionStatus transaction = platformTransactionManager.getTransaction(def);
-                        Object execute;
-                        try {
-                            execute = retryExecutor.execute(params);
-                            platformTransactionManager.commit(transaction);
-                        } catch (Exception e) {
-                            platformTransactionManager.rollback(transaction);
-                            throw e;
-                        }
-
-                        return execute;
-                    } else {
-                       return retryExecutor.execute(params);
-                    }
-                };
+                return () -> retryExecutor.execute(params);
             case ONLY_REMOTE:
                 // 仅仅是远程重试则直接上报
                 log.debug("上报 scene:[{}]", retryerInfo.getScene());
                 return () -> {
-                    reportHandler.asyncReport(retryerInfo.getScene(), retryerInfo.getExecutorClassName(), params);
+
+                    if (retryerInfo.isAsync()) {
+                        if (retryerInfo.isForceReport()) {
+                            reportHandler.asyncReportWithForce(retryerInfo.getScene(), retryerInfo.getExecutorClassName(), params);
+                        } else {
+                            reportHandler.asyncReport(retryerInfo.getScene(), retryerInfo.getExecutorClassName(), params);
+                        }
+                    } else {
+                        if (retryerInfo.isForceReport()) {
+                            reportHandler.syncReport(retryerInfo.getScene(), retryerInfo.getExecutorClassName(), params, retryerInfo.getTimeout(), retryerInfo.getUnit());
+                        } else {
+                            reportHandler.syncReport(retryerInfo.getScene(), retryerInfo.getExecutorClassName(), params, retryerInfo.getTimeout(), retryerInfo.getUnit());
+                        }
+                    }
+
                     RetrySiteSnapshot.setStage(RetrySiteSnapshot.EnumStage.REMOTE.getStage());
                     return null;
                 };

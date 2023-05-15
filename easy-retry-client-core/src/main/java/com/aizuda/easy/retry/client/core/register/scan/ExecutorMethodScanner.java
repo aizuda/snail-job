@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 扫描手动注入重试方法
@@ -61,6 +62,10 @@ public class ExecutorMethodScanner implements Scanner, ApplicationContextAware {
             Class<? extends IdempotentIdGenerate> idempotentIdGenerate = retryable.idempotentId();
             Method executorMethodName = executorNotProxy.getMethod("doExecute", Object.class);
             Class<? extends RetryCompleteCallback> retryCompleteCallback = retryable.retryCompleteCallback();
+            boolean async = retryable.async();
+            long timeout = retryable.timeout();
+            TimeUnit unit = retryable.unit();
+            boolean forceReport = retryable.forceReport();
 
             return new RetryerInfo(retryable.scene(),
                 executorClassName,
@@ -69,13 +74,17 @@ public class ExecutorMethodScanner implements Scanner, ApplicationContextAware {
                 executor,
                 executorMethodName,
                 RetryType.ONLY_REMOTE,
-                0,
-                0,
+                1,
+                1,
                 idempotentIdGenerate,
                 StringUtils.EMPTY,
                 (Class<? extends ExecutorMethod>) executor.getClass(),
-                true,
-                retryCompleteCallback
+                Boolean.TRUE,
+                retryCompleteCallback,
+                async,
+                forceReport,
+                timeout,
+                unit
             );
         }catch (Exception e) {
             LogUtils.error(log, "{}重试信息加载报错：{}", executor.getClass().getName(), e);

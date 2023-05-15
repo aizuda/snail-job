@@ -10,6 +10,7 @@ import com.aizuda.easy.retry.client.core.callback.SimpleRetryCompleteCallback;
 import com.aizuda.easy.retry.client.core.retryer.RetryType;
 
 import java.lang.annotation.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 重试接入入口
@@ -100,6 +101,27 @@ public @interface Retryable {
      * @return true-抛出 false-不抛出
      */
     boolean isThrowException() default true;
+
+    /**
+     * 异步上报数据到服务端
+     *
+     * @return boolean
+     */
+    boolean async() default true;
+
+    /**
+     * 同步(async:false)上报数据需要配置超时时间
+     *
+     * @return 超时时间
+     */
+    long timeout() default 60 * 1000;
+
+    /**
+     * 超时时间单位
+     *
+     * @return TimeUnit
+     */
+    TimeUnit unit() default TimeUnit.MILLISECONDS;
 
 }
 

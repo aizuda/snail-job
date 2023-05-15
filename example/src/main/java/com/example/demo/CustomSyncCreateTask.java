@@ -3,26 +3,26 @@ package com.example.demo;
 import com.aizuda.easy.retry.client.core.annotation.ExecutorMethodRegister;
 import com.aizuda.easy.retry.client.core.strategy.ExecutorMethod;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
-import com.example.model.Cat;
-import com.example.model.Zoo;
-import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
+ * 测试手动重试并同步上报任务
+ *
  * @author: www.byteblogs.com
  * @date : 2022-03-07 14:07
+ * @since 1.3.0
  */
-@ExecutorMethodRegister(scene = CustomCreateTask.SCENE)
+@ExecutorMethodRegister(scene = CustomSyncCreateTask.SCENE, async = false, timeout = 10000, unit = TimeUnit.MILLISECONDS)
 @Slf4j
-public class CustomCreateTask implements ExecutorMethod {
+public class CustomSyncCreateTask implements ExecutorMethod {
 
-    public static final String SCENE = "customCreateTask";
+    public static final String SCENE = "customSyncCreateTask";
 
     @Override
     public Object doExecute(Object obj) {
-        log.info("测试自定义重试方法 MyExecutorMethod params:[{}]", JsonUtil.toJsonString(obj));
+        log.info(SCENE + " params:[{}]", JsonUtil.toJsonString(obj));
         return "测试成功";
     }
 

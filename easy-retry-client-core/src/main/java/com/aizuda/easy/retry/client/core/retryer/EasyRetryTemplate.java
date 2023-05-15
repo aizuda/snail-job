@@ -1,10 +1,8 @@
 package com.aizuda.easy.retry.client.core.retryer;
 
 import com.aizuda.easy.retry.client.core.RetryOperations;
-import com.aizuda.easy.retry.client.core.report.ReportHandler;
 import com.aizuda.easy.retry.client.core.strategy.ExecutorMethod;
-
-import java.util.concurrent.TimeUnit;
+import com.aizuda.easy.retry.client.core.strategy.RetryStrategy;
 
 /**
  * 手动生成重试任务模板类
@@ -18,36 +16,11 @@ public class EasyRetryTemplate implements RetryOperations {
     private Class<? extends ExecutorMethod> executorMethodClass;
     private String scene;
     private Object[] params;
-    private ReportHandler reportHandler;
-    private long timeout = 60 * 1000;
-    private TimeUnit unit = TimeUnit.MILLISECONDS;
+    private RetryStrategy retryStrategy;
 
     @Override
-    public void generateAsyncTask() {
-        generateAsyncTask(Boolean.FALSE);
-    }
-
-    @Override
-    public void generateAsyncTask(boolean forceReport) {
-        if (forceReport) {
-            reportHandler.asyncReportWithForce(scene, executorMethodClass.getName(), params);
-        } else {
-            reportHandler.asyncReport(scene, executorMethodClass.getName(), params);
-        }
-    }
-
-    @Override
-    public Boolean generateSyncTask() {
-       return generateSyncTask(Boolean.FALSE);
-    }
-
-    @Override
-    public Boolean generateSyncTask(final boolean forceReport) {
-        if (forceReport) {
-           return reportHandler.syncReportWithForce(scene, executorMethodClass.getName(), params, timeout, unit);
-        } else {
-            return reportHandler.syncReport(scene, executorMethodClass.getName(), params,  timeout, unit);
-        }
+    public void executeRetry() {
+        retryStrategy.openRetry(scene, executorMethodClass.getName(), params);
     }
 
     protected void setExecutorMethodClass(
@@ -63,15 +36,7 @@ public class EasyRetryTemplate implements RetryOperations {
         this.params = params;
     }
 
-    protected void setReportHandler(final ReportHandler reportHandler) {
-        this.reportHandler = reportHandler;
-    }
-
-    protected void setTimeout(final long timeout) {
-        this.timeout = timeout;
-    }
-
-    protected void setUnit(final TimeUnit unit) {
-        this.unit = unit;
+    protected void setRetryStrategy(final RetryStrategy retryStrategy) {
+        this.retryStrategy = retryStrategy;
     }
 }
