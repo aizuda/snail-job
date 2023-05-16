@@ -16,7 +16,7 @@ public class RemoteService {
     private RestTemplate restTemplate;
 
     public Result call() {
-       return restTemplate.getForObject("http://127.0.0.1:8088/school/id", Result.class);
+       return restTemplate.getForObject("http://127.0.0.1:8089/school/id", Result.class);
 //        return new Result();
     }
 }

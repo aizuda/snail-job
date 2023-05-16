@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
  * @date : 2022-03-07 14:07
  * @since 1.3.0
  */
-@ExecutorMethodRegister(scene = CustomSyncCreateTask.SCENE, async = false, timeout = 10000, unit = TimeUnit.MILLISECONDS, forceReport = false)
+@ExecutorMethodRegister(scene = CustomSyncCreateTask.SCENE, async = false, timeout = 10000, unit = TimeUnit.MILLISECONDS, forceReport = true)
 @Slf4j
 public class CustomSyncCreateTask implements ExecutorMethod {
 

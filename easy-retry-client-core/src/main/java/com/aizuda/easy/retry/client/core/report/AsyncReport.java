@@ -1,23 +1,19 @@
 package com.aizuda.easy.retry.client.core.report;
 
 import com.aizuda.easy.retry.client.core.Lifecycle;
-import com.aizuda.easy.retry.client.core.client.NettyClient;
-import com.aizuda.easy.retry.client.core.client.proxy.RequestBuilder;
 import com.aizuda.easy.retry.client.core.retryer.RetryerInfo;
 import com.aizuda.easy.retry.client.core.window.RetryLeapArray;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
-import com.aizuda.easy.retry.common.core.model.NettyResult;
-import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.model.dto.RetryTaskDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * 异步上报数据
+ *
  * @author www.byteblogs.com
  * @date 2023-05-15
  * @since 1.3.0
@@ -62,8 +58,8 @@ public class AsyncReport extends AbstractReport implements Lifecycle {
 
     @Override
     public void close() {
-        log.info("reportHandler about to shutdown");
+        log.info("AsyncReport about to shutdown");
         slidingWindow.currentWindow();
-        log.info("reportHandler has been shutdown");
+        log.info("AsyncReport has been shutdown");
     }
 }

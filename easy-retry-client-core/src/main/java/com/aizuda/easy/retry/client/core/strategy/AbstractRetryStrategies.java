@@ -4,7 +4,7 @@ import com.aizuda.easy.retry.client.core.RetryExecutor;
 import com.aizuda.easy.retry.client.core.RetryExecutorParameter;
 import com.aizuda.easy.retry.client.core.event.EasyRetryListener;
 import com.aizuda.easy.retry.client.core.intercepter.RetrySiteSnapshot;
-import com.aizuda.easy.retry.client.core.report.Report;
+import com.aizuda.easy.retry.client.core.Report;
 import com.github.rholder.retry.Retryer;
 import com.github.rholder.retry.StopStrategy;
 import com.github.rholder.retry.WaitStrategy;

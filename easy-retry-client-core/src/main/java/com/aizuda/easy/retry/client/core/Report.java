@@ -1,4 +1,4 @@
-package com.aizuda.easy.retry.client.core.report;
+package com.aizuda.easy.retry.client.core;
 
 import com.aizuda.easy.retry.client.core.retryer.RetryerInfo;
 

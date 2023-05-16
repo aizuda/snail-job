@@ -12,7 +12,7 @@ import lombok.extern.slf4j.Slf4j;
  * @date : 2022-03-07 14:07
  * @since 1.3.0
  */
-@ExecutorMethodRegister(scene = CustomAsyncCreateTask.SCENE, async = true)
+@ExecutorMethodRegister(scene = CustomAsyncCreateTask.SCENE, async = true, forceReport = true)
 @Slf4j
 public class CustomAsyncCreateTask implements ExecutorMethod {
 

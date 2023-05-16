@@ -55,8 +55,8 @@ public class TestExistsTransactionalRetryService {
             throw new UnsupportedOperationException("调用远程失败" + school.getAddress());
         }
 
-        TransactionalEvent<String> event = new TransactionalEvent<>("123");
-        SpringContext.CONTEXT.publishEvent(event);
+//        TransactionalEvent<String> event = new TransactionalEvent<>("123");
+//        SpringContext.CONTEXT.publishEvent(event);
 
         return "testSimpleInsert"+school.getAddress();
     }

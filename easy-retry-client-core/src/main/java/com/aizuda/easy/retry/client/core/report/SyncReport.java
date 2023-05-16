@@ -16,6 +16,8 @@ import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * 同步上报数据
+ *
  * @author www.byteblogs.com
  * @date 2023-05-15
  * @since 1.3.0
@@ -42,14 +44,14 @@ public class SyncReport extends AbstractReport {
 
         RetryTaskDTO retryTaskDTO = buildRetryTaskDTO(scene, targetClassName, args);
 
-        NettyClient CLIENT = RequestBuilder.<NettyClient, NettyResult>newBuilder()
+        NettyClient client = RequestBuilder.<NettyClient, NettyResult>newBuilder()
                 .client(NettyClient.class)
                 .async(Boolean.FALSE)
                 .timeout(timeout)
                 .unit(unit)
                 .build();
 
-        NettyResult result = CLIENT.reportRetryInfo(Collections.singletonList(retryTaskDTO));
+        NettyResult result = client.reportRetryInfo(Collections.singletonList(retryTaskDTO));
         LogUtils.debug(log, "Data report result result:[{}]", JsonUtil.toJsonString(result));
 
         return (Boolean) result.getData();

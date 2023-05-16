@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.client.core.report;
 
 import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.client.core.IdempotentIdGenerate;
+import com.aizuda.easy.retry.client.core.Report;
 import com.aizuda.easy.retry.client.core.RetryArgSerializer;
 import com.aizuda.easy.retry.client.core.cache.RetryerInfoCache;
 import com.aizuda.easy.retry.client.core.config.EasyRetryProperties;
@@ -9,7 +10,6 @@ import com.aizuda.easy.retry.client.core.exception.EasyRetryClientException;
 import com.aizuda.easy.retry.client.core.intercepter.RetrySiteSnapshot;
 import com.aizuda.easy.retry.client.core.retryer.RetryerInfo;
 import com.aizuda.easy.retry.client.core.spel.SPELParamFunction;
-import com.aizuda.easy.retry.client.core.window.RetryLeapArray;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.model.dto.RetryTaskDTO;
 import lombok.extern.slf4j.Slf4j;
@@ -18,14 +18,14 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Method;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Function;
 
 /**
+ * 上报抽象类
+ *
  * @author www.byteblogs.com
  * @date 2023-05-15
- * @since 2.0
+ * @since 1.3.0
  */
 @Slf4j
 public abstract class AbstractReport implements Report {
@@ -34,9 +34,9 @@ public abstract class AbstractReport implements Report {
     @Qualifier("easyRetryJacksonSerializer")
     private RetryArgSerializer retryArgSerializer;
 
-    public static final int SAMPLE_COUNT = 10;
+    protected static final int SAMPLE_COUNT = 10;
 
-    public static final int INTERVAL_IN_MS = 1000;
+    protected static final int INTERVAL_IN_MS = 1000;
 
     @Override
     public boolean report(String scene, final String targetClassName, final Object[] params) {
@@ -44,7 +44,7 @@ public abstract class AbstractReport implements Report {
         Assert.notNull(retryerInfo, () -> new EasyRetryClientException("retryerInfo is null"));
 
         if (RetrySiteSnapshot.getStage().equals(RetrySiteSnapshot.EnumStage.REMOTE.getStage()) && !retryerInfo.isForceReport()) {
-            LogUtils.info(log, "已经上报成功，无需重复上报 scene:[{}] targetClassName:[{}] args:[{}]",
+            LogUtils.info(log, "Successfully reported, no need to repeat reporting. scene:[{}] targetClassName:[{}] args:[{}]",
                     retryerInfo.getScene(), retryerInfo.getExecutorClassName(), params);
             return Boolean.TRUE;
         }
