@@ -44,31 +44,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DispatchService implements Lifecycle {
 
-    static class Solution {
-
-        public static void main(String[] args) {
-            System.out.println(canCompleteCircuit(new int[]{1,2,3,4,5}, new int[]{3,4,5,1,2}));
-        }
-
-        public static int canCompleteCircuit(int[] gas, int[] cost) {
-
-            int len = gas.length; // 加油站数量
-            int spare = 0; // 当前剩余汽油量
-            int minSpare = Integer.MAX_VALUE; // 最小剩余汽油量
-            int minIndex = 0; // 最小剩余汽油量对应的加油站索引
-
-            for (int i = 0; i < len; i++) {
-                spare += gas[i] - cost[i]; // 计算当前加油站的剩余汽油量
-                if (spare < minSpare) { // 如果当前剩余汽油量比最小剩余汽油量小
-                    minSpare = spare; // 更新最小剩余汽油量
-                    minIndex = i; // 更新最小剩余汽油量对应的加油站索引
-                }
-            }
-
-            return spare < 0 ? -1 : (minIndex + 1) % len; // 判断是否存在解，并返回结果
-        }
-    }
-
     /**
      * 分配器线程
      */
