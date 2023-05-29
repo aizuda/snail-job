@@ -1,7 +1,7 @@
 package com.aizuda.easy.retry.server.model.dto;
 
+import com.aizuda.easy.retry.common.core.enums.AlarmTypeEnum;
 import com.aizuda.easy.retry.common.core.enums.NotifySceneEnum;
-import com.aizuda.easy.retry.common.core.enums.NotifyTypeEnum;
 import lombok.Data;
 import java.util.List;
 import java.util.Set;
@@ -43,7 +43,7 @@ public class ConfigDTO {
     public static class Notify {
 
         /**
-         * 通知类型 {@link NotifyTypeEnum}
+         * 通知类型 {@link AlarmTypeEnum}
          */
         private Integer notifyType;
 

@@ -37,8 +37,6 @@ mybatis-plus:
 logging:
   config: classpath:logback-boot.xml
 
-version: @project.version@ #系统版本号
-
 easy-retry:
   last-days: 30 # 拉取重试数据的天数
   retry-pull-page-size: 100 # 拉取重试数据的每批次的大小

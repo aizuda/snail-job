@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.client.core.init;
 
 import com.aizuda.easy.retry.client.core.Lifecycle;
+import com.aizuda.easy.retry.common.core.util.EasyRetryVersion;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -24,8 +25,8 @@ public class EasyRetryStartListener implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        log.info("Easy-Retry client is preparing to start");
+        log.info("Easy-Retry client is preparing to start... v{}", EasyRetryVersion.getVersion());
         lifecycleList.forEach(Lifecycle::start);
-        log.info("Easy-Retry client started successfully");
+        log.info("Easy-Retry client started successfully v{}", EasyRetryVersion.getVersion());
     }
 }

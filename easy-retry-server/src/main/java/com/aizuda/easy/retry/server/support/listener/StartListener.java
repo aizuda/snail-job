@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.server.support.listener;
 
 import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.core.util.EasyRetryVersion;
 import com.aizuda.easy.retry.server.support.Lifecycle;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,13 +25,10 @@ public class StartListener implements ApplicationListener<ContextRefreshedEvent>
     @Autowired
     private List<Lifecycle> lifecycleList;
 
-    @Value("${version}")
-    private String version;
-
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
-        LogUtils.info(log, "easy-retry-server v{} starting...", version);
+        LogUtils.info(log, "easy-retry-server v{} starting...", EasyRetryVersion.getVersion());
         lifecycleList.forEach(Lifecycle::start);
-        LogUtils.info(log, "easy-retry-server v{} start completed", version);
+        LogUtils.info(log, "easy-retry-server v{} start completed", EasyRetryVersion.getVersion());
     }
 }

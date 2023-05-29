@@ -1,7 +1,7 @@
 package com.aizuda.easy.retry.server.web.controller;
 
 import com.aizuda.easy.retry.common.core.model.Result;
-import org.springframework.beans.factory.annotation.Value;
+import com.aizuda.easy.retry.common.core.util.EasyRetryVersion;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,11 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/system")
 public class SystemInfoController {
 
-    @Value("${version:}")
-    private String version;
-
     @GetMapping("version")
     public Result<String> version() {
-        return new Result<>(version);
+        return new Result<>(EasyRetryVersion.getVersion());
     }
 }
