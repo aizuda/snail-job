@@ -26,6 +26,7 @@
       :pagination="pagination"
       :loading="memberLoading"
       @change="handleTableChange"
+      :scroll="{ x: 1200 }"
     >
       <template v-for="(col, i) in ['sceneName', 'description']" :slot="col" slot-scope="text, record">
         <a-input
@@ -68,7 +69,7 @@
         <a-input-number
           v-if="record.editable"
           :min="1"
-          :max="99999"
+          :max="max"
           style="width: 100%;"
           :value="text"
           placeholder="最大重试次数"
@@ -90,7 +91,7 @@
         <a-input
           v-if="record.editable"
           style="margin: -5px 0"
-          placeholder="间隔时间"
+          :placeholder="data.find(item => item.key === record.key).backOff === '3' ? '请输入CRON表达式' : '请输入间隔时间'"
           :value="text"
           :disabled="data.find(item => item.key === record.key).backOff === '1'"
           @change="e => handleChange(e.target.value, record.key, 'triggerInterval')"
@@ -149,7 +150,7 @@ export default {
           title: '场景状态',
           dataIndex: 'sceneStatus',
           key: 'sceneStatus',
-          width: '10%',
+          width: '8%',
           scopedSlots: { customRender: 'sceneStatus' }
         },
         {
@@ -163,33 +164,34 @@ export default {
           title: '最大重试次数',
           dataIndex: 'maxRetryCount',
           key: 'maxRetryCount',
-          width: '12%',
+          width: '10%',
           scopedSlots: { customRender: 'maxRetryCount' }
         },
         {
           title: '调用链超时时间',
           dataIndex: 'deadlineRequest',
           key: 'deadlineRequest',
-          width: '15%',
+          width: '10%',
           scopedSlots: { customRender: 'deadlineRequest' }
         },
         {
           title: '间隔时间',
           dataIndex: 'triggerInterval',
           key: 'triggerInterval',
-          width: '10%',
+          width: '15%',
           scopedSlots: { customRender: 'triggerInterval' }
         },
         {
           title: '描述',
           dataIndex: 'description',
           key: 'description',
-          width: '15%',
+          width: '18%',
           scopedSlots: { customRender: 'description' }
         },
         {
           title: '操作',
           key: 'action',
+          fixed: 'right',
           scopedSlots: { customRender: 'operation' }
         }
       ],
@@ -199,7 +201,7 @@ export default {
       advanced: false,
       memberLoading: false,
       triggerIntervalDisabled: false,
-      max: 21,
+      max: 26,
       pagination: {},
       backOffLabels: {
         '1': '延迟等级',
@@ -332,6 +334,12 @@ export default {
         return
       }
 
+      if ((backOff === '2' || backOff === '4') && triggerInterval < 10) {
+        this.memberLoading = false
+        this.$message.error('描述:  间隔时间最小为10秒')
+        return
+      }
+
       const target = this.formData.find(item => key === item.key)
       if (!target) {
         this.formData.push({
@@ -377,7 +385,7 @@ export default {
         switch (value) {
           case '1':
             this.triggerIntervalDisabled = true
-            this.max = 21
+            this.max = 26
             break
           default:
             this.triggerIntervalDisabled = false

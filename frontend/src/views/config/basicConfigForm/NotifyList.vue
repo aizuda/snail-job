@@ -5,6 +5,7 @@
       :dataSource="data"
       :pagination="false"
       :loading="memberLoading"
+      :scroll="{ x: 1200 }"
     >
       <template v-for="(col, i) in ['description']" :slot="col" slot-scope="text, record">
         <a-input
@@ -100,6 +101,16 @@
             v-decorator="[
               'dingDingUrl',
               {rules: [{ required: true, message: '请输入钉钉URL', whitespace: true}]}
+            ]" />
+        </a-form-item>
+        <a-form-item
+          v-if="this.notifyTypeValue === '4'"
+          label="飞书URL">
+          <a-input
+            placeholder="请输入飞书URL"
+            v-decorator="[
+              'feiShuUrl',
+              {rules: [{ required: true, message: '请输入飞书URL', whitespace: true}]}
             ]" />
         </a-form-item>
         <a-form-item
@@ -201,7 +212,7 @@ export default {
           title: '通知场景',
           dataIndex: 'notifyScene',
           key: 'notifyScene',
-          width: '15%',
+          width: '20%',
           scopedSlots: { customRender: 'notifyScene' }
         },
         {
@@ -215,19 +226,20 @@ export default {
           title: '配置属性',
           dataIndex: 'notifyAttribute',
           key: 'notifyAttribute',
-          width: '25%',
+          width: '30%',
           scopedSlots: { customRender: 'notifyAttribute' }
         },
         {
           title: '描述',
           dataIndex: 'description',
           key: 'description',
-          width: '25%',
+          width: '15%',
           scopedSlots: { customRender: 'description' }
         },
         {
           title: '操作',
           key: 'action',
+          fixed: 'right',
           scopedSlots: { customRender: 'operation' }
         }
       ],
@@ -248,7 +260,8 @@ export default {
       },
       notifyType: {
         '1': '钉钉通知',
-        '2': '邮箱通知'
+        '2': '邮箱通知',
+        '4': '飞书'
         // '3': '企业微信'
       },
       notifyThresholdDisabled: ['3', '4'],
@@ -319,8 +332,6 @@ export default {
 
       const target = this.formData.find(item => key === item.key)
       if (!target) {
-        console.log(target)
-        console.log(this.formData)
         this.formData.push({
           key: key,
           id,
@@ -374,7 +385,7 @@ export default {
         setTimeout(resolve, 1500)
       }).then(() => {
         const { form } = this
-        const formData = pick(record.notifyAttribute, ['dingDingUrl', 'user', 'pass', 'host', 'port', 'from', 'tos'])
+        const formData = pick(record.notifyAttribute, ['dingDingUrl', 'feiShuUrl', 'user', 'pass', 'host', 'port', 'from', 'tos'])
         console.log(formData)
         form.setFieldsValue(formData)
       })
@@ -410,6 +421,8 @@ export default {
 
       if (record.notifyType === '1') {
          s = '钉钉地址:' + text['dingDingUrl'] + ';'
+      } else if (record.notifyType === '4') {
+        s = '飞书地址:' + text['feiShuUrl'] + ';'
       }
 
       return s
