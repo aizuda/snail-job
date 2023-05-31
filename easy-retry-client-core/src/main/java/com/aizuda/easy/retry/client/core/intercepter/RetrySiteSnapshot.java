@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.client.core.intercepter;
 
 import cn.hutool.core.util.StrUtil;
+import com.aizuda.easy.retry.client.core.exception.EasyRetryClientException;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.model.EasyRetryHeaders;
 import lombok.Getter;
@@ -183,6 +184,16 @@ public class RetrySiteSnapshot {
 
         EnumStage(int stage) {
             this.stage = stage;
+        }
+
+        public static EnumStage valueOfStage(int stage) {
+            for (final EnumStage value : EnumStage.values()) {
+                if (value.getStage() == stage) {
+                    return value;
+                }
+            }
+
+            throw new EasyRetryClientException("unsupported stage");
         }
 
     }

@@ -4,6 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.client.core.cache.GroupVersionCache;
 import com.aizuda.easy.retry.client.core.config.EasyRetryProperties;
 import com.aizuda.easy.retry.client.core.exception.EasyRetryClientException;
+import com.aizuda.easy.retry.client.core.intercepter.RetrySiteSnapshot.EnumStage;
 import com.aizuda.easy.retry.client.core.strategy.RetryStrategy;
 import com.aizuda.easy.retry.client.core.annotation.Retryable;
 import com.aizuda.easy.retry.client.core.retryer.RetryerResultContext;
@@ -61,7 +62,7 @@ public class RetryAspect implements Ordered {
     public Object around(ProceedingJoinPoint point) throws Throwable {
         String traceId = UUID.randomUUID().toString();
 
-        LogUtils.debug(log,"进入 aop [{}]", traceId);
+        LogUtils.debug(log,"Start entering the around method traceId:[{}]", traceId);
         Retryable retryable = getAnnotationParameter(point);
         String executorClassName = point.getTarget().getClass().getName();
         String methodEntrance = getMethodEntrance(retryable, executorClassName);
@@ -78,12 +79,12 @@ public class RetryAspect implements Ordered {
             throwable = t;
         } finally {
 
-            LogUtils.debug(log,"开始进行重试 aop [{}]", traceId);
+            LogUtils.debug(log,"Start retrying. traceId:[{}] scene:[{}] executorClassName:[{}]", traceId, retryable.scene(), executorClassName);
             // 入口则开始处理重试
             retryerResultContext = doHandlerRetry(point, traceId, retryable, executorClassName, methodEntrance, throwable);
         }
 
-        LogUtils.debug(log,"aop 结果处理 traceId:[{}] result:[{}] ", traceId, result, throwable);
+        LogUtils.debug(log,"Method return value is [{}]. traceId:[{}]", result, traceId, throwable);
 
         // 若是重试完成了, 则判断是否返回重试完成后的数据
         if (Objects.nonNull(retryerResultContext)) {
@@ -112,13 +113,19 @@ public class RetryAspect implements Ordered {
                 // 下游响应不重试码，不开启重试
                 || RetrySiteSnapshot.isRetryForStatusCode()
         ) {
-            LogUtils.info(log, "校验不通过不开启重试 methodEntrance:[{}] isRunning:[{}] throwable:[{}] isRetryFlow:[{}] isRetryForStatusCode:[{}]" ,
-                    !RetrySiteSnapshot.isMethodEntrance(methodEntrance),
-                    RetrySiteSnapshot.isRunning(),
-                    Objects.isNull(throwable),
-                    RetrySiteSnapshot.isRetryFlow(),
-                    RetrySiteSnapshot.isRetryForStatusCode()
-            );
+            if (!RetrySiteSnapshot.isMethodEntrance(methodEntrance)) {
+                LogUtils.debug(log, "Non-method entry does not enable local retries. traceId:[{}] [{}]", traceId, RetrySiteSnapshot.getMethodEntrance());
+            } else if (RetrySiteSnapshot.isRunning()) {
+                LogUtils.debug(log, "Existing running retry tasks do not enable local retries. traceId:[{}] [{}]", traceId, EnumStage.valueOfStage(RetrySiteSnapshot.getStage()));
+            } else if (Objects.isNull(throwable)) {
+                LogUtils.debug(log, "No exception, no local retries. traceId:[{}]", traceId);
+            } else if (RetrySiteSnapshot.isRetryFlow()) {
+                LogUtils.debug(log, "Retry traffic does not enable local retries. traceId:[{}] [{}]", traceId,  RetrySiteSnapshot.getRetryHeader());
+            } else if (RetrySiteSnapshot.isRetryForStatusCode()) {
+                LogUtils.debug(log, "Existing exception retry codes do not enable local retries. traceId:[{}]", traceId);
+            } else {
+                LogUtils.debug(log, "Unknown situations do not enable local retry scenarios. traceId:[{}]", traceId);
+            }
             return null;
         }
 
@@ -130,14 +137,14 @@ public class RetryAspect implements Ordered {
         try {
 
             RetryerResultContext context = retryStrategy.openRetry(retryable.scene(), executorClassName, point.getArgs());
-            LogUtils.info(log,"本地重试结果 message:[{}]", context);
+            LogUtils.info(log,"local retry result. traceId:[{}] message:[{}]", traceId, context);
             if (RetryResultStatusEnum.SUCCESS.getStatus().equals(context.getRetryResultStatusEnum().getStatus())) {
-                LogUtils.debug(log, "aop 结果成功 traceId:[{}] result:[{}]", traceId, context.getResult());
+                LogUtils.debug(log, "local retry successful. traceId:[{}] result:[{}]", traceId, context.getResult());
             }
 
             return context;
         } catch (Exception e) {
-            LogUtils.error(log,"重试组件处理异常，{}", e);
+            LogUtils.error(log,"retry component handling exception，traceId:[{}]", traceId,  e);
 
             // 预警
             sendMessage(e);
@@ -160,14 +167,14 @@ public class RetryAspect implements Ordered {
                                 EasyRetryProperties.getGroup(),
                                 LocalDateTime.now().format(formatter),
                                 e.getMessage())
-                        .title("重试组件异常:[{}]", EasyRetryProperties.getGroup())
+                        .title("retry component handling exception:[{}]", EasyRetryProperties.getGroup())
                         .notifyAttribute(notifyAttribute.getNotifyAttribute());
 
                 Alarm<AlarmContext> alarmType = altinAlarmFactory.getAlarmType(notifyAttribute.getNotifyType());
                 alarmType.asyncSendMessage(context);
             }
         } catch (Exception e1) {
-            LogUtils.error(log, "客户端发送组件异常告警失败", e1);
+            LogUtils.error(log, "Client failed to send component exception alert.", e1);
         }
 
     }
