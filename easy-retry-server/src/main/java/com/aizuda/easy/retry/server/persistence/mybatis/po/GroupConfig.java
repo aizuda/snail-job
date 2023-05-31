@@ -25,6 +25,8 @@ public class GroupConfig implements Serializable {
 
     private Integer version;
 
+    private Integer initScene;
+
     private String description;
 
     private LocalDateTime createDt;

@@ -77,7 +77,8 @@ public enum DelayLevelEnum {
             }
         }
 
-       throw new EasyRetryCommonException("level:[{}] 不存在", level);
+        // 若配置的不存在默认1个小时一次
+       return DelayLevelEnum._15;
     }
 
 }

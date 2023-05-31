@@ -8,6 +8,7 @@ CREATE TABLE `group_config`
     `group_partition`   int(11) NOT NULL COMMENT '分区',
     `route_key`         tinyint(4) NOT NULL COMMENT '路由策略',
     `id_generator_mode` tinyint(4) NOT NULL DEFAULT '1' COMMENT '唯一id生成模式 默认号段模式',
+    `init_scene`        tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否初始化场景 0:否 1:是',
     `create_dt`         datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_dt`         datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     PRIMARY KEY (`id`),

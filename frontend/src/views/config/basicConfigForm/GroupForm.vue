@@ -78,6 +78,19 @@
           <a-select
             placeholder="请选择Id生成模式"
             v-decorator="[
+              'initScene',
+              {rules: [{ required: true, message: '请选择Id生成模式'}]}
+            ]" >
+            <a-select-option :value="key" v-for="(value, key) in initScene" :key="key">{{ value }}</a-select-option>
+          </a-select>
+        </a-form-item>
+      </a-col>
+      <a-col :lg="3" :md="6" :sm="12">
+        <a-form-item
+          label="初始化场景">
+          <a-select
+            placeholder="请选择是否初始化场景"
+            v-decorator="[
               'idGeneratorMode',
               {rules: [{ required: true, message: '请选择Id生成模式'}]}
             ]" >
@@ -116,6 +129,10 @@ export default {
       idGenMode: {
         '1': '号段模式',
         '2': '雪花算法'
+      },
+      initScene: {
+        '0': '否',
+        '1': '是'
       }
     }
   },
@@ -159,13 +176,13 @@ export default {
       new Promise((resolve) => {
         setTimeout(resolve, 1500)
       }).then(() => {
-        const formData = pick(data, ['id', 'groupName', 'routeKey', 'groupStatus', 'description', 'groupPartition', 'idGeneratorMode'])
+        const formData = pick(data, ['id', 'groupName', 'routeKey', 'groupStatus', 'description', 'groupPartition', 'idGeneratorMode', 'initScene'])
         formData.groupStatus = formData.groupStatus.toString()
         formData.routeKey = formData.routeKey.toString()
         formData.idGeneratorMode = formData.idGeneratorMode.toString()
+        formData.initScene = formData.initScene.toString()
         this.id = formData.id
 
-        console.log('formData', formData)
         form.setFieldsValue(formData)
       })
     }

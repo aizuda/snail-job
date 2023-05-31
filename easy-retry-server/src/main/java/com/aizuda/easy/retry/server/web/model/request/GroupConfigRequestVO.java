@@ -47,6 +47,11 @@ public class GroupConfigRequestVO {
     private Integer idGeneratorMode;
 
     /**
+     * 是否初始化场景
+     */
+    private Integer initScene;
+
+    /**
      * 通知列表
      */
     private List<NotifyConfigVO> notifyList;

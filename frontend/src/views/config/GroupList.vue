@@ -44,6 +44,9 @@
       <span slot="groupStatus" slot-scope="text">
         {{ text === 0 ? '停用': '启用' }}
       </span>
+      <span slot="initScene" slot-scope="text">
+        {{ text === 0 ? '否': '是' }}
+      </span>
       <span slot="action" slot-scope="text, record">
         <template>
           <a @click="handleEdit(record)">编辑</a>
@@ -103,9 +106,14 @@ export default {
           dataIndex: 'groupPartition',
           needTotal: true
         },
-         {
+        {
           title: 'ID生成模式',
           dataIndex: 'idGeneratorModeName'
+        },
+        {
+          title: '初始化场景',
+          dataIndex: 'initScene',
+          scopedSlots: { customRender: 'initScene' }
         },
         {
           title: '更新时间',

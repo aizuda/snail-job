@@ -30,6 +30,8 @@ public class GroupConfigResponseVO {
 
     private String idGeneratorModeName;
 
+    private Integer initScene;
+
      private List<String> onlinePodList;
 
     private LocalDateTime createDt;

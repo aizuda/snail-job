@@ -26,5 +26,4 @@ public class RetryRegisterService {
         return "这是一个简单的异常方法";
     }
 
-
 }
