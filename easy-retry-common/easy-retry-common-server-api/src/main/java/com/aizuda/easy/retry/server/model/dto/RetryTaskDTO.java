@@ -60,4 +60,9 @@ public class RetryTaskDTO implements Serializable {
      */
     private String extAttrs;
 
+    /**
+     * 是否初始化场景
+     */
+    private boolean initScene;
+
 }

@@ -85,6 +85,7 @@ public abstract class AbstractReport implements Report {
         retryTaskDTO.setArgsStr(serialize);
         retryTaskDTO.setGroupName(EasyRetryProperties.getGroup());
         retryTaskDTO.setSceneName(scene);
+        retryTaskDTO.setInitScene(retryerInfo.isInitScene());
 
         String bizNoSpel = retryerInfo.getBizNo();
         Function<Object[], String> spelParamFunction = new SPELParamFunction(bizNoSpel, executorMethod);

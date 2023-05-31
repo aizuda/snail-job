@@ -66,6 +66,7 @@ public class ExecutorMethodScanner implements Scanner, ApplicationContextAware {
             long timeout = retryable.timeout();
             TimeUnit unit = retryable.unit();
             boolean forceReport = retryable.forceReport();
+            boolean initScene = retryable.initScene();
 
             return new RetryerInfo(retryable.scene(),
                 executorClassName,
@@ -84,7 +85,8 @@ public class ExecutorMethodScanner implements Scanner, ApplicationContextAware {
                 async,
                 forceReport,
                 timeout,
-                unit
+                unit,
+                initScene
             );
         }catch (Exception e) {
             LogUtils.error(log, "{}重试信息加载报错：{}", executor.getClass().getName(), e);

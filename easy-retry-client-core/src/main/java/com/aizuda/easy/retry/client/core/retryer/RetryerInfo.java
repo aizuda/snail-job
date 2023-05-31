@@ -39,6 +39,7 @@ public class RetryerInfo {
     private final boolean forceReport;
     private final long timeout;
     private final TimeUnit unit;
+    private final boolean initScene;
 
 
 }

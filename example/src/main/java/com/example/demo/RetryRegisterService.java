@@ -26,5 +26,15 @@ public class RetryRegisterService {
         return "这是一个简单的异常方法";
     }
 
+    /**
+     * 测试自动生成场景配置
+     */
+    @Retryable(scene = "testInitScene", initScene = true)
+    public String testInitScene(List<Cat> name) {
+
+        double i = 1 / 0;
+
+        return "这是一个简单的异常方法";
+    }
 
 }

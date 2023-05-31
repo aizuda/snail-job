@@ -1,11 +1,13 @@
 package com.aizuda.easy.retry.server.service.impl;
 
 import cn.hutool.core.lang.Assert;
+import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.model.dto.RetryTaskDTO;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryDeadLetterMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskMapper;
+import com.aizuda.easy.retry.server.persistence.mybatis.mapper.SceneConfigMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.GroupConfig;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryDeadLetter;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask;
@@ -14,6 +16,7 @@ import com.aizuda.easy.retry.server.persistence.support.ConfigAccess;
 import com.aizuda.easy.retry.server.persistence.support.RetryTaskAccess;
 import com.aizuda.easy.retry.server.support.generator.IdGenerator;
 import com.aizuda.easy.retry.server.support.strategy.WaitStrategies;
+import com.aizuda.easy.retry.server.support.strategy.WaitStrategies.WaitStrategyEnum;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
 import com.aizuda.easy.retry.server.config.RequestDataHelper;
@@ -49,18 +52,18 @@ public class RetryServiceImpl implements RetryService {
     @Autowired
     @Qualifier("retryTaskAccessProcessor")
     private RetryTaskAccess<RetryTask> retryTaskAccess;
-
     @Autowired
     @Qualifier("configAccessProcessor")
     private ConfigAccess configAccess;
-
     @Autowired
     private List<IdGenerator> idGeneratorList;
-
     @Autowired
     private RetryTaskMapper retryTaskMapper;
     @Autowired
     private RetryDeadLetterMapper retryDeadLetterMapper;
+    @Autowired
+    private SceneConfigMapper sceneConfigMapper;
+
 
     @Transactional
     @Override
@@ -68,8 +71,19 @@ public class RetryServiceImpl implements RetryService {
         LogUtils.warn(log, "received report data [{}]", JsonUtil.toJsonString(retryTaskDTO));
 
         SceneConfig sceneConfig = configAccess.getSceneConfigByGroupNameAndSceneName(retryTaskDTO.getGroupName(), retryTaskDTO.getSceneName());
-        if (Objects.isNull(sceneConfig)) {
+        if (Objects.isNull(sceneConfig) && !retryTaskDTO.isInitScene()) {
             throw new EasyRetryServerException("failed to report data, no scene configuration found. groupName:[{}] sceneName:[{}]", retryTaskDTO.getGroupName(), retryTaskDTO.getSceneName());
+        }
+
+        if (retryTaskDTO.isInitScene()) {
+            sceneConfig = new SceneConfig();
+            sceneConfig.setGroupName(retryTaskDTO.getGroupName());
+            sceneConfig.setSceneName(retryTaskDTO.getSceneName());
+            sceneConfig.setSceneStatus(StatusEnum.YES.getStatus());
+            sceneConfig.setBackOff(WaitStrategyEnum.DELAY_LEVEL.getBackOff());
+            sceneConfig.setMaxRetryCount(26);
+            sceneConfig.setDescription("注解配置开启默认初始化场景");
+            Assert.isTrue(1 == sceneConfigMapper.insert(sceneConfig), () -> new EasyRetryServerException("init scene error"));
         }
 
         RequestDataHelper.setPartition(retryTaskDTO.getGroupName());

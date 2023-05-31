@@ -42,4 +42,21 @@ public class RetryRegisterServiceTest {
 
     }
 
+    @SneakyThrows
+    @Test
+    public void testInitScene() {
+
+        try {
+            List<Cat> list = new ArrayList<>();
+            Cat cat = new Cat();
+            cat.setName(UUID.randomUUID().toString());
+            list.add(cat);
+            retryRegisterService.testInitScene(list);
+        } catch (Exception e) {
+        }
+
+        Thread.sleep(90000);
+
+    }
+
 }

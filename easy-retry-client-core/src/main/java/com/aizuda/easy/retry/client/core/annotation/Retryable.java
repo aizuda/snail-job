@@ -123,5 +123,19 @@ public @interface Retryable {
      */
     TimeUnit unit() default TimeUnit.MILLISECONDS;
 
+    /**
+     * 是否初始化服务端场景配置
+     * @return
+     *
+     * 若配置为true则自动生成一个配置如下的场景
+     *
+     * backOff(退避策略): 等级策略
+     * maxRetryCount(最大重试次数): 26
+     * triggerInterval(间隔时间): see: {@link com.aizuda.easy.retry.common.core.enums.DelayLevelEnum}
+     *
+     * false: 新增场景必须在配置页面进行手动配置
+     */
+    boolean initScene() default false;
+
 }
 

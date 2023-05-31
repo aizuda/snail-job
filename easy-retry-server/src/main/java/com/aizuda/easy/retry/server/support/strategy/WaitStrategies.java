@@ -12,6 +12,7 @@ import com.aizuda.easy.retry.server.support.RetryContext;
 import com.aizuda.easy.retry.server.support.WaitStrategy;
 import com.aizuda.easy.retry.server.support.context.MaxAttemptsPersistenceRetryContext;
 import lombok.Data;
+import lombok.Getter;
 
 import java.text.ParseException;
 import java.time.LocalDateTime;
@@ -34,6 +35,7 @@ public class WaitStrategies {
     private WaitStrategies() {
     }
 
+    @Getter
     public enum WaitStrategyEnum {
         DELAY_LEVEL(1, delayLevelWait()),
         FIXED(2, fixedWait()),

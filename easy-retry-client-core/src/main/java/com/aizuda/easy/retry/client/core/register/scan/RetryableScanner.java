@@ -89,7 +89,7 @@ public class RetryableScanner implements Scanner, ApplicationContextAware {
         boolean async = retryable.async();
         long timeout = retryable.timeout();
         TimeUnit unit = retryable.unit();
-
+        boolean initScene = retryable.initScene();
         return new RetryerInfo(retryable.scene(),
             executorClassName,
             new HashSet<>(Arrays.asList(include)),
@@ -107,7 +107,8 @@ public class RetryableScanner implements Scanner, ApplicationContextAware {
             async,
             Boolean.FALSE, // 基于注解的上报不允许强制上报
             timeout,
-            unit
+            unit,
+            initScene
         );
     }
 
