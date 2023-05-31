@@ -109,7 +109,7 @@
           <a-input
             placeholder="请输入飞书URL"
             v-decorator="[
-              'feiShuUrl',
+              'larkUrl',
               {rules: [{ required: true, message: '请输入飞书URL', whitespace: true}]}
             ]" />
         </a-form-item>
@@ -385,7 +385,7 @@ export default {
         setTimeout(resolve, 1500)
       }).then(() => {
         const { form } = this
-        const formData = pick(record.notifyAttribute, ['dingDingUrl', 'feiShuUrl', 'user', 'pass', 'host', 'port', 'from', 'tos'])
+        const formData = pick(record.notifyAttribute, ['dingDingUrl', 'larkUrl', 'user', 'pass', 'host', 'port', 'from', 'tos'])
         console.log(formData)
         form.setFieldsValue(formData)
       })
@@ -422,7 +422,7 @@ export default {
       if (record.notifyType === '1') {
          s = '钉钉地址:' + text['dingDingUrl'] + ';'
       } else if (record.notifyType === '4') {
-        s = '飞书地址:' + text['feiShuUrl'] + ';'
+        s = '飞书地址:' + text['larkUrl'] + ';'
       }
 
       return s

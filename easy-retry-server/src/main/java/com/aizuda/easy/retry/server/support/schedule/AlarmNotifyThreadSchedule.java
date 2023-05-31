@@ -36,16 +36,16 @@ public class AlarmNotifyThreadSchedule {
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     private static String retryErrorMoreThresholdTextMessageFormatter =
-            "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 重试失败数据监控</font>  </br>" +
-                    "> 名称:{}  </br>" +
-                    "> 时间窗口:{} ~ {}  </br>" +
+            "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 重试失败数据监控</font>  \n" +
+                    "> 名称:{}  \n" +
+                    "> 时间窗口:{} ~ {}  \n" +
                     "> **共计:{}**  \n";
 
     private static String retryTaskMoreThresholdTextMessageFormatter =
-            "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 重试数据监控</font>  </br>" +
-                    "> 名称:{}  </br>" +
-                    "> 时间:{}  </br>" +
-                    "> **共计:{}**  </br>";
+            "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 重试数据监控</font>  \n" +
+                    "> 名称:{}  \n" +
+                    "> 时间:{}  \n" +
+                    "> **共计:{}**  \n";
 
     @Autowired
     private RetryDeadLetterMapper retryDeadLetterMapper;
@@ -60,8 +60,8 @@ public class AlarmNotifyThreadSchedule {
     /**
      * 监控重试表中数据总量是否到达阈值
      */
-    @Scheduled(cron = "0 0/10 * * * ?")
-    @SchedulerLock(name = "retryTaskMoreThreshold", lockAtMostFor = "PT10M", lockAtLeastFor = "PT10M")
+    @Scheduled(cron = "0 0/1 * * * ?")
+    @SchedulerLock(name = "retryTaskMoreThreshold", lockAtMostFor = "PT1M", lockAtLeastFor = "PT1M")
     public void retryTaskMoreThreshold() {
         LogUtils.info(log, "retryTaskMoreThreshold time[{}] ip:[{}]", LocalDateTime.now(), HostUtils.getIp());
 

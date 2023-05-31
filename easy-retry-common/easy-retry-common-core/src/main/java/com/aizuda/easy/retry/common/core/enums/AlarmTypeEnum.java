@@ -22,6 +22,11 @@ public enum AlarmTypeEnum {
      * 企业通知
      */
     QI_YE_WECHAT(3),
+
+    /**
+     * 飞书
+     */
+    LARK(4),
     ;
 
     private final int value;
