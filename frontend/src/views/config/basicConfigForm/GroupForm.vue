@@ -14,7 +14,7 @@
           <a-input
             placeholder="请输入组名称"
             :maxLength="64"
-            :disabled='this.id && this.id > 0'
+            :disabled="this.id && this.id > 0"
             v-decorator="[
               'groupName',
               {rules: [{ required: true, message: '请输入组名称', whitespace: true},{required: true, max: 64, message: '最多支持64个字符！'}, {validator: validate}]}
@@ -86,8 +86,14 @@
         </a-form-item>
       </a-col>
       <a-col :lg="3" :md="6" :sm="12">
-        <a-form-item
-          label="初始化场景">
+
+        <a-form-item>
+          <span slot="label">
+            初始化场景&nbsp;
+            <a-tooltip title="【是】: 当未查询到场景时默认生成一个场景(退避策略: 等级策略, 最大重试次数: 26); 【否】: 新增场景时必须先配置场景">
+              <a-icon type="question-circle-o" />
+            </a-tooltip>
+          </span>
           <a-select
             placeholder="请选择是否初始化场景"
             v-decorator="[
