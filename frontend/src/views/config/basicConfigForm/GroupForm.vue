@@ -78,10 +78,10 @@
           <a-select
             placeholder="请选择Id生成模式"
             v-decorator="[
-              'initScene',
+              'idGeneratorMode',
               {rules: [{ required: true, message: '请选择Id生成模式'}]}
             ]" >
-            <a-select-option :value="key" v-for="(value, key) in initScene" :key="key">{{ value }}</a-select-option>
+            <a-select-option :value="key" v-for="(value, key) in idGenMode" :key="key">{{ value }}</a-select-option>
           </a-select>
         </a-form-item>
       </a-col>
@@ -91,10 +91,10 @@
           <a-select
             placeholder="请选择是否初始化场景"
             v-decorator="[
-              'idGeneratorMode',
-              {rules: [{ required: true, message: '请选择Id生成模式'}]}
+              'initScene',
+              {rules: [{ required: true, message: '请选择是否初始化场景'}]}
             ]" >
-            <a-select-option :value="key" v-for="(value, key) in idGenMode" :key="key">{{ value }}</a-select-option>
+            <a-select-option :value="key" v-for="(value, key) in initScene" :key="key">{{ value }}</a-select-option>
           </a-select>
         </a-form-item>
       </a-col>

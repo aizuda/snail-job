@@ -18,7 +18,7 @@ public class RetryRegisterService {
     /**
      * 测试简单的异常情况
      */
-    @Retryable(scene = "errorMethod1")
+    @Retryable(scene = "errorMethod11231")
     public String errorMethod1(List<Cat> name) {
 
         double i = 1 / 0;

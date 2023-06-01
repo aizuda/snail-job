@@ -37,6 +37,7 @@
       :data="loadData"
       :alert="options.alert"
       :rowSelection="options.rowSelection"
+      :scroll="{ x: 1600 }"
     >
       <span slot="serial" slot-scope="text, record, index">
         {{ index + 1 }}
@@ -134,6 +135,7 @@ export default {
           title: '操作',
           dataIndex: 'action',
           width: '150px',
+          fixed: 'right',
           scopedSlots: { customRender: 'action' }
         }
       ],

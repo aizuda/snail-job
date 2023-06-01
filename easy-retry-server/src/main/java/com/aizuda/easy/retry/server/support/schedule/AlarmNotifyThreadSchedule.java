@@ -60,8 +60,8 @@ public class AlarmNotifyThreadSchedule {
     /**
      * 监控重试表中数据总量是否到达阈值
      */
-    @Scheduled(cron = "0 0/1 * * * ?")
-    @SchedulerLock(name = "retryTaskMoreThreshold", lockAtMostFor = "PT1M", lockAtLeastFor = "PT1M")
+    @Scheduled(cron = "0 0/10 * * * ?")
+    @SchedulerLock(name = "retryTaskMoreThreshold", lockAtMostFor = "PT10M", lockAtLeastFor = "PT10M")
     public void retryTaskMoreThreshold() {
         LogUtils.info(log, "retryTaskMoreThreshold time[{}] ip:[{}]", LocalDateTime.now(), HostUtils.getIp());
 
