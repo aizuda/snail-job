@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.server.service.impl;
 
 import cn.hutool.core.lang.Assert;
+import com.aizuda.easy.retry.common.core.enums.DelayLevelEnum;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
@@ -129,7 +130,7 @@ public class RetryServiceImpl implements RetryService {
         sceneConfig.setSceneName(retryTaskDTO.getSceneName());
         sceneConfig.setSceneStatus(StatusEnum.YES.getStatus());
         sceneConfig.setBackOff(WaitStrategyEnum.DELAY_LEVEL.getBackOff());
-        sceneConfig.setMaxRetryCount(26);
+        sceneConfig.setMaxRetryCount(DelayLevelEnum._21.getLevel());
         sceneConfig.setDescription("自动初始化场景");
         Assert.isTrue(1 == sceneConfigMapper.insert(sceneConfig), () -> new EasyRetryServerException("init scene error"));
     }

@@ -113,6 +113,7 @@ public class ExecUnitActor extends AbstractActor  {
         dispatchRetryDTO.setExecutorName(retryTask.getExecutorName());
         dispatchRetryDTO.setArgsStr(retryTask.getArgsStr());
         dispatchRetryDTO.setUniqueId(retryTask.getUniqueId());
+        dispatchRetryDTO.setRetryCount(retryTask.getRetryCount());
 
         // 设置header
         HttpHeaders requestHeaders = new HttpHeaders();

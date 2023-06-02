@@ -26,7 +26,7 @@
       :pagination="pagination"
       :loading="memberLoading"
       @change="handleTableChange"
-      :scroll="{ x: 1200 }"
+      :scroll="{ x: 1800 }"
     >
       <template v-for="(col, i) in ['sceneName', 'description']" :slot="col" slot-scope="text, record">
         <a-input
@@ -59,7 +59,7 @@
           :value="text === 0 ? null: text"
           @change="value => handleChange(value, record.key, 'backOff')">
           <a-select-option value="1">延迟等级</a-select-option>
-          <a-select-option value="2">固定定时间</a-select-option>
+          <a-select-option value="2">固定时间</a-select-option>
           <a-select-option value="3">CRON表达式</a-select-option>
           <a-select-option value="4">随机等待</a-select-option>
         </a-select>
@@ -72,8 +72,9 @@
           :max="max"
           style="width: 100%;"
           :value="text"
-          placeholder="最大重试次数"
-          @change="value => handleChange(value, record.key, 'maxRetryCount')"/>
+          :placeholder="maxRetryCount[data.find(item => item.key === record.key).backOff].placeholder"
+          @change="value => handleChange(value, record.key, 'maxRetryCount')">
+        </a-input-number>
         <template v-else>{{ text }}</template>
       </template>
       <template slot="deadlineRequest" slot-scope="text, record">
@@ -91,11 +92,15 @@
         <a-input
           v-if="record.editable"
           style="margin: -5px 0"
-          :placeholder="data.find(item => item.key === record.key).backOff === '3' ? '请输入CRON表达式' : '请输入间隔时间'"
+          :placeholder="triggerInterval[data.find(item => item.key === record.key).backOff].placeholder"
           :value="text"
           :disabled="data.find(item => item.key === record.key).backOff === '1'"
           @change="e => handleChange(e.target.value, record.key, 'triggerInterval')"
-        />
+        >
+          <a-tooltip slot="suffix" :title="triggerInterval[data.find(item => item.key === record.key).backOff].tooltip">
+            <a-icon type="info-circle" style="color: rgba(0, 0, 0, 0.45)" />
+          </a-tooltip>
+        </a-input>
         <template v-else>{{ text }}(秒)</template>
       </template>
       <template slot="operation" slot-scope="text, record">
@@ -205,13 +210,49 @@ export default {
       pagination: {},
       backOffLabels: {
         '1': '延迟等级',
-        '2': '固定定时间',
+        '2': '固定时间',
         '3': 'CRON表达式',
         '4': '随机等待'
       },
       sceneStatus: {
         '0': '停用',
         '1': '启用'
+      },
+      triggerInterval: {
+        '1': {
+          placeholder: '',
+          tooltip: ''
+        },
+        '2': {
+          placeholder: '请输入固定间隔时间',
+          tooltip: '请输入固定间隔时间'
+        },
+        '3': {
+          placeholder: '请输入CRON表达式',
+          tooltip: '通过CRON表达式计算执行时间'
+        },
+        '4': {
+          placeholder: '请输入最大间隔时间',
+          tooltip: '随机生成范围在[0, x]内的延迟时间; 其中x代表最大间隔时间'
+        }
+      },
+      maxRetryCount: {
+        '1': {
+          placeholder: '请输入延迟等级(max:26)',
+          tooltip: '请输入延迟等级（max:26)'
+        },
+        '2': {
+          placeholder: '请输入最大重试次数',
+          tooltip: '请输入最大重试次数'
+        },
+        '3': {
+          placeholder: '请输入最大重试次数',
+          tooltip: '请输入最大重试次数'
+        },
+        '4': {
+          placeholder: '请输入最大重试次数',
+          tooltip: '请输入最大重试次数'
+        }
       },
       queryParam: {}
     }

@@ -3,6 +3,8 @@ package com.aizuda.easy.retry.client.model;
 import lombok.Data;
 import org.hibernate.validator.constraints.NotBlank;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * 服务端调度重试入参
  *
@@ -21,4 +23,6 @@ public class DispatchRetryDTO {
     private String executorName;
     @NotBlank(message = "uniqueId 不能为空")
     private String uniqueId;
+    @NotNull(message = "retryCount 不能为空")
+    private Integer retryCount;
 }

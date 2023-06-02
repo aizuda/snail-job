@@ -33,7 +33,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.util.Objects;
 
@@ -75,6 +78,10 @@ public class RetryEndPoint {
         DispatchRetryResultDTO executeRespDto = new DispatchRetryResultDTO();
 
         try {
+            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            HttpServletRequest request = Objects.requireNonNull(attributes).getRequest();
+            request.setAttribute("attemptNumber", executeReqDto.getRetryCount());
+
             RetryerResultContext retryerResultContext = retryStrategy.openRetry(executeReqDto.getScene(), executeReqDto.getExecutorName(), deSerialize);
 
             if (RetrySiteSnapshot.isRetryForStatusCode()) {
