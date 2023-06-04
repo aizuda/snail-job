@@ -29,6 +29,8 @@ public class RetryDeadLetter implements Serializable {
 
     private String extAttrs;
 
+    private Integer taskType;
+
     private LocalDateTime createDt;
 
     private static final long serialVersionUID = 1L;

@@ -30,12 +30,14 @@ public class MybatisRetryTaskAccess extends AbstractRetryTaskAccess {
     }
 
     @Override
-    public List<RetryTask> listAvailableTasks(String groupName, LocalDateTime lastAt, Integer pageSize) {
+    public List<RetryTask> listAvailableTasks(String groupName, LocalDateTime lastAt, Integer pageSize, Integer taskType) {
         setPartition(groupName);
         return retryTaskMapper.selectPage(new PageDTO<>(0, pageSize),
                 new LambdaQueryWrapper<RetryTask>()
                         .eq(RetryTask::getRetryStatus, RetryStatusEnum.RUNNING.getStatus())
-                        .eq(RetryTask::getGroupName, groupName).ge(RetryTask::getCreateDt, lastAt)
+                        .eq(RetryTask::getGroupName, groupName)
+                        .eq(RetryTask::getTaskType, taskType)
+                        .ge(RetryTask::getCreateDt, lastAt)
                         .orderByAsc(RetryTask::getCreateDt)).getRecords();
     }
 

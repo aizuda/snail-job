@@ -31,6 +31,8 @@ public class RetryTaskLog implements Serializable {
 
     private Integer retryStatus;
 
+    private Integer taskType;
+
     private String errorMessage;
 
     private LocalDateTime createDt;

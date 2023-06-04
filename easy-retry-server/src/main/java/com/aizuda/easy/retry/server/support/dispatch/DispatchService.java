@@ -56,6 +56,7 @@ public class DispatchService implements Lifecycle {
      * MAX_ID_MAP[key] = group 的 idHash MAX_ID_MAP[value] = retry_task的 create_at时间
      */
     public static final Map<String, LocalDateTime> LAST_AT_MAP = new HashMap<>();
+    public static final Map<String, LocalDateTime> LAST_AT_CALL_BACK_MAP = new HashMap<>();
 
     /**
      * 调度时长

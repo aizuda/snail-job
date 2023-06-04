@@ -31,12 +31,21 @@ public class StopStrategies {
     }
 
     /**
-     * 根据客户端返回结果判断是否终止重试
+     * 根据客户端返回状态判断是否终止重试
      *
-     * @return {@link ResultStatusStopStrategy} 重试结果停止策略
+     * @return {@link ResultStatusCodeStopStrategy} 重试结果停止策略
      */
     public static StopStrategy stopResultStatus() {
         return new ResultStatusStopStrategy();
+    }
+
+    /**
+     * 根据客户端返回结果对象的状态码判断是否终止重试
+     *
+     * @return {@link ResultStatusCodeStopStrategy} 重试结果停止策略
+     */
+    public static StopStrategy stopResultStatusCode() {
+        return new ResultStatusCodeStopStrategy();
     }
 
     /**
@@ -61,20 +70,47 @@ public class StopStrategies {
     }
 
     /**
-     * 根据客户端返回结果集判断是否应该停止
-     *
+     * 根据客户端返回的状态码判断是否应该停止
+     * <p>
      * 1、{@link Result#getStatus()} 不为1 则继续重试
-     * 2、根据{@link Result#getData()}中的statusCode判断是否停止
      */
     private static final class ResultStatusStopStrategy implements StopStrategy {
 
         @Override
         public boolean shouldStop(RetryContext retryContext) {
 
-            MaxAttemptsPersistenceRetryContext<Result<DispatchRetryResultDTO>> context =
-                    (MaxAttemptsPersistenceRetryContext<Result<DispatchRetryResultDTO>>) retryContext;
+            Result response = (Result) retryContext.getCallResult();
 
-            Result<DispatchRetryResultDTO> response = context.getCallResult();
+            if (Objects.isNull(response) || StatusEnum.YES.getStatus() != response.getStatus()) {
+                return Boolean.FALSE;
+            }
+
+            return Boolean.TRUE;
+        }
+
+        @Override
+        public boolean supports(RetryContext retryContext) {
+            return true;
+        }
+
+        @Override
+        public int order() {
+            return 2;
+        }
+    }
+
+    /**
+     * 根据客户端返回结果集判断是否应该停止
+     * <p>
+     * 1、{@link Result#getStatus()} 不为1 则继续重试
+     * 2、根据{@link Result#getData()}中的statusCode判断是否停止
+     */
+    private static final class ResultStatusCodeStopStrategy implements StopStrategy {
+
+        @Override
+        public boolean shouldStop(RetryContext retryContext) {
+
+            Result<DispatchRetryResultDTO> response = (Result<DispatchRetryResultDTO>) retryContext.getCallResult();
 
             if (Objects.isNull(response) || StatusEnum.YES.getStatus() != response.getStatus()) {
                 return Boolean.FALSE;
@@ -97,7 +133,7 @@ public class StopStrategies {
 
         @Override
         public int order() {
-            return 2;
+            return 3;
         }
     }
 

@@ -14,12 +14,13 @@
     <result column="next_trigger_at" jdbcType="TIMESTAMP" property="nextTriggerAt" />
     <result column="retry_count" jdbcType="TINYINT" property="retryCount" />
     <result column="retry_status" jdbcType="TINYINT" property="retryStatus" />
+    <result column="task_type" jdbcType="TINYINT" property="taskType"/>
     <result column="create_dt" jdbcType="TIMESTAMP" property="createDt" />
     <result column="update_dt" jdbcType="TIMESTAMP" property="updateDt" />
   </resultMap>
   <sql id="Base_Column_List">
     id, unique_id, group_name, scene_name, idempotent_id, biz_no, executor_name, args_str, ext_attrs, next_trigger_at, retry_count, retry_status,
-    create_dt, update_dt
+    create_dt, update_dt, task_type
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
     select

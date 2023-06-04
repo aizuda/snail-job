@@ -2,7 +2,7 @@ package com.aizuda.easy.retry.server.akka;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
-import com.aizuda.easy.retry.server.support.dispatch.actor.callback.CallbackRetryResultActor;
+import com.aizuda.easy.retry.server.support.dispatch.actor.exec.ExecCallbackUnitActor;
 import com.aizuda.easy.retry.server.support.dispatch.actor.exec.ExecUnitActor;
 import com.aizuda.easy.retry.server.support.dispatch.actor.result.FailureActor;
 import com.aizuda.easy.retry.server.support.dispatch.actor.result.FinishActor;
@@ -53,7 +53,7 @@ public class ActorGenerator {
      * @return actor 引用
      */
     public static ActorRef callbackRetryResultActor() {
-        return getDispatchResultActorSystem().actorOf(getSpringExtension().props(CallbackRetryResultActor.BEAN_NAME));
+        return getDispatchResultActorSystem().actorOf(getSpringExtension().props(ExecCallbackUnitActor.BEAN_NAME));
     }
 
     /**

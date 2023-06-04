@@ -37,6 +37,8 @@ public class RetryTask implements Serializable {
 
     private Integer retryStatus;
 
+    private Integer taskType;
+
     private LocalDateTime createDt;
 
     private LocalDateTime updateDt;

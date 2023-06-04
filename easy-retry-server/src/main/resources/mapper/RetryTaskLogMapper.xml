@@ -12,12 +12,13 @@
         <result column="args_str" jdbcType="VARCHAR" property="argsStr"/>
         <result column="ext_attrs" jdbcType="VARCHAR" property="extAttrs"/>
         <result column="retry_status" jdbcType="TINYINT" property="retryStatus"/>
+        <result column="task_type" jdbcType="TINYINT" property="taskType"/>
         <result column="error_message" jdbcType="VARCHAR" property="errorMessage"/>
         <result column="create_dt" jdbcType="TIMESTAMP" property="createDt"/>
     </resultMap>
     <sql id="Base_Column_List">
         id, unique_id, group_name, scene_name, idempotent_id, biz_no, executor_name, args_str, ext_attrs, retry_status, error_message,
-    create_dt
+    create_dt, task_type
     </sql>
     <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
         select

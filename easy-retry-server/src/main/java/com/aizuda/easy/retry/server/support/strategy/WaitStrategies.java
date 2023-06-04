@@ -1,5 +1,7 @@
 package com.aizuda.easy.retry.server.support.strategy;
 
+import com.aizuda.easy.retry.common.core.constant.SystemConstants;
+import com.aizuda.easy.retry.common.core.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.SceneConfig;
@@ -145,8 +147,7 @@ public class WaitStrategies {
     private static final  class DelayLevelWaitStrategy implements WaitStrategy {
 
         @Override
-        public LocalDateTime computeRetryTime(RetryContext retryContext) {
-            MaxAttemptsPersistenceRetryContext context = (MaxAttemptsPersistenceRetryContext) retryContext;
+        public LocalDateTime computeRetryTime(RetryContext context) {
             RetryTask retryTask = context.getRetryTask();
             DelayLevelEnum levelEnum = DelayLevelEnum.getDelayLevelByLevel(retryTask.getRetryCount());
             return retryTask.getNextTriggerAt().plus(levelEnum.getTime(), levelEnum.getUnit());
@@ -160,13 +161,20 @@ public class WaitStrategies {
 
         @Override
         public LocalDateTime computeRetryTime(RetryContext retryContext) {
-            MaxAttemptsPersistenceRetryContext context = (MaxAttemptsPersistenceRetryContext) retryContext;
-            RetryTask retryTask = context.getRetryTask();
-            ConfigAccess configAccess = SpringContext.CONTEXT.getBean("configAccessProcessor", ConfigAccess.class);
+            RetryTask retryTask = retryContext.getRetryTask();
+            int triggerInterval;
+            if (TaskTypeEnum.CALLBACK.getType().equals(retryTask.getTaskType())) {
+                // 回调失败的默认15分钟执行一次重试
+                triggerInterval = SystemConstants.CALL_BACK.TRIGGER_INTERVAL;
+            } else {
+                ConfigAccess configAccess = SpringContext.CONTEXT.getBean("configAccessProcessor", ConfigAccess.class);
+                SceneConfig sceneConfig =
+                        configAccess.getSceneConfigByGroupNameAndSceneName(retryTask.getGroupName(), retryTask.getSceneName());
+                triggerInterval = Integer.parseInt(sceneConfig.getTriggerInterval());
+            }
 
-            SceneConfig sceneConfig =
-                    configAccess.getSceneConfigByGroupNameAndSceneName(retryTask.getGroupName(), retryTask.getSceneName());
-            return retryTask.getNextTriggerAt().plusSeconds(Integer.parseInt(sceneConfig.getTriggerInterval()));
+
+            return retryTask.getNextTriggerAt().plusSeconds(triggerInterval);
         }
     }
 
@@ -176,8 +184,7 @@ public class WaitStrategies {
     private static final class CronWaitStrategy implements WaitStrategy {
 
         @Override
-        public LocalDateTime computeRetryTime(RetryContext retryContext) {
-            MaxAttemptsPersistenceRetryContext context = (MaxAttemptsPersistenceRetryContext) retryContext;
+        public LocalDateTime computeRetryTime(RetryContext context) {
             RetryTask retryTask = context.getRetryTask();
 
             ConfigAccess configAccess = SpringContext.CONTEXT.getBean(ConfigAccess.class);
@@ -185,7 +192,7 @@ public class WaitStrategies {
             SceneConfig sceneConfig =
                     configAccess.getSceneConfigByGroupNameAndSceneName(retryTask.getGroupName(), retryTask.getSceneName());
 
-            Date nextValidTime = null;
+            Date nextValidTime;
             try {
                 ZonedDateTime zdt = retryTask.getNextTriggerAt().atZone(ZoneOffset.ofHours(8));
                 nextValidTime = new CronExpression(sceneConfig.getTriggerInterval()).getNextValidTimeAfter(Date.from(zdt.toInstant()));

@@ -1,6 +1,9 @@
 package com.aizuda.easy.retry.server.support;
 
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask;
+import com.aizuda.easy.retry.server.persistence.mybatis.po.ServerNode;
+
+import java.util.Set;
 
 /**
  * @author: www.byteblogs.com
@@ -42,4 +45,10 @@ public interface RetryContext<V> {
      * @param waitStrategy {@link WaitStrategy} 等待策略
      */
     void setWaitStrategy(WaitStrategy waitStrategy);
+
+    ServerNode getServerNode();
+
+    Set<String>  getSceneBlacklist();
+
+    V getCallResult();
 }

@@ -11,10 +11,11 @@
     <result column="executor_name" jdbcType="VARCHAR" property="executorName" />
     <result column="args_str" jdbcType="VARCHAR" property="argsStr" />
     <result column="ext_attrs" jdbcType="VARCHAR" property="extAttrs" />
+    <result column="task_type" jdbcType="TINYINT" property="taskType"/>
     <result column="create_dt" jdbcType="TIMESTAMP" property="createDt" />
   </resultMap>
   <sql id="Base_Column_List">
-    id, unique_id, group_name, scene_name, idempotent_id, biz_no, executor_name, args_str, ext_attrs, create_dt
+    id, unique_id, group_name, scene_name, idempotent_id, biz_no, executor_name, args_str, ext_attrs, create_dt, task_type
   </sql>
   <insert id="insertBatch">
     insert into retry_dead_letter_${partition} (id, unique_id, group_name, scene_name,

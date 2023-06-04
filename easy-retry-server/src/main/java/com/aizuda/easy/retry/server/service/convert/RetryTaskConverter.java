@@ -19,6 +19,8 @@ public interface RetryTaskConverter {
 
     RetryTask toRetryTask(RetryTaskDTO retryTaskDTO);
 
+    RetryTask toRetryTask(RetryTask retryTask);
+
     RetryTask toRetryTask(RetryTaskSaveRequestVO retryTaskSaveRequestVO);
 
     List<RetryTask> toRetryTaskList(List<RetryTaskDTO> retryTaskDTOList);

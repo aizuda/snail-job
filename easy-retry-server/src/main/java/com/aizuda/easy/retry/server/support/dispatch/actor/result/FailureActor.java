@@ -3,6 +3,9 @@ package com.aizuda.easy.retry.server.support.dispatch.actor.result;
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import cn.hutool.core.lang.Assert;
+import com.aizuda.easy.retry.common.core.constant.SystemConstants;
+import com.aizuda.easy.retry.common.core.enums.TaskTypeEnum;
+import com.aizuda.easy.retry.server.support.handler.CallbackRetryTaskHandler;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
@@ -21,6 +24,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
@@ -45,13 +51,15 @@ public class FailureActor extends AbstractActor {
     @Autowired
     @Qualifier("retryTaskAccessProcessor")
     private RetryTaskAccess<RetryTask> retryTaskAccess;
-
     @Autowired
     @Qualifier("configAccessProcessor")
     private ConfigAccess configAccess;
-
     @Autowired
     private RetryTaskLogMapper retryTaskLogMapper;
+    @Autowired
+    private CallbackRetryTaskHandler callbackRetryTaskHandler;
+    @Autowired
+    private TransactionTemplate transactionTemplate;
 
     @Override
     public Receive createReceive() {
@@ -62,19 +70,28 @@ public class FailureActor extends AbstractActor {
             SceneConfig sceneConfig =
                     configAccess.getSceneConfigByGroupNameAndSceneName(retryTask.getGroupName(), retryTask.getSceneName());
 
-            ActorRef actorRef = null;
-            if (sceneConfig.getMaxRetryCount() <= retryTask.getRetryCount()) {
-                retryTask.setRetryStatus(RetryStatusEnum.MAX_RETRY_COUNT.getStatus());
-                actorRef = ActorGenerator.callbackRetryResultActor();
-            }
-
             try {
-                retryTaskAccess.updateRetryTask(retryTask);
 
-                // 重试成功回调客户端
-                if (Objects.nonNull(actorRef)) {
-                    actorRef.tell(retryTask, actorRef);
-                }
+                transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+                    @Override
+                    protected void doInTransactionWithoutResult(TransactionStatus status) {
+
+                        Integer maxRetryCount;
+                        if (TaskTypeEnum.CALLBACK.getType().equals(retryTask.getTaskType())) {
+                            maxRetryCount = SystemConstants.CALL_BACK.MAX_RETRY_COUNT;
+                        } else {
+                            maxRetryCount = sceneConfig.getMaxRetryCount();
+                            // 创建一个回调任务
+                            callbackRetryTaskHandler.create(retryTask);
+                        }
+
+                        if (maxRetryCount <= retryTask.getRetryCount()) {
+                            retryTask.setRetryStatus(RetryStatusEnum.MAX_RETRY_COUNT.getStatus());
+                        }
+
+                        retryTaskAccess.updateRetryTask(retryTask);
+                    }
+                });
             } catch (Exception e) {
                 LogUtils.error(log,"更新重试任务失败", e);
             } finally {

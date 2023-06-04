@@ -3,6 +3,10 @@ package com.aizuda.easy.retry.server.support.dispatch.actor.result;
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import cn.hutool.core.lang.Assert;
+import com.aizuda.easy.retry.common.core.enums.TaskTypeEnum;
+import com.aizuda.easy.retry.server.service.convert.RetryTaskConverter;
+import com.aizuda.easy.retry.server.support.handler.CallbackRetryTaskHandler;
+import com.aizuda.easy.retry.server.support.strategy.WaitStrategies;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
@@ -14,14 +18,23 @@ import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTaskLog;
 import com.aizuda.easy.retry.server.persistence.support.RetryTaskAccess;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.CollectionUtils;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 重试完成执行器
@@ -42,9 +55,12 @@ public class FinishActor extends AbstractActor  {
     @Autowired
     @Qualifier("retryTaskAccessProcessor")
     private RetryTaskAccess<RetryTask> retryTaskAccess;
-
     @Autowired
     private RetryTaskLogMapper retryTaskLogMapper;
+    @Autowired
+    private CallbackRetryTaskHandler callbackRetryTaskHandler;
+    @Autowired
+    private TransactionTemplate transactionTemplate;
 
     @Override
     public Receive createReceive() {
@@ -54,11 +70,18 @@ public class FinishActor extends AbstractActor  {
             retryTask.setRetryStatus(RetryStatusEnum.FINISH.getStatus());
 
             try {
-                retryTaskAccess.updateRetryTask(retryTask);
+               transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+                   @Override
+                   protected void doInTransactionWithoutResult(TransactionStatus status) {
+                       retryTaskAccess.updateRetryTask(retryTask);
 
-                // 重试成功回调客户端
-                ActorRef actorRef = ActorGenerator.callbackRetryResultActor();
-                actorRef.tell(retryTask, actorRef);
+                       if (TaskTypeEnum.CALLBACK.getType().equals(retryTask.getTaskType())) {
+                           // 创建一个回调任务
+                           callbackRetryTaskHandler.create(retryTask);
+                       }
+                   }
+               });
+
             }catch (Exception e) {
                 LogUtils.error(log, "更新重试任务失败", e);
             } finally {

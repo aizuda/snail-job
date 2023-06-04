@@ -14,7 +14,7 @@ public interface RetryTaskAccess<T> {
     /**
      * 批量查询重试任务
      */
-    List<T> listAvailableTasks(String groupName, LocalDateTime lastAt, Integer pageSize);
+    List<T> listAvailableTasks(String groupName, LocalDateTime lastAt, Integer pageSize, Integer taskType);
 
     List<T> listRetryTaskByRetryCount(String groupName, Integer retryStatus);
 

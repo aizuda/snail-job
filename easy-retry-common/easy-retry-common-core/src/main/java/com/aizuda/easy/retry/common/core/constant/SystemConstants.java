@@ -61,4 +61,19 @@ public interface SystemConstants {
 
     }
 
+    interface CALL_BACK {
+        /**
+         * 回调id前缀
+         */
+        String CB_ = "CB_";
+        /**
+         * 最大重试次数
+         */
+        int MAX_RETRY_COUNT = 288;
+        /**
+         * 间隔时间
+         */
+        int TRIGGER_INTERVAL = 15 * 60;
+    }
+
 }

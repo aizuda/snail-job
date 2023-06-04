@@ -85,9 +85,7 @@ public class FilterStrategies {
 
         @Override
         public boolean filter(RetryContext retryContext) {
-            MaxAttemptsPersistenceRetryContext context = (MaxAttemptsPersistenceRetryContext) retryContext;
-
-            LocalDateTime nextTriggerAt = context.getRetryTask().getNextTriggerAt();
+            LocalDateTime nextTriggerAt = retryContext.getRetryTask().getNextTriggerAt();
             return nextTriggerAt.isBefore(LocalDateTime.now());
         }
 
@@ -131,8 +129,7 @@ public class FilterStrategies {
 
         @Override
         public boolean filter(RetryContext retryContext) {
-            MaxAttemptsPersistenceRetryContext context = (MaxAttemptsPersistenceRetryContext) retryContext;
-            return !context.getSceneBlacklist().contains(retryContext.getRetryTask().getSceneName());
+            return !retryContext.getSceneBlacklist().contains(retryContext.getRetryTask().getSceneName());
         }
 
         @Override
@@ -148,8 +145,7 @@ public class FilterStrategies {
 
         @Override
         public boolean filter(RetryContext retryContext) {
-            MaxAttemptsPersistenceRetryContext context = (MaxAttemptsPersistenceRetryContext) retryContext;
-            ServerNode serverNode = context.getServerNode();
+            ServerNode serverNode = retryContext.getServerNode();
 
             if (Objects.isNull(serverNode)) {
                 return false;
@@ -173,8 +169,7 @@ public class FilterStrategies {
 
         @Override
         public boolean filter(RetryContext retryContext) {
-            MaxAttemptsPersistenceRetryContext context = (MaxAttemptsPersistenceRetryContext) retryContext;
-            ServerNode serverNode = context.getServerNode();
+            ServerNode serverNode = retryContext.getServerNode();
 
             RateLimiter rateLimiter = CacheGroupRateLimiter.getRateLimiterByKey(serverNode.getHostId());
             if (Objects.nonNull(rateLimiter) && !rateLimiter.tryAcquire(100, TimeUnit.MILLISECONDS)) {
