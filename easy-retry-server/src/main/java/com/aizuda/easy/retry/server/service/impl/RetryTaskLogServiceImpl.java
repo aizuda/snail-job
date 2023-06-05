@@ -49,7 +49,7 @@ public class RetryTaskLogServiceImpl implements RetryTaskLogService {
 
         retryTaskLogLambdaQueryWrapper.select(RetryTaskLog::getGroupName, RetryTaskLog::getId, RetryTaskLog::getSceneName,
                 RetryTaskLog::getIdempotentId, RetryTaskLog::getBizNo, RetryTaskLog::getErrorMessage, RetryTaskLog::getRetryStatus,
-                RetryTaskLog::getCreateDt, RetryTaskLog::getUniqueId);
+                RetryTaskLog::getCreateDt, RetryTaskLog::getUniqueId, RetryTaskLog::getTaskType);
         PageDTO<RetryTaskLog> retryTaskLogPageDTO = retryTaskLogMapper.selectPage(pageDTO, retryTaskLogLambdaQueryWrapper.orderByDesc(RetryTaskLog::getCreateDt));
 
         return new PageResult<>(

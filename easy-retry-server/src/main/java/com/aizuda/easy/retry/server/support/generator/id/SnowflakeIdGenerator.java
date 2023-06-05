@@ -2,7 +2,7 @@ package com.aizuda.easy.retry.server.support.generator.id;
 
 import cn.hutool.core.lang.Snowflake;
 import cn.hutool.core.util.IdUtil;
-import com.aizuda.easy.retry.common.core.enums.IdGeneratorMode;
+import com.aizuda.easy.retry.server.enums.IdGeneratorMode;
 import com.aizuda.easy.retry.server.support.generator.IdGenerator;
 import org.springframework.stereotype.Component;
 

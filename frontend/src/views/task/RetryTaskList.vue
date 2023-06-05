@@ -84,6 +84,16 @@
       <span slot="serial" slot-scope="text, record">
         {{ record.id }}
       </span>
+      <span slot="taskType" slot-scope="text">
+        <a-tag :color="taskType[text].color">
+          {{ taskType[text].name }}
+        </a-tag>
+      </span>
+      <span slot="retryStatus" slot-scope="text">
+        <a-tag :color="retryStatus[text].color">
+          {{ retryStatus[text].name }}
+        </a-tag>
+      </span>
       <span slot="action" slot-scope="text, record">
         <template>
           <a @click="handleInfo(record)">详情</a>
@@ -131,10 +141,32 @@ export default {
       // 查询参数
       queryParam: {},
       retryStatus: {
-        0: '重试中',
-        1: '重试完成',
-        2: '最大次数',
-        3: '暂停'
+        '0': {
+          'name': '处理中',
+          'color': '#9c1f1f'
+        },
+        '1': {
+          'name': '处理成功',
+          'color': '#f5a22d'
+        },
+        '2': {
+          'name': '最大次数',
+          'color': '#68a5d0'
+        },
+        '3': {
+          'name': '暂停',
+          'color': '#f52d8e'
+        }
+      },
+      taskType: {
+        '1': {
+          'name': '重试数据',
+          'color': '#d06892'
+        },
+        '2': {
+          'name': '回调数据',
+          'color': '#f5a22d'
+        }
       },
       // 表头
       columns: [
@@ -184,7 +216,13 @@ export default {
         {
           title: '重试状态',
           dataIndex: 'retryStatus',
-          customRender: (text) => this.retryStatus[text],
+          scopedSlots: { customRender: 'retryStatus' },
+          width: '5%'
+        },
+        {
+          title: '任务类型',
+          dataIndex: 'taskType',
+          scopedSlots: { customRender: 'taskType' },
           width: '5%'
         },
         {

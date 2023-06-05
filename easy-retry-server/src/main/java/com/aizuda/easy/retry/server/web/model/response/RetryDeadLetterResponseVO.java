@@ -27,6 +27,8 @@ public class RetryDeadLetterResponseVO {
 
     private String extAttrs;
 
+    private Integer taskType;
+
     private LocalDateTime createDt;
 
 }

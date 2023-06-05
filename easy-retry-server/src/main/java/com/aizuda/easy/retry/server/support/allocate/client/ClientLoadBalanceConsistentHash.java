@@ -2,7 +2,7 @@ package com.aizuda.easy.retry.server.support.allocate.client;
 
 import com.aizuda.easy.retry.server.support.allocate.common.ConsistentHashRouter;
 import com.aizuda.easy.retry.server.support.allocate.common.Node;
-import com.aizuda.easy.retry.common.core.enums.AllocationAlgorithmEnum;
+import com.aizuda.easy.retry.server.enums.AllocationAlgorithmEnum;
 import com.aizuda.easy.retry.server.support.ClientLoadBalance;
 
 import java.util.ArrayList;

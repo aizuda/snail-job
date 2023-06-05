@@ -1,6 +1,5 @@
 package com.aizuda.easy.retry.server.web.model.request;
 
-import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
 import lombok.Data;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;

@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.server.web.model.request;
 
-import com.aizuda.easy.retry.common.core.enums.IdGeneratorMode;
+import com.aizuda.easy.retry.server.enums.IdGeneratorMode;
 import lombok.Data;
 import org.hibernate.validator.constraints.NotBlank;
 

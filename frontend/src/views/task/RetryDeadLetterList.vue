@@ -56,6 +56,11 @@
       <span slot="serial" slot-scope="text, record">
         {{ record.id }}
       </span>
+      <span slot="taskType" slot-scope="text">
+        <a-tag :color="taskType[text].color">
+          {{ taskType[text].name }}
+        </a-tag>
+      </span>
       <span slot="action" slot-scope="text, record">
         <template>
           <a-popconfirm
@@ -118,6 +123,16 @@ export default {
       advanced: false,
       // 查询参数
       queryParam: {},
+      taskType: {
+        '1': {
+          'name': '重试数据',
+          'color': '#d06892'
+        },
+        '2': {
+          'name': '回调数据',
+          'color': '#f5a22d'
+        }
+      },
       // 表头
       columns: [
         {
@@ -144,6 +159,12 @@ export default {
           title: '业务编号',
           dataIndex: 'bizNo',
           ellipsis: true
+        },
+        {
+          title: '任务类型',
+          dataIndex: 'taskType',
+          scopedSlots: { customRender: 'taskType' },
+          width: '5%'
         },
         {
           title: '创建时间',

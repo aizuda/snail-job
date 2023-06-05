@@ -1,8 +1,8 @@
 package com.aizuda.easy.retry.server.service.impl;
 
 import cn.hutool.core.lang.Assert;
-import com.aizuda.easy.retry.common.core.enums.DelayLevelEnum;
-import com.aizuda.easy.retry.common.core.enums.StatusEnum;
+import com.aizuda.easy.retry.server.enums.DelayLevelEnum;
+import com.aizuda.easy.retry.server.enums.StatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.model.dto.RetryTaskDTO;
@@ -119,7 +119,7 @@ public class RetryServiceImpl implements RetryService {
      * 若配置了默认初始化场景配置，则发现上报数据的时候未配置场景，默认生成一个场景
      * backOff(退避策略): 等级策略
      * maxRetryCount(最大重试次数): 26
-     * triggerInterval(间隔时间): see: {@link com.aizuda.easy.retry.common.core.enums.DelayLevelEnum}
+     * triggerInterval(间隔时间): see: {@link DelayLevelEnum}
      *
      * @param retryTaskDTO 重试上报DTO
      */

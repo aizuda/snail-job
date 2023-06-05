@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.server.support.generator.id;
 
-import com.aizuda.easy.retry.common.core.enums.IdGeneratorMode;
+import com.aizuda.easy.retry.server.enums.IdGeneratorMode;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.SequenceAllocMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.SequenceAlloc;

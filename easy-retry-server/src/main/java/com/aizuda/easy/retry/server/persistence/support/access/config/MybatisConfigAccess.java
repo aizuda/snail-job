@@ -4,7 +4,7 @@ import com.aizuda.easy.retry.server.persistence.mybatis.po.GroupConfig;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.NotifyConfig;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.SceneConfig;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.aizuda.easy.retry.common.core.enums.StatusEnum;
+import com.aizuda.easy.retry.server.enums.StatusEnum;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 

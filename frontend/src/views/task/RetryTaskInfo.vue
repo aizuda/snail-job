@@ -1,6 +1,6 @@
 <template>
   <div>
-    <page-header-wrapper @back="() => $router.go(-1)" style='margin: -24px -1px 0'>
+    <page-header-wrapper @back="() => $router.go(-1)" style="margin: -24px -1px 0">
       <div></div>
     </page-header-wrapper>
     <a-card :bordered="false">
@@ -23,8 +23,14 @@
         <a-descriptions-item label="重试次数">
           {{ retryTaskInfo.retryCount }}
         </a-descriptions-item>
-        <a-descriptions-item label="重试状态">
-          {{ retryStatus[retryTaskInfo.retryStatus] }}
+        <a-descriptions-item label="重试状态 | 数据类型">
+          <a-tag color="red">
+            {{ retryStatus[retryTaskInfo.retryStatus] }}
+          </a-tag>
+          <a-divider type="vertical" />
+          <a-tag :color="taskType[retryTaskInfo.taskType].color">
+            {{ taskType[retryTaskInfo.taskType].name }}
+          </a-tag>
         </a-descriptions-item>
         <a-descriptions-item label="触发时间">
           {{ retryTaskInfo.createDt }}
@@ -43,9 +49,9 @@
         </a-descriptions-item>
       </a-descriptions>
     </a-card>
-    <div style='margin: 20px'></div>
+    <div style="margin: 20px"></div>
     <a-card title="日志列表" style="width: 100%">
-      <RetryLogList v-if="retryTaskInfo !== null" ref='retryLogListRef' :showSearch="false" :group-name="retryTaskInfo.groupName" :unique-id="retryTaskInfo.uniqueId"/>
+      <RetryLogList v-if="retryTaskInfo !== null" ref="retryLogListRef" :showSearch="false" :group-name="retryTaskInfo.groupName" :unique-id="retryTaskInfo.uniqueId"/>
     </a-card>
   </div>
 </template>
@@ -64,9 +70,19 @@ export default {
     return {
       retryTaskInfo: {},
       retryStatus: {
-        '0': '重试中',
-        '1': '重试完成',
+        '0': '处理中',
+        '1': '处理成功',
         '2': '最大次数'
+      },
+      taskType: {
+        '1': {
+          'name': '重试数据',
+          'color': '#d06892'
+        },
+        '2': {
+          'name': '回调数据',
+          'color': '#f5a22d'
+        }
       }
     }
   },

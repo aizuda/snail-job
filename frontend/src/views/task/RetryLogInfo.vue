@@ -27,7 +27,9 @@
           {{ parseDate( retryInfo.createDt) }}
         </a-descriptions-item>
         <a-descriptions-item label="当前重试状态">
-          {{ retryStatus[retryInfo.retryStatus] }}
+          <a-tag color="red">
+            {{ retryStatus[retryInfo.retryStatus] }}
+          </a-tag>
         </a-descriptions-item>
         <a-descriptions-item label="执行器名称" :span="3">
           {{ retryInfo.executorName }}
@@ -56,8 +58,8 @@ export default {
     return {
       retryInfo: {},
       retryStatus: {
-        '0': '重试中',
-        '1': '重试完成',
+        '0': '处理中',
+        '1': '处理成功',
         '2': '最大次数'
       }
     }

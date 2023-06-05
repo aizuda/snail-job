@@ -2,7 +2,7 @@ package com.aizuda.easy.retry.server.service.impl;
 
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.HashUtil;
-import com.aizuda.easy.retry.common.core.enums.IdGeneratorMode;
+import com.aizuda.easy.retry.server.enums.IdGeneratorMode;
 import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.GroupConfigMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.NotifyConfigMapper;

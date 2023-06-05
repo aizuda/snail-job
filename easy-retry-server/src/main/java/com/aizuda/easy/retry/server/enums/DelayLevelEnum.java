@@ -1,6 +1,5 @@
-package com.aizuda.easy.retry.common.core.enums;
+package com.aizuda.easy.retry.server.enums;
 
-import com.aizuda.easy.retry.common.core.exception.EasyRetryCommonException;
 import lombok.Getter;
 
 import java.time.temporal.ChronoUnit;

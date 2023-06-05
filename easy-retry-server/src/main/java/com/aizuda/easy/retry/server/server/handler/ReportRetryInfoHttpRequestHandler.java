@@ -3,7 +3,7 @@ package com.aizuda.easy.retry.server.server.handler;
 import cn.hutool.core.net.url.UrlQuery;
 import com.aizuda.easy.retry.server.model.dto.RetryTaskDTO;
 import com.aizuda.easy.retry.server.service.RetryService;
-import com.aizuda.easy.retry.common.core.enums.StatusEnum;
+import com.aizuda.easy.retry.server.enums.StatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.model.NettyResult;
 import com.aizuda.easy.retry.common.core.model.EasyRetryRequest;

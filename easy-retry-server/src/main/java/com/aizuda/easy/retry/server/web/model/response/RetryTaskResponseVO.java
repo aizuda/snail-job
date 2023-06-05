@@ -36,6 +36,8 @@ public class RetryTaskResponseVO {
 
     private Integer retryStatus;
 
+    private Integer taskType;
+
     private LocalDateTime createDt;
 
     private LocalDateTime updateDt;

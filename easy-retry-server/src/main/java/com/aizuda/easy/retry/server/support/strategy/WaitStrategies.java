@@ -7,7 +7,7 @@ import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.SceneConfig;
 import com.aizuda.easy.retry.server.persistence.support.ConfigAccess;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
-import com.aizuda.easy.retry.common.core.enums.DelayLevelEnum;
+import com.aizuda.easy.retry.server.enums.DelayLevelEnum;
 import com.aizuda.easy.retry.common.core.util.CronExpression;
 import com.google.common.base.Preconditions;
 import com.aizuda.easy.retry.server.support.RetryContext;
