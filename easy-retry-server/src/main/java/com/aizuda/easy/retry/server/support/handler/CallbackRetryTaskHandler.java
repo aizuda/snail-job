@@ -3,7 +3,7 @@ package com.aizuda.easy.retry.server.support.handler;
 import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
-import com.aizuda.easy.retry.common.core.enums.TaskTypeEnum;
+import com.aizuda.easy.retry.server.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask;
 import com.aizuda.easy.retry.server.persistence.support.RetryTaskAccess;
@@ -35,13 +35,14 @@ public class CallbackRetryTaskHandler {
         RetryTask callbackRetryTask = RetryTaskConverter.INSTANCE.toRetryTask(retryTask);
 
         callbackRetryTask.setTaskType(TaskTypeEnum.CALLBACK.getType());
-        retryTask.setUniqueId(SystemConstants.CALL_BACK.CB_ + retryTask.getUniqueId());
-        retryTask.setRetryStatus(RetryStatusEnum.RUNNING.getStatus());
-        retryTask.setRetryCount(0);
-        retryTask.setCreateDt(LocalDateTime.now());
-        retryTask.setUpdateDt(LocalDateTime.now());
+        callbackRetryTask.setId(null);
+        callbackRetryTask.setUniqueId(SystemConstants.CALL_BACK.CB_ + retryTask.getUniqueId());
+        callbackRetryTask.setRetryStatus(RetryStatusEnum.RUNNING.getStatus());
+        callbackRetryTask.setRetryCount(0);
+        callbackRetryTask.setCreateDt(LocalDateTime.now());
+        callbackRetryTask.setUpdateDt(LocalDateTime.now());
 
-        retryTask.setNextTriggerAt(WaitStrategies.randomWait(1, TimeUnit.SECONDS, 60, TimeUnit.SECONDS).computeRetryTime(null));
+        callbackRetryTask.setNextTriggerAt(WaitStrategies.randomWait(1, TimeUnit.SECONDS, 60, TimeUnit.SECONDS).computeRetryTime(null));
 
         Assert.isTrue(1 == retryTaskAccess.saveRetryTask(callbackRetryTask), () -> new EasyRetryServerException("failed to report data"));
 

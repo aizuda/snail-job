@@ -1,7 +1,7 @@
 package com.aizuda.easy.retry.server.support.strategy;
 
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
-import com.aizuda.easy.retry.common.core.enums.TaskTypeEnum;
+import com.aizuda.easy.retry.server.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.SceneConfig;
@@ -12,7 +12,6 @@ import com.aizuda.easy.retry.common.core.util.CronExpression;
 import com.google.common.base.Preconditions;
 import com.aizuda.easy.retry.server.support.RetryContext;
 import com.aizuda.easy.retry.server.support.WaitStrategy;
-import com.aizuda.easy.retry.server.support.context.MaxAttemptsPersistenceRetryContext;
 import lombok.Data;
 import lombok.Getter;
 

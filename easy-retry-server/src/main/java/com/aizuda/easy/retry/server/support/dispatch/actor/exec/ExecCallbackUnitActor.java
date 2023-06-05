@@ -6,6 +6,7 @@ import com.aizuda.easy.retry.client.model.DispatchRetryDTO;
 import com.aizuda.easy.retry.client.model.DispatchRetryResultDTO;
 import com.aizuda.easy.retry.client.model.RetryCallbackDTO;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
+import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.model.EasyRetryHeaders;
 import com.aizuda.easy.retry.common.core.model.Result;
@@ -78,7 +79,7 @@ public class ExecCallbackUnitActor extends AbstractActor  {
                         retryTaskLog.setErrorMessage(context.getException().getMessage());
                     }
                 } else {
-                    retryTaskLog.setErrorMessage("暂无可用的客户端POD");
+                    retryTaskLog.setErrorMessage("There are currently no available client PODs.");
                 }
 
             }catch (Exception e) {
@@ -131,7 +132,7 @@ public class ExecCallbackUnitActor extends AbstractActor  {
         Result result = restTemplate.postForObject(format, requestEntity, Result.class);
         LogUtils.info(log, "回调请求客户端 response:[{}}] ", JsonUtil.toJsonString(result));
 
-        if (1 != result.getStatus()  && StringUtils.isNotBlank(result.getMessage())) {
+        if (StatusEnum.YES.getStatus() != result.getStatus()  && StringUtils.isNotBlank(result.getMessage())) {
             retryTaskLog.setErrorMessage(result.getMessage());
         } else {
             DispatchRetryResultDTO data = JsonUtil.parseObject(JsonUtil.toJsonString(result.getData()), DispatchRetryResultDTO.class);

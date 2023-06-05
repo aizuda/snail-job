@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.server.support.dispatch;
 
 import akka.actor.ActorRef;
 import com.aizuda.easy.retry.common.core.enums.NodeTypeEnum;
+import com.aizuda.easy.retry.server.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.config.SystemProperties;
@@ -23,11 +24,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -49,14 +47,6 @@ public class DispatchService implements Lifecycle {
      */
     private final ScheduledExecutorService dispatchService = Executors
         .newSingleThreadScheduledExecutor(r -> new Thread(r, "DispatchService"));
-
-    /**
-     * 缓存待拉取数据的起点时间
-     * <p>
-     * MAX_ID_MAP[key] = group 的 idHash MAX_ID_MAP[value] = retry_task的 create_at时间
-     */
-    public static final Map<String, LocalDateTime> LAST_AT_MAP = new HashMap<>();
-    public static final Map<String, LocalDateTime> LAST_AT_CALL_BACK_MAP = new HashMap<>();
 
     /**
      * 调度时长
@@ -87,7 +77,9 @@ public class DispatchService implements Lifecycle {
                 List<GroupConfig> currentHostGroupList = getCurrentHostGroupList();
                 if (!CollectionUtils.isEmpty(currentHostGroupList)) {
                     for (GroupConfig groupConfigContext : currentHostGroupList) {
-                        produceScanActorTask(groupConfigContext);
+                        ScanTaskDTO scanTaskDTO = new ScanTaskDTO();
+                        scanTaskDTO.setGroupName(groupConfigContext.getGroupName());
+                        produceScanActorTask(scanTaskDTO);
                     }
                 }
 
@@ -102,19 +94,23 @@ public class DispatchService implements Lifecycle {
     /**
      * 扫描任务生成器
      *
-     * @param groupConfig {@link  GroupConfig} 组上下文
+     * @param scanTaskDTO {@link  GroupConfig} 组上下文
      */
-    private void produceScanActorTask(GroupConfig groupConfig) {
+    private void produceScanActorTask(ScanTaskDTO scanTaskDTO) {
 
-        String groupName = groupConfig.getGroupName();
-
-        ActorRef scanActorRef = cacheActorRef(groupName);
+        String groupName = scanTaskDTO.getGroupName();
 
         // 缓存按照
         cacheRateLimiter(groupName);
 
-        // rebalance 和 group scan 流程合一
-        scanActorRef.tell(groupConfig, scanActorRef);
+        // 扫描重试数据
+        ActorRef scanRetryActorRef = cacheActorRef(groupName, TaskTypeEnum.RETRY);
+        scanRetryActorRef.tell(scanTaskDTO, scanRetryActorRef);
+
+        // 扫描回调数据
+        ActorRef scanCallbackActorRef = cacheActorRef(groupName, TaskTypeEnum.CALLBACK);
+        scanCallbackActorRef.tell(scanTaskDTO, scanCallbackActorRef);
+
     }
 
     /**
@@ -136,13 +132,12 @@ public class DispatchService implements Lifecycle {
     /**
      * 缓存Actor对象
      */
-    private ActorRef cacheActorRef(String groupName) {
-        Cache<String, ActorRef> actorRefCache = CacheGroupScanActor.getAll();
-        ActorRef scanActorRef = actorRefCache.getIfPresent(groupName);
+    private ActorRef cacheActorRef(String groupName, TaskTypeEnum typeEnum) {
+        ActorRef scanActorRef = CacheGroupScanActor.get(groupName, typeEnum);
         if (Objects.isNull(scanActorRef)) {
-            scanActorRef = ActorGenerator.scanGroupActor();
+            scanActorRef = typeEnum.getActorRef();
             // 缓存扫描器actor
-            actorRefCache.put(groupName, scanActorRef);
+            CacheGroupScanActor.put(groupName, typeEnum, scanActorRef);
         }
         return scanActorRef;
     }

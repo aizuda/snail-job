@@ -37,7 +37,7 @@ public class MybatisRetryTaskAccess extends AbstractRetryTaskAccess {
                         .eq(RetryTask::getRetryStatus, RetryStatusEnum.RUNNING.getStatus())
                         .eq(RetryTask::getGroupName, groupName)
                         .eq(RetryTask::getTaskType, taskType)
-                        .ge(RetryTask::getCreateDt, lastAt)
+                        .gt(RetryTask::getCreateDt, lastAt)
                         .orderByAsc(RetryTask::getCreateDt)).getRecords();
     }
 

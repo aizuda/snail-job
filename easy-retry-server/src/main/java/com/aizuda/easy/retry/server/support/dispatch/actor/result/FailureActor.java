@@ -1,16 +1,14 @@
 package com.aizuda.easy.retry.server.support.dispatch.actor.result;
 
 import akka.actor.AbstractActor;
-import akka.actor.ActorRef;
 import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
-import com.aizuda.easy.retry.common.core.enums.TaskTypeEnum;
+import com.aizuda.easy.retry.server.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.support.handler.CallbackRetryTaskHandler;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
-import com.aizuda.easy.retry.server.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskLogMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask;
@@ -30,7 +28,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
-import java.util.Objects;
 
 /**
  * 重试完成执行器
@@ -81,12 +78,12 @@ public class FailureActor extends AbstractActor {
                             maxRetryCount = SystemConstants.CALL_BACK.MAX_RETRY_COUNT;
                         } else {
                             maxRetryCount = sceneConfig.getMaxRetryCount();
-                            // 创建一个回调任务
-                            callbackRetryTaskHandler.create(retryTask);
                         }
 
                         if (maxRetryCount <= retryTask.getRetryCount()) {
                             retryTask.setRetryStatus(RetryStatusEnum.MAX_RETRY_COUNT.getStatus());
+                            // 创建一个回调任务
+                            callbackRetryTaskHandler.create(retryTask);
                         }
 
                         retryTaskAccess.updateRetryTask(retryTask);

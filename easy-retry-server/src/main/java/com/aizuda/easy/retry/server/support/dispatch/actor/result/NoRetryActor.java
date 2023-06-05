@@ -4,8 +4,8 @@ import akka.actor.AbstractActor;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask;
 import com.aizuda.easy.retry.server.persistence.support.RetryTaskAccess;
+import com.aizuda.easy.retry.server.support.RetryContext;
 import com.aizuda.easy.retry.server.support.WaitStrategy;
-import com.aizuda.easy.retry.server.support.context.MaxAttemptsPersistenceRetryContext;
 import com.aizuda.easy.retry.server.support.retry.RetryExecutor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +19,9 @@ import org.springframework.stereotype.Component;
  *
  * @author: www.byteblogs.com
  * @date : 2022-04-14 16:11
+ * @since 1.0.0
  */
-@Component("NoRetryActor")
+@Component(NoRetryActor.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Slf4j
 public class NoRetryActor extends AbstractActor {
@@ -35,7 +36,7 @@ public class NoRetryActor extends AbstractActor {
     public Receive createReceive() {
         return receiveBuilder().match(RetryExecutor.class, retryExecutor -> {
 
-            MaxAttemptsPersistenceRetryContext retryContext = (MaxAttemptsPersistenceRetryContext) retryExecutor.getRetryContext();
+            RetryContext retryContext = retryExecutor.getRetryContext();
             RetryTask retryTask = retryContext.getRetryTask();
             WaitStrategy waitStrategy = retryContext.getWaitStrategy();
             retryTask.setNextTriggerAt(waitStrategy.computeRetryTime(retryContext));

@@ -46,9 +46,13 @@ public interface RetryContext<V> {
      */
     void setWaitStrategy(WaitStrategy waitStrategy);
 
+    WaitStrategy getWaitStrategy();
+    
     ServerNode getServerNode();
 
-    Set<String>  getSceneBlacklist();
+    Set<String> getSceneBlacklist();
 
     V getCallResult();
+
+
 }

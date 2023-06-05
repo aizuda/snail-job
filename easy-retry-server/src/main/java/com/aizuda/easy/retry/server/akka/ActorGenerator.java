@@ -7,6 +7,8 @@ import com.aizuda.easy.retry.server.support.dispatch.actor.exec.ExecUnitActor;
 import com.aizuda.easy.retry.server.support.dispatch.actor.result.FailureActor;
 import com.aizuda.easy.retry.server.support.dispatch.actor.result.FinishActor;
 import com.aizuda.easy.retry.server.support.dispatch.actor.result.NoRetryActor;
+import com.aizuda.easy.retry.server.support.dispatch.actor.scan.AbstractScanGroup;
+import com.aizuda.easy.retry.server.support.dispatch.actor.scan.ScanCallbackGroupActor;
 import com.aizuda.easy.retry.server.support.dispatch.actor.scan.ScanGroupActor;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 
@@ -52,7 +54,7 @@ public class ActorGenerator {
      *
      * @return actor 引用
      */
-    public static ActorRef callbackRetryResultActor() {
+    public static ActorRef execCallbackUnitActor() {
         return getDispatchResultActorSystem().actorOf(getSpringExtension().props(ExecCallbackUnitActor.BEAN_NAME));
     }
 
@@ -72,6 +74,15 @@ public class ActorGenerator {
      */
     public static ActorRef scanGroupActor() {
         return getDispatchRetryActorSystem().actorOf(getSpringExtension().props(ScanGroupActor.BEAN_NAME));
+    }
+
+    /**
+     * 生成扫描重试数据的actor
+     *
+     * @return actor 引用
+     */
+    public static ActorRef scanCallbackGroupActor() {
+        return getDispatchRetryActorSystem().actorOf(getSpringExtension().props(ScanCallbackGroupActor.BEAN_NAME));
     }
 
     public static SpringExtension getSpringExtension() {

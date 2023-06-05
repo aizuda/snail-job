@@ -8,6 +8,8 @@ import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * BitSet幂等校验器
@@ -21,7 +23,7 @@ public class BitSetIdempotentStrategyHandler implements IdempotentStrategy<Strin
      * BIT_SET_MAP[key] : group
      * BIT_SET_MAP[value] : BitSet
      */
-    public static final Map<String, BitSet> BIT_SET_MAP = new HashMap<>();
+    public static final ConcurrentMap<String, BitSet> BIT_SET_MAP = new ConcurrentHashMap<>();
 
     @Override
     public boolean set(String groupId, Integer key) {

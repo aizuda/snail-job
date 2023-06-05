@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.server.support.cache;
 
 import akka.actor.ActorRef;
+import com.aizuda.easy.retry.server.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -28,8 +29,17 @@ public class CacheGroupScanActor implements Lifecycle {
      *
      * @return 缓存对象
      */
-    public static Cache<String, ActorRef> getAll() {
-        return CACHE;
+    public static ActorRef get(String groupName, TaskTypeEnum typeEnum) {
+       return CACHE.getIfPresent(groupName.concat(typeEnum.name()));
+    }
+
+    /**
+     * 获取所有缓存
+     *
+     * @return 缓存对象
+     */
+    public static void put(String groupName, TaskTypeEnum typeEnum, ActorRef actorRef) {
+         CACHE.put(groupName.concat(typeEnum.name()), actorRef);
     }
 
     @Override
@@ -44,5 +54,6 @@ public class CacheGroupScanActor implements Lifecycle {
     @Override
     public void close() {
         LogUtils.info(log, "CacheGroupScanActor stop");
+        CACHE.invalidateAll();
     }
 }
