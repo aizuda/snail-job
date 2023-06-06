@@ -31,18 +31,20 @@
         </chart-card>
       </a-col>
       <a-col :sm="24" :md="12" :xl="8" :style="{ marginBottom: '24px' }">
-        <chart-card :loading="loading" title="总在线机器" :total="countActivePodQuantity.total">
-          <a-tooltip :title="$t('dashboard.analysis.introduce')" slot="action">
-            <a-icon type="info-circle-o" />
-          </a-tooltip>
-          <div>
-            <span slot="term">客户端</span>
-            {{ countActivePodQuantity.clientTotal }}
-            <a-divider type="vertical" />
-            <span slot="term">服务端</span>
-            {{ countActivePodQuantity.serverTotal }}
-          </div>
-        </chart-card>
+        <a href="#" @click="jumpPosList">
+          <chart-card :loading="loading" title="总在线机器" :total="countActivePodQuantity.total">
+            <a-tooltip :title="$t('dashboard.analysis.introduce')" slot="action" >
+              <a-icon type="info-circle-o" />
+            </a-tooltip>
+            <div>
+              <span slot="term">客户端</span>
+              {{ countActivePodQuantity.clientTotal }}
+              <a-divider type="vertical" />
+              <span slot="term">服务端</span>
+              {{ countActivePodQuantity.serverTotal }}
+            </div>
+          </chart-card>
+        </a>
       </a-col>
     </a-row>
 
@@ -137,6 +139,9 @@ export default {
   },
   computed: {},
   methods: {
+    jumpPosList () {
+      this.$router.push({ path: '/dashboard/pods' })
+    },
     dataHandler (type) {
       this.$refs.viewChart.getLineDispatchQuantity(this.value, type)
       this.getRankSceneQuantity(this.value, type)

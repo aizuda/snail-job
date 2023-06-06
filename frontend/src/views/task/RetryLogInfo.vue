@@ -26,9 +26,13 @@
         <a-descriptions-item label="执行时间">
           {{ parseDate( retryInfo.createDt) }}
         </a-descriptions-item>
-        <a-descriptions-item label="当前重试状态">
+        <a-descriptions-item label="当前重试状态 | 数据类型">
           <a-tag color="red">
             {{ retryStatus[retryInfo.retryStatus] }}
+          </a-tag>
+          <a-divider type="vertical" />
+          <a-tag :color="taskType[retryInfo.taskType].color">
+            {{ taskType[retryInfo.taskType].name }}
           </a-tag>
         </a-descriptions-item>
         <a-descriptions-item label="执行器名称" :span="3">
@@ -61,6 +65,16 @@ export default {
         '0': '处理中',
         '1': '处理成功',
         '2': '最大次数'
+      },
+      taskType: {
+        '1': {
+          'name': '重试数据',
+          'color': '#d06892'
+        },
+        '2': {
+          'name': '回调数据',
+          'color': '#f5a22d'
+        }
       }
     }
   },

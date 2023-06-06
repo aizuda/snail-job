@@ -29,6 +29,12 @@ export const asyncRouterMap = [
             name: 'Analysis',
             component: () => import('@/views/dashboard/Analysis'),
             meta: { title: 'menu.dashboard.analysis', keepAlive: true, permission: ['dashboard'] }
+          },
+          {
+            path: '/dashboard/pods',
+            name: 'PodList',
+            component: () => import('@/views/dashboard/PodList'),
+            meta: { title: 'menu.dashboard.analysis', keepAlive: true, permission: ['dashboard'] }
           }
         ]
       },

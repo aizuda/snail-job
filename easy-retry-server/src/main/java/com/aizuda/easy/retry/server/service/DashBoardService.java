@@ -1,8 +1,11 @@
 package com.aizuda.easy.retry.server.service;
 
+import com.aizuda.easy.retry.server.web.model.base.PageResult;
+import com.aizuda.easy.retry.server.web.model.request.ServerNodeQueryVO;
 import com.aizuda.easy.retry.server.web.model.response.ActivePodQuantityResponseVO;
 import com.aizuda.easy.retry.server.web.model.response.DispatchQuantityResponseVO;
 import com.aizuda.easy.retry.server.web.model.response.SceneQuantityRankResponseVO;
+import com.aizuda.easy.retry.server.web.model.response.ServerNodeResponseVO;
 import com.aizuda.easy.retry.server.web.model.response.TaskQuantityResponseVO;
 
 import java.util.List;
@@ -23,4 +26,5 @@ public interface DashBoardService {
 
     List<DispatchQuantityResponseVO> lineDispatchQuantity(String groupName, String type, String startTime, String endTime);
 
+    PageResult<List<ServerNodeResponseVO>> pods(ServerNodeQueryVO serverNodeQueryVO);
 }

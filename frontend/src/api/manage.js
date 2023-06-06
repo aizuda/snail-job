@@ -36,10 +36,19 @@ const api = {
   rankSceneQuantity: '/dashboard/scene/rank',
   lineDispatchQuantity: '/dashboard/dispatch/line',
   totalPartition: '/group/partition',
-  systemVersion: '/system/version'
+  systemVersion: '/system/version',
+  pods: '/dashboard/pods'
 }
 
 export default api
+
+export function pods (parameter) {
+  return request({
+    url: api.pods,
+    method: 'get',
+    params: parameter
+  })
+}
 
 export function systemVersion () {
   return request({

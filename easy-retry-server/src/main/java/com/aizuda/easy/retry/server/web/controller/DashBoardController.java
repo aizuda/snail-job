@@ -1,10 +1,13 @@
 package com.aizuda.easy.retry.server.web.controller;
 
 import com.aizuda.easy.retry.server.service.DashBoardService;
+import com.aizuda.easy.retry.server.web.model.base.PageResult;
+import com.aizuda.easy.retry.server.web.model.request.ServerNodeQueryVO;
 import com.aizuda.easy.retry.server.web.model.response.ActivePodQuantityResponseVO;
 import com.aizuda.easy.retry.server.web.model.response.DispatchQuantityResponseVO;
 import com.aizuda.easy.retry.server.web.model.response.SceneQuantityRankResponseVO;
 import com.aizuda.easy.retry.server.web.annotation.LoginRequired;
+import com.aizuda.easy.retry.server.web.model.response.ServerNodeResponseVO;
 import com.aizuda.easy.retry.server.web.model.response.TaskQuantityResponseVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -55,7 +58,7 @@ public class DashBoardController {
         return dashBoardService.rankSceneQuantity(groupName, type, startTime, endTime);
     }
 
-    //    @LoginRequired
+    @LoginRequired
     @GetMapping("/dispatch/line")
     public List<DispatchQuantityResponseVO> lineDispatchQuantity(@RequestParam(value = "groupName", required = false)
                                                                          String groupName,
@@ -65,4 +68,12 @@ public class DashBoardController {
     ) {
         return dashBoardService.lineDispatchQuantity(groupName, type, startTime, endTime);
     }
+
+    @LoginRequired
+    @GetMapping("/pods")
+    public PageResult<List<ServerNodeResponseVO>> pods(ServerNodeQueryVO serverNodeQueryVO) {
+        return dashBoardService.pods(serverNodeQueryVO);
+    }
+
+
 }

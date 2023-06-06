@@ -4,6 +4,10 @@ import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskLogMappe
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.ServerNodeMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTaskLog;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.ServerNode;
+import com.aizuda.easy.retry.server.service.convert.ServerNodeResponseVOConverter;
+import com.aizuda.easy.retry.server.web.model.base.PageResult;
+import com.aizuda.easy.retry.server.web.model.request.ServerNodeQueryVO;
+import com.aizuda.easy.retry.server.web.model.response.ServerNodeResponseVO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.aizuda.easy.retry.common.core.enums.NodeTypeEnum;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
@@ -13,6 +17,7 @@ import com.aizuda.easy.retry.server.web.model.response.ActivePodQuantityResponse
 import com.aizuda.easy.retry.server.web.model.response.DispatchQuantityResponseVO;
 import com.aizuda.easy.retry.server.web.model.response.SceneQuantityRankResponseVO;
 import com.aizuda.easy.retry.server.web.model.response.TaskQuantityResponseVO;
+import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,6 +35,7 @@ import java.util.stream.Collectors;
 /**
  * @author: www.byteblogs.com
  * @date : 2022-04-22 20:19
+ * @since 1.0.0
  */
 @Service
 public class DashBoardServiceImpl implements DashBoardService {
@@ -140,6 +146,21 @@ public class DashBoardServiceImpl implements DashBoardService {
         dateTypeEnum.getConsumer().accept(totalDispatchQuantityResponseList);
 
         return totalDispatchQuantityResponseList.stream().sorted(Comparator.comparing(DispatchQuantityResponseVO::getCreateDt)).collect(Collectors.toList());
+    }
+
+    @Override
+    public PageResult<List<ServerNodeResponseVO>> pods(ServerNodeQueryVO queryVO) {
+        PageDTO<ServerNode> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
+
+        LambdaQueryWrapper<ServerNode> serverNodeLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        if (StringUtils.isNotBlank(queryVO.getGroupName())) {
+            serverNodeLambdaQueryWrapper.eq(ServerNode::getGroupName, queryVO.getGroupName());
+        }
+
+        PageDTO<ServerNode> serverNodePageDTO = serverNodeMapper.selectPage(pageDTO, serverNodeLambdaQueryWrapper.orderByDesc(ServerNode::getNodeType));
+
+        List<ServerNodeResponseVO> serverNodeResponseVOS = ServerNodeResponseVOConverter.INSTANCE.toServerNodeResponseVO(serverNodePageDTO.getRecords());
+        return new PageResult<>(serverNodePageDTO, serverNodeResponseVOS);
     }
 
 }
