@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.server.persistence.support.processor;
 
 import com.aizuda.easy.retry.server.model.dto.ConfigDTO;
+import com.aizuda.easy.retry.server.model.dto.ConfigDTO.Scene;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.GroupConfig;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.NotifyConfig;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.SceneConfig;
@@ -56,6 +57,11 @@ public class ConfigAccessProcessor implements ConfigAccess {
     }
 
     @Override
+    public List<SceneConfig> getSceneConfigByGroupName(final String groupName) {
+        return configAccess.getSceneConfigByGroupName(groupName);
+    }
+
+    @Override
     public List<GroupConfig> getAllOpenGroupConfig() {
         return configAccess.getAllOpenGroupConfig();
     }
@@ -107,6 +113,18 @@ public class ConfigAccessProcessor implements ConfigAccess {
         }
 
         configDTO.setNotifyList(notifies);
+
+        List<SceneConfig> sceneConfig = getSceneConfigByGroupName(groupName);
+
+        List<Scene> sceneList = new ArrayList<>();
+        for (SceneConfig config : sceneConfig) {
+            Scene scene = new Scene();
+            scene.setSceneName(config.getSceneName());
+            scene.setDdl(config.getDeadlineRequest());
+            sceneList.add(scene);
+        }
+
+        configDTO.setSceneList(sceneList);
         return configDTO;
     }
 

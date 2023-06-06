@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.common.core.model;
 
+import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import lombok.Data;
 
 /**
@@ -24,5 +25,5 @@ public class EasyRetryHeaders {
     /**
      * 调用链超时时间 单位毫秒(ms)
      */
-    private long ddl = 60000;
+    private long ddl = SystemConstants.DEFAULT_DDL;
 }

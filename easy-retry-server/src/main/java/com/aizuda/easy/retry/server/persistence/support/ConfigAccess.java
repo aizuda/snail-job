@@ -53,9 +53,17 @@ public interface ConfigAccess {
      * 获取通知配置
      *
      * @param groupName     组名称
-     * @return {@link NotifyConfig} 场景配置
+     * @return {@link NotifyConfig} 通知配置
      */
     List<NotifyConfig> getNotifyListConfigByGroupName(String groupName);
+
+    /**
+     * 获取场景配置
+     *
+     * @param groupName     组名称
+     * @return {@link SceneConfig} 场景配置
+     */
+    List<SceneConfig> getSceneConfigByGroupName(String groupName);
 
     /**
      * 获取已开启的组配置信息

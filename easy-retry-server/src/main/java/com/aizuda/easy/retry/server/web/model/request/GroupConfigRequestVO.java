@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.server.web.model.request;
 
+import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.server.enums.IdGeneratorMode;
 import lombok.Data;
 import org.hibernate.validator.constraints.NotBlank;
@@ -120,7 +121,7 @@ public class GroupConfigRequestVO {
          * Deadline Request 调用链超时 单位毫秒
          * 默认值为 60*10*1000
          */
-        @Max(message = "最大60000毫秒", value = 60000)
+        @Max(message = "最大60000毫秒", value = SystemConstants.DEFAULT_DDL)
         @Min(message = "最小100ms", value = 100)
         private Long deadlineRequest;
 

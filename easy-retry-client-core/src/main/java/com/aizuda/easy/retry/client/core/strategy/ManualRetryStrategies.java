@@ -116,7 +116,7 @@ public class ManualRetryStrategies extends AbstractRetryStrategies {
                     @Override
                     public <V> void onRetry(Attempt<V> attempt) {
                         if (attempt.hasResult()) {
-                            LogUtils.error(log, "easy-retry 手动创建重试数据成功，第[{}]次调度", attempt.getAttemptNumber());
+                            LogUtils.info(log, "easy-retry 手动创建重试数据成功，第[{}]次调度", attempt.getAttemptNumber());
                         }
 
                         if (attempt.hasException()) {

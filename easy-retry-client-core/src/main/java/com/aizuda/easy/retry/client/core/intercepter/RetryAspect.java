@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.client.core.intercepter;
 
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.client.core.cache.GroupVersionCache;
 import com.aizuda.easy.retry.client.core.config.EasyRetryProperties;
@@ -11,10 +12,13 @@ import com.aizuda.easy.retry.client.core.retryer.RetryerResultContext;
 import com.aizuda.easy.retry.common.core.alarm.Alarm;
 import com.aizuda.easy.retry.common.core.alarm.AlarmContext;
 import com.aizuda.easy.retry.common.core.alarm.AltinAlarmFactory;
+import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.NotifySceneEnum;
 import com.aizuda.easy.retry.common.core.enums.RetryResultStatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.core.model.EasyRetryHeaders;
 import com.aizuda.easy.retry.common.core.util.EnvironmentUtils;
+import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.model.dto.ConfigDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -136,6 +140,9 @@ public class RetryAspect implements Ordered {
 
         try {
 
+            // 标识重试流量
+            initHeaders(retryable);
+
             RetryerResultContext context = retryStrategy.openRetry(retryable.scene(), executorClassName, point.getArgs());
             LogUtils.info(log,"local retry result. traceId:[{}] message:[{}]", traceId, context);
             if (RetryResultStatusEnum.SUCCESS.getStatus().equals(context.getRetryResultStatusEnum().getStatus())) {
@@ -154,6 +161,15 @@ public class RetryAspect implements Ordered {
         }
 
         return null;
+    }
+
+    private void initHeaders(final Retryable retryable) {
+
+        EasyRetryHeaders easyRetryHeaders = new EasyRetryHeaders();
+        easyRetryHeaders.setEasyRetry(Boolean.TRUE);
+        easyRetryHeaders.setEasyRetryId(IdUtil.getSnowflakeNextIdStr());
+        easyRetryHeaders.setDdl(GroupVersionCache.getDdl(retryable.scene()));
+        RetrySiteSnapshot.setRetryHeader(easyRetryHeaders);
     }
 
     private void sendMessage(Exception e) {

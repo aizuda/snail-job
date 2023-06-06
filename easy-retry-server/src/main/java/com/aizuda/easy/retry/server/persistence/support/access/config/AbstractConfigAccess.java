@@ -38,6 +38,11 @@ public abstract class AbstractConfigAccess implements ConfigAccess {
                 .eq(SceneConfig::getGroupName, groupName).eq(SceneConfig::getSceneName, sceneName));
     }
 
+    protected List<SceneConfig> getSceneConfigs(String groupName) {
+        return sceneConfigMapper.selectList(new LambdaQueryWrapper<SceneConfig>()
+            .eq(SceneConfig::getGroupName, groupName));
+    }
+
     protected GroupConfig getByGroupName(String groupName) {
         return groupConfigMapper.selectOne(new LambdaQueryWrapper<GroupConfig>().eq(GroupConfig::getGroupName, groupName));
     }

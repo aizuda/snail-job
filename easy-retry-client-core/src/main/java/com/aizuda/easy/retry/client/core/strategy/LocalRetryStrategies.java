@@ -148,7 +148,7 @@ public class LocalRetryStrategies extends AbstractRetryStrategies {
                 return Collections.singletonList(new RetryListener() {
                     @Override
                     public <V> void onRetry(Attempt<V> attempt) {
-                        LogUtils.error(log,"easy-retry 本地重试，第[{}]次调度", attempt.getAttemptNumber());
+                        LogUtils.info(log,"easy-retry 本地重试，第[{}]次调度", attempt.getAttemptNumber());
                     }
                 });
             }

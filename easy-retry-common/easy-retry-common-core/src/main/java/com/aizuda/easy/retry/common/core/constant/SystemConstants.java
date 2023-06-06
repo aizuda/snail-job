@@ -25,6 +25,11 @@ public interface SystemConstants {
     String EASY_RETRY_STATUS_CODE = "519";
 
     /**
+     * 默认的调用链超时时间 单位毫秒(ms)
+     */
+    long DEFAULT_DDL = 60000L;
+
+    /**
      * 心跳
      */
     interface BEAT {

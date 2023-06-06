@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.server.model.dto;
 
+import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.AlarmTypeEnum;
 import com.aizuda.easy.retry.common.core.enums.NotifySceneEnum;
 import lombok.Data;
@@ -37,6 +38,16 @@ public class ConfigDTO {
 
     @Data
     public static class Scene {
+
+        /**
+         * 场景名称
+         */
+        private String sceneName;
+
+        /**
+         * 调用链超时时间 单位毫秒(ms)
+         */
+        private long ddl = SystemConstants.DEFAULT_DDL;
     }
 
     @Data

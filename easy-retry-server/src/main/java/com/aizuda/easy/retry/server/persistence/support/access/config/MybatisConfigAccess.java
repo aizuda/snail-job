@@ -49,6 +49,11 @@ public class MybatisConfigAccess extends AbstractConfigAccess {
     }
 
     @Override
+    public List<SceneConfig> getSceneConfigByGroupName(String groupName) {
+        return getSceneConfigs(groupName);
+    }
+
+    @Override
     public List<GroupConfig> getAllOpenGroupConfig() {
         return getAllConfigGroupList().stream().filter(i-> StatusEnum.YES.getStatus().equals(i.getGroupStatus())).collect(Collectors.toList());
     }
