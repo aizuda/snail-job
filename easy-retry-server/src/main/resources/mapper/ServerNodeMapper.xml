@@ -23,13 +23,7 @@
             #{hostPort,jdbcType=INTEGER},
             #{expireAt,jdbcType=TIMESTAMP}, #{nodeType,jdbcType=TINYINT},  #{contextPath,jdbcType=VARCHAR},  #{createDt,jdbcType=TIMESTAMP}
             ) ON DUPLICATE KEY UPDATE
-      host_id = values(`host_id`),
-      host_ip = values(`host_ip`),
-      host_port = values(`host_port`),
-      expire_at = values(`expire_at`),
-      node_type = values(`node_type`),
-      create_dt = values(`create_dt`),
-      context_path = values(`context_path`)
+      expire_at = values(`expire_at`)
   </insert>
   <delete id="deleteByExpireAt">
     delete from server_node
