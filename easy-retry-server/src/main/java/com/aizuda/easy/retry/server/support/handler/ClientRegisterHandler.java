@@ -21,6 +21,7 @@ import java.util.Objects;
 import java.util.concurrent.*;
 
 /**
+ * todo 待优化
  * @author www.byteblogs.com
  * @date 2022-03-09
  * @since 2.0
@@ -33,8 +34,6 @@ public class ClientRegisterHandler {
             new LinkedBlockingQueue<>(500), r -> new Thread(r, "CLIENT REGISTER THREAD"), (r, executor) -> LogUtils.error(log, "处理注册线程池已经超负荷运作"));
     public static final String URL = "http://{0}:{1}/{2}/retry/sync/version/v1";
 
-    @Autowired
-    private ServerNodeMapper serverNodeMapper;
     @Autowired
     private RestTemplate restTemplate;
     @Autowired

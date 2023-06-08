@@ -8,7 +8,7 @@ import com.aizuda.easy.retry.server.persistence.mybatis.po.ServerNode;
 import com.aizuda.easy.retry.server.persistence.support.ConfigAccess;
 import com.aizuda.easy.retry.server.service.RetryService;
 import com.aizuda.easy.retry.server.support.cache.CacheRegisterTable;
-import com.aizuda.easy.retry.server.support.handler.ServerRegisterNodeHandler;
+import com.aizuda.easy.retry.server.support.register.ServerRegister;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -49,14 +50,17 @@ public class ClearThreadSchedule {
     public void clearOfflineNode() {
 
         try {
-            LocalDateTime endTime = LocalDateTime.now().minusSeconds(ServerRegisterNodeHandler.DELAY_TIME * 2);
-            Set<ServerNode> allPods = CacheRegisterTable.getAllPods();
-            Set<ServerNode> waitOffline = allPods.stream().filter(serverNode -> serverNode.getExpireAt().isAfter(endTime)).collect(Collectors.toSet());
-            Set<String> podIds = waitOffline.stream().map(ServerNode::getHostId).collect(Collectors.toSet());
 
-            int delete = serverNodeMapper
-                .delete(new LambdaQueryWrapper<ServerNode>().in(ServerNode::getHostId, podIds));
-            Assert.isTrue(delete > 0, () -> new EasyRetryServerException("clearOfflineNode error"));
+            // TODO ING
+            serverNodeMapper.deleteByExpireAt(LocalDateTime.now().minusSeconds(ServerRegister.DELAY_TIME * 2));
+
+            LocalDateTime endTime = LocalDateTime.now().minusSeconds(ServerRegister.DELAY_TIME * 2);
+            Set<ServerNode> allPods = CacheRegisterTable.getAllPods();
+            Set<ServerNode> waitOffline = allPods.stream().filter(serverNode -> serverNode.getExpireAt().isBefore(endTime)).collect(Collectors.toSet());
+            Set<String> podIds = waitOffline.stream().map(ServerNode::getHostId).collect(Collectors.toSet());
+            if (CollectionUtils.isEmpty(podIds)) {
+                return;
+            }
 
             for (final ServerNode serverNode : waitOffline) {
                 CacheRegisterTable.remove(serverNode.getGroupName(), serverNode.getHostId());

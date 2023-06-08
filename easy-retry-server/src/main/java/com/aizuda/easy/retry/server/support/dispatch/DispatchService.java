@@ -1,41 +1,31 @@
 package com.aizuda.easy.retry.server.support.dispatch;
 
 import akka.actor.ActorRef;
-import com.aizuda.easy.retry.common.core.enums.NodeTypeEnum;
-import com.aizuda.easy.retry.server.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
-import com.aizuda.easy.retry.server.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.config.SystemProperties;
+import com.aizuda.easy.retry.server.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.ServerNodeMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.GroupConfig;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.ServerNode;
-import com.aizuda.easy.retry.server.persistence.support.ConfigAccess;
 import com.aizuda.easy.retry.server.support.Lifecycle;
-import com.aizuda.easy.retry.server.support.allocate.server.AllocateMessageQueueConsistentHash;
+import com.aizuda.easy.retry.server.support.cache.CacheConsumerGroup;
 import com.aizuda.easy.retry.server.support.cache.CacheGroupRateLimiter;
 import com.aizuda.easy.retry.server.support.cache.CacheGroupScanActor;
-import com.aizuda.easy.retry.server.support.cache.CacheRegisterTable;
 import com.aizuda.easy.retry.server.support.handler.ServerNodeBalance;
-import com.aizuda.easy.retry.server.support.handler.ServerRegisterNodeHandler;
-import com.aizuda.easy.retry.server.support.register.ServerRegister;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.google.common.cache.Cache;
 import com.google.common.util.concurrent.RateLimiter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * 分发器组件
@@ -65,9 +55,6 @@ public class DispatchService implements Lifecycle {
 
     @Autowired
     private ServerNodeMapper serverNodeMapper;
-
-    @Autowired
-    private ServerNodeBalance serverNodeBalance;
 
     @Autowired
     private SystemProperties systemProperties;
@@ -152,7 +139,7 @@ public class DispatchService implements Lifecycle {
      * @return {@link  GroupConfig} 组上下文
      */
     private Set<String> getCurrentHostGroupList() {
-        return serverNodeBalance.getLocalCidAll();
+        return CacheConsumerGroup.getAllPods();
     }
 
     @Override

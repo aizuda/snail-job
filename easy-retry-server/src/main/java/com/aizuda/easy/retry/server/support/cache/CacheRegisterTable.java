@@ -7,7 +7,9 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Map;
@@ -38,11 +40,15 @@ public class CacheRegisterTable implements Lifecycle {
      */
     public static Set<ServerNode> getAllPods() {
         ConcurrentMap<String, ConcurrentMap<String, ServerNode>> concurrentMap = CACHE.asMap();
+        if (CollectionUtils.isEmpty(concurrentMap)) {
+            return Collections.EMPTY_SET;
+        }
 
-        return (Set<ServerNode>) concurrentMap.values().stream().map(Map::values).reduce((s, y) -> {
-            Set<ServerNode> mergeSet = new HashSet<>(s);
-            mergeSet.addAll(y);
-            return mergeSet;
+        return concurrentMap.values().stream()
+                .map(stringServerNodeConcurrentMap -> new HashSet<>(stringServerNodeConcurrentMap.values()))
+                .reduce((s, y) -> {
+                    s.addAll(y);
+            return s;
         }).get();
 
     }
@@ -75,13 +81,16 @@ public class CacheRegisterTable implements Lifecycle {
      *
      * @return 缓存对象
      */
-    public static TreeSet<ServerNode> getServerNodeSet(String groupName) {
+    public static Set<ServerNode> getServerNodeSet(String groupName) {
         ConcurrentMap<String, ServerNode> concurrentMap = CACHE.getIfPresent(groupName);
+
+        Set<ServerNode> set = new TreeSet<>(Comparator.comparingInt(o -> o.getId().intValue()));
         if (Objects.isNull(concurrentMap)) {
-            return new TreeSet<>();
+            return set;
         }
 
-        return new TreeSet<>(Comparator.comparingInt(o -> o.getId().intValue()));
+        set.addAll(concurrentMap.values());
+        return set;
     }
 
     /**
@@ -90,7 +99,8 @@ public class CacheRegisterTable implements Lifecycle {
      * @return 缓存对象
      */
     public static Set<String> getPodIdSet(String groupName) {
-        return getServerNodeSet(groupName).stream().map(ServerNode::getHostId).collect(Collectors.toSet());
+        return getServerNodeSet(groupName).stream()
+                .map(ServerNode::getHostId).collect(Collectors.toSet());
     }
 
     /**
@@ -100,12 +110,16 @@ public class CacheRegisterTable implements Lifecycle {
      * @return 缓存对象
      */
     public static synchronized void addOrUpdate(String groupName, ServerNode serverNode) {
+
         ConcurrentMap<String, ServerNode> concurrentMap = CACHE.getIfPresent(groupName);
         if (Objects.isNull(concurrentMap)) {
+            LogUtils.info(log, "Add cache. groupName:[{}] hostId:[{}]", groupName, serverNode.getHostId());
             concurrentMap = new ConcurrentHashMap<>();
             CACHE.put(groupName, concurrentMap);
         }
 
+        LogUtils.info(log, "Update cache. groupName:[{}] hostId:[{}] hostIp:[{}]", groupName,
+                serverNode.getHostId(), serverNode.getExpireAt());
         concurrentMap.put(serverNode.getHostId(), serverNode);
     }
 
@@ -115,11 +129,8 @@ public class CacheRegisterTable implements Lifecycle {
             return;
         }
 
+        LogUtils.info(log, "Remove cache. groupName:[{}] hostId:[{}]", groupName, hostId);
         concurrentMap.remove(hostId);
-    }
-
-    public static void expirationElimination(String groupName, String hostId) {
-
     }
 
     @Override
@@ -129,6 +140,7 @@ public class CacheRegisterTable implements Lifecycle {
                 // 设置并发级别为cpu核心数
                 .concurrencyLevel(Runtime.getRuntime().availableProcessors())
                 .build();
+
     }
 
     @Override

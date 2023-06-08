@@ -28,15 +28,15 @@ import java.util.stream.Collectors;
 @Slf4j
 public class CacheConsumerGroup implements Lifecycle {
 
-    private static Cache<String /*groupName*/, String/*hostIp*/> CACHE;
+    private static Cache<String /*groupName*/, String/*groupName*/> CACHE;
 
     /**
      * 获取所有缓存
      *
      * @return 缓存对象
      */
-    public static Set<ServerNode> getAllPods() {
-        ConcurrentMap<String, ServerNode> concurrentMap = CACHE.asMap();
+    public static Set<String> getAllPods() {
+        ConcurrentMap<String, String> concurrentMap = CACHE.asMap();
         return new HashSet<>(concurrentMap.values());
 
     }
@@ -46,7 +46,7 @@ public class CacheConsumerGroup implements Lifecycle {
      *
      * @return 缓存对象
      */
-    public static ServerNode get(String hostId) {
+    public static String get(String hostId) {
         return CACHE.getIfPresent(hostId);
     }
 
@@ -57,11 +57,11 @@ public class CacheConsumerGroup implements Lifecycle {
      * @return 缓存对象
      */
     public static synchronized void addOrUpdate(String groupName) {
-        CACHE.put(groupName, "");
+        CACHE.put(groupName, groupName);
     }
 
-    public static void remove(String hostId) {
-        CACHE.invalidate(hostId);
+    public static void remove(String groupName) {
+        CACHE.invalidate(groupName);
     }
 
     @Override

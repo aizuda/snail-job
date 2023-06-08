@@ -11,6 +11,7 @@ import com.aizuda.easy.retry.server.support.Register;
 import com.aizuda.easy.retry.server.support.cache.CacheConsumerGroup;
 import com.aizuda.easy.retry.server.support.cache.CacheRegisterTable;
 import com.aizuda.easy.retry.server.support.handler.ServerNodeBalance;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -28,13 +29,16 @@ import java.util.concurrent.TimeUnit;
  * @date 2023-06-07
  * @since 1.6.0
  */
-@Component
+@Component(ServerRegister.BEAN_NAME)
+@Slf4j
 public class ServerRegister extends AbstractRegister {
+    public static final String BEAN_NAME = "serverRegister";
 
     private final ScheduledExecutorService serverRegisterNode = Executors.newSingleThreadScheduledExecutor(r -> new Thread(r,"ServerRegisterNode"));
     public static final int DELAY_TIME = 30;
     public static final String CURRENT_CID;
     public static final String GROUP_NAME = "DEFAULT_SERVER";
+
     @Autowired
     public ServerNodeBalance serverNodeBalance;
 
@@ -53,7 +57,6 @@ public class ServerRegister extends AbstractRegister {
         context.setGroupName(GROUP_NAME);
         context.setHostId(CURRENT_CID);
         context.setHostIp(HostUtils.getIp());
-        context.setGroupName(StrUtil.EMPTY);
         context.setContextPath(StrUtil.EMPTY);
     }
 
@@ -65,14 +68,6 @@ public class ServerRegister extends AbstractRegister {
     @Override
     protected boolean doRegister(RegisterContext context, ServerNode serverNode) {
         refreshExpireAt(serverNode);
-        Set<ServerNode> serverNodeSet = CacheRegisterTable.getServerNodeSet(context.getGroupName());
-        for (final ServerNode node : serverNodeSet) {
-            ServerNode consumerServerNode = CacheConsumerGroup.get(node.getHostId());
-            if (consumerServerNode.getExpireAt().isBefore(LocalDateTime.now())) {
-                // 触发rebalance
-                serverNodeBalance.doBalance();
-            }
-        }
         return Boolean.TRUE;
     }
 
@@ -83,15 +78,20 @@ public class ServerRegister extends AbstractRegister {
 
     @Override
     public void start() {
-        Register register = SpringContext.getBean("serverRegister", Register.class);
+        LogUtils.info(log, "ServerRegister start");
+
+        // 先删除已经过期未删除的节点
+        serverNodeMapper.deleteByExpireAt(LocalDateTime.now().minusSeconds(ServerRegister.DELAY_TIME * 2));
+
+        Register register = SpringContext.getBean(ServerRegister.BEAN_NAME, Register.class);
         serverRegisterNode.scheduleAtFixedRate(()->{
             register.register(new RegisterContext());
-        }, 1, DELAY_TIME / 2, TimeUnit.SECONDS);
+        }, 0, DELAY_TIME / 2, TimeUnit.SECONDS);
 
     }
 
     @Override
     public void close() {
-
+        LogUtils.info(log, "ServerRegister close");
     }
 }
