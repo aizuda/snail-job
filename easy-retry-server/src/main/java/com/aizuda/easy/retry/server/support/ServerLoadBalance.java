@@ -16,8 +16,6 @@
  */
 package com.aizuda.easy.retry.server.support;
 
-import com.aizuda.easy.retry.server.persistence.mybatis.po.GroupConfig;
-
 import java.util.List;
 
 /**
@@ -29,12 +27,12 @@ public interface ServerLoadBalance {
      * Allocating by consumer id
      *
      * @param currentCID current consumer id
-     * @param groupList consumer set in current consumer group
+     * @param groupNameList consumer set in current consumer group
      * @return The allocate result of given strategy
      */
-    List<GroupConfig> allocate(
+    List<String> allocate(
         final String currentCID,
-        final List<GroupConfig> groupList,
+        final List<String> groupNameList,
         final List<String> serverList
     );
 

@@ -2,12 +2,15 @@ package com.aizuda.easy.retry.server.support.register;
 
 import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.common.core.enums.NodeTypeEnum;
+import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.ServerNode;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 客户端注册
@@ -17,6 +20,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  * @since 1.6.0
  */
 @Component
+@Slf4j
 public class ClientRegister extends AbstractRegister {
     public static final int DELAY_TIME = 30;
     protected static final LinkedBlockingQueue<ServerNode> QUEUE = new LinkedBlockingQueue<>();
@@ -54,14 +58,17 @@ public class ClientRegister extends AbstractRegister {
     @Override
     public void start() {
         new Thread(() -> {
-            try {
-                ServerNode serverNode = QUEUE.take();
-                refreshExpireAt(serverNode);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            while (Thread.currentThread().isInterrupted()) {
+                try {
+                    ServerNode serverNode = QUEUE.take();
+                    refreshExpireAt(serverNode);
+                    // 防止刷的过快
+                    TimeUnit.MILLISECONDS.sleep(100);
+                } catch (InterruptedException e) {
+                    LogUtils.error(log, "client refresh expireAt error.");
+                }
             }
-
-        }).start();
+        }, "client_register_").start();
     }
 
     @Override

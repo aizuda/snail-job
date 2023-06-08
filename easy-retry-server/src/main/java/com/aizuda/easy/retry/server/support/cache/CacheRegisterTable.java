@@ -1,19 +1,17 @@
 package com.aizuda.easy.retry.server.support.cache;
 
-import akka.actor.ActorRef;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
-import com.aizuda.easy.retry.server.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.ServerNode;
 import com.aizuda.easy.retry.server.support.Lifecycle;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
-import java.util.Observable;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,11 +26,26 @@ import java.util.stream.Collectors;
  * @since 2.0
  */
 @Component
-@Data
 @Slf4j
 public class CacheRegisterTable implements Lifecycle {
 
     private static Cache<String, ConcurrentMap<String, ServerNode>> CACHE;
+
+    /**
+     * 获取所有缓存
+     *
+     * @return 缓存对象
+     */
+    public static Set<ServerNode> getAllPods() {
+        ConcurrentMap<String, ConcurrentMap<String, ServerNode>> concurrentMap = CACHE.asMap();
+
+        return (Set<ServerNode>) concurrentMap.values().stream().map(Map::values).reduce((s, y) -> {
+            Set<ServerNode> mergeSet = new HashSet<>(s);
+            mergeSet.addAll(y);
+            return mergeSet;
+        }).get();
+
+    }
 
     /**
      * 获取所有缓存
@@ -72,24 +85,27 @@ public class CacheRegisterTable implements Lifecycle {
     }
 
     /**
-     * 获取排序的ServerNode
+     * 获取排序的hostId
      *
      * @return 缓存对象
      */
-    public static Set<String> gePodIpSet(String groupName) {
-        return getServerNodeSet(groupName).stream().map(ServerNode::getHostIp).collect(Collectors.toSet());
+    public static Set<String> getPodIdSet(String groupName) {
+        return getServerNodeSet(groupName).stream().map(ServerNode::getHostId).collect(Collectors.toSet());
     }
 
     /**
-     * 获取所有缓存
+     * 无缓存时添加
+     * 有缓存时更新
      *
      * @return 缓存对象
      */
-    public static void put(String groupName, ServerNode serverNode) {
+    public static synchronized void addOrUpdate(String groupName, ServerNode serverNode) {
         ConcurrentMap<String, ServerNode> concurrentMap = CACHE.getIfPresent(groupName);
         if (Objects.isNull(concurrentMap)) {
             concurrentMap = new ConcurrentHashMap<>();
+            CACHE.put(groupName, concurrentMap);
         }
+
         concurrentMap.put(serverNode.getHostId(), serverNode);
     }
 

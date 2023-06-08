@@ -8,9 +8,15 @@ import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.util.HostUtils;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.ServerNode;
 import com.aizuda.easy.retry.server.support.Register;
+import com.aizuda.easy.retry.server.support.cache.CacheConsumerGroup;
+import com.aizuda.easy.retry.server.support.cache.CacheRegisterTable;
+import com.aizuda.easy.retry.server.support.handler.ServerNodeBalance;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -28,6 +34,10 @@ public class ServerRegister extends AbstractRegister {
     private final ScheduledExecutorService serverRegisterNode = Executors.newSingleThreadScheduledExecutor(r -> new Thread(r,"ServerRegisterNode"));
     public static final int DELAY_TIME = 30;
     public static final String CURRENT_CID;
+    public static final String GROUP_NAME = "DEFAULT_SERVER";
+    @Autowired
+    public ServerNodeBalance serverNodeBalance;
+
     static {
         CURRENT_CID = IdUtil.simpleUUID();
     }
@@ -40,6 +50,7 @@ public class ServerRegister extends AbstractRegister {
 
     @Override
     protected void beforeProcessor(RegisterContext context) {
+        context.setGroupName(GROUP_NAME);
         context.setHostId(CURRENT_CID);
         context.setHostIp(HostUtils.getIp());
         context.setGroupName(StrUtil.EMPTY);
@@ -54,6 +65,14 @@ public class ServerRegister extends AbstractRegister {
     @Override
     protected boolean doRegister(RegisterContext context, ServerNode serverNode) {
         refreshExpireAt(serverNode);
+        Set<ServerNode> serverNodeSet = CacheRegisterTable.getServerNodeSet(context.getGroupName());
+        for (final ServerNode node : serverNodeSet) {
+            ServerNode consumerServerNode = CacheConsumerGroup.get(node.getHostId());
+            if (consumerServerNode.getExpireAt().isBefore(LocalDateTime.now())) {
+                // 触发rebalance
+                serverNodeBalance.doBalance();
+            }
+        }
         return Boolean.TRUE;
     }
 

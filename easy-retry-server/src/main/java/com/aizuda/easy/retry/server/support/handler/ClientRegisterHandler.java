@@ -41,36 +41,6 @@ public class ClientRegisterHandler {
     @Qualifier("configAccessProcessor")
     private ConfigAccess configAccess;
 
-    public void registerClient(HttpHeaders headers) {
-
-        threadPoolExecutor.execute(() -> {
-
-            String hostId = headers.get(HeadersEnum.HOST_ID.getKey());
-            String hostIp = headers.get(HeadersEnum.HOST_IP.getKey());
-            Integer hostPort = headers.getInt(HeadersEnum.HOST_PORT.getKey());
-            String groupName = headers.get(HeadersEnum.GROUP_NAME.getKey());
-            String contextPath = headers.get(HeadersEnum.CONTEXT_PATH.getKey());
-
-            LocalDateTime endTime = LocalDateTime.now().plusSeconds(30);
-            ServerNode serverNode = new ServerNode();
-            serverNode.setGroupName(groupName);
-            serverNode.setNodeType(NodeTypeEnum.CLIENT.getType());
-            serverNode.setHostPort(hostPort);
-            serverNode.setHostIp(hostIp);
-            serverNode.setExpireAt(endTime);
-            serverNode.setCreateDt(LocalDateTime.now());
-            serverNode.setContextPath(contextPath);
-            serverNode.setHostId(hostId);
-
-            try {
-                int i = serverNodeMapper.insertOrUpdate(serverNode);
-            } catch (Exception e) {
-                LogUtils.error(log,"注册客户端失败", e);
-            }
-        });
-
-    }
-
     public void syncVersion(Integer clientVersion, String groupName, String hostIp, Integer hostPort, String contextPath) {
 
         threadPoolExecutor.execute(() -> {

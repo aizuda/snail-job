@@ -1,10 +1,15 @@
 package com.aizuda.easy.retry.server.support.schedule;
 
+import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.ServerNodeMapper;
+import com.aizuda.easy.retry.server.persistence.mybatis.po.ServerNode;
 import com.aizuda.easy.retry.server.persistence.support.ConfigAccess;
 import com.aizuda.easy.retry.server.service.RetryService;
+import com.aizuda.easy.retry.server.support.cache.CacheRegisterTable;
 import com.aizuda.easy.retry.server.support.handler.ServerRegisterNodeHandler;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 清除数据线程调度器
@@ -43,7 +49,19 @@ public class ClearThreadSchedule {
     public void clearOfflineNode() {
 
         try {
-            serverNodeMapper.deleteByExpireAt(LocalDateTime.now().minusSeconds(ServerRegisterNodeHandler.DELAY_TIME * 2));
+            LocalDateTime endTime = LocalDateTime.now().minusSeconds(ServerRegisterNodeHandler.DELAY_TIME * 2);
+            Set<ServerNode> allPods = CacheRegisterTable.getAllPods();
+            Set<ServerNode> waitOffline = allPods.stream().filter(serverNode -> serverNode.getExpireAt().isAfter(endTime)).collect(Collectors.toSet());
+            Set<String> podIds = waitOffline.stream().map(ServerNode::getHostId).collect(Collectors.toSet());
+
+            int delete = serverNodeMapper
+                .delete(new LambdaQueryWrapper<ServerNode>().in(ServerNode::getHostId, podIds));
+            Assert.isTrue(delete > 0, () -> new EasyRetryServerException("clearOfflineNode error"));
+
+            for (final ServerNode serverNode : waitOffline) {
+                CacheRegisterTable.remove(serverNode.getGroupName(), serverNode.getHostId());
+            }
+
         } catch (Exception e) {
             LogUtils.error(log, "clearOfflineNode 失败", e);
         }

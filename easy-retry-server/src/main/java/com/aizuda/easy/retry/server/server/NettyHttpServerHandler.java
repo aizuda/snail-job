@@ -2,12 +2,15 @@ package com.aizuda.easy.retry.server.server;
 
 import cn.hutool.core.net.url.UrlBuilder;
 import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
+import com.aizuda.easy.retry.server.support.Register;
 import com.aizuda.easy.retry.server.support.handler.ClientRegisterHandler;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.enums.HeadersEnum;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.server.handler.HttpRequestHandler;
+import com.aizuda.easy.retry.server.support.register.ClientRegister;
+import com.aizuda.easy.retry.server.support.register.RegisterContext;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -50,16 +53,25 @@ public class NettyHttpServerHandler extends SimpleChannelInboundHandler<FullHttp
             throw new EasyRetryServerException("uri 不能为空");
         }
 
-        ClientRegisterHandler registerHandler = SpringContext.getBeanByType(ClientRegisterHandler.class);
-        registerHandler.registerClient(headers);
+        Register register = SpringContext.getBean("clientRegister", Register.class);
 
-        Integer clientVersion = headers.getInt(HeadersEnum.VERSION.getKey());
-        String groupName = headers.get(HeadersEnum.GROUP_NAME.getKey());
+        RegisterContext registerContext = new RegisterContext();
+
+        String hostId = headers.get(HeadersEnum.HOST_ID.getKey());
         String hostIp = headers.get(HeadersEnum.HOST_IP.getKey());
         Integer hostPort = headers.getInt(HeadersEnum.HOST_PORT.getKey());
+        String groupName = headers.get(HeadersEnum.GROUP_NAME.getKey());
         String contextPath = headers.get(HeadersEnum.CONTEXT_PATH.getKey());
+        registerContext.setContextPath(contextPath);
+        registerContext.setGroupName(groupName);
+        registerContext.setHostPort(hostPort);
+        registerContext.setHostIp(hostIp);
+        registerContext.setHostId(hostId);
 
-        registerHandler.syncVersion(clientVersion, groupName, hostIp, hostPort, contextPath);
+        register.register(registerContext);
+
+//        Integer clientVersion = headers.getInt(HeadersEnum.VERSION.getKey());
+//        registerHandler.syncVersion(clientVersion, groupName, hostIp, hostPort, contextPath);
 
         UrlBuilder builder = UrlBuilder.ofHttp(uri);
         Collection<HttpRequestHandler> httpRequestHandlers = SpringContext.CONTEXT.getBeansOfType(HttpRequestHandler.class).values();

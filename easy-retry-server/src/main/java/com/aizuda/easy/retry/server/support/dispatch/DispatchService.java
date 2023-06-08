@@ -14,7 +14,10 @@ import com.aizuda.easy.retry.server.support.Lifecycle;
 import com.aizuda.easy.retry.server.support.allocate.server.AllocateMessageQueueConsistentHash;
 import com.aizuda.easy.retry.server.support.cache.CacheGroupRateLimiter;
 import com.aizuda.easy.retry.server.support.cache.CacheGroupScanActor;
+import com.aizuda.easy.retry.server.support.cache.CacheRegisterTable;
+import com.aizuda.easy.retry.server.support.handler.ServerNodeBalance;
 import com.aizuda.easy.retry.server.support.handler.ServerRegisterNodeHandler;
+import com.aizuda.easy.retry.server.support.register.ServerRegister;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.google.common.cache.Cache;
 import com.google.common.util.concurrent.RateLimiter;
@@ -24,9 +27,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -62,8 +67,7 @@ public class DispatchService implements Lifecycle {
     private ServerNodeMapper serverNodeMapper;
 
     @Autowired
-    @Qualifier("configAccessProcessor")
-    private ConfigAccess configAccess;
+    private ServerNodeBalance serverNodeBalance;
 
     @Autowired
     private SystemProperties systemProperties;
@@ -74,11 +78,11 @@ public class DispatchService implements Lifecycle {
         dispatchService.scheduleAtFixedRate(() -> {
 
             try {
-                List<GroupConfig> currentHostGroupList = getCurrentHostGroupList();
+                Set<String> currentHostGroupList = getCurrentHostGroupList();
                 if (!CollectionUtils.isEmpty(currentHostGroupList)) {
-                    for (GroupConfig groupConfigContext : currentHostGroupList) {
+                    for (String groupName : currentHostGroupList) {
                         ScanTaskDTO scanTaskDTO = new ScanTaskDTO();
-                        scanTaskDTO.setGroupName(groupConfigContext.getGroupName());
+                        scanTaskDTO.setGroupName(groupName);
                         produceScanActorTask(scanTaskDTO);
                     }
                 }
@@ -147,24 +151,8 @@ public class DispatchService implements Lifecycle {
      *
      * @return {@link  GroupConfig} 组上下文
      */
-    private List<GroupConfig> getCurrentHostGroupList() {
-        List<GroupConfig> prepareAllocateGroupConfig = configAccess.getAllOpenGroupConfig();
-        if (CollectionUtils.isEmpty(prepareAllocateGroupConfig)) {
-            return Collections.EMPTY_LIST;
-        }
-        //为了保证客户端分配算法的一致性,serverNodes 从数据库从数据获取
-        List<ServerNode> serverNodes = serverNodeMapper.selectList(
-            new LambdaQueryWrapper<ServerNode>().eq(ServerNode::getNodeType, NodeTypeEnum.SERVER.getType()));
-
-        if (CollectionUtils.isEmpty(serverNodes)) {
-            LogUtils.error(log, "服务端节点为空");
-            return Collections.EMPTY_LIST;
-        }
-
-        List<String> podIdList = serverNodes.stream().map(ServerNode::getHostId).collect(Collectors.toList());
-
-        return new AllocateMessageQueueConsistentHash()
-            .allocate(ServerRegisterNodeHandler.CURRENT_CID, prepareAllocateGroupConfig, podIdList);
+    private Set<String> getCurrentHostGroupList() {
+        return serverNodeBalance.getLocalCidAll();
     }
 
     @Override

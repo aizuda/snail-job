@@ -6,6 +6,7 @@ import com.aizuda.easy.retry.server.persistence.mybatis.mapper.ServerNodeMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.ServerNode;
 import com.aizuda.easy.retry.server.support.Lifecycle;
 import com.aizuda.easy.retry.server.support.Register;
+import com.aizuda.easy.retry.server.support.cache.CacheRegisterTable;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -20,7 +21,7 @@ import java.time.LocalDateTime;
 public abstract class AbstractRegister implements Register, Lifecycle {
 
     @Autowired
-    private ServerNodeMapper serverNodeMapper;
+    protected ServerNodeMapper serverNodeMapper;
     @Autowired
     private SystemProperties systemProperties;
 
@@ -38,6 +39,8 @@ public abstract class AbstractRegister implements Register, Lifecycle {
 
         try {
             serverNodeMapper.insertOrUpdate(serverNode);
+            // 刷新本地缓存
+            CacheRegisterTable.addOrUpdate(serverNode.getGroupName(), serverNode);
         }catch (Exception e) {
             LogUtils.error(log,"注册节点失败 groupName:[{}] hostIp:[{}]",
                     serverNode.getGroupName(), serverNode.getHostIp(), e);
