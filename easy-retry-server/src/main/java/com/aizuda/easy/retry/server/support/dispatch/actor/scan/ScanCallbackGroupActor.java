@@ -61,6 +61,7 @@ public class ScanCallbackGroupActor extends AbstractScanGroup {
             .withFilterStrategy(FilterStrategies.bitSetIdempotentFilter(idempotentStrategy))
             .withFilterStrategy(FilterStrategies.sceneBlackFilter())
             .withFilterStrategy(FilterStrategies.checkAliveClientPodFilter())
+            .withFilterStrategy(FilterStrategies.rebalanceFilterStrategies())
             .withFilterStrategy(FilterStrategies.rateLimiterFilter())
             .withRetryContext(retryContext)
             .build();

@@ -5,6 +5,7 @@ import com.aizuda.easy.retry.client.model.GenerateRetryIdempotentIdDTO;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.server.config.RequestDataHelper;
+import com.aizuda.easy.retry.server.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.GroupConfig;
@@ -161,7 +162,7 @@ public class RetryTaskServiceImpl implements RetryTaskService {
 
     @Override
     public String idempotentIdGenerate(final GenerateRetryIdempotentIdVO generateRetryIdempotentIdVO) {
-        ServerNode serverNode = clientNodeAllocateHandler.getServerNode(generateRetryIdempotentIdVO.getGroupName());
+        RegisterNodeInfo serverNode = clientNodeAllocateHandler.getServerNode(generateRetryIdempotentIdVO.getGroupName());
         Assert.notNull(serverNode, () -> new EasyRetryServerException("生成idempotentId失败: 不存在活跃的客户端节点"));
 
         // 委托客户端生成idempotentId

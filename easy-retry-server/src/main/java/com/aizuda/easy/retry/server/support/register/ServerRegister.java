@@ -6,11 +6,13 @@ import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.enums.NodeTypeEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.util.HostUtils;
+import com.aizuda.easy.retry.server.config.SystemProperties;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.ServerNode;
 import com.aizuda.easy.retry.server.support.Register;
 import com.aizuda.easy.retry.server.support.cache.CacheConsumerGroup;
 import com.aizuda.easy.retry.server.support.cache.CacheRegisterTable;
 import com.aizuda.easy.retry.server.support.handler.ServerNodeBalance;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -33,14 +35,15 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class ServerRegister extends AbstractRegister {
     public static final String BEAN_NAME = "serverRegister";
-
-    private final ScheduledExecutorService serverRegisterNode = Executors.newSingleThreadScheduledExecutor(r -> new Thread(r,"ServerRegisterNode"));
+    private final ScheduledExecutorService serverRegisterNode = Executors.newSingleThreadScheduledExecutor(r -> new Thread(r,"server-register-node"));
     public static final int DELAY_TIME = 30;
     public static final String CURRENT_CID;
     public static final String GROUP_NAME = "DEFAULT_SERVER";
 
     @Autowired
     public ServerNodeBalance serverNodeBalance;
+    @Autowired
+    private SystemProperties systemProperties;
 
     static {
         CURRENT_CID = IdUtil.simpleUUID();
@@ -57,6 +60,7 @@ public class ServerRegister extends AbstractRegister {
         context.setGroupName(GROUP_NAME);
         context.setHostId(CURRENT_CID);
         context.setHostIp(HostUtils.getIp());
+        context.setHostPort(systemProperties.getNettyPort());
         context.setContextPath(StrUtil.EMPTY);
     }
 
@@ -79,9 +83,6 @@ public class ServerRegister extends AbstractRegister {
     @Override
     public void start() {
         LogUtils.info(log, "ServerRegister start");
-
-        // 先删除已经过期未删除的节点
-        serverNodeMapper.deleteByExpireAt(LocalDateTime.now().minusSeconds(ServerRegister.DELAY_TIME * 2));
 
         Register register = SpringContext.getBean(ServerRegister.BEAN_NAME, Register.class);
         serverRegisterNode.scheduleAtFixedRate(()->{

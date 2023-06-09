@@ -9,6 +9,7 @@ import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.common.core.model.EasyRetryHeaders;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
+import com.aizuda.easy.retry.server.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskLogMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask;
@@ -64,7 +65,7 @@ public class ExecUnitActor extends AbstractActor  {
 
             MaxAttemptsPersistenceRetryContext context = (MaxAttemptsPersistenceRetryContext) retryExecutor.getRetryContext();
             RetryTask retryTask = context.getRetryTask();
-            ServerNode serverNode = context.getServerNode();
+            RegisterNodeInfo serverNode = context.getServerNode();
 
             RetryTaskLog retryTaskLog = RetryTaskLogConverter.INSTANCE.toRetryTask(retryTask);
             retryTaskLog.setErrorMessage(StringUtils.EMPTY);
@@ -105,7 +106,7 @@ public class ExecUnitActor extends AbstractActor  {
      * @param retryTask {@link RetryTask} 需要重试的数据
      * @return 重试结果返回值
      */
-    private Result<DispatchRetryResultDTO> callClient(RetryTask retryTask, RetryTaskLog retryTaskLog, ServerNode serverNode) {
+    private Result<DispatchRetryResultDTO> callClient(RetryTask retryTask, RetryTaskLog retryTaskLog, RegisterNodeInfo serverNode) {
 
         DispatchRetryDTO dispatchRetryDTO = new DispatchRetryDTO();
         dispatchRetryDTO.setIdempotentId(retryTask.getIdempotentId());

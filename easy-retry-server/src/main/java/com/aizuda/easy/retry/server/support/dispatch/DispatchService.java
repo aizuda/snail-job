@@ -32,6 +32,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author: www.byteblogs.com
  * @date : 2021-11-19 15:46
+ * @since 1.6.0
  */
 @Component
 @Slf4j
@@ -65,7 +66,14 @@ public class DispatchService implements Lifecycle {
         dispatchService.scheduleAtFixedRate(() -> {
 
             try {
+                // 当正在rebalance时延迟10s，尽量等待所有节点都完成rebalance
+                if (ServerNodeBalance.RE_BALANCE_ING.get()) {
+                    LogUtils.info(log, "正在rebalance中....");
+                    TimeUnit.SECONDS.sleep(INITIAL_DELAY);
+                }
+
                 Set<String> currentHostGroupList = getCurrentHostGroupList();
+                LogUtils.info(log, "当前分配的组:[{}]", currentHostGroupList);
                 if (!CollectionUtils.isEmpty(currentHostGroupList)) {
                     for (String groupName : currentHostGroupList) {
                         ScanTaskDTO scanTaskDTO = new ScanTaskDTO();

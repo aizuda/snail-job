@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.server.support.handler;
 
+import com.aizuda.easy.retry.server.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.ServerNodeMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.GroupConfig;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask;
@@ -33,17 +34,17 @@ public class ClientNodeAllocateHandler {
     /**
      * 获取分配的节点
      */
-    public ServerNode getServerNode(String groupName) {
+    public RegisterNodeInfo getServerNode(String groupName) {
 
         GroupConfig groupConfig = configAccess.getGroupConfigByGroupName(groupName);
-        Set<ServerNode> serverNodes = CacheRegisterTable.getServerNodeSet(groupName);
+        Set<RegisterNodeInfo> serverNodes = CacheRegisterTable.getServerNodeSet(groupName);
         if (CollectionUtils.isEmpty(serverNodes)) {
             return null;
         }
 
         ClientLoadBalance clientLoadBalanceRandom = ClientLoadBalanceManager.getClientLoadBalance(groupConfig.getRouteKey());
 
-        String hostIp = clientLoadBalanceRandom.route(groupName, new TreeSet<>(serverNodes.stream().map(ServerNode::getHostIp).collect(Collectors.toSet())));
+        String hostIp = clientLoadBalanceRandom.route(groupName, new TreeSet<>(serverNodes.stream().map(RegisterNodeInfo::getHostIp).collect(Collectors.toSet())));
         return serverNodes.stream().filter(s -> s.getHostIp().equals(hostIp)).findFirst().get();
     }
 

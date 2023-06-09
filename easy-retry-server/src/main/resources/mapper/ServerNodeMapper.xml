@@ -16,7 +16,7 @@
   <sql id="Base_Column_List">
     id, group_name, context_path, host_id, host_ip, host_port, expire_at, node_type,create_dt,update_dt
   </sql>
-  <insert id="insertOrUpdate" parameterType="com.aizuda.easy.retry.server.persistence.mybatis.po.ServerNode">
+  <insert id="insertOrUpdate" parameterType="com.aizuda.easy.retry.server.persistence.mybatis.po.ServerNode" useGeneratedKeys="true" keyProperty="id">
     insert into server_node (id, group_name, host_id, host_ip, host_port,
                              expire_at, node_type, context_path, create_dt)
     values (#{id,jdbcType=BIGINT}, #{groupName,jdbcType=VARCHAR}, #{hostId,jdbcType=VARCHAR}, #{hostIp,jdbcType=VARCHAR},

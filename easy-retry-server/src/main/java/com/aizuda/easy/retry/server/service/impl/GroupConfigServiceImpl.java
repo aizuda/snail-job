@@ -14,7 +14,7 @@ import com.aizuda.easy.retry.server.persistence.mybatis.po.NotifyConfig;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.SceneConfig;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.SequenceAlloc;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.ServerNode;
-import com.aizuda.easy.retry.server.support.handler.ClientRegisterHandler;
+import com.aizuda.easy.retry.server.support.handler.ConfigVersionSyncHandler;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
@@ -61,7 +61,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
     @Autowired
     private SequenceAllocMapper sequenceAllocMapper;
     @Autowired
-    private ClientRegisterHandler clientRegisterHandler;
+    private ConfigVersionSyncHandler configVersionSyncHandler;
 
     @Value("${easy-retry.total-partition:32}")
     private Integer totalPartition;
@@ -124,11 +124,11 @@ public class GroupConfigServiceImpl implements GroupConfigService {
 
         doUpdateSceneConfig(groupConfigRequestVO);
 
-        List<ServerNode> serverNodes = serverNodeMapper.selectList(new LambdaQueryWrapper<ServerNode>().eq(ServerNode::getGroupName, groupConfigRequestVO.getGroupName()));
-        for (ServerNode serverNode : serverNodes) {
-            clientRegisterHandler.syncVersion(null,
-                    groupConfigRequestVO.getGroupName(), serverNode.getHostIp(),
-                    serverNode.getHostPort(), serverNode.getContextPath());
+        // 同步版本， 版本为0代表需要同步到客户端
+        boolean add = configVersionSyncHandler.addSyncTask(groupConfigRequestVO.getGroupName(), 0);
+        // 若添加失败则强制发起同步
+        if (!add) {
+            configVersionSyncHandler.syncVersion(groupConfigRequestVO.getGroupName());
         }
 
         return Boolean.TRUE;

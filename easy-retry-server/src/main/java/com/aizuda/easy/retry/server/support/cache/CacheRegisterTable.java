@@ -1,7 +1,9 @@
 package com.aizuda.easy.retry.server.support.cache;
 
 import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.server.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.ServerNode;
+import com.aizuda.easy.retry.server.service.convert.RegisterNodeInfoConverter;
 import com.aizuda.easy.retry.server.support.Lifecycle;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -10,9 +12,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
@@ -25,31 +24,31 @@ import java.util.stream.Collectors;
  *
  * @author www.byteblogs.com
  * @date 2021-10-30
- * @since 2.0
+ * @since 1.6.0
  */
 @Component
 @Slf4j
 public class CacheRegisterTable implements Lifecycle {
 
-    private static Cache<String, ConcurrentMap<String, ServerNode>> CACHE;
+    private static Cache<String, ConcurrentMap<String, RegisterNodeInfo>> CACHE;
 
     /**
      * 获取所有缓存
      *
      * @return 缓存对象
      */
-    public static Set<ServerNode> getAllPods() {
-        ConcurrentMap<String, ConcurrentMap<String, ServerNode>> concurrentMap = CACHE.asMap();
+    public static Set<RegisterNodeInfo> getAllPods() {
+        ConcurrentMap<String, ConcurrentMap<String, RegisterNodeInfo>> concurrentMap = CACHE.asMap();
         if (CollectionUtils.isEmpty(concurrentMap)) {
             return Collections.EMPTY_SET;
         }
 
         return concurrentMap.values().stream()
-                .map(stringServerNodeConcurrentMap -> new HashSet<>(stringServerNodeConcurrentMap.values()))
-                .reduce((s, y) -> {
-                    s.addAll(y);
-            return s;
-        }).get();
+            .map(stringServerNodeConcurrentMap -> new TreeSet(stringServerNodeConcurrentMap.values()))
+            .reduce((s, y) -> {
+                s.addAll(y);
+                return s;
+            }).get();
 
     }
 
@@ -58,7 +57,7 @@ public class CacheRegisterTable implements Lifecycle {
      *
      * @return 缓存对象
      */
-    public static ConcurrentMap<String, ServerNode> get(String groupName) {
+    public static ConcurrentMap<String, RegisterNodeInfo> get(String groupName) {
         return CACHE.getIfPresent(groupName);
     }
 
@@ -67,8 +66,8 @@ public class CacheRegisterTable implements Lifecycle {
      *
      * @return 缓存对象
      */
-    public static ServerNode getServerNode(String groupName, String hostId) {
-        ConcurrentMap<String, ServerNode> concurrentMap = CACHE.getIfPresent(groupName);
+    public static RegisterNodeInfo getServerNode(String groupName, String hostId) {
+        ConcurrentMap<String, RegisterNodeInfo> concurrentMap = CACHE.getIfPresent(groupName);
         if (Objects.isNull(concurrentMap)) {
             return null;
         }
@@ -81,16 +80,13 @@ public class CacheRegisterTable implements Lifecycle {
      *
      * @return 缓存对象
      */
-    public static Set<ServerNode> getServerNodeSet(String groupName) {
-        ConcurrentMap<String, ServerNode> concurrentMap = CACHE.getIfPresent(groupName);
-
-        Set<ServerNode> set = new TreeSet<>(Comparator.comparingInt(o -> o.getId().intValue()));
-        if (Objects.isNull(concurrentMap)) {
-            return set;
+    public static Set<RegisterNodeInfo> getServerNodeSet(String groupName) {
+        ConcurrentMap<String, RegisterNodeInfo> concurrentMap = CACHE.getIfPresent(groupName);
+        if (CollectionUtils.isEmpty(concurrentMap)) {
+            return Collections.EMPTY_SET;
         }
 
-        set.addAll(concurrentMap.values());
-        return set;
+        return new TreeSet<>(concurrentMap.values());
     }
 
     /**
@@ -100,31 +96,43 @@ public class CacheRegisterTable implements Lifecycle {
      */
     public static Set<String> getPodIdSet(String groupName) {
         return getServerNodeSet(groupName).stream()
-                .map(ServerNode::getHostId).collect(Collectors.toSet());
+            .map(RegisterNodeInfo::getHostId).collect(Collectors.toSet());
     }
 
     /**
-     * 无缓存时添加
-     * 有缓存时更新
+     * 无缓存时添加 有缓存时更新
      *
      * @return 缓存对象
      */
     public static synchronized void addOrUpdate(String groupName, ServerNode serverNode) {
 
-        ConcurrentMap<String, ServerNode> concurrentMap = CACHE.getIfPresent(groupName);
+        ConcurrentMap<String, RegisterNodeInfo> concurrentMap = CACHE.getIfPresent(groupName);
+        RegisterNodeInfo registerNodeInfo;
         if (Objects.isNull(concurrentMap)) {
             LogUtils.info(log, "Add cache. groupName:[{}] hostId:[{}]", groupName, serverNode.getHostId());
             concurrentMap = new ConcurrentHashMap<>();
+            registerNodeInfo = RegisterNodeInfoConverter.INSTANCE.toRegisterNodeInfo(serverNode);
             CACHE.put(groupName, concurrentMap);
+        } else {
+            // 复用缓存中的对象
+            registerNodeInfo = concurrentMap.getOrDefault(serverNode.getHostId(), RegisterNodeInfoConverter.INSTANCE.toRegisterNodeInfo(serverNode));
+            registerNodeInfo.setExpireAt(serverNode.getExpireAt());
         }
 
-        LogUtils.info(log, "Update cache. groupName:[{}] hostId:[{}] hostIp:[{}]", groupName,
-                serverNode.getHostId(), serverNode.getExpireAt());
-        concurrentMap.put(serverNode.getHostId(), serverNode);
+        LogUtils.debug(log, "Update cache. groupName:[{}] hostId:[{}] hostIp:[{}] expireAt:[{}]", groupName,
+            serverNode.getHostId(), serverNode.getHostIp(), serverNode.getExpireAt());
+
+        concurrentMap.put(serverNode.getHostId(), registerNodeInfo);
     }
 
+    /**
+     * 删除缓存
+     *
+     * @param groupName 组名称
+     * @param hostId    机器id
+     */
     public static void remove(String groupName, String hostId) {
-        ConcurrentMap<String, ServerNode> concurrentMap = CACHE.getIfPresent(groupName);
+        ConcurrentMap<String, RegisterNodeInfo> concurrentMap = CACHE.getIfPresent(groupName);
         if (Objects.isNull(concurrentMap)) {
             return;
         }
@@ -137,9 +145,9 @@ public class CacheRegisterTable implements Lifecycle {
     public void start() {
         LogUtils.info(log, "CacheRegisterTable start");
         CACHE = CacheBuilder.newBuilder()
-                // 设置并发级别为cpu核心数
-                .concurrencyLevel(Runtime.getRuntime().availableProcessors())
-                .build();
+            // 设置并发级别为cpu核心数
+            .concurrencyLevel(Runtime.getRuntime().availableProcessors())
+            .build();
 
     }
 

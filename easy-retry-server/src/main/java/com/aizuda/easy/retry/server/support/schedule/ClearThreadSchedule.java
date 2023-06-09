@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.server.support.schedule;
 
 import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.server.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.ServerNodeMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.ServerNode;
@@ -51,19 +52,20 @@ public class ClearThreadSchedule {
 
         try {
 
-            // TODO ING
+            // 先删除DB中需要下线的机器
             serverNodeMapper.deleteByExpireAt(LocalDateTime.now().minusSeconds(ServerRegister.DELAY_TIME * 2));
 
+            // 删除内存缓存的待下线的机器
             LocalDateTime endTime = LocalDateTime.now().minusSeconds(ServerRegister.DELAY_TIME * 2);
-            Set<ServerNode> allPods = CacheRegisterTable.getAllPods();
-            Set<ServerNode> waitOffline = allPods.stream().filter(serverNode -> serverNode.getExpireAt().isBefore(endTime)).collect(Collectors.toSet());
-            Set<String> podIds = waitOffline.stream().map(ServerNode::getHostId).collect(Collectors.toSet());
+            Set<RegisterNodeInfo> allPods = CacheRegisterTable.getAllPods();
+            Set<RegisterNodeInfo> waitOffline = allPods.stream().filter(registerNodeInfo -> registerNodeInfo.getExpireAt().isBefore(endTime)).collect(Collectors.toSet());
+            Set<String> podIds = waitOffline.stream().map(RegisterNodeInfo::getHostId).collect(Collectors.toSet());
             if (CollectionUtils.isEmpty(podIds)) {
                 return;
             }
 
-            for (final ServerNode serverNode : waitOffline) {
-                CacheRegisterTable.remove(serverNode.getGroupName(), serverNode.getHostId());
+            for (final RegisterNodeInfo registerNodeInfo : waitOffline) {
+                CacheRegisterTable.remove(registerNodeInfo.getGroupName(), registerNodeInfo.getHostId());
             }
 
         } catch (Exception e) {

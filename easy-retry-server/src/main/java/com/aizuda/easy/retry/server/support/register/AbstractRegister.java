@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.server.support.register;
 
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.config.SystemProperties;
+import com.aizuda.easy.retry.server.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.ServerNodeMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.ServerNode;
 import com.aizuda.easy.retry.server.support.Lifecycle;
@@ -11,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * @author www.byteblogs.com
@@ -22,8 +24,6 @@ public abstract class AbstractRegister implements Register, Lifecycle {
 
     @Autowired
     protected ServerNodeMapper serverNodeMapper;
-    @Autowired
-    private SystemProperties systemProperties;
 
     @Override
     public boolean register(RegisterContext context) {
@@ -55,12 +55,11 @@ public abstract class AbstractRegister implements Register, Lifecycle {
         serverNode.setHostId(context.getHostId());
         serverNode.setHostIp(context.getHostIp());
         serverNode.setGroupName(context.getGroupName());
-        serverNode.setHostPort(systemProperties.getNettyPort());
+        serverNode.setHostPort(context.getHostPort());
         serverNode.setNodeType(getNodeType());
         serverNode.setCreateDt(LocalDateTime.now());
         serverNode.setContextPath(context.getContextPath());
         serverNode.setExpireAt(getExpireAt(context));
-
         return serverNode;
     }
 
