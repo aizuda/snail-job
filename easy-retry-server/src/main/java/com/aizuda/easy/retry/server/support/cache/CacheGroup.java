@@ -11,6 +11,7 @@ import org.springframework.util.CollectionUtils;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentMap;
 
 /**
@@ -37,7 +38,7 @@ public class CacheGroup implements Lifecycle {
             return Collections.EMPTY_SET;
         }
 
-        return new HashSet<>(concurrentMap.values());
+        return new TreeSet<>(concurrentMap.values());
 
     }
 

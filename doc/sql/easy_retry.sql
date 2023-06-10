@@ -135,6 +135,7 @@ CREATE TABLE `server_node`
     `create_dt`    datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_dt`    datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     PRIMARY KEY (`id`),
+    KEY            `idx_expire_at_node_type` (`expire_at`,`node_type`),
     UNIQUE KEY `uk_host_id_host_ip` (`host_id`,`host_ip`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='服务器节点'
 ;

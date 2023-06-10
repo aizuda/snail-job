@@ -46,7 +46,7 @@ public class ServerRegister extends AbstractRegister {
     private SystemProperties systemProperties;
 
     static {
-        CURRENT_CID = IdUtil.simpleUUID();
+        CURRENT_CID = IdUtil.getSnowflakeNextIdStr();
     }
 
     @Override

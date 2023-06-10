@@ -3,7 +3,7 @@ package com.aizuda.easy.retry.common.core.exception;
 import lombok.Data;
 
 /**
- * @author zhangshuguang
+ * @author www.byteblogs.com
  * @date 2020/05/13
  */
 @Data

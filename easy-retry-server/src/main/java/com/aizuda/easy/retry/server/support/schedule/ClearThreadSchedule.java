@@ -51,12 +51,12 @@ public class ClearThreadSchedule {
     public void clearOfflineNode() {
 
         try {
+            // 删除内存缓存的待下线的机器
+            LocalDateTime endTime = LocalDateTime.now().minusSeconds(ServerRegister.DELAY_TIME + (ServerRegister.DELAY_TIME / 3));
 
             // 先删除DB中需要下线的机器
-            serverNodeMapper.deleteByExpireAt(LocalDateTime.now().minusSeconds(ServerRegister.DELAY_TIME * 2));
+            serverNodeMapper.deleteByExpireAt(endTime);
 
-            // 删除内存缓存的待下线的机器
-            LocalDateTime endTime = LocalDateTime.now().minusSeconds(ServerRegister.DELAY_TIME * 2);
             Set<RegisterNodeInfo> allPods = CacheRegisterTable.getAllPods();
             Set<RegisterNodeInfo> waitOffline = allPods.stream().filter(registerNodeInfo -> registerNodeInfo.getExpireAt().isBefore(endTime)).collect(Collectors.toSet());
             Set<String> podIds = waitOffline.stream().map(RegisterNodeInfo::getHostId).collect(Collectors.toSet());
