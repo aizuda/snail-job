@@ -21,9 +21,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * 版本同步
  *
  * @author www.byteblogs.com
- * @date 2022-03-09
+ * @date 2023-06-10
  * @since 1.6.0
  */
 @Component
