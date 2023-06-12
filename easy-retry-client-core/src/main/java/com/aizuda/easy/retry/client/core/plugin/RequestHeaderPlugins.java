@@ -40,9 +40,11 @@ public class RequestHeaderPlugins {
                 LogUtils.warn(log, "entry method time is null. easyRetryId:[{}]", retryHeader.getEasyRetryId());
             } else {
                 long transmitTime = retryHeader.getDdl() - (callRemoteTime - entryMethodTime);
-                LogUtils.info(log, "RPC传递header头 callRemoteTime:[{}] - entryMethodTime:[{}] = transmitTime:[{}]", entryMethodTime, callRemoteTime, transmitTime);
+                LogUtils.info(log, "RPC传递header头 callRemoteTime:[{}] - entryMethodTime:[{}] = transmitTime:[{}]", callRemoteTime, entryMethodTime, transmitTime);
                 if (transmitTime > 0) {
                     retryHeader.setDdl(transmitTime);
+                    // 重新刷新进入时间
+                    RetrySiteSnapshot.setEntryMethodTime(System.currentTimeMillis());
                 } else {
                     throw new EasyRetryClientException("调用链超时, 不在继续调用后面请求");
                 }

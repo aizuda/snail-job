@@ -22,8 +22,10 @@ public class TestRetryMethodService {
         return "测试自定义重试方法";
     }
 
-    @Retryable(scene = "testRetryHeaderTransfer", retryStrategy = RetryType.ONLY_LOCAL)
+    @Retryable(scene = "testRetryHeaderTransfer", retryStrategy = RetryType.ONLY_LOCAL, localTimes = 1)
     public String testRetryHeaderTransfer(String p) {
+        demoClient.get();
+        demoClient.get();
         demoClient.get();
         double i = 1 / 0;
         return "测试重试流量标识服务间传递";
