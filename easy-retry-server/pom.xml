@@ -127,6 +127,10 @@
             <artifactId>perf4j</artifactId>
             <version>0.9.16</version>
         </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-validator</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.client.core.intercepter;
 
+import com.aizuda.easy.retry.client.core.intercepter.RetrySiteSnapshot.EnumStage;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.model.EasyRetryHeaders;
@@ -16,24 +17,29 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.Objects;
 
 /**
- * 请求头和响应头传递
+ * 服务间调用传递请求头和响应头
  *
  * @author: www.byteblogs.com
  * @date : 2022-04-18 09:19
+ * @since 1.0.0
  */
 @Aspect
 @Component
 @Slf4j
 public class HeaderAspect {
 
-    public void before(){
+    public void before() {
+        if (skip()) {
+            return;
+        }
+
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         String xRetry = attributes.getRequest().getHeader(SystemConstants.EASY_RETRY_HEAD_KEY);
         if (Objects.nonNull(xRetry)) {
             // 标记进入方法的时间
             RetrySiteSnapshot.setEntryMethodTime(System.currentTimeMillis());
 
-            LogUtils.info(log, "easy-retry 拦截器 xRetry:[{}]", xRetry);
+            LogUtils.info(log, "easy-retry request header :[{}]", xRetry);
             RetrySiteSnapshot.setRetryHeader(JsonUtil.parseObject(xRetry, EasyRetryHeaders.class));
         }
     }
@@ -66,7 +72,11 @@ public class HeaderAspect {
         HttpServletResponse response = attributes.getResponse();
         response.addHeader(SystemConstants.EASY_RETRY_STATUS_CODE_KEY, RetrySiteSnapshot.getRetryStatusCode());
 
-        // 服务端重试的在com.x.retry.client.core.client.RetryEndPoint 中进行清除threadLocal
+        if (skip()) {
+            return;
+        }
+
+        // 服务端重试的在com.aizuda.easy.retry.client.core.client.RetryEndPoint.dispatch 中进行清除threadLocal
         if (Objects.nonNull(RetrySiteSnapshot.getStage()) && RetrySiteSnapshot.EnumStage.REMOTE.getStage() == RetrySiteSnapshot.getStage()) {
             return;
         }
@@ -76,5 +86,20 @@ public class HeaderAspect {
         RetrySiteSnapshot.removeRetryStatusCode();
         RetrySiteSnapshot.removeEntryMethodTime();
 
+    }
+
+    /**
+     * 本地重试不执行afterReturning和before方法，避免header传递失效
+     *
+     * @return
+     */
+    private boolean skip() {
+
+        Integer stage = RetrySiteSnapshot.getStage();
+        if (Objects.nonNull(stage) && EnumStage.LOCAL.getStage() == RetrySiteSnapshot.getStage()) {
+            return true;
+        }
+
+        return false;
     }
 }

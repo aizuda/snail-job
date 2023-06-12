@@ -1,7 +1,10 @@
 package com.aizuda.easy.retry.client.core.strategy;
 
+import cn.hutool.core.util.IdUtil;
 import com.aizuda.easy.retry.client.core.RetryExecutor;
 import com.aizuda.easy.retry.client.core.RetryExecutorParameter;
+import com.aizuda.easy.retry.client.core.annotation.Retryable;
+import com.aizuda.easy.retry.client.core.cache.GroupVersionCache;
 import com.aizuda.easy.retry.client.core.exception.EasyRetryClientException;
 import com.aizuda.easy.retry.client.core.intercepter.RetrySiteSnapshot;
 import com.aizuda.easy.retry.client.core.retryer.RetryType;
@@ -9,6 +12,7 @@ import com.aizuda.easy.retry.client.core.retryer.RetryerInfo;
 import com.aizuda.easy.retry.client.core.retryer.RetryerResultContext;
 import com.aizuda.easy.retry.common.core.enums.RetryResultStatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.core.model.EasyRetryHeaders;
 import com.github.rholder.retry.Attempt;
 import com.github.rholder.retry.RetryListener;
 import com.github.rholder.retry.StopStrategies;
@@ -108,6 +112,10 @@ public class LocalRetryStrategies extends AbstractRetryStrategies {
             // 如果是仅仅本地重试或本地_远程模式则先支持重试
             case ONLY_LOCAL:
             case LOCAL_REMOTE:
+
+                // 标记进入方法的时间
+                RetrySiteSnapshot.setEntryMethodTime(System.currentTimeMillis());
+
                 return () -> retryExecutor.execute(params);
             case ONLY_REMOTE:
                 // 仅仅是远程重试则直接上报

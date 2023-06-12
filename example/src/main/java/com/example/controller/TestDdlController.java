@@ -1,5 +1,7 @@
 package com.example.controller;
 
+import com.aizuda.easy.retry.client.core.annotation.Retryable;
+import com.aizuda.easy.retry.client.core.retryer.RetryType;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.example.client.DemoClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +36,17 @@ public class TestDdlController {
 
     @GetMapping("test-feign")
     public Result feign() {
+        Result result = demoClient.get();
+        if (result.getStatus() == 0) {
+            throw new UnsupportedOperationException(result.getMessage());
+        }
+        return result;
+
+    }
+
+    @GetMapping("test-retry-header-controller-transfer")
+    @Retryable(scene = "testRetryHeaderControllerTransfer", retryStrategy = RetryType.ONLY_LOCAL)
+    public Result testRetryHeaderTransfer() {
         Result result = demoClient.get();
         if (result.getStatus() == 0) {
             throw new UnsupportedOperationException(result.getMessage());

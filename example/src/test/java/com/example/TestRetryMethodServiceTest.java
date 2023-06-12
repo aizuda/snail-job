@@ -27,4 +27,14 @@ public class TestRetryMethodServiceTest {
         Thread.sleep(90000);
     }
 
+    @Test
+    public void testRetryHeaderTransfer() throws InterruptedException {
+        try {
+            retryMethodService.testRetryHeaderTransfer(UUID.randomUUID().toString());
+        }catch (Exception e) {
+
+        }
+        Thread.sleep(90000);
+    }
+
 }

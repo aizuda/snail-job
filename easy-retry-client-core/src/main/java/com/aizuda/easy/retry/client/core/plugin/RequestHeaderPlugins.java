@@ -35,13 +35,17 @@ public class RequestHeaderPlugins {
         // 传递请求头
         if (Objects.nonNull(retryHeader)) {
             long callRemoteTime = System.currentTimeMillis();
-            long entryMethodTime = RetrySiteSnapshot.getEntryMethodTime();
-            long transmitTime = retryHeader.getDdl() - (callRemoteTime - entryMethodTime);
-            LogUtils.info(log, "RPC传递header头 entryMethodTime:[{}] - callRemoteTime:[{}] = transmitTime:[{}]", entryMethodTime, callRemoteTime, transmitTime);
-            if (transmitTime > 0) {
-                retryHeader.setDdl(transmitTime);
+            Long entryMethodTime = RetrySiteSnapshot.getEntryMethodTime();
+            if (Objects.isNull(entryMethodTime)) {
+                LogUtils.warn(log, "entry method time is null. easyRetryId:[{}]", retryHeader.getEasyRetryId());
             } else {
-                throw new EasyRetryClientException("调用链超时, 不在继续调用后面请求");
+                long transmitTime = retryHeader.getDdl() - (callRemoteTime - entryMethodTime);
+                LogUtils.info(log, "RPC传递header头 callRemoteTime:[{}] - entryMethodTime:[{}] = transmitTime:[{}]", entryMethodTime, callRemoteTime, transmitTime);
+                if (transmitTime > 0) {
+                    retryHeader.setDdl(transmitTime);
+                } else {
+                    throw new EasyRetryClientException("调用链超时, 不在继续调用后面请求");
+                }
             }
 
             header.put(SystemConstants.EASY_RETRY_HEAD_KEY, JsonUtil.toJsonString(retryHeader));
