@@ -4,7 +4,7 @@
       <div></div>
     </page-header-wrapper>
     <a-card :bordered="false">
-      <a-descriptions title="" bordered>
+      <a-descriptions title="" bordered v-if='retryInfo !== null'>
         <a-descriptions-item label="组名称">
           {{ retryInfo.groupName }}
         </a-descriptions-item>
@@ -60,7 +60,7 @@ export default {
   name: 'RetryLogInfo',
   data () {
     return {
-      retryInfo: {},
+      retryInfo: null,
       retryStatus: {
         '0': '处理中',
         '1': '处理成功',

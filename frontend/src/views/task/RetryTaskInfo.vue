@@ -3,7 +3,7 @@
     <page-header-wrapper @back="() => $router.go(-1)" style="margin: -24px -1px 0">
       <div></div>
     </page-header-wrapper>
-    <a-card :bordered="false">
+    <a-card :bordered="false" v-if="retryTaskInfo !==null ">
       <a-descriptions title="" bordered>
         <a-descriptions-item label="组名称">
           {{ retryTaskInfo.groupName }}
@@ -51,7 +51,7 @@
     </a-card>
     <div style="margin: 20px"></div>
     <a-card title="日志列表" style="width: 100%">
-      <RetryLogList v-if="retryTaskInfo !== null" ref="retryLogListRef" :showSearch="false"/>
+      <RetryLogList ref="retryLogListRef" :showSearch="false"/>
     </a-card>
   </div>
 </template>
@@ -68,7 +68,7 @@ export default {
   },
   data () {
     return {
-      retryTaskInfo: {},
+      retryTaskInfo: null,
       retryStatus: {
         '0': '处理中',
         '1': '处理成功',

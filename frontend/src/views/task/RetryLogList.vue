@@ -205,7 +205,6 @@ export default {
         if (this.groupName !== '' && this.uniqueId !== '') {
           parameter['groupName'] = this.groupName
           parameter['uniqueId'] = this.uniqueId
-          parameter['sceneName'] = this.sceneName
         }
         console.log('loadData.parameter', parameter)
         return getRetryTaskLogPage(Object.assign(parameter, this.queryParam))
@@ -243,7 +242,6 @@ export default {
     },
     refreshTable (v) {
       this.groupName = v.groupName
-      this.sceneName = v.sceneName
       this.uniqueId = v.uniqueId
       this.$refs.table.refresh(true)
     },
