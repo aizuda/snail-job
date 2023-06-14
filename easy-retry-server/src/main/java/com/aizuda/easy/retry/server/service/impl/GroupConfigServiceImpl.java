@@ -172,6 +172,9 @@ public class GroupConfigServiceImpl implements GroupConfigService {
         groupConfig.setGroupName(groupConfigRequestVO.getGroupName());
         if (Objects.isNull(groupConfigRequestVO.getGroupPartition())) {
             groupConfig.setGroupPartition(HashUtil.bkdrHash(groupConfigRequestVO.getGroupName()) % totalPartition);
+        } else {
+            Assert.isTrue(totalPartition > groupConfigRequestVO.getGroupPartition(), () -> new EasyRetryServerException("分区超过最大分区. [{}]", totalPartition-1));
+            Assert.isTrue(groupConfigRequestVO.getGroupPartition() > 0, () -> new EasyRetryServerException("分区不能是负数."));
         }
 
         Assert.isTrue(1 == groupConfigMapper.insert(groupConfig), () ->  new EasyRetryServerException("新增组异常异常 groupConfigVO[{}]", groupConfigRequestVO));
