@@ -164,7 +164,7 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
         try {
             TimeUnit.SECONDS.sleep(INITIAL_DELAY);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Thread.currentThread().interrupt();
         }
 
         while (!Thread.currentThread().isInterrupted()) {
@@ -234,13 +234,15 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
 
             } catch (InterruptedException e) {
                 LogUtils.error(log, "check balance interrupt");
+                Thread.currentThread().interrupt();
             } catch (Exception e) {
                 LogUtils.error(log, "check balance error", e);
             } finally {
                 try {
                     TimeUnit.SECONDS.sleep(1);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    LogUtils.error(log, "check balance interrupt");
+                    Thread.currentThread().interrupt();
                 }
             }
         }

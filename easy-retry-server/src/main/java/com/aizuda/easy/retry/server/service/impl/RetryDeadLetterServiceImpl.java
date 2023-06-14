@@ -89,6 +89,7 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
         retryTask.setNextTriggerAt(WaitStrategies.randomWait(1, TimeUnit.SECONDS, 60, TimeUnit.SECONDS).computeRetryTime(null));
         retryTask.setCreateDt(LocalDateTime.now());
         retryTask.setUpdateDt(LocalDateTime.now());
+        retryTask.setId(null);
         RequestDataHelper.setPartition(groupName);
         Assert.isTrue(1 == retryTaskMapper.insert(retryTask), () -> new EasyRetryServerException("新增重试任务失败"));
 
