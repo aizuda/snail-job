@@ -197,13 +197,13 @@ public class FilterStrategies {
     }
 
     /**
-     * 检查是否存在存活的客户端POD
+     * rebalance中数据不进行重试
      */
     private static final class ReBalanceFilterStrategies implements FilterStrategy {
 
         @Override
         public boolean filter(RetryContext retryContext) {
-            return ServerNodeBalance.RE_BALANCE_ING.get();
+            return !ServerNodeBalance.RE_BALANCE_ING.get();
         }
 
         @Override
