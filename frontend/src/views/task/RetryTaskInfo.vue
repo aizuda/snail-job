@@ -51,7 +51,7 @@
     </a-card>
     <div style="margin: 20px"></div>
     <a-card title="日志列表" style="width: 100%">
-      <RetryLogList v-if="retryTaskInfo !== null" ref="retryLogListRef" :showSearch="false" :group-name="retryTaskInfo.groupName" :unique-id="retryTaskInfo.uniqueId"/>
+      <RetryLogList v-if="retryTaskInfo !== null" ref="retryLogListRef" :showSearch="false"/>
     </a-card>
   </div>
 </template>
@@ -72,7 +72,8 @@ export default {
       retryStatus: {
         '0': '处理中',
         '1': '处理成功',
-        '2': '最大次数'
+        '2': '最大次数',
+        '3': '暂停'
       },
       taskType: {
         '1': {

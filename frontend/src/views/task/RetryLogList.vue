@@ -117,6 +117,10 @@ export default {
         '2': {
           'name': '最大次数',
           'color': '#68a5d0'
+        },
+        '3': {
+          'name': '暂停',
+          'color': '#f52d8e'
         }
       },
       taskType: {
@@ -201,8 +205,8 @@ export default {
         if (this.groupName !== '' && this.uniqueId !== '') {
           parameter['groupName'] = this.groupName
           parameter['uniqueId'] = this.uniqueId
+          parameter['sceneName'] = this.sceneName
         }
-        console.log('this.uniqueId', this.uniqueId)
         console.log('loadData.parameter', parameter)
         return getRetryTaskLogPage(Object.assign(parameter, this.queryParam))
           .then(res => {
@@ -224,7 +228,8 @@ export default {
       groupNameList: [],
       sceneList: [],
       groupName: '',
-      uniqueId: ''
+      uniqueId: '',
+      sceneName: ''
     }
   },
   created () {
@@ -238,6 +243,7 @@ export default {
     },
     refreshTable (v) {
       this.groupName = v.groupName
+      this.sceneName = v.sceneName
       this.uniqueId = v.uniqueId
       this.$refs.table.refresh(true)
     },
