@@ -142,7 +142,7 @@ public class ExecUnitActor extends AbstractActor  {
         String format = MessageFormat.format(URL, serverNode.getHostIp(), serverNode.getHostPort().toString(), serverNode.getContextPath());
         Result<DispatchRetryResultDTO> result = restTemplate.postForObject(format, requestEntity, Result.class);
 
-        LogUtils.info(log, "请求客户端 response:[{}}] ", JsonUtil.toJsonString(result));
+        LogUtils.info(log, "请求客户端 format:[{}] response:[{}}] ", format, JsonUtil.toJsonString(result));
         return result;
 
     }

@@ -121,14 +121,7 @@ public class ExecCallbackUnitActor extends AbstractActor  {
         retryCallbackDTO.setExecutorName(retryTask.getExecutorName());
         retryCallbackDTO.setUniqueId(retryTask.getUniqueId());
 
-        // 设置header
-        HttpHeaders requestHeaders = new HttpHeaders();
-        EasyRetryHeaders easyRetryHeaders = new EasyRetryHeaders();
-        easyRetryHeaders.setEasyRetry(Boolean.TRUE);
-        easyRetryHeaders.setEasyRetryId(retryTask.getUniqueId());
-        requestHeaders.add(SystemConstants.EASY_RETRY_HEAD_KEY, JsonUtil.toJsonString(easyRetryHeaders));
-
-        HttpEntity<RetryCallbackDTO> requestEntity = new HttpEntity<>(retryCallbackDTO, requestHeaders);
+        HttpEntity<RetryCallbackDTO> requestEntity = new HttpEntity<>(retryCallbackDTO);
 
         String format = MessageFormat.format(URL, serverNode.getHostIp(), serverNode.getHostPort().toString(), serverNode.getContextPath());
         Result result = restTemplate.postForObject(format, requestEntity, Result.class);
