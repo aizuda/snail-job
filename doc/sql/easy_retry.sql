@@ -49,6 +49,7 @@ CREATE TABLE `retry_dead_letter_0`
     KEY             `idx_group_name_scene_name` (`group_name`, `scene_name`),
     KEY             `idx_idempotent_id` (`idempotent_id`),
     KEY             `idx_biz_no` (`biz_no`),
+    KEY             `idx_create_dt` (`create_dt`),
     UNIQUE KEY `uk_name_unique_id` (`group_name`, `unique_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='重试死信队列'
 ;
@@ -75,6 +76,7 @@ CREATE TABLE `retry_task_0`
     KEY               `idx_retry_status` (`retry_status`),
     KEY               `idx_idempotent_id` (`idempotent_id`),
     KEY               `idx_biz_no` (`biz_no`),
+    KEY               `idx_create_dt` (`create_dt`),
     UNIQUE KEY `uk_name_unique_id` (`group_name`, `unique_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='重试表'
 ;
@@ -90,18 +92,30 @@ CREATE TABLE `retry_task_log`
     `executor_name` varchar(512) NOT NULL DEFAULT '' COMMENT '执行器名称',
     `args_str`      text         NOT NULL COMMENT '执行方法参数',
     `ext_attrs`     text         NOT NULL COMMENT '扩展字段',
-    `retry_status`  tinyint(4) NOT NULL DEFAULT '0' COMMENT '重试状态 0、失败 1、成功',
+    `retry_status`  tinyint(4) NOT NULL DEFAULT '0' COMMENT '重试状态 0、重试中 1、成功 2、最大次数',
     `task_type`     tinyint(4) NOT NULL DEFAULT '1' COMMENT '任务类型 1、重试数据 2、回调数据',
-    `create_dt`     datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_dt`     datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
-    `error_message` text         NOT NULL COMMENT '异常信息',
-    PRIMARY KEY (`id`),
+    `create_dt`     datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间'
+        PRIMARY KEY (`id`),
     KEY             `idx_group_name_scene_name` (`group_name`, `scene_name`),
     KEY             `idx_retry_status` (`retry_status`),
     KEY             `idx_idempotent_id` (`idempotent_id`),
     KEY             `idx_unique_id` (`unique_id`),
-    KEY             `idx_biz_no` (`biz_no`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='重试日志表'
+    KEY             `idx_biz_no` (`biz_no`),
+    KEY             `idx_create_dt` (`create_dt`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='重试日志基础信息表'
+;
+
+CREATE TABLE `retry_task_log_message`
+(
+    `id`         bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `group_name` varchar(64) NOT NULL COMMENT '组名称',
+    `unique_id`  varchar(64) NOT NULL COMMENT '同组下id唯一',
+    `create_dt`  datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `message`    text        NOT NULL COMMENT '异常信息',
+    PRIMARY KEY (`id`),
+    KEY          `idx_group_name_unique_id` (`group_name`, `unique_id`),
+    KEY          `idx_create_dt` (`create_dt`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='重试日志异常信息记录表'
 ;
 
 CREATE TABLE `scene_config`

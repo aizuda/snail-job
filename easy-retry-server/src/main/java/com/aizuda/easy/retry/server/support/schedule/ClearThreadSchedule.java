@@ -1,16 +1,18 @@
 package com.aizuda.easy.retry.server.support.schedule;
 
-import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.server.config.SystemProperties;
 import com.aizuda.easy.retry.server.dto.RegisterNodeInfo;
-import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
+import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskLogMapper;
+import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskLogMessageMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.ServerNodeMapper;
-import com.aizuda.easy.retry.server.persistence.mybatis.po.ServerNode;
+import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTaskLog;
+import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTaskLogMessage;
 import com.aizuda.easy.retry.server.persistence.support.ConfigAccess;
 import com.aizuda.easy.retry.server.service.RetryService;
 import com.aizuda.easy.retry.server.support.cache.CacheRegisterTable;
 import com.aizuda.easy.retry.server.support.register.ServerRegister;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +44,13 @@ public class ClearThreadSchedule {
     @Autowired
     @Qualifier("configAccessProcessor")
     private ConfigAccess configAccess;
+
+    @Autowired
+    private RetryTaskLogMessageMapper retryTaskLogMessageMapper;
+    @Autowired
+    private RetryTaskLogMapper retryTaskLogMapper;
+    @Autowired
+    private SystemProperties systemProperties;
 
     /**
      * 删除过期下线机器
@@ -92,6 +101,21 @@ public class ClearThreadSchedule {
             LogUtils.error(log, "clearFinishAndMoveDeadLetterRetryTask 失败", e);
         }
 
+    }
+
+    /**
+     * 清理日志 一小时运行一次
+     */
+    @Scheduled(cron = "0 0 0/1 * * ? ")
+    @SchedulerLock(name = "clearLog", lockAtMostFor = "PT1H", lockAtLeastFor = "PT1H")
+    public void clearLog() {
+        try {
+            LocalDateTime endTime = LocalDateTime.now().minusDays(systemProperties.getLogStorage());
+            retryTaskLogMapper.delete(new LambdaUpdateWrapper<RetryTaskLog>().le(RetryTaskLog::getCreateDt, endTime));
+            retryTaskLogMessageMapper.delete(new LambdaUpdateWrapper<RetryTaskLogMessage>().le(RetryTaskLogMessage::getCreateDt, endTime));
+        } catch (Exception e) {
+            LogUtils.error(log, "clear log error", e);
+        }
     }
 
 }

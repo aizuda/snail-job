@@ -4,17 +4,21 @@ import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.server.enums.DelayLevelEnum;
 import com.aizuda.easy.retry.server.enums.StatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.server.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.model.dto.RetryTaskDTO;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryDeadLetterMapper;
+import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskLogMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.SceneConfigMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.GroupConfig;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryDeadLetter;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask;
+import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTaskLog;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.SceneConfig;
 import com.aizuda.easy.retry.server.persistence.support.ConfigAccess;
 import com.aizuda.easy.retry.server.persistence.support.RetryTaskAccess;
+import com.aizuda.easy.retry.server.service.convert.RetryTaskLogConverter;
 import com.aizuda.easy.retry.server.support.generator.IdGenerator;
 import com.aizuda.easy.retry.server.support.strategy.WaitStrategies;
 import com.aizuda.easy.retry.server.support.strategy.WaitStrategies.WaitStrategyEnum;
@@ -64,7 +68,8 @@ public class RetryServiceImpl implements RetryService {
     private RetryDeadLetterMapper retryDeadLetterMapper;
     @Autowired
     private SceneConfigMapper sceneConfigMapper;
-
+    @Autowired
+    private RetryTaskLogMapper retryTaskLogMapper;
 
     @Transactional
     @Override
@@ -100,10 +105,12 @@ public class RetryServiceImpl implements RetryService {
             return Boolean.TRUE;
         }
 
+        LocalDateTime now = LocalDateTime.now();
         RetryTask retryTask = RetryTaskConverter.INSTANCE.toRetryTask(retryTaskDTO);
         retryTask.setUniqueId(getIdGenerator(retryTaskDTO.getGroupName()));
-        retryTask.setCreateDt(LocalDateTime.now());
-        retryTask.setUpdateDt(LocalDateTime.now());
+        retryTask.setTaskType(TaskTypeEnum.RETRY.getType());
+        retryTask.setCreateDt(now);
+        retryTask.setUpdateDt(now);
 
         if (StringUtils.isBlank(retryTask.getExtAttrs())) {
             retryTask.setExtAttrs(StringUtils.EMPTY);
@@ -112,6 +119,14 @@ public class RetryServiceImpl implements RetryService {
         retryTask.setNextTriggerAt(WaitStrategies.randomWait(1, TimeUnit.SECONDS, 60, TimeUnit.SECONDS).computeRetryTime(null));
 
         Assert.isTrue(1 ==  retryTaskAccess.saveRetryTask(retryTask), () ->  new EasyRetryServerException("failed to report data"));
+
+        // 初始化日志
+        RetryTaskLog retryTaskLog = RetryTaskLogConverter.INSTANCE.toRetryTask(retryTask);
+        retryTaskLog.setTaskType(TaskTypeEnum.RETRY.getType());
+        retryTaskLog.setCreateDt(now);
+        Assert.isTrue(1 ==  retryTaskLogMapper.insert(retryTaskLog),
+            () -> new EasyRetryServerException("新增重试日志失败"));
+
         return Boolean.TRUE;
     }
 
@@ -149,7 +164,7 @@ public class RetryServiceImpl implements RetryService {
         // 清除重试完成的数据
         clearFinishRetryData(groupId);
 
-        List<RetryTask> retryTasks = retryTaskAccess.listRetryTaskByRetryCount(groupId, RetryStatusEnum.MAX_RETRY_COUNT.getStatus());
+        List<RetryTask> retryTasks = retryTaskAccess.listRetryTaskByRetryCount(groupId, RetryStatusEnum.MAX_COUNT.getStatus());
         if (CollectionUtils.isEmpty(retryTasks)) {
             return Boolean.TRUE;
         }

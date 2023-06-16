@@ -18,6 +18,7 @@ public class AkkaConfiguration {
     private static final String DISPATCH_RETRY_ACTOR_SYSTEM = "DISPATCH_RETRY_ACTOR_SYSTEM";
     private static final String DISPATCH_EXEC_UNIT_RETRY_ACTOR_SYSTEM = "DISPATCH_EXEC_UNIT_RETRY_ACTOR_SYSTEM";
     private static final String DISPATCH_RESULT_ACTOR_SYSTEM = "DISPATCH_RESULT_ACTOR_SYSTEM";
+    private static final String LOG_ACTOR_SYSTEM = "LOG_ACTOR_SYSTEM";
 
     @Autowired
     private ApplicationContext applicationContext;
@@ -57,6 +58,18 @@ public class AkkaConfiguration {
     @Bean("dispatchResultActorSystem")
     public ActorSystem createDispatchResultRetryActorSystem() {
         ActorSystem system = ActorSystem.create(DISPATCH_RESULT_ACTOR_SYSTEM);
+        springExtension.initialize(applicationContext);
+        return system;
+    }
+
+    /**
+     * 日志处理
+     *
+     * @return {@link ActorSystem} 顶级actor
+     */
+    @Bean("logActorSystem")
+    public ActorSystem createLogActorSystem() {
+        ActorSystem system = ActorSystem.create(LOG_ACTOR_SYSTEM);
         springExtension.initialize(applicationContext);
         return system;
     }

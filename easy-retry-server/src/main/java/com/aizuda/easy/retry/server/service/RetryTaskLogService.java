@@ -1,7 +1,9 @@
 package com.aizuda.easy.retry.server.service;
 
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
+import com.aizuda.easy.retry.server.web.model.request.RetryTaskLogMessageQueryVO;
 import com.aizuda.easy.retry.server.web.model.request.RetryTaskLogQueryVO;
+import com.aizuda.easy.retry.server.web.model.response.RetryTaskLogMessageResponseVO;
 import com.aizuda.easy.retry.server.web.model.response.RetryTaskLogResponseVO;
 
 import java.util.List;
@@ -14,6 +16,8 @@ import java.util.List;
 public interface RetryTaskLogService {
 
     PageResult<List<RetryTaskLogResponseVO>> getRetryTaskLogPage(RetryTaskLogQueryVO queryVO);
+
+    PageResult<List<RetryTaskLogMessageResponseVO>> getRetryTaskLogMessagePage(RetryTaskLogMessageQueryVO queryVO);
 
     RetryTaskLogResponseVO getRetryTaskLogById(Long id);
 

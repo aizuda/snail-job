@@ -2,8 +2,10 @@ package com.aizuda.easy.retry.server.web.controller;
 
 import com.aizuda.easy.retry.server.service.RetryTaskLogService;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
+import com.aizuda.easy.retry.server.web.model.request.RetryTaskLogMessageQueryVO;
 import com.aizuda.easy.retry.server.web.model.request.RetryTaskLogQueryVO;
 import com.aizuda.easy.retry.server.web.annotation.LoginRequired;
+import com.aizuda.easy.retry.server.web.model.response.RetryTaskLogMessageResponseVO;
 import com.aizuda.easy.retry.server.web.model.response.RetryTaskLogResponseVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,6 +32,12 @@ public class RetryTaskLogController {
     @GetMapping("list")
     public PageResult<List<RetryTaskLogResponseVO>> getRetryTaskLogPage(RetryTaskLogQueryVO queryVO) {
         return retryTaskLogService.getRetryTaskLogPage(queryVO);
+    }
+
+    @LoginRequired
+    @GetMapping("/message/list")
+    public PageResult<List<RetryTaskLogMessageResponseVO>> getRetryTaskLogPage(RetryTaskLogMessageQueryVO queryVO) {
+        return retryTaskLogService.getRetryTaskLogMessagePage(queryVO);
     }
 
     @LoginRequired

@@ -2,15 +2,15 @@ package com.aizuda.easy.retry.server.akka;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
+import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.server.support.dispatch.actor.exec.ExecCallbackUnitActor;
 import com.aizuda.easy.retry.server.support.dispatch.actor.exec.ExecUnitActor;
+import com.aizuda.easy.retry.server.support.dispatch.actor.log.LogActor;
 import com.aizuda.easy.retry.server.support.dispatch.actor.result.FailureActor;
 import com.aizuda.easy.retry.server.support.dispatch.actor.result.FinishActor;
 import com.aizuda.easy.retry.server.support.dispatch.actor.result.NoRetryActor;
-import com.aizuda.easy.retry.server.support.dispatch.actor.scan.AbstractScanGroup;
 import com.aizuda.easy.retry.server.support.dispatch.actor.scan.ScanCallbackGroupActor;
 import com.aizuda.easy.retry.server.support.dispatch.actor.scan.ScanGroupActor;
-import com.aizuda.easy.retry.common.core.context.SpringContext;
 
 /**
  * Actor生成器
@@ -50,7 +50,7 @@ public class ActorGenerator {
     }
 
     /**
-     * 不触发重试actor
+     * 回调处理
      *
      * @return actor 引用
      */
@@ -85,6 +85,16 @@ public class ActorGenerator {
         return getDispatchRetryActorSystem().actorOf(getSpringExtension().props(ScanCallbackGroupActor.BEAN_NAME));
     }
 
+    /**
+     * 生成扫描重试数据的actor
+     *
+     * @return actor 引用
+     */
+    public static ActorRef logActor() {
+        return getLogActorSystemSystem().actorOf(getSpringExtension().props(LogActor.BEAN_NAME));
+    }
+
+
     public static SpringExtension getSpringExtension() {
        return SpringContext.getBeanByType(SpringExtension.class);
     }
@@ -104,6 +114,7 @@ public class ActorGenerator {
     public static ActorSystem getDispatchExecUnitActorSystem() {
         return SpringContext.getBean("dispatchExecUnitActorSystem", ActorSystem.class);
     }
+
     /**
      * 重试任务结果分发器
      * @return
@@ -112,4 +123,12 @@ public class ActorGenerator {
         return SpringContext.getBean("dispatchResultActorSystem", ActorSystem.class);
     }
 
+    /**
+     * 日志记录分发器
+     *
+     * @return
+     */
+    public static ActorSystem getLogActorSystemSystem() {
+        return SpringContext.getBean("logActorSystem", ActorSystem.class);
+    }
 }

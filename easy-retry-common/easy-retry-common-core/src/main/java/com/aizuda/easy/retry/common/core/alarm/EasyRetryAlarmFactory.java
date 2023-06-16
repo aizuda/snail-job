@@ -11,12 +11,12 @@ import java.util.concurrent.ConcurrentHashMap;
  * @date : 2021-11-25 09:20
  */
 @Component
-public class AltinAlarmFactory {
+public class EasyRetryAlarmFactory {
 
     private final Map<Integer, Alarm> alarmMap = new ConcurrentHashMap<>();
 
     @Autowired
-    public AltinAlarmFactory(Map<String, Alarm> map) {
+    public EasyRetryAlarmFactory(Map<String, Alarm> map) {
         for (Map.Entry<String, Alarm> entry : map.entrySet()) {
             alarmMap.put(entry.getValue().getAlarmType(), entry.getValue());
         }

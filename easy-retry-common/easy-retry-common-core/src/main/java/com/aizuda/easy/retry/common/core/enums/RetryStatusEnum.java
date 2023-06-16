@@ -25,9 +25,9 @@ public enum RetryStatusEnum {
     FINISH(1),
 
     /**
-     * 到达最大重试次数
+     * 到达最大次数
      */
-    MAX_RETRY_COUNT(2),
+    MAX_COUNT(2),
 
     /**
      * 暂停重试

@@ -140,7 +140,7 @@ public class RetryEndPoint {
             retryCompleteCallback.doSuccessCallback(retryerInfo.getScene(), retryerInfo.getExecutorClassName(), deSerialize);
         }
 
-        if (RetryStatusEnum.MAX_RETRY_COUNT.getStatus().equals(callbackDTO.getRetryStatus())) {
+        if (RetryStatusEnum.MAX_COUNT.getStatus().equals(callbackDTO.getRetryStatus())) {
             retryCompleteCallback.doMaxRetryCallback(retryerInfo.getScene(), retryerInfo.getExecutorClassName(), deSerialize);
         }
 

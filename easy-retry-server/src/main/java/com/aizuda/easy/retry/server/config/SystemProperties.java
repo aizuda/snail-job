@@ -46,4 +46,38 @@ public class SystemProperties {
      */
     private int step = 100;
 
+    /**
+     * 日志默认保存天数
+     */
+    private int logStorage = 90;
+
+    /**
+     * 回调配置
+     */
+    private Callback callback = new Callback();
+
+    /**
+     * 回调配置
+     */
+    @Data
+    public static class Callback {
+
+        /**
+         * 回调id前缀
+         */
+        String prefix = "CB_";
+
+        /**
+         * 回调的最大执行次数
+         */
+        private int maxCount = 288;
+
+        /**
+         * 间隔时间
+         */
+        private long triggerInterval = 15 * 60;
+
+    }
+
+
 }

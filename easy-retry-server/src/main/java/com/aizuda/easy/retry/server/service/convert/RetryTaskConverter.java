@@ -1,9 +1,12 @@
 package com.aizuda.easy.retry.server.service.convert;
 
 import com.aizuda.easy.retry.server.model.dto.RetryTaskDTO;
+import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryDeadLetter;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask;
 import com.aizuda.easy.retry.server.web.model.request.RetryTaskSaveRequestVO;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Mappings;
 import org.mapstruct.factory.Mappers;
 
 import java.util.List;
@@ -20,6 +23,11 @@ public interface RetryTaskConverter {
     RetryTask toRetryTask(RetryTaskDTO retryTaskDTO);
 
     RetryTask toRetryTask(RetryTask retryTask);
+
+    @Mappings({
+        @Mapping(target = "id", ignore = true),
+    })
+    RetryTask toRetryTask(RetryDeadLetter retryDeadLetter);
 
     RetryTask toRetryTask(RetryTaskSaveRequestVO retryTaskSaveRequestVO);
 

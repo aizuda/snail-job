@@ -1,24 +1,20 @@
 package com.aizuda.easy.retry.server.support.dispatch.actor.exec;
 
 import akka.actor.AbstractActor;
-import cn.hutool.core.lang.Assert;
-import com.aizuda.easy.retry.client.model.DispatchRetryResultDTO;
+import akka.actor.ActorRef;
 import com.aizuda.easy.retry.client.model.RetryCallbackDTO;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
+import com.aizuda.easy.retry.server.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.enums.StatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.model.EasyRetryHeaders;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
-import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
-import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskLogMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask;
-import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTaskLog;
-import com.aizuda.easy.retry.server.persistence.mybatis.po.ServerNode;
-import com.aizuda.easy.retry.server.service.convert.RetryTaskLogConverter;
 import com.aizuda.easy.retry.server.support.IdempotentStrategy;
 import com.aizuda.easy.retry.server.support.context.CallbackRetryContext;
+import com.aizuda.easy.retry.server.support.dispatch.actor.log.RetryTaskLogDTO;
 import com.aizuda.easy.retry.server.support.retry.RetryExecutor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
@@ -32,7 +28,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import java.text.MessageFormat;
-import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.concurrent.Callable;
 
@@ -55,8 +50,6 @@ public class ExecCallbackUnitActor extends AbstractActor  {
     @Qualifier("bitSetIdempotentStrategyHandler")
     private IdempotentStrategy<String, Integer> idempotentStrategy;
     @Autowired
-    private RetryTaskLogMapper retryTaskLogMapper;
-    @Autowired
     private RestTemplate restTemplate;
 
     @Override
@@ -67,34 +60,44 @@ public class ExecCallbackUnitActor extends AbstractActor  {
             RetryTask retryTask = context.getRetryTask();
             RegisterNodeInfo serverNode = context.getServerNode();
 
-            RetryTaskLog retryTaskLog = RetryTaskLogConverter.INSTANCE.toRetryTask(retryTask);
-            retryTaskLog.setErrorMessage(StringUtils.EMPTY);
-
+            RetryTaskLogDTO retryTaskLog = new RetryTaskLogDTO();
+            retryTaskLog.setGroupName(retryTask.getGroupName());
+            retryTaskLog.setUniqueId(retryTask.getUniqueId());
+            retryTaskLog.setRetryStatus(retryTask.getRetryStatus());
             try {
 
                 if (Objects.nonNull(serverNode)) {
-                    retryExecutor.call((Callable<Result<Void>>) () -> callClient(retryTask, retryTaskLog, serverNode));
+                    retryExecutor.call((Callable<Result<Void>>) () -> {
+                        Result<Void> result = callClient(retryTask, serverNode);
+
+                        if (StatusEnum.YES.getStatus() != result.getStatus()  && StringUtils.isNotBlank(result.getMessage())) {
+                            retryTaskLog.setMessage(result.getMessage());
+                        } else {
+                            retryTaskLog.setMessage("调度成功");
+                        }
+
+                        return result;
+                    });
                     if (context.hasException()) {
-                        retryTaskLog.setErrorMessage(context.getException().getMessage());
+                        retryTaskLog.setMessage(context.getException().getMessage());
                     }
                 } else {
-                    retryTaskLog.setErrorMessage("There are currently no available client PODs.");
+                    retryTaskLog.setMessage("There are currently no available client PODs.");
                 }
 
             }catch (Exception e) {
-                LogUtils.error(log, "回调客户端失败 retryTask:[{}]", JsonUtil.toJsonString(retryTask), e);
-                retryTaskLog.setErrorMessage(StringUtils.isBlank(e.getMessage()) ? StringUtils.EMPTY : e.getMessage());
+                LogUtils.error(log, "callback client error. retryTask:[{}]", JsonUtil.toJsonString(retryTask), e);
+                retryTaskLog.setMessage(StringUtils.isBlank(e.getMessage()) ? StringUtils.EMPTY : e.getMessage());
             } finally {
 
                 // 清除幂等标识位
                 idempotentStrategy.clear(retryTask.getGroupName(), retryTask.getId().intValue());
+
+                ActorRef actorRef = ActorGenerator.logActor();
+                actorRef.tell(retryTaskLog, actorRef);
+
                 getContext().stop(getSelf());
 
-                // 记录重试日志
-                retryTaskLog.setCreateDt(LocalDateTime.now());
-                retryTaskLog.setId(null);
-                Assert.isTrue(1 ==  retryTaskLogMapper.insert(retryTaskLog),
-                    () -> new EasyRetryServerException("新增重试日志失败"));
             }
 
         }).build();
@@ -106,7 +109,7 @@ public class ExecCallbackUnitActor extends AbstractActor  {
      * @param retryTask {@link RetryTask} 需要重试的数据
      * @return 重试结果返回值
      */
-    private Result<Void> callClient(RetryTask retryTask, RetryTaskLog retryTaskLog, RegisterNodeInfo serverNode) {
+    private Result<Void> callClient(RetryTask retryTask, RegisterNodeInfo serverNode) {
 
         // 回调参数
         RetryCallbackDTO retryCallbackDTO = new RetryCallbackDTO();
@@ -129,20 +132,8 @@ public class ExecCallbackUnitActor extends AbstractActor  {
 
         String format = MessageFormat.format(URL, serverNode.getHostIp(), serverNode.getHostPort().toString(), serverNode.getContextPath());
         Result result = restTemplate.postForObject(format, requestEntity, Result.class);
-        LogUtils.info(log, "回调请求客户端 response:[{}}] ", JsonUtil.toJsonString(result));
 
-        if (StatusEnum.YES.getStatus() != result.getStatus()  && StringUtils.isNotBlank(result.getMessage())) {
-            retryTaskLog.setErrorMessage(result.getMessage());
-        } else {
-            DispatchRetryResultDTO data = JsonUtil.parseObject(JsonUtil.toJsonString(result.getData()), DispatchRetryResultDTO.class);
-            result.setData(data);
-            if (Objects.nonNull(data) && StringUtils.isNotBlank(data.getExceptionMsg())) {
-                retryTaskLog.setErrorMessage(data.getExceptionMsg());
-            }
-
-        }
-
-        LogUtils.info(log, "请求客户端 response:[{}}] ", JsonUtil.toJsonString(result));
+        LogUtils.info(log, "请求客户端 format:[{}] response:[{}}] ", format, JsonUtil.toJsonString(result));
         return result;
 
     }

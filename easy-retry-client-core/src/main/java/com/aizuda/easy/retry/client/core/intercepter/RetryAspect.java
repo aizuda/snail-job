@@ -11,14 +11,12 @@ import com.aizuda.easy.retry.client.core.annotation.Retryable;
 import com.aizuda.easy.retry.client.core.retryer.RetryerResultContext;
 import com.aizuda.easy.retry.common.core.alarm.Alarm;
 import com.aizuda.easy.retry.common.core.alarm.AlarmContext;
-import com.aizuda.easy.retry.common.core.alarm.AltinAlarmFactory;
-import com.aizuda.easy.retry.common.core.constant.SystemConstants;
+import com.aizuda.easy.retry.common.core.alarm.EasyRetryAlarmFactory;
 import com.aizuda.easy.retry.common.core.enums.NotifySceneEnum;
 import com.aizuda.easy.retry.common.core.enums.RetryResultStatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.model.EasyRetryHeaders;
 import com.aizuda.easy.retry.common.core.util.EnvironmentUtils;
-import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.model.dto.ConfigDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -58,7 +56,7 @@ public class RetryAspect implements Ordered {
     @Qualifier("localRetryStrategies")
     private RetryStrategy retryStrategy;
     @Autowired
-    private AltinAlarmFactory altinAlarmFactory;
+    private EasyRetryAlarmFactory easyRetryAlarmFactory;
     @Autowired
     private StandardEnvironment standardEnvironment;
 
@@ -186,7 +184,7 @@ public class RetryAspect implements Ordered {
                         .title("retry component handling exception:[{}]", EasyRetryProperties.getGroup())
                         .notifyAttribute(notifyAttribute.getNotifyAttribute());
 
-                Alarm<AlarmContext> alarmType = altinAlarmFactory.getAlarmType(notifyAttribute.getNotifyType());
+                Alarm<AlarmContext> alarmType = easyRetryAlarmFactory.getAlarmType(notifyAttribute.getNotifyType());
                 alarmType.asyncSendMessage(context);
             }
         } catch (Exception e1) {

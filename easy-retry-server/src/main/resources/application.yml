@@ -43,5 +43,11 @@ easy-retry:
   netty-port: 1788  # 服务端netty端口
   total-partition: 2  # 重试和死信表的分区总数
   limiter: 10 # 一个客户端每秒最多接收的重试数量指令
+  step: 100 # 号段模式下步长配置
+  log-storage: 90 # 日志保存时间(单位: day)
+  callback:
+    max-count: 288
+    trigger-interval: 900
+
 
 

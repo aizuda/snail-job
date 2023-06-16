@@ -3,11 +3,15 @@ package com.aizuda.easy.retry.server.support.handler;
 import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
+import com.aizuda.easy.retry.server.config.SystemProperties;
 import com.aizuda.easy.retry.server.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
+import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskLogMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask;
+import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTaskLog;
 import com.aizuda.easy.retry.server.persistence.support.RetryTaskAccess;
 import com.aizuda.easy.retry.server.service.convert.RetryTaskConverter;
+import com.aizuda.easy.retry.server.service.convert.RetryTaskLogConverter;
 import com.aizuda.easy.retry.server.support.strategy.WaitStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -29,6 +33,10 @@ public class CallbackRetryTaskHandler {
     @Autowired
     @Qualifier("retryTaskAccessProcessor")
     private RetryTaskAccess<RetryTask> retryTaskAccess;
+    @Autowired
+    private RetryTaskLogMapper retryTaskLogMapper;
+    @Autowired
+    private SystemProperties systemProperties;
 
     @Transactional
     public void create(RetryTask retryTask) {
@@ -36,7 +44,7 @@ public class CallbackRetryTaskHandler {
 
         callbackRetryTask.setTaskType(TaskTypeEnum.CALLBACK.getType());
         callbackRetryTask.setId(null);
-        callbackRetryTask.setUniqueId(SystemConstants.CALL_BACK.CB_ + retryTask.getUniqueId());
+        callbackRetryTask.setUniqueId(systemProperties.getCallback().getPrefix() + retryTask.getUniqueId());
         callbackRetryTask.setRetryStatus(RetryStatusEnum.RUNNING.getStatus());
         callbackRetryTask.setRetryCount(0);
         callbackRetryTask.setCreateDt(LocalDateTime.now());
@@ -45,6 +53,14 @@ public class CallbackRetryTaskHandler {
         callbackRetryTask.setNextTriggerAt(WaitStrategies.randomWait(1, TimeUnit.SECONDS, 60, TimeUnit.SECONDS).computeRetryTime(null));
 
         Assert.isTrue(1 == retryTaskAccess.saveRetryTask(callbackRetryTask), () -> new EasyRetryServerException("failed to report data"));
+
+        // 初始化回调日志
+        RetryTaskLog retryTaskLog = RetryTaskLogConverter.INSTANCE.toRetryTask(callbackRetryTask);
+        // 记录重试日志
+        retryTaskLog.setTaskType(TaskTypeEnum.CALLBACK.getType());
+        retryTaskLog.setCreateDt(LocalDateTime.now());
+        Assert.isTrue(1 ==  retryTaskLogMapper.insert(retryTaskLog),
+            () -> new EasyRetryServerException("新增重试日志失败"));
 
     }
 

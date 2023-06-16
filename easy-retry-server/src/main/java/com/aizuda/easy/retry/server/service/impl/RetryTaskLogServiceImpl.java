@@ -1,7 +1,11 @@
 package com.aizuda.easy.retry.server.service.impl;
 
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskLogMapper;
+import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskLogMessageMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTaskLog;
+import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTaskLogMessage;
+import com.aizuda.easy.retry.server.web.model.request.RetryTaskLogMessageQueryVO;
+import com.aizuda.easy.retry.server.web.model.response.RetryTaskLogMessageResponseVO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
@@ -24,6 +28,8 @@ public class RetryTaskLogServiceImpl implements RetryTaskLogService {
 
     @Autowired
     private RetryTaskLogMapper retryTaskLogMapper;
+    @Autowired
+    private RetryTaskLogMessageMapper retryTaskLogMessageMapper;
 
     @Override
     public PageResult<List<RetryTaskLogResponseVO>> getRetryTaskLogPage(RetryTaskLogQueryVO queryVO) {
@@ -48,13 +54,35 @@ public class RetryTaskLogServiceImpl implements RetryTaskLogService {
         }
 
         retryTaskLogLambdaQueryWrapper.select(RetryTaskLog::getGroupName, RetryTaskLog::getId, RetryTaskLog::getSceneName,
-                RetryTaskLog::getIdempotentId, RetryTaskLog::getBizNo, RetryTaskLog::getErrorMessage, RetryTaskLog::getRetryStatus,
+                RetryTaskLog::getIdempotentId, RetryTaskLog::getBizNo, RetryTaskLog::getRetryStatus,
                 RetryTaskLog::getCreateDt, RetryTaskLog::getUniqueId, RetryTaskLog::getTaskType);
         PageDTO<RetryTaskLog> retryTaskLogPageDTO = retryTaskLogMapper.selectPage(pageDTO, retryTaskLogLambdaQueryWrapper.orderByDesc(RetryTaskLog::getCreateDt));
 
         return new PageResult<>(
                 retryTaskLogPageDTO,
                 RetryTaskLogResponseVOConverter.INSTANCE.batchConvert(retryTaskLogPageDTO.getRecords()));
+    }
+
+    @Override
+    public PageResult<List<RetryTaskLogMessageResponseVO>> getRetryTaskLogMessagePage(
+         RetryTaskLogMessageQueryVO queryVO) {
+
+        PageDTO<RetryTaskLogMessage> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
+        LambdaQueryWrapper<RetryTaskLogMessage> retryTaskLogLambdaQueryWrapper = new LambdaQueryWrapper<>();
+
+        if (StringUtils.isNotBlank(queryVO.getGroupName())) {
+            retryTaskLogLambdaQueryWrapper.eq(RetryTaskLogMessage::getGroupName, queryVO.getGroupName());
+        }
+        if (StringUtils.isNotBlank(queryVO.getUniqueId())) {
+            retryTaskLogLambdaQueryWrapper.eq(RetryTaskLogMessage::getUniqueId, queryVO.getUniqueId());
+        }
+
+        PageDTO<RetryTaskLogMessage> retryTaskLogPageDTO = retryTaskLogMessageMapper.selectPage(pageDTO, retryTaskLogLambdaQueryWrapper.orderByDesc(RetryTaskLogMessage::getCreateDt));
+
+        return new PageResult<>(
+            retryTaskLogPageDTO,
+            RetryTaskLogResponseVOConverter.INSTANCE.toRetryTaskLogMessageResponseVO(retryTaskLogPageDTO.getRecords()));
+
     }
 
     @Override

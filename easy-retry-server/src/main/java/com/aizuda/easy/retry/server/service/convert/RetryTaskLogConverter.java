@@ -3,6 +3,8 @@ package com.aizuda.easy.retry.server.service.convert;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTaskLog;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Mappings;
 import org.mapstruct.factory.Mappers;
 
 /**
@@ -14,5 +16,8 @@ public interface RetryTaskLogConverter {
 
     RetryTaskLogConverter INSTANCE = Mappers.getMapper(RetryTaskLogConverter.class);
 
+    @Mappings({
+        @Mapping(target = "id", ignore = true),
+    })
     RetryTaskLog toRetryTask(RetryTask retryTask);
 }

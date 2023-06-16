@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.server.support.strategy;
 
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
+import com.aizuda.easy.retry.server.config.SystemProperties;
 import com.aizuda.easy.retry.server.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask;
@@ -161,10 +162,11 @@ public class WaitStrategies {
         @Override
         public LocalDateTime computeRetryTime(RetryContext retryContext) {
             RetryTask retryTask = retryContext.getRetryTask();
-            int triggerInterval;
+            long triggerInterval;
             if (TaskTypeEnum.CALLBACK.getType().equals(retryTask.getTaskType())) {
                 // 回调失败的默认15分钟执行一次重试
-                triggerInterval = SystemConstants.CALL_BACK.TRIGGER_INTERVAL;
+                SystemProperties systemProperties = SpringContext.CONTEXT.getBean(SystemProperties.class);
+                triggerInterval = systemProperties.getCallback().getTriggerInterval();
             } else {
                 ConfigAccess configAccess = SpringContext.CONTEXT.getBean("configAccessProcessor", ConfigAccess.class);
                 SceneConfig sceneConfig =

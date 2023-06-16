@@ -1,8 +1,11 @@
 package com.aizuda.easy.retry.server.service.impl;
 
+import com.aizuda.easy.retry.server.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskLogMapper;
+import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskLogMessageMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.ServerNodeMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTaskLog;
+import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTaskLogMessage;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.ServerNode;
 import com.aizuda.easy.retry.server.service.convert.ServerNodeResponseVOConverter;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
@@ -44,6 +47,9 @@ public class DashBoardServiceImpl implements DashBoardService {
     private RetryTaskLogMapper retryTaskLogMapper;
 
     @Autowired
+    private RetryTaskLogMessageMapper retryTaskLogMessageMapper;
+
+    @Autowired
     private ServerNodeMapper serverNodeMapper;
 
     @Override
@@ -53,7 +59,7 @@ public class DashBoardServiceImpl implements DashBoardService {
         taskQuantityResponseVO.setTotal(retryTaskLogMapper.countTaskTotal());
 
         taskQuantityResponseVO.setFinish(retryTaskLogMapper.countTaskByRetryStatus(RetryStatusEnum.FINISH.getStatus()));
-        taskQuantityResponseVO.setMaxRetryCount(retryTaskLogMapper.countTaskByRetryStatus(RetryStatusEnum.MAX_RETRY_COUNT.getStatus()));
+        taskQuantityResponseVO.setMaxRetryCount(retryTaskLogMapper.countTaskByRetryStatus(RetryStatusEnum.MAX_COUNT.getStatus()));
         taskQuantityResponseVO.setRunning(taskQuantityResponseVO.getTotal() - taskQuantityResponseVO.getFinish() - taskQuantityResponseVO.getMaxRetryCount());
 
         return taskQuantityResponseVO;
@@ -63,7 +69,8 @@ public class DashBoardServiceImpl implements DashBoardService {
     public DispatchQuantityResponseVO countDispatch() {
         DispatchQuantityResponseVO dispatchQuantityResponseVO = new DispatchQuantityResponseVO();
 
-        Long total = retryTaskLogMapper.selectCount(null);
+        // 任务的总调度量
+        Long total = retryTaskLogMessageMapper.selectCount(null);
         dispatchQuantityResponseVO.setTotal(total);
 
         if (total == 0) {
@@ -71,8 +78,7 @@ public class DashBoardServiceImpl implements DashBoardService {
         }
 
         Long success = retryTaskLogMapper.selectCount(new LambdaQueryWrapper<RetryTaskLog>()
-                .in(RetryTaskLog::getRetryStatus, RetryStatusEnum.MAX_RETRY_COUNT.getStatus(),
-                        RetryStatusEnum.FINISH.getStatus()));
+                .eq(RetryTaskLog::getRetryStatus, RetryStatusEnum.FINISH.getStatus()));
         dispatchQuantityResponseVO.setSuccessPercent(BigDecimal.valueOf(success).divide(BigDecimal.valueOf(total), 2, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100)));
 
         return dispatchQuantityResponseVO;
