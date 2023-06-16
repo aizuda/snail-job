@@ -11,6 +11,8 @@ import java.time.LocalDateTime;
 @Data
 public class RetryTaskLogMessageResponseVO {
 
+    private Long id;
+
     private String message;
 
     private LocalDateTime createDt;

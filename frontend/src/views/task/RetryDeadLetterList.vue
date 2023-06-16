@@ -24,8 +24,13 @@
               </a-form-item>
             </a-col>
             <a-col :md="8" :sm="24">
-              <a-form-item label="业务id">
-                <a-input v-model="queryParam.idempotentId" placeholder="请输入业务id" allowClear/>
+              <a-form-item label="幂等id">
+                <a-input v-model="queryParam.idempotentId" placeholder="请输入幂等id" allowClear/>
+              </a-form-item>
+            </a-col>
+            <a-col :md="8" :sm="24">
+              <a-form-item label="UniqueId">
+                <a-input v-model="queryParam.uniqueId" placeholder="请输入唯一id" allowClear/>
               </a-form-item>
             </a-col>
           </template>
@@ -149,6 +154,11 @@ export default {
           title: '场景id',
           dataIndex: 'sceneName',
           ellipsis: true
+        },
+        {
+          title: 'UniqueId',
+          dataIndex: 'uniqueId',
+          width: '10%'
         },
         {
           title: '幂等id',

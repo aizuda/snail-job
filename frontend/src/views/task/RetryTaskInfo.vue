@@ -49,22 +49,19 @@
         </a-descriptions-item>
       </a-descriptions>
     </a-card>
-    <div style="margin: 20px"></div>
-    <a-card title="日志列表" style="width: 100%">
-      <RetryLogList ref="retryLogListRef" :showSearch="false"/>
-    </a-card>
+    <RetryTaskLogMessageList ref="retryTaskLogMessageListRef" />
   </div>
 </template>
 
 <script>
 import { getRetryTaskById } from '@/api/manage'
 import moment from 'moment'
-import RetryLogList from './RetryLogList'
+import RetryTaskLogMessageList from './RetryTaskLogMessageList'
 
 export default {
   name: 'RetryTaskInfo',
   components: {
-    RetryLogList
+    RetryTaskLogMessageList
   },
   data () {
     return {
@@ -93,7 +90,11 @@ export default {
     if (id && groupName) {
       getRetryTaskById(id, { 'groupName': groupName }).then(res => {
         this.retryTaskInfo = res.data
-        this.$refs.retryLogListRef.refreshTable(res.data)
+        this.queryParam = {
+          groupName: this.retryTaskInfo.groupName,
+          uniqueId: this.retryTaskInfo.uniqueId
+        }
+        this.$refs.retryTaskLogMessageListRef.refreshTable(this.queryParam)
       })
     } else {
       this.$router.push({ path: '/404' })

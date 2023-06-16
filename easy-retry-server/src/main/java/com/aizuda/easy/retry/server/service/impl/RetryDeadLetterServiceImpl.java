@@ -72,6 +72,10 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
             retryDeadLetterLambdaQueryWrapper.eq(RetryDeadLetter::getIdempotentId, queryVO.getIdempotentId());
         }
 
+        if (StringUtils.isNotBlank(queryVO.getUniqueId())) {
+            retryDeadLetterLambdaQueryWrapper.eq(RetryDeadLetter::getUniqueId, queryVO.getUniqueId());
+        }
+
         RequestDataHelper.setPartition(queryVO.getGroupName());
         PageDTO<RetryDeadLetter> retryDeadLetterPageDTO = retryDeadLetterMapper.selectPage(pageDTO, retryDeadLetterLambdaQueryWrapper);
 

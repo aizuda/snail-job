@@ -1,10 +1,10 @@
 <template>
   <div>
-    <page-header-wrapper @back="() => $router.go(-1)" style='margin: -24px -1px 0'>
+    <page-header-wrapper @back="() => $router.go(-1)" style="margin: -24px -1px 0">
       <div></div>
     </page-header-wrapper>
     <a-card :bordered="false">
-      <a-descriptions title="" bordered v-if='retryInfo !== null'>
+      <a-descriptions title="" bordered v-if="retryInfo !== null">
         <a-descriptions-item label="组名称">
           {{ retryInfo.groupName }}
         </a-descriptions-item>
@@ -41,23 +41,27 @@
         <a-descriptions-item label="参数" :span="3">
           {{ retryInfo.argsStr }}
         </a-descriptions-item>
-        <a-descriptions-item label="失败原因" :span="3">
-          {{ retryInfo.errorMessage }}
-        </a-descriptions-item>
         <a-descriptions-item label="扩展参数" :span="3">
           {{ retryInfo.extAttrs }}
         </a-descriptions-item>
       </a-descriptions>
     </a-card>
+    <RetryTaskLogMessageList ref="retryTaskLogMessageListRef" />
   </div>
 </template>
 
 <script>
 import { getRetryTaskLogById } from '@/api/manage'
 import moment from 'moment'
+import { STable } from '@/components'
+import RetryTaskLogMessageList from '@/views/task/RetryTaskLogMessageList'
 
 export default {
   name: 'RetryLogInfo',
+  components: {
+    RetryTaskLogMessageList,
+    STable
+  },
   data () {
     return {
       retryInfo: null,
@@ -83,6 +87,11 @@ export default {
     if (id) {
       getRetryTaskLogById(id).then(res => {
         this.retryInfo = res.data
+        this.queryParam = {
+          groupName: this.retryInfo.groupName,
+          uniqueId: this.retryInfo.uniqueId
+        }
+        this.$refs.retryTaskLogMessageListRef.refreshTable(this.queryParam)
       })
     }
   },
