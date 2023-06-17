@@ -27,7 +27,9 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
@@ -99,12 +101,12 @@ public class DashBoardServiceImpl implements DashBoardService {
     public List<SceneQuantityRankResponseVO> rankSceneQuantity(String groupName, String type, String startTime, String endTime) {
         LocalDateTime startDateTime = LocalDateTime.now();
         if (StringUtils.isNotBlank(startTime)) {
-            startDateTime = LocalDateTime.parse(startTime, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            startDateTime = LocalDateTime.of(LocalDate.parse(startTime, DateTimeFormatter.ofPattern("yyyy-MM-dd")), LocalTime.MIN);
         }
 
         LocalDateTime endDateTime = LocalDateTime.now();
         if (StringUtils.isNotBlank(endTime)) {
-            endDateTime = LocalDateTime.parse(endTime, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            endDateTime = LocalDateTime.of(LocalDate.parse(endTime, DateTimeFormatter.ofPattern("yyyy-MM-dd")), LocalTime.MAX);
         }
 
         DateTypeEnum dateTypeEnum = DateTypeEnum.valueOf(type.toUpperCase());
@@ -121,12 +123,12 @@ public class DashBoardServiceImpl implements DashBoardService {
 
         LocalDateTime startDateTime = LocalDateTime.now();
         if (StringUtils.isNotBlank(startTime)) {
-            startDateTime = LocalDateTime.parse(startTime, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            startDateTime = LocalDateTime.of(LocalDate.parse(startTime, DateTimeFormatter.ofPattern("yyyy-MM-dd")), LocalTime.MIN);
         }
 
         LocalDateTime endDateTime = LocalDateTime.now();
         if (StringUtils.isNotBlank(endTime)) {
-            endDateTime = LocalDateTime.parse(endTime, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            endDateTime = LocalDateTime.of(LocalDate.parse(endTime, DateTimeFormatter.ofPattern("yyyy-MM-dd")), LocalTime.MAX);
         }
 
         startDateTime = dateTypeEnum.getStartTime().apply(startDateTime);

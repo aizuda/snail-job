@@ -13,7 +13,7 @@ export default {
   'dashboard.analysis.conversion-rate': '转化率',
   'dashboard.analysis.operational-effect': '运营活动效果',
   'dashboard.analysis.sales-trend': '销售趋势',
-  'dashboard.analysis.sales-ranking': '异常重试量排名',
+  'dashboard.analysis.sales-ranking': '任务量排名',
   'dashboard.analysis.all-year': '全年',
   'dashboard.analysis.all-month': '本月',
   'dashboard.analysis.all-week': '本周',

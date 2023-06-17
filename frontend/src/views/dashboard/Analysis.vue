@@ -3,7 +3,7 @@
     <a-row :gutter="24">
       <a-col :sm="24" :md="12" :xl="8" :style="{ marginBottom: '24px' }">
         <chart-card :loading="loading" :title="$t('dashboard.analysis.total-sales')" :total="taskQuantity.total">
-          <a-tooltip :title="$t('dashboard.analysis.introduce')" slot="action">
+          <a-tooltip title="总任务量: 重试/回调任务量" slot="action">
             <a-icon type="info-circle-o" />
           </a-tooltip>
           <div>
@@ -20,7 +20,7 @@
       </a-col>
       <a-col :sm="24" :md="12" :xl="8" :style="{ marginBottom: '24px' }">
         <chart-card :loading="loading" title="总调度量" :total="dispatchQuantity.total">
-          <a-tooltip :title="$t('dashboard.analysis.introduce')" slot="action">
+          <a-tooltip title="成功率:总完成/总调度量;" slot="action">
             <a-icon type="info-circle-o" />
           </a-tooltip>
           <div>
@@ -33,7 +33,7 @@
       <a-col :sm="24" :md="12" :xl="8" :style="{ marginBottom: '24px' }">
         <a href="#" @click="jumpPosList">
           <chart-card :loading="loading" title="总在线机器" :total="countActivePodQuantity.total">
-            <a-tooltip :title="$t('dashboard.analysis.introduce')" slot="action" >
+            <a-tooltip title="总在线机器:注册到系统的客户端和服务端之和" slot="action" >
               <a-icon type="info-circle-o" />
             </a-tooltip>
             <div>
@@ -152,8 +152,11 @@ export default {
       this.getRankSceneQuantity(this.value)
     },
     dateChange (date, dateString) {
-      this.$refs.viewChart.getLineDispatchQuantity('others', new Date(dateString[0]).getTime(), new Date(dateString[1]).getTime())
-      this.getRankSceneQuantity(this.value, new Date(dateString[0]).getTime(), new Date(dateString[1]).getTime())
+      console.log(dateString)
+      const startTime = dateString[0]
+      const endTime = dateString[1]
+      this.$refs.viewChart.getLineDispatchQuantity(this.value, 'others', startTime, endTime)
+      this.getRankSceneQuantity(this.value, 'day', startTime, endTime)
     },
     getRankSceneQuantity (groupName, type = 'day', startTime, endTime) {
       rankSceneQuantity({

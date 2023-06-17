@@ -40,7 +40,6 @@
         select group_name, scene_name, count(*) as total
         from retry_task_log
         <where>
-            task_type = 1
             <if test="groupName != '' and groupName != null">
                and group_name = #{groupName}
             </if>
