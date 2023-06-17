@@ -45,9 +45,9 @@ easy-retry:
   limiter: 10 # 一个客户端每秒最多接收的重试数量指令
   step: 100 # 号段模式下步长配置
   log-storage: 90 # 日志保存时间(单位: day)
-  callback:
-    max-count: 288
-    trigger-interval: 900
+  callback: # 回调配置
+    max-count: 288 #回调最大执行次数
+    trigger-interval: 900 #间隔时间
 
 
 
