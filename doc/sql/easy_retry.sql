@@ -51,7 +51,7 @@ CREATE TABLE `retry_dead_letter_0`
     KEY             `idx_biz_no` (`biz_no`),
     KEY             `idx_create_dt` (`create_dt`),
     UNIQUE KEY `uk_name_unique_id` (`group_name`, `unique_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='重试死信队列'
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='死信队列表'
 ;
 
 CREATE TABLE `retry_task_0`
@@ -78,7 +78,7 @@ CREATE TABLE `retry_task_0`
     KEY               `idx_biz_no` (`biz_no`),
     KEY               `idx_create_dt` (`create_dt`),
     UNIQUE KEY `uk_name_unique_id` (`group_name`, `unique_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='重试表'
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='任务表'
 ;
 
 CREATE TABLE `retry_task_log`
@@ -102,7 +102,7 @@ CREATE TABLE `retry_task_log`
     KEY             `idx_unique_id` (`unique_id`),
     KEY             `idx_biz_no` (`biz_no`),
     KEY             `idx_create_dt` (`create_dt`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='重试日志基础信息表'
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='任务日志基础信息表'
 ;
 
 CREATE TABLE `retry_task_log_message`
@@ -115,7 +115,7 @@ CREATE TABLE `retry_task_log_message`
     PRIMARY KEY (`id`),
     KEY          `idx_group_name_unique_id` (`group_name`, `unique_id`),
     KEY          `idx_create_dt` (`create_dt`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='重试日志异常信息记录表'
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='任务调度日志信息记录表'
 ;
 
 CREATE TABLE `scene_config`
