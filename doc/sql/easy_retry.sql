@@ -1,3 +1,6 @@
+DROP DATABASE IF EXISTS easy_retry;
+CREATE DATABASE easy_retry;
+USE easy_retry;
 CREATE TABLE `group_config`
 (
     `id`                bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
