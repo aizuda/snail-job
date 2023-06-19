@@ -3,12 +3,12 @@ package com.aizuda.easy.retry.server.support.dispatch.actor.exec;
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import com.aizuda.easy.retry.client.model.RetryCallbackDTO;
-import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.server.akka.ActorGenerator;
+import com.aizuda.easy.retry.server.client.RequestBuilder;
+import com.aizuda.easy.retry.server.client.RpcClient;
 import com.aizuda.easy.retry.server.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.enums.StatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
-import com.aizuda.easy.retry.common.core.model.EasyRetryHeaders;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask;
@@ -22,12 +22,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import java.text.MessageFormat;
 import java.util.Objects;
 import java.util.concurrent.Callable;
 
@@ -49,8 +46,6 @@ public class ExecCallbackUnitActor extends AbstractActor  {
     @Autowired
     @Qualifier("bitSetIdempotentStrategyHandler")
     private IdempotentStrategy<String, Integer> idempotentStrategy;
-    @Autowired
-    private RestTemplate restTemplate;
 
     @Override
     public Receive createReceive() {
@@ -109,7 +104,7 @@ public class ExecCallbackUnitActor extends AbstractActor  {
      * @param retryTask {@link RetryTask} 需要重试的数据
      * @return 重试结果返回值
      */
-    private Result<Void> callClient(RetryTask retryTask, RegisterNodeInfo serverNode) {
+    private Result callClient(RetryTask retryTask, RegisterNodeInfo serverNode) {
 
         // 回调参数
         RetryCallbackDTO retryCallbackDTO = new RetryCallbackDTO();
@@ -121,13 +116,22 @@ public class ExecCallbackUnitActor extends AbstractActor  {
         retryCallbackDTO.setExecutorName(retryTask.getExecutorName());
         retryCallbackDTO.setUniqueId(retryTask.getUniqueId());
 
-        HttpEntity<RetryCallbackDTO> requestEntity = new HttpEntity<>(retryCallbackDTO);
+//        HttpEntity<RetryCallbackDTO> requestEntity = new HttpEntity<>(retryCallbackDTO);
+//
+//        String format = MessageFormat.format(URL, serverNode.getHostIp(), serverNode.getHostPort().toString(), serverNode.getContextPath());
+//        Result result = restTemplate.postForObject(format, requestEntity, Result.class);
 
-        String format = MessageFormat.format(URL, serverNode.getHostIp(), serverNode.getHostPort().toString(), serverNode.getContextPath());
-        Result result = restTemplate.postForObject(format, requestEntity, Result.class);
 
-        LogUtils.info(log, "请求客户端 format:[{}] response:[{}}] ", format, JsonUtil.toJsonString(result));
-        return result;
+        RpcClient rpcClient = RequestBuilder.<RpcClient, Result>newBuilder()
+            .hostPort(serverNode.getHostPort())
+            .groupName(serverNode.getGroupName())
+            .hostId(serverNode.getHostId())
+            .hostIp(serverNode.getHostIp())
+            .contextPath(serverNode.getContextPath())
+            .client(RpcClient.class)
+            .build();
+
+        return rpcClient.callback(retryCallbackDTO);
 
     }
 

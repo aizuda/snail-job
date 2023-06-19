@@ -10,6 +10,8 @@ import com.aizuda.easy.retry.common.core.model.EasyRetryHeaders;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.akka.ActorGenerator;
+import com.aizuda.easy.retry.server.client.RequestBuilder;
+import com.aizuda.easy.retry.server.client.RpcClient;
 import com.aizuda.easy.retry.server.enums.StatusEnum;
 import com.aizuda.easy.retry.server.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask;
@@ -50,8 +52,6 @@ public class ExecUnitActor extends AbstractActor  {
     @Autowired
     @Qualifier("bitSetIdempotentStrategyHandler")
     private IdempotentStrategy<String, Integer> idempotentStrategy;
-    @Autowired
-    private RestTemplate restTemplate;
 
     @Override
     public Receive createReceive() {
@@ -137,14 +137,20 @@ public class ExecUnitActor extends AbstractActor  {
         easyRetryHeaders.setEasyRetryId(retryTask.getUniqueId());
         requestHeaders.add(SystemConstants.EASY_RETRY_HEAD_KEY, JsonUtil.toJsonString(easyRetryHeaders));
 
-        HttpEntity<DispatchRetryDTO> requestEntity = new HttpEntity<>(dispatchRetryDTO, requestHeaders);
+        RpcClient rpcClient = RequestBuilder.<RpcClient, Result>newBuilder()
+            .hostPort(serverNode.getHostPort())
+            .groupName(serverNode.getGroupName())
+            .hostId(serverNode.getHostId())
+            .hostIp(serverNode.getHostIp())
+            .contextPath(serverNode.getContextPath())
+            .client(RpcClient.class)
+            .build();
 
-        String format = MessageFormat.format(URL, serverNode.getHostIp(), serverNode.getHostPort().toString(), serverNode.getContextPath());
-        Result<DispatchRetryResultDTO> result = restTemplate.postForObject(format, requestEntity, Result.class);
-
-        LogUtils.info(log, "请求客户端 format:[{}] response:[{}}] ", format, JsonUtil.toJsonString(result));
-        return result;
-
+//        HttpEntity<DispatchRetryDTO> requestEntity = new HttpEntity<>(dispatchRetryDTO, requestHeaders);
+//
+//        String format = MessageFormat.format(URL, serverNode.getHostIp(), serverNode.getHostPort().toString(), serverNode.getContextPath());
+//        Result<DispatchRetryResultDTO> result = restTemplate.postForObject(format, requestEntity, Result.class);
+        return rpcClient.dispatch(dispatchRetryDTO, easyRetryHeaders);
     }
 
 
