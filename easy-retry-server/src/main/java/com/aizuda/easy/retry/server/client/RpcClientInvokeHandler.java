@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.server.client;
 
 import cn.hutool.core.lang.Assert;
+import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.URLUtil;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
@@ -14,6 +15,7 @@ import com.aizuda.easy.retry.server.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.support.cache.CacheRegisterTable;
 import com.aizuda.easy.retry.server.support.handler.ClientNodeAllocateHandler;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpEntity;
@@ -87,35 +89,25 @@ public class RpcClientInvokeHandler implements InvocationHandler {
     private Result requestRemote(Method method, Object[] args, Mapping mapping, int count) {
 
         try {
-            Object body = null;
-            HttpHeaders requestHeaders = new HttpHeaders();
-            Map<String, Object> paramMap = new HashMap<>();
-            // 解析参数
-            Parameter[] parameters = method.getParameters();
-            for (int i = 0; i < parameters.length; i++) {
-                Parameter parameter = parameters[i];
-                if (parameter.isAnnotationPresent(Body.class)) {
-                    body = args[i];
-                } else if ((parameter.isAnnotationPresent(Header.class))) {
-                    requestHeaders.add(SystemConstants.EASY_RETRY_HEAD_KEY, JsonUtil.toJsonString(args[i]));
-                } else if ((parameter.isAnnotationPresent(Param.class))) {
-                    paramMap.put(parameter.getAnnotation(Param.class).name(), args[i]);
-                } else {
-                    throw new EasyRetryServerException("parameter error");
-                }
-            }
+
+            // 参数解析
+            ParseParasResult parasResult = doParseParams(method, args);
 
             // 若是POST请求，请求体不能是null
             if (RequestMethod.POST.name().equals(mapping.method().name())) {
-                Assert.notNull(body, () -> new EasyRetryServerException("body cannot be null"));
+                Assert.notNull(parasResult.body, () -> new EasyRetryServerException("body cannot be null"));
             }
 
-            // 拼接 url?a=1&b=1
             RestTemplate restTemplate = SpringContext.CONTEXT.getBean(RestTemplate.class);
+
             ResponseEntity<Result> response = restTemplate.exchange(
-                getUrl(mapping, paramMap).toString(),
+                // 拼接 url?a=1&b=1
+                getUrl(mapping, parasResult.paramMap).toString(),
+                // post or get
                 HttpMethod.valueOf(mapping.method().name()),
-                new HttpEntity<>(body, requestHeaders),
+                // body
+                new HttpEntity<>(parasResult.body, parasResult.requestHeaders),
+                // 返回值类型
                 Result.class);
 
             log.info("Request client success. count:[{}] hostId:[{}] addr:[{}:{}]", count, hostId, hostIp, hostPort);
@@ -167,4 +159,39 @@ public class RpcClientInvokeHandler implements InvocationHandler {
         return url;
     }
 
+    @NotNull
+    private ParseParasResult doParseParams(Method method, Object[] args) {
+
+        Object body = null;
+        HttpHeaders requestHeaders = new HttpHeaders();
+        Map<String, Object> paramMap = new HashMap<>();
+        // 解析参数
+        Parameter[] parameters = method.getParameters();
+        for (int i = 0; i < parameters.length; i++) {
+            Parameter parameter = parameters[i];
+            if (parameter.isAnnotationPresent(Body.class)) {
+                body = args[i];
+            } else if ((parameter.isAnnotationPresent(Header.class))) {
+                requestHeaders.add(SystemConstants.EASY_RETRY_HEAD_KEY, JsonUtil.toJsonString(args[i]));
+            } else if ((parameter.isAnnotationPresent(Param.class))) {
+                paramMap.put(parameter.getAnnotation(Param.class).name(), args[i]);
+            } else {
+                throw new EasyRetryServerException("parameter error");
+            }
+        }
+
+        ParseParasResult parseParasResult = new ParseParasResult();
+        parseParasResult.setBody(body);
+        parseParasResult.setParamMap(paramMap);
+        parseParasResult.setRequestHeaders(requestHeaders);
+        return parseParasResult;
+    }
+
+    @Data
+    private static class ParseParasResult {
+
+        Object body = null;
+        HttpHeaders requestHeaders;
+        Map<String, Object> paramMap;
+    }
 }

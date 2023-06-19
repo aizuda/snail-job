@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
  *
  * @author: www.byteblogs.com
  * @date : 2023-05-11 22:32
- * @since 1.3.0
+ * @since 2.0.0
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)

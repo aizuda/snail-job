@@ -41,7 +41,6 @@ import java.util.concurrent.Callable;
 public class ExecCallbackUnitActor extends AbstractActor  {
 
     public static final String BEAN_NAME = "ExecCallbackUnitActor";
-    public static final String URL = "http://{0}:{1}/{2}/retry/callback/v1";
 
     @Autowired
     @Qualifier("bitSetIdempotentStrategyHandler")
