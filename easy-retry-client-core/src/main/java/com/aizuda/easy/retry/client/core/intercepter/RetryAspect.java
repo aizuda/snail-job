@@ -3,9 +3,11 @@ package com.aizuda.easy.retry.client.core.intercepter;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.client.core.cache.GroupVersionCache;
+import com.aizuda.easy.retry.client.core.cache.RetryerInfoCache;
 import com.aizuda.easy.retry.client.core.config.EasyRetryProperties;
 import com.aizuda.easy.retry.client.core.exception.EasyRetryClientException;
 import com.aizuda.easy.retry.client.core.intercepter.RetrySiteSnapshot.EnumStage;
+import com.aizuda.easy.retry.client.core.retryer.RetryerInfo;
 import com.aizuda.easy.retry.client.core.strategy.RetryStrategy;
 import com.aizuda.easy.retry.client.core.annotation.Retryable;
 import com.aizuda.easy.retry.client.core.retryer.RetryerResultContext;
@@ -28,11 +30,13 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.Ordered;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -114,6 +118,8 @@ public class RetryAspect implements Ordered {
                 || RetrySiteSnapshot.isRetryFlow()
                 // 下游响应不重试码，不开启重试
                 || RetrySiteSnapshot.isRetryForStatusCode()
+                // 匹配异常信息
+                || !validate(throwable, RetryerInfoCache.get(retryable.scene(), executorClassName))
         ) {
             if (!RetrySiteSnapshot.isMethodEntrance(methodEntrance)) {
                 LogUtils.debug(log, "Non-method entry does not enable local retries. traceId:[{}] [{}]", traceId, RetrySiteSnapshot.getMethodEntrance());
@@ -125,6 +131,8 @@ public class RetryAspect implements Ordered {
                 LogUtils.debug(log, "Retry traffic does not enable local retries. traceId:[{}] [{}]", traceId,  RetrySiteSnapshot.getRetryHeader());
             } else if (RetrySiteSnapshot.isRetryForStatusCode()) {
                 LogUtils.debug(log, "Existing exception retry codes do not enable local retries. traceId:[{}]", traceId);
+            } else if(!validate(throwable, RetryerInfoCache.get(retryable.scene(), executorClassName))) {
+                LogUtils.debug(log, "Exception mismatch. traceId:[{}]", traceId);
             } else {
                 LogUtils.debug(log, "Unknown situations do not enable local retry scenarios. traceId:[{}]", traceId);
             }
@@ -220,5 +228,33 @@ public class RetryAspect implements Ordered {
         String order = standardEnvironment
             .getProperty("easy-retry.aop.order", String.valueOf(Ordered.HIGHEST_PRECEDENCE));
         return Integer.parseInt(order);
+    }
+
+    private boolean validate(Throwable throwable, RetryerInfo retryerInfo) {
+
+        Set<Class<? extends Throwable>> exclude = retryerInfo.getExclude();
+        Set<Class<? extends Throwable>> include = retryerInfo.getInclude();
+
+        if (CollectionUtils.isEmpty(include) && CollectionUtils.isEmpty(exclude)) {
+            return true;
+        }
+
+        for (Class<? extends Throwable> e : include) {
+            if (e.isAssignableFrom(throwable.getClass())) {
+                return true;
+            }
+        }
+
+        if (!CollectionUtils.isEmpty(exclude)) {
+            for (Class<? extends Throwable> e : exclude) {
+                if (e.isAssignableFrom(throwable.getClass())) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        return false;
     }
 }
