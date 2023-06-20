@@ -127,30 +127,6 @@ public abstract class AbstractRetryStrategies implements RetryStrategy {
     protected abstract Consumer<Throwable> doGetRetryErrorConsumer(RetryerInfo retryerInfo, Object[] params);
     protected abstract Callable doGetCallable(RetryExecutor<WaitStrategy, StopStrategy> retryExecutor,Object[] params);
     protected abstract RetryExecutorParameter<WaitStrategy, StopStrategy> getRetryExecutorParameter(RetryerInfo retryerInfo);
-
-    protected boolean validate(Class<? extends Throwable> throwable,RetryerInfo retryerInfo) {
-
-        Set<Class<? extends Throwable>> exclude = retryerInfo.getExclude();
-        Set<Class<? extends Throwable>> include = retryerInfo.getInclude();
-        if (CollectionUtils.isEmpty(include) && CollectionUtils.isEmpty(exclude)) {
-            return true;
-        }
-        for (Class<? extends Throwable> e : include) {
-            if (e.isAssignableFrom(throwable)) {
-                return true;
-            }
-        }
-        if (!CollectionUtils.isEmpty(exclude)) {
-            for (Class<? extends Throwable> e : exclude) {
-                if (e.isAssignableFrom(throwable)) {
-                    return false;
-                }
-            }
-            return true;
-        }
-        return false;
-    }
-
     /**
      * 上报数据
      *

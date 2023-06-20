@@ -33,7 +33,6 @@ public class GuavaRetryExecutor extends AbstractRetryExecutor<WaitStrategy, Stop
     public Retryer build(RetryExecutorParameter<WaitStrategy, StopStrategy> parameter) {
 
         RetryerBuilder<Object> retryerBuilder = RetryerBuilder.newBuilder();
-        retryerBuilder.retryIfException(throwable -> parameter.exceptionPredicate().apply(throwable));
         retryerBuilder.withWaitStrategy(parameter.backOff());
         retryerBuilder.withStopStrategy(parameter.stop());
         for (RetryListener retryListener : parameter.getRetryListeners()) {

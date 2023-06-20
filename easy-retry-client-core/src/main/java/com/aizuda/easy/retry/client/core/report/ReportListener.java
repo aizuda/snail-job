@@ -77,11 +77,6 @@ public class ReportListener implements Listener<RetryTaskDTO> {
         return new RetryExecutorParameter<WaitStrategy, StopStrategy>() {
 
             @Override
-            public Predicate<Throwable> exceptionPredicate() {
-                return throwable -> Boolean.TRUE;
-            }
-
-            @Override
             public WaitStrategy backOff() {
                 return WaitStrategies.fixedWait(2, TimeUnit.SECONDS);
             }

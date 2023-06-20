@@ -92,10 +92,6 @@ public class RemoteRetryStrategies extends AbstractRetryStrategies {
     @Override
     protected RetryExecutorParameter<WaitStrategy, StopStrategy> getRetryExecutorParameter(RetryerInfo retryerInfo) {
         return new RetryExecutorParameter<WaitStrategy, StopStrategy>() {
-            @Override
-            public Predicate<Throwable> exceptionPredicate() {
-                return throwable -> RemoteRetryStrategies.super.validate(throwable.getClass(), retryerInfo);
-            }
 
             @Override
             public WaitStrategy backOff() {
