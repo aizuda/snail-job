@@ -165,6 +165,7 @@ public class DashBoardServiceImpl implements DashBoardService {
             serverNodeLambdaQueryWrapper.eq(ServerNode::getGroupName, queryVO.getGroupName());
         }
 
+        serverNodeLambdaQueryWrapper.ge(ServerNode::getExpireAt, LocalDateTime.now());
         PageDTO<ServerNode> serverNodePageDTO = serverNodeMapper.selectPage(pageDTO, serverNodeLambdaQueryWrapper.orderByDesc(ServerNode::getNodeType));
 
         List<ServerNodeResponseVO> serverNodeResponseVOS = ServerNodeResponseVOConverter.INSTANCE.toServerNodeResponseVO(serverNodePageDTO.getRecords());
