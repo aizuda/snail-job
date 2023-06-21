@@ -147,7 +147,7 @@ public class DispatchService implements Lifecycle {
      * @return {@link  GroupConfig} 组上下文
      */
     private Set<String> getCurrentHostGroupList() {
-        return CacheConsumerGroup.getAllPods();
+        return CacheConsumerGroup.getAllConsumerGroupName();
     }
 
     @Override

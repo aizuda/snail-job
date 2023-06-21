@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.server.support.handler;
 
+import cn.hutool.core.lang.Opt;
 import com.aizuda.easy.retry.common.core.enums.NodeTypeEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.dto.RegisterNodeInfo;
@@ -23,7 +24,10 @@ import org.springframework.util.CollectionUtils;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -133,6 +137,16 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
         }
     }
 
+    private void refreshExpireAtCache(List<ServerNode> remotePods) {
+
+        // 刷新最新的节点注册信息
+        for (ServerNode node : remotePods) {
+            Optional.ofNullable(CacheRegisterTable.getServerNode(node.getGroupName(), node.getHostId())).ifPresent(registerNodeInfo -> {
+                registerNodeInfo.setExpireAt(node.getExpireAt());
+            });
+        }
+    }
+
     private void refreshCache(List<ServerNode> remotePods) {
 
         // 刷新最新的节点注册信息
@@ -175,8 +189,8 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
                         .eq(ServerNode::getNodeType, NodeTypeEnum.SERVER.getType()));
 
                 // 获取缓存中的节点
-                ConcurrentMap<String/*hostId*/, RegisterNodeInfo> concurrentMap = CacheRegisterTable
-                        .get(ServerRegister.GROUP_NAME);
+                ConcurrentMap<String/*hostId*/, RegisterNodeInfo> concurrentMap = Optional.ofNullable(CacheRegisterTable
+                        .get(ServerRegister.GROUP_NAME)).orElse(new ConcurrentHashMap<>());
 
                 Set<String> remoteHostIds = remotePods.stream().map(ServerNode::getHostId).collect(Collectors.toSet());
 
@@ -189,7 +203,7 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
                 // 无缓存的节点触发refreshCache
                 if (CollectionUtils.isEmpty(concurrentMap)
                         // 节点数量不一致触发
-                        || isNodeSizeNotEqual(remotePods.size(), concurrentMap.size())
+                        || isNodeSizeNotEqual(concurrentMap.size(), remotePods.size())
                         // 若存在远程和本地缓存的组的数量不一致则触发rebalance
                         || isGroupSizeNotEqual(removeGroupConfig, allGroup)
                         // 判断远程节点是不是和本地节点一致的，如果不一致则重新分配
@@ -212,8 +226,8 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
 
                 } else {
 
-                    // 重新刷新所有的缓存key
-                    refreshCache(remotePods);
+                    // 刷新过期时间
+                    refreshExpireAtCache(remotePods);
 
                     // 再次获取最新的节点信息
                     concurrentMap = CacheRegisterTable

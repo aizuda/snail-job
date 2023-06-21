@@ -1,8 +1,6 @@
 package com.aizuda.easy.retry.server.support.register;
 
 import com.aizuda.easy.retry.common.core.log.LogUtils;
-import com.aizuda.easy.retry.server.config.SystemProperties;
-import com.aizuda.easy.retry.server.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.ServerNodeMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.ServerNode;
 import com.aizuda.easy.retry.server.support.Lifecycle;
@@ -12,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 /**
  * @author www.byteblogs.com
@@ -39,8 +36,8 @@ public abstract class AbstractRegister implements Register, Lifecycle {
 
         try {
             serverNodeMapper.insertOrUpdate(serverNode);
-            // 刷新本地缓存
-            CacheRegisterTable.addOrUpdate(serverNode.getGroupName(), serverNode);
+            // 刷新本地缓存过期时间
+            CacheRegisterTable.refreshExpireAt(serverNode.getGroupName(), serverNode);
         }catch (Exception e) {
             LogUtils.error(log,"注册节点失败 groupName:[{}] hostIp:[{}]",
                     serverNode.getGroupName(), serverNode.getHostIp(), e);

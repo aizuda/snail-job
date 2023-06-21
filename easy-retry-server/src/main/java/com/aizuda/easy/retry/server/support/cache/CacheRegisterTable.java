@@ -11,8 +11,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
@@ -99,13 +101,29 @@ public class CacheRegisterTable implements Lifecycle {
             .map(RegisterNodeInfo::getHostId).collect(Collectors.toSet());
     }
 
+
+    /**
+     * 刷新过期时间若不存在则初始化
+     *
+     * @param groupName 组名称
+     */
+    public static synchronized void refreshExpireAt(String groupName, ServerNode serverNode) {
+        RegisterNodeInfo registerNodeInfo = getServerNode(groupName, serverNode.getHostId());
+        // 不存在则初始化
+        if (Objects.isNull(registerNodeInfo)) {
+            LogUtils.warn(log, "node not exists. groupName:[{}] hostId:[{}]", groupName, serverNode.getHostId());
+        } else {
+            // 存在则刷新过期时间
+            registerNodeInfo.setExpireAt(serverNode.getExpireAt());
+        }
+    }
+
     /**
      * 无缓存时添加 有缓存时更新
      *
      * @return 缓存对象
      */
     public static synchronized void addOrUpdate(String groupName, ServerNode serverNode) {
-
         ConcurrentMap<String, RegisterNodeInfo> concurrentMap = CACHE.getIfPresent(groupName);
         RegisterNodeInfo registerNodeInfo;
         if (Objects.isNull(concurrentMap)) {
@@ -119,7 +137,7 @@ public class CacheRegisterTable implements Lifecycle {
             registerNodeInfo.setExpireAt(serverNode.getExpireAt());
         }
 
-        LogUtils.debug(log, "Update cache. groupName:[{}] hostId:[{}] hostIp:[{}] expireAt:[{}]", groupName,
+        LogUtils.info(log, "Update cache. groupName:[{}] hostId:[{}] hostIp:[{}] expireAt:[{}]", groupName,
             serverNode.getHostId(), serverNode.getHostIp(), serverNode.getExpireAt());
 
         concurrentMap.put(serverNode.getHostId(), registerNodeInfo);

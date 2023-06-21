@@ -3,11 +3,17 @@ package com.aizuda.easy.retry.server.support.register;
 import com.aizuda.easy.retry.common.core.enums.NodeTypeEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.ServerNode;
+import com.aizuda.easy.retry.server.support.cache.CacheConsumerGroup;
+import com.aizuda.easy.retry.server.support.cache.CacheRegisterTable;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -70,8 +76,22 @@ public class ClientRegister extends AbstractRegister implements Runnable {
     public void run() {
         while (!Thread.currentThread().isInterrupted()) {
             try {
-                ServerNode serverNode = QUEUE.take();
-                refreshExpireAt(serverNode);
+                ServerNode serverNode = QUEUE.poll(5L, TimeUnit.SECONDS);
+                if (Objects.nonNull(serverNode)) {
+                    refreshExpireAt(serverNode);
+                }
+
+                // 同步当前POD消费的组的节点信息
+                // netty的client只会注册到一个服务端，若组分配的和client连接的不是一个POD则会导致当前POD没有其他客户端的注册信息
+                Set<String> allConsumerGroupName = CacheConsumerGroup.getAllConsumerGroupName();
+                if (!CollectionUtils.isEmpty(allConsumerGroupName)) {
+                    List<ServerNode> serverNodes = serverNodeMapper.selectList(
+                        new LambdaQueryWrapper<ServerNode>().in(ServerNode::getGroupName, allConsumerGroupName));
+                    for (final ServerNode node : serverNodes) {
+                        // 刷新全量本地缓存
+                        CacheRegisterTable.addOrUpdate(node.getGroupName(), node);
+                    }
+                }
             }catch (InterruptedException e) {
                 LogUtils.error(log, "[{}] thread interrupt.", Thread.currentThread().getName());
             } catch (Exception e) {

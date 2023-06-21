@@ -35,7 +35,7 @@ public class CacheConsumerGroup implements Lifecycle {
      *
      * @return 缓存对象
      */
-    public static Set<String> getAllPods() {
+    public static Set<String> getAllConsumerGroupName() {
         ConcurrentMap<String, String> concurrentMap = CACHE.asMap();
         return new HashSet<>(concurrentMap.values());
 
@@ -57,10 +57,12 @@ public class CacheConsumerGroup implements Lifecycle {
      * @return 缓存对象
      */
     public static synchronized void addOrUpdate(String groupName) {
+        LogUtils.info(log, "add consumer cache. groupName:[{}]", groupName);
         CACHE.put(groupName, groupName);
     }
 
     public static void remove(String groupName) {
+        LogUtils.info(log, "Remove consumer cache. groupName:[{}]", groupName);
         CACHE.invalidate(groupName);
     }
 

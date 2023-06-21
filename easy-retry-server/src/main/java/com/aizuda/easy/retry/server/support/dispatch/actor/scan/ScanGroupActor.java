@@ -60,7 +60,7 @@ public class ScanGroupActor extends AbstractScanGroup {
             .withStopStrategy(StopStrategies.stopException())
             .withStopStrategy(StopStrategies.stopResultStatusCode())
             .withWaitStrategy(getWaitWaitStrategy(retryTask.getGroupName(), retryTask.getSceneName()))
-            .withFilterStrategy(FilterStrategies.delayLevelFilter())
+            .withFilterStrategy(FilterStrategies.triggerAtFilter())
             .withFilterStrategy(FilterStrategies.bitSetIdempotentFilter(idempotentStrategy))
             .withFilterStrategy(FilterStrategies.sceneBlackFilter())
             .withFilterStrategy(FilterStrategies.checkAliveClientPodFilter())
