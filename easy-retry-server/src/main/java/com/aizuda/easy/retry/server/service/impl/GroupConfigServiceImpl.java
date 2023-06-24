@@ -2,18 +2,23 @@ package com.aizuda.easy.retry.server.service.impl;
 
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.HashUtil;
+import com.aizuda.easy.retry.server.config.RequestDataHelper;
 import com.aizuda.easy.retry.server.enums.IdGeneratorMode;
 import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.GroupConfigMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.NotifyConfigMapper;
+import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryDeadLetterMapper;
+import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.SceneConfigMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.SequenceAllocMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.ServerNodeMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.GroupConfig;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.NotifyConfig;
+import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.SceneConfig;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.SequenceAlloc;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.ServerNode;
+import com.aizuda.easy.retry.server.persistence.support.RetryTaskAccess;
 import com.aizuda.easy.retry.server.support.handler.ConfigVersionSyncHandler;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -31,11 +36,14 @@ import com.aizuda.easy.retry.server.web.model.response.GroupConfigResponseVO;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import java.sql.SQLSyntaxErrorException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -58,6 +66,10 @@ public class GroupConfigServiceImpl implements GroupConfigService {
     private SceneConfigMapper sceneConfigMapper;
     @Autowired
     private ServerNodeMapper serverNodeMapper;
+    @Autowired
+    protected RetryTaskMapper retryTaskMapper;
+    @Autowired
+    protected RetryDeadLetterMapper retryDeadLetterMapper;
     @Autowired
     private SequenceAllocMapper sequenceAllocMapper;
     @Autowired
@@ -115,6 +127,12 @@ public class GroupConfigServiceImpl implements GroupConfigService {
 
         groupConfig.setVersion(groupConfig.getVersion() + 1);
         BeanUtils.copyProperties(groupConfigRequestVO, groupConfig);
+
+        Assert.isTrue(totalPartition > groupConfigRequestVO.getGroupPartition(), () -> new EasyRetryServerException("分区超过最大分区. [{}]", totalPartition-1));
+        Assert.isTrue(groupConfigRequestVO.getGroupPartition() >= 0, () -> new EasyRetryServerException("分区不能是负数."));
+
+        // 校验retry_task_x和retry_dead_letter_x是否存在
+        checkGroupPartition(groupConfig);
 
         Assert.isTrue(1 == groupConfigMapper.update(groupConfig,
                 new LambdaUpdateWrapper<GroupConfig>().eq(GroupConfig::getGroupName, groupConfigRequestVO.getGroupName())),
@@ -178,6 +196,37 @@ public class GroupConfigServiceImpl implements GroupConfigService {
         }
 
         Assert.isTrue(1 == groupConfigMapper.insert(groupConfig), () ->  new EasyRetryServerException("新增组异常异常 groupConfigVO[{}]", groupConfigRequestVO));
+
+        // 校验retry_task_x和retry_dead_letter_x是否存在
+        checkGroupPartition(groupConfig);
+
+    }
+
+    /**
+     * 校验retry_task_x和retry_dead_letter_x是否存在
+     */
+    private void checkGroupPartition(GroupConfig groupConfig) {
+        try {
+            RequestDataHelper.setPartition(groupConfig.getGroupName());
+            retryTaskMapper.selectById(1);
+        } catch (BadSqlGrammarException e) {
+            Optional.ofNullable(e.getMessage()).ifPresent(s -> {
+                if (s.contains("retry_task_" + groupConfig.getGroupPartition()) && s.contains("doesn't exist")) {
+                    throw new EasyRetryServerException("分区:[{}] '未配置表retry_task_{}', 请联系管理员进行配置", groupConfig.getGroupPartition(), groupConfig.getGroupPartition());
+                }
+            });
+        }
+
+        try {
+            RequestDataHelper.setPartition(groupConfig.getGroupName());
+            retryDeadLetterMapper.selectById(1);
+        } catch (BadSqlGrammarException e) {
+            Optional.ofNullable(e.getMessage()).ifPresent(s -> {
+                if (s.contains("retry_dead_letter_" + groupConfig.getGroupPartition()) && s.contains("doesn't exist")) {
+                    throw new EasyRetryServerException("分区:[{}] '未配置表retry_dead_letter_{}', 请联系管理员进行配置", groupConfig.getGroupPartition(), groupConfig.getGroupPartition());
+                }
+            });
+        }
     }
 
     @Override

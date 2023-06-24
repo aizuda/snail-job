@@ -6,6 +6,7 @@ import cn.hutool.core.util.URLUtil;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.model.Result;
+import com.aizuda.easy.retry.common.core.util.HostUtils;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.client.annotation.Body;
 import com.aizuda.easy.retry.server.client.annotation.Header;
@@ -76,7 +77,7 @@ public class RpcClientInvokeHandler implements InvocationHandler {
         // 最多调用size次
         int size = serverNodeSet.size();
         for (int count = 1; count <= size; count++) {
-            log.info("Start request client. count:[{}] hostId:[{}] addr:[{}:{}]", count, hostId, hostIp, hostPort);
+            log.info("Start request client. count:[{}] clientId:[{}] clientAddr:[{}:{}] serverIp:[{}]", count, hostId, hostIp, hostPort, HostUtils.getIp());
             Result result = requestRemote(method, args, annotation, count);
             if (Objects.nonNull(result)) {
                 return result;
@@ -110,13 +111,13 @@ public class RpcClientInvokeHandler implements InvocationHandler {
                 // 返回值类型
                 Result.class);
 
-            log.info("Request client success. count:[{}] hostId:[{}] addr:[{}:{}]", count, hostId, hostIp, hostPort);
+            log.info("Request client success. count:[{}] clientId:[{}] clientAddr:[{}:{}] serverIp:[{}]", count, hostId, hostIp, hostPort, HostUtils.getIp());
 
             return Objects.requireNonNull(response.getBody());
         } catch (RestClientException ex) {
             // 网络异常
             if (ex instanceof ResourceAccessException) {
-                log.error("request client I/O error, count:[{}] hostId:[{}] addr:[{}:{}]", count, hostId, hostIp, hostPort, ex);
+                log.error("request client I/O error, count:[{}] clientId:[{}] clientAddr:[{}:{}] serverIp:[{}]", count, hostId, hostIp, hostPort, HostUtils.getIp(), ex);
 
                 // 进行路由剔除处理
                 CacheRegisterTable.remove(groupName, hostId);
@@ -136,11 +137,11 @@ public class RpcClientInvokeHandler implements InvocationHandler {
 
             } else {
                 // 其他异常继续抛出
-                log.error("request client error.count:[{}] hostId:[{}] addr:[{}:{}]", count, hostId, hostIp, hostPort, ex);
+                log.error("request client error.count:[{}] clientId:[{}] clientAddr:[{}:{}] serverIp:[{}]", count, hostId, hostIp, hostPort, HostUtils.getIp(), ex);
                 throw ex;
             }
         } catch (Exception ex) {
-            log.error("request client unknown exception. count:[{}] hostId:[{}] addr:[{}:{}]", count, hostId, hostIp, hostPort, ex);
+            log.error("request client unknown exception. count:[{}] clientId:[{}] clientAddr:[{}:{}] serverIp:[{}]", count, hostId, hostIp, hostPort, HostUtils.getIp(), ex);
             throw ex;
         }
 
@@ -190,8 +191,8 @@ public class RpcClientInvokeHandler implements InvocationHandler {
     @Data
     private static class ParseParasResult {
 
-        Object body = null;
-        HttpHeaders requestHeaders;
-        Map<String, Object> paramMap;
+        private Object body = null;
+        private HttpHeaders requestHeaders;
+        private Map<String, Object> paramMap;
     }
 }
