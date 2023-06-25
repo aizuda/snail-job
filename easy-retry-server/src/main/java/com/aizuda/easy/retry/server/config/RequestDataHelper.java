@@ -42,8 +42,7 @@ public class RequestDataHelper {
         Map<String, Object> map = new HashMap<>();
         map.put("partition", partition);
         RequestDataHelper.setRequestData(map);
-
-        REQUEST_DATA.set(map);
+        
     }
 
 
