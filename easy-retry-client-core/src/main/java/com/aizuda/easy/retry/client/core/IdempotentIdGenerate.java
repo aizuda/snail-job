@@ -1,5 +1,7 @@
 package com.aizuda.easy.retry.client.core;
 
+import com.aizuda.easy.retry.common.core.model.IdempotentIdContext;
+
 /**
  * 幂等id生成器
  * 同一个组的同一个场景下只会存在一个相同的idempotentId重试任务, 若存在相同的则上报服务后会被幂等处理
@@ -25,9 +27,9 @@ public interface IdempotentIdGenerate {
      * 3: 执行的方法名称: methodName(String)
      * scene, targetClassName, args, executorMethod.getName()
      *
-     * @param t 参数列表
+     * @param idempotentIdContext
      * @return idempotentId
      * @throws Exception
      */
-    String idGenerate(Object... t) throws Exception;
+    String idGenerate(IdempotentIdContext idempotentIdContext) throws Exception;
 }

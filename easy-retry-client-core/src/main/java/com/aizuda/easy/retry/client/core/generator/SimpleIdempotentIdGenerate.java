@@ -2,7 +2,7 @@ package com.aizuda.easy.retry.client.core.generator;
 
 import cn.hutool.crypto.SecureUtil;
 import com.aizuda.easy.retry.client.core.IdempotentIdGenerate;
-import com.aizuda.easy.retry.common.core.util.JsonUtil;
+import com.aizuda.easy.retry.common.core.model.IdempotentIdContext;
 
 /**
  * 默认的idempotentId 生成器
@@ -13,7 +13,7 @@ import com.aizuda.easy.retry.common.core.util.JsonUtil;
 public class SimpleIdempotentIdGenerate implements IdempotentIdGenerate {
 
     @Override
-    public String idGenerate(Object... t) throws Exception {
-        return SecureUtil.md5(JsonUtil.toJsonString(t));
+    public String idGenerate(IdempotentIdContext idempotentIdContext) throws Exception {
+        return SecureUtil.md5(idempotentIdContext.toString());
     }
 }
