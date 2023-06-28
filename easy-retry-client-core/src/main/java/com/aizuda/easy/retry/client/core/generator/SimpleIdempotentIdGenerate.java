@@ -13,7 +13,7 @@ import com.aizuda.easy.retry.common.core.model.IdempotentIdContext;
 public class SimpleIdempotentIdGenerate implements IdempotentIdGenerate {
 
     @Override
-    public String idGenerate(IdempotentIdContext idempotentIdContext) throws Exception {
-        return SecureUtil.md5(idempotentIdContext.toString());
+    public String idGenerate(IdempotentIdContext context) throws Exception {
+        return SecureUtil.md5(context.toString());
     }
 }

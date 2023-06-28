@@ -27,9 +27,9 @@ public interface IdempotentIdGenerate {
      * 3: 执行的方法名称: methodName(String)
      * scene, targetClassName, args, executorMethod.getName()
      *
-     * @param idempotentIdContext
+     * @param context {@link IdempotentIdContext} 幂等id生成器上下文
      * @return idempotentId
      * @throws Exception
      */
-    String idGenerate(IdempotentIdContext idempotentIdContext) throws Exception;
+    String idGenerate(IdempotentIdContext context) throws Exception;
 }
