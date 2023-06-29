@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.server.web.controller;
 
 import com.aizuda.easy.retry.server.service.DashBoardService;
+import com.aizuda.easy.retry.server.support.cache.CacheConsumerGroup;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
 import com.aizuda.easy.retry.server.web.model.request.ServerNodeQueryVO;
 import com.aizuda.easy.retry.server.web.model.response.ActivePodQuantityResponseVO;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * 看板接口
@@ -75,5 +77,10 @@ public class DashBoardController {
         return dashBoardService.pods(serverNodeQueryVO);
     }
 
+//    @LoginRequired
+    @GetMapping("/consumer/group")
+    public Set<String> allConsumerGroupName() {
+        return CacheConsumerGroup.getAllConsumerGroupName();
+    }
 
 }

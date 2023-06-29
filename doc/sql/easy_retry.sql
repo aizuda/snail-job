@@ -1,6 +1,9 @@
-DROP DATABASE IF EXISTS easy_retry;
-CREATE DATABASE easy_retry;
-USE easy_retry;
+DROP
+DATABASE IF EXISTS easy_retry;
+CREATE
+DATABASE easy_retry;
+USE
+easy_retry;
 CREATE TABLE `group_config`
 (
     `id`                bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
@@ -149,6 +152,7 @@ CREATE TABLE `server_node`
     `host_port`    int(16) NOT NULL COMMENT '机器端口',
     `expire_at`    datetime     NOT NULL COMMENT '过期时间',
     `node_type`    tinyint(4) NOT NULL COMMENT '节点类型 1、客户端 2、是服务端',
+    `ext_attrs`    varchar(256) NULL default '' COMMENT '扩展字段',
     `create_dt`    datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_dt`    datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     PRIMARY KEY (`id`),

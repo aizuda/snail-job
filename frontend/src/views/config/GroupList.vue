@@ -62,7 +62,7 @@
 <script>
 
 import AInput from 'ant-design-vue/es/input/Input'
-import { getGroupConfigForPage, saveGroup } from '@/api/manage'
+import { getGroupConfigForPage, updateGroupStatus } from '@/api/manage'
 import { STable } from '@/components'
 import moment from 'moment'
 
@@ -179,9 +179,9 @@ export default {
       this.advanced = !this.advanced
     },
     handleEditStatus (record) {
-      const { id, groupStatus, groupName } = record
+      const { groupStatus, groupName } = record
       const { $notification } = this
-      saveGroup({ id: id, groupName: groupName, groupStatus: (groupStatus === 1 ? 0 : 1) }).then(res => {
+      updateGroupStatus({ groupName: groupName, groupStatus: (groupStatus === 1 ? 0 : 1) }).then(res => {
         if (res.status === 0) {
           $notification['error']({
             message: res.message

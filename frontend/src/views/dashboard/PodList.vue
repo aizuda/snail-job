@@ -34,13 +34,29 @@
       <span slot="serial" slot-scope="text, record, index">
         {{ index + 1 }}
       </span>
+      <span slot="contextPath" slot-scope="text, record">
+        <div v-if="record.nodeType === 1">
+          路径:
+          <a-tag color="#108ee9" >
+            {{ text }}
+          </a-tag>
+        </div>
+
+        <div v-else>
+          组:
+          <a-tag color="pink" v-for="item in getData(record)" :key="item.hostId" style="margin-bottom: 16px">
+            {{ item }}
+          </a-tag>
+        </div>
+
+      </span>
     </s-table>
   </a-card>
 </template>
 
 <script>
 import moment from 'moment'
-import { pods } from '@/api/manage'
+import { pods, consumerGroup } from '@/api/manage'
 import { STable } from '@/components'
 
 export default {
@@ -58,32 +74,40 @@ export default {
       columns: [
         {
           title: '#',
-          scopedSlots: { customRender: 'serial' }
+          scopedSlots: { customRender: 'serial' },
+          width: '6%'
         },
         {
           title: '类型',
           dataIndex: 'nodeType',
-          customRender: (text) => this.nodeType[text]
+          customRender: (text) => this.nodeType[text],
+          width: '8%'
         },
         {
           title: '组名称',
-          dataIndex: 'groupName'
+          dataIndex: 'groupName',
+          width: '10%'
         },
         {
           title: 'PodId',
-          dataIndex: 'hostId'
+          dataIndex: 'hostId',
+          width: '18%'
         },
         {
           title: 'IP',
-          dataIndex: 'hostIp'
+          dataIndex: 'hostIp',
+          width: '12%'
         },
         {
           title: 'Port',
-          dataIndex: 'hostPort'
+          dataIndex: 'hostPort',
+          width: '8%'
         },
         {
-          title: '路径',
-          dataIndex: 'contextPath'
+          title: '路径/组',
+          dataIndex: 'contextPath',
+          scopedSlots: { customRender: 'contextPath' },
+          width: '22%'
         },
         {
           title: '更新时间',
@@ -97,6 +121,11 @@ export default {
         console.log('loadData.parameter', parameter)
         return pods(Object.assign(parameter, this.queryParam))
           .then(res => {
+            this.groupList = []
+            res.data.forEach((key, val) => {
+              this.getConsumerGroup(key)
+            })
+
             return res
           })
       },
@@ -114,7 +143,34 @@ export default {
       nodeType: {
         '1': '客户端',
         '2': '服务端'
+      },
+      groupList: []
+    }
+  },
+  methods: {
+    getConsumerGroup (record) {
+      if (record.extAttrs === undefined) {
+        return
       }
+      const extAttrs = JSON.parse(record.extAttrs)
+      consumerGroup(record.hostIp, extAttrs.webPort).then(res => {
+        this.groupList.push({
+          hostId: record.hostId,
+          data: res.data
+        })
+      })
+    },
+    getData (record) {
+      const s = this.groupList.find(item => item.hostId === record.hostId)
+      if (s === undefined) {
+        return ''
+      }
+
+      if (s.data === undefined || s.data.size > 0) {
+        return ''
+      }
+
+      return s.data
     }
   }
 }

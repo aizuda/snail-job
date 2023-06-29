@@ -38,16 +38,33 @@ const api = {
   lineDispatchQuantity: '/dashboard/dispatch/line',
   totalPartition: '/group/partition',
   systemVersion: '/system/version',
-  pods: '/dashboard/pods'
+  pods: '/dashboard/pods',
+  consumerGroup: '/dashboard/consumer/group',
+  updateGroupStatus: '/group/status'
 }
 
 export default api
+
+export function updateGroupStatus (data) {
+  return request({
+    url: api.updateGroupStatus,
+    method: 'put',
+    data
+  })
+}
 
 export function getRetryTaskLogMessagePage (parameter) {
   return request({
     url: api.retryTaskLogMessagePage,
     method: 'get',
     params: parameter
+  })
+}
+
+export function consumerGroup (ip, port) {
+  return request({
+    url: `http://${ip}:${port}` + api.consumerGroup,
+    method: 'get'
   })
 }
 

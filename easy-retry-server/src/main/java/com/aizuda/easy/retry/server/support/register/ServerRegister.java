@@ -6,7 +6,9 @@ import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.enums.NodeTypeEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.util.HostUtils;
+import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.config.SystemProperties;
+import com.aizuda.easy.retry.server.dto.ServerNodeExtAttrs;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.ServerNode;
 import com.aizuda.easy.retry.server.support.Register;
 import com.aizuda.easy.retry.server.support.cache.CacheConsumerGroup;
@@ -15,6 +17,7 @@ import com.aizuda.easy.retry.server.support.handler.ServerNodeBalance;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -44,6 +47,8 @@ public class ServerRegister extends AbstractRegister {
     public ServerNodeBalance serverNodeBalance;
     @Autowired
     private SystemProperties systemProperties;
+    @Autowired
+    private ServerProperties serverProperties;
 
     static {
         CURRENT_CID = IdUtil.getSnowflakeNextIdStr();
@@ -57,11 +62,16 @@ public class ServerRegister extends AbstractRegister {
 
     @Override
     protected void beforeProcessor(RegisterContext context) {
+        // 新增扩展参数
+        ServerNodeExtAttrs serverNodeExtAttrs = new ServerNodeExtAttrs();
+        serverNodeExtAttrs.setWebPort(serverProperties.getPort());
+
         context.setGroupName(GROUP_NAME);
         context.setHostId(CURRENT_CID);
         context.setHostIp(HostUtils.getIp());
         context.setHostPort(systemProperties.getNettyPort());
         context.setContextPath(StrUtil.EMPTY);
+        context.setExtAttrs(JsonUtil.toJsonString(serverNodeExtAttrs));
     }
 
     @Override

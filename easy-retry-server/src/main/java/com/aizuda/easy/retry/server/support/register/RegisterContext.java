@@ -26,4 +26,6 @@ public class RegisterContext {
 
     private String contextPath;
 
+    private String extAttrs;
+
 }

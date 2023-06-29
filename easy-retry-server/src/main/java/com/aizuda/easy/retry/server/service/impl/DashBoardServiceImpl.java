@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.server.service.impl;
 
+import com.aizuda.easy.retry.common.core.util.HostUtils;
 import com.aizuda.easy.retry.server.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskLogMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskLogMessageMapper;
@@ -23,6 +24,7 @@ import com.aizuda.easy.retry.server.web.model.response.TaskQuantityResponseVO;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -53,6 +55,9 @@ public class DashBoardServiceImpl implements DashBoardService {
 
     @Autowired
     private ServerNodeMapper serverNodeMapper;
+
+    @Autowired
+    private ServerProperties serverProperties;
 
     @Override
     public TaskQuantityResponseVO countTask() {

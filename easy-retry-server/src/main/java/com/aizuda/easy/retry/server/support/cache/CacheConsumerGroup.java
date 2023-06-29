@@ -42,15 +42,6 @@ public class CacheConsumerGroup implements Lifecycle {
     }
 
     /**
-     * 获取所有缓存
-     *
-     * @return 缓存对象
-     */
-    public static String get(String hostId) {
-        return CACHE.getIfPresent(hostId);
-    }
-
-    /**
      * 无缓存时添加
      * 有缓存时更新
      *

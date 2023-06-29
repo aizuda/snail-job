@@ -57,6 +57,8 @@ public abstract class AbstractRegister implements Register, Lifecycle {
         serverNode.setCreateDt(LocalDateTime.now());
         serverNode.setContextPath(context.getContextPath());
         serverNode.setExpireAt(getExpireAt(context));
+        serverNode.setExtAttrs(context.getExtAttrs());
+
         return serverNode;
     }
 

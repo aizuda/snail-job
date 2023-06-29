@@ -12,8 +12,6 @@ import java.time.LocalDateTime;
 @Data
 public class ServerNodeResponseVO {
 
-    private Long id;
-
     private String groupName;
 
     private String hostId;
@@ -29,4 +27,6 @@ public class ServerNodeResponseVO {
     private LocalDateTime createDt;
 
     private LocalDateTime updateDt;
+
+    private String extAttrs;
 }
