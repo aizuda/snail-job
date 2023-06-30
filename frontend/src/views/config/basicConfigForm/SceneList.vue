@@ -405,6 +405,7 @@ export default {
         target.editable = false
         target.isNew = false
         this.memberLoading = false
+        this.$message.warning('请点击右下角提交按钮以保存所有页面数据')
       })
     },
     toggle (key) {
