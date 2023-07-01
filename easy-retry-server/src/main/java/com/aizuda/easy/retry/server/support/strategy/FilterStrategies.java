@@ -1,5 +1,7 @@
 package com.aizuda.easy.retry.server.support.strategy;
 
+import com.aizuda.easy.retry.server.dto.RegisterNodeInfo;
+import com.aizuda.easy.retry.server.support.handler.ServerNodeBalance;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.google.common.util.concurrent.RateLimiter;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
@@ -11,7 +13,6 @@ import com.aizuda.easy.retry.server.support.FilterStrategy;
 import com.aizuda.easy.retry.server.support.IdempotentStrategy;
 import com.aizuda.easy.retry.server.support.RetryContext;
 import com.aizuda.easy.retry.server.support.cache.CacheGroupRateLimiter;
-import com.aizuda.easy.retry.server.support.context.MaxAttemptsPersistenceRetryContext;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
@@ -31,12 +32,12 @@ public class FilterStrategies {
     }
 
     /**
-     * 延迟等级的过滤策略
+     * 触发时间过滤策略
      *
-     * @return {@link DelayLevelFilterStrategies} 延迟等级的过滤策略
+     * @return {@link TriggerAtFilterStrategies} 触发时间过滤策略
      */
-    public static FilterStrategy delayLevelFilter() {
-        return new DelayLevelFilterStrategies();
+    public static FilterStrategy triggerAtFilter() {
+        return new TriggerAtFilterStrategies();
     }
 
     /**
@@ -75,13 +76,21 @@ public class FilterStrategies {
         return new RateLimiterFilterStrategies();
     }
 
+    /**
+     * 正在rebalance时不允许下发重试流量
+     *
+     * @return {@link ReBalanceFilterStrategies} 正在rebalance时不允许下发重试流量
+     */
+    public static FilterStrategy rebalanceFilterStrategies() {
+        return new ReBalanceFilterStrategies();
+    }
 
     /**
-     * 延迟等级的过滤策略
+     * 触发时间过滤策略
      * <p>
      * 根据延迟等级的时间计算下次触发时间是否小于当前时间，满足则返回true 否则返回false
      */
-    private static final class DelayLevelFilterStrategies implements FilterStrategy {
+    private static final class TriggerAtFilterStrategies implements FilterStrategy {
 
         @Override
         public boolean filter(RetryContext retryContext) {
@@ -145,7 +154,7 @@ public class FilterStrategies {
 
         @Override
         public boolean filter(RetryContext retryContext) {
-            ServerNode serverNode = retryContext.getServerNode();
+            RegisterNodeInfo serverNode = retryContext.getServerNode();
 
             if (Objects.isNull(serverNode)) {
                 return false;
@@ -169,7 +178,7 @@ public class FilterStrategies {
 
         @Override
         public boolean filter(RetryContext retryContext) {
-            ServerNode serverNode = retryContext.getServerNode();
+            RegisterNodeInfo serverNode = retryContext.getServerNode();
 
             RateLimiter rateLimiter = CacheGroupRateLimiter.getRateLimiterByKey(serverNode.getHostId());
             if (Objects.nonNull(rateLimiter) && !rateLimiter.tryAcquire(100, TimeUnit.MILLISECONDS)) {
@@ -185,5 +194,23 @@ public class FilterStrategies {
             return 4;
         }
     }
+
+    /**
+     * rebalance中数据不进行重试
+     */
+    private static final class ReBalanceFilterStrategies implements FilterStrategy {
+
+        @Override
+        public boolean filter(RetryContext retryContext) {
+            return !ServerNodeBalance.RE_BALANCE_ING.get();
+        }
+
+        @Override
+        public int order() {
+            return 1;
+        }
+    }
+
+
 
 }

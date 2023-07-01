@@ -42,6 +42,14 @@ public class GroupConfigController {
     }
 
     @LoginRequired
+    @PutMapping("status")
+    public Boolean updateGroupStatus(@RequestBody @Validated GroupConfigRequestVO groupConfigRequestVO) {
+        String groupName = groupConfigRequestVO.getGroupName();
+        Integer groupStatus = groupConfigRequestVO.getGroupStatus();
+        return groupConfigService.updateGroupStatus(groupName, groupStatus);
+    }
+
+    @LoginRequired
     @GetMapping("list")
     public PageResult<List<GroupConfigResponseVO>> getGroupConfigForPage(GroupConfigQueryVO queryVO) {
         return groupConfigService.getGroupConfigForPage(queryVO);

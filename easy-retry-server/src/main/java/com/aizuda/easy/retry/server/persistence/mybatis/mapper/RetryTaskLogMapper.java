@@ -11,7 +11,6 @@ import java.util.List;
 
 public interface RetryTaskLogMapper extends BaseMapper<RetryTaskLog> {
 
-    int deleteByPrimaryKey(Long id);
 
     RetryTaskLog selectByPrimaryKey(Long id);
 

@@ -1,14 +1,21 @@
 package com.aizuda.easy.retry.server.service.impl;
 
 import cn.hutool.core.lang.Assert;
+import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
+import com.aizuda.easy.retry.server.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryDeadLetterMapper;
+import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskLogMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryDeadLetter;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask;
+import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTaskLog;
 import com.aizuda.easy.retry.server.service.convert.RetryDeadLetterResponseVOConverter;
+import com.aizuda.easy.retry.server.service.convert.RetryTaskConverter;
+import com.aizuda.easy.retry.server.service.convert.RetryTaskLogConverter;
 import com.aizuda.easy.retry.server.support.strategy.WaitStrategies;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.aizuda.easy.retry.server.config.RequestDataHelper;
 import com.aizuda.easy.retry.server.service.RetryDeadLetterService;
@@ -24,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -35,9 +43,10 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
 
     @Autowired
     private RetryDeadLetterMapper retryDeadLetterMapper;
-
     @Autowired
     private RetryTaskMapper retryTaskMapper;
+    @Autowired
+    private RetryTaskLogMapper retryTaskLogMapper;
 
     @Override
     public PageResult<List<RetryDeadLetterResponseVO>> getRetryDeadLetterPage(RetryDeadLetterQueryVO queryVO) {
@@ -63,6 +72,10 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
             retryDeadLetterLambdaQueryWrapper.eq(RetryDeadLetter::getIdempotentId, queryVO.getIdempotentId());
         }
 
+        if (StringUtils.isNotBlank(queryVO.getUniqueId())) {
+            retryDeadLetterLambdaQueryWrapper.eq(RetryDeadLetter::getUniqueId, queryVO.getUniqueId());
+        }
+
         RequestDataHelper.setPartition(queryVO.getGroupName());
         PageDTO<RetryDeadLetter> retryDeadLetterPageDTO = retryDeadLetterMapper.selectPage(pageDTO, retryDeadLetterLambdaQueryWrapper);
 
@@ -83,17 +96,36 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
     public boolean rollback(String groupName, Long id) {
         RequestDataHelper.setPartition(groupName);
         RetryDeadLetter retryDeadLetter = retryDeadLetterMapper.selectById(id);
+        Assert.notNull(retryDeadLetter, () -> new EasyRetryServerException("数据不存在"));
 
-        RetryTask retryTask = new RetryTask();
-        BeanUtils.copyProperties(retryDeadLetter, retryTask);
+        RetryTask retryTask = RetryTaskConverter.INSTANCE.toRetryTask(retryDeadLetter);
         retryTask.setNextTriggerAt(WaitStrategies.randomWait(1, TimeUnit.SECONDS, 60, TimeUnit.SECONDS).computeRetryTime(null));
         retryTask.setCreateDt(LocalDateTime.now());
         retryTask.setUpdateDt(LocalDateTime.now());
+
         RequestDataHelper.setPartition(groupName);
         Assert.isTrue(1 == retryTaskMapper.insert(retryTask), () -> new EasyRetryServerException("新增重试任务失败"));
 
         RequestDataHelper.setPartition(groupName);
         Assert.isTrue(1 == retryDeadLetterMapper.deleteById(retryDeadLetter.getId()), () -> new EasyRetryServerException("删除死信队列数据失败"));
+
+        // 变动日志的状态
+        RetryTaskLog retryTaskLog = new RetryTaskLog();
+        retryTaskLog.setRetryStatus(RetryStatusEnum.RUNNING.getStatus());
+        int update = retryTaskLogMapper.update(retryTaskLog, new LambdaUpdateWrapper<RetryTaskLog>()
+            .eq(RetryTaskLog::getUniqueId, retryTask.getUniqueId())
+            .eq(RetryTaskLog::getGroupName, retryTask.getGroupName()));
+
+        // 若日志不存在则初始化一个
+        if (update == 0) {
+            // 初始化回调日志
+            retryTaskLog = RetryTaskLogConverter.INSTANCE.toRetryTask(retryTask);
+            retryTaskLog.setTaskType(retryTask.getTaskType());
+            retryTaskLog.setRetryStatus(RetryStatusEnum.RUNNING.getStatus());
+            retryTaskLog.setCreateDt(LocalDateTime.now());
+            Assert.isTrue(1 ==  retryTaskLogMapper.insert(retryTaskLog),
+                () -> new EasyRetryServerException("新增重试日志失败"));
+        }
 
         return true;
     }

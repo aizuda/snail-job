@@ -1,17 +1,14 @@
 package com.aizuda.easy.retry.server.server.handler;
 
 import cn.hutool.core.net.url.UrlQuery;
-import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants.HTTP_PATH;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
-import com.aizuda.easy.retry.server.support.handler.ClientRegisterHandler;
 import com.aizuda.easy.retry.common.core.model.NettyResult;
 import com.aizuda.easy.retry.common.core.model.EasyRetryRequest;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static com.aizuda.easy.retry.common.core.constant.SystemConstants.BEAT.PONG;

@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * 批量删除重试数据
  *
- * @author: shuguang.zhang
+ * @author: www.byteblogs.com
  * @date : 2023-04-30 22:30
  */
 @Data

@@ -96,11 +96,6 @@ public class ManualRetryStrategies extends AbstractRetryStrategies {
         return new RetryExecutorParameter<WaitStrategy, StopStrategy>() {
 
             @Override
-            public Predicate<Throwable> exceptionPredicate() {
-                return throwable -> ManualRetryStrategies.super.validate(throwable.getClass(), retryerInfo);
-            }
-
-            @Override
             public WaitStrategy backOff() {
                 return WaitStrategies.fixedWait(500, TimeUnit.MILLISECONDS);
             }

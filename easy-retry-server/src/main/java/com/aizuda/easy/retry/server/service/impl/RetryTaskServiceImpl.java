@@ -1,20 +1,27 @@
 package com.aizuda.easy.retry.server.service.impl;
 
+import akka.actor.ActorRef;
 import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.client.model.GenerateRetryIdempotentIdDTO;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
 import com.aizuda.easy.retry.common.core.model.Result;
+import com.aizuda.easy.retry.server.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.config.RequestDataHelper;
+import com.aizuda.easy.retry.server.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
+import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskLogMapper;
+import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskLogMessageMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.GroupConfig;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTaskLog;
+import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTaskLogMessage;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.ServerNode;
 import com.aizuda.easy.retry.server.persistence.support.ConfigAccess;
 import com.aizuda.easy.retry.server.service.RetryTaskService;
 import com.aizuda.easy.retry.server.service.convert.RetryTaskConverter;
 import com.aizuda.easy.retry.server.service.convert.RetryTaskResponseVOConverter;
+import com.aizuda.easy.retry.server.support.dispatch.actor.log.RetryTaskLogDTO;
 import com.aizuda.easy.retry.server.support.generator.IdGenerator;
 import com.aizuda.easy.retry.server.support.handler.ClientNodeAllocateHandler;
 import com.aizuda.easy.retry.server.support.strategy.WaitStrategies;
@@ -34,6 +41,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.text.MessageFormat;
@@ -61,7 +69,10 @@ public class RetryTaskServiceImpl implements RetryTaskService {
     private ClientNodeAllocateHandler clientNodeAllocateHandler;
     @Autowired
     private List<IdGenerator> idGeneratorList;
-
+    @Autowired
+    private RetryTaskLogMessageMapper retryTaskLogMessageMapper;
+    @Autowired
+    private RetryTaskLogMapper retryTaskLogMapper;
     @Autowired
     @Qualifier("configAccessProcessor")
     private ConfigAccess configAccess;
@@ -111,6 +122,7 @@ public class RetryTaskServiceImpl implements RetryTaskService {
     }
 
     @Override
+    @Transactional
     public int updateRetryTaskStatus(RetryTaskUpdateStatusRequestVO retryTaskUpdateStatusRequestVO) {
 
         RetryStatusEnum retryStatusEnum = RetryStatusEnum.getByStatus(retryTaskUpdateStatusRequestVO.getRetryStatus());
@@ -131,6 +143,22 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         if (RetryStatusEnum.RUNNING.getStatus().equals(retryStatusEnum.getStatus())) {
             retryTask.setNextTriggerAt(
                 WaitStrategies.randomWait(1, TimeUnit.SECONDS, 60, TimeUnit.SECONDS).computeRetryTime(null));
+        }
+
+        if (RetryStatusEnum.FINISH.getStatus().equals(retryStatusEnum.getStatus())) {
+
+            RetryTaskLogMessage retryTaskLogMessage = new RetryTaskLogMessage();
+            retryTaskLogMessage.setUniqueId(retryTask.getUniqueId());
+            retryTaskLogMessage.setGroupName(retryTask.getGroupName());
+            retryTaskLogMessage.setMessage("页面操作完成");
+            retryTaskLogMessage.setCreateDt(LocalDateTime.now());
+            retryTaskLogMessageMapper.insert(retryTaskLogMessage);
+
+            RetryTaskLog retryTaskLog = new RetryTaskLog();
+            retryTaskLog.setRetryStatus(RetryStatusEnum.FINISH.getStatus());
+            retryTaskLogMapper.update(retryTaskLog, new LambdaUpdateWrapper<RetryTaskLog>()
+                    .eq(RetryTaskLog::getUniqueId, retryTask.getUniqueId())
+                    .eq(RetryTaskLog::getGroupName, retryTask.getGroupName()));
         }
 
         RequestDataHelper.setPartition(retryTaskUpdateStatusRequestVO.getGroupName());
@@ -161,7 +189,7 @@ public class RetryTaskServiceImpl implements RetryTaskService {
 
     @Override
     public String idempotentIdGenerate(final GenerateRetryIdempotentIdVO generateRetryIdempotentIdVO) {
-        ServerNode serverNode = clientNodeAllocateHandler.getServerNode(generateRetryIdempotentIdVO.getGroupName());
+        RegisterNodeInfo serverNode = clientNodeAllocateHandler.getServerNode(generateRetryIdempotentIdVO.getGroupName());
         Assert.notNull(serverNode, () -> new EasyRetryServerException("生成idempotentId失败: 不存在活跃的客户端节点"));
 
         // 委托客户端生成idempotentId

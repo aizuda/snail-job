@@ -11,6 +11,7 @@ import com.aizuda.easy.retry.client.core.intercepter.RetrySiteSnapshot;
 import com.aizuda.easy.retry.client.core.retryer.RetryerInfo;
 import com.aizuda.easy.retry.client.core.spel.SPELParamFunction;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.core.model.IdempotentIdContext;
 import com.aizuda.easy.retry.server.model.dto.RetryTaskDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,9 +72,9 @@ public abstract class AbstractReport implements Report {
         try {
             Class<? extends IdempotentIdGenerate> idempotentIdGenerate = retryerInfo.getIdempotentIdGenerate();
             IdempotentIdGenerate generate = idempotentIdGenerate.newInstance();
-            Method method = idempotentIdGenerate.getMethod("idGenerate", Object[].class);
-            Object p = new Object[]{scene, targetClassName, args, executorMethod.getName()};
-            idempotentId = (String) ReflectionUtils.invokeMethod(method, generate, p);
+            Method method = idempotentIdGenerate.getMethod("idGenerate", IdempotentIdContext.class);
+            IdempotentIdContext idempotentIdContext = new IdempotentIdContext(scene, targetClassName, args, executorMethod.getName());
+            idempotentId = (String) ReflectionUtils.invokeMethod(method, generate, idempotentIdContext);
         } catch (Exception exception) {
             LogUtils.error(log, "幂等id生成异常：{},{}", scene, args, exception);
             throw new EasyRetryClientException("idempotentId生成异常：{},{}", scene, args);

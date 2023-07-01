@@ -3,7 +3,7 @@
     <page-header-wrapper @back="() => $router.go(-1)" style="margin: -24px -1px 0">
       <div></div>
     </page-header-wrapper>
-    <a-card :bordered="false">
+    <a-card :bordered="false" v-if="retryTaskInfo !==null ">
       <a-descriptions title="" bordered>
         <a-descriptions-item label="组名称">
           {{ retryTaskInfo.groupName }}
@@ -49,30 +49,28 @@
         </a-descriptions-item>
       </a-descriptions>
     </a-card>
-    <div style="margin: 20px"></div>
-    <a-card title="日志列表" style="width: 100%">
-      <RetryLogList v-if="retryTaskInfo !== null" ref="retryLogListRef" :showSearch="false" :group-name="retryTaskInfo.groupName" :unique-id="retryTaskInfo.uniqueId"/>
-    </a-card>
+    <RetryTaskLogMessageList ref="retryTaskLogMessageListRef" />
   </div>
 </template>
 
 <script>
 import { getRetryTaskById } from '@/api/manage'
 import moment from 'moment'
-import RetryLogList from './RetryLogList'
+import RetryTaskLogMessageList from './RetryTaskLogMessageList'
 
 export default {
   name: 'RetryTaskInfo',
   components: {
-    RetryLogList
+    RetryTaskLogMessageList
   },
   data () {
     return {
-      retryTaskInfo: {},
+      retryTaskInfo: null,
       retryStatus: {
         '0': '处理中',
         '1': '处理成功',
-        '2': '最大次数'
+        '2': '最大次数',
+        '3': '暂停'
       },
       taskType: {
         '1': {
@@ -92,7 +90,11 @@ export default {
     if (id && groupName) {
       getRetryTaskById(id, { 'groupName': groupName }).then(res => {
         this.retryTaskInfo = res.data
-        this.$refs.retryLogListRef.refreshTable(res.data)
+        this.queryParam = {
+          groupName: this.retryTaskInfo.groupName,
+          uniqueId: this.retryTaskInfo.uniqueId
+        }
+        this.$refs.retryTaskLogMessageListRef.refreshTable(this.queryParam)
       })
     } else {
       this.$router.push({ path: '/404' })

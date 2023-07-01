@@ -17,6 +17,8 @@ public interface GroupConfigService {
 
     Boolean updateGroup(GroupConfigRequestVO groupConfigRequestVO);
 
+    Boolean updateGroupStatus(String groupName, Integer status);
+
     PageResult<List<GroupConfigResponseVO>> getGroupConfigForPage(GroupConfigQueryVO queryVO);
 
     GroupConfigResponseVO getGroupConfigByGroupName(String groupName);

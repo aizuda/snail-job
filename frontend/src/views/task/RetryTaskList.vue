@@ -39,8 +39,13 @@
               </a-form-item>
             </a-col>
             <a-col :md="8" :sm="24">
-              <a-form-item label="业务id">
-                <a-input v-model="queryParam.idempotentId" placeholder="请输入业务id" allowClear />
+              <a-form-item label="幂等id">
+                <a-input v-model="queryParam.idempotentId" placeholder="请输入幂等id" allowClear />
+              </a-form-item>
+            </a-col>
+            <a-col :md="8" :sm="24">
+              <a-form-item label="UniqueId">
+                <a-input v-model="queryParam.uniqueId" placeholder="请输入唯一id" allowClear/>
               </a-form-item>
             </a-col>
           </template>
@@ -176,9 +181,9 @@ export default {
           fixed: 'left'
         },
         {
-          title: '唯一id',
+          title: 'UniqueId',
           dataIndex: 'uniqueId',
-          width: '8%'
+          width: '10%'
         },
         {
           title: '组名称',
@@ -208,10 +213,10 @@ export default {
           width: '10%'
         },
         {
-          title: '重试次数',
+          title: '次数',
           dataIndex: 'retryCount',
           sorter: true,
-          width: '10%'
+          width: '6%'
         },
         {
           title: '重试状态',

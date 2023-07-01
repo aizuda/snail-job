@@ -137,11 +137,6 @@ public class LocalRetryStrategies extends AbstractRetryStrategies {
         return new RetryExecutorParameter<WaitStrategy, StopStrategy>() {
 
             @Override
-            public Predicate<Throwable> exceptionPredicate() {
-                return throwable -> LocalRetryStrategies.super.validate(throwable.getClass(), retryerInfo);
-            }
-
-            @Override
             public WaitStrategy backOff() {
                 return WaitStrategies.fixedWait(retryerInfo.getLocalInterval(), TimeUnit.SECONDS);
             }

@@ -1,42 +1,38 @@
 package com.aizuda.easy.retry.server.support.dispatch;
 
 import akka.actor.ActorRef;
-import com.aizuda.easy.retry.common.core.enums.NodeTypeEnum;
-import com.aizuda.easy.retry.server.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
-import com.aizuda.easy.retry.server.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.config.SystemProperties;
+import com.aizuda.easy.retry.server.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.ServerNodeMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.GroupConfig;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.ServerNode;
-import com.aizuda.easy.retry.server.persistence.support.ConfigAccess;
 import com.aizuda.easy.retry.server.support.Lifecycle;
-import com.aizuda.easy.retry.server.support.allocate.server.AllocateMessageQueueConsistentHash;
+import com.aizuda.easy.retry.server.support.cache.CacheConsumerGroup;
 import com.aizuda.easy.retry.server.support.cache.CacheGroupRateLimiter;
 import com.aizuda.easy.retry.server.support.cache.CacheGroupScanActor;
-import com.aizuda.easy.retry.server.support.handler.ServerRegisterNodeHandler;
+import com.aizuda.easy.retry.server.support.handler.ServerNodeBalance;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.google.common.cache.Cache;
 import com.google.common.util.concurrent.RateLimiter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * 分发器组件
  *
  * @author: www.byteblogs.com
  * @date : 2021-11-19 15:46
+ * @since 1.6.0
  */
 @Component
 @Slf4j
@@ -62,10 +58,6 @@ public class DispatchService implements Lifecycle {
     private ServerNodeMapper serverNodeMapper;
 
     @Autowired
-    @Qualifier("configAccessProcessor")
-    private ConfigAccess configAccess;
-
-    @Autowired
     private SystemProperties systemProperties;
 
     @Override
@@ -74,11 +66,18 @@ public class DispatchService implements Lifecycle {
         dispatchService.scheduleAtFixedRate(() -> {
 
             try {
-                List<GroupConfig> currentHostGroupList = getCurrentHostGroupList();
+                // 当正在rebalance时延迟10s，尽量等待所有节点都完成rebalance
+                if (ServerNodeBalance.RE_BALANCE_ING.get()) {
+                    LogUtils.info(log, "正在rebalance中....");
+                    TimeUnit.SECONDS.sleep(INITIAL_DELAY);
+                }
+
+                Set<String> currentHostGroupList = getCurrentHostGroupList();
+                LogUtils.info(log, "当前分配的组:[{}]", currentHostGroupList);
                 if (!CollectionUtils.isEmpty(currentHostGroupList)) {
-                    for (GroupConfig groupConfigContext : currentHostGroupList) {
+                    for (String groupName : currentHostGroupList) {
                         ScanTaskDTO scanTaskDTO = new ScanTaskDTO();
-                        scanTaskDTO.setGroupName(groupConfigContext.getGroupName());
+                        scanTaskDTO.setGroupName(groupName);
                         produceScanActorTask(scanTaskDTO);
                     }
                 }
@@ -147,24 +146,8 @@ public class DispatchService implements Lifecycle {
      *
      * @return {@link  GroupConfig} 组上下文
      */
-    private List<GroupConfig> getCurrentHostGroupList() {
-        List<GroupConfig> prepareAllocateGroupConfig = configAccess.getAllOpenGroupConfig();
-        if (CollectionUtils.isEmpty(prepareAllocateGroupConfig)) {
-            return Collections.EMPTY_LIST;
-        }
-        //为了保证客户端分配算法的一致性,serverNodes 从数据库从数据获取
-        List<ServerNode> serverNodes = serverNodeMapper.selectList(
-            new LambdaQueryWrapper<ServerNode>().eq(ServerNode::getNodeType, NodeTypeEnum.SERVER.getType()));
-
-        if (CollectionUtils.isEmpty(serverNodes)) {
-            LogUtils.error(log, "服务端节点为空");
-            return Collections.EMPTY_LIST;
-        }
-
-        List<String> podIdList = serverNodes.stream().map(ServerNode::getHostId).collect(Collectors.toList());
-
-        return new AllocateMessageQueueConsistentHash()
-            .allocate(ServerRegisterNodeHandler.CURRENT_CID, prepareAllocateGroupConfig, podIdList);
+    private Set<String> getCurrentHostGroupList() {
+        return CacheConsumerGroup.getAllConsumerGroupName();
     }
 
     @Override

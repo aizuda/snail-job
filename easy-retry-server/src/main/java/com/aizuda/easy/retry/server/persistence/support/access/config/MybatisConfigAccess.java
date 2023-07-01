@@ -79,7 +79,7 @@ public class MybatisConfigAccess extends AbstractConfigAccess {
 
     @Override
     public List<GroupConfig> getAllConfigGroupList() {
-        List<GroupConfig> allSystemConfigGroupList = groupConfigMapper.selectList(new LambdaQueryWrapper<>());
+        List<GroupConfig> allSystemConfigGroupList = groupConfigMapper.selectList(new LambdaQueryWrapper<GroupConfig>().orderByAsc(GroupConfig::getId));
         if (CollectionUtils.isEmpty(allSystemConfigGroupList)) {
             return Collections.EMPTY_LIST;
         }

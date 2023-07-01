@@ -35,8 +35,6 @@ public class RetryTaskLogResponseVO {
 
     private Integer taskType;
 
-    private String errorMessage;
-
     private LocalDateTime createDt;
 
 }

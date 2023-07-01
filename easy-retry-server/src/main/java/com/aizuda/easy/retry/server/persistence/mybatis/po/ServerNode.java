@@ -27,6 +27,8 @@ public class ServerNode implements Serializable {
 
     private String contextPath;
 
+    private String extAttrs;
+
     private LocalDateTime createDt;
 
     private LocalDateTime updateDt;

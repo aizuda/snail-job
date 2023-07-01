@@ -2,7 +2,7 @@ package com.aizuda.easy.retry.server.support.schedule;
 
 import com.aizuda.easy.retry.common.core.alarm.Alarm;
 import com.aizuda.easy.retry.common.core.alarm.AlarmContext;
-import com.aizuda.easy.retry.common.core.alarm.AltinAlarmFactory;
+import com.aizuda.easy.retry.common.core.alarm.EasyRetryAlarmFactory;
 import com.aizuda.easy.retry.common.core.enums.NotifySceneEnum;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
@@ -52,7 +52,7 @@ public class AlarmNotifyThreadSchedule {
     @Autowired
     private RetryTaskMapper retryTaskMapper;
     @Autowired
-    private AltinAlarmFactory altinAlarmFactory;
+    private EasyRetryAlarmFactory easyRetryAlarmFactory;
     @Autowired
     @Qualifier("configAccessProcessor")
     private ConfigAccess configAccess;
@@ -84,7 +84,7 @@ public class AlarmNotifyThreadSchedule {
                             .title("组:[{}])重试数据过多", groupConfig.getGroupName())
                             .notifyAttribute(notifyConfig.getNotifyAttribute());
 
-                    Alarm<AlarmContext> alarmType = altinAlarmFactory.getAlarmType(notifyConfig.getNotifyType());
+                    Alarm<AlarmContext> alarmType = easyRetryAlarmFactory.getAlarmType(notifyConfig.getNotifyType());
                     alarmType.asyncSendMessage(context);
                 }
             }
@@ -122,7 +122,7 @@ public class AlarmNotifyThreadSchedule {
                             .title("组:[{}] 环境重试失败数据监控", groupConfig.getGroupName())
                             .notifyAttribute(notifyConfig.getNotifyAttribute());
 
-                    Alarm<AlarmContext> alarmType = altinAlarmFactory.getAlarmType(notifyConfig.getNotifyType());
+                    Alarm<AlarmContext> alarmType = easyRetryAlarmFactory.getAlarmType(notifyConfig.getNotifyType());
                     alarmType.asyncSendMessage(context);
                 }
             }

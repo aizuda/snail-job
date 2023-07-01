@@ -1,8 +1,12 @@
 package com.aizuda.easy.retry.server.service.impl;
 
+import com.aizuda.easy.retry.common.core.util.HostUtils;
+import com.aizuda.easy.retry.server.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskLogMapper;
+import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskLogMessageMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.ServerNodeMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTaskLog;
+import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTaskLogMessage;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.ServerNode;
 import com.aizuda.easy.retry.server.service.convert.ServerNodeResponseVOConverter;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
@@ -20,11 +24,14 @@ import com.aizuda.easy.retry.server.web.model.response.TaskQuantityResponseVO;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
@@ -44,7 +51,13 @@ public class DashBoardServiceImpl implements DashBoardService {
     private RetryTaskLogMapper retryTaskLogMapper;
 
     @Autowired
+    private RetryTaskLogMessageMapper retryTaskLogMessageMapper;
+
+    @Autowired
     private ServerNodeMapper serverNodeMapper;
+
+    @Autowired
+    private ServerProperties serverProperties;
 
     @Override
     public TaskQuantityResponseVO countTask() {
@@ -53,7 +66,7 @@ public class DashBoardServiceImpl implements DashBoardService {
         taskQuantityResponseVO.setTotal(retryTaskLogMapper.countTaskTotal());
 
         taskQuantityResponseVO.setFinish(retryTaskLogMapper.countTaskByRetryStatus(RetryStatusEnum.FINISH.getStatus()));
-        taskQuantityResponseVO.setMaxRetryCount(retryTaskLogMapper.countTaskByRetryStatus(RetryStatusEnum.MAX_RETRY_COUNT.getStatus()));
+        taskQuantityResponseVO.setMaxRetryCount(retryTaskLogMapper.countTaskByRetryStatus(RetryStatusEnum.MAX_COUNT.getStatus()));
         taskQuantityResponseVO.setRunning(taskQuantityResponseVO.getTotal() - taskQuantityResponseVO.getFinish() - taskQuantityResponseVO.getMaxRetryCount());
 
         return taskQuantityResponseVO;
@@ -63,7 +76,8 @@ public class DashBoardServiceImpl implements DashBoardService {
     public DispatchQuantityResponseVO countDispatch() {
         DispatchQuantityResponseVO dispatchQuantityResponseVO = new DispatchQuantityResponseVO();
 
-        Long total = retryTaskLogMapper.selectCount(null);
+        // 任务的总调度量
+        Long total = retryTaskLogMessageMapper.selectCount(null);
         dispatchQuantityResponseVO.setTotal(total);
 
         if (total == 0) {
@@ -71,8 +85,7 @@ public class DashBoardServiceImpl implements DashBoardService {
         }
 
         Long success = retryTaskLogMapper.selectCount(new LambdaQueryWrapper<RetryTaskLog>()
-                .in(RetryTaskLog::getRetryStatus, RetryStatusEnum.MAX_RETRY_COUNT.getStatus(),
-                        RetryStatusEnum.FINISH.getStatus()));
+                .eq(RetryTaskLog::getRetryStatus, RetryStatusEnum.FINISH.getStatus()));
         dispatchQuantityResponseVO.setSuccessPercent(BigDecimal.valueOf(success).divide(BigDecimal.valueOf(total), 2, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100)));
 
         return dispatchQuantityResponseVO;
@@ -93,12 +106,12 @@ public class DashBoardServiceImpl implements DashBoardService {
     public List<SceneQuantityRankResponseVO> rankSceneQuantity(String groupName, String type, String startTime, String endTime) {
         LocalDateTime startDateTime = LocalDateTime.now();
         if (StringUtils.isNotBlank(startTime)) {
-            startDateTime = LocalDateTime.parse(startTime, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            startDateTime = LocalDateTime.of(LocalDate.parse(startTime, DateTimeFormatter.ofPattern("yyyy-MM-dd")), LocalTime.MIN);
         }
 
         LocalDateTime endDateTime = LocalDateTime.now();
         if (StringUtils.isNotBlank(endTime)) {
-            endDateTime = LocalDateTime.parse(endTime, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            endDateTime = LocalDateTime.of(LocalDate.parse(endTime, DateTimeFormatter.ofPattern("yyyy-MM-dd")), LocalTime.MAX);
         }
 
         DateTypeEnum dateTypeEnum = DateTypeEnum.valueOf(type.toUpperCase());
@@ -115,12 +128,12 @@ public class DashBoardServiceImpl implements DashBoardService {
 
         LocalDateTime startDateTime = LocalDateTime.now();
         if (StringUtils.isNotBlank(startTime)) {
-            startDateTime = LocalDateTime.parse(startTime, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            startDateTime = LocalDateTime.of(LocalDate.parse(startTime, DateTimeFormatter.ofPattern("yyyy-MM-dd")), LocalTime.MIN);
         }
 
         LocalDateTime endDateTime = LocalDateTime.now();
         if (StringUtils.isNotBlank(endTime)) {
-            endDateTime = LocalDateTime.parse(endTime, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            endDateTime = LocalDateTime.of(LocalDate.parse(endTime, DateTimeFormatter.ofPattern("yyyy-MM-dd")), LocalTime.MAX);
         }
 
         startDateTime = dateTypeEnum.getStartTime().apply(startDateTime);
@@ -157,6 +170,7 @@ public class DashBoardServiceImpl implements DashBoardService {
             serverNodeLambdaQueryWrapper.eq(ServerNode::getGroupName, queryVO.getGroupName());
         }
 
+        serverNodeLambdaQueryWrapper.ge(ServerNode::getExpireAt, LocalDateTime.now());
         PageDTO<ServerNode> serverNodePageDTO = serverNodeMapper.selectPage(pageDTO, serverNodeLambdaQueryWrapper.orderByDesc(ServerNode::getNodeType));
 
         List<ServerNodeResponseVO> serverNodeResponseVOS = ServerNodeResponseVOConverter.INSTANCE.toServerNodeResponseVO(serverNodePageDTO.getRecords());

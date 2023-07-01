@@ -5,7 +5,7 @@
     </page-header-wrapper>
 
     <a-card :bordered="false">
-      <a-descriptions title="" bordered>
+      <a-descriptions title="" bordered v-if='retryDealLetterInfo !== null'>
         <a-descriptions-item label="组名称">
           {{ retryDealLetterInfo.groupName }}
         </a-descriptions-item>
@@ -55,7 +55,7 @@ export default {
   name: 'RetryDeadLetterInfo',
   data () {
     return {
-      retryDealLetterInfo: {},
+      retryDealLetterInfo: null,
       taskType: {
         '1': {
           'name': '重试数据',

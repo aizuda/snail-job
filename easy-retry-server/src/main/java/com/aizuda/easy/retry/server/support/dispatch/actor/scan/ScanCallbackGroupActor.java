@@ -57,10 +57,11 @@ public class ScanCallbackGroupActor extends AbstractScanGroup {
             .withStopStrategy(StopStrategies.stopException())
             .withStopStrategy(StopStrategies.stopResultStatus())
             .withWaitStrategy(getWaitWaitStrategy())
-            .withFilterStrategy(FilterStrategies.delayLevelFilter())
+            .withFilterStrategy(FilterStrategies.triggerAtFilter())
             .withFilterStrategy(FilterStrategies.bitSetIdempotentFilter(idempotentStrategy))
             .withFilterStrategy(FilterStrategies.sceneBlackFilter())
             .withFilterStrategy(FilterStrategies.checkAliveClientPodFilter())
+            .withFilterStrategy(FilterStrategies.rebalanceFilterStrategies())
             .withFilterStrategy(FilterStrategies.rateLimiterFilter())
             .withRetryContext(retryContext)
             .build();

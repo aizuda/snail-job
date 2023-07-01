@@ -4,8 +4,13 @@ import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.client.core.RetryExecutorParameter;
 import com.aizuda.easy.retry.client.core.cache.RetryerInfoCache;
 import com.aizuda.easy.retry.client.core.exception.EasyRetryClientException;
-import com.github.rholder.retry.*;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.github.rholder.retry.RetryException;
+import com.github.rholder.retry.RetryListener;
+import com.github.rholder.retry.Retryer;
+import com.github.rholder.retry.RetryerBuilder;
+import com.github.rholder.retry.StopStrategy;
+import com.github.rholder.retry.WaitStrategy;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.Callable;
@@ -33,7 +38,7 @@ public class GuavaRetryExecutor extends AbstractRetryExecutor<WaitStrategy, Stop
     public Retryer build(RetryExecutorParameter<WaitStrategy, StopStrategy> parameter) {
 
         RetryerBuilder<Object> retryerBuilder = RetryerBuilder.newBuilder();
-        retryerBuilder.retryIfException(throwable -> parameter.exceptionPredicate().apply(throwable));
+        retryerBuilder.retryIfException(throwable -> true);
         retryerBuilder.withWaitStrategy(parameter.backOff());
         retryerBuilder.withStopStrategy(parameter.stop());
         for (RetryListener retryListener : parameter.getRetryListeners()) {

@@ -13,4 +13,5 @@ public class RetryDeadLetterQueryVO extends BaseQueryVO {
     private String sceneName;
     private String bizNo;
     private String idempotentId;
+    private String uniqueId;
 }

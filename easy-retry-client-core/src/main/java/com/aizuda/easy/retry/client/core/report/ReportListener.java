@@ -12,7 +12,7 @@ import com.aizuda.easy.retry.client.core.cache.GroupVersionCache;
 import com.aizuda.easy.retry.client.core.executor.GuavaRetryExecutor;
 import com.aizuda.easy.retry.common.core.alarm.Alarm;
 import com.aizuda.easy.retry.common.core.alarm.AlarmContext;
-import com.aizuda.easy.retry.common.core.alarm.AltinAlarmFactory;
+import com.aizuda.easy.retry.common.core.alarm.EasyRetryAlarmFactory;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.enums.NotifySceneEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
@@ -77,11 +77,6 @@ public class ReportListener implements Listener<RetryTaskDTO> {
         return new RetryExecutorParameter<WaitStrategy, StopStrategy>() {
 
             @Override
-            public Predicate<Throwable> exceptionPredicate() {
-                return throwable -> Boolean.TRUE;
-            }
-
-            @Override
             public WaitStrategy backOff() {
                 return WaitStrategies.fixedWait(2, TimeUnit.SECONDS);
             }
@@ -125,8 +120,8 @@ public class ReportListener implements Listener<RetryTaskDTO> {
                         .title("上报异常:[{}]", EasyRetryProperties.getGroup())
                         .notifyAttribute(notifyAttribute.getNotifyAttribute());
 
-                AltinAlarmFactory altinAlarmFactory = SpringContext.getBeanByType(AltinAlarmFactory.class);
-                Alarm<AlarmContext> alarmType = altinAlarmFactory.getAlarmType(notifyAttribute.getNotifyType());
+                EasyRetryAlarmFactory easyRetryAlarmFactory = SpringContext.getBeanByType(EasyRetryAlarmFactory.class);
+                Alarm<AlarmContext> alarmType = easyRetryAlarmFactory.getAlarmType(notifyAttribute.getNotifyType());
                 alarmType.asyncSendMessage(context);
             }
         } catch (Exception e1) {

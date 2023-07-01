@@ -66,19 +66,10 @@ public interface SystemConstants {
 
     }
 
-    interface CALL_BACK {
-        /**
-         * 回调id前缀
-         */
-        String CB_ = "CB_";
-        /**
-         * 最大重试次数
-         */
-        int MAX_RETRY_COUNT = 288;
-        /**
-         * 间隔时间
-         */
-        int TRIGGER_INTERVAL = 15 * 60;
-    }
-
+    String LOGO = "  ___                ___     _            \n" +
+                    " | __|__ _ ____  _  | _ \\___| |_ _ _ _  _ \n" +
+                    " | _|/ _` (_-< || | |   / -_)  _| '_| || |\n" +
+                    " |___\\__,_/__/\\_, | |_|_\\___|\\__|_|  \\_, |\n" +
+                    "              |__/                   |__/ \n" +
+                    " :: Easy Retry ::                     (v{})       \n";
 }

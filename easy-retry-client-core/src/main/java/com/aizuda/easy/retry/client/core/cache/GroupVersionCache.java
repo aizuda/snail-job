@@ -38,6 +38,10 @@ public class GroupVersionCache implements Lifecycle {
     }
 
     public static long getDdl(String sceneName) {
+        // 缓存初始化时configDTO值为null,可能造成空指针异常
+        if (Objects.isNull(configDTO)){
+            return SystemConstants.DEFAULT_DDL;
+        }
         List<Scene> sceneList = configDTO.getSceneList();
         if (CollectionUtils.isEmpty(sceneList)) {
             return SystemConstants.DEFAULT_DDL;

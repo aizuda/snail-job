@@ -17,6 +17,7 @@ import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.enums.RetryResultStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.core.model.IdempotentIdContext;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.model.dto.ConfigDTO;
@@ -140,7 +141,7 @@ public class RetryEndPoint {
             retryCompleteCallback.doSuccessCallback(retryerInfo.getScene(), retryerInfo.getExecutorClassName(), deSerialize);
         }
 
-        if (RetryStatusEnum.MAX_RETRY_COUNT.getStatus().equals(callbackDTO.getRetryStatus())) {
+        if (RetryStatusEnum.MAX_COUNT.getStatus().equals(callbackDTO.getRetryStatus())) {
             retryCompleteCallback.doMaxRetryCallback(retryerInfo.getScene(), retryerInfo.getExecutorClassName(), deSerialize);
         }
 
@@ -178,9 +179,9 @@ public class RetryEndPoint {
         try {
             Class<? extends IdempotentIdGenerate> idempotentIdGenerate = retryerInfo.getIdempotentIdGenerate();
             IdempotentIdGenerate generate = idempotentIdGenerate.newInstance();
-            Method method = idempotentIdGenerate.getMethod("idGenerate", Object[].class);
-            Object p = new Object[]{scene, executorName, deSerialize, executorMethod.getName()};
-            idempotentId = (String) ReflectionUtils.invokeMethod(method, generate, p);
+            Method method = idempotentIdGenerate.getMethod("idGenerate", IdempotentIdContext.class);
+            IdempotentIdContext idempotentIdContext = new IdempotentIdContext(scene, executorName, deSerialize, executorMethod.getName());
+            idempotentId = (String) ReflectionUtils.invokeMethod(method, generate, idempotentIdContext);
         } catch (Exception exception) {
             LogUtils.error(log, "幂等id生成异常：{},{}", scene, argsStr, exception);
             throw new EasyRetryClientException("idempotentId生成异常：{},{}", scene, argsStr);

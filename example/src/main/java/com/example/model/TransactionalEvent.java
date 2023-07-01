@@ -4,7 +4,7 @@ import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
 
 /**
- * @author: shuguang.zhang
+ * @author: www.byteblogs.com
  * @date : 2023-04-25 22:48
  */
 @Getter

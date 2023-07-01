@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
  *
  * @author www.byteblogs.com
  * @date 2021-10-30
- * @since 2.0
+ * @since 1.0.0
  */
 @Component
 @Data

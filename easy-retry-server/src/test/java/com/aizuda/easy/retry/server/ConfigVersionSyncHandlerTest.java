@@ -1,10 +1,9 @@
 package com.aizuda.easy.retry.server;
 
-import com.aizuda.easy.retry.server.support.handler.ClientRegisterHandler;
+import com.aizuda.easy.retry.server.support.handler.ConfigVersionSyncHandler;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 
 /**
@@ -12,15 +11,15 @@ import org.springframework.boot.test.context.SpringBootTest;
  * @date : 2022-05-02 22:38
  */
 @SpringBootTest
-public class ClientRegisterHandlerTest {
+public class ConfigVersionSyncHandlerTest {
 
     @Autowired
-    private ClientRegisterHandler clientRegisterHandler;
+    private ConfigVersionSyncHandler configVersionSyncHandler;
 
     @SneakyThrows
     @Test
     public void syncVersion() {
-        clientRegisterHandler.syncVersion(null, "example_group", "127.0.0.1", 8089, "/");
+        configVersionSyncHandler.addSyncTask( "example_group", 0);
 
     }
 

@@ -47,7 +47,6 @@ export default {
         retains: ['total', 'createDt']
       })
 
-      console.log(dv.rows)
       this.chart.source(dv, {
         date: {
           type: 'cat'

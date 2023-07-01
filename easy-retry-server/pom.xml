@@ -19,6 +19,12 @@
         <maven.deploy.skip>true</maven.deploy.skip>
         <org.mapstruct.version>1.5.3.Final</org.mapstruct.version>
         <akka.version>2.6.20</akka.version>
+        <java-jwt.version>4.3.0</java-jwt.version>
+        <shedlock.version>4.0.1</shedlock.version>
+        <okhttp.version>4.10.0</okhttp.version>
+        <commons-lang.version>2.6</commons-lang.version>
+        <perf4j.version>0.9.16</perf4j.version>
+        <mysql.version>8.0.32</mysql.version>
     </properties>
 
     <dependencies>
@@ -54,17 +60,17 @@
         <dependency>
             <groupId>net.javacrumbs.shedlock</groupId>
             <artifactId>shedlock-provider-jdbc-template</artifactId>
-            <version>4.0.1</version>
+            <version>${shedlock.version}</version>
         </dependency>
         <dependency>
             <groupId>net.javacrumbs.shedlock</groupId>
             <artifactId>shedlock-spring</artifactId>
-            <version>4.0.1</version>
+            <version>${shedlock.version}</version>
         </dependency>
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.32</version>
+            <version>${mysql.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -90,7 +96,7 @@
         <dependency>
             <groupId>com.auth0</groupId>
             <artifactId>java-jwt</artifactId>
-            <version>4.3.0</version>
+            <version>${java-jwt.version}</version>
         </dependency>
         <dependency>
             <groupId>io.netty</groupId>
@@ -99,12 +105,12 @@
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
-            <version>4.10.0</version>
+            <version>${okhttp.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
-            <version>2.6</version>
+            <version>${commons-lang.version}</version>
         </dependency>
         <dependency>
             <groupId>org.mapstruct</groupId>
@@ -125,7 +131,7 @@
         <dependency>
             <groupId>org.perf4j</groupId>
             <artifactId>perf4j</artifactId>
-            <version>0.9.16</version>
+            <version>${perf4j.version}</version>
         </dependency>
         <dependency>
             <groupId>org.hibernate</groupId>

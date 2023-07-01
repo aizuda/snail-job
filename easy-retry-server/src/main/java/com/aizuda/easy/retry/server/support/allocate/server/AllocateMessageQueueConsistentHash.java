@@ -18,7 +18,6 @@ package com.aizuda.easy.retry.server.support.allocate.server;
 
 import com.aizuda.easy.retry.server.support.allocate.common.ConsistentHashRouter;
 import com.aizuda.easy.retry.server.support.allocate.common.HashFunction;
-import com.aizuda.easy.retry.server.persistence.mybatis.po.GroupConfig;
 import com.aizuda.easy.retry.server.support.ServerLoadBalance;
 import com.aizuda.easy.retry.server.support.allocate.common.Node;
 import org.springframework.util.CollectionUtils;
@@ -52,7 +51,7 @@ public class AllocateMessageQueueConsistentHash implements ServerLoadBalance {
     }
 
     @Override
-    public List<GroupConfig> allocate(String currentCID, List<GroupConfig> groupList,
+    public List<String> allocate(String currentCID, List<String> groupList,
                                       List<String> serverList) {
 
         if (currentCID == null || currentCID.length() < 1) {
@@ -65,7 +64,7 @@ public class AllocateMessageQueueConsistentHash implements ServerLoadBalance {
             throw new IllegalArgumentException("cidAll is null or cidAll empty");
         }
 
-        List<GroupConfig> result = new ArrayList<>();
+        List<String> result = new ArrayList<>();
         if (!serverList.contains(currentCID)) {
             return result;
         }
@@ -82,11 +81,11 @@ public class AllocateMessageQueueConsistentHash implements ServerLoadBalance {
             router = new ConsistentHashRouter<ClientNode>(cidNodes, virtualNodeCnt);
         }
 
-        List<GroupConfig> results = new ArrayList<>();
-        for (GroupConfig groupConfig : groupList) {
-            ClientNode clientNode = router.routeNode(groupConfig.getGroupName());
+        List<String> results = new ArrayList<>();
+        for (String groupName : groupList) {
+            ClientNode clientNode = router.routeNode(groupName);
             if (clientNode != null && currentCID.equals(clientNode.getKey())) {
-                results.add(groupConfig);
+                results.add(groupName);
             }
         }
 

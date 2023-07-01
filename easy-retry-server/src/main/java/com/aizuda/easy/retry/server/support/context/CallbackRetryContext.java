@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.server.support.context;
 
+import com.aizuda.easy.retry.server.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.ServerNode;
 import com.aizuda.easy.retry.server.support.RetryContext;
@@ -46,7 +47,7 @@ public class CallbackRetryContext<V> implements RetryContext<V> {
     /**
      * 需要调度的节点
      */
-    private ServerNode serverNode;
+    private RegisterNodeInfo serverNode;
 
     @Override
     public boolean hasException() {
