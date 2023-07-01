@@ -44,7 +44,7 @@
 
         <div v-else>
           组:
-          <a-tag color="pink" v-for="item in getData(record)" :key="item.hostId" style="margin-bottom: 16px">
+          <a-tag color="pink" v-for="item in record.consumerGroup" :key="item" style="margin-bottom: 16px">
             {{ item }}
           </a-tag>
         </div>
@@ -56,7 +56,7 @@
 
 <script>
 import moment from 'moment'
-import { pods, consumerGroup } from '@/api/manage'
+import { pods } from '@/api/manage'
 import { STable } from '@/components'
 
 export default {
@@ -121,11 +121,6 @@ export default {
         console.log('loadData.parameter', parameter)
         return pods(Object.assign(parameter, this.queryParam))
           .then(res => {
-            this.groupList = []
-            res.data.forEach((key, val) => {
-              this.getConsumerGroup(key)
-            })
-
             return res
           })
       },
@@ -143,35 +138,10 @@ export default {
       nodeType: {
         '1': '客户端',
         '2': '服务端'
-      },
-      groupList: []
+      }
     }
   },
   methods: {
-    getConsumerGroup (record) {
-      if (record.extAttrs === undefined) {
-        return
-      }
-      const extAttrs = JSON.parse(record.extAttrs)
-      consumerGroup(record.hostIp, extAttrs.webPort).then(res => {
-        this.groupList.push({
-          hostId: record.hostId,
-          data: res.data
-        })
-      })
-    },
-    getData (record) {
-      const s = this.groupList.find(item => item.hostId === record.hostId)
-      if (s === undefined) {
-        return ''
-      }
-
-      if (s.data === undefined || s.data.size > 0) {
-        return ''
-      }
-
-      return s.data
-    }
   }
 }
 </script>

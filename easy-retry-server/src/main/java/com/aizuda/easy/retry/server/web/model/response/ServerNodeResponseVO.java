@@ -3,6 +3,7 @@ package com.aizuda.easy.retry.server.web.model.response;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 /**
  * @author www.byteblogs.com
@@ -29,4 +30,6 @@ public class ServerNodeResponseVO {
     private LocalDateTime updateDt;
 
     private String extAttrs;
+
+    private Set<String> consumerGroup;
 }

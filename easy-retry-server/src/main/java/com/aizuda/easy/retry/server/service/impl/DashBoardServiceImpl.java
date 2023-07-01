@@ -1,6 +1,10 @@
 package com.aizuda.easy.retry.server.service.impl;
 
+import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.common.core.util.HostUtils;
+import com.aizuda.easy.retry.common.core.util.JsonUtil;
+import com.aizuda.easy.retry.server.dto.ServerNodeExtAttrs;
 import com.aizuda.easy.retry.server.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskLogMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskLogMessageMapper;
@@ -9,6 +13,8 @@ import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTaskLog;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTaskLogMessage;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.ServerNode;
 import com.aizuda.easy.retry.server.service.convert.ServerNodeResponseVOConverter;
+import com.aizuda.easy.retry.server.support.cache.CacheConsumerGroup;
+import com.aizuda.easy.retry.server.support.register.ServerRegister;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
 import com.aizuda.easy.retry.server.web.model.request.ServerNodeQueryVO;
 import com.aizuda.easy.retry.server.web.model.response.ServerNodeResponseVO;
@@ -22,21 +28,28 @@ import com.aizuda.easy.retry.server.web.model.response.DispatchQuantityResponseV
 import com.aizuda.easy.retry.server.web.model.response.SceneQuantityRankResponseVO;
 import com.aizuda.easy.retry.server.web.model.response.TaskQuantityResponseVO;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
+import com.google.common.collect.Sets;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -45,7 +58,9 @@ import java.util.stream.Collectors;
  * @since 1.0.0
  */
 @Service
+@Slf4j
 public class DashBoardServiceImpl implements DashBoardService {
+    public static final String URL = "http://{0}:{1}/dashboard/consumer/group";
 
     @Autowired
     private RetryTaskLogMapper retryTaskLogMapper;
@@ -57,7 +72,7 @@ public class DashBoardServiceImpl implements DashBoardService {
     private ServerNodeMapper serverNodeMapper;
 
     @Autowired
-    private ServerProperties serverProperties;
+    private RestTemplate restTemplate;
 
     @Override
     public TaskQuantityResponseVO countTask() {
@@ -174,6 +189,43 @@ public class DashBoardServiceImpl implements DashBoardService {
         PageDTO<ServerNode> serverNodePageDTO = serverNodeMapper.selectPage(pageDTO, serverNodeLambdaQueryWrapper.orderByDesc(ServerNode::getNodeType));
 
         List<ServerNodeResponseVO> serverNodeResponseVOS = ServerNodeResponseVOConverter.INSTANCE.toServerNodeResponseVO(serverNodePageDTO.getRecords());
+
+        for (final ServerNodeResponseVO serverNodeResponseVO : serverNodeResponseVOS) {
+            if (NodeTypeEnum.CLIENT.getType().equals(serverNodeResponseVO.getNodeType())) {
+                continue;
+            }
+
+            // 若是本地节点则直接从缓存中取
+            if (ServerRegister.CURRENT_CID.equals(serverNodeResponseVO.getHostId())) {
+                serverNodeResponseVO.setConsumerGroup(CacheConsumerGroup.getAllConsumerGroupName());
+                continue;
+            }
+
+            if (StringUtils.isBlank(serverNodeResponseVO.getExtAttrs())) {
+                continue;
+            }
+
+            ServerNodeExtAttrs serverNodeExtAttrs = JsonUtil
+                .parseObject(serverNodeResponseVO.getExtAttrs(), ServerNodeExtAttrs.class);
+
+            try {
+
+                // 从远程节点取
+                String format = MessageFormat
+                    .format(URL, serverNodeResponseVO.getHostIp(), serverNodeExtAttrs.getWebPort().toString());
+                Result<List<String>> result = restTemplate.getForObject(format, Result.class);
+                List<String> data = result.getData();
+                if (!CollectionUtils.isEmpty(data)) {
+                    serverNodeResponseVO.setConsumerGroup(new HashSet<>(data));
+                }
+
+            } catch (Exception e) {
+                LogUtils.error(log, "Failed to retrieve consumer group for node [{}:{}].", serverNodeResponseVO.getHostIp(), serverNodeExtAttrs.getWebPort());
+                serverNodeResponseVO.setConsumerGroup(Sets.newHashSet("获取数据异常"));
+            }
+
+        }
+
         return new PageResult<>(serverNodePageDTO, serverNodeResponseVOS);
     }
 

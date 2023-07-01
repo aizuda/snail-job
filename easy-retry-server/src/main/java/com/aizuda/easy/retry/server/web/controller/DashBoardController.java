@@ -77,7 +77,6 @@ public class DashBoardController {
         return dashBoardService.pods(serverNodeQueryVO);
     }
 
-//    @LoginRequired
     @GetMapping("/consumer/group")
     public Set<String> allConsumerGroupName() {
         return CacheConsumerGroup.getAllConsumerGroupName();
