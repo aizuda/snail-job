@@ -100,7 +100,7 @@ CREATE TABLE `retry_task_log`
     `ext_attrs`     text         NOT NULL COMMENT '扩展字段',
     `retry_status`  tinyint(4) NOT NULL DEFAULT '0' COMMENT '重试状态 0、重试中 1、成功 2、最大次数',
     `task_type`     tinyint(4) NOT NULL DEFAULT '1' COMMENT '任务类型 1、重试数据 2、回调数据',
-    `create_dt`     datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间'
+    `create_dt`     datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
         PRIMARY KEY (`id`),
     KEY             `idx_group_name_scene_name` (`group_name`, `scene_name`),
     KEY             `idx_retry_status` (`retry_status`),
