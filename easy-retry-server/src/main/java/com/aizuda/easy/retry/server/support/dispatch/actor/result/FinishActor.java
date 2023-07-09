@@ -57,10 +57,8 @@ public class FinishActor extends AbstractActor  {
                    protected void doInTransactionWithoutResult(TransactionStatus status) {
                        retryTaskAccess.updateRetryTask(retryTask);
 
-                       if (TaskTypeEnum.RETRY.getType().equals(retryTask.getTaskType())) {
-                           // 创建一个回调任务
-                           callbackRetryTaskHandler.create(retryTask);
-                       }
+                       // 创建一个回调任务
+                       callbackRetryTaskHandler.create(retryTask);
                    }
                });
 
