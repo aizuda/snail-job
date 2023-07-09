@@ -40,6 +40,10 @@ public class CallbackRetryTaskHandler {
 
     @Transactional
     public void create(RetryTask retryTask) {
+        if (!TaskTypeEnum.RETRY.getType().equals(retryTask.getTaskType())) {
+          return;
+        }
+
         RetryTask callbackRetryTask = RetryTaskConverter.INSTANCE.toRetryTask(retryTask);
 
         callbackRetryTask.setTaskType(TaskTypeEnum.CALLBACK.getType());
