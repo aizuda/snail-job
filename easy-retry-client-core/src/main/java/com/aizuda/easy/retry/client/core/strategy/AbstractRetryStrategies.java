@@ -56,8 +56,8 @@ public abstract class AbstractRetryStrategies implements RetryStrategy {
         retryerResultContext.setRetryerInfo(retryerInfo);
 
         try {
-            for (EasyRetryListener EasyRetryListener : easyRetryListeners) {
-                EasyRetryListener.beforeRetry(sceneName, executorClassName, params);
+            for (EasyRetryListener easyRetryListener : easyRetryListeners) {
+                easyRetryListener.beforeRetry(sceneName, executorClassName, params);
             }
 
             Object result = retryExecutor.call(retryer, doGetCallable(retryExecutor, params), getRetryErrorConsumer(retryerResultContext, params), getRetrySuccessConsumer(retryerResultContext));
@@ -83,8 +83,8 @@ public abstract class AbstractRetryStrategies implements RetryStrategy {
             Object result = retryerResultContext.getResult();
             RetryerInfo retryerInfo = retryerResultContext.getRetryerInfo();
 
-            for (EasyRetryListener EasyRetryListener : easyRetryListeners) {
-                EasyRetryListener.successOnRetry(result, retryerInfo.getScene(), retryerInfo.getExecutorClassName());
+            for (EasyRetryListener easyRetryListener : easyRetryListeners) {
+                easyRetryListener.successOnRetry(result, retryerInfo.getScene(), retryerInfo.getExecutorClassName());
             }
 
             doRetrySuccessConsumer(retryerResultContext).accept(retryerResultContext);
@@ -103,8 +103,8 @@ public abstract class AbstractRetryStrategies implements RetryStrategy {
 
             RetryerInfo retryerInfo = context.getRetryerInfo();
             try {
-                for (EasyRetryListener EasyRetryListener : easyRetryListeners) {
-                    EasyRetryListener
+                for (EasyRetryListener easyRetryListener : easyRetryListeners) {
+                    easyRetryListener
                         .failureOnRetry(retryerInfo.getScene(), retryerInfo.getExecutorClassName(), throwable);
                 }
             } catch (Exception e) {

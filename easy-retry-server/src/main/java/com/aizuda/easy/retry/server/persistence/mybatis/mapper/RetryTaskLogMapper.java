@@ -30,4 +30,6 @@ public interface RetryTaskLogMapper extends BaseMapper<RetryTaskLog> {
                                                           @Param("endTime")LocalDateTime endTime
     );
 
+    int batchInsert(List<RetryTaskLog> list);
+
 }

@@ -66,7 +66,8 @@
       </a-form>
     </div>
     <div class="table-operator">
-      <a-button type="primary" icon="plus" @click="handleNew()">新增</a-button>
+      <a-button type="primary" icon="plus" @click="handleNew()">单个</a-button>
+      <a-button type="primary" icon="plus" @click="handleBatchNew()">批量</a-button>
       <a-dropdown v-action:edit v-if="selectedRowKeys.length > 0">
         <a-menu slot="overlay" @click="onClick">
           <a-menu-item key="1"><a-icon type="delete" />删除</a-menu-item>
@@ -115,6 +116,8 @@
 
     <SaveRetryTask ref="saveRetryTask" @refreshTable="refreshTable"/>
     <BatchUpdateRetryTaskInfo ref="batchUpdateRetryTaskInfo" @refreshTable="refreshTable"/>
+    <BatchSaveRetryTask ref="batchSaveRetryTask" @refreshTable="refreshTable"/>
+
   </a-card>
 </template>
 
@@ -125,6 +128,7 @@ import { getAllGroupNameList, getRetryTaskPage, getSceneList, updateRetryTaskSta
 import { STable } from '@/components'
 import SaveRetryTask from './form/SaveRetryTask'
 import BatchUpdateRetryTaskInfo from './form/BatchUpdateRetryTaskInfo'
+import BatchSaveRetryTask from '@/views/task/form/BatchSaveRetryTask.vue'
 
 export default {
   name: 'RetryTask',
@@ -133,7 +137,8 @@ export default {
     ATextarea,
     STable,
     SaveRetryTask,
-    BatchUpdateRetryTaskInfo
+    BatchUpdateRetryTaskInfo,
+    BatchSaveRetryTask
   },
   data () {
     return {
@@ -284,6 +289,9 @@ export default {
   methods: {
     handleNew () {
       this.$refs.saveRetryTask.isShow(true, null)
+    },
+    handleBatchNew () {
+      this.$refs.batchSaveRetryTask.isShow(true, null)
     },
     handleChange (value) {
       getSceneList({ groupName: value }).then((res) => {

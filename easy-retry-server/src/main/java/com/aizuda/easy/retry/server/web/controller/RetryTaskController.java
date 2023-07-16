@@ -4,12 +4,7 @@ import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.server.service.RetryTaskService;
 import com.aizuda.easy.retry.server.web.annotation.LoginRequired;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
-import com.aizuda.easy.retry.server.web.model.request.BatchDeleteRetryTaskVO;
-import com.aizuda.easy.retry.server.web.model.request.GenerateRetryIdempotentIdVO;
-import com.aizuda.easy.retry.server.web.model.request.RetryTaskQueryVO;
-import com.aizuda.easy.retry.server.web.model.request.RetryTaskUpdateStatusRequestVO;
-import com.aizuda.easy.retry.server.web.model.request.RetryTaskSaveRequestVO;
-import com.aizuda.easy.retry.server.web.model.request.RetryTaskUpdateExecutorNameRequestVO;
+import com.aizuda.easy.retry.server.web.model.request.*;
 import com.aizuda.easy.retry.server.web.model.response.RetryTaskResponseVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -79,5 +74,11 @@ public class RetryTaskController {
     @DeleteMapping("/batch")
     public Integer deleteRetryTask(@RequestBody @Validated BatchDeleteRetryTaskVO requestVO) {
         return retryTaskService.deleteRetryTask(requestVO);
+    }
+
+    @LoginRequired
+    @PostMapping("/batch")
+    public Integer parseLogs(@RequestBody @Validated ParseLogsVO parseLogsVO) {
+        return retryTaskService.parseLogs(parseLogsVO);
     }
 }

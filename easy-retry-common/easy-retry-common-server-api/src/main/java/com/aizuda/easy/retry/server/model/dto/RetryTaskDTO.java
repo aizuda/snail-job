@@ -18,7 +18,7 @@ public class RetryTaskDTO implements Serializable {
     /**
      * 加密的groupId
      */
-    @NotBlank(message = "shardingGroupId 不能为空")
+    @NotBlank(message = "groupName 不能为空")
     @Length(max = 16, message = "组id最长为16")
     private String groupName;
 

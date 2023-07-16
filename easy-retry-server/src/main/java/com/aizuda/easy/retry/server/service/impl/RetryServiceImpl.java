@@ -74,7 +74,7 @@ public class RetryServiceImpl implements RetryService {
     @Transactional
     @Override
     public Boolean reportRetry(RetryTaskDTO retryTaskDTO) {
-        LogUtils.warn(log, "received report data [{}]", JsonUtil.toJsonString(retryTaskDTO));
+        LogUtils.info(log, "received report data. <|>{}<|>", JsonUtil.toJsonString(retryTaskDTO));
 
         SceneConfig sceneConfig = configAccess.getSceneConfigByGroupNameAndSceneName(retryTaskDTO.getGroupName(), retryTaskDTO.getSceneName());
         if (Objects.isNull(sceneConfig)) {

@@ -3,6 +3,7 @@ package com.aizuda.easy.retry.server.service.convert;
 import com.aizuda.easy.retry.server.model.dto.RetryTaskDTO;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryDeadLetter;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask;
+import com.aizuda.easy.retry.server.support.generator.task.TaskContext;
 import com.aizuda.easy.retry.server.web.model.request.RetryTaskSaveRequestVO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -32,4 +33,6 @@ public interface RetryTaskConverter {
     RetryTask toRetryTask(RetryTaskSaveRequestVO retryTaskSaveRequestVO);
 
     List<RetryTask> toRetryTaskList(List<RetryTaskDTO> retryTaskDTOList);
+
+    RetryTask toRetryTask(TaskContext.TaskInfo taskInfo);
 }

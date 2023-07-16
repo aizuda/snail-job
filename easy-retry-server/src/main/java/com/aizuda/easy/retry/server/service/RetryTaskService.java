@@ -1,12 +1,7 @@
 package com.aizuda.easy.retry.server.service;
 
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
-import com.aizuda.easy.retry.server.web.model.request.BatchDeleteRetryTaskVO;
-import com.aizuda.easy.retry.server.web.model.request.GenerateRetryIdempotentIdVO;
-import com.aizuda.easy.retry.server.web.model.request.RetryTaskQueryVO;
-import com.aizuda.easy.retry.server.web.model.request.RetryTaskUpdateStatusRequestVO;
-import com.aizuda.easy.retry.server.web.model.request.RetryTaskSaveRequestVO;
-import com.aizuda.easy.retry.server.web.model.request.RetryTaskUpdateExecutorNameRequestVO;
+import com.aizuda.easy.retry.server.web.model.request.*;
 import com.aizuda.easy.retry.server.web.model.response.RetryTaskResponseVO;
 
 import java.util.List;
@@ -69,4 +64,11 @@ public interface RetryTaskService {
      */
     Integer deleteRetryTask(BatchDeleteRetryTaskVO requestVO);
 
+    /**
+     * 解析日志
+     *
+     * @param parseLogsVO {@link ParseLogsVO} 解析参数模型
+     * @return
+     */
+    Integer parseLogs(ParseLogsVO parseLogsVO);
 }

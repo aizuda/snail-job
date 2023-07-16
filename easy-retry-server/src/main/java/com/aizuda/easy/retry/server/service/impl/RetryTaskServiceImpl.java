@@ -5,10 +5,13 @@ import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.client.model.GenerateRetryIdempotentIdDTO;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
 import com.aizuda.easy.retry.common.core.model.Result;
+import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.config.RequestDataHelper;
 import com.aizuda.easy.retry.server.dto.RegisterNodeInfo;
+import com.aizuda.easy.retry.server.enums.TaskGeneratorScene;
 import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
+import com.aizuda.easy.retry.server.model.dto.RetryTaskDTO;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskLogMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskLogMessageMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskMapper;
@@ -21,17 +24,15 @@ import com.aizuda.easy.retry.server.persistence.support.ConfigAccess;
 import com.aizuda.easy.retry.server.service.RetryTaskService;
 import com.aizuda.easy.retry.server.service.convert.RetryTaskConverter;
 import com.aizuda.easy.retry.server.service.convert.RetryTaskResponseVOConverter;
+import com.aizuda.easy.retry.server.service.convert.TaskContextConverter;
 import com.aizuda.easy.retry.server.support.dispatch.actor.log.RetryTaskLogDTO;
 import com.aizuda.easy.retry.server.support.generator.IdGenerator;
+import com.aizuda.easy.retry.server.support.generator.TaskGenerator;
+import com.aizuda.easy.retry.server.support.generator.task.TaskContext;
 import com.aizuda.easy.retry.server.support.handler.ClientNodeAllocateHandler;
 import com.aizuda.easy.retry.server.support.strategy.WaitStrategies;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
-import com.aizuda.easy.retry.server.web.model.request.BatchDeleteRetryTaskVO;
-import com.aizuda.easy.retry.server.web.model.request.GenerateRetryIdempotentIdVO;
-import com.aizuda.easy.retry.server.web.model.request.RetryTaskQueryVO;
-import com.aizuda.easy.retry.server.web.model.request.RetryTaskUpdateStatusRequestVO;
-import com.aizuda.easy.retry.server.web.model.request.RetryTaskSaveRequestVO;
-import com.aizuda.easy.retry.server.web.model.request.RetryTaskUpdateExecutorNameRequestVO;
+import com.aizuda.easy.retry.server.web.model.request.*;
 import com.aizuda.easy.retry.server.web.model.response.RetryTaskResponseVO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -42,14 +43,16 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * @author www.byteblogs.com
@@ -76,6 +79,8 @@ public class RetryTaskServiceImpl implements RetryTaskService {
     @Autowired
     @Qualifier("configAccessProcessor")
     private ConfigAccess configAccess;
+    @Autowired
+    private List<TaskGenerator> taskGenerators;
 
     @Override
     public PageResult<List<RetryTaskResponseVO>> getRetryTaskPage(RetryTaskQueryVO queryVO) {
@@ -109,8 +114,8 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         RequestDataHelper.setPartition(queryVO.getGroupName());
 
         retryTaskLambdaQueryWrapper.select(RetryTask::getId, RetryTask::getBizNo, RetryTask::getIdempotentId,
-            RetryTask::getGroupName, RetryTask::getNextTriggerAt, RetryTask::getRetryCount,
-            RetryTask::getRetryStatus, RetryTask::getUpdateDt, RetryTask::getSceneName, RetryTask::getUniqueId, RetryTask::getTaskType);
+                RetryTask::getGroupName, RetryTask::getNextTriggerAt, RetryTask::getRetryCount,
+                RetryTask::getRetryStatus, RetryTask::getUpdateDt, RetryTask::getSceneName, RetryTask::getUniqueId, RetryTask::getTaskType);
         pageDTO = retryTaskMapper.selectPage(pageDTO, retryTaskLambdaQueryWrapper.orderByDesc(RetryTask::getCreateDt));
         return new PageResult<>(pageDTO, RetryTaskResponseVOConverter.INSTANCE.toRetryTaskResponseVO(pageDTO.getRecords()));
     }
@@ -142,7 +147,7 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         // 若恢复重试则需要重新计算下次触发时间
         if (RetryStatusEnum.RUNNING.getStatus().equals(retryStatusEnum.getStatus())) {
             retryTask.setNextTriggerAt(
-                WaitStrategies.randomWait(1, TimeUnit.SECONDS, 60, TimeUnit.SECONDS).computeRetryTime(null));
+                    WaitStrategies.randomWait(1, TimeUnit.SECONDS, 60, TimeUnit.SECONDS).computeRetryTime(null));
         }
 
         if (RetryStatusEnum.FINISH.getStatus().equals(retryStatusEnum.getStatus())) {
@@ -172,19 +177,19 @@ public class RetryTaskServiceImpl implements RetryTaskService {
             throw new EasyRetryServerException("重试状态错误");
         }
 
-        RetryTask retryTask = RetryTaskConverter.INSTANCE.toRetryTask(retryTaskRequestVO);
-        retryTask.setCreateDt(LocalDateTime.now());
-        retryTask.setUpdateDt(LocalDateTime.now());
+        TaskGenerator taskGenerator = taskGenerators.stream()
+                .filter(t -> t.supports(TaskGeneratorScene.MANA_SINGLE.getScene()))
+                .findFirst().orElseThrow(() -> new EasyRetryServerException("没有匹配的任务生成器"));
 
-        if (StringUtils.isBlank(retryTask.getExtAttrs())) {
-            retryTask.setExtAttrs(StringUtils.EMPTY);
-        }
+        TaskContext taskContext = new TaskContext();
+        taskContext.setSceneName(retryTaskRequestVO.getSceneName());
+        taskContext.setGroupName(retryTaskRequestVO.getGroupName());
+        taskContext.setTaskInfos(Collections.singletonList(TaskContextConverter.INSTANCE.toTaskContextInfo(retryTaskRequestVO)));
 
-        retryTask.setNextTriggerAt(
-            WaitStrategies.randomWait(1, TimeUnit.SECONDS, 60, TimeUnit.SECONDS).computeRetryTime(null));
-        retryTask.setUniqueId(getIdGenerator(retryTask.getGroupName()));
-        RequestDataHelper.setPartition(retryTaskRequestVO.getGroupName());
-        return retryTaskMapper.insert(retryTask);
+        // 生成任务
+        taskGenerator.taskGenerator(taskContext);
+
+        return 1;
     }
 
     @Override
@@ -194,7 +199,7 @@ public class RetryTaskServiceImpl implements RetryTaskService {
 
         // 委托客户端生成idempotentId
         String url = MessageFormat
-            .format(URL, serverNode.getHostIp(), serverNode.getHostPort().toString(), serverNode.getContextPath());
+                .format(URL, serverNode.getHostIp(), serverNode.getHostPort().toString(), serverNode.getContextPath());
 
         GenerateRetryIdempotentIdDTO generateRetryIdempotentIdDTO = new GenerateRetryIdempotentIdDTO();
         generateRetryIdempotentIdDTO.setGroup(generateRetryIdempotentIdVO.getGroupName());
@@ -222,13 +227,54 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         // 根据重试数据id，更新执行器名称
         RequestDataHelper.setPartition(requestVO.getGroupName());
         return retryTaskMapper
-            .update(retryTask, new LambdaUpdateWrapper<RetryTask>().in(RetryTask::getId, requestVO.getIds()));
+                .update(retryTask, new LambdaUpdateWrapper<RetryTask>().in(RetryTask::getId, requestVO.getIds()));
     }
 
     @Override
     public Integer deleteRetryTask(final BatchDeleteRetryTaskVO requestVO) {
         RequestDataHelper.setPartition(requestVO.getGroupName());
         return retryTaskMapper.deleteBatchIds(requestVO.getIds());
+    }
+
+    @Override
+    public Integer parseLogs(ParseLogsVO parseLogsVO) {
+
+        String logStr = parseLogsVO.getLogStr();
+
+        String patternString = "<\\|>(.*?)<\\|>";
+        Pattern pattern = Pattern.compile(patternString);
+        Matcher matcher = pattern.matcher(logStr);
+
+        List<RetryTaskDTO> waitInsertList = new ArrayList<>();
+        // 查找匹配的内容并输出
+        while (matcher.find()) {
+            String extractedData = matcher.group(1);
+            if (StringUtils.isBlank(extractedData)) {
+                continue;
+            }
+
+            List<RetryTaskDTO> retryTaskList = JsonUtil.parseList(extractedData, RetryTaskDTO.class);
+            if (!CollectionUtils.isEmpty(retryTaskList)) {
+                waitInsertList.addAll(retryTaskList);
+            }
+        }
+
+        Assert.isFalse(waitInsertList.isEmpty(), () -> new EasyRetryServerException("未找到匹配的数据"));
+        Assert.isTrue(waitInsertList.size() <= 500, () -> new EasyRetryServerException("最多只能处理500条数据"));
+
+        TaskGenerator taskGenerator = taskGenerators.stream()
+                .filter(t -> t.supports(TaskGeneratorScene.MANA_BATCH.getScene()))
+                .findFirst().orElseThrow(() -> new EasyRetryServerException("没有匹配的任务生成器"));
+
+        TaskContext taskContext = new TaskContext();
+        taskContext.setSceneName(parseLogsVO.getSceneName());
+        taskContext.setGroupName(parseLogsVO.getGroupName());
+        taskContext.setTaskInfos(TaskContextConverter.INSTANCE.toTaskContextInfo(waitInsertList));
+
+        // 生成任务
+        taskGenerator.taskGenerator(taskContext);
+
+        return waitInsertList.size();
     }
 
     /**

@@ -76,7 +76,7 @@ public interface ConfigAccess {
      *
      * @return 黑名单列表
      */
-    Set<String> getBlacklist(String shardingGroupId);
+    Set<String> getBlacklist(String groupName);
 
     /**
      * 获取所有组配置信息

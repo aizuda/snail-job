@@ -20,8 +20,14 @@ import java.lang.annotation.Target;
 @Documented
 public @interface Mapping {
 
+    /**
+     * 请求类型
+     */
     RequestMethod method() default RequestMethod.GET;
 
+    /**
+     * 请求路径
+     */
     String path() default "";
 
 }

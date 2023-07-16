@@ -45,7 +45,6 @@ public @interface Retryable {
     /**
      * 重试处理入口，默认为原方法
      *
-     * @return
      */
     Class<? extends ExecutorMethod> retryMethod() default ExecutorAnnotationMethod.class;
 
@@ -60,7 +59,7 @@ public @interface Retryable {
      * 时刻3: 上报一个异常 idempotentId: A1 不会新增一个重试任务，会被幂等处理
      * 时刻4:  idempotentId: A1 重试完成, 状态为已完成
      * 时刻5: 上报一个异常 idempotentId: A1 状态为重试中, 新增一条重试任务
-     **
+     * <p>
      * 默认的idempotentId生成器{@link SimpleIdempotentIdGenerate} 对所有参数进行MD5
      *
      * @return idempotentId
@@ -70,14 +69,13 @@ public @interface Retryable {
     /**
      * 服务端重试完成(重试成功、重试到达最大次数)回调客户端
      *
-     * @return
      */
     Class<? extends RetryCompleteCallback> retryCompleteCallback() default SimpleRetryCompleteCallback.class;
 
     /**
      * 用于标识具有业务特点的值, 比如订单号、物流编号等，可以根据具体的业务场景生成，生成规则采用通用成熟的Spel表达式进行解析
      *
-     * see: https://docs.spring.io/spring-framework/docs/5.0.0.M5/spring-framework-reference/html/expressions.html
+     * see: <a href="https://docs.spring.io/spring-framework/docs/5.0.0.M5/spring-framework-reference/html/expressions.html">...</a>
      */
     String bizNo() default "";
 

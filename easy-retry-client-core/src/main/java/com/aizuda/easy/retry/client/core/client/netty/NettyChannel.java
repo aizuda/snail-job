@@ -50,7 +50,7 @@ public class NettyChannel {
     public static void send(HttpMethod method, String url, String body) throws InterruptedException {
 
         if (Objects.isNull(CHANNEL)) {
-            LogUtils.info(log, "send message but channel is null url:[{}] method:[{}] body:[{}] ", url, method, body);
+            LogUtils.error(log, "send message but channel is null url:[{}] method:[{}] body:[{}] ", url, method, body);
             return;
         }
 
