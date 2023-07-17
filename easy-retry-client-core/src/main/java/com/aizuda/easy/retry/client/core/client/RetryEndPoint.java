@@ -60,7 +60,7 @@ public class RetryEndPoint {
      * 服务端调度重试入口
      */
     @PostMapping("/dispatch/v1")
-   public Result<DispatchRetryResultDTO> dispatch(@RequestBody DispatchRetryDTO executeReqDto) {
+   public Result<DispatchRetryResultDTO> dispatch(@RequestBody @Validated DispatchRetryDTO executeReqDto) {
 
         RetryerInfo retryerInfo = RetryerInfoCache.get(executeReqDto.getScene(), executeReqDto.getExecutorName());
         if (Objects.isNull(retryerInfo)) {
@@ -119,7 +119,7 @@ public class RetryEndPoint {
     }
 
     @PostMapping("/callback/v1")
-    public Result callback(@RequestBody RetryCallbackDTO callbackDTO) {
+    public Result callback(@RequestBody @Validated RetryCallbackDTO callbackDTO) {
         RetryerInfo retryerInfo = RetryerInfoCache.get(callbackDTO.getScene(), callbackDTO.getExecutorName());
         if (Objects.isNull(retryerInfo)) {
             throw new EasyRetryClientException("场景:[{}]配置不存在", callbackDTO.getScene());

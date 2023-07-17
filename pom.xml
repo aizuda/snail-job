@@ -21,12 +21,11 @@
         <java.version>1.8</java.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <revision>2.0.1</revision>
+        <revision>2.1.0-SNAPSHOT</revision>
         <dingding-talk.version>1.0.0</dingding-talk.version>
-        <hibernate-validator.version>5.4.2.Final</hibernate-validator.version>
-        <netty-all.version>4.1.48.Final</netty-all.version>
-        <hutool-all.version>5.7.21</hutool-all.version>
-        <mybatis-plus.version>3.5.1</mybatis-plus.version>
+        <netty-all.version>4.1.94.Final</netty-all.version>
+        <hutool-all.version>5.8.19</hutool-all.version>
+        <mybatis-plus.version>3.5.3.1</mybatis-plus.version>
         <alibaba-dingtalk.version>2.0.0</alibaba-dingtalk.version>
     </properties>
 
@@ -81,11 +80,6 @@
                 <groupId>com.baomidou</groupId>
                 <artifactId>mybatis-plus-boot-starter</artifactId>
                 <version>${mybatis-plus.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.hibernate</groupId>
-                <artifactId>hibernate-validator</artifactId>
-                <version>${hibernate-validator.version}</version>
             </dependency>
 
         </dependencies>

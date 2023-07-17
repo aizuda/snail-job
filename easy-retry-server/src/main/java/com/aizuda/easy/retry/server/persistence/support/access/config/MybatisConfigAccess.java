@@ -10,6 +10,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -62,6 +63,9 @@ public class MybatisConfigAccess extends AbstractConfigAccess {
     public Set<String> getBlacklist(String groupName) {
 
         GroupConfig groupConfig = getByGroupName(groupName);
+        if (Objects.isNull(groupConfig)) {
+            return Collections.EMPTY_SET;
+        }
         LambdaQueryWrapper<SceneConfig> sceneConfigLambdaQueryWrapper = new LambdaQueryWrapper<SceneConfig>()
           .eq(SceneConfig::getSceneName, groupName);
 

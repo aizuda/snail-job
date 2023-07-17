@@ -23,7 +23,6 @@ public interface TaskGenerator {
      * 任务生成器
      *
      * @param taskContext 任务列表
-     * @return 成功处理的数据量
      */
     void taskGenerator(TaskContext taskContext);
 }

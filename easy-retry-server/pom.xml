@@ -18,19 +18,24 @@
         <java.version>1.8</java.version>
         <maven.deploy.skip>true</maven.deploy.skip>
         <org.mapstruct.version>1.5.3.Final</org.mapstruct.version>
-        <akka.version>2.6.20</akka.version>
-        <java-jwt.version>4.3.0</java-jwt.version>
+        <akka.version>2.6.21</akka.version>
+        <java-jwt.version>4.4.0</java-jwt.version>
         <shedlock.version>4.0.1</shedlock.version>
-        <okhttp.version>4.10.0</okhttp.version>
+        <okhttp.version>5.0.0-alpha.11</okhttp.version>
         <commons-lang.version>2.6</commons-lang.version>
         <perf4j.version>0.9.16</perf4j.version>
-        <mysql.version>8.0.32</mysql.version>
+        <mysql.version>8.0.33</mysql.version>
+        <guava.version>32.0.0-jre</guava.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
         <dependency>
             <groupId>com.baomidou</groupId>
@@ -50,7 +55,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>31.1-jre</version>
+            <version>${guava.version}</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -132,16 +137,6 @@
             <groupId>org.perf4j</groupId>
             <artifactId>perf4j</artifactId>
             <version>${perf4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-validator</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jetbrains</groupId>
-            <artifactId>annotations</artifactId>
-            <version>13.0</version>
-            <scope>compile</scope>
         </dependency>
     </dependencies>
 

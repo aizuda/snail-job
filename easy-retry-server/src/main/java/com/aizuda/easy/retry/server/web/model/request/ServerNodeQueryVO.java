@@ -2,9 +2,6 @@ package com.aizuda.easy.retry.server.web.model.request;
 
 import com.aizuda.easy.retry.server.web.model.base.BaseQueryVO;
 import lombok.Data;
-import org.hibernate.validator.constraints.NotBlank;
-
-import javax.validation.constraints.NotNull;
 
 
 /**

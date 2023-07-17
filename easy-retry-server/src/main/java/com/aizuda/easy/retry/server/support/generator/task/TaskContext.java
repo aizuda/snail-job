@@ -5,9 +5,11 @@ import lombok.Data;
 import java.util.List;
 
 /**
+ * 任务生成器上下文
+ *
  * @author www.byteblogs.com
  * @date 2023-07-16 21:26:52
- * @since
+ * @since 2.1.0
  */
 @Data
 public class TaskContext {
