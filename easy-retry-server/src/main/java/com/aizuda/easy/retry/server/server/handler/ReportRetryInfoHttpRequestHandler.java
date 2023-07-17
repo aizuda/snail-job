@@ -2,15 +2,14 @@ package com.aizuda.easy.retry.server.server.handler;
 
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.net.url.UrlQuery;
+import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.core.model.EasyRetryRequest;
+import com.aizuda.easy.retry.common.core.model.NettyResult;
+import com.aizuda.easy.retry.common.core.util.JsonUtil;
+import com.aizuda.easy.retry.server.enums.StatusEnum;
 import com.aizuda.easy.retry.server.enums.TaskGeneratorScene;
 import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.model.dto.RetryTaskDTO;
-import com.aizuda.easy.retry.server.service.RetryService;
-import com.aizuda.easy.retry.server.enums.StatusEnum;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
-import com.aizuda.easy.retry.common.core.model.NettyResult;
-import com.aizuda.easy.retry.common.core.model.EasyRetryRequest;
-import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.service.convert.TaskContextConverter;
 import com.aizuda.easy.retry.server.support.generator.TaskGenerator;
 import com.aizuda.easy.retry.server.support.generator.task.TaskContext;
@@ -19,6 +18,7 @@ import io.netty.handler.codec.http.HttpMethod;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -52,6 +52,7 @@ public class ReportRetryInfoHttpRequestHandler extends PostHttpRequestHandler {
     }
 
     @Override
+    @Transactional
     public String doHandler(String content, UrlQuery urlQuery, HttpHeaders  headers) {
         LogUtils.info(log, "Batch Report Retry Data. content:[{}]", content);
 

@@ -1,9 +1,10 @@
 package com.aizuda.easy.retry.server.web.model.request;
 
 import lombok.Data;
-import org.hibernate.validator.constraints.NotBlank;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 
 /**
  * 解析参数模型
@@ -17,7 +18,8 @@ public class ParseLogsVO {
     /**
      * 客户端打印的上报日志信息
      */
-    @NotBlank(message = "日志信息不能为空")
+    @NotBlank(message = "组名称不能为空")
+    @Pattern(regexp = "^[A-Za-z0-9_]{1,64}$", message = "仅支持长度为1~64字符且类型为数字、字母和下划线")
     private String logStr;
 
     /**

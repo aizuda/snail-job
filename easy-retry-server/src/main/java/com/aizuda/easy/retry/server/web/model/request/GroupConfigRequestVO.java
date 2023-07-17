@@ -3,11 +3,8 @@ package com.aizuda.easy.retry.server.web.model.request;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.server.enums.IdGeneratorMode;
 import lombok.Data;
-import org.hibernate.validator.constraints.NotBlank;
 
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.*;
 import java.util.List;
 
 /**
@@ -21,6 +18,7 @@ import java.util.List;
 public class GroupConfigRequestVO {
 
     @NotBlank(message = "组名称不能为空")
+    @Pattern(regexp = "^[A-Za-z0-9_]{1,64}$", message = "仅支持长度为1~64字符且类型为数字、字母和下划线")
     private String groupName;
 
     @NotNull(message = "组状态不能为空")

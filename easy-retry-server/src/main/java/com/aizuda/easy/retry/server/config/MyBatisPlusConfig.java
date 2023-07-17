@@ -37,7 +37,7 @@ public class MyBatisPlusConfig {
             if (!TABLES.contains(tableName)) {
                 return tableName;
             }
-            Integer partition = RequestDataHelper.getRequestData("partition");
+            Integer partition = RequestDataHelper.getPartition();
             RequestDataHelper.remove();
             return tableName + "_"+ partition;
         });

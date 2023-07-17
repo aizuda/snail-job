@@ -1,9 +1,9 @@
 package com.aizuda.easy.retry.server.web.model.request;
 
 import lombok.Data;
-import org.hibernate.validator.constraints.NotBlank;
-import org.hibernate.validator.constraints.NotEmpty;
-
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Pattern;
 import java.util.List;
 
 /**
@@ -19,6 +19,7 @@ public class BatchDeleteRetryTaskVO {
      * 组名称
      */
     @NotBlank(message = "groupName 不能为空")
+    @Pattern(regexp = "^[A-Za-z0-9_]{1,64}$", message = "仅支持长度为1~64字符且类型为数字、字母和下划线")
     private String groupName;
 
     /**

@@ -68,6 +68,7 @@ public abstract class AbstractGenerator implements TaskGenerator {
         Set<String> idempotentIdSet = taskInfos.stream().map(TaskContext.TaskInfo::getIdempotentId).collect(Collectors.toSet());
 
         // 获取相关的任务，用户幂等校验
+        RequestDataHelper.setPartition(taskContext.getGroupName());
         List<RetryTask> retryTasks = retryTaskMapper.selectList(new LambdaQueryWrapper<RetryTask>()
                 .eq(RetryTask::getGroupName, taskContext.getGroupName())
                 .eq(RetryTask::getSceneName, taskContext.getSceneName())
@@ -84,8 +85,12 @@ public abstract class AbstractGenerator implements TaskGenerator {
             waitInsertTaskLogs.addAll(pair.getValue());
         }
 
+        if (CollectionUtils.isEmpty(waitInsertTasks)) {
+            return;
+        }
+
         RequestDataHelper.setPartition(taskContext.getGroupName());
-        Assert.isTrue(waitInsertTasks.size() == retryTaskMapper.batchInsert(waitInsertTasks), () -> new EasyRetryServerException("failed to report data"));
+        Assert.isTrue(waitInsertTasks.size() == retryTaskMapper.batchInsert(waitInsertTasks, RequestDataHelper.getPartition()), () -> new EasyRetryServerException("failed to report data"));
         Assert.isTrue(waitInsertTaskLogs.size() == retryTaskLogMapper.batchInsert(waitInsertTaskLogs),
                 () -> new EasyRetryServerException("新增重试日志失败"));
     }
@@ -102,7 +107,7 @@ public abstract class AbstractGenerator implements TaskGenerator {
         List<RetryTaskLog> waitInsertTaskLogs = new ArrayList<>();
 
         // 判断是否存在与幂等ID相同的任务
-        List<RetryTask> list = retryTaskMap.get(taskInfo.getIdempotentId()).stream()
+        List<RetryTask> list = retryTaskMap.getOrDefault(taskInfo.getIdempotentId(), new ArrayList<>()).stream()
                 .filter(retryTask -> taskContext.getGroupName().equals(retryTask.getGroupName())
                         && taskContext.getSceneName().equals(retryTask.getSceneName())).collect(Collectors.toList());
         // 说明存在相同的任务

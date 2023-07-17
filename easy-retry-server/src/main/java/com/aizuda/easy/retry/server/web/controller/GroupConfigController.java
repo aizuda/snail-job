@@ -31,7 +31,7 @@ public class GroupConfigController {
 
     @LoginRequired(role = RoleEnum.ADMIN)
     @PostMapping("")
-    public Boolean addGroup(@RequestBody @Validated(PostMapping.class) GroupConfigRequestVO groupConfigRequestVO) {
+    public Boolean addGroup(@RequestBody @Validated GroupConfigRequestVO groupConfigRequestVO) {
         return groupConfigService.addGroup(groupConfigRequestVO);
     }
 

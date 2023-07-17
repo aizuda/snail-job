@@ -22,6 +22,7 @@ public class RequestDataHelper {
      * 请求参数存取
      */
     private static final ThreadLocal<Map<String, Object>> REQUEST_DATA = new ThreadLocal<>();
+    private static final String PARTITION = "group-partition";
 
     /**
      * 设置请求参数
@@ -40,7 +41,7 @@ public class RequestDataHelper {
     public static void setPartition(int partition) {
 
         Map<String, Object> map = new HashMap<>();
-        map.put("partition", partition);
+        map.put(PARTITION, partition);
         RequestDataHelper.setRequestData(map);
         
     }
@@ -90,6 +91,16 @@ public class RequestDataHelper {
     public static Map<String, Object> getRequestData() {
         return REQUEST_DATA.get();
     }
+
+    public static Integer getPartition() {
+        Map<String, Object> requestData = getRequestData();
+        if (CollectionUtils.isEmpty(requestData)) {
+            return null;
+        }
+
+        return (Integer) requestData.get(PARTITION);
+    }
+
 
 
     public static void remove() {

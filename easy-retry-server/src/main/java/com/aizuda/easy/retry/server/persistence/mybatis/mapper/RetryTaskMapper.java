@@ -13,6 +13,6 @@ public interface RetryTaskMapper extends BaseMapper<RetryTask> {
     int countAllRetryTaskByRetryStatus(@Param("partition") Integer partition,
                                        @Param("retryStatus") Integer retryStatus);
 
-    int batchInsert(List<RetryTask> list);
+    int batchInsert(@Param("list") List<RetryTask> list,  @Param("partition") Integer partition);
 
 }
