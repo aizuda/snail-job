@@ -69,6 +69,10 @@ public class MybatisConfigAccess extends AbstractConfigAccess {
         LambdaQueryWrapper<SceneConfig> sceneConfigLambdaQueryWrapper = new LambdaQueryWrapper<SceneConfig>()
           .eq(SceneConfig::getSceneName, groupName);
 
+        if (Objects.isNull(groupConfig)) {
+            return Collections.EMPTY_SET;
+        }
+
         if (StatusEnum.YES.getStatus().equals(groupConfig.getGroupStatus())) {
             sceneConfigLambdaQueryWrapper.eq(SceneConfig::getSceneStatus, StatusEnum.NO.getStatus());
         }

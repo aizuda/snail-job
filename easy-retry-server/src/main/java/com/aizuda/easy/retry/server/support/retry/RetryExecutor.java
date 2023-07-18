@@ -40,6 +40,9 @@ public class RetryExecutor<V> {
 
         for (FilterStrategy filterStrategy : filterStrategies) {
             if (!filterStrategy.filter(retryContext)) {
+                log.warn("当前任务不满足执行条件. groupName:[{}] uniqueId:[{}], filter:[{}]",
+                    retryContext.getRetryTask().getGroupName(),
+                    retryContext.getRetryTask().getUniqueId(), filterStrategy.getClass().getName());
                 return false;
             }
         }
