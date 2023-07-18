@@ -134,7 +134,7 @@ public class DispatchService implements Lifecycle {
     private ActorRef cacheActorRef(String groupName, TaskTypeEnum typeEnum) {
         ActorRef scanActorRef = CacheGroupScanActor.get(groupName, typeEnum);
         if (Objects.isNull(scanActorRef)) {
-            scanActorRef = typeEnum.getActorRef();
+            scanActorRef = typeEnum.getActorRef().get();
             // 缓存扫描器actor
             CacheGroupScanActor.put(groupName, typeEnum, scanActorRef);
         }
