@@ -5,6 +5,7 @@ import akka.actor.ActorRef;
 import com.aizuda.easy.retry.client.model.DispatchRetryDTO;
 import com.aizuda.easy.retry.client.model.DispatchRetryResultDTO;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
+import com.aizuda.easy.retry.common.core.enums.RetryResultStatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.model.EasyRetryHeaders;
 import com.aizuda.easy.retry.common.core.model.Result;
@@ -12,8 +13,8 @@ import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.client.RequestBuilder;
 import com.aizuda.easy.retry.server.client.RpcClient;
-import com.aizuda.easy.retry.server.enums.StatusEnum;
 import com.aizuda.easy.retry.server.dto.RegisterNodeInfo;
+import com.aizuda.easy.retry.server.enums.StatusEnum;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask;
 import com.aizuda.easy.retry.server.support.IdempotentStrategy;
 import com.aizuda.easy.retry.server.support.context.MaxAttemptsPersistenceRetryContext;
@@ -25,12 +26,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
-import java.text.MessageFormat;
 import java.util.Objects;
 import java.util.concurrent.Callable;
 
@@ -80,11 +78,16 @@ public class ExecUnitActor extends AbstractActor  {
                         } else {
                             DispatchRetryResultDTO data = JsonUtil.parseObject(JsonUtil.toJsonString(result.getData()), DispatchRetryResultDTO.class);
                             result.setData(data);
-                            if (Objects.nonNull(data) && StringUtils.isNotBlank(data.getExceptionMsg())) {
-                                retryTaskLog.setMessage(data.getExceptionMsg());
-                            } else {
-                                retryTaskLog.setMessage("调度成功");
+                            if (Objects.nonNull(data)) {
+                                if (RetryResultStatusEnum.FAILURE.getStatus().equals(data.getStatusCode())) {
+                                    retryTaskLog.setMessage(String.valueOf(data.getExceptionMsg()));
+                                } else if (RetryResultStatusEnum.STOP.getStatus().equals(data.getStatusCode())) {
+                                    retryTaskLog.setMessage("客户端主动停止任务");
+                                } else {
+                                    retryTaskLog.setMessage("调度成功");
+                                }
                             }
+
                         }
 
                         return result;
@@ -146,10 +149,6 @@ public class ExecUnitActor extends AbstractActor  {
             .client(RpcClient.class)
             .build();
 
-//        HttpEntity<DispatchRetryDTO> requestEntity = new HttpEntity<>(dispatchRetryDTO, requestHeaders);
-//
-//        String format = MessageFormat.format(URL, serverNode.getHostIp(), serverNode.getHostPort().toString(), serverNode.getContextPath());
-//        Result<DispatchRetryResultDTO> result = restTemplate.postForObject(format, requestEntity, Result.class);
         return rpcClient.dispatch(dispatchRetryDTO, easyRetryHeaders);
     }
 
