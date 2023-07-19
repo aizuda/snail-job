@@ -115,12 +115,6 @@ public class ExecCallbackUnitActor extends AbstractActor  {
         retryCallbackDTO.setExecutorName(retryTask.getExecutorName());
         retryCallbackDTO.setUniqueId(retryTask.getUniqueId());
 
-//        HttpEntity<RetryCallbackDTO> requestEntity = new HttpEntity<>(retryCallbackDTO);
-//
-//        String format = MessageFormat.format(URL, serverNode.getHostIp(), serverNode.getHostPort().toString(), serverNode.getContextPath());
-//        Result result = restTemplate.postForObject(format, requestEntity, Result.class);
-
-
         RpcClient rpcClient = RequestBuilder.<RpcClient, Result>newBuilder()
             .hostPort(serverNode.getHostPort())
             .groupName(serverNode.getGroupName())

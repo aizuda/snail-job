@@ -1,7 +1,8 @@
 package com.aizuda.easy.retry.client.model;
 
 import lombok.Data;
-import org.hibernate.validator.constraints.NotBlank;
+
+import javax.validation.constraints.NotBlank;
 
 /**
  * 生成idempotentId模型
