@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.client.core.config;
 
 import com.aizuda.easy.retry.common.core.context.SpringContext;
+import com.aizuda.easy.retry.common.core.util.HostUtils;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,6 +24,16 @@ public class EasyRetryProperties {
      * 服务端对应的group
      */
     private String group;
+
+    /**
+     * 指定客户端IP，默认取本地IP
+     */
+    private String host;
+
+    /**
+     * 指定客户端端口
+     */
+    private Integer port;
 
     /**
      * 服务端配置

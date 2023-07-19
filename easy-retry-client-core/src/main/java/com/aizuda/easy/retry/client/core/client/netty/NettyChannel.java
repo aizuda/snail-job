@@ -16,6 +16,7 @@ import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpVersion;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 
 import java.nio.charset.StandardCharsets;
@@ -30,8 +31,17 @@ import java.util.Optional;
 @Slf4j
 public class NettyChannel {
 
-    private static final String HOST_ID = IdUtil.simpleUUID();
-    private static final String HOST_IP = HostUtils.getIp();
+    private NettyChannel() {
+    }
+
+    private static final String HOST_ID = IdUtil.getSnowflake().nextIdStr();
+    private static final int PORT;
+    private static final String HOST;
+
+    static {
+        PORT = Integer.parseInt(System.getProperty("easy-retry.port", String.valueOf(8080)));
+        HOST = System.getProperty("easy-retry.host", HostUtils.getIp());
+    }
 
     private static Channel CHANNEL;
 
@@ -59,6 +69,19 @@ public class NettyChannel {
                 HttpVersion.HTTP_1_1, method, url, Unpooled.wrappedBuffer(body.getBytes(StandardCharsets.UTF_8)));
 
         ServerProperties serverProperties = SpringContext.CONTEXT.getBean(ServerProperties.class);
+        EasyRetryProperties easyRetryProperties = SpringContext.CONTEXT.getBean(EasyRetryProperties.class);
+
+        Integer port = easyRetryProperties.getPort();
+        // 获取客户端指定的端口
+        if (Objects.isNull(port)) {
+            port = Optional.ofNullable(serverProperties.getPort()).orElse(PORT);
+        }
+
+        String host = easyRetryProperties.getHost();
+        // 获取客户端指定的IP地址
+        if (StringUtils.isBlank(host)) {
+            host = HOST;
+        }
 
         request.headers()
                 .set(HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON)
@@ -67,10 +90,10 @@ public class NettyChannel {
                 //设置传递请求内容的长度
                 .set(HttpHeaderNames.CONTENT_LENGTH, request.content().readableBytes())
                 .set(HeadersEnum.HOST_ID.getKey(), HOST_ID)
-                .set(HeadersEnum.HOST_IP.getKey(), HOST_IP)
+                .set(HeadersEnum.HOST_IP.getKey(), host)
                 .set(HeadersEnum.GROUP_NAME.getKey(), EasyRetryProperties.getGroup())
                 .set(HeadersEnum.CONTEXT_PATH.getKey(), Optional.ofNullable(serverProperties.getServlet().getContextPath()).orElse("/"))
-                .set(HeadersEnum.HOST_PORT.getKey(), Optional.ofNullable(serverProperties.getPort()).orElse(8080))
+                .set(HeadersEnum.HOST_PORT.getKey(), port)
                 .set(HeadersEnum.VERSION.getKey(), GroupVersionCache.getVersion())
         ;
 
