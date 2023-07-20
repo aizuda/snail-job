@@ -22,7 +22,7 @@ import java.util.TimeZone;
 @EnableSchedulerLock(defaultLockAtMostFor = "PT30S")
 public class ShedlockConfig {
 
-    @Bean
+//    @Bean
     public LockProvider lockProvider(DataSource dataSource) {
         return new JdbcTemplateLockProvider(
                 JdbcTemplateLockProvider.Configuration.builder()
@@ -32,7 +32,7 @@ public class ShedlockConfig {
         );
     }
 
-    @Bean
+//    @Bean
     public TaskScheduler scheduledExecutorService() {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.setPoolSize(2);

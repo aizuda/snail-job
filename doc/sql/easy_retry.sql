@@ -161,7 +161,7 @@ CREATE TABLE `server_node`
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='服务器节点'
 ;
 
-CREATE TABLE `shedlock`
+CREATE TABLE `distributed_lock`
 (
     `id`         bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
     `name`       varchar(64)  NOT NULL COMMENT '锁名称',
