@@ -7,5 +7,5 @@ package com.aizuda.easy.retry.server.persistence.support;
  */
 public interface Access {
 
-    boolean supports(int type);
+    boolean supports(String storageMedium);
 }

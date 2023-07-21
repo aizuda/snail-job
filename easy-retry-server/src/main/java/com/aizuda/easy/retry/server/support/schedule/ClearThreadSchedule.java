@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
  */
 @Component
 @Slf4j
+@Deprecated
 public class ClearThreadSchedule {
 
     @Autowired
@@ -55,8 +56,8 @@ public class ClearThreadSchedule {
     /**
      * 删除过期下线机器
      */
-    @Scheduled(fixedRate = 5000)
-    @SchedulerLock(name = "clearOfflineNode", lockAtMostFor = "PT10s", lockAtLeastFor = "PT5s")
+//    @Scheduled(fixedRate = 5000)
+//    @SchedulerLock(name = "clearOfflineNode", lockAtMostFor = "PT10s", lockAtLeastFor = "PT5s")
     public void clearOfflineNode() {
 
         try {
@@ -86,8 +87,8 @@ public class ClearThreadSchedule {
     /**
      * 删除重试完成的和重试到达最大重试次数的数据迁移到死信队列表
      */
-    @Scheduled(cron = "0 0 0/1 * * ?")
-    @SchedulerLock(name = "clearFinishAndMoveDeadLetterRetryTask", lockAtMostFor = "PT60s", lockAtLeastFor = "PT60s")
+//    @Scheduled(cron = "0 0 0/1 * * ?")
+//    @SchedulerLock(name = "clearFinishAndMoveDeadLetterRetryTask", lockAtMostFor = "PT60s", lockAtLeastFor = "PT60s")
     public void clearFinishAndMoveDeadLetterRetryTask() {
 
         try {
@@ -106,8 +107,8 @@ public class ClearThreadSchedule {
     /**
      * 清理日志 一小时运行一次
      */
-    @Scheduled(cron = "0 0 0/1 * * ? ")
-    @SchedulerLock(name = "clearLog", lockAtMostFor = "PT1H", lockAtLeastFor = "PT1H")
+//    @Scheduled(cron = "0 0 0/1 * * ? ")
+//    @SchedulerLock(name = "clearLog", lockAtMostFor = "PT1H", lockAtLeastFor = "PT1H")
     public void clearLog() {
         try {
             LocalDateTime endTime = LocalDateTime.now().minusDays(systemProperties.getLogStorage());

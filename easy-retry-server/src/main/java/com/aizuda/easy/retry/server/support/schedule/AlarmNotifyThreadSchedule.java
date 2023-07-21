@@ -31,6 +31,7 @@ import java.util.List;
  */
 @Component
 @Slf4j
+@Deprecated
 public class AlarmNotifyThreadSchedule {
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -60,8 +61,8 @@ public class AlarmNotifyThreadSchedule {
     /**
      * 监控重试表中数据总量是否到达阈值
      */
-    @Scheduled(cron = "0 0/10 * * * ?")
-    @SchedulerLock(name = "retryTaskMoreThreshold", lockAtMostFor = "PT10M", lockAtLeastFor = "PT10M")
+//    @Scheduled(cron = "0 0/10 * * * ?")
+//    @SchedulerLock(name = "retryTaskMoreThreshold", lockAtMostFor = "PT10M", lockAtLeastFor = "PT10M")
     public void retryTaskMoreThreshold() {
         LogUtils.info(log, "retryTaskMoreThreshold time[{}] ip:[{}]", LocalDateTime.now(), HostUtils.getIp());
 
@@ -94,8 +95,8 @@ public class AlarmNotifyThreadSchedule {
     /**
      * 监控重试失败数据总量是否到达阈值
      */
-    @Scheduled(cron = "0 0/11 * * * ?")
-    @SchedulerLock(name = "retryErrorMoreThreshold", lockAtMostFor = "PT11M", lockAtLeastFor = "PT11M")
+//    @Scheduled(cron = "0 0/11 * * * ?")
+//    @SchedulerLock(name = "retryErrorMoreThreshold", lockAtMostFor = "PT11M", lockAtLeastFor = "PT11M")
     public void retryErrorMoreThreshold() {
         LogUtils.info(log, "retryErrorMoreThreshold time[{}] ip:[{}]", LocalDateTime.now(), HostUtils.getIp());
 

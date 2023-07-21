@@ -1,5 +1,7 @@
 package com.aizuda.easy.retry.common.core.constant;
 
+import java.time.format.DateTimeFormatter;
+
 /**
  * 系统通用常量
  *
@@ -72,4 +74,8 @@ public interface SystemConstants {
                     " |___\\__,_/__/\\_, | |_|_\\___|\\__|_|  \\_, |\n" +
                     "              |__/                   |__/ \n" +
                     " :: Easy Retry ::                     (v{})       \n";
+
+    interface DATE_FORMAT {
+        DateTimeFormatter YYYYMMDDHHMMSS = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    }
 }

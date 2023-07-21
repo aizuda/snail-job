@@ -1,7 +1,6 @@
 package com.aizuda.easy.retry.server.persistence.support;
 
-import net.javacrumbs.shedlock.core.LockConfiguration;
-import org.jetbrains.annotations.NotNull;
+import com.aizuda.easy.retry.server.dto.LockConfig;
 
 /**
  * @author www.byteblogs.com
@@ -10,10 +9,8 @@ import org.jetbrains.annotations.NotNull;
  */
 public interface LockAccess extends Access {
 
-    boolean insertRecord();
+    boolean lock(LockConfig lockConfig);
 
-    boolean updateRecord();
-
-    void unlock();
+    boolean unlock(LockConfig lockConfig);
 
 }

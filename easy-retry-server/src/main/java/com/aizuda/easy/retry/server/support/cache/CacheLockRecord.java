@@ -6,6 +6,9 @@ import com.aizuda.easy.retry.server.support.Lifecycle;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.Set;
@@ -17,6 +20,8 @@ import java.util.WeakHashMap;
  * @since 2.1.0
  */
 @Slf4j
+@Component
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class CacheLockRecord implements Lifecycle {
     private static Cache<String, String> CACHE;
 
@@ -30,6 +35,10 @@ public class CacheLockRecord implements Lifecycle {
 
     public static long getSize() {
         return CACHE.size();
+    }
+
+    public static void remove(String lockName) {
+        CACHE.invalidate(lockName);
     }
 
     public static void clear() {

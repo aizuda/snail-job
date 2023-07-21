@@ -18,21 +18,22 @@ import java.util.TimeZone;
  * @date : 2021-11-22 10:56
  */
 @Configuration
-@EnableScheduling
-@EnableSchedulerLock(defaultLockAtMostFor = "PT30S")
+//@EnableScheduling
+//@EnableSchedulerLock(defaultLockAtMostFor = "PT30S")
+@Deprecated
 public class ShedlockConfig {
 
 //    @Bean
-    public LockProvider lockProvider(DataSource dataSource) {
-        return new JdbcTemplateLockProvider(
-                JdbcTemplateLockProvider.Configuration.builder()
-                        .withJdbcTemplate(new JdbcTemplate(dataSource))
-                        .withTimeZone(TimeZone.getTimeZone("Asia/Shanghai"))
-                        .build()
-        );
-    }
+//    public LockProvider lockProvider(DataSource dataSource) {
+//        return new JdbcTemplateLockProvider(
+//                JdbcTemplateLockProvider.Configuration.builder()
+//                        .withJdbcTemplate(new JdbcTemplate(dataSource))
+//                        .withTimeZone(TimeZone.getTimeZone("Asia/Shanghai"))
+//                        .build()
+//        );
+//    }
 
-//    @Bean
+    @Bean
     public TaskScheduler scheduledExecutorService() {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.setPoolSize(2);
