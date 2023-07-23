@@ -2,7 +2,7 @@ package com.aizuda.easy.retry.server.persistence.support.access.lock;
 
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.dto.LockConfig;
-import com.aizuda.easy.retry.server.enums.DatabaseProductEnum;
+import com.aizuda.easy.retry.server.enums.DbTypeEnum;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.DistributedLockMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.DistributedLock;
 import com.aizuda.easy.retry.server.support.register.ServerRegister;
@@ -38,13 +38,14 @@ public class JdbcLockAccess extends AbstractLockAccess {
     @Override
     public boolean supports(final String storageMedium) {
         return Arrays.asList(
-            DatabaseProductEnum.MYSQL.getDb(),
-            DatabaseProductEnum.MARIADB.getDb(),
-            DatabaseProductEnum.POSTGRE_SQL.getDb()
+            DbTypeEnum.MYSQL.getDb(),
+            DbTypeEnum.MARIADB.getDb(),
+            DbTypeEnum.POSTGRE_SQL.getDb()
         ).contains(storageMedium);
     }
 
     @Override
+
     public boolean unlock(final LockConfig lockConfig) {
         LocalDateTime now = lockConfig.getCreateDt();
         DistributedLock distributedLock = new DistributedLock();

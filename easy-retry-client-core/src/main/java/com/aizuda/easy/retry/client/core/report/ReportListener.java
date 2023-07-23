@@ -68,7 +68,7 @@ public class ReportListener implements Listener<RetryTaskDTO> {
                 sendMessage(throwable);
             }, o -> LogUtils.info(log,"Data report successful retry：<|>{}<|>", JsonUtil.toJsonString(list)));
         } catch (Exception e) {
-            e.printStackTrace();
+            LogUtils.error(log,"Data report failed. <|>{}<|>", JsonUtil.toJsonString(list), e);
         }
     }
 
@@ -92,7 +92,7 @@ public class ReportListener implements Listener<RetryTaskDTO> {
                     public <V> void onRetry(Attempt<V> attempt) {
 
                         if (attempt.hasException()) {
-                            LogUtils.error(log,"easy-retry 上报失败，第[{}]次调度 ", attempt.getAttemptNumber(), attempt.getExceptionCause());
+                            LogUtils.error(log,"easy-retry 上报服务端失败，第[{}]次尝试上报 ", attempt.getAttemptNumber(), attempt.getExceptionCause());
                         }
 
                     }

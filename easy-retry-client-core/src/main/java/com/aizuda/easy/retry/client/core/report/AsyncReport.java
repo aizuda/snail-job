@@ -3,10 +3,12 @@ package com.aizuda.easy.retry.client.core.report;
 import com.aizuda.easy.retry.client.core.Lifecycle;
 import com.aizuda.easy.retry.client.core.retryer.RetryerInfo;
 import com.aizuda.easy.retry.client.core.window.RetryLeapArray;
+import com.aizuda.easy.retry.client.core.window.SlidingWindow;
 import com.aizuda.easy.retry.server.model.dto.RetryTaskDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.time.temporal.ChronoUnit;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -21,10 +23,11 @@ import java.util.concurrent.TimeUnit;
 @Component
 @Slf4j
 public class AsyncReport extends AbstractReport implements Lifecycle {
+    private static SlidingWindow<RetryTaskDTO> slidingWindow;
 
     private static ScheduledExecutorService dispatchService = Executors.newSingleThreadScheduledExecutor(r -> new Thread(r, "DispatchService"));
 
-    public static RetryLeapArray slidingWindow = new RetryLeapArray(SAMPLE_COUNT, INTERVAL_IN_MS, new ReportListener());
+//    public static RetryLeapArray slidingWindow = new RetryLeapArray(SAMPLE_COUNT, INTERVAL_IN_MS, new ReportListener());
 
     @Override
     public boolean supports(boolean async) {
@@ -43,23 +46,31 @@ public class AsyncReport extends AbstractReport implements Lifecycle {
     public Boolean syncReport(String scene, String targetClassName, Object[] args, long timeout, TimeUnit unit) {
 
         RetryTaskDTO retryTaskDTO = buildRetryTaskDTO(scene, targetClassName, args);
-        slidingWindow.currentWindow().value().add(retryTaskDTO);
-
+        slidingWindow.add(retryTaskDTO);
         return Boolean.TRUE;
     }
 
 
     @Override
     public void start() {
-        dispatchService.scheduleAtFixedRate(() -> {
-            slidingWindow.currentWindow();
-        }, INTERVAL_IN_MS, INTERVAL_IN_MS / SAMPLE_COUNT, TimeUnit.MILLISECONDS);
+
+        slidingWindow = SlidingWindow
+                .Builder
+                .<RetryTaskDTO>newBuilder()
+                .withTotalThreshold(50)
+                .withDuration(5, ChronoUnit.SECONDS)
+                .withListener(new ReportListener())
+                .build();
+        slidingWindow.start();
+//        dispatchService.scheduleAtFixedRate(() -> {
+//            slidingWindow.currentWindow();
+//        }, INTERVAL_IN_MS, INTERVAL_IN_MS / SAMPLE_COUNT, TimeUnit.MILLISECONDS);
     }
 
     @Override
     public void close() {
         log.info("AsyncReport about to shutdown");
-        slidingWindow.currentWindow();
+        slidingWindow.end();
         log.info("AsyncReport has been shutdown");
     }
 }

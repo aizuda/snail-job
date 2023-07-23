@@ -1,6 +1,5 @@
 package com.aizuda.easy.retry.server.support.cache;
 
-import akka.actor.ActorRef;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.support.Lifecycle;
 import com.google.common.cache.Cache;
@@ -10,11 +9,9 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
-import java.util.Set;
-import java.util.WeakHashMap;
-
 /**
+ * 缓存本地的分布式锁的名称
+ *
  * @author www.byteblogs.com
  * @date 2023-07-20 22:53:21
  * @since 2.1.0

@@ -151,20 +151,36 @@ public class LocalRetryStrategies extends AbstractRetryStrategies {
                 return Collections.singletonList(new RetryListener() {
                     @Override
                     public <V> void onRetry(Attempt<V> attempt) {
+                        if (attempt.hasException()) {
+                            RetryType retryType = retryerInfo.getRetryType();
+                            switch (retryType) {
+                                case ONLY_LOCAL:
+                                case LOCAL_REMOTE:
+                                    LogUtils.error(log,"[{}] 执行本地重试失败，第[{}]次重试", retryerInfo.getScene(), attempt.getAttemptNumber());
+                                    break;
+                                case ONLY_REMOTE:
+                                    LogUtils.error(log,"[{}] 执行远程重试失败，第[{}]次重试", retryerInfo.getScene(),  attempt.getAttemptNumber());
+                                    break;
+                                default:
+                                    throw new EasyRetryClientException("异常重试模式 [{}]", retryType.name());
 
-                        RetryType retryType = retryerInfo.getRetryType();
-                        switch (retryType) {
-                            case ONLY_LOCAL:
-                            case LOCAL_REMOTE:
-                                LogUtils.info(log,"[{}]执行本地重试，第[{}]次调度", retryerInfo.getScene(), attempt.getAttemptNumber());
-                                break;
-                            case ONLY_REMOTE:
-                                LogUtils.info(log,"[{}]执行远程重试，第[{}]次调度", retryerInfo.getScene(),  attempt.getAttemptNumber());
-                                break;
-                            default:
-                                throw new EasyRetryClientException("异常重试模式 [{}]", retryType.name());
+                            }
+                        } else {
+                            RetryType retryType = retryerInfo.getRetryType();
+                            switch (retryType) {
+                                case ONLY_LOCAL:
+                                case LOCAL_REMOTE:
+                                    LogUtils.info(log,"[{}] 执行本地重试成功.", retryerInfo.getScene(), attempt.getAttemptNumber());
+                                    break;
+                                case ONLY_REMOTE:
+                                    LogUtils.info(log,"[{}] 执行远程成功.", retryerInfo.getScene(),  attempt.getAttemptNumber());
+                                    break;
+                                default:
+                                    throw new EasyRetryClientException("异常重试模式 [{}]", retryType.name());
 
+                            }
                         }
+
                     }
                 });
             }

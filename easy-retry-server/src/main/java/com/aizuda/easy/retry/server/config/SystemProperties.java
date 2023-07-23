@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.server.config;
 
+import com.aizuda.easy.retry.server.enums.DbTypeEnum;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -50,6 +51,11 @@ public class SystemProperties {
      * 日志默认保存天数
      */
     private int logStorage = 90;
+
+    /**
+     * 数据库类型
+     */
+    private DbTypeEnum dbType = DbTypeEnum.MYSQL;
 
     /**
      * 回调配置

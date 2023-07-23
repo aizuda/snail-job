@@ -20,7 +20,6 @@
         <org.mapstruct.version>1.5.3.Final</org.mapstruct.version>
         <akka.version>2.6.21</akka.version>
         <java-jwt.version>4.4.0</java-jwt.version>
-        <shedlock.version>4.0.1</shedlock.version>
         <okhttp.version>5.0.0-alpha.11</okhttp.version>
         <commons-lang.version>2.6</commons-lang.version>
         <perf4j.version>0.9.16</perf4j.version>
@@ -61,16 +60,6 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>net.javacrumbs.shedlock</groupId>
-            <artifactId>shedlock-provider-jdbc-template</artifactId>
-            <version>${shedlock.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>net.javacrumbs.shedlock</groupId>
-            <artifactId>shedlock-spring</artifactId>
-            <version>${shedlock.version}</version>
         </dependency>
         <dependency>
             <groupId>mysql</groupId>

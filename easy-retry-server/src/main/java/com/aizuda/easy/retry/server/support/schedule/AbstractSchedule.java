@@ -2,9 +2,11 @@ package com.aizuda.easy.retry.server.support.schedule;
 
 import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.server.config.SystemProperties;
 import com.aizuda.easy.retry.server.dto.LockConfig;
 import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.persistence.support.LockAccess;
+import com.aizuda.easy.retry.server.support.Lifecycle;
 import com.aizuda.easy.retry.server.support.Schedule;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +15,7 @@ import org.springframework.scheduling.TaskScheduler;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * @author: www.byteblogs.com
@@ -26,7 +29,9 @@ public abstract class AbstractSchedule implements Schedule {
     @Qualifier("scheduledExecutorService")
     protected TaskScheduler taskScheduler;
     @Autowired
-    private LockAccess lockAccess;
+    private List<LockAccess> lockAccesses;
+    @Autowired
+    private SystemProperties systemProperties;
 
     @Override
     public void execute() {
@@ -39,6 +44,8 @@ public abstract class AbstractSchedule implements Schedule {
         Assert.notBlank(lockName, () -> new EasyRetryServerException("lockName can not be null."));
 
         LockConfig lockConfig = new LockConfig(LocalDateTime.now(), lockName, Duration.parse(lockAtMost), Duration.parse(lockAtLeast));
+
+        LockAccess lockAccess = getLockAccess();
         try {
             if (lockAccess.lock(lockConfig)) {
                 doExecute();
@@ -57,6 +64,12 @@ public abstract class AbstractSchedule implements Schedule {
 
     abstract String lockAtMost();
 
-    abstract  String lockAtLeast();
+    abstract String lockAtLeast();
+
+    private LockAccess getLockAccess() {
+        return lockAccesses.stream()
+                .filter(lockAccess -> lockAccess.supports(systemProperties.getDbType().getDb()))
+                .findFirst().orElseThrow(() -> new EasyRetryServerException("未找到合适锁处理器"));
+    }
 
 }

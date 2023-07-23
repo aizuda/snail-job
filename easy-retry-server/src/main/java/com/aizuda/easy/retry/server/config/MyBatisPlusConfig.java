@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.server.config;
 
-import com.baomidou.mybatisplus.annotation.DbType;
+import com.aizuda.easy.retry.server.enums.DbTypeEnum;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.DynamicTableNameInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
@@ -23,10 +23,11 @@ public class MyBatisPlusConfig {
     private final static List<String> TABLES = Arrays.asList("retry_task", "retry_dead_letter");
 
     @Bean
-    public MybatisPlusInterceptor mybatisPlusInterceptor() {
+    public MybatisPlusInterceptor mybatisPlusInterceptor(SystemProperties systemProperties) {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
         interceptor.addInnerInterceptor(dynamicTableNameInnerInterceptor());
-        interceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.MYSQL));
+        DbTypeEnum dbTypeEnum = systemProperties.getDbType();
+        interceptor.addInnerInterceptor(new PaginationInnerInterceptor(dbTypeEnum.getMpDbType()));
 
         return interceptor;
     }
