@@ -63,7 +63,7 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
      */
     private static final long SEGMENT_DURATION = 15 * 60 * 1000L;
 
-    private static final String TIME_FORMAT = "yyyyMMddHHmmss";
+    private static final String TIME_FORMAT = "yyyyMMddHHmmssSSS";
 
     private ThreadPoolExecutor service = new ThreadPoolExecutor(5, 10, 60L, TimeUnit.SECONDS,
             new LinkedBlockingDeque<>(5000), new UpdateThreadFactory());

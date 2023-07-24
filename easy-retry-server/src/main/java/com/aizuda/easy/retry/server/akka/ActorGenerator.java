@@ -3,6 +3,7 @@ package com.aizuda.easy.retry.server.akka;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
+import com.aizuda.easy.retry.server.server.RequestHandlerActor;
 import com.aizuda.easy.retry.server.support.dispatch.actor.exec.ExecCallbackUnitActor;
 import com.aizuda.easy.retry.server.support.dispatch.actor.exec.ExecUnitActor;
 import com.aizuda.easy.retry.server.support.dispatch.actor.log.LogActor;
@@ -91,9 +92,17 @@ public class ActorGenerator {
      * @return actor 引用
      */
     public static ActorRef logActor() {
-        return getLogActorSystemSystem().actorOf(getSpringExtension().props(LogActor.BEAN_NAME));
+        return getNettyActorSystem().actorOf(getSpringExtension().props(LogActor.BEAN_NAME));
     }
 
+    /**
+     * 生成扫描重试数据的actor
+     *
+     * @return actor 引用
+     */
+    public static ActorRef requestHandlerActor() {
+        return getLogActorSystemSystem().actorOf(getSpringExtension().props(RequestHandlerActor.BEAN_NAME));
+    }
 
     public static SpringExtension getSpringExtension() {
        return SpringContext.getBeanByType(SpringExtension.class);
@@ -130,5 +139,15 @@ public class ActorGenerator {
      */
     public static ActorSystem getLogActorSystemSystem() {
         return SpringContext.getBean("logActorSystem", ActorSystem.class);
+    }
+
+
+    /**
+     * 处理netty客户端请求
+     *
+     * @return
+     */
+    public static ActorSystem getNettyActorSystem() {
+        return SpringContext.getBean("nettyActorSystem", ActorSystem.class);
     }
 }

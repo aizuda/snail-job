@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.server.support.handler;
 
+import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.ServerNodeMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.GroupConfig;
@@ -10,6 +11,7 @@ import com.aizuda.easy.retry.server.support.allocate.client.ClientLoadBalanceMan
 import com.aizuda.easy.retry.server.support.cache.CacheRegisterTable;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.aizuda.easy.retry.server.support.ClientLoadBalance;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -25,6 +27,7 @@ import java.util.stream.Collectors;
  * @date : 2023-01-10 14:18
  */
 @Component
+@Slf4j
 public class ClientNodeAllocateHandler {
 
     @Autowired
@@ -39,6 +42,7 @@ public class ClientNodeAllocateHandler {
         GroupConfig groupConfig = configAccess.getGroupConfigByGroupName(groupName);
         Set<RegisterNodeInfo> serverNodes = CacheRegisterTable.getServerNodeSet(groupName);
         if (CollectionUtils.isEmpty(serverNodes)) {
+            LogUtils.warn(log, "client node is null. groupName:[{}]", groupName);
             return null;
         }
 

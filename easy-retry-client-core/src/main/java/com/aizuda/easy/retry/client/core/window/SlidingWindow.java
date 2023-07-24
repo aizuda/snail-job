@@ -21,9 +21,9 @@ import java.util.concurrent.locks.ReentrantLock;
  *
  * @author: www.byteblogs.com
  * @date : 2023-07-23 13:38
+ * @since 2.1.0
  */
 @Slf4j
-@SuppressWarnings({"squid:S1319"})
 public class SlidingWindow<T> {
 
     /**

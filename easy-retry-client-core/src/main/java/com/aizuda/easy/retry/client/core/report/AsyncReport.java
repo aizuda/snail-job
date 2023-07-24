@@ -25,10 +25,6 @@ import java.util.concurrent.TimeUnit;
 public class AsyncReport extends AbstractReport implements Lifecycle {
     private static SlidingWindow<RetryTaskDTO> slidingWindow;
 
-    private static ScheduledExecutorService dispatchService = Executors.newSingleThreadScheduledExecutor(r -> new Thread(r, "DispatchService"));
-
-//    public static RetryLeapArray slidingWindow = new RetryLeapArray(SAMPLE_COUNT, INTERVAL_IN_MS, new ReportListener());
-
     @Override
     public boolean supports(boolean async) {
         return async;
@@ -57,14 +53,10 @@ public class AsyncReport extends AbstractReport implements Lifecycle {
         slidingWindow = SlidingWindow
                 .Builder
                 .<RetryTaskDTO>newBuilder()
-                .withTotalThreshold(50)
+                .withTotalThreshold(10)
                 .withDuration(5, ChronoUnit.SECONDS)
                 .withListener(new ReportListener())
                 .build();
-        slidingWindow.start();
-//        dispatchService.scheduleAtFixedRate(() -> {
-//            slidingWindow.currentWindow();
-//        }, INTERVAL_IN_MS, INTERVAL_IN_MS / SAMPLE_COUNT, TimeUnit.MILLISECONDS);
     }
 
     @Override

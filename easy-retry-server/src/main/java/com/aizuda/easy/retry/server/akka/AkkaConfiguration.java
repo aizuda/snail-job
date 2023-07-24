@@ -19,6 +19,7 @@ public class AkkaConfiguration {
     private static final String DISPATCH_EXEC_UNIT_RETRY_ACTOR_SYSTEM = "DISPATCH_EXEC_UNIT_RETRY_ACTOR_SYSTEM";
     private static final String DISPATCH_RESULT_ACTOR_SYSTEM = "DISPATCH_RESULT_ACTOR_SYSTEM";
     private static final String LOG_ACTOR_SYSTEM = "LOG_ACTOR_SYSTEM";
+    private static final String NETTY_ACTOR_SYSTEM = "nettyActorSystem";
 
     @Autowired
     private ApplicationContext applicationContext;
@@ -70,6 +71,18 @@ public class AkkaConfiguration {
     @Bean("logActorSystem")
     public ActorSystem createLogActorSystem() {
         ActorSystem system = ActorSystem.create(LOG_ACTOR_SYSTEM);
+        springExtension.initialize(applicationContext);
+        return system;
+    }
+
+    /**
+     * 处理netty客户端请求
+     *
+     * @return {@link ActorSystem} 顶级actor
+     */
+    @Bean("nettyActorSystem")
+    public ActorSystem nettyActorSystem() {
+        ActorSystem system = ActorSystem.create(NETTY_ACTOR_SYSTEM);
         springExtension.initialize(applicationContext);
         return system;
     }
