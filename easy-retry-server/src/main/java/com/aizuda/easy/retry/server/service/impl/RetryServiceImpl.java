@@ -33,7 +33,6 @@ import com.aizuda.easy.retry.server.service.convert.RetryTaskConverter;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -233,6 +232,7 @@ public class RetryServiceImpl implements RetryService {
             waitDelDeadLetters.addAll(finishCallbackRetryIdList);
         }
 
+        RequestDataHelper.setPartition(groupName);
         Assert.isTrue(waitDelDeadLetters.size() == retryTaskMapper.deleteBatchIds(waitDelDeadLetters),
             () -> new EasyRetryServerException("删除重试数据失败 [{}]", JsonUtil.toJsonString(retryTasks)));
 
@@ -246,6 +246,9 @@ public class RetryServiceImpl implements RetryService {
      * @param retryTasks 待迁移数据
      */
     private void moveDeadLetters(String groupName, List<RetryTask> retryTasks) {
+        if (CollectionUtils.isEmpty(retryTasks)) {
+            return;
+        }
 
         List<RetryDeadLetter> retryDeadLetters = RetryDeadLetterConverter.INSTANCE.toRetryDeadLetter(retryTasks);
 
