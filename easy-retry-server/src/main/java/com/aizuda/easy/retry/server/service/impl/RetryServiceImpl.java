@@ -232,6 +232,10 @@ public class RetryServiceImpl implements RetryService {
             waitDelDeadLetters.addAll(finishCallbackRetryIdList);
         }
 
+        if (CollectionUtils.isEmpty(waitDelDeadLetters)) {
+            return Boolean.TRUE;
+        }
+
         RequestDataHelper.setPartition(groupName);
         Assert.isTrue(waitDelDeadLetters.size() == retryTaskMapper.deleteBatchIds(waitDelDeadLetters),
             () -> new EasyRetryServerException("删除重试数据失败 [{}]", JsonUtil.toJsonString(retryTasks)));
