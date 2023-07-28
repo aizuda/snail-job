@@ -73,18 +73,26 @@ public class ExecUnitActor extends AbstractActor  {
                         Result<DispatchRetryResultDTO> result = callClient(retryTask, serverNode);
 
                         // 回调接口请求成功，处理返回值
-                        if (StatusEnum.YES.getStatus() != result.getStatus() && StringUtils.isNotBlank(result.getMessage())) {
-                            retryTaskLog.setMessage(result.getMessage());
+                        if (StatusEnum.YES.getStatus() != result.getStatus()) {
+                            if (StringUtils.isNotBlank(result.getMessage())) {
+                                retryTaskLog.setMessage(result.getMessage());
+                            } else {
+                                retryTaskLog.setMessage("客户端执行失败: 异常信息为空");
+                            }
                         } else {
                             DispatchRetryResultDTO data = JsonUtil.parseObject(JsonUtil.toJsonString(result.getData()), DispatchRetryResultDTO.class);
                             result.setData(data);
                             if (Objects.nonNull(data)) {
                                 if (RetryResultStatusEnum.FAILURE.getStatus().equals(data.getStatusCode())) {
-                                    retryTaskLog.setMessage(String.valueOf(data.getExceptionMsg()));
+                                    if (StringUtils.isNotBlank(data.getExceptionMsg())) {
+                                        retryTaskLog.setMessage(data.getExceptionMsg());
+                                    } else {
+                                        retryTaskLog.setMessage("客户端重试失败: 异常信息为空");
+                                    }
                                 } else if (RetryResultStatusEnum.STOP.getStatus().equals(data.getStatusCode())) {
                                     retryTaskLog.setMessage("客户端主动停止任务");
                                 } else {
-                                    retryTaskLog.setMessage("调度成功");
+                                    retryTaskLog.setMessage("客户端执行成功");
                                 }
                             }
 

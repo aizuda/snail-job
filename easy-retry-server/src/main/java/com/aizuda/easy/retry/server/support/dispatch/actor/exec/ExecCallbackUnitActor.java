@@ -77,12 +77,15 @@ public class ExecCallbackUnitActor extends AbstractActor  {
                     retryExecutor.call((Callable<Result<Void>>) () -> {
                         Result<Void> result = callClient(retryTask, serverNode);
 
-                        if (StatusEnum.YES.getStatus() != result.getStatus()  && StringUtils.isNotBlank(result.getMessage())) {
-                            retryTaskLog.setMessage(result.getMessage());
-                        } else {
-                            retryTaskLog.setMessage("调度成功");
+                        String message = "回调客户端成功";
+                        if (StatusEnum.YES.getStatus() != result.getStatus()) {
+                            if (StringUtils.isNotBlank(result.getMessage())) {
+                                message = result.getMessage();
+                            } else {
+                                message = "回调客户端失败: 异常信息为空";
+                            }
                         }
-
+                        retryTaskLog.setMessage(message);
                         return result;
                     });
                     if (context.hasException()) {
