@@ -1,45 +1,34 @@
 package com.aizuda.easy.retry.server.server;
 
 import akka.actor.AbstractActor;
-import akka.actor.OneForOneStrategy;
-import akka.actor.SupervisorStrategy;
 import cn.hutool.core.net.url.UrlBuilder;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.enums.HeadersEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
-import com.aizuda.easy.retry.common.core.model.EasyRetryRequest;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.dto.NettyHttpRequest;
-import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.server.handler.HttpRequestHandler;
 import com.aizuda.easy.retry.server.support.Register;
-import com.aizuda.easy.retry.server.support.dispatch.actor.log.LogActor;
 import com.aizuda.easy.retry.server.support.handler.ConfigVersionSyncHandler;
 import com.aizuda.easy.retry.server.support.register.ClientRegister;
 import com.aizuda.easy.retry.server.support.register.RegisterContext;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
-import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.netty.handler.codec.http.HttpUtil;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.util.CharsetUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
-import org.springframework.dao.ConcurrencyFailureException;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionSystemException;
-import scala.concurrent.duration.Duration;
 
 import java.util.Collection;
 
@@ -57,24 +46,9 @@ public class RequestHandlerActor extends AbstractActor {
 
     public static final String BEAN_NAME = "requestHandlerActor";
 
-    private static final SupervisorStrategy STRATEGY =
-        new OneForOneStrategy(5, Duration.create("1 minute"),
-            throwable -> {
-                if (throwable instanceof DuplicateKeyException
-                    || throwable instanceof TransactionSystemException
-                    || throwable instanceof ConcurrencyFailureException) {
-                    LogUtils.error(log, "RequestHandlerActor handler exception", throwable);
-                    return SupervisorStrategy.restart();
-                }else {
-                    return SupervisorStrategy.escalate();
-                }
-            });
-
-
     @Override
     public Receive createReceive() {
         return receiveBuilder().match(NettyHttpRequest.class, nettyHttpRequest -> {
-
 
             final String uri = nettyHttpRequest.getUri();
             if (StringUtils.isBlank(uri)) {
@@ -89,18 +63,21 @@ public class RequestHandlerActor extends AbstractActor {
             final String content = nettyHttpRequest.getContent();
             final HttpHeaders headers = nettyHttpRequest.getHeaders();
 
-            String result = doProcess(uri, content, method, headers);
+            String result = "";
+            try {
+                result = doProcess(uri, content, method, headers);
+            } catch (Exception e) {
+                LogUtils.error(log, "http request error. [{}]", nettyHttpRequest.getContent(), e);
+                result = JsonUtil.toJsonString(new Result<>(0, e.getMessage()));
+                throw e;
+            } finally {
+                writeResponse(channelHandlerContext, keepAlive, result);
+                getContext().stop(getSelf());
+            }
 
-            writeResponse(channelHandlerContext, keepAlive, result);
 
         }).build();
     }
-
-    @Override
-    public SupervisorStrategy supervisorStrategy() {
-        return STRATEGY;
-    }
-
 
     private String doProcess(String uri, String content, HttpMethod method,
         HttpHeaders headers) {

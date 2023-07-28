@@ -104,7 +104,7 @@ public class ConfigVersionSyncHandler implements Lifecycle, Runnable {
             } finally {
                 try {
                     // 防止刷的过快，休眠1s
-                    TimeUnit.MILLISECONDS.sleep(1000);
+                    TimeUnit.SECONDS.sleep(1);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

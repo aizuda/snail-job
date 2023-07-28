@@ -61,7 +61,15 @@ public class SlidingWindow<T> {
      */
     private final ChronoUnit chronoUnit;
 
-    public static final ReentrantLock lock = new ReentrantLock();//创建锁对象
+    /**
+     * 新增窗口锁
+     */
+    private static final ReentrantLock SAVE_LOCK = new ReentrantLock();
+
+    /**
+     * 到达时间窗口期或者总量窗口期锁
+     */
+    private static final ReentrantLock NOTICE_LOCK = new ReentrantLock();
 
     public SlidingWindow(int totalThreshold,
         int windowTotalThreshold,
@@ -87,7 +95,7 @@ public class SlidingWindow<T> {
         LocalDateTime now = LocalDateTime.now();
         if (isOpenNewWindow(now)) {
 
-            lock.lock();
+            SAVE_LOCK.lock();
             LocalDateTime windowPeriod = now.plus(duration, chronoUnit);
             try {
 
@@ -111,7 +119,7 @@ public class SlidingWindow<T> {
                 }
 
             } finally {
-                lock.unlock();
+                SAVE_LOCK.unlock();
             }
 
         } else {
@@ -167,7 +175,7 @@ public class SlidingWindow<T> {
      */
     private void doHandlerListener(LocalDateTime windowPeriod) {
 
-        lock.lock();
+        NOTICE_LOCK.lock();
 
         try {
 
@@ -191,7 +199,7 @@ public class SlidingWindow<T> {
         } catch (Exception e) {
             log.error("到达总量窗口期通知异常", e);
         } finally {
-            lock.unlock();
+            NOTICE_LOCK.unlock();
         }
 
     }
@@ -397,6 +405,7 @@ public class SlidingWindow<T> {
          * @return this
          */
         public Builder<T> withDuration(long duration, ChronoUnit chronoUnit) {
+            Assert.isTrue(duration > 0, "窗口期不能小于0");
             this.duration = duration;
             this.chronoUnit = chronoUnit;
             return this;
@@ -421,7 +430,7 @@ public class SlidingWindow<T> {
         public SlidingWindow<T> build() {
             if (Objects.isNull(threadPoolExecutor)) {
                 threadPoolExecutor = Executors
-                    .newSingleThreadScheduledExecutor(r -> new Thread(r, "SlidingWindowThread"));
+                    .newSingleThreadScheduledExecutor(r -> new Thread(r, "sliding-window-thread"));
             }
 
             if (CollectionUtils.isEmpty(listeners)) {

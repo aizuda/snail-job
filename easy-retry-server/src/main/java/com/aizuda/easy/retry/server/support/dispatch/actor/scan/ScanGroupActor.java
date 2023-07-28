@@ -36,11 +36,11 @@ public class ScanGroupActor extends AbstractScanGroup {
 
     public static final String BEAN_NAME = "ScanGroupActor";
     /**
-     * 缓存待拉取数据的起点时间
+     * 缓存待拉取数据的起点id
      * <p>
-     * LAST_AT_MAP[key] = groupName  LAST_AT_MAP[value] = retry_task的 create_at时间
+     * LAST_AT_MAP[key] = groupName  LAST_AT_MAP[value] = retry_task的id
      */
-    public static final ConcurrentMap<String, LocalDateTime> LAST_AT_MAP = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String, Long> LAST_AT_MAP = new ConcurrentHashMap<>();
 
     @Override
     protected RetryContext<Result<DispatchRetryResultDTO>> builderRetryContext(final String groupName,
@@ -76,14 +76,15 @@ public class ScanGroupActor extends AbstractScanGroup {
     }
 
     @Override
-    protected LocalDateTime getLastAt(final String groupName) {
+    protected Long getLastId(final String groupName) {
         return LAST_AT_MAP.get(groupName);
     }
 
     @Override
-    protected LocalDateTime putLastAt(final String groupName, final LocalDateTime LocalDateTime) {
-        return LAST_AT_MAP.put(groupName, LocalDateTime);
+    protected void putLastId(final String groupName, final Long lastId) {
+        LAST_AT_MAP.put(groupName, lastId);
     }
+
 
     private WaitStrategy getWaitWaitStrategy(String groupName, String sceneName) {
 

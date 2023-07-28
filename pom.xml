@@ -27,6 +27,7 @@
         <hutool-all.version>5.8.19</hutool-all.version>
         <mybatis-plus.version>3.5.3.1</mybatis-plus.version>
         <alibaba-dingtalk.version>2.0.0</alibaba-dingtalk.version>
+        <guava-retrying.version>2.0.0</guava-retrying.version>
     </properties>
 
     <modules>
@@ -81,7 +82,11 @@
                 <artifactId>mybatis-plus-boot-starter</artifactId>
                 <version>${mybatis-plus.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>com.github.rholder</groupId>
+                <artifactId>guava-retrying</artifactId>
+                <version>${guava-retrying.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

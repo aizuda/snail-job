@@ -30,31 +30,35 @@ public class MybatisRetryTaskAccess extends AbstractRetryTaskAccess {
     }
 
     @Override
-    public List<RetryTask> listAvailableTasks(String groupName, LocalDateTime lastAt, Integer pageSize, Integer taskType) {
+    public List<RetryTask> listAvailableTasks(String groupName, LocalDateTime lastAt, Long lastId, Integer pageSize,
+        Integer taskType) {
         setPartition(groupName);
         return retryTaskMapper.selectPage(new PageDTO<>(0, pageSize),
                 new LambdaQueryWrapper<RetryTask>()
-                        .eq(RetryTask::getRetryStatus, RetryStatusEnum.RUNNING.getStatus())
-                        .eq(RetryTask::getGroupName, groupName)
-                        .eq(RetryTask::getTaskType, taskType)
-                        .gt(RetryTask::getCreateDt, lastAt)
-                        .orderByAsc(RetryTask::getCreateDt)).getRecords();
+                    .eq(RetryTask::getRetryStatus, RetryStatusEnum.RUNNING.getStatus())
+                    .eq(RetryTask::getGroupName, groupName)
+                    .eq(RetryTask::getTaskType, taskType)
+                    .gt(RetryTask::getId, lastId)
+                    .gt(RetryTask::getCreateDt, lastAt)
+                    .orderByAsc(RetryTask::getId)
+                    .orderByAsc(RetryTask::getCreateDt))
+            .getRecords();
     }
 
     @Override
     public List<RetryTask> listRetryTaskByRetryCount(String groupName, Integer retryStatus) {
         setPartition(groupName);
         return retryTaskMapper.selectPage(new PageDTO<>(0, 1000),
-                new LambdaQueryWrapper<RetryTask>()
-                        .eq(RetryTask::getRetryStatus, retryStatus)
-                        .eq(RetryTask::getGroupName, groupName)).getRecords();
+            new LambdaQueryWrapper<RetryTask>()
+                .eq(RetryTask::getRetryStatus, retryStatus)
+                .eq(RetryTask::getGroupName, groupName)).getRecords();
     }
 
     @Override
     public int deleteByDelayLevel(String groupName, Integer retryStatus) {
         setPartition(groupName);
         return retryTaskMapper.delete(new LambdaQueryWrapper<RetryTask>()
-                .eq(RetryTask::getGroupName, groupName).eq(RetryTask::getRetryStatus, retryStatus));
+            .eq(RetryTask::getGroupName, groupName).eq(RetryTask::getRetryStatus, retryStatus));
     }
 
     @Override

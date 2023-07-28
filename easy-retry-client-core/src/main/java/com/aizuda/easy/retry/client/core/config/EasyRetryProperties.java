@@ -1,18 +1,21 @@
 package com.aizuda.easy.retry.client.core.config;
 
 import com.aizuda.easy.retry.common.core.context.SpringContext;
-import com.aizuda.easy.retry.common.core.util.HostUtils;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
 /**
+ * easy retry 客户端配置
+ *
  * @author: www.byteblogs.com
  * @date : 2022-03-04 15:53
+ * @since 1.0.0
  */
 @Configuration
 @ConfigurationProperties(prefix = "easy-retry")
@@ -36,6 +39,11 @@ public class EasyRetryProperties {
     private Integer port;
 
     /**
+     * 远程上报滑动窗口配置
+     */
+    private SlidingWindowConfig slidingWindow = new SlidingWindowConfig();
+
+    /**
      * 服务端配置
      */
     private ServerConfig server = new ServerConfig();
@@ -51,6 +59,31 @@ public class EasyRetryProperties {
          * 服务端netty的端口号
          */
         private int port = 1788;
+    }
+
+    @Data
+    public static class SlidingWindowConfig {
+
+        /**
+         * 总量窗口期阈值
+         */
+        private int totalThreshold = 50;
+
+        /**
+         * 窗口数量预警
+         */
+        private int windowTotalThreshold = 150;
+
+        /**
+         * 窗口期时间长度
+         */
+        private long duration = 10;
+
+        /**
+         * 窗口期单位
+         */
+        private ChronoUnit chronoUnit = ChronoUnit.SECONDS;
+
     }
 
     public static String getGroup() {

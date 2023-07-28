@@ -2,9 +2,11 @@ package com.aizuda.easy.retry.server.support.dispatch.actor.result;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
+import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
 import com.aizuda.easy.retry.server.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.enums.TaskTypeEnum;
+import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.support.dispatch.actor.log.RetryTaskLogDTO;
 import com.aizuda.easy.retry.server.support.handler.CallbackRetryTaskHandler;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
@@ -55,7 +57,9 @@ public class FinishActor extends AbstractActor  {
                transactionTemplate.execute(new TransactionCallbackWithoutResult() {
                    @Override
                    protected void doInTransactionWithoutResult(TransactionStatus status) {
-                       retryTaskAccess.updateRetryTask(retryTask);
+                       Assert.isTrue(1 == retryTaskAccess.updateRetryTask(retryTask), () ->
+                           new EasyRetryServerException("更新重试任务失败. groupName:[{}] uniqueId:[{}]",
+                               retryTask.getGroupName(),  retryTask.getUniqueId()));
 
                        // 创建一个回调任务
                        callbackRetryTaskHandler.create(retryTask);

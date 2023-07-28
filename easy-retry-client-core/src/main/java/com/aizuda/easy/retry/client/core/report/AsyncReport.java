@@ -1,16 +1,15 @@
 package com.aizuda.easy.retry.client.core.report;
 
 import com.aizuda.easy.retry.client.core.Lifecycle;
+import com.aizuda.easy.retry.client.core.config.EasyRetryProperties;
+import com.aizuda.easy.retry.client.core.config.EasyRetryProperties.SlidingWindowConfig;
 import com.aizuda.easy.retry.client.core.retryer.RetryerInfo;
-import com.aizuda.easy.retry.client.core.window.RetryLeapArray;
 import com.aizuda.easy.retry.client.core.window.SlidingWindow;
 import com.aizuda.easy.retry.server.model.dto.RetryTaskDTO;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.time.temporal.ChronoUnit;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -23,8 +22,10 @@ import java.util.concurrent.TimeUnit;
 @Component
 @Slf4j
 public class AsyncReport extends AbstractReport implements Lifecycle {
-    private static SlidingWindow<RetryTaskDTO> slidingWindow;
 
+    @Autowired
+    private EasyRetryProperties easyRetryProperties;
+    private SlidingWindow<RetryTaskDTO> slidingWindow;
     @Override
     public boolean supports(boolean async) {
         return async;
@@ -33,7 +34,8 @@ public class AsyncReport extends AbstractReport implements Lifecycle {
     @Override
     public boolean doReport(RetryerInfo retryerInfo, Object[] params) {
 
-        return syncReport(retryerInfo.getScene(), retryerInfo.getExecutorClassName(), params, retryerInfo.getTimeout(), retryerInfo.getUnit());
+        return syncReport(retryerInfo.getScene(), retryerInfo.getExecutorClassName(), params, retryerInfo.getTimeout(),
+            retryerInfo.getUnit());
     }
 
     /**
@@ -46,17 +48,21 @@ public class AsyncReport extends AbstractReport implements Lifecycle {
         return Boolean.TRUE;
     }
 
-
     @Override
     public void start() {
 
+        SlidingWindowConfig slidingWindowConfig = easyRetryProperties.getSlidingWindow();
+
         slidingWindow = SlidingWindow
-                .Builder
-                .<RetryTaskDTO>newBuilder()
-                .withTotalThreshold(10)
-                .withDuration(5, ChronoUnit.SECONDS)
-                .withListener(new ReportListener())
-                .build();
+            .Builder
+            .<RetryTaskDTO>newBuilder()
+            .withTotalThreshold(slidingWindowConfig.getTotalThreshold())
+            .withWindowTotalThreshold(slidingWindowConfig.getWindowTotalThreshold())
+            .withDuration(slidingWindowConfig.getDuration(), slidingWindowConfig.getChronoUnit())
+            .withListener(new ReportListener())
+            .build();
+
+        slidingWindow.start();
     }
 
     @Override

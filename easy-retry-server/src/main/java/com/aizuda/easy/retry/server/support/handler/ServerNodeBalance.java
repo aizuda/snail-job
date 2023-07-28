@@ -3,6 +3,7 @@ package com.aizuda.easy.retry.server.support.handler;
 import cn.hutool.core.lang.Opt;
 import com.aizuda.easy.retry.common.core.enums.NodeTypeEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.server.config.SystemProperties;
 import com.aizuda.easy.retry.server.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.persistence.mybatis.mapper.ServerNodeMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.GroupConfig;
@@ -56,6 +57,8 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
 
     @Autowired
     protected ServerNodeMapper serverNodeMapper;
+    @Autowired
+    protected SystemProperties systemProperties;
 
     /**
      * 控制rebalance状态
@@ -253,7 +256,7 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
                 LogUtils.error(log, "check balance error", e);
             } finally {
                 try {
-                    TimeUnit.SECONDS.sleep(1);
+                    TimeUnit.SECONDS.sleep(systemProperties.getLoadBalanceCycleTime());
                 } catch (InterruptedException e) {
                     LogUtils.error(log, "check balance interrupt");
                     Thread.currentThread().interrupt();

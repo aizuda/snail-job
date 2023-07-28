@@ -1,7 +1,9 @@
 package com.aizuda.easy.retry.server.support.dispatch.actor.result;
 
 import akka.actor.AbstractActor;
+import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask;
 import com.aizuda.easy.retry.server.persistence.support.RetryTaskAccess;
 import com.aizuda.easy.retry.server.support.RetryContext;
@@ -44,7 +46,9 @@ public class NoRetryActor extends AbstractActor {
             // 不更新重试次数
             retryTask.setRetryCount(null);
             try {
-                retryTaskAccess.updateRetryTask(retryTask);
+                Assert.isTrue(1 == retryTaskAccess.updateRetryTask(retryTask), () ->
+                    new EasyRetryServerException("更新重试任务失败. groupName:[{}] uniqueId:[{}]",
+                        retryTask.getGroupName(),  retryTask.getUniqueId()));
             }catch (Exception e) {
                 LogUtils.error(log,"更新重试任务失败", e);
             } finally {

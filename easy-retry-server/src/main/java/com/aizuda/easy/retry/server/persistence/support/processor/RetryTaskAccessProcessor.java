@@ -30,8 +30,8 @@ public class RetryTaskAccessProcessor implements RetryTaskAccess<RetryTask> {
      * 批量查询重试任务
      */
     @Override
-    public List<RetryTask> listAvailableTasks(String groupName, LocalDateTime lastAt, Integer pageSize, Integer taskType) {
-        return retryTaskAccesses.listAvailableTasks(groupName, lastAt, pageSize, taskType);
+    public List<RetryTask> listAvailableTasks(String groupName, LocalDateTime lastAt, final Long lastId, Integer pageSize, Integer taskType) {
+        return retryTaskAccesses.listAvailableTasks(groupName, lastAt, lastId, pageSize, taskType);
     }
 
     @Override

@@ -13,16 +13,29 @@ import com.aizuda.easy.retry.server.model.dto.RetryTaskDTO;
 import com.aizuda.easy.retry.server.service.convert.TaskContextConverter;
 import com.aizuda.easy.retry.server.support.generator.TaskGenerator;
 import com.aizuda.easy.retry.server.support.generator.task.TaskContext;
+import com.github.rholder.retry.Attempt;
+import com.github.rholder.retry.RetryException;
+import com.github.rholder.retry.RetryListener;
+import com.github.rholder.retry.Retryer;
+import com.github.rholder.retry.RetryerBuilder;
+import com.github.rholder.retry.StopStrategies;
+import com.github.rholder.retry.WaitStrategies;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.ConcurrencyFailureException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.aizuda.easy.retry.common.core.constant.SystemConstants.HTTP_PATH.BATCH_REPORT;
@@ -72,20 +85,55 @@ public class ReportRetryInfoHttpRequestHandler extends PostHttpRequestHandler {
 
             Map<String, List<RetryTaskDTO>> map = retryTaskList.stream().collect(Collectors.groupingBy(RetryTaskDTO::getSceneName));
 
-            map.forEach(((sceneName, retryTaskDTOS) -> {
-                TaskContext taskContext = new TaskContext();
-                taskContext.setSceneName(sceneName);
-                taskContext.setGroupName(set.stream().findFirst().get());
-                taskContext.setTaskInfos(TaskContextConverter.INSTANCE.toTaskContextInfo(retryTaskList));
+            Retryer<Object> retryer =  RetryerBuilder.newBuilder()
+                    .retryIfException(throwable -> {
+                        // 若是数据库异常则重试
+                        if (throwable instanceof DuplicateKeyException
+                            || throwable instanceof TransactionSystemException
+                            || throwable instanceof ConcurrencyFailureException
+                            || throwable instanceof IOException) {
+                            return true;
+                        }
+                        return false;
+                    })
+                .withStopStrategy(StopStrategies.stopAfterAttempt(5))
+                .withWaitStrategy(WaitStrategies.fixedWait(1, TimeUnit.SECONDS))
+                .withRetryListener(new RetryListener() {
+                    @Override
+                    public <V> void onRetry(final Attempt<V> attempt) {
+                        if (attempt.hasException()) {
+                            LogUtils.error(log, "数据上报发生异常执行重试. reqId:[{}] count:[{}]",
+                                retryRequest.getReqId(), attempt.getAttemptNumber(), attempt.getExceptionCause());
+                        }
+                    }
+                })
+                .build();
 
-                // 生成任务
-                taskGenerator.taskGenerator(taskContext);
-            }));
+            retryer.call(() -> {
+                map.forEach(((sceneName, retryTaskDTOS) -> {
+                    TaskContext taskContext = new TaskContext();
+                    taskContext.setSceneName(sceneName);
+                    taskContext.setGroupName(set.stream().findFirst().get());
+                    taskContext.setTaskInfos(TaskContextConverter.INSTANCE.toTaskContextInfo(retryTaskList));
+
+                    // 生成任务
+                    taskGenerator.taskGenerator(taskContext);
+                }));
+
+                return null;
+            });
 
             return JsonUtil.toJsonString(new NettyResult(StatusEnum.YES.getStatus(), "Batch Retry Data Upload Processed Successfully", Boolean.TRUE, retryRequest.getReqId()));
         } catch (Exception e) {
-            LogUtils.error(log, "Batch Report Retry Data Error. <|>{}<|>", args[0], e);
-            return JsonUtil.toJsonString(new NettyResult(StatusEnum.YES.getStatus(), e.getMessage(), Boolean.FALSE, retryRequest.getReqId()));
+
+            Throwable throwable = e;
+            if (e.getClass().isAssignableFrom(RetryException.class)) {
+                RetryException re = (RetryException) e;
+                throwable = re.getLastFailedAttempt().getExceptionCause();
+            }
+
+            LogUtils.error(log, "Batch Report Retry Data Error. <|>{}<|>", args[0], throwable);
+            return JsonUtil.toJsonString(new NettyResult(StatusEnum.YES.getStatus(), throwable.getMessage(), Boolean.FALSE, retryRequest.getReqId()));
         }
     }
 }

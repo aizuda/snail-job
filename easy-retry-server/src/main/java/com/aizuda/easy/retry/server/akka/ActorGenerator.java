@@ -92,7 +92,7 @@ public class ActorGenerator {
      * @return actor 引用
      */
     public static ActorRef logActor() {
-        return getNettyActorSystem().actorOf(getSpringExtension().props(LogActor.BEAN_NAME));
+        return getLogActorSystemSystem().actorOf(getSpringExtension().props(LogActor.BEAN_NAME));
     }
 
     /**
@@ -101,7 +101,7 @@ public class ActorGenerator {
      * @return actor 引用
      */
     public static ActorRef requestHandlerActor() {
-        return getLogActorSystemSystem().actorOf(getSpringExtension().props(RequestHandlerActor.BEAN_NAME));
+        return getNettyActorSystem().actorOf(getSpringExtension().props(RequestHandlerActor.BEAN_NAME));
     }
 
     public static SpringExtension getSpringExtension() {

@@ -61,19 +61,19 @@ public abstract class AbstractScanGroup extends AbstractActor {
 
     protected void doScan(final ScanTaskDTO scanTaskDTO) {
 
-        LocalDateTime defLastAt = LocalDateTime.now().minusDays(systemProperties.getLastDays());
-
+        LocalDateTime lastAt = LocalDateTime.now().minusDays(systemProperties.getLastDays());
+        int retryPullPageSize = systemProperties.getRetryPullPageSize();
         String groupName = scanTaskDTO.getGroupName();
-        LocalDateTime lastAt = Optional.ofNullable(getLastAt(groupName)).orElse(defLastAt);
+        Long lastId = Optional.ofNullable(getLastId(groupName)).orElse(0L);
 
-        // 扫描当前Group 待重试的数据
-        List<RetryTask> list = retryTaskAccessProcessor.listAvailableTasks(groupName, lastAt, systemProperties.getRetryPullPageSize(),
+        // 扫描当前Group 待处理的任务
+        List<RetryTask> list = retryTaskAccessProcessor.listAvailableTasks(groupName, lastAt, lastId, retryPullPageSize,
             getTaskType());
 
         if (!CollectionUtils.isEmpty(list)) {
 
-            // 更新拉取的最大的创建时间
-            putLastAt(scanTaskDTO.getGroupName(), list.get(list.size() - 1).getCreateDt());
+            // 更新拉取的最大的id
+            putLastId(scanTaskDTO.getGroupName(), list.get(list.size() - 1).getId());
 
             for (RetryTask retryTask : list) {
 
@@ -97,7 +97,7 @@ public abstract class AbstractScanGroup extends AbstractActor {
                 Thread.currentThread().interrupt();
             }
 
-            putLastAt(groupName, defLastAt);
+            putLastId(groupName, 0L);
         }
 
     }
@@ -108,9 +108,9 @@ public abstract class AbstractScanGroup extends AbstractActor {
 
     protected abstract Integer getTaskType();
 
-    protected abstract LocalDateTime getLastAt(String groupName);
+    protected abstract Long getLastId(String groupName);
 
-    protected abstract LocalDateTime putLastAt(String groupName, LocalDateTime LocalDateTime);
+    protected abstract void putLastId(String groupName, Long lastId);
 
     private void retryCountIncrement(RetryTask retryTask) {
         Integer retryCount = retryTask.getRetryCount();

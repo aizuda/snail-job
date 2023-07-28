@@ -19,7 +19,7 @@ public class AkkaConfiguration {
     private static final String DISPATCH_EXEC_UNIT_RETRY_ACTOR_SYSTEM = "DISPATCH_EXEC_UNIT_RETRY_ACTOR_SYSTEM";
     private static final String DISPATCH_RESULT_ACTOR_SYSTEM = "DISPATCH_RESULT_ACTOR_SYSTEM";
     private static final String LOG_ACTOR_SYSTEM = "LOG_ACTOR_SYSTEM";
-    private static final String NETTY_ACTOR_SYSTEM = "nettyActorSystem";
+    private static final String NETTY_ACTOR_SYSTEM = "NETTY_ACTOR_SYSTEM";
 
     @Autowired
     private ApplicationContext applicationContext;

@@ -26,6 +26,8 @@ import com.aizuda.easy.retry.client.model.DispatchRetryDTO;
 import com.aizuda.easy.retry.client.model.DispatchRetryResultDTO;
 import com.aizuda.easy.retry.client.model.RetryCallbackDTO;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.util.ReflectionUtils;
@@ -60,7 +62,7 @@ public class RetryEndPoint {
      * 服务端调度重试入口
      */
     @PostMapping("/dispatch/v1")
-   public Result<DispatchRetryResultDTO> dispatch(@RequestBody @Validated DispatchRetryDTO executeReqDto) {
+    public Result<DispatchRetryResultDTO> dispatch(@RequestBody @Validated DispatchRetryDTO executeReqDto) {
 
         RetryerInfo retryerInfo = RetryerInfoCache.get(executeReqDto.getScene(), executeReqDto.getExecutorName());
         if (Objects.isNull(retryerInfo)) {
@@ -71,7 +73,8 @@ public class RetryEndPoint {
 
         Object[] deSerialize = null;
         try {
-            deSerialize = (Object[]) retryArgSerializer.deSerialize(executeReqDto.getArgsStr(), retryerInfo.getExecutor().getClass(), retryerInfo.getMethod());
+            deSerialize = (Object[]) retryArgSerializer.deSerialize(executeReqDto.getArgsStr(),
+                retryerInfo.getExecutor().getClass(), retryerInfo.getMethod());
         } catch (JsonProcessingException e) {
             throw new EasyRetryClientException("参数解析异常", e);
         }
@@ -83,7 +86,8 @@ public class RetryEndPoint {
             HttpServletRequest request = Objects.requireNonNull(attributes).getRequest();
             request.setAttribute("attemptNumber", executeReqDto.getRetryCount());
 
-            RetryerResultContext retryerResultContext = retryStrategy.openRetry(executeReqDto.getScene(), executeReqDto.getExecutorName(), deSerialize);
+            RetryerResultContext retryerResultContext = retryStrategy.openRetry(executeReqDto.getScene(),
+                executeReqDto.getExecutorName(), deSerialize);
 
             if (RetrySiteSnapshot.isRetryForStatusCode()) {
                 executeRespDto.setStatusCode(RetryResultStatusEnum.STOP.getStatus());
@@ -127,25 +131,87 @@ public class RetryEndPoint {
 
         RetryArgSerializer retryArgSerializer = new JacksonSerializer();
 
-        Object[] deSerialize = null;
+        Object[] deSerialize;
         try {
-            deSerialize = (Object[]) retryArgSerializer.deSerialize(callbackDTO.getArgsStr(), retryerInfo.getExecutor().getClass(), retryerInfo.getMethod());
+            deSerialize = (Object[]) retryArgSerializer.deSerialize(callbackDTO.getArgsStr(),
+                retryerInfo.getExecutor().getClass(), retryerInfo.getMethod());
         } catch (JsonProcessingException e) {
             throw new EasyRetryClientException("参数解析异常", e);
         }
 
+        try {
+            // 以Spring Bean模式回调
+            return doCallbackForSpringBean(callbackDTO, retryerInfo, deSerialize);
+        } catch (NoSuchBeanDefinitionException e) {
+            // 若不是SpringBean 则直接反射以普通类调用
+            return doCallbackForOrdinaryClass(callbackDTO, retryerInfo, deSerialize);
+        }
+    }
+
+    /**
+     * 以普通类进行回调
+     *
+     * @param callbackDTO {@link RetryCallbackDTO} 服务端调度重试入参
+     * @param retryerInfo {@link RetryerInfo} 定义重试场景的信息
+     * @param deSerialize 参数信息
+     * @return Result
+     */
+    private Result doCallbackForOrdinaryClass(RetryCallbackDTO callbackDTO, RetryerInfo retryerInfo,
+        Object[] deSerialize) {
         Class<? extends RetryCompleteCallback> retryCompleteCallbackClazz = retryerInfo.getRetryCompleteCallback();
+
+        try {
+            RetryCompleteCallback retryCompleteCallback = retryCompleteCallbackClazz.newInstance();
+            Method method;
+            switch (Objects.requireNonNull(RetryStatusEnum.getByStatus(callbackDTO.getRetryStatus()))) {
+                case FINISH:
+                    method = retryCompleteCallbackClazz.getMethod("doSuccessCallback", String.class, String.class,
+                        Object[].class);
+                    break;
+                case MAX_COUNT:
+                    method = retryCompleteCallbackClazz.getMethod("doMaxRetryCallback", String.class, String.class,
+                        Object[].class);
+                    break;
+                default:
+                    throw new EasyRetryClientException("回调状态异常");
+            }
+
+            Assert.notNull(method, () -> new EasyRetryClientException("no such method"));
+            ReflectionUtils.invokeMethod(method, retryCompleteCallback, retryerInfo.getScene(),
+                retryerInfo.getExecutorClassName(), deSerialize);
+            return new Result(1, "回调成功");
+        } catch (Exception ex) {
+            return new Result(0, ex.getMessage());
+        }
+
+    }
+
+    /**
+     * 以Spring Bean模式回调
+     *
+     * @param callbackDTO {@link RetryCallbackDTO} 服务端调度重试入参
+     * @param retryerInfo {@link RetryerInfo} 定义重试场景的信息
+     * @param deSerialize 参数信息
+     * @return Result
+     */
+    private Result doCallbackForSpringBean(RetryCallbackDTO callbackDTO, RetryerInfo retryerInfo, Object[] deSerialize) {
+        Class<? extends RetryCompleteCallback> retryCompleteCallbackClazz = retryerInfo.getRetryCompleteCallback();
+
         RetryCompleteCallback retryCompleteCallback = SpringContext.getBeanByType(retryCompleteCallbackClazz);
-
-        if (RetryStatusEnum.FINISH.getStatus().equals(callbackDTO.getRetryStatus())) {
-            retryCompleteCallback.doSuccessCallback(retryerInfo.getScene(), retryerInfo.getExecutorClassName(), deSerialize);
+        switch (Objects.requireNonNull(RetryStatusEnum.getByStatus(callbackDTO.getRetryStatus()))) {
+            case FINISH:
+                retryCompleteCallback.doSuccessCallback(retryerInfo.getScene(), retryerInfo.getExecutorClassName(),
+                    deSerialize);
+                break;
+            case MAX_COUNT:
+                retryCompleteCallback.doMaxRetryCallback(retryerInfo.getScene(), retryerInfo.getExecutorClassName(),
+                    deSerialize);
+                break;
+            default:
+                throw new EasyRetryClientException("回调状态异常");
         }
 
-        if (RetryStatusEnum.MAX_COUNT.getStatus().equals(callbackDTO.getRetryStatus())) {
-            retryCompleteCallback.doMaxRetryCallback(retryerInfo.getScene(), retryerInfo.getExecutorClassName(), deSerialize);
-        }
-
-        return new Result();
+        return new Result(1, "回调成功");
     }
 
     /**
@@ -155,14 +221,16 @@ public class RetryEndPoint {
      * @return idempotentId
      */
     @PostMapping("/generate/idempotent-id/v1")
-    public Result<String> idempotentIdGenerate(@RequestBody @Validated GenerateRetryIdempotentIdDTO generateRetryIdempotentIdDTO) {
+    public Result<String> idempotentIdGenerate(
+        @RequestBody @Validated GenerateRetryIdempotentIdDTO generateRetryIdempotentIdDTO) {
 
         String scene = generateRetryIdempotentIdDTO.getScene();
         String executorName = generateRetryIdempotentIdDTO.getExecutorName();
         String argsStr = generateRetryIdempotentIdDTO.getArgsStr();
 
         RetryerInfo retryerInfo = RetryerInfoCache.get(scene, executorName);
-        Assert.notNull(retryerInfo, ()-> new EasyRetryClientException("重试信息不存在 scene:[{}] executorName:[{}]", scene, executorName));
+        Assert.notNull(retryerInfo,
+            () -> new EasyRetryClientException("重试信息不存在 scene:[{}] executorName:[{}]", scene, executorName));
 
         Method executorMethod = retryerInfo.getMethod();
 
@@ -170,7 +238,8 @@ public class RetryEndPoint {
 
         Object[] deSerialize = null;
         try {
-            deSerialize = (Object[]) retryArgSerializer.deSerialize(argsStr, retryerInfo.getExecutor().getClass(), retryerInfo.getMethod());
+            deSerialize = (Object[]) retryArgSerializer.deSerialize(argsStr, retryerInfo.getExecutor().getClass(),
+                retryerInfo.getMethod());
         } catch (JsonProcessingException e) {
             throw new EasyRetryClientException("参数解析异常", e);
         }
@@ -180,7 +249,8 @@ public class RetryEndPoint {
             Class<? extends IdempotentIdGenerate> idempotentIdGenerate = retryerInfo.getIdempotentIdGenerate();
             IdempotentIdGenerate generate = idempotentIdGenerate.newInstance();
             Method method = idempotentIdGenerate.getMethod("idGenerate", IdempotentIdContext.class);
-            IdempotentIdContext idempotentIdContext = new IdempotentIdContext(scene, executorName, deSerialize, executorMethod.getName());
+            IdempotentIdContext idempotentIdContext = new IdempotentIdContext(scene, executorName, deSerialize,
+                executorMethod.getName());
             idempotentId = (String) ReflectionUtils.invokeMethod(method, generate, idempotentIdContext);
         } catch (Exception exception) {
             LogUtils.error(log, "幂等id生成异常：{},{}", scene, argsStr, exception);

@@ -2,12 +2,14 @@ package com.aizuda.easy.retry.server.support.dispatch.actor.result;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
+import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.config.SystemProperties;
 import com.aizuda.easy.retry.server.enums.TaskTypeEnum;
+import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.SceneConfig;
 import com.aizuda.easy.retry.server.persistence.support.ConfigAccess;
@@ -78,7 +80,9 @@ public class FailureActor extends AbstractActor {
                             callbackRetryTaskHandler.create(retryTask);
                         }
 
-                        retryTaskAccess.updateRetryTask(retryTask);
+                        Assert.isTrue(1 == retryTaskAccess.updateRetryTask(retryTask), () ->
+                            new EasyRetryServerException("更新重试任务失败. groupName:[{}] uniqueId:[{}]",
+                                retryTask.getGroupName(),  retryTask.getUniqueId()));
                     }
                 });
             } catch (Exception e) {

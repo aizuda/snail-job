@@ -39,7 +39,7 @@ public class SystemProperties {
     /**
      * 一个客户端每秒最多接收的重试数量指令
      */
-    private int limiter = 10;
+    private int limiter = 100;
 
     /**
      * 号段模式下步长配置
@@ -56,6 +56,11 @@ public class SystemProperties {
      * 数据库类型
      */
     private DbTypeEnum dbType = DbTypeEnum.MYSQL;
+
+    /**
+     * 负载均衡周期时间
+     */
+    private int loadBalanceCycleTime = 10;
 
     /**
      * 回调配置
