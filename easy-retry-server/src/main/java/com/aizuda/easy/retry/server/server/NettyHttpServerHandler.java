@@ -19,7 +19,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 @Slf4j
 public class NettyHttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
-    public NettyHttpServerHandler(final ThreadPoolExecutor serverHandlerPool) {
+    public NettyHttpServerHandler() {
     }
 
     @Override

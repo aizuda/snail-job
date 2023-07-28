@@ -13,12 +13,9 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
-import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.concurrent.*;
 
 /**
  * netty server
@@ -29,73 +26,55 @@ import java.util.concurrent.*;
  */
 @Component
 @Slf4j
-public class NettyHttpServer implements Runnable, Lifecycle {
-
-    public static final int CPU_NUM = Runtime.getRuntime().availableProcessors();
+public class NettyHttpServer implements Lifecycle {
 
     @Autowired
     private SystemProperties systemProperties;
 
-    @Override
-    public void run() {
+    /***
+     * 服务端启动
+     */
+    public void runServer() {
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
-
-        ThreadPoolExecutor serverHandlerPool = new ThreadPoolExecutor(CPU_NUM + 1, 2 * CPU_NUM, 60L, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(2000), r -> new Thread(r, "easy-retry-server-handler-pool-" + r.hashCode()), (r, executor) -> {
-            throw new EasyRetryServerException("easy-retry thread pool is EXHAUSTED!");
-        });
 
         try {
             // start server
             ServerBootstrap bootstrap = new ServerBootstrap();
             bootstrap.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
+                    .option(ChannelOption.SO_BACKLOG, 128)
+                    .childOption(ChannelOption.SO_KEEPALIVE, true)
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         public void initChannel(SocketChannel channel) throws Exception {
                             channel.pipeline()
-                                    .addLast(new IdleStateHandler(0, 0, 30 * 3, TimeUnit.SECONDS))  // beat 3N, close if idle
                                     .addLast(new HttpServerCodec())
-                                    .addLast(new HttpObjectAggregator(5 * 1024 * 1024))  // merge request & reponse to FULL
-                                    .addLast(new NettyHttpServerHandler(serverHandlerPool));
+                                    .addLast(new HttpObjectAggregator(5 * 1024 * 1024))
+                                    .addLast(new NettyHttpServerHandler());
                         }
-                    })
-                    .childOption(ChannelOption.SO_KEEPALIVE, true);
+                    });
 
-            // bind
+            // 在特定端口绑定并启动服务器 默认是1788
             ChannelFuture future = bootstrap.bind(systemProperties.getNettyPort()).sync();
 
             log.info("------> easy-retry remoting server start success, nettype = {}, port = {}", NettyHttpServer.class.getName(), systemProperties.getNettyPort());
 
             future.channel().closeFuture().sync();
 
-        } catch (InterruptedException e) {
-            log.info("--------> easy-retry remoting server stop.");
         } catch (Exception e) {
             log.error("--------> easy-retry remoting server error.", e);
+            throw new EasyRetryServerException("easy-retry server start error");
         } finally {
-
-            // stop
-            try {
-                serverHandlerPool.shutdown();
-            } catch (Exception e) {
-                log.error(e.getMessage(), e);
-            }
-            try {
-                workerGroup.shutdownGracefully();
-                bossGroup.shutdownGracefully();
-            } catch (Exception e) {
-                log.error(e.getMessage(), e);
-            }
+            // 当服务器正常关闭时，关闭EventLoopGroups以释放资源。
+            workerGroup.shutdownGracefully();
+            bossGroup.shutdownGracefully();
         }
     }
 
     @Override
     public void start() {
-        Thread thread = new Thread(this);
-        thread.setDaemon(true);
-        thread.start();
+        runServer();
     }
 
     @Override
