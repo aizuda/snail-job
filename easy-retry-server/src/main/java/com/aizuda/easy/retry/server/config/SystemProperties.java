@@ -42,8 +42,7 @@ public class SystemProperties {
     private int limiter = 100;
 
     /**
-     * 号段模式下步长配置
-     * 默认100
+     * 号段模式下步长配置 默认100
      */
     private int step = 100;
 
@@ -74,9 +73,9 @@ public class SystemProperties {
     public static class Callback {
 
         /**
-         * 回调id前缀
+         * 回调uniqueId前缀
          */
-        String prefix = "CB_";
+        String prefix = "CB";
 
         /**
          * 回调的最大执行次数

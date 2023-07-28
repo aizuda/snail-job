@@ -2,20 +2,28 @@ package com.aizuda.easy.retry.server.support.dispatch.actor.exec;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
+import cn.hutool.core.lang.Assert;
+import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.client.model.RetryCallbackDTO;
 import com.aizuda.easy.retry.server.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.client.RequestBuilder;
 import com.aizuda.easy.retry.server.client.RpcClient;
+import com.aizuda.easy.retry.server.config.RequestDataHelper;
+import com.aizuda.easy.retry.server.config.SystemProperties;
 import com.aizuda.easy.retry.server.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.enums.StatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
+import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
+import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskMapper;
 import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask;
 import com.aizuda.easy.retry.server.support.IdempotentStrategy;
 import com.aizuda.easy.retry.server.support.context.CallbackRetryContext;
 import com.aizuda.easy.retry.server.support.dispatch.actor.log.RetryTaskLogDTO;
+import com.aizuda.easy.retry.server.support.handler.CallbackRetryTaskHandler;
 import com.aizuda.easy.retry.server.support.retry.RetryExecutor;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +33,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Callable;
 
@@ -45,6 +54,10 @@ public class ExecCallbackUnitActor extends AbstractActor  {
     @Autowired
     @Qualifier("bitSetIdempotentStrategyHandler")
     private IdempotentStrategy<String, Integer> idempotentStrategy;
+    @Autowired
+    private RetryTaskMapper retryTaskMapper;
+    @Autowired
+    private CallbackRetryTaskHandler callbackRetryTaskHandler;
 
     @Override
     public Receive createReceive() {
@@ -100,10 +113,17 @@ public class ExecCallbackUnitActor extends AbstractActor  {
     /**
      * 调用客户端
      *
-     * @param retryTask {@link RetryTask} 需要重试的数据
+     * @param callbackTask {@link RetryTask} 回调任务
      * @return 重试结果返回值
      */
-    private Result callClient(RetryTask retryTask, RegisterNodeInfo serverNode) {
+    private Result callClient(RetryTask callbackTask, RegisterNodeInfo serverNode) {
+
+        String retryTaskUniqueId = callbackRetryTaskHandler.getRetryTaskUniqueId(callbackTask.getUniqueId());
+        RequestDataHelper.setPartition(callbackTask.getGroupName());
+        RetryTask retryTask = retryTaskMapper.selectOne(
+            new LambdaQueryWrapper<RetryTask>().eq(RetryTask::getUniqueId, retryTaskUniqueId));
+        Assert.notNull(retryTask, () -> new EasyRetryServerException("未查询回调任务对应的重试任务. callbackUniqueId:[{}] uniqueId:[{}]",
+            callbackTask.getUniqueId(), retryTaskUniqueId));
 
         // 回调参数
         RetryCallbackDTO retryCallbackDTO = new RetryCallbackDTO();

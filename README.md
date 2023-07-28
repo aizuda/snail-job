@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-    🔥🔥🔥基于BASE思想实现的分布式服务重试组件
+     致力提高分布式业务系统一致性的分布式重试平台
 </p>
 
 
@@ -43,13 +43,16 @@
 
 ## 相关链接
 - [字节跳动: 如何优雅地重试](https://juejin.cn/post/6914091859463634951)
-- [文档](https://www.easyretry.com/pages/d1d1da/)
-- [HelloWorld](https://www.easyretry.com/pages/da9ecc/)
-## 原理
+- [这款分布式重试组件,治好了我的重试强迫症！](https://juejin.cn/post/7249607108043145274)
+- [系统简介](https://www.easyretry.com/pages/d1d1da/)
 - [架构与功能](https://www.easyretry.com/pages/540554/)
 
+## 原理
+- [场景应用](https://www.easyretry.com/pages/406a68/)
+- [HelloWorld](https://www.easyretry.com/pages/da9ecc/)
+
 ## 应用实例
-- [Spring-Boot](https://gitee.com/zhangyutongxue/easy-retry-demo)
+- [easy-retry-demo](https://gitee.com/zhangyutongxue/easy-retry-demo)
 
 ## 期望
 欢迎提出更好的意见，帮助完善 Easy-Retry

@@ -2,6 +2,10 @@ package com.aizuda.easy.retry.server.support.generator.id;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * 特别声明: 此算法来自美团的leaf号段模式
+ * see： https://github.com/Meituan-Dianping/Leaf/blob/master/leaf-server/src/main/java/com/sankuai/inf/leaf/server/service/SegmentService.java
+ */
 public class Segment {
     private AtomicLong value = new AtomicLong(0);
     private volatile long max;

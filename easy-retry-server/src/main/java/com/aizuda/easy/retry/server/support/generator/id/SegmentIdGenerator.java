@@ -32,9 +32,10 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 /**
- * 此算法来自美团的leaf号段模式
+ * 特别声明: 此算法来自美团的leaf号段模式
+ * see： https://github.com/Meituan-Dianping/Leaf/blob/master/leaf-server/src/main/java/com/sankuai/inf/leaf/server/service/SegmentService.java
  *
- * @author www.byteblogs.com
+ *  @author www.byteblogs.com
  * @date 2023-05-04
  * @since 1.2.0
  */
