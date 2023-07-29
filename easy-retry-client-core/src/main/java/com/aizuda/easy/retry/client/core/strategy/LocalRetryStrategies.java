@@ -120,11 +120,9 @@ public class LocalRetryStrategies extends AbstractRetryStrategies {
             case ONLY_REMOTE:
                 // 仅仅是远程重试则直接上报
                 log.debug("上报 scene:[{}]", retryerInfo.getScene());
-                return () -> {
-                    doReport(retryerInfo, params);
-                    RetrySiteSnapshot.setStage(RetrySiteSnapshot.EnumStage.REMOTE.getStage());
-                    return null;
-                };
+                doReport(retryerInfo, params);
+                RetrySiteSnapshot.setStage(RetrySiteSnapshot.EnumStage.REMOTE.getStage());
+                return () -> null;
             default:
                 throw new EasyRetryClientException("异常重试模式 [{}]", retryType.name());
         }

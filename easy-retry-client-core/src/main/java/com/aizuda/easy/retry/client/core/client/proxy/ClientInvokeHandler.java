@@ -6,6 +6,7 @@ import com.aizuda.easy.retry.client.core.annotation.Mapping;
 import com.aizuda.easy.retry.client.core.client.netty.NettyChannel;
 import com.aizuda.easy.retry.client.core.client.netty.RpcContext;
 import com.aizuda.easy.retry.client.core.exception.EasyRetryClientException;
+import com.aizuda.easy.retry.client.core.exception.EasyRetryClientTimeOutException;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.model.EasyRetryRequest;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
@@ -15,7 +16,9 @@ import lombok.extern.slf4j.Slf4j;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 /**
@@ -41,7 +44,7 @@ public class ClientInvokeHandler<R> implements InvocationHandler {
     }
 
     @Override
-    public R invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
+    public R invoke(final Object proxy, final Method method, final Object[] args) throws InterruptedException {
         StopWatch sw = new StopWatch();
         Mapping annotation = method.getAnnotation(Mapping.class);
         EasyRetryRequest easyRetryRequest = new EasyRetryRequest(args);
@@ -67,7 +70,13 @@ public class ClientInvokeHandler<R> implements InvocationHandler {
             return null;
         } else {
             Assert.notNull(completableFuture, () -> new EasyRetryClientException("completableFuture is null"));
-            return completableFuture.get(timeout, unit);
+            try {
+                return completableFuture.get(timeout, unit);
+            } catch (ExecutionException e) {
+                throw new EasyRetryClientException("Request to remote interface exception. path:[{}]",  annotation.path());
+            } catch (TimeoutException e) {
+                throw new EasyRetryClientTimeOutException("Request to remote interface timed out. path:[{}]", annotation.path());
+            }
         }
 
     }

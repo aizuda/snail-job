@@ -64,9 +64,9 @@ public abstract class AbstractRetryStrategies implements RetryStrategy {
             retryerResultContext.setResult(result);
 
         } catch (Exception e) {
-            log.error("重试执行非预期异常", e);
+            log.error("重试期间发生非预期异常, sceneName:[{}] executorClassName:[{}]", sceneName, executorClassName,  e);
             retryerResultContext.setMessage("非预期异常" + e.getMessage());
-            // 本地重试状态未失败 远程重试状态为成功
+            // 本地重试状态为失败 远程重试状态为成功
             unexpectedError(e, retryerResultContext);
         }
 
