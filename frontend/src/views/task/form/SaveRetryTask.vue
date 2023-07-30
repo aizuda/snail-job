@@ -33,8 +33,10 @@
             name="idempotentId"
             placeholder="请输入幂等ID"
           >
-            <a-tooltip slot="suffix" title="同一个场景下正在重试中的幂等ID不能重复,若重复的幂等ID在上报时会被幂等处理">
-              <a-icon type="info-circle" style="color: rgba(0, 0, 0, 0.45)" />
+            <a-tooltip slot="suffix">
+              <a :href="officialWebsite + '/pages/b74542/#幂等id(idempotentId)'" target="_blank">
+                <a-icon type="info-circle" style="color: rgba(0, 0, 0, 0.45)" />
+              </a>
             </a-tooltip>
           </a-input>
           <a-button type="primary" style="position: absolute; margin: 3px 10px" @click="idempotentIdGenerate"> 通过客户端生成 </a-button>
@@ -45,8 +47,10 @@
             name="bizNo"
             placeholder="请输入业务编号"
           >
-            <a-tooltip slot="suffix" title="具有业务特征的编号比如订单号、物流编号等">
-              <a-icon type="info-circle" style="color: rgba(0, 0, 0, 0.45)" />
+            <a-tooltip slot="suffix">
+              <a :href="officialWebsite + '/pages/b74542/#业务编号(bizNo)'" target="_blank">
+                <a-icon type="info-circle" style="color: rgba(0, 0, 0, 0.45)" />
+              </a>
             </a-tooltip>
           </a-input>
         </a-form-item>
@@ -72,6 +76,7 @@
 
 <script>
 import { getAllGroupNameList, getSceneList, saveRetryTask, idempotentIdGenerate } from '@/api/manage'
+import { officialWebsite } from '@/utils/util'
 
 export default {
   name: 'SavRetryTask',
@@ -91,7 +96,8 @@ export default {
         1: '重试完成',
         2: '最大次数',
         3: '暂停'
-      }
+      },
+      officialWebsite: officialWebsite()
     }
   },
   methods: {

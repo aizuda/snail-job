@@ -22,20 +22,6 @@
     id, unique_id, group_name, scene_name, idempotent_id, biz_no, executor_name, args_str, ext_attrs, next_trigger_at, retry_count, retry_status,
     create_dt, update_dt, task_type
   </sql>
-  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
-    select
-    <include refid="Base_Column_List" />
-    from retry_task_${partition}
-    where id = #{id,jdbcType=BIGINT}
-  </select>
-  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
-    delete from retry_task_${partition}
-    where id = #{id,jdbcType=BIGINT}
-  </delete>
-  <delete id="deleteByRetryStatus">
-    delete from retry_task_${partition}
-    where retry_status = #{retryStatus,jdbcType=TINYINT}
-  </delete>
   <delete id="deleteBatch">
     delete from retry_task_${partition}
     where id IN
@@ -43,37 +29,17 @@
         #{id}
       </foreach>
   </delete>
-  <select id="selectRetryTask" resultMap="BaseResultMap">
-    select
-    <include refid="Base_Column_List" />
-    from retry_task_${partition} where create_dt &gt;#{createDt,jdbcType=TIMESTAMP} and retry_status = 0 limit #{pageSize}
-  </select>
-  <select id="selectRetryTaskByRetryCount" resultMap="BaseResultMap">
-    select
-    <include refid="Base_Column_List" />
-    from retry_task_${partition} where retry_status = #{retryStatus,jdbcType=TINYINT} limit 1000
-  </select>
   <select id="countAllRetryTaskByRetryStatus" resultType="int">
     select
     count(*)
     from retry_task_${partition} where retry_status = #{retryStatus}
   </select>
-  <select id="selectRetryTaskByGroupIdAndSceneId" resultMap="BaseResultMap">
-    select
-    <include refid="Base_Column_List" />
-    from retry_task_${partition} where idempotent_id = #{idempotentId,jdbcType=VARCHAR} AND  scene_id = #{sceneId,jdbcType=VARCHAR}
-  </select>
-  <select id="selectRetryTaskPage" resultMap="BaseResultMap">
-    select
-    <include refid="Base_Column_List" />
-    from retry_task_${partition}
-  </select>
   <!-- 定义批量新增的 SQL 映射 -->
   <insert id="batchInsert" parameterType="java.util.List">
-    INSERT INTO retry_task_${partition} (unique_id, group_name, scene_name, idempotent_id, biz_no, executor_name, args_str, ext_attrs, next_trigger_at, task_type, create_dt)
+    INSERT INTO retry_task_${partition} (unique_id, group_name, scene_name, idempotent_id, biz_no, executor_name, args_str, ext_attrs, next_trigger_at, task_type, retry_status, create_dt)
     VALUES
     <foreach collection="list" item="item" separator=",">
-      (#{item.uniqueId}, #{item.groupName}, #{item.sceneName}, #{item.idempotentId}, #{item.bizNo}, #{item.executorName}, #{item.argsStr}, #{item.extAttrs}, #{item.nextTriggerAt}, #{item.taskType}, #{item.createDt})
+      (#{item.uniqueId}, #{item.groupName}, #{item.sceneName}, #{item.idempotentId}, #{item.bizNo}, #{item.executorName}, #{item.argsStr}, #{item.extAttrs}, #{item.nextTriggerAt}, #{item.taskType}, #{item.retryStatus}, #{item.createDt})
     </foreach>
   </insert>
 </mapper>

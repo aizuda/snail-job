@@ -2,9 +2,18 @@ package com.aizuda.easy.retry.client.core.strategy;
 
 import com.aizuda.easy.retry.client.core.RetryExecutor;
 import com.aizuda.easy.retry.client.core.RetryExecutorParameter;
+import com.aizuda.easy.retry.client.core.cache.GroupVersionCache;
+import com.aizuda.easy.retry.client.core.config.EasyRetryProperties;
 import com.aizuda.easy.retry.client.core.event.EasyRetryListener;
 import com.aizuda.easy.retry.client.core.intercepter.RetrySiteSnapshot;
 import com.aizuda.easy.retry.client.core.Report;
+import com.aizuda.easy.retry.common.core.alarm.Alarm;
+import com.aizuda.easy.retry.common.core.alarm.AlarmContext;
+import com.aizuda.easy.retry.common.core.alarm.EasyRetryAlarmFactory;
+import com.aizuda.easy.retry.common.core.enums.NotifySceneEnum;
+import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.core.util.EnvironmentUtils;
+import com.aizuda.easy.retry.server.model.dto.ConfigDTO;
 import com.github.rholder.retry.Retryer;
 import com.github.rholder.retry.StopStrategy;
 import com.github.rholder.retry.WaitStrategy;
@@ -15,7 +24,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
@@ -26,10 +38,18 @@ import java.util.function.Consumer;
  */
 @Slf4j
 public abstract class AbstractRetryStrategies implements RetryStrategy {
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static String retryErrorMoreThresholdTextMessageFormatter =
+            "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 重试组件异常</font>  \r\n" +
+                    "> 名称:{}  \r\n" +
+                    "> 时间:{}  \r\n" +
+                    "> 异常:{}  \n"
+            ;
 
     @Autowired
     private List<EasyRetryListener> easyRetryListeners;
-
+    @Autowired
+    private EasyRetryAlarmFactory easyRetryAlarmFactory;
     @Autowired
     private List<Report> reports;
 
@@ -68,6 +88,9 @@ public abstract class AbstractRetryStrategies implements RetryStrategy {
             retryerResultContext.setMessage("非预期异常" + e.getMessage());
             // 本地重试状态为失败 远程重试状态为成功
             unexpectedError(e, retryerResultContext);
+
+            // 预警
+            sendMessage(e);
         }
 
         return retryerResultContext;
@@ -144,4 +167,26 @@ public abstract class AbstractRetryStrategies implements RetryStrategy {
         return Boolean.FALSE;
     }
 
+    private void sendMessage(Exception e) {
+
+        try {
+            ConfigDTO.Notify notifyAttribute = GroupVersionCache.getNotifyAttribute(NotifySceneEnum.CLIENT_COMPONENT_ERROR.getNotifyScene());
+            if (Objects.nonNull(notifyAttribute)) {
+                AlarmContext context = AlarmContext.build()
+                        .text(retryErrorMoreThresholdTextMessageFormatter,
+                                EnvironmentUtils.getActiveProfile(),
+                                EasyRetryProperties.getGroup(),
+                                LocalDateTime.now().format(formatter),
+                                e.getMessage())
+                        .title("retry component handling exception:[{}]", EasyRetryProperties.getGroup())
+                        .notifyAttribute(notifyAttribute.getNotifyAttribute());
+
+                Alarm<AlarmContext> alarmType = easyRetryAlarmFactory.getAlarmType(notifyAttribute.getNotifyType());
+                alarmType.asyncSendMessage(context);
+            }
+        } catch (Exception e1) {
+            LogUtils.error(log, "Client failed to send component exception alert.", e1);
+        }
+
+    }
 }

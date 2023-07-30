@@ -11,15 +11,6 @@
             <a-select-option v-for="item in groupNameList" :value="item" :key="item">{{ item }}</a-select-option>
           </a-select>
         </a-form-item>
-        <a-form-item label="场景名称">
-          <a-select
-            placeholder="请选择场景名称"
-            v-decorator="['sceneName', { rules: [{ required: true, message: '请选择场景名称' }] }]" >
-            <a-select-option v-for="item in sceneList" :value="item.sceneName" :key="item.sceneName">
-              {{ item.sceneName }}</a-select-option
-            >
-          </a-select>
-        </a-form-item>
         <a-form-item label="重试状态">
           <a-select
             placeholder="请选择重试状态"
@@ -36,7 +27,7 @@
             placeholder="请输入日志信息"
             v-decorator="['logStr', { rules: [{ required: true, message: '请输入包含<|>参数<|>的日志信息.' }, { validator: handleLogStr }], validateTrigger: 'change' }]"
           />
-          <a href="https://www.easyretry.com/" target="_blank">获取日志信息？</a>
+          <a :href="officialWebsite + '/pages/b74542/#如何获取日志信息'" target="_blank"> 获取日志信息？</a>
         </a-form-item>
 
       </a-form>
@@ -46,6 +37,7 @@
 
 <script>
 import { getAllGroupNameList, getSceneList, batchSaveRetryTask } from '@/api/manage'
+import { officialWebsite } from '@/utils/util'
 
 export default {
   name: 'SavRetryTask',
@@ -65,7 +57,8 @@ export default {
         1: '重试完成',
         2: '最大次数',
         3: '暂停'
-      }
+      },
+      officialWebsite: officialWebsite()
     }
   },
   methods: {
@@ -76,10 +69,10 @@ export default {
         if (!err) {
           console.log(values)
           batchSaveRetryTask(values).then((res) => {
-            // this.form.resetFields()
-            // this.$message.success('新增任务成功')
-            // this.visible = false
-            // this.$emit('refreshTable', 1)
+            this.form.resetFields()
+            this.$message.success('新增任务成功')
+            this.visible = false
+            this.$emit('refreshTable', 1)
           })
         }
       })

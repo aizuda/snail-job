@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.server.support.generator.task;
 
+import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
 import com.aizuda.easy.retry.server.enums.TaskGeneratorScene;
 import org.springframework.stereotype.Component;
 
@@ -15,5 +16,10 @@ public class ClientReportRetryGenerator extends AbstractGenerator {
     @Override
     public boolean supports(int scene) {
         return TaskGeneratorScene.CLIENT_REPORT.getScene() == scene;
+    }
+
+    @Override
+    protected Integer initStatus(TaskContext taskContext) {
+        return RetryStatusEnum.RUNNING.getStatus();
     }
 }

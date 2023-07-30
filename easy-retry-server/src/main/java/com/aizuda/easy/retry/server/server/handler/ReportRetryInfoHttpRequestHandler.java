@@ -80,6 +80,8 @@ public class ReportRetryInfoHttpRequestHandler extends PostHttpRequestHandler {
             Assert.notEmpty(args, () -> new EasyRetryServerException("上报的数据不能为空. reqId:[{}]", retryRequest.getReqId()));
             List<RetryTaskDTO> retryTaskList = JsonUtil.parseList(JsonUtil.toJsonString(args[0]), RetryTaskDTO.class);
 
+            LogUtils.info(log, "begin handler report data. <|>{}<|>", JsonUtil.toJsonString(retryTaskList));
+
             Set<String> set = retryTaskList.stream().map(RetryTaskDTO::getGroupName).collect(Collectors.toSet());
             Assert.isTrue(set.size() <= 1, () -> new EasyRetryServerException("批量上报数据,同一批次只能是相同的组. reqId:[{}]", retryRequest.getReqId()));
 

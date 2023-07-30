@@ -10,7 +10,16 @@
               'id',
             ]" />
         </a-form-item>
-        <a-form-item label="组名称">
+        <a-form-item>
+          <span slot="label">
+            组名称&nbsp;
+            <a
+              :href="officialWebsite + '/pages/32e4a0/#组是何物' +
+                ''"
+              target="_blank">
+              <a-icon type="question-circle-o" />
+            </a>
+          </span>
           <a-input
             placeholder="请输入组名称"
             :maxLength="64"
@@ -22,8 +31,13 @@
         </a-form-item>
       </a-col>
       <a-col :lg="6" :md="12" :sm="24">
-        <a-form-item
-          label="状态">
+        <a-form-item>
+          <span slot="label">
+            状态&nbsp;
+            <a :href="officialWebsite + '/pages/32e4a0/#什么是组状态'" target="_blank">
+              <a-icon type="question-circle-o" />
+            </a>
+          </span>
           <a-select
             placeholder="请选择状态"
             v-decorator="[
@@ -36,8 +50,13 @@
         </a-form-item>
       </a-col>
       <a-col :lg="6" :md="12" :sm="24">
-        <a-form-item
-          label="路由策略">
+        <a-form-item>
+          <span slot="label">
+            路由策略&nbsp;
+            <a :href="officialWebsite + '/pages/32e4a0/#什么是路由策略'" target="_blank">
+              <a-icon type="question-circle-o" />
+            </a>
+          </span>
           <a-select
             placeholder="请选择路由策略"
             v-decorator="[
@@ -60,7 +79,13 @@
         </a-form-item>
       </a-col>
       <a-col :lg="3" :md="6" :sm="12">
-        <a-form-item label="指定分区">
+        <a-form-item>
+          <span slot="label">
+            指定分区&nbsp;
+            <a :href="officialWebsite + '/pages/32e4a0/#什么是分区'" target="_blank">
+              <a-icon type="question-circle-o" />
+            </a>
+          </span>
           <a-input-number
             id="inputNumber"
             placeholder="分区"
@@ -73,8 +98,13 @@
         </a-form-item>
       </a-col>
       <a-col :lg="3" :md="6" :sm="12">
-        <a-form-item
-          label="Id生成模式">
+        <a-form-item>
+          <span slot="label">
+            Id生成模式&nbsp;
+            <a :href="officialWebsite + '/pages/32e4a0/#什么是id生成模式'" target="_blank">
+              <a-icon type="question-circle-o" />
+            </a>
+          </span>
           <a-select
             placeholder="请选择Id生成模式"
             v-decorator="[
@@ -86,13 +116,14 @@
         </a-form-item>
       </a-col>
       <a-col :lg="3" :md="6" :sm="12">
-
         <a-form-item>
           <span slot="label">
             初始化场景&nbsp;
-            <a-tooltip title="【是】: 当未查询到场景时默认生成一个场景(退避策略: 等级策略, 最大重试次数: 26); 【否】: 新增场景时必须先配置场景">
+            <a
+              :href="officialWebsite + '/pages/32e4a0/#什么是初始化场景'"
+              target="_blank">
               <a-icon type="question-circle-o" />
-            </a-tooltip>
+            </a>
           </span>
           <a-select
             placeholder="请选择是否初始化场景"
@@ -114,6 +145,7 @@
 <script>
 import { getGroupConfigByGroupName, getTotalPartition } from '@/api/manage'
 import pick from 'lodash.pick'
+import { officialWebsite } from '@/utils/util'
 
 export default {
   name: 'GroupForm',
@@ -139,7 +171,8 @@ export default {
       initScene: {
         '0': '否',
         '1': '是'
-      }
+      },
+      officialWebsite: officialWebsite()
     }
   },
   mounted () {

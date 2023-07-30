@@ -182,3 +182,11 @@ export function permissionsConfig (roleId) {
 
   return role[roleId]
 }
+
+export function officialWebsite () {
+  if (process.env.NODE_ENV === 'development') {
+    return 'http://localhost:8081'
+  } else {
+    return 'https://www.easyretry.com'
+  }
+}

@@ -184,6 +184,7 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         TaskContext taskContext = new TaskContext();
         taskContext.setSceneName(retryTaskRequestVO.getSceneName());
         taskContext.setGroupName(retryTaskRequestVO.getGroupName());
+        taskContext.setInitStatus(retryTaskRequestVO.getRetryStatus());
         taskContext.setTaskInfos(Collections.singletonList(TaskContextConverter.INSTANCE.toTaskContextInfo(retryTaskRequestVO)));
 
         // 生成任务
@@ -238,6 +239,10 @@ public class RetryTaskServiceImpl implements RetryTaskService {
 
     @Override
     public Integer parseLogs(ParseLogsVO parseLogsVO) {
+        RetryStatusEnum retryStatusEnum = RetryStatusEnum.getByStatus(parseLogsVO.getRetryStatus());
+        if (Objects.isNull(retryStatusEnum)) {
+            throw new EasyRetryServerException("重试状态错误");
+        }
 
         String logStr = parseLogsVO.getLogStr();
 
@@ -266,13 +271,21 @@ public class RetryTaskServiceImpl implements RetryTaskService {
                 .filter(t -> t.supports(TaskGeneratorScene.MANA_BATCH.getScene()))
                 .findFirst().orElseThrow(() -> new EasyRetryServerException("没有匹配的任务生成器"));
 
-        TaskContext taskContext = new TaskContext();
-        taskContext.setSceneName(parseLogsVO.getSceneName());
-        taskContext.setGroupName(parseLogsVO.getGroupName());
-        taskContext.setTaskInfos(TaskContextConverter.INSTANCE.toTaskContextInfo(waitInsertList));
+        boolean allMatch = waitInsertList.stream().allMatch(retryTaskDTO -> retryTaskDTO.getGroupName().equals(parseLogsVO.getGroupName()));
+        Assert.isTrue(allMatch, () -> new EasyRetryServerException("存在数据groupName不匹配，请检查您的数据"));
 
-        // 生成任务
-        taskGenerator.taskGenerator(taskContext);
+        Map<String, List<RetryTaskDTO>> map = waitInsertList.stream().collect(Collectors.groupingBy(RetryTaskDTO::getSceneName));
+
+        map.forEach(((sceneName, retryTaskDTOS) -> {
+            TaskContext taskContext = new TaskContext();
+            taskContext.setSceneName(sceneName);
+            taskContext.setGroupName(parseLogsVO.getGroupName());
+            taskContext.setInitStatus(parseLogsVO.getRetryStatus());
+            taskContext.setTaskInfos(TaskContextConverter.INSTANCE.toTaskContextInfo(retryTaskDTOS));
+
+            // 生成任务
+            taskGenerator.taskGenerator(taskContext);
+        }));
 
         return waitInsertList.size();
     }

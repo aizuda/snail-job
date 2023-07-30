@@ -66,7 +66,7 @@ public class RetryEndPoint {
 
         RetryerInfo retryerInfo = RetryerInfoCache.get(executeReqDto.getScene(), executeReqDto.getExecutorName());
         if (Objects.isNull(retryerInfo)) {
-            throw new EasyRetryClientException("场景:[{}]配置不存在", executeReqDto.getScene());
+            throw new EasyRetryClientException("场景:[{}]配置不存在, 请检查您的场景和执行器是否存在", executeReqDto.getScene());
         }
 
         RetryArgSerializer retryArgSerializer = new JacksonSerializer();
@@ -126,7 +126,7 @@ public class RetryEndPoint {
     public Result callback(@RequestBody @Validated RetryCallbackDTO callbackDTO) {
         RetryerInfo retryerInfo = RetryerInfoCache.get(callbackDTO.getScene(), callbackDTO.getExecutorName());
         if (Objects.isNull(retryerInfo)) {
-            throw new EasyRetryClientException("场景:[{}]配置不存在", callbackDTO.getScene());
+            throw new EasyRetryClientException("场景:[{}]配置不存在, 请检查您的场景和执行器是否存在", callbackDTO.getScene());
         }
 
         RetryArgSerializer retryArgSerializer = new JacksonSerializer();

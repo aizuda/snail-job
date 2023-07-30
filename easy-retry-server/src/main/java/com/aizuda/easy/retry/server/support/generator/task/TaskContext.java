@@ -25,6 +25,11 @@ public class TaskContext {
     private String sceneName;
 
     /**
+     * 任务的初始状态
+     */
+    private Integer initStatus;
+
+    /**
      * 任务信息
      */
     private List<TaskInfo> taskInfos;
