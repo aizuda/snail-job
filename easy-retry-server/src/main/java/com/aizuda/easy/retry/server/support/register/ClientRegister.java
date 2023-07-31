@@ -93,7 +93,7 @@ public class ClientRegister extends AbstractRegister implements Runnable {
                     }
                 }
             }catch (InterruptedException e) {
-                LogUtils.error(log, "[{}] thread interrupt.", Thread.currentThread().getName());
+                LogUtils.info(log, "[{}] thread stop.", Thread.currentThread().getName());
             } catch (Exception e) {
                 LogUtils.error(log, "client refresh expireAt error.");
             } finally {

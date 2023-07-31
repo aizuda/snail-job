@@ -250,7 +250,7 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
                 }
 
             } catch (InterruptedException e) {
-                LogUtils.error(log, "check balance interrupt");
+                LogUtils.info(log, "check balance stop");
                 Thread.currentThread().interrupt();
             } catch (Exception e) {
                 LogUtils.error(log, "check balance error", e);

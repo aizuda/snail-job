@@ -1,8 +1,13 @@
 package com.aizuda.easy.retry.server;
 
+import com.aizuda.easy.retry.server.server.NettyHttpServer;
 import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
+import org.springframework.boot.web.servlet.server.ServletWebServerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -28,4 +33,14 @@ public class EasyRetryServerApplication {
         SpringApplication.run(EasyRetryServerApplication.class, args);
     }
 
+    @Bean
+    public ApplicationRunner nettyStartupChecker(NettyHttpServer nettyHttpServer, ServletWebServerFactory serverFactory) {
+        return args -> {
+            if (!nettyHttpServer.isStarted()) {
+                // Netty启动失败，停止Web服务和Spring Boot应用程序
+                serverFactory.getWebServer().stop();
+                SpringApplication.exit(SpringApplication.run(EasyRetryServerApplication.class));
+            }
+        };
+    }
 }
