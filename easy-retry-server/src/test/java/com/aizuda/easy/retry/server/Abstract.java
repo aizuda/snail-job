@@ -1,0 +1,10 @@
+package com.aizuda.easy.retry.server;
+
+
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+
+//@RunWith(SpringRunner.class)
+@SpringBootTest(classes = EasyRetryServerApplication.class)
+public class Abstract {
+}
