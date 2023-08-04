@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.server.service.convert;
 
-import com.aizuda.easy.retry.server.persistence.mybatis.po.SystemUser;
+import com.aizuda.easy.retry.template.datasource.persistence.po.SystemUser;
 import com.aizuda.easy.retry.server.web.model.response.SystemUserResponseVO;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;

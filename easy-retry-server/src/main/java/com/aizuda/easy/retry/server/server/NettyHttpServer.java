@@ -15,6 +15,8 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 /**
@@ -26,6 +28,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Slf4j
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class NettyHttpServer implements Runnable, Lifecycle {
 
     @Autowired

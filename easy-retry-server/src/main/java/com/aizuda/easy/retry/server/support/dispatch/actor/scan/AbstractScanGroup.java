@@ -4,7 +4,7 @@ import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.config.SystemProperties;
-import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask;
+import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
 import com.aizuda.easy.retry.server.persistence.support.ConfigAccess;
 import com.aizuda.easy.retry.server.persistence.support.RetryTaskAccess;
 import com.aizuda.easy.retry.server.support.IdempotentStrategy;

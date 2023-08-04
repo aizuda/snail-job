@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.server.config;
 
-import com.aizuda.easy.retry.server.enums.DbTypeEnum;
+import com.aizuda.easy.retry.template.datasource.enums.DbTypeEnum;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;

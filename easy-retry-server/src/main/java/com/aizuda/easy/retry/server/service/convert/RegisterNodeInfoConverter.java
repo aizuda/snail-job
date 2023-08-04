@@ -1,7 +1,7 @@
 package com.aizuda.easy.retry.server.service.convert;
 
 import com.aizuda.easy.retry.server.dto.RegisterNodeInfo;
-import com.aizuda.easy.retry.server.persistence.mybatis.po.ServerNode;
+import com.aizuda.easy.retry.template.datasource.persistence.po.ServerNode;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 

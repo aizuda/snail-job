@@ -1,8 +1,8 @@
 package com.aizuda.easy.retry.server.support;
 
 import com.aizuda.easy.retry.server.dto.RegisterNodeInfo;
-import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask;
-import com.aizuda.easy.retry.server.persistence.mybatis.po.ServerNode;
+import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
+import com.aizuda.easy.retry.template.datasource.persistence.po.ServerNode;
 
 import java.util.Set;
 

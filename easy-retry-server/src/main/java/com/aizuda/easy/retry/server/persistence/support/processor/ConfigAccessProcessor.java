@@ -2,9 +2,9 @@ package com.aizuda.easy.retry.server.persistence.support.processor;
 
 import com.aizuda.easy.retry.server.model.dto.ConfigDTO;
 import com.aizuda.easy.retry.server.model.dto.ConfigDTO.Scene;
-import com.aizuda.easy.retry.server.persistence.mybatis.po.GroupConfig;
-import com.aizuda.easy.retry.server.persistence.mybatis.po.NotifyConfig;
-import com.aizuda.easy.retry.server.persistence.mybatis.po.SceneConfig;
+import com.aizuda.easy.retry.template.datasource.persistence.po.GroupConfig;
+import com.aizuda.easy.retry.template.datasource.persistence.po.NotifyConfig;
+import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
 import com.aizuda.easy.retry.server.persistence.support.ConfigAccess;
 import com.aizuda.easy.retry.server.persistence.support.access.config.AbstractConfigAccess;
 import com.aizuda.easy.retry.common.core.enums.NodeTypeEnum;

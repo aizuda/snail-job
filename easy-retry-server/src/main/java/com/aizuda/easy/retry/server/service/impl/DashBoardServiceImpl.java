@@ -6,12 +6,16 @@ import com.aizuda.easy.retry.common.core.util.HostUtils;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.dto.ServerNodeExtAttrs;
 import com.aizuda.easy.retry.server.enums.TaskTypeEnum;
-import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskLogMapper;
-import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskLogMessageMapper;
-import com.aizuda.easy.retry.server.persistence.mybatis.mapper.ServerNodeMapper;
-import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTaskLog;
-import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTaskLogMessage;
-import com.aizuda.easy.retry.server.persistence.mybatis.po.ServerNode;
+import com.aizuda.easy.retry.server.service.convert.DispatchQuantityResponseVOConverter;
+import com.aizuda.easy.retry.server.service.convert.SceneQuantityRankResponseVOConverter;
+import com.aizuda.easy.retry.template.datasource.persistence.dataobject.DispatchQuantityResponseDO;
+import com.aizuda.easy.retry.template.datasource.persistence.dataobject.SceneQuantityRankResponseDO;
+import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskLogMapper;
+import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskLogMessageMapper;
+import com.aizuda.easy.retry.template.datasource.persistence.mapper.ServerNodeMapper;
+import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLog;
+import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLogMessage;
+import com.aizuda.easy.retry.template.datasource.persistence.po.ServerNode;
 import com.aizuda.easy.retry.server.service.convert.ServerNodeResponseVOConverter;
 import com.aizuda.easy.retry.server.support.cache.CacheConsumerGroup;
 import com.aizuda.easy.retry.server.support.register.ServerRegister;
@@ -133,7 +137,8 @@ public class DashBoardServiceImpl implements DashBoardService {
         startDateTime = dateTypeEnum.getStartTime().apply(startDateTime);
         endDateTime = dateTypeEnum.getEndTime().apply(endDateTime);
 
-        return retryTaskLogMapper.rankSceneQuantity(groupName, startDateTime, endDateTime);
+        List<SceneQuantityRankResponseDO> dispatchQuantityResponseDOS = retryTaskLogMapper.rankSceneQuantity(groupName, startDateTime, endDateTime);
+        return SceneQuantityRankResponseVOConverter.INSTANCE.toSceneQuantityRankResponseVO(dispatchQuantityResponseDOS);
     }
 
     @Override
@@ -154,26 +159,28 @@ public class DashBoardServiceImpl implements DashBoardService {
         startDateTime = dateTypeEnum.getStartTime().apply(startDateTime);
         endDateTime = dateTypeEnum.getEndTime().apply(endDateTime);
 
-        List<DispatchQuantityResponseVO> totalDispatchQuantityResponseList = retryTaskLogMapper.lineDispatchQuantity(groupName, null, type, startDateTime, endDateTime);
+        List<DispatchQuantityResponseDO> totalDispatchQuantityResponseList = retryTaskLogMapper.lineDispatchQuantity(groupName, null, type, startDateTime, endDateTime);
 
-        List<DispatchQuantityResponseVO> successDispatchQuantityResponseList = retryTaskLogMapper.lineDispatchQuantity(groupName, RetryStatusEnum.FINISH.getStatus(), type, startDateTime, endDateTime);
-        Map<String, DispatchQuantityResponseVO> successDispatchQuantityResponseVOMap = successDispatchQuantityResponseList.stream().collect(Collectors.toMap(DispatchQuantityResponseVO::getCreateDt, i -> i));
-        for (DispatchQuantityResponseVO dispatchQuantityResponseVO : totalDispatchQuantityResponseList) {
+        List<DispatchQuantityResponseDO> successDispatchQuantityResponseList = retryTaskLogMapper.lineDispatchQuantity(groupName, RetryStatusEnum.FINISH.getStatus(), type, startDateTime, endDateTime);
+        Map<String, DispatchQuantityResponseDO> successDispatchQuantityResponseVOMap = successDispatchQuantityResponseList.stream().collect(Collectors.toMap(DispatchQuantityResponseDO::getCreateDt, i -> i));
+        for (DispatchQuantityResponseDO dispatchQuantityResponseDO : totalDispatchQuantityResponseList) {
 
-            DispatchQuantityResponseVO quantityResponseVO = successDispatchQuantityResponseVOMap.get(dispatchQuantityResponseVO.getCreateDt());
+            DispatchQuantityResponseDO quantityResponseVO = successDispatchQuantityResponseVOMap.get(dispatchQuantityResponseDO.getCreateDt());
             if (Objects.isNull(quantityResponseVO)) {
-                dispatchQuantityResponseVO.setSuccess(0L);
+                dispatchQuantityResponseDO.setSuccess(0L);
             } else {
-                dispatchQuantityResponseVO.setSuccess(quantityResponseVO.getTotal());
+                dispatchQuantityResponseDO.setSuccess(quantityResponseVO.getTotal());
             }
 
-            dispatchQuantityResponseVO.setFail(dispatchQuantityResponseVO.getTotal() - dispatchQuantityResponseVO.getSuccess());
+            dispatchQuantityResponseDO.setFail(dispatchQuantityResponseDO.getTotal() - dispatchQuantityResponseDO.getSuccess());
 
         }
 
-        dateTypeEnum.getConsumer().accept(totalDispatchQuantityResponseList);
+        List<DispatchQuantityResponseVO> dispatchQuantityResponse = DispatchQuantityResponseVOConverter.INSTANCE.toDispatchQuantityResponse(totalDispatchQuantityResponseList);
 
-        return totalDispatchQuantityResponseList.stream().sorted(Comparator.comparing(DispatchQuantityResponseVO::getCreateDt)).collect(Collectors.toList());
+        dateTypeEnum.getConsumer().accept(dispatchQuantityResponse);
+
+        return dispatchQuantityResponse.stream().sorted(Comparator.comparing(DispatchQuantityResponseVO::getCreateDt)).collect(Collectors.toList());
     }
 
     @Override

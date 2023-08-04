@@ -2,10 +2,10 @@ package com.aizuda.easy.retry.server.support.schedule;
 
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.config.SystemProperties;
-import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskLogMapper;
-import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskLogMessageMapper;
-import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTaskLog;
-import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTaskLogMessage;
+import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskLogMapper;
+import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskLogMessageMapper;
+import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLog;
+import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLogMessage;
 import com.aizuda.easy.retry.server.support.Lifecycle;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import lombok.extern.slf4j.Slf4j;

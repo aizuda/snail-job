@@ -1,7 +1,7 @@
 package com.aizuda.easy.retry.server.service.convert;
 
-import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTaskLog;
-import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTaskLogMessage;
+import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLog;
+import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLogMessage;
 import com.aizuda.easy.retry.server.web.model.response.RetryTaskLogMessageResponseVO;
 import com.aizuda.easy.retry.server.web.model.response.RetryTaskLogResponseVO;
 import org.mapstruct.Mapper;

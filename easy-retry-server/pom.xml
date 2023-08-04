@@ -23,7 +23,6 @@
         <okhttp.version>5.0.0-alpha.11</okhttp.version>
         <commons-lang.version>2.6</commons-lang.version>
         <perf4j.version>0.9.16</perf4j.version>
-        <mysql.version>8.0.33</mysql.version>
         <guava.version>32.0.0-jre</guava.version>
     </properties>
 
@@ -60,11 +59,6 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>${mysql.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -135,6 +129,22 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.aizuda</groupId>
+            <artifactId>easy-retry-datasource-template</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.aizuda</groupId>
+            <artifactId>easy-retry-mysql-datasource</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.aizuda</groupId>
+            <artifactId>easy-retry-postgres-datasource</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.aizuda</groupId>
+            <artifactId>easy-retry-mariadb-datasource</artifactId>
         </dependency>
     </dependencies>
 

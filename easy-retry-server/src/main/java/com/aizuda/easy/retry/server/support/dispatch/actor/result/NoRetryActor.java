@@ -4,7 +4,7 @@ import akka.actor.AbstractActor;
 import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
-import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask;
+import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
 import com.aizuda.easy.retry.server.persistence.support.RetryTaskAccess;
 import com.aizuda.easy.retry.server.support.RetryContext;
 import com.aizuda.easy.retry.server.support.WaitStrategy;

@@ -1,8 +1,8 @@
 package com.aizuda.easy.retry.server.web.interceptor;
 
 import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
-import com.aizuda.easy.retry.server.persistence.mybatis.mapper.SystemUserMapper;
-import com.aizuda.easy.retry.server.persistence.mybatis.po.SystemUser;
+import com.aizuda.easy.retry.template.datasource.persistence.mapper.SystemUserMapper;
+import com.aizuda.easy.retry.template.datasource.persistence.po.SystemUser;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;

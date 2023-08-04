@@ -2,9 +2,9 @@ package com.aizuda.easy.retry.server.support.register;
 
 import com.aizuda.easy.retry.common.core.enums.NodeTypeEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
-import com.aizuda.easy.retry.server.persistence.mybatis.po.ServerNode;
 import com.aizuda.easy.retry.server.support.cache.CacheConsumerGroup;
 import com.aizuda.easy.retry.server.support.cache.CacheRegisterTable;
+import com.aizuda.easy.retry.template.datasource.persistence.po.ServerNode;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

@@ -6,7 +6,7 @@ import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.model.EasyRetryRequest;
 import com.aizuda.easy.retry.common.core.model.NettyResult;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
-import com.aizuda.easy.retry.server.enums.StatusEnum;
+import com.aizuda.easy.retry.template.datasource.enums.StatusEnum;
 import com.aizuda.easy.retry.server.enums.TaskGeneratorScene;
 import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.model.dto.RetryTaskDTO;
@@ -34,7 +34,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 

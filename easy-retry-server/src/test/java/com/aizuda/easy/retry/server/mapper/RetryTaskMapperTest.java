@@ -1,8 +1,8 @@
 package com.aizuda.easy.retry.server.mapper;
 
-import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskMapper;
-import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask;
-import com.aizuda.easy.retry.server.config.RequestDataHelper;
+import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskMapper;
+import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
+import com.aizuda.easy.retry.template.datasource.utils.RequestDataHelper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

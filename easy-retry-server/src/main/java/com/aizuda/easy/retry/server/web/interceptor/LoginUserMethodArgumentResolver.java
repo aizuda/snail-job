@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.server.web.interceptor;
 
-import com.aizuda.easy.retry.server.persistence.mybatis.po.SystemUser;
+import com.aizuda.easy.retry.template.datasource.persistence.po.SystemUser;
 import com.aizuda.easy.retry.server.web.annotation.LoginUser;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;

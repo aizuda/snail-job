@@ -2,10 +2,10 @@ package com.aizuda.easy.retry.server.support.dispatch.actor.log;
 
 import akka.actor.AbstractActor;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
-import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskLogMapper;
-import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskLogMessageMapper;
-import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTaskLog;
-import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTaskLogMessage;
+import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskLogMapper;
+import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskLogMessageMapper;
+import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLog;
+import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLogMessage;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;

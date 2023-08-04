@@ -2,9 +2,9 @@ package com.aizuda.easy.retry.server.persistence.support;
 
 import com.aizuda.easy.retry.common.core.enums.NotifySceneEnum;
 import com.aizuda.easy.retry.server.model.dto.ConfigDTO;
-import com.aizuda.easy.retry.server.persistence.mybatis.po.GroupConfig;
-import com.aizuda.easy.retry.server.persistence.mybatis.po.NotifyConfig;
-import com.aizuda.easy.retry.server.persistence.mybatis.po.SceneConfig;
+import com.aizuda.easy.retry.template.datasource.persistence.po.GroupConfig;
+import com.aizuda.easy.retry.template.datasource.persistence.po.NotifyConfig;
+import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
 
 import java.util.List;
 import java.util.Set;

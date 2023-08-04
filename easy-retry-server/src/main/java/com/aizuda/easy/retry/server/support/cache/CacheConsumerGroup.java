@@ -1,7 +1,7 @@
 package com.aizuda.easy.retry.server.support.cache;
 
 import com.aizuda.easy.retry.common.core.log.LogUtils;
-import com.aizuda.easy.retry.server.persistence.mybatis.po.ServerNode;
+import com.aizuda.easy.retry.template.datasource.persistence.po.ServerNode;
 import com.aizuda.easy.retry.server.support.Lifecycle;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;

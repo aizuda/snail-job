@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.server.service.convert;
 
-import com.aizuda.easy.retry.server.persistence.mybatis.po.SceneConfig;
+import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
 import com.aizuda.easy.retry.server.web.model.request.GroupConfigRequestVO;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;

@@ -5,11 +5,11 @@ spring:
     active: dev
   datasource:
     name: easy_retry
-    url:  jdbc:mysql://localhost:3306/easy_retry?useSSL=false&characterEncoding=utf8&useUnicode=true
-    username: root
+    url:  jdbc:postgresql://localhost:5432/easy_retry
+    username: postgres
     password: root
+    driver-class-name: org.postgresql.Driver
     type: com.zaxxer.hikari.HikariDataSource
-    driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       connection-timeout: 30000
       minimum-idle: 5
@@ -23,11 +23,10 @@ spring:
     resources:
       static-locations: classpath:admin/
 mybatis-plus:
-  mapper-locations: classpath:/mapper/*.xml
-  typeAliasesPackage: com.aizuda.easy.retry.server.persistence.mybatis.po
+  typeAliasesPackage: com.aizuda.easy.retry.template.datasource.persistence.po
   global-config:
     db-config:
-      field-strategy: NOT_EMPTY
+      where-strategy: NOT_EMPTY
       capital-mode: false
       logic-delete-value: 1
       logic-not-delete-value: 0
@@ -48,7 +47,7 @@ easy-retry:
   callback: # 回调配置
     max-count: 288 #回调最大执行次数
     trigger-interval: 900 #间隔时间
-  db-type: mysql
+  db-type: postgres
 
 
 

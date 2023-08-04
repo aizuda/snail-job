@@ -6,8 +6,8 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
-import com.aizuda.easy.retry.server.persistence.mybatis.mapper.RetryTaskMapper;
-import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask;
+import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskMapper;
+import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

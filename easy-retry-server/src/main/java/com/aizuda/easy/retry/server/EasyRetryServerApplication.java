@@ -14,9 +14,9 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
 @SpringBootApplication
-@MapperScan("com.aizuda.easy.retry.server.persistence.mybatis.mapper")
 @EnableTransactionManagement(proxyTargetClass = true)
 public class EasyRetryServerApplication {
 
@@ -36,6 +36,13 @@ public class EasyRetryServerApplication {
     @Bean
     public ApplicationRunner nettyStartupChecker(NettyHttpServer nettyHttpServer, ServletWebServerFactory serverFactory) {
         return args -> {
+            // 最长自旋10秒，保证nettyHttpServer启动完成
+            int waitCount = 0;
+            while (!nettyHttpServer.isStarted() || waitCount > 100) {
+                TimeUnit.MILLISECONDS.sleep(100);
+                waitCount++;
+            }
+
             if (!nettyHttpServer.isStarted()) {
                 // Netty启动失败，停止Web服务和Spring Boot应用程序
                 serverFactory.getWebServer().stop();

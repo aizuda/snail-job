@@ -5,8 +5,7 @@ import com.aizuda.easy.retry.client.model.DispatchRetryResultDTO;
 import com.aizuda.easy.retry.server.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.server.akka.ActorGenerator;
-import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask;
-import com.aizuda.easy.retry.server.persistence.mybatis.po.SceneConfig;
+import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
 import com.aizuda.easy.retry.server.support.RetryContext;
 import com.aizuda.easy.retry.server.support.WaitStrategy;
 import com.aizuda.easy.retry.server.support.context.MaxAttemptsPersistenceRetryContext;
@@ -15,12 +14,12 @@ import com.aizuda.easy.retry.server.support.retry.RetryExecutor;
 import com.aizuda.easy.retry.server.support.strategy.FilterStrategies;
 import com.aizuda.easy.retry.server.support.strategy.StopStrategies;
 import com.aizuda.easy.retry.server.support.strategy.WaitStrategies;
+import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 

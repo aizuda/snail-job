@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.server.service;
 
-import com.aizuda.easy.retry.server.persistence.mybatis.po.SystemUser;
+import com.aizuda.easy.retry.template.datasource.persistence.po.SystemUser;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
 import com.aizuda.easy.retry.server.web.model.request.SystemUserQueryVO;
 import com.aizuda.easy.retry.server.web.model.request.SystemUserRequestVO;

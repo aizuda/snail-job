@@ -1,11 +1,11 @@
 package com.aizuda.easy.retry.server.support.register;
 
 import com.aizuda.easy.retry.common.core.log.LogUtils;
-import com.aizuda.easy.retry.server.persistence.mybatis.mapper.ServerNodeMapper;
-import com.aizuda.easy.retry.server.persistence.mybatis.po.ServerNode;
 import com.aizuda.easy.retry.server.support.Lifecycle;
 import com.aizuda.easy.retry.server.support.Register;
 import com.aizuda.easy.retry.server.support.cache.CacheRegisterTable;
+import com.aizuda.easy.retry.template.datasource.persistence.mapper.ServerNodeMapper;
+import com.aizuda.easy.retry.template.datasource.persistence.po.ServerNode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 

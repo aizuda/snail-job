@@ -1,13 +1,13 @@
 package com.aizuda.easy.retry.server.persistence.support.access.config;
 
 import com.aizuda.easy.retry.server.model.dto.ConfigDTO;
-import com.aizuda.easy.retry.server.persistence.mybatis.mapper.GroupConfigMapper;
-import com.aizuda.easy.retry.server.persistence.mybatis.mapper.NotifyConfigMapper;
-import com.aizuda.easy.retry.server.persistence.mybatis.mapper.SceneConfigMapper;
-import com.aizuda.easy.retry.server.persistence.mybatis.po.GroupConfig;
-import com.aizuda.easy.retry.server.persistence.mybatis.po.NotifyConfig;
-import com.aizuda.easy.retry.server.persistence.mybatis.po.SceneConfig;
+import com.aizuda.easy.retry.template.datasource.persistence.po.GroupConfig;
+import com.aizuda.easy.retry.template.datasource.persistence.po.NotifyConfig;
+import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
 import com.aizuda.easy.retry.server.persistence.support.ConfigAccess;
+import com.aizuda.easy.retry.template.datasource.persistence.mapper.GroupConfigMapper;
+import com.aizuda.easy.retry.template.datasource.persistence.mapper.NotifyConfigMapper;
+import com.aizuda.easy.retry.template.datasource.persistence.mapper.SceneConfigMapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 

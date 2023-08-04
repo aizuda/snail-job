@@ -2,8 +2,8 @@ package com.aizuda.easy.retry.server.support.generator.id;
 
 import com.aizuda.easy.retry.server.enums.IdGeneratorMode;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
-import com.aizuda.easy.retry.server.persistence.mybatis.mapper.SequenceAllocMapper;
-import com.aizuda.easy.retry.server.persistence.mybatis.po.SequenceAlloc;
+import com.aizuda.easy.retry.template.datasource.persistence.mapper.SequenceAllocMapper;
+import com.aizuda.easy.retry.template.datasource.persistence.po.SequenceAlloc;
 import com.aizuda.easy.retry.server.support.Lifecycle;
 import com.aizuda.easy.retry.server.support.generator.IdGenerator;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;

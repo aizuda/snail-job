@@ -1,8 +1,8 @@
 package com.aizuda.easy.retry.server.service.convert;
 
 import com.aizuda.easy.retry.server.model.dto.RetryTaskDTO;
-import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryDeadLetter;
-import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask;
+import com.aizuda.easy.retry.template.datasource.persistence.po.RetryDeadLetter;
+import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
 import com.aizuda.easy.retry.server.support.generator.task.TaskContext;
 import com.aizuda.easy.retry.server.web.model.request.RetryTaskSaveRequestVO;
 import org.mapstruct.Mapper;

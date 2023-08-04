@@ -1,7 +1,7 @@
 package com.aizuda.easy.retry.server.service.impl;
 
-import com.aizuda.easy.retry.server.persistence.mybatis.mapper.SceneConfigMapper;
-import com.aizuda.easy.retry.server.persistence.mybatis.po.SceneConfig;
+import com.aizuda.easy.retry.template.datasource.persistence.mapper.SceneConfigMapper;
+import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
 import com.aizuda.easy.retry.server.service.convert.SceneConfigResponseVOConverter;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;

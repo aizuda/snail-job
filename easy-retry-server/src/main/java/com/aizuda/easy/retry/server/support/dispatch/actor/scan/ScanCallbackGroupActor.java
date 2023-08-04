@@ -4,7 +4,7 @@ import akka.actor.ActorRef;
 import com.aizuda.easy.retry.server.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.server.akka.ActorGenerator;
-import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask;
+import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
 import com.aizuda.easy.retry.server.support.RetryContext;
 import com.aizuda.easy.retry.server.support.WaitStrategy;
 import com.aizuda.easy.retry.server.support.context.CallbackRetryContext;

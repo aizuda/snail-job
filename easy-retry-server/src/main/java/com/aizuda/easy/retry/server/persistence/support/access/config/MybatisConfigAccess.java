@@ -1,10 +1,10 @@
 package com.aizuda.easy.retry.server.persistence.support.access.config;
 
-import com.aizuda.easy.retry.server.persistence.mybatis.po.GroupConfig;
-import com.aizuda.easy.retry.server.persistence.mybatis.po.NotifyConfig;
-import com.aizuda.easy.retry.server.persistence.mybatis.po.SceneConfig;
+import com.aizuda.easy.retry.template.datasource.persistence.po.GroupConfig;
+import com.aizuda.easy.retry.template.datasource.persistence.po.NotifyConfig;
+import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.aizuda.easy.retry.server.enums.StatusEnum;
+import com.aizuda.easy.retry.template.datasource.enums.StatusEnum;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 

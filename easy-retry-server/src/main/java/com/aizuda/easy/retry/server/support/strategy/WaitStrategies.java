@@ -1,15 +1,14 @@
 package com.aizuda.easy.retry.server.support.strategy;
 
-import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.server.config.SystemProperties;
 import com.aizuda.easy.retry.server.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
-import com.aizuda.easy.retry.server.persistence.mybatis.po.RetryTask;
-import com.aizuda.easy.retry.server.persistence.mybatis.po.SceneConfig;
+import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
 import com.aizuda.easy.retry.server.persistence.support.ConfigAccess;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.server.enums.DelayLevelEnum;
 import com.aizuda.easy.retry.common.core.util.CronExpression;
+import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
 import com.google.common.base.Preconditions;
 import com.aizuda.easy.retry.server.support.RetryContext;
 import com.aizuda.easy.retry.server.support.WaitStrategy;

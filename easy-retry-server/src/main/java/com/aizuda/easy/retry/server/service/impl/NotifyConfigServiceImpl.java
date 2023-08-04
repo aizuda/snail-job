@@ -1,7 +1,7 @@
 package com.aizuda.easy.retry.server.service.impl;
 
-import com.aizuda.easy.retry.server.persistence.mybatis.mapper.NotifyConfigMapper;
-import com.aizuda.easy.retry.server.persistence.mybatis.po.NotifyConfig;
+import com.aizuda.easy.retry.template.datasource.persistence.mapper.NotifyConfigMapper;
+import com.aizuda.easy.retry.template.datasource.persistence.po.NotifyConfig;
 import com.aizuda.easy.retry.server.service.NotifyConfigService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.aizuda.easy.retry.server.service.convert.NotifyConfigResponseVOConverter;

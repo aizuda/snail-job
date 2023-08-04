@@ -2,9 +2,9 @@ package com.aizuda.easy.retry.server.support.cache;
 
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.dto.RegisterNodeInfo;
-import com.aizuda.easy.retry.server.persistence.mybatis.po.ServerNode;
 import com.aizuda.easy.retry.server.service.convert.RegisterNodeInfoConverter;
 import com.aizuda.easy.retry.server.support.Lifecycle;
+import com.aizuda.easy.retry.template.datasource.persistence.po.ServerNode;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import lombok.extern.slf4j.Slf4j;
