@@ -1,7 +1,9 @@
 package com.aizuda.easy.retry.client.core.intercepter;
 
 import cn.hutool.core.util.StrUtil;
+import com.aizuda.easy.retry.client.core.RetrySiteSnapshotContext;
 import com.aizuda.easy.retry.client.core.exception.EasyRetryClientException;
+import com.aizuda.easy.retry.client.core.loader.EasyRetrySpiLoader;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.model.EasyRetryHeaders;
 import lombok.Getter;
@@ -19,32 +21,32 @@ public class RetrySiteSnapshot {
     /**
      * 重试阶段，1-内存重试阶段，2-服务端重试阶段
      */
-    private static final ThreadLocal<Integer> RETRY_STAGE = new ThreadLocal<>();
+    private static final RetrySiteSnapshotContext<Integer> RETRY_STAGE = EasyRetrySpiLoader.loadRetrySiteSnapshotContext();
 
     /**
      * 标记重试方法入口
      */
-    private static final ThreadLocal<String> RETRY_CLASS_METHOD_ENTRANCE = new ThreadLocal<>();
+    private static final RetrySiteSnapshotContext<String> RETRY_CLASS_METHOD_ENTRANCE = EasyRetrySpiLoader.loadRetrySiteSnapshotContext();
 
     /**
      * 重试状态
      */
-    private static final ThreadLocal<Integer> RETRY_STATUS = ThreadLocal.withInitial(EnumStatus.COMPLETE::getStatus);
+    private static final RetrySiteSnapshotContext<Integer> RETRY_STATUS = EasyRetrySpiLoader.loadRetrySiteSnapshotContext(new ThreadLockRetrySiteSnapshotContext<>(ThreadLocal.withInitial(EnumStatus.COMPLETE::getStatus)));
 
     /**
      * 重试请求头
      */
-    private static final ThreadLocal<EasyRetryHeaders> RETRY_HEADER = new ThreadLocal<>();
+    private static final RetrySiteSnapshotContext<EasyRetryHeaders> RETRY_HEADER =  EasyRetrySpiLoader.loadRetrySiteSnapshotContext();
 
     /**
      * 状态码
      */
-    private static final ThreadLocal<String> RETRY_STATUS_CODE = new ThreadLocal<>();
+    private static final RetrySiteSnapshotContext<String> RETRY_STATUS_CODE =  EasyRetrySpiLoader.loadRetrySiteSnapshotContext();
 
     /**
      * 进入方法入口时间标记
      */
-    private static final ThreadLocal<Long> ENTRY_METHOD_TIME = new ThreadLocal<>();
+    private static final RetrySiteSnapshotContext<Long> ENTRY_METHOD_TIME =  EasyRetrySpiLoader.loadRetrySiteSnapshotContext();
 
     public static Integer getStage() {
         return RETRY_STAGE.get();

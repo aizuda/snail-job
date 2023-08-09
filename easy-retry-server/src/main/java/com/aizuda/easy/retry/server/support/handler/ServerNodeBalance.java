@@ -4,20 +4,19 @@ import com.aizuda.easy.retry.common.core.enums.NodeTypeEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.config.SystemProperties;
 import com.aizuda.easy.retry.server.dto.RegisterNodeInfo;
-import com.aizuda.easy.retry.server.persistence.support.ConfigAccess;
 import com.aizuda.easy.retry.server.support.Lifecycle;
 import com.aizuda.easy.retry.server.support.allocate.server.AllocateMessageQueueConsistentHash;
 import com.aizuda.easy.retry.server.support.cache.CacheConsumerGroup;
 import com.aizuda.easy.retry.server.support.cache.CacheGroup;
 import com.aizuda.easy.retry.server.support.cache.CacheRegisterTable;
 import com.aizuda.easy.retry.server.support.register.ServerRegister;
+import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.ServerNodeMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.GroupConfig;
 import com.aizuda.easy.retry.template.datasource.persistence.po.ServerNode;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -49,8 +48,7 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
     public static final Long INITIAL_DELAY = 10L;
 
     @Autowired
-    @Qualifier("configAccessProcessor")
-    private ConfigAccess configAccess;
+    protected AccessTemplate accessTemplate;
     private Thread THREAD = null;
 
     @Autowired
@@ -198,7 +196,7 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
                 Set<String> localHostIds = concurrentMap.values().stream().map(RegisterNodeInfo::getHostId)
                         .collect(Collectors.toSet());
 
-                List<GroupConfig> removeGroupConfig = configAccess.getAllOpenGroupConfig();
+                List<GroupConfig> removeGroupConfig = accessTemplate.getGroupConfigAccess().getAllOpenGroupConfig();
                 Set<String> allGroup = CacheGroup.getAllGroup();
 
                 // 无缓存的节点触发refreshCache

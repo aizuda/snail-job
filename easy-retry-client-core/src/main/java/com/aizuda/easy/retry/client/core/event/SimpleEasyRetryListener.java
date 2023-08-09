@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
  * @author: www.byteblogs.com
  * @date : 2022-03-04 16:55
  */
-@Component
 @Slf4j
 public class SimpleEasyRetryListener implements EasyRetryListener {
 

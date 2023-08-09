@@ -8,6 +8,7 @@ import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
 import com.aizuda.easy.retry.template.datasource.utils.RequestDataHelper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,7 @@ public abstract class AbstractTaskAccess<T> implements TaskAccess<T> {
 
     @Autowired
     protected Environment environment;
-    protected final static List<String> ALLOW_DB =  Arrays.asList(DbTypeEnum.MYSQL.getDb(),
+    protected static final List<String> ALLOW_DB =  Arrays.asList(DbTypeEnum.MYSQL.getDb(),
             DbTypeEnum.MARIADB.getDb(),
             DbTypeEnum.POSTGRES.getDb());
 
@@ -49,23 +50,6 @@ public abstract class AbstractTaskAccess<T> implements TaskAccess<T> {
     public List<T> list(String groupName, LambdaQueryWrapper<T> query) {
         setPartition(groupName);
         return doList(query);
-    }
-
-    private String getGroupName(LambdaQueryWrapper<T> query) {
-
-        String sqlSegment = query.getSqlSegment();
-        int indexOf = sqlSegment.indexOf("group_name");
-        if (indexOf < 0) {
-            throw new EasyRetryDatasourceException("groupName can not be null");
-        }
-
-        // 获取 ew.paramNameValuePairs.MPGENVAL2
-        String substring = sqlSegment.substring(indexOf + 15, sqlSegment.indexOf("}", indexOf));
-
-        // 获取MPGENVAL2
-        String key = substring.replace(Constants.WRAPPER + Constants.WRAPPER_PARAM_MIDDLE, "");
-        Map<String, Object> paramNameValuePairs = query.getParamNameValuePairs();
-        return (String) paramNameValuePairs.get(key);
     }
 
     @Override
@@ -94,6 +78,21 @@ public abstract class AbstractTaskAccess<T> implements TaskAccess<T> {
         return doInsert(t);
     }
 
+    @Override
+    public IPage<T> listPage(final String groupName, final IPage<T> iPage, final LambdaQueryWrapper<T> query) {
+        setPartition(groupName);
+        return doListPage(iPage, query);
+    }
+
+    protected abstract IPage<T> doListPage(final IPage<T> iPage, final LambdaQueryWrapper<T> query);
+
+    @Override
+    public long count(final String groupName, final LambdaQueryWrapper<T> query) {
+        setPartition(groupName);
+        return doCount(query);
+    }
+
+    protected abstract long doCount(final LambdaQueryWrapper<T> query);
 
     protected abstract int doInsert(T t);
 

@@ -46,7 +46,7 @@ public class ScanGroupActor extends AbstractScanGroup {
         final RetryTask retryTask) {
         MaxAttemptsPersistenceRetryContext<Result<DispatchRetryResultDTO>> retryContext = new MaxAttemptsPersistenceRetryContext<>();
         retryContext.setRetryTask(retryTask);
-        retryContext.setSceneBlacklist(configAccess.getBlacklist(groupName));
+        retryContext.setSceneBlacklist(accessTemplate.getSceneConfigAccess().getBlacklist(groupName));
         retryContext.setServerNode(clientNodeAllocateHandler.getServerNode(retryTask.getGroupName()));
         return retryContext;
     }
@@ -87,7 +87,7 @@ public class ScanGroupActor extends AbstractScanGroup {
 
     private WaitStrategy getWaitWaitStrategy(String groupName, String sceneName) {
 
-        SceneConfig sceneConfig = configAccess.getSceneConfigByGroupNameAndSceneName(groupName, sceneName);
+        SceneConfig sceneConfig = accessTemplate.getSceneConfigAccess().getSceneConfigByGroupNameAndSceneName(groupName, sceneName);
         Integer backOff = sceneConfig.getBackOff();
 
         return WaitStrategies.WaitStrategyEnum.getWaitStrategy(backOff);

@@ -96,6 +96,7 @@ public interface ConfigAccess<T> extends Access<T>  {
     Integer getConfigVersion(String groupName);
 
     /**
+     * 同步客户端配置
      *
      * @param groupName 组名称
      * @return ConfigDTO

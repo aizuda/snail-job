@@ -37,14 +37,13 @@ public abstract class AbstractConfigAccess<T> implements ConfigAccess<T> {
     protected GroupConfigMapper groupConfigMapper;
     @Autowired
     protected Environment environment;
-    protected final static List<String> ALLOW_DB =  Arrays.asList(DbTypeEnum.MYSQL.getDb(),
+    protected static final List<String> ALLOW_DB =  Arrays.asList(DbTypeEnum.MYSQL.getDb(),
             DbTypeEnum.MARIADB.getDb(),
             DbTypeEnum.POSTGRES.getDb());
 
     protected DbTypeEnum getDbType() {
         String dbType = environment.getProperty("easy-retry.db-type");
-        DbTypeEnum dbTypeEnum = DbTypeEnum.modeOf(dbType);
-        return dbTypeEnum;
+        return DbTypeEnum.modeOf(dbType);
     }
 
     protected List<NotifyConfig> getByGroupIdAndNotifyScene(String groupName, Integer notifyScene) {

@@ -1,21 +1,18 @@
 package com.aizuda.easy.retry.template.datasource.access.task;
 
-import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
-import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.template.datasource.enums.DbTypeEnum;
 import com.aizuda.easy.retry.template.datasource.enums.OperationTypeEnum;
-import com.aizuda.easy.retry.template.datasource.exception.EasyRetryDatasourceException;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -58,6 +55,16 @@ public class RetryTaskAccess extends AbstractTaskAccess<RetryTask> {
     @Override
     protected int doUpdate(RetryTask retryTask, LambdaUpdateWrapper<RetryTask> query) {
         return retryTaskMapper.update(retryTask, query);
+    }
+
+    @Override
+    protected IPage<RetryTask> doListPage(final IPage<RetryTask> iPage, final LambdaQueryWrapper<RetryTask> query) {
+        return retryTaskMapper.selectPage(iPage, query);
+    }
+
+    @Override
+    protected long doCount(final LambdaQueryWrapper<RetryTask> query) {
+        return retryTaskMapper.selectCount(query);
     }
 
     @Override

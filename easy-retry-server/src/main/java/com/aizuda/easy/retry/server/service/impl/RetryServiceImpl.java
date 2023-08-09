@@ -2,39 +2,39 @@ package com.aizuda.easy.retry.server.service.impl;
 
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
-import com.aizuda.easy.retry.server.enums.DelayLevelEnum;
-import com.aizuda.easy.retry.template.datasource.enums.StatusEnum;
+import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.core.util.JsonUtil;
+import com.aizuda.easy.retry.server.enums.DelayLevelEnum;
 import com.aizuda.easy.retry.server.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.model.dto.RetryTaskDTO;
+import com.aizuda.easy.retry.server.service.RetryService;
+import com.aizuda.easy.retry.server.service.convert.RetryDeadLetterConverter;
+import com.aizuda.easy.retry.server.service.convert.RetryTaskConverter;
+import com.aizuda.easy.retry.server.service.convert.RetryTaskLogConverter;
+import com.aizuda.easy.retry.server.support.generator.IdGenerator;
+import com.aizuda.easy.retry.server.support.strategy.WaitStrategies;
+import com.aizuda.easy.retry.server.support.strategy.WaitStrategies.WaitStrategyEnum;
+import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
+import com.aizuda.easy.retry.template.datasource.access.ConfigAccess;
+import com.aizuda.easy.retry.template.datasource.access.TaskAccess;
+import com.aizuda.easy.retry.template.datasource.enums.StatusEnum;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryDeadLetterMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskLogMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.SceneConfigMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.GroupConfig;
-import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryDeadLetter;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLog;
-import com.aizuda.easy.retry.server.persistence.support.ConfigAccess;
-import com.aizuda.easy.retry.server.persistence.support.RetryTaskAccess;
-import com.aizuda.easy.retry.server.service.convert.RetryDeadLetterConverter;
-import com.aizuda.easy.retry.server.service.convert.RetryTaskLogConverter;
-import com.aizuda.easy.retry.server.support.generator.IdGenerator;
-import com.aizuda.easy.retry.server.support.strategy.WaitStrategies;
-import com.aizuda.easy.retry.server.support.strategy.WaitStrategies.WaitStrategyEnum;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
+import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
 import com.aizuda.easy.retry.template.datasource.utils.RequestDataHelper;
-import com.aizuda.easy.retry.common.core.util.JsonUtil;
-import com.aizuda.easy.retry.server.service.RetryService;
-import com.aizuda.easy.retry.server.service.convert.RetryTaskConverter;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -59,19 +59,13 @@ import java.util.stream.Collectors;
 public class RetryServiceImpl implements RetryService {
 
     @Autowired
-    @Qualifier("retryTaskAccessProcessor")
-    private RetryTaskAccess<RetryTask> retryTaskAccess;
-    @Autowired
-    @Qualifier("configAccessProcessor")
-    private ConfigAccess configAccess;
+    private AccessTemplate accessTemplate;
     @Autowired
     private List<IdGenerator> idGeneratorList;
     @Autowired
     private RetryTaskMapper retryTaskMapper;
     @Autowired
     private RetryDeadLetterMapper retryDeadLetterMapper;
-    @Autowired
-    private SceneConfigMapper sceneConfigMapper;
     @Autowired
     private RetryTaskLogMapper retryTaskLogMapper;
 
@@ -80,11 +74,12 @@ public class RetryServiceImpl implements RetryService {
     public Boolean reportRetry(RetryTaskDTO retryTaskDTO) {
         LogUtils.info(log, "received report data. <|>{}<|>", JsonUtil.toJsonString(retryTaskDTO));
 
-        SceneConfig sceneConfig = configAccess.getSceneConfigByGroupNameAndSceneName(retryTaskDTO.getGroupName(),
+        ConfigAccess<SceneConfig> sceneConfigAccess = accessTemplate.getSceneConfigAccess();
+        SceneConfig sceneConfig = sceneConfigAccess.getSceneConfigByGroupNameAndSceneName(retryTaskDTO.getGroupName(),
             retryTaskDTO.getSceneName());
         if (Objects.isNull(sceneConfig)) {
 
-            GroupConfig groupConfig = configAccess.getGroupConfigByGroupName(retryTaskDTO.getGroupName());
+            GroupConfig groupConfig = sceneConfigAccess.getGroupConfigByGroupName(retryTaskDTO.getGroupName());
             if (Objects.isNull(groupConfig)) {
                 throw new EasyRetryServerException(
                     "failed to report data, no group configuration found. groupName:[{}]", retryTaskDTO.getGroupName());
@@ -127,7 +122,8 @@ public class RetryServiceImpl implements RetryService {
         retryTask.setNextTriggerAt(
             WaitStrategies.randomWait(1, TimeUnit.SECONDS, 60, TimeUnit.SECONDS).computeRetryTime(null));
 
-        Assert.isTrue(1 == retryTaskAccess.saveRetryTask(retryTask),
+        TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();
+        Assert.isTrue(1 == retryTaskAccess.insert(retryTaskDTO.getGroupName(), retryTask),
             () -> new EasyRetryServerException("failed to report data"));
 
         // 初始化日志
@@ -147,15 +143,16 @@ public class RetryServiceImpl implements RetryService {
      * @param retryTaskDTO 重试上报DTO
      */
     private void initScene(final RetryTaskDTO retryTaskDTO) {
-        SceneConfig sceneConfig;
-        sceneConfig = new SceneConfig();
+
+        SceneConfig sceneConfig = new SceneConfig();
         sceneConfig.setGroupName(retryTaskDTO.getGroupName());
         sceneConfig.setSceneName(retryTaskDTO.getSceneName());
         sceneConfig.setSceneStatus(StatusEnum.YES.getStatus());
         sceneConfig.setBackOff(WaitStrategyEnum.DELAY_LEVEL.getBackOff());
         sceneConfig.setMaxRetryCount(DelayLevelEnum._21.getLevel());
         sceneConfig.setDescription("自动初始化场景");
-        Assert.isTrue(1 == sceneConfigMapper.insert(sceneConfig),
+
+        Assert.isTrue(1 == accessTemplate.getSceneConfigAccess().insert(sceneConfig),
             () -> new EasyRetryServerException("init scene error"));
     }
 
@@ -187,8 +184,7 @@ public class RetryServiceImpl implements RetryService {
             return callbackTaskUniqueId.substring(callbackTaskUniqueId.lastIndexOf(StrUtil.UNDERLINE) + 1);
         }).collect(Collectors.toSet());
 
-        RequestDataHelper.setPartition(groupName);
-        List<RetryTask> retryTasks = retryTaskMapper.selectList(new LambdaQueryWrapper<RetryTask>()
+        List<RetryTask> retryTasks = accessTemplate.getRetryTaskAccess().list(groupName, new LambdaQueryWrapper<RetryTask>()
             .eq(RetryTask::getTaskType, TaskTypeEnum.RETRY.getType())
             .in(RetryTask::getUniqueId, uniqueIdSet)
         );
@@ -236,8 +232,8 @@ public class RetryServiceImpl implements RetryService {
             return Boolean.TRUE;
         }
 
-        RequestDataHelper.setPartition(groupName);
-        Assert.isTrue(waitDelDeadLetters.size() == retryTaskMapper.deleteBatchIds(waitDelDeadLetters),
+        Assert.isTrue(waitDelDeadLetters.size() == accessTemplate.getRetryTaskAccess().delete(groupName, new LambdaQueryWrapper<RetryTask>()
+                .in(RetryTask::getId, waitDelDeadLetters)),
             () -> new EasyRetryServerException("删除重试数据失败 [{}]", JsonUtil.toJsonString(retryTasks)));
 
         return Boolean.TRUE;
@@ -256,13 +252,14 @@ public class RetryServiceImpl implements RetryService {
 
         List<RetryDeadLetter> retryDeadLetters = RetryDeadLetterConverter.INSTANCE.toRetryDeadLetter(retryTasks);
 
-        GroupConfig groupConfig = configAccess.getGroupConfigByGroupName(groupName);
+        GroupConfig groupConfig = accessTemplate.getGroupConfigAccess().getGroupConfigByGroupName(groupName);
         Assert.isTrue(retryDeadLetters.size() == retryDeadLetterMapper.insertBatch(retryDeadLetters,
                 groupConfig.getGroupPartition()),
             () -> new EasyRetryServerException("插入死信队列失败 [{}]", JsonUtil.toJsonString(retryDeadLetters)));
 
+        TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();
         List<Long> ids = retryTasks.stream().map(RetryTask::getId).collect(Collectors.toList());
-        Assert.isTrue(retryTasks.size() == retryTaskMapper.deleteBatch(ids, groupConfig.getGroupPartition()),
+        Assert.isTrue(retryTasks.size() == retryTaskAccess.delete(groupName, new LambdaQueryWrapper<RetryTask>().in(RetryTask::getId, ids)),
             () -> new EasyRetryServerException("删除重试数据失败 [{}]", JsonUtil.toJsonString(retryTasks)));
     }
 
@@ -274,7 +271,7 @@ public class RetryServiceImpl implements RetryService {
      */
     private String getIdGenerator(String groupName) {
 
-        GroupConfig groupConfig = configAccess.getGroupConfigByGroupName(groupName);
+        GroupConfig groupConfig = accessTemplate.getGroupConfigAccess().getGroupConfigByGroupName(groupName);
         for (final IdGenerator idGenerator : idGeneratorList) {
             if (idGenerator.supports(groupConfig.getIdGeneratorMode())) {
                 return idGenerator.idGenerator(groupName);

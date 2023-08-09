@@ -1,13 +1,12 @@
 package com.aizuda.easy.retry.server.support.schedule;
 
 import com.aizuda.easy.retry.common.core.log.LogUtils;
-import com.aizuda.easy.retry.server.persistence.support.ConfigAccess;
 import com.aizuda.easy.retry.server.service.RetryService;
 import com.aizuda.easy.retry.server.support.Lifecycle;
+import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
@@ -27,8 +26,7 @@ import java.util.Set;
 public class RetryTaskSchedule extends AbstractSchedule implements Lifecycle  {
     private final RetryService retryService;
     @Autowired
-    @Qualifier("configAccessProcessor")
-    private ConfigAccess configAccess;
+    protected AccessTemplate accessTemplate;
     @Override
     public void start() {
         taskScheduler.scheduleWithFixedDelay(this::execute, Instant.now(), Duration.parse("PT1H"));
@@ -42,7 +40,7 @@ public class RetryTaskSchedule extends AbstractSchedule implements Lifecycle  {
     @Override
     protected void doExecute() {
         try {
-            Set<String> groupNameList = configAccess.getGroupNameList();
+            Set<String> groupNameList = accessTemplate.getGroupConfigAccess().getGroupNameList();
 
             for (String groupName : groupNameList) {
                 retryService.moveDeadLetterAndDelFinish(groupName);

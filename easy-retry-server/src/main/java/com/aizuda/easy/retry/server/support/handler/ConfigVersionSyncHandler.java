@@ -5,12 +5,11 @@ import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.server.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.model.dto.ConfigDTO;
-import com.aizuda.easy.retry.server.persistence.support.ConfigAccess;
 import com.aizuda.easy.retry.server.support.Lifecycle;
 import com.aizuda.easy.retry.server.support.cache.CacheRegisterTable;
+import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -39,8 +38,7 @@ public class ConfigVersionSyncHandler implements Lifecycle, Runnable {
     @Autowired
     private RestTemplate restTemplate;
     @Autowired
-    @Qualifier("configAccessProcessor")
-    private ConfigAccess configAccess;
+    protected AccessTemplate accessTemplate;
 
     /**
      * 添加任务
@@ -63,7 +61,7 @@ public class ConfigVersionSyncHandler implements Lifecycle, Runnable {
             Set<RegisterNodeInfo> serverNodeSet = CacheRegisterTable.getServerNodeSet(groupName);
             // 同步版本到每个客户端节点
             for (final RegisterNodeInfo registerNodeInfo : serverNodeSet) {
-                ConfigDTO configDTO = configAccess.getConfigInfo(groupName);
+                ConfigDTO configDTO = accessTemplate.getGroupConfigAccess().getConfigInfo(groupName);
                 String format = MessageFormat.format(URL, registerNodeInfo.getHostIp(), registerNodeInfo.getHostPort().toString(),
                     registerNodeInfo.getContextPath());
                 Result result = restTemplate.postForObject(format, configDTO, Result.class);
@@ -93,7 +91,7 @@ public class ConfigVersionSyncHandler implements Lifecycle, Runnable {
             try {
                 Pair<String, Integer> pair = QUEUE.take();
                 // 远程版本号
-                Integer remoteVersion = configAccess.getConfigVersion(pair.getKey());
+                Integer remoteVersion = accessTemplate.getGroupConfigAccess().getConfigVersion(pair.getKey());
                 if (Objects.isNull(remoteVersion) || !pair.getValue().equals(remoteVersion)) {
                     syncVersion(pair.getKey());
                 }

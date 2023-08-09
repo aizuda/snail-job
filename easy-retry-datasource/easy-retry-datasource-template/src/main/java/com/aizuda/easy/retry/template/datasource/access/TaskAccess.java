@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.template.datasource.access;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,4 +29,9 @@ public interface TaskAccess<T> extends Access<T> {
     int delete(String groupName, LambdaQueryWrapper<T> query);
 
     int insert(String groupName, T t);
+
+    IPage<T> listPage(String groupName, IPage<T> iPage, LambdaQueryWrapper<T> query);
+
+    long count(String groupName, LambdaQueryWrapper<T> query);
+
 }

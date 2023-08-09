@@ -3,19 +3,18 @@ package com.aizuda.easy.retry.server.support.dispatch.actor.result;
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import cn.hutool.core.lang.Assert;
-import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.config.SystemProperties;
 import com.aizuda.easy.retry.server.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
-import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
-import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
-import com.aizuda.easy.retry.server.persistence.support.ConfigAccess;
 import com.aizuda.easy.retry.server.persistence.support.RetryTaskAccess;
 import com.aizuda.easy.retry.server.support.dispatch.actor.log.RetryTaskLogDTO;
 import com.aizuda.easy.retry.server.support.handler.CallbackRetryTaskHandler;
+import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
+import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
+import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -44,8 +43,7 @@ public class FailureActor extends AbstractActor {
     @Qualifier("retryTaskAccessProcessor")
     private RetryTaskAccess<RetryTask> retryTaskAccess;
     @Autowired
-    @Qualifier("configAccessProcessor")
-    private ConfigAccess configAccess;
+    private AccessTemplate accessTemplate;
     @Autowired
     private CallbackRetryTaskHandler callbackRetryTaskHandler;
     @Autowired
@@ -60,7 +58,7 @@ public class FailureActor extends AbstractActor {
 
             // 超过最大等级
             SceneConfig sceneConfig =
-                configAccess.getSceneConfigByGroupNameAndSceneName(retryTask.getGroupName(), retryTask.getSceneName());
+                accessTemplate.getSceneConfigAccess().getSceneConfigByGroupNameAndSceneName(retryTask.getGroupName(), retryTask.getSceneName());
 
             try {
                 transactionTemplate.execute(new TransactionCallbackWithoutResult() {

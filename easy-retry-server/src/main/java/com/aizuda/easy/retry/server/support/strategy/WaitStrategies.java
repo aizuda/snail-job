@@ -1,17 +1,17 @@
 package com.aizuda.easy.retry.server.support.strategy;
 
+import com.aizuda.easy.retry.common.core.context.SpringContext;
+import com.aizuda.easy.retry.common.core.util.CronExpression;
 import com.aizuda.easy.retry.server.config.SystemProperties;
+import com.aizuda.easy.retry.server.enums.DelayLevelEnum;
 import com.aizuda.easy.retry.server.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
-import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
-import com.aizuda.easy.retry.server.persistence.support.ConfigAccess;
-import com.aizuda.easy.retry.common.core.context.SpringContext;
-import com.aizuda.easy.retry.server.enums.DelayLevelEnum;
-import com.aizuda.easy.retry.common.core.util.CronExpression;
-import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
-import com.google.common.base.Preconditions;
 import com.aizuda.easy.retry.server.support.RetryContext;
 import com.aizuda.easy.retry.server.support.WaitStrategy;
+import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
+import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
+import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
+import com.google.common.base.Preconditions;
 import lombok.Data;
 import lombok.Getter;
 
@@ -167,9 +167,9 @@ public class WaitStrategies {
                 SystemProperties systemProperties = SpringContext.CONTEXT.getBean(SystemProperties.class);
                 triggerInterval = systemProperties.getCallback().getTriggerInterval();
             } else {
-                ConfigAccess configAccess = SpringContext.CONTEXT.getBean("configAccessProcessor", ConfigAccess.class);
+                AccessTemplate accessTemplate = SpringContext.CONTEXT.getBean(AccessTemplate.class);
                 SceneConfig sceneConfig =
-                        configAccess.getSceneConfigByGroupNameAndSceneName(retryTask.getGroupName(), retryTask.getSceneName());
+                    accessTemplate.getSceneConfigAccess().getSceneConfigByGroupNameAndSceneName(retryTask.getGroupName(), retryTask.getSceneName());
                 triggerInterval = Integer.parseInt(sceneConfig.getTriggerInterval());
             }
 
@@ -187,10 +187,10 @@ public class WaitStrategies {
         public LocalDateTime computeRetryTime(RetryContext context) {
             RetryTask retryTask = context.getRetryTask();
 
-            ConfigAccess configAccess = SpringContext.CONTEXT.getBean(ConfigAccess.class);
+            AccessTemplate accessTemplate = SpringContext.CONTEXT.getBean(AccessTemplate.class);
 
             SceneConfig sceneConfig =
-                    configAccess.getSceneConfigByGroupNameAndSceneName(retryTask.getGroupName(), retryTask.getSceneName());
+                accessTemplate.getSceneConfigAccess().getSceneConfigByGroupNameAndSceneName(retryTask.getGroupName(), retryTask.getSceneName());
 
             Date nextValidTime;
             try {
@@ -231,9 +231,9 @@ public class WaitStrategies {
             if (Objects.nonNull(retryContext)) {
                 RetryTask retryTask = retryContext.getRetryTask();
 
-                ConfigAccess configAccess = SpringContext.CONTEXT.getBean(ConfigAccess.class);
+                AccessTemplate accessTemplate = SpringContext.CONTEXT.getBean(AccessTemplate.class);
                 SceneConfig sceneConfig =
-                        configAccess.getSceneConfigByGroupNameAndSceneName(retryTask.getGroupName(), retryTask.getSceneName());
+                    accessTemplate.getSceneConfigAccess().getSceneConfigByGroupNameAndSceneName(retryTask.getGroupName(), retryTask.getSceneName());
 
                 if (maximum == 0) {
                     maximum = Long.parseLong(sceneConfig.getTriggerInterval());

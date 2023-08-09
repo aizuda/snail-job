@@ -5,9 +5,9 @@ import com.aizuda.easy.retry.template.datasource.enums.OperationTypeEnum;
 import com.aizuda.easy.retry.template.datasource.exception.EasyRetryDatasourceException;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryDeadLetterMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryDeadLetter;
-import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -40,6 +40,17 @@ public class RetryDeadLetterTaskAccess  extends AbstractTaskAccess<RetryDeadLett
     @Override
     protected int doUpdate(RetryDeadLetter retryDeadLetter, LambdaUpdateWrapper<RetryDeadLetter> query) {
         return retryDeadLetterMapper.update(retryDeadLetter, query);
+    }
+
+    @Override
+    protected IPage<RetryDeadLetter> doListPage(final IPage<RetryDeadLetter> iPage,
+        final LambdaQueryWrapper<RetryDeadLetter> query) {
+        return retryDeadLetterMapper.selectPage(iPage, query);
+    }
+
+    @Override
+    protected long doCount(final LambdaQueryWrapper<RetryDeadLetter> query) {
+        return retryDeadLetterMapper.selectCount(query);
     }
 
     @Override

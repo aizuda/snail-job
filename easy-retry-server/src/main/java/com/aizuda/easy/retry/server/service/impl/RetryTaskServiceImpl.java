@@ -5,22 +5,10 @@ import com.aizuda.easy.retry.client.model.GenerateRetryIdempotentIdDTO;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
-import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
-import com.aizuda.easy.retry.template.datasource.access.TaskAccess;
-import com.aizuda.easy.retry.template.datasource.access.task.RetryTaskAccess;
-import com.aizuda.easy.retry.template.datasource.utils.RequestDataHelper;
 import com.aizuda.easy.retry.server.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.enums.TaskGeneratorScene;
 import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.model.dto.RetryTaskDTO;
-import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskLogMapper;
-import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskLogMessageMapper;
-import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskMapper;
-import com.aizuda.easy.retry.template.datasource.persistence.po.GroupConfig;
-import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
-import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLog;
-import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLogMessage;
-import com.aizuda.easy.retry.server.persistence.support.ConfigAccess;
 import com.aizuda.easy.retry.server.service.RetryTaskService;
 import com.aizuda.easy.retry.server.service.convert.RetryTaskResponseVOConverter;
 import com.aizuda.easy.retry.server.service.convert.TaskContextConverter;
@@ -30,14 +18,27 @@ import com.aizuda.easy.retry.server.support.generator.task.TaskContext;
 import com.aizuda.easy.retry.server.support.handler.ClientNodeAllocateHandler;
 import com.aizuda.easy.retry.server.support.strategy.WaitStrategies;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
-import com.aizuda.easy.retry.server.web.model.request.*;
+import com.aizuda.easy.retry.server.web.model.request.BatchDeleteRetryTaskVO;
+import com.aizuda.easy.retry.server.web.model.request.GenerateRetryIdempotentIdVO;
+import com.aizuda.easy.retry.server.web.model.request.ParseLogsVO;
+import com.aizuda.easy.retry.server.web.model.request.RetryTaskQueryVO;
+import com.aizuda.easy.retry.server.web.model.request.RetryTaskSaveRequestVO;
+import com.aizuda.easy.retry.server.web.model.request.RetryTaskUpdateExecutorNameRequestVO;
+import com.aizuda.easy.retry.server.web.model.request.RetryTaskUpdateStatusRequestVO;
 import com.aizuda.easy.retry.server.web.model.response.RetryTaskResponseVO;
+import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
+import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskLogMapper;
+import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskLogMessageMapper;
+import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskMapper;
+import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
+import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLog;
+import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLogMessage;
+import com.aizuda.easy.retry.template.datasource.utils.RequestDataHelper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,7 +47,11 @@ import org.springframework.web.client.RestTemplate;
 
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -75,8 +80,7 @@ public class RetryTaskServiceImpl implements RetryTaskService {
     @Autowired
     private RetryTaskLogMapper retryTaskLogMapper;
     @Autowired
-    @Qualifier("configAccessProcessor")
-    private ConfigAccess configAccess;
+    private AccessTemplate accessTemplate;
     @Autowired
     private List<TaskGenerator> taskGenerators;
 
@@ -288,21 +292,4 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         return waitInsertList.size();
     }
 
-    /**
-     * 获取分布式id
-     *
-     * @param groupName 组id
-     * @return 分布式id
-     */
-    private String getIdGenerator(String groupName) {
-
-        GroupConfig groupConfig = configAccess.getGroupConfigByGroupName(groupName);
-        for (final IdGenerator idGenerator : idGeneratorList) {
-            if (idGenerator.supports(groupConfig.getIdGeneratorMode())) {
-                return idGenerator.idGenerator(groupName);
-            }
-        }
-
-        throw new EasyRetryServerException("id generator mode not configured. [{}]", groupName);
-    }
 }

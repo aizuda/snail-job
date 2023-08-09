@@ -21,11 +21,11 @@
         <java.version>1.8</java.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <revision>2.1.0</revision>
+        <revision>2.2.0-SNAPSHOT</revision>
         <dingding-talk.version>1.0.0</dingding-talk.version>
         <netty-all.version>4.1.94.Final</netty-all.version>
         <hutool-all.version>5.8.19</hutool-all.version>
-        <mybatis-plus.version>3.5.3.1</mybatis-plus.version>
+        <mybatis-plus.version>3.5.3.2</mybatis-plus.version>
         <alibaba-dingtalk.version>2.0.0</alibaba-dingtalk.version>
         <guava-retrying.version>2.0.0</guava-retrying.version>
     </properties>

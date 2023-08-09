@@ -9,13 +9,12 @@ import com.aizuda.easy.retry.client.core.config.EasyRetryProperties;
 import com.aizuda.easy.retry.client.core.exception.EasyRetryClientException;
 import com.aizuda.easy.retry.client.core.intercepter.RetrySiteSnapshot;
 import com.aizuda.easy.retry.client.core.retryer.RetryerInfo;
+import com.aizuda.easy.retry.client.core.loader.EasyRetrySpiLoader;
 import com.aizuda.easy.retry.client.core.spel.SPELParamFunction;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.model.IdempotentIdContext;
 import com.aizuda.easy.retry.server.model.dto.RetryTaskDTO;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Method;
@@ -30,14 +29,6 @@ import java.util.function.Function;
  */
 @Slf4j
 public abstract class AbstractReport implements Report {
-
-    @Autowired
-    @Qualifier("easyRetryJacksonSerializer")
-    private RetryArgSerializer retryArgSerializer;
-
-    protected static final int SAMPLE_COUNT = 10;
-
-    protected static final int INTERVAL_IN_MS = 1000;
 
     @Override
     public boolean report(String scene, final String targetClassName, final Object[] params) {
@@ -79,6 +70,8 @@ public abstract class AbstractReport implements Report {
             LogUtils.error(log, "幂等id生成异常：{},{}", scene, args, exception);
             throw new EasyRetryClientException("idempotentId生成异常：{},{}", scene, args);
         }
+
+        RetryArgSerializer retryArgSerializer = EasyRetrySpiLoader.loadRetryArgSerializer();
 
         String serialize = retryArgSerializer.serialize(args);
         retryTaskDTO.setIdempotentId(idempotentId);

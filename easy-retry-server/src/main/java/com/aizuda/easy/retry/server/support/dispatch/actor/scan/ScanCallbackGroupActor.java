@@ -46,7 +46,7 @@ public class ScanCallbackGroupActor extends AbstractScanGroup {
 
         CallbackRetryContext<Result> retryContext = new CallbackRetryContext<>();
         retryContext.setRetryTask(retryTask);
-        retryContext.setSceneBlacklist(configAccess.getBlacklist(groupName));
+        retryContext.setSceneBlacklist(accessTemplate.getSceneConfigAccess().getBlacklist(groupName));
         retryContext.setServerNode(clientNodeAllocateHandler.getServerNode(retryTask.getGroupName()));
         return retryContext;
     }

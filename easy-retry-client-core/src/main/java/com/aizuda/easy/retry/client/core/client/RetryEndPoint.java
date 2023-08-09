@@ -10,6 +10,7 @@ import com.aizuda.easy.retry.client.core.exception.EasyRetryClientException;
 import com.aizuda.easy.retry.client.core.intercepter.RetrySiteSnapshot;
 import com.aizuda.easy.retry.client.core.retryer.RetryerInfo;
 import com.aizuda.easy.retry.client.core.retryer.RetryerResultContext;
+import com.aizuda.easy.retry.client.core.loader.EasyRetrySpiLoader;
 import com.aizuda.easy.retry.client.core.serializer.JacksonSerializer;
 import com.aizuda.easy.retry.client.core.strategy.RetryStrategy;
 import com.aizuda.easy.retry.client.model.GenerateRetryIdempotentIdDTO;
@@ -26,7 +27,6 @@ import com.aizuda.easy.retry.client.model.DispatchRetryDTO;
 import com.aizuda.easy.retry.client.model.DispatchRetryResultDTO;
 import com.aizuda.easy.retry.client.model.RetryCallbackDTO;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -69,7 +69,7 @@ public class RetryEndPoint {
             throw new EasyRetryClientException("场景:[{}]配置不存在, 请检查您的场景和执行器是否存在", executeReqDto.getScene());
         }
 
-        RetryArgSerializer retryArgSerializer = new JacksonSerializer();
+        RetryArgSerializer retryArgSerializer = EasyRetrySpiLoader.loadRetryArgSerializer();
 
         Object[] deSerialize = null;
         try {
@@ -129,7 +129,7 @@ public class RetryEndPoint {
             throw new EasyRetryClientException("场景:[{}]配置不存在, 请检查您的场景和执行器是否存在", callbackDTO.getScene());
         }
 
-        RetryArgSerializer retryArgSerializer = new JacksonSerializer();
+        RetryArgSerializer retryArgSerializer = EasyRetrySpiLoader.loadRetryArgSerializer();
 
         Object[] deSerialize;
         try {

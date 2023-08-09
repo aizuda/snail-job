@@ -4,8 +4,6 @@ import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.config.SystemProperties;
-import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
-import com.aizuda.easy.retry.server.persistence.support.ConfigAccess;
 import com.aizuda.easy.retry.server.persistence.support.RetryTaskAccess;
 import com.aizuda.easy.retry.server.support.IdempotentStrategy;
 import com.aizuda.easy.retry.server.support.RetryContext;
@@ -13,6 +11,8 @@ import com.aizuda.easy.retry.server.support.dispatch.DispatchService;
 import com.aizuda.easy.retry.server.support.dispatch.ScanTaskDTO;
 import com.aizuda.easy.retry.server.support.handler.ClientNodeAllocateHandler;
 import com.aizuda.easy.retry.server.support.retry.RetryExecutor;
+import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
+import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -40,8 +40,7 @@ public abstract class AbstractScanGroup extends AbstractActor {
     @Autowired
     protected SystemProperties systemProperties;
     @Autowired
-    @Qualifier("configAccessProcessor")
-    protected ConfigAccess configAccess;
+    protected AccessTemplate accessTemplate;
     @Autowired
     protected ClientNodeAllocateHandler clientNodeAllocateHandler;
 

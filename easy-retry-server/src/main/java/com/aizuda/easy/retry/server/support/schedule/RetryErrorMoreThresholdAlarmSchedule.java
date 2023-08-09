@@ -8,17 +8,13 @@ import com.aizuda.easy.retry.common.core.enums.NotifySceneEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.util.EnvironmentUtils;
 import com.aizuda.easy.retry.common.core.util.HostUtils;
+import com.aizuda.easy.retry.server.support.Lifecycle;
+import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryDeadLetterMapper;
-import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.GroupConfig;
 import com.aizuda.easy.retry.template.datasource.persistence.po.NotifyConfig;
-import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
-import com.aizuda.easy.retry.server.persistence.support.ConfigAccess;
-import com.aizuda.easy.retry.server.support.Lifecycle;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -48,8 +44,7 @@ public class RetryErrorMoreThresholdAlarmSchedule extends AbstractSchedule imple
     @Autowired
     private EasyRetryAlarmFactory easyRetryAlarmFactory;
     @Autowired
-    @Qualifier("configAccessProcessor")
-    private ConfigAccess configAccess;
+    protected AccessTemplate accessTemplate;
 
     @Override
     public void start() {
@@ -65,8 +60,8 @@ public class RetryErrorMoreThresholdAlarmSchedule extends AbstractSchedule imple
     protected void doExecute() {
         LogUtils.info(log, "retryErrorMoreThreshold time[{}] ip:[{}]", LocalDateTime.now(), HostUtils.getIp());
 
-        for (GroupConfig groupConfig : configAccess.getAllConfigGroupList()) {
-            List<NotifyConfig> notifyConfigs = configAccess.getNotifyConfigByGroupName(groupConfig.getGroupName(), NotifySceneEnum.MAX_RETRY_ERROR.getNotifyScene());
+        for (GroupConfig groupConfig : accessTemplate.getGroupConfigAccess().getAllConfigGroupList()) {
+            List<NotifyConfig> notifyConfigs = accessTemplate.getNotifyConfigAccess().getNotifyConfigByGroupName(groupConfig.getGroupName(), NotifySceneEnum.MAX_RETRY_ERROR.getNotifyScene());
             if (CollectionUtils.isEmpty(notifyConfigs)) {
                 continue;
             }

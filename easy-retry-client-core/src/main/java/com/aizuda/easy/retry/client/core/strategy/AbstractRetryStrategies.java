@@ -7,6 +7,7 @@ import com.aizuda.easy.retry.client.core.config.EasyRetryProperties;
 import com.aizuda.easy.retry.client.core.event.EasyRetryListener;
 import com.aizuda.easy.retry.client.core.intercepter.RetrySiteSnapshot;
 import com.aizuda.easy.retry.client.core.Report;
+import com.aizuda.easy.retry.client.core.loader.EasyRetrySpiLoader;
 import com.aizuda.easy.retry.common.core.alarm.Alarm;
 import com.aizuda.easy.retry.common.core.alarm.AlarmContext;
 import com.aizuda.easy.retry.common.core.alarm.EasyRetryAlarmFactory;
@@ -22,13 +23,11 @@ import com.aizuda.easy.retry.client.core.retryer.RetryerInfo;
 import com.aizuda.easy.retry.client.core.retryer.RetryerResultContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 
@@ -46,8 +45,8 @@ public abstract class AbstractRetryStrategies implements RetryStrategy {
                     "> 异常:{}  \n"
             ;
 
-    @Autowired
-    private List<EasyRetryListener> easyRetryListeners;
+    private final List<EasyRetryListener> easyRetryListeners = EasyRetrySpiLoader.loadEasyRetryListener();
+
     @Autowired
     private EasyRetryAlarmFactory easyRetryAlarmFactory;
     @Autowired

@@ -4,34 +4,37 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.lang.Pair;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
-import com.aizuda.easy.retry.template.datasource.utils.RequestDataHelper;
 import com.aizuda.easy.retry.server.enums.DelayLevelEnum;
-import com.aizuda.easy.retry.template.datasource.enums.StatusEnum;
 import com.aizuda.easy.retry.server.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
-import com.aizuda.easy.retry.template.datasource.persistence.mapper.*;
-import com.aizuda.easy.retry.template.datasource.persistence.po.GroupConfig;
-import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
-import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLog;
-import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
-import com.aizuda.easy.retry.server.persistence.support.ConfigAccess;
 import com.aizuda.easy.retry.server.service.convert.RetryTaskConverter;
 import com.aizuda.easy.retry.server.service.convert.RetryTaskLogConverter;
 import com.aizuda.easy.retry.server.support.generator.IdGenerator;
 import com.aizuda.easy.retry.server.support.generator.TaskGenerator;
 import com.aizuda.easy.retry.server.support.strategy.WaitStrategies;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
+import com.aizuda.easy.retry.template.datasource.enums.StatusEnum;
+import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskLogMapper;
+import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.SceneConfigMapper;
-
+import com.aizuda.easy.retry.template.datasource.persistence.po.GroupConfig;
+import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
+import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLog;
+import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
+import com.aizuda.easy.retry.template.datasource.utils.RequestDataHelper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -44,8 +47,7 @@ import java.util.stream.Collectors;
 public abstract class AbstractGenerator implements TaskGenerator {
 
     @Autowired
-    @Qualifier("configAccessProcessor")
-    private ConfigAccess configAccess;
+    protected AccessTemplate accessTemplate;
     @Autowired
     private List<IdGenerator> idGeneratorList;
     @Autowired
@@ -143,10 +145,10 @@ public abstract class AbstractGenerator implements TaskGenerator {
     protected abstract Integer initStatus(TaskContext taskContext);
 
     private void checkAndInitScene( TaskContext taskContext) {
-        SceneConfig sceneConfig = configAccess.getSceneConfigByGroupNameAndSceneName(taskContext.getGroupName(), taskContext.getSceneName());
+        SceneConfig sceneConfig = accessTemplate.getSceneConfigAccess().getSceneConfigByGroupNameAndSceneName(taskContext.getGroupName(), taskContext.getSceneName());
         if (Objects.isNull(sceneConfig)) {
 
-            GroupConfig groupConfig = configAccess.getGroupConfigByGroupName(taskContext.getGroupName());
+            GroupConfig groupConfig = accessTemplate.getGroupConfigAccess().getGroupConfigByGroupName(taskContext.getGroupName());
             if (Objects.isNull(groupConfig)) {
                 throw new EasyRetryServerException("failed to report data, no group configuration found. groupName:[{}]", taskContext.getGroupName());
             }
@@ -190,7 +192,7 @@ public abstract class AbstractGenerator implements TaskGenerator {
      */
     private String getIdGenerator(String groupName) {
 
-        GroupConfig groupConfig = configAccess.getGroupConfigByGroupName(groupName);
+        GroupConfig groupConfig = accessTemplate.getGroupConfigAccess().getGroupConfigByGroupName(groupName);
         for (final IdGenerator idGenerator : idGeneratorList) {
             if (idGenerator.supports(groupConfig.getIdGeneratorMode())) {
                 return idGenerator.idGenerator(groupName);
