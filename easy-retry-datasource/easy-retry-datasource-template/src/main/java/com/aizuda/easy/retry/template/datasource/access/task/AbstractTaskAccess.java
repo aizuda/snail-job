@@ -10,6 +10,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
+import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -79,12 +80,28 @@ public abstract class AbstractTaskAccess<T> implements TaskAccess<T> {
     }
 
     @Override
-    public IPage<T> listPage(final String groupName, final IPage<T> iPage, final LambdaQueryWrapper<T> query) {
+    public int batchInsert(String groupName, List<T> list) {
+        setPartition(groupName);
+        return doBatchInsert(list);
+    }
+
+    protected abstract int doBatchInsert(List<T> list);
+
+    @Override
+    public PageDTO<T> listPage(final String groupName, final PageDTO<T> iPage, final LambdaQueryWrapper<T> query) {
         setPartition(groupName);
         return doListPage(iPage, query);
     }
 
-    protected abstract IPage<T> doListPage(final IPage<T> iPage, final LambdaQueryWrapper<T> query);
+    @Override
+    public T one(String groupName, LambdaQueryWrapper<T> query) {
+        setPartition(groupName);
+        return doOne(query);
+    }
+
+    protected abstract T doOne(LambdaQueryWrapper<T> query);
+
+    protected abstract PageDTO<T> doListPage(final PageDTO<T> iPage, final LambdaQueryWrapper<T> query);
 
     @Override
     public long count(final String groupName, final LambdaQueryWrapper<T> query) {

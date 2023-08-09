@@ -1,6 +1,8 @@
 package com.aizuda.easy.retry.server.service;
 
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
+import com.aizuda.easy.retry.server.web.model.request.BatchDeleteRetryDeadLetterVO;
+import com.aizuda.easy.retry.server.web.model.request.BatchRollBackRetryDeadLetterVO;
 import com.aizuda.easy.retry.server.web.model.request.RetryDeadLetterQueryVO;
 import com.aizuda.easy.retry.server.web.model.response.RetryDeadLetterResponseVO;
 
@@ -16,7 +18,7 @@ public interface RetryDeadLetterService {
 
     RetryDeadLetterResponseVO getRetryDeadLetterById(String groupName, Long id);
 
-    boolean rollback(String groupName, Long id);
+    boolean rollback(BatchRollBackRetryDeadLetterVO rollBackRetryDeadLetterVO);
 
-    boolean deleteById(String groupName, Long id);
+    boolean batchDelete(BatchDeleteRetryDeadLetterVO deadLetterVO);
 }

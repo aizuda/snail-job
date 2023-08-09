@@ -13,9 +13,9 @@ import com.aizuda.easy.retry.server.support.generator.IdGenerator;
 import com.aizuda.easy.retry.server.support.generator.TaskGenerator;
 import com.aizuda.easy.retry.server.support.strategy.WaitStrategies;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
+import com.aizuda.easy.retry.template.datasource.access.TaskAccess;
 import com.aizuda.easy.retry.template.datasource.enums.StatusEnum;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskLogMapper;
-import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.SceneConfigMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.GroupConfig;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
@@ -30,11 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -51,10 +47,6 @@ public abstract class AbstractGenerator implements TaskGenerator {
     @Autowired
     private List<IdGenerator> idGeneratorList;
     @Autowired
-    private RetryTaskMapper retryTaskMapper;
-    @Autowired
-    private SceneConfigMapper sceneConfigMapper;
-    @Autowired
     private RetryTaskLogMapper retryTaskLogMapper;
 
     @Override
@@ -68,9 +60,11 @@ public abstract class AbstractGenerator implements TaskGenerator {
 
         Set<String> idempotentIdSet = taskInfos.stream().map(TaskContext.TaskInfo::getIdempotentId).collect(Collectors.toSet());
 
+        TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();
+
         // 获取相关的任务，用户幂等校验
         RequestDataHelper.setPartition(taskContext.getGroupName());
-        List<RetryTask> retryTasks = retryTaskMapper.selectList(new LambdaQueryWrapper<RetryTask>()
+        List<RetryTask> retryTasks = retryTaskAccess.list(taskContext.getGroupName(), new LambdaQueryWrapper<RetryTask>()
                 .eq(RetryTask::getGroupName, taskContext.getGroupName())
                 .eq(RetryTask::getSceneName, taskContext.getSceneName())
                 .in(RetryTask::getIdempotentId, idempotentIdSet));
@@ -90,8 +84,9 @@ public abstract class AbstractGenerator implements TaskGenerator {
             return;
         }
 
-        RequestDataHelper.setPartition(taskContext.getGroupName());
-        Assert.isTrue(waitInsertTasks.size() == retryTaskMapper.batchInsert(waitInsertTasks, RequestDataHelper.getPartition()), () -> new EasyRetryServerException("failed to report data"));
+
+        Assert.isTrue(waitInsertTasks.size() == retryTaskAccess.batchInsert(taskContext.getGroupName(), waitInsertTasks),
+                () -> new EasyRetryServerException("failed to report data"));
         Assert.isTrue(waitInsertTaskLogs.size() == retryTaskLogMapper.batchInsert(waitInsertTaskLogs),
                 () -> new EasyRetryServerException("新增重试日志失败"));
     }
@@ -144,7 +139,7 @@ public abstract class AbstractGenerator implements TaskGenerator {
 
     protected abstract Integer initStatus(TaskContext taskContext);
 
-    private void checkAndInitScene( TaskContext taskContext) {
+    private void checkAndInitScene(TaskContext taskContext) {
         SceneConfig sceneConfig = accessTemplate.getSceneConfigAccess().getSceneConfigByGroupNameAndSceneName(taskContext.getGroupName(), taskContext.getSceneName());
         if (Objects.isNull(sceneConfig)) {
 
@@ -181,7 +176,7 @@ public abstract class AbstractGenerator implements TaskGenerator {
         sceneConfig.setBackOff(WaitStrategies.WaitStrategyEnum.DELAY_LEVEL.getBackOff());
         sceneConfig.setMaxRetryCount(DelayLevelEnum._21.getLevel());
         sceneConfig.setDescription("自动初始化场景");
-        Assert.isTrue(1 == sceneConfigMapper.insert(sceneConfig), () -> new EasyRetryServerException("init scene error"));
+        Assert.isTrue(1 == accessTemplate.getSceneConfigAccess().insert(sceneConfig), () -> new EasyRetryServerException("init scene error"));
     }
 
     /**

@@ -34,10 +34,5 @@
       count(*)
     from retry_dead_letter_${partition} where create_dt>= #{startTime} and create_dt &lt;=#{endTime}
   </select>
-  <select id="searchAllByPage" resultMap="BaseResultMap">
-    select
-    <include refid="Base_Column_List" />
-    from retry_dead_letter_${partition};
-  </select>
 
 </mapper>

@@ -5,8 +5,8 @@ import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.config.SystemProperties;
 import com.aizuda.easy.retry.server.dto.LockConfig;
 import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
-import com.aizuda.easy.retry.server.support.lock.LockAccess;
 import com.aizuda.easy.retry.server.support.Schedule;
+import com.aizuda.easy.retry.server.support.lock.LockProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -28,7 +28,7 @@ public abstract class AbstractSchedule implements Schedule {
     @Qualifier("scheduledExecutorService")
     protected TaskScheduler taskScheduler;
     @Autowired
-    private List<LockAccess> lockAccesses;
+    private List<LockProvider> lockProviders;
     @Autowired
     private SystemProperties systemProperties;
 
@@ -44,15 +44,15 @@ public abstract class AbstractSchedule implements Schedule {
 
         LockConfig lockConfig = new LockConfig(LocalDateTime.now(), lockName, Duration.parse(lockAtMost), Duration.parse(lockAtLeast));
 
-        LockAccess lockAccess = getLockAccess();
+        LockProvider lockProvider = getLockAccess();
         try {
-            if (lockAccess.lock(lockConfig)) {
+            if (lockProvider.lock(lockConfig)) {
                 doExecute();
             }
         } catch (Exception e) {
             LogUtils.error(log, this.getClass().getName() + " execute error. lockName:[{}]", lockName, e);
         } finally {
-            lockAccess.unlock(lockConfig);
+            lockProvider.unlock(lockConfig);
         }
 
     }
@@ -65,9 +65,9 @@ public abstract class AbstractSchedule implements Schedule {
 
     abstract String lockAtLeast();
 
-    private LockAccess getLockAccess() {
-        return lockAccesses.stream()
-                .filter(lockAccess -> lockAccess.supports(systemProperties.getDbType().getDb()))
+    private LockProvider getLockAccess() {
+        return lockProviders.stream()
+                .filter(lockProvider -> lockProvider.supports(systemProperties.getDbType().getDb()))
                 .findFirst().orElseThrow(() -> new EasyRetryServerException("未找到合适锁处理器"));
     }
 

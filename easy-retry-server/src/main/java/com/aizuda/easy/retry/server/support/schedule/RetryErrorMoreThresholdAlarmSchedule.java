@@ -10,9 +10,11 @@ import com.aizuda.easy.retry.common.core.util.EnvironmentUtils;
 import com.aizuda.easy.retry.common.core.util.HostUtils;
 import com.aizuda.easy.retry.server.support.Lifecycle;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
-import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryDeadLetterMapper;
+import com.aizuda.easy.retry.template.datasource.access.TaskAccess;
 import com.aizuda.easy.retry.template.datasource.persistence.po.GroupConfig;
 import com.aizuda.easy.retry.template.datasource.persistence.po.NotifyConfig;
+import com.aizuda.easy.retry.template.datasource.persistence.po.RetryDeadLetter;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -40,8 +42,6 @@ public class RetryErrorMoreThresholdAlarmSchedule extends AbstractSchedule imple
             "> **共计:{}**  \n";
 
     @Autowired
-    private RetryDeadLetterMapper retryDeadLetterMapper;
-    @Autowired
     private EasyRetryAlarmFactory easyRetryAlarmFactory;
     @Autowired
     protected AccessTemplate accessTemplate;
@@ -68,8 +68,10 @@ public class RetryErrorMoreThresholdAlarmSchedule extends AbstractSchedule imple
 
             // x分钟内进入死信队列的数据量
             LocalDateTime now = LocalDateTime.now();
-            int count = retryDeadLetterMapper.countRetryDeadLetterByCreateAt(now.minusMinutes(30), now, groupConfig.getGroupPartition());
+            TaskAccess<RetryDeadLetter> retryDeadLetterAccess = accessTemplate.getRetryDeadLetterAccess();
 
+            long count = retryDeadLetterAccess.count(groupConfig.getGroupName(), new LambdaQueryWrapper<RetryDeadLetter>()
+                    .between(RetryDeadLetter::getCreateDt, now.minusMinutes(30), now));
             for (NotifyConfig notifyConfig : notifyConfigs) {
                 if (count > notifyConfig.getNotifyThreshold()) {
                     // 预警

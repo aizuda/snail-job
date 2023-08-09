@@ -9,11 +9,6 @@ import java.util.List;
 
 public interface RetryDeadLetterMapper extends BaseMapper<RetryDeadLetter> {
 
-    int insertBatch(@Param("retryDeadLetters") List<RetryDeadLetter> retryDeadLetters,  @Param("partition") Integer partition);
+    int insertBatch(@Param("retryDeadLetters") List<RetryDeadLetter> retryDeadLetter);
 
-    int countRetryDeadLetterByCreateAt(@Param("startTime") LocalDateTime startTime,
-                                       @Param("endTime") LocalDateTime endTime,
-                                       @Param("partition") Integer partition);
-
-//    List<RetryDeadLetter> searchAllByPage(PageDTO<RetryTask> pageDTO,@Param("queryVO") RetryDeadLetterQueryVO queryVO);
 }

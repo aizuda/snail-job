@@ -12,24 +12,17 @@ import com.aizuda.easy.retry.server.model.dto.RetryTaskDTO;
 import com.aizuda.easy.retry.server.service.RetryTaskService;
 import com.aizuda.easy.retry.server.service.convert.RetryTaskResponseVOConverter;
 import com.aizuda.easy.retry.server.service.convert.TaskContextConverter;
-import com.aizuda.easy.retry.server.support.generator.IdGenerator;
 import com.aizuda.easy.retry.server.support.generator.TaskGenerator;
 import com.aizuda.easy.retry.server.support.generator.task.TaskContext;
 import com.aizuda.easy.retry.server.support.handler.ClientNodeAllocateHandler;
 import com.aizuda.easy.retry.server.support.strategy.WaitStrategies;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
-import com.aizuda.easy.retry.server.web.model.request.BatchDeleteRetryTaskVO;
-import com.aizuda.easy.retry.server.web.model.request.GenerateRetryIdempotentIdVO;
-import com.aizuda.easy.retry.server.web.model.request.ParseLogsVO;
-import com.aizuda.easy.retry.server.web.model.request.RetryTaskQueryVO;
-import com.aizuda.easy.retry.server.web.model.request.RetryTaskSaveRequestVO;
-import com.aizuda.easy.retry.server.web.model.request.RetryTaskUpdateExecutorNameRequestVO;
-import com.aizuda.easy.retry.server.web.model.request.RetryTaskUpdateStatusRequestVO;
+import com.aizuda.easy.retry.server.web.model.request.*;
 import com.aizuda.easy.retry.server.web.model.response.RetryTaskResponseVO;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
+import com.aizuda.easy.retry.template.datasource.access.TaskAccess;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskLogMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskLogMessageMapper;
-import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLog;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLogMessage;
@@ -47,11 +40,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -68,13 +57,9 @@ public class RetryTaskServiceImpl implements RetryTaskService {
     public static final String URL = "http://{0}:{1}/{2}/retry/generate/idempotent-id/v1";
 
     @Autowired
-    private RetryTaskMapper retryTaskMapper;
-    @Autowired
     private RestTemplate restTemplate;
     @Autowired
     private ClientNodeAllocateHandler clientNodeAllocateHandler;
-    @Autowired
-    private List<IdGenerator> idGeneratorList;
     @Autowired
     private RetryTaskLogMessageMapper retryTaskLogMessageMapper;
     @Autowired
@@ -118,14 +103,17 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         retryTaskLambdaQueryWrapper.select(RetryTask::getId, RetryTask::getBizNo, RetryTask::getIdempotentId,
                 RetryTask::getGroupName, RetryTask::getNextTriggerAt, RetryTask::getRetryCount,
                 RetryTask::getRetryStatus, RetryTask::getUpdateDt, RetryTask::getSceneName, RetryTask::getUniqueId, RetryTask::getTaskType);
-        pageDTO = retryTaskMapper.selectPage(pageDTO, retryTaskLambdaQueryWrapper.orderByDesc(RetryTask::getCreateDt));
+        pageDTO = accessTemplate.getRetryTaskAccess().listPage(queryVO.getGroupName(), pageDTO,
+                retryTaskLambdaQueryWrapper.orderByDesc(RetryTask::getCreateDt));
         return new PageResult<>(pageDTO, RetryTaskResponseVOConverter.INSTANCE.toRetryTaskResponseVO(pageDTO.getRecords()));
     }
 
     @Override
     public RetryTaskResponseVO getRetryTaskById(String groupName, Long id) {
         RequestDataHelper.setPartition(groupName);
-        return RetryTaskResponseVOConverter.INSTANCE.toRetryTaskResponseVO(retryTaskMapper.selectById(id));
+        TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();
+        RetryTask retryTask = retryTaskAccess.one(groupName, new LambdaQueryWrapper<RetryTask>().eq(RetryTask::getId, id));
+        return RetryTaskResponseVOConverter.INSTANCE.toRetryTaskResponseVO(retryTask);
     }
 
     @Override
@@ -137,8 +125,9 @@ public class RetryTaskServiceImpl implements RetryTaskService {
             throw new EasyRetryServerException("重试状态错误");
         }
 
-        RequestDataHelper.setPartition(retryTaskUpdateStatusRequestVO.getGroupName());
-        RetryTask retryTask = retryTaskMapper.selectById(retryTaskUpdateStatusRequestVO.getId());
+        TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();
+        RetryTask retryTask = retryTaskAccess.one(retryTaskUpdateStatusRequestVO.getGroupName(),
+                new LambdaQueryWrapper<RetryTask>().eq(RetryTask::getId, retryTaskUpdateStatusRequestVO.getId()));
         if (Objects.isNull(retryTask)) {
             throw new EasyRetryServerException("未查询到重试任务");
         }
@@ -168,8 +157,8 @@ public class RetryTaskServiceImpl implements RetryTaskService {
                     .eq(RetryTaskLog::getGroupName, retryTask.getGroupName()));
         }
 
-        RequestDataHelper.setPartition(retryTaskUpdateStatusRequestVO.getGroupName());
-        return retryTaskMapper.updateById(retryTask);
+        retryTask.setUpdateDt(LocalDateTime.now());
+        return retryTaskAccess.updateById(retryTaskUpdateStatusRequestVO.getGroupName(), retryTask);
     }
 
     @Override
@@ -228,15 +217,20 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         retryTask.setUpdateDt(LocalDateTime.now());
 
         // 根据重试数据id，更新执行器名称
-        RequestDataHelper.setPartition(requestVO.getGroupName());
-        return retryTaskMapper
-                .update(retryTask, new LambdaUpdateWrapper<RetryTask>().in(RetryTask::getId, requestVO.getIds()));
+        TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();
+        return retryTaskAccess.update(requestVO.getGroupName(), retryTask,
+                new LambdaUpdateWrapper<RetryTask>()
+                        .eq(RetryTask::getGroupName, requestVO.getGroupName())
+                        .in(RetryTask::getId, requestVO.getIds()));
     }
 
     @Override
     public Integer deleteRetryTask(final BatchDeleteRetryTaskVO requestVO) {
-        RequestDataHelper.setPartition(requestVO.getGroupName());
-        return retryTaskMapper.deleteBatchIds(requestVO.getIds());
+        TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();
+        return retryTaskAccess.delete(requestVO.getGroupName(),
+                new LambdaQueryWrapper<RetryTask>()
+                        .eq(RetryTask::getGroupName, requestVO.getGroupName())
+                        .in(RetryTask::getId, requestVO.getIds()));
     }
 
     @Override

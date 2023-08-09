@@ -7,6 +7,7 @@ import com.aizuda.easy.retry.template.datasource.persistence.po.NotifyConfig;
 import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 
 import java.util.List;
 import java.util.Set;
@@ -112,4 +113,11 @@ public interface ConfigAccess<T> extends Access<T>  {
     int delete(LambdaQueryWrapper<T> query);
 
     int insert(T t);
+
+    T one(LambdaQueryWrapper<T> query);
+
+    PageDTO<T> listPage(PageDTO<T> iPage, LambdaQueryWrapper<T> query);
+
+    long count(LambdaQueryWrapper<T> query);
+
 }

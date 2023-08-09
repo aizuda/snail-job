@@ -3,6 +3,7 @@ package com.aizuda.easy.retry.template.datasource.access;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,12 +16,9 @@ import java.util.List;
  */
 public interface TaskAccess<T> extends Access<T> {
 
-    /**
-     * 批量查询重试任务
-     */
-    List<T> listAvailableTasks(String groupName, LocalDateTime lastAt, final Long lastId, Integer pageSize, Integer taskType);
-
     List<T> list(String groupName, LambdaQueryWrapper<T> query);
+
+    T one(String groupName, LambdaQueryWrapper<T> query);
 
     int update(String groupName, T t, LambdaUpdateWrapper<T> query);
 
@@ -30,7 +28,9 @@ public interface TaskAccess<T> extends Access<T> {
 
     int insert(String groupName, T t);
 
-    IPage<T> listPage(String groupName, IPage<T> iPage, LambdaQueryWrapper<T> query);
+    int batchInsert(String groupName, List<T> list);
+
+    PageDTO<T> listPage(String groupName, PageDTO<T> iPage, LambdaQueryWrapper<T> query);
 
     long count(String groupName, LambdaQueryWrapper<T> query);
 

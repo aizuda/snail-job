@@ -2,9 +2,9 @@ package com.aizuda.easy.retry.server.support.dispatch.actor.scan;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
+import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.config.SystemProperties;
-import com.aizuda.easy.retry.server.persistence.support.RetryTaskAccess;
 import com.aizuda.easy.retry.server.support.IdempotentStrategy;
 import com.aizuda.easy.retry.server.support.RetryContext;
 import com.aizuda.easy.retry.server.support.dispatch.DispatchService;
@@ -13,6 +13,8 @@ import com.aizuda.easy.retry.server.support.handler.ClientNodeAllocateHandler;
 import com.aizuda.easy.retry.server.support.retry.RetryExecutor;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -31,9 +33,7 @@ import java.util.Optional;
  */
 @Slf4j
 public abstract class AbstractScanGroup extends AbstractActor {
-    @Autowired
-    @Qualifier("retryTaskAccessProcessor")
-    protected RetryTaskAccess<RetryTask> retryTaskAccessProcessor;
+
     @Autowired
     @Qualifier("bitSetIdempotentStrategyHandler")
     protected IdempotentStrategy<String, Integer> idempotentStrategy;
@@ -66,8 +66,7 @@ public abstract class AbstractScanGroup extends AbstractActor {
         Long lastId = Optional.ofNullable(getLastId(groupName)).orElse(0L);
 
         // 扫描当前Group 待处理的任务
-        List<RetryTask> list = retryTaskAccessProcessor.listAvailableTasks(groupName, lastAt, lastId, retryPullPageSize,
-            getTaskType());
+        List<RetryTask> list = listAvailableTasks(groupName, lastAt, lastId, retryPullPageSize, getTaskType());
 
         if (!CollectionUtils.isEmpty(list)) {
 
@@ -127,5 +126,22 @@ public abstract class AbstractScanGroup extends AbstractActor {
     }
 
     protected abstract ActorRef getActorRef();
+
+    public List<RetryTask> listAvailableTasks(String groupName,
+                                              LocalDateTime lastAt,
+                                              Long lastId,
+                                              Integer pageSize,
+                                              Integer taskType) {
+        return accessTemplate.getRetryTaskAccess().listPage(groupName, new PageDTO<>(0, pageSize),
+                        new LambdaQueryWrapper<RetryTask>()
+                                .eq(RetryTask::getRetryStatus, RetryStatusEnum.RUNNING.getStatus())
+                                .eq(RetryTask::getGroupName, groupName)
+                                .eq(RetryTask::getTaskType, taskType)
+                                .gt(RetryTask::getId, lastId)
+                                .gt(RetryTask::getCreateDt, lastAt)
+                                .orderByAsc(RetryTask::getId)
+                                .orderByAsc(RetryTask::getCreateDt))
+                .getRecords();
+    }
 
 }

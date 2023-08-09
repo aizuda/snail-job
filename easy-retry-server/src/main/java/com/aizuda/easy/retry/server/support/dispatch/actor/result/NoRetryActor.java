@@ -4,17 +4,18 @@ import akka.actor.AbstractActor;
 import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
-import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
-import com.aizuda.easy.retry.server.persistence.support.RetryTaskAccess;
 import com.aizuda.easy.retry.server.support.RetryContext;
 import com.aizuda.easy.retry.server.support.WaitStrategy;
 import com.aizuda.easy.retry.server.support.retry.RetryExecutor;
+import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
+import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
 
 /**
  * 不重试,只更新下次触发时间
@@ -31,8 +32,7 @@ public class NoRetryActor extends AbstractActor {
     public static final String BEAN_NAME = "NoRetryActor";
 
     @Autowired
-    @Qualifier("retryTaskAccessProcessor")
-    private RetryTaskAccess<RetryTask> retryTaskAccess;
+    protected AccessTemplate accessTemplate;
 
     @Override
     public Receive createReceive() {
@@ -46,7 +46,9 @@ public class NoRetryActor extends AbstractActor {
             // 不更新重试次数
             retryTask.setRetryCount(null);
             try {
-                Assert.isTrue(1 == retryTaskAccess.updateRetryTask(retryTask), () ->
+                retryTask.setUpdateDt(LocalDateTime.now());
+                Assert.isTrue(1 == accessTemplate.getRetryTaskAccess()
+                        .updateById(retryTask.getGroupName(),retryTask), () ->
                     new EasyRetryServerException("更新重试任务失败. groupName:[{}] uniqueId:[{}]",
                         retryTask.getGroupName(),  retryTask.getUniqueId()));
             }catch (Exception e) {

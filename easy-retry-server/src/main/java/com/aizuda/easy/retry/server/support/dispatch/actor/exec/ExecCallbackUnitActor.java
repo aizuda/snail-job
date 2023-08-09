@@ -7,6 +7,8 @@ import com.aizuda.easy.retry.client.model.RetryCallbackDTO;
 import com.aizuda.easy.retry.server.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.client.RequestBuilder;
 import com.aizuda.easy.retry.server.client.RpcClient;
+import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
+import com.aizuda.easy.retry.template.datasource.access.TaskAccess;
 import com.aizuda.easy.retry.template.datasource.utils.RequestDataHelper;
 import com.aizuda.easy.retry.server.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.template.datasource.enums.StatusEnum;
@@ -14,7 +16,6 @@ import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
-import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
 import com.aizuda.easy.retry.server.support.IdempotentStrategy;
 import com.aizuda.easy.retry.server.support.context.CallbackRetryContext;
@@ -51,7 +52,7 @@ public class ExecCallbackUnitActor extends AbstractActor  {
     @Qualifier("bitSetIdempotentStrategyHandler")
     private IdempotentStrategy<String, Integer> idempotentStrategy;
     @Autowired
-    private RetryTaskMapper retryTaskMapper;
+    private AccessTemplate accessTemplate;
     @Autowired
     private CallbackRetryTaskHandler callbackRetryTaskHandler;
 
@@ -118,8 +119,9 @@ public class ExecCallbackUnitActor extends AbstractActor  {
     private Result callClient(RetryTask callbackTask, RegisterNodeInfo serverNode) {
 
         String retryTaskUniqueId = callbackRetryTaskHandler.getRetryTaskUniqueId(callbackTask.getUniqueId());
-        RequestDataHelper.setPartition(callbackTask.getGroupName());
-        RetryTask retryTask = retryTaskMapper.selectOne(
+
+        TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();
+        RetryTask retryTask = retryTaskAccess.one(callbackTask.getGroupName(),
             new LambdaQueryWrapper<RetryTask>().eq(RetryTask::getUniqueId, retryTaskUniqueId));
         Assert.notNull(retryTask, () -> new EasyRetryServerException("未查询回调任务对应的重试任务. callbackUniqueId:[{}] uniqueId:[{}]",
             callbackTask.getUniqueId(), retryTaskUniqueId));

@@ -6,17 +6,16 @@ import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
 import com.aizuda.easy.retry.server.config.SystemProperties;
 import com.aizuda.easy.retry.server.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
-import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskLogMapper;
-import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
-import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLog;
-import com.aizuda.easy.retry.server.persistence.support.RetryTaskAccess;
 import com.aizuda.easy.retry.server.service.convert.RetryTaskConverter;
 import com.aizuda.easy.retry.server.service.convert.RetryTaskLogConverter;
 import com.aizuda.easy.retry.server.support.strategy.WaitStrategies;
+import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
+import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskLogMapper;
+import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
+import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLog;
 import org.slf4j.helpers.FormattingTuple;
 import org.slf4j.helpers.MessageFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,8 +36,7 @@ public class CallbackRetryTaskHandler {
     private static final String CALLBACK_UNIQUE_ID_RULE = "{}_{}";
 
     @Autowired
-    @Qualifier("retryTaskAccessProcessor")
-    private RetryTaskAccess<RetryTask> retryTaskAccess;
+    protected AccessTemplate accessTemplate;
     @Autowired
     private RetryTaskLogMapper retryTaskLogMapper;
     @Autowired
@@ -66,7 +64,9 @@ public class CallbackRetryTaskHandler {
 
         callbackRetryTask.setNextTriggerAt(WaitStrategies.randomWait(1, TimeUnit.SECONDS, 60, TimeUnit.SECONDS).computeRetryTime(null));
 
-        Assert.isTrue(1 == retryTaskAccess.saveRetryTask(callbackRetryTask), () -> new EasyRetryServerException("failed to report data"));
+        Assert.isTrue(1 == accessTemplate.getRetryTaskAccess()
+                .insert(callbackRetryTask.getGroupName(), callbackRetryTask),
+                () -> new EasyRetryServerException("failed to report data"));
 
         // 初始化回调日志
         RetryTaskLog retryTaskLog = RetryTaskLogConverter.INSTANCE.toRetryTask(callbackRetryTask);

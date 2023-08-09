@@ -9,7 +9,6 @@ import com.aizuda.easy.retry.server.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.config.SystemProperties;
 import com.aizuda.easy.retry.server.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
-import com.aizuda.easy.retry.server.persistence.support.RetryTaskAccess;
 import com.aizuda.easy.retry.server.support.dispatch.actor.log.RetryTaskLogDTO;
 import com.aizuda.easy.retry.server.support.handler.CallbackRetryTaskHandler;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
@@ -17,13 +16,14 @@ import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
 import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
+
+import java.time.LocalDateTime;
 
 /**
  * 重试完成执行器 1、更新重试任务 2、记录重试日志
@@ -39,9 +39,6 @@ public class FailureActor extends AbstractActor {
 
     public static final String BEAN_NAME = "FailureActor";
 
-    @Autowired
-    @Qualifier("retryTaskAccessProcessor")
-    private RetryTaskAccess<RetryTask> retryTaskAccess;
     @Autowired
     private AccessTemplate accessTemplate;
     @Autowired
@@ -78,8 +75,10 @@ public class FailureActor extends AbstractActor {
                             callbackRetryTaskHandler.create(retryTask);
                         }
 
-                        Assert.isTrue(1 == retryTaskAccess.updateRetryTask(retryTask), () ->
-                            new EasyRetryServerException("更新重试任务失败. groupName:[{}] uniqueId:[{}]",
+                        retryTask.setUpdateDt(LocalDateTime.now());
+                        Assert.isTrue(1 == accessTemplate.getRetryTaskAccess()
+                                .updateById(retryTask.getGroupName(), retryTask),
+                                () -> new EasyRetryServerException("更新重试任务失败. groupName:[{}] uniqueId:[{}]",
                                 retryTask.getGroupName(),  retryTask.getUniqueId()));
                     }
                 });

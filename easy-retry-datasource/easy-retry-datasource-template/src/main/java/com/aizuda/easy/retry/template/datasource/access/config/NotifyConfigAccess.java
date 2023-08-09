@@ -2,9 +2,11 @@ package com.aizuda.easy.retry.template.datasource.access.config;
 
 import com.aizuda.easy.retry.template.datasource.enums.DbTypeEnum;
 import com.aizuda.easy.retry.template.datasource.enums.OperationTypeEnum;
+import com.aizuda.easy.retry.template.datasource.persistence.po.GroupConfig;
 import com.aizuda.easy.retry.template.datasource.persistence.po.NotifyConfig;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -50,5 +52,19 @@ public class NotifyConfigAccess extends AbstractConfigAccess<NotifyConfig>  {
         return notifyConfigMapper.insert(notifyConfig);
     }
 
+    @Override
+    public NotifyConfig one(LambdaQueryWrapper<NotifyConfig> query) {
+        return notifyConfigMapper.selectOne(query);
+    }
+
+    @Override
+    public PageDTO<NotifyConfig> listPage(PageDTO<NotifyConfig> iPage, LambdaQueryWrapper<NotifyConfig> query) {
+        return notifyConfigMapper.selectPage(iPage, query);
+    }
+
+    @Override
+    public long count(LambdaQueryWrapper<NotifyConfig> query) {
+        return notifyConfigMapper.selectCount(query);
+    }
 
 }

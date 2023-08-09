@@ -3,7 +3,6 @@ package com.aizuda.easy.retry.server.support.lock;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.config.SystemProperties;
 import com.aizuda.easy.retry.server.dto.LockConfig;
-import com.aizuda.easy.retry.template.datasource.enums.DbTypeEnum;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.DistributedLockMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.DistributedLock;
 import com.aizuda.easy.retry.server.support.register.ServerRegister;
@@ -21,7 +20,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionSystemException;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
 
 /**
  * 基于DB实现的分布式锁
@@ -33,7 +31,7 @@ import java.util.Arrays;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class JdbcLockAccess extends AbstractLockAccess {
+public class JdbcLockProvider extends AbstractLockProvider {
 
     private final DistributedLockMapper distributedLockMapper;
 

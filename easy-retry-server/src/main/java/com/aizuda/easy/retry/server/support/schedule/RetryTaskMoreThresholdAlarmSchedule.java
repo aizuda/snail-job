@@ -11,9 +11,10 @@ import com.aizuda.easy.retry.common.core.util.EnvironmentUtils;
 import com.aizuda.easy.retry.common.core.util.HostUtils;
 import com.aizuda.easy.retry.server.support.Lifecycle;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
-import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.GroupConfig;
 import com.aizuda.easy.retry.template.datasource.persistence.po.NotifyConfig;
+import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -41,7 +42,6 @@ public class RetryTaskMoreThresholdAlarmSchedule extends AbstractSchedule implem
             "> 时间:{}  \n" +
             "> **共计:{}**  \n";
 
-    private final RetryTaskMapper retryTaskMapper;
     private final EasyRetryAlarmFactory easyRetryAlarmFactory;
     private final AccessTemplate accessTemplate;
 
@@ -65,7 +65,9 @@ public class RetryTaskMoreThresholdAlarmSchedule extends AbstractSchedule implem
                 continue;
             }
 
-            int count = retryTaskMapper.countAllRetryTaskByRetryStatus(groupConfig.getGroupPartition(), RetryStatusEnum.RUNNING.getStatus());
+            long count = accessTemplate.getRetryTaskAccess().count(groupConfig.getGroupName(), new LambdaQueryWrapper<RetryTask>()
+                    .eq(RetryTask::getGroupName, groupConfig.getGroupName())
+                    .eq(RetryTask::getRetryStatus, RetryStatusEnum.RUNNING.getStatus()));
             for (NotifyConfig notifyConfig : notifyConfigs) {
                 if (count > notifyConfig.getNotifyThreshold()) {
                     // 预警

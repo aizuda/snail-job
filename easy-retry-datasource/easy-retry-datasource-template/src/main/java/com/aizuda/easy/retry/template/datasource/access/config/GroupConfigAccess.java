@@ -6,6 +6,7 @@ import com.aizuda.easy.retry.template.datasource.persistence.po.GroupConfig;
 import com.aizuda.easy.retry.template.datasource.persistence.po.NotifyConfig;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -18,8 +19,6 @@ import java.util.List;
  */
 @Component
 public class GroupConfigAccess extends AbstractConfigAccess<GroupConfig> {
-
-
 
     @Override
     public boolean supports(String operationType) {
@@ -51,6 +50,21 @@ public class GroupConfigAccess extends AbstractConfigAccess<GroupConfig> {
     @Override
     public int insert(GroupConfig groupConfig) {
         return groupConfigMapper.insert(groupConfig);
+    }
+
+    @Override
+    public GroupConfig one(LambdaQueryWrapper<GroupConfig> query) {
+        return groupConfigMapper.selectOne(query);
+    }
+
+    @Override
+    public PageDTO<GroupConfig> listPage(PageDTO<GroupConfig> iPage, LambdaQueryWrapper<GroupConfig> query) {
+        return groupConfigMapper.selectPage(iPage, query);
+    }
+
+    @Override
+    public long count(LambdaQueryWrapper<GroupConfig> query) {
+        return groupConfigMapper.selectCount(query);
     }
 
 }

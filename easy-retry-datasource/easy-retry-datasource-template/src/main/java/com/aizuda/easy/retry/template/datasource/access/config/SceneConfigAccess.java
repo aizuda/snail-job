@@ -2,9 +2,11 @@ package com.aizuda.easy.retry.template.datasource.access.config;
 
 import com.aizuda.easy.retry.template.datasource.enums.DbTypeEnum;
 import com.aizuda.easy.retry.template.datasource.enums.OperationTypeEnum;
+import com.aizuda.easy.retry.template.datasource.persistence.po.NotifyConfig;
 import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -48,5 +50,20 @@ public class SceneConfigAccess extends AbstractConfigAccess<SceneConfig> {
     @Override
     public int insert(SceneConfig sceneConfig) {
         return sceneConfigMapper.insert(sceneConfig);
+    }
+
+    @Override
+    public SceneConfig one(LambdaQueryWrapper<SceneConfig> query) {
+        return sceneConfigMapper.selectOne(query);
+    }
+
+    @Override
+    public PageDTO<SceneConfig> listPage(PageDTO<SceneConfig> iPage, LambdaQueryWrapper<SceneConfig> query) {
+        return sceneConfigMapper.selectPage(iPage, query);
+    }
+
+    @Override
+    public long count(LambdaQueryWrapper<SceneConfig> query) {
+        return sceneConfigMapper.selectCount(query);
     }
 }

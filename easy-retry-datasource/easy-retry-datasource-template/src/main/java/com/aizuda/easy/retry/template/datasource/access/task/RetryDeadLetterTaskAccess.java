@@ -8,6 +8,7 @@ import com.aizuda.easy.retry.template.datasource.persistence.po.RetryDeadLetter;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -33,19 +34,24 @@ public class RetryDeadLetterTaskAccess  extends AbstractTaskAccess<RetryDeadLett
     }
 
     @Override
-    public List<RetryDeadLetter> listAvailableTasks(String groupName, LocalDateTime lastAt, Long lastId, Integer pageSize, Integer taskType) {
-        throw new EasyRetryDatasourceException("不支持查询");
-    }
-
-    @Override
     protected int doUpdate(RetryDeadLetter retryDeadLetter, LambdaUpdateWrapper<RetryDeadLetter> query) {
         return retryDeadLetterMapper.update(retryDeadLetter, query);
     }
 
     @Override
-    protected IPage<RetryDeadLetter> doListPage(final IPage<RetryDeadLetter> iPage,
+    protected int doBatchInsert(List<RetryDeadLetter> list) {
+        return retryDeadLetterMapper.insertBatch(list);
+    }
+
+    @Override
+    protected RetryDeadLetter doOne(LambdaQueryWrapper<RetryDeadLetter> query) {
+        return retryDeadLetterMapper.selectOne(query);
+    }
+
+    @Override
+    protected PageDTO<RetryDeadLetter> doListPage(final PageDTO<RetryDeadLetter> PageDTO,
         final LambdaQueryWrapper<RetryDeadLetter> query) {
-        return retryDeadLetterMapper.selectPage(iPage, query);
+        return retryDeadLetterMapper.selectPage(PageDTO, query);
     }
 
     @Override

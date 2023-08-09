@@ -2,10 +2,13 @@ package com.aizuda.easy.retry.server.web.controller;
 
 import com.aizuda.easy.retry.server.service.RetryDeadLetterService;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
+import com.aizuda.easy.retry.server.web.model.request.BatchDeleteRetryDeadLetterVO;
+import com.aizuda.easy.retry.server.web.model.request.BatchRollBackRetryDeadLetterVO;
 import com.aizuda.easy.retry.server.web.model.request.RetryDeadLetterQueryVO;
 import com.aizuda.easy.retry.server.web.annotation.LoginRequired;
 import com.aizuda.easy.retry.server.web.model.response.RetryDeadLetterResponseVO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -37,16 +40,14 @@ public class RetryDeadLetterController {
     }
 
     @LoginRequired
-    @GetMapping("/rollback/{id}")
-    public boolean rollback(@RequestParam("groupName") String groupName,
-                            @PathVariable("id") Long id) {
-        return retryDeadLetterService.rollback(groupName, id);
+    @GetMapping("/batch/rollback")
+    public boolean rollback(@RequestBody @Validated BatchRollBackRetryDeadLetterVO rollBackRetryDeadLetterVO) {
+        return retryDeadLetterService.rollback(rollBackRetryDeadLetterVO);
     }
 
     @LoginRequired
-    @DeleteMapping("/{id}")
-    public boolean deleteById(@RequestParam("groupName") String groupName,
-                            @PathVariable("id") Long id) {
-        return retryDeadLetterService.deleteById(groupName, id);
+    @DeleteMapping("/batch")
+    public boolean deleteById(@RequestBody @Validated BatchDeleteRetryDeadLetterVO deadLetterVO) {
+        return retryDeadLetterService.batchDelete(deadLetterVO);
     }
 }
