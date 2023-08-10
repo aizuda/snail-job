@@ -20,12 +20,6 @@
         <a-descriptions-item label="业务编号">
           {{ retryInfo.bizNo }}
         </a-descriptions-item>
-        <a-descriptions-item label="下次触发时间">
-          {{ parseDate(retryInfo.nextTriggerAt) }}
-        </a-descriptions-item>
-        <a-descriptions-item label="执行时间">
-          {{ parseDate( retryInfo.createDt) }}
-        </a-descriptions-item>
         <a-descriptions-item label="当前重试状态 | 数据类型">
           <a-tag color="red">
             {{ retryStatus[retryInfo.retryStatus] }}
@@ -34,6 +28,9 @@
           <a-tag :color="taskType[retryInfo.taskType].color">
             {{ taskType[retryInfo.taskType].name }}
           </a-tag>
+        </a-descriptions-item>
+        <a-descriptions-item label="创建时间">
+          {{ retryInfo.createDt  }}
         </a-descriptions-item>
         <a-descriptions-item label="执行器名称" :span="3">
           {{ retryInfo.executorName }}

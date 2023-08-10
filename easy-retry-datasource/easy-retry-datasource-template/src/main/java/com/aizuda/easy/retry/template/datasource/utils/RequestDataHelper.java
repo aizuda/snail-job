@@ -13,8 +13,11 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
+ * 组分区处理类
+ *
  * @author: www.byteblogs.com
  * @date : 2022-02-28 17:18
+ * @since 1.0.0
  */
 public class RequestDataHelper {
 
@@ -43,7 +46,7 @@ public class RequestDataHelper {
         Map<String, Object> map = new HashMap<>();
         map.put(PARTITION, partition);
         RequestDataHelper.setRequestData(map);
-        
+
     }
 
 

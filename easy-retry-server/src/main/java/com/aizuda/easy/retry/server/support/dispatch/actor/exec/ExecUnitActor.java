@@ -14,7 +14,7 @@ import com.aizuda.easy.retry.server.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.client.RequestBuilder;
 import com.aizuda.easy.retry.server.client.RpcClient;
 import com.aizuda.easy.retry.server.dto.RegisterNodeInfo;
-import com.aizuda.easy.retry.template.datasource.enums.StatusEnum;
+import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
 import com.aizuda.easy.retry.server.support.IdempotentStrategy;
 import com.aizuda.easy.retry.server.support.context.MaxAttemptsPersistenceRetryContext;

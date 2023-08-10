@@ -2,7 +2,7 @@ package com.aizuda.easy.retry.server.support.strategy;
 
 import com.aizuda.easy.retry.client.model.DispatchRetryResultDTO;
 import com.aizuda.easy.retry.common.core.enums.RetryResultStatusEnum;
-import com.aizuda.easy.retry.template.datasource.enums.StatusEnum;
+import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.server.support.RetryContext;
 import com.aizuda.easy.retry.server.support.StopStrategy;

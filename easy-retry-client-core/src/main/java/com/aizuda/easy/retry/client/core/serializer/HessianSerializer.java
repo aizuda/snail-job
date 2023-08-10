@@ -3,9 +3,7 @@ package com.aizuda.easy.retry.client.core.serializer;
 import com.aizuda.easy.retry.client.core.RetryArgSerializer;
 import com.caucho.hessian.io.HessianInput;
 import com.caucho.hessian.io.HessianOutput;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.commons.lang.StringUtils;
-import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -38,7 +36,7 @@ public class HessianSerializer implements RetryArgSerializer {
     }
 
     @Override
-    public Object deSerialize(String infoStr, Class aClass, Method method) throws JsonProcessingException {
+    public Object deSerialize(String infoStr, Class aClass, Method method) {
         if (StringUtils.isBlank(infoStr)) {
             return null;
         }
@@ -46,7 +44,7 @@ public class HessianSerializer implements RetryArgSerializer {
         byte[] convertBytes = Base64.getDecoder().decode(infoStr);
         try (ByteArrayInputStream is = new ByteArrayInputStream(convertBytes)) {
             HessianInput hi = new HessianInput(is);
-            return hi.readObject(aClass);
+            return hi.readObject(Object[].class);
         } catch (IOException e) {
             throw new IllegalStateException("HessianSerializationConverter.deSerialize failed.", e);
         }

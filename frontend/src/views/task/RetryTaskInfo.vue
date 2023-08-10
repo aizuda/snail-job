@@ -32,8 +32,8 @@
             {{ taskType[retryTaskInfo.taskType].name }}
           </a-tag>
         </a-descriptions-item>
-        <a-descriptions-item label="触发时间">
-          {{ retryTaskInfo.createDt }}
+        <a-descriptions-item label="下次触发时间">
+          {{ retryTaskInfo.nextTriggerAt }}
         </a-descriptions-item>
         <a-descriptions-item label="更新时间">
           {{ retryTaskInfo.updateDt }}

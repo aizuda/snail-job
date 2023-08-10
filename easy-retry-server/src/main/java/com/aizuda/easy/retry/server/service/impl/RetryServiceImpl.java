@@ -19,7 +19,7 @@ import com.aizuda.easy.retry.server.support.strategy.WaitStrategies.WaitStrategy
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
 import com.aizuda.easy.retry.template.datasource.access.ConfigAccess;
 import com.aizuda.easy.retry.template.datasource.access.TaskAccess;
-import com.aizuda.easy.retry.template.datasource.enums.StatusEnum;
+import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskLogMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.*;
 import com.aizuda.easy.retry.template.datasource.utils.RequestDataHelper;

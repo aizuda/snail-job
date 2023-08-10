@@ -1,4 +1,4 @@
-package com.aizuda.easy.retry.template.datasource.enums;
+package com.aizuda.easy.retry.common.core.enums;
 
 import lombok.Getter;
 

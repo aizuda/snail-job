@@ -18,19 +18,13 @@
         <a-descriptions-item label="业务编号">
           {{ retryDealLetterInfo.bizNo }}
         </a-descriptions-item>
-        <a-descriptions-item label="下次触发时间">
-          {{ parseDate(retryDealLetterInfo.nextTriggerAt) }}
-        </a-descriptions-item>
         <a-descriptions-item label="数据类型">
           <a-tag :color="taskType[retryDealLetterInfo.taskType].color">
             {{ taskType[retryDealLetterInfo.taskType].name }}
           </a-tag>
         </a-descriptions-item>
         <a-descriptions-item label="创建时间">
-          {{ parseDate( retryDealLetterInfo.createDt) }}
-        </a-descriptions-item>
-        <a-descriptions-item label="更新时间">
-          {{ parseDate(retryDealLetterInfo.updateDt) }}
+          {{ retryDealLetterInfo.createDt }}
         </a-descriptions-item>
         <a-descriptions-item label="执行器名称" span="2">
           {{ retryDealLetterInfo.executorName }}

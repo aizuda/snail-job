@@ -5,8 +5,11 @@ import com.aizuda.easy.retry.client.core.RetrySiteSnapshotContext;
 import com.aizuda.easy.retry.client.core.exception.EasyRetryClientException;
 
 /**
- * @author: shuguang.zhang
+ * ThreadLocal实现类
+ *
+ * @author: www.byteblogs.com
  * @date : 2023-08-09 16:34
+ * @since 2.2.0
  */
 public class ThreadLockRetrySiteSnapshotContext<T> implements RetrySiteSnapshotContext<T> {
 

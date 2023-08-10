@@ -18,7 +18,7 @@
     id, unique_id, group_name, scene_name, idempotent_id, biz_no, executor_name, args_str, ext_attrs, create_dt, task_type
   </sql>
   <insert id="insertBatch">
-    insert into retry_dead_letter_${partition} (id, unique_id, group_name, scene_name,
+    insert into retry_dead_letter (id, unique_id, group_name, scene_name,
     idempotent_id, biz_no, executor_name, args_str,
                                               ext_attrs, create_dt
     )

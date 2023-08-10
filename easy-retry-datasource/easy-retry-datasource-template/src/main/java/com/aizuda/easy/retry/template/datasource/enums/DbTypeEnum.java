@@ -8,11 +8,11 @@ import lombok.Getter;
 import java.util.Objects;
 
 /**
- * 锁的存储介质
+ * DB数据库类型
  *
  * @author www.byteblogs.com
  * @date 2023-06-04
- * @since 2.0
+ * @since 2.1.0
  */
 @AllArgsConstructor
 @Getter
