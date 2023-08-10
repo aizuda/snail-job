@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.server.service.impl;
 
 import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
+import com.aizuda.easy.retry.server.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.service.RetryDeadLetterService;
 import com.aizuda.easy.retry.server.service.convert.RetryDeadLetterResponseVOConverter;
@@ -90,7 +91,7 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
 
     @Override
     @Transactional
-    public boolean rollback(BatchRollBackRetryDeadLetterVO rollBackRetryDeadLetterVO) {
+    public int rollback(BatchRollBackRetryDeadLetterVO rollBackRetryDeadLetterVO) {
 
         String groupName = rollBackRetryDeadLetterVO.getGroupName();
         List<Long> ids = rollBackRetryDeadLetterVO.getIds();
@@ -103,9 +104,10 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
         List<RetryTask> waitRollbackList = new ArrayList<>();
         for (RetryDeadLetter retryDeadLetter : retryDeadLetterList) {
             RetryTask retryTask = RetryTaskConverter.INSTANCE.toRetryTask(retryDeadLetter);
+            retryTask.setRetryStatus(RetryStatusEnum.RUNNING.getStatus());
+            retryTask.setTaskType(TaskTypeEnum.RETRY.getType());
             retryTask.setNextTriggerAt(WaitStrategies.randomWait(1, TimeUnit.SECONDS, 60, TimeUnit.SECONDS).computeRetryTime(null));
             retryTask.setCreateDt(LocalDateTime.now());
-            retryTask.setUpdateDt(LocalDateTime.now());
             waitRollbackList.add(retryTask);
         }
 
@@ -118,7 +120,7 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
                 .in(RetryDeadLetter::getId, waitDelRetryDeadLetterIdSet)), () -> new EasyRetryServerException("删除死信队列数据失败"))
         ;
 
-        // 变动日志的状态
+        // 变更日志的状态
         RetryTaskLog retryTaskLog = new RetryTaskLog();
         retryTaskLog.setRetryStatus(RetryStatusEnum.RUNNING.getStatus());
 
@@ -126,15 +128,15 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
         int update = retryTaskLogMapper.update(retryTaskLog, new LambdaUpdateWrapper<RetryTaskLog>()
                 .in(RetryTaskLog::getUniqueId, uniqueIdSet)
                 .eq(RetryTaskLog::getGroupName, groupName));
-        Assert.isTrue(update == uniqueIdSet.size(), () -> new EasyRetryServerException("回滚日志状态失败, 可能原因: 日志信息缺失"));
+        Assert.isTrue(update == uniqueIdSet.size(), () -> new EasyRetryServerException("回滚日志状态失败, 可能原因: 日志信息缺失或存在多个相同uniqueId"));
 
-        return true;
+        return update;
     }
 
     @Override
-    public boolean batchDelete(BatchDeleteRetryDeadLetterVO deadLetterVO) {
+    public int batchDelete(BatchDeleteRetryDeadLetterVO deadLetterVO) {
         TaskAccess<RetryDeadLetter> retryDeadLetterAccess = accessTemplate.getRetryDeadLetterAccess();
-        return 1 == retryDeadLetterAccess.delete(deadLetterVO.getGroupName(),
+        return retryDeadLetterAccess.delete(deadLetterVO.getGroupName(),
                 new LambdaQueryWrapper<RetryDeadLetter>()
                         .eq(RetryDeadLetter::getGroupName, deadLetterVO.getGroupName())
                         .in(RetryDeadLetter::getId, deadLetterVO.getIds()));

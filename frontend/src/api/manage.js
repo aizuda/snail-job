@@ -24,8 +24,8 @@ const api = {
   retryTaskLogById: '/retry-task-log/',
   retryDeadLetterPage: '/retry-dead-letter/list',
   retryDeadLetterById: '/retry-dead-letter/',
-  retryDeadLetterRollback: '/retry-dead-letter/rollback/',
-  deleteRetryDeadLetter: '/retry-dead-letter/',
+  retryDeadLetterRollback: '/retry-dead-letter/batch/rollback',
+  deleteRetryDeadLetter: '/retry-dead-letter/batch',
   scenePageList: '/scene-config/page/list',
   sceneList: '/scene-config/list',
   notifyConfigList: '/notify-config/list',
@@ -255,19 +255,19 @@ export function getRetryDeadLetterById (id, parameter) {
   })
 }
 
-export function rollbackRetryDeadLetter (id, parameter) {
+export function rollbackRetryDeadLetter (data) {
   return request({
-    url: api.retryDeadLetterRollback + id,
-    method: 'get',
-    params: parameter
+    url: api.retryDeadLetterRollback,
+    method: 'post',
+    data
   })
 }
 
-export function deleteRetryDeadLetter (id, parameter) {
+export function deleteRetryDeadLetter (data) {
   return request({
-    url: api.deleteRetryDeadLetter + id,
+    url: api.deleteRetryDeadLetter,
     method: 'delete',
-    params: parameter
+    data
   })
 }
 

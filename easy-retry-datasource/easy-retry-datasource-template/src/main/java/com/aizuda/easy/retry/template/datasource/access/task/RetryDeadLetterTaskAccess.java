@@ -2,17 +2,14 @@ package com.aizuda.easy.retry.template.datasource.access.task;
 
 import com.aizuda.easy.retry.template.datasource.enums.DbTypeEnum;
 import com.aizuda.easy.retry.template.datasource.enums.OperationTypeEnum;
-import com.aizuda.easy.retry.template.datasource.exception.EasyRetryDatasourceException;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryDeadLetterMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryDeadLetter;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -29,7 +26,7 @@ public class RetryDeadLetterTaskAccess  extends AbstractTaskAccess<RetryDeadLett
     @Override
     public boolean supports(String operationType) {
         DbTypeEnum dbType = getDbType();
-        return OperationTypeEnum.RETRY_TASK.name().equals(operationType)
+        return OperationTypeEnum.RETRY_DEAD_LETTER.name().equals(operationType)
                 && ALLOW_DB.contains(dbType.getDb());
     }
 

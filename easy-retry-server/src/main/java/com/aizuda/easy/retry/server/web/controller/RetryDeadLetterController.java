@@ -40,14 +40,14 @@ public class RetryDeadLetterController {
     }
 
     @LoginRequired
-    @GetMapping("/batch/rollback")
-    public boolean rollback(@RequestBody @Validated BatchRollBackRetryDeadLetterVO rollBackRetryDeadLetterVO) {
+    @PostMapping("/batch/rollback")
+    public int rollback(@RequestBody @Validated BatchRollBackRetryDeadLetterVO rollBackRetryDeadLetterVO) {
         return retryDeadLetterService.rollback(rollBackRetryDeadLetterVO);
     }
 
     @LoginRequired
     @DeleteMapping("/batch")
-    public boolean deleteById(@RequestBody @Validated BatchDeleteRetryDeadLetterVO deadLetterVO) {
+    public int batchDelete(@RequestBody @Validated BatchDeleteRetryDeadLetterVO deadLetterVO) {
         return retryDeadLetterService.batchDelete(deadLetterVO);
     }
 }

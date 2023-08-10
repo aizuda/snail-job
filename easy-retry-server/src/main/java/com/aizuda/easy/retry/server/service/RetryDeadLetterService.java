@@ -18,7 +18,7 @@ public interface RetryDeadLetterService {
 
     RetryDeadLetterResponseVO getRetryDeadLetterById(String groupName, Long id);
 
-    boolean rollback(BatchRollBackRetryDeadLetterVO rollBackRetryDeadLetterVO);
+    int rollback(BatchRollBackRetryDeadLetterVO rollBackRetryDeadLetterVO);
 
-    boolean batchDelete(BatchDeleteRetryDeadLetterVO deadLetterVO);
+    int batchDelete(BatchDeleteRetryDeadLetterVO deadLetterVO);
 }

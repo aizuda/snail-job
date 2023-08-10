@@ -5,11 +5,11 @@ spring:
     active: dev
   datasource:
     name: easy_retry
-    url:  jdbc:postgresql://localhost:5432/easy_retry
-    username: postgres
+    url:  jdbc:mysql://localhost:3306/easy_retry?useSSL=false&characterEncoding=utf8&useUnicode=true
+    username: root
     password: root
-    driver-class-name: org.postgresql.Driver
     type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       connection-timeout: 30000
       minimum-idle: 5
@@ -47,7 +47,7 @@ easy-retry:
   callback: # 回调配置
     max-count: 288 #回调最大执行次数
     trigger-interval: 900 #间隔时间
-  db-type: postgres
+  db-type: mysql #当前使用的数据库
 
 
 

@@ -48,10 +48,20 @@
       </a-form>
     </div>
 
+    <div class="table-operator">
+      <a-dropdown v-action:edit v-if="selectedRowKeys.length > 0">
+        <a-menu slot="overlay" @click="onClick">
+          <a-menu-item key="1"><a-icon type="delete" />回滚</a-menu-item>
+          <a-menu-item key="2"><a-icon type="edit" />删除</a-menu-item>
+        </a-menu>
+        <a-button style="margin-left: 8px"> 批量操作 <a-icon type="down" /> </a-button>
+      </a-dropdown>
+    </div>
+
     <s-table
       ref="table"
       size="default"
-      rowKey="key"
+      :rowKey="(record) => record.id"
       :columns="columns"
       :data="loadData"
       :alert="options.alert"
@@ -107,7 +117,13 @@
 
 import ATextarea from 'ant-design-vue/es/input/TextArea'
 import AInput from 'ant-design-vue/es/input/Input'
-import { getAllGroupNameList, getRetryDeadLetterPage, getSceneList, rollbackRetryDeadLetter, deleteRetryDeadLetter } from '@/api/manage'
+import {
+  getAllGroupNameList,
+  getRetryDeadLetterPage,
+  getSceneList,
+  rollbackRetryDeadLetter,
+  deleteRetryDeadLetter
+} from '@/api/manage'
 
 import { STable } from '@/components'
 import moment from 'moment'
@@ -234,12 +250,12 @@ export default {
       })
     },
     handleRollback (record) {
-      rollbackRetryDeadLetter(record.id, { groupName: record.groupName }).then(res => {
+      rollbackRetryDeadLetter({ groupName: record.groupName, ids: [ record.id ] }).then(res => {
         this.$refs.table.refresh(true)
       })
     },
     handleDelete (record) {
-      deleteRetryDeadLetter(record.id, { groupName: record.groupName }).then(res => {
+      deleteRetryDeadLetter({ groupName: record.groupName, ids: [ record.id ] }).then(res => {
         this.$refs.table.refresh(true)
       })
     },
@@ -248,6 +264,52 @@ export default {
     },
     handleInfo (record) {
       this.$router.push({ path: '/retry-dead-letter/info', query: { id: record.id, groupName: record.groupName } })
+    },
+    onClick ({ key }) {
+      if (key === '1') {
+        this.handlerRollback()
+        return
+      }
+
+      if (key === '2') {
+        this.handlerDel()
+      }
+    },
+    handlerRollback () {
+      var that = this
+      this.$confirm({
+        title: '您要回滚这些数据吗?',
+        content: h => <div style="color:red;">请确认是否回滚!</div>,
+        onOk () {
+          rollbackRetryDeadLetter({ groupName: that.selectedRows[0].groupName, ids: that.selectedRowKeys }).then(res => {
+            that.$refs.table.refresh(true)
+            that.$message.success(`成功删除${res.data}条数据`)
+            that.selectedRowKeys = []
+          })
+        },
+        onCancel () {},
+        class: 'test'
+      })
+    },
+    handlerDel () {
+      var that = this
+      this.$confirm({
+        title: '您要删除这些数据吗?',
+        content: h => <div style="color:red;">删除后数据不可恢复，请确认!</div>,
+        onOk () {
+          deleteRetryDeadLetter({ groupName: that.selectedRows[0].groupName, ids: that.selectedRowKeys }).then(res => {
+            that.$refs.table.refresh(true)
+            that.$message.success(`成功删除${res.data}条数据`)
+            that.selectedRowKeys = []
+          })
+        },
+        onCancel () {},
+        class: 'test'
+      })
+    },
+    onSelectChange (selectedRowKeys, selectedRows) {
+      this.selectedRowKeys = selectedRowKeys
+      this.selectedRows = selectedRows
     }
   }
 }
