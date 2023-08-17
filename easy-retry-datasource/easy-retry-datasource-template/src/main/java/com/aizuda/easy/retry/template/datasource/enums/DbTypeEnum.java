@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.template.datasource.enums;
 
-import com.aizuda.easy.retry.client.core.exception.EasyRetryClientException;
+import com.aizuda.easy.retry.template.datasource.exception.EasyRetryDatasourceException;
 import com.baomidou.mybatisplus.annotation.DbType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -32,6 +32,6 @@ public enum DbTypeEnum {
             }
         }
 
-        throw new EasyRetryClientException("暂不支持此数据库 [{}]", db);
+        throw new EasyRetryDatasourceException("暂不支持此数据库 [{}]", db);
     }
 }

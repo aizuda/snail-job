@@ -38,7 +38,7 @@
         </dependency>
         <dependency>
             <groupId>com.aizuda</groupId>
-            <artifactId>easy-retry-client-core</artifactId>
+            <artifactId>easy-retry-common-server-api</artifactId>
         </dependency>
     </dependencies>
 

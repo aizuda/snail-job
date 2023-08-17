@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.template.datasource.utils;
 
-import com.aizuda.easy.retry.client.core.exception.EasyRetryClientException;
+import com.aizuda.easy.retry.template.datasource.exception.EasyRetryDatasourceException;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.GroupConfigMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.GroupConfig;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -58,7 +58,7 @@ public class RequestDataHelper {
     public static void setPartition(String groupName) {
 
         if (StringUtils.isBlank(groupName)) {
-            throw new EasyRetryClientException("组名称不能为空");
+            throw new EasyRetryDatasourceException("组名称不能为空");
         }
 
         GroupConfigMapper groupConfigMapper = SpringContext.getBeanByType(GroupConfigMapper.class);
@@ -66,7 +66,7 @@ public class RequestDataHelper {
         GroupConfig groupConfig = groupConfigMapper.selectOne(new LambdaQueryWrapper<GroupConfig>()
                 .eq(GroupConfig::getGroupName, groupName));
         if (Objects.isNull(groupConfig)) {
-            throw new EasyRetryClientException("groupName:[{}]不存在", groupName);
+            throw new EasyRetryDatasourceException("groupName:[{}]不存在", groupName);
         }
 
         setPartition(groupConfig.getGroupPartition());

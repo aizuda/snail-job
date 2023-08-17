@@ -27,14 +27,6 @@
         </dependency>
         <dependency>
             <groupId>com.aizuda</groupId>
-            <artifactId>easy-retry-common-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus-boot-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.aizuda</groupId>
             <artifactId>easy-retry-datasource-template</artifactId>
         </dependency>
         <dependency>
