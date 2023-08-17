@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.server.support.generator.task;
 
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.lang.Pair;
+import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.enums.DelayLevelEnum;
@@ -66,6 +67,8 @@ public abstract class AbstractGenerator implements TaskGenerator {
         List<RetryTask> retryTasks = retryTaskAccess.list(taskContext.getGroupName(), new LambdaQueryWrapper<RetryTask>()
                 .eq(RetryTask::getGroupName, taskContext.getGroupName())
                 .eq(RetryTask::getSceneName, taskContext.getSceneName())
+                .eq(RetryTask::getRetryStatus, RetryStatusEnum.RUNNING.getStatus())
+                .eq(RetryTask::getTaskType, TaskTypeEnum.RETRY.getType())
                 .in(RetryTask::getIdempotentId, idempotentIdSet));
 
         Map<String/*幂等ID*/, List<RetryTask>> retryTaskMap = retryTasks.stream().collect(Collectors.groupingBy(RetryTask::getIdempotentId));
