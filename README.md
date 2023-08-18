@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://www.easyretry.com">
-   <img alt="Easy-Retry-Logo" src="doc/images/logo.png">
+   <img alt="Easy-Retry-Logo" src="doc/images/logo.png" width="350px">
   </a>
 </p>
 
