@@ -301,12 +301,8 @@ public class SlidingWindow<T> {
      * 滑动窗口关闭
      */
     public void end() {
-        ConcurrentLinkedQueue<T> list = saveData.get(LocalDateTime.now());
-        if (CollectionUtils.isEmpty(list)) {
-            return;
-        }
-        for (Listener<T> listener : listeners) {
-            listener.handler(new ArrayList<>(list));
+        for (final LocalDateTime windowPeriod : saveData.keySet()) {
+            doHandlerListener(windowPeriod);
         }
     }
 
