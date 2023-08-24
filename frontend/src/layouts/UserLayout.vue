@@ -9,7 +9,8 @@
         <div class="top">
           <div class="header">
             <a href="/">
-              <span class="title">Easy-Retry</span>
+              <img src="../../public/logo.png" class="logo">
+              <span class="title">Easy Retry</span>
               <span class="desc" style="font-size: 16px; font-weight: 600;">v{{ version }}</span>
             </a>
           </div>

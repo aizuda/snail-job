@@ -21,7 +21,7 @@
     -->
     <template v-slot:menuHeaderRender>
       <div>
-        <!--        <logo-svg />-->
+        <img src="../../public/logo.png">
         <h1>{{ title }}</h1>
       </div>
     </template>

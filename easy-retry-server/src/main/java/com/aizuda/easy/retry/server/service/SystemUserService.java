@@ -29,4 +29,6 @@ public interface SystemUserService {
     PageResult<List<SystemUserResponseVO>> getSystemUserPageList(SystemUserQueryVO queryVO);
 
     SystemUserResponseVO getSystemUserByUserName(String username);
+
+    boolean delUser(Long id);
 }

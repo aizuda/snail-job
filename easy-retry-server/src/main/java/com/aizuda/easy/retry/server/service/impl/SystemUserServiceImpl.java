@@ -204,6 +204,11 @@ public class SystemUserServiceImpl implements SystemUserService {
         return getUserInfo(systemUser);
     }
 
+    @Override
+    public boolean delUser(final Long id) {
+        return 1 == systemUserMapper.deleteById(id);
+    }
+
     /**
      * 生成Token
      */

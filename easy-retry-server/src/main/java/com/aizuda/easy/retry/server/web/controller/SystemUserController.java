@@ -61,4 +61,10 @@ public class SystemUserController {
     public SystemUserResponseVO getSystemUserByUserName(@RequestParam("username") String username) {
         return systemUserService.getSystemUserByUserName(username);
     }
+
+    @LoginRequired
+    @DeleteMapping("/user/{id}")
+    public boolean delUser(@PathVariable("id") Long id) {
+        return systemUserService.delUser(id);
+    }
 }

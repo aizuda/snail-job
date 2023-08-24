@@ -30,6 +30,7 @@ const api = {
   sceneList: '/scene-config/list',
   notifyConfigList: '/notify-config/list',
   userPageList: '/user/page/list',
+  delUser: '/user/',
   saveUser: '/user',
   systemUserByUserName: '/user/username/user-info',
   countTask: '/dashboard/task/count',
@@ -46,6 +47,13 @@ const api = {
 
 export default api
 
+export function delUser (id) {
+  return request({
+    url: api.delUser + id,
+    method: 'delete'
+  })
+}
+
 export function updateGroupStatus (data) {
   return request({
     url: api.updateGroupStatus,
@@ -59,13 +67,6 @@ export function getRetryTaskLogMessagePage (parameter) {
     url: api.retryTaskLogMessagePage,
     method: 'get',
     params: parameter
-  })
-}
-
-export function consumerGroup (ip, port) {
-  return request({
-    url: `http://${ip}:${port}` + api.consumerGroup,
-    method: 'get'
   })
 }
 

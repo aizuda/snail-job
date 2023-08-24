@@ -21,16 +21,16 @@
 
     <div class="table-operator">
       <a-button type="primary" icon="plus" @click="handleNew()">新建</a-button>
-      <a-dropdown v-action:edit v-if="selectedRowKeys.length > 0">
-        <a-menu slot="overlay">
-          <a-menu-item key="1"><a-icon type="delete" />删除</a-menu-item>
-          <!-- lock | unlock -->
-          <a-menu-item key="2"><a-icon type="lock" />锁定</a-menu-item>
-        </a-menu>
-        <a-button style="margin-left: 8px">
-          批量操作 <a-icon type="down" />
-        </a-button>
-      </a-dropdown>
+      <!--      <a-dropdown v-action:edit v-if="selectedRowKeys.length > 0">-->
+      <!--        <a-menu slot="overlay">-->
+      <!--          <a-menu-item key="1"><a-icon type="delete" />删除</a-menu-item>-->
+      <!--          &lt;!&ndash; lock | unlock &ndash;&gt;-->
+      <!--          <a-menu-item key="2"><a-icon type="lock" />锁定</a-menu-item>-->
+      <!--        </a-menu>-->
+      <!--        <a-button style="margin-left: 8px">-->
+      <!--          批量操作 <a-icon type="down" />-->
+      <!--        </a-button>-->
+      <!--      </a-dropdown>-->
     </div>
 
     <s-table
@@ -42,8 +42,8 @@
       :alert="options.alert"
       :rowSelection="options.rowSelection"
     >
-      <span slot="serial" slot-scope="text, record, index">
-        {{ index + 1 }}
+      <span slot="serial" slot-scope="text, record">
+        {{ record.id }}
       </span>
       <span slot="groupNameList" slot-scope="text, record">
         {{ record.role === 2 ? '所有组' : text.toString() }}
@@ -55,7 +55,14 @@
         <template>
           <a @click="handleEdit(record)">编辑</a>
           <a-divider type="vertical" />
-          <a href="javascript:;">删除</a>
+          <a-popconfirm
+            title="是否确认删除这个用户吗?"
+            ok-text="删除"
+            cancel-text="取消"
+            @confirm="handleDel(record)">
+            <a href="javascript:;">删除</a>
+          </a-popconfirm>
+
         </template>
       </span>
     </s-table>
@@ -68,7 +75,7 @@ import ATextarea from 'ant-design-vue/es/input/TextArea'
 import AInput from 'ant-design-vue/es/input/Input'
 import moment from 'moment'
 // 动态切换组件
-import { getUserPage } from '@/api/manage'
+import { getUserPage, delUser } from '@/api/manage'
 import { STable } from '@/components'
 
 export default {
@@ -158,6 +165,12 @@ export default {
     handleEdit (record) {
       this.record = record || ''
       this.$router.push({ path: '/user-form', query: { username: record.username } })
+    },
+    handleDel (record) {
+      delUser(record.id).then(res => {
+        this.$refs.table.refresh(true)
+        this.$message.success(`删除成功`)
+      })
     },
     handleGoBack () {
       this.record = ''
