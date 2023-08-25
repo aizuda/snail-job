@@ -53,7 +53,15 @@ public class LocalRetryStrategies extends AbstractRetryStrategies {
     @Override
     protected Consumer<Object> doRetrySuccessConsumer(RetryerResultContext context) {
         return o -> {
-            LogUtils.debug(log, "doRetrySuccessConsumer 重试成功");
+
+            RetryerInfo retryerInfo = context.getRetryerInfo();
+            if (retryerInfo.getRetryType() == RetryType.ONLY_REMOTE) {
+                // 若是远程重试模式，采用直接上报服务端
+                // 这里标志结果为失败，是表示数据并未重试成功，等待服务端重试
+                context.setRetryResultStatusEnum(RetryResultStatusEnum.FAILURE);
+            } else {
+                LogUtils.debug(log, "doRetrySuccessConsumer 重试成功");
+            }
         };
     }
 
@@ -157,7 +165,7 @@ public class LocalRetryStrategies extends AbstractRetryStrategies {
                                     LogUtils.error(log,"[{}] 执行本地重试失败，第[{}]次重试", retryerInfo.getScene(), attempt.getAttemptNumber());
                                     break;
                                 case ONLY_REMOTE:
-                                    LogUtils.error(log,"[{}] 执行远程重试失败，第[{}]次重试", retryerInfo.getScene(),  attempt.getAttemptNumber());
+                                    LogUtils.error(log,"[{}] 执行上报服务端失败，第[{}]次重试", retryerInfo.getScene(),  attempt.getAttemptNumber());
                                     break;
                                 default:
                                     throw new EasyRetryClientException("异常重试模式 [{}]", retryType.name());
@@ -168,10 +176,10 @@ public class LocalRetryStrategies extends AbstractRetryStrategies {
                             switch (retryType) {
                                 case ONLY_LOCAL:
                                 case LOCAL_REMOTE:
-                                    LogUtils.info(log,"[{}] 执行本地重试成功.", retryerInfo.getScene(), attempt.getAttemptNumber());
+                                    LogUtils.info(log,"[{}] 执行本地重试成功.", retryerInfo.getScene());
                                     break;
                                 case ONLY_REMOTE:
-                                    LogUtils.info(log,"[{}] 执行远程成功.", retryerInfo.getScene(),  attempt.getAttemptNumber());
+                                    LogUtils.info(log,"[{}] 执行上报服务端成功.", retryerInfo.getScene());
                                     break;
                                 default:
                                     throw new EasyRetryClientException("异常重试模式 [{}]", retryType.name());

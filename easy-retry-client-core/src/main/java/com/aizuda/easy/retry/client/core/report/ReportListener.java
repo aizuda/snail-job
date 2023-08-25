@@ -92,7 +92,7 @@ public class ReportListener implements Listener<RetryTaskDTO> {
                     public <V> void onRetry(Attempt<V> attempt) {
 
                         if (attempt.hasException()) {
-                            LogUtils.error(log,"easy-retry 上报服务端失败，第[{}]次尝试上报 ", attempt.getAttemptNumber(), attempt.getExceptionCause());
+                            LogUtils.error(log,"EasyRetry上报异常数据时接口发生异常，第[{}]次尝试上报 ", attempt.getAttemptNumber(), attempt.getExceptionCause());
                         }
 
                     }

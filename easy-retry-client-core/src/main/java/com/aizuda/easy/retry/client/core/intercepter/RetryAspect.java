@@ -20,6 +20,7 @@ import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.model.EasyRetryHeaders;
 import com.aizuda.easy.retry.common.core.util.EnvironmentUtils;
 import com.aizuda.easy.retry.server.model.dto.ConfigDTO;
+import com.google.common.base.Defaults;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -97,6 +98,13 @@ public class RetryAspect implements Ordered {
             // 重试成功直接返回结果 若注解配置了isThrowException=false 则不抛出异常
             if (retryerResultContext.getRetryResultStatusEnum().getStatus().equals(RetryResultStatusEnum.SUCCESS.getStatus())
             || !retryable.isThrowException()) {
+
+                // 若返回值是NULL且是基本类型则返回默认值
+                MethodSignature signature = (MethodSignature) point.getSignature();
+                if (Objects.isNull(retryerResultContext.getResult()) && signature.getReturnType().isPrimitive()) {
+                  return Defaults.defaultValue(signature.getReturnType());
+                }
+
                 return retryerResultContext.getResult();
             }
         }
