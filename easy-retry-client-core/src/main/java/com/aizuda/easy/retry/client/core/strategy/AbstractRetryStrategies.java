@@ -7,6 +7,7 @@ import com.aizuda.easy.retry.client.core.config.EasyRetryProperties;
 import com.aizuda.easy.retry.client.core.event.EasyRetryListener;
 import com.aizuda.easy.retry.client.core.intercepter.RetrySiteSnapshot;
 import com.aizuda.easy.retry.client.core.Report;
+import com.aizuda.easy.retry.client.core.intercepter.RetrySiteSnapshot.EnumStatus;
 import com.aizuda.easy.retry.client.core.loader.EasyRetrySpiLoader;
 import com.aizuda.easy.retry.common.core.alarm.Alarm;
 import com.aizuda.easy.retry.common.core.alarm.AlarmContext;
@@ -90,6 +91,9 @@ public abstract class AbstractRetryStrategies implements RetryStrategy {
 
             // 预警
             sendMessage(e);
+        } finally {
+            // 重试调度完成
+            RetrySiteSnapshot.setStatus(EnumStatus.COMPLETE.getStatus());
         }
 
         return retryerResultContext;
@@ -132,8 +136,6 @@ public abstract class AbstractRetryStrategies implements RetryStrategy {
             } catch (Exception e) {
                 log.error("失败监听者模式 处理失败 ", e);
                 throw e;
-            } finally {
-                RetrySiteSnapshot.setStatus(RetrySiteSnapshot.EnumStatus.COMPLETE.getStatus());
             }
 
             doGetRetryErrorConsumer(retryerInfo, params).accept(throwable);

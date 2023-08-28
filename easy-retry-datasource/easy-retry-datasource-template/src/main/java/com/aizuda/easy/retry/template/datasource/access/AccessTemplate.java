@@ -8,10 +8,12 @@ import com.aizuda.easy.retry.template.datasource.access.task.RetryTaskAccess;
 import com.aizuda.easy.retry.template.datasource.enums.OperationTypeEnum;
 import com.aizuda.easy.retry.template.datasource.exception.EasyRetryDatasourceException;
 import com.aizuda.easy.retry.template.datasource.persistence.po.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * 数据处理模板类
@@ -22,9 +24,18 @@ import java.util.List;
  */
 @Component
 public class AccessTemplate {
+    protected Map<String, Access> REGISTER_ACCESS = new HashMap<>();
+    public AccessTemplate(List<Access> accesses) {
 
-    @Autowired
-    private List<Access> accesses;
+        for (Access access : accesses) {
+            for (final OperationTypeEnum typeEnum : OperationTypeEnum.values()) {
+                if (access.supports(typeEnum.name())) {
+                    REGISTER_ACCESS.put(typeEnum.name(), access);
+                    break;
+                }
+            }
+        }
+    }
 
     /**
      * 获取重试任务操作类
@@ -32,14 +43,8 @@ public class AccessTemplate {
      * @return {@link RetryTaskAccess} 重试任务操作类
      */
     public TaskAccess<RetryTask> getRetryTaskAccess() {
-
-        for (Access access : accesses) {
-            if (access.supports(OperationTypeEnum.RETRY_TASK.name())) {
-                return (TaskAccess<RetryTask>) access;
-            }
-        }
-
-        throw new EasyRetryDatasourceException("not supports operation type");
+        return (TaskAccess<RetryTask>) Optional.ofNullable(REGISTER_ACCESS.get(OperationTypeEnum.RETRY_TASK.name()))
+            .orElseThrow(() -> new EasyRetryDatasourceException("not supports operation type"));
     }
 
     /**
@@ -48,14 +53,10 @@ public class AccessTemplate {
      * @return {@link RetryDeadLetterTaskAccess} 获取死信任务操作类
      */
     public TaskAccess<RetryDeadLetter> getRetryDeadLetterAccess() {
+        return (TaskAccess<RetryDeadLetter>) Optional.ofNullable(
+                REGISTER_ACCESS.get(OperationTypeEnum.RETRY_DEAD_LETTER.name()))
+            .orElseThrow(() -> new EasyRetryDatasourceException("not supports operation type"));
 
-        for (Access access : accesses) {
-            if (access.supports(OperationTypeEnum.RETRY_DEAD_LETTER.name())) {
-                return (TaskAccess<RetryDeadLetter>) access;
-            }
-        }
-
-        throw new EasyRetryDatasourceException("not supports operation type");
     }
 
     /**
@@ -64,14 +65,9 @@ public class AccessTemplate {
      * @return {@link SceneConfigAccess} 获取场景配置操作类
      */
     public ConfigAccess<SceneConfig> getSceneConfigAccess() {
+        return (ConfigAccess<SceneConfig>) Optional.ofNullable(REGISTER_ACCESS.get(OperationTypeEnum.SCENE.name()))
+            .orElseThrow(() -> new EasyRetryDatasourceException("not supports operation type"));
 
-        for (Access access : accesses) {
-            if (access.supports(OperationTypeEnum.SCENE.name())) {
-                return (ConfigAccess<SceneConfig>) access;
-            }
-        }
-
-        throw new EasyRetryDatasourceException("not supports operation type");
     }
 
     /**
@@ -80,14 +76,9 @@ public class AccessTemplate {
      * @return {@link GroupConfigAccess} 获取组配置操作类
      */
     public ConfigAccess<GroupConfig> getGroupConfigAccess() {
+        return (ConfigAccess<GroupConfig>) Optional.ofNullable(REGISTER_ACCESS.get(OperationTypeEnum.GROUP.name()))
+            .orElseThrow(() -> new EasyRetryDatasourceException("not supports operation type"));
 
-        for (Access access : accesses) {
-            if (access.supports(OperationTypeEnum.GROUP.name())) {
-                return (ConfigAccess<GroupConfig>) access;
-            }
-        }
-
-        throw new EasyRetryDatasourceException("not supports operation type");
     }
 
     /**
@@ -96,14 +87,9 @@ public class AccessTemplate {
      * @return {@link NotifyConfigAccess} 获取通知配置操作类
      */
     public ConfigAccess<NotifyConfig> getNotifyConfigAccess() {
+        return (ConfigAccess<NotifyConfig>) Optional.ofNullable(REGISTER_ACCESS.get(OperationTypeEnum.NOTIFY.name()))
+            .orElseThrow(() -> new EasyRetryDatasourceException("not supports operation type"));
 
-        for (Access access : accesses) {
-            if (access.supports(OperationTypeEnum.GROUP.name())) {
-                return (ConfigAccess<NotifyConfig>) access;
-            }
-        }
-
-        throw new EasyRetryDatasourceException("not supports operation type");
     }
 
 }

@@ -52,16 +52,7 @@ public class EasyRetrySpiLoader {
     /**
      * 加载重试现场记录上下文SPI类
      *
-     * @return {@link SimpleEasyRetryListener} 默认序列化类为SimpleEasyRetryListener
-     */
-    public static <T> RetrySiteSnapshotContext<T> loadRetrySiteSnapshotContext(RetrySiteSnapshotContext<T> context) {
-        return Optional.ofNullable(ServiceLoaderUtil.loadFirst(RetrySiteSnapshotContext.class)).orElse(context);
-    }
-
-    /**
-     * 加载重试现场记录上下文SPI类
-     *
-     * @return {@link SimpleEasyRetryListener} 默认序列化类为SimpleEasyRetryListener
+     * @return {@link RetrySiteSnapshotContext} 默认序列化类为ThreadLockRetrySiteSnapshotContext
      */
     public static <T> RetrySiteSnapshotContext<T> loadRetrySiteSnapshotContext() {
         return Optional.ofNullable(ServiceLoaderUtil.loadFirst(RetrySiteSnapshotContext.class)).orElse(new ThreadLockRetrySiteSnapshotContext<T>(new ThreadLocal<>()));

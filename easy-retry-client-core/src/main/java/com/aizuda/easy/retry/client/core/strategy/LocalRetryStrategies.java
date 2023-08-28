@@ -162,10 +162,10 @@ public class LocalRetryStrategies extends AbstractRetryStrategies {
                             switch (retryType) {
                                 case ONLY_LOCAL:
                                 case LOCAL_REMOTE:
-                                    LogUtils.error(log,"[{}] 执行本地重试失败，第[{}]次重试", retryerInfo.getScene(), attempt.getAttemptNumber());
+                                    LogUtils.error(log,"[{}] 本地重试执行失败，第[{}]次重试", retryerInfo.getScene(), attempt.getAttemptNumber());
                                     break;
                                 case ONLY_REMOTE:
-                                    LogUtils.error(log,"[{}] 执行上报服务端失败，第[{}]次重试", retryerInfo.getScene(),  attempt.getAttemptNumber());
+                                    LogUtils.error(log,"[{}] 上报服务端执行失败，第[{}]次重试", retryerInfo.getScene(),  attempt.getAttemptNumber());
                                     break;
                                 default:
                                     throw new EasyRetryClientException("异常重试模式 [{}]", retryType.name());
@@ -176,10 +176,10 @@ public class LocalRetryStrategies extends AbstractRetryStrategies {
                             switch (retryType) {
                                 case ONLY_LOCAL:
                                 case LOCAL_REMOTE:
-                                    LogUtils.info(log,"[{}] 执行本地重试成功.", retryerInfo.getScene());
+                                    LogUtils.info(log,"[{}] 本地重试执行成功.", retryerInfo.getScene());
                                     break;
                                 case ONLY_REMOTE:
-                                    LogUtils.info(log,"[{}] 执行上报服务端成功.", retryerInfo.getScene());
+                                    LogUtils.info(log,"[{}] 上报服务端执行成功.", retryerInfo.getScene());
                                     break;
                                 default:
                                     throw new EasyRetryClientException("异常重试模式 [{}]", retryType.name());

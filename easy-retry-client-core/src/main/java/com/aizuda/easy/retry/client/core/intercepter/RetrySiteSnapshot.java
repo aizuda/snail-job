@@ -9,6 +9,7 @@ import com.aizuda.easy.retry.common.core.model.EasyRetryHeaders;
 import lombok.Getter;
 
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * 重试现场记录器
@@ -31,7 +32,7 @@ public class RetrySiteSnapshot {
     /**
      * 重试状态
      */
-    private static final RetrySiteSnapshotContext<Integer> RETRY_STATUS = EasyRetrySpiLoader.loadRetrySiteSnapshotContext(new ThreadLockRetrySiteSnapshotContext<>(ThreadLocal.withInitial(EnumStatus.COMPLETE::getStatus)));
+    private static final RetrySiteSnapshotContext<Integer> RETRY_STATUS = EasyRetrySpiLoader.loadRetrySiteSnapshotContext();
 
     /**
      * 重试请求头
@@ -77,7 +78,8 @@ public class RetrySiteSnapshot {
     }
 
     public static Integer getStatus() {
-        return RETRY_STATUS.get();
+        return Optional.ofNullable(RETRY_STATUS.get()).orElse(EnumStatus.COMPLETE.status);
+
     }
 
     public static void setStatus(Integer status) {
