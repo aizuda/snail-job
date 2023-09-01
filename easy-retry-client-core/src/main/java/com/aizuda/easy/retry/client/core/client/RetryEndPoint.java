@@ -26,6 +26,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.aizuda.easy.retry.client.model.DispatchRetryDTO;
 import com.aizuda.easy.retry.client.model.DispatchRetryResultDTO;
 import com.aizuda.easy.retry.client.model.RetryCallbackDTO;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +40,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.util.Objects;
 
@@ -83,6 +83,7 @@ public class RetryEndPoint {
 
         try {
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            // TODO 此处用ThreadLocal替换
             HttpServletRequest request = Objects.requireNonNull(attributes).getRequest();
             request.setAttribute("attemptNumber", executeReqDto.getRetryCount());
 

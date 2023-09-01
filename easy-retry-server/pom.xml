@@ -15,7 +15,7 @@
     <description>easy-retry-server</description>
 
     <properties>
-        <java.version>1.8</java.version>
+        <java.version>17</java.version>
         <maven.deploy.skip>true</maven.deploy.skip>
         <org.mapstruct.version>1.5.3.Final</org.mapstruct.version>
         <akka.version>2.6.21</akka.version>

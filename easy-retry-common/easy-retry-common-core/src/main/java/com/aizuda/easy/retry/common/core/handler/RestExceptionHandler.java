@@ -3,6 +3,8 @@ package com.aizuda.easy.retry.common.core.handler;
 import com.aizuda.easy.retry.common.core.exception.AbstractError;
 import com.aizuda.easy.retry.common.core.exception.BaseEasyRetryException;
 import com.aizuda.easy.retry.common.core.model.Result;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -17,9 +19,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -77,13 +76,11 @@ public class RestExceptionHandler {
     /**
      * validation 异常处理
      *
-     * @param request 请求体
      * @param e       ConstraintViolationException
      * @return HttpResult
      */
     @ExceptionHandler(ConstraintViolationException.class)
-    public Result onConstraintViolationException(HttpServletRequest request,
-                                                 ConstraintViolationException e) {
+    public Result onConstraintViolationException(ConstraintViolationException e) {
         Set<ConstraintViolation<?>> constraintViolations = e.getConstraintViolations();
         if (!CollectionUtils.isEmpty(constraintViolations)) {
             String errorMessage = constraintViolations
@@ -99,13 +96,11 @@ public class RestExceptionHandler {
     /**
      * validation 异常处理
      *
-     * @param request 请求体
      * @param e       MethodArgumentNotValidException
      * @return HttpResult
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public Result onMethodArgumentNotValidException(HttpServletRequest request,
-                                                    MethodArgumentNotValidException e) {
+    public Result onMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         BindingResult result = e.getBindingResult();
         if (result != null && result.hasErrors()) {
             StringBuilder sb = new StringBuilder();

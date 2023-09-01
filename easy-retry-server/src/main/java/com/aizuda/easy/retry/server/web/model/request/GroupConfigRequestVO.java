@@ -4,7 +4,7 @@ import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.server.enums.IdGeneratorMode;
 import lombok.Data;
 
-import javax.validation.constraints.*;
+import jakarta.validation.constraints.*;
 import java.util.List;
 
 /**
