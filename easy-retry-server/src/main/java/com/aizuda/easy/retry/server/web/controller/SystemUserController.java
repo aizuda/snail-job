@@ -9,10 +9,10 @@ import com.aizuda.easy.retry.server.web.annotation.LoginUser;
 import com.aizuda.easy.retry.server.web.annotation.LoginRequired;
 import com.aizuda.easy.retry.server.web.annotation.RoleEnum;
 import com.aizuda.easy.retry.server.web.model.response.SystemUserResponseVO;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.List;
 
 /**

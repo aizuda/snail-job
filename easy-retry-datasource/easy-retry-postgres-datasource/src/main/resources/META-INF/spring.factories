@@ -1,2 +1,0 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  com.aizuda.easy.retry.postgres.datasource.config.EasyRetryPostgresAutoConfiguration

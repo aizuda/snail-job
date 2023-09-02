@@ -8,12 +8,15 @@ import com.aizuda.easy.retry.client.core.cache.RetryerInfoCache;
 import com.aizuda.easy.retry.client.core.callback.RetryCompleteCallback;
 import com.aizuda.easy.retry.client.core.exception.EasyRetryClientException;
 import com.aizuda.easy.retry.client.core.intercepter.RetrySiteSnapshot;
+import com.aizuda.easy.retry.client.core.loader.EasyRetrySpiLoader;
 import com.aizuda.easy.retry.client.core.retryer.RetryerInfo;
 import com.aizuda.easy.retry.client.core.retryer.RetryerResultContext;
-import com.aizuda.easy.retry.client.core.loader.EasyRetrySpiLoader;
 import com.aizuda.easy.retry.client.core.serializer.JacksonSerializer;
 import com.aizuda.easy.retry.client.core.strategy.RetryStrategy;
+import com.aizuda.easy.retry.client.model.DispatchRetryDTO;
+import com.aizuda.easy.retry.client.model.DispatchRetryResultDTO;
 import com.aizuda.easy.retry.client.model.GenerateRetryIdempotentIdDTO;
+import com.aizuda.easy.retry.client.model.RetryCallbackDTO;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.enums.RetryResultStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
@@ -23,10 +26,6 @@ import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.model.dto.ConfigDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.aizuda.easy.retry.client.model.DispatchRetryDTO;
-import com.aizuda.easy.retry.client.model.DispatchRetryResultDTO;
-import com.aizuda.easy.retry.client.model.RetryCallbackDTO;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,8 +36,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.lang.reflect.Method;
 import java.util.Objects;
@@ -82,10 +79,7 @@ public class RetryEndPoint {
         DispatchRetryResultDTO executeRespDto = new DispatchRetryResultDTO();
 
         try {
-            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-            // TODO 此处用ThreadLocal替换
-            HttpServletRequest request = Objects.requireNonNull(attributes).getRequest();
-            request.setAttribute("attemptNumber", executeReqDto.getRetryCount());
+            RetrySiteSnapshot.setAttemptNumber(executeReqDto.getRetryCount());
 
             RetryerResultContext retryerResultContext = retryStrategy.openRetry(executeReqDto.getScene(),
                 executeReqDto.getExecutorName(), deSerialize);
@@ -105,7 +99,6 @@ public class RetryEndPoint {
             if (Objects.nonNull(retryerResultContext.getResult())) {
                 executeRespDto.setResultJson(JsonUtil.toJsonString(retryerResultContext.getResult()));
             }
-
 
         } finally {
             RetrySiteSnapshot.removeAll();
