@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.server.support.generator.task;
 
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.lang.Pair;
+import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
@@ -120,6 +121,7 @@ public abstract class AbstractGenerator implements TaskGenerator {
         retryTask.setGroupName(taskContext.getGroupName());
         retryTask.setSceneName(taskContext.getSceneName());
         retryTask.setRetryStatus(initStatus(taskContext));
+        retryTask.setBizNo(Optional.ofNullable(retryTask.getBizNo()).orElse(StrUtil.EMPTY));
         retryTask.setCreateDt(now);
         retryTask.setUpdateDt(now);
 

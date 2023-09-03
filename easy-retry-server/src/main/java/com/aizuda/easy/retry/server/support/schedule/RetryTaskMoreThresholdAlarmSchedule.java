@@ -38,8 +38,8 @@ import java.util.List;
 public class RetryTaskMoreThresholdAlarmSchedule extends AbstractSchedule implements Lifecycle {
     private static String retryTaskMoreThresholdTextMessageFormatter =
         "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 重试数据监控</font>  \n" +
-            "> 名称:{}  \n" +
-            "> 时间:{}  \n" +
+            "> 组名称:{}  \n" +
+            "> 告警时间:{}  \n" +
             "> **共计:{}**  \n";
 
     private final EasyRetryAlarmFactory easyRetryAlarmFactory;

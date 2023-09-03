@@ -127,13 +127,14 @@ public class ExecCallbackUnitActor extends AbstractActor  {
 
         // 回调参数
         RetryCallbackDTO retryCallbackDTO = new RetryCallbackDTO();
-        retryCallbackDTO.setIdempotentId(retryTask.getIdempotentId());
+        retryCallbackDTO.setIdempotentId(callbackTask.getIdempotentId());
+        // 重试任务的状态
         retryCallbackDTO.setRetryStatus(retryTask.getRetryStatus());
-        retryCallbackDTO.setArgsStr(retryTask.getArgsStr());
-        retryCallbackDTO.setScene(retryTask.getSceneName());
-        retryCallbackDTO.setGroup(retryTask.getGroupName());
-        retryCallbackDTO.setExecutorName(retryTask.getExecutorName());
-        retryCallbackDTO.setUniqueId(retryTask.getUniqueId());
+        retryCallbackDTO.setArgsStr(callbackTask.getArgsStr());
+        retryCallbackDTO.setScene(callbackTask.getSceneName());
+        retryCallbackDTO.setGroup(callbackTask.getGroupName());
+        retryCallbackDTO.setExecutorName(callbackTask.getExecutorName());
+        retryCallbackDTO.setUniqueId(callbackTask.getUniqueId());
 
         RpcClient rpcClient = RequestBuilder.<RpcClient, Result>newBuilder()
             .hostPort(serverNode.getHostPort())
