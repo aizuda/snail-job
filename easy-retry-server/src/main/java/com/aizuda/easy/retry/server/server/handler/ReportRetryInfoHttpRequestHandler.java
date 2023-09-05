@@ -115,7 +115,7 @@ public class ReportRetryInfoHttpRequestHandler extends PostHttpRequestHandler {
                     TaskContext taskContext = new TaskContext();
                     taskContext.setSceneName(sceneName);
                     taskContext.setGroupName(set.stream().findFirst().get());
-                    taskContext.setTaskInfos(TaskContextConverter.INSTANCE.toTaskContextInfo(retryTaskList));
+                    taskContext.setTaskInfos(TaskContextConverter.INSTANCE.toTaskContextInfo(retryTaskDTOS));
 
                     // 生成任务
                     taskGenerator.taskGenerator(taskContext);
