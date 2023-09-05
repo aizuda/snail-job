@@ -49,16 +49,16 @@ public class EasyRetryInterceptor implements MethodInterceptor, AfterAdvice, Ser
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private static String retryErrorMoreThresholdTextMessageFormatter =
-        "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 重试组件异常</font>  \r\n" +
-            "> 名称:{}  \r\n" +
-            "> 时间:{}  \r\n" +
-            "> 异常:{}  \n";
+            "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 重试组件异常</font>  \r\n" +
+                    "> 名称:{}  \r\n" +
+                    "> 时间:{}  \r\n" +
+                    "> 异常:{}  \n";
 
     private final StandardEnvironment standardEnvironment;
     private final RetryStrategy retryStrategy;
 
     public EasyRetryInterceptor(StandardEnvironment standardEnvironment,
-        RetryStrategy localRetryStrategies) {
+                                RetryStrategy localRetryStrategies) {
         this.standardEnvironment = standardEnvironment;
         this.retryStrategy = localRetryStrategies;
     }
@@ -86,10 +86,10 @@ public class EasyRetryInterceptor implements MethodInterceptor, AfterAdvice, Ser
         } finally {
 
             LogUtils.debug(log, "Start retrying. traceId:[{}] scene:[{}] executorClassName:[{}]", traceId,
-                retryable.scene(), executorClassName);
+                    retryable.scene(), executorClassName);
             // 入口则开始处理重试
             retryerResultContext = doHandlerRetry(invocation, traceId, retryable, executorClassName, methodEntrance,
-                throwable);
+                    throwable);
         }
 
         LogUtils.debug(log, "Method return value is [{}]. traceId:[{}]", result, traceId, throwable);
@@ -98,8 +98,8 @@ public class EasyRetryInterceptor implements MethodInterceptor, AfterAdvice, Ser
         if (Objects.nonNull(retryerResultContext)) {
             // 重试成功直接返回结果 若注解配置了isThrowException=false 则不抛出异常
             if (retryerResultContext.getRetryResultStatusEnum().getStatus()
-                .equals(RetryResultStatusEnum.SUCCESS.getStatus())
-                || !retryable.isThrowException()) {
+                    .equals(RetryResultStatusEnum.SUCCESS.getStatus())
+                    || !retryable.isThrowException()) {
 
                 // 若返回值是NULL且是基本类型则返回默认值
                 Method method = invocation.getMethod();
@@ -121,32 +121,32 @@ public class EasyRetryInterceptor implements MethodInterceptor, AfterAdvice, Ser
 
 
     private RetryerResultContext doHandlerRetry(MethodInvocation invocation, String traceId, Retryable retryable,
-        String executorClassName, String methodEntrance, Throwable throwable) {
+                                                String executorClassName, String methodEntrance, Throwable throwable) {
 
         if (!RetrySiteSnapshot.isMethodEntrance(methodEntrance)
-            || RetrySiteSnapshot.isRunning()
-            || Objects.isNull(throwable)
-            // 重试流量不开启重试
-            || RetrySiteSnapshot.isRetryFlow()
-            // 下游响应不重试码，不开启重试
-            || RetrySiteSnapshot.isRetryForStatusCode()
-            // 匹配异常信息
-            || !validate(throwable, RetryerInfoCache.get(retryable.scene(), executorClassName))
+                || RetrySiteSnapshot.isRunning()
+                || Objects.isNull(throwable)
+                // 重试流量不开启重试
+                || RetrySiteSnapshot.isRetryFlow()
+                // 下游响应不重试码，不开启重试
+                || RetrySiteSnapshot.isRetryForStatusCode()
+                // 匹配异常信息
+                || !validate(throwable, RetryerInfoCache.get(retryable.scene(), executorClassName))
         ) {
             if (!RetrySiteSnapshot.isMethodEntrance(methodEntrance)) {
                 LogUtils.debug(log, "Non-method entry does not enable local retries. traceId:[{}] [{}]", traceId,
-                    RetrySiteSnapshot.getMethodEntrance());
+                        RetrySiteSnapshot.getMethodEntrance());
             } else if (RetrySiteSnapshot.isRunning()) {
                 LogUtils.debug(log, "Existing running retry tasks do not enable local retries. traceId:[{}] [{}]",
-                    traceId, EnumStage.valueOfStage(RetrySiteSnapshot.getStage()));
+                        traceId, EnumStage.valueOfStage(RetrySiteSnapshot.getStage()));
             } else if (Objects.isNull(throwable)) {
                 LogUtils.debug(log, "No exception, no local retries. traceId:[{}]", traceId);
             } else if (RetrySiteSnapshot.isRetryFlow()) {
                 LogUtils.debug(log, "Retry traffic does not enable local retries. traceId:[{}] [{}]", traceId,
-                    RetrySiteSnapshot.getRetryHeader());
+                        RetrySiteSnapshot.getRetryHeader());
             } else if (RetrySiteSnapshot.isRetryForStatusCode()) {
                 LogUtils.debug(log, "Existing exception retry codes do not enable local retries. traceId:[{}]",
-                    traceId);
+                        traceId);
             } else if (!validate(throwable, RetryerInfoCache.get(retryable.scene(), executorClassName))) {
                 LogUtils.debug(log, "Exception mismatch. traceId:[{}]", traceId);
             } else {
@@ -159,7 +159,7 @@ public class EasyRetryInterceptor implements MethodInterceptor, AfterAdvice, Ser
     }
 
     private RetryerResultContext openRetry(MethodInvocation point, String traceId, Retryable retryable,
-        String executorClassName, Throwable throwable) {
+                                           String executorClassName, Throwable throwable) {
 
         try {
 
@@ -167,7 +167,7 @@ public class EasyRetryInterceptor implements MethodInterceptor, AfterAdvice, Ser
             initHeaders(retryable);
 
             RetryerResultContext context = retryStrategy.openRetry(retryable.scene(), executorClassName,
-                point.getArguments());
+                    point.getArguments());
             if (RetryResultStatusEnum.SUCCESS.getStatus().equals(context.getRetryResultStatusEnum().getStatus())) {
                 LogUtils.debug(log, "local retry successful. traceId:[{}] result:[{}]", traceId, context.getResult());
             } else {
@@ -201,16 +201,16 @@ public class EasyRetryInterceptor implements MethodInterceptor, AfterAdvice, Ser
 
         try {
             ConfigDTO.Notify notifyAttribute = GroupVersionCache.getNotifyAttribute(
-                NotifySceneEnum.CLIENT_COMPONENT_ERROR.getNotifyScene());
+                    NotifySceneEnum.CLIENT_COMPONENT_ERROR.getNotifyScene());
             if (Objects.nonNull(notifyAttribute)) {
                 AlarmContext context = AlarmContext.build()
-                    .text(retryErrorMoreThresholdTextMessageFormatter,
-                        EnvironmentUtils.getActiveProfile(),
-                        EasyRetryProperties.getGroup(),
-                        LocalDateTime.now().format(formatter),
-                        e.getMessage())
-                    .title("retry component handling exception:[{}]", EasyRetryProperties.getGroup())
-                    .notifyAttribute(notifyAttribute.getNotifyAttribute());
+                        .text(retryErrorMoreThresholdTextMessageFormatter,
+                                EnvironmentUtils.getActiveProfile(),
+                                EasyRetryProperties.getGroup(),
+                                LocalDateTime.now().format(formatter),
+                                e.getMessage())
+                        .title("retry component handling exception:[{}]", EasyRetryProperties.getGroup())
+                        .notifyAttribute(notifyAttribute.getNotifyAttribute());
 
                 Alarm<AlarmContext> alarmType = SpringContext.getBeanByType(EasyRetryAlarmFactory.class).getAlarmType(notifyAttribute.getNotifyType());
                 alarmType.asyncSendMessage(context);
@@ -249,7 +249,7 @@ public class EasyRetryInterceptor implements MethodInterceptor, AfterAdvice, Ser
     @Override
     public int getOrder() {
         String order = standardEnvironment
-            .getProperty("easy-retry.aop.order", String.valueOf(Ordered.HIGHEST_PRECEDENCE));
+                .getProperty("easy-retry.aop.order", String.valueOf(Ordered.HIGHEST_PRECEDENCE));
         return Integer.parseInt(order);
     }
 
