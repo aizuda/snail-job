@@ -72,20 +72,22 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
 
             if (CollectionUtils.isEmpty(podIpSet)) {
                 LogUtils.error(log, "server node is empty");
-                return;
             }
 
             Set<String> allGroup = CacheGroup.getAllGroup();
             if (CollectionUtils.isEmpty(allGroup)) {
                 LogUtils.error(log, "group is empty");
+            }
+
+            // 删除本地缓存的所有组信息
+            CacheConsumerGroup.clear();
+            if(CollectionUtils.isEmpty(podIpSet) || CollectionUtils.isEmpty(allGroup)) {
                 return;
             }
 
             List<String> allocate = new AllocateMessageQueueConsistentHash()
                     .allocate(ServerRegister.CURRENT_CID, new ArrayList<>(allGroup), new ArrayList<>(podIpSet));
 
-            // 删除本地缓存的所有组信息
-            CacheConsumerGroup.clear();
             // 重新覆盖本地分配的组信息
             for (String groupName : allocate) {
                 CacheConsumerGroup.addOrUpdate(groupName);

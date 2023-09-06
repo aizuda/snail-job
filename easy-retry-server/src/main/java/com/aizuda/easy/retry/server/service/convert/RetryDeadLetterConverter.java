@@ -2,9 +2,7 @@ package com.aizuda.easy.retry.server.service.convert;
 
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryDeadLetter;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Mappings;
+import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 
 import java.util.List;
@@ -19,10 +17,14 @@ public interface RetryDeadLetterConverter {
 
     RetryDeadLetterConverter INSTANCE = Mappers.getMapper(RetryDeadLetterConverter.class);
 
+    @Named("ignoreId")
     @Mappings({
-        @Mapping(source = "id", target = "id", ignore = true),
-        @Mapping(source = "createDt", target = "createDt", ignore = true)
+            @Mapping(target = "id", ignore = true),
+            @Mapping(target = "createDt", ignore = true)
     })
+    RetryDeadLetter toRetryDeadLetter(RetryTask retryTasks);
+
+    @IterableMapping(qualifiedByName = "ignoreId")
     List<RetryDeadLetter> toRetryDeadLetter(List<RetryTask> retryTasks);
 
 }

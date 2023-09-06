@@ -237,7 +237,10 @@ public class RetryServiceImpl implements RetryService {
         }
 
         List<RetryDeadLetter> retryDeadLetters = RetryDeadLetterConverter.INSTANCE.toRetryDeadLetter(retryTasks);
-
+        LocalDateTime now = LocalDateTime.now();
+        for (RetryDeadLetter retryDeadLetter : retryDeadLetters) {
+            retryDeadLetter.setCreateDt(now);
+        }
         Assert.isTrue(retryDeadLetters.size() == accessTemplate
                         .getRetryDeadLetterAccess().batchInsert(groupName, retryDeadLetters),
             () -> new EasyRetryServerException("插入死信队列失败 [{}]", JsonUtil.toJsonString(retryDeadLetters)));

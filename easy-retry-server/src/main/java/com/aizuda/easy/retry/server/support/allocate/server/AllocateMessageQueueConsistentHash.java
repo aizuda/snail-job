@@ -58,10 +58,10 @@ public class AllocateMessageQueueConsistentHash implements ServerLoadBalance {
             throw new IllegalArgumentException("currentCID is empty");
         }
         if (CollectionUtils.isEmpty(groupList)) {
-            throw new IllegalArgumentException("mqAll is null or mqAll empty");
+            throw new IllegalArgumentException("groupList is null or groupList empty");
         }
         if (CollectionUtils.isEmpty(serverList)) {
-            throw new IllegalArgumentException("cidAll is null or cidAll empty");
+            throw new IllegalArgumentException("serverList is null or serverList empty");
         }
 
         List<String> result = new ArrayList<>();
