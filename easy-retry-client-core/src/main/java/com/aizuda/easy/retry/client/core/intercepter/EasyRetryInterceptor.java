@@ -1,10 +1,15 @@
 package com.aizuda.easy.retry.client.core.intercepter;
 
+import cn.hutool.core.lang.Assert;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.client.core.annotation.Retryable;
 import com.aizuda.easy.retry.client.core.cache.GroupVersionCache;
+import com.aizuda.easy.retry.client.core.cache.RetryerInfoCache;
 import com.aizuda.easy.retry.client.core.config.EasyRetryProperties;
+import com.aizuda.easy.retry.client.core.exception.EasyRetryClientException;
 import com.aizuda.easy.retry.client.core.intercepter.RetrySiteSnapshot.EnumStage;
+import com.aizuda.easy.retry.client.core.retryer.RetryerInfo;
 import com.aizuda.easy.retry.client.core.retryer.RetryerResultContext;
 import com.aizuda.easy.retry.client.core.strategy.RetryStrategy;
 import com.aizuda.easy.retry.common.core.alarm.Alarm;
@@ -13,12 +18,14 @@ import com.aizuda.easy.retry.common.core.alarm.EasyRetryAlarmFactory;
 import com.aizuda.easy.retry.common.core.enums.NotifySceneEnum;
 import com.aizuda.easy.retry.common.core.enums.RetryResultStatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.core.model.EasyRetryHeaders;
 import com.aizuda.easy.retry.common.core.util.EnvironmentUtils;
 import com.aizuda.easy.retry.server.model.dto.ConfigDTO;
 import com.google.common.base.Defaults;
 import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.aspectj.lang.ProceedingJoinPoint;
 import org.springframework.aop.AfterAdvice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -26,12 +33,14 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -120,6 +129,8 @@ public class EasyRetryInterceptor implements MethodInterceptor, AfterAdvice, Ser
             || RetrySiteSnapshot.isRetryFlow()
             // 下游响应不重试码，不开启重试
             || RetrySiteSnapshot.isRetryForStatusCode()
+            // 匹配异常信息
+            || !validate(throwable, RetryerInfoCache.get(retryable.scene(), executorClassName))
         ) {
             if (!RetrySiteSnapshot.isMethodEntrance(methodEntrance)) {
                 LogUtils.debug(log, "Non-method entry does not enable local retries. traceId:[{}] [{}]", traceId, RetrySiteSnapshot.getMethodEntrance());
@@ -131,6 +142,8 @@ public class EasyRetryInterceptor implements MethodInterceptor, AfterAdvice, Ser
                 LogUtils.debug(log, "Retry traffic does not enable local retries. traceId:[{}] [{}]", traceId,  RetrySiteSnapshot.getRetryHeader());
             } else if (RetrySiteSnapshot.isRetryForStatusCode()) {
                 LogUtils.debug(log, "Existing exception retry codes do not enable local retries. traceId:[{}]", traceId);
+            } else if(!validate(throwable, RetryerInfoCache.get(retryable.scene(), executorClassName))) {
+                LogUtils.debug(log, "Exception mismatch. traceId:[{}]", traceId);
             } else {
                 LogUtils.debug(log, "Unknown situations do not enable local retry scenarios. traceId:[{}]", traceId);
             }
@@ -144,10 +157,14 @@ public class EasyRetryInterceptor implements MethodInterceptor, AfterAdvice, Ser
 
         try {
 
+            // 标识重试流量
+            initHeaders(retryable);
+
             RetryerResultContext context = retryStrategy.openRetry(retryable.scene(), executorClassName, point.getArguments());
-            LogUtils.info(log,"local retry result. traceId:[{}] message:[{}]", traceId, context);
             if (RetryResultStatusEnum.SUCCESS.getStatus().equals(context.getRetryResultStatusEnum().getStatus())) {
                 LogUtils.debug(log, "local retry successful. traceId:[{}] result:[{}]", traceId, context.getResult());
+            } else {
+                LogUtils.info(log,"local retry result. traceId:[{}] throwable:[{}]", traceId, context.getThrowable());
             }
 
             return context;
@@ -162,6 +179,15 @@ public class EasyRetryInterceptor implements MethodInterceptor, AfterAdvice, Ser
         }
 
         return null;
+    }
+
+    private void initHeaders(final Retryable retryable) {
+
+        EasyRetryHeaders easyRetryHeaders = new EasyRetryHeaders();
+        easyRetryHeaders.setEasyRetry(Boolean.TRUE);
+        easyRetryHeaders.setEasyRetryId(IdUtil.getSnowflakeNextIdStr());
+        easyRetryHeaders.setDdl(GroupVersionCache.getDdl(retryable.scene()));
+        RetrySiteSnapshot.setRetryHeader(easyRetryHeaders);
     }
 
     private void sendMessage(Exception e) {
@@ -205,13 +231,10 @@ public class EasyRetryInterceptor implements MethodInterceptor, AfterAdvice, Ser
         }
 
         if (retryable == null) {
-            //返回当前类或父类或接口方法上标注的注解对象
+            // 返回当前类或父类或接口方法上标注的注解对象
             retryable = AnnotatedElementUtils.findMergedAnnotation(method, Retryable.class);
         }
-        if (retryable == null) {
-            //返回当前类或父类或接口上标注的注解对象
-            retryable = AnnotatedElementUtils.findMergedAnnotation(method.getDeclaringClass(), Retryable.class);
-        }
+
         return retryable;
     }
 
@@ -222,4 +245,33 @@ public class EasyRetryInterceptor implements MethodInterceptor, AfterAdvice, Ser
         return Integer.parseInt(order);
     }
 
+
+
+    private boolean validate(Throwable throwable, RetryerInfo retryerInfo) {
+
+        Set<Class<? extends Throwable>> exclude = retryerInfo.getExclude();
+        Set<Class<? extends Throwable>> include = retryerInfo.getInclude();
+
+        if (CollectionUtils.isEmpty(include) && CollectionUtils.isEmpty(exclude)) {
+            return true;
+        }
+
+        for (Class<? extends Throwable> e : include) {
+            if (e.isAssignableFrom(throwable.getClass())) {
+                return true;
+            }
+        }
+
+        if (!CollectionUtils.isEmpty(exclude)) {
+            for (Class<? extends Throwable> e : exclude) {
+                if (e.isAssignableFrom(throwable.getClass())) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        return false;
+    }
 }
