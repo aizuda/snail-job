@@ -46,9 +46,6 @@ public class EasyRetryPointcutAdvisor extends AbstractPointcutAdvisor implements
         }
     }
 
-    /**
-     * Set the {@code BeanFactory} to be used when looking up executors by qualifier.
-     */
     @Override
     public void setBeanFactory(BeanFactory beanFactory) {
         this.beanFactory = beanFactory;
@@ -78,7 +75,7 @@ public class EasyRetryPointcutAdvisor extends AbstractPointcutAdvisor implements
     }
 
     protected Pointcut buildPointcut() {
-        return new AnnotationClassOrMethodPointcut(Retryable.class);
+        return new EasyRetryAnnotationMethodPointcut(Retryable.class);
     }
 
     @Override
@@ -86,13 +83,13 @@ public class EasyRetryPointcutAdvisor extends AbstractPointcutAdvisor implements
         return pointcut;
     }
 
-    private final class AnnotationClassOrMethodPointcut extends StaticMethodMatcherPointcut {
+    private static final class EasyRetryAnnotationMethodPointcut extends StaticMethodMatcherPointcut {
 
         private final MethodMatcher methodResolver;
 
-        AnnotationClassOrMethodPointcut(Class<? extends Annotation> annotationType) {
+        EasyRetryAnnotationMethodPointcut(Class<? extends Annotation> annotationType) {
             this.methodResolver = new AnnotationMethodMatcher(annotationType, true);
-            setClassFilter(new AnnotationClassOrMethodFilter(annotationType));
+            setClassFilter(new EasyRetryAnnotationClassOrMethodFilter(annotationType));
         }
 
         @Override
@@ -105,21 +102,20 @@ public class EasyRetryPointcutAdvisor extends AbstractPointcutAdvisor implements
             if (this == other) {
                 return true;
             }
-            if (!(other instanceof AnnotationClassOrMethodPointcut)) {
+            if (!(other instanceof EasyRetryAnnotationMethodPointcut)) {
                 return false;
             }
-            AnnotationClassOrMethodPointcut otherAdvisor = (AnnotationClassOrMethodPointcut) other;
+            EasyRetryAnnotationMethodPointcut otherAdvisor = (EasyRetryAnnotationMethodPointcut) other;
             return ObjectUtils.nullSafeEquals(this.methodResolver, otherAdvisor.methodResolver);
         }
 
     }
 
-
-    private static final class AnnotationClassOrMethodFilter extends AnnotationClassFilter {
+    private static final class EasyRetryAnnotationClassOrMethodFilter extends AnnotationClassFilter {
 
         private final AnnotationMethodsResolver methodResolver;
 
-        AnnotationClassOrMethodFilter(Class<? extends Annotation> annotationType) {
+        EasyRetryAnnotationClassOrMethodFilter(Class<? extends Annotation> annotationType) {
             super(annotationType, true);
             this.methodResolver = new AnnotationMethodsResolver(annotationType);
         }
@@ -133,7 +129,7 @@ public class EasyRetryPointcutAdvisor extends AbstractPointcutAdvisor implements
 
     private static class AnnotationMethodsResolver {
 
-        private Class<? extends Annotation> annotationType;
+        private final Class<? extends Annotation> annotationType;
 
         public AnnotationMethodsResolver(Class<? extends Annotation> annotationType) {
             this.annotationType = annotationType;
@@ -154,7 +150,5 @@ public class EasyRetryPointcutAdvisor extends AbstractPointcutAdvisor implements
         }
 
     }
-
-
 
 }
