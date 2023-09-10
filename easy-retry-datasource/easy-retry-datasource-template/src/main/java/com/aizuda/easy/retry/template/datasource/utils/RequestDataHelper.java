@@ -1,12 +1,12 @@
 package com.aizuda.easy.retry.template.datasource.utils;
 
+import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.template.datasource.exception.EasyRetryDatasourceException;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.GroupConfigMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.GroupConfig;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
-import org.apache.commons.lang.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -57,7 +57,7 @@ public class RequestDataHelper {
      */
     public static void setPartition(String groupName) {
 
-        if (StringUtils.isBlank(groupName)) {
+        if (StrUtil.isBlank(groupName)) {
             throw new EasyRetryDatasourceException("组名称不能为空");
         }
 

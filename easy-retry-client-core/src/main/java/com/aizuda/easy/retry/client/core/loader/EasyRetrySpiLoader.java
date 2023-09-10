@@ -1,10 +1,12 @@
 package com.aizuda.easy.retry.client.core.loader;
 
 import cn.hutool.core.util.ServiceLoaderUtil;
+import com.aizuda.easy.retry.client.core.ExpressionEngine;
 import com.aizuda.easy.retry.client.core.RetryArgSerializer;
 import com.aizuda.easy.retry.client.core.event.EasyRetryListener;
 import com.aizuda.easy.retry.client.core.event.SimpleEasyRetryListener;
 import com.aizuda.easy.retry.client.core.RetrySiteSnapshotContext;
+import com.aizuda.easy.retry.client.core.expression.SpELExpressionEngine;
 import com.aizuda.easy.retry.client.core.intercepter.ThreadLockRetrySiteSnapshotContext;
 import com.aizuda.easy.retry.client.core.serializer.JacksonSerializer;
 import org.springframework.util.CollectionUtils;
@@ -56,6 +58,15 @@ public class EasyRetrySpiLoader {
      */
     public static <T> RetrySiteSnapshotContext<T> loadRetrySiteSnapshotContext() {
         return Optional.ofNullable(ServiceLoaderUtil.loadFirst(RetrySiteSnapshotContext.class)).orElse(new ThreadLockRetrySiteSnapshotContext<T>(new ThreadLocal<>()));
+    }
+
+    /**
+     * 表达式引擎SPI类
+     *
+     * @return {@link SpELExpressionEngine} 默认序列化类为SpELExpressionEngine
+     */
+    public static ExpressionEngine loadExpressionEngine() {
+        return Optional.ofNullable(ServiceLoaderUtil.loadFirst(ExpressionEngine.class)).orElse(new SpELExpressionEngine());
     }
 
 }

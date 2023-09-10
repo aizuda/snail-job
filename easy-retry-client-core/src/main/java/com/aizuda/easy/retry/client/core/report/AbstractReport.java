@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.client.core.report;
 
 import cn.hutool.core.lang.Assert;
+import com.aizuda.easy.retry.client.core.ExpressionEngine;
 import com.aizuda.easy.retry.client.core.IdempotentIdGenerate;
 import com.aizuda.easy.retry.client.core.Report;
 import com.aizuda.easy.retry.client.core.RetryArgSerializer;
@@ -8,9 +9,8 @@ import com.aizuda.easy.retry.client.core.cache.RetryerInfoCache;
 import com.aizuda.easy.retry.client.core.config.EasyRetryProperties;
 import com.aizuda.easy.retry.client.core.exception.EasyRetryClientException;
 import com.aizuda.easy.retry.client.core.intercepter.RetrySiteSnapshot;
-import com.aizuda.easy.retry.client.core.retryer.RetryerInfo;
 import com.aizuda.easy.retry.client.core.loader.EasyRetrySpiLoader;
-import com.aizuda.easy.retry.client.core.spel.SPELParamFunction;
+import com.aizuda.easy.retry.client.core.retryer.RetryerInfo;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.model.IdempotentIdContext;
 import com.aizuda.easy.retry.server.model.dto.RetryTaskDTO;
@@ -18,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Method;
-import java.util.function.Function;
 
 /**
  * 上报抽象类
@@ -80,9 +79,9 @@ public abstract class AbstractReport implements Report {
         retryTaskDTO.setGroupName(EasyRetryProperties.getGroup());
         retryTaskDTO.setSceneName(scene);
 
-        String bizNoSpel = retryerInfo.getBizNo();
-        Function<Object[], String> spelParamFunction = new SPELParamFunction(bizNoSpel, executorMethod);
-        retryTaskDTO.setBizNo(spelParamFunction.apply(args));
+        String expression = retryerInfo.getBizNo();
+        ExpressionEngine expressionEngine = EasyRetrySpiLoader.loadExpressionEngine();
+        retryTaskDTO.setBizNo((String) expressionEngine.eval(expression, args, executorMethod));
         return retryTaskDTO;
     }
 

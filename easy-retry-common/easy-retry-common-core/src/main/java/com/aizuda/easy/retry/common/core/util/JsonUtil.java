@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.common.core.util;
 
+import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.exception.EasyRetryCommonException;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -7,19 +8,15 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
-import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 
 /**
  * @author: byteblogs
@@ -109,8 +106,8 @@ public class JsonUtil {
      * 内部类，处理Json
      */
     public static class JsonMapper {
-        private static String YYYY_MM_DD_HH_MM_SS = "yyyy-MM-dd HH:mm:ss";
-        private static String YYYY_MM_DD = "yyyy-MM-dd";
+        private final static String YYYY_MM_DD_HH_MM_SS = "yyyy-MM-dd HH:mm:ss";
+        private final static String YYYY_MM_DD = "yyyy-MM-dd";
 
         private static ObjectMapper objectMapper = jacksonObjectMapper();
 
@@ -148,14 +145,14 @@ public class JsonUtil {
                 @Override
                 public LocalDate deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
                     String value = jsonParser.getValueAsString();
-                    return StringUtils.isBlank(value) ? null : LocalDateTime.parse(value, DateTimeFormatter.ofPattern(YYYY_MM_DD_HH_MM_SS)).toLocalDate();
+                    return StrUtil.isBlank(value) ? null : LocalDateTime.parse(value, DateTimeFormatter.ofPattern(YYYY_MM_DD_HH_MM_SS)).toLocalDate();
                 }
             });
             javaTimeModule.addDeserializer(LocalDateTime.class, new JsonDeserializer<LocalDateTime>() {
                 @Override
                 public LocalDateTime deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
                     String value = jsonParser.getValueAsString();
-                    return StringUtils.isBlank(value) ? null : LocalDateTime.parse(value, DateTimeFormatter.ofPattern(YYYY_MM_DD_HH_MM_SS));
+                    return StrUtil.isBlank(value) ? null : LocalDateTime.parse(value, DateTimeFormatter.ofPattern(YYYY_MM_DD_HH_MM_SS));
                 }
             });
 
