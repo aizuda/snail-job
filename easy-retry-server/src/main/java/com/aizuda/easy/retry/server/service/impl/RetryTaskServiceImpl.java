@@ -1,20 +1,32 @@
 package com.aizuda.easy.retry.server.service.impl;
 
+import akka.actor.ActorRef;
 import cn.hutool.core.lang.Assert;
+import com.aizuda.easy.retry.client.model.DispatchRetryResultDTO;
 import com.aizuda.easy.retry.client.model.GenerateRetryIdempotentIdDTO;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
+import com.aizuda.easy.retry.server.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.enums.TaskGeneratorScene;
+import com.aizuda.easy.retry.server.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.model.dto.RetryTaskDTO;
 import com.aizuda.easy.retry.server.service.RetryTaskService;
 import com.aizuda.easy.retry.server.service.convert.RetryTaskResponseVOConverter;
 import com.aizuda.easy.retry.server.service.convert.TaskContextConverter;
+import com.aizuda.easy.retry.server.support.IdempotentStrategy;
+import com.aizuda.easy.retry.server.support.WaitStrategy;
+import com.aizuda.easy.retry.server.support.context.CallbackRetryContext;
+import com.aizuda.easy.retry.server.support.context.MaxAttemptsPersistenceRetryContext;
 import com.aizuda.easy.retry.server.support.generator.TaskGenerator;
 import com.aizuda.easy.retry.server.support.generator.task.TaskContext;
 import com.aizuda.easy.retry.server.support.handler.ClientNodeAllocateHandler;
+import com.aizuda.easy.retry.server.support.retry.RetryBuilder;
+import com.aizuda.easy.retry.server.support.retry.RetryExecutor;
+import com.aizuda.easy.retry.server.support.strategy.FilterStrategies;
+import com.aizuda.easy.retry.server.support.strategy.StopStrategies;
 import com.aizuda.easy.retry.server.support.strategy.WaitStrategies;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
 import com.aizuda.easy.retry.server.web.model.request.*;
@@ -26,12 +38,14 @@ import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskLog
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLog;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLogMessage;
+import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
 import com.aizuda.easy.retry.template.datasource.utils.RequestDataHelper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -68,6 +82,9 @@ public class RetryTaskServiceImpl implements RetryTaskService {
     private AccessTemplate accessTemplate;
     @Autowired
     private List<TaskGenerator> taskGenerators;
+    @Autowired
+    @Qualifier("bitSetIdempotentStrategyHandler")
+    protected IdempotentStrategy<String, Integer> idempotentStrategy;
 
     @Override
     public PageResult<List<RetryTaskResponseVO>> getRetryTaskPage(RetryTaskQueryVO queryVO) {
@@ -286,4 +303,107 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         return waitInsertList.size();
     }
 
+    @Override
+    public boolean manualTriggerRetryTask(ManualTriggerTaskRequestVO requestVO) {
+
+        List<String> uniqueIds = requestVO.getUniqueIds();
+        String groupName = requestVO.getGroupName();
+
+        List<RetryTask> list = accessTemplate.getRetryTaskAccess().list(requestVO.getGroupName(),
+                new LambdaQueryWrapper<RetryTask>()
+                        .eq(RetryTask::getTaskType, TaskTypeEnum.RETRY.getType())
+                        .in(RetryTask::getUniqueId, uniqueIds));
+        Assert.notEmpty(list, () -> new EasyRetryServerException("没有可执行的任务"));
+
+        for (RetryTask retryTask : list) {
+            MaxAttemptsPersistenceRetryContext<Result<DispatchRetryResultDTO>> retryContext = new MaxAttemptsPersistenceRetryContext<>();
+            retryContext.setRetryTask(retryTask);
+            retryContext.setSceneBlacklist(accessTemplate.getSceneConfigAccess().getBlacklist(groupName));
+            retryContext.setServerNode(clientNodeAllocateHandler.getServerNode(retryTask.getGroupName()));
+
+            retryCountIncrement(retryTask);
+
+            RetryExecutor<Result<DispatchRetryResultDTO>> executor = RetryBuilder.<Result<DispatchRetryResultDTO>>newBuilder()
+                    .withStopStrategy(StopStrategies.stopException())
+                    .withStopStrategy(StopStrategies.stopResultStatusCode())
+                    .withWaitStrategy(getRetryTaskWaitWaitStrategy(retryTask.getGroupName(), retryTask.getSceneName()))
+                    .withFilterStrategy(FilterStrategies.bitSetIdempotentFilter(idempotentStrategy))
+                    .withFilterStrategy(FilterStrategies.checkAliveClientPodFilter())
+                    .withFilterStrategy(FilterStrategies.rebalanceFilterStrategies())
+                    .withFilterStrategy(FilterStrategies.rateLimiterFilter())
+                    .withRetryContext(retryContext)
+                    .build();
+
+            Assert.isTrue(executor.filter(), () -> new EasyRetryServerException("任务:{}不满足执行条件.具体原因请查看系统日志", retryTask.getUniqueId()));
+
+            productExecUnitActor(executor, ActorGenerator.execUnitActor());
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean manualTriggerCallbackTask(ManualTriggerTaskRequestVO requestVO) {
+        List<String> uniqueIds = requestVO.getUniqueIds();
+        String groupName = requestVO.getGroupName();
+
+        List<RetryTask> list = accessTemplate.getRetryTaskAccess().list(requestVO.getGroupName(),
+                new LambdaQueryWrapper<RetryTask>()
+                        .eq(RetryTask::getTaskType, TaskTypeEnum.CALLBACK.getType())
+                        .in(RetryTask::getUniqueId, uniqueIds));
+        Assert.notEmpty(list, () -> new EasyRetryServerException("没有可执行的任务"));
+
+        for (RetryTask retryTask : list) {
+
+            CallbackRetryContext<Result> retryContext = new CallbackRetryContext<>();
+            retryContext.setRetryTask(retryTask);
+            retryContext.setSceneBlacklist(accessTemplate.getSceneConfigAccess().getBlacklist(groupName));
+            retryContext.setServerNode(clientNodeAllocateHandler.getServerNode(retryTask.getGroupName()));
+
+            retryCountIncrement(retryTask);
+
+            RetryExecutor<Result> executor = RetryBuilder.<Result>newBuilder()
+                    .withStopStrategy(StopStrategies.stopException())
+                    .withStopStrategy(StopStrategies.stopResultStatusCode())
+                    .withWaitStrategy(getCallbackWaitWaitStrategy())
+                    .withFilterStrategy(FilterStrategies.bitSetIdempotentFilter(idempotentStrategy))
+                    .withFilterStrategy(FilterStrategies.checkAliveClientPodFilter())
+                    .withFilterStrategy(FilterStrategies.rebalanceFilterStrategies())
+                    .withFilterStrategy(FilterStrategies.rateLimiterFilter())
+                    .withRetryContext(retryContext)
+                    .build();
+
+            Assert.isTrue(executor.filter(), () -> new EasyRetryServerException("任务:{}不满足执行条件.具体原因请查看系统日志", retryTask.getUniqueId()));
+
+            productExecUnitActor(executor, ActorGenerator.execCallbackUnitActor());
+        }
+
+        return true;
+    }
+
+    private WaitStrategy getRetryTaskWaitWaitStrategy(String groupName, String sceneName) {
+
+        SceneConfig sceneConfig = accessTemplate.getSceneConfigAccess().getSceneConfigByGroupNameAndSceneName(groupName, sceneName);
+        Integer backOff = sceneConfig.getBackOff();
+
+        return WaitStrategies.WaitStrategyEnum.getWaitStrategy(backOff);
+    }
+
+    private WaitStrategy getCallbackWaitWaitStrategy() {
+        // 回调失败每15min重试一次
+        return WaitStrategies.WaitStrategyEnum.getWaitStrategy(WaitStrategies.WaitStrategyEnum.FIXED.getBackOff());
+    }
+
+    private void retryCountIncrement(RetryTask retryTask) {
+        Integer retryCount = retryTask.getRetryCount();
+        retryTask.setRetryCount(++retryCount);
+    }
+
+    private void productExecUnitActor(RetryExecutor retryExecutor, ActorRef actorRef) {
+        String groupIdHash = retryExecutor.getRetryContext().getRetryTask().getGroupName();
+        Long retryId = retryExecutor.getRetryContext().getRetryTask().getId();
+        idempotentStrategy.set(groupIdHash, retryId.intValue());
+
+        actorRef.tell(retryExecutor, actorRef);
+    }
 }

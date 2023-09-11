@@ -19,6 +19,8 @@ const api = {
   batchUpdate: '/retry-task/batch',
   deleteRetryTask: '/retry-task/batch',
   updateRetryTaskStatus: '/retry-task/status',
+  manualTriggerRetryTask: '/retry-task/manual/trigger/retry/task',
+  manualTriggerCallbackTask: '/retry-task/manual/trigger/callback/task',
   retryTaskLogPage: '/retry-task-log/list',
   retryTaskLogMessagePage: '/retry-task-log/message/list',
   retryTaskLogById: '/retry-task-log/',
@@ -205,6 +207,22 @@ export function updateRetryTaskStatus (data) {
   return request({
     url: api.updateRetryTaskStatus,
     method: 'put',
+    data
+  })
+}
+
+export function manualTriggerCallbackTask (data) {
+  return request({
+    url: api.manualTriggerCallbackTask,
+    method: 'post',
+    data
+  })
+}
+
+export function manualTriggerRetryTask (data) {
+  return request({
+    url: api.manualTriggerRetryTask,
+    method: 'post',
     data
   })
 }

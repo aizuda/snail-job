@@ -104,12 +104,42 @@
         <template>
           <a @click="handleInfo(record)">详情</a>
           <a-divider type="vertical" />
-          <a @click="handleSuspend(record)" v-if="record.retryStatus === 0">暂停</a>
+          <a-popconfirm
+            title="是否暂停?"
+            ok-text="恢复"
+            cancel-text="取消"
+            @confirm="handleSuspend(record)"
+          >
+            <a href="javascript:;" v-if="record.retryStatus === 0">暂停</a>
+          </a-popconfirm>
           <a-divider type="vertical" v-if="record.retryStatus === 0" />
-          <a @click="handleRecovery(record)" v-if="record.retryStatus === 3">恢复</a>
+          <a-popconfirm
+            title="是否恢复?"
+            ok-text="恢复"
+            cancel-text="取消"
+            @confirm="handleRecovery(record)"
+          >
+            <a href="javascript:;" v-if="record.retryStatus === 3">恢复</a>
+          </a-popconfirm>
           <a-divider type="vertical" v-if="record.retryStatus === 3" />
-          <a @click="handleFinish(record)" v-if="record.retryStatus !== 1">完成</a>
-          <a-divider type="vertical" v-if="record.retryStatus !== 1" />
+          <a-popconfirm
+            title="是否完成?"
+            ok-text="完成"
+            cancel-text="取消"
+            @confirm="handleFinish(record)"
+          >
+            <a href="javascript:;" v-if="record.retryStatus !== 1 && record.retryStatus !== 2">完成</a>
+          </a-popconfirm>
+          <a-divider type="vertical" v-if="record.retryStatus !== 1 && record.retryStatus !== 2" />
+          <a-popconfirm
+            title="是否执行任务?"
+            ok-text="执行"
+            cancel-text="取消"
+            @confirm="handleTrigger(record)"
+          >
+            <a href="javascript:;" v-if="record.retryStatus !== 1 && record.retryStatus !== 2">执行</a>
+          </a-popconfirm>
+
         </template>
       </span>
     </s-table>
@@ -124,7 +154,14 @@
 <script>
 import ATextarea from 'ant-design-vue/es/input/TextArea'
 import AInput from 'ant-design-vue/es/input/Input'
-import { getAllGroupNameList, getRetryTaskPage, getSceneList, updateRetryTaskStatus, batchDelete } from '@/api/manage'
+import {
+  getAllGroupNameList,
+  getRetryTaskPage,
+  getSceneList,
+  updateRetryTaskStatus,
+  batchDelete,
+  manualTriggerCallbackTask, manualTriggerRetryTask
+} from '@/api/manage'
 import { STable } from '@/components'
 import SaveRetryTask from './form/SaveRetryTask'
 import BatchUpdateRetryTaskInfo from './form/BatchUpdateRetryTaskInfo'
@@ -245,7 +282,7 @@ export default {
           title: '操作',
           fixed: 'right',
           dataIndex: 'action',
-          width: '150px',
+          width: '180px',
           scopedSlots: { customRender: 'action' }
         }
       ],
@@ -337,6 +374,29 @@ export default {
           this.$message.success('重试完成成功')
         }
       })
+    },
+    handleTrigger (record) {
+      if (record.taskType === 1) {
+        manualTriggerRetryTask({ groupName: record.groupName, uniqueIds: [ record.uniqueId ] }).then(res => {
+          const { status } = res
+          if (status === 0) {
+            this.$message.error('执行失败')
+          } else {
+            this.$refs.table.refresh(true)
+            this.$message.success('重试完成成功')
+          }
+        })
+      } else {
+        manualTriggerCallbackTask({ groupName: record.groupName, uniqueIds: [ record.uniqueId ] }).then(res => {
+          const { status } = res
+          if (status === 0) {
+            this.$message.error('执行失败')
+          } else {
+            this.$refs.table.refresh(true)
+            this.$message.success('重试完成成功')
+          }
+        })
+      }
     },
     refreshTable (v) {
       this.$refs.table.refresh(true)

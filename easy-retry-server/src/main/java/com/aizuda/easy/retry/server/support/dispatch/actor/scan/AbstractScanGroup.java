@@ -120,7 +120,6 @@ public abstract class AbstractScanGroup extends AbstractActor {
         Long retryId = retryExecutor.getRetryContext().getRetryTask().getId();
         idempotentStrategy.set(groupIdHash, retryId.intValue());
 
-        // 重试成功回调客户端
         ActorRef actorRef = getActorRef();
         actorRef.tell(retryExecutor, actorRef);
     }

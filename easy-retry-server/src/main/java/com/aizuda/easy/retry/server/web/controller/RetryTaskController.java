@@ -81,4 +81,16 @@ public class RetryTaskController {
     public Integer parseLogs(@RequestBody @Validated ParseLogsVO parseLogsVO) {
         return retryTaskService.parseLogs(parseLogsVO);
     }
+
+    @LoginRequired
+    @PostMapping("/manual/trigger/retry/task")
+    public boolean manualTriggerRetryTask(@RequestBody @Validated ManualTriggerTaskRequestVO requestVO) {
+        return retryTaskService.manualTriggerRetryTask(requestVO);
+    }
+
+    @LoginRequired
+    @PostMapping("/manual/trigger/callback/task")
+    public boolean manualTriggerCallbackTask(@RequestBody @Validated ManualTriggerTaskRequestVO requestVO) {
+        return retryTaskService.manualTriggerCallbackTask(requestVO);
+    }
 }

@@ -71,4 +71,20 @@ public interface RetryTaskService {
      * @return
      */
     Integer parseLogs(ParseLogsVO parseLogsVO);
+
+    /**
+     * 手动支持重试任务
+     *
+     * @param requestVO
+     * @return
+     */
+    boolean manualTriggerRetryTask(ManualTriggerTaskRequestVO requestVO);
+
+    /**
+     * 手动执行回调任务
+     *
+     * @param requestVO
+     * @return
+     */
+    boolean manualTriggerCallbackTask(ManualTriggerTaskRequestVO requestVO);
 }
