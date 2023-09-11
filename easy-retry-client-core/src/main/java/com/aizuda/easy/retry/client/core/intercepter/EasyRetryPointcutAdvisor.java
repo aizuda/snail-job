@@ -3,6 +3,7 @@ package com.aizuda.easy.retry.client.core.intercepter;
 import com.aizuda.easy.retry.client.core.annotation.Retryable;
 import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.aop.Advice;
+import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.MethodMatcher;
@@ -14,8 +15,6 @@ import org.springframework.aop.support.annotation.AnnotationMethodMatcher;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
@@ -28,14 +27,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author www.byteblogs.com
  * @date 2023-08-23
  */
-@Configuration
+//@Configuration
 @Slf4j
 public class EasyRetryPointcutAdvisor extends AbstractPointcutAdvisor implements IntroductionAdvisor, BeanFactoryAware, InitializingBean {
     private Advice advice;
     private Pointcut pointcut;
     private BeanFactory beanFactory;
-    @Autowired
-    private EasyRetryInterceptor easyRetryInterceptor;
+    private MethodInterceptor easyRetryInterceptor;
+
+    public EasyRetryPointcutAdvisor(MethodInterceptor methodInterceptor) {
+        this.easyRetryInterceptor = methodInterceptor;
+    }
 
     @Override
     public void afterPropertiesSet() throws Exception {
