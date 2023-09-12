@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.server.support.retry;
 
 import akka.actor.ActorRef;
+import cn.hutool.core.lang.Pair;
 import com.aizuda.easy.retry.server.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.support.FilterStrategy;
 import com.aizuda.easy.retry.server.support.RetryContext;
@@ -36,18 +37,16 @@ public class RetryExecutor<V> {
         this.retryContext = retryContext;
     }
 
-    public boolean filter() {
+    public Pair<Boolean /*是否符合条件*/, StringBuilder/*描述信息*/> filter() {
 
         for (FilterStrategy filterStrategy : filterStrategies) {
-            if (!filterStrategy.filter(retryContext)) {
-                log.warn("当前任务不满足执行条件. groupName:[{}] uniqueId:[{}], filter:[{}]",
-                    retryContext.getRetryTask().getGroupName(),
-                    retryContext.getRetryTask().getUniqueId(), filterStrategy.getClass().getName());
-                return false;
+            Pair<Boolean, StringBuilder> pair = filterStrategy.filter(retryContext);
+            if (!pair.getKey()) {
+                return pair;
             }
         }
 
-        return true;
+        return Pair.of(Boolean.TRUE, new StringBuilder());
     }
 
     /**

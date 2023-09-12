@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.server.service.impl;
 
 import akka.actor.ActorRef;
 import cn.hutool.core.lang.Assert;
+import cn.hutool.core.lang.Pair;
 import com.aizuda.easy.retry.client.model.DispatchRetryResultDTO;
 import com.aizuda.easy.retry.client.model.GenerateRetryIdempotentIdDTO;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
@@ -334,7 +335,8 @@ public class RetryTaskServiceImpl implements RetryTaskService {
                     .withRetryContext(retryContext)
                     .build();
 
-            Assert.isTrue(executor.filter(), () -> new EasyRetryServerException("任务:{}不满足执行条件.具体原因请查看系统日志", retryTask.getUniqueId()));
+            Pair<Boolean, StringBuilder> pair = executor.filter();
+            Assert.isTrue(pair.getKey(), () -> new EasyRetryServerException(pair.getValue().toString()));
 
             productExecUnitActor(executor, ActorGenerator.execUnitActor());
         }
@@ -373,8 +375,9 @@ public class RetryTaskServiceImpl implements RetryTaskService {
                     .withRetryContext(retryContext)
                     .build();
 
-            Assert.isTrue(executor.filter(), () -> new EasyRetryServerException("任务:{}不满足执行条件.具体原因请查看系统日志", retryTask.getUniqueId()));
-
+            Pair<Boolean, StringBuilder> pair = executor.filter();
+            Assert.isTrue(pair.getKey(), () -> new EasyRetryServerException(pair.getValue().toString()));
+            
             productExecUnitActor(executor, ActorGenerator.execCallbackUnitActor());
         }
 

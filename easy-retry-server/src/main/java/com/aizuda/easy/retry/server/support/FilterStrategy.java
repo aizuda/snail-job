@@ -1,5 +1,7 @@
 package com.aizuda.easy.retry.server.support;
 
+import cn.hutool.core.lang.Pair;
+
 /**
  * 重试过滤策略，为了判断哪些重试数据符合条件
  *
@@ -14,7 +16,7 @@ public interface FilterStrategy {
      * @param retryContext {@link RetryContext} 重试上下文
      * @return true- 符合重试条 false- 不满足重试条件
      */
-    boolean filter(RetryContext retryContext);
+    Pair<Boolean /*是否符合条件*/, StringBuilder/*描述信息*/> filter(RetryContext retryContext);
 
     /**
      * 按照正序排列重试过滤器

@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.server.support.dispatch.actor.scan;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
+import cn.hutool.core.lang.Pair;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.config.SystemProperties;
@@ -81,7 +82,11 @@ public abstract class AbstractScanGroup extends AbstractActor {
                 RetryContext retryContext = builderRetryContext(groupName, retryTask);
                 RetryExecutor executor = builderResultRetryExecutor(retryContext);
 
-                if (!executor.filter()) {
+                Pair<Boolean /*是否符合条件*/, StringBuilder/*描述信息*/> pair = executor.filter();
+                if (!pair.getKey()) {
+                    log.warn("当前任务不满足执行条件. groupName:[{}] uniqueId:[{}], description:[{}]",
+                        retryContext.getRetryTask().getGroupName(),
+                        retryContext.getRetryTask().getUniqueId(), pair.getValue().toString());
                     continue;
                 }
 
