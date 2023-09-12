@@ -368,10 +368,10 @@ export default {
       updateRetryTaskStatus({ id: record.id, groupName: record.groupName, retryStatus: 1 }).then((res) => {
         const { status } = res
         if (status === 0) {
-          this.$message.error('重试完成失败')
+          this.$message.error('执行失败')
         } else {
           this.$refs.table.refresh(true)
-          this.$message.success('重试完成成功')
+          this.$message.success('执行成功')
         }
       })
     },
@@ -383,7 +383,7 @@ export default {
             this.$message.error('执行失败')
           } else {
             this.$refs.table.refresh(true)
-            this.$message.success('重试完成成功')
+            this.$message.success('执行成功')
           }
         })
       } else {
@@ -393,7 +393,7 @@ export default {
             this.$message.error('执行失败')
           } else {
             this.$refs.table.refresh(true)
-            this.$message.success('重试完成成功')
+            this.$message.success('执行完成')
           }
         })
       }
