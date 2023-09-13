@@ -206,7 +206,6 @@ export default {
           parameter['groupName'] = this.groupName
           parameter['uniqueId'] = this.uniqueId
         }
-        console.log('loadData.parameter', parameter)
         return getRetryTaskLogPage(Object.assign(parameter, this.queryParam))
           .then(res => {
             return res

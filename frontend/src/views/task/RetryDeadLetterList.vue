@@ -209,7 +209,6 @@ export default {
       ],
       // 加载数据方法 必须为 Promise 对象
       loadData: parameter => {
-        console.log('loadData.parameter', parameter)
         return getRetryDeadLetterPage(Object.assign(parameter, this.queryParam))
           .then(res => {
             return res
@@ -237,6 +236,7 @@ export default {
       if (this.groupNameList !== null && this.groupNameList.length > 0) {
         this.queryParam['groupName'] = this.groupNameList[0]
         this.$refs.table.refresh(true)
+        this.handleChange(this.groupNameList[0])
       }
     })
   },

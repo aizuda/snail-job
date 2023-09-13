@@ -26,8 +26,8 @@
           <a-col :md="8" :sm="24">
             <a-form-item label="重试状态">
               <a-select v-model="queryParam.retryStatus" placeholder="请选择状态" allowClear>
-                <a-select-option v-for="(value, key) in retryStatus" :value="key" :key="key">
-                  {{ value }}</a-select-option
+                <a-select-option v-for="(index, value) in retryStatus" :value="value" :key="value">
+                  {{ index.name }}</a-select-option
                 >
               </a-select>
             </a-form-item>
