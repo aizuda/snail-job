@@ -40,13 +40,11 @@
 
     <dependencyManagement>
         <dependencies>
-
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-all</artifactId>
                 <version>${netty-all.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>com.aizuda</groupId>
                 <artifactId>easy-retry-common-core</artifactId>
