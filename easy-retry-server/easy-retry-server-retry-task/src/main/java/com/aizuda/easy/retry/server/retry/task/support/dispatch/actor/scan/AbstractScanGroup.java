@@ -8,8 +8,7 @@ import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.retry.task.support.IdempotentStrategy;
 import com.aizuda.easy.retry.server.retry.task.support.RetryContext;
-import com.aizuda.easy.retry.server.retry.task.support.dispatch.DispatchService;
-import com.aizuda.easy.retry.server.retry.task.support.dispatch.ScanTaskDTO;
+import com.aizuda.easy.retry.server.retry.task.support.dispatch.ScanTask;
 import com.aizuda.easy.retry.server.common.handler.ClientNodeAllocateHandler;
 import com.aizuda.easy.retry.server.retry.task.support.retry.RetryExecutor;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
@@ -47,7 +46,7 @@ public abstract class AbstractScanGroup extends AbstractActor {
 
     @Override
     public Receive createReceive() {
-        return receiveBuilder().match(ScanTaskDTO.class, config -> {
+        return receiveBuilder().match(ScanTask.class, config -> {
 
             try {
                 doScan(config);
@@ -59,11 +58,11 @@ public abstract class AbstractScanGroup extends AbstractActor {
 
     }
 
-    protected void doScan(final ScanTaskDTO scanTaskDTO) {
+    protected void doScan(final ScanTask scanTask) {
 
         LocalDateTime lastAt = LocalDateTime.now().minusDays(systemProperties.getLastDays());
         int retryPullPageSize = systemProperties.getRetryPullPageSize();
-        String groupName = scanTaskDTO.getGroupName();
+        String groupName = scanTask.getGroupName();
         Long lastId = Optional.ofNullable(getLastId(groupName)).orElse(0L);
 
         // 扫描当前Group 待处理的任务
@@ -72,7 +71,7 @@ public abstract class AbstractScanGroup extends AbstractActor {
         if (!CollectionUtils.isEmpty(list)) {
 
             // 更新拉取的最大的id
-            putLastId(scanTaskDTO.getGroupName(), list.get(list.size() - 1).getId());
+            putLastId(scanTask.getGroupName(), list.get(list.size() - 1).getId());
 
             for (RetryTask retryTask : list) {
 

@@ -10,7 +10,7 @@ import lombok.Data;
  * @since 1.5.0
  */
 @Data
-public class ScanTaskDTO {
+public class ScanTask {
 
     String groupName;
 }

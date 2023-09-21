@@ -20,17 +20,17 @@ import org.springframework.stereotype.Component;
 @Component
 @Data
 @Slf4j
-public class CacheGroupScanActor implements Lifecycle {
+public class CacheBucketActor implements Lifecycle {
 
-    private static Cache<String, ActorRef> CACHE;
+    private static Cache<Integer, ActorRef> CACHE;
 
     /**
      * 获取所有缓存
      *
      * @return 缓存对象
      */
-    public static ActorRef get(String groupName, TaskTypeEnum typeEnum) {
-       return CACHE.getIfPresent(groupName.concat(typeEnum.name()));
+    public static ActorRef get(Integer bucket) {
+       return CACHE.getIfPresent(bucket);
     }
 
     /**
@@ -38,8 +38,8 @@ public class CacheGroupScanActor implements Lifecycle {
      *
      * @return 缓存对象
      */
-    public static void put(String groupName, TaskTypeEnum typeEnum, ActorRef actorRef) {
-         CACHE.put(groupName.concat(typeEnum.name()), actorRef);
+    public static void put(Integer bucket, ActorRef actorRef) {
+         CACHE.put(bucket, actorRef);
     }
 
     @Override
