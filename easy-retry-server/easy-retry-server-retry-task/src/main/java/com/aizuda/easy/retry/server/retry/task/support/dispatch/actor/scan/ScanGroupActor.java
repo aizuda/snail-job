@@ -33,7 +33,6 @@ import java.util.concurrent.ConcurrentMap;
 @Slf4j
 public class ScanGroupActor extends AbstractScanGroup {
 
-    public static final String BEAN_NAME = "ScanGroupActor";
     /**
      * 缓存待拉取数据的起点id
      * <p>

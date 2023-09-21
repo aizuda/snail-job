@@ -4,11 +4,11 @@ import cn.hutool.core.lang.Pair;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
+import com.aizuda.easy.retry.server.common.dto.DistributeInstance;
 import com.aizuda.easy.retry.server.retry.task.support.FilterStrategy;
 import com.aizuda.easy.retry.server.retry.task.support.IdempotentStrategy;
 import com.aizuda.easy.retry.server.retry.task.support.RetryContext;
 import com.aizuda.easy.retry.server.retry.task.support.cache.CacheGroupRateLimiter;
-import com.aizuda.easy.retry.server.common.handler.ServerNodeBalance;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.ServerNodeMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
 import com.aizuda.easy.retry.template.datasource.persistence.po.ServerNode;
@@ -239,7 +239,7 @@ public class FilterStrategies {
         @Override
         public Pair<Boolean /*是否符合条件*/, StringBuilder/*描述信息*/> filter(RetryContext retryContext) {
             RetryTask retryTask = retryContext.getRetryTask();
-            boolean result = !ServerNodeBalance.RE_BALANCE_ING.get();
+            boolean result = ! DistributeInstance.RE_BALANCE_ING.get();
             StringBuilder description = new StringBuilder();
             if (!result) {
                 description.append(MessageFormat.format("系统Rebalancing中数据无法重试.uniqueId:[{0}]", retryTask.getUniqueId()));

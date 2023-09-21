@@ -4,10 +4,8 @@ import com.aizuda.easy.retry.common.core.enums.NodeTypeEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.common.Lifecycle;
 import com.aizuda.easy.retry.server.common.allocate.server.AllocateMessageQueueAveragely;
-import com.aizuda.easy.retry.server.common.allocate.server.AllocateMessageQueueConsistentHash;
-import com.aizuda.easy.retry.server.common.cache.CacheConsumerGroup;
-import com.aizuda.easy.retry.server.common.cache.CacheGroup;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
+import com.aizuda.easy.retry.server.common.dto.DistributeInstance;
 import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
 import com.aizuda.easy.retry.server.common.register.ServerRegister;
@@ -16,7 +14,6 @@ import com.aizuda.easy.retry.template.datasource.persistence.mapper.ServerNodeMa
 import com.aizuda.easy.retry.template.datasource.persistence.po.GroupConfig;
 import com.aizuda.easy.retry.template.datasource.persistence.po.ServerNode;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -30,9 +27,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * 负责处理组或者节点变化时，重新分配组在不同的节点上消费
@@ -61,14 +56,9 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
 
     private List<Integer> bucketList;
 
-    /**
-     * 控制rebalance状态
-     */
-    public static final AtomicBoolean RE_BALANCE_ING = new AtomicBoolean(Boolean.FALSE);
-
     public void doBalance() {
         LogUtils.info(log, "rebalance start");
-        RE_BALANCE_ING.set(Boolean.TRUE);
+        DistributeInstance.RE_BALANCE_ING.set(Boolean.TRUE);
 
         try {
 
@@ -79,14 +69,9 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
                 LogUtils.error(log, "server node is empty");
             }
 
-            Set<String> allGroup = CacheGroup.getAllGroup();
-            if (CollectionUtils.isEmpty(allGroup)) {
-                LogUtils.error(log, "group is empty");
-            }
-
-            // 删除本地缓存的所有组信息
-            CacheConsumerGroup.clear();
-            if(CollectionUtils.isEmpty(podIpSet) || CollectionUtils.isEmpty(allGroup)) {
+            // 删除本地缓存的消费桶的信息
+            DistributeInstance.INSTANCE.clearConsumerBucket();
+            if(CollectionUtils.isEmpty(podIpSet)) {
                 return;
             }
 
@@ -94,15 +79,13 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
                     .allocate(ServerRegister.CURRENT_CID, bucketList, new ArrayList<>(podIpSet));
 
             // 重新覆盖本地分配的组信息
-            for (String groupName : allocate) {
-                CacheConsumerGroup.addOrUpdate(groupName);
-            }
+            DistributeInstance.INSTANCE.setConsumerBucket(allocate);
 
             LogUtils.info(log, "rebalance complete. allocate:[{}]", allocate);
         } catch (Exception e) {
             LogUtils.error(log, "rebalance error. ", e);
         } finally {
-            RE_BALANCE_ING.set(Boolean.FALSE);
+            DistributeInstance.RE_BALANCE_ING.set(Boolean.FALSE);
         }
 
     }
@@ -128,25 +111,6 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
             RegisterNodeInfo registerNodeInfo = concurrentMap.get(localHostId);
             // 删除过期的节点信息
             CacheRegisterTable.remove(registerNodeInfo.getGroupName(), registerNodeInfo.getHostId());
-            // 删除本地消费组信息
-            CacheConsumerGroup.remove(registerNodeInfo.getGroupName());
-        }
-    }
-
-    private void refreshAndRemoveGroup(List<GroupConfig> removeGroupConfig, final Set<String> allGroup) {
-        if (allGroup.size() != removeGroupConfig.size()) {
-            allGroup.removeAll(removeGroupConfig.stream()
-                    .map(GroupConfig::getGroupName).collect(Collectors.toSet()));
-
-            // 删除已关闭的组
-            for (String groupName : allGroup) {
-                CacheGroup.remove(groupName);
-            }
-
-            // 添加组
-            for (final GroupConfig groupConfig : removeGroupConfig) {
-                CacheGroup.addOrUpdate(groupConfig.getGroupName());
-            }
         }
     }
 
@@ -210,23 +174,15 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
                 Set<String> localHostIds = concurrentMap.values().stream().map(RegisterNodeInfo::getHostId)
                         .collect(Collectors.toSet());
 
-                List<GroupConfig> removeGroupConfig = accessTemplate.getGroupConfigAccess().getAllOpenGroupConfig();
-                Set<String> allGroup = CacheGroup.getAllGroup();
-
                 // 无缓存的节点触发refreshCache
                 if (CollectionUtils.isEmpty(concurrentMap)
                         // 节点数量不一致触发
                         || isNodeSizeNotEqual(concurrentMap.size(), remotePods.size())
-                        // 若存在远程和本地缓存的组的数量不一致则触发rebalance
-                        || isGroupSizeNotEqual(removeGroupConfig, allGroup)
                         // 判断远程节点是不是和本地节点一致的，如果不一致则重新分配
                         || isNodeNotMatch(remoteHostIds, localHostIds)) {
 
                     // 删除本地缓存以下线的节点信息
                     removeNode(concurrentMap, remoteHostIds, localHostIds);
-
-                    // 刷新组配置和删除已关闭的组
-                    refreshAndRemoveGroup(removeGroupConfig, allGroup);
 
                     // 重新获取DB中最新的服务信息
                     refreshCache(remotePods);
@@ -253,8 +209,6 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
                     for (final RegisterNodeInfo registerNodeInfo : expireNodeSet) {
                         // 删除过期的节点信息
                         CacheRegisterTable.remove(registerNodeInfo.getGroupName(), registerNodeInfo.getHostId());
-                        // 删除本地消费组信息
-                        CacheConsumerGroup.remove(registerNodeInfo.getGroupName());
                     }
 
                 }
