@@ -47,6 +47,9 @@ public class DispatchService implements Lifecycle {
     @Override
     public void start() {
 
+        // TODO待优化
+        ActorRef actorRef = ActorGenerator.scanBucketActor();
+
         dispatchService.scheduleAtFixedRate(() -> {
 
             try {
@@ -59,11 +62,9 @@ public class DispatchService implements Lifecycle {
                 Set<Integer> currentConsumerBuckets = getConsumerBucket();
                 LogUtils.info(log, "当前节点分配的桶:[{}]", currentConsumerBuckets);
                 if (!CollectionUtils.isEmpty(currentConsumerBuckets)) {
-                    for (Integer bucket : currentConsumerBuckets) {
-                        ConsumerBucket scanTaskDTO = new ConsumerBucket();
-                        scanTaskDTO.setBucket(bucket);
-                        produceConsumerBucketActorTask(scanTaskDTO);
-                    }
+                    ConsumerBucket scanTaskDTO = new ConsumerBucket();
+                    scanTaskDTO.setBuckets(currentConsumerBuckets);
+                    actorRef.tell(scanTaskDTO, actorRef);
                 }
 
             } catch (Exception e) {
@@ -76,41 +77,12 @@ public class DispatchService implements Lifecycle {
 
 
     /**
-     * 生成bucket对应的Actor
-     *
-     * @param consumerBucket {@link  ConsumerBucket} 消费的桶的上下文
-     */
-    private void produceConsumerBucketActorTask(ConsumerBucket consumerBucket) {
-
-        Integer bucket = consumerBucket.getBucket();
-
-        // 缓存bucket对应的 Actor
-        ActorRef actorRef = cacheActorRef(bucket);
-        actorRef.tell(consumerBucket, actorRef);
-
-    }
-
-
-    /**
      * 分配当前POD负责消费的桶
      *
      * @return {@link  GroupConfig} 组上下文
      */
     private Set<Integer> getConsumerBucket() {
         return DistributeInstance.INSTANCE.getConsumerBucket();
-    }
-
-    /**
-     * 缓存Actor对象
-     */
-    private ActorRef cacheActorRef(Integer bucket) {
-        ActorRef scanActorRef = CacheBucketActor.get(bucket);
-        if (Objects.isNull(scanActorRef)) {
-            scanActorRef = ActorGenerator.scanBucketActor();
-            // 缓存扫描器actor
-            CacheBucketActor.put(bucket, scanActorRef);
-        }
-        return scanActorRef;
     }
 
     @Override

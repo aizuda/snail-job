@@ -1,6 +1,8 @@
-package com.aizuda.easy.retry.server.retry.task.support.dispatch;
+package com.aizuda.easy.retry.server.common.dto;
 
 import lombok.Data;
+
+import java.util.Set;
 
 /**
  * 扫描任务模型
@@ -12,5 +14,7 @@ import lombok.Data;
 @Data
 public class ScanTask {
 
-    String groupName;
+    private String groupName;
+
+    private Set<Integer> buckets;
 }

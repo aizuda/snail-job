@@ -9,11 +9,15 @@ import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
+import com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.CallbackTimerTask;
+import com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.RetryTimerTask;
+import com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.TimerWheelHandler;
 import com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.log.RetryTaskLogDTO;
 import com.aizuda.easy.retry.server.retry.task.support.handler.CallbackRetryTaskHandler;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
 import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
+import io.netty.util.TimerTask;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -24,6 +28,8 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 重试完成执行器 1、更新重试任务 2、记录重试日志
@@ -60,11 +66,14 @@ public class FailureActor extends AbstractActor {
                     @Override
                     protected void doInTransactionWithoutResult(TransactionStatus status) {
 
+                        TimerTask timerTask = null;
                         Integer maxRetryCount;
                         if (TaskTypeEnum.CALLBACK.getType().equals(retryTask.getTaskType())) {
                             maxRetryCount = systemProperties.getCallback().getMaxCount();
+                            timerTask = new CallbackTimerTask();
                         } else {
                             maxRetryCount = sceneConfig.getMaxRetryCount();
+                            timerTask = new RetryTimerTask();
                         }
 
                         if (maxRetryCount <= retryTask.getRetryCount()) {
@@ -72,6 +81,11 @@ public class FailureActor extends AbstractActor {
                             // 创建一个回调任务
                             callbackRetryTaskHandler.create(retryTask);
                         }
+
+                        // TODO 计算延迟的时间 此处需要判断符合条件的才会进入时间轮
+                        LocalDateTime nextTriggerAt = retryTask.getNextTriggerAt();
+                        long delay = nextTriggerAt.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+                        TimerWheelHandler.register(retryTask.getGroupName(), retryTask.getUniqueId(), timerTask, delay, TimeUnit.MILLISECONDS);
 
                         retryTask.setUpdateDt(LocalDateTime.now());
                         Assert.isTrue(1 == accessTemplate.getRetryTaskAccess()

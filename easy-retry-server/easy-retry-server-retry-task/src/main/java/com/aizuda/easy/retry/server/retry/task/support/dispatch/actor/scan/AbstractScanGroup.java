@@ -8,21 +8,29 @@ import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.retry.task.support.IdempotentStrategy;
 import com.aizuda.easy.retry.server.retry.task.support.RetryContext;
-import com.aizuda.easy.retry.server.retry.task.support.dispatch.ScanTask;
+import com.aizuda.easy.retry.server.common.dto.ScanTask;
 import com.aizuda.easy.retry.server.common.handler.ClientNodeAllocateHandler;
+import com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.RetryTimerTask;
+import com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.TimerWheelHandler;
 import com.aizuda.easy.retry.server.retry.task.support.retry.RetryExecutor;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
+import io.netty.util.HashedWheelTimer;
+import io.netty.util.Timeout;
+import io.netty.util.TimerTask;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 数据扫描模板类
@@ -43,6 +51,7 @@ public abstract class AbstractScanGroup extends AbstractActor {
     protected AccessTemplate accessTemplate;
     @Autowired
     protected ClientNodeAllocateHandler clientNodeAllocateHandler;
+
 
     @Override
     public Receive createReceive() {
@@ -89,12 +98,15 @@ public abstract class AbstractScanGroup extends AbstractActor {
                     continue;
                 }
 
-                productExecUnitActor(executor);
+                Timeout timeout = TimerWheelHandler.taskConcurrentHashMap.get(retryTask.getGroupName().concat("_").concat(retryTask.getUniqueId()));
+                if (Objects.isNull(timeout)) {
+                    productExecUnitActor(executor);
+                }
             }
         } else {
             // 数据为空则休眠5s
             try {
-                Thread.sleep((DispatchService.PERIOD / 2) * 1000);
+                Thread.sleep((10 / 2) * 1000);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }

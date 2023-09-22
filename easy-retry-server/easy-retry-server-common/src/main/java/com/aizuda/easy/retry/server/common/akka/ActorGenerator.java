@@ -15,6 +15,7 @@ public class ActorGenerator {
 
     public static final String SCAN_CALLBACK_GROUP_ACTOR = "ScanCallbackGroupActor";
     public static final String SCAN_RETRY_GROUP_ACTOR = "ScanGroupActor";
+    public static final String SCAN_JOB_ACTOR = "ScanJobActor";
     public static final String SCAN_BUCKET_ACTOR = "ScanBucketActor";
     public static final String FINISH_ACTOR = "FinishActor";
     public static final String FAILURE_ACTOR = "FailureActor";
@@ -82,12 +83,21 @@ public class ActorGenerator {
     }
 
     /**
-     * 生成扫描重试数据的actor
+     * 生成扫描回调数据的actor
      *
      * @return actor 引用
      */
     public static ActorRef scanCallbackGroupActor() {
         return getDispatchRetryActorSystem().actorOf(getSpringExtension().props(SCAN_CALLBACK_GROUP_ACTOR));
+    }
+
+    /**
+     * 生成扫描JOB任务的actor
+     *
+     * @return actor 引用
+     */
+    public static ActorRef scanJobActor() {
+        return getDispatchRetryActorSystem().actorOf(getSpringExtension().props(SCAN_JOB_ACTOR));
     }
 
     /**

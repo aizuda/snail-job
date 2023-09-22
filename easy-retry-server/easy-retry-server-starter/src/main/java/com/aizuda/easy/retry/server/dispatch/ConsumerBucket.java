@@ -2,6 +2,8 @@ package com.aizuda.easy.retry.server.dispatch;
 
 import lombok.Data;
 
+import java.util.Set;
+
 /**
  * @author www.byteblogs.com
  * @date 2023-09-21 23:30:22
@@ -10,5 +12,5 @@ import lombok.Data;
 @Data
 public class ConsumerBucket {
 
-   private Integer bucket;
+   private Set<Integer> buckets;
 }
