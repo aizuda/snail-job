@@ -20,7 +20,6 @@ import java.util.concurrent.ConcurrentMap;
  */
 @Component
 @Slf4j
-@Deprecated
 public class CacheConsumerGroup implements Lifecycle {
 
     private static Cache<String /*groupName*/, String/*groupName*/> CACHE;
@@ -30,11 +29,29 @@ public class CacheConsumerGroup implements Lifecycle {
      *
      * @return 缓存对象
      */
-    @Deprecated
     public static Set<String> getAllConsumerGroupName() {
         ConcurrentMap<String, String> concurrentMap = CACHE.asMap();
         return new HashSet<>(concurrentMap.values());
+    }
 
+    /**
+     * 无缓存时添加
+     * 有缓存时更新
+     *
+     * @return 缓存对象
+     */
+    public static synchronized void addOrUpdate(String groupName) {
+        LogUtils.info(log, "add consumer cache. groupName:[{}]", groupName);
+        CACHE.put(groupName, groupName);
+    }
+
+    public static void remove(String groupName) {
+        LogUtils.info(log, "Remove consumer cache. groupName:[{}]", groupName);
+        CACHE.invalidate(groupName);
+    }
+
+    public static void clear() {
+        CACHE.invalidateAll();
     }
 
     @Override

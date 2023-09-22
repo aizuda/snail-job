@@ -1,20 +1,18 @@
 package com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.scan;
 
 import akka.actor.ActorRef;
-import com.aizuda.easy.retry.client.model.DispatchRetryResultDTO;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.retry.task.support.RetryContext;
 import com.aizuda.easy.retry.server.retry.task.support.WaitStrategy;
-import com.aizuda.easy.retry.server.retry.task.support.context.MaxAttemptsPersistenceRetryContext;
+import com.aizuda.easy.retry.server.retry.task.support.context.CallbackRetryContext;
 import com.aizuda.easy.retry.server.retry.task.support.retry.RetryBuilder;
 import com.aizuda.easy.retry.server.retry.task.support.retry.RetryExecutor;
 import com.aizuda.easy.retry.server.retry.task.support.strategy.FilterStrategies;
 import com.aizuda.easy.retry.server.retry.task.support.strategy.StopStrategies;
 import com.aizuda.easy.retry.server.retry.task.support.strategy.WaitStrategies;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
-import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -26,24 +24,26 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * @author www.byteblogs.com
  * @date 2021-10-30
- * @since 2.0
+ * @since 1.5.0
  */
-@Component(ActorGenerator.SCAN_RETRY_GROUP_ACTOR)
+@Component(ActorGenerator.SCAN_CALLBACK_GROUP_ACTOR)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Slf4j
-public class ScanGroupActor extends AbstractScanGroup {
+public class ScanCallbackTaskActor extends AbstractScanGroup {
+
+    public static final String BEAN_NAME = "ScanCallbackTaskActor";
 
     /**
      * 缓存待拉取数据的起点id
      * <p>
-     * LAST_AT_MAP[key] = groupName  LAST_AT_MAP[value] = retry_task的id
+     * LAST_AT_MAP[key] = groupName  LAST_AT_MAP[value] = retry_task的 id
      */
     private static final ConcurrentMap<String, Long> LAST_AT_MAP = new ConcurrentHashMap<>();
 
     @Override
-    protected RetryContext<Result<DispatchRetryResultDTO>> builderRetryContext(final String groupName,
-        final RetryTask retryTask) {
-        MaxAttemptsPersistenceRetryContext<Result<DispatchRetryResultDTO>> retryContext = new MaxAttemptsPersistenceRetryContext<>();
+    protected RetryContext builderRetryContext(final String groupName, final RetryTask retryTask) {
+
+        CallbackRetryContext<Result> retryContext = new CallbackRetryContext<>();
         retryContext.setRetryTask(retryTask);
         retryContext.setSceneBlacklist(accessTemplate.getSceneConfigAccess().getBlacklist(groupName));
         retryContext.setServerNode(clientNodeAllocateHandler.getServerNode(retryTask.getGroupName()));
@@ -51,13 +51,11 @@ public class ScanGroupActor extends AbstractScanGroup {
     }
 
     @Override
-    protected RetryExecutor<Result<DispatchRetryResultDTO>> builderResultRetryExecutor(RetryContext retryContext) {
-
-        RetryTask retryTask = retryContext.getRetryTask();
-        return RetryBuilder.<Result<DispatchRetryResultDTO>>newBuilder()
+    protected RetryExecutor builderResultRetryExecutor(RetryContext retryContext) {
+        return RetryBuilder.<Result>newBuilder()
             .withStopStrategy(StopStrategies.stopException())
-            .withStopStrategy(StopStrategies.stopResultStatusCode())
-            .withWaitStrategy(getWaitWaitStrategy(retryTask.getGroupName(), retryTask.getSceneName()))
+            .withStopStrategy(StopStrategies.stopResultStatus())
+            .withWaitStrategy(getWaitWaitStrategy())
             .withFilterStrategy(FilterStrategies.triggerAtFilter())
             .withFilterStrategy(FilterStrategies.bitSetIdempotentFilter(idempotentStrategy))
             .withFilterStrategy(FilterStrategies.sceneBlackFilter())
@@ -70,7 +68,7 @@ public class ScanGroupActor extends AbstractScanGroup {
 
     @Override
     protected Integer getTaskType() {
-        return TaskTypeEnum.RETRY.getType();
+        return TaskTypeEnum.CALLBACK.getType();
     }
 
     @Override
@@ -83,19 +81,14 @@ public class ScanGroupActor extends AbstractScanGroup {
         LAST_AT_MAP.put(groupName, lastId);
     }
 
-
-    private WaitStrategy getWaitWaitStrategy(String groupName, String sceneName) {
-
-        SceneConfig sceneConfig = accessTemplate.getSceneConfigAccess().getSceneConfigByGroupNameAndSceneName(groupName, sceneName);
-        Integer backOff = sceneConfig.getBackOff();
-
-        return WaitStrategies.WaitStrategyEnum.getWaitStrategy(backOff);
+    private WaitStrategy getWaitWaitStrategy() {
+        // 回调失败每15min重试一次
+        return WaitStrategies.WaitStrategyEnum.getWaitStrategy(WaitStrategies.WaitStrategyEnum.FIXED.getBackOff());
     }
 
     @Override
     protected ActorRef getActorRef() {
-        return ActorGenerator.execUnitActor();
+        return ActorGenerator.execCallbackUnitActor();
     }
-
 
 }

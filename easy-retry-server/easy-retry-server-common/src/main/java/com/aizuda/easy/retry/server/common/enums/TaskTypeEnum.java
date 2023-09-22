@@ -16,7 +16,10 @@ import java.util.function.Supplier;
 @Getter
 public enum TaskTypeEnum {
     RETRY(1, ActorGenerator::scanGroupActor),
-    CALLBACK(2, ActorGenerator::scanCallbackGroupActor);
+    CALLBACK(2, ActorGenerator::scanCallbackGroupActor),
+    JOB(3, ActorGenerator::scanJobActor),
+    ;
+
 
     private final Integer type;
     private final Supplier<ActorRef> actorRef;

@@ -95,7 +95,7 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
 
         int bucketTotal = systemProperties.getBucketTotal();
         bucketList = new ArrayList<>(bucketTotal);
-        for (int i = 1; i <= bucketTotal; i++) {
+        for (int i = 0; i < bucketTotal; i++) {
             bucketList.add(i);
         }
 
