@@ -7,6 +7,7 @@ import com.aizuda.easy.retry.server.common.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.retry.task.support.RetryContext;
 import com.aizuda.easy.retry.server.retry.task.support.WaitStrategy;
 import com.aizuda.easy.retry.server.retry.task.support.context.CallbackRetryContext;
+import com.aizuda.easy.retry.server.retry.task.support.dispatch.task.TaskActuatorSceneEnum;
 import com.aizuda.easy.retry.server.retry.task.support.retry.RetryBuilder;
 import com.aizuda.easy.retry.server.retry.task.support.retry.RetryExecutor;
 import com.aizuda.easy.retry.server.retry.task.support.strategy.FilterStrategies;
@@ -41,34 +42,8 @@ public class ScanCallbackTaskActor extends AbstractScanGroup {
     private static final ConcurrentMap<String, Long> LAST_AT_MAP = new ConcurrentHashMap<>();
 
     @Override
-    protected RetryContext builderRetryContext(final String groupName, final RetryTask retryTask) {
-
-        CallbackRetryContext<Result> retryContext = new CallbackRetryContext<>();
-        retryContext.setRetryTask(retryTask);
-        retryContext.setSceneBlacklist(accessTemplate.getSceneConfigAccess().getBlacklist(groupName));
-        retryContext.setServerNode(clientNodeAllocateHandler.getServerNode(retryTask.getGroupName()));
-        return retryContext;
-    }
-
-    @Override
-    protected RetryExecutor builderResultRetryExecutor(RetryContext retryContext) {
-        return RetryBuilder.<Result>newBuilder()
-            .withStopStrategy(StopStrategies.stopException())
-            .withStopStrategy(StopStrategies.stopResultStatus())
-            .withWaitStrategy(getWaitWaitStrategy())
-            .withFilterStrategy(FilterStrategies.triggerAtFilter())
-            .withFilterStrategy(FilterStrategies.bitSetIdempotentFilter(idempotentStrategy))
-            .withFilterStrategy(FilterStrategies.sceneBlackFilter())
-            .withFilterStrategy(FilterStrategies.checkAliveClientPodFilter())
-            .withFilterStrategy(FilterStrategies.rebalanceFilterStrategies())
-            .withFilterStrategy(FilterStrategies.rateLimiterFilter())
-            .withRetryContext(retryContext)
-            .build();
-    }
-
-    @Override
-    protected Integer getTaskType() {
-        return TaskTypeEnum.CALLBACK.getType();
+    protected TaskActuatorSceneEnum taskActuatorScene() {
+        return TaskActuatorSceneEnum.AUTO_CALLBACK;
     }
 
     @Override
@@ -84,11 +59,6 @@ public class ScanCallbackTaskActor extends AbstractScanGroup {
     private WaitStrategy getWaitWaitStrategy() {
         // 回调失败每15min重试一次
         return WaitStrategies.WaitStrategyEnum.getWaitStrategy(WaitStrategies.WaitStrategyEnum.FIXED.getBackOff());
-    }
-
-    @Override
-    protected ActorRef getActorRef() {
-        return ActorGenerator.execCallbackUnitActor();
     }
 
 }

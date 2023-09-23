@@ -22,6 +22,8 @@ import com.aizuda.easy.retry.server.retry.task.support.WaitStrategy;
 import com.aizuda.easy.retry.server.retry.task.support.context.CallbackRetryContext;
 import com.aizuda.easy.retry.server.retry.task.support.context.MaxAttemptsPersistenceRetryContext;
 import com.aizuda.easy.retry.server.common.handler.ClientNodeAllocateHandler;
+import com.aizuda.easy.retry.server.retry.task.support.dispatch.task.TaskActuator;
+import com.aizuda.easy.retry.server.retry.task.support.dispatch.task.TaskActuatorSceneEnum;
 import com.aizuda.easy.retry.server.retry.task.support.retry.RetryBuilder;
 import com.aizuda.easy.retry.server.retry.task.support.retry.RetryExecutor;
 import com.aizuda.easy.retry.server.retry.task.support.strategy.FilterStrategies;
@@ -97,6 +99,8 @@ public class RetryTaskServiceImpl implements RetryTaskService {
     @Autowired
     @Qualifier("bitSetIdempotentStrategyHandler")
     protected IdempotentStrategy<String, Integer> idempotentStrategy;
+    @Autowired
+    private List<TaskActuator> taskActuators;
 
     @Override
     public PageResult<List<RetryTaskResponseVO>> getRetryTaskPage(RetryTaskQueryVO queryVO) {
@@ -327,29 +331,13 @@ public class RetryTaskServiceImpl implements RetryTaskService {
                         .in(RetryTask::getUniqueId, uniqueIds));
         Assert.notEmpty(list, () -> new EasyRetryServerException("没有可执行的任务"));
 
+
         for (RetryTask retryTask : list) {
-            MaxAttemptsPersistenceRetryContext<Result<DispatchRetryResultDTO>> retryContext = new MaxAttemptsPersistenceRetryContext<>();
-            retryContext.setRetryTask(retryTask);
-            retryContext.setSceneBlacklist(accessTemplate.getSceneConfigAccess().getBlacklist(groupName));
-            retryContext.setServerNode(clientNodeAllocateHandler.getServerNode(retryTask.getGroupName()));
-
-            retryCountIncrement(retryTask);
-
-            RetryExecutor<Result<DispatchRetryResultDTO>> executor = RetryBuilder.<Result<DispatchRetryResultDTO>>newBuilder()
-                    .withStopStrategy(StopStrategies.stopException())
-                    .withStopStrategy(StopStrategies.stopResultStatusCode())
-                    .withWaitStrategy(getRetryTaskWaitWaitStrategy(retryTask.getGroupName(), retryTask.getSceneName()))
-                    .withFilterStrategy(FilterStrategies.bitSetIdempotentFilter(idempotentStrategy))
-                    .withFilterStrategy(FilterStrategies.checkAliveClientPodFilter())
-                    .withFilterStrategy(FilterStrategies.rebalanceFilterStrategies())
-                    .withFilterStrategy(FilterStrategies.rateLimiterFilter())
-                    .withRetryContext(retryContext)
-                    .build();
-
-            Pair<Boolean, StringBuilder> pair = executor.filter();
-            Assert.isTrue(pair.getKey(), () -> new EasyRetryServerException(pair.getValue().toString()));
-
-            productExecUnitActor(executor, ActorGenerator.execUnitActor());
+            for (TaskActuator taskActuator : taskActuators) {
+                if (taskActuator.getTaskType().getScene() == TaskActuatorSceneEnum.MANUAL_RETRY.getScene()) {
+                    taskActuator.actuator(retryTask);
+                }
+            }
         }
 
         return true;
@@ -367,29 +355,12 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         Assert.notEmpty(list, () -> new EasyRetryServerException("没有可执行的任务"));
 
         for (RetryTask retryTask : list) {
+            for (TaskActuator taskActuator : taskActuators) {
+                if (taskActuator.getTaskType().getScene() == TaskActuatorSceneEnum.MANUAL_CALLBACK.getScene()) {
+                    taskActuator.actuator(retryTask);
+                }
+            }
 
-            CallbackRetryContext<Result> retryContext = new CallbackRetryContext<>();
-            retryContext.setRetryTask(retryTask);
-            retryContext.setSceneBlacklist(accessTemplate.getSceneConfigAccess().getBlacklist(groupName));
-            retryContext.setServerNode(clientNodeAllocateHandler.getServerNode(retryTask.getGroupName()));
-
-            retryCountIncrement(retryTask);
-
-            RetryExecutor<Result> executor = RetryBuilder.<Result>newBuilder()
-                    .withStopStrategy(StopStrategies.stopException())
-                    .withStopStrategy(StopStrategies.stopResultStatusCode())
-                    .withWaitStrategy(getCallbackWaitWaitStrategy())
-                    .withFilterStrategy(FilterStrategies.bitSetIdempotentFilter(idempotentStrategy))
-                    .withFilterStrategy(FilterStrategies.checkAliveClientPodFilter())
-                    .withFilterStrategy(FilterStrategies.rebalanceFilterStrategies())
-                    .withFilterStrategy(FilterStrategies.rateLimiterFilter())
-                    .withRetryContext(retryContext)
-                    .build();
-
-            Pair<Boolean, StringBuilder> pair = executor.filter();
-            Assert.isTrue(pair.getKey(), () -> new EasyRetryServerException(pair.getValue().toString()));
-
-            productExecUnitActor(executor, ActorGenerator.execCallbackUnitActor());
         }
 
         return true;

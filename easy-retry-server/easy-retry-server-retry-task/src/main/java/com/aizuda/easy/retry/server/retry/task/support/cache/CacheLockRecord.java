@@ -53,6 +53,6 @@ public class CacheLockRecord implements Lifecycle {
 
     @Override
     public void close() {
-
+        CACHE.invalidateAll();
     }
 }
