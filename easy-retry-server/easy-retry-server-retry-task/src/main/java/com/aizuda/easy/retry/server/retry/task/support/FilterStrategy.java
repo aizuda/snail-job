@@ -14,7 +14,7 @@ public interface FilterStrategy {
      * 过滤器执行器
      *
      * @param retryContext {@link RetryContext} 重试上下文
-     * @return true- 符合重试条 false- 不满足重试条件
+     * @return true- 符合重试条件 false- 不满足重试条件
      */
     Pair<Boolean /*是否符合条件*/, StringBuilder/*描述信息*/> filter(RetryContext retryContext);
 
