@@ -7,6 +7,7 @@ import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.retry.task.support.IdempotentStrategy;
 import com.aizuda.easy.retry.server.common.dto.ScanTask;
 import com.aizuda.easy.retry.server.common.handler.ClientNodeAllocateHandler;
+import com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.TimerWheelHandler;
 import com.aizuda.easy.retry.server.retry.task.support.dispatch.task.TaskActuator;
 import com.aizuda.easy.retry.server.retry.task.support.dispatch.task.TaskActuatorSceneEnum;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
@@ -74,6 +75,12 @@ public abstract class AbstractScanGroup extends AbstractActor {
             putLastId(scanTask.getGroupName(), list.get(list.size() - 1).getId());
 
             for (RetryTask retryTask : list) {
+                // 已经存在时间轮里面的任务由时间轮负责调度
+                boolean existed = TimerWheelHandler.isExisted(retryTask.getGroupName(), retryTask.getUniqueId());
+                if (existed) {
+                    continue;
+                }
+
                 for (TaskActuator taskActuator : taskActuators) {
                     if (taskActuatorScene().getScene() == taskActuator.getTaskType().getScene()) {
                         taskActuator.actuator(retryTask);

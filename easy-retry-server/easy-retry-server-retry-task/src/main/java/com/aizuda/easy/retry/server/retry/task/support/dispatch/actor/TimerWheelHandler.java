@@ -35,7 +35,7 @@ public class TimerWheelHandler implements Lifecycle {
         // tickDuration 和 timeUnit 一格的时间长度
         // ticksPerWheel 一圈有多少格
         timer = new HashedWheelTimer(
-                new CustomizableThreadFactory("retry_task_timer_wheel_"), 100,
+                new CustomizableThreadFactory("retry-task-timer-wheel-"), 100,
                 TimeUnit.MILLISECONDS, 1024);
 
         timer.start();
@@ -78,6 +78,10 @@ public class TimerWheelHandler implements Lifecycle {
 
     public static Timeout getTimeout(String groupName, String uniqueId) {
         return cache.getIfPresent(getKey(groupName, uniqueId));
+    }
+
+    public static boolean isExisted(String groupName, String uniqueId) {
+        return Objects.nonNull(cache.getIfPresent(getKey(groupName, uniqueId)));
     }
 
     public static boolean cancel(String groupName, String uniqueId) {

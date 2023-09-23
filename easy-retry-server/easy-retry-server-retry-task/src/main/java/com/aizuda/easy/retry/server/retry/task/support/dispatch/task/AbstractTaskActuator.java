@@ -50,10 +50,7 @@ public abstract class AbstractTaskActuator implements TaskActuator, Initializing
             return;
         }
 
-        Timeout timeout = TimerWheelHandler.getTimeout(retryTask.getGroupName(), retryTask.getUniqueId());
-        if (Objects.isNull(timeout)) {
-            productExecUnitActor(executor);
-        }
+        productExecUnitActor(executor);
     }
 
     protected boolean preCheck(RetryContext retryContext, RetryExecutor executor) {
@@ -73,7 +70,7 @@ public abstract class AbstractTaskActuator implements TaskActuator, Initializing
         retryTask.setRetryCount(++retryCount);
     }
 
-    private void productExecUnitActor(RetryExecutor retryExecutor) {
+    protected void productExecUnitActor(RetryExecutor retryExecutor) {
         String groupIdHash = retryExecutor.getRetryContext().getRetryTask().getGroupName();
         Long retryId = retryExecutor.getRetryContext().getRetryTask().getId();
         idempotentStrategy.set(groupIdHash, retryId.intValue());
