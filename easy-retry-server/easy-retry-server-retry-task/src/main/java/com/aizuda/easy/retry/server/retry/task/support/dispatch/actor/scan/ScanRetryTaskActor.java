@@ -8,6 +8,7 @@ import com.aizuda.easy.retry.server.common.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.retry.task.support.RetryContext;
 import com.aizuda.easy.retry.server.retry.task.support.WaitStrategy;
 import com.aizuda.easy.retry.server.retry.task.support.context.MaxAttemptsPersistenceRetryContext;
+import com.aizuda.easy.retry.server.retry.task.support.dispatch.task.TaskActuatorSceneEnum;
 import com.aizuda.easy.retry.server.retry.task.support.retry.RetryBuilder;
 import com.aizuda.easy.retry.server.retry.task.support.retry.RetryExecutor;
 import com.aizuda.easy.retry.server.retry.task.support.strategy.FilterStrategies;
@@ -41,36 +42,8 @@ public class ScanRetryTaskActor extends AbstractScanGroup {
     private static final ConcurrentMap<String, Long> LAST_AT_MAP = new ConcurrentHashMap<>();
 
     @Override
-    protected RetryContext<Result<DispatchRetryResultDTO>> builderRetryContext(final String groupName,
-        final RetryTask retryTask) {
-        MaxAttemptsPersistenceRetryContext<Result<DispatchRetryResultDTO>> retryContext = new MaxAttemptsPersistenceRetryContext<>();
-        retryContext.setRetryTask(retryTask);
-        retryContext.setSceneBlacklist(accessTemplate.getSceneConfigAccess().getBlacklist(groupName));
-        retryContext.setServerNode(clientNodeAllocateHandler.getServerNode(retryTask.getGroupName()));
-        return retryContext;
-    }
-
-    @Override
-    protected RetryExecutor<Result<DispatchRetryResultDTO>> builderResultRetryExecutor(RetryContext retryContext) {
-
-        RetryTask retryTask = retryContext.getRetryTask();
-        return RetryBuilder.<Result<DispatchRetryResultDTO>>newBuilder()
-            .withStopStrategy(StopStrategies.stopException())
-            .withStopStrategy(StopStrategies.stopResultStatusCode())
-            .withWaitStrategy(getWaitWaitStrategy(retryTask.getGroupName(), retryTask.getSceneName()))
-            .withFilterStrategy(FilterStrategies.triggerAtFilter())
-            .withFilterStrategy(FilterStrategies.bitSetIdempotentFilter(idempotentStrategy))
-            .withFilterStrategy(FilterStrategies.sceneBlackFilter())
-            .withFilterStrategy(FilterStrategies.checkAliveClientPodFilter())
-            .withFilterStrategy(FilterStrategies.rebalanceFilterStrategies())
-            .withFilterStrategy(FilterStrategies.rateLimiterFilter())
-            .withRetryContext(retryContext)
-            .build();
-    }
-
-    @Override
-    protected Integer getTaskType() {
-        return TaskTypeEnum.RETRY.getType();
+    protected TaskActuatorSceneEnum taskActuatorScene() {
+        return TaskActuatorSceneEnum.AUTO_RETRY;
     }
 
     @Override
@@ -82,20 +55,5 @@ public class ScanRetryTaskActor extends AbstractScanGroup {
     protected void putLastId(final String groupName, final Long lastId) {
         LAST_AT_MAP.put(groupName, lastId);
     }
-
-
-    private WaitStrategy getWaitWaitStrategy(String groupName, String sceneName) {
-
-        SceneConfig sceneConfig = accessTemplate.getSceneConfigAccess().getSceneConfigByGroupNameAndSceneName(groupName, sceneName);
-        Integer backOff = sceneConfig.getBackOff();
-
-        return WaitStrategies.WaitStrategyEnum.getWaitStrategy(backOff);
-    }
-
-    @Override
-    protected ActorRef getActorRef() {
-        return ActorGenerator.execUnitActor();
-    }
-
 
 }

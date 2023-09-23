@@ -1,36 +1,26 @@
 package com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.scan;
 
 import akka.actor.AbstractActor;
-import akka.actor.ActorRef;
-import cn.hutool.core.lang.Pair;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.retry.task.support.IdempotentStrategy;
-import com.aizuda.easy.retry.server.retry.task.support.RetryContext;
 import com.aizuda.easy.retry.server.common.dto.ScanTask;
 import com.aizuda.easy.retry.server.common.handler.ClientNodeAllocateHandler;
-import com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.RetryTimerTask;
-import com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.TimerWheelHandler;
-import com.aizuda.easy.retry.server.retry.task.support.retry.RetryExecutor;
+import com.aizuda.easy.retry.server.retry.task.support.dispatch.task.TaskActuator;
+import com.aizuda.easy.retry.server.retry.task.support.dispatch.task.TaskActuatorSceneEnum;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
-import io.netty.util.HashedWheelTimer;
-import io.netty.util.Timeout;
-import io.netty.util.TimerTask;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 数据扫描模板类
@@ -51,7 +41,8 @@ public abstract class AbstractScanGroup extends AbstractActor {
     protected AccessTemplate accessTemplate;
     @Autowired
     protected ClientNodeAllocateHandler clientNodeAllocateHandler;
-
+    @Autowired
+    protected List<TaskActuator> taskActuators;
 
     @Override
     public Receive createReceive() {
@@ -75,7 +66,7 @@ public abstract class AbstractScanGroup extends AbstractActor {
         Long lastId = Optional.ofNullable(getLastId(groupName)).orElse(0L);
 
         // 扫描当前Group 待处理的任务
-        List<RetryTask> list = listAvailableTasks(groupName, lastAt, lastId, retryPullPageSize, getTaskType());
+        List<RetryTask> list = listAvailableTasks(groupName, lastAt, lastId, retryPullPageSize, taskActuatorScene().getScene());
 
         if (!CollectionUtils.isEmpty(list)) {
 
@@ -83,24 +74,10 @@ public abstract class AbstractScanGroup extends AbstractActor {
             putLastId(scanTask.getGroupName(), list.get(list.size() - 1).getId());
 
             for (RetryTask retryTask : list) {
-
-                // 重试次数累加
-                retryCountIncrement(retryTask);
-
-                RetryContext retryContext = builderRetryContext(groupName, retryTask);
-                RetryExecutor executor = builderResultRetryExecutor(retryContext);
-
-                Pair<Boolean /*是否符合条件*/, StringBuilder/*描述信息*/> pair = executor.filter();
-                if (!pair.getKey()) {
-                    log.warn("当前任务不满足执行条件. groupName:[{}] uniqueId:[{}], description:[{}]",
-                        retryContext.getRetryTask().getGroupName(),
-                        retryContext.getRetryTask().getUniqueId(), pair.getValue().toString());
-                    continue;
-                }
-
-                Timeout timeout = TimerWheelHandler.taskConcurrentHashMap.get(retryTask.getGroupName().concat("_").concat(retryTask.getUniqueId()));
-                if (Objects.isNull(timeout)) {
-                    productExecUnitActor(executor);
+                for (TaskActuator taskActuator : taskActuators) {
+                    if (taskActuatorScene().getScene() == taskActuator.getTaskType().getScene()) {
+                        taskActuator.actuator(retryTask);
+                    }
                 }
             }
         } else {
@@ -116,31 +93,11 @@ public abstract class AbstractScanGroup extends AbstractActor {
 
     }
 
-    protected abstract RetryContext builderRetryContext(String groupName, RetryTask retryTask);
-
-    protected abstract RetryExecutor builderResultRetryExecutor(RetryContext retryContext);
-
-    protected abstract Integer getTaskType();
+    protected abstract TaskActuatorSceneEnum taskActuatorScene();
 
     protected abstract Long getLastId(String groupName);
 
     protected abstract void putLastId(String groupName, Long lastId);
-
-    private void retryCountIncrement(RetryTask retryTask) {
-        Integer retryCount = retryTask.getRetryCount();
-        retryTask.setRetryCount(++retryCount);
-    }
-
-    private void productExecUnitActor(RetryExecutor retryExecutor) {
-        String groupIdHash = retryExecutor.getRetryContext().getRetryTask().getGroupName();
-        Long retryId = retryExecutor.getRetryContext().getRetryTask().getId();
-        idempotentStrategy.set(groupIdHash, retryId.intValue());
-
-        ActorRef actorRef = getActorRef();
-        actorRef.tell(retryExecutor, actorRef);
-    }
-
-    protected abstract ActorRef getActorRef();
 
     public List<RetryTask> listAvailableTasks(String groupName,
                                               LocalDateTime lastAt,

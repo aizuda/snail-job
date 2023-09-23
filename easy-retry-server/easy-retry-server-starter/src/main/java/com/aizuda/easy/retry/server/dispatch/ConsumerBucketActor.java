@@ -71,8 +71,8 @@ public class ConsumerBucketActor extends AbstractActor {
                 .in(SceneConfig::getBucketIndex, consumerBucket.getBuckets())
                 .groupBy(SceneConfig::getGroupName)).stream().map(SceneConfig::getGroupName).collect(Collectors.toSet());
 
-        CacheConsumerGroup.clear();
         // todo 需要对groupNameSet进行状态过滤只有开启才进行任务调度
+        // todo 通过同步线程对集群中的当前节点需要处理的组进行同步
         for (final String groupName : groupNameSet) {
             CacheConsumerGroup.addOrUpdate(groupName);
             ScanTask scanTask = new ScanTask();
