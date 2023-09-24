@@ -116,7 +116,10 @@ public abstract class AbstractScanGroup extends AbstractActor {
                                 .eq(RetryTask::getRetryStatus, RetryStatusEnum.RUNNING.getStatus())
                                 .eq(RetryTask::getGroupName, groupName)
                                 .eq(RetryTask::getTaskType, taskType)
+                                // TODO 提前10秒把需要执行的任务拉取出来
+                                .le(RetryTask::getNextTriggerAt, LocalDateTime.now().plusSeconds(10))
                                 .gt(RetryTask::getId, lastId)
+                                // TODO 验证一下lastAt会不会改变
                                 .gt(RetryTask::getCreateDt, lastAt)
                                 .orderByAsc(RetryTask::getId)
                                 .orderByAsc(RetryTask::getCreateDt))
