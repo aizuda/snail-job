@@ -7,7 +7,13 @@ import io.netty.util.TimerTask;
  * @author: www.byteblogs.com
  * @date : 2023-09-25 17:28
  */
-public class JobTimerTask implements TimerTask  {
+public class JobTimerTask implements TimerTask {
+
+    private JobContext jobContext;
+
+    public JobTimerTask(JobContext jobContext) {
+        this.jobContext = jobContext;
+    }
 
     @Override
     public void run(final Timeout timeout) throws Exception {

@@ -1,16 +1,22 @@
 package com.aizuda.easy.retry.server.job.task.scan;
 
 import akka.actor.AbstractActor;
+import akka.actor.ActorRef;
+import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.common.dto.ScanTask;
+import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.handler.ClientNodeAllocateHandler;
 import com.aizuda.easy.retry.server.job.task.BlockStrategy;
+import com.aizuda.easy.retry.server.job.task.WaitStrategy;
+import com.aizuda.easy.retry.server.job.task.dto.JobTaskPrepareDTO;
 import com.aizuda.easy.retry.server.job.task.strategy.BlockStrategies;
 import com.aizuda.easy.retry.server.job.task.strategy.BlockStrategies.BlockStrategyContext;
 import com.aizuda.easy.retry.server.job.task.strategy.BlockStrategies.BlockStrategyEnum;
+import com.aizuda.easy.retry.server.job.task.strategy.WaitStrategies;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
@@ -33,6 +39,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+
+import static com.aizuda.easy.retry.server.job.task.strategy.WaitStrategies.*;
 
 /**
  * JOB任务扫描
@@ -88,41 +96,23 @@ public class ScanJobTaskActor extends AbstractActor {
         lastId.set(jobs.get(jobs.size() - 1).getId());
 
         for (Job job : jobs) {
-            JobContext jobContext = new JobContext();
-            // 选择客户端节点
-            // TODO 校验一下客户端是否存活
-            jobContext.setRegisterNodeInfo(clientNodeAllocateHandler.getServerNode(job.getGroupName()));
 
-            Long count = jobTaskMapper.selectCount(new LambdaQueryWrapper<JobTask>().eq(JobTask::getTaskStatus, StatusEnum.YES.getStatus()));
-            if (count <= 0) {
-                // 生成可执行任务
-                JobTask jobTask = new JobTask();
-                jobTask.setJobId(job.getId());
-                jobTask.setGroupName(job.getGroupName());
-                jobTaskMapper.insert(jobTask);
+            // 更新下次触发时间
+            WaitStrategy waitStrategy = WaitStrategyEnum.getWaitStrategy(job.getTriggerType());
+            WaitStrategyContext waitStrategyContext = new WaitStrategyContext();
+            waitStrategyContext.setTriggerType(job.getTriggerType());
+            waitStrategyContext.setTriggerInterval(job.getTriggerInterval());
+            waitStrategyContext.setNextTriggerAt(job.getNextTriggerAt());
+            job.setNextTriggerAt(waitStrategy.computeRetryTime(waitStrategyContext));
+            Assert.isTrue(1 == jobMapper.updateById(job), () -> new EasyRetryServerException("更新job下次触发时间失败.jobId:[{}]", job.getId()));
 
-                // 更新下次触发时间
-                // ToDo 根据CRON表达式计算
-                job.setNextTriggerAt(LocalDateTime.now().plusSeconds(50));
-                jobMapper.updateById(job);
-            } else {
-                BlockStrategyContext blockStrategyContext = new BlockStrategyContext();
-
-                BlockStrategy blockStrategy = BlockStrategyEnum.getBlockStrategy(job.getBlockStrategy());
-                blockStrategy.block(blockStrategyContext);
-            }
-
-
-
-            // 进入时间轮
-            JobTimerWheelHandler.register(job.getGroupName(), job.getId().toString(), new JobTimerTask(), 1, TimeUnit.MILLISECONDS);
-            // 校验是否存在已经在执行的任务了
-//            boolean isExist = true;
-//            if (isExist) {
-//                // 选择丢弃策略
-//               String blockStrategy = job.getBlockStrategy();
-//
-//            }
+            // 执行预处理阶段
+            ActorRef actorRef = ActorGenerator.jobTaskPrepareActor();
+            JobTaskPrepareDTO jobTaskPrepareDTO = new JobTaskPrepareDTO();
+            jobTaskPrepareDTO.setJobId(job.getId());
+            jobTaskPrepareDTO.setTriggerType(job.getTriggerType());
+            jobTaskPrepareDTO.setNextTriggerAt(job.getNextTriggerAt());
+            actorRef.tell(jobTaskPrepareDTO, actorRef);
         }
 
     }

@@ -1,7 +1,12 @@
 package com.aizuda.easy.retry.server.job.task.strategy;
 
+import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
+import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.job.task.BlockStrategy;
+import com.aizuda.easy.retry.server.job.task.scan.JobContext;
+import com.aizuda.easy.retry.server.job.task.scan.JobTimerTask;
+import com.aizuda.easy.retry.server.job.task.scan.JobTimerWheelHandler;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
@@ -9,6 +14,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author: www.byteblogs.com
@@ -78,9 +85,12 @@ public class BlockStrategies {
             JobTask jobTask = new JobTask();
             jobTask.setJobId(job.getId());
             jobTask.setGroupName(job.getGroupName());
-
             JobTaskMapper jobTaskMapper = SpringContext.getBeanByType(JobTaskMapper.class);
-            jobTaskMapper.insert(jobTask);
+            Assert.isTrue(1 == jobTaskMapper.insert(jobTask), () -> new EasyRetryServerException("新增调度任务失败.jobId:[{}]", job.getId()));
+
+            JobContext jobContext = new JobContext();
+            // 进入时间轮
+            JobTimerWheelHandler.register(job.getGroupName(), job.getId().toString(), new JobTimerTask(jobContext), 1, TimeUnit.MILLISECONDS);
 
             return false;
         }
