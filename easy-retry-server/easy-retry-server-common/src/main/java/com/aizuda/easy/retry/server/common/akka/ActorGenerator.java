@@ -15,7 +15,6 @@ public class ActorGenerator {
 
     public static final String SCAN_CALLBACK_GROUP_ACTOR = "ScanCallbackGroupActor";
     public static final String SCAN_RETRY_GROUP_ACTOR = "ScanGroupActor";
-    public static final String SCAN_JOB_ACTOR = "ScanJobActor";
     public static final String SCAN_BUCKET_ACTOR = "ScanBucketActor";
     public static final String FINISH_ACTOR = "FinishActor";
     public static final String FAILURE_ACTOR = "FailureActor";
@@ -25,6 +24,10 @@ public class ActorGenerator {
     public static final String LOG_ACTOR = "LogActor";
     public static final String REQUEST_HANDLER_ACTOR = "RequestHandlerActor";
 
+    /*----------------------------------------分布式任务调度----------------------------------------*/
+    public static final String SCAN_JOB_ACTOR = "ScanJobActor";
+
+    public static final String JOB_TASK_PREPARE_ACTOR = "JobTaskPrepareActor";
 
     private ActorGenerator() {}
 
@@ -127,6 +130,15 @@ public class ActorGenerator {
         return getNettyActorSystem().actorOf(getSpringExtension().props(REQUEST_HANDLER_ACTOR));
     }
 
+    /**
+     * Job调度准备阶段actor
+     *
+     * @return actor 引用
+     */
+    public static ActorRef jobTaskPrepareActor() {
+        return getJobActorSystem().actorOf(getSpringExtension().props(JOB_TASK_PREPARE_ACTOR));
+    }
+
     public static SpringExtension getSpringExtension() {
        return SpringContext.getBeanByType(SpringExtension.class);
     }
@@ -173,4 +185,15 @@ public class ActorGenerator {
     public static ActorSystem getNettyActorSystem() {
         return SpringContext.getBean("nettyActorSystem", ActorSystem.class);
     }
+
+    /**
+     * 处理Job调度
+     *
+     * @return
+     */
+    public static ActorSystem getJobActorSystem() {
+        return SpringContext.getBean("jobActorSystem", ActorSystem.class);
+    }
+
+
 }

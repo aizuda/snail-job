@@ -1,33 +1,18 @@
-package com.aizuda.easy.retry.template.datasource.persistence.po;
+package com.aizuda.easy.retry.server.job.task.dto;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
+import lombok.Data;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 
-import lombok.Getter;
-import lombok.Setter;
-
 /**
- * <p>
- * 任务信息
- * </p>
- *
  * @author www.byteblogs.com
- * @since 2023-09-24
+ * @date 2023-09-25 22:42:21
+ * @since 2.4.0
  */
-@Getter
-@Setter
-public class Job implements Serializable {
+@Data
+public class JobTaskPrepareDTO {
 
-    private static final long serialVersionUID = 1L;
-
-    /**
-     * 主键
-     */
-    @TableId(value = "id", type = IdType.AUTO)
-    private Long id;
+    private Long jobId;
 
     /**
      * 组名称
@@ -113,26 +98,5 @@ public class Job implements Serializable {
      * bucket
      */
     private Integer bucketIndex;
-
-    /**
-     * 描述
-     */
-    private String description;
-
-    /**
-     * 创建时间
-     */
-    private LocalDateTime createDt;
-
-    /**
-     * 修改时间
-     */
-    private LocalDateTime updateDt;
-
-    /**
-     * 逻辑删除 1、删除
-     */
-    private Integer deleted;
-
 
 }
