@@ -31,11 +31,11 @@
     </properties>
 
     <modules>
-        <module>easy-retry-client-core</module>
         <module>easy-retry-common</module>
         <module>easy-retry-server</module>
         <module>easy-retry-client-starter</module>
         <module>easy-retry-datasource</module>
+        <module>easy-retry-client</module>
     </modules>
 
     <dependencyManagement>

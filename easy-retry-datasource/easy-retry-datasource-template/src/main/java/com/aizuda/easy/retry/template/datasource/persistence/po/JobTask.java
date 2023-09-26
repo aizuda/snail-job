@@ -52,6 +52,11 @@ public class JobTask implements Serializable {
     private Integer taskStatus;
 
     /**
+     * 客户端节点id
+     */
+    private String hostId;
+
+    /**
      * 创建时间
      */
     private LocalDateTime createDt;

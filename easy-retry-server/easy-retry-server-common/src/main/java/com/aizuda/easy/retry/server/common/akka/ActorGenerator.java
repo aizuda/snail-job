@@ -26,8 +26,8 @@ public class ActorGenerator {
 
     /*----------------------------------------分布式任务调度----------------------------------------*/
     public static final String SCAN_JOB_ACTOR = "ScanJobActor";
-
     public static final String JOB_TASK_PREPARE_ACTOR = "JobTaskPrepareActor";
+    public static final String JOB_EXECUTOR_ACTOR = "JobExecutorActor";
 
     private ActorGenerator() {}
 
@@ -130,6 +130,7 @@ public class ActorGenerator {
         return getNettyActorSystem().actorOf(getSpringExtension().props(REQUEST_HANDLER_ACTOR));
     }
 
+
     /**
      * Job调度准备阶段actor
      *
@@ -137,6 +138,15 @@ public class ActorGenerator {
      */
     public static ActorRef jobTaskPrepareActor() {
         return getJobActorSystem().actorOf(getSpringExtension().props(JOB_TASK_PREPARE_ACTOR));
+    }
+
+    /**
+     * Job任务执行阶段actor
+     *
+     * @return actor 引用
+     */
+    public static ActorRef jobTaskExecutorActor() {
+        return getJobActorSystem().actorOf(getSpringExtension().props(JOB_EXECUTOR_ACTOR));
     }
 
     public static SpringExtension getSpringExtension() {
