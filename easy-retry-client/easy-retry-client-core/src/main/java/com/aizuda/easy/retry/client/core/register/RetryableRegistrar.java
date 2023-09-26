@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.client.core.register;
 
-import com.aizuda.easy.retry.client.core.Lifecycle;
+import com.aizuda.easy.retry.client.common.Lifecycle;
 import com.aizuda.easy.retry.client.core.Scanner;
 import com.aizuda.easy.retry.client.core.cache.RetryerInfoCache;
 import com.aizuda.easy.retry.client.core.exception.EasyRetryClientException;

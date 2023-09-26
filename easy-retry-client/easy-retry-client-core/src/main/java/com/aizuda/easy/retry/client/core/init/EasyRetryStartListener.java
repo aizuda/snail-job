@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.client.core.init;
 
-import com.aizuda.easy.retry.client.core.Lifecycle;
+import com.aizuda.easy.retry.client.common.Lifecycle;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.util.EasyRetryVersion;
 import lombok.extern.slf4j.Slf4j;

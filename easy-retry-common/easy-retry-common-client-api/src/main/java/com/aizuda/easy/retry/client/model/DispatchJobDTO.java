@@ -21,4 +21,14 @@ public class DispatchJobDTO {
     @NotBlank(message = "group 不能为空")
     private String groupName;
 
+    @NotBlank(message = "parallelNum 不能为空")
+    private Integer parallelNum;
+
+    @NotNull(message = "executorType 不能为空")
+    private Integer executorType;
+
+    @NotBlank(message = "executorName 不能为空")
+    private String executorName;
+
+
 }

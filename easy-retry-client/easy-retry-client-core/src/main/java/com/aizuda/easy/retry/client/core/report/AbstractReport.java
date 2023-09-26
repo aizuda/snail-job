@@ -1,12 +1,12 @@
 package com.aizuda.easy.retry.client.core.report;
 
 import cn.hutool.core.lang.Assert;
+import com.aizuda.easy.retry.client.common.config.EasyRetryProperties;
 import com.aizuda.easy.retry.client.core.ExpressionEngine;
 import com.aizuda.easy.retry.client.core.IdempotentIdGenerate;
 import com.aizuda.easy.retry.client.core.Report;
 import com.aizuda.easy.retry.client.core.RetryArgSerializer;
 import com.aizuda.easy.retry.client.core.cache.RetryerInfoCache;
-import com.aizuda.easy.retry.client.core.config.EasyRetryProperties;
 import com.aizuda.easy.retry.client.core.exception.EasyRetryClientException;
 import com.aizuda.easy.retry.client.core.intercepter.RetrySiteSnapshot;
 import com.aizuda.easy.retry.client.core.loader.EasyRetrySpiLoader;
