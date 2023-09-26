@@ -1,7 +1,7 @@
 package com.aizuda.easy.retry.client.core.report;
 
+import com.aizuda.easy.retry.client.common.proxy.RequestBuilder;
 import com.aizuda.easy.retry.client.core.client.NettyClient;
-import com.aizuda.easy.retry.client.core.client.proxy.RequestBuilder;
 import com.aizuda.easy.retry.client.core.retryer.RetryerInfo;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.model.NettyResult;

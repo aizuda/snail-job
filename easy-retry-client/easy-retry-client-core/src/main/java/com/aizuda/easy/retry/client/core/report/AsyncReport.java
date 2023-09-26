@@ -1,8 +1,7 @@
 package com.aizuda.easy.retry.client.core.report;
 
-import com.aizuda.easy.retry.client.core.Lifecycle;
-import com.aizuda.easy.retry.client.core.config.EasyRetryProperties;
-import com.aizuda.easy.retry.client.core.config.EasyRetryProperties.SlidingWindowConfig;
+import com.aizuda.easy.retry.client.common.Lifecycle;
+import com.aizuda.easy.retry.client.common.config.EasyRetryProperties;
 import com.aizuda.easy.retry.client.core.retryer.RetryerInfo;
 import com.aizuda.easy.retry.client.core.window.SlidingWindow;
 import com.aizuda.easy.retry.server.model.dto.RetryTaskDTO;
@@ -51,7 +50,7 @@ public class AsyncReport extends AbstractReport implements Lifecycle {
     @Override
     public void start() {
 
-        SlidingWindowConfig slidingWindowConfig = easyRetryProperties.getSlidingWindow();
+        EasyRetryProperties.SlidingWindowConfig slidingWindowConfig = easyRetryProperties.getSlidingWindow();
 
         slidingWindow = SlidingWindow
             .Builder
