@@ -1,9 +1,16 @@
 package com.aizuda.easy.retry.server.job.task.strategy;
 
 import cn.hutool.core.lang.Assert;
+import com.aizuda.easy.retry.client.model.InterruptJobDTO;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
+import com.aizuda.easy.retry.common.core.enums.StatusEnum;
+import com.aizuda.easy.retry.common.core.model.Result;
+import com.aizuda.easy.retry.server.common.client.RequestBuilder;
+import com.aizuda.easy.retry.server.common.client.RpcClient;
+import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.job.task.BlockStrategy;
+import com.aizuda.easy.retry.server.job.task.enums.TaskStatusEnum;
 import com.aizuda.easy.retry.server.job.task.scan.JobContext;
 import com.aizuda.easy.retry.server.job.task.scan.JobTimerTask;
 import com.aizuda.easy.retry.server.job.task.scan.JobTimerWheelHandler;
@@ -41,9 +48,8 @@ public class BlockStrategies {
                 }
             }
 
-            return null;
+            throw new EasyRetryServerException("不符合的阻塞策略. blockStrategy:[{}]", blockStrategy);
         }
-
 
     }
 
@@ -52,7 +58,11 @@ public class BlockStrategies {
 
         private Long jobId;
 
-        private Job job;
+        private Long taskId;
+
+        private String groupName;
+
+        private RegisterNodeInfo registerNodeInfo;
     }
 
     private static final class DiscardBlockStrategy implements BlockStrategy {
@@ -70,6 +80,46 @@ public class BlockStrategies {
         public boolean block(final BlockStrategyContext context) {
             log.warn("阻塞策略为覆盖. jobId:[{}]", context.getJobId());
             // 向客户端发送中断执行指令
+            RegisterNodeInfo registerNodeInfo = context.registerNodeInfo;
+            RpcClient rpcClient = RequestBuilder.<RpcClient, Result>newBuilder()
+                .hostPort(registerNodeInfo.getHostPort())
+                .groupName(registerNodeInfo.getGroupName())
+                .hostId(registerNodeInfo.getHostId())
+                .hostIp(registerNodeInfo.getHostIp())
+                .contextPath(registerNodeInfo.getContextPath())
+                .client(RpcClient.class)
+                .build();
+
+            InterruptJobDTO interruptJobDTO = new InterruptJobDTO();
+            interruptJobDTO.setTaskId(context.getTaskId());
+            interruptJobDTO.setGroupName(context.getGroupName());
+            interruptJobDTO.setJobId(context.getJobId());
+
+            // TODO 处理结果
+            Result<Boolean> result = rpcClient.interrupt(interruptJobDTO);
+            Integer taskStatus;
+            if (result.getStatus() == StatusEnum.YES.getStatus() && Boolean.TRUE.equals(result.getData())) {
+                taskStatus = TaskStatusEnum.INTERRUPT_SUCCESS.getStatus();
+
+                // 生成一个新的任务
+                JobTask jobTask = new JobTask();
+                jobTask.setJobId(context.getJobId());
+                jobTask.setGroupName(context.getGroupName());
+                JobTaskMapper jobTaskMapper = SpringContext.getBeanByType(JobTaskMapper.class);
+                Assert.isTrue(1 == jobTaskMapper.insert(jobTask), () -> new EasyRetryServerException("新增调度任务失败.jobId:[{}]", context.getJobId()));
+
+                JobContext jobContext = new JobContext();
+                // 进入时间轮
+                JobTimerWheelHandler.register(context.getGroupName(), context.getJobId().toString(), new JobTimerTask(jobTask.getJobId(), jobTask.getGroupName()), 1, TimeUnit.MILLISECONDS);
+
+            } else {
+                taskStatus = TaskStatusEnum.INTERRUPT_FAIL.getStatus();
+            }
+
+            JobTaskMapper jobTaskMapper = SpringContext.getBeanByType(JobTaskMapper.class);
+            JobTask jobTask = new JobTask();
+            jobTask.setTaskStatus(taskStatus);
+            Assert.isTrue(1 == jobTaskMapper.updateById(jobTask), ()-> new EasyRetryServerException("更新调度任务失败. jopId:[{}]", context.getJobId()));
 
             return true;
         }
@@ -80,17 +130,15 @@ public class BlockStrategies {
         @Override
         public boolean block(final BlockStrategyContext context) {
             log.warn("阻塞策略为并行执行. jobId:[{}]", context.getJobId());
-            Job job = context.getJob();
 
             JobTask jobTask = new JobTask();
-            jobTask.setJobId(job.getId());
-            jobTask.setGroupName(job.getGroupName());
+            jobTask.setJobId(context.getJobId());
+            jobTask.setGroupName(context.getGroupName());
             JobTaskMapper jobTaskMapper = SpringContext.getBeanByType(JobTaskMapper.class);
-            Assert.isTrue(1 == jobTaskMapper.insert(jobTask), () -> new EasyRetryServerException("新增调度任务失败.jobId:[{}]", job.getId()));
+            Assert.isTrue(1 == jobTaskMapper.insert(jobTask), () -> new EasyRetryServerException("新增调度任务失败.jobId:[{}]", context.getJobId()));
 
-            JobContext jobContext = new JobContext();
             // 进入时间轮
-            JobTimerWheelHandler.register(job.getGroupName(), job.getId().toString(), new JobTimerTask(jobContext), 1, TimeUnit.MILLISECONDS);
+            JobTimerWheelHandler.register(context.getGroupName(), context.getJobId().toString(), new JobTimerTask(jobTask.getJobId(), jobTask.getGroupName()), 1, TimeUnit.MILLISECONDS);
 
             return false;
         }
