@@ -59,11 +59,11 @@ public abstract class AbstractSchedule implements Schedule {
 
     protected abstract void doExecute();
 
-    abstract String lockName();
+    protected abstract String lockName();
 
-    abstract String lockAtMost();
+    protected abstract String lockAtMost();
 
-    abstract String lockAtLeast();
+    protected abstract String lockAtLeast();
 
     private LockProvider getLockAccess() {
         return lockProviders.stream()

@@ -1,9 +1,9 @@
 package com.aizuda.easy.retry.server.common.client;
 
-import com.aizuda.easy.retry.client.model.DispatchJobDTO;
+import com.aizuda.easy.retry.client.model.request.DispatchJobRequest;
 import com.aizuda.easy.retry.client.model.DispatchRetryDTO;
 import com.aizuda.easy.retry.client.model.DispatchRetryResultDTO;
-import com.aizuda.easy.retry.client.model.InterruptJobDTO;
+import com.aizuda.easy.retry.client.model.StopJobDTO;
 import com.aizuda.easy.retry.client.model.RetryCallbackDTO;
 import com.aizuda.easy.retry.common.core.model.EasyRetryHeaders;
 import com.aizuda.easy.retry.common.core.model.Result;
@@ -26,10 +26,10 @@ public interface RpcClient {
     @Mapping(path = "/retry/callback/v1", method = RequestMethod.POST)
     Result callback(@Body RetryCallbackDTO retryCallbackDTO);
 
-    @Mapping(path = "/job/interrupt/v1", method = RequestMethod.POST)
-    Result<Boolean> interrupt(@Body InterruptJobDTO interruptJobDTO);
+    @Mapping(path = "/job/stop/v1", method = RequestMethod.POST)
+    Result<Boolean> stop(@Body StopJobDTO stopJobDTO);
 
     @Mapping(path = "/job/dispatch/v1", method = RequestMethod.POST)
-    Result dispatch(@Body DispatchJobDTO dispatchJobDTO);
+    Result<Boolean> dispatch(@Body DispatchJobRequest dispatchJobRequest);
 
 }

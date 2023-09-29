@@ -1,2 +1,3 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  com.aizuda.easy.retry.client.starter.EasyRetryClientAutoConfiguration
+  com.aizuda.easy.retry.client.starter.EasyRetryClientAutoConfiguration,\
+  com.aizuda.easy.retry.client.starter.EasyRetryJobClientAutoConfiguration

@@ -8,8 +8,11 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author: www.byteblogs.com
  * @date : 2022-03-03 17:43
+ * @since : 2.4.0
  */
 public class JobExecutorInfoCache {
+
+    private JobExecutorInfoCache() {}
 
     private static final ConcurrentHashMap<String, JobExecutorInfo> JOB_EXECUTOR_REPOSITORY = new ConcurrentHashMap<>();
 
@@ -22,7 +25,7 @@ public class JobExecutorInfoCache {
     }
 
     public static boolean isExisted(String executorName) {
-        return !Objects.nonNull(JOB_EXECUTOR_REPOSITORY.get(executorName));
+        return Objects.nonNull(JOB_EXECUTOR_REPOSITORY.get(executorName));
     }
 
 }

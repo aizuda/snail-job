@@ -13,6 +13,7 @@ import com.aizuda.easy.retry.server.common.dto.ScanTask;
 import com.aizuda.easy.retry.server.retry.task.support.cache.CacheGroupRateLimiter;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.ServerNodeMapper;
+import com.aizuda.easy.retry.template.datasource.persistence.po.GroupConfig;
 import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
 import com.aizuda.easy.retry.template.datasource.persistence.po.ServerNode;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -23,8 +24,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -65,27 +68,28 @@ public class ConsumerBucketActor extends AbstractActor {
     private void doDispatch(final ConsumerBucket consumerBucket) {
 
         // 查询桶对应组信息
-        Set<String> groupNameSet = accessTemplate.getSceneConfigAccess().list(
-            new LambdaQueryWrapper<SceneConfig>().select(SceneConfig::getGroupName)
-                .eq(SceneConfig::getSceneStatus, StatusEnum.YES.getStatus())
-                .in(SceneConfig::getBucketIndex, consumerBucket.getBuckets())
-                .groupBy(SceneConfig::getGroupName)).stream().map(SceneConfig::getGroupName).collect(Collectors.toSet());
+        List<GroupConfig> groupConfigs = accessTemplate.getGroupConfigAccess().list(
+            new LambdaQueryWrapper<GroupConfig>()
+                .select(GroupConfig::getGroupName)
+                .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus())
+                .in(GroupConfig::getBucketIndex, consumerBucket.getBuckets())
+        );
 
-        // todo 需要对groupNameSet进行状态过滤只有开启才进行任务调度
-        // todo 通过同步线程对集群中的当前节点需要处理的组进行同步
-        for (final String groupName : groupNameSet) {
-            CacheConsumerGroup.addOrUpdate(groupName);
-            ScanTask scanTask = new ScanTask();
-            scanTask.setBuckets(consumerBucket.getBuckets());
-            scanTask.setGroupName(groupName);
-            produceScanActorTask(scanTask);
+        if (!CollectionUtils.isEmpty(groupConfigs)) {
+            for (final GroupConfig groupConfig : groupConfigs) {
+                CacheConsumerGroup.addOrUpdate(groupConfig.getGroupName());
+                ScanTask scanTask = new ScanTask();
+                scanTask.setGroupName(groupConfig.getGroupName());
+                scanTask.setBuckets(consumerBucket.getBuckets());
+                produceScanActorTask(scanTask);
+            }
         }
 
-        // job
+        // 扫描回调数据
         ScanTask scanTask = new ScanTask();
         scanTask.setBuckets(consumerBucket.getBuckets());
-        ActorRef jobActor = TaskTypeEnum.JOB.getActorRef().get();
-        jobActor.tell(scanTask, jobActor);
+        ActorRef scanJobActorRef = cacheActorRef("DEFAULT_JOB_KEY", TaskTypeEnum.JOB);
+        scanJobActorRef.tell(scanTask, scanJobActorRef);
     }
 
     /**

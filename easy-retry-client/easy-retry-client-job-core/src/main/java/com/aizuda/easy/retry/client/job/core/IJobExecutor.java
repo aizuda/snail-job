@@ -1,8 +1,7 @@
 package com.aizuda.easy.retry.client.job.core;
 
-import com.aizuda.easy.retry.client.job.core.dto.ExecuteResult;
-
-import java.util.concurrent.Callable;
+import com.aizuda.easy.retry.client.model.ExecuteResult;
+import com.aizuda.easy.retry.client.job.core.dto.JobContext;
 
 /**
  * job执行者
@@ -11,7 +10,6 @@ import java.util.concurrent.Callable;
  * @date : 2023-09-27 09:38
  * @since 2.4.0
  */
-public interface IJobExecutor extends Callable<ExecuteResult> {
-
-    String getName();
+public interface IJobExecutor {
+    void jobExecute(JobContext jobContext);
 }

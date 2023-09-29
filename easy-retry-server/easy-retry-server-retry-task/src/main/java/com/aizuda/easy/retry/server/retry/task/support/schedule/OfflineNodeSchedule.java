@@ -59,17 +59,17 @@ public class OfflineNodeSchedule extends AbstractSchedule implements Lifecycle {
     }
 
     @Override
-    String lockName() {
+    public String lockName() {
         return "clearOfflineNode";
     }
 
     @Override
-    String lockAtMost() {
+    public String lockAtMost() {
         return "PT10S";
     }
 
     @Override
-    String lockAtLeast() {
+    public String lockAtLeast() {
         return "PT5S";
     }
 

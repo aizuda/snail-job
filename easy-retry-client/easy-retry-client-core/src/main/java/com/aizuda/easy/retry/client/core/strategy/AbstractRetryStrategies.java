@@ -3,7 +3,7 @@ package com.aizuda.easy.retry.client.core.strategy;
 import com.aizuda.easy.retry.client.common.config.EasyRetryProperties;
 import com.aizuda.easy.retry.client.core.RetryExecutor;
 import com.aizuda.easy.retry.client.core.RetryExecutorParameter;
-import com.aizuda.easy.retry.client.core.cache.GroupVersionCache;
+import com.aizuda.easy.retry.client.common.cache.GroupVersionCache;
 import com.aizuda.easy.retry.client.core.event.EasyRetryListener;
 import com.aizuda.easy.retry.client.core.intercepter.RetrySiteSnapshot;
 import com.aizuda.easy.retry.client.core.Report;

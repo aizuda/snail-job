@@ -110,6 +110,16 @@ public class Job implements Serializable {
     private Integer retryInterval;
 
     /**
+     * 任务类型
+     */
+    private Integer taskType;
+
+    /**
+     * 并行数
+     */
+    private Integer parallelNum;
+
+    /**
      * bucket
      */
     private Integer bucketIndex;

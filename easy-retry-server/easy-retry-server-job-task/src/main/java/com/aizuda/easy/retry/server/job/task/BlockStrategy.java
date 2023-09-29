@@ -7,6 +7,5 @@ import com.aizuda.easy.retry.server.job.task.strategy.BlockStrategies.BlockStrat
  * @date : 2023-09-25 17:53
  */
 public interface BlockStrategy {
-
-    boolean block(BlockStrategyContext context);
+    void block(BlockStrategyContext context);
 }

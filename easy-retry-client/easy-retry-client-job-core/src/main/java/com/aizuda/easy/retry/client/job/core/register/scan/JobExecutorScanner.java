@@ -4,6 +4,7 @@ import com.aizuda.easy.retry.client.job.core.IJobExecutor;
 import com.aizuda.easy.retry.client.job.core.Scanner;
 import com.aizuda.easy.retry.client.job.core.annotation.JobExecutor;
 import com.aizuda.easy.retry.client.job.core.cache.JobExecutorInfoCache;
+import com.aizuda.easy.retry.client.job.core.dto.JobContext;
 import com.aizuda.easy.retry.client.job.core.dto.JobExecutorInfo;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +14,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Method;
@@ -52,18 +54,12 @@ public class JobExecutorScanner implements Scanner, ApplicationContextAware {
                 LogUtils.error(log, "{} JobExecutor加载异常：{}", beanDefinitionName, ex);
             }
 
-            if (annotatedMethods == null || annotatedMethods.isEmpty()) {
-                continue;
-            }
-
             String executorClassName = bean.getClass().getName();
 
             // 通过实现接口进行注册
             if (bean.getClass().isAssignableFrom(IJobExecutor.class)) {
-                IJobExecutor iJobExecutor = (IJobExecutor) bean;
-                String executorName = iJobExecutor.getName();
-                if (JobExecutorInfoCache.isExisted(executorName)) {
-                    retryerInfoList.add(new JobExecutorInfo(executorClassName, ReflectionUtils.findMethod(bean.getClass(), "jobExecute"), bean));
+                if (!JobExecutorInfoCache.isExisted(executorClassName)) {
+                    retryerInfoList.add(new JobExecutorInfo(executorClassName, ReflectionUtils.findMethod(bean.getClass(), "jobExecute"), bean, false));
                 }
 
             }
@@ -72,16 +68,20 @@ public class JobExecutorScanner implements Scanner, ApplicationContextAware {
             JobExecutor jobExecutor = bean.getClass().getAnnotation(JobExecutor.class);
             if (Objects.nonNull(jobExecutor)) {
                 String executorName = jobExecutor.name();
-                if (JobExecutorInfoCache.isExisted(executorName)) {
+                if (!JobExecutorInfoCache.isExisted(executorName)) {
                     JobExecutorInfo jobExecutorInfo =
                             new JobExecutorInfo(
                                     executorName,
-                                    ReflectionUtils.findMethod(bean.getClass(), jobExecutor.method()),
-                                    bean
+                                    ReflectionUtils.findMethod(bean.getClass(), jobExecutor.method(), JobContext.class),
+                                    bean, true
                             );
                     retryerInfoList.add(jobExecutorInfo);
                 }
 
+            }
+
+            if (CollectionUtils.isEmpty(annotatedMethods)) {
+                continue;
             }
 
             // 扫描方法上的注解
@@ -96,7 +96,7 @@ public class JobExecutorScanner implements Scanner, ApplicationContextAware {
                         new JobExecutorInfo(
                                 jobExecutor.name(),
                                 executeMethod,
-                                bean
+                                bean,true
                         );
                 retryerInfoList.add(jobExecutorInfo);
             }

@@ -27,6 +27,8 @@ public class GroupConfig implements Serializable {
 
     private Integer initScene;
 
+    private Integer bucketIndex;
+
     private String description;
 
     private LocalDateTime createDt;

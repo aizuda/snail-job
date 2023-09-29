@@ -93,17 +93,17 @@ public class RetryErrorMoreThresholdAlarmSchedule extends AbstractSchedule imple
     }
 
     @Override
-    String lockName() {
+    public String lockName() {
         return "retryErrorMoreThreshold";
     }
 
     @Override
-    String lockAtMost() {
+    public String lockAtMost() {
         return "PT10M";
     }
 
     @Override
-    String lockAtLeast() {
+    public String lockAtLeast() {
         return "PT1M";
     }
 }

@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.client.common.netty;
 
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
+import com.aizuda.easy.retry.client.common.cache.GroupVersionCache;
 import com.aizuda.easy.retry.client.common.config.EasyRetryProperties;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.enums.HeadersEnum;
@@ -93,8 +94,7 @@ public class NettyChannel {
                 .set(HeadersEnum.GROUP_NAME.getKey(), EasyRetryProperties.getGroup())
                 .set(HeadersEnum.CONTEXT_PATH.getKey(), Optional.ofNullable(serverProperties.getServlet().getContextPath()).orElse("/"))
                 .set(HeadersEnum.HOST_PORT.getKey(), port)
-                // TODO 待办
-//                .set(HeadersEnum.VERSION.getKey(), GroupVersionCache.getVersion())
+                .set(HeadersEnum.VERSION.getKey(), GroupVersionCache.getVersion())
         ;
 
         //发送数据

@@ -7,11 +7,12 @@
         <id column="id" property="id" />
         <result column="group_name" property="groupName" />
         <result column="job_id" property="jobId" />
-        <result column="retry_count" property="retryCount" />
-        <result column="task_status" property="taskStatus" />
+        <result column="task_batch_id" property="taskBatchId" />
+        <result column="parent_id" property="parentId" />
+        <result column="execute_status" property="executeStatus" />
+        <result column="result_message" property="resultMessage" />
         <result column="create_dt" property="createDt" />
         <result column="update_dt" property="updateDt" />
-        <result column="deleted" property="deleted" />
     </resultMap>
 
 </mapper>

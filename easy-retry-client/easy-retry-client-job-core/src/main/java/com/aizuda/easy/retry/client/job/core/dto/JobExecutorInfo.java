@@ -18,5 +18,8 @@ public class JobExecutorInfo {
 
     private final Method method;
 
-    Object executor;
+    private Object executor;
+
+    private boolean isAnnotation;
+
 }

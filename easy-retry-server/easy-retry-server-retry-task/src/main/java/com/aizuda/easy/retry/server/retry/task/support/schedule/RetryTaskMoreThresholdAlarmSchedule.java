@@ -88,17 +88,17 @@ public class RetryTaskMoreThresholdAlarmSchedule extends AbstractSchedule implem
     }
 
     @Override
-    String lockName() {
+    public String lockName() {
         return "retryTaskMoreThreshold";
     }
 
     @Override
-    String lockAtMost() {
+    public String lockAtMost() {
         return "PT10M";
     }
 
     @Override
-    String lockAtLeast() {
+    public String lockAtLeast() {
         return "PT1M";
     }
 }

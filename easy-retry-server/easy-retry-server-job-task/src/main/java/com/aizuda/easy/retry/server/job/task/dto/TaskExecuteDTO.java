@@ -9,5 +9,7 @@ import lombok.Data;
 @Data
 public class TaskExecuteDTO {
 
-    private Long taskId;
+    private Long jobId;
+    private Long taskBatchId;
+    private String groupName;
 }

@@ -3,7 +3,7 @@ package com.aizuda.easy.retry.client.core.client;
 import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.client.core.IdempotentIdGenerate;
 import com.aizuda.easy.retry.client.core.RetryArgSerializer;
-import com.aizuda.easy.retry.client.core.cache.GroupVersionCache;
+import com.aizuda.easy.retry.client.common.cache.GroupVersionCache;
 import com.aizuda.easy.retry.client.core.cache.RetryerInfoCache;
 import com.aizuda.easy.retry.client.core.callback.RetryCompleteCallback;
 import com.aizuda.easy.retry.client.core.exception.EasyRetryClientException;
