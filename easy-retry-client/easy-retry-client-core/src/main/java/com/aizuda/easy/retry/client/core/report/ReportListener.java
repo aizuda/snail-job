@@ -4,7 +4,7 @@ import com.aizuda.easy.retry.client.common.config.EasyRetryProperties;
 import com.aizuda.easy.retry.client.common.proxy.RequestBuilder;
 import com.aizuda.easy.retry.client.core.RetryExecutor;
 import com.aizuda.easy.retry.client.core.RetryExecutorParameter;
-import com.aizuda.easy.retry.client.core.cache.GroupVersionCache;
+import com.aizuda.easy.retry.client.common.cache.GroupVersionCache;
 import com.aizuda.easy.retry.client.core.client.NettyClient;
 import com.aizuda.easy.retry.client.core.executor.GuavaRetryExecutor;
 import com.aizuda.easy.retry.common.core.alarm.Alarm;

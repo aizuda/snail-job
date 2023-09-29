@@ -11,7 +11,24 @@ public class JobContext {
 
     private Long jobId;
 
+    private Long taskBatchId;
+
     private Long taskId;
 
     private String groupName;
+
+    private String executorName;
+
+    /**
+     * 任务类型
+     */
+    private Integer taskType;
+
+    private Integer parallelNum;
+
+    private Integer shardingTotal;
+
+    private Integer shardingIndex;
+
+    private Integer executorTimeout;
 }

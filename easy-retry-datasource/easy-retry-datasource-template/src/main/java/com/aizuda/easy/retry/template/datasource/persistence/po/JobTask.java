@@ -12,7 +12,7 @@ import lombok.Setter;
 
 /**
  * <p>
- * 调度任务
+ * 任务实例
  * </p>
  *
  * @author www.byteblogs.com
@@ -37,9 +37,24 @@ public class JobTask implements Serializable {
     private String groupName;
 
     /**
-     * 任务id
+     * 任务信息id
      */
     private Long jobId;
+
+    /**
+     * 调度任务id
+     */
+    private Long taskBatchId;
+
+    /**
+     * 父执行器id
+     */
+    private Long parentId;
+
+    /**
+     * 执行的状态 0、失败 1、成功
+     */
+    private Integer executeStatus;
 
     /**
      * 重试次数
@@ -47,14 +62,29 @@ public class JobTask implements Serializable {
     private Integer retryCount;
 
     /**
-     * 任务状态 0、失败 1、成功
+     * 执行结果
      */
-    private Integer taskStatus;
+    private String resultMessage;
 
     /**
-     * 客户端节点id
+     * 客户端ID
      */
-    private String hostId;
+    private String clientId;
+
+    /**
+     * 执行方法参数
+     */
+    private String argsStr;
+
+    /**
+     * 参数类型 text/json
+     */
+    private String argsType;
+
+    /**
+     * 扩展字段
+     */
+    private String extAttrs;
 
     /**
      * 创建时间
@@ -65,11 +95,6 @@ public class JobTask implements Serializable {
      * 修改时间
      */
     private LocalDateTime updateDt;
-
-    /**
-     * 逻辑删除 1、删除
-     */
-    private Integer deleted;
 
 
 }

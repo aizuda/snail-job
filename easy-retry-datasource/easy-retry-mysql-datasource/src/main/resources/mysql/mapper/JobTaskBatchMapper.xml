@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskBatchMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.aizuda.easy.retry.template.datasource.persistence.po.JobTaskBatch">
+        <id column="id" property="id" />
+        <result column="group_name" property="groupName" />
+        <result column="job_id" property="jobId" />
+        <result column="task_status" property="taskStatus" />
+        <result column="create_dt" property="createDt" />
+        <result column="update_dt" property="updateDt" />
+        <result column="deleted" property="deleted" />
+    </resultMap>
+
+    <update id="updateJobTaskBatchStatus">
+        update job_task_batch
+        set task_status = #{taskStatus}
+        <where>
+            id = #{taskBatchId}
+            <if test="taskStatus == 4">
+                and EXISTS (select id from job_task where task_batch_id = #{taskBatchId} and execute_status = 4)
+            </if>
+            <if test="taskStatus == 3">
+                and NOT EXISTS (select id from job_task where task_batch_id = #{taskBatchId} and execute_status IN(1, 2, 4, 5))
+            </if>
+            <if test="taskStatus == 5">
+                and NOT EXISTS (select id from job_task where task_batch_id = #{taskBatchId} and execute_status IN(1, 2))
+            </if>
+        </where>
+
+    </update>
+
+</mapper>

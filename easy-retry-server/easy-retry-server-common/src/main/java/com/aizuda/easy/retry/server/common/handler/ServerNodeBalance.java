@@ -222,7 +222,6 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
                 try {
                     TimeUnit.SECONDS.sleep(systemProperties.getLoadBalanceCycleTime());
                 } catch (InterruptedException e) {
-                    LogUtils.error(log, "check balance interrupt");
                     Thread.currentThread().interrupt();
                 }
             }

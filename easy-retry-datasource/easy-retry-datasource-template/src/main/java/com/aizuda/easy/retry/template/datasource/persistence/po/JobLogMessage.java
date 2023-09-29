@@ -3,8 +3,10 @@ package com.aizuda.easy.retry.template.datasource.persistence.po;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -26,7 +28,7 @@ public class JobLogMessage implements Serializable {
     /**
      * 主键
      */
-      @TableId(value = "id", type = IdType.AUTO)
+    @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
     /**
@@ -42,17 +44,22 @@ public class JobLogMessage implements Serializable {
     /**
      * 任务实例id
      */
-    private Long taskId;
+    private Long taskBatchId;
 
     /**
      * 调度任务id
      */
-    private Long taskInstanceId;
+    private Long taskId;
 
     /**
      * 创建时间
      */
     private LocalDateTime createDt;
+
+    /**
+     * 客户端信息
+     */
+    private String clientAddress;
 
     /**
      * 调度信息

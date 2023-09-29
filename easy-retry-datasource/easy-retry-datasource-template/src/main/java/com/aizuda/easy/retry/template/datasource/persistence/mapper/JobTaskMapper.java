@@ -6,7 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 
 /**
  * <p>
- * 调度任务 Mapper 接口
+ * 任务实例 Mapper 接口
  * </p>
  *
  * @author www.byteblogs.com

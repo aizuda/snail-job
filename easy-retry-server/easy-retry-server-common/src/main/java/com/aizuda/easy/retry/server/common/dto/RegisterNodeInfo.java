@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.server.common.dto;
 
 import lombok.Data;
 
+import java.text.MessageFormat;
 import java.time.LocalDateTime;
 
 /**
@@ -12,6 +13,8 @@ import java.time.LocalDateTime;
  */
 @Data
 public class RegisterNodeInfo implements Comparable<RegisterNodeInfo> {
+
+    private static final String URL = "http://{0}:{1}/{2}";
 
     private String groupName;
 
@@ -26,6 +29,10 @@ public class RegisterNodeInfo implements Comparable<RegisterNodeInfo> {
     private Integer nodeType;
 
     private String contextPath;
+
+    public String fullUrl() {
+        return MessageFormat.format(URL, hostIp, hostPort.toString(), contextPath);
+    }
 
     @Override
     public int compareTo(RegisterNodeInfo info) {

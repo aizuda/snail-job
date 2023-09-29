@@ -4,7 +4,7 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.client.common.config.EasyRetryProperties;
 import com.aizuda.easy.retry.client.core.annotation.Retryable;
-import com.aizuda.easy.retry.client.core.cache.GroupVersionCache;
+import com.aizuda.easy.retry.client.common.cache.GroupVersionCache;
 import com.aizuda.easy.retry.client.core.cache.RetryerInfoCache;
 import com.aizuda.easy.retry.client.core.intercepter.RetrySiteSnapshot.EnumStage;
 import com.aizuda.easy.retry.client.core.retryer.RetryerInfo;

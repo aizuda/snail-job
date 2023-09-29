@@ -28,6 +28,10 @@ public class ActorGenerator {
     public static final String SCAN_JOB_ACTOR = "ScanJobActor";
     public static final String JOB_TASK_PREPARE_ACTOR = "JobTaskPrepareActor";
     public static final String JOB_EXECUTOR_ACTOR = "JobExecutorActor";
+    public static final String JOB_EXECUTOR_RESULT_ACTOR = "JobExecutorResultActor";
+    public static final String JOB_LOG_ACTOR = "JobLogActor";
+    public static final String REAL_JOB_EXECUTOR_ACTOR = "RealJobExecutorActor";
+    public static final String REAL_STOP_TASK_INSTANCE_ACTOR = "RealStopTaskInstanceActor";
 
     private ActorGenerator() {}
 
@@ -147,6 +151,42 @@ public class ActorGenerator {
      */
     public static ActorRef jobTaskExecutorActor() {
         return getJobActorSystem().actorOf(getSpringExtension().props(JOB_EXECUTOR_ACTOR));
+    }
+
+    /**
+     * Job任务执行结果actor
+     *
+     * @return actor 引用
+     */
+    public static ActorRef jobTaskExecutorResultActor() {
+        return getJobActorSystem().actorOf(getSpringExtension().props(JOB_EXECUTOR_RESULT_ACTOR));
+    }
+
+    /**
+     * Job任务向客户端发起请求阶段actor
+     *
+     * @return actor 引用
+     */
+    public static ActorRef jobRealTaskExecutorActor() {
+        return getJobActorSystem().actorOf(getSpringExtension().props(REAL_JOB_EXECUTOR_ACTOR));
+    }
+
+    /**
+     * Job任务向客户端发起请求阶段actor
+     *
+     * @return actor 引用
+     */
+    public static ActorRef jobRealStopTaskInstanceActor() {
+        return getJobActorSystem().actorOf(getSpringExtension().props(REAL_STOP_TASK_INSTANCE_ACTOR));
+    }
+
+    /**
+     * Job日志actor
+     *
+     * @return actor 引用
+     */
+    public static ActorRef jobLogActor() {
+        return getJobActorSystem().actorOf(getSpringExtension().props(JOB_LOG_ACTOR));
     }
 
     public static SpringExtension getSpringExtension() {

@@ -4,6 +4,7 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.URLUtil;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
+import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.common.core.util.HostUtils;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
@@ -15,13 +16,23 @@ import com.aizuda.easy.retry.server.common.client.annotation.Param;
 import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.handler.ClientNodeAllocateHandler;
+import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
+import com.github.rholder.retry.Attempt;
+import com.github.rholder.retry.RetryException;
+import com.github.rholder.retry.RetryListener;
+import com.github.rholder.retry.Retryer;
+import com.github.rholder.retry.RetryerBuilder;
+import com.github.rholder.retry.StopStrategies;
+import com.github.rholder.retry.WaitStrategies;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -34,6 +45,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 请求处理器
@@ -71,11 +84,23 @@ public class RpcClientInvokeHandler implements InvocationHandler {
         Mapping annotation = method.getAnnotation(Mapping.class);
         Assert.notNull(annotation, () -> new EasyRetryServerException("@Mapping cannot be null"));
 
+        if (annotation.failover()) {
+            return doFailoverHandler(method, args, annotation);
+        }
+
+        return requestRemote(method, args, annotation, 0);
+    }
+
+    @NotNull
+    private Result doFailoverHandler(final Method method, final Object[] args, final Mapping annotation)
+        throws Throwable {
         Set<RegisterNodeInfo> serverNodeSet = CacheRegisterTable.getServerNodeSet(groupName);
+
         // 最多调用size次
         int size = serverNodeSet.size();
         for (int count = 1; count <= size; count++) {
-            log.info("Start request client. count:[{}] clientId:[{}] clientAddr:[{}:{}] serverIp:[{}]", count, hostId, hostIp, hostPort, HostUtils.getIp());
+            log.info("Start request client. count:[{}] clientId:[{}] clientAddr:[{}:{}] serverIp:[{}]", count, hostId,
+                hostIp, hostPort, HostUtils.getIp());
             Result result = requestRemote(method, args, annotation, count);
             if (Objects.nonNull(result)) {
                 return result;
@@ -85,7 +110,7 @@ public class RpcClientInvokeHandler implements InvocationHandler {
         throw new EasyRetryServerException("No available nodes.");
     }
 
-    private Result requestRemote(Method method, Object[] args, Mapping mapping, int count) {
+    private Result requestRemote(Method method, Object[] args, Mapping mapping, int count) throws Throwable {
 
         try {
 
@@ -99,23 +124,31 @@ public class RpcClientInvokeHandler implements InvocationHandler {
 
             RestTemplate restTemplate = SpringContext.CONTEXT.getBean(RestTemplate.class);
 
-            ResponseEntity<Result> response = restTemplate.exchange(
-                // 拼接 url?a=1&b=1
-                getUrl(mapping, parasResult.paramMap).toString(),
-                // post or get
-                HttpMethod.valueOf(mapping.method().name()),
-                // body
-                new HttpEntity<>(parasResult.body, parasResult.requestHeaders),
-                // 返回值类型
-                Result.class);
+            Retryer<Result> retryer = buildResultRetryer(mapping);
 
-            log.info("Request client success. count:[{}] clientId:[{}] clientAddr:[{}:{}] serverIp:[{}]", count, hostId, hostIp, hostPort, HostUtils.getIp());
+            Result result = retryer.call(() -> {
+                ResponseEntity<Result> response = restTemplate.exchange(
+                    // 拼接 url?a=1&b=1
+                    getUrl(mapping, parasResult.paramMap).toString(),
+                    // post or get
+                    HttpMethod.valueOf(mapping.method().name()),
+                    // body
+                    new HttpEntity<>(parasResult.body, parasResult.requestHeaders),
+                    // 返回值类型
+                    Result.class);
 
-            return Objects.requireNonNull(response.getBody());
+                return Objects.requireNonNull(response.getBody());
+            });
+
+            log.info("Request client success. count:[{}] clientId:[{}] clientAddr:[{}:{}] serverIp:[{}]", count, hostId,
+                hostIp, hostPort, HostUtils.getIp());
+
+            return result;
         } catch (RestClientException ex) {
             // 网络异常
-            if (ex instanceof ResourceAccessException) {
-                log.error("request client I/O error, count:[{}] clientId:[{}] clientAddr:[{}:{}] serverIp:[{}]", count, hostId, hostIp, hostPort, HostUtils.getIp(), ex);
+            if (ex instanceof ResourceAccessException && mapping.failover()) {
+                log.error("request client I/O error, count:[{}] clientId:[{}] clientAddr:[{}:{}] serverIp:[{}]", count,
+                    hostId, hostIp, hostPort, HostUtils.getIp(), ex);
 
                 // 进行路由剔除处理
                 CacheRegisterTable.remove(groupName, hostId);
@@ -135,15 +168,43 @@ public class RpcClientInvokeHandler implements InvocationHandler {
 
             } else {
                 // 其他异常继续抛出
-                log.error("request client error.count:[{}] clientId:[{}] clientAddr:[{}:{}] serverIp:[{}]", count, hostId, hostIp, hostPort, HostUtils.getIp(), ex);
+                log.error("request client error.count:[{}] clientId:[{}] clientAddr:[{}:{}] serverIp:[{}]", count,
+                    hostId, hostIp, hostPort, HostUtils.getIp(), ex);
                 throw ex;
             }
         } catch (Exception ex) {
-            log.error("request client unknown exception. count:[{}] clientId:[{}] clientAddr:[{}:{}] serverIp:[{}]", count, hostId, hostIp, hostPort, HostUtils.getIp(), ex);
-            throw ex;
+            log.error("request client unknown exception. count:[{}] clientId:[{}] clientAddr:[{}:{}] serverIp:[{}]",
+                count, hostId, hostIp, hostPort, HostUtils.getIp(), ex);
+
+            Throwable throwable = ex;
+            if (ex.getClass().isAssignableFrom(RetryException.class)) {
+                RetryException re = (RetryException) ex;
+                throwable = re.getLastFailedAttempt().getExceptionCause();
+            }
+
+            throw throwable;
         }
 
-       return null;
+        return null;
+    }
+
+    private Retryer<Result> buildResultRetryer(Mapping mapping) throws InstantiationException, IllegalAccessException, NoSuchMethodException {
+        Class<? extends RetryListener> retryListenerClazz = mapping.retryListener();
+        RetryListener retryListener = retryListenerClazz.newInstance();
+        Method method = retryListenerClazz.getMethod("onRetry", Attempt.class);
+
+        Retryer<Result> retryer = RetryerBuilder.<Result>newBuilder()
+            .retryIfException(throwable -> mapping.failRetry())
+            .withStopStrategy(StopStrategies.stopAfterAttempt(mapping.retryTimes()))
+            .withWaitStrategy(WaitStrategies.fixedWait(mapping.retryInterval(), TimeUnit.SECONDS))
+            .withRetryListener(new RetryListener() {
+                @Override
+                public <V> void onRetry(Attempt<V> attempt) {
+                    ReflectionUtils.invokeMethod(method, retryListener, attempt);
+                }
+            })
+            .build();
+        return retryer;
     }
 
     private StringBuilder getUrl(Mapping mapping, Map<String, Object> paramMap) {

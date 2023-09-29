@@ -105,6 +105,11 @@
                 <artifactId>easy-retry-client-core</artifactId>
                 <version>${revision}</version>
             </dependency>
+            <dependency>
+                <groupId>com.aizuda</groupId>
+                <artifactId>easy-retry-client-job-core</artifactId>
+                <version>${revision}</version>
+            </dependency>
             <!-- dingding talk sdk -->
             <dependency>
                 <groupId>com.aliyun</groupId>

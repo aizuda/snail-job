@@ -66,6 +66,10 @@ public interface SystemConstants {
          */
         String BATCH_REPORT = "/batch/report";
 
+        /**
+         * 上报job的运行结果
+         */
+        String REPORT_JOB_DISPATCH_RESULT = "/report/dispatch/result";
     }
 
     String LOGO = "  ___                ___     _            \n" +

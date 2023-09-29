@@ -9,22 +9,38 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 /**
+ * TODO 任务执行完成了，该如何优雅的终止线程池?????
+ *
  * @author: www.byteblogs.com
  * @date : 2023-09-27 17:12
+ * @since : 2.4.0
  */
 @Component
 public class ThreadPoolCache {
     private static final ConcurrentHashMap<Long, ThreadPoolExecutor> CACHE_THREAD_POOL = new ConcurrentHashMap<>();
 
-    public static ThreadPoolExecutor createThreadPool(Long taskId, int parallelNum) {
-        Supplier<ThreadPoolExecutor> supplier = () -> new ThreadPoolExecutor(
-                parallelNum, parallelNum, 10, TimeUnit.SECONDS, new LinkedBlockingQueue<>()
-        );
-        return CACHE_THREAD_POOL.putIfAbsent(taskId, supplier.get());
+    public static ThreadPoolExecutor createThreadPool(Long taskBatchId, int parallelNum) {
+        Supplier<ThreadPoolExecutor> supplier = () -> {
+
+            ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(
+                    parallelNum, parallelNum, 10, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
+            threadPoolExecutor.allowCoreThreadTimeOut(true);
+            return threadPoolExecutor;
+         };
+
+        ThreadPoolExecutor threadPoolExecutor = supplier.get();
+        CACHE_THREAD_POOL.putIfAbsent(taskBatchId, supplier.get());
+        return threadPoolExecutor;
     }
 
-    public static void getThreadPool(Long taskId, int parallelNum) {
+    public static ThreadPoolExecutor getThreadPool(Long taskBatchId) {
+        return CACHE_THREAD_POOL.get(taskBatchId);
+    }
 
+    public static void stopThreadPool(Long taskBatchId) {
+        FutureCache.remove(taskBatchId);
+        ThreadPoolExecutor threadPoolExecutor = CACHE_THREAD_POOL.get(taskBatchId);
+        threadPoolExecutor.shutdownNow();
 
     }
 }

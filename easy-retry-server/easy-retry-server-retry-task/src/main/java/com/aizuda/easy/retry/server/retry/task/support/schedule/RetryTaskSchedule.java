@@ -52,17 +52,17 @@ public class RetryTaskSchedule extends AbstractSchedule implements Lifecycle  {
     }
 
     @Override
-    String lockName() {
+    public String lockName() {
         return "clearFinishAndMoveDeadLetterRetryTask";
     }
 
     @Override
-    String lockAtMost() {
+    public String lockAtMost() {
         return "PT60s";
     }
 
     @Override
-    String lockAtLeast() {
+    public String lockAtLeast() {
         return "PT60s";
     }
 }
