@@ -80,7 +80,7 @@ public class ScanJobTaskActor extends AbstractActor {
                 WaitStrategyContext waitStrategyContext = new WaitStrategyContext();
                 waitStrategyContext.setTriggerType(partitionTask.getTriggerType());
                 waitStrategyContext.setTriggerInterval(partitionTask.getTriggerInterval());
-                waitStrategyContext.setNextTriggerAt(partitionTask.getNextTriggerAt());
+                waitStrategyContext.setNextTriggerAt(LocalDateTime.now());
 
                 Job job = new Job();
                 job.setId(partitionTask.getId());

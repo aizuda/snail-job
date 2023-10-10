@@ -49,4 +49,9 @@ public class JobPartitionTask extends PartitionTask {
      */
     private Integer executorTimeout;
 
+    /**
+     * 任务类型
+     */
+    private Integer taskType;
+
 }
