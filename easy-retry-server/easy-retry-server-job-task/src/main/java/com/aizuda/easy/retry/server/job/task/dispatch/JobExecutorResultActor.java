@@ -45,6 +45,7 @@ public class JobExecutorResultActor extends AbstractActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder().match(JobExecutorResultDTO.class, result -> {
+            log.info("更新任务状态. 参数:[{}]", JsonUtil.toJsonString(result));
 
             transactionTemplate.execute(new TransactionCallbackWithoutResult() {
                 @Override

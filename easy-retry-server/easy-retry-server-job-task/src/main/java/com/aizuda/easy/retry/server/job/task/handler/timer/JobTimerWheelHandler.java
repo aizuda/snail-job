@@ -45,7 +45,7 @@ public class JobTimerWheelHandler implements Lifecycle {
                 .build();
     }
 
-    public static void register(String groupName, Long taskId, TimerTask task, long delay, TimeUnit unit) {
+    public static void register(String groupName, Long taskBatchId, TimerTask task, long delay, TimeUnit unit) {
 
         if (delay < 0) {
             delay = 0;
@@ -54,19 +54,19 @@ public class JobTimerWheelHandler implements Lifecycle {
         // TODO 支持可配置
         if (delay > 60 * 1000) {
             LogUtils.warn(log, "距离下次执行时间过久, 不满足进入时间轮的条件. groupName:[{}] uniqueId:[{}] delay:[{}ms]",
-                    groupName, taskId,  delay);
+                    groupName, taskBatchId,  delay);
             return;
         }
 
-        Timeout timeout = getTimeout(groupName, taskId);
+        Timeout timeout = getTimeout(groupName, taskBatchId);
         if (Objects.isNull(timeout)) {
             try {
-                log.info("加入时间轮. delay:[{}ms] taskId:[{}]", delay, taskId);
+                log.info("加入时间轮. delay:[{}ms] taskId:[{}]", delay, taskBatchId);
                 timeout = timer.newTimeout(task, delay, unit);
-                cache.put(getKey(groupName, taskId), timeout);
+                cache.put(getKey(groupName, taskBatchId), timeout);
             } catch (Exception e) {
                 LogUtils.error(log, "加入时间轮失败. groupName:[{}] uniqueId:[{}]",
-                        groupName, taskId, e);
+                        groupName, taskBatchId, e);
             }
         }
 

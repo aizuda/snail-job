@@ -32,7 +32,7 @@ public class WaitJobPrepareHandler extends AbstractJobPrePareHandler {
         log.info("存在待处理任务. taskBatchId:[{}]", jobPrepareDTO.getTaskBatchId());
 
         // 若时间轮中数据不存在则重新加入
-        if (!JobTimerWheelHandler.isExisted(jobPrepareDTO.getGroupName(), jobPrepareDTO.getJobId())) {
+        if (!JobTimerWheelHandler.isExisted(jobPrepareDTO.getGroupName(), jobPrepareDTO.getTaskBatchId())) {
 
             // 进入时间轮
             long delay = jobPrepareDTO.getNextTriggerAt().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
@@ -40,7 +40,7 @@ public class WaitJobPrepareHandler extends AbstractJobPrePareHandler {
             JobTimerTaskDTO jobTimerTaskDTO = new JobTimerTaskDTO();
             jobTimerTaskDTO.setTaskBatchId(jobPrepareDTO.getTaskBatchId());
 
-            JobTimerWheelHandler.register(jobPrepareDTO.getGroupName(), jobPrepareDTO.getJobId(),
+            JobTimerWheelHandler.register(jobPrepareDTO.getGroupName(), jobPrepareDTO.getTaskBatchId(),
                     new JobTimerTask(jobTimerTaskDTO), delay, TimeUnit.MILLISECONDS);
         }
     }

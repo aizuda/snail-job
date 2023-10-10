@@ -57,7 +57,7 @@ public class JobTaskBatchGenerator {
         JobTimerTaskDTO jobTimerTaskDTO = new JobTimerTaskDTO();
         jobTimerTaskDTO.setTaskBatchId(jobTaskBatch.getId());
 
-        JobTimerWheelHandler.register(context.getGroupName(), context.getJobId(),
+        JobTimerWheelHandler.register(context.getGroupName(), jobTaskBatch.getId(),
                 new JobTimerTask(jobTimerTaskDTO), delay, TimeUnit.MILLISECONDS);
 
     }

@@ -22,8 +22,8 @@ import lombok.extern.slf4j.Slf4j;
 public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> {
 
     private static final JobNettyClient CLIENT = RequestBuilder.<JobNettyClient, NettyResult>newBuilder()
-        .client(JobNettyClient.class)
-        .callback(nettyResult -> LogUtils.info(log, "Data report successfully requestId:[{}]", nettyResult.getRequestId())).build();
+            .client(JobNettyClient.class)
+            .callback(nettyResult -> LogUtils.info(log, "Data report successfully requestId:[{}]", nettyResult.getRequestId())).build();
 
     private JobContext jobContext;
 
@@ -35,34 +35,35 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
     public void onSuccess(final ExecuteResult result) {
         // 上报执行成功
         log.info("任务执行成功 [{}]", JsonUtil.toJsonString(result));
-        DispatchJobResultRequest dispatchJobRequest = new DispatchJobResultRequest();
+
+        int taskStatus;
         if (result.getStatus() == StatusEnum.NO.getStatus()) {
-            dispatchJobRequest.setTaskStatus(JobTaskStatusEnum.FAIL.getStatus());
+            taskStatus = JobTaskStatusEnum.FAIL.getStatus();
         } else {
-            dispatchJobRequest.setTaskStatus(JobTaskStatusEnum.SUCCESS.getStatus());
+            taskStatus = JobTaskStatusEnum.SUCCESS.getStatus();
         }
 
-        dispatchJobRequest.setTaskBatchId(jobContext.getTaskId());
-        dispatchJobRequest.setGroupName(jobContext.getGroupName());
-        dispatchJobRequest.setJobId(jobContext.getJobId());
-        dispatchJobRequest.setTaskId(jobContext.getTaskId());
-        dispatchJobRequest.setTaskType(jobContext.getTaskType());
-        dispatchJobRequest.setExecuteResult(result);
-        CLIENT.dispatchResult(dispatchJobRequest);
+        CLIENT.dispatchResult(buildDispatchJobResultRequest(result, taskStatus));
     }
 
     @Override
     public void onFailure(final Throwable t) {
         // 上报执行失败
         log.error("任务执行失败 jobTask:[{}]", jobContext.getTaskId(), t);
+        CLIENT.dispatchResult(
+                buildDispatchJobResultRequest(ExecuteResult.failure(t.getMessage()), JobTaskStatusEnum.FAIL.getStatus())
+        );
+    }
+
+    private DispatchJobResultRequest buildDispatchJobResultRequest(ExecuteResult executeResult, int status) {
         DispatchJobResultRequest dispatchJobRequest = new DispatchJobResultRequest();
-        dispatchJobRequest.setTaskBatchId(jobContext.getTaskId());
+        dispatchJobRequest.setTaskBatchId(jobContext.getTaskBatchId());
         dispatchJobRequest.setGroupName(jobContext.getGroupName());
         dispatchJobRequest.setJobId(jobContext.getJobId());
         dispatchJobRequest.setTaskId(jobContext.getTaskId());
-        dispatchJobRequest.setTaskStatus(JobTaskStatusEnum.FAIL.getStatus());
         dispatchJobRequest.setTaskType(jobContext.getTaskType());
-        dispatchJobRequest.setExecuteResult(ExecuteResult.failure(t.getMessage()));
-        CLIENT.dispatchResult(dispatchJobRequest);
+        dispatchJobRequest.setExecuteResult(executeResult);
+        dispatchJobRequest.setTaskStatus(status);
+        return dispatchJobRequest;
     }
 }
