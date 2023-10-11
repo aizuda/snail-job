@@ -15,7 +15,7 @@ import java.util.List;
  * @since 2.0
  */
 @Configuration
-public class XRetryWebMvcConfigurerAdapter implements WebMvcConfigurer {
+public class EasyRetryRetryWebMvcConfigurerAdapter implements WebMvcConfigurer {
 
     @Autowired
     private LoginUserMethodArgumentResolver loginUserMethodArgumentResolver;

@@ -131,9 +131,25 @@ export const asyncRouterMap = [
         meta: { title: '新增或更新用户', icon: 'profile', permission: ['userForm'] }
       },
       {
-        path: 'https://www.easyretry.com',
-        name: 'HelpDocs',
-        meta: { title: '帮助文档', icon: 'question-circle', target: '_blank' }
+        path: '/job',
+        name: 'Job',
+        component: RouteView,
+        redirect: '/list',
+        meta: { title: '任务调度管理', icon: 'profile', permission: ['retryLog'] },
+        children: [
+          {
+            path: '/list',
+            name: 'JobList',
+            component: () => import('@/views/job/JobList'),
+            meta: { title: '调度任务', icon: 'profile', permission: ['retryLog'] }
+          },
+          {
+            path: '/retry-log/info',
+            name: 'RetryLogInfo',
+            component: () => import('@/views/task/RetryLogInfo'),
+            meta: { title: '任务批次', icon: 'profile', permission: ['retryLog'] }
+          }
+        ]
       }
     ]
   },

@@ -80,20 +80,6 @@ public class JobExecutorResultActor extends AbstractActor {
                 }
             });
 
-            // TODO 60秒内的任务直接丢入时间轮中
-            if (Integer.parseInt("30") <= 60) {
-                if (jobTaskBatchMapper.selectCount(new LambdaQueryWrapper<JobTaskBatch>()
-                        .eq(JobTaskBatch::getId, result.getTaskBatchId())
-                    .in(JobTaskBatch::getTaskStatus, JobTaskBatchStatusEnum.NOT_COMPLETE)) <= 0) {
-                    ActorRef scanActorRef = CacheGroupScanActor.get("DEFAULT_JOB_KEY", TaskTypeEnum.JOB);
-                    ScanTask scanTask = new ScanTask();
-                    scanTask.setBuckets(Sets.newHashSet(0));
-                    scanTask.setSize(1);
-                    scanTask.setStartId(result.getJobId());
-                    scanActorRef.tell(scanTask, scanActorRef);
-                }
-            }
-
             JobLogDTO jobLogDTO = JobTaskConverter.INSTANCE.toJobLogDTO(result);
             jobLogDTO.setMessage(result.getMessage());
             jobLogDTO.setClientId(result.getClientId());

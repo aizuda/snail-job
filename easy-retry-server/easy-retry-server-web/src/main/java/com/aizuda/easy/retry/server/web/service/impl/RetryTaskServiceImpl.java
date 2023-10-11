@@ -97,9 +97,6 @@ public class RetryTaskServiceImpl implements RetryTaskService {
     @Autowired
     private List<TaskGenerator> taskGenerators;
     @Autowired
-    @Qualifier("bitSetIdempotentStrategyHandler")
-    protected IdempotentStrategy<String, Integer> idempotentStrategy;
-    @Autowired
     private List<TaskActuator> taskActuators;
 
     @Override
@@ -323,7 +320,6 @@ public class RetryTaskServiceImpl implements RetryTaskService {
     public boolean manualTriggerRetryTask(ManualTriggerTaskRequestVO requestVO) {
 
         List<String> uniqueIds = requestVO.getUniqueIds();
-        String groupName = requestVO.getGroupName();
 
         List<RetryTask> list = accessTemplate.getRetryTaskAccess().list(requestVO.getGroupName(),
                 new LambdaQueryWrapper<RetryTask>()
@@ -346,7 +342,6 @@ public class RetryTaskServiceImpl implements RetryTaskService {
     @Override
     public boolean manualTriggerCallbackTask(ManualTriggerTaskRequestVO requestVO) {
         List<String> uniqueIds = requestVO.getUniqueIds();
-        String groupName = requestVO.getGroupName();
 
         List<RetryTask> list = accessTemplate.getRetryTaskAccess().list(requestVO.getGroupName(),
                 new LambdaQueryWrapper<RetryTask>()
@@ -366,29 +361,4 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         return true;
     }
 
-    private WaitStrategy getRetryTaskWaitWaitStrategy(String groupName, String sceneName) {
-
-        SceneConfig sceneConfig = accessTemplate.getSceneConfigAccess().getSceneConfigByGroupNameAndSceneName(groupName, sceneName);
-        Integer backOff = sceneConfig.getBackOff();
-
-        return WaitStrategies.WaitStrategyEnum.getWaitStrategy(backOff);
-    }
-
-    private WaitStrategy getCallbackWaitWaitStrategy() {
-        // 回调失败每15min重试一次
-        return WaitStrategies.WaitStrategyEnum.getWaitStrategy(WaitStrategies.WaitStrategyEnum.FIXED.getBackOff());
-    }
-
-    private void retryCountIncrement(RetryTask retryTask) {
-        Integer retryCount = retryTask.getRetryCount();
-        retryTask.setRetryCount(++retryCount);
-    }
-
-    private void productExecUnitActor(RetryExecutor retryExecutor, ActorRef actorRef) {
-        String groupIdHash = retryExecutor.getRetryContext().getRetryTask().getGroupName();
-        Long retryId = retryExecutor.getRetryContext().getRetryTask().getId();
-        idempotentStrategy.set(groupIdHash, retryId.intValue());
-
-        actorRef.tell(retryExecutor, actorRef);
-    }
 }
