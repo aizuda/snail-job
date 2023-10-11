@@ -24,14 +24,14 @@ public class JobTaskBatchHelper {
     @Autowired
     private JobTaskBatchMapper jobTaskBatchMapper;
 
-    public void complete(Long taskBatchId) {
+    public boolean complete(Long taskBatchId) {
 
         List<JobTask> jobTasks = jobTaskMapper.selectList(
             new LambdaQueryWrapper<JobTask>().select(JobTask::getExecuteStatus)
                 .eq(JobTask::getTaskBatchId, taskBatchId));
 
         if (jobTasks.stream().anyMatch(jobTask -> JobTaskStatusEnum.NOT_COMPLETE.contains(jobTask.getExecuteStatus()))) {
-           return;
+           return false;
         }
 
         long failCount = jobTasks.stream().filter(jobTask -> jobTask.getExecuteStatus() == JobTaskBatchStatusEnum.FAIL.getStatus()).count();
@@ -48,6 +48,8 @@ public class JobTaskBatchHelper {
         }
 
         jobTaskBatchMapper.updateById(jobTaskBatch);
+
+        return true;
 
     }
 }

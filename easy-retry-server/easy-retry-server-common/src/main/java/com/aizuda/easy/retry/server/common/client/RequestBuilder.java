@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.server.common.client;
 
 import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
+import com.github.rholder.retry.RetryListener;
 
 import java.lang.reflect.Proxy;
 import java.util.Objects;
@@ -21,6 +22,11 @@ public class RequestBuilder<T, R> {
     private String hostIp;
     private Integer hostPort;
     private String contextPath;
+    private boolean failRetry;
+    private int retryTimes = 3;
+    private int retryInterval = 1;
+   private RetryListener retryListener = new SimpleRetryListener();
+
 
     public static <T, R> RequestBuilder<T, R> newBuilder() {
         return new RequestBuilder<>();
@@ -56,6 +62,27 @@ public class RequestBuilder<T, R> {
         return this;
     }
 
+    public RequestBuilder<T, R> failRetry(boolean failRetry) {
+        this.failRetry = failRetry;
+        return this;
+    }
+
+    public RequestBuilder<T, R> retryTimes(int retryTimes) {
+        this.retryTimes = retryTimes;
+        return this;
+    }
+
+    public RequestBuilder<T, R> retryInterval(int retryInterval) {
+        this.retryInterval = retryInterval;
+        return this;
+    }
+
+    public RequestBuilder<T, R> retryListener(RetryListener retryListener) {
+        this.retryListener = retryListener;
+        return this;
+    }
+
+
     public T build() {
         if (Objects.isNull(clintInterface)) {
             throw new EasyRetryServerException("clintInterface cannot be null");
@@ -73,7 +100,8 @@ public class RequestBuilder<T, R> {
             throw new EasyRetryServerException("class not found exception to: [{}]", clintInterface.getName());
         }
 
-        RpcClientInvokeHandler clientInvokeHandler = new RpcClientInvokeHandler(groupName, hostId, hostIp, hostPort, contextPath);
+        RpcClientInvokeHandler clientInvokeHandler = new RpcClientInvokeHandler(
+            groupName, hostId, hostIp, hostPort, contextPath, failRetry, retryTimes, retryInterval, retryListener);
 
         return (T) Proxy.newProxyInstance(clintInterface.getClassLoader(),
             new Class[]{clintInterface}, clientInvokeHandler);

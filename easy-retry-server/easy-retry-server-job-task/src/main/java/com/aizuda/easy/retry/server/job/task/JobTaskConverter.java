@@ -33,6 +33,11 @@ public interface JobTaskConverter {
     )
     JobTaskPrepareDTO toJobTaskPrepare(JobPartitionTask job);
 
+    @Mappings(
+        @Mapping(source = "id", target = "jobId")
+    )
+    JobTaskPrepareDTO toJobTaskPrepare(Job job);
+
     JobTaskBatchGeneratorContext toJobTaskGeneratorContext(JobTaskPrepareDTO jobTaskPrepareDTO);
 
     JobTaskBatchGeneratorContext toJobTaskGeneratorContext(BlockStrategies.BlockStrategyContext context);
@@ -70,6 +75,9 @@ public interface JobTaskConverter {
 
     JobExecutorResultDTO toJobExecutorResultDTO(ClientCallbackContext context);
 
+    @Mappings(
+        @Mapping(source = "id", target = "taskId")
+    )
     JobExecutorResultDTO toJobExecutorResultDTO(JobTask jobTask);
 
     RealStopTaskInstanceDTO toRealStopTaskInstanceDTO(TaskStopJobContext context);

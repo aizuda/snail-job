@@ -4,20 +4,17 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
  * @author: www.byteblogs.com
  * @date : 2023-09-26 14:26
+ * @since : 2.4.0
  */
 @AllArgsConstructor
 @Getter
 public enum JobTaskStatusEnum {
-
-    /**
-     * 待处理
-     */
-    WAITING(1),
 
     /**
      * 处理中
@@ -35,7 +32,7 @@ public enum JobTaskStatusEnum {
     FAIL(4),
 
     /**
-     * 任务停止成功
+     * 任务停止
      */
     STOP(5),
 
@@ -44,7 +41,7 @@ public enum JobTaskStatusEnum {
 
     private final int status;
 
-    public static final List<Integer> NOT_COMPLETE = Arrays.asList(WAITING.status, RUNNING.status);
+    public static final List<Integer> NOT_COMPLETE = Collections.singletonList(RUNNING.status);
 
     public static final List<Integer> COMPLETED = Arrays.asList(SUCCESS.status, FAIL.status, STOP.status);
 }

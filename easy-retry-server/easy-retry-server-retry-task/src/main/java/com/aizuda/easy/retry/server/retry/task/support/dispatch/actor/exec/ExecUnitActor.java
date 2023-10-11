@@ -14,8 +14,8 @@ import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.client.RequestBuilder;
-import com.aizuda.easy.retry.server.common.client.RpcClient;
 import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
+import com.aizuda.easy.retry.server.retry.task.client.RetryRpcClient;
 import com.aizuda.easy.retry.server.retry.task.support.IdempotentStrategy;
 import com.aizuda.easy.retry.server.retry.task.support.context.MaxAttemptsPersistenceRetryContext;
 import com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.log.RetryTaskLogDTO;
@@ -145,13 +145,13 @@ public class ExecUnitActor extends AbstractActor  {
         easyRetryHeaders.setEasyRetryId(retryTask.getUniqueId());
         requestHeaders.add(SystemConstants.EASY_RETRY_HEAD_KEY, JsonUtil.toJsonString(easyRetryHeaders));
 
-        RpcClient rpcClient = RequestBuilder.<RpcClient, Result>newBuilder()
+        RetryRpcClient rpcClient = RequestBuilder.<RetryRpcClient, Result>newBuilder()
             .hostPort(serverNode.getHostPort())
             .groupName(serverNode.getGroupName())
             .hostId(serverNode.getHostId())
             .hostIp(serverNode.getHostIp())
             .contextPath(serverNode.getContextPath())
-            .client(RpcClient.class)
+            .client(RetryRpcClient.class)
             .build();
 
         return rpcClient.dispatch(dispatchRetryDTO, easyRetryHeaders);

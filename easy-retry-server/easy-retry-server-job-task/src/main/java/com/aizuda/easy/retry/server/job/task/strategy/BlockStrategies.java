@@ -8,6 +8,7 @@ import com.aizuda.easy.retry.server.job.task.generator.batch.JobTaskBatchGenerat
 import com.aizuda.easy.retry.server.job.task.generator.batch.JobTaskBatchGeneratorContext;
 import com.aizuda.easy.retry.server.job.task.handler.stop.JobTaskStopHandler;
 import com.aizuda.easy.retry.server.job.task.handler.stop.JobTaskStopFactory;
+import com.aizuda.easy.retry.server.job.task.handler.stop.TaskStopJobContext;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -49,7 +50,7 @@ public class BlockStrategies {
 
         private Long jobId;
 
-        private Long taskId;
+        private Long taskBatchId;
 
         private String groupName;
 
@@ -69,7 +70,7 @@ public class BlockStrategies {
 
         @Override
         public void block(final BlockStrategyContext context) {
-            log.warn("阻塞策略为丢弃此次执行. jobId:[{}]", context.getJobId());
+            log.warn("阻塞策略为丢弃此次执行. taskBatchId:[{}]", context.getTaskBatchId());
         }
     }
 
@@ -77,11 +78,13 @@ public class BlockStrategies {
 
         @Override
         public void block(final BlockStrategyContext context) {
-            log.warn("阻塞策略为覆盖. jobId:[{}]", context.getJobId());
+            log.warn("阻塞策略为覆盖. taskBatchId:[{}]", context.getTaskBatchId());
 
             // 停止任务
             JobTaskStopHandler instanceInterrupt = JobTaskStopFactory.getJobTaskStop(context.taskType);
-            instanceInterrupt.stop(JobTaskConverter.INSTANCE.toStopJobContext(context));
+            TaskStopJobContext stopJobContext = JobTaskConverter.INSTANCE.toStopJobContext(context);
+            stopJobContext.setNeedUpdateTaskStatus(Boolean.TRUE);
+            instanceInterrupt.stop(stopJobContext);
 
             // 重新生成任务
             JobTaskBatchGenerator jobTaskBatchGenerator = SpringContext.getBeanByType(JobTaskBatchGenerator.class);
@@ -94,7 +97,7 @@ public class BlockStrategies {
 
         @Override
         public void block(final BlockStrategyContext context) {
-            log.warn("阻塞策略为并行执行. jobId:[{}]", context.getJobId());
+            log.warn("阻塞策略为并行执行. taskBatchId:[{}]", context.getTaskBatchId());
 
             // 重新生成任务
             JobTaskBatchGenerator jobTaskBatchGenerator = SpringContext.getBeanByType(JobTaskBatchGenerator.class);

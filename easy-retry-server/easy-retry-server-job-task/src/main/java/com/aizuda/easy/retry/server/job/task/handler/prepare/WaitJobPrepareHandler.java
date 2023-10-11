@@ -39,6 +39,8 @@ public class WaitJobPrepareHandler extends AbstractJobPrePareHandler {
                     - System.currentTimeMillis();
             JobTimerTaskDTO jobTimerTaskDTO = new JobTimerTaskDTO();
             jobTimerTaskDTO.setTaskBatchId(jobPrepareDTO.getTaskBatchId());
+            jobTimerTaskDTO.setJobId(jobPrepareDTO.getJobId());
+            jobTimerTaskDTO.setGroupName(jobPrepareDTO.getGroupName());
 
             JobTimerWheelHandler.register(jobPrepareDTO.getGroupName(), jobPrepareDTO.getTaskBatchId(),
                     new JobTimerTask(jobTimerTaskDTO), delay, TimeUnit.MILLISECONDS);

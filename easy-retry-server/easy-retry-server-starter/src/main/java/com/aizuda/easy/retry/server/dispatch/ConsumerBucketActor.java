@@ -88,6 +88,8 @@ public class ConsumerBucketActor extends AbstractActor {
         // 扫描回调数据
         ScanTask scanTask = new ScanTask();
         scanTask.setBuckets(consumerBucket.getBuckets());
+        scanTask.setSize(1000);
+        scanTask.setStartId(0);
         ActorRef scanJobActorRef = cacheActorRef("DEFAULT_JOB_KEY", TaskTypeEnum.JOB);
         scanJobActorRef.tell(scanTask, scanJobActorRef);
     }

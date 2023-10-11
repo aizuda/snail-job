@@ -18,6 +18,7 @@ public enum JobOperationReasonEnum {
     NONE(0, StrUtil.EMPTY),
     EXECUTE_TIMEOUT(1, "执行超时"),
     NOT_CLIENT(2, "无客户端节点"),
+    JOB_CLOSED(3, "任务已关闭"),
     ;
 
     private final int reason;

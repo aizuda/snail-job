@@ -11,4 +11,6 @@ import lombok.Data;
 public class JobTimerTaskDTO {
 
     private Long taskBatchId;
+    private String groupName;
+    private Long jobId;
 }
