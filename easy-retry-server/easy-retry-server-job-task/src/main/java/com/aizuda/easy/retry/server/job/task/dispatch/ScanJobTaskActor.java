@@ -52,8 +52,6 @@ public class ScanJobTaskActor extends AbstractActor {
     @Autowired
     private JobMapper jobMapper;
 
-    private static final AtomicLong lastId = new AtomicLong(0L);
-
     @Override
     public Receive createReceive() {
         return receiveBuilder().match(ScanTask.class, config -> {
@@ -104,9 +102,9 @@ public class ScanJobTaskActor extends AbstractActor {
             new LambdaQueryWrapper<Job>()
                 .eq(Job::getJobStatus, StatusEnum.YES.getStatus())
                 .in(Job::getBucketIndex, scanTask.getBuckets())
-                .le(Job::getNextTriggerAt, LocalDateTime.now().plusSeconds(60))
+                .le(Job::getNextTriggerAt, LocalDateTime.now().plusSeconds(10))
                 .eq(Job::getDeleted, StatusEnum.NO.getStatus())
-                .gt(Job::getId, startId)
+                .ge(Job::getId, startId)
         ).getRecords();
 
         return JobTaskConverter.INSTANCE.toJobPartitionTasks(jobs);

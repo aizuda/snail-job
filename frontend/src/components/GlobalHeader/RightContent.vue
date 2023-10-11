@@ -1,7 +1,9 @@
 <template>
   <div :class="wrpCls">
-    <avatar-dropdown :menu="showMenu" :current-user="currentUser" :class="prefixCls" />
-<!--    <select-lang :class="prefixCls" />-->
+    <a href="https://www.easyretry.com" target="_blank" :class="prefixCls"><a-icon type="question-circle" :style="{ fontSize: '18px', color: '#08c' }"/></a>
+    <avatar-dropdown :menu="showMenu" :current-user="currentUser" :class="prefixCls"/>
+    <!--    <select-lang :class="prefixCls" />-->
+
   </div>
 </template>
 

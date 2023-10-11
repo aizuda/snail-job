@@ -35,7 +35,7 @@ public class DispatchService implements Lifecycle {
     /**
      * 调度时长
      */
-    public static final Long PERIOD = 60L;
+    public static final Long PERIOD = 10L;
 
     /**
      * 延迟10s为了尽可能保障集群节点都启动完成在进行rebalance
