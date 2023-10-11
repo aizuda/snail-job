@@ -6,8 +6,8 @@ import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
 import com.aizuda.easy.retry.server.common.client.RequestBuilder;
-import com.aizuda.easy.retry.server.common.client.RpcClient;
 import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
+import com.aizuda.easy.retry.server.job.task.client.JobRpcClient;
 import com.aizuda.easy.retry.server.job.task.dto.RealStopTaskInstanceDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -48,13 +48,16 @@ public class RealStopTaskActor extends AbstractActor {
     }
 
     private Result<Boolean> requestClient(RealStopTaskInstanceDTO realStopTaskInstanceDTO, RegisterNodeInfo registerNodeInfo) {
-        RpcClient rpcClient = RequestBuilder.<RpcClient, Result>newBuilder()
+        JobRpcClient rpcClient = RequestBuilder.<JobRpcClient, Result>newBuilder()
             .hostPort(registerNodeInfo.getHostPort())
             .groupName(realStopTaskInstanceDTO.getGroupName())
             .hostId(registerNodeInfo.getHostId())
             .hostIp(registerNodeInfo.getHostIp())
             .contextPath(registerNodeInfo.getContextPath())
-            .client(RpcClient.class)
+            .failRetry(Boolean.TRUE)
+            .retryTimes(3)
+            .retryInterval(1)
+            .client(JobRpcClient.class)
             .build();
 
         StopJobDTO stopJobDTO = new StopJobDTO();

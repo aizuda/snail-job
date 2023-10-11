@@ -1,8 +1,6 @@
 package com.aizuda.easy.retry.server.common.client.annotation;
 
 import com.aizuda.easy.retry.server.common.client.RequestMethod;
-import com.aizuda.easy.retry.server.common.client.SimpleRetryListener;
-import com.github.rholder.retry.RetryListener;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -26,16 +24,10 @@ public @interface Mapping {
 
     String path() default "";
 
+    /**
+     * 是否支持失败转移
+     * @return false or trur
+     */
     boolean failover() default false;
-
-    boolean failRetry() default false;
-
-    int retryTimes() default 3;
-
-    int retryInterval() default 1;
-
-    Class<? extends RetryListener> retryListener() default SimpleRetryListener.class;
-
-
 
 }

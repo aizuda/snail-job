@@ -18,4 +18,8 @@ public class ScanTask {
     private String groupName;
 
     private Set<Integer> buckets;
+
+    private long size;
+
+    private long startId;
 }

@@ -10,6 +10,7 @@ import com.aizuda.easy.retry.server.common.cache.CacheConsumerGroup;
 import com.aizuda.easy.retry.server.common.dto.PartitionTask;
 import com.aizuda.easy.retry.server.common.dto.ScanTask;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
+import com.aizuda.easy.retry.server.common.util.PartitionTaskUtils;
 import com.aizuda.easy.retry.server.job.task.JobTaskConverter;
 import com.aizuda.easy.retry.server.job.task.WaitStrategy;
 import com.aizuda.easy.retry.server.job.task.dto.JobPartitionTask;
@@ -70,7 +71,7 @@ public class ScanJobTaskActor extends AbstractActor {
     private void doScan(final ScanTask scanTask) {
         log.info("job scan start");
 
-        long total = process(startId -> listAvailableJobs(startId, scanTask), partitionTasks -> {
+        long total = PartitionTaskUtils.process(startId -> listAvailableJobs(startId, scanTask), partitionTasks -> {
             for (final JobPartitionTask partitionTask : (List<JobPartitionTask>) partitionTasks) {
                 CacheConsumerGroup.addOrUpdate(partitionTask.getGroupName());
                 JobTaskPrepareDTO jobTaskPrepare = JobTaskConverter.INSTANCE.toJobTaskPrepare(partitionTask);
@@ -92,18 +93,18 @@ public class ScanJobTaskActor extends AbstractActor {
                 ActorRef actorRef = ActorGenerator.jobTaskPrepareActor();
                 actorRef.tell(jobTaskPrepare, actorRef);
             }
-        }, 0);
+        }, scanTask.getStartId());
 
         log.info("job scan end. total:[{}]", total);
     }
 
     private List<JobPartitionTask> listAvailableJobs(Long startId, ScanTask scanTask) {
 
-        List<Job> jobs = jobMapper.selectPage(new PageDTO<Job>(0, 1000),
+        List<Job> jobs = jobMapper.selectPage(new PageDTO<Job>(0, scanTask.getSize()),
             new LambdaQueryWrapper<Job>()
                 .eq(Job::getJobStatus, StatusEnum.YES.getStatus())
                 .in(Job::getBucketIndex, scanTask.getBuckets())
-                .le(Job::getNextTriggerAt, LocalDateTime.now().plusSeconds(6))
+                .le(Job::getNextTriggerAt, LocalDateTime.now().plusSeconds(60))
                 .eq(Job::getDeleted, StatusEnum.NO.getStatus())
                 .gt(Job::getId, startId)
         ).getRecords();
@@ -111,27 +112,5 @@ public class ScanJobTaskActor extends AbstractActor {
         return JobTaskConverter.INSTANCE.toJobPartitionTasks(jobs);
     }
 
-    public long process(
-        Function<Long, List<? extends PartitionTask>> dataSource, Consumer<List<? extends PartitionTask>> task, long startId) {
-        int total = 0;
-        do {
-            List<? extends PartitionTask> products = dataSource.apply(startId);
-            if (CollectionUtils.isEmpty(products)) {
-                // 没有查询到数据直接退出
-                break;
-            }
 
-            total += products.size();
-
-            task.accept(products);
-            startId = maxId(products);
-        } while (startId > 0);
-
-        return total;
-    }
-
-    private static long maxId(List<? extends PartitionTask> products) {
-        Optional<Long> max = products.stream().map(PartitionTask::getId).max(Long::compareTo);
-        return max.orElse(-1L) + 1;
-    }
 }

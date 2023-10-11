@@ -34,7 +34,7 @@ public class JobTimerWheelHandler implements Lifecycle {
         // tickDuration 和 timeUnit 一格的时间长度
         // ticksPerWheel 一圈有多少格
         timer = new HashedWheelTimer(
-                new CustomizableThreadFactory("job-task-timer-wheel-"), 100,
+                new CustomizableThreadFactory("job-task-timer-wheel-"), 1000,
                 TimeUnit.MILLISECONDS, 1024);
 
         timer.start();

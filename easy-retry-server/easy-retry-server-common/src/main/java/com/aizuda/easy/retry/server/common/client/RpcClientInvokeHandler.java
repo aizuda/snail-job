@@ -4,7 +4,6 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.URLUtil;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.common.core.util.HostUtils;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
@@ -16,14 +15,13 @@ import com.aizuda.easy.retry.server.common.client.annotation.Param;
 import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.handler.ClientNodeAllocateHandler;
-import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
-import com.github.rholder.retry.Attempt;
 import com.github.rholder.retry.RetryException;
 import com.github.rholder.retry.RetryListener;
 import com.github.rholder.retry.Retryer;
 import com.github.rholder.retry.RetryerBuilder;
 import com.github.rholder.retry.StopStrategies;
 import com.github.rholder.retry.WaitStrategies;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -32,7 +30,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -45,7 +42,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -56,28 +52,20 @@ import java.util.concurrent.TimeUnit;
  * @since 2.0.0
  */
 @Slf4j
+@AllArgsConstructor
 public class RpcClientInvokeHandler implements InvocationHandler {
 
     public static final String URL = "http://{0}:{1}/{2}";
 
-    private final String groupName;
+    private String groupName;
     private String hostId;
     private String hostIp;
     private Integer hostPort;
     private String contextPath;
-
-    public RpcClientInvokeHandler(
-        final String groupName,
-        final String hostId,
-        final String hostIp,
-        final Integer hostPort,
-        final String contextPath) {
-        this.groupName = groupName;
-        this.hostId = hostId;
-        this.hostIp = hostIp;
-        this.hostPort = hostPort;
-        this.contextPath = contextPath;
-    }
+    private boolean failRetry;
+    private int retryTimes;
+    private int retryInterval;
+    private RetryListener retryListener;
 
     @Override
     public Result invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
@@ -124,7 +112,7 @@ public class RpcClientInvokeHandler implements InvocationHandler {
 
             RestTemplate restTemplate = SpringContext.CONTEXT.getBean(RestTemplate.class);
 
-            Retryer<Result> retryer = buildResultRetryer(mapping);
+            Retryer<Result> retryer = buildResultRetryer();
 
             Result result = retryer.call(() -> {
                 ResponseEntity<Result> response = restTemplate.exchange(
@@ -188,21 +176,12 @@ public class RpcClientInvokeHandler implements InvocationHandler {
         return null;
     }
 
-    private Retryer<Result> buildResultRetryer(Mapping mapping) throws InstantiationException, IllegalAccessException, NoSuchMethodException {
-        Class<? extends RetryListener> retryListenerClazz = mapping.retryListener();
-        RetryListener retryListener = retryListenerClazz.newInstance();
-        Method method = retryListenerClazz.getMethod("onRetry", Attempt.class);
-
+    private Retryer<Result> buildResultRetryer() {
         Retryer<Result> retryer = RetryerBuilder.<Result>newBuilder()
-            .retryIfException(throwable -> mapping.failRetry())
-            .withStopStrategy(StopStrategies.stopAfterAttempt(mapping.retryTimes()))
-            .withWaitStrategy(WaitStrategies.fixedWait(mapping.retryInterval(), TimeUnit.SECONDS))
-            .withRetryListener(new RetryListener() {
-                @Override
-                public <V> void onRetry(Attempt<V> attempt) {
-                    ReflectionUtils.invokeMethod(method, retryListener, attempt);
-                }
-            })
+            .retryIfException(throwable -> failRetry)
+            .withStopStrategy(StopStrategies.stopAfterAttempt(retryTimes))
+            .withWaitStrategy(WaitStrategies.fixedWait(retryInterval, TimeUnit.SECONDS))
+            .withRetryListener(retryListener)
             .build();
         return retryer;
     }
