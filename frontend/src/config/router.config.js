@@ -52,68 +52,106 @@ export const asyncRouterMap = [
         meta: { title: '基础信息配置', hidden: true, hideChildrenInMenu: true, icon: 'profile', permission: ['basicConfig'] }
       },
       {
-        path: '/retry-task',
+        path: '/retry',
         name: 'RetryTask',
         component: RouteView,
-        hideChildrenInMenu: true,
-        redirect: '/retry-task/list',
-        meta: { title: '任务管理', icon: 'schedule', hideChildrenInMenu: true, keepAlive: true, permission: ['retryTask'] },
+        redirect: '/retry/list',
+        meta: { title: '重试任务管理', icon: 'schedule', hideChildrenInMenu: true, keepAlive: true, permission: ['retryTask'] },
         children: [
           {
-            path: '/retry-task/info',
+            path: '/retry/list',
+            name: 'RetryTaskList',
+            component: () => import('@/views/task/RetryTaskList'),
+            meta: { title: '重试任务', icon: 'profile', keepAlive: true, permission: ['retryTask'] }
+          },
+          {
+            path: '/retry/info',
             name: 'RetryTaskInfo',
+            hidden: true,
             component: () => import('@/views/task/RetryTaskInfo'),
             meta: { title: '任务管理详情', icon: 'profile', keepAlive: true, permission: ['retryTask'] }
           },
           {
-            path: '/retry-task/list',
-            name: 'RetryTaskList',
-            component: () => import('@/views/task/RetryTaskList'),
-            meta: { title: '任务管理列表', icon: 'profile', keepAlive: true, permission: ['retryTask'] }
+            path: '/retry/dead-letter/list',
+            name: 'RetryDeadLetterList',
+            component: () => import('@/views/task/RetryDeadLetterList'),
+            meta: { title: '死信队列', icon: 'profile', permission: ['retryDeadLetter'] }
+          },
+          {
+            path: '/retry/dead-letter/info',
+            name: 'RetryDeadLetterInfo',
+            hidden: true,
+            component: () => import('@/views/task/RetryDeadLetterInfo'),
+            meta: { title: '死信队列管理详情', icon: 'profile', permission: ['retryDeadLetter'] }
+          },
+          {
+            path: '/retry/log/list',
+            name: 'RetryLogList',
+            component: () => import('@/views/task/RetryLogList'),
+            meta: { title: '重试日志', icon: 'profile', permission: ['retryLog'] }
+          },
+          {
+            path: '/retry/log/info',
+            name: 'RetryLogInfo',
+            hidden: true,
+            component: () => import('@/views/task/RetryLogInfo'),
+            meta: { title: '重试日志详情', icon: 'profile', permission: ['retryLog'] }
           }
           ]
       },
+      // {
+      //   path: '/retry-dead-letter',
+      //   name: 'RetryDeadLetter',
+      //   component: RouteView,
+      //   hideChildrenInMenu: true,
+      //   redirect: '/retry-dead-letter/list',
+      //   meta: { title: '死信队列管理', icon: 'exception', permission: ['retryDeadLetter'] },
+      //   children: [
+      //     {
+      //       path: '/retry-dead-letter/list',
+      //       name: 'RetryDeadLetterList',
+      //       component: () => import('@/views/task/RetryDeadLetterList'),
+      //       meta: { title: '死信队列管理列表', icon: 'profile', permission: ['retryDeadLetter'] }
+      //     },
+      //     {
+      //       path: '/retry-dead-letter/info',
+      //       name: 'RetryDeadLetterInfo',
+      //       component: () => import('@/views/task/RetryDeadLetterInfo'),
+      //       meta: { title: '死信队列管理详情', icon: 'profile', permission: ['retryDeadLetter'] }
+      //     }
+      //   ]
+      // },
       {
-        path: '/retry-dead-letter',
-        name: 'RetryDeadLetter',
+        path: '/job',
+        name: 'Job',
         component: RouteView,
-        hideChildrenInMenu: true,
-        redirect: '/retry-dead-letter/list',
-        meta: { title: '死信队列管理', icon: 'exception', permission: ['retryDeadLetter'] },
+        redirect: '/job/list',
+        meta: { title: '定时任务管理', icon: 'profile', permission: ['retryLog'] },
         children: [
           {
-            path: '/retry-dead-letter/list',
-            name: 'RetryDeadLetterList',
-            component: () => import('@/views/task/RetryDeadLetterList'),
-            meta: { title: '死信队列管理列表', icon: 'profile', permission: ['retryDeadLetter'] }
+            path: '/job/list',
+            name: 'JobList',
+            component: () => import('@/views/job/JobList'),
+            meta: { title: '任务信息', icon: 'profile', permission: ['retryLog'] }
           },
           {
-            path: '/retry-dead-letter/info',
-            name: 'RetryDeadLetterInfo',
-            component: () => import('@/views/task/RetryDeadLetterInfo'),
-            meta: { title: '死信队列管理详情', icon: 'profile', permission: ['retryDeadLetter'] }
-          }
-        ]
-      },
-      {
-        path: '/retry-log',
-        name: 'RetryLog',
-        component: RouteView,
-        hideChildrenInMenu: true,
-        redirect: '/retry-log/list',
-        meta: { title: '重试日志管理', icon: 'profile', permission: ['retryLog'] },
-        children: [
-          {
-            path: '/retry-log/list',
-            name: 'RetryLogList',
-            component: () => import('@/views/task/RetryLogList'),
-            meta: { title: '重试日志列表', icon: 'profile', permission: ['retryLog'] }
+            path: '/job/info',
+            name: 'JobInfo',
+            hidden: true,
+            component: () => import('@/views/job/JobInfo'),
+            meta: { title: '定时任务详情', icon: 'profile', permission: ['retryLog'] }
           },
           {
-            path: '/retry-log/info',
-            name: 'RetryLogInfo',
-            component: () => import('@/views/task/RetryLogInfo'),
-            meta: { title: '重试日志详情', icon: 'profile', permission: ['retryLog'] }
+            path: '/job/batch/list',
+            name: 'JobBatch',
+            component: () => import('@/views/job/JobBatch'),
+            meta: { title: '任务批次', icon: 'profile', permission: ['retryLog'] }
+          },
+          {
+            path: '/job/task/list',
+            name: 'JobTask',
+            component: () => import('@/views/job/JobTask'),
+            meta: { title: '任务项', icon: 'profile', permission: ['retryLog'] }
           }
         ]
       },
@@ -129,27 +167,6 @@ export const asyncRouterMap = [
         hidden: true,
         component: () => import('@/views/user/UserForm'),
         meta: { title: '新增或更新用户', icon: 'profile', permission: ['userForm'] }
-      },
-      {
-        path: '/job',
-        name: 'Job',
-        component: RouteView,
-        redirect: '/list',
-        meta: { title: '任务调度管理', icon: 'profile', permission: ['retryLog'] },
-        children: [
-          {
-            path: '/list',
-            name: 'JobList',
-            component: () => import('@/views/job/JobList'),
-            meta: { title: '调度任务', icon: 'profile', permission: ['retryLog'] }
-          },
-          {
-            path: '/retry-log/info',
-            name: 'RetryLogInfo',
-            component: () => import('@/views/task/RetryLogInfo'),
-            meta: { title: '任务批次', icon: 'profile', permission: ['retryLog'] }
-          }
-        ]
       }
     ]
   },
