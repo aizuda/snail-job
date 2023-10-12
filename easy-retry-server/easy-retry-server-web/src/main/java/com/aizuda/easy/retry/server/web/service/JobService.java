@@ -15,10 +15,10 @@ import java.util.List;
 public interface JobService {
     PageResult<List<JobResponseVO>> getJobPage(JobQueryVO jobQueryVO);
 
-    PageResult<List<JobResponseVO>> getJobDetail(Long id);
+    JobResponseVO getJobDetail(Long id);
 
-    PageResult<List<JobResponseVO>> saveJob(JobRequestVO jobRequestVO);
+    boolean saveJob(JobRequestVO jobRequestVO);
 
-    PageResult<List<JobResponseVO>> updateJob(JobRequestVO jobRequestVO);
+    boolean updateJob(JobRequestVO jobRequestVO);
 
 }

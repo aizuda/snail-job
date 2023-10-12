@@ -13,22 +13,4 @@
         <result column="deleted" property="deleted" />
     </resultMap>
 
-    <update id="updateJobTaskBatchStatus">
-        update job_task_batch
-        set task_status = #{taskStatus}
-        <where>
-            id = #{taskBatchId}
-            <if test="taskStatus == 4">
-                and EXISTS (select id from job_task where task_batch_id = #{taskBatchId} and execute_status = 4)
-            </if>
-            <if test="taskStatus == 3">
-                and NOT EXISTS (select id from job_task where task_batch_id = #{taskBatchId} and execute_status IN(1, 2, 4, 5))
-            </if>
-            <if test="taskStatus == 5">
-                and NOT EXISTS (select id from job_task where task_batch_id = #{taskBatchId} and execute_status IN(1, 2))
-            </if>
-        </where>
-
-    </update>
-
 </mapper>

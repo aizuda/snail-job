@@ -58,7 +58,7 @@ public class DispatchService implements Lifecycle {
                 }
 
                 Set<Integer> currentConsumerBuckets = getConsumerBucket();
-                LogUtils.info(log, "当前节点分配的桶:[{}]", currentConsumerBuckets);
+//                LogUtils.info(log, "当前节点分配的桶:[{}]", currentConsumerBuckets);
                 if (!CollectionUtils.isEmpty(currentConsumerBuckets)) {
                     ConsumerBucket scanTaskDTO = new ConsumerBucket();
                     scanTaskDTO.setBuckets(currentConsumerBuckets);

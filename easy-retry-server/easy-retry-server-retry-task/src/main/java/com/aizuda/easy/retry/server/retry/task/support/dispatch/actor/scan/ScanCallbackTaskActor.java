@@ -1,19 +1,9 @@
 package com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.scan;
 
-import akka.actor.ActorRef;
-import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
-import com.aizuda.easy.retry.server.common.enums.TaskTypeEnum;
-import com.aizuda.easy.retry.server.retry.task.support.RetryContext;
 import com.aizuda.easy.retry.server.retry.task.support.WaitStrategy;
-import com.aizuda.easy.retry.server.retry.task.support.context.CallbackRetryContext;
-import com.aizuda.easy.retry.server.retry.task.support.dispatch.task.TaskActuatorSceneEnum;
-import com.aizuda.easy.retry.server.retry.task.support.retry.RetryBuilder;
-import com.aizuda.easy.retry.server.retry.task.support.retry.RetryExecutor;
-import com.aizuda.easy.retry.server.retry.task.support.strategy.FilterStrategies;
-import com.aizuda.easy.retry.server.retry.task.support.strategy.StopStrategies;
+import com.aizuda.easy.retry.server.retry.task.support.dispatch.task.TaskExecutorSceneEnum;
 import com.aizuda.easy.retry.server.retry.task.support.strategy.WaitStrategies;
-import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -42,8 +32,8 @@ public class ScanCallbackTaskActor extends AbstractScanGroup {
     private static final ConcurrentMap<String, Long> LAST_AT_MAP = new ConcurrentHashMap<>();
 
     @Override
-    protected TaskActuatorSceneEnum taskActuatorScene() {
-        return TaskActuatorSceneEnum.AUTO_CALLBACK;
+    protected TaskExecutorSceneEnum taskActuatorScene() {
+        return TaskExecutorSceneEnum.AUTO_CALLBACK;
     }
 
     @Override

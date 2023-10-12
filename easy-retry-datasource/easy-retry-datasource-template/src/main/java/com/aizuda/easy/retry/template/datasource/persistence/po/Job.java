@@ -47,7 +47,7 @@ public class Job implements Serializable {
     /**
      * 参数类型 text/json
      */
-    private String argsType;
+    private Integer argsType;
 
     /**
      * 扩展字段

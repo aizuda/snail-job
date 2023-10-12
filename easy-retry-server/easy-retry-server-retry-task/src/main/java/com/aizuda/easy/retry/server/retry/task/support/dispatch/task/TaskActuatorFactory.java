@@ -1,7 +1,5 @@
 package com.aizuda.easy.retry.server.retry.task.support.dispatch.task;
 
-import com.aizuda.easy.retry.template.datasource.access.Access;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,13 +10,13 @@ import java.util.Map;
  */
 public class TaskActuatorFactory {
 
-    private static final Map<TaskActuatorSceneEnum, TaskActuator> REGISTER_TASK_ACTUATOR = new HashMap<>();
+    private static final Map<TaskExecutorSceneEnum, TaskExecutor> REGISTER_TASK_ACTUATOR = new HashMap<>();
 
-    protected static void register(TaskActuatorSceneEnum scene,TaskActuator taskActuator) {
-        REGISTER_TASK_ACTUATOR.put(scene, taskActuator);
+    protected static void register(TaskExecutorSceneEnum scene, TaskExecutor taskExecutor) {
+        REGISTER_TASK_ACTUATOR.put(scene, taskExecutor);
     }
 
-    public static TaskActuator getTaskActuator(TaskActuatorSceneEnum scene) {
+    public static TaskExecutor getTaskActuator(TaskExecutorSceneEnum scene) {
         return REGISTER_TASK_ACTUATOR.get(scene);
     }
 
