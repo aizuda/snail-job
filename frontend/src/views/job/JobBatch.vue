@@ -94,9 +94,9 @@
           {{ taskType[text].name }}
         </a-tag>
       </span>
-      <span slot="jobStatus" slot-scope="text">
-        <a-tag :color="jobStatus[text].color">
-          {{ jobStatus[text].name }}
+      <span slot="taskStatus" slot-scope="text">
+        <a-tag :color="taskStatus[text].color">
+          {{ taskStatus[text].name }}
         </a-tag>
       </span>
       <span slot="triggerType" slot-scope="text">
@@ -166,7 +166,7 @@
 import ATextarea from 'ant-design-vue/es/input/TextArea'
 import AInput from 'ant-design-vue/es/input/Input'
 import { STable } from '@/components'
-import { getJobList } from '@/api/jobApi'
+import { jobBatchList } from '@/api/jobApi'
 import { getAllGroupNameList } from '@/api/manage'
 
 export default {
@@ -250,13 +250,9 @@ export default {
           ellipsis: true
         },
         {
-          title: '触发时间',
-          dataIndex: 'nextTriggerAt'
-        },
-        {
           title: '状态',
-          dataIndex: 'jobStatus',
-          scopedSlots: { customRender: 'jobStatus' }
+          dataIndex: 'taskStatus',
+          scopedSlots: { customRender: 'taskStatus' }
         },
         {
           title: '任务类型',
@@ -284,8 +280,8 @@ export default {
           scopedSlots: { customRender: 'executorTimeout' }
         },
         {
-          title: '更新时间',
-          dataIndex: 'updateDt',
+          title: '创建时间',
+          dataIndex: 'createDt',
           sorter: true,
           width: '10%'
         },
@@ -299,7 +295,7 @@ export default {
       ],
       // 加载数据方法 必须为 Promise 对象
       loadData: (parameter) => {
-        return getJobList(Object.assign(parameter, this.queryParam)).then((res) => {
+        return jobBatchList(Object.assign(parameter, this.queryParam)).then((res) => {
           return res
         })
       },

@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author www.byteblogs.com
@@ -42,6 +43,10 @@ public class JobServiceImpl implements JobService {
 
         if (StrUtil.isNotBlank(queryVO.getJobName())) {
             queryWrapper.eq(Job::getJobName, queryVO.getJobName());
+        }
+
+        if (Objects.nonNull(queryVO.getJobStatus())) {
+            queryWrapper.eq(Job::getJobStatus, queryVO.getJobStatus());
         }
 
         PageDTO<Job> selectPage = jobMapper.selectPage(pageDTO, queryWrapper);
