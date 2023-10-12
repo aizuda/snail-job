@@ -135,8 +135,8 @@ public class CacheRegisterTable implements Lifecycle {
             registerNodeInfo.setExpireAt(serverNode.getExpireAt());
         }
 
-        LogUtils.info(log, "Update cache. groupName:[{}] hostId:[{}] hostIp:[{}] expireAt:[{}]", groupName,
-            serverNode.getHostId(), serverNode.getHostIp(), serverNode.getExpireAt());
+//        LogUtils.info(log, "Update cache. groupName:[{}] hostId:[{}] hostIp:[{}] expireAt:[{}]", groupName,
+//            serverNode.getHostId(), serverNode.getHostIp(), serverNode.getExpireAt());
 
         concurrentMap.put(serverNode.getHostId(), registerNodeInfo);
     }

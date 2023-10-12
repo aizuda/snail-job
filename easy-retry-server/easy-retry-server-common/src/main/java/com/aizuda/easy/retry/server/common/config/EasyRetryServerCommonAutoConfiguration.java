@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
  *
  * @author: www.byteblogs.com
  * @date : 2023-09-19 09:21
+ * @since : 2.4.0
  */
 @Configuration
 @ComponentScan("com.aizuda.easy.retry.server.common.*")

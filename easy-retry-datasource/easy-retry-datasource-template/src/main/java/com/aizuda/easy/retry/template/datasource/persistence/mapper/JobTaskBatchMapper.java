@@ -16,5 +16,4 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface JobTaskBatchMapper extends BaseMapper<JobTaskBatch> {
 
-    int updateJobTaskBatchStatus(@Param("taskBatchId") Long taskBatchId, @Param("taskStatus") Integer taskStatus);
 }

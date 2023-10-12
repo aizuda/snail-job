@@ -114,7 +114,6 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
     }
 
     private void updateCacheFromDb() {
-        LogUtils.info(log, "update cache from db");
         StopWatch sw = new Slf4JStopWatch();
         try {
             List<SequenceAlloc> sequenceAllocs = sequenceAllocMapper
@@ -189,7 +188,6 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
     }
 
     public void updateSegmentFromDb(String key, Segment segment) {
-        StopWatch sw = new Slf4JStopWatch();
         SegmentBuffer buffer = segment.getBuffer();
         SequenceAlloc sequenceAlloc;
         if (!buffer.isInitOk()) {
@@ -231,7 +229,6 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
         segment.getValue().set(value);
         segment.setMax(sequenceAlloc.getMaxId());
         segment.setStep(buffer.getStep());
-        sw.stop("updateSegmentFromDb", key + " " + segment);
     }
 
     public String getIdFromSegmentBuffer(final SegmentBuffer buffer) {

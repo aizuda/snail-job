@@ -18,4 +18,6 @@ public interface JobResponseVOConverter {
     JobResponseVOConverter INSTANCE = Mappers.getMapper(JobResponseVOConverter.class);
 
     List<JobResponseVO> toJobResponseVOs(List<Job> jobs);
+
+    JobResponseVO toJobResponseVO(Job job);
 }

@@ -7,9 +7,9 @@ import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.retry.task.support.IdempotentStrategy;
 import com.aizuda.easy.retry.server.common.dto.ScanTask;
 import com.aizuda.easy.retry.server.common.handler.ClientNodeAllocateHandler;
-import com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.TimerWheelHandler;
-import com.aizuda.easy.retry.server.retry.task.support.dispatch.task.TaskActuator;
-import com.aizuda.easy.retry.server.retry.task.support.dispatch.task.TaskActuatorSceneEnum;
+import com.aizuda.easy.retry.server.retry.task.support.dispatch.task.TaskExecutor;
+import com.aizuda.easy.retry.server.retry.task.support.timer.TimerWheelHandler;
+import com.aizuda.easy.retry.server.retry.task.support.dispatch.task.TaskExecutorSceneEnum;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -43,7 +43,7 @@ public abstract class AbstractScanGroup extends AbstractActor {
     @Autowired
     protected ClientNodeAllocateHandler clientNodeAllocateHandler;
     @Autowired
-    protected List<TaskActuator> taskActuators;
+    protected List<TaskExecutor> taskExecutors;
 
     @Override
     public Receive createReceive() {
@@ -81,9 +81,9 @@ public abstract class AbstractScanGroup extends AbstractActor {
                     continue;
                 }
 
-                for (TaskActuator taskActuator : taskActuators) {
-                    if (taskActuatorScene().getScene() == taskActuator.getTaskType().getScene()) {
-                        taskActuator.actuator(retryTask);
+                for (TaskExecutor taskExecutor : taskExecutors) {
+                    if (taskActuatorScene().getScene() == taskExecutor.getTaskType().getScene()) {
+                        taskExecutor.actuator(retryTask);
                     }
                 }
             }
@@ -100,7 +100,7 @@ public abstract class AbstractScanGroup extends AbstractActor {
 
     }
 
-    protected abstract TaskActuatorSceneEnum taskActuatorScene();
+    protected abstract TaskExecutorSceneEnum taskActuatorScene();
 
     protected abstract Long getLastId(String groupName);
 

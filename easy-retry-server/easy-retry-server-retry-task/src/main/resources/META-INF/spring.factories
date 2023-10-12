@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-   com.aizuda.easy.retry.server.retry.task.config.EasyRetryServerRetryTaskAutoConfiguration
+   com.aizuda.easy.retry.server.retry.task.EasyRetryRetryTaskStarter

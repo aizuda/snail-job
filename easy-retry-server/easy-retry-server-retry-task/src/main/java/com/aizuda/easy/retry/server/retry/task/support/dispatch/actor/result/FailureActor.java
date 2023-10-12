@@ -9,12 +9,12 @@ import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
-import com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.CallbackTimerTask;
-import com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.RetryTimerContext;
-import com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.RetryTimerTask;
-import com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.TimerWheelHandler;
+import com.aizuda.easy.retry.server.retry.task.support.timer.CallbackTimerTask;
+import com.aizuda.easy.retry.server.retry.task.support.timer.RetryTimerContext;
+import com.aizuda.easy.retry.server.retry.task.support.timer.RetryTimerTask;
+import com.aizuda.easy.retry.server.retry.task.support.timer.TimerWheelHandler;
 import com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.log.RetryTaskLogDTO;
-import com.aizuda.easy.retry.server.retry.task.support.dispatch.task.TaskActuatorSceneEnum;
+import com.aizuda.easy.retry.server.retry.task.support.dispatch.task.TaskExecutorSceneEnum;
 import com.aizuda.easy.retry.server.retry.task.support.handler.CallbackRetryTaskHandler;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
@@ -77,11 +77,11 @@ public class FailureActor extends AbstractActor {
                         if (TaskTypeEnum.CALLBACK.getType().equals(retryTask.getTaskType())) {
                             maxRetryCount = systemProperties.getCallback().getMaxCount();
                             timerTask = new CallbackTimerTask();
-                            timerContext.setScene(TaskActuatorSceneEnum.AUTO_CALLBACK);
+                            timerContext.setScene(TaskExecutorSceneEnum.AUTO_CALLBACK);
                         } else {
                             maxRetryCount = sceneConfig.getMaxRetryCount();
                             timerTask = new RetryTimerTask(timerContext);
-                            timerContext.setScene(TaskActuatorSceneEnum.AUTO_RETRY);
+                            timerContext.setScene(TaskExecutorSceneEnum.AUTO_RETRY);
                         }
 
                         if (maxRetryCount <= retryTask.getRetryCount()) {

@@ -1,15 +1,11 @@
 package com.aizuda.easy.retry.server.web.service.impl;
 
-import akka.actor.ActorRef;
 import cn.hutool.core.lang.Assert;
-import cn.hutool.core.lang.Pair;
 import cn.hutool.core.util.StrUtil;
-import com.aizuda.easy.retry.client.model.DispatchRetryResultDTO;
 import com.aizuda.easy.retry.client.model.GenerateRetryIdempotentIdDTO;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
-import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.common.enums.TaskGeneratorScene;
 import com.aizuda.easy.retry.server.common.enums.TaskTypeEnum;
@@ -17,17 +13,9 @@ import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.model.dto.RetryTaskDTO;
 import com.aizuda.easy.retry.server.retry.task.generator.task.TaskContext;
 import com.aizuda.easy.retry.server.retry.task.generator.task.TaskGenerator;
-import com.aizuda.easy.retry.server.retry.task.support.IdempotentStrategy;
-import com.aizuda.easy.retry.server.retry.task.support.WaitStrategy;
-import com.aizuda.easy.retry.server.retry.task.support.context.CallbackRetryContext;
-import com.aizuda.easy.retry.server.retry.task.support.context.MaxAttemptsPersistenceRetryContext;
 import com.aizuda.easy.retry.server.common.handler.ClientNodeAllocateHandler;
-import com.aizuda.easy.retry.server.retry.task.support.dispatch.task.TaskActuator;
-import com.aizuda.easy.retry.server.retry.task.support.dispatch.task.TaskActuatorSceneEnum;
-import com.aizuda.easy.retry.server.retry.task.support.retry.RetryBuilder;
-import com.aizuda.easy.retry.server.retry.task.support.retry.RetryExecutor;
-import com.aizuda.easy.retry.server.retry.task.support.strategy.FilterStrategies;
-import com.aizuda.easy.retry.server.retry.task.support.strategy.StopStrategies;
+import com.aizuda.easy.retry.server.retry.task.support.dispatch.task.TaskExecutor;
+import com.aizuda.easy.retry.server.retry.task.support.dispatch.task.TaskExecutorSceneEnum;
 import com.aizuda.easy.retry.server.retry.task.support.strategy.WaitStrategies;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
 import com.aizuda.easy.retry.server.web.model.request.BatchDeleteRetryTaskVO;
@@ -49,13 +37,11 @@ import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskLog
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLog;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLogMessage;
-import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
 import com.aizuda.easy.retry.template.datasource.utils.RequestDataHelper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -97,7 +83,7 @@ public class RetryTaskServiceImpl implements RetryTaskService {
     @Autowired
     private List<TaskGenerator> taskGenerators;
     @Autowired
-    private List<TaskActuator> taskActuators;
+    private List<TaskExecutor> taskExecutors;
 
     @Override
     public PageResult<List<RetryTaskResponseVO>> getRetryTaskPage(RetryTaskQueryVO queryVO) {
@@ -329,9 +315,9 @@ public class RetryTaskServiceImpl implements RetryTaskService {
 
 
         for (RetryTask retryTask : list) {
-            for (TaskActuator taskActuator : taskActuators) {
-                if (taskActuator.getTaskType().getScene() == TaskActuatorSceneEnum.MANUAL_RETRY.getScene()) {
-                    taskActuator.actuator(retryTask);
+            for (TaskExecutor taskExecutor : taskExecutors) {
+                if (taskExecutor.getTaskType().getScene() == TaskExecutorSceneEnum.MANUAL_RETRY.getScene()) {
+                    taskExecutor.actuator(retryTask);
                 }
             }
         }
@@ -350,9 +336,9 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         Assert.notEmpty(list, () -> new EasyRetryServerException("没有可执行的任务"));
 
         for (RetryTask retryTask : list) {
-            for (TaskActuator taskActuator : taskActuators) {
-                if (taskActuator.getTaskType().getScene() == TaskActuatorSceneEnum.MANUAL_CALLBACK.getScene()) {
-                    taskActuator.actuator(retryTask);
+            for (TaskExecutor taskExecutor : taskExecutors) {
+                if (taskExecutor.getTaskType().getScene() == TaskExecutorSceneEnum.MANUAL_CALLBACK.getScene()) {
+                    taskExecutor.actuator(retryTask);
                 }
             }
 
