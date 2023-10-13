@@ -12,6 +12,7 @@ import com.aizuda.easy.retry.server.retry.task.support.strategy.FilterStrategies
 import com.aizuda.easy.retry.server.retry.task.support.strategy.StopStrategies;
 import com.aizuda.easy.retry.server.retry.task.support.strategy.WaitStrategies;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
+import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
 import org.springframework.stereotype.Component;
 
 /**
@@ -25,17 +26,20 @@ import org.springframework.stereotype.Component;
 public class CallbackTaskExecutor extends AbstractTaskExecutor {
 
     @Override
-    protected RetryContext builderRetryContext(final String groupName, final RetryTask retryTask) {
+    protected RetryContext builderRetryContext(final String groupName, final RetryTask retryTask,
+        final SceneConfig sceneConfig) {
 
         CallbackRetryContext<Result> retryContext = new CallbackRetryContext<>();
         retryContext.setRetryTask(retryTask);
         retryContext.setSceneBlacklist(accessTemplate.getSceneConfigAccess().getBlacklist(groupName));
-        retryContext.setServerNode(clientNodeAllocateHandler.getServerNode(retryTask.getGroupName()));
+        retryContext.setServerNode(
+            clientNodeAllocateHandler.getServerNode(retryTask.getSceneName(), retryTask.getGroupName(),
+                sceneConfig.getRouteKey()));
         return retryContext;
     }
 
     @Override
-    protected RetryExecutor builderResultRetryExecutor(RetryContext retryContext) {
+    protected RetryExecutor builderResultRetryExecutor(RetryContext retryContext, final SceneConfig sceneConfig) {
         return RetryBuilder.<Result>newBuilder()
                 .withStopStrategy(StopStrategies.stopException())
                 .withStopStrategy(StopStrategies.stopResultStatus())

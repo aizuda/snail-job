@@ -28,30 +28,34 @@ public class RetryTaskExecutor extends AbstractTaskExecutor {
 
     @Override
     protected RetryContext<Result<DispatchRetryResultDTO>> builderRetryContext(final String groupName,
-                                                                               final RetryTask retryTask) {
+        final RetryTask retryTask,
+        final SceneConfig sceneConfig) {
         MaxAttemptsPersistenceRetryContext<Result<DispatchRetryResultDTO>> retryContext = new MaxAttemptsPersistenceRetryContext<>();
         retryContext.setRetryTask(retryTask);
         retryContext.setSceneBlacklist(accessTemplate.getSceneConfigAccess().getBlacklist(groupName));
-        retryContext.setServerNode(clientNodeAllocateHandler.getServerNode(retryTask.getGroupName()));
+        retryContext.setServerNode(
+            clientNodeAllocateHandler.getServerNode(retryTask.getSceneName(), retryTask.getGroupName(),
+                sceneConfig.getRouteKey()));
         return retryContext;
     }
 
     @Override
-    protected RetryExecutor<Result<DispatchRetryResultDTO>> builderResultRetryExecutor(RetryContext retryContext) {
+    protected RetryExecutor<Result<DispatchRetryResultDTO>> builderResultRetryExecutor(RetryContext retryContext,
+        final SceneConfig sceneConfig) {
 
         RetryTask retryTask = retryContext.getRetryTask();
         return RetryBuilder.<Result<DispatchRetryResultDTO>>newBuilder()
-                .withStopStrategy(StopStrategies.stopException())
-                .withStopStrategy(StopStrategies.stopResultStatusCode())
-                .withWaitStrategy(getWaitWaitStrategy(retryTask.getGroupName(), retryTask.getSceneName()))
-                .withFilterStrategy(FilterStrategies.triggerAtFilter())
-                .withFilterStrategy(FilterStrategies.bitSetIdempotentFilter(idempotentStrategy))
-                .withFilterStrategy(FilterStrategies.sceneBlackFilter())
-                .withFilterStrategy(FilterStrategies.checkAliveClientPodFilter())
-                .withFilterStrategy(FilterStrategies.rebalanceFilterStrategies())
-                .withFilterStrategy(FilterStrategies.rateLimiterFilter())
-                .withRetryContext(retryContext)
-                .build();
+            .withStopStrategy(StopStrategies.stopException())
+            .withStopStrategy(StopStrategies.stopResultStatusCode())
+            .withWaitStrategy(getWaitWaitStrategy(sceneConfig))
+            .withFilterStrategy(FilterStrategies.triggerAtFilter())
+            .withFilterStrategy(FilterStrategies.bitSetIdempotentFilter(idempotentStrategy))
+            .withFilterStrategy(FilterStrategies.sceneBlackFilter())
+            .withFilterStrategy(FilterStrategies.checkAliveClientPodFilter())
+            .withFilterStrategy(FilterStrategies.rebalanceFilterStrategies())
+            .withFilterStrategy(FilterStrategies.rateLimiterFilter())
+            .withRetryContext(retryContext)
+            .build();
     }
 
     @Override
@@ -59,11 +63,8 @@ public class RetryTaskExecutor extends AbstractTaskExecutor {
         return TaskExecutorSceneEnum.AUTO_RETRY;
     }
 
-    private WaitStrategy getWaitWaitStrategy(String groupName, String sceneName) {
-
-        SceneConfig sceneConfig = accessTemplate.getSceneConfigAccess().getSceneConfigByGroupNameAndSceneName(groupName, sceneName);
+    private WaitStrategy getWaitWaitStrategy(SceneConfig sceneConfig) {
         Integer backOff = sceneConfig.getBackOff();
-
         return WaitStrategies.WaitStrategyEnum.getWaitStrategy(backOff);
     }
 

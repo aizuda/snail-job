@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.server.common.handler;
 
 import cn.hutool.core.net.url.UrlBuilder;
 import cn.hutool.core.net.url.UrlQuery;
+import com.aizuda.easy.retry.server.common.HttpRequestHandler;
 import io.netty.handler.codec.http.HttpHeaders;
 
 /**

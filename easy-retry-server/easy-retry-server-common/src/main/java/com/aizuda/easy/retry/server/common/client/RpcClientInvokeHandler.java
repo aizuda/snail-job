@@ -7,6 +7,7 @@ import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.common.core.util.HostUtils;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
+import com.aizuda.easy.retry.server.common.allocate.client.ClientLoadBalanceManager.AllocationAlgorithmEnum;
 import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
 import com.aizuda.easy.retry.server.common.client.annotation.Body;
 import com.aizuda.easy.retry.server.common.client.annotation.Header;
@@ -29,6 +30,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.OkHttp3ClientHttpRequestFactory;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientException;
@@ -52,27 +54,47 @@ import java.util.concurrent.TimeUnit;
  * @since 2.0.0
  */
 @Slf4j
-@AllArgsConstructor
 public class RpcClientInvokeHandler implements InvocationHandler {
 
     public static final String URL = "http://{0}:{1}/{2}";
 
-    private String groupName;
+    private final String groupName;
     private String hostId;
     private String hostIp;
     private Integer hostPort;
     private String contextPath;
-    private boolean failRetry;
-    private int retryTimes;
-    private int retryInterval;
-    private RetryListener retryListener;
+    private final boolean failRetry;
+    private final int retryTimes;
+    private final int retryInterval;
+    private final RetryListener retryListener;
+    private final boolean failover;
+    private final Integer routeKey;
+    private final String allocKey;
+
+    public RpcClientInvokeHandler(final String groupName, final RegisterNodeInfo registerNodeInfo,
+        final boolean failRetry, final int retryTimes,
+        final int retryInterval, final RetryListener retryListener, final Integer routeKey, final String allocKey,
+        final boolean failover) {
+        this.groupName = groupName;
+        this.hostId = registerNodeInfo.getHostId();
+        this.hostPort = registerNodeInfo.getHostPort();
+        this.hostIp = registerNodeInfo.getHostIp();
+        this.contextPath = registerNodeInfo.getContextPath();
+        this.failRetry = failRetry;
+        this.retryTimes = retryTimes;
+        this.retryInterval = retryInterval;
+        this.retryListener = retryListener;
+        this.failover = failover;
+        this.routeKey = routeKey;
+        this.allocKey = allocKey;
+    }
 
     @Override
     public Result invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
         Mapping annotation = method.getAnnotation(Mapping.class);
         Assert.notNull(annotation, () -> new EasyRetryServerException("@Mapping cannot be null"));
 
-        if (annotation.failover()) {
+        if (failover) {
             return doFailoverHandler(method, args, annotation);
         }
 
@@ -134,7 +156,7 @@ public class RpcClientInvokeHandler implements InvocationHandler {
             return result;
         } catch (RestClientException ex) {
             // 网络异常
-            if (ex instanceof ResourceAccessException && mapping.failover()) {
+            if (ex instanceof ResourceAccessException && failover) {
                 log.error("request client I/O error, count:[{}] clientId:[{}] clientAddr:[{}:{}] serverIp:[{}]", count,
                     hostId, hostIp, hostPort, HostUtils.getIp(), ex);
 
@@ -143,7 +165,8 @@ public class RpcClientInvokeHandler implements InvocationHandler {
                 // 重新选一个可用的客户端节点
                 ClientNodeAllocateHandler clientNodeAllocateHandler = SpringContext.CONTEXT.getBean(
                     ClientNodeAllocateHandler.class);
-                RegisterNodeInfo serverNode = clientNodeAllocateHandler.getServerNode(groupName);
+                RegisterNodeInfo serverNode = clientNodeAllocateHandler.getServerNode(allocKey, groupName,
+                    routeKey);
                 // 这里表示无可用节点
                 if (Objects.isNull(serverNode)) {
                     throw ex;

@@ -19,6 +19,7 @@ public class GroupConfig implements Serializable {
 
     private Integer groupPartition;
 
+    @Deprecated
     private Integer routeKey;
 
     private Integer idGeneratorMode;

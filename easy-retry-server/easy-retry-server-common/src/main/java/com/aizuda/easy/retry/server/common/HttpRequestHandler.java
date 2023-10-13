@@ -1,4 +1,4 @@
-package com.aizuda.easy.retry.server.common.handler;
+package com.aizuda.easy.retry.server.common;
 
 import cn.hutool.core.net.url.UrlBuilder;
 import io.netty.handler.codec.http.HttpHeaders;

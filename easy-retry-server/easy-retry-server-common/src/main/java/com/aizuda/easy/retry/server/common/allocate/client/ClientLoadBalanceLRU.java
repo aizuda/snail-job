@@ -23,8 +23,8 @@ public class ClientLoadBalanceLRU implements ClientLoadBalance {
     private ConcurrentHashMap<String, LinkedHashMap<String, String>> LRU_CACHE = new ConcurrentHashMap<>();
 
     @Override
-    public String route(String currentGroupName, TreeSet<String> clientAllAddressSet) {
-        LinkedHashMap<String, String> lruItem = LRU_CACHE.get(currentGroupName);
+    public String route(String allocKey, TreeSet<String> clientAllAddressSet) {
+        LinkedHashMap<String, String> lruItem = LRU_CACHE.get(allocKey);
         if (Objects.isNull(lruItem)) {
             lruItem = new LinkedHashMap<String, String>(16, 0.75f, true) {
                 @Override
@@ -32,13 +32,13 @@ public class ClientLoadBalanceLRU implements ClientLoadBalance {
                     return super.size() > size;
                 }
             };
+
+            LRU_CACHE.put(allocKey, lruItem);
         }
 
         // 添加新数据
         for (String address: clientAllAddressSet) {
-            if (!lruItem.containsKey(address)) {
-                lruItem.put(address, address);
-            }
+            lruItem.computeIfAbsent(address, key -> address);
         }
 
         // 删除已经下线的节点

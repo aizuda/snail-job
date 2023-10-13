@@ -52,15 +52,12 @@ public class BroadcastTaskGenerator extends AbstractJobTaskGenerator {
             return Lists.newArrayList();
         }
 
-        Job job = jobMapper.selectById(context.getJobId());
-
         List<JobTask> jobTasks = new ArrayList<>(serverNodes.size());
         for (RegisterNodeInfo serverNode : serverNodes) {
             JobTask jobTask = JobTaskConverter.INSTANCE.toJobTaskInstance(context);
             jobTask.setClientId(serverNode.getHostId());
-            jobTask.setArgsType(job.getArgsType());
-            jobTask.setArgsStr(job.getArgsStr());
-            jobTask.setExtAttrs(job.getExtAttrs());
+            jobTask.setArgsType(context.getArgsType());
+            jobTask.setArgsStr(context.getArgsStr());
             jobTask.setExecuteStatus(JobTaskStatusEnum.RUNNING.getStatus());
             jobTask.setResultMessage(Optional.ofNullable(jobTask.getResultMessage()).orElse(StrUtil.EMPTY));
             Assert.isTrue(1 == jobTaskMapper.insert(jobTask), () -> new EasyRetryServerException("新增任务实例失败"));

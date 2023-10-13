@@ -36,6 +36,16 @@ public class JobExecutorContext {
 
     private List<JobTask> taskList;
 
-    private Job job;
+    /**
+     * 执行方法参数
+     */
+    private String argsStr;
+
+    /**
+     * 参数类型 text/json
+     */
+    private Integer argsType;
+
+    private Integer routeKey;
 
 }

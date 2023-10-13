@@ -6,11 +6,14 @@ import com.aizuda.easy.retry.client.model.GenerateRetryIdempotentIdDTO;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
+import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
+import com.aizuda.easy.retry.server.common.client.RequestBuilder;
 import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.common.enums.TaskGeneratorScene;
 import com.aizuda.easy.retry.server.common.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.model.dto.RetryTaskDTO;
+import com.aizuda.easy.retry.server.retry.task.client.RetryRpcClient;
 import com.aizuda.easy.retry.server.retry.task.generator.task.TaskContext;
 import com.aizuda.easy.retry.server.retry.task.generator.task.TaskGenerator;
 import com.aizuda.easy.retry.server.common.handler.ClientNodeAllocateHandler;
@@ -37,6 +40,7 @@ import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskLog
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLog;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLogMessage;
+import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
 import com.aizuda.easy.retry.template.datasource.utils.RequestDataHelper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -55,6 +59,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -202,21 +207,34 @@ public class RetryTaskServiceImpl implements RetryTaskService {
 
     @Override
     public String idempotentIdGenerate(final GenerateRetryIdempotentIdVO generateRetryIdempotentIdVO) {
-        RegisterNodeInfo serverNode = clientNodeAllocateHandler.getServerNode(generateRetryIdempotentIdVO.getGroupName());
-        Assert.notNull(serverNode, () -> new EasyRetryServerException("生成idempotentId失败: 不存在活跃的客户端节点"));
+
+        Set<RegisterNodeInfo> serverNodes = CacheRegisterTable.getServerNodeSet(generateRetryIdempotentIdVO.getGroupName());
+        Assert.notEmpty(serverNodes, () -> new EasyRetryServerException("生成idempotentId失败: 不存在活跃的客户端节点"));
+
+        SceneConfig sceneConfig = accessTemplate.getSceneConfigAccess()
+            .getSceneConfigByGroupNameAndSceneName(generateRetryIdempotentIdVO.getGroupName(),
+                generateRetryIdempotentIdVO.getSceneName());
+
+        RegisterNodeInfo serverNode = clientNodeAllocateHandler.getServerNode(sceneConfig.getSceneName(),
+            sceneConfig.getGroupName(), sceneConfig.getRouteKey());
 
         // 委托客户端生成idempotentId
-        String url = MessageFormat
-                .format(URL, serverNode.getHostIp(), serverNode.getHostPort().toString(), serverNode.getContextPath());
-
         GenerateRetryIdempotentIdDTO generateRetryIdempotentIdDTO = new GenerateRetryIdempotentIdDTO();
         generateRetryIdempotentIdDTO.setGroup(generateRetryIdempotentIdVO.getGroupName());
         generateRetryIdempotentIdDTO.setScene(generateRetryIdempotentIdVO.getSceneName());
         generateRetryIdempotentIdDTO.setArgsStr(generateRetryIdempotentIdVO.getArgsStr());
         generateRetryIdempotentIdDTO.setExecutorName(generateRetryIdempotentIdVO.getExecutorName());
 
-        HttpEntity<GenerateRetryIdempotentIdDTO> requestEntity = new HttpEntity<>(generateRetryIdempotentIdDTO);
-        Result result = restTemplate.postForObject(url, requestEntity, Result.class);
+        RetryRpcClient rpcClient = RequestBuilder.<RetryRpcClient, Result>newBuilder()
+            .hostPort(serverNode.getHostPort())
+            .groupName(serverNode.getGroupName())
+            .hostId(serverNode.getHostId())
+            .hostIp(serverNode.getHostIp())
+            .contextPath(serverNode.getContextPath())
+            .client(RetryRpcClient.class)
+            .build();
+
+        Result result = rpcClient.generateIdempotentId(generateRetryIdempotentIdDTO);
 
         Assert.notNull(result, () -> new EasyRetryServerException("idempotentId生成失败"));
         Assert.isTrue(1 == result.getStatus(), () -> new EasyRetryServerException("idempotentId生成失败:请确保参数与执行器名称正确"));

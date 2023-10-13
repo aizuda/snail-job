@@ -45,20 +45,18 @@ public class ClusterTaskGenerator extends AbstractJobTaskGenerator {
     @Override
     public List<JobTask> doGenerate(JobTaskGenerateContext context) {
         // 生成可执行任务
-        RegisterNodeInfo serverNode = clientNodeAllocateHandler.getServerNode(context.getGroupName());
+        RegisterNodeInfo serverNode = clientNodeAllocateHandler.getServerNode(context.getJobId().toString(),
+            context.getGroupName(), context.getRouteKey());
         if (Objects.isNull(serverNode)) {
             log.error("无可执行的客户端信息. jobId:[{}]", context.getJobId());
             return Lists.newArrayList();
         }
 
-        Job job = jobMapper.selectById(context.getJobId());
-
         // 新增任务实例
         JobTask jobTask = JobTaskConverter.INSTANCE.toJobTaskInstance(context);
         jobTask.setClientId(serverNode.getHostId());
-        jobTask.setArgsType(job.getArgsType());
-        jobTask.setArgsStr(job.getArgsStr());
-        jobTask.setExtAttrs(job.getExtAttrs());
+        jobTask.setArgsType(context.getArgsType());
+        jobTask.setArgsStr(context.getArgsStr());
         jobTask.setExecuteStatus(JobTaskStatusEnum.RUNNING.getStatus());
         jobTask.setResultMessage(Optional.ofNullable(jobTask.getResultMessage()).orElse(StrUtil.EMPTY));
         Assert.isTrue(1 == jobTaskMapper.insert(jobTask), () -> new EasyRetryServerException("新增任务实例失败"));

@@ -24,10 +24,4 @@ public @interface Mapping {
 
     String path() default "";
 
-    /**
-     * 是否支持失败转移
-     * @return false or trur
-     */
-    boolean failover() default false;
-
 }

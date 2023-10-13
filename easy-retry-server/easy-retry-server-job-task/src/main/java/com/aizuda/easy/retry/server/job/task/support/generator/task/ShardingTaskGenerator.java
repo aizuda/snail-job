@@ -55,8 +55,7 @@ public class ShardingTaskGenerator extends AbstractJobTaskGenerator {
             return Lists.newArrayList();
         }
 
-        Job job = jobMapper.selectById(context.getJobId());
-        String argsStr = job.getArgsStr();
+        String argsStr = context.getArgsStr();
         Map<String, String> split = Splitter.on(";").omitEmptyStrings().withKeyValueSeparator('=').split(argsStr);
 
         List<RegisterNodeInfo> nodeInfoList = new ArrayList<>(serverNodes);
@@ -66,9 +65,8 @@ public class ShardingTaskGenerator extends AbstractJobTaskGenerator {
             // 新增任务实例
             JobTask jobTask = JobTaskConverter.INSTANCE.toJobTaskInstance(context);
             jobTask.setClientId(registerNodeInfo.getHostId());
-            jobTask.setArgsType(job.getArgsType());
-            jobTask.setArgsStr(job.getArgsStr());
-            jobTask.setExtAttrs(job.getExtAttrs());
+            jobTask.setArgsType(context.getArgsType());
+            jobTask.setArgsStr(value);
             jobTask.setExecuteStatus(JobTaskStatusEnum.RUNNING.getStatus());
             jobTask.setResultMessage(Optional.ofNullable(jobTask.getResultMessage()).orElse(StrUtil.EMPTY));
             Assert.isTrue(1 == jobTaskMapper.insert(jobTask), () -> new EasyRetryServerException("新增任务实例失败"));

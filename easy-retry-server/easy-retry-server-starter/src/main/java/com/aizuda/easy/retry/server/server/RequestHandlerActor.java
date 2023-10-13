@@ -14,7 +14,7 @@ import com.aizuda.easy.retry.server.common.Register;
 import com.aizuda.easy.retry.server.retry.task.support.handler.ConfigVersionSyncHandler;
 import com.aizuda.easy.retry.server.common.register.ClientRegister;
 import com.aizuda.easy.retry.server.common.register.RegisterContext;
-import com.aizuda.easy.retry.server.common.handler.HttpRequestHandler;
+import com.aizuda.easy.retry.server.common.HttpRequestHandler;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
