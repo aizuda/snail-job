@@ -31,16 +31,19 @@ public class ManualRetryTaskExecutor extends AbstractTaskExecutor {
 
     @Override
     protected RetryContext<Result<DispatchRetryResultDTO>> builderRetryContext(final String groupName,
-                                                                               final RetryTask retryTask) {
+                                                                               final RetryTask retryTask,
+        final SceneConfig sceneConfig) {
         MaxAttemptsPersistenceRetryContext<Result<DispatchRetryResultDTO>> retryContext = new MaxAttemptsPersistenceRetryContext<>();
         retryContext.setRetryTask(retryTask);
         retryContext.setSceneBlacklist(accessTemplate.getSceneConfigAccess().getBlacklist(groupName));
-        retryContext.setServerNode(clientNodeAllocateHandler.getServerNode(retryTask.getGroupName()));
-        return retryContext;
+        retryContext.setServerNode(
+            clientNodeAllocateHandler.getServerNode(retryTask.getSceneName(), retryTask.getGroupName(),
+                sceneConfig.getRouteKey()));        return retryContext;
     }
 
     @Override
-    protected RetryExecutor<Result<DispatchRetryResultDTO>> builderResultRetryExecutor(RetryContext retryContext) {
+    protected RetryExecutor<Result<DispatchRetryResultDTO>> builderResultRetryExecutor(RetryContext retryContext,
+        final SceneConfig sceneConfig) {
 
         RetryTask retryTask = retryContext.getRetryTask();
         return RetryBuilder.<Result>newBuilder()

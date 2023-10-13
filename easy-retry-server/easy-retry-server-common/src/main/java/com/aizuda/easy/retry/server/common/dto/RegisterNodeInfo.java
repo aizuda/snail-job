@@ -34,6 +34,10 @@ public class RegisterNodeInfo implements Comparable<RegisterNodeInfo> {
         return MessageFormat.format(URL, hostIp, hostPort.toString(), contextPath);
     }
 
+    public String address() {
+        return MessageFormat.format("{0}:{1}", hostIp, hostPort.toString());
+    }
+
     @Override
     public int compareTo(RegisterNodeInfo info) {
         return hostId.compareTo(info.hostId);

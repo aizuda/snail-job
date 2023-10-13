@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.server.common.client;
 
 import cn.hutool.core.lang.Assert;
+import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.github.rholder.retry.RetryListener;
 
@@ -18,14 +19,14 @@ public class RequestBuilder<T, R> {
 
     private Class<T> clintInterface;
     private String groupName;
-    private String hostId;
-    private String hostIp;
-    private Integer hostPort;
-    private String contextPath;
+    private RegisterNodeInfo nodeInfo;
     private boolean failRetry;
     private int retryTimes = 3;
     private int retryInterval = 1;
    private RetryListener retryListener = new SimpleRetryListener();
+   private boolean failover;
+   private int routeKey;
+   private String allocKey;
 
 
     public static <T, R> RequestBuilder<T, R> newBuilder() {
@@ -37,23 +38,8 @@ public class RequestBuilder<T, R> {
         return this;
     }
 
-    public RequestBuilder<T, R> hostPort(Integer hostPort) {
-        this.hostPort = hostPort;
-        return this;
-    }
-
-    public RequestBuilder<T, R> contextPath(String contextPath) {
-        this.contextPath = contextPath;
-        return this;
-    }
-
-    public RequestBuilder<T, R> hostId(String hostId) {
-        this.hostId = hostId;
-        return this;
-    }
-
-    public RequestBuilder<T, R> hostIp(String hostIp) {
-        this.hostIp = hostIp;
+    public RequestBuilder<T, R> nodeInfo(RegisterNodeInfo nodeInfo) {
+        this.nodeInfo = nodeInfo;
         return this;
     }
 
@@ -82,6 +68,21 @@ public class RequestBuilder<T, R> {
         return this;
     }
 
+    public RequestBuilder<T, R> allocKey(boolean failover) {
+        this.failover = failover;
+        return this;
+    }
+
+    public RequestBuilder<T, R> routeKey(int routeKey) {
+        this.routeKey = routeKey;
+        return this;
+    }
+
+
+    public RequestBuilder<T, R> allocKey(String allocKey) {
+        this.allocKey = allocKey;
+        return this;
+    }
 
     public T build() {
         if (Objects.isNull(clintInterface)) {
@@ -89,11 +90,12 @@ public class RequestBuilder<T, R> {
         }
 
         Assert.notBlank(groupName, () -> new EasyRetryServerException("groupName cannot be null"));
-        Assert.notBlank(hostId, () -> new EasyRetryServerException("hostId cannot be null"));
-        Assert.notBlank(hostIp, () -> new EasyRetryServerException("hostIp cannot be null"));
-        Assert.notNull(hostPort, () -> new EasyRetryServerException("hostPort cannot be null"));
-        Assert.notBlank(contextPath, () -> new EasyRetryServerException("contextPath cannot be null"));
+        Assert.notNull(nodeInfo, () -> new EasyRetryServerException("nodeInfo cannot be null"));
 
+        if (failover) {
+            Assert.isTrue(routeKey > 0, () -> new EasyRetryServerException("routeKey cannot be null"));
+            Assert.notBlank(allocKey, () -> new EasyRetryServerException("allocKey cannot be null"));
+        }
         try {
             clintInterface = (Class<T>) Class.forName(clintInterface.getName());
         } catch (Exception e) {
@@ -101,7 +103,7 @@ public class RequestBuilder<T, R> {
         }
 
         RpcClientInvokeHandler clientInvokeHandler = new RpcClientInvokeHandler(
-            groupName, hostId, hostIp, hostPort, contextPath, failRetry, retryTimes, retryInterval, retryListener);
+            groupName, nodeInfo, failRetry, retryTimes, retryInterval, retryListener, routeKey, allocKey, failover);
 
         return (T) Proxy.newProxyInstance(clintInterface.getClassLoader(),
             new Class[]{clintInterface}, clientInvokeHandler);

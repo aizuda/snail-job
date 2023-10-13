@@ -1,7 +1,7 @@
 package com.aizuda.easy.retry.server.common.allocate.client;
 
 import com.aizuda.easy.retry.server.common.ClientLoadBalance;
-import com.aizuda.easy.retry.server.common.enums.AllocationAlgorithmEnum;
+import com.aizuda.easy.retry.server.common.allocate.client.ClientLoadBalanceManager.AllocationAlgorithmEnum;
 import com.aizuda.easy.retry.server.common.allocate.common.ConsistentHashRouter;
 import com.aizuda.easy.retry.server.common.allocate.common.Node;
 
@@ -22,7 +22,7 @@ public class ClientLoadBalanceConsistentHash implements ClientLoadBalance {
     }
 
     @Override
-    public String route(String currentGroupName, TreeSet<String> clientAllAddressSet) {
+    public String route(String allocKey, TreeSet<String> clientAllAddressSet) {
 
         Collection<ClientNode> cidNodes = new ArrayList<ClientNode>();
         for (String clientAddress : clientAllAddressSet) {
@@ -30,7 +30,7 @@ public class ClientLoadBalanceConsistentHash implements ClientLoadBalance {
         }
         final ConsistentHashRouter<ClientNode> consistentHashRouter = new ConsistentHashRouter<>(cidNodes, virtualNodeCnt);
 
-        ClientNode clientNode = consistentHashRouter.routeNode(currentGroupName);
+        ClientNode clientNode = consistentHashRouter.routeNode(allocKey);
 
         return clientNode.clientAddress;
     }

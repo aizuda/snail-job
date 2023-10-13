@@ -8,7 +8,7 @@ import java.util.TreeSet;
  */
 public interface ClientLoadBalance {
 
-    String route(String currentGroupName, TreeSet<String> clientAllAddressSet);
+    String route(String key, TreeSet<String> clientAllAddressSet);
 
     int routeType();
 

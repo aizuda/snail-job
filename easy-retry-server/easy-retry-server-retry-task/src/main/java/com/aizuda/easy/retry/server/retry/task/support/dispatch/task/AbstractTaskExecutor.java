@@ -9,6 +9,7 @@ import com.aizuda.easy.retry.server.retry.task.support.RetryContext;
 import com.aizuda.easy.retry.server.retry.task.support.retry.RetryExecutor;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
+import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,8 +40,10 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, Initializing
         // 重试次数累加
         retryCountIncrement(retryTask);
 
-        RetryContext retryContext = builderRetryContext(retryTask.getGroupName(), retryTask);
-        RetryExecutor executor = builderResultRetryExecutor(retryContext);
+        SceneConfig sceneConfig = accessTemplate.getSceneConfigAccess().getSceneConfigByGroupNameAndSceneName(retryTask.getGroupName(), retryTask.getSceneName());
+
+        RetryContext retryContext = builderRetryContext(retryTask.getGroupName(), retryTask, sceneConfig);
+        RetryExecutor executor = builderResultRetryExecutor(retryContext, sceneConfig);
 
         if (!preCheck(retryContext, executor)) {
             return;
@@ -75,9 +78,11 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, Initializing
         actorRef.tell(retryExecutor, actorRef);
     }
 
-    protected abstract RetryContext builderRetryContext(String groupName, RetryTask retryTask);
+    protected abstract RetryContext builderRetryContext(String groupName, RetryTask retryTask,
+        final SceneConfig sceneConfig);
 
-    protected abstract RetryExecutor builderResultRetryExecutor(RetryContext retryContext);
+    protected abstract RetryExecutor builderResultRetryExecutor(RetryContext retryContext,
+        final SceneConfig sceneConfig);
 
     protected abstract ActorRef getActorRef();
 

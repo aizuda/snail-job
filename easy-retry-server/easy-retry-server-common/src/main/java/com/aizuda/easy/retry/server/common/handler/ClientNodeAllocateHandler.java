@@ -3,6 +3,7 @@ package com.aizuda.easy.retry.server.common.handler;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.common.ClientLoadBalance;
 import com.aizuda.easy.retry.server.common.allocate.client.ClientLoadBalanceManager;
+import com.aizuda.easy.retry.server.common.allocate.client.ClientLoadBalanceManager.AllocationAlgorithmEnum;
 import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
@@ -15,6 +16,7 @@ import org.springframework.util.CollectionUtils;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author: www.byteblogs.com
@@ -29,20 +31,25 @@ public class ClientNodeAllocateHandler {
 
     /**
      * 获取分配的节点
+     * @param allocKey  分配的key
+     * @param groupName 组名称
+     * @param routeKey {@link AllocationAlgorithmEnum} 路由类型
      */
-    public RegisterNodeInfo getServerNode(String groupName) {
+    public RegisterNodeInfo getServerNode(String allocKey, String groupName, Integer routeKey) {
 
-        GroupConfig groupConfig = accessTemplate.getGroupConfigAccess().getGroupConfigByGroupName(groupName);
         Set<RegisterNodeInfo> serverNodes = CacheRegisterTable.getServerNodeSet(groupName);
         if (CollectionUtils.isEmpty(serverNodes)) {
             LogUtils.warn(log, "client node is null. groupName:[{}]", groupName);
             return null;
         }
 
-        ClientLoadBalance clientLoadBalanceRandom = ClientLoadBalanceManager.getClientLoadBalance(groupConfig.getRouteKey());
+        ClientLoadBalance clientLoadBalanceRandom = ClientLoadBalanceManager.getClientLoadBalance(routeKey);
 
-        String hostIp = clientLoadBalanceRandom.route(groupName, new TreeSet<>(serverNodes.stream().map(RegisterNodeInfo::getHostIp).collect(Collectors.toSet())));
-        return serverNodes.stream().filter(s -> s.getHostIp().equals(hostIp)).findFirst().get();
+        String hostIp = clientLoadBalanceRandom.route(allocKey, new TreeSet<>(serverNodes.stream().map(RegisterNodeInfo::getHostIp).collect(Collectors.toSet())));
+
+        Stream<RegisterNodeInfo> registerNodeInfoStream = serverNodes.stream()
+            .filter(s -> s.getHostIp().equals(hostIp));
+        return registerNodeInfoStream.findFirst().orElse(null);
     }
 
 

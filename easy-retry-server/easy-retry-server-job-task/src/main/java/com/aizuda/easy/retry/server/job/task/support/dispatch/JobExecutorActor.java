@@ -49,6 +49,7 @@ public class JobExecutorActor extends AbstractActor {
         context.setGroupName(taskExecute.getGroupName());
         context.setJobId(job.getId());
         context.setTaskType(job.getTaskType());
+        context.setJob(job);
         jobExecutor.execute(context);
 
     }

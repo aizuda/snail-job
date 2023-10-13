@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.server.retry.task.client;
 
 import com.aizuda.easy.retry.client.model.DispatchRetryDTO;
 import com.aizuda.easy.retry.client.model.DispatchRetryResultDTO;
+import com.aizuda.easy.retry.client.model.GenerateRetryIdempotentIdDTO;
 import com.aizuda.easy.retry.client.model.RetryCallbackDTO;
 import com.aizuda.easy.retry.client.model.StopJobDTO;
 import com.aizuda.easy.retry.client.model.request.DispatchJobRequest;
@@ -26,5 +27,8 @@ public interface RetryRpcClient {
 
     @Mapping(path = "/retry/callback/v1", method = RequestMethod.POST, failover = true)
     Result callback(@Body RetryCallbackDTO retryCallbackDTO);
+
+    @Mapping(path = "/retry/generate/idempotent-id/v1", method = RequestMethod.POST)
+    Result generateIdempotentId(@Body GenerateRetryIdempotentIdDTO retryCallbackDTO);
 
 }

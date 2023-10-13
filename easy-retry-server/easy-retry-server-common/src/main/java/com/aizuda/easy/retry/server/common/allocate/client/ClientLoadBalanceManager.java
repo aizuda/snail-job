@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.server.common.allocate.client;
 
 import com.aizuda.easy.retry.server.common.ClientLoadBalance;
+import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
 
@@ -8,7 +9,6 @@ import org.springframework.stereotype.Component;
  * @author: www.byteblogs.com
  * @date : 2022-03-12 10:20
  */
-@Component
 public class ClientLoadBalanceManager {
 
     public static ClientLoadBalance getClientLoadBalance(int routeType) {
@@ -19,7 +19,7 @@ public class ClientLoadBalanceManager {
             }
         }
 
-        return null;
+        throw new EasyRetryServerException("routeType is not existed. routeType:[{}]", routeType);
     }
 
     @Getter
@@ -28,6 +28,7 @@ public class ClientLoadBalanceManager {
         CONSISTENT_HASH(1, new ClientLoadBalanceConsistentHash(100)),
         RANDOM(2, new ClientLoadBalanceRandom()),
         LRU(3, new ClientLoadBalanceLRU(100)),
+        ROUND(4, new ClientLoadBalanceRound())
         ;
 
         private final int type;
