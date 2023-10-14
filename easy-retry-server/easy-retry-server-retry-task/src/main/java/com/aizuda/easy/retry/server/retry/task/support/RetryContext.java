@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.server.retry.task.support;
 
 import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
+import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
 
 import java.util.Set;
 
@@ -74,4 +75,10 @@ public interface RetryContext<V> {
      */
     Set<String> getSceneBlacklist();
 
+    /**
+     * 路由策略
+     *
+     * @return 路由策略
+     */
+    SceneConfig sceneConfig();
 }

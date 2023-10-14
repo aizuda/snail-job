@@ -36,6 +36,7 @@ public class RetryTaskExecutor extends AbstractTaskExecutor {
         retryContext.setServerNode(
             clientNodeAllocateHandler.getServerNode(retryTask.getSceneName(), retryTask.getGroupName(),
                 sceneConfig.getRouteKey()));
+        retryContext.setSceneConfig(sceneConfig);
         return retryContext;
     }
 
@@ -43,7 +44,6 @@ public class RetryTaskExecutor extends AbstractTaskExecutor {
     protected RetryExecutor<Result<DispatchRetryResultDTO>> builderResultRetryExecutor(RetryContext retryContext,
         final SceneConfig sceneConfig) {
 
-        RetryTask retryTask = retryContext.getRetryTask();
         return RetryBuilder.<Result<DispatchRetryResultDTO>>newBuilder()
             .withStopStrategy(StopStrategies.stopException())
             .withStopStrategy(StopStrategies.stopResultStatusCode())

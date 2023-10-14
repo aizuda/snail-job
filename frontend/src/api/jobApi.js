@@ -8,11 +8,32 @@ const jobApi = {
 
   // 任务批次
   jobBatchList: '/job/batch/list',
-  jobBatchDetail: '/job/batch/'
+  jobBatchDetail: '/job/batch/',
 
+  // 任务
+  jobTaskList: '/job/task/list',
+
+  // 日志
+  jobLogList: '/job/log/list'
 }
 
 export default jobApi
+
+export function jobLogList (parameter) {
+  return request({
+    url: jobApi.jobLogList,
+    method: 'get',
+    params: parameter
+  })
+}
+
+export function jobTaskList (parameter) {
+  return request({
+    url: jobApi.jobTaskList,
+    method: 'get',
+    params: parameter
+  })
+}
 
 export function jobBatchList (parameter) {
   return request({

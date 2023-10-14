@@ -18,7 +18,6 @@ import java.util.Objects;
 public class RequestBuilder<T, R> {
 
     private Class<T> clintInterface;
-    private String groupName;
     private RegisterNodeInfo nodeInfo;
     private boolean failRetry;
     private int retryTimes = 3;
@@ -43,10 +42,10 @@ public class RequestBuilder<T, R> {
         return this;
     }
 
-    public RequestBuilder<T, R> groupName(String groupName) {
-        this.groupName = groupName;
-        return this;
-    }
+//    public RequestBuilder<T, R> groupName(String groupName) {
+//        this.groupName = groupName;
+//        return this;
+//    }
 
     public RequestBuilder<T, R> failRetry(boolean failRetry) {
         this.failRetry = failRetry;
@@ -68,7 +67,7 @@ public class RequestBuilder<T, R> {
         return this;
     }
 
-    public RequestBuilder<T, R> allocKey(boolean failover) {
+    public RequestBuilder<T, R> failover(boolean failover) {
         this.failover = failover;
         return this;
     }
@@ -89,7 +88,6 @@ public class RequestBuilder<T, R> {
             throw new EasyRetryServerException("clintInterface cannot be null");
         }
 
-        Assert.notBlank(groupName, () -> new EasyRetryServerException("groupName cannot be null"));
         Assert.notNull(nodeInfo, () -> new EasyRetryServerException("nodeInfo cannot be null"));
 
         if (failover) {
@@ -103,7 +101,7 @@ public class RequestBuilder<T, R> {
         }
 
         RpcClientInvokeHandler clientInvokeHandler = new RpcClientInvokeHandler(
-            groupName, nodeInfo, failRetry, retryTimes, retryInterval, retryListener, routeKey, allocKey, failover);
+                nodeInfo.getGroupName(), nodeInfo, failRetry, retryTimes, retryInterval, retryListener, routeKey, allocKey, failover);
 
         return (T) Proxy.newProxyInstance(clintInterface.getClassLoader(),
             new Class[]{clintInterface}, clientInvokeHandler);

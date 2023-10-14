@@ -66,8 +66,6 @@
       </a-form>
     </div>
     <div class="table-operator">
-      <a-button type="primary" icon="plus" @click="handleNew()">新增</a-button>
-      <!--      <a-button type="primary" icon="plus" @click="handleBatchNew()">批量</a-button>-->
       <a-dropdown v-action:edit v-if="selectedRowKeys.length > 0">
         <a-menu slot="overlay" @click="onClick">
           <a-menu-item key="1"><a-icon type="delete" />删除</a-menu-item>
@@ -89,31 +87,13 @@
       <span slot="serial" slot-scope="text, record">
         {{ record.id }}
       </span>
-      <span slot="taskType" slot-scope="text">
-        <a-tag :color="taskType[text].color">
-          {{ taskType[text].name }}
-        </a-tag>
-      </span>
       <span slot="taskStatus" slot-scope="text">
         <a-tag :color="taskStatus[text].color">
           {{ taskStatus[text].name }}
         </a-tag>
       </span>
-      <span slot="triggerType" slot-scope="text">
-        <a-tag :color="triggerType[text].color">
-          {{ triggerType[text].name }}
-        </a-tag>
-      </span>
-      <span slot="blockStrategy" slot-scope="text">
-        <a-tag :color="blockStrategy[text].color">
-          {{ blockStrategy[text].name }}
-        </a-tag>
-      </span>
-      <span slot="triggerInterval" slot-scope="text">
-        <span>{{ text }}(秒)</span>
-      </span>
-      <span slot="executorTimeout" slot-scope="text">
-        <span>{{ text }}(秒)</span>
+      <span slot="operationReason" slot-scope="text">
+        {{ operationReason[text].name }}
       </span>
       <span slot="action" slot-scope="text, record">
         <template>
@@ -168,9 +148,10 @@ import AInput from 'ant-design-vue/es/input/Input'
 import { STable } from '@/components'
 import { jobBatchList } from '@/api/jobApi'
 import { getAllGroupNameList } from '@/api/manage'
+const enums = require('@/utils/enum')
 
 export default {
-  name: 'JobList',
+  name: 'JobBatchList',
   components: {
     AInput,
     ATextarea,
@@ -186,54 +167,8 @@ export default {
       advanced: false,
       // 查询参数
       queryParam: {},
-      jobStatus: {
-        '0': {
-          'name': '关闭',
-          'color': '#9c1f1f'
-        },
-        '1': {
-          'name': '开启',
-          'color': '#f5a22d'
-        }
-      },
-      taskType: {
-        '1': {
-          'name': '集群模式',
-          'color': '#d06892'
-        },
-        '2': {
-          'name': '广播模式',
-          'color': '#f5a22d'
-        },
-        '3': {
-          'name': '分片模式',
-          'color': '#e1f52d'
-        }
-      },
-      triggerType: {
-        '1': {
-          'name': 'CRON表达式',
-          'color': '#d06892'
-        },
-        '2': {
-          'name': '固定时间',
-          'color': '#f5a22d'
-        }
-      },
-      blockStrategy: {
-        '1': {
-          'name': '丢弃策略',
-          'color': '#d06892'
-        },
-        '2': {
-          'name': '覆盖',
-          'color': '#f5a22d'
-        },
-        '3': {
-          'name': '并行',
-          'color': '#e1f52d'
-        }
-      },
+      taskStatus: enums.taskStatus,
+      operationReason: enums.operationReason,
       // 表头
       columns: [
         {
@@ -242,42 +177,27 @@ export default {
         },
         {
           title: '组名称',
-          dataIndex: 'groupName'
-        },
-        {
-          title: '任务名称',
-          dataIndex: 'jobName',
+          dataIndex: 'groupName',
           ellipsis: true
         },
+        // {
+        //   title: '任务名称',
+        //   dataIndex: 'jobName',
+        //   ellipsis: true
+        // },
         {
           title: '状态',
           dataIndex: 'taskStatus',
           scopedSlots: { customRender: 'taskStatus' }
         },
         {
-          title: '任务类型',
-          dataIndex: 'taskType',
-          scopedSlots: { customRender: 'taskType' }
+          title: '开始执行时间',
+          dataIndex: 'executionAt'
         },
         {
-          title: '触发类型',
-          dataIndex: 'triggerType',
-          scopedSlots: { customRender: 'triggerType' }
-        },
-        {
-          title: '间隔时长',
-          dataIndex: 'triggerInterval',
-          scopedSlots: { customRender: 'triggerInterval' }
-        },
-        {
-          title: '阻塞策略',
-          dataIndex: 'blockStrategy',
-          scopedSlots: { customRender: 'blockStrategy' }
-        },
-        {
-          title: '超时时间',
-          dataIndex: 'executorTimeout',
-          scopedSlots: { customRender: 'executorTimeout' }
+          title: '操作原因',
+          dataIndex: 'operationReason',
+          scopedSlots: { customRender: 'operationReason' }
         },
         {
           title: '创建时间',
@@ -343,7 +263,7 @@ export default {
       this.advanced = !this.advanced
     },
     handleInfo (record) {
-      this.$router.push({ path: '/job/info', query: { id: record.id, groupName: record.groupName } })
+      this.$router.push({ path: '/job/batch/info', query: { id: record.id, groupName: record.groupName } })
     },
     handleOk (record) {},
     handleSuspend (record) {

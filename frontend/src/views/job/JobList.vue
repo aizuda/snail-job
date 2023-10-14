@@ -95,8 +95,8 @@
         </a-tag>
       </span>
       <span slot="jobStatus" slot-scope="text">
-        <a-tag :color="jobStatus[text].color">
-          {{ jobStatus[text].name }}
+        <a-tag :color="jobStatusEnum[text].color">
+          {{ jobStatusEnum[text].name }}
         </a-tag>
       </span>
       <span slot="triggerType" slot-scope="text">
@@ -168,6 +168,7 @@ import AInput from 'ant-design-vue/es/input/Input'
 import { STable } from '@/components'
 import { getJobList } from '@/api/jobApi'
 import { getAllGroupNameList } from '@/api/manage'
+import enums from '@/utils/enum'
 
 export default {
   name: 'JobList',
@@ -186,54 +187,11 @@ export default {
       advanced: false,
       // 查询参数
       queryParam: {},
-      jobStatus: {
-        '0': {
-          'name': '关闭',
-          'color': '#9c1f1f'
-        },
-        '1': {
-          'name': '开启',
-          'color': '#f5a22d'
-        }
-      },
-      taskType: {
-        '1': {
-          'name': '集群模式',
-          'color': '#d06892'
-        },
-        '2': {
-          'name': '广播模式',
-          'color': '#f5a22d'
-        },
-        '3': {
-          'name': '分片模式',
-          'color': '#e1f52d'
-        }
-      },
-      triggerType: {
-        '1': {
-          'name': 'CRON表达式',
-          'color': '#d06892'
-        },
-        '2': {
-          'name': '固定时间',
-          'color': '#f5a22d'
-        }
-      },
-      blockStrategy: {
-        '1': {
-          'name': '丢弃策略',
-          'color': '#d06892'
-        },
-        '2': {
-          'name': '覆盖',
-          'color': '#f5a22d'
-        },
-        '3': {
-          'name': '并行',
-          'color': '#e1f52d'
-        }
-      },
+      jobStatusEnum: enums.jobStatusEnum,
+      taskType: enums.taskType,
+      triggerType: enums.triggerType,
+      blockStrategy: enums.blockStrategy,
+      executorType: enums.executorType,
       // 表头
       columns: [
         {

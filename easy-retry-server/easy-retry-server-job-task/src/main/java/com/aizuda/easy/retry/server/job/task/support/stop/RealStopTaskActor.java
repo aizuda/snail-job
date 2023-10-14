@@ -49,11 +49,7 @@ public class RealStopTaskActor extends AbstractActor {
 
     private Result<Boolean> requestClient(RealStopTaskInstanceDTO realStopTaskInstanceDTO, RegisterNodeInfo registerNodeInfo) {
         JobRpcClient rpcClient = RequestBuilder.<JobRpcClient, Result>newBuilder()
-            .hostPort(registerNodeInfo.getHostPort())
-            .groupName(realStopTaskInstanceDTO.getGroupName())
-            .hostId(registerNodeInfo.getHostId())
-            .hostIp(registerNodeInfo.getHostIp())
-            .contextPath(registerNodeInfo.getContextPath())
+            .nodeInfo(registerNodeInfo)
             .failRetry(Boolean.TRUE)
             .retryTimes(3)
             .retryInterval(1)

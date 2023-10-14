@@ -21,6 +21,7 @@ import com.aizuda.easy.retry.server.retry.task.support.context.MaxAttemptsPersis
 import com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.log.RetryTaskLogDTO;
 import com.aizuda.easy.retry.server.retry.task.support.retry.RetryExecutor;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
+import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -42,7 +43,7 @@ import java.util.concurrent.Callable;
 @Component(ActorGenerator.EXEC_UNIT_ACTOR)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Slf4j
-public class ExecUnitActor extends AbstractActor  {
+public class ExecUnitActor extends AbstractActor {
 
     @Autowired
     @Qualifier("bitSetIdempotentStrategyHandler")
@@ -55,6 +56,7 @@ public class ExecUnitActor extends AbstractActor  {
             MaxAttemptsPersistenceRetryContext context = (MaxAttemptsPersistenceRetryContext) retryExecutor.getRetryContext();
             RetryTask retryTask = context.getRetryTask();
             RegisterNodeInfo serverNode = context.getServerNode();
+            SceneConfig sceneConfig = context.getSceneConfig();
 
             RetryTaskLogDTO retryTaskLog = new RetryTaskLogDTO();
             retryTaskLog.setGroupName(retryTask.getGroupName());
@@ -67,7 +69,7 @@ public class ExecUnitActor extends AbstractActor  {
 
                     retryExecutor.call((Callable<Result<DispatchRetryResultDTO>>) () -> {
 
-                        Result<DispatchRetryResultDTO> result = callClient(retryTask, serverNode);
+                        Result<DispatchRetryResultDTO> result = callClient(retryTask, serverNode, sceneConfig);
 
                         // 回调接口请求成功，处理返回值
                         if (StatusEnum.YES.getStatus() != result.getStatus()) {
@@ -106,7 +108,7 @@ public class ExecUnitActor extends AbstractActor  {
                     retryTaskLog.setMessage("There are currently no available client PODs.");
                 }
 
-            }catch (Exception e) {
+            } catch (Exception e) {
                 LogUtils.error(log, "callback client error. retryTask:[{}]", JsonUtil.toJsonString(retryTask), e);
                 retryTaskLog.setMessage(e.getMessage());
             } finally {
@@ -128,7 +130,7 @@ public class ExecUnitActor extends AbstractActor  {
      * @param retryTask {@link RetryTask} 需要重试的数据
      * @return 重试结果返回值
      */
-    private Result<DispatchRetryResultDTO> callClient(RetryTask retryTask, RegisterNodeInfo serverNode) {
+    private Result<DispatchRetryResultDTO> callClient(RetryTask retryTask, RegisterNodeInfo serverNode, SceneConfig sceneConfig) {
 
         DispatchRetryDTO dispatchRetryDTO = new DispatchRetryDTO();
         dispatchRetryDTO.setIdempotentId(retryTask.getIdempotentId());
@@ -139,20 +141,17 @@ public class ExecUnitActor extends AbstractActor  {
         dispatchRetryDTO.setRetryCount(retryTask.getRetryCount());
 
         // 设置header
-        HttpHeaders requestHeaders = new HttpHeaders();
         EasyRetryHeaders easyRetryHeaders = new EasyRetryHeaders();
         easyRetryHeaders.setEasyRetry(Boolean.TRUE);
         easyRetryHeaders.setEasyRetryId(retryTask.getUniqueId());
-        requestHeaders.add(SystemConstants.EASY_RETRY_HEAD_KEY, JsonUtil.toJsonString(easyRetryHeaders));
 
         RetryRpcClient rpcClient = RequestBuilder.<RetryRpcClient, Result>newBuilder()
-            .hostPort(serverNode.getHostPort())
-            .groupName(serverNode.getGroupName())
-            .hostId(serverNode.getHostId())
-            .hostIp(serverNode.getHostIp())
-            .contextPath(serverNode.getContextPath())
-            .client(RetryRpcClient.class)
-            .build();
+                .nodeInfo(serverNode)
+                .failover(Boolean.TRUE)
+                .allocKey(retryTask.getSceneName())
+                .routeKey(sceneConfig.getRouteKey())
+                .client(RetryRpcClient.class)
+                .build();
 
         return rpcClient.dispatch(dispatchRetryDTO, easyRetryHeaders);
     }

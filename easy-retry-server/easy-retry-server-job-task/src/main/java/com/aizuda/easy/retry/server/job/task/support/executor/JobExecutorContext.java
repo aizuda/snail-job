@@ -1,6 +1,5 @@
 package com.aizuda.easy.retry.server.job.task.support.executor;
 
-import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
 import lombok.Data;
 
@@ -48,4 +47,37 @@ public class JobExecutorContext {
 
     private Integer routeKey;
 
+    /**
+     * 扩展字段
+     */
+    private String extAttrs;
+
+
+
+    private Long taskId;
+
+
+    private Integer parallelNum;
+
+    private Integer executorType;
+
+    private String executorName;
+
+    private String clientId;
+
+    /**
+     * 最大重试次数
+     */
+    private Integer maxRetryTimes;
+
+    /**
+     * 重试间隔(s)
+     */
+    private Integer retryInterval;
+
+    private Integer shardingTotal;
+
+    private Integer shardingIndex;
+
+    private Integer executorTimeout;
 }

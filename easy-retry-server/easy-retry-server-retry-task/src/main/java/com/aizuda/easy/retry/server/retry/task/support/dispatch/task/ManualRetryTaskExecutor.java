@@ -38,7 +38,9 @@ public class ManualRetryTaskExecutor extends AbstractTaskExecutor {
         retryContext.setSceneBlacklist(accessTemplate.getSceneConfigAccess().getBlacklist(groupName));
         retryContext.setServerNode(
             clientNodeAllocateHandler.getServerNode(retryTask.getSceneName(), retryTask.getGroupName(),
-                sceneConfig.getRouteKey()));        return retryContext;
+                sceneConfig.getRouteKey()));
+        retryContext.setSceneConfig(sceneConfig);
+        return retryContext;
     }
 
     @Override

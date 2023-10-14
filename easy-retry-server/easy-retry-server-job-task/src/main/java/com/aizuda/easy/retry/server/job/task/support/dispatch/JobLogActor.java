@@ -49,7 +49,7 @@ public class JobLogActor extends AbstractActor {
         JobLogMessage jobLogMessage = JobTaskConverter.INSTANCE.toJobLogMessage(jobLogDTO);
         if (Objects.nonNull(jobLogDTO.getClientId())) {
             Optional.ofNullable(CacheRegisterTable.getServerNode(jobLogDTO.getGroupName(), jobLogDTO.getClientId())).ifPresent(registerNodeInfo -> {
-                jobLogMessage.setClientAddress(registerNodeInfo.fullUrl());
+                jobLogMessage.setClientAddress(registerNodeInfo.address());
             });
         }
 

@@ -4,6 +4,7 @@ import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.retry.task.support.RetryContext;
 import com.aizuda.easy.retry.server.retry.task.support.WaitStrategy;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
+import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
 import lombok.Data;
 import lombok.Getter;
 
@@ -50,6 +51,11 @@ public class MaxAttemptsPersistenceRetryContext<V> implements RetryContext<V> {
      */
     private RegisterNodeInfo serverNode;
 
+    /**
+     * 场景配置
+     */
+    private SceneConfig sceneConfig;
+
     @Override
     public void setCallResult(V v) {
         this.callResult = v;
@@ -64,4 +70,10 @@ public class MaxAttemptsPersistenceRetryContext<V> implements RetryContext<V> {
     public boolean hasException() {
         return Objects.nonNull(exception);
     }
+
+    @Override
+    public SceneConfig sceneConfig() {
+        return sceneConfig;
+    }
+
 }

@@ -30,10 +30,9 @@ public class ShardingJobExecutor extends AbstractJobExecutor {
 
     @Override
     protected void doExecute(JobExecutorContext context) {
-        Job job = context.getJob();
         List<JobTask> taskList = context.getTaskList();
         for (int i = 0; i < taskList.size(); i++) {
-            RealJobExecutorDTO realJobExecutor = JobTaskConverter.INSTANCE.toRealJobExecutorDTO(job, taskList.get(i));
+            RealJobExecutorDTO realJobExecutor = JobTaskConverter.INSTANCE.toRealJobExecutorDTO(context, taskList.get(i));
             realJobExecutor.setShardingIndex(i);
             realJobExecutor.setShardingTotal(taskList.size());
             ActorRef actorRef = ActorGenerator.jobRealTaskExecutorActor();

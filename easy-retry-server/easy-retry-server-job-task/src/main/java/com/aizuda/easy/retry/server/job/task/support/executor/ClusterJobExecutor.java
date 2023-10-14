@@ -31,9 +31,8 @@ public class ClusterJobExecutor extends AbstractJobExecutor {
     protected void doExecute(JobExecutorContext context) {
 
         // 调度客户端
-        Job job = context.getJob();
         List<JobTask> taskList = context.getTaskList();
-        RealJobExecutorDTO realJobExecutor = JobTaskConverter.INSTANCE.toRealJobExecutorDTO(job, taskList.get(0));
+        RealJobExecutorDTO realJobExecutor = JobTaskConverter.INSTANCE.toRealJobExecutorDTO(context, taskList.get(0));
         ActorRef actorRef = ActorGenerator.jobRealTaskExecutorActor();
         actorRef.tell(realJobExecutor, actorRef);
 
