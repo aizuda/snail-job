@@ -115,7 +115,6 @@ public class RealJobExecutorActor extends AbstractActor {
 
     private JobRpcClient buildRpcClient(RegisterNodeInfo registerNodeInfo, RealJobExecutorDTO realJobExecutorDTO) {
         return RequestBuilder.<JobRpcClient, Result>newBuilder()
-            .groupName(registerNodeInfo.getGroupName())
             .nodeInfo(registerNodeInfo)
             .failRetry(Boolean.TRUE)
             .retryTimes(realJobExecutorDTO.getMaxRetryTimes())

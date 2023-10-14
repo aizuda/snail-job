@@ -29,11 +29,10 @@ public class BroadcastTaskJobExecutor extends AbstractJobExecutor {
     @Override
     protected void doExecute(JobExecutorContext context) {
 
-        Job job = context.getJob();
         List<JobTask> taskList = context.getTaskList();
 
         for (JobTask jobTask : taskList) {
-            RealJobExecutorDTO realJobExecutor = JobTaskConverter.INSTANCE.toRealJobExecutorDTO(job, jobTask);
+            RealJobExecutorDTO realJobExecutor = JobTaskConverter.INSTANCE.toRealJobExecutorDTO(context, jobTask);
             ActorRef actorRef = ActorGenerator.jobRealTaskExecutorActor();
             actorRef.tell(realJobExecutor, actorRef);
         }

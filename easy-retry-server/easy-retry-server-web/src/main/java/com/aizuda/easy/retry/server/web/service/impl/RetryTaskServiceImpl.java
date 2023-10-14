@@ -226,11 +226,7 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         generateRetryIdempotentIdDTO.setExecutorName(generateRetryIdempotentIdVO.getExecutorName());
 
         RetryRpcClient rpcClient = RequestBuilder.<RetryRpcClient, Result>newBuilder()
-            .hostPort(serverNode.getHostPort())
-            .groupName(serverNode.getGroupName())
-            .hostId(serverNode.getHostId())
-            .hostIp(serverNode.getHostIp())
-            .contextPath(serverNode.getContextPath())
+            .nodeInfo(serverNode)
             .client(RetryRpcClient.class)
             .build();
 

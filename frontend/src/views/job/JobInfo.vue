@@ -4,24 +4,57 @@
       <div></div>
     </page-header-wrapper>
     <a-card :bordered="false" v-if="jobInfo !==null ">
-      <a-descriptions title="" bordered>
+      <a-descriptions title="" :column="4" bordered>
         <a-descriptions-item label="组名称">
           {{ jobInfo.groupName }}
         </a-descriptions-item>
         <a-descriptions-item label="任务名称">
           {{ jobInfo.jobName }}
         </a-descriptions-item>
-        <a-descriptions-item label="重试次数">
-          {{ jobInfo.retryCount }}
-        </a-descriptions-item>
-        <a-descriptions-item label="重试状态 | 数据类型">
-          <a-tag color="red">
-            {{ retryStatus[jobInfo.retryStatus] }}
+        <a-descriptions-item label="触发类型">
+          <a-tag :color="triggerType[jobInfo.triggerType].color">
+            {{ triggerType[jobInfo.triggerType].name }}
           </a-tag>
-          <a-divider type="vertical" />
+        </a-descriptions-item>
+        <a-descriptions-item label="间隔时长">
+          {{ jobInfo.triggerInterval }}
+        </a-descriptions-item>
+        <a-descriptions-item label="最大重试次数">
+          {{ jobInfo.maxRetryTimes }}次
+        </a-descriptions-item>
+        <a-descriptions-item label="重试间隔">
+          {{ jobInfo.retryInterval }}(秒)
+        </a-descriptions-item>
+        <a-descriptions-item label="并行数">
+          {{ jobInfo.parallelNum }}
+        </a-descriptions-item>
+        <a-descriptions-item label="执行器类型">
+          <a-tag :color="routeKey[jobInfo.routeKey].color">
+            {{ routeKey[jobInfo.routeKey].name }}
+          </a-tag>
+        </a-descriptions-item>
+        <a-descriptions-item label="执行器类型">
+          <a-tag :color="executorType[jobInfo.executorType].color">
+            {{ executorType[jobInfo.executorType].name }}
+          </a-tag>
+        </a-descriptions-item>
+        <a-descriptions-item label="任务类型">
           <a-tag :color="taskType[jobInfo.taskType].color">
             {{ taskType[jobInfo.taskType].name }}
           </a-tag>
+        </a-descriptions-item>
+        <a-descriptions-item label="阻塞策略">
+          <a-tag :color="blockStrategy[jobInfo.blockStrategy].color">
+            {{ blockStrategy[jobInfo.blockStrategy].name }}
+          </a-tag>
+        </a-descriptions-item>
+        <a-descriptions-item label="重试状态">
+          <a-tag :color="jobStatusEnum[jobInfo.jobStatus].color">
+            {{ jobStatusEnum[jobInfo.jobStatus].name }}
+          </a-tag>
+        </a-descriptions-item>
+        <a-descriptions-item label="超时时间">
+          {{ jobInfo.executorTimeout }}(秒)
         </a-descriptions-item>
         <a-descriptions-item label="下次触发时间">
           {{ jobInfo.nextTriggerAt }}
@@ -46,6 +79,7 @@
 <script>
 import { getJobDetail } from '@/api/jobApi'
 import moment from 'moment'
+import enums from '@/utils/enum'
 
 export default {
   name: 'JobInfo',
@@ -55,22 +89,12 @@ export default {
   data () {
     return {
       jobInfo: null,
-      retryStatus: {
-        '0': '处理中',
-        '1': '处理成功',
-        '2': '最大次数',
-        '3': '暂停'
-      },
-      taskType: {
-        '1': {
-          'name': '重试数据',
-          'color': '#d06892'
-        },
-        '2': {
-          'name': '回调数据',
-          'color': '#f5a22d'
-        }
-      }
+      jobStatusEnum: enums.jobStatusEnum,
+      taskType: enums.taskType,
+      triggerType: enums.triggerType,
+      blockStrategy: enums.blockStrategy,
+      executorType: enums.executorType,
+      routeKey: enums.routeKey
     }
   },
   created () {

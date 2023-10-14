@@ -22,10 +22,10 @@ import com.aizuda.easy.retry.server.common.client.annotation.Mapping;
  */
 public interface RetryRpcClient {
 
-    @Mapping(path = "/retry/dispatch/v1", method = RequestMethod.POST, failover = true)
+    @Mapping(path = "/retry/dispatch/v1", method = RequestMethod.POST)
     Result<DispatchRetryResultDTO> dispatch(@Body DispatchRetryDTO dispatchRetryDTO, @Header EasyRetryHeaders headers);
 
-    @Mapping(path = "/retry/callback/v1", method = RequestMethod.POST, failover = true)
+    @Mapping(path = "/retry/callback/v1", method = RequestMethod.POST)
     Result callback(@Body RetryCallbackDTO retryCallbackDTO);
 
     @Mapping(path = "/retry/generate/idempotent-id/v1", method = RequestMethod.POST)

@@ -5,6 +5,7 @@ import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.job.task.dto.TaskExecuteDTO;
 import com.aizuda.easy.retry.server.job.task.support.JobExecutor;
+import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.server.job.task.support.executor.JobExecutorContext;
 import com.aizuda.easy.retry.server.job.task.support.executor.JobExecutorFactory;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobMapper;
@@ -44,12 +45,10 @@ public class JobExecutorActor extends AbstractActor {
         Job job = jobMapper.selectById(taskExecute.getJobId());
         JobExecutor jobExecutor = JobExecutorFactory.getJobExecutor(job.getTaskType());
 
-        JobExecutorContext context = new JobExecutorContext();
+        JobExecutorContext context = JobTaskConverter.INSTANCE.toJobExecutorContext(job);
         context.setTaskBatchId(taskExecute.getTaskBatchId());
-        context.setGroupName(taskExecute.getGroupName());
         context.setJobId(job.getId());
         context.setTaskType(job.getTaskType());
-        context.setJob(job);
         jobExecutor.execute(context);
 
     }

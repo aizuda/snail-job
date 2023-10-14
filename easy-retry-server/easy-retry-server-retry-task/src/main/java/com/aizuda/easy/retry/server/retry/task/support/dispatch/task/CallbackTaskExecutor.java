@@ -35,6 +35,7 @@ public class CallbackTaskExecutor extends AbstractTaskExecutor {
         retryContext.setServerNode(
             clientNodeAllocateHandler.getServerNode(retryTask.getSceneName(), retryTask.getGroupName(),
                 sceneConfig.getRouteKey()));
+        retryContext.setSceneConfig(sceneConfig);
         return retryContext;
     }
 
