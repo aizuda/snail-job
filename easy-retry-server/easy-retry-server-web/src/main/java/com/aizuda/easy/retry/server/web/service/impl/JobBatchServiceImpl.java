@@ -1,11 +1,14 @@
 package com.aizuda.easy.retry.server.web.service.impl;
 
+import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
 import com.aizuda.easy.retry.server.web.model.request.JobBatchQueryVO;
 import com.aizuda.easy.retry.server.web.model.response.JobBatchResponseVO;
 import com.aizuda.easy.retry.server.web.service.JobBatchService;
 import com.aizuda.easy.retry.server.web.service.convert.JobBatchResponseVOConverter;
+import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskBatchMapper;
+import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTaskBatch;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
@@ -25,6 +28,8 @@ public class JobBatchServiceImpl implements JobBatchService {
 
     @Autowired
     private JobTaskBatchMapper jobTaskBatchMapper;
+    @Autowired
+    private JobMapper jobMapper;
 
     @Override
     public PageResult<List<JobBatchResponseVO>> getJobBatchPage(final JobBatchQueryVO queryVO) {
@@ -32,6 +37,8 @@ public class JobBatchServiceImpl implements JobBatchService {
         PageDTO<JobTaskBatch> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
 
         LambdaQueryWrapper<JobTaskBatch> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(JobTaskBatch::getDeleted, StatusEnum.NO.getStatus());
+
         if (Objects.nonNull(queryVO.getJobId())) {
             queryWrapper.eq(JobTaskBatch::getJobId, queryVO.getJobId());
         }
@@ -47,6 +54,11 @@ public class JobBatchServiceImpl implements JobBatchService {
     @Override
     public JobBatchResponseVO getJobBatchDetail(final Long id) {
         JobTaskBatch jobTaskBatch = jobTaskBatchMapper.selectById(id);
-        return JobBatchResponseVOConverter.INSTANCE.toJobBatchResponseVO(jobTaskBatch);
+        if (Objects.isNull(jobTaskBatch)) {
+            return null;
+        }
+
+        Job job = jobMapper.selectById(jobTaskBatch.getJobId());
+        return JobBatchResponseVOConverter.INSTANCE.toJobBatchResponseVO(jobTaskBatch, job);
     }
 }

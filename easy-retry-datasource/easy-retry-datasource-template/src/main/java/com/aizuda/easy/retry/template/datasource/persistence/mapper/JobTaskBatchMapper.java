@@ -1,9 +1,12 @@
 package com.aizuda.easy.retry.template.datasource.persistence.mapper;
 
+import com.aizuda.easy.retry.template.datasource.persistence.dataobject.JobBatchResponseDO;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTaskBatch;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * <p>
@@ -16,4 +19,5 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface JobTaskBatchMapper extends BaseMapper<JobTaskBatch> {
 
+    List<JobBatchResponseDO> selectJobBatchList();
 }

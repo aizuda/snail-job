@@ -142,6 +142,13 @@ export const asyncRouterMap = [
             meta: { title: '定时任务详情', icon: 'profile', permission: ['retryLog'] }
           },
           {
+            path: '/job/config',
+            name: 'JobFrom',
+            hidden: true,
+            component: () => import('@/views/job/from/JobFrom'),
+            meta: { title: '任务配置', icon: 'profile', permission: ['retryLog'] }
+          },
+          {
             path: '/job/batch/list',
             name: 'JobBatchList',
             component: () => import('@/views/job/JobBatchList'),

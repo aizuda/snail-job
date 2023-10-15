@@ -4,23 +4,36 @@
       <div></div>
     </page-header-wrapper>
     <a-card :bordered="false" v-if="jobBatchInfo !==null ">
-      <a-descriptions title="" :column="5" bordered>
+      <a-descriptions title="" :column="3" bordered>
         <a-descriptions-item label="组名称">
           {{ jobBatchInfo.groupName }}
         </a-descriptions-item>
         <a-descriptions-item label="任务名称">
           {{ jobBatchInfo.jobName }}
         </a-descriptions-item>
-        <a-descriptions-item label="重试状态">
+        <a-descriptions-item label="状态">
           <a-tag :color="taskStatus[jobBatchInfo.taskStatus].color">
             {{ taskStatus[jobBatchInfo.taskStatus].name }}
           </a-tag>
         </a-descriptions-item>
-        <a-descriptions-item label="更新时间">
-          {{ jobBatchInfo.updateDt }}
+        <a-descriptions-item label="执行器类型">
+          <a-tag :color="executorType[jobBatchInfo.executorType].color">
+            {{ executorType[jobBatchInfo.executorType].name }}
+          </a-tag>
         </a-descriptions-item>
-        <a-descriptions-item label="执行器名称" span="3">
+        <a-descriptions-item label="操作原因">
+          <a-tag :color="operationReason[jobBatchInfo.operationReason].color">
+            {{ operationReason[jobBatchInfo.operationReason].name }}
+          </a-tag>
+        </a-descriptions-item>
+        <a-descriptions-item label="开始执行时间">
+          {{ jobBatchInfo.executionAt }}
+        </a-descriptions-item>
+        <a-descriptions-item label="执行器名称" span="4">
           {{ jobBatchInfo.executorName }}
+        </a-descriptions-item>
+        <a-descriptions-item label="创建时间">
+          {{ jobBatchInfo.createDt }}
         </a-descriptions-item>
       </a-descriptions>
     </a-card>
@@ -47,7 +60,11 @@ export default {
     return {
       jobBatchInfo: null,
       taskStatus: enums.taskStatus,
-      operationReason: enums.operationReason
+      operationReason: enums.operationReason,
+      taskType: enums.taskType,
+      triggerType: enums.triggerType,
+      blockStrategy: enums.blockStrategy,
+      executorType: enums.executorType
     }
   },
   created () {

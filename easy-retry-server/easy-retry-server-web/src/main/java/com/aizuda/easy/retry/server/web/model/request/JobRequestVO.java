@@ -30,6 +30,12 @@ public class JobRequestVO {
     private String jobName;
 
     /**
+     * 重试状态 0、关闭、1、开启
+     */
+    @NotNull(message = "jobStatus 不能为空")
+    private Integer jobStatus;
+
+    /**
      * 执行方法参数
      */
     private String argsStr;
@@ -37,14 +43,14 @@ public class JobRequestVO {
     /**
      * 参数类型 text/json
      */
-    @NotNull(message = "argsType 不能为空")
+//    @NotNull(message = "argsType 不能为空")
     private Integer argsType;
 
     /**
      * 执行器路由策略
      */
     @NotNull(message = "routeKey 不能为空")
-    private String routeKey;
+    private Integer routeKey;
 
     /**
      * 执行器类型 1、Java

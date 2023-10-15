@@ -1,8 +1,11 @@
 package com.aizuda.easy.retry.server.web.service.convert;
 
 import com.aizuda.easy.retry.server.web.model.response.JobBatchResponseVO;
+import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTaskBatch;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Mappings;
 import org.mapstruct.factory.Mappers;
 
 import java.util.List;
@@ -19,5 +22,10 @@ public interface JobBatchResponseVOConverter {
 
     List<JobBatchResponseVO> toJobBatchResponseVOs(List<JobTaskBatch> jobBatches);
 
-    JobBatchResponseVO toJobBatchResponseVO(JobTaskBatch jobBatch);
+    @Mappings({
+            @Mapping(source = "jobBatch.groupName", target = "groupName"),
+            @Mapping(source = "jobBatch.id", target = "id"),
+            @Mapping(source = "jobBatch.createDt", target = "createDt")
+    })
+    JobBatchResponseVO toJobBatchResponseVO(JobTaskBatch jobBatch, Job job);
 }

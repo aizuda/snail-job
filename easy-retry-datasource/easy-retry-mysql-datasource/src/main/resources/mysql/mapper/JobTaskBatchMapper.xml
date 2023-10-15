@@ -12,5 +12,8 @@
         <result column="update_dt" property="updateDt" />
         <result column="deleted" property="deleted" />
     </resultMap>
-
+    <select id="selectJobBatchList" resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.JobBatchResponseDO">
+        SELECT a.*, b.job_name, b.task_type, b.block_strategy, b.trigger_type
+        FROM job_task_batch a join job b on a.job_id = b.id
+    </select>
 </mapper>
