@@ -66,6 +66,19 @@ export default {
       total: 0
     }
   },
+  created () {
+    const taskBatchId = this.$route.query.taskBatchId
+    const jobId = this.$route.query.jobId
+    if (taskBatchId && jobId) {
+      this.queryParam = {
+        taskBatchId: taskBatchId,
+        jobId: jobId
+      }
+      this.$refs.table.refresh(true)
+    } else {
+      this.$router.push({ path: '/404' })
+    }
+  },
   methods: {
     refreshTable (v) {
       this.queryParam = v

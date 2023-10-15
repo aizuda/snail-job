@@ -5,6 +5,8 @@ const jobApi = {
   jobDetail: '/job/',
   saveJob: '/job/',
   updateJob: '/job/',
+  updateJobStatus: '/job/status',
+  delJob: '/job/',
 
   // 任务批次
   jobBatchList: '/job/batch/list',
@@ -18,6 +20,21 @@ const jobApi = {
 }
 
 export default jobApi
+
+export function delJob (id) {
+  return request({
+    url: jobApi.delJob + id,
+    method: 'delete'
+  })
+}
+
+export function updateJobStatus (data) {
+  return request({
+    url: jobApi.updateJobStatus,
+    method: 'put',
+    data
+  })
+}
 
 export function jobLogList (parameter) {
   return request({

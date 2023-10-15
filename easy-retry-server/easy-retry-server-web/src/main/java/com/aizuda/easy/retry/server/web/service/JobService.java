@@ -3,6 +3,7 @@ package com.aizuda.easy.retry.server.web.service;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
 import com.aizuda.easy.retry.server.web.model.request.JobQueryVO;
 import com.aizuda.easy.retry.server.web.model.request.JobRequestVO;
+import com.aizuda.easy.retry.server.web.model.request.JobUpdateJobStatusRequestVO;
 import com.aizuda.easy.retry.server.web.model.response.JobResponseVO;
 
 import java.util.List;
@@ -21,4 +22,7 @@ public interface JobService {
 
     boolean updateJob(JobRequestVO jobRequestVO);
 
+    Boolean updateJobStatus(JobUpdateJobStatusRequestVO jobRequestVO);
+
+    Boolean deleteJobById(Long id);
 }

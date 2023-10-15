@@ -35,8 +35,6 @@ import java.util.*;
 public class ShardingTaskGenerator extends AbstractJobTaskGenerator {
 
     @Autowired
-    private JobMapper jobMapper;
-    @Autowired
     protected ClientNodeAllocateHandler clientNodeAllocateHandler;
     @Autowired
     private JobTaskMapper jobTaskMapper;

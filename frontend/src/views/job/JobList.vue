@@ -14,40 +14,40 @@
               </a-select>
             </a-form-item>
           </a-col>
-          <a-col :md="8" :sm="24">
-            <a-form-item label="场景名称">
-              <a-select v-model="queryParam.sceneName" placeholder="请选择场景名称" allowClear>
-                <a-select-option v-for="item in sceneList" :value="item.sceneName" :key="item.sceneName">
-                  {{ item.sceneName }}</a-select-option
-                >
-              </a-select>
-            </a-form-item>
-          </a-col>
+          <!--          <a-col :md="8" :sm="24">-->
+          <!--            <a-form-item label="场景名称">-->
+          <!--              <a-select v-model="queryParam.sceneName" placeholder="请选择场景名称" allowClear>-->
+          <!--                <a-select-option v-for="item in sceneList" :value="item.sceneName" :key="item.sceneName">-->
+          <!--                  {{ item.sceneName }}</a-select-option-->
+          <!--                >-->
+          <!--              </a-select>-->
+          <!--            </a-form-item>-->
+          <!--          </a-col>-->
           <a-col :md="8" :sm="24">
             <a-form-item label="状态">
               <a-select v-model="queryParam.jobStatus" placeholder="请选择状态" allowClear>
-                <a-select-option v-for="(index, value) in jobStatus" :value="value" :key="value">
+                <a-select-option v-for="(index, value) in jobStatusEnum" :value="value" :key="value">
                   {{ index.name }}</a-select-option
                 >
               </a-select>
             </a-form-item>
           </a-col>
           <template v-if="advanced">
-            <a-col :md="8" :sm="24">
-              <a-form-item label="业务编号">
-                <a-input v-model="queryParam.bizNo" placeholder="请输入业务编号" allowClear />
-              </a-form-item>
-            </a-col>
-            <a-col :md="8" :sm="24">
-              <a-form-item label="幂等id">
-                <a-input v-model="queryParam.idempotentId" placeholder="请输入幂等id" allowClear />
-              </a-form-item>
-            </a-col>
-            <a-col :md="8" :sm="24">
-              <a-form-item label="UniqueId">
-                <a-input v-model="queryParam.uniqueId" placeholder="请输入唯一id" allowClear/>
-              </a-form-item>
-            </a-col>
+            <!--            <a-col :md="8" :sm="24">-->
+            <!--              <a-form-item label="业务编号">-->
+            <!--                <a-input v-model="queryParam.bizNo" placeholder="请输入业务编号" allowClear />-->
+            <!--              </a-form-item>-->
+            <!--            </a-col>-->
+            <!--            <a-col :md="8" :sm="24">-->
+            <!--              <a-form-item label="幂等id">-->
+            <!--                <a-input v-model="queryParam.idempotentId" placeholder="请输入幂等id" allowClear />-->
+            <!--              </a-form-item>-->
+            <!--            </a-col>-->
+            <!--            <a-col :md="8" :sm="24">-->
+            <!--              <a-form-item label="UniqueId">-->
+            <!--                <a-input v-model="queryParam.uniqueId" placeholder="请输入唯一id" allowClear/>-->
+            <!--              </a-form-item>-->
+            <!--            </a-col>-->
           </template>
           <a-col :md="(!advanced && 8) || 24" :sm="24">
             <span
@@ -70,10 +70,9 @@
       <!--      <a-button type="primary" icon="plus" @click="handleBatchNew()">批量</a-button>-->
       <a-dropdown v-action:edit v-if="selectedRowKeys.length > 0">
         <a-menu slot="overlay" @click="onClick">
-          <a-menu-item key="1"><a-icon type="delete" />删除</a-menu-item>
-          <a-menu-item key="2"><a-icon type="edit" />更新</a-menu-item>
+          <!--          <a-menu-item key="1"><a-icon type="delete" />删除</a-menu-item>-->
         </a-menu>
-        <a-button style="margin-left: 8px"> 批量操作 <a-icon type="down" /> </a-button>
+        <!--        <a-button style="margin-left: 8px"> 批量操作 <a-icon type="down" /> </a-button>-->
       </a-dropdown>
     </div>
 
@@ -83,8 +82,6 @@
       :rowKey="(record) => record.id"
       :columns="columns"
       :data="loadData"
-      :alert="options.alert"
-      :rowSelection="options.rowSelection"
     >
       <span slot="serial" slot-scope="text, record">
         {{ record.id }}
@@ -119,40 +116,33 @@
         <template>
           <a @click="handleInfo(record)">详情</a>
           <a-divider type="vertical" />
+          <a @click="handleEdit(record)">编辑</a>
+          <a-divider type="vertical" />
           <a-popconfirm
-            title="是否暂停?"
-            ok-text="恢复"
+            title="是否关闭?"
+            ok-text="关闭"
             cancel-text="取消"
-            @confirm="handleSuspend(record)"
+            @confirm="handleClose(record)"
           >
-            <a href="javascript:;" v-if="record.retryStatus === 0">暂停</a>
+            <a href="javascript:;" v-if="record.jobStatus === 1">关闭</a>
           </a-popconfirm>
-          <a-divider type="vertical" v-if="record.retryStatus === 0" />
+          <a-divider type="vertical" v-if="record.jobStatus === 1" />
           <a-popconfirm
-            title="是否恢复?"
-            ok-text="恢复"
+            title="是否开启?"
+            ok-text="开启"
             cancel-text="取消"
-            @confirm="handleRecovery(record)"
+            @confirm="handleOpen(record)"
           >
-            <a href="javascript:;" v-if="record.retryStatus === 3">恢复</a>
+            <a href="javascript:;" v-if="record.jobStatus === 0">开启</a>
           </a-popconfirm>
-          <a-divider type="vertical" v-if="record.retryStatus === 3" />
+          <a-divider type="vertical" v-if="record.jobStatus === 0" />
           <a-popconfirm
-            title="是否完成?"
-            ok-text="完成"
+            title="是否删除任务?"
+            ok-text="删除"
             cancel-text="取消"
-            @confirm="handleFinish(record)"
+            @confirm="handleDel(record)"
           >
-            <a href="javascript:;" v-if="record.retryStatus !== 1 && record.retryStatus !== 2">完成</a>
-          </a-popconfirm>
-          <a-divider type="vertical" v-if="record.retryStatus !== 1 && record.retryStatus !== 2" />
-          <a-popconfirm
-            title="是否执行任务?"
-            ok-text="执行"
-            cancel-text="取消"
-            @confirm="handleTrigger(record)"
-          >
-            <a href="javascript:;" v-if="record.retryStatus !== 1 && record.retryStatus !== 2">执行</a>
+            <a href="javascript:;" v-if="record.jobStatus === 0">删除</a>
           </a-popconfirm>
 
         </template>
@@ -166,7 +156,7 @@
 import ATextarea from 'ant-design-vue/es/input/TextArea'
 import AInput from 'ant-design-vue/es/input/Input'
 import { STable } from '@/components'
-import { getJobList } from '@/api/jobApi'
+import { delJob, getJobList, updateJobStatus } from '@/api/jobApi'
 import { getAllGroupNameList } from '@/api/manage'
 import enums from '@/utils/enum'
 
@@ -293,11 +283,11 @@ export default {
     })
   },
   methods: {
-    handleNew () {
-      this.$refs.saveRetryTask.isShow(true, null)
+    handleEdit (record) {
+      this.$router.push({ path: '/job/config', query: { id: record.id } })
     },
-    handleBatchNew () {
-      this.$refs.batchSaveRetryTask.isShow(true, null)
+    handleNew () {
+      this.$router.push({ path: '/job/config' })
     },
     handleChange (value) {
     },
@@ -308,61 +298,38 @@ export default {
       this.$router.push({ path: '/job/info', query: { id: record.id, groupName: record.groupName } })
     },
     handleOk (record) {},
-    handleSuspend (record) {
-      // updateRetryTaskStatus({ id: record.id, groupName: record.groupName, retryStatus: 3 }).then((res) => {
-      //   const { status } = res
-      //   if (status === 0) {
-      //     this.$message.error('暂停失败')
-      //   } else {
-      //     this.$refs.table.refresh(true)
-      //     this.$message.success('暂停成功')
-      //   }
-      // })
+    handleClose (record) {
+      updateJobStatus({ id: record.id, jobStatus: 0 }).then((res) => {
+        const { status } = res
+        if (status === 0) {
+          this.$message.error('关闭失败')
+        } else {
+          this.$refs.table.refresh(true)
+          this.$message.success('关闭成功')
+        }
+      })
     },
-    handleRecovery (record) {
-      // updateRetryTaskStatus({ id: record.id, groupName: record.groupName, retryStatus: 0 }).then((res) => {
-      //   const { status } = res
-      //   if (status === 0) {
-      //     this.$message.error('恢复失败')
-      //   } else {
-      //     this.$refs.table.refresh(true)
-      //     this.$message.success('恢复成功')
-      //   }
-      // })
+    handleOpen (record) {
+      updateJobStatus({ id: record.id, jobStatus: 1 }).then((res) => {
+        const { status } = res
+        if (status === 0) {
+          this.$message.error('开启失败')
+        } else {
+          this.$refs.table.refresh(true)
+          this.$message.success('开启成功')
+        }
+      })
     },
-    handleFinish (record) {
-      // updateRetryTaskStatus({ id: record.id, groupName: record.groupName, retryStatus: 1 }).then((res) => {
-      //   const { status } = res
-      //   if (status === 0) {
-      //     this.$message.error('执行失败')
-      //   } else {
-      //     this.$refs.table.refresh(true)
-      //     this.$message.success('执行成功')
-      //   }
-      // })
-    },
-    handleTrigger (record) {
-      // if (record.taskType === 1) {
-      //   manualTriggerRetryTask({ groupName: record.groupName, uniqueIds: [ record.uniqueId ] }).then(res => {
-      //     const { status } = res
-      //     if (status === 0) {
-      //       this.$message.error('执行失败')
-      //     } else {
-      //       this.$refs.table.refresh(true)
-      //       this.$message.success('执行成功')
-      //     }
-      //   })
-      // } else {
-      //   manualTriggerCallbackTask({ groupName: record.groupName, uniqueIds: [ record.uniqueId ] }).then(res => {
-      //     const { status } = res
-      //     if (status === 0) {
-      //       this.$message.error('执行失败')
-      //     } else {
-      //       this.$refs.table.refresh(true)
-      //       this.$message.success('执行完成')
-      //     }
-      //   })
-      // }
+    handleDel (record) {
+      delJob(record.id).then((res) => {
+        const { status } = res
+        if (status === 0) {
+          this.$message.error('删除失败')
+        } else {
+          this.$refs.table.refresh(true)
+          this.$message.success('删除成功')
+        }
+      })
     },
     refreshTable (v) {
       this.$refs.table.refresh(true)
@@ -370,23 +337,6 @@ export default {
     onSelectChange (selectedRowKeys, selectedRows) {
       this.selectedRowKeys = selectedRowKeys
       this.selectedRows = selectedRows
-    },
-    handlerDel () {
-      // var that = this
-      // this.$confirm({
-      //   title: '您要删除这些数据吗?',
-      //   content: h => <div style="color:red;">删除后数据不可恢复，请确认!</div>,
-      //   onOk () {
-      //     batchDelete({ groupName: that.selectedRows[0].groupName, ids: that.selectedRowKeys }).then(res => {
-      //       that.$refs.table.refresh(true)
-      //       that.$message.success(`成功删除${res.data}条数据`)
-      //       that.selectedRowKeys = []
-      //     })
-      //   },
-      //   onCancel () {
-      //   },
-      //   class: 'test'
-      // })
     },
     onClick ({ key }) {
       if (key === '2') {

@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author: www.byteblogs.com
@@ -31,6 +32,13 @@ public class JobLogServiceImpl implements JobLogService {
         PageDTO<JobLogMessage> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
 
         LambdaQueryWrapper<JobLogMessage> queryWrapper = new LambdaQueryWrapper<>();
+        if (Objects.nonNull(queryVO.getJobId())) {
+            queryWrapper.eq(JobLogMessage::getJobId, queryVO.getJobId());
+        }
+
+        if (Objects.nonNull(queryVO.getTaskBatchId())) {
+            queryWrapper.eq(JobLogMessage::getTaskBatchId, queryVO.getTaskBatchId());
+        }
 
         PageDTO<JobLogMessage> selectPage = jobLogMessageMapper.selectPage(pageDTO, queryWrapper);
 

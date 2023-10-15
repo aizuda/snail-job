@@ -11,36 +11,14 @@
         <a-descriptions-item label="任务名称">
           {{ jobInfo.jobName }}
         </a-descriptions-item>
-        <a-descriptions-item label="触发类型">
-          <a-tag :color="triggerType[jobInfo.triggerType].color">
-            {{ triggerType[jobInfo.triggerType].name }}
+        <a-descriptions-item label="重试状态">
+          <a-tag :color="jobStatusEnum[jobInfo.jobStatus].color">
+            {{ jobStatusEnum[jobInfo.jobStatus].name }}
           </a-tag>
         </a-descriptions-item>
-        <a-descriptions-item label="间隔时长">
-          {{ jobInfo.triggerInterval }}
-        </a-descriptions-item>
-        <a-descriptions-item label="最大重试次数">
-          {{ jobInfo.maxRetryTimes }}次
-        </a-descriptions-item>
-        <a-descriptions-item label="重试间隔">
-          {{ jobInfo.retryInterval }}(秒)
-        </a-descriptions-item>
-        <a-descriptions-item label="并行数">
-          {{ jobInfo.parallelNum }}
-        </a-descriptions-item>
-        <a-descriptions-item label="执行器类型">
+        <a-descriptions-item label="路由策略">
           <a-tag :color="routeKey[jobInfo.routeKey].color">
             {{ routeKey[jobInfo.routeKey].name }}
-          </a-tag>
-        </a-descriptions-item>
-        <a-descriptions-item label="执行器类型">
-          <a-tag :color="executorType[jobInfo.executorType].color">
-            {{ executorType[jobInfo.executorType].name }}
-          </a-tag>
-        </a-descriptions-item>
-        <a-descriptions-item label="任务类型">
-          <a-tag :color="taskType[jobInfo.taskType].color">
-            {{ taskType[jobInfo.taskType].name }}
           </a-tag>
         </a-descriptions-item>
         <a-descriptions-item label="阻塞策略">
@@ -48,10 +26,14 @@
             {{ blockStrategy[jobInfo.blockStrategy].name }}
           </a-tag>
         </a-descriptions-item>
-        <a-descriptions-item label="重试状态">
-          <a-tag :color="jobStatusEnum[jobInfo.jobStatus].color">
-            {{ jobStatusEnum[jobInfo.jobStatus].name }}
-          </a-tag>
+        <a-descriptions-item label="并行数">
+          {{ jobInfo.parallelNum }}
+        </a-descriptions-item>
+        <a-descriptions-item label="最大重试次数">
+          {{ jobInfo.maxRetryTimes }}次
+        </a-descriptions-item>
+        <a-descriptions-item label="重试间隔">
+          {{ jobInfo.retryInterval }}(秒)
         </a-descriptions-item>
         <a-descriptions-item label="超时时间">
           {{ jobInfo.executorTimeout }}(秒)
@@ -59,16 +41,34 @@
         <a-descriptions-item label="下次触发时间">
           {{ jobInfo.nextTriggerAt }}
         </a-descriptions-item>
-        <a-descriptions-item label="更新时间">
+        <a-descriptions-item label="更新时间" span="4">
           {{ jobInfo.updateDt }}
         </a-descriptions-item>
-        <a-descriptions-item label="执行器名称" span="3">
+        <a-descriptions-item label="触发类型" span="1">
+          <a-tag :color="triggerType[jobInfo.triggerType].color">
+            {{ triggerType[jobInfo.triggerType].name }}
+          </a-tag>
+        </a-descriptions-item>
+        <a-descriptions-item label="间隔时长" span="4">
+          {{ jobInfo.triggerInterval }}
+        </a-descriptions-item>
+        <a-descriptions-item label="执行器类型">
+          <a-tag :color="executorType[jobInfo.executorType].color">
+            {{ executorType[jobInfo.executorType].name }}
+          </a-tag>
+        </a-descriptions-item>
+        <a-descriptions-item label="执行器名称" span="4">
           {{ jobInfo.executorName }}
         </a-descriptions-item>
-        <a-descriptions-item label="参数" span="3">
+        <a-descriptions-item label="任务类型">
+          <a-tag :color="taskType[jobInfo.taskType].color">
+            {{ taskType[jobInfo.taskType].name }}
+          </a-tag>
+        </a-descriptions-item>
+        <a-descriptions-item label="参数" span="4">
           {{ jobInfo.argsStr }}
         </a-descriptions-item>
-        <a-descriptions-item label="扩展参数" span="3">
+        <a-descriptions-item label="描述" span="4">
           {{ jobInfo.extAttrs }}
         </a-descriptions-item>
       </a-descriptions>

@@ -20,6 +20,11 @@ public class JobBatchResponseVO {
     private String groupName;
 
     /**
+     * 名称
+     */
+    private String jobName;
+
+    /**
      * 任务信息id
      */
     private Long jobId;
@@ -43,4 +48,14 @@ public class JobBatchResponseVO {
      * 操作原因
      */
     private Integer operationReason;
+
+    /**
+     * 执行器类型 1、Java
+     */
+    private Integer executorType;
+
+    /**
+     * 执行器名称
+     */
+    private String executorName;
 }

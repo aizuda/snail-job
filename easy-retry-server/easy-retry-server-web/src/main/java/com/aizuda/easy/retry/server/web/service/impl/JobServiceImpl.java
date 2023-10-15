@@ -2,10 +2,13 @@ package com.aizuda.easy.retry.server.web.service.impl;
 
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
+import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
+import com.aizuda.easy.retry.server.retry.task.support.strategy.WaitStrategies;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
 import com.aizuda.easy.retry.server.web.model.request.JobQueryVO;
 import com.aizuda.easy.retry.server.web.model.request.JobRequestVO;
+import com.aizuda.easy.retry.server.web.model.request.JobUpdateJobStatusRequestVO;
 import com.aizuda.easy.retry.server.web.model.response.JobResponseVO;
 import com.aizuda.easy.retry.server.web.service.JobService;
 import com.aizuda.easy.retry.server.web.service.convert.JobConverter;
@@ -19,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author www.byteblogs.com
@@ -37,6 +41,7 @@ public class JobServiceImpl implements JobService {
         PageDTO<Job> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
 
         LambdaQueryWrapper<Job> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Job::getDeleted, StatusEnum.NO.getStatus());
         if (StrUtil.isNotBlank(queryVO.getGroupName())) {
             queryWrapper.eq(Job::getGroupName, queryVO.getGroupName());
         }
@@ -66,6 +71,7 @@ public class JobServiceImpl implements JobService {
     @Override
     public boolean saveJob(JobRequestVO jobRequestVO) {
         Job job = JobConverter.INSTANCE.toJob(jobRequestVO);
+        job.setNextTriggerAt(WaitStrategies.randomWait(1, TimeUnit.SECONDS, 60, TimeUnit.SECONDS).computeRetryTime(null));
         return 1 == jobMapper.insert(job);
     }
 
@@ -74,6 +80,25 @@ public class JobServiceImpl implements JobService {
         Assert.notNull(jobRequestVO.getId(), () -> new EasyRetryServerException("id 不能为空"));
         Assert.isTrue(1 == jobMapper.selectCount(new LambdaQueryWrapper<Job>().eq(Job::getId, jobRequestVO.getId())));
         Job job = JobConverter.INSTANCE.toJob(jobRequestVO);
+        return 1 == jobMapper.updateById(job);
+    }
+
+    @Override
+    public Boolean updateJobStatus(JobUpdateJobStatusRequestVO jobRequestVO) {
+        Assert.notNull(jobRequestVO.getId(), () -> new EasyRetryServerException("id 不能为空"));
+        Assert.isTrue(1 == jobMapper.selectCount(new LambdaQueryWrapper<Job>().eq(Job::getId, jobRequestVO.getId())));
+
+        Job job = new Job();
+        job.setId(jobRequestVO.getId());
+        job.setJobStatus(jobRequestVO.getJobStatus());
+        return 1 == jobMapper.updateById(job);
+    }
+
+    @Override
+    public Boolean deleteJobById(Long id) {
+        Job job = new Job();
+        job.setId(id);
+        job.setDeleted(StatusEnum.YES.getStatus());
         return 1 == jobMapper.updateById(job);
     }
 }
