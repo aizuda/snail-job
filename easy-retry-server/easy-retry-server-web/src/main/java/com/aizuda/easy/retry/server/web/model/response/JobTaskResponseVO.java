@@ -37,7 +37,7 @@ public class JobTaskResponseVO {
     /**
      * 执行的状态 0、失败 1、成功
      */
-    private Integer executeStatus;
+    private Integer taskStatus;
 
     /**
      * 重试次数
@@ -52,7 +52,7 @@ public class JobTaskResponseVO {
     /**
      * 客户端ID
      */
-    private String clientId;
+    private String clientInfo;
 
     /**
      * 执行方法参数

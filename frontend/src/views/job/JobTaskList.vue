@@ -87,10 +87,13 @@
       <span slot="serial" slot-scope="text, record">
         {{ record.id }}
       </span>
-      <span slot="executeStatus" slot-scope="text">
-        <a-tag :color="executeStatus[text].color">
-          {{ executeStatus[text].name }}
+      <span slot="taskStatus" slot-scope="text">
+        <a-tag :color="taskStatus[text].color">
+          {{ taskStatus[text].name }}
         </a-tag>
+      </span>
+      <span slot="clientInfo" slot-scope="text">
+        {{ text !== '' ? text.split('@')[1] : '' }}
       </span>
       <p slot="expandedRowRender" style="margin: 0" slot-scope="record">
         执行结果: {{ record.resultMessage }}<br/>
@@ -132,7 +135,7 @@ export default {
       advanced: false,
       // 查询参数
       queryParam: {},
-      executeStatus: enums.executeStatus,
+      taskStatus: enums.taskStatus,
       // 表头
       columns: [
         {
@@ -142,6 +145,11 @@ export default {
         {
           title: '组名称',
           dataIndex: 'groupName'
+        },
+        {
+          title: '地址',
+          dataIndex: 'clientInfo',
+          scopedSlots: { customRender: 'clientInfo' }
         },
         {
           title: '参数',
@@ -155,8 +163,8 @@ export default {
         },
         {
           title: '状态',
-          dataIndex: 'executeStatus',
-          scopedSlots: { customRender: 'executeStatus' }
+          dataIndex: 'taskStatus',
+          scopedSlots: { customRender: 'taskStatus' }
         },
         {
           title: '重试次数',

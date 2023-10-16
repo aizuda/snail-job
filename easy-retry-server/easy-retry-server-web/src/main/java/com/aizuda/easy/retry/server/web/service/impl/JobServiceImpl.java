@@ -4,7 +4,9 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
-import com.aizuda.easy.retry.server.retry.task.support.strategy.WaitStrategies;
+import com.aizuda.easy.retry.server.job.task.support.WaitStrategy;
+import com.aizuda.easy.retry.server.job.task.support.strategy.WaitStrategies.WaitStrategyContext;
+import com.aizuda.easy.retry.server.job.task.support.strategy.WaitStrategies.WaitStrategyEnum;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
 import com.aizuda.easy.retry.server.web.model.request.JobQueryVO;
 import com.aizuda.easy.retry.server.web.model.request.JobRequestVO;
@@ -20,6 +22,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -47,13 +50,14 @@ public class JobServiceImpl implements JobService {
         }
 
         if (StrUtil.isNotBlank(queryVO.getJobName())) {
-            queryWrapper.eq(Job::getJobName, queryVO.getJobName());
+            queryWrapper.like(Job::getJobName, "%" + queryVO.getJobName() + "%");
         }
 
         if (Objects.nonNull(queryVO.getJobStatus())) {
             queryWrapper.eq(Job::getJobStatus, queryVO.getJobStatus());
         }
 
+        queryWrapper.orderByDesc(Job::getId);
         PageDTO<Job> selectPage = jobMapper.selectPage(pageDTO, queryWrapper);
 
         List<JobResponseVO> jobResponseList = JobResponseVOConverter.INSTANCE.toJobResponseVOs(selectPage.getRecords());
@@ -71,7 +75,12 @@ public class JobServiceImpl implements JobService {
     @Override
     public boolean saveJob(JobRequestVO jobRequestVO) {
         Job job = JobConverter.INSTANCE.toJob(jobRequestVO);
-        job.setNextTriggerAt(WaitStrategies.randomWait(1, TimeUnit.SECONDS, 60, TimeUnit.SECONDS).computeRetryTime(null));
+        WaitStrategy waitStrategy = WaitStrategyEnum.getWaitStrategy(jobRequestVO.getTriggerType());
+        WaitStrategyContext waitStrategyContext = new WaitStrategyContext();
+        waitStrategyContext.setTriggerType(jobRequestVO.getTriggerType());
+        waitStrategyContext.setTriggerInterval(jobRequestVO.getTriggerInterval());
+        waitStrategyContext.setNextTriggerAt(LocalDateTime.now());
+        job.setNextTriggerAt(waitStrategy.computeRetryTime(waitStrategyContext));
         return 1 == jobMapper.insert(job);
     }
 

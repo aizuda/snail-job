@@ -61,8 +61,8 @@ public class JobRequestVO {
     /**
      * 执行器名称
      */
-    @NotBlank(message = "executorName 不能为空")
-    private String executorName;
+    @NotBlank(message = "executorInfo 不能为空")
+    private String executorInfo;
 
     /**
      * 触发类型 1.CRON 表达式 2. 固定时间

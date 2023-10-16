@@ -12,8 +12,26 @@
         <result column="update_dt" property="updateDt" />
         <result column="deleted" property="deleted" />
     </resultMap>
-    <select id="selectJobBatchList" resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.JobBatchResponseDO">
+    <select id="selectJobBatchList"
+        parameterType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.JobBatchQueryDO"
+        resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.JobBatchResponseDO">
         SELECT a.*, b.job_name, b.task_type, b.block_strategy, b.trigger_type
         FROM job_task_batch a join job b on a.job_id = b.id
+        <where>
+            <if test="queryDO.jobId != null">
+                and job_id = #{queryDO.jobId}
+            </if>
+            <if test="queryDO.groupName != null">
+                and a.group_name = #{queryDO.groupName}
+            </if>
+            <if test="queryDO.taskBatchStatus != null">
+                and task_status = #{queryDO.taskBatchStatus}
+            </if>
+            <if test="queryDO.jobName != null">
+                and job_name like #{queryDO.jobName}
+            </if>
+         and a.deleted = 0
+        </where>
+
     </select>
 </mapper>

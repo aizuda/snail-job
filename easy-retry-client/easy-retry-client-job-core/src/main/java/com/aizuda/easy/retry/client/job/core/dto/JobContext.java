@@ -17,7 +17,7 @@ public class JobContext {
 
     private String groupName;
 
-    private String executorName;
+    private String executorInfo;
 
     /**
      * 任务类型

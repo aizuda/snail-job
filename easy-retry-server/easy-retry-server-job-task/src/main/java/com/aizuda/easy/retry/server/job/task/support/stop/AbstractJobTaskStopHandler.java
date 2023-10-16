@@ -31,7 +31,7 @@ public abstract class AbstractJobTaskStopHandler implements JobTaskStopHandler, 
         List<JobTask> jobTasks = jobTaskMapper.selectList(
                 new LambdaQueryWrapper<JobTask>()
                         .eq(JobTask::getTaskBatchId, context.getTaskBatchId())
-                        .in(JobTask::getExecuteStatus, JobTaskStatusEnum.NOT_COMPLETE)
+                        .in(JobTask::getTaskStatus, JobTaskStatusEnum.NOT_COMPLETE)
         );
 
         if (CollectionUtils.isEmpty(jobTasks)) {

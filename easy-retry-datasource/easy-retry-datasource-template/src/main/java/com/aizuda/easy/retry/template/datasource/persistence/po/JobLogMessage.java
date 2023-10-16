@@ -57,11 +57,6 @@ public class JobLogMessage implements Serializable {
     private LocalDateTime createDt;
 
     /**
-     * 客户端信息
-     */
-    private String clientAddress;
-
-    /**
      * 调度信息
      */
     private String message;

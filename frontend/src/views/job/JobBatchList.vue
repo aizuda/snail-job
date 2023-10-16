@@ -15,39 +15,35 @@
             </a-form-item>
           </a-col>
           <a-col :md="8" :sm="24">
-            <a-form-item label="场景名称">
-              <a-select v-model="queryParam.sceneName" placeholder="请选择场景名称" allowClear>
-                <a-select-option v-for="item in sceneList" :value="item.sceneName" :key="item.sceneName">
-                  {{ item.sceneName }}</a-select-option
-                >
-              </a-select>
+            <a-form-item label="任务名称">
+              <a-input v-model="queryParam.jobName" placeholder="请输入任务名称" allowClear />
             </a-form-item>
           </a-col>
           <a-col :md="8" :sm="24">
             <a-form-item label="状态">
-              <a-select v-model="queryParam.jobStatus" placeholder="请选择状态" allowClear>
-                <a-select-option v-for="(index, value) in jobStatus" :value="value" :key="value">
-                  {{ index.name }}</a-select-option
+              <a-select v-model="queryParam.taskBatchStatus" placeholder="请选择状态" allowClear>
+                <a-select-option v-for="(item, index) in taskStatus" :value="index" :key="index">
+                  {{ item.name }}</a-select-option
                 >
               </a-select>
             </a-form-item>
           </a-col>
           <template v-if="advanced">
-            <a-col :md="8" :sm="24">
-              <a-form-item label="业务编号">
-                <a-input v-model="queryParam.bizNo" placeholder="请输入业务编号" allowClear />
-              </a-form-item>
-            </a-col>
-            <a-col :md="8" :sm="24">
-              <a-form-item label="幂等id">
-                <a-input v-model="queryParam.idempotentId" placeholder="请输入幂等id" allowClear />
-              </a-form-item>
-            </a-col>
-            <a-col :md="8" :sm="24">
-              <a-form-item label="UniqueId">
-                <a-input v-model="queryParam.uniqueId" placeholder="请输入唯一id" allowClear/>
-              </a-form-item>
-            </a-col>
+<!--            <a-col :md="8" :sm="24">-->
+<!--              <a-form-item label="业务编号">-->
+<!--                <a-input v-model="queryParam.bizNo" placeholder="请输入业务编号" allowClear />-->
+<!--              </a-form-item>-->
+<!--            </a-col>-->
+<!--            <a-col :md="8" :sm="24">-->
+<!--              <a-form-item label="幂等id">-->
+<!--                <a-input v-model="queryParam.idempotentId" placeholder="请输入幂等id" allowClear />-->
+<!--              </a-form-item>-->
+<!--            </a-col>-->
+<!--            <a-col :md="8" :sm="24">-->
+<!--              <a-form-item label="UniqueId">-->
+<!--                <a-input v-model="queryParam.uniqueId" placeholder="请输入唯一id" allowClear/>-->
+<!--              </a-form-item>-->
+<!--            </a-col>-->
           </template>
           <a-col :md="(!advanced && 8) || 24" :sm="24">
             <span
@@ -87,9 +83,9 @@
       <span slot="serial" slot-scope="text, record">
         {{ record.id }}
       </span>
-      <span slot="taskStatus" slot-scope="text">
-        <a-tag :color="taskStatus[text].color">
-          {{ taskStatus[text].name }}
+      <span slot="taskBatchStatus" slot-scope="text">
+        <a-tag :color="taskBatchStatus[text].color">
+          {{ taskBatchStatus[text].name }}
         </a-tag>
       </span>
       <span slot="operationReason" slot-scope="text">
@@ -99,41 +95,41 @@
         <template>
           <a @click="handleInfo(record)">详情</a>
           <a-divider type="vertical" />
-          <a-popconfirm
-            title="是否暂停?"
-            ok-text="恢复"
-            cancel-text="取消"
-            @confirm="handleSuspend(record)"
-          >
-            <a href="javascript:;" v-if="record.retryStatus === 0">暂停</a>
-          </a-popconfirm>
-          <a-divider type="vertical" v-if="record.retryStatus === 0" />
-          <a-popconfirm
-            title="是否恢复?"
-            ok-text="恢复"
-            cancel-text="取消"
-            @confirm="handleRecovery(record)"
-          >
-            <a href="javascript:;" v-if="record.retryStatus === 3">恢复</a>
-          </a-popconfirm>
-          <a-divider type="vertical" v-if="record.retryStatus === 3" />
-          <a-popconfirm
-            title="是否完成?"
-            ok-text="完成"
-            cancel-text="取消"
-            @confirm="handleFinish(record)"
-          >
-            <a href="javascript:;" v-if="record.retryStatus !== 1 && record.retryStatus !== 2">完成</a>
-          </a-popconfirm>
-          <a-divider type="vertical" v-if="record.retryStatus !== 1 && record.retryStatus !== 2" />
-          <a-popconfirm
-            title="是否执行任务?"
-            ok-text="执行"
-            cancel-text="取消"
-            @confirm="handleTrigger(record)"
-          >
-            <a href="javascript:;" v-if="record.retryStatus !== 1 && record.retryStatus !== 2">执行</a>
-          </a-popconfirm>
+<!--          <a-popconfirm-->
+<!--            title="是否暂停?"-->
+<!--            ok-text="恢复"-->
+<!--            cancel-text="取消"-->
+<!--            @confirm="handleSuspend(record)"-->
+<!--          >-->
+<!--            <a href="javascript:;" v-if="record.retryStatus === 0">暂停</a>-->
+<!--          </a-popconfirm>-->
+<!--          <a-divider type="vertical" v-if="record.retryStatus === 0" />-->
+<!--          <a-popconfirm-->
+<!--            title="是否恢复?"-->
+<!--            ok-text="恢复"-->
+<!--            cancel-text="取消"-->
+<!--            @confirm="handleRecovery(record)"-->
+<!--          >-->
+<!--            <a href="javascript:;" v-if="record.retryStatus === 3">恢复</a>-->
+<!--          </a-popconfirm>-->
+<!--          <a-divider type="vertical" v-if="record.retryStatus === 3" />-->
+<!--          <a-popconfirm-->
+<!--            title="是否完成?"-->
+<!--            ok-text="完成"-->
+<!--            cancel-text="取消"-->
+<!--            @confirm="handleFinish(record)"-->
+<!--          >-->
+<!--            <a href="javascript:;" v-if="record.retryStatus !== 1 && record.retryStatus !== 2">完成</a>-->
+<!--          </a-popconfirm>-->
+<!--          <a-divider type="vertical" v-if="record.retryStatus !== 1 && record.retryStatus !== 2" />-->
+<!--          <a-popconfirm-->
+<!--            title="是否执行任务?"-->
+<!--            ok-text="执行"-->
+<!--            cancel-text="取消"-->
+<!--            @confirm="handleTrigger(record)"-->
+<!--          >-->
+<!--            <a href="javascript:;" v-if="record.retryStatus !== 1 && record.retryStatus !== 2">执行</a>-->
+<!--          </a-popconfirm>-->
 
         </template>
       </span>
@@ -167,7 +163,7 @@ export default {
       advanced: false,
       // 查询参数
       queryParam: {},
-      taskStatus: enums.taskStatus,
+      taskStatus: enums.taskBatchStatus,
       operationReason: enums.operationReason,
       // 表头
       columns: [
@@ -180,15 +176,15 @@ export default {
           dataIndex: 'groupName',
           ellipsis: true
         },
-        // {
-        //   title: '任务名称',
-        //   dataIndex: 'jobName',
-        //   ellipsis: true
-        // },
+        {
+          title: '任务名称',
+          dataIndex: 'jobName',
+          ellipsis: true
+        },
         {
           title: '状态',
-          dataIndex: 'taskStatus',
-          scopedSlots: { customRender: 'taskStatus' }
+          dataIndex: 'taskBatchStatus',
+          scopedSlots: { customRender: 'taskBatchStatus' }
         },
         {
           title: '开始执行时间',

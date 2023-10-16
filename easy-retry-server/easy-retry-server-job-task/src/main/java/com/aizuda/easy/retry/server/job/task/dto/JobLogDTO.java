@@ -30,10 +30,6 @@ public class JobLogDTO {
      */
     private Long taskId;
 
-    /**
-     * 执行的客户端信息
-     */
-    private String clientId;
 
     /**
      * 调度信息

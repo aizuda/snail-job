@@ -37,11 +37,6 @@ export default {
           width: '5%'
         },
         {
-          title: '客户端地址',
-          dataIndex: 'clientAddress',
-          width: '10%'
-        },
-        {
           title: '信息',
           dataIndex: 'message',
           width: '50%'

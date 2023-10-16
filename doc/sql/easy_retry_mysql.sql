@@ -221,7 +221,6 @@ CREATE TABLE `job` (
     `job_name` varchar(64) NOT NULL COMMENT '名称',
     `args_str` text NOT NULL COMMENT '执行方法参数',
     `args_type` tinyint(4) NOT NULL DEFAULT '' COMMENT '参数类型 ',
-    `ext_attrs` text COMMENT '扩展字段',
     `next_trigger_at` datetime NOT NULL COMMENT '下次触发时间',
     `job_status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '重试状态 0、关闭、1、开启',
     `task_type` varchar(255) DEFAULT NULL COMMENT '任务类型 1、集群 2、广播 3、切片',
@@ -237,6 +236,7 @@ CREATE TABLE `job` (
     `retry_interval` int(11) NOT NULL DEFAULT '0' COMMENT '重试间隔(s)',
     `bucket_index` int(11) NOT NULL DEFAULT '0' COMMENT 'bucket',
     `description` varchar(256) NOT NULL DEFAULT '' COMMENT '描述',
+    `ext_attrs` varchar(256) NULL default '' COMMENT '扩展字段',
     `create_dt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_dt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     `deleted` tinyint(4) NOT NULL DEFAULT '0' COMMENT '逻辑删除 1、删除',
@@ -268,7 +268,7 @@ CREATE TABLE `job_task` (
     `result_message` text NOT NULL COMMENT '执行结果',
     `args_str` text NOT NULL COMMENT '执行方法参数',
     `args_type` varchar(16) NOT NULL DEFAULT '' COMMENT '参数类型 text/json',
-    `ext_attrs` text NOT NULL COMMENT '扩展字段',
+    `ext_attrs` varchar(256) NULL default '' COMMENT '扩展字段',
     `create_dt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_dt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     PRIMARY KEY (`id`)
@@ -284,6 +284,6 @@ CREATE TABLE `job_task_batch` (
     `create_dt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_dt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     `deleted` tinyint(4) NOT NULL DEFAULT '0' COMMENT '逻辑删除 1、删除',
-    `ext_attrs`    varchar(256) NULL default '' COMMENT '扩展字段',
+    `ext_attrs` varchar(256) NULL default '' COMMENT '扩展字段',
     PRIMARY KEY (`id`)
     ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='任务批次';

@@ -50,7 +50,7 @@ public class JobExecutorResultActor extends AbstractActor {
                 @Override
                 protected void doInTransactionWithoutResult(final TransactionStatus status) {
                     JobTask jobTask = new JobTask();
-                    jobTask.setExecuteStatus(result.getTaskStatus());
+                    jobTask.setTaskStatus(result.getTaskStatus());
                     if (Objects.nonNull(result.getResult())) {
                         jobTask.setResultMessage(JsonUtil.toJsonString(result.getResult()));
                     }
@@ -66,7 +66,6 @@ public class JobExecutorResultActor extends AbstractActor {
 
             JobLogDTO jobLogDTO = JobTaskConverter.INSTANCE.toJobLogDTO(result);
             jobLogDTO.setMessage(result.getMessage());
-            jobLogDTO.setClientId(result.getClientId());
             jobLogDTO.setTaskId(result.getTaskId());
             ActorRef actorRef = ActorGenerator.jobLogActor();
             actorRef.tell(jobLogDTO, actorRef);

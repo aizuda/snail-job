@@ -27,24 +27,24 @@ public class JobTaskBatchHandler {
     public boolean complete(Long taskBatchId) {
 
         List<JobTask> jobTasks = jobTaskMapper.selectList(
-            new LambdaQueryWrapper<JobTask>().select(JobTask::getExecuteStatus)
+            new LambdaQueryWrapper<JobTask>().select(JobTask::getTaskStatus)
                 .eq(JobTask::getTaskBatchId, taskBatchId));
 
-        if (jobTasks.stream().anyMatch(jobTask -> JobTaskStatusEnum.NOT_COMPLETE.contains(jobTask.getExecuteStatus()))) {
+        if (jobTasks.stream().anyMatch(jobTask -> JobTaskStatusEnum.NOT_COMPLETE.contains(jobTask.getTaskStatus()))) {
            return false;
         }
 
-        long failCount = jobTasks.stream().filter(jobTask -> jobTask.getExecuteStatus() == JobTaskBatchStatusEnum.FAIL.getStatus()).count();
-        long stopCount = jobTasks.stream().filter(jobTask -> jobTask.getExecuteStatus() == JobTaskBatchStatusEnum.STOP.getStatus()).count();
+        long failCount = jobTasks.stream().filter(jobTask -> jobTask.getTaskStatus() == JobTaskBatchStatusEnum.FAIL.getStatus()).count();
+        long stopCount = jobTasks.stream().filter(jobTask -> jobTask.getTaskStatus() == JobTaskBatchStatusEnum.STOP.getStatus()).count();
 
         JobTaskBatch jobTaskBatch = new JobTaskBatch();
         jobTaskBatch.setId(taskBatchId);
         if (failCount > 0) {
-            jobTaskBatch.setTaskStatus(JobTaskBatchStatusEnum.FAIL.getStatus());
+            jobTaskBatch.setTaskBatchStatus(JobTaskBatchStatusEnum.FAIL.getStatus());
         } else if (stopCount > 0) {
-            jobTaskBatch.setTaskStatus(JobTaskBatchStatusEnum.STOP.getStatus());
+            jobTaskBatch.setTaskBatchStatus(JobTaskBatchStatusEnum.STOP.getStatus());
         } else {
-            jobTaskBatch.setTaskStatus(JobTaskBatchStatusEnum.SUCCESS.getStatus());
+            jobTaskBatch.setTaskBatchStatus(JobTaskBatchStatusEnum.SUCCESS.getStatus());
         }
 
         jobTaskBatchMapper.updateById(jobTaskBatch);

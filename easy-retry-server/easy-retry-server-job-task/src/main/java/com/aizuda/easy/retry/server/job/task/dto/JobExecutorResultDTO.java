@@ -22,8 +22,6 @@ public class JobExecutorResultDTO {
 
     private String message;
 
-    private String clientId;
-
     private Integer taskType;
 
     private Object result;

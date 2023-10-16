@@ -69,7 +69,7 @@ public class JobTimerTask implements TimerTask {
                 JobTaskBatch jobTaskBatch = new JobTaskBatch();
                 jobTaskBatch.setId(jobTimerTaskDTO.getTaskBatchId());
                 jobTaskBatch.setExecutionAt(LocalDateTime.now());
-                jobTaskBatch.setTaskStatus(taskStatus);
+                jobTaskBatch.setTaskBatchStatus(taskStatus);
                 jobTaskBatch.setOperationReason(operationReason);
                 Assert.isTrue(1 == jobTaskBatchMapper.updateById(jobTaskBatch),
                     () -> new EasyRetryServerException("更新任务失败"));

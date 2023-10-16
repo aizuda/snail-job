@@ -52,9 +52,9 @@ public class JobTask implements Serializable {
     private Long parentId;
 
     /**
-     * 执行的状态 0、失败 1、成功
+     * 执行状态
      */
-    private Integer executeStatus;
+    private Integer taskStatus;
 
     /**
      * 重试次数
@@ -69,7 +69,7 @@ public class JobTask implements Serializable {
     /**
      * 客户端ID
      */
-    private String clientId;
+    private String clientInfo;
 
     /**
      * 执行方法参数

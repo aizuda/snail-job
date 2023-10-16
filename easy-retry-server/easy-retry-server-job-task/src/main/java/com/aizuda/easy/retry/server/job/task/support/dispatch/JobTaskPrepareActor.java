@@ -53,7 +53,7 @@ public class JobTaskPrepareActor extends AbstractActor {
 
         List<JobTaskBatch> notCompleteJobTaskBatchList = jobTaskBatchMapper.selectList(new LambdaQueryWrapper<JobTaskBatch>()
                 .eq(JobTaskBatch::getJobId, prepare.getJobId())
-                .in(JobTaskBatch::getTaskStatus, NOT_COMPLETE));
+                .in(JobTaskBatch::getTaskBatchStatus, NOT_COMPLETE));
 
         // 说明所以任务已经完成
         if (CollectionUtils.isEmpty(notCompleteJobTaskBatchList)) {
@@ -64,7 +64,7 @@ public class JobTaskPrepareActor extends AbstractActor {
                 prepare.setExecutionAt(jobTaskBatch.getExecutionAt());
                 prepare.setTaskBatchId(jobTaskBatch.getId());
                 for (JobPrePareHandler prePareHandler : prePareHandlers) {
-                    if (prePareHandler.matches(jobTaskBatch.getTaskStatus())) {
+                    if (prePareHandler.matches(jobTaskBatch.getTaskBatchStatus())) {
                         prePareHandler.handler(prepare);
                         break;
                     }

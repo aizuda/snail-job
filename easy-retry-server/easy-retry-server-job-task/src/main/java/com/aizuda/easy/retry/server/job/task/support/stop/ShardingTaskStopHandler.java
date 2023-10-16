@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.server.job.task.support.stop;
 
 import akka.actor.ActorRef;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
+import com.aizuda.easy.retry.server.common.util.ClientInfoUtils;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.server.job.task.dto.RealStopTaskInstanceDTO;
 import com.aizuda.easy.retry.server.job.task.enums.TaskTypeEnum;
@@ -27,9 +28,8 @@ public class ShardingTaskStopHandler extends AbstractJobTaskStopHandler {
     public void doStop(TaskStopJobContext context) {
 
         for (final JobTask jobTask : context.getJobTasks()) {
-            String clientId = jobTask.getClientId();
             RealStopTaskInstanceDTO taskInstanceDTO = JobTaskConverter.INSTANCE.toRealStopTaskInstanceDTO(context);
-            taskInstanceDTO.setClientId(clientId);
+            taskInstanceDTO.setClientId(ClientInfoUtils.clientId(jobTask.getClientInfo()));
 
             ActorRef actorRef = ActorGenerator.jobRealStopTaskInstanceActor();
             actorRef.tell(taskInstanceDTO, actorRef);

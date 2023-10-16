@@ -50,22 +50,22 @@
         </a-form-item>
       </a-col>
       <a-col :lg="6" :md="12" :sm="24">
-        <a-form-item>
-          <span slot="label">
-            路由策略&nbsp;
-            <a :href="officialWebsite + '/pages/32e4a0/#什么是路由策略'" target="_blank">
-              <a-icon type="question-circle-o" />
-            </a>
-          </span>
-          <a-select
-            placeholder="请选择路由策略"
-            v-decorator="[
-              'routeKey',
-              {rules: [{ required: true, message: '请选择路由策略'}]}
-            ]" >
-            <a-select-option :value="key" v-for="(value, key) in routeKey" :key="key">{{ value }}</a-select-option>
-          </a-select>
-        </a-form-item>
+<!--        <a-form-item>-->
+<!--          <span slot="label">-->
+<!--            路由策略&nbsp;-->
+<!--            <a :href="officialWebsite + '/pages/32e4a0/#什么是路由策略'" target="_blank">-->
+<!--              <a-icon type="question-circle-o" />-->
+<!--            </a>-->
+<!--          </span>-->
+<!--          <a-select-->
+<!--            placeholder="请选择路由策略"-->
+<!--            v-decorator="[-->
+<!--              'routeKey',-->
+<!--              {rules: [{ required: true, message: '请选择路由策略'}]}-->
+<!--            ]" >-->
+<!--            <a-select-option :value="key" v-for="(value, key) in routeKey" :key="key">{{ value }}</a-select-option>-->
+<!--          </a-select>-->
+<!--        </a-form-item>-->
       </a-col>
       <a-col :lg="6" :md="12" :sm="24">
         <a-form-item label="描述">
