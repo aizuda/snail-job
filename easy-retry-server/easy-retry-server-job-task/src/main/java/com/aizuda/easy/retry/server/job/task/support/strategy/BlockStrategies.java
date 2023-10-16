@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.server.job.task.support.strategy;
 
 import com.aizuda.easy.retry.common.core.context.SpringContext;
+import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.job.task.support.BlockStrategy;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
@@ -64,6 +65,8 @@ public class BlockStrategies {
          */
         private LocalDateTime nextTriggerAt;
 
+        private JobOperationReasonEnum operationReason;
+
     }
 
     private static final class DiscardBlockStrategy implements BlockStrategy {
@@ -83,6 +86,7 @@ public class BlockStrategies {
             // 停止任务
             JobTaskStopHandler instanceInterrupt = JobTaskStopFactory.getJobTaskStop(context.taskType);
             TaskStopJobContext stopJobContext = JobTaskConverter.INSTANCE.toStopJobContext(context);
+            stopJobContext.setJobOperationReasonEnum(context.getOperationReason());
             stopJobContext.setNeedUpdateTaskStatus(Boolean.TRUE);
             instanceInterrupt.stop(stopJobContext);
 

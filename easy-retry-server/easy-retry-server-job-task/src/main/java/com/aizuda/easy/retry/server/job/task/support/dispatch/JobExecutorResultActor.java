@@ -60,7 +60,7 @@ public class JobExecutorResultActor extends AbstractActor {
                         ()-> new EasyRetryServerException("更新任务实例失败"));
 
                     // 更新批次上的状态
-                    jobTaskBatchHandler.complete(result.getTaskBatchId());
+                    jobTaskBatchHandler.complete(result.getTaskBatchId(), result.getJobOperationReasonEnum());
                 }
             });
 

@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.server.job.task.support.executor;
 
 import akka.actor.ActorRef;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
+import com.aizuda.easy.retry.server.common.util.ClientInfoUtils;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.server.job.task.dto.RealJobExecutorDTO;
 import com.aizuda.easy.retry.server.job.task.enums.TaskTypeEnum;
@@ -32,7 +33,9 @@ public class ShardingJobExecutor extends AbstractJobExecutor {
     protected void doExecute(JobExecutorContext context) {
         List<JobTask> taskList = context.getTaskList();
         for (int i = 0; i < taskList.size(); i++) {
-            RealJobExecutorDTO realJobExecutor = JobTaskConverter.INSTANCE.toRealJobExecutorDTO(context, taskList.get(i));
+            JobTask jobTask = taskList.get(i);
+            RealJobExecutorDTO realJobExecutor = JobTaskConverter.INSTANCE.toRealJobExecutorDTO(context, jobTask);
+            realJobExecutor.setClientId(ClientInfoUtils.clientId(jobTask.getClientInfo()));
             realJobExecutor.setShardingIndex(i);
             realJobExecutor.setShardingTotal(taskList.size());
             ActorRef actorRef = ActorGenerator.jobRealTaskExecutorActor();

@@ -95,10 +95,10 @@
       <span slot="clientInfo" slot-scope="text">
         {{ text !== '' ? text.split('@')[1] : '' }}
       </span>
-      <p slot="expandedRowRender" style="margin: 0" slot-scope="record">
-        执行结果: {{ record.resultMessage }}<br/>
-        参数: {{ record.argsStr }}
-      </p>
+      <!--      <p slot="expandedRowRender" style="margin: 0" slot-scope="record">-->
+      <!--        执行结果: {{ record.resultMessage }}<br/>-->
+      <!--        参数: {{ record.argsStr }}-->
+      <!--      </p>-->
       <span slot="action" slot-scope="text, record">
         <template>
           <a @click="handleLog(record)">日志</a>
@@ -234,7 +234,7 @@ export default {
       this.advanced = !this.advanced
     },
     handleLog (record) {
-      this.$router.push({ path: '/job/log/list', query: { taskBatchId: record.id, jobId: record.jobId } })
+      this.$router.push({ path: '/job/log/list', query: { taskBatchId: record.taskBatchId, jobId: record.jobId } })
     },
     handleOk (record) {},
     handleSuspend (record) {

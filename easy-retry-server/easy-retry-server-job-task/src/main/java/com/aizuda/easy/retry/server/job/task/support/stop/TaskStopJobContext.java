@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.server.job.task.support.stop;
 
+import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
 import lombok.Data;
 
@@ -45,5 +46,7 @@ public class TaskStopJobContext {
     private boolean needUpdateTaskStatus;
 
     private List<JobTask> jobTasks;
+
+    private JobOperationReasonEnum jobOperationReasonEnum;
 
 }

@@ -48,7 +48,7 @@ public class RealJobExecutorDTO extends BaseDTO {
 
     private Integer executorType;
 
-    private String executorName;
+    private String executorInfo;
 
     private String clientId;
 

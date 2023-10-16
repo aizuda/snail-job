@@ -7,7 +7,7 @@
         <id column="id" property="id" />
         <result column="group_name" property="groupName" />
         <result column="job_id" property="jobId" />
-        <result column="task_status" property="taskStatus" />
+        <result column="task_batch_status" property="taskBatchStatus" />
         <result column="create_dt" property="createDt" />
         <result column="update_dt" property="updateDt" />
         <result column="deleted" property="deleted" />
@@ -31,6 +31,7 @@
                 and job_name like #{queryDO.jobName}
             </if>
          and a.deleted = 0
+        order by id desc
         </where>
 
     </select>

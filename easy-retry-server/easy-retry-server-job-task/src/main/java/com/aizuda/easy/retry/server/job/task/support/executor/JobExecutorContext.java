@@ -61,7 +61,7 @@ public class JobExecutorContext {
 
     private Integer executorType;
 
-    private String executorName;
+    private String executorInfo;
 
 
     /**
