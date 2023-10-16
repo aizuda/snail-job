@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.server.job.task.support.handler;
 
+import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskStatusEnum;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskBatchMapper;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author: www.byteblogs.com
@@ -24,7 +26,7 @@ public class JobTaskBatchHandler {
     @Autowired
     private JobTaskBatchMapper jobTaskBatchMapper;
 
-    public boolean complete(Long taskBatchId) {
+    public boolean complete(Long taskBatchId, JobOperationReasonEnum jobOperationReasonEnum) {
 
         List<JobTask> jobTasks = jobTaskMapper.selectList(
             new LambdaQueryWrapper<JobTask>().select(JobTask::getTaskStatus)
@@ -47,6 +49,9 @@ public class JobTaskBatchHandler {
             jobTaskBatch.setTaskBatchStatus(JobTaskBatchStatusEnum.SUCCESS.getStatus());
         }
 
+        if (Objects.nonNull(jobOperationReasonEnum)) {
+            jobTaskBatch.setOperationReason(jobOperationReasonEnum.getReason());
+        }
         jobTaskBatchMapper.updateById(jobTaskBatch);
 
         return true;

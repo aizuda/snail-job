@@ -40,6 +40,7 @@ public class JobLogServiceImpl implements JobLogService {
             queryWrapper.eq(JobLogMessage::getTaskBatchId, queryVO.getTaskBatchId());
         }
 
+        queryWrapper.orderByDesc(JobLogMessage::getId);
         PageDTO<JobLogMessage> selectPage = jobLogMessageMapper.selectPage(pageDTO, queryWrapper);
 
         return new PageResult<>(pageDTO, JobLogResponseVOConverter.INSTANCE.toJobLogResponseVOs(selectPage.getRecords()));

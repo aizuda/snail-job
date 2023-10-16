@@ -4,6 +4,9 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
+
+
+
 /**
  * @author: www.byteblogs.com
  * @date : 2023-10-12 10:18
@@ -30,9 +33,9 @@ public class JobBatchResponseVO {
     private Long jobId;
 
     /**
-     * 任务状态 0、失败 1、成功
+     * 任务状态
      */
-    private Integer taskStatus;
+    private Integer taskBatchStatus;
 
     /**
      * 创建时间
@@ -43,9 +46,9 @@ public class JobBatchResponseVO {
      * 任务执行时间
      */
     private LocalDateTime executionAt;
-
     /**
      * 操作原因
+
      */
     private Integer operationReason;
 
@@ -57,5 +60,5 @@ public class JobBatchResponseVO {
     /**
      * 执行器名称
      */
-    private String executorName;
+    private String executorInfo;
 }

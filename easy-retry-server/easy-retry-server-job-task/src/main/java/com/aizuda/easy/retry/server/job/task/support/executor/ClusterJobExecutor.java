@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.server.job.task.support.executor;
 
 import akka.actor.ActorRef;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
+import com.aizuda.easy.retry.server.common.util.ClientInfoUtils;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.server.job.task.dto.RealJobExecutorDTO;
 import com.aizuda.easy.retry.server.job.task.enums.TaskTypeEnum;
@@ -32,7 +33,9 @@ public class ClusterJobExecutor extends AbstractJobExecutor {
 
         // 调度客户端
         List<JobTask> taskList = context.getTaskList();
-        RealJobExecutorDTO realJobExecutor = JobTaskConverter.INSTANCE.toRealJobExecutorDTO(context, taskList.get(0));
+        JobTask jobTask = taskList.get(0);
+        RealJobExecutorDTO realJobExecutor = JobTaskConverter.INSTANCE.toRealJobExecutorDTO(context, jobTask);
+        realJobExecutor.setClientId(ClientInfoUtils.clientId(jobTask.getClientInfo()));
         ActorRef actorRef = ActorGenerator.jobRealTaskExecutorActor();
         actorRef.tell(realJobExecutor, actorRef);
 

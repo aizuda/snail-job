@@ -30,9 +30,9 @@ public class JobBatchResponseDO {
     private Long jobId;
 
     /**
-     * 任务状态 0、失败 1、成功
+     * 任务状态
      */
-    private Integer taskStatus;
+    private Integer taskBatchStatus;
 
     /**
      * 创建时间

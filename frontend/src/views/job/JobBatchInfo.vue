@@ -12,8 +12,8 @@
           {{ jobBatchInfo.jobName }}
         </a-descriptions-item>
         <a-descriptions-item label="状态">
-          <a-tag :color="taskStatus[jobBatchInfo.taskStatus].color">
-            {{ taskStatus[jobBatchInfo.taskStatus].name }}
+          <a-tag :color="taskBatchStatus[jobBatchInfo.taskBatchStatus].color">
+            {{ taskBatchStatus[jobBatchInfo.taskBatchStatus].name }}
           </a-tag>
         </a-descriptions-item>
         <a-descriptions-item label="执行器类型">
@@ -30,7 +30,7 @@
           {{ jobBatchInfo.executionAt }}
         </a-descriptions-item>
         <a-descriptions-item label="执行器名称" span="4">
-          {{ jobBatchInfo.executorName }}
+          {{ jobBatchInfo.executorInfo }}
         </a-descriptions-item>
         <a-descriptions-item label="创建时间">
           {{ jobBatchInfo.createDt }}
@@ -59,7 +59,7 @@ export default {
   data () {
     return {
       jobBatchInfo: null,
-      taskStatus: enums.taskBatchStatus,
+      taskBatchStatus: enums.taskBatchStatus,
       operationReason: enums.operationReason,
       taskType: enums.taskType,
       triggerType: enums.triggerType,

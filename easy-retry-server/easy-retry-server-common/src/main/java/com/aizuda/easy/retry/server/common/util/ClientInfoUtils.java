@@ -14,7 +14,7 @@ import java.util.List;
 public class ClientInfoUtils {
 
     public static String generate(RegisterNodeInfo registerNodeInfo) {
-        return registerNodeInfo + StrUtil.AT + registerNodeInfo.address();
+        return registerNodeInfo.getHostId() + StrUtil.AT + registerNodeInfo.address();
     }
 
     public static String clientId(String clientInfo) {

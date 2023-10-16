@@ -220,7 +220,7 @@ CREATE TABLE `job` (
     `group_name` varchar(64) NOT NULL COMMENT '组名称',
     `job_name` varchar(64) NOT NULL COMMENT '名称',
     `args_str` text NOT NULL COMMENT '执行方法参数',
-    `args_type` tinyint(4) NOT NULL DEFAULT '' COMMENT '参数类型 ',
+    `args_type` tinyint(4) NOT NULL DEFAULT '1' COMMENT '参数类型 ',
     `next_trigger_at` datetime NOT NULL COMMENT '下次触发时间',
     `job_status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '重试状态 0、关闭、1、开启',
     `task_type` varchar(255) DEFAULT NULL COMMENT '任务类型 1、集群 2、广播 3、切片',
