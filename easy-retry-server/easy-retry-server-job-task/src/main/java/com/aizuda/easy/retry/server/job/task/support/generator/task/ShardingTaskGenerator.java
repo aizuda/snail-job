@@ -7,11 +7,10 @@ import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
 import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.handler.ClientNodeAllocateHandler;
+import com.aizuda.easy.retry.server.common.util.ClientInfoUtils;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.server.job.task.enums.TaskTypeEnum;
-import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskMapper;
-import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
@@ -62,10 +61,10 @@ public class ShardingTaskGenerator extends AbstractJobTaskGenerator {
             RegisterNodeInfo registerNodeInfo = nodeInfoList.get(Integer.parseInt(key) % serverNodes.size());
             // 新增任务实例
             JobTask jobTask = JobTaskConverter.INSTANCE.toJobTaskInstance(context);
-            jobTask.setClientId(registerNodeInfo.getHostId());
+            jobTask.setClientInfo(ClientInfoUtils.generate(registerNodeInfo));
             jobTask.setArgsType(context.getArgsType());
             jobTask.setArgsStr(value);
-            jobTask.setExecuteStatus(JobTaskStatusEnum.RUNNING.getStatus());
+            jobTask.setTaskStatus(JobTaskStatusEnum.RUNNING.getStatus());
             jobTask.setResultMessage(Optional.ofNullable(jobTask.getResultMessage()).orElse(StrUtil.EMPTY));
             Assert.isTrue(1 == jobTaskMapper.insert(jobTask), () -> new EasyRetryServerException("新增任务实例失败"));
         });

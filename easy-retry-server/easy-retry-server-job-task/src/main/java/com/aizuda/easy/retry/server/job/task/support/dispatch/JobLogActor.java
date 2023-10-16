@@ -47,12 +47,6 @@ public class JobLogActor extends AbstractActor {
 
     private void saveLogMessage(JobLogDTO jobLogDTO) {
         JobLogMessage jobLogMessage = JobTaskConverter.INSTANCE.toJobLogMessage(jobLogDTO);
-        if (Objects.nonNull(jobLogDTO.getClientId())) {
-            Optional.ofNullable(CacheRegisterTable.getServerNode(jobLogDTO.getGroupName(), jobLogDTO.getClientId())).ifPresent(registerNodeInfo -> {
-                jobLogMessage.setClientAddress(registerNodeInfo.address());
-            });
-        }
-
         jobLogMessage.setCreateDt(LocalDateTime.now());
         jobLogMessage.setMessage(Optional.ofNullable(jobLogDTO.getMessage()).orElse(StrUtil.EMPTY));
         jobLogMessage.setTaskId(Optional.ofNullable(jobLogMessage.getTaskId()).orElse(0L));

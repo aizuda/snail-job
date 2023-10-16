@@ -75,9 +75,9 @@ public class Job implements Serializable {
     private Integer executorType;
 
     /**
-     * 执行器名称
+     * 执行器信息
      */
-    private String executorName;
+    private String executorInfo;
 
     /**
      * 触发类型 1.CRON 表达式 2. 固定时间

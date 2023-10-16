@@ -4,7 +4,7 @@
       <div></div>
     </page-header-wrapper>
     <a-card :body-style="{padding: '24px 32px'}" :bordered="false" :loading="loading">
-      <a-form @submit="handleSubmit" :form="form" class="form-row" layout="vertical" style="width: 35%;margin: auto;">
+      <a-form @submit="handleSubmit" :form="form" class="form-row" layout="vertical" style="width: 40%;margin: auto;">
         <a-row class="form-row" :gutter="16">
           <a-col :lg="24" :md="24" :sm="24">
             <a-form-item>
@@ -132,7 +132,7 @@
                 type="textarea"
                 :rows="1"
                 v-decorator="[
-                  'executorName',
+                  'executorInfo',
                   {rules: [{ required: true, message: '请输入执行器名称', whitespace: true}]}
                 ]" />
             </a-form-item>
@@ -169,7 +169,7 @@
           </a-col>
         </a-row>
         <a-row class="form-row" :gutter="16">
-          <a-col :lg="6" :md="12" :sm="12">
+          <a-col :lg="6" :md="12" :sm="24">
             <a-form-item label="超时时间(秒)">
               <a-input-number
                 id="inputNumber"
@@ -184,7 +184,7 @@
                 ]" />
             </a-form-item>
           </a-col>
-          <a-col :lg="6" :md="12" :sm="12">
+          <a-col :lg="6" :md="12" :sm="24">
             <a-form-item label="最大重试次数">
               <a-input-number
                 :min="1"
@@ -197,7 +197,7 @@
                 ]" />
             </a-form-item>
           </a-col>
-          <a-col :lg="6" :md="12" :sm="12">
+          <a-col :lg="6" :md="12" :sm="24">
             <a-form-item label="重试间隔(秒)">
               <a-input-number
                 :min="1"
@@ -211,7 +211,7 @@
                 ]" />
             </a-form-item>
           </a-col>
-          <a-col :lg="6" :md="6" :sm="12">
+          <a-col :lg="6" :md="12" :sm="24">
             <a-form-item label="并行数">
               <a-input-number
                 :min="1"

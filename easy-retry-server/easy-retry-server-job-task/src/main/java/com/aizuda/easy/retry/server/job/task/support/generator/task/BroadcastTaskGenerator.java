@@ -6,11 +6,11 @@ import com.aizuda.easy.retry.common.core.enums.JobTaskStatusEnum;
 import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
 import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
+import com.aizuda.easy.retry.server.common.util.ClientInfoUtils;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.server.job.task.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskMapper;
-import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
@@ -55,10 +55,10 @@ public class BroadcastTaskGenerator extends AbstractJobTaskGenerator {
         List<JobTask> jobTasks = new ArrayList<>(serverNodes.size());
         for (RegisterNodeInfo serverNode : serverNodes) {
             JobTask jobTask = JobTaskConverter.INSTANCE.toJobTaskInstance(context);
-            jobTask.setClientId(serverNode.getHostId());
+            jobTask.setClientInfo(ClientInfoUtils.generate(serverNode));
             jobTask.setArgsType(context.getArgsType());
             jobTask.setArgsStr(context.getArgsStr());
-            jobTask.setExecuteStatus(JobTaskStatusEnum.RUNNING.getStatus());
+            jobTask.setTaskStatus(JobTaskStatusEnum.RUNNING.getStatus());
             jobTask.setResultMessage(Optional.ofNullable(jobTask.getResultMessage()).orElse(StrUtil.EMPTY));
             Assert.isTrue(1 == jobTaskMapper.insert(jobTask), () -> new EasyRetryServerException("新增任务实例失败"));
             jobTasks.add(jobTask);

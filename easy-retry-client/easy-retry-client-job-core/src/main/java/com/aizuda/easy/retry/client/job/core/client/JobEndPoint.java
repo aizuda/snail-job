@@ -38,12 +38,12 @@ public class JobEndPoint {
         jobContext.setTaskId(dispatchJob.getTaskId());
         jobContext.setTaskBatchId(dispatchJob.getTaskBatchId());
         jobContext.setGroupName(dispatchJob.getGroupName());
-        jobContext.setExecutorName(dispatchJob.getExecutorName());
+        jobContext.setExecutorInfo(dispatchJob.getExecutorInfo());
         jobContext.setParallelNum(dispatchJob.getParallelNum());
         jobContext.setTaskType(dispatchJob.getTaskType());
         jobContext.setExecutorTimeout(dispatchJob.getExecutorTimeout());
 
-        JobExecutorInfo jobExecutorInfo = JobExecutorInfoCache.get(jobContext.getExecutorName());
+        JobExecutorInfo jobExecutorInfo = JobExecutorInfoCache.get(jobContext.getExecutorInfo());
         if (jobExecutorInfo.isAnnotation()) {
             IJobExecutor iJobExecutor = SpringContext.getBeanByType(AnnotationJobExecutor.class);
             iJobExecutor.jobExecute(jobContext);

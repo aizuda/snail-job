@@ -68,7 +68,6 @@ public interface JobTaskConverter {
             @Mapping(source = "jobTask.groupName", target = "groupName"),
             @Mapping(source = "jobTask.jobId", target = "jobId"),
             @Mapping(source = "jobTask.taskBatchId", target = "taskBatchId"),
-            @Mapping(source = "jobTask.clientId", target = "clientId"),
             @Mapping(source = "jobTask.id", target = "taskId"),
             @Mapping(source = "jobTask.argsStr", target = "argsStr"),
             @Mapping(source = "jobTask.argsType", target = "argsType"),

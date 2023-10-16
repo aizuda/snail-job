@@ -33,13 +33,14 @@ public class DispatchJobRequest {
     @NotNull(message = "executorType 不能为空")
     private Integer executorType;
 
-    @NotBlank(message = "executorName 不能为空")
-    private String executorName;
+    @NotBlank(message = "executorInfo 不能为空")
+    private String executorInfo;
 
     private Integer shardingTotal;
 
     private Integer shardingIndex;
 
+    @NotBlank(message = "executorTimeout 不能为空")
     private Integer executorTimeout;
 
 }

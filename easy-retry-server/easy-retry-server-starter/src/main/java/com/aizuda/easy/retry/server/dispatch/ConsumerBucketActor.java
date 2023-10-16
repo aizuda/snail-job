@@ -66,6 +66,9 @@ public class ConsumerBucketActor extends AbstractActor {
     }
 
     private void doDispatch(final ConsumerBucket consumerBucket) {
+        if (CollectionUtils.isEmpty(consumerBucket.getBuckets())) {
+            return;
+        }
 
         // 查询桶对应组信息
         List<GroupConfig> groupConfigs = accessTemplate.getGroupConfigAccess().list(

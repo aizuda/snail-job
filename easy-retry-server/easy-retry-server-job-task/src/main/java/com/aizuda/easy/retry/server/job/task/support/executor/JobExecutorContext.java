@@ -63,7 +63,6 @@ public class JobExecutorContext {
 
     private String executorName;
 
-    private String clientId;
 
     /**
      * 最大重试次数

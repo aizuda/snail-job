@@ -71,7 +71,7 @@ const enums = {
       'color': '#e1f52d'
     }
   },
-  taskStatus: {
+  taskBatchStatus: {
     '1': {
       'name': '待处理',
       'color': '#64a6ea'
@@ -113,20 +113,8 @@ const enums = {
       'name': '任务已关闭',
       'color': '#087da1'
     }
-    // '4': {
-    //   'name': '失败',
-    //   'color': '#f52d80'
-    // },
-    // '5': {
-    //   'name': '停止',
-    //   'color': '#ac2df5'
-    // },
-    // '6': {
-    //   'name': '取消',
-    //   'color': '#f5732d'
-    // }
   },
-  executeStatus: {
+  taskStatus: {
     '2': {
       'name': '运行中',
       'color': '#1b7ee5'

@@ -59,7 +59,7 @@ export default {
   data () {
     return {
       jobBatchInfo: null,
-      taskStatus: enums.taskStatus,
+      taskStatus: enums.taskBatchStatus,
       operationReason: enums.operationReason,
       taskType: enums.taskType,
       triggerType: enums.triggerType,

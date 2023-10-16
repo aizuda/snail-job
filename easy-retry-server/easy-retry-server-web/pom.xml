@@ -69,6 +69,10 @@
             <groupId>com.aizuda</groupId>
             <artifactId>easy-retry-server-retry-task</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.aizuda</groupId>
+            <artifactId>easy-retry-server-job-task</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

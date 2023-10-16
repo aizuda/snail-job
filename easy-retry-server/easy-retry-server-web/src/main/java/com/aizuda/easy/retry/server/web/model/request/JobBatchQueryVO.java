@@ -13,4 +13,7 @@ import lombok.EqualsAndHashCode;
 @Data
 public class JobBatchQueryVO extends BaseQueryVO {
     private Long jobId ;
+    private String jobName;
+    private Integer taskBatchStatus;
+    private String groupName;
 }

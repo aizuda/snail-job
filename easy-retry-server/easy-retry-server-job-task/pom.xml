@@ -55,6 +55,10 @@
             <groupId>com.github.rholder</groupId>
             <artifactId>guava-retrying</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.aizuda</groupId>
+            <artifactId>easy-retry-server-retry-task</artifactId>
+        </dependency>
 
     </dependencies>
     <build>

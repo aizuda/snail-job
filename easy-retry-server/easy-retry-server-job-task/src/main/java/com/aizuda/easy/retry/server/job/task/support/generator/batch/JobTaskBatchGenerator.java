@@ -41,14 +41,14 @@ public class JobTaskBatchGenerator {
 
         // 无执行的节点
         if (CollectionUtils.isEmpty(CacheRegisterTable.getServerNodeSet(context.getGroupName()))) {
-            jobTaskBatch.setTaskStatus(JobTaskBatchStatusEnum.CANCEL.getStatus());
+            jobTaskBatch.setTaskBatchStatus(JobTaskBatchStatusEnum.CANCEL.getStatus());
             jobTaskBatch.setOperationReason(JobOperationReasonEnum.NOT_CLIENT.getReason());
             Assert.isTrue(1 == jobTaskBatchMapper.insert(jobTaskBatch), () -> new EasyRetryServerException("新增调度任务失败.jobId:[{}]", context.getJobId()));
             return;
         }
 
         // 生成一个新的任务
-        jobTaskBatch.setTaskStatus(JobTaskBatchStatusEnum.WAITING.getStatus());
+        jobTaskBatch.setTaskBatchStatus(JobTaskBatchStatusEnum.WAITING.getStatus());
         Assert.isTrue(1 == jobTaskBatchMapper.insert(jobTaskBatch), () -> new EasyRetryServerException("新增调度任务失败.jobId:[{}]", context.getJobId()));
 
         // 进入时间轮

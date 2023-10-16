@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.server.job.task.support.stop;
 
 import akka.actor.ActorRef;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
+import com.aizuda.easy.retry.server.common.util.ClientInfoUtils;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.server.job.task.dto.RealStopTaskInstanceDTO;
 import com.aizuda.easy.retry.server.job.task.enums.TaskTypeEnum;
@@ -30,9 +31,8 @@ public class ClusterTaskStopHandler extends AbstractJobTaskStopHandler {
     public void  doStop(TaskStopJobContext context) {
         List<JobTask> jobTasks = context.getJobTasks();
 
-        String clientId = jobTasks.get(0).getClientId();
         RealStopTaskInstanceDTO taskInstanceDTO = JobTaskConverter.INSTANCE.toRealStopTaskInstanceDTO(context);
-        taskInstanceDTO.setClientId(clientId);
+        taskInstanceDTO.setClientId(ClientInfoUtils.clientId(jobTasks.get(0).getClientInfo()));
 
         ActorRef actorRef = ActorGenerator.jobRealStopTaskInstanceActor();
         actorRef.tell(taskInstanceDTO, actorRef);

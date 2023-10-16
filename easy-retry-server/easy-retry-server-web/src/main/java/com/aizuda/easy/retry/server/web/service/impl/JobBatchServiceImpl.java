@@ -1,11 +1,14 @@
 package com.aizuda.easy.retry.server.web.service.impl;
 
+import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
 import com.aizuda.easy.retry.server.web.model.request.JobBatchQueryVO;
 import com.aizuda.easy.retry.server.web.model.response.JobBatchResponseVO;
 import com.aizuda.easy.retry.server.web.service.JobBatchService;
 import com.aizuda.easy.retry.server.web.service.convert.JobBatchResponseVOConverter;
+import com.aizuda.easy.retry.template.datasource.persistence.dataobject.JobBatchQueryDO;
+import com.aizuda.easy.retry.template.datasource.persistence.dataobject.JobBatchResponseDO;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskBatchMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
@@ -36,17 +39,18 @@ public class JobBatchServiceImpl implements JobBatchService {
 
         PageDTO<JobTaskBatch> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
 
-        LambdaQueryWrapper<JobTaskBatch> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(JobTaskBatch::getDeleted, StatusEnum.NO.getStatus());
-
-        if (Objects.nonNull(queryVO.getJobId())) {
-            queryWrapper.eq(JobTaskBatch::getJobId, queryVO.getJobId());
+        JobBatchQueryDO jobBatchQueryDO = new JobBatchQueryDO();
+        if (StrUtil.isNotBlank(queryVO.getJobName())) {
+            jobBatchQueryDO.setJobName("%" + queryVO.getJobName() + "%");
         }
 
-        PageDTO<JobTaskBatch> selectPage = jobTaskBatchMapper.selectPage(pageDTO, queryWrapper);
+        jobBatchQueryDO.setJobId(queryVO.getJobId());
+        jobBatchQueryDO.setTaskBatchStatus(queryVO.getTaskBatchStatus());
+        jobBatchQueryDO.setGroupName(queryVO.getGroupName());
+        List<JobBatchResponseDO> batchResponseDOList  = jobTaskBatchMapper.selectJobBatchList(pageDTO, jobBatchQueryDO);
 
         List<JobBatchResponseVO> batchResponseVOList = JobBatchResponseVOConverter.INSTANCE.toJobBatchResponseVOs(
-            selectPage.getRecords());
+            batchResponseDOList);
 
         return new PageResult<>(pageDTO, batchResponseVOList);
     }

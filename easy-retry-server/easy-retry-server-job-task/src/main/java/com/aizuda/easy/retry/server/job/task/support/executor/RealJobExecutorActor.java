@@ -107,6 +107,7 @@ public class RealJobExecutorActor extends AbstractActor {
                 LogUtils.error(log, "任务调度失败. taskInstanceId:[{}] count:[{}]",
                     realJobExecutorDTO.getTaskBatchId(), attempt.getAttemptNumber(), attempt.getExceptionCause());
                 JobTask jobTask = new JobTask();
+                jobTask.setId(realJobExecutorDTO.getTaskId());
                 jobTask.setRetryCount((int) attempt.getAttemptNumber());
                 jobTaskMapper.updateById(jobTask);
             }
