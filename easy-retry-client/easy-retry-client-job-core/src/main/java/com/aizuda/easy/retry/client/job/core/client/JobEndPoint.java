@@ -3,8 +3,8 @@ package com.aizuda.easy.retry.client.job.core.client;
 import com.aizuda.easy.retry.client.job.core.IJobExecutor;
 import com.aizuda.easy.retry.client.job.core.cache.JobExecutorInfoCache;
 import com.aizuda.easy.retry.client.job.core.cache.ThreadPoolCache;
+import com.aizuda.easy.retry.client.job.core.executor.AbstractJobExecutor;
 import com.aizuda.easy.retry.client.job.core.executor.AnnotationJobExecutor;
-import com.aizuda.easy.retry.client.job.core.executor.NormalJobExecutor;
 import com.aizuda.easy.retry.client.job.core.dto.JobContext;
 import com.aizuda.easy.retry.client.job.core.dto.JobExecutorInfo;
 import com.aizuda.easy.retry.client.model.request.DispatchJobRequest;
@@ -48,7 +48,7 @@ public class JobEndPoint {
             IJobExecutor iJobExecutor = SpringContext.getBeanByType(AnnotationJobExecutor.class);
             iJobExecutor.jobExecute(jobContext);
         } else {
-            NormalJobExecutor normalJobExecutor = (NormalJobExecutor) jobExecutorInfo.getExecutor();
+            AbstractJobExecutor normalJobExecutor = (AbstractJobExecutor) jobExecutorInfo.getExecutor();
             normalJobExecutor.jobExecute(jobContext);
         }
 

@@ -3,6 +3,7 @@ package com.aizuda.easy.retry.server.web.service.impl;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
+import com.aizuda.easy.retry.common.core.util.CronExpression;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.job.task.support.WaitStrategy;
 import com.aizuda.easy.retry.server.job.task.support.strategy.WaitStrategies.WaitStrategyContext;
@@ -22,10 +23,15 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.ParseException;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author www.byteblogs.com
@@ -34,6 +40,8 @@ import java.util.concurrent.TimeUnit;
  */
 @Service
 public class JobServiceImpl implements JobService {
+
+    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Autowired
     private JobMapper jobMapper;
@@ -71,6 +79,26 @@ public class JobServiceImpl implements JobService {
         Job job = jobMapper.selectById(id);
         return JobResponseVOConverter.INSTANCE.toJobResponseVO(job);
     }
+
+    @Override
+    public List<String> getTimeByCron(String cron) {
+
+        List<String> list = new ArrayList<>();
+        LocalDateTime now = LocalDateTime.now();
+        for (int i = 0; i < 5; i++) {
+            Date nextValidTime;
+            try {
+                ZonedDateTime zdt = now.atZone(ZoneOffset.ofHours(8));
+                nextValidTime = new CronExpression(cron).getNextValidTimeAfter(Date.from(zdt.toInstant()));
+                now = LocalDateTime.ofEpochSecond( nextValidTime.getTime() / 1000,0, ZoneOffset.ofHours(8));
+                list.add(dateTimeFormatter.format(now));
+            } catch (ParseException ignored) {
+            }
+        }
+
+        return list;
+    }
+
 
     @Override
     public boolean saveJob(JobRequestVO jobRequestVO) {

@@ -62,7 +62,7 @@ public class JobResponseVO {
     /**
      * 执行器名称
      */
-    private String executorName;
+    private String executorInfo;
 
     /**
      * 触发类型 1.CRON 表达式 2. 固定时间

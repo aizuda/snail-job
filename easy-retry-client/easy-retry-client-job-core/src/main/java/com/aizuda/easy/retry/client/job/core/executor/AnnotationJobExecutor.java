@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.client.job.core.executor;
 
 import com.aizuda.easy.retry.client.job.core.cache.JobExecutorInfoCache;
+import com.aizuda.easy.retry.client.job.core.dto.JobArgs;
 import com.aizuda.easy.retry.client.job.core.dto.JobContext;
 import com.aizuda.easy.retry.client.job.core.dto.JobExecutorInfo;
 import com.aizuda.easy.retry.client.model.ExecuteResult;
@@ -18,8 +19,8 @@ import org.springframework.util.ReflectionUtils;
 public class AnnotationJobExecutor extends AbstractJobExecutor {
 
     @Override
-    protected ExecuteResult doJobExecute(final JobContext jobContext) {
-        JobExecutorInfo jobExecutorInfo = JobExecutorInfoCache.get(jobContext.getExecutorInfo());
-        return  (ExecuteResult) ReflectionUtils.invokeMethod(jobExecutorInfo.getMethod(), jobExecutorInfo.getExecutor(), jobContext);
+    protected ExecuteResult doJobExecute(final JobArgs jobArgs) {
+        JobExecutorInfo jobExecutorInfo = JobExecutorInfoCache.get(jobArgs.getExecutorInfo());
+        return  (ExecuteResult) ReflectionUtils.invokeMethod(jobExecutorInfo.getMethod(), jobExecutorInfo.getExecutor(), jobArgs);
     }
 }

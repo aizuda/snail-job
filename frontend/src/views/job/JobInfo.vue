@@ -58,7 +58,7 @@
           </a-tag>
         </a-descriptions-item>
         <a-descriptions-item label="执行器名称" span="4">
-          {{ jobInfo.executorName }}
+          {{ jobInfo.executorInfo }}
         </a-descriptions-item>
         <a-descriptions-item label="任务类型">
           <a-tag :color="taskType[jobInfo.taskType].color">
