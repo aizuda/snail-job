@@ -107,7 +107,7 @@
         </a-tag>
       </span>
       <span slot="triggerInterval" slot-scope="text">
-        <span>{{ text }}(秒)</span>
+        <span>{{ text }}</span>
       </span>
       <span slot="executorTimeout" slot-scope="text">
         <span>{{ text }}(秒)</span>
@@ -199,7 +199,8 @@ export default {
         },
         {
           title: '触发时间',
-          dataIndex: 'nextTriggerAt'
+          dataIndex: 'nextTriggerAt',
+          ellipsis: true
         },
         {
           title: '状态',
@@ -219,7 +220,8 @@ export default {
         {
           title: '间隔时长',
           dataIndex: 'triggerInterval',
-          scopedSlots: { customRender: 'triggerInterval' }
+          scopedSlots: { customRender: 'triggerInterval' },
+          ellipsis: true
         },
         {
           title: '阻塞策略',

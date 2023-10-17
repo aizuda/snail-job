@@ -61,4 +61,10 @@ public class JobController {
         return jobService.deleteJobById(id);
     }
 
+    @GetMapping("/cron")
+    @LoginRequired
+    public List<String> getTimeByCron(@RequestParam("cron") String cron) {
+        return jobService.getTimeByCron(cron);
+    }
+
 }

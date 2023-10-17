@@ -101,6 +101,7 @@
           <a-col :lg="16" :md="12" :sm="12">
             <a-form-item label="间隔时长">
               <a-input
+                @click="handlerCron"
                 placeholder="请输入间隔时长"
                 v-decorator="[
                   'triggerInterval',
@@ -250,7 +251,7 @@
       </a-form>
     </a-card>
 
-    <a-modal :visible="visible" title="添加配置" @ok="handleOk" @cancel="handlerCancel" width="500px">
+    <a-modal :visible="visible" title="分片参数" @ok="handleOk" @cancel="handlerCancel" width="500px">
       <a-form :form="dynamicForm" @submit="handleSubmit" :body-style="{padding: '0px 0px'}" v-bind="formItemLayout" >
         <a-form-item
           v-for="(k, index) in dynamicForm.getFieldValue('keys')"
@@ -298,6 +299,7 @@
         </a-form-item>
       </a-form>
     </a-modal>
+    <cron-modal ref="cronModalRef" @getCron="getCron"/>
   </div>
 </template>
 
@@ -305,11 +307,18 @@
 import { getAllGroupNameList } from '@/api/manage'
 import { getJobDetail, saveJob, updateJob } from '@/api/jobApi'
 import pick from 'lodash.pick'
+import CronModal from '@/views/job/from/CronModal'
+
 const enums = require('@/utils/enum')
+
 let id = 0
 export default {
   name: 'JobFrom',
+  components: { CronModal },
   props: {},
+  comments: {
+    CronModal
+  },
   data () {
     return {
       form: this.$form.createForm(this),
@@ -336,7 +345,6 @@ export default {
     }
   },
   beforeCreate () {
-    console.log('beforeCreate')
     this.dynamicForm = this.$form.createForm(this, { name: 'dynamic_form_item' })
     this.dynamicForm.getFieldDecorator('keys', { initialValue: [], preserve: true })
   },
@@ -357,6 +365,16 @@ export default {
     })
   },
   methods: {
+    handlerCron () {
+      const triggerType = this.form.getFieldValue('triggerType')
+      if (triggerType === '1') {
+        let triggerInterval = this.form.getFieldValue('triggerInterval')
+        if (triggerInterval === null || triggerInterval === '') {
+          triggerInterval = '* * * * * ?'
+        }
+        this.$refs.cronModalRef.isShow(triggerInterval)
+      }
+    },
     remove (k) {
       const { dynamicForm } = this
       // can use data-binding to get
@@ -414,6 +432,11 @@ export default {
         })
       }
     },
+    getCron (cron) {
+      this.form.setFieldsValue({
+        triggerInterval: cron
+      })
+    },
     handleOk (e) {
       const { form } = this
       e.preventDefault()
@@ -461,7 +484,7 @@ export default {
         setTimeout(resolve, 100)
       }).then(() => {
         const formData = pick(data, [
-          'id', 'jobName', 'groupName', 'jobStatus', 'executorName', 'argsStr', 'executorTimeout', 'description',
+          'id', 'jobName', 'groupName', 'jobStatus', 'executorInfo', 'argsStr', 'executorTimeout', 'description',
           'maxRetryTimes', 'parallelNum', 'retryInterval', 'triggerType', 'blockStrategy', 'executorType', 'taskType', 'triggerInterval'])
         formData.jobStatus = formData.jobStatus.toString()
         formData.taskType = formData.taskType.toString()

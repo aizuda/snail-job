@@ -3,6 +3,7 @@ package com.aizuda.easy.retry.client.job.core.executor;
 import com.aizuda.easy.retry.client.job.core.IJobExecutor;
 import com.aizuda.easy.retry.client.job.core.cache.FutureCache;
 import com.aizuda.easy.retry.client.job.core.cache.ThreadPoolCache;
+import com.aizuda.easy.retry.client.job.core.dto.JobArgs;
 import com.aizuda.easy.retry.client.job.core.dto.JobContext;
 import com.aizuda.easy.retry.client.job.core.timer.StopTaskTimerTask;
 import com.aizuda.easy.retry.client.job.core.timer.TimerManager;
@@ -23,7 +24,7 @@ import java.util.concurrent.TimeUnit;
  * @date : 2023-09-27 09:48
  * @since 2.4.0
  */
-abstract class AbstractJobExecutor implements IJobExecutor {
+public abstract class AbstractJobExecutor implements IJobExecutor {
 
     @Override
     public void jobExecute(JobContext jobContext) {
@@ -43,6 +44,6 @@ abstract class AbstractJobExecutor implements IJobExecutor {
 
     }
 
-    protected abstract ExecuteResult doJobExecute(JobContext jobContext);
+    protected abstract ExecuteResult doJobExecute(JobArgs jobArgs);
 
 }
