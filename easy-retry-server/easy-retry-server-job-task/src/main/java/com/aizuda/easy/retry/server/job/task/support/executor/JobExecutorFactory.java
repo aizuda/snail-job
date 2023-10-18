@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.server.job.task.support.executor;
 
-import com.aizuda.easy.retry.server.job.task.enums.TaskTypeEnum;
+import com.aizuda.easy.retry.common.core.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.job.task.support.JobExecutor;
 
 import java.util.concurrent.ConcurrentHashMap;

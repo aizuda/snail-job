@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.server.job.task.support.stop;
 
-import com.aizuda.easy.retry.server.job.task.enums.TaskTypeEnum;
+import com.aizuda.easy.retry.common.core.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskStopHandler;
 
 import java.util.concurrent.ConcurrentHashMap;

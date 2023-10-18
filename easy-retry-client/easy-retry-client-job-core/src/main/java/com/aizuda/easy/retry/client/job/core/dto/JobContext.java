@@ -31,4 +31,6 @@ public class JobContext {
     private Integer shardingIndex;
 
     private Integer executorTimeout;
+
+    private String argsStr;
 }

@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.server.job.task.support.executor;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
+import com.aizuda.easy.retry.client.model.ExecuteResult;
 import com.aizuda.easy.retry.client.model.request.DispatchJobRequest;
 import com.aizuda.easy.retry.common.core.enums.JobTaskStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
@@ -11,11 +12,14 @@ import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
 import com.aizuda.easy.retry.server.common.client.RequestBuilder;
 import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
+import com.aizuda.easy.retry.server.job.task.support.ClientCallbackHandler;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.server.job.task.client.JobRpcClient;
 import com.aizuda.easy.retry.server.job.task.dto.JobExecutorResultDTO;
 import com.aizuda.easy.retry.server.job.task.dto.JobLogDTO;
 import com.aizuda.easy.retry.server.job.task.dto.RealJobExecutorDTO;
+import com.aizuda.easy.retry.server.job.task.support.callback.ClientCallbackContext;
+import com.aizuda.easy.retry.server.job.task.support.callback.ClientCallbackFactory;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
 import com.github.rholder.retry.Attempt;
@@ -72,12 +76,17 @@ public class RealJobExecutorActor extends AbstractActor {
             if (dispatch.getStatus() == StatusEnum.YES.getStatus() && Objects.equals(dispatch.getData(),
                 Boolean.TRUE)) {
                 jobLogDTO.setMessage("任务调度成功");
+                ActorRef actorRef = ActorGenerator.jobLogActor();
+                actorRef.tell(jobLogDTO, actorRef);
             } else {
-                jobLogDTO.setMessage(dispatch.getMessage());
+                // 客户端返回失败，则认为任务执行失败
+                ClientCallbackHandler clientCallback = ClientCallbackFactory.getClientCallback(realJobExecutorDTO.getTaskType());
+                ClientCallbackContext context = JobTaskConverter.INSTANCE.toClientCallbackContext(realJobExecutorDTO);
+                context.setTaskStatus(JobTaskStatusEnum.FAIL.getStatus());
+                context.setExecuteResult(ExecuteResult.failure(null, dispatch.getMessage()));
+                clientCallback.callback(context);
             }
 
-            ActorRef actorRef = ActorGenerator.jobLogActor();
-            actorRef.tell(jobLogDTO, actorRef);
         } catch (Exception e) {
             log.error("调用客户端失败.", e);
             Throwable throwable = e;

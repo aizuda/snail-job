@@ -7,9 +7,12 @@ import com.aizuda.easy.retry.client.job.core.executor.AbstractJobExecutor;
 import com.aizuda.easy.retry.client.job.core.executor.AnnotationJobExecutor;
 import com.aizuda.easy.retry.client.job.core.dto.JobContext;
 import com.aizuda.easy.retry.client.job.core.dto.JobExecutorInfo;
+import com.aizuda.easy.retry.client.job.core.executor.JobExecutorFutureCallback;
+import com.aizuda.easy.retry.client.model.ExecuteResult;
 import com.aizuda.easy.retry.client.model.request.DispatchJobRequest;
 import com.aizuda.easy.retry.client.model.StopJobDTO;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
+import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.common.core.model.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
@@ -33,6 +36,27 @@ public class JobEndPoint {
     @PostMapping("/dispatch/v1")
     public Result<Boolean> dispatchJob(@RequestBody @Validated DispatchJobRequest dispatchJob) {
 
+        JobContext jobContext = buildJobContext(dispatchJob);
+        JobExecutorInfo jobExecutorInfo = JobExecutorInfoCache.get(jobContext.getExecutorInfo());
+        if (Objects.isNull(jobExecutorInfo)) {
+            return new Result<>(Boolean.FALSE);
+        }
+
+        // 选择执行器
+        Object executor = jobExecutorInfo.getExecutor();
+        IJobExecutor jobExecutor;
+        if (executor.getClass().isAssignableFrom(IJobExecutor.class)) {
+            jobExecutor = (AbstractJobExecutor) executor;
+        } else {
+            jobExecutor = SpringContext.getBeanByType(AnnotationJobExecutor.class);
+        }
+
+        jobExecutor.jobExecute(jobContext);
+
+        return new Result<>(Boolean.TRUE);
+    }
+
+    private static JobContext buildJobContext(DispatchJobRequest dispatchJob) {
         JobContext jobContext = new JobContext();
         jobContext.setJobId(dispatchJob.getJobId());
         jobContext.setTaskId(dispatchJob.getTaskId());
@@ -42,17 +66,8 @@ public class JobEndPoint {
         jobContext.setParallelNum(dispatchJob.getParallelNum());
         jobContext.setTaskType(dispatchJob.getTaskType());
         jobContext.setExecutorTimeout(dispatchJob.getExecutorTimeout());
-
-        JobExecutorInfo jobExecutorInfo = JobExecutorInfoCache.get(jobContext.getExecutorInfo());
-        if (jobExecutorInfo.isAnnotation()) {
-            IJobExecutor iJobExecutor = SpringContext.getBeanByType(AnnotationJobExecutor.class);
-            iJobExecutor.jobExecute(jobContext);
-        } else {
-            AbstractJobExecutor normalJobExecutor = (AbstractJobExecutor) jobExecutorInfo.getExecutor();
-            normalJobExecutor.jobExecute(jobContext);
-        }
-
-        return new Result<>(Boolean.TRUE);
+        jobContext.setArgsStr(dispatchJob.getArgsStr());
+        return jobContext;
     }
 
     @PostMapping("/stop/v1")

@@ -186,6 +186,9 @@ export default {
       ],
       // 加载数据方法 必须为 Promise 对象
       loadData: (parameter) => {
+        if (this.queryParam.taskBatchId === null || this.queryParam.taskBatchId === undefined) {
+          return []
+        }
         return jobTaskList(Object.assign(parameter, this.queryParam)).then((res) => {
           return res
         })
