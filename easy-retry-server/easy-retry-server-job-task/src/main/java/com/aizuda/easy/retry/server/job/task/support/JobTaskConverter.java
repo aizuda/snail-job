@@ -62,6 +62,8 @@ public interface JobTaskConverter {
 
     ClientCallbackContext toClientCallbackContext(DispatchJobResultRequest request);
 
+    ClientCallbackContext toClientCallbackContext(RealJobExecutorDTO request);
+
     DispatchJobRequest toDispatchJobRequest(RealJobExecutorDTO realJobExecutorDTO);
 
     @Mappings({

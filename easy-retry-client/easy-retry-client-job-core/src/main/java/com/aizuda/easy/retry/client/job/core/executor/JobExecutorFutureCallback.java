@@ -43,16 +43,25 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
             taskStatus = JobTaskStatusEnum.SUCCESS.getStatus();
         }
 
-        CLIENT.dispatchResult(buildDispatchJobResultRequest(result, taskStatus));
+        try {
+            CLIENT.dispatchResult(buildDispatchJobResultRequest(result, taskStatus));
+        } catch (Exception e) {
+            log.error("执行结果上报异常.[{}]", jobContext.getTaskId(), e);
+        }
     }
 
     @Override
     public void onFailure(final Throwable t) {
         // 上报执行失败
         log.error("任务执行失败 jobTask:[{}]", jobContext.getTaskId(), t);
-        CLIENT.dispatchResult(
-                buildDispatchJobResultRequest(ExecuteResult.failure(t.getMessage()), JobTaskStatusEnum.FAIL.getStatus())
-        );
+        try {
+            CLIENT.dispatchResult(
+                    buildDispatchJobResultRequest(ExecuteResult.failure(t.getMessage()), JobTaskStatusEnum.FAIL.getStatus())
+            );
+        } catch (Exception e) {
+            log.error("执行结果上报异常.[{}]", jobContext.getTaskId(), e);
+        }
+
     }
 
     private DispatchJobResultRequest buildDispatchJobResultRequest(ExecuteResult executeResult, int status) {

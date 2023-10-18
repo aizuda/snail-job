@@ -36,6 +36,8 @@ public class DispatchJobRequest {
     @NotBlank(message = "executorInfo 不能为空")
     private String executorInfo;
 
+    private String argsStr;
+
     private Integer shardingTotal;
 
     private Integer shardingIndex;

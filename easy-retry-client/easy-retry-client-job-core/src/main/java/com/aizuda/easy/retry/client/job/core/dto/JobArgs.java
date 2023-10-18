@@ -10,5 +10,7 @@ import lombok.Data;
 @Data
 public class JobArgs {
 
+    private String argsStr;
+
     private String executorInfo;
 }

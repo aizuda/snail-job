@@ -20,6 +20,4 @@ public class JobExecutorInfo {
 
     private Object executor;
 
-    private boolean isAnnotation;
-
 }

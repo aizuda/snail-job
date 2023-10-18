@@ -4,6 +4,7 @@ import com.aizuda.easy.retry.client.job.core.IJobExecutor;
 import com.aizuda.easy.retry.client.job.core.Scanner;
 import com.aizuda.easy.retry.client.job.core.annotation.JobExecutor;
 import com.aizuda.easy.retry.client.job.core.cache.JobExecutorInfoCache;
+import com.aizuda.easy.retry.client.job.core.dto.JobArgs;
 import com.aizuda.easy.retry.client.job.core.dto.JobContext;
 import com.aizuda.easy.retry.client.job.core.dto.JobExecutorInfo;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
@@ -59,7 +60,7 @@ public class JobExecutorScanner implements Scanner, ApplicationContextAware {
             // 通过实现接口进行注册
             if (bean.getClass().isAssignableFrom(IJobExecutor.class)) {
                 if (!JobExecutorInfoCache.isExisted(executorClassName)) {
-                    retryerInfoList.add(new JobExecutorInfo(executorClassName, ReflectionUtils.findMethod(bean.getClass(), "jobExecute"), bean, false));
+                    retryerInfoList.add(new JobExecutorInfo(executorClassName, ReflectionUtils.findMethod(bean.getClass(), "jobExecute"), bean));
                 }
 
             }
@@ -72,8 +73,8 @@ public class JobExecutorScanner implements Scanner, ApplicationContextAware {
                     JobExecutorInfo jobExecutorInfo =
                             new JobExecutorInfo(
                                     executorName,
-                                    ReflectionUtils.findMethod(bean.getClass(), jobExecutor.method(), JobContext.class),
-                                    bean, true
+                                    ReflectionUtils.findMethod(bean.getClass(), jobExecutor.method(), JobArgs.class),
+                                    bean
                             );
                     retryerInfoList.add(jobExecutorInfo);
                 }
@@ -96,7 +97,7 @@ public class JobExecutorScanner implements Scanner, ApplicationContextAware {
                         new JobExecutorInfo(
                                 jobExecutor.name(),
                                 executeMethod,
-                                bean,true
+                                bean
                         );
                 retryerInfoList.add(jobExecutorInfo);
             }

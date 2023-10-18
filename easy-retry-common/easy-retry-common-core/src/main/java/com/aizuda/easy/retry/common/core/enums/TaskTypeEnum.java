@@ -1,6 +1,6 @@
-package com.aizuda.easy.retry.server.job.task.enums;
+package com.aizuda.easy.retry.common.core.enums;
 
-import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
+import com.aizuda.easy.retry.common.core.exception.EasyRetryCommonException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -26,6 +26,6 @@ public enum TaskTypeEnum {
             }
         }
 
-        throw new EasyRetryServerException("未知类型");
+        throw new EasyRetryCommonException("未知类型");
     }
 }
