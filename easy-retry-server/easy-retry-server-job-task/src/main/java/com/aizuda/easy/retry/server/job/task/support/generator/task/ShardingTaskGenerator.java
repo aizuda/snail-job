@@ -67,6 +67,7 @@ public class ShardingTaskGenerator extends AbstractJobTaskGenerator {
             jobTask.setTaskStatus(JobTaskStatusEnum.RUNNING.getStatus());
             jobTask.setResultMessage(Optional.ofNullable(jobTask.getResultMessage()).orElse(StrUtil.EMPTY));
             Assert.isTrue(1 == jobTaskMapper.insert(jobTask), () -> new EasyRetryServerException("新增任务实例失败"));
+            jobTasks.add(jobTask);
         });
 
         return jobTasks;

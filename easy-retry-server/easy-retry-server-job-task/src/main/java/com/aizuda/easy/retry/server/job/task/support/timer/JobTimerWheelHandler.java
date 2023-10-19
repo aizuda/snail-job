@@ -5,6 +5,8 @@ import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.common.Lifecycle;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.hash.BloomFilter;
+import com.google.common.hash.Funnels;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timeout;
 import io.netty.util.TimerTask;
@@ -23,19 +25,18 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class JobTimerWheelHandler implements Lifecycle {
 
+    private static final int TICK_DURATION = 100;
+    private static final String THREAD_NAME_REFIX = "job-task-timer-wheel-";
+
     private static HashedWheelTimer timer = null;
 
     private static Cache<String, Timeout> cache;
 
     @Override
     public void start() {
-
-        // TODO 支持可配置
-        // tickDuration 和 timeUnit 一格的时间长度
-        // ticksPerWheel 一圈有多少格
         timer = new HashedWheelTimer(
-                new CustomizableThreadFactory("job-task-timer-wheel-"), 1000,
-                TimeUnit.MILLISECONDS, 1024);
+                new CustomizableThreadFactory(THREAD_NAME_REFIX), TICK_DURATION,
+                TimeUnit.MILLISECONDS);
 
         timer.start();
 
@@ -49,13 +50,6 @@ public class JobTimerWheelHandler implements Lifecycle {
 
         if (delay < 0) {
             delay = 0;
-        }
-
-        // TODO 支持可配置
-        if (delay > 60 * 1000) {
-            LogUtils.warn(log, "距离下次执行时间过久, 不满足进入时间轮的条件. groupName:[{}] uniqueId:[{}] delay:[{}ms]",
-                    groupName, taskBatchId,  delay);
-            return;
         }
 
         Timeout timeout = getTimeout(groupName, taskBatchId);

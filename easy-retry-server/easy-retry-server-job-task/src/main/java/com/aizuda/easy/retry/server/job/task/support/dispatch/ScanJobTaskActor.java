@@ -5,6 +5,7 @@ import akka.actor.ActorRef;
 import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.cache.CacheConsumerGroup;
 import com.aizuda.easy.retry.server.common.dto.ScanTask;
@@ -71,7 +72,7 @@ public class ScanJobTaskActor extends AbstractActor {
                 WaitStrategyContext waitStrategyContext = new WaitStrategyContext();
                 waitStrategyContext.setTriggerType(partitionTask.getTriggerType());
                 waitStrategyContext.setTriggerInterval(partitionTask.getTriggerInterval());
-                waitStrategyContext.setNextTriggerAt(LocalDateTime.now());
+                waitStrategyContext.setNextTriggerAt(jobTaskPrepare.getNextTriggerAt());
 
                 Job job = new Job();
                 job.setId(partitionTask.getId());
