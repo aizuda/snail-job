@@ -7,7 +7,7 @@ import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.job.task.dto.JobTimerTaskDTO;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.easy.retry.server.job.task.support.timer.JobTimerTask;
-import com.aizuda.easy.retry.server.job.task.support.timer.JobTimerWheelHandler;
+import com.aizuda.easy.retry.server.job.task.support.timer.JobTimerWheel;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskBatchMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTaskBatch;
 import lombok.extern.slf4j.Slf4j;
@@ -58,7 +58,7 @@ public class JobTaskBatchGenerator {
         jobTimerTaskDTO.setTaskBatchId(jobTaskBatch.getId());
         jobTimerTaskDTO.setGroupName(context.getGroupName());
         jobTimerTaskDTO.setJobId(context.getJobId());
-        JobTimerWheelHandler.register(context.getGroupName(), jobTaskBatch.getId(),
+        JobTimerWheel.register(jobTaskBatch.getId(),
                 new JobTimerTask(jobTimerTaskDTO), delay, TimeUnit.MILLISECONDS);
 
     }

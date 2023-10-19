@@ -6,7 +6,7 @@ import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.common.dto.DistributeInstance;
 import com.aizuda.easy.retry.server.retry.task.support.FilterStrategy;
-import com.aizuda.easy.retry.server.retry.task.support.IdempotentStrategy;
+import com.aizuda.easy.retry.server.common.IdempotentStrategy;
 import com.aizuda.easy.retry.server.retry.task.support.RetryContext;
 import com.aizuda.easy.retry.server.retry.task.support.cache.CacheGroupRateLimiter;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.ServerNodeMapper;

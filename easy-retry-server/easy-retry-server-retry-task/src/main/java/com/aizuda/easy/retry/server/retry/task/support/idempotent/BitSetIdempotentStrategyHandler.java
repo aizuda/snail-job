@@ -1,7 +1,7 @@
 package com.aizuda.easy.retry.server.retry.task.support.idempotent;
 
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
-import com.aizuda.easy.retry.server.retry.task.support.IdempotentStrategy;
+import com.aizuda.easy.retry.server.common.IdempotentStrategy;
 import org.springframework.stereotype.Component;
 
 import java.util.BitSet;

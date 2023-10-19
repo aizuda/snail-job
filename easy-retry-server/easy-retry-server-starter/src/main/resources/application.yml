@@ -48,6 +48,7 @@ easy-retry:
     max-count: 288 #回调最大执行次数
     trigger-interval: 900 #间隔时间
   db-type: mysql #当前使用的数据库
+  mode: retry
 
 
 

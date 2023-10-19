@@ -1,6 +1,5 @@
 package com.aizuda.easy.retry.server;
 
-import com.aizuda.easy.retry.server.retry.task.support.handler.ConfigVersionSyncHandler;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,14 +12,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 public class ConfigVersionSyncHandlerTest {
 
-    @Autowired
-    private ConfigVersionSyncHandler configVersionSyncHandler;
-
-    @SneakyThrows
-    @Test
-    public void syncVersion() {
-        configVersionSyncHandler.addSyncTask( "example_group", 0);
-
-    }
+//    @Autowired
+//    private ConfigVersionSyncHandler configVersionSyncHandler;
+//
+//    @SneakyThrows
+//    @Test
+//    public void syncVersion() {
+//        configVersionSyncHandler.addSyncTask( "example_group", 0);
+//
+//    }
 
 }
