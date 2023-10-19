@@ -8,6 +8,7 @@ import com.google.common.collect.Tables;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -31,6 +32,10 @@ public class FutureCache {
 
     public static void remove(Long taskBatchId) {
         Map<Long, ListenableFuture<ExecuteResult>> futureMap = futureCache.row(taskBatchId);
+        if (Objects.isNull(futureMap)) {
+            return;
+        }
+
         futureMap.forEach((taskId, future) -> {
             future.cancel(true);
             futureCache.remove(taskBatchId, taskId);

@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.client.job.core.cache;
 
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -40,6 +41,10 @@ public class ThreadPoolCache {
     public static void stopThreadPool(Long taskBatchId) {
         FutureCache.remove(taskBatchId);
         ThreadPoolExecutor threadPoolExecutor = CACHE_THREAD_POOL.get(taskBatchId);
+        if (Objects.isNull(threadPoolExecutor)) {
+            return;
+        }
+
         threadPoolExecutor.shutdownNow();
 
     }

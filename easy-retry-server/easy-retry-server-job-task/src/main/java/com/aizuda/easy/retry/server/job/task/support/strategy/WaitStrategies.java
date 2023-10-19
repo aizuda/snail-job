@@ -142,7 +142,7 @@ public class WaitStrategies {
                 throw new EasyRetryServerException("解析CRON表达式异常 [{}]", context.getTriggerInterval(), e);
             }
 
-            return  LocalDateTime.ofEpochSecond( nextValidTime.getTime() / 1000,0, ZoneOffset.ofHours(8));
+            return LocalDateTime.ofEpochSecond( nextValidTime.getTime() / 1000,0, ZoneOffset.ofHours(8));
         }
     }
 

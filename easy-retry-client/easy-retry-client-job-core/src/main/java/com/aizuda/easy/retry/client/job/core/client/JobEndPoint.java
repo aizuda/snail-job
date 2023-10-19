@@ -39,7 +39,7 @@ public class JobEndPoint {
         JobContext jobContext = buildJobContext(dispatchJob);
         JobExecutorInfo jobExecutorInfo = JobExecutorInfoCache.get(jobContext.getExecutorInfo());
         if (Objects.isNull(jobExecutorInfo)) {
-            return new Result<>(Boolean.FALSE);
+            return new Result<>("执行器配置有误", Boolean.FALSE);
         }
 
         // 选择执行器
