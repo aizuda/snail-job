@@ -4,7 +4,7 @@ import akka.actor.AbstractActor;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
-import com.aizuda.easy.retry.server.retry.task.support.IdempotentStrategy;
+import com.aizuda.easy.retry.server.common.IdempotentStrategy;
 import com.aizuda.easy.retry.server.common.dto.ScanTask;
 import com.aizuda.easy.retry.server.common.handler.ClientNodeAllocateHandler;
 import com.aizuda.easy.retry.server.retry.task.support.dispatch.task.TaskExecutor;

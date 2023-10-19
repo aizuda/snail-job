@@ -49,7 +49,7 @@ public class JobTimerTask implements TimerTask {
 
             try {
                 // 清除时间轮的缓存
-                JobTimerWheelHandler.clearCache(jobTimerTaskDTO.getGroupName(), jobTimerTaskDTO.getTaskBatchId());
+                JobTimerWheel.clearCache(jobTimerTaskDTO.getTaskBatchId());
 
                 JobMapper jobMapper = SpringContext.getBeanByType(JobMapper.class);
                 Job job = jobMapper.selectOne(new LambdaQueryWrapper<Job>()

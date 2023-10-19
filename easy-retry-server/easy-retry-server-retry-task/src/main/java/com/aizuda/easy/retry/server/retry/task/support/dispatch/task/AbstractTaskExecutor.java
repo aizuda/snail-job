@@ -4,7 +4,7 @@ import akka.actor.ActorRef;
 import cn.hutool.core.lang.Pair;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.handler.ClientNodeAllocateHandler;
-import com.aizuda.easy.retry.server.retry.task.support.IdempotentStrategy;
+import com.aizuda.easy.retry.server.common.IdempotentStrategy;
 import com.aizuda.easy.retry.server.retry.task.support.RetryContext;
 import com.aizuda.easy.retry.server.retry.task.support.retry.RetryExecutor;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;

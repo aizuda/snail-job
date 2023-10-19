@@ -8,13 +8,13 @@ import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.cache.CacheConsumerGroup;
 import com.aizuda.easy.retry.server.common.cache.CacheGroupScanActor;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
+import com.aizuda.easy.retry.server.common.enums.SystemModeEnum;
 import com.aizuda.easy.retry.server.common.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.common.dto.ScanTask;
 import com.aizuda.easy.retry.server.retry.task.support.cache.CacheGroupRateLimiter;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.ServerNodeMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.GroupConfig;
-import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
 import com.aizuda.easy.retry.template.datasource.persistence.po.ServerNode;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.google.common.cache.Cache;
@@ -70,31 +70,36 @@ public class ConsumerBucketActor extends AbstractActor {
             return;
         }
 
-        // 查询桶对应组信息
-        List<GroupConfig> groupConfigs = accessTemplate.getGroupConfigAccess().list(
-            new LambdaQueryWrapper<GroupConfig>()
-                .select(GroupConfig::getGroupName)
-                .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus())
-                .in(GroupConfig::getBucketIndex, consumerBucket.getBuckets())
-        );
+        if (systemProperties.getMode() == SystemModeEnum.ALL || systemProperties.getMode() == SystemModeEnum.RETRY) {
+            // 查询桶对应组信息
+            List<GroupConfig> groupConfigs = accessTemplate.getGroupConfigAccess().list(
+                    new LambdaQueryWrapper<GroupConfig>()
+                            .select(GroupConfig::getGroupName)
+                            .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus())
+                            .in(GroupConfig::getBucketIndex, consumerBucket.getBuckets())
+            );
 
-        if (!CollectionUtils.isEmpty(groupConfigs)) {
-            for (final GroupConfig groupConfig : groupConfigs) {
-                CacheConsumerGroup.addOrUpdate(groupConfig.getGroupName());
-                ScanTask scanTask = new ScanTask();
-                scanTask.setGroupName(groupConfig.getGroupName());
-                scanTask.setBuckets(consumerBucket.getBuckets());
-                produceScanActorTask(scanTask);
+            if (!CollectionUtils.isEmpty(groupConfigs)) {
+                for (final GroupConfig groupConfig : groupConfigs) {
+                    CacheConsumerGroup.addOrUpdate(groupConfig.getGroupName());
+                    ScanTask scanTask = new ScanTask();
+                    scanTask.setGroupName(groupConfig.getGroupName());
+                    scanTask.setBuckets(consumerBucket.getBuckets());
+                    produceScanActorTask(scanTask);
+                }
             }
         }
 
-        // 扫描回调数据
-        ScanTask scanTask = new ScanTask();
-        scanTask.setBuckets(consumerBucket.getBuckets());
-        scanTask.setSize(1000);
-        scanTask.setStartId(0);
-        ActorRef scanJobActorRef = cacheActorRef("DEFAULT_JOB_KEY", TaskTypeEnum.JOB);
-        scanJobActorRef.tell(scanTask, scanJobActorRef);
+        if (systemProperties.getMode() == SystemModeEnum.ALL || systemProperties.getMode() == SystemModeEnum.JOB) {
+            // 扫描回调数据
+            ScanTask scanTask = new ScanTask();
+            scanTask.setBuckets(consumerBucket.getBuckets());
+            scanTask.setSize(1000);
+            scanTask.setStartId(0);
+            ActorRef scanJobActorRef = cacheActorRef("DEFAULT_JOB_KEY", TaskTypeEnum.JOB);
+            scanJobActorRef.tell(scanTask, scanJobActorRef);
+        }
+
     }
 
     /**

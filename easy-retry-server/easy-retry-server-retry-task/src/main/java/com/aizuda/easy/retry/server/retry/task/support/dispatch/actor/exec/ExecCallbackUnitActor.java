@@ -14,7 +14,7 @@ import com.aizuda.easy.retry.server.common.client.RequestBuilder;
 import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.retry.task.client.RetryRpcClient;
-import com.aizuda.easy.retry.server.retry.task.support.IdempotentStrategy;
+import com.aizuda.easy.retry.server.common.IdempotentStrategy;
 import com.aizuda.easy.retry.server.retry.task.support.context.CallbackRetryContext;
 import com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.log.RetryTaskLogDTO;
 import com.aizuda.easy.retry.server.retry.task.support.handler.CallbackRetryTaskHandler;
