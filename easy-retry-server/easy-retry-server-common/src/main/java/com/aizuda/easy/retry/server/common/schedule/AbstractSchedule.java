@@ -1,12 +1,12 @@
-package com.aizuda.easy.retry.server.retry.task.support.schedule;
+package com.aizuda.easy.retry.server.common.schedule;
 
 import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.server.common.Schedule;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.dto.LockConfig;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
-import com.aizuda.easy.retry.server.retry.task.support.Schedule;
-import com.aizuda.easy.retry.server.retry.task.support.lock.LockProvider;
+import com.aizuda.easy.retry.server.common.lock.LockProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;

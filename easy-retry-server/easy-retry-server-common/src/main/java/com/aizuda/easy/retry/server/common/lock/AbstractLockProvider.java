@@ -1,7 +1,7 @@
-package com.aizuda.easy.retry.server.retry.task.support.lock;
+package com.aizuda.easy.retry.server.common.lock;
 
+import com.aizuda.easy.retry.server.common.cache.CacheLockRecord;
 import com.aizuda.easy.retry.server.common.dto.LockConfig;
-import com.aizuda.easy.retry.server.retry.task.support.cache.CacheLockRecord;
 import com.aizuda.easy.retry.template.datasource.enums.DbTypeEnum;
 
 import java.util.Arrays;

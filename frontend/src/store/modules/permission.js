@@ -67,7 +67,6 @@ const permission = {
       return new Promise(resolve => {
         const { roles } = data
         const routerMap = cloneDeep(asyncRouterMap)
-        console.log(routerMap)
         const accessedRouters = filterAsyncRouter(routerMap, roles)
 
         console.log(routerMap)

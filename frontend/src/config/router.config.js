@@ -99,54 +99,32 @@ export const asyncRouterMap = [
           }
           ]
       },
-      // {
-      //   path: '/retry-dead-letter',
-      //   name: 'RetryDeadLetter',
-      //   component: RouteView,
-      //   hideChildrenInMenu: true,
-      //   redirect: '/retry-dead-letter/list',
-      //   meta: { title: '死信队列管理', icon: 'exception', permission: ['retryDeadLetter'] },
-      //   children: [
-      //     {
-      //       path: '/retry-dead-letter/list',
-      //       name: 'RetryDeadLetterList',
-      //       component: () => import('@/views/task/RetryDeadLetterList'),
-      //       meta: { title: '死信队列管理列表', icon: 'profile', permission: ['retryDeadLetter'] }
-      //     },
-      //     {
-      //       path: '/retry-dead-letter/info',
-      //       name: 'RetryDeadLetterInfo',
-      //       component: () => import('@/views/task/RetryDeadLetterInfo'),
-      //       meta: { title: '死信队列管理详情', icon: 'profile', permission: ['retryDeadLetter'] }
-      //     }
-      //   ]
-      // },
       {
         path: '/job',
         name: 'Job',
         component: RouteView,
         redirect: '/job/list',
-        meta: { title: '定时任务管理', icon: 'profile', permission: ['retryLog'] },
+        meta: { title: '定时任务管理', icon: 'profile', permission: ['job'] },
         children: [
           {
             path: '/job/list',
             name: 'JobList',
             component: () => import('@/views/job/JobList'),
-            meta: { title: '任务信息', icon: 'profile', permission: ['retryLog'] }
+            meta: { title: '任务信息', icon: 'profile', permission: ['job'] }
           },
           {
             path: '/job/info',
             name: 'JobInfo',
             hidden: true,
             component: () => import('@/views/job/JobInfo'),
-            meta: { title: '定时任务详情', icon: 'profile', permission: ['retryLog'] }
+            meta: { title: '定时任务详情', icon: 'profile', permission: ['job'] }
           },
           {
             path: '/job/config',
             name: 'JobFrom',
             hidden: true,
             component: () => import('@/views/job/from/JobFrom'),
-            meta: { title: '任务配置', icon: 'profile', permission: ['retryLog'] }
+            meta: { title: '任务配置', icon: 'profile', permission: ['job'] }
           },
           {
             path: '/job/batch/list',

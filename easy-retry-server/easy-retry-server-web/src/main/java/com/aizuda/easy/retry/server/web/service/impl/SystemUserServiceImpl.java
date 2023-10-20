@@ -3,6 +3,7 @@ package com.aizuda.easy.retry.server.web.service.impl;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
+import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.SystemUserMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.SystemUserPermissionMapper;
@@ -41,12 +42,14 @@ import java.util.stream.Collectors;
 @Service
 public class SystemUserServiceImpl implements SystemUserService {
 
-    public static final long EXPIRE_TIME = 3600 * 1000;
+    public static final long EXPIRE_TIME = 3600 * 7 * 1000;
 
     @Autowired
     private SystemUserMapper systemUserMapper;
     @Autowired
     private SystemUserPermissionMapper systemUserPermissionMapper;
+    @Autowired
+    private SystemProperties systemProperties;
 
     @Override
     public SystemUserResponseVO login(SystemUserRequestVO requestVO) {
@@ -64,6 +67,7 @@ public class SystemUserServiceImpl implements SystemUserService {
 
         SystemUserResponseVO systemUserResponseVO = SystemUserResponseVOConverter.INSTANCE.convert(systemUser);
         systemUserResponseVO.setToken(token);
+        systemUserResponseVO.setMode(systemProperties.getMode().name());
 
         if (RoleEnum.ADMIN.getRoleId().equals(systemUser.getRole())) {
             return systemUserResponseVO;
@@ -80,6 +84,7 @@ public class SystemUserServiceImpl implements SystemUserService {
     @Override
     public SystemUserResponseVO getUserInfo(SystemUser systemUser) {
         SystemUserResponseVO systemUserResponseVO = SystemUserResponseVOConverter.INSTANCE.convert(systemUser);
+        systemUserResponseVO.setMode(systemProperties.getMode().name());
 
         if (RoleEnum.ADMIN.getRoleId().equals(systemUser.getRole())) {
             return systemUserResponseVO;
@@ -89,6 +94,7 @@ public class SystemUserServiceImpl implements SystemUserService {
                 .eq(SystemUserPermission::getSystemUserId, systemUser.getId()));
         systemUserResponseVO.setGroupNameList(systemUserPermissions.stream()
                 .map(SystemUserPermission::getGroupName).collect(Collectors.toList()));
+
 
         return systemUserResponseVO;
     }

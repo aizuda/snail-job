@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.server.retry.task.support.schedule;
 
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.common.Lifecycle;
+import com.aizuda.easy.retry.server.common.schedule.AbstractSchedule;
 import com.aizuda.easy.retry.server.retry.task.service.RetryService;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
 import lombok.RequiredArgsConstructor;

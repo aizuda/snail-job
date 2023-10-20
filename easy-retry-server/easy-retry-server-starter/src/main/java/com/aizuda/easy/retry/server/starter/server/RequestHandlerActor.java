@@ -1,4 +1,4 @@
-package com.aizuda.easy.retry.server.server;
+package com.aizuda.easy.retry.server.starter.server;
 
 import akka.actor.AbstractActor;
 import cn.hutool.core.net.url.UrlBuilder;
@@ -8,13 +8,12 @@ import com.aizuda.easy.retry.common.core.enums.HeadersEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
+import com.aizuda.easy.retry.server.common.HttpRequestHandler;
+import com.aizuda.easy.retry.server.common.Register;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.dto.NettyHttpRequest;
-import com.aizuda.easy.retry.server.common.Register;
-import com.aizuda.easy.retry.server.retry.task.support.handler.ConfigVersionSyncHandler;
 import com.aizuda.easy.retry.server.common.register.ClientRegister;
 import com.aizuda.easy.retry.server.common.register.RegisterContext;
-import com.aizuda.easy.retry.server.common.HttpRequestHandler;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
@@ -101,10 +100,6 @@ public class RequestHandlerActor extends AbstractActor {
             LogUtils.warn(log, "client register error. groupName:[{}]", groupName);
         }
 
-        // 同步版本
-        ConfigVersionSyncHandler syncHandler = SpringContext.getBeanByType(ConfigVersionSyncHandler.class);
-        Integer clientVersion = headers.getInt(HeadersEnum.VERSION.getKey());
-        syncHandler.addSyncTask(groupName, clientVersion);
 
         UrlBuilder builder = UrlBuilder.ofHttp(uri);
         Collection<HttpRequestHandler> httpRequestHandlers = SpringContext.CONTEXT

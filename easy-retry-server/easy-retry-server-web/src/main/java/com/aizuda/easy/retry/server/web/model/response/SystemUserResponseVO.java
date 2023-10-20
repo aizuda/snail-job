@@ -27,4 +27,6 @@ public class SystemUserResponseVO {
 
     private LocalDateTime updateDt;
 
+    private String mode;
+
 }

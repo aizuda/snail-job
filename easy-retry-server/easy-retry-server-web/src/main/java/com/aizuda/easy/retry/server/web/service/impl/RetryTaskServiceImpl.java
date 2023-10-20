@@ -46,6 +46,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -73,10 +74,6 @@ import java.util.stream.Collectors;
 @Service
 public class RetryTaskServiceImpl implements RetryTaskService {
 
-    public static final String URL = "http://{0}:{1}/{2}/retry/generate/idempotent-id/v1";
-
-    @Autowired
-    private RestTemplate restTemplate;
     @Autowired
     private ClientNodeAllocateHandler clientNodeAllocateHandler;
     @Autowired
@@ -86,7 +83,9 @@ public class RetryTaskServiceImpl implements RetryTaskService {
     @Autowired
     private AccessTemplate accessTemplate;
     @Autowired
+    @Lazy
     private List<TaskGenerator> taskGenerators;
+    @Lazy
     @Autowired
     private List<TaskExecutor> taskExecutors;
 

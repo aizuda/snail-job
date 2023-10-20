@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.server;
 
-import com.aizuda.easy.retry.server.server.NettyHttpServer;
+import com.aizuda.easy.retry.server.starter.server.NettyHttpServer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"com.aizuda.easy.retry.server.starter.*"})
 @EnableTransactionManagement(proxyTargetClass = true)
 @Slf4j
 public class EasyRetryServerApplication {

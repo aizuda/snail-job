@@ -1,3 +1,5 @@
+const permissionsConfig1 = require('@/utils/permissionsConfig')
+
 export function timeFix () {
   const time = new Date()
   const hour = time.getHours()
@@ -94,93 +96,8 @@ export function scorePassword (pass) {
   return parseInt(score)
 }
 
-export function permissionsConfig (roleId) {
-  const role = {
-    1: [
-      {
-        roleId: 1,
-        permissionId: 'group',
-        permissionName: '组配置',
-        actionEntitySet: []
-      },
-      {
-        roleId: 1,
-        permissionId: 'dashboard',
-        permissionName: '看板'
-      },
-      {
-        roleId: 1,
-        permissionId: 'retryTask',
-        permissionName: '任务管理'
-      },
-      {
-        roleId: 1,
-        permissionId: 'retryDeadLetter',
-        permissionName: '死信队列管理'
-      },
-      {
-        roleId: 1,
-        permissionId: 'retryLog',
-        permissionName: '重试日志管理'
-      },
-      {
-        roleId: 1,
-        permissionId: 'basicConfig',
-        permissionName: '基础信息配置'
-      }
-    ],
-    2: [
-      {
-        roleId: 2,
-        permissionId: 'group',
-        permissionName: '组配置',
-        actionEntitySet: [
-          {
-            action: 'add',
-            describe: '新增',
-            defaultCheck: false
-          }
-        ]
-      },
-      {
-        roleId: 2,
-        permissionId: 'user',
-        permissionName: '用户'
-      },
-      {
-        roleId: 2,
-        permissionId: 'userForm',
-        permissionName: '新增或更新用户'
-      },
-      {
-        roleId: 2,
-        permissionId: 'dashboard',
-        permissionName: '看板'
-      },
-      {
-        roleId: 2,
-        permissionId: 'retryTask',
-        permissionName: '任务管理'
-      },
-      {
-        roleId: 2,
-        permissionId: 'retryDeadLetter',
-        permissionName: '死信队列管理'
-      },
-      {
-        roleId: 2,
-        permissionId: 'retryLog',
-        permissionName: '重试日志管理'
-      },
-      {
-        roleId: 2,
-        permissionId: 'basicConfig',
-        permissionName: '基础信息配置'
-      }
-    ]
-  }
-
-  return role[roleId]
+export function permissionsConfig (roleId, mode) {
+  return permissionsConfig1[mode][roleId]
 }
 
 export function officialWebsite () {
