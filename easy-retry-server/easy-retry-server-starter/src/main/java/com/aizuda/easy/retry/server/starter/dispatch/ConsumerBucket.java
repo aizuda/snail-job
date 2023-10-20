@@ -1,4 +1,4 @@
-package com.aizuda.easy.retry.server.dispatch;
+package com.aizuda.easy.retry.server.starter.dispatch;
 
 import lombok.Data;
 

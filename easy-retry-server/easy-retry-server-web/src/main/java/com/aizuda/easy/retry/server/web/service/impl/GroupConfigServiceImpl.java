@@ -4,7 +4,9 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.HashUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
+import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.enums.IdGeneratorMode;
+import com.aizuda.easy.retry.server.common.enums.SystemModeEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.retry.task.support.handler.ConfigVersionSyncHandler;
 import com.aizuda.easy.retry.server.web.service.GroupConfigService;
@@ -27,6 +29,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,12 +56,15 @@ public class GroupConfigServiceImpl implements GroupConfigService {
     @Autowired
     private SequenceAllocMapper sequenceAllocMapper;
     @Autowired
+    @Lazy
     private ConfigVersionSyncHandler configVersionSyncHandler;
 
     @Value("${easy-retry.total-partition:32}")
     private Integer totalPartition;
     @Value("${easy-retry.step:100}")
     private Integer step;
+    @Autowired
+    private SystemProperties systemProperties;
 
     @Override
     @Transactional
@@ -125,11 +131,13 @@ public class GroupConfigServiceImpl implements GroupConfigService {
 
         doUpdateSceneConfig(groupConfigRequestVO);
 
-        // 同步版本， 版本为0代表需要同步到客户端
-        boolean add = configVersionSyncHandler.addSyncTask(groupConfigRequestVO.getGroupName(), 0);
-        // 若添加失败则强制发起同步
-        if (!add) {
-            configVersionSyncHandler.syncVersion(groupConfigRequestVO.getGroupName());
+        if (SystemModeEnum.isRetry(systemProperties.getMode())) {
+            // 同步版本， 版本为0代表需要同步到客户端
+            boolean add = configVersionSyncHandler.addSyncTask(groupConfigRequestVO.getGroupName(), 0);
+            // 若添加失败则强制发起同步
+            if (!add) {
+                configVersionSyncHandler.syncVersion(groupConfigRequestVO.getGroupName());
+            }
         }
 
         return Boolean.TRUE;

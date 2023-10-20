@@ -1,4 +1,4 @@
-package com.aizuda.easy.retry.server.dispatch;
+package com.aizuda.easy.retry.server.starter.dispatch;
 
 import akka.actor.ActorRef;
 import com.aizuda.easy.retry.common.core.log.LogUtils;

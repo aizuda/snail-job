@@ -2,6 +2,8 @@ package com.aizuda.easy.retry.server.retry.task.support.handler;
 
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.net.url.UrlQuery;
+import com.aizuda.easy.retry.common.core.context.SpringContext;
+import com.aizuda.easy.retry.common.core.enums.HeadersEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.model.EasyRetryRequest;
 import com.aizuda.easy.retry.common.core.model.NettyResult;
@@ -67,6 +69,10 @@ public class ReportRetryInfoHttpRequestHandler extends PostHttpRequestHandler {
         Object[] args = retryRequest.getArgs();
 
         try {
+
+            // 同步版本
+            syncConfig(headers);
+
             TaskGenerator taskGenerator = taskGenerators.stream()
                     .filter(t -> t.supports(TaskGeneratorScene.CLIENT_REPORT.getScene()))
                     .findFirst().orElseThrow(() -> new EasyRetryServerException("没有匹配的任务生成器"));
@@ -131,5 +137,11 @@ public class ReportRetryInfoHttpRequestHandler extends PostHttpRequestHandler {
             LogUtils.error(log, "Batch Report Retry Data Error. <|>{}<|>", args[0], throwable);
             return JsonUtil.toJsonString(new NettyResult(StatusEnum.YES.getStatus(), throwable.getMessage(), Boolean.FALSE, retryRequest.getReqId()));
         }
+    }
+
+    private void syncConfig(HttpHeaders  headers) {
+        ConfigVersionSyncHandler syncHandler = SpringContext.getBeanByType(ConfigVersionSyncHandler.class);
+        Integer clientVersion = headers.getInt(HeadersEnum.VERSION.getKey());
+        syncHandler.addSyncTask(headers.get(HeadersEnum.GROUP_NAME.getKey()), clientVersion);
     }
 }

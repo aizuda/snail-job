@@ -1,4 +1,4 @@
-package com.aizuda.easy.retry.server.server;
+package com.aizuda.easy.retry.server.starter.server;
 
 
 import com.aizuda.easy.retry.server.common.config.SystemProperties;

@@ -11,5 +11,13 @@ public enum SystemModeEnum {
 
     RETRY,
     JOB,
-    ALL
+    ALL;
+
+    public static boolean isRetry(SystemModeEnum mode) {
+        return RETRY == mode || ALL == mode;
+    }
+
+    public static boolean isJob(SystemModeEnum mode) {
+        return JOB == mode || ALL == mode;
+    }
 }

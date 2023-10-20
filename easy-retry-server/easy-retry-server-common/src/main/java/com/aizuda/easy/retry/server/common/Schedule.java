@@ -1,4 +1,4 @@
-package com.aizuda.easy.retry.server.retry.task.support;
+package com.aizuda.easy.retry.server.common;
 
 /**
  * @author: www.byteblogs.com

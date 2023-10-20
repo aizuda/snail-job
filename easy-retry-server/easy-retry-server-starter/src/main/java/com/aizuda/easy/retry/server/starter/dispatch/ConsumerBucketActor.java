@@ -1,4 +1,4 @@
-package com.aizuda.easy.retry.server.dispatch;
+package com.aizuda.easy.retry.server.starter.dispatch;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
@@ -27,10 +27,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * 消费当前节点分配的bucket并生成扫描任务
@@ -70,7 +67,7 @@ public class ConsumerBucketActor extends AbstractActor {
             return;
         }
 
-        if (systemProperties.getMode() == SystemModeEnum.ALL || systemProperties.getMode() == SystemModeEnum.RETRY) {
+        if (SystemModeEnum.isRetry(systemProperties.getMode())) {
             // 查询桶对应组信息
             List<GroupConfig> groupConfigs = accessTemplate.getGroupConfigAccess().list(
                     new LambdaQueryWrapper<GroupConfig>()
@@ -90,7 +87,7 @@ public class ConsumerBucketActor extends AbstractActor {
             }
         }
 
-        if (systemProperties.getMode() == SystemModeEnum.ALL || systemProperties.getMode() == SystemModeEnum.JOB) {
+        if (SystemModeEnum.isJob(systemProperties.getMode())) {
             // 扫描回调数据
             ScanTask scanTask = new ScanTask();
             scanTask.setBuckets(consumerBucket.getBuckets());

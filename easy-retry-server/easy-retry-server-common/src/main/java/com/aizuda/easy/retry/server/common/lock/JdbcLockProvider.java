@@ -1,4 +1,4 @@
-package com.aizuda.easy.retry.server.retry.task.support.lock;
+package com.aizuda.easy.retry.server.common.lock;
 
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
