@@ -1,14 +1,14 @@
 package com.aizuda.easy.retry.client.job.core.cache;
 
-import com.aizuda.easy.retry.client.job.core.dto.JobExecutorInfo;
 import com.aizuda.easy.retry.client.model.ExecuteResult;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
-import com.google.common.collect.Tables;
 import com.google.common.util.concurrent.ListenableFuture;
 
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -18,28 +18,18 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class FutureCache {
 
-    private static final Table<Long, Long, ListenableFuture<ExecuteResult>> futureCache = HashBasedTable.create();
+    private static final ConcurrentHashMap<Long, ListenableFuture<ExecuteResult>> futureCache = new ConcurrentHashMap<>();
 
-    public static void addFuture(Long taskBatchId, Long taskId, ListenableFuture<ExecuteResult> future) {
-        futureCache.put(taskBatchId, taskId, future);
-    }
-
-    public static void remove(Long taskBatchId, Long taskId) {
-        ListenableFuture<ExecuteResult> future = futureCache.get(taskBatchId, taskId);
-        future.cancel(true);
-        futureCache.remove(taskBatchId, taskId);
+    public static void addFuture(Long taskBatchId, ListenableFuture<ExecuteResult> future) {
+        futureCache.put(taskBatchId, future);
     }
 
     public static void remove(Long taskBatchId) {
-        Map<Long, ListenableFuture<ExecuteResult>> futureMap = futureCache.row(taskBatchId);
-        if (Objects.isNull(futureMap)) {
-            return;
-        }
-
-        futureMap.forEach((taskId, future) -> {
+        Optional.ofNullable(futureCache.get(taskBatchId)).ifPresent(future -> {
             future.cancel(true);
-            futureCache.remove(taskBatchId, taskId);
+            futureCache.remove(taskBatchId);
         });
+
     }
 
 }

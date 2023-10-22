@@ -3,13 +3,17 @@ package com.aizuda.easy.retry.server.job.task.support.dispatch;
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import cn.hutool.core.lang.Assert;
+import com.aizuda.easy.retry.common.core.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.server.job.task.dto.JobExecutorResultDTO;
 import com.aizuda.easy.retry.server.job.task.dto.JobLogDTO;
+import com.aizuda.easy.retry.server.job.task.support.JobTaskStopHandler;
 import com.aizuda.easy.retry.server.job.task.support.handler.JobTaskBatchHandler;
+import com.aizuda.easy.retry.server.job.task.support.stop.JobTaskStopFactory;
+import com.aizuda.easy.retry.server.job.task.support.stop.TaskStopJobContext;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -60,7 +64,18 @@ public class JobExecutorResultActor extends AbstractActor {
                         ()-> new EasyRetryServerException("更新任务实例失败"));
 
                     // 更新批次上的状态
-                    jobTaskBatchHandler.complete(result.getTaskBatchId(), result.getJobOperationReasonEnum());
+                    boolean complete = jobTaskBatchHandler.complete(result.getTaskBatchId(), result.getJobOperationReasonEnum());
+                    if (complete) {
+                        // 尝试停止任务
+                        // 若是集群任务则客户端会主动关闭
+                        if (result.getTaskType() != TaskTypeEnum.CLUSTER.getType()) {
+                            JobTaskStopHandler instanceInterrupt = JobTaskStopFactory.getJobTaskStop(result.getTaskType());
+                            TaskStopJobContext stopJobContext = JobTaskConverter.INSTANCE.toStopJobContext(result);
+                            stopJobContext.setNeedUpdateTaskStatus(Boolean.FALSE);
+                            stopJobContext.setForceStop(Boolean.TRUE);
+                            instanceInterrupt.stop(stopJobContext);
+                        }
+                    }
                 }
             });
 

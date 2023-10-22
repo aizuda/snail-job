@@ -311,7 +311,6 @@ import CronModal from '@/views/job/from/CronModal'
 
 const enums = require('@/utils/enum')
 
-let id = 0
 export default {
   name: 'JobFrom',
   components: { CronModal },
@@ -341,7 +340,8 @@ export default {
       executorType: enums.executorType,
       routeKey: enums.routeKey,
       loading: false,
-      visible: false
+      visible: false,
+      count: 0
     }
   },
   beforeCreate () {
@@ -395,7 +395,7 @@ export default {
       // can use data-binding to get
       const keys = dynamicForm.getFieldValue('keys')
       console.log(keys)
-      const nextKeys = keys.concat(id++)
+      const nextKeys = keys.concat(this.count++)
       // can use data-binding to set
       // important! notify form to detect changes
       dynamicForm.setFieldsValue({
@@ -419,7 +419,7 @@ export default {
         const restoredArray = keyValuePairs.map(pair => {
           const [index, value] = pair.split('=')
           console.log(value)
-          id++
+          this.count++
           return Number.parseInt(index)
         })
 

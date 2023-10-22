@@ -52,13 +52,12 @@ public class DispatchService implements Lifecycle {
 
             try {
                 // 当正在rebalance时延迟10s，尽量等待所有节点都完成rebalance
-                if ( DistributeInstance.RE_BALANCE_ING.get()) {
+                if (DistributeInstance.RE_BALANCE_ING.get()) {
                     LogUtils.info(log, "正在rebalance中....");
                     TimeUnit.SECONDS.sleep(INITIAL_DELAY);
                 }
 
                 Set<Integer> currentConsumerBuckets = getConsumerBucket();
-//                LogUtils.info(log, "当前节点分配的桶:[{}]", currentConsumerBuckets);
                 if (!CollectionUtils.isEmpty(currentConsumerBuckets)) {
                     ConsumerBucket scanTaskDTO = new ConsumerBucket();
                     scanTaskDTO.setBuckets(currentConsumerBuckets);

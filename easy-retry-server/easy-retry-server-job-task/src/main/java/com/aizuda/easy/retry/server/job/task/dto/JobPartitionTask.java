@@ -54,4 +54,8 @@ public class JobPartitionTask extends PartitionTask {
      */
     private Integer taskType;
 
+    /**
+     * 是否是常驻任务
+     */
+    private Integer resident;
 }

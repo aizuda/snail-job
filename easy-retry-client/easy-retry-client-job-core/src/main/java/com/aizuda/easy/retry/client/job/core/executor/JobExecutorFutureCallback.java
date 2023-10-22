@@ -1,12 +1,14 @@
 package com.aizuda.easy.retry.client.job.core.executor;
 
 import com.aizuda.easy.retry.client.common.proxy.RequestBuilder;
+import com.aizuda.easy.retry.client.job.core.cache.ThreadPoolCache;
 import com.aizuda.easy.retry.client.job.core.client.JobNettyClient;
 import com.aizuda.easy.retry.client.job.core.dto.JobContext;
 import com.aizuda.easy.retry.client.model.ExecuteResult;
 import com.aizuda.easy.retry.client.model.request.DispatchJobResultRequest;
 import com.aizuda.easy.retry.common.core.enums.JobTaskStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
+import com.aizuda.easy.retry.common.core.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.model.NettyResult;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
@@ -47,6 +49,14 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
             CLIENT.dispatchResult(buildDispatchJobResultRequest(result, taskStatus));
         } catch (Exception e) {
             log.error("执行结果上报异常.[{}]", jobContext.getTaskId(), e);
+        } finally {
+            stopThreadPool();
+        }
+    }
+
+    private void stopThreadPool() {
+        if (jobContext.getTaskType() == TaskTypeEnum.CLUSTER.getType()) {
+            ThreadPoolCache.stopThreadPool(jobContext.getTaskBatchId());
         }
     }
 
@@ -60,6 +70,8 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
             );
         } catch (Exception e) {
             log.error("执行结果上报异常.[{}]", jobContext.getTaskId(), e);
+        } finally {
+            stopThreadPool();
         }
 
     }
