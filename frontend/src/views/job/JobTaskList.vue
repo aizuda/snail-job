@@ -83,6 +83,7 @@
       :data="loadData"
       :alert="options.alert"
       :rowSelection="options.rowSelection"
+      :scroll="{ x: 2000 }"
     >
       <span slot="serial" slot-scope="text, record">
         {{ record.id }}
@@ -140,7 +141,8 @@ export default {
       columns: [
         {
           title: 'ID',
-          scopedSlots: { customRender: 'serial' }
+          scopedSlots: { customRender: 'serial' },
+          width: '8%'
         },
         {
           title: '组名称',

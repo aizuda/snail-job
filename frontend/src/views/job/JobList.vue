@@ -78,6 +78,7 @@
       :rowKey="(record) => record.id"
       :columns="columns"
       :data="loadData"
+      :scroll="{ x: 2000 }"
     >
       <span slot="serial" slot-scope="text, record">
         {{ record.id }}
@@ -111,6 +112,8 @@
       <span slot="action" slot-scope="text, record">
         <template>
           <a @click="handleInfo(record)">详情</a>
+          <a-divider type="vertical" />
+          <a @click="goJobBatchList(record)">批次</a>
           <a-divider type="vertical" />
           <a @click="handleEdit(record)">编辑</a>
           <a-divider type="vertical" />
@@ -182,16 +185,19 @@ export default {
       columns: [
         {
           title: 'ID',
-          scopedSlots: { customRender: 'serial' }
+          scopedSlots: { customRender: 'serial' },
+          width: '4%'
         },
         {
           title: '组名称',
-          dataIndex: 'groupName'
+          dataIndex: 'groupName',
+          width: '10%'
         },
         {
           title: '任务名称',
           dataIndex: 'jobName',
-          ellipsis: true
+          ellipsis: true,
+          width: '10%'
         },
         {
           title: '触发时间',
@@ -283,6 +289,9 @@ export default {
   methods: {
     handleEdit (record) {
       this.$router.push({ path: '/job/config', query: { id: record.id } })
+    },
+    goJobBatchList (record) {
+      this.$router.push({ path: '/job/batch/list', query: { jobId: record.id } })
     },
     handleNew () {
       this.$router.push({ path: '/job/config' })

@@ -27,4 +27,6 @@ public interface JobService {
     Boolean deleteJobById(Long id);
 
     List<String> getTimeByCron(String cron);
+
+    List<JobResponseVO> getJobNameList(String keywords, Long jobId);
 }

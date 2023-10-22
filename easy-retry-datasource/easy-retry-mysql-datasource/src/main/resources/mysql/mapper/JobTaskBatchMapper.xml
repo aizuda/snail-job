@@ -25,13 +25,13 @@
                 and a.group_name = #{queryDO.groupName}
             </if>
             <if test="queryDO.taskBatchStatus != null">
-                and task_status = #{queryDO.taskBatchStatus}
+                and task_batch_status = #{queryDO.taskBatchStatus}
             </if>
             <if test="queryDO.jobName != null">
                 and job_name like #{queryDO.jobName}
             </if>
          and a.deleted = 0
-        order by id desc
+        order by a.id desc
         </where>
 
     </select>

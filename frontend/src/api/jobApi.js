@@ -8,6 +8,7 @@ const jobApi = {
   updateJobStatus: '/job/status',
   delJob: '/job/',
   timeByCron: '/job/cron',
+  jobNameList: '/job/job-name/list',
 
   // 任务批次
   jobBatchList: '/job/batch/list',
@@ -21,6 +22,14 @@ const jobApi = {
 }
 
 export default jobApi
+
+export function jobNameList (parameter) {
+  return request({
+    url: jobApi.jobNameList,
+    method: 'get',
+    params: parameter
+  })
+}
 
 export function timeByCron (parameter) {
   return request({
