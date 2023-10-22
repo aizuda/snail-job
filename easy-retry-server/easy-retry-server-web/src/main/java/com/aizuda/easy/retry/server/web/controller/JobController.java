@@ -2,9 +2,11 @@ package com.aizuda.easy.retry.server.web.controller;
 
 import com.aizuda.easy.retry.server.web.annotation.LoginRequired;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
+import com.aizuda.easy.retry.server.web.model.request.JobBatchQueryVO;
 import com.aizuda.easy.retry.server.web.model.request.JobQueryVO;
 import com.aizuda.easy.retry.server.web.model.request.JobRequestVO;
 import com.aizuda.easy.retry.server.web.model.request.JobUpdateJobStatusRequestVO;
+import com.aizuda.easy.retry.server.web.model.response.JobBatchResponseVO;
 import com.aizuda.easy.retry.server.web.model.response.JobResponseVO;
 import com.aizuda.easy.retry.server.web.service.JobService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,4 +69,12 @@ public class JobController {
         return jobService.getTimeByCron(cron);
     }
 
+    @GetMapping("/job-name/list")
+    @LoginRequired
+    public List<JobResponseVO> getJobNameList(
+            @RequestParam(value = "keywords", required = false) String keywords,
+            @RequestParam(value = "jobId", required = false) Long jobId
+    ) {
+        return jobService.getJobNameList(keywords, jobId);
+    }
 }

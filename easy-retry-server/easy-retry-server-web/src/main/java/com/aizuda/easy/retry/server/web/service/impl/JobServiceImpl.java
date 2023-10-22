@@ -58,7 +58,7 @@ public class JobServiceImpl implements JobService {
         }
 
         if (StrUtil.isNotBlank(queryVO.getJobName())) {
-            queryWrapper.like(Job::getJobName, "%" + queryVO.getJobName() + "%");
+            queryWrapper.like(Job::getJobName, "%" + queryVO.getJobName().trim() + "%");
         }
 
         if (Objects.nonNull(queryVO.getJobStatus())) {
@@ -90,7 +90,7 @@ public class JobServiceImpl implements JobService {
             try {
                 ZonedDateTime zdt = now.atZone(ZoneOffset.ofHours(8));
                 nextValidTime = new CronExpression(cron).getNextValidTimeAfter(Date.from(zdt.toInstant()));
-                now = LocalDateTime.ofEpochSecond( nextValidTime.getTime() / 1000,0, ZoneOffset.ofHours(8));
+                now = LocalDateTime.ofEpochSecond(nextValidTime.getTime() / 1000, 0, ZoneOffset.ofHours(8));
                 list.add(dateTimeFormatter.format(now));
             } catch (ParseException ignored) {
             }
@@ -99,6 +99,23 @@ public class JobServiceImpl implements JobService {
         return list;
     }
 
+    @Override
+    public List<JobResponseVO> getJobNameList(String keywords, Long jobId) {
+
+        LambdaQueryWrapper<Job> queryWrapper = new LambdaQueryWrapper<Job>()
+                .select(Job::getId, Job::getJobName);
+        if (StrUtil.isNotBlank(keywords)) {
+            queryWrapper.like(Job::getJobName, "%" + keywords.trim() + "%");
+        }
+
+        if (Objects.nonNull(jobId)) {
+            queryWrapper.eq(Job::getId, jobId);
+        }
+        
+        PageDTO<Job> pageDTO = new PageDTO<>(1, 20);
+        PageDTO<Job> selectPage = jobMapper.selectPage(pageDTO, queryWrapper);
+        return JobResponseVOConverter.INSTANCE.toJobResponseVOs(selectPage.getRecords());
+    }
 
     @Override
     public boolean saveJob(JobRequestVO jobRequestVO) {

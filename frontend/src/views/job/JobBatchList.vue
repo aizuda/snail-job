@@ -16,13 +16,28 @@
           </a-col>
           <a-col :md="8" :sm="24">
             <a-form-item label="任务名称">
-              <a-input v-model="queryParam.jobName" placeholder="请输入任务名称" allowClear />
+              <a-select
+                show-search
+                v-model="queryParam.jobId"
+                placeholder="请输入任务名称"
+                :default-active-first-option="false"
+                :show-arrow="true"
+                :filter-option="false"
+                :not-found-content="null"
+                @search="handleSearch"
+                @change="handleChange"
+              >
+                <a-select-option v-for="(item, index) in jobNameList" :value="item.id" :key="index">
+                  {{ item.jobName }}
+                </a-select-option>
+
+              </a-select>
             </a-form-item>
           </a-col>
           <a-col :md="8" :sm="24">
             <a-form-item label="状态">
               <a-select v-model="queryParam.taskBatchStatus" placeholder="请选择状态" allowClear>
-                <a-select-option v-for="(item, index) in taskStatus" :value="index" :key="index">
+                <a-select-option v-for="(item, index) in taskBatchStatus" :value="index" :key="index">
                   {{ item.name }}</a-select-option
                 >
               </a-select>
@@ -79,8 +94,9 @@
       :data="loadData"
       :alert="options.alert"
       :rowSelection="options.rowSelection"
+      :scroll="{ x: 1800 }"
     >
-      <span slot="serial" slot-scope="text, record">
+      <span slot="serial" slot-scope="record">
         {{ record.id }}
       </span>
       <span slot="taskBatchStatus" slot-scope="text">
@@ -142,7 +158,7 @@
 import ATextarea from 'ant-design-vue/es/input/TextArea'
 import AInput from 'ant-design-vue/es/input/Input'
 import { STable } from '@/components'
-import { jobBatchList } from '@/api/jobApi'
+import { jobBatchList, jobNameList } from '@/api/jobApi'
 import { getAllGroupNameList } from '@/api/manage'
 const enums = require('@/utils/enum')
 
@@ -162,38 +178,46 @@ export default {
       // 高级搜索 展开/关闭
       advanced: false,
       // 查询参数
-      queryParam: {},
+      queryParam: {
+        jobId: null
+      },
       taskBatchStatus: enums.taskBatchStatus,
       operationReason: enums.operationReason,
       // 表头
       columns: [
         {
           title: 'ID',
-          scopedSlots: { customRender: 'serial' }
+          scopedSlots: { customRender: 'serial' },
+          width: '5%'
         },
         {
           title: '组名称',
           dataIndex: 'groupName',
-          ellipsis: true
+          ellipsis: true,
+          width: '15%'
         },
         {
           title: '任务名称',
           dataIndex: 'jobName',
-          ellipsis: true
+          ellipsis: true,
+          width: '15%'
+        },
+        {
+          title: '开始执行时间',
+          dataIndex: 'executionAt',
+          width: '10%'
         },
         {
           title: '状态',
           dataIndex: 'taskBatchStatus',
-          scopedSlots: { customRender: 'taskBatchStatus' }
-        },
-        {
-          title: '开始执行时间',
-          dataIndex: 'executionAt'
+          scopedSlots: { customRender: 'taskBatchStatus' },
+          width: '5%'
         },
         {
           title: '操作原因',
           dataIndex: 'operationReason',
-          scopedSlots: { customRender: 'operationReason' }
+          scopedSlots: { customRender: 'operationReason' },
+          width: '15%'
         },
         {
           title: '创建时间',
@@ -211,6 +235,7 @@ export default {
       ],
       // 加载数据方法 必须为 Promise 对象
       loadData: (parameter) => {
+        // this.queryParam['jobId'] = this.$route.query.jobId
         return jobBatchList(Object.assign(parameter, this.queryParam)).then((res) => {
           return res
         })
@@ -233,7 +258,7 @@ export default {
       },
       optionAlertShow: false,
       groupNameList: [],
-      sceneList: []
+      jobNameList: []
     }
   },
   created () {
@@ -242,7 +267,16 @@ export default {
       if (this.groupNameList !== null && this.groupNameList.length > 0) {
         this.queryParam['groupName'] = this.groupNameList[0]
         this.$refs.table.refresh(true)
-        this.handleChange(this.groupNameList[0])
+      }
+    })
+
+    const jobId = this.$route.query.jobId
+    jobNameList({ jobId: jobId }).then(res => {
+      this.jobNameList = res.data
+      console.log(jobId)
+      if (jobId) {
+        this.queryParam['jobId'] = this.jobNameList[0].id
+        this.$refs.table.refresh(true)
       }
     })
   },
@@ -253,7 +287,16 @@ export default {
     handleBatchNew () {
       this.$refs.batchSaveRetryTask.isShow(true, null)
     },
+    handleSearch (value) {
+      console.log(`selected ${value}`)
+      jobNameList({ keywords: value }).then(res => {
+        this.jobNameList = res.data
+      })
+    },
     handleChange (value) {
+      console.log(`handleChange ${value}`)
+      // this.queryParam['jobId'] = value
+      // this.$refs.table.refresh(true)
     },
     toggleAdvanced () {
       this.advanced = !this.advanced
