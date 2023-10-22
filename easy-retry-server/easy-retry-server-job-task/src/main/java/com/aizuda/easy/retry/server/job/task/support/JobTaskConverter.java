@@ -49,6 +49,7 @@ public interface JobTaskConverter {
     BlockStrategies.BlockStrategyContext toBlockStrategyContext(JobTaskPrepareDTO prepareDTO);
 
     TaskStopJobContext toStopJobContext(BlockStrategies.BlockStrategyContext context);
+    TaskStopJobContext toStopJobContext(JobExecutorResultDTO context);
 
     JobLogMessage toJobLogMessage(JobLogDTO jobLogDTO);
 

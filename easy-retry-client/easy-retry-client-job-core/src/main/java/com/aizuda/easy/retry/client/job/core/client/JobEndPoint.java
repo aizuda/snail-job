@@ -72,12 +72,12 @@ public class JobEndPoint {
 
     @PostMapping("/stop/v1")
     public Result<Boolean> stopJob(@RequestBody @Validated StopJobDTO interruptJob) {
-        ThreadPoolExecutor threadPool = ThreadPoolCache.getThreadPool(interruptJob.getTaskId());
+        ThreadPoolExecutor threadPool = ThreadPoolCache.getThreadPool(interruptJob.getTaskBatchId());
         if (Objects.isNull(threadPool) || threadPool.isShutdown() || threadPool.isTerminated()) {
             return new Result<>(Boolean.TRUE);
         }
 
-        ThreadPoolCache.stopThreadPool(interruptJob.getTaskId());
+        ThreadPoolCache.stopThreadPool(interruptJob.getTaskBatchId());
         return new Result<>(threadPool.isShutdown() || threadPool.isTerminated());
     }
 }

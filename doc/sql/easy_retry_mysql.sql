@@ -235,6 +235,7 @@ CREATE TABLE `job` (
     `parallel_num` int(11) NOT NULL DEFAULT '1' COMMENT '并行数',
     `retry_interval` int(11) NOT NULL DEFAULT '0' COMMENT '重试间隔(s)',
     `bucket_index` int(11) NOT NULL DEFAULT '0' COMMENT 'bucket',
+    `resident` tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否是常驻任务',
     `description` varchar(256) NOT NULL DEFAULT '' COMMENT '描述',
     `ext_attrs` varchar(256) NULL default '' COMMENT '扩展字段',
     `create_dt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',

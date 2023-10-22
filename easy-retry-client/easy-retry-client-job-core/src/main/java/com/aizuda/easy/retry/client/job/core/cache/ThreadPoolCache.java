@@ -10,7 +10,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 /**
- * TODO 任务执行完成了，该如何优雅的终止线程池?????
  *
  * @author: www.byteblogs.com
  * @date : 2023-09-27 17:12
@@ -46,6 +45,7 @@ public class ThreadPoolCache {
         }
 
         threadPoolExecutor.shutdownNow();
+        CACHE_THREAD_POOL.remove(taskBatchId);
 
     }
 }

@@ -125,6 +125,11 @@ public class Job implements Serializable {
     private Integer bucketIndex;
 
     /**
+     * 是否是常驻任务
+     */
+    private Integer resident;
+
+    /**
      * 描述
      */
     private String description;

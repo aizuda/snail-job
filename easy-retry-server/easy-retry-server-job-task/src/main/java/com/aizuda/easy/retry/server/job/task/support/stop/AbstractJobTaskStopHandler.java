@@ -28,11 +28,14 @@ public abstract class AbstractJobTaskStopHandler implements JobTaskStopHandler, 
     @Override
     public void stop(TaskStopJobContext context) {
 
-        List<JobTask> jobTasks = jobTaskMapper.selectList(
-                new LambdaQueryWrapper<JobTask>()
-                        .eq(JobTask::getTaskBatchId, context.getTaskBatchId())
-                        .in(JobTask::getTaskStatus, JobTaskStatusEnum.NOT_COMPLETE)
-        );
+        LambdaQueryWrapper<JobTask> queryWrapper = new LambdaQueryWrapper<JobTask>()
+                .eq(JobTask::getTaskBatchId, context.getTaskBatchId());
+
+        if (!context.isForceStop()) {
+            queryWrapper.in(JobTask::getTaskStatus, JobTaskStatusEnum.NOT_COMPLETE);
+        }
+
+        List<JobTask> jobTasks = jobTaskMapper.selectList(queryWrapper);
 
         if (CollectionUtils.isEmpty(jobTasks)) {
             return;

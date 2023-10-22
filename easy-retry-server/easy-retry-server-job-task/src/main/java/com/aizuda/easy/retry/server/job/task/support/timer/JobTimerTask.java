@@ -8,8 +8,13 @@ import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
+import com.aizuda.easy.retry.server.job.task.dto.JobTaskPrepareDTO;
 import com.aizuda.easy.retry.server.job.task.dto.JobTimerTaskDTO;
 import com.aizuda.easy.retry.server.job.task.dto.TaskExecuteDTO;
+import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
+import com.aizuda.easy.retry.server.job.task.support.WaitStrategy;
+import com.aizuda.easy.retry.server.job.task.support.cache.ResidentTaskCache;
+import com.aizuda.easy.retry.server.job.task.support.strategy.WaitStrategies;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskBatchMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
@@ -20,6 +25,7 @@ import io.netty.util.TimerTask;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -37,8 +43,8 @@ public class JobTimerTask implements TimerTask {
 
     private JobTimerTaskDTO jobTimerTaskDTO;
 
-    private static final ThreadPoolExecutor executor = new ThreadPoolExecutor(2, 2, 10, TimeUnit.SECONDS,
-        new LinkedBlockingQueue<>());
+    private static final ThreadPoolExecutor executor = new ThreadPoolExecutor(4, 4, 10, TimeUnit.SECONDS,
+            new LinkedBlockingQueue<>());
 
     @Override
     public void run(final Timeout timeout) throws Exception {
@@ -46,15 +52,15 @@ public class JobTimerTask implements TimerTask {
         log.info("开始执行任务调度. 当前时间:[{}] taskId:[{}]", LocalDateTime.now(), jobTimerTaskDTO.getTaskBatchId());
 
         executor.execute(() -> {
-
+            Job job = null;
             try {
                 // 清除时间轮的缓存
                 JobTimerWheel.clearCache(jobTimerTaskDTO.getTaskBatchId());
 
                 JobMapper jobMapper = SpringContext.getBeanByType(JobMapper.class);
-                Job job = jobMapper.selectOne(new LambdaQueryWrapper<Job>()
-                    .eq(Job::getJobStatus, StatusEnum.YES.getStatus())
-                    .eq(Job::getId, jobTimerTaskDTO.getJobId())
+                job = jobMapper.selectOne(new LambdaQueryWrapper<Job>()
+                        .eq(Job::getJobStatus, StatusEnum.YES.getStatus())
+                        .eq(Job::getId, jobTimerTaskDTO.getJobId())
                 );
 
                 int taskStatus = JobTaskBatchStatusEnum.RUNNING.getStatus();
@@ -72,7 +78,7 @@ public class JobTimerTask implements TimerTask {
                 jobTaskBatch.setTaskBatchStatus(taskStatus);
                 jobTaskBatch.setOperationReason(operationReason);
                 Assert.isTrue(1 == jobTaskBatchMapper.updateById(jobTaskBatch),
-                    () -> new EasyRetryServerException("更新任务失败"));
+                        () -> new EasyRetryServerException("更新任务失败"));
 
                 // 如果任务已经关闭则不需要执行
                 if (Objects.isNull(job)) {
@@ -88,9 +94,42 @@ public class JobTimerTask implements TimerTask {
 
             } catch (Exception e) {
                 log.error("任务调度执行失败", e);
+            } finally {
+                // 处理常驻任务
+                doHandlerResidentTask(job);
+
             }
-
         });
+    }
 
+    private void doHandlerResidentTask(Job job) {
+        if (Objects.nonNull(job)) {
+            // 是否是常驻任务
+            if (Objects.equals(StatusEnum.YES.getStatus(), job.getResident())) {
+                ResidentJobTimerTask timerTask = new ResidentJobTimerTask(jobTimerTaskDTO, job);
+                WaitStrategy waitStrategy = WaitStrategies.WaitStrategyEnum.getWaitStrategy(job.getTriggerType());
+
+                LocalDateTime preTriggerAt = ResidentTaskCache.get(jobTimerTaskDTO.getJobId());
+                if (Objects.isNull(preTriggerAt) || preTriggerAt.isBefore(job.getNextTriggerAt())) {
+                    preTriggerAt = job.getNextTriggerAt();
+                }
+
+                WaitStrategies.WaitStrategyContext waitStrategyContext = new WaitStrategies.WaitStrategyContext();
+                waitStrategyContext.setTriggerType(job.getTriggerType());
+                waitStrategyContext.setTriggerInterval(job.getTriggerInterval());
+                waitStrategyContext.setNextTriggerAt(preTriggerAt);
+                LocalDateTime nextTriggerAt = waitStrategy.computeRetryTime(waitStrategyContext);
+
+                // 获取时间差的毫秒数
+                Duration duration = Duration.between(preTriggerAt, nextTriggerAt);
+                long milliseconds = duration.toMillis();
+
+                log.info("常驻任务监控. 任务时间差:[{}] 取余:[{}]", milliseconds, System.currentTimeMillis() % 1000);
+                job.setNextTriggerAt(nextTriggerAt);
+
+                JobTimerWheel.register(jobTimerTaskDTO.getTaskBatchId(), timerTask, milliseconds - System.currentTimeMillis() % 1000, TimeUnit.MILLISECONDS);
+                ResidentTaskCache.refresh(jobTimerTaskDTO.getJobId(), nextTriggerAt);
+            }
+        }
     }
 }

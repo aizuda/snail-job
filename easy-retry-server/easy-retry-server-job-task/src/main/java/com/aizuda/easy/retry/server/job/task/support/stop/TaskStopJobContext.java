@@ -36,11 +36,6 @@ public class TaskStopJobContext {
     private Integer taskType;
 
     /**
-     * 下次触发时间
-     */
-    private LocalDateTime nextTriggerAt;
-
-    /**
      * 是否需要变更任务状态
      */
     private boolean needUpdateTaskStatus;
@@ -49,4 +44,13 @@ public class TaskStopJobContext {
 
     private JobOperationReasonEnum jobOperationReasonEnum;
 
+    private boolean forceStop;
+
+    protected List<JobTask> getJobTasks() {
+        return jobTasks;
+    }
+
+    protected void setJobTasks(List<JobTask> jobTasks) {
+        this.jobTasks = jobTasks;
+    }
 }

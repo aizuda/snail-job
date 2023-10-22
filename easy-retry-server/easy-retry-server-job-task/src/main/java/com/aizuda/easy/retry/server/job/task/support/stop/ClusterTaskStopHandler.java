@@ -28,7 +28,7 @@ public class ClusterTaskStopHandler extends AbstractJobTaskStopHandler {
     }
 
     @Override
-    public void  doStop(TaskStopJobContext context) {
+    public void doStop(TaskStopJobContext context) {
         List<JobTask> jobTasks = context.getJobTasks();
 
         RealStopTaskInstanceDTO taskInstanceDTO = JobTaskConverter.INSTANCE.toRealStopTaskInstanceDTO(context);
@@ -38,7 +38,6 @@ public class ClusterTaskStopHandler extends AbstractJobTaskStopHandler {
         actorRef.tell(taskInstanceDTO, actorRef);
 
     }
-
 
 
 }

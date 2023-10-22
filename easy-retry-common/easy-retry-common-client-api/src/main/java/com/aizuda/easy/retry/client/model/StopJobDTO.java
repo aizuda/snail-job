@@ -15,8 +15,8 @@ public class StopJobDTO {
     @NotNull(message = "jobId 不能为空")
     private Long jobId;
 
-    @NotNull(message = "taskId 不能为空")
-    private Long taskId;
+    @NotNull(message = "taskBatchId 不能为空")
+    private Long taskBatchId;
 
     @NotBlank(message = "group 不能为空")
     private String groupName;

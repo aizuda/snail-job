@@ -14,15 +14,11 @@
               </a-select>
             </a-form-item>
           </a-col>
-          <!--          <a-col :md="8" :sm="24">-->
-          <!--            <a-form-item label="场景名称">-->
-          <!--              <a-select v-model="queryParam.sceneName" placeholder="请选择场景名称" allowClear>-->
-          <!--                <a-select-option v-for="item in sceneList" :value="item.sceneName" :key="item.sceneName">-->
-          <!--                  {{ item.sceneName }}</a-select-option-->
-          <!--                >-->
-          <!--              </a-select>-->
-          <!--            </a-form-item>-->
-          <!--          </a-col>-->
+          <a-col :md="8" :sm="24">
+            <a-form-item label="任务名称">
+              <a-input v-model="queryParam.jobName" placeholder="请输入任务名称" allowClear />
+            </a-form-item>
+          </a-col>
           <a-col :md="8" :sm="24">
             <a-form-item label="状态">
               <a-select v-model="queryParam.jobStatus" placeholder="请选择状态" allowClear>

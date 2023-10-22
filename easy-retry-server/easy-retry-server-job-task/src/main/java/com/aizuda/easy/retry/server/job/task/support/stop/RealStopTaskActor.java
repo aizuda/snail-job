@@ -57,7 +57,7 @@ public class RealStopTaskActor extends AbstractActor {
             .build();
 
         StopJobDTO stopJobDTO = new StopJobDTO();
-        stopJobDTO.setTaskId(realStopTaskInstanceDTO.getTaskBatchId());
+        stopJobDTO.setTaskBatchId(realStopTaskInstanceDTO.getTaskBatchId());
         stopJobDTO.setJobId(realStopTaskInstanceDTO.getJobId());
         stopJobDTO.setGroupName(realStopTaskInstanceDTO.getGroupName());
         return rpcClient.stop(stopJobDTO);

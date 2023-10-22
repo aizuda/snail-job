@@ -50,7 +50,7 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
             return doJobExecute(jobArgs);
         });
 
-        FutureCache.addFuture(jobContext.getTaskBatchId(), jobContext.getTaskId(), submit);
+        FutureCache.addFuture(jobContext.getTaskBatchId(), submit);
         Futures.addCallback(submit, new JobExecutorFutureCallback(jobContext), decorator);
     }
 
