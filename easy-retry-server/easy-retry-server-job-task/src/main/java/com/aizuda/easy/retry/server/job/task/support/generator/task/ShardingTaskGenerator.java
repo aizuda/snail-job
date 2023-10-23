@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.server.job.task.support.generator.task;
 
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
+import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.JobTaskStatusEnum;
 import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
 import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
@@ -53,7 +54,7 @@ public class ShardingTaskGenerator extends AbstractJobTaskGenerator {
         }
 
         String argsStr = context.getArgsStr();
-        Map<String, String> split = Splitter.on(";").omitEmptyStrings().withKeyValueSeparator('=').split(argsStr);
+        Map<String, String> split = Splitter.on(SystemConstants.JOB_SHARDING_ARGS_SEPARATOR).omitEmptyStrings().withKeyValueSeparator(SystemConstants.JOB_SHARDING_VALUE_SEPARATOR).split(argsStr);
 
         List<RegisterNodeInfo> nodeInfoList = new ArrayList<>(serverNodes);
         List<JobTask> jobTasks = new ArrayList<>(split.size());

@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -111,7 +112,7 @@ public class JobServiceImpl implements JobService {
         if (Objects.nonNull(jobId)) {
             queryWrapper.eq(Job::getId, jobId);
         }
-        
+
         PageDTO<Job> pageDTO = new PageDTO<>(1, 20);
         PageDTO<Job> selectPage = jobMapper.selectPage(pageDTO, queryWrapper);
         return JobResponseVOConverter.INSTANCE.toJobResponseVOs(selectPage.getRecords());
@@ -126,6 +127,25 @@ public class JobServiceImpl implements JobService {
         waitStrategyContext.setTriggerInterval(jobRequestVO.getTriggerInterval());
         waitStrategyContext.setNextTriggerAt(LocalDateTime.now());
         job.setNextTriggerAt(waitStrategy.computeRetryTime(waitStrategyContext));
+
+        // 判断常驻任务
+        if (jobRequestVO.getTriggerType() == WaitStrategyEnum.FIXED.getTriggerType()) {
+            if (Integer.parseInt(jobRequestVO.getTriggerInterval()) < 10) {
+                job.setResident(StatusEnum.YES.getStatus());
+            }
+        } else if(jobRequestVO.getTriggerType() == WaitStrategyEnum.CRON.getTriggerType()) {
+            List<String> timeByCron = getTimeByCron(jobRequestVO.getTriggerInterval());
+            LocalDateTime first = LocalDateTime.parse(timeByCron.get(0), dateTimeFormatter);
+            LocalDateTime second = LocalDateTime.parse(timeByCron.get(1), dateTimeFormatter);
+            Duration duration = Duration.between(first, second);
+            long milliseconds = duration.toMillis();
+            if (milliseconds < 10 * 1000) {
+                job.setResident(StatusEnum.YES.getStatus());
+            }
+        } else {
+            throw new EasyRetryServerException("未知触发类型");
+        }
+
         return 1 == jobMapper.insert(job);
     }
 
