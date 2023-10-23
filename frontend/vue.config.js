@@ -120,7 +120,7 @@ const vueConfig = {
   lintOnSave: undefined,
   // babel-loader no-ignore node_modules/*
   transpileDependencies: [],
-  outputDir: '../easy-retry-server/src/main/resources/admin',
+  outputDir: '../easy-retry-server/easy-retry-server-starter/src/main/resources/admin'
 }
 
 // preview.pro.loacg.com only do not use in your production;

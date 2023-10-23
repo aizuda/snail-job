@@ -87,6 +87,7 @@
             <a-form-item label="触发类型">
               <a-select
                 placeholder="请选择触发类型"
+                @change="handleChange"
                 v-decorator="[
                   'triggerType',
                   {
@@ -100,7 +101,19 @@
           </a-col>
           <a-col :lg="16" :md="12" :sm="12">
             <a-form-item label="间隔时长">
+              <a-input-number
+                v-if="triggerTypeValue === '2'"
+                style="width: -webkit-fill-available"
+                placeholder="请输入间隔时长(秒)"
+                :min="1"
+                v-decorator="[
+                  'triggerInterval',
+                  {initialValue: '60',
+                   rules: [ { required: true, message: '请输入间隔时长'}]}
+                ]" />
+
               <a-input
+                v-if="triggerTypeValue === '1'"
                 @click="handlerCron"
                 placeholder="请输入间隔时长"
                 v-decorator="[
@@ -341,7 +354,8 @@ export default {
       routeKey: enums.routeKey,
       loading: false,
       visible: false,
-      count: 0
+      count: 0,
+      triggerTypeValue: '2'
     }
   },
   beforeCreate () {
@@ -365,6 +379,13 @@ export default {
     })
   },
   methods: {
+    handleChange (value) {
+      console.log(value)
+      this.triggerTypeValue = value
+      this.form.setFieldsValue({
+        triggerInterval: null
+      })
+    },
     handlerCron () {
       const triggerType = this.form.getFieldValue('triggerType')
       if (triggerType === '1') {
@@ -413,11 +434,16 @@ export default {
 
         const argsStr = this.form.getFieldValue('argsStr')
 
+        console.log(argsStr.includes('#=@'))
+        if (!argsStr.includes('#=@')) {
+          return
+        }
+
         // 将字符串分割成键值对数组
-        const keyValuePairs = argsStr.split(';')
+        const keyValuePairs = argsStr.split('#;@')
         console.log(keyValuePairs)
         const restoredArray = keyValuePairs.map(pair => {
-          const [index, value] = pair.split('=')
+          const [index, value] = pair.split('#=@')
           console.log(value)
           this.count++
           return Number.parseInt(index)
@@ -426,7 +452,7 @@ export default {
         this.dynamicForm.getFieldDecorator('keys', { initialValue: restoredArray, preserve: true })
 
         keyValuePairs.map(pair => {
-          const [index, value] = pair.split('=')
+          const [index, value] = pair.split('#=@')
           this.dynamicForm.getFieldDecorator(`sharding[${index}]`, { initialValue: value, preserve: true })
           return value
         })
@@ -445,7 +471,7 @@ export default {
         if (!err) {
           console.log(values)
           const arr = values['sharding']
-          const formattedString = arr.map((item, index) => `${index}=${item}`).join(';')
+          const formattedString = arr.map((item, index) => `${index}#=@${item}`).join('#;@')
           form.setFieldsValue({
             argsStr: formattedString
           })
@@ -491,6 +517,7 @@ export default {
         formData.executorType = formData.executorType.toString()
         formData.blockStrategy = formData.blockStrategy.toString()
         formData.triggerType = formData.triggerType.toString()
+        this.triggerTypeValue = formData.triggerType
         form.setFieldsValue(formData)
       })
     }
