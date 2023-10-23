@@ -1,5 +1,16 @@
 <template>
   <div>
+    <s-table
+      ref="table"
+      size="default"
+      :rowKey="(record) => record.id"
+      :columns="notifyColumns"
+      :data="loadData"
+      :alert="options.alert"
+      :rowSelection="options.rowSelection"
+      :scroll="{ x: 2000 }"
+    >
+    </s-table>
     <a-table
       :columns="notifyColumns"
       :dataSource="data"
@@ -89,8 +100,6 @@
         </span>
       </template>
     </a-table>
-    <a-button style="width: 100%; margin-top: 16px; margin-bottom: 8px" type="dashed" icon="plus" @click="newMember">新增成员</a-button>
-
     <a-modal :visible="visible" title="添加配置" @ok="handleOk" @cancel="handlerCancel" width="1000px">
       <a-form :form="form" @submit="handleSubmit" :body-style="{padding: '0px 0px'}" v-bind="formItemLayout" >
         <a-form-item
@@ -195,9 +204,11 @@
 <script>
 import { getNotifyConfigList } from '@/api/manage'
 import pick from 'lodash.pick'
+import { STable } from '@/components'
 
 export default {
   name: 'NotifyList',
+  components: { STable },
   data () {
     return {
       notifyColumns: [
@@ -251,6 +262,28 @@ export default {
         labelCol: { lg: { span: 7 }, sm: { span: 7 } },
         wrapperCol: { lg: { span: 10 }, sm: { span: 17 } }
       },
+      loadData: (parameter) => {
+        return getNotifyConfigList(Object.assign(parameter, this.queryParam)).then((res) => {
+          return res
+        })
+      },
+      selectedRowKeys: [],
+      selectedRows: [],
+
+      // custom table alert & rowSelection
+      options: {
+        alert: {
+          show: true,
+          clear: () => {
+            this.selectedRowKeys = []
+          }
+        },
+        rowSelection: {
+          selectedRowKeys: this.selectedRowKeys,
+          onChange: this.onSelectChange
+        }
+      },
+      optionAlertShow: false,
       memberLoading: false,
       notifyScene: {
         '1': '重试数量超过阈值',

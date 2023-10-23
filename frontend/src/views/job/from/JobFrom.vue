@@ -322,7 +322,7 @@ import { getJobDetail, saveJob, updateJob } from '@/api/jobApi'
 import pick from 'lodash.pick'
 import CronModal from '@/views/job/from/CronModal'
 
-const enums = require('@/utils/enum')
+const enums = require('@/utils/jobEnum')
 
 export default {
   name: 'JobFrom',

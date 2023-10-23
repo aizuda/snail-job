@@ -30,12 +30,15 @@ public class SceneConfigServiceImpl implements SceneConfigService {
         PageDTO<SceneConfig> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
 
         LambdaQueryWrapper<SceneConfig> sceneConfigLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        if (StrUtil.isNotBlank(queryVO.getGroupName())) {
+            sceneConfigLambdaQueryWrapper.eq(SceneConfig::getGroupName, queryVO.getGroupName());
+        }
+
         if (StrUtil.isNotBlank(queryVO.getSceneName())) {
             sceneConfigLambdaQueryWrapper.eq(SceneConfig::getSceneName, queryVO.getSceneName());
         }
 
-        pageDTO = sceneConfigMapper.selectPage(pageDTO, sceneConfigLambdaQueryWrapper
-                .eq(SceneConfig::getGroupName, queryVO.getGroupName()).orderByDesc(SceneConfig::getCreateDt));
+        pageDTO = sceneConfigMapper.selectPage(pageDTO, sceneConfigLambdaQueryWrapper.orderByDesc(SceneConfig::getCreateDt));
 
         return new PageResult<>(pageDTO, SceneConfigResponseVOConverter.INSTANCE.batchConvert(pageDTO.getRecords()));
 

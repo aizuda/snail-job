@@ -79,7 +79,7 @@
 <script>
 import { getJobDetail } from '@/api/jobApi'
 import moment from 'moment'
-import enums from '@/utils/enum'
+import enums from '@/utils/jobEnum'
 
 export default {
   name: 'JobInfo',
@@ -103,11 +103,6 @@ export default {
     if (id && groupName) {
       getJobDetail(id).then(res => {
         this.jobInfo = res.data
-        // this.queryParam = {
-        //   groupName: this.retryTaskInfo.groupName,
-        //   uniqueId: this.retryTaskInfo.uniqueId
-        // }
-        // this.$refs.retryTaskLogMessageListRef.refreshTable(this.queryParam)
       })
     } else {
       this.$router.push({ path: '/404' })
