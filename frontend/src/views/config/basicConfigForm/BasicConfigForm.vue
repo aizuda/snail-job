@@ -1,17 +1,17 @@
 <template>
   <div>
-    <page-header-wrapper content="配置组、场景、通知配置" @back="() => $router.go(-1)" style='margin: -24px -1px 0'>
+    <page-header-wrapper content="配置组、场景、通知配置" @back="() => $router.go(-1)" style="margin: -24px -1px 0">
       <div></div>
     </page-header-wrapper>
     <a-card class="card" title="组配置" :bordered="false">
       <group-form ref="groupConfig" :showSubmit="false" />
     </a-card>
-    <a-card class="card" title="通知配置" :bordered="false">
-      <notify-list ref="notify"></notify-list>
-    </a-card>
-    <a-card class="card" title="场景配置" :bordered="false">
-      <scene-list ref="scene"></scene-list>
-    </a-card>
+    <!--    <a-card class="card" title="通知配置" :bordered="false">-->
+    <!--      <notify-list ref="notify"></notify-list>-->
+    <!--    </a-card>-->
+    <!--    <a-card class="card" title="场景配置" :bordered="false">-->
+    <!--      <scene-list ref="scene"></scene-list>-->
+    <!--    </a-card>-->
 
     <!-- fixed footer toolbar -->
     <footer-tool-bar :is-mobile="isMobile" :collapsed="sideCollapsed" style="width: 100%">
@@ -38,7 +38,7 @@
 <script>
 import GroupForm from './GroupForm'
 import SceneList from './SceneList'
-import NotifyList from './NotifyList'
+// import NotifyList from '../../task/NotifyList.vue'
 import FooterToolBar from '@/components/FooterToolbar'
 import { baseMixin } from '@/store/app-mixin'
 import { saveGroup } from '@/api/manage'
@@ -55,8 +55,8 @@ export default {
   components: {
     FooterToolBar,
     GroupForm,
-    SceneList,
-    NotifyList
+    SceneList
+    // NotifyList
   },
   data () {
     return {

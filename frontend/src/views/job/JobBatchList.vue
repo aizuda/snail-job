@@ -160,7 +160,7 @@ import AInput from 'ant-design-vue/es/input/Input'
 import { STable } from '@/components'
 import { jobBatchList, jobNameList } from '@/api/jobApi'
 import { getAllGroupNameList } from '@/api/manage'
-const enums = require('@/utils/enum')
+const enums = require('@/utils/jobEnum')
 
 export default {
   name: 'JobBatchList',

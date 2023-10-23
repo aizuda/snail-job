@@ -47,7 +47,7 @@
 <script>
 import { jobBatchDetail, jobTaskList } from '@/api/jobApi'
 import moment from 'moment'
-import enums from '@/utils/enum'
+import enums from '@/utils/jobEnum'
 import JobTaskList from './JobTaskList'
 
 export default {

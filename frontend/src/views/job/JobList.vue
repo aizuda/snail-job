@@ -157,7 +157,7 @@ import AInput from 'ant-design-vue/es/input/Input'
 import { STable } from '@/components'
 import { delJob, getJobList, updateJobStatus } from '@/api/jobApi'
 import { getAllGroupNameList } from '@/api/manage'
-import enums from '@/utils/enum'
+import enums from '@/utils/jobEnum'
 
 export default {
   name: 'JobList',
