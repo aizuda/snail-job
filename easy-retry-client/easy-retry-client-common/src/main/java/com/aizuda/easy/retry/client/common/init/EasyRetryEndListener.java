@@ -1,4 +1,4 @@
-package com.aizuda.easy.retry.client.core.init;
+package com.aizuda.easy.retry.client.common.init;
 
 import com.aizuda.easy.retry.client.common.Lifecycle;
 import com.aizuda.easy.retry.common.core.util.EasyRetryVersion;

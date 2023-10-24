@@ -70,10 +70,15 @@ public class JobExecutorScanner implements Scanner, ApplicationContextAware {
             if (Objects.nonNull(jobExecutor)) {
                 String executorName = jobExecutor.name();
                 if (!JobExecutorInfoCache.isExisted(executorName)) {
+                    Method method = ReflectionUtils.findMethod(bean.getClass(), jobExecutor.method(), JobArgs.class);
+                    if (method == null) {
+                        method = ReflectionUtils.findMethod(bean.getClass(), jobExecutor.method());
+                    }
+
                     JobExecutorInfo jobExecutorInfo =
                             new JobExecutorInfo(
                                     executorName,
-                                    ReflectionUtils.findMethod(bean.getClass(), jobExecutor.method(), JobArgs.class),
+                                    method,
                                     bean
                             );
                     retryerInfoList.add(jobExecutorInfo);

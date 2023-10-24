@@ -103,7 +103,7 @@ const permissionsConfig = {
       },
       {
         roleId: 1,
-        permissionId: 'JobBatch',
+        permissionId: 'jobBatch',
         permissionName: '任务批次'
       }
     ],
@@ -142,7 +142,7 @@ const permissionsConfig = {
       },
       {
         roleId: 1,
-        permissionId: 'JobBatch',
+        permissionId: 'jobBatch',
         permissionName: '任务批次'
       }
     ]
@@ -187,7 +187,7 @@ const permissionsConfig = {
       },
       {
         roleId: 1,
-        permissionId: 'JobBatch',
+        permissionId: 'jobBatch',
         permissionName: '任务批次'
       }
     ],
@@ -246,7 +246,7 @@ const permissionsConfig = {
       },
       {
         roleId: 1,
-        permissionId: 'JobBatch',
+        permissionId: 'jobBatch',
         permissionName: '任务批次'
       }
     ]

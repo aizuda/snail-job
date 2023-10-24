@@ -15,6 +15,8 @@ import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.google.common.util.concurrent.FutureCallback;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Objects;
+
 /**
  * @author: www.byteblogs.com
  * @date : 2023-10-08 16:44
@@ -34,9 +36,13 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
     }
 
     @Override
-    public void onSuccess(final ExecuteResult result) {
+    public void onSuccess(ExecuteResult result) {
         // 上报执行成功
         log.info("任务执行成功 [{}]", JsonUtil.toJsonString(result));
+
+        if (Objects.isNull(result)) {
+            result = ExecuteResult.success();
+        }
 
         int taskStatus;
         if (result.getStatus() == StatusEnum.NO.getStatus()) {
