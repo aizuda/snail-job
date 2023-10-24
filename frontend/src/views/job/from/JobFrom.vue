@@ -177,7 +177,7 @@
                 @click="handleBlur"
                 v-decorator="[
                   'argsStr',
-                  {rules: [{ required: true, message: '请输入方法参数', whitespace: true}]}
+                  {rules: [{ required: false, message: '请输入方法参数', whitespace: true}]}
                 ]" />
             </a-form-item>
           </a-col>

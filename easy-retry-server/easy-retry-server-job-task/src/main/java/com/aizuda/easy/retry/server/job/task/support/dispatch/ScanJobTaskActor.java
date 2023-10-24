@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -65,6 +66,9 @@ public class ScanJobTaskActor extends AbstractActor {
 
     private void doScan(final ScanTask scanTask) {
         log.info("job scan start");
+        if (CollectionUtils.isEmpty(scanTask.getBuckets())) {
+            return;
+        }
 
         long total = PartitionTaskUtils.process(startId -> listAvailableJobs(startId, scanTask), this::processJobPartitionTasks, scanTask.getStartId());
 

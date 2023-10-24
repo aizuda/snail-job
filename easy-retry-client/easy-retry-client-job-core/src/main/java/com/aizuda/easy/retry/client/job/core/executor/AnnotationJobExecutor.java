@@ -21,6 +21,12 @@ public class AnnotationJobExecutor extends AbstractJobExecutor {
     @Override
     protected ExecuteResult doJobExecute(final JobArgs jobArgs) {
         JobExecutorInfo jobExecutorInfo = JobExecutorInfoCache.get(jobArgs.getExecutorInfo());
-        return  (ExecuteResult) ReflectionUtils.invokeMethod(jobExecutorInfo.getMethod(), jobExecutorInfo.getExecutor(), jobArgs);
+        Class<?>[] paramTypes = jobExecutorInfo.getMethod().getParameterTypes();
+
+        if (paramTypes.length > 0) {
+            return (ExecuteResult) ReflectionUtils.invokeMethod(jobExecutorInfo.getMethod(), jobExecutorInfo.getExecutor(), jobArgs);
+        } else {
+            return (ExecuteResult) ReflectionUtils.invokeMethod(jobExecutorInfo.getMethod(), jobExecutorInfo.getExecutor());
+        }
     }
 }

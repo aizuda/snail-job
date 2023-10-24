@@ -9,7 +9,7 @@ import java.lang.annotation.*;
  * @date 2023-09-26 23:19:01
  * @since 2.4.0
  */
-@Target({ElementType.TYPE, ElementType.ANNOTATION_TYPE})
+@Target({ElementType.METHOD, ElementType.TYPE, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented

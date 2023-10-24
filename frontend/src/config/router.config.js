@@ -149,28 +149,28 @@ export const asyncRouterMap = [
             path: '/job/batch/list',
             name: 'JobBatchList',
             component: () => import('@/views/job/JobBatchList'),
-            meta: { title: '任务批次', icon: 'profile', permission: ['retryLog'] }
+            meta: { title: '任务批次', icon: 'profile', permission: ['jobBatch'] }
           },
           {
             path: '/job/batch/info',
             name: 'JobBatchInfo',
             hidden: true,
             component: () => import('@/views/job/JobBatchInfo'),
-            meta: { title: '任务批次详情', icon: 'profile', permission: ['retryLog'] }
+            meta: { title: '任务批次详情', icon: 'profile', permission: ['jobBatch'] }
           },
           {
             path: '/job/task/list',
             name: 'JobTaskList',
             hidden: true,
             component: () => import('@/views/job/JobTaskList'),
-            meta: { title: '任务项', icon: 'profile', permission: ['retryLog'] }
+            meta: { title: '任务项', icon: 'profile', permission: ['jobBatch'] }
           },
           {
             path: '/job/log/list',
             name: 'JobLogMessageList',
             hidden: true,
             component: () => import('@/views/job/JobLogMessageList'),
-            meta: { title: '任务调度日志', icon: 'profile', permission: ['retryLog'] }
+            meta: { title: '任务调度日志', icon: 'profile', permission: ['jobBatch'] }
           }
         ]
       },
