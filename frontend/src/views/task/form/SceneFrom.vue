@@ -71,9 +71,13 @@
             <a-form-item label="间隔时长">
               <a-input
                 v-if="backOff === '1'"
-                placeholder="1 2 4 5"
+                placeholder="10s,15s,30s,35s,40s,50s,1m,2m,4m,6m,8m,10m,20m,40m,1h,2h,3h,4h,5h,6h,7h,8h,9h,10h,11h,12h"
                 disabled
-              />
+              >
+                <a-tooltip slot="suffix" title="10s,15s,30s,35s,40s,50s,1m,2m,4m,6m,8m,10m,20m,40m,1h,2h,3h,4h,5h,6h,7h,8h,9h,10h,11h,12h">
+                  <a-icon type="info-circle" style="color: rgba(0, 0, 0, 0.45)" />
+                </a-tooltip>
+              </a-input>
 
               <a-input-number
                 v-if="backOff === '2' || backOff === '4'"
@@ -228,7 +232,7 @@ export default {
       loading: false,
       visible: false,
       count: 0,
-      backOff: '1'
+      backOff: '2'
 
     }
   },
