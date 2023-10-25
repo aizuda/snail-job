@@ -25,7 +25,7 @@ public class SystemProperties {
     /**
      * 重试每次拉取的条数
      */
-    private int retryPullPageSize = 100;
+    private int retryPullPageSize = 1000;
 
     /**
      * netty 端口
