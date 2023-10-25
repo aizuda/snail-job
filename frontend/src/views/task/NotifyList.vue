@@ -1,210 +1,80 @@
 <template>
   <div>
-    <s-table
-      ref="table"
-      size="default"
-      :rowKey="(record) => record.id"
-      :columns="notifyColumns"
-      :data="loadData"
-      :alert="options.alert"
-      :rowSelection="options.rowSelection"
-      :scroll="{ x: 2000 }"
-    >
-    </s-table>
-    <a-table
-      :columns="notifyColumns"
-      :dataSource="data"
-      :pagination="false"
-      :loading="memberLoading"
-      :scroll="{ x: 1200 }"
-    >
-      <template v-for="(col, i) in ['description']" :slot="col" slot-scope="text, record">
-        <a-input
-          :key="col"
-          v-if="record.editable"
-          style="margin: -5px 0"
-          :value="text"
-          :placeholder="notifyColumns.find(item => item.key === col).title"
-          @change="e => handleChange(e.target.value, record.key, col)"
-        />
-        <template v-else>{{ text }}</template>
-      </template>
-      <template slot="notifyAttribute" slot-scope="text, record">
-        <a-textarea
-          v-if="record.editable"
-          style="margin: -5px 0"
-          :value="parseJson(text, record)"
-          auto-size
-          :placeholder="notifyColumns.find(item => item.key === 'notifyAttribute').title"
-          @click="handleBlur(record)"
-        />
-        <template v-else>
-          <span v-html="parseJson(text, record).replaceAll(&quot;\r\n&quot;, &quot;</br>&quot;)"></span>
-        </template>
-      </template>
-      <template slot="notifyScene" slot-scope="text, record">
-        <a-select
-          v-if="record.editable"
-          placeholder="通知场景"
-          style="width: 100%;"
-          :value="text"
-          @change="value => handleChange(value, record.key, 'notifyScene')">
-          <a-select-option :value="key" v-for="(value, key) in notifyScene" :key="key">{{ value }}</a-select-option>
-        </a-select>
-        <template v-else>{{ notifyScene[text] }}</template>
-      </template>
-      <template slot="notifyType" slot-scope="text, record">
-        <a-select
-          v-if="record.editable"
-          placeholder="通知类型"
-          style="width: 100%;"
-          :value="text"
-          @change="value => handleChange(value, record.key, 'notifyType')">
-          <a-select-option :value="key" v-for="(value, key) in notifyType" :key="key">{{ value }}</a-select-option>
-        </a-select>
-        <template v-else>{{ notifyType[text] }}</template>
-      </template>
-      <template slot="notifyThreshold" slot-scope="text, record">
-        <a-input-number
-          v-if="record.editable"
-          :min="1"
-          :max="999999"
-          style="width: 100%;"
-          :value="text"
-          :disabled="notifyThresholdDisabled.includes(data.find(item => item.key === record.key).notifyScene)"
-          placeholder="通知阈值"
-          @change="value => handleChange(value, record.key, 'notifyThreshold')"/>
-        <template v-else>{{ text }}</template>
-      </template>
-      <template slot="operation" slot-scope="text, record">
-        <template v-if="record.editable">
-          <span v-if="record.isNew">
-            <a @click="saveRow(record)">添加</a>
-            <a-divider type="vertical" />
-            <a-popconfirm title="是否要删除此行？" @confirm="remove(record.key)">
-              <a>删除</a>
-            </a-popconfirm>
-          </span>
-          <span v-else>
-            <a @click="saveRow(record)">保存</a>
-            <a-divider type="vertical" />
-            <a @click="cancel(record.key)">取消</a>
-          </span>
-        </template>
-        <span v-else>
-          <a @click="toggle(record.key)">编辑</a>
-          <a-divider type="vertical" />
-          <a-popconfirm title="是否要删除此行？" @confirm="remove(record.key)">
-            <a>删除</a>
-          </a-popconfirm>
+    <a-card :bordered="false">
+      <div class="table-page-search-wrapper">
+        <a-form layout="inline">
+          <a-row :gutter="48">
+            <template>
+              <a-col :md="8" :sm="24">
+                <a-form-item label="组名称">
+                  <a-select
+                    v-model="queryParam.groupName"
+                    placeholder="请输入组名称"
+                  >
+                    <a-select-option v-for="item in groupNameList" :value="item" :key="item">{{ item }}</a-select-option>
+                  </a-select>
+                </a-form-item>
+              </a-col>
+            </template>
+            <a-col :md="!advanced && 8 || 24" :sm="24">
+              <span class="table-page-search-submitButtons" :style="advanced && { float: 'right', overflow: 'hidden' } || {} ">
+                <a-button type="primary" @click="queryChange()">查询</a-button>
+                <a-button style="margin-left: 8px" @click="() => queryParam = {}">重置</a-button>
+              </span>
+            </a-col>
+          </a-row>
+        </a-form>
+      </div>
+      <div class="table-operator">
+        <a-button type="primary" icon="plus" @click="handleNew()">新增</a-button>
+      <!--        <a-dropdown v-action:edit v-if="selectedRowKeys.length > 0">-->
+      <!--          <a-menu slot="overlay" @click="onClick">-->
+      <!--            <a-menu-item key="1"><a-icon type="delete" />删除</a-menu-item>-->
+      <!--            <a-menu-item key="2"><a-icon type="edit" />更新</a-menu-item>-->
+      <!--          </a-menu>-->
+      <!--          <a-button style="margin-left: 8px"> 批量操作 <a-icon type="down" /> </a-button>-->
+      <!--        </a-dropdown>-->
+      </div>
+      <s-table
+        ref="table"
+        size="default"
+        :rowKey="(record) => record.id"
+        :columns="notifyColumns"
+        :data="loadData"
+        :alert="options.alert"
+        :rowSelection="options.rowSelection"
+      >
+        <span slot="notifyType" slot-scope="text">
+          <a-tag :color="notifyType[text].color">
+            {{ notifyType[text].name }}
+          </a-tag>
         </span>
-      </template>
-    </a-table>
-    <a-modal :visible="visible" title="添加配置" @ok="handleOk" @cancel="handlerCancel" width="1000px">
-      <a-form :form="form" @submit="handleSubmit" :body-style="{padding: '0px 0px'}" v-bind="formItemLayout" >
-        <a-form-item
-          v-if="this.notifyTypeValue === '1'"
-          label="钉钉URL">
-          <a-input
-            placeholder="请输入钉钉URL"
-            v-decorator="[
-              'dingDingUrl',
-              {rules: [{ required: true, message: '请输入钉钉URL', whitespace: true}]}
-            ]" />
-        </a-form-item>
-        <a-form-item
-          v-if="this.notifyTypeValue === '4'"
-          label="飞书URL">
-          <a-input
-            placeholder="请输入飞书URL"
-            v-decorator="[
-              'larkUrl',
-              {rules: [{ required: true, message: '请输入飞书URL', whitespace: true}]}
-            ]" />
-        </a-form-item>
-        <a-form-item
-          v-if="this.notifyTypeValue === '2'"
-          label="用户名">
-          <a-input
-            placeholder="请输入用户名"
-            v-if="this.notifyTypeValue === '2'"
-            v-decorator="[
-              'user',
-              {rules: [{ required: true, message: '请输入用户名', whitespace: true}]}
-            ]" />
-        </a-form-item>
-        <a-form-item
-          v-if="this.notifyTypeValue === '2'"
-          label="密码">
-          <a-input
-            placeholder="请输入密码"
-            v-if="this.notifyTypeValue === '2'"
-            v-decorator="[
-              'pass',
-              {rules: [{ required: true, message: '请输入密码', whitespace: true}]}
-            ]"/>
-        </a-form-item>
-        <a-form-item
-          v-if="this.notifyTypeValue === '2'"
-          label="SMTP地址">
-          <a-input
-            placeholder="请输入邮件服务器的SMTP地址"
-            v-if="this.notifyTypeValue === '2'"
-            v-decorator="[
-              'host',
-              {rules: [{ required: true, message: '请输入邮件服务器的SMTP地址', whitespace: true}]}
-            ]"/>
-        </a-form-item>
-        <a-form-item
-          v-if="this.notifyTypeValue === '2'"
-          label="SMTP端口">
-          <a-input
-            v-if="this.notifyTypeValue === '2'"
-            placeholder="请输入邮件服务器的SMTP端口"
-            v-decorator="[
-              'port',
-              {rules: [{ required: true, message: '请输入邮件服务器的SMTP端口', whitespace: true}]}
-            ]"/>
-        </a-form-item>
-        <a-form-item
-          v-if="this.notifyTypeValue === '2'"
-          label="发件人">
-          <a-input
-            v-if="this.notifyTypeValue === '2'"
-            placeholder="请输入发件人"
-            v-decorator="[
-              'from',
-              {rules: [{ required: true, message: '请输入发件人', whitespace: true}]}
-            ]"/>
-        </a-form-item>
-        <a-form-item
-          v-if="this.notifyTypeValue === '2'"
-          label="收件人">
-          <a-input
-            v-if="this.notifyTypeValue === '2'"
-            placeholder="请输入收件人"
-            v-decorator="[
-              'tos',
-              {rules: [{ required: true, message: '请输入收件人', whitespace: true}]}
-            ]"/>
-        </a-form-item>
-        <a-form-item
-          :wrapper-col="{
-            xs: { span: 24, offset: 0 },
-            sm: { span: 16, offset: 8 },
-            lg: { span: 7 }
-          }">
-        </a-form-item>
-      </a-form>
-    </a-modal>
+        <span slot="notifyScene" slot-scope="text">
+          <a-tag :color="notifyScene[text].color">
+            {{ notifyScene[text].name }}
+          </a-tag>
+        </span>
+        <span slot="notifyAttribute" slot-scope="text, record">
+          {{ parseJson(JSON.parse(text),record) }}
+        </span>
+        <span slot="notifyThreshold" slot-scope="text">
+          {{ text === 0 ? '无' : text }}
+        </span>
+        <span slot="action" slot-scope="record">
+          <template>
+            <a @click="handleEdit(record)">编辑</a>
+          </template>
+        </span>
+      </s-table>
+    </a-card>
   </div>
 
 </template>
 
 <script>
-import { getNotifyConfigList } from '@/api/manage'
-import pick from 'lodash.pick'
+import { getAllGroupNameList, getNotifyConfigList } from '@/api/manage'
 import { STable } from '@/components'
+const enums = require('@/utils/retryEnum')
 
 export default {
   name: 'NotifyList',
@@ -216,21 +86,21 @@ export default {
           title: '通知类型',
           dataIndex: 'notifyType',
           key: 'notifyType',
-          width: '12%',
+          width: '10%',
           scopedSlots: { customRender: 'notifyType' }
         },
         {
           title: '通知场景',
           dataIndex: 'notifyScene',
           key: 'notifyScene',
-          width: '20%',
+          width: '10%',
           scopedSlots: { customRender: 'notifyScene' }
         },
         {
           title: '通知阈值',
           dataIndex: 'notifyThreshold',
           key: 'notifyThreshold',
-          width: '12%',
+          width: '10%',
           scopedSlots: { customRender: 'notifyThreshold' }
         },
         {
@@ -244,24 +114,23 @@ export default {
           title: '描述',
           dataIndex: 'description',
           key: 'description',
-          width: '15%',
+          width: '20%',
           scopedSlots: { customRender: 'description' }
         },
         {
           title: '操作',
           key: 'action',
           fixed: 'right',
-          scopedSlots: { customRender: 'operation' }
+          width: '180px',
+          scopedSlots: { customRender: 'action' }
         }
       ],
       data: [],
-      formData: [],
       loading: false,
       form: this.$form.createForm(this),
-      formItemLayout: {
-        labelCol: { lg: { span: 7 }, sm: { span: 7 } },
-        wrapperCol: { lg: { span: 10 }, sm: { span: 17 } }
-      },
+      // 高级搜索 展开/关闭
+      advanced: false,
+      queryParam: {},
       loadData: (parameter) => {
         return getNotifyConfigList(Object.assign(parameter, this.queryParam)).then((res) => {
           return res
@@ -285,160 +154,31 @@ export default {
       },
       optionAlertShow: false,
       memberLoading: false,
-      notifyScene: {
-        '1': '重试数量超过阈值',
-        '2': '重试失败数量超过阈值',
-        '3': '客户端上报失败',
-        '4': '客户端组件异常'
-      },
-      notifyType: {
-        '1': '钉钉通知',
-        '2': '邮箱通知',
-        '4': '飞书'
-        // '3': '企业微信'
-      },
-      notifyThresholdDisabled: ['3', '4'],
+      notifyScene: enums.notifyScene,
+      notifyType: enums.notifyType,
+      notifyStatus: enums.notifyStatus,
       visible: false,
       key: '',
-      notifyTypeValue: '1'
+      notifyTypeValue: '1',
+      groupNameList: []
     }
   },
   created () {
+    getAllGroupNameList().then((res) => {
+      this.groupNameList = res.data
+    })
+
     const groupName = this.$route.query.groupName
     if (groupName) {
       this.getNotifyConfigList(groupName)
     }
   },
   methods: {
-    reset () {
-      this.formData = []
-      this.data = []
-      const groupName = this.$route.query.groupName
-      if (groupName) {
-        this.getNotifyConfigList(groupName)
-      }
+    handleNew () {
+      this.$router.push({ path: '/retry/notify/config' })
     },
-    getNotifyConfigList (groupName) {
-      getNotifyConfigList({ groupName: groupName }).then(res => {
-        res.data.map(record => {
-          const { id, notifyType, notifyThreshold, notifyScene, description, notifyAttribute } = record
-          this.data.push({
-            key: id,
-            id: id,
-            notifyType: notifyType.toString(),
-            notifyThreshold: notifyThreshold,
-            notifyScene: notifyScene.toString(),
-            description: description,
-            notifyAttribute: JSON.parse(notifyAttribute),
-            editable: false,
-            isNew: false
-          })
-        })
-      })
-    },
-    remove (delKey) {
-      const delData = this.data.find(item => delKey === item.key)
-      const { id, key, notifyType, notifyThreshold, notifyAttribute, notifyScene, description } = delData
-      this.formData.push({
-        key: key,
-        id: id,
-        notifyType: notifyType,
-        notifyThreshold: notifyThreshold,
-        notifyScene: notifyScene,
-        notifyAttribute: JSON.stringify(notifyAttribute),
-        description: description,
-        isDeleted: 1
-      })
-
-      const newData = this.data.filter(item => item.key !== key)
-      this.data = newData
-    },
-    saveRow (record) {
-      this.memberLoading = true
-      const { id, key, notifyType, notifyThreshold, notifyAttribute, notifyScene, description } = record
-
-      if (!notifyType || !notifyScene || !notifyAttribute || !description || (this.notifyThresholdDisabled.includes(notifyScene) ? false : !notifyThreshold)) {
-        this.memberLoading = false
-        this.$message.error('请填写完整成员信息。')
-        return
-      }
-
-      const target = this.formData.find(item => key === item.key)
-      if (!target) {
-        this.formData.push({
-          key: key,
-          id,
-          notifyType: notifyType,
-          notifyThreshold: notifyThreshold,
-          notifyScene: notifyScene,
-          notifyAttribute: JSON.stringify(notifyAttribute),
-          description: description,
-          isDeleted: 0
-        })
-      }
-
-      // 模拟网络请求、卡顿 800ms
-      new Promise((resolve) => {
-        setTimeout(() => {
-          resolve({ loop: false })
-        }, 100)
-      }).then(() => {
-        const target = this.data.find(item => item.key === key)
-        target.editable = false
-        target.isNew = false
-        this.memberLoading = false
-        this.$message.warning('请点击右下角提交按钮以保存所有页面数据')
-      })
-    },
-    toggle (key) {
-      const target = this.data.find(item => item.key === key)
-      target._originalData = { ...target }
-      target.editable = !target.editable
-    },
-    getRowByKey (key, newData) {
-      const data = this.data
-      return (newData || data).find(item => item.key === key)
-    },
-    cancel (key) {
-      const target = this.data.find(item => item.key === key)
-      Object.keys(target).forEach(key => { target[key] = target._originalData[key] })
-      target._originalData = undefined
-    },
-    handleChange (value, key, column) {
-      const newData = [...this.data]
-      const target = newData.find(item => key === item.key)
-      if (target) {
-        target[column] = value
-        this.data = newData
-      }
-    },
-    handleBlur (record) {
-      this.key = record.key
-      this.notifyTypeValue = record.notifyType
-      new Promise((resolve) => {
-        setTimeout(resolve, 1500)
-      }).then(() => {
-        const { form } = this
-        const formData = pick(record.notifyAttribute, ['dingDingUrl', 'larkUrl', 'user', 'pass', 'host', 'port', 'from', 'tos'])
-        console.log(formData)
-        form.setFieldsValue(formData)
-      })
-      this.visible = !this.visible
-    },
-    handleOk () {
-      this.form.validateFields((err, values) => {
-        if (!err) {
-          this.handleChange(values, this.key, 'notifyAttribute')
-          this.visible = false
-          this.key = ''
-        }
-      })
-    },
-    handleSubmit (e) {
-      e.preventDefault()
-    },
-    handlerCancel () {
-      this.visible = false
+    handleEdit (record) {
+      this.$router.push({ path: '/retry/notify/config', query: { id: record.id } })
     },
     parseJson (text, record) {
       if (!text) {
@@ -453,29 +193,13 @@ export default {
         '发件人:' + text['from'] + ';\r\n' +
         '收件人:' + text['tos'] + ';'
 
-      if (record.notifyType === '1') {
-         s = '钉钉地址:' + text['dingDingUrl'] + ';'
-      } else if (record.notifyType === '4') {
-        s = '飞书地址:' + text['larkUrl'] + ';'
+      if (record.notifyType === 1) {
+         s = text['dingDingUrl']
+      } else if (record.notifyType === 4) {
+        s = text['larkUrl']
       }
 
       return s
-    },
-    newMember () {
-      const length = this.data.length
-      this.data.push({
-        key: length === 0 ? '1' : (parseInt(this.data[length - 1].key) + 1).toString(),
-        notifyType: '1',
-        notifyScene: '1',
-        notifyThreshold: null,
-        notifyAttribute: '',
-        description: '',
-        editable: true,
-        isNew: true
-      })
-
-      const { form } = this
-      form.resetFields()
     }
   }
 }

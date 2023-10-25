@@ -3,32 +3,29 @@ package com.aizuda.easy.retry.server.web.service.impl;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.HashUtil;
 import cn.hutool.core.util.StrUtil;
-import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.enums.IdGeneratorMode;
 import com.aizuda.easy.retry.server.common.enums.SystemModeEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.retry.task.support.handler.ConfigVersionSyncHandler;
-import com.aizuda.easy.retry.server.web.service.GroupConfigService;
-import com.aizuda.easy.retry.server.web.service.convert.GroupConfigConverter;
-import com.aizuda.easy.retry.server.web.service.convert.GroupConfigResponseVOConverter;
-import com.aizuda.easy.retry.server.web.service.convert.NotifyConfigConverter;
-import com.aizuda.easy.retry.server.web.service.convert.SceneConfigConverter;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
 import com.aizuda.easy.retry.server.web.model.request.GroupConfigQueryVO;
 import com.aizuda.easy.retry.server.web.model.request.GroupConfigRequestVO;
 import com.aizuda.easy.retry.server.web.model.response.GroupConfigResponseVO;
+import com.aizuda.easy.retry.server.web.service.GroupConfigService;
+import com.aizuda.easy.retry.server.web.service.convert.GroupConfigConverter;
+import com.aizuda.easy.retry.server.web.service.convert.GroupConfigResponseVOConverter;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
 import com.aizuda.easy.retry.template.datasource.access.ConfigAccess;
 import com.aizuda.easy.retry.template.datasource.access.TaskAccess;
-import com.aizuda.easy.retry.template.datasource.persistence.mapper.*;
+import com.aizuda.easy.retry.template.datasource.persistence.mapper.SequenceAllocMapper;
+import com.aizuda.easy.retry.template.datasource.persistence.mapper.ServerNodeMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.*;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.stereotype.Service;
@@ -36,7 +33,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -59,10 +58,6 @@ public class GroupConfigServiceImpl implements GroupConfigService {
     @Lazy
     private ConfigVersionSyncHandler configVersionSyncHandler;
 
-    @Value("${easy-retry.total-partition:32}")
-    private Integer totalPartition;
-    @Value("${easy-retry.step:100}")
-    private Integer step;
     @Autowired
     private SystemProperties systemProperties;
 
@@ -81,12 +76,6 @@ public class GroupConfigServiceImpl implements GroupConfigService {
         // 保存生成唯一id配置
         doSaveSequenceAlloc(groupConfigRequestVO);
 
-        // 保存通知配置
-        doSaveNotifyConfig(groupConfigRequestVO);
-
-        // 保存场景配置
-        doSaveSceneConfig(groupConfigRequestVO.getSceneList(), groupConfigRequestVO.getGroupName());
-
         return Boolean.TRUE;
     }
 
@@ -98,7 +87,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
     private void doSaveSequenceAlloc(final GroupConfigRequestVO groupConfigRequestVO) {
         SequenceAlloc sequenceAlloc = new SequenceAlloc();
         sequenceAlloc.setGroupName(groupConfigRequestVO.getGroupName());
-        sequenceAlloc.setStep(step);
+        sequenceAlloc.setStep(systemProperties.getStep());
         sequenceAlloc.setUpdateDt(LocalDateTime.now());
         Assert.isTrue(1 == sequenceAllocMapper.insert(sequenceAlloc), () -> new EasyRetryServerException("failed to save sequence generation rule configuration [{}].", groupConfigRequestVO.getGroupName()));
     }
@@ -117,7 +106,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
         groupConfig.setVersion(groupConfig.getVersion() + 1);
         BeanUtils.copyProperties(groupConfigRequestVO, groupConfig);
 
-        Assert.isTrue(totalPartition > groupConfigRequestVO.getGroupPartition(), () -> new EasyRetryServerException("分区超过最大分区. [{}]", totalPartition - 1));
+        Assert.isTrue(systemProperties.getTotalPartition() > groupConfigRequestVO.getGroupPartition(), () -> new EasyRetryServerException("分区超过最大分区. [{}]", systemProperties.getTotalPartition() - 1));
         Assert.isTrue(groupConfigRequestVO.getGroupPartition() >= 0, () -> new EasyRetryServerException("分区不能是负数."));
 
         // 校验retry_task_x和retry_dead_letter_x是否存在
@@ -127,9 +116,6 @@ public class GroupConfigServiceImpl implements GroupConfigService {
                         new LambdaUpdateWrapper<GroupConfig>().eq(GroupConfig::getGroupName, groupConfigRequestVO.getGroupName())),
                 () -> new EasyRetryServerException("exception occurred while adding group. groupConfigVO[{}]", groupConfigRequestVO));
 
-        doUpdateNotifyConfig(groupConfigRequestVO);
-
-        doUpdateSceneConfig(groupConfigRequestVO);
 
         if (SystemModeEnum.isRetry(systemProperties.getMode())) {
             // 同步版本， 版本为0代表需要同步到客户端
@@ -161,6 +147,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
 
         ConfigAccess<GroupConfig> groupConfigAccess = accessTemplate.getGroupConfigAccess();
 
+        groupConfigLambdaQueryWrapper.orderByDesc(GroupConfig::getId);
         PageDTO<GroupConfig> groupConfigPageDTO = groupConfigAccess.listPage(new PageDTO<>(queryVO.getPage(), queryVO.getSize()), groupConfigLambdaQueryWrapper);
         List<GroupConfig> records = groupConfigPageDTO.getRecords();
         if (CollectionUtils.isEmpty(records)) {
@@ -190,9 +177,10 @@ public class GroupConfigServiceImpl implements GroupConfigService {
         groupConfig.setVersion(1);
         groupConfig.setGroupName(groupConfigRequestVO.getGroupName());
         if (Objects.isNull(groupConfigRequestVO.getGroupPartition())) {
-            groupConfig.setGroupPartition(HashUtil.bkdrHash(groupConfigRequestVO.getGroupName()) % totalPartition);
+            groupConfig.setGroupPartition(HashUtil.bkdrHash(groupConfigRequestVO.getGroupName()) % systemProperties.getTotalPartition());
+            groupConfig.setBucketIndex(HashUtil.bkdrHash(groupConfigRequestVO.getGroupName()) % systemProperties.getBucketTotal());
         } else {
-            Assert.isTrue(totalPartition > groupConfigRequestVO.getGroupPartition(), () -> new EasyRetryServerException("分区超过最大分区. [{}]", totalPartition - 1));
+            Assert.isTrue(systemProperties.getTotalPartition() > groupConfigRequestVO.getGroupPartition(), () -> new EasyRetryServerException("分区超过最大分区. [{}]", systemProperties.getTotalPartition() - 1));
             Assert.isTrue(groupConfigRequestVO.getGroupPartition() >= 0, () -> new EasyRetryServerException("分区不能是负数."));
         }
 
@@ -201,7 +189,6 @@ public class GroupConfigServiceImpl implements GroupConfigService {
 
         // 校验retry_task_x和retry_dead_letter_x是否存在
         checkGroupPartition(groupConfig);
-
     }
 
     /**
@@ -254,114 +241,6 @@ public class GroupConfigServiceImpl implements GroupConfigService {
                         .select(GroupConfig::getGroupName)).stream()
                 .map(GroupConfig::getGroupName)
                 .collect(Collectors.toList());
-    }
-
-    private void doSaveNotifyConfig(GroupConfigRequestVO groupConfigRequestVO) {
-        List<GroupConfigRequestVO.NotifyConfigVO> notifyList = groupConfigRequestVO.getNotifyList();
-        if (!CollectionUtils.isEmpty(notifyList)) {
-            for (GroupConfigRequestVO.NotifyConfigVO notifyConfigVO : notifyList) {
-                doSaveNotifyConfig(groupConfigRequestVO.getGroupName(), notifyConfigVO);
-            }
-        }
-    }
-
-    private void doSaveNotifyConfig(String groupName, GroupConfigRequestVO.NotifyConfigVO notifyConfigVO) {
-
-        NotifyConfig notifyConfig = NotifyConfigConverter.INSTANCE.convert(notifyConfigVO);
-        notifyConfig.setGroupName(groupName);
-        notifyConfig.setCreateDt(LocalDateTime.now());
-
-        ConfigAccess<NotifyConfig> notifyConfigAccess = accessTemplate.getNotifyConfigAccess();
-
-        Assert.isTrue(1 == notifyConfigAccess.insert(notifyConfig),
-                () -> new EasyRetryServerException("failed to insert notify. sceneConfig:[{}]", JsonUtil.toJsonString(notifyConfig)));
-    }
-
-    private void doSaveSceneConfig(List<GroupConfigRequestVO.SceneConfigVO> sceneList, String groupName) {
-        if (!CollectionUtils.isEmpty(sceneList)) {
-
-            for (GroupConfigRequestVO.SceneConfigVO sceneConfigVO : sceneList) {
-
-                SceneConfig sceneConfig = SceneConfigConverter.INSTANCE.convert(sceneConfigVO);
-                sceneConfig.setCreateDt(LocalDateTime.now());
-                sceneConfig.setGroupName(groupName);
-                ConfigAccess<SceneConfig> sceneConfigAccess = accessTemplate.getSceneConfigAccess();
-
-                Assert.isTrue(1 == sceneConfigAccess.insert(sceneConfig),
-                        () -> new EasyRetryServerException("failed to insert scene. sceneConfig:[{}]", JsonUtil.toJsonString(sceneConfig)));
-            }
-        }
-    }
-
-    private void doUpdateSceneConfig(GroupConfigRequestVO groupConfigRequestVO) {
-        List<GroupConfigRequestVO.SceneConfigVO> sceneList = groupConfigRequestVO.getSceneList();
-        if (!CollectionUtils.isEmpty(sceneList)) {
-
-            ConfigAccess<SceneConfig> sceneConfigAccess = accessTemplate.getSceneConfigAccess();
-
-            List<SceneConfig> sceneConfigs = sceneConfigAccess.list(new LambdaQueryWrapper<SceneConfig>().eq(SceneConfig::getGroupName, groupConfigRequestVO.getGroupName()));
-            Map<String, SceneConfig> sceneConfigMap = sceneConfigs.stream().collect(Collectors.toMap(SceneConfig::getSceneName, i -> i));
-
-            Iterator<GroupConfigRequestVO.SceneConfigVO> iterator = sceneList.iterator();
-
-            while (iterator.hasNext()) {
-                GroupConfigRequestVO.SceneConfigVO sceneConfigVO = iterator.next();
-                SceneConfig oldSceneConfig = sceneConfigMap.get(sceneConfigVO.getSceneName());
-                if (Objects.isNull(oldSceneConfig)) {
-                    doSaveSceneConfig(Collections.singletonList(sceneConfigVO), groupConfigRequestVO.getGroupName());
-
-                } else if (sceneConfigVO.getIsDeleted() == 1) {
-                    Assert.isTrue(
-                            1 == sceneConfigAccess.delete(new LambdaQueryWrapper<SceneConfig>().eq(SceneConfig::getId, oldSceneConfig.getId())),
-                            () -> new EasyRetryServerException("failed to delete scene. [{}]", sceneConfigVO.getSceneName()));
-                } else {
-                    SceneConfig sceneConfig = SceneConfigConverter.INSTANCE.convert(sceneConfigVO);
-                    sceneConfig.setGroupName(groupConfigRequestVO.getGroupName());
-
-                    Assert.isTrue(1 == sceneConfigAccess.update(sceneConfig,
-                                    new LambdaUpdateWrapper<SceneConfig>()
-                                            .eq(SceneConfig::getGroupName, sceneConfig.getGroupName())
-                                            .eq(SceneConfig::getSceneName, sceneConfig.getSceneName())),
-                            () -> new EasyRetryServerException("failed to update scene. sceneConfig:[{}]", JsonUtil.toJsonString(sceneConfig)));
-                }
-
-                iterator.remove();
-            }
-        }
-    }
-
-    private void doUpdateNotifyConfig(GroupConfigRequestVO groupConfigRequestVO) {
-        List<GroupConfigRequestVO.NotifyConfigVO> notifyList = groupConfigRequestVO.getNotifyList();
-
-        if (CollectionUtils.isEmpty(notifyList)) {
-            return;
-        }
-
-        ConfigAccess<NotifyConfig> notifyConfigAccess = accessTemplate.getNotifyConfigAccess();
-
-        for (GroupConfigRequestVO.NotifyConfigVO notifyConfigVO : notifyList) {
-
-            NotifyConfig notifyConfig = NotifyConfigConverter.INSTANCE.convert(notifyConfigVO);
-            notifyConfig.setGroupName(groupConfigRequestVO.getGroupName());
-            notifyConfig.setCreateDt(LocalDateTime.now());
-            if (Objects.isNull(notifyConfigVO.getId())) {
-                // insert
-                doSaveNotifyConfig(groupConfigRequestVO.getGroupName(), notifyConfigVO);
-            } else if (Objects.nonNull(notifyConfigVO.getId()) && notifyConfigVO.getIsDeleted() == 1) {
-                // delete
-                Assert.isTrue(1 == notifyConfigAccess.delete(new LambdaQueryWrapper<NotifyConfig>()
-                                .eq(NotifyConfig::getId, notifyConfigVO.getId())),
-                        () -> new EasyRetryServerException("failed to delete notify. sceneConfig:[{}]", JsonUtil.toJsonString(notifyConfigVO)));
-            } else {
-                // update
-                Assert.isTrue(1 == notifyConfigAccess.update(notifyConfig,
-                                new LambdaUpdateWrapper<NotifyConfig>()
-                                        .eq(NotifyConfig::getId, notifyConfigVO.getId())
-                                        .eq(NotifyConfig::getGroupName, notifyConfig.getGroupName())
-                                        .eq(NotifyConfig::getNotifyScene, notifyConfig.getNotifyScene())),
-                        () -> new EasyRetryServerException("failed to update notify. sceneConfig:[{}]", JsonUtil.toJsonString(notifyConfig)));
-            }
-        }
     }
 
 }

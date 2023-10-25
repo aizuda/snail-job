@@ -1,5 +1,8 @@
 package com.aizuda.easy.retry.server.web.service;
 
+import com.aizuda.easy.retry.server.web.model.base.PageResult;
+import com.aizuda.easy.retry.server.web.model.request.NotifyConfigQueryVO;
+import com.aizuda.easy.retry.server.web.model.request.NotifyConfigRequestVO;
 import com.aizuda.easy.retry.server.web.model.response.NotifyConfigResponseVO;
 
 import java.util.List;
@@ -10,6 +13,11 @@ import java.util.List;
  */
 public interface NotifyConfigService {
 
-    List<NotifyConfigResponseVO> getNotifyConfigList(String groupName);
+    PageResult<List<NotifyConfigResponseVO>> getNotifyConfigList(NotifyConfigQueryVO queryVO);
 
+    Boolean saveNotify(NotifyConfigRequestVO requestVO);
+
+    Boolean updateNotify(NotifyConfigRequestVO requestVO);
+
+    NotifyConfigResponseVO getNotifyConfigDetail(Long id);
 }

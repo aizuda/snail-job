@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.server.web.service;
 
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
 import com.aizuda.easy.retry.server.web.model.request.SceneConfigQueryVO;
+import com.aizuda.easy.retry.server.web.model.request.SceneConfigRequestVO;
 import com.aizuda.easy.retry.server.web.model.response.SceneConfigResponseVO;
 
 import java.util.List;
@@ -15,4 +16,10 @@ public interface SceneConfigService {
    PageResult<List<SceneConfigResponseVO>> getSceneConfigPageList(SceneConfigQueryVO groupName);
 
    List<SceneConfigResponseVO> getSceneConfigList(String groupName);
+
+    Boolean saveSceneConfig(SceneConfigRequestVO requestVO);
+
+    Boolean updateSceneConfig(SceneConfigRequestVO requestVO);
+
+    SceneConfigResponseVO getSceneConfigDetail(Long id);
 }

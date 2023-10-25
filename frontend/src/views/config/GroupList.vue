@@ -32,27 +32,43 @@
     <s-table
       ref="table"
       size="default"
-      rowKey="key"
+      :rowKey="(record) => record.id"
       :columns="columns"
       :data="loadData"
       :alert="options.alert"
       :rowSelection="options.rowSelection"
       :scroll="{ x: 1600 }"
     >
-      <span slot="serial" slot-scope="text, record, index">
-        {{ index + 1 }}
+      <span slot="serial" slot-scope="text, record">
+        {{ record.id }}
       </span>
       <span slot="groupStatus" slot-scope="text">
-        {{ text === 0 ? '停用': '启用' }}
+        <a-tag :color="groupStatus[text].color">
+          {{ groupStatus[text].name }}
+        </a-tag>
       </span>
       <span slot="initScene" slot-scope="text">
-        {{ text === 0 ? '否': '是' }}
+        <a-tag :color="initScene[text].color">
+          {{ initScene[text].name }}
+        </a-tag>
+      </span>
+      <span slot="idGeneratorMode" slot-scope="text">
+        <a-tag :color="idGeneratorMode[text].color">
+          {{ idGeneratorMode[text].name }}
+        </a-tag>
       </span>
       <span slot="action" slot-scope="text, record">
         <template>
           <a @click="handleEdit(record)">编辑</a>
           <a-divider type="vertical" />
-          <a @click="handleEditStatus(record)">{{ record.groupStatus === 1 ? '停用': '启用' }}</a>
+          <a-popconfirm
+            :title="record.groupStatus === 1 ? '是否停用?': '是否启用?'"
+            ok-text="确定"
+            cancel-text="取消"
+            @confirm="handleEditStatus(record)"
+          >
+            <a href="javascript:;">{{ record.groupStatus === 1 ? '停用': '启用' }}</a>
+          </a-popconfirm>
         </template>
       </span>
     </s-table>
@@ -65,6 +81,7 @@ import AInput from 'ant-design-vue/es/input/Input'
 import { getGroupConfigForPage, updateGroupStatus } from '@/api/manage'
 import { STable } from '@/components'
 import moment from 'moment'
+const enums = require('@/utils/retryEnum')
 
 export default {
   name: 'TableListWrapper',
@@ -94,11 +111,6 @@ export default {
           scopedSlots: { customRender: 'groupStatus' }
         },
         {
-          title: '路由策略',
-          dataIndex: 'routeKey',
-          customRender: (text) => this.routeKey[text]
-        },
-        {
           title: '版本',
           dataIndex: 'version'
         },
@@ -109,7 +121,8 @@ export default {
         },
         {
           title: 'ID生成模式',
-          dataIndex: 'idGeneratorModeName'
+          dataIndex: 'idGeneratorMode',
+          scopedSlots: { customRender: 'idGeneratorMode' }
         },
         {
           title: '初始化场景',
@@ -158,11 +171,9 @@ export default {
           onChange: this.onSelectChange
         }
       },
-      routeKey: {
-        '1': '一致性hash算法',
-        '2': '随机算法',
-        '3': '最近最久未使用算法'
-      }
+      initScene: enums.initScene,
+      groupStatus: enums.groupStatus,
+      idGeneratorMode: enums.idGenMode
     }
   },
   created () {

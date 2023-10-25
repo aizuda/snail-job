@@ -1,13 +1,14 @@
 package com.aizuda.easy.retry.server.web.controller;
 
 import com.aizuda.easy.retry.server.web.annotation.LoginRequired;
+import com.aizuda.easy.retry.server.web.model.base.PageResult;
+import com.aizuda.easy.retry.server.web.model.request.NotifyConfigQueryVO;
+import com.aizuda.easy.retry.server.web.model.request.NotifyConfigRequestVO;
 import com.aizuda.easy.retry.server.web.model.response.NotifyConfigResponseVO;
 import com.aizuda.easy.retry.server.web.service.NotifyConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -26,8 +27,26 @@ public class NotifyConfigController {
 
     @LoginRequired
     @GetMapping("list")
-    public List<NotifyConfigResponseVO> getNotifyConfigList(@RequestParam("groupName") String groupName) {
-        return notifyConfigService.getNotifyConfigList(groupName);
+    public PageResult<List<NotifyConfigResponseVO>> getNotifyConfigList(NotifyConfigQueryVO queryVO) {
+        return notifyConfigService.getNotifyConfigList(queryVO);
     }
 
+    @LoginRequired
+    @GetMapping("{id}")
+    public NotifyConfigResponseVO getNotifyConfigDetail(@PathVariable("id") Long id) {
+        return notifyConfigService.getNotifyConfigDetail(id);
+    }
+
+
+    @LoginRequired
+    @PostMapping
+    public Boolean saveNotify(@RequestBody @Validated NotifyConfigRequestVO requestVO) {
+        return notifyConfigService.saveNotify(requestVO);
+    }
+
+    @LoginRequired
+    @PutMapping
+    public Boolean updateNotify(@RequestBody @Validated NotifyConfigRequestVO requestVO) {
+        return notifyConfigService.updateNotify(requestVO);
+    }
 }
