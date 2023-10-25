@@ -78,6 +78,13 @@ export const asyncRouterMap = [
             meta: { title: '通知配置', icon: 'profile', keepAlive: true, permission: ['retryTask'] }
           },
           {
+            path: '/retry/notify/config',
+            name: 'NotifyFrom',
+            hidden: true,
+            component: () => import('@/views/task/form/NotifyFrom'),
+            meta: { title: '通知配置', icon: 'profile', keepAlive: true, permission: ['retryTask'] }
+          },
+          {
             path: '/retry/list',
             name: 'RetryTaskList',
             component: () => import('@/views/task/RetryTaskList'),

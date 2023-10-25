@@ -13,7 +13,7 @@
     "@ant-design-vue/pro-layout": "^1.0.11",
     "@antv/data-set": "^0.10.2",
     "@antv/g2": "^3.5.1",
-    "ant-design-vue": "^1.7.6",
+    "ant-design-vue": "^1.7.8",
     "antv-cron": "^1.0.9",
     "axios": ">=0.21.1",
     "core-js": "^3.8.3",

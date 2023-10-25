@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.server.web.service.convert;
 
+import com.aizuda.easy.retry.server.web.model.request.NotifyConfigRequestVO;
 import com.aizuda.easy.retry.template.datasource.persistence.po.NotifyConfig;
 import com.aizuda.easy.retry.server.web.model.request.GroupConfigRequestVO;
 import org.mapstruct.Mapper;
@@ -16,7 +17,5 @@ public interface NotifyConfigConverter {
 
     NotifyConfigConverter INSTANCE = Mappers.getMapper(NotifyConfigConverter.class);
 
-    NotifyConfig convert(GroupConfigRequestVO.NotifyConfigVO notifyConfigVO);
-
-    List<NotifyConfig> batchConvert(List<GroupConfigRequestVO.NotifyConfigVO> notifyConfigVOS);
+    NotifyConfig toNotifyConfig(NotifyConfigRequestVO notifyConfigVO);
 }

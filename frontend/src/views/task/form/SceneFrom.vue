@@ -141,6 +141,7 @@
               <a-input-number
                 :min="1"
                 style="width: -webkit-fill-available"
+                :max="this.backOff === '1' ? 26 : 9999999"
                 v-decorator="[
                   'maxRetryCount',
                   {
@@ -197,13 +198,13 @@
 
 <script>
 import { getAllGroupNameList } from '@/api/manage'
-import { getJobDetail, saveJob, updateJob } from '@/api/jobApi'
+import { saveScene, updateScene, getSceneDetail } from '@/api/retryApi'
 import pick from 'lodash.pick'
 import CronModal from '@/views/job/from/CronModal'
 
 const enums = require('@/utils/retryEnum')
 export default {
-  name: 'JobFrom',
+  name: 'SceneFrom',
   components: { CronModal },
   props: {},
   comments: {
@@ -212,20 +213,8 @@ export default {
   data () {
     return {
       form: this.$form.createForm(this),
-      formItemLayout: {
-        labelCol: { lg: { span: 7 }, sm: { span: 7 } },
-        wrapperCol: { lg: { span: 10 }, sm: { span: 17 } }
-      },
-      formItemLayoutWithOutLabel: {
-        wrapperCol: {
-          xs: { span: 24, offset: 0 },
-          sm: { span: 20, offset: 4 }
-        }
-      },
       formType: 'create',
       groupNameList: [],
-      blockStrategy: enums.blockStrategy,
-      executorType: enums.executorType,
       routeKey: enums.routeKey,
       backOffLabels: enums.backOffLabels,
       sceneStatus: enums.sceneStatus,
@@ -233,7 +222,6 @@ export default {
       visible: false,
       count: 0,
       backOff: '2'
-
     }
   },
   beforeCreate () {
@@ -249,7 +237,7 @@ export default {
       const id = this.$route.query.id
       if (id) {
         this.loading = true
-        getJobDetail(id).then(res => {
+        getSceneDetail(id).then(res => {
           this.loadEditInfo(res.data)
           this.loading = false
         })
@@ -284,13 +272,13 @@ export default {
       this.form.validateFields((err, values) => {
         if (!err) {
           if (this.formType === 'create') {
-            saveJob(values).then(res => {
+            saveScene(values).then(res => {
               this.$message.success('任务新增完成')
               this.form.resetFields()
               this.$router.go(-1)
             })
           } else {
-            updateJob(values).then(res => {
+            updateScene(values).then(res => {
               this.$message.success('任务更新完成')
               this.form.resetFields()
               this.$router.go(-1)
@@ -307,14 +295,11 @@ export default {
         setTimeout(resolve, 100)
       }).then(() => {
         const formData = pick(data, [
-          'id', 'jobName', 'groupName', 'jobStatus', 'executorInfo', 'argsStr', 'executorTimeout', 'description',
-          'maxRetryTimes', 'parallelNum', 'retryInterval', 'triggerType', 'blockStrategy', 'executorType', 'taskType', 'triggerInterval'])
-        formData.jobStatus = formData.jobStatus.toString()
-        formData.taskType = formData.taskType.toString()
-        formData.executorType = formData.executorType.toString()
-        formData.blockStrategy = formData.blockStrategy.toString()
-        formData.triggerType = formData.triggerType.toString()
-        this.triggerTypeValue = formData.triggerType
+          'id', 'sceneName', 'groupName', 'sceneStatus', 'deadlineRequest', 'maxRetryCount', 'description',
+          'backOff', 'triggerInterval'])
+        formData.sceneStatus = formData.sceneStatus.toString()
+        formData.backOff = formData.backOff.toString()
+        this.backOff = formData.backOff
         form.setFieldsValue(formData)
       })
     }

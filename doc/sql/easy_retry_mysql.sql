@@ -26,6 +26,7 @@ CREATE TABLE `notify_config`
 (
     `id`               bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
     `group_name`       varchar(64)  NOT NULL COMMENT '组名称',
+    `notify_status`     tinyint(4) NOT NULL DEFAULT '0' COMMENT '组状态 0、未启用 1、启用',
     `notify_type`      tinyint(4) NOT NULL DEFAULT '0' COMMENT '通知类型 1、钉钉 2、邮件 3、企业微信',
     `notify_attribute` varchar(512) NOT NULL COMMENT '配置属性',
     `notify_threshold` int(11) NOT NULL DEFAULT '0' COMMENT '通知阈值',

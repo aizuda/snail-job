@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.server.web.service.convert;
 
+import com.aizuda.easy.retry.server.web.model.request.SceneConfigRequestVO;
 import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
 import com.aizuda.easy.retry.server.web.model.request.GroupConfigRequestVO;
 import org.mapstruct.Mapper;
@@ -16,7 +17,6 @@ public interface SceneConfigConverter {
 
     SceneConfigConverter INSTANCE = Mappers.getMapper(SceneConfigConverter.class);
 
-    SceneConfig convert(GroupConfigRequestVO.SceneConfigVO sceneConfigVO);
+    SceneConfig toSceneConfigRequestVO(SceneConfigRequestVO requestVO);
 
-    List<SceneConfig> batchConvert(List<GroupConfigRequestVO.SceneConfigVO> sceneConfigVOS);
 }

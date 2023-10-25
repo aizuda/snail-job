@@ -3,15 +3,9 @@
     <page-header-wrapper content="配置组、场景、通知配置" @back="() => $router.go(-1)" style="margin: -24px -1px 0">
       <div></div>
     </page-header-wrapper>
-    <a-card class="card" title="组配置" :bordered="false">
+    <a-card class="card" :bordered="false">
       <group-form ref="groupConfig" :showSubmit="false" />
     </a-card>
-    <!--    <a-card class="card" title="通知配置" :bordered="false">-->
-    <!--      <notify-list ref="notify"></notify-list>-->
-    <!--    </a-card>-->
-    <!--    <a-card class="card" title="场景配置" :bordered="false">-->
-    <!--      <scene-list ref="scene"></scene-list>-->
-    <!--    </a-card>-->
 
     <!-- fixed footer toolbar -->
     <footer-tool-bar :is-mobile="isMobile" :collapsed="sideCollapsed" style="width: 100%">
@@ -37,8 +31,6 @@
 
 <script>
 import GroupForm from './GroupForm'
-import SceneList from './SceneList'
-// import NotifyList from '../../task/NotifyList.vue'
 import FooterToolBar from '@/components/FooterToolbar'
 import { baseMixin } from '@/store/app-mixin'
 import { saveGroup } from '@/api/manage'
@@ -54,9 +46,7 @@ export default {
   mixins: [baseMixin],
   components: {
     FooterToolBar,
-    GroupForm,
-    SceneList
-    // NotifyList
+    GroupForm
   },
   data () {
     return {
@@ -72,7 +62,7 @@ export default {
     },
     // 最终全页面提交
     validate () {
-      const { $refs: { groupConfig, scene, notify }, $notification } = this
+      const { $refs: { groupConfig }, $notification } = this
       const groupConfigForm = new Promise((resolve, reject) => {
         groupConfig.form.validateFields((err, values) => {
           if (err) {
@@ -90,8 +80,6 @@ export default {
         if (!value['id']) {
           value['id'] = 0
         }
-        value['sceneList'] = scene.formData
-        value['notifyList'] = notify.formData
         saveGroup(value).then(res => {
           if (res.status === 0) {
             $notification['error']({
@@ -101,7 +89,6 @@ export default {
             $notification['success']({
               message: res.message
             })
-            this.$refs.notify.reset()
             this.$router.go(-1)
           }
         })

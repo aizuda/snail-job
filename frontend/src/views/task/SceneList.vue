@@ -6,6 +6,16 @@
           <a-row :gutter="48">
             <template>
               <a-col :md="8" :sm="24">
+                <a-form-item label="组名称">
+                  <a-select
+                    v-model="queryParam.groupName"
+                    placeholder="请输入组名称"
+                  >
+                    <a-select-option v-for="item in groupNameList" :value="item" :key="item">{{ item }}</a-select-option>
+                  </a-select>
+                </a-form-item>
+              </a-col>
+              <a-col :md="8" :sm="24">
                 <a-form-item label="场景名称">
                   <a-input v-model="queryParam.sceneName" placeholder="请输入场景名称" allowClear/>
                 </a-form-item>
@@ -13,8 +23,8 @@
             </template>
             <a-col :md="!advanced && 8 || 24" :sm="24">
               <span class="table-page-search-submitButtons" :style="advanced && { float: 'right', overflow: 'hidden' } || {} ">
-                <a-button type="primary" @click="queryChange()">查询</a-button>
-                <a-button style="margin-left: 8px" @click="() => queryParam = {}">重置</a-button>
+                <a-button type="primary" @click="$refs.table.refresh(true)">查询</a-button>
+                <a-button style="margin-left: 8px" @click="() => (queryParam = {})">重置</a-button>
               </span>
             </a-col>
           </a-row>
@@ -45,7 +55,7 @@
         </span>
         <span slot="sceneStatus" slot-scope="text">
           <a-tag :color="sceneStatus[text].color">
-            {{ sceneStatus[text].name }}>
+            {{ sceneStatus[text].name }}
           </a-tag>
         </span>
         <span slot="backOff" slot-scope="text">
@@ -54,126 +64,21 @@
           </a-tag>
         </span>
         <span slot="triggerInterval" slot-scope="text">
-          {{ text }}
+          {{ text ? text : '无' }}
+        </span>
+        <span slot="action" slot-scope="record">
+          <template>
+            <a @click="handleEdit(record)">编辑</a>
+          </template>
         </span>
       </s-table>
     </a-card>
-
-    <!--    <a-table-->
-    <!--      :columns="sceneColumns"-->
-    <!--      :row-key="record => record.key"-->
-    <!--      :dataSource="data"-->
-    <!--      :pagination="pagination"-->
-    <!--      :loading="memberLoading"-->
-    <!--      @change="handleTableChange"-->
-    <!--      :scroll="{ x: 1800 }"-->
-    <!--    >-->
-    <!--      <template v-for="(col, i) in ['sceneName', 'description']" :slot="col" slot-scope="text, record">-->
-    <!--        <a-input-->
-    <!--          :key="col"-->
-    <!--          v-if="record.editable"-->
-    <!--          style="margin: -5px 0"-->
-    <!--          :value="text"-->
-    <!--          :placeholder="sceneColumns.find(item => item.key === col).title"-->
-    <!--          @change="e => handleChange(e.target.value, record.key, col)"-->
-    <!--        />-->
-    <!--        <template v-else>{{ text }}</template>-->
-    <!--      </template>-->
-    <!--      <template slot="sceneStatus" slot-scope="text, record">-->
-    <!--        <a-select-->
-    <!--          v-if="record.editable"-->
-    <!--          placeholder="场景状态"-->
-    <!--          style="width: 100%;"-->
-    <!--          :value="text === 0 ? '1': text"-->
-    <!--          @change="value => handleChange(value, record.key, 'sceneStatus')">-->
-    <!--          <a-select-option value="0">停用</a-select-option>-->
-    <!--          <a-select-option value="1">启用</a-select-option>-->
-    <!--        </a-select>-->
-    <!--        <template v-else>{{ sceneStatus[text] }}</template>-->
-    <!--      </template>-->
-    <!--      <template slot="backOff" slot-scope="text, record">-->
-    <!--        <a-select-->
-    <!--          v-if="record.editable"-->
-    <!--          placeholder="退避策略"-->
-    <!--          style="width: 100%;"-->
-    <!--          :value="text === 0 ? null: text"-->
-    <!--          @change="value => handleChange(value, record.key, 'backOff')">-->
-    <!--          <a-select-option value="1">延迟等级</a-select-option>-->
-    <!--          <a-select-option value="2">固定时间</a-select-option>-->
-    <!--          <a-select-option value="3">CRON表达式</a-select-option>-->
-    <!--          <a-select-option value="4">随机等待</a-select-option>-->
-    <!--        </a-select>-->
-    <!--        <template v-else>{{ backOffLabels[text] }}</template>-->
-    <!--      </template>-->
-    <!--      <template slot="maxRetryCount" slot-scope="text, record">-->
-    <!--        <a-input-number-->
-    <!--          v-if="record.editable"-->
-    <!--          :min="1"-->
-    <!--          :max="max"-->
-    <!--          style="width: 100%;"-->
-    <!--          :value="text"-->
-    <!--          :placeholder="maxRetryCount[data.find(item => item.key === record.key).backOff].placeholder"-->
-    <!--          @change="value => handleChange(value, record.key, 'maxRetryCount')">-->
-    <!--        </a-input-number>-->
-    <!--        <template v-else>{{ text }}</template>-->
-    <!--      </template>-->
-    <!--      <template slot="deadlineRequest" slot-scope="text, record">-->
-    <!--        <a-input-number-->
-    <!--          v-if="record.editable"-->
-    <!--          :min="100"-->
-    <!--          :max="60000"-->
-    <!--          style="width: 100%;"-->
-    <!--          :value="text"-->
-    <!--          placeholder="调用链超时时间(毫秒)"-->
-    <!--          @change="value => handleChange(value, record.key, 'deadlineRequest')"/>-->
-    <!--        <template v-else>{{ text }}(毫秒)</template>-->
-    <!--      </template>-->
-    <!--      <template slot="triggerInterval" slot-scope="text, record">-->
-    <!--        <a-input-->
-    <!--          v-if="record.editable"-->
-    <!--          style="margin: -5px 0"-->
-    <!--          :placeholder="triggerInterval[data.find(item => item.key === record.key).backOff].placeholder"-->
-    <!--          :value="text"-->
-    <!--          :disabled="data.find(item => item.key === record.key).backOff === '1'"-->
-    <!--          @change="e => handleChange(e.target.value, record.key, 'triggerInterval')"-->
-    <!--        >-->
-    <!--          <a-tooltip slot="suffix" :title="triggerInterval[data.find(item => item.key === record.key).backOff].tooltip">-->
-    <!--            <a-icon type="info-circle" style="color: rgba(0, 0, 0, 0.45)" />-->
-    <!--          </a-tooltip>-->
-    <!--        </a-input>-->
-    <!--        <template v-else>{{ text }}(秒)</template>-->
-    <!--      </template>-->
-    <!--      <template slot="operation" slot-scope="text, record">-->
-    <!--        <template v-if="record.editable">-->
-    <!--          <span v-if="record.isNew">-->
-    <!--            <a @click="saveRow(record)">添加</a>-->
-    <!--            <a-divider type="vertical" />-->
-    <!--            <a-popconfirm title="是否要删除此行？" @confirm="remove(record.key)">-->
-    <!--              <a>删除</a>-->
-    <!--            </a-popconfirm>-->
-    <!--          </span>-->
-    <!--          <span v-else>-->
-    <!--            <a @click="saveRow(record)">保存</a>-->
-    <!--            <a-divider type="vertical" />-->
-    <!--            <a @click="cancel(record.key)">取消</a>-->
-    <!--          </span>-->
-    <!--        </template>-->
-    <!--        <span v-else>-->
-    <!--          <a @click="toggle(record.key)">编辑</a>-->
-    <!--          <a-divider type="vertical" />-->
-    <!--          <a-popconfirm title="是否要删除此行？" @confirm="remove(record.key)">-->
-    <!--            <a>删除</a>-->
-    <!--          </a-popconfirm>-->
-    <!--        </span>-->
-    <!--      </template>-->
-    <!--    </a-table>-->
-    <!--    <a-button style="width: 100%; margin-top: 16px; margin-bottom: 8px" type="dashed" icon="plus" @click="newMember">新增成员</a-button>-->
   </div>
 
 </template>
 
 <script>
-import { getScenePage } from '@/api/manage'
+import { getAllGroupNameList, getScenePage } from '@/api/manage'
 import { STable } from '@/components'
 const enums = require('@/utils/retryEnum')
 export default {
@@ -234,7 +139,8 @@ export default {
           title: '操作',
           key: 'action',
           fixed: 'right',
-          scopedSlots: { customRender: 'operation' }
+          width: '180px',
+          scopedSlots: { customRender: 'action' }
         }
       ],
       data: [],
@@ -259,6 +165,8 @@ export default {
           tooltip: '随机生成范围在[0, x]内的延迟时间; 其中x代表最大间隔时间'
         }
       },
+      // 高级搜索 展开/关闭
+      advanced: false,
       maxRetryCount: {
         '1': {
           placeholder: '请输入延迟等级(max:26)',
@@ -299,10 +207,15 @@ export default {
           onChange: this.onSelectChange
         }
       },
-      optionAlertShow: false
+      optionAlertShow: false,
+      groupNameList: []
     }
   },
   created () {
+    getAllGroupNameList().then((res) => {
+      this.groupNameList = res.data
+    })
+
     const groupName = this.$route.query.groupName
     if (groupName) {
       this.fetch({
@@ -316,6 +229,9 @@ export default {
   methods: {
     handleNew () {
       this.$router.push({ path: '/retry/scene/config' })
+    },
+    handleEdit (record) {
+      this.$router.push({ path: '/retry/scene/config', query: { id: record.id } })
     },
     reset () {
       this.formData = []
@@ -489,21 +405,6 @@ export default {
         target[column] = value
         this.data = newData
       }
-    },
-    newMember () {
-      const length = this.data.length
-      this.data.unshift({
-        key: length === 0 ? '1' : (parseInt(this.data[length - 1].key) + 1).toString(),
-        sceneName: '',
-        sceneStatus: '1',
-        maxRetryCount: null,
-        backOff: '1',
-        triggerInterval: '',
-        deadlineRequest: '60000',
-        description: '',
-        editable: true,
-        isNew: true
-      })
     }
   }
 }

@@ -15,6 +15,8 @@ public class NotifyConfig implements Serializable {
 
     private String groupName;
 
+    private Integer notifyStatus;
+
     private Integer notifyType;
 
     private String notifyAttribute;

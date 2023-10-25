@@ -2,14 +2,13 @@ package com.aizuda.easy.retry.server.web.controller;
 
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
 import com.aizuda.easy.retry.server.web.model.request.SceneConfigQueryVO;
+import com.aizuda.easy.retry.server.web.model.request.SceneConfigRequestVO;
 import com.aizuda.easy.retry.server.web.model.response.SceneConfigResponseVO;
 import com.aizuda.easy.retry.server.web.annotation.LoginRequired;
 import com.aizuda.easy.retry.server.web.service.SceneConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -36,5 +35,23 @@ public class SceneConfigSceneController {
     @GetMapping("list")
     public List<SceneConfigResponseVO> getSceneConfigList(@RequestParam("groupName") String groupName) {
         return sceneConfigService.getSceneConfigList(groupName);
+    }
+
+    @LoginRequired
+    @GetMapping("{id}")
+    public SceneConfigResponseVO getSceneConfigDetail(@PathVariable("id") Long id) {
+        return sceneConfigService.getSceneConfigDetail(id);
+    }
+
+    @LoginRequired
+    @PostMapping
+    public Boolean saveSceneConfig(@RequestBody @Validated SceneConfigRequestVO requestVO) {
+        return sceneConfigService.saveSceneConfig(requestVO);
+    }
+
+    @LoginRequired
+    @PutMapping
+    public Boolean updateSceneConfig(@RequestBody @Validated SceneConfigRequestVO requestVO) {
+        return sceneConfigService.updateSceneConfig(requestVO);
     }
 }

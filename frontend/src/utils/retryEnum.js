@@ -37,24 +37,22 @@ const enums = {
       'color': '#f5a22d'
     }
   },
-  blockStrategy: {
+  notifyScene: {
     '1': {
-      'name': '丢弃策略',
+      'name': '重试数量超过阈值',
       'color': '#d06892'
     },
     '2': {
-      'name': '覆盖',
+      'name': '重试失败数量超过阈值',
       'color': '#f5a22d'
     },
     '3': {
-      'name': '并行',
+      'name': '客户端上报失败',
       'color': '#e1f52d'
-    }
-  },
-  executorType: {
-    '1': {
-      'name': 'Java',
-      'color': '#d06892'
+    },
+    '4': {
+      'name': '客户端组件异常',
+      'color': '#a127f3'
     }
   },
   routeKey: {
@@ -75,65 +73,58 @@ const enums = {
       'color': '#e1f52d'
     }
   },
-  taskBatchStatus: {
+  notifyType: {
     '1': {
-      'name': '待处理',
+      'name': '钉钉通知',
       'color': '#64a6ea'
     },
     '2': {
-      'name': '运行中',
+      'name': '邮箱通知',
       'color': '#1b7ee5'
     },
-    '3': {
-      'name': '成功',
-      'color': '#087da1'
-    },
     '4': {
-      'name': '失败',
-      'color': '#f52d80'
-    },
-    '5': {
-      'name': '停止',
-      'color': '#ac2df5'
-    },
-    '6': {
-      'name': '取消',
-      'color': '#f5732d'
+      'name': '飞书',
+      'color': '#087da1'
     }
   },
-  operationReason: {
+  notifyStatus: {
     '0': {
-      'name': ''
+      'name': '停用',
+      'color': '#9c1f1f'
     },
     '1': {
-      'name': '执行超时',
-      'color': '#64a6ea'
-    },
-    '2': {
-      'name': '无客户端节点',
+      'name': '启用',
+      'color': '#f5a22d'
+    }
+  },
+  idGenMode: {
+    '1': {
+      'name': '号段模式',
       'color': '#1b7ee5'
     },
-    '3': {
-      'name': '任务已关闭',
+    '2': {
+      'name': '雪花算法',
       'color': '#087da1'
     }
   },
-  taskStatus: {
-    '2': {
-      'name': '运行中',
-      'color': '#1b7ee5'
+  groupStatus: {
+    '0': {
+      'name': '停用',
+      'color': '#9c1f1f'
     },
-    '3': {
-      'name': '成功',
-      'color': '#087da1'
+    '1': {
+      'name': '启用',
+      'color': '#f5a22d'
+    }
+  },
+  initScene: {
+    '0': {
+      'name': '否',
+      'color': '#9c1f1f'
     },
-    '4': {
-      'name': '失败',
-      'color': '#f52d80'
-    },
-    '5': {
-      'name': '停止',
-      'color': '#ac2df5'
+    '1': {
+      'name': '是',
+      'color': '#f5a22d'
     }
   }
 }

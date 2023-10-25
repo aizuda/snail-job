@@ -12,6 +12,8 @@ public class NotifyConfigResponseVO implements Serializable {
 
     private String groupName;
 
+    private Integer notifyStatus;
+
     private String notifyName;
 
     private Integer notifyType;
