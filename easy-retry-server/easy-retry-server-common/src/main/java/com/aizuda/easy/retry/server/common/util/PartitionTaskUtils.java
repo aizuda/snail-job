@@ -19,8 +19,8 @@ public class PartitionTaskUtils {
     }
 
     public static long process(
-        Function<Long, List<? extends PartitionTask>> dataSource, Consumer<List<? extends PartitionTask>> task,
-        long startId) {
+            Function<Long, List<? extends PartitionTask>> dataSource, Consumer<List<? extends PartitionTask>> task,
+            long startId) {
         int total = 0;
         do {
             List<? extends PartitionTask> products = dataSource.apply(startId);
@@ -39,8 +39,8 @@ public class PartitionTaskUtils {
     }
 
     private static long maxId(List<? extends PartitionTask> products) {
-        Optional<Long> max = products.stream().map(PartitionTask::getId).max(Long::compareTo);
-        return max.orElse(-1L) + 1;
+        // 使用的地方必须按照id正序排序
+        return products.get(products.size() - 1).getId() + 1;
     }
 
 }

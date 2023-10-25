@@ -68,7 +68,7 @@ public class RetryExecutor<V> {
         }
 
         // 计算下次触发时间
-        retryContext.getRetryTask().setNextTriggerAt(waitStrategy.computeRetryTime(retryContext));
+//        retryContext.getRetryTask().setNextTriggerAt();
 
         boolean isStop = Boolean.TRUE;
 

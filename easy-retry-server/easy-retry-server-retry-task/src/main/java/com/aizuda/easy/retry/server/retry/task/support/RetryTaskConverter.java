@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.server.retry.task.support;
 
 import com.aizuda.easy.retry.server.model.dto.RetryTaskDTO;
+import com.aizuda.easy.retry.server.retry.task.dto.RetryPartitionTask;
 import com.aizuda.easy.retry.server.retry.task.generator.task.TaskContext;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryDeadLetter;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
@@ -29,9 +30,9 @@ public interface RetryTaskConverter {
     })
     RetryTask toRetryTask(RetryDeadLetter retryDeadLetter);
 
-//    RetryTask toRetryTask(RetryTaskSaveRequestVO retryTaskSaveRequestVO);
-
     List<RetryTask> toRetryTaskList(List<RetryTaskDTO> retryTaskDTOList);
 
     RetryTask toRetryTask(TaskContext.TaskInfo taskInfo);
+
+    List<RetryPartitionTask> toRetryPartitionTasks(List<RetryTask> retryTasks);
 }
