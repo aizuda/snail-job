@@ -120,20 +120,36 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public boolean saveJob(JobRequestVO jobRequestVO) {
-        Job job = JobConverter.INSTANCE.toJob(jobRequestVO);
         WaitStrategy waitStrategy = WaitStrategyEnum.getWaitStrategy(jobRequestVO.getTriggerType());
         WaitStrategyContext waitStrategyContext = new WaitStrategyContext();
         waitStrategyContext.setTriggerType(jobRequestVO.getTriggerType());
         waitStrategyContext.setTriggerInterval(jobRequestVO.getTriggerInterval());
         waitStrategyContext.setNextTriggerAt(LocalDateTime.now());
-        job.setNextTriggerAt(waitStrategy.computeRetryTime(waitStrategyContext));
 
         // 判断常驻任务
+        Job job = updateJobResident(jobRequestVO);
+        job.setNextTriggerAt(waitStrategy.computeRetryTime(waitStrategyContext));
+        return 1 == jobMapper.insert(job);
+    }
+
+    @Override
+    public boolean updateJob(JobRequestVO jobRequestVO) {
+        Assert.notNull(jobRequestVO.getId(), () -> new EasyRetryServerException("id 不能为空"));
+        Assert.isTrue(1 == jobMapper.selectCount(new LambdaQueryWrapper<Job>().eq(Job::getId, jobRequestVO.getId())));
+
+        // 判断常驻任务
+        Job job = updateJobResident(jobRequestVO);
+        return 1 == jobMapper.updateById(job);
+    }
+
+    @Override
+    public Job updateJobResident(JobRequestVO jobRequestVO) {
+        Job job = JobConverter.INSTANCE.toJob(jobRequestVO);
         if (jobRequestVO.getTriggerType() == WaitStrategyEnum.FIXED.getTriggerType()) {
             if (Integer.parseInt(jobRequestVO.getTriggerInterval()) < 10) {
                 job.setResident(StatusEnum.YES.getStatus());
             }
-        } else if(jobRequestVO.getTriggerType() == WaitStrategyEnum.CRON.getTriggerType()) {
+        } else if (jobRequestVO.getTriggerType() == WaitStrategyEnum.CRON.getTriggerType()) {
             List<String> timeByCron = getTimeByCron(jobRequestVO.getTriggerInterval());
             LocalDateTime first = LocalDateTime.parse(timeByCron.get(0), dateTimeFormatter);
             LocalDateTime second = LocalDateTime.parse(timeByCron.get(1), dateTimeFormatter);
@@ -145,16 +161,7 @@ public class JobServiceImpl implements JobService {
         } else {
             throw new EasyRetryServerException("未知触发类型");
         }
-
-        return 1 == jobMapper.insert(job);
-    }
-
-    @Override
-    public boolean updateJob(JobRequestVO jobRequestVO) {
-        Assert.notNull(jobRequestVO.getId(), () -> new EasyRetryServerException("id 不能为空"));
-        Assert.isTrue(1 == jobMapper.selectCount(new LambdaQueryWrapper<Job>().eq(Job::getId, jobRequestVO.getId())));
-        Job job = JobConverter.INSTANCE.toJob(jobRequestVO);
-        return 1 == jobMapper.updateById(job);
+        return job;
     }
 
     @Override
