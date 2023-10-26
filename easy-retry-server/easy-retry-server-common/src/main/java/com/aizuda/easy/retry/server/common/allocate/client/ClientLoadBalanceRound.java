@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.server.common.allocate.client;
 
 import com.aizuda.easy.retry.server.common.ClientLoadBalance;
+import com.aizuda.easy.retry.server.common.allocate.client.ClientLoadBalanceManager.AllocationAlgorithmEnum;
 
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,7 +21,7 @@ public class ClientLoadBalanceRound implements ClientLoadBalance  {
     public String route(final String allocKey, final TreeSet<String> clientAllAddressSet) {
         String[] addressArr = clientAllAddressSet.toArray(new String[0]);
         AtomicInteger next = COUNTER.getOrDefault(allocKey, new AtomicInteger(1));
-        String nextClientId = addressArr[ next.get() % clientAllAddressSet.size()];
+        String nextClientId = addressArr[next.get() % clientAllAddressSet.size()];
         int nextIndex = next.incrementAndGet();
         if (nextIndex > THRESHOLD) {
             next = new AtomicInteger(1);
@@ -32,6 +33,6 @@ public class ClientLoadBalanceRound implements ClientLoadBalance  {
 
     @Override
     public int routeType() {
-        return 0;
+        return AllocationAlgorithmEnum.ROUND.getType();
     }
 }

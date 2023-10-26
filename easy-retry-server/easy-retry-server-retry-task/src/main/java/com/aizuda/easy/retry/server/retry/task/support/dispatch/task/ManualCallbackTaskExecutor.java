@@ -48,7 +48,6 @@ public class ManualCallbackTaskExecutor extends AbstractTaskExecutor {
             .withStopStrategy(StopStrategies.stopException())
             .withStopStrategy(StopStrategies.stopResultStatus())
             .withWaitStrategy(getWaitWaitStrategy())
-            .withFilterStrategy(FilterStrategies.triggerAtFilter())
             .withFilterStrategy(FilterStrategies.bitSetIdempotentFilter(idempotentStrategy))
             .withFilterStrategy(FilterStrategies.sceneBlackFilter())
             .withFilterStrategy(FilterStrategies.checkAliveClientPodFilter())

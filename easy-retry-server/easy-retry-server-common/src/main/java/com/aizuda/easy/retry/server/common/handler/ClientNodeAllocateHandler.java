@@ -45,10 +45,10 @@ public class ClientNodeAllocateHandler {
 
         ClientLoadBalance clientLoadBalanceRandom = ClientLoadBalanceManager.getClientLoadBalance(routeKey);
 
-        String hostIp = clientLoadBalanceRandom.route(allocKey, new TreeSet<>(serverNodes.stream().map(RegisterNodeInfo::getHostIp).collect(Collectors.toSet())));
+        String hostId = clientLoadBalanceRandom.route(allocKey, new TreeSet<>(serverNodes.stream().map(RegisterNodeInfo::getHostId).collect(Collectors.toSet())));
 
         Stream<RegisterNodeInfo> registerNodeInfoStream = serverNodes.stream()
-            .filter(s -> s.getHostIp().equals(hostIp));
+            .filter(s -> s.getHostId().equals(hostId));
         return registerNodeInfoStream.findFirst().orElse(null);
     }
 

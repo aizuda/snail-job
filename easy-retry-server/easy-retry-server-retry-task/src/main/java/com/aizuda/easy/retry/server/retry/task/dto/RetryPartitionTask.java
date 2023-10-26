@@ -4,6 +4,8 @@ import com.aizuda.easy.retry.server.common.dto.PartitionTask;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.time.LocalDateTime;
+
 /**
  * @author www.byteblogs.com
  * @date 2023-10-25 22:23:24
@@ -12,4 +14,18 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class RetryPartitionTask extends PartitionTask {
+
+    private String uniqueId;
+
+    private String groupName;
+
+    private String sceneName;
+
+    /**
+     * 下次触发时间
+     */
+    private LocalDateTime nextTriggerAt;
+
+    private Integer retryCount;
+
 }

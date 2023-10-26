@@ -1,5 +1,7 @@
 package com.aizuda.easy.retry.server.retry.task.support;
 
+import com.aizuda.easy.retry.server.retry.task.support.strategy.WaitStrategies.WaitStrategyContext;
+
 import java.time.LocalDateTime;
 
 /**
@@ -13,9 +15,9 @@ public interface WaitStrategy {
     /**
      * 计算下次重试触发时间
      *
-     * @param retryContext {@link RetryContext} 重试上下文
+     * @param waitStrategyContext {@link WaitStrategyContext} 重试上下文
      * @return 下次触发时间
      */
-    LocalDateTime computeRetryTime(RetryContext retryContext);
+    LocalDateTime computeRetryTime(WaitStrategyContext waitStrategyContext);
 
 }

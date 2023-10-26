@@ -48,7 +48,7 @@ public class RetryTaskExecutor extends AbstractTaskExecutor {
             .withStopStrategy(StopStrategies.stopException())
             .withStopStrategy(StopStrategies.stopResultStatusCode())
             .withWaitStrategy(getWaitWaitStrategy(sceneConfig))
-            .withFilterStrategy(FilterStrategies.triggerAtFilter())
+//            .withFilterStrategy(FilterStrategies.triggerAtFilter())
             .withFilterStrategy(FilterStrategies.bitSetIdempotentFilter(idempotentStrategy))
             .withFilterStrategy(FilterStrategies.sceneBlackFilter())
             .withFilterStrategy(FilterStrategies.checkAliveClientPodFilter())

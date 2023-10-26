@@ -32,6 +32,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.concurrent.Callable;
 
@@ -68,6 +69,8 @@ public class ExecCallbackUnitActor extends AbstractActor {
             retryTaskLog.setGroupName(retryTask.getGroupName());
             retryTaskLog.setUniqueId(retryTask.getUniqueId());
             retryTaskLog.setRetryStatus(retryTask.getRetryStatus());
+            retryTaskLog.setTriggerTime(LocalDateTime.now());
+
             try {
 
                 if (Objects.nonNull(serverNode)) {

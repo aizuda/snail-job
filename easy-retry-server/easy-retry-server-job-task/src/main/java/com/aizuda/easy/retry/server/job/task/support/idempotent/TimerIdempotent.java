@@ -21,7 +21,7 @@ public class TimerIdempotent implements IdempotentStrategy<Long, Long> {
 
     @Override
     public Long get(Long s) {
-       throw new UnsupportedOperationException("不支持此操作");
+        throw new UnsupportedOperationException("不支持此操作");
     }
 
     @Override
@@ -31,7 +31,6 @@ public class TimerIdempotent implements IdempotentStrategy<Long, Long> {
 
     @Override
     public boolean clear(Long key, Long value) {
-        cache.clear();
-        return Boolean.TRUE;
+        return cache.removeIf(l -> l.equals(key));
     }
 }

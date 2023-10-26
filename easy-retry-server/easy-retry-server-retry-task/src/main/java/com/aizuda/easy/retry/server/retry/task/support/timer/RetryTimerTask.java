@@ -33,7 +33,6 @@ public class RetryTimerTask extends AbstractTimerTask {
     @Override
     public void doRun(final Timeout timeout){
         log.info("重试任务执行 {}", LocalDateTime.now());
-        // todo
         AccessTemplate accessTemplate = SpringContext.getBeanByType(AccessTemplate.class);
         TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();
         RetryTask retryTask = retryTaskAccess.one(context.getGroupName(), new LambdaQueryWrapper<RetryTask>()
