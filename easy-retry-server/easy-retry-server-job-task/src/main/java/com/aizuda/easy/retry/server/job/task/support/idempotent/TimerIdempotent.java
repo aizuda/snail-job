@@ -1,9 +1,11 @@
 package com.aizuda.easy.retry.server.job.task.support.idempotent;
 
 import com.aizuda.easy.retry.server.common.IdempotentStrategy;
+import scala.collection.immutable.Stream;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * @author www.byteblogs.com
@@ -12,7 +14,7 @@ import java.util.Set;
  */
 public class TimerIdempotent implements IdempotentStrategy<Long, Long> {
 
-    private static final Set<Long> cache = new HashSet<>();
+    private static final CopyOnWriteArraySet<Long> cache = new CopyOnWriteArraySet<>();
 
     @Override
     public boolean set(Long key, Long value) {

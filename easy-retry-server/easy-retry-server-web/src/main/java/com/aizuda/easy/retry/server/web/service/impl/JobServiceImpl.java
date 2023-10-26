@@ -66,7 +66,7 @@ public class JobServiceImpl implements JobService {
             queryWrapper.eq(Job::getJobStatus, queryVO.getJobStatus());
         }
 
-        queryWrapper.eq(Job::getDeleted, StatusEnum.YES.getStatus());
+        queryWrapper.eq(Job::getDeleted, StatusEnum.NO.getStatus());
         queryWrapper.orderByDesc(Job::getId);
         PageDTO<Job> selectPage = jobMapper.selectPage(pageDTO, queryWrapper);
 
@@ -114,7 +114,7 @@ public class JobServiceImpl implements JobService {
             queryWrapper.eq(Job::getId, jobId);
         }
 
-        queryWrapper.eq(Job::getDeleted, StatusEnum.YES.getStatus());
+        queryWrapper.eq(Job::getDeleted, StatusEnum.NO.getStatus());
         PageDTO<Job> pageDTO = new PageDTO<>(1, 20);
         PageDTO<Job> selectPage = jobMapper.selectPage(pageDTO, queryWrapper);
         return JobResponseVOConverter.INSTANCE.toJobResponseVOs(selectPage.getRecords());

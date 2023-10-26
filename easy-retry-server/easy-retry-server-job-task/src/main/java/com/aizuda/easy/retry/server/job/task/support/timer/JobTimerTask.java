@@ -8,10 +8,8 @@ import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
-import com.aizuda.easy.retry.server.job.task.dto.JobTaskPrepareDTO;
 import com.aizuda.easy.retry.server.job.task.dto.JobTimerTaskDTO;
 import com.aizuda.easy.retry.server.job.task.dto.TaskExecuteDTO;
-import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.server.job.task.support.WaitStrategy;
 import com.aizuda.easy.retry.server.job.task.support.cache.ResidentTaskCache;
 import com.aizuda.easy.retry.server.job.task.support.strategy.WaitStrategies;
@@ -124,10 +122,10 @@ public class JobTimerTask implements TimerTask {
                 Duration duration = Duration.between(preTriggerAt, nextTriggerAt);
                 long milliseconds = duration.toMillis();
 
-                log.info("常驻任务监控. 任务时间差:[{}] 取余:[{}]", milliseconds, System.currentTimeMillis() % 1000);
+                log.info("常驻任务监控. 任务时间差:[{}] 取余:[{}]", milliseconds, System.currentTimeMillis() % 100);
                 job.setNextTriggerAt(nextTriggerAt);
 
-                JobTimerWheel.register(jobTimerTaskDTO.getTaskBatchId(), timerTask, milliseconds - System.currentTimeMillis() % 1000, TimeUnit.MILLISECONDS);
+                JobTimerWheel.register(jobTimerTaskDTO.getTaskBatchId(), timerTask, milliseconds - System.currentTimeMillis() % 100, TimeUnit.MILLISECONDS);
                 ResidentTaskCache.refresh(jobTimerTaskDTO.getJobId(), nextTriggerAt);
             }
         }
