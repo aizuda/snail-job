@@ -5,6 +5,7 @@ import com.aizuda.easy.retry.server.web.model.request.JobQueryVO;
 import com.aizuda.easy.retry.server.web.model.request.JobRequestVO;
 import com.aizuda.easy.retry.server.web.model.request.JobUpdateJobStatusRequestVO;
 import com.aizuda.easy.retry.server.web.model.response.JobResponseVO;
+import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
 
 import java.util.List;
 
@@ -23,6 +24,8 @@ public interface JobService {
     boolean updateJob(JobRequestVO jobRequestVO);
 
     Boolean updateJobStatus(JobUpdateJobStatusRequestVO jobRequestVO);
+
+    Job updateJobResident(JobRequestVO jobRequestVO);
 
     Boolean deleteJobById(Long id);
 
