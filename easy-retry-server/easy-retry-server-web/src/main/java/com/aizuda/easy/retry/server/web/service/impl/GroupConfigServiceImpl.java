@@ -97,14 +97,15 @@ public class GroupConfigServiceImpl implements GroupConfigService {
     public Boolean updateGroup(GroupConfigRequestVO groupConfigRequestVO) {
 
         ConfigAccess<GroupConfig> groupConfigAccess = accessTemplate.getGroupConfigAccess();
-        GroupConfig groupConfig = groupConfigAccess.one(
+        long count = groupConfigAccess.count(
                 new LambdaQueryWrapper<GroupConfig>().eq(GroupConfig::getGroupName, groupConfigRequestVO.getGroupName()));
-        if (Objects.isNull(groupConfig)) {
+        if (count <= 0) {
             return false;
         }
 
+        GroupConfig groupConfig = GroupConfigConverter.INSTANCE.convert(groupConfigRequestVO);
         groupConfig.setVersion(groupConfig.getVersion() + 1);
-        BeanUtils.copyProperties(groupConfigRequestVO, groupConfig);
+        groupConfig.setDescription(Optional.ofNullable(groupConfigRequestVO.getDescription()).orElse(StrUtil.EMPTY));
 
         Assert.isTrue(systemProperties.getTotalPartition() > groupConfigRequestVO.getGroupPartition(), () -> new EasyRetryServerException("分区超过最大分区. [{}]", systemProperties.getTotalPartition() - 1));
         Assert.isTrue(groupConfigRequestVO.getGroupPartition() >= 0, () -> new EasyRetryServerException("分区不能是负数."));
@@ -176,6 +177,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
         groupConfig.setCreateDt(LocalDateTime.now());
         groupConfig.setVersion(1);
         groupConfig.setGroupName(groupConfigRequestVO.getGroupName());
+        groupConfig.setDescription(Optional.ofNullable(groupConfigRequestVO.getDescription()).orElse(StrUtil.EMPTY));
         if (Objects.isNull(groupConfigRequestVO.getGroupPartition())) {
             groupConfig.setGroupPartition(HashUtil.bkdrHash(groupConfigRequestVO.getGroupName()) % systemProperties.getTotalPartition());
             groupConfig.setBucketIndex(HashUtil.bkdrHash(groupConfigRequestVO.getGroupName()) % systemProperties.getBucketTotal());

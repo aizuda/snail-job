@@ -8,7 +8,7 @@ CREATE TABLE `group_config`
 (
     `id`                bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
     `group_name`        varchar(64)  NOT NULL DEFAULT '' COMMENT '组名称',
-    `description`       varchar(256) NOT NULL COMMENT '组描述',
+    `description`       varchar(256) NOT NULL DEFAULT '' COMMENT '组描述',
     `group_status`      tinyint(4) NOT NULL DEFAULT '0' COMMENT '组状态 0、未启用 1、启用',
     `version`           int(11) NOT NULL COMMENT '版本号',
     `group_partition`   int(11) NOT NULL COMMENT '分区',
@@ -220,7 +220,7 @@ CREATE TABLE `job` (
     `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
     `group_name` varchar(64) NOT NULL COMMENT '组名称',
     `job_name` varchar(64) NOT NULL COMMENT '名称',
-    `args_str` text NOT NULL COMMENT '执行方法参数',
+    `args_str` text DEFAULT NULL COMMENT '执行方法参数',
     `args_type` tinyint(4) NOT NULL DEFAULT '1' COMMENT '参数类型 ',
     `next_trigger_at` datetime NOT NULL COMMENT '下次触发时间',
     `job_status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '重试状态 0、关闭、1、开启',
