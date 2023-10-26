@@ -59,13 +59,14 @@ public class JobServiceImpl implements JobService {
         }
 
         if (StrUtil.isNotBlank(queryVO.getJobName())) {
-            queryWrapper.like(Job::getJobName, "%" + queryVO.getJobName().trim() + "%");
+            queryWrapper.like(Job::getJobName, queryVO.getJobName().trim() + "%");
         }
 
         if (Objects.nonNull(queryVO.getJobStatus())) {
             queryWrapper.eq(Job::getJobStatus, queryVO.getJobStatus());
         }
 
+        queryWrapper.eq(Job::getDeleted, StatusEnum.YES.getStatus());
         queryWrapper.orderByDesc(Job::getId);
         PageDTO<Job> selectPage = jobMapper.selectPage(pageDTO, queryWrapper);
 
@@ -106,13 +107,14 @@ public class JobServiceImpl implements JobService {
         LambdaQueryWrapper<Job> queryWrapper = new LambdaQueryWrapper<Job>()
                 .select(Job::getId, Job::getJobName);
         if (StrUtil.isNotBlank(keywords)) {
-            queryWrapper.like(Job::getJobName, "%" + keywords.trim() + "%");
+            queryWrapper.like(Job::getJobName,  keywords.trim() + "%");
         }
 
         if (Objects.nonNull(jobId)) {
             queryWrapper.eq(Job::getId, jobId);
         }
 
+        queryWrapper.eq(Job::getDeleted, StatusEnum.YES.getStatus());
         PageDTO<Job> pageDTO = new PageDTO<>(1, 20);
         PageDTO<Job> selectPage = jobMapper.selectPage(pageDTO, queryWrapper);
         return JobResponseVOConverter.INSTANCE.toJobResponseVOs(selectPage.getRecords());
