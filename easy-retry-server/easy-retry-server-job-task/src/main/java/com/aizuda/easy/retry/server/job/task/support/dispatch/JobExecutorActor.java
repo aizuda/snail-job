@@ -48,7 +48,6 @@ public class JobExecutorActor extends AbstractActor {
         JobExecutorContext context = JobTaskConverter.INSTANCE.toJobExecutorContext(job);
         context.setTaskBatchId(taskExecute.getTaskBatchId());
         context.setJobId(job.getId());
-        context.setTaskType(job.getTaskType());
         jobExecutor.execute(context);
 
     }

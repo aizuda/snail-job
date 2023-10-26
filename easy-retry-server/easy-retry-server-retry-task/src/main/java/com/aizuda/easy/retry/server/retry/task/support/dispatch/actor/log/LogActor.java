@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 /**
  * 处理日志信息
@@ -69,7 +70,7 @@ public class LogActor extends AbstractActor {
         String errorMessage = retryTaskLogDTO.getMessage();
         retryTaskLogMessage.setMessage(
             StrUtil.isBlank(errorMessage) ? StrUtil.EMPTY : errorMessage);
-        retryTaskLogMessage.setCreateDt(LocalDateTime.now());
+        retryTaskLogMessage.setCreateDt(Optional.ofNullable(retryTaskLogDTO.getTriggerTime()).orElse(LocalDateTime.now()));
         retryTaskLogMessageMapper.insert(retryTaskLogMessage);
 
     }

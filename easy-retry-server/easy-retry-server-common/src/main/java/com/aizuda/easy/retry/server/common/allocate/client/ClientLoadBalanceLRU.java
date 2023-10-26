@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.server.common.allocate.client;
 
 import com.aizuda.easy.retry.server.common.ClientLoadBalance;
+import com.aizuda.easy.retry.server.common.allocate.client.ClientLoadBalanceManager.AllocationAlgorithmEnum;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -53,6 +54,6 @@ public class ClientLoadBalanceLRU implements ClientLoadBalance {
 
     @Override
     public int routeType() {
-        return 0;
+        return AllocationAlgorithmEnum.LRU.getType();
     }
 }

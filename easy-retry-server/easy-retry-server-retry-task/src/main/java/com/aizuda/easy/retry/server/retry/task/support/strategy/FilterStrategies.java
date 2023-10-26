@@ -38,6 +38,7 @@ public class FilterStrategies {
      *
      * @return {@link TriggerAtFilterStrategies} 触发时间过滤策略
      */
+    @Deprecated
     public static FilterStrategy triggerAtFilter() {
         return new TriggerAtFilterStrategies();
     }

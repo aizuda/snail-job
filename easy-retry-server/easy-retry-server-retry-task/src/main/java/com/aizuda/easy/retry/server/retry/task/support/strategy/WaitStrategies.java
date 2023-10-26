@@ -1,16 +1,10 @@
 package com.aizuda.easy.retry.server.retry.task.support.strategy;
 
-import com.aizuda.easy.retry.common.core.context.SpringContext;
+import cn.hutool.core.date.DateUtil;
 import com.aizuda.easy.retry.common.core.util.CronExpression;
-import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.enums.DelayLevelEnum;
-import com.aizuda.easy.retry.server.common.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
-import com.aizuda.easy.retry.server.retry.task.support.RetryContext;
 import com.aizuda.easy.retry.server.retry.task.support.WaitStrategy;
-import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
-import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
-import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
 import com.google.common.base.Preconditions;
 import lombok.Data;
 import lombok.Getter;
@@ -30,10 +24,33 @@ import java.util.concurrent.TimeUnit;
  * @author: www.byteblogs.com
  * @date : 2021-11-29 18:19
  */
-@SuppressWarnings({"squid:S3776", "squid:S2676", "squid:S3740"})
 public class WaitStrategies {
 
     private WaitStrategies() {
+    }
+
+    @Data
+    public static class WaitStrategyContext {
+//        /**
+//         * 触发类型 1.CRON 表达式 2. 固定时间
+//         */
+//        private Integer triggerType;
+
+        /**
+         * 间隔时长
+         */
+        private String triggerInterval;
+
+        /**
+         * 下次触发时间
+         */
+        private LocalDateTime nextTriggerAt;
+
+        /**
+         * 触发次数
+         */
+        private Integer triggerCount;
+
     }
 
     @Getter
@@ -89,10 +106,6 @@ public class WaitStrategies {
             return WaitStrategyEnum.DELAY_LEVEL;
         }
 
-        @Data
-        public static class StrategyParameter {
-        }
-
     }
 
     /**
@@ -143,13 +156,12 @@ public class WaitStrategies {
     /**
      * 延迟等级等待策略
      */
-    private static final  class DelayLevelWaitStrategy implements WaitStrategy {
+    private static final class DelayLevelWaitStrategy implements WaitStrategy {
 
         @Override
-        public LocalDateTime computeRetryTime(RetryContext context) {
-            RetryTask retryTask = context.getRetryTask();
-            DelayLevelEnum levelEnum = DelayLevelEnum.getDelayLevelByLevel(retryTask.getRetryCount());
-            return retryTask.getNextTriggerAt().plus(levelEnum.getTime(), levelEnum.getUnit());
+        public LocalDateTime computeRetryTime(WaitStrategyContext context) {
+            DelayLevelEnum levelEnum = DelayLevelEnum.getDelayLevelByLevel(context.getTriggerCount());
+            return context.getNextTriggerAt().plus(levelEnum.getTime(), levelEnum.getUnit());
         }
     }
 
@@ -159,22 +171,19 @@ public class WaitStrategies {
     private static final class FixedWaitStrategy implements WaitStrategy {
 
         @Override
-        public LocalDateTime computeRetryTime(RetryContext retryContext) {
-            RetryTask retryTask = retryContext.getRetryTask();
-            long triggerInterval;
-            if (TaskTypeEnum.CALLBACK.getType().equals(retryTask.getTaskType())) {
-                // 回调失败的默认15分钟执行一次重试
-                SystemProperties systemProperties = SpringContext.CONTEXT.getBean(SystemProperties.class);
-                triggerInterval = systemProperties.getCallback().getTriggerInterval();
-            } else {
-                AccessTemplate accessTemplate = SpringContext.CONTEXT.getBean(AccessTemplate.class);
-                SceneConfig sceneConfig =
-                    accessTemplate.getSceneConfigAccess().getSceneConfigByGroupNameAndSceneName(retryTask.getGroupName(), retryTask.getSceneName());
-                triggerInterval = Integer.parseInt(sceneConfig.getTriggerInterval());
-            }
+        public LocalDateTime computeRetryTime(WaitStrategyContext retryContext) {
+//            if (TaskTypeEnum.CALLBACK.getType().equals(retryTask.getTaskType())) {
+//                // 回调失败的默认15分钟执行一次重试
+//                SystemProperties systemProperties = SpringContext.CONTEXT.getBean(SystemProperties.class);
+//                triggerInterval = systemProperties.getCallback().getTriggerInterval();
+//            } else {
+//                AccessTemplate accessTemplate = SpringContext.CONTEXT.getBean(AccessTemplate.class);
+//                SceneConfig sceneConfig =
+//                    accessTemplate.getSceneConfigAccess().getSceneConfigByGroupNameAndSceneName(retryTask.getGroupName(), retryTask.getSceneName());
+//                triggerInterval = Integer.parseInt(sceneConfig.getTriggerInterval());
+//            }
 
-
-            return retryTask.getNextTriggerAt().plusSeconds(triggerInterval);
+            return retryContext.getNextTriggerAt().plusSeconds(Integer.parseInt(retryContext.getTriggerInterval()));
         }
     }
 
@@ -184,23 +193,16 @@ public class WaitStrategies {
     private static final class CronWaitStrategy implements WaitStrategy {
 
         @Override
-        public LocalDateTime computeRetryTime(RetryContext context) {
-            RetryTask retryTask = context.getRetryTask();
+        public LocalDateTime computeRetryTime(WaitStrategyContext context) {
 
-            AccessTemplate accessTemplate = SpringContext.CONTEXT.getBean(AccessTemplate.class);
-
-            SceneConfig sceneConfig =
-                accessTemplate.getSceneConfigAccess().getSceneConfigByGroupNameAndSceneName(retryTask.getGroupName(), retryTask.getSceneName());
-
-            Date nextValidTime;
             try {
-                ZonedDateTime zdt = retryTask.getNextTriggerAt().atZone(ZoneOffset.ofHours(8));
-                nextValidTime = new CronExpression(sceneConfig.getTriggerInterval()).getNextValidTimeAfter(Date.from(zdt.toInstant()));
+                ZonedDateTime zdt = context.getNextTriggerAt().atZone(ZoneOffset.ofHours(8));
+                Date nextValidTime = new CronExpression(context.getTriggerInterval()).getNextValidTimeAfter(Date.from(zdt.toInstant()));
+                return DateUtil.toLocalDateTime(nextValidTime);
             } catch (ParseException e) {
-                throw new EasyRetryServerException("解析CRON表达式异常 [{}]", sceneConfig.getTriggerInterval(), e);
+                throw new EasyRetryServerException("解析CRON表达式异常 [{}]", context.getTriggerInterval(), e);
             }
 
-            return  LocalDateTime.ofEpochSecond( nextValidTime.getTime() / 1000,0, ZoneOffset.ofHours(8));
         }
     }
 
@@ -226,19 +228,12 @@ public class WaitStrategies {
         }
 
         @Override
-        public LocalDateTime computeRetryTime(RetryContext retryContext) {
+        public LocalDateTime computeRetryTime(WaitStrategyContext retryContext) {
 
             if (Objects.nonNull(retryContext)) {
-                RetryTask retryTask = retryContext.getRetryTask();
-
-                AccessTemplate accessTemplate = SpringContext.CONTEXT.getBean(AccessTemplate.class);
-                SceneConfig sceneConfig =
-                    accessTemplate.getSceneConfigAccess().getSceneConfigByGroupNameAndSceneName(retryTask.getGroupName(), retryTask.getSceneName());
-
                 if (maximum == 0) {
-                    maximum = Long.parseLong(sceneConfig.getTriggerInterval());
+                    maximum = Long.parseLong(retryContext.getTriggerInterval());
                 }
-
             }
 
             Preconditions.checkArgument(maximum > minimum, "maximum must be > minimum but maximum is %d and minimum is", maximum, minimum);

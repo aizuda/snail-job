@@ -2,6 +2,8 @@ package com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.log;
 
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 /**
  * 日志上下文模型
  *
@@ -31,5 +33,7 @@ public class RetryTaskLogDTO {
      * 重试状态
      */
     private Integer retryStatus;
+
+    private LocalDateTime triggerTime;
 
 }

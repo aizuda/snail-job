@@ -34,8 +34,6 @@ public class ClusterTaskGenerator extends AbstractJobTaskGenerator {
     protected ClientNodeAllocateHandler clientNodeAllocateHandler;
     @Autowired
     private JobTaskMapper jobTaskMapper;
-    @Autowired
-    private JobMapper jobMapper;
 
     @Override
     public TaskTypeEnum getTaskInstanceType() {

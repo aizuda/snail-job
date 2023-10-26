@@ -12,7 +12,7 @@ import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.retry.task.support.timer.CallbackTimerTask;
 import com.aizuda.easy.retry.server.retry.task.support.timer.RetryTimerContext;
 import com.aizuda.easy.retry.server.retry.task.support.timer.RetryTimerTask;
-import com.aizuda.easy.retry.server.retry.task.support.timer.TimerWheelHandler;
+import com.aizuda.easy.retry.server.retry.task.support.timer.RetryTimerWheel;
 import com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.log.RetryTaskLogDTO;
 import com.aizuda.easy.retry.server.retry.task.support.dispatch.task.TaskExecutorSceneEnum;
 import com.aizuda.easy.retry.server.retry.task.support.handler.CallbackRetryTaskHandler;
@@ -68,32 +68,17 @@ public class FailureActor extends AbstractActor {
                     @Override
                     protected void doInTransactionWithoutResult(TransactionStatus status) {
 
-                        RetryTimerContext timerContext = new RetryTimerContext();
-                        timerContext.setGroupName(retryTask.getGroupName());
-                        timerContext.setUniqueId(retryTask.getUniqueId());
-
-                        TimerTask timerTask = null;
                         Integer maxRetryCount;
                         if (TaskTypeEnum.CALLBACK.getType().equals(retryTask.getTaskType())) {
                             maxRetryCount = systemProperties.getCallback().getMaxCount();
-                            timerTask = new CallbackTimerTask();
-                            timerContext.setScene(TaskExecutorSceneEnum.AUTO_CALLBACK);
                         } else {
                             maxRetryCount = sceneConfig.getMaxRetryCount();
-                            timerTask = new RetryTimerTask(timerContext);
-                            timerContext.setScene(TaskExecutorSceneEnum.AUTO_RETRY);
                         }
 
                         if (maxRetryCount <= retryTask.getRetryCount()) {
                             retryTask.setRetryStatus(RetryStatusEnum.MAX_COUNT.getStatus());
                             // 创建一个回调任务
                             callbackRetryTaskHandler.create(retryTask);
-                        } else {
-                            // TODO 计算延迟的时间 此处需要判断符合条件的才会进入时间轮
-                            LocalDateTime nextTriggerAt = retryTask.getNextTriggerAt();
-                            long delay = nextTriggerAt.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() - System.currentTimeMillis();
-                            log.info("准确进入时间轮 {} {}", nextTriggerAt, delay);
-                            TimerWheelHandler.register(retryTask.getGroupName(), retryTask.getUniqueId(), timerTask, delay, TimeUnit.MILLISECONDS);
                         }
 
                         retryTask.setUpdateDt(LocalDateTime.now());

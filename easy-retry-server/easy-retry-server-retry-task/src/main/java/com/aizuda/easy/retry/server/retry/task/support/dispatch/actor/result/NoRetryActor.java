@@ -41,8 +41,6 @@ public class NoRetryActor extends AbstractActor {
 
             RetryContext retryContext = retryExecutor.getRetryContext();
             RetryTask retryTask = retryContext.getRetryTask();
-            WaitStrategy waitStrategy = retryContext.getWaitStrategy();
-            retryTask.setNextTriggerAt(waitStrategy.computeRetryTime(retryContext));
 
             // 不更新重试次数
             retryTask.setRetryCount(null);
