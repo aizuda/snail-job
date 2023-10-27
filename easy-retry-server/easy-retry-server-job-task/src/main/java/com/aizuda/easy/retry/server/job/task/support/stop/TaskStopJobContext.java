@@ -42,7 +42,7 @@ public class TaskStopJobContext {
 
     private List<JobTask> jobTasks;
 
-    private JobOperationReasonEnum jobOperationReasonEnum;
+    private Integer jobOperationReason;
 
     private boolean forceStop;
 

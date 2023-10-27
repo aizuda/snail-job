@@ -19,6 +19,9 @@ public enum JobOperationReasonEnum {
     EXECUTE_TIMEOUT(1, "任务执行超时"),
     NOT_CLIENT(2, "无客户端节点"),
     JOB_CLOSED(3, "JOB已关闭"),
+    JOB_DISCARD(4, "任务丢弃"),
+    JOB_OVERLAY(5, "任务被覆盖"),
+    NOT_EXECUTE_TASK(6, "无可执行任务项"),
     ;
 
     private final int reason;

@@ -64,7 +64,7 @@ public class JobExecutorResultActor extends AbstractActor {
                         ()-> new EasyRetryServerException("更新任务实例失败"));
 
                     // 更新批次上的状态
-                    boolean complete = jobTaskBatchHandler.complete(result.getTaskBatchId(), result.getJobOperationReasonEnum());
+                    boolean complete = jobTaskBatchHandler.complete(result.getTaskBatchId(), result.getJobOperationReason());
                     if (complete) {
                         // 尝试停止任务
                         // 若是集群任务则客户端会主动关闭

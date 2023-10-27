@@ -27,7 +27,7 @@ public class JobExecutorResultDTO {
 
     private Object result;
 
-    private JobOperationReasonEnum jobOperationReasonEnum;
+    private Integer jobOperationReason;
 
 
 }
