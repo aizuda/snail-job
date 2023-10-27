@@ -122,10 +122,10 @@ public class JobTimerTask implements TimerTask {
                 Duration duration = Duration.between(preTriggerAt, nextTriggerAt);
                 long milliseconds = duration.toMillis();
 
-                log.info("常驻任务监控. 任务时间差:[{}] 取余:[{}]", milliseconds, System.currentTimeMillis() % 100);
+                log.info("常驻任务监控. 任务时间差:[{}] 取余:[{}]", milliseconds, System.currentTimeMillis() % 1000);
                 job.setNextTriggerAt(nextTriggerAt);
 
-                JobTimerWheel.register(jobTimerTaskDTO.getTaskBatchId(), timerTask, milliseconds - System.currentTimeMillis() % 100, TimeUnit.MILLISECONDS);
+                JobTimerWheel.register(jobTimerTaskDTO.getTaskBatchId(), timerTask, milliseconds - System.currentTimeMillis() % 1000, TimeUnit.MILLISECONDS);
                 ResidentTaskCache.refresh(jobTimerTaskDTO.getJobId(), nextTriggerAt);
             }
         }

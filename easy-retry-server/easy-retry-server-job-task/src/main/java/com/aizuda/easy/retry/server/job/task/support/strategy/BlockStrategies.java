@@ -83,6 +83,11 @@ public class BlockStrategies {
         public void block(final BlockStrategyContext context) {
             log.warn("阻塞策略为覆盖. taskBatchId:[{}]", context.getTaskBatchId());
 
+            // 重新生成任务
+            JobTaskBatchGenerator jobTaskBatchGenerator = SpringContext.getBeanByType(JobTaskBatchGenerator.class);
+            JobTaskBatchGeneratorContext jobTaskBatchGeneratorContext = JobTaskConverter.INSTANCE.toJobTaskGeneratorContext(context);
+            jobTaskBatchGenerator.generateJobTaskBatch(jobTaskBatchGeneratorContext);
+
             // 停止任务
             JobTaskStopHandler instanceInterrupt = JobTaskStopFactory.getJobTaskStop(context.taskType);
             TaskStopJobContext stopJobContext = JobTaskConverter.INSTANCE.toStopJobContext(context);
@@ -90,10 +95,6 @@ public class BlockStrategies {
             stopJobContext.setNeedUpdateTaskStatus(Boolean.TRUE);
             instanceInterrupt.stop(stopJobContext);
 
-            // 重新生成任务
-            JobTaskBatchGenerator jobTaskBatchGenerator = SpringContext.getBeanByType(JobTaskBatchGenerator.class);
-            JobTaskBatchGeneratorContext jobTaskBatchGeneratorContext = JobTaskConverter.INSTANCE.toJobTaskGeneratorContext(context);
-            jobTaskBatchGenerator.generateJobTaskBatch(jobTaskBatchGeneratorContext);
         }
     }
 
