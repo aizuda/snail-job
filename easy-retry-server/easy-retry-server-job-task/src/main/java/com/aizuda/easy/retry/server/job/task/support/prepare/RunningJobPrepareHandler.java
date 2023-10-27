@@ -55,6 +55,9 @@ public class RunningJobPrepareHandler extends AbstractJobPrePareHandler {
 
         }
 
+        if (prepare.isOnlyTimeoutCheck()) {
+            return;
+        }
         BlockStrategies.BlockStrategyContext blockStrategyContext = JobTaskConverter.INSTANCE.toBlockStrategyContext(prepare);
         blockStrategyContext.setOperationReason(jobOperationReasonEnum);
         BlockStrategy blockStrategyInterface = BlockStrategies.BlockStrategyEnum.getBlockStrategy(blockStrategy);

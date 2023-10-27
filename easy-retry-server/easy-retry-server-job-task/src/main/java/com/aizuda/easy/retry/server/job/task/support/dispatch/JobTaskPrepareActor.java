@@ -60,15 +60,21 @@ public class JobTaskPrepareActor extends AbstractActor {
             TerminalJobPrepareHandler terminalJobPrepareHandler = SpringContext.getBeanByType(TerminalJobPrepareHandler.class);
             terminalJobPrepareHandler.handler(prepare);
         } else {
+
+            boolean onlyTimeoutCheck = false;
             for (JobTaskBatch jobTaskBatch : notCompleteJobTaskBatchList) {
                 prepare.setExecutionAt(jobTaskBatch.getExecutionAt());
                 prepare.setTaskBatchId(jobTaskBatch.getId());
+                prepare.setOnlyTimeoutCheck(onlyTimeoutCheck);
                 for (JobPrePareHandler prePareHandler : prePareHandlers) {
                     if (prePareHandler.matches(jobTaskBatch.getTaskBatchStatus())) {
                         prePareHandler.handler(prepare);
                         break;
                     }
                 }
+
+                // 当存在大量待处理任务时，除了第一个任务需要执行阻塞策略，其他任务只做任务检查
+                onlyTimeoutCheck = true;
             }
         }
     }

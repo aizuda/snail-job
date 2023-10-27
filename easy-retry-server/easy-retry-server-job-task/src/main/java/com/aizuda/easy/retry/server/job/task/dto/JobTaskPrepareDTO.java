@@ -53,4 +53,6 @@ public class JobTaskPrepareDTO {
      */
     private LocalDateTime executionAt;
 
+    private boolean onlyTimeoutCheck;
+
 }
