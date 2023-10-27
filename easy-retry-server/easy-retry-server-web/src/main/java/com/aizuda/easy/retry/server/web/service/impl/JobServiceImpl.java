@@ -147,6 +147,7 @@ public class JobServiceImpl implements JobService {
     @Override
     public Job updateJobResident(JobRequestVO jobRequestVO) {
         Job job = JobConverter.INSTANCE.toJob(jobRequestVO);
+        job.setResident(StatusEnum.NO.getStatus());
         if (jobRequestVO.getTriggerType() == WaitStrategyEnum.FIXED.getTriggerType()) {
             if (Integer.parseInt(jobRequestVO.getTriggerInterval()) < 10) {
                 job.setResident(StatusEnum.YES.getStatus());
@@ -163,6 +164,7 @@ public class JobServiceImpl implements JobService {
         } else {
             throw new EasyRetryServerException("未知触发类型");
         }
+
         return job;
     }
 

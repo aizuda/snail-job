@@ -10,6 +10,7 @@ import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
@@ -22,6 +23,7 @@ import java.util.List;
 public abstract class AbstractJobExecutor implements JobExecutor, InitializingBean {
 
     @Override
+    @Transactional
     public void execute(JobExecutorContext context) {
 
         // 生成任务

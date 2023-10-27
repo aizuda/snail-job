@@ -7,6 +7,8 @@ import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
+import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
+import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.job.task.dto.JobTimerTaskDTO;
 import com.aizuda.easy.retry.server.job.task.dto.TaskExecuteDTO;
@@ -32,10 +34,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.util.CollectionUtils;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -81,11 +85,8 @@ public class JobExecutorActor extends AbstractActor {
         );
 
         try {
-            // 更新批次的状态
-            updateBatchStatus(taskExecute, job);
 
-            // 如果任务已经关闭则不需要执行
-            if (Objects.isNull(job)) {
+            if (!handlerTaskBatch(taskExecute, job)) {
                 return;
             }
 
@@ -101,13 +102,16 @@ public class JobExecutorActor extends AbstractActor {
 
     }
 
-    private void updateBatchStatus(final TaskExecuteDTO taskExecute, final Job job) {
+    private boolean handlerTaskBatch(final TaskExecuteDTO taskExecute, final Job job) {
+
         int taskStatus = JobTaskBatchStatusEnum.RUNNING.getStatus();
         int operationReason = JobOperationReasonEnum.NONE.getReason();
         if (Objects.isNull(job)) {
-            log.warn("任务已经关闭不允许执行. jobId:[{}]", taskExecute.getJobId());
             taskStatus = JobTaskBatchStatusEnum.CANCEL.getStatus();
             operationReason = JobOperationReasonEnum.JOB_CLOSED.getReason();
+        } else if (CollectionUtils.isEmpty(CacheRegisterTable.getServerNodeSet(taskExecute.getGroupName()))) {
+            taskStatus = JobTaskBatchStatusEnum.CANCEL.getStatus();
+            operationReason = JobOperationReasonEnum.NOT_CLIENT.getReason();
         }
 
         JobTaskBatch jobTaskBatch = new JobTaskBatch();
@@ -117,6 +121,8 @@ public class JobExecutorActor extends AbstractActor {
         jobTaskBatch.setOperationReason(operationReason);
         Assert.isTrue(1 == jobTaskBatchMapper.updateById(jobTaskBatch),
             () -> new EasyRetryServerException("更新任务失败"));
+
+        return taskStatus == JobTaskBatchStatusEnum.RUNNING.getStatus();
     }
 
     private void doHandlerResidentTask(Job job, TaskExecuteDTO taskExecuteDTO) {
