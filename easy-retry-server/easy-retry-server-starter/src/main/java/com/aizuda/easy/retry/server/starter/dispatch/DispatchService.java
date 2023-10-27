@@ -38,9 +38,9 @@ public class DispatchService implements Lifecycle {
     public static final Long PERIOD = 10L;
 
     /**
-     * 延迟10s为了尽可能保障集群节点都启动完成在进行rebalance
+     * 延迟30s为了尽可能保障集群节点都启动完成在进行rebalance
      */
-    public static final Long INITIAL_DELAY = 10L;
+    public static final Long INITIAL_DELAY = 30L;
 
     @Override
     public void start() {

@@ -5,6 +5,7 @@ import com.aizuda.easy.retry.server.common.IdempotentStrategy;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * @author www.byteblogs.com
@@ -13,7 +14,7 @@ import java.util.Set;
  */
 public class TimerIdempotent implements IdempotentStrategy<String, String> {
 
-    private static final Set<String> cache = new HashSet<>();
+    private static final CopyOnWriteArraySet<String> cache = new CopyOnWriteArraySet<>();
 
     @Override
     public boolean set(String key, String value) {
