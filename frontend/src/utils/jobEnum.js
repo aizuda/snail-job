@@ -112,6 +112,18 @@ const enums = {
     '3': {
       'name': '任务已关闭',
       'color': '#087da1'
+    },
+    '4': {
+      'name': '任务丢弃',
+      'color': '#3a2f81'
+    },
+    '5': {
+      'name': '任务被覆盖',
+      'color': '#c2238a'
+    },
+    '6': {
+      'name': '无可执行任务项',
+      'color': '#23c28a'
     }
   },
   taskStatus: {

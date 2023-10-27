@@ -18,7 +18,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author: www.byteblogs.com
@@ -32,21 +34,37 @@ public class JobTaskBatchHandler {
     @Autowired
     private JobTaskBatchMapper jobTaskBatchMapper;
 
-    public boolean complete(Long taskBatchId, JobOperationReasonEnum jobOperationReasonEnum) {
+    public boolean complete(Long taskBatchId, Integer jobOperationReason) {
 
         List<JobTask> jobTasks = jobTaskMapper.selectList(
             new LambdaQueryWrapper<JobTask>().select(JobTask::getTaskStatus)
                 .eq(JobTask::getTaskBatchId, taskBatchId));
 
-
-        if (CollectionUtils.isEmpty(jobTasks) || jobTasks.stream().anyMatch(jobTask -> JobTaskStatusEnum.NOT_COMPLETE.contains(jobTask.getTaskStatus()))) {
-            return false;
-        }
-        long failCount = jobTasks.stream().filter(jobTask -> jobTask.getTaskStatus() == JobTaskBatchStatusEnum.FAIL.getStatus()).count();
-        long stopCount = jobTasks.stream().filter(jobTask -> jobTask.getTaskStatus() == JobTaskBatchStatusEnum.STOP.getStatus()).count();
-
         JobTaskBatch jobTaskBatch = new JobTaskBatch();
         jobTaskBatch.setId(taskBatchId);
+
+        if (CollectionUtils.isEmpty(jobTasks)) {
+            // todo 此为异常数据没有生成对应的任务项(task)， 直接更新为失败
+            jobTaskBatch.setTaskBatchStatus(JobTaskBatchStatusEnum.FAIL.getStatus());
+            jobTaskBatch.setOperationReason(JobOperationReasonEnum.NOT_EXECUTE_TASK.getReason());
+            jobTaskBatchMapper.update(jobTaskBatch,
+                new LambdaUpdateWrapper<JobTaskBatch>()
+                    .eq(JobTaskBatch::getId, taskBatchId)
+                    .in(JobTaskBatch::getTaskBatchStatus, JobTaskStatusEnum.NOT_COMPLETE));
+
+            return false;
+        }
+
+        if (jobTasks.stream().anyMatch(jobTask -> JobTaskStatusEnum.NOT_COMPLETE.contains(jobTask.getTaskStatus()))) {
+            return false;
+        }
+
+        Map<Integer, Long> statusCountMap = jobTasks.stream()
+            .collect(Collectors.groupingBy(JobTask::getTaskStatus, Collectors.counting()));
+
+        long failCount = statusCountMap.getOrDefault(JobTaskBatchStatusEnum.FAIL.getStatus(), 0L);
+        long stopCount = statusCountMap.getOrDefault(JobTaskBatchStatusEnum.STOP.getStatus(), 0L);
+
         if (failCount > 0) {
             jobTaskBatch.setTaskBatchStatus(JobTaskBatchStatusEnum.FAIL.getStatus());
         } else if (stopCount > 0) {
@@ -55,8 +73,8 @@ public class JobTaskBatchHandler {
             jobTaskBatch.setTaskBatchStatus(JobTaskBatchStatusEnum.SUCCESS.getStatus());
         }
 
-        if (Objects.nonNull(jobOperationReasonEnum)) {
-            jobTaskBatch.setOperationReason(jobOperationReasonEnum.getReason());
+        if (Objects.nonNull(jobOperationReason)) {
+            jobTaskBatch.setOperationReason(jobOperationReason);
         }
 
         return 1 == jobTaskBatchMapper.update(jobTaskBatch,

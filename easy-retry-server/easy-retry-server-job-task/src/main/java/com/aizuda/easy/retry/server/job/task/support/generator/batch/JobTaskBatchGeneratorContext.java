@@ -23,14 +23,19 @@ public class JobTaskBatchGeneratorContext {
     private Long jobId;
 
     /**
-     * 任务类型
-     */
-    private Integer taskInstanceType;
-
-    /**
      * 下次触发时间
      */
     private LocalDateTime nextTriggerAt;
+
+    /**
+     * 操作原因
+     */
+    private Integer operationReason;
+
+    /**
+     * 任务批次状态
+     */
+    private Integer taskBatchStatus;
 
 
 }

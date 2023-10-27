@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.time.ZoneId;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -43,12 +44,12 @@ public class JobTaskBatchGenerator {
         if (CollectionUtils.isEmpty(CacheRegisterTable.getServerNodeSet(context.getGroupName()))) {
             jobTaskBatch.setTaskBatchStatus(JobTaskBatchStatusEnum.CANCEL.getStatus());
             jobTaskBatch.setOperationReason(JobOperationReasonEnum.NOT_CLIENT.getReason());
-            Assert.isTrue(1 == jobTaskBatchMapper.insert(jobTaskBatch), () -> new EasyRetryServerException("新增调度任务失败.jobId:[{}]", context.getJobId()));
-            return;
+        } else {
+            // 生成一个新的任务
+            jobTaskBatch.setTaskBatchStatus(Optional.ofNullable(context.getTaskBatchStatus()).orElse(JobTaskBatchStatusEnum.WAITING.getStatus()));
+            jobTaskBatch.setOperationReason(context.getOperationReason());
         }
 
-        // 生成一个新的任务
-        jobTaskBatch.setTaskBatchStatus(JobTaskBatchStatusEnum.WAITING.getStatus());
         Assert.isTrue(1 == jobTaskBatchMapper.insert(jobTaskBatch), () -> new EasyRetryServerException("新增调度任务失败.jobId:[{}]", context.getJobId()));
 
         // 进入时间轮

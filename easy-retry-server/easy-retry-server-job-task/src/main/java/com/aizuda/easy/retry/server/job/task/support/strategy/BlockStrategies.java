@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.server.job.task.support.strategy;
 
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
+import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.job.task.support.BlockStrategy;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
@@ -16,6 +17,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 /**
  * @author: www.byteblogs.com
@@ -65,7 +67,7 @@ public class BlockStrategies {
          */
         private LocalDateTime nextTriggerAt;
 
-        private JobOperationReasonEnum operationReason;
+        private Integer operationReason;
 
     }
 
@@ -74,6 +76,13 @@ public class BlockStrategies {
         @Override
         public void block(final BlockStrategyContext context) {
             log.warn("阻塞策略为丢弃此次执行. taskBatchId:[{}]", context.getTaskBatchId());
+
+            // 重新生成任务
+            JobTaskBatchGenerator jobTaskBatchGenerator = SpringContext.getBeanByType(JobTaskBatchGenerator.class);
+            JobTaskBatchGeneratorContext jobTaskBatchGeneratorContext = JobTaskConverter.INSTANCE.toJobTaskGeneratorContext(context);
+            jobTaskBatchGeneratorContext.setTaskBatchStatus(JobTaskBatchStatusEnum.FAIL.getStatus());
+            jobTaskBatchGeneratorContext.setOperationReason(JobOperationReasonEnum.JOB_OVERLAY.getReason());
+            jobTaskBatchGenerator.generateJobTaskBatch(jobTaskBatchGeneratorContext);
         }
     }
 
@@ -91,7 +100,7 @@ public class BlockStrategies {
             // 停止任务
             JobTaskStopHandler instanceInterrupt = JobTaskStopFactory.getJobTaskStop(context.taskType);
             TaskStopJobContext stopJobContext = JobTaskConverter.INSTANCE.toStopJobContext(context);
-            stopJobContext.setJobOperationReasonEnum(context.getOperationReason());
+            stopJobContext.setJobOperationReason(Optional.ofNullable(context.getOperationReason()).orElse(JobOperationReasonEnum.JOB_DISCARD.getReason()));
             stopJobContext.setNeedUpdateTaskStatus(Boolean.TRUE);
             instanceInterrupt.stop(stopJobContext);
 
