@@ -58,7 +58,7 @@ public class JobExecutorScanner implements Scanner, ApplicationContextAware {
             String executorClassName = bean.getClass().getName();
 
             // 通过实现接口进行注册
-            if (bean.getClass().isAssignableFrom(IJobExecutor.class)) {
+            if (IJobExecutor.class.isAssignableFrom(bean.getClass())) {
                 if (!JobExecutorInfoCache.isExisted(executorClassName)) {
                     retryerInfoList.add(new JobExecutorInfo(executorClassName, ReflectionUtils.findMethod(bean.getClass(), "jobExecute"), bean));
                 }

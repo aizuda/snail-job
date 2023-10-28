@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -39,7 +40,7 @@ public class JobTaskBatchGenerator {
         JobTaskBatch jobTaskBatch = new JobTaskBatch();
         jobTaskBatch.setJobId(context.getJobId());
         jobTaskBatch.setGroupName(context.getGroupName());
-
+        jobTaskBatch.setCreateDt(LocalDateTime.now());
         // 无执行的节点
         if (CollectionUtils.isEmpty(CacheRegisterTable.getServerNodeSet(context.getGroupName()))) {
             jobTaskBatch.setTaskBatchStatus(JobTaskBatchStatusEnum.CANCEL.getStatus());
