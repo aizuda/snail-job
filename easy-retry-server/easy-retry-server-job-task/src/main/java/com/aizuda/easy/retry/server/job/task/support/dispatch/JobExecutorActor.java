@@ -33,6 +33,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.CollectionUtils;
 
@@ -97,7 +99,15 @@ public class JobExecutorActor extends AbstractActor {
             context.setJobId(job.getId());
             jobExecutor.execute(context);
         } finally {
-            doHandlerResidentTask(job, taskExecute);
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    // 清除时间轮的缓存
+                    JobTimerWheel.clearCache(taskExecute.getTaskBatchId());
+                    //方法内容
+                    doHandlerResidentTask(job, taskExecute);
+                }
+            });
         }
 
     }

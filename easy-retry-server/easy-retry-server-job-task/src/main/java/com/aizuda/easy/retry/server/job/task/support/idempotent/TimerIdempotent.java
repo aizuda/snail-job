@@ -1,10 +1,7 @@
 package com.aizuda.easy.retry.server.job.task.support.idempotent;
 
 import com.aizuda.easy.retry.server.common.IdempotentStrategy;
-import scala.collection.immutable.Stream;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 /**

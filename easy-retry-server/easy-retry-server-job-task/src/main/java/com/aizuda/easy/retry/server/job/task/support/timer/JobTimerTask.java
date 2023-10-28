@@ -28,9 +28,6 @@ public class JobTimerTask implements TimerTask {
         log.info("开始执行任务调度. 当前时间:[{}] taskId:[{}]", LocalDateTime.now(), jobTimerTaskDTO.getTaskBatchId());
 
         try {
-            // 清除时间轮的缓存
-            JobTimerWheel.clearCache(jobTimerTaskDTO.getTaskBatchId());
-
             TaskExecuteDTO taskExecuteDTO = new TaskExecuteDTO();
             taskExecuteDTO.setTaskBatchId(jobTimerTaskDTO.getTaskBatchId());
             taskExecuteDTO.setGroupName(jobTimerTaskDTO.getGroupName());

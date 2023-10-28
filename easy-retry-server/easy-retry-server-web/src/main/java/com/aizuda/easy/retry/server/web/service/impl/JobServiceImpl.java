@@ -1,9 +1,11 @@
 package com.aizuda.easy.retry.server.web.service.impl;
 
 import cn.hutool.core.lang.Assert;
+import cn.hutool.core.util.HashUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.common.core.util.CronExpression;
+import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.job.task.support.WaitStrategy;
 import com.aizuda.easy.retry.server.job.task.support.strategy.WaitStrategies.WaitStrategyContext;
@@ -43,7 +45,8 @@ import java.util.Objects;
 public class JobServiceImpl implements JobService {
 
     private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
+    @Autowired
+    private SystemProperties systemProperties;
     @Autowired
     private JobMapper jobMapper;
 
@@ -107,7 +110,7 @@ public class JobServiceImpl implements JobService {
         LambdaQueryWrapper<Job> queryWrapper = new LambdaQueryWrapper<Job>()
                 .select(Job::getId, Job::getJobName);
         if (StrUtil.isNotBlank(keywords)) {
-            queryWrapper.like(Job::getJobName,  keywords.trim() + "%");
+            queryWrapper.like(Job::getJobName, keywords.trim() + "%");
         }
 
         if (Objects.nonNull(jobId)) {
@@ -130,6 +133,7 @@ public class JobServiceImpl implements JobService {
 
         // 判断常驻任务
         Job job = updateJobResident(jobRequestVO);
+        job.setBucketIndex(HashUtil.bkdrHash(jobRequestVO.getGroupName() + jobRequestVO.getJobName()) % systemProperties.getBucketTotal());
         job.setNextTriggerAt(waitStrategy.computeRetryTime(waitStrategyContext));
         return 1 == jobMapper.insert(job);
     }

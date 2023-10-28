@@ -45,7 +45,7 @@ public class JobEndPoint {
         // 选择执行器
         Object executor = jobExecutorInfo.getExecutor();
         IJobExecutor jobExecutor;
-        if (executor.getClass().isAssignableFrom(IJobExecutor.class)) {
+        if (IJobExecutor.class.isAssignableFrom(executor.getClass())) {
             jobExecutor = (AbstractJobExecutor) executor;
         } else {
             jobExecutor = SpringContext.getBeanByType(AnnotationJobExecutor.class);
