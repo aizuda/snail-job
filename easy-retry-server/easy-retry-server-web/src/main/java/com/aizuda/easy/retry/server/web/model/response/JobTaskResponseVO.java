@@ -14,6 +14,8 @@ public class JobTaskResponseVO {
 
     private Long id;
 
+    private Long key;
+
     /**
      * 组名称
      */

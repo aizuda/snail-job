@@ -45,6 +45,10 @@ public class JobTaskServiceImpl implements JobTaskService {
 
         List<JobTaskResponseVO> jobTaskResponseVOs = JobTaskResponseVOConverter.INSTANCE.toJobTaskResponseVOs(
             selectPage.getRecords());
+        for (JobTaskResponseVO jobTaskResponseVO : jobTaskResponseVOs) {
+            jobTaskResponseVO.setKey(jobTaskResponseVO.getId());
+        }
+
         return new PageResult<>(pageDTO, jobTaskResponseVOs);
     }
 }

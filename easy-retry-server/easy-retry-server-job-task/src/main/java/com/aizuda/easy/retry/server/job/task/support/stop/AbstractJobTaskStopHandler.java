@@ -25,6 +25,8 @@ public abstract class AbstractJobTaskStopHandler implements JobTaskStopHandler, 
     @Autowired
     private JobTaskMapper jobTaskMapper;
 
+    protected abstract void doStop(TaskStopJobContext context);
+
     @Override
     public void stop(TaskStopJobContext context) {
 
@@ -58,8 +60,6 @@ public abstract class AbstractJobTaskStopHandler implements JobTaskStopHandler, 
 
         }
     }
-
-    protected abstract void doStop(TaskStopJobContext context);
 
     @Override
     public void afterPropertiesSet() throws Exception {
