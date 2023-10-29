@@ -17,7 +17,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
+import java.util.Objects;
 
 /**
  * @author: www.byteblogs.com
@@ -81,7 +81,7 @@ public class BlockStrategies {
             JobTaskBatchGenerator jobTaskBatchGenerator = SpringContext.getBeanByType(JobTaskBatchGenerator.class);
             JobTaskBatchGeneratorContext jobTaskBatchGeneratorContext = JobTaskConverter.INSTANCE.toJobTaskGeneratorContext(context);
             jobTaskBatchGeneratorContext.setTaskBatchStatus(JobTaskBatchStatusEnum.FAIL.getStatus());
-            jobTaskBatchGeneratorContext.setOperationReason(JobOperationReasonEnum.JOB_OVERLAY.getReason());
+            jobTaskBatchGeneratorContext.setOperationReason(JobOperationReasonEnum.JOB_DISCARD.getReason());
             jobTaskBatchGenerator.generateJobTaskBatch(jobTaskBatchGeneratorContext);
         }
     }
@@ -100,7 +100,13 @@ public class BlockStrategies {
             // 停止任务
             JobTaskStopHandler instanceInterrupt = JobTaskStopFactory.getJobTaskStop(context.taskType);
             TaskStopJobContext stopJobContext = JobTaskConverter.INSTANCE.toStopJobContext(context);
-            stopJobContext.setJobOperationReason(Optional.ofNullable(context.getOperationReason()).orElse(JobOperationReasonEnum.JOB_DISCARD.getReason()));
+
+            Integer operationReason = context.getOperationReason();
+            if (Objects.isNull(context.getOperationReason()) || context.getOperationReason() == JobOperationReasonEnum.NONE.getReason()) {
+                operationReason = JobOperationReasonEnum.JOB_OVERLAY.getReason();
+            }
+
+            stopJobContext.setJobOperationReason(operationReason);
             stopJobContext.setNeedUpdateTaskStatus(Boolean.TRUE);
             instanceInterrupt.stop(stopJobContext);
 

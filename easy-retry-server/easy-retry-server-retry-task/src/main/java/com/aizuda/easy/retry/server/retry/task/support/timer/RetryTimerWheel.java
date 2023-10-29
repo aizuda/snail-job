@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.server.retry.task.support.timer;
 
+import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.common.Lifecycle;
 import com.aizuda.easy.retry.server.retry.task.support.idempotent.TimerIdempotent;
@@ -47,6 +48,9 @@ public class RetryTimerWheel implements Lifecycle {
     }
 
     public static boolean isExisted(String groupName, String uniqueId) {
+        if (StrUtil.isNotBlank(groupName) || StrUtil.isNotBlank(uniqueId)) {
+            return Boolean.FALSE;
+        }
         return idempotent.isExist(groupName, uniqueId);
     }
 

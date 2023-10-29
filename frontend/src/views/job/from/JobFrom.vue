@@ -157,10 +157,11 @@
             <a-form-item label="任务类型">
               <a-select
                 placeholder="请选择任务类型"
+                @change="handleTaskTypeChange"
                 v-decorator="[
                   'taskType',
                   {
-                    initialValue: '1',
+                    initialValue: taskTypeValue,
                     rules: [{ required: true, message: '请选择任务类型'}]
                   }
                 ]" >
@@ -177,7 +178,7 @@
                 @click="handleBlur"
                 v-decorator="[
                   'argsStr',
-                  {rules: [{ required: false, message: '请输入方法参数', whitespace: true}]}
+                  {rules: [{ required: this.taskTypeValue === '3', message: '请输入方法参数', whitespace: true}]}
                 ]" />
             </a-form-item>
           </a-col>
@@ -259,7 +260,7 @@
           style="text-align: center"
         >
           <a-button htmlType="submit" type="primary">提交</a-button>
-          <a-button style="margin-left: 8px">重置</a-button>
+          <a-button style="margin-left: 8px" @click="reset">重置</a-button>
         </a-form-item>
       </a-form>
     </a-card>
@@ -355,7 +356,8 @@ export default {
       loading: false,
       visible: false,
       count: 0,
-      triggerTypeValue: '2'
+      triggerTypeValue: '2',
+      taskTypeValue: '1'
     }
   },
   beforeCreate () {
@@ -380,11 +382,14 @@ export default {
   },
   methods: {
     handleChange (value) {
-      console.log(value)
       this.triggerTypeValue = value
       this.form.setFieldsValue({
         triggerInterval: null
       })
+    },
+    handleTaskTypeChange (value) {
+      console.log(value)
+      this.taskTypeValue = value
     },
     handlerCron () {
       const triggerType = this.form.getFieldValue('triggerType')
@@ -520,7 +525,12 @@ export default {
         this.triggerTypeValue = formData.triggerType
         form.setFieldsValue(formData)
       })
+    },
+    reset () {
+      this.form.resetFields()
+      this.dynamicForm.resetFields()
     }
+
   }
 }
 </script>

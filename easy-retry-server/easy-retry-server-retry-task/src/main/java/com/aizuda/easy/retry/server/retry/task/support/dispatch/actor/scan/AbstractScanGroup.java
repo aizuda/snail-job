@@ -131,7 +131,7 @@ public abstract class AbstractScanGroup extends AbstractActor {
 
         long delay = partitionTask.getNextTriggerAt().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
             - System.currentTimeMillis();
-        RetryTimerWheel.register(retryTask.getGroupName(), retryTask.getUniqueId(), timerTask(partitionTask), delay,
+        RetryTimerWheel.register(partitionTask.getGroupName(), partitionTask.getUniqueId(), timerTask(partitionTask), delay,
             TimeUnit.MILLISECONDS);
     }
 

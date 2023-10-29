@@ -16,6 +16,7 @@ import com.google.common.util.concurrent.FutureCallback;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Objects;
+import java.util.concurrent.CancellationException;
 
 /**
  * @author: www.byteblogs.com
@@ -71,8 +72,16 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
         // 上报执行失败
         log.error("任务执行失败 jobTask:[{}]", jobContext.getTaskId(), t);
         try {
+
+            ExecuteResult failure = ExecuteResult.failure();
+            if (t instanceof CancellationException) {
+                failure.setMessage("任务被取消");
+            } else {
+                failure.setMessage(t.getMessage());
+            }
+
             CLIENT.dispatchResult(
-                    buildDispatchJobResultRequest(ExecuteResult.failure(t.getMessage()), JobTaskStatusEnum.FAIL.getStatus())
+                    buildDispatchJobResultRequest(failure, JobTaskStatusEnum.FAIL.getStatus())
             );
         } catch (Exception e) {
             log.error("执行结果上报异常.[{}]", jobContext.getTaskId(), e);

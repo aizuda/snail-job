@@ -33,6 +33,7 @@ public class WaitJobPrepareHandler extends AbstractJobPrePareHandler {
 
         // 若时间轮中数据不存在则重新加入
         if (!JobTimerWheel.isExisted(jobPrepareDTO.getTaskBatchId())) {
+            log.info("存在待处理任务且时间轮中不存在 taskBatchId:[{}]", jobPrepareDTO.getTaskBatchId());
 
             // 进入时间轮
             long delay = jobPrepareDTO.getNextTriggerAt().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()

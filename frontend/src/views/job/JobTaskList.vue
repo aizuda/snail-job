@@ -114,7 +114,6 @@ import AInput from 'ant-design-vue/es/input/Input'
 import { STable } from '@/components'
 import { jobLogList, jobTaskList } from '@/api/jobApi'
 import enums from '@/utils/jobEnum'
-import JobLogMessageList from './JobLogMessageList'
 import moment from 'moment/moment'
 
 export default {
@@ -122,8 +121,7 @@ export default {
   components: {
     AInput,
     ATextarea,
-    STable,
-    JobLogMessageList
+    STable
   },
   data () {
     return {

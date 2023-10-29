@@ -22,6 +22,7 @@ public enum JobOperationReasonEnum {
     JOB_DISCARD(4, "任务丢弃"),
     JOB_OVERLAY(5, "任务被覆盖"),
     NOT_EXECUTE_TASK(6, "无可执行任务项"),
+    TASK_EXECUTE_ERROR(7, "任务执行期间发生非预期异常"),
     ;
 
     private final int reason;
