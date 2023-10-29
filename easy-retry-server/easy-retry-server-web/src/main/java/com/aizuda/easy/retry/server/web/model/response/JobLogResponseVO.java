@@ -14,6 +14,8 @@ public class JobLogResponseVO {
 
     private Long id;
 
+    private Long key;
+
     /**
      * 组名称
      */

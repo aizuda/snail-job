@@ -53,6 +53,11 @@ public class JobTaskBatchGenerator {
 
         Assert.isTrue(1 == jobTaskBatchMapper.insert(jobTaskBatch), () -> new EasyRetryServerException("新增调度任务失败.jobId:[{}]", context.getJobId()));
 
+        // 非待处理状态无需进入时间轮中
+        if (JobTaskBatchStatusEnum.WAITING.getStatus() != jobTaskBatch.getTaskBatchStatus()) {
+            return;
+        }
+
         // 进入时间轮
         long delay = context.getNextTriggerAt().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
                 - System.currentTimeMillis();

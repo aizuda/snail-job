@@ -67,23 +67,18 @@
     </div>
     <div class="table-operator">
       <a-dropdown v-action:edit v-if="selectedRowKeys.length > 0">
-        <a-menu slot="overlay" @click="onClick">
-          <a-menu-item key="1"><a-icon type="delete" />删除</a-menu-item>
-          <a-menu-item key="2"><a-icon type="edit" />更新</a-menu-item>
-        </a-menu>
         <a-button style="margin-left: 8px"> 批量操作 <a-icon type="down" /> </a-button>
       </a-dropdown>
     </div>
 
-    <s-table
-      ref="table"
-      size="default"
-      :rowKey="(record) => record.id"
+    <a-table
       :columns="columns"
-      :data="loadData"
-      :alert="options.alert"
-      :rowSelection="options.rowSelection"
-      :scroll="{ x: 2000 }"
+      :dataSource="data"
+      :pagination="pagination"
+      :loading="memberLoading"
+      :scroll="{ x: 1200 }"
+      rowKey="id"
+      @expand="getRows"
     >
       <span slot="serial" slot-scope="text, record">
         {{ record.id }}
@@ -96,17 +91,20 @@
       <span slot="clientInfo" slot-scope="text">
         {{ text !== '' ? text.split('@')[1] : '' }}
       </span>
-      <!--      <p slot="expandedRowRender" style="margin: 0" slot-scope="record">-->
-      <!--        执行结果: {{ record.resultMessage }}<br/>-->
-      <!--        参数: {{ record.argsStr }}-->
-      <!--      </p>-->
-      <span slot="action" slot-scope="text, record">
-        <template>
-          <a @click="handleLog(record)">日志</a>
-        </template>
-      </span>
-    </s-table>
 
+      <a-table
+        slot="expandedRowRender"
+        slot-scope="record"
+        :columns="logColumns"
+        :data-source="loadData(record)"
+        :pagination="false"
+        rowKey="id"
+      >
+        <span slot="serial" slot-scope="text, record">
+          {{ record.id }}
+        </span>
+      </a-table>
+    </a-table>
   </a-card>
 </template>
 
@@ -114,10 +112,11 @@
 import ATextarea from 'ant-design-vue/es/input/TextArea'
 import AInput from 'ant-design-vue/es/input/Input'
 import { STable } from '@/components'
-import { jobTaskList } from '@/api/jobApi'
-import { getAllGroupNameList } from '@/api/manage'
+import { jobLogList, jobTaskList } from '@/api/jobApi'
 import enums from '@/utils/jobEnum'
 import JobLogMessageList from './JobLogMessageList'
+import moment from 'moment/moment'
+
 export default {
   name: 'JobTaskList',
   components: {
@@ -129,13 +128,13 @@ export default {
   data () {
     return {
       currentComponet: 'List',
-      record: '',
-      mdl: {},
       visible: false,
       // 高级搜索 展开/关闭
       advanced: false,
       // 查询参数
       queryParam: {},
+      data: [],
+      logData: [],
       taskStatus: enums.taskStatus,
       // 表头
       columns: [
@@ -177,27 +176,29 @@ export default {
           dataIndex: 'createDt',
           sorter: true,
           width: '10%'
-        },
-        {
-          title: '操作',
-          fixed: 'right',
-          dataIndex: 'action',
-          width: '180px',
-          scopedSlots: { customRender: 'action' }
         }
       ],
-      // 加载数据方法 必须为 Promise 对象
-      loadData: (parameter) => {
-        if (this.queryParam.taskBatchId === null || this.queryParam.taskBatchId === undefined) {
-          return []
+      logColumns: [
+        {
+          title: '#',
+          scopedSlots: { customRender: 'serial' },
+          width: '5%'
+        },
+        {
+          title: '信息',
+          dataIndex: 'message',
+          width: '50%'
+        },
+        {
+          title: '执行时间',
+          dataIndex: 'createDt',
+          sorter: true,
+          customRender: (text) => moment(text).format('YYYY-MM-DD HH:mm:ss'),
+          width: '10%'
         }
-        return jobTaskList(Object.assign(parameter, this.queryParam)).then((res) => {
-          return res
-        })
-      },
+      ],
       selectedRowKeys: [],
       selectedRows: [],
-
       // custom table alert & rowSelection
       options: {
         alert: {
@@ -213,125 +214,66 @@ export default {
       },
       optionAlertShow: false,
       groupNameList: [],
-      sceneList: []
+      sceneList: [],
+      memberLoading: false,
+      pagination: {},
+      logPagination: {}
     }
   },
   created () {
-    getAllGroupNameList().then((res) => {
-      this.groupNameList = res.data
-      if (this.groupNameList !== null && this.groupNameList.length > 0) {
-        this.queryParam['groupName'] = this.groupNameList[0]
-        this.$refs.table.refresh(true)
-        this.handleChange(this.groupNameList[0])
-      }
-    })
   },
   methods: {
-    handleNew () {
-      this.$refs.saveRetryTask.isShow(true, null)
-    },
-    handleBatchNew () {
-      this.$refs.batchSaveRetryTask.isShow(true, null)
+    loadData (record) {
+     const foundItem = this.logData.filter(item => item.taskId === record.id)
+      console.log(record)
+      console.log(foundItem)
+      return foundItem
     },
     handleChange (value) {
     },
     toggleAdvanced () {
       this.advanced = !this.advanced
     },
-    handleLog (record) {
-      this.$router.push({ path: '/job/log/list', query: { taskBatchId: record.taskBatchId, jobId: record.jobId } })
+    getRows (expanded, record) {
+      console.log(record)
+      if (expanded) {
+        this.fetchLog({
+          taskBatchId: record.taskBatchId,
+          jobId: record.jobId,
+          taskId: record.id
+        }, record)
+      }
     },
     handleOk (record) {},
-    handleSuspend (record) {
-      // updateRetryTaskStatus({ id: record.id, groupName: record.groupName, retryStatus: 3 }).then((res) => {
-      //   const { status } = res
-      //   if (status === 0) {
-      //     this.$message.error('暂停失败')
-      //   } else {
-      //     this.$refs.table.refresh(true)
-      //     this.$message.success('暂停成功')
-      //   }
-      // })
+    queryChange () {
+      this.fetch()
     },
-    handleRecovery (record) {
-      // updateRetryTaskStatus({ id: record.id, groupName: record.groupName, retryStatus: 0 }).then((res) => {
-      //   const { status } = res
-      //   if (status === 0) {
-      //     this.$message.error('恢复失败')
-      //   } else {
-      //     this.$refs.table.refresh(true)
-      //     this.$message.success('恢复成功')
-      //   }
-      // })
-    },
-    handleFinish (record) {
-      // updateRetryTaskStatus({ id: record.id, groupName: record.groupName, retryStatus: 1 }).then((res) => {
-      //   const { status } = res
-      //   if (status === 0) {
-      //     this.$message.error('执行失败')
-      //   } else {
-      //     this.$refs.table.refresh(true)
-      //     this.$message.success('执行成功')
-      //   }
-      // })
-    },
-    handleTrigger (record) {
-      // if (record.taskType === 1) {
-      //   manualTriggerRetryTask({ groupName: record.groupName, uniqueIds: [ record.uniqueId ] }).then(res => {
-      //     const { status } = res
-      //     if (status === 0) {
-      //       this.$message.error('执行失败')
-      //     } else {
-      //       this.$refs.table.refresh(true)
-      //       this.$message.success('执行成功')
-      //     }
-      //   })
-      // } else {
-      //   manualTriggerCallbackTask({ groupName: record.groupName, uniqueIds: [ record.uniqueId ] }).then(res => {
-      //     const { status } = res
-      //     if (status === 0) {
-      //       this.$message.error('执行失败')
-      //     } else {
-      //       this.$refs.table.refresh(true)
-      //       this.$message.success('执行完成')
-      //     }
-      //   })
-      // }
+    fetch () {
+      this.loading = true
+      jobTaskList(this.queryParam).then(res => {
+        this.data = res.data
+        const pagination = { ...this.pagination }
+
+        pagination.pageSize = res.size
+        pagination.current = res.page
+        pagination.total = res.total
+
+        this.pagination = pagination
+        this.loading = false
+      })
     },
     refreshTable (v) {
       this.queryParam = v
-      this.$refs.table.refresh(true)
+      this.queryChange()
+    },
+    async fetchLog (queryParam, record) {
+     const res = await jobLogList(queryParam)
+      console.log(this.logData)
+      this.logData.push(...res.data)
     },
     onSelectChange (selectedRowKeys, selectedRows) {
       this.selectedRowKeys = selectedRowKeys
       this.selectedRows = selectedRows
-    },
-    handlerDel () {
-      // var that = this
-      // this.$confirm({
-      //   title: '您要删除这些数据吗?',
-      //   content: h => <div style="color:red;">删除后数据不可恢复，请确认!</div>,
-      //   onOk () {
-      //     batchDelete({ groupName: that.selectedRows[0].groupName, ids: that.selectedRowKeys }).then(res => {
-      //       that.$refs.table.refresh(true)
-      //       that.$message.success(`成功删除${res.data}条数据`)
-      //       that.selectedRowKeys = []
-      //     })
-      //   },
-      //   onCancel () {
-      //   },
-      //   class: 'test'
-      // })
-    },
-    onClick ({ key }) {
-      if (key === '2') {
-        this.$refs.batchUpdateRetryTaskInfo.isShow(true, this.selectedRows, this.selectedRowKeys)
-        return
-      }
-
-      if (key === '1') {
-        this.handlerDel()
-      }
     }
   }
 }

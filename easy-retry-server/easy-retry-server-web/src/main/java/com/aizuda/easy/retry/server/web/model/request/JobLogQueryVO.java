@@ -14,4 +14,5 @@ import lombok.EqualsAndHashCode;
 public class JobLogQueryVO extends BaseQueryVO {
     private Long jobId;
     private Long taskBatchId;
+    private Long taskId;
 }
