@@ -8,7 +8,6 @@ import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
-import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.job.task.dto.JobTimerTaskDTO;
 import com.aizuda.easy.retry.server.job.task.dto.TaskExecuteDTO;
@@ -41,7 +40,6 @@ import org.springframework.util.CollectionUtils;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -73,6 +71,8 @@ public class JobExecutorActor extends AbstractActor {
 
             } catch (Exception e) {
                 LogUtils.error(log, "job executor exception. [{}]", taskExecute, e);
+                handlerTaskBatch(taskExecute, JobTaskBatchStatusEnum.FAIL.getStatus(), JobOperationReasonEnum.TASK_EXECUTE_ERROR.getReason());
+                // TODO 告警通知
             } finally {
                 getContext().stop(getSelf());
             }
@@ -82,13 +82,27 @@ public class JobExecutorActor extends AbstractActor {
     private void doExecute(final TaskExecuteDTO taskExecute) {
 
         Job job = jobMapper.selectOne(new LambdaQueryWrapper<Job>()
-            .eq(Job::getJobStatus, StatusEnum.YES.getStatus())
-            .eq(Job::getId, taskExecute.getJobId())
+                .eq(Job::getJobStatus, StatusEnum.YES.getStatus())
+                .eq(Job::getId, taskExecute.getJobId())
         );
 
         try {
 
-            if (!handlerTaskBatch(taskExecute, job)) {
+            int taskStatus = JobTaskBatchStatusEnum.RUNNING.getStatus();
+            int operationReason = JobOperationReasonEnum.NONE.getReason();
+            if (Objects.isNull(job)) {
+                taskStatus = JobTaskBatchStatusEnum.CANCEL.getStatus();
+                operationReason = JobOperationReasonEnum.JOB_CLOSED.getReason();
+            } else if (CollectionUtils.isEmpty(CacheRegisterTable.getServerNodeSet(taskExecute.getGroupName()))) {
+                taskStatus = JobTaskBatchStatusEnum.CANCEL.getStatus();
+                operationReason = JobOperationReasonEnum.NOT_CLIENT.getReason();
+            }
+
+            // 更新状态
+            handlerTaskBatch(taskExecute, taskStatus, operationReason);
+
+            // 不是运行中的，不需要生产任务
+            if (taskStatus != JobTaskBatchStatusEnum.RUNNING.getStatus()) {
                 return;
             }
 
@@ -101,7 +115,7 @@ public class JobExecutorActor extends AbstractActor {
         } finally {
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                 @Override
-                public void afterCommit() {
+                public void afterCompletion(int status) {
                     // 清除时间轮的缓存
                     JobTimerWheel.clearCache(taskExecute.getTaskBatchId());
                     //方法内容
@@ -112,17 +126,7 @@ public class JobExecutorActor extends AbstractActor {
 
     }
 
-    private boolean handlerTaskBatch(final TaskExecuteDTO taskExecute, final Job job) {
-
-        int taskStatus = JobTaskBatchStatusEnum.RUNNING.getStatus();
-        int operationReason = JobOperationReasonEnum.NONE.getReason();
-        if (Objects.isNull(job)) {
-            taskStatus = JobTaskBatchStatusEnum.CANCEL.getStatus();
-            operationReason = JobOperationReasonEnum.JOB_CLOSED.getReason();
-        } else if (CollectionUtils.isEmpty(CacheRegisterTable.getServerNodeSet(taskExecute.getGroupName()))) {
-            taskStatus = JobTaskBatchStatusEnum.CANCEL.getStatus();
-            operationReason = JobOperationReasonEnum.NOT_CLIENT.getReason();
-        }
+    private void handlerTaskBatch(TaskExecuteDTO taskExecute, int taskStatus, int operationReason) {
 
         JobTaskBatch jobTaskBatch = new JobTaskBatch();
         jobTaskBatch.setId(taskExecute.getTaskBatchId());
@@ -130,9 +134,8 @@ public class JobExecutorActor extends AbstractActor {
         jobTaskBatch.setTaskBatchStatus(taskStatus);
         jobTaskBatch.setOperationReason(operationReason);
         Assert.isTrue(1 == jobTaskBatchMapper.updateById(jobTaskBatch),
-            () -> new EasyRetryServerException("更新任务失败"));
+                () -> new EasyRetryServerException("更新任务失败"));
 
-        return taskStatus == JobTaskBatchStatusEnum.RUNNING.getStatus();
     }
 
     private void doHandlerResidentTask(Job job, TaskExecuteDTO taskExecuteDTO) {

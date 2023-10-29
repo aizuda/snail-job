@@ -124,6 +124,10 @@ const enums = {
     '6': {
       'name': '无可执行任务项',
       'color': '#23c28a'
+    },
+    '7': {
+      'name': '任务执行期间发生非预期异常',
+      'color': '#bdc223'
     }
   },
   taskStatus: {

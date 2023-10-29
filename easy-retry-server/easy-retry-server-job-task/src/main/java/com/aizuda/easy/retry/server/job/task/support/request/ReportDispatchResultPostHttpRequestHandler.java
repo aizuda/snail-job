@@ -52,13 +52,6 @@ public class ReportDispatchResultPostHttpRequestHandler extends PostHttpRequestH
         ClientCallbackContext context = JobTaskConverter.INSTANCE.toClientCallbackContext(dispatchJobResultRequest);
         clientCallback.callback(context);
 
-//        JobLogDTO jobLogDTO = JobTaskConverter.INSTANCE.toJobLogDTO(dispatchJobResultRequest);
-//        ExecuteResult executeResult = dispatchJobResultRequest.getExecuteResult();
-//        jobLogDTO.setMessage(executeResult.getMessage());
-//        jobLogDTO.setClientId(hostId);
-//        ActorRef actorRef = ActorGenerator.jobLogActor();
-//        actorRef.tell(jobLogDTO, actorRef);
-
         return JsonUtil.toJsonString(new NettyResult(StatusEnum.YES.getStatus(), "Report Dispatch Result Processed Successfully", Boolean.TRUE, retryRequest.getReqId()));
     }
 }
