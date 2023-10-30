@@ -263,7 +263,7 @@ export default {
       this.advanced = !this.advanced
     },
     handleInfo (record) {
-      this.$router.push({ path: '/retry-dead-letter/info', query: { id: record.id, groupName: record.groupName } })
+      this.$router.push({ path: '/retry/dead-letter/info', query: { id: record.id, groupName: record.groupName } })
     },
     onClick ({ key }) {
       if (key === '1') {

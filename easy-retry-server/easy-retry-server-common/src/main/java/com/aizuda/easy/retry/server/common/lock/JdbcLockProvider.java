@@ -78,7 +78,7 @@ public class JdbcLockProvider extends AbstractLockProvider {
             distributedLock.setUpdateDt(now);
             return distributedLockMapper.insert(distributedLock) > 0;
         } catch (DuplicateKeyException | ConcurrencyFailureException | TransactionSystemException e) {
-            LogUtils.warn(log,"Duplicate key. lockName:[{}]", lockConfig.getLockName());
+//            LogUtils.warn(log,"Duplicate key. lockName:[{}]", lockConfig.getLockName());
             return false;
         } catch (DataIntegrityViolationException | BadSqlGrammarException | UncategorizedSQLException e) {
             LogUtils.error(log,"Unexpected exception. lockName:[{}]", lockConfig.getLockName(), e);

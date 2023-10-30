@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.scan;
 
+import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.retry.task.dto.RetryPartitionTask;
 import com.aizuda.easy.retry.server.retry.task.support.WaitStrategy;
@@ -57,7 +58,14 @@ public class ScanRetryTaskActor extends AbstractScanGroup {
             .getSceneConfigByGroupNameAndSceneName(partitionTask.getGroupName(), partitionTask.getSceneName());
 
         WaitStrategyContext waitStrategyContext = new WaitStrategyContext();
-        waitStrategyContext.setNextTriggerAt(partitionTask.getNextTriggerAt());
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime nextTriggerAt = partitionTask.getNextTriggerAt();
+        if (nextTriggerAt.plusSeconds(SystemConstants.SCHEDULE_PERIOD).isBefore(now)) {
+            nextTriggerAt = now;
+        }
+
+        waitStrategyContext.setNextTriggerAt(nextTriggerAt);
         waitStrategyContext.setTriggerInterval(sceneConfig.getTriggerInterval());
         waitStrategyContext.setTriggerCount(partitionTask.getRetryCount() + 1);
         // 更新触发时间, 任务进入时间轮

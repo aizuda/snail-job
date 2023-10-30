@@ -85,6 +85,7 @@ export default {
     }
   },
   created () {
+    console.log('111')
     const id = this.$route.query.id
     const groupName = this.$route.query.groupName
     if (id && groupName) {
@@ -97,7 +98,7 @@ export default {
         this.$refs.retryTaskLogMessageListRef.refreshTable(this.queryParam)
       })
     } else {
-      this.$router.push({ path: '/404' })
+      // this.$router.push({ path: '/404' })
     }
   },
   methods: {

@@ -86,4 +86,14 @@ public interface SystemConstants {
     String JOB_SHARDING_VALUE_SEPARATOR = "#=@";
 
     String JOB_SHARDING_ARGS_SEPARATOR = "#;@";
+
+    /**
+     * 调度时长
+     */
+    Long SCHEDULE_PERIOD = 10L;
+
+    /**
+     * 延迟30s为了尽可能保障集群节点都启动完成在进行rebalance
+     */
+   Long SCHEDULE_INITIAL_DELAY = 30L;
 }

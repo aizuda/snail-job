@@ -172,17 +172,6 @@ public class WaitStrategies {
 
         @Override
         public LocalDateTime computeRetryTime(WaitStrategyContext retryContext) {
-//            if (TaskTypeEnum.CALLBACK.getType().equals(retryTask.getTaskType())) {
-//                // 回调失败的默认15分钟执行一次重试
-//                SystemProperties systemProperties = SpringContext.CONTEXT.getBean(SystemProperties.class);
-//                triggerInterval = systemProperties.getCallback().getTriggerInterval();
-//            } else {
-//                AccessTemplate accessTemplate = SpringContext.CONTEXT.getBean(AccessTemplate.class);
-//                SceneConfig sceneConfig =
-//                    accessTemplate.getSceneConfigAccess().getSceneConfigByGroupNameAndSceneName(retryTask.getGroupName(), retryTask.getSceneName());
-//                triggerInterval = Integer.parseInt(sceneConfig.getTriggerInterval());
-//            }
-
             return retryContext.getNextTriggerAt().plusSeconds(Integer.parseInt(retryContext.getTriggerInterval()));
         }
     }

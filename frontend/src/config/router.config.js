@@ -56,7 +56,7 @@ export const asyncRouterMap = [
         name: 'RetryTask',
         component: RouteView,
         redirect: '/retry/list',
-        meta: { title: '重试任务管理', icon: 'schedule', hideChildrenInMenu: true, keepAlive: true, permission: ['retryTask'] },
+        meta: { title: '重试任务管理', icon: 'schedule', permission: ['retryTask'] },
         children: [
           {
             path: '/retry/scene/list',
