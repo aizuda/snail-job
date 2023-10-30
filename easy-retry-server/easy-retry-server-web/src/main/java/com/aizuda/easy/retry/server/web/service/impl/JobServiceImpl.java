@@ -125,16 +125,10 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public boolean saveJob(JobRequestVO jobRequestVO) {
-        WaitStrategy waitStrategy = WaitStrategyEnum.getWaitStrategy(jobRequestVO.getTriggerType());
-        WaitStrategyContext waitStrategyContext = new WaitStrategyContext();
-        waitStrategyContext.setTriggerType(jobRequestVO.getTriggerType());
-        waitStrategyContext.setTriggerInterval(jobRequestVO.getTriggerInterval());
-        waitStrategyContext.setNextTriggerAt(LocalDateTime.now());
-
         // 判断常驻任务
         Job job = updateJobResident(jobRequestVO);
         job.setBucketIndex(HashUtil.bkdrHash(jobRequestVO.getGroupName() + jobRequestVO.getJobName()) % systemProperties.getBucketTotal());
-        job.setNextTriggerAt(waitStrategy.computeRetryTime(waitStrategyContext));
+        calculateNextTriggerAt(jobRequestVO, job);
         return 1 == jobMapper.insert(job);
     }
 
@@ -145,7 +139,17 @@ public class JobServiceImpl implements JobService {
 
         // 判断常驻任务
         Job job = updateJobResident(jobRequestVO);
+        calculateNextTriggerAt(jobRequestVO, job);
         return 1 == jobMapper.updateById(job);
+    }
+
+    private static void calculateNextTriggerAt(final JobRequestVO jobRequestVO, final Job job) {
+        WaitStrategy waitStrategy = WaitStrategyEnum.getWaitStrategy(jobRequestVO.getTriggerType());
+        WaitStrategyContext waitStrategyContext = new WaitStrategyContext();
+        waitStrategyContext.setTriggerType(jobRequestVO.getTriggerType());
+        waitStrategyContext.setTriggerInterval(jobRequestVO.getTriggerInterval());
+        waitStrategyContext.setNextTriggerAt(LocalDateTime.now());
+        job.setNextTriggerAt(waitStrategy.computeRetryTime(waitStrategyContext));
     }
 
     @Override

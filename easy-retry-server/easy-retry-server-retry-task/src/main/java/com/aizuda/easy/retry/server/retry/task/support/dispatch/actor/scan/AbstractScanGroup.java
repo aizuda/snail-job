@@ -32,6 +32,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /**
  * 数据扫描模板类
@@ -55,8 +58,8 @@ public abstract class AbstractScanGroup extends AbstractActor {
     @Autowired
     protected List<TaskExecutor> taskExecutors;
 
-     private static long preCostTime = 0L;
-    private static long loopCount = 1L;
+    private static final AtomicLong preCostTime = new AtomicLong(0L);
+    private static final AtomicLong pullCount = new AtomicLong(1L);
 
     @Override
     public Receive createReceive() {
@@ -74,8 +77,9 @@ public abstract class AbstractScanGroup extends AbstractActor {
             // 获取结束时间
             long endTime = System.nanoTime();
 
-            preCostTime = (endTime - startTime) / 1_000_000;
-            log.info("重试任务调度耗时:[{}]", preCostTime);
+            preCostTime.set((endTime - startTime) / 1_000_000);
+
+            log.info("重试任务调度耗时:[{}]", preCostTime.get());
 
         }).build();
 
@@ -84,41 +88,43 @@ public abstract class AbstractScanGroup extends AbstractActor {
     protected void doScan(final ScanTask scanTask) {
 
         // 计算循环拉取的次数
-        if (preCostTime > 0) {
-            loopCount = (10 * 1000) / preCostTime;
-            loopCount = loopCount == 0 ? 1 : loopCount;
+        if (preCostTime.get() > 0) {
+            long loopCount = Math.max((10 * 1000) / preCostTime.get(), 1);
+            // TODO 最大拉取次数支持可配置
+            loopCount = Math.min(loopCount, 10);
+            pullCount.set(loopCount);
         }
 
         String groupName = scanTask.getGroupName();
         Long lastId = Optional.ofNullable(getLastId(groupName)).orElse(0L);
 
+        log.info("retry scan start. groupName:[{}] startId:[{}]  pullCount:[{}] preCostTime:[{}]",
+            groupName, lastId,  pullCount.get(), preCostTime.get());
+
         AtomicInteger count = new AtomicInteger(0);
-        PartitionTaskUtils.process(startId -> {
-                int i = count.getAndIncrement();
-                if (i > loopCount) {
-                    // 为空则中断处理
-                    return Lists.newArrayList();
+        PartitionTaskUtils.process(startId -> listAvailableTasks(groupName, startId, taskActuatorScene().getTaskType().getType()),
+            partitionTasks -> processRetryPartitionTasks(partitionTasks, scanTask), partitionTasks -> {
+                if (CollectionUtils.isEmpty(partitionTasks)) {
+                    putLastId(scanTask.getGroupName(), 0L);
+                    return Boolean.TRUE;
                 }
-                return listAvailableTasks(groupName, startId, taskActuatorScene().getTaskType().getType());
-            },
-            partitionTasks -> processRetryPartitionTasks(partitionTasks, scanTask), lastId);
+
+                // 超过最大的拉取次数则中断
+                if (count.getAndIncrement() > pullCount.get()) {
+                    putLastId(scanTask.getGroupName(), partitionTasks.get(partitionTasks.size() - 1).getId());
+                    return Boolean.TRUE;
+                }
+
+                return false;
+            }, lastId);
 
     }
 
     private void processRetryPartitionTasks(List<? extends PartitionTask> partitionTasks, ScanTask scanTask) {
 
-        StopWatch watch = new StopWatch();
-        watch.start();
-        if (!CollectionUtils.isEmpty(partitionTasks)) {
-            putLastId(scanTask.getGroupName(), partitionTasks.get(partitionTasks.size() - 1).getId());
-            for (PartitionTask partitionTask : partitionTasks) {
-                processRetryTask((RetryPartitionTask) partitionTask);
-            }
-        } else {
-            putLastId(scanTask.getGroupName(), 0L);
+        for (PartitionTask partitionTask : partitionTasks) {
+            processRetryTask((RetryPartitionTask) partitionTask);
         }
-
-        watch.getTotalTimeMillis();
 
     }
 
@@ -131,7 +137,8 @@ public abstract class AbstractScanGroup extends AbstractActor {
 
         long delay = partitionTask.getNextTriggerAt().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
             - System.currentTimeMillis();
-        RetryTimerWheel.register(partitionTask.getGroupName(), partitionTask.getUniqueId(), timerTask(partitionTask), delay,
+        RetryTimerWheel.register(partitionTask.getGroupName(), partitionTask.getUniqueId(), timerTask(partitionTask),
+            delay,
             TimeUnit.MILLISECONDS);
     }
 
@@ -151,7 +158,8 @@ public abstract class AbstractScanGroup extends AbstractActor {
                 new LambdaQueryWrapper<RetryTask>()
                     .eq(RetryTask::getRetryStatus, RetryStatusEnum.RUNNING.getStatus())
                     .eq(RetryTask::getGroupName, groupName).eq(RetryTask::getTaskType, taskType)
-                    .le(RetryTask::getNextTriggerAt, LocalDateTime.now().plusSeconds(10)).gt(RetryTask::getId, lastId)
+                    .le(RetryTask::getNextTriggerAt, LocalDateTime.now().plusSeconds(10))
+                    .gt(RetryTask::getId, lastId)
                     .orderByAsc(RetryTask::getId))
             .getRecords();
 
