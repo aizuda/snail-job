@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.LongConsumer;
+import java.util.function.LongFunction;
+import java.util.function.Predicate;
 
 /**
  * @author: www.byteblogs.com
@@ -18,14 +21,38 @@ public class PartitionTaskUtils {
     private PartitionTaskUtils() {
     }
 
+    public static long process(LongFunction<List<? extends PartitionTask>> dataSource,
+        Consumer<List<? extends PartitionTask>> task,
+        long startId) {
+        return process(dataSource, task, curStartId -> {}, CollectionUtils::isEmpty, startId);
+    }
+
+    public static long process(LongFunction<List<? extends PartitionTask>> dataSource,
+        Consumer<List<? extends PartitionTask>> task,
+        Predicate<List<? extends PartitionTask>> stopCondition,
+        long startId) {
+        return process(dataSource, task, curStartId -> {}, stopCondition, startId);
+    }
+
+    public static long process(LongFunction<List<? extends PartitionTask>> dataSource,
+        Consumer<List<? extends PartitionTask>> task,
+        LongConsumer stopAfterProcessor,
+        long startId) {
+        return process(dataSource, task, stopAfterProcessor, CollectionUtils::isEmpty, startId);
+    }
+
     public static long process(
-            Function<Long, List<? extends PartitionTask>> dataSource, Consumer<List<? extends PartitionTask>> task,
-            long startId) {
+        LongFunction<List<? extends PartitionTask>> dataSource,
+        Consumer<List<? extends PartitionTask>> task,
+        LongConsumer stopAfterProcessor,
+        Predicate<List<? extends PartitionTask>> stopCondition,
+        long startId) {
         int total = 0;
         do {
             List<? extends PartitionTask> products = dataSource.apply(startId);
-            if (CollectionUtils.isEmpty(products)) {
+            if (stopCondition.test(products)) {
                 // 没有查询到数据直接退出
+                stopAfterProcessor.accept(startId);
                 break;
             }
 
