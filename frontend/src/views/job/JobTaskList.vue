@@ -223,8 +223,6 @@ export default {
   methods: {
     loadData (record) {
      const foundItem = this.logData.filter(item => item.taskId === record.id)
-      console.log(record)
-      console.log(foundItem)
       return foundItem
     },
     handleChange (value) {

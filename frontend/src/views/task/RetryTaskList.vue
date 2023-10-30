@@ -339,7 +339,7 @@ export default {
       this.advanced = !this.advanced
     },
     handleInfo (record) {
-      this.$router.push({ path: '/retry-task/info', query: { id: record.id, groupName: record.groupName } })
+      this.$router.push({ path: '/retry/info', query: { id: record.id, groupName: record.groupName } })
     },
     handleOk (record) {},
     handleSuspend (record) {

@@ -2,7 +2,10 @@ package com.aizuda.easy.retry.server.job.task.support.dispatch;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
+import cn.hutool.core.date.DateUnit;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Assert;
+import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
@@ -125,7 +128,14 @@ public class ScanJobTaskActor extends AbstractActor {
         WaitStrategyContext waitStrategyContext = new WaitStrategyContext();
         waitStrategyContext.setTriggerType(partitionTask.getTriggerType());
         waitStrategyContext.setTriggerInterval(partitionTask.getTriggerInterval());
-        waitStrategyContext.setNextTriggerAt(partitionTask.getNextTriggerAt());
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime nextTriggerAt = partitionTask.getNextTriggerAt();
+        if (nextTriggerAt.plusSeconds(SystemConstants.SCHEDULE_PERIOD).isBefore(now)) {
+            nextTriggerAt = now;
+        }
+
+        waitStrategyContext.setNextTriggerAt(nextTriggerAt);
 
         return waitStrategy.computeRetryTime(waitStrategyContext);
     }
@@ -136,7 +146,7 @@ public class ScanJobTaskActor extends AbstractActor {
                 new LambdaQueryWrapper<Job>()
                         .eq(Job::getJobStatus, StatusEnum.YES.getStatus())
                         .in(Job::getBucketIndex, scanTask.getBuckets())
-                        .le(Job::getNextTriggerAt, LocalDateTime.now().plusSeconds(10))
+                        .le(Job::getNextTriggerAt, LocalDateTime.now().plusSeconds(SystemConstants.SCHEDULE_PERIOD))
                         .eq(Job::getDeleted, StatusEnum.NO.getStatus())
                         .ge(Job::getId, startId)
         ).getRecords();

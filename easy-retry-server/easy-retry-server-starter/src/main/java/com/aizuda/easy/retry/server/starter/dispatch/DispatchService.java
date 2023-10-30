@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.server.starter.dispatch;
 
 import akka.actor.ActorRef;
+import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.common.Lifecycle;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
@@ -35,12 +36,12 @@ public class DispatchService implements Lifecycle {
     /**
      * 调度时长
      */
-    public static final Long PERIOD = 10L;
+    public static final Long PERIOD = SystemConstants.SCHEDULE_PERIOD;
 
     /**
      * 延迟30s为了尽可能保障集群节点都启动完成在进行rebalance
      */
-    public static final Long INITIAL_DELAY = 30L;
+    public static final Long INITIAL_DELAY = SystemConstants.SCHEDULE_INITIAL_DELAY;
 
     @Override
     public void start() {

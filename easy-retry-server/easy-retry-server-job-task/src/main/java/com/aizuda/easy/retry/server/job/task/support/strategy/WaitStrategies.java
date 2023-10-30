@@ -122,12 +122,8 @@ public class WaitStrategies {
         public LocalDateTime computeRetryTime(WaitStrategyContext context) {
             long triggerInterval = Long.parseLong(context.triggerInterval);
 
-            LocalDateTime nextTriggerAt = context.getNextTriggerAt();
-            if (nextTriggerAt.isBefore(LocalDateTime.now())) {
-                nextTriggerAt = LocalDateTime.now();
-            }
 
-            return nextTriggerAt.plusSeconds(triggerInterval);
+            return context.nextTriggerAt.plusSeconds(triggerInterval);
         }
     }
 
@@ -139,14 +135,9 @@ public class WaitStrategies {
         @Override
         public LocalDateTime computeRetryTime(WaitStrategyContext context) {
 
-            LocalDateTime nextTriggerAt = context.getNextTriggerAt();
-            if (nextTriggerAt.isBefore(LocalDateTime.now())) {
-                nextTriggerAt = LocalDateTime.now();
-            }
-
             Date nextValidTime;
             try {
-                ZonedDateTime zdt = nextTriggerAt.atZone(ZoneOffset.ofHours(8));
+                ZonedDateTime zdt = context.nextTriggerAt.atZone(ZoneOffset.ofHours(8));
                 nextValidTime = new CronExpression(context.getTriggerInterval()).getNextValidTimeAfter(Date.from(zdt.toInstant()));
             } catch (ParseException e) {
                 throw new EasyRetryServerException("解析CRON表达式异常 [{}]", context.getTriggerInterval(), e);

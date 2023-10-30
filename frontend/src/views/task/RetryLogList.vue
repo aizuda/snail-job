@@ -253,7 +253,8 @@ export default {
       this.advanced = !this.advanced
     },
     handleInfo (record) {
-      this.$router.push({ path: '/retry-log/info', query: { id: record.id } })
+      console.log(record)
+      this.$router.push({ path: '/retry/log/info', query: { id: record.id } })
     }
   }
 }
