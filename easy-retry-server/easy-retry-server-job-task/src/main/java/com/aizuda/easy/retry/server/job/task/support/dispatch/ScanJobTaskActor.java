@@ -97,7 +97,13 @@ public class ScanJobTaskActor extends AbstractActor {
             // 更新下次触发时间
            nextTriggerAt = calculateNextTriggerTime(partitionTask);
         } else {
-            triggerTask = false;
+            // 若常驻任务的缓存时间为空则触发一次任务调度，说明常驻任务长时间未更新或者是系统刚刚启动
+            triggerTask = Objects.isNull(nextTriggerAt);
+            // 若出现常驻任务时间为null或者常驻任务的内存时间长期未更新, 刷新为now
+            LocalDateTime now = LocalDateTime.now();
+            if (Objects.isNull(nextTriggerAt) || nextTriggerAt.plusSeconds(SystemConstants.SCHEDULE_PERIOD).isBefore(now)) {
+                nextTriggerAt = now;
+            }
         }
 
         job.setNextTriggerAt(nextTriggerAt);
@@ -118,8 +124,7 @@ public class ScanJobTaskActor extends AbstractActor {
      * 3、常驻任务中的触发时间不是最新的
      */
     private static boolean needCalculateNextTriggerTime(JobPartitionTask partitionTask, LocalDateTime nextTriggerAt) {
-        return !Objects.equals(StatusEnum.YES.getStatus(), partitionTask.getResident())
-                || Objects.isNull(nextTriggerAt) || partitionTask.getNextTriggerAt().isAfter(nextTriggerAt);
+        return !Objects.equals(StatusEnum.YES.getStatus(), partitionTask.getResident());
     }
 
     private LocalDateTime calculateNextTriggerTime(JobPartitionTask partitionTask) {

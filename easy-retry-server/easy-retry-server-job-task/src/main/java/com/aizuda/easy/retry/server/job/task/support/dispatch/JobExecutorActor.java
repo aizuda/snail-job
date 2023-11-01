@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.server.job.task.support.dispatch;
 
 import akka.actor.AbstractActor;
 import cn.hutool.core.lang.Assert;
+import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
@@ -157,6 +158,8 @@ public class JobExecutorActor extends AbstractActor {
             if (Objects.isNull(preTriggerAt) || preTriggerAt.isBefore(job.getNextTriggerAt())) {
                 preTriggerAt = job.getNextTriggerAt();
             }
+
+            System.out.println("时间监控 " + ResidentTaskCache.get(job.getId()) + "-" + job.getNextTriggerAt());
 
             WaitStrategies.WaitStrategyContext waitStrategyContext = new WaitStrategies.WaitStrategyContext();
             waitStrategyContext.setTriggerType(job.getTriggerType());
