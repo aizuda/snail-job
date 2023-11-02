@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class ResidentTaskCache {
 
-    private static final Cache<Long, LocalDateTime> cache;
+    private static final Cache<Long, Long/*ms*/> cache;
 
     static {
         cache = CacheBuilder.newBuilder()
@@ -23,15 +23,15 @@ public class ResidentTaskCache {
                 .build();
     }
 
-    public static void refresh(Long jobId, LocalDateTime nextTriggerTime) {
+    public static void refresh(Long jobId, Long nextTriggerTime) {
         cache.put(jobId, nextTriggerTime);
     }
 
-    public static LocalDateTime getOrDefault(Long jobId, LocalDateTime nextTriggerTime) {
+    public static Long getOrDefault(Long jobId, Long nextTriggerTime) {
         return Optional.ofNullable(cache.getIfPresent(jobId)).orElse(nextTriggerTime);
     }
 
-    public static LocalDateTime get(Long jobId) {
+    public static Long get(Long jobId) {
         return getOrDefault(jobId, null);
     }
 

@@ -64,7 +64,7 @@
           </a-tag>
         </span>
         <span slot="triggerInterval" slot-scope="text">
-          {{ text ? text : '无' }}
+          {{ text ? text : '10s,15s,30s,35s,40s,50s,1m,2m,4m,6m,8m,10m,20m,40m,1h,2h,3h,4h,5h,6h,7h,8h,9h,10h,11h,12h' }}
         </span>
         <span slot="action" slot-scope="record">
           <template>
@@ -125,6 +125,7 @@ export default {
           title: '间隔时间',
           dataIndex: 'triggerInterval',
           key: 'triggerInterval',
+          ellipsis: true,
           width: '15%',
           scopedSlots: { customRender: 'triggerInterval' }
         },

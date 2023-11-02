@@ -2,11 +2,10 @@ package com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.scan;
 
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.retry.task.dto.RetryPartitionTask;
-import com.aizuda.easy.retry.server.retry.task.support.WaitStrategy;
+import com.aizuda.easy.retry.server.common.WaitStrategy;
 import com.aizuda.easy.retry.server.retry.task.support.dispatch.task.TaskExecutorSceneEnum;
-import com.aizuda.easy.retry.server.retry.task.support.strategy.WaitStrategies;
-import com.aizuda.easy.retry.server.retry.task.support.strategy.WaitStrategies.WaitStrategyContext;
-import com.aizuda.easy.retry.server.retry.task.support.strategy.WaitStrategies.WaitStrategyEnum;
+import com.aizuda.easy.retry.server.common.strategy.WaitStrategies.WaitStrategyContext;
+import com.aizuda.easy.retry.server.common.strategy.WaitStrategies.WaitStrategyEnum;
 import com.aizuda.easy.retry.server.retry.task.support.timer.CallbackTimerTask;
 import com.aizuda.easy.retry.server.retry.task.support.timer.RetryTimerContext;
 import io.netty.util.TimerTask;
@@ -59,13 +58,13 @@ public class ScanCallbackTaskActor extends AbstractScanGroup {
     protected LocalDateTime calculateNextTriggerTime(final RetryPartitionTask partitionTask) {
 
         long triggerInterval = systemProperties.getCallback().getTriggerInterval();
-        WaitStrategy waitStrategy = WaitStrategyEnum.getWaitStrategy(WaitStrategyEnum.FIXED.getBackOff());
+        WaitStrategy waitStrategy = WaitStrategyEnum.getWaitStrategy(WaitStrategyEnum.FIXED.getType());
         WaitStrategyContext waitStrategyContext = new WaitStrategyContext();
         waitStrategyContext.setNextTriggerAt(partitionTask.getNextTriggerAt());
         waitStrategyContext.setTriggerInterval(String.valueOf(triggerInterval));
 
         // 更新触发时间, 任务进入时间轮
-        return waitStrategy.computeRetryTime(waitStrategyContext);
+        return waitStrategy.computeTriggerTime(waitStrategyContext);
     }
 
     @Override

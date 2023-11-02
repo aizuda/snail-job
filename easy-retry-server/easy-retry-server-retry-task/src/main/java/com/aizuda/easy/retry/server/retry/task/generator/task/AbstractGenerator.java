@@ -14,10 +14,10 @@ import com.aizuda.easy.retry.server.common.generator.id.IdGenerator;
 import com.aizuda.easy.retry.server.retry.task.generator.task.TaskContext.TaskInfo;
 import com.aizuda.easy.retry.server.retry.task.support.RetryTaskConverter;
 import com.aizuda.easy.retry.server.retry.task.support.RetryTaskLogConverter;
-import com.aizuda.easy.retry.server.retry.task.support.WaitStrategy;
-import com.aizuda.easy.retry.server.retry.task.support.strategy.WaitStrategies;
-import com.aizuda.easy.retry.server.retry.task.support.strategy.WaitStrategies.WaitStrategyContext;
-import com.aizuda.easy.retry.server.retry.task.support.strategy.WaitStrategies.WaitStrategyEnum;
+import com.aizuda.easy.retry.server.common.WaitStrategy;
+import com.aizuda.easy.retry.server.common.strategy.WaitStrategies;
+import com.aizuda.easy.retry.server.common.strategy.WaitStrategies.WaitStrategyContext;
+import com.aizuda.easy.retry.server.common.strategy.WaitStrategies.WaitStrategyEnum;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
 import com.aizuda.easy.retry.template.datasource.access.TaskAccess;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskLogMapper;
@@ -134,9 +134,9 @@ public abstract class AbstractGenerator implements TaskGenerator {
         WaitStrategyContext waitStrategyContext = new WaitStrategyContext();
         waitStrategyContext.setNextTriggerAt(now);
         waitStrategyContext.setTriggerInterval(sceneConfig.getTriggerInterval());
-        waitStrategyContext.setTriggerCount(1);
+        waitStrategyContext.setDelayLevel(1);
         WaitStrategy waitStrategy = WaitStrategyEnum.getWaitStrategy(sceneConfig.getBackOff());
-        retryTask.setNextTriggerAt(waitStrategy.computeRetryTime(waitStrategyContext));
+        retryTask.setNextTriggerAt(waitStrategy.computeTriggerTime(waitStrategyContext));
         waitInsertTasks.add(retryTask);
 
         // 初始化日志
@@ -185,7 +185,7 @@ public abstract class AbstractGenerator implements TaskGenerator {
         sceneConfig.setGroupName(groupName);
         sceneConfig.setSceneName(sceneName);
         sceneConfig.setSceneStatus(StatusEnum.YES.getStatus());
-        sceneConfig.setBackOff(WaitStrategies.WaitStrategyEnum.DELAY_LEVEL.getBackOff());
+        sceneConfig.setBackOff(WaitStrategies.WaitStrategyEnum.DELAY_LEVEL.getType());
         sceneConfig.setMaxRetryCount(DelayLevelEnum._21.getLevel());
         sceneConfig.setDescription("自动初始化场景");
         Assert.isTrue(1 == accessTemplate.getSceneConfigAccess().insert(sceneConfig), () -> new EasyRetryServerException("init scene error"));

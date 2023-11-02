@@ -6,9 +6,10 @@ import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
+import com.aizuda.easy.retry.server.common.util.DateUtil;
 import com.aizuda.easy.retry.server.retry.task.support.RetryTaskConverter;
 import com.aizuda.easy.retry.server.retry.task.support.RetryTaskLogConverter;
-import com.aizuda.easy.retry.server.retry.task.support.strategy.WaitStrategies;
+import com.aizuda.easy.retry.server.common.strategy.WaitStrategies;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskLogMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
 
@@ -50,7 +52,7 @@ public class CallbackRetryTaskHandler {
     @Transactional
     public void create(RetryTask retryTask) {
         if (!TaskTypeEnum.RETRY.getType().equals(retryTask.getTaskType())) {
-          return;
+            return;
         }
 
         RetryTask callbackRetryTask = RetryTaskConverter.INSTANCE.toRetryTask(retryTask);
@@ -62,10 +64,11 @@ public class CallbackRetryTaskHandler {
         callbackRetryTask.setCreateDt(LocalDateTime.now());
         callbackRetryTask.setUpdateDt(LocalDateTime.now());
 
-        callbackRetryTask.setNextTriggerAt(WaitStrategies.randomWait(1, TimeUnit.SECONDS, 60, TimeUnit.SECONDS).computeRetryTime(null));
+        Long triggerTime = WaitStrategies.randomWait(1, TimeUnit.SECONDS, 60, TimeUnit.SECONDS).computeTriggerTime(null);
+        callbackRetryTask.setNextTriggerAt(DateUtil.toLocalDateTime(Instant.ofEpochMilli(triggerTime)));
 
         Assert.isTrue(1 == accessTemplate.getRetryTaskAccess()
-                .insert(callbackRetryTask.getGroupName(), callbackRetryTask),
+                        .insert(callbackRetryTask.getGroupName(), callbackRetryTask),
                 () -> new EasyRetryServerException("failed to report data"));
 
         // 初始化回调日志
@@ -73,8 +76,8 @@ public class CallbackRetryTaskHandler {
         // 记录重试日志
         retryTaskLog.setTaskType(TaskTypeEnum.CALLBACK.getType());
         retryTaskLog.setCreateDt(LocalDateTime.now());
-        Assert.isTrue(1 ==  retryTaskLogMapper.insert(retryTaskLog),
-            () -> new EasyRetryServerException("新增重试日志失败"));
+        Assert.isTrue(1 == retryTaskLogMapper.insert(retryTaskLog),
+                () -> new EasyRetryServerException("新增重试日志失败"));
 
     }
 
@@ -87,7 +90,7 @@ public class CallbackRetryTaskHandler {
     public String generatorCallbackUniqueId(String uniqueId) {
         // eg: CB_202307180949471
         FormattingTuple callbackUniqueId = MessageFormatter.arrayFormat(CALLBACK_UNIQUE_ID_RULE,
-            new Object[]{systemProperties.getCallback().getPrefix(), uniqueId});
+                new Object[]{systemProperties.getCallback().getPrefix(), uniqueId});
 
         return callbackUniqueId.getMessage();
     }

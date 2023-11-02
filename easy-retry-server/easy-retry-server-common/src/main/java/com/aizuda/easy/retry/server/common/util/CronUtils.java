@@ -1,0 +1,49 @@
+package com.aizuda.easy.retry.server.common.util;
+
+import com.aizuda.easy.retry.common.core.constant.SystemConstants;
+import com.aizuda.easy.retry.common.core.util.CronExpression;
+import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
+
+import java.text.ParseException;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+/**
+ * @author www.byteblogs.com
+ * @date 2023-11-02 22:52:10
+ * @since 2.4.0
+ */
+public class CronUtils {
+
+    public static List<String> getExecuteTimeByCron(String cron, int nums) {
+
+        List<String> list = new ArrayList<>();
+        LocalDateTime now = LocalDateTime.now();
+        for (int i = 0; i < nums; i++) {
+            Date nextValidTime;
+            try {
+                ZonedDateTime zdt = now.atZone(ZoneOffset.ofHours(8));
+                nextValidTime = new CronExpression(cron).getNextValidTimeAfter(Date.from(zdt.toInstant()));
+                now = LocalDateTime.ofEpochSecond(nextValidTime.getTime() / 1000, 0, ZoneOffset.ofHours(8));
+                list.add(SystemConstants.DATE_FORMAT.YYYYMMDDHHMMSS.format(now));
+            } catch (ParseException ignored) {
+            }
+        }
+
+        return list;
+    }
+
+    public static long getExecuteInterval(String cron) {
+        List<String> executeTimeByCron = getExecuteTimeByCron(cron, 2);
+        LocalDateTime first = LocalDateTime.parse(executeTimeByCron.get(0), SystemConstants.DATE_FORMAT.YYYYMMDDHHMMSS);
+        LocalDateTime second = LocalDateTime.parse(executeTimeByCron.get(1), SystemConstants.DATE_FORMAT.YYYYMMDDHHMMSS);
+        Duration duration = Duration.between(first, second);
+        return duration.toMillis();
+    }
+
+}

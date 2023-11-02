@@ -57,7 +57,7 @@ public class Job implements Serializable {
     /**
      * 下次触发时间
      */
-    private LocalDateTime nextTriggerAt;
+    private Long nextTriggerAt;
 
     /**
      * 重试状态 0、关闭、1、开启

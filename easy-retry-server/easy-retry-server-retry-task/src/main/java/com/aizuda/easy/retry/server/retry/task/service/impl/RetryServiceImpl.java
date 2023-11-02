@@ -15,7 +15,7 @@ import com.aizuda.easy.retry.server.retry.task.service.RetryDeadLetterConverter;
 import com.aizuda.easy.retry.server.retry.task.service.RetryService;
 import com.aizuda.easy.retry.server.retry.task.support.RetryTaskConverter;
 import com.aizuda.easy.retry.server.retry.task.support.RetryTaskLogConverter;
-import com.aizuda.easy.retry.server.retry.task.support.strategy.WaitStrategies;
+import com.aizuda.easy.retry.server.common.strategy.WaitStrategies;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
 import com.aizuda.easy.retry.template.datasource.access.ConfigAccess;
 import com.aizuda.easy.retry.template.datasource.access.TaskAccess;
@@ -103,7 +103,7 @@ public class RetryServiceImpl implements RetryService {
         }
 
         retryTask.setNextTriggerAt(
-            WaitStrategies.randomWait(1, TimeUnit.SECONDS, 60, TimeUnit.SECONDS).computeRetryTime(null));
+            WaitStrategies.randomWait(1, TimeUnit.SECONDS, 60, TimeUnit.SECONDS).computeTriggerTime(null));
 
         Assert.isTrue(1 == retryTaskAccess.insert(retryTaskDTO.getGroupName(), retryTask),
             () -> new EasyRetryServerException("failed to report data"));
@@ -130,7 +130,7 @@ public class RetryServiceImpl implements RetryService {
         sceneConfig.setGroupName(retryTaskDTO.getGroupName());
         sceneConfig.setSceneName(retryTaskDTO.getSceneName());
         sceneConfig.setSceneStatus(StatusEnum.YES.getStatus());
-        sceneConfig.setBackOff(WaitStrategies.WaitStrategyEnum.DELAY_LEVEL.getBackOff());
+        sceneConfig.setBackOff(WaitStrategies.WaitStrategyEnum.DELAY_LEVEL.getType());
         sceneConfig.setMaxRetryCount(DelayLevelEnum._21.getLevel());
         sceneConfig.setDescription("自动初始化场景");
 

@@ -1,18 +1,17 @@
-package com.aizuda.easy.retry.server.retry.task.support.strategy;
+package com.aizuda.easy.retry.server.common.strategy;
 
-import cn.hutool.core.date.DateUtil;
+import com.aizuda.easy.retry.common.core.exception.EasyRetryCommonException;
 import com.aizuda.easy.retry.common.core.util.CronExpression;
+import com.aizuda.easy.retry.server.common.WaitStrategy;
 import com.aizuda.easy.retry.server.common.enums.DelayLevelEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
-import com.aizuda.easy.retry.server.retry.task.support.WaitStrategy;
+import com.aizuda.easy.retry.server.common.util.DateUtil;
 import com.google.common.base.Preconditions;
 import lombok.Data;
 import lombok.Getter;
 
 import java.text.ParseException;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
+import java.time.Duration;
 import java.util.Date;
 import java.util.Objects;
 import java.util.Random;
@@ -31,10 +30,6 @@ public class WaitStrategies {
 
     @Data
     public static class WaitStrategyContext {
-//        /**
-//         * 触发类型 1.CRON 表达式 2. 固定时间
-//         */
-//        private Integer triggerType;
 
         /**
          * 间隔时长
@@ -44,12 +39,13 @@ public class WaitStrategies {
         /**
          * 下次触发时间
          */
-        private LocalDateTime nextTriggerAt;
+        private long nextTriggerAt;
 
         /**
-         * 触发次数
+         * 延迟等级
+         * 仅在选择 DELAY_LEVEL时使用 {@link DelayLevelEnum}
          */
-        private Integer triggerCount;
+        private Integer delayLevel;
 
     }
 
@@ -60,11 +56,11 @@ public class WaitStrategies {
         CRON(3, cronWait()),
         RANDOM(4, randomWait());
 
-        private final int backOff;
+        private final int type;
         private final WaitStrategy waitStrategy;
 
-        WaitStrategyEnum(int backOff, WaitStrategy waitStrategy) {
-            this.backOff = backOff;
+        WaitStrategyEnum(int type, WaitStrategy waitStrategy) {
+            this.type = type;
             this.waitStrategy = waitStrategy;
         }
 
@@ -75,35 +71,26 @@ public class WaitStrategies {
          * @return 退避策略
          */
         public static WaitStrategy getWaitStrategy(int backOff) {
-
-            WaitStrategyEnum waitStrategy = getWaitStrategyEnum(backOff);
-            switch (waitStrategy) {
-                case RANDOM:
-                    return randomWait();
-                case CRON:
-                    return cronWait();
-                default:
-                   return waitStrategy.waitStrategy;
-            }
+            return getWaitStrategyEnum(backOff).getWaitStrategy();
 
         }
 
         /**
-         * 获取退避策略枚举对象
+         * 获取等待策略类型枚举对象
          *
-         * @param backOff 退避策略
-         * @return 退避策略枚举对象
+         * @param type 等待策略类型
+         * @return 等待策略类型枚举对象
          */
-        public static WaitStrategyEnum getWaitStrategyEnum(int backOff) {
+        public static WaitStrategyEnum getWaitStrategyEnum(int type) {
 
             for (WaitStrategyEnum value : WaitStrategyEnum.values()) {
-                if (value.backOff == backOff) {
+                if (value.type == type) {
                     return value;
                 }
             }
 
             // 兜底为默认等级策略
-            return WaitStrategyEnum.DELAY_LEVEL;
+            throw new EasyRetryCommonException("等待策略类型不存在. [{}]", type);
         }
 
     }
@@ -159,9 +146,10 @@ public class WaitStrategies {
     private static final class DelayLevelWaitStrategy implements WaitStrategy {
 
         @Override
-        public LocalDateTime computeRetryTime(WaitStrategyContext context) {
-            DelayLevelEnum levelEnum = DelayLevelEnum.getDelayLevelByLevel(context.getTriggerCount());
-            return context.getNextTriggerAt().plus(levelEnum.getTime(), levelEnum.getUnit());
+        public Long computeTriggerTime(WaitStrategyContext context) {
+            DelayLevelEnum levelEnum = DelayLevelEnum.getDelayLevelByLevel(context.getDelayLevel());
+            Duration of = Duration.of(levelEnum.getTime(), levelEnum.getUnit());
+            return context.getNextTriggerAt() + of.toMillis();
         }
     }
 
@@ -171,8 +159,8 @@ public class WaitStrategies {
     private static final class FixedWaitStrategy implements WaitStrategy {
 
         @Override
-        public LocalDateTime computeRetryTime(WaitStrategyContext retryContext) {
-            return retryContext.getNextTriggerAt().plusSeconds(Integer.parseInt(retryContext.getTriggerInterval()));
+        public Long computeTriggerTime(WaitStrategyContext retryContext) {
+            return retryContext.getNextTriggerAt() + Integer.parseInt(retryContext.getTriggerInterval());
         }
     }
 
@@ -182,12 +170,11 @@ public class WaitStrategies {
     private static final class CronWaitStrategy implements WaitStrategy {
 
         @Override
-        public LocalDateTime computeRetryTime(WaitStrategyContext context) {
+        public Long computeTriggerTime(WaitStrategyContext context) {
 
             try {
-                ZonedDateTime zdt = context.getNextTriggerAt().atZone(ZoneOffset.ofHours(8));
-                Date nextValidTime = new CronExpression(context.getTriggerInterval()).getNextValidTimeAfter(Date.from(zdt.toInstant()));
-                return DateUtil.toLocalDateTime(nextValidTime);
+                Date nextValidTime = new CronExpression(context.getTriggerInterval()).getNextValidTimeAfter(new Date(context.getNextTriggerAt()));
+                return DateUtil.toEpochMilli(nextValidTime);
             } catch (ParseException e) {
                 throw new EasyRetryServerException("解析CRON表达式异常 [{}]", context.getTriggerInterval(), e);
             }
@@ -217,7 +204,7 @@ public class WaitStrategies {
         }
 
         @Override
-        public LocalDateTime computeRetryTime(WaitStrategyContext retryContext) {
+        public Long computeTriggerTime(WaitStrategyContext retryContext) {
 
             if (Objects.nonNull(retryContext)) {
                 if (maximum == 0) {
@@ -228,9 +215,7 @@ public class WaitStrategies {
             Preconditions.checkArgument(maximum > minimum, "maximum must be > minimum but maximum is %d and minimum is", maximum, minimum);
 
             long t = Math.abs(RANDOM.nextLong()) % (maximum - minimum);
-            long now = LocalDateTime.now().toInstant(ZoneOffset.of("+8")).toEpochMilli();
-
-            return  LocalDateTime.ofEpochSecond( (t + minimum + now) / 1000,0, ZoneOffset.ofHours(8));
+            return (t + minimum + System.currentTimeMillis()) / 1000;
         }
     }
 }

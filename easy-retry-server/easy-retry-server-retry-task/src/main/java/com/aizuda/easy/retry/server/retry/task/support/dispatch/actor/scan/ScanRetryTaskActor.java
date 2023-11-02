@@ -2,11 +2,12 @@ package com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.scan;
 
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
+import com.aizuda.easy.retry.server.common.util.DateUtil;
 import com.aizuda.easy.retry.server.retry.task.dto.RetryPartitionTask;
-import com.aizuda.easy.retry.server.retry.task.support.WaitStrategy;
+import com.aizuda.easy.retry.server.common.WaitStrategy;
 import com.aizuda.easy.retry.server.retry.task.support.dispatch.task.TaskExecutorSceneEnum;
-import com.aizuda.easy.retry.server.retry.task.support.strategy.WaitStrategies.WaitStrategyContext;
-import com.aizuda.easy.retry.server.retry.task.support.strategy.WaitStrategies.WaitStrategyEnum;
+import com.aizuda.easy.retry.server.common.strategy.WaitStrategies.WaitStrategyContext;
+import com.aizuda.easy.retry.server.common.strategy.WaitStrategies.WaitStrategyEnum;
 import com.aizuda.easy.retry.server.retry.task.support.timer.RetryTimerContext;
 import com.aizuda.easy.retry.server.retry.task.support.timer.RetryTimerTask;
 import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -69,12 +71,12 @@ public class ScanRetryTaskActor extends AbstractScanGroup {
             nextTriggerAt = now;
         }
 
-        waitStrategyContext.setNextTriggerAt(nextTriggerAt);
+        waitStrategyContext.setNextTriggerAt(DateUtil.toEpochMilli(nextTriggerAt));
         waitStrategyContext.setTriggerInterval(sceneConfig.getTriggerInterval());
-        waitStrategyContext.setTriggerCount(partitionTask.getRetryCount() + 1);
+        waitStrategyContext.setDelayLevel(partitionTask.getRetryCount() + 1);
         // 更新触发时间, 任务进入时间轮
         WaitStrategy waitStrategy = WaitStrategyEnum.getWaitStrategy(sceneConfig.getBackOff());
-        return waitStrategy.computeRetryTime(waitStrategyContext);
+        return DateUtil.toEpochMilli(waitStrategy.computeTriggerTime(waitStrategyContext));
     }
 
     @Override

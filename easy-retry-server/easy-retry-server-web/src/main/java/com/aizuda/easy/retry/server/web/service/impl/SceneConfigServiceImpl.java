@@ -4,6 +4,8 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
+import com.aizuda.easy.retry.server.common.util.CronUtils;
+import com.aizuda.easy.retry.server.common.strategy.WaitStrategies;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
 import com.aizuda.easy.retry.server.web.model.request.SceneConfigQueryVO;
 import com.aizuda.easy.retry.server.web.model.request.SceneConfigRequestVO;
@@ -17,11 +19,13 @@ import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
+import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author: www.byteblogs.com
@@ -64,6 +68,9 @@ public class SceneConfigServiceImpl implements SceneConfigService {
 
     @Override
     public Boolean saveSceneConfig(SceneConfigRequestVO requestVO) {
+
+        checkExecuteInterval(requestVO);
+
         SceneConfig sceneConfig = SceneConfigConverter.INSTANCE.toSceneConfigRequestVO(requestVO);
         sceneConfig.setCreateDt(LocalDateTime.now());
         ConfigAccess<SceneConfig> sceneConfigAccess = accessTemplate.getSceneConfigAccess();
@@ -72,10 +79,25 @@ public class SceneConfigServiceImpl implements SceneConfigService {
         return Boolean.TRUE;
     }
 
+    private static void checkExecuteInterval(SceneConfigRequestVO requestVO) {
+        if (Lists.newArrayList(WaitStrategies.WaitStrategyEnum.FIXED.getType(), WaitStrategies.WaitStrategyEnum.RANDOM.getType())
+                .contains(requestVO.getBackOff())) {
+            if (Integer.parseInt(requestVO.getTriggerInterval()) < 10) {
+                throw new EasyRetryServerException("间隔时间不得小于10");
+            }
+        } else if (requestVO.getBackOff() == WaitStrategies.WaitStrategyEnum.CRON.getType()) {
+            if (CronUtils.getExecuteInterval(requestVO.getTriggerInterval()) < 10 * 1000) {
+                throw new EasyRetryServerException("间隔时间不得小于10");
+            }
+        }
+    }
+
+
     @Override
     public Boolean updateSceneConfig(SceneConfigRequestVO requestVO) {
+        checkExecuteInterval(requestVO);
         SceneConfig sceneConfig = SceneConfigConverter.INSTANCE.toSceneConfigRequestVO(requestVO);
-
+        sceneConfig.setTriggerInterval(Optional.ofNullable(sceneConfig.getTriggerInterval()).orElse(StrUtil.EMPTY));
         Assert.isTrue(1 == accessTemplate.getSceneConfigAccess().update(sceneConfig,
                         new LambdaUpdateWrapper<SceneConfig>()
                                 .eq(SceneConfig::getGroupName, sceneConfig.getGroupName())

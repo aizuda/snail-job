@@ -27,7 +27,7 @@ public class JobPartitionTask extends PartitionTask {
     /**
      * 下次触发时间
      */
-    private LocalDateTime nextTriggerAt;
+    private long nextTriggerAt;
 
     /**
      * 阻塞策略 1、丢弃 2、覆盖 3、并行
