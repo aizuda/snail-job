@@ -33,6 +33,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -146,6 +147,9 @@ public class ScanJobTaskActor extends AbstractActor {
     }
 
     private List<JobPartitionTask> listAvailableJobs(Long startId, ScanTask scanTask) {
+        if (CollectionUtils.isEmpty(scanTask.getBuckets())) {
+            return Collections.emptyList();
+        }
 
         List<Job> jobs = jobMapper.selectPage(new PageDTO<Job>(0, scanTask.getSize()),
                 new LambdaQueryWrapper<Job>()

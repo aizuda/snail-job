@@ -20,6 +20,7 @@ public class SystemProperties {
     /**
      * 拉取数据天数
      */
+    @Deprecated
     private int lastDays = 30;
 
     /**

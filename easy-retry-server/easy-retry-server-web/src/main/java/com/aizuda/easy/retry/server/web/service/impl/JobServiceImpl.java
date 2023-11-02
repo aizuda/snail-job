@@ -112,7 +112,7 @@ public class JobServiceImpl implements JobService {
     public List<JobResponseVO> getJobNameList(String keywords, Long jobId) {
 
         LambdaQueryWrapper<Job> queryWrapper = new LambdaQueryWrapper<Job>()
-                .select(Job::getId, Job::getJobName);
+            .select(Job::getId, Job::getJobName);
         if (StrUtil.isNotBlank(keywords)) {
             queryWrapper.like(Job::getJobName, keywords.trim() + "%");
         }
@@ -131,7 +131,8 @@ public class JobServiceImpl implements JobService {
     public boolean saveJob(JobRequestVO jobRequestVO) {
         // 判断常驻任务
         Job job = updateJobResident(jobRequestVO);
-        job.setBucketIndex(HashUtil.bkdrHash(jobRequestVO.getGroupName() + jobRequestVO.getJobName()) % systemProperties.getBucketTotal());
+        job.setBucketIndex(HashUtil.bkdrHash(jobRequestVO.getGroupName() + jobRequestVO.getJobName())
+            % systemProperties.getBucketTotal());
         calculateNextTriggerAt(jobRequestVO, LocalDateTime.now());
         return 1 == jobMapper.insert(job);
     }
@@ -143,33 +144,22 @@ public class JobServiceImpl implements JobService {
         Job job = jobMapper.selectById(jobRequestVO.getId());
         Assert.notNull(job, () -> new EasyRetryServerException("更新失败"));
 
-        LocalDateTime oldTime = job.getNextTriggerAt();
         // 判断常驻任务
         Job updateJob = updateJobResident(jobRequestVO);
-
-//        LocalDateTime waitUpdateTime = null;
-        // 新老都是常驻任务
-        if (Objects.equals(job.getResident(), StatusEnum.YES.getStatus()) && Objects.equals(updateJob.getResident(), StatusEnum.YES.getStatus())) {
-//            LocalDateTime newTime = calculateNextTriggerAt(jobRequestVO, LocalDateTime.now());
-            log.info("新老都是常驻任务 newTime:[{}] oldTime:[{}]", null ,  oldTime);
-//            job.setNextTriggerAt(oldTime);
-            // 老的是常驻任务 新的是非常驻任务 需要使用内存里面的触发时间计算触发时间
-        } else  if (Objects.equals(job.getResident(), StatusEnum.YES.getStatus()) && Objects.equals(updateJob.getResident(), StatusEnum.NO.getStatus())) {
+        // 非常驻任务 > 非常驻任务
+        if (Objects.equals(job.getResident(), StatusEnum.NO.getStatus()) && Objects.equals(updateJob.getResident(),
+            StatusEnum.NO.getStatus())) {
+            updateJob.setNextTriggerAt(calculateNextTriggerAt(jobRequestVO, LocalDateTime.now()));
+        } else if (Objects.equals(job.getResident(), StatusEnum.YES.getStatus()) && Objects.equals(
+            updateJob.getResident(), StatusEnum.NO.getStatus())) {
             // 常驻任务的触发时间
-            LocalDateTime time = Optional.ofNullable(ResidentTaskCache.get(jobRequestVO.getId())).orElse(LocalDateTime.now());
-            LocalDateTime newTime = calculateNextTriggerAt(jobRequestVO, time);
-            log.info("old是常驻任务 new不常驻任务 newTime:[{}] oldTime:[{}]", newTime ,  oldTime);
-            updateJob.setNextTriggerAt(newTime);
+            LocalDateTime time = Optional.ofNullable(ResidentTaskCache.get(jobRequestVO.getId()))
+                .orElse(LocalDateTime.now());
+            updateJob.setNextTriggerAt(calculateNextTriggerAt(jobRequestVO, time));
             // 老的是不是常驻任务 新的是常驻任务 需要使用当前时间计算下次触发时间
-        }  else  if (Objects.equals(job.getResident(), StatusEnum.NO.getStatus()) && Objects.equals(updateJob.getResident(), StatusEnum.YES.getStatus())) {
-            LocalDateTime newTime = calculateNextTriggerAt(jobRequestVO, LocalDateTime.now());
-            log.info("old不是常驻任务 new是常驻任务 newTime:[{}] oldTime:[{}]",newTime ,  oldTime);
+        } else if (Objects.equals(job.getResident(), StatusEnum.NO.getStatus()) && Objects.equals(
+            updateJob.getResident(), StatusEnum.YES.getStatus())) {
             updateJob.setNextTriggerAt(LocalDateTime.now());
-        } else {
-
-            LocalDateTime newTime = calculateNextTriggerAt(jobRequestVO, LocalDateTime.now());
-            log.info("old不是常驻任务 new不常驻任务 newTime:[{}] oldTime:[{}]",newTime ,  oldTime);
-            updateJob.setNextTriggerAt(newTime);
         }
 
         return 1 == jobMapper.updateById(updateJob);

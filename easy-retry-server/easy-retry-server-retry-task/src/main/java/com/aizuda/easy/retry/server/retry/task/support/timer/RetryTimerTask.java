@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.server.retry.task.support.timer;
 
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
+import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.retry.task.support.dispatch.task.TaskExecutor;
 import com.aizuda.easy.retry.server.retry.task.support.dispatch.task.TaskActuatorFactory;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
@@ -11,8 +12,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import io.netty.util.Timeout;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-
-import java.time.LocalDateTime;
 
 /**
  * @author: www.byteblogs.com
@@ -32,7 +31,6 @@ public class RetryTimerTask extends AbstractTimerTask {
 
     @Override
     public void doRun(final Timeout timeout){
-        log.info("重试任务执行 {}", LocalDateTime.now());
         AccessTemplate accessTemplate = SpringContext.getBeanByType(AccessTemplate.class);
         TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();
         RetryTask retryTask = retryTaskAccess.one(context.getGroupName(), new LambdaQueryWrapper<RetryTask>()

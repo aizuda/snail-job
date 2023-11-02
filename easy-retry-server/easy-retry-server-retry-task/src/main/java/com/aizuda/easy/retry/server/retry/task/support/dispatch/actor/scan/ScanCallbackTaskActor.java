@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author www.byteblogs.com
@@ -28,6 +29,9 @@ import java.util.concurrent.ConcurrentMap;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Slf4j
 public class ScanCallbackTaskActor extends AbstractScanGroup {
+
+    private static final AtomicLong preCostTime = new AtomicLong(0L);
+    private static final AtomicLong pullCount = new AtomicLong(1L);
 
     /**
      * 缓存待拉取数据的起点id
@@ -72,6 +76,16 @@ public class ScanCallbackTaskActor extends AbstractScanGroup {
         retryTimerContext.setUniqueId(partitionTask.getUniqueId());
 
         return new CallbackTimerTask(retryTimerContext);
+    }
+
+    @Override
+    protected AtomicLong preCostTime() {
+        return preCostTime;
+    }
+
+    @Override
+    protected AtomicLong prePullCount() {
+        return pullCount;
     }
 
 
