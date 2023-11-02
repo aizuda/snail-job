@@ -19,13 +19,11 @@ import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
-import com.google.common.collect.Lists;
 import io.netty.util.TimerTask;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StopWatch;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -34,8 +32,6 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 /**
  * 数据扫描模板类
@@ -59,9 +55,6 @@ public abstract class AbstractScanGroup extends AbstractActor {
     @Autowired
     protected List<TaskExecutor> taskExecutors;
 
-    private static final AtomicLong preCostTime = new AtomicLong(0L);
-    private static final AtomicLong pullCount = new AtomicLong(1L);
-
     @Override
     public Receive createReceive() {
         return receiveBuilder().match(ScanTask.class, config -> {
@@ -78,9 +71,9 @@ public abstract class AbstractScanGroup extends AbstractActor {
             // 获取结束时间
             long endTime = System.nanoTime();
 
-            preCostTime.set((endTime - startTime) / 1_000_000);
+            preCostTime().set((endTime - startTime) / 1_000_000);
 
-            log.info("重试任务调度耗时:[{}]", preCostTime.get());
+            log.info(this.getClass().getName() + "重试任务调度耗时:[{}]", preCostTime().get());
 
         }).build();
 
@@ -89,35 +82,39 @@ public abstract class AbstractScanGroup extends AbstractActor {
     protected void doScan(final ScanTask scanTask) {
 
         // 计算循环拉取的次数
-        if (preCostTime.get() > 0) {
-            long loopCount = Math.max((SystemConstants.SCHEDULE_PERIOD * 1000) / preCostTime.get(), 1);
+        if (preCostTime().get() > 0) {
+            long loopCount = Math.max((SystemConstants.SCHEDULE_PERIOD * 1000) / preCostTime().get(), 1);
             // TODO 最大拉取次数支持可配置
             loopCount = Math.min(loopCount, 10);
-            pullCount.set(loopCount);
+            prePullCount().set(loopCount);
         }
 
         String groupName = scanTask.getGroupName();
         Long lastId = Optional.ofNullable(getLastId(groupName)).orElse(0L);
 
-        log.info("retry scan start. groupName:[{}] startId:[{}]  pullCount:[{}] preCostTime:[{}]",
-                groupName, lastId, pullCount.get(), preCostTime.get());
+        log.info(this.getClass().getName() + " retry scan start. groupName:[{}] startId:[{}]  pullCount:[{}] preCostTime:[{}]",
+                groupName, lastId, prePullCount().get(), preCostTime().get());
 
         AtomicInteger count = new AtomicInteger(0);
-        PartitionTaskUtils.process(startId -> listAvailableTasks(groupName, startId, taskActuatorScene().getTaskType().getType()),
-                partitionTasks -> processRetryPartitionTasks(partitionTasks, scanTask), partitionTasks -> {
-                    if (CollectionUtils.isEmpty(partitionTasks)) {
-                        putLastId(scanTask.getGroupName(), 0L);
-                        return Boolean.TRUE;
-                    }
+        long total = PartitionTaskUtils.process(
+            startId -> listAvailableTasks(groupName, startId, taskActuatorScene().getTaskType().getType()),
+            partitionTasks -> processRetryPartitionTasks(partitionTasks, scanTask), partitionTasks -> {
+                if (CollectionUtils.isEmpty(partitionTasks)) {
+                    putLastId(scanTask.getGroupName(), 0L);
+                    return Boolean.TRUE;
+                }
 
-                    // 超过最大的拉取次数则中断
-                    if (count.getAndIncrement() > pullCount.get()) {
-                        putLastId(scanTask.getGroupName(), partitionTasks.get(partitionTasks.size() - 1).getId());
-                        return Boolean.TRUE;
-                    }
+                // 超过最大的拉取次数则中断
+                if (count.getAndIncrement() > prePullCount().get()) {
+                    putLastId(scanTask.getGroupName(), partitionTasks.get(partitionTasks.size() - 1).getId());
+                    return Boolean.TRUE;
+                }
 
-                    return false;
-                }, lastId);
+                return false;
+            }, lastId);
+
+        log.info(this.getClass().getName() + " retry scan end. groupName:[{}] total:[{}] realPullCount:[{}]",
+            groupName, total, count);
 
     }
 
@@ -137,7 +134,7 @@ public abstract class AbstractScanGroup extends AbstractActor {
         accessTemplate.getRetryTaskAccess().updateById(partitionTask.getGroupName(), retryTask);
 
         long delay = partitionTask.getNextTriggerAt().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
-                - System.currentTimeMillis();
+                - System.currentTimeMillis() - System.currentTimeMillis() % 500;
         RetryTimerWheel.register(partitionTask.getGroupName(), partitionTask.getUniqueId(), timerTask(partitionTask),
                 delay,
                 TimeUnit.MILLISECONDS);
@@ -152,6 +149,10 @@ public abstract class AbstractScanGroup extends AbstractActor {
     protected abstract LocalDateTime calculateNextTriggerTime(RetryPartitionTask partitionTask);
 
     protected abstract TimerTask timerTask(RetryPartitionTask partitionTask);
+
+    protected abstract AtomicLong preCostTime();
+
+    protected abstract AtomicLong prePullCount();
 
     public List<RetryPartitionTask> listAvailableTasks(String groupName, Long lastId, Integer taskType) {
         List<RetryTask> retryTasks = accessTemplate.getRetryTaskAccess()

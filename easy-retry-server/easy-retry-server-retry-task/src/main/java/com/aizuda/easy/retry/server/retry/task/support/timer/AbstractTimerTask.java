@@ -20,25 +20,24 @@ public abstract class AbstractTimerTask implements TimerTask {
     protected String groupName;
     protected String uniqueId;
 
-    private static final ThreadPoolExecutor executor = new ThreadPoolExecutor(8, 8, 10, TimeUnit.SECONDS,
+    private static final ThreadPoolExecutor executor = new ThreadPoolExecutor(16, 16, 10, TimeUnit.SECONDS,
         new LinkedBlockingQueue<>());
 
 
     @Override
     public void run(Timeout timeout) throws Exception {
-        log.info("开始执行重试任务. 当前时间:[{}] groupName:[{}] uniqueId:[{}]", LocalDateTime.now(), groupName, uniqueId);
-
         executor.execute(() -> {
-
+            log.info("开始执行重试任务. 当前时间:[{}] groupName:[{}] uniqueId:[{}]", LocalDateTime.now(), groupName,
+                uniqueId);
             try {
+                doRun(timeout);
+            } catch (Exception e) {
+                log.error("重试任务执行失败 groupName:[{}] uniqueId:[{}]", groupName, uniqueId, e);
+            } finally {
                 // 先清除时间轮的缓存
                 RetryTimerWheel.clearCache(groupName, uniqueId);
 
-                doRun(timeout);
-            } catch (Exception e) {
-                log.error("重试任务执行失败", e);
             }
-
         });
 
     }

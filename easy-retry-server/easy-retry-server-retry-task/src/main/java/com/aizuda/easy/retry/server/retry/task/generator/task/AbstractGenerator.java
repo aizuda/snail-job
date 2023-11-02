@@ -11,9 +11,13 @@ import com.aizuda.easy.retry.server.common.enums.DelayLevelEnum;
 import com.aizuda.easy.retry.server.common.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.generator.id.IdGenerator;
+import com.aizuda.easy.retry.server.retry.task.generator.task.TaskContext.TaskInfo;
 import com.aizuda.easy.retry.server.retry.task.support.RetryTaskConverter;
 import com.aizuda.easy.retry.server.retry.task.support.RetryTaskLogConverter;
+import com.aizuda.easy.retry.server.retry.task.support.WaitStrategy;
 import com.aizuda.easy.retry.server.retry.task.support.strategy.WaitStrategies;
+import com.aizuda.easy.retry.server.retry.task.support.strategy.WaitStrategies.WaitStrategyContext;
+import com.aizuda.easy.retry.server.retry.task.support.strategy.WaitStrategies.WaitStrategyEnum;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
 import com.aizuda.easy.retry.template.datasource.access.TaskAccess;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskLogMapper;
@@ -30,7 +34,6 @@ import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -53,7 +56,7 @@ public abstract class AbstractGenerator implements TaskGenerator {
     public void taskGenerator(TaskContext taskContext) {
         LogUtils.info(log, "received report data. {}", JsonUtil.toJsonString(taskContext));
 
-        checkAndInitScene(taskContext);
+        SceneConfig sceneConfig = checkAndInitScene(taskContext);
 
         List<TaskContext.TaskInfo> taskInfos = taskContext.getTaskInfos();
 
@@ -76,7 +79,7 @@ public abstract class AbstractGenerator implements TaskGenerator {
         List<RetryTaskLog> waitInsertTaskLogs = new ArrayList<>();
         LocalDateTime now = LocalDateTime.now();
         for (TaskContext.TaskInfo taskInfo : taskInfos) {
-            Pair<List<RetryTask>, List<RetryTaskLog>> pair = doConvertTask(retryTaskMap, taskContext, now, taskInfo);
+            Pair<List<RetryTask>, List<RetryTaskLog>> pair = doConvertTask(retryTaskMap, taskContext, now, taskInfo, sceneConfig);
             waitInsertTasks.addAll(pair.getKey());
             waitInsertTaskLogs.addAll(pair.getValue());
         }
@@ -96,10 +99,11 @@ public abstract class AbstractGenerator implements TaskGenerator {
      * @param retryTaskMap
      * @param now
      * @param taskInfo
+     * @param sceneConfig
      */
     private Pair<List<RetryTask>, List<RetryTaskLog>> doConvertTask(Map<String/*幂等ID*/, List<RetryTask>> retryTaskMap,
                                                                     TaskContext taskContext, LocalDateTime now,
-                                                                    TaskContext.TaskInfo taskInfo) {
+                                                                    TaskInfo taskInfo, SceneConfig sceneConfig) {
         List<RetryTask> waitInsertTasks = new ArrayList<>();
         List<RetryTaskLog> waitInsertTaskLogs = new ArrayList<>();
 
@@ -127,7 +131,12 @@ public abstract class AbstractGenerator implements TaskGenerator {
             retryTask.setExtAttrs(StrUtil.EMPTY);
         }
 
-        retryTask.setNextTriggerAt(WaitStrategies.randomWait(1, TimeUnit.SECONDS, 60, TimeUnit.SECONDS).computeRetryTime(null));
+        WaitStrategyContext waitStrategyContext = new WaitStrategyContext();
+        waitStrategyContext.setNextTriggerAt(now);
+        waitStrategyContext.setTriggerInterval(sceneConfig.getTriggerInterval());
+        waitStrategyContext.setTriggerCount(1);
+        WaitStrategy waitStrategy = WaitStrategyEnum.getWaitStrategy(sceneConfig.getBackOff());
+        retryTask.setNextTriggerAt(waitStrategy.computeRetryTime(waitStrategyContext));
         waitInsertTasks.add(retryTask);
 
         // 初始化日志
@@ -141,7 +150,7 @@ public abstract class AbstractGenerator implements TaskGenerator {
 
     protected abstract Integer initStatus(TaskContext taskContext);
 
-    private void checkAndInitScene(TaskContext taskContext) {
+    private SceneConfig checkAndInitScene(TaskContext taskContext) {
         SceneConfig sceneConfig = accessTemplate.getSceneConfigAccess().getSceneConfigByGroupNameAndSceneName(taskContext.getGroupName(), taskContext.getSceneName());
         if (Objects.isNull(sceneConfig)) {
 
@@ -154,9 +163,11 @@ public abstract class AbstractGenerator implements TaskGenerator {
                 throw new EasyRetryServerException("failed to report data, no scene configuration found. groupName:[{}] sceneName:[{}]", taskContext.getGroupName(), taskContext.getSceneName());
             } else {
                 // 若配置了默认初始化场景配置，则发现上报数据的时候未配置场景，默认生成一个场景
-                initScene(taskContext.getGroupName(), taskContext.getSceneName());
+                sceneConfig = initScene(taskContext.getGroupName(), taskContext.getSceneName());
             }
         }
+
+        return sceneConfig;
 
     }
 
@@ -169,9 +180,8 @@ public abstract class AbstractGenerator implements TaskGenerator {
      * @param groupName 组名称
      * @param sceneName 场景名称
      */
-    private void initScene(String groupName, String sceneName) {
-        SceneConfig sceneConfig;
-        sceneConfig = new SceneConfig();
+    private SceneConfig initScene(String groupName, String sceneName) {
+        SceneConfig sceneConfig = new SceneConfig();
         sceneConfig.setGroupName(groupName);
         sceneConfig.setSceneName(sceneName);
         sceneConfig.setSceneStatus(StatusEnum.YES.getStatus());
@@ -179,6 +189,7 @@ public abstract class AbstractGenerator implements TaskGenerator {
         sceneConfig.setMaxRetryCount(DelayLevelEnum._21.getLevel());
         sceneConfig.setDescription("自动初始化场景");
         Assert.isTrue(1 == accessTemplate.getSceneConfigAccess().insert(sceneConfig), () -> new EasyRetryServerException("init scene error"));
+        return sceneConfig;
     }
 
     /**

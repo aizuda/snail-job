@@ -159,8 +159,6 @@ public class JobExecutorActor extends AbstractActor {
                 preTriggerAt = job.getNextTriggerAt();
             }
 
-            System.out.println("时间监控 " + ResidentTaskCache.get(job.getId()) + "-" + job.getNextTriggerAt());
-
             WaitStrategies.WaitStrategyContext waitStrategyContext = new WaitStrategies.WaitStrategyContext();
             waitStrategyContext.setTriggerType(job.getTriggerType());
             waitStrategyContext.setTriggerInterval(job.getTriggerInterval());

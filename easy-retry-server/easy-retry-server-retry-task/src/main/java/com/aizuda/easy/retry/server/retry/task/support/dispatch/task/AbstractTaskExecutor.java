@@ -2,10 +2,12 @@ package com.aizuda.easy.retry.server.retry.task.support.dispatch.task;
 
 import akka.actor.ActorRef;
 import cn.hutool.core.lang.Pair;
+import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.handler.ClientNodeAllocateHandler;
 import com.aizuda.easy.retry.server.common.IdempotentStrategy;
 import com.aizuda.easy.retry.server.retry.task.support.RetryContext;
+import com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.log.RetryTaskLogDTO;
 import com.aizuda.easy.retry.server.retry.task.support.retry.RetryExecutor;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
@@ -14,6 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+
+import java.time.LocalDateTime;
 
 /**
  *
@@ -55,9 +59,21 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, Initializing
     protected boolean preCheck(RetryContext retryContext, RetryExecutor executor) {
         Pair<Boolean /*是否符合条件*/, StringBuilder/*描述信息*/> pair = executor.filter();
         if (!pair.getKey()) {
+            RetryTask retryTask = retryContext.getRetryTask();
             log.warn("当前任务不满足执行条件. groupName:[{}] uniqueId:[{}], description:[{}]",
-                    retryContext.getRetryTask().getGroupName(),
-                    retryContext.getRetryTask().getUniqueId(), pair.getValue().toString());
+                retryTask.getGroupName(),
+                retryTask.getUniqueId(), pair.getValue().toString());
+
+            // 记录日志
+            RetryTaskLogDTO retryTaskLog = new RetryTaskLogDTO();
+            retryTaskLog.setGroupName(retryTask.getGroupName());
+            retryTaskLog.setUniqueId(retryTask.getUniqueId());
+            retryTaskLog.setRetryStatus(retryTask.getRetryStatus());
+            retryTaskLog.setMessage(pair.getValue().toString());
+            retryTaskLog.setTriggerTime(LocalDateTime.now());
+            ActorRef actorRef = ActorGenerator.logActor();
+            actorRef.tell(retryTaskLog, actorRef);
+
             return false;
         }
 

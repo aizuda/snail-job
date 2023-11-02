@@ -68,13 +68,18 @@ public class ConsumerBucketActor extends AbstractActor {
         }
 
         if (SystemModeEnum.isRetry(systemProperties.getMode())) {
-            // 查询桶对应组信息
-            List<GroupConfig> groupConfigs = accessTemplate.getGroupConfigAccess().list(
+            List<GroupConfig> groupConfigs = null;
+            try {
+                // 查询桶对应组信息
+                groupConfigs = accessTemplate.getGroupConfigAccess().list(
                     new LambdaQueryWrapper<GroupConfig>()
-                            .select(GroupConfig::getGroupName)
-                            .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus())
-                            .in(GroupConfig::getBucketIndex, consumerBucket.getBuckets())
-            );
+                        .select(GroupConfig::getGroupName)
+                        .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus())
+                        .in(GroupConfig::getBucketIndex, consumerBucket.getBuckets())
+                );
+            } catch (Exception e) {
+                log.error("生成重试任务异常.", e);
+            }
 
             if (!CollectionUtils.isEmpty(groupConfigs)) {
                 for (final GroupConfig groupConfig : groupConfigs) {
