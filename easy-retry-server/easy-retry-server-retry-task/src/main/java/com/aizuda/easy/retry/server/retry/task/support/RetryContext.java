@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.server.retry.task.support;
 
+import com.aizuda.easy.retry.server.common.WaitStrategy;
 import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
 import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;

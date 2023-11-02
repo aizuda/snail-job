@@ -4,7 +4,7 @@ import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.retry.task.support.FilterStrategy;
 import com.aizuda.easy.retry.server.retry.task.support.RetryContext;
 import com.aizuda.easy.retry.server.retry.task.support.StopStrategy;
-import com.aizuda.easy.retry.server.retry.task.support.WaitStrategy;
+import com.aizuda.easy.retry.server.common.WaitStrategy;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;

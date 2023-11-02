@@ -6,7 +6,7 @@ import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
 
 import com.aizuda.easy.retry.server.common.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
-import com.aizuda.easy.retry.server.retry.task.support.strategy.WaitStrategies;
+import com.aizuda.easy.retry.server.common.strategy.WaitStrategies;
 import com.aizuda.easy.retry.server.web.service.RetryDeadLetterService;
 import com.aizuda.easy.retry.server.web.service.convert.RetryDeadLetterResponseVOConverter;
 import com.aizuda.easy.retry.server.retry.task.support.RetryTaskConverter;
@@ -107,7 +107,7 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
             RetryTask retryTask = RetryTaskConverter.INSTANCE.toRetryTask(retryDeadLetter);
             retryTask.setRetryStatus(RetryStatusEnum.RUNNING.getStatus());
             retryTask.setTaskType(TaskTypeEnum.RETRY.getType());
-            retryTask.setNextTriggerAt(WaitStrategies.randomWait(1, TimeUnit.SECONDS, 60, TimeUnit.SECONDS).computeRetryTime(null));
+            retryTask.setNextTriggerAt(WaitStrategies.randomWait(1, TimeUnit.SECONDS, 60, TimeUnit.SECONDS).computeTriggerTime(null));
             retryTask.setCreateDt(LocalDateTime.now());
             waitRollbackList.add(retryTask);
         }

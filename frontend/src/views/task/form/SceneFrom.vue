@@ -83,7 +83,7 @@
                 v-if="backOff === '2' || backOff === '4'"
                 style="width: -webkit-fill-available"
                 placeholder="请输入间隔时长(秒)"
-                :min="1"
+                :min="10"
                 v-decorator="[
                   'triggerInterval',
                   {initialValue: '60',
@@ -273,13 +273,13 @@ export default {
         if (!err) {
           if (this.formType === 'create') {
             saveScene(values).then(res => {
-              this.$message.success('任务新增完成')
+              this.$message.success('场景新增完成')
               this.form.resetFields()
               this.$router.go(-1)
             })
           } else {
             updateScene(values).then(res => {
-              this.$message.success('任务更新完成')
+              this.$message.success('场景更新完成')
               this.form.resetFields()
               this.$router.go(-1)
             })

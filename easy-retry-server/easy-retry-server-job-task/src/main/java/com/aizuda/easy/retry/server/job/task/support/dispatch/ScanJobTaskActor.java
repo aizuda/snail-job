@@ -2,25 +2,22 @@ package com.aizuda.easy.retry.server.job.task.support.dispatch;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
-import cn.hutool.core.date.DateUnit;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.server.common.WaitStrategy;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.cache.CacheConsumerGroup;
 import com.aizuda.easy.retry.server.common.dto.PartitionTask;
 import com.aizuda.easy.retry.server.common.dto.ScanTask;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
+import com.aizuda.easy.retry.server.common.strategy.WaitStrategies;
 import com.aizuda.easy.retry.server.common.util.PartitionTaskUtils;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.server.job.task.dto.JobPartitionTask;
 import com.aizuda.easy.retry.server.job.task.dto.JobTaskPrepareDTO;
-import com.aizuda.easy.retry.server.job.task.support.WaitStrategy;
 import com.aizuda.easy.retry.server.job.task.support.cache.ResidentTaskCache;
-import com.aizuda.easy.retry.server.job.task.support.timer.JobTimerTask;
-import com.aizuda.easy.retry.server.job.task.support.timer.ResidentJobTimerTask;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -32,12 +29,10 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import static com.aizuda.easy.retry.server.job.task.support.strategy.WaitStrategies.*;
 
 /**
  * JOB任务扫描
@@ -93,16 +88,16 @@ public class ScanJobTaskActor extends AbstractActor {
         job.setId(partitionTask.getId());
 
         boolean triggerTask = true;
-        LocalDateTime nextTriggerAt = ResidentTaskCache.get(partitionTask.getId());
-        if (needCalculateNextTriggerTime(partitionTask, nextTriggerAt)) {
+        Long nextTriggerAt = ResidentTaskCache.get(partitionTask.getId());
+        if (needCalculateNextTriggerTime(partitionTask)) {
             // 更新下次触发时间
-           nextTriggerAt = calculateNextTriggerTime(partitionTask);
+            nextTriggerAt = calculateNextTriggerTime(partitionTask);
         } else {
             // 若常驻任务的缓存时间为空则触发一次任务调度，说明常驻任务长时间未更新或者是系统刚刚启动
             triggerTask = Objects.isNull(nextTriggerAt);
             // 若出现常驻任务时间为null或者常驻任务的内存时间长期未更新, 刷新为now
-            LocalDateTime now = LocalDateTime.now();
-            if (Objects.isNull(nextTriggerAt) || nextTriggerAt.plusSeconds(SystemConstants.SCHEDULE_PERIOD).isBefore(now)) {
+            long now = System.currentTimeMillis();
+            if (Objects.isNull(nextTriggerAt) || (nextTriggerAt + SystemConstants.SCHEDULE_PERIOD * 1000) < now) {
                 nextTriggerAt = now;
             }
         }
@@ -124,26 +119,25 @@ public class ScanJobTaskActor extends AbstractActor {
      * 2、常驻任务缓存的触发任务为空
      * 3、常驻任务中的触发时间不是最新的
      */
-    private static boolean needCalculateNextTriggerTime(JobPartitionTask partitionTask, LocalDateTime nextTriggerAt) {
+    private static boolean needCalculateNextTriggerTime(JobPartitionTask partitionTask) {
         return !Objects.equals(StatusEnum.YES.getStatus(), partitionTask.getResident());
     }
 
-    private LocalDateTime calculateNextTriggerTime(JobPartitionTask partitionTask) {
-        // 更新下次触发时间
-        WaitStrategy waitStrategy = WaitStrategyEnum.getWaitStrategy(partitionTask.getTriggerType());
-        WaitStrategyContext waitStrategyContext = new WaitStrategyContext();
-        waitStrategyContext.setTriggerType(partitionTask.getTriggerType());
-        waitStrategyContext.setTriggerInterval(partitionTask.getTriggerInterval());
+    private Long calculateNextTriggerTime(JobPartitionTask partitionTask) {
 
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime nextTriggerAt = partitionTask.getNextTriggerAt();
-        if (nextTriggerAt.plusSeconds(SystemConstants.SCHEDULE_PERIOD).isBefore(now)) {
+        long now = System.currentTimeMillis();
+        long nextTriggerAt = partitionTask.getNextTriggerAt();
+        if ((nextTriggerAt + SystemConstants.SCHEDULE_PERIOD * 1000) < now) {
             nextTriggerAt = now;
         }
 
+        // 更新下次触发时间
+        WaitStrategy waitStrategy = WaitStrategies.WaitStrategyEnum.getWaitStrategy(partitionTask.getTriggerType());
+        WaitStrategies.WaitStrategyContext waitStrategyContext = new WaitStrategies.WaitStrategyContext();
+        waitStrategyContext.setTriggerInterval(partitionTask.getTriggerInterval());
         waitStrategyContext.setNextTriggerAt(nextTriggerAt);
 
-        return waitStrategy.computeRetryTime(waitStrategyContext);
+        return waitStrategy.computeTriggerTime(waitStrategyContext);
     }
 
     private List<JobPartitionTask> listAvailableJobs(Long startId, ScanTask scanTask) {
@@ -155,7 +149,7 @@ public class ScanJobTaskActor extends AbstractActor {
                 new LambdaQueryWrapper<Job>()
                         .eq(Job::getJobStatus, StatusEnum.YES.getStatus())
                         .in(Job::getBucketIndex, scanTask.getBuckets())
-                        .le(Job::getNextTriggerAt, LocalDateTime.now().plusSeconds(SystemConstants.SCHEDULE_PERIOD))
+                        .le(Job::getNextTriggerAt, System.currentTimeMillis() + SystemConstants.SCHEDULE_PERIOD * 1000)
                         .eq(Job::getDeleted, StatusEnum.NO.getStatus())
                         .ge(Job::getId, startId)
         ).getRecords();

@@ -4,13 +4,12 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.HashUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
-import com.aizuda.easy.retry.common.core.util.CronExpression;
+import com.aizuda.easy.retry.server.common.WaitStrategy;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
-import com.aizuda.easy.retry.server.job.task.support.WaitStrategy;
+import com.aizuda.easy.retry.server.common.strategy.WaitStrategies;
+import com.aizuda.easy.retry.server.common.util.CronUtils;
 import com.aizuda.easy.retry.server.job.task.support.cache.ResidentTaskCache;
-import com.aizuda.easy.retry.server.job.task.support.strategy.WaitStrategies.WaitStrategyContext;
-import com.aizuda.easy.retry.server.job.task.support.strategy.WaitStrategies.WaitStrategyEnum;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
 import com.aizuda.easy.retry.server.web.model.request.JobQueryVO;
 import com.aizuda.easy.retry.server.web.model.request.JobRequestVO;
@@ -27,14 +26,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.text.ParseException;
-import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -91,28 +84,14 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public List<String> getTimeByCron(String cron) {
-
-        List<String> list = new ArrayList<>();
-        LocalDateTime now = LocalDateTime.now();
-        for (int i = 0; i < 5; i++) {
-            Date nextValidTime;
-            try {
-                ZonedDateTime zdt = now.atZone(ZoneOffset.ofHours(8));
-                nextValidTime = new CronExpression(cron).getNextValidTimeAfter(Date.from(zdt.toInstant()));
-                now = LocalDateTime.ofEpochSecond(nextValidTime.getTime() / 1000, 0, ZoneOffset.ofHours(8));
-                list.add(dateTimeFormatter.format(now));
-            } catch (ParseException ignored) {
-            }
-        }
-
-        return list;
+        return CronUtils.getExecuteTimeByCron(cron, 5);
     }
 
     @Override
     public List<JobResponseVO> getJobNameList(String keywords, Long jobId) {
 
         LambdaQueryWrapper<Job> queryWrapper = new LambdaQueryWrapper<Job>()
-            .select(Job::getId, Job::getJobName);
+                .select(Job::getId, Job::getJobName);
         if (StrUtil.isNotBlank(keywords)) {
             queryWrapper.like(Job::getJobName, keywords.trim() + "%");
         }
@@ -132,8 +111,8 @@ public class JobServiceImpl implements JobService {
         // 判断常驻任务
         Job job = updateJobResident(jobRequestVO);
         job.setBucketIndex(HashUtil.bkdrHash(jobRequestVO.getGroupName() + jobRequestVO.getJobName())
-            % systemProperties.getBucketTotal());
-        calculateNextTriggerAt(jobRequestVO, LocalDateTime.now());
+                % systemProperties.getBucketTotal());
+        job.setNextTriggerAt(calculateNextTriggerAt(jobRequestVO, LocalDateTime.now()));
         return 1 == jobMapper.insert(job);
     }
 
@@ -148,17 +127,17 @@ public class JobServiceImpl implements JobService {
         Job updateJob = updateJobResident(jobRequestVO);
         // 非常驻任务 > 非常驻任务
         if (Objects.equals(job.getResident(), StatusEnum.NO.getStatus()) && Objects.equals(updateJob.getResident(),
-            StatusEnum.NO.getStatus())) {
+                StatusEnum.NO.getStatus())) {
             updateJob.setNextTriggerAt(calculateNextTriggerAt(jobRequestVO, LocalDateTime.now()));
         } else if (Objects.equals(job.getResident(), StatusEnum.YES.getStatus()) && Objects.equals(
-            updateJob.getResident(), StatusEnum.NO.getStatus())) {
+                updateJob.getResident(), StatusEnum.NO.getStatus())) {
             // 常驻任务的触发时间
             LocalDateTime time = Optional.ofNullable(ResidentTaskCache.get(jobRequestVO.getId()))
-                .orElse(LocalDateTime.now());
+                    .orElse(LocalDateTime.now());
             updateJob.setNextTriggerAt(calculateNextTriggerAt(jobRequestVO, time));
             // 老的是不是常驻任务 新的是常驻任务 需要使用当前时间计算下次触发时间
         } else if (Objects.equals(job.getResident(), StatusEnum.NO.getStatus()) && Objects.equals(
-            updateJob.getResident(), StatusEnum.YES.getStatus())) {
+                updateJob.getResident(), StatusEnum.YES.getStatus())) {
             updateJob.setNextTriggerAt(LocalDateTime.now());
         }
 
@@ -166,29 +145,23 @@ public class JobServiceImpl implements JobService {
     }
 
     private static LocalDateTime calculateNextTriggerAt(final JobRequestVO jobRequestVO, LocalDateTime time) {
-        WaitStrategy waitStrategy = WaitStrategyEnum.getWaitStrategy(jobRequestVO.getTriggerType());
-        WaitStrategyContext waitStrategyContext = new WaitStrategyContext();
-        waitStrategyContext.setTriggerType(jobRequestVO.getTriggerType());
+        WaitStrategy waitStrategy = WaitStrategies.WaitStrategyEnum.getWaitStrategy(jobRequestVO.getTriggerType());
+        WaitStrategies.WaitStrategyContext waitStrategyContext = new WaitStrategies.WaitStrategyContext();
         waitStrategyContext.setTriggerInterval(jobRequestVO.getTriggerInterval());
         waitStrategyContext.setNextTriggerAt(time);
-        return waitStrategy.computeRetryTime(waitStrategyContext);
+        return waitStrategy.computeTriggerTime(waitStrategyContext);
     }
 
     @Override
     public Job updateJobResident(JobRequestVO jobRequestVO) {
         Job job = JobConverter.INSTANCE.toJob(jobRequestVO);
         job.setResident(StatusEnum.NO.getStatus());
-        if (jobRequestVO.getTriggerType() == WaitStrategyEnum.FIXED.getTriggerType()) {
+        if (jobRequestVO.getTriggerType() == WaitStrategies.WaitStrategyEnum.FIXED.getType()) {
             if (Integer.parseInt(jobRequestVO.getTriggerInterval()) < 10) {
                 job.setResident(StatusEnum.YES.getStatus());
             }
-        } else if (jobRequestVO.getTriggerType() == WaitStrategyEnum.CRON.getTriggerType()) {
-            List<String> timeByCron = getTimeByCron(jobRequestVO.getTriggerInterval());
-            LocalDateTime first = LocalDateTime.parse(timeByCron.get(0), dateTimeFormatter);
-            LocalDateTime second = LocalDateTime.parse(timeByCron.get(1), dateTimeFormatter);
-            Duration duration = Duration.between(first, second);
-            long milliseconds = duration.toMillis();
-            if (milliseconds < 10 * 1000) {
+        } else if (jobRequestVO.getTriggerType() == WaitStrategies.WaitStrategyEnum.CRON.getType()) {
+            if (CronUtils.getExecuteInterval(jobRequestVO.getTriggerInterval()) < 10 * 1000) {
                 job.setResident(StatusEnum.YES.getStatus());
             }
         } else {

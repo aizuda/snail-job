@@ -2,23 +2,22 @@ package com.aizuda.easy.retry.server.job.task.support.dispatch;
 
 import akka.actor.AbstractActor;
 import cn.hutool.core.lang.Assert;
-import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.server.common.WaitStrategy;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
+import com.aizuda.easy.retry.server.common.strategy.WaitStrategies;
 import com.aizuda.easy.retry.server.job.task.dto.JobTimerTaskDTO;
 import com.aizuda.easy.retry.server.job.task.dto.TaskExecuteDTO;
 import com.aizuda.easy.retry.server.job.task.support.JobExecutor;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
-import com.aizuda.easy.retry.server.job.task.support.WaitStrategy;
 import com.aizuda.easy.retry.server.job.task.support.cache.ResidentTaskCache;
 import com.aizuda.easy.retry.server.job.task.support.executor.JobExecutorContext;
 import com.aizuda.easy.retry.server.job.task.support.executor.JobExecutorFactory;
-import com.aizuda.easy.retry.server.job.task.support.strategy.WaitStrategies;
 import com.aizuda.easy.retry.server.job.task.support.timer.JobTimerWheel;
 import com.aizuda.easy.retry.server.job.task.support.timer.ResidentJobTimerTask;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobMapper;
@@ -38,7 +37,6 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.CollectionUtils;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -154,20 +152,18 @@ public class JobExecutorActor extends AbstractActor {
             ResidentJobTimerTask timerTask = new ResidentJobTimerTask(jobTimerTaskDTO, job);
             WaitStrategy waitStrategy = WaitStrategies.WaitStrategyEnum.getWaitStrategy(job.getTriggerType());
 
-            LocalDateTime preTriggerAt = ResidentTaskCache.get(job.getId());
-            if (Objects.isNull(preTriggerAt) || preTriggerAt.isBefore(job.getNextTriggerAt())) {
+            Long preTriggerAt = ResidentTaskCache.get(job.getId());
+            if (Objects.isNull(preTriggerAt) || preTriggerAt < job.getNextTriggerAt()) {
                 preTriggerAt = job.getNextTriggerAt();
             }
 
             WaitStrategies.WaitStrategyContext waitStrategyContext = new WaitStrategies.WaitStrategyContext();
-            waitStrategyContext.setTriggerType(job.getTriggerType());
             waitStrategyContext.setTriggerInterval(job.getTriggerInterval());
             waitStrategyContext.setNextTriggerAt(preTriggerAt);
-            LocalDateTime nextTriggerAt = waitStrategy.computeRetryTime(waitStrategyContext);
+            Long nextTriggerAt = waitStrategy.computeTriggerTime(waitStrategyContext);
 
             // 获取时间差的毫秒数
-            Duration duration = Duration.between(preTriggerAt, nextTriggerAt);
-            long milliseconds = duration.toMillis();
+            long milliseconds = nextTriggerAt - preTriggerAt;
 
             log.info("常驻任务监控. 任务时间差:[{}] 取余:[{}]", milliseconds, System.currentTimeMillis() % 1000);
             job.setNextTriggerAt(nextTriggerAt);

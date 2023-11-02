@@ -4,13 +4,13 @@ import akka.actor.ActorRef;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.retry.task.support.RetryContext;
-import com.aizuda.easy.retry.server.retry.task.support.WaitStrategy;
+import com.aizuda.easy.retry.server.common.WaitStrategy;
 import com.aizuda.easy.retry.server.retry.task.support.context.CallbackRetryContext;
 import com.aizuda.easy.retry.server.retry.task.support.retry.RetryBuilder;
 import com.aizuda.easy.retry.server.retry.task.support.retry.RetryExecutor;
 import com.aizuda.easy.retry.server.retry.task.support.strategy.FilterStrategies;
 import com.aizuda.easy.retry.server.retry.task.support.strategy.StopStrategies;
-import com.aizuda.easy.retry.server.retry.task.support.strategy.WaitStrategies;
+import com.aizuda.easy.retry.server.common.strategy.WaitStrategies;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
 import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
 import org.springframework.stereotype.Component;
@@ -62,7 +62,7 @@ public class CallbackTaskExecutor extends AbstractTaskExecutor {
 
     private WaitStrategy getWaitWaitStrategy() {
         // 回调失败每15min重试一次
-        return WaitStrategies.WaitStrategyEnum.getWaitStrategy(WaitStrategies.WaitStrategyEnum.FIXED.getBackOff());
+        return WaitStrategies.WaitStrategyEnum.getWaitStrategy(WaitStrategies.WaitStrategyEnum.FIXED.getType());
     }
 
     @Override

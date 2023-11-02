@@ -66,7 +66,7 @@
           </a-tag>
         </a-descriptions-item>
         <a-descriptions-item label="参数" span="4">
-          {{ jobInfo.argsStr }}
+          {{ jobInfo.taskType === 3 ? JSON.parse(jobInfo.argsStr).map((item, index) => `分区:${index}=>${item}`).join('; ') : jobInfo.argsStr }}
         </a-descriptions-item>
         <a-descriptions-item label="描述" span="4">
           {{ jobInfo.extAttrs }}

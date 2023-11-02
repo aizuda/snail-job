@@ -6,7 +6,7 @@ import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.retry.task.support.FilterStrategy;
 import com.aizuda.easy.retry.server.retry.task.support.RetryContext;
 import com.aizuda.easy.retry.server.retry.task.support.StopStrategy;
-import com.aizuda.easy.retry.server.retry.task.support.WaitStrategy;
+import com.aizuda.easy.retry.server.common.WaitStrategy;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;

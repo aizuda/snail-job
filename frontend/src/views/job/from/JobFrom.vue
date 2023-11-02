@@ -357,7 +357,8 @@ export default {
       visible: false,
       count: 0,
       triggerTypeValue: '2',
-      taskTypeValue: '1'
+      taskTypeValue: '1',
+      argsStrValue: []
     }
   },
   beforeCreate () {
@@ -432,35 +433,28 @@ export default {
       const taskType = this.form.getFieldValue('taskType')
       if (taskType === '3') {
         this.visible = !this.visible
-
+        const { form } = this
         if (this.formType === 'create') {
           return
         }
 
-        const argsStr = this.form.getFieldValue('argsStr')
+        form.setFieldsValue({
+          argsStr: ''
+        })
 
-        console.log(argsStr.includes('#=@'))
-        if (!argsStr.includes('#=@')) {
+        console.log(this.argsStrValue)
+        if (this.argsStrValue.length === 0) {
           return
         }
 
         // 将字符串分割成键值对数组
-        const keyValuePairs = argsStr.split('#;@')
-        console.log(keyValuePairs)
-        const restoredArray = keyValuePairs.map(pair => {
-          const [index, value] = pair.split('#=@')
-          console.log(value)
+        const keys = this.argsStrValue.map((item, index) => {
           this.count++
-          return Number.parseInt(index)
+          this.dynamicForm.getFieldDecorator(`sharding[${index}]`, { initialValue: item, preserve: true })
+          return index
         })
 
-        this.dynamicForm.getFieldDecorator('keys', { initialValue: restoredArray, preserve: true })
-
-        keyValuePairs.map(pair => {
-          const [index, value] = pair.split('#=@')
-          this.dynamicForm.getFieldDecorator(`sharding[${index}]`, { initialValue: value, preserve: true })
-          return value
-        })
+        this.dynamicForm.getFieldDecorator('keys', { initialValue: keys, preserve: true })
       }
     },
     getCron (cron) {
@@ -472,13 +466,10 @@ export default {
       const { form } = this
       e.preventDefault()
       this.dynamicForm.validateFields((err, values) => {
-        console.log()
         if (!err) {
-          console.log(values)
-          const arr = values['sharding']
-          const formattedString = arr.map((item, index) => `${index}#=@${item}`).join('#;@')
+          this.argsStrValue = values['sharding']
           form.setFieldsValue({
-            argsStr: formattedString
+            argsStr: this.argsStrValue.map((item, index) => `分区:${index}=>${item}`).join('; ')
           })
           this.visible = false
         }
@@ -491,6 +482,10 @@ export default {
       e.preventDefault()
       this.form.validateFields((err, values) => {
         if (!err) {
+          if (this.taskTypeValue === '3') {
+            values['argsStr'] = this.argsStrValue
+          }
+
           if (this.formType === 'create') {
             saveJob(values).then(res => {
               this.$message.success('任务新增完成')
@@ -523,6 +518,8 @@ export default {
         formData.blockStrategy = formData.blockStrategy.toString()
         formData.triggerType = formData.triggerType.toString()
         this.triggerTypeValue = formData.triggerType
+        this.argsStrValue = JSON.parse(formData.argsStr)
+        formData.argsStr = this.argsStrValue.map((item, index) => `分区:${index}=>${item}`).join(';')
         form.setFieldsValue(formData)
       })
     },
