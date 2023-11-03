@@ -24,7 +24,7 @@ import static com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum.NOT
  *
  * @author www.byteblogs.com
  * @date 2023-09-25 22:20:53
- * @since
+ * @since 2.4.0
  */
 @Component(ActorGenerator.JOB_TASK_PREPARE_ACTOR)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)

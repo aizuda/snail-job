@@ -1,8 +1,6 @@
 package com.aizuda.easy.retry.server.common.util;
 
-import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.util.CronExpression;
-import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 
 import java.text.ParseException;
 import java.time.Duration;
@@ -30,7 +28,7 @@ public class CronUtils {
                 ZonedDateTime zdt = now.atZone(ZoneOffset.ofHours(8));
                 nextValidTime = new CronExpression(cron).getNextValidTimeAfter(Date.from(zdt.toInstant()));
                 now = LocalDateTime.ofEpochSecond(nextValidTime.getTime() / 1000, 0, ZoneOffset.ofHours(8));
-                list.add(SystemConstants.DATE_FORMAT.YYYYMMDDHHMMSS.format(now));
+                list.add(DateUtils.format(now, DateUtils.NORM_DATETIME_PATTERN));
             } catch (ParseException ignored) {
             }
         }
@@ -40,8 +38,8 @@ public class CronUtils {
 
     public static long getExecuteInterval(String cron) {
         List<String> executeTimeByCron = getExecuteTimeByCron(cron, 2);
-        LocalDateTime first = LocalDateTime.parse(executeTimeByCron.get(0), SystemConstants.DATE_FORMAT.YYYYMMDDHHMMSS);
-        LocalDateTime second = LocalDateTime.parse(executeTimeByCron.get(1), SystemConstants.DATE_FORMAT.YYYYMMDDHHMMSS);
+        LocalDateTime first = LocalDateTime.parse(executeTimeByCron.get(0), DateUtils.NORM_DATETIME_PATTERN);
+        LocalDateTime second = LocalDateTime.parse(executeTimeByCron.get(1), DateUtils.NORM_DATETIME_PATTERN);
         Duration duration = Duration.between(first, second);
         return duration.toMillis();
     }

@@ -9,6 +9,7 @@ import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.dto.PartitionTask;
 import com.aizuda.easy.retry.server.common.dto.ScanTask;
 import com.aizuda.easy.retry.server.common.handler.ClientNodeAllocateHandler;
+import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.server.common.util.PartitionTaskUtils;
 import com.aizuda.easy.retry.server.retry.task.dto.RetryPartitionTask;
 import com.aizuda.easy.retry.server.retry.task.support.RetryTaskConverter;
@@ -98,7 +99,7 @@ public abstract class AbstractScanGroup extends AbstractActor {
         AtomicInteger count = new AtomicInteger(0);
         long total = PartitionTaskUtils.process(
             startId -> listAvailableTasks(groupName, startId, taskActuatorScene().getTaskType().getType()),
-            partitionTasks -> processRetryPartitionTasks(partitionTasks, scanTask), partitionTasks -> {
+            partitionTasks -> processRetryPartitionTasks(partitionTasks), partitionTasks -> {
                 if (CollectionUtils.isEmpty(partitionTasks)) {
                     putLastId(scanTask.getGroupName(), 0L);
                     return Boolean.TRUE;
@@ -118,7 +119,7 @@ public abstract class AbstractScanGroup extends AbstractActor {
 
     }
 
-    private void processRetryPartitionTasks(List<? extends PartitionTask> partitionTasks, ScanTask scanTask) {
+    private void processRetryPartitionTasks(List<? extends PartitionTask> partitionTasks) {
 
         for (PartitionTask partitionTask : partitionTasks) {
             processRetryTask((RetryPartitionTask) partitionTask);
@@ -133,8 +134,8 @@ public abstract class AbstractScanGroup extends AbstractActor {
         retryTask.setId(partitionTask.getId());
         accessTemplate.getRetryTaskAccess().updateById(partitionTask.getGroupName(), retryTask);
 
-        long delay = partitionTask.getNextTriggerAt().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
-                - System.currentTimeMillis() - System.currentTimeMillis() % 500;
+        long nowMilli = DateUtils.toNowMilli();
+        long delay = DateUtils.toEpochMilli(partitionTask.getNextTriggerAt()) - nowMilli - nowMilli % 100;
         RetryTimerWheel.register(partitionTask.getGroupName(), partitionTask.getUniqueId(), timerTask(partitionTask),
                 delay,
                 TimeUnit.MILLISECONDS);

@@ -10,6 +10,7 @@ import com.aizuda.easy.retry.server.common.enums.DelayLevelEnum;
 import com.aizuda.easy.retry.server.common.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.generator.id.IdGenerator;
+import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.server.model.dto.RetryTaskDTO;
 import com.aizuda.easy.retry.server.retry.task.service.RetryDeadLetterConverter;
 import com.aizuda.easy.retry.server.retry.task.service.RetryService;
@@ -47,103 +48,6 @@ public class RetryServiceImpl implements RetryService {
 
     @Autowired
     private AccessTemplate accessTemplate;
-    @Autowired
-    private List<IdGenerator> idGeneratorList;
-    @Autowired
-    private RetryTaskLogMapper retryTaskLogMapper;
-
-    @Transactional
-    @Override
-    public Boolean reportRetry(RetryTaskDTO retryTaskDTO) {
-        LogUtils.info(log, "received report data. <|>{}<|>", JsonUtil.toJsonString(retryTaskDTO));
-
-        ConfigAccess<SceneConfig> sceneConfigAccess = accessTemplate.getSceneConfigAccess();
-        SceneConfig sceneConfig = sceneConfigAccess.getSceneConfigByGroupNameAndSceneName(retryTaskDTO.getGroupName(),
-            retryTaskDTO.getSceneName());
-        if (Objects.isNull(sceneConfig)) {
-
-            GroupConfig groupConfig = sceneConfigAccess.getGroupConfigByGroupName(retryTaskDTO.getGroupName());
-            if (Objects.isNull(groupConfig)) {
-                throw new EasyRetryServerException(
-                    "failed to report data, no group configuration found. groupName:[{}]", retryTaskDTO.getGroupName());
-            }
-
-            if (groupConfig.getInitScene().equals(StatusEnum.NO.getStatus())) {
-                throw new EasyRetryServerException(
-                    "failed to report data, no scene configuration found. groupName:[{}] sceneName:[{}]",
-                    retryTaskDTO.getGroupName(), retryTaskDTO.getSceneName());
-            } else {
-                // 若配置了默认初始化场景配置，则发现上报数据的时候未配置场景，默认生成一个场景
-                initScene(retryTaskDTO);
-            }
-        }
-
-        // 此处做幂等处理，避免客户端重复多次上报
-        TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();
-        long count =retryTaskAccess.count(retryTaskDTO.getGroupName(), new LambdaQueryWrapper<RetryTask>()
-            .eq(RetryTask::getIdempotentId, retryTaskDTO.getIdempotentId())
-            .eq(RetryTask::getGroupName, retryTaskDTO.getGroupName())
-            .eq(RetryTask::getSceneName, retryTaskDTO.getSceneName())
-            .eq(RetryTask::getRetryStatus, RetryStatusEnum.RUNNING.getStatus())
-        );
-        if (0 < count) {
-            LogUtils.warn(log, "interrupted reporting in retrying task. [{}]", JsonUtil.toJsonString(retryTaskDTO));
-            return Boolean.TRUE;
-        }
-
-        LocalDateTime now = LocalDateTime.now();
-        RetryTask retryTask = RetryTaskConverter.INSTANCE.toRetryTask(retryTaskDTO);
-        retryTask.setUniqueId(getIdGenerator(retryTaskDTO.getGroupName()));
-        retryTask.setTaskType(TaskTypeEnum.RETRY.getType());
-        retryTask.setCreateDt(now);
-        retryTask.setUpdateDt(now);
-
-        if (StrUtil.isBlank(retryTask.getExtAttrs())) {
-            retryTask.setExtAttrs(StrUtil.EMPTY);
-        }
-
-        retryTask.setNextTriggerAt(
-            WaitStrategies.randomWait(1, TimeUnit.SECONDS, 60, TimeUnit.SECONDS).computeTriggerTime(null));
-
-        Assert.isTrue(1 == retryTaskAccess.insert(retryTaskDTO.getGroupName(), retryTask),
-            () -> new EasyRetryServerException("failed to report data"));
-
-        // 初始化日志
-        RetryTaskLog retryTaskLog = RetryTaskLogConverter.INSTANCE.toRetryTask(retryTask);
-        retryTaskLog.setTaskType(TaskTypeEnum.RETRY.getType());
-        retryTaskLog.setCreateDt(now);
-        Assert.isTrue(1 == retryTaskLogMapper.insert(retryTaskLog),
-            () -> new EasyRetryServerException("新增重试日志失败"));
-
-        return Boolean.TRUE;
-    }
-
-    /**
-     * 若配置了默认初始化场景配置，则发现上报数据的时候未配置场景，默认生成一个场景 backOff(退避策略): 等级策略 maxRetryCount(最大重试次数): 26 triggerInterval(间隔时间): see:
-     * {@link DelayLevelEnum}
-     *
-     * @param retryTaskDTO 重试上报DTO
-     */
-    private void initScene(final RetryTaskDTO retryTaskDTO) {
-
-        SceneConfig sceneConfig = new SceneConfig();
-        sceneConfig.setGroupName(retryTaskDTO.getGroupName());
-        sceneConfig.setSceneName(retryTaskDTO.getSceneName());
-        sceneConfig.setSceneStatus(StatusEnum.YES.getStatus());
-        sceneConfig.setBackOff(WaitStrategies.WaitStrategyEnum.DELAY_LEVEL.getType());
-        sceneConfig.setMaxRetryCount(DelayLevelEnum._21.getLevel());
-        sceneConfig.setDescription("自动初始化场景");
-
-        Assert.isTrue(1 == accessTemplate.getSceneConfigAccess().insert(sceneConfig),
-            () -> new EasyRetryServerException("init scene error"));
-    }
-
-    @Transactional
-    @Override
-    public Boolean batchReportRetry(List<RetryTaskDTO> retryTaskDTOList) {
-        retryTaskDTOList.forEach(this::reportRetry);
-        return Boolean.TRUE;
-    }
 
     @Transactional
     @Override
@@ -250,21 +154,4 @@ public class RetryServiceImpl implements RetryService {
             () -> new EasyRetryServerException("删除重试数据失败 [{}]", JsonUtil.toJsonString(retryTasks)));
     }
 
-    /**
-     * 获取分布式id
-     *
-     * @param groupName 组id
-     * @return 分布式id
-     */
-    private String getIdGenerator(String groupName) {
-
-        GroupConfig groupConfig = accessTemplate.getGroupConfigAccess().getGroupConfigByGroupName(groupName);
-        for (final IdGenerator idGenerator : idGeneratorList) {
-            if (idGenerator.supports(groupConfig.getIdGeneratorMode())) {
-                return idGenerator.idGenerator(groupName);
-            }
-        }
-
-        throw new EasyRetryServerException("id generator mode not configured. [{}]", groupName);
-    }
 }

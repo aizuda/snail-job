@@ -3,10 +3,13 @@ package com.aizuda.easy.retry.server.retry.task.support.handler;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
+import com.aizuda.easy.retry.server.common.WaitStrategy;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
-import com.aizuda.easy.retry.server.common.util.DateUtil;
+import com.aizuda.easy.retry.server.common.strategy.WaitStrategies.WaitStrategyContext;
+import com.aizuda.easy.retry.server.common.strategy.WaitStrategies.WaitStrategyEnum;
+import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.server.retry.task.support.RetryTaskConverter;
 import com.aizuda.easy.retry.server.retry.task.support.RetryTaskLogConverter;
 import com.aizuda.easy.retry.server.common.strategy.WaitStrategies;
@@ -64,8 +67,13 @@ public class CallbackRetryTaskHandler {
         callbackRetryTask.setCreateDt(LocalDateTime.now());
         callbackRetryTask.setUpdateDt(LocalDateTime.now());
 
-        Long triggerTime = WaitStrategies.randomWait(1, TimeUnit.SECONDS, 60, TimeUnit.SECONDS).computeTriggerTime(null);
-        callbackRetryTask.setNextTriggerAt(DateUtil.toLocalDateTime(Instant.ofEpochMilli(triggerTime)));
+        long triggerInterval = systemProperties.getCallback().getTriggerInterval();
+        WaitStrategy waitStrategy = WaitStrategyEnum.getWaitStrategy(WaitStrategyEnum.FIXED.getType());
+        WaitStrategyContext waitStrategyContext = new WaitStrategyContext();
+        waitStrategyContext.setNextTriggerAt(DateUtils.toNowMilli());
+        waitStrategyContext.setTriggerInterval(String.valueOf(triggerInterval));
+
+        callbackRetryTask.setNextTriggerAt(DateUtils.toLocalDateTime(waitStrategy.computeTriggerTime(waitStrategyContext)));
 
         Assert.isTrue(1 == accessTemplate.getRetryTaskAccess()
                         .insert(callbackRetryTask.getGroupName(), callbackRetryTask),

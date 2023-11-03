@@ -6,12 +6,16 @@ import com.aizuda.easy.retry.client.model.GenerateRetryIdempotentIdDTO;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
+import com.aizuda.easy.retry.server.common.WaitStrategy;
 import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
 import com.aizuda.easy.retry.server.common.client.RequestBuilder;
 import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.common.enums.TaskGeneratorScene;
 import com.aizuda.easy.retry.server.common.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
+import com.aizuda.easy.retry.server.common.strategy.WaitStrategies.WaitStrategyContext;
+import com.aizuda.easy.retry.server.common.strategy.WaitStrategies.WaitStrategyEnum;
+import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.server.model.dto.RetryTaskDTO;
 import com.aizuda.easy.retry.server.retry.task.client.RetryRpcClient;
 import com.aizuda.easy.retry.server.retry.task.generator.task.TaskContext;
@@ -139,7 +143,7 @@ public class RetryTaskServiceImpl implements RetryTaskService {
 
         RetryStatusEnum retryStatusEnum = RetryStatusEnum.getByStatus(retryTaskUpdateStatusRequestVO.getRetryStatus());
         if (Objects.isNull(retryStatusEnum)) {
-            throw new EasyRetryServerException("重试状态错误");
+            throw new EasyRetryServerException("重试状态错误. [{}]", retryTaskUpdateStatusRequestVO.getRetryStatus());
         }
 
         TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();
@@ -154,8 +158,15 @@ public class RetryTaskServiceImpl implements RetryTaskService {
 
         // 若恢复重试则需要重新计算下次触发时间
         if (RetryStatusEnum.RUNNING.getStatus().equals(retryStatusEnum.getStatus())) {
-            retryTask.setNextTriggerAt(
-                    WaitStrategies.randomWait(1, TimeUnit.SECONDS, 60, TimeUnit.SECONDS).computeTriggerTime(null));
+
+            SceneConfig sceneConfig = accessTemplate.getSceneConfigAccess()
+                .getSceneConfigByGroupNameAndSceneName(retryTask.getGroupName(), retryTask.getSceneName());
+            WaitStrategyContext waitStrategyContext = new WaitStrategyContext();
+            waitStrategyContext.setNextTriggerAt(DateUtils.toNowMilli());
+            waitStrategyContext.setTriggerInterval(sceneConfig.getTriggerInterval());
+            waitStrategyContext.setDelayLevel(retryTask.getRetryCount() + 1);
+            WaitStrategy waitStrategy = WaitStrategyEnum.getWaitStrategy(sceneConfig.getBackOff());
+            retryTask.setNextTriggerAt(DateUtils.toLocalDateTime(waitStrategy.computeTriggerTime(waitStrategyContext)));
         }
 
         if (RetryStatusEnum.FINISH.getStatus().equals(retryStatusEnum.getStatus())) {
@@ -163,7 +174,7 @@ public class RetryTaskServiceImpl implements RetryTaskService {
             RetryTaskLogMessage retryTaskLogMessage = new RetryTaskLogMessage();
             retryTaskLogMessage.setUniqueId(retryTask.getUniqueId());
             retryTaskLogMessage.setGroupName(retryTask.getGroupName());
-            retryTaskLogMessage.setMessage("页面操作完成");
+            retryTaskLogMessage.setMessage("手动操作完成");
             retryTaskLogMessage.setCreateDt(LocalDateTime.now());
             retryTaskLogMessageMapper.insert(retryTaskLogMessage);
 

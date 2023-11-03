@@ -2,7 +2,7 @@ package com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.scan;
 
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
-import com.aizuda.easy.retry.server.common.util.DateUtil;
+import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.server.retry.task.dto.RetryPartitionTask;
 import com.aizuda.easy.retry.server.common.WaitStrategy;
 import com.aizuda.easy.retry.server.retry.task.support.dispatch.task.TaskExecutorSceneEnum;
@@ -17,7 +17,6 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -71,12 +70,12 @@ public class ScanRetryTaskActor extends AbstractScanGroup {
             nextTriggerAt = now;
         }
 
-        waitStrategyContext.setNextTriggerAt(DateUtil.toEpochMilli(nextTriggerAt));
+        waitStrategyContext.setNextTriggerAt(DateUtils.toEpochMilli(nextTriggerAt));
         waitStrategyContext.setTriggerInterval(sceneConfig.getTriggerInterval());
         waitStrategyContext.setDelayLevel(partitionTask.getRetryCount() + 1);
         // 更新触发时间, 任务进入时间轮
         WaitStrategy waitStrategy = WaitStrategyEnum.getWaitStrategy(sceneConfig.getBackOff());
-        return DateUtil.toEpochMilli(waitStrategy.computeTriggerTime(waitStrategyContext));
+        return DateUtils.toLocalDateTime(waitStrategy.computeTriggerTime(waitStrategyContext));
     }
 
     @Override

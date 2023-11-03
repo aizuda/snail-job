@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.scan;
 
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
+import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.server.retry.task.dto.RetryPartitionTask;
 import com.aizuda.easy.retry.server.common.WaitStrategy;
 import com.aizuda.easy.retry.server.retry.task.support.dispatch.task.TaskExecutorSceneEnum;
@@ -64,7 +65,7 @@ public class ScanCallbackTaskActor extends AbstractScanGroup {
         waitStrategyContext.setTriggerInterval(String.valueOf(triggerInterval));
 
         // 更新触发时间, 任务进入时间轮
-        return waitStrategy.computeTriggerTime(waitStrategyContext);
+        return DateUtils.toLocalDateTime(waitStrategy.computeTriggerTime(waitStrategyContext));
     }
 
     @Override

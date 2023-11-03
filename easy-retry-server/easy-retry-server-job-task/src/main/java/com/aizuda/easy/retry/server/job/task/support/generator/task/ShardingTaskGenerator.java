@@ -4,6 +4,7 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.JobTaskStatusEnum;
+import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
 import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
@@ -54,22 +55,33 @@ public class ShardingTaskGenerator extends AbstractJobTaskGenerator {
         }
 
         String argsStr = context.getArgsStr();
-        Map<String, String> split = Splitter.on(SystemConstants.JOB_SHARDING_ARGS_SEPARATOR).omitEmptyStrings().withKeyValueSeparator(SystemConstants.JOB_SHARDING_VALUE_SEPARATOR).split(argsStr);
+        if (StrUtil.isBlank(argsStr)) {
+            log.error("切片参数为空. jobId:[{}]", context.getJobId());
+            return Lists.newArrayList();
+        }
+
+        List<String> argsStrs;
+        try {
+            argsStrs = JsonUtil.parseList(argsStr, String.class);
+        } catch (Exception e) {
+            log.error("切片参数解析失败. jobId:[{}]", context.getJobId(), e);
+            return Lists.newArrayList();
+        }
 
         List<RegisterNodeInfo> nodeInfoList = new ArrayList<>(serverNodes);
-        List<JobTask> jobTasks = new ArrayList<>(split.size());
-        split.forEach((key, value) -> {
-            RegisterNodeInfo registerNodeInfo = nodeInfoList.get(Integer.parseInt(key) % serverNodes.size());
+        List<JobTask> jobTasks = new ArrayList<>(argsStrs.size());
+        for (int index = 0; index < argsStrs.size(); index++) {
+            RegisterNodeInfo registerNodeInfo = nodeInfoList.get(index % serverNodes.size());
             // 新增任务实例
             JobTask jobTask = JobTaskConverter.INSTANCE.toJobTaskInstance(context);
             jobTask.setClientInfo(ClientInfoUtils.generate(registerNodeInfo));
             jobTask.setArgsType(context.getArgsType());
-            jobTask.setArgsStr(value);
+            jobTask.setArgsStr(argsStrs.get(index));
             jobTask.setTaskStatus(JobTaskStatusEnum.RUNNING.getStatus());
             jobTask.setResultMessage(Optional.ofNullable(jobTask.getResultMessage()).orElse(StrUtil.EMPTY));
             Assert.isTrue(1 == jobTaskMapper.insert(jobTask), () -> new EasyRetryServerException("新增任务实例失败"));
             jobTasks.add(jobTask);
-        });
+        }
 
         return jobTasks;
     }

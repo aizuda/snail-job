@@ -25,7 +25,7 @@ public class JobTaskBatchGeneratorContext {
     /**
      * 下次触发时间
      */
-    private LocalDateTime nextTriggerAt;
+    private Long nextTriggerAt;
 
     /**
      * 操作原因

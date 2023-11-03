@@ -282,7 +282,7 @@ CREATE TABLE `job_task_batch` (
     `job_id` bigint(20) NOT NULL COMMENT '任务id',
     `task_batch_status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '任务批次状态 0、失败 1、成功',
     `operation_reason` tinyint(4) NOT NULL DEFAULT '0' COMMENT '操作原因',
-    `execution_at` datetime DEFAULT NULL COMMENT '任务执行时间',
+    `execution_at`  bigint(13) NOT NULL DEFAULT '0'  COMMENT '任务执行时间',
     `create_dt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_dt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     `deleted` tinyint(4) NOT NULL DEFAULT '0' COMMENT '逻辑删除 1、删除',

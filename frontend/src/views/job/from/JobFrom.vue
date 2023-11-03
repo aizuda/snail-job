@@ -483,7 +483,7 @@ export default {
       this.form.validateFields((err, values) => {
         if (!err) {
           if (this.taskTypeValue === '3') {
-            values['argsStr'] = this.argsStrValue
+            values['argsStr'] = JSON.stringify(this.argsStrValue)
           }
 
           if (this.formType === 'create') {
@@ -518,8 +518,13 @@ export default {
         formData.blockStrategy = formData.blockStrategy.toString()
         formData.triggerType = formData.triggerType.toString()
         this.triggerTypeValue = formData.triggerType
-        this.argsStrValue = JSON.parse(formData.argsStr)
-        formData.argsStr = this.argsStrValue.map((item, index) => `分区:${index}=>${item}`).join(';')
+        this.taskTypeValue = formData.taskType
+
+        if (this.taskTypeValue === '3') {
+          this.argsStrValue = JSON.parse(formData.argsStr)
+          formData.argsStr = this.argsStrValue.map((item, index) => `分区:${index}=>${item}`).join(';')
+        }
+
         form.setFieldsValue(formData)
       })
     },

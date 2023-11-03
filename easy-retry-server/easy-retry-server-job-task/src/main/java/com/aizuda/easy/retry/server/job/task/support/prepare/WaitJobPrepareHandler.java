@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.server.job.task.support.prepare;
 
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
+import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.server.job.task.dto.JobTaskPrepareDTO;
 import com.aizuda.easy.retry.server.job.task.dto.JobTimerTaskDTO;
 import com.aizuda.easy.retry.server.job.task.support.timer.JobTimerWheel;
@@ -8,7 +9,6 @@ import com.aizuda.easy.retry.server.job.task.support.timer.JobTimerTask;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.time.ZoneId;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -36,8 +36,7 @@ public class WaitJobPrepareHandler extends AbstractJobPrePareHandler {
             log.info("存在待处理任务且时间轮中不存在 taskBatchId:[{}]", jobPrepareDTO.getTaskBatchId());
 
             // 进入时间轮
-            long delay = jobPrepareDTO.getNextTriggerAt().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
-                    - System.currentTimeMillis();
+            long delay = jobPrepareDTO.getNextTriggerAt() - DateUtils.toNowMilli();
             JobTimerTaskDTO jobTimerTaskDTO = new JobTimerTaskDTO();
             jobTimerTaskDTO.setTaskBatchId(jobPrepareDTO.getTaskBatchId());
             jobTimerTaskDTO.setJobId(jobPrepareDTO.getJobId());

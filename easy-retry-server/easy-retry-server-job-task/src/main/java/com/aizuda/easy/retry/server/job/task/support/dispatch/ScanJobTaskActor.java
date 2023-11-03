@@ -13,6 +13,7 @@ import com.aizuda.easy.retry.server.common.dto.PartitionTask;
 import com.aizuda.easy.retry.server.common.dto.ScanTask;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.strategy.WaitStrategies;
+import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.server.common.util.PartitionTaskUtils;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.server.job.task.dto.JobPartitionTask;
@@ -97,7 +98,7 @@ public class ScanJobTaskActor extends AbstractActor {
             triggerTask = Objects.isNull(nextTriggerAt);
             // 若出现常驻任务时间为null或者常驻任务的内存时间长期未更新, 刷新为now
             long now = System.currentTimeMillis();
-            if (Objects.isNull(nextTriggerAt) || (nextTriggerAt + SystemConstants.SCHEDULE_PERIOD * 1000) < now) {
+            if (Objects.isNull(nextTriggerAt) || (nextTriggerAt + DateUtils.toEpochMilli(SystemConstants.SCHEDULE_PERIOD)) < now) {
                 nextTriggerAt = now;
             }
         }
@@ -127,7 +128,7 @@ public class ScanJobTaskActor extends AbstractActor {
 
         long now = System.currentTimeMillis();
         long nextTriggerAt = partitionTask.getNextTriggerAt();
-        if ((nextTriggerAt + SystemConstants.SCHEDULE_PERIOD * 1000) < now) {
+        if ((nextTriggerAt + DateUtils.toEpochMilli(SystemConstants.SCHEDULE_PERIOD)) < now) {
             nextTriggerAt = now;
         }
 

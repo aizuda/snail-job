@@ -5,13 +5,14 @@ import com.aizuda.easy.retry.common.core.util.CronExpression;
 import com.aizuda.easy.retry.server.common.WaitStrategy;
 import com.aizuda.easy.retry.server.common.enums.DelayLevelEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
-import com.aizuda.easy.retry.server.common.util.DateUtil;
+import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.google.common.base.Preconditions;
 import lombok.Data;
 import lombok.Getter;
 
 import java.text.ParseException;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Objects;
 import java.util.Random;
@@ -47,6 +48,13 @@ public class WaitStrategies {
          */
         private Integer delayLevel;
 
+        public void setNextTriggerAt(final long nextTriggerAt) {
+            this.nextTriggerAt = nextTriggerAt;
+        }
+
+        public void setNextTriggerAt(final LocalDateTime nextTriggerAt) {
+            this.nextTriggerAt = DateUtils.toEpochMilli(nextTriggerAt);
+        }
     }
 
     @Getter
@@ -160,7 +168,7 @@ public class WaitStrategies {
 
         @Override
         public Long computeTriggerTime(WaitStrategyContext retryContext) {
-            return retryContext.getNextTriggerAt() + Integer.parseInt(retryContext.getTriggerInterval());
+            return retryContext.getNextTriggerAt() + DateUtils.toEpochMilli(Integer.parseInt(retryContext.getTriggerInterval()));
         }
     }
 
@@ -174,7 +182,7 @@ public class WaitStrategies {
 
             try {
                 Date nextValidTime = new CronExpression(context.getTriggerInterval()).getNextValidTimeAfter(new Date(context.getNextTriggerAt()));
-                return DateUtil.toEpochMilli(nextValidTime);
+                return DateUtils.toEpochMilli(nextValidTime);
             } catch (ParseException e) {
                 throw new EasyRetryServerException("解析CRON表达式异常 [{}]", context.getTriggerInterval(), e);
             }
@@ -215,7 +223,7 @@ public class WaitStrategies {
             Preconditions.checkArgument(maximum > minimum, "maximum must be > minimum but maximum is %d and minimum is", maximum, minimum);
 
             long t = Math.abs(RANDOM.nextLong()) % (maximum - minimum);
-            return (t + minimum + System.currentTimeMillis()) / 1000;
+            return (t + minimum + DateUtils.toNowMilli());
         }
     }
 }
