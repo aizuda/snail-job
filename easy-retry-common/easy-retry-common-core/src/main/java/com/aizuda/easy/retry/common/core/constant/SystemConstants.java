@@ -79,14 +79,6 @@ public interface SystemConstants {
                     "              |__/                   |__/ \n" +
                     " :: Easy Retry ::                     (v{})       \n";
 
-    interface DATE_FORMAT {
-        DateTimeFormatter YYYYMMDDHHMMSS = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    }
-
-    String JOB_SHARDING_VALUE_SEPARATOR = "#=@";
-
-    String JOB_SHARDING_ARGS_SEPARATOR = "#;@";
-
     /**
      * 调度时长
      */

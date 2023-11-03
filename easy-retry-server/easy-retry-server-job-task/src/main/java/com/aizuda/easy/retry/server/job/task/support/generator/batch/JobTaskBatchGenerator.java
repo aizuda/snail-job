@@ -4,6 +4,7 @@ import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
+import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.server.job.task.dto.JobTimerTaskDTO;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.easy.retry.server.job.task.support.timer.JobTimerTask;
@@ -59,8 +60,7 @@ public class JobTaskBatchGenerator {
         }
 
         // 进入时间轮
-        long delay = context.getNextTriggerAt().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
-                - System.currentTimeMillis();
+        long delay = context.getNextTriggerAt() - DateUtils.toNowMilli();
         JobTimerTaskDTO jobTimerTaskDTO = new JobTimerTaskDTO();
         jobTimerTaskDTO.setTaskBatchId(jobTaskBatch.getId());
         jobTimerTaskDTO.setGroupName(context.getGroupName());

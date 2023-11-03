@@ -42,7 +42,7 @@ public class JobBatchResponseDO {
     /**
      * 任务执行时间
      */
-    private LocalDateTime executionAt;
+    private Long executionAt;
 
     /**
      * 操作原因

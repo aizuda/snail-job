@@ -11,6 +11,7 @@ import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.strategy.WaitStrategies;
+import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.server.job.task.dto.JobTimerTaskDTO;
 import com.aizuda.easy.retry.server.job.task.dto.TaskExecuteDTO;
 import com.aizuda.easy.retry.server.job.task.support.JobExecutor;
@@ -37,7 +38,6 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.CollectionUtils;
 
-import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -129,7 +129,7 @@ public class JobExecutorActor extends AbstractActor {
 
         JobTaskBatch jobTaskBatch = new JobTaskBatch();
         jobTaskBatch.setId(taskExecute.getTaskBatchId());
-        jobTaskBatch.setExecutionAt(LocalDateTime.now());
+        jobTaskBatch.setExecutionAt(DateUtils.toNowMilli());
         jobTaskBatch.setTaskBatchStatus(taskStatus);
         jobTaskBatch.setOperationReason(operationReason);
         Assert.isTrue(1 == jobTaskBatchMapper.updateById(jobTaskBatch),
@@ -165,10 +165,10 @@ public class JobExecutorActor extends AbstractActor {
             // 获取时间差的毫秒数
             long milliseconds = nextTriggerAt - preTriggerAt;
 
-            log.info("常驻任务监控. 任务时间差:[{}] 取余:[{}]", milliseconds, System.currentTimeMillis() % 1000);
+            log.info("常驻任务监控. 任务时间差:[{}] 取余:[{}]", milliseconds, DateUtils.toNowMilli() % 1000);
             job.setNextTriggerAt(nextTriggerAt);
 
-            JobTimerWheel.register(jobTimerTaskDTO.getTaskBatchId(), timerTask, milliseconds - System.currentTimeMillis() % 1000, TimeUnit.MILLISECONDS);
+            JobTimerWheel.register(jobTimerTaskDTO.getTaskBatchId(), timerTask, milliseconds - DateUtils.toNowMilli() % 1000, TimeUnit.MILLISECONDS);
             ResidentTaskCache.refresh(job.getId(), nextTriggerAt);
         }
     }

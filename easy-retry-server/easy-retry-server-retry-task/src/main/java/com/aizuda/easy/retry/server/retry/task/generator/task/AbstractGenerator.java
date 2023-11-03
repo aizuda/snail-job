@@ -11,6 +11,7 @@ import com.aizuda.easy.retry.server.common.enums.DelayLevelEnum;
 import com.aizuda.easy.retry.server.common.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.generator.id.IdGenerator;
+import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.server.retry.task.generator.task.TaskContext.TaskInfo;
 import com.aizuda.easy.retry.server.retry.task.support.RetryTaskConverter;
 import com.aizuda.easy.retry.server.retry.task.support.RetryTaskLogConverter;
@@ -136,7 +137,7 @@ public abstract class AbstractGenerator implements TaskGenerator {
         waitStrategyContext.setTriggerInterval(sceneConfig.getTriggerInterval());
         waitStrategyContext.setDelayLevel(1);
         WaitStrategy waitStrategy = WaitStrategyEnum.getWaitStrategy(sceneConfig.getBackOff());
-        retryTask.setNextTriggerAt(waitStrategy.computeTriggerTime(waitStrategyContext));
+        retryTask.setNextTriggerAt(DateUtils.toLocalDateTime(waitStrategy.computeTriggerTime(waitStrategyContext)));
         waitInsertTasks.add(retryTask);
 
         // 初始化日志

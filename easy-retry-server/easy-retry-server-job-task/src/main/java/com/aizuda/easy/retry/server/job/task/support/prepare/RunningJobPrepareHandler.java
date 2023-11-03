@@ -3,6 +3,7 @@ package com.aizuda.easy.retry.server.job.task.support.prepare;
 import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
+import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.server.job.task.support.BlockStrategy;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.server.job.task.dto.JobTaskPrepareDTO;
@@ -15,8 +16,6 @@ import com.aizuda.easy.retry.server.job.task.support.handler.JobTaskBatchHandler
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.time.ZoneId;
 
 /**
  * 处理处于{@link JobTaskBatchStatusEnum::RUNNING}状态的任务
@@ -48,11 +47,11 @@ public class RunningJobPrepareHandler extends AbstractJobPrePareHandler {
             blockStrategy =  BlockStrategyEnum.CONCURRENCY.getBlockStrategy();
         } else {
             // 计算超时时间
-            long delay = System.currentTimeMillis() - prepare.getExecutionAt().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+            long delay = DateUtils.toNowMilli() - prepare.getExecutionAt();
 
             // 计算超时时间，到达超时时间中断任务
-            if (delay > prepare.getExecutorTimeout() * 1000) {
-                log.info("任务执行超时.taskBatchId:[{}] delay:[{}] executorTimeout:[{}]", prepare.getTaskBatchId(), delay, prepare.getExecutorTimeout() * 1000);
+            if (delay > DateUtils.toEpochMilli(prepare.getExecutorTimeout())) {
+                log.info("任务执行超时.taskBatchId:[{}] delay:[{}] executorTimeout:[{}]", prepare.getTaskBatchId(), delay, DateUtils.toEpochMilli(prepare.getExecutorTimeout()));
                 // 超时停止任务
                 JobTaskStopHandler instanceInterrupt = JobTaskStopFactory.getJobTaskStop(prepare.getTaskType());
                 TaskStopJobContext stopJobContext = JobTaskConverter.INSTANCE.toStopJobContext(prepare);

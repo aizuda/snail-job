@@ -65,7 +65,7 @@ public class BlockStrategies {
         /**
          * 下次触发时间
          */
-        private LocalDateTime nextTriggerAt;
+        private Long nextTriggerAt;
 
         private Integer operationReason;
 

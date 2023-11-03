@@ -3,6 +3,7 @@ package com.aizuda.easy.retry.server.common.generator.id;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.common.Lifecycle;
 import com.aizuda.easy.retry.server.common.enums.IdGeneratorMode;
+import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.SequenceAllocMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.SequenceAlloc;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -62,8 +63,6 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
      * 一个Segment维持时间为15分钟
      */
     private static final long SEGMENT_DURATION = 15 * 60 * 1000L;
-
-    private static final String TIME_FORMAT = "yyyyMMddHHmmssSSS";
 
     private ThreadPoolExecutor service = new ThreadPoolExecutor(5, 10, 60L, TimeUnit.SECONDS,
             new LinkedBlockingDeque<>(5000), new UpdateThreadFactory());
@@ -309,7 +308,7 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
 
     @Override
     public String idGenerator(String group) {
-        String time = LocalDateTime.now().format(DateTimeFormatter.ofPattern(TIME_FORMAT));
+        String time = DateUtils.format(DateUtils.toNowLocalDateTime(), DateUtils.PURE_DATETIME_MS_PATTERN);
         return time.concat(get(group));
     }
 

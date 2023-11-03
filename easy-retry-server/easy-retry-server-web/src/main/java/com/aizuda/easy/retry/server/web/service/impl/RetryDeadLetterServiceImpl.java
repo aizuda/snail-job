@@ -4,9 +4,13 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
 
+import com.aizuda.easy.retry.server.common.WaitStrategy;
 import com.aizuda.easy.retry.server.common.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.strategy.WaitStrategies;
+import com.aizuda.easy.retry.server.common.strategy.WaitStrategies.WaitStrategyContext;
+import com.aizuda.easy.retry.server.common.strategy.WaitStrategies.WaitStrategyEnum;
+import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.server.web.service.RetryDeadLetterService;
 import com.aizuda.easy.retry.server.web.service.convert.RetryDeadLetterResponseVOConverter;
 import com.aizuda.easy.retry.server.retry.task.support.RetryTaskConverter;
@@ -16,11 +20,13 @@ import com.aizuda.easy.retry.server.web.model.request.BatchRollBackRetryDeadLett
 import com.aizuda.easy.retry.server.web.model.request.RetryDeadLetterQueryVO;
 import com.aizuda.easy.retry.server.web.model.response.RetryDeadLetterResponseVO;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
+import com.aizuda.easy.retry.template.datasource.access.ConfigAccess;
 import com.aizuda.easy.retry.template.datasource.access.TaskAccess;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskLogMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryDeadLetter;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLog;
+import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
@@ -30,9 +36,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -76,17 +86,17 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
         }
 
         PageDTO<RetryDeadLetter> retryDeadLetterPageDTO = accessTemplate.getRetryDeadLetterAccess()
-                .listPage(queryVO.getGroupName(), pageDTO, retryDeadLetterLambdaQueryWrapper);
+            .listPage(queryVO.getGroupName(), pageDTO, retryDeadLetterLambdaQueryWrapper);
 
         return new PageResult<>(retryDeadLetterPageDTO,
-                RetryDeadLetterResponseVOConverter.INSTANCE.batchConvert(retryDeadLetterPageDTO.getRecords()));
+            RetryDeadLetterResponseVOConverter.INSTANCE.batchConvert(retryDeadLetterPageDTO.getRecords()));
     }
 
     @Override
     public RetryDeadLetterResponseVO getRetryDeadLetterById(String groupName, Long id) {
         TaskAccess<RetryDeadLetter> retryDeadLetterAccess = accessTemplate.getRetryDeadLetterAccess();
         RetryDeadLetter retryDeadLetter = retryDeadLetterAccess.one(groupName,
-                new LambdaQueryWrapper<RetryDeadLetter>().eq(RetryDeadLetter::getId, id));
+            new LambdaQueryWrapper<RetryDeadLetter>().eq(RetryDeadLetter::getId, id));
         return RetryDeadLetterResponseVOConverter.INSTANCE.convert(retryDeadLetter);
     }
 
@@ -98,27 +108,50 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
         List<Long> ids = rollBackRetryDeadLetterVO.getIds();
         TaskAccess<RetryDeadLetter> retryDeadLetterAccess = accessTemplate.getRetryDeadLetterAccess();
         List<RetryDeadLetter> retryDeadLetterList = retryDeadLetterAccess.list(groupName,
-                new LambdaQueryWrapper<RetryDeadLetter>().in(RetryDeadLetter::getId, ids));
+            new LambdaQueryWrapper<RetryDeadLetter>().in(RetryDeadLetter::getId, ids));
 
         Assert.notEmpty(retryDeadLetterList, () -> new EasyRetryServerException("数据不存在"));
 
+        ConfigAccess<SceneConfig> sceneConfigAccess = accessTemplate.getSceneConfigAccess();
+        Set<String> sceneNameSet = retryDeadLetterList.stream().map(RetryDeadLetter::getSceneName)
+            .collect(Collectors.toSet());
+        List<SceneConfig> sceneConfigs = sceneConfigAccess.list(new LambdaQueryWrapper<SceneConfig>()
+            .in(SceneConfig::getSceneName, sceneNameSet));
+
+        Map<String, SceneConfig> sceneConfigMap = sceneConfigs.stream().collect(Collectors.toMap((sceneConfig) ->
+            sceneConfig.getGroupName() + sceneConfig.getSceneName(), Function.identity()));
+
         List<RetryTask> waitRollbackList = new ArrayList<>();
         for (RetryDeadLetter retryDeadLetter : retryDeadLetterList) {
+            SceneConfig sceneConfig = sceneConfigMap.get(
+                retryDeadLetter.getGroupName() + retryDeadLetter.getSceneName());
+            Assert.notNull(sceneConfig, () -> new EasyRetryServerException("未查询到场景. [{}]", retryDeadLetter.getSceneName()));
+
             RetryTask retryTask = RetryTaskConverter.INSTANCE.toRetryTask(retryDeadLetter);
             retryTask.setRetryStatus(RetryStatusEnum.RUNNING.getStatus());
             retryTask.setTaskType(TaskTypeEnum.RETRY.getType());
-            retryTask.setNextTriggerAt(WaitStrategies.randomWait(1, TimeUnit.SECONDS, 60, TimeUnit.SECONDS).computeTriggerTime(null));
+
+            WaitStrategyContext waitStrategyContext = new WaitStrategyContext();
+            waitStrategyContext.setNextTriggerAt(LocalDateTime.now());
+            waitStrategyContext.setTriggerInterval(sceneConfig.getTriggerInterval());
+            waitStrategyContext.setDelayLevel(1);
+            WaitStrategy waitStrategy = WaitStrategyEnum.getWaitStrategy(sceneConfig.getBackOff());
+            retryTask.setNextTriggerAt(DateUtils.toLocalDateTime(waitStrategy.computeTriggerTime(waitStrategyContext)));
             retryTask.setCreateDt(LocalDateTime.now());
             waitRollbackList.add(retryTask);
         }
 
         TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();
-        Assert.isTrue(waitRollbackList.size() == retryTaskAccess.batchInsert(groupName, waitRollbackList), () -> new EasyRetryServerException("新增重试任务失败"));
+        Assert.isTrue(waitRollbackList.size() == retryTaskAccess.batchInsert(groupName, waitRollbackList),
+            () -> new EasyRetryServerException("新增重试任务失败"));
 
-        Set<Long> waitDelRetryDeadLetterIdSet = retryDeadLetterList.stream().map(RetryDeadLetter::getId).collect(Collectors.toSet());
-        Assert.isTrue(waitDelRetryDeadLetterIdSet.size() == retryDeadLetterAccess.delete(groupName, new LambdaQueryWrapper<RetryDeadLetter>()
-                .eq(RetryDeadLetter::getGroupName, groupName)
-                .in(RetryDeadLetter::getId, waitDelRetryDeadLetterIdSet)), () -> new EasyRetryServerException("删除死信队列数据失败"))
+        Set<Long> waitDelRetryDeadLetterIdSet = retryDeadLetterList.stream().map(RetryDeadLetter::getId)
+            .collect(Collectors.toSet());
+        Assert.isTrue(waitDelRetryDeadLetterIdSet.size() == retryDeadLetterAccess.delete(groupName,
+                new LambdaQueryWrapper<RetryDeadLetter>()
+                    .eq(RetryDeadLetter::getGroupName, groupName)
+                    .in(RetryDeadLetter::getId, waitDelRetryDeadLetterIdSet)),
+            () -> new EasyRetryServerException("删除死信队列数据失败"))
         ;
 
         // 变更日志的状态
@@ -127,9 +160,10 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
 
         Set<String> uniqueIdSet = waitRollbackList.stream().map(RetryTask::getUniqueId).collect(Collectors.toSet());
         int update = retryTaskLogMapper.update(retryTaskLog, new LambdaUpdateWrapper<RetryTaskLog>()
-                .in(RetryTaskLog::getUniqueId, uniqueIdSet)
-                .eq(RetryTaskLog::getGroupName, groupName));
-        Assert.isTrue(update == uniqueIdSet.size(), () -> new EasyRetryServerException("回滚日志状态失败, 可能原因: 日志信息缺失或存在多个相同uniqueId"));
+            .in(RetryTaskLog::getUniqueId, uniqueIdSet)
+            .eq(RetryTaskLog::getGroupName, groupName));
+        Assert.isTrue(update == uniqueIdSet.size(),
+            () -> new EasyRetryServerException("回滚日志状态失败, 可能原因: 日志信息缺失或存在多个相同uniqueId"));
 
         return update;
     }
@@ -138,8 +172,8 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
     public int batchDelete(BatchDeleteRetryDeadLetterVO deadLetterVO) {
         TaskAccess<RetryDeadLetter> retryDeadLetterAccess = accessTemplate.getRetryDeadLetterAccess();
         return retryDeadLetterAccess.delete(deadLetterVO.getGroupName(),
-                new LambdaQueryWrapper<RetryDeadLetter>()
-                        .eq(RetryDeadLetter::getGroupName, deadLetterVO.getGroupName())
-                        .in(RetryDeadLetter::getId, deadLetterVO.getIds()));
+            new LambdaQueryWrapper<RetryDeadLetter>()
+                .eq(RetryDeadLetter::getGroupName, deadLetterVO.getGroupName())
+                .in(RetryDeadLetter::getId, deadLetterVO.getIds()));
     }
 }

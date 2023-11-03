@@ -3,7 +3,6 @@ package com.aizuda.easy.retry.server.retry.task.support.schedule;
 import com.aizuda.easy.retry.common.core.alarm.Alarm;
 import com.aizuda.easy.retry.common.core.alarm.AlarmContext;
 import com.aizuda.easy.retry.common.core.alarm.EasyRetryAlarmFactory;
-import com.aizuda.easy.retry.common.core.constant.SystemConstants.DATE_FORMAT;
 import com.aizuda.easy.retry.common.core.enums.NotifySceneEnum;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
@@ -11,6 +10,7 @@ import com.aizuda.easy.retry.common.core.util.EnvironmentUtils;
 import com.aizuda.easy.retry.common.core.util.HostUtils;
 import com.aizuda.easy.retry.server.common.Lifecycle;
 import com.aizuda.easy.retry.server.common.schedule.AbstractSchedule;
+import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
 import com.aizuda.easy.retry.template.datasource.persistence.po.GroupConfig;
 import com.aizuda.easy.retry.template.datasource.persistence.po.NotifyConfig;
@@ -76,7 +76,7 @@ public class RetryTaskMoreThresholdAlarmSchedule extends AbstractSchedule implem
                         .text(retryTaskMoreThresholdTextMessageFormatter,
                             EnvironmentUtils.getActiveProfile(),
                             groupConfig.getGroupName(),
-                            LocalDateTime.now().format(DATE_FORMAT.YYYYMMDDHHMMSS),
+                            DateUtils.toNowFormat(DateUtils.NORM_DATETIME_PATTERN),
                             count)
                         .title("组:[{}])重试数据过多", groupConfig.getGroupName())
                         .notifyAttribute(notifyConfig.getNotifyAttribute());

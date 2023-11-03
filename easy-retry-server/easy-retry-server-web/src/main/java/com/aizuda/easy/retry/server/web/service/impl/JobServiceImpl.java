@@ -9,6 +9,7 @@ import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.strategy.WaitStrategies;
 import com.aizuda.easy.retry.server.common.util.CronUtils;
+import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.server.job.task.support.cache.ResidentTaskCache;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
 import com.aizuda.easy.retry.server.web.model.request.JobQueryVO;
@@ -112,7 +113,7 @@ public class JobServiceImpl implements JobService {
         Job job = updateJobResident(jobRequestVO);
         job.setBucketIndex(HashUtil.bkdrHash(jobRequestVO.getGroupName() + jobRequestVO.getJobName())
                 % systemProperties.getBucketTotal());
-        job.setNextTriggerAt(calculateNextTriggerAt(jobRequestVO, LocalDateTime.now()));
+        job.setNextTriggerAt(calculateNextTriggerAt(jobRequestVO, DateUtils.toNowMilli()));
         return 1 == jobMapper.insert(job);
     }
 
@@ -128,23 +129,23 @@ public class JobServiceImpl implements JobService {
         // 非常驻任务 > 非常驻任务
         if (Objects.equals(job.getResident(), StatusEnum.NO.getStatus()) && Objects.equals(updateJob.getResident(),
                 StatusEnum.NO.getStatus())) {
-            updateJob.setNextTriggerAt(calculateNextTriggerAt(jobRequestVO, LocalDateTime.now()));
+            updateJob.setNextTriggerAt(calculateNextTriggerAt(jobRequestVO, DateUtils.toNowMilli()));
         } else if (Objects.equals(job.getResident(), StatusEnum.YES.getStatus()) && Objects.equals(
                 updateJob.getResident(), StatusEnum.NO.getStatus())) {
             // 常驻任务的触发时间
-            LocalDateTime time = Optional.ofNullable(ResidentTaskCache.get(jobRequestVO.getId()))
-                    .orElse(LocalDateTime.now());
+            long time = Optional.ofNullable(ResidentTaskCache.get(jobRequestVO.getId()))
+                    .orElse(DateUtils.toNowMilli());
             updateJob.setNextTriggerAt(calculateNextTriggerAt(jobRequestVO, time));
             // 老的是不是常驻任务 新的是常驻任务 需要使用当前时间计算下次触发时间
         } else if (Objects.equals(job.getResident(), StatusEnum.NO.getStatus()) && Objects.equals(
                 updateJob.getResident(), StatusEnum.YES.getStatus())) {
-            updateJob.setNextTriggerAt(LocalDateTime.now());
+            updateJob.setNextTriggerAt(DateUtils.toNowMilli());
         }
 
         return 1 == jobMapper.updateById(updateJob);
     }
 
-    private static LocalDateTime calculateNextTriggerAt(final JobRequestVO jobRequestVO, LocalDateTime time) {
+    private static Long calculateNextTriggerAt(final JobRequestVO jobRequestVO, Long time) {
         WaitStrategy waitStrategy = WaitStrategies.WaitStrategyEnum.getWaitStrategy(jobRequestVO.getTriggerType());
         WaitStrategies.WaitStrategyContext waitStrategyContext = new WaitStrategies.WaitStrategyContext();
         waitStrategyContext.setTriggerInterval(jobRequestVO.getTriggerInterval());
