@@ -31,6 +31,8 @@ public class SceneConfig implements Serializable {
 
     private Integer routeKey;
 
+    private Integer executorTimeout;
+
     private LocalDateTime createDt;
 
     private LocalDateTime updateDt;

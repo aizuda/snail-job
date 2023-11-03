@@ -26,6 +26,7 @@ public class RequestBuilder<T, R> {
    private boolean failover;
    private int routeKey;
    private String allocKey;
+   private Integer executorTimeout;
 
 
     public static <T, R> RequestBuilder<T, R> newBuilder() {
@@ -42,10 +43,15 @@ public class RequestBuilder<T, R> {
         return this;
     }
 
-//    public RequestBuilder<T, R> groupName(String groupName) {
-//        this.groupName = groupName;
-//        return this;
-//    }
+    public RequestBuilder<T, R> executorTimeout(Integer executorTimeout) {
+        if (Objects.isNull(executorTimeout)) {
+            return this;
+        }
+
+        Assert.isTrue(executorTimeout > 0, () -> new EasyRetryServerException("executorTimeout can not less 0"));
+        this.executorTimeout = executorTimeout;
+        return this;
+    }
 
     public RequestBuilder<T, R> failRetry(boolean failRetry) {
         this.failRetry = failRetry;
@@ -101,7 +107,8 @@ public class RequestBuilder<T, R> {
         }
 
         RpcClientInvokeHandler clientInvokeHandler = new RpcClientInvokeHandler(
-                nodeInfo.getGroupName(), nodeInfo, failRetry, retryTimes, retryInterval, retryListener, routeKey, allocKey, failover);
+                nodeInfo.getGroupName(), nodeInfo, failRetry, retryTimes, retryInterval,
+            retryListener, routeKey, allocKey, failover, executorTimeout);
 
         return (T) Proxy.newProxyInstance(clintInterface.getClassLoader(),
             new Class[]{clintInterface}, clientInvokeHandler);

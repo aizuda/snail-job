@@ -145,6 +145,7 @@ public class ExecCallbackUnitActor extends AbstractActor {
                 .failover(Boolean.TRUE)
                 .routeKey(sceneConfig.getRouteKey())
                 .allocKey(sceneConfig.getSceneName())
+                .executorTimeout(sceneConfig.getExecutorTimeout())
                 .client(RetryRpcClient.class)
                 .build();
         return rpcClient.callback(retryCallbackDTO);

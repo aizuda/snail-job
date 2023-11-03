@@ -150,6 +150,7 @@ public class ExecUnitActor extends AbstractActor {
                 .failover(Boolean.TRUE)
                 .allocKey(retryTask.getSceneName())
                 .routeKey(sceneConfig.getRouteKey())
+                .executorTimeout(sceneConfig.getExecutorTimeout())
                 .client(RetryRpcClient.class)
                 .build();
 
