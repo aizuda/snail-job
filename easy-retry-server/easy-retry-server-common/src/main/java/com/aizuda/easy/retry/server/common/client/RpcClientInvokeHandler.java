@@ -7,7 +7,6 @@ import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.common.core.util.HostUtils;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
-import com.aizuda.easy.retry.server.common.allocate.client.ClientLoadBalanceManager.AllocationAlgorithmEnum;
 import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
 import com.aizuda.easy.retry.server.common.client.annotation.Body;
 import com.aizuda.easy.retry.server.common.client.annotation.Header;
@@ -22,7 +21,6 @@ import com.github.rholder.retry.Retryer;
 import com.github.rholder.retry.RetryerBuilder;
 import com.github.rholder.retry.StopStrategies;
 import com.github.rholder.retry.WaitStrategies;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -30,7 +28,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.OkHttp3ClientHttpRequestFactory;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientException;
@@ -70,11 +67,12 @@ public class RpcClientInvokeHandler implements InvocationHandler {
     private final boolean failover;
     private final Integer routeKey;
     private final String allocKey;
+    private final Integer executorTimeout;
 
     public RpcClientInvokeHandler(final String groupName, final RegisterNodeInfo registerNodeInfo,
         final boolean failRetry, final int retryTimes,
         final int retryInterval, final RetryListener retryListener, final Integer routeKey, final String allocKey,
-        final boolean failover) {
+        final boolean failover, final Integer executorTimeout) {
         this.groupName = groupName;
         this.hostId = registerNodeInfo.getHostId();
         this.hostPort = registerNodeInfo.getHostPort();
@@ -87,6 +85,7 @@ public class RpcClientInvokeHandler implements InvocationHandler {
         this.failover = failover;
         this.routeKey = routeKey;
         this.allocKey = allocKey;
+        this.executorTimeout = executorTimeout;
     }
 
     @Override
@@ -98,7 +97,7 @@ public class RpcClientInvokeHandler implements InvocationHandler {
             return doFailoverHandler(method, args, annotation);
         }
 
-        return requestRemote(method, args, annotation, 0);
+        return requestRemote(method, args, annotation, 1);
     }
 
     @NotNull
@@ -135,6 +134,11 @@ public class RpcClientInvokeHandler implements InvocationHandler {
             RestTemplate restTemplate = SpringContext.CONTEXT.getBean(RestTemplate.class);
 
             Retryer<Result> retryer = buildResultRetryer();
+
+            HttpHeaders requestHeaders = parasResult.requestHeaders;
+            if (Objects.nonNull(executorTimeout)) {
+                requestHeaders.set(RequestInterceptor.TIMEOUT_TIME, String.valueOf(executorTimeout));
+            }
 
             Result result = retryer.call(() -> {
                 ResponseEntity<Result> response = restTemplate.exchange(

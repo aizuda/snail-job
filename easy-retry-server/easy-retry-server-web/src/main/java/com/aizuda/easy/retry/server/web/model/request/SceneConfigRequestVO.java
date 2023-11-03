@@ -50,7 +50,13 @@ public class SceneConfigRequestVO {
      */
     @Max(message = "最大60000毫秒", value = SystemConstants.DEFAULT_DDL)
     @Min(message = "最小100ms", value = 100)
+    @NotNull(message = "调用链超时不能为空")
     private Long deadlineRequest;
+
+    @Max(message = "最大60(秒)", value = 60)
+    @Min(message = "最小1(秒)", value = 1)
+    @NotNull(message = "执行超时不能为空")
+    private Integer executorTimeout;
 
     /**
      * 是否删除

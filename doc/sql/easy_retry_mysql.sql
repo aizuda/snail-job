@@ -135,6 +135,7 @@ CREATE TABLE `scene_config`
     `back_off`         tinyint(4) NOT NULL DEFAULT '1' COMMENT '1、默认等级 2、固定间隔时间 3、CRON 表达式',
     `trigger_interval` varchar(16)  NOT NULL DEFAULT '' COMMENT '间隔时长',
     `deadline_request` bigint(20) unsigned NOT NULL DEFAULT '60000' COMMENT 'Deadline Request 调用链超时 单位毫秒',
+    `executor_timeout` int(11) unsigned NOT NULL DEFAULT '5' COMMENT '任务执行超时时间，单位秒',
     `route_key`         tinyint(4) NOT NULL DEFAULT '4' COMMENT '路由策略',
     `description`      varchar(256) NOT NULL DEFAULT '' COMMENT '描述',
     `create_dt`        datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
