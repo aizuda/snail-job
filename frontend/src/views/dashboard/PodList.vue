@@ -36,17 +36,30 @@
       </span>
       <span slot="contextPath" slot-scope="text, record">
         <div v-if="record.nodeType === 1">
-          路径:
+          Path:
           <a-tag color="#108ee9" >
             {{ text }}
           </a-tag>
         </div>
 
         <div v-else>
-          组:
-          <a-tag color="pink" v-for="item in record.consumerGroup" :key="item" style="margin-bottom: 16px">
-            {{ item }}
-          </a-tag>
+          Bucket:
+          <a-popover placement="topLeft">
+            <template slot="content">
+              <a-tag color="pink" v-for="item in record.consumerBuckets" :key="item" style="margin-bottom: 16px">
+                {{ item }}
+              </a-tag>
+            </template>
+            <template slot="title">
+              <span>Bucket列表</span>
+            </template>
+            <a-tag color="pink" v-for="item in 5" :key="item" style="margin-bottom: 16px">
+              {{ record.consumerBuckets[item-1] }}
+            </a-tag>
+            <a-tag color="pink" style="margin-bottom: 16px" v-if="record.consumerBuckets.length > 5">
+              ...
+            </a-tag>
+          </a-popover>
         </div>
 
       </span>
@@ -107,6 +120,7 @@ export default {
           title: '路径/组',
           dataIndex: 'contextPath',
           scopedSlots: { customRender: 'contextPath' },
+          ellipsis: true,
           width: '22%'
         },
         {
@@ -118,7 +132,6 @@ export default {
       ],
       // 加载数据方法 必须为 Promise 对象
       loadData: parameter => {
-        console.log('loadData.parameter', parameter)
         return pods(Object.assign(parameter, this.queryParam))
           .then(res => {
             return res

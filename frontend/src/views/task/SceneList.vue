@@ -48,7 +48,7 @@
         :data="loadData"
         :alert="options.alert"
         :rowSelection="options.rowSelection"
-        :scroll="{ x: 1500 }"
+        :scroll="{ x: 2000 }"
       >
         <span slot="serial" slot-scope="text, record">
           {{ record.id }}
@@ -64,7 +64,18 @@
           </a-tag>
         </span>
         <span slot="triggerInterval" slot-scope="text">
-          {{ text ? text : '10s,15s,30s,35s,40s,50s,1m,2m,4m,6m,8m,10m,20m,40m,1h,2h,3h,4h,5h,6h,7h,8h,9h,10h,11h,12h' }}
+          <a-tooltip>
+            <template slot="title">
+              {{ text ? text : '10s,15s,30s,35s,40s,50s,1m,2m,4m,6m,8m,10m,20m,40m,1h,2h,3h,4h,5h,6h,7h,8h,9h,10h,11h,12h' }}
+            </template>
+            {{ text ? text : '10s,15s,30s,35s,40s,50s,1m,2m,4m,6m,8m,10m,20m,40m,1h,2h,3h,4h,5h,6h,7h,8h,9h,10h,11h,12h' }}
+          </a-tooltip>
+        </span>
+        <span slot="deadlineRequest" slot-scope="text">
+          {{ text }}(ms)
+        </span>
+        <span slot="executorTimeout" slot-scope="text">
+          {{ text }}(s)
         </span>
         <span slot="action" slot-scope="record">
           <template>
@@ -92,19 +103,19 @@ export default {
         {
           title: '场景名称',
           dataIndex: 'sceneName',
-          width: '15%'
+          width: '10%'
         },
         {
           title: '场景状态',
           dataIndex: 'sceneStatus',
-          width: '8%',
+          width: '10%',
           scopedSlots: { customRender: 'sceneStatus' }
         },
         {
           title: '退避策略',
           dataIndex: 'backOff',
           key: 'backOff',
-          width: '12%',
+          width: '10%',
           scopedSlots: { customRender: 'backOff' }
         },
         {
@@ -115,6 +126,14 @@ export default {
           scopedSlots: { customRender: 'maxRetryCount' }
         },
         {
+          title: '间隔时间',
+          dataIndex: 'triggerInterval',
+          key: 'triggerInterval',
+          ellipsis: true,
+          width: '10%',
+          scopedSlots: { customRender: 'triggerInterval' }
+        },
+        {
           title: '调用链超时时间',
           dataIndex: 'deadlineRequest',
           key: 'deadlineRequest',
@@ -122,18 +141,29 @@ export default {
           scopedSlots: { customRender: 'deadlineRequest' }
         },
         {
-          title: '间隔时间',
-          dataIndex: 'triggerInterval',
-          key: 'triggerInterval',
-          ellipsis: true,
-          width: '15%',
-          scopedSlots: { customRender: 'triggerInterval' }
+          title: '执行超时时间',
+          dataIndex: 'executorTimeout',
+          key: 'executorTimeout',
+          width: '10%',
+          scopedSlots: { customRender: 'executorTimeout' }
+        },
+        {
+          title: '创建时间',
+          dataIndex: 'createDt',
+          key: 'createDt',
+          width: '10%'
+        },
+        {
+          title: '更新时间',
+          dataIndex: 'updateDt',
+          key: 'updateDt',
+          width: '10%'
         },
         {
           title: '描述',
           dataIndex: 'description',
           key: 'description',
-          width: '18%',
+          width: '10%',
           scopedSlots: { customRender: 'description' }
         },
         {
@@ -148,44 +178,8 @@ export default {
       pagination: {},
       backOffLabels: enums.backOffLabels,
       sceneStatus: enums.sceneStatus,
-      triggerInterval: {
-        '1': {
-          placeholder: '',
-          tooltip: ''
-        },
-        '2': {
-          placeholder: '请输入固定间隔时间',
-          tooltip: '请输入固定间隔时间'
-        },
-        '3': {
-          placeholder: '请输入CRON表达式',
-          tooltip: '通过CRON表达式计算执行时间'
-        },
-        '4': {
-          placeholder: '请输入最大间隔时间',
-          tooltip: '随机生成范围在[0, x]内的延迟时间; 其中x代表最大间隔时间'
-        }
-      },
       // 高级搜索 展开/关闭
       advanced: false,
-      maxRetryCount: {
-        '1': {
-          placeholder: '请输入延迟等级(max:26)',
-          tooltip: '请输入延迟等级（max:26)'
-        },
-        '2': {
-          placeholder: '请输入最大重试次数',
-          tooltip: '请输入最大重试次数'
-        },
-        '3': {
-          placeholder: '请输入最大重试次数',
-          tooltip: '请输入最大重试次数'
-        },
-        '4': {
-          placeholder: '请输入最大重试次数',
-          tooltip: '请输入最大重试次数'
-        }
-      },
       queryParam: {},
       loadData: (parameter) => {
         return getScenePage(Object.assign(parameter, this.queryParam)).then((res) => {
@@ -216,16 +210,6 @@ export default {
     getAllGroupNameList().then((res) => {
       this.groupNameList = res.data
     })
-
-    const groupName = this.$route.query.groupName
-    if (groupName) {
-      this.fetch({
-          groupName: groupName,
-          size: 6,
-          page: 1
-        }
-      )
-    }
   },
   methods: {
     handleNew () {
@@ -233,179 +217,6 @@ export default {
     },
     handleEdit (record) {
       this.$router.push({ path: '/retry/scene/config', query: { id: record.id } })
-    },
-    reset () {
-      this.formData = []
-      this.data = []
-      const groupName = this.$route.query.groupName
-      if (groupName) {
-        this.fetch({
-            groupName: groupName,
-            size: 6,
-            page: 1
-          }
-        )
-      }
-    },
-    handleTableChange (pagination, filters, sorter) {
-      console.log(pagination)
-      const pager = { ...this.pagination }
-      pager.current = pagination.current
-      this.pagination = pager
-      this.fetch({
-        groupName: this.$route.query.groupName,
-        size: pagination.pageSize,
-        page: pagination.current,
-        sortField: sorter.field,
-        sortOrder: sorter.order,
-        ...filters
-      })
-    },
-    queryChange () {
-      this.fetch({
-          groupName: this.$route.query.groupName,
-          size: 6,
-          page: 1,
-          sceneName: this.queryParam.sceneName
-        }
-      )
-    },
-    fetch (params = {}) {
-      this.loading = true
-      getScenePage(params).then(res => {
-        this.data = []
-        res.data.map(record => {
-          this.loading = false
-          const { id, sceneName, sceneStatus, maxRetryCount, backOff, triggerInterval, description, deadlineRequest } = record
-          this.data.push({
-            key: id,
-            sceneName: sceneName,
-            sceneStatus: sceneStatus.toString(),
-            maxRetryCount: maxRetryCount,
-            backOff: backOff.toString(),
-            triggerInterval: triggerInterval,
-            description: description,
-            deadlineRequest: deadlineRequest,
-            editable: false,
-            isNew: false
-          })
-        })
-
-        const pagination = { ...this.pagination }
-
-        pagination.pageSize = res.size
-        pagination.current = res.page
-        pagination.total = res.total
-
-        this.pagination = pagination
-      })
-    },
-    remove (delKey) {
-      const delData = this.data.find(item => item.key === delKey)
-      const { key, sceneName, sceneStatus, maxRetryCount, backOff, triggerInterval, description, deadlineRequest } = delData
-      this.formData.push({
-        key: key,
-        sceneName: sceneName,
-        sceneStatus: sceneStatus,
-        maxRetryCount: maxRetryCount,
-        backOff: backOff,
-        triggerInterval: triggerInterval,
-        deadlineRequest: deadlineRequest,
-        description: description,
-        isDeleted: 1
-      })
-
-      const newData = this.data.filter(item => item.key !== delKey)
-      this.data = newData
-    },
-    saveRow (record) {
-      this.memberLoading = true
-      const { key, sceneName, sceneStatus, maxRetryCount, backOff, triggerInterval, description, deadlineRequest } = record
-      if (!sceneName || !sceneStatus || !maxRetryCount || !backOff || (backOff === '1' ? false : !triggerInterval)) {
-        this.memberLoading = false
-        this.$message.error('请填写完整成员信息。')
-        return
-      }
-
-      const regex = /^[A-Za-z0-9_]{1,64}$/
-      if (!regex.test(sceneName)) {
-        this.memberLoading = false
-        this.$message.error('场景名称: 仅支持长度为:1~64位字符.格式为:数字、字母、下划线。')
-        return
-      }
-
-      if (description.length > 256) {
-        this.memberLoading = false
-        this.$message.error('描述:  仅支持长度为:1~256位字符')
-        return
-      }
-
-      if ((backOff === '2' || backOff === '4') && triggerInterval < 10) {
-        this.memberLoading = false
-        this.$message.error('描述:  间隔时间最小为10秒')
-        return
-      }
-
-      const target = this.formData.find(item => key === item.key)
-      if (!target) {
-        this.formData.push({
-          key: key,
-          sceneName: sceneName,
-          sceneStatus: sceneStatus,
-          maxRetryCount: maxRetryCount,
-          backOff: backOff,
-          triggerInterval: triggerInterval,
-          description: description,
-          deadlineRequest: deadlineRequest,
-          isDeleted: 0
-        })
-      }
-
-      new Promise((resolve) => {
-        setTimeout(() => {
-          resolve({ loop: false })
-        }, 200)
-      }).then(() => {
-        const target = this.data.find(item => item.key === key)
-        target.editable = false
-        target.isNew = false
-        this.memberLoading = false
-        this.$message.warning('请点击右下角提交按钮以保存所有页面数据')
-      })
-    },
-    toggle (key) {
-      const target = this.data.find(item => item.key === key)
-      target._originalData = { ...target }
-      target.editable = !target.editable
-    },
-    getRowByKey (key, newData) {
-      const data = this.data
-      return (newData || data).find(item => item.key === key)
-    },
-    cancel (key) {
-      const target = this.data.find(item => item.key === key)
-      Object.keys(target).forEach(key => { target[key] = target._originalData[key] })
-      target._originalData = undefined
-    },
-    handleChange (value, key, column) {
-      if (column === 'backOff') {
-        switch (value) {
-          case '1':
-            this.triggerIntervalDisabled = true
-            this.max = 26
-            break
-          default:
-            this.triggerIntervalDisabled = false
-            this.max = 99999
-        }
-      }
-
-      const newData = [...this.data]
-      const target = newData.find(item => key === item.key)
-      if (target) {
-        target[column] = value
-        this.data = newData
-      }
     }
   }
 }

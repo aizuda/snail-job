@@ -118,8 +118,6 @@
               </a-select>
             </a-form-item>
           </a-col>
-        </a-row>
-        <a-row class="form-row" :gutter="16">
           <a-col :lg="8" :md="24" :sm="24">
             <a-form-item label="超时时间(秒)">
               <a-input-number
@@ -145,12 +143,14 @@
                 v-decorator="[
                   'maxRetryCount',
                   {
-                    initialValue: '3',
+                    initialValue: '16',
                     rules: [{ required: true, message: '请输入最大重试次数'}]
                   }
                 ]" />
             </a-form-item>
           </a-col>
+        </a-row>
+        <a-row class="form-row" :gutter="16">
           <a-col :lg="8" :md="24" :sm="24">
             <a-form-item label="调用链超时时间(毫秒)">
               <a-input-number
@@ -296,7 +296,7 @@ export default {
       }).then(() => {
         const formData = pick(data, [
           'id', 'sceneName', 'groupName', 'sceneStatus', 'deadlineRequest', 'maxRetryCount', 'description',
-          'backOff', 'triggerInterval'])
+          'backOff', 'triggerInterval', 'executorTimeout'])
         formData.sceneStatus = formData.sceneStatus.toString()
         formData.backOff = formData.backOff.toString()
         this.backOff = formData.backOff

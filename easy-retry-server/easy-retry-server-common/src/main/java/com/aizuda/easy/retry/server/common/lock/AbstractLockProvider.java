@@ -21,8 +21,8 @@ public abstract class AbstractLockProvider implements LockProvider {
 
         String lockName = lockConfig.getLockName();
 
-        boolean tryToCreateLockRecord = CacheLockRecord.lockRecordRecentlyCreated(lockName);
-        if (!tryToCreateLockRecord) {
+        boolean tryToCreateLockRecord = !CacheLockRecord.lockRecordRecentlyCreated(lockName);
+        if (tryToCreateLockRecord) {
             if (doLock(lockConfig)) {
                 CacheLockRecord.addLockRecord(lockName);
                 return true;

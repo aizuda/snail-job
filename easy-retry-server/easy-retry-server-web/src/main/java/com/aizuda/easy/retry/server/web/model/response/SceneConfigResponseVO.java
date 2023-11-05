@@ -29,6 +29,8 @@ public class SceneConfigResponseVO {
 
     private Long deadlineRequest;
 
+    private Integer executorTimeout;
+
     private LocalDateTime createDt;
 
     private LocalDateTime updateDt;

@@ -37,7 +37,6 @@ logging:
   config: classpath:logback-boot.xml
 
 easy-retry:
-  last-days: 30 # 拉取重试数据的天数
   retry-pull-page-size: 100 # 拉取重试数据的每批次的大小
   netty-port: 1788  # 服务端netty端口
   total-partition: 2  # 重试和死信表的分区总数
