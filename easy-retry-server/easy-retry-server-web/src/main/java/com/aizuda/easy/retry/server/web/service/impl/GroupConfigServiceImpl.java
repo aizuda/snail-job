@@ -104,9 +104,9 @@ public class GroupConfigServiceImpl implements GroupConfigService {
         }
 
         GroupConfig groupConfig = GroupConfigConverter.INSTANCE.convert(groupConfigRequestVO);
-        groupConfig.setVersion(groupConfig.getVersion() + 1);
         groupConfig.setDescription(Optional.ofNullable(groupConfigRequestVO.getDescription()).orElse(StrUtil.EMPTY));
-
+        // 使用@TableField(value = "version", update= "%s+1") 进行更新version, 这里必须初始化一个值
+        groupConfig.setVersion(1);
         Assert.isTrue(systemProperties.getTotalPartition() > groupConfigRequestVO.getGroupPartition(), () -> new EasyRetryServerException("分区超过最大分区. [{}]", systemProperties.getTotalPartition() - 1));
         Assert.isTrue(groupConfigRequestVO.getGroupPartition() >= 0, () -> new EasyRetryServerException("分区不能是负数."));
 

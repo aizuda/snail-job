@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.template.datasource.persistence.po;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 
@@ -21,6 +22,7 @@ public class GroupConfig implements Serializable {
 
     private Integer idGeneratorMode;
 
+    @TableField(value = "version", update= "%s+1")
     private Integer version;
 
     private Integer initScene;
