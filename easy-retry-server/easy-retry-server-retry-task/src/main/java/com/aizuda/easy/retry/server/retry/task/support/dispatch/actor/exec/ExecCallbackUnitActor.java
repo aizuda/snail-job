@@ -13,6 +13,7 @@ import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.client.RequestBuilder;
 import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
+import com.aizuda.easy.retry.server.common.util.ClientInfoUtils;
 import com.aizuda.easy.retry.server.retry.task.client.RetryRpcClient;
 import com.aizuda.easy.retry.server.common.IdempotentStrategy;
 import com.aizuda.easy.retry.server.retry.task.support.context.CallbackRetryContext;
@@ -70,6 +71,7 @@ public class ExecCallbackUnitActor extends AbstractActor {
             retryTaskLog.setUniqueId(retryTask.getUniqueId());
             retryTaskLog.setRetryStatus(retryTask.getRetryStatus());
             retryTaskLog.setTriggerTime(LocalDateTime.now());
+            retryTaskLog.setClientInfo(ClientInfoUtils.generate(serverNode));
 
             try {
 

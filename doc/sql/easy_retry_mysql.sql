@@ -119,6 +119,7 @@ CREATE TABLE `retry_task_log_message`
     `unique_id`  varchar(64) NOT NULL COMMENT '同组下id唯一',
     `create_dt`  datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `message`    text        NOT NULL COMMENT '异常信息',
+    `client_info` varchar(128) DEFAULT NULL COMMENT '客户端地址 clientId#ip:port',
     PRIMARY KEY (`id`),
     KEY          `idx_group_name_unique_id` (`group_name`, `unique_id`),
     KEY          `idx_create_dt` (`create_dt`)
@@ -267,7 +268,7 @@ CREATE TABLE `job_task` (
     `parent_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '父执行器id',
     `task_status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '执行的状态 0、失败 1、成功',
     `retry_count` int(11) NOT NULL DEFAULT '0' COMMENT '重试次数',
-    `client_info` varchar(255) DEFAULT NULL COMMENT '客户端地址 clientId#ip:port',
+    `client_info` varchar(128) DEFAULT NULL COMMENT '客户端地址 clientId#ip:port',
     `result_message` text NOT NULL COMMENT '执行结果',
     `args_str` text DEFAULT NULL COMMENT '执行方法参数',
     `args_type` tinyint(4) NOT NULL DEFAULT '1' COMMENT '参数类型 ',

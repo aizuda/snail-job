@@ -101,8 +101,7 @@ public class ClientRegister extends AbstractRegister implements Runnable {
                 // 防止刷的过快
                 try {
                     TimeUnit.MILLISECONDS.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                } catch (InterruptedException ignored) {
                 }
             }
         }

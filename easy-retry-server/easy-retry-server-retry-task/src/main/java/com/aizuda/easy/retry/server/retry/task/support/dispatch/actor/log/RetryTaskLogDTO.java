@@ -34,6 +34,14 @@ public class RetryTaskLogDTO {
      */
     private Integer retryStatus;
 
+    /**
+     * 触发时间
+     */
     private LocalDateTime triggerTime;
+
+    /**
+     * 客户端信息
+     */
+    private String clientInfo;
 
 }
