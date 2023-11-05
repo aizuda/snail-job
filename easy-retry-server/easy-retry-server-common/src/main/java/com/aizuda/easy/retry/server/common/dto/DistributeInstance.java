@@ -5,10 +5,10 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * www.byteblogs.com
  *
- * @author: shuguang.zhang
+ * @author: www.byteblogs.com
  * @date : 2023-09-21 09:26
+ * since: 2.4.0
  */
 public class DistributeInstance {
     private DistributeInstance() {

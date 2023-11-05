@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.server.web.controller;
 
 import com.aizuda.easy.retry.server.common.cache.CacheConsumerGroup;
+import com.aizuda.easy.retry.server.common.dto.DistributeInstance;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
 import com.aizuda.easy.retry.server.web.model.request.ServerNodeQueryVO;
 import com.aizuda.easy.retry.server.web.model.response.ActivePodQuantityResponseVO;
@@ -77,9 +78,9 @@ public class DashBoardController {
         return dashBoardService.pods(serverNodeQueryVO);
     }
 
-    @GetMapping("/consumer/group")
-    public Set<String> allConsumerGroupName() {
-        return CacheConsumerGroup.getAllConsumerGroupName();
+    @GetMapping("/consumer/bucket")
+    public Set<Integer> allConsumerGroupName() {
+        return DistributeInstance.INSTANCE.getConsumerBucket();
     }
 
 }

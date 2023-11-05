@@ -59,32 +59,6 @@ export const asyncRouterMap = [
         meta: { title: '重试任务管理', icon: 'schedule', permission: ['retryTask'] },
         children: [
           {
-            path: '/retry/scene/list',
-            name: 'SceneList',
-            component: () => import('@/views/task/SceneList'),
-            meta: { title: '场景列表', icon: 'profile', keepAlive: true, permission: ['retryTask'] }
-          },
-          {
-            path: '/retry/scene/config',
-            name: 'SceneFrom',
-            hidden: true,
-            component: () => import('@/views/task/form/SceneFrom'),
-            meta: { title: '场景配置', icon: 'profile', keepAlive: true, permission: ['retryTask'] }
-          },
-          {
-            path: '/retry/notify/list',
-            name: 'NotifyList',
-            component: () => import('@/views/task/NotifyList'),
-            meta: { title: '通知配置', icon: 'profile', keepAlive: true, permission: ['retryTask'] }
-          },
-          {
-            path: '/retry/notify/config',
-            name: 'NotifyFrom',
-            hidden: true,
-            component: () => import('@/views/task/form/NotifyFrom'),
-            meta: { title: '通知配置', icon: 'profile', keepAlive: true, permission: ['retryTask'] }
-          },
-          {
             path: '/retry/list',
             name: 'RetryTaskList',
             component: () => import('@/views/task/RetryTaskList'),
@@ -122,6 +96,32 @@ export const asyncRouterMap = [
             hidden: true,
             component: () => import('@/views/task/RetryLogInfo'),
             meta: { title: '重试日志详情', icon: 'profile', permission: ['retryLog'] }
+          },
+          {
+            path: '/retry/scene/list',
+            name: 'SceneList',
+            component: () => import('@/views/task/SceneList'),
+            meta: { title: '场景列表', icon: 'profile', keepAlive: true, permission: ['retryTask'] }
+          },
+          {
+            path: '/retry/scene/config',
+            name: 'SceneFrom',
+            hidden: true,
+            component: () => import('@/views/task/form/SceneFrom'),
+            meta: { title: '场景配置', icon: 'profile', keepAlive: true, permission: ['retryTask'] }
+          },
+          {
+            path: '/retry/notify/list',
+            name: 'NotifyList',
+            component: () => import('@/views/task/NotifyList'),
+            meta: { title: '通知配置', icon: 'profile', keepAlive: true, permission: ['retryTask'] }
+          },
+          {
+            path: '/retry/notify/config',
+            name: 'NotifyFrom',
+            hidden: true,
+            component: () => import('@/views/task/form/NotifyFrom'),
+            meta: { title: '通知配置', icon: 'profile', keepAlive: true, permission: ['retryTask'] }
           }
           ]
       },

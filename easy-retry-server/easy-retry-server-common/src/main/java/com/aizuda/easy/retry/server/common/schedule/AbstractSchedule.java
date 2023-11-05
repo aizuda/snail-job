@@ -45,14 +45,18 @@ public abstract class AbstractSchedule implements Schedule {
         LockConfig lockConfig = new LockConfig(LocalDateTime.now(), lockName, Duration.parse(lockAtMost), Duration.parse(lockAtLeast));
 
         LockProvider lockProvider = getLockAccess();
+        boolean lock = false;
         try {
-            if (lockProvider.lock(lockConfig)) {
+            lock = lockProvider.lock(lockConfig);
+            if (lock) {
                 doExecute();
             }
         } catch (Exception e) {
             LogUtils.error(log, this.getClass().getName() + " execute error. lockName:[{}]", lockName, e);
         } finally {
-            lockProvider.unlock(lockConfig);
+            if (lock) {
+                lockProvider.unlock(lockConfig);
+            }
         }
 
     }

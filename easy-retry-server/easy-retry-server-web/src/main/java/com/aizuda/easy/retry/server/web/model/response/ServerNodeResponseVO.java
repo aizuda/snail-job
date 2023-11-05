@@ -31,5 +31,5 @@ public class ServerNodeResponseVO {
 
     private String extAttrs;
 
-    private Set<String> consumerGroup;
+    private Set<Integer> consumerBuckets;
 }

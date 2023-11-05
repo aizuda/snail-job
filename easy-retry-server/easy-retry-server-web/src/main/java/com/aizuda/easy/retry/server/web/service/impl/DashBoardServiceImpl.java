@@ -5,6 +5,7 @@ import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.cache.CacheConsumerGroup;
+import com.aizuda.easy.retry.server.common.dto.DistributeInstance;
 import com.aizuda.easy.retry.server.common.dto.ServerNodeExtAttrs;
 import com.aizuda.easy.retry.server.common.register.ServerRegister;
 import com.aizuda.easy.retry.server.web.service.convert.DispatchQuantityResponseVOConverter;
@@ -60,7 +61,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class DashBoardServiceImpl implements DashBoardService {
-    public static final String URL = "http://{0}:{1}/dashboard/consumer/group";
+    public static final String URL = "http://{0}:{1}/dashboard/consumer/bucket";
 
     @Autowired
     private RetryTaskLogMapper retryTaskLogMapper;
@@ -200,7 +201,7 @@ public class DashBoardServiceImpl implements DashBoardService {
 
             // 若是本地节点则直接从缓存中取
             if (ServerRegister.CURRENT_CID.equals(serverNodeResponseVO.getHostId())) {
-                serverNodeResponseVO.setConsumerGroup(CacheConsumerGroup.getAllConsumerGroupName());
+                serverNodeResponseVO.setConsumerBuckets(DistributeInstance.INSTANCE.getConsumerBucket());
                 continue;
             }
 
@@ -216,15 +217,14 @@ public class DashBoardServiceImpl implements DashBoardService {
                 // 从远程节点取
                 String format = MessageFormat
                     .format(URL, serverNodeResponseVO.getHostIp(), serverNodeExtAttrs.getWebPort().toString());
-                Result<List<String>> result = restTemplate.getForObject(format, Result.class);
-                List<String> data = result.getData();
+                Result<List<Integer>> result = restTemplate.getForObject(format, Result.class);
+                List<Integer> data = result.getData();
                 if (!CollectionUtils.isEmpty(data)) {
-                    serverNodeResponseVO.setConsumerGroup(new HashSet<>(data));
+                    serverNodeResponseVO.setConsumerBuckets(new HashSet<>(data));
                 }
 
             } catch (Exception e) {
                 LogUtils.error(log, "Failed to retrieve consumer group for node [{}:{}].", serverNodeResponseVO.getHostIp(), serverNodeExtAttrs.getWebPort());
-                serverNodeResponseVO.setConsumerGroup(Sets.newHashSet("获取数据异常"));
             }
 
         }
