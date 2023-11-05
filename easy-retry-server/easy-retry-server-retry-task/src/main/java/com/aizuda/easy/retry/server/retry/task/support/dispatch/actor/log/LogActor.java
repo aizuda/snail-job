@@ -67,6 +67,7 @@ public class LogActor extends AbstractActor {
         RetryTaskLogMessage retryTaskLogMessage = new RetryTaskLogMessage();
         retryTaskLogMessage.setUniqueId(retryTaskLogDTO.getUniqueId());
         retryTaskLogMessage.setGroupName(retryTaskLogDTO.getGroupName());
+        retryTaskLogMessage.setClientInfo(retryTaskLogDTO.getClientInfo());
         String errorMessage = retryTaskLogDTO.getMessage();
         retryTaskLogMessage.setMessage(
             StrUtil.isBlank(errorMessage) ? StrUtil.EMPTY : errorMessage);

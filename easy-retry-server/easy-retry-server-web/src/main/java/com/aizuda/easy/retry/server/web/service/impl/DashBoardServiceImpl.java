@@ -46,11 +46,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -189,7 +185,7 @@ public class DashBoardServiceImpl implements DashBoardService {
             serverNodeLambdaQueryWrapper.eq(ServerNode::getGroupName, queryVO.getGroupName());
         }
 
-        serverNodeLambdaQueryWrapper.ge(ServerNode::getExpireAt, LocalDateTime.now());
+        serverNodeLambdaQueryWrapper.ge(ServerNode::getExpireAt, LocalDateTime.now().minusSeconds(ServerRegister.DELAY_TIME + (ServerRegister.DELAY_TIME / 3)));
         PageDTO<ServerNode> serverNodePageDTO = serverNodeMapper.selectPage(pageDTO, serverNodeLambdaQueryWrapper.orderByDesc(ServerNode::getNodeType));
 
         List<ServerNodeResponseVO> serverNodeResponseVOS = ServerNodeResponseVOConverter.INSTANCE.toServerNodeResponseVO(serverNodePageDTO.getRecords());
@@ -220,7 +216,9 @@ public class DashBoardServiceImpl implements DashBoardService {
                 Result<List<Integer>> result = restTemplate.getForObject(format, Result.class);
                 List<Integer> data = result.getData();
                 if (!CollectionUtils.isEmpty(data)) {
-                    serverNodeResponseVO.setConsumerBuckets(new HashSet<>(data));
+                    serverNodeResponseVO.setConsumerBuckets(data.stream()
+                            .sorted(Integer::compareTo)
+                            .collect(Collectors.toCollection(LinkedHashSet::new)));
                 }
 
             } catch (Exception e) {

@@ -15,6 +15,11 @@ public class RetryTaskLogMessageResponseVO {
 
     private String message;
 
+    /**
+     * 客户端信息
+     */
+    private String clientInfo;
+
     private LocalDateTime createDt;
 
 }

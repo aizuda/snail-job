@@ -14,6 +14,9 @@
         <span slot="serial" slot-scope="text, record">
           {{ record.id }}
         </span>
+        <span slot="clientInfo" slot-scope="text">
+          {{ text ? text.split('@')[1] : '无' }}
+        </span>
       </s-table>
     </a-card>
   </div>
@@ -43,6 +46,12 @@ export default {
           title: '信息',
           dataIndex: 'message',
           width: '50%'
+        },
+        {
+          title: '地址',
+          dataIndex: 'clientInfo',
+          scopedSlots: { customRender: 'clientInfo' },
+          width: '10%'
         },
         {
           title: '触发时间',
