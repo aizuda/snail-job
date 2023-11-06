@@ -57,7 +57,8 @@ public abstract class AbstractGenerator implements TaskGenerator {
 
         checkAndInitScene(taskContext);
 
-        List<TaskContext.TaskInfo> taskInfos = taskContext.getTaskInfos();
+        //客户端上报任务根据幂等id去重
+        List <TaskContext.TaskInfo> taskInfos= taskContext.getTaskInfos().stream().collect(Collectors.collectingAndThen(Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(TaskContext.TaskInfo::getIdempotentId))), ArrayList::new));
 
         Set<String> idempotentIdSet = taskInfos.stream().map(TaskContext.TaskInfo::getIdempotentId).collect(Collectors.toSet());
 
