@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -67,7 +68,9 @@ public class AsyncReport extends AbstractReport implements Lifecycle {
     @Override
     public void close() {
         log.info("AsyncReport about to shutdown");
-        slidingWindow.end();
+        if (Objects.nonNull(slidingWindow)) {
+            slidingWindow.end();
+        }
         log.info("AsyncReport has been shutdown");
     }
 }
