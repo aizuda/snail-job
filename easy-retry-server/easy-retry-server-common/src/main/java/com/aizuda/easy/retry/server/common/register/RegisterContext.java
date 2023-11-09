@@ -28,4 +28,6 @@ public class RegisterContext {
 
     private String extAttrs;
 
+    private String uri;
+
 }
