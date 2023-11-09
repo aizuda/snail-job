@@ -64,6 +64,11 @@ export default {
       queryParam: {},
       // 加载数据方法 必须为 Promise 对象
       loadData: parameter => {
+        console.log(this.queryParam)
+        if (!this.queryParam['groupName']) {
+          return
+        }
+
         return getRetryTaskLogMessagePage(Object.assign(parameter, this.queryParam))
           .then(res => {
             this.total = res.total
