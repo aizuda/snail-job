@@ -85,7 +85,6 @@ export default {
     }
   },
   created () {
-    console.log('111')
     const id = this.$route.query.id
     const groupName = this.$route.query.groupName
     if (id && groupName) {

@@ -98,7 +98,7 @@ public abstract class AbstractScanGroup extends AbstractActor {
         AtomicInteger count = new AtomicInteger(0);
         long total = PartitionTaskUtils.process(
             startId -> listAvailableTasks(groupName, startId, taskActuatorScene().getTaskType().getType()),
-            partitionTasks -> processRetryPartitionTasks(partitionTasks), partitionTasks -> {
+                this::processRetryPartitionTasks, partitionTasks -> {
                 if (CollectionUtils.isEmpty(partitionTasks)) {
                     putLastId(scanTask.getGroupName(), 0L);
                     return Boolean.TRUE;
@@ -159,7 +159,8 @@ public abstract class AbstractScanGroup extends AbstractActor {
                 .listPage(groupName, new PageDTO<>(0, systemProperties.getRetryPullPageSize()),
                         new LambdaQueryWrapper<RetryTask>()
                                 .eq(RetryTask::getRetryStatus, RetryStatusEnum.RUNNING.getStatus())
-                                .eq(RetryTask::getGroupName, groupName).eq(RetryTask::getTaskType, taskType)
+                                .eq(RetryTask::getGroupName, groupName)
+                                .eq(RetryTask::getTaskType, taskType)
                                 .le(RetryTask::getNextTriggerAt, LocalDateTime.now().plusSeconds(SystemConstants.SCHEDULE_PERIOD))
                                 .gt(RetryTask::getId, lastId)
                                 .orderByAsc(RetryTask::getId))

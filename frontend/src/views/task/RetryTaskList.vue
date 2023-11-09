@@ -225,7 +225,7 @@ export default {
         {
           title: 'UniqueId',
           dataIndex: 'uniqueId',
-          width: '10%'
+          width: '9%'
         },
         {
           title: '组名称',
