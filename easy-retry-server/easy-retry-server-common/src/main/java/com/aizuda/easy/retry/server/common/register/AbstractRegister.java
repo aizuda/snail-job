@@ -35,6 +35,7 @@ public abstract class AbstractRegister implements Register, Lifecycle {
     protected void refreshExpireAt(ServerNode serverNode) {
 
         try {
+            serverNode.setExpireAt(getExpireAt());
             serverNodeMapper.insertOrUpdate(serverNode);
             // 刷新本地缓存过期时间
             CacheRegisterTable.refreshExpireAt(serverNode.getGroupName(), serverNode);
@@ -56,13 +57,12 @@ public abstract class AbstractRegister implements Register, Lifecycle {
         serverNode.setNodeType(getNodeType());
         serverNode.setCreateDt(LocalDateTime.now());
         serverNode.setContextPath(context.getContextPath());
-        serverNode.setExpireAt(getExpireAt(context));
         serverNode.setExtAttrs(context.getExtAttrs());
 
         return serverNode;
     }
 
-    protected abstract LocalDateTime getExpireAt(RegisterContext context);
+    protected abstract LocalDateTime getExpireAt();
 
 
     protected abstract boolean doRegister(RegisterContext context, ServerNode serverNode);

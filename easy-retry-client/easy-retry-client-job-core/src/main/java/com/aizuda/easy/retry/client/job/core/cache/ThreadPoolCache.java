@@ -29,7 +29,7 @@ public class ThreadPoolCache {
          };
 
         ThreadPoolExecutor threadPoolExecutor = supplier.get();
-        CACHE_THREAD_POOL.putIfAbsent(taskBatchId, supplier.get());
+        CACHE_THREAD_POOL.putIfAbsent(taskBatchId, threadPoolExecutor);
         return threadPoolExecutor;
     }
 

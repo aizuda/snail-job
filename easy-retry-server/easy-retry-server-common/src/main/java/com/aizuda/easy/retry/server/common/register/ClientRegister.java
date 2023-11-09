@@ -41,11 +41,10 @@ public class ClientRegister extends AbstractRegister implements Runnable {
 
     @Override
     protected void beforeProcessor(RegisterContext context) {
-
     }
 
     @Override
-    protected LocalDateTime getExpireAt(RegisterContext context) {
+    protected LocalDateTime getExpireAt() {
         return LocalDateTime.now().plusSeconds(DELAY_TIME);
     }
 
@@ -93,14 +92,12 @@ public class ClientRegister extends AbstractRegister implements Runnable {
                     }
                 }
 
-            }catch (InterruptedException e) {
-                LogUtils.info(log, "[{}] thread stop.", Thread.currentThread().getName());
             } catch (Exception e) {
                 LogUtils.error(log, "client refresh expireAt error.");
             } finally {
                 // 防止刷的过快
                 try {
-                    TimeUnit.MILLISECONDS.sleep(1000);
+                    TimeUnit.MILLISECONDS.sleep(5000);
                 } catch (InterruptedException ignored) {
                 }
             }

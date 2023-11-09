@@ -70,7 +70,7 @@ public class ServerRegister extends AbstractRegister {
     }
 
     @Override
-    protected LocalDateTime getExpireAt(RegisterContext context) {
+    protected LocalDateTime getExpireAt() {
         return LocalDateTime.now().plusSeconds(DELAY_TIME);
     }
 
