@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.server.common.register;
 
+import com.aizuda.easy.retry.common.core.constant.SystemConstants.HTTP_PATH;
 import com.aizuda.easy.retry.common.core.enums.NodeTypeEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.common.cache.CacheConsumerGroup;
@@ -14,7 +15,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -32,7 +33,7 @@ public class ClientRegister extends AbstractRegister implements Runnable {
 
     public static final int DELAY_TIME = 30;
     private Thread THREAD = null;
-    protected static final LinkedBlockingQueue<ServerNode> QUEUE = new LinkedBlockingQueue<>(256);
+    protected static final LinkedBlockingDeque<ServerNode> QUEUE = new LinkedBlockingDeque<>(256);
 
     @Override
     public boolean supports(int type) {
@@ -50,7 +51,11 @@ public class ClientRegister extends AbstractRegister implements Runnable {
 
     @Override
     protected boolean doRegister(RegisterContext context, ServerNode serverNode) {
-        return QUEUE.offer(serverNode);
+        if (HTTP_PATH.BEAT.equals(context.getUri())) {
+           return QUEUE.offerFirst(serverNode);
+        }
+
+        return QUEUE.offerLast(serverNode);
     }
 
     @Override

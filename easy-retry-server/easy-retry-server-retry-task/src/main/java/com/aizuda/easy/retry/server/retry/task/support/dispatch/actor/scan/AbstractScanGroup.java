@@ -85,8 +85,7 @@ public abstract class AbstractScanGroup extends AbstractActor {
         // 计算循环拉取的次数
         if (preCostTime().get() > 0) {
             long loopCount = Math.max((SystemConstants.SCHEDULE_PERIOD * 1000) / preCostTime().get(), 1);
-            // TODO 最大拉取次数支持可配置
-            loopCount = Math.min(loopCount, 10);
+            loopCount = Math.min(loopCount, systemProperties.getRetryMaxPullCount());
             prePullCount().set(loopCount);
         }
 

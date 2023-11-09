@@ -95,6 +95,7 @@ public class RequestHandlerActor extends AbstractActor {
         registerContext.setHostPort(hostPort);
         registerContext.setHostIp(hostIp);
         registerContext.setHostId(hostId);
+        registerContext.setUri(uri);
         boolean result = register.register(registerContext);
         if (!result) {
             LogUtils.warn(log, "client register error. groupName:[{}]", groupName);
