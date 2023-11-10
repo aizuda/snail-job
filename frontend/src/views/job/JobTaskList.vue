@@ -96,7 +96,7 @@
         slot="expandedRowRender"
         slot-scope="record"
         :columns="logColumns"
-        :data-source="loadData(record)"
+        :data-source="record.logData"
         :pagination="false"
         rowKey="id"
       >
@@ -230,14 +230,15 @@ export default {
     toggleAdvanced () {
       this.advanced = !this.advanced
     },
-    getRows (expanded, record) {
+    async getRows (expanded, record) {
       console.log(record)
       if (expanded) {
-        this.fetchLog({
+        await this.fetchLog({
           taskBatchId: record.taskBatchId,
           jobId: record.jobId,
           taskId: record.id
         }, record)
+        this.$forceUpdate()
       }
     },
     handleOk (record) {},
@@ -263,9 +264,8 @@ export default {
       this.queryChange()
     },
     async fetchLog (queryParam, record) {
-     const res = await jobLogList(queryParam)
-      console.log(this.logData)
-      this.logData.push(...res.data)
+      const res = await jobLogList(queryParam)
+      record.logData = res.data
     },
     onSelectChange (selectedRowKeys, selectedRows) {
       this.selectedRowKeys = selectedRowKeys
