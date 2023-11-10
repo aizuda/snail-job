@@ -37,7 +37,6 @@ public class RetryTimerWheel implements Lifecycle {
 
         if (!isExisted(groupName, uniqueId)) {
             delay = delay < 0 ? 0 : delay;
-            log.info("加入时间轮. delay:[{}ms] uniqueId:[{}]", delay, uniqueId);
             try {
                 timer.newTimeout(task, delay, unit);
                 idempotent.set(uniqueId, uniqueId);

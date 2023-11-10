@@ -2,11 +2,11 @@ package com.aizuda.easy.retry.server.retry.task.support.idempotent;
 
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.server.common.IdempotentStrategy;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author www.byteblogs.com
@@ -16,11 +16,24 @@ import java.util.concurrent.CopyOnWriteArraySet;
 @Slf4j
 public class TimerIdempotent implements IdempotentStrategy<String, String> {
 
-    private static final CopyOnWriteArraySet<String> cache = new CopyOnWriteArraySet<>();
+
+    private static final Cache<String, String> cache;
+
+    static {
+        cache = CacheBuilder.newBuilder()
+            .concurrencyLevel(16) // 并发级别
+            .expireAfterWrite(20, TimeUnit.SECONDS)
+            .build();
+    }
 
     @Override
     public boolean set(String key, String value) {
-        return cache.add(key.concat(StrUtil.UNDERLINE).concat(String.valueOf(value)));
+        cache.put(getKey(key, value), value);
+        return Boolean.TRUE;
+    }
+
+    private static String getKey(final String key, final String value) {
+        return key.concat(StrUtil.UNDERLINE).concat(String.valueOf(value));
     }
 
     @Override
@@ -30,14 +43,12 @@ public class TimerIdempotent implements IdempotentStrategy<String, String> {
 
     @Override
     public boolean isExist(String key, String value) {
-        if (key == null || value == null) {
-            log.error("异常监控. key:[{}] value:[{}]", key, value);
-        }
-        return cache.contains(key.concat(StrUtil.UNDERLINE).concat(String.valueOf(value)));
+        return cache.asMap().containsKey(getKey(key, value));
     }
 
     @Override
     public boolean clear(String key, String value) {
-        return cache.removeIf(s-> s.equals(key.concat(StrUtil.UNDERLINE).concat(String.valueOf(value))));
+        cache.invalidate(getKey(key, value));
+        return Boolean.TRUE;
     }
 }

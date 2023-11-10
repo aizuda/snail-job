@@ -29,6 +29,11 @@ public class SystemProperties {
     private int retryPullPageSize = 1000;
 
     /**
+     * 任务调度每次拉取的条数
+     */
+    private int jobPullPageSize = 1000;
+
+    /**
      * 重试每次拉取的次数
      */
     private int retryMaxPullCount = 10;

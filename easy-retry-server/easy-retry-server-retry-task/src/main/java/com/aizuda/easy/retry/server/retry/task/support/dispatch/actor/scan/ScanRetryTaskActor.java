@@ -57,10 +57,9 @@ public class ScanRetryTaskActor extends AbstractScanGroup {
         LAST_AT_MAP.put(groupName, lastId);
     }
 
-    protected LocalDateTime calculateNextTriggerTime(RetryPartitionTask partitionTask) {
+    @Override
+    protected LocalDateTime calculateNextTriggerTime(RetryPartitionTask partitionTask, final SceneConfig sceneConfig) {
         // 更新下次触发时间
-        SceneConfig sceneConfig = accessTemplate.getSceneConfigAccess()
-            .getSceneConfigByGroupNameAndSceneName(partitionTask.getGroupName(), partitionTask.getSceneName());
 
         WaitStrategyContext waitStrategyContext = new WaitStrategyContext();
 

@@ -9,6 +9,7 @@ import com.aizuda.easy.retry.server.common.strategy.WaitStrategies.WaitStrategyC
 import com.aizuda.easy.retry.server.common.strategy.WaitStrategies.WaitStrategyEnum;
 import com.aizuda.easy.retry.server.retry.task.support.timer.CallbackTimerTask;
 import com.aizuda.easy.retry.server.retry.task.support.timer.RetryTimerContext;
+import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
 import io.netty.util.TimerTask;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -56,7 +57,8 @@ public class ScanCallbackTaskActor extends AbstractScanGroup {
     }
 
     @Override
-    protected LocalDateTime calculateNextTriggerTime(final RetryPartitionTask partitionTask) {
+    protected LocalDateTime calculateNextTriggerTime(final RetryPartitionTask partitionTask,
+        final SceneConfig sceneConfig) {
 
         long triggerInterval = systemProperties.getCallback().getTriggerInterval();
         WaitStrategy waitStrategy = WaitStrategyEnum.getWaitStrategy(WaitStrategyEnum.FIXED.getType());

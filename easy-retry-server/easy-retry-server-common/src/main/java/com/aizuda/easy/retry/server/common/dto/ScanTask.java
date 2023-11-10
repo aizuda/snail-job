@@ -19,7 +19,5 @@ public class ScanTask {
 
     private Set<Integer> buckets;
 
-    private long size;
-
-    private long startId;
+    private Integer groupPartition;
 }
