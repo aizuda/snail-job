@@ -1,8 +1,12 @@
 package com.aizuda.easy.retry.template.datasource.persistence.mapper;
 
 import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
+import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * <p>
@@ -14,5 +18,7 @@ import org.apache.ibatis.annotations.Mapper;
  */
 @Mapper
 public interface JobMapper extends BaseMapper<Job> {
+
+    int updateBatchNextTriggerAtById(@Param("list") List<Job> list);
 
 }

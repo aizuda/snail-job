@@ -73,7 +73,7 @@ public class ConsumerBucketActor extends AbstractActor {
                 // 查询桶对应组信息
                 groupConfigs = accessTemplate.getGroupConfigAccess().list(
                     new LambdaQueryWrapper<GroupConfig>()
-                        .select(GroupConfig::getGroupName)
+                        .select(GroupConfig::getGroupName, GroupConfig::getGroupPartition)
                         .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus())
                         .in(GroupConfig::getBucketIndex, consumerBucket.getBuckets())
                 );
@@ -87,6 +87,7 @@ public class ConsumerBucketActor extends AbstractActor {
                     ScanTask scanTask = new ScanTask();
                     scanTask.setGroupName(groupConfig.getGroupName());
                     scanTask.setBuckets(consumerBucket.getBuckets());
+                    scanTask.setGroupPartition(groupConfig.getGroupPartition());
                     produceScanActorTask(scanTask);
                 }
             }
@@ -96,8 +97,6 @@ public class ConsumerBucketActor extends AbstractActor {
             // 扫描回调数据
             ScanTask scanTask = new ScanTask();
             scanTask.setBuckets(consumerBucket.getBuckets());
-            scanTask.setSize(1000);
-            scanTask.setStartId(0);
             ActorRef scanJobActorRef = cacheActorRef("DEFAULT_JOB_KEY", TaskTypeEnum.JOB);
             scanJobActorRef.tell(scanTask, scanJobActorRef);
         }
