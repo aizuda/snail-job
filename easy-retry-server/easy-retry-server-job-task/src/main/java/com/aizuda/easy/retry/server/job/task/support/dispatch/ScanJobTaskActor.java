@@ -29,10 +29,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.time.LocalDateTime;
+import java.util.*;
 
 
 /**
@@ -72,7 +70,7 @@ public class ScanJobTaskActor extends AbstractActor {
         }
 
         long total = PartitionTaskUtils.process(startId -> listAvailableJobs(startId, scanTask),
-            this::processJobPartitionTasks, 0);
+                this::processJobPartitionTasks, 0);
 
         log.info("job scan end. total:[{}]", total);
     }
@@ -81,8 +79,9 @@ public class ScanJobTaskActor extends AbstractActor {
 
         List<Job> waitUpdateJobs = new ArrayList<>();
         List<JobTaskPrepareDTO> waitExecJobs = new ArrayList<>();
+        long now = DateUtils.toNowMilli();
         for (PartitionTask partitionTask : partitionTasks) {
-            processJob((JobPartitionTask) partitionTask, waitUpdateJobs, waitExecJobs);
+            processJob((JobPartitionTask) partitionTask, waitUpdateJobs, waitExecJobs, now);
         }
 
         // 批量更新
@@ -96,9 +95,8 @@ public class ScanJobTaskActor extends AbstractActor {
     }
 
     private void processJob(JobPartitionTask partitionTask, final List<Job> waitUpdateJobs,
-        final List<JobTaskPrepareDTO> waitExecJobs) {
+                            final List<JobTaskPrepareDTO> waitExecJobs, long now) {
         CacheConsumerGroup.addOrUpdate(partitionTask.getGroupName());
-        JobTaskPrepareDTO jobTaskPrepare = JobTaskConverter.INSTANCE.toJobTaskPrepare(partitionTask);
 
         Job job = new Job();
         job.setId(partitionTask.getId());
@@ -107,14 +105,13 @@ public class ScanJobTaskActor extends AbstractActor {
         Long nextTriggerAt = ResidentTaskCache.get(partitionTask.getId());
         if (needCalculateNextTriggerTime(partitionTask)) {
             // 更新下次触发时间
-            nextTriggerAt = calculateNextTriggerTime(partitionTask);
+            nextTriggerAt = calculateNextTriggerTime(partitionTask, now);
         } else {
             // 若常驻任务的缓存时间为空则触发一次任务调度，说明常驻任务长时间未更新或者是系统刚刚启动
             triggerTask = Objects.isNull(nextTriggerAt);
             // 若出现常驻任务时间为null或者常驻任务的内存时间长期未更新, 刷新为now
-            long now = System.currentTimeMillis();
             if (Objects.isNull(nextTriggerAt)
-                || (nextTriggerAt + DateUtils.toEpochMilli(SystemConstants.SCHEDULE_PERIOD)) < now) {
+                    || (nextTriggerAt + DateUtils.toEpochMilli(SystemConstants.SCHEDULE_PERIOD)) < now) {
                 nextTriggerAt = now;
             }
         }
@@ -124,7 +121,7 @@ public class ScanJobTaskActor extends AbstractActor {
         waitUpdateJobs.add(job);
 
         if (triggerTask) {
-            waitExecJobs.add(jobTaskPrepare);
+            waitExecJobs.add(JobTaskConverter.INSTANCE.toJobTaskPrepare(partitionTask));
         }
 
     }
@@ -136,12 +133,12 @@ public class ScanJobTaskActor extends AbstractActor {
         return !Objects.equals(StatusEnum.YES.getStatus(), partitionTask.getResident());
     }
 
-    private Long calculateNextTriggerTime(JobPartitionTask partitionTask) {
+    private Long calculateNextTriggerTime(JobPartitionTask partitionTask, long now) {
 
-        long now = System.currentTimeMillis();
         long nextTriggerAt = partitionTask.getNextTriggerAt();
         if ((nextTriggerAt + DateUtils.toEpochMilli(SystemConstants.SCHEDULE_PERIOD)) < now) {
             nextTriggerAt = now;
+            partitionTask.setNextTriggerAt(nextTriggerAt);
         }
 
         // 更新下次触发时间
@@ -158,13 +155,17 @@ public class ScanJobTaskActor extends AbstractActor {
             return Collections.emptyList();
         }
 
-        List<Job> jobs = jobMapper.selectPage(new PageDTO<Job>(0, systemProperties.getJobPullPageSize()),
-            new LambdaQueryWrapper<Job>()
-                .eq(Job::getJobStatus, StatusEnum.YES.getStatus())
-                .eq(Job::getDeleted, StatusEnum.NO.getStatus())
-                .in(Job::getBucketIndex, scanTask.getBuckets())
-                .le(Job::getNextTriggerAt, System.currentTimeMillis() + SystemConstants.SCHEDULE_PERIOD * 1000)
-                .ge(Job::getId, startId)
+        List<Job> jobs = jobMapper.selectPage(new PageDTO<>(0, systemProperties.getJobPullPageSize()),
+                new LambdaQueryWrapper<Job>()
+                        .select(Job::getGroupName, Job::getNextTriggerAt, Job::getBlockStrategy, Job::getTriggerType,
+                                Job::getTriggerInterval, Job::getExecutorTimeout, Job::getTaskType, Job::getResident,
+                                Job::getId)
+                        .eq(Job::getJobStatus, StatusEnum.YES.getStatus())
+                        .eq(Job::getDeleted, StatusEnum.NO.getStatus())
+                        .in(Job::getBucketIndex, scanTask.getBuckets())
+                        .le(Job::getNextTriggerAt, DateUtils.toNowMilli() + DateUtils.toEpochMilli(SystemConstants.SCHEDULE_PERIOD))
+                        .ge(Job::getId, startId)
+                        .orderByAsc(Job::getId)
         ).getRecords();
 
         return JobTaskConverter.INSTANCE.toJobPartitionTasks(jobs);

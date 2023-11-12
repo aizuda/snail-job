@@ -14,6 +14,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -26,6 +27,7 @@ import java.util.concurrent.TimeUnit;
  * @date : 2023-09-27 09:48
  * @since 2.4.0
  */
+@Slf4j
 public abstract class AbstractJobExecutor implements IJobExecutor {
 
     @Override
@@ -58,6 +60,7 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
         JobArgs jobArgs = new JobArgs();
         jobArgs.setArgsStr(jobContext.getArgsStr());
         jobArgs.setExecutorInfo(jobContext.getExecutorInfo());
+        jobArgs.setTaskBatchId(jobContext.getTaskBatchId());
         return jobArgs;
     }
 

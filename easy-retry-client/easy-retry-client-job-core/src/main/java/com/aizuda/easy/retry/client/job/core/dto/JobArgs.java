@@ -13,4 +13,6 @@ public class JobArgs {
     private String argsStr;
 
     private String executorInfo;
+
+    private Long taskBatchId;
 }

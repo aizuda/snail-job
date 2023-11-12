@@ -4,6 +4,7 @@ import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.common.core.enums.TaskTypeEnum;
+import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
@@ -49,41 +50,46 @@ public class JobExecutorResultActor extends AbstractActor {
     public Receive createReceive() {
         return receiveBuilder().match(JobExecutorResultDTO.class, result -> {
             log.info("更新任务状态. 参数:[{}]", JsonUtil.toJsonString(result));
+            try {
+                transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+                    @Override
+                    protected void doInTransactionWithoutResult(final TransactionStatus status) {
+                        JobTask jobTask = new JobTask();
+                        jobTask.setTaskStatus(result.getTaskStatus());
+                        if (Objects.nonNull(result.getResult())) {
+                            jobTask.setResultMessage(JsonUtil.toJsonString(result.getResult()));
+                        }
 
-            transactionTemplate.execute(new TransactionCallbackWithoutResult() {
-                @Override
-                protected void doInTransactionWithoutResult(final TransactionStatus status) {
-                    JobTask jobTask = new JobTask();
-                    jobTask.setTaskStatus(result.getTaskStatus());
-                    if (Objects.nonNull(result.getResult())) {
-                        jobTask.setResultMessage(JsonUtil.toJsonString(result.getResult()));
-                    }
+                        Assert.isTrue(1 == jobTaskMapper.update(jobTask,
+                                        new LambdaUpdateWrapper<JobTask>().eq(JobTask::getId, result.getTaskId())),
+                                ()-> new EasyRetryServerException("更新任务实例失败"));
 
-                    Assert.isTrue(1 == jobTaskMapper.update(jobTask,
-                            new LambdaUpdateWrapper<JobTask>().eq(JobTask::getId, result.getTaskId())),
-                        ()-> new EasyRetryServerException("更新任务实例失败"));
-
-                    // 更新批次上的状态
-                    boolean complete = jobTaskBatchHandler.complete(result.getTaskBatchId(), result.getJobOperationReason());
-                    if (complete) {
-                        // 尝试停止任务
-                        // 若是集群任务则客户端会主动关闭
-                        if (result.getTaskType() != TaskTypeEnum.CLUSTER.getType()) {
-                            JobTaskStopHandler instanceInterrupt = JobTaskStopFactory.getJobTaskStop(result.getTaskType());
-                            TaskStopJobContext stopJobContext = JobTaskConverter.INSTANCE.toStopJobContext(result);
-                            stopJobContext.setNeedUpdateTaskStatus(Boolean.FALSE);
-                            stopJobContext.setForceStop(Boolean.TRUE);
-                            instanceInterrupt.stop(stopJobContext);
+                        // 更新批次上的状态
+                        boolean complete = jobTaskBatchHandler.complete(result.getTaskBatchId(), result.getJobOperationReason());
+                        if (complete) {
+                            // 尝试停止任务
+                            // 若是集群任务则客户端会主动关闭
+                            if (result.getTaskType() != TaskTypeEnum.CLUSTER.getType()) {
+                                JobTaskStopHandler instanceInterrupt = JobTaskStopFactory.getJobTaskStop(result.getTaskType());
+                                TaskStopJobContext stopJobContext = JobTaskConverter.INSTANCE.toStopJobContext(result);
+                                stopJobContext.setNeedUpdateTaskStatus(Boolean.FALSE);
+                                stopJobContext.setForceStop(Boolean.TRUE);
+                                instanceInterrupt.stop(stopJobContext);
+                            }
                         }
                     }
-                }
-            });
+                });
 
-            JobLogDTO jobLogDTO = JobTaskConverter.INSTANCE.toJobLogDTO(result);
-            jobLogDTO.setMessage(result.getMessage());
-            jobLogDTO.setTaskId(result.getTaskId());
-            ActorRef actorRef = ActorGenerator.jobLogActor();
-            actorRef.tell(jobLogDTO, actorRef);
+                JobLogDTO jobLogDTO = JobTaskConverter.INSTANCE.toJobLogDTO(result);
+                jobLogDTO.setMessage(result.getMessage());
+                jobLogDTO.setTaskId(result.getTaskId());
+                ActorRef actorRef = ActorGenerator.jobLogActor();
+                actorRef.tell(jobLogDTO, actorRef);
+            } catch (Exception e) {
+                LogUtils.error(log, " job executor result exception. [{}]", result, e);
+            } finally {
+                getContext().stop(getSelf());
+            }
 
         }).build();
     }

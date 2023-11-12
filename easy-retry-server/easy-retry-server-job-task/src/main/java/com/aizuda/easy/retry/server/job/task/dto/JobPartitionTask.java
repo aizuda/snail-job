@@ -20,11 +20,6 @@ public class JobPartitionTask extends PartitionTask {
     private String groupName;
 
     /**
-     * 名称
-     */
-    private String jobName;
-
-    /**
      * 下次触发时间
      */
     private long nextTriggerAt;

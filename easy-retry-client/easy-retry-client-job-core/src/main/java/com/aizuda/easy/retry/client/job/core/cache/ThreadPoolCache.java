@@ -1,7 +1,10 @@
 package com.aizuda.easy.retry.client.job.core.cache;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.stereotype.Component;
 
+import java.text.MessageFormat;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -16,14 +19,20 @@ import java.util.function.Supplier;
  * @since : 2.4.0
  */
 @Component
+@Slf4j
 public class ThreadPoolCache {
     private static final ConcurrentHashMap<Long, ThreadPoolExecutor> CACHE_THREAD_POOL = new ConcurrentHashMap<>();
 
     public static ThreadPoolExecutor createThreadPool(Long taskBatchId, int parallelNum) {
+        if (CACHE_THREAD_POOL.containsKey(taskBatchId)) {
+            return CACHE_THREAD_POOL.get(taskBatchId);
+        }
+
         Supplier<ThreadPoolExecutor> supplier = () -> {
 
             ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(
-                    parallelNum, parallelNum, 10, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
+                    parallelNum, parallelNum, 10, TimeUnit.SECONDS, new LinkedBlockingQueue<>(),
+                    new CustomizableThreadFactory(MessageFormat.format("easy-retry-job-{0}-", taskBatchId)));
             threadPoolExecutor.allowCoreThreadTimeOut(true);
             return threadPoolExecutor;
          };

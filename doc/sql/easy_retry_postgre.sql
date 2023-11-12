@@ -8,9 +8,9 @@ CREATE TABLE group_config
     group_status      SMALLINT NOT NULL DEFAULT 0,
     version           INT NOT NULL,
     group_partition   INT NOT NULL,
-    route_key         SMALLINT NOT NULL,
     id_generator_mode SMALLINT NOT NULL DEFAULT 1,
     init_scene        SMALLINT NOT NULL DEFAULT 0,
+    bucket_index      INT NOT NULL DEFAULT 0,
     create_dt         TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_dt         TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -90,7 +90,7 @@ COMMENT ON COLUMN "retry_dead_letter_0"."ext_attrs" IS '扩展字段';
 COMMENT ON COLUMN "retry_dead_letter_0"."task_type" IS '任务类型 1、重试数据 2、回调数据';
 COMMENT ON COLUMN "retry_dead_letter_0"."create_dt" IS '创建时间';
 COMMENT ON TABLE "retry_dead_letter_0" IS '死信队列表';
-    
+
 CREATE TABLE retry_task_0
 (
     id              BIGSERIAL PRIMARY KEY,
@@ -106,6 +106,7 @@ CREATE TABLE retry_task_0
     retry_count     INT NOT NULL DEFAULT 0,
     retry_status    SMALLINT NOT NULL DEFAULT 0,
     task_type       SMALLINT NOT NULL DEFAULT 1,
+    route_key       SMALLINT NOT NULL,
     create_dt       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_dt       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -289,7 +290,7 @@ COMMENT ON COLUMN "system_user"."role" IS '角色：1-普通用户、2-管理员
 COMMENT ON COLUMN "system_user"."create_dt" IS '创建时间';
 COMMENT ON COLUMN "system_user"."update_dt" IS '修改时间';
 COMMENT ON TABLE "system_user" IS '系统用户表';
-    
+
 -- pwd: admin
 INSERT INTO system_user (username, password, role)
 VALUES ('admin', '465c194afb65670f38322df087f0a9bb225cc257e43eb4ac5a0c98ef5b3173ac', 2);
@@ -311,7 +312,7 @@ COMMENT ON COLUMN "system_user_permission"."create_dt" IS '创建时间';
 COMMENT ON COLUMN "system_user_permission"."update_dt" IS '修改时间';
 COMMENT ON TABLE "system_user_permission" IS '系统用户权限表';
 
-    
+
 CREATE TABLE sequence_alloc
 (
     id         BIGSERIAL PRIMARY KEY,
