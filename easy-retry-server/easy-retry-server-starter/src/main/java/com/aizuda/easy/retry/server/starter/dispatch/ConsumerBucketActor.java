@@ -67,6 +67,14 @@ public class ConsumerBucketActor extends AbstractActor {
             return;
         }
 
+        if (SystemModeEnum.isJob(systemProperties.getMode())) {
+            // 扫描回调数据
+            ScanTask scanTask = new ScanTask();
+            scanTask.setBuckets(consumerBucket.getBuckets());
+            ActorRef scanJobActorRef = cacheActorRef("DEFAULT_JOB_KEY", TaskTypeEnum.JOB);
+            scanJobActorRef.tell(scanTask, scanJobActorRef);
+        }
+
         if (SystemModeEnum.isRetry(systemProperties.getMode())) {
             List<GroupConfig> groupConfigs = null;
             try {
@@ -91,14 +99,6 @@ public class ConsumerBucketActor extends AbstractActor {
                     produceScanActorTask(scanTask);
                 }
             }
-        }
-
-        if (SystemModeEnum.isJob(systemProperties.getMode())) {
-            // 扫描回调数据
-            ScanTask scanTask = new ScanTask();
-            scanTask.setBuckets(consumerBucket.getBuckets());
-            ActorRef scanJobActorRef = cacheActorRef("DEFAULT_JOB_KEY", TaskTypeEnum.JOB);
-            scanJobActorRef.tell(scanTask, scanJobActorRef);
         }
 
     }

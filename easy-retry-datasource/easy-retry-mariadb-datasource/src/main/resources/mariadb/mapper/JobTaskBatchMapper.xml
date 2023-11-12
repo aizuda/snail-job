@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskBatchMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.aizuda.easy.retry.template.datasource.persistence.po.JobTaskBatch">
+        <id column="id" property="id" />
+        <result column="group_name" property="groupName" />
+        <result column="job_id" property="jobId" />
+        <result column="task_batch_status" property="taskBatchStatus" />
+        <result column="create_dt" property="createDt" />
+        <result column="update_dt" property="updateDt" />
+        <result column="deleted" property="deleted" />
+    </resultMap>
+    <select id="selectJobBatchList"
+        parameterType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.JobBatchQueryDO"
+        resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.JobBatchResponseDO">
+        SELECT a.*, b.job_name, b.task_type, b.block_strategy, b.trigger_type
+        FROM job_task_batch a join job b on a.job_id = b.id
+        <where>
+            <if test="queryDO.jobId != null">
+                and job_id = #{queryDO.jobId}
+            </if>
+            <if test="queryDO.groupName != null">
+                and a.group_name = #{queryDO.groupName}
+            </if>
+            <if test="queryDO.taskBatchStatus != null">
+                and task_batch_status = #{queryDO.taskBatchStatus}
+            </if>
+            <if test="queryDO.jobName != null">
+                and job_name like #{queryDO.jobName}
+            </if>
+         and a.deleted = 0
+        order by a.id desc
+        </where>
+
+    </select>
+</mapper>

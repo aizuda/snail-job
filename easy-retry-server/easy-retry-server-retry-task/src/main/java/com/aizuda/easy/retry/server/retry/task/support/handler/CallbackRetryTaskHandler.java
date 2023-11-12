@@ -3,6 +3,7 @@ package com.aizuda.easy.retry.server.retry.task.support.handler;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
+import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.WaitStrategy;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.enums.TaskTypeEnum;
@@ -17,9 +18,11 @@ import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskLogMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLog;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.helpers.FormattingTuple;
 import org.slf4j.helpers.MessageFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +39,7 @@ import java.util.concurrent.TimeUnit;
  * @since 1.5.0
  */
 @Component
+@Slf4j
 public class CallbackRetryTaskHandler {
 
     private static final String CALLBACK_UNIQUE_ID_RULE = "{}_{}";
@@ -75,9 +79,15 @@ public class CallbackRetryTaskHandler {
 
         callbackRetryTask.setNextTriggerAt(DateUtils.toLocalDateTime(waitStrategy.computeTriggerTime(waitStrategyContext)));
 
-        Assert.isTrue(1 == accessTemplate.getRetryTaskAccess()
-                        .insert(callbackRetryTask.getGroupName(), callbackRetryTask),
-                () -> new EasyRetryServerException("failed to report data"));
+        try {
+            Assert.isTrue(1 == accessTemplate.getRetryTaskAccess()
+                            .insert(callbackRetryTask.getGroupName(), callbackRetryTask),
+                    () -> new EasyRetryServerException("failed to report data"));
+        } catch (DuplicateKeyException e) {
+            log.warn("回调数据重复新增. [{}]", JsonUtil.toJsonString(retryTask));
+            return;
+        }
+
 
         // 初始化回调日志
         RetryTaskLog retryTaskLog = RetryTaskLogConverter.INSTANCE.toRetryTask(callbackRetryTask);

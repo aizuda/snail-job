@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.aizuda.easy.retry.template.datasource.persistence.po.JobTask">
+        <id column="id" property="id" />
+        <result column="group_name" property="groupName" />
+        <result column="job_id" property="jobId" />
+        <result column="task_batch_id" property="taskBatchId" />
+        <result column="parent_id" property="parentId" />
+        <result column="task_status" property="taskStatus" />
+        <result column="result_message" property="resultMessage" />
+        <result column="create_dt" property="createDt" />
+        <result column="update_dt" property="updateDt" />
+    </resultMap>
+
+</mapper>

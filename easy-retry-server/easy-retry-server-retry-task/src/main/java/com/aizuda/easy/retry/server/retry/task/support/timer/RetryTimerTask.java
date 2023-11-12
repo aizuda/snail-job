@@ -13,6 +13,8 @@ import io.netty.util.Timeout;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Objects;
+
 /**
  * @author: www.byteblogs.com
  * @date : 2023-09-22 17:09
@@ -37,6 +39,9 @@ public class RetryTimerTask extends AbstractTimerTask {
                 .eq(RetryTask::getGroupName, context.getGroupName())
                 .eq(RetryTask::getUniqueId, context.getUniqueId())
                 .eq(RetryTask::getRetryStatus, RetryStatusEnum.RUNNING.getStatus()));
+        if (Objects.isNull(retryTask)) {
+            return;
+        }
         TaskExecutor taskExecutor = TaskActuatorFactory.getTaskActuator(context.getScene());
         taskExecutor.actuator(retryTask);
     }

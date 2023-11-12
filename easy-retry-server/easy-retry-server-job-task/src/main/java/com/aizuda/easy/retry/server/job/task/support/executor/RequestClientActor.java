@@ -41,7 +41,7 @@ import java.util.Objects;
 @Component(ActorGenerator.REAL_JOB_EXECUTOR_ACTOR)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Slf4j
-public class RealJobExecutorActor extends AbstractActor {
+public class RequestClientActor extends AbstractActor {
 
     @Autowired
     private JobTaskMapper jobTaskMapper;

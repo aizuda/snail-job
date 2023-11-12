@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.server.common.akka;
 
 import akka.actor.ActorSystem;
+import com.typesafe.config.ConfigFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -15,12 +16,12 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class AkkaConfiguration {
 
-    private static final String DISPATCH_RETRY_ACTOR_SYSTEM = "DISPATCH_RETRY_ACTOR_SYSTEM";
-    private static final String DISPATCH_EXEC_UNIT_RETRY_ACTOR_SYSTEM = "DISPATCH_EXEC_UNIT_RETRY_ACTOR_SYSTEM";
-    private static final String DISPATCH_RESULT_ACTOR_SYSTEM = "DISPATCH_RESULT_ACTOR_SYSTEM";
-    private static final String LOG_ACTOR_SYSTEM = "LOG_ACTOR_SYSTEM";
+    private static final String CONFIG_NAME = "easyretry";
     private static final String NETTY_ACTOR_SYSTEM = "NETTY_ACTOR_SYSTEM";
     private static final String JOB_ACTOR_SYSTEM = "JOB_ACTOR_SYSTEM";
+    private static final String RETRY_ACTOR_SYSTEM = "RETRY_ACTOR_SYSTEM";
+    private static final String COMMON_ACTOR_SYSTEM = "COMMON_ACTOR_SYSTEM";
+
 
     @Autowired
     private ApplicationContext applicationContext;
@@ -28,50 +29,13 @@ public class AkkaConfiguration {
     private SpringExtension springExtension;
 
     /**
-     * 重试分发ActorSystem
-     *
-     * @return {@link ActorSystem} 顶级actor
-     */
-    @Bean("dispatchRetryActorSystem")
-    public ActorSystem createDispatchRetryActorSystem() {
-        ActorSystem system = ActorSystem.create(DISPATCH_RETRY_ACTOR_SYSTEM);
-        springExtension.initialize(applicationContext);
-        return system;
-    }
-
-    /**
-     * 重试分发执行ActorSystem
-     *
-     * @return {@link ActorSystem} 顶级actor
-     */
-    @Bean("dispatchExecUnitActorSystem")
-    public ActorSystem createDispatchExecUnitRetryActorSystem() {
-        ActorSystem system = ActorSystem.create(DISPATCH_EXEC_UNIT_RETRY_ACTOR_SYSTEM);
-        springExtension.initialize(applicationContext);
-        return system;
-    }
-
-
-    /**
-     * 重试分发执行结果处理ActorSystem
-     *
-     * @return {@link ActorSystem} 顶级actor
-     */
-    @Bean("dispatchResultActorSystem")
-    public ActorSystem createDispatchResultRetryActorSystem() {
-        ActorSystem system = ActorSystem.create(DISPATCH_RESULT_ACTOR_SYSTEM);
-        springExtension.initialize(applicationContext);
-        return system;
-    }
-
-    /**
      * 日志处理
      *
      * @return {@link ActorSystem} 顶级actor
      */
-    @Bean("logActorSystem")
+    @Bean("commonActorSystem")
     public ActorSystem createLogActorSystem() {
-        ActorSystem system = ActorSystem.create(LOG_ACTOR_SYSTEM);
+        ActorSystem system = ActorSystem.create(COMMON_ACTOR_SYSTEM, ConfigFactory.load(CONFIG_NAME));
         springExtension.initialize(applicationContext);
         return system;
     }
@@ -83,10 +47,23 @@ public class AkkaConfiguration {
      */
     @Bean("nettyActorSystem")
     public ActorSystem nettyActorSystem() {
-        ActorSystem system = ActorSystem.create(NETTY_ACTOR_SYSTEM);
+        ActorSystem system = ActorSystem.create(NETTY_ACTOR_SYSTEM, ConfigFactory.load(CONFIG_NAME));
         springExtension.initialize(applicationContext);
         return system;
     }
+
+    /**
+     * 处理retry调度
+     *
+     * @return {@link ActorSystem} 顶级actor
+     */
+    @Bean("retryActorSystem")
+    public ActorSystem retryActorSystem() {
+        ActorSystem system = ActorSystem.create(RETRY_ACTOR_SYSTEM, ConfigFactory.load(CONFIG_NAME));
+        springExtension.initialize(applicationContext);
+        return system;
+    }
+
 
     /**
      * 处理job调度
@@ -95,8 +72,9 @@ public class AkkaConfiguration {
      */
     @Bean("jobActorSystem")
     public ActorSystem jobActorSystem() {
-        ActorSystem system = ActorSystem.create(JOB_ACTOR_SYSTEM);
+        ActorSystem system = ActorSystem.create(JOB_ACTOR_SYSTEM, ConfigFactory.load(CONFIG_NAME));
         springExtension.initialize(applicationContext);
         return system;
     }
+
 }

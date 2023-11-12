@@ -36,8 +36,6 @@ import java.time.LocalDateTime;
 @Slf4j
 public class FinishActor extends AbstractActor  {
 
-    public static final String BEAN_NAME = "FinishActor";
-
     @Autowired
     private AccessTemplate accessTemplate;
     @Autowired
@@ -56,7 +54,6 @@ public class FinishActor extends AbstractActor  {
                transactionTemplate.execute(new TransactionCallbackWithoutResult() {
                    @Override
                    protected void doInTransactionWithoutResult(TransactionStatus status) {
-
 
                        retryTask.setUpdateDt(LocalDateTime.now());
                        Assert.isTrue(1 == accessTemplate.getRetryTaskAccess()

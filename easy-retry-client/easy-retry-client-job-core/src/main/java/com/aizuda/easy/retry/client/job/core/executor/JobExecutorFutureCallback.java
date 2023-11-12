@@ -39,7 +39,7 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
     @Override
     public void onSuccess(ExecuteResult result) {
         // 上报执行成功
-        log.info("任务执行成功 [{}]", JsonUtil.toJsonString(result));
+        log.warn("任务执行成功 taskBatchId:[{}] [{}]", jobContext.getTaskBatchId(), JsonUtil.toJsonString(result));
 
         if (Objects.isNull(result)) {
             result = ExecuteResult.success();
@@ -70,7 +70,7 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
     @Override
     public void onFailure(final Throwable t) {
         // 上报执行失败
-        log.error("任务执行失败 jobTask:[{}]", jobContext.getTaskId(), t);
+        log.error("任务执行失败 任务执行成功 taskBatchId:[{}]", jobContext.getTaskBatchId(), t);
         try {
 
             ExecuteResult failure = ExecuteResult.failure();

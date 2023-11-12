@@ -51,7 +51,8 @@ public class JobTaskPrepareActor extends AbstractActor {
 
     private void doPrepare(JobTaskPrepareDTO prepare) {
 
-        List<JobTaskBatch> notCompleteJobTaskBatchList = jobTaskBatchMapper.selectList(new LambdaQueryWrapper<JobTaskBatch>()
+        List<JobTaskBatch> notCompleteJobTaskBatchList = jobTaskBatchMapper
+                .selectList(new LambdaQueryWrapper<JobTaskBatch>()
                 .eq(JobTaskBatch::getJobId, prepare.getJobId())
                 .in(JobTaskBatch::getTaskBatchStatus, NOT_COMPLETE));
 

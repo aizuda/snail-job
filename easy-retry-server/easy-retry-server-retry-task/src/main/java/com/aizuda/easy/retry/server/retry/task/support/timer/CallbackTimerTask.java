@@ -13,6 +13,7 @@ import io.netty.util.TimerTask;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * @author: www.byteblogs.com
@@ -38,6 +39,9 @@ public class CallbackTimerTask extends AbstractTimerTask {
             .eq(RetryTask::getGroupName, context.getGroupName())
             .eq(RetryTask::getUniqueId, context.getUniqueId())
             .eq(RetryTask::getRetryStatus, RetryStatusEnum.RUNNING.getStatus()));
+        if (Objects.isNull(retryTask)) {
+            return;
+        }
         TaskExecutor taskExecutor = TaskActuatorFactory.getTaskActuator(context.getScene());
         taskExecutor.actuator(retryTask);
     }
