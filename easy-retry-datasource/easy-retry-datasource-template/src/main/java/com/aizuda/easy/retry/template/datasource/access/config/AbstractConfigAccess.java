@@ -111,12 +111,10 @@ public abstract class AbstractConfigAccess<T> implements ConfigAccess<T> {
         if (Objects.isNull(groupConfig)) {
             return Collections.EMPTY_SET;
         }
-        LambdaQueryWrapper<SceneConfig> sceneConfigLambdaQueryWrapper = new LambdaQueryWrapper<SceneConfig>()
-                .eq(SceneConfig::getSceneName, groupName);
 
-        if (Objects.isNull(groupConfig)) {
-            return Collections.EMPTY_SET;
-        }
+        LambdaQueryWrapper<SceneConfig> sceneConfigLambdaQueryWrapper = new LambdaQueryWrapper<SceneConfig>()
+                .select(SceneConfig::getSceneName)
+                .eq(SceneConfig::getGroupName, groupName);
 
         if (StatusEnum.YES.getStatus().equals(groupConfig.getGroupStatus())) {
             sceneConfigLambdaQueryWrapper.eq(SceneConfig::getSceneStatus, StatusEnum.NO.getStatus());

@@ -90,7 +90,9 @@ public class ActorGenerator {
      * @return actor 引用
      */
     public static ActorRef execCallbackUnitActor() {
-        return getRetryActorSystem().actorOf(getSpringExtension().props(EXEC_CALLBACK_UNIT_ACTOR).withDispatcher(RETRY_TASK_EXECUTOR_DISPATCHER));
+        return getRetryActorSystem().actorOf(getSpringExtension()
+                .props(EXEC_CALLBACK_UNIT_ACTOR)
+                .withDispatcher(RETRY_TASK_EXECUTOR_DISPATCHER));
     }
 
     /**
