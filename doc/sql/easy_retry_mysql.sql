@@ -26,7 +26,7 @@ CREATE TABLE `notify_config`
 (
     `id`               bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
     `group_name`       varchar(64)  NOT NULL COMMENT '组名称',
-    `notify_status`     tinyint(4) NOT NULL DEFAULT '0' COMMENT '组状态 0、未启用 1、启用',
+    `notify_status`    tinyint(4) NOT NULL DEFAULT '0' COMMENT '组状态 0、未启用 1、启用',
     `notify_type`      tinyint(4) NOT NULL DEFAULT '0' COMMENT '通知类型 1、钉钉 2、邮件 3、企业微信',
     `notify_attribute` varchar(512) NOT NULL COMMENT '配置属性',
     `notify_threshold` int(11) NOT NULL DEFAULT '0' COMMENT '通知阈值',
@@ -102,7 +102,7 @@ CREATE TABLE `retry_task_log`
     `retry_status`  tinyint(4) NOT NULL DEFAULT '0' COMMENT '重试状态 0、重试中 1、成功 2、最大次数',
     `task_type`     tinyint(4) NOT NULL DEFAULT '1' COMMENT '任务类型 1、重试数据 2、回调数据',
     `create_dt`     datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-        PRIMARY KEY (`id`),
+    PRIMARY KEY (`id`),
     KEY             `idx_group_name_scene_name` (`group_name`, `scene_name`),
     KEY             `idx_retry_status` (`retry_status`),
     KEY             `idx_idempotent_id` (`idempotent_id`),
@@ -114,15 +114,15 @@ CREATE TABLE `retry_task_log`
 
 CREATE TABLE `retry_task_log_message`
 (
-    `id`         bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `group_name` varchar(64) NOT NULL COMMENT '组名称',
-    `unique_id`  varchar(64) NOT NULL COMMENT '同组下id唯一',
-    `create_dt`  datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `message`    text        NOT NULL COMMENT '异常信息',
-    `client_info` varchar(128) DEFAULT NULL COMMENT '客户端地址 clientId#ip:port',
+    `id`          bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `group_name`  varchar(64) NOT NULL COMMENT '组名称',
+    `unique_id`   varchar(64) NOT NULL COMMENT '同组下id唯一',
+    `create_dt`   datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `message`     text        NOT NULL COMMENT '异常信息',
+    `client_info` varchar(128)         DEFAULT NULL COMMENT '客户端地址 clientId#ip:port',
     PRIMARY KEY (`id`),
-    KEY          `idx_group_name_unique_id` (`group_name`, `unique_id`),
-    KEY          `idx_create_dt` (`create_dt`)
+    KEY           `idx_group_name_unique_id` (`group_name`, `unique_id`),
+    KEY           `idx_create_dt` (`create_dt`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='任务调度日志信息记录表'
 ;
 
@@ -137,7 +137,7 @@ CREATE TABLE `scene_config`
     `trigger_interval` varchar(16)  NOT NULL DEFAULT '' COMMENT '间隔时长',
     `deadline_request` bigint(20) unsigned NOT NULL DEFAULT '60000' COMMENT 'Deadline Request 调用链超时 单位毫秒',
     `executor_timeout` int(11) unsigned NOT NULL DEFAULT '5' COMMENT '任务执行超时时间，单位秒',
-    `route_key`         tinyint(4) NOT NULL DEFAULT '4' COMMENT '路由策略',
+    `route_key`        tinyint(4) NOT NULL DEFAULT '4' COMMENT '路由策略',
     `description`      varchar(256) NOT NULL DEFAULT '' COMMENT '描述',
     `create_dt`        datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_dt`        datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
@@ -218,76 +218,88 @@ CREATE TABLE `sequence_alloc`
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='号段模式序号ID分配表';
 
 -- 分布式调度DDL
-CREATE TABLE `job` (
-    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `group_name` varchar(64) NOT NULL COMMENT '组名称',
-    `job_name` varchar(64) NOT NULL COMMENT '名称',
-    `args_str` text DEFAULT NULL COMMENT '执行方法参数',
-    `args_type` tinyint(4) NOT NULL DEFAULT '1' COMMENT '参数类型 ',
-    `next_trigger_at` bigint(13) NOT NULL COMMENT '下次触发时间',
-    `job_status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '重试状态 0、关闭、1、开启',
-    `task_type` varchar(255) DEFAULT NULL COMMENT '任务类型 1、集群 2、广播 3、切片',
-    `route_key` tinyint(4) NOT NULL DEFAULT '4' COMMENT '路由策略',
-    `executor_type` tinyint(4) NOT NULL DEFAULT '1' COMMENT '执行器类型',
-    `executor_info` varchar(255) DEFAULT NULL COMMENT '执行器名称',
-    `trigger_type` tinyint(4) NOT NULL COMMENT '触发类型 1.CRON 表达式 2. 固定时间',
+CREATE TABLE `job`
+(
+    `id`               bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `group_name`       varchar(64)  NOT NULL COMMENT '组名称',
+    `job_name`         varchar(64)  NOT NULL COMMENT '名称',
+    `args_str`         text                  DEFAULT NULL COMMENT '执行方法参数',
+    `args_type`        tinyint(4) NOT NULL DEFAULT '1' COMMENT '参数类型 ',
+    `next_trigger_at`  bigint(13) NOT NULL COMMENT '下次触发时间',
+    `job_status`       tinyint(4) NOT NULL DEFAULT '1' COMMENT '重试状态 0、关闭、1、开启',
+    `task_type`        varchar(255)          DEFAULT NULL COMMENT '任务类型 1、集群 2、广播 3、切片',
+    `route_key`        tinyint(4) NOT NULL DEFAULT '4' COMMENT '路由策略',
+    `executor_type`    tinyint(4) NOT NULL DEFAULT '1' COMMENT '执行器类型',
+    `executor_info`    varchar(255)          DEFAULT NULL COMMENT '执行器名称',
+    `trigger_type`     tinyint(4) NOT NULL COMMENT '触发类型 1.CRON 表达式 2. 固定时间',
     `trigger_interval` varchar(255) NOT NULL COMMENT '间隔时长',
-    `block_strategy` varchar(50) DEFAULT NULL COMMENT '阻塞策略 1、丢弃 2、覆盖 3、并行',
+    `block_strategy`   varchar(50)           DEFAULT NULL COMMENT '阻塞策略 1、丢弃 2、覆盖 3、并行',
     `executor_timeout` int(11) NOT NULL DEFAULT '0' COMMENT '任务执行超时时间，单位秒',
-    `max_retry_times` int(11) NOT NULL DEFAULT '0' COMMENT '最大重试次数',
-    `parallel_num` int(11) NOT NULL DEFAULT '1' COMMENT '并行数',
-    `retry_interval` int(11) NOT NULL DEFAULT '0' COMMENT '重试间隔(s)',
-    `bucket_index` int(11) NOT NULL DEFAULT '0' COMMENT 'bucket',
-    `resident` tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否是常驻任务',
-    `description` varchar(256) NOT NULL DEFAULT '' COMMENT '描述',
-    `ext_attrs` varchar(256) NULL default '' COMMENT '扩展字段',
-    `create_dt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_dt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
-    `deleted` tinyint(4) NOT NULL DEFAULT '0' COMMENT '逻辑删除 1、删除',
+    `max_retry_times`  int(11) NOT NULL DEFAULT '0' COMMENT '最大重试次数',
+    `parallel_num`     int(11) NOT NULL DEFAULT '1' COMMENT '并行数',
+    `retry_interval`   int(11) NOT NULL DEFAULT '0' COMMENT '重试间隔(s)',
+    `bucket_index`     int(11) NOT NULL DEFAULT '0' COMMENT 'bucket',
+    `resident`         tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否是常驻任务',
+    `description`      varchar(256) NOT NULL DEFAULT '' COMMENT '描述',
+    `ext_attrs`        varchar(256) NULL default '' COMMENT '扩展字段',
+    `create_dt`        datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_dt`        datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+    `deleted`          tinyint(4) NOT NULL DEFAULT '0' COMMENT '逻辑删除 1、删除',
     PRIMARY KEY (`id`),
-    KEY `idx_group_name` (`group_name`)
-    ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='任务信息';
+    KEY                `idx_group_name` (`group_name`),
+    KEY                `idx_job_status_bucket_index` (`job_status`, `bucket_index`),
+    KEY                `idx_create_dt` (`create_dt`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='任务信息';
 
-CREATE TABLE `job_log_message` (
-    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `group_name` varchar(64) NOT NULL COMMENT '组名称',
-    `job_id` bigint(20) NOT NULL COMMENT '任务信息id',
+CREATE TABLE `job_log_message`
+(
+    `id`            bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `group_name`    varchar(64) NOT NULL COMMENT '组名称',
+    `job_id`        bigint(20) NOT NULL COMMENT '任务信息id',
     `task_batch_id` bigint(20) NOT NULL COMMENT '任务批次id',
-    `task_id` bigint(20) NOT NULL COMMENT '调度任务id',
-    `message` text NOT NULL COMMENT '调度信息',
-    `create_dt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `ext_attrs`    varchar(256) NULL default '' COMMENT '扩展字段',
-    PRIMARY KEY (`id`)
-    ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='调度日志';
+    `task_id`       bigint(20) NOT NULL COMMENT '调度任务id',
+    `message`       text        NOT NULL COMMENT '调度信息',
+    `create_dt`     datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `ext_attrs`     varchar(256) NULL default '' COMMENT '扩展字段',
+    PRIMARY KEY (`id`),
+    KEY             `idx_task_batch_id_task_id` (`task_batch_id`, `task_id`),
+    KEY             `idx_create_dt` (`create_dt`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='调度日志';
 
-CREATE TABLE `job_task` (
-    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `group_name` varchar(64) NOT NULL COMMENT '组名称',
-    `job_id` bigint(20) NOT NULL COMMENT '任务信息id',
-    `task_batch_id` bigint(20) NOT NULL COMMENT '调度任务id',
-    `parent_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '父执行器id',
-    `task_status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '执行的状态 0、失败 1、成功',
-    `retry_count` int(11) NOT NULL DEFAULT '0' COMMENT '重试次数',
-    `client_info` varchar(128) DEFAULT NULL COMMENT '客户端地址 clientId#ip:port',
-    `result_message` text NOT NULL COMMENT '执行结果',
-    `args_str` text DEFAULT NULL COMMENT '执行方法参数',
-    `args_type` tinyint(4) NOT NULL DEFAULT '1' COMMENT '参数类型 ',
-    `ext_attrs` varchar(256) NULL default '' COMMENT '扩展字段',
-    `create_dt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_dt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
-    PRIMARY KEY (`id`)
-    ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='任务实例';
+CREATE TABLE `job_task`
+(
+    `id`             bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `group_name`     varchar(64) NOT NULL COMMENT '组名称',
+    `job_id`         bigint(20) NOT NULL COMMENT '任务信息id',
+    `task_batch_id`  bigint(20) NOT NULL COMMENT '调度任务id',
+    `parent_id`      bigint(20) NOT NULL DEFAULT '0' COMMENT '父执行器id',
+    `task_status`    tinyint(4) NOT NULL DEFAULT '0' COMMENT '执行的状态 0、失败 1、成功',
+    `retry_count`    int(11) NOT NULL DEFAULT '0' COMMENT '重试次数',
+    `client_info`    varchar(128)         DEFAULT NULL COMMENT '客户端地址 clientId#ip:port',
+    `result_message` text        NOT NULL COMMENT '执行结果',
+    `args_str`       text                 DEFAULT NULL COMMENT '执行方法参数',
+    `args_type`      tinyint(4) NOT NULL DEFAULT '1' COMMENT '参数类型 ',
+    `ext_attrs`      varchar(256) NULL default '' COMMENT '扩展字段',
+    `create_dt`      datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_dt`      datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+    PRIMARY KEY (`id`),
+    KEY              `idx_task_batch_id_task_status` (`task_batch_id`, `task_status`),
+    KEY              `idx_create_dt` (`create_dt`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='任务实例';
 
-CREATE TABLE `job_task_batch` (
-    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `group_name` varchar(64) NOT NULL COMMENT '组名称',
-    `job_id` bigint(20) NOT NULL COMMENT '任务id',
+CREATE TABLE `job_task_batch`
+(
+    `id`                bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `group_name`        varchar(64) NOT NULL COMMENT '组名称',
+    `job_id`            bigint(20) NOT NULL COMMENT '任务id',
     `task_batch_status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '任务批次状态 0、失败 1、成功',
-    `operation_reason` tinyint(4) NOT NULL DEFAULT '0' COMMENT '操作原因',
-    `execution_at`  bigint(13) NOT NULL DEFAULT '0'  COMMENT '任务执行时间',
-    `create_dt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_dt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
-    `deleted` tinyint(4) NOT NULL DEFAULT '0' COMMENT '逻辑删除 1、删除',
-    `ext_attrs` varchar(256) NULL default '' COMMENT '扩展字段',
-    PRIMARY KEY (`id`)
-    ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='任务批次';
+    `operation_reason`  tinyint(4) NOT NULL DEFAULT '0' COMMENT '操作原因',
+    `execution_at`      bigint(13) NOT NULL DEFAULT '0' COMMENT '任务执行时间',
+    `create_dt`         datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_dt`         datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+    `deleted`           tinyint(4) NOT NULL DEFAULT '0' COMMENT '逻辑删除 1、删除',
+    `ext_attrs`         varchar(256) NULL default '' COMMENT '扩展字段',
+    PRIMARY KEY (`id`),
+    KEY                 `idx_job_id_task_batch_status` (`job_id`, `task_batch_status`),
+    KEY                 `idx_create_dt` (`create_dt`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='任务批次';
