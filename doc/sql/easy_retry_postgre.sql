@@ -3,16 +3,16 @@
 CREATE TABLE group_config
 (
     id                BIGSERIAL PRIMARY KEY,
-    group_name        VARCHAR(64) NOT NULL,
+    group_name        VARCHAR(64)  NOT NULL,
     description       VARCHAR(256) NOT NULL,
-    group_status      SMALLINT NOT NULL DEFAULT 0,
-    version           INT NOT NULL,
-    group_partition   INT NOT NULL,
-    id_generator_mode SMALLINT NOT NULL DEFAULT 1,
-    init_scene        SMALLINT NOT NULL DEFAULT 0,
-    bucket_index      INT NOT NULL DEFAULT 0,
-    create_dt         TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    update_dt         TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    group_status      SMALLINT     NOT NULL DEFAULT 0,
+    version           INT          NOT NULL,
+    group_partition   INT          NOT NULL,
+    id_generator_mode SMALLINT     NOT NULL DEFAULT 1,
+    init_scene        SMALLINT     NOT NULL DEFAULT 0,
+    bucket_index      INT          NOT NULL DEFAULT 0,
+    create_dt         TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_dt         TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE UNIQUE INDEX "uk_name_group_config" ON "group_config" ("group_name");
@@ -23,9 +23,9 @@ COMMENT ON COLUMN "group_config"."description" IS '组描述';
 COMMENT ON COLUMN "group_config"."group_status" IS '组状态 0、未启用 1、启用';
 COMMENT ON COLUMN "group_config"."version" IS '版本号';
 COMMENT ON COLUMN "group_config"."group_partition" IS '分区';
-COMMENT ON COLUMN "group_config"."route_key" IS '路由策略';
 COMMENT ON COLUMN "group_config"."id_generator_mode" IS '唯一id生成模式 默认号段模式';
 COMMENT ON COLUMN "group_config"."init_scene" IS '是否初始化场景 0:否 1:是';
+COMMENT ON COLUMN "group_config"."bucket_index" IS 'bucket';
 COMMENT ON COLUMN "group_config"."create_dt" IS '创建时间';
 COMMENT ON COLUMN "group_config"."update_dt" IS '修改时间';
 COMMENT ON TABLE "group_config" IS '组配置';
@@ -33,47 +33,57 @@ COMMENT ON TABLE "group_config" IS '组配置';
 CREATE TABLE notify_config
 (
     id               BIGSERIAL PRIMARY KEY,
-    group_name       VARCHAR(64) NOT NULL,
-    notify_type      SMALLINT NOT NULL DEFAULT 0,
+    group_name       VARCHAR(64)  NOT NULL,
+    notify_type      SMALLINT     NOT NULL DEFAULT 0,
     notify_attribute VARCHAR(512) NOT NULL,
-    notify_threshold INT NOT NULL DEFAULT 0,
-    notify_scene     SMALLINT NOT NULL DEFAULT 0,
+    notify_threshold INT          NOT NULL DEFAULT 0,
+    notify_scene     SMALLINT     NOT NULL DEFAULT 0,
     description      VARCHAR(256) NOT NULL DEFAULT '',
-    create_dt        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    update_dt        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    create_dt        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_dt        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX idx_group_name ON notify_config (group_name);
 
-COMMENT ON COLUMN "notify_config"."id" IS '主键';
-COMMENT ON COLUMN "notify_config"."group_name" IS '组名称';
-COMMENT ON COLUMN "notify_config"."notify_type" IS '通知类型 1、钉钉 2、邮件 3、企业微信';
-COMMENT ON COLUMN "notify_config"."notify_attribute" IS '配置属性';
-COMMENT ON COLUMN "notify_config"."notify_threshold" IS '通知阈值';
-COMMENT ON COLUMN "notify_config"."notify_scene" IS '通知场景';
-COMMENT ON COLUMN "notify_config"."description" IS '描述';
-COMMENT ON COLUMN "notify_config"."create_dt" IS '创建时间';
-COMMENT ON COLUMN "notify_config"."update_dt" IS '修改时间';
-COMMENT ON TABLE "notify_config" IS '通知配置';
+COMMENT
+ON COLUMN "notify_config"."id" IS '主键';
+COMMENT
+ON COLUMN "notify_config"."group_name" IS '组名称';
+COMMENT
+ON COLUMN "notify_config"."notify_type" IS '通知类型 1、钉钉 2、邮件 3、企业微信';
+COMMENT
+ON COLUMN "notify_config"."notify_attribute" IS '配置属性';
+COMMENT
+ON COLUMN "notify_config"."notify_threshold" IS '通知阈值';
+COMMENT
+ON COLUMN "notify_config"."notify_scene" IS '通知场景';
+COMMENT
+ON COLUMN "notify_config"."description" IS '描述';
+COMMENT
+ON COLUMN "notify_config"."create_dt" IS '创建时间';
+COMMENT
+ON COLUMN "notify_config"."update_dt" IS '修改时间';
+COMMENT
+ON TABLE "notify_config" IS '通知配置';
 
 
 CREATE TABLE retry_dead_letter_0
 (
     id            BIGSERIAL PRIMARY KEY,
-    unique_id     VARCHAR(64) NOT NULL,
-    group_name    VARCHAR(64) NOT NULL,
-    scene_name    VARCHAR(64) NOT NULL,
-    idempotent_id VARCHAR(64) NOT NULL,
-    biz_no        VARCHAR(64) NOT NULL DEFAULT '',
+    unique_id     VARCHAR(64)  NOT NULL,
+    group_name    VARCHAR(64)  NOT NULL,
+    scene_name    VARCHAR(64)  NOT NULL,
+    idempotent_id VARCHAR(64)  NOT NULL,
+    biz_no        VARCHAR(64)  NOT NULL DEFAULT '',
     executor_name VARCHAR(512) NOT NULL DEFAULT '',
-    args_str      TEXT NOT NULL,
-    ext_attrs     TEXT NOT NULL,
-    task_type     SMALLINT NOT NULL DEFAULT 1,
-    create_dt     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    args_str      TEXT         NOT NULL,
+    ext_attrs     TEXT         NOT NULL,
+    task_type     SMALLINT     NOT NULL DEFAULT 1,
+    create_dt     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE UNIQUE INDEX "uk_name_unique_id_retry_dead_letter" ON "retry_dead_letter_0" ("group_name","unique_id");
-CREATE INDEX "idx_group_name_scene_name_retry_dead_letter" ON "retry_dead_letter_0" ("group_name","scene_name");
+CREATE UNIQUE INDEX "uk_name_unique_id_retry_dead_letter" ON "retry_dead_letter_0" ("group_name", "unique_id");
+CREATE INDEX "idx_group_name_scene_name_retry_dead_letter" ON "retry_dead_letter_0" ("group_name", "scene_name");
 CREATE INDEX "idx_idempotent_id_retry_dead_letter" ON "retry_dead_letter_0" ("idempotent_id");
 CREATE INDEX "idx_biz_no_retry_dead_letter" ON "retry_dead_letter_0" ("biz_no");
 CREATE INDEX "idx_create_dt_retry_dead_letter" ON "retry_dead_letter_0" ("create_dt");
@@ -94,24 +104,24 @@ COMMENT ON TABLE "retry_dead_letter_0" IS '死信队列表';
 CREATE TABLE retry_task_0
 (
     id              BIGSERIAL PRIMARY KEY,
-    unique_id       VARCHAR(64) NOT NULL,
-    group_name      VARCHAR(64) NOT NULL,
-    scene_name      VARCHAR(64) NOT NULL,
-    idempotent_id   VARCHAR(64) NOT NULL,
-    biz_no          VARCHAR(64) NOT NULL DEFAULT '',
+    unique_id       VARCHAR(64)  NOT NULL,
+    group_name      VARCHAR(64)  NOT NULL,
+    scene_name      VARCHAR(64)  NOT NULL,
+    idempotent_id   VARCHAR(64)  NOT NULL,
+    biz_no          VARCHAR(64)  NOT NULL DEFAULT '',
     executor_name   VARCHAR(512) NOT NULL DEFAULT '',
-    args_str        TEXT NOT NULL,
-    ext_attrs       TEXT NOT NULL,
-    next_trigger_at TIMESTAMP NOT NULL,
-    retry_count     INT NOT NULL DEFAULT 0,
-    retry_status    SMALLINT NOT NULL DEFAULT 0,
-    task_type       SMALLINT NOT NULL DEFAULT 1,
-    route_key       SMALLINT NOT NULL,
-    create_dt       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    update_dt       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    args_str        TEXT         NOT NULL,
+    ext_attrs       TEXT         NOT NULL,
+    next_trigger_at TIMESTAMP    NOT NULL,
+    retry_count     INT          NOT NULL DEFAULT 0,
+    retry_status    SMALLINT     NOT NULL DEFAULT 0,
+    task_type       SMALLINT     NOT NULL DEFAULT 1,
+    route_key       SMALLINT     NOT NULL,
+    create_dt       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_dt       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE UNIQUE INDEX "uk_name_unique_id_retry_task" ON "retry_task_0" ("group_name","unique_id");
+CREATE UNIQUE INDEX "uk_name_unique_id_retry_task" ON "retry_task_0" ("group_name", "unique_id");
 CREATE INDEX "idx_group_name_scene_name_retry_task" ON "retry_task_0" ("group_name", "scene_name");
 CREATE INDEX "idx_retry_status_retry_task" ON "retry_task_0" ("retry_status");
 CREATE INDEX "idx_idempotent_id_retry_task" ON "retry_task_0" ("idempotent_id");
@@ -138,20 +148,20 @@ COMMENT ON TABLE "retry_task_0" IS '任务表';
 CREATE TABLE retry_task_log
 (
     id            BIGSERIAL PRIMARY KEY,
-    unique_id     VARCHAR(64) NOT NULL,
-    group_name    VARCHAR(64) NOT NULL,
-    scene_name    VARCHAR(64) NOT NULL,
-    idempotent_id VARCHAR(64) NOT NULL,
-    biz_no        VARCHAR(64) NOT NULL DEFAULT '',
+    unique_id     VARCHAR(64)  NOT NULL,
+    group_name    VARCHAR(64)  NOT NULL,
+    scene_name    VARCHAR(64)  NOT NULL,
+    idempotent_id VARCHAR(64)  NOT NULL,
+    biz_no        VARCHAR(64)  NOT NULL DEFAULT '',
     executor_name VARCHAR(512) NOT NULL DEFAULT '',
-    args_str      TEXT NOT NULL,
-    ext_attrs     TEXT NOT NULL,
-    retry_status  SMALLINT NOT NULL DEFAULT 0,
-    task_type     SMALLINT NOT NULL DEFAULT 1,
-    create_dt     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    args_str      TEXT         NOT NULL,
+    ext_attrs     TEXT         NOT NULL,
+    retry_status  SMALLINT     NOT NULL DEFAULT 0,
+    task_type     SMALLINT     NOT NULL DEFAULT 1,
+    create_dt     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX "idx_group_name_scene_name_retry_task_log" ON "retry_task_log" ( "group_name","scene_name");
+CREATE INDEX "idx_group_name_scene_name_retry_task_log" ON "retry_task_log" ("group_name", "scene_name");
 CREATE INDEX "idx_retry_status_retry_task_log" ON "retry_task_log" ("retry_status");
 CREATE INDEX "idx_idempotent_id_retry_task_log" ON "retry_task_log" ("idempotent_id");
 CREATE INDEX "idx_unique_id" ON "retry_task_log" ("unique_id");
@@ -177,11 +187,11 @@ CREATE TABLE retry_task_log_message
     id         BIGSERIAL PRIMARY KEY,
     group_name VARCHAR(64) NOT NULL,
     unique_id  VARCHAR(64) NOT NULL,
-    create_dt  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    message    TEXT NOT NULL
+    create_dt  TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    message    TEXT        NOT NULL
 );
 
-CREATE INDEX "idx_group_name_unique_id" ON "retry_task_log_message" ("group_name","unique_id");
+CREATE INDEX "idx_group_name_unique_id" ON "retry_task_log_message" ("group_name", "unique_id");
 CREATE INDEX "idx_create_dt" ON "retry_task_log_message" ("create_dt");
 COMMENT ON COLUMN "retry_task_log_message"."id" IS '主键';
 COMMENT ON COLUMN "retry_task_log_message"."group_name" IS '组名称';
@@ -193,16 +203,18 @@ COMMENT ON TABLE "retry_task_log_message" IS '任务调度日志信息记录表'
 CREATE TABLE scene_config
 (
     id               BIGSERIAL PRIMARY KEY,
-    scene_name       VARCHAR(64) NOT NULL,
-    group_name       VARCHAR(64) NOT NULL,
-    scene_status     SMALLINT NOT NULL DEFAULT 0,
-    max_retry_count  INT NOT NULL DEFAULT 5,
-    back_off         SMALLINT NOT NULL DEFAULT 1,
-    trigger_interval VARCHAR(16) NOT NULL DEFAULT '',
-    deadline_request BIGINT NOT NULL DEFAULT 60000,
+    scene_name       VARCHAR(64)  NOT NULL,
+    group_name       VARCHAR(64)  NOT NULL,
+    scene_status     SMALLINT     NOT NULL DEFAULT 0,
+    max_retry_count  INT          NOT NULL DEFAULT 5,
+    back_off         SMALLINT     NOT NULL DEFAULT 1,
+    trigger_interval VARCHAR(16)  NOT NULL DEFAULT '',
+    deadline_request BIGINT       NOT NULL DEFAULT 60000,
+    route_key        SMALLINT     NOT NULL,
+    executor_timeout INT          NOT NULL DEFAULT 5,
     description      VARCHAR(256) NOT NULL DEFAULT '',
-    create_dt        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    update_dt        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    create_dt        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_dt        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE UNIQUE INDEX "uk_group_name_scene_name" ON "scene_config" ("group_name","scene_name");
@@ -215,6 +227,8 @@ COMMENT ON COLUMN "scene_config"."back_off" IS '1、默认等级 2、固定间�
 COMMENT ON COLUMN "scene_config"."trigger_interval" IS '间隔时长';
 COMMENT ON COLUMN "scene_config"."deadline_request" IS 'Deadline Request 调用链超时 单位毫秒';
 COMMENT ON COLUMN "scene_config"."description" IS '描述';
+COMMENT ON COLUMN "scene_config"."route_key" IS '路由策略';
+COMMENT ON COLUMN "scene_config"."executor_timeout" IS '超时时间';
 COMMENT ON COLUMN "scene_config"."create_dt" IS '创建时间';
 COMMENT ON COLUMN "scene_config"."update_dt" IS '修改时间';
 COMMENT ON TABLE "scene_config" IS '场景配置';
@@ -222,16 +236,16 @@ COMMENT ON TABLE "scene_config" IS '场景配置';
 CREATE TABLE server_node
 (
     id           BIGSERIAL PRIMARY KEY,
-    group_name   VARCHAR(64) NOT NULL,
-    host_id      VARCHAR(64) NOT NULL,
-    host_ip      VARCHAR(64) NOT NULL,
+    group_name   VARCHAR(64)  NOT NULL,
+    host_id      VARCHAR(64)  NOT NULL,
+    host_ip      VARCHAR(64)  NOT NULL,
     context_path VARCHAR(256) NOT NULL DEFAULT '/',
-    host_port    INT NOT NULL,
-    expire_at    TIMESTAMP NOT NULL,
-    node_type    SMALLINT NOT NULL,
-    ext_attrs    VARCHAR(256) DEFAULT '',
-    create_dt    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    update_dt    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    host_port    INT          NOT NULL,
+    expire_at    TIMESTAMP    NOT NULL,
+    node_type    SMALLINT     NOT NULL,
+    ext_attrs VARCHAR(256) DEFAULT '',
+    create_dt    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_dt    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE UNIQUE INDEX "uk_host_id_host_ip" ON "server_node" ("host_id","host_ip");
@@ -252,12 +266,12 @@ COMMENT ON TABLE "server_node" IS '服务器节点';
 CREATE TABLE distributed_lock
 (
     id         BIGSERIAL PRIMARY KEY,
-    name       VARCHAR(64) NOT NULL,
-    lock_until TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    locked_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    name       VARCHAR(64)  NOT NULL,
+    lock_until TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    locked_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     locked_by  VARCHAR(255) NOT NULL,
-    create_dt  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    update_dt  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    create_dt  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_dt  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 ALTER TABLE distributed_lock ADD CONSTRAINT uk_name UNIQUE (name);
@@ -275,11 +289,11 @@ COMMENT ON TABLE "distributed_lock" IS '锁定表';
 CREATE TABLE system_user
 (
     id        BIGSERIAL PRIMARY KEY,
-    username  VARCHAR(64) NOT NULL,
+    username  VARCHAR(64)  NOT NULL,
     password  VARCHAR(128) NOT NULL,
-    role      SMALLINT NOT NULL DEFAULT 0,
-    create_dt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    update_dt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    role      SMALLINT     NOT NULL DEFAULT 0,
+    create_dt TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_dt TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE UNIQUE INDEX "uk_username" ON "system_user" ("username");
@@ -299,9 +313,9 @@ CREATE TABLE system_user_permission
 (
     id             BIGSERIAL PRIMARY KEY,
     group_name     VARCHAR(64) NOT NULL,
-    system_user_id BIGINT NOT NULL,
-    create_dt      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    update_dt      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    system_user_id BIGINT      NOT NULL,
+    create_dt      TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_dt      TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE UNIQUE INDEX "uk_group_name_system_user_id" ON "system_user_permission" ("group_name","system_user_id");
@@ -317,9 +331,9 @@ CREATE TABLE sequence_alloc
 (
     id         BIGSERIAL PRIMARY KEY,
     group_name VARCHAR(64) NOT NULL DEFAULT '',
-    max_id     BIGINT NOT NULL DEFAULT 1,
-    step       INT NOT NULL DEFAULT 100,
-    update_dt  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    max_id     BIGINT      NOT NULL DEFAULT 1,
+    step       INT         NOT NULL DEFAULT 100,
+    update_dt  TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE UNIQUE INDEX "uk_group_name" ON "sequence_alloc" ("group_name");
@@ -329,3 +343,126 @@ COMMENT ON COLUMN "sequence_alloc"."max_id" IS '最大id';
 COMMENT ON COLUMN "sequence_alloc"."step" IS '步长';
 COMMENT ON COLUMN "sequence_alloc"."update_dt" IS '更新时间';
 COMMENT ON TABLE "sequence_alloc" IS '号段模式序号ID分配表';
+
+-- 分布式调度DDL
+CREATE TABLE job
+(
+    id               BIGSERIAL PRIMARY KEY,
+    group_name       VARCHAR(64)  NOT NULL,
+    job_name         VARCHAR(64)  NOT NULL,
+    args_str         TEXT         NOT NULL,
+    args_type        SMALLINT     NOT NULL 1,
+    ext_attrs        TEXT         NOT NULL,
+    next_trigger_at  BIGINT       NOT NULL,
+    job_status       SMALLINT     NOT NULL DEFAULT 1,
+    task_type        SMALLINT     NOT NULL DEFAULT 1,
+    route_key        SMALLINT     NOT NULL DEFAULT 4,
+    executor_type    SMALLINT     NOT NULL DEFAULT 1,
+    executor_info    VARCHAR(255)          DEFAULT NULL,
+    trigger_type     SMALLINT     NOT NULL,
+    trigger_interval VARCHAR(255) NOT NULL,
+    block_strategy   SMALLINT     NOT NULL DEFAULT 1,
+    executor_timeout INT          NOT NULL DEFAULT 0,
+    max_retry_times  INT          NOT NULL DEFAULT 0,
+    parallel_num     INT          NOT NULL DEFAULT 1,
+    retry_interval   INT          NOT NULL DEFAULT 0,
+    bucket_index     INT          NOT NULL DEFAULT 0,
+    resident         SMALLINT     NOT NULL DEFAULT 0,
+    description      VARCHAR(256) NOT NULL DEFAULT '',
+    ext_attrs        VARCHAR(256)          DEFAULT NULL,
+    create_dt        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_dt        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted          SMALLINT     NOT NULL DEFAULT 0
+);
+
+CREATE INDEX "idx_group_name" ON "job" ("group_name");
+CREATE INDEX "idx_job_status_bucket_index" ON "job" (`job_status`, `bucket_index`);
+CREATE INDEX "idx_create_dt" ON "job" (`create_dt`);
+
+COMMENT ON COLUMN "job"."id" IS '主键';
+COMMENT ON COLUMN "job"."group_name" IS '组名称';
+COMMENT ON COLUMN "job"."job_name" IS '名称';
+COMMENT ON COLUMN "job"."args_str" IS '执行方法参数';
+COMMENT ON COLUMN "job"."args_type" IS '参数类型';
+COMMENT ON COLUMN "job"."next_trigger_at" IS '下次触发时间';
+COMMENT ON COLUMN "job"."job_status" IS '重试状态 0、关闭、1、开启';
+COMMENT ON COLUMN "job"."task_type" IS '任务类型 1、集群 2、广播 3、切片';
+COMMENT ON COLUMN "job"."route_key" IS '路由策略';
+COMMENT ON COLUMN "job"."executor_type" IS '执行器类型';
+COMMENT ON COLUMN "job"."executor_info" IS '执行器名称';
+COMMENT ON COLUMN "job"."trigger_type" IS '触发类型 1.CRON 表达式 2. 固定时间';
+COMMENT ON COLUMN "job"."trigger_interval" IS '间隔时长';
+COMMENT ON COLUMN "job"."block_strategy" IS '阻塞策略 1、丢弃 2、覆盖 3、并行';
+COMMENT ON COLUMN "job"."executor_timeout" IS '任务执行超时时间，单位秒';
+COMMENT ON COLUMN "job"."max_retry_times" IS '最大重试次数';
+COMMENT ON COLUMN "job"."parallel_num" IS '并行数';
+COMMENT ON COLUMN "job"."retry_interval" IS '更新重试间隔(s)';
+COMMENT ON COLUMN "job"."bucket_index" IS 'bucket';
+COMMENT ON COLUMN "job"."resident" IS '是否是常驻任务';
+COMMENT ON COLUMN "job"."description" IS '描述';
+COMMENT ON COLUMN "job"."ext_attrs" IS '扩展字段';
+COMMENT ON COLUMN "job"."create_dt" IS '创建时间';
+COMMENT ON COLUMN "job"."deleted" IS '逻辑删除 1、删除';
+COMMENT ON COLUMN "job"."update_dt" IS '更新时间';
+COMMENT ON TABLE "job" IS '任务信息';
+
+
+CREATE TABLE sequence_alloc
+(
+    id            BIGSERIAL PRIMARY KEY,
+    group_name    VARCHAR(64) NOT NULL,
+    job_id        BIGINT      NOT NULL,
+    task_batch_id BIGINT      NOT NULL,
+    task_id       BIGINT      NOT NULL,
+    message       TEXT        NOT NULL,
+    ext_attrs     VARCHAR(256)         DEFAULT '',
+    create_dt     TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+COMMENT ON COLUMN "job_log_message"."id" IS '主键';
+COMMENT ON COLUMN "job_log_message"."group_name" IS '组名称';
+COMMENT ON COLUMN "job_log_message"."job_id" IS '任务信息id';
+COMMENT ON COLUMN "job_log_message"."task_batch_id" IS '任务批次id';
+COMMENT ON COLUMN "job_log_message"."task_id" IS '调度任务id';
+COMMENT ON COLUMN "job_log_message"."message" IS '调度信息';
+COMMENT ON COLUMN "job_log_message"."create_dt" IS '创建时间';
+COMMENT ON COLUMN "job_log_message"."ext_attrs" IS '扩展字段';
+COMMENT ON TABLE "job_log_message" IS '调度日志';
+
+CREATE TABLE `job_task`
+(
+    `id`             bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `group_name`     varchar(64) NOT NULL COMMENT '组名称',
+    `job_id`         bigint(20) NOT NULL COMMENT '任务信息id',
+    `task_batch_id`  bigint(20) NOT NULL COMMENT '调度任务id',
+    `parent_id`      bigint(20) NOT NULL DEFAULT '0' COMMENT '父执行器id',
+    `task_status`    tinyint(4) NOT NULL DEFAULT '0' COMMENT '执行的状态 0、失败 1、成功',
+    `retry_count`    int(11) NOT NULL DEFAULT '0' COMMENT '重试次数',
+    `client_info`    varchar(128)         DEFAULT NULL COMMENT '客户端地址 clientId#ip:port',
+    `result_message` text        NOT NULL COMMENT '执行结果',
+    `args_str`       text                 DEFAULT NULL COMMENT '执行方法参数',
+    `args_type`      tinyint(4) NOT NULL DEFAULT '1' COMMENT '参数类型 ',
+    `ext_attrs`      varchar(256) NULL default '' COMMENT '扩展字段',
+    `create_dt`      datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_dt`      datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+    PRIMARY KEY (`id`),
+    KEY              `idx_task_batch_id_task_status` (`task_batch_id`, `task_status`),
+    KEY              `idx_create_dt` (`create_dt`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='任务实例';
+
+CREATE TABLE `job_task_batch`
+(
+    `id`                bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `group_name`        varchar(64) NOT NULL COMMENT '组名称',
+    `job_id`            bigint(20) NOT NULL COMMENT '任务id',
+    `task_batch_status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '任务批次状态 0、失败 1、成功',
+    `operation_reason`  tinyint(4) NOT NULL DEFAULT '0' COMMENT '操作原因',
+    `execution_at`      bigint(13) NOT NULL DEFAULT '0' COMMENT '任务执行时间',
+    `create_dt`         datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_dt`         datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+    `deleted`           tinyint(4) NOT NULL DEFAULT '0' COMMENT '逻辑删除 1、删除',
+    `ext_attrs`         varchar(256) NULL default '' COMMENT '扩展字段',
+    PRIMARY KEY (`id`),
+    KEY                 `idx_job_id_task_batch_status` (`job_id`, `task_batch_status`),
+    KEY                 `idx_create_dt` (`create_dt`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='任务批次';
