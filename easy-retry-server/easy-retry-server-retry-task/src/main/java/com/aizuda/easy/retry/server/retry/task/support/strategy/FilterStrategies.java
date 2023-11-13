@@ -48,7 +48,7 @@ public class FilterStrategies {
      *
      * @return {@link BitSetIdempotentFilterStrategies} BitSet幂等的过滤策略
      */
-    public static FilterStrategy bitSetIdempotentFilter(IdempotentStrategy<String, Integer> idempotentStrategy) {
+    public static FilterStrategy bitSetIdempotentFilter(IdempotentStrategy<String, Long> idempotentStrategy) {
         return new BitSetIdempotentFilterStrategies(idempotentStrategy);
     }
 
@@ -122,9 +122,9 @@ public class FilterStrategies {
      */
     private static final class BitSetIdempotentFilterStrategies implements FilterStrategy {
 
-        private IdempotentStrategy<String, Integer> idempotentStrategy;
+        private IdempotentStrategy<String, Long> idempotentStrategy;
 
-        public BitSetIdempotentFilterStrategies(IdempotentStrategy<String, Integer> idempotentStrategy) {
+        public BitSetIdempotentFilterStrategies(IdempotentStrategy<String, Long> idempotentStrategy) {
             this.idempotentStrategy = idempotentStrategy;
         }
 
@@ -132,7 +132,7 @@ public class FilterStrategies {
         public Pair<Boolean /*是否符合条件*/, StringBuilder/*描述信息*/> filter(RetryContext retryContext) {
             RetryTask retryTask = retryContext.getRetryTask();
 
-            boolean result = !idempotentStrategy.isExist(retryTask.getGroupName(), retryTask.getId().intValue());
+            boolean result = !idempotentStrategy.isExist(retryTask.getGroupName(), retryTask.getId());
             StringBuilder description = new StringBuilder();
             if (!result) {
                 description.append(MessageFormat.format("存在执行中的任务.uniqueId:[{0}]", retryTask.getUniqueId()));

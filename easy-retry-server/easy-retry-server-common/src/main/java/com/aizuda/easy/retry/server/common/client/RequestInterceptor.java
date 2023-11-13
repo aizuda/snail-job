@@ -27,7 +27,6 @@ public class RequestInterceptor implements Interceptor {
         String timeoutTime = request.header(TIMEOUT_TIME);
         if (StrUtil.isNotBlank(timeoutTime)) {
             int timeout = Integer.parseInt(timeoutTime);
-            log.info("url:[{}] timeout:[{}]", request.url(), timeout);
             if (timeout <= 0) {
                 return chain.proceed(request);
             }

@@ -30,8 +30,8 @@ import java.time.LocalDateTime;
 public abstract class AbstractTaskExecutor implements TaskExecutor, InitializingBean {
 
     @Autowired
-    @Qualifier("bitSetIdempotentStrategyHandler")
-    protected IdempotentStrategy<String, Integer> idempotentStrategy;
+    @Qualifier("retryIdempotentStrategyHandler")
+    protected IdempotentStrategy<String, Long> idempotentStrategy;
     @Autowired
     protected SystemProperties systemProperties;
     @Autowired
@@ -86,9 +86,9 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, Initializing
     }
 
     protected void productExecUnitActor(RetryExecutor retryExecutor) {
-        String groupIdHash = retryExecutor.getRetryContext().getRetryTask().getGroupName();
+        String groupName = retryExecutor.getRetryContext().getRetryTask().getGroupName();
         Long retryId = retryExecutor.getRetryContext().getRetryTask().getId();
-        idempotentStrategy.set(groupIdHash, retryId.intValue());
+        idempotentStrategy.set(groupName, retryId);
 
         ActorRef actorRef = getActorRef();
         actorRef.tell(retryExecutor, actorRef);

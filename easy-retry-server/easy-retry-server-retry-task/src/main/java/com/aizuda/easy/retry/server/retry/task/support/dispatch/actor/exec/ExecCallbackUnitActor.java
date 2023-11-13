@@ -15,7 +15,6 @@ import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.util.ClientInfoUtils;
 import com.aizuda.easy.retry.server.retry.task.client.RetryRpcClient;
-import com.aizuda.easy.retry.server.common.IdempotentStrategy;
 import com.aizuda.easy.retry.server.retry.task.support.context.CallbackRetryContext;
 import com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.log.RetryTaskLogDTO;
 import com.aizuda.easy.retry.server.retry.task.support.handler.CallbackRetryTaskHandler;
@@ -28,7 +27,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -49,9 +47,6 @@ import java.util.concurrent.Callable;
 @Slf4j
 public class ExecCallbackUnitActor extends AbstractActor {
 
-    @Autowired
-    @Qualifier("bitSetIdempotentStrategyHandler")
-    private IdempotentStrategy<String, Integer> idempotentStrategy;
     @Autowired
     private AccessTemplate accessTemplate;
     @Autowired
@@ -102,9 +97,6 @@ public class ExecCallbackUnitActor extends AbstractActor {
                 retryTaskLog.setMessage(StringUtils.isBlank(e.getMessage()) ? StrUtil.EMPTY : e.getMessage());
             } finally {
 
-                // 清除幂等标识位
-                idempotentStrategy.clear(retryTask.getGroupName(), retryTask.getId().intValue());
-
                 ActorRef actorRef = ActorGenerator.logActor();
                 actorRef.tell(retryTaskLog, actorRef);
 
@@ -127,14 +119,17 @@ public class ExecCallbackUnitActor extends AbstractActor {
 
         TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();
         RetryTask retryTask = retryTaskAccess.one(callbackTask.getGroupName(),
-                new LambdaQueryWrapper<RetryTask>().eq(RetryTask::getUniqueId, retryTaskUniqueId));
+                new LambdaQueryWrapper<RetryTask>()
+                        .select(RetryTask::getRetryStatus)
+                        .eq(RetryTask::getGroupName, callbackTask.getGroupName())
+                        .eq(RetryTask::getUniqueId, retryTaskUniqueId));
         Assert.notNull(retryTask, () -> new EasyRetryServerException("未查询回调任务对应的重试任务. callbackUniqueId:[{}] uniqueId:[{}]",
                 callbackTask.getUniqueId(), retryTaskUniqueId));
 
         // 回调参数
         RetryCallbackDTO retryCallbackDTO = new RetryCallbackDTO();
         retryCallbackDTO.setIdempotentId(callbackTask.getIdempotentId());
-        // 重试任务的状态
+        // 重试任务的状态, 客户端根据重试状态判断最大次数或者成功成功
         retryCallbackDTO.setRetryStatus(retryTask.getRetryStatus());
         retryCallbackDTO.setArgsStr(callbackTask.getArgsStr());
         retryCallbackDTO.setScene(callbackTask.getSceneName());

@@ -5,6 +5,7 @@ import akka.actor.ActorRef;
 import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.server.common.IdempotentStrategy;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.log.RetryTaskLogDTO;
@@ -13,6 +14,7 @@ import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -42,6 +44,9 @@ public class FinishActor extends AbstractActor  {
     private CallbackRetryTaskHandler callbackRetryTaskHandler;
     @Autowired
     private TransactionTemplate transactionTemplate;
+    @Autowired
+    @Qualifier("retryIdempotentStrategyHandler")
+    private IdempotentStrategy<String, Long> idempotentStrategy;
 
     @Override
     public Receive createReceive() {
@@ -69,6 +74,8 @@ public class FinishActor extends AbstractActor  {
             }catch (Exception e) {
                 LogUtils.error(log, "更新重试任务失败", e);
             } finally {
+                // 清除幂等标识位
+                idempotentStrategy.clear(retryTask.getGroupName(), retryTask.getId());
 
                 RetryTaskLogDTO retryTaskLogDTO = new RetryTaskLogDTO();
                 retryTaskLogDTO.setGroupName(retryTask.getGroupName());

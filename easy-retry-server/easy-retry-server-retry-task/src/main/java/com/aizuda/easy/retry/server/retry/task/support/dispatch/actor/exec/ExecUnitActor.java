@@ -16,15 +16,12 @@ import com.aizuda.easy.retry.server.common.client.RequestBuilder;
 import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.common.util.ClientInfoUtils;
 import com.aizuda.easy.retry.server.retry.task.client.RetryRpcClient;
-import com.aizuda.easy.retry.server.common.IdempotentStrategy;
 import com.aizuda.easy.retry.server.retry.task.support.context.MaxAttemptsPersistenceRetryContext;
 import com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.log.RetryTaskLogDTO;
 import com.aizuda.easy.retry.server.retry.task.support.retry.RetryExecutor;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
 import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -44,10 +41,6 @@ import java.util.concurrent.Callable;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Slf4j
 public class ExecUnitActor extends AbstractActor {
-
-    @Autowired
-    @Qualifier("bitSetIdempotentStrategyHandler")
-    private IdempotentStrategy<String, Integer> idempotentStrategy;
 
     @Override
     public Receive createReceive() {
@@ -115,8 +108,6 @@ public class ExecUnitActor extends AbstractActor {
                 retryTaskLog.setMessage(e.getMessage());
             } finally {
 
-                // 清除幂等标识位
-                idempotentStrategy.clear(retryTask.getGroupName(), retryTask.getId().intValue());
                 ActorRef actorRef = ActorGenerator.logActor();
                 actorRef.tell(retryTaskLog, actorRef);
                 getContext().stop(getSelf());

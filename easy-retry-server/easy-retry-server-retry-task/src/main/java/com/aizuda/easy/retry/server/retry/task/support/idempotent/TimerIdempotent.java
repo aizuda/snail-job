@@ -16,7 +16,6 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class TimerIdempotent implements IdempotentStrategy<String, String> {
 
-
     private static final Cache<String, String> cache;
 
     static {
@@ -33,7 +32,7 @@ public class TimerIdempotent implements IdempotentStrategy<String, String> {
     }
 
     private static String getKey(final String key, final String value) {
-        return key.concat(StrUtil.UNDERLINE).concat(String.valueOf(value));
+        return key.concat(StrUtil.UNDERLINE).concat(value);
     }
 
     @Override
