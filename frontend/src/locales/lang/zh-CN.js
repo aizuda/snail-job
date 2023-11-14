@@ -21,7 +21,7 @@ export default {
 
   'layouts.usermenu.dialog.title': '信息',
   'layouts.usermenu.dialog.content': '您确定要注销吗？',
-  'layouts.userLayout.title': '致力提高分布式业务系统一致性的分布式重试平台',
+  'layouts.userLayout.title': '一款为了提高分布式业务系统一致性的分布式任务重试和分布式任务调度平台',
   ...components,
   ...global,
   ...menu,
