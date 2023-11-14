@@ -263,7 +263,8 @@ CREATE TABLE `job_log_message`
     `ext_attrs`     varchar(256) NULL default '' COMMENT '扩展字段',
     PRIMARY KEY (`id`),
     KEY             `idx_task_batch_id_task_id` (`task_batch_id`, `task_id`),
-    KEY             `idx_create_dt` (`create_dt`)
+    KEY             `idx_create_dt` (`create_dt`),
+    KEY             `idx_group_name` (`group_name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='调度日志';
 
 CREATE TABLE `job_task`
@@ -284,7 +285,8 @@ CREATE TABLE `job_task`
     `update_dt`      datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     PRIMARY KEY (`id`),
     KEY              `idx_task_batch_id_task_status` (`task_batch_id`, `task_status`),
-    KEY              `idx_create_dt` (`create_dt`)
+    KEY              `idx_create_dt` (`create_dt`),
+    KEY              `idx_group_name` (`group_name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='任务实例';
 
 CREATE TABLE `job_task_batch`
@@ -295,11 +297,13 @@ CREATE TABLE `job_task_batch`
     `task_batch_status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '任务批次状态 0、失败 1、成功',
     `operation_reason`  tinyint(4) NOT NULL DEFAULT '0' COMMENT '操作原因',
     `execution_at`      bigint(13) NOT NULL DEFAULT '0' COMMENT '任务执行时间',
+    `parent_id`        varchar(64) NOT NULL DEFAULT '' COMMENT '父节点',
     `create_dt`         datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_dt`         datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     `deleted`           tinyint(4) NOT NULL DEFAULT '0' COMMENT '逻辑删除 1、删除',
     `ext_attrs`         varchar(256) NULL default '' COMMENT '扩展字段',
     PRIMARY KEY (`id`),
     KEY                 `idx_job_id_task_batch_status` (`job_id`, `task_batch_status`),
-    KEY                 `idx_create_dt` (`create_dt`)
+    KEY                 `idx_create_dt` (`create_dt`),
+    KEY                 `idx_group_name` (`group_name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='任务批次';
