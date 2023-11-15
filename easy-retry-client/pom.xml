@@ -11,6 +11,9 @@
     </parent>
 
     <artifactId>easy-retry-client</artifactId>
+    <name>easy-retry-client</name>
+    <description>easy-retry-client</description>
+
     <packaging>pom</packaging>
     <modules>
         <module>easy-retry-client-common</module>

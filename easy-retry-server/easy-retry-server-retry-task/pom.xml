@@ -11,6 +11,8 @@
     </parent>
 
     <artifactId>easy-retry-server-retry-task</artifactId>
+    <name>easy-retry-server-retry-task</name>
+    <description>easy-retry-server-retry-task</description>
     <packaging>jar</packaging>
 
     <properties>

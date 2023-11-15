@@ -71,4 +71,9 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <build>
+        <finalName>easy-retry-server</finalName>
+    </build>
+
 </project>

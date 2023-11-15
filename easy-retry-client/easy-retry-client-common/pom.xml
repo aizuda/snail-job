@@ -12,6 +12,8 @@
 
 
     <artifactId>easy-retry-client-common</artifactId>
+    <name>easy-retry-client-common</name>
+    <description>easy-retry-client-common</description>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
