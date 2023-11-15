@@ -11,6 +11,8 @@
     </parent>
 
     <artifactId>easy-retry-server-web</artifactId>
+    <name>easy-retry-server-web</name>
+    <description>easy-retry-server-web</description>
     <packaging>jar</packaging>
 
     <properties>

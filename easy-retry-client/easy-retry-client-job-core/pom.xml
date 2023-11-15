@@ -11,6 +11,8 @@
     </parent>
 
     <artifactId>easy-retry-client-job-core</artifactId>
+    <name>easy-retry-client-job-core</name>
+    <description>easy-retry-client-job-core</description>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>

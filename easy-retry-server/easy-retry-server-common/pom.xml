@@ -11,6 +11,8 @@
     </parent>
 
     <artifactId>easy-retry-server-common</artifactId>
+    <name>easy-retry-server-common</name>
+    <description>easy-retry-server-common</description>
     <packaging>jar</packaging>
 
     <properties>
