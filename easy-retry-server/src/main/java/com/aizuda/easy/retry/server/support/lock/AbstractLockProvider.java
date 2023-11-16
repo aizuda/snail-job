@@ -35,7 +35,7 @@ public abstract class AbstractLockProvider implements LockProvider {
         try {
             return doLockAfter(lockConfig);
         } catch (Exception e) {
-            if (tryToCreateLockRecord) {
+            if (!tryToCreateLockRecord) {
                 CacheLockRecord.remove(lockName);
             }
 
