@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.server.common.client;
 
 import cn.hutool.core.lang.Assert;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
@@ -42,6 +43,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 /**
  * 请求处理器
@@ -214,8 +216,9 @@ public class RpcClientInvokeHandler implements InvocationHandler {
     }
 
     private StringBuilder getUrl(Mapping mapping, Map<String, Object> paramMap) {
-        StringBuilder url = new StringBuilder(MessageFormat.format(URL, hostIp, hostPort.toString(), contextPath));
-        url.append(mapping.path());
+        StringBuilder url = new StringBuilder();
+        String format = MessageFormat.format(URL, hostIp, hostPort.toString(), contextPath).replaceAll("/+$", StrUtil.EMPTY);
+        url.append(format).append(StrUtil.SLASH).append(mapping.path().replaceFirst("^/+", StrUtil.EMPTY));
         if (!CollectionUtils.isEmpty(paramMap)) {
             String query = URLUtil.buildQuery(paramMap, null);
             url.append("?").append(query);
