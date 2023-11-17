@@ -77,4 +77,10 @@ public class JobController {
     ) {
         return jobService.getJobNameList(keywords, jobId);
     }
+
+    @PostMapping("/trigger/{jobId}")
+    @LoginRequired
+    public Boolean trigger(@PathVariable("jobId") Long jobId) {
+        return jobService.trigger(jobId);
+    }
 }

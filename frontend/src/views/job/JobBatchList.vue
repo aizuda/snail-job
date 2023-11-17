@@ -111,6 +111,14 @@
         <template>
           <a @click="handleInfo(record)">详情</a>
           <a-divider type="vertical" />
+          <a-popconfirm
+            title="是否停止?"
+            ok-text="停止"
+            cancel-text="取消"
+            @confirm="handleStop(record)"
+          >
+            <a href="javascript:;" v-if="record.taskBatchStatus === 1 || record.taskBatchStatus === 2">停止</a>
+          </a-popconfirm>
           <!--          <a-popconfirm-->
           <!--            title="是否暂停?"-->
           <!--            ok-text="恢复"-->
@@ -158,7 +166,7 @@
 import ATextarea from 'ant-design-vue/es/input/TextArea'
 import AInput from 'ant-design-vue/es/input/Input'
 import { STable } from '@/components'
-import { jobBatchList, jobNameList } from '@/api/jobApi'
+import { jobBatchList, jobNameList, stop } from '@/api/jobApi'
 import { getAllGroupNameList } from '@/api/manage'
 const enums = require('@/utils/jobEnum')
 
@@ -301,16 +309,16 @@ export default {
       this.$router.push({ path: '/job/batch/info', query: { id: record.id, groupName: record.groupName } })
     },
     handleOk (record) {},
-    handleSuspend (record) {
-      // updateRetryTaskStatus({ id: record.id, groupName: record.groupName, retryStatus: 3 }).then((res) => {
-      //   const { status } = res
-      //   if (status === 0) {
-      //     this.$message.error('暂停失败')
-      //   } else {
-      //     this.$refs.table.refresh(true)
-      //     this.$message.success('暂停成功')
-      //   }
-      // })
+    handleStop (record) {
+      stop(record.id).then((res) => {
+        const { status } = res
+        if (status === 0) {
+          this.$message.error('停止失败')
+        } else {
+          this.$refs.table.refresh(true)
+          this.$message.success('停止成功')
+        }
+      })
     },
     handleRecovery (record) {
       // updateRetryTaskStatus({ id: record.id, groupName: record.groupName, retryStatus: 0 }).then((res) => {

@@ -32,4 +32,7 @@ public interface JobService {
     List<String> getTimeByCron(String cron);
 
     List<JobResponseVO> getJobNameList(String keywords, Long jobId);
+
+    boolean trigger(Long jobId);
+
 }

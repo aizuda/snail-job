@@ -16,4 +16,7 @@ public interface JobBatchService {
     PageResult<List<JobBatchResponseVO>> getJobBatchPage(JobBatchQueryVO jobQueryVO);
 
     JobBatchResponseVO getJobBatchDetail(Long id);
+
+    boolean stop(Long taskBatchId);
+
 }

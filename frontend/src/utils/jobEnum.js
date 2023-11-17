@@ -128,6 +128,10 @@ const enums = {
     '7': {
       'name': '任务执行期间发生非预期异常',
       'color': '#bdc223'
+    },
+    '8': {
+      'name': '手动停止',
+      'color': '#23c28a'
     }
   },
   taskStatus: {

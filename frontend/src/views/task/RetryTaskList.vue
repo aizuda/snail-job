@@ -106,7 +106,7 @@
           <a-divider type="vertical" />
           <a-popconfirm
             title="是否暂停?"
-            ok-text="恢复"
+            ok-text="暂停"
             cancel-text="取消"
             @confirm="handleSuspend(record)"
           >

@@ -10,6 +10,9 @@ import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.strategy.WaitStrategies;
 import com.aizuda.easy.retry.server.common.util.CronUtils;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
+import com.aizuda.easy.retry.server.job.task.dto.JobTaskPrepareDTO;
+import com.aizuda.easy.retry.server.job.task.support.JobPrePareHandler;
+import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.server.job.task.support.cache.ResidentTaskCache;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
 import com.aizuda.easy.retry.server.web.model.request.JobQueryVO;
@@ -25,6 +28,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -42,11 +46,13 @@ import java.util.Optional;
 @Slf4j
 public class JobServiceImpl implements JobService {
 
-    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     @Autowired
     private SystemProperties systemProperties;
     @Autowired
     private JobMapper jobMapper;
+    @Autowired
+    @Qualifier("terminalJobPrepareHandler")
+    private JobPrePareHandler jobPrePareHandler;
 
     @Override
     public PageResult<List<JobResponseVO>> getJobPage(JobQueryVO queryVO) {
@@ -189,5 +195,20 @@ public class JobServiceImpl implements JobService {
         job.setId(id);
         job.setDeleted(StatusEnum.YES.getStatus());
         return 1 == jobMapper.updateById(job);
+    }
+
+    @Override
+    public boolean trigger(Long jobId) {
+
+        Job job = jobMapper.selectById(jobId);
+        Assert.notNull(job, () -> new EasyRetryServerException("job can not be null."));
+
+        JobTaskPrepareDTO jobTaskPrepare = JobTaskConverter.INSTANCE.toJobTaskPrepare(job);
+        // 设置now表示立即执行
+        jobTaskPrepare.setNextTriggerAt(DateUtils.toNowMilli());
+        // 创建批次
+        jobPrePareHandler.handler(jobTaskPrepare);
+
+        return Boolean.TRUE;
     }
 }

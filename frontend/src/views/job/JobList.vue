@@ -111,6 +111,15 @@
       </span>
       <span slot="action" slot-scope="text, record">
         <template>
+          <a-popconfirm
+            title="是否运行?"
+            ok-text="运行"
+            cancel-text="取消"
+            @confirm="handleTrigger(record)"
+          >
+            <a href="javascript:;">运行</a>
+          </a-popconfirm>
+          <a-divider type="vertical" />
           <a @click="handleInfo(record)">详情</a>
           <a-divider type="vertical" />
           <a @click="goJobBatchList(record)">批次</a>
@@ -155,7 +164,7 @@
 import ATextarea from 'ant-design-vue/es/input/TextArea'
 import AInput from 'ant-design-vue/es/input/Input'
 import { STable } from '@/components'
-import { delJob, getJobList, updateJobStatus } from '@/api/jobApi'
+import { delJob, getJobList, triggerJob, updateJobStatus } from '@/api/jobApi'
 import { getAllGroupNameList } from '@/api/manage'
 import enums from '@/utils/jobEnum'
 
@@ -308,6 +317,17 @@ export default {
         } else {
           this.$refs.table.refresh(true)
           this.$message.success('关闭成功')
+        }
+      })
+    },
+    handleTrigger (record) {
+      triggerJob(record.id).then((res) => {
+        const { status } = res
+        if (status === 0) {
+          this.$message.error('执行失败')
+        } else {
+          // this.$refs.table.refresh(true)
+          this.$message.success('执行成功')
         }
       })
     },
