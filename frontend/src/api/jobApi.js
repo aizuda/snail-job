@@ -9,10 +9,12 @@ const jobApi = {
   delJob: '/job/',
   timeByCron: '/job/cron',
   jobNameList: '/job/job-name/list',
+  triggerJob: '/job/trigger/',
 
   // 任务批次
   jobBatchList: '/job/batch/list',
   jobBatchDetail: '/job/batch/',
+  stop: '/job/batch/stop/',
 
   // 任务
   jobTaskList: '/job/task/list',
@@ -22,6 +24,20 @@ const jobApi = {
 }
 
 export default jobApi
+
+export function triggerJob (id) {
+  return request({
+    url: jobApi.triggerJob + id,
+    method: 'post'
+  })
+}
+
+export function stop (id) {
+  return request({
+    url: jobApi.stop + id,
+    method: 'post'
+  })
+}
 
 export function jobNameList (parameter) {
   return request({

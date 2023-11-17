@@ -3,15 +3,10 @@ package com.aizuda.easy.retry.server.web.controller;
 import com.aizuda.easy.retry.server.web.annotation.LoginRequired;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
 import com.aizuda.easy.retry.server.web.model.request.JobBatchQueryVO;
-import com.aizuda.easy.retry.server.web.model.request.JobQueryVO;
 import com.aizuda.easy.retry.server.web.model.response.JobBatchResponseVO;
-import com.aizuda.easy.retry.server.web.model.response.JobResponseVO;
 import com.aizuda.easy.retry.server.web.service.JobBatchService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -39,5 +34,10 @@ public class JobBatchController {
         return jobBatchService.getJobBatchDetail(id);
     }
 
+    @PostMapping("/stop/{taskBatchId}")
+    @LoginRequired
+    public Boolean stop(@PathVariable("taskBatchId") Long taskBatchId) {
+        return jobBatchService.stop(taskBatchId);
+    }
 
 }
