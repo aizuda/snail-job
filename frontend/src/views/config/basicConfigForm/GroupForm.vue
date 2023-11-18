@@ -119,10 +119,10 @@
                     </a>
                   </span>
                   <a-select
-                    placeholder="请选择是否初始化场景"
+                    placeholder="请选择是否分区"
                     v-decorator="[
-                      'initPartition',
-                      {initialValue: '0' ,rules: [{ required: true, message: '请选择是否初始化场景'}]}
+                      'groupPartition',
+                      {initialValue: '0' ,rules: [{ required: true, message: '请选择是否分区'}]}
                     ]" >
                     <a-select-option :value="key" v-for="(value, key) in initPartition" :key="key">{{ value }}</a-select-option>
                   </a-select>
@@ -224,7 +224,7 @@ export default {
       new Promise((resolve) => {
         setTimeout(resolve, 100)
       }).then(() => {
-        const formData = pick(data, ['id', 'groupName', 'groupStatus', 'description', 'idGeneratorMode', 'initScene'])
+        const formData = pick(data, ['id', 'groupName', 'groupStatus', 'description', 'groupPartition', 'idGeneratorMode', 'initScene'])
         formData.groupStatus = formData.groupStatus.toString()
         formData.idGeneratorMode = formData.idGeneratorMode.toString()
         formData.initScene = formData.initScene.toString()

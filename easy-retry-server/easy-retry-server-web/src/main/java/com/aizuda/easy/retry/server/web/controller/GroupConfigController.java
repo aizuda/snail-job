@@ -86,6 +86,6 @@ public class GroupConfigController {
     public List<Integer> getTablePartitionList() {
         // https://gitee.com/aizuda/easy-retry/issues/I8DAMH
         List<String> tableList = jdbcTemplate.queryForList("SHOW TABLES LIKE 'retry_task_%'", String.class);
-        return tableList.stream().map(i -> ReUtil.getFirstNumber(i)).filter(i -> !Objects.isNull(i) && i <= systemProperties.getTotalPartition()).distinct().collect(Collectors.toList());
+        return tableList.stream().map(ReUtil::getFirstNumber).filter(i -> !Objects.isNull(i) && i <= systemProperties.getTotalPartition()).distinct().collect(Collectors.toList());
     }
 }
