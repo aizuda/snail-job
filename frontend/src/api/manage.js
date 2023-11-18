@@ -40,6 +40,7 @@ const api = {
   countActivePod: '/dashboard/active-pod/count',
   rankSceneQuantity: '/dashboard/scene/rank',
   lineDispatchQuantity: '/dashboard/dispatch/line',
+  partitionTableList: '/group/partition-table/list',
   totalPartition: '/group/partition',
   systemVersion: '/system/version',
   pods: '/dashboard/pods',
@@ -124,6 +125,13 @@ export function batchSaveRetryTask (data) {
     url: api.batchSaveRetryTask,
     method: 'post',
     data
+  })
+}
+
+export function getPartitionTableList () {
+  return request({
+    url: api.partitionTableList,
+    method: 'get'
   })
 }
 

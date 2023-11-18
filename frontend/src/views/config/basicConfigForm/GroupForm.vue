@@ -118,22 +118,18 @@
                       <a-icon type="question-circle-o" />
                     </a>
                   </span>
-                  <a-input-number
-                    id="inputNumber"
-                    style="width: -webkit-fill-available"
-                    placeholder="分区"
+                  <a-select
+                    placeholder="请选择是否初始化场景"
                     v-decorator="[
-                      'groupPartition'
-                    ]"
-                    :min="0"
-                    :max="maxGroupPartition"
-                  />
+                      'initPartition',
+                      {initialValue: '0' ,rules: [{ required: true, message: '请选择是否初始化场景'}]}
+                    ]" >
+                    <a-select-option :value="key" v-for="(value, key) in initPartition" :key="key">{{ value }}</a-select-option>
+                  </a-select>
                 </a-form-item>
               </a-col>
             </a-row>
           </CollapsePanel>
-          <!--        <CollapsePanel key="3" header="定时任务配置" :style="customStyle">-->
-          <!--        </collapsepanel>-->
         </Collapse>
         <a-form-item v-if="showSubmit">
           <a-button htmlType="submit" >Submit</a-button>
@@ -146,7 +142,7 @@
 </template>
 
 <script>
-import { getGroupConfigByGroupName, getTotalPartition } from '@/api/manage'
+import { getGroupConfigByGroupName, getPartitionTableList } from '@/api/manage'
 import pick from 'lodash.pick'
 import { officialWebsite } from '@/utils/util'
 import CollapsePanel from 'ant-design-vue/lib/collapse/CollapsePanel'
@@ -166,7 +162,6 @@ export default {
   data () {
     return {
       form: this.$form.createForm(this),
-      maxGroupPartition: 32,
       idGenMode: {
         '1': '号段模式',
         '2': '雪花算法'
@@ -174,6 +169,9 @@ export default {
       initScene: {
         '0': '否',
         '1': '是'
+      },
+      initPartition: {
+
       },
       officialWebsite: officialWebsite(),
       expandIconPosition: 'left',
@@ -185,11 +183,10 @@ export default {
     }
   },
   mounted () {
+    getPartitionTableList().then(res => {
+      this.initPartition = res.data
+    })
     this.$nextTick(() => {
-      getTotalPartition().then(res => {
-        this.maxGroupPartition = res.data
-      })
-
       const groupName = this.$route.query.groupName
       if (groupName) {
         this.loading = true
@@ -227,7 +224,7 @@ export default {
       new Promise((resolve) => {
         setTimeout(resolve, 100)
       }).then(() => {
-        const formData = pick(data, ['id', 'groupName', 'groupStatus', 'description', 'groupPartition', 'idGeneratorMode', 'initScene'])
+        const formData = pick(data, ['id', 'groupName', 'groupStatus', 'description', 'idGeneratorMode', 'initScene'])
         formData.groupStatus = formData.groupStatus.toString()
         formData.idGeneratorMode = formData.idGeneratorMode.toString()
         formData.initScene = formData.initScene.toString()
