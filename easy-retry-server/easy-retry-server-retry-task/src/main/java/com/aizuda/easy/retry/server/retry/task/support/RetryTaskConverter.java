@@ -5,6 +5,7 @@ import com.aizuda.easy.retry.server.retry.task.dto.RetryPartitionTask;
 import com.aizuda.easy.retry.server.retry.task.generator.task.TaskContext;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryDeadLetter;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
+import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLog;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
@@ -26,7 +27,7 @@ public interface RetryTaskConverter {
     RetryTask toRetryTask(RetryTask retryTask);
 
     @Mappings({
-        @Mapping(target = "id", ignore = true),
+            @Mapping(target = "id", ignore = true),
     })
     RetryTask toRetryTask(RetryDeadLetter retryDeadLetter);
 
@@ -35,4 +36,7 @@ public interface RetryTaskConverter {
     RetryTask toRetryTask(TaskContext.TaskInfo taskInfo);
 
     List<RetryPartitionTask> toRetryPartitionTasks(List<RetryTask> retryTasks);
+
+    List<RetryPartitionTask> toRetryTaskLogPartitionTasks(List<RetryTaskLog> retryTaskLogList);
+
 }

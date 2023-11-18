@@ -12,6 +12,7 @@ import com.aizuda.easy.retry.server.job.task.support.strategy.BlockStrategies;
 import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobLogMessage;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
+import com.aizuda.easy.retry.template.datasource.persistence.po.JobTaskBatch;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
@@ -91,5 +92,7 @@ public interface JobTaskConverter {
     RealStopTaskInstanceDTO toRealStopTaskInstanceDTO(TaskStopJobContext context);
 
     List<JobPartitionTask> toJobPartitionTasks(List<Job> jobs);
+
+    List<JobPartitionTask> toJobTaskBatchPartitionTasks(List<JobTaskBatch> jobTaskBatches);
 
 }
