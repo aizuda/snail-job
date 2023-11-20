@@ -28,7 +28,7 @@ public class NotifyConfig implements Serializable {
 
     private Integer rateLimiterStatus;
 
-    private int rateLimiterThreshold;
+    private Integer rateLimiterThreshold;
 
     private String description;
 
