@@ -3,7 +3,6 @@ package com.aizuda.easy.retry.template.datasource.persistence.po;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
-
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -15,6 +14,8 @@ public class NotifyConfig implements Serializable {
 
     private String groupName;
 
+    private String sceneName;
+
     private Integer notifyStatus;
 
     private Integer notifyType;
@@ -24,6 +25,10 @@ public class NotifyConfig implements Serializable {
     private Integer notifyThreshold;
 
     private Integer notifyScene;
+
+    private Integer rateLimiterStatus;
+
+    private Integer rateLimiterThreshold;
 
     private String description;
 

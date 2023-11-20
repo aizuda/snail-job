@@ -12,6 +12,8 @@ public class NotifyConfigResponseVO implements Serializable {
 
     private String groupName;
 
+    private String sceneName;
+
     private Integer notifyStatus;
 
     private String notifyName;
@@ -23,6 +25,10 @@ public class NotifyConfigResponseVO implements Serializable {
     private Integer notifyThreshold;
 
     private Integer notifyScene;
+
+    private Integer rateLimiterStatus;
+
+    private Integer rateLimiterThreshold;
 
     private String description;
 

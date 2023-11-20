@@ -34,11 +34,14 @@ CREATE TABLE notify_config
 (
     id               BIGSERIAL PRIMARY KEY,
     group_name       VARCHAR(64)  NOT NULL,
+    scene_name       VARCHAR(64)  NOT NULL,
     notify_status    SMALLINT  NOT NULL DEFAULT 0,
     notify_type      SMALLINT     NOT NULL DEFAULT 0,
     notify_attribute VARCHAR(512) NOT NULL,
     notify_threshold INT          NOT NULL DEFAULT 0,
     notify_scene     SMALLINT     NOT NULL DEFAULT 0,
+    rate_limiter_status    SMALLINT  NOT NULL DEFAULT 0,
+    rate_limiter_threshold INT          NOT NULL DEFAULT 0,
     description      VARCHAR(256) NOT NULL DEFAULT '',
     create_dt        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_dt        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -48,11 +51,14 @@ CREATE INDEX idx_group_name ON notify_config (group_name);
 
 COMMENT ON COLUMN "notify_config"."id" IS '主键';
 COMMENT ON COLUMN "notify_config"."group_name" IS '组名称';
+COMMENT ON COLUMN "notify_config"."scene_name" IS '场景名称';
 COMMENT ON COLUMN "notify_config"."notify_status" IS '通知状态 0、未启用 1、启用';
 COMMENT ON COLUMN "notify_config"."notify_type" IS '通知类型 1、钉钉 2、邮件 3、企业微信';
 COMMENT ON COLUMN "notify_config"."notify_attribute" IS '配置属性';
 COMMENT ON COLUMN "notify_config"."notify_threshold" IS '通知阈值';
 COMMENT ON COLUMN "notify_config"."notify_scene" IS '通知场景';
+COMMENT ON COLUMN "notify_config"."rate_limiter_status" IS '限流状态 0、未启用 1、启用';
+COMMENT ON COLUMN "notify_config"."rate_limiter_threshold" IS '每秒限流阈值';
 COMMENT ON COLUMN "notify_config"."description" IS '描述';
 COMMENT ON COLUMN "notify_config"."create_dt" IS '创建时间';
 COMMENT ON COLUMN "notify_config"."update_dt" IS '修改时间';

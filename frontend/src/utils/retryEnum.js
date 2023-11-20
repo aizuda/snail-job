@@ -39,11 +39,11 @@ const enums = {
   },
   notifyScene: {
     '1': {
-      'name': '重试数量超过阈值',
+      'name': '场景重试数量超过阈值',
       'color': '#d06892'
     },
     '2': {
-      'name': '重试失败数量超过阈值',
+      'name': '场景重试失败数量超过阈值',
       'color': '#f5a22d'
     },
     '3': {
@@ -53,6 +53,14 @@ const enums = {
     '4': {
       'name': '客户端组件异常',
       'color': '#a127f3'
+    },
+    '5': {
+      'name': '任务重试数量超过阈值',
+      'color': '#f5a22d'
+    },
+    '6': {
+      'name': '任务失败进入死信队列',
+      'color': '#f5a22d'
     }
   },
   routeKey: {
@@ -85,6 +93,16 @@ const enums = {
     '4': {
       'name': '飞书',
       'color': '#087da1'
+    }
+  },
+  rateLimiterStatus: {
+    '0': {
+      'name': '未启用',
+      'color': '#9c1f1f'
+    },
+    '1': {
+      'name': '启用',
+      'color': '#f5a22d'
     }
   },
   notifyStatus: {

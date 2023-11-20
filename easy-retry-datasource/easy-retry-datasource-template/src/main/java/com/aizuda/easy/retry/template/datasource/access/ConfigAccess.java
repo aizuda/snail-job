@@ -52,6 +52,17 @@ public interface ConfigAccess<T> extends Access<T>  {
      */
     List<NotifyConfig> getNotifyConfigByGroupName(String groupName, Integer notifyScene);
 
+
+    /**
+     * 获取通知配置
+     *
+     * @param groupName     组名称
+     * @param groupName     场景名称
+     * @param notifyScene {@link NotifySceneEnum} 场景类型
+     * @return {@link NotifyConfig} 场景配置
+     */
+    List<NotifyConfig> getNotifyConfigByGroupNameAndSceneName(String groupName,String sceneName, Integer notifyScene);
+
     /**
      * 获取通知配置
      *
@@ -87,6 +98,14 @@ public interface ConfigAccess<T> extends Access<T>  {
      * @return 组配置列表
      */
     List<GroupConfig> getAllConfigGroupList();
+
+
+    /**
+     * 获取所有场景配置信息
+     *
+     * @return 场景配置列表
+     */
+    List<SceneConfig> getAllConfigSceneList();
 
     /**
      * 获取配置版本号

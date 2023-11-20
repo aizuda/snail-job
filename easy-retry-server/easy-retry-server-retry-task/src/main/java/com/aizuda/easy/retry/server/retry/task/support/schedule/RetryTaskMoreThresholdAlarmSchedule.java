@@ -12,9 +12,9 @@ import com.aizuda.easy.retry.server.common.Lifecycle;
 import com.aizuda.easy.retry.server.common.schedule.AbstractSchedule;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
-import com.aizuda.easy.retry.template.datasource.persistence.po.GroupConfig;
 import com.aizuda.easy.retry.template.datasource.persistence.po.NotifyConfig;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
+import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +40,7 @@ public class RetryTaskMoreThresholdAlarmSchedule extends AbstractSchedule implem
     private static String retryTaskMoreThresholdTextMessageFormatter =
         "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 重试数据监控</font>  \n" +
             "> 组名称:{}  \n" +
+            "> 场景名称:{}  \n" +
             "> 告警时间:{}  \n" +
             "> **共计:{}**  \n";
 
@@ -59,34 +60,33 @@ public class RetryTaskMoreThresholdAlarmSchedule extends AbstractSchedule implem
     @Override
     protected void doExecute() {
         LogUtils.info(log, "retryTaskMoreThreshold time[{}] ip:[{}]", LocalDateTime.now(), HostUtils.getIp());
-
-        for (GroupConfig groupConfig : accessTemplate.getGroupConfigAccess().getAllConfigGroupList()) {
-            List<NotifyConfig> notifyConfigs = accessTemplate.getNotifyConfigAccess().getNotifyConfigByGroupName(groupConfig.getGroupName(), NotifySceneEnum.MAX_RETRY.getNotifyScene());
-            if (CollectionUtils.isEmpty(notifyConfigs)) {
-                continue;
-            }
-
-            long count = accessTemplate.getRetryTaskAccess().count(groupConfig.getGroupName(), new LambdaQueryWrapper<RetryTask>()
-                    .eq(RetryTask::getGroupName, groupConfig.getGroupName())
-                    .eq(RetryTask::getRetryStatus, RetryStatusEnum.RUNNING.getStatus()));
-            for (NotifyConfig notifyConfig : notifyConfigs) {
-                if (count > notifyConfig.getNotifyThreshold()) {
-                    // 预警
-                    AlarmContext context = AlarmContext.build()
-                        .text(retryTaskMoreThresholdTextMessageFormatter,
-                            EnvironmentUtils.getActiveProfile(),
-                            groupConfig.getGroupName(),
-                            DateUtils.toNowFormat(DateUtils.NORM_DATETIME_PATTERN),
-                            count)
-                        .title("组:[{}])重试数据过多", groupConfig.getGroupName())
-                        .notifyAttribute(notifyConfig.getNotifyAttribute());
-
-                    Alarm<AlarmContext> alarmType = easyRetryAlarmFactory.getAlarmType(notifyConfig.getNotifyType());
-                    alarmType.asyncSendMessage(context);
+            for (SceneConfig sceneConfig : accessTemplate.getSceneConfigAccess().getAllConfigSceneList()) {
+                List<NotifyConfig> notifyConfigs = accessTemplate.getNotifyConfigAccess().getNotifyConfigByGroupNameAndSceneName(sceneConfig.getGroupName(),sceneConfig.getSceneName(), NotifySceneEnum.MAX_RETRY.getNotifyScene());
+                if (CollectionUtils.isEmpty(notifyConfigs)) {
+                    continue;
+                }
+                long count = accessTemplate.getRetryTaskAccess().count(sceneConfig.getGroupName(), new LambdaQueryWrapper<RetryTask>()
+                        .eq(RetryTask::getGroupName, sceneConfig.getGroupName())
+                        .eq(RetryTask::getSceneName,sceneConfig.getSceneName())
+                        .eq(RetryTask::getRetryStatus, RetryStatusEnum.RUNNING.getStatus()));
+                for (NotifyConfig notifyConfig : notifyConfigs) {
+                    if (count > notifyConfig.getNotifyThreshold()) {
+                        // 预警
+                        AlarmContext context = AlarmContext.build()
+                                .text(retryTaskMoreThresholdTextMessageFormatter,
+                                        EnvironmentUtils.getActiveProfile(),
+                                        sceneConfig.getGroupName(),
+                                        sceneConfig.getSceneName(),
+                                        DateUtils.toNowFormat(DateUtils.NORM_DATETIME_PATTERN),
+                                        count)
+                                .title("组:[{}] 场景:[{}] 重试数据过多", sceneConfig.getGroupName(),sceneConfig.getSceneName())
+                                .notifyAttribute(notifyConfig.getNotifyAttribute());
+                        Alarm<AlarmContext> alarmType = easyRetryAlarmFactory.getAlarmType(notifyConfig.getNotifyType());
+                        alarmType.asyncSendMessage(context);
+                    }
                 }
             }
         }
-    }
 
     @Override
     public String lockName() {
