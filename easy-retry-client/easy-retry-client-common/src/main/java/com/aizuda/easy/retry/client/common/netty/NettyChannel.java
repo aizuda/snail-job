@@ -71,6 +71,13 @@ public class NettyChannel {
         ServerProperties serverProperties = SpringContext.CONTEXT.getBean(ServerProperties.class);
         EasyRetryProperties easyRetryProperties = SpringContext.CONTEXT.getBean(EasyRetryProperties.class);
 
+        // server配置不能为空
+        EasyRetryProperties.ServerConfig serverConfig = easyRetryProperties.getServer();
+        if (Objects.isNull(serverConfig)) {
+            LogUtils.error(log, "easy retry server config is null");
+            return;
+        }
+
         Integer port = easyRetryProperties.getPort();
         // 获取客户端指定的端口
         if (Objects.isNull(port)) {
@@ -95,6 +102,7 @@ public class NettyChannel {
                 .set(HeadersEnum.CONTEXT_PATH.getKey(), Optional.ofNullable(serverProperties.getServlet().getContextPath()).orElse("/"))
                 .set(HeadersEnum.HOST_PORT.getKey(), port)
                 .set(HeadersEnum.VERSION.getKey(), GroupVersionCache.getVersion())
+                .set(HeadersEnum.HOST.getKey(), serverConfig.getHost())
         ;
 
         //发送数据

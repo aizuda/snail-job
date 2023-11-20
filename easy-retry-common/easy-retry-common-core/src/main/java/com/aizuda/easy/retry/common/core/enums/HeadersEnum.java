@@ -16,6 +16,7 @@ public enum HeadersEnum {
     CONTEXT_PATH("context-path"),
     REQUEST_ID("request-id"),
     VERSION("version"),
+    HOST("Host"),
         ;
 
     private final String key;
