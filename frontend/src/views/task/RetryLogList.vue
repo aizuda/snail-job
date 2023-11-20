@@ -37,7 +37,7 @@
           <a-col :md="!advanced && 8 || 24" :sm="24">
             <span class="table-page-search-submitButtons" :style="advanced && { float: 'right', overflow: 'hidden' } || {} ">
               <a-button type="primary" @click="$refs.table.refresh(true)">查询</a-button>
-              <a-button style="margin-left: 8px" @click="() => queryParam = {}">重置</a-button>
+              <a-button style="margin-left: 8px" @click="resetFiled">重置</a-button>
               <a @click="toggleAdvanced" style="margin-left: 8px">
                 {{ advanced ? '收起' : '展开' }}
                 <a-icon :type="advanced ? 'up' : 'down'"/>
@@ -157,7 +157,7 @@ export default {
           width: '10%'
         },
         {
-          title: '场景id',
+          title: '场景名称',
           dataIndex: 'sceneName',
           ellipsis: true,
           width: '10%'
@@ -236,6 +236,10 @@ export default {
     })
   },
   methods: {
+    resetFiled () {
+      this.queryParam = {}
+      this.sceneList = []
+    },
     handleNew () {
       this.$router.push('/form/basic-config')
     },

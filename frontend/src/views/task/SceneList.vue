@@ -7,24 +7,23 @@
             <template>
               <a-col :md="8" :sm="24">
                 <a-form-item label="组名称">
-                  <a-select
-                    v-model="queryParam.groupName"
-                    placeholder="请输入组名称"
-                  >
+                  <a-select v-model="queryParam.groupName" placeholder="请输入组名称" @change="value => handleChange(value)" allowClear>
                     <a-select-option v-for="item in groupNameList" :value="item" :key="item">{{ item }}</a-select-option>
                   </a-select>
                 </a-form-item>
               </a-col>
               <a-col :md="8" :sm="24">
                 <a-form-item label="场景名称">
-                  <a-input v-model="queryParam.sceneName" placeholder="请输入场景名称" allowClear/>
+                  <a-select v-model="queryParam.sceneName" placeholder="请选择场景名称" allowClear>
+                    <a-select-option v-for="item in sceneList" :value="item.sceneName" :key="item.sceneName"> {{ item.sceneName }}</a-select-option>
+                  </a-select>
                 </a-form-item>
               </a-col>
             </template>
             <a-col :md="!advanced && 8 || 24" :sm="24">
               <span class="table-page-search-submitButtons" :style="advanced && { float: 'right', overflow: 'hidden' } || {} ">
                 <a-button type="primary" @click="$refs.table.refresh(true)">查询</a-button>
-                <a-button style="margin-left: 8px" @click="() => (queryParam = {})">重置</a-button>
+                <a-button style="margin-left: 8px" @click="resetFiled">重置</a-button>
               </span>
             </a-col>
           </a-row>
@@ -89,7 +88,7 @@
 </template>
 
 <script>
-import { getAllGroupNameList, getScenePage } from '@/api/manage'
+import { getAllGroupNameList, getSceneList, getScenePage } from '@/api/manage'
 import { STable } from '@/components'
 const enums = require('@/utils/retryEnum')
 export default {
@@ -100,6 +99,13 @@ export default {
   data () {
     return {
       sceneColumns: [
+        {
+          title: '组名',
+          dataIndex: 'groupName',
+          key: 'groupName',
+          width: '10%',
+          scopedSlots: { customRender: 'groupName' }
+        },
         {
           title: '场景名称',
           dataIndex: 'sceneName',
@@ -203,20 +209,35 @@ export default {
         }
       },
       optionAlertShow: false,
-      groupNameList: []
+      groupNameList: [],
+      sceneList: []
     }
   },
   created () {
     getAllGroupNameList().then((res) => {
       this.groupNameList = res.data
+      if (this.groupNameList !== null && this.groupNameList.length > 0) {
+        this.queryParam['groupName'] = this.groupNameList[0]
+        this.$refs.table.refresh(true)
+        this.handleChange(this.groupNameList[0])
+      }
     })
   },
   methods: {
+    resetFiled () {
+      this.queryParam = {}
+      this.sceneList = []
+    },
     handleNew () {
       this.$router.push({ path: '/retry/scene/config' })
     },
     handleEdit (record) {
       this.$router.push({ path: '/retry/scene/config', query: { id: record.id } })
+    },
+    handleChange (value) {
+      getSceneList({ groupName: value }).then((res) => {
+        this.sceneList = res.data
+      })
     }
   }
 }

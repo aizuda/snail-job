@@ -7,6 +7,11 @@ import lombok.Data;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+/**
+ * @author zuojunlin
+ * @date 2023-11-19 22:05:25
+ * @since 2.5.0
+ */
 @Data
 public class SceneConfig implements Serializable {
 

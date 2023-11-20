@@ -40,7 +40,9 @@ public class NotifyConfigServiceImpl implements NotifyConfigService {
         if (StrUtil.isNotBlank(queryVO.getGroupName())) {
             queryWrapper.eq(NotifyConfig::getGroupName, queryVO.getGroupName());
         }
-
+        if (StrUtil.isNotBlank(queryVO.getSceneName())) {
+            queryWrapper.eq(NotifyConfig::getSceneName, queryVO.getSceneName());
+        }
         List<NotifyConfig> notifyConfigs = accessTemplate.getNotifyConfigAccess().listPage(pageDTO, queryWrapper).getRecords();
         return new PageResult<>(pageDTO, NotifyConfigResponseVOConverter.INSTANCE.batchConvert(notifyConfigs));
     }

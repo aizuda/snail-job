@@ -187,7 +187,7 @@
           style="text-align: center"
         >
           <a-button htmlType="submit" type="primary">提交</a-button>
-          <a-button style="margin-left: 8px">重置</a-button>
+          <a-button style="margin-left: 8px" @click="resetFiled">重置</a-button>
         </a-form-item>
       </a-form>
     </a-card>
@@ -245,6 +245,9 @@ export default {
     })
   },
   methods: {
+    resetFiled () {
+      this.form.resetFields()
+    },
     handleChange (value) {
       console.log(value)
       this.backOff = value

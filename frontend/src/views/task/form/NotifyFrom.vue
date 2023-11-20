@@ -21,11 +21,11 @@
                   'notifyScene',
                   {
                     initialValue: '1',
-                    rules: [{ required: true, message: '请选择状态'}]
+                    rules: [{ required: true, message: '请选通知场景'}]
                   }
                 ]"
               >
-                <a-select-option :value="index" v-for="(item, index) in notifyScene" :key="index">{{ item.name }}</a-select-option>
+                <a-select-option :value="index" v-for="(item, index) in notifySceneList" :key="index">{{ item.name }}</a-select-option>
               </a-select>
             </a-form-item>
           </a-col>
@@ -50,33 +50,21 @@
                     rules: [{ required: !notifyThresholdDisabled.includes(this.notifySceneValue), message: '请输入通知阈值'}]
                   }
                 ]" />
-
             </a-form-item>
           </a-col>
         </a-row>
         <a-row class="form-row" :gutter="16">
-          <a-col :lg="18" :md="18" :sm="24">
+          <a-col :lg="18" :md="12" :sm="24">
             <a-form-item label="组">
-              <a-select
-                placeholder="请选择组"
-                v-decorator="['groupName', { rules: [{ required: true, message: '请选择组' }] }]"
-              >
+              <a-select placeholder="请选择组"  v-decorator="['groupName', { rules: [{ required: true, message: '请选择组' }] }]" @change="value => changeGroup(value)">
                 <a-select-option v-for="item in groupNameList" :value="item" :key="item">{{ item }}</a-select-option>
               </a-select>
             </a-form-item>
           </a-col>
           <a-col :lg="6" :md="12" :sm="24">
-            <a-form-item label="状态">
-              <a-select
-                placeholder="请选择状态"
-                v-decorator="[
-                  'notifyStatus',
-                  {
-                    initialValue: '1',
-                    rules: [{ required: true, message: '请选择状态'}]
-                  }
-                ]" >
-                <a-select-option :value="index" v-for="(item, index) in notifyStatus" :key="index">{{ item.name }}</a-select-option>
+            <a-form-item label="场景">
+              <a-select :disabled="sceneNameDisabled.includes(this.notifySceneValue)" placeholder="请选择场景"  v-decorator="['sceneName', { rules: [{ required: !sceneNameDisabled.includes(this.notifySceneValue), message: '请选择场景' }] }]"  >
+                <a-select-option v-for="item in sceneList" :value="item.sceneName" :key="item.sceneName">{{ item.sceneName }}</a-select-option>
               </a-select>
             </a-form-item>
           </a-col>
@@ -92,11 +80,11 @@
                   'notifyType',
                   {
                     initialValue: '1',
-                    rules: [{ required: true, message: '请选择状态'}]
+                    rules: [{ required: true, message: '请选择通知类型'}]
                   }
                 ]"
               >
-                <a-select-option :value="index" v-for="(item, index) in notifyType" :key="index">{{ item.name }}</a-select-option>
+                <a-select-option :value="index" v-for="(item, index) in notifyTypeList" :key="index">{{ item.name }}</a-select-option>
               </a-select>
             </a-form-item>
           </a-col>
@@ -109,7 +97,35 @@
                   'notifyAttribute',
                   {rules: [{ required: true, message: '请输入配置属性', whitespace: true}]}
                 ]" />
-
+            </a-form-item>
+          </a-col>
+        </a-row>
+        <a-row class="form-row" :gutter="16">
+          <a-col :lg="8" :md="12" :sm="24">
+            <a-form-item label="限流状态">
+              <a-select :disabled="rateLimiterStatusDisabled.includes(this.notifySceneValue)" placeholder="请选择限流状态" @change="changeRateLimiterStatus" v-decorator="['rateLimiterStatus',{initialValue: '0', rules: [{ required: true, message: '请选择限流状态'}]}]"  >
+                <a-select-option :value="index" v-for="(item, index) in rateLimiterStatusList" :key="index">{{ item.name }}</a-select-option>
+              </a-select>
+            </a-form-item>
+          </a-col>
+          <a-col :lg="8" :md="12" :sm="24">
+            <a-form-item label="每秒限流阈值">
+              <a-input-number :disabled="rateLimiterThresholdDisabled.includes(this.rateLimiterStatusValue)" id="inputNumber" :min="1" style="width: -webkit-fill-available" v-decorator= "['rateLimiterThreshold',{initialValue: '100',rules: [{ required: !rateLimiterThresholdDisabled.includes(this.rateLimiterStatusValue), message: '请输入通知阈值' }]}]" />
+          </a-form-item>
+          </a-col>
+          <a-col :lg="8" :md="12" :sm="24">
+            <a-form-item label="状态">
+              <a-select
+                  placeholder="请选择状态"
+                  v-decorator="[
+                  'notifyStatus',
+                  {
+                    initialValue: '1',
+                    rules: [{ required: true, message: '请选择状态'}]
+                  }
+                ]" >
+                <a-select-option :value="index" v-for="(item, index) in notifyStatusList" :key="index">{{ item.name }}</a-select-option>
+              </a-select>
             </a-form-item>
           </a-col>
         </a-row>
@@ -131,11 +147,9 @@
           style="text-align: center"
         >
           <a-button htmlType="submit" type="primary">提交</a-button>
-          <a-button style="margin-left: 8px">重置</a-button>
         </a-form-item>
       </a-form>
     </a-card>
-
     <a-modal :visible="visible" title="添加配置" @ok="handleOk" @cancel="handlerCancel" width="1000px">
       <a-form :form="notifyAttributeForm" @submit="handleSubmit" :body-style="{padding: '0px 0px'}" v-bind="formItemLayout" >
         <a-form-item
@@ -144,8 +158,19 @@
           <a-input
             placeholder="请输入钉钉URL"
             v-decorator="[
-              'dingDingUrl',
+              'webhookUrl',
               {rules: [{ required: true, message: '请输入钉钉URL', whitespace: true}]}
+            ]" />
+        </a-form-item>
+        <a-form-item v-if="this.notifyTypeValue === '1'">
+          <span slot="label">被@负责人手机号&nbsp;<a :href="officialWebsite + '/pages/32e4a0/#被@负责人手机号是何物' +''" target="_blank"> <a-icon type="question-circle-o" /></a></span>
+          <a-input
+            placeholder="请输入被@负责人手机号"
+            type="textarea"
+            v-if="this.notifyTypeValue === '1'"
+            v-decorator="[
+              'ats',
+              {rules: [{ required: true, message: '请输入被@负责人手机号', whitespace: true}]}
             ]" />
         </a-form-item>
         <a-form-item
@@ -154,8 +179,20 @@
           <a-input
             placeholder="请输入飞书URL"
             v-decorator="[
-              'larkUrl',
+              'webhookUrl',
               {rules: [{ required: true, message: '请输入飞书URL', whitespace: true}]}
+            ]" />
+        </a-form-item>
+        <a-form-item
+          v-if="this.notifyTypeValue === '4'">
+          <span slot="label">被@负责人用户id&nbsp;<a :href="officialWebsite + '/pages/32e4a0/#被@负责人用户id是何物' +''" target="_blank"> <a-icon type="question-circle-o" /></a></span>
+          <a-input
+            placeholder="请输入被@负责人用户id"
+            type="textarea"
+            v-if="this.notifyTypeValue === '4'"
+            v-decorator="[
+              'ats',
+              {rules: [{ required: true, message: '请输入被@负责人用户id', whitespace: true}]}
             ]" />
         </a-form-item>
         <a-form-item
@@ -237,15 +274,14 @@
 </template>
 
 <script>
-import { getAllGroupNameList } from '@/api/manage'
+import { getAllGroupNameList, getSceneList } from '@/api/manage'
 import { getNotifyConfigDetail, saveNotify, updateNotify } from '@/api/retryApi'
 import pick from 'lodash.pick'
 import CronModal from '@/views/job/from/CronModal'
-
+import { officialWebsite } from '@/utils/util'
 const enums = require('@/utils/retryEnum')
 export default {
   name: 'NotifyFrom',
-  components: { CronModal },
   props: {},
   comments: {
     CronModal
@@ -257,6 +293,7 @@ export default {
         labelCol: { lg: { span: 7 }, sm: { span: 7 } },
         wrapperCol: { lg: { span: 10 }, sm: { span: 17 } }
       },
+      officialWebsite: officialWebsite(),
       formItemLayoutWithOutLabel: {
         wrapperCol: {
           xs: { span: 24, offset: 0 },
@@ -265,17 +302,24 @@ export default {
       },
       formType: 'create',
       groupNameList: [],
-      notifyScene: enums.notifyScene,
-      notifyType: enums.notifyType,
-      notifyStatus: enums.notifyStatus,
+      sceneList: [],
+      notifySceneList: enums.notifyScene,
+      notifyTypeList: enums.notifyType,
+      notifyStatusList: enums.notifyStatus,
+      rateLimiterStatusList: enums.rateLimiterStatus,
       loading: false,
       visible: false,
       count: 0,
       notifyTypeValue: '1',
       notifyAttribute: '',
-      notifyThresholdDisabled: ['3', '4'],
-      notifySceneValue: '1'
-
+      notifyThresholdDisabled: ['3', '4', '6'],
+      sceneNameDisabled: ['3', '4'],
+      rateLimiterStatusDisabled: ['1', '2', '3', '4'],
+      rateLimiterThresholdDisabled: ['0'],
+      notifySceneValue: '1',
+      rateLimiterStatusValue: '0',
+      defaultRateLimiterStatusValue: '0',
+      defaultRateLimiterThreshold: '100'
     }
   },
   beforeCreate () {
@@ -299,24 +343,55 @@ export default {
     })
   },
   methods: {
+    resetFiled () {
+      this.form.resetFields()
+    },
+    buildNotifyAttribute (formData) {
+      formData.ats = formData.ats && formData.ats.replace(/\s+/g, '').split(',')
+      return JSON.stringify(formData)
+    },
     handleChange (notifyType) {
       this.notifyTypeValue = notifyType
     },
+    changeGroup (value) {
+      getSceneList({ groupName: value }).then((res) => {
+        this.sceneList = res.data
+      })
+    },
+    changeRateLimiterStatus (rateLimiterStatus) {
+      this.rateLimiterStatusValue = rateLimiterStatus
+    },
     changeNotifyScene (notifyScene) {
-      console.log(notifyScene)
       this.notifySceneValue = notifyScene
+      const { form } = this
+      if (this.sceneNameDisabled.includes(notifyScene)) {
+        form.setFieldsValue({
+          sceneName: ''
+        })
+      }
+      if (this.rateLimiterStatusDisabled.includes(notifyScene)) {
+        form.setFieldsValue({
+          rateLimiterStatus: this.defaultRateLimiterStatusValue,
+          rateLimiterThreshold: this.defaultRateLimiterThreshold
+        })
+        this.changeRateLimiterStatus(this.defaultRateLimiterStatusValue)
+      }
     },
     handleBlur () {
       new Promise((resolve) => {
         setTimeout(resolve, 100)
       }).then(() => {
         if (this.formType === 'edit') {
-          const formData = pick(JSON.parse(this.notifyAttribute), ['dingDingUrl', 'larkUrl', 'user', 'pass', 'host', 'port', 'from', 'tos'])
-          console.log(formData)
-
-          this.notifyAttributeForm.getFieldDecorator(`dingDingUrl`, { initialValue: formData.dingDingUrl, preserve: true })
+          const formData = pick(JSON.parse(this.notifyAttribute), ['webhookUrl', 'ats', 'user', 'pass', 'host', 'port', 'from', 'tos'])
+          this.notifyAttributeForm.getFieldDecorator(`webhookUrl`, { initialValue: formData.webhookUrl, preserve: true })
+          this.notifyAttributeForm.getFieldDecorator(`ats`, { initialValue: formData.ats.join(','), preserve: true })
+          this.notifyAttributeForm.getFieldDecorator(`user`, { initialValue: formData.user, preserve: true })
+          this.notifyAttributeForm.getFieldDecorator(`pass`, { initialValue: formData.pass, preserve: true })
+          this.notifyAttributeForm.getFieldDecorator(`host`, { initialValue: formData.host, preserve: true })
+          this.notifyAttributeForm.getFieldDecorator(`port`, { initialValue: formData.port, preserve: true })
+          this.notifyAttributeForm.getFieldDecorator(`from`, { initialValue: formData.from, preserve: true })
+          this.notifyAttributeForm.getFieldDecorator(`tos`, { initialValue: formData.tos, preserve: true })
         }
-
         this.visible = !this.visible
       })
     },
@@ -326,11 +401,9 @@ export default {
     handleOk () {
       this.notifyAttributeForm.validateFields((err, values) => {
         if (!err) {
-          console.log(values)
           const { form } = this
-          const formData = pick(values, ['dingDingUrl', 'larkUrl', 'user', 'pass', 'host', 'port', 'from', 'tos'])
-          console.log(this.parseJson(formData))
-          this.notifyAttribute = JSON.stringify(formData)
+          const formData = pick(values, ['webhookUrl', 'ats', 'user', 'pass', 'host', 'port', 'from', 'tos'])
+          this.notifyAttribute = this.buildNotifyAttribute(formData)
           form.setFieldsValue({
             notifyAttribute: this.parseJson(formData)
           })
@@ -359,24 +432,29 @@ export default {
         }
       })
     },
-    loadEditInfo (data) {
+      loadEditInfo (data) {
       this.formType = 'edit'
       const { form } = this
       // ajax
       new Promise((resolve) => {
-        setTimeout(resolve, 100)
+        setTimeout(async () => {
+          await this.changeGroup(data.groupName)
+          resolve()
+        }, 100)
       }).then(() => {
         const formData = pick(data, [
-          'id', 'notifyAttribute', 'groupName', 'notifyStatus', 'notifyScene', 'notifyThreshold', 'notifyType', 'notifyThreshold', 'description'])
+          'id', 'notifyAttribute', 'groupName', 'sceneName', 'notifyStatus', 'notifyScene', 'notifyThreshold', 'notifyType', 'description', 'rateLimiterStatus', 'rateLimiterThreshold'])
         formData.notifyStatus = formData.notifyStatus.toString()
         formData.notifyScene = formData.notifyScene.toString()
         formData.notifyType = formData.notifyType.toString()
         formData.notifyThreshold = formData.notifyThreshold.toString()
+        formData.rateLimiterStatus = formData.rateLimiterStatus.toString()
+        formData.rateLimiterThreshold = formData.rateLimiterThreshold.toString()
         this.notifyTypeValue = formData.notifyType
         this.notifyAttribute = formData.notifyAttribute
         this.notifySceneValue = formData.notifyScene
+        this.rateLimiterStatusValue = formData.rateLimiterStatus
         formData.notifyAttribute = this.parseJson(JSON.parse(formData.notifyAttribute))
-        console.log(formData)
         form.setFieldsValue(formData)
       })
     },
@@ -394,11 +472,14 @@ export default {
         '收件人:' + json['tos'] + ';'
 
       if (this.notifyTypeValue === '1') {
-        s = json['dingDingUrl']
+        s =
+          '钉钉Url:' + json['webhookUrl'] + ';' +
+          '被@负责人手机号:' + json['ats'] + ';'
       } else if (this.notifyTypeValue === '4') {
-        s = json['larkUrl']
+        s =
+          '飞书Url:' + json['webhookUrl'] + ';' +
+          '被@负责人用户id:' + json['ats'] + ';'
       }
-
       return s
     }
   }

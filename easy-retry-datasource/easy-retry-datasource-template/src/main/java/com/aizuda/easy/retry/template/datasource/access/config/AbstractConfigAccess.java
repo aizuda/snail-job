@@ -50,6 +50,12 @@ public abstract class AbstractConfigAccess<T> implements ConfigAccess<T> {
                 .eq(NotifyConfig::getNotifyScene, notifyScene));
     }
 
+    private List<NotifyConfig> getByGroupIdAndSceneIdAndNotifyScene(String groupName, String sceneName, Integer notifyScene) {
+        return notifyConfigMapper.selectList(new LambdaQueryWrapper<NotifyConfig>().eq(NotifyConfig::getGroupName, groupName)
+                .eq(NotifyConfig::getSceneName, sceneName)
+                .eq(NotifyConfig::getNotifyScene, notifyScene));
+    }
+
     protected SceneConfig getByGroupNameAndSceneName(String groupName, String sceneName) {
         return sceneConfigMapper.selectOne(new LambdaQueryWrapper<SceneConfig>()
                 .eq(SceneConfig::getGroupName, groupName).eq(SceneConfig::getSceneName, sceneName));
@@ -87,6 +93,11 @@ public abstract class AbstractConfigAccess<T> implements ConfigAccess<T> {
     @Override
     public List<NotifyConfig> getNotifyConfigByGroupName(String shardingGroupId, Integer notifyScene) {
         return getByGroupIdAndNotifyScene(shardingGroupId, notifyScene);
+    }
+
+    @Override
+    public List<NotifyConfig> getNotifyConfigByGroupNameAndSceneName(String shardingGroupId,String shardingSceneId, Integer notifyScene) {
+        return getByGroupIdAndSceneIdAndNotifyScene(shardingGroupId,shardingSceneId, notifyScene);
     }
 
     @Override
@@ -136,6 +147,15 @@ public abstract class AbstractConfigAccess<T> implements ConfigAccess<T> {
         }
 
         return allSystemConfigGroupList;
+    }
+
+    @Override
+    public List<SceneConfig> getAllConfigSceneList() {
+        List<SceneConfig> allSystemConfigSceneList = sceneConfigMapper.selectList(new LambdaQueryWrapper<SceneConfig>().orderByAsc(SceneConfig::getId));
+        if (CollectionUtils.isEmpty(allSystemConfigSceneList)) {
+            return Collections.EMPTY_LIST;
+        }
+        return allSystemConfigSceneList;
     }
 
     @Override
