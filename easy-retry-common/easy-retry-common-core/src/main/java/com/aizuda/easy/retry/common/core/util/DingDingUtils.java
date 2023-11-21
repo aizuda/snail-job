@@ -5,7 +5,11 @@ import com.dingtalk.api.DefaultDingTalkClient;
 import com.dingtalk.api.DingTalkClient;
 import com.dingtalk.api.request.OapiRobotSendRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author: www.byteblogs.com
@@ -36,16 +40,29 @@ public class DingDingUtils {
      * @param text
      * @return
      */
-    public static OapiRobotSendRequest buildSendRequest(String title, String text) {
-
+    public static OapiRobotSendRequest buildSendRequest(String title, String text, List<String> ats,boolean isAtAll) {
         OapiRobotSendRequest request = new OapiRobotSendRequest();
         request.setMsgtype("markdown");
         OapiRobotSendRequest.Markdown markdown = new OapiRobotSendRequest.Markdown();
         markdown.setTitle(title);
-        markdown.setText(subTextLength(text));
+        markdown.setText(subTextLength(getAtText(ats,text)));
         request.setMarkdown(markdown);
 
+        OapiRobotSendRequest.At at = new OapiRobotSendRequest.At();
+        at.setAtMobiles(ats);
+        at.setIsAtAll(isAtAll);
+        request.setAt(at);
         return request;
+    }
+
+    private static String getAtText(List<String> ats, String text) {
+        if(CollectionUtils.isEmpty(ats)){
+            return text;
+        }
+        for(String at: ats){
+            text = "@" + at;
+        }
+        return text;
     }
 
     /**

@@ -1,39 +1,27 @@
 package com.aizuda.easy.retry.server.retry.task.service.impl;
-
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
-import com.aizuda.easy.retry.common.core.enums.StatusEnum;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
-import com.aizuda.easy.retry.server.common.enums.DelayLevelEnum;
 import com.aizuda.easy.retry.server.common.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
-import com.aizuda.easy.retry.server.common.generator.id.IdGenerator;
-import com.aizuda.easy.retry.server.common.util.DateUtils;
-import com.aizuda.easy.retry.server.model.dto.RetryTaskDTO;
 import com.aizuda.easy.retry.server.retry.task.service.RetryDeadLetterConverter;
 import com.aizuda.easy.retry.server.retry.task.service.RetryService;
-import com.aizuda.easy.retry.server.retry.task.support.RetryTaskConverter;
-import com.aizuda.easy.retry.server.retry.task.support.RetryTaskLogConverter;
-import com.aizuda.easy.retry.server.common.strategy.WaitStrategies;
+import com.aizuda.easy.retry.server.retry.task.support.event.RetryTaskFailDeadLetterAlarmEvent;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
-import com.aizuda.easy.retry.template.datasource.access.ConfigAccess;
 import com.aizuda.easy.retry.template.datasource.access.TaskAccess;
-import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskLogMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.*;
 import com.aizuda.easy.retry.template.datasource.utils.RequestDataHelper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -48,6 +36,9 @@ public class RetryServiceImpl implements RetryService {
 
     @Autowired
     private AccessTemplate accessTemplate;
+
+    @Autowired
+    private ApplicationContext context;
 
     @Transactional
     @Override
@@ -123,7 +114,6 @@ public class RetryServiceImpl implements RetryService {
                         .delete(groupName, new LambdaQueryWrapper<RetryTask>()
                                 .eq(RetryTask::getGroupName, groupName).in(RetryTask::getId, waitDelRetryFinishSet)),
             () -> new EasyRetryServerException("删除重试数据失败 [{}]", JsonUtil.toJsonString(retryTasks)));
-
         return Boolean.TRUE;
     }
 
@@ -152,6 +142,8 @@ public class RetryServiceImpl implements RetryService {
         Assert.isTrue(retryTasks.size() == retryTaskAccess.delete(groupName, new LambdaQueryWrapper<RetryTask>()
                         .eq(RetryTask::getGroupName, groupName).in(RetryTask::getId, ids)),
             () -> new EasyRetryServerException("删除重试数据失败 [{}]", JsonUtil.toJsonString(retryTasks)));
+
+        context.publishEvent(new RetryTaskFailDeadLetterAlarmEvent(retryDeadLetters));
     }
 
 }
