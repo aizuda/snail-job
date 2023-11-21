@@ -11,13 +11,18 @@ import lombok.Getter;
 @Getter
 public enum NotifySceneEnum {
 
-    MAX_RETRY(1, "重试数量超过阈值", NodeTypeEnum.SERVER),
+    MAX_RETRY(1, "场景重试数量超过阈值", NodeTypeEnum.SERVER),
 
-    MAX_RETRY_ERROR(2, "重试失败数量超过阈值", NodeTypeEnum.SERVER),
+    MAX_RETRY_ERROR(2, "场景重试失败数量超过阈值", NodeTypeEnum.SERVER),
 
     CLIENT_REPORT_ERROR(3,"客户端上报失败", NodeTypeEnum.CLIENT),
 
-    CLIENT_COMPONENT_ERROR(4,"客户端组件异常", NodeTypeEnum.CLIENT);
+    CLIENT_COMPONENT_ERROR(4,"客户端组件异常", NodeTypeEnum.CLIENT),
+
+    RETRY_TASK_REACH_THRESHOLD(5, "任务重试失败数量超过阈值", NodeTypeEnum.SERVER),
+
+    RETRY_TASK_ENTER_DEAD_LETTER(6, "任务重试失败进入死信队列", NodeTypeEnum.SERVER);
+
 
     /**
      * 通知场景
