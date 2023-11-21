@@ -45,10 +45,38 @@ const api = {
   systemVersion: '/system/version',
   pods: '/dashboard/pods',
   consumerGroup: '/dashboard/consumer/group',
-  updateGroupStatus: '/group/status'
+  updateGroupStatus: '/group/status',
+
+  addNamespace: '/namespace',
+  updateNamespace: '/namespace',
+  namespaceList: '/namespace/list',
+  delNamespace: '/namespace/'
 }
 
 export default api
+
+export function delNamespace (id) {
+  return request({
+    url: api.delNamespace + id,
+    method: 'delete'
+  })
+}
+
+export function addNamespace (data) {
+  return request({
+    url: api.addNamespace,
+    method: 'post',
+    data
+  })
+}
+
+export function namespaceList (parameter) {
+  return request({
+    url: api.namespaceList,
+    method: 'get',
+    params: parameter
+  })
+}
 
 export function delUser (id) {
   return request({

@@ -1,9 +1,24 @@
 <template>
   <div :class="wrpCls">
+    <a-dropdown>
+      <span placement="bottomRight">
+        Default <a-icon type="down" />
+      </span>
+      <a-menu slot="overlay">
+        <a-menu-item>
+          <a href="javascript:;">Uat</a>
+        </a-menu-item>
+        <a-menu-item>
+          <a href="javascript:;">Dev</a>
+        </a-menu-item>
+        <a-menu-item>
+          <a href="javascript:;">Prod</a>
+        </a-menu-item>
+      </a-menu>
+    </a-dropdown>
     <a href="https://www.easyretry.com" target="_blank" :class="prefixCls"><a-icon type="question-circle" :style="{ fontSize: '18px', color: '#08c' }"/></a>
     <avatar-dropdown :menu="showMenu" :current-user="currentUser" :class="prefixCls"/>
     <!--    <select-lang :class="prefixCls" />-->
-
   </div>
 </template>
 
