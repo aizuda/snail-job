@@ -69,8 +69,8 @@ public class GroupConfigController {
 
     @LoginRequired
     @GetMapping("/all/group-name/list")
-    public List<String> getAllGroupNameList() {
-        return groupConfigService.getAllGroupNameList();
+    public List<String> getAllGroupNameList(@RequestParam("namespaceId") Long namespaceId) {
+        return groupConfigService.getAllGroupNameList(namespaceId);
     }
 
     @Deprecated

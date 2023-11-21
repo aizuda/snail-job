@@ -18,6 +18,9 @@ public class SceneConfig implements Serializable {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
+    private Long namespaceId;
+
+
     private String groupName;
 
     private String sceneName;

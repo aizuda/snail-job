@@ -16,4 +16,9 @@ public class JobBatchQueryVO extends BaseQueryVO {
     private String jobName;
     private Integer taskBatchStatus;
     private String groupName;
+
+    /**
+     * 命名空间id
+     */
+    private Long namespaceId;
 }

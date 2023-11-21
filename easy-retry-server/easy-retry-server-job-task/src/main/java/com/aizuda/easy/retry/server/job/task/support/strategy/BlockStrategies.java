@@ -80,7 +80,7 @@ public class BlockStrategies {
             // 重新生成任务
             JobTaskBatchGenerator jobTaskBatchGenerator = SpringContext.getBeanByType(JobTaskBatchGenerator.class);
             JobTaskBatchGeneratorContext jobTaskBatchGeneratorContext = JobTaskConverter.INSTANCE.toJobTaskGeneratorContext(context);
-            jobTaskBatchGeneratorContext.setTaskBatchStatus(JobTaskBatchStatusEnum.FAIL.getStatus());
+            jobTaskBatchGeneratorContext.setTaskBatchStatus(JobTaskBatchStatusEnum.CANCEL.getStatus());
             jobTaskBatchGeneratorContext.setOperationReason(JobOperationReasonEnum.JOB_DISCARD.getReason());
             jobTaskBatchGenerator.generateJobTaskBatch(jobTaskBatchGeneratorContext);
         }

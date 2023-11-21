@@ -15,4 +15,6 @@ public class JobQueryVO extends BaseQueryVO {
     private String groupName;
     private String jobName;
     private Integer jobStatus;
+    private Long namespaceId;
+
 }

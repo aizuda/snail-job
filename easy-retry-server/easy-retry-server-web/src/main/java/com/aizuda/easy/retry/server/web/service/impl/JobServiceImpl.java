@@ -61,6 +61,7 @@ public class JobServiceImpl implements JobService {
 
         LambdaQueryWrapper<Job> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Job::getDeleted, StatusEnum.NO.getStatus());
+        queryWrapper.eq(Job::getNamespaceId, queryVO.getNamespaceId());
         if (StrUtil.isNotBlank(queryVO.getGroupName())) {
             queryWrapper.eq(Job::getGroupName, queryVO.getGroupName());
         }

@@ -37,6 +37,7 @@ public class NotifyConfigServiceImpl implements NotifyConfigService {
         PageDTO<NotifyConfig> pageDTO = new PageDTO<>();
 
         LambdaQueryWrapper<NotifyConfig> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(NotifyConfig::getNamespaceId, queryVO.getNamespaceId());
         if (StrUtil.isNotBlank(queryVO.getGroupName())) {
             queryWrapper.eq(NotifyConfig::getGroupName, queryVO.getGroupName());
         }
