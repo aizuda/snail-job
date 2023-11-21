@@ -9,11 +9,7 @@ import com.aizuda.easy.retry.server.web.service.NamespaceService;
 import com.aizuda.easy.retry.template.datasource.persistence.po.SystemUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -39,12 +35,17 @@ public class NamespaceController {
         return namespaceService.updateNamespace(namespaceRequestVO);
     }
 
-    @PutMapping
+    @GetMapping("list")
     public PageResult<List<NamespaceResponseVO>> getNamespacePage(NamespaceQueryVO queryVO) {
         return namespaceService.getNamespacePage(queryVO);
     }
 
-    @PutMapping
+    @DeleteMapping("{id}")
+    public Boolean deleteNamespace(@PathVariable("id") Long id) {
+        return namespaceService.deleteNamespace(id);
+    }
+
+//    @PutMapping
     public List<NamespaceResponseVO> getNamespaceByUserId(@LoginUser SystemUser systemUser) {
         return namespaceService.getNamespaceByUserId(systemUser);
     }

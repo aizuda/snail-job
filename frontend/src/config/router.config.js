@@ -39,6 +39,13 @@ export const asyncRouterMap = [
       },
       // profile
       {
+        path: '/namespace',
+        name: 'namespace',
+        component: () => import('@/views/namespace/NamespaceList'),
+        meta: { title: '命名空间', icon: 'team', permission: ['group'] }
+      },
+      // profile
+      {
         path: '/basic-config-list',
         name: 'basicConfigList',
         component: () => import('@/views/config/GroupList'),
