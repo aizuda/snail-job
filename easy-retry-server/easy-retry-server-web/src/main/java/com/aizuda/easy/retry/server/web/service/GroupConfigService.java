@@ -23,5 +23,5 @@ public interface GroupConfigService {
 
     GroupConfigResponseVO getGroupConfigByGroupName(String groupName);
 
-    List<String> getAllGroupNameList();
+    List<String> getAllGroupNameList(final Long namespaceId);
 }

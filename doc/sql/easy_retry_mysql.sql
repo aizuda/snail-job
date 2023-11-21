@@ -8,14 +8,14 @@ USE
 CREATE TABLE `namespace`
 (
     `id`        bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `name`      varchar(64)         NOT NULL DEFAULT '' COMMENT '名称',
-    `unique_id` varchar(64)         NOT NULL DEFAULT '' COMMENT '唯一id',
+    `name`      varchar(64)         NOT NULL COMMENT '名称',
+    `unique_id` varchar(64)         NOT NULL COMMENT '唯一id',
     `create_dt` datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_dt` datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     `deleted`   tinyint(4)          NOT NULL DEFAULT '0' COMMENT '逻辑删除 1、删除',
     PRIMARY KEY (`id`),
     KEY `idx_name` (`name`),
-    UNIQUE KEY `uk_name` (`unique_id`)
+    UNIQUE KEY `uk_unique_id` (`unique_id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4 COMMENT ='命名空间';
 
@@ -246,6 +246,7 @@ CREATE TABLE `system_user_permission`
 (
     `id`             bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
     `group_name`     varchar(64)         NOT NULL COMMENT '组名称',
+    `namespace_id`   bigint(20) unsigned NOT NULL DEFAULT 1 COMMENT '命名空间id',
     `system_user_id` bigint(20)          NOT NULL COMMENT '系统用户id',
     `create_dt`      datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_dt`      datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',

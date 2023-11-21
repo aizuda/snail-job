@@ -5,14 +5,14 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * @author www.byteblogs.com
- * @date 2023-10-25 10:16:14
- * @since 2.4.0
+ * @author: xiaowoniu
+ * @date : 2023-11-21 15:21
+ * @since : 2.5.0
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class NotifyConfigQueryVO extends BaseQueryVO {
-    private String groupName;
-    private String sceneName;
-    private Long namespaceId;
+public class NamespaceQueryVO extends BaseQueryVO {
+
+    private String name;
+
 }

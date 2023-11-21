@@ -14,5 +14,9 @@ public class JobBatchQueryDO {
     private Integer taskBatchStatus;
     private String jobName;
     private Long jobId;
+    /**
+     * 命名空间id
+     */
+    private Long namespaceId;
 
 }

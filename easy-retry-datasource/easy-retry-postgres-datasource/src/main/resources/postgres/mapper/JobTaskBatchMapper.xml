@@ -7,6 +7,7 @@
         <id column="id" property="id" />
         <result column="group_name" property="groupName" />
         <result column="job_id" property="jobId" />
+        <result column="namespace_id" property="namespaceId" />
         <result column="task_batch_status" property="taskBatchStatus" />
         <result column="create_dt" property="createDt" />
         <result column="update_dt" property="updateDt" />
@@ -18,6 +19,7 @@
         SELECT a.*, b.job_name, b.task_type, b.block_strategy, b.trigger_type
         FROM job_task_batch a join job b on a.job_id = b.id
         <where>
+            namespace_id =  #{queryDO.namespaceId}
             <if test="queryDO.jobId != null">
                 and job_id = #{queryDO.jobId}
             </if>

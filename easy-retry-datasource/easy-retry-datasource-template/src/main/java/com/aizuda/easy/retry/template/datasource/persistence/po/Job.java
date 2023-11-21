@@ -30,6 +30,11 @@ public class Job implements Serializable {
     private Long id;
 
     /**
+     * 命名空间id
+     */
+    private Long namespaceId;
+
+    /**
      * 组名称
      */
     private String groupName;

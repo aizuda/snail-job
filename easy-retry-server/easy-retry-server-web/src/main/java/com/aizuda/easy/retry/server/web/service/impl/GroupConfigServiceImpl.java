@@ -24,7 +24,6 @@ import com.aizuda.easy.retry.template.datasource.persistence.po.*;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.jdbc.BadSqlGrammarException;
@@ -142,8 +141,9 @@ public class GroupConfigServiceImpl implements GroupConfigService {
     public PageResult<List<GroupConfigResponseVO>> getGroupConfigForPage(GroupConfigQueryVO queryVO) {
 
         LambdaQueryWrapper<GroupConfig> groupConfigLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        groupConfigLambdaQueryWrapper.eq(GroupConfig::getNamespaceId, queryVO.getNamespaceId());
         if (StrUtil.isNotBlank(queryVO.getGroupName())) {
-            groupConfigLambdaQueryWrapper.like(GroupConfig::getGroupName, queryVO.getGroupName());
+            groupConfigLambdaQueryWrapper.like(GroupConfig::getGroupName, queryVO.getGroupName() + "%");
         }
 
         ConfigAccess<GroupConfig> groupConfigAccess = accessTemplate.getGroupConfigAccess();
@@ -236,10 +236,11 @@ public class GroupConfigServiceImpl implements GroupConfigService {
     }
 
     @Override
-    public List<String> getAllGroupNameList() {
+    public List<String> getAllGroupNameList(final Long namespaceId) {
         ConfigAccess<GroupConfig> groupConfigAccess = accessTemplate.getGroupConfigAccess();
 
         return groupConfigAccess.list(new LambdaQueryWrapper<GroupConfig>()
+                .eq(GroupConfig::getNamespaceId, namespaceId)
                         .select(GroupConfig::getGroupName)).stream()
                 .map(GroupConfig::getGroupName)
                 .collect(Collectors.toList());

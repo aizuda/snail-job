@@ -4,6 +4,8 @@ import cn.hutool.core.util.StrUtil;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.HashMap;
+
 /**
  * 标识某个操作的具体原因
  *
