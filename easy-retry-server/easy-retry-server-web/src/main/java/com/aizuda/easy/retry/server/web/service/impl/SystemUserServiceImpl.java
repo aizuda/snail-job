@@ -5,8 +5,12 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
+import com.aizuda.easy.retry.server.web.model.request.UserPermissionRequestVO;
+import com.aizuda.easy.retry.server.web.service.convert.NamespaceResponseVOConverter;
+import com.aizuda.easy.retry.template.datasource.persistence.mapper.NamespaceMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.SystemUserMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.SystemUserPermissionMapper;
+import com.aizuda.easy.retry.template.datasource.persistence.po.Namespace;
 import com.aizuda.easy.retry.template.datasource.persistence.po.SystemUser;
 import com.aizuda.easy.retry.template.datasource.persistence.po.SystemUserPermission;
 import com.aizuda.easy.retry.server.web.service.SystemUserService;
@@ -49,12 +53,15 @@ public class SystemUserServiceImpl implements SystemUserService {
     @Autowired
     private SystemUserPermissionMapper systemUserPermissionMapper;
     @Autowired
+    private NamespaceMapper namespaceMapper;
+    @Autowired
     private SystemProperties systemProperties;
 
     @Override
     public SystemUserResponseVO login(SystemUserRequestVO requestVO) {
 
-        SystemUser systemUser = systemUserMapper.selectOne(new LambdaQueryWrapper<SystemUser>().eq(SystemUser::getUsername, requestVO.getUsername()));
+        SystemUser systemUser = systemUserMapper.selectOne(
+            new LambdaQueryWrapper<SystemUser>().eq(SystemUser::getUsername, requestVO.getUsername()));
         if (Objects.isNull(systemUser)) {
             throw new EasyRetryServerException("用户名或密码错误");
         }
@@ -69,16 +76,28 @@ public class SystemUserServiceImpl implements SystemUserService {
         systemUserResponseVO.setToken(token);
         systemUserResponseVO.setMode(systemProperties.getMode().name());
 
-        if (RoleEnum.ADMIN.getRoleId().equals(systemUser.getRole())) {
-            return systemUserResponseVO;
-        }
-
-        List<SystemUserPermission> systemUserPermissions = systemUserPermissionMapper.selectList(new LambdaQueryWrapper<SystemUserPermission>()
-                .eq(SystemUserPermission::getSystemUserId, systemUser.getId()));
-        systemUserResponseVO.setGroupNameList(systemUserPermissions.stream()
-                .map(SystemUserPermission::getGroupName).collect(Collectors.toList()));
+        getPermission(systemUser, systemUserResponseVO);
 
         return systemUserResponseVO;
+    }
+
+    private void getPermission(final SystemUser systemUser, final SystemUserResponseVO systemUserResponseVO) {
+
+        LambdaQueryWrapper<Namespace> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.select(Namespace::getId, Namespace::getUniqueId, Namespace::getName);
+        if (RoleEnum.USER.getRoleId().equals(systemUser.getRole())) {
+            List<SystemUserPermission> systemUserPermissions = systemUserPermissionMapper.selectList(
+                new LambdaQueryWrapper<SystemUserPermission>()
+                    .select(SystemUserPermission::getNamespaceId)
+                    .eq(SystemUserPermission::getSystemUserId, systemUser.getId())
+                    .groupBy(SystemUserPermission::getNamespaceId));
+            queryWrapper.in(Namespace::getId, systemUserPermissions.stream()
+                .map(SystemUserPermission::getNamespaceId).collect(Collectors.toList()));
+        }
+
+        List<Namespace> namespaces = namespaceMapper.selectList(queryWrapper);
+        systemUserResponseVO.setNamespaceIdList(
+            NamespaceResponseVOConverter.INSTANCE.toNamespaceResponseVOs(namespaces));
     }
 
     @Override
@@ -86,15 +105,7 @@ public class SystemUserServiceImpl implements SystemUserService {
         SystemUserResponseVO systemUserResponseVO = SystemUserResponseVOConverter.INSTANCE.convert(systemUser);
         systemUserResponseVO.setMode(systemProperties.getMode().name());
 
-        if (RoleEnum.ADMIN.getRoleId().equals(systemUser.getRole())) {
-            return systemUserResponseVO;
-        }
-
-        List<SystemUserPermission> systemUserPermissions = systemUserPermissionMapper.selectList(new LambdaQueryWrapper<SystemUserPermission>()
-                .eq(SystemUserPermission::getSystemUserId, systemUser.getId()));
-        systemUserResponseVO.setGroupNameList(systemUserPermissions.stream()
-                .map(SystemUserPermission::getGroupName).collect(Collectors.toList()));
-
+        getPermission(systemUser, systemUserResponseVO);
 
         return systemUserResponseVO;
     }
@@ -102,7 +113,8 @@ public class SystemUserServiceImpl implements SystemUserService {
     @Override
     @Transactional
     public void addUser(SystemUserRequestVO requestVO) {
-        long count = systemUserMapper.selectCount(new LambdaQueryWrapper<SystemUser>().eq(SystemUser::getUsername, requestVO.getUsername()));
+        long count = systemUserMapper.selectCount(
+            new LambdaQueryWrapper<SystemUser>().eq(SystemUser::getUsername, requestVO.getUsername()));
         if (count > 0) {
             throw new EasyRetryServerException("该用户已存在");
         }
@@ -112,19 +124,21 @@ public class SystemUserServiceImpl implements SystemUserService {
         systemUser.setPassword(SecureUtil.sha256(requestVO.getPassword()));
         systemUser.setRole(requestVO.getRole());
 
-        Assert.isTrue(1 == systemUserMapper.insert(systemUser), () ->  new EasyRetryServerException("新增用户失败"));
+        Assert.isTrue(1 == systemUserMapper.insert(systemUser), () -> new EasyRetryServerException("新增用户失败"));
 
         // 只添加为普通用户添加权限
-        List<String> groupNameList = requestVO.getGroupNameList();
+        List<UserPermissionRequestVO> groupNameList = requestVO.getPermissions();
         if (CollectionUtils.isEmpty(groupNameList) || RoleEnum.ADMIN.getRoleId().equals(requestVO.getRole())) {
             return;
         }
 
-        for (String groupName : groupNameList) {
+        for (UserPermissionRequestVO permission : groupNameList) {
             SystemUserPermission systemUserPermission = new SystemUserPermission();
             systemUserPermission.setSystemUserId(systemUser.getId());
-            systemUserPermission.setGroupName(groupName);
-            Assert.isTrue(1 == systemUserPermissionMapper.insert(systemUserPermission), () ->  new EasyRetryServerException("新增用户权限失败"));
+            systemUserPermission.setGroupName(permission.getGroupName());
+            systemUserPermission.setNamespaceId(permission.getNamespaceId());
+            Assert.isTrue(1 == systemUserPermissionMapper.insert(systemUserPermission),
+                () -> new EasyRetryServerException("新增用户权限失败"));
         }
 
     }
@@ -132,13 +146,15 @@ public class SystemUserServiceImpl implements SystemUserService {
     @Override
     @Transactional
     public void update(SystemUserRequestVO requestVO) {
-        SystemUser systemUser = systemUserMapper.selectOne(new LambdaQueryWrapper<SystemUser>().eq(SystemUser::getId, requestVO.getId()));
+        SystemUser systemUser = systemUserMapper.selectOne(
+            new LambdaQueryWrapper<SystemUser>().eq(SystemUser::getId, requestVO.getId()));
         if (Objects.isNull(systemUser)) {
             throw new EasyRetryServerException("该用户不存在");
         }
 
         if (!systemUser.getUsername().equals(requestVO.getUsername())) {
-            long count = systemUserMapper.selectCount(new LambdaQueryWrapper<SystemUser>().eq(SystemUser::getUsername, requestVO.getUsername()));
+            long count = systemUserMapper.selectCount(
+                new LambdaQueryWrapper<SystemUser>().eq(SystemUser::getUsername, requestVO.getUsername()));
             if (count > 0) {
                 throw new EasyRetryServerException("该用户已存在");
             }
@@ -151,22 +167,24 @@ public class SystemUserServiceImpl implements SystemUserService {
 
         systemUser.setRole(requestVO.getRole());
 
-        Assert.isTrue(1 == systemUserMapper.updateById(systemUser), () ->  new EasyRetryServerException("更新用户失败"));
+        Assert.isTrue(1 == systemUserMapper.updateById(systemUser), () -> new EasyRetryServerException("更新用户失败"));
 
         // 只添加为普通用户添加权限
-        List<String> groupNameList = requestVO.getGroupNameList();
-        if (CollectionUtils.isEmpty(groupNameList) || RoleEnum.ADMIN.getRoleId().equals(requestVO.getRole())) {
+        List<UserPermissionRequestVO> permissions = requestVO.getPermissions();
+        if (CollectionUtils.isEmpty(permissions) || RoleEnum.ADMIN.getRoleId().equals(requestVO.getRole())) {
             return;
         }
 
         systemUserPermissionMapper.delete(new LambdaQueryWrapper<SystemUserPermission>()
-                .eq(SystemUserPermission::getSystemUserId, systemUser.getId()));
+            .eq(SystemUserPermission::getSystemUserId, systemUser.getId()));
 
-        for (String groupName : groupNameList) {
+        for (UserPermissionRequestVO permission : permissions) {
             SystemUserPermission systemUserPermission = new SystemUserPermission();
             systemUserPermission.setSystemUserId(systemUser.getId());
-            systemUserPermission.setGroupName(groupName);
-            Assert.isTrue(1 == systemUserPermissionMapper.insert(systemUserPermission), () ->  new EasyRetryServerException("更新用户权限失败"));
+            systemUserPermission.setGroupName(permission.getGroupName());
+            systemUserPermission.setNamespaceId(permission.getNamespaceId());
+            Assert.isTrue(1 == systemUserPermissionMapper.insert(systemUserPermission),
+                () -> new EasyRetryServerException("更新用户权限失败"));
         }
     }
 
@@ -180,28 +198,31 @@ public class SystemUserServiceImpl implements SystemUserService {
             systemUserLambdaQueryWrapper.like(SystemUser::getUsername, "%" + queryVO.getUsername() + "%");
         }
 
-        userPageDTO = systemUserMapper.selectPage(userPageDTO, systemUserLambdaQueryWrapper.orderByDesc(SystemUser::getId));
+        userPageDTO = systemUserMapper.selectPage(userPageDTO,
+            systemUserLambdaQueryWrapper.orderByDesc(SystemUser::getId));
 
-        List<SystemUserResponseVO> userResponseVOList = SystemUserResponseVOConverter.INSTANCE.batchConvert(userPageDTO.getRecords());
+        List<SystemUserResponseVO> userResponseVOList = SystemUserResponseVOConverter.INSTANCE.batchConvert(
+            userPageDTO.getRecords());
 
         userResponseVOList.stream()
-                .filter(systemUserResponseVO -> systemUserResponseVO.getRole().equals(RoleEnum.USER.getRoleId()))
-                .forEach(systemUserResponseVO -> {
-                    List<SystemUserPermission> systemUserPermissionList = systemUserPermissionMapper.selectList(
-                            new LambdaQueryWrapper<SystemUserPermission>()
-                                    .select(SystemUserPermission::getGroupName)
-                                    .eq(SystemUserPermission::getSystemUserId, systemUserResponseVO.getId()));
+            .filter(systemUserResponseVO -> systemUserResponseVO.getRole().equals(RoleEnum.USER.getRoleId()))
+            .forEach(systemUserResponseVO -> {
+                List<SystemUserPermission> systemUserPermissionList = systemUserPermissionMapper.selectList(
+                    new LambdaQueryWrapper<SystemUserPermission>()
+                        .select(SystemUserPermission::getGroupName)
+                        .eq(SystemUserPermission::getSystemUserId, systemUserResponseVO.getId()));
 
-                    systemUserResponseVO.setGroupNameList(systemUserPermissionList.stream()
-                            .map(SystemUserPermission::getGroupName).collect(Collectors.toList()));
-                });
+                systemUserResponseVO.setGroupNameList(systemUserPermissionList.stream()
+                    .map(SystemUserPermission::getGroupName).collect(Collectors.toList()));
+            });
 
         return new PageResult<>(userPageDTO, userResponseVOList);
     }
 
     @Override
     public SystemUserResponseVO getSystemUserByUserName(String username) {
-        SystemUser systemUser = systemUserMapper.selectOne(new LambdaQueryWrapper<SystemUser>().eq(SystemUser::getUsername, username));
+        SystemUser systemUser = systemUserMapper.selectOne(
+            new LambdaQueryWrapper<SystemUser>().eq(SystemUser::getUsername, username));
         if (Objects.isNull(systemUser)) {
             throw new EasyRetryServerException("用户不存在");
         }
@@ -220,7 +241,7 @@ public class SystemUserServiceImpl implements SystemUserService {
     private String getToken(SystemUser systemUser) {
         String sign = systemUser.getPassword();
         return JWT.create().withExpiresAt(new Date(System.currentTimeMillis() + EXPIRE_TIME))
-                .withAudience(JsonUtil.toJsonString(SystemUserResponseVOConverter.INSTANCE.convert(systemUser)))
-                .sign(Algorithm.HMAC256(sign));
+            .withAudience(JsonUtil.toJsonString(SystemUserResponseVOConverter.INSTANCE.convert(systemUser)))
+            .sign(Algorithm.HMAC256(sign));
     }
 }

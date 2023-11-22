@@ -21,7 +21,8 @@ public interface NamespaceService {
 
     PageResult<List<NamespaceResponseVO>> getNamespacePage(NamespaceQueryVO queryVO);
 
-    List<NamespaceResponseVO> getNamespaceByUserId(SystemUser systemUser);
-
     Boolean deleteNamespace(Long id);
+
+    List<NamespaceResponseVO> getAllNamespace();
+
 }

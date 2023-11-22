@@ -50,10 +50,18 @@ const api = {
   addNamespace: '/namespace',
   updateNamespace: '/namespace',
   namespaceList: '/namespace/list',
-  delNamespace: '/namespace/'
+  delNamespace: '/namespace/',
+  allNamespace: '/namespace/all'
 }
 
 export default api
+
+export function getAllNamespace () {
+  return request({
+    url: api.allNamespace,
+    method: 'get'
+  })
+}
 
 export function delNamespace (id) {
   return request({
@@ -215,11 +223,11 @@ export function getGroupConfigForPage (parameter) {
   })
 }
 
-export function getAllGroupNameList (parameter) {
+export function getAllGroupNameList (data) {
   return request({
     url: api.allGroupNameList,
-    method: 'get',
-    params: parameter
+    method: 'post',
+    data
   })
 }
 

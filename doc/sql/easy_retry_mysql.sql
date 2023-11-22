@@ -7,26 +7,27 @@ USE
 
 CREATE TABLE `namespace`
 (
-    `id`        bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `name`      varchar(64)         NOT NULL COMMENT '名称',
-    `unique_id` varchar(64)         NOT NULL COMMENT '唯一id',
-    `create_dt` datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_dt` datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
-    `deleted`   tinyint(4)          NOT NULL DEFAULT '0' COMMENT '逻辑删除 1、删除',
+    `id`          bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `name`        varchar(64)  NOT NULL COMMENT '名称',
+    `unique_id`   varchar(64)  NOT NULL COMMENT '唯一id',
+    `description` varchar(256) NOT NULL DEFAULT '' COMMENT '描述',
+    `create_dt`   datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_dt`   datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+    `deleted`     tinyint(4) NOT NULL DEFAULT '0' COMMENT '逻辑删除 1、删除',
     PRIMARY KEY (`id`),
-    KEY `idx_name` (`name`),
+    KEY           `idx_name` (`name`),
     UNIQUE KEY `uk_unique_id` (`unique_id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4 COMMENT ='命名空间';
 
 INSERT INTO `namespace` (`id`, `name`, `unique_id`, `create_dt`, `update_dt`, `deleted`)
-VALUES (1, 'default', '764d604ec6fc45f68cd92514c40e9e1a', now(), now(), 0);
+VALUES (1, 'Default', '764d604ec6fc45f68cd92514c40e9e1a', now(), now(), 0);
 
 
 CREATE TABLE `group_config`
 (
     `id`                bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `namespace_id`      bigint(20) unsigned NOT NULL DEFAULT 1 COMMENT '命名空间id',
+    `namespace_id`      varchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' COMMENT '命名空间id',
     `group_name`        varchar(64)         NOT NULL DEFAULT '' COMMENT '组名称',
     `description`       varchar(256)        NOT NULL DEFAULT '' COMMENT '组描述',
     `group_status`      tinyint(4)          NOT NULL DEFAULT '0' COMMENT '组状态 0、未启用 1、启用',
@@ -46,8 +47,8 @@ CREATE TABLE `group_config`
 
 CREATE TABLE `notify_config`
 (
-    `id`                     bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `namespace_id`           bigint(20) unsigned NOT NULL DEFAULT 1 COMMENT '命名空间id',
+    `id`                     bigint(20)  unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `namespace_id`      varchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' COMMENT '命名空间id',
     `group_name`             varchar(64)         NOT NULL COMMENT '组名称',
     `scene_name`             varchar(64)         NOT NULL COMMENT '场景名称',
     `notify_status`          tinyint(4)          NOT NULL DEFAULT '0' COMMENT '通知状态 0、未启用 1、启用',
@@ -70,7 +71,7 @@ CREATE TABLE `notify_config`
 CREATE TABLE `retry_dead_letter_0`
 (
     `id`            bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `namespace_id`  bigint(20) unsigned NOT NULL DEFAULT 1 COMMENT '命名空间id',
+    `namespace_id`      varchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' COMMENT '命名空间id',
     `unique_id`     varchar(64)         NOT NULL COMMENT '同组下id唯一',
     `group_name`    varchar(64)         NOT NULL COMMENT '组名称',
     `scene_name`    varchar(64)         NOT NULL COMMENT '场景名称',
@@ -95,7 +96,7 @@ CREATE TABLE `retry_dead_letter_0`
 CREATE TABLE `retry_task_0`
 (
     `id`              bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `namespace_id`    bigint(20) unsigned NOT NULL DEFAULT 1 COMMENT '命名空间id',
+    `namespace_id`      varchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' COMMENT '命名空间id',
     `unique_id`       varchar(64)         NOT NULL COMMENT '同组下id唯一',
     `group_name`      varchar(64)         NOT NULL COMMENT '组名称',
     `scene_name`      varchar(64)         NOT NULL COMMENT '场景名称',
@@ -125,7 +126,7 @@ CREATE TABLE `retry_task_0`
 CREATE TABLE `retry_task_log`
 (
     `id`            bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `namespace_id`  bigint(20) unsigned NOT NULL DEFAULT 1 COMMENT '命名空间id',
+    `namespace_id`      varchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' COMMENT '命名空间id',
     `unique_id`     varchar(64)         NOT NULL COMMENT '同组下id唯一',
     `group_name`    varchar(64)         NOT NULL COMMENT '组名称',
     `scene_name`    varchar(64)         NOT NULL COMMENT '场景名称',
@@ -168,7 +169,7 @@ CREATE TABLE `retry_task_log_message`
 CREATE TABLE `scene_config`
 (
     `id`               bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `namespace_id`  bigint(20) unsigned NOT NULL DEFAULT 1 COMMENT '命名空间id',
+    `namespace_id`      varchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' COMMENT '命名空间id',
     `scene_name`       varchar(64)         NOT NULL COMMENT '场景名称',
     `group_name`       varchar(64)         NOT NULL COMMENT '组名称',
     `scene_status`     tinyint(4)          NOT NULL DEFAULT '0' COMMENT '组状态 0、未启用 1、启用',
@@ -246,7 +247,7 @@ CREATE TABLE `system_user_permission`
 (
     `id`             bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
     `group_name`     varchar(64)         NOT NULL COMMENT '组名称',
-    `namespace_id`   bigint(20) unsigned NOT NULL DEFAULT 1 COMMENT '命名空间id',
+    `namespace_id`   varchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' COMMENT '命名空间id',
     `system_user_id` bigint(20)          NOT NULL COMMENT '系统用户id',
     `create_dt`      datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_dt`      datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
@@ -271,7 +272,7 @@ CREATE TABLE `sequence_alloc`
 CREATE TABLE `job`
 (
     `id`               bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `namespace_id`  bigint(20) unsigned NOT NULL DEFAULT 1 COMMENT '命名空间id',
+    `namespace_id`      varchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' COMMENT '命名空间id',
     `group_name`       varchar(64)         NOT NULL COMMENT '组名称',
     `job_name`         varchar(64)         NOT NULL COMMENT '名称',
     `args_str`         text                         DEFAULT NULL COMMENT '执行方法参数',
@@ -307,7 +308,7 @@ CREATE TABLE `job`
 CREATE TABLE `job_log_message`
 (
     `id`            bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `namespace_id`  bigint(20) unsigned NOT NULL DEFAULT 1 COMMENT '命名空间id',
+    `namespace_id`      varchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' COMMENT '命名空间id',
     `group_name`    varchar(64)         NOT NULL COMMENT '组名称',
     `job_id`        bigint(20)          NOT NULL COMMENT '任务信息id',
     `task_batch_id` bigint(20)          NOT NULL COMMENT '任务批次id',
@@ -350,7 +351,7 @@ CREATE TABLE `job_task`
 CREATE TABLE `job_task_batch`
 (
     `id`                bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `namespace_id`      bigint(20) unsigned NOT NULL DEFAULT 1 COMMENT '命名空间id',
+    `namespace_id`      varchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' COMMENT '命名空间id',
     `group_name`        varchar(64)         NOT NULL COMMENT '组名称',
     `job_id`            bigint(20)          NOT NULL COMMENT '任务id',
     `task_batch_status` tinyint(4)          NOT NULL DEFAULT '0' COMMENT '任务批次状态 0、失败 1、成功',

@@ -236,14 +236,14 @@ public class GroupConfigServiceImpl implements GroupConfigService {
     }
 
     @Override
-    public List<String> getAllGroupNameList(final Long namespaceId) {
+    public List<GroupConfigResponseVO> getAllGroupNameList(final List<String> namespaceId) {
         ConfigAccess<GroupConfig> groupConfigAccess = accessTemplate.getGroupConfigAccess();
 
-        return groupConfigAccess.list(new LambdaQueryWrapper<GroupConfig>()
-                .eq(GroupConfig::getNamespaceId, namespaceId)
-                        .select(GroupConfig::getGroupName)).stream()
-                .map(GroupConfig::getGroupName)
-                .collect(Collectors.toList());
+        List<GroupConfig> groupConfigs = groupConfigAccess.list(new LambdaQueryWrapper<GroupConfig>()
+                .in(GroupConfig::getNamespaceId, namespaceId)
+                .select(GroupConfig::getGroupName, GroupConfig::getNamespaceId)).stream()
+            .collect(Collectors.toList());
+        return GroupConfigResponseVOConverter.INSTANCE.toGroupConfigResponseVO(groupConfigs);
     }
 
 }

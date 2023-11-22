@@ -19,7 +19,10 @@ public class SystemUserResponseVO {
 
     private Integer role;
 
+    @Deprecated
     private List<String> groupNameList;
+
+    private List<NamespaceResponseVO> namespaceIdList;
 
     private String token;
 

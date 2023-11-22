@@ -29,5 +29,5 @@ public class SystemUserRequestVO {
     @NotNull(groups = {PutMapping.class, PostMapping.class})
     private Integer role;
 
-    private List<String> groupNameList;
+    private List<UserPermissionRequestVO> permissions;
 }
