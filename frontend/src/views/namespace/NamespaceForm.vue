@@ -66,7 +66,7 @@ export default {
       e.preventDefault()
       this.form.validateFields((err, values) => {
         if (!err) {
-          if (this.formType === 'create') {
+          if (!this.isEdit) {
             addNamespace(values).then(res => {
               this.$message.success('操作成功')
               this.$emit('refreshTable', 1)

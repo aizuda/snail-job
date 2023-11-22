@@ -2,9 +2,11 @@ package com.aizuda.easy.retry.server.web.controller;
 
 import cn.hutool.core.util.ReUtil;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
+import com.aizuda.easy.retry.server.web.annotation.LoginUser;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
 import com.aizuda.easy.retry.server.web.model.request.GroupConfigQueryVO;
 import com.aizuda.easy.retry.server.web.model.request.GroupConfigRequestVO;
+import com.aizuda.easy.retry.server.web.model.request.UserSessionVO;
 import com.aizuda.easy.retry.server.web.model.response.GroupConfigResponseVO;
 import com.aizuda.easy.retry.server.web.annotation.LoginRequired;
 import com.aizuda.easy.retry.server.web.annotation.RoleEnum;
@@ -37,8 +39,8 @@ public class GroupConfigController {
 
     @LoginRequired(role = RoleEnum.ADMIN)
     @PostMapping("")
-    public Boolean addGroup(@RequestBody @Validated GroupConfigRequestVO groupConfigRequestVO) {
-        return groupConfigService.addGroup(groupConfigRequestVO);
+    public Boolean addGroup(@LoginUser UserSessionVO systemUser, @RequestBody @Validated GroupConfigRequestVO groupConfigRequestVO) {
+        return groupConfigService.addGroup(systemUser, groupConfigRequestVO);
     }
 
     @LoginRequired
@@ -68,9 +70,15 @@ public class GroupConfigController {
     }
 
     @LoginRequired
-    @PostMapping("/all/group-name/list")
+    @PostMapping("/all/group-config/list")
     public List<GroupConfigResponseVO> getAllGroupNameList(@RequestBody List<String> namespaceIds) {
-        return groupConfigService.getAllGroupNameList(namespaceIds);
+        return groupConfigService.getAllGroupConfigList(namespaceIds);
+    }
+
+    @LoginRequired
+    @PostMapping("/all/group-name/list")
+    public List<String> getAllGroupNameList() {
+        return groupConfigService.getAllGroupNameList();
     }
 
     @Deprecated

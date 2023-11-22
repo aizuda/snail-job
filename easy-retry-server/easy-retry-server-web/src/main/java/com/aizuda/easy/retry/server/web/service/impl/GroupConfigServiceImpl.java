@@ -11,10 +11,12 @@ import com.aizuda.easy.retry.server.retry.task.support.handler.ConfigVersionSync
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
 import com.aizuda.easy.retry.server.web.model.request.GroupConfigQueryVO;
 import com.aizuda.easy.retry.server.web.model.request.GroupConfigRequestVO;
+import com.aizuda.easy.retry.server.web.model.request.UserSessionVO;
 import com.aizuda.easy.retry.server.web.model.response.GroupConfigResponseVO;
 import com.aizuda.easy.retry.server.web.service.GroupConfigService;
 import com.aizuda.easy.retry.server.web.service.convert.GroupConfigConverter;
 import com.aizuda.easy.retry.server.web.service.convert.GroupConfigResponseVOConverter;
+import com.aizuda.easy.retry.server.web.util.UserSessionUtils;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
 import com.aizuda.easy.retry.template.datasource.access.ConfigAccess;
 import com.aizuda.easy.retry.template.datasource.access.TaskAccess;
@@ -62,7 +64,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
 
     @Override
     @Transactional
-    public Boolean addGroup(GroupConfigRequestVO groupConfigRequestVO) {
+    public Boolean addGroup(UserSessionVO systemUser, GroupConfigRequestVO groupConfigRequestVO) {
 
         ConfigAccess<GroupConfig> groupConfigAccess = accessTemplate.getGroupConfigAccess();
         Assert.isTrue(groupConfigAccess.count(new LambdaQueryWrapper<GroupConfig>()
@@ -70,10 +72,10 @@ public class GroupConfigServiceImpl implements GroupConfigService {
                 () -> new EasyRetryServerException("GroupName已经存在 {}", groupConfigRequestVO.getGroupName()));
 
         // 保存组配置
-        doSaveGroupConfig(groupConfigRequestVO);
+        doSaveGroupConfig(systemUser, groupConfigRequestVO);
 
         // 保存生成唯一id配置
-        doSaveSequenceAlloc(groupConfigRequestVO);
+        doSaveSequenceAlloc(systemUser, groupConfigRequestVO);
 
         return Boolean.TRUE;
     }
@@ -81,11 +83,13 @@ public class GroupConfigServiceImpl implements GroupConfigService {
     /**
      * 保存序号生成规则配置失败
      *
+     * @param systemUser
      * @param groupConfigRequestVO 组、场景、通知配置类
      */
-    private void doSaveSequenceAlloc(final GroupConfigRequestVO groupConfigRequestVO) {
+    private void doSaveSequenceAlloc(UserSessionVO systemUser, final GroupConfigRequestVO groupConfigRequestVO) {
         SequenceAlloc sequenceAlloc = new SequenceAlloc();
         sequenceAlloc.setGroupName(groupConfigRequestVO.getGroupName());
+        sequenceAlloc.setNamespaceId(systemUser.getNamespaceId());
         sequenceAlloc.setStep(systemProperties.getStep());
         sequenceAlloc.setUpdateDt(LocalDateTime.now());
         Assert.isTrue(1 == sequenceAllocMapper.insert(sequenceAlloc), () -> new EasyRetryServerException("failed to save sequence generation rule configuration [{}].", groupConfigRequestVO.getGroupName()));
@@ -141,7 +145,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
     public PageResult<List<GroupConfigResponseVO>> getGroupConfigForPage(GroupConfigQueryVO queryVO) {
 
         LambdaQueryWrapper<GroupConfig> groupConfigLambdaQueryWrapper = new LambdaQueryWrapper<>();
-        groupConfigLambdaQueryWrapper.eq(GroupConfig::getNamespaceId, queryVO.getNamespaceId());
+        groupConfigLambdaQueryWrapper.eq(GroupConfig::getNamespaceId, UserSessionUtils.currentUserSession().getNamespaceId());
         if (StrUtil.isNotBlank(queryVO.getGroupName())) {
             groupConfigLambdaQueryWrapper.like(GroupConfig::getGroupName, queryVO.getGroupName() + "%");
         }
@@ -172,10 +176,11 @@ public class GroupConfigServiceImpl implements GroupConfigService {
         return pageResult;
     }
 
-    private void doSaveGroupConfig(GroupConfigRequestVO groupConfigRequestVO) {
+    private void doSaveGroupConfig(UserSessionVO systemUser, GroupConfigRequestVO groupConfigRequestVO) {
         GroupConfig groupConfig = GroupConfigConverter.INSTANCE.convert(groupConfigRequestVO);
         groupConfig.setCreateDt(LocalDateTime.now());
         groupConfig.setVersion(1);
+        groupConfig.setNamespaceId(systemUser.getNamespaceId());
         groupConfig.setGroupName(groupConfigRequestVO.getGroupName());
         groupConfig.setDescription(Optional.ofNullable(groupConfigRequestVO.getDescription()).orElse(StrUtil.EMPTY));
         if (Objects.isNull(groupConfigRequestVO.getGroupPartition())) {
@@ -236,14 +241,26 @@ public class GroupConfigServiceImpl implements GroupConfigService {
     }
 
     @Override
-    public List<GroupConfigResponseVO> getAllGroupNameList(final List<String> namespaceId) {
+    public List<GroupConfigResponseVO> getAllGroupConfigList(final List<String> namespaceId) {
         ConfigAccess<GroupConfig> groupConfigAccess = accessTemplate.getGroupConfigAccess();
 
         List<GroupConfig> groupConfigs = groupConfigAccess.list(new LambdaQueryWrapper<GroupConfig>()
-                .in(GroupConfig::getNamespaceId, namespaceId)
-                .select(GroupConfig::getGroupName, GroupConfig::getNamespaceId)).stream()
-            .collect(Collectors.toList());
+                        .in(GroupConfig::getNamespaceId, namespaceId)
+                        .select(GroupConfig::getGroupName, GroupConfig::getNamespaceId)).stream()
+                .collect(Collectors.toList());
         return GroupConfigResponseVOConverter.INSTANCE.toGroupConfigResponseVO(groupConfigs);
+    }
+
+    @Override
+    public List<String> getAllGroupNameList() {
+        ConfigAccess<GroupConfig> groupConfigAccess = accessTemplate.getGroupConfigAccess();
+
+        List<GroupConfig> groupConfigs = groupConfigAccess.list(new LambdaQueryWrapper<GroupConfig>()
+                        .in(GroupConfig::getNamespaceId, UserSessionUtils.currentUserSession().getNamespaceId())
+                        .select(GroupConfig::getGroupName)).stream()
+                .collect(Collectors.toList());
+
+        return groupConfigs.stream().map(GroupConfig::getGroupName).collect(Collectors.toList());
     }
 
 }

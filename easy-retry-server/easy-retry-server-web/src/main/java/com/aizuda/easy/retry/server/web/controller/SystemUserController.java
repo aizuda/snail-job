@@ -1,7 +1,7 @@
 package com.aizuda.easy.retry.server.web.controller;
 
+import com.aizuda.easy.retry.server.web.model.request.UserSessionVO;
 import com.aizuda.easy.retry.server.web.service.SystemUserService;
-import com.aizuda.easy.retry.template.datasource.persistence.po.SystemUser;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
 import com.aizuda.easy.retry.server.web.model.request.SystemUserQueryVO;
 import com.aizuda.easy.retry.server.web.model.request.SystemUserRequestVO;
@@ -34,7 +34,7 @@ public class SystemUserController {
 
     @LoginRequired
     @GetMapping("/user/info")
-    public SystemUserResponseVO getUserInfo(@LoginUser SystemUser systemUser) {
+    public SystemUserResponseVO getUserInfo(@LoginUser UserSessionVO systemUser) {
         return systemUserService.getUserInfo(systemUser);
     }
 

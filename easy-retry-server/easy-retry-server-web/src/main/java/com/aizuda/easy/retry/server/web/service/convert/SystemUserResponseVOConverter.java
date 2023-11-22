@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.server.web.service.convert;
 
+import com.aizuda.easy.retry.server.web.model.request.UserSessionVO;
 import com.aizuda.easy.retry.template.datasource.persistence.po.SystemUser;
 import com.aizuda.easy.retry.server.web.model.response.SystemUserResponseVO;
 import org.mapstruct.Mapper;
@@ -16,6 +17,8 @@ import java.util.List;
 public interface SystemUserResponseVOConverter {
 
     SystemUserResponseVOConverter INSTANCE = Mappers.getMapper(SystemUserResponseVOConverter.class);
+
+    SystemUserResponseVO convert(UserSessionVO systemUser);
 
     SystemUserResponseVO convert(SystemUser systemUser);
 
