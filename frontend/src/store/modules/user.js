@@ -10,7 +10,8 @@ const user = {
     welcome: '',
     avatar: '',
     roles: [],
-    info: {}
+    info: {},
+    namespaces: []
   },
 
   mutations: {
@@ -29,6 +30,9 @@ const user = {
     },
     SET_INFO: (state, info) => {
       state.info = info
+    },
+    SET_NAMESPACES: (state, namespaces) => {
+      state.namespaces = namespaces
     }
   },
 
@@ -55,6 +59,8 @@ const user = {
           result['role'] = {
             permissions: permissionsConfig(result.role, result.mode)
           }
+
+          commit('SET_NAMESPACES', result.namespaceIdList)
 
           if (result.role && result.role.permissions.length > 0) {
             const role = result.role

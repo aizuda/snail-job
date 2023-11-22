@@ -259,6 +259,7 @@ CREATE TABLE `system_user_permission`
 CREATE TABLE `sequence_alloc`
 (
     `id`         bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `namespace_id`      varchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' COMMENT '命名空间id',
     `group_name` varchar(64)         NOT NULL DEFAULT '' COMMENT '组名称',
     `max_id`     bigint(20)          NOT NULL DEFAULT '1' COMMENT '最大id',
     `step`       int(11)             NOT NULL DEFAULT '100' COMMENT '步长',

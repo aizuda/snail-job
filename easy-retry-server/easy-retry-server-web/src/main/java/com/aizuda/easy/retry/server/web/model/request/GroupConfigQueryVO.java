@@ -22,9 +22,4 @@ public class GroupConfigQueryVO extends BaseQueryVO {
     @NotNull(message = "组状态不能为空")
     private Integer groupStatus;
 
-    /**
-     * 命名空间id
-     */
-    private Long namespaceId;
-
 }

@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.server.web.interceptor;
 
+import com.aizuda.easy.retry.server.web.model.request.UserSessionVO;
 import com.aizuda.easy.retry.template.datasource.persistence.po.SystemUser;
 import com.aizuda.easy.retry.server.web.annotation.LoginUser;
 import org.springframework.core.MethodParameter;
@@ -21,13 +22,13 @@ public class LoginUserMethodArgumentResolver implements HandlerMethodArgumentRes
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        return parameter.getParameterType().isAssignableFrom(SystemUser.class)
+        return parameter.getParameterType().isAssignableFrom(UserSessionVO.class)
                 && parameter.hasParameterAnnotation(LoginUser.class);
     }
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest,
                                   WebDataBinderFactory binderFactory) throws Exception {
-        SystemUser userInfo = (SystemUser) webRequest.getAttribute("currentUser", RequestAttributes.SCOPE_REQUEST);
+        UserSessionVO userInfo = (UserSessionVO) webRequest.getAttribute("currentUser", RequestAttributes.SCOPE_REQUEST);
         if (userInfo != null) {
             return userInfo;
         }

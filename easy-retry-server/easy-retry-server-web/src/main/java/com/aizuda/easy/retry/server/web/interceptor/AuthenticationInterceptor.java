@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.server.web.interceptor;
 
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
+import com.aizuda.easy.retry.server.web.model.request.UserSessionVO;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.SystemUserMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.SystemUser;
 import com.auth0.jwt.JWT;
@@ -33,6 +34,7 @@ import java.util.Objects;
 public class AuthenticationInterceptor implements HandlerInterceptor {
 
     public static final String AUTHENTICATION = "EASY-RETRY-AUTH";
+    public static final String NAMESPACE_ID = "EASY-RETRY-NAMESPACE-ID";
 
     @Autowired
     private SystemUserMapper systemUserMapper;
@@ -41,6 +43,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object object) throws Exception {
         // 从 http 请求头中取出 token
         String token = httpServletRequest.getHeader(AUTHENTICATION);
+        String namespaceId = httpServletRequest.getHeader(NAMESPACE_ID);
 
         // 如果不是映射到方法直接通过
         if (!(object instanceof HandlerMethod)) {
@@ -74,7 +77,13 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
                 throw new EasyRetryServerException("{} 用户不存在", systemUser.getUsername());
             }
 
-            httpServletRequest.setAttribute("currentUser", systemUser);
+            UserSessionVO userSessionVO = new UserSessionVO();
+            userSessionVO.setId(systemUser.getId());
+            userSessionVO.setUsername(systemUser.getUsername());
+            userSessionVO.setRole(systemUser.getRole());
+            userSessionVO.setNamespaceId(namespaceId);
+
+            httpServletRequest.setAttribute("currentUser", userSessionVO);
 
             // 验证 token
             JWTVerifier jwtVerifier = JWT.require(Algorithm.HMAC256(systemUser.getPassword())).build();

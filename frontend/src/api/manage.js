@@ -70,6 +70,14 @@ export function delNamespace (id) {
   })
 }
 
+export function updateNamespace (data) {
+  return request({
+    url: api.addNamespace,
+    method: 'put',
+    data
+  })
+}
+
 export function addNamespace (data) {
   return request({
     url: api.addNamespace,

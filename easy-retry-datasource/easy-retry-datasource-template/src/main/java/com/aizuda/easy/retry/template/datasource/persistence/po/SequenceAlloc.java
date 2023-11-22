@@ -35,6 +35,8 @@ public class SequenceAlloc implements Serializable {
      */
     private String groupName;
 
+    private String namespaceId;
+
     /**
      * 最大id
      */
