@@ -1,5 +1,4 @@
 package com.aizuda.easy.retry.common.core.alarm.strategy;
-
 import cn.hutool.http.ContentType;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
@@ -14,7 +13,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-
+import org.springframework.util.CollectionUtils;
+import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -30,6 +30,10 @@ import java.util.Map;
 @Component
 @Slf4j
 public class LarkAlarm extends AbstractAlarm<AlarmContext> {
+
+
+
+    public static final String atLabel = "<at id={0}></at>";
 
     @Override
     public Integer getAlarmType() {
@@ -52,7 +56,7 @@ public class LarkAlarm extends AbstractAlarm<AlarmContext> {
 
         Map<String, Object> map = new HashMap<>();
         map.put("header", buildHeader(context.getTitle()));
-        map.put("elements", buildElements(context.getText()));
+        map.put("elements", buildElements(context.getText(),larkAttribute.getAts(),larkAttribute.isAtAll()));
 
         LarkMessage builder = LarkMessage.builder()
             .msgType("interactive")
@@ -71,10 +75,10 @@ public class LarkAlarm extends AbstractAlarm<AlarmContext> {
         return true;
     }
 
-    private List buildElements(final String text) {
+    private List buildElements(String text,List<String> ats,boolean isAtAll) {
         Map<String, String> map = new HashMap<>();
         map.put("tag", "markdown");
-        map.put("content", text);
+        map.put("content", getAtText(text,ats,isAtAll));
         return Collections.singletonList(map);
     }
 
@@ -110,5 +114,16 @@ public class LarkAlarm extends AbstractAlarm<AlarmContext> {
         private Map<String, Object> card;
     }
 
+    public String getAtText(String text, List<String> ats, boolean isAtAll) {
+        StringBuilder sb = new StringBuilder(text);
+        if (isAtAll) {
+            sb.append(MessageFormat.format(atLabel, "all"));
+        } else {
+            if (!CollectionUtils.isEmpty(ats)) {
+                ats.forEach(at -> sb.append(MessageFormat.format(atLabel, at)));
+            }
+        }
+        return sb.toString();
+    }
 }
 

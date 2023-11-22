@@ -98,7 +98,7 @@ public class RetryTaskFailMoreThresholdAlarmListener extends AbstractFlowControl
                                         retryTask.getRetryCount(),
                                         retryTask.getArgsStr(),
                                         DateUtils.format(retryTask.getCreateDt(), DateUtils.NORM_DATETIME_PATTERN))
-                                .title("组:[{}] 场景:[{}] 环境重试任务失败数量超过阈值", retryTask.getGroupName(), retryTask.getSceneName())
+                                .title("{}环境 环境重试任务失败数量超过阈值", EnvironmentUtils.getActiveProfile())
                                 .notifyAttribute(notifyConfig.getNotifyAttribute());
                         Alarm<AlarmContext> alarmType = easyRetryAlarmFactory.getAlarmType(notifyConfig.getNotifyType());
                         alarmType.asyncSendMessage(context);

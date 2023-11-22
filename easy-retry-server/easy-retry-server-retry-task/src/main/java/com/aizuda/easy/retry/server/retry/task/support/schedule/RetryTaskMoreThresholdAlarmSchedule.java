@@ -79,7 +79,7 @@ public class RetryTaskMoreThresholdAlarmSchedule extends AbstractSchedule implem
                                         sceneConfig.getSceneName(),
                                         DateUtils.toNowFormat(DateUtils.NORM_DATETIME_PATTERN),
                                         count)
-                                .title("组:[{}] 场景:[{}] 重试数据过多", sceneConfig.getGroupName(),sceneConfig.getSceneName())
+                                .title("{}环境 场景重试数量超过阈值", EnvironmentUtils.getActiveProfile())
                                 .notifyAttribute(notifyConfig.getNotifyAttribute());
                         Alarm<AlarmContext> alarmType = easyRetryAlarmFactory.getAlarmType(notifyConfig.getNotifyType());
                         alarmType.asyncSendMessage(context);

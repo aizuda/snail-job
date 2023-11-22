@@ -107,7 +107,7 @@ public class RetryTaskFailDeadLetterAlarmListener extends AbstractFlowControl im
                                                 retryDeadLetter.getSceneName(),
                                                 retryDeadLetter.getArgsStr(),
                                                 DateUtils.format(retryDeadLetter.getCreateDt(), DateUtils.NORM_DATETIME_PATTERN))
-                                        .title("组:[{}] 场景:[{}] 环境重试任务失败进入死信队列", retryDeadLetter.getGroupName(), retryDeadLetter.getSceneName())
+                                        .title("{}环境 重试任务失败进入死信队列", EnvironmentUtils.getActiveProfile())
                                         .notifyAttribute(notifyConfig.getNotifyAttribute());
                                 Alarm<AlarmContext> alarmType = easyRetryAlarmFactory.getAlarmType(notifyConfig.getNotifyType());
                                 alarmType.asyncSendMessage(context);
