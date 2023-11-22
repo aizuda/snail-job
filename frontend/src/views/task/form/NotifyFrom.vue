@@ -163,14 +163,14 @@
             ]" />
         </a-form-item>
         <a-form-item v-if="this.notifyTypeValue === '1'">
-          <span slot="label">被@负责人手机号&nbsp;<a :href="officialWebsite + '/pages/32e4a0/#被@负责人手机号是何物' +''" target="_blank"> <a-icon type="question-circle-o" /></a></span>
+          <span slot="label">被@人手机号&nbsp;<a :href="officialWebsite + '/pages/32e4a0/#被@人手机号是何物' +''" target="_blank"> <a-icon type="question-circle-o" /></a></span>
           <a-input
             placeholder="请输入被@负责人手机号"
             type="textarea"
             v-if="this.notifyTypeValue === '1'"
             v-decorator="[
               'ats',
-              {rules: [{ required: true, message: '请输入被@负责人手机号', whitespace: true}]}
+              {rules: [{ required: true, message: '请输入被@人手机号', whitespace: true}]}
             ]" />
         </a-form-item>
         <a-form-item
@@ -185,14 +185,14 @@
         </a-form-item>
         <a-form-item
           v-if="this.notifyTypeValue === '4'">
-          <span slot="label">被@负责人用户id&nbsp;<a :href="officialWebsite + '/pages/32e4a0/#被@负责人用户id是何物' +''" target="_blank"> <a-icon type="question-circle-o" /></a></span>
+          <span slot="label">被@负责人用户id&nbsp;<a :href="officialWebsite + '/pages/32e4a0/#被@人open_id是何物' +''" target="_blank"> <a-icon type="question-circle-o" /></a></span>
           <a-input
-            placeholder="请输入被@负责人用户id"
+            placeholder="请输入被@人open_id"
             type="textarea"
             v-if="this.notifyTypeValue === '4'"
             v-decorator="[
               'ats',
-              {rules: [{ required: true, message: '请输入被@负责人用户id', whitespace: true}]}
+              {rules: [{ required: true, message: '请输入被@人open_id', whitespace: true}]}
             ]" />
         </a-form-item>
         <a-form-item

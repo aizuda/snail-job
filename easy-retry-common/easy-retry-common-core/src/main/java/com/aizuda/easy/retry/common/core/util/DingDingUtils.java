@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.List;
 
@@ -17,6 +18,9 @@ import java.util.List;
  */
 @Slf4j
 public class DingDingUtils {
+
+    public static final String atLabel = "@{0}";
+
     /**
      * 防止文本过长钉钉限流，目前最大为4000
      *
@@ -55,14 +59,13 @@ public class DingDingUtils {
         return request;
     }
 
-    private static String getAtText(List<String> ats, String text) {
-        if(CollectionUtils.isEmpty(ats)){
+    public static String getAtText(List<String> ats, String text) {
+        if (CollectionUtils.isEmpty(ats)) {
             return text;
         }
-        for(String at: ats){
-            text = "@" + at;
-        }
-        return text;
+        StringBuilder sb = new StringBuilder(text);
+        ats.forEach(at -> sb.append(MessageFormat.format(atLabel, at)));
+        return sb.toString();
     }
 
     /**
