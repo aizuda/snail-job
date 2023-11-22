@@ -12,7 +12,7 @@ import {
   TOGGLE_WEAK,
   TOGGLE_MULTI_TAB,
   // i18n
-  APP_LANGUAGE
+  APP_LANGUAGE, APP_NAMESPACE
 } from '@/store/mutation-types'
 import { loadLanguageAsync } from '@/locales'
 
@@ -29,6 +29,7 @@ const app = {
     color: '',
     weak: false,
     multiTab: true,
+    namespace: '',
     lang: 'zh-CN',
     _antLocale: {}
   },
@@ -80,6 +81,10 @@ const app = {
     [TOGGLE_MULTI_TAB]: (state, bool) => {
       storage.set(TOGGLE_MULTI_TAB, bool)
       state.multiTab = bool
+    },
+    [APP_NAMESPACE]: (state, namespace) => {
+      storage.set(APP_NAMESPACE, namespace)
+      state.namespace = namespace
     }
   },
   actions: {
@@ -91,6 +96,16 @@ const app = {
         }).catch((e) => {
           reject(e)
         })
+      })
+    },
+    setNamespace ({ commit }, namespaceId) {
+      return new Promise((resolve, reject) => {
+        commit(APP_NAMESPACE, namespaceId)
+        // loadLanguageAsync(lang).then(() => {
+        //   resolve()
+        // }).catch((e) => {
+        //   reject(e)
+        // })
       })
     }
   }

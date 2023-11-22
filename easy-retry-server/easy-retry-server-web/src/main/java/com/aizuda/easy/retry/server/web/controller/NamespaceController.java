@@ -45,8 +45,8 @@ public class NamespaceController {
         return namespaceService.deleteNamespace(id);
     }
 
-//    @PutMapping
-    public List<NamespaceResponseVO> getNamespaceByUserId(@LoginUser SystemUser systemUser) {
-        return namespaceService.getNamespaceByUserId(systemUser);
+    @GetMapping("/all")
+    public List<NamespaceResponseVO> getAllNamespace() {
+        return namespaceService.getAllNamespace();
     }
 }

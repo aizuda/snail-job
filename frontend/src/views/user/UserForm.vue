@@ -38,19 +38,35 @@
         </a-select>
       </a-form-item>
       <a-form-item
-        label="权限"
+        label="命名空间"
         v-if="role !== '2'">
         <a-select
           mode="tags"
-
+          style="width: 100%"
+          :token-separators="[',']"
+          @change="value => handleNamespacesIdChange(value)"
+          v-decorator="[
+            'namespacesIds',
+            {rules: [{ required: true, message: '请分配命名空间'}]}
+          ]">
+          <a-select-option v-for="(item, index) in namespaceList" :key="index" :value="item.uniqueId">
+            {{ item.name }} ({{ item.uniqueId }})
+          </a-select-option>
+        </a-select>
+      </a-form-item>
+      <a-form-item
+        label="组"
+        v-if="role !== '2'">
+        <a-select
+          mode="tags"
           style="width: 100%"
           :token-separators="[',']"
           v-decorator="[
-            'groupNameList',
+            'groupNames',
             {rules: [{ required: true, message: '请分配组'}]}
           ]">
-          <a-select-option v-for="(item, index) in groupNameList" :key="index" :value="item">
-            {{ item }}
+          <a-select-option v-for="(item, index) in groupNameList" :key="index" :value="item.name">
+            {{ item.name }} ({{ item.namespaceId }})
           </a-select-option>
         </a-select>
       </a-form-item>
@@ -69,7 +85,7 @@
 
 <script>
 import md5 from 'md5'
-import { getAllGroupNameList, saveUser, getSystemUserByUserName } from '@/api/manage'
+import { saveUser, getSystemUserByUserName, getAllNamespace, getAllGroupNameList } from '@/api/manage'
 import pick from 'lodash.pick'
 
 export default {
@@ -85,12 +101,13 @@ export default {
         labelCol: { lg: { span: 7 }, sm: { span: 7 } },
         wrapperCol: { lg: { span: 10 }, sm: { span: 17 } }
       },
-      groupNameList: []
+      groupNameList: [],
+      namespaceList: []
     }
   },
   mounted () {
-    getAllGroupNameList().then(res => {
-      this.groupNameList = res.data
+    getAllNamespace().then(res => {
+      this.namespaceList = res.data
     })
 
     this.$nextTick(() => {
@@ -104,6 +121,11 @@ export default {
   methods: {
     handleChange (role) {
       this.role = role
+    },
+    handleNamespacesIdChange (namespacesIds) {
+      getAllGroupNameList(namespacesIds).then(res => {
+        this.groupNameList = res.data
+      })
     },
     handleSubmit (e) {
       e.preventDefault()
@@ -135,7 +157,7 @@ export default {
       new Promise((resolve) => {
         setTimeout(resolve, 1500)
       }).then(() => {
-        const formData = pick(data, ['id', 'username', 'role', 'groupNameList'])
+        const formData = pick(data, ['id', 'username', 'role', 'groupNames', 'namespacesIds'])
         formData.role = formData.role.toString()
         form.setFieldsValue(formData)
       })

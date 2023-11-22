@@ -15,6 +15,11 @@ public class NamespaceRequestVO {
     private Long id;
 
     /**
+     * 命名空间唯一标识
+     */
+    String uniqueId;
+
+    /**
      * 名称
      */
     @NotBlank(message= "name 不能为空")

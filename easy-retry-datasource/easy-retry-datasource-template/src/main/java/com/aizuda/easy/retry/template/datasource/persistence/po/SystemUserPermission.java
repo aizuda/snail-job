@@ -25,6 +25,8 @@ public class SystemUserPermission implements Serializable {
 
     private String groupName;
 
+    private String namespaceId;
+
     private Long systemUserId;
 
     private LocalDateTime createDt;

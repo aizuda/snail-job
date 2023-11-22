@@ -37,7 +37,9 @@ public class NamespaceServiceImpl implements NamespaceService {
     public Boolean saveNamespace(final NamespaceRequestVO namespaceRequestVO) {
         Namespace namespace = new Namespace();
         namespace.setName(namespaceRequestVO.getName());
-        namespace.setUniqueId(IdUtil.simpleUUID());
+        if (StrUtil.isBlank(namespaceRequestVO.getUniqueId())) {
+            namespace.setUniqueId(IdUtil.simpleUUID());
+        }
         return 1 == namespaceMapper.insert(namespace);
     }
 
@@ -59,22 +61,27 @@ public class NamespaceServiceImpl implements NamespaceService {
 
         LambdaQueryWrapper<Namespace> queryWrapper = new LambdaQueryWrapper<>();
         if (StrUtil.isNotBlank(queryVO.getName())) {
-            queryWrapper.like(Namespace::getName,queryVO.getName() + "%");
+            queryWrapper.like(Namespace::getName, queryVO.getName() + "%");
         }
 
         queryWrapper.eq(Namespace::getDeleted, StatusEnum.NO);
         queryWrapper.orderByDesc(Namespace::getId);
         PageDTO<Namespace> selectPage = namespaceMapper.selectPage(pageDTO, queryWrapper);
-        return new PageResult<>(pageDTO, NamespaceResponseVOConverter.INSTANCE.toNamespaceResponseVOs(selectPage.getRecords()));
-    }
-
-    @Override
-    public List<NamespaceResponseVO> getNamespaceByUserId(final SystemUser systemUser) {
-        return null;
+        return new PageResult<>(pageDTO,
+            NamespaceResponseVOConverter.INSTANCE.toNamespaceResponseVOs(selectPage.getRecords()));
     }
 
     @Override
     public Boolean deleteNamespace(Long id) {
         return 1 == namespaceMapper.deleteById(id);
+    }
+
+    @Override
+    public List<NamespaceResponseVO> getAllNamespace() {
+        List<Namespace> namespaces = namespaceMapper.selectList(
+            new LambdaQueryWrapper<Namespace>()
+                .select(Namespace::getName, Namespace::getUniqueId)
+        );
+        return NamespaceResponseVOConverter.INSTANCE.toNamespaceResponseVOs(namespaces);
     }
 }
