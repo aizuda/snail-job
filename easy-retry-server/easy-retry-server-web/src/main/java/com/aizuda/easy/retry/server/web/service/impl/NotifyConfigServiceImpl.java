@@ -11,6 +11,7 @@ import com.aizuda.easy.retry.server.web.model.response.NotifyConfigResponseVO;
 import com.aizuda.easy.retry.server.web.service.NotifyConfigService;
 import com.aizuda.easy.retry.server.web.service.convert.NotifyConfigConverter;
 import com.aizuda.easy.retry.server.web.service.convert.NotifyConfigResponseVOConverter;
+import com.aizuda.easy.retry.server.web.util.UserSessionUtils;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
 import com.aizuda.easy.retry.template.datasource.access.ConfigAccess;
 import com.aizuda.easy.retry.template.datasource.persistence.po.NotifyConfig;
@@ -37,7 +38,7 @@ public class NotifyConfigServiceImpl implements NotifyConfigService {
         PageDTO<NotifyConfig> pageDTO = new PageDTO<>();
 
         LambdaQueryWrapper<NotifyConfig> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(NotifyConfig::getNamespaceId, queryVO.getNamespaceId());
+        queryWrapper.eq(NotifyConfig::getNamespaceId, UserSessionUtils.currentUserSession().getNamespaceId());
         if (StrUtil.isNotBlank(queryVO.getGroupName())) {
             queryWrapper.eq(NotifyConfig::getGroupName, queryVO.getGroupName());
         }
@@ -64,6 +65,8 @@ public class NotifyConfigServiceImpl implements NotifyConfigService {
     public Boolean updateNotify(NotifyConfigRequestVO requestVO) {
         Assert.notNull(requestVO.getId(), () -> new EasyRetryServerException("参数异常"));
         NotifyConfig notifyConfig = NotifyConfigConverter.INSTANCE.toNotifyConfig(requestVO);
+        // 防止被覆盖
+        notifyConfig.setNamespaceId(null);
         Assert.isTrue(1 == accessTemplate.getNotifyConfigAccess().updateById(notifyConfig),
                 () -> new EasyRetryServerException("failed to update notify. sceneConfig:[{}]", JsonUtil.toJsonString(notifyConfig)));
         return Boolean.TRUE;

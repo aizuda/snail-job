@@ -8,6 +8,7 @@ import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.web.model.request.UserPermissionRequestVO;
 import com.aizuda.easy.retry.server.web.model.request.UserSessionVO;
 import com.aizuda.easy.retry.server.web.service.convert.NamespaceResponseVOConverter;
+import com.aizuda.easy.retry.server.web.service.convert.PermissionsResponseVOConverter;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.NamespaceMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.SystemUserMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.SystemUserPermissionMapper;
@@ -92,12 +93,12 @@ public class SystemUserServiceImpl implements SystemUserService {
                             .select(SystemUserPermission::getNamespaceId)
                             .eq(SystemUserPermission::getSystemUserId, userId)
                             .groupBy(SystemUserPermission::getNamespaceId));
-            queryWrapper.in(Namespace::getId, systemUserPermissions.stream()
+            queryWrapper.in(Namespace::getUniqueId, systemUserPermissions.stream()
                     .map(SystemUserPermission::getNamespaceId).collect(Collectors.toList()));
         }
 
         List<Namespace> namespaces = namespaceMapper.selectList(queryWrapper);
-        systemUserResponseVO.setNamespaceIdList(
+        systemUserResponseVO.setNamespaceIds(
                 NamespaceResponseVOConverter.INSTANCE.toNamespaceResponseVOs(namespaces));
     }
 
@@ -229,7 +230,25 @@ public class SystemUserServiceImpl implements SystemUserService {
         }
 
         SystemUserResponseVO responseVO = SystemUserResponseVOConverter.INSTANCE.convert(systemUser);
-        getPermission(systemUser.getRole(), systemUser.getId(), responseVO);
+        if (RoleEnum.ADMIN.getRoleId().equals(systemUser.getRole())) {
+            return responseVO;
+        }
+
+        List<SystemUserPermission> systemUserPermissions = systemUserPermissionMapper.selectList(
+            new LambdaQueryWrapper<SystemUserPermission>()
+                .select(SystemUserPermission::getNamespaceId, SystemUserPermission::getGroupName)
+                .eq(SystemUserPermission::getSystemUserId, responseVO.getId()));
+
+        LambdaQueryWrapper<Namespace> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.select(Namespace::getId, Namespace::getUniqueId, Namespace::getName);
+        queryWrapper.in(Namespace::getUniqueId, systemUserPermissions.stream()
+            .map(SystemUserPermission::getNamespaceId).distinct().collect(Collectors.toList()));
+        List<Namespace> namespaces = namespaceMapper.selectList(queryWrapper);
+        responseVO.setNamespaceIds(
+            NamespaceResponseVOConverter.INSTANCE.toNamespaceResponseVOs(namespaces));
+
+        responseVO.setPermissions(PermissionsResponseVOConverter.INSTANCE.toPermissionsResponseVOs(systemUserPermissions));
+
         return responseVO;
     }
 

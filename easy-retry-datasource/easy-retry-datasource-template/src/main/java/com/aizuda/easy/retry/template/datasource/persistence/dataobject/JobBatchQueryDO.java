@@ -17,6 +17,6 @@ public class JobBatchQueryDO {
     /**
      * 命名空间id
      */
-    private Long namespaceId;
+    private String namespaceId;
 
 }

@@ -111,10 +111,13 @@ public class ReportRetryInfoHttpRequestHandler extends PostHttpRequestHandler {
                 })
                 .build();
 
+            String namespaceId = headers.getAsString(HeadersEnum.NAMESPACE.getKey());
+
             retryer.call(() -> {
                 map.forEach(((sceneName, retryTaskDTOS) -> {
                     TaskContext taskContext = new TaskContext();
                     taskContext.setSceneName(sceneName);
+                    taskContext.setNamespaceId(namespaceId);
                     taskContext.setGroupName(set.stream().findFirst().get());
                     taskContext.setTaskInfos(TaskContextConverter.INSTANCE.toTaskContextInfo(retryTaskDTOS));
 
@@ -142,6 +145,7 @@ public class ReportRetryInfoHttpRequestHandler extends PostHttpRequestHandler {
     private void syncConfig(HttpHeaders  headers) {
         ConfigVersionSyncHandler syncHandler = SpringContext.getBeanByType(ConfigVersionSyncHandler.class);
         Integer clientVersion = headers.getInt(HeadersEnum.VERSION.getKey());
-        syncHandler.addSyncTask(headers.get(HeadersEnum.GROUP_NAME.getKey()), clientVersion);
+        String namespace = headers.getAsString(HeadersEnum.NAMESPACE.getKey());
+        syncHandler.addSyncTask(headers.get(HeadersEnum.GROUP_NAME.getKey()), namespace, clientVersion);
     }
 }

@@ -2,7 +2,6 @@ package com.aizuda.easy.retry.server.job.task.support.generator.task;
 
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
-import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.JobTaskStatusEnum;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
@@ -14,7 +13,6 @@ import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.common.core.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
-import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +46,7 @@ public class ShardingTaskGenerator extends AbstractJobTaskGenerator {
     @Override
     public List<JobTask> doGenerate(JobTaskGenerateContext context) {
 
-        Set<RegisterNodeInfo> serverNodes = CacheRegisterTable.getServerNodeSet(context.getGroupName());
+        Set<RegisterNodeInfo> serverNodes = CacheRegisterTable.getServerNodeSet(context.getGroupName(), namespaceId);
         if (CollectionUtils.isEmpty(serverNodes)) {
             log.error("无可执行的客户端信息. jobId:[{}]", context.getJobId());
             return Lists.newArrayList();

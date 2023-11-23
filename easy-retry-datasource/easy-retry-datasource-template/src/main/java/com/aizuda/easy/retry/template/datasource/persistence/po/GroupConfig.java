@@ -16,7 +16,6 @@ public class GroupConfig implements Serializable {
 
     private String namespaceId;
 
-
     private String groupName;
 
     private Integer groupStatus;

@@ -22,6 +22,7 @@ import com.aizuda.easy.retry.server.web.model.response.JobResponseVO;
 import com.aizuda.easy.retry.server.web.service.JobService;
 import com.aizuda.easy.retry.server.web.service.convert.JobConverter;
 import com.aizuda.easy.retry.server.web.service.convert.JobResponseVOConverter;
+import com.aizuda.easy.retry.server.web.util.UserSessionUtils;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -61,7 +62,7 @@ public class JobServiceImpl implements JobService {
 
         LambdaQueryWrapper<Job> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Job::getDeleted, StatusEnum.NO.getStatus());
-        queryWrapper.eq(Job::getNamespaceId, queryVO.getNamespaceId());
+        queryWrapper.eq(Job::getNamespaceId, UserSessionUtils.currentUserSession().getNamespaceId());
         if (StrUtil.isNotBlank(queryVO.getGroupName())) {
             queryWrapper.eq(Job::getGroupName, queryVO.getGroupName());
         }
@@ -133,6 +134,8 @@ public class JobServiceImpl implements JobService {
 
         // 判断常驻任务
         Job updateJob = updateJobResident(jobRequestVO);
+        updateJob.setNamespaceId(job.getNamespaceId());
+
         // 非常驻任务 > 非常驻任务
         if (Objects.equals(job.getResident(), StatusEnum.NO.getStatus()) && Objects.equals(updateJob.getResident(),
                 StatusEnum.NO.getStatus())) {

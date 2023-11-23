@@ -7,6 +7,7 @@ import com.aizuda.easy.retry.server.common.Lifecycle;
 import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.model.dto.ConfigDTO;
 import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
+import com.aizuda.easy.retry.server.retry.task.dto.ConfigSyncTask;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,8 +31,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class ConfigVersionSyncHandler implements Lifecycle, Runnable {
 
-    private static final LinkedBlockingQueue<Pair<String/*groupName*/, Integer/*版本号*/>> QUEUE = new LinkedBlockingQueue<>(
-        256);
+    private static final LinkedBlockingQueue<ConfigSyncTask> QUEUE = new LinkedBlockingQueue<>(256);
 
     public static final String URL = "http://{0}:{1}/{2}/retry/sync/version/v1";
     public static Thread THREAD = null;
@@ -47,21 +47,28 @@ public class ConfigVersionSyncHandler implements Lifecycle, Runnable {
      * @param currentVersion 当前版本号
      * @return false-队列容量已满， true-添加成功
      */
-    public boolean addSyncTask(String groupName, Integer currentVersion) {
-        return QUEUE.offer(Pair.of(groupName, currentVersion));
+    public boolean addSyncTask(String groupName, String namespaceId, Integer currentVersion) {
+
+        ConfigSyncTask configSyncTask = new ConfigSyncTask();
+        configSyncTask.setCurrentVersion(currentVersion);
+        configSyncTask.setNamespaceId(namespaceId);
+        configSyncTask.setGroupName(groupName);
+        return QUEUE.offer(configSyncTask);
     }
 
     /**
      * 同步版本
+     *
      * @param groupName
+     * @param namespaceId
      */
-    public void syncVersion(String groupName) {
+    public void syncVersion(String groupName, final String namespaceId) {
 
         try {
-            Set<RegisterNodeInfo> serverNodeSet = CacheRegisterTable.getServerNodeSet(groupName);
+            Set<RegisterNodeInfo> serverNodeSet = CacheRegisterTable.getServerNodeSet(groupName, namespaceId);
             // 同步版本到每个客户端节点
             for (final RegisterNodeInfo registerNodeInfo : serverNodeSet) {
-                ConfigDTO configDTO = accessTemplate.getGroupConfigAccess().getConfigInfo(groupName);
+                ConfigDTO configDTO = accessTemplate.getGroupConfigAccess().getConfigInfo(groupName, namespaceId);
                 String format = MessageFormat.format(URL, registerNodeInfo.getHostIp(), registerNodeInfo.getHostPort().toString(),
                     registerNodeInfo.getContextPath());
                 Result result = restTemplate.postForObject(format, configDTO, Result.class);
@@ -89,11 +96,11 @@ public class ConfigVersionSyncHandler implements Lifecycle, Runnable {
     public void run() {
         while (!Thread.currentThread().isInterrupted()) {
             try {
-                Pair<String, Integer> pair = QUEUE.take();
+                ConfigSyncTask task = QUEUE.take();
                 // 远程版本号
-                Integer remoteVersion = accessTemplate.getGroupConfigAccess().getConfigVersion(pair.getKey());
-                if (Objects.isNull(remoteVersion) || !pair.getValue().equals(remoteVersion)) {
-                    syncVersion(pair.getKey());
+                Integer remoteVersion = accessTemplate.getGroupConfigAccess().getConfigVersion(task.getGroupName(), task.getNamespaceId());
+                if (Objects.isNull(remoteVersion) || !task.getCurrentVersion().equals(remoteVersion)) {
+                    syncVersion(task.getGroupName(), task.getNamespaceId());
                 }
             } catch (InterruptedException e) {
                 LogUtils.info(log, "[{}] thread stop.", Thread.currentThread().getName());

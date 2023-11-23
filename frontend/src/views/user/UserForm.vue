@@ -46,7 +46,7 @@
           :token-separators="[',']"
           @change="value => handleNamespacesIdChange(value)"
           v-decorator="[
-            'namespacesIds',
+            'namespaceIds',
             {rules: [{ required: true, message: '请分配命名空间'}]}
           ]">
           <a-select-option v-for="(item, index) in namespaceList" :key="index" :value="item.uniqueId">
@@ -62,11 +62,11 @@
           style="width: 100%"
           :token-separators="[',']"
           v-decorator="[
-            'groupNames',
+            'permissions',
             {rules: [{ required: true, message: '请分配组'}]}
           ]">
-          <a-select-option v-for="(item, index) in groupNameList" :key="index" :value="item.name">
-            {{ item.name }} ({{ item.namespaceId }})
+          <a-select-option v-for="(item, index) in groupNameList" :key="index" :value="item.groupName + '@@'+ item.namespaceId">
+            {{ item.groupName }} ({{ item.namespaceId }})
           </a-select-option>
         </a-select>
       </a-form-item>
@@ -85,7 +85,12 @@
 
 <script>
 import md5 from 'md5'
-import { saveUser, getSystemUserByUserName, getAllNamespace, getAllGroupNameList } from '@/api/manage'
+import {
+  saveUser,
+  getSystemUserByUserName,
+  getAllNamespace,
+  allGroupConfigList
+} from '@/api/manage'
 import pick from 'lodash.pick'
 
 export default {
@@ -123,7 +128,7 @@ export default {
       this.role = role
     },
     handleNamespacesIdChange (namespacesIds) {
-      getAllGroupNameList(namespacesIds).then(res => {
+      allGroupConfigList(namespacesIds).then(res => {
         this.groupNameList = res.data
       })
     },
@@ -133,6 +138,19 @@ export default {
         if (!err) {
           if (values.password) {
             values.password = md5(values.password)
+          }
+
+          if (values.permissions) {
+            const filteredData = values.permissions.map(input => {
+              const [groupName, namespaceId] = input.split('@@')
+
+              return this.groupNameList.filter(item =>
+                item.groupName === groupName && item.namespaceId === namespaceId
+              )
+            }).flat()
+
+            values['permissions'] = filteredData
+            console.log(filteredData)
           }
 
           values.role = parseInt(values.role)
@@ -157,8 +175,10 @@ export default {
       new Promise((resolve) => {
         setTimeout(resolve, 1500)
       }).then(() => {
-        const formData = pick(data, ['id', 'username', 'role', 'groupNames', 'namespacesIds'])
+        const formData = pick(data, ['id', 'username', 'role', 'permissions', 'namespaceIds'])
         formData.role = formData.role.toString()
+        formData.namespaceIds = formData.namespaceIds.map(i => i.uniqueId)
+        formData.permissions = formData.permissions.map(i => i.groupName + '@@' + i.namespaceId)
         form.setFieldsValue(formData)
       })
     }

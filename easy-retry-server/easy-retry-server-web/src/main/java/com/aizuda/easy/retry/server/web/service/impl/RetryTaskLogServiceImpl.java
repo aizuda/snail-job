@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.server.web.service.impl;
 
 import cn.hutool.core.util.StrUtil;
+import com.aizuda.easy.retry.server.web.util.UserSessionUtils;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskLogMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskLogMessageMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLog;
@@ -34,8 +35,10 @@ public class RetryTaskLogServiceImpl implements RetryTaskLogService {
     @Override
     public PageResult<List<RetryTaskLogResponseVO>> getRetryTaskLogPage(RetryTaskLogQueryVO queryVO) {
 
+        String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
         PageDTO<RetryTaskLog> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
         LambdaQueryWrapper<RetryTaskLog> retryTaskLogLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        retryTaskLogLambdaQueryWrapper.eq(RetryTaskLog::getNamespaceId, namespaceId);
 
         if (StrUtil.isNotBlank(queryVO.getGroupName())) {
             retryTaskLogLambdaQueryWrapper.eq(RetryTaskLog::getGroupName, queryVO.getGroupName());
@@ -67,8 +70,11 @@ public class RetryTaskLogServiceImpl implements RetryTaskLogService {
     public PageResult<List<RetryTaskLogMessageResponseVO>> getRetryTaskLogMessagePage(
          RetryTaskLogMessageQueryVO queryVO) {
 
+        String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
+
         PageDTO<RetryTaskLogMessage> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
         LambdaQueryWrapper<RetryTaskLogMessage> retryTaskLogLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        retryTaskLogLambdaQueryWrapper.eq(RetryTaskLogMessage::getNamespaceId, namespaceId);
 
         if (StrUtil.isNotBlank(queryVO.getGroupName())) {
             retryTaskLogLambdaQueryWrapper.eq(RetryTaskLogMessage::getGroupName, queryVO.getGroupName());

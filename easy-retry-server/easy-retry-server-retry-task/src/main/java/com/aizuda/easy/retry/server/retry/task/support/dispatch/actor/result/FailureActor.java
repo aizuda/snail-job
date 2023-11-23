@@ -63,7 +63,8 @@ public class FailureActor extends AbstractActor {
             try {
                 // 超过最大等级
                 SceneConfig sceneConfig =
-                        accessTemplate.getSceneConfigAccess().getSceneConfigByGroupNameAndSceneName(retryTask.getGroupName(), retryTask.getSceneName());
+                        accessTemplate.getSceneConfigAccess().getSceneConfigByGroupNameAndSceneName(retryTask.getGroupName(), retryTask.getSceneName(),
+                            retryTask.getNamespaceId());
 
                 transactionTemplate.execute(new TransactionCallbackWithoutResult() {
                     @Override

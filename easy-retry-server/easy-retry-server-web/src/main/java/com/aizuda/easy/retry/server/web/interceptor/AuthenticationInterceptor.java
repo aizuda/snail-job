@@ -1,8 +1,12 @@
 package com.aizuda.easy.retry.server.web.interceptor;
 
+import cn.hutool.core.lang.Assert;
+import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.web.model.request.UserSessionVO;
+import com.aizuda.easy.retry.template.datasource.persistence.mapper.NamespaceMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.SystemUserMapper;
+import com.aizuda.easy.retry.template.datasource.persistence.po.Namespace;
 import com.aizuda.easy.retry.template.datasource.persistence.po.SystemUser;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
@@ -38,6 +42,8 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
 
     @Autowired
     private SystemUserMapper systemUserMapper;
+    @Autowired
+    private NamespaceMapper namespaceMapper;
 
     @Override
     public boolean preHandle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object object) throws Exception {
@@ -64,6 +70,10 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
                 throw new EasyRetryServerException("登陆过期，请重新登陆");
             }
 
+            if (StrUtil.isBlank(namespaceId)) {
+                throw new EasyRetryServerException("{} 命名空间不存在", namespaceId);
+            }
+
             // 获取 token 中的 user id
             SystemUser systemUser;
             try {
@@ -77,6 +87,9 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
                 throw new EasyRetryServerException("{} 用户不存在", systemUser.getUsername());
             }
 
+            Long count = namespaceMapper.selectCount(
+                new LambdaQueryWrapper<Namespace>().eq(Namespace::getUniqueId, namespaceId));
+            Assert.isTrue(count > 0, ()->new EasyRetryServerException("[{}] 命名空间不存在", namespaceId));
             UserSessionVO userSessionVO = new UserSessionVO();
             userSessionVO.setId(systemUser.getId());
             userSessionVO.setUsername(systemUser.getUsername());

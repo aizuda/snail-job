@@ -15,12 +15,17 @@ import java.util.List;
 public class TaskContext {
 
     /**
-     * 加密的groupId
+     * namespaceId
+     */
+    private String namespaceId;
+
+    /**
+     * groupName
      */
     private String groupName;
 
     /**
-     * 加密的sceneId
+     * sceneName
      */
     private String sceneName;
 

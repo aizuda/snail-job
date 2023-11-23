@@ -24,7 +24,7 @@ public class NotifyConfigRequestVO {
      * 命名空间id
      */
     @NotNull(message = "命名空间id 不能为空")
-    private Long namespaceId;
+    private String namespaceId;
 
     private String sceneName;
 

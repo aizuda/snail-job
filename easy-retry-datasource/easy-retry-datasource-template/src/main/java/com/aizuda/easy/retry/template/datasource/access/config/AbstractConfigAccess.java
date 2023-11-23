@@ -37,28 +37,35 @@ public abstract class AbstractConfigAccess<T> implements ConfigAccess<T> {
     @Autowired
     protected Environment environment;
     protected static final List<String> ALLOW_DB = Arrays.asList(DbTypeEnum.MYSQL.getDb(),
-            DbTypeEnum.MARIADB.getDb(),
-            DbTypeEnum.POSTGRES.getDb());
+        DbTypeEnum.MARIADB.getDb(),
+        DbTypeEnum.POSTGRES.getDb());
 
     protected DbTypeEnum getDbType() {
         String dbType = environment.getProperty("easy-retry.db-type");
         return DbTypeEnum.modeOf(dbType);
     }
 
-    protected List<NotifyConfig> getByGroupIdAndNotifyScene(String groupName, Integer notifyScene) {
-        return notifyConfigMapper.selectList(new LambdaQueryWrapper<NotifyConfig>().eq(NotifyConfig::getGroupName, groupName)
+    protected List<NotifyConfig> getByGroupIdAndNotifyScene(String groupName, Integer notifyScene, String namespaceId) {
+        return notifyConfigMapper.selectList(
+            new LambdaQueryWrapper<NotifyConfig>()
+                .eq(NotifyConfig::getNamespaceId, namespaceId)
+                .eq(NotifyConfig::getGroupName, groupName)
                 .eq(NotifyConfig::getNotifyScene, notifyScene));
     }
 
-    private List<NotifyConfig> getByGroupIdAndSceneIdAndNotifyScene(String groupName, String sceneName, Integer notifyScene) {
-        return notifyConfigMapper.selectList(new LambdaQueryWrapper<NotifyConfig>().eq(NotifyConfig::getGroupName, groupName)
+    private List<NotifyConfig> getByGroupIdAndSceneIdAndNotifyScene(String groupName, String sceneName,
+        Integer notifyScene) {
+        return notifyConfigMapper.selectList(
+            new LambdaQueryWrapper<NotifyConfig>().eq(NotifyConfig::getGroupName, groupName)
                 .eq(NotifyConfig::getSceneName, sceneName)
                 .eq(NotifyConfig::getNotifyScene, notifyScene));
     }
 
-    protected SceneConfig getByGroupNameAndSceneName(String groupName, String sceneName) {
+    protected SceneConfig getByGroupNameAndSceneName(String groupName, String sceneName, String namespaceId) {
         return sceneConfigMapper.selectOne(new LambdaQueryWrapper<SceneConfig>()
-                .eq(SceneConfig::getGroupName, groupName).eq(SceneConfig::getSceneName, sceneName));
+            .eq(SceneConfig::getNamespaceId, namespaceId)
+            .eq(SceneConfig::getGroupName, groupName)
+            .eq(SceneConfig::getSceneName, sceneName));
     }
 
     protected List<SceneConfig> getSceneConfigs(String groupName) {
@@ -66,43 +73,49 @@ public abstract class AbstractConfigAccess<T> implements ConfigAccess<T> {
             .eq(SceneConfig::getGroupName, groupName));
     }
 
-    protected GroupConfig getByGroupName(String groupName) {
-        return groupConfigMapper.selectOne(new LambdaQueryWrapper<GroupConfig>().eq(GroupConfig::getGroupName, groupName));
+    protected GroupConfig getByGroupName(String groupName, final String namespaceId) {
+        return groupConfigMapper.selectOne(new LambdaQueryWrapper<GroupConfig>()
+            .eq(GroupConfig::getNamespaceId, namespaceId)
+            .eq(GroupConfig::getGroupName, groupName));
     }
 
-    protected List<NotifyConfig> getNotifyConfigs(String groupName) {
-        return notifyConfigMapper.selectList(new LambdaQueryWrapper<NotifyConfig>().eq(NotifyConfig::getGroupName, groupName));
+    protected List<NotifyConfig> getNotifyConfigs(String groupName, String namespaceId) {
+        return notifyConfigMapper.selectList(
+            new LambdaQueryWrapper<NotifyConfig>()
+                .eq(NotifyConfig::getNamespaceId, namespaceId)
+                .eq(NotifyConfig::getGroupName, groupName));
     }
 
     @Override
-    public Set<String> getGroupNameList() {
-        List<GroupConfig> groupList = getAllConfigGroupList();
+    public Set<String> getGroupNameList(String namespaceId) {
+        List<GroupConfig> groupList = getAllConfigGroupList(namespaceId);
         return groupList.stream().map(GroupConfig::getGroupName).collect(Collectors.toSet());
     }
 
     @Override
-    public GroupConfig getGroupConfigByGroupName(String shardingGroupId) {
-        return getByGroupName(shardingGroupId);
+    public GroupConfig getGroupConfigByGroupName(String groupName, String namespaceId) {
+        return getByGroupName(groupName, namespaceId);
     }
 
     @Override
-    public SceneConfig getSceneConfigByGroupNameAndSceneName(String shardingGroupId, String sceneId) {
-        return getByGroupNameAndSceneName(shardingGroupId, sceneId);
+    public SceneConfig getSceneConfigByGroupNameAndSceneName(String groupName, String sceneName, String namespaceId) {
+        return getByGroupNameAndSceneName(groupName, sceneName, namespaceId);
     }
 
     @Override
-    public List<NotifyConfig> getNotifyConfigByGroupName(String shardingGroupId, Integer notifyScene) {
-        return getByGroupIdAndNotifyScene(shardingGroupId, notifyScene);
+    public List<NotifyConfig> getNotifyConfigByGroupName(String groupName, Integer notifyScene, String namespaceId) {
+        return getByGroupIdAndNotifyScene(groupName, notifyScene, namespaceId);
     }
 
     @Override
-    public List<NotifyConfig> getNotifyConfigByGroupNameAndSceneName(String shardingGroupId,String shardingSceneId, Integer notifyScene) {
-        return getByGroupIdAndSceneIdAndNotifyScene(shardingGroupId,shardingSceneId, notifyScene);
+    public List<NotifyConfig> getNotifyConfigByGroupNameAndSceneName(String groupName, String sceneName,
+        Integer notifyScene) {
+        return getByGroupIdAndSceneIdAndNotifyScene(groupName, sceneName, notifyScene);
     }
 
     @Override
-    public List<NotifyConfig> getNotifyListConfigByGroupName(String shardingGroupId) {
-        return getNotifyConfigs(shardingGroupId);
+    public List<NotifyConfig> getNotifyListConfigByGroupName(String groupName, String namespaceId) {
+        return getNotifyConfigs(groupName, namespaceId);
     }
 
     @Override
@@ -111,21 +124,22 @@ public abstract class AbstractConfigAccess<T> implements ConfigAccess<T> {
     }
 
     @Override
-    public List<GroupConfig> getAllOpenGroupConfig() {
-        return getAllConfigGroupList().stream().filter(i-> StatusEnum.YES.getStatus().equals(i.getGroupStatus())).collect(Collectors.toList());
+    public List<GroupConfig> getAllOpenGroupConfig(String namespaceId) {
+        return getAllConfigGroupList(namespaceId).stream().filter(i -> StatusEnum.YES.getStatus().equals(i.getGroupStatus()))
+            .collect(Collectors.toList());
     }
 
     @Override
-    public Set<String> getBlacklist(String groupName) {
+    public Set<String> getBlacklist(String groupName, String namespaceId) {
 
-        GroupConfig groupConfig = getByGroupName(groupName);
+        GroupConfig groupConfig = getByGroupName(groupName, namespaceId);
         if (Objects.isNull(groupConfig)) {
             return Collections.EMPTY_SET;
         }
 
         LambdaQueryWrapper<SceneConfig> sceneConfigLambdaQueryWrapper = new LambdaQueryWrapper<SceneConfig>()
-                .select(SceneConfig::getSceneName)
-                .eq(SceneConfig::getGroupName, groupName);
+            .select(SceneConfig::getSceneName)
+            .eq(SceneConfig::getGroupName, groupName);
 
         if (StatusEnum.YES.getStatus().equals(groupConfig.getGroupStatus())) {
             sceneConfigLambdaQueryWrapper.eq(SceneConfig::getSceneStatus, StatusEnum.NO.getStatus());
@@ -140,8 +154,11 @@ public abstract class AbstractConfigAccess<T> implements ConfigAccess<T> {
     }
 
     @Override
-    public List<GroupConfig> getAllConfigGroupList() {
-        List<GroupConfig> allSystemConfigGroupList = groupConfigMapper.selectList(new LambdaQueryWrapper<GroupConfig>().orderByAsc(GroupConfig::getId));
+    public List<GroupConfig> getAllConfigGroupList(String namespaceId) {
+        List<GroupConfig> allSystemConfigGroupList = groupConfigMapper.selectList(
+            new LambdaQueryWrapper<GroupConfig>()
+                .eq(GroupConfig::getNamespaceId, namespaceId)
+                .orderByAsc(GroupConfig::getId));
         if (CollectionUtils.isEmpty(allSystemConfigGroupList)) {
             return Collections.EMPTY_LIST;
         }
@@ -151,7 +168,8 @@ public abstract class AbstractConfigAccess<T> implements ConfigAccess<T> {
 
     @Override
     public List<SceneConfig> getAllConfigSceneList() {
-        List<SceneConfig> allSystemConfigSceneList = sceneConfigMapper.selectList(new LambdaQueryWrapper<SceneConfig>().orderByAsc(SceneConfig::getId));
+        List<SceneConfig> allSystemConfigSceneList = sceneConfigMapper.selectList(
+            new LambdaQueryWrapper<SceneConfig>().orderByAsc(SceneConfig::getId));
         if (CollectionUtils.isEmpty(allSystemConfigSceneList)) {
             return Collections.EMPTY_LIST;
         }
@@ -159,8 +177,8 @@ public abstract class AbstractConfigAccess<T> implements ConfigAccess<T> {
     }
 
     @Override
-    public Integer getConfigVersion(String groupName) {
-        GroupConfig groupConfig = getGroupConfigByGroupName(groupName);
+    public Integer getConfigVersion(String groupName, String namespaceId) {
+        GroupConfig groupConfig = getGroupConfigByGroupName(groupName, namespaceId);
         if (Objects.isNull(groupConfig)) {
             return 0;
         }
@@ -169,19 +187,20 @@ public abstract class AbstractConfigAccess<T> implements ConfigAccess<T> {
     }
 
     @Override
-    public ConfigDTO getConfigInfo(String groupName) {
+    public ConfigDTO getConfigInfo(String groupName, final String namespaceId) {
 
         ConfigDTO configDTO = new ConfigDTO();
-        configDTO.setSceneBlacklist(getBlacklist(groupName));
-        configDTO.setVersion(getConfigVersion(groupName));
+        configDTO.setSceneBlacklist(getBlacklist(groupName, namespaceId));
+        configDTO.setVersion(getConfigVersion(groupName, namespaceId));
 
-        List<NotifyConfig> notifyList = getNotifyListConfigByGroupName(groupName);
+        List<NotifyConfig> notifyList = getNotifyListConfigByGroupName(groupName, namespaceId);
 
         List<ConfigDTO.Notify> notifies = new ArrayList<>();
         for (NotifyConfig notifyConfig : notifyList) {
 
             // 只选择客户端的通知配置即可
-            NotifySceneEnum notifyScene = NotifySceneEnum.getNotifyScene(notifyConfig.getNotifyScene(), NodeTypeEnum.CLIENT);
+            NotifySceneEnum notifyScene = NotifySceneEnum.getNotifyScene(notifyConfig.getNotifyScene(),
+                NodeTypeEnum.CLIENT);
             if (Objects.isNull(notifyScene)) {
                 continue;
             }

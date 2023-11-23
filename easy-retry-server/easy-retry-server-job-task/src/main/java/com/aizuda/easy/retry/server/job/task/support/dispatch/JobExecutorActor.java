@@ -95,7 +95,8 @@ public class JobExecutorActor extends AbstractActor {
             if (Objects.isNull(job)) {
                 taskStatus = JobTaskBatchStatusEnum.CANCEL.getStatus();
                 operationReason = JobOperationReasonEnum.JOB_CLOSED.getReason();
-            } else if (CollectionUtils.isEmpty(CacheRegisterTable.getServerNodeSet(taskExecute.getGroupName()))) {
+            } else if (CollectionUtils.isEmpty(CacheRegisterTable.getServerNodeSet(taskExecute.getGroupName(),
+                namespaceId))) {
                 taskStatus = JobTaskBatchStatusEnum.CANCEL.getStatus();
                 operationReason = JobOperationReasonEnum.NOT_CLIENT.getReason();
             }

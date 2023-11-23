@@ -153,6 +153,7 @@ CREATE TABLE `retry_task_log`
 CREATE TABLE `retry_task_log_message`
 (
     `id`          bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `namespace_id`      varchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' COMMENT '命名空间id',
     `group_name`  varchar(64)         NOT NULL COMMENT '组名称',
     `unique_id`   varchar(64)         NOT NULL COMMENT '同组下id唯一',
     `create_dt`   datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
@@ -192,6 +193,7 @@ CREATE TABLE `scene_config`
 CREATE TABLE `server_node`
 (
     `id`           bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `namespace_id`      varchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' COMMENT '命名空间id',
     `group_name`   varchar(64)         NOT NULL COMMENT '组名称',
     `host_id`      varchar(64)         NOT NULL COMMENT '主机id',
     `host_ip`      varchar(64)         NOT NULL COMMENT '机器ip',
@@ -328,6 +330,7 @@ CREATE TABLE `job_log_message`
 CREATE TABLE `job_task`
 (
     `id`             bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `namespace_id`      varchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' COMMENT '命名空间id',
     `group_name`     varchar(64)         NOT NULL COMMENT '组名称',
     `job_id`         bigint(20)          NOT NULL COMMENT '任务信息id',
     `task_batch_id`  bigint(20)          NOT NULL COMMENT '调度任务id',

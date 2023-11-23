@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.server.common.handler;
 
+import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.enums.NodeTypeEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.common.Lifecycle;
@@ -63,7 +64,7 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
         try {
 
             // 为了保证客户端分配算法的一致性,serverNodes 从数据库从数据获取
-            Set<String> podIpSet = CacheRegisterTable.getPodIdSet(ServerRegister.GROUP_NAME);
+            Set<String> podIpSet = CacheRegisterTable.getPodIdSet(ServerRegister.GROUP_NAME, StrUtil.EMPTY);
 
             if (CollectionUtils.isEmpty(podIpSet)) {
                 LogUtils.error(log, "server node is empty");
@@ -110,7 +111,7 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
         for (String localHostId : localHostIds) {
             RegisterNodeInfo registerNodeInfo = concurrentMap.get(localHostId);
             // 删除过期的节点信息
-            CacheRegisterTable.remove(registerNodeInfo.getGroupName(), registerNodeInfo.getHostId());
+            CacheRegisterTable.remove(registerNodeInfo.getGroupName(), registerNodeInfo.getNamespaceId(), registerNodeInfo.getHostId());
         }
     }
 
@@ -118,7 +119,7 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
 
         // 刷新最新的节点注册信息
         for (ServerNode node : remotePods) {
-            Optional.ofNullable(CacheRegisterTable.getServerNode(node.getGroupName(), node.getHostId())).ifPresent(registerNodeInfo -> {
+            Optional.ofNullable(CacheRegisterTable.getServerNode(node.getGroupName(), node.getNamespaceId(), node.getHostId())).ifPresent(registerNodeInfo -> {
                 registerNodeInfo.setExpireAt(node.getExpireAt());
             });
         }
@@ -128,7 +129,7 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
 
         // 刷新最新的节点注册信息
         for (ServerNode node : remotePods) {
-            CacheRegisterTable.addOrUpdate(node.getGroupName(), node);
+            CacheRegisterTable.addOrUpdate(node);
         }
     }
 
@@ -167,7 +168,7 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
 
                 // 获取缓存中的节点
                 ConcurrentMap<String/*hostId*/, RegisterNodeInfo> concurrentMap = Optional.ofNullable(CacheRegisterTable
-                        .get(ServerRegister.GROUP_NAME)).orElse(new ConcurrentHashMap<>());
+                        .get(ServerRegister.GROUP_NAME, StrUtil.EMPTY)).orElse(new ConcurrentHashMap<>());
 
                 Set<String> remoteHostIds = remotePods.stream().map(ServerNode::getHostId).collect(Collectors.toSet());
 
@@ -200,7 +201,7 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
 
                     // 再次获取最新的节点信息
                     concurrentMap = CacheRegisterTable
-                            .get(ServerRegister.GROUP_NAME);
+                            .get(ServerRegister.GROUP_NAME, StrUtil.EMPTY);
 
                     // 找出过期的节点
                     Set<RegisterNodeInfo> expireNodeSet = concurrentMap.values().stream()
@@ -208,7 +209,7 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
                             .collect(Collectors.toSet());
                     for (final RegisterNodeInfo registerNodeInfo : expireNodeSet) {
                         // 删除过期的节点信息
-                        CacheRegisterTable.remove(registerNodeInfo.getGroupName(), registerNodeInfo.getHostId());
+                        CacheRegisterTable.remove(registerNodeInfo.getGroupName(), registerNodeInfo.getNamespaceId(), registerNodeInfo.getHostId());
                     }
 
                 }

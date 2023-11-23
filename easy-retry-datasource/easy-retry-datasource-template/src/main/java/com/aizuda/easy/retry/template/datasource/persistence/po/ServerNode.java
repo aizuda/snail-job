@@ -13,6 +13,8 @@ public class ServerNode implements Serializable {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
+    private String namespaceId;
+
     private String groupName;
 
     private String hostId;
