@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.server.retry.task.support.timer;
 
+import cn.hutool.core.lang.Pair;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.common.Lifecycle;
@@ -29,32 +30,29 @@ public class RetryTimerWheel implements Lifecycle {
     @Override
     public void start() {
         timer = new HashedWheelTimer(
-            new CustomizableThreadFactory(THREAD_NAME_PREFIX), TICK_DURATION, TimeUnit.MILLISECONDS);
+                new CustomizableThreadFactory(THREAD_NAME_PREFIX), TICK_DURATION, TimeUnit.MILLISECONDS);
         timer.start();
     }
 
-    public static void register(String groupName, String uniqueId, TimerTask task, long delay, TimeUnit unit) {
+    public static void register(Pair<String/*groupName*/, String/*namespaceId*/> pair, String uniqueId, TimerTask task, long delay, TimeUnit unit) {
 
-        if (!isExisted(groupName, uniqueId)) {
+        if (!isExisted(pair, uniqueId)) {
             delay = delay < 0 ? 0 : delay;
             try {
                 timer.newTimeout(task, delay, unit);
-                idempotent.set(uniqueId, uniqueId);
+                idempotent.set(pair, uniqueId);
             } catch (Exception e) {
                 LogUtils.error(log, "加入时间轮失败. uniqueId:[{}]", uniqueId, e);
             }
         }
     }
 
-    public static boolean isExisted(String groupName, String uniqueId) {
-        if (StrUtil.isNotBlank(groupName) || StrUtil.isNotBlank(uniqueId)) {
-            return Boolean.FALSE;
-        }
-        return idempotent.isExist(groupName, uniqueId);
+    public static boolean isExisted(Pair<String/*groupName*/, String/*namespaceId*/> pair, String uniqueId) {
+        return idempotent.isExist(pair, uniqueId);
     }
 
-    public static void clearCache(String groupName, String uniqueId) {
-        idempotent.clear(groupName, uniqueId);
+    public static void clearCache(Pair<String/*groupName*/, String/*namespaceId*/> pair, String uniqueId) {
+        idempotent.clear(pair, uniqueId);
     }
 
     @Override

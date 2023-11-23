@@ -14,6 +14,11 @@ import java.util.List;
 public class JobExecutorContext {
 
     /**
+     * 命名空间id
+     */
+    private String namespaceId;
+
+    /**
      * 组名称
      */
     private String groupName;

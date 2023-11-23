@@ -1,12 +1,10 @@
 package com.aizuda.easy.retry.server.web.controller;
 
-import com.aizuda.easy.retry.server.web.annotation.LoginUser;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
 import com.aizuda.easy.retry.server.web.model.request.NamespaceQueryVO;
 import com.aizuda.easy.retry.server.web.model.request.NamespaceRequestVO;
 import com.aizuda.easy.retry.server.web.model.response.NamespaceResponseVO;
 import com.aizuda.easy.retry.server.web.service.NamespaceService;
-import com.aizuda.easy.retry.template.datasource.persistence.po.SystemUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;

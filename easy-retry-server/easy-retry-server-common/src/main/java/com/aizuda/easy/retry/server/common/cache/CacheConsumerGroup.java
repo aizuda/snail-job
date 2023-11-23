@@ -7,9 +7,8 @@ import com.google.common.cache.CacheBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 当前POD负责消费的组
@@ -22,16 +21,15 @@ import java.util.concurrent.ConcurrentMap;
 @Slf4j
 public class CacheConsumerGroup implements Lifecycle {
 
-    private static Cache<String /*groupName*/, String/*groupName*/> CACHE;
+    private static Cache<String /*groupName*/, String/*namespaceId*/> CACHE;
 
     /**
      * 获取所有缓存
      *
      * @return 缓存对象
      */
-    public static Set<String> getAllConsumerGroupName() {
-        ConcurrentMap<String, String> concurrentMap = CACHE.asMap();
-        return new HashSet<>(concurrentMap.values());
+    public static ConcurrentMap<String, String> getAllConsumerGroupName() {
+        return CACHE.asMap();
     }
 
     /**
@@ -40,9 +38,9 @@ public class CacheConsumerGroup implements Lifecycle {
      *
      * @return 缓存对象
      */
-    public static synchronized void addOrUpdate(String groupName) {
+    public static synchronized void addOrUpdate(String groupName, String namespaceId) {
         LogUtils.info(log, "add consumer cache. groupName:[{}]", groupName);
-        CACHE.put(groupName, groupName);
+        CACHE.put(groupName, namespaceId);
     }
 
     public static void remove(String groupName) {
@@ -60,6 +58,8 @@ public class CacheConsumerGroup implements Lifecycle {
         CACHE = CacheBuilder.newBuilder()
                 // 设置并发级别为cpu核心数
                 .concurrencyLevel(Runtime.getRuntime().availableProcessors())
+                // 若当前节点不在消费次组，则自动到期删除
+                .expireAfterWrite(60, TimeUnit.SECONDS)
                 .build();
     }
 

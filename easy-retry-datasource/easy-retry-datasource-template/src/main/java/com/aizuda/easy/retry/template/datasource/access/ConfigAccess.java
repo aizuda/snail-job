@@ -39,7 +39,7 @@ public interface ConfigAccess<T> extends Access<T>  {
      *
      * @param groupName   组名称
      * @param sceneName   场景名称
-     * @param namespaceId
+     * @param namespaceId 命名空间
      * @return {@link SceneConfig} 场景配置
      */
     SceneConfig getSceneConfigByGroupNameAndSceneName(String groupName, String sceneName, String namespaceId);

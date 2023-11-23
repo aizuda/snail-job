@@ -14,6 +14,8 @@ import java.time.LocalDateTime;
 @Data
 public class JobPartitionTask extends PartitionTask {
 
+    private String namespaceId;
+
     /**
      * 组名称
      */

@@ -55,6 +55,8 @@ public class BlockStrategies {
 
         private Long taskBatchId;
 
+        private String namespaceId;
+
         private String groupName;
 
         /**

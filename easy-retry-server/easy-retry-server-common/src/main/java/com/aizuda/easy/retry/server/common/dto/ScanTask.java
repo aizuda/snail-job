@@ -15,6 +15,8 @@ import java.util.Set;
 @Data
 public class ScanTask {
 
+    private String namespaceId;
+
     private String groupName;
 
     private Set<Integer> buckets;

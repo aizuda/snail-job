@@ -12,6 +12,9 @@ import java.time.LocalDateTime;
 @Data
 public class JobTaskBatchGeneratorContext {
 
+
+    private String namespaceId;
+
     /**
      * 组名称
      */

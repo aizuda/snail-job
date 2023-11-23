@@ -3,6 +3,7 @@ package com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.result;
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import cn.hutool.core.lang.Assert;
+import cn.hutool.core.lang.Pair;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.common.IdempotentStrategy;
@@ -10,6 +11,7 @@ import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
+import com.aizuda.easy.retry.server.retry.task.support.RetryTaskLogConverter;
 import com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.log.RetryTaskLogDTO;
 import com.aizuda.easy.retry.server.retry.task.support.event.RetryTaskFailMoreThresholdAlarmEvent;
 import com.aizuda.easy.retry.server.retry.task.support.handler.CallbackRetryTaskHandler;
@@ -52,7 +54,7 @@ public class FailureActor extends AbstractActor {
     private SystemProperties systemProperties;
     @Autowired
     @Qualifier("retryIdempotentStrategyHandler")
-    private IdempotentStrategy<String, Long> idempotentStrategy;
+    private IdempotentStrategy<Pair<String/*groupName*/, String/*namespaceId*/>, Long> idempotentStrategy;
 
     @Override
     public Receive createReceive() {
@@ -96,13 +98,11 @@ public class FailureActor extends AbstractActor {
                 LogUtils.error(log, "更新重试任务失败", e);
             } finally {
                 // 清除幂等标识位
-                idempotentStrategy.clear(retryTask.getGroupName(), retryTask.getId());
+                idempotentStrategy.clear(Pair.of(retryTask.getGroupName(), retryTask.getNamespaceId()), retryTask.getId());
 
                 if (RetryStatusEnum.MAX_COUNT.getStatus().equals(retryTask.getRetryStatus())) {
-                    RetryTaskLogDTO retryTaskLogDTO = new RetryTaskLogDTO();
-                    retryTaskLogDTO.setGroupName(retryTask.getGroupName());
-                    retryTaskLogDTO.setUniqueId(retryTask.getUniqueId());
-                    retryTaskLogDTO.setRetryStatus(retryTask.getRetryStatus());
+
+                    RetryTaskLogDTO retryTaskLogDTO = RetryTaskLogConverter.INSTANCE.toRetryTaskLogDTO(retryTask);
                     retryTaskLogDTO.setMessage("任务已经到达最大执行次数了.");
                     ActorRef actorRef = ActorGenerator.logActor();
                     actorRef.tell(retryTaskLogDTO, actorRef);

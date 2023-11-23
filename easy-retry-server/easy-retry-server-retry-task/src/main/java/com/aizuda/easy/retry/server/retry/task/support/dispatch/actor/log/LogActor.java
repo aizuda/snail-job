@@ -38,24 +38,25 @@ public class LogActor extends AbstractActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder().match(RetryTaskLogDTO.class,
-            retryTaskLogDTO -> RetryStatusEnum.RUNNING.getStatus().equals(retryTaskLogDTO.getRetryStatus()),
-            retryTaskLogDTO -> {
-                saveRetryTaskLogMessage(retryTaskLogDTO);
-                getContext().stop(getSelf());
-            }).match(RetryTaskLogDTO.class, (retryTaskLogDTO) ->
-                RetryStatusEnum.MAX_COUNT.getStatus().equals(retryTaskLogDTO.getRetryStatus())
-                    || RetryStatusEnum.FINISH.getStatus().equals(retryTaskLogDTO.getRetryStatus()),
-            retryTaskLogDTO -> {
+                retryTaskLogDTO -> RetryStatusEnum.RUNNING.getStatus().equals(retryTaskLogDTO.getRetryStatus()),
+                retryTaskLogDTO -> {
+                    saveRetryTaskLogMessage(retryTaskLogDTO);
+                    getContext().stop(getSelf());
+                }).match(RetryTaskLogDTO.class, (retryTaskLogDTO) ->
+                        RetryStatusEnum.MAX_COUNT.getStatus().equals(retryTaskLogDTO.getRetryStatus())
+                                || RetryStatusEnum.FINISH.getStatus().equals(retryTaskLogDTO.getRetryStatus()),
+                retryTaskLogDTO -> {
 
-                // 变动日志的状态
-                RetryTaskLog retryTaskLog = new RetryTaskLog();
-                retryTaskLog.setRetryStatus(retryTaskLogDTO.getRetryStatus());
-                retryTaskLogMapper.update(retryTaskLog, new LambdaUpdateWrapper<RetryTaskLog>()
-                    .eq(RetryTaskLog::getUniqueId, retryTaskLogDTO.getUniqueId())
-                    .eq(RetryTaskLog::getGroupName, retryTaskLogDTO.getGroupName()));
+                    // 变动日志的状态
+                    RetryTaskLog retryTaskLog = new RetryTaskLog();
+                    retryTaskLog.setRetryStatus(retryTaskLogDTO.getRetryStatus());
+                    retryTaskLogMapper.update(retryTaskLog, new LambdaUpdateWrapper<RetryTaskLog>()
+                            .eq(RetryTaskLog::getNamespaceId, retryTaskLogDTO.getNamespaceId())
+                            .eq(RetryTaskLog::getUniqueId, retryTaskLogDTO.getUniqueId())
+                            .eq(RetryTaskLog::getGroupName, retryTaskLogDTO.getGroupName()));
 
-                getContext().stop(getSelf());
-            }).build();
+                    getContext().stop(getSelf());
+                }).build();
     }
 
     /**
@@ -68,9 +69,10 @@ public class LogActor extends AbstractActor {
         retryTaskLogMessage.setUniqueId(retryTaskLogDTO.getUniqueId());
         retryTaskLogMessage.setGroupName(retryTaskLogDTO.getGroupName());
         retryTaskLogMessage.setClientInfo(retryTaskLogDTO.getClientInfo());
+        retryTaskLogMessage.setNamespaceId(retryTaskLogDTO.getNamespaceId());
         String errorMessage = retryTaskLogDTO.getMessage();
         retryTaskLogMessage.setMessage(
-            StrUtil.isBlank(errorMessage) ? StrUtil.EMPTY : errorMessage);
+                StrUtil.isBlank(errorMessage) ? StrUtil.EMPTY : errorMessage);
         retryTaskLogMessage.setCreateDt(Optional.ofNullable(retryTaskLogDTO.getTriggerTime()).orElse(LocalDateTime.now()));
         retryTaskLogMessageMapper.insert(retryTaskLogMessage);
 

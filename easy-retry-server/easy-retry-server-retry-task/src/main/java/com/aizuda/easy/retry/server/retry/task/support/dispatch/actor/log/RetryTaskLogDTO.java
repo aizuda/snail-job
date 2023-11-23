@@ -15,6 +15,11 @@ import java.time.LocalDateTime;
 public class RetryTaskLogDTO {
 
     /**
+     * 命名空间
+     */
+    private String namespaceId;
+
+    /**
      * 组名称
      */
     private String groupName;

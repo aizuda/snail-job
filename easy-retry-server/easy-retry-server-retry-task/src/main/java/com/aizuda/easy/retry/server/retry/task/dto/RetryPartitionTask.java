@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Data
 public class RetryPartitionTask extends PartitionTask {
 
-    private String uniqueId;
+    private String namespaceId;
 
     private String groupName;
 

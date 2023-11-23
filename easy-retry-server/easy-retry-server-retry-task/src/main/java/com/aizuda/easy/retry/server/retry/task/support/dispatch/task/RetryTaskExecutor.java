@@ -28,34 +28,36 @@ public class RetryTaskExecutor extends AbstractTaskExecutor {
 
     @Override
     protected RetryContext<Result<DispatchRetryResultDTO>> builderRetryContext(final String groupName,
-        final RetryTask retryTask,
-        final SceneConfig sceneConfig) {
+                                                                               final RetryTask retryTask,
+                                                                               final SceneConfig sceneConfig) {
         MaxAttemptsPersistenceRetryContext<Result<DispatchRetryResultDTO>> retryContext = new MaxAttemptsPersistenceRetryContext<>();
         retryContext.setRetryTask(retryTask);
         retryContext.setSceneBlacklist(accessTemplate.getSceneConfigAccess().getBlacklist(groupName, sceneConfig.getNamespaceId()));
         retryContext.setServerNode(
-            clientNodeAllocateHandler.getServerNode(retryTask.getSceneName(), retryTask.getGroupName(),
-                sceneConfig.getRouteKey()));
+                clientNodeAllocateHandler.getServerNode(retryTask.getSceneName(),
+                        retryTask.getGroupName(),
+                        retryTask.getNamespaceId(),
+                        sceneConfig.getRouteKey()));
         retryContext.setSceneConfig(sceneConfig);
         return retryContext;
     }
 
     @Override
     protected RetryExecutor<Result<DispatchRetryResultDTO>> builderResultRetryExecutor(RetryContext retryContext,
-        final SceneConfig sceneConfig) {
+                                                                                       final SceneConfig sceneConfig) {
 
         return RetryBuilder.<Result<DispatchRetryResultDTO>>newBuilder()
-            .withStopStrategy(StopStrategies.stopException())
-            .withStopStrategy(StopStrategies.stopResultStatusCode())
-            .withWaitStrategy(getWaitWaitStrategy(sceneConfig))
+                .withStopStrategy(StopStrategies.stopException())
+                .withStopStrategy(StopStrategies.stopResultStatusCode())
+                .withWaitStrategy(getWaitWaitStrategy(sceneConfig))
 //            .withFilterStrategy(FilterStrategies.triggerAtFilter())
-            .withFilterStrategy(FilterStrategies.bitSetIdempotentFilter(idempotentStrategy))
-            .withFilterStrategy(FilterStrategies.sceneBlackFilter())
-            .withFilterStrategy(FilterStrategies.checkAliveClientPodFilter())
-            .withFilterStrategy(FilterStrategies.rebalanceFilterStrategies())
-            .withFilterStrategy(FilterStrategies.rateLimiterFilter())
-            .withRetryContext(retryContext)
-            .build();
+                .withFilterStrategy(FilterStrategies.bitSetIdempotentFilter(idempotentStrategy))
+                .withFilterStrategy(FilterStrategies.sceneBlackFilter())
+                .withFilterStrategy(FilterStrategies.checkAliveClientPodFilter())
+                .withFilterStrategy(FilterStrategies.rebalanceFilterStrategies())
+                .withFilterStrategy(FilterStrategies.rateLimiterFilter())
+                .withRetryContext(retryContext)
+                .build();
     }
 
     @Override

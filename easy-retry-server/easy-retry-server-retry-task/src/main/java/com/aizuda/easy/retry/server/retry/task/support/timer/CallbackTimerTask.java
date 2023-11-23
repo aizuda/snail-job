@@ -28,6 +28,7 @@ public class CallbackTimerTask extends AbstractTimerTask {
         this.context = context;
         super.groupName = context.getGroupName();
         super.uniqueId = context.getUniqueId();
+        super.namespaceId = context.getNamespaceId();
     }
 
     @Override
@@ -36,9 +37,10 @@ public class CallbackTimerTask extends AbstractTimerTask {
         AccessTemplate accessTemplate = SpringContext.getBeanByType(AccessTemplate.class);
         TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();
         RetryTask retryTask = retryTaskAccess.one(context.getGroupName(), new LambdaQueryWrapper<RetryTask>()
-            .eq(RetryTask::getGroupName, context.getGroupName())
-            .eq(RetryTask::getUniqueId, context.getUniqueId())
-            .eq(RetryTask::getRetryStatus, RetryStatusEnum.RUNNING.getStatus()));
+                .eq(RetryTask::getNamespaceId, context.getNamespaceId())
+                .eq(RetryTask::getGroupName, context.getGroupName())
+                .eq(RetryTask::getUniqueId, context.getUniqueId())
+                .eq(RetryTask::getRetryStatus, RetryStatusEnum.RUNNING.getStatus()));
         if (Objects.isNull(retryTask)) {
             return;
         }

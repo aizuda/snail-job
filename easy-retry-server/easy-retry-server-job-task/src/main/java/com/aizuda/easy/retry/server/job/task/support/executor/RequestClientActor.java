@@ -59,8 +59,10 @@ public class RequestClientActor extends AbstractActor {
 
     private void doExecute(RealJobExecutorDTO realJobExecutorDTO) {
         // 检查客户端是否存在
-        RegisterNodeInfo registerNodeInfo = CacheRegisterTable.getServerNode(realJobExecutorDTO.getGroupName(),
-            realJobExecutorDTO.getClientId());
+        RegisterNodeInfo registerNodeInfo = CacheRegisterTable.getServerNode(
+                realJobExecutorDTO.getGroupName(),
+                realJobExecutorDTO.getNamespaceId(),
+                realJobExecutorDTO.getClientId());
         if (Objects.isNull(registerNodeInfo)) {
             taskExecuteFailure(realJobExecutorDTO, "无可执行的客户端");
             return;
@@ -74,7 +76,7 @@ public class RequestClientActor extends AbstractActor {
             JobRpcClient rpcClient = buildRpcClient(registerNodeInfo, realJobExecutorDTO);
             Result<Boolean> dispatch = rpcClient.dispatch(dispatchJobRequest);
             if (dispatch.getStatus() == StatusEnum.YES.getStatus() && Objects.equals(dispatch.getData(),
-                Boolean.TRUE)) {
+                    Boolean.TRUE)) {
                 jobLogDTO.setMessage("任务调度成功");
                 ActorRef actorRef = ActorGenerator.jobLogActor();
                 actorRef.tell(jobLogDTO, actorRef);
@@ -105,7 +107,7 @@ public class RequestClientActor extends AbstractActor {
         private JobTaskMapper jobTaskMapper;
 
         public JobExecutorRetryListener(final RealJobExecutorDTO realJobExecutorDTO,
-            final JobTaskMapper jobTaskMapper) {
+                                        final JobTaskMapper jobTaskMapper) {
             this.realJobExecutorDTO = realJobExecutorDTO;
             this.jobTaskMapper = jobTaskMapper;
         }
@@ -114,7 +116,7 @@ public class RequestClientActor extends AbstractActor {
         public <V> void onRetry(final Attempt<V> attempt) {
             if (attempt.hasException()) {
                 LogUtils.error(log, "任务调度失败. taskInstanceId:[{}] count:[{}]",
-                    realJobExecutorDTO.getTaskBatchId(), attempt.getAttemptNumber(), attempt.getExceptionCause());
+                        realJobExecutorDTO.getTaskBatchId(), attempt.getAttemptNumber(), attempt.getExceptionCause());
                 JobTask jobTask = new JobTask();
                 jobTask.setId(realJobExecutorDTO.getTaskId());
                 jobTask.setRetryCount((int) attempt.getAttemptNumber());
@@ -125,13 +127,14 @@ public class RequestClientActor extends AbstractActor {
 
     private JobRpcClient buildRpcClient(RegisterNodeInfo registerNodeInfo, RealJobExecutorDTO realJobExecutorDTO) {
         return RequestBuilder.<JobRpcClient, Result>newBuilder()
-            .nodeInfo(registerNodeInfo)
-            .failRetry(Boolean.TRUE)
-            .retryTimes(realJobExecutorDTO.getMaxRetryTimes())
-            .retryInterval(realJobExecutorDTO.getRetryInterval())
-            .retryListener(new JobExecutorRetryListener(realJobExecutorDTO, jobTaskMapper))
-            .client(JobRpcClient.class)
-            .build();
+                .nodeInfo(registerNodeInfo)
+                .namespaceId(registerNodeInfo.getNamespaceId())
+                .failRetry(Boolean.TRUE)
+                .retryTimes(realJobExecutorDTO.getMaxRetryTimes())
+                .retryInterval(realJobExecutorDTO.getRetryInterval())
+                .retryListener(new JobExecutorRetryListener(realJobExecutorDTO, jobTaskMapper))
+                .client(JobRpcClient.class)
+                .build();
     }
 
     private static void taskExecuteFailure(RealJobExecutorDTO realJobExecutorDTO, String message) {

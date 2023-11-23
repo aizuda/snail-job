@@ -38,7 +38,7 @@ public abstract class AbstractRegister implements Register, Lifecycle {
             serverNode.setExpireAt(getExpireAt());
             serverNodeMapper.insertOrUpdate(serverNode);
             // 刷新本地缓存过期时间
-            CacheRegisterTable.refreshExpireAt(serverNode.getGroupName(), serverNode);
+            CacheRegisterTable.refreshExpireAt(serverNode);
         }catch (Exception e) {
             LogUtils.error(log,"注册节点失败 groupName:[{}] hostIp:[{}]",
                     serverNode.getGroupName(), serverNode.getHostIp(), e);

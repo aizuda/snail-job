@@ -32,7 +32,7 @@ public class RealStopTaskActor extends AbstractActor {
             try {
                 doStop(realStopTaskInstanceDTO);
             } catch (Exception e) {
-              log.error("停止任务执行失败", e);
+                log.error("停止任务执行失败", e);
             }
         }).build();
     }
@@ -40,7 +40,10 @@ public class RealStopTaskActor extends AbstractActor {
     private void doStop(final RealStopTaskInstanceDTO realStopTaskInstanceDTO) {
 
         // 检查客户端是否存在
-        RegisterNodeInfo registerNodeInfo = CacheRegisterTable.getServerNode(realStopTaskInstanceDTO.getGroupName(), realStopTaskInstanceDTO.getClientId());
+        RegisterNodeInfo registerNodeInfo = CacheRegisterTable.getServerNode(
+                realStopTaskInstanceDTO.getGroupName(),
+                realStopTaskInstanceDTO.getNamespaceId(),
+                realStopTaskInstanceDTO.getClientId());
         if (Objects.nonNull(registerNodeInfo)) {
             // 不用关心停止的结果，若服务端尝试终止失败,客户端会兜底进行关闭
             requestClient(realStopTaskInstanceDTO, registerNodeInfo);
@@ -49,12 +52,13 @@ public class RealStopTaskActor extends AbstractActor {
 
     private Result<Boolean> requestClient(RealStopTaskInstanceDTO realStopTaskInstanceDTO, RegisterNodeInfo registerNodeInfo) {
         JobRpcClient rpcClient = RequestBuilder.<JobRpcClient, Result>newBuilder()
-            .nodeInfo(registerNodeInfo)
-            .failRetry(Boolean.TRUE)
-            .retryTimes(3)
-            .retryInterval(1)
-            .client(JobRpcClient.class)
-            .build();
+                .nodeInfo(registerNodeInfo)
+                .namespaceId(registerNodeInfo.getNamespaceId())
+                .failRetry(Boolean.TRUE)
+                .retryTimes(3)
+                .retryInterval(1)
+                .client(JobRpcClient.class)
+                .build();
 
         StopJobDTO stopJobDTO = new StopJobDTO();
         stopJobDTO.setTaskBatchId(realStopTaskInstanceDTO.getTaskBatchId());

@@ -51,7 +51,7 @@ public class OfflineNodeSchedule extends AbstractSchedule implements Lifecycle {
             }
 
             for (final RegisterNodeInfo registerNodeInfo : waitOffline) {
-                CacheRegisterTable.remove(registerNodeInfo.getGroupName(), registerNodeInfo.getHostId());
+                CacheRegisterTable.remove(registerNodeInfo.getGroupName(), registerNodeInfo.getNamespaceId(), registerNodeInfo.getHostId());
             }
 
         } catch (Exception e) {

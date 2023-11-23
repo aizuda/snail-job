@@ -11,6 +11,8 @@ import lombok.Data;
 @Data
 public class RetryTimerContext {
 
+    private String namespaceId;
+
     private String groupName;
 
     private String uniqueId;

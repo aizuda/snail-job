@@ -13,6 +13,11 @@ public class ClientCallbackContext {
 
     private Long jobId;
 
+    /**
+     * 命名空间
+     */
+    private String namespaceId;
+
     private Long taskBatchId;
 
     private Long taskId;

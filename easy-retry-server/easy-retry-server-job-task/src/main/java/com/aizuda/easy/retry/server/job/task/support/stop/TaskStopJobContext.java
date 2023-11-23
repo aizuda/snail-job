@@ -16,6 +16,11 @@ import java.util.List;
 public class TaskStopJobContext {
 
     /**
+     * 命名空间
+     */
+    private String namespaceId;
+
+    /**
      * 组名称
      */
     private String groupName;

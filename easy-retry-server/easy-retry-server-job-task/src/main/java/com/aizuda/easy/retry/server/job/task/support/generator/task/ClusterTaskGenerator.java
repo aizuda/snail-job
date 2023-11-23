@@ -44,7 +44,7 @@ public class ClusterTaskGenerator extends AbstractJobTaskGenerator {
     public List<JobTask> doGenerate(JobTaskGenerateContext context) {
         // 生成可执行任务
         RegisterNodeInfo serverNode = clientNodeAllocateHandler.getServerNode(context.getJobId().toString(),
-            context.getGroupName(), context.getRouteKey());
+            context.getGroupName(), context.getNamespaceId(), context.getRouteKey());
         if (Objects.isNull(serverNode)) {
             log.error("无可执行的客户端信息. jobId:[{}]", context.getJobId());
             return Lists.newArrayList();

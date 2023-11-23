@@ -16,6 +16,7 @@ import com.aizuda.easy.retry.server.common.client.RequestBuilder;
 import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.common.util.ClientInfoUtils;
 import com.aizuda.easy.retry.server.retry.task.client.RetryRpcClient;
+import com.aizuda.easy.retry.server.retry.task.support.RetryTaskLogConverter;
 import com.aizuda.easy.retry.server.retry.task.support.context.MaxAttemptsPersistenceRetryContext;
 import com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.log.RetryTaskLogDTO;
 import com.aizuda.easy.retry.server.retry.task.support.retry.RetryExecutor;
@@ -51,10 +52,7 @@ public class ExecUnitActor extends AbstractActor {
             RegisterNodeInfo serverNode = context.getServerNode();
             SceneConfig sceneConfig = context.getSceneConfig();
 
-            RetryTaskLogDTO retryTaskLog = new RetryTaskLogDTO();
-            retryTaskLog.setGroupName(retryTask.getGroupName());
-            retryTaskLog.setUniqueId(retryTask.getUniqueId());
-            retryTaskLog.setRetryStatus(retryTask.getRetryStatus());
+            RetryTaskLogDTO retryTaskLog = RetryTaskLogConverter.INSTANCE.toRetryTaskLogDTO(retryTask);
             retryTaskLog.setTriggerTime(LocalDateTime.now());
             retryTaskLog.setClientInfo(ClientInfoUtils.generate(serverNode));
 
@@ -140,6 +138,7 @@ public class ExecUnitActor extends AbstractActor {
 
         RetryRpcClient rpcClient = RequestBuilder.<RetryRpcClient, Result>newBuilder()
                 .nodeInfo(serverNode)
+                .namespaceId(serverNode.getNamespaceId())
                 .failover(Boolean.TRUE)
                 .allocKey(retryTask.getSceneName())
                 .routeKey(sceneConfig.getRouteKey())

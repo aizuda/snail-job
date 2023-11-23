@@ -95,8 +95,8 @@ public class JobExecutorActor extends AbstractActor {
             if (Objects.isNull(job)) {
                 taskStatus = JobTaskBatchStatusEnum.CANCEL.getStatus();
                 operationReason = JobOperationReasonEnum.JOB_CLOSED.getReason();
-            } else if (CollectionUtils.isEmpty(CacheRegisterTable.getServerNodeSet(taskExecute.getGroupName(),
-                namespaceId))) {
+            } else if (CollectionUtils.isEmpty(CacheRegisterTable.getServerNodeSet(job.getGroupName(),
+                    job.getNamespaceId()))) {
                 taskStatus = JobTaskBatchStatusEnum.CANCEL.getStatus();
                 operationReason = JobOperationReasonEnum.NOT_CLIENT.getReason();
             }
@@ -153,7 +153,6 @@ public class JobExecutorActor extends AbstractActor {
             JobTimerTaskDTO jobTimerTaskDTO = new JobTimerTaskDTO();
             jobTimerTaskDTO.setJobId(taskExecuteDTO.getJobId());
             jobTimerTaskDTO.setTaskBatchId(taskExecuteDTO.getTaskBatchId());
-            jobTimerTaskDTO.setGroupName(taskExecuteDTO.getGroupName());
             ResidentJobTimerTask timerTask = new ResidentJobTimerTask(jobTimerTaskDTO, job);
             WaitStrategy waitStrategy = WaitStrategies.WaitStrategyEnum.getWaitStrategy(job.getTriggerType());
 

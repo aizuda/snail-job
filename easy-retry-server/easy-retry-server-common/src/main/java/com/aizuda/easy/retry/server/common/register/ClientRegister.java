@@ -12,9 +12,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 
@@ -52,7 +54,7 @@ public class ClientRegister extends AbstractRegister implements Runnable {
     @Override
     protected boolean doRegister(RegisterContext context, ServerNode serverNode) {
         if (HTTP_PATH.BEAT.equals(context.getUri())) {
-           return QUEUE.offerFirst(serverNode);
+            return QUEUE.offerFirst(serverNode);
         }
 
         return QUEUE.offerLast(serverNode);
@@ -87,10 +89,13 @@ public class ClientRegister extends AbstractRegister implements Runnable {
 
                 // 同步当前POD消费的组的节点信息
                 // netty的client只会注册到一个服务端，若组分配的和client连接的不是一个POD则会导致当前POD没有其他客户端的注册信息
-                Set<String> allConsumerGroupName = CacheConsumerGroup.getAllConsumerGroupName();
+                ConcurrentMap<String, String> allConsumerGroupName = CacheConsumerGroup.getAllConsumerGroupName();
                 if (!CollectionUtils.isEmpty(allConsumerGroupName)) {
                     List<ServerNode> serverNodes = serverNodeMapper.selectList(
-                        new LambdaQueryWrapper<ServerNode>().in(ServerNode::getGroupName, allConsumerGroupName));
+                            new LambdaQueryWrapper<ServerNode>()
+                                    .eq(ServerNode::getNodeType, NodeTypeEnum.CLIENT.getType())
+                                    .in(ServerNode::getNamespaceId, new HashSet<>(allConsumerGroupName.values()))
+                                    .in(ServerNode::getGroupName, allConsumerGroupName.keySet()));
                     for (final ServerNode node : serverNodes) {
                         // 刷新全量本地缓存
                         CacheRegisterTable.addOrUpdate(node);

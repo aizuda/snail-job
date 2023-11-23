@@ -30,14 +30,16 @@ public class ManualCallbackTaskExecutor extends AbstractTaskExecutor {
 
     @Override
     protected RetryContext builderRetryContext(final String groupName, final RetryTask retryTask,
-        final SceneConfig sceneConfig) {
+                                               final SceneConfig sceneConfig) {
 
         CallbackRetryContext<Result> retryContext = new CallbackRetryContext<>();
         retryContext.setRetryTask(retryTask);
         retryContext.setSceneBlacklist(accessTemplate.getSceneConfigAccess().getBlacklist(groupName, sceneConfig.getNamespaceId()));
         retryContext.setServerNode(
-            clientNodeAllocateHandler.getServerNode(retryTask.getSceneName(), retryTask.getGroupName(),
-                sceneConfig.getRouteKey()));
+                clientNodeAllocateHandler.getServerNode(retryTask.getSceneName(),
+                        retryTask.getGroupName(),
+                        retryTask.getNamespaceId(),
+                        sceneConfig.getRouteKey()));
         retryContext.setSceneConfig(sceneConfig);
         return retryContext;
     }
@@ -45,16 +47,16 @@ public class ManualCallbackTaskExecutor extends AbstractTaskExecutor {
     @Override
     protected RetryExecutor builderResultRetryExecutor(RetryContext retryContext, final SceneConfig sceneConfig) {
         return RetryBuilder.<Result>newBuilder()
-            .withStopStrategy(StopStrategies.stopException())
-            .withStopStrategy(StopStrategies.stopResultStatus())
-            .withWaitStrategy(getWaitWaitStrategy())
-            .withFilterStrategy(FilterStrategies.bitSetIdempotentFilter(idempotentStrategy))
-            .withFilterStrategy(FilterStrategies.sceneBlackFilter())
-            .withFilterStrategy(FilterStrategies.checkAliveClientPodFilter())
-            .withFilterStrategy(FilterStrategies.rebalanceFilterStrategies())
-            .withFilterStrategy(FilterStrategies.rateLimiterFilter())
-            .withRetryContext(retryContext)
-            .build();
+                .withStopStrategy(StopStrategies.stopException())
+                .withStopStrategy(StopStrategies.stopResultStatus())
+                .withWaitStrategy(getWaitWaitStrategy())
+                .withFilterStrategy(FilterStrategies.bitSetIdempotentFilter(idempotentStrategy))
+                .withFilterStrategy(FilterStrategies.sceneBlackFilter())
+                .withFilterStrategy(FilterStrategies.checkAliveClientPodFilter())
+                .withFilterStrategy(FilterStrategies.rebalanceFilterStrategies())
+                .withFilterStrategy(FilterStrategies.rateLimiterFilter())
+                .withRetryContext(retryContext)
+                .build();
     }
 
     @Override

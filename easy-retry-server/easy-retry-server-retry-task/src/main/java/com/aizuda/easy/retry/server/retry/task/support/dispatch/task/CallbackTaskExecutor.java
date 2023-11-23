@@ -27,14 +27,16 @@ public class CallbackTaskExecutor extends AbstractTaskExecutor {
 
     @Override
     protected RetryContext builderRetryContext(final String groupName, final RetryTask retryTask,
-        final SceneConfig sceneConfig) {
+                                               final SceneConfig sceneConfig) {
 
         CallbackRetryContext<Result> retryContext = new CallbackRetryContext<>();
         retryContext.setRetryTask(retryTask);
         retryContext.setSceneBlacklist(accessTemplate.getSceneConfigAccess().getBlacklist(groupName, sceneConfig.getNamespaceId()));
         retryContext.setServerNode(
-            clientNodeAllocateHandler.getServerNode(retryTask.getSceneName(), retryTask.getGroupName(),
-                sceneConfig.getRouteKey()));
+                clientNodeAllocateHandler.getServerNode(retryTask.getSceneName(),
+                        retryTask.getGroupName(),
+                        retryTask.getNamespaceId(),
+                        sceneConfig.getRouteKey()));
         retryContext.setSceneConfig(sceneConfig);
         return retryContext;
     }
