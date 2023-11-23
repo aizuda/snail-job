@@ -41,8 +41,9 @@ public class JobTaskBatchGenerator {
         jobTaskBatch.setJobId(context.getJobId());
         jobTaskBatch.setGroupName(context.getGroupName());
         jobTaskBatch.setCreateDt(LocalDateTime.now());
+        jobTaskBatch.setNamespaceId(context.getNamespaceId());
         // 无执行的节点
-        if (CollectionUtils.isEmpty(CacheRegisterTable.getServerNodeSet(context.getGroupName(), namespaceId))) {
+        if (CollectionUtils.isEmpty(CacheRegisterTable.getServerNodeSet(context.getGroupName(), context.getNamespaceId()))) {
             jobTaskBatch.setTaskBatchStatus(JobTaskBatchStatusEnum.CANCEL.getStatus());
             jobTaskBatch.setOperationReason(JobOperationReasonEnum.NOT_CLIENT.getReason());
         } else {
@@ -62,7 +63,6 @@ public class JobTaskBatchGenerator {
         long delay = context.getNextTriggerAt() - DateUtils.toNowMilli();
         JobTimerTaskDTO jobTimerTaskDTO = new JobTimerTaskDTO();
         jobTimerTaskDTO.setTaskBatchId(jobTaskBatch.getId());
-        jobTimerTaskDTO.setGroupName(context.getGroupName());
         jobTimerTaskDTO.setJobId(context.getJobId());
         JobTimerWheel.register(jobTaskBatch.getId(),
                 new JobTimerTask(jobTimerTaskDTO), delay, TimeUnit.MILLISECONDS);

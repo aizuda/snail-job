@@ -3,6 +3,7 @@ package com.aizuda.easy.retry.server.retry.task.support;
 import com.aizuda.easy.retry.server.model.dto.RetryTaskDTO;
 import com.aizuda.easy.retry.server.retry.task.dto.RetryPartitionTask;
 import com.aizuda.easy.retry.server.retry.task.generator.task.TaskContext;
+import com.aizuda.easy.retry.server.retry.task.support.timer.RetryTimerContext;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryDeadLetter;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLog;
@@ -39,4 +40,5 @@ public interface RetryTaskConverter {
 
     List<RetryPartitionTask> toRetryTaskLogPartitionTasks(List<RetryTaskLog> retryTaskLogList);
 
+    RetryTimerContext toRetryTimerContext(RetryPartitionTask retryPartitionTask);
 }

@@ -4,6 +4,7 @@ import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.server.retry.task.dto.RetryPartitionTask;
 import com.aizuda.easy.retry.server.common.WaitStrategy;
+import com.aizuda.easy.retry.server.retry.task.support.RetryTaskConverter;
 import com.aizuda.easy.retry.server.retry.task.support.dispatch.task.TaskExecutorSceneEnum;
 import com.aizuda.easy.retry.server.common.strategy.WaitStrategies.WaitStrategyContext;
 import com.aizuda.easy.retry.server.common.strategy.WaitStrategies.WaitStrategyEnum;
@@ -72,11 +73,8 @@ public class ScanCallbackTaskActor extends AbstractScanGroup {
 
     @Override
     protected TimerTask timerTask(final RetryPartitionTask partitionTask) {
-        RetryTimerContext retryTimerContext = new RetryTimerContext();
-        retryTimerContext.setGroupName(partitionTask.getGroupName());
+        RetryTimerContext retryTimerContext = RetryTaskConverter.INSTANCE.toRetryTimerContext(partitionTask);
         retryTimerContext.setScene(taskActuatorScene());
-        retryTimerContext.setUniqueId(partitionTask.getUniqueId());
-
         return new CallbackTimerTask(retryTimerContext);
     }
 

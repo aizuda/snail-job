@@ -3,11 +3,13 @@ package com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.result;
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import cn.hutool.core.lang.Assert;
+import cn.hutool.core.lang.Pair;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.common.IdempotentStrategy;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
+import com.aizuda.easy.retry.server.retry.task.support.RetryTaskLogConverter;
 import com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.log.RetryTaskLogDTO;
 import com.aizuda.easy.retry.server.retry.task.support.handler.CallbackRetryTaskHandler;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
@@ -46,7 +48,7 @@ public class FinishActor extends AbstractActor  {
     private TransactionTemplate transactionTemplate;
     @Autowired
     @Qualifier("retryIdempotentStrategyHandler")
-    private IdempotentStrategy<String, Long> idempotentStrategy;
+    private IdempotentStrategy<Pair<String/*groupName*/, String/*namespaceId*/>, Long> idempotentStrategy;
 
     @Override
     public Receive createReceive() {
@@ -75,12 +77,9 @@ public class FinishActor extends AbstractActor  {
                 LogUtils.error(log, "更新重试任务失败", e);
             } finally {
                 // 清除幂等标识位
-                idempotentStrategy.clear(retryTask.getGroupName(), retryTask.getId());
+                idempotentStrategy.clear(Pair.of(retryTask.getGroupName(), retryTask.getNamespaceId()), retryTask.getId());
 
-                RetryTaskLogDTO retryTaskLogDTO = new RetryTaskLogDTO();
-                retryTaskLogDTO.setGroupName(retryTask.getGroupName());
-                retryTaskLogDTO.setUniqueId(retryTask.getUniqueId());
-                retryTaskLogDTO.setRetryStatus(retryTask.getRetryStatus());
+                RetryTaskLogDTO retryTaskLogDTO = RetryTaskLogConverter.INSTANCE.toRetryTaskLogDTO(retryTask);
                 retryTaskLogDTO.setMessage("任务已经执行成功了.");
                 ActorRef actorRef = ActorGenerator.logActor();
                 actorRef.tell(retryTaskLogDTO, actorRef);

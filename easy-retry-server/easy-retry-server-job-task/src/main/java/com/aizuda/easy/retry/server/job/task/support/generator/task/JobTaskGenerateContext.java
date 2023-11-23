@@ -9,6 +9,11 @@ import lombok.Data;
  */
 @Data
 public class JobTaskGenerateContext {
+    /**
+     * 命名空间id
+     */
+    private String namespaceId;
+
     private Long taskBatchId;
     private String groupName;
     private Long jobId;

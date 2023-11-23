@@ -15,6 +15,7 @@ import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.util.ClientInfoUtils;
 import com.aizuda.easy.retry.server.retry.task.client.RetryRpcClient;
+import com.aizuda.easy.retry.server.retry.task.support.RetryTaskLogConverter;
 import com.aizuda.easy.retry.server.retry.task.support.context.CallbackRetryContext;
 import com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.log.RetryTaskLogDTO;
 import com.aizuda.easy.retry.server.retry.task.support.handler.CallbackRetryTaskHandler;
@@ -61,10 +62,7 @@ public class ExecCallbackUnitActor extends AbstractActor {
             RegisterNodeInfo serverNode = context.getServerNode();
             SceneConfig sceneConfig = context.getSceneConfig();
 
-            RetryTaskLogDTO retryTaskLog = new RetryTaskLogDTO();
-            retryTaskLog.setGroupName(retryTask.getGroupName());
-            retryTaskLog.setUniqueId(retryTask.getUniqueId());
-            retryTaskLog.setRetryStatus(retryTask.getRetryStatus());
+            RetryTaskLogDTO retryTaskLog = RetryTaskLogConverter.INSTANCE.toRetryTaskLogDTO(retryTask);
             retryTaskLog.setTriggerTime(LocalDateTime.now());
             retryTaskLog.setClientInfo(ClientInfoUtils.generate(serverNode));
 
@@ -121,6 +119,7 @@ public class ExecCallbackUnitActor extends AbstractActor {
         RetryTask retryTask = retryTaskAccess.one(callbackTask.getGroupName(),
                 new LambdaQueryWrapper<RetryTask>()
                         .select(RetryTask::getRetryStatus)
+                        .eq(RetryTask::getNamespaceId, serverNode.getNamespaceId())
                         .eq(RetryTask::getGroupName, callbackTask.getGroupName())
                         .eq(RetryTask::getUniqueId, retryTaskUniqueId));
         Assert.notNull(retryTask, () -> new EasyRetryServerException("未查询回调任务对应的重试任务. callbackUniqueId:[{}] uniqueId:[{}]",
@@ -139,6 +138,7 @@ public class ExecCallbackUnitActor extends AbstractActor {
 
         RetryRpcClient rpcClient = RequestBuilder.<RetryRpcClient, Result>newBuilder()
                 .nodeInfo(serverNode)
+                .namespaceId(serverNode.getNamespaceId())
                 .failover(Boolean.TRUE)
                 .routeKey(sceneConfig.getRouteKey())
                 .allocKey(sceneConfig.getSceneName())

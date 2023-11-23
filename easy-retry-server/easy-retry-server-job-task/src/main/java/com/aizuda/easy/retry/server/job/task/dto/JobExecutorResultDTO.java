@@ -17,6 +17,11 @@ public class JobExecutorResultDTO {
 
     private Long taskId;
 
+    /**
+     * 命名空间
+     */
+    private String namespaceId;
+
     private String groupName;
 
     private Integer taskStatus;

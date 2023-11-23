@@ -11,5 +11,5 @@ public class TaskExecuteDTO {
 
     private Long jobId;
     private Long taskBatchId;
-    private String groupName;
+
 }

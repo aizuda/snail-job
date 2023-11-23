@@ -80,10 +80,10 @@ public class ConsumerBucketActor extends AbstractActor {
             try {
                 // 查询桶对应组信息
                 groupConfigs = accessTemplate.getGroupConfigAccess().list(
-                    new LambdaQueryWrapper<GroupConfig>()
-                        .select(GroupConfig::getGroupName, GroupConfig::getGroupPartition)
-                        .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus())
-                        .in(GroupConfig::getBucketIndex, consumerBucket.getBuckets())
+                        new LambdaQueryWrapper<GroupConfig>()
+                                .select(GroupConfig::getGroupName, GroupConfig::getGroupPartition, GroupConfig::getNamespaceId)
+                                .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus())
+                                .in(GroupConfig::getBucketIndex, consumerBucket.getBuckets())
                 );
             } catch (Exception e) {
                 log.error("生成重试任务异常.", e);
@@ -91,8 +91,9 @@ public class ConsumerBucketActor extends AbstractActor {
 
             if (!CollectionUtils.isEmpty(groupConfigs)) {
                 for (final GroupConfig groupConfig : groupConfigs) {
-                    CacheConsumerGroup.addOrUpdate(groupConfig.getGroupName());
+                    CacheConsumerGroup.addOrUpdate(groupConfig.getGroupName(), groupConfig.getNamespaceId());
                     ScanTask scanTask = new ScanTask();
+                    scanTask.setNamespaceId(groupConfig.getNamespaceId());
                     scanTask.setGroupName(groupConfig.getGroupName());
                     scanTask.setBuckets(consumerBucket.getBuckets());
                     scanTask.setGroupPartition(groupConfig.getGroupPartition());
@@ -130,7 +131,7 @@ public class ConsumerBucketActor extends AbstractActor {
      */
     private void cacheRateLimiter(String groupName) {
         List<ServerNode> serverNodes = serverNodeMapper.selectList(new LambdaQueryWrapper<ServerNode>()
-            .eq(ServerNode::getGroupName, groupName));
+                .eq(ServerNode::getGroupName, groupName));
         Cache<String, RateLimiter> rateLimiterCache = CacheGroupRateLimiter.getAll();
         for (ServerNode serverNode : serverNodes) {
             RateLimiter rateLimiter = rateLimiterCache.getIfPresent(serverNode.getHostId());

@@ -14,6 +14,8 @@ public class JobTaskPrepareDTO {
 
     private Long jobId;
 
+    private String namespaceId;
+
     /**
      * 组名称
      */

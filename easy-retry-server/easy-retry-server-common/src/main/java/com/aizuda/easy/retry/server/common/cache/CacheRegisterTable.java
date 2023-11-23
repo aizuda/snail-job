@@ -8,6 +8,7 @@ import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.template.datasource.persistence.po.ServerNode;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -18,6 +19,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -45,11 +47,11 @@ public class CacheRegisterTable implements Lifecycle {
         }
 
         return concurrentMap.values().stream()
-            .map(stringServerNodeConcurrentMap -> new TreeSet(stringServerNodeConcurrentMap.values()))
-            .reduce((s, y) -> {
-                s.addAll(y);
-                return s;
-            }).get();
+                .map(stringServerNodeConcurrentMap -> new TreeSet(stringServerNodeConcurrentMap.values()))
+                .reduce((s, y) -> {
+                    s.addAll(y);
+                    return s;
+                }).get();
 
     }
 
@@ -67,7 +69,7 @@ public class CacheRegisterTable implements Lifecycle {
      *
      * @return 缓存对象
      */
-    public static RegisterNodeInfo getServerNode(String groupName,  String namespaceId, String hostId) {
+    public static RegisterNodeInfo getServerNode(String groupName, String namespaceId, String hostId) {
         ConcurrentMap<String, RegisterNodeInfo> concurrentMap = CACHE.getIfPresent(getKey(groupName, namespaceId));
         if (Objects.isNull(concurrentMap)) {
             return null;
@@ -101,20 +103,20 @@ public class CacheRegisterTable implements Lifecycle {
      */
     public static Set<String> getPodIdSet(String groupName, String namespaceId) {
         return getServerNodeSet(groupName, namespaceId).stream()
-            .map(RegisterNodeInfo::getHostId).collect(Collectors.toSet());
+                .map(RegisterNodeInfo::getHostId).collect(Collectors.toSet());
     }
 
 
     /**
      * 刷新过期时间若不存在则初始化
      *
-     * @param groupName 组名称
+     * @param serverNode 服务节点
      */
-    public static synchronized void refreshExpireAt(String groupName, String namespaceId, ServerNode serverNode) {
-        RegisterNodeInfo registerNodeInfo = getServerNode(groupName, namespaceId, serverNode.getHostId());
+    public static synchronized void refreshExpireAt(ServerNode serverNode) {
+        RegisterNodeInfo registerNodeInfo = getServerNode(serverNode.getGroupName(), serverNode.getNamespaceId(), serverNode.getHostId());
         // 不存在则初始化
         if (Objects.isNull(registerNodeInfo)) {
-            LogUtils.warn(log, "node not exists. groupName:[{}] hostId:[{}]", groupName, serverNode.getHostId());
+            LogUtils.warn(log, "node not exists. groupName:[{}] hostId:[{}]", serverNode.getGroupName(), serverNode.getHostId());
         } else {
             // 存在则刷新过期时间
             registerNodeInfo.setExpireAt(serverNode.getExpireAt());
@@ -166,6 +168,10 @@ public class CacheRegisterTable implements Lifecycle {
             // 设置并发级别为cpu核心数
             .concurrencyLevel(Runtime.getRuntime().availableProcessors())
             .build();
+
+    }
+
+    public static void main(String[] args) {
 
     }
 

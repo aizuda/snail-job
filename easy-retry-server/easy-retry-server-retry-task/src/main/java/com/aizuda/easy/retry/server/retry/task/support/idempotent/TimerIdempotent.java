@@ -1,11 +1,13 @@
 package com.aizuda.easy.retry.server.retry.task.support.idempotent;
 
+import cn.hutool.core.lang.Pair;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.server.common.IdempotentStrategy;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import lombok.extern.slf4j.Slf4j;
 
+import java.text.MessageFormat;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -14,8 +16,9 @@ import java.util.concurrent.TimeUnit;
  * @since 2.4.0
  */
 @Slf4j
-public class TimerIdempotent implements IdempotentStrategy<String, String> {
+public class TimerIdempotent implements IdempotentStrategy<Pair<String/*groupName*/, String/*namespaceId*/>, String> {
 
+    private static final String KEY_FORMAT = "{0}_{1}_{2}";
     private static final Cache<String, String> cache;
 
     static {
@@ -26,28 +29,28 @@ public class TimerIdempotent implements IdempotentStrategy<String, String> {
     }
 
     @Override
-    public boolean set(String key, String value) {
-        cache.put(getKey(key, value), value);
+    public boolean set(Pair<String/*groupName*/, String/*namespaceId*/> pair, String value) {
+        cache.put(getKey(pair, value), value);
         return Boolean.TRUE;
     }
 
-    private static String getKey(final String key, final String value) {
-        return key.concat(StrUtil.UNDERLINE).concat(value);
+    private static String getKey(Pair<String/*groupName*/, String/*namespaceId*/> pair, final String value) {
+        return MessageFormat.format(KEY_FORMAT, pair.getKey(), pair.getValue(), value);
     }
 
     @Override
-    public String get(String s) {
+    public String get(Pair<String/*groupName*/, String/*namespaceId*/> pair) {
        throw new UnsupportedOperationException("不支持此操作");
     }
 
     @Override
-    public boolean isExist(String key, String value) {
-        return cache.asMap().containsKey(getKey(key, value));
+    public boolean isExist(Pair<String/*groupName*/, String/*namespaceId*/> pair, String value) {
+        return cache.asMap().containsKey(getKey(pair, value));
     }
 
     @Override
-    public boolean clear(String key, String value) {
-        cache.invalidate(getKey(key, value));
+    public boolean clear(Pair<String/*groupName*/, String/*namespaceId*/> pair, String value) {
+        cache.invalidate(getKey(pair, value));
         return Boolean.TRUE;
     }
 }

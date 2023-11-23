@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.server.job.task.support.request;
 
 import cn.hutool.core.net.url.UrlQuery;
 import com.aizuda.easy.retry.client.model.request.DispatchJobResultRequest;
+import com.aizuda.easy.retry.common.core.enums.HeadersEnum;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.model.EasyRetryRequest;
@@ -50,6 +51,7 @@ public class ReportDispatchResultPostHttpRequestHandler extends PostHttpRequestH
         ClientCallbackHandler clientCallback = ClientCallbackFactory.getClientCallback(dispatchJobResultRequest.getTaskType());
 
         ClientCallbackContext context = JobTaskConverter.INSTANCE.toClientCallbackContext(dispatchJobResultRequest);
+        context.setNamespaceId(headers.getAsString(HeadersEnum.NAMESPACE.getKey()));
         clientCallback.callback(context);
 
         return JsonUtil.toJsonString(new NettyResult(StatusEnum.YES.getStatus(), "Report Dispatch Result Processed Successfully", Boolean.TRUE, retryRequest.getReqId()));

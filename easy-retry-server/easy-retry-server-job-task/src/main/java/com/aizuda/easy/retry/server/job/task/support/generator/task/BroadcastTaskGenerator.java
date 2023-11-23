@@ -43,7 +43,7 @@ public class BroadcastTaskGenerator extends AbstractJobTaskGenerator {
     @Override
     @Transactional
     public List<JobTask> doGenerate(JobTaskGenerateContext context) {
-        Set<RegisterNodeInfo> serverNodes = CacheRegisterTable.getServerNodeSet(context.getGroupName(), namespaceId);
+        Set<RegisterNodeInfo> serverNodes = CacheRegisterTable.getServerNodeSet(context.getGroupName(), context.getNamespaceId());
         if (CollectionUtils.isEmpty(serverNodes)) {
             log.error("无可执行的客户端信息. jobId:[{}]", context.getJobId());
             return Lists.newArrayList();

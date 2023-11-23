@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.server.retry.task.support;
 
+import com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.log.RetryTaskLogDTO;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLog;
 import org.mapstruct.Mapper;
@@ -20,4 +21,6 @@ public interface RetryTaskLogConverter {
         @Mapping(target = "id", ignore = true),
     })
     RetryTaskLog toRetryTask(RetryTask retryTask);
+
+    RetryTaskLogDTO toRetryTaskLogDTO(RetryTask retryTask);
 }

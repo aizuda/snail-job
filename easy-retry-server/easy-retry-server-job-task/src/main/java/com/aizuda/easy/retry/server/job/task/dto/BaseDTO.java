@@ -13,6 +13,7 @@ public class BaseDTO {
     private Long jobId;
     private Long taskBatchId;
     private String groupName;
+    private String namespaceId;
     private Long taskId;
     private Integer taskType;
     private String clientId;

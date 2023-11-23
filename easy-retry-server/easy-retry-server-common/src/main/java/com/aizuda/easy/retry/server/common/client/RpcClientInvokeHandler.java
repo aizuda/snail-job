@@ -70,10 +70,12 @@ public class RpcClientInvokeHandler implements InvocationHandler {
     private final String allocKey;
     private final Integer executorTimeout;
 
+    private final String namespaceId;
+
     public RpcClientInvokeHandler(final String groupName, final RegisterNodeInfo registerNodeInfo,
         final boolean failRetry, final int retryTimes,
         final int retryInterval, final RetryListener retryListener, final Integer routeKey, final String allocKey,
-        final boolean failover, final Integer executorTimeout) {
+        final boolean failover, final Integer executorTimeout, final String namespaceId) {
         this.groupName = groupName;
         this.hostId = registerNodeInfo.getHostId();
         this.hostPort = registerNodeInfo.getHostPort();
@@ -87,6 +89,7 @@ public class RpcClientInvokeHandler implements InvocationHandler {
         this.routeKey = routeKey;
         this.allocKey = allocKey;
         this.executorTimeout = executorTimeout;
+        this.namespaceId = namespaceId;
     }
 
     @Override
@@ -166,11 +169,11 @@ public class RpcClientInvokeHandler implements InvocationHandler {
                     hostId, hostIp, hostPort, HostUtils.getIp(), ex);
 
                 // 进行路由剔除处理
-                CacheRegisterTable.remove(groupName, hostId);
+                CacheRegisterTable.remove(groupName, namespaceId, hostId);
                 // 重新选一个可用的客户端节点
                 ClientNodeAllocateHandler clientNodeAllocateHandler = SpringContext.CONTEXT.getBean(
                     ClientNodeAllocateHandler.class);
-                RegisterNodeInfo serverNode = clientNodeAllocateHandler.getServerNode(allocKey, groupName,
+                RegisterNodeInfo serverNode = clientNodeAllocateHandler.getServerNode(allocKey, groupName, namespaceId,
                     routeKey);
                 // 这里表示无可用节点
                 if (Objects.isNull(serverNode)) {

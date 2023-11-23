@@ -32,6 +32,11 @@ public class JobTask implements Serializable {
     private Long id;
 
     /**
+     * 命名空间
+     */
+    private String namespaceId;
+
+    /**
      * 组名称
      */
     private String groupName;

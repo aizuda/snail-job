@@ -31,7 +31,7 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, Initializing
 
     @Autowired
     @Qualifier("retryIdempotentStrategyHandler")
-    protected IdempotentStrategy<String, Long> idempotentStrategy;
+    protected IdempotentStrategy<Pair<String/*groupName*/, String/*namespaceId*/>, Long> idempotentStrategy;
     @Autowired
     protected SystemProperties systemProperties;
     @Autowired
@@ -87,9 +87,11 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, Initializing
     }
 
     protected void productExecUnitActor(RetryExecutor retryExecutor) {
-        String groupName = retryExecutor.getRetryContext().getRetryTask().getGroupName();
+        RetryTask retryTask = retryExecutor.getRetryContext().getRetryTask();
+        String groupName = retryTask.getGroupName();
+        String namespaceId = retryTask.getNamespaceId();
         Long retryId = retryExecutor.getRetryContext().getRetryTask().getId();
-        idempotentStrategy.set(groupName, retryId);
+        idempotentStrategy.set(Pair.of(groupName, namespaceId), retryId);
 
         ActorRef actorRef = getActorRef();
         actorRef.tell(retryExecutor, actorRef);

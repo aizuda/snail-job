@@ -122,13 +122,13 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         RequestDataHelper.setPartition(queryVO.getGroupName());
 
         retryTaskLambdaQueryWrapper.select(RetryTask::getId, RetryTask::getBizNo, RetryTask::getIdempotentId,
-            RetryTask::getGroupName, RetryTask::getNextTriggerAt, RetryTask::getRetryCount,
-            RetryTask::getRetryStatus, RetryTask::getUpdateDt, RetryTask::getSceneName, RetryTask::getUniqueId,
-            RetryTask::getTaskType);
+                RetryTask::getGroupName, RetryTask::getNextTriggerAt, RetryTask::getRetryCount,
+                RetryTask::getRetryStatus, RetryTask::getUpdateDt, RetryTask::getSceneName, RetryTask::getUniqueId,
+                RetryTask::getTaskType);
         pageDTO = accessTemplate.getRetryTaskAccess().listPage(queryVO.getGroupName(), pageDTO,
-            retryTaskLambdaQueryWrapper.orderByDesc(RetryTask::getCreateDt));
+                retryTaskLambdaQueryWrapper.orderByDesc(RetryTask::getCreateDt));
         return new PageResult<>(pageDTO,
-            RetryTaskResponseVOConverter.INSTANCE.toRetryTaskResponseVO(pageDTO.getRecords()));
+                RetryTaskResponseVOConverter.INSTANCE.toRetryTaskResponseVO(pageDTO.getRecords()));
     }
 
     @Override
@@ -136,7 +136,7 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         RequestDataHelper.setPartition(groupName);
         TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();
         RetryTask retryTask = retryTaskAccess.one(groupName,
-            new LambdaQueryWrapper<RetryTask>().eq(RetryTask::getId, id));
+                new LambdaQueryWrapper<RetryTask>().eq(RetryTask::getId, id));
         return RetryTaskResponseVOConverter.INSTANCE.toRetryTaskResponseVO(retryTask);
     }
 
@@ -153,9 +153,9 @@ public class RetryTaskServiceImpl implements RetryTaskService {
 
         TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();
         RetryTask retryTask = retryTaskAccess.one(retryTaskUpdateStatusRequestVO.getGroupName(),
-            new LambdaQueryWrapper<RetryTask>()
-                .eq(RetryTask::getNamespaceId, namespaceId)
-                .eq(RetryTask::getId, retryTaskUpdateStatusRequestVO.getId()));
+                new LambdaQueryWrapper<RetryTask>()
+                        .eq(RetryTask::getNamespaceId, namespaceId)
+                        .eq(RetryTask::getId, retryTaskUpdateStatusRequestVO.getId()));
         if (Objects.isNull(retryTask)) {
             throw new EasyRetryServerException("未查询到重试任务");
         }
@@ -167,7 +167,7 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         if (RetryStatusEnum.RUNNING.getStatus().equals(retryStatusEnum.getStatus())) {
 
             SceneConfig sceneConfig = accessTemplate.getSceneConfigAccess()
-                .getSceneConfigByGroupNameAndSceneName(retryTask.getGroupName(), retryTask.getSceneName(), namespaceId);
+                    .getSceneConfigByGroupNameAndSceneName(retryTask.getGroupName(), retryTask.getSceneName(), namespaceId);
             WaitStrategyContext waitStrategyContext = new WaitStrategyContext();
             waitStrategyContext.setNextTriggerAt(DateUtils.toNowMilli());
             waitStrategyContext.setTriggerInterval(sceneConfig.getTriggerInterval());
@@ -188,9 +188,9 @@ public class RetryTaskServiceImpl implements RetryTaskService {
             RetryTaskLog retryTaskLog = new RetryTaskLog();
             retryTaskLog.setRetryStatus(RetryStatusEnum.FINISH.getStatus());
             retryTaskLogMapper.update(retryTaskLog, new LambdaUpdateWrapper<RetryTaskLog>()
-                .eq(RetryTaskLog::getNamespaceId, namespaceId)
-                .eq(RetryTaskLog::getUniqueId, retryTask.getUniqueId())
-                .eq(RetryTaskLog::getGroupName, retryTask.getGroupName()));
+                    .eq(RetryTaskLog::getNamespaceId, namespaceId)
+                    .eq(RetryTaskLog::getUniqueId, retryTask.getUniqueId())
+                    .eq(RetryTaskLog::getGroupName, retryTask.getGroupName()));
         }
 
         retryTask.setUpdateDt(LocalDateTime.now());
@@ -205,8 +205,8 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         }
 
         TaskGenerator taskGenerator = taskGenerators.stream()
-            .filter(t -> t.supports(TaskGeneratorScene.MANA_SINGLE.getScene()))
-            .findFirst().orElseThrow(() -> new EasyRetryServerException("没有匹配的任务生成器"));
+                .filter(t -> t.supports(TaskGeneratorScene.MANA_SINGLE.getScene()))
+                .findFirst().orElseThrow(() -> new EasyRetryServerException("没有匹配的任务生成器"));
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
 
         TaskContext taskContext = new TaskContext();
@@ -215,7 +215,7 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         taskContext.setInitStatus(retryTaskRequestVO.getRetryStatus());
         taskContext.setNamespaceId(namespaceId);
         taskContext.setTaskInfos(
-            Collections.singletonList(TaskContextConverter.INSTANCE.toTaskContextInfo(retryTaskRequestVO)));
+                Collections.singletonList(TaskContextConverter.INSTANCE.toTaskContextInfo(retryTaskRequestVO)));
 
         // 生成任务
         taskGenerator.taskGenerator(taskContext);
@@ -228,17 +228,17 @@ public class RetryTaskServiceImpl implements RetryTaskService {
 
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
         Set<RegisterNodeInfo> serverNodes = CacheRegisterTable.getServerNodeSet(
-            generateRetryIdempotentIdVO.getGroupName(),
-            namespaceId);
+                generateRetryIdempotentIdVO.getGroupName(),
+                namespaceId);
         Assert.notEmpty(serverNodes,
-            () -> new EasyRetryServerException("生成idempotentId失败: 不存在活跃的客户端节点"));
+                () -> new EasyRetryServerException("生成idempotentId失败: 不存在活跃的客户端节点"));
 
         SceneConfig sceneConfig = accessTemplate.getSceneConfigAccess()
-            .getSceneConfigByGroupNameAndSceneName(generateRetryIdempotentIdVO.getGroupName(),
-                generateRetryIdempotentIdVO.getSceneName(), namespaceId);
+                .getSceneConfigByGroupNameAndSceneName(generateRetryIdempotentIdVO.getGroupName(),
+                        generateRetryIdempotentIdVO.getSceneName(), namespaceId);
 
         RegisterNodeInfo serverNode = clientNodeAllocateHandler.getServerNode(sceneConfig.getSceneName(),
-            sceneConfig.getGroupName(), sceneConfig.getNamespaceId(), sceneConfig.getRouteKey());
+                sceneConfig.getGroupName(), sceneConfig.getNamespaceId(), sceneConfig.getRouteKey());
 
         // 委托客户端生成idempotentId
         GenerateRetryIdempotentIdDTO generateRetryIdempotentIdDTO = new GenerateRetryIdempotentIdDTO();
@@ -248,15 +248,16 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         generateRetryIdempotentIdDTO.setExecutorName(generateRetryIdempotentIdVO.getExecutorName());
 
         RetryRpcClient rpcClient = RequestBuilder.<RetryRpcClient, Result>newBuilder()
-            .nodeInfo(serverNode)
-            .client(RetryRpcClient.class)
-            .build();
+                .nodeInfo(serverNode)
+                .namespaceId(serverNode.getNamespaceId())
+                .client(RetryRpcClient.class)
+                .build();
 
         Result result = rpcClient.generateIdempotentId(generateRetryIdempotentIdDTO);
 
         Assert.notNull(result, () -> new EasyRetryServerException("idempotentId生成失败"));
         Assert.isTrue(1 == result.getStatus(),
-            () -> new EasyRetryServerException("idempotentId生成失败:请确保参数与执行器名称正确"));
+                () -> new EasyRetryServerException("idempotentId生成失败:请确保参数与执行器名称正确"));
 
         return (String) result.getData();
     }
@@ -273,10 +274,10 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         // 根据重试数据id，更新执行器名称
         TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();
         return retryTaskAccess.update(requestVO.getGroupName(), retryTask,
-            new LambdaUpdateWrapper<RetryTask>()
-                .eq(RetryTask::getNamespaceId, namespaceId)
-                .eq(RetryTask::getGroupName, requestVO.getGroupName())
-                .in(RetryTask::getId, requestVO.getIds()));
+                new LambdaUpdateWrapper<RetryTask>()
+                        .eq(RetryTask::getNamespaceId, namespaceId)
+                        .eq(RetryTask::getGroupName, requestVO.getGroupName())
+                        .in(RetryTask::getId, requestVO.getIds()));
     }
 
     @Override
@@ -284,10 +285,10 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
         return retryTaskAccess.delete(requestVO.getGroupName(),
-            new LambdaQueryWrapper<RetryTask>()
-                .eq(RetryTask::getNamespaceId, namespaceId)
-                .eq(RetryTask::getGroupName, requestVO.getGroupName())
-                .in(RetryTask::getId, requestVO.getIds()));
+                new LambdaQueryWrapper<RetryTask>()
+                        .eq(RetryTask::getNamespaceId, namespaceId)
+                        .eq(RetryTask::getGroupName, requestVO.getGroupName())
+                        .in(RetryTask::getId, requestVO.getIds()));
     }
 
     @Override
@@ -321,15 +322,15 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         Assert.isTrue(waitInsertList.size() <= 500, () -> new EasyRetryServerException("最多只能处理500条数据"));
 
         TaskGenerator taskGenerator = taskGenerators.stream()
-            .filter(t -> t.supports(TaskGeneratorScene.MANA_BATCH.getScene()))
-            .findFirst().orElseThrow(() -> new EasyRetryServerException("没有匹配的任务生成器"));
+                .filter(t -> t.supports(TaskGeneratorScene.MANA_BATCH.getScene()))
+                .findFirst().orElseThrow(() -> new EasyRetryServerException("没有匹配的任务生成器"));
 
         boolean allMatch = waitInsertList.stream()
-            .allMatch(retryTaskDTO -> retryTaskDTO.getGroupName().equals(parseLogsVO.getGroupName()));
+                .allMatch(retryTaskDTO -> retryTaskDTO.getGroupName().equals(parseLogsVO.getGroupName()));
         Assert.isTrue(allMatch, () -> new EasyRetryServerException("存在数据groupName不匹配，请检查您的数据"));
 
         Map<String, List<RetryTaskDTO>> map = waitInsertList.stream()
-            .collect(Collectors.groupingBy(RetryTaskDTO::getSceneName));
+                .collect(Collectors.groupingBy(RetryTaskDTO::getSceneName));
 
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
 
@@ -355,10 +356,10 @@ public class RetryTaskServiceImpl implements RetryTaskService {
 
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
         List<RetryTask> list = accessTemplate.getRetryTaskAccess().list(requestVO.getGroupName(),
-            new LambdaQueryWrapper<RetryTask>()
-                .eq(RetryTask::getNamespaceId, namespaceId)
-                .eq(RetryTask::getTaskType, TaskTypeEnum.RETRY.getType())
-                .in(RetryTask::getUniqueId, uniqueIds));
+                new LambdaQueryWrapper<RetryTask>()
+                        .eq(RetryTask::getNamespaceId, namespaceId)
+                        .eq(RetryTask::getTaskType, TaskTypeEnum.RETRY.getType())
+                        .in(RetryTask::getUniqueId, uniqueIds));
         Assert.notEmpty(list, () -> new EasyRetryServerException("没有可执行的任务"));
 
         for (RetryTask retryTask : list) {
@@ -379,10 +380,10 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
 
         List<RetryTask> list = accessTemplate.getRetryTaskAccess().list(requestVO.getGroupName(),
-            new LambdaQueryWrapper<RetryTask>()
-                .eq(RetryTask::getNamespaceId, namespaceId)
-                .eq(RetryTask::getTaskType, TaskTypeEnum.CALLBACK.getType())
-                .in(RetryTask::getUniqueId, uniqueIds));
+                new LambdaQueryWrapper<RetryTask>()
+                        .eq(RetryTask::getNamespaceId, namespaceId)
+                        .eq(RetryTask::getTaskType, TaskTypeEnum.CALLBACK.getType())
+                        .in(RetryTask::getUniqueId, uniqueIds));
         Assert.notEmpty(list, () -> new EasyRetryServerException("没有可执行的任务"));
 
         for (RetryTask retryTask : list) {

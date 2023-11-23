@@ -35,6 +35,7 @@ public class RetryTimerTask extends AbstractTimerTask {
         AccessTemplate accessTemplate = SpringContext.getBeanByType(AccessTemplate.class);
         TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();
         RetryTask retryTask = retryTaskAccess.one(context.getGroupName(), new LambdaQueryWrapper<RetryTask>()
+                .eq(RetryTask::getNamespaceId, context.getNamespaceId())
                 .eq(RetryTask::getGroupName, context.getGroupName())
                 .eq(RetryTask::getUniqueId, context.getUniqueId())
                 .eq(RetryTask::getRetryStatus, RetryStatusEnum.RUNNING.getStatus()));

@@ -96,7 +96,7 @@ public class ScanJobTaskActor extends AbstractActor {
 
     private void processJob(JobPartitionTask partitionTask, final List<Job> waitUpdateJobs,
                             final List<JobTaskPrepareDTO> waitExecJobs, long now) {
-        CacheConsumerGroup.addOrUpdate(partitionTask.getGroupName());
+        CacheConsumerGroup.addOrUpdate(partitionTask.getGroupName(), partitionTask.getNamespaceId());
 
         Job job = new Job();
         job.setId(partitionTask.getId());
