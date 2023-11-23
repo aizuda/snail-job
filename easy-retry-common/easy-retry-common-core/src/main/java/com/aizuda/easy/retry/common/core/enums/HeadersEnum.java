@@ -17,6 +17,7 @@ public enum HeadersEnum {
     REQUEST_ID("request-id"),
     VERSION("version"),
     HOST("Host"),
+    NAMESPACE("namespace"),
         ;
 
     private final String key;

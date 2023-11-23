@@ -32,7 +32,7 @@ public class Job implements Serializable {
     /**
      * 命名空间id
      */
-    private Long namespaceId;
+    private String namespaceId;
 
     /**
      * 组名称

@@ -7,7 +7,6 @@ import com.aizuda.easy.retry.server.common.allocate.client.ClientLoadBalanceMana
 import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
-import com.aizuda.easy.retry.template.datasource.persistence.po.GroupConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -31,13 +30,14 @@ public class ClientNodeAllocateHandler {
 
     /**
      * 获取分配的节点
+     *
      * @param allocKey  分配的key
      * @param groupName 组名称
      * @param routeKey {@link AllocationAlgorithmEnum} 路由类型
      */
-    public RegisterNodeInfo getServerNode(String allocKey, String groupName, Integer routeKey) {
+    public RegisterNodeInfo getServerNode(String allocKey, String groupName, String namespaceId, Integer routeKey) {
 
-        Set<RegisterNodeInfo> serverNodes = CacheRegisterTable.getServerNodeSet(groupName);
+        Set<RegisterNodeInfo> serverNodes = CacheRegisterTable.getServerNodeSet(groupName, namespaceId);
         if (CollectionUtils.isEmpty(serverNodes)) {
             LogUtils.warn(log, "client node is null. groupName:[{}]", groupName);
             return null;

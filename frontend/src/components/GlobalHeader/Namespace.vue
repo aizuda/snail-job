@@ -30,6 +30,9 @@ export default {
     handleMenuClick (e) {
       this.name = this.namespaceIds.find(i => i.uniqueId === e.key).name
       this.$store.dispatch('setNamespace', e.key)
+      setTimeout(() => {
+        this.$router.go(0)
+      }, 500)
     }
   }
 }

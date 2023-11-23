@@ -43,7 +43,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
 
 /**
  * 请求处理器
@@ -105,7 +104,7 @@ public class RpcClientInvokeHandler implements InvocationHandler {
     @NotNull
     private Result doFailoverHandler(final Method method, final Object[] args, final Mapping annotation)
         throws Throwable {
-        Set<RegisterNodeInfo> serverNodeSet = CacheRegisterTable.getServerNodeSet(groupName);
+        Set<RegisterNodeInfo> serverNodeSet = CacheRegisterTable.getServerNodeSet(groupName, namespaceId);
 
         // 最多调用size次
         int size = serverNodeSet.size();

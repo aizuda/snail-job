@@ -16,6 +16,8 @@ public class RegisterNodeInfo implements Comparable<RegisterNodeInfo> {
 
     private static final String URL = "http://{0}:{1}/{2}";
 
+    private String namespaceId;
+
     private String groupName;
 
     private String hostId;

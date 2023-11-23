@@ -43,7 +43,8 @@ public class ConfigHttpRequestHandler extends GetHttpRequestHandler {
         log.info("版本同步 content:[{}]", urlQuery.toString());
         EasyRetryRequest retryRequest = JsonUtil.parseObject(content, EasyRetryRequest.class);
         String groupName = headers.get(HeadersEnum.GROUP_NAME.getKey());
-        ConfigDTO configDTO = accessTemplate.getGroupConfigAccess().getConfigInfo(groupName);
+        String namespace = headers.get(HeadersEnum.NAMESPACE.getKey());
+        ConfigDTO configDTO = accessTemplate.getGroupConfigAccess().getConfigInfo(groupName, namespace);
         return JsonUtil.toJsonString(new NettyResult(JsonUtil.toJsonString(configDTO), retryRequest.getReqId()));
     }
 }

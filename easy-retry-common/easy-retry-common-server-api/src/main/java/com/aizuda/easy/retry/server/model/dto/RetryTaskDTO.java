@@ -1,9 +1,6 @@
 package com.aizuda.easy.retry.server.model.dto;
 
 import lombok.Data;
-import org.hibernate.validator.constraints.Length;
-import org.hibernate.validator.constraints.NotBlank;
-
 import java.io.Serializable;
 
 /**
@@ -16,43 +13,38 @@ import java.io.Serializable;
 public class RetryTaskDTO implements Serializable {
 
     /**
-     * 加密的groupId
+     * groupName
      */
-    @NotBlank(message = "groupName 不能为空")
-    @Length(max = 16, message = "组id最长为16")
     private String groupName;
 
     /**
-     * 加密的sceneId
+     * namespaceId
      */
-    @NotBlank(message = "sceneId 不能为空")
-    @Length(max = 16, message = "场景id最长为16")
+    private String namespaceId;
+
+    /**
+     * sceneName
+     */
     private String sceneName;
 
     /**
      * 业务唯一id
      */
-    @NotBlank(message = "idempotentId 不能为空")
-    @Length(max = 64, message = "幂等id最长为64")
     private String idempotentId;
 
     /**
      * 执行器名称
      */
-    @NotBlank(message = "executorName 不能为空")
-    @Length(max = 512, message = "业务唯一id最长为512")
     private String executorName;
 
     /**
      * 业务唯一编号
      */
-    @Length(max = 64, message = "业务唯一编号最长为64")
     private String bizNo;
 
     /**
      * 客户端上报参数
      */
-    @NotBlank(message = "argsStr 不能为空")
     private String argsStr;
 
     /**

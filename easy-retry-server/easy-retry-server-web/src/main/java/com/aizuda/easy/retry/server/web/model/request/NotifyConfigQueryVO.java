@@ -14,5 +14,4 @@ import lombok.EqualsAndHashCode;
 public class NotifyConfigQueryVO extends BaseQueryVO {
     private String groupName;
     private String sceneName;
-    private Long namespaceId;
 }

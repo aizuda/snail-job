@@ -76,7 +76,7 @@ public class GroupConfigController {
     }
 
     @LoginRequired
-    @PostMapping("/all/group-name/list")
+    @GetMapping("/all/group-name/list")
     public List<String> getAllGroupNameList() {
         return groupConfigService.getAllGroupNameList();
     }

@@ -17,6 +17,7 @@ import com.aizuda.easy.retry.server.web.model.request.JobBatchQueryVO;
 import com.aizuda.easy.retry.server.web.model.response.JobBatchResponseVO;
 import com.aizuda.easy.retry.server.web.service.JobBatchService;
 import com.aizuda.easy.retry.server.web.service.convert.JobBatchResponseVOConverter;
+import com.aizuda.easy.retry.server.web.util.UserSessionUtils;
 import com.aizuda.easy.retry.template.datasource.persistence.dataobject.JobBatchQueryDO;
 import com.aizuda.easy.retry.template.datasource.persistence.dataobject.JobBatchResponseDO;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobMapper;
@@ -58,7 +59,7 @@ public class JobBatchServiceImpl implements JobBatchService {
         jobBatchQueryDO.setJobId(queryVO.getJobId());
         jobBatchQueryDO.setTaskBatchStatus(queryVO.getTaskBatchStatus());
         jobBatchQueryDO.setGroupName(queryVO.getGroupName());
-        jobBatchQueryDO.setNamespaceId(queryVO.getNamespaceId());
+        jobBatchQueryDO.setNamespaceId(UserSessionUtils.currentUserSession().getNamespaceId());
         List<JobBatchResponseDO> batchResponseDOList = jobTaskBatchMapper.selectJobBatchList(pageDTO, jobBatchQueryDO);
 
         List<JobBatchResponseVO> batchResponseVOList = JobBatchResponseVOConverter.INSTANCE.toJobBatchResponseVOs(

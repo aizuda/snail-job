@@ -1,6 +1,6 @@
 import storage from 'store'
 import { login, getInfo } from '@/api/login'
-import { ACCESS_TOKEN } from '@/store/mutation-types'
+import { ACCESS_TOKEN, APP_NAMESPACE } from '@/store/mutation-types'
 import { welcome, permissionsConfig } from '@/utils/util'
 
 const user = {
@@ -33,6 +33,10 @@ const user = {
     },
     SET_NAMESPACES: (state, namespaces) => {
       state.namespaces = namespaces
+      if (storage.get(APP_NAMESPACE)) {
+      } else {
+        storage.set(APP_NAMESPACE, namespaces[0].uniqueId)
+      }
     }
   },
 
@@ -42,8 +46,9 @@ const user = {
       return new Promise((resolve, reject) => {
         login(userInfo).then(response => {
           const { data } = response
-          storage.set(ACCESS_TOKEN, data.token, 60 * 60 * 1000)
+          storage.set(ACCESS_TOKEN, data.token, 7 * 60 * 60 * 1000)
           commit('SET_TOKEN', data.token)
+          commit('SET_NAMESPACES', data.namespaceIds)
           resolve()
         }).catch(error => {
           reject(error)
@@ -60,7 +65,7 @@ const user = {
             permissions: permissionsConfig(result.role, result.mode)
           }
 
-          commit('SET_NAMESPACES', result.namespaceIdList)
+          commit('SET_NAMESPACES', result.namespaceIds)
 
           if (result.role && result.role.permissions.length > 0) {
             const role = result.role
@@ -98,6 +103,7 @@ const user = {
         commit('SET_TOKEN', '')
         commit('SET_ROLES', [])
         storage.remove(ACCESS_TOKEN)
+        storage.remove(APP_NAMESPACE)
         resolve()
       })
     }

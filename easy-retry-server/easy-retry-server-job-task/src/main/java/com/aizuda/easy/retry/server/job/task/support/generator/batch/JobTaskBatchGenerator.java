@@ -18,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -43,7 +42,7 @@ public class JobTaskBatchGenerator {
         jobTaskBatch.setGroupName(context.getGroupName());
         jobTaskBatch.setCreateDt(LocalDateTime.now());
         // 无执行的节点
-        if (CollectionUtils.isEmpty(CacheRegisterTable.getServerNodeSet(context.getGroupName()))) {
+        if (CollectionUtils.isEmpty(CacheRegisterTable.getServerNodeSet(context.getGroupName(), namespaceId))) {
             jobTaskBatch.setTaskBatchStatus(JobTaskBatchStatusEnum.CANCEL.getStatus());
             jobTaskBatch.setOperationReason(JobOperationReasonEnum.NOT_CLIENT.getReason());
         } else {

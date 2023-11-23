@@ -11,6 +11,7 @@ const api = {
   saveGroup: '/group',
   groupConfigByGroupName: `/group`,
   allGroupNameList: `/group/all/group-name/list`,
+  allGroupConfigList: `/group/all/group-config/list`,
   retryTaskPage: '/retry-task/list',
   retryTaskById: '/retry-task/',
   saveRetryTask: '/retry-task',
@@ -55,6 +56,14 @@ const api = {
 }
 
 export default api
+
+export function allGroupConfigList (data) {
+  return request({
+    url: api.allGroupConfigList,
+    method: 'post',
+    data
+  })
+}
 
 export function getAllNamespace () {
   return request({

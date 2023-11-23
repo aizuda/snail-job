@@ -93,7 +93,7 @@ public class ClientRegister extends AbstractRegister implements Runnable {
                         new LambdaQueryWrapper<ServerNode>().in(ServerNode::getGroupName, allConsumerGroupName));
                     for (final ServerNode node : serverNodes) {
                         // 刷新全量本地缓存
-                        CacheRegisterTable.addOrUpdate(node.getGroupName(), node);
+                        CacheRegisterTable.addOrUpdate(node);
                     }
                 }
 

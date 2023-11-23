@@ -44,7 +44,8 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, Initializing
         // 重试次数累加
         retryCountIncrement(retryTask);
 
-        SceneConfig sceneConfig = accessTemplate.getSceneConfigAccess().getSceneConfigByGroupNameAndSceneName(retryTask.getGroupName(), retryTask.getSceneName());
+        SceneConfig sceneConfig = accessTemplate.getSceneConfigAccess().getSceneConfigByGroupNameAndSceneName(retryTask.getGroupName(), retryTask.getSceneName(),
+            retryTask.getNamespaceId());
 
         RetryContext retryContext = builderRetryContext(retryTask.getGroupName(), retryTask, sceneConfig);
         RetryExecutor executor = builderResultRetryExecutor(retryContext, sceneConfig);

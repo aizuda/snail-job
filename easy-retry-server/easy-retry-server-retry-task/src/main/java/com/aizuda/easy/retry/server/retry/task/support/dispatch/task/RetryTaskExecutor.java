@@ -32,7 +32,7 @@ public class RetryTaskExecutor extends AbstractTaskExecutor {
         final SceneConfig sceneConfig) {
         MaxAttemptsPersistenceRetryContext<Result<DispatchRetryResultDTO>> retryContext = new MaxAttemptsPersistenceRetryContext<>();
         retryContext.setRetryTask(retryTask);
-        retryContext.setSceneBlacklist(accessTemplate.getSceneConfigAccess().getBlacklist(groupName));
+        retryContext.setSceneBlacklist(accessTemplate.getSceneConfigAccess().getBlacklist(groupName, sceneConfig.getNamespaceId()));
         retryContext.setServerNode(
             clientNodeAllocateHandler.getServerNode(retryTask.getSceneName(), retryTask.getGroupName(),
                 sceneConfig.getRouteKey()));

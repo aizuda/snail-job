@@ -16,6 +16,8 @@ public class GroupConfigResponseVO {
 
     private String groupName;
 
+    private String namespaceId;
+
     private Integer groupStatus;
 
     private Integer groupPartition;
