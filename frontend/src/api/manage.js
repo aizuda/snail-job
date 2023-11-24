@@ -188,13 +188,6 @@ export function getPartitionTableList () {
   })
 }
 
-export function getTotalPartition () {
-  return request({
-    url: api.totalPartition,
-    method: 'get'
-  })
-}
-
 export function getLineDispatchQuantity (parameter) {
   return request({
     url: api.lineDispatchQuantity,
@@ -240,11 +233,10 @@ export function getGroupConfigForPage (parameter) {
   })
 }
 
-export function getAllGroupNameList (data) {
+export function getAllGroupNameList () {
   return request({
     url: api.allGroupNameList,
-    method: 'post',
-    data
+    method: 'get'
   })
 }
 

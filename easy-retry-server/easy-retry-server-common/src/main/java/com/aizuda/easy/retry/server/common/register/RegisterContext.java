@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 @Data
 public class RegisterContext {
 
+    private String namespaceId;
+
     private String groupName;
 
     private String hostId;

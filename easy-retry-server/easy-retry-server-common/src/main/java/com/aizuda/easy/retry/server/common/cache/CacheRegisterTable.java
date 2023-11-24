@@ -135,7 +135,7 @@ public class CacheRegisterTable implements Lifecycle {
             LogUtils.info(log, "Add cache. groupName:[{}] namespaceId:[{}] hostId:[{}]", serverNode.getGroupName(), serverNode.getNamespaceId(), serverNode.getHostId());
             concurrentMap = new ConcurrentHashMap<>();
             registerNodeInfo = RegisterNodeInfoConverter.INSTANCE.toRegisterNodeInfo(serverNode);
-            CACHE.put(serverNode.getGroupName(), concurrentMap);
+            CACHE.put(getKey(serverNode.getGroupName(), serverNode.getNamespaceId()), concurrentMap);
         } else {
             // 复用缓存中的对象
             registerNodeInfo = concurrentMap.getOrDefault(serverNode.getHostId(), RegisterNodeInfoConverter.INSTANCE.toRegisterNodeInfo(serverNode));

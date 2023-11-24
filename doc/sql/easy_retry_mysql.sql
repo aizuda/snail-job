@@ -39,7 +39,7 @@ CREATE TABLE `group_config`
     `create_dt`         datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_dt`         datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_name` (`group_name`)
+    UNIQUE KEY `uk_namespace_id_group_name` (`namespace_id`, `group_name`)
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 0
   DEFAULT CHARSET = utf8mb4 COMMENT ='组配置'
@@ -62,7 +62,7 @@ CREATE TABLE `notify_config`
     `create_dt`              datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_dt`              datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     PRIMARY KEY (`id`),
-    KEY `idx_group_name` (`group_name`)
+    KEY `idx_namespace_id_group_name` (`namespace_id`, `group_name`)
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 0
   DEFAULT CHARSET = utf8mb4 COMMENT ='通知配置'
@@ -83,11 +83,11 @@ CREATE TABLE `retry_dead_letter_0`
     `task_type`     tinyint(4)          NOT NULL DEFAULT '1' COMMENT '任务类型 1、重试数据 2、回调数据',
     `create_dt`     datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     PRIMARY KEY (`id`),
-    KEY `idx_group_name_scene_name` (`group_name`, `scene_name`),
+    KEY `idx_namespace_id_group_name_scene_name` (`namespace_id`, `group_name`, `scene_name`),
     KEY `idx_idempotent_id` (`idempotent_id`),
     KEY `idx_biz_no` (`biz_no`),
     KEY `idx_create_dt` (`create_dt`),
-    UNIQUE KEY `uk_name_unique_id` (`group_name`, `unique_id`)
+    UNIQUE KEY `uk_namespace_id_group_name_unique_id` (`namespace_id`, `group_name`, `unique_id`)
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 0
   DEFAULT CHARSET = utf8mb4 COMMENT ='死信队列表'
@@ -112,12 +112,13 @@ CREATE TABLE `retry_task_0`
     `create_dt`       datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_dt`       datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     PRIMARY KEY (`id`),
-    KEY `idx_group_name_scene_name` (`group_name`, `scene_name`),
-    KEY `idx_retry_status` (`retry_status`),
+    KEY `idx_namespace_id_group_name_scene_name` (`namespace_id`,`group_name`, `scene_name`),
+    KEY `idx_namespace_id_group_name_task_type` (`namespace_id`,`group_name`, `task_type`),
+    KEY `idx_namespace_id_group_name_retry_status` (`namespace_id`,`group_name`, `retry_status`),
     KEY `idx_idempotent_id` (`idempotent_id`),
     KEY `idx_biz_no` (`biz_no`),
     KEY `idx_create_dt` (`create_dt`),
-    UNIQUE KEY `uk_name_unique_id` (`group_name`, `unique_id`)
+    UNIQUE KEY `uk_name_unique_id` (`namespace_id`, `group_name`, `unique_id`)
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 0
   DEFAULT CHARSET = utf8mb4 COMMENT ='任务表'
@@ -139,7 +140,7 @@ CREATE TABLE `retry_task_log`
     `task_type`     tinyint(4)          NOT NULL DEFAULT '1' COMMENT '任务类型 1、重试数据 2、回调数据',
     `create_dt`     datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     PRIMARY KEY (`id`),
-    KEY `idx_group_name_scene_name` (`group_name`, `scene_name`),
+    KEY `idx_group_name_scene_name` (`namespace_id`,`group_name`, `scene_name`),
     KEY `idx_retry_status` (`retry_status`),
     KEY `idx_idempotent_id` (`idempotent_id`),
     KEY `idx_unique_id` (`unique_id`),
@@ -160,7 +161,7 @@ CREATE TABLE `retry_task_log_message`
     `message`     text                NOT NULL COMMENT '异常信息',
     `client_info` varchar(128)                 DEFAULT NULL COMMENT '客户端地址 clientId#ip:port',
     PRIMARY KEY (`id`),
-    KEY `idx_group_name_unique_id` (`group_name`, `unique_id`),
+    KEY `idx_namespace_id_group_name_scene_name` (`namespace_id`,`group_name`, `unique_id`),
     KEY `idx_create_dt` (`create_dt`)
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 0
@@ -184,7 +185,7 @@ CREATE TABLE `scene_config`
     `create_dt`        datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_dt`        datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_group_name_scene_name` (`group_name`, `scene_name`)
+    UNIQUE KEY `uk_namespace_id_group_name_scene_name` (`namespace_id`, `group_name`, `scene_name`)
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 0
   DEFAULT CHARSET = utf8mb4 COMMENT ='场景配置'
@@ -205,6 +206,7 @@ CREATE TABLE `server_node`
     `create_dt`    datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_dt`    datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     PRIMARY KEY (`id`),
+    KEY `idx_namespace_id_group_name` (`namespace_id`,`group_name`),
     KEY `idx_expire_at_node_type` (`expire_at`, `node_type`),
     UNIQUE KEY `uk_host_id_host_ip` (`host_id`, `host_ip`)
 ) ENGINE = InnoDB
@@ -254,20 +256,20 @@ CREATE TABLE `system_user_permission`
     `create_dt`      datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_dt`      datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_group_name_system_user_id` (`group_name`, `system_user_id`) USING BTREE
+    UNIQUE KEY `uk_namespace_id_group_name_system_user_id` (`namespace_id`, `group_name`, `system_user_id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4 COMMENT ='系统用户权限表';
 
 CREATE TABLE `sequence_alloc`
 (
-    `id`         bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `namespace_id`      varchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' COMMENT '命名空间id',
-    `group_name` varchar(64)         NOT NULL DEFAULT '' COMMENT '组名称',
-    `max_id`     bigint(20)          NOT NULL DEFAULT '1' COMMENT '最大id',
-    `step`       int(11)             NOT NULL DEFAULT '100' COMMENT '步长',
-    `update_dt`  datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `id`           bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `namespace_id` varchar(64) NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' COMMENT '命名空间id',
+    `group_name`   varchar(64) NOT NULL DEFAULT '' COMMENT '组名称',
+    `max_id`       bigint(20) NOT NULL DEFAULT '1' COMMENT '最大id',
+    `step`         int(11) NOT NULL DEFAULT '100' COMMENT '步长',
+    `update_dt`    datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_group_name` (`group_name`) USING BTREE
+    UNIQUE KEY `uk_namespace_id_group_name` (`namespace_id`, `group_name`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4 COMMENT ='号段模式序号ID分配表';
 
@@ -301,7 +303,7 @@ CREATE TABLE `job`
     `update_dt`        datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     `deleted`          tinyint(4)          NOT NULL DEFAULT '0' COMMENT '逻辑删除 1、删除',
     PRIMARY KEY (`id`),
-    KEY `idx_group_name` (`group_name`),
+    KEY `idx_namespace_id_group_name` (`namespace_id`, `group_name`),
     KEY `idx_job_status_bucket_index` (`job_status`, `bucket_index`),
     KEY `idx_create_dt` (`create_dt`)
 ) ENGINE = InnoDB
@@ -322,7 +324,7 @@ CREATE TABLE `job_log_message`
     PRIMARY KEY (`id`),
     KEY `idx_task_batch_id_task_id` (`task_batch_id`, `task_id`),
     KEY `idx_create_dt` (`create_dt`),
-    KEY `idx_group_name` (`group_name`)
+    KEY `idx_namespace_id_group_name` (`namespace_id`, `group_name`)
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 0
   DEFAULT CHARSET = utf8mb4 COMMENT ='调度日志';
@@ -347,7 +349,7 @@ CREATE TABLE `job_task`
     PRIMARY KEY (`id`),
     KEY `idx_task_batch_id_task_status` (`task_batch_id`, `task_status`),
     KEY `idx_create_dt` (`create_dt`),
-    KEY `idx_group_name` (`group_name`)
+    KEY `idx_namespace_id_group_name` (`namespace_id`, `group_name`)
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 0
   DEFAULT CHARSET = utf8mb4 COMMENT ='任务实例';
@@ -369,7 +371,7 @@ CREATE TABLE `job_task_batch`
     PRIMARY KEY (`id`),
     KEY `idx_job_id_task_batch_status` (`job_id`, `task_batch_status`),
     KEY `idx_create_dt` (`create_dt`),
-    KEY `idx_group_name` (`group_name`)
+    KEY `idx_namespace_id_group_name` (`namespace_id`, `group_name`)
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 0
   DEFAULT CHARSET = utf8mb4 COMMENT ='任务批次';
