@@ -1,7 +1,5 @@
 package com.aizuda.easy.retry.common.core.constant;
 
-import java.time.format.DateTimeFormatter;
-
 /**
  * 系统通用常量
  *
@@ -88,4 +86,9 @@ public interface SystemConstants {
      * 延迟30s为了尽可能保障集群节点都启动完成在进行rebalance
      */
    Long SCHEDULE_INITIAL_DELAY = 30L;
+
+    /**
+     * 默认名称空间
+     */
+   String DEFAULT_NAMESPACE = "764d604ec6fc45f68cd92514c40e9e1a";
 }

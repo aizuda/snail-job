@@ -34,7 +34,7 @@ public class ConfigVersionSyncHandler implements Lifecycle, Runnable {
     private static final LinkedBlockingQueue<ConfigSyncTask> QUEUE = new LinkedBlockingQueue<>(256);
 
     public static final String URL = "http://{0}:{1}/{2}/retry/sync/version/v1";
-    public static Thread THREAD = null;
+    public Thread THREAD = null;
     @Autowired
     private RestTemplate restTemplate;
     @Autowired

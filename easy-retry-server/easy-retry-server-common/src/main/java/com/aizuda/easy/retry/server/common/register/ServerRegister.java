@@ -12,6 +12,7 @@ import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.dto.ServerNodeExtAttrs;
 import com.aizuda.easy.retry.server.common.handler.ServerNodeBalance;
 import com.aizuda.easy.retry.template.datasource.persistence.po.ServerNode;
+import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
@@ -76,7 +77,7 @@ public class ServerRegister extends AbstractRegister {
 
     @Override
     protected boolean doRegister(RegisterContext context, ServerNode serverNode) {
-        refreshExpireAt(serverNode);
+        refreshExpireAt(Lists.newArrayList(serverNode));
         return Boolean.TRUE;
     }
 
