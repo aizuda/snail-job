@@ -57,7 +57,6 @@ export default {
   methods: {
     isShow (record) {
       this.formType = record ? 'edit' : 'create'
-      console.log(this.formType)
       this.loadEditInfo(record)
       this.visible = true
       this.form.resetFields()
@@ -79,6 +78,8 @@ export default {
               this.visible = false
             })
           }
+
+          this.$store.dispatch('GetInfo')
         }
       })
     },

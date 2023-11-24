@@ -87,6 +87,7 @@ public class RequestHandlerActor extends AbstractActor {
         Integer hostPort = headers.getInt(HeadersEnum.HOST_PORT.getKey());
         String groupName = headers.get(HeadersEnum.GROUP_NAME.getKey());
         String contextPath = headers.get(HeadersEnum.CONTEXT_PATH.getKey());
+        String namespace = headers.get(HeadersEnum.NAMESPACE.getKey());
 
         // 注册版本
         RegisterContext registerContext = new RegisterContext();
@@ -96,6 +97,7 @@ public class RequestHandlerActor extends AbstractActor {
         registerContext.setHostIp(hostIp);
         registerContext.setHostId(hostId);
         registerContext.setUri(uri);
+        registerContext.setNamespaceId(namespace);
         boolean result = register.register(registerContext);
         if (!result) {
             LogUtils.warn(log, "client register error. groupName:[{}]", groupName);

@@ -43,7 +43,7 @@
       :rowSelection="options.rowSelection"
     >
       <span slot="serial" slot-scope="text, record">
-        {{ record.id }}
+        <a href="#" @click="handlerDetail">{{ record.id }}</a>
       </span>
       <span slot="groupNameList" slot-scope="text, record">
         {{ record.role === 2 ? '所有组' : text.toString() }}
@@ -66,6 +66,33 @@
         </template>
       </span>
     </s-table>
+    <a-drawer
+      title="Basic Drawer"
+      placement="right"
+      :visible="openDrawer"
+      @close="onClose"
+    >
+      <p>Some contents...</p>
+      <p>Some contents...</p>
+      <p>Some contents...</p>
+
+      <div
+        :style="{
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          marginRight: '5px',
+          width: '100%',
+          borderTop: '1px solid #e9e9e9',
+          padding: '10px 16px',
+          background: '#fff',
+          // textAlign: 'right',
+          zIndex: 1,
+        }"
+      >
+        <a-button style='background: none'><a-icon type="arrows-alt" style='size: 16px;'/></a-button>
+
+      </div></a-drawer>
   </a-card>
 </template>
 
@@ -150,7 +177,8 @@ export default {
           onChange: this.onSelectChange
         }
       },
-      optionAlertShow: false
+      optionAlertShow: false,
+      openDrawer: false
     }
   },
   filters: {
@@ -175,6 +203,12 @@ export default {
     handleGoBack () {
       this.record = ''
       this.currentComponet = 'List'
+    },
+    handlerDetail () {
+      this.openDrawer = true
+    },
+    onClose () {
+      this.openDrawer = false
     }
   },
   watch: {

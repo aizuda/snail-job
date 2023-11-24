@@ -295,7 +295,8 @@ public class GroupConfigServiceImpl implements GroupConfigService {
 
         List<GroupConfig> groupConfigs = groupConfigAccess.list(new LambdaQueryWrapper<GroupConfig>()
                 .in(GroupConfig::getNamespaceId, UserSessionUtils.currentUserSession().getNamespaceId())
-                .select(GroupConfig::getGroupName)).stream()
+                .select(GroupConfig::getGroupName))
+            .stream()
             .collect(Collectors.toList());
 
         return groupConfigs.stream().map(GroupConfig::getGroupName).collect(Collectors.toList());

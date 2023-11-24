@@ -38,6 +38,7 @@ public class ServerRegister extends AbstractRegister {
     public static final int DELAY_TIME = 30;
     public static final String CURRENT_CID;
     public static final String GROUP_NAME = "DEFAULT_SERVER";
+    public static final String NAMESPACE_ID = "DEFAULT_SERVER_NAMESPACE_ID";
 
     @Autowired
     public ServerNodeBalance serverNodeBalance;
@@ -67,6 +68,7 @@ public class ServerRegister extends AbstractRegister {
         context.setHostIp(HostUtils.getIp());
         context.setHostPort(systemProperties.getNettyPort());
         context.setContextPath(StrUtil.EMPTY);
+        context.setNamespaceId(NAMESPACE_ID);
         context.setExtAttrs(JsonUtil.toJsonString(serverNodeExtAttrs));
     }
 
