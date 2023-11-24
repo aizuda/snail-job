@@ -5,13 +5,17 @@ import com.aizuda.easy.retry.common.core.enums.NodeTypeEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.common.cache.CacheConsumerGroup;
 import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
+import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
 import com.aizuda.easy.retry.template.datasource.persistence.po.ServerNode;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -19,6 +23,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * 客户端注册
@@ -35,7 +40,7 @@ public class ClientRegister extends AbstractRegister implements Runnable {
 
     public static final int DELAY_TIME = 30;
     private Thread THREAD = null;
-    protected static final LinkedBlockingDeque<ServerNode> QUEUE = new LinkedBlockingDeque<>(256);
+    protected static final LinkedBlockingDeque<ServerNode> QUEUE = new LinkedBlockingDeque<>(1000);
 
     @Override
     public boolean supports(int type) {
@@ -84,7 +89,16 @@ public class ClientRegister extends AbstractRegister implements Runnable {
             try {
                 ServerNode serverNode = QUEUE.poll(5L, TimeUnit.SECONDS);
                 if (Objects.nonNull(serverNode)) {
-                    refreshExpireAt(serverNode);
+                    List<ServerNode> lists = Lists.newArrayList(serverNode);
+                    QUEUE.drainTo(lists, 100);
+
+                    // 去重
+                    lists = new ArrayList<>(lists.stream()
+                        .collect(
+                            Collectors.toMap(ServerNode::getHostId, node -> node, (existing, replacement) -> existing))
+                        .values());
+
+                    refreshExpireAt(lists);
                 }
 
                 // 同步当前POD消费的组的节点信息
@@ -92,16 +106,18 @@ public class ClientRegister extends AbstractRegister implements Runnable {
                 ConcurrentMap<String, String> allConsumerGroupName = CacheConsumerGroup.getAllConsumerGroupName();
                 if (!CollectionUtils.isEmpty(allConsumerGroupName)) {
                     List<ServerNode> serverNodes = serverNodeMapper.selectList(
-                            new LambdaQueryWrapper<ServerNode>()
-                                    .eq(ServerNode::getNodeType, NodeTypeEnum.CLIENT.getType())
-                                    .in(ServerNode::getNamespaceId, new HashSet<>(allConsumerGroupName.values()))
-                                    .in(ServerNode::getGroupName, allConsumerGroupName.keySet()));
+                        new LambdaQueryWrapper<ServerNode>()
+                            .eq(ServerNode::getNodeType, NodeTypeEnum.CLIENT.getType())
+                            .in(ServerNode::getNamespaceId, new HashSet<>(allConsumerGroupName.values()))
+                            .in(ServerNode::getGroupName, allConsumerGroupName.keySet()));
                     for (final ServerNode node : serverNodes) {
                         // 刷新全量本地缓存
                         CacheRegisterTable.addOrUpdate(node);
                     }
                 }
 
+            } catch (InterruptedException ignored) {
+                Thread.currentThread().interrupt();
             } catch (Exception e) {
                 LogUtils.error(log, "client refresh expireAt error.");
             } finally {
@@ -109,6 +125,7 @@ public class ClientRegister extends AbstractRegister implements Runnable {
                 try {
                     TimeUnit.MILLISECONDS.sleep(5000);
                 } catch (InterruptedException ignored) {
+                    Thread.currentThread().interrupt();
                 }
             }
         }

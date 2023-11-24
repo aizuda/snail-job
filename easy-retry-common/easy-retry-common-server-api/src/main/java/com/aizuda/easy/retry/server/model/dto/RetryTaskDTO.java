@@ -18,11 +18,6 @@ public class RetryTaskDTO implements Serializable {
     private String groupName;
 
     /**
-     * namespaceId
-     */
-    private String namespaceId;
-
-    /**
      * sceneName
      */
     private String sceneName;

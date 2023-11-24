@@ -62,6 +62,7 @@ public interface ConfigAccess<T> extends Access<T>  {
      * @param notifyScene {@link NotifySceneEnum} 场景类型
      * @return {@link NotifyConfig} 场景配置
      */
+    @Deprecated
     List<NotifyConfig> getNotifyConfigByGroupNameAndSceneName(String groupName, String sceneName, Integer notifyScene);
 
     /**

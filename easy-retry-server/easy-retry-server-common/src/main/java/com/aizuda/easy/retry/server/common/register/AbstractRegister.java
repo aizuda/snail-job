@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * @author www.byteblogs.com
@@ -32,16 +33,23 @@ public abstract class AbstractRegister implements Register, Lifecycle {
         return doRegister(context, serverNode);
     }
 
-    protected void refreshExpireAt(ServerNode serverNode) {
+    protected void refreshExpireAt(List<ServerNode> serverNodes) {
 
         try {
-            serverNode.setExpireAt(getExpireAt());
-            serverNodeMapper.insertOrUpdate(serverNode);
-            // 刷新本地缓存过期时间
-            CacheRegisterTable.refreshExpireAt(serverNode);
+
+            for (final ServerNode serverNode : serverNodes) {
+                serverNode.setExpireAt(getExpireAt());
+            }
+
+            serverNodeMapper.insertOrUpdate(serverNodes);
+
+            for (final ServerNode serverNode : serverNodes) {
+                // 刷新本地缓存过期时间
+                CacheRegisterTable.refreshExpireAt(serverNode);
+            }
+
         }catch (Exception e) {
-            LogUtils.error(log,"注册节点失败 groupName:[{}] hostIp:[{}]",
-                    serverNode.getGroupName(), serverNode.getHostIp(), e);
+            LogUtils.error(log,"注册节点失败", e);
         }
     }
 

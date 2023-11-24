@@ -26,6 +26,11 @@ public class EasyRetryProperties {
     /**
      * 服务端对应的group
      */
+    private String namespace;
+
+    /**
+     * 服务端对应的group
+     */
     private String group;
 
     /**
