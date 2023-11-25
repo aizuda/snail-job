@@ -1,10 +1,10 @@
 <template>
   <div>
-    <page-header-wrapper @back="() => $router.go(-1)" style="margin: -24px -1px 0">
+    <page-header-wrapper @back="() => $router.replace('/job/list')" style="margin: -24px -1px 0" v-if="showHeader">
       <div></div>
     </page-header-wrapper>
     <a-card :bordered="false" v-if="jobInfo !==null ">
-      <a-descriptions title="" :column="4" bordered>
+      <a-descriptions title="" :column="column" bordered>
         <a-descriptions-item label="组名称">
           {{ jobInfo.groupName }}
         </a-descriptions-item>
@@ -84,7 +84,16 @@ import enums from '@/utils/jobEnum'
 export default {
   name: 'JobInfo',
   components: {
-
+  },
+  props: {
+    showHeader: {
+      type: Boolean,
+      default: true
+    },
+    column: {
+      type: Number,
+      default: 4
+    }
   },
   data () {
     return {
@@ -101,16 +110,21 @@ export default {
     const id = this.$route.query.id
     const groupName = this.$route.query.groupName
     if (id && groupName) {
-      getJobDetail(id).then(res => {
-        this.jobInfo = res.data
-      })
+      this.jobDetail(id)
     } else {
-      this.$router.push({ path: '/404' })
+      if (this.showHeader) {
+        this.$router.push({ path: '/404' })
+      }
     }
   },
   methods: {
     parseDate (date) {
       return moment(date).format('YYYY-MM-DD HH:mm:ss')
+    },
+    jobDetail (id) {
+      getJobDetail(id).then(res => {
+        this.jobInfo = res.data
+      })
     }
   }
 }

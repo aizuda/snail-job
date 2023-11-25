@@ -159,7 +159,7 @@ public class ScanJobTaskActor extends AbstractActor {
                 new LambdaQueryWrapper<Job>()
                         .select(Job::getGroupName, Job::getNextTriggerAt, Job::getBlockStrategy, Job::getTriggerType,
                                 Job::getTriggerInterval, Job::getExecutorTimeout, Job::getTaskType, Job::getResident,
-                                Job::getId)
+                                Job::getId, Job::getNamespaceId)
                         .eq(Job::getJobStatus, StatusEnum.YES.getStatus())
                         .eq(Job::getDeleted, StatusEnum.NO.getStatus())
                         .in(Job::getBucketIndex, scanTask.getBuckets())

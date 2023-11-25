@@ -19,9 +19,9 @@
         SELECT a.*, b.job_name, b.task_type, b.block_strategy, b.trigger_type
         FROM job_task_batch a join job b on a.job_id = b.id
         <where>
-            namespace_id = #{queryDO.namespaceId}
+            a.namespace_id = #{queryDO.namespaceId}
             <if test="queryDO.jobId != null">
-                and job_id = #{queryDO.jobId}
+                and a.job_id = #{queryDO.jobId}
             </if>
             <if test="queryDO.groupName != null">
                 and a.group_name = #{queryDO.groupName}

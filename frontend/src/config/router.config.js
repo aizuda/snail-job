@@ -76,20 +76,20 @@ export const asyncRouterMap = [
             name: 'RetryTaskInfo',
             hidden: true,
             component: () => import('@/views/task/RetryTaskInfo'),
-            meta: { title: '任务管理详情', icon: 'profile', keepAlive: true, permission: ['retryTask'] }
+            meta: { title: '重试任务详情', icon: 'profile', keepAlive: true, permission: ['retryTask'] }
           },
           {
             path: '/retry/dead-letter/list',
             name: 'RetryDeadLetterList',
             component: () => import('@/views/task/RetryDeadLetterList'),
-            meta: { title: '死信队列', icon: 'profile', permission: ['retryDeadLetter'] }
+            meta: { title: '死信任务', icon: 'profile', permission: ['retryDeadLetter'] }
           },
           {
             path: '/retry/dead-letter/info',
             name: 'RetryDeadLetterInfo',
             hidden: true,
             component: () => import('@/views/task/RetryDeadLetterInfo'),
-            meta: { title: '死信队列管理详情', icon: 'profile', permission: ['retryDeadLetter'] }
+            meta: { title: '死信任务详情', icon: 'profile', permission: ['retryDeadLetter'] }
           },
           {
             path: '/retry/log/list',
@@ -143,14 +143,14 @@ export const asyncRouterMap = [
             path: '/job/list',
             name: 'JobList',
             component: () => import('@/views/job/JobList'),
-            meta: { title: '任务信息', icon: 'profile', permission: ['job'] }
+            meta: { title: '任务信息', keepAlive: true, icon: 'profile', permission: ['job'] }
           },
           {
             path: '/job/info',
             name: 'JobInfo',
             hidden: true,
             component: () => import('@/views/job/JobInfo'),
-            meta: { title: '定时任务详情', icon: 'profile', permission: ['job'] }
+            meta: { title: '定时任务详情', keepAlive: true, icon: 'profile', permission: ['job'] }
           },
           {
             path: '/job/config',

@@ -65,10 +65,8 @@
       <a-button type="primary" icon="plus" @click="handleNew()">新增</a-button>
       <!--      <a-button type="primary" icon="plus" @click="handleBatchNew()">批量</a-button>-->
       <a-dropdown v-action:edit v-if="selectedRowKeys.length > 0">
-        <a-menu slot="overlay" @click="onClick">
-          <!--          <a-menu-item key="1"><a-icon type="delete" />删除</a-menu-item>-->
-        </a-menu>
-        <!--        <a-button style="margin-left: 8px"> 批量操作 <a-icon type="down" /> </a-button>-->
+        <!--          <a-menu-item key="1"><a-icon type="delete" />删除</a-menu-item>-->
+      <!--        <a-button style="margin-left: 8px"> 批量操作 <a-icon type="down" /> </a-button>-->
       </a-dropdown>
     </div>
 
@@ -82,6 +80,9 @@
     >
       <span slot="serial" slot-scope="text, record">
         {{ record.id }}
+      </span>
+      <span slot="jobName" slot-scope="text, record">
+        <a href="#" @click="handlerOpenDrawer(record)">{{ text }}</a>
       </span>
       <span slot="taskType" slot-scope="text">
         <a-tag :color="taskType[text].color">
@@ -157,23 +158,38 @@
       </span>
     </s-table>
 
+    <Drawer
+      title="任务详情"
+      placement="right"
+      :width="800"
+      :visibleAmplify="true"
+      :visible="openDrawer"
+      @closeDrawer="onClose"
+      @handlerAmplify="handleInfo"
+    >
+      <job-info ref="jobInfoRef" :showHeader="false" :column="2"/>
+    </Drawer>
+
   </a-card>
 </template>
 
 <script>
 import ATextarea from 'ant-design-vue/es/input/TextArea'
 import AInput from 'ant-design-vue/es/input/Input'
-import { STable } from '@/components'
+import { STable, Drawer } from '@/components'
 import { delJob, getJobList, triggerJob, updateJobStatus } from '@/api/jobApi'
 import { getAllGroupNameList } from '@/api/manage'
 import enums from '@/utils/jobEnum'
+import JobInfo from '@/views/job/JobInfo'
 
 export default {
   name: 'JobList',
   components: {
     AInput,
     ATextarea,
-    STable
+    STable,
+    JobInfo,
+    Drawer
   },
   data () {
     return {
@@ -205,6 +221,7 @@ export default {
         {
           title: '任务名称',
           dataIndex: 'jobName',
+          scopedSlots: { customRender: 'jobName' },
           ellipsis: true,
           width: '10%'
         },
@@ -282,7 +299,9 @@ export default {
       },
       optionAlertShow: false,
       groupNameList: [],
-      sceneList: []
+      sceneList: [],
+      openDrawer: false,
+      currentShowRecord: null
     }
   },
   created () {
@@ -306,6 +325,7 @@ export default {
       this.advanced = !this.advanced
     },
     handleInfo (record) {
+      record = record || this.currentShowRecord
       this.$router.push({ path: '/job/info', query: { id: record.id, groupName: record.groupName } })
     },
     handleOk (record) {},
@@ -360,15 +380,16 @@ export default {
       this.selectedRowKeys = selectedRowKeys
       this.selectedRows = selectedRows
     },
-    onClick ({ key }) {
-      if (key === '2') {
-        this.$refs.batchUpdateRetryTaskInfo.isShow(true, this.selectedRows, this.selectedRowKeys)
-        return
-      }
-
-      if (key === '1') {
-        this.handlerDel()
-      }
+    handlerOpenDrawer (record) {
+      this.currentShowRecord = record
+      this.openDrawer = true
+      setTimeout(() => {
+        this.$refs.jobInfoRef.jobDetail(record.id)
+      }, 200)
+    },
+    onClose () {
+      this.openDrawer = false
+      this.currentShowRecord = null
     }
   }
 }

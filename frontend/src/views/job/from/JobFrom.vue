@@ -283,7 +283,7 @@
                   {
                     required: true,
                     whitespace: true,
-                    message: '分片参数必填',
+                    message: '分片参数必填'
                   },
                 ],
               },

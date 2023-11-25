@@ -87,8 +87,8 @@
       :rowSelection="options.rowSelection"
       :scroll="{ x: 2000 }"
     >
-      <span slot="serial" slot-scope="text, record">
-        {{ record.id }}
+      <span slot="uniqueId" slot-scope="text, record">
+        <a href="#" @click="handlerOpenDrawer(record)">  {{ text }}</a>
       </span>
       <span slot="taskType" slot-scope="text">
         <a-tag :color="taskType[text].color">
@@ -144,6 +144,18 @@
       </span>
     </s-table>
 
+    <Drawer
+      title="任务详情"
+      placement="right"
+      :width="800"
+      :visibleAmplify="true"
+      :visible="openDrawer"
+      @closeDrawer="onClose"
+      @handlerAmplify="handleInfo"
+    >
+      <retry-task-info ref="retryTaskInfoRef" :showHeader="false" :column="1"/>
+    </Drawer>
+
     <SaveRetryTask ref="saveRetryTask" @refreshTable="refreshTable"/>
     <BatchUpdateRetryTaskInfo ref="batchUpdateRetryTaskInfo" @refreshTable="refreshTable"/>
     <BatchSaveRetryTask ref="batchSaveRetryTask" @refreshTable="refreshTable"/>
@@ -162,14 +174,17 @@ import {
   batchDelete,
   manualTriggerCallbackTask, manualTriggerRetryTask
 } from '@/api/manage'
-import { STable } from '@/components'
+import { Drawer, STable } from '@/components'
 import SaveRetryTask from './form/SaveRetryTask'
 import BatchUpdateRetryTaskInfo from './form/BatchUpdateRetryTaskInfo'
 import BatchSaveRetryTask from '@/views/task/form/BatchSaveRetryTask.vue'
+import RetryTaskInfo from '@/views/task/RetryTaskInfo'
 
 export default {
   name: 'RetryTask',
   components: {
+    Drawer,
+    RetryTaskInfo,
     AInput,
     ATextarea,
     STable,
@@ -218,14 +233,10 @@ export default {
       // 表头
       columns: [
         {
-          title: 'ID',
-          scopedSlots: { customRender: 'serial' },
-          fixed: 'left'
-        },
-        {
           title: 'UniqueId',
           dataIndex: 'uniqueId',
-          width: '9%'
+          fixed: 'left',
+          scopedSlots: { customRender: 'uniqueId' }
         },
         {
           title: '组名称',
@@ -310,7 +321,9 @@ export default {
       },
       optionAlertShow: false,
       groupNameList: [],
-      sceneList: []
+      sceneList: [],
+      openDrawer: false,
+      currentShowRecord: null
     }
   },
   created () {
@@ -343,6 +356,7 @@ export default {
       this.advanced = !this.advanced
     },
     handleInfo (record) {
+      record = record || this.currentShowRecord
       this.$router.push({ path: '/retry/info', query: { id: record.id, groupName: record.groupName } })
     },
     handleOk (record) {},
@@ -435,6 +449,17 @@ export default {
       if (key === '1') {
         this.handlerDel()
       }
+    },
+    handlerOpenDrawer (record) {
+      this.currentShowRecord = record
+      this.openDrawer = true
+      setTimeout(() => {
+        this.$refs.retryTaskInfoRef.getRetryTaskById(record.id, record.groupName)
+      }, 200)
+    },
+    onClose () {
+      this.openDrawer = false
+      this.currentShowRecord = null
     }
   }
 }

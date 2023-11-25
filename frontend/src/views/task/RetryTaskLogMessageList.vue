@@ -1,7 +1,8 @@
 <template>
   <div>
     <div style="margin: 20px 0; border-left: #f5222d 5px solid; font-size: medium; font-weight: bold">
-      &nbsp;&nbsp; 调用日志详情 (总调度次数: {{ total }})
+      <span style="padding-left: 18px">调用日志详情 (总调度次数: {{ total }})</span>
+      <span style="padding-left: 18px"><a-icon type="sync" @click="()=> this.$refs.table.refresh(true)"/></span>
     </div>
     <a-card>
       <s-table
@@ -64,7 +65,6 @@ export default {
       queryParam: {},
       // 加载数据方法 必须为 Promise 对象
       loadData: parameter => {
-        console.log(this.queryParam)
         if (!this.queryParam['groupName']) {
           return
         }

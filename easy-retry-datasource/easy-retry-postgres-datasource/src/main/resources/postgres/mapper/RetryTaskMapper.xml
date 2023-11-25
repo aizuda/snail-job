@@ -3,6 +3,7 @@
 <mapper namespace="com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskMapper">
   <resultMap id="BaseResultMap" type="com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask">
     <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="namespace_id" jdbcType="VARCHAR" property="namespaceId"/>
     <result column="unique_id" jdbcType="VARCHAR" property="uniqueId"/>
     <result column="group_name" jdbcType="VARCHAR" property="groupName" />
     <result column="scene_name" jdbcType="VARCHAR" property="sceneName" />
@@ -19,15 +20,15 @@
     <result column="update_dt" jdbcType="TIMESTAMP" property="updateDt" />
   </resultMap>
   <sql id="Base_Column_List">
-    id, unique_id, group_name, scene_name, idempotent_id, biz_no, executor_name, args_str, ext_attrs, next_trigger_at, retry_count, retry_status,
+    id, namespace_id, unique_id, group_name, scene_name, idempotent_id, biz_no, executor_name, args_str, ext_attrs, next_trigger_at, retry_count, retry_status,
     create_dt, update_dt, task_type
   </sql>
   <!-- 定义批量新增的 SQL 映射 -->
   <insert id="batchInsert" parameterType="java.util.List">
-    INSERT INTO retry_task (unique_id, group_name, scene_name, idempotent_id, biz_no, executor_name, args_str, ext_attrs, next_trigger_at, task_type, retry_status, create_dt)
+    INSERT INTO retry_task (namespace_id, unique_id, group_name, scene_name, idempotent_id, biz_no, executor_name, args_str, ext_attrs, next_trigger_at, task_type, retry_status, create_dt)
     VALUES
     <foreach collection="list" item="item" separator=",">
-      (#{item.uniqueId}, #{item.groupName}, #{item.sceneName}, #{item.idempotentId}, #{item.bizNo}, #{item.executorName}, #{item.argsStr}, #{item.extAttrs}, #{item.nextTriggerAt}, #{item.taskType}, #{item.retryStatus}, #{item.createDt})
+      (#{item.namespaceId}, #{item.uniqueId}, #{item.groupName}, #{item.sceneName}, #{item.idempotentId}, #{item.bizNo}, #{item.executorName}, #{item.argsStr}, #{item.extAttrs}, #{item.nextTriggerAt}, #{item.taskType}, #{item.retryStatus}, #{item.createDt})
     </foreach>
   </insert>
   <update id="updateBatchNextTriggerAtById" parameterType="java.util.List">

@@ -49,7 +49,8 @@ public class RetryTaskSchedule extends AbstractSchedule implements Lifecycle {
         try {
             Set<String> groupNameList = accessTemplate.getGroupConfigAccess()
                 .list(new LambdaQueryWrapper<GroupConfig>()
-                    .select(GroupConfig::getGroupName).eq(GroupConfig::getGroupStatus, StatusEnum.YES))
+                    .select(GroupConfig::getGroupName)
+                        .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus()))
                 .stream().map(GroupConfig::getGroupName).collect(Collectors.toSet());
 
             for (String groupName : groupNameList) {

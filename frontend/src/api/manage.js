@@ -36,6 +36,7 @@ const api = {
   delUser: '/user/',
   saveUser: '/user',
   systemUserByUserName: '/user/username/user-info',
+  systemUserPermissionByUserId: '/user-permissions/',
   countTask: '/dashboard/task/count',
   countDispatch: '/dashboard/dispatch/count',
   countActivePod: '/dashboard/active-pod/count',
@@ -356,6 +357,13 @@ export function getSystemUserByUserName (parameter) {
     url: api.systemUserByUserName,
     method: 'get',
     params: parameter
+  })
+}
+
+export function getSystemUserPermissionByUserId (id) {
+  return request({
+    url: api.systemUserPermissionByUserId + id,
+    method: 'get'
   })
 }
 

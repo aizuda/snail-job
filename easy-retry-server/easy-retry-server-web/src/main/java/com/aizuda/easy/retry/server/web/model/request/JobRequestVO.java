@@ -30,12 +30,6 @@ public class JobRequestVO {
     private String jobName;
 
     /**
-     * 命名空间id
-     */
-    @NotNull(message = "命名空间id 不能为空")
-    private String namespaceId;
-
-    /**
      * 重试状态 0、关闭、1、开启
      */
     @NotNull(message = "jobStatus 不能为空")

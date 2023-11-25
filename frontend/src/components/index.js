@@ -25,6 +25,7 @@ import IconSelector from '@/components/IconSelector'
 import TagSelect from '@/components/TagSelect'
 import StandardFormRow from '@/components/StandardFormRow'
 import ArticleListContent from '@/components/ArticleListContent'
+import Drawer from '@/components/Drawer'
 
 import Dialog from '@/components/Dialog'
 
@@ -53,6 +54,6 @@ export {
   StandardFormRow,
   ArticleListContent,
   G2Line,
-
+  Drawer,
   Dialog
 }
