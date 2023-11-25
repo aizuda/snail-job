@@ -53,7 +53,7 @@ public class NotifyConfigServiceImpl implements NotifyConfigService {
     public Boolean saveNotify(NotifyConfigRequestVO requestVO) {
         NotifyConfig notifyConfig = NotifyConfigConverter.INSTANCE.toNotifyConfig(requestVO);
         notifyConfig.setCreateDt(LocalDateTime.now());
-
+        notifyConfig.setNamespaceId(UserSessionUtils.currentUserSession().getNamespaceId());
         ConfigAccess<NotifyConfig> notifyConfigAccess = accessTemplate.getNotifyConfigAccess();
 
         Assert.isTrue(1 == notifyConfigAccess.insert(notifyConfig),

@@ -58,8 +58,8 @@
       :rowSelection="options.rowSelection"
       :scroll="{ x: 2000 }"
     >
-      <span slot="serial" slot-scope="text, record, index">
-        {{ index + 1 }}
+      <span slot="uniqueId" slot-scope="text, record">
+        <a href="#" @click="handlerOpenDrawer(record)">  {{ text }}</a>
       </span>
       <span slot="taskType" slot-scope="text">
         <a-tag :color="taskType[text].color">
@@ -77,6 +77,19 @@
         </template>
       </span>
     </s-table>
+
+    <Drawer
+      title="重试日志详情"
+      placement="right"
+      :width="800"
+      :visibleAmplify="true"
+      :visible="openDrawer"
+      @closeDrawer="onClose"
+      @handlerAmplify="handleInfo"
+    >
+      <retry-log-info ref="retryLogInfoRef" :showHeader="false" :column="1"/>
+    </Drawer>
+
   </a-card>
 </template>
 
@@ -86,12 +99,15 @@ import ATextarea from 'ant-design-vue/es/input/TextArea'
 import AInput from 'ant-design-vue/es/input/Input'
 import { getAllGroupNameList, getRetryTaskLogPage, getSceneList } from '@/api/manage'
 
-import { STable } from '@/components'
+import { Drawer, STable } from '@/components'
 import moment from 'moment'
+import RetryLogInfo from '@/views/task/RetryLogInfo'
 
 export default {
   name: 'RetryTaskLog',
   components: {
+    RetryLogInfo,
+    Drawer,
     AInput,
     ATextarea,
     STable
@@ -141,14 +157,10 @@ export default {
       // 表头
       columns: [
         {
-          title: '#',
-          scopedSlots: { customRender: 'serial' },
-          width: '5%'
-        },
-        {
           title: 'UniqueId',
           dataIndex: 'uniqueId',
-          width: '10%'
+          width: '10%',
+          scopedSlots: { customRender: 'uniqueId' }
         },
         {
           title: '组名称',
@@ -227,7 +239,9 @@ export default {
       sceneList: [],
       groupName: '',
       uniqueId: '',
-      sceneName: ''
+      sceneName: '',
+      currentShowRecord: null,
+      openDrawer: false
     }
   },
   created () {
@@ -257,8 +271,19 @@ export default {
       this.advanced = !this.advanced
     },
     handleInfo (record) {
-      console.log(record)
+     record = record || this.currentShowRecord
       this.$router.push({ path: '/retry/log/info', query: { id: record.id } })
+    },
+    handlerOpenDrawer (record) {
+      this.currentShowRecord = record
+      this.openDrawer = true
+      setTimeout(() => {
+        this.$refs.retryLogInfoRef.getRetryTaskLogById(record.id)
+      }, 1000)
+    },
+    onClose () {
+      this.openDrawer = false
+      this.currentShowRecord = null
     }
   }
 }

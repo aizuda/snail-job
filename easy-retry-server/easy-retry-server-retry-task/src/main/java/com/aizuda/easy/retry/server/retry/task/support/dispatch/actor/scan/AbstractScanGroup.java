@@ -186,7 +186,8 @@ public abstract class AbstractScanGroup extends AbstractActor {
                 .listPage(groupName, new PageDTO<>(0, systemProperties.getRetryPullPageSize()),
                         new LambdaQueryWrapper<RetryTask>()
                                 .select(RetryTask::getId, RetryTask::getNextTriggerAt, RetryTask::getUniqueId,
-                                        RetryTask::getGroupName, RetryTask::getRetryCount, RetryTask::getSceneName)
+                                        RetryTask::getGroupName, RetryTask::getRetryCount, RetryTask::getSceneName,
+                                        RetryTask::getNamespaceId)
                                 .eq(RetryTask::getRetryStatus, RetryStatusEnum.RUNNING.getStatus())
                                 .eq(RetryTask::getGroupName, groupName)
                                 .eq(RetryTask::getNamespaceId, namespaceId)

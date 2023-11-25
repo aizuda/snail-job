@@ -1,10 +1,10 @@
 <template>
   <div>
-    <page-header-wrapper @back="() => $router.go(-1)" style="margin: -24px -1px 0">
+    <page-header-wrapper @back="() => $router.replace('/retry/log/list')" style="margin: -24px -1px 0" v-if="showHeader">
       <div></div>
     </page-header-wrapper>
     <a-card :bordered="false">
-      <a-descriptions title="" bordered v-if="retryInfo !== null">
+      <a-descriptions title="" :column="column" bordered v-if="retryInfo !== null">
         <a-descriptions-item label="组名称">
           {{ retryInfo.groupName }}
         </a-descriptions-item>
@@ -30,7 +30,7 @@
           </a-tag>
         </a-descriptions-item>
         <a-descriptions-item label="创建时间">
-          {{ retryInfo.createDt  }}
+          {{ retryInfo.createDt }}
         </a-descriptions-item>
         <a-descriptions-item label="执行器名称" :span="3">
           {{ retryInfo.executorName }}
@@ -49,7 +49,6 @@
 
 <script>
 import { getRetryTaskLogById } from '@/api/manage'
-import moment from 'moment'
 import { STable } from '@/components'
 import RetryTaskLogMessageList from '@/views/task/RetryTaskLogMessageList'
 
@@ -58,6 +57,16 @@ export default {
   components: {
     RetryTaskLogMessageList,
     STable
+  },
+  props: {
+    showHeader: {
+      type: Boolean,
+      default: true
+    },
+    column: {
+      type: Number,
+      default: 3
+    }
   },
   data () {
     return {
@@ -82,6 +91,11 @@ export default {
   created () {
     const id = this.$route.query.id
     if (id) {
+      this.getRetryTaskLogById(id)
+    }
+  },
+  methods: {
+    getRetryTaskLogById (id) {
       getRetryTaskLogById(id).then(res => {
         this.retryInfo = res.data
         this.queryParam = {
@@ -91,11 +105,7 @@ export default {
         this.$refs.retryTaskLogMessageListRef.refreshTable(this.queryParam)
       })
     }
-  },
-  methods: {
-    parseDate (date) {
-      return moment(date).format('YYYY-MM-DD HH:mm:ss')
-    }
+
   }
 }
 </script>

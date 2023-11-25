@@ -77,13 +77,6 @@
       </a-form>
     </div>
     <div class="table-operator">
-      <a-dropdown v-action:edit v-if="selectedRowKeys.length > 0">
-        <a-menu slot="overlay" @click="onClick">
-          <a-menu-item key="1"><a-icon type="delete" />删除</a-menu-item>
-          <a-menu-item key="2"><a-icon type="edit" />更新</a-menu-item>
-        </a-menu>
-        <a-button style="margin-left: 8px"> 批量操作 <a-icon type="down" /> </a-button>
-      </a-dropdown>
     </div>
 
     <s-table
@@ -97,7 +90,7 @@
       :scroll="{ x: 1800 }"
     >
       <span slot="serial" slot-scope="record">
-        {{ record.id }}
+        <a href="#" @click="handlerOpenDrawer(record)">{{ record.id }}</a>
       </span>
       <span slot="taskBatchStatus" slot-scope="text">
         <a-tag :color="taskBatchStatus[text].color">
@@ -119,45 +112,21 @@
           >
             <a href="javascript:;" v-if="record.taskBatchStatus === 1 || record.taskBatchStatus === 2">停止</a>
           </a-popconfirm>
-          <!--          <a-popconfirm-->
-          <!--            title="是否暂停?"-->
-          <!--            ok-text="恢复"-->
-          <!--            cancel-text="取消"-->
-          <!--            @confirm="handleSuspend(record)"-->
-          <!--          >-->
-          <!--            <a href="javascript:;" v-if="record.retryStatus === 0">暂停</a>-->
-          <!--          </a-popconfirm>-->
-          <!--          <a-divider type="vertical" v-if="record.retryStatus === 0" />-->
-          <!--          <a-popconfirm-->
-          <!--            title="是否恢复?"-->
-          <!--            ok-text="恢复"-->
-          <!--            cancel-text="取消"-->
-          <!--            @confirm="handleRecovery(record)"-->
-          <!--          >-->
-          <!--            <a href="javascript:;" v-if="record.retryStatus === 3">恢复</a>-->
-          <!--          </a-popconfirm>-->
-          <!--          <a-divider type="vertical" v-if="record.retryStatus === 3" />-->
-          <!--          <a-popconfirm-->
-          <!--            title="是否完成?"-->
-          <!--            ok-text="完成"-->
-          <!--            cancel-text="取消"-->
-          <!--            @confirm="handleFinish(record)"-->
-          <!--          >-->
-          <!--            <a href="javascript:;" v-if="record.retryStatus !== 1 && record.retryStatus !== 2">完成</a>-->
-          <!--          </a-popconfirm>-->
-          <!--          <a-divider type="vertical" v-if="record.retryStatus !== 1 && record.retryStatus !== 2" />-->
-          <!--          <a-popconfirm-->
-          <!--            title="是否执行任务?"-->
-          <!--            ok-text="执行"-->
-          <!--            cancel-text="取消"-->
-          <!--            @confirm="handleTrigger(record)"-->
-          <!--          >-->
-          <!--            <a href="javascript:;" v-if="record.retryStatus !== 1 && record.retryStatus !== 2">执行</a>-->
-          <!--          </a-popconfirm>-->
-
         </template>
       </span>
     </s-table>
+
+    <Drawer
+      title="任务详情"
+      placement="right"
+      :width="800"
+      :visibleAmplify="true"
+      :visible="openDrawer"
+      @closeDrawer="onClose"
+      @handlerAmplify="handleInfo"
+    >
+      <job-batch-info ref="jobBatchInfoRef" :showHeader="false" :column="2"/>
+    </Drawer>
 
   </a-card>
 </template>
@@ -165,14 +134,17 @@
 <script>
 import ATextarea from 'ant-design-vue/es/input/TextArea'
 import AInput from 'ant-design-vue/es/input/Input'
-import { STable } from '@/components'
+import { Drawer, STable } from '@/components'
 import { jobBatchList, jobNameList, stop } from '@/api/jobApi'
 import { getAllGroupNameList } from '@/api/manage'
+import JobBatchInfo from '@/views/job/JobBatchInfo'
 const enums = require('@/utils/jobEnum')
 
 export default {
   name: 'JobBatchList',
   components: {
+    JobBatchInfo,
+    Drawer,
     AInput,
     ATextarea,
     STable
@@ -266,7 +238,9 @@ export default {
       },
       optionAlertShow: false,
       groupNameList: [],
-      jobNameList: []
+      jobNameList: [],
+      openDrawer: false,
+      currentShowRecord: null
     }
   },
   created () {
@@ -285,27 +259,19 @@ export default {
     })
   },
   methods: {
-    handleNew () {
-      this.$refs.saveRetryTask.isShow(true, null)
-    },
-    handleBatchNew () {
-      this.$refs.batchSaveRetryTask.isShow(true, null)
-    },
     handleSearch (value) {
-      console.log(`selected ${value}`)
       jobNameList({ keywords: value }).then(res => {
         this.jobNameList = res.data
       })
     },
     handleChange (value) {
       console.log(`handleChange ${value}`)
-      // this.queryParam['jobId'] = value
-      // this.$refs.table.refresh(true)
     },
     toggleAdvanced () {
       this.advanced = !this.advanced
     },
     handleInfo (record) {
+      record = record || this.currentShowRecord
       this.$router.push({ path: '/job/batch/info', query: { id: record.id, groupName: record.groupName } })
     },
     handleOk (record) {},
@@ -320,51 +286,6 @@ export default {
         }
       })
     },
-    handleRecovery (record) {
-      // updateRetryTaskStatus({ id: record.id, groupName: record.groupName, retryStatus: 0 }).then((res) => {
-      //   const { status } = res
-      //   if (status === 0) {
-      //     this.$message.error('恢复失败')
-      //   } else {
-      //     this.$refs.table.refresh(true)
-      //     this.$message.success('恢复成功')
-      //   }
-      // })
-    },
-    handleFinish (record) {
-      // updateRetryTaskStatus({ id: record.id, groupName: record.groupName, retryStatus: 1 }).then((res) => {
-      //   const { status } = res
-      //   if (status === 0) {
-      //     this.$message.error('执行失败')
-      //   } else {
-      //     this.$refs.table.refresh(true)
-      //     this.$message.success('执行成功')
-      //   }
-      // })
-    },
-    handleTrigger (record) {
-      // if (record.taskType === 1) {
-      //   manualTriggerRetryTask({ groupName: record.groupName, uniqueIds: [ record.uniqueId ] }).then(res => {
-      //     const { status } = res
-      //     if (status === 0) {
-      //       this.$message.error('执行失败')
-      //     } else {
-      //       this.$refs.table.refresh(true)
-      //       this.$message.success('执行成功')
-      //     }
-      //   })
-      // } else {
-      //   manualTriggerCallbackTask({ groupName: record.groupName, uniqueIds: [ record.uniqueId ] }).then(res => {
-      //     const { status } = res
-      //     if (status === 0) {
-      //       this.$message.error('执行失败')
-      //     } else {
-      //       this.$refs.table.refresh(true)
-      //       this.$message.success('执行完成')
-      //     }
-      //   })
-      // }
-    },
     refreshTable (v) {
       this.$refs.table.refresh(true)
     },
@@ -372,32 +293,16 @@ export default {
       this.selectedRowKeys = selectedRowKeys
       this.selectedRows = selectedRows
     },
-    handlerDel () {
-      // var that = this
-      // this.$confirm({
-      //   title: '您要删除这些数据吗?',
-      //   content: h => <div style="color:red;">删除后数据不可恢复，请确认!</div>,
-      //   onOk () {
-      //     batchDelete({ groupName: that.selectedRows[0].groupName, ids: that.selectedRowKeys }).then(res => {
-      //       that.$refs.table.refresh(true)
-      //       that.$message.success(`成功删除${res.data}条数据`)
-      //       that.selectedRowKeys = []
-      //     })
-      //   },
-      //   onCancel () {
-      //   },
-      //   class: 'test'
-      // })
+    handlerOpenDrawer (record) {
+      this.currentShowRecord = record
+      this.openDrawer = true
+      setTimeout(() => {
+        this.$refs.jobBatchInfoRef.jobBatchDetail(record.id)
+      }, 200)
     },
-    onClick ({ key }) {
-      if (key === '2') {
-        this.$refs.batchUpdateRetryTaskInfo.isShow(true, this.selectedRows, this.selectedRowKeys)
-        return
-      }
-
-      if (key === '1') {
-        this.handlerDel()
-      }
+    onClose () {
+      this.openDrawer = false
+      this.currentShowRecord = null
     }
   }
 }

@@ -43,7 +43,11 @@
       :rowSelection="options.rowSelection"
     >
       <span slot="serial" slot-scope="text, record">
-        <a href="#" @click="handlerDetail">{{ record.id }}</a>
+        {{ record.id }}
+      </span>
+      <span slot="username" slot-scope="text, record">
+        <a href="#" @click="handlerDetail(record)" v-if="record.role === 1">{{ text }}</a>
+        <span v-else>{{ text }}</span>
       </span>
       <span slot="groupNameList" slot-scope="text, record">
         {{ record.role === 2 ? '所有组' : text.toString() }}
@@ -66,33 +70,23 @@
         </template>
       </span>
     </s-table>
-    <a-drawer
-      title="Basic Drawer"
+
+    <Drawer
+      title="用户权限"
       placement="right"
+      :width="800"
+      :visibleAmplify="false"
       :visible="openDrawer"
-      @close="onClose"
+      @closeDrawer="onClose"
     >
-      <p>Some contents...</p>
-      <p>Some contents...</p>
-      <p>Some contents...</p>
-
-      <div
-        :style="{
-          position: 'absolute',
-          top: 0,
-          right: 0,
-          marginRight: '5px',
-          width: '100%',
-          borderTop: '1px solid #e9e9e9',
-          padding: '10px 16px',
-          background: '#fff',
-          // textAlign: 'right',
-          zIndex: 1,
-        }"
-      >
-        <a-button style='background: none'><a-icon type="arrows-alt" style='size: 16px;'/></a-button>
-
-      </div></a-drawer>
+      <a-descriptions :column="8" bordered>
+        <a-descriptions-item :label="item.namespaceName + ' (' + item.namespaceId + ')'" :key="item.namespaceId" :span="8" v-for="item in systemPermissions">
+          <a-tag v-for="item in item.groupNames" :key="item">
+            {{ item }}
+          </a-tag>
+        </a-descriptions-item>
+      </a-descriptions>
+    </Drawer>
   </a-card>
 </template>
 
@@ -102,12 +96,15 @@ import ATextarea from 'ant-design-vue/es/input/TextArea'
 import AInput from 'ant-design-vue/es/input/Input'
 import moment from 'moment'
 // 动态切换组件
-import { getUserPage, delUser } from '@/api/manage'
-import { STable } from '@/components'
+import { getUserPage, delUser, getSystemUserPermissionByUserId } from '@/api/manage'
+import { Drawer, STable } from '@/components'
+import RetryDeadLetterInfo from '@/views/task/RetryDeadLetterInfo.vue'
 
 export default {
   name: 'TableListWrapper',
   components: {
+    Drawer,
+RetryDeadLetterInfo,
     AInput,
     ATextarea,
     STable
@@ -125,29 +122,20 @@ export default {
       columns: [
         {
           title: '#',
-          width: '5%',
           scopedSlots: { customRender: 'serial' }
         },
         {
           title: '用户名',
-          width: '12%',
-          dataIndex: 'username'
+          dataIndex: 'username',
+          scopedSlots: { customRender: 'username' }
         },
         {
           title: '角色',
           dataIndex: 'role',
-          width: '10%',
           scopedSlots: { customRender: 'role' }
         },
         {
-          title: '权限',
-          dataIndex: 'groupNameList',
-          width: '45%',
-          scopedSlots: { customRender: 'groupNameList' }
-        },
-        {
           title: '更新时间',
-          width: '18%',
           dataIndex: 'updateDt',
           customRender: (text) => moment(text).format('YYYY-MM-DD HH:mm:ss')
         },
@@ -178,7 +166,8 @@ export default {
         }
       },
       optionAlertShow: false,
-      openDrawer: false
+      openDrawer: false,
+      systemPermissions: []
     }
   },
   filters: {
@@ -204,11 +193,14 @@ export default {
       this.record = ''
       this.currentComponet = 'List'
     },
-    handlerDetail () {
-      this.openDrawer = true
+    handlerDetail (record) {
+      getSystemUserPermissionByUserId(record.id).then(res => {
+        this.systemPermissions = res.data
+        this.openDrawer = true
+      })
     },
     onClose () {
-      this.openDrawer = false
+      this.openDrawer = !this.openDrawer
     }
   },
   watch: {
@@ -219,3 +211,31 @@ export default {
   }
 }
 </script>
+<style>
+.open {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 10;
+  display: block;
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  color: rgba(0, 0, 0, 0.45);
+  font-weight: 700;
+  font-size: 16px;
+  font-style: normal;
+  line-height: 56px;
+  text-align: center;
+  text-transform: none;
+  text-decoration: none;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  cursor: pointer;
+  -webkit-transition: color 0.3s;
+  transition: color 0.3s;
+  text-rendering: auto;
+  padding-right: 70px;
+}
+</style>

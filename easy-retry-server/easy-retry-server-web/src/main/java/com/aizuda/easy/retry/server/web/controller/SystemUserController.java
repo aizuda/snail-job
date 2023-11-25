@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.server.web.controller;
 
 import com.aizuda.easy.retry.server.web.model.request.UserSessionVO;
+import com.aizuda.easy.retry.server.web.model.response.PermissionsResponseVO;
 import com.aizuda.easy.retry.server.web.service.SystemUserService;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
 import com.aizuda.easy.retry.server.web.model.request.SystemUserQueryVO;
@@ -60,6 +61,12 @@ public class SystemUserController {
     @GetMapping("/user/username/user-info")
     public SystemUserResponseVO getSystemUserByUserName(@RequestParam("username") String username) {
         return systemUserService.getSystemUserByUserName(username);
+    }
+
+    @LoginRequired(role = RoleEnum.ADMIN)
+    @GetMapping("/user-permissions/{id}")
+    public List<PermissionsResponseVO> getSystemUserPermissionByUserName(@PathVariable("id") Long id) {
+        return systemUserService.getSystemUserPermissionByUserName(id);
     }
 
     @LoginRequired

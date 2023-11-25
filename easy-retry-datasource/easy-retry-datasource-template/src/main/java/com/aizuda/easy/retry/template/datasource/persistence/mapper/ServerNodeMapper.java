@@ -12,7 +12,7 @@ import java.util.List;
 @Mapper
 public interface ServerNodeMapper extends BaseMapper<ServerNode> {
 
-    int insertOrUpdate(List<ServerNode> records);
+    int insertOrUpdate(@Param("records") List<ServerNode> records);
 
     int deleteByExpireAt(@Param("endTime") LocalDateTime endTime);
 

@@ -66,10 +66,10 @@
       :data="loadData"
       :alert="options.alert"
       :rowSelection="options.rowSelection"
-      :scroll="{ x: 2000 }"
+      :scroll="{ x: 1800 }"
     >
-      <span slot="serial" slot-scope="text, record">
-        {{ record.id }}
+      <span slot="uniqueId" slot-scope="text, record">
+        <a href="#" @click="handlerOpenDrawer(record)">{{ text }}</a>
       </span>
       <span slot="taskType" slot-scope="text">
         <a-tag :color="taskType[text].color">
@@ -110,6 +110,18 @@
         </a-dropdown>
       </span>
     </s-table>
+
+    <Drawer
+      title="任务详情"
+      placement="right"
+      :width="800"
+      :visibleAmplify="true"
+      :visible="openDrawer"
+      @closeDrawer="onClose"
+      @handlerAmplify="handleInfo"
+    >
+      <retry-dead-letter-info ref="retryDeadLetterInfoRef" :showHeader="false" :column="1"/>
+    </Drawer>
   </a-card>
 </template>
 
@@ -125,12 +137,15 @@ import {
   deleteRetryDeadLetter
 } from '@/api/manage'
 
-import { STable } from '@/components'
+import { Drawer, STable } from '@/components'
 import moment from 'moment'
+import RetryDeadLetterInfo from '@/views/task/RetryDeadLetterInfo'
 
 export default {
   name: 'RetryDeadLetterList',
   components: {
+    RetryDeadLetterInfo,
+    Drawer,
     AInput,
     ATextarea,
     STable
@@ -157,9 +172,10 @@ export default {
       // 表头
       columns: [
         {
-          title: '#',
-          scopedSlots: { customRender: 'serial' },
-          width: '5%'
+          title: 'UniqueId',
+          dataIndex: 'uniqueId',
+          fixed: 'left',
+          scopedSlots: { customRender: 'uniqueId' }
         },
         {
           title: '组名称',
@@ -170,11 +186,6 @@ export default {
           title: '场景名称',
           dataIndex: 'sceneName',
           ellipsis: true
-        },
-        {
-          title: 'UniqueId',
-          dataIndex: 'uniqueId',
-          width: '10%'
         },
         {
           title: '幂等id',
@@ -189,15 +200,13 @@ export default {
         {
           title: '任务类型',
           dataIndex: 'taskType',
-          scopedSlots: { customRender: 'taskType' },
-          width: '5%'
+          scopedSlots: { customRender: 'taskType' }
         },
         {
           title: '创建时间',
           dataIndex: 'createDt',
           sorter: true,
-          customRender: (text) => moment(text).format('YYYY-MM-DD HH:mm:ss'),
-          ellipsis: true
+          customRender: (text) => moment(text).format('YYYY-MM-DD HH:mm:ss')
         },
         {
           title: '操作',
@@ -227,7 +236,9 @@ export default {
       },
       optionAlertShow: false,
       groupNameList: [],
-      sceneList: []
+      sceneList: [],
+      currentShowRecord: null,
+      openDrawer: false
     }
   },
   created () {
@@ -267,6 +278,7 @@ export default {
       this.advanced = !this.advanced
     },
     handleInfo (record) {
+      record = record || this.currentShowRecord
       this.$router.push({ path: '/retry/dead-letter/info', query: { id: record.id, groupName: record.groupName } })
     },
     onClick ({ key }) {
@@ -314,6 +326,17 @@ export default {
     onSelectChange (selectedRowKeys, selectedRows) {
       this.selectedRowKeys = selectedRowKeys
       this.selectedRows = selectedRows
+    },
+    handlerOpenDrawer (record) {
+      this.currentShowRecord = record
+      this.openDrawer = true
+      setTimeout(() => {
+        this.$refs.retryDeadLetterInfoRef.retryDeadLetterById(record.id, record.groupName)
+      }, 200)
+    },
+    onClose () {
+      this.openDrawer = false
+      this.currentShowRecord = null
     }
   }
 }

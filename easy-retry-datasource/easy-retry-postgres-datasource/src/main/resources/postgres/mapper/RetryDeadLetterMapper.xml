@@ -3,6 +3,7 @@
 <mapper namespace="com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryDeadLetterMapper">
   <resultMap id="BaseResultMap" type="com.aizuda.easy.retry.template.datasource.persistence.po.RetryDeadLetter">
     <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="namespace_id" jdbcType="VARCHAR" property="namespaceId"/>
     <result column="unique_id" jdbcType="VARCHAR" property="uniqueId"/>
     <result column="group_name" jdbcType="VARCHAR" property="groupName" />
     <result column="scene_name" jdbcType="VARCHAR" property="sceneName" />
@@ -15,16 +16,16 @@
     <result column="create_dt" jdbcType="TIMESTAMP" property="createDt" />
   </resultMap>
   <sql id="Base_Column_List">
-    id, unique_id, group_name, scene_name, idempotent_id, biz_no, executor_name, args_str, ext_attrs, create_dt, task_type
+    id, namespace_id, unique_id, group_name, scene_name, idempotent_id, biz_no, executor_name, args_str, ext_attrs, create_dt, task_type
   </sql>
   <insert id="insertBatch">
-    insert into retry_dead_letter (id, unique_id, group_name, scene_name,
+    insert into retry_dead_letter (namespace_id, unique_id, group_name, scene_name,
     idempotent_id, biz_no, executor_name, args_str,
                                               ext_attrs, create_dt
     )
     values
           <foreach collection="retryDeadLetters" item="retryDeadLetter" separator=",">
-            (#{retryDeadLetter.id,jdbcType=BIGINT},  #{retryDeadLetter.uniqueId,jdbcType=VARCHAR}, #{retryDeadLetter.groupName,jdbcType=VARCHAR}, #{retryDeadLetter.sceneName,jdbcType=VARCHAR},
+            (#{retryDeadLetter.namespaceId,jdbcType=VARCHAR},  #{retryDeadLetter.uniqueId,jdbcType=VARCHAR}, #{retryDeadLetter.groupName,jdbcType=VARCHAR}, #{retryDeadLetter.sceneName,jdbcType=VARCHAR},
             #{retryDeadLetter.idempotentId,jdbcType=VARCHAR}, #{retryDeadLetter.bizNo,jdbcType=VARCHAR},  #{retryDeadLetter.executorName,jdbcType=VARCHAR}, #{retryDeadLetter.argsStr,jdbcType=VARCHAR},
             #{retryDeadLetter.extAttrs,jdbcType=VARCHAR}, #{retryDeadLetter.createDt,jdbcType=TIMESTAMP})
           </foreach>

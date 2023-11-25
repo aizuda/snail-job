@@ -1,10 +1,10 @@
 <template>
   <div>
-    <page-header-wrapper @back="() => $router.go(-1)" style="margin: -24px -1px 0">
+    <page-header-wrapper @back="() => $router.replace('/job/batch/list')" style="margin: -24px -1px 0"v-if="showHeader">
       <div></div>
     </page-header-wrapper>
     <a-card :bordered="false" v-if="jobBatchInfo !==null ">
-      <a-descriptions title="" :column="3" bordered>
+      <a-descriptions title="" :column="column" bordered>
         <a-descriptions-item label="组名称">
           {{ jobBatchInfo.groupName }}
         </a-descriptions-item>
@@ -38,14 +38,15 @@
       </a-descriptions>
     </a-card>
     <div style="margin: 20px 0; border-left: #f5222d 5px solid; font-size: medium; font-weight: bold">
-      &nbsp;&nbsp; 任务项列表
+      <span style="padding-left: 18px">任务项列表</span>
+      <span style="padding-left: 18px"><a-icon type="sync" @click="()=> this.$refs.JobTaskListRef.refreshTable(this.queryParam)"/></span>
     </div>
     <JobTaskList ref="JobTaskListRef" />
   </div>
 </template>
 
 <script>
-import { jobBatchDetail, jobTaskList } from '@/api/jobApi'
+import { jobBatchDetail } from '@/api/jobApi'
 import moment from 'moment'
 import enums from '@/utils/jobEnum'
 import JobTaskList from './JobTaskList'
@@ -56,6 +57,16 @@ export default {
     JobTaskList
 
   },
+  props: {
+    showHeader: {
+      type: Boolean,
+      default: true
+    },
+    column: {
+      type: Number,
+      default: 3
+    }
+  },
   data () {
     return {
       jobBatchInfo: null,
@@ -64,13 +75,26 @@ export default {
       taskType: enums.taskType,
       triggerType: enums.triggerType,
       blockStrategy: enums.blockStrategy,
-      executorType: enums.executorType
+      executorType: enums.executorType,
+      queryParam: {}
     }
   },
   created () {
     const id = this.$route.query.id
     const groupName = this.$route.query.groupName
     if (id && groupName) {
+      this.jobBatchDetail(id)
+    } else {
+      if (this.showHeader) {
+        this.$router.push({ path: '/404' })
+      }
+    }
+  },
+  methods: {
+    parseDate (date) {
+      return moment(date).format('YYYY-MM-DD HH:mm:ss')
+    },
+    jobBatchDetail (id) {
       jobBatchDetail(id).then(res => {
         this.jobBatchInfo = res.data
         this.queryParam = {
@@ -79,14 +103,6 @@ export default {
         }
         this.$refs.JobTaskListRef.refreshTable(this.queryParam)
       })
-    } else {
-      this.$router.push({ path: '/404' })
-    }
-  },
-  methods: {
-    jobTaskList,
-    parseDate (date) {
-      return moment(date).format('YYYY-MM-DD HH:mm:ss')
     }
   }
 }

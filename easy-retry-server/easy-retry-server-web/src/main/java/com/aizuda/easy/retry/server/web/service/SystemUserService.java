@@ -4,6 +4,7 @@ import com.aizuda.easy.retry.server.web.model.request.UserSessionVO;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
 import com.aizuda.easy.retry.server.web.model.request.SystemUserQueryVO;
 import com.aizuda.easy.retry.server.web.model.request.SystemUserRequestVO;
+import com.aizuda.easy.retry.server.web.model.response.PermissionsResponseVO;
 import com.aizuda.easy.retry.server.web.model.response.SystemUserResponseVO;
 
 import java.util.List;
@@ -31,4 +32,6 @@ public interface SystemUserService {
     SystemUserResponseVO getSystemUserByUserName(String username);
 
     boolean delUser(Long id);
+
+    List<PermissionsResponseVO> getSystemUserPermissionByUserName(Long id);
 }

@@ -1,12 +1,15 @@
 package com.aizuda.easy.retry.server.web.service.impl;
 
 import cn.hutool.core.lang.Assert;
+import cn.hutool.core.lang.Pair;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
+import com.aizuda.easy.retry.server.common.triple.Triple;
 import com.aizuda.easy.retry.server.web.model.request.UserPermissionRequestVO;
 import com.aizuda.easy.retry.server.web.model.request.UserSessionVO;
+import com.aizuda.easy.retry.server.web.model.response.PermissionsResponseVO;
 import com.aizuda.easy.retry.server.web.service.convert.NamespaceResponseVOConverter;
 import com.aizuda.easy.retry.server.web.service.convert.PermissionsResponseVOConverter;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.NamespaceMapper;
@@ -27,14 +30,13 @@ import com.aizuda.easy.retry.server.web.model.base.PageResult;
 import com.aizuda.easy.retry.server.web.model.request.SystemUserQueryVO;
 import com.aizuda.easy.retry.server.web.model.request.SystemUserRequestVO;
 import com.aizuda.easy.retry.server.web.model.response.SystemUserResponseVO;
+import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -230,30 +232,57 @@ public class SystemUserServiceImpl implements SystemUserService {
         }
 
         SystemUserResponseVO responseVO = SystemUserResponseVOConverter.INSTANCE.convert(systemUser);
-        if (RoleEnum.ADMIN.getRoleId().equals(systemUser.getRole())) {
-            return responseVO;
-        }
+        getPermission(systemUser.getRole(), systemUser.getId(), responseVO);
 
         List<SystemUserPermission> systemUserPermissions = systemUserPermissionMapper.selectList(
-            new LambdaQueryWrapper<SystemUserPermission>()
-                .select(SystemUserPermission::getNamespaceId, SystemUserPermission::getGroupName)
-                .eq(SystemUserPermission::getSystemUserId, responseVO.getId()));
-
-        LambdaQueryWrapper<Namespace> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.select(Namespace::getId, Namespace::getUniqueId, Namespace::getName);
-        queryWrapper.in(Namespace::getUniqueId, systemUserPermissions.stream()
-            .map(SystemUserPermission::getNamespaceId).distinct().collect(Collectors.toList()));
-        List<Namespace> namespaces = namespaceMapper.selectList(queryWrapper);
-        responseVO.setNamespaceIds(
-            NamespaceResponseVOConverter.INSTANCE.toNamespaceResponseVOs(namespaces));
-
+                new LambdaQueryWrapper<SystemUserPermission>()
+                        .select(SystemUserPermission::getNamespaceId, SystemUserPermission::getGroupName)
+                        .eq(SystemUserPermission::getSystemUserId, responseVO.getId()));
         responseVO.setPermissions(PermissionsResponseVOConverter.INSTANCE.toPermissionsResponseVOs(systemUserPermissions));
+
 
         return responseVO;
     }
 
     @Override
+    public List<PermissionsResponseVO> getSystemUserPermissionByUserName(Long id) {
+
+        List<SystemUserPermission> systemUserPermissions = systemUserPermissionMapper.selectList(
+                new LambdaQueryWrapper<SystemUserPermission>()
+                        .select(SystemUserPermission::getNamespaceId, SystemUserPermission::getGroupName)
+                        .eq(SystemUserPermission::getSystemUserId, id));
+
+        if (CollectionUtils.isEmpty(systemUserPermissions)) {
+            return Lists.newArrayList();
+        }
+
+        Map<String, List<SystemUserPermission>> permissionsMap = systemUserPermissions.stream().collect(Collectors.groupingBy(SystemUserPermission::getNamespaceId));
+
+        LambdaQueryWrapper<Namespace> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.select(Namespace::getId, Namespace::getUniqueId, Namespace::getName);
+        queryWrapper.in(Namespace::getUniqueId, permissionsMap.keySet());
+        List<Namespace> namespaces = namespaceMapper.selectList(queryWrapper);
+        Map<String, String> map = namespaces.stream().collect(Collectors.toMap(Namespace::getUniqueId, Namespace::getName));
+
+        List<PermissionsResponseVO> response = new ArrayList<>();
+        permissionsMap.forEach((namespaceId, values) -> {
+            PermissionsResponseVO responseVO = new PermissionsResponseVO();
+            responseVO.setNamespaceName(map.get(namespaceId));
+            responseVO.setNamespaceId(namespaceId);
+            responseVO.setGroupNames(values.stream().map(SystemUserPermission::getGroupName).collect(Collectors.toSet()));
+            response.add(responseVO);
+        });
+
+        return response;
+    }
+
+    @Override
+    @Transactional
     public boolean delUser(final Long id) {
+        systemUserPermissionMapper.delete(
+                new LambdaQueryWrapper<SystemUserPermission>()
+                        .eq(SystemUserPermission::getSystemUserId, id)
+        );
         return 1 == systemUserMapper.deleteById(id);
     }
 

@@ -122,8 +122,8 @@ public class SceneConfigServiceImpl implements SceneConfigService {
         Assert.isTrue(1 == accessTemplate.getSceneConfigAccess().update(sceneConfig,
                 new LambdaUpdateWrapper<SceneConfig>()
                     .eq(SceneConfig::getNamespaceId, namespaceId)
-                    .eq(SceneConfig::getGroupName, sceneConfig.getGroupName())
-                    .eq(SceneConfig::getSceneName, sceneConfig.getSceneName())),
+                    .eq(SceneConfig::getGroupName, requestVO.getGroupName())
+                    .eq(SceneConfig::getSceneName, requestVO.getSceneName())),
             () -> new EasyRetryServerException("failed to update scene. sceneConfig:[{}]",
                 JsonUtil.toJsonString(sceneConfig)));
         return Boolean.TRUE;

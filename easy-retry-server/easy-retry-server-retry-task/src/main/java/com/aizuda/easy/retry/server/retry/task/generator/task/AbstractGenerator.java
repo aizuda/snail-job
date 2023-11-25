@@ -129,7 +129,7 @@ public abstract class AbstractGenerator implements TaskGenerator {
         }
 
         RetryTask retryTask = RetryTaskConverter.INSTANCE.toRetryTask(taskInfo);
-        retryTask.setNamespaceId(sceneConfig.getNamespaceId());
+        retryTask.setNamespaceId(taskContext.getNamespaceId());
         retryTask.setUniqueId(getIdGenerator(taskContext.getGroupName(), taskContext.getNamespaceId()));
         retryTask.setTaskType(TaskTypeEnum.RETRY.getType());
         retryTask.setGroupName(taskContext.getGroupName());

@@ -122,6 +122,7 @@ public class JobServiceImpl implements JobService {
         job.setBucketIndex(HashUtil.bkdrHash(jobRequestVO.getGroupName() + jobRequestVO.getJobName())
                 % systemProperties.getBucketTotal());
         job.setNextTriggerAt(calculateNextTriggerAt(jobRequestVO, DateUtils.toNowMilli()));
+        job.setNamespaceId(UserSessionUtils.currentUserSession().getNamespaceId());
         return 1 == jobMapper.insert(job);
     }
 

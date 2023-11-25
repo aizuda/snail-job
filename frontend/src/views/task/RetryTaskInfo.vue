@@ -1,10 +1,10 @@
 <template>
   <div>
-    <page-header-wrapper @back="() => $router.go(-1)" style="margin: -24px -1px 0">
+    <page-header-wrapper @back="() => $router.replace('/retry/list')" style="margin: -24px -1px 0" v-if="showHeader">
       <div></div>
     </page-header-wrapper>
-    <a-card :bordered="false" v-if="retryTaskInfo !==null ">
-      <a-descriptions title="" bordered>
+    <a-card :bordered="false" v-if="retryTaskInfo !== null">
+      <a-descriptions title="" :column="column" bordered>
         <a-descriptions-item label="组名称">
           {{ retryTaskInfo.groupName }}
         </a-descriptions-item>
@@ -55,13 +55,22 @@
 
 <script>
 import { getRetryTaskById } from '@/api/manage'
-import moment from 'moment'
 import RetryTaskLogMessageList from './RetryTaskLogMessageList'
 
 export default {
   name: 'RetryTaskInfo',
   components: {
     RetryTaskLogMessageList
+  },
+  props: {
+    showHeader: {
+      type: Boolean,
+      default: true
+    },
+    column: {
+      type: Number,
+      default: 3
+    }
   },
   data () {
     return {
@@ -88,6 +97,15 @@ export default {
     const id = this.$route.query.id
     const groupName = this.$route.query.groupName
     if (id && groupName) {
+      this.getRetryTaskById(id, groupName)
+    } else {
+      if (this.showHeader) {
+        this.$router.push({ path: '/404' })
+      }
+    }
+  },
+  methods: {
+    getRetryTaskById (id, groupName) {
       getRetryTaskById(id, { 'groupName': groupName }).then(res => {
         this.retryTaskInfo = res.data
         this.queryParam = {
@@ -96,13 +114,6 @@ export default {
         }
         this.$refs.retryTaskLogMessageListRef.refreshTable(this.queryParam)
       })
-    } else {
-      // this.$router.push({ path: '/404' })
-    }
-  },
-  methods: {
-    parseDate (date) {
-      return moment(date).format('YYYY-MM-DD HH:mm:ss')
     }
   }
 }
