@@ -183,12 +183,6 @@ public class GroupConfigServiceImpl implements GroupConfigService {
             records);
 
         for (GroupConfigResponseVO groupConfigResponseVO : responseVOList) {
-            List<ServerNode> serverNodes = serverNodeMapper.selectList(
-                new LambdaQueryWrapper<ServerNode>().eq(ServerNode::getGroupName,
-                    groupConfigResponseVO.getGroupName()));
-            groupConfigResponseVO.setOnlinePodList(
-                serverNodes.stream().map(serverNode -> serverNode.getHostIp() + ":" + serverNode.getHostPort())
-                    .collect(Collectors.toList()));
             Optional.ofNullable(IdGeneratorMode.modeOf(groupConfigResponseVO.getIdGeneratorMode()))
                 .ifPresent(idGeneratorMode -> {
                     groupConfigResponseVO.setIdGeneratorModeName(idGeneratorMode.getDesc());
@@ -300,6 +294,16 @@ public class GroupConfigServiceImpl implements GroupConfigService {
             .collect(Collectors.toList());
 
         return groupConfigs.stream().map(GroupConfig::getGroupName).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> getOnlinePods(String groupName) {
+        List<ServerNode> serverNodes = serverNodeMapper.selectList(
+                new LambdaQueryWrapper<ServerNode>()
+                        .eq(ServerNode::getNamespaceId, UserSessionUtils.currentUserSession().getNamespaceId())
+                        .eq(ServerNode::getGroupName, groupName));
+        return serverNodes.stream().map(serverNode -> serverNode.getHostIp() + ":" + serverNode.getHostPort())
+                .collect(Collectors.toList());
     }
 
 }

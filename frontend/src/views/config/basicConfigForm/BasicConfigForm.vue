@@ -1,6 +1,6 @@
 <template>
   <div>
-    <page-header-wrapper content="配置组、场景、通知配置" @back="() => $router.go(-1)" style="margin: -24px -1px 0">
+    <page-header-wrapper content="配置组" @back="() => $router.go(-1)" style="margin: -24px -1px 0">
       <div></div>
     </page-header-wrapper>
     <a-card class="card" :bordered="false">

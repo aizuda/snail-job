@@ -28,4 +28,5 @@ public interface GroupConfigService {
 
     List<String> getAllGroupNameList();
 
+    List<String> getOnlinePods(String groupName);
 }

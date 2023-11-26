@@ -39,6 +39,8 @@ public class NamespaceServiceImpl implements NamespaceService {
         namespace.setName(namespaceRequestVO.getName());
         if (StrUtil.isBlank(namespaceRequestVO.getUniqueId())) {
             namespace.setUniqueId(IdUtil.simpleUUID());
+        } else {
+            namespace.setUniqueId(namespaceRequestVO.getUniqueId());
         }
         return 1 == namespaceMapper.insert(namespace);
     }

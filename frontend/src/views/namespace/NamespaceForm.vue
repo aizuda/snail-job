@@ -7,11 +7,10 @@
           v-decorator="['id']" />
       </a-form-item>
       <a-form-item
-        label="唯一标识"
-        v-if="isEdit">
+        label="唯一标识(默认UUID)">
         <a-input
           placeholder="唯一标识"
-          disabled
+          :disabled="isEdit"
           v-decorator="[
             'uniqueId',
             {rules: [{ required: false, message: '请输入空间名称', whitespace: true}]}

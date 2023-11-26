@@ -39,8 +39,8 @@
       :rowSelection="options.rowSelection"
       :scroll="{ x: 1600 }"
     >
-      <span slot="serial" slot-scope="text, record">
-        {{ record.id }}
+      <span slot="groupName" slot-scope="text, record">
+        <a href="#" @click="handlerOpenDrawer(record)">{{ text }}</a>
       </span>
       <span slot="groupStatus" slot-scope="text">
         <a-tag :color="groupStatus[text].color">
@@ -59,19 +59,35 @@
       </span>
       <span slot="action" slot-scope="text, record">
         <template>
-          <a @click="handleEdit(record)">编辑</a>
-          <a-divider type="vertical" />
+          <a @click="handleInfo(record)">详情</a>
+          <a-divider type="vertical"/>
+          <a @click="handleEdit(record)" v-if="$auth('group.edit')">编辑</a>
+          <a-divider type="vertical" v-if="$auth('group.edit')"/>
           <a-popconfirm
             :title="record.groupStatus === 1 ? '是否停用?': '是否启用?'"
             ok-text="确定"
             cancel-text="取消"
             @confirm="handleEditStatus(record)"
+            v-if="$auth('group.stop')"
           >
             <a href="javascript:;">{{ record.groupStatus === 1 ? '停用': '启用' }}</a>
           </a-popconfirm>
         </template>
       </span>
     </s-table>
+
+    <Drawer
+      title="组配置详情"
+      placement="right"
+      :width="800"
+      :visibleAmplify="true"
+      :visible="openDrawer"
+      @closeDrawer="onClose"
+      @handlerAmplify="handleInfo"
+    >
+      <group-info ref="groupInfoRef" :showHeader="false" :column="1"/>
+    </Drawer>
+
   </a-card>
 </template>
 
@@ -79,13 +95,16 @@
 
 import AInput from 'ant-design-vue/es/input/Input'
 import { getGroupConfigForPage, updateGroupStatus } from '@/api/manage'
-import { STable } from '@/components'
+import { Drawer, STable } from '@/components'
 import moment from 'moment'
+import GroupInfo from '@/views/config/GroupInfo.vue'
 const enums = require('@/utils/retryEnum')
 
 export default {
   name: 'TableListWrapper',
   components: {
+    GroupInfo,
+    Drawer,
     AInput,
     STable
   },
@@ -98,12 +117,10 @@ export default {
       // 表头
       columns: [
         {
-          title: '#',
-          scopedSlots: { customRender: 'serial' }
-        },
-        {
           title: '名称',
-          dataIndex: 'groupName'
+          dataIndex: 'groupName',
+          scopedSlots: { customRender: 'groupName' }
+
         },
         {
           title: '状态',
@@ -140,11 +157,6 @@ export default {
           dataIndex: 'description'
         },
         {
-          title: 'OnLine机器',
-          dataIndex: 'onlinePodList',
-          customRender: (text) => text.toString()
-        },
-        {
           title: '操作',
           dataIndex: 'action',
           width: '150px',
@@ -173,7 +185,9 @@ export default {
       },
       initScene: enums.initScene,
       groupStatus: enums.groupStatus,
-      idGeneratorMode: enums.idGenMode
+      idGeneratorMode: enums.idGenMode,
+      currentShowRecord: null,
+      openDrawer: false
     }
   },
   created () {
@@ -181,10 +195,14 @@ export default {
   },
   methods: {
     handleNew () {
-      this.$router.push('/basic-config')
+      this.$router.push('/group/config')
     },
     handleEdit (record) {
-      this.$router.push({ path: '/basic-config', query: { groupName: record.groupName } })
+      this.$router.push({ path: '/group/config', query: { groupName: record.groupName } })
+    },
+    handleInfo (record) {
+      record = record || this.currentShowRecord
+      this.$router.push({ path: '/group/info', query: { groupName: record.groupName } })
     },
     toggleAdvanced () {
       this.advanced = !this.advanced
@@ -205,6 +223,17 @@ export default {
           this.$refs.table.refresh()
         }
       })
+    },
+    handlerOpenDrawer (record) {
+      this.currentShowRecord = record
+      this.openDrawer = true
+      setTimeout(() => {
+        this.$refs.groupInfoRef.groupConfigDetail(record.groupName)
+      }, 200)
+    },
+    onClose () {
+      this.openDrawer = false
+      this.currentShowRecord = null
     }
   }
 }
