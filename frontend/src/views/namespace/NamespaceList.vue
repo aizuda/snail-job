@@ -45,14 +45,14 @@
         <span slot="action" slot-scope="text, record">
           <template>
             <a @click="handleEdit(record)">编辑</a>
-            <a-divider type="vertical" />
-            <a-popconfirm
-              title="命名空间删除后不可恢复，请确认是否删除这个空间?"
-              ok-text="删除"
-              cancel-text="取消"
-              @confirm="handleDel(record)">
-              <a href="javascript:;">删除</a>
-            </a-popconfirm>
+            <!--            <a-divider type="vertical" />-->
+            <!--            <a-popconfirm-->
+            <!--              title="命名空间删除后不可恢复，请确认是否删除这个空间?"-->
+            <!--              ok-text="删除"-->
+            <!--              cancel-text="取消"-->
+            <!--              @confirm="handleDel(record)">-->
+            <!--              <a href="javascript:;">删除</a>-->
+            <!--            </a-popconfirm>-->
 
           </template>
         </span>
@@ -158,6 +158,7 @@ export default {
       delNamespace(record.id).then(res => {
         this.$message.success('删除成功')
         this.$refs.table.refresh()
+        this.$store.dispatch('GetInfo')
       })
     },
     handleGoBack () {

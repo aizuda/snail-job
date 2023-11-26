@@ -1,5 +1,5 @@
 <template>
-  <a-dropdown>
+  <a-dropdown v-if="namespaceIds && namespaceIds.length > 0">
     <a-menu slot="overlay" @click="handleMenuClick">
       <a-menu-item :key="item.uniqueId" v-for="item in namespaceIds">
         <a href="javascript:;">{{ item.name }}</a>
@@ -7,6 +7,9 @@
     </a-menu>
     <a-button shape="round">  {{ name }}  <a-icon type="down" /> </a-button>
   </a-dropdown>
+  <span v-else>
+    <a-spin size="small" :style="{ marginLeft: 8, marginRight: 8 }" />
+  </span>
 </template>
 <script>
 import namespaceMixin from '@/store/namespace-mixin'
@@ -18,6 +21,16 @@ export default {
     return {
       namespaceIds: [],
       name: 'Default'
+    }
+  },
+  computed: {
+    refreshNamespace () {
+      return this.$store.getters.namespaces
+    }
+  },
+  watch: {
+    refreshNamespace (val) {
+      this.namespaceIds = val
     }
   },
   mounted () {

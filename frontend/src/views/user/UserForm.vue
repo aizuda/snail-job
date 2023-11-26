@@ -4,7 +4,7 @@
       <div></div>
     </page-header-wrapper>
     <a-card class="card" title="" :bordered="false">
-      <a-form @submit="handleSubmit" :form="form" :body-style="{padding: '24px 32px'}" v-bind="formItemLayout" :rules="rules">
+      <a-form @submit="handleSubmit" :form="form" :body-style="{padding: '24px 32px'}" v-bind="formItemLayout">
         <a-form-item>
           <a-input
             hidden
@@ -20,25 +20,32 @@
             ]" />
         </a-form-item>
         <a-form-item
-          label="密码">
+          label="修改密码"
+          v-if="formType === 'edit'">
+          <a-switch checked-children="修改" un-checked-children="不修改" @change="onChange" />
+        </a-form-item>
+        <a-form-item
+          label="密码"
+          v-if="updatePass">
           <a-input
             placeholder="请输入密码"
             type="password"
             autocomplete="off"
             v-decorator="[
               'password',
-              {rules: [{ required: formType === 'create', message: '请输入密码', whitespace: true}, {validator: validatePass, validateTrigger: ['change', 'blur']}]}
+              {rules: [{ required: true, message: '请输入密码', whitespace: true}, {validator: validatePass, trigger: ['change', 'blur']}]}
             ]"/>
         </a-form-item>
         <a-form-item
-          label="确认密码">
+          label="确认密码"
+          v-if="updatePass">
           <a-input
             placeholder="请输入确认密码"
             type="password"
             autocomplete="off"
             v-decorator="[
               'checkPassword',
-              {rules: [{ required: formType === 'create', message: '请输入密码', whitespace: true}, {validator: validateCheckPass, validateTrigger: ['change', 'blur']}]}
+              {rules: [{ required: true, message: '请输入确认密码', whitespace: true}, {validator: validateCheckPass, trigger: ['change', 'blur']}]}
             ]"/>
         </a-form-item>
         <a-form-item
@@ -82,7 +89,7 @@
               'permissions',
               {rules: [{ required: true, message: '请分配组'}]}
             ]">
-            <a-select-option v-for="(item, index) in groupNameList" :key="index" :value="item.groupName + '@@'+ item.namespaceId">
+            <a-select-option v-for="(item, index) in groupNameList" :key="index" :value="item.groupName + '@'+ item.namespaceId">
               {{ item.groupName }} ({{ item.namespaceId }})
             </a-select-option>
           </a-select>
@@ -125,7 +132,8 @@ export default {
         wrapperCol: { lg: { span: 10 }, sm: { span: 17 } }
       },
       groupNameList: [],
-      namespaceList: []
+      namespaceList: [],
+      updatePass: true
     }
   },
   mounted () {
@@ -135,6 +143,7 @@ export default {
 
     this.$nextTick(() => {
       if (this.$route.query.username) {
+        this.updatePass = false
         getSystemUserByUserName({ username: this.$route.query.username }).then(res => {
           this.loadEditInfo(res.data)
         })
@@ -159,16 +168,13 @@ export default {
           }
 
           if (values.permissions) {
-            const filteredData = values.permissions.map(input => {
-              const [groupName, namespaceId] = input.split('@@')
-
+            values['permissions'] = values.permissions.map(input => {
+              const [groupName, namespaceId] = input.split('@')
+              console.log(this.groupNameList)
               return this.groupNameList.filter(item =>
                 item.groupName === groupName && item.namespaceId === namespaceId
               )
             }).flat()
-
-            values['permissions'] = filteredData
-            console.log(filteredData)
           }
 
           values.role = parseInt(values.role)
@@ -180,22 +186,24 @@ export default {
       })
     },
     validatePass (rule, value, callback) {
-      if (value === '') {
-        callback(new Error('请输入密码'))
-      } else {
+      if (value) {
         if (this.form.getFieldValue('checkPassword') !== '') {
-          this.$refs.form.validateField('checkPassword')
+          this.form.validateFields(['checkPassword'], (errors, values) => {
+            console.log(errors)
+          })
         }
-        callback()
       }
+        callback()
     },
     validateCheckPass (rule, value, callback) {
-      if (value === '') {
-        callback(new Error('请再次输入密码'))
-      } else if (value !== this.form.getFieldValue('password')) {
-        callback(new Error('两次密码不匹配!'))
-      } else {
-        callback()
+      console.log(value)
+      if (value) {
+        console.log(value)
+        if (value !== this.form.getFieldValue('password')) {
+          callback(new Error('两次密码不匹配!'))
+        } else {
+          callback()
+        }
       }
     },
     loadEditInfo (data) {
@@ -207,11 +215,17 @@ export default {
       }).then(() => {
         const formData = pick(data, ['id', 'username', 'role', 'permissions', 'namespaceIds'])
         formData.role = formData.role.toString()
+        this.role = formData.role
         formData.namespaceIds = formData.namespaceIds.map(i => i.uniqueId)
-        formData.permissions = formData.permissions.map(i => i.groupName + '@@' + i.namespaceId)
+        formData.permissions = formData.permissions.map(i => i.groupName + '@' + i.namespaceId)
         form.setFieldsValue(formData)
+        this.handleNamespacesIdChange(formData.namespaceIds)
       })
+    },
+    onChange (checked) {
+      this.updatePass = checked
     }
+
   }
 }
 </script>
