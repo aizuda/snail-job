@@ -12,6 +12,7 @@ const api = {
   groupConfigByGroupName: `/group`,
   allGroupNameList: `/group/all/group-name/list`,
   allGroupConfigList: `/group/all/group-config/list`,
+  onlinePods: `/group/on-line/pods/`,
   retryTaskPage: '/retry-task/list',
   retryTaskById: '/retry-task/',
   saveRetryTask: '/retry-task',
@@ -57,6 +58,13 @@ const api = {
 }
 
 export default api
+
+export function onlinePods (parameter) {
+  return request({
+    url: api.onlinePods + parameter,
+    method: 'get'
+  })
+}
 
 export function allGroupConfigList (data) {
   return request({

@@ -150,6 +150,7 @@
             ok-text="删除"
             cancel-text="取消"
             @confirm="handleDel(record)"
+            v-if="$auth('job.del')"
           >
             <a href="javascript:;" v-if="record.jobStatus === 0">删除</a>
           </a-popconfirm>

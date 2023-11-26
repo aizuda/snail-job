@@ -42,22 +42,40 @@ export const asyncRouterMap = [
         path: '/namespace',
         name: 'namespace',
         component: () => import('@/views/namespace/NamespaceList'),
-        meta: { title: '命名空间', icon: 'team', permission: ['group'] }
+        meta: { title: '命名空间', icon: 'team', permission: ['namespace'] }
       },
       // profile
       {
-        path: '/basic-config-list',
-        name: 'basicConfigList',
-        component: () => import('@/views/config/GroupList'),
-        meta: { title: '组管理', icon: 'team', permission: ['group'] }
+        path: '/group',
+        name: 'GroupConfigList',
+        component: RouteView,
+        hideChildrenInMenu: true,
+        redirect: '/group/list',
+        meta: { title: '组管理', hideChildrenInMenu: true, icon: 'team', permission: ['group'] },
+        children: [
+          {
+            path: '/group/list',
+            name: 'basicConfigList',
+            component: () => import('@/views/config/GroupList'),
+            meta: { title: '组配置列表', hidden: true, icon: 'team', permission: ['group'] }
+          },
+          {
+            path: '/group/config',
+            name: 'GroupConfig',
+            hidden: true,
+            component: () => import('@/views/config/basicConfigForm/BasicConfigForm'),
+            meta: { title: '组信息配置', hidden: true, hideChildrenInMenu: true, icon: 'profile', permission: ['group'] }
+          },
+          {
+            path: '/group/info',
+            name: 'GroupInfo',
+            hidden: true,
+            component: () => import('@/views/config/GroupInfo'),
+            meta: { title: '组配置详情', hidden: true, hideChildrenInMenu: true, icon: 'profile', permission: ['group'] }
+          }
+        ]
       },
-      {
-        path: '/basic-config',
-        name: 'basicConfig',
-        hidden: true,
-        component: () => import('@/views/config/basicConfigForm/BasicConfigForm'),
-        meta: { title: '基础信息配置', hidden: true, hideChildrenInMenu: true, icon: 'profile', permission: ['basicConfig'] }
-      },
+
       {
         path: '/retry',
         name: 'RetryTask',

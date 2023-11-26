@@ -43,13 +43,13 @@ public class GroupConfigController {
         return groupConfigService.addGroup(systemUser, groupConfigRequestVO);
     }
 
-    @LoginRequired
+    @LoginRequired(role = RoleEnum.ADMIN)
     @PutMapping("")
     public Boolean updateGroup(@RequestBody @Validated GroupConfigRequestVO groupConfigRequestVO) {
         return groupConfigService.updateGroup(groupConfigRequestVO);
     }
 
-    @LoginRequired
+    @LoginRequired(role = RoleEnum.ADMIN)
     @PutMapping("status")
     public Boolean updateGroupStatus(@RequestBody @Validated GroupConfigRequestVO groupConfigRequestVO) {
         String groupName = groupConfigRequestVO.getGroupName();
@@ -81,19 +81,19 @@ public class GroupConfigController {
         return groupConfigService.getAllGroupNameList();
     }
 
-    @Deprecated
     @LoginRequired
-    @GetMapping("/partition")
-    public Integer getTotalPartition() {
-        // 组分区从0开始,所以是最大值减一
-        return systemProperties.getTotalPartition() - 1;
+    @GetMapping("/on-line/pods/{groupName}")
+    public List<String> getOnlinePods(@PathVariable("groupName") String groupName) {
+        return groupConfigService.getOnlinePods(groupName);
     }
 
-    @LoginRequired
+    @LoginRequired(role = RoleEnum.ADMIN)
     @GetMapping("/partition-table/list")
     public List<Integer> getTablePartitionList() {
         // https://gitee.com/aizuda/easy-retry/issues/I8DAMH
         List<String> tableList = jdbcTemplate.queryForList("SHOW TABLES LIKE 'retry_task_%'", String.class);
         return tableList.stream().map(ReUtil::getFirstNumber).filter(i -> !Objects.isNull(i) && i <= systemProperties.getTotalPartition()).distinct().collect(Collectors.toList());
     }
+
+
 }

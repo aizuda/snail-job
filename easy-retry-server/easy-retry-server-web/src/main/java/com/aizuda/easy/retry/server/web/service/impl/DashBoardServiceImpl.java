@@ -10,6 +10,8 @@ import com.aizuda.easy.retry.server.common.dto.ServerNodeExtAttrs;
 import com.aizuda.easy.retry.server.common.register.ServerRegister;
 import com.aizuda.easy.retry.server.web.service.convert.DispatchQuantityResponseVOConverter;
 import com.aizuda.easy.retry.server.web.service.convert.SceneQuantityRankResponseVOConverter;
+import com.aizuda.easy.retry.server.web.util.UserSessionUtils;
+import com.aizuda.easy.retry.template.datasource.persistence.dataobject.ActivePodQuantityResponseDO;
 import com.aizuda.easy.retry.template.datasource.persistence.dataobject.DispatchQuantityResponseDO;
 import com.aizuda.easy.retry.template.datasource.persistence.dataobject.SceneQuantityRankResponseDO;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskLogMapper;
@@ -32,6 +34,7 @@ import com.aizuda.easy.retry.server.web.model.response.SceneQuantityRankResponse
 import com.aizuda.easy.retry.server.web.model.response.TaskQuantityResponseVO;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,9 +110,15 @@ public class DashBoardServiceImpl implements DashBoardService {
     public ActivePodQuantityResponseVO countActivePod() {
 
         ActivePodQuantityResponseVO activePodQuantityResponseVO = new ActivePodQuantityResponseVO();
-        activePodQuantityResponseVO.setTotal(serverNodeMapper.selectCount(null));
-        activePodQuantityResponseVO.setServerTotal(serverNodeMapper.selectCount(new LambdaQueryWrapper<ServerNode>().eq(ServerNode::getNodeType, NodeTypeEnum.SERVER.getType())));
-        activePodQuantityResponseVO.setClientTotal(serverNodeMapper.selectCount(new LambdaQueryWrapper<ServerNode>().eq(ServerNode::getNodeType, NodeTypeEnum.CLIENT.getType())));
+
+        List<ActivePodQuantityResponseDO> activePodQuantityDO = serverNodeMapper.countActivePod(UserSessionUtils.currentUserSession().getNamespaceId());
+        Map<Integer, Long> map = activePodQuantityDO.stream().collect(Collectors.toMap(ActivePodQuantityResponseDO::getNodeType, ActivePodQuantityResponseDO::getTotal));
+        Long clientTotal = map.getOrDefault(NodeTypeEnum.CLIENT.getType(), 0L);
+        Long serverTotal = map.getOrDefault(NodeTypeEnum.SERVER.getType(), 0L);
+        activePodQuantityResponseVO.setServerTotal(serverTotal);
+        activePodQuantityResponseVO.setClientTotal(clientTotal);
+
+        activePodQuantityResponseVO.setTotal(clientTotal + serverTotal);
 
         return activePodQuantityResponseVO;
     }
@@ -181,6 +190,9 @@ public class DashBoardServiceImpl implements DashBoardService {
         PageDTO<ServerNode> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
 
         LambdaQueryWrapper<ServerNode> serverNodeLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        serverNodeLambdaQueryWrapper.in(ServerNode::getNamespaceId, Lists.newArrayList(
+                UserSessionUtils.currentUserSession().getNamespaceId(), ServerRegister.NAMESPACE_ID
+        ));
         if (StrUtil.isNotBlank(queryVO.getGroupName())) {
             serverNodeLambdaQueryWrapper.eq(ServerNode::getGroupName, queryVO.getGroupName());
         }
@@ -206,13 +218,13 @@ public class DashBoardServiceImpl implements DashBoardService {
             }
 
             ServerNodeExtAttrs serverNodeExtAttrs = JsonUtil
-                .parseObject(serverNodeResponseVO.getExtAttrs(), ServerNodeExtAttrs.class);
+                    .parseObject(serverNodeResponseVO.getExtAttrs(), ServerNodeExtAttrs.class);
 
             try {
 
                 // 从远程节点取
                 String format = MessageFormat
-                    .format(URL, serverNodeResponseVO.getHostIp(), serverNodeExtAttrs.getWebPort().toString());
+                        .format(URL, serverNodeResponseVO.getHostIp(), serverNodeExtAttrs.getWebPort().toString());
                 Result<List<Integer>> result = restTemplate.getForObject(format, Result.class);
                 List<Integer> data = result.getData();
                 if (!CollectionUtils.isEmpty(data)) {

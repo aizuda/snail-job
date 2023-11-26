@@ -1,5 +1,7 @@
 package com.aizuda.easy.retry.server.web.controller;
 
+import com.aizuda.easy.retry.server.web.annotation.LoginRequired;
+import com.aizuda.easy.retry.server.web.annotation.RoleEnum;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
 import com.aizuda.easy.retry.server.web.model.request.NamespaceQueryVO;
 import com.aizuda.easy.retry.server.web.model.request.NamespaceRequestVO;
@@ -23,26 +25,31 @@ public class NamespaceController {
     @Autowired
     private NamespaceService namespaceService;
 
+    @LoginRequired(role = RoleEnum.ADMIN)
     @PostMapping
     public Boolean saveNamespace(@RequestBody @Validated NamespaceRequestVO namespaceRequestVO) {
         return namespaceService.saveNamespace(namespaceRequestVO);
     }
 
+    @LoginRequired(role = RoleEnum.ADMIN)
     @PutMapping
     public Boolean updateNamespace(@RequestBody @Validated NamespaceRequestVO namespaceRequestVO) {
         return namespaceService.updateNamespace(namespaceRequestVO);
     }
 
+    @LoginRequired(role = RoleEnum.ADMIN)
     @GetMapping("list")
     public PageResult<List<NamespaceResponseVO>> getNamespacePage(NamespaceQueryVO queryVO) {
         return namespaceService.getNamespacePage(queryVO);
     }
 
+    @LoginRequired(role = RoleEnum.ADMIN)
     @DeleteMapping("{id}")
     public Boolean deleteNamespace(@PathVariable("id") Long id) {
         return namespaceService.deleteNamespace(id);
     }
 
+    @LoginRequired(role = RoleEnum.ADMIN)
     @GetMapping("/all")
     public List<NamespaceResponseVO> getAllNamespace() {
         return namespaceService.getAllNamespace();

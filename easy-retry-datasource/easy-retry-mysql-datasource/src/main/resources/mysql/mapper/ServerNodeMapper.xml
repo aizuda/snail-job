@@ -34,4 +34,10 @@
     delete from server_node
     where expire_at &lt;= #{endTime,jdbcType=TIMESTAMP}
   </delete>
+  <select id="countActivePod"
+          resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.ActivePodQuantityResponseDO">
+    SELECT node_type as nodeType, count(*) as total
+    from server_node
+    GROUP BY node_type
+  </select>
 </mapper>
