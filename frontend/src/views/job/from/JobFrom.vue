@@ -389,7 +389,6 @@ export default {
       })
     },
     handleTaskTypeChange (value) {
-      console.log(value)
       this.taskTypeValue = value
     },
     handlerCron () {
