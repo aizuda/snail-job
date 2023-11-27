@@ -265,53 +265,45 @@
       </a-form>
     </a-card>
 
-    <a-modal :visible="visible" title="分片参数" @ok="handleOk" @cancel="handlerCancel" width="500px">
-      <a-form :form="dynamicForm" @submit="handleSubmit" :body-style="{padding: '0px 0px'}" v-bind="formItemLayout" >
-        <a-form-item
-          v-for="(k, index) in dynamicForm.getFieldValue('keys')"
-          :key="k"
-          v-bind="formItemLayoutWithOutLabel"
-          :label="'分片' + index "
-          :required="true"
+    <a-modal :visible="visible" title="分片参数" @ok="submitForm()" @cancel="handlerCancel" width="500px">
+      <a-form-model ref="dynamicValidateForm" :model="dynamicValidateForm" style="margin-left: 15%" layout="vertical" >
+        <a-form-model-item
+          v-for="(domain, index) in dynamicValidateForm.domains"
+          :key="domain.key"
+          :label="'分片' + (index)"
+          :prop="'domains.' + index + '.value'"
+          :rules="{
+            required: true,
+            message: '分区参数不能为空',
+            trigger: 'blur',
+          }"
         >
           <a-input
-            v-decorator="[
-              `sharding[${k}]`,
-              {
-                validateTrigger: ['change', 'blur'],
-                rules: [
-                  {
-                    required: true,
-                    whitespace: true,
-                    message: '分片参数必填'
-                  },
-                ],
-              },
-            ]"
-            placeholder="请输入参数"
-            style="width: 60%; margin-right: 8px"
+            v-model="domain.value"
+            placeholder="请输入分区的参数"
+            style="width: 80%; margin-right: 8px"
           />
           <a-icon
-            v-if="dynamicForm.getFieldValue('keys').length > 1"
+            v-if="dynamicValidateForm.domains.length > 1"
             class="dynamic-delete-button"
             type="minus-circle-o"
-            :disabled="dynamicForm.getFieldValue('keys').length === 1"
-            @click="() => remove(k)"
+            :disabled="dynamicValidateForm.domains.length === 1"
+            @click="removeDomain(domain)"
           />
-        </a-form-item>
-        <a-form-item v-bind="formItemLayoutWithOutLabel">
+        </a-form-model-item>
+        <a-form-model-item v-bind="formItemLayoutWithOutLabel">
           <a-button type="dashed" style="width: 60%" @click="add">
             <a-icon type="plus" /> 添加分片
           </a-button>
-        </a-form-item>
-        <a-form-item
+        </a-form-model-item>
+        <a-form-model-item
           :wrapper-col="{
             xs: { span: 24, offset: 0 },
             sm: { span: 16, offset: 8 },
             lg: { span: 7 }
           }">
-        </a-form-item>
-      </a-form>
+        </a-form-model-item>
+      </a-form-model>
     </a-modal>
     <cron-modal ref="cronModalRef" @getCron="getCron"/>
   </div>
@@ -323,21 +315,31 @@ import { getJobDetail, saveJob, updateJob } from '@/api/jobApi'
 import pick from 'lodash.pick'
 import CronModal from '@/views/job/from/CronModal'
 
+import AFormModel from 'ant-design-vue/es/form-model/Form'
+import AFormModelItem from 'ant-design-vue/es/form-model/FormItem'
+
 const enums = require('@/utils/jobEnum')
 
 export default {
   name: 'JobFrom',
-  components: { CronModal },
-  props: {},
-  comments: {
-    CronModal
+  components: {
+    CronModal,
+    AFormModel,
+    AFormModelItem
   },
+  props: {},
   data () {
     return {
       form: this.$form.createForm(this),
       formItemLayout: {
-        labelCol: { lg: { span: 7 }, sm: { span: 7 } },
-        wrapperCol: { lg: { span: 10 }, sm: { span: 17 } }
+        labelCol: {
+          xs: { span: 24 },
+          sm: { span: 4 }
+        },
+        wrapperCol: {
+          xs: { span: 24 },
+          sm: { span: 20 }
+        }
       },
       formItemLayoutWithOutLabel: {
         wrapperCol: {
@@ -358,12 +360,15 @@ export default {
       count: 0,
       triggerTypeValue: '2',
       taskTypeValue: '1',
-      argsStrValue: []
+      argsStrValue: [],
+      dynamicValidateForm: {
+        domains: []
+      }
     }
   },
   beforeCreate () {
-    this.dynamicForm = this.$form.createForm(this, { name: 'dynamic_form_item' })
-    this.dynamicForm.getFieldDecorator('keys', { initialValue: [], preserve: true })
+    // this.dynamicForm = this.$form.createForm(this, { name: 'dynamic_form_item' })
+    // this.dynamicForm.getFieldDecorator('keys', { initialValue: [], preserve: true })
   },
   mounted () {
     getAllGroupNameList().then((res) => {
@@ -401,64 +406,66 @@ export default {
         this.$refs.cronModalRef.isShow(triggerInterval)
       }
     },
-    remove (k) {
-      const { dynamicForm } = this
-      // can use data-binding to get
-      const keys = dynamicForm.getFieldValue('keys')
-      // We need at least one passenger
-      if (keys.length === 1) {
-        return
+    removeDomain (item) {
+      const index = this.dynamicValidateForm.domains.indexOf(item)
+      if (index !== -1) {
+        this.dynamicValidateForm.domains.splice(index, 1)
       }
-
-      // can use data-binding to set
-      dynamicForm.setFieldsValue({
-        keys: keys.filter(key => key !== k)
-      })
     },
-
     add () {
-      const { dynamicForm } = this
-      // can use data-binding to get
-      const keys = dynamicForm.getFieldValue('keys')
-      console.log(keys)
-      const nextKeys = keys.concat(this.count++)
-      // can use data-binding to set
-      // important! notify form to detect changes
-      dynamicForm.setFieldsValue({
-        keys: nextKeys
+      this.dynamicValidateForm.domains.push({
+        value: '',
+        key: Date.now()
       })
     },
     handleBlur () {
       const taskType = this.form.getFieldValue('taskType')
       if (taskType === '3') {
         this.visible = !this.visible
-        const { form } = this
-        if (this.formType === 'create') {
-          return
-        }
-
-        form.setFieldsValue({
-          argsStr: ''
-        })
-
-        console.log(this.argsStrValue)
-        if (this.argsStrValue.length === 0) {
-          return
-        }
-
-        // 将字符串分割成键值对数组
-        const keys = this.argsStrValue.map((item, index) => {
-          this.count++
-          this.dynamicForm.getFieldDecorator(`sharding[${index}]`, { initialValue: item, preserve: true })
-          return index
-        })
-
-        this.dynamicForm.getFieldDecorator('keys', { initialValue: keys, preserve: true })
+        // const { form } = this
+        // if (this.formType === 'create') {
+        //   return
+        // }
+        //
+        // form.setFieldsValue({
+        //   argsStr: ''
+        // })
+        //
+        // console.log(this.argsStrValue)
+        // if (this.argsStrValue.length === 0) {
+        //   return
+        // }
+        //
+        // // 将字符串分割成键值对数组
+        // const keys = this.argsStrValue.map((item, index) => {
+        //   this.count++
+        //   this.dynamicForm.getFieldDecorator(`sharding[${index}]`, { initialValue: item, preserve: true })
+        //   return index
+        // })
+        //
+        // console.log(keys)
+        // this.dynamicForm.getFieldDecorator('keys', { initialValue: keys, preserve: true })
       }
     },
     getCron (cron) {
       this.form.setFieldsValue({
         triggerInterval: cron
+      })
+    },
+    submitForm () {
+      const { form } = this
+      this.$refs['dynamicValidateForm'].validate(valid => {
+        if (valid) {
+          console.log(this.dynamicValidateForm.domains)
+          this.argsStrValue = this.dynamicValidateForm.domains.map((item, index) => item.value)
+          form.setFieldsValue({
+            argsStr: this.dynamicValidateForm.domains.map((item, index) => `分区:${index}=>${item.value}`).join('; ')
+          })
+          this.visible = !this.visible
+        } else {
+          console.log('error submit!!')
+          return false
+        }
       })
     },
     handleOk (e) {
@@ -467,8 +474,9 @@ export default {
       this.dynamicForm.validateFields((err, values) => {
         if (!err) {
           this.argsStrValue = values['sharding']
+          console.log(this.argsStrValue)
           form.setFieldsValue({
-            argsStr: this.argsStrValue.map((item, index) => `分区:${index}=>${item}`).join('; ')
+            argsStr: this.argsStrValue.filter(item => item).map((item, index) => `分区:${index}=>${item}`).join('; ')
           })
           this.visible = false
         }
@@ -522,6 +530,13 @@ export default {
         if (this.taskTypeValue === '3') {
           this.argsStrValue = JSON.parse(formData.argsStr)
           formData.argsStr = this.argsStrValue.map((item, index) => `分区:${index}=>${item}`).join(';')
+
+          this.argsStrValue.forEach((item, index) => {
+            this.dynamicValidateForm.domains.push({
+              value: item,
+              key: Date.now() + index
+            })
+          })
         }
 
         form.setFieldsValue(formData)

@@ -16,6 +16,7 @@
               <a-input
                 placeholder="请输入场景名称"
                 :maxLength="64"
+                :disabled="this.formType === 'edit'"
                 v-decorator="[
                   'sceneName',
                   {rules: [{ required: true, message: '请输入场景名称', whitespace: true},{required: true, max: 64, message: '最多支持64个字符！'}]}
@@ -27,6 +28,7 @@
           <a-col :lg="18" :md="18" :sm="24">
             <a-form-item label="组">
               <a-select
+                :disabled="this.formType === 'edit'"
                 placeholder="请选择组"
                 v-decorator="['groupName', { rules: [{ required: true, message: '请选择组' }] }]"
               >
