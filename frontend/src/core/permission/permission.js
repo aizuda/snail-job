@@ -30,8 +30,6 @@ function plugin (Vue) {
           return permissionList.find((val) => {
             return val.permissionId === permission
           }).actionList.findIndex((val) => {
-              console.log(val)
-              console.log(action)
               return val === action
             }) > -1
         }
