@@ -60,7 +60,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class DashBoardServiceImpl implements DashBoardService {
-    public static final String URL = "http://{0}:{1}/dashboard/consumer/bucket";
+    public static final String URL = "http://{0}:{1}/{2}/dashboard/consumer/bucket";
 
     @Autowired
     private RetryTaskLogMapper retryTaskLogMapper;
@@ -224,7 +224,7 @@ public class DashBoardServiceImpl implements DashBoardService {
 
                 // 从远程节点取
                 String format = MessageFormat
-                        .format(URL, serverNodeResponseVO.getHostIp(), serverNodeExtAttrs.getWebPort().toString());
+                        .format(URL, serverNodeResponseVO.getHostIp(), serverNodeExtAttrs.getWebPort().toString(), serverNodeResponseVO.getContextPath());
                 Result<List<Integer>> result = restTemplate.getForObject(format, Result.class);
                 List<Integer> data = result.getData();
                 if (!CollectionUtils.isEmpty(data)) {
