@@ -19,6 +19,7 @@ import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -67,7 +68,7 @@ public class ServerRegister extends AbstractRegister {
         context.setHostId(CURRENT_CID);
         context.setHostIp(HostUtils.getIp());
         context.setHostPort(systemProperties.getNettyPort());
-        context.setContextPath(serverProperties.getServlet().getContextPath());
+        context.setContextPath(Optional.ofNullable(serverProperties.getServlet().getContextPath()).orElse(StrUtil.EMPTY));
         context.setNamespaceId(NAMESPACE_ID);
         context.setExtAttrs(JsonUtil.toJsonString(serverNodeExtAttrs));
     }

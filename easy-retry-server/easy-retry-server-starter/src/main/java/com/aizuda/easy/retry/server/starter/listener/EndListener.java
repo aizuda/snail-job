@@ -1,4 +1,4 @@
-package com.aizuda.easy.retry.server.common.listener;
+package com.aizuda.easy.retry.server.starter.listener;
 
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.common.Lifecycle;
