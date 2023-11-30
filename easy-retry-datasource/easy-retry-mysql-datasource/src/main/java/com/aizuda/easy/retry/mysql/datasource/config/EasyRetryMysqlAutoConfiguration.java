@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @ComponentScan("com.aizuda.easy.retry.mysql.datasource")
-@ConditionalOnProperty(prefix = "easy-retry", name = "db-type", havingValue = "postgre")
+@ConditionalOnProperty(prefix = "easy-retry", name = "db-type", havingValue = "mysql")
 public class EasyRetryMysqlAutoConfiguration {
 
 }

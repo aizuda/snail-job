@@ -73,7 +73,7 @@
     </dependencies>
 
     <build>
-        <finalName>easy-retry-server</finalName>
+        <finalName>easy-retry-server-starter</finalName>
     </build>
 
 </project>
