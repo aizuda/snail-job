@@ -12,9 +12,7 @@ import com.aizuda.easy.retry.server.web.model.response.NamespaceResponseVO;
 import com.aizuda.easy.retry.server.web.service.NamespaceService;
 import com.aizuda.easy.retry.server.web.service.convert.NamespaceResponseVOConverter;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.NamespaceMapper;
-import com.aizuda.easy.retry.template.datasource.persistence.po.JobTaskBatch;
 import com.aizuda.easy.retry.template.datasource.persistence.po.Namespace;
-import com.aizuda.easy.retry.template.datasource.persistence.po.SystemUser;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +33,13 @@ public class NamespaceServiceImpl implements NamespaceService {
 
     @Override
     public Boolean saveNamespace(final NamespaceRequestVO namespaceRequestVO) {
+
+        if (StrUtil.isNotBlank(namespaceRequestVO.getUniqueId())) {
+            Assert.isTrue(namespaceMapper.selectCount(new LambdaQueryWrapper<Namespace>()
+                            .eq(Namespace::getUniqueId, namespaceRequestVO.getUniqueId())) == 0,
+                    () -> new EasyRetryServerException("空间唯一标记已经存在 {}", namespaceRequestVO.getUniqueId()));
+        }
+
         Namespace namespace = new Namespace();
         namespace.setName(namespaceRequestVO.getName());
         if (StrUtil.isBlank(namespaceRequestVO.getUniqueId())) {
