@@ -13,7 +13,7 @@
           :disabled="isEdit"
           v-decorator="[
             'uniqueId',
-            {rules: [{ required: false, message: '请输入空间名称', whitespace: true}]}
+            {rules: [{ required: false, message: '请输入空间名称', whitespace: true},{required: true, max: 64, message: '最多支持64个字符！'}, {validator: validate, trigger: ['change', 'blur']}]}
           ]" />
       </a-form-item>
       <a-form-item
@@ -59,6 +59,13 @@ export default {
       this.loadEditInfo(record)
       this.visible = true
       this.form.resetFields()
+    },
+    validate (rule, value, callback) {
+      const regex = /^[A-Za-z0-9_]+$/
+      if (!regex.test(value)) {
+        callback(new Error('仅支持数字字母下划线'))
+      }
+      callback()
     },
     handleOk (e) {
       e.preventDefault()
