@@ -87,7 +87,7 @@ public class FailureActor extends AbstractActor {
 
                         retryTask.setUpdateDt(LocalDateTime.now());
                         Assert.isTrue(1 == accessTemplate.getRetryTaskAccess()
-                                        .updateById(retryTask.getGroupName(), retryTask),
+                                        .updateById(retryTask.getGroupName(), retryTask.getNamespaceId(), retryTask),
                                 () -> new EasyRetryServerException("更新重试任务失败. groupName:[{}] uniqueId:[{}]",
                                         retryTask.getGroupName(), retryTask.getUniqueId()));
 

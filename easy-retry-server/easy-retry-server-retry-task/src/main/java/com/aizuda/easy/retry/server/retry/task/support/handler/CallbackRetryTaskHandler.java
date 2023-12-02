@@ -81,13 +81,12 @@ public class CallbackRetryTaskHandler {
 
         try {
             Assert.isTrue(1 == accessTemplate.getRetryTaskAccess()
-                            .insert(callbackRetryTask.getGroupName(), callbackRetryTask),
+                            .insert(callbackRetryTask.getGroupName(), callbackRetryTask.getNamespaceId(), callbackRetryTask),
                     () -> new EasyRetryServerException("failed to report data"));
         } catch (DuplicateKeyException e) {
             log.warn("回调数据重复新增. [{}]", JsonUtil.toJsonString(retryTask));
             return;
         }
-
 
         // 初始化回调日志
         RetryTaskLog retryTaskLog = RetryTaskLogConverter.INSTANCE.toRetryTask(callbackRetryTask);

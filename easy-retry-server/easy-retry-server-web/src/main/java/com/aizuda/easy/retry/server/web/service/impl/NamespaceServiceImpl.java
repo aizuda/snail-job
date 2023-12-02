@@ -67,8 +67,10 @@ public class NamespaceServiceImpl implements NamespaceService {
         PageDTO<Namespace> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
 
         LambdaQueryWrapper<Namespace> queryWrapper = new LambdaQueryWrapper<>();
-        if (StrUtil.isNotBlank(queryVO.getName())) {
-            queryWrapper.like(Namespace::getName, queryVO.getName() + "%");
+        if (StrUtil.isNotBlank(queryVO.getKeyword())) {
+            queryWrapper.like(Namespace::getName, queryVO.getKeyword().trim() + "%")
+                    .or().like(Namespace::getUniqueId, queryVO.getKeyword().trim() + "%")
+            ;
         }
 
         queryWrapper.eq(Namespace::getDeleted, StatusEnum.NO);

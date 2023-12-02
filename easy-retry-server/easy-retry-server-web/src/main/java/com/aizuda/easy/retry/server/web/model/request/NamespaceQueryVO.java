@@ -13,6 +13,6 @@ import lombok.EqualsAndHashCode;
 @Data
 public class NamespaceQueryVO extends BaseQueryVO {
 
-    private String name;
+    private String keyword;
 
 }

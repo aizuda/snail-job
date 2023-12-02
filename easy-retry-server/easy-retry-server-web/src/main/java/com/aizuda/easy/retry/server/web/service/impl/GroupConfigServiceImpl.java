@@ -69,8 +69,9 @@ public class GroupConfigServiceImpl implements GroupConfigService {
 
         ConfigAccess<GroupConfig> groupConfigAccess = accessTemplate.getGroupConfigAccess();
         Assert.isTrue(groupConfigAccess.count(new LambdaQueryWrapper<GroupConfig>()
-                .eq(GroupConfig::getGroupName, groupConfigRequestVO.getGroupName())) == 0,
-            () -> new EasyRetryServerException("GroupName已经存在 {}", groupConfigRequestVO.getGroupName()));
+                        .eq(GroupConfig::getNamespaceId, systemUser.getNamespaceId())
+                        .eq(GroupConfig::getGroupName, groupConfigRequestVO.getGroupName())) == 0,
+                () -> new EasyRetryServerException("GroupName已经存在 {}", groupConfigRequestVO.getGroupName()));
 
         // 保存组配置
         doSaveGroupConfig(systemUser, groupConfigRequestVO);
@@ -94,8 +95,8 @@ public class GroupConfigServiceImpl implements GroupConfigService {
         sequenceAlloc.setStep(systemProperties.getStep());
         sequenceAlloc.setUpdateDt(LocalDateTime.now());
         Assert.isTrue(1 == sequenceAllocMapper.insert(sequenceAlloc),
-            () -> new EasyRetryServerException("failed to save sequence generation rule configuration [{}].",
-                groupConfigRequestVO.getGroupName()));
+                () -> new EasyRetryServerException("failed to save sequence generation rule configuration [{}].",
+                        groupConfigRequestVO.getGroupName()));
     }
 
     @Override
@@ -107,7 +108,9 @@ public class GroupConfigServiceImpl implements GroupConfigService {
 
         ConfigAccess<GroupConfig> groupConfigAccess = accessTemplate.getGroupConfigAccess();
         long count = groupConfigAccess.count(
-            new LambdaQueryWrapper<GroupConfig>().eq(GroupConfig::getGroupName, groupName));
+                new LambdaQueryWrapper<GroupConfig>()
+                        .eq(GroupConfig::getNamespaceId, namespaceId)
+                        .eq(GroupConfig::getGroupName, groupName));
         if (count <= 0) {
             return false;
         }
@@ -117,20 +120,19 @@ public class GroupConfigServiceImpl implements GroupConfigService {
         // 使用@TableField(value = "version", update= "%s+1") 进行更新version, 这里必须初始化一个值
         groupConfig.setVersion(1);
         Assert.isTrue(systemProperties.getTotalPartition() > groupConfigRequestVO.getGroupPartition(),
-            () -> new EasyRetryServerException("分区超过最大分区. [{}]", systemProperties.getTotalPartition() - 1));
+                () -> new EasyRetryServerException("分区超过最大分区. [{}]", systemProperties.getTotalPartition() - 1));
         Assert.isTrue(groupConfigRequestVO.getGroupPartition() >= 0,
-            () -> new EasyRetryServerException("分区不能是负数."));
+                () -> new EasyRetryServerException("分区不能是负数."));
 
         // 校验retry_task_x和retry_dead_letter_x是否存在
-        checkGroupPartition(groupConfig);
-
+        checkGroupPartition(groupConfig, namespaceId);
 
         Assert.isTrue(1 == groupConfigAccess.update(groupConfig,
-                new LambdaUpdateWrapper<GroupConfig>()
-                    .eq(GroupConfig::getNamespaceId,namespaceId)
-                    .eq(GroupConfig::getGroupName, groupName)),
-            () -> new EasyRetryServerException("exception occurred while adding group. groupConfigVO[{}]",
-                groupConfigRequestVO));
+                        new LambdaUpdateWrapper<GroupConfig>()
+                                .eq(GroupConfig::getNamespaceId, namespaceId)
+                                .eq(GroupConfig::getGroupName, groupName)),
+                () -> new EasyRetryServerException("exception occurred while adding group. groupConfigVO[{}]",
+                        groupConfigRequestVO));
 
         if (SystemModeEnum.isRetry(systemProperties.getMode())) {
             // 同步版本， 版本为0代表需要同步到客户端
@@ -150,9 +152,9 @@ public class GroupConfigServiceImpl implements GroupConfigService {
         groupConfig.setGroupStatus(status);
         ConfigAccess<GroupConfig> groupConfigAccess = accessTemplate.getGroupConfigAccess();
         return groupConfigAccess.update(groupConfig,
-            new LambdaUpdateWrapper<GroupConfig>()
+                new LambdaUpdateWrapper<GroupConfig>()
 
-                .eq(GroupConfig::getGroupName, groupName)) == 1;
+                        .eq(GroupConfig::getGroupName, groupName)) == 1;
     }
 
     @Override
@@ -160,7 +162,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
 
         LambdaQueryWrapper<GroupConfig> groupConfigLambdaQueryWrapper = new LambdaQueryWrapper<>();
         groupConfigLambdaQueryWrapper.eq(GroupConfig::getNamespaceId,
-            UserSessionUtils.currentUserSession().getNamespaceId());
+                UserSessionUtils.currentUserSession().getNamespaceId());
         if (StrUtil.isNotBlank(queryVO.getGroupName())) {
             groupConfigLambdaQueryWrapper.like(GroupConfig::getGroupName, queryVO.getGroupName() + "%");
         }
@@ -169,24 +171,24 @@ public class GroupConfigServiceImpl implements GroupConfigService {
 
         groupConfigLambdaQueryWrapper.orderByDesc(GroupConfig::getId);
         PageDTO<GroupConfig> groupConfigPageDTO = groupConfigAccess.listPage(
-            new PageDTO<>(queryVO.getPage(), queryVO.getSize()), groupConfigLambdaQueryWrapper);
+                new PageDTO<>(queryVO.getPage(), queryVO.getSize()), groupConfigLambdaQueryWrapper);
         List<GroupConfig> records = groupConfigPageDTO.getRecords();
         if (CollectionUtils.isEmpty(records)) {
             return new PageResult<>(groupConfigPageDTO.getCurrent(), groupConfigPageDTO.getSize(),
-                groupConfigPageDTO.getTotal());
+                    groupConfigPageDTO.getTotal());
         }
 
         PageResult<List<GroupConfigResponseVO>> pageResult = new PageResult<>(groupConfigPageDTO.getCurrent(),
-            groupConfigPageDTO.getSize(), groupConfigPageDTO.getTotal());
+                groupConfigPageDTO.getSize(), groupConfigPageDTO.getTotal());
 
         List<GroupConfigResponseVO> responseVOList = GroupConfigResponseVOConverter.INSTANCE.toGroupConfigResponseVO(
-            records);
+                records);
 
         for (GroupConfigResponseVO groupConfigResponseVO : responseVOList) {
             Optional.ofNullable(IdGeneratorMode.modeOf(groupConfigResponseVO.getIdGeneratorMode()))
-                .ifPresent(idGeneratorMode -> {
-                    groupConfigResponseVO.setIdGeneratorModeName(idGeneratorMode.getDesc());
-                });
+                    .ifPresent(idGeneratorMode -> {
+                        groupConfigResponseVO.setIdGeneratorModeName(idGeneratorMode.getDesc());
+                    });
         }
 
         pageResult.setData(responseVOList);
@@ -203,50 +205,50 @@ public class GroupConfigServiceImpl implements GroupConfigService {
         groupConfig.setDescription(Optional.ofNullable(groupConfigRequestVO.getDescription()).orElse(StrUtil.EMPTY));
         if (Objects.isNull(groupConfigRequestVO.getGroupPartition())) {
             groupConfig.setGroupPartition(
-                HashUtil.bkdrHash(groupConfigRequestVO.getGroupName()) % systemProperties.getTotalPartition());
+                    HashUtil.bkdrHash(groupConfigRequestVO.getGroupName()) % systemProperties.getTotalPartition());
         } else {
             Assert.isTrue(systemProperties.getTotalPartition() > groupConfigRequestVO.getGroupPartition(),
-                () -> new EasyRetryServerException("分区超过最大分区. [{}]", systemProperties.getTotalPartition() - 1));
+                    () -> new EasyRetryServerException("分区超过最大分区. [{}]", systemProperties.getTotalPartition() - 1));
             Assert.isTrue(groupConfigRequestVO.getGroupPartition() >= 0,
-                () -> new EasyRetryServerException("分区不能是负数."));
+                    () -> new EasyRetryServerException("分区不能是负数."));
         }
 
         groupConfig.setBucketIndex(
-            HashUtil.bkdrHash(groupConfigRequestVO.getGroupName()) % systemProperties.getBucketTotal());
+                HashUtil.bkdrHash(groupConfigRequestVO.getGroupName()) % systemProperties.getBucketTotal());
         ConfigAccess<GroupConfig> groupConfigAccess = accessTemplate.getGroupConfigAccess();
         Assert.isTrue(1 == groupConfigAccess.insert(groupConfig),
-            () -> new EasyRetryServerException("新增组异常异常 groupConfigVO[{}]", groupConfigRequestVO));
+                () -> new EasyRetryServerException("新增组异常异常 groupConfigVO[{}]", groupConfigRequestVO));
 
         // 校验retry_task_x和retry_dead_letter_x是否存在
-        checkGroupPartition(groupConfig);
+        checkGroupPartition(groupConfig, systemUser.getNamespaceId());
     }
 
     /**
      * 校验retry_task_x和retry_dead_letter_x是否存在
      */
-    private void checkGroupPartition(GroupConfig groupConfig) {
+    private void checkGroupPartition(GroupConfig groupConfig, String namespaceId) {
         try {
             TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();
-            retryTaskAccess.one(groupConfig.getGroupName(),
-                new LambdaQueryWrapper<RetryTask>().eq(RetryTask::getId, 1));
+            retryTaskAccess.count(groupConfig.getGroupName(), namespaceId,
+                    new LambdaQueryWrapper<RetryTask>().eq(RetryTask::getId, 1));
         } catch (BadSqlGrammarException e) {
             Optional.ofNullable(e.getMessage()).ifPresent(s -> {
                 if (s.contains("retry_task_" + groupConfig.getGroupPartition()) && s.contains("doesn't exist")) {
                     throw new EasyRetryServerException("分区:[{}] '未配置表retry_task_{}', 请联系管理员进行配置",
-                        groupConfig.getGroupPartition(), groupConfig.getGroupPartition());
+                            groupConfig.getGroupPartition(), groupConfig.getGroupPartition());
                 }
             });
         }
 
         try {
             TaskAccess<RetryDeadLetter> retryTaskAccess = accessTemplate.getRetryDeadLetterAccess();
-            retryTaskAccess.one(groupConfig.getGroupName(),
-                new LambdaQueryWrapper<RetryDeadLetter>().eq(RetryDeadLetter::getId, 1));
+            retryTaskAccess.one(groupConfig.getGroupName(), groupConfig.getNamespaceId(),
+                    new LambdaQueryWrapper<RetryDeadLetter>().eq(RetryDeadLetter::getId, 1));
         } catch (BadSqlGrammarException e) {
             Optional.ofNullable(e.getMessage()).ifPresent(s -> {
                 if (s.contains("retry_dead_letter_" + groupConfig.getGroupPartition()) && s.contains("doesn't exist")) {
                     throw new EasyRetryServerException("分区:[{}] '未配置表retry_dead_letter_{}', 请联系管理员进行配置",
-                        groupConfig.getGroupPartition(), groupConfig.getGroupPartition());
+                            groupConfig.getGroupPartition(), groupConfig.getGroupPartition());
                 }
             });
         }
@@ -257,10 +259,12 @@ public class GroupConfigServiceImpl implements GroupConfigService {
 
         ConfigAccess<GroupConfig> groupConfigAccess = accessTemplate.getGroupConfigAccess();
         GroupConfig groupConfig = groupConfigAccess.one(
-            new LambdaQueryWrapper<GroupConfig>().eq(GroupConfig::getGroupName, groupName));
+                new LambdaQueryWrapper<GroupConfig>()
+                        .eq(GroupConfig::getNamespaceId, UserSessionUtils.currentUserSession().getNamespaceId())
+                        .eq(GroupConfig::getGroupName, groupName));
 
         GroupConfigResponseVO groupConfigResponseVO = GroupConfigResponseVOConverter.INSTANCE.toGroupConfigResponseVO(
-            groupConfig);
+                groupConfig);
 
         Optional.ofNullable(IdGeneratorMode.modeOf(groupConfig.getIdGeneratorMode())).ifPresent(idGeneratorMode -> {
             groupConfigResponseVO.setIdGeneratorModeName(idGeneratorMode.getDesc());
@@ -271,7 +275,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
 
     @Override
     public List<GroupConfigResponseVO> getAllGroupConfigList(final List<String> namespaceIds) {
-        if(CollectionUtils.isEmpty(namespaceIds)) {
+        if (CollectionUtils.isEmpty(namespaceIds)) {
             return new ArrayList<>();
         }
 
@@ -288,10 +292,10 @@ public class GroupConfigServiceImpl implements GroupConfigService {
         ConfigAccess<GroupConfig> groupConfigAccess = accessTemplate.getGroupConfigAccess();
 
         List<GroupConfig> groupConfigs = groupConfigAccess.list(new LambdaQueryWrapper<GroupConfig>()
-                .in(GroupConfig::getNamespaceId, UserSessionUtils.currentUserSession().getNamespaceId())
-                .select(GroupConfig::getGroupName))
-            .stream()
-            .collect(Collectors.toList());
+                        .in(GroupConfig::getNamespaceId, UserSessionUtils.currentUserSession().getNamespaceId())
+                        .select(GroupConfig::getGroupName))
+                .stream()
+                .collect(Collectors.toList());
 
         return groupConfigs.stream().map(GroupConfig::getGroupName).collect(Collectors.toList());
     }

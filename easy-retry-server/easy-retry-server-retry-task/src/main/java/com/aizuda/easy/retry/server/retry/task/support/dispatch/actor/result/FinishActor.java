@@ -38,7 +38,7 @@ import java.time.LocalDateTime;
 @Component(ActorGenerator.FINISH_ACTOR)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Slf4j
-public class FinishActor extends AbstractActor  {
+public class FinishActor extends AbstractActor {
 
     @Autowired
     private AccessTemplate accessTemplate;
@@ -52,28 +52,28 @@ public class FinishActor extends AbstractActor  {
 
     @Override
     public Receive createReceive() {
-        return receiveBuilder().match(RetryTask.class, retryTask->{
+        return receiveBuilder().match(RetryTask.class, retryTask -> {
             LogUtils.info(log, "FinishActor params:[{}]", retryTask);
 
             retryTask.setRetryStatus(RetryStatusEnum.FINISH.getStatus());
 
             try {
-               transactionTemplate.execute(new TransactionCallbackWithoutResult() {
-                   @Override
-                   protected void doInTransactionWithoutResult(TransactionStatus status) {
+                transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+                    @Override
+                    protected void doInTransactionWithoutResult(TransactionStatus status) {
 
-                       retryTask.setUpdateDt(LocalDateTime.now());
-                       Assert.isTrue(1 == accessTemplate.getRetryTaskAccess()
-                                       .updateById(retryTask.getGroupName(), retryTask),
-                               () -> new EasyRetryServerException("更新重试任务失败. groupName:[{}] uniqueId:[{}]",
-                                       retryTask.getGroupName(),  retryTask.getUniqueId()));
+                        retryTask.setUpdateDt(LocalDateTime.now());
+                        Assert.isTrue(1 == accessTemplate.getRetryTaskAccess()
+                                        .updateById(retryTask.getGroupName(), retryTask.getNamespaceId(), retryTask),
+                                () -> new EasyRetryServerException("更新重试任务失败. groupName:[{}] uniqueId:[{}]",
+                                        retryTask.getGroupName(), retryTask.getUniqueId()));
 
-                       // 创建一个回调任务
-                       callbackRetryTaskHandler.create(retryTask);
-                   }
-               });
+                        // 创建一个回调任务
+                        callbackRetryTaskHandler.create(retryTask);
+                    }
+                });
 
-            }catch (Exception e) {
+            } catch (Exception e) {
                 LogUtils.error(log, "更新重试任务失败", e);
             } finally {
                 // 清除幂等标识位

@@ -119,49 +119,49 @@ public class RetryTaskServiceImpl implements RetryTaskService {
             retryTaskLambdaQueryWrapper.eq(RetryTask::getRetryStatus, queryVO.getRetryStatus());
         }
 
-        RequestDataHelper.setPartition(queryVO.getGroupName());
-
         retryTaskLambdaQueryWrapper.select(RetryTask::getId, RetryTask::getBizNo, RetryTask::getIdempotentId,
                 RetryTask::getGroupName, RetryTask::getNextTriggerAt, RetryTask::getRetryCount,
                 RetryTask::getRetryStatus, RetryTask::getUpdateDt, RetryTask::getSceneName, RetryTask::getUniqueId,
                 RetryTask::getTaskType);
-        pageDTO = accessTemplate.getRetryTaskAccess().listPage(queryVO.getGroupName(), pageDTO,
-                retryTaskLambdaQueryWrapper.orderByDesc(RetryTask::getCreateDt));
+        pageDTO = accessTemplate.getRetryTaskAccess()
+                .listPage(queryVO.getGroupName(), namespaceId,
+                        pageDTO,
+                        retryTaskLambdaQueryWrapper.orderByDesc(RetryTask::getCreateDt));
         return new PageResult<>(pageDTO,
                 RetryTaskResponseVOConverter.INSTANCE.toRetryTaskResponseVO(pageDTO.getRecords()));
     }
 
     @Override
     public RetryTaskResponseVO getRetryTaskById(String groupName, Long id) {
-        RequestDataHelper.setPartition(groupName);
         TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();
-        RetryTask retryTask = retryTaskAccess.one(groupName,
-                new LambdaQueryWrapper<RetryTask>().eq(RetryTask::getId, id));
+        RetryTask retryTask = retryTaskAccess.one(groupName, UserSessionUtils.currentUserSession().getNamespaceId(),
+                new LambdaQueryWrapper<RetryTask>()
+                        .eq(RetryTask::getId, id));
         return RetryTaskResponseVOConverter.INSTANCE.toRetryTaskResponseVO(retryTask);
     }
 
     @Override
     @Transactional
-    public int updateRetryTaskStatus(RetryTaskUpdateStatusRequestVO retryTaskUpdateStatusRequestVO) {
+    public int updateRetryTaskStatus(RetryTaskUpdateStatusRequestVO requestVO) {
 
-        RetryStatusEnum retryStatusEnum = RetryStatusEnum.getByStatus(retryTaskUpdateStatusRequestVO.getRetryStatus());
+        RetryStatusEnum retryStatusEnum = RetryStatusEnum.getByStatus(requestVO.getRetryStatus());
         if (Objects.isNull(retryStatusEnum)) {
-            throw new EasyRetryServerException("重试状态错误. [{}]", retryTaskUpdateStatusRequestVO.getRetryStatus());
+            throw new EasyRetryServerException("重试状态错误. [{}]", requestVO.getRetryStatus());
         }
 
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
 
         TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();
-        RetryTask retryTask = retryTaskAccess.one(retryTaskUpdateStatusRequestVO.getGroupName(),
+        RetryTask retryTask = retryTaskAccess.one(requestVO.getGroupName(), namespaceId,
                 new LambdaQueryWrapper<RetryTask>()
                         .eq(RetryTask::getNamespaceId, namespaceId)
-                        .eq(RetryTask::getId, retryTaskUpdateStatusRequestVO.getId()));
+                        .eq(RetryTask::getId, requestVO.getId()));
         if (Objects.isNull(retryTask)) {
             throw new EasyRetryServerException("未查询到重试任务");
         }
 
-        retryTask.setRetryStatus(retryTaskUpdateStatusRequestVO.getRetryStatus());
-        retryTask.setGroupName(retryTaskUpdateStatusRequestVO.getGroupName());
+        retryTask.setRetryStatus(requestVO.getRetryStatus());
+        retryTask.setGroupName(requestVO.getGroupName());
 
         // 若恢复重试则需要重新计算下次触发时间
         if (RetryStatusEnum.RUNNING.getStatus().equals(retryStatusEnum.getStatus())) {
@@ -194,7 +194,7 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         }
 
         retryTask.setUpdateDt(LocalDateTime.now());
-        return retryTaskAccess.updateById(retryTaskUpdateStatusRequestVO.getGroupName(), retryTask);
+        return retryTaskAccess.updateById(requestVO.getGroupName(), namespaceId, retryTask);
     }
 
     @Override
@@ -273,7 +273,7 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
         // 根据重试数据id，更新执行器名称
         TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();
-        return retryTaskAccess.update(requestVO.getGroupName(), retryTask,
+        return retryTaskAccess.update(requestVO.getGroupName(), namespaceId, retryTask,
                 new LambdaUpdateWrapper<RetryTask>()
                         .eq(RetryTask::getNamespaceId, namespaceId)
                         .eq(RetryTask::getGroupName, requestVO.getGroupName())
@@ -284,7 +284,7 @@ public class RetryTaskServiceImpl implements RetryTaskService {
     public Integer deleteRetryTask(final BatchDeleteRetryTaskVO requestVO) {
         TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
-        return retryTaskAccess.delete(requestVO.getGroupName(),
+        return retryTaskAccess.delete(requestVO.getGroupName(), namespaceId,
                 new LambdaQueryWrapper<RetryTask>()
                         .eq(RetryTask::getNamespaceId, namespaceId)
                         .eq(RetryTask::getGroupName, requestVO.getGroupName())
@@ -355,7 +355,8 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         List<String> uniqueIds = requestVO.getUniqueIds();
 
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
-        List<RetryTask> list = accessTemplate.getRetryTaskAccess().list(requestVO.getGroupName(),
+        List<RetryTask> list = accessTemplate.getRetryTaskAccess().list(
+                requestVO.getGroupName(), namespaceId,
                 new LambdaQueryWrapper<RetryTask>()
                         .eq(RetryTask::getNamespaceId, namespaceId)
                         .eq(RetryTask::getTaskType, TaskTypeEnum.RETRY.getType())
@@ -379,7 +380,7 @@ public class RetryTaskServiceImpl implements RetryTaskService {
 
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
 
-        List<RetryTask> list = accessTemplate.getRetryTaskAccess().list(requestVO.getGroupName(),
+        List<RetryTask> list = accessTemplate.getRetryTaskAccess().list(requestVO.getGroupName(), namespaceId,
                 new LambdaQueryWrapper<RetryTask>()
                         .eq(RetryTask::getNamespaceId, namespaceId)
                         .eq(RetryTask::getTaskType, TaskTypeEnum.CALLBACK.getType())

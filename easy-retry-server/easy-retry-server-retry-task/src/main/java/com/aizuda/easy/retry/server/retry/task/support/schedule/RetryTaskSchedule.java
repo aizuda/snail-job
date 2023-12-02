@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.server.retry.task.support.schedule;
 
+import cn.hutool.core.lang.Pair;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.common.Lifecycle;
@@ -47,14 +48,18 @@ public class RetryTaskSchedule extends AbstractSchedule implements Lifecycle {
     @Override
     protected void doExecute() {
         try {
-            Set<String> groupNameList = accessTemplate.getGroupConfigAccess()
+            Set<Pair<String/*groupName*/, String/*namespaceId*/>> groupNameList = accessTemplate.getGroupConfigAccess()
                 .list(new LambdaQueryWrapper<GroupConfig>()
-                    .select(GroupConfig::getGroupName)
+                    .select(GroupConfig::getGroupName, GroupConfig::getNamespaceId)
                         .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus()))
-                .stream().map(GroupConfig::getGroupName).collect(Collectors.toSet());
+                .stream().map(groupConfig -> {
 
-            for (String groupName : groupNameList) {
-                retryService.moveDeadLetterAndDelFinish(groupName);
+
+                    return Pair.of(groupConfig.getGroupName(), groupConfig.getNamespaceId());
+                    }).collect(Collectors.toSet());
+
+            for (Pair<String/*groupName*/, String/*namespaceId*/> pair : groupNameList) {
+                retryService.moveDeadLetterAndDelFinish(pair.getKey(), pair.getValue());
             }
 
         } catch (Exception e) {

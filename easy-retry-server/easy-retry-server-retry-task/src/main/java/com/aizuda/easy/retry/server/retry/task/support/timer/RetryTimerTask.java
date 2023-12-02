@@ -31,10 +31,11 @@ public class RetryTimerTask extends AbstractTimerTask {
     }
 
     @Override
-    public void doRun(final Timeout timeout){
+    public void doRun(final Timeout timeout) {
         AccessTemplate accessTemplate = SpringContext.getBeanByType(AccessTemplate.class);
         TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();
-        RetryTask retryTask = retryTaskAccess.one(context.getGroupName(), new LambdaQueryWrapper<RetryTask>()
+        RetryTask retryTask = retryTaskAccess.one(context.getGroupName(), context.getNamespaceId(),
+                new LambdaQueryWrapper<RetryTask>()
                 .eq(RetryTask::getNamespaceId, context.getNamespaceId())
                 .eq(RetryTask::getGroupName, context.getGroupName())
                 .eq(RetryTask::getUniqueId, context.getUniqueId())

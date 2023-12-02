@@ -55,16 +55,19 @@ public class RequestDataHelper {
      *
      * @param groupName 组名称
      */
-    public static void setPartition(String groupName) {
+    public static void setPartition(String groupName, String namespaceId) {
 
-        if (StrUtil.isBlank(groupName)) {
-            throw new EasyRetryDatasourceException("组名称不能为空");
+        if (StrUtil.isBlank(groupName) && StrUtil.isNotBlank(namespaceId)) {
+            throw new EasyRetryDatasourceException("组名称或者命名空间ID不能为空");
         }
 
         GroupConfigMapper groupConfigMapper = SpringContext.getBeanByType(GroupConfigMapper.class);
 
-        GroupConfig groupConfig = groupConfigMapper.selectOne(new LambdaQueryWrapper<GroupConfig>()
-                .eq(GroupConfig::getGroupName, groupName));
+        GroupConfig groupConfig = groupConfigMapper.selectOne(
+                new LambdaQueryWrapper<GroupConfig>()
+                        .select(GroupConfig::getGroupPartition)
+                        .eq(GroupConfig::getNamespaceId, namespaceId)
+                        .eq(GroupConfig::getGroupName, groupName));
         if (Objects.isNull(groupConfig)) {
             throw new EasyRetryDatasourceException("groupName:[{}]不存在", groupName);
         }
@@ -103,7 +106,6 @@ public class RequestDataHelper {
 
         return (Integer) requestData.get(PARTITION);
     }
-
 
 
     public static void remove() {

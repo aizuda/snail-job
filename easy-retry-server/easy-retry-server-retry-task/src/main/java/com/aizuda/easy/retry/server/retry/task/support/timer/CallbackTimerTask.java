@@ -36,11 +36,12 @@ public class CallbackTimerTask extends AbstractTimerTask {
         log.info("回调任务执行 {}", LocalDateTime.now());
         AccessTemplate accessTemplate = SpringContext.getBeanByType(AccessTemplate.class);
         TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();
-        RetryTask retryTask = retryTaskAccess.one(context.getGroupName(), new LambdaQueryWrapper<RetryTask>()
-                .eq(RetryTask::getNamespaceId, context.getNamespaceId())
-                .eq(RetryTask::getGroupName, context.getGroupName())
-                .eq(RetryTask::getUniqueId, context.getUniqueId())
-                .eq(RetryTask::getRetryStatus, RetryStatusEnum.RUNNING.getStatus()));
+        RetryTask retryTask = retryTaskAccess.one(context.getGroupName(), context.getNamespaceId(),
+                new LambdaQueryWrapper<RetryTask>()
+                        .eq(RetryTask::getNamespaceId, context.getNamespaceId())
+                        .eq(RetryTask::getGroupName, context.getGroupName())
+                        .eq(RetryTask::getUniqueId, context.getUniqueId())
+                        .eq(RetryTask::getRetryStatus, RetryStatusEnum.RUNNING.getStatus()));
         if (Objects.isNull(retryTask)) {
             return;
         }

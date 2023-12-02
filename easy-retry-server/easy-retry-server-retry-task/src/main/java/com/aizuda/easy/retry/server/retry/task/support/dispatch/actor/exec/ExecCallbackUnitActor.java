@@ -116,7 +116,7 @@ public class ExecCallbackUnitActor extends AbstractActor {
         String retryTaskUniqueId = callbackRetryTaskHandler.getRetryTaskUniqueId(callbackTask.getUniqueId());
 
         TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();
-        RetryTask retryTask = retryTaskAccess.one(callbackTask.getGroupName(),
+        RetryTask retryTask = retryTaskAccess.one(callbackTask.getGroupName(), callbackTask.getNamespaceId(),
                 new LambdaQueryWrapper<RetryTask>()
                         .select(RetryTask::getRetryStatus)
                         .eq(RetryTask::getNamespaceId, serverNode.getNamespaceId())

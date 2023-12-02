@@ -61,34 +61,33 @@ public abstract class AbstractGenerator implements TaskGenerator {
 
         //客户端上报任务根据幂等id去重
         List<TaskContext.TaskInfo> taskInfos = taskContext.getTaskInfos().stream().collect(Collectors.collectingAndThen(
-            Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(TaskContext.TaskInfo::getIdempotentId))),
-            ArrayList::new));
+                Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(TaskContext.TaskInfo::getIdempotentId))),
+                ArrayList::new));
 
         Set<String> idempotentIdSet = taskInfos.stream().map(TaskContext.TaskInfo::getIdempotentId)
-            .collect(Collectors.toSet());
+                .collect(Collectors.toSet());
 
         TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();
 
         // 获取相关的任务，用户幂等校验
-        RequestDataHelper.setPartition(taskContext.getGroupName());
-        List<RetryTask> retryTasks = retryTaskAccess.list(taskContext.getGroupName(),
-            new LambdaQueryWrapper<RetryTask>()
-                .eq(RetryTask::getNamespaceId, taskContext.getNamespaceId())
-                .eq(RetryTask::getGroupName, taskContext.getGroupName())
-                .eq(RetryTask::getSceneName, taskContext.getSceneName())
-                .eq(RetryTask::getRetryStatus, RetryStatusEnum.RUNNING.getStatus())
-                .eq(RetryTask::getTaskType, TaskTypeEnum.RETRY.getType())
-                .in(RetryTask::getIdempotentId, idempotentIdSet));
+        List<RetryTask> retryTasks = retryTaskAccess.list(taskContext.getGroupName(), taskContext.getNamespaceId(),
+                new LambdaQueryWrapper<RetryTask>()
+                        .eq(RetryTask::getNamespaceId, taskContext.getNamespaceId())
+                        .eq(RetryTask::getGroupName, taskContext.getGroupName())
+                        .eq(RetryTask::getSceneName, taskContext.getSceneName())
+                        .eq(RetryTask::getRetryStatus, RetryStatusEnum.RUNNING.getStatus())
+                        .eq(RetryTask::getTaskType, TaskTypeEnum.RETRY.getType())
+                        .in(RetryTask::getIdempotentId, idempotentIdSet));
 
         Map<String/*幂等ID*/, List<RetryTask>> retryTaskMap = retryTasks.stream()
-            .collect(Collectors.groupingBy(RetryTask::getIdempotentId));
+                .collect(Collectors.groupingBy(RetryTask::getIdempotentId));
 
         List<RetryTask> waitInsertTasks = new ArrayList<>();
         List<RetryTaskLog> waitInsertTaskLogs = new ArrayList<>();
         LocalDateTime now = LocalDateTime.now();
         for (TaskContext.TaskInfo taskInfo : taskInfos) {
             Pair<List<RetryTask>, List<RetryTaskLog>> pair = doConvertTask(retryTaskMap, taskContext, now, taskInfo,
-                sceneConfig);
+                    sceneConfig);
             waitInsertTasks.addAll(pair.getKey());
             waitInsertTaskLogs.addAll(pair.getValue());
         }
@@ -98,10 +97,11 @@ public abstract class AbstractGenerator implements TaskGenerator {
         }
 
         Assert.isTrue(
-            waitInsertTasks.size() == retryTaskAccess.batchInsert(taskContext.getGroupName(), waitInsertTasks),
-            () -> new EasyRetryServerException("failed to report data"));
+                waitInsertTasks.size() == retryTaskAccess.batchInsert(taskContext.getGroupName(),
+                        taskContext.getNamespaceId(), waitInsertTasks),
+                () -> new EasyRetryServerException("failed to report data"));
         Assert.isTrue(waitInsertTaskLogs.size() == retryTaskLogMapper.batchInsert(waitInsertTaskLogs),
-            () -> new EasyRetryServerException("新增重试日志失败"));
+                () -> new EasyRetryServerException("新增重试日志失败"));
     }
 
     /**
@@ -111,17 +111,17 @@ public abstract class AbstractGenerator implements TaskGenerator {
      * @param sceneConfig
      */
     private Pair<List<RetryTask>, List<RetryTaskLog>> doConvertTask(Map<String/*幂等ID*/, List<RetryTask>> retryTaskMap,
-        TaskContext taskContext, LocalDateTime now,
-        TaskInfo taskInfo, SceneConfig sceneConfig) {
+                                                                    TaskContext taskContext, LocalDateTime now,
+                                                                    TaskInfo taskInfo, SceneConfig sceneConfig) {
         List<RetryTask> waitInsertTasks = new ArrayList<>();
         List<RetryTaskLog> waitInsertTaskLogs = new ArrayList<>();
 
         // 判断是否存在与幂等ID相同的任务
         List<RetryTask> list = retryTaskMap.getOrDefault(taskInfo.getIdempotentId(), new ArrayList<>()).stream()
-            .filter(retryTask ->
-                taskContext.getGroupName().equals(retryTask.getGroupName())
-                    && taskContext.getNamespaceId().equals(retryTask.getNamespaceId())
-                    && taskContext.getSceneName().equals(retryTask.getSceneName())).collect(Collectors.toList());
+                .filter(retryTask ->
+                        taskContext.getGroupName().equals(retryTask.getGroupName())
+                                && taskContext.getNamespaceId().equals(retryTask.getNamespaceId())
+                                && taskContext.getSceneName().equals(retryTask.getSceneName())).collect(Collectors.toList());
         // 说明存在相同的任务
         if (!CollectionUtils.isEmpty(list)) {
             LogUtils.warn(log, "interrupted reporting in retrying task. [{}]", JsonUtil.toJsonString(taskInfo));
@@ -164,21 +164,21 @@ public abstract class AbstractGenerator implements TaskGenerator {
 
     private SceneConfig checkAndInitScene(TaskContext taskContext) {
         SceneConfig sceneConfig = accessTemplate.getSceneConfigAccess()
-            .getSceneConfigByGroupNameAndSceneName(taskContext.getGroupName(), taskContext.getSceneName(),
-                taskContext.getNamespaceId());
+                .getSceneConfigByGroupNameAndSceneName(taskContext.getGroupName(), taskContext.getSceneName(),
+                        taskContext.getNamespaceId());
         if (Objects.isNull(sceneConfig)) {
 
             GroupConfig groupConfig = accessTemplate.getGroupConfigAccess()
-                .getGroupConfigByGroupName(taskContext.getGroupName(), taskContext.getNamespaceId());
+                    .getGroupConfigByGroupName(taskContext.getGroupName(), taskContext.getNamespaceId());
             if (Objects.isNull(groupConfig)) {
                 throw new EasyRetryServerException(
-                    "failed to report data, no group configuration found. groupName:[{}]", taskContext.getGroupName());
+                        "failed to report data, no group configuration found. groupName:[{}]", taskContext.getGroupName());
             }
 
             if (groupConfig.getInitScene().equals(StatusEnum.NO.getStatus())) {
                 throw new EasyRetryServerException(
-                    "failed to report data, no scene configuration found. groupName:[{}] sceneName:[{}]",
-                    taskContext.getGroupName(), taskContext.getSceneName());
+                        "failed to report data, no scene configuration found. groupName:[{}] sceneName:[{}]",
+                        taskContext.getGroupName(), taskContext.getSceneName());
             } else {
                 // 若配置了默认初始化场景配置，则发现上报数据的时候未配置场景，默认生成一个场景
                 sceneConfig = initScene(taskContext.getGroupName(), taskContext.getSceneName(), taskContext.getNamespaceId());
@@ -206,7 +206,7 @@ public abstract class AbstractGenerator implements TaskGenerator {
         sceneConfig.setMaxRetryCount(DelayLevelEnum._21.getLevel());
         sceneConfig.setDescription("自动初始化场景");
         Assert.isTrue(1 == accessTemplate.getSceneConfigAccess().insert(sceneConfig),
-            () -> new EasyRetryServerException("init scene error"));
+                () -> new EasyRetryServerException("init scene error"));
         return sceneConfig;
     }
 

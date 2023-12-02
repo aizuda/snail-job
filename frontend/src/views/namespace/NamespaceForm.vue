@@ -13,7 +13,7 @@
           :disabled="isEdit"
           v-decorator="[
             'uniqueId',
-            {rules: [{ required: false, message: '请输入空间名称', whitespace: true},{required: true, max: 64, message: '最多支持64个字符！'}, {validator: validate, trigger: ['change', 'blur']}]}
+            {rules: [{ required: false, message: '请输入空间名称', whitespace: true},{required: false, max: 64, message: '最多支持64个字符！'}, {validator: validate, trigger: ['change', 'blur']}]}
           ]" />
       </a-form-item>
       <a-form-item

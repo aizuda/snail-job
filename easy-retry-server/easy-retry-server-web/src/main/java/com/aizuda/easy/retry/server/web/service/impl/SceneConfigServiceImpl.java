@@ -54,7 +54,7 @@ public class SceneConfigServiceImpl implements SceneConfigService {
         }
 
         pageDTO = accessTemplate.getSceneConfigAccess()
-            .listPage(pageDTO, sceneConfigLambdaQueryWrapper.orderByDesc(SceneConfig::getCreateDt));
+                .listPage(pageDTO, sceneConfigLambdaQueryWrapper.orderByDesc(SceneConfig::getCreateDt));
 
         return new PageResult<>(pageDTO, SceneConfigResponseVOConverter.INSTANCE.batchConvert(pageDTO.getRecords()));
 
@@ -66,11 +66,11 @@ public class SceneConfigServiceImpl implements SceneConfigService {
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
 
         List<SceneConfig> sceneConfigs = accessTemplate.getSceneConfigAccess()
-            .list(new LambdaQueryWrapper<SceneConfig>()
-                .select(SceneConfig::getSceneName, SceneConfig::getDescription)
-                .eq(SceneConfig::getNamespaceId, namespaceId)
-                .eq(SceneConfig::getGroupName, groupName)
-                .orderByDesc(SceneConfig::getCreateDt));
+                .list(new LambdaQueryWrapper<SceneConfig>()
+                        .select(SceneConfig::getSceneName, SceneConfig::getDescription)
+                        .eq(SceneConfig::getNamespaceId, namespaceId)
+                        .eq(SceneConfig::getGroupName, groupName)
+                        .orderByDesc(SceneConfig::getCreateDt));
 
         return SceneConfigResponseVOConverter.INSTANCE.batchConvert(sceneConfigs);
     }
@@ -79,23 +79,29 @@ public class SceneConfigServiceImpl implements SceneConfigService {
     public Boolean saveSceneConfig(SceneConfigRequestVO requestVO) {
 
         checkExecuteInterval(requestVO);
-
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
+        ConfigAccess<SceneConfig> sceneConfigAccess = accessTemplate.getSceneConfigAccess();
+        Assert.isTrue(0 == sceneConfigAccess.count(
+                new LambdaQueryWrapper<SceneConfig>()
+                        .eq(SceneConfig::getNamespaceId, namespaceId)
+                        .eq(SceneConfig::getGroupName, requestVO.getGroupName())
+                        .eq(SceneConfig::getSceneName, requestVO.getSceneName())
+
+        ), () -> new EasyRetryServerException("场景名称重复. {}", requestVO.getSceneName()));
 
         SceneConfig sceneConfig = SceneConfigConverter.INSTANCE.toSceneConfigRequestVO(requestVO);
         sceneConfig.setCreateDt(LocalDateTime.now());
         sceneConfig.setNamespaceId(namespaceId);
-        ConfigAccess<SceneConfig> sceneConfigAccess = accessTemplate.getSceneConfigAccess();
         Assert.isTrue(1 == sceneConfigAccess.insert(sceneConfig),
-            () -> new EasyRetryServerException("failed to insert scene. sceneConfig:[{}]",
-                JsonUtil.toJsonString(sceneConfig)));
+                () -> new EasyRetryServerException("failed to insert scene. sceneConfig:[{}]",
+                        JsonUtil.toJsonString(sceneConfig)));
         return Boolean.TRUE;
     }
 
     private static void checkExecuteInterval(SceneConfigRequestVO requestVO) {
         if (Lists.newArrayList(WaitStrategies.WaitStrategyEnum.FIXED.getType(),
-                WaitStrategies.WaitStrategyEnum.RANDOM.getType())
-            .contains(requestVO.getBackOff())) {
+                        WaitStrategies.WaitStrategyEnum.RANDOM.getType())
+                .contains(requestVO.getBackOff())) {
             if (Integer.parseInt(requestVO.getTriggerInterval()) < 10) {
                 throw new EasyRetryServerException("间隔时间不得小于10");
             }
@@ -120,19 +126,19 @@ public class SceneConfigServiceImpl implements SceneConfigService {
 
         sceneConfig.setTriggerInterval(Optional.ofNullable(sceneConfig.getTriggerInterval()).orElse(StrUtil.EMPTY));
         Assert.isTrue(1 == accessTemplate.getSceneConfigAccess().update(sceneConfig,
-                new LambdaUpdateWrapper<SceneConfig>()
-                    .eq(SceneConfig::getNamespaceId, namespaceId)
-                    .eq(SceneConfig::getGroupName, requestVO.getGroupName())
-                    .eq(SceneConfig::getSceneName, requestVO.getSceneName())),
-            () -> new EasyRetryServerException("failed to update scene. sceneConfig:[{}]",
-                JsonUtil.toJsonString(sceneConfig)));
+                        new LambdaUpdateWrapper<SceneConfig>()
+                                .eq(SceneConfig::getNamespaceId, namespaceId)
+                                .eq(SceneConfig::getGroupName, requestVO.getGroupName())
+                                .eq(SceneConfig::getSceneName, requestVO.getSceneName())),
+                () -> new EasyRetryServerException("failed to update scene. sceneConfig:[{}]",
+                        JsonUtil.toJsonString(sceneConfig)));
         return Boolean.TRUE;
     }
 
     @Override
     public SceneConfigResponseVO getSceneConfigDetail(Long id) {
         SceneConfig sceneConfig = accessTemplate.getSceneConfigAccess().one(new LambdaQueryWrapper<SceneConfig>()
-            .eq(SceneConfig::getId, id));
+                .eq(SceneConfig::getId, id));
         return SceneConfigResponseVOConverter.INSTANCE.convert(sceneConfig);
     }
 }
