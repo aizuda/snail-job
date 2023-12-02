@@ -2,7 +2,6 @@ package com.aizuda.easy.retry.server.web.model.response;
 
 import lombok.Data;
 
-import java.math.BigDecimal;
 
 /**
  * @author: www.byteblogs.com
@@ -11,14 +10,19 @@ import java.math.BigDecimal;
 @Data
 public class DispatchQuantityResponseVO {
 
+    private String createDt;
+
     private Long total;
 
-    private BigDecimal successPercent = BigDecimal.ZERO;
-
-    private Long success;
+    private Long successNum;
 
     private Long fail;
 
-    private String createDt;
+    private Long totalNum;
 
+    private Long failNum;
+
+    private Long stopNum;
+
+    private Long cancelNum;
 }

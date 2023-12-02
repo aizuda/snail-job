@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.template.datasource.persistence.mapper;
 
 
+import com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardRetryResponseDO;
 import com.aizuda.easy.retry.template.datasource.persistence.dataobject.DispatchQuantityResponseDO;
 import com.aizuda.easy.retry.template.datasource.persistence.dataobject.SceneQuantityRankResponseDO;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLog;
@@ -24,13 +25,15 @@ public interface RetryTaskLogMapper extends BaseMapper<RetryTaskLog> {
                                                         @Param("endTime")LocalDateTime endTime
                                                         );
 
+    @Deprecated
     List<DispatchQuantityResponseDO> lineDispatchQuantity(@Param("groupName") String groupName,
                                                           @Param("retryStatus") Integer retryStatus,
                                                           @Param("type") String type,
                                                           @Param("startTime")LocalDateTime startTime,
                                                           @Param("endTime")LocalDateTime endTime
     );
-//
+
     int batchInsert(List<RetryTaskLog> list);
 
+    List<DashboardRetryResponseDO> retrySummaryRetryTaskLogList(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
 }

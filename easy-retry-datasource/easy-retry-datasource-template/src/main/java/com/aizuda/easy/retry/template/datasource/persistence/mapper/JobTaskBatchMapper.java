@@ -2,12 +2,14 @@ package com.aizuda.easy.retry.template.datasource.persistence.mapper;
 
 import com.aizuda.easy.retry.template.datasource.persistence.dataobject.JobBatchQueryDO;
 import com.aizuda.easy.retry.template.datasource.persistence.dataobject.JobBatchResponseDO;
+import com.aizuda.easy.retry.template.datasource.persistence.dataobject.JobBatchSummaryResponseDO;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTaskBatch;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -22,4 +24,6 @@ import java.util.List;
 public interface JobTaskBatchMapper extends BaseMapper<JobTaskBatch> {
 
     List<JobBatchResponseDO> selectJobBatchList(IPage<JobTaskBatch> iPage, @Param("queryDO") JobBatchQueryDO queryDO);
+
+    List<JobBatchSummaryResponseDO> summaryJobBatchList(@Param("from") LocalDateTime todayFrom, @Param("to") LocalDateTime to);
 }

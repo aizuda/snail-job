@@ -5,6 +5,11 @@ const api = {
   role: '/role',
   service: '/service',
   permission: '/permission',
+  dashboardTaskRetryJob: `/dashboard/task-retry-job`,
+  dashboardRetryLine: '/dashboard/retry/line',
+  dashboardJobLine: '/dashboard/job/line',
+  pods: '/dashboard/pods',
+  consumerGroup: '/dashboard/consumer/group',
   permissionNoPager: '/permission/no-pager',
   orgTree: '/org/tree',
   groupConfigForPage: '/group/list',
@@ -38,16 +43,9 @@ const api = {
   saveUser: '/user',
   systemUserByUserName: '/user/username/user-info',
   systemUserPermissionByUserId: '/user-permissions/',
-  countTask: '/dashboard/task/count',
-  countDispatch: '/dashboard/dispatch/count',
-  countActivePod: '/dashboard/active-pod/count',
-  rankSceneQuantity: '/dashboard/scene/rank',
-  lineDispatchQuantity: '/dashboard/dispatch/line',
   partitionTableList: '/group/partition-table/list',
   totalPartition: '/group/partition',
   systemVersion: '/system/version',
-  pods: '/dashboard/pods',
-  consumerGroup: '/dashboard/consumer/group',
   updateGroupStatus: '/group/status',
 
   addNamespace: '/namespace',
@@ -197,43 +195,6 @@ export function getPartitionTableList () {
   })
 }
 
-export function getLineDispatchQuantity (parameter) {
-  return request({
-    url: api.lineDispatchQuantity,
-    method: 'get',
-    params: parameter
-  })
-}
-
-export function rankSceneQuantity (parameter) {
-  return request({
-    url: api.rankSceneQuantity,
-    method: 'get',
-    params: parameter
-  })
-}
-
-export function countActivePod () {
-  return request({
-    url: api.countActivePod,
-    method: 'get'
-  })
-}
-
-export function countTask () {
-  return request({
-    url: api.countTask,
-    method: 'get'
-  })
-}
-
-export function countDispatch () {
-  return request({
-    url: api.countDispatch,
-    method: 'get'
-  })
-}
-
 export function getGroupConfigForPage (parameter) {
   return request({
     url: api.groupConfigForPage,
@@ -246,6 +207,30 @@ export function getAllGroupNameList () {
   return request({
     url: api.allGroupNameList,
     method: 'get'
+  })
+}
+
+export function getDashboardRetryLine (parameter) {
+  return request({
+    url: api.dashboardRetryLine,
+    method: 'get',
+    params: parameter
+  })
+}
+
+export function getDashboardJobLine (parameter) {
+  return request({
+    url: api.dashboardJobLine,
+    method: 'get',
+    params: parameter
+  })
+}
+
+export function getDashboardTaskRetryJob (parameter) {
+  return request({
+    url: api.dashboardTaskRetryJob,
+    method: 'get',
+    params: parameter
   })
 }
 

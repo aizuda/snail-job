@@ -14,7 +14,6 @@
 <script>
 export default {
   name: 'RankList',
-  // ['title', 'list']
   props: {
     title: {
       type: String,

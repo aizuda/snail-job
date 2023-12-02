@@ -1,7 +1,7 @@
 package com.aizuda.easy.retry.server.web.service.convert;
 
-import com.aizuda.easy.retry.server.web.model.response.SceneQuantityRankResponseVO;
-import com.aizuda.easy.retry.template.datasource.persistence.dataobject.SceneQuantityRankResponseDO;
+import com.aizuda.easy.retry.server.web.model.response.DashboardRetryLineResponseVO;
+import com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
@@ -17,5 +17,5 @@ public interface SceneQuantityRankResponseVOConverter {
 
     SceneQuantityRankResponseVOConverter INSTANCE = Mappers.getMapper(SceneQuantityRankResponseVOConverter.class);
 
-    List<SceneQuantityRankResponseVO> toSceneQuantityRankResponseVO(List<SceneQuantityRankResponseDO> dispatchQuantityResponseDOS);
+    List<DashboardRetryLineResponseVO.Rank> toDashboardRetryLineResponseVORank(List<DashboardRetryLineResponseDO.Rank> rankList);
 }
