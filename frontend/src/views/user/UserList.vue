@@ -81,7 +81,7 @@
     >
       <a-descriptions :column="8" bordered>
         <a-descriptions-item :label="item.namespaceName + ' (' + item.namespaceId + ')'" :key="item.namespaceId" :span="8" v-for="item in systemPermissions">
-          <a-tag v-for="item in item.groupNames" :key="item">
+          <a-tag color="#64a6ea" v-for="item in item.groupNames" :key="item">
             {{ item }}
           </a-tag>
         </a-descriptions-item>

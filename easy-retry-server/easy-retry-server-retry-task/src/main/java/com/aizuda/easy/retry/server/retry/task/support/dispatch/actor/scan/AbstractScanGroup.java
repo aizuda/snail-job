@@ -183,7 +183,7 @@ public abstract class AbstractScanGroup extends AbstractActor {
 
     public List<RetryPartitionTask> listAvailableTasks(String groupName, String namespaceId, Long lastId, Integer taskType) {
         List<RetryTask> retryTasks = accessTemplate.getRetryTaskAccess()
-                .listPage(groupName, new PageDTO<>(0, systemProperties.getRetryPullPageSize()),
+                .listPage(groupName, namespaceId, new PageDTO<>(0, systemProperties.getRetryPullPageSize()),
                         new LambdaQueryWrapper<RetryTask>()
                                 .select(RetryTask::getId, RetryTask::getNextTriggerAt, RetryTask::getUniqueId,
                                         RetryTask::getGroupName, RetryTask::getRetryCount, RetryTask::getSceneName,

@@ -50,11 +50,11 @@ public class NoRetryActor extends AbstractActor {
             try {
                 retryTask.setUpdateDt(LocalDateTime.now());
                 Assert.isTrue(1 == accessTemplate.getRetryTaskAccess()
-                        .updateById(retryTask.getGroupName(),retryTask), () ->
-                    new EasyRetryServerException("更新重试任务失败. groupName:[{}] uniqueId:[{}]",
-                        retryTask.getGroupName(),  retryTask.getUniqueId()));
-            }catch (Exception e) {
-                LogUtils.error(log,"更新重试任务失败", e);
+                        .updateById(retryTask.getGroupName(), retryTask.getNamespaceId() , retryTask), () ->
+                        new EasyRetryServerException("更新重试任务失败. groupName:[{}] uniqueId:[{}]",
+                                retryTask.getGroupName(), retryTask.getUniqueId()));
+            } catch (Exception e) {
+                LogUtils.error(log, "更新重试任务失败", e);
             } finally {
                 // 清除幂等标识位
                 idempotentStrategy.clear(Pair.of(retryTask.getGroupName(), retryTask.getNamespaceId()), retryTask.getId());

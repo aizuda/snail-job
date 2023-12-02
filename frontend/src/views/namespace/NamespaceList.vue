@@ -7,7 +7,7 @@
           <a-row :gutter="48">
             <a-col :md="8" :sm="24">
               <a-form-item label="用户名">
-                <a-input v-model="queryParam.name" placeholder="请输入空间名称" allowClear/>
+                <a-input v-model="queryParam.keyword" placeholder="请输入空间名称/唯一标识" allowClear/>
               </a-form-item>
             </a-col>
             <a-col :md="!advanced && 8 || 24" :sm="24">
@@ -36,12 +36,6 @@
         <span slot="serial" slot-scope="record">
           {{ record.id }}
         </span>
-        <!--        <span slot="groupNameList" slot-scope="text, record">-->
-        <!--          {{ record.role === 2 ? '所有组' : text.toString() }}-->
-        <!--        </span>-->
-        <!--        <span slot="role" slot-scope="text, record">-->
-        <!--          {{ record.role === 2 ? '管理员' : '普通用户' }}-->
-        <!--        </span>-->
         <span slot="action" slot-scope="text, record">
           <template>
             <a @click="handleEdit(record)">编辑</a>

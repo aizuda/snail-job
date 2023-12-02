@@ -67,8 +67,9 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
             return new PageResult<>(pageDTO, new ArrayList<>());
         }
 
+        String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
         LambdaQueryWrapper<RetryDeadLetter> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(RetryDeadLetter::getNamespaceId, UserSessionUtils.currentUserSession().getNamespaceId());
+        queryWrapper.eq(RetryDeadLetter::getNamespaceId, namespaceId);
         queryWrapper.eq(RetryDeadLetter::getGroupName, queryVO.getGroupName());
 
         if (StrUtil.isNotBlank(queryVO.getSceneName())) {
@@ -88,17 +89,19 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
         }
 
         PageDTO<RetryDeadLetter> retryDeadLetterPageDTO = accessTemplate.getRetryDeadLetterAccess()
-            .listPage(queryVO.getGroupName(), pageDTO, queryWrapper);
+                .listPage(queryVO.getGroupName(), namespaceId, pageDTO, queryWrapper);
 
         return new PageResult<>(retryDeadLetterPageDTO,
-            RetryDeadLetterResponseVOConverter.INSTANCE.batchConvert(retryDeadLetterPageDTO.getRecords()));
+                RetryDeadLetterResponseVOConverter.INSTANCE.batchConvert(retryDeadLetterPageDTO.getRecords()));
     }
 
     @Override
     public RetryDeadLetterResponseVO getRetryDeadLetterById(String groupName, Long id) {
+        String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
+
         TaskAccess<RetryDeadLetter> retryDeadLetterAccess = accessTemplate.getRetryDeadLetterAccess();
-        RetryDeadLetter retryDeadLetter = retryDeadLetterAccess.one(groupName,
-            new LambdaQueryWrapper<RetryDeadLetter>().eq(RetryDeadLetter::getId, id));
+        RetryDeadLetter retryDeadLetter = retryDeadLetterAccess.one(groupName, namespaceId,
+                new LambdaQueryWrapper<RetryDeadLetter>().eq(RetryDeadLetter::getId, id));
         return RetryDeadLetterResponseVOConverter.INSTANCE.convert(retryDeadLetter);
     }
 
@@ -106,32 +109,32 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
     @Transactional
     public int rollback(BatchRollBackRetryDeadLetterVO rollBackRetryDeadLetterVO) {
 
+        String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
+
         String groupName = rollBackRetryDeadLetterVO.getGroupName();
         List<Long> ids = rollBackRetryDeadLetterVO.getIds();
         TaskAccess<RetryDeadLetter> retryDeadLetterAccess = accessTemplate.getRetryDeadLetterAccess();
-        List<RetryDeadLetter> retryDeadLetterList = retryDeadLetterAccess.list(groupName,
-            new LambdaQueryWrapper<RetryDeadLetter>().in(RetryDeadLetter::getId, ids));
+        List<RetryDeadLetter> retryDeadLetterList = retryDeadLetterAccess.list(groupName, namespaceId,
+                new LambdaQueryWrapper<RetryDeadLetter>().in(RetryDeadLetter::getId, ids));
 
         Assert.notEmpty(retryDeadLetterList, () -> new EasyRetryServerException("数据不存在"));
 
-        String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
-
         ConfigAccess<SceneConfig> sceneConfigAccess = accessTemplate.getSceneConfigAccess();
         Set<String> sceneNameSet = retryDeadLetterList.stream().map(RetryDeadLetter::getSceneName)
-            .collect(Collectors.toSet());
+                .collect(Collectors.toSet());
         List<SceneConfig> sceneConfigs = sceneConfigAccess.list(new LambdaQueryWrapper<SceneConfig>()
-            .eq(SceneConfig::getNamespaceId, namespaceId)
-            .in(SceneConfig::getSceneName, sceneNameSet));
+                .eq(SceneConfig::getNamespaceId, namespaceId)
+                .in(SceneConfig::getSceneName, sceneNameSet));
 
         Map<String, SceneConfig> sceneConfigMap = sceneConfigs.stream().collect(Collectors.toMap((sceneConfig) ->
-            sceneConfig.getGroupName() + sceneConfig.getSceneName(), Function.identity()));
+                sceneConfig.getGroupName() + sceneConfig.getSceneName(), Function.identity()));
 
         List<RetryTask> waitRollbackList = new ArrayList<>();
         for (RetryDeadLetter retryDeadLetter : retryDeadLetterList) {
             SceneConfig sceneConfig = sceneConfigMap.get(
-                retryDeadLetter.getGroupName() + retryDeadLetter.getSceneName());
+                    retryDeadLetter.getGroupName() + retryDeadLetter.getSceneName());
             Assert.notNull(sceneConfig,
-                () -> new EasyRetryServerException("未查询到场景. [{}]", retryDeadLetter.getSceneName()));
+                    () -> new EasyRetryServerException("未查询到场景. [{}]", retryDeadLetter.getSceneName()));
 
             RetryTask retryTask = RetryTaskConverter.INSTANCE.toRetryTask(retryDeadLetter);
             retryTask.setRetryStatus(RetryStatusEnum.RUNNING.getStatus());
@@ -148,16 +151,16 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
         }
 
         TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();
-        Assert.isTrue(waitRollbackList.size() == retryTaskAccess.batchInsert(groupName, waitRollbackList),
-            () -> new EasyRetryServerException("新增重试任务失败"));
+        Assert.isTrue(waitRollbackList.size() == retryTaskAccess.batchInsert(groupName, namespaceId, waitRollbackList),
+                () -> new EasyRetryServerException("新增重试任务失败"));
 
         Set<Long> waitDelRetryDeadLetterIdSet = retryDeadLetterList.stream().map(RetryDeadLetter::getId)
-            .collect(Collectors.toSet());
-        Assert.isTrue(waitDelRetryDeadLetterIdSet.size() == retryDeadLetterAccess.delete(groupName,
-                new LambdaQueryWrapper<RetryDeadLetter>()
-                    .eq(RetryDeadLetter::getGroupName, groupName)
-                    .in(RetryDeadLetter::getId, waitDelRetryDeadLetterIdSet)),
-            () -> new EasyRetryServerException("删除死信队列数据失败"))
+                .collect(Collectors.toSet());
+        Assert.isTrue(waitDelRetryDeadLetterIdSet.size() == retryDeadLetterAccess.delete(groupName, namespaceId,
+                        new LambdaQueryWrapper<RetryDeadLetter>()
+                                .eq(RetryDeadLetter::getGroupName, groupName)
+                                .in(RetryDeadLetter::getId, waitDelRetryDeadLetterIdSet)),
+                () -> new EasyRetryServerException("删除死信队列数据失败"))
         ;
 
         // 变更日志的状态
@@ -166,11 +169,11 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
 
         Set<String> uniqueIdSet = waitRollbackList.stream().map(RetryTask::getUniqueId).collect(Collectors.toSet());
         int update = retryTaskLogMapper.update(retryTaskLog, new LambdaUpdateWrapper<RetryTaskLog>()
-            .eq(RetryTaskLog::getNamespaceId, namespaceId)
-            .in(RetryTaskLog::getUniqueId, uniqueIdSet)
-            .eq(RetryTaskLog::getGroupName, groupName));
+                .eq(RetryTaskLog::getNamespaceId, namespaceId)
+                .in(RetryTaskLog::getUniqueId, uniqueIdSet)
+                .eq(RetryTaskLog::getGroupName, groupName));
         Assert.isTrue(update == uniqueIdSet.size(),
-            () -> new EasyRetryServerException("回滚日志状态失败, 可能原因: 日志信息缺失或存在多个相同uniqueId"));
+                () -> new EasyRetryServerException("回滚日志状态失败, 可能原因: 日志信息缺失或存在多个相同uniqueId"));
 
         return update;
     }
@@ -179,10 +182,10 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
     public int batchDelete(BatchDeleteRetryDeadLetterVO deadLetterVO) {
         TaskAccess<RetryDeadLetter> retryDeadLetterAccess = accessTemplate.getRetryDeadLetterAccess();
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
-        return retryDeadLetterAccess.delete(deadLetterVO.getGroupName(),
-            new LambdaQueryWrapper<RetryDeadLetter>()
-                .eq(RetryDeadLetter::getNamespaceId, namespaceId)
-                .eq(RetryDeadLetter::getGroupName, deadLetterVO.getGroupName())
-                .in(RetryDeadLetter::getId, deadLetterVO.getIds()));
+        return retryDeadLetterAccess.delete(deadLetterVO.getGroupName(), namespaceId,
+                new LambdaQueryWrapper<RetryDeadLetter>()
+                        .eq(RetryDeadLetter::getNamespaceId, namespaceId)
+                        .eq(RetryDeadLetter::getGroupName, deadLetterVO.getGroupName())
+                        .in(RetryDeadLetter::getId, deadLetterVO.getIds()));
     }
 }

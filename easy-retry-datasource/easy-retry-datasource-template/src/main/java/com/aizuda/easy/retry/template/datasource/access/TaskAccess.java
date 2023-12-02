@@ -16,22 +16,22 @@ import java.util.List;
  */
 public interface TaskAccess<T> extends Access<T> {
 
-    List<T> list(String groupName, LambdaQueryWrapper<T> query);
+    List<T> list(String groupName, String namespaceId, LambdaQueryWrapper<T> query);
 
-    T one(String groupName, LambdaQueryWrapper<T> query);
+    T one(String groupName, String namespaceId, LambdaQueryWrapper<T> query);
 
-    int update(String groupName, T t, LambdaUpdateWrapper<T> query);
+    int update(String groupName, String namespaceId, T t, LambdaUpdateWrapper<T> query);
 
-    int updateById(String groupName, T t);
+    int updateById(String groupName, String namespaceId, T t);
 
-    int delete(String groupName, LambdaQueryWrapper<T> query);
+    int delete(String groupName, String namespaceId, LambdaQueryWrapper<T> query);
 
-    int insert(String groupName, T t);
+    int insert(String groupName, String namespaceId, T t);
 
-    int batchInsert(String groupName, List<T> list);
+    int batchInsert(String groupName, String namespaceId, List<T> list);
 
-    PageDTO<T> listPage(String groupName, PageDTO<T> iPage, LambdaQueryWrapper<T> query);
+    PageDTO<T> listPage(String groupName, String namespaceId, PageDTO<T> iPage, LambdaQueryWrapper<T> query);
 
-    long count(String groupName, LambdaQueryWrapper<T> query);
+    long count(String groupName, String namespaceId, LambdaQueryWrapper<T> query);
 
 }
