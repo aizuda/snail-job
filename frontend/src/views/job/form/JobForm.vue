@@ -313,7 +313,7 @@
 import { getAllGroupNameList } from '@/api/manage'
 import { getJobDetail, saveJob, updateJob } from '@/api/jobApi'
 import pick from 'lodash.pick'
-import CronModal from '@/views/job/from/CronModal'
+import CronModal from '@/views/job/form/CronModal'
 
 import AFormModel from 'ant-design-vue/es/form-model/Form'
 import AFormModelItem from 'ant-design-vue/es/form-model/FormItem'

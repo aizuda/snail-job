@@ -1,6 +1,8 @@
 import request from '@/utils/request'
+import retryApi from "@/api/retryApi";
 const jobApi = {
   // 任务信息
+  jobPageList: '/job/page/list',
   jobList: '/job/list',
   jobDetail: '/job/',
   saveJob: '/job/',
@@ -15,6 +17,13 @@ const jobApi = {
   jobBatchList: '/job/batch/list',
   jobBatchDetail: '/job/batch/',
   stop: '/job/batch/stop/',
+
+  //通知
+  jobNotifyConfigPageList: '/job/notify/config/page/list',
+  jobNotifyConfigDetail: '/job/notify/config/',
+  saveJobNotify: '/job/notify/config/',
+  updateJobNotify: '/job/notify/config/',
+
 
   // 任务
   jobTaskList: '/job/task/list',
@@ -101,6 +110,14 @@ export function jobBatchDetail (id) {
   })
 }
 
+export function getJobPageList (parameter) {
+  return request({
+    url: jobApi.jobPageList,
+    method: 'get',
+    params: parameter
+  })
+}
+
 export function getJobList (parameter) {
   return request({
     url: jobApi.jobList,
@@ -127,6 +144,36 @@ export function saveJob (data) {
 export function updateJob (data) {
   return request({
     url: jobApi.updateJob,
+    method: 'put',
+    data
+  })
+}
+
+export function jobNotifyConfigPageList (parameter) {
+  return request({
+    url: jobApi.jobNotifyConfigPageList,
+    method: 'get',
+    params: parameter
+  })
+}
+export function getJobNotifyConfigDetail (id) {
+  return request({
+    url: jobApi.jobNotifyConfigDetail + id,
+    method: 'get'
+  })
+}
+
+export function saveJobNotify (data) {
+  return request({
+    url: jobApi.saveJobNotify,
+    method: 'post',
+    data
+  })
+}
+
+export function updateJobNotify (data) {
+  return request({
+    url: jobApi.updateJobNotify,
     method: 'put',
     data
   })

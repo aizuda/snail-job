@@ -15,6 +15,11 @@ public class JobBatchResponseDO {
     private Long id;
 
     /**
+     * 命名空间
+     */
+    private String namespaceId;
+
+    /**
      * 组名称
      */
     private String groupName;
@@ -57,12 +62,15 @@ public class JobBatchResponseDO {
     /**
      * 执行器名称
      */
-    private String executorName;
+    private String executorInfo;
 
 
     private Integer taskType;
     private Integer blockStrategy;
     private Integer triggerType;
+
+    private String argsStr;
+
 
 
 }

@@ -18,10 +18,12 @@ import com.aizuda.easy.retry.server.job.task.dto.TaskExecuteDTO;
 import com.aizuda.easy.retry.server.job.task.support.JobExecutor;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.server.job.task.support.cache.ResidentTaskCache;
+import com.aizuda.easy.retry.server.job.task.support.event.JobTaskFailAlarmEvent;
 import com.aizuda.easy.retry.server.job.task.support.executor.JobExecutorContext;
 import com.aizuda.easy.retry.server.job.task.support.executor.JobExecutorFactory;
 import com.aizuda.easy.retry.server.job.task.support.timer.JobTimerWheel;
 import com.aizuda.easy.retry.server.job.task.support.timer.ResidentJobTimerTask;
+import com.aizuda.easy.retry.server.retry.task.support.event.RetryTaskFailMoreThresholdAlarmEvent;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskBatchMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
@@ -30,6 +32,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
@@ -58,6 +61,8 @@ public class JobExecutorActor extends AbstractActor {
     private JobTaskBatchMapper jobTaskBatchMapper;
     @Autowired
     private TransactionTemplate transactionTemplate;
+    @Autowired
+    private ApplicationContext context;
 
     @Override
     public Receive createReceive() {
@@ -74,7 +79,7 @@ public class JobExecutorActor extends AbstractActor {
             } catch (Exception e) {
                 LogUtils.error(log, "job executor exception. [{}]", taskExecute, e);
                 handlerTaskBatch(taskExecute, JobTaskBatchStatusEnum.FAIL.getStatus(), JobOperationReasonEnum.TASK_EXECUTE_ERROR.getReason());
-                // TODO 告警通知
+                context.publishEvent(new JobTaskFailAlarmEvent(taskExecute.getTaskBatchId()));
             } finally {
                 getContext().stop(getSelf());
             }

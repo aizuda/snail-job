@@ -202,7 +202,7 @@
 import { getAllGroupNameList } from '@/api/manage'
 import { saveScene, updateScene, getSceneDetail } from '@/api/retryApi'
 import pick from 'lodash.pick'
-import CronModal from '@/views/job/from/CronModal'
+import CronModal from '@/views/job/form/CronModal'
 
 const enums = require('@/utils/retryEnum')
 export default {

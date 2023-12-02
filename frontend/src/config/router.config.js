@@ -130,9 +130,9 @@ export const asyncRouterMap = [
           },
           {
             path: '/retry/scene/config',
-            name: 'SceneFrom',
+            name: 'SceneForm',
             hidden: true,
-            component: () => import('@/views/task/form/SceneFrom'),
+            component: () => import('@/views/task/form/SceneForm.vue'),
             meta: { title: '场景配置', icon: 'profile', keepAlive: true, permission: ['retryTask'] }
           },
           {
@@ -143,9 +143,9 @@ export const asyncRouterMap = [
           },
           {
             path: '/retry/notify/config',
-            name: 'NotifyFrom',
+            name: 'NotifyForm',
             hidden: true,
-            component: () => import('@/views/task/form/NotifyFrom'),
+            component: () => import('@/views/task/form/NotifyForm.vue'),
             meta: { title: '通知配置', icon: 'profile', keepAlive: true, permission: ['retryTask'] }
           }
           ]
@@ -172,9 +172,9 @@ export const asyncRouterMap = [
           },
           {
             path: '/job/config',
-            name: 'JobFrom',
+            name: 'JobForm',
             hidden: true,
-            component: () => import('@/views/job/from/JobFrom'),
+            component: () => import('@/views/job/form/JobForm.vue'),
             meta: { title: '任务配置', icon: 'profile', permission: ['job'] }
           },
           {
@@ -196,6 +196,19 @@ export const asyncRouterMap = [
             hidden: true,
             component: () => import('@/views/job/JobTaskList'),
             meta: { title: '任务项', icon: 'profile', permission: ['jobBatch'] }
+          },
+          {
+            path: '/job/notify/list',
+            name: 'JobNotifyList',
+            component: () => import('@/views/job/JobNotifyList'),
+            meta: { title: '通知列表', icon: 'profile', keepAlive: true, permission: ['jobNotify'] }
+          },
+          {
+            path: '/job/notify/config',
+            name: 'JobNotifyForm',
+            hidden: true,
+            component: () => import('@/views/job/form/JobNotifyForm.vue'),
+            meta: { title: '通知配置', icon: 'profile', keepAlive: true, permission: ['jobNotify'] }
           }
         ]
       },

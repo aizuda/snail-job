@@ -22,9 +22,11 @@ import com.aizuda.easy.retry.server.web.model.response.JobResponseVO;
 import com.aizuda.easy.retry.server.web.service.JobService;
 import com.aizuda.easy.retry.server.web.service.convert.JobConverter;
 import com.aizuda.easy.retry.server.web.service.convert.JobResponseVOConverter;
+import com.aizuda.easy.retry.server.web.service.convert.SceneConfigResponseVOConverter;
 import com.aizuda.easy.retry.server.web.util.UserSessionUtils;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
+import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import lombok.extern.slf4j.Slf4j;
@@ -215,5 +217,17 @@ public class JobServiceImpl implements JobService {
         jobPrePareHandler.handler(jobTaskPrepare);
 
         return Boolean.TRUE;
+    }
+
+    @Override
+    public List<JobResponseVO> getJobList(String groupName) {
+        String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
+        List<Job> jobs = jobMapper.selectList(new LambdaQueryWrapper<Job>()
+                .select(Job::getId, Job::getJobName)
+                .eq(Job::getNamespaceId, namespaceId)
+                .eq(Job::getGroupName, groupName)
+                .orderByDesc(Job::getCreateDt));
+        List<JobResponseVO> jobResponseList = JobResponseVOConverter.INSTANCE.toJobResponseVOs(jobs);
+        return jobResponseList;
     }
 }
