@@ -46,6 +46,18 @@ const commonAdmin = [
 const retryAdmin = [
   {
     roleId: 2,
+    permissionId: 'RetryAnalysis',
+    permissionName: '重试任务',
+    actionEntitySet: [
+      {
+        action: 'retry',
+        describe: '重试',
+        defaultCheck: false
+      }
+    ]
+  },
+  {
+    roleId: 2,
     permissionId: 'dashboard',
     permissionName: '看板'
   },
@@ -66,6 +78,18 @@ const retryAdmin = [
   }
 ]
 const jobAdmin = [
+  {
+    roleId: 2,
+    permissionId: 'JobAnalysis',
+    permissionName: '定时任务',
+    actionEntitySet: [
+      {
+        action: 'job',
+        describe: '定时',
+        defaultCheck: false
+      }
+    ]
+  },
   {
     roleId: 2,
     permissionId: 'dashboard',
@@ -99,6 +123,18 @@ const commonUser = [
   }
 ]
 const retryUser = [
+  {
+    roleId: 1,
+    permissionId: 'RetryAnalysis',
+    permissionName: '重试任务',
+    actionEntitySet: [
+      {
+        action: 'retry',
+        describe: '重试',
+        defaultCheck: false
+      }
+    ]
+  },
   {
     roleId: 1,
     permissionId: 'dashboard',

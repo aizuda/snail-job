@@ -2,8 +2,6 @@ package com.aizuda.easy.retry.template.datasource.persistence.dataobject;
 
 import lombok.Data;
 
-import java.math.BigDecimal;
-
 /**
  * @author: www.byteblogs.com
  * @date : 2022-04-22 20:27
@@ -11,14 +9,19 @@ import java.math.BigDecimal;
 @Data
 public class DispatchQuantityResponseDO {
 
+    private String createDt;
+
     private Long total;
 
-    private BigDecimal successPercent = BigDecimal.ZERO;
-
-    private Long success;
+    private Long successNum;
 
     private Long fail;
 
-    private String createDt;
+    private Long totalNum;
 
+    private Long failNum;
+
+    private Long stopNum;
+
+    private Long cancelNum;
 }

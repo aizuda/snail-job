@@ -34,6 +34,8 @@ Vue.use(CronInput)
 
 window.umi_plugin_ant_themeVar = themePluginConfig.theme
 
+Vue.prototype.$bus = new Vue()
+
 new Vue({
   router,
   store,

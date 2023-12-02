@@ -26,7 +26,7 @@ export const asyncRouterMap = [
           {
             path: '/dashboard/analysis',
             name: 'Analysis',
-            component: () => import('@/views/dashboard/Analysis'),
+            component: () => import('@/views/dashboard/Analysis.vue'),
             meta: { title: 'menu.dashboard.analysis', keepAlive: true, permission: ['dashboard'] }
           },
           {

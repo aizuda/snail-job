@@ -1,6 +1,8 @@
 package com.aizuda.easy.retry.server.web.service.convert;
 
+import com.aizuda.easy.retry.server.web.model.response.DashboardRetryLinkeResponseVO;
 import com.aizuda.easy.retry.server.web.model.response.DispatchQuantityResponseVO;
+import com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardRetryLinkeResponseDO;
 import com.aizuda.easy.retry.template.datasource.persistence.dataobject.DispatchQuantityResponseDO;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
@@ -17,6 +19,7 @@ public interface DispatchQuantityResponseVOConverter {
 
     DispatchQuantityResponseVOConverter INSTANCE = Mappers.getMapper(DispatchQuantityResponseVOConverter.class);
 
-    List<DispatchQuantityResponseVO> toDispatchQuantityResponse(List<DispatchQuantityResponseDO> dispatchQuantityResponseDOS);
+    List<DashboardRetryLinkeResponseVO> toDashboardRetryLinkeResponseVO(List<DashboardRetryLinkeResponseDO> dashboardRetryLinkeResponseDOList);
 
+    List<DispatchQuantityResponseVO> toDispatchQuantityResponseVO(List<DispatchQuantityResponseDO> dispatchQuantityResponseDOList);
 }
