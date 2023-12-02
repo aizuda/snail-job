@@ -151,7 +151,45 @@ const enums = {
       'name': '停止',
       'color': '#ac2df5'
     }
-  }
+  },
+  notifyScene: {
+    '1': {
+      'name': '任务执行失败',
+      'color': '#d06892'
+    }
+  },
+  notifyType: {
+    '1': {
+      'name': '钉钉通知',
+      'color': '#64a6ea'
+    },
+    '2': {
+      'name': '邮箱通知',
+      'color': '#1b7ee5'
+    },
+    '4': {
+      'name': '飞书',
+      'color': '#087da1'
+    }
+  }, notifyStatus: {
+    '0': {
+      'name': '停用',
+      'color': '#9c1f1f'
+    },
+    '1': {
+      'name': '启用',
+      'color': '#f5a22d'
+    }
+  },  rateLimiterStatus: {
+    '0': {
+      'name': '未启用',
+      'color': '#9c1f1f'
+    },
+    '1': {
+      'name': '启用',
+      'color': '#f5a22d'
+    }
+  },
 }
 
 module.exports = enums

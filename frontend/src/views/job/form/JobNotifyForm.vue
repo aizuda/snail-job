@@ -62,9 +62,9 @@
             </a-form-item>
           </a-col>
           <a-col :lg="6" :md="12" :sm="24">
-            <a-form-item label="场景">
-              <a-select :disabled="sceneNameDisabled.includes(this.notifySceneValue)" placeholder="请选择场景"  v-decorator="['sceneName', { rules: [{ required: !sceneNameDisabled.includes(this.notifySceneValue), message: '请选择场景' }] }]"  >
-                <a-select-option v-for="item in sceneList" :value="item.sceneName" :key="item.sceneName">{{ item.sceneName }}</a-select-option>
+            <a-form-item label="任务">
+              <a-select :disabled="sceneNameDisabled.includes(this.notifySceneValue)" placeholder="请选择任务"  v-decorator="['jobId', { rules: [{ required: true, message: '请选择任务' }] }]"  >
+                <a-select-option v-for="item in jobList" :value="item.id" :key="item.id">{{item.jobName}}</a-select-option>
               </a-select>
             </a-form-item>
           </a-col>
@@ -277,9 +277,10 @@
 import { getAllGroupNameList, getSceneList } from '@/api/manage'
 import { getNotifyConfigDetail, saveNotify, updateNotify } from '@/api/retryApi'
 import pick from 'lodash.pick'
-import CronModal from '@/views/job/from/CronModal'
+import CronModal from '@/views/job/form/CronModal'
 import { officialWebsite } from '@/utils/util'
-const enums = require('@/utils/retryEnum')
+import {getJobList, getJobNotifyConfigDetail, saveJobNotify, updateJobNotify} from "@/api/jobApi";
+const enums = require('@/utils/jobEnum')
 export default {
   name: 'NotifyFrom',
   props: {},
@@ -302,7 +303,7 @@ export default {
       },
       formType: 'create',
       groupNameList: [],
-      sceneList: [],
+      jobList: [],
       notifySceneList: enums.notifyScene,
       notifyTypeList: enums.notifyType,
       notifyStatusList: enums.notifyStatus,
@@ -312,9 +313,9 @@ export default {
       count: 0,
       notifyTypeValue: '1',
       notifyAttribute: '',
-      notifyThresholdDisabled: ['3', '4', '6'],
+      notifyThresholdDisabled: ['1'],
       sceneNameDisabled: ['3', '4'],
-      rateLimiterStatusDisabled: ['1', '2', '3', '4'],
+      rateLimiterStatusDisabled: ['1'],
       rateLimiterThresholdDisabled: ['0'],
       notifySceneValue: '1',
       rateLimiterStatusValue: '0',
@@ -335,7 +336,7 @@ export default {
       console.log(id)
       if (id) {
         this.loading = true
-        getNotifyConfigDetail(id).then(res => {
+        getJobNotifyConfigDetail(id).then(res => {
           this.loadEditInfo(res.data)
           this.loading = false
         })
@@ -354,8 +355,8 @@ export default {
       this.notifyTypeValue = notifyType
     },
     changeGroup (value) {
-      getSceneList({ groupName: value }).then((res) => {
-        this.sceneList = res.data
+      getJobList({ groupName: value }).then((res) => {
+        this.jobList = res.data
       })
     },
     changeRateLimiterStatus (rateLimiterStatus) {
@@ -417,13 +418,13 @@ export default {
         if (!err) {
           values['notifyAttribute'] = this.notifyAttribute
           if (this.formType === 'create') {
-            saveNotify(values).then(res => {
+            saveJobNotify(values).then(res => {
               this.$message.success('任务新增完成')
               this.form.resetFields()
               this.$router.go(-1)
             })
           } else {
-            updateNotify(values).then(res => {
+            updateJobNotify(values).then(res => {
               this.$message.success('任务更新完成')
               this.form.resetFields()
               this.$router.go(-1)
@@ -443,7 +444,7 @@ export default {
         }, 100)
       }).then(() => {
         const formData = pick(data, [
-          'id', 'notifyAttribute', 'groupName', 'sceneName', 'notifyStatus', 'notifyScene', 'notifyThreshold', 'notifyType', 'description', 'rateLimiterStatus', 'rateLimiterThreshold'])
+          'id', 'notifyAttribute', 'groupName', 'jobId', 'notifyStatus', 'notifyScene', 'notifyThreshold', 'notifyType', 'description', 'rateLimiterStatus', 'rateLimiterThreshold'])
         formData.notifyStatus = formData.notifyStatus.toString()
         formData.notifyScene = formData.notifyScene.toString()
         formData.notifyType = formData.notifyType.toString()
@@ -474,11 +475,11 @@ export default {
       if (this.notifyTypeValue === '1') {
         s =
           '钉钉Url:' + json['webhookUrl'] + ';' +
-          '被@负责人手机号:' + json['ats'] + ';'
+          '被@人手机号:' + json['ats'] + ';'
       } else if (this.notifyTypeValue === '4') {
         s =
           '飞书Url:' + json['webhookUrl'] + ';' +
-          '被@负责人用户id:' + json['ats'] + ';'
+          '被@人用户id:' + json['ats'] + ';'
       }
       return s
     }

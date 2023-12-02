@@ -178,7 +178,7 @@
 import ATextarea from 'ant-design-vue/es/input/TextArea'
 import AInput from 'ant-design-vue/es/input/Input'
 import { STable, Drawer } from '@/components'
-import { delJob, getJobList, triggerJob, updateJobStatus } from '@/api/jobApi'
+import { delJob, getJobPageList, triggerJob, updateJobStatus } from '@/api/jobApi'
 import { getAllGroupNameList } from '@/api/manage'
 import enums from '@/utils/jobEnum'
 import JobInfo from '@/views/job/JobInfo'
@@ -278,7 +278,7 @@ export default {
       ],
       // 加载数据方法 必须为 Promise 对象
       loadData: (parameter) => {
-        return getJobList(Object.assign(parameter, this.queryParam)).then((res) => {
+        return getJobPageList(Object.assign(parameter, this.queryParam)).then((res) => {
           return res
         })
       },

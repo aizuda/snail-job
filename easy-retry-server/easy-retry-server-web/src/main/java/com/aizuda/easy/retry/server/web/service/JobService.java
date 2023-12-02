@@ -35,4 +35,5 @@ public interface JobService {
 
     boolean trigger(Long jobId);
 
+    List<JobResponseVO> getJobList(String groupName);
 }

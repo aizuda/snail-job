@@ -13,7 +13,7 @@
         <result column="update_dt" property="updateDt" />
         <result column="deleted" property="deleted" />
     </resultMap>
-    <select id="selectJobBatchList"
+    <select id="selectJobBatchPageList"
         parameterType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.JobBatchQueryDO"
         resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.JobBatchResponseDO">
         SELECT a.*, b.job_name, b.task_type, b.block_strategy, b.trigger_type
@@ -54,5 +54,18 @@
         WHERE create_dt BETWEEN #{from} AND #{to}
         GROUP BY namespace_id, group_name, job_id, task_batch_status, operation_reason
 
+    </select>
+
+    <select id="selectJobBatchListByIds"
+            resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.JobBatchResponseDO">
+        SELECT a.*, b.job_name, b.task_type, b.block_strategy, b.trigger_type,b.executor_info,b.args_str
+        FROM job_task_batch a join job b on a.job_id = b.id
+        <where>
+            a.id in
+            <foreach collection="ids" item="id" separator="," open="(" close=")">
+                #{id}
+            </foreach>
+            and a.deleted = 0
+        </where>
     </select>
 </mapper>

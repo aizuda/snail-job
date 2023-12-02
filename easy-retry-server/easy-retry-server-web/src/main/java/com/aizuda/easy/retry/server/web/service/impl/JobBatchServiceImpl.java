@@ -60,7 +60,7 @@ public class JobBatchServiceImpl implements JobBatchService {
         jobBatchQueryDO.setTaskBatchStatus(queryVO.getTaskBatchStatus());
         jobBatchQueryDO.setGroupName(queryVO.getGroupName());
         jobBatchQueryDO.setNamespaceId(UserSessionUtils.currentUserSession().getNamespaceId());
-        List<JobBatchResponseDO> batchResponseDOList = jobTaskBatchMapper.selectJobBatchList(pageDTO, jobBatchQueryDO);
+        List<JobBatchResponseDO> batchResponseDOList = jobTaskBatchMapper.selectJobBatchPageList(pageDTO, jobBatchQueryDO);
 
         List<JobBatchResponseVO> batchResponseVOList = JobBatchResponseVOConverter.INSTANCE.toJobBatchResponseVOs(
                 batchResponseDOList);

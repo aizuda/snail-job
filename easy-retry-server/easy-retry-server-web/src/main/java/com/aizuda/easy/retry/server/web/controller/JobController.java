@@ -27,10 +27,16 @@ public class JobController {
     @Autowired
     private JobService jobService;
 
-    @GetMapping("/list")
+    @GetMapping("/page/list")
     @LoginRequired
     public PageResult<List<JobResponseVO>> getJobPage(JobQueryVO jobQueryVO) {
         return jobService.getJobPage(jobQueryVO);
+    }
+
+    @GetMapping("/list")
+    @LoginRequired
+    public List<JobResponseVO> getJobList(@RequestParam("groupName") String groupName) {
+        return jobService.getJobList(groupName);
     }
 
     @GetMapping("{id}")
