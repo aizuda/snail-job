@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.server.job.task.support.dispatch;
 
 import akka.actor.AbstractActor;
 import cn.hutool.core.lang.Assert;
+import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
@@ -23,7 +24,6 @@ import com.aizuda.easy.retry.server.job.task.support.executor.JobExecutorContext
 import com.aizuda.easy.retry.server.job.task.support.executor.JobExecutorFactory;
 import com.aizuda.easy.retry.server.job.task.support.timer.JobTimerWheel;
 import com.aizuda.easy.retry.server.job.task.support.timer.ResidentJobTimerTask;
-import com.aizuda.easy.retry.server.retry.task.support.event.RetryTaskFailMoreThresholdAlarmEvent;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskBatchMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
@@ -61,8 +61,6 @@ public class JobExecutorActor extends AbstractActor {
     private JobTaskBatchMapper jobTaskBatchMapper;
     @Autowired
     private TransactionTemplate transactionTemplate;
-    @Autowired
-    private ApplicationContext context;
 
     @Override
     public Receive createReceive() {
@@ -79,7 +77,7 @@ public class JobExecutorActor extends AbstractActor {
             } catch (Exception e) {
                 LogUtils.error(log, "job executor exception. [{}]", taskExecute, e);
                 handlerTaskBatch(taskExecute, JobTaskBatchStatusEnum.FAIL.getStatus(), JobOperationReasonEnum.TASK_EXECUTE_ERROR.getReason());
-                context.publishEvent(new JobTaskFailAlarmEvent(taskExecute.getTaskBatchId()));
+                SpringContext.CONTEXT.publishEvent(new JobTaskFailAlarmEvent(taskExecute.getTaskBatchId()));
             } finally {
                 getContext().stop(getSelf());
             }

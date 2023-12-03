@@ -171,7 +171,8 @@ const enums = {
       'name': '飞书',
       'color': '#087da1'
     }
-  }, notifyStatus: {
+  },
+notifyStatus: {
     '0': {
       'name': '停用',
       'color': '#9c1f1f'
@@ -180,7 +181,8 @@ const enums = {
       'name': '启用',
       'color': '#f5a22d'
     }
-  },  rateLimiterStatus: {
+  },
+rateLimiterStatus: {
     '0': {
       'name': '未启用',
       'color': '#9c1f1f'
@@ -189,7 +191,7 @@ const enums = {
       'name': '启用',
       'color': '#f5a22d'
     }
-  },
+  }
 }
 
 module.exports = enums

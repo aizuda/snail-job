@@ -109,8 +109,8 @@ public abstract class AbstractScanGroup extends AbstractActor {
                     return false;
                 }, lastId);
 
-        log.warn(this.getClass().getName() + " retry scan end. groupName:[{}] startId:[{}] preCostTime:[{}] total:[{}] realPullCount:[{}]",
-                groupName, lastId, preCostTime().get(), total, count.get());
+//        log.warn(this.getClass().getName() + " retry scan end. groupName:[{}] startId:[{}] preCostTime:[{}] total:[{}] realPullCount:[{}]",
+//                groupName, lastId, preCostTime().get(), total, count.get());
 
     }
 

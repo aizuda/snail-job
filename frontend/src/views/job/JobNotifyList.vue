@@ -28,7 +28,7 @@
                   @search="handleSearch"
                 >
                   <a-select-option v-for="(item, index) in jobNameList" :value="item.id" :key="index">
-                    {{item.jobName}}
+                    {{ item.jobName }}
                   </a-select-option>
 
                 </a-select>
@@ -38,17 +38,17 @@
 
             </template>
             <a-col :md="(!advanced && 8) || 24" :sm="24">
-            <span
-              class="table-page-search-submitButtons"
-              :style="(advanced && { float: 'right', overflow: 'hidden' }) || {}"
-            >
-              <a-button type="primary" @click="$refs.table.refresh(true)">查询</a-button>
-              <a-button style="margin-left: 8px" @click="() => (queryParam = {})">重置</a-button>
-              <a @click="toggleAdvanced" style="margin-left: 8px">
-                {{ advanced ? '收起' : '展开' }}
-                <a-icon :type="advanced ? 'up' : 'down'" />
-              </a>
-            </span>
+              <span
+                class="table-page-search-submitButtons"
+                :style="(advanced && { float: 'right', overflow: 'hidden' }) || {}"
+              >
+                <a-button type="primary" @click="$refs.table.refresh(true)">查询</a-button>
+                <a-button style="margin-left: 8px" @click="() => (queryParam = {})">重置</a-button>
+                <a @click="toggleAdvanced" style="margin-left: 8px">
+                  {{ advanced ? '收起' : '展开' }}
+                  <a-icon :type="advanced ? 'up' : 'down'" />
+                </a>
+              </span>
             </a-col>
           </a-row>
         </a-form>
@@ -99,9 +99,9 @@
 </template>
 
 <script>
-import {getAllGroupNameList, getSceneList} from '@/api/manage'
+import { getAllGroupNameList } from '@/api/manage'
 import { STable } from '@/components'
-import {getJobList, jobNameList, jobNotifyConfigPageList} from "@/api/jobApi";
+import { getJobList, jobNameList, jobNotifyConfigPageList } from '@/api/jobApi'
 const enums = require('@/utils/retryEnum')
 
 export default {
@@ -202,7 +202,7 @@ export default {
       key: '',
       notifyTypeValue: '1',
       groupNameList: [],
-      jobNameList: [],
+      jobNameList: []
     }
   },
   created () {
@@ -239,7 +239,7 @@ export default {
     },
     handleEdit (record) {
       this.$router.push({ path: '/job/notify/config', query: { id: record.id } })
-    },
+    }
   }
 }
 </script>

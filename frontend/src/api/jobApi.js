@@ -1,5 +1,4 @@
 import request from '@/utils/request'
-import retryApi from "@/api/retryApi";
 const jobApi = {
   // 任务信息
   jobPageList: '/job/page/list',
@@ -18,12 +17,11 @@ const jobApi = {
   jobBatchDetail: '/job/batch/',
   stop: '/job/batch/stop/',
 
-  //通知
+  // 通知
   jobNotifyConfigPageList: '/job/notify/config/page/list',
   jobNotifyConfigDetail: '/job/notify/config/',
   saveJobNotify: '/job/notify/config/',
   updateJobNotify: '/job/notify/config/',
-
 
   // 任务
   jobTaskList: '/job/task/list',
