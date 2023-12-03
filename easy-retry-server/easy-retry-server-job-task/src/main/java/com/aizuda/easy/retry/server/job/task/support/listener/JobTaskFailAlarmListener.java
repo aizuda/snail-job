@@ -8,7 +8,11 @@ import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.util.EnvironmentUtils;
 import com.aizuda.easy.retry.common.core.util.HostUtils;
+import com.aizuda.easy.retry.server.common.AlarmInfoConverter;
 import com.aizuda.easy.retry.server.common.Lifecycle;
+import com.aizuda.easy.retry.server.common.alarm.AbstractJobAlarm;
+import com.aizuda.easy.retry.server.common.dto.JobAlarmInfo;
+import com.aizuda.easy.retry.server.common.dto.NotifyConfigInfo;
 import com.aizuda.easy.retry.server.common.triple.ImmutableTriple;
 import com.aizuda.easy.retry.server.common.triple.Triple;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
@@ -40,11 +44,7 @@ import java.util.stream.Collectors;
  */
 @Component
 @Slf4j
-public class JobTaskFailAlarmListener implements ApplicationListener<JobTaskFailAlarmEvent>, Runnable, Lifecycle {
-
-
-    @Autowired
-    private JobNotifyConfigMapper jobNotifyConfigMapper;
+public class JobTaskFailAlarmListener extends AbstractJobAlarm<JobTaskFailAlarmEvent> {
 
     @Autowired
     private JobTaskBatchMapper jobTaskBatchMapper;
@@ -65,107 +65,45 @@ public class JobTaskFailAlarmListener implements ApplicationListener<JobTaskFail
                     "> 方法参数:{}  \n" +
                     "> 时间:{}  \n";
 
-    private Thread thread;
-
     @Override
-    public void start() {
-        thread = new Thread(this);
-        thread.start();
-    }
+    protected List<JobAlarmInfo> poll() throws InterruptedException {
+        // 无数据时阻塞线程
+        Long jobTaskBatchId = queue.take();
+        // 拉取200条
+        List<Long> jobTaskBatchIds = Lists.newArrayList(jobTaskBatchId);
+        queue.drainTo(jobTaskBatchIds, 200);
 
-    @Override
-    public void close() {
-        if (Objects.nonNull(thread)) {
-            thread.interrupt();
-        }
+        List<JobBatchResponseDO> jobTaskBatchList = jobTaskBatchMapper.selectJobBatchListByIds(jobTaskBatchIds);
+        return AlarmInfoConverter.INSTANCE.toJobAlarmInfos(jobTaskBatchList);
     }
 
     @Override
-    public void run() {
-        LogUtils.info(log, "JobTaskFailAlarmListener time[{}] ip:[{}]", LocalDateTime.now(), HostUtils.getIp());
-        while (!Thread.currentThread().isInterrupted()) {
-            try {
-                // 无数据时阻塞线程
-                Long jobTaskBatchId = queue.take();
-                // 拉取200条
-                List<Long> jobTaskBatchIds = Lists.newArrayList(jobTaskBatchId);
-                queue.drainTo(jobTaskBatchIds, 200);
-                List<JobBatchResponseDO> jobTaskBatchList = jobTaskBatchMapper.selectJobBatchListByIds(jobTaskBatchIds);
-                Set<String> namespaceIds = new HashSet<>();
-                Set<String> groupNames = new HashSet<>();
-                Set<Long> jobIds = new HashSet<>();
-                Map<Triple<String, String, Long>, List<JobBatchResponseDO>> jobTaskBatchMap = getJobTaskBatchMap(
-                        jobTaskBatchList, namespaceIds, groupNames, jobIds);
+    protected AlarmContext buildAlarmContext(JobAlarmInfo alarmDTO, NotifyConfigInfo notifyConfig) {
+        // 预警
+        AlarmContext context = AlarmContext.build()
+                .text(jobTaskFailTextMessagesFormatter,
+                        EnvironmentUtils.getActiveProfile(),
+                        alarmDTO.getGroupName(),
+                        alarmDTO.getJobName(),
+                        alarmDTO.getExecutorInfo(),
+                        alarmDTO.getArgsStr(),
+                        DateUtils.toNowFormat(DateUtils.NORM_DATETIME_PATTERN))
+                .title("{}环境 JOB任务失败", EnvironmentUtils.getActiveProfile())
+                .notifyAttribute(notifyConfig.getNotifyAttribute());
+        Alarm<AlarmContext> alarmType = easyRetryAlarmFactory.getAlarmType(notifyConfig.getNotifyType());
+        alarmType.asyncSendMessage(context);
 
-                Map<Triple<String, String, Long>, List<JobNotifyConfig>> jobNotifyConfigMap = getJobNotifyConfigMap(
-                        namespaceIds, groupNames, jobIds);
-                if (jobNotifyConfigMap == null) {
-                    continue;
-                }
-                // 循环发送消息
-                jobTaskBatchMap.forEach((key, list) -> {
-                    List<JobNotifyConfig> jobNotifyConfigsList = jobNotifyConfigMap.get(key);
-                    for (JobBatchResponseDO JobBatch : list) {
-                        for (final JobNotifyConfig jobNotifyConfig : jobNotifyConfigsList) {
-                            // 预警
-                            AlarmContext context = AlarmContext.build()
-                                    .text(jobTaskFailTextMessagesFormatter,
-                                            EnvironmentUtils.getActiveProfile(),
-                                            JobBatch.getGroupName(),
-                                            JobBatch.getJobName(),
-                                            JobBatch.getExecutorInfo(),
-                                            JobBatch.getArgsStr(),
-                                            DateUtils.toNowFormat(DateUtils.NORM_DATETIME_PATTERN))
-                                    .title("{}环境 JOB任务失败", EnvironmentUtils.getActiveProfile())
-                                    .notifyAttribute(jobNotifyConfig.getNotifyAttribute());
-                            Alarm<AlarmContext> alarmType = easyRetryAlarmFactory.getAlarmType(jobNotifyConfig.getNotifyType());
-                            alarmType.asyncSendMessage(context);
-                        }
-                    }
-                });
-            } catch (InterruptedException e) {
-                LogUtils.info(log, "job task fail more alarm stop");
-                Thread.currentThread().interrupt();
-            } catch (Exception e) {
-                LogUtils.error(log, "JobTaskFailAlarmListener queue take Exception", e);
-            }
-        }
+        return context;
     }
 
-    private Map<Triple<String, String, Long>, List<JobNotifyConfig>> getJobNotifyConfigMap(Set<String> namespaceIds, Set<String> groupNames, Set<Long> jobIds) {
-        // 批量获取所需的通知配置
-        List<JobNotifyConfig> jobNotifyConfigs = jobNotifyConfigMapper.selectList(
-                new LambdaQueryWrapper<JobNotifyConfig>()
-                        .eq(JobNotifyConfig::getNotifyStatus, StatusEnum.YES)
-                        .eq(JobNotifyConfig::getNotifyScene, JobNotifySceneEnum.JOB_TASK_ERROR.getNotifyScene())
-                        .in(JobNotifyConfig::getNamespaceId, namespaceIds)
-                        .in(JobNotifyConfig::getGroupName, groupNames)
-                        .in(JobNotifyConfig::getJobId, jobIds)
-        );
-        if (CollectionUtils.isEmpty(jobNotifyConfigs)) {
-            return null;
-        }
-        return jobNotifyConfigs.stream()
-                .collect(Collectors.groupingBy(i -> {
-
-                    String namespaceId = i.getNamespaceId();
-                    String groupName = i.getGroupName();
-                    Long jobId = i.getJobId();
-
-                    return ImmutableTriple.of(namespaceId, groupName, jobId);
-                }));
+    @Override
+    protected void startLog() {
+        LogUtils.info(log, "JobTaskFailAlarmListener started");
     }
 
-    private Map<Triple<String, String, Long>, List<JobBatchResponseDO>> getJobTaskBatchMap(List<JobBatchResponseDO> jobTaskBatchList, Set<String> namespaceIds, Set<String> groupNames, Set<Long> jobIds) {
-        return jobTaskBatchList.stream().collect(Collectors.groupingBy(i -> {
-            String namespaceId = i.getNamespaceId();
-            String groupName = i.getGroupName();
-            Long jobId = i.getJobId();
-            namespaceIds.add(namespaceId);
-            groupNames.add(groupName);
-            jobIds.add(jobId);
-            return ImmutableTriple.of(namespaceId, groupName, jobId);
-        }));
+    @Override
+    protected int getNotifyScene() {
+        return JobNotifySceneEnum.JOB_TASK_ERROR.getNotifyScene();
     }
 
 

@@ -497,3 +497,37 @@ COMMENT ON COLUMN "job_task_batch"."create_dt" IS '创建时间';
 COMMENT ON COLUMN "job_task_batch"."update_dt" IS '创建时间';
 COMMENT ON COLUMN "job_task_batch"."ext_attrs" IS '扩展字段';
 COMMENT ON TABLE "job_task" IS '任务批次';
+
+CREATE TABLE job_notify_config
+(
+    id               BIGSERIAL PRIMARY KEY,
+    group_name       VARCHAR(64)  NOT NULL,
+    job_id            BIGINT      NOT NULL,
+    notify_status    SMALLINT  NOT NULL DEFAULT 0,
+    notify_type      SMALLINT     NOT NULL DEFAULT 0,
+    notify_attribute VARCHAR(512) NOT NULL,
+    notify_threshold INT          NOT NULL DEFAULT 0,
+    notify_scene     SMALLINT     NOT NULL DEFAULT 0,
+    rate_limiter_status    SMALLINT  NOT NULL DEFAULT 0,
+    rate_limiter_threshold INT          NOT NULL DEFAULT 0,
+    description      VARCHAR(256) NOT NULL DEFAULT '',
+    create_dt        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_dt        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_group_name ON job_notify_config (group_name);
+
+COMMENT ON COLUMN "job_notify_config"."id" IS '主键';
+COMMENT ON COLUMN "job_notify_config"."group_name" IS '组名称';
+COMMENT ON COLUMN "job_notify_config"."job_id" IS '任务信息id';
+COMMENT ON COLUMN "job_notify_config"."notify_status" IS '通知状态 0、未启用 1、启用';
+COMMENT ON COLUMN "job_notify_config"."notify_type" IS '通知类型 1、钉钉 2、邮件 3、企业微信';
+COMMENT ON COLUMN "job_notify_config"."notify_attribute" IS '配置属性';
+COMMENT ON COLUMN "job_notify_config"."notify_threshold" IS '通知阈值';
+COMMENT ON COLUMN "job_notify_config"."notify_scene" IS '通知场景';
+COMMENT ON COLUMN "job_notify_config"."rate_limiter_status" IS '限流状态 0、未启用 1、启用';
+COMMENT ON COLUMN "job_notify_config"."rate_limiter_threshold" IS '每秒限流阈值';
+COMMENT ON COLUMN "job_notify_config"."description" IS '描述';
+COMMENT ON COLUMN "job_notify_config"."create_dt" IS '创建时间';
+COMMENT ON COLUMN "job_notify_config"."update_dt" IS '修改时间';
+COMMENT ON TABLE "job_notify_config" IS '通知配置';

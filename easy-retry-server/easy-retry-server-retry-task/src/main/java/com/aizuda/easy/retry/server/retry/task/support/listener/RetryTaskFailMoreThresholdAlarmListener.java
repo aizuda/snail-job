@@ -1,11 +1,17 @@
 package com.aizuda.easy.retry.server.retry.task.support.listener;
 
 import com.aizuda.easy.retry.common.core.alarm.AlarmContext;
+import com.aizuda.easy.retry.common.core.enums.NotifySceneEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.util.EnvironmentUtils;
 import com.aizuda.easy.retry.common.core.util.HostUtils;
+import com.aizuda.easy.retry.server.common.AlarmInfoConverter;
 import com.aizuda.easy.retry.server.common.Lifecycle;
-import com.aizuda.easy.retry.server.common.flow.control.AbstractFlowControl;
+import com.aizuda.easy.retry.server.common.alarm.AbstractFlowControl;
+import com.aizuda.easy.retry.server.common.alarm.AbstractRetryAlarm;
+import com.aizuda.easy.retry.server.common.dto.AlarmInfo;
+import com.aizuda.easy.retry.server.common.dto.NotifyConfigInfo;
+import com.aizuda.easy.retry.server.common.dto.RetryAlarmInfo;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.server.common.triple.ImmutableTriple;
 import com.aizuda.easy.retry.server.common.triple.Triple;
@@ -36,75 +42,31 @@ import java.util.stream.Collectors;
 @Component
 @Slf4j
 public class RetryTaskFailMoreThresholdAlarmListener extends
-    AbstractFlowControl<RetryTaskFailMoreThresholdAlarmEvent> implements Runnable, Lifecycle {
+        AbstractRetryAlarm<RetryTaskFailMoreThresholdAlarmEvent> implements Runnable, Lifecycle {
 
     /**
      * 重试任务失败数量超过阈值告警数据
      */
     private LinkedBlockingQueue<RetryTask> queue = new LinkedBlockingQueue<>(1000);
-    private Thread thread;
     private static String retryTaskFailMoreThresholdMessagesFormatter =
-        "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 重试任务失败数量超过阈值</font>  \n" +
-            "> 组名称:{}  \n" +
-            "> 执行器名称:{}  \n" +
-            "> 场景名称:{}  \n" +
-            "> 重试次数:{}  \n" +
-            "> 业务数据:{}  \n" +
-            "> 时间:{}  \n";
+            "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 重试任务失败数量超过阈值</font>  \n" +
+                    "> 组名称:{}  \n" +
+                    "> 执行器名称:{}  \n" +
+                    "> 场景名称:{}  \n" +
+                    "> 重试次数:{}  \n" +
+                    "> 业务数据:{}  \n" +
+                    "> 时间:{}  \n";
 
     @Override
-    public void start() {
-        thread = new Thread(this);
-        thread.start();
-    }
+    protected List<RetryAlarmInfo> poll() throws InterruptedException {
+        // 无数据时阻塞线程
+        RetryTask retryTask = queue.take();
 
-    @Override
-    public void close() {
-        if (Objects.nonNull(thread)) {
-            thread.interrupt();
-        }
-    }
+        // 拉取100条
+        List<RetryTask> lists = Lists.newArrayList(retryTask);
+        queue.drainTo(lists, 200);
 
-    @Override
-    public void run() {
-        LogUtils.info(log, "RetryTaskFailMoreThresholdAlarmListener time[{}] ip:[{}]", LocalDateTime.now(),
-            HostUtils.getIp());
-        while (!Thread.currentThread().isInterrupted()) {
-            try {
-
-                // 无数据时阻塞线程
-                RetryTask retryTask = queue.take();
-
-                // 拉取100条
-                List<RetryTask> lists = Lists.newArrayList(retryTask);
-                queue.drainTo(lists, 200);
-
-                Set<String> namespaceIds = new HashSet<>();
-                Set<String> groupNames = new HashSet<>();
-                Set<String> sceneNames = new HashSet<>();
-                Map<Triple<String, String, String>, List<RetryTask>> retryTaskMap = getRetryTaskMap(
-                    lists, namespaceIds, groupNames, sceneNames);
-
-                Map<Triple<String, String, String>, List<NotifyConfig>> notifyConfigMap = getNotifyConfigMap(
-                    namespaceIds, groupNames, sceneNames);
-                if (notifyConfigMap == null) {
-                    continue;
-                }
-
-                // 循环发送消息
-                retryTaskMap.forEach((key, list) -> {
-                    List<NotifyConfig> notifyConfigsList = notifyConfigMap.get(key);
-                    for (RetryTask retryTask1 : list) {
-                        doSendAlarm(key, notifyConfigsList, AlarmDTOConverter.INSTANCE.toAlarmDTO(retryTask1));
-                    }
-                });
-            } catch (InterruptedException e) {
-                LogUtils.info(log, "retry task fail more alarm stop");
-                Thread.currentThread().interrupt();
-            } catch (Exception e) {
-                LogUtils.error(log, "RetryTaskFailMoreThresholdAlarmListener queue poll Exception", e);
-            }
-        }
+        return AlarmInfoConverter.INSTANCE.retryTaskToAlarmInfo(lists);
     }
 
     @Override
@@ -115,39 +77,29 @@ public class RetryTaskFailMoreThresholdAlarmListener extends
     }
 
     @Override
-    protected AlarmContext buildAlarmContext(AlarmDTO alarmDTO, NotifyConfig notifyConfig) {
+    protected AlarmContext buildAlarmContext(RetryAlarmInfo retryAlarmInfo, NotifyConfigInfo notifyConfig) {
+
         // 预警
         return AlarmContext.build().text(retryTaskFailMoreThresholdMessagesFormatter,
-                EnvironmentUtils.getActiveProfile(),
-                alarmDTO.getGroupName(),
-                alarmDTO.getExecutorName(),
-                alarmDTO.getSceneName(),
-                alarmDTO.getRetryCount(),
-                alarmDTO.getArgsStr(),
-                DateUtils.format(alarmDTO.getCreateDt(), DateUtils.NORM_DATETIME_PATTERN))
-            .title("组:[{}] 场景:[{}] 环境重试任务失败数量超过阈值", alarmDTO.getGroupName(), alarmDTO.getSceneName())
-            .notifyAttribute(notifyConfig.getNotifyAttribute());
+                        EnvironmentUtils.getActiveProfile(),
+                        retryAlarmInfo.getGroupName(),
+                        retryAlarmInfo.getExecutorName(),
+                        retryAlarmInfo.getSceneName(),
+                        retryAlarmInfo.getRetryCount(),
+                        retryAlarmInfo.getArgsStr(),
+                        DateUtils.format(retryAlarmInfo.getCreateDt(), DateUtils.NORM_DATETIME_PATTERN))
+                .title("组:[{}] 场景:[{}] 环境重试任务失败数量超过阈值", retryAlarmInfo.getGroupName(),
+                        retryAlarmInfo.getSceneName())
+                .notifyAttribute(notifyConfig.getNotifyAttribute());
     }
 
-    @NotNull
-    private static Map<Triple<String, String, String>, List<RetryTask>> getRetryTaskMap(
-        final List<RetryTask> list, final Set<String> namespaceIds,
-        final Set<String> groupNames, final Set<String> sceneNames) {
-
-        return list.stream()
-            .collect(Collectors.groupingBy(retryTask -> {
-                String namespaceId = retryTask.getNamespaceId();
-                String groupName = retryTask.getGroupName();
-                String sceneName = retryTask.getSceneName();
-
-                namespaceIds.add(namespaceId);
-                groupNames.add(groupName);
-                sceneNames.add(sceneName);
-
-                return ImmutableTriple.of(namespaceId, groupName, sceneName);
-            }));
-
+    @Override
+    protected void startLog() {
+        LogUtils.info(log, "RetryTaskFailMoreThresholdAlarmListener started");
     }
 
-
+    @Override
+    protected int getNotifyScene() {
+        return NotifySceneEnum.MAX_RETRY_ERROR.getNotifyScene();
+    }
 }

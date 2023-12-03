@@ -25,7 +25,7 @@ public interface JobTaskBatchMapper extends BaseMapper<JobTaskBatch> {
 
     List<JobBatchResponseDO> selectJobBatchPageList(IPage<JobTaskBatch> iPage, @Param("queryDO") JobBatchQueryDO queryDO);
 
-    List<JobBatchResponseDO> selectJobBatchListByIds( @Param("ids") List<Long> ids);
+    List<JobBatchResponseDO> selectJobBatchListByIds(@Param("ids") List<Long> ids);
 
     List<JobBatchSummaryResponseDO> summaryJobBatchList(@Param("from") LocalDateTime todayFrom, @Param("to") LocalDateTime to);
 }
