@@ -34,7 +34,10 @@
     <select id="countActivePod"
             resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.ActivePodQuantityResponseDO">
         SELECT node_type as nodeType, count(*) as total
-        from server_node
+        from server_node where namespace_id in
+        <foreach collection="namespaceIds" item="namespaceId" separator="," open="(" close=")">
+            #{namespaceId}
+        </foreach>
         GROUP BY node_type
     </select>
 </mapper>

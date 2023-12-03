@@ -10,6 +10,7 @@ import com.aizuda.easy.retry.server.common.dto.AlarmInfo;
 import com.aizuda.easy.retry.server.common.dto.NotifyConfigInfo;
 import com.aizuda.easy.retry.server.common.triple.Triple;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
+import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.RateLimiter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,7 +62,7 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
 
                 // 循环发送消息
                 waitSendAlarmInfos.forEach((key, list) -> {
-                    List<NotifyConfigInfo> notifyConfigsList = notifyConfig.get(key);
+                    List<NotifyConfigInfo> notifyConfigsList = notifyConfig.getOrDefault(key, Lists.newArrayList());
                     for (A alarmDTO : list) {
                         sendAlarm(notifyConfigsList, alarmDTO);
                     }

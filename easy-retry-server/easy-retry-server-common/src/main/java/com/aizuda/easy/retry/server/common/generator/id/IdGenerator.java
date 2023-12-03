@@ -20,9 +20,10 @@ public interface IdGenerator {
     /**
      * 获取分布式id
      *
-     * @param group 组
+     * @param groupName 组
+     * @param namespaceId 命名空间
      * @return id
      */
-    String idGenerator(String group);
+    String idGenerator(String groupName, String namespaceId);
 
 }

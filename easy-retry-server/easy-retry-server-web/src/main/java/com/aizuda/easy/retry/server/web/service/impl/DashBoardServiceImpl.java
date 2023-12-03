@@ -80,7 +80,7 @@ public class DashBoardServiceImpl implements DashBoardService {
         // 重试任务柱状图
         dashboardCardResponseVO.setRetryTaskBarList(RetrySummaryResponseVOConverter.INSTANCE.toRetryTaskBar(retrySummaryMapper.retryTaskBarList(namespaceId)));
         // 在线Pods
-        List<ActivePodQuantityResponseDO> activePodQuantityDO = serverNodeMapper.countActivePod(namespaceId);
+        List<ActivePodQuantityResponseDO> activePodQuantityDO = serverNodeMapper.countActivePod(Lists.newArrayList(namespaceId, ServerRegister.NAMESPACE_ID));
         Map<Integer, Long> map = activePodQuantityDO.stream().collect(Collectors.toMap(ActivePodQuantityResponseDO::getNodeType, ActivePodQuantityResponseDO::getTotal));
         Long clientTotal = map.getOrDefault(NodeTypeEnum.CLIENT.getType(), 0L);
         Long serverTotal = map.getOrDefault(NodeTypeEnum.SERVER.getType(), 0L);

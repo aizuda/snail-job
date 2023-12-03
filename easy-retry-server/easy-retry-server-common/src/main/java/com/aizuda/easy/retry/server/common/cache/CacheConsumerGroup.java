@@ -39,7 +39,7 @@ public class CacheConsumerGroup implements Lifecycle {
      * @return 缓存对象
      */
     public static synchronized void addOrUpdate(String groupName, String namespaceId) {
-        LogUtils.info(log, "add consumer cache. groupName:[{}]", groupName);
+//        LogUtils.info(log, "add consumer cache. groupName:[{}]", groupName);
         CACHE.put(groupName, namespaceId);
     }
 

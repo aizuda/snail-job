@@ -17,6 +17,6 @@ public interface ServerNodeMapper extends BaseMapper<ServerNode> {
 
     int deleteByExpireAt(@Param("endTime") LocalDateTime endTime);
 
-    List<ActivePodQuantityResponseDO> countActivePod(@Param("namespaceId") String namespaceId);
+    List<ActivePodQuantityResponseDO> countActivePod(@Param("namespaceIds") List<String> namespaceIds);
 
 }

@@ -221,7 +221,7 @@ public abstract class AbstractGenerator implements TaskGenerator {
         GroupConfig groupConfig = accessTemplate.getGroupConfigAccess().getGroupConfigByGroupName(groupName, namespaceId);
         for (final IdGenerator idGenerator : idGeneratorList) {
             if (idGenerator.supports(groupConfig.getIdGeneratorMode())) {
-                return idGenerator.idGenerator(groupName);
+                return idGenerator.idGenerator(groupName, namespaceId);
             }
         }
 

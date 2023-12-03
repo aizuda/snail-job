@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.server.common.generator.id;
 
+import cn.hutool.core.lang.Pair;
 import lombok.Data;
 
 import java.util.Arrays;
@@ -15,7 +16,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 @Data
 public class SegmentBuffer {
-    private String key;
+    private Pair<String/*groupName*/, String/*namespaceId*/> key;
     private Segment[] segments; //双buffer
     private volatile int currentPos; //当前的使用的segment的index
     private volatile boolean nextReady; //下一个segment是否处于可切换状态
@@ -36,11 +37,11 @@ public class SegmentBuffer {
         lock = new ReentrantReadWriteLock();
     }
 
-    public String getKey() {
+    public Pair<String, String> getKey() {
         return key;
     }
 
-    public void setKey(String key) {
+    public void setKey(Pair<String, String> key) {
         this.key = key;
     }
 
