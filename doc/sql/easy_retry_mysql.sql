@@ -62,7 +62,7 @@ CREATE TABLE `notify_config`
     `create_dt`              datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_dt`              datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     PRIMARY KEY (`id`),
-    KEY `idx_namespace_id_group_name` (`namespace_id`, `group_name`)
+    KEY `idx_namespace_id_group_name_scene_name` (`namespace_id`, `group_name`, `scene_name`)
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 0
   DEFAULT CHARSET = utf8mb4 COMMENT ='通知配置'
@@ -393,7 +393,7 @@ CREATE TABLE `job_notify_config`
     `create_dt`              datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_dt`              datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     PRIMARY KEY (`id`),
-    KEY                      `idx_namespace_id_group_name` (`namespace_id`,`group_name`)
+    KEY                      `idx_namespace_id_group_name_job_id` (`namespace_id`,`group_name`, job_id)
 ) ENGINE=InnoDB
   AUTO_INCREMENT=4
   DEFAULT CHARSET=utf8mb4 COMMENT='job通知配置';
@@ -415,6 +415,7 @@ CREATE TABLE `job_summary`
     `create_dt`     datetime        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_dt`     datetime        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     PRIMARY KEY (`id`),
+    KEY `idx_namespace_id_group_name_job_id` (`namespace_id`, `group_name`, job_id),
     UNIQUE KEY `uk_job_id_trigger_at` (`job_id`, `trigger_at`) USING BTREE
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 1
@@ -434,7 +435,8 @@ CREATE TABLE `retry_summary`
     `create_dt`     datetime        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_dt`     datetime        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_scene_name_trigger_at` (`scene_name`, `trigger_at`) USING BTREE
+    KEY `idx_namespace_id_group_name_scene_name` (`namespace_id`, `group_name`, scene_name),
+    UNIQUE KEY `uk_scene_name_trigger_at` (`namespace_id`, `group_name`, `scene_name`, `trigger_at`) USING BTREE
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 1
   DEFAULT CHARSET = utf8mb4 COMMENT ='DashBoard_Retry';

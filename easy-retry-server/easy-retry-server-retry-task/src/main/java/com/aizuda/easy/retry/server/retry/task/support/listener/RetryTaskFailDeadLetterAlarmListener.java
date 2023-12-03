@@ -74,7 +74,7 @@ public class RetryTaskFailDeadLetterAlarmListener extends AbstractRetryAlarm<Ret
 
     @Override
     public void onApplicationEvent(RetryTaskFailDeadLetterAlarmEvent event) {
-        if (queue.offer(event.getRetryDeadLetters())) {
+        if (!queue.offer(event.getRetryDeadLetters())) {
             LogUtils.warn(log, "任务重试失败进入死信队列告警队列已满");
         }
     }

@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -25,6 +27,9 @@ public class JobTimerWheel implements Lifecycle {
     private static final int TICK_DURATION = 100;
     private static final String THREAD_NAME_PREFIX = "job-task-timer-wheel-";
     private static HashedWheelTimer timer = null;
+    private static final ThreadPoolExecutor executor =
+            new ThreadPoolExecutor(4, 4, 10, TimeUnit.SECONDS,
+                    new LinkedBlockingQueue<>(), new CustomizableThreadFactory(THREAD_NAME_PREFIX));
 
     private static final TimerIdempotent idempotent = new TimerIdempotent();
 
@@ -32,7 +37,7 @@ public class JobTimerWheel implements Lifecycle {
     public void start() {
         timer = new HashedWheelTimer(
                 new CustomizableThreadFactory(THREAD_NAME_PREFIX), TICK_DURATION,
-                TimeUnit.MILLISECONDS);
+                TimeUnit.MILLISECONDS, 512, true, -1, executor);
         timer.start();
     }
 

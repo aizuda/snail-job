@@ -30,7 +30,7 @@
         <foreach collection="list" item="item" separator=",">
             (#{item.uniqueId}, #{item.groupName}, #{item.sceneName}, #{item.idempotentId},
              #{item.bizNo}, #{item.executorName}, #{item.argsStr}, #{item.extAttrs},
-             #{item.taskType}, #{item.createDt}, #{namespaceId})
+             #{item.taskType}, #{item.createDt}, #{item.namespaceId})
         </foreach>
     </insert>
 

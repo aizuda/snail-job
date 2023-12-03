@@ -109,7 +109,7 @@ public class JobTaskFailAlarmListener extends AbstractJobAlarm<JobTaskFailAlarmE
 
     @Override
     public void onApplicationEvent(JobTaskFailAlarmEvent event) {
-        if (queue.offer(event.getJobTaskBatchId())) {
+        if (!queue.offer(event.getJobTaskBatchId())) {
             LogUtils.warn(log, "JOB任务执行失败告警队列已满");
         }
     }
