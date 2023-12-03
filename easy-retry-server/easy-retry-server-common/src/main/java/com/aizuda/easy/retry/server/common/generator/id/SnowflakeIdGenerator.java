@@ -24,7 +24,7 @@ public class SnowflakeIdGenerator implements IdGenerator {
     }
 
     @Override
-    public String idGenerator(String group) {
+    public String idGenerator(String group, String namespaceId) {
         return SNOWFLAKE.nextIdStr();
     }
 }

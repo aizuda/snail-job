@@ -2,7 +2,6 @@ package com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.scan;
 
 import akka.actor.AbstractActor;
 import cn.hutool.core.lang.Pair;
-import cn.hutool.core.lang.Tuple;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
@@ -117,7 +116,7 @@ public abstract class AbstractScanGroup extends AbstractActor {
     private void processRetryPartitionTasks(List<? extends PartitionTask> partitionTasks, final ScanTask scanTask) {
 
         // 批次查询场景
-        Map<String, SceneConfig> sceneConfigMap = getSceneConfigMap(partitionTasks);
+        Map<String, SceneConfig> sceneConfigMap = getSceneConfigMap(partitionTasks, scanTask);
 
         List<RetryTask> waitUpdateRetryTasks = new ArrayList<>();
         for (PartitionTask task : partitionTasks) {
@@ -148,12 +147,14 @@ public abstract class AbstractScanGroup extends AbstractActor {
 
     }
 
-    private Map<String, SceneConfig> getSceneConfigMap(final List<? extends PartitionTask> partitionTasks) {
+    private Map<String, SceneConfig> getSceneConfigMap(final List<? extends PartitionTask> partitionTasks, ScanTask scanTask) {
         Set<String> sceneNameSet = partitionTasks.stream()
                 .map(partitionTask -> ((RetryPartitionTask) partitionTask).getSceneName()).collect(Collectors.toSet());
         List<SceneConfig> sceneConfigs = accessTemplate.getSceneConfigAccess()
                 .list(new LambdaQueryWrapper<SceneConfig>()
                         .select(SceneConfig::getBackOff, SceneConfig::getTriggerInterval, SceneConfig::getSceneName)
+                        .eq(SceneConfig::getNamespaceId, scanTask.getNamespaceId())
+                        .eq(SceneConfig::getGroupName, scanTask.getGroupName())
                         .in(SceneConfig::getSceneName, sceneNameSet));
         return sceneConfigs.stream()
                 .collect(Collectors.toMap(SceneConfig::getSceneName, i -> i));

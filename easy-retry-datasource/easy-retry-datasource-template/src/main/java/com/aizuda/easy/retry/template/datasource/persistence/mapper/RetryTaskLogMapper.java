@@ -13,26 +13,6 @@ import java.util.List;
 
 public interface RetryTaskLogMapper extends BaseMapper<RetryTaskLog> {
 
-
-    RetryTaskLog selectByPrimaryKey(Long id);
-
-    long countTaskTotal();
-
-    long countTaskByRetryStatus(@Param("retryStatus") Integer retryStatus);
-
-    List<SceneQuantityRankResponseDO> rankSceneQuantity(@Param("groupName") String groupName,
-                                                        @Param("startTime") LocalDateTime startTime,
-                                                        @Param("endTime")LocalDateTime endTime
-                                                        );
-
-    @Deprecated
-    List<DispatchQuantityResponseDO> lineDispatchQuantity(@Param("groupName") String groupName,
-                                                          @Param("retryStatus") Integer retryStatus,
-                                                          @Param("type") String type,
-                                                          @Param("startTime")LocalDateTime startTime,
-                                                          @Param("endTime")LocalDateTime endTime
-    );
-
     int batchInsert(List<RetryTaskLog> list);
 
     List<DashboardRetryResponseDO> retrySummaryRetryTaskLogList(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);

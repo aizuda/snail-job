@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.server.common.generator.id;
 
+import cn.hutool.core.lang.Pair;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.common.Lifecycle;
 import com.aizuda.easy.retry.server.common.enums.IdGeneratorMode;
@@ -14,8 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -68,7 +67,7 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
             new LinkedBlockingDeque<>(5000), new UpdateThreadFactory());
 
     private volatile boolean initOK = false;
-    private Map<String, SegmentBuffer> cache = new ConcurrentHashMap<>();
+    private Map<Pair<String, String>, SegmentBuffer> cache = new ConcurrentHashMap<>();
 
     @Autowired
     private SequenceAllocMapper sequenceAllocMapper;
@@ -121,19 +120,21 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
                 return;
             }
 
-            List<String> dbTags = sequenceAllocs.stream().map(SequenceAlloc::getGroupName).collect(Collectors.toList());
+            List<Pair<String, String>> dbTags = sequenceAllocs.stream()
+                    .map(sequenceAlloc -> Pair.of(sequenceAlloc.getGroupName(), sequenceAlloc.getNamespaceId()))
+                    .collect(Collectors.toList());
 
-            List<String> cacheTags = new ArrayList<>(cache.keySet());
-            Set<String> insertTagsSet = new HashSet<>(dbTags);
-            Set<String> removeTagsSet = new HashSet<>(cacheTags);
+            List<Pair<String, String>> cacheTags = new ArrayList<>(cache.keySet());
+            Set<Pair<String, String>> insertTagsSet = new HashSet<>(dbTags);
+            Set<Pair<String, String>> removeTagsSet = new HashSet<>(cacheTags);
             //db中新加的tags灌进cache
             for (int i = 0; i < cacheTags.size(); i++) {
-                String tmp = cacheTags.get(i);
+                Pair<String, String> tmp = cacheTags.get(i);
                 if (insertTagsSet.contains(tmp)) {
                     insertTagsSet.remove(tmp);
                 }
             }
-            for (String tag : insertTagsSet) {
+            for (Pair<String, String> tag : insertTagsSet) {
                 SegmentBuffer buffer = new SegmentBuffer();
                 buffer.setKey(tag);
                 Segment segment = buffer.getCurrent();
@@ -145,12 +146,12 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
             }
             //cache中已失效的tags从cache删除
             for (int i = 0; i < dbTags.size(); i++) {
-                String tmp = dbTags.get(i);
+                Pair<String, String> tmp = dbTags.get(i);
                 if (removeTagsSet.contains(tmp)) {
                     removeTagsSet.remove(tmp);
                 }
             }
-            for (String tag : removeTagsSet) {
+            for (Pair<String, String> tag : removeTagsSet) {
                 cache.remove(tag);
                 LogUtils.info(log, "Remove tag {} from IdCache", tag);
             }
@@ -161,11 +162,12 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
         }
     }
 
-    public String get(final String key) {
+    public String get(final String groupName, String namespaceId) {
         if (!initOK) {
             return Long.toString(EXCEPTION_ID_IDCACHE_INIT_FALSE);
         }
 
+        Pair<String, String> key = Pair.of(groupName, namespaceId);
         if (cache.containsKey(key)) {
             SegmentBuffer buffer = cache.get(key);
             if (!buffer.isInitOk()) {
@@ -186,16 +188,16 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
         return Long.toString(EXCEPTION_ID_KEY_NOT_EXISTS);
     }
 
-    public void updateSegmentFromDb(String key, Segment segment) {
+    public void updateSegmentFromDb(Pair<String, String> key, Segment segment) {
         SegmentBuffer buffer = segment.getBuffer();
         SequenceAlloc sequenceAlloc;
         if (!buffer.isInitOk()) {
-            sequenceAllocMapper.updateMaxId(key);
+            sequenceAllocMapper.updateMaxId(key.getKey(), key.getValue());
             sequenceAlloc = sequenceAllocMapper.selectOne(new LambdaQueryWrapper<SequenceAlloc>().eq(SequenceAlloc::getGroupName, key));
             buffer.setStep(sequenceAlloc.getStep());
             buffer.setMinStep(sequenceAlloc.getStep());//leafAlloc中的step为DB中的step
         } else if (buffer.getUpdateTimestamp() == 0) {
-            sequenceAllocMapper.updateMaxId(key);
+            sequenceAllocMapper.updateMaxId(key.getKey(), key.getValue());
             sequenceAlloc = sequenceAllocMapper.selectOne(new LambdaQueryWrapper<SequenceAlloc>().eq(SequenceAlloc::getGroupName, key));
             buffer.setUpdateTimestamp(System.currentTimeMillis());
             buffer.setStep(sequenceAlloc.getStep());
@@ -216,7 +218,7 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
             }
             LogUtils.info(log, "leafKey[{}], step[{}], duration[{}mins], nextStep[{}]", key, buffer.getStep(), String.format("%.2f", ((double) duration / (1000 * 60))), nextStep);
 
-            sequenceAllocMapper.updateMaxIdByCustomStep(nextStep, key);
+            sequenceAllocMapper.updateMaxIdByCustomStep(nextStep, key.getKey(), key.getValue());
             sequenceAlloc = sequenceAllocMapper
                     .selectOne(new LambdaQueryWrapper<SequenceAlloc>().eq(SequenceAlloc::getGroupName, key));
             buffer.setUpdateTimestamp(System.currentTimeMillis());
@@ -307,9 +309,9 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
     }
 
     @Override
-    public String idGenerator(String group) {
+    public String idGenerator(String groupName, String namespaceId) {
         String time = DateUtils.format(DateUtils.toNowLocalDateTime(), DateUtils.PURE_DATETIME_MS_PATTERN);
-        return time.concat(get(group));
+        return time.concat(get(groupName, namespaceId));
     }
 
 }

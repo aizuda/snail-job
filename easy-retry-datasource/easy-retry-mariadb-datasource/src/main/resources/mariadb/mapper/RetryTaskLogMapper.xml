@@ -4,6 +4,7 @@
     <resultMap id="BaseResultMap" type="com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLog">
         <id column="id" jdbcType="BIGINT" property="id"/>
         <result column="unique_id" jdbcType="VARCHAR" property="uniqueId"/>
+        <result column="namespace_id" jdbcType="VARCHAR" property="namespaceId"/>
         <result column="group_name" jdbcType="VARCHAR" property="groupName"/>
         <result column="scene_name" jdbcType="VARCHAR" property="sceneName"/>
         <result column="idempotent_id" jdbcType="VARCHAR" property="idempotentId"/>
@@ -18,81 +19,17 @@
     <sql id="Base_Column_List">
         id
         , unique_id, group_name, scene_name, idempotent_id, biz_no, executor_name, args_str, ext_attrs, retry_status,
-    create_dt, task_type
+    create_dt, task_type, namespace_id
     </sql>
-    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
-        select
-        <include refid="Base_Column_List"/>
-        from retry_task_log
-        where id = #{id,jdbcType=BIGINT}
-    </select>
-    <select id="countTaskTotal" resultType="java.lang.Long">
-        select count(*)
-        from retry_task_log
-    </select>
-    <select id="countTaskByRetryStatus" resultType="java.lang.Long">
-        select count(*)
-        from retry_task_log
-        where retry_status = #{retryStatus}
-    </select>
-    <select id="rankSceneQuantity"
-        resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.SceneQuantityRankResponseDO">
-        select group_name, scene_name, count(*) as total
-        from retry_task_log
-        <where>
-            <if test="groupName != '' and groupName != null">
-               and group_name = #{groupName}
-            </if>
-            and create_dt >= #{startTime} and create_dt &lt;= #{endTime}
-        </where>
-        group by group_name, scene_name
-        order by total desc
-
-    </select>
-    <select id="lineDispatchQuantity"
-        resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DispatchQuantityResponseDO">
-        select
-        <choose>
-            <when test="type == 'day'">
-                DATE_FORMAT(create_dt,'%H')
-            </when>
-            <when test="type == 'week'">
-                DATE_FORMAT(create_dt,'%Y-%m-%d')
-            </when>
-            <when test="type =='month'">
-                DATE_FORMAT(create_dt,'%Y-%m-%d')
-            </when>
-            <when test="type == 'year'">
-                DATE_FORMAT(create_dt,'%Y-%m')
-            </when>
-            <otherwise>
-                DATE_FORMAT(create_dt,'%Y-%m-%d')
-            </otherwise>
-        </choose>
-        as createDt, count(*) as total
-        from retry_task_log
-        <where>
-            <if test="groupName != '' and groupName != null">
-                group_name = #{groupName}
-            </if>
-            <if test="retryStatus!=null ">
-                and retry_status = #{retryStatus}
-            </if>
-
-            and create_dt >= #{startTime} and create_dt &lt;= #{endTime}
-        </where>
-        group by createDt
-        order by total desc
-
-
-    </select>
-
     <!-- 定义批量新增的 SQL 映射 -->
     <insert id="batchInsert" parameterType="java.util.List">
-        INSERT INTO retry_task_log (unique_id, group_name, scene_name, idempotent_id, biz_no, executor_name, args_str, ext_attrs, task_type, create_dt)
+        INSERT INTO retry_task_log (unique_id, group_name, scene_name, idempotent_id, biz_no, executor_name,
+        args_str, ext_attrs, task_type, create_dt, namespace_id)
         VALUES
         <foreach collection="list" item="item" separator=",">
-            (#{item.uniqueId}, #{item.groupName}, #{item.sceneName}, #{item.idempotentId}, #{item.bizNo}, #{item.executorName}, #{item.argsStr}, #{item.extAttrs}, #{item.taskType}, #{item.createDt})
+            (#{item.uniqueId}, #{item.groupName}, #{item.sceneName}, #{item.idempotentId},
+            #{item.bizNo}, #{item.executorName}, #{item.argsStr}, #{item.extAttrs},
+            #{item.taskType}, #{item.createDt}, #{namespaceId})
         </foreach>
     </insert>
 </mapper>

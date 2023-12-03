@@ -28,6 +28,7 @@ public class RetryTimerTask extends AbstractTimerTask {
         this.context = context;
         super.groupName = context.getGroupName();
         super.uniqueId = context.getUniqueId();
+        super.namespaceId = context.getNamespaceId();
     }
 
     @Override
