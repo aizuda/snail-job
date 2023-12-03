@@ -71,7 +71,7 @@ public class RetryTaskFailMoreThresholdAlarmListener extends
 
     @Override
     public void onApplicationEvent(RetryTaskFailMoreThresholdAlarmEvent event) {
-        if (queue.offer(event.getRetryTask())) {
+        if (!queue.offer(event.getRetryTask())) {
             LogUtils.warn(log, "任务失败数量超过阈值告警队列已满");
         }
     }

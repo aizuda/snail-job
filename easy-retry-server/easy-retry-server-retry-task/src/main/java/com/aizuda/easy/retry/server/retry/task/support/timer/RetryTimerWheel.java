@@ -26,8 +26,10 @@ public class RetryTimerWheel implements Lifecycle {
     private static final int TICK_DURATION = 500;
     private static final String THREAD_NAME_PREFIX = "retry-task-timer-wheel-";
     private static HashedWheelTimer timer = null;
-    private static final ThreadPoolExecutor executor = new ThreadPoolExecutor(16, 16, 10, TimeUnit.SECONDS,
-            new LinkedBlockingQueue<>());
+    private static final ThreadPoolExecutor executor =
+            new ThreadPoolExecutor(16, 16, 10, TimeUnit.SECONDS,
+            new LinkedBlockingQueue<>(), new CustomizableThreadFactory(THREAD_NAME_PREFIX));
+
     private static final TimerIdempotent idempotent = new TimerIdempotent();
 
     @Override
