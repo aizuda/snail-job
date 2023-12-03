@@ -375,3 +375,66 @@ CREATE TABLE `job_task_batch`
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 0
   DEFAULT CHARSET = utf8mb4 COMMENT ='任务批次';
+
+CREATE TABLE `job_notify_config`
+(
+    `id`                     bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `namespace_id`           varchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' COMMENT '命名空间id',
+    `group_name`             varchar(64)  NOT NULL COMMENT '组名称',
+    `job_id`                 bigint(20) NOT NULL COMMENT '任务id',
+    `notify_status`          tinyint(4) NOT NULL DEFAULT '0' COMMENT '通知状态 0、未启用 1、启用',
+    `notify_type`            tinyint(4) NOT NULL DEFAULT '0' COMMENT '通知类型 1、钉钉 2、邮件 3、企业微信',
+    `notify_attribute`       varchar(512) NOT NULL COMMENT '配置属性',
+    `notify_threshold`       int(11) NOT NULL DEFAULT '0' COMMENT '通知阈值',
+    `notify_scene`           tinyint(4) NOT NULL DEFAULT '0' COMMENT '通知场景',
+    `rate_limiter_status`    tinyint(4) NOT NULL DEFAULT '0' COMMENT '限流状态 0、未启用 1、启用',
+    `rate_limiter_threshold` int(11) NOT NULL DEFAULT '0' COMMENT '每秒限流阈值',
+    `description`            varchar(256) NOT NULL DEFAULT '' COMMENT '描述',
+    `create_dt`              datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_dt`              datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+    PRIMARY KEY (`id`),
+    KEY                      `idx_namespace_id_group_name` (`namespace_id`,`group_name`)
+) ENGINE=InnoDB
+  AUTO_INCREMENT=4
+  DEFAULT CHARSET=utf8mb4 COMMENT='job通知配置';
+
+CREATE TABLE `job_summary`
+(
+    `id`            bigint unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `namespace_id`  VARCHAR(64)     NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' COMMENT '命名空间id',
+    `group_name`    VARCHAR(64)     NOT NULL DEFAULT '' COMMENT '组名称',
+    `job_id`        bigint          NOT NULL COMMENT '任务信息id',
+    `trigger_at`    datetime        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '统计时间',
+    `success_num`   int             NOT NULL DEFAULT '0' COMMENT '执行成功-日志数量',
+    `fail_num`      int             NOT NULL DEFAULT '0' COMMENT '执行失败-日志数量',
+    `fail_reason`   varchar(512)    NOT NULL DEFAULT '' COMMENT '失败原因',
+    `stop_num`      int             NOT NULL DEFAULT '0' COMMENT '执行失败-日志数量',
+    `stop_reason`   varchar(512)    NOT NULL DEFAULT '' COMMENT '失败原因',
+    `cancel_num`    int             NOT NULL DEFAULT '0' COMMENT '执行失败-日志数量',
+    `cancel_reason` varchar(512)    NOT NULL DEFAULT '' COMMENT '失败原因',
+    `create_dt`     datetime        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_dt`     datetime        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_job_id_trigger_at` (`job_id`, `trigger_at`) USING BTREE
+) ENGINE = InnoDB
+  AUTO_INCREMENT = 1
+  DEFAULT CHARSET = utf8mb4 COMMENT ='DashBoard_Job';
+
+CREATE TABLE `retry_summary`
+(
+    `id`            bigint unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `namespace_id`  VARCHAR(64)     NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' COMMENT '命名空间id',
+    `group_name`    VARCHAR(64)     NOT NULL DEFAULT '' COMMENT '组名称',
+    `scene_name`    VARCHAR(50)     NOT NULL DEFAULT '' COMMENT '场景名称',
+    `trigger_at`    datetime        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '统计时间',
+    `running_num`   int             NOT NULL DEFAULT '0' COMMENT '重试中-日志数量',
+    `finish_num`    int             NOT NULL DEFAULT '0' COMMENT '重试完成-日志数量',
+    `max_count_num` int             NOT NULL DEFAULT '0' COMMENT '重试到达最大次数-日志数量',
+    `suspend_num`   int             NOT NULL DEFAULT '0' COMMENT '暂停重试-日志数量',
+    `create_dt`     datetime        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_dt`     datetime        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_scene_name_trigger_at` (`scene_name`, `trigger_at`) USING BTREE
+) ENGINE = InnoDB
+  AUTO_INCREMENT = 1
+  DEFAULT CHARSET = utf8mb4 COMMENT ='DashBoard_Retry';
