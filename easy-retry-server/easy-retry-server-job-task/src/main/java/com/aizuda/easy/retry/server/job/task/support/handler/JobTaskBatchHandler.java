@@ -1,12 +1,10 @@
 package com.aizuda.easy.retry.server.job.task.support.handler;
 
+import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskStatusEnum;
-import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
-import com.aizuda.easy.retry.server.job.task.support.JobTaskStopHandler;
-import com.aizuda.easy.retry.server.job.task.support.stop.JobTaskStopFactory;
-import com.aizuda.easy.retry.server.job.task.support.stop.TaskStopJobContext;
+import com.aizuda.easy.retry.server.job.task.support.event.JobTaskFailAlarmEvent;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskBatchMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
@@ -51,7 +49,7 @@ public class JobTaskBatchHandler {
                 new LambdaUpdateWrapper<JobTaskBatch>()
                     .eq(JobTaskBatch::getId, taskBatchId)
                     .in(JobTaskBatch::getTaskBatchStatus, JobTaskStatusEnum.NOT_COMPLETE));
-
+            SpringContext.CONTEXT.publishEvent(new JobTaskFailAlarmEvent(taskBatchId));
             return false;
         }
 
@@ -67,6 +65,7 @@ public class JobTaskBatchHandler {
 
         if (failCount > 0) {
             jobTaskBatch.setTaskBatchStatus(JobTaskBatchStatusEnum.FAIL.getStatus());
+            SpringContext.CONTEXT.publishEvent(new JobTaskFailAlarmEvent(taskBatchId));
         } else if (stopCount > 0) {
             jobTaskBatch.setTaskBatchStatus(JobTaskBatchStatusEnum.STOP.getStatus());
         } else {

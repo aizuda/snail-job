@@ -56,15 +56,15 @@
         <a-row class="form-row" :gutter="16">
           <a-col :lg="18" :md="12" :sm="24">
             <a-form-item label="组">
-              <a-select placeholder="请选择组"  v-decorator="['groupName', { rules: [{ required: true, message: '请选择组' }] }]" @change="value => changeGroup(value)">
+              <a-select placeholder="请选择组" v-decorator="['groupName', { rules: [{ required: true, message: '请选择组' }] }]" @change="value => changeGroup(value)">
                 <a-select-option v-for="item in groupNameList" :value="item" :key="item">{{ item }}</a-select-option>
               </a-select>
             </a-form-item>
           </a-col>
           <a-col :lg="6" :md="12" :sm="24">
             <a-form-item label="任务">
-              <a-select :disabled="sceneNameDisabled.includes(this.notifySceneValue)" placeholder="请选择任务"  v-decorator="['jobId', { rules: [{ required: true, message: '请选择任务' }] }]"  >
-                <a-select-option v-for="item in jobList" :value="item.id" :key="item.id">{{item.jobName}}</a-select-option>
+              <a-select :disabled="sceneNameDisabled.includes(this.notifySceneValue)" placeholder="请选择任务" v-decorator="['jobId', { rules: [{ required: true, message: '请选择任务' }] }]" >
+                <a-select-option v-for="item in jobList" :value="item.id" :key="item.id">{{ item.jobName }}</a-select-option>
               </a-select>
             </a-form-item>
           </a-col>
@@ -103,21 +103,21 @@
         <a-row class="form-row" :gutter="16">
           <a-col :lg="8" :md="12" :sm="24">
             <a-form-item label="限流状态">
-              <a-select :disabled="rateLimiterStatusDisabled.includes(this.notifySceneValue)" placeholder="请选择限流状态" @change="changeRateLimiterStatus" v-decorator="['rateLimiterStatus',{initialValue: '0', rules: [{ required: true, message: '请选择限流状态'}]}]"  >
+              <a-select :disabled="rateLimiterStatusDisabled.includes(this.notifySceneValue)" placeholder="请选择限流状态" @change="changeRateLimiterStatus" v-decorator="['rateLimiterStatus',{initialValue: '0', rules: [{ required: true, message: '请选择限流状态'}]}]" >
                 <a-select-option :value="index" v-for="(item, index) in rateLimiterStatusList" :key="index">{{ item.name }}</a-select-option>
               </a-select>
             </a-form-item>
           </a-col>
           <a-col :lg="8" :md="12" :sm="24">
             <a-form-item label="每秒限流阈值">
-              <a-input-number :disabled="rateLimiterThresholdDisabled.includes(this.rateLimiterStatusValue)" id="inputNumber" :min="1" style="width: -webkit-fill-available" v-decorator= "['rateLimiterThreshold',{initialValue: '100',rules: [{ required: !rateLimiterThresholdDisabled.includes(this.rateLimiterStatusValue), message: '请输入通知阈值' }]}]" />
-          </a-form-item>
+              <a-input-number :disabled="rateLimiterThresholdDisabled.includes(this.rateLimiterStatusValue)" id="inputNumber" :min="1" style="width: -webkit-fill-available" v-decorator="['rateLimiterThreshold',{initialValue: '100',rules: [{ required: !rateLimiterThresholdDisabled.includes(this.rateLimiterStatusValue), message: '请输入通知阈值' }]}]" />
+            </a-form-item>
           </a-col>
           <a-col :lg="8" :md="12" :sm="24">
             <a-form-item label="状态">
               <a-select
-                  placeholder="请选择状态"
-                  v-decorator="[
+                placeholder="请选择状态"
+                v-decorator="[
                   'notifyStatus',
                   {
                     initialValue: '1',
@@ -274,12 +274,11 @@
 </template>
 
 <script>
-import { getAllGroupNameList, getSceneList } from '@/api/manage'
-import { getNotifyConfigDetail, saveNotify, updateNotify } from '@/api/retryApi'
+import { getAllGroupNameList } from '@/api/manage'
 import pick from 'lodash.pick'
 import CronModal from '@/views/job/form/CronModal'
 import { officialWebsite } from '@/utils/util'
-import {getJobList, getJobNotifyConfigDetail, saveJobNotify, updateJobNotify} from "@/api/jobApi";
+import { getJobList, getJobNotifyConfigDetail, saveJobNotify, updateJobNotify } from '@/api/jobApi'
 const enums = require('@/utils/jobEnum')
 export default {
   name: 'NotifyFrom',

@@ -111,7 +111,7 @@ const jobAdmin = [
     roleId: 1,
     permissionId: 'jobBatch',
     permissionName: '任务批次'
-  },{
+  }, {
     roleId: 1,
     permissionId: 'jobNotify',
     permissionName: '任务通知'
