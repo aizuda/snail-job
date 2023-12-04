@@ -2,8 +2,6 @@ package com.aizuda.easy.retry.template.datasource.persistence.mapper;
 
 
 import com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardRetryResponseDO;
-import com.aizuda.easy.retry.template.datasource.persistence.dataobject.DispatchQuantityResponseDO;
-import com.aizuda.easy.retry.template.datasource.persistence.dataobject.SceneQuantityRankResponseDO;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLog;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;

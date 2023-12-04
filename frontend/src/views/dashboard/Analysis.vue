@@ -8,9 +8,9 @@
           </a-tooltip>
           <div class="antv-chart-mini">
             <div class="chart-wrapper" :style="{ height: 46 }">
-              <v-chart :force-fit="true" :height="height" :data="retryTaskBarList" :padding="[36, 5, 18, 5]">
+              <v-chart :force-fit="true" :height="height" :data="retryTaskBarList" :padding="[30, 22, 18, 10]">
                 <v-tooltip />
-                <v-bar position="x*y" />
+                <v-bar position="x*taskTotal" />
               </v-chart>
             </div>
           </div>
@@ -72,15 +72,29 @@
 
     <a-card :loading="loading" :bordered="true" :body-style="{padding: '0'}">
       <div class="salesCard">
-        <a-tabs>
-          <a-tab-pane loading="true" :tab="$t('dashboard.analysis.sales')" v-if="$auth('RetryAnalysis.retry')" key="1">
+        <a-tabs @change="callback">
+          <div class="extra-wrapper" slot="tabBarExtraContent">
+            <div class="extra-item">
+              <a href="#" @click="dataHandler('DAY')"><a-checkable-tag :checked="type == 'DAY'">{{ $t('dashboard.analysis.all-day') }}</a-checkable-tag></a>
+              <a href="#" @click="dataHandler('WEEK')"><a-checkable-tag :checked="type == 'WEEK'">{{ $t('dashboard.analysis.all-week') }}</a-checkable-tag></a>
+              <a href="#" @click="dataHandler('MONTH')"><a-checkable-tag :checked="type == 'MONTH'">{{ $t('dashboard.analysis.all-month') }}</a-checkable-tag></a>
+              <a href="#" @click="dataHandler('YEAR')"><a-checkable-tag :checked="type == 'YEAR'">{{ $t('dashboard.analysis.all-year') }}</a-checkable-tag></a>
+            </div>
+            <div class="extra-item">
+              <a-range-picker @change="dateChange" :show-time="{format: 'HH:mm:ss',defaultValue: [moment('00:00:00', 'HH:mm:ss'),moment('23:59:59', 'HH:mm:ss')]}" format="YYYY-MM-DD HH:mm:ss" :placeholder="['Start Time', 'End Time']" />
+            </div>
+            <a-select placeholder="请输入组名称" @change="value => handleChange(value)" :style="{width: '256px'}">
+              <a-select-option v-for="item in groupNameList" :value="item" :key="item">{{ item }}</a-select-option>
+            </a-select>
+          </div>
+          <a-tab-pane loading="true" :tab="$t('dashboard.analysis.sales')" v-if="$auth('RetryAnalysis.retry')" key="RETRY">
             <div>
-              <retry-analysis />
+              <retry-analysis ref="retryAnalysisRef"/>
             </div>
           </a-tab-pane>
-          <a-tab-pane :tab="$t('dashboard.analysis.visits')" v-if="$auth('JobAnalysis.job')" key="2">
+          <a-tab-pane :tab="$t('dashboard.analysis.visits')" v-if="$auth('JobAnalysis.job')" key="JOB">
             <div>
-              <job-analysis />
+              <job-analysis ref="jobAnalysisRef"/>
             </div>
           </a-tab-pane>
         </a-tabs>
@@ -99,12 +113,13 @@ import {
   NumberInfo,
   MiniSmoothArea
 } from '@/components'
-import {
-  getDashboardTaskRetryJob
-} from '@/api/manage'
 
+import { getAllGroupNameList, getDashboardTaskRetryJob } from '@/api/manage'
 import RetryAnalysis from '@/views/dashboard/RetryAnalysis.vue'
 import JobAnalysis from '@/views/dashboard/JobAnalysis.vue'
+import { APP_MODE } from '@/store/mutation-types'
+import storage from 'store'
+import moment from 'moment'
 
 export default {
   name: 'Analysis',
@@ -124,6 +139,9 @@ export default {
       loading: true,
       height: 100,
       retryTaskBarList: [],
+      groupNameList: [],
+      type: 'WEEK',
+      mode: '',
       retryTask: {
         totalNum: 0,
         runningNum: 0,
@@ -147,16 +165,35 @@ export default {
   computed: {
   },
   methods: {
+    moment,
+    callback (key) {
+      this.mode = key
+    },
     jumpPosList () {
       this.$router.push({ path: '/dashboard/pods' })
+    },
+    dataHandler (type) {
+      this.type = type
+      this.mode === 'ALL' || this.mode === 'RETRY' ? this.$refs.retryAnalysisRef.dataHandler(this.type) : this.$refs.jobAnalysisRef.dataHandler(this.type)
+    },
+    dateChange (date, dateString) {
+      this.mode === 'ALL' || this.mode === 'RETRY' ? this.$refs.retryAnalysisRef.dateChange(date, dateString) : this.$refs.jobAnalysisRef.dateChange(date, dateString)
+    },
+    handleChange (value) {
+      this.mode === 'ALL' || this.mode === 'RETRY' ? this.$refs.retryAnalysisRef.handleChange(value) : this.$refs.jobAnalysisRef.handleChange(value)
     }
   },
   created () {
+    this.mode = storage.get(APP_MODE)
     getDashboardTaskRetryJob().then(res => {
       this.retryTask = res.data.retryTask
       this.jobTask = res.data.jobTask
       this.onLineService = res.data.onLineService
       this.retryTaskBarList = res.data.retryTaskBarList
+    })
+
+    getAllGroupNameList().then(res => {
+      this.groupNameList = res.data
     })
 
     setTimeout(() => {
@@ -179,7 +216,6 @@ export default {
 }
 
 .extra-wrapper {
-  line-height: 55px;
   padding-right: 24px;
 
   .extra-item {

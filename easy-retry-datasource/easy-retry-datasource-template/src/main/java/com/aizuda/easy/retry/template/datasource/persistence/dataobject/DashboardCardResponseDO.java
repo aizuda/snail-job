@@ -61,13 +61,13 @@ public class DashboardCardResponseDO {
     @Data
     public static class RetryTaskBar {
         /**
-         * 时间x
+         * 时间x轴
          */
         private String x;
 
         /**
-         * 总数y
+         * 任务总数y轴
          */
-        private Long y;
+        private Long taskTotal;
     }
 }

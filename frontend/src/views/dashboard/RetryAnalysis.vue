@@ -1,19 +1,5 @@
 <template>
   <div class="antd-pro-pages-dashboard-analysis-twoColLayout" :class="!isMobile && 'desktop'">
-    <div class="extra-wrapper" slot="tabBarExtraContent">
-      <div class="extra-item">
-        <a href="#" @click="dataHandler('DAY')"><a-tag :class="dateType == 'DAY' ? 'in' : 'on'">{{ $t('dashboard.analysis.all-day') }}</a-tag></a>
-        <a href="#" @click="dataHandler('WEEK')"><a-tag :class="dateType == 'WEEK' ? 'in' : 'on'">{{ $t('dashboard.analysis.all-week') }}</a-tag></a>
-        <a href="#" @click="dataHandler('MONTH')"><a-tag :class="dateType == 'MONTH' ? 'in' : 'on'">{{ $t('dashboard.analysis.all-month') }}</a-tag></a>
-        <a href="#" @click="dataHandler('YEAR')"><a-tag :class="dateType == 'YEAR' ? 'in' : 'on'">{{ $t('dashboard.analysis.all-year') }}</a-tag></a>
-      </div>
-      <div class="extra-item">
-        <a-range-picker @change="dateChange" :show-time="{format: 'HH:mm:ss',defaultValue: [moment('00:00:00', 'HH:mm:ss'),moment('23:59:59', 'HH:mm:ss')]}" format="YYYY-MM-DD HH:mm:ss" :placeholder="['Start Time', 'End Time']" />
-      </div>
-      <a-select placeholder="请输入组名称" @change="value => handleChange(value)" :style="{width: '256px'}">
-        <a-select-option v-for="item in groupNameList" :value="item" :key="item">{{ item }}</a-select-option>
-      </a-select>
-    </div>
     <a-row>
       <a-col :xl="16" :lg="12" :md="12" :sm="24" :xs="24">
         <g2-retry-line ref="viewChart" name="RetryLine" />
@@ -38,13 +24,6 @@
       </a-col>
       <a-col :xl="12" :lg="24" :md="24" :sm="24" :xs="24">
         <a-card class="antd-pro-pages-dashboard-analysis-salesCard" :loading="loading" :bordered="false" :title="$t('dashboard.analysis.the-proportion-of-sales')" :style="{ height: '100%' }">
-          <div slot="extra" style="height: inherit;">
-            <div class="analysis-salesTypeRadio">
-              <a-radio-group defaultValue="a">
-                <a-radio-button value="retry">{{ $t('dashboard.analysis.channel.online') }}</a-radio-button>
-              </a-radio-group>
-            </div>
-          </div>
           <h4>{{ $t('dashboard.analysis.sales') }}</h4>
           <div>
             <div>
@@ -86,7 +65,6 @@ export default {
       loading: true,
       rankList: [],
       taskList: [],
-      dateType: 'WEEK',
       type: 'WEEK',
       groupName: '',
       startTime: [],
@@ -133,7 +111,7 @@ export default {
       this.suspendNum = 0
       this.rankList = res.data.rankList
       this.taskList = res.data.taskList
-      res.data.retryLinkeResponseVOList.forEach(res => {
+      res.data.dashboardLineResponseDOList.forEach(res => {
         this.successNum += res.successNum
         this.runningNum += res.runningNum
         this.maxCountNum += res.maxCountNum
@@ -151,7 +129,6 @@ export default {
   methods: {
     moment,
     dataHandler (type) {
-      this.dateType = type
       this.type = type
       this.$refs.viewChart.getDashboardRetryLine(this.groupName, this.type, this.startTime, this.endTime)
     },

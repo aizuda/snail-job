@@ -11,7 +11,6 @@ import com.aizuda.easy.retry.server.common.register.ServerRegister;
 import com.aizuda.easy.retry.server.web.model.base.BaseQueryVO;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
 import com.aizuda.easy.retry.server.web.model.enums.DateTypeEnum;
-import com.aizuda.easy.retry.server.web.model.enums.RetryDateTypeEnum;
 import com.aizuda.easy.retry.server.web.model.request.ServerNodeQueryVO;
 import com.aizuda.easy.retry.server.web.model.response.*;
 import com.aizuda.easy.retry.server.web.service.DashBoardService;
@@ -19,8 +18,7 @@ import com.aizuda.easy.retry.server.web.service.convert.*;
 import com.aizuda.easy.retry.server.web.util.UserSessionUtils;
 import com.aizuda.easy.retry.template.datasource.persistence.dataobject.ActivePodQuantityResponseDO;
 import com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO;
-import com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardRetryLinkeResponseDO;
-import com.aizuda.easy.retry.template.datasource.persistence.dataobject.DispatchQuantityResponseDO;
+import com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardLineResponseDO;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobSummaryMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetrySummaryMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.ServerNodeMapper;
@@ -40,6 +38,7 @@ import org.springframework.web.client.RestTemplate;
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -103,13 +102,14 @@ public class DashBoardServiceImpl implements DashBoardService {
         dashboardRetryLineResponseVO.setTaskList(pageResult);
 
         // 折线图
-        RetryDateTypeEnum dateTypeEnum = RetryDateTypeEnum.valueOf(type);
+        DateTypeEnum dateTypeEnum = DateTypeEnum.valueOf(type);
         LocalDateTime startDateTime = dateTypeEnum.getStartTime().apply(StrUtil.isNotBlank(startTime) ? LocalDateTime.parse(startTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) : null);
         LocalDateTime endDateTime = dateTypeEnum.getEndTime().apply(StrUtil.isNotBlank(endTime) ? LocalDateTime.parse(endTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) : null);
-        List<DashboardRetryLinkeResponseDO> dashboardRetryLinkeResponseDOList = retrySummaryMapper.retryLineList(namespaceId, type, startDateTime, endDateTime);
-        List<DashboardRetryLinkeResponseVO> retryLinkeResponseVOList = DispatchQuantityResponseVOConverter.INSTANCE.toDashboardRetryLinkeResponseVO(dashboardRetryLinkeResponseDOList);
-        dateTypeEnum.getConsumer().accept(retryLinkeResponseVOList);
-        dashboardRetryLineResponseVO.setRetryLinkeResponseVOList(retryLinkeResponseVOList);
+        List<DashboardLineResponseDO> dashboardRetryLinkeResponseDOList = retrySummaryMapper.retryLineList(namespaceId, type, startDateTime, endDateTime);
+        List<DashboardLineResponseVO> dashboardLineResponseVOList = DispatchQuantityResponseVOConverter.INSTANCE.toDashboardLineResponseVO(dashboardRetryLinkeResponseDOList);
+        dateTypeEnum.getConsumer().accept(dashboardLineResponseVOList);
+        dashboardLineResponseVOList.sort(Comparator.comparing(a -> a.getCreateDt()));
+        dashboardRetryLineResponseVO.setDashboardLineResponseDOList(dashboardLineResponseVOList);
 
         // 排行榜
         List<DashboardRetryLineResponseDO.Rank> rankList = retrySummaryMapper.dashboardRank(namespaceId, groupName, startDateTime, endDateTime);
@@ -133,10 +133,11 @@ public class DashBoardServiceImpl implements DashBoardService {
         DateTypeEnum dateTypeEnum = DateTypeEnum.valueOf(type);
         LocalDateTime startDateTime = dateTypeEnum.getStartTime().apply(StrUtil.isNotBlank(startTime) ? LocalDateTime.parse(startTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) : null);
         LocalDateTime endDateTime = dateTypeEnum.getEndTime().apply(StrUtil.isNotBlank(endTime) ? LocalDateTime.parse(endTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) : null);
-        List<DispatchQuantityResponseDO> dispatchQuantityResponseDOList = jobSummaryMapper.jobLineList(namespaceId, type, startDateTime, endDateTime);
-        List<DispatchQuantityResponseVO> dispatchQuantityResponseVOList = DispatchQuantityResponseVOConverter.INSTANCE.toDispatchQuantityResponseVO(dispatchQuantityResponseDOList);
-        dateTypeEnum.getConsumer().accept(dispatchQuantityResponseVOList);
-        dashboardRetryLineResponseVO.setDispatchQuantityResponseVOList(dispatchQuantityResponseVOList);
+        List<DashboardLineResponseDO> dashboardLineResponseDOList = jobSummaryMapper.jobLineList(namespaceId, type, startDateTime, endDateTime);
+        List<DashboardLineResponseVO> dashboardLineResponseVOList = DispatchQuantityResponseVOConverter.INSTANCE.toDashboardLineResponseVO(dashboardLineResponseDOList);
+        dateTypeEnum.getConsumer().accept(dashboardLineResponseVOList);
+        dashboardLineResponseVOList.sort(Comparator.comparing(a -> a.getCreateDt()));
+        dashboardRetryLineResponseVO.setDashboardLineResponseDOList(dashboardLineResponseVOList);
 
         // 排行榜
         List<DashboardRetryLineResponseDO.Rank> rankList = jobSummaryMapper.dashboardRank(namespaceId, groupName, startDateTime, endDateTime);

@@ -15,6 +15,7 @@ export default {
   data () {
     return {
       viewRecords: [],
+      dashboardLineResponseDOList: [],
       chart: null
     }
   },
@@ -31,7 +32,7 @@ export default {
         'endTime': endTime
       }).then(res => {
         this.$bus.$emit('job', res)
-        this.viewCharts(res.data.dispatchQuantityResponseVOList)
+        this.viewCharts(res.data.dashboardLineResponseDOList)
       })
     },
     viewCharts (viewRecords, type = 'WEEK') {

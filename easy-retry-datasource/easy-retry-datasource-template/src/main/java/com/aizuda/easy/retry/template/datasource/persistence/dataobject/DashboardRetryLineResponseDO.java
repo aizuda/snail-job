@@ -24,7 +24,7 @@ public class DashboardRetryLineResponseDO {
     /**
      * 折线图列表
      */
-    private List<DispatchQuantityResponseDO> dispatchQuantityResponseVOList;
+    private List<DashboardLineResponseDO> dashboardLineResponseDOList;
 
     @Data
     public static class Task {
