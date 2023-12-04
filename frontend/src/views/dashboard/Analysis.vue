@@ -81,7 +81,7 @@
               <a href="#" @click="dataHandler('YEAR')"><a-checkable-tag :checked="type == 'YEAR'">{{ $t('dashboard.analysis.all-year') }}</a-checkable-tag></a>
             </div>
             <div class="extra-item">
-              <a-range-picker @change="dateChange" :show-time="{format: 'HH:mm:ss',defaultValue: [moment('00:00:00', 'HH:mm:ss'),moment('23:59:59', 'HH:mm:ss')]}" format="YYYY-MM-DD HH:mm:ss" :placeholder="['Start Time', 'End Time']" />
+              <a-range-picker @change="dateChange" :show-time="{format: 'HH:mm:ss',defaultValue: [moment('00:00:00', 'HH:mm:ss'),moment('23:59:59', 'HH:mm:ss')]}" format="YYYY-MM-DD HH:mm:ss" :placeholder="['开始时间', '结束时间']" />
             </div>
             <a-select placeholder="请输入组名称" @change="value => handleChange(value)" :style="{width: '256px'}">
               <a-select-option v-for="item in groupNameList" :value="item" :key="item">{{ item }}</a-select-option>

@@ -4,6 +4,7 @@ import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.Lifecycle;
+import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.dto.JobTaskBatchReason;
 import com.aizuda.easy.retry.server.common.schedule.AbstractSchedule;
 import com.aizuda.easy.retry.template.datasource.persistence.dataobject.JobBatchSummaryResponseDO;
@@ -35,6 +36,8 @@ public class JobSummarySchedule extends AbstractSchedule implements Lifecycle {
     private JobTaskBatchMapper jobTaskBatchMapper;
     @Autowired
     private JobSummaryMapper jobSummaryMapper;
+    @Autowired
+    private SystemProperties systemProperties;
 
     @Override
     public String lockName() {
@@ -54,21 +57,24 @@ public class JobSummarySchedule extends AbstractSchedule implements Lifecycle {
     @Override
     protected void doExecute() {
         try {
-            // 定时按日实时查询统计数据（00:00:00 - 23:59:59）
-            LocalDateTime todayFrom = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
-            LocalDateTime todayTo = LocalDateTime.of(LocalDate.now(), LocalTime.MAX);
-            List<JobBatchSummaryResponseDO> summaryResponseDOList = jobTaskBatchMapper.summaryJobBatchList(todayFrom, todayTo);
-            if (summaryResponseDOList == null || summaryResponseDOList.size() < 1) {
-                return;
-            }
+            for (int i = 0; i < systemProperties.getSummaryDay(); i++) {
 
-            // insertOrUpdate
-            List<JobSummary> jobSummaryList = jobSummaryList(todayFrom, summaryResponseDOList);
-            int total = jobSummaryMapper.updateBatchTriggerAtById(jobSummaryList);
-            if (total < 1) {
-                jobSummaryMapper.insertBatchJobSummary(jobSummaryList);
+                // 定时按日实时查询统计数据（00:00:00 - 23:59:59）
+                LocalDateTime todayFrom = LocalDateTime.of(LocalDate.now(), LocalTime.MIN).plusDays(-i);
+                LocalDateTime todayTo = LocalDateTime.of(LocalDate.now(), LocalTime.MAX).plusDays(-i);
+                List<JobBatchSummaryResponseDO> summaryResponseDOList = jobTaskBatchMapper.summaryJobBatchList(todayFrom, todayTo);
+                if (summaryResponseDOList == null || summaryResponseDOList.size() < 1) {
+                    continue;
+                }
+
+                // insertOrUpdate
+                List<JobSummary> jobSummaryList = jobSummaryList(todayFrom, summaryResponseDOList);
+                int total = jobSummaryMapper.updateBatchTriggerAtById(jobSummaryList);
+                if (total < 1) {
+                    jobSummaryMapper.insertBatchJobSummary(jobSummaryList);
+                }
+                LogUtils.debug(log, "job summary dashboard success todayFrom:[{}] todayTo:[{}] total:[{}]", todayFrom, todayTo, total);
             }
-            LogUtils.debug(log, "job summary dashboard success todayFrom:[{}] todayTo:[{}] total:[{}]", todayFrom, todayTo, total);
         } catch (Exception e) {
             LogUtils.error(log, "job summary dashboard log error", e);
         }

@@ -118,7 +118,7 @@ export default {
       this.rankList = res.data.rankList
       this.taskList = res.data.taskList
       res.data.dashboardLineResponseDOList.forEach(res => {
-        this.successNum += res.successNum
+        this.successNum += res.success
         this.failNum += res.failNum
         this.stopNum += res.stopNum
         this.cancelNum += res.cancelNum

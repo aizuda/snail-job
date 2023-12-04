@@ -36,6 +36,7 @@ public enum DateTypeEnum {
                         .setFailNum(0L)
                         .setMaxCountNum(0L)
                         .setRunningNum(0L)
+                        .setSuccess(0L)
                         .setSuccessNum(0L)
                         .setSuspendNum(0L)
                         .setStopNum(0L)
@@ -70,6 +71,7 @@ public enum DateTypeEnum {
                         .setFailNum(0L)
                         .setMaxCountNum(0L)
                         .setRunningNum(0L)
+                        .setSuccess(0L)
                         .setSuccessNum(0L)
                         .setSuspendNum(0L)
                         .setStopNum(0L)
@@ -105,6 +107,7 @@ public enum DateTypeEnum {
                         .setFailNum(0L)
                         .setMaxCountNum(0L)
                         .setRunningNum(0L)
+                        .setSuccess(0L)
                         .setSuccessNum(0L)
                         .setSuspendNum(0L)
                         .setStopNum(0L)
@@ -127,6 +130,28 @@ public enum DateTypeEnum {
      * 年
      */
     YEAR(dashboardLineResponseVOList -> {
+        Map<String, DashboardLineResponseVO> dispatchQuantityResponseVOMap = dashboardLineResponseVOList.stream().collect(Collectors.toMap(DashboardLineResponseVO::getCreateDt, i -> i));
+        for (int i = 0; i < 12; i++) {
+
+            String format = LocalDateTime.of(LocalDate.now().minusMonths(i), LocalTime.MIN).format(DateTimeFormatter.ofPattern("yyyy-MM"));
+            DashboardLineResponseVO dashboardLineResponseVO = dispatchQuantityResponseVOMap.get(format);
+            if (Objects.isNull(dashboardLineResponseVO)) {
+                dashboardLineResponseVO = new DashboardLineResponseVO()
+                        .setTotal(0L)
+                        .setTotalNum(0L)
+                        .setFail(0L)
+                        .setFailNum(0L)
+                        .setMaxCountNum(0L)
+                        .setRunningNum(0L)
+                        .setSuccess(0L)
+                        .setSuccessNum(0L)
+                        .setSuspendNum(0L)
+                        .setStopNum(0L)
+                        .setCancelNum(0L)
+                        .setCreateDt(format);
+                dashboardLineResponseVOList.add(dashboardLineResponseVO);
+            }
+        }
     }, (startTime) -> {
         return LocalDateTime.of(LocalDate.now().with(TemporalAdjusters.firstDayOfYear()), LocalTime.MIN.withNano(0));
     }, (endTime) -> {

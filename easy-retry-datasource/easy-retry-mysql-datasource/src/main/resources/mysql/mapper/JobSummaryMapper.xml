@@ -93,14 +93,19 @@
             </otherwise>
         </choose>
         AS createDt,
-        ifnull(SUM(success_num), 0) AS successNum,
+        ifnull(SUM(success_num), 0) AS success,
         ifnull(SUM(fail_num), 0) AS failNum,
         ifnull(SUM(stop_num), 0) AS stopNum,
         ifnull(SUM(cancel_num), 0) AS cancelNum,
         ifnull(SUM(fail_num + stop_num + cancel_num), 0) AS fail,
         ifnull(SUM(success_num + fail_num + stop_num + cancel_num), 0) AS total
         FROM job_summary
-        WHERE namespace_id = #{namespaceId} AND trigger_at BETWEEN #{from} AND #{to}
+        <where>
+            <if test="groupName != null and groupName != '' ">
+                AND group_name = #{groupName}
+            </if>
+            AND namespace_id = #{namespaceId} AND trigger_at BETWEEN #{from} AND #{to}
+        </where>
         GROUP BY createDt
     </select>
 
