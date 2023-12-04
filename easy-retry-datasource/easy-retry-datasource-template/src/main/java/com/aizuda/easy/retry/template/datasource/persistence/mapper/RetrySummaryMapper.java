@@ -32,6 +32,7 @@ public interface RetrySummaryMapper extends BaseMapper<RetrySummary> {
     IPage<DashboardRetryLineResponseDO.Task> retryTaskList(@Param("namespaceId") String namespaceId, Page<Object> page);
 
     List<DashboardLineResponseDO> retryLineList(@Param("namespaceId") String namespaceId,
+                                                @Param("groupName") String groupName,
                                                 @Param("type") String type,
                                                 @Param("from") LocalDateTime from,
                                                 @Param("to") LocalDateTime to);

@@ -66,4 +66,9 @@ public class DashboardLineResponseVO {
      */
     private Long cancelNum;
 
+    /**
+     * 定时-成功数
+     */
+    private Long success;
+
 }

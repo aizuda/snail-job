@@ -114,5 +114,9 @@ public class SystemProperties {
 
     }
 
+    /**
+     * Dashboard 任务容错天数
+     */
+    private int summaryDay = 7;
 
 }

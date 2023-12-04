@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.server.retry.task.support.schedule;
 
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.common.Lifecycle;
+import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.schedule.AbstractSchedule;
 import com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardRetryResponseDO;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetrySummaryMapper;
@@ -33,6 +34,8 @@ public class RetrySummarySchedule extends AbstractSchedule implements Lifecycle 
     private RetryTaskLogMapper retryTaskLogMapper;
     @Autowired
     private RetrySummaryMapper retrySummaryMapper;
+    @Autowired
+    private SystemProperties systemProperties;
 
     @Override
     public String lockName() {
@@ -52,21 +55,24 @@ public class RetrySummarySchedule extends AbstractSchedule implements Lifecycle 
     @Override
     protected void doExecute() {
         try {
-            // 重试按日实时查询统计数据（00:00:00 - 23:59:59）
-            LocalDateTime todayFrom = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
-            LocalDateTime todayTo = LocalDateTime.of(LocalDate.now(), LocalTime.MAX);
-            List<DashboardRetryResponseDO> dashboardRetryResponseDOList = retryTaskLogMapper.retrySummaryRetryTaskLogList(todayFrom, todayTo);
-            if (dashboardRetryResponseDOList == null || dashboardRetryResponseDOList.size() < 1) {
-                return;
-            }
+            for (int i = 0; i < systemProperties.getSummaryDay(); i++) {
 
-            // insertOrUpdate
-            List<RetrySummary> retrySummaryList = retrySummaryList(todayFrom, dashboardRetryResponseDOList);
-            int total = retrySummaryMapper.updateBatchSceneNameById(retrySummaryList);
-            if (total < 1) {
-                retrySummaryMapper.insertBatchRetrySummary(retrySummaryList);
+                // 重试按日实时查询统计数据（00:00:00 - 23:59:59）
+                LocalDateTime todayFrom = LocalDateTime.of(LocalDate.now(), LocalTime.MIN).plusDays(-i);
+                LocalDateTime todayTo = LocalDateTime.of(LocalDate.now(), LocalTime.MAX).plusDays(-i);
+                List<DashboardRetryResponseDO> dashboardRetryResponseDOList = retryTaskLogMapper.retrySummaryRetryTaskLogList(todayFrom, todayTo);
+                if (dashboardRetryResponseDOList == null || dashboardRetryResponseDOList.size() < 1) {
+                    continue;
+                }
+
+                // insertOrUpdate
+                List<RetrySummary> retrySummaryList = retrySummaryList(todayFrom, dashboardRetryResponseDOList);
+                int total = retrySummaryMapper.updateBatchSceneNameById(retrySummaryList);
+                if (total < 1) {
+                    retrySummaryMapper.insertBatchRetrySummary(retrySummaryList);
+                }
+                LogUtils.debug(log, "retry summary dashboard success todayFrom:[{}] todayTo:[{}] total:[{}]", todayFrom, todayTo, total);
             }
-            LogUtils.debug(log, "retry summary dashboard success todayFrom:[{}] todayTo:[{}] total:[{}]", todayFrom, todayTo, total);
         } catch (Exception e) {
             LogUtils.error(log, "retry summary dashboard log error", e);
         }

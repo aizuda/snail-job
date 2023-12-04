@@ -28,6 +28,7 @@ public interface JobSummaryMapper extends BaseMapper<JobSummary> {
     IPage<DashboardRetryLineResponseDO.Task> jobTaskList(@Param("namespaceId") String namespaceId, Page<Object> page);
 
     List<DashboardLineResponseDO> jobLineList(@Param("namespaceId") String namespaceId,
+                                              @Param("groupName") String groupName,
                                               @Param("type") String type,
                                               @Param("from") LocalDateTime from,
                                               @Param("to") LocalDateTime to);

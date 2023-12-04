@@ -57,7 +57,11 @@
         rs.finish_num = tt.finish_num,
         rs.max_count_num = tt.max_count_num,
         rs.suspend_num = tt.suspend_num
-        WHERE rs.scene_name = tt.scene_name AND rs.trigger_at = tt.trigger_at
+        WHERE
+        rs.namespace_id = tt.namespace_id
+        AND rs.group_name = tt.group_name
+        AND rs.scene_name = tt.scene_name
+        AND rs.trigger_at = tt.trigger_at
     </update>
 
     <select id="retryTask"
@@ -92,6 +96,7 @@
                  LEFT JOIN (
             SELECT DATE (trigger_at) AS triggerAt,
              SUM(running_num + finish_num + max_count_num + suspend_num) AS taskTotal FROM retry_summary
+        WHERE namespace_id = #{namespaceId}
         GROUP BY triggerAt
             ) b
         ON tmp.date = b.triggerAt
@@ -124,7 +129,12 @@
         ifnull(SUM(suspend_num), 0) AS suspendNum,
         ifnull(SUM(finish_num + running_num + max_count_num + suspend_num), 0) AS total
         FROM retry_summary
-        WHERE namespace_id = #{namespaceId} AND trigger_at BETWEEN #{from} AND #{to}
+        <where>
+            <if test="groupName != null and groupName != '' ">
+                AND group_name = #{groupName}
+            </if>
+            AND namespace_id = #{namespaceId} AND trigger_at BETWEEN #{from} AND #{to}
+        </where>
         GROUP BY createDt
     </select>
 
