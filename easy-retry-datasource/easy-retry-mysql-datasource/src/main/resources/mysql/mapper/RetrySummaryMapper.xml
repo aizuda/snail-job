@@ -73,22 +73,48 @@
 
     <select id="retryTaskBarList"
             resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardCardResponseDO$RetryTaskBar">
-        SELECT DATE_FORMAT(trigger_at, '%Y-%m-%d')                         AS x,
-               SUM(running_num + finish_num + max_count_num + suspend_num) AS y
-        FROM retry_summary
-        WHERE namespace_id = #{namespaceId}
-        GROUP BY trigger_at LIMIT 7
+        SELECT tmp.date AS x, ifnull(b.taskTotal, 0) AS taskTotal
+        FROM (
+                 SELECT curdate() AS date
+                 UNION ALL
+                 SELECT DATE_SUB(CURDATE(), INTERVAL 1 DAY) AS date
+                 UNION ALL
+                 SELECT DATE_SUB(CURDATE(), interval 2 day) AS date
+                 UNION ALL
+                 SELECT DATE_SUB(CURDATE(), interval 3 day) AS date
+                 UNION ALL
+                 SELECT DATE_SUB(CURDATE(), interval 4 day) AS date
+                 UNION ALL
+                 SELECT DATE_SUB(CURDATE(), interval 5 day) AS date
+                 UNION ALL
+                 SELECT DATE_SUB(CURDATE(), interval 6 day) AS date
+             ) tmp
+                 LEFT JOIN (
+            SELECT DATE (trigger_at) AS triggerAt,
+             SUM(running_num + finish_num + max_count_num + suspend_num) AS taskTotal FROM retry_summary
+        GROUP BY triggerAt
+            ) b
+        ON tmp.date = b.triggerAt
     </select>
 
     <select id="retryLineList"
-            resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardRetryLinkeResponseDO">
+            resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardLineResponseDO">
         SELECT
         <choose>
+            <when test="type == 'DAY'">
+                DATE_FORMAT(create_dt,'%H')
+            </when>
+            <when test="type == 'WEEK'">
+                DATE_FORMAT(create_dt,'%Y-%m-%d')
+            </when>
+            <when test="type =='MONTH'">
+                DATE_FORMAT(create_dt,'%Y-%m-%d')
+            </when>
             <when test="type == 'YEAR'">
-                DATE_FORMAT(trigger_at,'%Y-%m')
+                DATE_FORMAT(create_dt,'%Y-%m')
             </when>
             <otherwise>
-                DATE_FORMAT(trigger_at,'%Y-%m-%d')
+                DATE_FORMAT(create_dt,'%Y-%m-%d')
             </otherwise>
         </choose>
         AS createDt,

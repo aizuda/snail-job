@@ -2,7 +2,7 @@ package com.aizuda.easy.retry.template.datasource.persistence.mapper;
 
 import com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardCardResponseDO;
 import com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO;
-import com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardRetryLinkeResponseDO;
+import com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardLineResponseDO;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetrySummary;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -31,10 +31,10 @@ public interface RetrySummaryMapper extends BaseMapper<RetrySummary> {
 
     IPage<DashboardRetryLineResponseDO.Task> retryTaskList(@Param("namespaceId") String namespaceId, Page<Object> page);
 
-    List<DashboardRetryLinkeResponseDO> retryLineList(@Param("namespaceId") String namespaceId,
-                                                      @Param("type") String type,
-                                                      @Param("from") LocalDateTime from,
-                                                      @Param("to") LocalDateTime to);
+    List<DashboardLineResponseDO> retryLineList(@Param("namespaceId") String namespaceId,
+                                                @Param("type") String type,
+                                                @Param("from") LocalDateTime from,
+                                                @Param("to") LocalDateTime to);
 
 
     List<DashboardRetryLineResponseDO.Rank> dashboardRank(@Param("namespaceId") String namespaceId,

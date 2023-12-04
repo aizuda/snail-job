@@ -32,7 +32,7 @@ export default {
         'endTime': endTime
       }).then(res => {
         this.$bus.$emit('retry', res)
-        this.viewCharts(res.data.retryLinkeResponseVOList)
+        this.viewCharts(res.data.dashboardLineResponseDOList)
       })
     },
     viewCharts (viewRecords, type = 'WEEK') {

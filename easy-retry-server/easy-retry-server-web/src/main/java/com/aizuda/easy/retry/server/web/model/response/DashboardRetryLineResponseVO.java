@@ -25,23 +25,18 @@ public class DashboardRetryLineResponseVO {
     /**
      * 折线图列表
      */
-    private List<DispatchQuantityResponseVO> dispatchQuantityResponseVOList;
-
-    private List<DashboardRetryLinkeResponseVO> retryLinkeResponseVOList;
+    private List<DashboardLineResponseVO> dashboardLineResponseDOList;
 
     @Data
     public static class Task {
         private String groupName;
-
         private Integer run;
-
         private Integer total;
     }
 
     @Data
     public static class Rank {
         private String name;
-
         private String total;
     }
 }

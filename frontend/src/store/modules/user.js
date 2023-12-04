@@ -1,6 +1,6 @@
 import storage from 'store'
 import { login, getInfo } from '@/api/login'
-import { ACCESS_TOKEN, APP_NAMESPACE } from '@/store/mutation-types'
+import { ACCESS_TOKEN, APP_MODE, APP_NAMESPACE } from '@/store/mutation-types'
 import { welcome, permissionsConfig } from '@/utils/util'
 
 const user = {
@@ -37,6 +37,9 @@ const user = {
       } else {
         storage.set(APP_NAMESPACE, namespaces[0].uniqueId)
       }
+    },
+    SET_MODE: (state, mode) => {
+      storage.set(APP_MODE, mode)
     }
   },
 
@@ -84,6 +87,7 @@ const user = {
               return permission.permissionId
             })
             commit('SET_ROLES', result.role)
+            commit('SET_MODE', result.mode)
             commit('SET_INFO', result)
           } else {
             reject(new Error('getInfo: roles must be a non-null array !'))

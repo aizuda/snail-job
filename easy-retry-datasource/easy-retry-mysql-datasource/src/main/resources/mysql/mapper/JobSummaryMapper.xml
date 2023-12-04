@@ -73,14 +73,23 @@
     </update>
 
     <select id="jobLineList"
-            resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DispatchQuantityResponseDO">
+            resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardLineResponseDO">
         SELECT
         <choose>
+            <when test="type == 'DAY'">
+                DATE_FORMAT(create_dt,'%H')
+            </when>
+            <when test="type == 'WEEK'">
+                DATE_FORMAT(create_dt,'%Y-%m-%d')
+            </when>
+            <when test="type =='MONTH'">
+                DATE_FORMAT(create_dt,'%Y-%m-%d')
+            </when>
             <when test="type == 'YEAR'">
-                DATE_FORMAT(trigger_at,'%Y-%m')
+                DATE_FORMAT(create_dt,'%Y-%m')
             </when>
             <otherwise>
-                DATE_FORMAT(trigger_at,'%Y-%m-%d')
+                DATE_FORMAT(create_dt,'%Y-%m-%d')
             </otherwise>
         </choose>
         AS createDt,

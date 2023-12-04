@@ -1,8 +1,8 @@
 package com.aizuda.easy.retry.template.datasource.persistence.mapper;
 
 import com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardCardResponseDO;
+import com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardLineResponseDO;
 import com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO;
-import com.aizuda.easy.retry.template.datasource.persistence.dataobject.DispatchQuantityResponseDO;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobSummary;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -27,10 +27,10 @@ public interface JobSummaryMapper extends BaseMapper<JobSummary> {
 
     IPage<DashboardRetryLineResponseDO.Task> jobTaskList(@Param("namespaceId") String namespaceId, Page<Object> page);
 
-    List<DispatchQuantityResponseDO> jobLineList(@Param("namespaceId") String namespaceId,
-                                                 @Param("type") String type,
-                                                 @Param("from") LocalDateTime from,
-                                                 @Param("to") LocalDateTime to);
+    List<DashboardLineResponseDO> jobLineList(@Param("namespaceId") String namespaceId,
+                                              @Param("type") String type,
+                                              @Param("from") LocalDateTime from,
+                                              @Param("to") LocalDateTime to);
 
     DashboardCardResponseDO.JobTask toJobTask(@Param("namespaceId") String namespaceId);
 
