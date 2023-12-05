@@ -67,11 +67,8 @@ public class RetrySummarySchedule extends AbstractSchedule implements Lifecycle 
 
                 // insertOrUpdate
                 List<RetrySummary> retrySummaryList = retrySummaryList(todayFrom, dashboardRetryResponseDOList);
-                int total = retrySummaryMapper.updateBatchSceneNameById(retrySummaryList);
-                if (total < 1) {
-                    retrySummaryMapper.insertBatchRetrySummary(retrySummaryList);
-                }
-                LogUtils.debug(log, "retry summary dashboard success todayFrom:[{}] todayTo:[{}] total:[{}]", todayFrom, todayTo, total);
+                int totalRetrySummary = retrySummaryMapper.insertOrUpdate(retrySummaryList);
+                LogUtils.debug(log, "retry summary dashboard success todayFrom:[{}] todayTo:[{}] total:[{}]", todayFrom, todayTo, totalRetrySummary);
             }
         } catch (Exception e) {
             LogUtils.error(log, "retry summary dashboard log error", e);

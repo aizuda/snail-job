@@ -28,7 +28,7 @@
           <div>
             <div>
               <v-chart :force-fit="true" :height="405" :data="pieData" :scale="pieScale" >
-                <v-tooltip :showTitle="false" dataKey="name*percent" />
+                <v-tooltip :showTitle="false" dataKey="value*percent" />
                 <v-axis />
                 <v-legend dataKey="value" />
                 <v-pie position="percent" color="value" :vStyle="pieStyle" />
