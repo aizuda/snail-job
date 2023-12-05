@@ -177,21 +177,20 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         }
 
         if (RetryStatusEnum.FINISH.getStatus().equals(retryStatusEnum.getStatus())) {
-
             RetryTaskLogMessage retryTaskLogMessage = new RetryTaskLogMessage();
             retryTaskLogMessage.setUniqueId(retryTask.getUniqueId());
             retryTaskLogMessage.setGroupName(retryTask.getGroupName());
             retryTaskLogMessage.setMessage("手动操作完成");
             retryTaskLogMessage.setCreateDt(LocalDateTime.now());
             retryTaskLogMessageMapper.insert(retryTaskLogMessage);
-
-            RetryTaskLog retryTaskLog = new RetryTaskLog();
-            retryTaskLog.setRetryStatus(RetryStatusEnum.FINISH.getStatus());
-            retryTaskLogMapper.update(retryTaskLog, new LambdaUpdateWrapper<RetryTaskLog>()
-                    .eq(RetryTaskLog::getNamespaceId, namespaceId)
-                    .eq(RetryTaskLog::getUniqueId, retryTask.getUniqueId())
-                    .eq(RetryTaskLog::getGroupName, retryTask.getGroupName()));
         }
+
+        RetryTaskLog retryTaskLog = new RetryTaskLog();
+        retryTaskLog.setRetryStatus(requestVO.getRetryStatus());
+        retryTaskLogMapper.update(retryTaskLog, new LambdaUpdateWrapper<RetryTaskLog>()
+            .eq(RetryTaskLog::getNamespaceId, namespaceId)
+            .eq(RetryTaskLog::getUniqueId, retryTask.getUniqueId())
+            .eq(RetryTaskLog::getGroupName, retryTask.getGroupName()));
 
         retryTask.setUpdateDt(LocalDateTime.now());
         return retryTaskAccess.updateById(requestVO.getGroupName(), namespaceId, retryTask);

@@ -157,9 +157,9 @@
     <select id="retryTaskList"
             resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO$Task">
         SELECT group_name                                          AS groupName,
-               sum(CASE WHEN (group_status = 1) THEN 1 ELSE 0 END) AS run,
+               sum(CASE WHEN (scene_status = 1) THEN 1 ELSE 0 END) AS run,
                count(*)                                            AS total
-        FROM group_config
+        FROM scene_config
         WHERE namespace_id = #{namespaceId}
         GROUP BY namespace_id, group_name
     </select>

@@ -189,11 +189,6 @@ export default {
   created () {
     getAllGroupNameList().then((res) => {
       this.groupNameList = res.data
-      if (this.groupNameList !== null && this.groupNameList.length > 0) {
-        this.queryParam['groupName'] = this.groupNameList[0]
-        this.$refs.table.refresh(true)
-        this.handleChange(this.groupNameList[0])
-      }
     })
 
     const groupName = this.$route.query.groupName
