@@ -5,6 +5,8 @@ export default {
   'dashboard.analysis.day-sales': '日均任务',
   'dashboard.analysis.job_success': '成功',
   'dashboard.analysis.job_fail': '失败',
+  'dashboard.analysis.job_stop': '停止',
+  'dashboard.analysis.job_cancel': '取消',
   'dashboard.analysis.visits': '定时任务',
   'dashboard.analysis.visits-trend': '访问量趋势',
   'dashboard.analysis.visits-ranking': '门店访问量排名',

@@ -5,7 +5,7 @@
         <g2-job-line ref="jobViewChart" name="G2JobLine" />
       </a-col>
       <a-col :xl="8" :lg="12" :md="12" :sm="24" :xs="24">
-        <rank-list :title="$t('dashboard.analysis.sales-ranking')" :list="rankList" />
+        <rank-list title="失败任务排名" :list="rankList" />
       </a-col>
     </a-row>
     <a-row :gutter="24" type="flex" :style="{ marginTop: '24px' }">

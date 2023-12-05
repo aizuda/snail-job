@@ -35,6 +35,6 @@ public interface JobSummaryResponseVOConverter {
         if (Objects.isNull(totalNum) || totalNum == 0) {
             return null;
         }
-        return new BigDecimal(successNum + "").divide(new BigDecimal(totalNum + ""), 4, RoundingMode.HALF_UP).multiply(new BigDecimal("100"));
+        return new BigDecimal(String.valueOf(successNum)).divide(new BigDecimal(String.valueOf(totalNum)), 4, RoundingMode.HALF_UP).multiply(new BigDecimal("100"));
     }
 }

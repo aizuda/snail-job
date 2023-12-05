@@ -263,9 +263,13 @@ export default {
       this.$refs.table.refresh(true)
     },
     handleChange (value) {
-      getSceneList({ 'groupName': value }).then(res => {
-        this.sceneList = res.data
-      })
+      if (value) {
+        getSceneList({ groupName: value }).then((res) => {
+          this.sceneList = res.data
+        })
+      } else {
+        this.sceneList = []
+      }
     },
     toggleAdvanced () {
       this.advanced = !this.advanced
