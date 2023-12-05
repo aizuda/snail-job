@@ -21,9 +21,7 @@ import java.util.List;
 @Mapper
 public interface JobSummaryMapper extends BaseMapper<JobSummary> {
 
-    int insertBatchJobSummary(@Param("list") List<JobSummary> list);
-
-    int updateBatchTriggerAtById(@Param("list") List<JobSummary> list);
+    int insertOrUpdate(@Param("list") List<JobSummary> list);
 
     IPage<DashboardRetryLineResponseDO.Task> jobTaskList(@Param("namespaceId") String namespaceId, Page<Object> page);
 
