@@ -17,6 +17,7 @@ import com.aizuda.easy.retry.server.web.service.DashBoardService;
 import com.aizuda.easy.retry.server.web.service.convert.*;
 import com.aizuda.easy.retry.server.web.util.UserSessionUtils;
 import com.aizuda.easy.retry.template.datasource.persistence.dataobject.ActivePodQuantityResponseDO;
+import com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardCardResponseDO;
 import com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO;
 import com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardLineResponseDO;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobSummaryMapper;

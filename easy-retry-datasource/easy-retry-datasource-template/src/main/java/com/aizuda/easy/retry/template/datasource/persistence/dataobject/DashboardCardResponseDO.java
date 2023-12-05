@@ -52,6 +52,10 @@ public class DashboardCardResponseDO {
         private Integer successNum;
         //失败
         private Integer failNum;
+        //取消
+        private Integer cancelNum;
+        //停止
+        private Integer stopNum;
         // 总数
         private Integer totalNum;
         // 成功率

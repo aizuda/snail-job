@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
  *
  * @author: wodeyangzipingpingwuqi
  * @date : 2023-11-21 11:15
- * @since 2.1.0
+ * @since 2.5.0
  */
 @Component
 @Slf4j
@@ -69,7 +69,7 @@ public class JobSummarySchedule extends AbstractSchedule implements Lifecycle {
 
                 // insertOrUpdate
                 List<JobSummary> jobSummaryList = jobSummaryList(todayFrom, summaryResponseDOList);
-                int totalJobSummary = jobSummaryMapper.insertOrUpdate(jobSummaryList);
+                 int totalJobSummary = jobSummaryMapper.insertOrUpdate(jobSummaryList);
                 LogUtils.debug(log, "job summary dashboard success todayFrom:[{}] todayTo:[{}] total:[{}]", todayFrom, todayTo, totalJobSummary);
             }
         } catch (Exception e) {

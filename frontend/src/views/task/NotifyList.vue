@@ -208,9 +208,13 @@ export default {
       this.$router.push({ path: '/retry/notify/config', query: { id: record.id } })
     },
     handleChange (value) {
-      getSceneList({ groupName: value }).then((res) => {
-        this.sceneList = res.data
-      })
+      if (value) {
+        getSceneList({ groupName: value }).then((res) => {
+          this.sceneList = res.data
+        })
+      } else {
+        this.sceneList = []
+      }
     }
   }
 }

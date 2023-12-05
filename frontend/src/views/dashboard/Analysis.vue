@@ -47,6 +47,12 @@
             <a-divider type="vertical" />
             {{ $t('dashboard.analysis.job_fail') }}
             <span>{{ jobTask.failNum }}</span>
+            <a-divider type="vertical" />
+            {{ $t('dashboard.analysis.job_stop') }}
+            <span>{{ jobTask.stopNum }}</span>
+            <a-divider type="vertical" />
+            {{ $t('dashboard.analysis.job_cancel') }}
+            <span>{{ jobTask.cancelNum }}</span>
           </template>
         </chart-card>
       </a-col>
@@ -153,6 +159,8 @@ export default {
         successRate: 0,
         successNum: 0,
         failNum: 0,
+        cancelNum: 0,
+        stopNum: 0,
         totalNum: 0
       },
       onLineService: {

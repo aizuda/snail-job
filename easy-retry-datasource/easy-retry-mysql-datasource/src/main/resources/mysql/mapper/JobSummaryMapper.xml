@@ -39,7 +39,13 @@
             )
         </foreach>
         ON DUPLICATE KEY UPDATE
-        job_id = values(`job_id`), trigger_at = values(`trigger_at`)
+        success_num = values(`success_num`),
+        fail_num = values(`fail_num`),
+        fail_reason = values(`fail_reason`),
+        stop_num = values(`stop_num`),
+        stop_reason = values(`stop_reason`),
+        cancel_num = values(`cancel_num`),
+        cancel_reason = values(`cancel_reason`)
     </insert>
 
     <select id="jobLineList"
@@ -82,7 +88,9 @@
     <select id="toJobTask"
             resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardCardResponseDO$JobTask">
         SELECT ifnull(sum(success_num), 0)                                    AS successNum,
-               ifnull(sum(fail_num + stop_num + cancel_num), 0)               AS failNum,
+               ifnull(sum(stop_num), 0)                                       AS stopNum,
+               ifnull(sum(cancel_num), 0)                                     AS cancelNum,
+               ifnull(sum(fail_num), 0)                                       AS failNum,
                ifnull(sum(success_num + fail_num + stop_num + cancel_num), 0) AS totalNum
         FROM job_summary
         WHERE namespace_id = #{namespaceId}
@@ -92,7 +100,7 @@
             resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO$Rank">
         SELECT
         CONCAT(group_name, '/', (SELECT job_name FROM job WHERE id=job_id)) `name`,
-        SUM(success_num + fail_num + stop_num + cancel_num) AS total FROM job_summary
+        SUM(fail_num) AS total FROM job_summary
         <where>
             <if test="groupName != '' and groupName != null">
                 AND group_name = #{groupName}
