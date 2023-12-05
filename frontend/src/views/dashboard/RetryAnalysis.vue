@@ -10,7 +10,7 @@
     </a-row>
     <a-row :gutter="24" type="flex" :style="{ marginTop: '24px' }">
       <a-col :xl="12" :lg="24" :md="24" :sm="24" :xs="24">
-        <a-card :loading="loading" :bordered="false" :title="$t('dashboard.analysis.online-top-search')" :style="{ height: '100%' }">
+        <a-card :loading="loading" :bordered="false" title="场景列表" :style="{ height: '100%' }">
           <s-table
             ref="table"
             size="default"
@@ -28,7 +28,7 @@
           <div>
             <div>
               <v-chart :force-fit="true" :height="405" :data="pieData" :scale="pieScale" >
-                <v-tooltip :showTitle="true" dataKey="value*percent" />
+                <v-tooltip :showTitle="false" dataKey="name*percent" />
                 <v-axis />
                 <v-legend dataKey="value" />
                 <v-pie position="percent" color="value" :vStyle="pieStyle" />
