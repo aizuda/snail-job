@@ -11,6 +11,7 @@ import com.aizuda.easy.retry.server.common.cache.CacheConsumerGroup;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.dto.PartitionTask;
 import com.aizuda.easy.retry.server.common.dto.ScanTask;
+import com.aizuda.easy.retry.server.common.enums.JobTriggerTypeEnum;
 import com.aizuda.easy.retry.server.common.strategy.WaitStrategies;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.server.common.util.PartitionTaskUtils;
@@ -29,7 +30,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import java.time.LocalDateTime;
 import java.util.*;
 
 
@@ -90,6 +90,7 @@ public class ScanJobTaskActor extends AbstractActor {
         for (final JobTaskPrepareDTO waitExecJob : waitExecJobs) {
             // 执行预处理阶段
             ActorRef actorRef = ActorGenerator.jobTaskPrepareActor();
+            waitExecJob.setTriggerType(JobTriggerTypeEnum.AUTO.getType());
             actorRef.tell(waitExecJob, actorRef);
         }
     }

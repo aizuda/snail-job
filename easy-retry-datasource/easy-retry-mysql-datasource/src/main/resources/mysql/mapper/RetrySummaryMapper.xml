@@ -33,10 +33,10 @@
             )
         </foreach>
         ON DUPLICATE KEY UPDATE
-        namespace_id = values(`namespace_id`),
-        group_name = values(`group_name`),
-        scene_name = values(`scene_name`),
-        trigger_at = values(`trigger_at`)
+        running_num = values(`running_num`),
+        finish_num = values(`finish_num`),
+        max_count_num = values(`max_count_num`),
+        suspend_num = values(`suspend_num`)
     </insert>
 
     <select id="retryTask"

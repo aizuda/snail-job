@@ -40,5 +40,10 @@ public class JobTaskBatchGeneratorContext {
      */
     private Integer taskBatchStatus;
 
+    /**
+     * 触发类似 1、auto 2、manual
+     */
+    private Integer triggerType;
+
 
 }

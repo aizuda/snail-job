@@ -11,6 +11,7 @@ import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.WaitStrategy;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
+import com.aizuda.easy.retry.server.common.enums.JobTriggerTypeEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.strategy.WaitStrategies;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
@@ -86,10 +87,13 @@ public class JobExecutorActor extends AbstractActor {
 
     private void doExecute(final TaskExecuteDTO taskExecute) {
 
-        Job job = jobMapper.selectOne(new LambdaQueryWrapper<Job>()
-                .eq(Job::getJobStatus, StatusEnum.YES.getStatus())
-                .eq(Job::getId, taskExecute.getJobId())
-        );
+        LambdaQueryWrapper<Job> queryWrapper = new LambdaQueryWrapper<Job>();
+        // 自动的校验任务必须是开启状态，手动触发无需校验
+        if (JobTriggerTypeEnum.AUTO.getType().equals(taskExecute.getTriggerType())) {
+            queryWrapper.eq(Job::getJobStatus, StatusEnum.YES.getStatus());
+        }
+
+        Job job = jobMapper.selectOne(queryWrapper.eq(Job::getId, taskExecute.getJobId()));
 
         try {
 
@@ -146,7 +150,7 @@ public class JobExecutorActor extends AbstractActor {
     }
 
     private void doHandlerResidentTask(Job job, TaskExecuteDTO taskExecuteDTO) {
-        if (Objects.isNull(job)) {
+        if (Objects.isNull(job) || JobTriggerTypeEnum.MANUAL.getType().equals(taskExecuteDTO.getTriggerType())) {
             return;
         }
 
@@ -156,6 +160,7 @@ public class JobExecutorActor extends AbstractActor {
             JobTimerTaskDTO jobTimerTaskDTO = new JobTimerTaskDTO();
             jobTimerTaskDTO.setJobId(taskExecuteDTO.getJobId());
             jobTimerTaskDTO.setTaskBatchId(taskExecuteDTO.getTaskBatchId());
+            jobTimerTaskDTO.setTriggerType(JobTriggerTypeEnum.AUTO.getType());
             ResidentJobTimerTask timerTask = new ResidentJobTimerTask(jobTimerTaskDTO, job);
             WaitStrategy waitStrategy = WaitStrategies.WaitStrategyEnum.getWaitStrategy(job.getTriggerType());
 

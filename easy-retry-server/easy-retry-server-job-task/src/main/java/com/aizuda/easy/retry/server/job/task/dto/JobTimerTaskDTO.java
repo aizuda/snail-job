@@ -12,4 +12,8 @@ public class JobTimerTaskDTO {
 
     private Long taskBatchId;
     private Long jobId;
+    /**
+     * 触发类似 1、auto 2、manual
+     */
+    private Integer triggerType;
 }

@@ -11,5 +11,9 @@ public class TaskExecuteDTO {
 
     private Long jobId;
     private Long taskBatchId;
+    /**
+     * 触发类似 1、auto 2、manual
+     */
+    private Integer triggerType;
 
 }

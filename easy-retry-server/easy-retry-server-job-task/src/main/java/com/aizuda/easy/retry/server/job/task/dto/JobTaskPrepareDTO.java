@@ -52,4 +52,9 @@ public class JobTaskPrepareDTO {
 
     private boolean onlyTimeoutCheck;
 
+    /**
+     * 触发类似 1、auto 2、manual
+     */
+    private Integer triggerType;
+
 }
