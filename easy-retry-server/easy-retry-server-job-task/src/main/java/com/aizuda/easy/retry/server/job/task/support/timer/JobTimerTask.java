@@ -31,6 +31,7 @@ public class JobTimerTask implements TimerTask {
             TaskExecuteDTO taskExecuteDTO = new TaskExecuteDTO();
             taskExecuteDTO.setTaskBatchId(jobTimerTaskDTO.getTaskBatchId());
             taskExecuteDTO.setJobId(jobTimerTaskDTO.getJobId());
+            taskExecuteDTO.setTriggerType(jobTimerTaskDTO.getTriggerType());
             ActorRef actorRef = ActorGenerator.jobTaskExecutorActor();
             actorRef.tell(taskExecuteDTO, actorRef);
 
