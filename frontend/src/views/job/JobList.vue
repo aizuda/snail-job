@@ -76,7 +76,7 @@
       :rowKey="(record) => record.id"
       :columns="columns"
       :data="loadData"
-      :scroll="{ x: 2000 }"
+      :scroll="{ x: 1800 }"
     >
       <span slot="serial" slot-scope="text, record">
         {{ record.id }}
@@ -212,7 +212,14 @@ export default {
         {
           title: 'ID',
           scopedSlots: { customRender: 'serial' },
-          width: '4%'
+          fixed: 'left'
+        },
+        {
+          title: '任务名称',
+          dataIndex: 'jobName',
+          scopedSlots: { customRender: 'jobName' },
+          ellipsis: true,
+          fixed: 'left'
         },
         {
           title: '组名称',
@@ -220,15 +227,9 @@ export default {
           width: '10%'
         },
         {
-          title: '任务名称',
-          dataIndex: 'jobName',
-          scopedSlots: { customRender: 'jobName' },
-          ellipsis: true,
-          width: '10%'
-        },
-        {
           title: '触发时间',
           dataIndex: 'nextTriggerAt',
+          width: '10%',
           ellipsis: true
         },
         {

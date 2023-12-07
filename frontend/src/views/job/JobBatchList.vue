@@ -87,7 +87,7 @@
       :data="loadData"
       :alert="options.alert"
       :rowSelection="options.rowSelection"
-      :scroll="{ x: 1800 }"
+      :scroll="{ x: 1500 }"
     >
       <span slot="serial" slot-scope="record">
         <a href="#" @click="handlerOpenDrawer(record)">{{ record.id }}</a>
@@ -168,7 +168,7 @@ export default {
         {
           title: 'ID',
           scopedSlots: { customRender: 'serial' },
-          width: '5%'
+          fixed: 'left'
         },
         {
           title: '组名称',
@@ -185,7 +185,7 @@ export default {
         {
           title: '开始执行时间',
           dataIndex: 'executionAt',
-          width: '10%'
+          width: '15%'
         },
         {
           title: '状态',
@@ -203,7 +203,7 @@ export default {
           title: '创建时间',
           dataIndex: 'createDt',
           sorter: true,
-          width: '10%'
+          width: '15%'
         },
         {
           title: '操作',

@@ -37,7 +37,7 @@
       :data="loadData"
       :alert="options.alert"
       :rowSelection="options.rowSelection"
-      :scroll="{ x: 1600 }"
+      :scroll="{ x: 1800 }"
     >
       <span slot="groupName" slot-scope="text, record">
         <a href="#" @click="handlerOpenDrawer(record)">{{ text }}</a>
@@ -119,8 +119,8 @@ export default {
         {
           title: '名称',
           dataIndex: 'groupName',
-          scopedSlots: { customRender: 'groupName' }
-
+          scopedSlots: { customRender: 'groupName' },
+          fixed: 'left'
         },
         {
           title: '状态',

@@ -54,7 +54,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DashBoardServiceImpl implements DashBoardService {
 
-    public static final String URL = "http://{0}:{1}/dashboard/consumer/bucket";
+    public static final String URL = "http://{0}:{1}/{2}/dashboard/consumer/bucket";
 
     @Autowired
     private ServerNodeMapper serverNodeMapper;
@@ -180,7 +180,8 @@ public class DashBoardServiceImpl implements DashBoardService {
             ServerNodeExtAttrs serverNodeExtAttrs = JsonUtil.parseObject(serverNodeResponseVO.getExtAttrs(), ServerNodeExtAttrs.class);
             try {
                 // 从远程节点取
-                String format = MessageFormat.format(URL, serverNodeResponseVO.getHostIp(), serverNodeExtAttrs.getWebPort().toString());
+                String format = MessageFormat
+                        .format(URL, serverNodeResponseVO.getHostIp(), serverNodeExtAttrs.getWebPort().toString(), serverNodeResponseVO.getContextPath());
                 Result<List<Integer>> result = restTemplate.getForObject(format, Result.class);
                 List<Integer> data = result.getData();
                 if (!CollectionUtils.isEmpty(data)) {
