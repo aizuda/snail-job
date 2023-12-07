@@ -114,14 +114,14 @@ export default {
           title: '组名',
           dataIndex: 'groupName',
           key: 'groupName',
-          width: '10%',
+          width: '15%',
           scopedSlots: { customRender: 'groupName' }
         },
         {
           title: '任务',
           dataIndex: 'jobName',
           key: 'jobName',
-          width: '10%',
+          width: '15%',
           scopedSlots: { customRender: 'jobName' }
         },
         {
@@ -141,7 +141,7 @@ export default {
           title: '通知场景',
           dataIndex: 'notifyScene',
           key: 'notifyScene',
-          width: '10%',
+          width: '15%',
           scopedSlots: { customRender: 'notifyScene' }
         },
         {
@@ -155,7 +155,7 @@ export default {
           title: '描述',
           dataIndex: 'description',
           key: 'description',
-          width: '20%',
+          width: '15%',
           scopedSlots: { customRender: 'description' }
         },
         {
