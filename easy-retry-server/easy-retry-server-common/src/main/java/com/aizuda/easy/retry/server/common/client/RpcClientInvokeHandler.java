@@ -199,6 +199,10 @@ public class RpcClientInvokeHandler implements InvocationHandler {
             if (ex.getClass().isAssignableFrom(RetryException.class)) {
                 RetryException re = (RetryException) ex;
                 throwable = re.getLastFailedAttempt().getExceptionCause();
+                if (throwable instanceof ResourceAccessException) {
+                    // 若重试之后该接口仍然有问题，进行路由剔除处理
+                    CacheRegisterTable.remove(groupName, namespaceId, hostId);
+                }
             }
 
             throw throwable;

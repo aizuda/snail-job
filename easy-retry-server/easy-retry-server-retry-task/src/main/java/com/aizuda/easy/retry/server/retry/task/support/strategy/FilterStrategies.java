@@ -3,6 +3,7 @@ package com.aizuda.easy.retry.server.retry.task.support.strategy;
 import cn.hutool.core.lang.Pair;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
 import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.common.dto.DistributeInstance;
 import com.aizuda.easy.retry.server.retry.task.support.FilterStrategy;
@@ -192,6 +193,8 @@ public class FilterStrategies {
             ServerNodeMapper serverNodeMapper = SpringContext.getBeanByType(ServerNodeMapper.class);
             boolean result = 1 == serverNodeMapper.selectCount(new LambdaQueryWrapper<ServerNode>().eq(ServerNode::getHostId, serverNode.getHostId()));
             if (!result) {
+                // 删除缓存中的失效节点
+                CacheRegisterTable.remove(retryTask.getGroupName(), retryTask.getNamespaceId(), serverNode.getHostId());
                 description.append(MessageFormat.format("DB中未查询到客户端节点. hostId:[{0}] uniqueId:[{1}]",  serverNode.getHostId(), retryTask.getUniqueId()));
             }
 

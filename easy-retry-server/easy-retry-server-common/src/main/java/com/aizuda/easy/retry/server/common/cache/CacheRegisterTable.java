@@ -1,20 +1,31 @@
 package com.aizuda.easy.retry.server.common.cache;
 
 import cn.hutool.core.util.StrUtil;
+import com.aizuda.easy.retry.common.core.context.SpringContext;
+import com.aizuda.easy.retry.common.core.enums.NodeTypeEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.common.Lifecycle;
 import com.aizuda.easy.retry.server.common.RegisterNodeInfoConverter;
 import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
+import com.aizuda.easy.retry.server.common.register.ServerRegister;
+import com.aizuda.easy.retry.template.datasource.persistence.mapper.ServerNodeMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.ServerNode;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
@@ -43,15 +54,15 @@ public class CacheRegisterTable implements Lifecycle {
     public static Set<RegisterNodeInfo> getAllPods() {
         ConcurrentMap<String, ConcurrentMap<String, RegisterNodeInfo>> concurrentMap = CACHE.asMap();
         if (CollectionUtils.isEmpty(concurrentMap)) {
-            return Collections.EMPTY_SET;
+            return Sets.newHashSet();
         }
 
         return concurrentMap.values().stream()
-                .map(stringServerNodeConcurrentMap -> new TreeSet(stringServerNodeConcurrentMap.values()))
-                .reduce((s, y) -> {
-                    s.addAll(y);
-                    return s;
-                }).get();
+            .map(stringServerNodeConcurrentMap -> new TreeSet(stringServerNodeConcurrentMap.values()))
+            .reduce((s, y) -> {
+                s.addAll(y);
+                return s;
+            }).get();
 
     }
 
@@ -72,7 +83,25 @@ public class CacheRegisterTable implements Lifecycle {
     public static RegisterNodeInfo getServerNode(String groupName, String namespaceId, String hostId) {
         ConcurrentMap<String, RegisterNodeInfo> concurrentMap = CACHE.getIfPresent(getKey(groupName, namespaceId));
         if (Objects.isNull(concurrentMap)) {
-            return null;
+            // 此处为了降级，若缓存中没有则取DB中查询
+            ServerNodeMapper serverNodeMapper = SpringContext.getBeanByType(ServerNodeMapper.class);
+            List<ServerNode> serverNodes = serverNodeMapper.selectList(
+                new LambdaQueryWrapper<ServerNode>()
+                    .eq(ServerNode::getNodeType, NodeTypeEnum.CLIENT.getType())
+                    .eq(ServerNode::getNamespaceId, namespaceId)
+                    .eq(ServerNode::getGroupName, groupName)
+                    .eq(ServerNode::getHostId, hostId)
+                    .orderByDesc(ServerNode::getExpireAt));
+            if (CollectionUtils.isEmpty(serverNodes)) {
+                return null;
+            }
+
+            CacheRegisterTable.addOrUpdate(serverNodes.get(0));
+
+            concurrentMap = CACHE.getIfPresent(getKey(groupName, namespaceId));
+            if (CollectionUtils.isEmpty(concurrentMap)) {
+                return null;
+            }
         }
 
         return concurrentMap.get(hostId);
@@ -86,7 +115,23 @@ public class CacheRegisterTable implements Lifecycle {
     public static Set<RegisterNodeInfo> getServerNodeSet(String groupName, String namespaceId) {
         ConcurrentMap<String, RegisterNodeInfo> concurrentMap = CACHE.getIfPresent(getKey(groupName, namespaceId));
         if (CollectionUtils.isEmpty(concurrentMap)) {
-            return Collections.EMPTY_SET;
+
+            // 此处为了降级，若缓存中没有则取DB中查询
+            ServerNodeMapper serverNodeMapper = SpringContext.getBeanByType(ServerNodeMapper.class);
+            List<ServerNode> serverNodes = serverNodeMapper.selectList(
+                new LambdaQueryWrapper<ServerNode>()
+                    .eq(ServerNode::getNodeType, NodeTypeEnum.CLIENT.getType())
+                    .eq(ServerNode::getNamespaceId, namespaceId)
+                    .eq(ServerNode::getGroupName, groupName));
+            for (final ServerNode node : serverNodes) {
+                // 刷新全量本地缓存
+                CacheRegisterTable.addOrUpdate(node);
+            }
+
+            concurrentMap = CACHE.getIfPresent(getKey(groupName, namespaceId));
+            if (CollectionUtils.isEmpty(serverNodes) || CollectionUtils.isEmpty(concurrentMap)) {
+                return Sets.newHashSet();
+            }
         }
 
         return new TreeSet<>(concurrentMap.values());
@@ -103,7 +148,7 @@ public class CacheRegisterTable implements Lifecycle {
      */
     public static Set<String> getPodIdSet(String groupName, String namespaceId) {
         return getServerNodeSet(groupName, namespaceId).stream()
-                .map(RegisterNodeInfo::getHostId).collect(Collectors.toSet());
+            .map(RegisterNodeInfo::getHostId).collect(Collectors.toSet());
     }
 
 
@@ -113,10 +158,12 @@ public class CacheRegisterTable implements Lifecycle {
      * @param serverNode 服务节点
      */
     public static synchronized void refreshExpireAt(ServerNode serverNode) {
-        RegisterNodeInfo registerNodeInfo = getServerNode(serverNode.getGroupName(), serverNode.getNamespaceId(), serverNode.getHostId());
+        RegisterNodeInfo registerNodeInfo = getServerNode(serverNode.getGroupName(), serverNode.getNamespaceId(),
+            serverNode.getHostId());
         // 不存在则初始化
         if (Objects.isNull(registerNodeInfo)) {
-            LogUtils.warn(log, "node not exists. groupName:[{}] hostId:[{}]", serverNode.getGroupName(), serverNode.getHostId());
+            LogUtils.warn(log, "node not exists. groupName:[{}] hostId:[{}]", serverNode.getGroupName(),
+                serverNode.getHostId());
         } else {
             // 存在则刷新过期时间
             registerNodeInfo.setExpireAt(serverNode.getExpireAt());
@@ -129,21 +176,42 @@ public class CacheRegisterTable implements Lifecycle {
      * @return 缓存对象
      */
     public static synchronized void addOrUpdate(ServerNode serverNode) {
-        ConcurrentMap<String, RegisterNodeInfo> concurrentMap = CACHE.getIfPresent(getKey(serverNode.getGroupName(), serverNode.getNamespaceId()));
+        ConcurrentMap<String, RegisterNodeInfo> concurrentMap = CACHE.getIfPresent(
+            getKey(serverNode.getGroupName(), serverNode.getNamespaceId()));
         RegisterNodeInfo registerNodeInfo;
         if (Objects.isNull(concurrentMap)) {
-            LogUtils.info(log, "Add cache. groupName:[{}] namespaceId:[{}] hostId:[{}]", serverNode.getGroupName(), serverNode.getNamespaceId(), serverNode.getHostId());
+            LogUtils.info(log, "Add cache. groupName:[{}] namespaceId:[{}] hostId:[{}]", serverNode.getGroupName(),
+                serverNode.getNamespaceId(), serverNode.getHostId());
             concurrentMap = new ConcurrentHashMap<>();
             registerNodeInfo = RegisterNodeInfoConverter.INSTANCE.toRegisterNodeInfo(serverNode);
-            CACHE.put(getKey(serverNode.getGroupName(), serverNode.getNamespaceId()), concurrentMap);
+
         } else {
             // 复用缓存中的对象
-            registerNodeInfo = concurrentMap.getOrDefault(serverNode.getHostId(), RegisterNodeInfoConverter.INSTANCE.toRegisterNodeInfo(serverNode));
+            registerNodeInfo = concurrentMap.getOrDefault(serverNode.getHostId(),
+                RegisterNodeInfoConverter.INSTANCE.toRegisterNodeInfo(serverNode));
             registerNodeInfo.setExpireAt(serverNode.getExpireAt());
+
+            // 删除过期的节点信息
+            delExpireNode(concurrentMap);
         }
 
         concurrentMap.put(serverNode.getHostId(), registerNodeInfo);
+        // 此缓存设置了60秒没有写入即过期，因此这次刷新缓存防止过期
+        CACHE.put(getKey(serverNode.getGroupName(), serverNode.getNamespaceId()), concurrentMap);
     }
+
+    /**
+     * 删除过期的节点信息
+     * @param concurrentMap 并发映射的节点信息
+     */
+    private static void delExpireNode(final ConcurrentMap<String, RegisterNodeInfo> concurrentMap) {
+        concurrentMap.values().stream()
+            .filter(registerNodeInfo -> registerNodeInfo.getExpireAt().isBefore(
+                LocalDateTime.now().minusSeconds(ServerRegister.DELAY_TIME + (ServerRegister.DELAY_TIME / 3))))
+            .forEach(registerNodeInfo -> remove(registerNodeInfo.getGroupName(),
+                registerNodeInfo.getNamespaceId(), registerNodeInfo.getHostId()));
+    }
+
 
     /**
      * 删除缓存
@@ -167,13 +235,11 @@ public class CacheRegisterTable implements Lifecycle {
         CACHE = CacheBuilder.newBuilder()
             // 设置并发级别为cpu核心数
             .concurrencyLevel(Runtime.getRuntime().availableProcessors())
+            // 设置写缓存后60秒过期
+            .expireAfterWrite(60, TimeUnit.SECONDS)
             .build();
-
     }
 
-    public static void main(String[] args) {
-
-    }
 
     @Override
     public void close() {
