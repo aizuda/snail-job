@@ -30,8 +30,14 @@ public abstract class AbstractRegister implements Register, Lifecycle {
 
         ServerNode serverNode = initServerNode(context);
 
-        return doRegister(context, serverNode);
+        boolean result = doRegister(context, serverNode);
+
+        afterProcessor(serverNode);
+
+        return result;
     }
+
+    protected abstract void afterProcessor(final ServerNode serverNode);
 
     protected void refreshExpireAt(List<ServerNode> serverNodes) {
 

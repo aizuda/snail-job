@@ -8,18 +8,25 @@ import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.util.HostUtils;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.Register;
+import com.aizuda.easy.retry.server.common.cache.CacheConsumerGroup;
+import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.dto.ServerNodeExtAttrs;
 import com.aizuda.easy.retry.server.common.handler.ServerNodeBalance;
 import com.aizuda.easy.retry.template.datasource.persistence.po.ServerNode;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -57,7 +64,6 @@ public class ServerRegister extends AbstractRegister {
         return getNodeType().equals(type);
     }
 
-
     @Override
     protected void beforeProcessor(RegisterContext context) {
         // 新增扩展参数
@@ -82,6 +88,29 @@ public class ServerRegister extends AbstractRegister {
     protected boolean doRegister(RegisterContext context, ServerNode serverNode) {
         refreshExpireAt(Lists.newArrayList(serverNode));
         return Boolean.TRUE;
+    }
+
+
+    @Override
+    protected void afterProcessor(final ServerNode serverNode) {
+        try {
+            // 同步当前POD消费的组的节点信息
+            // netty的client只会注册到一个服务端，若组分配的和client连接的不是一个POD则会导致当前POD没有其他客户端的注册信息
+            ConcurrentMap<String /*groupName*/, String/*namespaceId*/> allConsumerGroupName = CacheConsumerGroup.getAllConsumerGroupName();
+            if (!CollectionUtils.isEmpty(allConsumerGroupName)) {
+                List<ServerNode> serverNodes = serverNodeMapper.selectList(
+                    new LambdaQueryWrapper<ServerNode>()
+                        .eq(ServerNode::getNodeType, NodeTypeEnum.CLIENT.getType())
+                        .in(ServerNode::getNamespaceId, new HashSet<>(allConsumerGroupName.values()))
+                        .in(ServerNode::getGroupName, allConsumerGroupName.keySet()));
+                for (final ServerNode node : serverNodes) {
+                    // 刷新全量本地缓存
+                    CacheRegisterTable.addOrUpdate(node);
+                }
+            }
+        } catch (Exception e) {
+            LogUtils.error(log, "刷新客户端失败", e);
+        }
     }
 
     @Override

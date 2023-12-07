@@ -46,7 +46,6 @@ public class ClientRegister extends AbstractRegister implements Runnable {
     public boolean supports(int type) {
         return getNodeType().equals(type);
     }
-
     @Override
     protected void beforeProcessor(RegisterContext context) {
     }
@@ -64,6 +63,12 @@ public class ClientRegister extends AbstractRegister implements Runnable {
 
         return QUEUE.offerLast(serverNode);
     }
+
+    @Override
+    protected void afterProcessor(final ServerNode serverNode) {
+
+    }
+
 
     @Override
     protected Integer getNodeType() {
@@ -100,22 +105,6 @@ public class ClientRegister extends AbstractRegister implements Runnable {
 
                     refreshExpireAt(lists);
                 }
-
-                // 同步当前POD消费的组的节点信息
-                // netty的client只会注册到一个服务端，若组分配的和client连接的不是一个POD则会导致当前POD没有其他客户端的注册信息
-                ConcurrentMap<String, String> allConsumerGroupName = CacheConsumerGroup.getAllConsumerGroupName();
-                if (!CollectionUtils.isEmpty(allConsumerGroupName)) {
-                    List<ServerNode> serverNodes = serverNodeMapper.selectList(
-                        new LambdaQueryWrapper<ServerNode>()
-                            .eq(ServerNode::getNodeType, NodeTypeEnum.CLIENT.getType())
-                            .in(ServerNode::getNamespaceId, new HashSet<>(allConsumerGroupName.values()))
-                            .in(ServerNode::getGroupName, allConsumerGroupName.keySet()));
-                    for (final ServerNode node : serverNodes) {
-                        // 刷新全量本地缓存
-                        CacheRegisterTable.addOrUpdate(node);
-                    }
-                }
-
             } catch (InterruptedException ignored) {
                 Thread.currentThread().interrupt();
             } catch (Exception e) {

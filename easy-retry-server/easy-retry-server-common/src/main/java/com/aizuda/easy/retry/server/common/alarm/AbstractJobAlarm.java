@@ -11,6 +11,7 @@ import com.aizuda.easy.retry.server.common.triple.Triple;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobNotifyConfigMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobNotifyConfig;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.google.common.collect.Maps;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.util.CollectionUtils;
@@ -51,14 +52,14 @@ public abstract class AbstractJobAlarm<E extends ApplicationEvent> extends Abstr
         // 批量获取所需的通知配置
         List<JobNotifyConfig> jobNotifyConfigs = jobNotifyConfigMapper.selectList(
                 new LambdaQueryWrapper<JobNotifyConfig>()
-                        .eq(JobNotifyConfig::getNotifyStatus, StatusEnum.YES)
+                        .eq(JobNotifyConfig::getNotifyStatus, StatusEnum.YES.getStatus())
                         .eq(JobNotifyConfig::getNotifyScene, getNotifyScene())
                         .in(JobNotifyConfig::getNamespaceId, namespaceIds)
                         .in(JobNotifyConfig::getGroupName, groupNames)
                         .in(JobNotifyConfig::getJobId, jobIds)
         );
         if (CollectionUtils.isEmpty(jobNotifyConfigs)) {
-            return null;
+            return Maps.newHashMap();
         }
 
         List<NotifyConfigInfo> notifyConfigInfos = AlarmInfoConverter.INSTANCE.jobToNotifyConfigInfos(jobNotifyConfigs);

@@ -55,7 +55,7 @@ public abstract class AbstractRetryAlarm<E extends ApplicationEvent> extends Abs
         // 批量获取所需的通知配置
         List<NotifyConfig> notifyConfigs = accessTemplate.getNotifyConfigAccess().list(
                 new LambdaQueryWrapper<NotifyConfig>()
-                        .eq(NotifyConfig::getNotifyStatus, StatusEnum.YES)
+                        .eq(NotifyConfig::getNotifyStatus, StatusEnum.YES.getStatus())
                         .eq(NotifyConfig::getNotifyScene, getNotifyScene())
                         .in(NotifyConfig::getNamespaceId, namespaceIds)
                         .in(NotifyConfig::getGroupName, groupNames)
