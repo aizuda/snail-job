@@ -71,8 +71,8 @@
         AS createDt,
         ifnull(SUM(success_num), 0) AS success,
         ifnull(SUM(fail_num), 0) AS failNum,
-        ifnull(SUM(stop_num), 0) AS stopNum,
-        ifnull(SUM(cancel_num), 0) AS cancelNum,
+        ifnull(SUM(stop_num), 0) AS stop,
+        ifnull(SUM(cancel_num), 0) AS cancel,
         ifnull(SUM(fail_num + stop_num + cancel_num), 0) AS fail,
         ifnull(SUM(success_num + fail_num + stop_num + cancel_num), 0) AS total
         FROM job_summary
@@ -109,6 +109,7 @@
         </where>
         AND namespace_id = #{namespaceId}
         GROUP BY namespace_id, group_name, job_id
+        HAVING total > 0
         ORDER BY total DESC LIMIT 10
     </select>
 

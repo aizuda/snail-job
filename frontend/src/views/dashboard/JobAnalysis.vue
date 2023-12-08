@@ -70,10 +70,10 @@ export default {
       groupName: '',
       startTime: '',
       endTime: '',
-      successNum: 0,
-      failNum: 0,
-      stopNum: 0,
-      cancelNum: 0,
+      success: 0,
+      fail: 0,
+      stop: 0,
+      cancel: 0,
       total: 0,
       groupNameList: [],
       pieScale: [{
@@ -111,24 +111,24 @@ export default {
   mounted () {
     this.$bus.$on('job', (res) => {
       this.total = 0
-      this.successNum = 0
-      this.failNum = 0
-      this.stopNum = 0
-      this.cancelNum = 0
+      this.success = 0
+      this.fail = 0
+      this.stop = 0
+      this.cancel = 0
       this.rankList = res.data.rankList
       this.taskList = res.data.taskList
       res.data.dashboardLineResponseDOList.forEach(res => {
-        this.successNum += res.success
-        this.failNum += res.failNum
-        this.stopNum += res.stopNum
-        this.cancelNum += res.cancelNum
+        this.success += res.success
+        this.fail += res.fail
+        this.stop += res.stop
+        this.cancel += res.cancel
       })
-      this.total = this.successNum + this.failNum + this.stopNum + this.cancelNum
+      this.total = this.success + this.fail + this.stop + this.cancel
       this.pieData = [
-        { value: 'SUCCESS', name: this.successNum, percent: this.successNum / this.total },
-        { value: 'FAIL', name: this.failNum, percent: this.failNum / this.total },
-        { value: 'STOP', name: this.stopNum, percent: this.stopNum / this.total },
-        { value: 'CANCEL', name: this.cancelNum, percent: this.cancelNum / this.total }
+        { value: 'SUCCESS', name: this.success, percent: this.success / this.total },
+        { value: 'FAIL', name: this.fail, percent: this.fail / this.total },
+        { value: 'STOP', name: this.stop, percent: this.stop / this.total },
+        { value: 'CANCEL', name: this.cancel, percent: this.cancel / this.total }
       ]
     })
   },

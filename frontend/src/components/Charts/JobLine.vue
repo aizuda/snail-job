@@ -43,7 +43,7 @@ export default {
       var dv = ds.createView().source(viewRecords)
       dv.transform({
         type: 'fold',
-        fields: ['success', 'fail'],
+        fields: ['success', 'fail', 'stop', 'cancel'],
         key: 'name',
         value: 'viewTotal',
         retains: ['total', 'createDt']
