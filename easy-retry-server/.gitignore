@@ -30,5 +30,3 @@ target/
 
 # Maven ignore
 .flattened-pom.xml
-
-data/
