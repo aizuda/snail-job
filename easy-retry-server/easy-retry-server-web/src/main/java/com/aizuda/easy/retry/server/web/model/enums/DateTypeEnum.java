@@ -39,8 +39,8 @@ public enum DateTypeEnum {
                         .setSuccess(0L)
                         .setSuccessNum(0L)
                         .setSuspendNum(0L)
-                        .setStopNum(0L)
-                        .setCancelNum(0L)
+                        .setStop(0L)
+                        .setCancel(0L)
                         .setCreateDt(format);
                 dashboardLineResponseVOList.add(dashboardLineResponseVO);
             }
@@ -74,8 +74,8 @@ public enum DateTypeEnum {
                         .setSuccess(0L)
                         .setSuccessNum(0L)
                         .setSuspendNum(0L)
-                        .setStopNum(0L)
-                        .setCancelNum(0L)
+                        .setStop(0L)
+                        .setCancel(0L)
                         .setCreateDt(format);
                 dashboardLineResponseVOList.add(dashboardLineResponseVO);
             }
@@ -110,8 +110,8 @@ public enum DateTypeEnum {
                         .setSuccess(0L)
                         .setSuccessNum(0L)
                         .setSuspendNum(0L)
-                        .setStopNum(0L)
-                        .setCancelNum(0L)
+                        .setStop(0L)
+                        .setCancel(0L)
                         .setCreateDt(format);
                 dashboardLineResponseVOList.add(dashboardLineResponseVO);
             }
@@ -146,8 +146,8 @@ public enum DateTypeEnum {
                         .setSuccess(0L)
                         .setSuccessNum(0L)
                         .setSuspendNum(0L)
-                        .setStopNum(0L)
-                        .setCancelNum(0L)
+                        .setStop(0L)
+                        .setCancel(0L)
                         .setCreateDt(format);
                 dashboardLineResponseVOList.add(dashboardLineResponseVO);
             }

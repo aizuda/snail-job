@@ -59,12 +59,12 @@ public class DashboardLineResponseVO {
     /**
      * 定时-停止数
      */
-    private Long stopNum;
+    private Long stop;
 
     /**
      * 定时-取消数
      */
-    private Long cancelNum;
+    private Long cancel;
 
     /**
      * 定时-成功数

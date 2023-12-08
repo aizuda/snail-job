@@ -123,6 +123,7 @@
             AND trigger_at >= #{startTime} AND trigger_at &lt;= #{endTime}
         </where>
         GROUP BY namespace_id, group_name, scene_name
+        HAVING total > 0
         ORDER BY total DESC LIMIT 10
     </select>
 
