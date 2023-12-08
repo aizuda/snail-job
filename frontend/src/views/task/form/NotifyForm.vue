@@ -163,14 +163,14 @@
             ]" />
         </a-form-item>
         <a-form-item v-if="this.notifyTypeValue === '1'">
-          <span slot="label">被@人手机号&nbsp;<a :href="officialWebsite + '/pages/32e4a0/#被@人手机号是何物' +''" target="_blank"> <a-icon type="question-circle-o" /></a></span>
+          <span slot="label">被@人手机号或钉钉号&nbsp;<a :href="officialWebsite + '/pages/32e4a0/#被被@人手机号或钉钉号是何物' +''" target="_blank"> <a-icon type="question-circle-o" /></a></span>
           <a-input
-            placeholder="请输入被@人手机号"
+            placeholder="请输入被@人手机号或钉钉号"
             type="textarea"
             v-if="this.notifyTypeValue === '1'"
             v-decorator="[
               'ats',
-              {rules: [{ required: true, message: '请输入被@人手机号', whitespace: true}]}
+              {rules: [{ required: false, message: '请输入被@人手机号或钉钉号', whitespace: true}]}
             ]" />
         </a-form-item>
         <a-form-item
@@ -192,7 +192,7 @@
             v-if="this.notifyTypeValue === '4'"
             v-decorator="[
               'ats',
-              {rules: [{ required: true, message: '请输入被@人open_id', whitespace: true}]}
+              {rules: [{ required: false, message: '请输入被@人open_id', whitespace: true}]}
             ]" />
         </a-form-item>
         <a-form-item
@@ -474,11 +474,11 @@ export default {
       if (this.notifyTypeValue === '1') {
         s =
           '钉钉Url:' + json['webhookUrl'] + ';' +
-          '被@人手机号:' + json['ats'] + ';'
+          '被@人手机号或钉钉号:' + json['ats'] + ';'
       } else if (this.notifyTypeValue === '4') {
         s =
           '飞书Url:' + json['webhookUrl'] + ';' +
-          '被@人用户id:' + json['ats'] + ';'
+          '被@人openid:' + json['ats'] + ';'
       }
       return s
     }

@@ -11,7 +11,7 @@ import java.util.List;
 @Data
 public class DingDingAttribute {
 
-    private String dingDingUrl;
+    private String webhookUrl;
 
     private List<String> ats;
 

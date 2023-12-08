@@ -14,7 +14,7 @@ import java.util.List;
 @Data
 public class LarkAttribute {
 
-    private String larkUrl;
+    private String webhookUrl;
 
     private List<String> ats;
 
