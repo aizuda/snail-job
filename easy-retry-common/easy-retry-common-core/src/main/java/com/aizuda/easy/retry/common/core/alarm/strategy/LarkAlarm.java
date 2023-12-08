@@ -63,7 +63,7 @@ public class LarkAlarm extends AbstractAlarm<AlarmContext> {
             .card(map).build();
 
         try {
-            HttpRequest post = HttpUtil.createPost(larkAttribute.getLarkUrl());
+            HttpRequest post = HttpUtil.createPost(larkAttribute.getWebhookUrl());
             HttpRequest request = post.body(JsonUtil.toJsonString(builder), ContentType.JSON.toString());
             HttpResponse execute = request.execute();
             LogUtils.debug(log, JsonUtil.toJsonString(execute));

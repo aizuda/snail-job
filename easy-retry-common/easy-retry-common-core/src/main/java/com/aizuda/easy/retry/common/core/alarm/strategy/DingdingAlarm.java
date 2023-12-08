@@ -26,7 +26,7 @@ public class DingdingAlarm extends AbstractAlarm<AlarmContext> {
 
         DingDingAttribute dingDingAttribute = JsonUtil.parseObject(context.getNotifyAttribute(), DingDingAttribute.class);
         threadPoolExecutor.execute(() ->
-                DingDingUtils.sendMessage(DingDingUtils.buildSendRequest(context.getTitle(), context.getText(),dingDingAttribute.getAts(),dingDingAttribute.isAtAll()), dingDingAttribute.getDingDingUrl()));
+                DingDingUtils.sendMessage(DingDingUtils.buildSendRequest(context.getTitle(), context.getText(),dingDingAttribute.getAts(),dingDingAttribute.isAtAll()), dingDingAttribute.getWebhookUrl()));
 
         return true;
     }
@@ -34,7 +34,7 @@ public class DingdingAlarm extends AbstractAlarm<AlarmContext> {
     @Override
     public boolean syncSendMessage(AlarmContext context) {
         DingDingAttribute dingDingAttribute = JsonUtil.parseObject(context.getNotifyAttribute(), DingDingAttribute.class);
-        return DingDingUtils.sendMessage(DingDingUtils.buildSendRequest(context.getTitle(), context.getText(),dingDingAttribute.getAts(),dingDingAttribute.isAtAll()), dingDingAttribute.getDingDingUrl());
+        return DingDingUtils.sendMessage(DingDingUtils.buildSendRequest(context.getTitle(), context.getText(),dingDingAttribute.getAts(),dingDingAttribute.isAtAll()), dingDingAttribute.getWebhookUrl());
     }
 
     @Override
