@@ -163,14 +163,14 @@
             ]" />
         </a-form-item>
         <a-form-item v-if="this.notifyTypeValue === '1'">
-          <span slot="label">被@人手机号&nbsp;<a :href="officialWebsite + '/pages/32e4a0/#被@人手机号是何物' +''" target="_blank"> <a-icon type="question-circle-o" /></a></span>
+          <span slot="label">被@人手机号或钉钉号&nbsp;<a :href="officialWebsite + '/pages/32e4a0/#被@人手机号是何物' +''" target="_blank"> <a-icon type="question-circle-o" /></a></span>
           <a-input
-            placeholder="请输入被@负责人手机号"
+            placeholder="请输入被@人手机号或钉钉号"
             type="textarea"
             v-if="this.notifyTypeValue === '1'"
             v-decorator="[
               'ats',
-              {rules: [{ required: true, message: '请输入被@人手机号', whitespace: true}]}
+              {rules: [{ required: true, message: '请输入被@人手机号或钉钉号', whitespace: true}]}
             ]" />
         </a-form-item>
         <a-form-item
@@ -211,6 +211,7 @@
           label="密码">
           <a-input
             placeholder="请输入密码"
+            type="password"
             v-if="this.notifyTypeValue === '2'"
             v-decorator="[
               'pass',
@@ -384,7 +385,9 @@ export default {
         if (this.formType === 'edit') {
           const formData = pick(JSON.parse(this.notifyAttribute), ['webhookUrl', 'ats', 'user', 'pass', 'host', 'port', 'from', 'tos'])
           this.notifyAttributeForm.getFieldDecorator(`webhookUrl`, { initialValue: formData.webhookUrl, preserve: true })
-          this.notifyAttributeForm.getFieldDecorator(`ats`, { initialValue: formData.ats.join(','), preserve: true })
+          if (formData.ats) {
+            this.notifyAttributeForm.getFieldDecorator(`ats`, { initialValue: formData.ats.join(','), preserve: true })
+          }
           this.notifyAttributeForm.getFieldDecorator(`user`, { initialValue: formData.user, preserve: true })
           this.notifyAttributeForm.getFieldDecorator(`pass`, { initialValue: formData.pass, preserve: true })
           this.notifyAttributeForm.getFieldDecorator(`host`, { initialValue: formData.host, preserve: true })

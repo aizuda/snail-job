@@ -211,6 +211,7 @@
           label="密码">
           <a-input
             placeholder="请输入密码"
+            type="password"
             v-if="this.notifyTypeValue === '2'"
             v-decorator="[
               'pass',
@@ -384,7 +385,9 @@ export default {
         if (this.formType === 'edit') {
           const formData = pick(JSON.parse(this.notifyAttribute), ['webhookUrl', 'ats', 'user', 'pass', 'host', 'port', 'from', 'tos'])
           this.notifyAttributeForm.getFieldDecorator(`webhookUrl`, { initialValue: formData.webhookUrl, preserve: true })
-          this.notifyAttributeForm.getFieldDecorator(`ats`, { initialValue: formData.ats.join(','), preserve: true })
+          if (formData.ats) {
+            this.notifyAttributeForm.getFieldDecorator(`ats`, { initialValue: formData.ats.join(','), preserve: true })
+          }
           this.notifyAttributeForm.getFieldDecorator(`user`, { initialValue: formData.user, preserve: true })
           this.notifyAttributeForm.getFieldDecorator(`pass`, { initialValue: formData.pass, preserve: true })
           this.notifyAttributeForm.getFieldDecorator(`host`, { initialValue: formData.host, preserve: true })

@@ -80,7 +80,7 @@ public class JobTaskFailAlarmListener extends AbstractJobAlarm<JobTaskFailAlarmE
     @Override
     protected AlarmContext buildAlarmContext(JobAlarmInfo alarmDTO, NotifyConfigInfo notifyConfig) {
         // 预警
-        AlarmContext context = AlarmContext.build()
+        return AlarmContext.build()
                 .text(jobTaskFailTextMessagesFormatter,
                         EnvironmentUtils.getActiveProfile(),
                         alarmDTO.getGroupName(),
@@ -90,10 +90,6 @@ public class JobTaskFailAlarmListener extends AbstractJobAlarm<JobTaskFailAlarmE
                         DateUtils.toNowFormat(DateUtils.NORM_DATETIME_PATTERN))
                 .title("{}环境 JOB任务失败", EnvironmentUtils.getActiveProfile())
                 .notifyAttribute(notifyConfig.getNotifyAttribute());
-        Alarm<AlarmContext> alarmType = easyRetryAlarmFactory.getAlarmType(notifyConfig.getNotifyType());
-        alarmType.asyncSendMessage(context);
-
-        return context;
     }
 
     @Override
