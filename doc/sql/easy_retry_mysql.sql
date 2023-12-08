@@ -283,7 +283,7 @@ CREATE TABLE `job`
     `args_str`         text                         DEFAULT NULL COMMENT '执行方法参数',
     `args_type`        tinyint(4)          NOT NULL DEFAULT '1' COMMENT '参数类型 ',
     `next_trigger_at`  bigint(13)          NOT NULL COMMENT '下次触发时间',
-    `job_status`       tinyint(4)          NOT NULL DEFAULT '1' COMMENT '重试状态 0、关闭、1、开启',
+    `job_status`       tinyint(4)          NOT NULL DEFAULT '1' COMMENT '任务状态 0、关闭、1、开启',
     `task_type`        tinyint(4)          NOT NULL DEFAULT '1' COMMENT '任务类型 1、集群 2、广播 3、切片',
     `route_key`        tinyint(4)          NOT NULL DEFAULT '4' COMMENT '路由策略',
     `executor_type`    tinyint(4)          NOT NULL DEFAULT '1' COMMENT '执行器类型',

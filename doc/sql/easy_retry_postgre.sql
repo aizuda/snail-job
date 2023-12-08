@@ -1,8 +1,31 @@
 -- PostgreSQL DDL
 
+CREATE TABLE namespace
+(
+    id          BIGSERIAL PRIMARY KEY,
+    name        VARCHAR(64)  NOT NULL,
+    unique_id   VARCHAR(64)  NOT NULL,
+    description VARCHAR(256) NOT NULL DEFAULT '',
+    create_dt   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_dt   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted     SMALLINT     NOT NULL DEFAULT 0
+);
+
+CREATE UNIQUE INDEX uk_namespace_unique_id ON namespace (unique_id);
+
+COMMENT ON COLUMN namespace.id IS '主键';
+COMMENT ON COLUMN namespace.name IS '名称';
+COMMENT ON COLUMN namespace.unique_id IS '唯一id';
+COMMENT ON COLUMN namespace.description IS '描述';
+COMMENT ON COLUMN namespace.create_dt IS '创建时间';
+COMMENT ON COLUMN namespace.update_dt IS '修改时间';
+COMMENT ON COLUMN namespace.deleted IS '逻辑删除 1、删除';
+COMMENT ON TABLE namespace IS '命名空间';
+
 CREATE TABLE group_config
 (
     id                BIGSERIAL PRIMARY KEY,
+    namespace_id      VARCHAR(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
     group_name        VARCHAR(64)  NOT NULL,
     description       VARCHAR(256) NOT NULL,
     group_status      SMALLINT     NOT NULL DEFAULT 0,
@@ -15,9 +38,10 @@ CREATE TABLE group_config
     update_dt         TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE UNIQUE INDEX "uk_name_group_config" ON "group_config" ("group_name");
+CREATE UNIQUE INDEX "uk_namespace_id_group_name_group_config" ON "group_config" ("namespace_id", "group_name");
 
 COMMENT ON COLUMN "group_config"."id" IS '主键';
+COMMENT ON COLUMN "group_config"."namespace_id" IS '命名空间';
 COMMENT ON COLUMN "group_config"."group_name" IS '组名称';
 COMMENT ON COLUMN "group_config"."description" IS '组描述';
 COMMENT ON COLUMN "group_config"."group_status" IS '组状态 0、未启用 1、启用';
@@ -32,25 +56,27 @@ COMMENT ON TABLE "group_config" IS '组配置';
 
 CREATE TABLE notify_config
 (
-    id               BIGSERIAL PRIMARY KEY,
-    group_name       VARCHAR(64)  NOT NULL,
-    scene_name       VARCHAR(64)  NOT NULL,
-    notify_status    SMALLINT  NOT NULL DEFAULT 0,
-    notify_type      SMALLINT     NOT NULL DEFAULT 0,
-    notify_attribute VARCHAR(512) NOT NULL,
-    notify_threshold INT          NOT NULL DEFAULT 0,
-    notify_scene     SMALLINT     NOT NULL DEFAULT 0,
-    rate_limiter_status    SMALLINT  NOT NULL DEFAULT 0,
+    id                     BIGSERIAL PRIMARY KEY,
+    namespace_id           VARCHAR(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
+    group_name             VARCHAR(64)  NOT NULL,
+    scene_name             VARCHAR(64)  NOT NULL,
+    notify_status          SMALLINT     NOT NULL DEFAULT 0,
+    notify_type            SMALLINT     NOT NULL DEFAULT 0,
+    notify_attribute       VARCHAR(512) NOT NULL,
+    notify_threshold       INT          NOT NULL DEFAULT 0,
+    notify_scene           SMALLINT     NOT NULL DEFAULT 0,
+    rate_limiter_status    SMALLINT     NOT NULL DEFAULT 0,
     rate_limiter_threshold INT          NOT NULL DEFAULT 0,
-    description      VARCHAR(256) NOT NULL DEFAULT '',
-    create_dt        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    update_dt        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
+    description            VARCHAR(256) NOT NULL DEFAULT '',
+    create_dt              TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_dt              TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_group_name ON notify_config (group_name);
+CREATE INDEX idx_namespace_id_group_name ON notify_config (namespace_id, group_name);
 
 COMMENT ON COLUMN "notify_config"."id" IS '主键';
 COMMENT ON COLUMN "notify_config"."group_name" IS '组名称';
+COMMENT ON COLUMN "notify_config"."namespace_id" IS '命名空间id';
 COMMENT ON COLUMN "notify_config"."scene_name" IS '场景名称';
 COMMENT ON COLUMN "notify_config"."notify_status" IS '通知状态 0、未启用 1、启用';
 COMMENT ON COLUMN "notify_config"."notify_type" IS '通知类型 1、钉钉 2、邮件 3、企业微信';
@@ -69,6 +95,7 @@ CREATE TABLE retry_dead_letter_0
 (
     id            BIGSERIAL PRIMARY KEY,
     unique_id     VARCHAR(64)  NOT NULL,
+    namespace_id  VARCHAR(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
     group_name    VARCHAR(64)  NOT NULL,
     scene_name    VARCHAR(64)  NOT NULL,
     idempotent_id VARCHAR(64)  NOT NULL,
@@ -80,16 +107,17 @@ CREATE TABLE retry_dead_letter_0
     create_dt     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE UNIQUE INDEX "uk_name_unique_id_retry_dead_letter" ON "retry_dead_letter_0" ("group_name", "unique_id");
-CREATE INDEX "idx_group_name_scene_name_retry_dead_letter" ON "retry_dead_letter_0" ("group_name", "scene_name");
+CREATE UNIQUE INDEX "uk_namespace_id_group_name_unique_id_retry_dead_letter" ON "retry_dead_letter_0" ("namespace_id", "group_name", "unique_id");
+CREATE INDEX "idx_namespace_id_group_name_scene_name_retry_dead_letter" ON "retry_dead_letter_0" ("namespace_id", "group_name", "scene_name");
 CREATE INDEX "idx_idempotent_id_retry_dead_letter" ON "retry_dead_letter_0" ("idempotent_id");
 CREATE INDEX "idx_biz_no_retry_dead_letter" ON "retry_dead_letter_0" ("biz_no");
 CREATE INDEX "idx_create_dt_retry_dead_letter" ON "retry_dead_letter_0" ("create_dt");
 
 COMMENT ON COLUMN "retry_dead_letter_0"."id" IS '主键';
 COMMENT ON COLUMN "retry_dead_letter_0"."unique_id" IS '同组下id唯一';
+COMMENT ON COLUMN "retry_dead_letter_0"."namespace_id" IS '命名空间id';
 COMMENT ON COLUMN "retry_dead_letter_0"."group_name" IS '组名称';
-COMMENT ON COLUMN "retry_dead_letter_0"."scene_name" IS '场景id';
+COMMENT ON COLUMN "retry_dead_letter_0"."scene_name" IS '场景名称';
 COMMENT ON COLUMN "retry_dead_letter_0"."idempotent_id" IS '幂等id';
 COMMENT ON COLUMN "retry_dead_letter_0"."biz_no" IS '业务编号';
 COMMENT ON COLUMN "retry_dead_letter_0"."executor_name" IS '执行器名称';
@@ -103,6 +131,7 @@ CREATE TABLE retry_task_0
 (
     id              BIGSERIAL PRIMARY KEY,
     unique_id       VARCHAR(64)  NOT NULL,
+    namespace_id    VARCHAR(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
     group_name      VARCHAR(64)  NOT NULL,
     scene_name      VARCHAR(64)  NOT NULL,
     idempotent_id   VARCHAR(64)  NOT NULL,
@@ -118,15 +147,16 @@ CREATE TABLE retry_task_0
     update_dt       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE UNIQUE INDEX "uk_name_unique_id_retry_task" ON "retry_task_0" ("group_name", "unique_id");
-CREATE INDEX "idx_group_name_scene_name_retry_task" ON "retry_task_0" ("group_name", "scene_name");
-CREATE INDEX "idx_retry_status_retry_task" ON "retry_task_0" ("retry_status");
+CREATE UNIQUE INDEX "uk_name_unique_id_retry_task" ON "retry_task_0" ("namespace_id", "group_name", "unique_id");
+CREATE INDEX "idx_namespace_id_group_name_scene_name_retry_task" ON "retry_task_0" ("namespace_id", "group_name", "scene_name");
+CREATE INDEX "idx_namespace_id_group_name_retry_status_retry_task" ON "retry_task_0" (namespace_id, group_name, "retry_status");
 CREATE INDEX "idx_idempotent_id_retry_task" ON "retry_task_0" ("idempotent_id");
 CREATE INDEX "idx_biz_no_retry_task" ON "retry_task_0" ("biz_no");
 CREATE INDEX "idx_create_dt_retry_task" ON "retry_task_0" ("create_dt");
 
 COMMENT ON COLUMN "retry_task_0"."id" IS '主键';
 COMMENT ON COLUMN "retry_task_0"."unique_id" IS '同组下id唯一';
+COMMENT ON COLUMN "retry_task_0"."namespace_id" IS '命名空间id';
 COMMENT ON COLUMN "retry_task_0"."group_name" IS '组名称';
 COMMENT ON COLUMN "retry_task_0"."scene_name" IS '场景名称';
 COMMENT ON COLUMN "retry_task_0"."idempotent_id" IS '幂等id';
@@ -146,6 +176,7 @@ CREATE TABLE retry_task_log
 (
     id            BIGSERIAL PRIMARY KEY,
     unique_id     VARCHAR(64)  NOT NULL,
+    namespace_id  VARCHAR(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
     group_name    VARCHAR(64)  NOT NULL,
     scene_name    VARCHAR(64)  NOT NULL,
     idempotent_id VARCHAR(64)  NOT NULL,
@@ -158,14 +189,15 @@ CREATE TABLE retry_task_log
     create_dt     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX "idx_group_name_scene_name_retry_task_log" ON "retry_task_log" ("group_name", "scene_name");
+CREATE INDEX "idx_group_name_scene_name_retry_task_log" ON "retry_task_log" ("namespace_id", "group_name", "scene_name");
 CREATE INDEX "idx_retry_status_retry_task_log" ON "retry_task_log" ("retry_status");
 CREATE INDEX "idx_idempotent_id_retry_task_log" ON "retry_task_log" ("idempotent_id");
-CREATE INDEX "idx_unique_id" ON "retry_task_log" ("unique_id");
+CREATE INDEX "idx_unique_id" ON "retry_task_log" ("namespace_id", "group_name", "unique_id");
 CREATE INDEX "idx_biz_no_retry_task_log" ON "retry_task_log" ("biz_no");
 CREATE INDEX "idx_create_dt_retry_task_log" ON "retry_task_log" ("create_dt");
 
 COMMENT ON COLUMN "retry_task_log"."id" IS '主键';
+COMMENT ON COLUMN "retry_task_log"."namespace_id" IS '命名空间id';
 COMMENT ON COLUMN "retry_task_log"."unique_id" IS '同组下id唯一';
 COMMENT ON COLUMN "retry_task_log"."group_name" IS '组名称';
 COMMENT ON COLUMN "retry_task_log"."scene_name" IS '场景名称';
@@ -181,17 +213,19 @@ COMMENT ON TABLE "retry_task_log" IS '任务日志基础信息表';
 
 CREATE TABLE retry_task_log_message
 (
-    id          BIGSERIAL PRIMARY KEY,
-    group_name  VARCHAR(64) NOT NULL,
-    unique_id   VARCHAR(64) NOT NULL,
-    create_dt   TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    message     TEXT        NOT NULL,
-    client_info VARCHAR(128)         DEFAULT NULL
+    id           BIGSERIAL PRIMARY KEY,
+    namespace_id VARCHAR(64) NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
+    group_name   VARCHAR(64) NOT NULL,
+    unique_id    VARCHAR(64) NOT NULL,
+    create_dt    TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    message      TEXT        NOT NULL,
+    client_info  VARCHAR(128)         DEFAULT NULL
 );
 
-CREATE INDEX "idx_group_name_unique_id" ON "retry_task_log_message" ("group_name", "unique_id");
+CREATE INDEX "idx_namespace_id_group_name_unique_id" ON "retry_task_log_message" ("namespace_id", "group_name", "unique_id");
 CREATE INDEX "idx_create_dt" ON "retry_task_log_message" ("create_dt");
 COMMENT ON COLUMN "retry_task_log_message"."id" IS '主键';
+COMMENT ON COLUMN "retry_task_log_message"."namespace_id" IS '命名空间';
 COMMENT ON COLUMN "retry_task_log_message"."group_name" IS '组名称';
 COMMENT ON COLUMN "retry_task_log_message"."unique_id" IS '同组下id唯一';
 COMMENT ON COLUMN "retry_task_log_message"."create_dt" IS '创建时间';
@@ -202,6 +236,7 @@ COMMENT ON TABLE "retry_task_log_message" IS '任务调度日志信息记录表'
 CREATE TABLE scene_config
 (
     id               BIGSERIAL PRIMARY KEY,
+    namespace_id     VARCHAR(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
     scene_name       VARCHAR(64)  NOT NULL,
     group_name       VARCHAR(64)  NOT NULL,
     scene_status     SMALLINT     NOT NULL DEFAULT 0,
@@ -216,8 +251,9 @@ CREATE TABLE scene_config
     update_dt        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE UNIQUE INDEX "uk_group_name_scene_name" ON "scene_config" ("group_name","scene_name");
+CREATE UNIQUE INDEX "uk_namespace_id_group_name_scene_name" ON "scene_config" ("namespace_id", "group_name","scene_name");
 COMMENT ON COLUMN "scene_config"."id" IS '主键';
+COMMENT ON COLUMN "scene_config"."namespace_id" IS '命名空间id';
 COMMENT ON COLUMN "scene_config"."scene_name" IS '场景名称';
 COMMENT ON COLUMN "scene_config"."group_name" IS '组名称';
 COMMENT ON COLUMN "scene_config"."scene_status" IS '组状态 0、未启用 1、启用';
@@ -235,6 +271,7 @@ COMMENT ON TABLE "scene_config" IS '场景配置';
 CREATE TABLE server_node
 (
     id           BIGSERIAL PRIMARY KEY,
+    namespace_id VARCHAR(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
     group_name   VARCHAR(64)  NOT NULL,
     host_id      VARCHAR(64)  NOT NULL,
     host_ip      VARCHAR(64)  NOT NULL,
@@ -242,15 +279,18 @@ CREATE TABLE server_node
     host_port    INT          NOT NULL,
     expire_at    TIMESTAMP    NOT NULL,
     node_type    SMALLINT     NOT NULL,
-    ext_attrs VARCHAR(256) DEFAULT '',
+    ext_attrs    VARCHAR(256)          DEFAULT '',
     create_dt    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_dt    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE UNIQUE INDEX "uk_host_id_host_ip" ON "server_node" ("host_id","host_ip");
 CREATE INDEX "idx_expire_at_node_type" ON "server_node" ("expire_at","node_type");
+CREATE INDEX "idx_namespace_id_group_name_server_node" ON "server_node" ("namespace_id", "group_name");
+
 COMMENT ON COLUMN "server_node"."id" IS '主键';
 COMMENT ON COLUMN "server_node"."group_name" IS '组名称';
+COMMENT ON COLUMN "server_node"."namespace_id" IS '命名空间id';
 COMMENT ON COLUMN "server_node"."host_id" IS '主机id';
 COMMENT ON COLUMN "server_node"."host_ip" IS '机器ip';
 COMMENT ON COLUMN "server_node"."context_path" IS '客户端上下文路径 server.servlet.context-path';
@@ -311,14 +351,16 @@ VALUES ('admin', '465c194afb65670f38322df087f0a9bb225cc257e43eb4ac5a0c98ef5b3173
 CREATE TABLE system_user_permission
 (
     id             BIGSERIAL PRIMARY KEY,
+    namespace_id   VARCHAR(64) NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
     group_name     VARCHAR(64) NOT NULL,
     system_user_id BIGINT      NOT NULL,
     create_dt      TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_dt      TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE UNIQUE INDEX "uk_group_name_system_user_id" ON "system_user_permission" ("group_name","system_user_id");
+CREATE UNIQUE INDEX "uk_namespace_id_group_name_system_user_id" ON "system_user_permission" ("namespace_id","group_name","system_user_id");
 COMMENT ON COLUMN "system_user_permission"."id" IS '主键';
+COMMENT ON COLUMN "system_user_permission"."namespace_id" IS '命名空间id';
 COMMENT ON COLUMN "system_user_permission"."group_name" IS '组名称';
 COMMENT ON COLUMN "system_user_permission"."system_user_id" IS '系统用户id';
 COMMENT ON COLUMN "system_user_permission"."create_dt" IS '创建时间';
@@ -328,15 +370,18 @@ COMMENT ON TABLE "system_user_permission" IS '系统用户权限表';
 
 CREATE TABLE sequence_alloc
 (
-    id         BIGSERIAL PRIMARY KEY,
-    group_name VARCHAR(64) NOT NULL DEFAULT '',
-    max_id     BIGINT      NOT NULL DEFAULT 1,
-    step       INT         NOT NULL DEFAULT 100,
-    update_dt  TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP
+    id           BIGSERIAL PRIMARY KEY,
+    namespace_id VARCHAR(64) NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
+    group_name   VARCHAR(64) NOT NULL DEFAULT '',
+    max_id       BIGINT      NOT NULL DEFAULT 1,
+    step         INT         NOT NULL DEFAULT 100,
+    update_dt    TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE UNIQUE INDEX "uk_group_name" ON "sequence_alloc" ("group_name");
+CREATE UNIQUE INDEX "uk_namespace_id_group_name" ON "sequence_alloc" ("namespace_id", "group_name");
+
 COMMENT ON COLUMN "sequence_alloc"."id" IS '主键';
+COMMENT ON COLUMN "sequence_alloc"."namespace_id" IS '命名空间id';
 COMMENT ON COLUMN "sequence_alloc"."group_name" IS '组名称';
 COMMENT ON COLUMN "sequence_alloc"."max_id" IS '最大id';
 COMMENT ON COLUMN "sequence_alloc"."step" IS '步长';
@@ -347,6 +392,7 @@ COMMENT ON TABLE "sequence_alloc" IS '号段模式序号ID分配表';
 CREATE TABLE job
 (
     id               BIGSERIAL PRIMARY KEY,
+    namespace_id     VARCHAR(64) NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
     group_name       VARCHAR(64)  NOT NULL,
     job_name         VARCHAR(64)  NOT NULL,
     args_str         TEXT         NOT NULL,
@@ -373,11 +419,12 @@ CREATE TABLE job
     deleted          SMALLINT     NOT NULL DEFAULT 0
 );
 
-CREATE INDEX "idx_group_name_to_job" ON "job" ("group_name");
+CREATE INDEX "idx_namespace_id_group_name_job" ON "job" ("namespace_id", "group_name");
 CREATE INDEX "idx_job_status_bucket_index_job" ON "job" ("job_status", "bucket_index");
 CREATE INDEX "idx_create_dt_job" ON "job" ("create_dt");
 
 COMMENT ON COLUMN "job"."id" IS '主键';
+COMMENT ON COLUMN "job"."namespace_id" IS '命名空间id';
 COMMENT ON COLUMN "job"."group_name" IS '组名称';
 COMMENT ON COLUMN "job"."job_name" IS '名称';
 COMMENT ON COLUMN "job"."args_str" IS '执行方法参数';
@@ -407,6 +454,7 @@ COMMENT ON TABLE "job" IS '任务信息';
 CREATE TABLE job_log_message
 (
     id            BIGSERIAL PRIMARY KEY,
+    namespace_id  VARCHAR(64) NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
     group_name    VARCHAR(64) NOT NULL,
     job_id        BIGINT      NOT NULL,
     task_batch_id BIGINT      NOT NULL,
@@ -416,10 +464,12 @@ CREATE TABLE job_log_message
     create_dt     TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX "idx_group_name_to_job_log_message" ON "job_log_message" ("group_name");
+CREATE INDEX "idx_namespace_id_group_name_to_job_log_message" ON "job_log_message" ("namespace_id", "group_name");
 CREATE INDEX "idx_task_batch_id_task_id_to_job_log_message" ON "job_log_message" ("task_batch_id", "task_id");
 CREATE INDEX "idx_create_dt_to_job_log_message" ON "job_log_message" ("create_dt");
+
 COMMENT ON COLUMN "job_log_message"."id" IS '主键';
+COMMENT ON COLUMN "job_log_message"."namespace_id" IS '命名空间id';
 COMMENT ON COLUMN "job_log_message"."group_name" IS '组名称';
 COMMENT ON COLUMN "job_log_message"."job_id" IS '任务信息id';
 COMMENT ON COLUMN "job_log_message"."task_batch_id" IS '任务批次id';
@@ -432,6 +482,7 @@ COMMENT ON TABLE "job_log_message" IS '调度日志';
 CREATE TABLE job_task
 (
     id             BIGSERIAL PRIMARY KEY,
+    namespace_id   VARCHAR(64) NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
     group_name     VARCHAR(64) NOT NULL,
     job_id         BIGINT      NOT NULL,
     task_batch_id  BIGINT      NOT NULL,
@@ -448,10 +499,11 @@ CREATE TABLE job_task
 );
 
 
-CREATE INDEX "idx_group_name_to_job_task" ON "job_task" ("group_name");
+CREATE INDEX "idx_namespace_id_group_name_to_job_task" ON "job_task" ("namespace_id", "group_name");
 CREATE INDEX "idx_task_batch_id_task_status_to_job_task" ON "job_task" ("task_batch_id", "task_status");
 CREATE INDEX "idx_create_dt_to_job_task" ON "job_task" ("create_dt");
 COMMENT ON COLUMN "job_task"."id" IS '主键';
+COMMENT ON COLUMN "job_task"."namespace_id" IS '命名空间id';
 COMMENT ON COLUMN "job_task"."group_name" IS '组名称';
 COMMENT ON COLUMN "job_task"."job_id" IS '任务信息id';
 COMMENT ON COLUMN "job_task"."task_batch_id" IS '任务批次id';
@@ -470,6 +522,7 @@ COMMENT ON TABLE "job_task" IS '任务实例';
 CREATE TABLE job_task_batch
 (
     id                BIGSERIAL PRIMARY KEY,
+    namespace_id      VARCHAR(64) NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
     group_name        VARCHAR(64) NOT NULL,
     job_id            BIGINT      NOT NULL,
     parent_id         VARCHAR(64) NOT NULL DEFAULT '',
@@ -482,10 +535,11 @@ CREATE TABLE job_task_batch
     update_dt         TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX "idx_group_name_to_job_task_batch" ON "job_task_batch" ("group_name");
+CREATE INDEX "idx_namespace_id_group_name_to_job_task_batch" ON "job_task_batch" ("namespace_id", "group_name");
 CREATE INDEX "idx_job_id_task_batch_status_to_job_task_batch" ON "job_task_batch" ("job_id", "task_batch_status");
 CREATE INDEX "idx_create_dt_to_job_task_batch" ON "job_task_batch" ("create_dt");
 COMMENT ON COLUMN "job_task_batch"."id" IS '主键';
+COMMENT ON COLUMN "job_task_batch"."namespace_id" IS '命名空间id';
 COMMENT ON COLUMN "job_task_batch"."group_name" IS '组名称';
 COMMENT ON COLUMN "job_task_batch"."job_id" IS '任务信息id';
 COMMENT ON COLUMN "job_task_batch"."task_batch_status" IS '任务批次状态 0、失败 1、成功';
@@ -531,3 +585,68 @@ COMMENT ON COLUMN "job_notify_config"."description" IS '描述';
 COMMENT ON COLUMN "job_notify_config"."create_dt" IS '创建时间';
 COMMENT ON COLUMN "job_notify_config"."update_dt" IS '修改时间';
 COMMENT ON TABLE "job_notify_config" IS '通知配置';
+
+CREATE TABLE retry_summary
+(
+    id            BIGSERIAL PRIMARY KEY,
+    namespace_id  VARCHAR(64) NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
+    group_name    VARCHAR(64) NOT NULL DEFAULT '',
+    scene_name    VARCHAR(50) NOT NULL DEFAULT '',
+    trigger_at    TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    running_num   INT         NOT NULL DEFAULT 0,
+    finish_num    INT         NOT NULL DEFAULT 0,
+    max_count_num INT         NOT NULL DEFAULT 0,
+    suspend_num   INT         NOT NULL DEFAULT 0,
+    create_dt     TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_dt     TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE UNIQUE INDEX uk_scene_name_trigger_at ON retry_summary ("namespace_id", "group_name", "scene_name", "trigger_at");
+
+COMMENT ON COLUMN "retry_summary"."id" IS '主键';
+COMMENT ON COLUMN "retry_summary"."namespace_id" IS '命名空间id';
+COMMENT ON COLUMN "retry_summary"."group_name" IS '组名称';
+COMMENT ON COLUMN "retry_summary"."scene_name" IS '场景名称';
+COMMENT ON COLUMN "retry_summary"."trigger_at" IS '统计时间';
+COMMENT ON COLUMN "retry_summary"."running_num" IS '重试中-日志数量';
+COMMENT ON COLUMN "retry_summary"."finish_num" IS '重试完成-日志数量';
+COMMENT ON COLUMN "retry_summary"."max_count_num" IS '重试到达最大次数-日志数量';
+COMMENT ON COLUMN "retry_summary"."suspend_num" IS '暂停重试-日志数量';
+COMMENT ON COLUMN "retry_summary"."create_dt" IS '创建时间';
+COMMENT ON COLUMN "retry_summary"."update_dt" IS '修改时间';
+COMMENT ON TABLE "retry_summary" IS 'DashBoard_Retry';
+
+CREATE TABLE job_summary
+(
+    id            BIGSERIAL PRIMARY KEY,
+    namespace_id  VARCHAR(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
+    group_name    VARCHAR(64)  NOT NULL DEFAULT '',
+    job_id        BIGINT       NOT NULL,
+    trigger_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    success_num   INT          NOT NULL DEFAULT 0,
+    fail_num      INT          NOT NULL DEFAULT 0,
+    fail_reason   VARCHAR(512) NOT NULL DEFAULT '',
+    stop_num      INT          NOT NULL DEFAULT 0,
+    stop_reason   VARCHAR(512) NOT NULL DEFAULT '',
+    cancel_num    INT          NOT NULL DEFAULT 0,
+    cancel_reason VARCHAR(512) NOT NULL DEFAULT '',
+    create_dt     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_dt     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE UNIQUE INDEX uk_job_id_trigger_at ON job_summary ("job_id", "trigger_at");
+CREATE INDEX idx_namespace_id_group_name_job_id ON job_summary ("namespace_id", "group_name", "job_id");
+
+COMMENT ON COLUMN "job_summary"."id" IS '主键';
+COMMENT ON COLUMN "job_summary"."namespace_id" IS '命名空间id';
+COMMENT ON COLUMN "job_summary"."group_name" IS '组名称';
+COMMENT ON COLUMN "job_summary"."job_id" IS '任务信息id';
+COMMENT ON COLUMN "job_summary"."trigger_at" IS '统计时间';
+COMMENT ON COLUMN "job_summary"."success_num" IS '执行成功-日志数量';
+COMMENT ON COLUMN "job_summary"."fail_num" IS '执行失败-日志数量';
+COMMENT ON COLUMN "job_summary"."fail_reason" IS '失败原因';
+COMMENT ON COLUMN "job_summary"."stop_num" IS '执行失败-日志数量';
+COMMENT ON COLUMN "job_summary"."stop_reason" IS '失败原因';
+COMMENT ON COLUMN "job_summary"."cancel_num" IS '执行失败-日志数量';
+COMMENT ON COLUMN "job_summary"."cancel_reason" IS '失败原因';
+COMMENT ON TABLE "job_summary" IS 'DashBoard_Job';
