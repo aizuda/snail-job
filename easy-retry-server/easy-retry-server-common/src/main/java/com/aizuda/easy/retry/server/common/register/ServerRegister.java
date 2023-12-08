@@ -125,7 +125,7 @@ public class ServerRegister extends AbstractRegister {
         Register register = SpringContext.getBean(ServerRegister.BEAN_NAME, Register.class);
         serverRegisterNode.scheduleAtFixedRate(()->{
             register.register(new RegisterContext());
-        }, 0, DELAY_TIME / 2, TimeUnit.SECONDS);
+        }, 0, DELAY_TIME * 2 / 3, TimeUnit.SECONDS);
 
     }
 
