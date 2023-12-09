@@ -20,7 +20,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/scene-config")
-public class SceneConfigSceneController {
+public class SceneConfigController {
 
     @Autowired
     private SceneConfigService sceneConfigService;

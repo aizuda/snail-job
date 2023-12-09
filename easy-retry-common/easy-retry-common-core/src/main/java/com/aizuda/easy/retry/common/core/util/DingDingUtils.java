@@ -53,8 +53,8 @@ public class DingDingUtils {
         request.setMsgtype("markdown");
         OapiRobotSendRequest.Markdown markdown = new OapiRobotSendRequest.Markdown();
         markdown.setTitle(title);
-        request.setMarkdown(markdown);
         markdown.setText(subTextLength(getAtText(ats, text)));
+        request.setMarkdown(markdown);
 
         OapiRobotSendRequest.At at = new OapiRobotSendRequest.At();
         at.setAtMobiles(ats);
@@ -81,9 +81,10 @@ public class DingDingUtils {
     public static boolean sendMessage(OapiRobotSendRequest request, String url) {
 
         try {
-            if (StrUtil.isNotBlank(url)) {
+            if (StrUtil.isBlank(url)) {
                 return false;
             }
+
             DingTalkClient client = new DefaultDingTalkClient(url);
             client.execute(request);
 

@@ -40,9 +40,10 @@ import java.util.concurrent.TimeUnit;
 public class ReportListener implements Listener<RetryTaskDTO> {
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private static String reportErrorTextMessageFormatter =
-            "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 上报失败</font>  \r\n" +
-                    "> 名称:{}  \r\n" +
-                    "> 时间:{}  \r\n" +
+            "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 异步批量上报异常</font>  \n" +
+                    "> 空间ID:{}  n" +
+                    "> 名称:{}  \n" +
+                    "> 时间:{}  \n" +
                     "> 异常:{}  \n"
             ;
 
@@ -106,20 +107,24 @@ public class ReportListener implements Listener<RetryTaskDTO> {
 
         try {
             ConfigDTO.Notify notifyAttribute = GroupVersionCache.getNotifyAttribute(NotifySceneEnum.CLIENT_REPORT_ERROR.getNotifyScene());
-            if (Objects.nonNull(notifyAttribute)) {
-                AlarmContext context = AlarmContext.build()
-                        .text(reportErrorTextMessageFormatter,
-                                EnvironmentUtils.getActiveProfile(),
-                                EasyRetryProperties.getGroup(),
-                                LocalDateTime.now().format(formatter),
-                                e.getMessage())
-                        .title("上报异常:[{}]", EasyRetryProperties.getGroup())
-                        .notifyAttribute(notifyAttribute.getNotifyAttribute());
-
-                EasyRetryAlarmFactory easyRetryAlarmFactory = SpringContext.getBeanByType(EasyRetryAlarmFactory.class);
-                Alarm<AlarmContext> alarmType = easyRetryAlarmFactory.getAlarmType(notifyAttribute.getNotifyType());
-                alarmType.asyncSendMessage(context);
+            if (Objects.isNull(notifyAttribute)) {
+                return;
             }
+
+            EasyRetryProperties properties = SpringContext.CONTEXT.getBean(EasyRetryProperties.class);
+            AlarmContext context = AlarmContext.build()
+                    .text(reportErrorTextMessageFormatter,
+                            EnvironmentUtils.getActiveProfile(),
+                            properties.getNamespace(),
+                            EasyRetryProperties.getGroup(),
+                            LocalDateTime.now().format(formatter),
+                            e.getMessage())
+                    .title("上报异常:[{}]", EasyRetryProperties.getGroup())
+                    .notifyAttribute(notifyAttribute.getNotifyAttribute());
+
+            EasyRetryAlarmFactory easyRetryAlarmFactory = SpringContext.getBeanByType(EasyRetryAlarmFactory.class);
+            Alarm<AlarmContext> alarmType = easyRetryAlarmFactory.getAlarmType(notifyAttribute.getNotifyType());
+            alarmType.asyncSendMessage(context);
         } catch (Exception e1) {
             LogUtils.error(log, "客户端发送组件异常告警失败", e1);
         }

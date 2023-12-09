@@ -42,6 +42,7 @@
                 v-else
                 id="inputNumber"
                 :min="1"
+                :max="maxNotifyThreshold"
                 style="width: -webkit-fill-available"
                 v-decorator="[
                   'notifyThreshold',
@@ -63,8 +64,8 @@
           </a-col>
           <a-col :lg="6" :md="12" :sm="24">
             <a-form-item label="场景">
-              <a-select :disabled="sceneNameDisabled.includes(this.notifySceneValue)" placeholder="请选择场景" v-decorator="['sceneName', { rules: [{ required: !sceneNameDisabled.includes(this.notifySceneValue), message: '请选择场景' }] }]" >
-                <a-select-option v-for="item in sceneList" :value="item.sceneName" :key="item.sceneName">{{ item.sceneName }}</a-select-option>
+              <a-select :disabled="sceneNameDisabled.includes(this.notifySceneValue)" placeholder="请选择场景" v-decorator="['sceneName', { rules: [{ required: !sceneNameDisabled.includes(this.notifySceneValue), message: '请选择场景' }] }]" @select="changeSceneName">
+                <a-select-option v-for="item in sceneList" :value="item.sceneName" :maxRetryCount="item.maxRetryCount" :key="item.sceneName">{{ item.sceneName }}</a-select-option>
               </a-select>
             </a-form-item>
           </a-col>
@@ -321,7 +322,8 @@ export default {
       notifySceneValue: '1',
       rateLimiterStatusValue: '0',
       defaultRateLimiterStatusValue: '0',
-      defaultRateLimiterThreshold: '100'
+      defaultRateLimiterThreshold: '100',
+      maxNotifyThreshold: 999
     }
   },
   beforeCreate () {
@@ -364,6 +366,9 @@ export default {
       getSceneList({ groupName: value }).then((res) => {
         this.sceneList = res.data
       })
+    },
+    changeSceneName (value, option) {
+      this.maxNotifyThreshold = option.data.attrs.maxRetryCount
     },
     changeRateLimiterStatus (rateLimiterStatus) {
       this.rateLimiterStatusValue = rateLimiterStatus
