@@ -1,5 +1,7 @@
 package com.aizuda.easy.retry.common.core.util;
 
+import cn.hutool.core.util.StrUtil;
+import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.dingtalk.api.DefaultDingTalkClient;
 import com.dingtalk.api.DingTalkClient;
@@ -10,7 +12,9 @@ import org.springframework.util.StringUtils;
 
 import java.text.MessageFormat;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author: www.byteblogs.com
@@ -44,18 +48,20 @@ public class DingDingUtils {
      * @param text
      * @return
      */
-    public static OapiRobotSendRequest buildSendRequest(String title, String text, List<String> ats,boolean isAtAll) {
+    public static OapiRobotSendRequest buildSendRequest(String title, String text, List<String> ats) {
         OapiRobotSendRequest request = new OapiRobotSendRequest();
         request.setMsgtype("markdown");
         OapiRobotSendRequest.Markdown markdown = new OapiRobotSendRequest.Markdown();
         markdown.setTitle(title);
-        markdown.setText(subTextLength(getAtText(ats,text)));
         request.setMarkdown(markdown);
+        markdown.setText(subTextLength(getAtText(ats, text)));
 
         OapiRobotSendRequest.At at = new OapiRobotSendRequest.At();
         at.setAtMobiles(ats);
-        at.setIsAtAll(isAtAll);
         request.setAt(at);
+        if (!CollectionUtils.isEmpty(ats)) {
+            at.setIsAtAll(ats.stream().map(String::toLowerCase).anyMatch(SystemConstants.AT_ALL::equals));
+        }
         return request;
     }
 
@@ -64,18 +70,18 @@ public class DingDingUtils {
             return text;
         }
         StringBuilder sb = new StringBuilder(text);
-        ats.forEach(at -> sb.append(MessageFormat.format(atLabel, at)));
+        ats.stream().filter(StrUtil::isNotBlank)
+                .forEach(at -> sb.append(MessageFormat.format(atLabel, at)));
         return sb.toString();
     }
 
     /**
-     *
      * @param request
      */
-    public static boolean sendMessage(OapiRobotSendRequest request, String url){
+    public static boolean sendMessage(OapiRobotSendRequest request, String url) {
 
         try {
-            if (StringUtils.isEmpty(url)) {
+            if (StrUtil.isNotBlank(url)) {
                 return false;
             }
             DingTalkClient client = new DefaultDingTalkClient(url);
@@ -83,7 +89,7 @@ public class DingDingUtils {
 
             return true;
         } catch (Exception e) {
-            LogUtils.error(log,"dingDingProcessNotify", e);
+            LogUtils.error(log, "dingDingProcessNotify", e);
         }
 
         return false;

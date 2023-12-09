@@ -102,7 +102,7 @@
 import { getAllGroupNameList } from '@/api/manage'
 import { STable } from '@/components'
 import { getJobList, jobNameList, jobNotifyConfigPageList } from '@/api/jobApi'
-const enums = require('@/utils/retryEnum')
+const enums = require('@/utils/jobEnum')
 
 export default {
   name: 'JobNotifyList',

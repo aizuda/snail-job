@@ -91,4 +91,9 @@ public interface SystemConstants {
      * 默认名称空间
      */
    String DEFAULT_NAMESPACE = "764d604ec6fc45f68cd92514c40e9e1a";
+
+    /**
+     * AT 所有人
+     */
+   String AT_ALL = "all";
 }

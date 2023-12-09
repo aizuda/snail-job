@@ -153,7 +153,7 @@
     <a-modal :visible="visible" title="添加配置" @ok="handleOk" @cancel="handlerCancel" width="1000px">
       <a-form :form="notifyAttributeForm" @submit="handleSubmit" :body-style="{padding: '0px 0px'}" v-bind="formItemLayout" >
         <a-form-item
-          v-if="this.notifyTypeValue === '1'"
+          v-if="this.tempNotifyTypeValue === '1'"
           label="钉钉URL">
           <a-input
             placeholder="请输入钉钉URL"
@@ -162,19 +162,19 @@
               {rules: [{ required: true, message: '请输入钉钉URL', whitespace: true}]}
             ]" />
         </a-form-item>
-        <a-form-item v-if="this.notifyTypeValue === '1'">
+        <a-form-item v-if="this.tempNotifyTypeValue === '1'">
           <span slot="label">被@人手机号或钉钉号&nbsp;<a :href="officialWebsite + '/pages/32e4a0/#被@人手机号是何物' +''" target="_blank"> <a-icon type="question-circle-o" /></a></span>
           <a-input
             placeholder="请输入被@人手机号或钉钉号"
             type="textarea"
-            v-if="this.notifyTypeValue === '1'"
+            v-if="this.tempNotifyTypeValue === '1'"
             v-decorator="[
               'ats',
-              {rules: [{ required: true, message: '请输入被@人手机号或钉钉号', whitespace: true}]}
+              {rules: [{ required: false, message: '请输入被@人手机号或钉钉号', whitespace: true}]}
             ]" />
         </a-form-item>
         <a-form-item
-          v-if="this.notifyTypeValue === '4'"
+          v-if="this.tempNotifyTypeValue === '4'"
           label="飞书URL">
           <a-input
             placeholder="请输入飞书URL"
@@ -184,56 +184,56 @@
             ]" />
         </a-form-item>
         <a-form-item
-          v-if="this.notifyTypeValue === '4'">
+          v-if="this.tempNotifyTypeValue === '4'">
           <span slot="label">被@负责人用户id&nbsp;<a :href="officialWebsite + '/pages/32e4a0/#被@人open_id是何物' +''" target="_blank"> <a-icon type="question-circle-o" /></a></span>
           <a-input
             placeholder="请输入被@人open_id"
             type="textarea"
-            v-if="this.notifyTypeValue === '4'"
+            v-if="this.tempNotifyTypeValue === '4'"
             v-decorator="[
               'ats',
-              {rules: [{ required: true, message: '请输入被@人open_id', whitespace: true}]}
+              {rules: [{ required: false, message: '请输入被@人open_id', whitespace: true}]}
             ]" />
         </a-form-item>
         <a-form-item
-          v-if="this.notifyTypeValue === '2'"
+          v-if="this.tempNotifyTypeValue === '2'"
           label="用户名">
           <a-input
             placeholder="请输入用户名"
-            v-if="this.notifyTypeValue === '2'"
+            v-if="this.tempNotifyTypeValue === '2'"
             v-decorator="[
               'user',
               {rules: [{ required: true, message: '请输入用户名', whitespace: true}]}
             ]" />
         </a-form-item>
         <a-form-item
-          v-if="this.notifyTypeValue === '2'"
+          v-if="this.tempNotifyTypeValue === '2'"
           label="密码">
           <a-input
             placeholder="请输入密码"
             type="password"
-            v-if="this.notifyTypeValue === '2'"
+            v-if="this.tempNotifyTypeValue === '2'"
             v-decorator="[
               'pass',
               {rules: [{ required: true, message: '请输入密码', whitespace: true}]}
             ]"/>
         </a-form-item>
         <a-form-item
-          v-if="this.notifyTypeValue === '2'"
+          v-if="this.tempNotifyTypeValue === '2'"
           label="SMTP地址">
           <a-input
             placeholder="请输入邮件服务器的SMTP地址"
-            v-if="this.notifyTypeValue === '2'"
+            v-if="this.tempNotifyTypeValue === '2'"
             v-decorator="[
               'host',
               {rules: [{ required: true, message: '请输入邮件服务器的SMTP地址', whitespace: true}]}
             ]"/>
         </a-form-item>
         <a-form-item
-          v-if="this.notifyTypeValue === '2'"
+          v-if="this.tempNotifyTypeValue === '2'"
           label="SMTP端口">
           <a-input
-            v-if="this.notifyTypeValue === '2'"
+            v-if="this.tempNotifyTypeValue === '2'"
             placeholder="请输入邮件服务器的SMTP端口"
             v-decorator="[
               'port',
@@ -241,10 +241,10 @@
             ]"/>
         </a-form-item>
         <a-form-item
-          v-if="this.notifyTypeValue === '2'"
+          v-if="this.tempNotifyTypeValue === '2'"
           label="发件人">
           <a-input
-            v-if="this.notifyTypeValue === '2'"
+            v-if="this.tempNotifyTypeValue === '2'"
             placeholder="请输入发件人"
             v-decorator="[
               'from',
@@ -252,10 +252,10 @@
             ]"/>
         </a-form-item>
         <a-form-item
-          v-if="this.notifyTypeValue === '2'"
+          v-if="this.tempNotifyTypeValue === '2'"
           label="收件人">
           <a-input
-            v-if="this.notifyTypeValue === '2'"
+            v-if="this.tempNotifyTypeValue === '2'"
             placeholder="请输入收件人"
             v-decorator="[
               'tos',
@@ -312,6 +312,7 @@ export default {
       visible: false,
       count: 0,
       notifyTypeValue: '1',
+      tempNotifyTypeValue: '1',
       notifyAttribute: '',
       notifyThresholdDisabled: ['1'],
       sceneNameDisabled: ['3', '4'],
@@ -348,11 +349,16 @@ export default {
       this.form.resetFields()
     },
     buildNotifyAttribute (formData) {
-      formData.ats = formData.ats && formData.ats.replace(/\s+/g, '').split(',')
+      if (formData.ats) {
+        formData.ats = formData.ats && formData.ats.replace(/\s+/g, '').split(',')
+      }
       return JSON.stringify(formData)
     },
     handleChange (notifyType) {
-      this.notifyTypeValue = notifyType
+      this.tempNotifyTypeValue = notifyType
+      this.form.setFieldsValue({
+        notifyAttribute: ''
+      })
     },
     changeGroup (value) {
       getJobList({ groupName: value }).then((res) => {
@@ -379,10 +385,11 @@ export default {
       }
     },
     handleBlur () {
+      this.notifyAttributeForm.resetFields()
       new Promise((resolve) => {
         setTimeout(resolve, 100)
       }).then(() => {
-        if (this.formType === 'edit') {
+        if (this.formType === 'edit' && this.tempNotifyTypeValue === this.notifyTypeValue) {
           const formData = pick(JSON.parse(this.notifyAttribute), ['webhookUrl', 'ats', 'user', 'pass', 'host', 'port', 'from', 'tos'])
           this.notifyAttributeForm.getFieldDecorator(`webhookUrl`, { initialValue: formData.webhookUrl, preserve: true })
           if (formData.ats) {
@@ -394,7 +401,11 @@ export default {
           this.notifyAttributeForm.getFieldDecorator(`port`, { initialValue: formData.port, preserve: true })
           this.notifyAttributeForm.getFieldDecorator(`from`, { initialValue: formData.from, preserve: true })
           this.notifyAttributeForm.getFieldDecorator(`tos`, { initialValue: formData.tos, preserve: true })
+        } else {
+          this.notifyAttributeForm.getFieldDecorator(`webhookUrl`, { initialValue: '', preserve: true })
+          this.notifyAttributeForm.getFieldDecorator(`ats`, { initialValue: '', preserve: true })
         }
+
         this.visible = !this.visible
       })
     },
@@ -410,6 +421,7 @@ export default {
           form.setFieldsValue({
             notifyAttribute: this.parseJson(formData)
           })
+          this.notifyTypeValue = this.tempNotifyTypeValue
           this.visible = false
         }
       })
@@ -454,6 +466,7 @@ export default {
         formData.rateLimiterStatus = formData.rateLimiterStatus.toString()
         formData.rateLimiterThreshold = formData.rateLimiterThreshold.toString()
         this.notifyTypeValue = formData.notifyType
+        this.tempNotifyTypeValue = formData.notifyType
         this.notifyAttribute = formData.notifyAttribute
         this.notifySceneValue = formData.notifyScene
         this.rateLimiterStatusValue = formData.rateLimiterStatus

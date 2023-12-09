@@ -18,5 +18,4 @@ public class LarkAttribute {
 
     private List<String> ats;
 
-    private boolean isAtAll;
 }

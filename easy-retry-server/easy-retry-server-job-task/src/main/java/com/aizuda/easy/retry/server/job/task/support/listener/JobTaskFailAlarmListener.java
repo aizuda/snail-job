@@ -1,38 +1,25 @@
 package com.aizuda.easy.retry.server.job.task.support.listener;
 
-import com.aizuda.easy.retry.common.core.alarm.Alarm;
 import com.aizuda.easy.retry.common.core.alarm.AlarmContext;
 import com.aizuda.easy.retry.common.core.alarm.EasyRetryAlarmFactory;
 import com.aizuda.easy.retry.common.core.enums.JobNotifySceneEnum;
-import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.util.EnvironmentUtils;
-import com.aizuda.easy.retry.common.core.util.HostUtils;
 import com.aizuda.easy.retry.server.common.AlarmInfoConverter;
-import com.aizuda.easy.retry.server.common.Lifecycle;
 import com.aizuda.easy.retry.server.common.alarm.AbstractJobAlarm;
 import com.aizuda.easy.retry.server.common.dto.JobAlarmInfo;
 import com.aizuda.easy.retry.server.common.dto.NotifyConfigInfo;
-import com.aizuda.easy.retry.server.common.triple.ImmutableTriple;
-import com.aizuda.easy.retry.server.common.triple.Triple;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.server.job.task.support.event.JobTaskFailAlarmEvent;
 import com.aizuda.easy.retry.template.datasource.persistence.dataobject.JobBatchResponseDO;
-import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobNotifyConfigMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskBatchMapper;
-import com.aizuda.easy.retry.template.datasource.persistence.po.*;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
-import java.time.LocalDateTime;
-import java.util.*;
+import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.stream.Collectors;
 
 
 /**
@@ -49,16 +36,14 @@ public class JobTaskFailAlarmListener extends AbstractJobAlarm<JobTaskFailAlarmE
     @Autowired
     private JobTaskBatchMapper jobTaskBatchMapper;
 
-    @Autowired
-    private EasyRetryAlarmFactory easyRetryAlarmFactory;
-
     /**
      * job任务失败数据
      */
     private LinkedBlockingQueue<Long> queue = new LinkedBlockingQueue<>(1000);
 
     private static String jobTaskFailTextMessagesFormatter =
-            "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 Job任务执行失败</font>  \n" +
+            "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 Job任务执行失败</font> \n" +
+                    "> 空间ID:{}  \n" +
                     "> 组名称:{}  \n" +
                     "> 任务名称:{}  \n" +
                     "> 执行器名称:{}  \n" +
@@ -83,6 +68,7 @@ public class JobTaskFailAlarmListener extends AbstractJobAlarm<JobTaskFailAlarmE
         return AlarmContext.build()
                 .text(jobTaskFailTextMessagesFormatter,
                         EnvironmentUtils.getActiveProfile(),
+                        alarmDTO.getNamespaceId(),
                         alarmDTO.getGroupName(),
                         alarmDTO.getJobName(),
                         alarmDTO.getExecutorInfo(),

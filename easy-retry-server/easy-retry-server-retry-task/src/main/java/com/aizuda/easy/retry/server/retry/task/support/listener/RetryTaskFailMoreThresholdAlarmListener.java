@@ -50,6 +50,7 @@ public class RetryTaskFailMoreThresholdAlarmListener extends
     private LinkedBlockingQueue<RetryTask> queue = new LinkedBlockingQueue<>(1000);
     private static String retryTaskFailMoreThresholdMessagesFormatter =
             "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 重试任务失败数量超过阈值</font>  \n" +
+                    "> 空间ID:{}  \n" +
                     "> 组名称:{}  \n" +
                     "> 执行器名称:{}  \n" +
                     "> 场景名称:{}  \n" +
@@ -82,6 +83,7 @@ public class RetryTaskFailMoreThresholdAlarmListener extends
         // 预警
         return AlarmContext.build().text(retryTaskFailMoreThresholdMessagesFormatter,
                         EnvironmentUtils.getActiveProfile(),
+                        retryAlarmInfo.getNamespaceId(),
                         retryAlarmInfo.getGroupName(),
                         retryAlarmInfo.getExecutorName(),
                         retryAlarmInfo.getSceneName(),
@@ -100,6 +102,6 @@ public class RetryTaskFailMoreThresholdAlarmListener extends
 
     @Override
     protected int getNotifyScene() {
-        return NotifySceneEnum.MAX_RETRY_ERROR.getNotifyScene();
+        return NotifySceneEnum.RETRY_TASK_REACH_THRESHOLD.getNotifyScene();
     }
 }

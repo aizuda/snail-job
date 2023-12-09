@@ -118,6 +118,12 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
                 }
             }
 
+            if (Objects.nonNull(alarmDTO.getCount()) && Objects.nonNull(notifyConfig.getNotifyThreshold())) {
+                 if (notifyConfig.getNotifyThreshold() > alarmDTO.getCount()) {
+                     continue;
+                 }
+            }
+
             AlarmContext context = buildAlarmContext(alarmDTO, notifyConfig);
             Alarm<AlarmContext> alarmType = easyRetryAlarmFactory.getAlarmType(
                     notifyConfig.getNotifyType());
