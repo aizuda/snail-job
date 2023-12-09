@@ -33,7 +33,9 @@ public class EmailAlarm extends AbstractAlarm<AlarmContext> {
         String notifyAttribute = alarmContext.getNotifyAttribute();
         EmailAttribute emailAttribute = JsonUtil.parseObject(notifyAttribute, EmailAttribute.class);
         emailAttribute.setAuth(true);
-        MailUtil.send(emailAttribute, emailAttribute.getTos(), alarmContext.getTitle(), alarmContext.getText(), true);
+        String text = alarmContext.getText();
+        text = text.replaceAll("\n", "<br/>");
+        MailUtil.send(emailAttribute, emailAttribute.getTos(), alarmContext.getTitle(), text, true);
 
         return true;
     }

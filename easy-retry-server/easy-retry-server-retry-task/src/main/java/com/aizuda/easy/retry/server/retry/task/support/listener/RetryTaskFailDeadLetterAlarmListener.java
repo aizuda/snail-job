@@ -55,6 +55,7 @@ public class RetryTaskFailDeadLetterAlarmListener extends AbstractRetryAlarm<Ret
 
     private static String retryTaskDeadTextMessagesFormatter =
             "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 重试任务失败进入死信队列</font>  \n" +
+                    "> 空间ID:{}  \n" +
                     "> 组名称:{}  \n" +
                     "> 执行器名称:{}  \n" +
                     "> 场景名称:{}  \n" +
@@ -85,6 +86,7 @@ public class RetryTaskFailDeadLetterAlarmListener extends AbstractRetryAlarm<Ret
         // 预警
         return AlarmContext.build().text(retryTaskDeadTextMessagesFormatter,
                         EnvironmentUtils.getActiveProfile(),
+                        retryAlarmInfo.getNamespaceId(),
                         retryAlarmInfo.getGroupName(),
                         retryAlarmInfo.getExecutorName(),
                         retryAlarmInfo.getSceneName(),
@@ -102,6 +104,6 @@ public class RetryTaskFailDeadLetterAlarmListener extends AbstractRetryAlarm<Ret
 
     @Override
     protected int getNotifyScene() {
-        return NotifySceneEnum.MAX_RETRY.getNotifyScene();
+        return NotifySceneEnum.RETRY_TASK_ENTER_DEAD_LETTER.getNotifyScene();
     }
 }

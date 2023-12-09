@@ -10,6 +10,8 @@ import com.aizuda.easy.retry.template.datasource.persistence.po.NotifyConfig;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryDeadLetter;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Mappings;
 import org.mapstruct.factory.Mappers;
 
 import java.util.List;
@@ -24,7 +26,15 @@ public interface AlarmInfoConverter {
 
     AlarmInfoConverter INSTANCE = Mappers.getMapper(AlarmInfoConverter.class);
 
+    @Mappings(
+            @Mapping(source = "retryCount", target = "count")
+    )
     List<RetryAlarmInfo> retryTaskToAlarmInfo(List<RetryTask> retryTasks);
+
+    @Mappings(
+            @Mapping(source = "retryCount", target = "count")
+    )
+    RetryAlarmInfo retryTaskToAlarmInfo(RetryTask retryTask);
 
     List<RetryAlarmInfo> deadLetterToAlarmInfo(List<RetryDeadLetter> retryDeadLetters);
 

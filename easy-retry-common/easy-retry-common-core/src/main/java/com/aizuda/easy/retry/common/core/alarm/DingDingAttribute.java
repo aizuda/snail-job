@@ -15,5 +15,4 @@ public class DingDingAttribute {
 
     private List<String> ats;
 
-    private boolean isAtAll;
 }
