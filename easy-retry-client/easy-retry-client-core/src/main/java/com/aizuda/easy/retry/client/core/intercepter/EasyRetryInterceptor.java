@@ -47,10 +47,11 @@ public class EasyRetryInterceptor implements MethodInterceptor, AfterAdvice, Ser
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private static String retryErrorMoreThresholdTextMessageFormatter =
-        "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 重试组件异常</font>  \r\n" +
-            "> 名称:{}  \r\n" +
-            "> 时间:{}  \r\n" +
-            "> 异常:{}  \n";
+            "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 重试组件异常</font>  \n" +
+                    "> 空间ID:{}  \n" +
+                    "> 名称:{}  \n" +
+                    "> 时间:{}  \n" +
+                    "> 异常:{}  \n";
 
     private final StandardEnvironment standardEnvironment;
     private final RetryStrategy retryStrategy;
@@ -199,16 +200,17 @@ public class EasyRetryInterceptor implements MethodInterceptor, AfterAdvice, Ser
 
         try {
             ConfigDTO.Notify notifyAttribute = GroupVersionCache.getNotifyAttribute(
-                NotifySceneEnum.CLIENT_COMPONENT_ERROR.getNotifyScene());
+                    NotifySceneEnum.CLIENT_COMPONENT_ERROR.getNotifyScene());
             if (Objects.nonNull(notifyAttribute)) {
                 AlarmContext context = AlarmContext.build()
-                    .text(retryErrorMoreThresholdTextMessageFormatter,
-                        EnvironmentUtils.getActiveProfile(),
-                        EasyRetryProperties.getGroup(),
-                        LocalDateTime.now().format(formatter),
-                        e.getMessage())
-                    .title("retry component handling exception:[{}]", EasyRetryProperties.getGroup())
-                    .notifyAttribute(notifyAttribute.getNotifyAttribute());
+                        .text(retryErrorMoreThresholdTextMessageFormatter,
+                                EnvironmentUtils.getActiveProfile(),
+                                standardEnvironment.getProperty("easy-retry.namespace", StrUtil.EMPTY),
+                                EasyRetryProperties.getGroup(),
+                                LocalDateTime.now().format(formatter),
+                                e.getMessage())
+                        .title("retry component handling exception:[{}]", EasyRetryProperties.getGroup())
+                        .notifyAttribute(notifyAttribute.getNotifyAttribute());
 
                 Alarm<AlarmContext> alarmType = SpringContext.getBeanByType(EasyRetryAlarmFactory.class).getAlarmType(notifyAttribute.getNotifyType());
                 alarmType.asyncSendMessage(context);

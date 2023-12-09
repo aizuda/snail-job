@@ -40,9 +40,10 @@ import java.util.function.Consumer;
 public abstract class AbstractRetryStrategies implements RetryStrategy {
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private static String retryErrorMoreThresholdTextMessageFormatter =
-            "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 重试组件异常</font>  \r\n" +
-                    "> 名称:{}  \r\n" +
-                    "> 时间:{}  \r\n" +
+            "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 重试期间发生非预期异常</font>  \n" +
+                    "> 空间ID:{}  \n" +
+                    "> 名称:{}  \n" +
+                    "> 时间:{}  \n" +
                     "> 异常:{}  \n"
             ;
 
@@ -52,6 +53,8 @@ public abstract class AbstractRetryStrategies implements RetryStrategy {
     private EasyRetryAlarmFactory easyRetryAlarmFactory;
     @Autowired
     private List<Report> reports;
+    @Autowired
+    private EasyRetryProperties easyRetryProperties;
 
     @Override
     public RetryerResultContext openRetry(String sceneName, String executorClassName, Object[] params) {
@@ -176,6 +179,7 @@ public abstract class AbstractRetryStrategies implements RetryStrategy {
                 AlarmContext context = AlarmContext.build()
                         .text(retryErrorMoreThresholdTextMessageFormatter,
                                 EnvironmentUtils.getActiveProfile(),
+                                easyRetryProperties.getNamespace(),
                                 EasyRetryProperties.getGroup(),
                                 LocalDateTime.now().format(formatter),
                                 e.getMessage())

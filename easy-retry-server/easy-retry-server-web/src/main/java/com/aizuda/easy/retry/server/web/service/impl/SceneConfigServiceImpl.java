@@ -67,7 +67,7 @@ public class SceneConfigServiceImpl implements SceneConfigService {
 
         List<SceneConfig> sceneConfigs = accessTemplate.getSceneConfigAccess()
                 .list(new LambdaQueryWrapper<SceneConfig>()
-                        .select(SceneConfig::getSceneName, SceneConfig::getDescription)
+                        .select(SceneConfig::getSceneName, SceneConfig::getDescription, SceneConfig::getMaxRetryCount)
                         .eq(SceneConfig::getNamespaceId, namespaceId)
                         .eq(SceneConfig::getGroupName, groupName)
                         .orderByDesc(SceneConfig::getCreateDt));
