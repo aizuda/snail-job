@@ -7,6 +7,7 @@ import lombok.Getter;
  *
  * @author: www.byteblogs.com
  * @date : 2021-11-24 18:18
+ * @since : 1.0.0
  */
 @Getter
 public enum NotifySceneEnum {
@@ -19,7 +20,7 @@ public enum NotifySceneEnum {
 
     CLIENT_COMPONENT_ERROR(4,"客户端组件异常", NodeTypeEnum.CLIENT),
 
-    RETRY_TASK_REACH_THRESHOLD(5, "任务重试失败数量超过阈值", NodeTypeEnum.SERVER),
+    RETRY_TASK_REACH_THRESHOLD(5, "任务重试次数超过阈值", NodeTypeEnum.SERVER),
 
     RETRY_TASK_ENTER_DEAD_LETTER(6, "任务重试失败进入死信队列", NodeTypeEnum.SERVER);
 

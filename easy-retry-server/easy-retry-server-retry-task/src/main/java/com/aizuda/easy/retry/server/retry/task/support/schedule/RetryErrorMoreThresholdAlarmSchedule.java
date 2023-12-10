@@ -47,7 +47,8 @@ import java.util.List;
 @Slf4j
 public class RetryErrorMoreThresholdAlarmSchedule extends AbstractSchedule implements Lifecycle {
     private static String retryErrorMoreThresholdTextMessageFormatter =
-            "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 重试失败数据监控</font>  \n" +
+            "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 场景重试失败数量超过{}个</font>  \n" +
+                    "> 空间ID:{}  \n" +
                     "> 组名称:{}  \n" +
                     "> 场景名称:{}  \n" +
                     "> 时间窗口:{} ~ {}  \n" +
@@ -90,11 +91,13 @@ public class RetryErrorMoreThresholdAlarmSchedule extends AbstractSchedule imple
                         between(RetryDeadLetter::getCreateDt, now.minusMinutes(30), now)
                         .eq(RetryDeadLetter::getGroupName, notifyConfigPartitionTask.getGroupName())
                         .eq(RetryDeadLetter::getSceneName, notifyConfigPartitionTask.getSceneName()));
-        if (count > notifyConfigPartitionTask.getNotifyThreshold()) {
+        if (count >= notifyConfigPartitionTask.getNotifyThreshold()) {
             // 预警
             AlarmContext context = AlarmContext.build()
                     .text(retryErrorMoreThresholdTextMessageFormatter,
                             EnvironmentUtils.getActiveProfile(),
+                            count,
+                            notifyConfigPartitionTask.getNamespaceId(),
                             notifyConfigPartitionTask.getGroupName(),
                             notifyConfigPartitionTask.getSceneName(),
                             DateUtils.format(now.minusMinutes(30),

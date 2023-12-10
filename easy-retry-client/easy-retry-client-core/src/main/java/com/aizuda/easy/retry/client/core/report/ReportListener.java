@@ -15,6 +15,7 @@ import com.aizuda.easy.retry.common.core.enums.NotifySceneEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.model.NettyResult;
 import com.aizuda.easy.retry.common.core.util.EnvironmentUtils;
+import com.aizuda.easy.retry.common.core.util.HostUtils;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.common.core.window.Listener;
 import com.aizuda.easy.retry.server.model.dto.ConfigDTO;
@@ -41,7 +42,8 @@ public class ReportListener implements Listener<RetryTaskDTO> {
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private static String reportErrorTextMessageFormatter =
             "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 异步批量上报异常</font>  \n" +
-                    "> 空间ID:{}  n" +
+                    "> IP:{}  \n" +
+                    "> 空间ID:{}  \n" +
                     "> 名称:{}  \n" +
                     "> 时间:{}  \n" +
                     "> 异常:{}  \n"
@@ -50,7 +52,6 @@ public class ReportListener implements Listener<RetryTaskDTO> {
     private static final NettyClient CLIENT = RequestBuilder.<NettyClient, NettyResult>newBuilder()
         .client(NettyClient.class)
         .callback(nettyResult -> LogUtils.info(log, "Data report successfully requestId:[{}]", nettyResult.getRequestId())).build();
-
 
     @Override
     public void handler(List<RetryTaskDTO> list) {
@@ -115,6 +116,7 @@ public class ReportListener implements Listener<RetryTaskDTO> {
             AlarmContext context = AlarmContext.build()
                     .text(reportErrorTextMessageFormatter,
                             EnvironmentUtils.getActiveProfile(),
+                            HostUtils.getIp(),
                             properties.getNamespace(),
                             EasyRetryProperties.getGroup(),
                             LocalDateTime.now().format(formatter),

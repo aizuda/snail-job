@@ -15,6 +15,7 @@ import com.aizuda.easy.retry.common.core.alarm.EasyRetryAlarmFactory;
 import com.aizuda.easy.retry.common.core.enums.NotifySceneEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.util.EnvironmentUtils;
+import com.aizuda.easy.retry.common.core.util.HostUtils;
 import com.aizuda.easy.retry.server.model.dto.ConfigDTO;
 import com.github.rholder.retry.Retryer;
 import com.github.rholder.retry.StopStrategy;
@@ -41,6 +42,7 @@ public abstract class AbstractRetryStrategies implements RetryStrategy {
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private static String retryErrorMoreThresholdTextMessageFormatter =
             "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 重试期间发生非预期异常</font>  \n" +
+                    "> IP:{}  \n" +
                     "> 空间ID:{}  \n" +
                     "> 名称:{}  \n" +
                     "> 时间:{}  \n" +
@@ -179,6 +181,7 @@ public abstract class AbstractRetryStrategies implements RetryStrategy {
                 AlarmContext context = AlarmContext.build()
                         .text(retryErrorMoreThresholdTextMessageFormatter,
                                 EnvironmentUtils.getActiveProfile(),
+                                HostUtils.getIp(),
                                 easyRetryProperties.getNamespace(),
                                 EasyRetryProperties.getGroup(),
                                 LocalDateTime.now().format(formatter),
