@@ -14,6 +14,7 @@ import com.aizuda.easy.retry.server.job.task.support.stop.JobTaskStopFactory;
 import com.aizuda.easy.retry.server.job.task.support.stop.TaskStopJobContext;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
 import com.aizuda.easy.retry.server.web.model.request.JobBatchQueryVO;
+import com.aizuda.easy.retry.server.web.model.request.UserSessionVO;
 import com.aizuda.easy.retry.server.web.model.response.JobBatchResponseVO;
 import com.aizuda.easy.retry.server.web.service.JobBatchService;
 import com.aizuda.easy.retry.server.web.service.convert.JobBatchResponseVOConverter;
@@ -26,9 +27,11 @@ import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTaskBatch;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
+import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.Objects;
@@ -51,6 +54,21 @@ public class JobBatchServiceImpl implements JobBatchService {
 
         PageDTO<JobTaskBatch> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
 
+        UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
+        List<String> groupNames = Lists.newArrayList();
+        if (userSessionVO.isUser()) {
+            groupNames = userSessionVO.getGroupNames();
+        }
+
+        if (StrUtil.isNotBlank(queryVO.getGroupName())) {
+            // 说明当前组不在用户配置的权限中
+            if (!CollectionUtils.isEmpty(groupNames) && !groupNames.contains(queryVO.getGroupName())) {
+                return new PageResult<>(pageDTO, Lists.newArrayList());
+            } else {
+                groupNames = Lists.newArrayList(queryVO.getGroupName());
+            }
+        }
+
         JobBatchQueryDO jobBatchQueryDO = new JobBatchQueryDO();
         if (StrUtil.isNotBlank(queryVO.getJobName())) {
             jobBatchQueryDO.setJobName(queryVO.getJobName() + "%");
@@ -58,8 +76,8 @@ public class JobBatchServiceImpl implements JobBatchService {
 
         jobBatchQueryDO.setJobId(queryVO.getJobId());
         jobBatchQueryDO.setTaskBatchStatus(queryVO.getTaskBatchStatus());
-        jobBatchQueryDO.setGroupName(queryVO.getGroupName());
-        jobBatchQueryDO.setNamespaceId(UserSessionUtils.currentUserSession().getNamespaceId());
+        jobBatchQueryDO.setGroupNames(groupNames);
+        jobBatchQueryDO.setNamespaceId(userSessionVO.getNamespaceId());
         List<JobBatchResponseDO> batchResponseDOList = jobTaskBatchMapper.selectJobBatchPageList(pageDTO, jobBatchQueryDO);
 
         List<JobBatchResponseVO> batchResponseVOList = JobBatchResponseVOConverter.INSTANCE.toJobBatchResponseVOs(

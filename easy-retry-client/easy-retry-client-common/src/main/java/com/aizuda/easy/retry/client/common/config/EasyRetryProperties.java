@@ -24,7 +24,8 @@ import java.util.Objects;
 public class EasyRetryProperties {
 
     /**
-     * 服务端对应的group
+     * 命名空间ID
+     * 若不填则默认为 SystemConstants::DEFAULT_NAMESPACE
      */
     private String namespace;
 

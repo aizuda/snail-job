@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.server.web.service.impl;
 
 import cn.hutool.core.util.StrUtil;
+import com.aizuda.easy.retry.server.web.model.request.UserSessionVO;
 import com.aizuda.easy.retry.server.web.util.UserSessionUtils;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskLogMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskLogMessageMapper;
@@ -8,6 +9,7 @@ import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLog;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLogMessage;
 import com.aizuda.easy.retry.server.web.model.request.RetryTaskLogMessageQueryVO;
 import com.aizuda.easy.retry.server.web.model.response.RetryTaskLogMessageResponseVO;
+import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
@@ -35,10 +37,15 @@ public class RetryTaskLogServiceImpl implements RetryTaskLogService {
     @Override
     public PageResult<List<RetryTaskLogResponseVO>> getRetryTaskLogPage(RetryTaskLogQueryVO queryVO) {
 
-        String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
+        UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
+        String namespaceId = userSessionVO.getNamespaceId();
         PageDTO<RetryTaskLog> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
         LambdaQueryWrapper<RetryTaskLog> retryTaskLogLambdaQueryWrapper = new LambdaQueryWrapper<>();
         retryTaskLogLambdaQueryWrapper.eq(RetryTaskLog::getNamespaceId, namespaceId);
+
+        if (userSessionVO.isUser()) {
+            retryTaskLogLambdaQueryWrapper.in(RetryTaskLog::getGroupName, userSessionVO.getGroupNames());
+        }
 
         if (StrUtil.isNotBlank(queryVO.getGroupName())) {
             retryTaskLogLambdaQueryWrapper.eq(RetryTaskLog::getGroupName, queryVO.getGroupName());

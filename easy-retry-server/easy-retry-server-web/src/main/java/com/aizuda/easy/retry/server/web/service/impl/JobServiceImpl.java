@@ -19,12 +19,14 @@ import com.aizuda.easy.retry.server.web.model.base.PageResult;
 import com.aizuda.easy.retry.server.web.model.request.JobQueryVO;
 import com.aizuda.easy.retry.server.web.model.request.JobRequestVO;
 import com.aizuda.easy.retry.server.web.model.request.JobUpdateJobStatusRequestVO;
+import com.aizuda.easy.retry.server.web.model.request.UserSessionVO;
 import com.aizuda.easy.retry.server.web.model.response.JobResponseVO;
 import com.aizuda.easy.retry.server.web.service.JobService;
 import com.aizuda.easy.retry.server.web.service.convert.JobConverter;
 import com.aizuda.easy.retry.server.web.service.convert.JobResponseVOConverter;
 import com.aizuda.easy.retry.server.web.util.UserSessionUtils;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobMapper;
+import com.aizuda.easy.retry.template.datasource.persistence.po.GroupConfig;
 import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
@@ -58,10 +60,15 @@ public class JobServiceImpl implements JobService {
     public PageResult<List<JobResponseVO>> getJobPage(JobQueryVO queryVO) {
 
         PageDTO<Job> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
-
+        UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
         LambdaQueryWrapper<Job> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Job::getDeleted, StatusEnum.NO.getStatus());
-        queryWrapper.eq(Job::getNamespaceId, UserSessionUtils.currentUserSession().getNamespaceId());
+        queryWrapper.eq(Job::getNamespaceId, userSessionVO.getNamespaceId());
+
+        if (userSessionVO.isUser()) {
+            queryWrapper.in(Job::getGroupName, userSessionVO.getGroupNames());
+        }
+
         if (StrUtil.isNotBlank(queryVO.getGroupName())) {
             queryWrapper.eq(Job::getGroupName, queryVO.getGroupName());
         }
