@@ -30,8 +30,11 @@
       <if test="queryDO.jobId != null">
         and a.job_id = #{queryDO.jobId}
       </if>
-      <if test="queryDO.groupName != null">
-        and a.group_name = #{queryDO.groupName}
+      <if test="queryDO.groupNames != null and queryDO.groupNames.size > 0">
+        and a.group_name IN
+        <foreach collection="queryDO.groupNames" item="groupName"  open="("  separator="," close=")">
+          #{groupName}
+        </foreach>
       </if>
       order by a.id desc
     </where>

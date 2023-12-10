@@ -21,8 +21,12 @@
             useGeneratedKeys="true" keyProperty="id">
         INSERT INTO server_node (group_name, host_id, host_ip, host_port,
                                  expire_at, node_type, ext_attrs, context_path, create_dt)
-        VALUES (#{groupName}, #{hostId}, #{hostIp}, #{hostPort},
-                #{expireAt}, #{nodeType}, #{extAttrs}, #{contextPath}, #{createDt})
+        VALUES
+        <foreach collection="records" item="item" index="index" separator=",">
+            (#{item.namespaceId,jdbcType=VARCHAR}, #{item.groupName,jdbcType=VARCHAR}, #{item.hostId,jdbcType=VARCHAR}, #{item.hostIp,jdbcType=VARCHAR},
+            #{item.hostPort,jdbcType=INTEGER}, #{item.expireAt,jdbcType=TIMESTAMP}, #{item.nodeType,jdbcType=TINYINT},
+            #{item.extAttrs,jdbcType=VARCHAR},  #{item.contextPath,jdbcType=VARCHAR},  #{item.createDt,jdbcType=TIMESTAMP})
+        </foreach>
         ON CONFLICT (host_id, host_ip) DO UPDATE SET expire_at = EXCLUDED.expire_at
 
     </insert>

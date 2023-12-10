@@ -9,6 +9,7 @@ import com.aizuda.easy.retry.server.common.strategy.WaitStrategies;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
 import com.aizuda.easy.retry.server.web.model.request.SceneConfigQueryVO;
 import com.aizuda.easy.retry.server.web.model.request.SceneConfigRequestVO;
+import com.aizuda.easy.retry.server.web.model.request.UserSessionVO;
 import com.aizuda.easy.retry.server.web.model.response.SceneConfigResponseVO;
 import com.aizuda.easy.retry.server.web.service.SceneConfigService;
 import com.aizuda.easy.retry.server.web.service.convert.SceneConfigConverter;
@@ -16,6 +17,7 @@ import com.aizuda.easy.retry.server.web.service.convert.SceneConfigResponseVOCon
 import com.aizuda.easy.retry.server.web.util.UserSessionUtils;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
 import com.aizuda.easy.retry.template.datasource.access.ConfigAccess;
+import com.aizuda.easy.retry.template.datasource.persistence.po.NotifyConfig;
 import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -42,9 +44,15 @@ public class SceneConfigServiceImpl implements SceneConfigService {
     public PageResult<List<SceneConfigResponseVO>> getSceneConfigPageList(SceneConfigQueryVO queryVO) {
         PageDTO<SceneConfig> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
 
-        String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
+        UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
+        String namespaceId = userSessionVO.getNamespaceId();
         LambdaQueryWrapper<SceneConfig> sceneConfigLambdaQueryWrapper = new LambdaQueryWrapper<>();
         sceneConfigLambdaQueryWrapper.eq(SceneConfig::getNamespaceId, namespaceId);
+
+        if (userSessionVO.isUser()) {
+            sceneConfigLambdaQueryWrapper.in(SceneConfig::getGroupName, userSessionVO.getGroupNames());
+        }
+
         if (StrUtil.isNotBlank(queryVO.getGroupName())) {
             sceneConfigLambdaQueryWrapper.eq(SceneConfig::getGroupName, queryVO.getGroupName().trim());
         }

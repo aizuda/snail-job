@@ -2,6 +2,8 @@ package com.aizuda.easy.retry.template.datasource.persistence.dataobject;
 
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * @author zuoJunLin
  * @date 2023-12-02 23:03:01
@@ -10,7 +12,7 @@ import lombok.Data;
 @Data
 public class JobNotifyConfigQueryDO {
 
-    private String groupName;
+    private List<String> groupNames;
 
     private Long jobId;
     /**

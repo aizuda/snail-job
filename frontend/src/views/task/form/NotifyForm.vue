@@ -1,6 +1,6 @@
 <template>
   <div>
-    <page-header-wrapper content="场景配置" @back="() => $router.go(-1)" style="margin: -24px -1px 0">
+    <page-header-wrapper content="通知配置" @back="() => $router.go(-1)" style="margin: -24px -1px 0">
       <div></div>
     </page-header-wrapper>
     <a-card :body-style="{padding: '24px 32px'}" :bordered="false" :loading="loading">
@@ -12,7 +12,8 @@
                 hidden
                 v-decorator="['id']" />
             </a-form-item>
-            <a-form-item label="通知场景">
+            <a-form-item>
+              <span slot="label">通知场景&nbsp;<a :href="officialWebsite + '/pages/038b42/' +''" target="_blank"> <a-icon type="question-circle-o" /></a></span>
               <a-select
                 placeholder="通知场景"
                 style="width: 100%;"
@@ -72,7 +73,8 @@
         </a-row>
         <a-row class="form-row" :gutter="16">
           <a-col :lg="8" :md="12" :sm="12">
-            <a-form-item label="通知类型">
+            <a-form-item>
+              <span slot="label">通知类型&nbsp; <a :href="officialWebsite + '/pages/6dbf43/' +''" target="_blank"> <a-icon type="question-circle-o" /></a></span>
               <a-select
                 @change="handleChange"
                 placeholder="通知类型"
@@ -164,7 +166,7 @@
             ]" />
         </a-form-item>
         <a-form-item v-if="this.tempNotifyTypeValue === '1'">
-          <span slot="label">被@人手机号或钉钉号&nbsp;<a :href="officialWebsite + '/pages/32e4a0/#被被@人手机号或钉钉号是何物' +''" target="_blank"> <a-icon type="question-circle-o" /></a></span>
+          <span slot="label">被@人手机号或钉钉号&nbsp;</span>
           <a-input
             placeholder="请输入被@人手机号或钉钉号"
             type="textarea"
@@ -186,7 +188,7 @@
         </a-form-item>
         <a-form-item
           v-if="this.tempNotifyTypeValue === '4'">
-          <span slot="label">被@人用户id&nbsp;<a :href="officialWebsite + '/pages/32e4a0/#被@人open_id是何物' +''" target="_blank"> <a-icon type="question-circle-o" /></a></span>
+          <span slot="label">被@人用户id&nbsp;</span>
           <a-input
             placeholder="请输入被@人open_id"
             type="textarea"

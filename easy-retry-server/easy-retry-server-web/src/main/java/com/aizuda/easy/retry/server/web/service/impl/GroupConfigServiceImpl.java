@@ -160,18 +160,24 @@ public class GroupConfigServiceImpl implements GroupConfigService {
     @Override
     public PageResult<List<GroupConfigResponseVO>> getGroupConfigForPage(GroupConfigQueryVO queryVO) {
 
-        LambdaQueryWrapper<GroupConfig> groupConfigLambdaQueryWrapper = new LambdaQueryWrapper<>();
-        groupConfigLambdaQueryWrapper.eq(GroupConfig::getNamespaceId,
-                UserSessionUtils.currentUserSession().getNamespaceId());
+        UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
+        String namespaceId = userSessionVO.getNamespaceId();
+        LambdaQueryWrapper<GroupConfig> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(GroupConfig::getNamespaceId, namespaceId);
+
+        if (userSessionVO.isUser()) {
+            queryWrapper.in(GroupConfig::getGroupName, userSessionVO.getGroupNames());
+        }
+
         if (StrUtil.isNotBlank(queryVO.getGroupName())) {
-            groupConfigLambdaQueryWrapper.like(GroupConfig::getGroupName, queryVO.getGroupName() + "%");
+            queryWrapper.like(GroupConfig::getGroupName, queryVO.getGroupName() + "%");
         }
 
         ConfigAccess<GroupConfig> groupConfigAccess = accessTemplate.getGroupConfigAccess();
 
-        groupConfigLambdaQueryWrapper.orderByDesc(GroupConfig::getId);
+        queryWrapper.orderByDesc(GroupConfig::getId);
         PageDTO<GroupConfig> groupConfigPageDTO = groupConfigAccess.listPage(
-                new PageDTO<>(queryVO.getPage(), queryVO.getSize()), groupConfigLambdaQueryWrapper);
+                new PageDTO<>(queryVO.getPage(), queryVO.getSize()), queryWrapper);
         List<GroupConfig> records = groupConfigPageDTO.getRecords();
         if (CollectionUtils.isEmpty(records)) {
             return new PageResult<>(groupConfigPageDTO.getCurrent(), groupConfigPageDTO.getSize(),
@@ -289,10 +295,15 @@ public class GroupConfigServiceImpl implements GroupConfigService {
 
     @Override
     public List<String> getAllGroupNameList() {
-        ConfigAccess<GroupConfig> groupConfigAccess = accessTemplate.getGroupConfigAccess();
 
+        UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
+        if (userSessionVO.isUser()) {
+            return userSessionVO.getGroupNames();
+        }
+
+        ConfigAccess<GroupConfig> groupConfigAccess = accessTemplate.getGroupConfigAccess();
         List<GroupConfig> groupConfigs = groupConfigAccess.list(new LambdaQueryWrapper<GroupConfig>()
-                        .in(GroupConfig::getNamespaceId, UserSessionUtils.currentUserSession().getNamespaceId())
+                        .eq(GroupConfig::getNamespaceId, userSessionVO.getNamespaceId())
                         .select(GroupConfig::getGroupName))
                 .stream()
                 .collect(Collectors.toList());

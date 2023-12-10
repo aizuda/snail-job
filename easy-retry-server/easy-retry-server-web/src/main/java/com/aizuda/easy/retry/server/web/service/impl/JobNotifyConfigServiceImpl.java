@@ -7,6 +7,7 @@ import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
 import com.aizuda.easy.retry.server.web.model.request.JobNotifyConfigQueryVO;
 import com.aizuda.easy.retry.server.web.model.request.JobNotifyConfigRequestVO;
+import com.aizuda.easy.retry.server.web.model.request.UserSessionVO;
 import com.aizuda.easy.retry.server.web.model.response.JobNotifyConfigResponseVO;
 import com.aizuda.easy.retry.server.web.service.JobNotifyConfigService;
 import com.aizuda.easy.retry.server.web.service.convert.JobNotifyConfigConverter;
@@ -17,11 +18,14 @@ import com.aizuda.easy.retry.template.datasource.persistence.dataobject.JobBatch
 import com.aizuda.easy.retry.template.datasource.persistence.dataobject.JobNotifyConfigQueryDO;
 import com.aizuda.easy.retry.template.datasource.persistence.dataobject.JobNotifyConfigResponseDO;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobNotifyConfigMapper;
+import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobNotifyConfig;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
+import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -41,11 +45,25 @@ public class JobNotifyConfigServiceImpl implements JobNotifyConfigService {
     @Override
     public PageResult<List<JobNotifyConfigResponseVO>> getJobNotifyConfigList(JobNotifyConfigQueryVO queryVO) {
         PageDTO<JobNotifyConfig> pageDTO = new PageDTO<>();
+        UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
         JobNotifyConfigQueryDO jobNotifyConfigQueryDO = new JobNotifyConfigQueryDO();
-        jobNotifyConfigQueryDO.setNamespaceId(UserSessionUtils.currentUserSession().getNamespaceId());
-        if (StrUtil.isNotBlank(queryVO.getGroupName())) {
-            jobNotifyConfigQueryDO.setGroupName(queryVO.getGroupName());
+        jobNotifyConfigQueryDO.setNamespaceId(userSessionVO.getNamespaceId());
+
+        List<String> groupNames = Lists.newArrayList();
+        if (userSessionVO.isUser()) {
+            groupNames = userSessionVO.getGroupNames();
         }
+
+        if (StrUtil.isNotBlank(queryVO.getGroupName())) {
+            // 说明当前组不在用户配置的权限中
+            if (!CollectionUtils.isEmpty(groupNames) && !groupNames.contains(queryVO.getGroupName())) {
+                return new PageResult<>(pageDTO, Lists.newArrayList());
+            } else {
+                groupNames = Lists.newArrayList(queryVO.getGroupName());
+            }
+        }
+
+        jobNotifyConfigQueryDO.setGroupNames(groupNames);
         if (Objects.nonNull(queryVO.getJobId())) {
             jobNotifyConfigQueryDO.setJobId(queryVO.getJobId());
         }

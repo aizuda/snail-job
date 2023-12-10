@@ -6,8 +6,10 @@ import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.web.model.request.UserSessionVO;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.NamespaceMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.SystemUserMapper;
+import com.aizuda.easy.retry.template.datasource.persistence.mapper.SystemUserPermissionMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.Namespace;
 import com.aizuda.easy.retry.template.datasource.persistence.po.SystemUser;
+import com.aizuda.easy.retry.template.datasource.persistence.po.SystemUserPermission;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -26,7 +28,9 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * 系统登陆认证
@@ -44,6 +48,8 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
     private SystemUserMapper systemUserMapper;
     @Autowired
     private NamespaceMapper namespaceMapper;
+    @Autowired
+    private SystemUserPermissionMapper systemUserPermissionMapper;
 
     @Override
     public boolean preHandle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object object) throws Exception {
@@ -82,19 +88,30 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
                 throw new EasyRetryServerException("登陆过期，请重新登陆");
             }
 
-            systemUser = systemUserMapper.selectOne(new LambdaQueryWrapper<SystemUser>().eq(SystemUser::getUsername, systemUser.getUsername()));
+            systemUser = systemUserMapper.selectById(systemUser.getId());
             if (Objects.isNull(systemUser)) {
-                throw new EasyRetryServerException("{} 用户不存在", systemUser.getUsername());
+                throw new EasyRetryServerException("用户不存在");
             }
 
             Long count = namespaceMapper.selectCount(
-                new LambdaQueryWrapper<Namespace>().eq(Namespace::getUniqueId, namespaceId));
-            Assert.isTrue(count > 0, ()->new EasyRetryServerException("[{}] 命名空间不存在", namespaceId));
+                    new LambdaQueryWrapper<Namespace>().eq(Namespace::getUniqueId, namespaceId));
+            Assert.isTrue(count > 0, () -> new EasyRetryServerException("[{}] 命名空间不存在", namespaceId));
             UserSessionVO userSessionVO = new UserSessionVO();
             userSessionVO.setId(systemUser.getId());
             userSessionVO.setUsername(systemUser.getUsername());
             userSessionVO.setRole(systemUser.getRole());
             userSessionVO.setNamespaceId(namespaceId);
+
+            // 普通用户才获取权限
+            if (userSessionVO.isUser()) {
+                List<SystemUserPermission> systemUserPermissions = systemUserPermissionMapper.selectList(
+                        new LambdaQueryWrapper<SystemUserPermission>()
+                                .select(SystemUserPermission::getGroupName)
+                                .eq(SystemUserPermission::getSystemUserId, systemUser.getId())
+                                .eq(SystemUserPermission::getNamespaceId, namespaceId)
+                );
+                userSessionVO.setGroupNames(systemUserPermissions.stream().map(SystemUserPermission::getGroupName).collect(Collectors.toList()));
+            }
 
             httpServletRequest.setAttribute("currentUser", userSessionVO);
 

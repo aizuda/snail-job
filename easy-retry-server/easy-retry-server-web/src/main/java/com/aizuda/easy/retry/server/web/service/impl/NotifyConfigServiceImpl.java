@@ -7,6 +7,7 @@ import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
 import com.aizuda.easy.retry.server.web.model.request.NotifyConfigQueryVO;
 import com.aizuda.easy.retry.server.web.model.request.NotifyConfigRequestVO;
+import com.aizuda.easy.retry.server.web.model.request.UserSessionVO;
 import com.aizuda.easy.retry.server.web.model.response.NotifyConfigResponseVO;
 import com.aizuda.easy.retry.server.web.service.NotifyConfigService;
 import com.aizuda.easy.retry.server.web.service.convert.NotifyConfigConverter;
@@ -14,6 +15,7 @@ import com.aizuda.easy.retry.server.web.service.convert.NotifyConfigResponseVOCo
 import com.aizuda.easy.retry.server.web.util.UserSessionUtils;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
 import com.aizuda.easy.retry.template.datasource.access.ConfigAccess;
+import com.aizuda.easy.retry.template.datasource.persistence.po.GroupConfig;
 import com.aizuda.easy.retry.template.datasource.persistence.po.NotifyConfig;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
@@ -37,14 +39,22 @@ public class NotifyConfigServiceImpl implements NotifyConfigService {
     public PageResult<List<NotifyConfigResponseVO>> getNotifyConfigList(NotifyConfigQueryVO queryVO) {
         PageDTO<NotifyConfig> pageDTO = new PageDTO<>();
 
+        UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
         LambdaQueryWrapper<NotifyConfig> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(NotifyConfig::getNamespaceId, UserSessionUtils.currentUserSession().getNamespaceId());
+        queryWrapper.eq(NotifyConfig::getNamespaceId, userSessionVO.getNamespaceId());
+
+        if (userSessionVO.isUser()) {
+            queryWrapper.in(NotifyConfig::getGroupName, userSessionVO.getGroupNames());
+        }
+
         if (StrUtil.isNotBlank(queryVO.getGroupName())) {
             queryWrapper.eq(NotifyConfig::getGroupName, queryVO.getGroupName());
         }
         if (StrUtil.isNotBlank(queryVO.getSceneName())) {
             queryWrapper.eq(NotifyConfig::getSceneName, queryVO.getSceneName());
         }
+
+        queryWrapper.orderByDesc(NotifyConfig::getId);
         List<NotifyConfig> notifyConfigs = accessTemplate.getNotifyConfigAccess().listPage(pageDTO, queryWrapper).getRecords();
         return new PageResult<>(pageDTO, NotifyConfigResponseVOConverter.INSTANCE.batchConvert(notifyConfigs));
     }

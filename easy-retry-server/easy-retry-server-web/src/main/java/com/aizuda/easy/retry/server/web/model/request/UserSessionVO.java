@@ -1,6 +1,10 @@
 package com.aizuda.easy.retry.server.web.model.request;
 
+import com.aizuda.easy.retry.server.web.annotation.RoleEnum;
 import lombok.Data;
+
+import java.util.List;
+import java.util.Objects;
 
 /**
  * @author xiaowoniu
@@ -17,5 +21,15 @@ public final class UserSessionVO {
     private Integer role;
 
     private String namespaceId;
+
+    private List<String> groupNames;
+
+    /**
+     * 是否是普通用户
+     */
+    public boolean isUser() {
+        return Objects.equals(this.role, RoleEnum.USER.getRoleId());
+    }
+
 
 }
