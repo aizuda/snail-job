@@ -44,7 +44,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RetryTaskMoreThresholdAlarmSchedule extends AbstractSchedule implements Lifecycle {
     private static String retryTaskMoreThresholdTextMessageFormatter =
-            "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 重试数据监控</font>  \n" +
+            "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 场景重试数量超过{}个</font>  \n" +
+                    "> 空间ID:{}  \n" +
                     "> 组名称:{}  \n" +
                     "> 场景名称:{}  \n" +
                     "> 告警时间:{}  \n" +
@@ -83,11 +84,13 @@ public class RetryTaskMoreThresholdAlarmSchedule extends AbstractSchedule implem
                                 .eq(RetryTask::getGroupName, partitionTask.getGroupName())
                                 .eq(RetryTask::getSceneName, partitionTask.getSceneName())
                                 .eq(RetryTask::getRetryStatus, RetryStatusEnum.RUNNING.getStatus()));
-        if (count > partitionTask.getNotifyThreshold()) {
+        if (count >= partitionTask.getNotifyThreshold()) {
             // 预警
             AlarmContext context = AlarmContext.build()
                     .text(retryTaskMoreThresholdTextMessageFormatter,
                             EnvironmentUtils.getActiveProfile(),
+                            count,
+                            partitionTask.getNamespaceId(),
                             partitionTask.getGroupName(),
                             partitionTask.getSceneName(),
                             DateUtils.toNowFormat(DateUtils.NORM_DATETIME_PATTERN),

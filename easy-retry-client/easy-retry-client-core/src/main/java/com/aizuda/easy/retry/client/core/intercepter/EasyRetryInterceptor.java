@@ -19,6 +19,7 @@ import com.aizuda.easy.retry.common.core.enums.RetryResultStatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.model.EasyRetryHeaders;
 import com.aizuda.easy.retry.common.core.util.EnvironmentUtils;
+import com.aizuda.easy.retry.common.core.util.HostUtils;
 import com.aizuda.easy.retry.server.model.dto.ConfigDTO;
 import com.google.common.base.Defaults;
 import lombok.extern.slf4j.Slf4j;
@@ -48,6 +49,7 @@ public class EasyRetryInterceptor implements MethodInterceptor, AfterAdvice, Ser
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private static String retryErrorMoreThresholdTextMessageFormatter =
             "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 重试组件异常</font>  \n" +
+                    "> IP:{}  \n" +
                     "> 空间ID:{}  \n" +
                     "> 名称:{}  \n" +
                     "> 时间:{}  \n" +
@@ -205,6 +207,7 @@ public class EasyRetryInterceptor implements MethodInterceptor, AfterAdvice, Ser
                 AlarmContext context = AlarmContext.build()
                         .text(retryErrorMoreThresholdTextMessageFormatter,
                                 EnvironmentUtils.getActiveProfile(),
+                                HostUtils.getIp(),
                                 standardEnvironment.getProperty("easy-retry.namespace", StrUtil.EMPTY),
                                 EasyRetryProperties.getGroup(),
                                 LocalDateTime.now().format(formatter),
