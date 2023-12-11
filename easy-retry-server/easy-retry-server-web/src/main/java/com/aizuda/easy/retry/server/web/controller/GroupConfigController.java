@@ -12,11 +12,19 @@ import com.aizuda.easy.retry.server.web.annotation.LoginRequired;
 import com.aizuda.easy.retry.server.web.annotation.RoleEnum;
 import com.aizuda.easy.retry.server.web.service.GroupConfigService;
 import com.aizuda.easy.retry.template.datasource.enums.DbTypeEnum;
+import com.google.common.collect.Lists;
+import com.zaxxer.hikari.HikariDataSource;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.helpers.MessageFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -33,10 +41,6 @@ public class GroupConfigController {
 
     @Autowired
     private GroupConfigService groupConfigService;
-    @Autowired
-    private SystemProperties systemProperties;
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
 
     @LoginRequired(role = RoleEnum.ADMIN)
     @PostMapping("")
@@ -91,20 +95,7 @@ public class GroupConfigController {
     @LoginRequired(role = RoleEnum.ADMIN)
     @GetMapping("/partition-table/list")
     public List<Integer> getTablePartitionList() {
-        // https://gitee.com/aizuda/easy-retry/issues/I8DAMH
-        String sql;
-        if (systemProperties.getDbType().getDb().equals(DbTypeEnum.POSTGRES.getDb())) {
-            sql = "SELECT table_name\n"
-                + "FROM information_schema.tables\n"
-                + "WHERE table_name LIKE 'retry_task_%' AND table_schema = 'public'";
-        } else {
-            sql = "SHOW TABLES LIKE 'retry_task_%'";
-        }
-
-        List<String> tableList = jdbcTemplate.queryForList(sql, String.class);
-        return tableList.stream().map(ReUtil::getFirstNumber).filter(i ->
-                !Objects.isNull(i) && i <= systemProperties.getTotalPartition()).distinct().collect(Collectors.toList());
+        return groupConfigService.getTablePartitionList();
     }
-
 
 }

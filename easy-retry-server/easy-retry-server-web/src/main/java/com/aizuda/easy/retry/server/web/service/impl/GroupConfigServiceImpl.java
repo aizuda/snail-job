@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.server.web.service.impl;
 
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.HashUtil;
+import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.enums.IdGeneratorMode;
@@ -26,13 +27,20 @@ import com.aizuda.easy.retry.template.datasource.persistence.po.*;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
+import com.google.common.collect.Lists;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.helpers.MessageFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.jdbc.BadSqlGrammarException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,9 +67,10 @@ public class GroupConfigServiceImpl implements GroupConfigService {
     @Autowired
     @Lazy
     private ConfigVersionSyncHandler configVersionSyncHandler;
-
     @Autowired
     private SystemProperties systemProperties;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @Override
     @Transactional
@@ -319,6 +328,42 @@ public class GroupConfigServiceImpl implements GroupConfigService {
                         .eq(ServerNode::getGroupName, groupName));
         return serverNodes.stream().map(serverNode -> serverNode.getHostIp() + ":" + serverNode.getHostPort())
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Integer> getTablePartitionList() {
+        DataSource dataSource = jdbcTemplate.getDataSource();
+        Connection connection = null;
+        try {
+            connection = dataSource.getConnection();
+            String catalog = connection.getCatalog();
+            String schema = connection.getSchema();
+
+            // https://gitee.com/aizuda/easy-retry/issues/I8DAMH
+            String sql =  MessageFormatter.arrayFormat("SELECT table_name\n"
+                + "FROM information_schema.tables\n"
+                + "WHERE table_name LIKE 'retry_task_%' AND table_schema = '{}' and table_catalog = '{}'", new Object[]{schema, catalog}).getMessage();
+
+            List<String> tableList = jdbcTemplate.queryForList(sql, String.class);
+            return tableList.stream().map(ReUtil::getFirstNumber).filter(i ->
+                    !Objects.isNull(i) && i <= systemProperties.getTotalPartition()).distinct()
+                .collect(Collectors.toList());
+        } catch (SQLException ignored) {
+        } finally {
+            if (Objects.nonNull(connection)) {
+                try {
+                    connection.close();
+                } catch (SQLException ignored) {
+                }
+            }
+        }
+
+        // 兜底
+        List<Integer> tableList = Lists.newArrayList();
+        for (int i = 0; i < systemProperties.getTotalPartition(); i++) {
+            tableList.add(i);
+        }
+        return tableList;
     }
 
 }
