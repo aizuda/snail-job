@@ -11,7 +11,7 @@ CREATE TABLE namespace
     deleted     SMALLINT     NOT NULL DEFAULT 0
 );
 
-CREATE UNIQUE INDEX uk_namespace_unique_id ON namespace (unique_id);
+CREATE UNIQUE INDEX uk_namespace_unique_id ON "namespace" (unique_id);
 
 COMMENT ON COLUMN namespace.id IS '主键';
 COMMENT ON COLUMN namespace.name IS '名称';
@@ -21,6 +21,9 @@ COMMENT ON COLUMN namespace.create_dt IS '创建时间';
 COMMENT ON COLUMN namespace.update_dt IS '修改时间';
 COMMENT ON COLUMN namespace.deleted IS '逻辑删除 1、删除';
 COMMENT ON TABLE namespace IS '命名空间';
+
+INSERT INTO namespace (name, unique_id, create_dt, update_dt, deleted)
+VALUES ('Default', '764d604ec6fc45f68cd92514c40e9e1a', now(), now(), 0);
 
 CREATE TABLE group_config
 (
@@ -555,6 +558,7 @@ COMMENT ON TABLE "job_task" IS '任务批次';
 CREATE TABLE job_notify_config
 (
     id               BIGSERIAL PRIMARY KEY,
+    namespace_id      VARCHAR(64) NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
     group_name       VARCHAR(64)  NOT NULL,
     job_id            BIGINT      NOT NULL,
     notify_status    SMALLINT  NOT NULL DEFAULT 0,
@@ -569,9 +573,10 @@ CREATE TABLE job_notify_config
     update_dt        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_group_name ON job_notify_config (group_name);
+CREATE INDEX idx_namespace_id_group_name_job_id_job_notify_config ON job_notify_config (namespace_id, group_name, job_id);
 
 COMMENT ON COLUMN "job_notify_config"."id" IS '主键';
+COMMENT ON COLUMN "job_task"."namespace_id" IS '命名空间id';
 COMMENT ON COLUMN "job_notify_config"."group_name" IS '组名称';
 COMMENT ON COLUMN "job_notify_config"."job_id" IS '任务信息id';
 COMMENT ON COLUMN "job_notify_config"."notify_status" IS '通知状态 0、未启用 1、启用';

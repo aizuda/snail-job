@@ -41,31 +41,31 @@
 
     <select id="retryTask"
             resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardCardResponseDO$RetryTask">
-        SELECT ifnull(sum(running_num), 0)                                            AS runningNum,
-               ifnull(sum(finish_num), 0)                                             AS finishNum,
-               ifnull(sum(max_count_num), 0)                                          AS maxCountNum,
-               ifnull(sum(suspend_num), 0)                                            AS suspendNum,
-               ifnull(sum(running_num + finish_num + max_count_num + suspend_num), 0) AS totalNum
+        SELECT COALESCE(sum(running_num), 0)                                            AS runningNum,
+               COALESCE(sum(finish_num), 0)                                             AS finishNum,
+               COALESCE(sum(max_count_num), 0)                                          AS maxCountNum,
+               COALESCE(sum(suspend_num), 0)                                            AS suspendNum,
+               COALESCE(sum(running_num + finish_num + max_count_num + suspend_num), 0) AS totalNum
         FROM retry_summary
         WHERE namespace_id = #{namespaceId}
     </select>
 
     <select id="retryTaskBarList"
             resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardCardResponseDO$RetryTaskBar">
-        SELECT tmp.date AS x, ifnull(b.taskTotal, 0) AS taskTotal
-        FROM (SELECT curdate() AS date
+        SELECT tmp.date AS x, COALESCE(b.taskTotal, 0) AS taskTotal
+        FROM (SELECT CURRENT_DATE AS date
               UNION ALL
-              SELECT DATE_SUB(CURDATE(), INTERVAL 1 DAY) AS date
+              SELECT CURRENT_DATE - INTERVAL '1 day' AS date
               UNION ALL
-              SELECT DATE_SUB(CURDATE(), interval 2 day) AS date
+              SELECT CURRENT_DATE - INTERVAL '2 days' AS date
               UNION ALL
-              SELECT DATE_SUB(CURDATE(), interval 3 day) AS date
+              SELECT CURRENT_DATE - INTERVAL '3 days' AS date
               UNION ALL
-              SELECT DATE_SUB(CURDATE(), interval 4 day) AS date
+              SELECT CURRENT_DATE - INTERVAL '4 days' AS date
               UNION ALL
-              SELECT DATE_SUB(CURDATE(), interval 5 day) AS date
+              SELECT CURRENT_DATE - INTERVAL '5 days' AS date
               UNION ALL
-              SELECT DATE_SUB(CURDATE(), interval 6 day) AS date) tmp
+              SELECT CURRENT_DATE - INTERVAL '6 days' AS date) tmp
                  LEFT JOIN (SELECT DATE (trigger_at) AS triggerAt,
              SUM(running_num + finish_num + max_count_num + suspend_num) AS taskTotal FROM retry_summary
         WHERE namespace_id = #{namespaceId}
@@ -79,27 +79,27 @@
         SELECT
         <choose>
             <when test="type == 'DAY'">
-                DATE_FORMAT(create_dt,'%H')
+                to_char(create_dt,'%H')
             </when>
             <when test="type == 'WEEK'">
-                DATE_FORMAT(create_dt,'%Y-%m-%d')
+                to_char(create_dt,'%Y-%m-%d')
             </when>
             <when test="type =='MONTH'">
-                DATE_FORMAT(create_dt,'%Y-%m-%d')
+                to_char(create_dt,'%Y-%m-%d')
             </when>
             <when test="type == 'YEAR'">
-                DATE_FORMAT(create_dt,'%Y-%m')
+                to_char(create_dt,'%Y-%m')
             </when>
             <otherwise>
-                DATE_FORMAT(create_dt,'%Y-%m-%d')
+                to_char(create_dt,'%Y-%m-%d')
             </otherwise>
         </choose>
         AS createDt,
-        ifnull(SUM(finish_num), 0) AS successNum,
-        ifnull(SUM(running_num), 0) AS runningNum,
-        ifnull(SUM(max_count_num), 0) AS maxCountNum,
-        ifnull(SUM(suspend_num), 0) AS suspendNum,
-        ifnull(SUM(finish_num + running_num + max_count_num + suspend_num), 0) AS total
+        COALESCE(SUM(finish_num), 0) AS successNum,
+        COALESCE(SUM(running_num), 0) AS runningNum,
+        COALESCE(SUM(max_count_num), 0) AS maxCountNum,
+        COALESCE(SUM(suspend_num), 0) AS suspendNum,
+        COALESCE(SUM(finish_num + running_num + max_count_num + suspend_num), 0) AS total
         FROM retry_summary
         <where>
             <if test="groupName != null and groupName != '' ">
@@ -113,7 +113,7 @@
     <select id="dashboardRank"
             resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO$Rank">
         SELECT
-        CONCAT(group_name, '/', scene_name) `name`,
+        CONCAT(group_name, '/', scene_name) name,
         SUM(running_num + finish_num + max_count_num + suspend_num) AS total FROM retry_summary
         <where>
             <if test="groupName != '' and groupName != null">
@@ -123,7 +123,7 @@
             AND trigger_at >= #{startTime} AND trigger_at &lt;= #{endTime}
         </where>
         GROUP BY namespace_id, group_name, scene_name
-        HAVING total > 0
+        HAVING SUM(running_num + finish_num + max_count_num + suspend_num) > 0
         ORDER BY total DESC LIMIT 10
     </select>
 

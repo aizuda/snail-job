@@ -73,7 +73,7 @@ public class NamespaceServiceImpl implements NamespaceService {
             ;
         }
 
-        queryWrapper.eq(Namespace::getDeleted, StatusEnum.NO);
+        queryWrapper.eq(Namespace::getDeleted, StatusEnum.NO.getStatus());
         queryWrapper.orderByDesc(Namespace::getId);
         PageDTO<Namespace> selectPage = namespaceMapper.selectPage(pageDTO, queryWrapper);
         return new PageResult<>(pageDTO,

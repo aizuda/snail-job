@@ -53,28 +53,28 @@
         SELECT
         <choose>
             <when test="type == 'DAY'">
-                DATE_FORMAT(create_dt,'%H')
+                to_char(create_dt,'%H')
             </when>
             <when test="type == 'WEEK'">
-                DATE_FORMAT(create_dt,'%Y-%m-%d')
+                to_char(create_dt,'%Y-%m-%d')
             </when>
             <when test="type =='MONTH'">
-                DATE_FORMAT(create_dt,'%Y-%m-%d')
+                to_char(create_dt,'%Y-%m-%d')
             </when>
             <when test="type == 'YEAR'">
-                DATE_FORMAT(create_dt,'%Y-%m')
+                to_char(create_dt,'%Y-%m')
             </when>
             <otherwise>
-                DATE_FORMAT(create_dt,'%Y-%m-%d')
+                to_char(create_dt,'%Y-%m-%d')
             </otherwise>
         </choose>
         AS createDt,
-        ifnull(SUM(success_num), 0) AS success,
-        ifnull(SUM(fail_num), 0) AS failNum,
-        ifnull(SUM(stop_num), 0) AS stop,
-        ifnull(SUM(cancel_num), 0) AS cancel,
-        ifnull(SUM(fail_num + stop_num + cancel_num), 0) AS fail,
-        ifnull(SUM(success_num + fail_num + stop_num + cancel_num), 0) AS total
+        COALESCE(SUM(success_num), 0) AS success,
+        COALESCE(SUM(fail_num), 0) AS failNum,
+        COALESCE(SUM(stop_num), 0) AS stop,
+        COALESCE(SUM(cancel_num), 0) AS cancel,
+        COALESCE(SUM(fail_num + stop_num + cancel_num), 0) AS fail,
+        COALESCE(SUM(success_num + fail_num + stop_num + cancel_num), 0) AS total
         FROM job_summary
         <where>
             <if test="groupName != null and groupName != '' ">
@@ -87,11 +87,11 @@
 
     <select id="toJobTask"
             resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardCardResponseDO$JobTask">
-        SELECT ifnull(sum(success_num), 0)                                    AS successNum,
-               ifnull(sum(stop_num), 0)                                       AS stopNum,
-               ifnull(sum(cancel_num), 0)                                     AS cancelNum,
-               ifnull(sum(fail_num), 0)                                       AS failNum,
-               ifnull(sum(success_num + fail_num + stop_num + cancel_num), 0) AS totalNum
+        SELECT COALESCE(sum(success_num), 0)                                    AS successNum,
+               COALESCE(sum(stop_num), 0)                                       AS stopNum,
+               COALESCE(sum(cancel_num), 0)                                     AS cancelNum,
+               COALESCE(sum(fail_num), 0)                                       AS failNum,
+               COALESCE(sum(success_num + fail_num + stop_num + cancel_num), 0) AS totalNum
         FROM job_summary
         WHERE namespace_id = #{namespaceId}
     </select>
@@ -99,7 +99,7 @@
     <select id="dashboardRank"
             resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO$Rank">
         SELECT
-        CONCAT(group_name, '/', (SELECT job_name FROM job WHERE id=job_id)) `name`,
+        CONCAT(group_name, '/', (SELECT job_name FROM job WHERE id=job_id)) name,
         SUM(fail_num) AS total FROM job_summary
         <where>
             <if test="groupName != '' and groupName != null">
@@ -109,7 +109,7 @@
         </where>
         AND namespace_id = #{namespaceId}
         GROUP BY namespace_id, group_name, job_id
-        HAVING total > 0
+        HAVING SUM(fail_num) > 0
         ORDER BY total DESC LIMIT 10
     </select>
 

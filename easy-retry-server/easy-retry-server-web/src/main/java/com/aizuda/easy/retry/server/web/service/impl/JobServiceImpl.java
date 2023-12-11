@@ -26,13 +26,13 @@ import com.aizuda.easy.retry.server.web.service.convert.JobConverter;
 import com.aizuda.easy.retry.server.web.service.convert.JobResponseVOConverter;
 import com.aizuda.easy.retry.server.web.util.UserSessionUtils;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobMapper;
-import com.aizuda.easy.retry.template.datasource.persistence.po.GroupConfig;
 import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -54,6 +54,7 @@ public class JobServiceImpl implements JobService {
     private JobMapper jobMapper;
     @Autowired
     @Qualifier("terminalJobPrepareHandler")
+    @Lazy
     private JobPrePareHandler jobPrePareHandler;
 
     @Override

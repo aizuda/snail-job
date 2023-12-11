@@ -248,7 +248,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
 
         try {
             TaskAccess<RetryDeadLetter> retryTaskAccess = accessTemplate.getRetryDeadLetterAccess();
-            retryTaskAccess.one(groupConfig.getGroupName(), groupConfig.getNamespaceId(),
+            retryTaskAccess.one(groupConfig.getGroupName(), namespaceId,
                     new LambdaQueryWrapper<RetryDeadLetter>().eq(RetryDeadLetter::getId, 1));
         } catch (BadSqlGrammarException e) {
             Optional.ofNullable(e.getMessage()).ifPresent(s -> {
