@@ -77,6 +77,12 @@
         ifnull(SUM(success_num + fail_num + stop_num + cancel_num), 0) AS total
         FROM job_summary
         <where>
+            <if test="groupNames != null and groupNames.size > 0">
+                AND group_name IN
+                <foreach collection="groupNames" item="groupName" open="(" separator="," close=")">
+                    #{groupName}
+                </foreach>
+            </if>
             <if test="groupName != null and groupName != '' ">
                 AND group_name = #{groupName}
             </if>
@@ -87,13 +93,19 @@
 
     <select id="toJobTask"
             resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardCardResponseDO$JobTask">
-        SELECT ifnull(sum(success_num), 0)                                    AS successNum,
-               ifnull(sum(stop_num), 0)                                       AS stopNum,
-               ifnull(sum(cancel_num), 0)                                     AS cancelNum,
-               ifnull(sum(fail_num), 0)                                       AS failNum,
-               ifnull(sum(success_num + fail_num + stop_num + cancel_num), 0) AS totalNum
+        SELECT ifnull(sum(success_num), 0) AS successNum,
+        ifnull(sum(stop_num), 0) AS stopNum,
+        ifnull(sum(cancel_num), 0) AS cancelNum,
+        ifnull(sum(fail_num), 0) AS failNum,
+        ifnull(sum(success_num + fail_num + stop_num + cancel_num), 0) AS totalNum
         FROM job_summary
         WHERE namespace_id = #{namespaceId}
+        <if test="groupNames != null and groupNames.size > 0">
+            AND group_name IN
+            <foreach collection="groupNames" item="groupName" open="(" separator="," close=")">
+                #{groupName}
+            </foreach>
+        </if>
     </select>
 
     <select id="dashboardRank"
@@ -102,6 +114,12 @@
         CONCAT(group_name, '/', (SELECT job_name FROM job WHERE id=job_id)) `name`,
         SUM(fail_num) AS total FROM job_summary
         <where>
+            <if test="groupNames != null and groupNames.size > 0">
+                AND group_name IN
+                <foreach collection="groupNames" item="groupName" open="(" separator="," close=")">
+                    #{groupName}
+                </foreach>
+            </if>
             <if test="groupName != '' and groupName != null">
                 AND group_name = #{groupName}
             </if>
@@ -120,6 +138,12 @@
                count(*)                                          AS total
         FROM job
         WHERE namespace_id = #{namespaceId}
+        <if test="groupNames != null and groupNames.size > 0">
+            AND group_name IN
+            <foreach collection="groupNames" item="groupName"  open="("  separator="," close=")">
+                #{groupName}
+            </foreach>
+        </if>
         GROUP BY namespace_id, group_name
     </select>
 </mapper>

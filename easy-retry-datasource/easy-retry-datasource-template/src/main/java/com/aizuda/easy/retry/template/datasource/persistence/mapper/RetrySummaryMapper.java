@@ -23,13 +23,14 @@ public interface RetrySummaryMapper extends BaseMapper<RetrySummary> {
 
     int insertOrUpdate(@Param("list") List<RetrySummary> list);
 
-    DashboardCardResponseDO.RetryTask retryTask(@Param("namespaceId") String namespaceId);
+    DashboardCardResponseDO.RetryTask retryTask(@Param("namespaceId") String namespaceId, @Param("groupNames") List<String> groupNames);
 
-    List<DashboardCardResponseDO.RetryTaskBar> retryTaskBarList(@Param("namespaceId") String namespaceId);
+    List<DashboardCardResponseDO.RetryTaskBar> retryTaskBarList(@Param("namespaceId") String namespaceId, @Param("groupNames") List<String> groupNames);
 
-    IPage<DashboardRetryLineResponseDO.Task> retryTaskList(@Param("namespaceId") String namespaceId, Page<Object> page);
+    IPage<DashboardRetryLineResponseDO.Task> retryTaskList(@Param("namespaceId") String namespaceId, @Param("groupNames") List<String> groupNames, Page<Object> page);
 
     List<DashboardLineResponseDO> retryLineList(@Param("namespaceId") String namespaceId,
+                                                @Param("groupNames") List<String> groupNames,
                                                 @Param("groupName") String groupName,
                                                 @Param("type") String type,
                                                 @Param("from") LocalDateTime from,
@@ -37,6 +38,7 @@ public interface RetrySummaryMapper extends BaseMapper<RetrySummary> {
 
 
     List<DashboardRetryLineResponseDO.Rank> dashboardRank(@Param("namespaceId") String namespaceId,
+                                                          @Param("groupNames") List<String> groupNames,
                                                           @Param("groupName") String groupName,
                                                           @Param("startTime") LocalDateTime startTime,
                                                           @Param("endTime") LocalDateTime endTime

@@ -23,17 +23,19 @@ public interface JobSummaryMapper extends BaseMapper<JobSummary> {
 
     int insertOrUpdate(@Param("list") List<JobSummary> list);
 
-    IPage<DashboardRetryLineResponseDO.Task> jobTaskList(@Param("namespaceId") String namespaceId, Page<Object> page);
+    IPage<DashboardRetryLineResponseDO.Task> jobTaskList(@Param("namespaceId") String namespaceId, @Param("groupNames") List<String> groupNames, Page<Object> page);
 
     List<DashboardLineResponseDO> jobLineList(@Param("namespaceId") String namespaceId,
+                                              @Param("groupNames") List<String> groupNames,
                                               @Param("groupName") String groupName,
                                               @Param("type") String type,
                                               @Param("from") LocalDateTime from,
                                               @Param("to") LocalDateTime to);
 
-    DashboardCardResponseDO.JobTask toJobTask(@Param("namespaceId") String namespaceId);
+    DashboardCardResponseDO.JobTask toJobTask(@Param("namespaceId") String namespaceId, @Param("groupNames") List<String> groupNames);
 
     List<DashboardRetryLineResponseDO.Rank> dashboardRank(@Param("namespaceId") String namespaceId,
+                                                          @Param("groupNames") List<String> groupNames,
                                                           @Param("groupName") String groupName,
                                                           @Param("startTime") LocalDateTime startTime,
                                                           @Param("endTime") LocalDateTime endTime
