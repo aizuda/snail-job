@@ -48,6 +48,12 @@
                COALESCE(sum(running_num + finish_num + max_count_num + suspend_num), 0) AS totalNum
         FROM retry_summary
         WHERE namespace_id = #{namespaceId}
+        <if test="groupNames != null and groupNames.size > 0">
+            AND group_name IN
+            <foreach collection="groupNames" item="groupName"  open="("  separator="," close=")">
+                #{groupName}
+            </foreach>
+        </if>
     </select>
 
     <select id="retryTaskBarList"
@@ -69,6 +75,12 @@
                  LEFT JOIN (SELECT DATE (trigger_at) AS triggerAt,
              SUM(running_num + finish_num + max_count_num + suspend_num) AS taskTotal FROM retry_summary
         WHERE namespace_id = #{namespaceId}
+        <if test="groupNames != null and groupNames.size > 0">
+            AND group_name IN
+            <foreach collection="groupNames" item="groupName"  open="("  separator="," close=")">
+                #{groupName}
+            </foreach>
+        </if>
         GROUP BY triggerAt
             ) b
         ON tmp.date = b.triggerAt
@@ -102,6 +114,12 @@
         COALESCE(SUM(finish_num + running_num + max_count_num + suspend_num), 0) AS total
         FROM retry_summary
         <where>
+            <if test="groupNames != null and groupNames.size > 0">
+                AND group_name IN
+                <foreach collection="groupNames" item="groupName"  open="("  separator="," close=")">
+                    #{groupName}
+                </foreach>
+            </if>
             <if test="groupName != null and groupName != '' ">
                 AND group_name = #{groupName}
             </if>
@@ -116,6 +134,12 @@
         CONCAT(group_name, '/', scene_name) name,
         SUM(running_num + finish_num + max_count_num + suspend_num) AS total FROM retry_summary
         <where>
+            <if test="groupNames != null and groupNames.size > 0">
+                AND group_name IN
+                <foreach collection="groupNames" item="groupName"  open="("  separator="," close=")">
+                    #{groupName}
+                </foreach>
+            </if>
             <if test="groupName != '' and groupName != null">
                 AND group_name = #{groupName}
             </if>
@@ -134,6 +158,12 @@
                count(*)                                            AS total
         FROM scene_config
         WHERE namespace_id = #{namespaceId}
+        <if test="groupNames != null and groupNames.size > 0">
+            AND group_name IN
+            <foreach collection="groupNames" item="groupName"  open="("  separator="," close=")">
+                #{groupName}
+            </foreach>
+        </if>
         GROUP BY namespace_id, group_name
     </select>
 </mapper>

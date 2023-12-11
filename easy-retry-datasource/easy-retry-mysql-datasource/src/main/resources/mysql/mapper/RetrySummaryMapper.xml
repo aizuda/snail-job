@@ -114,17 +114,17 @@
         ifnull(SUM(finish_num + running_num + max_count_num + suspend_num), 0) AS total
         FROM retry_summary
         <where>
+            <if test="groupNames != null and groupNames.size > 0">
+                AND group_name IN
+                <foreach collection="groupNames" item="groupName"  open="("  separator="," close=")">
+                    #{groupName}
+                </foreach>
+            </if>
             <if test="groupName != null and groupName != '' ">
                 AND group_name = #{groupName}
             </if>
             AND namespace_id = #{namespaceId} AND trigger_at BETWEEN #{from} AND #{to}
         </where>
-        <if test="groupNames != null and groupNames.size > 0">
-            AND group_name IN
-            <foreach collection="groupNames" item="groupName"  open="("  separator="," close=")">
-                #{groupName}
-            </foreach>
-        </if>
         GROUP BY createDt
     </select>
 
@@ -134,18 +134,18 @@
         CONCAT(group_name, '/', scene_name) `name`,
         SUM(running_num + finish_num + max_count_num + suspend_num) AS total FROM retry_summary
         <where>
+            <if test="groupNames != null and groupNames.size > 0">
+                AND group_name IN
+                <foreach collection="groupNames" item="groupName"  open="("  separator="," close=")">
+                    #{groupName}
+                </foreach>
+            </if>
             <if test="groupName != '' and groupName != null">
                 AND group_name = #{groupName}
             </if>
             AND namespace_id = #{namespaceId}
             AND trigger_at >= #{startTime} AND trigger_at &lt;= #{endTime}
         </where>
-        <if test="groupNames != null and groupNames.size > 0">
-            AND group_name IN
-            <foreach collection="groupNames" item="groupName"  open="("  separator="," close=")">
-                #{groupName}
-            </foreach>
-        </if>
         GROUP BY namespace_id, group_name, scene_name
         HAVING total > 0
         ORDER BY total DESC LIMIT 10
