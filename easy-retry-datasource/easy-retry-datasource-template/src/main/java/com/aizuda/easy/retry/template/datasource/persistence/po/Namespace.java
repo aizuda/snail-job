@@ -52,5 +52,5 @@ public class Namespace implements Serializable {
     /**
      * 逻辑删除 1、删除
      */
-    private Byte deleted;
+    private Integer deleted;
 }

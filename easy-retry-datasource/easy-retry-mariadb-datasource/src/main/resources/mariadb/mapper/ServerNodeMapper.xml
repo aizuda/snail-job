@@ -18,13 +18,13 @@
     id, group_name, context_path, host_id, host_ip, host_port, expire_at, node_type,create_dt,update_dt
   </sql>
   <insert id="insertOrUpdate" parameterType="com.aizuda.easy.retry.template.datasource.persistence.po.ServerNode" useGeneratedKeys="true" keyProperty="id">
-      insert into server_node (id, group_name, host_id, host_ip, host_port,
+      insert into server_node (namespace_id, group_name, host_id, host_ip, host_port,
                                expire_at, node_type, ext_attrs, context_path, create_dt)
       values
-      <foreach collection="records" item="item" index="index" separator="," open="(" close=")">
-          #{id,jdbcType=BIGINT}, #{groupName,jdbcType=VARCHAR}, #{hostId,jdbcType=VARCHAR}, #{hostIp,jdbcType=VARCHAR},
-          #{hostPort,jdbcType=INTEGER},
-          #{expireAt,jdbcType=TIMESTAMP}, #{nodeType,jdbcType=TINYINT},  #{extAttrs,jdbcType=VARCHAR},  #{contextPath,jdbcType=VARCHAR},  #{createDt,jdbcType=TIMESTAMP}
+      <foreach collection="records" item="item" index="index" separator=",">
+          (#{item.namespaceId,jdbcType=VARCHAR}, #{item.groupName,jdbcType=VARCHAR}, #{item.hostId,jdbcType=VARCHAR}, #{item.hostIp,jdbcType=VARCHAR},
+          #{item.hostPort,jdbcType=INTEGER}, #{item.expireAt,jdbcType=TIMESTAMP}, #{item.nodeType,jdbcType=TINYINT},
+          #{item.extAttrs,jdbcType=VARCHAR},  #{item.contextPath,jdbcType=VARCHAR},  #{item.createDt,jdbcType=TIMESTAMP})
       </foreach>
          ON DUPLICATE KEY UPDATE
           expire_at = values(`expire_at`)
