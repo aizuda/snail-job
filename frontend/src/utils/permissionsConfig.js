@@ -163,6 +163,18 @@ const retryUser = [
 const jobUser = [
   {
     roleId: 1,
+    permissionId: 'JobAnalysis',
+    permissionName: '定时任务',
+    actionEntitySet: [
+      {
+        action: 'job',
+        describe: '定时',
+        defaultCheck: false
+      }
+    ]
+  },
+  {
+    roleId: 1,
     permissionId: 'dashboard',
     permissionName: '看板'
   },

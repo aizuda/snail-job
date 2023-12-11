@@ -12,6 +12,7 @@ import com.aizuda.easy.retry.server.web.model.base.BaseQueryVO;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
 import com.aizuda.easy.retry.server.web.model.enums.DateTypeEnum;
 import com.aizuda.easy.retry.server.web.model.request.ServerNodeQueryVO;
+import com.aizuda.easy.retry.server.web.model.request.UserSessionVO;
 import com.aizuda.easy.retry.server.web.model.response.*;
 import com.aizuda.easy.retry.server.web.service.DashBoardService;
 import com.aizuda.easy.retry.server.web.service.convert.*;
@@ -39,10 +40,7 @@ import org.springframework.web.client.RestTemplate;
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Comparator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -71,16 +69,19 @@ public class DashBoardServiceImpl implements DashBoardService {
     @Override
     public DashboardCardResponseVO taskRetryJob() {
 
-        String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
+        // 查询登录用户权限
+        UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
+        String namespaceId = userSessionVO.getNamespaceId();
+        List<String> groupNames = userSessionVO.isUser() ? userSessionVO.getGroupNames() : new ArrayList<>();
         DashboardCardResponseVO dashboardCardResponseVO = new DashboardCardResponseVO();
         // 重试任务
-        dashboardCardResponseVO.setRetryTask(RetrySummaryResponseVOConverter.INSTANCE.toRetryTask(retrySummaryMapper.retryTask(namespaceId)));
+        dashboardCardResponseVO.setRetryTask(RetrySummaryResponseVOConverter.INSTANCE.toRetryTask(retrySummaryMapper.retryTask(namespaceId, groupNames)));
         // 定时任务
-        dashboardCardResponseVO.setJobTask(JobSummaryResponseVOConverter.INSTANCE.toTaskJob(jobSummaryMapper.toJobTask(namespaceId)));
+        dashboardCardResponseVO.setJobTask(JobSummaryResponseVOConverter.INSTANCE.toTaskJob(jobSummaryMapper.toJobTask(namespaceId, groupNames)));
         // 重试任务柱状图
-        dashboardCardResponseVO.setRetryTaskBarList(RetrySummaryResponseVOConverter.INSTANCE.toRetryTaskBar(retrySummaryMapper.retryTaskBarList(namespaceId)));
+        dashboardCardResponseVO.setRetryTaskBarList(RetrySummaryResponseVOConverter.INSTANCE.toRetryTaskBar(retrySummaryMapper.retryTaskBarList(namespaceId, groupNames)));
         // 在线Pods
-        List<ActivePodQuantityResponseDO> activePodQuantityDO = serverNodeMapper.countActivePod(Lists.newArrayList(namespaceId, ServerRegister.NAMESPACE_ID));
+        List<ActivePodQuantityResponseDO> activePodQuantityDO = serverNodeMapper.countActivePod(Lists.newArrayList(userSessionVO.getNamespaceId(), ServerRegister.NAMESPACE_ID));
         Map<Integer, Long> map = activePodQuantityDO.stream().collect(Collectors.toMap(ActivePodQuantityResponseDO::getNodeType, ActivePodQuantityResponseDO::getTotal));
         Long clientTotal = map.getOrDefault(NodeTypeEnum.CLIENT.getType(), 0L);
         Long serverTotal = map.getOrDefault(NodeTypeEnum.SERVER.getType(), 0L);
@@ -94,10 +95,13 @@ public class DashBoardServiceImpl implements DashBoardService {
     @Override
     public DashboardRetryLineResponseVO retryLineList(BaseQueryVO baseQueryVO, String groupName, String type, String startTime, String endTime) {
 
-        String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
+        // 查询登录用户权限
+        UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
+        String namespaceId = userSessionVO.getNamespaceId();
+        List<String> groupNames = userSessionVO.isUser() ? userSessionVO.getGroupNames() : new ArrayList<>();
         DashboardRetryLineResponseVO dashboardRetryLineResponseVO = new DashboardRetryLineResponseVO();
         // 重试任务列表
-        IPage<DashboardRetryLineResponseDO.Task> IPage = retrySummaryMapper.retryTaskList(namespaceId, new Page<>(baseQueryVO.getPage(), baseQueryVO.getSize()));
+        IPage<DashboardRetryLineResponseDO.Task> IPage = retrySummaryMapper.retryTaskList(namespaceId, groupNames, new Page<>(baseQueryVO.getPage(), baseQueryVO.getSize()));
         List<DashboardRetryLineResponseVO.Task> taskList = JobSummaryResponseVOConverter.INSTANCE.toDashboardRetryLineResponseVO(IPage.getRecords());
         PageResult<List<DashboardRetryLineResponseVO.Task>> pageResult = new PageResult<>(new PageDTO(IPage.getCurrent(), IPage.getSize(), IPage.getTotal()), taskList);
         dashboardRetryLineResponseVO.setTaskList(pageResult);
@@ -106,14 +110,14 @@ public class DashBoardServiceImpl implements DashBoardService {
         DateTypeEnum dateTypeEnum = DateTypeEnum.valueOf(type);
         LocalDateTime startDateTime = dateTypeEnum.getStartTime().apply(StrUtil.isNotBlank(startTime) ? LocalDateTime.parse(startTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) : null);
         LocalDateTime endDateTime = dateTypeEnum.getEndTime().apply(StrUtil.isNotBlank(endTime) ? LocalDateTime.parse(endTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) : null);
-        List<DashboardLineResponseDO> dashboardRetryLinkeResponseDOList = retrySummaryMapper.retryLineList(namespaceId, groupName, type, startDateTime, endDateTime);
+        List<DashboardLineResponseDO> dashboardRetryLinkeResponseDOList = retrySummaryMapper.retryLineList(namespaceId, groupNames, groupName, type, startDateTime, endDateTime);
         List<DashboardLineResponseVO> dashboardLineResponseVOList = DispatchQuantityResponseVOConverter.INSTANCE.toDashboardLineResponseVO(dashboardRetryLinkeResponseDOList);
         dateTypeEnum.getConsumer().accept(dashboardLineResponseVOList);
         dashboardLineResponseVOList.sort(Comparator.comparing(a -> a.getCreateDt()));
         dashboardRetryLineResponseVO.setDashboardLineResponseDOList(dashboardLineResponseVOList);
 
         // 排行榜
-        List<DashboardRetryLineResponseDO.Rank> rankList = retrySummaryMapper.dashboardRank(namespaceId, groupName, startDateTime, endDateTime);
+        List<DashboardRetryLineResponseDO.Rank> rankList = retrySummaryMapper.dashboardRank(namespaceId, groupNames, groupName, startDateTime, endDateTime);
         List<DashboardRetryLineResponseVO.Rank> ranks = SceneQuantityRankResponseVOConverter.INSTANCE.toDashboardRetryLineResponseVORank(rankList);
         dashboardRetryLineResponseVO.setRankList(ranks);
         return dashboardRetryLineResponseVO;
@@ -122,10 +126,13 @@ public class DashBoardServiceImpl implements DashBoardService {
     @Override
     public DashboardRetryLineResponseVO jobLineList(BaseQueryVO baseQueryVO, String groupName, String type, String startTime, String endTime) {
 
-        String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
+        // 查询登录用户权限
+        UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
+        String namespaceId = userSessionVO.getNamespaceId();
+        List<String> groupNames = userSessionVO.isUser() ? userSessionVO.getGroupNames() : new ArrayList<>();
         DashboardRetryLineResponseVO dashboardRetryLineResponseVO = new DashboardRetryLineResponseVO();
         // 重试任务列表
-        IPage<DashboardRetryLineResponseDO.Task> IPage = jobSummaryMapper.jobTaskList(namespaceId, new Page<>(baseQueryVO.getPage(), baseQueryVO.getSize()));
+        IPage<DashboardRetryLineResponseDO.Task> IPage = jobSummaryMapper.jobTaskList(namespaceId, groupNames, new Page<>(baseQueryVO.getPage(), baseQueryVO.getSize()));
         List<DashboardRetryLineResponseVO.Task> taskList = JobSummaryResponseVOConverter.INSTANCE.toDashboardRetryLineResponseVO(IPage.getRecords());
         PageResult<List<DashboardRetryLineResponseVO.Task>> pageResult = new PageResult<>(new PageDTO(IPage.getCurrent(), IPage.getSize(), IPage.getTotal()), taskList);
         dashboardRetryLineResponseVO.setTaskList(pageResult);
@@ -134,14 +141,14 @@ public class DashBoardServiceImpl implements DashBoardService {
         DateTypeEnum dateTypeEnum = DateTypeEnum.valueOf(type);
         LocalDateTime startDateTime = dateTypeEnum.getStartTime().apply(StrUtil.isNotBlank(startTime) ? LocalDateTime.parse(startTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) : null);
         LocalDateTime endDateTime = dateTypeEnum.getEndTime().apply(StrUtil.isNotBlank(endTime) ? LocalDateTime.parse(endTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) : null);
-        List<DashboardLineResponseDO> dashboardLineResponseDOList = jobSummaryMapper.jobLineList(namespaceId, groupName, type, startDateTime, endDateTime);
+        List<DashboardLineResponseDO> dashboardLineResponseDOList = jobSummaryMapper.jobLineList(namespaceId, groupNames, groupName, type, startDateTime, endDateTime);
         List<DashboardLineResponseVO> dashboardLineResponseVOList = DispatchQuantityResponseVOConverter.INSTANCE.toDashboardLineResponseVO(dashboardLineResponseDOList);
         dateTypeEnum.getConsumer().accept(dashboardLineResponseVOList);
         dashboardLineResponseVOList.sort(Comparator.comparing(a -> a.getCreateDt()));
         dashboardRetryLineResponseVO.setDashboardLineResponseDOList(dashboardLineResponseVOList);
 
         // 排行榜
-        List<DashboardRetryLineResponseDO.Rank> rankList = jobSummaryMapper.dashboardRank(namespaceId, groupName, startDateTime, endDateTime);
+        List<DashboardRetryLineResponseDO.Rank> rankList = jobSummaryMapper.dashboardRank(namespaceId, groupNames, groupName, startDateTime, endDateTime);
         List<DashboardRetryLineResponseVO.Rank> ranks = SceneQuantityRankResponseVOConverter.INSTANCE.toDashboardRetryLineResponseVORank(rankList);
         dashboardRetryLineResponseVO.setRankList(ranks);
         return dashboardRetryLineResponseVO;

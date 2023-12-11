@@ -48,6 +48,12 @@
                ifnull(sum(running_num + finish_num + max_count_num + suspend_num), 0) AS totalNum
         FROM retry_summary
         WHERE namespace_id = #{namespaceId}
+        <if test="groupNames != null and groupNames.size > 0">
+            AND group_name IN
+            <foreach collection="groupNames" item="groupName"  open="("  separator="," close=")">
+                #{groupName}
+            </foreach>
+        </if>
     </select>
 
     <select id="retryTaskBarList"
@@ -69,6 +75,12 @@
                  LEFT JOIN (SELECT DATE (trigger_at) AS triggerAt,
              SUM(running_num + finish_num + max_count_num + suspend_num) AS taskTotal FROM retry_summary
         WHERE namespace_id = #{namespaceId}
+        <if test="groupNames != null and groupNames.size > 0">
+            AND group_name IN
+            <foreach collection="groupNames" item="groupName"  open="("  separator="," close=")">
+                #{groupName}
+            </foreach>
+        </if>
         GROUP BY triggerAt
             ) b
         ON tmp.date = b.triggerAt
@@ -107,6 +119,12 @@
             </if>
             AND namespace_id = #{namespaceId} AND trigger_at BETWEEN #{from} AND #{to}
         </where>
+        <if test="groupNames != null and groupNames.size > 0">
+            AND group_name IN
+            <foreach collection="groupNames" item="groupName"  open="("  separator="," close=")">
+                #{groupName}
+            </foreach>
+        </if>
         GROUP BY createDt
     </select>
 
@@ -122,6 +140,12 @@
             AND namespace_id = #{namespaceId}
             AND trigger_at >= #{startTime} AND trigger_at &lt;= #{endTime}
         </where>
+        <if test="groupNames != null and groupNames.size > 0">
+            AND group_name IN
+            <foreach collection="groupNames" item="groupName"  open="("  separator="," close=")">
+                #{groupName}
+            </foreach>
+        </if>
         GROUP BY namespace_id, group_name, scene_name
         HAVING total > 0
         ORDER BY total DESC LIMIT 10
@@ -134,6 +158,12 @@
                count(*)                                            AS total
         FROM scene_config
         WHERE namespace_id = #{namespaceId}
+        <if test="groupNames != null and groupNames.size > 0">
+            AND group_name IN
+            <foreach collection="groupNames" item="groupName"  open="("  separator="," close=")">
+                #{groupName}
+            </foreach>
+        </if>
         GROUP BY namespace_id, group_name
     </select>
 </mapper>
