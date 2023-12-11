@@ -41,8 +41,8 @@ Easy-RETRY 是一个针对业务系统重试流量的治理平台，其自身具
 
 # 流量管理平台预览
 地址: <http://preview.easyretry.com/>
-账号: admin
-密码: admin
+账号: developer
+密码: 123456
 
 ## 特别用户
 <a href="http://aizuda.com/?from=mp">![aizuda.png](doc/images/aizuda.png)</a>

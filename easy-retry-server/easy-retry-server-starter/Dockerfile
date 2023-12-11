@@ -1,7 +1,7 @@
 FROM --platform=$BUILDPLATFORM openjdk:8-jdk-alpine as builder
 WORKDIR /
 
-ADD ./target/easy-retry-server.jar easy-retry-server.jar
+ADD ./target/easy-retry-server-exec.jar easy-retry-server.jar
 
 FROM --platform=$BUILDPLATFORM openjdk:8-jdk-alpine
 MAINTAINER www.byteblogs.com
