@@ -40,7 +40,7 @@ Easy-RETRY 是一个针对业务系统重试流量的治理平台，其自身具
 - https://www.easyretry.com/pages/406a68/
 
 # 流量管理平台预览
-地址: <http://preview.easyretry.com/>
+地址: <http://preview.easyretry.com/easy-retry/>
 账号: developer
 密码: 123456
 
