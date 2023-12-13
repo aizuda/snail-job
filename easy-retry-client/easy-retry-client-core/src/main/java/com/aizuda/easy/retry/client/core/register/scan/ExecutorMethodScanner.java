@@ -9,7 +9,7 @@ import com.aizuda.easy.retry.client.core.retryer.RetryerInfo;
 import com.aizuda.easy.retry.client.core.strategy.ExecutorMethod;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
+import cn.hutool.core.util.StrUtil;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -77,7 +77,7 @@ public class ExecutorMethodScanner implements Scanner, ApplicationContextAware {
                 1,
                 1,
                 idempotentIdGenerate,
-                StringUtils.EMPTY,
+                StrUtil.EMPTY,
                 (Class<? extends ExecutorMethod>) executor.getClass(),
                 Boolean.TRUE,
                 retryCompleteCallback,
