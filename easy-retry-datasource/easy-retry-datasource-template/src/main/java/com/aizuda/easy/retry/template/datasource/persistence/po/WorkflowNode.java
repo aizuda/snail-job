@@ -45,6 +45,11 @@ public class WorkflowNode implements Serializable {
     private Long jobId;
 
     /**
+     * 工作流ID
+     */
+    private Long workflowId;
+
+    /**
      * 1、任务节点 2、条件节点
      */
     private Byte nodeType;

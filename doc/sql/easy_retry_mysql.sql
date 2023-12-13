@@ -468,6 +468,7 @@ CREATE TABLE `workflow_node`
     `namespace_id`         varchar(64)         NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' COMMENT '命名空间id',
     `group_name`           varchar(64)         NOT NULL COMMENT '组名称',
     `job_id`               bigint(20)          NOT NULL COMMENT '任务信息id',
+    `workflow_id`               bigint(20)          NOT NULL COMMENT '工作流ID',
     `node_type`            tinyint(4)          NOT NULL DEFAULT 1 COMMENT '1、任务节点 2、条件节点',
     `expression_type`      tinyint(4)          NOT NULL DEFAULT 0 COMMENT '1、SpEl、2、Aviator 3、QL',
     `fail_strategy`        tinyint(4)          NOT NULL DEFAULT 0 COMMENT '失败策略 1、跳过 2、阻塞',
