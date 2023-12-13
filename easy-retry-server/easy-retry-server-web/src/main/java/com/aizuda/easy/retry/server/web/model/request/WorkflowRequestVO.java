@@ -21,7 +21,7 @@ public class WorkflowRequestVO {
     @Pattern(regexp = "^[A-Za-z0-9_]{1,64}$", message = "仅支持长度为1~64字符且类型为数字、字母和下划线")
     private String groupName;
 
-    @NotBlank(message = "触发类型不能为空")
+    @NotNull(message = "触发类型不能为空")
     private Integer triggerType;
 
     @NotBlank(message = "触发间隔不能为空")
@@ -30,34 +30,62 @@ public class WorkflowRequestVO {
     @NotNull(message = "执行超时时间不能为空")
     private Integer executorTimeout;
 
-    @NotEmpty(message = "执行超时时间不能为空")
-    @Valid
+    /**
+     * 0、关闭、1、开启
+     */
+    @NotNull(message = "工作流状态")
+    private Integer workflowStatus;
+
+    @NotEmpty(message = "节点信息不能为空")
     private List<NodeInfo> nodeInfos;
 
     @Data
     public static class NodeInfo {
 
         /**
+         * 优先级
+         */
+        private Integer priorityLevel;
+
+        /**
+         * 1、任务节点 2、条件节点
+         */
+        @NotNull(message = "节点类型不能为空 ")
+        private Integer nodeType;
+
+        /**
+         * 任务ID
+         */
+        @NotNull(message = "任务ID不能为空")
+        private Long jobId;
+
+        /**
+         * 表达式类型 1、SpEl、2、Aviator 3、QL
+         */
+        @NotNull(message = "表达式类型不能为空")
+        private Integer expressionType;
+
+        /**
          * 条件节点表达式
          */
         private String nodeExpression;
 
-        @NotNull(message = "节点类型不能为空")
-        private Integer nodeType;
-
-        @NotNull(message = "任务ID不能为空")
-        private Long jobId;
-
-        @NotNull(message = "表达式类型不能为空")
-        private Integer expressionType;
-
+        /**
+         * 1、跳过 2、阻塞
+         */
         @NotNull(message = "失败策略不能为空")
         private Integer failStrategy;
 
         /**
+         * 工作流状态  0、关闭、1、开启
+         */
+        @NotNull(message = "工作流状态不能为空")
+        private Integer workflowNodeStatus;
+
+        /**
          * 子节点
          */
-        private List<NodeInfo> childrenList;
+        private List<NodeInfo> childreList;
 
     }
 

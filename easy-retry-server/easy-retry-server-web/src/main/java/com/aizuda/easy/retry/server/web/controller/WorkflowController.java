@@ -4,6 +4,7 @@ import com.aizuda.easy.retry.server.web.model.request.WorkflowRequestVO;
 import com.aizuda.easy.retry.server.web.service.WorkflowService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -18,9 +19,8 @@ public class WorkflowController {
 
     private final WorkflowService workflowService;
 
-    @Autowired
     @PostMapping
-    public Boolean saveWorkflow(@RequestBody WorkflowRequestVO workflowRequestVO) {
+    public Boolean saveWorkflow(@RequestBody @Validated WorkflowRequestVO workflowRequestVO) {
         return workflowService.saveWorkflow(workflowRequestVO);
     }
 

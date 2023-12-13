@@ -8,6 +8,9 @@ import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
 /**
  * <p>
  * 工作流
@@ -41,9 +44,24 @@ public class Workflow implements Serializable {
     private String groupName;
 
     /**
+     * 触发类型
+     */
+    private Integer triggerType;
+
+    /**
+     * 触发间隔
+     */
+    private String triggerInterval;
+
+    /**
+     * 执行超时时间
+     */
+    private Integer executorTimeout;
+
+    /**
      * 工作流状态 0、关闭、1、开启
      */
-    private Byte workflowStatus;
+    private Integer workflowStatus;
 
     /**
      * 任务执行时间
