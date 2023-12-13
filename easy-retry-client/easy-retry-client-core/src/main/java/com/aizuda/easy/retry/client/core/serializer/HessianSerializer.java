@@ -3,7 +3,7 @@ package com.aizuda.easy.retry.client.core.serializer;
 import com.aizuda.easy.retry.client.core.RetryArgSerializer;
 import com.caucho.hessian.io.HessianInput;
 import com.caucho.hessian.io.HessianOutput;
-import org.apache.commons.lang.StringUtils;
+import cn.hutool.core.util.StrUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -23,7 +23,7 @@ public class HessianSerializer implements RetryArgSerializer {
     @Override
     public String serialize(Object t) {
         if (Objects.isNull(t)) {
-            return StringUtils.EMPTY;
+            return StrUtil.EMPTY;
         }
 
         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
@@ -37,7 +37,7 @@ public class HessianSerializer implements RetryArgSerializer {
 
     @Override
     public Object deSerialize(String infoStr, Class aClass, Method method) {
-        if (StringUtils.isBlank(infoStr)) {
+        if (StrUtil.isBlank(infoStr)) {
             return null;
         }
 
