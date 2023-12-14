@@ -36,7 +36,7 @@ import java.util.Map;
 public class LarkAlarm extends AbstractAlarm<AlarmContext> {
 
 
-    public static final String atLabel = "<at id={0}></at>";
+    public static final String AT_LABEL = "<at id={0}></at>";
 
     @Override
     public Integer getAlarmType() {
@@ -45,9 +45,7 @@ public class LarkAlarm extends AbstractAlarm<AlarmContext> {
 
     @Override
     public boolean asyncSendMessage(AlarmContext context) {
-        threadPoolExecutor.execute(() -> {
-            syncSendMessage(context);
-        });
+        threadPoolExecutor.execute(() -> syncSendMessage(context));
 
         return true;
     }
@@ -69,12 +67,15 @@ public class LarkAlarm extends AbstractAlarm<AlarmContext> {
             HttpRequest request = post.body(JsonUtil.toJsonString(builder), ContentType.JSON.toString());
             HttpResponse execute = request.execute();
             LogUtils.debug(log, JsonUtil.toJsonString(execute));
+            if (execute.isOk()) {
+                return true;
+            }
+            LogUtils.error(log, "发送lark消息失败:{}", execute.body());
+            return false;
         } catch (Exception e) {
             log.error("发送lark消息失败", e);
             return false;
         }
-
-        return true;
     }
 
     private List buildElements(String text, List<String> ats) {
@@ -123,10 +124,10 @@ public class LarkAlarm extends AbstractAlarm<AlarmContext> {
 
         StringBuilder sb = new StringBuilder(text);
         if (ats.stream().map(String::toLowerCase).anyMatch(SystemConstants.AT_ALL::equals)) {
-            sb.append(MessageFormat.format(atLabel, SystemConstants.AT_ALL));
+            sb.append(MessageFormat.format(AT_LABEL, SystemConstants.AT_ALL));
         } else {
             ats.stream().filter(StrUtil::isNotBlank)
-                    .forEach(at -> sb.append(MessageFormat.format(atLabel, at)));
+                    .forEach(at -> sb.append(MessageFormat.format(AT_LABEL, at)));
         }
         return sb.toString();
     }

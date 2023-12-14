@@ -171,6 +171,10 @@ const enums = {
       'name': '邮箱通知',
       'color': '#1b7ee5'
     },
+    '3': {
+      'name': '企业微信',
+      'color': '#0082EF'
+    },
     '4': {
       'name': '飞书',
       'color': '#087da1'

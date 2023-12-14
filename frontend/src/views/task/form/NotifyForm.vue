@@ -165,7 +165,8 @@
               {rules: [{ required: true, message: '请输入钉钉URL', whitespace: true}]}
             ]" />
         </a-form-item>
-        <a-form-item v-if="this.tempNotifyTypeValue === '1'">
+        <a-form-item
+          v-if="this.tempNotifyTypeValue === '1'">
           <span slot="label">被@人手机号或钉钉号&nbsp;</span>
           <a-input
             placeholder="请输入被@人手机号或钉钉号"
@@ -174,6 +175,28 @@
             v-decorator="[
               'ats',
               {rules: [{ required: false, message: '请输入被@人手机号或钉钉号', whitespace: true}]}
+            ]" />
+        </a-form-item>
+        <a-form-item
+          v-if="this.tempNotifyTypeValue === '3'"
+          label="企业微信URL">
+          <a-input
+            placeholder="请输入企业微信URL"
+            v-decorator="[
+              'webhookUrl',
+              {rules: [{ required: true, message: '请输入企业微信URL', whitespace: true}]}
+            ]" />
+        </a-form-item>
+        <a-form-item
+          v-if="this.tempNotifyTypeValue === '3'">
+          <span slot="label">被@人企业微信用户id&nbsp;</span>
+          <a-input
+            placeholder="请输入被@人企业微信用户id"
+            type="textarea"
+            v-if="this.tempNotifyTypeValue === '3'"
+            v-decorator="[
+              'ats',
+              {rules: [{ required: false, message: '请输入被@人企业微信用户id', whitespace: true}]}
             ]" />
         </a-form-item>
         <a-form-item
@@ -493,6 +516,10 @@ export default {
         s =
           '钉钉Url:' + json['webhookUrl'] + ';' +
           '被@人手机号或钉钉号:' + json['ats'] + ';'
+      } else if (this.notifyTypeValue === '3') {
+        s =
+          '企业微信Url:' + json['webhookUrl'] + ';' +
+          '被@人企业微信用户id:' + json['ats'] + ';'
       } else if (this.notifyTypeValue === '4') {
         s =
           '飞书Url:' + json['webhookUrl'] + ';' +
