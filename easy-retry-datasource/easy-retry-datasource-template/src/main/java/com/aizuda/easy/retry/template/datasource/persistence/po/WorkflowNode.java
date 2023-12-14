@@ -35,6 +35,11 @@ public class WorkflowNode implements Serializable {
     private String namespaceId;
 
     /**
+     * 节点名称
+     */
+    private String nodeName;
+
+    /**
      * 组名称
      */
     private String groupName;
@@ -52,22 +57,22 @@ public class WorkflowNode implements Serializable {
     /**
      * 1、任务节点 2、条件节点
      */
-    private Byte nodeType;
+    private Integer nodeType;
 
     /**
      * 1、SpEl、2、Aviator 3、QL
      */
-    private Byte expressionType;
+    private Integer expressionType;
 
     /**
      * 失败策略 1、跳过 2、阻塞
      */
-    private Byte failStrategy;
+    private Integer failStrategy;
 
     /**
      * 工作流节点状态 0、关闭、1、开启
      */
-    private Byte workflowNodeStatus;
+    private Integer workflowNodeStatus;
 
     /**
      * 节点表达式
@@ -87,7 +92,7 @@ public class WorkflowNode implements Serializable {
     /**
      * 逻辑删除 1、删除
      */
-    private Byte deleted;
+    private Integer deleted;
 
     /**
      * 扩展字段

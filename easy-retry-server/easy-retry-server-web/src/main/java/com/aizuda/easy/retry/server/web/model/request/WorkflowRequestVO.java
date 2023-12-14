@@ -36,22 +36,44 @@ public class WorkflowRequestVO {
     @NotNull(message = "工作流状态")
     private Integer workflowStatus;
 
-    @NotEmpty(message = "节点信息不能为空")
-    private List<NodeInfo> nodeInfos;
+    /**
+     * DAG节点配置
+     */
+    private NodeConfig nodeConfig;
 
     @Data
-    public static class NodeInfo {
-
-        /**
-         * 优先级
-         */
-        private Integer priorityLevel;
+    public static class NodeConfig {
 
         /**
          * 1、任务节点 2、条件节点
          */
         @NotNull(message = "节点类型不能为空 ")
         private Integer nodeType;
+
+        /**
+         * 节点信息
+         */
+        private List<NodeInfo> conditionNodes;
+
+        /**
+         * 子节点
+         */
+        private NodeConfig childNode;
+
+    }
+
+    @Data
+    public static class NodeInfo {
+
+        /**
+         * 节点名称
+         */
+        private String nodeName;
+
+        /**
+         * 优先级
+         */
+        private Integer priorityLevel;
 
         /**
          * 任务ID
@@ -85,7 +107,7 @@ public class WorkflowRequestVO {
         /**
          * 子节点
          */
-        private List<NodeInfo> childreList;
+        private NodeConfig childNode;
 
     }
 

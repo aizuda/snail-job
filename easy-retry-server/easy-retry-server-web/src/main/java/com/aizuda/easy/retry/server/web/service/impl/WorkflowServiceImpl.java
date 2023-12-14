@@ -5,6 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.web.model.request.WorkflowRequestVO;
+import com.aizuda.easy.retry.server.web.model.request.WorkflowRequestVO.NodeConfig;
 import com.aizuda.easy.retry.server.web.model.request.WorkflowRequestVO.NodeInfo;
 import com.aizuda.easy.retry.server.web.service.WorkflowService;
 import com.aizuda.easy.retry.server.web.service.convert.WorkflowConverter;
@@ -13,9 +14,11 @@ import com.aizuda.easy.retry.template.datasource.persistence.mapper.WorkflowNode
 import com.aizuda.easy.retry.template.datasource.persistence.po.Workflow;
 import com.aizuda.easy.retry.template.datasource.persistence.po.WorkflowNode;
 import com.google.common.collect.Lists;
+import com.google.common.graph.ElementOrder;
 import com.google.common.graph.GraphBuilder;
 import com.google.common.graph.MutableGraph;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -23,6 +26,7 @@ import org.springframework.util.CollectionUtils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author xiaowoniu
@@ -30,6 +34,7 @@ import java.util.Map;
  * @since 2.6.0
  */
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class WorkflowServiceImpl implements WorkflowService {
     private final WorkflowMapper workflowMapper;
@@ -39,7 +44,7 @@ public class WorkflowServiceImpl implements WorkflowService {
     public boolean saveWorkflow(WorkflowRequestVO workflowRequestVO) {
 
         Long root = -1L;
-        MutableGraph<Long> graph = GraphBuilder.directed().build();
+        MutableGraph<Long> graph = GraphBuilder.directed().allowsSelfLoops(false).build();
         // 添加虚拟头节点
         graph.addNode(root);
 
@@ -48,12 +53,13 @@ public class WorkflowServiceImpl implements WorkflowService {
         workflow.setFlowInfo(StrUtil.EMPTY);
         Assert.isTrue(1 ==  workflowMapper.insert(workflow), () -> new EasyRetryServerException("新增工作流失败"));
 
-        // 组装节点信息
-        List<NodeInfo> nodeInfos = workflowRequestVO.getNodeInfos();
+        // 获取DAG节点配置
+        NodeConfig nodeConfig = workflowRequestVO.getNodeConfig();
 
         // 递归构建图
-        buildGraph(root, workflowRequestVO.getGroupName(), workflow.getId(), nodeInfos, graph);
+        buildGraph(Lists.newArrayList(root), workflowRequestVO.getGroupName(), workflow.getId(), nodeConfig, graph);
 
+        log.info("图构建完成. graph:[{}]", graph);
         // 保存图信息
         workflow.setFlowInfo(JsonUtil.toJsonString(convertGraphToAdjacencyList(graph)));
         workflowMapper.updateById(workflow);
@@ -71,23 +77,33 @@ public class WorkflowServiceImpl implements WorkflowService {
         return adjacencyList;
     }
 
-    public void buildGraph(Long parentId, String groupName, Long workflowId, List<NodeInfo> nodeInfos, MutableGraph<Long> graph) {
+    public void buildGraph(List<Long> parentIds, String groupName, Long workflowId, NodeConfig nodeConfig, MutableGraph<Long> graph) {
 
-        if (CollectionUtils.isEmpty(nodeInfos)) {
+        if (Objects.isNull(nodeConfig)) {
             return;
         }
 
-        for (final NodeInfo nodeInfo : nodeInfos) {
-            WorkflowNode workflowNode = WorkflowConverter.INSTANCE.toWorkflowNode(nodeInfo);
-            workflowNode.setWorkflowId(workflowId);
-            workflowNode.setGroupName(groupName);
-            Assert.isTrue(1 ==  workflowNodeMapper.insert(workflowNode), () -> new EasyRetryServerException("新增工作流节点失败"));
-            // 添加节点
-            graph.addNode(workflowNode.getId());
-            // 添加边
-            graph.putEdge(parentId, workflowNode.getId());
-            buildGraph(workflowNode.getId(), groupName, workflowId, nodeInfo.getChildreList(), graph);
+        // 获取节点信息
+        List<NodeInfo> conditionNodes = nodeConfig.getConditionNodes();
+        List<Long> parentIds1 = Lists.newArrayList();
+        if (!CollectionUtils.isEmpty(conditionNodes)) {
+            for (final NodeInfo nodeInfo : conditionNodes) {
+                WorkflowNode workflowNode = WorkflowConverter.INSTANCE.toWorkflowNode(nodeInfo);
+                workflowNode.setWorkflowId(workflowId);
+                workflowNode.setGroupName(groupName);
+                Assert.isTrue(1 ==  workflowNodeMapper.insert(workflowNode), () -> new EasyRetryServerException("新增工作流节点失败"));
+                // 添加节点
+                graph.addNode(workflowNode.getId());
+                for (final Long parentId : parentIds) {
+                    // 添加边
+                    graph.putEdge(parentId, workflowNode.getId());
+                }
+                parentIds1.add(workflowNode.getId());
+                buildGraph(Lists.newArrayList(workflowNode.getId()), groupName, workflowId, nodeInfo.getChildNode(), graph);
+            }
         }
+
+        buildGraph(parentIds1, groupName, workflowId, nodeConfig.getChildNode(), graph);
     }
 
 
