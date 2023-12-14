@@ -8,13 +8,9 @@ import com.dingtalk.api.DingTalkClient;
 import com.dingtalk.api.request.OapiRobotSendRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
 import java.text.MessageFormat;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author: www.byteblogs.com
@@ -24,22 +20,6 @@ import java.util.stream.Collectors;
 public class DingDingUtils {
 
     public static final String atLabel = "@{0}";
-
-    /**
-     * 防止文本过长钉钉限流，目前最大为4000
-     *
-     * @param text
-     * @return
-     */
-    private static String subTextLength(String text) {
-        int length = text.length();
-
-        if (length > 4000) {
-            return text.substring(0, 4000);
-        } else {
-            return text;
-        }
-    }
 
     /**
      * 组装OapiRobotSendRequest
@@ -53,7 +33,8 @@ public class DingDingUtils {
         request.setMsgtype("markdown");
         OapiRobotSendRequest.Markdown markdown = new OapiRobotSendRequest.Markdown();
         markdown.setTitle(title);
-        markdown.setText(subTextLength(getAtText(ats, text)));
+        // 防止文本过长钉钉限流，目前最大为4000
+        markdown.setText(StrUtil.sub(getAtText(ats, text, atLabel), 0, 4000));
         request.setMarkdown(markdown);
 
         OapiRobotSendRequest.At at = new OapiRobotSendRequest.At();
@@ -65,7 +46,7 @@ public class DingDingUtils {
         return request;
     }
 
-    public static String getAtText(List<String> ats, String text) {
+    public static String getAtText(List<String> ats, String text, String atLabel) {
         if (CollectionUtils.isEmpty(ats)) {
             return text;
         }
