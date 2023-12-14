@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.server.web.service;
 
 import com.aizuda.easy.retry.server.web.model.request.WorkflowRequestVO;
+import com.aizuda.easy.retry.server.web.model.response.WorkflowDetailResponseVO;
 
 /**
  * @author xiaowoniu
@@ -10,4 +11,6 @@ import com.aizuda.easy.retry.server.web.model.request.WorkflowRequestVO;
 public interface WorkflowService {
 
     boolean saveWorkflow(WorkflowRequestVO workflowRequestVO);
+
+    WorkflowDetailResponseVO getWorkflowDetail(Long id);
 }

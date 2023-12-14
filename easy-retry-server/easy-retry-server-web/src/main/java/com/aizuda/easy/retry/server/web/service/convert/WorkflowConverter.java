@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.server.web.service.convert;
 
 import com.aizuda.easy.retry.server.web.model.request.WorkflowRequestVO;
+import com.aizuda.easy.retry.server.web.model.response.WorkflowDetailResponseVO;
 import com.aizuda.easy.retry.template.datasource.persistence.po.Workflow;
 import com.aizuda.easy.retry.template.datasource.persistence.po.WorkflowNode;
 import org.mapstruct.Mapper;
@@ -22,4 +23,7 @@ public interface WorkflowConverter {
 
     WorkflowNode toWorkflowNode(WorkflowRequestVO.NodeInfo nodeInfo);
 
+    WorkflowDetailResponseVO toWorkflowDetailResponseVO(Workflow workflow);
+
+    WorkflowDetailResponseVO.NodeInfo toNodeInfo(WorkflowNode workflowNode);
 }
