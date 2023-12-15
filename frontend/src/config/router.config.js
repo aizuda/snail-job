@@ -209,6 +209,12 @@ export const asyncRouterMap = [
             hidden: true,
             component: () => import('@/views/job/form/JobNotifyForm.vue'),
             meta: { title: '通知配置', icon: 'profile', keepAlive: true, permission: ['jobNotify'] }
+          },
+          {
+            path: '/job/workflow/list',
+            name: 'WorkflowList',
+            component: () => import('@/views/job/WorkflowList'),
+            meta: { title: '工作流', icon: 'profile', permission: ['jobBatch'] }
           }
         ]
       },

@@ -45,9 +45,8 @@ public class JdbcLockProvider extends AbstractLockProvider {
     }
 
     @Override
-
     public boolean unlock(final LockConfig lockConfig) {
-        LocalDateTime now = lockConfig.getCreateDt();
+        LocalDateTime now = LocalDateTime.now();
         DistributedLock distributedLock = new DistributedLock();
         distributedLock.setLockedBy(ServerRegister.CURRENT_CID);
         LocalDateTime lockAtLeast = lockConfig.getLockAtLeast();

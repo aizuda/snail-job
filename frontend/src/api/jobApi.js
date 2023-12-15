@@ -27,10 +27,25 @@ const jobApi = {
   jobTaskList: '/job/task/list',
 
   // 日志
-  jobLogList: '/job/log/list'
+  jobLogList: '/job/log/list',
+
+  // DAG
+  listPage: '/workflow/page/list',
+  saveWorkflow: '/workflow',
+  updateWorkflow: '/workflow',
+  workflowDetail: '/workflow'
+
 }
 
 export default jobApi
+
+export function listPage (parameter) {
+  return request({
+    url: jobApi.listPage,
+    method: 'get',
+    params: parameter
+  })
+}
 
 export function triggerJob (id) {
   return request({
