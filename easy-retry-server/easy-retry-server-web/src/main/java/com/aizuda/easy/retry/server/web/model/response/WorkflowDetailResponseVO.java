@@ -76,6 +76,11 @@ public class WorkflowDetailResponseVO {
         private Long id;
 
         /**
+         * 1、任务节点 2、条件节点 3、回调节点
+         */
+        private Integer nodeType;
+
+        /**
          * 节点名称
          */
         private String nodeName;

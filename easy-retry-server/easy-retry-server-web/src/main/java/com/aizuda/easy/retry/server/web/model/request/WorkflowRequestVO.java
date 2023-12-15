@@ -21,6 +21,9 @@ public class WorkflowRequestVO {
     @Pattern(regexp = "^[A-Za-z0-9_]{1,64}$", message = "仅支持长度为1~64字符且类型为数字、字母和下划线")
     private String groupName;
 
+    @NotBlank(message = "工作流名称不能为空")
+    private String workflowName;
+
     @NotNull(message = "触发类型不能为空")
     private Integer triggerType;
 
@@ -35,6 +38,12 @@ public class WorkflowRequestVO {
      */
     @NotNull(message = "工作流状态")
     private Integer workflowStatus;
+
+    /**
+     * 描述
+     */
+    private String description;
+
 
     /**
      * DAG节点配置

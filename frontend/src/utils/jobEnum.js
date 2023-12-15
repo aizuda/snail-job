@@ -172,7 +172,7 @@ const enums = {
       'color': '#087da1'
     }
   },
-notifyStatus: {
+  notifyStatus: {
     '0': {
       'name': '停用',
       'color': '#9c1f1f'
@@ -182,13 +182,23 @@ notifyStatus: {
       'color': '#f5a22d'
     }
   },
-rateLimiterStatus: {
+  rateLimiterStatus: {
     '0': {
       'name': '未启用',
       'color': '#9c1f1f'
     },
     '1': {
       'name': '启用',
+      'color': '#f5a22d'
+    }
+  },
+  workflowStatus: {
+    '0': {
+      'name': '关闭',
+      'color': '#9c1f1f'
+    },
+    '1': {
+      'name': '开启',
       'color': '#f5a22d'
     }
   }

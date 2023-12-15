@@ -8,9 +8,6 @@ import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-
 /**
  * <p>
  * 工作流
@@ -32,6 +29,11 @@ public class Workflow implements Serializable {
      */
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
+
+    /**
+     * 工作流名称
+     */
+    private String workflowName;
 
     /**
      * 命名空间id
@@ -66,12 +68,17 @@ public class Workflow implements Serializable {
     /**
      * 任务执行时间
      */
-    private Long executionAt;
+    private Long nextTriggerAt;
 
     /**
      * 流程信息
      */
     private String flowInfo;
+
+    /**
+     * 描述
+     */
+    private String description;
 
     /**
      * 创建时间
@@ -86,7 +93,7 @@ public class Workflow implements Serializable {
     /**
      * 逻辑删除 1、删除
      */
-    private Byte deleted;
+    private Integer deleted;
 
     /**
      * 扩展字段

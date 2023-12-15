@@ -1,7 +1,13 @@
 package com.aizuda.easy.retry.server.web.service;
 
+import com.aizuda.easy.retry.server.web.model.base.PageResult;
+import com.aizuda.easy.retry.server.web.model.request.WorkflowQueryVO;
 import com.aizuda.easy.retry.server.web.model.request.WorkflowRequestVO;
 import com.aizuda.easy.retry.server.web.model.response.WorkflowDetailResponseVO;
+import com.aizuda.easy.retry.server.web.model.response.WorkflowResponseVO;
+
+import java.io.IOException;
+import java.util.List;
 
 /**
  * @author xiaowoniu
@@ -12,5 +18,7 @@ public interface WorkflowService {
 
     boolean saveWorkflow(WorkflowRequestVO workflowRequestVO);
 
-    WorkflowDetailResponseVO getWorkflowDetail(Long id);
+    WorkflowDetailResponseVO getWorkflowDetail(Long id) throws IOException;
+
+    PageResult<List<WorkflowResponseVO>> listPage(WorkflowQueryVO queryVO);
 }
