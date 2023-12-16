@@ -6,9 +6,9 @@
       <a href="https://github.com/byteblogs168" target="_blank">@byteblogs168</a>
     </template>
     <template v-slot:copyright >
-      <a href="mailto:598092184@qq.com" target="_blank" style='margin: 10px'><icon-font style="fontSize: 20px" type="icon-youxiang" /></a>
-      <a href="https://github.com/aizuda/easy-retry" target="_blank" style='margin: 10px'><icon-font style="fontSize: 20px" type="icon-github2" /> </a>
-      <a href="https://gitee.com/aizuda/easy-retry" target="_blank" style='margin: 10px'>   <icon-font style="fontSize: 20px" type="icon-GITEE" /></a>
+      <a href="mailto:598092184@qq.com" target="_blank" style="margin: 10px"><icon-font style="fontSize: 20px" type="icon-youxiang" /></a>
+      <a href="https://github.com/aizuda/easy-retry" target="_blank" style="margin: 10px"><icon-font style="fontSize: 20px" type="icon-github2" /> </a>
+      <a href="https://gitee.com/aizuda/easy-retry" target="_blank" style="margin: 10px">   <icon-font style="fontSize: 20px" type="icon-GITEE" /></a>
     </template>
   </global-footer>
 </template>
