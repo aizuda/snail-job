@@ -1,10 +1,9 @@
 <template>
   <iframe
     ref="iframe"
-    :src="`/lib/index.html?token=${token}&namespaceId=${namespaceId}&id=${id}`"
+    :src="`/lib?token=${token}&x1c2Hdd6=D7Rzd7Oe&namespaceId=${namespaceId}&id=${id}`"
     marginwidth="0"
     frameborder="no"
-    onLoad="this.height=100"
     :style="`width: 100%;height:calc(99vh - 60px)`"
   />
 </template>
