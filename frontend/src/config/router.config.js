@@ -3,7 +3,7 @@ import { UserLayout, BasicLayout, BlankLayout } from '@/layouts'
 
 const RouteView = {
   name: 'RouteView',
-  render: h => h('router-view')
+  render: (h) => h('router-view')
 }
 
 export const asyncRouterMap = [
@@ -64,14 +64,26 @@ export const asyncRouterMap = [
             name: 'GroupConfig',
             hidden: true,
             component: () => import('@/views/config/basicConfigForm/BasicConfigForm'),
-            meta: { title: '组信息配置', hidden: true, hideChildrenInMenu: true, icon: 'profile', permission: ['group'] }
+            meta: {
+              title: '组信息配置',
+              hidden: true,
+              hideChildrenInMenu: true,
+              icon: 'profile',
+              permission: ['group']
+            }
           },
           {
             path: '/group/info',
             name: 'GroupInfo',
             hidden: true,
             component: () => import('@/views/config/GroupInfo'),
-            meta: { title: '组配置详情', hidden: true, hideChildrenInMenu: true, icon: 'profile', permission: ['group'] }
+            meta: {
+              title: '组配置详情',
+              hidden: true,
+              hideChildrenInMenu: true,
+              icon: 'profile',
+              permission: ['group']
+            }
           }
         ]
       },
@@ -148,7 +160,7 @@ export const asyncRouterMap = [
             component: () => import('@/views/task/form/NotifyForm.vue'),
             meta: { title: '通知配置', icon: 'profile', keepAlive: true, permission: ['retryTask'] }
           }
-          ]
+        ]
       },
       {
         path: '/job',
@@ -215,6 +227,13 @@ export const asyncRouterMap = [
             name: 'WorkflowList',
             component: () => import('@/views/job/WorkflowList'),
             meta: { title: '工作流', icon: 'profile', permission: ['jobBatch'] }
+          },
+          {
+            path: '/job/workflow/edit',
+            name: 'WorkflowEdit',
+            hidden: true,
+            component: () => import('@/views/job/WorkflowEdit'),
+            meta: { title: '工作流编辑', icon: 'profile', permission: ['jobBatch'] }
           }
         ]
       },
