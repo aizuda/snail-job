@@ -292,13 +292,13 @@ export default {
   },
   methods: {
     handleEdit (record) {
-      this.$router.push({ path: '/job/config', query: { id: record.id } })
+      this.$router.push({ path: '/job/workflow/edit', query: { id: record.id } })
     },
     goJobBatchList (record) {
       this.$router.push({ path: '/job/batch/list', query: { jobId: record.id } })
     },
     handleNew () {
-      this.$router.push({ path: '/job/config' })
+      this.$router.push({ path: '/job/workflow/edit' })
     },
     handleChange (value) {
     },
