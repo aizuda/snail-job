@@ -35,11 +35,15 @@ export default {
   methods: {
     save () {
       window.removeEventListener('message', this.handleMessage)
-      this.$message.info('工作流提交成功')
+      this.$message.info('工作流新增成功')
       this.$router.push({ path: '/job/workflow/list' })
     },
     cancel () {
       window.removeEventListener('message', this.handleMessage)
+      this.$router.push({ path: '/job/workflow/list' })
+    },
+    update () {
+      this.$message.info('工作流修改成功')
       this.$router.push({ path: '/job/workflow/list' })
     },
     handleMessage (e) {
@@ -48,6 +52,8 @@ export default {
           this.save()
         } else if (e.data.code === 'kb4DO9h6WIiqFhbp') {
           this.cancel()
+        } else if (e.data.code === '8Rr3XPtVVAHfduQg') {
+          this.update()
         }
       }
     }
