@@ -234,6 +234,13 @@ export const asyncRouterMap = [
             hidden: true,
             component: () => import('@/views/job/WorkflowEdit'),
             meta: { title: '工作流编辑', icon: 'profile', permission: ['jobBatch'] }
+          },
+          {
+            path: '/job/workflow/detail',
+            name: 'WorkflowDetail',
+            hidden: true,
+            component: () => import('@/views/job/WorkflowDetail'),
+            meta: { title: '工作流详情', icon: 'profile', permission: ['jobBatch'] }
           }
         ]
       },

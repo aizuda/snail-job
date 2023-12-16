@@ -307,7 +307,7 @@ export default {
     },
     handleInfo (record) {
       record = record || this.currentShowRecord
-      this.$router.push({ path: '/job/info', query: { id: record.id, groupName: record.groupName } })
+      this.$router.push({ path: '/job/workflow/detail', query: { id: record.id } })
     },
     handleOk (record) {},
     handleClose (record) {
