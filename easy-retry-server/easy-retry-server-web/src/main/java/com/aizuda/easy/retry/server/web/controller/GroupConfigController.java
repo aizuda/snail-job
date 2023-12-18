@@ -1,33 +1,19 @@
 package com.aizuda.easy.retry.server.web.controller;
 
-import cn.hutool.core.util.ReUtil;
-import com.aizuda.easy.retry.server.common.config.SystemProperties;
+import com.aizuda.easy.retry.server.web.annotation.LoginRequired;
 import com.aizuda.easy.retry.server.web.annotation.LoginUser;
+import com.aizuda.easy.retry.server.web.annotation.RoleEnum;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
 import com.aizuda.easy.retry.server.web.model.request.GroupConfigQueryVO;
 import com.aizuda.easy.retry.server.web.model.request.GroupConfigRequestVO;
 import com.aizuda.easy.retry.server.web.model.request.UserSessionVO;
 import com.aizuda.easy.retry.server.web.model.response.GroupConfigResponseVO;
-import com.aizuda.easy.retry.server.web.annotation.LoginRequired;
-import com.aizuda.easy.retry.server.web.annotation.RoleEnum;
 import com.aizuda.easy.retry.server.web.service.GroupConfigService;
-import com.aizuda.easy.retry.template.datasource.enums.DbTypeEnum;
-import com.google.common.collect.Lists;
-import com.zaxxer.hikari.HikariDataSource;
-import org.jetbrains.annotations.NotNull;
-import org.slf4j.helpers.MessageFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.text.MessageFormat;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * 重试组接口

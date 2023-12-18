@@ -21,4 +21,6 @@ public interface WorkflowService {
     WorkflowDetailResponseVO getWorkflowDetail(Long id) throws IOException;
 
     PageResult<List<WorkflowResponseVO>> listPage(WorkflowQueryVO queryVO);
+
+    Boolean updateWorkflow(WorkflowRequestVO workflowRequestVO);
 }

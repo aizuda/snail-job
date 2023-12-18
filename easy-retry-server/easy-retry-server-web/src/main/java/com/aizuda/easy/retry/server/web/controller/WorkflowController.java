@@ -41,8 +41,9 @@ public class WorkflowController {
     }
 
     @PutMapping
-    public void updateWorkflow() {
-
+    @LoginRequired(role = RoleEnum.USER)
+    public Boolean updateWorkflow(@RequestBody @Validated WorkflowRequestVO workflowRequestVO) {
+        return workflowService.updateWorkflow(workflowRequestVO);
     }
 
     @GetMapping("{id}")

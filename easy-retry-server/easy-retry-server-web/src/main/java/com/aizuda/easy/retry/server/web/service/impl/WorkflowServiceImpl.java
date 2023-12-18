@@ -11,16 +11,13 @@ import com.aizuda.easy.retry.server.web.model.request.WorkflowQueryVO;
 import com.aizuda.easy.retry.server.web.model.request.WorkflowRequestVO;
 import com.aizuda.easy.retry.server.web.model.request.WorkflowRequestVO.NodeConfig;
 import com.aizuda.easy.retry.server.web.model.request.WorkflowRequestVO.NodeInfo;
-import com.aizuda.easy.retry.server.web.model.response.JobResponseVO;
 import com.aizuda.easy.retry.server.web.model.response.WorkflowDetailResponseVO;
 import com.aizuda.easy.retry.server.web.model.response.WorkflowResponseVO;
 import com.aizuda.easy.retry.server.web.service.WorkflowService;
-import com.aizuda.easy.retry.server.web.service.convert.JobResponseVOConverter;
 import com.aizuda.easy.retry.server.web.service.convert.WorkflowConverter;
 import com.aizuda.easy.retry.server.web.util.UserSessionUtils;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.WorkflowMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.WorkflowNodeMapper;
-import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
 import com.aizuda.easy.retry.template.datasource.persistence.po.Workflow;
 import com.aizuda.easy.retry.template.datasource.persistence.po.WorkflowNode;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -28,6 +25,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.common.graph.GraphBuilder;
 import com.google.common.graph.MutableGraph;
 import lombok.RequiredArgsConstructor;
@@ -101,8 +99,9 @@ public class WorkflowServiceImpl implements WorkflowService {
 
         String flowInfo = workflow.getFlowInfo();
         try {
+            MutableGraph<Long> graph = deserializeJsonToGraph(flowInfo);
             // 反序列化构建图
-            WorkflowDetailResponseVO.NodeConfig config = deserializeJsonToGraph(flowInfo, workflowNodeMap);
+            WorkflowDetailResponseVO.NodeConfig config = buildNodeConfig(graph, root, new HashMap<>(), workflowNodeMap);
             responseVO.setNodeConfig(config);
         } catch (Exception e) {
             log.error("反序列化失败. json:[{}]", flowInfo, e);
@@ -128,50 +127,100 @@ public class WorkflowServiceImpl implements WorkflowService {
         return new PageResult<>(pageDTO, jobResponseList);
     }
 
+    @Override
+    public Boolean updateWorkflow(WorkflowRequestVO workflowRequestVO) {
+
+        Assert.notNull(workflowRequestVO.getId(), () -> new EasyRetryServerException("工作流ID不能为空"));
+
+        Assert.isTrue(workflowMapper.selectCount(new LambdaQueryWrapper<Workflow>()
+                        .eq(Workflow::getId, workflowRequestVO.getId())) > 0,
+                () -> new EasyRetryServerException("工作流不存在"));
+
+        MutableGraph<Long> graph = GraphBuilder.directed().allowsSelfLoops(false).build();
+        // 添加虚拟头节点
+        graph.addNode(root);
+
+        // 获取DAG节点配置
+        NodeConfig nodeConfig = workflowRequestVO.getNodeConfig();
+
+        // 递归构建图
+        buildGraph(Lists.newArrayList(root), workflowRequestVO.getGroupName(), workflowRequestVO.getId(), nodeConfig, graph);
+
+        log.info("图构建完成. graph:[{}]", graph);
+
+        // 保存图信息
+        Workflow workflow = new Workflow();
+        workflow.setId(workflowRequestVO.getId());
+        workflow.setFlowInfo(JsonUtil.toJsonString(convertGraphToAdjacencyList(graph)));
+        Assert.isTrue(workflowMapper.updateById(workflow) > 0, () -> new EasyRetryServerException("更新失败"));
+
+        return Boolean.TRUE;
+    }
+
     // 从JSON反序列化为Guava图
-    private static  WorkflowDetailResponseVO.NodeConfig deserializeJsonToGraph(String jsonGraph,
-         Map<Long, WorkflowDetailResponseVO.NodeInfo> workflowNodeMap) throws IOException {
+    private static MutableGraph<Long> deserializeJsonToGraph(String jsonGraph) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
 
-        // 将JSON字符串转换为Map<String, Iterable<String>>
+        // 将JSON字符串转换为Map<Long, Iterable<Long>>
         Map<Long, Iterable<Long>> adjacencyList = objectMapper.readValue(
-            jsonGraph, new TypeReference<Map<Long, Iterable<Long>>>() {});
-
-        Map<Long, WorkflowDetailResponseVO.NodeConfig> configMap = new HashMap<>();
-        WorkflowDetailResponseVO.NodeConfig rootConfig = new WorkflowDetailResponseVO.NodeConfig();
+                jsonGraph, new TypeReference<Map<Long, Iterable<Long>>>() {
+                });
 
         // 创建Guava图并添加节点和边
+        MutableGraph<Long> graph = GraphBuilder.directed().build();
         for (Map.Entry<Long, Iterable<Long>> entry : adjacencyList.entrySet()) {
             Long node = entry.getKey();
             Iterable<Long> successors = entry.getValue();
-            WorkflowDetailResponseVO.NodeConfig previousConfig = configMap.getOrDefault(node, new WorkflowDetailResponseVO.NodeConfig());
 
-            WorkflowDetailResponseVO.NodeConfig currentConfig = new WorkflowDetailResponseVO.NodeConfig();
+            graph.addNode(node);
             for (Long successor : successors) {
-                WorkflowDetailResponseVO.NodeInfo nodeInfo = workflowNodeMap.get(successor);
-                // 第一层节点
-                if (node == root) {
-                    rootConfig.setNodeType(nodeInfo.getNodeType());
-                    List<WorkflowDetailResponseVO.NodeInfo> nodeInfos = Optional.ofNullable(
-                        rootConfig.getConditionNodes()).orElse(Lists.newArrayList());
-                    nodeInfos.add(nodeInfo);
-                    rootConfig.setConditionNodes(nodeInfos);
-                    configMap.put(nodeInfo.getId(), rootConfig);
-                } else {
-                    currentConfig.setNodeType(nodeInfo.getNodeType());
-                    List<WorkflowDetailResponseVO.NodeInfo> nodeInfos = Optional.ofNullable(
-                        currentConfig.getConditionNodes()).orElse(Lists.newArrayList());
-                    nodeInfos.add(nodeInfo);
-                    currentConfig.setConditionNodes(nodeInfos);
-                    configMap.put(nodeInfo.getId(), currentConfig);
-                    previousConfig.setChildNode(currentConfig);
-                }
+                graph.putEdge(node, successor);
             }
         }
 
-        return rootConfig;
+        return graph;
     }
 
+    private WorkflowDetailResponseVO.NodeConfig buildNodeConfig(MutableGraph<Long> graph,
+                                                                Long parentId,
+                                                                Map<Long, WorkflowDetailResponseVO.NodeConfig> nodeConfigMap,
+                                                                Map<Long, WorkflowDetailResponseVO.NodeInfo> workflowNodeMap) {
+
+        Set<Long> successors = graph.successors(parentId);
+        if (CollectionUtils.isEmpty(successors)) {
+            return null;
+        }
+
+        WorkflowDetailResponseVO.NodeInfo previousNodeInfo = workflowNodeMap.get(parentId);
+        WorkflowDetailResponseVO.NodeConfig currentConfig = new WorkflowDetailResponseVO.NodeConfig();
+        currentConfig.setConditionNodes(Lists.newArrayList());
+
+        boolean mount = false;
+
+        for (Long successor : successors) {
+            Set<Long> predecessors = graph.predecessors(successor);
+            WorkflowDetailResponseVO.NodeInfo nodeInfo = workflowNodeMap.get(successor);
+            currentConfig.setNodeType(nodeInfo.getNodeType());
+            currentConfig.getConditionNodes().add(nodeInfo);
+            nodeConfigMap.put(successor, currentConfig);
+
+            if (predecessors.size() >= 2) {
+                WorkflowDetailResponseVO.NodeConfig parentNodeConfig = nodeConfigMap.get(new ArrayList<>(predecessors).get(0));
+                parentNodeConfig.setChildNode(currentConfig);
+                mount = false;
+            } else {
+                mount = true;
+            }
+
+            buildNodeConfig(graph, successor, nodeConfigMap, workflowNodeMap);
+        }
+
+        if (parentId != root && mount) {
+            previousNodeInfo.setChildNode(currentConfig);
+        }
+
+        return currentConfig;
+    }
 
     private Map<Long, Iterable<Long>> convertGraphToAdjacencyList(MutableGraph<Long> graph) {
         Map<Long, Iterable<Long>> adjacencyList = new HashMap<>();
