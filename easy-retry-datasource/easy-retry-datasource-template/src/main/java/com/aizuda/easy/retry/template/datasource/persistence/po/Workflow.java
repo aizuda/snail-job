@@ -76,6 +76,11 @@ public class Workflow implements Serializable {
     private String flowInfo;
 
     /**
+     * bucket
+     */
+    private Integer bucketIndex;
+
+    /**
      * 描述
      */
     private String description;

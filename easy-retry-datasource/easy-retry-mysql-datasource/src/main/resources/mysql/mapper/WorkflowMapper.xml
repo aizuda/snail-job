@@ -8,12 +8,26 @@
         <result column="namespace_id" property="namespaceId" />
         <result column="group_name" property="groupName" />
         <result column="workflow_status" property="workflowStatus" />
-        <result column="execution_at" property="executionAt" />
+        <result column="next_trigger_at" property="nextTriggerAt" />
         <result column="flow_info" property="flowInfo" />
         <result column="create_dt" property="createDt" />
         <result column="update_dt" property="updateDt" />
         <result column="deleted" property="deleted" />
         <result column="ext_attrs" property="extAttrs" />
     </resultMap>
+    <update id="updateBatchNextTriggerAtById" parameterType="java.util.List">
+        update workflow rt,
+        (
+        <foreach collection="list" item="item" index="index" separator=" union all ">
+            select
+            #{item.nextTriggerAt} as next_trigger_at,
+            #{item.id} as id
+        </foreach>
+        ) tt
+        set
+        rt.next_trigger_at = tt.next_trigger_at
+        where rt.id = tt.id
+    </update>
+
 
 </mapper>

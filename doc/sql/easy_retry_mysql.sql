@@ -453,6 +453,7 @@ CREATE TABLE `workflow`
     `executor_timeout` int(11)             NOT NULL DEFAULT '0' COMMENT '任务执行超时时间，单位秒',
     `description`            varchar(256) NOT NULL DEFAULT '' COMMENT '描述',
     `flow_info`       text                 DEFAULT  NULL COMMENT '流程信息',
+    `bucket_index`     int(11)             NOT NULL DEFAULT '0' COMMENT 'bucket',
     `create_dt`       datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_dt`       datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     `deleted`         tinyint(4)          NOT NULL DEFAULT '0' COMMENT '逻辑删除 1、删除',

@@ -40,7 +40,9 @@ public class ActorGenerator {
 
     /*----------------------------------------分布式任务调度 START----------------------------------------*/
     public static final String SCAN_JOB_ACTOR = "ScanJobActor";
+    public static final String SCAN_WORKFLOW_ACTOR = "ScanWorkflowTaskActor";
     public static final String JOB_TASK_PREPARE_ACTOR = "JobTaskPrepareActor";
+    public static final String WORKFLOW_TASK_PREPARE_ACTOR = "WorkflowTaskPrepareActor";
     public static final String JOB_EXECUTOR_ACTOR = "JobExecutorActor";
     public static final String JOB_EXECUTOR_RESULT_ACTOR = "JobExecutorResultActor";
     public static final String JOB_LOG_ACTOR = "JobLogActor";
@@ -137,6 +139,17 @@ public class ActorGenerator {
         return getCommonActorSystemSystem().actorOf(getSpringExtension()
             .props(SCAN_JOB_ACTOR)
             .withDispatcher(COMMON_SCAN_TASK_DISPATCHER));
+    }
+
+    /**
+     * 生成扫描工作流任务的actor
+     *
+     * @return actor 引用
+     */
+    public static ActorRef scanWorkflowActor() {
+        return getCommonActorSystemSystem().actorOf(getSpringExtension()
+                .props(SCAN_WORKFLOW_ACTOR)
+                .withDispatcher(COMMON_SCAN_TASK_DISPATCHER));
     }
 
     /**

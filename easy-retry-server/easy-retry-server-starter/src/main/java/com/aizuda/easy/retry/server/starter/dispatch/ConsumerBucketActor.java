@@ -19,6 +19,7 @@ import com.aizuda.easy.retry.template.datasource.persistence.po.ServerNode;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.google.common.cache.Cache;
 import com.google.common.util.concurrent.RateLimiter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -40,14 +41,13 @@ import java.util.Objects;
 @Component(ActorGenerator.SCAN_BUCKET_ACTOR)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Slf4j
+@RequiredArgsConstructor
 public class ConsumerBucketActor extends AbstractActor {
-
-    @Autowired
-    protected AccessTemplate accessTemplate;
-    @Autowired
-    protected ServerNodeMapper serverNodeMapper;
-    @Autowired
-    protected SystemProperties systemProperties;
+    private final AccessTemplate accessTemplate;
+    private final ServerNodeMapper serverNodeMapper;
+    private final SystemProperties systemProperties;
+    private static final  String DEFAULT_JOB_KEY = "DEFAULT_JOB_KEY";
+    private static final  String DEFAULT_WORKFLOW_KEY = "DEFAULT_JOB_KEY";
 
     @Override
     public Receive createReceive() {
@@ -68,11 +68,17 @@ public class ConsumerBucketActor extends AbstractActor {
         }
 
         if (SystemModeEnum.isJob(systemProperties.getMode())) {
-            // 扫描回调数据
+
             ScanTask scanTask = new ScanTask();
             scanTask.setBuckets(consumerBucket.getBuckets());
-            ActorRef scanJobActorRef = cacheActorRef("DEFAULT_JOB_KEY", TaskTypeEnum.JOB);
+
+            // 扫描定时任务数据
+            ActorRef scanJobActorRef = cacheActorRef(DEFAULT_JOB_KEY, TaskTypeEnum.JOB);
             scanJobActorRef.tell(scanTask, scanJobActorRef);
+
+            // 扫描DAG工作流任务数据
+            ActorRef scanWorkflowActorRef = cacheActorRef(DEFAULT_WORKFLOW_KEY, TaskTypeEnum.WORKFLOW);
+            scanJobActorRef.tell(scanTask, scanWorkflowActorRef);
         }
 
         if (SystemModeEnum.isRetry(systemProperties.getMode())) {
