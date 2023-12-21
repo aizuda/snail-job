@@ -18,6 +18,7 @@ public enum TaskTypeEnum {
     RETRY(1, ActorGenerator::scanGroupActor),
     CALLBACK(2, ActorGenerator::scanCallbackGroupActor),
     JOB(3, ActorGenerator::scanJobActor),
+    WORKFLOW(4, ActorGenerator::scanWorkflowActor),
     ;
 
 

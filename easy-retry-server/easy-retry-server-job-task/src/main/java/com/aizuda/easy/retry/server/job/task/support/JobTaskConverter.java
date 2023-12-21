@@ -23,6 +23,7 @@ import java.util.List;
 /**
  * @author: www.byteblogs.com
  * @date : 2021-11-26 15:22
+ * @since : 2.5.0
  */
 @Mapper
 public interface JobTaskConverter {
@@ -32,7 +33,7 @@ public interface JobTaskConverter {
     @Mappings(
             @Mapping(source = "id", target = "jobId")
     )
-    JobTaskPrepareDTO toJobTaskPrepare(JobPartitionTask job);
+    JobTaskPrepareDTO toJobTaskPrepare(JobPartitionTaskDTO job);
 
     @Mappings(
         @Mapping(source = "id", target = "jobId")
@@ -55,13 +56,9 @@ public interface JobTaskConverter {
 
     JobLogMessage toJobLogMessage(JobLogDTO jobLogDTO);
 
-    JobLogDTO toJobLogDTO(JobExecutorContext context);
-
     JobLogDTO toJobLogDTO(JobExecutorResultDTO resultDTO);
 
     JobLogDTO toJobLogDTO(BaseDTO baseDTO);
-
-    JobLogDTO toJobLogDTO(DispatchJobResultRequest request);
 
     ClientCallbackContext toClientCallbackContext(DispatchJobResultRequest request);
 
@@ -92,8 +89,8 @@ public interface JobTaskConverter {
 
     RealStopTaskInstanceDTO toRealStopTaskInstanceDTO(TaskStopJobContext context);
 
-    List<JobPartitionTask> toJobPartitionTasks(List<Job> jobs);
+    List<JobPartitionTaskDTO> toJobPartitionTasks(List<Job> jobs);
 
-    List<JobPartitionTask> toJobTaskBatchPartitionTasks(List<JobTaskBatch> jobTaskBatches);
+    List<JobPartitionTaskDTO> toJobTaskBatchPartitionTasks(List<JobTaskBatch> jobTaskBatches);
 
 }

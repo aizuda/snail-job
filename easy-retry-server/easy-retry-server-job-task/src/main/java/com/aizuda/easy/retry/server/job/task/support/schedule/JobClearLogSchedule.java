@@ -6,7 +6,7 @@ import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.dto.PartitionTask;
 import com.aizuda.easy.retry.server.common.schedule.AbstractSchedule;
 import com.aizuda.easy.retry.server.common.util.PartitionTaskUtils;
-import com.aizuda.easy.retry.server.job.task.dto.JobPartitionTask;
+import com.aizuda.easy.retry.server.job.task.dto.JobPartitionTaskDTO;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobLogMessageMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskBatchMapper;
@@ -97,7 +97,7 @@ public class JobClearLogSchedule extends AbstractSchedule implements Lifecycle {
      * @param endTime
      * @return
      */
-    private List<JobPartitionTask> jobTaskBatchList(Long startId, LocalDateTime endTime) {
+    private List<JobPartitionTaskDTO> jobTaskBatchList(Long startId, LocalDateTime endTime) {
 
         List<JobTaskBatch> jobTaskBatchList = jobTaskBatchMapper.selectPage(
                 new Page<>(0, 1000),

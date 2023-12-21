@@ -4,15 +4,13 @@ import com.aizuda.easy.retry.server.common.dto.PartitionTask;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.time.LocalDateTime;
-
 /**
  * @author:  www.byteblogs.com
  * @date : 2023-10-10 17:52
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class JobPartitionTask extends PartitionTask {
+public class JobPartitionTaskDTO extends PartitionTask {
 
     private String namespaceId;
 

@@ -16,7 +16,7 @@ import com.aizuda.easy.retry.server.common.strategy.WaitStrategies;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.server.common.util.PartitionTaskUtils;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
-import com.aizuda.easy.retry.server.job.task.dto.JobPartitionTask;
+import com.aizuda.easy.retry.server.job.task.dto.JobPartitionTaskDTO;
 import com.aizuda.easy.retry.server.job.task.dto.JobTaskPrepareDTO;
 import com.aizuda.easy.retry.server.job.task.support.cache.ResidentTaskCache;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobMapper;
@@ -81,7 +81,7 @@ public class ScanJobTaskActor extends AbstractActor {
         List<JobTaskPrepareDTO> waitExecJobs = new ArrayList<>();
         long now = DateUtils.toNowMilli();
         for (PartitionTask partitionTask : partitionTasks) {
-            processJob((JobPartitionTask) partitionTask, waitUpdateJobs, waitExecJobs, now);
+            processJob((JobPartitionTaskDTO) partitionTask, waitUpdateJobs, waitExecJobs, now);
         }
 
         // 批量更新
@@ -95,7 +95,7 @@ public class ScanJobTaskActor extends AbstractActor {
         }
     }
 
-    private void processJob(JobPartitionTask partitionTask, final List<Job> waitUpdateJobs,
+    private void processJob(JobPartitionTaskDTO partitionTask, final List<Job> waitUpdateJobs,
                             final List<JobTaskPrepareDTO> waitExecJobs, long now) {
         CacheConsumerGroup.addOrUpdate(partitionTask.getGroupName(), partitionTask.getNamespaceId());
 
@@ -130,11 +130,11 @@ public class ScanJobTaskActor extends AbstractActor {
     /**
      * 需要重新计算触发时间的条件 1、不是常驻任务 2、常驻任务缓存的触发任务为空 3、常驻任务中的触发时间不是最新的
      */
-    private static boolean needCalculateNextTriggerTime(JobPartitionTask partitionTask) {
+    private static boolean needCalculateNextTriggerTime(JobPartitionTaskDTO partitionTask) {
         return !Objects.equals(StatusEnum.YES.getStatus(), partitionTask.getResident());
     }
 
-    private Long calculateNextTriggerTime(JobPartitionTask partitionTask, long now) {
+    private Long calculateNextTriggerTime(JobPartitionTaskDTO partitionTask, long now) {
 
         long nextTriggerAt = partitionTask.getNextTriggerAt();
         if ((nextTriggerAt + DateUtils.toEpochMilli(SystemConstants.SCHEDULE_PERIOD)) < now) {
@@ -151,7 +151,7 @@ public class ScanJobTaskActor extends AbstractActor {
         return waitStrategy.computeTriggerTime(waitStrategyContext);
     }
 
-    private List<JobPartitionTask> listAvailableJobs(Long startId, ScanTask scanTask) {
+    private List<JobPartitionTaskDTO> listAvailableJobs(Long startId, ScanTask scanTask) {
         if (CollectionUtils.isEmpty(scanTask.getBuckets())) {
             return Collections.emptyList();
         }
