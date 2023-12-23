@@ -1,11 +1,18 @@
 package com.aizuda.easy.retry.server.web.service.impl;
 
 import cn.hutool.core.lang.Assert;
+import cn.hutool.core.util.HashUtil;
 import cn.hutool.core.util.StrUtil;
+import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
+import com.aizuda.easy.retry.server.common.WaitStrategy;
+import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
+import com.aizuda.easy.retry.server.common.strategy.WaitStrategies;
+import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
+import com.aizuda.easy.retry.server.web.model.request.JobRequestVO;
 import com.aizuda.easy.retry.server.web.model.request.UserSessionVO;
 import com.aizuda.easy.retry.server.web.model.request.WorkflowQueryVO;
 import com.aizuda.easy.retry.server.web.model.request.WorkflowRequestVO;
@@ -30,6 +37,7 @@ import com.google.common.graph.GraphBuilder;
 import com.google.common.graph.MutableGraph;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -49,7 +57,7 @@ import java.util.stream.Collectors;
 public class WorkflowServiceImpl implements WorkflowService {
     private final WorkflowMapper workflowMapper;
     private final WorkflowNodeMapper workflowNodeMapper;
-    private final static long root = -1;
+    private final SystemProperties systemProperties;
 
     @Override
     @Transactional
@@ -57,20 +65,22 @@ public class WorkflowServiceImpl implements WorkflowService {
 
         MutableGraph<Long> graph = GraphBuilder.directed().allowsSelfLoops(false).build();
         // 添加虚拟头节点
-        graph.addNode(root);
+        graph.addNode(SystemConstants.ROOT);
 
         // 组装工作流信息
         Workflow workflow = WorkflowConverter.INSTANCE.toWorkflow(workflowRequestVO);
-        // TODO 临时设置值
-        workflow.setNextTriggerAt(1L);
+        workflow.setNextTriggerAt(calculateNextTriggerAt(workflowRequestVO, DateUtils.toNowMilli()));
         workflow.setFlowInfo(StrUtil.EMPTY);
+        workflow.setBucketIndex(HashUtil.bkdrHash(workflowRequestVO.getGroupName() + workflowRequestVO.getWorkflowName())
+            % systemProperties.getBucketTotal());
+        workflow.setNamespaceId(UserSessionUtils.currentUserSession().getNamespaceId());
         Assert.isTrue(1 == workflowMapper.insert(workflow), () -> new EasyRetryServerException("新增工作流失败"));
 
         // 获取DAG节点配置
         NodeConfig nodeConfig = workflowRequestVO.getNodeConfig();
 
         // 递归构建图
-        buildGraph(Lists.newArrayList(root), workflowRequestVO.getGroupName(), workflow.getId(), nodeConfig, graph);
+        buildGraph(Lists.newArrayList(SystemConstants.ROOT), workflowRequestVO.getGroupName(), workflow.getId(), nodeConfig, graph);
 
         log.info("图构建完成. graph:[{}]", graph);
         // 保存图信息
@@ -80,6 +90,13 @@ public class WorkflowServiceImpl implements WorkflowService {
         return true;
     }
 
+    private static Long calculateNextTriggerAt(final WorkflowRequestVO workflowRequestVO, Long time) {
+        WaitStrategy waitStrategy = WaitStrategies.WaitStrategyEnum.getWaitStrategy(workflowRequestVO.getTriggerType());
+        WaitStrategies.WaitStrategyContext waitStrategyContext = new WaitStrategies.WaitStrategyContext();
+        waitStrategyContext.setTriggerInterval(workflowRequestVO.getTriggerInterval());
+        waitStrategyContext.setNextTriggerAt(time);
+        return waitStrategy.computeTriggerTime(waitStrategyContext);
+    }
     @Override
     public WorkflowDetailResponseVO getWorkflowDetail(Long id) throws IOException {
 
@@ -101,7 +118,7 @@ public class WorkflowServiceImpl implements WorkflowService {
         try {
             MutableGraph<Long> graph = deserializeJsonToGraph(flowInfo);
             // 反序列化构建图
-            WorkflowDetailResponseVO.NodeConfig config = buildNodeConfig(graph, root, new HashMap<>(), workflowNodeMap);
+            WorkflowDetailResponseVO.NodeConfig config = buildNodeConfig(graph, SystemConstants.ROOT, new HashMap<>(), workflowNodeMap);
             responseVO.setNodeConfig(config);
         } catch (Exception e) {
             log.error("反序列化失败. json:[{}]", flowInfo, e);
@@ -138,13 +155,13 @@ public class WorkflowServiceImpl implements WorkflowService {
 
         MutableGraph<Long> graph = GraphBuilder.directed().allowsSelfLoops(false).build();
         // 添加虚拟头节点
-        graph.addNode(root);
+        graph.addNode(SystemConstants.ROOT);
 
         // 获取DAG节点配置
         NodeConfig nodeConfig = workflowRequestVO.getNodeConfig();
 
         // 递归构建图
-        buildGraph(Lists.newArrayList(root), workflowRequestVO.getGroupName(), workflowRequestVO.getId(), nodeConfig, graph);
+        buildGraph(Lists.newArrayList(SystemConstants.ROOT), workflowRequestVO.getGroupName(), workflowRequestVO.getId(), nodeConfig, graph);
 
         log.info("图构建完成. graph:[{}]", graph);
 
@@ -215,7 +232,7 @@ public class WorkflowServiceImpl implements WorkflowService {
             buildNodeConfig(graph, successor, nodeConfigMap, workflowNodeMap);
         }
 
-        if (parentId != root && mount) {
+        if (parentId != SystemConstants.ROOT && mount) {
             previousNodeInfo.setChildNode(currentConfig);
         }
 

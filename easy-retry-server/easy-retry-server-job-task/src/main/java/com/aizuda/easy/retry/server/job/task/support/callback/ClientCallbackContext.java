@@ -20,6 +20,8 @@ public class ClientCallbackContext {
 
     private Long taskBatchId;
 
+    private Long workflowBatchId;
+
     private Long taskId;
 
     private String groupName;

@@ -49,6 +49,16 @@ public class JobTaskBatch implements Serializable {
     private Long jobId;
 
     /**
+     * 工作流批次id
+     */
+    private Long workflowTaskBatchId;
+
+    /**
+     * 工作流节点id
+     */
+    private Long workflowNodeId;
+
+    /**
      * 任务批次状态
      */
     private Integer taskBatchStatus;

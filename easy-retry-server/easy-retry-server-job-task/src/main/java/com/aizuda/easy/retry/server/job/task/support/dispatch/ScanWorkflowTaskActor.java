@@ -84,7 +84,7 @@ public class ScanWorkflowTaskActor extends AbstractActor {
 
         for (final WorkflowTaskPrepareDTO waitExecTask : waitExecWorkflows) {
             // 执行预处理阶段
-            ActorRef actorRef = ActorGenerator.jobTaskPrepareActor();
+            ActorRef actorRef = ActorGenerator.workflowTaskPrepareActor();
             waitExecTask.setTriggerType(JobTriggerTypeEnum.AUTO.getType());
             actorRef.tell(waitExecTask, actorRef);
         }

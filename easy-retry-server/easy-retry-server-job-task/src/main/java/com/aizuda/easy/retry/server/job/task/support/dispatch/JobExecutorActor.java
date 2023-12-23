@@ -87,7 +87,7 @@ public class JobExecutorActor extends AbstractActor {
 
     private void doExecute(final TaskExecuteDTO taskExecute) {
 
-        LambdaQueryWrapper<Job> queryWrapper = new LambdaQueryWrapper<Job>();
+        LambdaQueryWrapper<Job> queryWrapper = new LambdaQueryWrapper<>();
         // 自动的校验任务必须是开启状态，手动触发无需校验
         if (JobTriggerTypeEnum.AUTO.getType().equals(taskExecute.getTriggerType())) {
             queryWrapper.eq(Job::getJobStatus, StatusEnum.YES.getStatus());
@@ -150,38 +150,39 @@ public class JobExecutorActor extends AbstractActor {
     }
 
     private void doHandlerResidentTask(Job job, TaskExecuteDTO taskExecuteDTO) {
-        if (Objects.isNull(job) || JobTriggerTypeEnum.MANUAL.getType().equals(taskExecuteDTO.getTriggerType())) {
+        if (Objects.isNull(job)
+            || JobTriggerTypeEnum.MANUAL.getType().equals(taskExecuteDTO.getTriggerType())
+            || JobTriggerTypeEnum.WORKFLOW.getType().equals(taskExecuteDTO.getTriggerType())
+            // 是否是常驻任务
+            || Objects.equals(StatusEnum.NO.getStatus(), job.getResident())
+        ) {
             return;
         }
 
-        // 是否是常驻任务
-        if (Objects.equals(StatusEnum.YES.getStatus(), job.getResident())) {
+        JobTimerTaskDTO jobTimerTaskDTO = new JobTimerTaskDTO();
+        jobTimerTaskDTO.setJobId(taskExecuteDTO.getJobId());
+        jobTimerTaskDTO.setTaskBatchId(taskExecuteDTO.getTaskBatchId());
+        jobTimerTaskDTO.setTriggerType(JobTriggerTypeEnum.AUTO.getType());
+        ResidentJobTimerTask timerTask = new ResidentJobTimerTask(jobTimerTaskDTO, job);
+        WaitStrategy waitStrategy = WaitStrategies.WaitStrategyEnum.getWaitStrategy(job.getTriggerType());
 
-            JobTimerTaskDTO jobTimerTaskDTO = new JobTimerTaskDTO();
-            jobTimerTaskDTO.setJobId(taskExecuteDTO.getJobId());
-            jobTimerTaskDTO.setTaskBatchId(taskExecuteDTO.getTaskBatchId());
-            jobTimerTaskDTO.setTriggerType(JobTriggerTypeEnum.AUTO.getType());
-            ResidentJobTimerTask timerTask = new ResidentJobTimerTask(jobTimerTaskDTO, job);
-            WaitStrategy waitStrategy = WaitStrategies.WaitStrategyEnum.getWaitStrategy(job.getTriggerType());
-
-            Long preTriggerAt = ResidentTaskCache.get(job.getId());
-            if (Objects.isNull(preTriggerAt) || preTriggerAt < job.getNextTriggerAt()) {
-                preTriggerAt = job.getNextTriggerAt();
-            }
-
-            WaitStrategies.WaitStrategyContext waitStrategyContext = new WaitStrategies.WaitStrategyContext();
-            waitStrategyContext.setTriggerInterval(job.getTriggerInterval());
-            waitStrategyContext.setNextTriggerAt(preTriggerAt);
-            Long nextTriggerAt = waitStrategy.computeTriggerTime(waitStrategyContext);
-
-            // 获取时间差的毫秒数
-            long milliseconds = nextTriggerAt - preTriggerAt;
-
-            log.info("常驻任务监控. 任务时间差:[{}] 取余:[{}]", milliseconds, DateUtils.toNowMilli() % 1000);
-            job.setNextTriggerAt(nextTriggerAt);
-
-            JobTimerWheel.register(jobTimerTaskDTO.getTaskBatchId(), timerTask, milliseconds - DateUtils.toNowMilli() % 1000, TimeUnit.MILLISECONDS);
-            ResidentTaskCache.refresh(job.getId(), nextTriggerAt);
+        Long preTriggerAt = ResidentTaskCache.get(job.getId());
+        if (Objects.isNull(preTriggerAt) || preTriggerAt < job.getNextTriggerAt()) {
+            preTriggerAt = job.getNextTriggerAt();
         }
+
+        WaitStrategies.WaitStrategyContext waitStrategyContext = new WaitStrategies.WaitStrategyContext();
+        waitStrategyContext.setTriggerInterval(job.getTriggerInterval());
+        waitStrategyContext.setNextTriggerAt(preTriggerAt);
+        Long nextTriggerAt = waitStrategy.computeTriggerTime(waitStrategyContext);
+
+        // 获取时间差的毫秒数
+        long milliseconds = nextTriggerAt - preTriggerAt;
+
+        log.info("常驻任务监控. 任务时间差:[{}] 取余:[{}]", milliseconds, DateUtils.toNowMilli() % 1000);
+        job.setNextTriggerAt(nextTriggerAt);
+
+        JobTimerWheel.register(jobTimerTaskDTO.getTaskBatchId(), timerTask, milliseconds - DateUtils.toNowMilli() % 1000, TimeUnit.MILLISECONDS);
+        ResidentTaskCache.refresh(job.getId(), nextTriggerAt);
     }
 }

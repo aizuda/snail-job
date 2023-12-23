@@ -57,4 +57,15 @@ public class JobTaskPrepareDTO {
      */
     private Integer triggerType;
 
+    /**
+     * 工作流任务批次id
+     */
+    private Long workflowTaskBatchId;
+
+    /**
+     * 工作流节点id
+     */
+    private Long workflowNodeId;
+
+
 }

@@ -78,7 +78,7 @@ public class ConsumerBucketActor extends AbstractActor {
 
             // 扫描DAG工作流任务数据
             ActorRef scanWorkflowActorRef = cacheActorRef(DEFAULT_WORKFLOW_KEY, TaskTypeEnum.WORKFLOW);
-            scanJobActorRef.tell(scanTask, scanWorkflowActorRef);
+            scanWorkflowActorRef.tell(scanTask, scanWorkflowActorRef);
         }
 
         if (SystemModeEnum.isRetry(systemProperties.getMode())) {

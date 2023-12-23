@@ -1,6 +1,5 @@
 package com.aizuda.easy.retry.server.job.task.dto;
 
-import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import lombok.Data;
 
 /**
@@ -14,6 +13,13 @@ public class JobExecutorResultDTO {
     private Long jobId;
 
     private Long taskBatchId;
+
+    /**
+     * 工作流任务批次id
+     */
+    private Long workflowTaskBatchId;
+
+    private Long workflowNodeId;
 
     private Long taskId;
 

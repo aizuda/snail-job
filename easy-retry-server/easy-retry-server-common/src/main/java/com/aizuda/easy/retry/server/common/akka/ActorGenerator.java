@@ -44,6 +44,7 @@ public class ActorGenerator {
     public static final String JOB_TASK_PREPARE_ACTOR = "JobTaskPrepareActor";
     public static final String WORKFLOW_TASK_PREPARE_ACTOR = "WorkflowTaskPrepareActor";
     public static final String JOB_EXECUTOR_ACTOR = "JobExecutorActor";
+    public static final String WORKFLOW_EXECUTOR_ACTOR = "WorkflowExecutorActor";
     public static final String JOB_EXECUTOR_RESULT_ACTOR = "JobExecutorResultActor";
     public static final String JOB_LOG_ACTOR = "JobLogActor";
     public static final String REAL_JOB_EXECUTOR_ACTOR = "RealJobExecutorActor";
@@ -196,6 +197,16 @@ public class ActorGenerator {
     }
 
     /**
+     * Job调度准备阶段actor
+     *
+     * @return actor 引用
+     */
+    public static ActorRef workflowTaskPrepareActor() {
+        return getJobActorSystem().actorOf(getSpringExtension().props(WORKFLOW_TASK_PREPARE_ACTOR)
+            .withDispatcher(JOB_TASK_DISPATCHER));
+    }
+
+    /**
      * Job任务执行阶段actor
      *
      * @return actor 引用
@@ -206,6 +217,19 @@ public class ActorGenerator {
                         .props(JOB_EXECUTOR_ACTOR)
                         .withDispatcher(JOB_TASK_EXECUTOR_DISPATCHER)
                 );
+    }
+
+    /**
+     * Job任务执行阶段actor
+     *
+     * @return actor 引用
+     */
+    public static ActorRef workflowTaskExecutorActor() {
+        return getJobActorSystem()
+            .actorOf(getSpringExtension()
+                .props(WORKFLOW_EXECUTOR_ACTOR)
+                .withDispatcher(JOB_TASK_EXECUTOR_DISPATCHER)
+            );
     }
 
     /**
