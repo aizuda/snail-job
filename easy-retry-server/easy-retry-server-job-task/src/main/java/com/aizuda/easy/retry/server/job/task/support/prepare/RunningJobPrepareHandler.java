@@ -43,7 +43,7 @@ public class RunningJobPrepareHandler extends AbstractJobPrePareHandler {
         // 若存在所有的任务都是完成，但是批次上的状态为运行中，则是并发导致的未把批次状态变成为终态，此处做一次兜底处理
         int blockStrategy = prepare.getBlockStrategy();
         JobOperationReasonEnum jobOperationReasonEnum = JobOperationReasonEnum.NONE;
-        if (jobTaskBatchHandler.complete(prepare.getTaskBatchId(), jobOperationReasonEnum.getReason())) {
+        if (jobTaskBatchHandler.complete(prepare.getWorkflowNodeId(), prepare.getWorkflowTaskBatchId(), prepare.getTaskBatchId(), jobOperationReasonEnum.getReason())) {
             blockStrategy =  BlockStrategyEnum.CONCURRENCY.getBlockStrategy();
         } else {
             // 计算超时时间

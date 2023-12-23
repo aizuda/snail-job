@@ -30,7 +30,7 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
             .client(JobNettyClient.class)
             .callback(nettyResult -> LogUtils.info(log, "Data report successfully requestId:[{}]", nettyResult.getRequestId())).build();
 
-    private JobContext jobContext;
+    private final JobContext jobContext;
 
     public JobExecutorFutureCallback(final JobContext jobContext) {
         this.jobContext = jobContext;
@@ -96,6 +96,9 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
         dispatchJobRequest.setTaskBatchId(jobContext.getTaskBatchId());
         dispatchJobRequest.setGroupName(jobContext.getGroupName());
         dispatchJobRequest.setJobId(jobContext.getJobId());
+        dispatchJobRequest.setTaskId(jobContext.getTaskId());
+        dispatchJobRequest.setWorkflowBatchId(jobContext.getWorkflowBatchId());
+        dispatchJobRequest.setTaskBatchId(jobContext.getTaskBatchId());
         dispatchJobRequest.setTaskId(jobContext.getTaskId());
         dispatchJobRequest.setTaskType(jobContext.getTaskType());
         dispatchJobRequest.setExecuteResult(executeResult);

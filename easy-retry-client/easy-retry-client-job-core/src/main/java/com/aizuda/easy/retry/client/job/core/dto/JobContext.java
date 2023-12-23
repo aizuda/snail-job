@@ -13,6 +13,10 @@ public class JobContext {
 
     private Long taskBatchId;
 
+    private Long workflowBatchId;
+
+    private Long workflowNodeId;
+
     private Long taskId;
 
     private String groupName;

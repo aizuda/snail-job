@@ -1,9 +1,14 @@
 package com.aizuda.easy.retry.server.job.task.support.handler;
 
+import akka.actor.ActorRef;
+import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskStatusEnum;
+import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
+import com.aizuda.easy.retry.server.common.enums.JobTriggerTypeEnum;
+import com.aizuda.easy.retry.server.job.task.dto.WorkflowNodeTaskExecuteDTO;
 import com.aizuda.easy.retry.server.job.task.support.event.JobTaskFailAlarmEvent;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskBatchMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskMapper;
@@ -11,6 +16,7 @@ import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTaskBatch;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -25,6 +31,7 @@ import java.util.stream.Collectors;
  * @date : 2023-10-10 16:50
  */
 @Component
+@Slf4j
 public class JobTaskBatchHandler {
 
     @Autowired
@@ -32,7 +39,16 @@ public class JobTaskBatchHandler {
     @Autowired
     private JobTaskBatchMapper jobTaskBatchMapper;
 
-    public boolean complete(Long taskBatchId, Integer jobOperationReason) {
+    /**
+     * TODO 参数待优化
+     *
+     * @param workflowNodeId
+     * @param workflowTaskBatchId
+     * @param taskBatchId
+     * @param jobOperationReason
+     * @return
+     */
+    public boolean complete(Long workflowNodeId, Long workflowTaskBatchId, Long taskBatchId, Integer jobOperationReason) {
 
         List<JobTask> jobTasks = jobTaskMapper.selectList(
             new LambdaQueryWrapper<JobTask>().select(JobTask::getTaskStatus)
@@ -74,6 +90,20 @@ public class JobTaskBatchHandler {
 
         if (Objects.nonNull(jobOperationReason)) {
             jobTaskBatch.setOperationReason(jobOperationReason);
+        }
+
+        if (Objects.nonNull(workflowNodeId) && Objects.nonNull(workflowTaskBatchId)) {
+            // 若是工作流则开启下一个任务
+            try {
+                WorkflowNodeTaskExecuteDTO taskExecuteDTO = new WorkflowNodeTaskExecuteDTO();
+                taskExecuteDTO.setWorkflowTaskBatchId(workflowTaskBatchId);
+                taskExecuteDTO.setTriggerType(JobTriggerTypeEnum.AUTO.getType());
+                taskExecuteDTO.setParentId(workflowNodeId);
+                ActorRef actorRef = ActorGenerator.jobTaskExecutorActor();
+                actorRef.tell(taskExecuteDTO, actorRef);
+            } catch (Exception e) {
+                log.error("任务调度执行失败", e);
+            }
         }
 
         return 1 == jobTaskBatchMapper.update(jobTaskBatch,

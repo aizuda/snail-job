@@ -36,13 +36,18 @@ public class DispatchJobRequest {
     @NotBlank(message = "executorInfo 不能为空")
     private String executorInfo;
 
+    @NotBlank(message = "executorTimeout 不能为空")
+    private Integer executorTimeout;
+
     private String argsStr;
 
     private Integer shardingTotal;
 
     private Integer shardingIndex;
 
-    @NotBlank(message = "executorTimeout 不能为空")
-    private Integer executorTimeout;
+    private Long workflowBatchId;
+
+    private Long workflowNodeId;
+
 
 }

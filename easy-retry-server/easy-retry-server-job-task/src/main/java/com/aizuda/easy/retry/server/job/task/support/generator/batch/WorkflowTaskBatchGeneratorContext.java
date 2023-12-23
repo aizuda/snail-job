@@ -2,16 +2,13 @@ package com.aizuda.easy.retry.server.job.task.support.generator.batch;
 
 import lombok.Data;
 
-import java.time.LocalDateTime;
-
 /**
  * @author www.byteblogs.com
  * @date 2023-10-02 13:12:48
  * @since 2.4.0
  */
 @Data
-public class JobTaskBatchGeneratorContext {
-
+public class WorkflowTaskBatchGeneratorContext {
 
     private String namespaceId;
 
@@ -21,9 +18,9 @@ public class JobTaskBatchGeneratorContext {
     private String groupName;
 
     /**
-     * 任务id
+     * 工作流id
      */
-    private Long jobId;
+    private Long workflowId;
 
     /**
      * 下次触发时间
@@ -46,9 +43,9 @@ public class JobTaskBatchGeneratorContext {
     private Integer triggerType;
 
     /**
-     * 工作流任务批次id
+     * 流程信息
      */
-    private Long workflowTaskBatchId;
+    private String flowInfo;
 
 
 }

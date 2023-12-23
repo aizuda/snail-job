@@ -96,4 +96,9 @@ public interface SystemConstants {
      * AT 所有人
      */
    String AT_ALL = "all";
+
+    /**
+     * 根节点
+     */
+   Long ROOT = -1L;
 }

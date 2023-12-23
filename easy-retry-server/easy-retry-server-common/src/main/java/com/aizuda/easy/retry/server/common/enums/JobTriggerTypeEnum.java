@@ -15,7 +15,9 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum JobTriggerTypeEnum {
     AUTO(1, "自动触发"),
-    MANUAL(2, "手动触发");
+    MANUAL(2, "手动触发"),
+    WORKFLOW(2, "DAG触发"),
+    ;
 
     private final Integer type;
     private final String desc;

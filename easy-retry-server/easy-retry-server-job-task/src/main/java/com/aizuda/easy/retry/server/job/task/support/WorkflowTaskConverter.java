@@ -1,10 +1,13 @@
 package com.aizuda.easy.retry.server.job.task.support;
 
-import com.aizuda.easy.retry.server.job.task.dto.JobPartitionTaskDTO;
 import com.aizuda.easy.retry.server.job.task.dto.WorkflowPartitionTaskDTO;
 import com.aizuda.easy.retry.server.job.task.dto.WorkflowTaskPrepareDTO;
+import com.aizuda.easy.retry.server.job.task.support.generator.batch.WorkflowTaskBatchGeneratorContext;
 import com.aizuda.easy.retry.template.datasource.persistence.po.Workflow;
+import com.aizuda.easy.retry.template.datasource.persistence.po.WorkflowTaskBatch;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Mappings;
 import org.mapstruct.factory.Mappers;
 
 import java.util.List;
@@ -20,5 +23,12 @@ public interface WorkflowTaskConverter {
 
     List<WorkflowPartitionTaskDTO> toWorkflowPartitionTaskList(List<Workflow> workflowList);
 
+    @Mappings(
+        @Mapping(source = "id", target = "workflowId")
+    )
     WorkflowTaskPrepareDTO toWorkflowTaskPrepareDTO(WorkflowPartitionTaskDTO workflowPartitionTaskDTO);
+
+    WorkflowTaskBatchGeneratorContext toWorkflowTaskBatchGeneratorContext(WorkflowTaskPrepareDTO workflowTaskPrepareDTO);
+
+    WorkflowTaskBatch toWorkflowTaskBatch(WorkflowTaskBatchGeneratorContext context);
 }

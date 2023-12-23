@@ -356,22 +356,24 @@ CREATE TABLE `job_task`
 
 CREATE TABLE `job_task_batch`
 (
-    `id`                bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `namespace_id`      varchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' COMMENT '命名空间id',
-    `group_name`        varchar(64)         NOT NULL COMMENT '组名称',
-    `job_id`            bigint(20)          NOT NULL COMMENT '任务id',
-    `task_batch_status` tinyint(4)          NOT NULL DEFAULT '0' COMMENT '任务批次状态 0、失败 1、成功',
-    `operation_reason`  tinyint(4)          NOT NULL DEFAULT '0' COMMENT '操作原因',
-    `execution_at`      bigint(13)          NOT NULL DEFAULT '0' COMMENT '任务执行时间',
-    `parent_id`         varchar(64)         NOT NULL DEFAULT '' COMMENT '父节点',
-    `create_dt`         datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_dt`         datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
-    `deleted`           tinyint(4)          NOT NULL DEFAULT '0' COMMENT '逻辑删除 1、删除',
-    `ext_attrs`         varchar(256)        NULL     default '' COMMENT '扩展字段',
+    `id`                     bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `namespace_id`           varchar(64) NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' COMMENT '命名空间id',
+    `group_name`             varchar(64) NOT NULL COMMENT '组名称',
+    `job_id`                 bigint(20) NOT NULL COMMENT '任务id',
+    `workflow_node_id`       bigint(20) NOT NULL COMMENT '工作流节点id',
+    `workflow_task_batch_id` bigint(20) NOT NULL COMMENT '工作流任务批次id',
+    `task_batch_status`      tinyint(4) NOT NULL DEFAULT '0' COMMENT '任务批次状态 0、失败 1、成功',
+    `operation_reason`       tinyint(4) NOT NULL DEFAULT '0' COMMENT '操作原因',
+    `execution_at`           bigint(13) NOT NULL DEFAULT '0' COMMENT '任务执行时间',
+    `parent_id`              varchar(64) NOT NULL DEFAULT '' COMMENT '父节点',
+    `create_dt`              datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_dt`              datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+    `deleted`                tinyint(4) NOT NULL DEFAULT '0' COMMENT '逻辑删除 1、删除',
+    `ext_attrs`              varchar(256) NULL default '' COMMENT '扩展字段',
     PRIMARY KEY (`id`),
-    KEY `idx_job_id_task_batch_status` (`job_id`, `task_batch_status`),
-    KEY `idx_create_dt` (`create_dt`),
-    KEY `idx_namespace_id_group_name` (`namespace_id`, `group_name`)
+    KEY                      `idx_job_id_task_batch_status` (`job_id`, `task_batch_status`),
+    KEY                      `idx_create_dt` (`create_dt`),
+    KEY                      `idx_namespace_id_group_name` (`namespace_id`, `group_name`)
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 0
   DEFAULT CHARSET = utf8mb4 COMMENT ='任务批次';
@@ -442,25 +444,25 @@ CREATE TABLE `retry_summary`
 
 CREATE TABLE `workflow`
 (
-    `id`              bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `workflow_name`      varchar(64)         NOT NULL COMMENT '工作流名称',
-    `namespace_id`    varchar(64)         NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' COMMENT '命名空间id',
-    `group_name`      varchar(64)         NOT NULL COMMENT '组名称',
-    `workflow_status` tinyint(4)          NOT NULL DEFAULT '1' COMMENT '工作流状态 0、关闭、1、开启',
-    `trigger_type`     tinyint(4)          NOT NULL COMMENT '触发类型 1.CRON 表达式 2. 固定时间',
-    `trigger_interval` varchar(255)        NOT NULL COMMENT '间隔时长',
-    `next_trigger_at`  bigint(13)          NOT NULL COMMENT '下次触发时间',
-    `executor_timeout` int(11)             NOT NULL DEFAULT '0' COMMENT '任务执行超时时间，单位秒',
-    `description`            varchar(256) NOT NULL DEFAULT '' COMMENT '描述',
-    `flow_info`       text                 DEFAULT  NULL COMMENT '流程信息',
-    `bucket_index`     int(11)             NOT NULL DEFAULT '0' COMMENT 'bucket',
-    `create_dt`       datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_dt`       datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
-    `deleted`         tinyint(4)          NOT NULL DEFAULT '0' COMMENT '逻辑删除 1、删除',
-    `ext_attrs`       varchar(256)        NULL     default '' COMMENT '扩展字段',
+    `id`               bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `workflow_name`    varchar(64)  NOT NULL COMMENT '工作流名称',
+    `namespace_id`     varchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' COMMENT '命名空间id',
+    `group_name`       varchar(64)  NOT NULL COMMENT '组名称',
+    `workflow_status`  tinyint(4) NOT NULL DEFAULT '1' COMMENT '工作流状态 0、关闭、1、开启',
+    `trigger_type`     tinyint(4) NOT NULL COMMENT '触发类型 1.CRON 表达式 2. 固定时间',
+    `trigger_interval` varchar(255) NOT NULL COMMENT '间隔时长',
+    `next_trigger_at`  bigint(13) NOT NULL COMMENT '下次触发时间',
+    `executor_timeout` int(11) NOT NULL DEFAULT '0' COMMENT '任务执行超时时间，单位秒',
+    `description`      varchar(256) NOT NULL DEFAULT '' COMMENT '描述',
+    `flow_info`        text                  DEFAULT NULL COMMENT '流程信息',
+    `bucket_index`     int(11) NOT NULL DEFAULT '0' COMMENT 'bucket',
+    `create_dt`        datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_dt`        datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+    `deleted`          tinyint(4) NOT NULL DEFAULT '0' COMMENT '逻辑删除 1、删除',
+    `ext_attrs`        varchar(256) NULL default '' COMMENT '扩展字段',
     PRIMARY KEY (`id`),
-    KEY `idx_create_dt` (`create_dt`),
-    KEY `idx_namespace_id_group_name` (`namespace_id`, `group_name`)
+    KEY                `idx_create_dt` (`create_dt`),
+    KEY                `idx_namespace_id_group_name` (`namespace_id`, `group_name`)
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 0
   DEFAULT CHARSET = utf8mb4 COMMENT ='工作流';
@@ -468,23 +470,23 @@ CREATE TABLE `workflow`
 CREATE TABLE `workflow_node`
 (
     `id`                   bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `namespace_id`         varchar(64)         NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' COMMENT '命名空间id',
-    `node_name`           varchar(64)          NOT NULL COMMENT '节点名称',
-    `group_name`           varchar(64)         NOT NULL COMMENT '组名称',
-    `job_id`               bigint(20)          NOT NULL DEFAULT -1 COMMENT '任务信息id',
-    `workflow_id`               bigint(20)          NOT NULL COMMENT '工作流ID',
-    `node_type`            tinyint(4)          NOT NULL DEFAULT 1 COMMENT '1、任务节点 2、条件节点',
-    `expression_type`      tinyint(4)          NOT NULL DEFAULT 0 COMMENT '1、SpEl、2、Aviator 3、QL',
-    `fail_strategy`        tinyint(4)          NOT NULL DEFAULT 0 COMMENT '失败策略 1、跳过 2、阻塞',
-    `workflow_node_status` tinyint(4)          NOT NULL DEFAULT 1 COMMENT '工作流节点状态 0、关闭、1、开启',
-    `node_expression`      text                         DEFAULT NULL  COMMENT '节点表达式',
-    `create_dt`            datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_dt`            datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
-    `deleted`              tinyint(4)          NOT NULL DEFAULT '0' COMMENT '逻辑删除 1、删除',
-    `ext_attrs`            varchar(256)        NULL     default '' COMMENT '扩展字段',
+    `namespace_id`         varchar(64) NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' COMMENT '命名空间id',
+    `node_name`            varchar(64) NOT NULL COMMENT '节点名称',
+    `group_name`           varchar(64) NOT NULL COMMENT '组名称',
+    `job_id`               bigint(20) NOT NULL DEFAULT -1 COMMENT '任务信息id',
+    `workflow_id`          bigint(20) NOT NULL COMMENT '工作流ID',
+    `node_type`            tinyint(4) NOT NULL DEFAULT 1 COMMENT '1、任务节点 2、条件节点',
+    `expression_type`      tinyint(4) NOT NULL DEFAULT 0 COMMENT '1、SpEl、2、Aviator 3、QL',
+    `fail_strategy`        tinyint(4) NOT NULL DEFAULT 0 COMMENT '失败策略 1、跳过 2、阻塞',
+    `workflow_node_status` tinyint(4) NOT NULL DEFAULT 1 COMMENT '工作流节点状态 0、关闭、1、开启',
+    `node_expression`      text                 DEFAULT NULL COMMENT '节点表达式',
+    `create_dt`            datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_dt`            datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+    `deleted`              tinyint(4) NOT NULL DEFAULT '0' COMMENT '逻辑删除 1、删除',
+    `ext_attrs`            varchar(256) NULL default '' COMMENT '扩展字段',
     PRIMARY KEY (`id`),
-    KEY `idx_create_dt` (`create_dt`),
-    KEY `idx_namespace_id_group_name` (`namespace_id`, `group_name`)
+    KEY                    `idx_create_dt` (`create_dt`),
+    KEY                    `idx_namespace_id_group_name` (`namespace_id`, `group_name`)
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 0
   DEFAULT CHARSET = utf8mb4 COMMENT ='工作流节点';
@@ -492,20 +494,21 @@ CREATE TABLE `workflow_node`
 CREATE TABLE `workflow_task_batch`
 (
     `id`                bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `namespace_id`      varchar(64)         NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' COMMENT '命名空间id',
-    `group_name`        varchar(64)         NOT NULL COMMENT '组名称',
-    `workflow_id`       bigint(20)          NOT NULL COMMENT '工作流任务id',
-    `task_batch_status` tinyint(4)          NOT NULL DEFAULT '0' COMMENT '任务批次状态 0、失败 1、成功',
-    `operation_reason`  tinyint(4)          NOT NULL DEFAULT '0' COMMENT '操作原因',
-    `execution_at`      bigint(13)          NOT NULL DEFAULT '0' COMMENT '任务执行时间',
-    `create_dt`         datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_dt`         datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
-    `deleted`           tinyint(4)          NOT NULL DEFAULT '0' COMMENT '逻辑删除 1、删除',
-    `ext_attrs`         varchar(256)        NULL     default '' COMMENT '扩展字段',
+    `namespace_id`      varchar(64) NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' COMMENT '命名空间id',
+    `group_name`        varchar(64) NOT NULL COMMENT '组名称',
+    `workflow_id`       bigint(20) NOT NULL COMMENT '工作流任务id',
+    `task_batch_status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '任务批次状态 0、失败 1、成功',
+    `operation_reason`  tinyint(4) NOT NULL DEFAULT '0' COMMENT '操作原因',
+    `flow_info`         text                 DEFAULT NULL COMMENT '流程信息',
+    `execution_at`      bigint(13) NOT NULL DEFAULT '0' COMMENT '任务执行时间',
+    `create_dt`         datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_dt`         datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+    `deleted`           tinyint(4) NOT NULL DEFAULT '0' COMMENT '逻辑删除 1、删除',
+    `ext_attrs`         varchar(256) NULL default '' COMMENT '扩展字段',
     PRIMARY KEY (`id`),
-    KEY `idx_job_id_task_batch_status` (`workflow_id`, `task_batch_status`),
-    KEY `idx_create_dt` (`create_dt`),
-    KEY `idx_namespace_id_group_name` (`namespace_id`, `group_name`)
+    KEY                 `idx_job_id_task_batch_status` (`workflow_id`, `task_batch_status`),
+    KEY                 `idx_create_dt` (`create_dt`),
+    KEY                 `idx_namespace_id_group_name` (`namespace_id`, `group_name`)
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 0
   DEFAULT CHARSET = utf8mb4 COMMENT ='工作流批次';

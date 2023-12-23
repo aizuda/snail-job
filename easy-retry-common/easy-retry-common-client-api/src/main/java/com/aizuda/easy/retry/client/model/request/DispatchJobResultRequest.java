@@ -14,6 +14,10 @@ public class DispatchJobResultRequest {
 
     private Long taskBatchId;
 
+    private Long workflowBatchId;
+
+    private Long workflowNodeId;
+
     private Long taskId;
 
     /**

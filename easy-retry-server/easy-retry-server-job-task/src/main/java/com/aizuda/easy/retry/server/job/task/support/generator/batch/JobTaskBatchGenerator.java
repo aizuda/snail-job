@@ -42,6 +42,7 @@ public class JobTaskBatchGenerator {
         jobTaskBatch.setGroupName(context.getGroupName());
         jobTaskBatch.setCreateDt(LocalDateTime.now());
         jobTaskBatch.setNamespaceId(context.getNamespaceId());
+        jobTaskBatch.setWorkflowTaskBatchId(context.getWorkflowTaskBatchId());
         // 无执行的节点
         if (CollectionUtils.isEmpty(CacheRegisterTable.getServerNodeSet(context.getGroupName(), context.getNamespaceId()))) {
             jobTaskBatch.setTaskBatchStatus(JobTaskBatchStatusEnum.CANCEL.getStatus());

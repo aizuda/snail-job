@@ -47,17 +47,22 @@ public class WorkflowTaskBatch implements Serializable {
     /**
      * 任务批次状态 0、失败 1、成功
      */
-    private Byte taskBatchStatus;
+    private Integer taskBatchStatus;
 
     /**
      * 操作原因
      */
-    private Byte operationReason;
+    private Integer operationReason;
 
     /**
      * 任务执行时间
      */
     private Long executionAt;
+
+    /**
+     * 流程信息
+     */
+    private String flowInfo;
 
     /**
      * 创建时间
@@ -72,7 +77,7 @@ public class WorkflowTaskBatch implements Serializable {
     /**
      * 逻辑删除 1、删除
      */
-    private Byte deleted;
+    private Integer deleted;
 
     /**
      * 扩展字段
