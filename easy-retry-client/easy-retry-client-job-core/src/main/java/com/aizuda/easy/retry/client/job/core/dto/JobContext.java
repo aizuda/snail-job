@@ -13,7 +13,7 @@ public class JobContext {
 
     private Long taskBatchId;
 
-    private Long workflowBatchId;
+    private Long workflowTaskBatchId;
 
     private Long workflowNodeId;
 

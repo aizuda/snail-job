@@ -67,5 +67,10 @@ public class JobTaskPrepareDTO {
      */
     private Long workflowNodeId;
 
+    /**
+     * 工作流父节点id
+     */
+    private Long parentWorkflowNodeId;
+
 
 }

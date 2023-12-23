@@ -52,4 +52,8 @@ public class WorkflowTaskPrepareDTO {
      */
     private String flowInfo;
 
+    /**
+     * 下次触发时间
+     */
+    private long nextTriggerAt;
 }

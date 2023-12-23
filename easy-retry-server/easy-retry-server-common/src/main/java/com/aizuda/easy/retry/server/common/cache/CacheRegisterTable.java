@@ -62,7 +62,7 @@ public class CacheRegisterTable implements Lifecycle {
             .reduce((s, y) -> {
                 s.addAll(y);
                 return s;
-            }).get();
+            }).orElse(new TreeSet<>());
 
     }
 

@@ -7,6 +7,7 @@ import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.server.job.task.dto.JobTimerTaskDTO;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
+import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.server.job.task.support.timer.JobTimerTask;
 import com.aizuda.easy.retry.server.job.task.support.timer.JobTimerWheel;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskBatchMapper;
@@ -37,12 +38,9 @@ public class JobTaskBatchGenerator {
     public void generateJobTaskBatch(JobTaskBatchGeneratorContext context) {
 
         // 生成一个新的任务
-        JobTaskBatch jobTaskBatch = new JobTaskBatch();
-        jobTaskBatch.setJobId(context.getJobId());
-        jobTaskBatch.setGroupName(context.getGroupName());
+        JobTaskBatch jobTaskBatch = JobTaskConverter.INSTANCE.toJobTaskBatch(context);
         jobTaskBatch.setCreateDt(LocalDateTime.now());
-        jobTaskBatch.setNamespaceId(context.getNamespaceId());
-        jobTaskBatch.setWorkflowTaskBatchId(context.getWorkflowTaskBatchId());
+
         // 无执行的节点
         if (CollectionUtils.isEmpty(CacheRegisterTable.getServerNodeSet(context.getGroupName(), context.getNamespaceId()))) {
             jobTaskBatch.setTaskBatchStatus(JobTaskBatchStatusEnum.CANCEL.getStatus());
@@ -66,6 +64,8 @@ public class JobTaskBatchGenerator {
         jobTimerTaskDTO.setTaskBatchId(jobTaskBatch.getId());
         jobTimerTaskDTO.setJobId(context.getJobId());
         jobTimerTaskDTO.setTriggerType(context.getTriggerType());
+        jobTimerTaskDTO.setWorkflowTaskBatchId(context.getWorkflowTaskBatchId());
+        jobTimerTaskDTO.setWorkflowNodeId(context.getWorkflowNodeId());
         JobTimerWheel.register(jobTaskBatch.getId(),
                 new JobTimerTask(jobTimerTaskDTO), delay, TimeUnit.MILLISECONDS);
 

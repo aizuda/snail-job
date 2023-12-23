@@ -45,7 +45,7 @@ public class DispatchJobRequest {
 
     private Integer shardingIndex;
 
-    private Long workflowBatchId;
+    private Long workflowTaskBatchId;
 
     private Long workflowNodeId;
 

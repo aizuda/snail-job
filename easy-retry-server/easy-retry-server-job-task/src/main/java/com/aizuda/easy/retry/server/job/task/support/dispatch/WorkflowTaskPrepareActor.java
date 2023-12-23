@@ -1,13 +1,19 @@
 package com.aizuda.easy.retry.server.job.task.support.dispatch;
 
 import akka.actor.AbstractActor;
+import com.aizuda.easy.retry.common.core.context.SpringContext;
+import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.job.task.dto.JobTaskPrepareDTO;
 import com.aizuda.easy.retry.server.job.task.dto.WorkflowTaskPrepareDTO;
+import com.aizuda.easy.retry.server.job.task.support.WorkflowPrePareHandler;
+import com.aizuda.easy.retry.server.job.task.support.prepare.TerminalJobPrepareHandler;
+import com.aizuda.easy.retry.server.job.task.support.prepare.workflow.TerminalWorkflowPrepareHandler;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskBatchMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.WorkflowTaskBatchMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.WorkflowTaskBatch;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +23,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
+
+import static com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum.NOT_COMPLETE;
 
 /**
  * @author xiaowoniu
@@ -28,6 +36,7 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 public class WorkflowTaskPrepareActor extends AbstractActor {
+    private final List<WorkflowPrePareHandler> workflowPrePareHandlers;
     private final WorkflowTaskBatchMapper workflowTaskBatchMapper;
     @Override
     public Receive createReceive() {
@@ -45,15 +54,21 @@ public class WorkflowTaskPrepareActor extends AbstractActor {
     private void doPrepare(WorkflowTaskPrepareDTO workflowTaskPrepareDTO) {
         List<WorkflowTaskBatch> workflowTaskBatches = workflowTaskBatchMapper.selectList(new LambdaQueryWrapper<WorkflowTaskBatch>()
                 .eq(WorkflowTaskBatch::getWorkflowId, workflowTaskPrepareDTO.getWorkflowId())
-                .eq(WorkflowTaskBatch::getTaskBatchStatus, 0));
+                .in(WorkflowTaskBatch::getTaskBatchStatus, NOT_COMPLETE));
 
         // 则直接创建一个任务批次
         if (CollectionUtils.isEmpty(workflowTaskBatches)) {
-
+            for (WorkflowPrePareHandler workflowPrePareHandler : workflowPrePareHandlers) {
+                // 终态任务
+                if (workflowPrePareHandler.matches(null)) {
+                    workflowPrePareHandler.handler(workflowTaskPrepareDTO);
+                }
+            }
         } else {
             // 判断任务是否执行超时
             // 任务是否为发起调用
         }
+
     }
 
 }

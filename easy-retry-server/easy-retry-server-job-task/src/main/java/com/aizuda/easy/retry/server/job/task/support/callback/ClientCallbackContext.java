@@ -20,7 +20,12 @@ public class ClientCallbackContext {
 
     private Long taskBatchId;
 
-    private Long workflowBatchId;
+    /**
+     * 工作流任务批次id
+     */
+    private Long workflowTaskBatchId;
+
+    private Long workflowNodeId;
 
     private Long taskId;
 

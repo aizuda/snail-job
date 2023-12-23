@@ -28,7 +28,7 @@ public class JobTimerWheel implements Lifecycle {
     private static final String THREAD_NAME_PREFIX = "job-task-timer-wheel-";
     private static HashedWheelTimer timer = null;
     private static final ThreadPoolExecutor executor =
-            new ThreadPoolExecutor(4, 4, 10, TimeUnit.SECONDS,
+            new ThreadPoolExecutor(16, 16, 10, TimeUnit.SECONDS,
                     new LinkedBlockingQueue<>(), new CustomizableThreadFactory(THREAD_NAME_PREFIX));
 
     private static final TimerIdempotent idempotent = new TimerIdempotent();

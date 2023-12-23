@@ -121,6 +121,8 @@ public class JobExecutorActor extends AbstractActor {
             JobExecutorContext context = JobTaskConverter.INSTANCE.toJobExecutorContext(job);
             context.setTaskBatchId(taskExecute.getTaskBatchId());
             context.setJobId(job.getId());
+            context.setWorkflowTaskBatchId(taskExecute.getWorkflowTaskBatchId());
+            context.setWorkflowNodeId(taskExecute.getWorkflowNodeId());
             jobExecutor.execute(context);
         } finally {
             log.info("准备执行任务完成.[{}]", JsonUtil.toJsonString(taskExecute));
