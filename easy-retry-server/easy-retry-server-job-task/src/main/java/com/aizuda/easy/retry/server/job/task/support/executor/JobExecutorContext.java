@@ -84,4 +84,11 @@ public class JobExecutorContext {
     private Integer shardingIndex;
 
     private Integer executorTimeout;
+    /**
+     * 工作流任务批次id
+     */
+    private Long workflowTaskBatchId;
+
+    private Long workflowNodeId;
+
 }

@@ -93,4 +93,6 @@ public interface JobTaskConverter {
 
     List<JobPartitionTaskDTO> toJobTaskBatchPartitionTasks(List<JobTaskBatch> jobTaskBatches);
 
+    JobTaskBatch toJobTaskBatch(JobTaskBatchGeneratorContext context);
+
 }

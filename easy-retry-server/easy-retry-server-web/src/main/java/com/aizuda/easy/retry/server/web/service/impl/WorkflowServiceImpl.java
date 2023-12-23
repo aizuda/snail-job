@@ -11,6 +11,7 @@ import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.strategy.WaitStrategies;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
+import com.aizuda.easy.retry.server.common.util.GraphUtils;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
 import com.aizuda.easy.retry.server.web.model.request.JobRequestVO;
 import com.aizuda.easy.retry.server.web.model.request.UserSessionVO;
@@ -84,7 +85,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 
         log.info("图构建完成. graph:[{}]", graph);
         // 保存图信息
-        workflow.setFlowInfo(JsonUtil.toJsonString(convertGraphToAdjacencyList(graph)));
+        workflow.setFlowInfo(JsonUtil.toJsonString(GraphUtils.serializeGraphToJson(graph)));
         workflowMapper.updateById(workflow);
 
         return true;
@@ -116,13 +117,13 @@ public class WorkflowServiceImpl implements WorkflowService {
 
         String flowInfo = workflow.getFlowInfo();
         try {
-            MutableGraph<Long> graph = deserializeJsonToGraph(flowInfo);
+            MutableGraph<Long> graph = GraphUtils.deserializeJsonToGraph(flowInfo);
             // 反序列化构建图
             WorkflowDetailResponseVO.NodeConfig config = buildNodeConfig(graph, SystemConstants.ROOT, new HashMap<>(), workflowNodeMap);
             responseVO.setNodeConfig(config);
         } catch (Exception e) {
             log.error("反序列化失败. json:[{}]", flowInfo, e);
-            throw e;
+            throw new EasyRetryServerException("查询工作流详情失败");
         }
 
         return responseVO;
@@ -168,34 +169,10 @@ public class WorkflowServiceImpl implements WorkflowService {
         // 保存图信息
         Workflow workflow = new Workflow();
         workflow.setId(workflowRequestVO.getId());
-        workflow.setFlowInfo(JsonUtil.toJsonString(convertGraphToAdjacencyList(graph)));
+        workflow.setFlowInfo(JsonUtil.toJsonString(GraphUtils.serializeGraphToJson(graph)));
         Assert.isTrue(workflowMapper.updateById(workflow) > 0, () -> new EasyRetryServerException("更新失败"));
 
         return Boolean.TRUE;
-    }
-
-    // 从JSON反序列化为Guava图
-    private static MutableGraph<Long> deserializeJsonToGraph(String jsonGraph) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        // 将JSON字符串转换为Map<Long, Iterable<Long>>
-        Map<Long, Iterable<Long>> adjacencyList = objectMapper.readValue(
-                jsonGraph, new TypeReference<Map<Long, Iterable<Long>>>() {
-                });
-
-        // 创建Guava图并添加节点和边
-        MutableGraph<Long> graph = GraphBuilder.directed().build();
-        for (Map.Entry<Long, Iterable<Long>> entry : adjacencyList.entrySet()) {
-            Long node = entry.getKey();
-            Iterable<Long> successors = entry.getValue();
-
-            graph.addNode(node);
-            for (Long successor : successors) {
-                graph.putEdge(node, successor);
-            }
-        }
-
-        return graph;
     }
 
     private WorkflowDetailResponseVO.NodeConfig buildNodeConfig(MutableGraph<Long> graph,
@@ -212,6 +189,7 @@ public class WorkflowServiceImpl implements WorkflowService {
         WorkflowDetailResponseVO.NodeConfig currentConfig = new WorkflowDetailResponseVO.NodeConfig();
         currentConfig.setConditionNodes(Lists.newArrayList());
 
+        // 是否挂载子节点
         boolean mount = false;
 
         for (Long successor : successors) {
@@ -232,21 +210,11 @@ public class WorkflowServiceImpl implements WorkflowService {
             buildNodeConfig(graph, successor, nodeConfigMap, workflowNodeMap);
         }
 
-        if (parentId != SystemConstants.ROOT && mount) {
+        if (!parentId.equals(SystemConstants.ROOT) && mount) {
             previousNodeInfo.setChildNode(currentConfig);
         }
 
         return currentConfig;
-    }
-
-    private Map<Long, Iterable<Long>> convertGraphToAdjacencyList(MutableGraph<Long> graph) {
-        Map<Long, Iterable<Long>> adjacencyList = new HashMap<>();
-
-        for (Long node : graph.nodes()) {
-            adjacencyList.put(node, graph.successors(node));
-        }
-
-        return adjacencyList;
     }
 
     public void buildGraph(List<Long> parentIds, String groupName, Long workflowId, NodeConfig nodeConfig, MutableGraph<Long> graph) {

@@ -13,6 +13,12 @@ public class JobTimerTaskDTO {
     private Long taskBatchId;
     private Long jobId;
     /**
+     * 工作流任务批次id
+     */
+    private Long workflowTaskBatchId;
+
+    private Long workflowNodeId;
+    /**
      * 触发类似 1、auto 2、manual
      */
     private Integer triggerType;

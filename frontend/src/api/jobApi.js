@@ -30,18 +30,34 @@ const jobApi = {
   jobLogList: '/job/log/list',
 
   // DAG
-  listPage: '/workflow/page/list',
+  workflowListPage: '/workflow/page/list',
   saveWorkflow: '/workflow',
   updateWorkflow: '/workflow',
-  workflowDetail: '/workflow'
-
+  workflowDetail: '/workflow',
+  workflowBatchListPage: '/workflow/batch/page/list',
+  workflowBatchDetail: '/workflow/batch/'
 }
 
 export default jobApi
 
-export function listPage (parameter) {
+export function workflowBatchDetail (id) {
   return request({
-    url: jobApi.listPage,
+    url: jobApi.workflowBatchDetail + id,
+    method: 'get'
+  })
+}
+
+export function workflowBatchListPage (parameter) {
+  return request({
+    url: jobApi.workflowBatchListPage,
+    method: 'get',
+    params: parameter
+  })
+}
+
+export function workflowListPage (parameter) {
+  return request({
+    url: jobApi.workflowListPage,
     method: 'get',
     params: parameter
   })

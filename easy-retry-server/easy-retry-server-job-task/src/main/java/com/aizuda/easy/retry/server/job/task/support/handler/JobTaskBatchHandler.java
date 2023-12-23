@@ -99,7 +99,7 @@ public class JobTaskBatchHandler {
                 taskExecuteDTO.setWorkflowTaskBatchId(workflowTaskBatchId);
                 taskExecuteDTO.setTriggerType(JobTriggerTypeEnum.AUTO.getType());
                 taskExecuteDTO.setParentId(workflowNodeId);
-                ActorRef actorRef = ActorGenerator.jobTaskExecutorActor();
+                ActorRef actorRef = ActorGenerator.workflowTaskExecutorActor();
                 actorRef.tell(taskExecuteDTO, actorRef);
             } catch (Exception e) {
                 log.error("任务调度执行失败", e);

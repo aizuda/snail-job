@@ -67,6 +67,8 @@ public class JobEndPoint {
         jobContext.setTaskType(dispatchJob.getTaskType());
         jobContext.setExecutorTimeout(dispatchJob.getExecutorTimeout());
         jobContext.setArgsStr(dispatchJob.getArgsStr());
+        jobContext.setWorkflowNodeId(dispatchJob.getWorkflowNodeId());
+        jobContext.setWorkflowTaskBatchId(dispatchJob.getWorkflowTaskBatchId());
         return jobContext;
     }
 

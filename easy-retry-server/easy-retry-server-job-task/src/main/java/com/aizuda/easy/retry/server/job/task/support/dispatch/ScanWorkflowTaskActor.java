@@ -131,7 +131,7 @@ public class ScanWorkflowTaskActor extends AbstractActor {
                 new LambdaQueryWrapper<Workflow>()
                         .select(Workflow::getGroupName, Workflow::getNextTriggerAt, Workflow::getTriggerType,
                                 Workflow::getTriggerInterval, Workflow::getExecutorTimeout,
-                                Workflow::getId, Workflow::getNamespaceId)
+                                Workflow::getId, Workflow::getNamespaceId, Workflow::getFlowInfo)
                         .eq(Workflow::getWorkflowStatus, StatusEnum.YES.getStatus())
                         .eq(Workflow::getDeleted, StatusEnum.NO.getStatus())
                         .in(Workflow::getBucketIndex, scanTask.getBuckets())

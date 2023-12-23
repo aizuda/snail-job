@@ -97,7 +97,8 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
         dispatchJobRequest.setGroupName(jobContext.getGroupName());
         dispatchJobRequest.setJobId(jobContext.getJobId());
         dispatchJobRequest.setTaskId(jobContext.getTaskId());
-        dispatchJobRequest.setWorkflowBatchId(jobContext.getWorkflowBatchId());
+        dispatchJobRequest.setWorkflowTaskBatchId(jobContext.getWorkflowTaskBatchId());
+        dispatchJobRequest.setWorkflowNodeId(jobContext.getWorkflowNodeId());
         dispatchJobRequest.setTaskBatchId(jobContext.getTaskBatchId());
         dispatchJobRequest.setTaskId(jobContext.getTaskId());
         dispatchJobRequest.setTaskType(jobContext.getTaskType());

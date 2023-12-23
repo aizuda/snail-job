@@ -3,6 +3,7 @@ package com.aizuda.easy.retry.server.job.task.support.dispatch;
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import cn.hutool.core.lang.Assert;
+import cn.hutool.core.lang.Pair;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
@@ -51,7 +52,7 @@ import java.util.stream.Collectors;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Slf4j
 @RequiredArgsConstructor
-public class WorkflowExecutorActor  extends AbstractActor  {
+public class WorkflowExecutorActor extends AbstractActor {
     private final WorkflowTaskBatchMapper workflowTaskBatchMapper;
     private final WorkflowNodeMapper workflowNodeMapper;
     private final JobMapper jobMapper;
@@ -59,7 +60,7 @@ public class WorkflowExecutorActor  extends AbstractActor  {
 
     @Override
     public Receive createReceive() {
-        return  receiveBuilder().match(WorkflowNodeTaskExecuteDTO.class, taskExecute -> {
+        return receiveBuilder().match(WorkflowNodeTaskExecuteDTO.class, taskExecute -> {
             try {
                 doExecutor(taskExecute);
             } catch (Exception e) {
@@ -80,15 +81,22 @@ public class WorkflowExecutorActor  extends AbstractActor  {
         String flowInfo = workflowTaskBatch.getFlowInfo();
         MutableGraph<Long> graph = GraphUtils.deserializeJsonToGraph(flowInfo);
 
-        Set<Long> predecessors = graph.predecessors(taskExecute.getParentId());
-        List<WorkflowNode> workflowNodes = workflowNodeMapper.selectBatchIds(predecessors);
-        Set<Long> jobIdSet = workflowNodes.stream().map(WorkflowNode::getJobId).collect(Collectors.toSet());
-        List<Job> jobs = jobMapper.selectBatchIds(jobIdSet);
-        for (Job job : jobs) {
+        Set<Long> successors = graph.successors(taskExecute.getParentId());
+        if (CollectionUtils.isEmpty(successors)) {
+            return;
+        }
+
+        List<WorkflowNode> workflowNodes = workflowNodeMapper.selectBatchIds(successors);
+        List<Job> jobs = jobMapper.selectBatchIds(workflowNodes.stream().map(WorkflowNode::getJobId).collect(Collectors.toSet()));
+        Map<Long, Job> jobMap = jobs.stream().collect(Collectors.toMap(Job::getId, i -> i));;
+        for (WorkflowNode workflowNode : workflowNodes) {
             // 生成任务批次
-            JobTaskPrepareDTO jobTaskPrepare = JobTaskConverter.INSTANCE.toJobTaskPrepare(job);
+            JobTaskPrepareDTO jobTaskPrepare = JobTaskConverter.INSTANCE.toJobTaskPrepare(jobMap.get(workflowNode.getJobId()));
             jobTaskPrepare.setTriggerType(JobTriggerTypeEnum.WORKFLOW.getType());
             jobTaskPrepare.setNextTriggerAt(DateUtils.toNowMilli());
+            jobTaskPrepare.setWorkflowNodeId(workflowNode.getId());
+            jobTaskPrepare.setWorkflowTaskBatchId(taskExecute.getWorkflowTaskBatchId());
+            jobTaskPrepare.setParentWorkflowNodeId(taskExecute.getParentId());
             // 执行预处理阶段
             ActorRef actorRef = ActorGenerator.jobTaskPrepareActor();
             actorRef.tell(jobTaskPrepare, actorRef);
@@ -104,7 +112,7 @@ public class WorkflowExecutorActor  extends AbstractActor  {
         jobTaskBatch.setTaskBatchStatus(taskStatus);
         jobTaskBatch.setOperationReason(operationReason);
         Assert.isTrue(1 == workflowTaskBatchMapper.updateById(jobTaskBatch),
-            () -> new EasyRetryServerException("更新任务失败"));
+                () -> new EasyRetryServerException("更新任务失败"));
 
     }
 }

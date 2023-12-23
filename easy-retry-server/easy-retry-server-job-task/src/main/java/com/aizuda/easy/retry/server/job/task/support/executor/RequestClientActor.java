@@ -91,7 +91,7 @@ public class RequestClientActor extends AbstractActor {
 
         } catch (Exception e) {
             log.error("调用客户端失败.", e);
-            Throwable throwable = e;
+            Throwable throwable;
             if (e.getClass().isAssignableFrom(RetryException.class)) {
                 RetryException re = (RetryException) e;
                 throwable = re.getLastFailedAttempt().getExceptionCause();
@@ -103,8 +103,8 @@ public class RequestClientActor extends AbstractActor {
 
     public static class JobExecutorRetryListener implements RetryListener {
 
-        private RealJobExecutorDTO realJobExecutorDTO;
-        private JobTaskMapper jobTaskMapper;
+        private final RealJobExecutorDTO realJobExecutorDTO;
+        private final JobTaskMapper jobTaskMapper;
 
         public JobExecutorRetryListener(final RealJobExecutorDTO realJobExecutorDTO,
                                         final JobTaskMapper jobTaskMapper) {

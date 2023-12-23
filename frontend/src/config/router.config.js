@@ -173,7 +173,7 @@ export const asyncRouterMap = [
             path: '/job/list',
             name: 'JobList',
             component: () => import('@/views/job/JobList'),
-            meta: { title: '任务信息', keepAlive: true, icon: 'profile', permission: ['job'] }
+            meta: { title: '定时任务信息', keepAlive: true, icon: 'profile', permission: ['job'] }
           },
           {
             path: '/job/info',
@@ -193,14 +193,14 @@ export const asyncRouterMap = [
             path: '/job/batch/list',
             name: 'JobBatchList',
             component: () => import('@/views/job/JobBatchList'),
-            meta: { title: '任务批次', icon: 'profile', permission: ['jobBatch'] }
+            meta: { title: '定时任务批次', icon: 'profile', permission: ['jobBatch'] }
           },
           {
             path: '/job/batch/info',
             name: 'JobBatchInfo',
             hidden: true,
             component: () => import('@/views/job/JobBatchInfo'),
-            meta: { title: '任务批次详情', icon: 'profile', permission: ['jobBatch'] }
+            meta: { title: '定时任务批次详情', icon: 'profile', permission: ['jobBatch'] }
           },
           {
             path: '/job/task/list',
@@ -226,7 +226,7 @@ export const asyncRouterMap = [
             path: '/job/workflow/list',
             name: 'WorkflowList',
             component: () => import('@/views/job/WorkflowList'),
-            meta: { title: '工作流', icon: 'profile', permission: ['jobBatch'] }
+            meta: { title: '工作流信息', icon: 'profile', permission: ['jobBatch'] }
           },
           {
             path: '/job/workflow/edit',
@@ -241,6 +241,12 @@ export const asyncRouterMap = [
             hidden: true,
             component: () => import('@/views/job/WorkflowDetail'),
             meta: { title: '工作流详情', icon: 'profile', permission: ['jobBatch'] }
+          },
+          {
+            path: '/job/workflow/batch/list',
+            name: 'WorkflowBatchList',
+            component: () => import('@/views/job/WorkflowBatchList'),
+            meta: { title: '工作流任务批次', icon: 'profile', permission: ['jobBatch'] }
           }
         ]
       },

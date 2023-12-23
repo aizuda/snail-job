@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.server.web.model.response;
 
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -114,6 +115,21 @@ public class WorkflowDetailResponseVO {
          * 工作流状态  0、关闭、1、开启
          */
         private Integer workflowNodeStatus;
+
+        /**
+         * 任务批次状态
+         */
+        private Integer taskBatchStatus;
+
+        /**
+         * 任务执行时间
+         */
+        private LocalDateTime executionAt;
+
+        /**
+         * 操作原因
+         */
+        private Integer operationReason;
 
         /**
          * 子节点

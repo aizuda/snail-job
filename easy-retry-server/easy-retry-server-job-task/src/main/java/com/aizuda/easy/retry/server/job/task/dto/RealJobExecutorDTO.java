@@ -68,4 +68,11 @@ public class RealJobExecutorDTO extends BaseDTO {
 
     private Integer executorTimeout;
 
+    /**
+     * 工作流任务批次id
+     */
+    private Long workflowTaskBatchId;
+
+    private Long workflowNodeId;
+
 }
