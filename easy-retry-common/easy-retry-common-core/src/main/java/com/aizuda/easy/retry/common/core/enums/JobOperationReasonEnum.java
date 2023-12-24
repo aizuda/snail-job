@@ -26,6 +26,7 @@ public enum JobOperationReasonEnum {
     NOT_EXECUTE_TASK(6, "无可执行任务项"),
     TASK_EXECUTE_ERROR(7, "任务执行期间发生非预期异常"),
     MANNER_STOP(8, "手动停止"),
+    WORKFLOW_CONDITION_NODE_EXECUTOR_ERROR(8, "手动停止"),
     ;
 
     private final int reason;

@@ -49,6 +49,9 @@ public class WorkflowExecutorContext {
 
     private String expression;
 
-    private Map<String, Object> expressionContext;
+    /**
+     * 客户端返回的结果
+     */
+    private String result;
 
 }

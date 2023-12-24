@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.Objects;
 
 /**
  * @author xiaowoniu
@@ -23,7 +24,7 @@ public class RunningWorkflowPrepareHandler extends AbstractWorkflowPrePareHandle
 
     @Override
     public boolean matches(Integer status) {
-        return JobTaskBatchStatusEnum.RUNNING.getStatus() == status;
+        return Objects.nonNull(status) && JobTaskBatchStatusEnum.RUNNING.getStatus() == status;
     }
 
     @Override

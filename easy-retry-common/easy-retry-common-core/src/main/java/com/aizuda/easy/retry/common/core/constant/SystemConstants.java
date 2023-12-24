@@ -101,4 +101,9 @@ public interface SystemConstants {
      * 根节点
      */
    Long ROOT = -1L;
+
+    /**
+     * 根节点
+     */
+    Long CONDITION_JOB_ID = -1000L;
 }

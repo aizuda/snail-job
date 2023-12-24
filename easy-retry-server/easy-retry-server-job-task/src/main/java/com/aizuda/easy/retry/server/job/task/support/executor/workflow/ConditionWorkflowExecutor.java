@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.server.job.task.support.executor.workflow;
 
 import akka.actor.ActorRef;
+import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.WorkflowNodeTypeEnum;
@@ -8,15 +9,12 @@ import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.enums.JobTriggerTypeEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
-import com.aizuda.easy.retry.server.common.util.DateUtils;
-import com.aizuda.easy.retry.server.job.task.dto.JobTaskPrepareDTO;
-import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
+import com.aizuda.easy.retry.server.job.task.dto.WorkflowNodeTaskExecuteDTO;
+import com.aizuda.easy.retry.server.job.task.support.WorkflowTaskConverter;
 import com.aizuda.easy.retry.server.job.task.support.generator.batch.JobTaskBatchGenerator;
 import com.aizuda.easy.retry.server.job.task.support.generator.batch.JobTaskBatchGeneratorContext;
-import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskBatchMapper;
-import com.aizuda.easy.retry.template.datasource.persistence.po.JobTaskBatch;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
@@ -32,6 +30,7 @@ import java.util.Map;
  */
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class ConditionWorkflowExecutor extends AbstractWorkflowExecutor {
 
     private final static ExpressionParser ENGINE = new SpelExpressionParser();
@@ -45,25 +44,38 @@ public class ConditionWorkflowExecutor extends AbstractWorkflowExecutor {
 
     @Override
     protected void doExecute(WorkflowExecutorContext context) {
+        int taskBatchStatus = JobTaskBatchStatusEnum.SUCCESS.getStatus();
+        int operationReason = JobOperationReasonEnum.NONE.getReason();
 
-        // 根据配置的表达式执行
-        Boolean result = doEval(context.getExpression(), context.getExpressionContext());
-        if (result) {
-            JobTaskBatchGeneratorContext generatorContext = new JobTaskBatchGeneratorContext();
-            generatorContext.setGroupName(context.getGroupName());
-            generatorContext.setNamespaceId(context.getNamespaceId());
-            generatorContext.setTaskBatchStatus(JobTaskBatchStatusEnum.SUCCESS.getStatus());
-            generatorContext.setOperationReason(JobOperationReasonEnum.NONE.getReason());
-            // 特殊的job
-            generatorContext.setJobId(-1L);
-            generatorContext.setWorkflowNodeId(context.getWorkflowNodeId());
-            generatorContext.setParentWorkflowNodeId(context.getParentWorkflowNodeId());
-            generatorContext.setWorkflowTaskBatchId(context.getWorkflowTaskBatchId());
-            jobTaskBatchGenerator.generateJobTaskBatch(generatorContext);
-        } else {
-            //
+        try {
+            // 根据配置的表达式执行
+            Boolean result = doEval(context.getExpression(), JsonUtil.parseHashMap(context.getResult()));
+            if (result) {
+                // 若是工作流则开启下一个任务
+                try {
+                    WorkflowNodeTaskExecuteDTO taskExecuteDTO = new WorkflowNodeTaskExecuteDTO();
+                    taskExecuteDTO.setWorkflowTaskBatchId(context.getWorkflowTaskBatchId());
+                    taskExecuteDTO.setTriggerType(JobTriggerTypeEnum.AUTO.getType());
+                    taskExecuteDTO.setParentId(context.getWorkflowNodeId());
+                    taskExecuteDTO.setResult(context.getResult());
+                    ActorRef actorRef = ActorGenerator.workflowTaskExecutorActor();
+                    actorRef.tell(taskExecuteDTO, actorRef);
+                } catch (Exception e) {
+                    log.error("工作流执行失败", e);
+                }
+            }
+        } catch (Exception e) {
+            taskBatchStatus = JobTaskBatchStatusEnum.FAIL.getStatus();
+            operationReason = JobOperationReasonEnum.WORKFLOW_CONDITION_NODE_EXECUTOR_ERROR.getReason();
         }
 
+        JobTaskBatchGeneratorContext generatorContext = WorkflowTaskConverter.INSTANCE.toJobTaskBatchGeneratorContext(context);
+        generatorContext.setTaskBatchStatus(taskBatchStatus);
+        generatorContext.setOperationReason(operationReason);
+
+        // 特殊的job
+        generatorContext.setJobId(SystemConstants.CONDITION_JOB_ID);
+        jobTaskBatchGenerator.generateJobTaskBatch(generatorContext);
     }
 
     protected Boolean doEval(String expression, Map<String, Object> context) {

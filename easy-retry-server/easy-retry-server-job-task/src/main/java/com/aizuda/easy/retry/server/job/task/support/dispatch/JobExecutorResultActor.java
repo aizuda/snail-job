@@ -8,6 +8,7 @@ import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
+import com.aizuda.easy.retry.server.job.task.dto.CompleteJobBatchDTO;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.server.job.task.dto.JobExecutorResultDTO;
 import com.aizuda.easy.retry.server.job.task.dto.JobLogDTO;
@@ -64,8 +65,11 @@ public class JobExecutorResultActor extends AbstractActor {
                                         new LambdaUpdateWrapper<JobTask>().eq(JobTask::getId, result.getTaskId())),
                                 ()-> new EasyRetryServerException("更新任务实例失败"));
 
+
+
                         // 更新批次上的状态
-                        boolean complete = jobTaskBatchHandler.complete(result.getWorkflowNodeId(), result.getWorkflowTaskBatchId(), result.getTaskBatchId(), result.getJobOperationReason());
+                        CompleteJobBatchDTO completeJobBatchDTO = JobTaskConverter.INSTANCE.toCompleteJobBatchDTO(result);
+                        boolean complete = jobTaskBatchHandler.complete(completeJobBatchDTO);
                         if (complete) {
                             // 尝试停止任务
                             // 若是集群任务则客户端会主动关闭
