@@ -8,6 +8,7 @@ import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.enums.JobTriggerTypeEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
@@ -17,6 +18,10 @@ import com.aizuda.easy.retry.server.job.task.dto.JobTaskPrepareDTO;
 import com.aizuda.easy.retry.server.job.task.dto.TaskExecuteDTO;
 import com.aizuda.easy.retry.server.job.task.dto.WorkflowNodeTaskExecuteDTO;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
+import com.aizuda.easy.retry.server.job.task.support.WorkflowExecutor;
+import com.aizuda.easy.retry.server.job.task.support.executor.workflow.WorkflowExecutorContext;
+import com.aizuda.easy.retry.server.job.task.support.executor.workflow.WorkflowExecutorFactory;
+import com.aizuda.easy.retry.server.job.task.support.handler.WorkflowBatchHandler;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskBatchMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.WorkflowNodeMapper;
@@ -40,6 +45,7 @@ import org.springframework.util.CollectionUtils;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -57,6 +63,7 @@ public class WorkflowExecutorActor extends AbstractActor {
     private final WorkflowNodeMapper workflowNodeMapper;
     private final JobMapper jobMapper;
     private final JobTaskBatchMapper jobTaskBatchMapper;
+    private final WorkflowBatchHandler workflowBatchHandler;
 
     @Override
     public Receive createReceive() {
@@ -83,23 +90,40 @@ public class WorkflowExecutorActor extends AbstractActor {
 
         Set<Long> successors = graph.successors(taskExecute.getParentId());
         if (CollectionUtils.isEmpty(successors)) {
+            boolean complete = workflowBatchHandler.complete(taskExecute.getWorkflowTaskBatchId(), workflowTaskBatch);
             return;
         }
 
+        List<JobTaskBatch> jobTaskBatchList = jobTaskBatchMapper.selectList(new LambdaQueryWrapper<JobTaskBatch>()
+                .select(JobTaskBatch::getWorkflowTaskBatchId, JobTaskBatch::getWorkflowNodeId)
+                .eq(JobTaskBatch::getWorkflowTaskBatchId, workflowTaskBatch.getId())
+                .in(JobTaskBatch::getWorkflowNodeId, successors)
+        );
+
+        Map<Long, JobTaskBatch> jobTaskBatchMap = jobTaskBatchList.stream().collect(Collectors.toMap(JobTaskBatch::getWorkflowNodeId, i -> i));
+
         List<WorkflowNode> workflowNodes = workflowNodeMapper.selectBatchIds(successors);
         List<Job> jobs = jobMapper.selectBatchIds(workflowNodes.stream().map(WorkflowNode::getJobId).collect(Collectors.toSet()));
-        Map<Long, Job> jobMap = jobs.stream().collect(Collectors.toMap(Job::getId, i -> i));;
+        Map<Long, Job> jobMap = jobs.stream().collect(Collectors.toMap(Job::getId, i -> i));
+
+        // TODO 此次做策略，按照任务节点 条件节点 回调节点做抽象
+        // 不管什么任务都需要创建一个 job_task_batch记录 保障一个节点执行创建一次，同时可以判断出DAG是否全部执行完成
         for (WorkflowNode workflowNode : workflowNodes) {
-            // 生成任务批次
-            JobTaskPrepareDTO jobTaskPrepare = JobTaskConverter.INSTANCE.toJobTaskPrepare(jobMap.get(workflowNode.getJobId()));
-            jobTaskPrepare.setTriggerType(JobTriggerTypeEnum.WORKFLOW.getType());
-            jobTaskPrepare.setNextTriggerAt(DateUtils.toNowMilli());
-            jobTaskPrepare.setWorkflowNodeId(workflowNode.getId());
-            jobTaskPrepare.setWorkflowTaskBatchId(taskExecute.getWorkflowTaskBatchId());
-            jobTaskPrepare.setParentWorkflowNodeId(taskExecute.getParentId());
-            // 执行预处理阶段
-            ActorRef actorRef = ActorGenerator.jobTaskPrepareActor();
-            actorRef.tell(jobTaskPrepare, actorRef);
+            // 批次已经存在就不在重复生成
+            if (Objects.nonNull(jobTaskBatchMap.get(workflowNode.getId()))) {
+                continue;
+            }
+
+            // 执行DAG中的节点
+            WorkflowExecutor workflowExecutor = WorkflowExecutorFactory.getWorkflowExecutor(workflowNode.getNodeType());
+
+            WorkflowExecutorContext context = new WorkflowExecutorContext();
+            context.setJob(jobMap.get(workflowNode.getJobId()));
+            context.setWorkflowNodeId(workflowNode.getWorkflowId());
+            context.setWorkflowTaskBatchId(taskExecute.getWorkflowTaskBatchId());
+            context.setParentWorkflowNodeId(taskExecute.getParentId());
+
+            workflowExecutor.execute(context);
         }
 
     }

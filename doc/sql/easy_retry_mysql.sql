@@ -361,7 +361,7 @@ CREATE TABLE `job_task_batch`
     `group_name`             varchar(64) NOT NULL COMMENT '组名称',
     `job_id`                 bigint(20) NOT NULL COMMENT '任务id',
     `workflow_node_id`       bigint(20) NOT NULL DEFAULT '0' COMMENT '工作流节点id',
-    `parent_workflow_node_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '工作流任务批次id',
+    `parent_workflow_node_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '工作流任务父批次id',
     `workflow_task_batch_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '工作流任务批次id',
     `task_batch_status`      tinyint(4) NOT NULL DEFAULT '0' COMMENT '任务批次状态 0、失败 1、成功',
     `operation_reason`       tinyint(4) NOT NULL DEFAULT '0' COMMENT '操作原因',
@@ -374,7 +374,8 @@ CREATE TABLE `job_task_batch`
     PRIMARY KEY (`id`),
     KEY                      `idx_job_id_task_batch_status` (`job_id`, `task_batch_status`),
     KEY                      `idx_create_dt` (`create_dt`),
-    KEY                      `idx_namespace_id_group_name` (`namespace_id`, `group_name`)
+    KEY                      `idx_namespace_id_group_name` (`namespace_id`, `group_name`),
+    UNIQUE KEY               `uk_workflow_task_batch_id_workflow_node_id` (`workflow_task_batch_id`, `workflow_node_id`)
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 0
   DEFAULT CHARSET = utf8mb4 COMMENT ='任务批次';

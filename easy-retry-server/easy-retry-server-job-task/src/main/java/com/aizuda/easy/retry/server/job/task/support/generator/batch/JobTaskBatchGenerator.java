@@ -14,6 +14,7 @@ import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskBatch
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTaskBatch;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -51,7 +52,12 @@ public class JobTaskBatchGenerator {
             jobTaskBatch.setOperationReason(context.getOperationReason());
         }
 
-        Assert.isTrue(1 == jobTaskBatchMapper.insert(jobTaskBatch), () -> new EasyRetryServerException("新增调度任务失败.jobId:[{}]", context.getJobId()));
+        try {
+            Assert.isTrue(1 == jobTaskBatchMapper.insert(jobTaskBatch), () -> new EasyRetryServerException("新增调度任务失败.jobId:[{}]", context.getJobId()));
+        } catch (DuplicateKeyException ignored) {
+            // 忽略重复的DAG任务
+            return;
+        }
 
         // 非待处理状态无需进入时间轮中
         if (JobTaskBatchStatusEnum.WAITING.getStatus() != jobTaskBatch.getTaskBatchStatus()) {
