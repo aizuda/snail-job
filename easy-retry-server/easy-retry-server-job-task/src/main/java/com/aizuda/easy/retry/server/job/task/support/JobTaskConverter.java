@@ -95,4 +95,8 @@ public interface JobTaskConverter {
 
     JobTaskBatch toJobTaskBatch(JobTaskBatchGeneratorContext context);
 
+    CompleteJobBatchDTO toCompleteJobBatchDTO(JobExecutorResultDTO jobExecutorResultDTO);
+
+    CompleteJobBatchDTO completeJobBatchDTO(JobTaskPrepareDTO jobTaskPrepareDTO);
+
 }

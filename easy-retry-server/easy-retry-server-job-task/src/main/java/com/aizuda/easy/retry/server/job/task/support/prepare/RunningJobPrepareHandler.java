@@ -4,6 +4,7 @@ import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
+import com.aizuda.easy.retry.server.job.task.dto.CompleteJobBatchDTO;
 import com.aizuda.easy.retry.server.job.task.support.BlockStrategy;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.server.job.task.dto.JobTaskPrepareDTO;
@@ -43,7 +44,9 @@ public class RunningJobPrepareHandler extends AbstractJobPrePareHandler {
         // 若存在所有的任务都是完成，但是批次上的状态为运行中，则是并发导致的未把批次状态变成为终态，此处做一次兜底处理
         int blockStrategy = prepare.getBlockStrategy();
         JobOperationReasonEnum jobOperationReasonEnum = JobOperationReasonEnum.NONE;
-        if (jobTaskBatchHandler.complete(prepare.getWorkflowNodeId(), prepare.getWorkflowTaskBatchId(), prepare.getTaskBatchId(), jobOperationReasonEnum.getReason())) {
+        CompleteJobBatchDTO completeJobBatchDTO = JobTaskConverter.INSTANCE.completeJobBatchDTO(prepare);
+        completeJobBatchDTO.setJobOperationReason(jobOperationReasonEnum.getReason());
+        if (jobTaskBatchHandler.complete(completeJobBatchDTO)) {
             blockStrategy =  BlockStrategyEnum.CONCURRENCY.getBlockStrategy();
         } else {
             // 计算超时时间

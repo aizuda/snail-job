@@ -26,4 +26,5 @@ public class WorkflowNodeTaskExecuteDTO {
 
     private Long parentId;
 
+    private String result;
 }

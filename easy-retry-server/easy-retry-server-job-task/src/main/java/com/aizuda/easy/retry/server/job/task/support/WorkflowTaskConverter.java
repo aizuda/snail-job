@@ -2,6 +2,8 @@ package com.aizuda.easy.retry.server.job.task.support;
 
 import com.aizuda.easy.retry.server.job.task.dto.WorkflowPartitionTaskDTO;
 import com.aizuda.easy.retry.server.job.task.dto.WorkflowTaskPrepareDTO;
+import com.aizuda.easy.retry.server.job.task.support.executor.workflow.WorkflowExecutorContext;
+import com.aizuda.easy.retry.server.job.task.support.generator.batch.JobTaskBatchGeneratorContext;
 import com.aizuda.easy.retry.server.job.task.support.generator.batch.WorkflowTaskBatchGeneratorContext;
 import com.aizuda.easy.retry.template.datasource.persistence.po.Workflow;
 import com.aizuda.easy.retry.template.datasource.persistence.po.WorkflowTaskBatch;
@@ -31,4 +33,6 @@ public interface WorkflowTaskConverter {
     WorkflowTaskBatchGeneratorContext toWorkflowTaskBatchGeneratorContext(WorkflowTaskPrepareDTO workflowTaskPrepareDTO);
 
     WorkflowTaskBatch toWorkflowTaskBatch(WorkflowTaskBatchGeneratorContext context);
+
+    JobTaskBatchGeneratorContext toJobTaskBatchGeneratorContext(WorkflowExecutorContext context);
 }

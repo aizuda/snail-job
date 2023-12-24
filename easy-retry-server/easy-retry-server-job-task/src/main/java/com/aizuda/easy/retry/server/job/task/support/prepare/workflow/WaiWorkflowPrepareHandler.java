@@ -13,6 +13,7 @@ import com.aizuda.easy.retry.server.job.task.support.timer.WorkflowTimerTask;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -28,7 +29,7 @@ public class WaiWorkflowPrepareHandler extends AbstractWorkflowPrePareHandler {
 
     @Override
     public boolean matches(Integer status) {
-        return JobTaskBatchStatusEnum.WAITING.getStatus() == status;
+        return Objects.nonNull(status) && JobTaskBatchStatusEnum.WAITING.getStatus() == status;
     }
 
     @Override
