@@ -88,7 +88,7 @@ public class JobExecutorActor extends AbstractActor {
     private void doExecute(final TaskExecuteDTO taskExecute) {
 
         LambdaQueryWrapper<Job> queryWrapper = new LambdaQueryWrapper<>();
-        // 自动的校验任务必须是开启状态，手动触发无需校验
+        // 自动地校验任务必须是开启状态，手动触发无需校验
         if (JobTriggerTypeEnum.AUTO.getType().equals(taskExecute.getTriggerType())) {
             queryWrapper.eq(Job::getJobStatus, StatusEnum.YES.getStatus());
         }

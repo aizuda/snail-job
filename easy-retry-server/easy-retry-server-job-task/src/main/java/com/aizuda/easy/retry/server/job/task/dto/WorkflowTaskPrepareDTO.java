@@ -10,6 +10,8 @@ import lombok.Data;
 @Data
 public class WorkflowTaskPrepareDTO {
 
+    private Long workflowTaskBatchId;
+
     private Long workflowId;
 
     /**

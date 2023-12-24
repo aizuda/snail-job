@@ -11,11 +11,7 @@ import lombok.Getter;
 @Getter
 public enum JobNotifySceneEnum {
 
-
-
     JOB_TASK_ERROR(1, "JOB任务执行失败", NodeTypeEnum.SERVER);
-
-
 
     /**
      * 通知场景
