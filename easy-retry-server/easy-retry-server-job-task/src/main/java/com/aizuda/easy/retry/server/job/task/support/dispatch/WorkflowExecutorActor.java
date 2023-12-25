@@ -103,11 +103,15 @@ public class WorkflowExecutorActor extends AbstractActor {
 
         Map<Long, JobTaskBatch> jobTaskBatchMap = jobTaskBatchList.stream().collect(Collectors.toMap(JobTaskBatch::getWorkflowNodeId, i -> i));
 
-        List<WorkflowNode> workflowNodes = workflowNodeMapper.selectBatchIds(successors);
+        List<WorkflowNode> workflowNodes = workflowNodeMapper.selectList(new LambdaQueryWrapper<WorkflowNode>()
+                .in(WorkflowNode::getId, successors).orderByAsc(WorkflowNode::getPriorityLevel));
         List<Job> jobs = jobMapper.selectBatchIds(workflowNodes.stream().map(WorkflowNode::getJobId).collect(Collectors.toSet()));
         Map<Long, Job> jobMap = jobs.stream().collect(Collectors.toMap(Job::getId, i -> i));
 
         // 不管什么任务都需要创建一个 job_task_batch记录 保障一个节点执行创建一次，同时可以判断出DAG是否全部执行完成
+
+        // 只会条件节点会使用
+        Boolean evaluationResult = null;
         for (WorkflowNode workflowNode : workflowNodes) {
             // 批次已经存在就不在重复生成
             if (Objects.nonNull(jobTaskBatchMap.get(workflowNode.getId()))) {
@@ -121,8 +125,12 @@ public class WorkflowExecutorActor extends AbstractActor {
             context.setJob(jobMap.get(workflowNode.getJobId()));
             context.setWorkflowTaskBatchId(taskExecute.getWorkflowTaskBatchId());
             context.setParentWorkflowNodeId(taskExecute.getParentId());
+            context.setResult(taskExecute.getResult());
+            context.setEvaluationResult(evaluationResult);
 
             workflowExecutor.execute(context);
+
+            evaluationResult = context.getEvaluationResult();
         }
 
     }
