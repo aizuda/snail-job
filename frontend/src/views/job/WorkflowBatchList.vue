@@ -120,7 +120,7 @@
 import ATextarea from 'ant-design-vue/es/input/TextArea'
 import AInput from 'ant-design-vue/es/input/Input'
 import { Drawer, STable } from '@/components'
-import { workflowBatchListPage, jobNameList, workflowBatchDetail } from '@/api/jobApi'
+import { workflowBatchListPage, jobNameList } from '@/api/jobApi'
 import { getAllGroupNameList } from '@/api/manage'
 import JobBatchInfo from '@/views/job/JobBatchInfo'
 const enums = require('@/utils/jobEnum')
@@ -255,11 +255,7 @@ export default {
     },
     handleInfo (record) {
       record = record || this.currentShowRecord
-      // this.$router.push({ path: '/job/batch/info', query: { id: record.id, groupName: record.groupName } })
-      // TODO 工作流批次详情
-      workflowBatchDetail(record.id).then(res => {
-        console.log(res)
-      })
+      this.$router.push({ path: '/job/workflow/batch/detail', query: { id: record.id } })
     },
     handleOk (record) {},
     handleStop (record) {
