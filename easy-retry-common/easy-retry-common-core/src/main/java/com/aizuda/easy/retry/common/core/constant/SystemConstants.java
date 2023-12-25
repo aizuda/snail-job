@@ -103,7 +103,7 @@ public interface SystemConstants {
    Long ROOT = -1L;
 
     /**
-     * 根节点
+     * 系统内置的条件任务ID
      */
     Long CONDITION_JOB_ID = -1000L;
 }

@@ -6,6 +6,7 @@ import com.aizuda.easy.retry.server.job.task.support.executor.workflow.WorkflowE
 import com.aizuda.easy.retry.server.job.task.support.generator.batch.JobTaskBatchGeneratorContext;
 import com.aizuda.easy.retry.server.job.task.support.generator.batch.WorkflowTaskBatchGeneratorContext;
 import com.aizuda.easy.retry.template.datasource.persistence.po.Workflow;
+import com.aizuda.easy.retry.template.datasource.persistence.po.WorkflowNode;
 import com.aizuda.easy.retry.template.datasource.persistence.po.WorkflowTaskBatch;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -35,4 +36,9 @@ public interface WorkflowTaskConverter {
     WorkflowTaskBatch toWorkflowTaskBatch(WorkflowTaskBatchGeneratorContext context);
 
     JobTaskBatchGeneratorContext toJobTaskBatchGeneratorContext(WorkflowExecutorContext context);
+
+    @Mappings(
+        @Mapping(source = "id", target = "workflowNodeId")
+    )
+    WorkflowExecutorContext toWorkflowExecutorContext(WorkflowNode workflowNode);
 }

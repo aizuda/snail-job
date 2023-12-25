@@ -54,4 +54,24 @@ public class WorkflowExecutorContext {
      */
     private String result;
 
+    /**
+     * 1、SpEl、2、Aviator 3、QL
+     */
+    private Integer expressionType;
+
+    /**
+     * 失败策略 1、跳过 2、阻塞
+     */
+    private Integer failStrategy;
+
+    /**
+     * 工作流节点状态 0、关闭、1、开启
+     */
+    private Integer workflowNodeStatus;
+
+    /**
+     * 节点表达式
+     */
+    private String nodeExpression;
+
 }

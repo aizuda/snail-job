@@ -12,6 +12,7 @@ import com.aizuda.easy.retry.server.job.task.support.timer.JobTimerTask;
 import com.aizuda.easy.retry.server.job.task.support.timer.JobTimerWheel;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskBatchMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTaskBatch;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
@@ -36,7 +37,7 @@ public class JobTaskBatchGenerator {
     private JobTaskBatchMapper jobTaskBatchMapper;
 
     @Transactional
-    public void generateJobTaskBatch(JobTaskBatchGeneratorContext context) {
+    public JobTaskBatch generateJobTaskBatch(JobTaskBatchGeneratorContext context) {
 
         // 生成一个新的任务
         JobTaskBatch jobTaskBatch = JobTaskConverter.INSTANCE.toJobTaskBatch(context);
@@ -56,12 +57,16 @@ public class JobTaskBatchGenerator {
             Assert.isTrue(1 == jobTaskBatchMapper.insert(jobTaskBatch), () -> new EasyRetryServerException("新增调度任务失败.jobId:[{}]", context.getJobId()));
         } catch (DuplicateKeyException ignored) {
             // 忽略重复的DAG任务
-            return;
+            return jobTaskBatchMapper.selectOne(new LambdaQueryWrapper<JobTaskBatch>()
+                .eq(JobTaskBatch::getWorkflowTaskBatchId, context.getWorkflowTaskBatchId())
+                .eq(JobTaskBatch::getWorkflowNodeId, context.getWorkflowNodeId())
+            );
+
         }
 
         // 非待处理状态无需进入时间轮中
         if (JobTaskBatchStatusEnum.WAITING.getStatus() != jobTaskBatch.getTaskBatchStatus()) {
-            return;
+            return jobTaskBatch;
         }
 
         // 进入时间轮
@@ -75,6 +80,7 @@ public class JobTaskBatchGenerator {
         JobTimerWheel.register(jobTaskBatch.getId(),
                 new JobTimerTask(jobTimerTaskDTO), delay, TimeUnit.MILLISECONDS);
 
+        return jobTaskBatch;
     }
 
 }
