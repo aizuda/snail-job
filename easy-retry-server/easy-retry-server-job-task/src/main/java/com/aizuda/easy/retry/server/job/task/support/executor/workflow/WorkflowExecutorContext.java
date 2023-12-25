@@ -1,11 +1,7 @@
 package com.aizuda.easy.retry.server.job.task.support.executor.workflow;
 
 import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
-import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
 import lombok.Data;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author xiaowoniu
@@ -47,7 +43,7 @@ public class WorkflowExecutorContext {
      */
     private Job job;
 
-    private String expression;
+    private String nodeExpression;
 
     /**
      * 客户端返回的结果
@@ -70,8 +66,8 @@ public class WorkflowExecutorContext {
     private Integer workflowNodeStatus;
 
     /**
-     * 节点表达式
+     * 条件节点的判定结果
      */
-    private String nodeExpression;
+    private Boolean evaluationResult;
 
 }

@@ -481,6 +481,7 @@ CREATE TABLE `workflow_node`
     `expression_type`      tinyint(4) NOT NULL DEFAULT 0 COMMENT '1、SpEl、2、Aviator 3、QL',
     `fail_strategy`        tinyint(4) NOT NULL DEFAULT 0 COMMENT '失败策略 1、跳过 2、阻塞',
     `workflow_node_status` tinyint(4) NOT NULL DEFAULT 1 COMMENT '工作流节点状态 0、关闭、1、开启',
+    `priority_level`        int(11)    NOT NULL DEFAULT 1 COMMENT '优先级',
     `node_expression`      text                 DEFAULT NULL COMMENT '节点表达式',
     `create_dt`            datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_dt`            datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',

@@ -70,6 +70,11 @@ public class WorkflowNode implements Serializable {
     private Integer failStrategy;
 
     /**
+     * 优先级
+     */
+    private Integer priorityLevel;
+
+    /**
      * 工作流节点状态 0、关闭、1、开启
      */
     private Integer workflowNodeStatus;
