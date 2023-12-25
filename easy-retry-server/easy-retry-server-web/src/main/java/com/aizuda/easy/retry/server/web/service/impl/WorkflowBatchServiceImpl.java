@@ -118,10 +118,12 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
 
         Map<Long, WorkflowDetailResponseVO.NodeInfo> workflowNodeMap = nodeInfos.stream()
                 .peek(nodeInfo -> {
-                    JobTaskBatch taskBatch = jobTaskBatchMap.getOrDefault(nodeInfo.getId(), new JobTaskBatch());
-                    nodeInfo.setExecutionAt(DateUtils.toLocalDateTime(taskBatch.getExecutionAt()));
-                    nodeInfo.setTaskBatchStatus(taskBatch.getTaskBatchStatus());
-                    nodeInfo.setOperationReason(taskBatch.getOperationReason());
+                    JobTaskBatch jobTaskBatch = jobTaskBatchMap.get(nodeInfo.getId());
+                    if (Objects.nonNull(jobTaskBatch)) {
+                        nodeInfo.setExecutionAt(DateUtils.toLocalDateTime(jobTaskBatch.getExecutionAt()));
+                        nodeInfo.setTaskBatchStatus(jobTaskBatch.getTaskBatchStatus());
+                        nodeInfo.setOperationReason(jobTaskBatch.getOperationReason());
+                    }
                 })
                 .collect(Collectors.toMap(WorkflowDetailResponseVO.NodeInfo::getId, i -> i));
 

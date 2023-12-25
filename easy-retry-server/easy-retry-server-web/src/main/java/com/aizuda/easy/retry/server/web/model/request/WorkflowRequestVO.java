@@ -46,10 +46,10 @@ public class WorkflowRequestVO {
      */
     private String description;
 
-
     /**
      * DAG节点配置
      */
+    @NotNull(message = "DAG节点配置不能为空")
     private NodeConfig nodeConfig;
 
     @Data

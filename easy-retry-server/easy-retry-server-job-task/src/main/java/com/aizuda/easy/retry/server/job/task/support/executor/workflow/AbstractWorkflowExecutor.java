@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.server.job.task.support.executor.workflow;
 
 import com.aizuda.easy.retry.server.job.task.support.WorkflowExecutor;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author xiaowoniu
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.InitializingBean;
 public abstract class AbstractWorkflowExecutor implements WorkflowExecutor, InitializingBean {
 
     @Override
+    @Transactional
     public void execute(WorkflowExecutorContext context) {
 
         doExecute(context);

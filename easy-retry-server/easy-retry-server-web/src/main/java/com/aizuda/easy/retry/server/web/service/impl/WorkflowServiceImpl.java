@@ -5,6 +5,7 @@ import cn.hutool.core.util.HashUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
+import com.aizuda.easy.retry.common.core.enums.WorkflowNodeTypeEnum;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.WaitStrategy;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
@@ -232,6 +233,9 @@ public class WorkflowServiceImpl implements WorkflowService {
                 workflowNode.setWorkflowId(workflowId);
                 workflowNode.setGroupName(groupName);
                 workflowNode.setNodeType(nodeConfig.getNodeType());
+                if (WorkflowNodeTypeEnum.CONDITION.getType() == nodeConfig.getNodeType()) {
+                    workflowNode.setJobId(SystemConstants.CONDITION_JOB_ID);
+                }
                 Assert.isTrue(1 == workflowNodeMapper.insert(workflowNode), () -> new EasyRetryServerException("新增工作流节点失败"));
                 // 添加节点
                 graph.addNode(workflowNode.getId());

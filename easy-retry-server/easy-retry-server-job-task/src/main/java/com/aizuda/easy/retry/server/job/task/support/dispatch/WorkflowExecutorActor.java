@@ -19,6 +19,7 @@ import com.aizuda.easy.retry.server.job.task.dto.TaskExecuteDTO;
 import com.aizuda.easy.retry.server.job.task.dto.WorkflowNodeTaskExecuteDTO;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.server.job.task.support.WorkflowExecutor;
+import com.aizuda.easy.retry.server.job.task.support.WorkflowTaskConverter;
 import com.aizuda.easy.retry.server.job.task.support.executor.workflow.WorkflowExecutorContext;
 import com.aizuda.easy.retry.server.job.task.support.executor.workflow.WorkflowExecutorFactory;
 import com.aizuda.easy.retry.server.job.task.support.handler.WorkflowBatchHandler;
@@ -106,7 +107,6 @@ public class WorkflowExecutorActor extends AbstractActor {
         List<Job> jobs = jobMapper.selectBatchIds(workflowNodes.stream().map(WorkflowNode::getJobId).collect(Collectors.toSet()));
         Map<Long, Job> jobMap = jobs.stream().collect(Collectors.toMap(Job::getId, i -> i));
 
-        // TODO 此次做策略，按照任务节点 条件节点 回调节点做抽象
         // 不管什么任务都需要创建一个 job_task_batch记录 保障一个节点执行创建一次，同时可以判断出DAG是否全部执行完成
         for (WorkflowNode workflowNode : workflowNodes) {
             // 批次已经存在就不在重复生成
@@ -117,9 +117,8 @@ public class WorkflowExecutorActor extends AbstractActor {
             // 执行DAG中的节点
             WorkflowExecutor workflowExecutor = WorkflowExecutorFactory.getWorkflowExecutor(workflowNode.getNodeType());
 
-            WorkflowExecutorContext context = new WorkflowExecutorContext();
+            WorkflowExecutorContext context = WorkflowTaskConverter.INSTANCE.toWorkflowExecutorContext(workflowNode);
             context.setJob(jobMap.get(workflowNode.getJobId()));
-            context.setWorkflowNodeId(workflowNode.getWorkflowId());
             context.setWorkflowTaskBatchId(taskExecute.getWorkflowTaskBatchId());
             context.setParentWorkflowNodeId(taskExecute.getParentId());
 
