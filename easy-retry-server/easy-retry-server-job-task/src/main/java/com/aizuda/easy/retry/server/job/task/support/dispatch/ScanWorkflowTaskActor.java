@@ -129,9 +129,9 @@ public class ScanWorkflowTaskActor extends AbstractActor {
 
         List<Workflow> workflows = workflowMapper.selectPage(new PageDTO<>(0, systemProperties.getJobPullPageSize()),
                 new LambdaQueryWrapper<Workflow>()
-                        .select(Workflow::getGroupName, Workflow::getNextTriggerAt, Workflow::getTriggerType,
-                                Workflow::getTriggerInterval, Workflow::getExecutorTimeout,
-                                Workflow::getId, Workflow::getNamespaceId, Workflow::getFlowInfo)
+                        .select(Workflow::getId, Workflow::getGroupName, Workflow::getNextTriggerAt, Workflow::getTriggerType,
+                                Workflow::getTriggerInterval, Workflow::getExecutorTimeout, Workflow::getNamespaceId,
+                                Workflow::getFlowInfo, Workflow::getBlockStrategy)
                         .eq(Workflow::getWorkflowStatus, StatusEnum.YES.getStatus())
                         .eq(Workflow::getDeleted, StatusEnum.NO.getStatus())
                         .in(Workflow::getBucketIndex, scanTask.getBuckets())

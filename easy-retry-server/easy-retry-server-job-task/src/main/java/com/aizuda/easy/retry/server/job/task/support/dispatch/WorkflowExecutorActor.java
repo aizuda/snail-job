@@ -5,6 +5,7 @@ import akka.actor.ActorRef;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.lang.Pair;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
+import com.aizuda.easy.retry.common.core.enums.FailStrategyEnum;
 import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
@@ -34,6 +35,7 @@ import com.aizuda.easy.retry.template.datasource.persistence.po.WorkflowTaskBatc
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Sets;
 import com.google.common.graph.GraphBuilder;
 import com.google.common.graph.MutableGraph;
 import lombok.RequiredArgsConstructor;
@@ -91,27 +93,33 @@ public class WorkflowExecutorActor extends AbstractActor {
 
         Set<Long> successors = graph.successors(taskExecute.getParentId());
         if (CollectionUtils.isEmpty(successors)) {
-            boolean complete = workflowBatchHandler.complete(taskExecute.getWorkflowTaskBatchId(), workflowTaskBatch);
+            workflowBatchHandler.complete(taskExecute.getWorkflowTaskBatchId(), workflowTaskBatch);
             return;
         }
 
         // 添加父节点，为了判断父节点的处理状态
-        successors.add(taskExecute.getParentId());
         List<JobTaskBatch> jobTaskBatchList = jobTaskBatchMapper.selectList(new LambdaQueryWrapper<JobTaskBatch>()
                 .select(JobTaskBatch::getWorkflowTaskBatchId, JobTaskBatch::getWorkflowNodeId)
                 .eq(JobTaskBatch::getWorkflowTaskBatchId, workflowTaskBatch.getId())
-                .in(JobTaskBatch::getWorkflowNodeId, successors)
+                .in(JobTaskBatch::getWorkflowNodeId, Sets.union(successors, Sets.newHashSet(taskExecute.getParentId())))
         );
 
         List<WorkflowNode> workflowNodes = workflowNodeMapper.selectList(new LambdaQueryWrapper<WorkflowNode>()
-            .in(WorkflowNode::getId, successors).orderByAsc(WorkflowNode::getPriorityLevel));
+                .in(WorkflowNode::getId, Sets.union(successors, Sets.newHashSet(taskExecute.getParentId()))).orderByAsc(WorkflowNode::getPriorityLevel));
 
         Map<Long, JobTaskBatch> jobTaskBatchMap = jobTaskBatchList.stream().collect(Collectors.toMap(JobTaskBatch::getWorkflowNodeId, i -> i));
+        Map<Long, WorkflowNode> workflowNodeMap = workflowNodes.stream().collect(Collectors.toMap(WorkflowNode::getId, i -> i));
         JobTaskBatch jobTaskBatch = jobTaskBatchMap.get(taskExecute.getParentId());
-        if (JobTaskBatchStatusEnum.SUCCESS.getStatus() != jobTaskBatch.getTaskBatchStatus()) {
-            // 判断是否继续处理，根据失败策略
-        }
 
+        // 失败策略处理
+        if (Objects.nonNull(jobTaskBatch) && JobTaskBatchStatusEnum.SUCCESS.getStatus() != jobTaskBatch.getTaskBatchStatus()) {
+            // 判断是否继续处理，根据失败策略
+            WorkflowNode workflowNode = workflowNodeMap.get(taskExecute.getParentId());
+            // 失败了阻塞策略
+            if (Objects.equals(workflowNode.getFailStrategy(), FailStrategyEnum.BLOCK.getCode())) {
+                return;
+            }
+        }
 
         List<Job> jobs = jobMapper.selectBatchIds(workflowNodes.stream().map(WorkflowNode::getJobId).collect(Collectors.toSet()));
         Map<Long, Job> jobMap = jobs.stream().collect(Collectors.toMap(Job::getId, i -> i));

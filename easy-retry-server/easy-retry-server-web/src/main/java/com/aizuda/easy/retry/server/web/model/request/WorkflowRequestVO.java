@@ -35,6 +35,9 @@ public class WorkflowRequestVO {
     @NotNull(message = "执行超时时间不能为空")
     private Integer executorTimeout;
 
+    @NotNull(message = "阻塞策略不能为空")
+    private Integer blockStrategy;
+
     /**
      * 0、关闭、1、开启
      */

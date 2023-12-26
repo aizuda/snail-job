@@ -38,17 +38,8 @@ public class WorkflowBatchGenerator {
 
         // 生成任务批次
         WorkflowTaskBatch workflowTaskBatch = WorkflowTaskConverter.INSTANCE.toWorkflowTaskBatch(context);
-        workflowTaskBatch.setTaskBatchStatus(JobTaskBatchStatusEnum.WAITING.getStatus());
-
-        // 无执行的节点
-        if (CollectionUtils.isEmpty(CacheRegisterTable.getServerNodeSet(context.getGroupName(), context.getNamespaceId()))) {
-            workflowTaskBatch.setTaskBatchStatus(JobTaskBatchStatusEnum.CANCEL.getStatus());
-            workflowTaskBatch.setOperationReason(JobOperationReasonEnum.NOT_CLIENT.getReason());
-        } else {
-            // 生成一个新的任务
-            workflowTaskBatch.setTaskBatchStatus(Optional.ofNullable(context.getTaskBatchStatus()).orElse(JobTaskBatchStatusEnum.WAITING.getStatus()));
-            workflowTaskBatch.setOperationReason(context.getOperationReason());
-        }
+        workflowTaskBatch.setTaskBatchStatus(Optional.ofNullable(context.getTaskBatchStatus()).orElse(JobTaskBatchStatusEnum.WAITING.getStatus()));
+        workflowTaskBatch.setOperationReason(context.getOperationReason());
 
         Assert.isTrue(1 == workflowTaskBatchMapper.insert(workflowTaskBatch), () -> new EasyRetryServerException("新增调度任务失败. [{}]", context.getWorkflowId()));
 

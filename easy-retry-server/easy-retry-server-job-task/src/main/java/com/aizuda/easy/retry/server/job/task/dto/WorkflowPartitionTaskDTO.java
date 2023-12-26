@@ -24,6 +24,11 @@ public class WorkflowPartitionTaskDTO extends PartitionTask {
     private String groupName;
 
     /**
+     * 阻塞策略
+     */
+    private Integer blockStrategy;
+
+    /**
      * 触发类型
      */
     private Integer triggerType;
