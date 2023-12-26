@@ -46,6 +46,16 @@ public class BlockStrategies {
             throw new EasyRetryServerException("不符合的阻塞策略. blockStrategy:[{}]", blockStrategy);
         }
 
+        public static BlockStrategyEnum valueOf(int blockStrategy) {
+            for (final BlockStrategyEnum value : BlockStrategyEnum.values()) {
+                if (value.blockStrategy == blockStrategy) {
+                    return value;
+                }
+            }
+
+            throw new EasyRetryServerException("不符合的阻塞策略. blockStrategy:[{}]", blockStrategy);
+        }
+
     }
 
     @Data

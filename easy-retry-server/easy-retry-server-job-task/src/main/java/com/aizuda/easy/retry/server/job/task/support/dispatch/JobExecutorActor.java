@@ -1,7 +1,9 @@
 package com.aizuda.easy.retry.server.job.task.support.dispatch;
 
 import akka.actor.AbstractActor;
+import akka.actor.ActorRef;
 import cn.hutool.core.lang.Assert;
+import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
@@ -17,6 +19,7 @@ import com.aizuda.easy.retry.server.common.strategy.WaitStrategies;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.server.job.task.dto.JobTimerTaskDTO;
 import com.aizuda.easy.retry.server.job.task.dto.TaskExecuteDTO;
+import com.aizuda.easy.retry.server.job.task.dto.WorkflowNodeTaskExecuteDTO;
 import com.aizuda.easy.retry.server.job.task.support.JobExecutor;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.server.job.task.support.cache.ResidentTaskCache;
@@ -106,6 +109,26 @@ public class JobExecutorActor extends AbstractActor {
                     job.getNamespaceId()))) {
                 taskStatus = JobTaskBatchStatusEnum.CANCEL.getStatus();
                 operationReason = JobOperationReasonEnum.NOT_CLIENT.getReason();
+                TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                    @Override
+                    public void afterCompletion(int status) {
+                        if (Objects.nonNull(taskExecute.getWorkflowNodeId()) && Objects.nonNull(taskExecute.getWorkflowTaskBatchId())) {
+                            // 若是工作流则开启下一个任务
+                            try {
+                                WorkflowNodeTaskExecuteDTO taskExecuteDTO = new WorkflowNodeTaskExecuteDTO();
+                                taskExecuteDTO.setWorkflowTaskBatchId(taskExecute.getWorkflowTaskBatchId());
+                                taskExecuteDTO.setTriggerType(JobTriggerTypeEnum.AUTO.getType());
+                                taskExecuteDTO.setParentId(taskExecute.getWorkflowNodeId());
+                                taskExecuteDTO.setResult(StrUtil.EMPTY);
+                                ActorRef actorRef = ActorGenerator.workflowTaskExecutorActor();
+                                actorRef.tell(taskExecuteDTO, actorRef);
+                            } catch (Exception e) {
+                                log.error("任务调度执行失败", e);
+                            }
+                        }
+                    }
+                });
+
             }
 
             // 更新状态

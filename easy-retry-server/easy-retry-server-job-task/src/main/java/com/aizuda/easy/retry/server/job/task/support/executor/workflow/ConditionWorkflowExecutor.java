@@ -29,6 +29,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -66,8 +67,12 @@ public class ConditionWorkflowExecutor extends AbstractWorkflowExecutor {
             taskBatchStatus = JobTaskBatchStatusEnum.CANCEL.getStatus();
         } else {
             try {
+                Map<String, Object> contextMap = new HashMap<>();
                 // 根据配置的表达式执行
-                result = doEval(context.getNodeExpression(), JsonUtil.parseHashMap(context.getResult()));
+                if (StrUtil.isNotBlank(context.getResult())) {
+                    contextMap = JsonUtil.parseHashMap(context.getResult());
+                }
+                result = doEval(context.getNodeExpression(), contextMap);
                 log.info("执行条件表达式：[{}]，参数: [{}] 结果：[{}]", context.getNodeExpression(), context.getResult(), result);
             } catch (Exception e) {
                 taskBatchStatus = JobTaskBatchStatusEnum.FAIL.getStatus();

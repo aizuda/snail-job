@@ -95,20 +95,26 @@ public class WorkflowExecutorActor extends AbstractActor {
             return;
         }
 
+        // 添加父节点，为了判断父节点的处理状态
+        successors.add(taskExecute.getParentId());
         List<JobTaskBatch> jobTaskBatchList = jobTaskBatchMapper.selectList(new LambdaQueryWrapper<JobTaskBatch>()
                 .select(JobTaskBatch::getWorkflowTaskBatchId, JobTaskBatch::getWorkflowNodeId)
                 .eq(JobTaskBatch::getWorkflowTaskBatchId, workflowTaskBatch.getId())
                 .in(JobTaskBatch::getWorkflowNodeId, successors)
         );
 
-        Map<Long, JobTaskBatch> jobTaskBatchMap = jobTaskBatchList.stream().collect(Collectors.toMap(JobTaskBatch::getWorkflowNodeId, i -> i));
-
         List<WorkflowNode> workflowNodes = workflowNodeMapper.selectList(new LambdaQueryWrapper<WorkflowNode>()
-                .in(WorkflowNode::getId, successors).orderByAsc(WorkflowNode::getPriorityLevel));
+            .in(WorkflowNode::getId, successors).orderByAsc(WorkflowNode::getPriorityLevel));
+
+        Map<Long, JobTaskBatch> jobTaskBatchMap = jobTaskBatchList.stream().collect(Collectors.toMap(JobTaskBatch::getWorkflowNodeId, i -> i));
+        JobTaskBatch jobTaskBatch = jobTaskBatchMap.get(taskExecute.getParentId());
+        if (JobTaskBatchStatusEnum.SUCCESS.getStatus() != jobTaskBatch.getTaskBatchStatus()) {
+            // 判断是否继续处理，根据失败策略
+        }
+
+
         List<Job> jobs = jobMapper.selectBatchIds(workflowNodes.stream().map(WorkflowNode::getJobId).collect(Collectors.toSet()));
         Map<Long, Job> jobMap = jobs.stream().collect(Collectors.toMap(Job::getId, i -> i));
-
-        // 不管什么任务都需要创建一个 job_task_batch记录 保障一个节点执行创建一次，同时可以判断出DAG是否全部执行完成
 
         // 只会条件节点会使用
         Boolean evaluationResult = null;
