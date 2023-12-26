@@ -6,11 +6,13 @@ import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.job.task.dto.JobTaskPrepareDTO;
 import com.aizuda.easy.retry.server.job.task.dto.WorkflowTaskPrepareDTO;
+import com.aizuda.easy.retry.server.job.task.support.JobPrePareHandler;
 import com.aizuda.easy.retry.server.job.task.support.WorkflowPrePareHandler;
 import com.aizuda.easy.retry.server.job.task.support.prepare.TerminalJobPrepareHandler;
 import com.aizuda.easy.retry.server.job.task.support.prepare.workflow.TerminalWorkflowPrepareHandler;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskBatchMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.WorkflowTaskBatchMapper;
+import com.aizuda.easy.retry.template.datasource.persistence.po.JobTaskBatch;
 import com.aizuda.easy.retry.template.datasource.persistence.po.WorkflowTaskBatch;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.google.common.collect.Lists;
@@ -65,8 +67,21 @@ public class WorkflowTaskPrepareActor extends AbstractActor {
                 }
             }
         } else {
-            // 判断任务是否执行超时
-            // 任务是否为发起调用
+            boolean onlyTimeoutCheck = false;
+            for (WorkflowTaskBatch workflowTaskBatch : workflowTaskBatches) {
+                workflowTaskPrepareDTO.setExecutionAt(workflowTaskBatch.getExecutionAt());
+                workflowTaskPrepareDTO.setWorkflowTaskBatchId(workflowTaskBatch.getId());
+                workflowTaskPrepareDTO.setOnlyTimeoutCheck(onlyTimeoutCheck);
+                for (WorkflowPrePareHandler prePareHandler : workflowPrePareHandlers) {
+                    if (prePareHandler.matches(workflowTaskBatch.getTaskBatchStatus())) {
+                        prePareHandler.handler(workflowTaskPrepareDTO);
+                        break;
+                    }
+                }
+
+                // 当存在大量待处理任务时，除了第一个任务需要执行阻塞策略，其他任务只做任务检查
+                onlyTimeoutCheck = true;
+            }
         }
 
     }

@@ -454,6 +454,7 @@ CREATE TABLE `workflow`
     `trigger_type`     tinyint(4) NOT NULL COMMENT '触发类型 1.CRON 表达式 2. 固定时间',
     `trigger_interval` varchar(255) NOT NULL COMMENT '间隔时长',
     `next_trigger_at`  bigint(13) NOT NULL COMMENT '下次触发时间',
+    `block_strategy`   tinyint(4)          NOT NULL DEFAULT '1' COMMENT '阻塞策略 1、丢弃 2、覆盖 3、并行',
     `executor_timeout` int(11) NOT NULL DEFAULT '0' COMMENT '任务执行超时时间，单位秒',
     `description`      varchar(256) NOT NULL DEFAULT '' COMMENT '描述',
     `flow_info`        text                  DEFAULT NULL COMMENT '流程信息',

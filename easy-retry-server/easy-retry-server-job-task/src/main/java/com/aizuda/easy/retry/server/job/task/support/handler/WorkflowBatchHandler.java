@@ -188,6 +188,10 @@ public class WorkflowBatchHandler {
             .in(JobTaskBatch::getTaskBatchStatus, NOT_COMPLETE)
             .eq(JobTaskBatch::getWorkflowTaskBatchId, workflowTaskBatchId));
 
+        if (CollectionUtils.isEmpty(jobTaskBatches)) {
+            return;
+        }
+
         List<Job> jobs = jobMapper.selectBatchIds(
             jobTaskBatches.stream().map(JobTaskBatch::getJobId).collect(Collectors.toSet()));
 

@@ -51,6 +51,11 @@ public class Workflow implements Serializable {
     private Integer triggerType;
 
     /**
+     * 阻塞策略
+     */
+    private Integer blockStrategy;
+
+    /**
      * 触发间隔
      */
     private String triggerInterval;
