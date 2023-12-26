@@ -1,6 +1,10 @@
 package com.aizuda.easy.retry.server.job.task.support.generator.batch;
 
+import cn.hutool.core.lang.Assert;
+import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
+import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
+import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.server.job.task.dto.JobTimerTaskDTO;
 import com.aizuda.easy.retry.server.job.task.dto.WorkflowTimerTaskDTO;
@@ -14,7 +18,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -33,7 +39,23 @@ public class WorkflowBatchGenerator {
         // 生成任务批次
         WorkflowTaskBatch workflowTaskBatch = WorkflowTaskConverter.INSTANCE.toWorkflowTaskBatch(context);
         workflowTaskBatch.setTaskBatchStatus(JobTaskBatchStatusEnum.WAITING.getStatus());
-        workflowTaskBatchMapper.insert(workflowTaskBatch);
+
+        // 无执行的节点
+        if (CollectionUtils.isEmpty(CacheRegisterTable.getServerNodeSet(context.getGroupName(), context.getNamespaceId()))) {
+            workflowTaskBatch.setTaskBatchStatus(JobTaskBatchStatusEnum.CANCEL.getStatus());
+            workflowTaskBatch.setOperationReason(JobOperationReasonEnum.NOT_CLIENT.getReason());
+        } else {
+            // 生成一个新的任务
+            workflowTaskBatch.setTaskBatchStatus(Optional.ofNullable(context.getTaskBatchStatus()).orElse(JobTaskBatchStatusEnum.WAITING.getStatus()));
+            workflowTaskBatch.setOperationReason(context.getOperationReason());
+        }
+
+        Assert.isTrue(1 == workflowTaskBatchMapper.insert(workflowTaskBatch), () -> new EasyRetryServerException("新增调度任务失败. [{}]", context.getWorkflowId()));
+
+        // 非待处理状态无需进入时间轮中
+        if (JobTaskBatchStatusEnum.WAITING.getStatus() != workflowTaskBatch.getTaskBatchStatus()) {
+            return;
+        }
 
         // 开始执行工作流
         // 进入时间轮

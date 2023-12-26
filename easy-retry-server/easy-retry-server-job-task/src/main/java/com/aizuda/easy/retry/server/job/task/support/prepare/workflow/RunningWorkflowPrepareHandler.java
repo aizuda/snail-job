@@ -1,9 +1,21 @@
 package com.aizuda.easy.retry.server.job.task.support.prepare.workflow;
 
+import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
+import com.aizuda.easy.retry.server.common.util.DateUtils;
+import com.aizuda.easy.retry.server.job.task.dto.CompleteJobBatchDTO;
 import com.aizuda.easy.retry.server.job.task.dto.WorkflowTaskPrepareDTO;
+import com.aizuda.easy.retry.server.job.task.support.BlockStrategy;
+import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
+import com.aizuda.easy.retry.server.job.task.support.JobTaskStopHandler;
+import com.aizuda.easy.retry.server.job.task.support.WorkflowTaskConverter;
+import com.aizuda.easy.retry.server.job.task.support.block.workflow.WorkflowBlockStrategyContext;
+import com.aizuda.easy.retry.server.job.task.support.block.workflow.WorkflowBlockStrategyFactory;
 import com.aizuda.easy.retry.server.job.task.support.handler.WorkflowBatchHandler;
+import com.aizuda.easy.retry.server.job.task.support.stop.JobTaskStopFactory;
+import com.aizuda.easy.retry.server.job.task.support.stop.TaskStopJobContext;
+import com.aizuda.easy.retry.server.job.task.support.strategy.BlockStrategies.BlockStrategyEnum;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -20,6 +32,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 @Slf4j
 public class RunningWorkflowPrepareHandler extends AbstractWorkflowPrePareHandler {
+
     private final WorkflowBatchHandler workflowBatchHandler;
 
     @Override
@@ -28,18 +41,43 @@ public class RunningWorkflowPrepareHandler extends AbstractWorkflowPrePareHandle
     }
 
     @Override
-    protected void doHandler(WorkflowTaskPrepareDTO jobPrepareDTO) {
-        log.info("存在运行中的任务. prepare:[{}]", JsonUtil.toJsonString(jobPrepareDTO));
+    protected void doHandler(WorkflowTaskPrepareDTO prepare) {
+        log.info("存在运行中的任务. prepare:[{}]", JsonUtil.toJsonString(prepare));
 
-        // 1. 若DAG已经支持完成了，由于异常原因导致的没有更新成终态此次进行一次更新操作
         try {
-            workflowBatchHandler.complete(jobPrepareDTO.getWorkflowTaskBatchId());
-        } catch (IOException e) {
-            // TODO 待处理
-        }
+            // 1. 若DAG已经支持完成了，由于异常原因导致的没有更新成终态此次进行一次更新操作
+            int blockStrategy = prepare.getBlockStrategy();
+            if (workflowBatchHandler.complete(prepare.getWorkflowTaskBatchId())) {
+                // 开启新的任务
+                blockStrategy =  BlockStrategyEnum.CONCURRENCY.getBlockStrategy();
+            } else {
+                // 计算超时时间
+                long delay = DateUtils.toNowMilli() - prepare.getExecutionAt();
 
-        // 2. 判断DAG是否已经支持超时
-        // 3. 支持阻塞策略同JOB逻辑一致
+                // 2. 判断DAG是否已经支持超时
+                // 计算超时时间，到达超时时间中断任务
+                if (delay > DateUtils.toEpochMilli(prepare.getExecutorTimeout())) {
+                    log.info("任务执行超时.workflowTaskBatchId:[{}] delay:[{}] executorTimeout:[{}]",
+                        prepare.getWorkflowTaskBatchId(), delay, DateUtils.toEpochMilli(prepare.getExecutorTimeout()));
+                    // 超时停止任务
+                    workflowBatchHandler.stop(prepare.getWorkflowTaskBatchId(), JobOperationReasonEnum.EXECUTE_TIMEOUT.getReason());
+                }
+            }
+
+            // 仅是超时检测的，不执行阻塞策略
+            if (prepare.isOnlyTimeoutCheck()) {
+                return;
+            }
+
+            // 3. 支持阻塞策略同JOB逻辑一致
+            BlockStrategy blockStrategyInterface = WorkflowBlockStrategyFactory.getJobTaskStop(blockStrategy);
+            WorkflowBlockStrategyContext workflowBlockStrategyContext = WorkflowTaskConverter.INSTANCE.toWorkflowBlockStrategyContext(
+                prepare);
+            blockStrategyInterface.block(workflowBlockStrategyContext);
+        } catch (IOException e) {
+            log.error("更新任务状态失败. prepare:[{}]", JsonUtil.toJsonString(prepare), e);
+
+        }
 
 
     }

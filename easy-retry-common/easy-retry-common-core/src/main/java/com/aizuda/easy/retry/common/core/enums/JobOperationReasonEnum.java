@@ -4,8 +4,6 @@ import cn.hutool.core.util.StrUtil;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import java.util.HashMap;
-
 /**
  * 标识某个操作的具体原因
  *
@@ -27,6 +25,7 @@ public enum JobOperationReasonEnum {
     TASK_EXECUTE_ERROR(7, "任务执行期间发生非预期异常"),
     MANNER_STOP(8, "手动停止"),
     WORKFLOW_CONDITION_NODE_EXECUTOR_ERROR(8, "条件节点执行异常"),
+    JOB_TASK_INTERRUPTED(8, "任务中断"),
     ;
 
     private final int reason;

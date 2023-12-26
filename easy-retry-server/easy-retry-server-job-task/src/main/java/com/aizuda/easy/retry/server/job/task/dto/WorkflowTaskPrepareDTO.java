@@ -20,6 +20,11 @@ public class WorkflowTaskPrepareDTO {
     private Integer triggerType;
 
     /**
+     * 阻塞策略 1、丢弃 2、覆盖 3、并行
+     */
+    private Integer blockStrategy;
+
+    /**
      * 工作流名称
      */
     private String workflowName;
@@ -58,4 +63,14 @@ public class WorkflowTaskPrepareDTO {
      * 下次触发时间
      */
     private long nextTriggerAt;
+
+    /**
+     * 任务执行时间
+     */
+    private Long executionAt;
+
+    /**
+     * 仅做超时检测
+     */
+    private boolean onlyTimeoutCheck;
 }
