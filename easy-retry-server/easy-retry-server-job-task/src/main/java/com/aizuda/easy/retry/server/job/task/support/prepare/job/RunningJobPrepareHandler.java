@@ -1,4 +1,4 @@
-package com.aizuda.easy.retry.server.job.task.support.prepare;
+package com.aizuda.easy.retry.server.job.task.support.prepare.job;
 
 import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
@@ -11,8 +11,8 @@ import com.aizuda.easy.retry.server.job.task.dto.JobTaskPrepareDTO;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskStopHandler;
 import com.aizuda.easy.retry.server.job.task.support.stop.JobTaskStopFactory;
 import com.aizuda.easy.retry.server.job.task.support.stop.TaskStopJobContext;
-import com.aizuda.easy.retry.server.job.task.support.strategy.BlockStrategies;
-import com.aizuda.easy.retry.server.job.task.support.strategy.BlockStrategies.BlockStrategyEnum;
+import com.aizuda.easy.retry.server.job.task.support.block.job.BlockStrategies;
+import com.aizuda.easy.retry.server.job.task.support.block.job.BlockStrategies.BlockStrategyEnum;
 import com.aizuda.easy.retry.server.job.task.support.handler.JobTaskBatchHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

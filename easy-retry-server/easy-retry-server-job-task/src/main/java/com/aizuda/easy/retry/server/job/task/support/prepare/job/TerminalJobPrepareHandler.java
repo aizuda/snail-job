@@ -1,4 +1,4 @@
-package com.aizuda.easy.retry.server.job.task.support.prepare;
+package com.aizuda.easy.retry.server.job.task.support.prepare.job;
 
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;

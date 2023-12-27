@@ -1,15 +1,12 @@
-package com.aizuda.easy.retry.server.job.task.support.executor;
+package com.aizuda.easy.retry.server.job.task.support.executor.job;
 
 import com.aizuda.easy.retry.server.job.task.support.JobExecutor;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.server.job.task.support.generator.task.JobTaskGenerateContext;
 import com.aizuda.easy.retry.server.job.task.support.generator.task.JobTaskGenerator;
 import com.aizuda.easy.retry.server.job.task.support.generator.task.JobTaskGeneratorFactory;
-import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobMapper;
-import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 

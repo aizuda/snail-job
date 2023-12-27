@@ -1,11 +1,9 @@
 package com.aizuda.easy.retry.server.job.task.support.block.workflow;
 
-import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
-import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.easy.retry.server.job.task.support.WorkflowTaskConverter;
 import com.aizuda.easy.retry.server.job.task.support.generator.batch.WorkflowBatchGenerator;
 import com.aizuda.easy.retry.server.job.task.support.generator.batch.WorkflowTaskBatchGeneratorContext;
-import com.aizuda.easy.retry.server.job.task.support.strategy.BlockStrategies.BlockStrategyEnum;
+import com.aizuda.easy.retry.server.job.task.support.block.job.BlockStrategies.BlockStrategyEnum;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

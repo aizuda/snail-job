@@ -5,7 +5,7 @@ import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.job.task.dto.JobTaskPrepareDTO;
 import com.aizuda.easy.retry.server.job.task.support.JobPrePareHandler;
-import com.aizuda.easy.retry.server.job.task.support.prepare.TerminalJobPrepareHandler;
+import com.aizuda.easy.retry.server.job.task.support.prepare.job.TerminalJobPrepareHandler;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskBatchMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTaskBatch;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;

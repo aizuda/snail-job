@@ -71,6 +71,7 @@ public class WorkflowExecutorActor extends AbstractActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder().match(WorkflowNodeTaskExecuteDTO.class, taskExecute -> {
+            log.info("工作流开始执行. [{}]", JsonUtil.toJsonString(taskExecute));
             try {
                 doExecutor(taskExecute);
             } catch (Exception e) {
@@ -109,10 +110,10 @@ public class WorkflowExecutorActor extends AbstractActor {
 
         Map<Long, JobTaskBatch> jobTaskBatchMap = jobTaskBatchList.stream().collect(Collectors.toMap(JobTaskBatch::getWorkflowNodeId, i -> i));
         Map<Long, WorkflowNode> workflowNodeMap = workflowNodes.stream().collect(Collectors.toMap(WorkflowNode::getId, i -> i));
-        JobTaskBatch jobTaskBatch = jobTaskBatchMap.get(taskExecute.getParentId());
+        JobTaskBatch parentJobTaskBatch = jobTaskBatchMap.get(taskExecute.getParentId());
 
         // 失败策略处理
-        if (Objects.nonNull(jobTaskBatch) && JobTaskBatchStatusEnum.SUCCESS.getStatus() != jobTaskBatch.getTaskBatchStatus()) {
+        if (Objects.nonNull(parentJobTaskBatch) && JobTaskBatchStatusEnum.SUCCESS.getStatus() != parentJobTaskBatch.getTaskBatchStatus()) {
             // 判断是否继续处理，根据失败策略
             WorkflowNode workflowNode = workflowNodeMap.get(taskExecute.getParentId());
             // 失败了阻塞策略
@@ -128,7 +129,8 @@ public class WorkflowExecutorActor extends AbstractActor {
         Boolean evaluationResult = null;
         for (WorkflowNode workflowNode : workflowNodes) {
             // 批次已经存在就不在重复生成
-            if (Objects.nonNull(jobTaskBatchMap.get(workflowNode.getId()))) {
+            JobTaskBatch jobTaskBatch = jobTaskBatchMap.get(workflowNode.getId());
+            if (Objects.nonNull(jobTaskBatch) && JobTaskBatchStatusEnum.COMPLETED.contains(jobTaskBatch.getTaskBatchStatus())) {
                 continue;
             }
 

@@ -1,8 +1,7 @@
 package com.aizuda.easy.retry.server.job.task.support.block.workflow;
 
-import com.aizuda.easy.retry.common.core.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.job.task.support.BlockStrategy;
-import com.aizuda.easy.retry.server.job.task.support.strategy.BlockStrategies.BlockStrategyEnum;
+import com.aizuda.easy.retry.server.job.task.support.block.job.BlockStrategies.BlockStrategyEnum;
 
 import java.util.concurrent.ConcurrentHashMap;
 

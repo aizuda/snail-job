@@ -1,4 +1,4 @@
-package com.aizuda.easy.retry.server.job.task.support.executor;
+package com.aizuda.easy.retry.server.job.task.support.executor.job;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
