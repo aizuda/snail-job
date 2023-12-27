@@ -1,8 +1,8 @@
 package com.aizuda.easy.retry.server.job.task.support.block.workflow;
 
 import com.aizuda.easy.retry.server.job.task.support.BlockStrategy;
-import com.aizuda.easy.retry.server.job.task.support.strategy.BlockStrategies.BlockStrategyContext;
-import com.aizuda.easy.retry.server.job.task.support.strategy.BlockStrategies.BlockStrategyEnum;
+import com.aizuda.easy.retry.server.job.task.support.block.job.BlockStrategies.BlockStrategyContext;
+import com.aizuda.easy.retry.server.job.task.support.block.job.BlockStrategies.BlockStrategyEnum;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.transaction.annotation.Transactional;
 

@@ -1,12 +1,17 @@
 package com.aizuda.easy.retry.server.job.task.support.generator.batch;
 
+import akka.actor.ActorRef;
 import cn.hutool.core.lang.Assert;
+import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
+import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
+import com.aizuda.easy.retry.server.common.enums.JobTriggerTypeEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.server.job.task.dto.JobTimerTaskDTO;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
+import com.aizuda.easy.retry.server.job.task.dto.WorkflowNodeTaskExecuteDTO;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.server.job.task.support.timer.JobTimerTask;
 import com.aizuda.easy.retry.server.job.task.support.timer.JobTimerWheel;
@@ -18,9 +23,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -47,6 +55,28 @@ public class JobTaskBatchGenerator {
         if (CollectionUtils.isEmpty(CacheRegisterTable.getServerNodeSet(context.getGroupName(), context.getNamespaceId()))) {
             jobTaskBatch.setTaskBatchStatus(JobTaskBatchStatusEnum.CANCEL.getStatus());
             jobTaskBatch.setOperationReason(JobOperationReasonEnum.NOT_CLIENT.getReason());
+
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCompletion(int status) {
+
+                    if (Objects.nonNull(context.getWorkflowNodeId()) && Objects.nonNull(context.getWorkflowTaskBatchId())) {
+                        // 若是工作流则开启下一个任务
+                        try {
+                            WorkflowNodeTaskExecuteDTO taskExecuteDTO = new WorkflowNodeTaskExecuteDTO();
+                            taskExecuteDTO.setWorkflowTaskBatchId(context.getWorkflowTaskBatchId());
+                            taskExecuteDTO.setTriggerType(JobTriggerTypeEnum.AUTO.getType());
+                            taskExecuteDTO.setParentId(context.getWorkflowNodeId());
+                            taskExecuteDTO.setResult(StrUtil.EMPTY);
+                            ActorRef actorRef = ActorGenerator.workflowTaskExecutorActor();
+                            actorRef.tell(taskExecuteDTO, actorRef);
+                        } catch (Exception e) {
+                            log.error("任务调度执行失败", e);
+                        }
+                    }
+                }
+            });
+
         } else {
             // 生成一个新的任务
             jobTaskBatch.setTaskBatchStatus(Optional.ofNullable(context.getTaskBatchStatus()).orElse(JobTaskBatchStatusEnum.WAITING.getStatus()));

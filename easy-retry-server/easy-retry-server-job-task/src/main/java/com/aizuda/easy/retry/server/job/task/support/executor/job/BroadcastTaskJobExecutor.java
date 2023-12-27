@@ -1,4 +1,4 @@
-package com.aizuda.easy.retry.server.job.task.support.executor;
+package com.aizuda.easy.retry.server.job.task.support.executor.job;
 
 import akka.actor.ActorRef;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
@@ -14,29 +14,29 @@ import java.util.List;
 
 /**
  * @author www.byteblogs.com
- * @date 2023-10-03 22:12:40
+ * @date 2023-10-06 10:27:26
  * @since 2.4.0
  */
-@Slf4j
 @Component
-public class ClusterJobExecutor extends AbstractJobExecutor {
-
+@Slf4j
+public class BroadcastTaskJobExecutor extends AbstractJobExecutor {
 
     @Override
     public TaskTypeEnum getTaskInstanceType() {
-        return TaskTypeEnum.CLUSTER;
+        return TaskTypeEnum.BROADCAST;
     }
 
     @Override
     protected void doExecute(JobExecutorContext context) {
 
-        // 调度客户端
         List<JobTask> taskList = context.getTaskList();
-        JobTask jobTask = taskList.get(0);
-        RealJobExecutorDTO realJobExecutor = JobTaskConverter.INSTANCE.toRealJobExecutorDTO(context, jobTask);
-        realJobExecutor.setClientId(ClientInfoUtils.clientId(jobTask.getClientInfo()));
-        ActorRef actorRef = ActorGenerator.jobRealTaskExecutorActor();
-        actorRef.tell(realJobExecutor, actorRef);
+
+        for (JobTask jobTask : taskList) {
+            RealJobExecutorDTO realJobExecutor = JobTaskConverter.INSTANCE.toRealJobExecutorDTO(context, jobTask);
+            realJobExecutor.setClientId(ClientInfoUtils.clientId(jobTask.getClientInfo()));
+            ActorRef actorRef = ActorGenerator.jobRealTaskExecutorActor();
+            actorRef.tell(realJobExecutor, actorRef);
+        }
 
     }
 

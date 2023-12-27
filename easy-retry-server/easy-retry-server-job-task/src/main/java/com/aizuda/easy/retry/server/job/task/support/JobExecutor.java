@@ -1,7 +1,7 @@
 package com.aizuda.easy.retry.server.job.task.support;
 
 import com.aizuda.easy.retry.common.core.enums.TaskTypeEnum;
-import com.aizuda.easy.retry.server.job.task.support.executor.JobExecutorContext;
+import com.aizuda.easy.retry.server.job.task.support.executor.job.JobExecutorContext;
 
 /**
  * @author www.byteblogs.com

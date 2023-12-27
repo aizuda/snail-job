@@ -1,4 +1,4 @@
-package com.aizuda.easy.retry.server.job.task.support.strategy;
+package com.aizuda.easy.retry.server.job.task.support.block.job;
 
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;

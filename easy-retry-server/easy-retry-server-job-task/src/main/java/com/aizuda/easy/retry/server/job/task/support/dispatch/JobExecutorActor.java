@@ -24,8 +24,8 @@ import com.aizuda.easy.retry.server.job.task.support.JobExecutor;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.server.job.task.support.cache.ResidentTaskCache;
 import com.aizuda.easy.retry.server.job.task.support.event.JobTaskFailAlarmEvent;
-import com.aizuda.easy.retry.server.job.task.support.executor.JobExecutorContext;
-import com.aizuda.easy.retry.server.job.task.support.executor.JobExecutorFactory;
+import com.aizuda.easy.retry.server.job.task.support.executor.job.JobExecutorContext;
+import com.aizuda.easy.retry.server.job.task.support.executor.job.JobExecutorFactory;
 import com.aizuda.easy.retry.server.job.task.support.timer.JobTimerWheel;
 import com.aizuda.easy.retry.server.job.task.support.timer.ResidentJobTimerTask;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobMapper;
@@ -36,7 +36,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
@@ -112,6 +111,7 @@ public class JobExecutorActor extends AbstractActor {
                 TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                     @Override
                     public void afterCompletion(int status) {
+
                         if (Objects.nonNull(taskExecute.getWorkflowNodeId()) && Objects.nonNull(taskExecute.getWorkflowTaskBatchId())) {
                             // 若是工作流则开启下一个任务
                             try {

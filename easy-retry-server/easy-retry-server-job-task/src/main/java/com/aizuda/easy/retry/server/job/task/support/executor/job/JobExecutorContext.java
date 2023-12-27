@@ -1,4 +1,4 @@
-package com.aizuda.easy.retry.server.job.task.support.executor;
+package com.aizuda.easy.retry.server.job.task.support.executor.job;
 
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
 import lombok.Data;

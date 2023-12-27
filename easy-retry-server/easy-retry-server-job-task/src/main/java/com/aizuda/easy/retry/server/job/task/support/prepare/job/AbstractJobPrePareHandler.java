@@ -1,4 +1,4 @@
-package com.aizuda.easy.retry.server.job.task.support.prepare;
+package com.aizuda.easy.retry.server.job.task.support.prepare.job;
 
 import com.aizuda.easy.retry.server.job.task.dto.JobTaskPrepareDTO;
 import com.aizuda.easy.retry.server.job.task.support.JobPrePareHandler;
