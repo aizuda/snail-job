@@ -1,11 +1,15 @@
 package com.aizuda.easy.retry.server.job.task.support.block.workflow;
 
+import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.job.task.support.WorkflowTaskConverter;
 import com.aizuda.easy.retry.server.job.task.support.generator.batch.WorkflowBatchGenerator;
 import com.aizuda.easy.retry.server.job.task.support.generator.batch.WorkflowTaskBatchGeneratorContext;
 import com.aizuda.easy.retry.server.job.task.support.block.job.BlockStrategies.BlockStrategyEnum;
+import com.aizuda.easy.retry.server.job.task.support.handler.WorkflowBatchHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+
+import java.io.IOException;
 
 /**
  * @author: shuguang.zhang
@@ -16,9 +20,17 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ConcurrencyWorkflowBlockStrategy extends AbstractWorkflowBlockStrategy {
     private final WorkflowBatchGenerator workflowBatchGenerator;
+    private final WorkflowBatchHandler workflowBatchHandler;
 
     @Override
     protected void doBlock(final WorkflowBlockStrategyContext workflowBlockStrategyContext) {
+
+        try {
+            workflowBatchHandler.checkWorkflowExecutor(workflowBlockStrategyContext.getWorkflowTaskBatchId(), null);
+        } catch (IOException e) {
+            throw new EasyRetryServerException("校验工作流失败", e);
+        }
+
         WorkflowTaskBatchGeneratorContext workflowTaskBatchGeneratorContext = WorkflowTaskConverter.INSTANCE.toWorkflowTaskBatchGeneratorContext(workflowBlockStrategyContext);
         workflowBatchGenerator.generateJobTaskBatch(workflowTaskBatchGeneratorContext);
     }
