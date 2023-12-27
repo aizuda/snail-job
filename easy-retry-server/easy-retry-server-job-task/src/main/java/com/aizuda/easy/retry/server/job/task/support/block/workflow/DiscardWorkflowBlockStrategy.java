@@ -5,13 +5,17 @@ import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
+import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.job.task.dto.WorkflowNodeTaskExecuteDTO;
 import com.aizuda.easy.retry.server.job.task.support.WorkflowTaskConverter;
 import com.aizuda.easy.retry.server.job.task.support.generator.batch.WorkflowBatchGenerator;
 import com.aizuda.easy.retry.server.job.task.support.generator.batch.WorkflowTaskBatchGeneratorContext;
 import com.aizuda.easy.retry.server.job.task.support.block.job.BlockStrategies.BlockStrategyEnum;
+import com.aizuda.easy.retry.server.job.task.support.handler.WorkflowBatchHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+
+import java.io.IOException;
 
 /**
  * @author: xiaowoniu
@@ -22,18 +26,15 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class DiscardWorkflowBlockStrategy extends AbstractWorkflowBlockStrategy {
     private final WorkflowBatchGenerator workflowBatchGenerator;
+    private final WorkflowBatchHandler workflowBatchHandler;
     @Override
     protected void doBlock(final WorkflowBlockStrategyContext workflowBlockStrategyContext) {
 
-        // 重新尝试执行, 重新生成任务批次
-        WorkflowNodeTaskExecuteDTO taskExecuteDTO = new WorkflowNodeTaskExecuteDTO();
-        taskExecuteDTO.setWorkflowTaskBatchId(workflowBlockStrategyContext.getWorkflowTaskBatchId());
-        taskExecuteDTO.setWorkflowId(workflowBlockStrategyContext.getWorkflowId());
-        taskExecuteDTO.setTriggerType(workflowBlockStrategyContext.getTriggerType());
-        taskExecuteDTO.setParentId(SystemConstants.ROOT);
-        ActorRef actorRef = ActorGenerator.workflowTaskExecutorActor();
-        actorRef.tell(taskExecuteDTO, actorRef);
-
+        try {
+            workflowBatchHandler.checkWorkflowExecutor(workflowBlockStrategyContext.getWorkflowTaskBatchId(), null);
+        } catch (IOException e) {
+            throw new EasyRetryServerException("校验工作流失败", e);
+        }
         // 生成状态为取消的工作流批次
         WorkflowTaskBatchGeneratorContext workflowTaskBatchGeneratorContext = WorkflowTaskConverter.INSTANCE.toWorkflowTaskBatchGeneratorContext(workflowBlockStrategyContext);
         workflowTaskBatchGeneratorContext.setTaskBatchStatus(JobTaskBatchStatusEnum.CANCEL.getStatus());
