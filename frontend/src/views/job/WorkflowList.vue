@@ -69,7 +69,7 @@
       <span slot="workflowName" slot-scope="text, record">
         <a href="#" @click="handlerOpenDrawer(record)">{{ text }}</a>
       </span>
-      <span slot="jobStatus" slot-scope="text">
+      <span slot="workflowStatus" slot-scope="text">
         <a-tag :color="workflowStatus[text].color">
           {{ workflowStatus[text].name }}
         </a-tag>

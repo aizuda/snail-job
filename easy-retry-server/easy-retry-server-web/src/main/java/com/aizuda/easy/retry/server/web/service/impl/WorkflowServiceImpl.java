@@ -138,7 +138,7 @@ public class WorkflowServiceImpl implements WorkflowService {
         LambdaQueryWrapper<Workflow> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Workflow::getDeleted, StatusEnum.NO.getStatus());
         queryWrapper.eq(Workflow::getNamespaceId, userSessionVO.getNamespaceId());
-
+        queryWrapper.orderByDesc(Workflow::getId);
         PageDTO<Workflow> page = workflowMapper.selectPage(pageDTO, queryWrapper);
 
         List<WorkflowResponseVO> jobResponseList = WorkflowConverter.INSTANCE.toWorkflowResponseVO(page.getRecords());
@@ -236,6 +236,7 @@ public class WorkflowServiceImpl implements WorkflowService {
                 if (WorkflowNodeTypeEnum.CONDITION.getType() == nodeConfig.getNodeType()) {
                     workflowNode.setJobId(SystemConstants.CONDITION_JOB_ID);
                 }
+
                 Assert.isTrue(1 == workflowNodeMapper.insert(workflowNode), () -> new EasyRetryServerException("新增工作流节点失败"));
                 // 添加节点
                 graph.addNode(workflowNode.getId());
@@ -244,6 +245,8 @@ public class WorkflowServiceImpl implements WorkflowService {
                     graph.putEdge(parentId, workflowNode.getId());
                 }
                 parentIds1.add(workflowNode.getId());
+                log.warn("workflowNodeId:[{}] parentIds1: [{}] parentIds:[{}]",
+                        workflowNode.getId(), JsonUtil.toJsonString(parentIds1),JsonUtil.toJsonString(parentIds));
                 buildGraph(Lists.newArrayList(workflowNode.getId()), groupName, workflowId, nodeInfo.getChildNode(), graph);
             }
         }
