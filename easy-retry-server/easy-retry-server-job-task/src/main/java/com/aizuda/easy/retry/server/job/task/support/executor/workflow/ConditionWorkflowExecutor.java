@@ -72,9 +72,10 @@ public class ConditionWorkflowExecutor extends AbstractWorkflowExecutor {
                 if (StrUtil.isNotBlank(context.getResult())) {
                     contextMap = JsonUtil.parseHashMap(context.getResult());
                 }
-                result = doEval(context.getNodeExpression(), contextMap);
+                result = Optional.ofNullable(doEval(context.getNodeExpression(), contextMap)).orElse(Boolean.FALSE);
                 log.info("执行条件表达式：[{}]，参数: [{}] 结果：[{}]", context.getNodeExpression(), context.getResult(), result);
             } catch (Exception e) {
+                log.error("执行条件表达式解析异常. 表达式:[{}]，参数: [{}]", context.getNodeExpression(), context.getResult(), e);
                 taskBatchStatus = JobTaskBatchStatusEnum.FAIL.getStatus();
                 operationReason = JobOperationReasonEnum.WORKFLOW_CONDITION_NODE_EXECUTOR_ERROR.getReason();
                 jobTaskStatus = JobTaskStatusEnum.FAIL.getStatus();

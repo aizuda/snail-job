@@ -100,7 +100,7 @@ public class WorkflowExecutorActor extends AbstractActor {
 
         // 添加父节点，为了判断父节点的处理状态
         List<JobTaskBatch> jobTaskBatchList = jobTaskBatchMapper.selectList(new LambdaQueryWrapper<JobTaskBatch>()
-                .select(JobTaskBatch::getWorkflowTaskBatchId, JobTaskBatch::getWorkflowNodeId)
+                .select(JobTaskBatch::getWorkflowTaskBatchId, JobTaskBatch::getWorkflowNodeId, JobTaskBatch::getTaskBatchStatus)
                 .eq(JobTaskBatch::getWorkflowTaskBatchId, workflowTaskBatch.getId())
                 .in(JobTaskBatch::getWorkflowNodeId, Sets.union(successors, Sets.newHashSet(taskExecute.getParentId())))
         );
@@ -122,12 +122,17 @@ public class WorkflowExecutorActor extends AbstractActor {
             }
         }
 
+        // 去掉父节点
+        workflowNodes = workflowNodes.stream().filter(workflowNode -> !workflowNode.getId().equals(taskExecute.getParentId())).collect(
+            Collectors.toList());
+
         List<Job> jobs = jobMapper.selectBatchIds(workflowNodes.stream().map(WorkflowNode::getJobId).collect(Collectors.toSet()));
         Map<Long, Job> jobMap = jobs.stream().collect(Collectors.toMap(Job::getId, i -> i));
 
         // 只会条件节点会使用
         Boolean evaluationResult = null;
         for (WorkflowNode workflowNode : workflowNodes) {
+
             // 批次已经存在就不在重复生成
             JobTaskBatch jobTaskBatch = jobTaskBatchMap.get(workflowNode.getId());
             if (Objects.nonNull(jobTaskBatch) && JobTaskBatchStatusEnum.COMPLETED.contains(jobTaskBatch.getTaskBatchStatus())) {

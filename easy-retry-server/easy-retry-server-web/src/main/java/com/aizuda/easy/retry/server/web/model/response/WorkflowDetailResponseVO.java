@@ -122,6 +122,11 @@ public class WorkflowDetailResponseVO {
         private Integer taskBatchStatus;
 
         /**
+         * 定时任务批次id
+         */
+        private Long jobTaskBatchId;
+
+        /**
          * 任务执行时间
          */
         private LocalDateTime executionAt;
