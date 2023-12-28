@@ -1,30 +1,20 @@
 <template>
-  <iframe
-    ref="iframe"
-    :src="`/lib?token=${token}&x1c2Hdd6=kaxC8Iml&namespaceId=${namespaceId}&id=${id}`"
-    marginwidth="0"
-    frameborder="no"
-    :style="`width: 100%;height:calc(99vh - 60px)`"
-  />
+  <work-flow value="kaxC8Iml" />
 </template>
 
 <script>
-import storage from 'store'
+import WorkFlow from './form/WorkFlow.vue'
 
 export default {
   name: 'WorkFlowDetail',
-  components: {},
+  components: { WorkFlow },
   data () {
     return {
-      id: '',
-      token: '',
-      namespaceId: ''
+      id: ''
     }
   },
   mounted () {
     this.id = this.$route.query.id
-    this.token = storage.get('Access-Token')
-    this.namespaceId = storage.get('app_namespace')
   },
   methods: {}
 }
