@@ -120,6 +120,7 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
                 .peek(nodeInfo -> {
                     JobTaskBatch jobTaskBatch = jobTaskBatchMap.get(nodeInfo.getId());
                     if (Objects.nonNull(jobTaskBatch)) {
+                        nodeInfo.setJobTaskBatchId(jobTaskBatch.getId());
                         nodeInfo.setExecutionAt(DateUtils.toLocalDateTime(jobTaskBatch.getExecutionAt()));
                         nodeInfo.setTaskBatchStatus(jobTaskBatch.getTaskBatchStatus());
                         nodeInfo.setOperationReason(jobTaskBatch.getOperationReason());

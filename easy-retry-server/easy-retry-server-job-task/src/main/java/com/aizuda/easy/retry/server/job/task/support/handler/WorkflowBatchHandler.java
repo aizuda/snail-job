@@ -28,6 +28,7 @@ import com.aizuda.easy.retry.template.datasource.persistence.po.JobTaskBatch;
 import com.aizuda.easy.retry.template.datasource.persistence.po.WorkflowNode;
 import com.aizuda.easy.retry.template.datasource.persistence.po.WorkflowTaskBatch;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.google.common.collect.Lists;
 import com.google.common.graph.MutableGraph;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -105,7 +106,7 @@ public class WorkflowBatchHandler {
             // 条件节点是或的关系一个成功就代表成功
             if (WorkflowNodeTypeEnum.CONDITION.getType() == workflowNode.getNodeType()) {
                 for (final Long predecessor : predecessors) {
-                    List<JobTaskBatch> jobTaskBatcheList = map.get(predecessor);
+                    List<JobTaskBatch> jobTaskBatcheList = map.getOrDefault(predecessor, Lists.newArrayList());
                     Map<Integer, Long> statusCountMap = jobTaskBatcheList.stream()
                             .collect(Collectors.groupingBy(JobTaskBatch::getTaskBatchStatus, Collectors.counting()));
                     long successCount = statusCountMap.getOrDefault(JobTaskBatchStatusEnum.SUCCESS.getStatus(), 0L);
@@ -131,7 +132,7 @@ public class WorkflowBatchHandler {
             } else {
 
                 for (final Long predecessor : predecessors) {
-                    List<JobTaskBatch> jobTaskBatcheList = map.get(predecessor);
+                    List<JobTaskBatch> jobTaskBatcheList = map.getOrDefault(predecessor, Lists.newArrayList());
                     Map<Integer, Long> statusCountMap = jobTaskBatcheList.stream()
                             .collect(Collectors.groupingBy(JobTaskBatch::getTaskBatchStatus, Collectors.counting()));
                     long failCount = statusCountMap.getOrDefault(JobTaskBatchStatusEnum.FAIL.getStatus(), 0L);
@@ -256,7 +257,7 @@ public class WorkflowBatchHandler {
                 taskExecuteDTO.setWorkflowTaskBatchId(workflowTaskBatchId);
                 taskExecuteDTO.setWorkflowId(successor);
                 taskExecuteDTO.setTriggerType(1);
-                taskExecuteDTO.setParentId(successor);
+                taskExecuteDTO.setParentId(parentId);
                 ActorRef actorRef = ActorGenerator.workflowTaskExecutorActor();
                 actorRef.tell(taskExecuteDTO, actorRef);
                 continue;
@@ -277,7 +278,7 @@ public class WorkflowBatchHandler {
                 continue;
             }
 
-            // 已经是终态的需要递归查询是否已经完成
+            // 已经是终态的需要递归遍历后继节点是否正常执行
             checkWorkflowExecutor(successor, workflowTaskBatchId, graph, jobTaskBatchMap);
         }
     }
