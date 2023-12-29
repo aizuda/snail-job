@@ -76,7 +76,7 @@ public class WorkflowServiceImpl implements WorkflowService {
         workflow.setNextTriggerAt(calculateNextTriggerAt(workflowRequestVO, DateUtils.toNowMilli()));
         workflow.setFlowInfo(StrUtil.EMPTY);
         workflow.setBucketIndex(HashUtil.bkdrHash(workflowRequestVO.getGroupName() + workflowRequestVO.getWorkflowName())
-            % systemProperties.getBucketTotal());
+                % systemProperties.getBucketTotal());
         workflow.setNamespaceId(UserSessionUtils.currentUserSession().getNamespaceId());
         Assert.isTrue(1 == workflowMapper.insert(workflow), () -> new EasyRetryServerException("新增工作流失败"));
 
@@ -85,7 +85,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 
         // 递归构建图
         buildGraph(Lists.newArrayList(SystemConstants.ROOT), new LinkedBlockingDeque<>(),
-            workflowRequestVO.getGroupName(), workflow.getId(), nodeConfig, graph);
+                workflowRequestVO.getGroupName(), workflow.getId(), nodeConfig, graph);
 
         log.info("图构建完成. graph:[{}]", graph);
         // 保存图信息
@@ -113,21 +113,21 @@ public class WorkflowServiceImpl implements WorkflowService {
 
         WorkflowDetailResponseVO responseVO = WorkflowConverter.INSTANCE.toWorkflowDetailResponseVO(workflow);
         List<WorkflowNode> workflowNodes = workflowNodeMapper.selectList(new LambdaQueryWrapper<WorkflowNode>()
-            .eq(WorkflowNode::getDeleted, 0)
-            .eq(WorkflowNode::getWorkflowId, id)
-            .orderByAsc(WorkflowNode::getPriorityLevel));
+                .eq(WorkflowNode::getDeleted, 0)
+                .eq(WorkflowNode::getWorkflowId, id)
+                .orderByAsc(WorkflowNode::getPriorityLevel));
 
         List<WorkflowDetailResponseVO.NodeInfo> nodeInfos = WorkflowConverter.INSTANCE.toNodeInfo(workflowNodes);
 
         Map<Long, WorkflowDetailResponseVO.NodeInfo> workflowNodeMap = nodeInfos.stream()
-            .collect(Collectors.toMap(WorkflowDetailResponseVO.NodeInfo::getId, i -> i));
+                .collect(Collectors.toMap(WorkflowDetailResponseVO.NodeInfo::getId, i -> i));
 
         String flowInfo = workflow.getFlowInfo();
         try {
             MutableGraph<Long> graph = GraphUtils.deserializeJsonToGraph(flowInfo);
             // 反序列化构建图
             WorkflowDetailResponseVO.NodeConfig config = buildNodeConfig(graph, SystemConstants.ROOT, new HashMap<>(),
-                workflowNodeMap);
+                    workflowNodeMap);
             responseVO.setNodeConfig(config);
         } catch (Exception e) {
             log.error("反序列化失败. json:[{}]", flowInfo, e);
@@ -159,8 +159,8 @@ public class WorkflowServiceImpl implements WorkflowService {
         Assert.notNull(workflowRequestVO.getId(), () -> new EasyRetryServerException("工作流ID不能为空"));
 
         Assert.isTrue(workflowMapper.selectCount(new LambdaQueryWrapper<Workflow>()
-                .eq(Workflow::getId, workflowRequestVO.getId())) > 0,
-            () -> new EasyRetryServerException("工作流不存在"));
+                        .eq(Workflow::getId, workflowRequestVO.getId())) > 0,
+                () -> new EasyRetryServerException("工作流不存在"));
 
         MutableGraph<Long> graph = GraphBuilder.directed().allowsSelfLoops(false).build();
         // 添加虚拟头节点
@@ -171,7 +171,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 
         // 递归构建图
         buildGraph(Lists.newArrayList(SystemConstants.ROOT), new LinkedBlockingDeque<>(),
-            workflowRequestVO.getGroupName(), workflowRequestVO.getId(), nodeConfig, graph);
+                workflowRequestVO.getGroupName(), workflowRequestVO.getId(), nodeConfig, graph);
 
         log.info("图构建完成. graph:[{}]", graph);
 
@@ -184,10 +184,35 @@ public class WorkflowServiceImpl implements WorkflowService {
         return Boolean.TRUE;
     }
 
+    @Override
+    public Boolean updateStatus(Long id) {
+        Workflow workflow = workflowMapper.selectOne(
+                new LambdaQueryWrapper<Workflow>()
+                        .select(Workflow::getId, Workflow::getWorkflowStatus)
+                        .eq(Workflow::getId, id));
+        Assert.notNull(workflow, () -> new EasyRetryServerException("工作流不存在"));
+
+        if (Objects.equals(workflow.getWorkflowStatus(), StatusEnum.NO.getStatus())) {
+            workflow.setWorkflowStatus(StatusEnum.YES.getStatus());
+        } else {
+            workflow.setWorkflowStatus(StatusEnum.NO.getStatus());
+        }
+
+        return 1 == workflowMapper.updateById(workflow);
+    }
+
+    @Override
+    public Boolean deleteById(Long id) {
+        Workflow workflow = new Workflow();
+        workflow.setId(id);
+        workflow.setDeleted(StatusEnum.YES.getStatus());
+        return 1 == workflowMapper.updateById(workflow);
+    }
+
     private WorkflowDetailResponseVO.NodeConfig buildNodeConfig(MutableGraph<Long> graph,
-        Long parentId,
-        Map<Long, WorkflowDetailResponseVO.NodeConfig> nodeConfigMap,
-        Map<Long, WorkflowDetailResponseVO.NodeInfo> workflowNodeMap) {
+                                                                Long parentId,
+                                                                Map<Long, WorkflowDetailResponseVO.NodeConfig> nodeConfigMap,
+                                                                Map<Long, WorkflowDetailResponseVO.NodeInfo> workflowNodeMap) {
 
         Set<Long> successors = graph.successors(parentId);
         if (CollectionUtils.isEmpty(successors)) {
@@ -254,7 +279,7 @@ public class WorkflowServiceImpl implements WorkflowService {
     }
 
     public void buildGraph(List<Long> parentIds, LinkedBlockingDeque<Long> deque, String groupName, Long workflowId,
-        NodeConfig nodeConfig, MutableGraph<Long> graph) {
+                           NodeConfig nodeConfig, MutableGraph<Long> graph) {
 
         if (Objects.isNull(nodeConfig)) {
             return;
@@ -273,7 +298,7 @@ public class WorkflowServiceImpl implements WorkflowService {
                 }
 
                 Assert.isTrue(1 == workflowNodeMapper.insert(workflowNode),
-                    () -> new EasyRetryServerException("新增工作流节点失败"));
+                        () -> new EasyRetryServerException("新增工作流节点失败"));
                 // 添加节点
                 graph.addNode(workflowNode.getId());
                 for (final Long parentId : parentIds) {
@@ -281,11 +306,11 @@ public class WorkflowServiceImpl implements WorkflowService {
                     graph.putEdge(parentId, workflowNode.getId());
                 }
                 log.warn("workflowNodeId:[{}] parentIds:[{}]",
-                    workflowNode.getId(), JsonUtil.toJsonString(parentIds));
+                        workflowNode.getId(), JsonUtil.toJsonString(parentIds));
                 NodeConfig childNode = nodeInfo.getChildNode();
                 if (Objects.nonNull(childNode) && !CollectionUtils.isEmpty(childNode.getConditionNodes())) {
                     buildGraph(Lists.newArrayList(workflowNode.getId()), deque, groupName, workflowId, childNode,
-                        graph);
+                            graph);
                 } else {
                     // 叶子节点记录一下
                     deque.add(workflowNode.getId());

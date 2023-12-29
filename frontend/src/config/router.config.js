@@ -210,19 +210,6 @@ export const asyncRouterMap = [
             meta: { title: '任务项', icon: 'profile', permission: ['jobBatch'] }
           },
           {
-            path: '/job/notify/list',
-            name: 'JobNotifyList',
-            component: () => import('@/views/job/JobNotifyList'),
-            meta: { title: '通知列表', icon: 'profile', keepAlive: true, permission: ['jobNotify'] }
-          },
-          {
-            path: '/job/notify/config',
-            name: 'JobNotifyForm',
-            hidden: true,
-            component: () => import('@/views/job/form/JobNotifyForm.vue'),
-            meta: { title: '通知配置', icon: 'profile', keepAlive: true, permission: ['jobNotify'] }
-          },
-          {
             path: '/job/workflow/list',
             name: 'WorkflowList',
             component: () => import('@/views/job/WorkflowList'),
@@ -254,6 +241,18 @@ export const asyncRouterMap = [
             hidden: true,
             component: () => import('@/views/job/WorkflowBatchDetail'),
             meta: { title: '工作流任务批次详情', icon: 'profile', permission: ['jobBatch'] }
+          }, {
+            path: '/job/notify/list',
+            name: 'JobNotifyList',
+            component: () => import('@/views/job/JobNotifyList'),
+            meta: { title: '通知列表', icon: 'profile', keepAlive: true, permission: ['jobNotify'] }
+          },
+          {
+            path: '/job/notify/config',
+            name: 'JobNotifyForm',
+            hidden: true,
+            component: () => import('@/views/job/form/JobNotifyForm.vue'),
+            meta: { title: '通知配置', icon: 'profile', keepAlive: true, permission: ['jobNotify'] }
           }
         ]
       },

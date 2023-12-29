@@ -23,4 +23,8 @@ public interface WorkflowService {
     PageResult<List<WorkflowResponseVO>> listPage(WorkflowQueryVO queryVO);
 
     Boolean updateWorkflow(WorkflowRequestVO workflowRequestVO);
+
+    Boolean updateStatus(Long id);
+
+    Boolean deleteById(Long id);
 }

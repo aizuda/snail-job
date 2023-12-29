@@ -37,7 +37,7 @@ public class WorkflowController {
     @GetMapping("/page/list")
     @LoginRequired(role = RoleEnum.USER)
     public PageResult<List<WorkflowResponseVO>> listPage(WorkflowQueryVO queryVO) {
-       return workflowService.listPage(queryVO);
+        return workflowService.listPage(queryVO);
     }
 
     @PutMapping
@@ -49,7 +49,17 @@ public class WorkflowController {
     @GetMapping("{id}")
     @LoginRequired(role = RoleEnum.USER)
     public WorkflowDetailResponseVO getWorkflowDetail(@PathVariable("id") Long id) throws IOException {
-       return workflowService.getWorkflowDetail(id);
+        return workflowService.getWorkflowDetail(id);
+    }
+
+    @PutMapping("/update/status/{id}")
+    public Boolean updateStatus(@PathVariable("id") Long id) {
+        return workflowService.updateStatus(id);
+    }
+
+    @DeleteMapping("/{id}")
+    public Boolean deleteById(@PathVariable("id") Long id) {
+        return workflowService.deleteById(id);
     }
 
     @PostMapping("/start")
