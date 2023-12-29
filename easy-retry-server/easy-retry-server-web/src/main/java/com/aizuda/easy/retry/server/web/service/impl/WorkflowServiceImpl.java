@@ -237,6 +237,7 @@ public class WorkflowServiceImpl implements WorkflowService {
             previousNodeInfo.setChildNode(currentConfig);
         }
 
+        currentConfig.getConditionNodes().sort(Comparator.comparing(WorkflowDetailResponseVO.NodeInfo::getPriorityLevel));
         return currentConfig;
     }
 
