@@ -106,28 +106,38 @@
             title="是否关闭?"
             ok-text="关闭"
             cancel-text="取消"
-            @confirm="handleClose(record)"
+            @confirm="handleOpenOrClose(record)"
           >
-            <a href="javascript:;" v-if="record.jobStatus === 1">关闭</a>
+            <a href="javascript:;" v-if="record.workflowStatus === 1">关闭</a>
           </a-popconfirm>
-          <a-divider type="vertical" v-if="record.jobStatus === 1" />
+          <a-divider type="vertical" v-if="record.workflowStatus === 1" />
           <a-popconfirm
             title="是否开启?"
             ok-text="开启"
             cancel-text="取消"
-            @confirm="handleOpen(record)"
+            @confirm="handleOpenOrClose(record)"
           >
-            <a href="javascript:;" v-if="record.jobStatus === 0">开启</a>
+            <a href="javascript:;" v-if="record.workflowStatus === 0">开启</a>
           </a-popconfirm>
-          <a-divider type="vertical" v-if="record.jobStatus === 0" />
+          <a-divider type="vertical" v-if="record.workflowStatus === 0" />
           <a-popconfirm
-            title="是否删除任务?"
+            title="是否删除工作流?"
             ok-text="删除"
             cancel-text="取消"
             @confirm="handleDel(record)"
             v-if="$auth('job.del')"
           >
-            <a href="javascript:;" v-if="record.jobStatus === 0">删除</a>
+            <a href="javascript:;" v-if="record.workflowStatus === 0">删除</a>
+          </a-popconfirm>
+          <a-divider type="vertical" />
+          <a-popconfirm
+            title="是否复制此工作流?"
+            ok-text="复制"
+            cancel-text="取消"
+            @confirm="handleCopy(record)"
+            v-if="$auth('job.del')"
+          >
+            <a href="javascript:;">复制</a>
           </a-popconfirm>
 
         </template>
@@ -153,13 +163,13 @@
 import ATextarea from 'ant-design-vue/es/input/TextArea'
 import AInput from 'ant-design-vue/es/input/Input'
 import { STable, Drawer } from '@/components'
-import { delJob, workflowListPage, triggerJob, updateJobStatus } from '@/api/jobApi'
+import { workflowListPage, triggerJob, updateWorkflowStatus, delWorkflow } from '@/api/jobApi'
 import { getAllGroupNameList } from '@/api/manage'
 import enums from '@/utils/jobEnum'
 import JobInfo from '@/views/job/JobInfo'
 
 export default {
-  name: 'JobList',
+  name: 'WorkflowList',
   components: {
     AInput,
     ATextarea,
@@ -295,17 +305,6 @@ export default {
       this.$router.push({ path: '/job/workflow/detail', query: { id: record.id } })
     },
     handleOk (record) {},
-    handleClose (record) {
-      updateJobStatus({ id: record.id, jobStatus: 0 }).then((res) => {
-        const { status } = res
-        if (status === 0) {
-          this.$message.error('关闭失败')
-        } else {
-          this.$refs.table.refresh(true)
-          this.$message.success('关闭成功')
-        }
-      })
-    },
     handleTrigger (record) {
       triggerJob(record.id).then((res) => {
         const { status } = res
@@ -317,19 +316,21 @@ export default {
         }
       })
     },
-    handleOpen (record) {
-      updateJobStatus({ id: record.id, jobStatus: 1 }).then((res) => {
+    handleOpenOrClose (record) {
+      updateWorkflowStatus(record.id).then((res) => {
         const { status } = res
         if (status === 0) {
-          this.$message.error('开启失败')
+          this.$message.error('执行失败')
         } else {
           this.$refs.table.refresh(true)
-          this.$message.success('开启成功')
+          this.$message.success('执行成功')
         }
       })
     },
+    handleCopy (record) {
+    },
     handleDel (record) {
-      delJob(record.id).then((res) => {
+      delWorkflow(record.id).then((res) => {
         const { status } = res
         if (status === 0) {
           this.$message.error('删除失败')

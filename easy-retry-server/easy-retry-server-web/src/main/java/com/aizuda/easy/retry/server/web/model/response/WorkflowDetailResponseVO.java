@@ -21,6 +21,11 @@ public class WorkflowDetailResponseVO {
     /**
      * 组名称
      */
+    private String workflowName;
+
+    /**
+     * 组名称
+     */
     private String groupName;
 
     /**

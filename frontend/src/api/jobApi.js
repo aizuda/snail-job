@@ -35,10 +35,26 @@ const jobApi = {
   updateWorkflow: '/workflow',
   workflowDetail: '/workflow',
   workflowBatchListPage: '/workflow/batch/page/list',
-  workflowBatchDetail: '/workflow/batch/'
+  workflowBatchDetail: '/workflow/batch/',
+  updateStatus: '/workflow/update/status/',
+  delWorkflow: '/workflow/'
 }
 
 export default jobApi
+
+export function delWorkflow (id) {
+  return request({
+    url: jobApi.delWorkflow + id,
+    method: 'delete'
+  })
+}
+
+export function updateWorkflowStatus (id) {
+  return request({
+    url: jobApi.updateStatus + id,
+    method: 'put'
+  })
+}
 
 export function workflowBatchDetail (id) {
   return request({
