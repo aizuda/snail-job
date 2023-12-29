@@ -9,7 +9,7 @@ import com.aizuda.easy.retry.client.core.retryer.RetryerInfo;
 import com.aizuda.easy.retry.client.core.strategy.ExecutorMethod;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.aop.support.AopUtils;
+import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -76,7 +76,7 @@ public class RetryableScanner implements Scanner, ApplicationContextAware {
         Class<? extends Throwable>[] include = retryable.include();
         Class<? extends Throwable>[] exclude = retryable.exclude();
 
-        Class executorNotProxy = AopUtils.getTargetClass(executor);
+        Class executorNotProxy = AopProxyUtils.ultimateTargetClass(executor);
         String executorClassName = executorNotProxy.getName();
         Class<? extends IdempotentIdGenerate> idempotentIdGenerate = retryable.idempotentId();
         String bizNo = retryable.bizNo();
