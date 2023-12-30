@@ -1,11 +1,11 @@
 package com.aizuda.easy.retry.server.common.util;
 
+import cn.hutool.core.util.StrUtil;
+import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.graph.GraphBuilder;
 import com.google.common.graph.MutableGraph;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,14 +17,19 @@ import java.util.Map;
 public class GraphUtils {
 
 
-    // 从JSON反序列化为Guava图
-    public static MutableGraph<Long> deserializeJsonToGraph(String jsonGraph) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-
+    /**
+     * 从JSON反序列化为Guava图
+     *
+     * @param jsonGraph 图的json串
+     * @return {@link MutableGraph} 图对象
+     */
+    public static MutableGraph<Long> deserializeJsonToGraph(String jsonGraph) {
+        if (StrUtil.isBlank(jsonGraph)) {
+            return null;
+        }
         // 将JSON字符串转换为Map<Long, Iterable<Long>>
-        Map<Long, Iterable<Long>> adjacencyList = objectMapper.readValue(
-                jsonGraph, new TypeReference<Map<Long, Iterable<Long>>>() {
-                });
+        Map<Long, Iterable<Long>> adjacencyList = JsonUtil.parseObject(jsonGraph, new TypeReference<Map<Long, Iterable<Long>>>() {
+        });
 
         // 创建Guava图并添加节点和边
         MutableGraph<Long> graph = GraphBuilder.directed().build();

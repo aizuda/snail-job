@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.server.web.model.request;
 
-import com.aizuda.easy.retry.server.common.enums.IdGeneratorMode;
+import com.aizuda.easy.retry.server.common.enums.IdGeneratorModeEnum;
 import lombok.Data;
 
 import jakarta.validation.constraints.*;
@@ -35,7 +35,7 @@ public class GroupConfigRequestVO {
 
     /**
      * 唯一id生成模式
-     * {@link IdGeneratorMode}
+     * {@link IdGeneratorModeEnum}
      */
     private Integer idGeneratorMode;
 

@@ -1,5 +1,8 @@
 package com.aizuda.easy.retry.server.web.model.response;
 
+import com.aizuda.easy.retry.server.common.dto.CallbackConfig;
+import com.aizuda.easy.retry.server.common.dto.DecisionConfig;
+import com.aizuda.easy.retry.server.common.dto.JobTaskConfig;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -97,49 +100,34 @@ public class WorkflowDetailResponseVO {
         private Integer priorityLevel;
 
         /**
-         * 任务ID
-         */
-        private Long jobId;
-
-        /**
-         * 表达式类型 1、SpEl、2、Aviator 3、QL
-         */
-        private Integer expressionType;
-
-        /**
-         * 条件节点表达式
-         */
-        private String nodeExpression;
-
-        /**
-         * 1、跳过 2、阻塞
-         */
-        private Integer failStrategy;
-
-        /**
          * 工作流状态  0、关闭、1、开启
          */
         private Integer workflowNodeStatus;
 
         /**
-         * 任务批次状态
+         * 失败策略 1、跳过 2、阻塞
          */
-        private Integer taskBatchStatus;
+        private Integer failStrategy;
 
         /**
-         * 定时任务批次id
+         * 判定配置
          */
-        private Long jobTaskBatchId;
+        private DecisionConfig decision;
 
         /**
-         * 任务执行时间
+         * 回调配置
          */
-        private LocalDateTime executionAt;
+        private CallbackConfig callback;
 
         /**
-         * 操作原因
+         * 任务配置
          */
-        private Integer operationReason;
+        private JobTaskConfig jobTask;
+
+        /**
+         * 定时任务批次信息
+         */
+        private JobBatchResponseVO jobBatch;
 
         /**
          * 子节点
@@ -147,6 +135,5 @@ public class WorkflowDetailResponseVO {
         private NodeConfig childNode;
 
     }
-
 
 }

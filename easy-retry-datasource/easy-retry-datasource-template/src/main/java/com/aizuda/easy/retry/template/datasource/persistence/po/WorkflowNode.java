@@ -55,14 +55,14 @@ public class WorkflowNode implements Serializable {
     private Long workflowId;
 
     /**
-     * 1、任务节点 2、条件节点
+     * 1、任务节点 2、条件节点 3、回调节点
      */
     private Integer nodeType;
 
     /**
-     * 1、SpEl、2、Aviator 3、QL
+     * 节点信息
      */
-    private Integer expressionType;
+    private String nodeInfo;
 
     /**
      * 失败策略 1、跳过 2、阻塞
@@ -80,9 +80,9 @@ public class WorkflowNode implements Serializable {
     private Integer workflowNodeStatus;
 
     /**
-     * 节点表达式
+     * 版本号
      */
-    private String nodeExpression;
+    private Integer version;
 
     /**
      * 创建时间

@@ -103,7 +103,12 @@ public interface SystemConstants {
    Long ROOT = -1L;
 
     /**
-     * 系统内置的条件任务ID
+     * 系统内置的决策任务ID
      */
-    Long CONDITION_JOB_ID = -1000L;
+    Long DECISION_JOB_ID = -1000L;
+
+    /**
+     * 系统内置的回调任务ID
+     */
+    Long CALLBACK_JOB_ID = -2000L;
 }

@@ -2,7 +2,7 @@ package com.aizuda.easy.retry.server.common.generator.id;
 
 import cn.hutool.core.lang.Snowflake;
 import cn.hutool.core.util.IdUtil;
-import com.aizuda.easy.retry.server.common.enums.IdGeneratorMode;
+import com.aizuda.easy.retry.server.common.enums.IdGeneratorModeEnum;
 import org.springframework.stereotype.Component;
 
 /**
@@ -20,7 +20,7 @@ public class SnowflakeIdGenerator implements IdGenerator {
 
     @Override
     public boolean supports(int mode) {
-        return IdGeneratorMode.SNOWFLAKE.getMode() == mode;
+        return IdGeneratorModeEnum.SNOWFLAKE.getMode() == mode;
     }
 
     @Override

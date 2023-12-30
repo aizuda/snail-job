@@ -12,7 +12,7 @@ import lombok.Getter;
 @Getter
 public enum WorkflowNodeTypeEnum {
     JOB_TASK(1, "JOB任务"),
-    CONDITION(2, "条件节点"),
+    DECISION(2, "决策节点"),
     CALLBACK(3, "回调节点"),
     ;
 

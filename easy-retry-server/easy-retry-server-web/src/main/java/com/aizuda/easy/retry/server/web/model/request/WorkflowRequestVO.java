@@ -1,5 +1,8 @@
 package com.aizuda.easy.retry.server.web.model.request;
 
+import com.aizuda.easy.retry.server.common.dto.CallbackConfig;
+import com.aizuda.easy.retry.server.common.dto.DecisionConfig;
+import com.aizuda.easy.retry.server.common.dto.JobTaskConfig;
 import lombok.Data;
 
 import javax.validation.Valid;
@@ -67,6 +70,7 @@ public class WorkflowRequestVO {
         /**
          * 节点信息
          */
+        @NotEmpty(message = "节点信息不能为空")
         private List<NodeInfo> conditionNodes;
 
         /**
@@ -82,35 +86,8 @@ public class WorkflowRequestVO {
         /**
          * 节点名称
          */
+        @NotBlank(message = "节点名称不能为空")
         private String nodeName;
-
-        /**
-         * 优先级
-         */
-        private Integer priorityLevel;
-
-        /**
-         * 任务ID
-         */
-        @NotNull(message = "任务ID不能为空")
-        private Long jobId;
-
-        /**
-         * 表达式类型 1、SpEl、2、Aviator 3、QL
-         */
-        @NotNull(message = "表达式类型不能为空")
-        private Integer expressionType;
-
-        /**
-         * 条件节点表达式
-         */
-        private String nodeExpression;
-
-        /**
-         * 1、跳过 2、阻塞
-         */
-        @NotNull(message = "失败策略不能为空")
-        private Integer failStrategy;
 
         /**
          * 工作流状态  0、关闭、1、开启
@@ -119,11 +96,35 @@ public class WorkflowRequestVO {
         private Integer workflowNodeStatus;
 
         /**
+         * 优先级
+         */
+        @NotNull(message = "优先级不能为空")
+        private Integer priorityLevel;
+
+        /**
          * 子节点
          */
         private NodeConfig childNode;
 
-    }
+        /**
+         * 1、跳过 2、阻塞
+         */
+        private Integer failStrategy;
 
+        /**
+         * 任务节点配置
+         */
+        private JobTaskConfig jobTask;
+
+        /**
+         * 决策节点配置
+         */
+        private DecisionConfig decision;
+
+        /**
+         * 回调配置
+         */
+        private CallbackConfig callback;
+    }
 
 }

@@ -1,16 +1,20 @@
 package com.aizuda.easy.retry.client.core.loader;
 
+import cn.hutool.core.lang.Pair;
 import cn.hutool.core.util.ServiceLoaderUtil;
-import com.aizuda.easy.retry.client.core.ExpressionEngine;
+import com.aizuda.easy.retry.client.core.expression.ExpressionInvocationHandler;
+import com.aizuda.easy.retry.common.core.expression.ExpressionEngine;
 import com.aizuda.easy.retry.client.core.RetryArgSerializer;
 import com.aizuda.easy.retry.client.core.event.EasyRetryListener;
 import com.aizuda.easy.retry.client.core.event.SimpleEasyRetryListener;
 import com.aizuda.easy.retry.client.core.RetrySiteSnapshotContext;
-import com.aizuda.easy.retry.client.core.expression.SpELExpressionEngine;
+import com.aizuda.easy.retry.common.core.expression.ExpressionFactory;
+import com.aizuda.easy.retry.common.core.expression.strategy.SpELExpressionEngine;
 import com.aizuda.easy.retry.client.core.intercepter.ThreadLockRetrySiteSnapshotContext;
 import com.aizuda.easy.retry.client.core.serializer.JacksonSerializer;
 import org.springframework.util.CollectionUtils;
 
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -66,7 +70,8 @@ public class EasyRetrySpiLoader {
      * @return {@link SpELExpressionEngine} 默认序列化类为SpELExpressionEngine
      */
     public static ExpressionEngine loadExpressionEngine() {
-        return Optional.ofNullable(ServiceLoaderUtil.loadFirst(ExpressionEngine.class)).orElse(new SpELExpressionEngine());
+        ExpressionEngine expressionEngine = Optional.ofNullable(ServiceLoaderUtil.loadFirst(ExpressionEngine.class)).orElse(new SpELExpressionEngine());
+        return ExpressionFactory.getExpressionEngine(new ExpressionInvocationHandler(expressionEngine));
     }
 
 }
