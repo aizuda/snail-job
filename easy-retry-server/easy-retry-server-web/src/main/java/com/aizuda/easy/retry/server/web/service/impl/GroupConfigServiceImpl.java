@@ -5,7 +5,7 @@ import cn.hutool.core.util.HashUtil;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
-import com.aizuda.easy.retry.server.common.enums.IdGeneratorMode;
+import com.aizuda.easy.retry.server.common.enums.IdGeneratorModeEnum;
 import com.aizuda.easy.retry.server.common.enums.SystemModeEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.retry.task.support.handler.ConfigVersionSyncHandler;
@@ -28,7 +28,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.google.common.collect.Lists;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.helpers.MessageFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -200,7 +199,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
                 records);
 
         for (GroupConfigResponseVO groupConfigResponseVO : responseVOList) {
-            Optional.ofNullable(IdGeneratorMode.modeOf(groupConfigResponseVO.getIdGeneratorMode()))
+            Optional.ofNullable(IdGeneratorModeEnum.modeOf(groupConfigResponseVO.getIdGeneratorMode()))
                     .ifPresent(idGeneratorMode -> {
                         groupConfigResponseVO.setIdGeneratorModeName(idGeneratorMode.getDesc());
                     });
@@ -281,7 +280,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
         GroupConfigResponseVO groupConfigResponseVO = GroupConfigResponseVOConverter.INSTANCE.toGroupConfigResponseVO(
                 groupConfig);
 
-        Optional.ofNullable(IdGeneratorMode.modeOf(groupConfig.getIdGeneratorMode())).ifPresent(idGeneratorMode -> {
+        Optional.ofNullable(IdGeneratorModeEnum.modeOf(groupConfig.getIdGeneratorMode())).ifPresent(idGeneratorMode -> {
             groupConfigResponseVO.setIdGeneratorModeName(idGeneratorMode.getDesc());
         });
 

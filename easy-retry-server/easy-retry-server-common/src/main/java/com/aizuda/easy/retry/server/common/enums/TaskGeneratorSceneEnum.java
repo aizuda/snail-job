@@ -13,7 +13,7 @@ import lombok.Getter;
  */
 @AllArgsConstructor
 @Getter
-public enum TaskGeneratorScene {
+public enum TaskGeneratorSceneEnum {
 
     CLIENT_REPORT(1,"客户端匹配上报"),
     MANA_BATCH(2, "控制台手动批量新增"),
@@ -24,8 +24,8 @@ public enum TaskGeneratorScene {
 
     private final String desc;
 
-    public static TaskGeneratorScene modeOf(int scene) {
-        for (TaskGeneratorScene value : TaskGeneratorScene.values()) {
+    public static TaskGeneratorSceneEnum modeOf(int scene) {
+        for (TaskGeneratorSceneEnum value : TaskGeneratorSceneEnum.values()) {
             if (value.getScene() == scene) {
                 return value;
             }

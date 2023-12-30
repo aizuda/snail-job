@@ -76,6 +76,15 @@ public class JsonUtil {
     }
 
     /**
+     * 将JSON字符串转Map 对象
+     * @param jsonString
+     * @return
+     */
+    public static <T> T parseObject(String jsonString, TypeReference<T> reference) {
+        return (T) JsonMapper.toJavaObject(jsonString, reference);
+    }
+
+    /**
      * 将JSON字符串转JSON 对象
      * @param jsonString
      * @return
@@ -205,7 +214,7 @@ public class JsonUtil {
          * @param typeReference
          * @return
          */
-        private static Object toJavaObject(String jsonString, TypeReference typeReference) {
+        public static Object toJavaObject(String jsonString, TypeReference typeReference) {
             try {
                 return objectMapper.readValue(jsonString, typeReference);
             } catch (Exception e) {

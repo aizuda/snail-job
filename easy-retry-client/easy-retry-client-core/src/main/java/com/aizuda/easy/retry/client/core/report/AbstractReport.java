@@ -2,7 +2,7 @@ package com.aizuda.easy.retry.client.core.report;
 
 import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.client.common.config.EasyRetryProperties;
-import com.aizuda.easy.retry.client.core.ExpressionEngine;
+import com.aizuda.easy.retry.common.core.expression.ExpressionEngine;
 import com.aizuda.easy.retry.client.core.IdempotentIdGenerate;
 import com.aizuda.easy.retry.client.core.Report;
 import com.aizuda.easy.retry.client.core.RetryArgSerializer;

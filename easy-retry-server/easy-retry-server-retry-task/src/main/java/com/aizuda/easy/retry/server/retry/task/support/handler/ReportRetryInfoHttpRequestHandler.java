@@ -9,7 +9,7 @@ import com.aizuda.easy.retry.common.core.model.EasyRetryRequest;
 import com.aizuda.easy.retry.common.core.model.NettyResult;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
-import com.aizuda.easy.retry.server.common.enums.TaskGeneratorScene;
+import com.aizuda.easy.retry.server.common.enums.TaskGeneratorSceneEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.handler.PostHttpRequestHandler;
 import com.aizuda.easy.retry.server.model.dto.RetryTaskDTO;
@@ -74,7 +74,7 @@ public class ReportRetryInfoHttpRequestHandler extends PostHttpRequestHandler {
             syncConfig(headers);
 
             TaskGenerator taskGenerator = taskGenerators.stream()
-                    .filter(t -> t.supports(TaskGeneratorScene.CLIENT_REPORT.getScene()))
+                    .filter(t -> t.supports(TaskGeneratorSceneEnum.CLIENT_REPORT.getScene()))
                     .findFirst().orElseThrow(() -> new EasyRetryServerException("没有匹配的任务生成器"));
 
             Assert.notEmpty(args, () -> new EasyRetryServerException("上报的数据不能为空. reqId:[{}]", retryRequest.getReqId()));

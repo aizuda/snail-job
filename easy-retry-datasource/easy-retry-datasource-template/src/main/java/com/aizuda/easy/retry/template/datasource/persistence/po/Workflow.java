@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.template.datasource.persistence.po;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
@@ -89,6 +90,12 @@ public class Workflow implements Serializable {
      * 描述
      */
     private String description;
+
+    /**
+     * 版本号
+     */
+    @TableField(value = "version", update= "%s+1")
+    private Integer version;
 
     /**
      * 创建时间

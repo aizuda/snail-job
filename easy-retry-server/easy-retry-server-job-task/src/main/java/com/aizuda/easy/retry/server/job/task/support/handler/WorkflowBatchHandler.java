@@ -5,7 +5,6 @@ import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
-import com.aizuda.easy.retry.common.core.enums.JobTaskStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.WorkflowNodeTypeEnum;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.enums.JobTriggerTypeEnum;
@@ -16,6 +15,7 @@ import com.aizuda.easy.retry.server.job.task.dto.JobTaskPrepareDTO;
 import com.aizuda.easy.retry.server.job.task.dto.WorkflowNodeTaskExecuteDTO;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskStopHandler;
+import com.aizuda.easy.retry.server.job.task.support.cache.MutableGraphCache;
 import com.aizuda.easy.retry.server.job.task.support.stop.JobTaskStopFactory;
 import com.aizuda.easy.retry.server.job.task.support.stop.TaskStopJobContext;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobMapper;
@@ -23,7 +23,6 @@ import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskBatch
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.WorkflowNodeMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.WorkflowTaskBatchMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
-import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTaskBatch;
 import com.aizuda.easy.retry.template.datasource.persistence.po.WorkflowNode;
 import com.aizuda.easy.retry.template.datasource.persistence.po.WorkflowTaskBatch;
@@ -42,7 +41,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum.COMPLETED;
 import static com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum.NOT_COMPLETE;
 
 /**
@@ -69,7 +67,7 @@ public class WorkflowBatchHandler {
         Assert.notNull(workflowTaskBatch, () -> new EasyRetryServerException("任务不存在"));
 
         String flowInfo = workflowTaskBatch.getFlowInfo();
-        MutableGraph<Long> graph = GraphUtils.deserializeJsonToGraph(flowInfo);
+        MutableGraph<Long> graph = MutableGraphCache.getOrDefault(workflowTaskBatchId, flowInfo);
 
         // 说明没有后继节点了, 此时需要判断整个DAG是否全部执行完成
         List<JobTaskBatch> jobTaskBatches = jobTaskBatchMapper.selectList(new LambdaQueryWrapper<JobTaskBatch>()
@@ -104,7 +102,7 @@ public class WorkflowBatchHandler {
             Set<Long> predecessors = graph.predecessors(jobTaskBatch.getWorkflowNodeId());
             WorkflowNode workflowNode = workflowNodeMap.get(jobTaskBatch.getWorkflowNodeId());
             // 条件节点是或的关系一个成功就代表成功
-            if (WorkflowNodeTypeEnum.CONDITION.getType() == workflowNode.getNodeType()) {
+            if (WorkflowNodeTypeEnum.DECISION.getType() == workflowNode.getNodeType()) {
                 for (final Long predecessor : predecessors) {
                     List<JobTaskBatch> jobTaskBatcheList = map.getOrDefault(predecessor, Lists.newArrayList());
                     Map<Integer, Long> statusCountMap = jobTaskBatcheList.stream()
@@ -225,7 +223,7 @@ public class WorkflowBatchHandler {
                 .orElseGet(() -> workflowTaskBatchMapper.selectById(workflowTaskBatchId));
         Assert.notNull(workflowTaskBatch, () -> new EasyRetryServerException("任务不存在"));
         String flowInfo = workflowTaskBatch.getFlowInfo();
-        MutableGraph<Long> graph = GraphUtils.deserializeJsonToGraph(flowInfo);
+        MutableGraph<Long> graph =MutableGraphCache.getOrDefault(workflowTaskBatchId, flowInfo);
         Set<Long> successors = graph.successors(SystemConstants.ROOT);
         if (CollectionUtils.isEmpty(successors)) {
             return;

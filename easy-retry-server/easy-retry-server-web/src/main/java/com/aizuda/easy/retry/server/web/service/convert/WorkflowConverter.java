@@ -1,5 +1,10 @@
 package com.aizuda.easy.retry.server.web.service.convert;
 
+import com.aizuda.easy.retry.common.core.enums.WorkflowNodeTypeEnum;
+import com.aizuda.easy.retry.common.core.util.JsonUtil;
+import com.aizuda.easy.retry.server.common.dto.CallbackConfig;
+import com.aizuda.easy.retry.server.common.dto.DecisionConfig;
+import com.aizuda.easy.retry.server.common.dto.JobTaskConfig;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.server.web.model.request.WorkflowRequestVO;
 import com.aizuda.easy.retry.server.web.model.response.WorkflowBatchResponseVO;
@@ -36,6 +41,13 @@ public interface WorkflowConverter {
 
     List<WorkflowDetailResponseVO.NodeInfo> toNodeInfo(List<WorkflowNode> workflowNodes);
 
+    @Mappings({
+            @Mapping(target = "decision", expression = "java(WorkflowConverter.parseDecisionConfig(workflowNode))"),
+            @Mapping(target = "callback", expression = "java(WorkflowConverter.parseCallbackConfig(workflowNode))"),
+            @Mapping(target = "jobTask", expression = "java(WorkflowConverter.parseJobTaskConfig(workflowNode))")
+    })
+    WorkflowDetailResponseVO.NodeInfo toNodeInfo(WorkflowNode workflowNode);
+
     List<WorkflowResponseVO> toWorkflowResponseVO(List<Workflow> workflowList);
 
     List<WorkflowBatchResponseVO> toWorkflowBatchResponseVO(List<WorkflowBatchResponseDO> workflowBatchResponseList);
@@ -55,4 +67,30 @@ public interface WorkflowConverter {
 
         return DateUtils.toLocalDateTime(nextTriggerAt);
     }
+
+    static DecisionConfig parseDecisionConfig(WorkflowNode workflowNode) {
+        if (WorkflowNodeTypeEnum.DECISION.getType() == workflowNode.getNodeType()) {
+            return JsonUtil.parseObject(workflowNode.getNodeInfo(), DecisionConfig.class);
+        }
+
+        return null;
+    }
+
+    static CallbackConfig parseCallbackConfig(WorkflowNode workflowNode) {
+        if (WorkflowNodeTypeEnum.CALLBACK.getType() == workflowNode.getNodeType()) {
+            return JsonUtil.parseObject(workflowNode.getNodeInfo(), CallbackConfig.class);
+        }
+
+        return null;
+    }
+
+    static JobTaskConfig parseJobTaskConfig(WorkflowNode workflowNode) {
+        if (WorkflowNodeTypeEnum.JOB_TASK.getType() == workflowNode.getNodeType()) {
+            return JsonUtil.parseObject(workflowNode.getNodeInfo(), JobTaskConfig.class);
+        }
+
+        return null;
+    }
+
+
 }

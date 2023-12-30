@@ -21,6 +21,7 @@ import com.aizuda.easy.retry.server.job.task.dto.WorkflowNodeTaskExecuteDTO;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.server.job.task.support.WorkflowExecutor;
 import com.aizuda.easy.retry.server.job.task.support.WorkflowTaskConverter;
+import com.aizuda.easy.retry.server.job.task.support.cache.MutableGraphCache;
 import com.aizuda.easy.retry.server.job.task.support.executor.workflow.WorkflowExecutorContext;
 import com.aizuda.easy.retry.server.job.task.support.executor.workflow.WorkflowExecutorFactory;
 import com.aizuda.easy.retry.server.job.task.support.handler.WorkflowBatchHandler;
@@ -90,7 +91,7 @@ public class WorkflowExecutorActor extends AbstractActor {
 
         // 获取DAG图
         String flowInfo = workflowTaskBatch.getFlowInfo();
-        MutableGraph<Long> graph = GraphUtils.deserializeJsonToGraph(flowInfo);
+        MutableGraph<Long> graph = MutableGraphCache.getOrDefault(workflowTaskBatch.getId(), flowInfo);
 
         Set<Long> successors = graph.successors(taskExecute.getParentId());
         if (CollectionUtils.isEmpty(successors)) {

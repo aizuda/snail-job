@@ -2,20 +2,23 @@ package com.aizuda.easy.retry.server.job.task.support.executor.workflow;
 
 import akka.actor.ActorRef;
 import cn.hutool.core.lang.Assert;
-import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.WorkflowNodeTypeEnum;
+import com.aizuda.easy.retry.common.core.expression.ExpressionEngine;
+import com.aizuda.easy.retry.common.core.expression.ExpressionFactory;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
+import com.aizuda.easy.retry.server.common.enums.ExpressionTypeEnum;
 import com.aizuda.easy.retry.server.common.enums.JobTriggerTypeEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.job.task.dto.JobLogDTO;
 import com.aizuda.easy.retry.server.job.task.dto.WorkflowNodeTaskExecuteDTO;
 import com.aizuda.easy.retry.server.job.task.support.WorkflowTaskConverter;
+import com.aizuda.easy.retry.server.job.task.support.expression.ExpressionInvocationHandler;
 import com.aizuda.easy.retry.server.job.task.support.generator.batch.JobTaskBatchGenerator;
 import com.aizuda.easy.retry.server.job.task.support.generator.batch.JobTaskBatchGeneratorContext;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskMapper;
@@ -50,7 +53,7 @@ public class ConditionWorkflowExecutor extends AbstractWorkflowExecutor {
 
     @Override
     public WorkflowNodeTypeEnum getWorkflowNodeType() {
-        return WorkflowNodeTypeEnum.CONDITION;
+        return WorkflowNodeTypeEnum.DECISION;
     }
 
     @Override
@@ -67,12 +70,11 @@ public class ConditionWorkflowExecutor extends AbstractWorkflowExecutor {
             taskBatchStatus = JobTaskBatchStatusEnum.CANCEL.getStatus();
         } else {
             try {
-                Map<String, Object> contextMap = new HashMap<>();
-                // 根据配置的表达式执行
-                if (StrUtil.isNotBlank(context.getResult())) {
-                    contextMap = JsonUtil.parseHashMap(context.getResult());
-                }
-                result = Optional.ofNullable(doEval(context.getNodeExpression(), contextMap)).orElse(Boolean.FALSE);
+                ExpressionEngine realExpressionEngine = ExpressionTypeEnum.valueOf(context.getExpressionType());
+                Assert.notNull(realExpressionEngine, () -> new EasyRetryServerException("表达式引擎不存在"));
+                ExpressionInvocationHandler invocationHandler = new ExpressionInvocationHandler(realExpressionEngine);
+                ExpressionEngine expressionEngine = ExpressionFactory.getExpressionEngine(invocationHandler);
+                result = (Boolean) Optional.ofNullable(expressionEngine.eval(context.getNodeExpression(), context.getResult())).orElse(Boolean.FALSE);
                 log.info("执行条件表达式：[{}]，参数: [{}] 结果：[{}]", context.getNodeExpression(), context.getResult(), result);
             } catch (Exception e) {
                 log.error("执行条件表达式解析异常. 表达式:[{}]，参数: [{}]", context.getNodeExpression(), context.getResult(), e);
@@ -104,14 +106,14 @@ public class ConditionWorkflowExecutor extends AbstractWorkflowExecutor {
         JobTaskBatchGeneratorContext generatorContext = WorkflowTaskConverter.INSTANCE.toJobTaskBatchGeneratorContext(context);
         generatorContext.setTaskBatchStatus(taskBatchStatus);
         generatorContext.setOperationReason(operationReason);
-        generatorContext.setJobId(SystemConstants.CONDITION_JOB_ID);
+        generatorContext.setJobId(SystemConstants.DECISION_JOB_ID);
         JobTaskBatch jobTaskBatch = jobTaskBatchGenerator.generateJobTaskBatch(generatorContext);
 
         // 生成执行任务实例
         JobTask jobTask = new JobTask();
         jobTask.setGroupName(context.getGroupName());
         jobTask.setNamespaceId(context.getNamespaceId());
-        jobTask.setJobId(SystemConstants.CONDITION_JOB_ID);
+        jobTask.setJobId(SystemConstants.DECISION_JOB_ID);
         jobTask.setClientInfo(StrUtil.EMPTY);
         jobTask.setTaskBatchId(jobTaskBatch.getId());
         jobTask.setArgsType(1);
@@ -125,7 +127,7 @@ public class ConditionWorkflowExecutor extends AbstractWorkflowExecutor {
         // TODO 等实时日志处理完毕后，再处理
         jobLogDTO.setMessage(message);
         jobLogDTO.setTaskId(jobTask.getId());
-        jobLogDTO.setJobId(SystemConstants.CONDITION_JOB_ID);
+        jobLogDTO.setJobId(SystemConstants.DECISION_JOB_ID);
         jobLogDTO.setGroupName(context.getGroupName());
         jobLogDTO.setNamespaceId(context.getNamespaceId());
         jobLogDTO.setTaskBatchId(jobTaskBatch.getId());

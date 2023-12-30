@@ -10,7 +10,7 @@ import com.aizuda.easy.retry.server.common.WaitStrategy;
 import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
 import com.aizuda.easy.retry.server.common.client.RequestBuilder;
 import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
-import com.aizuda.easy.retry.server.common.enums.TaskGeneratorScene;
+import com.aizuda.easy.retry.server.common.enums.TaskGeneratorSceneEnum;
 import com.aizuda.easy.retry.server.common.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.strategy.WaitStrategies.WaitStrategyContext;
@@ -45,7 +45,6 @@ import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLog;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLogMessage;
 import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
-import com.aizuda.easy.retry.template.datasource.utils.RequestDataHelper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
@@ -204,7 +203,7 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         }
 
         TaskGenerator taskGenerator = taskGenerators.stream()
-                .filter(t -> t.supports(TaskGeneratorScene.MANA_SINGLE.getScene()))
+                .filter(t -> t.supports(TaskGeneratorSceneEnum.MANA_SINGLE.getScene()))
                 .findFirst().orElseThrow(() -> new EasyRetryServerException("没有匹配的任务生成器"));
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
 
@@ -321,7 +320,7 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         Assert.isTrue(waitInsertList.size() <= 500, () -> new EasyRetryServerException("最多只能处理500条数据"));
 
         TaskGenerator taskGenerator = taskGenerators.stream()
-                .filter(t -> t.supports(TaskGeneratorScene.MANA_BATCH.getScene()))
+                .filter(t -> t.supports(TaskGeneratorSceneEnum.MANA_BATCH.getScene()))
                 .findFirst().orElseThrow(() -> new EasyRetryServerException("没有匹配的任务生成器"));
 
         boolean allMatch = waitInsertList.stream()

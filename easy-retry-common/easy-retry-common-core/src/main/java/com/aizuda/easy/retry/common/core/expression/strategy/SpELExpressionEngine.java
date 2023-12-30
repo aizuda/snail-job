@@ -1,6 +1,6 @@
-package com.aizuda.easy.retry.client.core.expression;
+package com.aizuda.easy.retry.common.core.expression.strategy;
 
-import com.aizuda.easy.retry.client.core.exception.EasyRetryClientException;
+import com.aizuda.easy.retry.common.core.exception.EasyRetryCommonException;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.ExpressionParser;
@@ -28,7 +28,7 @@ public class SpELExpressionEngine extends AbstractExpressionEngine {
             context.forEach(evaluationContext::setVariable);
             return ENGINE.parseExpression(expression).getValue(evaluationContext, String.class);
         } catch (Exception e) {
-            throw new EasyRetryClientException("SpEL表达式解析异常. expression:[{}] context:[{}]",
+            throw new EasyRetryCommonException("SpEL表达式解析异常. expression:[{}] context:[{}]",
                     expression, JsonUtil.toJsonString(context), e);
         }
 

@@ -3,7 +3,7 @@ package com.aizuda.easy.retry.server.common.generator.id;
 import cn.hutool.core.lang.Pair;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.common.Lifecycle;
-import com.aizuda.easy.retry.server.common.enums.IdGeneratorMode;
+import com.aizuda.easy.retry.server.common.enums.IdGeneratorModeEnum;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.SequenceAllocMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.SequenceAlloc;
@@ -305,7 +305,7 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
 
     @Override
     public boolean supports(int mode) {
-        return IdGeneratorMode.SEGMENT.getMode() == mode;
+        return IdGeneratorModeEnum.SEGMENT.getMode() == mode;
     }
 
     @Override

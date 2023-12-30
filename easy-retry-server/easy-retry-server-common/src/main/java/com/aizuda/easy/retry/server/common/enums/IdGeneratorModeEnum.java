@@ -12,7 +12,7 @@ import lombok.Getter;
  */
 @AllArgsConstructor
 @Getter
-public enum IdGeneratorMode {
+public enum IdGeneratorModeEnum {
 
     SEGMENT(1,"号段模式"),
     SNOWFLAKE(2, "雪花算法模式");
@@ -21,8 +21,8 @@ public enum IdGeneratorMode {
 
     private final String desc;
 
-    public static IdGeneratorMode modeOf(int mode) {
-        for (IdGeneratorMode value : IdGeneratorMode.values()) {
+    public static IdGeneratorModeEnum modeOf(int mode) {
+        for (IdGeneratorModeEnum value : IdGeneratorModeEnum.values()) {
             if (value.getMode() == mode) {
                 return value;
             }
