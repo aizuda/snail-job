@@ -121,10 +121,11 @@ public class WorkflowHandler {
      * @param workflowId 工作流ID
      * @param nodeConfig 节点配置
      * @param graph      图
+     * @param version    版本号
      */
     public void buildGraph(List<Long> parentIds, LinkedBlockingDeque<Long> deque,
                            String groupName, Long workflowId,
-                           WorkflowRequestVO.NodeConfig nodeConfig, MutableGraph<Long> graph) {
+                           WorkflowRequestVO.NodeConfig nodeConfig, MutableGraph<Long> graph, Integer version) {
 
         if (Objects.isNull(nodeConfig)) {
             return;
@@ -138,6 +139,7 @@ public class WorkflowHandler {
                 workflowNode.setWorkflowId(workflowId);
                 workflowNode.setGroupName(groupName);
                 workflowNode.setNodeType(nodeConfig.getNodeType());
+                workflowNode.setVersion(version);
                 if (WorkflowNodeTypeEnum.DECISION.getType() == nodeConfig.getNodeType()) {
                     workflowNode.setJobId(SystemConstants.DECISION_JOB_ID);
                     workflowNode.setNodeInfo(JsonUtil.toJsonString(nodeInfo.getDecision()));
@@ -166,7 +168,7 @@ public class WorkflowHandler {
                 WorkflowRequestVO.NodeConfig childNode = nodeInfo.getChildNode();
                 if (Objects.nonNull(childNode) && !CollectionUtils.isEmpty(childNode.getConditionNodes())) {
                     buildGraph(Lists.newArrayList(workflowNode.getId()), deque, groupName, workflowId, childNode,
-                            graph);
+                            graph, version);
                 } else {
                     // 叶子节点记录一下
                     deque.add(workflowNode.getId());
@@ -179,7 +181,7 @@ public class WorkflowHandler {
             //  应该是conditionNodes里面叶子节点的选择
             List<Long> list = Lists.newArrayList();
             deque.drainTo(list);
-            buildGraph(list, deque, groupName, workflowId, childNode, graph);
+            buildGraph(list, deque, groupName, workflowId, childNode, graph, version);
         }
     }
 

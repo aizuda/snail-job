@@ -5,11 +5,9 @@ import cn.hutool.core.util.HashUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
-import com.aizuda.easy.retry.common.core.enums.WorkflowNodeTypeEnum;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.WaitStrategy;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
-import com.aizuda.easy.retry.server.common.dto.JobTaskConfig;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.strategy.WaitStrategies;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
@@ -19,7 +17,6 @@ import com.aizuda.easy.retry.server.web.model.request.UserSessionVO;
 import com.aizuda.easy.retry.server.web.model.request.WorkflowQueryVO;
 import com.aizuda.easy.retry.server.web.model.request.WorkflowRequestVO;
 import com.aizuda.easy.retry.server.web.model.request.WorkflowRequestVO.NodeConfig;
-import com.aizuda.easy.retry.server.web.model.request.WorkflowRequestVO.NodeInfo;
 import com.aizuda.easy.retry.server.web.model.response.WorkflowDetailResponseVO;
 import com.aizuda.easy.retry.server.web.model.response.WorkflowResponseVO;
 import com.aizuda.easy.retry.server.web.service.WorkflowService;
@@ -33,16 +30,13 @@ import com.aizuda.easy.retry.template.datasource.persistence.po.WorkflowNode;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.google.common.graph.GraphBuilder;
 import com.google.common.graph.MutableGraph;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.stream.Collectors;
@@ -84,8 +78,11 @@ public class WorkflowServiceImpl implements WorkflowService {
         NodeConfig nodeConfig = workflowRequestVO.getNodeConfig();
 
         // 递归构建图
-        workflowHandler.buildGraph(Lists.newArrayList(SystemConstants.ROOT), new LinkedBlockingDeque<>(),
-                workflowRequestVO.getGroupName(), workflow.getId(), nodeConfig, graph);
+        workflowHandler.buildGraph(Lists.newArrayList(SystemConstants.ROOT),
+                new LinkedBlockingDeque<>(),
+                workflowRequestVO.getGroupName(),
+                workflow.getId(), nodeConfig, graph,
+                workflow.getVersion());
 
         log.info("图构建完成. graph:[{}]", graph);
         // 保存图信息
@@ -154,13 +151,13 @@ public class WorkflowServiceImpl implements WorkflowService {
     }
 
     @Override
+    @Transactional
     public Boolean updateWorkflow(WorkflowRequestVO workflowRequestVO) {
 
         Assert.notNull(workflowRequestVO.getId(), () -> new EasyRetryServerException("工作流ID不能为空"));
 
-        Assert.isTrue(workflowMapper.selectCount(new LambdaQueryWrapper<Workflow>()
-                        .eq(Workflow::getId, workflowRequestVO.getId())) > 0,
-                () -> new EasyRetryServerException("工作流不存在"));
+        Workflow workflow = workflowMapper.selectById(workflowRequestVO.getId());
+        Assert.notNull(workflow, () -> new EasyRetryServerException("工作流不存在"));
 
         MutableGraph<Long> graph = GraphBuilder.directed().allowsSelfLoops(false).build();
         // 添加虚拟头节点
@@ -171,14 +168,14 @@ public class WorkflowServiceImpl implements WorkflowService {
 
         // 递归构建图
         workflowHandler.buildGraph(Lists.newArrayList(SystemConstants.ROOT), new LinkedBlockingDeque<>(),
-                workflowRequestVO.getGroupName(), workflowRequestVO.getId(), nodeConfig, graph);
+                workflowRequestVO.getGroupName(), workflowRequestVO.getId(), nodeConfig, graph, workflow.getVersion() + 1);
 
         log.info("图构建完成. graph:[{}]", graph);
 
         // 保存图信息
-        Workflow workflow = new Workflow();
+        workflow = new Workflow();
         workflow.setId(workflowRequestVO.getId());
-        workflow.setVersion(1);
+        workflow.setVersion(workflow.getVersion() + 1);
         workflow.setFlowInfo(JsonUtil.toJsonString(GraphUtils.serializeGraphToJson(graph)));
         Assert.isTrue(workflowMapper.updateById(workflow) > 0, () -> new EasyRetryServerException("更新失败"));
 
