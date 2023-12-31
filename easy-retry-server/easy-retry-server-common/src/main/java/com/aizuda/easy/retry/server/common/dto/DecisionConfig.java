@@ -22,4 +22,9 @@ public class DecisionConfig {
      */
     private String nodeExpression;
 
+    /**
+     * 判定逻辑 and 或者 or
+     */
+    private Integer logicalCondition;
+
 }
