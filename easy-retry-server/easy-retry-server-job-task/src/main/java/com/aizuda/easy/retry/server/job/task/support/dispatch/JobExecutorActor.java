@@ -119,7 +119,7 @@ public class JobExecutorActor extends AbstractActor {
                                 taskExecuteDTO.setWorkflowTaskBatchId(taskExecute.getWorkflowTaskBatchId());
                                 taskExecuteDTO.setTriggerType(JobTriggerTypeEnum.AUTO.getType());
                                 taskExecuteDTO.setParentId(taskExecute.getWorkflowNodeId());
-                                taskExecuteDTO.setResult(StrUtil.EMPTY);
+                                taskExecuteDTO.setTaskBatchId(taskExecute.getTaskBatchId());
                                 ActorRef actorRef = ActorGenerator.workflowTaskExecutorActor();
                                 actorRef.tell(taskExecuteDTO, actorRef);
                             } catch (Exception e) {

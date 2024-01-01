@@ -127,7 +127,7 @@ public class WorkflowDetailResponseVO {
         /**
          * 定时任务批次信息
          */
-        private JobBatchResponseVO jobBatch;
+        private List<JobBatchResponseVO> jobBatchList;
 
         /**
          * 子节点

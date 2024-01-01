@@ -31,6 +31,8 @@ public interface JobBatchResponseVOConverter {
     })
     JobBatchResponseVO toJobBatchResponseVO(JobBatchResponseDO jobBatchResponseDO);
 
+    List<JobBatchResponseVO> jobTaskBatchToJobBatchResponseVOs(List<JobTaskBatch> jobTaskBatchList);
+
     @Mappings({
             @Mapping(target = "executionAt", expression = "java(JobBatchResponseVOConverter.toLocalDateTime(jobTaskBatch.getExecutionAt()))")
     })

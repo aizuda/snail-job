@@ -26,5 +26,8 @@ public class WorkflowNodeTaskExecuteDTO {
 
     private Long parentId;
 
-    private String result;
+    /**
+     * 调度任务id
+     */
+    private Long taskBatchId;
 }

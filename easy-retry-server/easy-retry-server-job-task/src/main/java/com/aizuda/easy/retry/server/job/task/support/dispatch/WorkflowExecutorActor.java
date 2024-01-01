@@ -100,7 +100,7 @@ public class WorkflowExecutorActor extends AbstractActor {
         }
 
         // 添加父节点，为了判断父节点的处理状态
-        List<JobTaskBatch> jobTaskBatchList = jobTaskBatchMapper.selectList(new LambdaQueryWrapper<JobTaskBatch>()
+        List<JobTaskBatch> allJobTaskBatchList = jobTaskBatchMapper.selectList(new LambdaQueryWrapper<JobTaskBatch>()
                 .select(JobTaskBatch::getWorkflowTaskBatchId, JobTaskBatch::getWorkflowNodeId, JobTaskBatch::getTaskBatchStatus)
                 .eq(JobTaskBatch::getWorkflowTaskBatchId, workflowTaskBatch.getId())
                 .in(JobTaskBatch::getWorkflowNodeId, Sets.union(successors, Sets.newHashSet(taskExecute.getParentId())))
@@ -109,12 +109,15 @@ public class WorkflowExecutorActor extends AbstractActor {
         List<WorkflowNode> workflowNodes = workflowNodeMapper.selectList(new LambdaQueryWrapper<WorkflowNode>()
                 .in(WorkflowNode::getId, Sets.union(successors, Sets.newHashSet(taskExecute.getParentId()))).orderByAsc(WorkflowNode::getPriorityLevel));
 
-        Map<Long, JobTaskBatch> jobTaskBatchMap = jobTaskBatchList.stream().collect(Collectors.toMap(JobTaskBatch::getWorkflowNodeId, i -> i));
+        Map<Long, List<JobTaskBatch>> jobTaskBatchMap = allJobTaskBatchList.stream().collect(Collectors.groupingBy(JobTaskBatch::getWorkflowNodeId));
         Map<Long, WorkflowNode> workflowNodeMap = workflowNodes.stream().collect(Collectors.toMap(WorkflowNode::getId, i -> i));
-        JobTaskBatch parentJobTaskBatch = jobTaskBatchMap.get(taskExecute.getParentId());
+        List<JobTaskBatch> parentJobTaskBatchList = jobTaskBatchMap.get(taskExecute.getParentId());
 
         // 失败策略处理
-        if (Objects.nonNull(parentJobTaskBatch) && JobTaskBatchStatusEnum.SUCCESS.getStatus() != parentJobTaskBatch.getTaskBatchStatus()) {
+        if (!CollectionUtils.isEmpty(parentJobTaskBatchList)
+                && parentJobTaskBatchList.stream()
+                .map(JobTaskBatch::getTaskBatchStatus)
+                .anyMatch(i -> i != JobTaskBatchStatusEnum.SUCCESS.getStatus())) {
             // 判断是否继续处理，根据失败策略
             WorkflowNode workflowNode = workflowNodeMap.get(taskExecute.getParentId());
             // 失败了阻塞策略
@@ -125,7 +128,7 @@ public class WorkflowExecutorActor extends AbstractActor {
 
         // 去掉父节点
         workflowNodes = workflowNodes.stream().filter(workflowNode -> !workflowNode.getId().equals(taskExecute.getParentId())).collect(
-            Collectors.toList());
+                Collectors.toList());
 
         List<Job> jobs = jobMapper.selectBatchIds(workflowNodes.stream().map(WorkflowNode::getJobId).collect(Collectors.toSet()));
         Map<Long, Job> jobMap = jobs.stream().collect(Collectors.toMap(Job::getId, i -> i));
@@ -135,8 +138,8 @@ public class WorkflowExecutorActor extends AbstractActor {
         for (WorkflowNode workflowNode : workflowNodes) {
 
             // 批次已经存在就不在重复生成
-            JobTaskBatch jobTaskBatch = jobTaskBatchMap.get(workflowNode.getId());
-            if (Objects.nonNull(jobTaskBatch) && JobTaskBatchStatusEnum.COMPLETED.contains(jobTaskBatch.getTaskBatchStatus())) {
+            List<JobTaskBatch> jobTaskBatchList = jobTaskBatchMap.get(workflowNode.getId());
+            if (!CollectionUtils.isEmpty(jobTaskBatchList)) {
                 continue;
             }
 
@@ -147,8 +150,8 @@ public class WorkflowExecutorActor extends AbstractActor {
             context.setJob(jobMap.get(workflowNode.getJobId()));
             context.setWorkflowTaskBatchId(taskExecute.getWorkflowTaskBatchId());
             context.setParentWorkflowNodeId(taskExecute.getParentId());
-            context.setResult(taskExecute.getResult());
             context.setEvaluationResult(evaluationResult);
+            context.setTaskBatchId(taskExecute.getTaskBatchId());
 
             workflowExecutor.execute(context);
 

@@ -15,7 +15,7 @@ public class CallbackConfig {
     /**
      * webhook
      */
-    private Integer webhook;
+    private String webhook;
 
     /**
      * 请求类型
