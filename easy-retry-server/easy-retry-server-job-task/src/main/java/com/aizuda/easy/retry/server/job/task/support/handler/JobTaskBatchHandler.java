@@ -86,7 +86,7 @@ public class JobTaskBatchHandler {
                 taskExecuteDTO.setTriggerType(JobTriggerTypeEnum.AUTO.getType());
                 taskExecuteDTO.setParentId(completeJobBatchDTO.getWorkflowNodeId());
                 // 这里取第一个的任务执行结果
-                taskExecuteDTO.setResult(jobTasks.get(0).getResultMessage());
+                taskExecuteDTO.setTaskBatchId(completeJobBatchDTO.getTaskBatchId());
                 ActorRef actorRef = ActorGenerator.workflowTaskExecutorActor();
                 actorRef.tell(taskExecuteDTO, actorRef);
             } catch (Exception e) {

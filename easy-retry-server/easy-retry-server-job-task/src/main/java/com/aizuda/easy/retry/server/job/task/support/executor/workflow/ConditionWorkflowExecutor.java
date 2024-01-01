@@ -12,8 +12,10 @@ import com.aizuda.easy.retry.common.core.expression.ExpressionEngine;
 import com.aizuda.easy.retry.common.core.expression.ExpressionFactory;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
+import com.aizuda.easy.retry.server.common.dto.DecisionConfig;
 import com.aizuda.easy.retry.server.common.enums.ExpressionTypeEnum;
 import com.aizuda.easy.retry.server.common.enums.JobTriggerTypeEnum;
+import com.aizuda.easy.retry.server.common.enums.LogicalConditionEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.job.task.dto.JobLogDTO;
 import com.aizuda.easy.retry.server.job.task.dto.WorkflowNodeTaskExecuteDTO;
@@ -24,6 +26,7 @@ import com.aizuda.easy.retry.server.job.task.support.generator.batch.JobTaskBatc
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTaskBatch;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.expression.EvaluationContext;
@@ -32,9 +35,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * @author xiaowoniu
@@ -45,9 +46,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Slf4j
 public class ConditionWorkflowExecutor extends AbstractWorkflowExecutor {
-
-    private static final ExpressionParser ENGINE = new SpelExpressionParser();
-
     private final JobTaskBatchGenerator jobTaskBatchGenerator;
     private final JobTaskMapper jobTaskMapper;
 
@@ -69,15 +67,36 @@ public class ConditionWorkflowExecutor extends AbstractWorkflowExecutor {
             // 多个条件节点直接是或的关系，只要一个成功其他节点就取消
             taskBatchStatus = JobTaskBatchStatusEnum.CANCEL.getStatus();
         } else {
+            DecisionConfig decisionConfig = JsonUtil.parseObject(context.getNodeInfo(), DecisionConfig.class);
             try {
-                ExpressionEngine realExpressionEngine = ExpressionTypeEnum.valueOf(context.getExpressionType());
+                ExpressionEngine realExpressionEngine = ExpressionTypeEnum.valueOf(decisionConfig.getExpressionType());
                 Assert.notNull(realExpressionEngine, () -> new EasyRetryServerException("表达式引擎不存在"));
                 ExpressionInvocationHandler invocationHandler = new ExpressionInvocationHandler(realExpressionEngine);
                 ExpressionEngine expressionEngine = ExpressionFactory.getExpressionEngine(invocationHandler);
-                result = (Boolean) Optional.ofNullable(expressionEngine.eval(context.getNodeExpression(), context.getResult())).orElse(Boolean.FALSE);
-                log.info("执行条件表达式：[{}]，参数: [{}] 结果：[{}]", context.getNodeExpression(), context.getResult(), result);
+
+                List<JobTask> jobTasks = jobTaskMapper.selectList(new LambdaQueryWrapper<JobTask>()
+                                .select(JobTask::getResultMessage)
+                        .eq(JobTask::getTaskBatchId, context.getTaskBatchId()));
+                Boolean tempResult = Boolean.TRUE;
+                for (JobTask jobTask : jobTasks) {
+                    Boolean execResult = (Boolean) Optional.ofNullable(expressionEngine.eval(decisionConfig.getNodeExpression(), jobTask.getResultMessage())).orElse(Boolean.FALSE);
+
+                    if (Objects.equals(decisionConfig.getLogicalCondition(), LogicalConditionEnum.AND.getCode())) {
+                        tempResult = tempResult && execResult;
+                    } else {
+                        tempResult = tempResult || execResult;
+                        if (tempResult) {
+                            break;
+                        }
+                    }
+
+                    log.info("执行条件表达式：[{}]，参数: [{}] 结果：[{}]", decisionConfig.getNodeExpression(), jobTask.getResultMessage(), result);
+
+                }
+
+                result = tempResult;
             } catch (Exception e) {
-                log.error("执行条件表达式解析异常. 表达式:[{}]，参数: [{}]", context.getNodeExpression(), context.getResult(), e);
+                log.error("执行条件表达式解析异常. 表达式:[{}]，参数: [{}]", decisionConfig.getNodeExpression(), context.getResult(), e);
                 taskBatchStatus = JobTaskBatchStatusEnum.FAIL.getStatus();
                 operationReason = JobOperationReasonEnum.WORKFLOW_CONDITION_NODE_EXECUTOR_ERROR.getReason();
                 jobTaskStatus = JobTaskStatusEnum.FAIL.getStatus();
@@ -92,7 +111,7 @@ public class ConditionWorkflowExecutor extends AbstractWorkflowExecutor {
                 taskExecuteDTO.setWorkflowTaskBatchId(context.getWorkflowTaskBatchId());
                 taskExecuteDTO.setTriggerType(JobTriggerTypeEnum.AUTO.getType());
                 taskExecuteDTO.setParentId(context.getWorkflowNodeId());
-                taskExecuteDTO.setResult(context.getResult());
+                taskExecuteDTO.setTaskBatchId(context.getTaskBatchId());
                 ActorRef actorRef = ActorGenerator.workflowTaskExecutorActor();
                 actorRef.tell(taskExecuteDTO, actorRef);
             } catch (Exception e) {
@@ -135,15 +154,4 @@ public class ConditionWorkflowExecutor extends AbstractWorkflowExecutor {
         actorRef.tell(jobLogDTO, actorRef);
     }
 
-    protected Boolean doEval(String expression, Map<String, Object> context) {
-        try {
-            final EvaluationContext evaluationContext = new StandardEvaluationContext();
-            context.forEach(evaluationContext::setVariable);
-            return ENGINE.parseExpression(expression).getValue(evaluationContext, Boolean.class);
-        } catch (Exception e) {
-            throw new EasyRetryServerException("SpEL表达式解析异常. expression:[{}] context:[{}]",
-                    expression, JsonUtil.toJsonString(context), e);
-        }
-
-    }
 }

@@ -107,19 +107,18 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
                 .eq(WorkflowNode::getDeleted, StatusEnum.NO.getStatus())
                 .eq(WorkflowNode::getWorkflowId, workflow.getId()));
 
-        List<JobTaskBatch> jobTaskBatchList = jobTaskBatchMapper.selectList(new LambdaQueryWrapper<JobTaskBatch>()
+        List<JobTaskBatch> alJobTaskBatchList = jobTaskBatchMapper.selectList(new LambdaQueryWrapper<JobTaskBatch>()
                 .eq(JobTaskBatch::getWorkflowTaskBatchId, id));
 
-        Map<Long, JobTaskBatch> jobTaskBatchMap = jobTaskBatchList.stream()
-               .collect(Collectors.toMap(JobTaskBatch::getWorkflowNodeId, i -> i, (v1, v2) -> v1));
+        Map<Long, List<JobTaskBatch>> jobTaskBatchMap = alJobTaskBatchList.stream()
+                .collect(Collectors.groupingBy(JobTaskBatch::getWorkflowNodeId));
         List<WorkflowDetailResponseVO.NodeInfo> nodeInfos = WorkflowConverter.INSTANCE.toNodeInfo(workflowNodes);
 
         Map<Long, WorkflowDetailResponseVO.NodeInfo> workflowNodeMap = nodeInfos.stream()
                 .peek(nodeInfo -> {
-                    JobTaskBatch jobTaskBatch = jobTaskBatchMap.get(nodeInfo.getId());
-                    if (Objects.nonNull(jobTaskBatch)) {
-                        JobBatchResponseVO jobBatchResponseVO = JobBatchResponseVOConverter.INSTANCE.toJobBatchResponseVO(jobTaskBatch);
-                        nodeInfo.setJobBatch(jobBatchResponseVO);
+                    List<JobTaskBatch> jobTaskBatchList = jobTaskBatchMap.get(nodeInfo.getId());
+                    if (!CollectionUtils.isEmpty(jobTaskBatchList)) {
+                        nodeInfo.setJobBatchList(JobBatchResponseVOConverter.INSTANCE.jobTaskBatchToJobBatchResponseVOs(jobTaskBatchList));
                     }
                 })
                 .collect(Collectors.toMap(WorkflowDetailResponseVO.NodeInfo::getId, i -> i));

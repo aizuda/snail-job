@@ -43,17 +43,10 @@ public class WorkflowExecutorContext {
      */
     private Job job;
 
-    private String nodeExpression;
-
     /**
      * 客户端返回的结果
      */
     private String result;
-
-    /**
-     * 1、SpEl、2、Aviator 3、QL
-     */
-    private Integer expressionType;
 
     /**
      * 失败策略 1、跳过 2、阻塞
@@ -69,5 +62,16 @@ public class WorkflowExecutorContext {
      * 条件节点的判定结果
      */
     private Boolean evaluationResult;
+
+    /**
+     * 调度任务id
+     */
+    private Long taskBatchId;
+
+    /**
+     * 节点信息
+     */
+    private String nodeInfo;
+
 
 }
