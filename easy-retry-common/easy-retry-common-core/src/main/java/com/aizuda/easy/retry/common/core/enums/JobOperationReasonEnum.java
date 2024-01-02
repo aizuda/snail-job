@@ -26,6 +26,8 @@ public enum JobOperationReasonEnum {
     MANNER_STOP(8, "手动停止"),
     WORKFLOW_CONDITION_NODE_EXECUTOR_ERROR(8, "条件节点执行异常"),
     JOB_TASK_INTERRUPTED(9, "任务中断"),
+    WORKFLOW_CALLBACK_NODE_EXECUTOR_ERROR(8, "条件节点执行异常"),
+
     ;
 
     private final int reason;
