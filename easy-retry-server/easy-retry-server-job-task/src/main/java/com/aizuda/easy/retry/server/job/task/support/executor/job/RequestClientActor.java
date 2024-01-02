@@ -20,13 +20,10 @@ import com.aizuda.easy.retry.server.job.task.dto.JobLogDTO;
 import com.aizuda.easy.retry.server.job.task.dto.RealJobExecutorDTO;
 import com.aizuda.easy.retry.server.job.task.support.callback.ClientCallbackContext;
 import com.aizuda.easy.retry.server.job.task.support.callback.ClientCallbackFactory;
-import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskMapper;
-import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
 import com.github.rholder.retry.Attempt;
 import com.github.rholder.retry.RetryException;
 import com.github.rholder.retry.RetryListener;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -42,9 +39,6 @@ import java.util.Objects;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Slf4j
 public class RequestClientActor extends AbstractActor {
-
-    @Autowired
-    private JobTaskMapper jobTaskMapper;
 
     @Override
     public Receive createReceive() {
@@ -103,24 +97,23 @@ public class RequestClientActor extends AbstractActor {
 
     public static class JobExecutorRetryListener implements RetryListener {
 
-        private final RealJobExecutorDTO realJobExecutorDTO;
-        private final JobTaskMapper jobTaskMapper;
+        private RealJobExecutorDTO realJobExecutorDTO;
 
-        public JobExecutorRetryListener(final RealJobExecutorDTO realJobExecutorDTO,
-                                        final JobTaskMapper jobTaskMapper) {
+        public JobExecutorRetryListener(final RealJobExecutorDTO realJobExecutorDTO) {
             this.realJobExecutorDTO = realJobExecutorDTO;
-            this.jobTaskMapper = jobTaskMapper;
         }
 
         @Override
         public <V> void onRetry(final Attempt<V> attempt) {
+            // 负载节点
             if (attempt.hasException()) {
                 LogUtils.error(log, "任务调度失败. taskInstanceId:[{}] count:[{}]",
                         realJobExecutorDTO.getTaskBatchId(), attempt.getAttemptNumber(), attempt.getExceptionCause());
-                JobTask jobTask = new JobTask();
-                jobTask.setId(realJobExecutorDTO.getTaskId());
-                jobTask.setRetryCount((int) attempt.getAttemptNumber());
-                jobTaskMapper.updateById(jobTask);
+                ClientCallbackHandler clientCallback = ClientCallbackFactory.getClientCallback(realJobExecutorDTO.getTaskType());
+                ClientCallbackContext context = JobTaskConverter.INSTANCE.toClientCallbackContext(realJobExecutorDTO);
+                context.setTaskStatus(JobTaskStatusEnum.FAIL.getStatus());
+                context.setExecuteResult(ExecuteResult.failure(null, "网络请求失败"));
+                clientCallback.callback(context);
             }
         }
     }
@@ -132,7 +125,7 @@ public class RequestClientActor extends AbstractActor {
                 .failRetry(Boolean.TRUE)
                 .retryTimes(realJobExecutorDTO.getMaxRetryTimes())
                 .retryInterval(realJobExecutorDTO.getRetryInterval())
-                .retryListener(new JobExecutorRetryListener(realJobExecutorDTO, jobTaskMapper))
+                .retryListener(new JobExecutorRetryListener(realJobExecutorDTO))
                 .client(JobRpcClient.class)
                 .build();
     }
