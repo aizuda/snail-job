@@ -7,15 +7,6 @@ import WorkFlow from './form/WorkFlow.vue'
 
 export default {
   name: 'WorkFlowDetail',
-  components: { WorkFlow },
-  data () {
-    return {
-      id: ''
-    }
-  },
-  mounted () {
-    this.id = this.$route.query.id
-  },
-  methods: {}
+  components: { WorkFlow }
 }
 </script>
