@@ -13,7 +13,7 @@ import java.util.List;
  * @since 2.1.0
  */
 public abstract class AbstractLockProvider implements LockProvider {
-    protected final static List<String> ALLOW_DB =  Arrays.asList(DbTypeEnum.MYSQL.getDb(),
+    protected static final List<String> ALLOW_DB =  Arrays.asList(DbTypeEnum.MYSQL.getDb(),
             DbTypeEnum.MARIADB.getDb(),
             DbTypeEnum.POSTGRES.getDb());
     @Override

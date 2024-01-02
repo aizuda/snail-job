@@ -177,7 +177,10 @@ public class WorkflowServiceImpl implements WorkflowService {
         workflow.setId(workflowRequestVO.getId());
         workflow.setVersion(workflow.getVersion() + 1);
         workflow.setFlowInfo(JsonUtil.toJsonString(GraphUtils.serializeGraphToJson(graph)));
-        Assert.isTrue(workflowMapper.updateById(workflow) > 0, () -> new EasyRetryServerException("更新失败"));
+        Assert.isTrue(workflowMapper.update(workflow, new LambdaQueryWrapper<Workflow>()
+            .eq(Workflow::getId, workflow.getId())
+            .eq(Workflow::getVersion, workflow.getVersion())
+        ) > 0, () -> new EasyRetryServerException("更新失败"));
 
         return Boolean.TRUE;
     }

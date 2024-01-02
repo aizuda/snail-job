@@ -2,8 +2,10 @@ package com.aizuda.easy.retry.server.common.lock;
 
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
+import com.aizuda.easy.retry.server.common.Lifecycle;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.dto.LockConfig;
+import com.aizuda.easy.retry.server.common.enums.UnLockOperationEnum;
 import com.aizuda.easy.retry.server.common.register.ServerRegister;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.DistributedLockMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.DistributedLock;
@@ -32,7 +34,7 @@ import java.time.LocalDateTime;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class JdbcLockProvider extends AbstractLockProvider {
+public class JdbcLockProvider extends AbstractLockProvider implements Lifecycle {
 
     private final DistributedLockMapper distributedLockMapper;
 
@@ -47,15 +49,20 @@ public class JdbcLockProvider extends AbstractLockProvider {
     @Override
     public boolean unlock(final LockConfig lockConfig) {
         LocalDateTime now = LocalDateTime.now();
-        DistributedLock distributedLock = new DistributedLock();
-        distributedLock.setLockedBy(ServerRegister.CURRENT_CID);
-        LocalDateTime lockAtLeast = lockConfig.getLockAtLeast();
-        distributedLock.setLockUntil(now.isBefore(lockAtLeast) ? lockAtLeast : now);
 
         for (int i = 0; i < 10; i++) {
             try {
-                return distributedLockMapper.update(distributedLock, new LambdaUpdateWrapper<DistributedLock>()
+                if (lockConfig.getUnLockOperation() == UnLockOperationEnum.UPDATE) {
+                    DistributedLock distributedLock = new DistributedLock();
+                    distributedLock.setLockedBy(ServerRegister.CURRENT_CID);
+                    LocalDateTime lockAtLeast = lockConfig.getLockAtLeast();
+                    distributedLock.setLockUntil(now.isBefore(lockAtLeast) ? lockAtLeast : now);
+                    return distributedLockMapper.update(distributedLock, new LambdaUpdateWrapper<DistributedLock>()
                         .eq(DistributedLock::getName, lockConfig.getLockName())) > 0;
+                } else {
+                    return distributedLockMapper.delete(new LambdaUpdateWrapper<DistributedLock>()
+                        .eq(DistributedLock::getName, lockConfig.getLockName())) > 0;
+                }
             } catch (Exception e) {
                 LogUtils.error(log, "unlock error. retrying attempt [{}] ", i, e);
             }
@@ -97,8 +104,8 @@ public class JdbcLockProvider extends AbstractLockProvider {
         distributedLock.setName(lockConfig.getLockName());
         try {
             return distributedLockMapper.update(distributedLock, new LambdaUpdateWrapper<DistributedLock>()
-                    .eq(DistributedLock::getName, lockConfig.getLockName())
-                    .le(DistributedLock::getLockUntil, now)) > 0;
+                .eq(DistributedLock::getName, lockConfig.getLockName())
+                .le(DistributedLock::getLockUntil, now)) > 0;
         } catch (ConcurrencyFailureException | DataIntegrityViolationException | TransactionSystemException |
                  UncategorizedSQLException e) {
             return false;
@@ -106,4 +113,17 @@ public class JdbcLockProvider extends AbstractLockProvider {
 
     }
 
+    @Override
+    public void start() {
+        // 删除已经过期的锁记录
+        distributedLockMapper.delete(new LambdaQueryWrapper<DistributedLock>()
+            .le(DistributedLock::getLockUntil, LocalDateTime.now().minusSeconds(10)));
+    }
+
+    @Override
+    public void close() {
+        // 删除当前节点获取的锁记录
+        distributedLockMapper.delete(new LambdaUpdateWrapper<DistributedLock>()
+            .eq(DistributedLock::getLockedBy, ServerRegister.CURRENT_CID));
+    }
 }

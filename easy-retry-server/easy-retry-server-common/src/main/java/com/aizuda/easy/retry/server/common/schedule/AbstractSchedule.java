@@ -5,6 +5,7 @@ import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.common.Schedule;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.dto.LockConfig;
+import com.aizuda.easy.retry.server.common.enums.UnLockOperationEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.lock.LockProvider;
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +43,9 @@ public abstract class AbstractSchedule implements Schedule {
         Assert.notBlank(lockAtLeast, () -> new EasyRetryServerException("lockAtLeast can not be null."));
         Assert.notBlank(lockName, () -> new EasyRetryServerException("lockName can not be null."));
 
-        LockConfig lockConfig = new LockConfig(LocalDateTime.now(), lockName, Duration.parse(lockAtMost), Duration.parse(lockAtLeast));
+        LockConfig lockConfig = new LockConfig(LocalDateTime.now(), lockName, Duration.parse(lockAtMost),
+            Duration.parse(lockAtLeast),
+            UnLockOperationEnum.UPDATE);
 
         LockProvider lockProvider = getLockAccess();
         boolean lock = false;
