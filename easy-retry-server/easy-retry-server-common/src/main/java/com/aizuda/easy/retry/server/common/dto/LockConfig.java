@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.server.common.dto;
 
 import cn.hutool.core.lang.Assert;
+import com.aizuda.easy.retry.server.common.enums.UnLockOperationEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 
 import java.time.Duration;
@@ -21,17 +22,25 @@ public class LockConfig {
 
     private final Duration lockAtLeast;
 
-    public LockConfig(final LocalDateTime createDt, final String lockName, final Duration lockAtMost, final Duration lockAtLeast) {
+    private final UnLockOperationEnum unLockOperation;
+
+    public LockConfig(final LocalDateTime createDt,
+        final String lockName,
+        final Duration lockAtMost,
+        final Duration lockAtLeast,
+        final UnLockOperationEnum unLockOperation) {
         this.lockName = lockName;
         this.lockAtMost = lockAtMost;
         this.lockAtLeast = lockAtLeast;
         this.createDt = createDt;
+        this.unLockOperation = unLockOperation;
         Assert.notNull(createDt, () -> new EasyRetryServerException("createDt can not be null."));
         Assert.notBlank(lockName, () -> new EasyRetryServerException("lockName can not be null."));
         Assert.notNull(lockAtMost, () -> new EasyRetryServerException("lockAtMost can not be null. lockName:[{}]", lockName));
         Assert.isFalse(lockAtMost.isNegative(), () -> new EasyRetryServerException("lockAtMost  is negative. lockName:[{}]", lockName));
         Assert.notNull(lockAtLeast, () -> new EasyRetryServerException("lockAtLeast can not be null. lockName:[{}]", lockName));
         Assert.isFalse(lockAtLeast.compareTo(lockAtMost) > 0, () -> new EasyRetryServerException("lockAtLeast is longer than lockAtMost for lock. lockName:[{}]", lockName));
+        Assert.notNull(unLockOperation, () -> new EasyRetryServerException("unLockOperation can not be null. lockName:[{}]", lockName));
     }
 
     public LocalDateTime getCreateDt() {
@@ -44,6 +53,10 @@ public class LockConfig {
 
     public LocalDateTime getLockAtMost() {
         return createDt.plus(lockAtMost);
+    }
+
+    public UnLockOperationEnum getUnLockOperation() {
+        return unLockOperation;
     }
 
     public LocalDateTime getLockAtLeast() {
