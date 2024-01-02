@@ -105,7 +105,6 @@ public class ConditionWorkflowExecutor extends AbstractWorkflowExecutor {
         }
 
         if (result) {
-            // 若是工作流则开启下一个任务
             try {
                 WorkflowNodeTaskExecuteDTO taskExecuteDTO = new WorkflowNodeTaskExecuteDTO();
                 taskExecuteDTO.setWorkflowTaskBatchId(context.getWorkflowTaskBatchId());

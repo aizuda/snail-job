@@ -6,6 +6,8 @@ import com.aizuda.easy.retry.server.job.task.support.block.workflow.WorkflowBloc
 import com.aizuda.easy.retry.server.job.task.support.executor.workflow.WorkflowExecutorContext;
 import com.aizuda.easy.retry.server.job.task.support.generator.batch.JobTaskBatchGeneratorContext;
 import com.aizuda.easy.retry.server.job.task.support.generator.batch.WorkflowTaskBatchGeneratorContext;
+import com.aizuda.easy.retry.server.model.dto.CallbackParamsDTO;
+import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
 import com.aizuda.easy.retry.template.datasource.persistence.po.Workflow;
 import com.aizuda.easy.retry.template.datasource.persistence.po.WorkflowNode;
 import com.aizuda.easy.retry.template.datasource.persistence.po.WorkflowTaskBatch;
@@ -46,4 +48,6 @@ public interface WorkflowTaskConverter {
     WorkflowTaskBatchGeneratorContext toWorkflowTaskBatchGeneratorContext(WorkflowBlockStrategyContext context);
 
     WorkflowBlockStrategyContext toWorkflowBlockStrategyContext(WorkflowTaskPrepareDTO prepareDTO);
+
+    List<CallbackParamsDTO> toCallbackParamsDTO(List<JobTask> tasks);
 }

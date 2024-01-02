@@ -27,7 +27,7 @@ public class JobTaskWorkflowExecutor extends AbstractWorkflowExecutor {
         // 生成任务批次
         JobTaskPrepareDTO jobTaskPrepare = JobTaskConverter.INSTANCE.toJobTaskPrepare(context.getJob());
         jobTaskPrepare.setTriggerType(JobTriggerTypeEnum.WORKFLOW.getType());
-        jobTaskPrepare.setNextTriggerAt(DateUtils.toNowMilli() + DateUtils.toNowMilli() % 1000);
+        jobTaskPrepare.setNextTriggerAt(DateUtils.toNowMilli() + DateUtils.toNowMilli() % 5000);
         jobTaskPrepare.setWorkflowNodeId(context.getWorkflowNodeId());
         jobTaskPrepare.setWorkflowTaskBatchId(context.getWorkflowTaskBatchId());
         jobTaskPrepare.setParentWorkflowNodeId(context.getParentWorkflowNodeId());

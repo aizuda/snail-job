@@ -86,7 +86,9 @@ public interface WorkflowConverter {
 
     static JobTaskConfig parseJobTaskConfig(WorkflowNode workflowNode) {
         if (WorkflowNodeTypeEnum.JOB_TASK.getType() == workflowNode.getNodeType()) {
-            return JsonUtil.parseObject(workflowNode.getNodeInfo(), JobTaskConfig.class);
+            JobTaskConfig jobTaskConfig = new JobTaskConfig();
+            jobTaskConfig.setJobId(workflowNode.getJobId());
+            return jobTaskConfig;
         }
 
         return null;
