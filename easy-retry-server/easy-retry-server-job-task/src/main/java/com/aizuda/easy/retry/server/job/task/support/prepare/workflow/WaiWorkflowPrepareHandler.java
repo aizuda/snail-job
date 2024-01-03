@@ -41,7 +41,7 @@ public class WaiWorkflowPrepareHandler extends AbstractWorkflowPrePareHandler {
             WorkflowTimerTaskDTO workflowTimerTaskDTO = new WorkflowTimerTaskDTO();
             workflowTimerTaskDTO.setWorkflowTaskBatchId(workflowTaskPrepareDTO.getWorkflowTaskBatchId());
             workflowTimerTaskDTO.setWorkflowId(workflowTaskPrepareDTO.getWorkflowId());
-            workflowTimerTaskDTO.setTriggerType(workflowTaskPrepareDTO.getTriggerType());
+            workflowTimerTaskDTO.setExecuteStrategy(workflowTaskPrepareDTO.getExecuteStrategy());
             JobTimerWheel.register(workflowTaskPrepareDTO.getWorkflowTaskBatchId(),
                     new WorkflowTimerTask(workflowTimerTaskDTO), delay, TimeUnit.MILLISECONDS);
         }

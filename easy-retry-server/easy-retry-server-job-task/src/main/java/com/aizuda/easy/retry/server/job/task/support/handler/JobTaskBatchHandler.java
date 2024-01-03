@@ -80,7 +80,7 @@ public class JobTaskBatchHandler {
             try {
                 WorkflowNodeTaskExecuteDTO taskExecuteDTO = new WorkflowNodeTaskExecuteDTO();
                 taskExecuteDTO.setWorkflowTaskBatchId(completeJobBatchDTO.getWorkflowTaskBatchId());
-                taskExecuteDTO.setTriggerType(JobExecuteStrategyEnum.AUTO.getType());
+                taskExecuteDTO.setExecuteStrategy(JobExecuteStrategyEnum.AUTO.getType());
                 taskExecuteDTO.setParentId(completeJobBatchDTO.getWorkflowNodeId());
                 // 这里取第一个的任务执行结果
                 taskExecuteDTO.setTaskBatchId(completeJobBatchDTO.getTaskBatchId());

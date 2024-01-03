@@ -15,9 +15,9 @@ public class WorkflowTaskPrepareDTO {
     private Long workflowId;
 
     /**
-     * 触发类似 1、auto 2、manual
+     * 执行策略 1、auto 2、manual 3、workflow
      */
-    private Integer triggerType;
+    private Integer executeStrategy;
 
     /**
      * 阻塞策略 1、丢弃 2、覆盖 3、并行

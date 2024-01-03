@@ -92,7 +92,7 @@ public class ScanJobTaskActor extends AbstractActor {
         for (final JobTaskPrepareDTO waitExecJob : waitExecJobs) {
             // 执行预处理阶段
             ActorRef actorRef = ActorGenerator.jobTaskPrepareActor();
-            waitExecJob.setTriggerType(JobExecuteStrategyEnum.AUTO.getType());
+            waitExecJob.setExecuteStrategy(JobExecuteStrategyEnum.AUTO.getType());
             actorRef.tell(waitExecJob, actorRef);
         }
     }

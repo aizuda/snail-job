@@ -230,7 +230,7 @@ public class JobServiceImpl implements JobService {
         JobTaskPrepareDTO jobTaskPrepare = JobTaskConverter.INSTANCE.toJobTaskPrepare(job);
         // 设置now表示立即执行
         jobTaskPrepare.setNextTriggerAt(DateUtils.toNowMilli());
-        jobTaskPrepare.setTriggerType(JobExecuteStrategyEnum.MANUAL.getType());
+        jobTaskPrepare.setExecuteStrategy(JobExecuteStrategyEnum.MANUAL.getType());
         // 创建批次
         jobPrePareHandler.handler(jobTaskPrepare);
 

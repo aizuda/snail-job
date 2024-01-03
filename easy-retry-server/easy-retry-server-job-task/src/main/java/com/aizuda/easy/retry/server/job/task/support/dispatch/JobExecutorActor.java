@@ -90,7 +90,7 @@ public class JobExecutorActor extends AbstractActor {
 
         LambdaQueryWrapper<Job> queryWrapper = new LambdaQueryWrapper<>();
         // 自动地校验任务必须是开启状态，手动触发无需校验
-        if (JobExecuteStrategyEnum.AUTO.getType().equals(taskExecute.getTriggerType())) {
+        if (JobExecuteStrategyEnum.AUTO.getType().equals(taskExecute.getExecuteStrategy())) {
             queryWrapper.eq(Job::getJobStatus, StatusEnum.YES.getStatus());
         }
 
@@ -116,7 +116,7 @@ public class JobExecutorActor extends AbstractActor {
                             try {
                                 WorkflowNodeTaskExecuteDTO taskExecuteDTO = new WorkflowNodeTaskExecuteDTO();
                                 taskExecuteDTO.setWorkflowTaskBatchId(taskExecute.getWorkflowTaskBatchId());
-                                taskExecuteDTO.setTriggerType(JobExecuteStrategyEnum.AUTO.getType());
+                                taskExecuteDTO.setExecuteStrategy(JobExecuteStrategyEnum.AUTO.getType());
                                 taskExecuteDTO.setParentId(taskExecute.getWorkflowNodeId());
                                 taskExecuteDTO.setTaskBatchId(taskExecute.getTaskBatchId());
                                 ActorRef actorRef = ActorGenerator.workflowTaskExecutorActor();
@@ -175,8 +175,8 @@ public class JobExecutorActor extends AbstractActor {
 
     private void doHandlerResidentTask(Job job, TaskExecuteDTO taskExecuteDTO) {
         if (Objects.isNull(job)
-            || JobExecuteStrategyEnum.MANUAL.getType().equals(taskExecuteDTO.getTriggerType())
-            || JobExecuteStrategyEnum.WORKFLOW.getType().equals(taskExecuteDTO.getTriggerType())
+            || JobExecuteStrategyEnum.MANUAL.getType().equals(taskExecuteDTO.getExecuteStrategy())
+            || JobExecuteStrategyEnum.WORKFLOW.getType().equals(taskExecuteDTO.getExecuteStrategy())
             // 是否是常驻任务
             || Objects.equals(StatusEnum.NO.getStatus(), job.getResident())
         ) {
@@ -186,7 +186,7 @@ public class JobExecutorActor extends AbstractActor {
         JobTimerTaskDTO jobTimerTaskDTO = new JobTimerTaskDTO();
         jobTimerTaskDTO.setJobId(taskExecuteDTO.getJobId());
         jobTimerTaskDTO.setTaskBatchId(taskExecuteDTO.getTaskBatchId());
-        jobTimerTaskDTO.setTriggerType(JobExecuteStrategyEnum.AUTO.getType());
+        jobTimerTaskDTO.setExecuteStrategy(JobExecuteStrategyEnum.AUTO.getType());
         ResidentJobTimerTask timerTask = new ResidentJobTimerTask(jobTimerTaskDTO, job);
         WaitStrategy waitStrategy = WaitStrategies.WaitStrategyEnum.getWaitStrategy(job.getTriggerType());
 

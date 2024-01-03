@@ -30,7 +30,7 @@ public class ResidentJobTimerTask implements TimerTask {
             // 清除时间轮的缓存
             JobTimerWheel.clearCache(jobTimerTaskDTO.getTaskBatchId());
             JobTaskPrepareDTO jobTaskPrepare = JobTaskConverter.INSTANCE.toJobTaskPrepare(job);
-            jobTaskPrepare.setTriggerType(JobExecuteStrategyEnum.AUTO.getType());
+            jobTaskPrepare.setExecuteStrategy(JobExecuteStrategyEnum.AUTO.getType());
             // 执行预处理阶段
             ActorRef actorRef = ActorGenerator.jobTaskPrepareActor();
             actorRef.tell(jobTaskPrepare, actorRef);

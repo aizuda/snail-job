@@ -3,6 +3,7 @@ package com.aizuda.easy.retry.server.common.lock;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.Lifecycle;
+import com.aizuda.easy.retry.server.common.cache.CacheLockRecord;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.dto.LockConfig;
 import com.aizuda.easy.retry.server.common.enums.UnLockOperationEnum;
@@ -60,6 +61,7 @@ public class JdbcLockProvider extends AbstractLockProvider implements Lifecycle 
                     return distributedLockMapper.update(distributedLock, new LambdaUpdateWrapper<DistributedLock>()
                         .eq(DistributedLock::getName, lockConfig.getLockName())) > 0;
                 } else {
+                    CacheLockRecord.remove(lockConfig.getLockName());
                     return distributedLockMapper.delete(new LambdaUpdateWrapper<DistributedLock>()
                         .eq(DistributedLock::getName, lockConfig.getLockName())) > 0;
                 }

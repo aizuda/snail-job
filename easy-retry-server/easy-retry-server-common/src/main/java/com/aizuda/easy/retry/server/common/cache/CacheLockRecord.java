@@ -9,6 +9,8 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
+
 /**
  * 缓存本地的分布式锁的名称
  *
@@ -48,6 +50,7 @@ public class CacheLockRecord implements Lifecycle {
         CACHE = CacheBuilder.newBuilder()
                 // 设置并发级别为cpu核心数
                 .concurrencyLevel(Runtime.getRuntime().availableProcessors())
+                .expireAfterWrite(Duration.ofHours(1))
                 .build();
     }
 

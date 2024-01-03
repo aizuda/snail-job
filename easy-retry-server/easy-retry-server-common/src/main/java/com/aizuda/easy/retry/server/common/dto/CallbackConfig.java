@@ -20,7 +20,7 @@ public class CallbackConfig {
     /**
      * 请求类型
      */
-    private String contentType;
+    private Integer contentType;
 
     /**
      * 秘钥

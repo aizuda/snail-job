@@ -37,6 +37,11 @@ public class WorkflowDetailResponseVO {
     private Integer triggerType;
 
     /**
+     * 阻塞策略
+     */
+    private Integer blockStrategy;
+
+    /**
      * 触发间隔
      */
     private String triggerInterval;
@@ -108,6 +113,11 @@ public class WorkflowDetailResponseVO {
          * 失败策略 1、跳过 2、阻塞
          */
         private Integer failStrategy;
+
+        /**
+         * 任务批次状态
+         */
+        private Integer taskBatchStatus;
 
         /**
          * 判定配置
