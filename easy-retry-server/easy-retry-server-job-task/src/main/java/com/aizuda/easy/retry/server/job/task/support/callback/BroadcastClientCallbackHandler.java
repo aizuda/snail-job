@@ -12,6 +12,8 @@ import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.toolkit.SqlHelper;
 import com.aizuda.easy.retry.template.datasource.utils.LambdaUpdateExpandWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.aizuda.easy.retry.common.core.enums.JobTaskTypeEnum;
@@ -48,16 +50,19 @@ public class BroadcastClientCallbackHandler extends AbstractClientCallbackHandle
             }
             if (jobTask.getRetryCount() < job.getMaxRetryTimes()) {
                 // 更新重试次数
-                jobTaskMapper.update(null, new LambdaUpdateExpandWrapper<>(JobTask.class)
-                        .incrField(JobTask::getRetryCount, 1)
+                JobTask updateJobTask = new JobTask();
+                updateJobTask.setRetryCount(1);
+                boolean success = SqlHelper.retBool(jobTaskMapper.update(updateJobTask, Wrappers.<JobTask>lambdaUpdate()
                         .lt(JobTask::getRetryCount, job.getMaxRetryTimes())
                         .eq(JobTask::getId, context.getTaskId())
-                );
-                RealJobExecutorDTO realJobExecutor = JobTaskConverter.INSTANCE.toRealJobExecutorDTO(JobTaskConverter.INSTANCE.toJobExecutorContext(job), jobTask);
-                realJobExecutor.setClientId(ClientInfoUtils.clientId(jobTask.getClientInfo()));
-                ActorRef actorRef = ActorGenerator.jobRealTaskExecutorActor();
-                actorRef.tell(realJobExecutor, actorRef);
-                // TODO 记录日志
+                ));
+                if (success) {
+                    RealJobExecutorDTO realJobExecutor = JobTaskConverter.INSTANCE.toRealJobExecutorDTO(JobTaskConverter.INSTANCE.toJobExecutorContext(job), jobTask);
+                    realJobExecutor.setClientId(ClientInfoUtils.clientId(jobTask.getClientInfo()));
+                    ActorRef actorRef = ActorGenerator.jobRealTaskExecutorActor();
+                    actorRef.tell(realJobExecutor, actorRef);
+                    // TODO 记录日志
+                }
                 return;
             }
         }

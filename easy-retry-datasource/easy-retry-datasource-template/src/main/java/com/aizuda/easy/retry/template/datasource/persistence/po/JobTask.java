@@ -1,8 +1,6 @@
 package com.aizuda.easy.retry.template.datasource.persistence.po;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -64,6 +62,7 @@ public class JobTask implements Serializable {
     /**
      * 重试次数
      */
+    @TableField(value = "retry_count", update= "%s+1")
     private Integer retryCount;
 
     /**
