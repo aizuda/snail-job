@@ -104,7 +104,7 @@ public class ConditionWorkflowExecutor extends AbstractWorkflowExecutor {
             try {
                 WorkflowNodeTaskExecuteDTO taskExecuteDTO = new WorkflowNodeTaskExecuteDTO();
                 taskExecuteDTO.setWorkflowTaskBatchId(context.getWorkflowTaskBatchId());
-                taskExecuteDTO.setTriggerType(JobExecuteStrategyEnum.AUTO.getType());
+                taskExecuteDTO.setExecuteStrategy(JobExecuteStrategyEnum.AUTO.getType());
                 taskExecuteDTO.setParentId(context.getWorkflowNodeId());
                 taskExecuteDTO.setTaskBatchId(context.getTaskBatchId());
                 ActorRef actorRef = ActorGenerator.workflowTaskExecutorActor();

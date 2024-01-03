@@ -54,7 +54,7 @@ public class WorkflowBatchGenerator {
         WorkflowTimerTaskDTO workflowTimerTaskDTO = new WorkflowTimerTaskDTO();
         workflowTimerTaskDTO.setWorkflowTaskBatchId(workflowTaskBatch.getId());
         workflowTimerTaskDTO.setWorkflowId(context.getWorkflowId());
-        workflowTimerTaskDTO.setTriggerType(context.getTriggerType());
+        workflowTimerTaskDTO.setExecuteStrategy(context.getExecuteStrategy());
         JobTimerWheel.register(workflowTaskBatch.getId(),
             new WorkflowTimerTask(workflowTimerTaskDTO), delay, TimeUnit.MILLISECONDS);
     }

@@ -108,7 +108,7 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
                 .eq(WorkflowNode::getWorkflowId, workflow.getId()));
 
         List<JobTaskBatch> alJobTaskBatchList = jobTaskBatchMapper.selectList(new LambdaQueryWrapper<JobTaskBatch>()
-                .eq(JobTaskBatch::getWorkflowTaskBatchId, id));
+                .eq(JobTaskBatch::getWorkflowTaskBatchId, id).orderByDesc(JobTaskBatch::getId));
 
         Map<Long, List<JobTaskBatch>> jobTaskBatchMap = alJobTaskBatchList.stream()
                 .collect(Collectors.groupingBy(JobTaskBatch::getWorkflowNodeId));
@@ -119,6 +119,11 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
                     List<JobTaskBatch> jobTaskBatchList = jobTaskBatchMap.get(nodeInfo.getId());
                     if (!CollectionUtils.isEmpty(jobTaskBatchList)) {
                         nodeInfo.setJobBatchList(JobBatchResponseVOConverter.INSTANCE.jobTaskBatchToJobBatchResponseVOs(jobTaskBatchList));
+                        // 取第最新的一条状态
+                        nodeInfo.setTaskBatchStatus(jobTaskBatchList.get(0).getTaskBatchStatus());
+                    } else {
+                        // 前端显示待上游调度
+                        nodeInfo.setTaskBatchStatus(-1);
                     }
                 })
                 .collect(Collectors.toMap(WorkflowDetailResponseVO.NodeInfo::getId, i -> i));

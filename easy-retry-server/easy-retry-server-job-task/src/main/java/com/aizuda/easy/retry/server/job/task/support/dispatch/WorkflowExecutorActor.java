@@ -5,6 +5,7 @@ import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.common.core.enums.FailStrategyEnum;
 import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
+import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
@@ -96,7 +97,9 @@ public class WorkflowExecutorActor extends AbstractActor {
         );
 
         List<WorkflowNode> workflowNodes = workflowNodeMapper.selectList(new LambdaQueryWrapper<WorkflowNode>()
-                .in(WorkflowNode::getId, Sets.union(successors, Sets.newHashSet(taskExecute.getParentId()))).orderByAsc(WorkflowNode::getPriorityLevel));
+                .eq(WorkflowNode::getWorkflowNodeStatus, StatusEnum.YES.getStatus())
+                .in(WorkflowNode::getId, Sets.union(successors, Sets.newHashSet(taskExecute.getParentId())))
+            .orderByAsc(WorkflowNode::getPriorityLevel));
 
         Map<Long, List<JobTaskBatch>> jobTaskBatchMap = allJobTaskBatchList.stream().collect(Collectors.groupingBy(JobTaskBatch::getWorkflowNodeId));
         Map<Long, WorkflowNode> workflowNodeMap = workflowNodes.stream().collect(Collectors.toMap(WorkflowNode::getId, i -> i));

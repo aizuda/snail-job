@@ -64,7 +64,7 @@ public class JobTaskBatchGenerator {
                         try {
                             WorkflowNodeTaskExecuteDTO taskExecuteDTO = new WorkflowNodeTaskExecuteDTO();
                             taskExecuteDTO.setWorkflowTaskBatchId(context.getWorkflowTaskBatchId());
-                            taskExecuteDTO.setTriggerType(JobExecuteStrategyEnum.AUTO.getType());
+                            taskExecuteDTO.setExecuteStrategy(JobExecuteStrategyEnum.AUTO.getType());
                             taskExecuteDTO.setParentId(context.getWorkflowNodeId());
                             ActorRef actorRef = ActorGenerator.workflowTaskExecutorActor();
                             actorRef.tell(taskExecuteDTO, actorRef);
@@ -102,7 +102,7 @@ public class JobTaskBatchGenerator {
         JobTimerTaskDTO jobTimerTaskDTO = new JobTimerTaskDTO();
         jobTimerTaskDTO.setTaskBatchId(jobTaskBatch.getId());
         jobTimerTaskDTO.setJobId(context.getJobId());
-        jobTimerTaskDTO.setTriggerType(context.getTriggerType());
+        jobTimerTaskDTO.setExecuteStrategy(context.getExecuteStrategy());
         jobTimerTaskDTO.setWorkflowTaskBatchId(context.getWorkflowTaskBatchId());
         jobTimerTaskDTO.setWorkflowNodeId(context.getWorkflowNodeId());
         JobTimerWheel.register(jobTaskBatch.getId(),

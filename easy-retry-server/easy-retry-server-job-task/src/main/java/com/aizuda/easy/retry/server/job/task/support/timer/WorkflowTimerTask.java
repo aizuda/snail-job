@@ -47,7 +47,7 @@ public class WorkflowTimerTask implements TimerTask {
             WorkflowNodeTaskExecuteDTO taskExecuteDTO = new WorkflowNodeTaskExecuteDTO();
             taskExecuteDTO.setWorkflowTaskBatchId(workflowTimerTaskDTO.getWorkflowTaskBatchId());
             taskExecuteDTO.setWorkflowId(workflowTimerTaskDTO.getWorkflowId());
-            taskExecuteDTO.setTriggerType(workflowTimerTaskDTO.getTriggerType());
+            taskExecuteDTO.setExecuteStrategy(workflowTimerTaskDTO.getExecuteStrategy());
             taskExecuteDTO.setParentId(SystemConstants.ROOT);
             ActorRef actorRef = ActorGenerator.workflowTaskExecutorActor();
             actorRef.tell(taskExecuteDTO, actorRef);

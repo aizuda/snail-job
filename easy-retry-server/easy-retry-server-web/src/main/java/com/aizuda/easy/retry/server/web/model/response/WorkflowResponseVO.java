@@ -47,7 +47,7 @@ public class WorkflowResponseVO  {
     /**
      * 任务执行时间
      */
-    private Long nextTriggerAt;
+    private LocalDateTime nextTriggerAt;
 
     /**
      * 创建时间

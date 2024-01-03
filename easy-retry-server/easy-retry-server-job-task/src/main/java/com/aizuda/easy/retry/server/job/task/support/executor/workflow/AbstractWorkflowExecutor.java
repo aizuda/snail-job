@@ -11,6 +11,8 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.MessageFormat;
+
 /**
  * @author xiaowoniu
  * @date 2023-12-24 08:15:19
@@ -19,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public abstract class AbstractWorkflowExecutor implements WorkflowExecutor, InitializingBean {
 
+    private static final String KEY = "workflow_execute_{0}_{1}";
     @Autowired
     private DistributedLockHandler distributedLockHandler;
     @Autowired
@@ -27,7 +30,8 @@ public abstract class AbstractWorkflowExecutor implements WorkflowExecutor, Init
     @Override
     @Transactional
     public void execute(WorkflowExecutorContext context) {
-        distributedLockHandler.lockAndProcessAfterUnlockDel("workflow_execute_" + context.getWorkflowNodeId(), "PT5S",
+        distributedLockHandler.lockAndProcessAfterUnlockDel(
+            MessageFormat.format(KEY, context.getWorkflowTaskBatchId(), context.getWorkflowNodeId()), "PT5S",
             () -> {
 
                 Long total = jobTaskBatchMapper.selectCount(new LambdaQueryWrapper<JobTaskBatch>()

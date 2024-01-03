@@ -86,6 +86,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 
         log.info("图构建完成. graph:[{}]", graph);
         // 保存图信息
+        workflow.setVersion(null);
         workflow.setFlowInfo(JsonUtil.toJsonString(GraphUtils.serializeGraphToJson(graph)));
         Assert.isTrue(1 == workflowMapper.updateById(workflow), () -> new EasyRetryServerException("保存工作流图失败"));
         return true;
@@ -166,20 +167,21 @@ public class WorkflowServiceImpl implements WorkflowService {
         // 获取DAG节点配置
         NodeConfig nodeConfig = workflowRequestVO.getNodeConfig();
 
+        int version = workflow.getVersion();
         // 递归构建图
         workflowHandler.buildGraph(Lists.newArrayList(SystemConstants.ROOT), new LinkedBlockingDeque<>(),
-                workflowRequestVO.getGroupName(), workflowRequestVO.getId(), nodeConfig, graph, workflow.getVersion() + 1);
+                workflowRequestVO.getGroupName(), workflowRequestVO.getId(), nodeConfig, graph, version + 1);
 
         log.info("图构建完成. graph:[{}]", graph);
 
         // 保存图信息
         workflow = new Workflow();
         workflow.setId(workflowRequestVO.getId());
-        workflow.setVersion(workflow.getVersion() + 1);
+        workflow.setVersion(version);
         workflow.setFlowInfo(JsonUtil.toJsonString(GraphUtils.serializeGraphToJson(graph)));
         Assert.isTrue(workflowMapper.update(workflow, new LambdaQueryWrapper<Workflow>()
             .eq(Workflow::getId, workflow.getId())
-            .eq(Workflow::getVersion, workflow.getVersion())
+            .eq(Workflow::getVersion, version)
         ) > 0, () -> new EasyRetryServerException("更新失败"));
 
         return Boolean.TRUE;

@@ -15,7 +15,7 @@ public class WorkflowTimerTaskDTO {
     private Long workflowId;
 
     /**
-     * 触发类似 1、auto 2、manual
+     * 执行策略 1、auto 2、manual 3、workflow
      */
-    private Integer triggerType;
+    private Integer executeStrategy;
 }

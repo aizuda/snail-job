@@ -5,6 +5,7 @@ import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
+import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.common.core.enums.WorkflowNodeTypeEnum;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.enums.JobExecuteStrategyEnum;
@@ -84,6 +85,7 @@ public class WorkflowBatchHandler {
         }
 
         List<WorkflowNode> workflowNodes = workflowNodeMapper.selectList(new LambdaQueryWrapper<WorkflowNode>()
+                .eq(WorkflowNode::getWorkflowNodeStatus, StatusEnum.YES.getStatus())
                 .in(WorkflowNode::getId, graph.nodes()));
         if (jobTaskBatches.size() < workflowNodes.size()) {
             return false;
@@ -115,39 +117,30 @@ public class WorkflowBatchHandler {
 
                     if (failCount > 0) {
                         taskStatus = JobTaskBatchStatusEnum.FAIL.getStatus();
-                        operationReason = JobOperationReasonEnum.TASK_EXECUTE_ERROR.getReason();
                         break;
                     }
 
                     if (stopCount > 0) {
-                        taskStatus = JobTaskBatchStatusEnum.STOP.getStatus();
-                        operationReason = JobOperationReasonEnum.TASK_EXECUTE_ERROR.getReason();
+                        taskStatus = JobTaskBatchStatusEnum.FAIL.getStatus();
                         break;
                     }
 
                 }
             } else {
-
                 for (final Long predecessor : predecessors) {
                     List<JobTaskBatch> jobTaskBatcheList = map.getOrDefault(predecessor, Lists.newArrayList());
                     Map<Integer, Long> statusCountMap = jobTaskBatcheList.stream()
                             .collect(Collectors.groupingBy(JobTaskBatch::getTaskBatchStatus, Collectors.counting()));
                     long failCount = statusCountMap.getOrDefault(JobTaskBatchStatusEnum.FAIL.getStatus(), 0L);
                     long stopCount = statusCountMap.getOrDefault(JobTaskBatchStatusEnum.STOP.getStatus(), 0L);
-                    if (failCount > 0) {
+                    long cancelCount = statusCountMap.getOrDefault(JobTaskBatchStatusEnum.CANCEL.getStatus(), 0L);
+                    // 一个节点没有成功则认为失败
+                    if (failCount > 0 || stopCount > 0 || cancelCount > 0) {
                         taskStatus = JobTaskBatchStatusEnum.FAIL.getStatus();
-                        operationReason = JobOperationReasonEnum.TASK_EXECUTE_ERROR.getReason();
-                        break;
-                    }
-
-                    if (stopCount > 0) {
-                        taskStatus = JobTaskBatchStatusEnum.STOP.getStatus();
-                        operationReason = JobOperationReasonEnum.TASK_EXECUTE_ERROR.getReason();
                         break;
                     }
                 }
             }
-
 
             if (taskStatus != JobTaskBatchStatusEnum.SUCCESS.getStatus()) {
                 break;
@@ -253,7 +246,7 @@ public class WorkflowBatchHandler {
                 WorkflowNodeTaskExecuteDTO taskExecuteDTO = new WorkflowNodeTaskExecuteDTO();
                 taskExecuteDTO.setWorkflowTaskBatchId(workflowTaskBatchId);
                 taskExecuteDTO.setWorkflowId(successor);
-                taskExecuteDTO.setTriggerType(1);
+                taskExecuteDTO.setExecuteStrategy(JobExecuteStrategyEnum.WORKFLOW.getType());
                 taskExecuteDTO.setParentId(parentId);
                 ActorRef actorRef = ActorGenerator.workflowTaskExecutorActor();
                 actorRef.tell(taskExecuteDTO, actorRef);
@@ -264,7 +257,7 @@ public class WorkflowBatchHandler {
                 // 生成任务批次
                 Job job = jobMapper.selectById(jobTaskBatch.getJobId());
                 JobTaskPrepareDTO jobTaskPrepare = JobTaskConverter.INSTANCE.toJobTaskPrepare(job);
-                jobTaskPrepare.setTriggerType(JobExecuteStrategyEnum.WORKFLOW.getType());
+                jobTaskPrepare.setExecuteStrategy(JobExecuteStrategyEnum.WORKFLOW.getType());
                 jobTaskPrepare.setNextTriggerAt(DateUtils.toNowMilli());
                 jobTaskPrepare.setWorkflowNodeId(successor);
                 jobTaskPrepare.setWorkflowTaskBatchId(workflowTaskBatchId);

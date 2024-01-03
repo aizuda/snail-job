@@ -10,7 +10,9 @@ import com.aizuda.easy.retry.common.core.enums.JobTaskStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.WorkflowNodeTypeEnum;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
+import com.aizuda.easy.retry.server.common.client.RequestInterceptor;
 import com.aizuda.easy.retry.server.common.dto.CallbackConfig;
+import com.aizuda.easy.retry.server.common.enums.ContentTypeEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.job.task.dto.JobLogDTO;
 import com.aizuda.easy.retry.server.job.task.support.WorkflowTaskConverter;
@@ -26,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -33,6 +36,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -45,6 +49,7 @@ import java.util.Optional;
 @Slf4j
 public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
     private static final String SECRET = "secret";
+    private static final String CALLBACK_TIMEOUT = "10";
     private final RestTemplate restTemplate;
     private final JobTaskMapper jobTaskMapper;
     private final JobTaskBatchGenerator jobTaskBatchGenerator;
@@ -64,15 +69,17 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
         String message = StrUtil.EMPTY;
 
         HttpHeaders requestHeaders = new HttpHeaders();
-        requestHeaders.set(HttpHeaders.CONTENT_TYPE, decisionConfig.getContentType());
         requestHeaders.set(SECRET, decisionConfig.getSecret());
+        requestHeaders.setContentType(ContentTypeEnum.valueOf(decisionConfig.getContentType()).getMediaType());
+        // 设置回调超时时间
+        requestHeaders.set(RequestInterceptor.TIMEOUT_TIME, CALLBACK_TIMEOUT);
 
         List<JobTask> jobTasks = jobTaskMapper.selectList(new LambdaQueryWrapper<JobTask>()
                 .select(JobTask::getResultMessage, JobTask::getClientInfo)
                 .eq(JobTask::getTaskBatchId, context.getTaskBatchId()));
         List<CallbackParamsDTO> callbackParamsList = WorkflowTaskConverter.INSTANCE.toCallbackParamsDTO(jobTasks);
 
-        String result = StrUtil.EMPTY;
+        String result = null;
         try {
             Map<String, String> uriVariables = new HashMap<>();
             uriVariables.put(SECRET, decisionConfig.getSecret());
@@ -92,7 +99,7 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
         JobTaskBatchGeneratorContext generatorContext = WorkflowTaskConverter.INSTANCE.toJobTaskBatchGeneratorContext(context);
         generatorContext.setTaskBatchStatus(taskBatchStatus);
         generatorContext.setOperationReason(operationReason);
-        generatorContext.setJobId(SystemConstants.DECISION_JOB_ID);
+        generatorContext.setJobId(SystemConstants.CALLBACK_JOB_ID);
         JobTaskBatch jobTaskBatch = jobTaskBatchGenerator.generateJobTaskBatch(generatorContext);
 
         // 生成执行任务实例
@@ -105,7 +112,7 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
         jobTask.setArgsType(1);
         jobTask.setArgsStr(Optional.ofNullable(context.getResult()).orElse(StrUtil.EMPTY));
         jobTask.setTaskStatus(jobTaskStatus);
-        jobTask.setResultMessage(result);
+        jobTask.setResultMessage(Optional.ofNullable(result).orElse(StrUtil.EMPTY));
         Assert.isTrue(1 == jobTaskMapper.insert(jobTask), () -> new EasyRetryServerException("新增任务实例失败"));
 
         // 保存执行的日志
