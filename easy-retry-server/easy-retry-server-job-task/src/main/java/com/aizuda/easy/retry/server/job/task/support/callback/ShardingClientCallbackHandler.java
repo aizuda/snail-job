@@ -1,6 +1,8 @@
 package com.aizuda.easy.retry.server.job.task.support.callback;
 
 import akka.actor.ActorRef;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.RandomUtil;
 import com.aizuda.easy.retry.common.core.enums.JobTaskStatusEnum;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
@@ -14,13 +16,14 @@ import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
+import com.aizuda.easy.retry.template.datasource.utils.LambdaUpdateExpandWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.aizuda.easy.retry.common.core.enums.JobTaskTypeEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
+import java.util.Set;
 
 /**
  * @author: www.byteblogs.com
@@ -50,17 +53,19 @@ public class ShardingClientCallbackHandler extends AbstractClientCallbackHandler
                 return;
             }
             if (jobTask.getRetryCount() < job.getMaxRetryTimes()) {
-                Optional<RegisterNodeInfo> serverNode = CacheRegisterTable.getServerNodeSet(context.getGroupName(), context.getNamespaceId()).stream().findAny();
-                if (!serverNode.isPresent()) {
+                Set<RegisterNodeInfo> nodes = CacheRegisterTable.getServerNodeSet(context.getGroupName(), context.getNamespaceId());
+                if (CollUtil.isEmpty(nodes)) {
                     log.error("无可执行的客户端信息. jobId:[{}]", context.getJobId());
                     return;
                 }
-                String newClient = ClientInfoUtils.generate(serverNode.get());
+                RegisterNodeInfo serverNode = RandomUtil.randomEle(nodes.toArray(new RegisterNodeInfo[0]));
+                String newClient = ClientInfoUtils.generate(serverNode);
                 // 更新重试次数
-                jobTaskMapper.update(null, Wrappers.<JobTask>lambdaUpdate()
+                jobTaskMapper.update(null, new LambdaUpdateExpandWrapper<>(JobTask.class)
+                        .incrField(JobTask::getRetryCount, 1)
                         .set(JobTask::getClientInfo, newClient)
-                        .setSql("retry_count = retry_count + 1")
-                        .apply("retry_count < 3")
+                        .lt(JobTask::getRetryCount, job.getMaxRetryTimes())
+                        .eq(JobTask::getId, context.getTaskId())
                 );
                 RealJobExecutorDTO realJobExecutor = JobTaskConverter.INSTANCE.toRealJobExecutorDTO(JobTaskConverter.INSTANCE.toJobExecutorContext(job), jobTask);
                 realJobExecutor.setClientId(ClientInfoUtils.clientId(newClient));
