@@ -14,6 +14,7 @@ import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
+import com.aizuda.easy.retry.template.datasource.utils.LambdaUpdateExpandWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.aizuda.easy.retry.common.core.enums.JobTaskTypeEnum;
 import lombok.extern.slf4j.Slf4j;
@@ -62,10 +63,11 @@ public class ClusterClientCallbackHandler extends AbstractClientCallbackHandler 
                 }
                 String newClient = ClientInfoUtils.generate(serverNode);
                 // 更新重试次数
-                jobTaskMapper.update(null, Wrappers.<JobTask>lambdaUpdate()
+                jobTaskMapper.update(null, new LambdaUpdateExpandWrapper<>(JobTask.class)
+                        .incrField(JobTask::getRetryCount, 1)
                         .set(JobTask::getClientInfo, newClient)
-                        .setSql("retry_count = retry_count + 1")
-                        .apply("retry_count < 3")
+                        .lt(JobTask::getRetryCount, job.getMaxRetryTimes())
+                        .eq(JobTask::getId, context.getTaskId())
                 );
                 RealJobExecutorDTO realJobExecutor = JobTaskConverter.INSTANCE.toRealJobExecutorDTO(JobTaskConverter.INSTANCE.toJobExecutorContext(job), jobTask);
                 realJobExecutor.setClientId(ClientInfoUtils.clientId(newClient));
