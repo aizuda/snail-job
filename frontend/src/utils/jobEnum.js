@@ -31,6 +31,10 @@ const enums = {
     '2': {
       'name': '固定时间',
       'color': '#f5a22d'
+    },
+    '3': {
+      'name': '工作流',
+      'color': '#76f52d'
     }
   },
   blockStrategy: {

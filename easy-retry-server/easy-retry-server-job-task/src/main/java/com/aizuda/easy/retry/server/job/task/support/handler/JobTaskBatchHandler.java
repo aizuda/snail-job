@@ -1,14 +1,11 @@
 package com.aizuda.easy.retry.server.job.task.support.handler;
 
 import akka.actor.ActorRef;
-import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
-import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskStatusEnum;
-import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
-import com.aizuda.easy.retry.server.common.enums.JobTriggerTypeEnum;
+import com.aizuda.easy.retry.server.common.enums.JobExecuteStrategyEnum;
 import com.aizuda.easy.retry.server.job.task.dto.CompleteJobBatchDTO;
 import com.aizuda.easy.retry.server.job.task.dto.WorkflowNodeTaskExecuteDTO;
 import com.aizuda.easy.retry.server.job.task.support.event.JobTaskFailAlarmEvent;
@@ -83,7 +80,7 @@ public class JobTaskBatchHandler {
             try {
                 WorkflowNodeTaskExecuteDTO taskExecuteDTO = new WorkflowNodeTaskExecuteDTO();
                 taskExecuteDTO.setWorkflowTaskBatchId(completeJobBatchDTO.getWorkflowTaskBatchId());
-                taskExecuteDTO.setTriggerType(JobTriggerTypeEnum.AUTO.getType());
+                taskExecuteDTO.setTriggerType(JobExecuteStrategyEnum.AUTO.getType());
                 taskExecuteDTO.setParentId(completeJobBatchDTO.getWorkflowNodeId());
                 // 这里取第一个的任务执行结果
                 taskExecuteDTO.setTaskBatchId(completeJobBatchDTO.getTaskBatchId());

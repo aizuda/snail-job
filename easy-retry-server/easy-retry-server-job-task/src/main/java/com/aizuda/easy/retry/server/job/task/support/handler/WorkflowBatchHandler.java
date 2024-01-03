@@ -7,10 +7,9 @@ import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.WorkflowNodeTypeEnum;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
-import com.aizuda.easy.retry.server.common.enums.JobTriggerTypeEnum;
+import com.aizuda.easy.retry.server.common.enums.JobExecuteStrategyEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
-import com.aizuda.easy.retry.server.common.util.GraphUtils;
 import com.aizuda.easy.retry.server.job.task.dto.JobTaskPrepareDTO;
 import com.aizuda.easy.retry.server.job.task.dto.WorkflowNodeTaskExecuteDTO;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
@@ -265,7 +264,7 @@ public class WorkflowBatchHandler {
                 // 生成任务批次
                 Job job = jobMapper.selectById(jobTaskBatch.getJobId());
                 JobTaskPrepareDTO jobTaskPrepare = JobTaskConverter.INSTANCE.toJobTaskPrepare(job);
-                jobTaskPrepare.setTriggerType(JobTriggerTypeEnum.WORKFLOW.getType());
+                jobTaskPrepare.setTriggerType(JobExecuteStrategyEnum.WORKFLOW.getType());
                 jobTaskPrepare.setNextTriggerAt(DateUtils.toNowMilli());
                 jobTaskPrepare.setWorkflowNodeId(successor);
                 jobTaskPrepare.setWorkflowTaskBatchId(workflowTaskBatchId);

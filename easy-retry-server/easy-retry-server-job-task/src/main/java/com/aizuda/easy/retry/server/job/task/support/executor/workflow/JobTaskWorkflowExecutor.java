@@ -3,7 +3,7 @@ package com.aizuda.easy.retry.server.job.task.support.executor.workflow;
 import akka.actor.ActorRef;
 import com.aizuda.easy.retry.common.core.enums.WorkflowNodeTypeEnum;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
-import com.aizuda.easy.retry.server.common.enums.JobTriggerTypeEnum;
+import com.aizuda.easy.retry.server.common.enums.JobExecuteStrategyEnum;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.server.job.task.dto.JobTaskPrepareDTO;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
@@ -26,7 +26,7 @@ public class JobTaskWorkflowExecutor extends AbstractWorkflowExecutor {
     protected void doExecute(WorkflowExecutorContext context) {
         // 生成任务批次
         JobTaskPrepareDTO jobTaskPrepare = JobTaskConverter.INSTANCE.toJobTaskPrepare(context.getJob());
-        jobTaskPrepare.setTriggerType(JobTriggerTypeEnum.WORKFLOW.getType());
+        jobTaskPrepare.setTriggerType(JobExecuteStrategyEnum.WORKFLOW.getType());
         jobTaskPrepare.setNextTriggerAt(DateUtils.toNowMilli() + DateUtils.toNowMilli() % 5000);
         jobTaskPrepare.setWorkflowNodeId(context.getWorkflowNodeId());
         jobTaskPrepare.setWorkflowTaskBatchId(context.getWorkflowTaskBatchId());

@@ -13,10 +13,10 @@ import lombok.Getter;
  */
 @Getter
 @AllArgsConstructor
-public enum JobTriggerTypeEnum {
-    AUTO(1, "自动触发"),
-    MANUAL(2, "手动触发"),
-    WORKFLOW(2, "DAG触发"),
+public enum JobExecuteStrategyEnum {
+    AUTO(1, "自动执行"),
+    MANUAL(2, "手动执行"),
+    WORKFLOW(2, "DAG执行"),
     ;
 
     private final Integer type;
@@ -29,10 +29,10 @@ public enum JobTriggerTypeEnum {
      * @return 对应的触发器类型枚举
      * @throws EasyRetryServerException 当给定的类型不是有效的枚举类型时抛出异常
      */
-    public static JobTriggerTypeEnum get(Integer type) {
-        for (JobTriggerTypeEnum jobTriggerTypeEnum : JobTriggerTypeEnum.values()) {
-            if(jobTriggerTypeEnum.getType().equals(type)) {
-                return jobTriggerTypeEnum;
+    public static JobExecuteStrategyEnum get(Integer type) {
+        for (JobExecuteStrategyEnum jobExecuteStrategyEnum : JobExecuteStrategyEnum.values()) {
+            if(jobExecuteStrategyEnum.getType().equals(type)) {
+                return jobExecuteStrategyEnum;
             }
         }
 

@@ -120,6 +120,14 @@
                   'triggerInterval',
                   {rules: [{ required: true, message: '请输入间隔时长', whitespace: true}]}
                 ]" />
+
+              <a-input
+                v-if="triggerTypeValue === '3'"
+                disabled
+                placeholder=""
+                v-decorator="[
+                  'triggerInterval'
+                ]" />
             </a-form-item>
           </a-col>
         </a-row>
@@ -422,29 +430,6 @@ export default {
       const taskType = this.form.getFieldValue('taskType')
       if (taskType === '3') {
         this.visible = !this.visible
-        // const { form } = this
-        // if (this.formType === 'create') {
-        //   return
-        // }
-        //
-        // form.setFieldsValue({
-        //   argsStr: ''
-        // })
-        //
-        // console.log(this.argsStrValue)
-        // if (this.argsStrValue.length === 0) {
-        //   return
-        // }
-        //
-        // // 将字符串分割成键值对数组
-        // const keys = this.argsStrValue.map((item, index) => {
-        //   this.count++
-        //   this.dynamicForm.getFieldDecorator(`sharding[${index}]`, { initialValue: item, preserve: true })
-        //   return index
-        // })
-        //
-        // console.log(keys)
-        // this.dynamicForm.getFieldDecorator('keys', { initialValue: keys, preserve: true })
       }
     },
     getCron (cron) {
@@ -456,7 +441,6 @@ export default {
       const { form } = this
       this.$refs['dynamicValidateForm'].validate(valid => {
         if (valid) {
-          console.log(this.dynamicValidateForm.domains)
           this.argsStrValue = this.dynamicValidateForm.domains.map((item, index) => item.value)
           form.setFieldsValue({
             argsStr: this.dynamicValidateForm.domains.map((item, index) => `分区:${index}=>${item.value}`).join('; ')
@@ -493,6 +477,10 @@ export default {
             values['argsStr'] = JSON.stringify(this.argsStrValue)
           }
 
+          if (this.triggerTypeValue === '3') {
+            values['triggerInterval'] = '0'
+          }
+
           if (this.formType === 'create') {
             saveJob(values).then(res => {
               this.$message.success('任务新增完成')
@@ -526,6 +514,10 @@ export default {
         formData.triggerType = formData.triggerType.toString()
         this.triggerTypeValue = formData.triggerType
         this.taskTypeValue = formData.taskType
+
+        if (this.triggerTypeValue === '3') {
+          formData.triggerInterval = null
+        }
 
         if (this.taskTypeValue === '3') {
           this.argsStrValue = JSON.parse(formData.argsStr)
