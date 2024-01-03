@@ -14,7 +14,7 @@ import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.dto.DecisionConfig;
 import com.aizuda.easy.retry.server.common.enums.ExpressionTypeEnum;
-import com.aizuda.easy.retry.server.common.enums.JobTriggerTypeEnum;
+import com.aizuda.easy.retry.server.common.enums.JobExecuteStrategyEnum;
 import com.aizuda.easy.retry.server.common.enums.LogicalConditionEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.job.task.dto.JobLogDTO;
@@ -29,10 +29,6 @@ import com.aizuda.easy.retry.template.datasource.persistence.po.JobTaskBatch;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.expression.EvaluationContext;
-import org.springframework.expression.ExpressionParser;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -108,7 +104,7 @@ public class ConditionWorkflowExecutor extends AbstractWorkflowExecutor {
             try {
                 WorkflowNodeTaskExecuteDTO taskExecuteDTO = new WorkflowNodeTaskExecuteDTO();
                 taskExecuteDTO.setWorkflowTaskBatchId(context.getWorkflowTaskBatchId());
-                taskExecuteDTO.setTriggerType(JobTriggerTypeEnum.AUTO.getType());
+                taskExecuteDTO.setTriggerType(JobExecuteStrategyEnum.AUTO.getType());
                 taskExecuteDTO.setParentId(context.getWorkflowNodeId());
                 taskExecuteDTO.setTaskBatchId(context.getTaskBatchId());
                 ActorRef actorRef = ActorGenerator.workflowTaskExecutorActor();

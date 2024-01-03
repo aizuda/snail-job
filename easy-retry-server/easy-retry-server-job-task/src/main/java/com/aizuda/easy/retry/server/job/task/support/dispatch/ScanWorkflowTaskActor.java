@@ -11,19 +11,14 @@ import com.aizuda.easy.retry.server.common.cache.CacheConsumerGroup;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.dto.PartitionTask;
 import com.aizuda.easy.retry.server.common.dto.ScanTask;
-import com.aizuda.easy.retry.server.common.enums.JobTriggerTypeEnum;
+import com.aizuda.easy.retry.server.common.enums.JobExecuteStrategyEnum;
 import com.aizuda.easy.retry.server.common.strategy.WaitStrategies;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.server.common.util.PartitionTaskUtils;
-import com.aizuda.easy.retry.server.job.task.dto.JobPartitionTaskDTO;
-import com.aizuda.easy.retry.server.job.task.dto.JobTaskPrepareDTO;
 import com.aizuda.easy.retry.server.job.task.dto.WorkflowPartitionTaskDTO;
 import com.aizuda.easy.retry.server.job.task.dto.WorkflowTaskPrepareDTO;
-import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.server.job.task.support.WorkflowTaskConverter;
-import com.aizuda.easy.retry.server.job.task.support.cache.ResidentTaskCache;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.WorkflowMapper;
-import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
 import com.aizuda.easy.retry.template.datasource.persistence.po.Workflow;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
@@ -37,7 +32,6 @@ import org.springframework.util.CollectionUtils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * @author xiaowoniu
@@ -85,7 +79,7 @@ public class ScanWorkflowTaskActor extends AbstractActor {
         for (final WorkflowTaskPrepareDTO waitExecTask : waitExecWorkflows) {
             // 执行预处理阶段
             ActorRef actorRef = ActorGenerator.workflowTaskPrepareActor();
-            waitExecTask.setTriggerType(JobTriggerTypeEnum.AUTO.getType());
+            waitExecTask.setTriggerType(JobExecuteStrategyEnum.AUTO.getType());
             actorRef.tell(waitExecTask, actorRef);
         }
     }

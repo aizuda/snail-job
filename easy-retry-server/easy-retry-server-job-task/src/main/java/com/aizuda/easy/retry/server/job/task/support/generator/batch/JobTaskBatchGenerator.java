@@ -2,11 +2,10 @@ package com.aizuda.easy.retry.server.job.task.support.generator.batch;
 
 import akka.actor.ActorRef;
 import cn.hutool.core.lang.Assert;
-import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
-import com.aizuda.easy.retry.server.common.enums.JobTriggerTypeEnum;
+import com.aizuda.easy.retry.server.common.enums.JobExecuteStrategyEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.server.job.task.dto.JobTimerTaskDTO;
@@ -65,7 +64,7 @@ public class JobTaskBatchGenerator {
                         try {
                             WorkflowNodeTaskExecuteDTO taskExecuteDTO = new WorkflowNodeTaskExecuteDTO();
                             taskExecuteDTO.setWorkflowTaskBatchId(context.getWorkflowTaskBatchId());
-                            taskExecuteDTO.setTriggerType(JobTriggerTypeEnum.AUTO.getType());
+                            taskExecuteDTO.setTriggerType(JobExecuteStrategyEnum.AUTO.getType());
                             taskExecuteDTO.setParentId(context.getWorkflowNodeId());
                             ActorRef actorRef = ActorGenerator.workflowTaskExecutorActor();
                             actorRef.tell(taskExecuteDTO, actorRef);

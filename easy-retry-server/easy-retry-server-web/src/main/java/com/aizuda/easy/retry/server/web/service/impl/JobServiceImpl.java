@@ -6,7 +6,8 @@ import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.server.common.WaitStrategy;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
-import com.aizuda.easy.retry.server.common.enums.JobTriggerTypeEnum;
+import com.aizuda.easy.retry.server.common.enums.JobExecuteStrategyEnum;
+import com.aizuda.easy.retry.server.common.enums.TriggerTypeEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.strategy.WaitStrategies;
 import com.aizuda.easy.retry.server.common.util.CronUtils;
@@ -144,8 +145,11 @@ public class JobServiceImpl implements JobService {
         Job updateJob = updateJobResident(jobRequestVO);
         updateJob.setNamespaceId(job.getNamespaceId());
 
-        // 非常驻任务 > 非常驻任务
-        if (Objects.equals(job.getResident(), StatusEnum.NO.getStatus()) && Objects.equals(updateJob.getResident(),
+        // 工作流任务
+        if (Objects.equals(jobRequestVO.getTriggerType(), TriggerTypeEnum.WORKFLOW.getType())) {
+            job.setNextTriggerAt(0L);
+            // 非常驻任务 > 非常驻任务
+        } else if (Objects.equals(job.getResident(), StatusEnum.NO.getStatus()) && Objects.equals(updateJob.getResident(),
                 StatusEnum.NO.getStatus())) {
             updateJob.setNextTriggerAt(calculateNextTriggerAt(jobRequestVO, DateUtils.toNowMilli()));
         } else if (Objects.equals(job.getResident(), StatusEnum.YES.getStatus()) && Objects.equals(
@@ -164,6 +168,10 @@ public class JobServiceImpl implements JobService {
     }
 
     private static Long calculateNextTriggerAt(final JobRequestVO jobRequestVO, Long time) {
+        if (Objects.equals(jobRequestVO.getTriggerType(), TriggerTypeEnum.WORKFLOW.getType())) {
+            return 0L;
+        }
+
         WaitStrategy waitStrategy = WaitStrategies.WaitStrategyEnum.getWaitStrategy(jobRequestVO.getTriggerType());
         WaitStrategies.WaitStrategyContext waitStrategyContext = new WaitStrategies.WaitStrategyContext();
         waitStrategyContext.setTriggerInterval(jobRequestVO.getTriggerInterval());
@@ -175,6 +183,10 @@ public class JobServiceImpl implements JobService {
     public Job updateJobResident(JobRequestVO jobRequestVO) {
         Job job = JobConverter.INSTANCE.toJob(jobRequestVO);
         job.setResident(StatusEnum.NO.getStatus());
+        if (Objects.equals(jobRequestVO.getTriggerType(), TriggerTypeEnum.WORKFLOW.getType())) {
+            return job;
+        }
+
         if (jobRequestVO.getTriggerType() == WaitStrategies.WaitStrategyEnum.FIXED.getType()) {
             if (Integer.parseInt(jobRequestVO.getTriggerInterval()) < 10) {
                 job.setResident(StatusEnum.YES.getStatus());
@@ -218,7 +230,7 @@ public class JobServiceImpl implements JobService {
         JobTaskPrepareDTO jobTaskPrepare = JobTaskConverter.INSTANCE.toJobTaskPrepare(job);
         // 设置now表示立即执行
         jobTaskPrepare.setNextTriggerAt(DateUtils.toNowMilli());
-        jobTaskPrepare.setTriggerType(JobTriggerTypeEnum.MANUAL.getType());
+        jobTaskPrepare.setTriggerType(JobExecuteStrategyEnum.MANUAL.getType());
         // 创建批次
         jobPrePareHandler.handler(jobTaskPrepare);
 

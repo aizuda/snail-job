@@ -3,7 +3,6 @@ package com.aizuda.easy.retry.server.job.task.support.dispatch;
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import cn.hutool.core.lang.Assert;
-import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
@@ -13,7 +12,7 @@ import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.WaitStrategy;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
-import com.aizuda.easy.retry.server.common.enums.JobTriggerTypeEnum;
+import com.aizuda.easy.retry.server.common.enums.JobExecuteStrategyEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.strategy.WaitStrategies;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
@@ -91,7 +90,7 @@ public class JobExecutorActor extends AbstractActor {
 
         LambdaQueryWrapper<Job> queryWrapper = new LambdaQueryWrapper<>();
         // 自动地校验任务必须是开启状态，手动触发无需校验
-        if (JobTriggerTypeEnum.AUTO.getType().equals(taskExecute.getTriggerType())) {
+        if (JobExecuteStrategyEnum.AUTO.getType().equals(taskExecute.getTriggerType())) {
             queryWrapper.eq(Job::getJobStatus, StatusEnum.YES.getStatus());
         }
 
@@ -117,7 +116,7 @@ public class JobExecutorActor extends AbstractActor {
                             try {
                                 WorkflowNodeTaskExecuteDTO taskExecuteDTO = new WorkflowNodeTaskExecuteDTO();
                                 taskExecuteDTO.setWorkflowTaskBatchId(taskExecute.getWorkflowTaskBatchId());
-                                taskExecuteDTO.setTriggerType(JobTriggerTypeEnum.AUTO.getType());
+                                taskExecuteDTO.setTriggerType(JobExecuteStrategyEnum.AUTO.getType());
                                 taskExecuteDTO.setParentId(taskExecute.getWorkflowNodeId());
                                 taskExecuteDTO.setTaskBatchId(taskExecute.getTaskBatchId());
                                 ActorRef actorRef = ActorGenerator.workflowTaskExecutorActor();
@@ -176,8 +175,8 @@ public class JobExecutorActor extends AbstractActor {
 
     private void doHandlerResidentTask(Job job, TaskExecuteDTO taskExecuteDTO) {
         if (Objects.isNull(job)
-            || JobTriggerTypeEnum.MANUAL.getType().equals(taskExecuteDTO.getTriggerType())
-            || JobTriggerTypeEnum.WORKFLOW.getType().equals(taskExecuteDTO.getTriggerType())
+            || JobExecuteStrategyEnum.MANUAL.getType().equals(taskExecuteDTO.getTriggerType())
+            || JobExecuteStrategyEnum.WORKFLOW.getType().equals(taskExecuteDTO.getTriggerType())
             // 是否是常驻任务
             || Objects.equals(StatusEnum.NO.getStatus(), job.getResident())
         ) {
@@ -187,7 +186,7 @@ public class JobExecutorActor extends AbstractActor {
         JobTimerTaskDTO jobTimerTaskDTO = new JobTimerTaskDTO();
         jobTimerTaskDTO.setJobId(taskExecuteDTO.getJobId());
         jobTimerTaskDTO.setTaskBatchId(taskExecuteDTO.getTaskBatchId());
-        jobTimerTaskDTO.setTriggerType(JobTriggerTypeEnum.AUTO.getType());
+        jobTimerTaskDTO.setTriggerType(JobExecuteStrategyEnum.AUTO.getType());
         ResidentJobTimerTask timerTask = new ResidentJobTimerTask(jobTimerTaskDTO, job);
         WaitStrategy waitStrategy = WaitStrategies.WaitStrategyEnum.getWaitStrategy(job.getTriggerType());
 
