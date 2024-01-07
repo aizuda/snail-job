@@ -41,9 +41,9 @@ public class JobTimerWheel implements Lifecycle {
         timer.start();
     }
 
-    public static void register(Long uniqueId, TimerTask task, long delay, TimeUnit unit) {
+    public static void register(Integer taskType, Long uniqueId, TimerTask task, long delay, TimeUnit unit) {
 
-        if (!isExisted(uniqueId)) {
+        if (!isExisted(taskType, uniqueId)) {
             delay = delay < 0 ? 0 : delay;
             log.info("加入时间轮. delay:[{}ms] uniqueId:[{}]", delay, uniqueId);
             try {
@@ -55,12 +55,12 @@ public class JobTimerWheel implements Lifecycle {
         }
     }
 
-    public static boolean isExisted(Long uniqueId) {
-        return idempotent.isExist(uniqueId, uniqueId);
+    public static boolean isExisted(Integer taskType, Long uniqueId) {
+        return idempotent.isExist(Long.valueOf(taskType), uniqueId);
     }
 
-    public static void clearCache(Long uniqueId) {
-        idempotent.clear(uniqueId, uniqueId);
+    public static void clearCache(Integer taskType, Long uniqueId) {
+        idempotent.clear(Long.valueOf(taskType), uniqueId);
     }
 
     @Override

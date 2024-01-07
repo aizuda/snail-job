@@ -35,6 +35,11 @@ public enum JobTaskStatusEnum {
      * 任务停止
      */
     STOP(5),
+
+    /**
+     * 取消
+     */
+    CANCEL(6),
     ;
 
     private final int status;

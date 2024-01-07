@@ -2,7 +2,9 @@ package com.aizuda.easy.retry.server.web.service.impl;
 
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
+import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
+import com.aizuda.easy.retry.server.common.dto.JobTaskConfig;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.job.task.support.cache.MutableGraphCache;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
@@ -29,16 +31,15 @@ import com.aizuda.easy.retry.template.datasource.persistence.po.WorkflowTaskBatc
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.common.graph.MutableGraph;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -50,6 +51,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 public class WorkflowBatchServiceImpl implements WorkflowBatchService {
+    private static final Integer NOT_HANDLE_STATUS = 99;
     private final WorkflowTaskBatchMapper workflowTaskBatchMapper;
     private final WorkflowMapper workflowMapper;
     private final WorkflowNodeMapper workflowNodeMapper;
@@ -114,6 +116,10 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
                 .collect(Collectors.groupingBy(JobTaskBatch::getWorkflowNodeId));
         List<WorkflowDetailResponseVO.NodeInfo> nodeInfos = WorkflowConverter.INSTANCE.toNodeInfo(workflowNodes);
 
+        String flowInfo = workflowTaskBatch.getFlowInfo();
+        MutableGraph<Long> graph = MutableGraphCache.getOrDefault(id, flowInfo);
+
+        Set<Long> allNoOperationNode = Sets.newHashSet();
         Map<Long, WorkflowDetailResponseVO.NodeInfo> workflowNodeMap = nodeInfos.stream()
                 .peek(nodeInfo -> {
                     List<JobTaskBatch> jobTaskBatchList = jobTaskBatchMap.get(nodeInfo.getId());
@@ -121,16 +127,36 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
                         nodeInfo.setJobBatchList(JobBatchResponseVOConverter.INSTANCE.jobTaskBatchToJobBatchResponseVOs(jobTaskBatchList));
                         // 取第最新的一条状态
                         nodeInfo.setTaskBatchStatus(jobTaskBatchList.get(0).getTaskBatchStatus());
-                    } else {
-                        // 前端显示待上游调度
-                        nodeInfo.setTaskBatchStatus(-1);
+
+                        if (jobTaskBatchList.stream()
+                                .map(JobTaskBatch::getOperationReason)
+                                .filter(Objects::nonNull)
+                                .anyMatch(i -> i == JobOperationReasonEnum.WORKFLOW_NODE_NO_OPERATION_REQUIRED.getReason())) {
+                            // 当前节点下面的所有节点都是无需处理的节点
+                            Set<Long> allDescendants = MutableGraphCache.getAllDescendants(graph, nodeInfo.getId());
+                            allNoOperationNode.addAll(allDescendants);
+                        } else {
+                            // 删除被误添加的节点
+                            allNoOperationNode.remove(nodeInfo.getId());
+                        }
                     }
                 })
                 .collect(Collectors.toMap(WorkflowDetailResponseVO.NodeInfo::getId, i -> i));
 
-        String flowInfo = workflowTaskBatch.getFlowInfo();
+        for (Long noOperationNodeId : allNoOperationNode) {
+            WorkflowDetailResponseVO.NodeInfo nodeInfo = workflowNodeMap.get(noOperationNodeId);
+            JobBatchResponseVO jobBatchResponseVO = new JobBatchResponseVO();
+            JobTaskConfig jobTask = nodeInfo.getJobTask();
+            if (Objects.nonNull(jobTask)) {
+                jobBatchResponseVO.setJobId(jobTask.getJobId());
+            }
+            // 只为前端展示提供
+            nodeInfo.setTaskBatchStatus(NOT_HANDLE_STATUS);
+            jobBatchResponseVO.setTaskBatchStatus(NOT_HANDLE_STATUS);
+            jobBatchResponseVO.setOperationReason(JobOperationReasonEnum.WORKFLOW_NODE_NO_OPERATION_REQUIRED.getReason());
+            nodeInfo.setJobBatchList(Lists.newArrayList(jobBatchResponseVO));
+        }
         try {
-            MutableGraph<Long> graph = MutableGraphCache.getOrDefault(id, flowInfo);
             // 反序列化构建图
             WorkflowDetailResponseVO.NodeConfig config = workflowHandler.buildNodeConfig(graph, SystemConstants.ROOT, new HashMap<>(), workflowNodeMap);
             responseVO.setNodeConfig(config);

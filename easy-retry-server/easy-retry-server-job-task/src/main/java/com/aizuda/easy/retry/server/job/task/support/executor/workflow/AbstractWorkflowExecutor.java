@@ -1,9 +1,26 @@
 package com.aizuda.easy.retry.server.job.task.support.executor.workflow;
 
+import akka.actor.ActorRef;
+import cn.hutool.core.lang.Assert;
+import cn.hutool.core.util.StrUtil;
+import com.aizuda.easy.retry.common.core.constant.SystemConstants;
+import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
+import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
+import com.aizuda.easy.retry.common.core.enums.StatusEnum;
+import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
+import com.aizuda.easy.retry.server.common.enums.JobExecuteStrategyEnum;
+import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
+import com.aizuda.easy.retry.server.job.task.dto.WorkflowNodeTaskExecuteDTO;
 import com.aizuda.easy.retry.server.job.task.support.LockExecutor;
 import com.aizuda.easy.retry.server.job.task.support.WorkflowExecutor;
+import com.aizuda.easy.retry.server.job.task.support.WorkflowTaskConverter;
+import com.aizuda.easy.retry.server.job.task.support.generator.batch.JobTaskBatchGenerator;
+import com.aizuda.easy.retry.server.job.task.support.generator.batch.JobTaskBatchGeneratorContext;
 import com.aizuda.easy.retry.server.job.task.support.handler.DistributedLockHandler;
+import com.aizuda.easy.retry.server.job.task.support.handler.WorkflowBatchHandler;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskBatchMapper;
+import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskMapper;
+import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTaskBatch;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +28,10 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * @author xiaowoniu
@@ -26,6 +46,12 @@ public abstract class AbstractWorkflowExecutor implements WorkflowExecutor, Init
     private DistributedLockHandler distributedLockHandler;
     @Autowired
     private JobTaskBatchMapper jobTaskBatchMapper;
+    @Autowired
+    private JobTaskBatchGenerator jobTaskBatchGenerator;
+    @Autowired
+    private WorkflowBatchHandler workflowBatchHandler;
+    @Autowired
+    private JobTaskMapper jobTaskMapper;
 
     @Override
     @Transactional
@@ -43,12 +69,83 @@ public abstract class AbstractWorkflowExecutor implements WorkflowExecutor, Init
                     return;
                 }
 
+                if (!preValidate(context)) {
+                    return;
+                }
+
+                beforeExecute(context);
+
                 doExecute(context);
+
+                afterExecute(context);
+
             });
 
     }
 
+    protected boolean preValidate(WorkflowExecutorContext context) {
+
+        // 无需处理
+        if (Objects.equals(context.getWorkflowNodeStatus(), StatusEnum.NO.getStatus())) {
+            JobTaskBatchGeneratorContext generatorContext = WorkflowTaskConverter.INSTANCE.toJobTaskBatchGeneratorContext(context);
+            generatorContext.setTaskBatchStatus(JobTaskBatchStatusEnum.CANCEL.getStatus());
+            generatorContext.setOperationReason(JobOperationReasonEnum.WORKFLOW_NODE_NO_OPERATION_REQUIRED.getReason());
+            generatorContext.setJobId(context.getJobId());
+            jobTaskBatchGenerator.generateJobTaskBatch(generatorContext);
+            try {
+                workflowBatchHandler.complete(context.getWorkflowTaskBatchId());
+            } catch (IOException e) {
+                throw new EasyRetryServerException("工作流完成处理异常", e);
+            }
+
+            return false;
+        }
+
+        return doPreValidate(context);
+    }
+
+    protected abstract boolean doPreValidate(WorkflowExecutorContext context);
+
+    protected abstract void afterExecute(WorkflowExecutorContext context);
+
+    protected abstract void beforeExecute(WorkflowExecutorContext context);
+
     protected abstract void doExecute(WorkflowExecutorContext context);
+
+    protected JobTaskBatch generateJobTaskBatch(WorkflowExecutorContext context) {
+        JobTaskBatchGeneratorContext generatorContext = WorkflowTaskConverter.INSTANCE.toJobTaskBatchGeneratorContext(context);
+        return jobTaskBatchGenerator.generateJobTaskBatch(generatorContext);
+    }
+
+    protected void workflowTaskExecutor(WorkflowExecutorContext context) {
+        try {
+            WorkflowNodeTaskExecuteDTO taskExecuteDTO = new WorkflowNodeTaskExecuteDTO();
+            taskExecuteDTO.setWorkflowTaskBatchId(context.getWorkflowTaskBatchId());
+            taskExecuteDTO.setExecuteStrategy(JobExecuteStrategyEnum.AUTO.getType());
+            taskExecuteDTO.setParentId(context.getWorkflowNodeId());
+            taskExecuteDTO.setTaskBatchId(context.getTaskBatchId());
+            ActorRef actorRef = ActorGenerator.workflowTaskExecutorActor();
+            actorRef.tell(taskExecuteDTO, actorRef);
+        } catch (Exception e) {
+            log.error("工作流执行失败", e);
+        }
+    }
+
+    protected JobTask generateJobTask(WorkflowExecutorContext context, JobTaskBatch jobTaskBatch) {
+        // 生成执行任务实例
+        JobTask jobTask = new JobTask();
+        jobTask.setGroupName(context.getGroupName());
+        jobTask.setNamespaceId(context.getNamespaceId());
+        jobTask.setJobId(context.getJobId());
+        jobTask.setClientInfo(StrUtil.EMPTY);
+        jobTask.setTaskBatchId(jobTaskBatch.getId());
+        jobTask.setArgsType(1);
+        jobTask.setArgsStr(Optional.ofNullable(context.getResult()).orElse(StrUtil.EMPTY));
+        jobTask.setTaskStatus(context.getJobTaskStatus());
+        jobTask.setResultMessage(String.valueOf(context.getEvaluationResult()));
+        Assert.isTrue(1 == jobTaskMapper.insert(jobTask), () -> new EasyRetryServerException("新增任务实例失败"));
+        return jobTask;
+    }
 
     @Override
     public void afterPropertiesSet() throws Exception {

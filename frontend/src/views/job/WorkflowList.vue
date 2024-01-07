@@ -61,13 +61,13 @@
       :rowKey="(record) => record.id"
       :columns="columns"
       :data="loadData"
-      :scroll="{ x: 1800 }"
+      :scroll="{ x: 1600 }"
     >
       <span slot="serial" slot-scope="text, record">
         {{ record.id }}
       </span>
-      <span slot="workflowName" slot-scope="text, record">
-        <a href="#" @click="handlerOpenDrawer(record)">{{ text }}</a>
+      <span slot="workflowName" slot-scope="text">
+        {{ text }}
       </span>
       <span slot="workflowStatus" slot-scope="text">
         <a-tag :color="workflowStatus[text].color">
@@ -129,7 +129,7 @@
           >
             <a href="javascript:;" v-if="record.workflowStatus === 0">删除</a>
           </a-popconfirm>
-          <a-divider type="vertical" />
+          <a-divider type="vertical" v-if="record.workflowStatus === 0"/>
           <a-popconfirm
             title="是否复制此工作流?"
             ok-text="复制"
@@ -143,18 +143,6 @@
         </template>
       </span>
     </s-table>
-
-    <Drawer
-      title="任务详情"
-      placement="right"
-      :width="800"
-      :visibleAmplify="true"
-      :visible="openDrawer"
-      @closeDrawer="onClose"
-      @handlerAmplify="handleInfo"
-    >
-      <job-info ref="jobInfoRef" :showHeader="false" :column="2"/>
-    </Drawer>
 
   </a-card>
 </template>
@@ -199,22 +187,20 @@ export default {
           fixed: 'left'
         },
         {
-          title: '任务名称',
+          title: '工作流名称',
           dataIndex: 'workflowName',
-          scopedSlots: { customRender: 'workflowName' },
-          ellipsis: true,
-          fixed: 'left'
+          scopedSlots: { customRender: 'workflowName' }
         },
         {
           title: '组名称',
           dataIndex: 'groupName',
-          width: '10%'
+          width: '15%'
         },
         {
           title: '触发时间',
           dataIndex: 'nextTriggerAt',
-          width: '10%',
-          ellipsis: true
+          ellipsis: true,
+          width: '10%'
         },
         {
           title: '状态',
@@ -240,8 +226,7 @@ export default {
         {
           title: '更新时间',
           dataIndex: 'updateDt',
-          sorter: true,
-          width: '10%'
+          sorter: true
         },
         {
           title: '操作',

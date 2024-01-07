@@ -6,7 +6,6 @@ import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
-import com.aizuda.easy.retry.common.core.enums.WorkflowNodeTypeEnum;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.enums.JobExecuteStrategyEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
@@ -87,71 +86,69 @@ public class WorkflowBatchHandler {
         List<WorkflowNode> workflowNodes = workflowNodeMapper.selectList(new LambdaQueryWrapper<WorkflowNode>()
                 .eq(WorkflowNode::getWorkflowNodeStatus, StatusEnum.YES.getStatus())
                 .in(WorkflowNode::getId, graph.nodes()));
-        if (jobTaskBatches.size() < workflowNodes.size()) {
-            return false;
-        }
 
-        Map<Long, WorkflowNode> workflowNodeMap = workflowNodes.stream()
-                .collect(Collectors.toMap(WorkflowNode::getId, workflowNode -> workflowNode));
+        Map<Long, List<JobTaskBatch>> currentWorkflowNodeMap = jobTaskBatches.stream()
+                .collect(Collectors.groupingBy(JobTaskBatch::getWorkflowNodeId));
 
-        Map<Long, List<JobTaskBatch>> map = jobTaskBatches.stream()
-                .collect(Collectors.groupingBy(JobTaskBatch::getParentWorkflowNodeId));
-
+        // 判定最后的工作流批次状态
         int taskStatus = JobTaskBatchStatusEnum.SUCCESS.getStatus();
         int operationReason = JobOperationReasonEnum.NONE.getReason();
-        for (final JobTaskBatch jobTaskBatch : jobTaskBatches) {
-            Set<Long> predecessors = graph.predecessors(jobTaskBatch.getWorkflowNodeId());
-            WorkflowNode workflowNode = workflowNodeMap.get(jobTaskBatch.getWorkflowNodeId());
-            // 条件节点是或的关系一个成功就代表成功
-            if (WorkflowNodeTypeEnum.DECISION.getType() == workflowNode.getNodeType()) {
-                for (final Long predecessor : predecessors) {
-                    List<JobTaskBatch> jobTaskBatcheList = map.getOrDefault(predecessor, Lists.newArrayList());
-                    Map<Integer, Long> statusCountMap = jobTaskBatcheList.stream()
-                            .collect(Collectors.groupingBy(JobTaskBatch::getTaskBatchStatus, Collectors.counting()));
-                    long successCount = statusCountMap.getOrDefault(JobTaskBatchStatusEnum.SUCCESS.getStatus(), 0L);
-                    long failCount = statusCountMap.getOrDefault(JobTaskBatchStatusEnum.FAIL.getStatus(), 0L);
-                    long stopCount = statusCountMap.getOrDefault(JobTaskBatchStatusEnum.STOP.getStatus(), 0L);
-                    if (successCount > 0) {
-                        break;
-                    }
 
-                    if (failCount > 0) {
-                        taskStatus = JobTaskBatchStatusEnum.FAIL.getStatus();
-                        break;
-                    }
-
-                    if (stopCount > 0) {
-                        taskStatus = JobTaskBatchStatusEnum.FAIL.getStatus();
-                        break;
-                    }
-
-                }
-            } else {
-                for (final Long predecessor : predecessors) {
-                    List<JobTaskBatch> jobTaskBatcheList = map.getOrDefault(predecessor, Lists.newArrayList());
-                    Map<Integer, Long> statusCountMap = jobTaskBatcheList.stream()
-                            .collect(Collectors.groupingBy(JobTaskBatch::getTaskBatchStatus, Collectors.counting()));
-                    long failCount = statusCountMap.getOrDefault(JobTaskBatchStatusEnum.FAIL.getStatus(), 0L);
-                    long stopCount = statusCountMap.getOrDefault(JobTaskBatchStatusEnum.STOP.getStatus(), 0L);
-                    long cancelCount = statusCountMap.getOrDefault(JobTaskBatchStatusEnum.CANCEL.getStatus(), 0L);
-                    // 一个节点没有成功则认为失败
-                    if (failCount > 0 || stopCount > 0 || cancelCount > 0) {
-                        taskStatus = JobTaskBatchStatusEnum.FAIL.getStatus();
-                        break;
-                    }
+        // 判定所有的叶子节点是否完成
+        List<Long> leaves = MutableGraphCache.getLeaves(workflowTaskBatchId, flowInfo);
+        for (Long leaf : leaves) {
+            List<JobTaskBatch> jobTaskBatchList = currentWorkflowNodeMap.getOrDefault(leaf, Lists.newArrayList());
+            if (CollectionUtils.isEmpty(jobTaskBatchList)) {
+                boolean isNeedProcess = checkLeafCompleted(graph, currentWorkflowNodeMap, graph.predecessors(leaf));
+                // 说明当前叶子节点需要处理，但是未处理返回false
+                if (isNeedProcess) {
+                    return false;
                 }
             }
 
-            if (taskStatus != JobTaskBatchStatusEnum.SUCCESS.getStatus()) {
-                break;
+            // 判定叶子节点的状态
+            for (JobTaskBatch jobTaskBatch : jobTaskBatchList) {
+                if (JobTaskBatchStatusEnum.NOT_SUCCESS.contains(jobTaskBatch.getTaskBatchStatus())) {
+                    // 只要叶子节点不是无需处理的都是失败
+                    if (JobOperationReasonEnum.WORKFLOW_NODE_NO_OPERATION_REQUIRED.getReason() != jobTaskBatch.getOperationReason()) {
+                        taskStatus = JobTaskBatchStatusEnum.FAIL.getStatus();
+                    }
+                }
             }
-
         }
 
         handlerTaskBatch(workflowTaskBatchId, taskStatus, operationReason);
 
         return true;
 
+    }
+
+    private static boolean checkLeafCompleted(MutableGraph<Long> graph, Map<Long,
+            List<JobTaskBatch>> currentWorkflowNodeMap, Set<Long> parentIds) {
+
+        // 判定子节点是否需要处理
+        boolean isNeedProcess = true;
+        for (Long nodeId : parentIds) {
+            List<JobTaskBatch> jobTaskBatchList = currentWorkflowNodeMap.get(nodeId);
+            if (CollectionUtils.isEmpty(jobTaskBatchList)) {
+                // 递归查询有执行过的任务批次
+                isNeedProcess = isNeedProcess || checkLeafCompleted(graph, currentWorkflowNodeMap, graph.predecessors(nodeId));
+                continue;
+            }
+
+            for (JobTaskBatch jobTaskBatch : jobTaskBatchList) {
+                // 只要是无需处理的说明后面的子节点都不需要处理了，isNeedProcess为false
+                if (JobOperationReasonEnum.WORKFLOW_NODE_NO_OPERATION_REQUIRED.getReason() == jobTaskBatch.getOperationReason()) {
+                    isNeedProcess = false;
+                    continue;
+                }
+
+                isNeedProcess = true;
+            }
+
+        }
+
+        return isNeedProcess;
     }
 
     private void handlerTaskBatch(Long workflowTaskBatchId, int taskStatus, int operationReason) {
@@ -215,7 +212,7 @@ public class WorkflowBatchHandler {
                 .orElseGet(() -> workflowTaskBatchMapper.selectById(workflowTaskBatchId));
         Assert.notNull(workflowTaskBatch, () -> new EasyRetryServerException("任务不存在"));
         String flowInfo = workflowTaskBatch.getFlowInfo();
-        MutableGraph<Long> graph =MutableGraphCache.getOrDefault(workflowTaskBatchId, flowInfo);
+        MutableGraph<Long> graph = MutableGraphCache.getOrDefault(workflowTaskBatchId, flowInfo);
         Set<Long> successors = graph.successors(SystemConstants.ROOT);
         if (CollectionUtils.isEmpty(successors)) {
             return;
@@ -232,7 +229,15 @@ public class WorkflowBatchHandler {
         checkWorkflowExecutor(SystemConstants.ROOT, workflowTaskBatchId, graph, jobTaskBatchMap);
     }
 
-    private void checkWorkflowExecutor(Long parentId, Long workflowTaskBatchId,  MutableGraph<Long> graph, Map<Long, JobTaskBatch> jobTaskBatchMap) {
+    private void checkWorkflowExecutor(Long parentId, Long workflowTaskBatchId, MutableGraph<Long> graph, Map<Long, JobTaskBatch> jobTaskBatchMap) {
+
+        // 判定条件节点是否已经执行完成
+        JobTaskBatch parentJobTaskBatch = jobTaskBatchMap.get(parentId);
+        if (Objects.nonNull(parentJobTaskBatch) &&
+                JobOperationReasonEnum.WORKFLOW_NODE_NO_OPERATION_REQUIRED.getReason()
+                        == parentJobTaskBatch.getOperationReason()) {
+            return;
+        }
 
         Set<Long> successors = graph.successors(parentId);
         if (CollectionUtils.isEmpty(successors)) {
@@ -245,12 +250,11 @@ public class WorkflowBatchHandler {
                 // 重新尝试执行, 重新生成任务批次
                 WorkflowNodeTaskExecuteDTO taskExecuteDTO = new WorkflowNodeTaskExecuteDTO();
                 taskExecuteDTO.setWorkflowTaskBatchId(workflowTaskBatchId);
-                taskExecuteDTO.setWorkflowId(successor);
                 taskExecuteDTO.setExecuteStrategy(JobExecuteStrategyEnum.WORKFLOW.getType());
                 taskExecuteDTO.setParentId(parentId);
                 ActorRef actorRef = ActorGenerator.workflowTaskExecutorActor();
                 actorRef.tell(taskExecuteDTO, actorRef);
-                continue;
+                break;
             }
 
             if (NOT_COMPLETE.contains(jobTaskBatch.getTaskBatchStatus())) {
@@ -258,18 +262,19 @@ public class WorkflowBatchHandler {
                 Job job = jobMapper.selectById(jobTaskBatch.getJobId());
                 JobTaskPrepareDTO jobTaskPrepare = JobTaskConverter.INSTANCE.toJobTaskPrepare(job);
                 jobTaskPrepare.setExecuteStrategy(JobExecuteStrategyEnum.WORKFLOW.getType());
-                jobTaskPrepare.setNextTriggerAt(DateUtils.toNowMilli());
-                jobTaskPrepare.setWorkflowNodeId(successor);
+                jobTaskPrepare.setNextTriggerAt(DateUtils.toNowMilli() + DateUtils.toNowMilli() % 1000);
                 jobTaskPrepare.setWorkflowTaskBatchId(workflowTaskBatchId);
                 jobTaskPrepare.setParentWorkflowNodeId(parentId);
                 // 执行预处理阶段
                 ActorRef actorRef = ActorGenerator.jobTaskPrepareActor();
                 actorRef.tell(jobTaskPrepare, actorRef);
-                continue;
+                break;
             }
 
             // 已经是终态的需要递归遍历后继节点是否正常执行
             checkWorkflowExecutor(successor, workflowTaskBatchId, graph, jobTaskBatchMap);
         }
     }
+
+
 }

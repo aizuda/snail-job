@@ -1,13 +1,25 @@
 package com.aizuda.easy.retry.server.job.task.support.executor.workflow;
 
 import akka.actor.ActorRef;
+import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
+import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
+import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.common.core.enums.WorkflowNodeTypeEnum;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.enums.JobExecuteStrategyEnum;
+import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.server.job.task.dto.JobTaskPrepareDTO;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
+import com.aizuda.easy.retry.server.job.task.support.WorkflowTaskConverter;
+import com.aizuda.easy.retry.server.job.task.support.generator.batch.JobTaskBatchGenerator;
+import com.aizuda.easy.retry.server.job.task.support.generator.batch.JobTaskBatchGeneratorContext;
+import com.aizuda.easy.retry.server.job.task.support.handler.WorkflowBatchHandler;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.util.Objects;
 
 /**
  * @author xiaowoniu
@@ -15,6 +27,7 @@ import org.springframework.stereotype.Component;
  * @since 2.6.0
  */
 @Component
+@RequiredArgsConstructor
 public class JobTaskWorkflowExecutor extends AbstractWorkflowExecutor {
 
     @Override
@@ -23,11 +36,26 @@ public class JobTaskWorkflowExecutor extends AbstractWorkflowExecutor {
     }
 
     @Override
+    protected boolean doPreValidate(WorkflowExecutorContext context) {
+        return true;
+    }
+
+    @Override
+    protected void afterExecute(WorkflowExecutorContext context) {
+
+    }
+
+    @Override
+    protected void beforeExecute(WorkflowExecutorContext context) {
+
+    }
+
+    @Override
     protected void doExecute(WorkflowExecutorContext context) {
         // 生成任务批次
         JobTaskPrepareDTO jobTaskPrepare = JobTaskConverter.INSTANCE.toJobTaskPrepare(context.getJob());
         jobTaskPrepare.setExecuteStrategy(JobExecuteStrategyEnum.WORKFLOW.getType());
-        jobTaskPrepare.setNextTriggerAt(DateUtils.toNowMilli() + DateUtils.toNowMilli() % 5000);
+        jobTaskPrepare.setNextTriggerAt(DateUtils.toNowMilli() + DateUtils.toNowMilli() % 1000);
         jobTaskPrepare.setWorkflowNodeId(context.getWorkflowNodeId());
         jobTaskPrepare.setWorkflowTaskBatchId(context.getWorkflowTaskBatchId());
         jobTaskPrepare.setParentWorkflowNodeId(context.getParentWorkflowNodeId());
