@@ -163,13 +163,17 @@ public class WorkflowHandler {
                     // 添加边
                     graph.putEdge(parentId, workflowNode.getId());
                 }
-                log.warn("workflowNodeId:[{}] parentIds:[{}]",
+                log.info("workflowNodeId:[{}] parentIds:[{}]",
                         workflowNode.getId(), JsonUtil.toJsonString(parentIds));
                 WorkflowRequestVO.NodeConfig childNode = nodeInfo.getChildNode();
                 if (Objects.nonNull(childNode) && !CollectionUtils.isEmpty(childNode.getConditionNodes())) {
                     buildGraph(Lists.newArrayList(workflowNode.getId()), deque, groupName, workflowId, childNode,
                             graph, version);
                 } else {
+                    if (WorkflowNodeTypeEnum.DECISION.getType() == nodeConfig.getNodeType()) {
+                        throw new EasyRetryServerException("决策节点不能作为叶子节点");
+                    }
+
                     // 叶子节点记录一下
                     deque.add(workflowNode.getId());
                 }

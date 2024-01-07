@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.server.job.task.support.prepare.workflow;
 
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
+import com.aizuda.easy.retry.server.common.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.server.job.task.dto.WorkflowTaskPrepareDTO;
 import com.aizuda.easy.retry.server.job.task.dto.WorkflowTimerTaskDTO;
@@ -33,7 +34,7 @@ public class WaiWorkflowPrepareHandler extends AbstractWorkflowPrePareHandler {
         log.info("存在待处理任务. workflowTaskBatchId:[{}]", workflowTaskPrepareDTO.getWorkflowTaskBatchId());
 
         // 若时间轮中数据不存在则重新加入
-        if (!JobTimerWheel.isExisted(workflowTaskPrepareDTO.getWorkflowTaskBatchId())) {
+        if (!JobTimerWheel.isExisted(TaskTypeEnum.WORKFLOW.getType(), workflowTaskPrepareDTO.getWorkflowTaskBatchId())) {
             log.info("存在待处理任务且时间轮中不存在 workflowTaskBatchId:[{}]", workflowTaskPrepareDTO.getWorkflowTaskBatchId());
 
             // 进入时间轮
@@ -42,7 +43,7 @@ public class WaiWorkflowPrepareHandler extends AbstractWorkflowPrePareHandler {
             workflowTimerTaskDTO.setWorkflowTaskBatchId(workflowTaskPrepareDTO.getWorkflowTaskBatchId());
             workflowTimerTaskDTO.setWorkflowId(workflowTaskPrepareDTO.getWorkflowId());
             workflowTimerTaskDTO.setExecuteStrategy(workflowTaskPrepareDTO.getExecuteStrategy());
-            JobTimerWheel.register(workflowTaskPrepareDTO.getWorkflowTaskBatchId(),
+            JobTimerWheel.register(TaskTypeEnum.WORKFLOW.getType(), workflowTaskPrepareDTO.getWorkflowTaskBatchId(),
                     new WorkflowTimerTask(workflowTimerTaskDTO), delay, TimeUnit.MILLISECONDS);
         }
     }

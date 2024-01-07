@@ -3,9 +3,14 @@ package com.aizuda.easy.retry.server.job.task.support.cache;
 import com.aizuda.easy.retry.server.common.util.GraphUtils;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.Lists;
 import com.google.common.graph.MutableGraph;
+import org.springframework.util.CollectionUtils;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -45,5 +50,38 @@ public class MutableGraphCache {
         return getOrDefault(workflowBatchId, "");
     }
 
+    /**
+     * 获取所有的叶子节点
+     *
+     * @param workflowBatchId 工作流批次ID
+     * @param jsonGraph JSON格式的图对象字符串
+     * @return 叶子节点
+     */
+    public static List<Long> getLeaves(Long workflowBatchId, String jsonGraph) {
 
+        MutableGraph<Long> graph = getOrDefault(workflowBatchId, jsonGraph);
+        List<Long> leaves = Lists.newArrayList();
+        for (Long node : graph.nodes()) {
+            if (CollectionUtils.isEmpty(graph.successors(node))) {
+                leaves.add(node);
+            }
+        }
+
+        return leaves;
+    }
+
+    public static Set<Long> getAllDescendants(MutableGraph<Long> graph, Long parentId) {
+        Set<Long> descendants = new HashSet<>();
+        getAllDescendantsHelper(graph, parentId, descendants);
+        return descendants;
+    }
+
+    private static void getAllDescendantsHelper(MutableGraph<Long> graph, Long parentId, Set<Long> descendants) {
+        Set<Long> successors = graph.successors(parentId);
+        descendants.addAll(successors);
+
+        for (Long successor : successors) {
+            getAllDescendantsHelper(graph, successor, descendants);
+        }
+    }
 }

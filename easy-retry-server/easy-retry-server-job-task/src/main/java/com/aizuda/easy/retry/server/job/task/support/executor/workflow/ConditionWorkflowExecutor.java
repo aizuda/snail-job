@@ -4,25 +4,17 @@ import akka.actor.ActorRef;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
-import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
-import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
-import com.aizuda.easy.retry.common.core.enums.JobTaskStatusEnum;
-import com.aizuda.easy.retry.common.core.enums.WorkflowNodeTypeEnum;
+import com.aizuda.easy.retry.common.core.enums.*;
 import com.aizuda.easy.retry.common.core.expression.ExpressionEngine;
 import com.aizuda.easy.retry.common.core.expression.ExpressionFactory;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.dto.DecisionConfig;
 import com.aizuda.easy.retry.server.common.enums.ExpressionTypeEnum;
-import com.aizuda.easy.retry.server.common.enums.JobExecuteStrategyEnum;
 import com.aizuda.easy.retry.server.common.enums.LogicalConditionEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.job.task.dto.JobLogDTO;
-import com.aizuda.easy.retry.server.job.task.dto.WorkflowNodeTaskExecuteDTO;
-import com.aizuda.easy.retry.server.job.task.support.WorkflowTaskConverter;
 import com.aizuda.easy.retry.server.job.task.support.expression.ExpressionInvocationHandler;
-import com.aizuda.easy.retry.server.job.task.support.generator.batch.JobTaskBatchGenerator;
-import com.aizuda.easy.retry.server.job.task.support.generator.batch.JobTaskBatchGeneratorContext;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTaskBatch;
@@ -31,7 +23,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * @author xiaowoniu
@@ -42,12 +36,16 @@ import java.util.*;
 @RequiredArgsConstructor
 @Slf4j
 public class ConditionWorkflowExecutor extends AbstractWorkflowExecutor {
-    private final JobTaskBatchGenerator jobTaskBatchGenerator;
     private final JobTaskMapper jobTaskMapper;
 
     @Override
     public WorkflowNodeTypeEnum getWorkflowNodeType() {
         return WorkflowNodeTypeEnum.DECISION;
+    }
+
+    @Override
+    protected void beforeExecute(WorkflowExecutorContext context) {
+
     }
 
     @Override
@@ -57,89 +55,83 @@ public class ConditionWorkflowExecutor extends AbstractWorkflowExecutor {
         int jobTaskStatus = JobTaskStatusEnum.SUCCESS.getStatus();
         String message = StrUtil.EMPTY;
 
-        Boolean result = Optional.ofNullable(context.getEvaluationResult()).orElse(Boolean.FALSE);
+        Boolean result = (Boolean) Optional.ofNullable(context.getEvaluationResult()).orElse(Boolean.FALSE);
 
         if (result) {
-            // 多个条件节点直接是或的关系，只要一个成功其他节点就取消
+            // 多个条件节点直接是或的关系，只要一个成功其他节点就取消且是无需处理状态
             taskBatchStatus = JobTaskBatchStatusEnum.CANCEL.getStatus();
+            jobTaskStatus = JobTaskStatusEnum.CANCEL.getStatus();
+            operationReason = JobOperationReasonEnum.WORKFLOW_NODE_NO_OPERATION_REQUIRED.getReason();
         } else {
+            boolean tempResult = Boolean.TRUE;
+
             DecisionConfig decisionConfig = JsonUtil.parseObject(context.getNodeInfo(), DecisionConfig.class);
-            try {
-                ExpressionEngine realExpressionEngine = ExpressionTypeEnum.valueOf(decisionConfig.getExpressionType());
-                Assert.notNull(realExpressionEngine, () -> new EasyRetryServerException("表达式引擎不存在"));
-                ExpressionInvocationHandler invocationHandler = new ExpressionInvocationHandler(realExpressionEngine);
-                ExpressionEngine expressionEngine = ExpressionFactory.getExpressionEngine(invocationHandler);
+            if (StatusEnum.NO.getStatus().equals(decisionConfig.getDefaultDecision())) {
+                try {
+                    ExpressionEngine realExpressionEngine = ExpressionTypeEnum.valueOf(decisionConfig.getExpressionType());
+                    Assert.notNull(realExpressionEngine, () -> new EasyRetryServerException("表达式引擎不存在"));
+                    ExpressionInvocationHandler invocationHandler = new ExpressionInvocationHandler(realExpressionEngine);
+                    ExpressionEngine expressionEngine = ExpressionFactory.getExpressionEngine(invocationHandler);
 
-                List<JobTask> jobTasks = jobTaskMapper.selectList(new LambdaQueryWrapper<JobTask>()
-                                .select(JobTask::getResultMessage)
-                        .eq(JobTask::getTaskBatchId, context.getTaskBatchId()));
-                Boolean tempResult = Boolean.TRUE;
-                for (JobTask jobTask : jobTasks) {
-                    Boolean execResult = (Boolean) Optional.ofNullable(expressionEngine.eval(decisionConfig.getNodeExpression(), jobTask.getResultMessage())).orElse(Boolean.FALSE);
+                    List<JobTask> jobTasks = jobTaskMapper.selectList(new LambdaQueryWrapper<JobTask>()
+                            .select(JobTask::getResultMessage)
+                            .eq(JobTask::getTaskBatchId, context.getTaskBatchId()));
 
-                    if (Objects.equals(decisionConfig.getLogicalCondition(), LogicalConditionEnum.AND.getCode())) {
-                        tempResult = tempResult && execResult;
-                    } else {
-                        tempResult = tempResult || execResult;
-                        if (tempResult) {
-                            break;
+                    for (JobTask jobTask : jobTasks) {
+                        boolean execResult = (Boolean) Optional.ofNullable(expressionEngine.eval(decisionConfig.getNodeExpression(), jobTask.getResultMessage())).orElse(Boolean.FALSE);
+
+                        if (Objects.equals(decisionConfig.getLogicalCondition(), LogicalConditionEnum.AND.getCode())) {
+                            tempResult = tempResult && execResult;
+                        } else {
+                            tempResult = tempResult || execResult;
+                            if (tempResult) {
+                                break;
+                            }
                         }
+
+                        log.info("执行条件表达式：[{}]，参数: [{}] 结果：[{}]", decisionConfig.getNodeExpression(), jobTask.getResultMessage(), result);
+
                     }
 
-                    log.info("执行条件表达式：[{}]，参数: [{}] 结果：[{}]", decisionConfig.getNodeExpression(), jobTask.getResultMessage(), result);
-
+                    result = tempResult;
+                } catch (Exception e) {
+                    log.error("执行条件表达式解析异常. 表达式:[{}]，参数: [{}]", decisionConfig.getNodeExpression(), context.getResult(), e);
+                    taskBatchStatus = JobTaskBatchStatusEnum.FAIL.getStatus();
+                    operationReason = JobOperationReasonEnum.WORKFLOW_CONDITION_NODE_EXECUTOR_ERROR.getReason();
+                    jobTaskStatus = JobTaskStatusEnum.FAIL.getStatus();
+                    message = e.getMessage();
                 }
-
-                result = tempResult;
-            } catch (Exception e) {
-                log.error("执行条件表达式解析异常. 表达式:[{}]，参数: [{}]", decisionConfig.getNodeExpression(), context.getResult(), e);
-                taskBatchStatus = JobTaskBatchStatusEnum.FAIL.getStatus();
-                operationReason = JobOperationReasonEnum.WORKFLOW_CONDITION_NODE_EXECUTOR_ERROR.getReason();
-                jobTaskStatus = JobTaskStatusEnum.FAIL.getStatus();
-                message = e.getMessage();
             }
         }
 
-        if (result) {
-            try {
-                WorkflowNodeTaskExecuteDTO taskExecuteDTO = new WorkflowNodeTaskExecuteDTO();
-                taskExecuteDTO.setWorkflowTaskBatchId(context.getWorkflowTaskBatchId());
-                taskExecuteDTO.setExecuteStrategy(JobExecuteStrategyEnum.AUTO.getType());
-                taskExecuteDTO.setParentId(context.getWorkflowNodeId());
-                taskExecuteDTO.setTaskBatchId(context.getTaskBatchId());
-                ActorRef actorRef = ActorGenerator.workflowTaskExecutorActor();
-                actorRef.tell(taskExecuteDTO, actorRef);
-            } catch (Exception e) {
-                log.error("工作流执行失败", e);
-            }
+        if (JobTaskBatchStatusEnum.SUCCESS.getStatus() == taskBatchStatus) {
+            workflowTaskExecutor(context);
         }
 
         // 回传执行结果
         context.setEvaluationResult(result);
+        context.setTaskBatchStatus(taskBatchStatus);
+        context.setOperationReason(operationReason);
+        context.setJobTaskStatus(jobTaskStatus);
+        context.setLogMessage(message);
+    }
 
-        JobTaskBatchGeneratorContext generatorContext = WorkflowTaskConverter.INSTANCE.toJobTaskBatchGeneratorContext(context);
-        generatorContext.setTaskBatchStatus(taskBatchStatus);
-        generatorContext.setOperationReason(operationReason);
-        generatorContext.setJobId(SystemConstants.DECISION_JOB_ID);
-        JobTaskBatch jobTaskBatch = jobTaskBatchGenerator.generateJobTaskBatch(generatorContext);
+    @Override
+    protected boolean doPreValidate(WorkflowExecutorContext context) {
+        return true;
+    }
 
-        // 生成执行任务实例
-        JobTask jobTask = new JobTask();
-        jobTask.setGroupName(context.getGroupName());
-        jobTask.setNamespaceId(context.getNamespaceId());
-        jobTask.setJobId(SystemConstants.DECISION_JOB_ID);
-        jobTask.setClientInfo(StrUtil.EMPTY);
-        jobTask.setTaskBatchId(jobTaskBatch.getId());
-        jobTask.setArgsType(1);
-        jobTask.setArgsStr(Optional.ofNullable(context.getResult()).orElse(StrUtil.EMPTY));
-        jobTask.setTaskStatus(jobTaskStatus);
-        jobTask.setResultMessage(String.valueOf(result));
-        Assert.isTrue(1 == jobTaskMapper.insert(jobTask), () -> new EasyRetryServerException("新增任务实例失败"));
+    @Override
+    protected void afterExecute(WorkflowExecutorContext context) {
+
+        JobTaskBatch jobTaskBatch = generateJobTaskBatch(context);
+
+        JobTask jobTask = generateJobTask(context, jobTaskBatch);
 
         // 保存执行的日志
         JobLogDTO jobLogDTO = new JobLogDTO();
         // TODO 等实时日志处理完毕后，再处理
-        jobLogDTO.setMessage(message);
+        jobLogDTO.setMessage(context.getLogMessage());
         jobLogDTO.setTaskId(jobTask.getId());
         jobLogDTO.setJobId(SystemConstants.DECISION_JOB_ID);
         jobLogDTO.setGroupName(context.getGroupName());
@@ -148,5 +140,4 @@ public class ConditionWorkflowExecutor extends AbstractWorkflowExecutor {
         ActorRef actorRef = ActorGenerator.jobLogActor();
         actorRef.tell(jobLogDTO, actorRef);
     }
-
 }

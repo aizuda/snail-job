@@ -48,6 +48,8 @@ public class ExpressionInvocationHandler implements InvocationHandler {
             context.put(paramNameArr[i], methodArgs[i]);
         }
 
-        return method.invoke(expression, context);
+        // 替换参数
+        args[1] = new Object[]{context};
+        return method.invoke(expressionEngine, args);
     }
 }

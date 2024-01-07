@@ -61,7 +61,7 @@ public class WorkflowExecutorContext {
     /**
      * 条件节点的判定结果
      */
-    private Boolean evaluationResult;
+    private Object evaluationResult;
 
     /**
      * 调度任务id
@@ -73,5 +73,23 @@ public class WorkflowExecutorContext {
      */
     private String nodeInfo;
 
+    /**
+     * 任务批次状态
+     */
+    private Integer taskBatchStatus;
 
+    /**
+     * 操作原因
+     */
+    private Integer operationReason;
+
+    /**
+     * 任务状态
+     */
+    private Integer jobTaskStatus;
+
+    /**
+     * 日志信息
+     */
+    private String logMessage;
 }

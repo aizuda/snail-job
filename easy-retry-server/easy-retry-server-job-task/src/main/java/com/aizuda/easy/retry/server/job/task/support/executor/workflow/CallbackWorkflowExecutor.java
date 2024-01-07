@@ -1,7 +1,6 @@
 package com.aizuda.easy.retry.server.job.task.support.executor.workflow;
 
 import akka.actor.ActorRef;
-import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
@@ -13,11 +12,8 @@ import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.client.RequestInterceptor;
 import com.aizuda.easy.retry.server.common.dto.CallbackConfig;
 import com.aizuda.easy.retry.server.common.enums.ContentTypeEnum;
-import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.job.task.dto.JobLogDTO;
 import com.aizuda.easy.retry.server.job.task.support.WorkflowTaskConverter;
-import com.aizuda.easy.retry.server.job.task.support.generator.batch.JobTaskBatchGenerator;
-import com.aizuda.easy.retry.server.job.task.support.generator.batch.JobTaskBatchGeneratorContext;
 import com.aizuda.easy.retry.server.model.dto.CallbackParamsDTO;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
@@ -28,7 +24,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -36,8 +31,6 @@ import org.springframework.web.client.RestTemplate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 
 /**
  * @author xiaowoniu
@@ -52,7 +45,6 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
     private static final String CALLBACK_TIMEOUT = "10";
     private final RestTemplate restTemplate;
     private final JobTaskMapper jobTaskMapper;
-    private final JobTaskBatchGenerator jobTaskBatchGenerator;
 
     @Override
     public WorkflowNodeTypeEnum getWorkflowNodeType() {
@@ -60,7 +52,13 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
     }
 
     @Override
+    protected void beforeExecute(WorkflowExecutorContext context) {
+
+    }
+
+    @Override
     protected void doExecute(WorkflowExecutorContext context) {
+
         CallbackConfig decisionConfig = JsonUtil.parseObject(context.getNodeInfo(), CallbackConfig.class);
         int taskBatchStatus = JobTaskBatchStatusEnum.SUCCESS.getStatus();
         int operationReason = JobOperationReasonEnum.NONE.getReason();
@@ -91,34 +89,39 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
         } catch (Exception e) {
             log.error("回调异常. webHook:[{}]，参数: [{}]", decisionConfig.getWebhook(), context.getResult(), e);
             taskBatchStatus = JobTaskBatchStatusEnum.FAIL.getStatus();
-            operationReason = JobOperationReasonEnum.WORKFLOW_CONDITION_NODE_EXECUTOR_ERROR.getReason();
+            operationReason = JobOperationReasonEnum.WORKFLOW_CALLBACK_NODE_EXECUTOR_ERROR.getReason();
             jobTaskStatus = JobTaskStatusEnum.FAIL.getStatus();
             message = e.getMessage();
         }
 
-        JobTaskBatchGeneratorContext generatorContext = WorkflowTaskConverter.INSTANCE.toJobTaskBatchGeneratorContext(context);
-        generatorContext.setTaskBatchStatus(taskBatchStatus);
-        generatorContext.setOperationReason(operationReason);
-        generatorContext.setJobId(SystemConstants.CALLBACK_JOB_ID);
-        JobTaskBatch jobTaskBatch = jobTaskBatchGenerator.generateJobTaskBatch(generatorContext);
+        if (JobTaskBatchStatusEnum.SUCCESS.getStatus() == taskBatchStatus) {
+            workflowTaskExecutor(context);
+        }
 
-        // 生成执行任务实例
-        JobTask jobTask = new JobTask();
-        jobTask.setGroupName(context.getGroupName());
-        jobTask.setNamespaceId(context.getNamespaceId());
-        jobTask.setJobId(SystemConstants.CALLBACK_JOB_ID);
-        jobTask.setClientInfo(StrUtil.EMPTY);
-        jobTask.setTaskBatchId(jobTaskBatch.getId());
-        jobTask.setArgsType(1);
-        jobTask.setArgsStr(Optional.ofNullable(context.getResult()).orElse(StrUtil.EMPTY));
-        jobTask.setTaskStatus(jobTaskStatus);
-        jobTask.setResultMessage(Optional.ofNullable(result).orElse(StrUtil.EMPTY));
-        Assert.isTrue(1 == jobTaskMapper.insert(jobTask), () -> new EasyRetryServerException("新增任务实例失败"));
+        context.setTaskBatchStatus(taskBatchStatus);
+        context.setOperationReason(operationReason);
+        context.setJobTaskStatus(jobTaskStatus);
+        context.setEvaluationResult(result);
+        context.setLogMessage(message);
+
+    }
+
+
+    @Override
+    protected boolean doPreValidate(WorkflowExecutorContext context) {
+        return true;
+    }
+
+    @Override
+    protected void afterExecute(WorkflowExecutorContext context) {
+        JobTaskBatch jobTaskBatch = generateJobTaskBatch(context);
+
+        JobTask jobTask = generateJobTask(context, jobTaskBatch);
 
         // 保存执行的日志
         JobLogDTO jobLogDTO = new JobLogDTO();
         // TODO 等实时日志处理完毕后，再处理
-        jobLogDTO.setMessage(message);
+        jobLogDTO.setMessage(context.getLogMessage());
         jobLogDTO.setTaskId(jobTask.getId());
         jobLogDTO.setJobId(SystemConstants.CALLBACK_JOB_ID);
         jobLogDTO.setGroupName(context.getGroupName());

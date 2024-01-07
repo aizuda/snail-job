@@ -17,6 +17,7 @@ import com.aizuda.easy.retry.template.datasource.persistence.po.GroupConfig;
 import com.aizuda.easy.retry.template.datasource.persistence.po.ServerNode;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -73,7 +74,7 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
 
             // 删除本地缓存的消费桶的信息
             DistributeInstance.INSTANCE.clearConsumerBucket();
-            if(CollectionUtils.isEmpty(podIpSet)) {
+            if (CollectionUtils.isEmpty(podIpSet)) {
                 return;
             }
 
@@ -117,13 +118,8 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
     }
 
     private void refreshExpireAtCache(List<ServerNode> remotePods) {
-
-        // 刷新最新的节点注册信息
-        for (ServerNode node : remotePods) {
-            Optional.ofNullable(CacheRegisterTable.getServerNode(node.getGroupName(), node.getNamespaceId(), node.getHostId())).ifPresent(registerNodeInfo -> {
-                registerNodeInfo.setExpireAt(node.getExpireAt());
-            });
-        }
+        // 重新刷新缓存
+        refreshCache(remotePods);
     }
 
     private void refreshCache(List<ServerNode> remotePods) {

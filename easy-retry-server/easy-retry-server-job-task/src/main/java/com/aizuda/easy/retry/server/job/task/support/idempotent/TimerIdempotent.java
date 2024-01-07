@@ -1,9 +1,11 @@
 package com.aizuda.easy.retry.server.job.task.support.idempotent;
 
+import cn.hutool.core.lang.Pair;
 import com.aizuda.easy.retry.server.common.IdempotentStrategy;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
+import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.TimeUnit;
@@ -14,8 +16,9 @@ import java.util.concurrent.TimeUnit;
  * @since 2.4.0
  */
 public class TimerIdempotent implements IdempotentStrategy<Long, Long> {
+    private static final String KEY_FORMAT = "{0}_{1}_{2}";
 
-    private static final Cache<Long, Long> cache;
+    private static final Cache<String, Long> cache;
 
     static {
         cache = CacheBuilder.newBuilder()
@@ -27,7 +30,7 @@ public class TimerIdempotent implements IdempotentStrategy<Long, Long> {
 
     @Override
     public boolean set(Long key, Long value) {
-        cache.put(key, value);
+        cache.put(getKey(key, value), value);
         return Boolean.TRUE;
     }
 
@@ -38,12 +41,16 @@ public class TimerIdempotent implements IdempotentStrategy<Long, Long> {
 
     @Override
     public boolean isExist(Long key, Long value) {
-        return cache.asMap().containsKey(key);
+        return cache.asMap().containsKey(getKey(key, value));
     }
 
     @Override
     public boolean clear(Long key, Long value) {
-        cache.invalidate(key);
+        cache.invalidate(getKey(key, value));
         return Boolean.TRUE;
+    }
+
+    private static String getKey(Long key, Long value) {
+        return MessageFormat.format(KEY_FORMAT,key, value);
     }
 }

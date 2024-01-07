@@ -4,6 +4,7 @@ import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
+import com.aizuda.easy.retry.server.common.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.server.job.task.dto.JobTimerTaskDTO;
@@ -55,7 +56,7 @@ public class WorkflowBatchGenerator {
         workflowTimerTaskDTO.setWorkflowTaskBatchId(workflowTaskBatch.getId());
         workflowTimerTaskDTO.setWorkflowId(context.getWorkflowId());
         workflowTimerTaskDTO.setExecuteStrategy(context.getExecuteStrategy());
-        JobTimerWheel.register(workflowTaskBatch.getId(),
+        JobTimerWheel.register(TaskTypeEnum.WORKFLOW.getType(), workflowTaskBatch.getId(),
             new WorkflowTimerTask(workflowTimerTaskDTO), delay, TimeUnit.MILLISECONDS);
     }
 }

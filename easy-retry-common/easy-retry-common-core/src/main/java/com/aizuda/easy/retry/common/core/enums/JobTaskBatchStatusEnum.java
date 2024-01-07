@@ -52,4 +52,6 @@ public enum JobTaskBatchStatusEnum {
 
     public static final List<Integer> COMPLETED = Arrays.asList(SUCCESS.status, FAIL.status, STOP.status, CANCEL.status);
 
+    public static final List<Integer> NOT_SUCCESS = Arrays.asList(FAIL.status, STOP.status, CANCEL.status);
+
 }

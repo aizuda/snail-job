@@ -30,6 +30,8 @@ public class ExpressionInvocationHandler implements InvocationHandler {
         if (StrUtil.isNotBlank(params)) {
             contextMap = JsonUtil.parseHashMap(params);
         }
-        return method.invoke(expressionEngine, contextMap);
+
+        args[1] = new Object[]{contextMap};
+        return method.invoke(expressionEngine, args);
     }
 }

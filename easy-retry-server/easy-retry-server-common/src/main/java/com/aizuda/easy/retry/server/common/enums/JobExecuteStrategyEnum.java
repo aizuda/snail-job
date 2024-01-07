@@ -16,7 +16,7 @@ import lombok.Getter;
 public enum JobExecuteStrategyEnum {
     AUTO(1, "自动执行"),
     MANUAL(2, "手动执行"),
-    WORKFLOW(2, "DAG执行"),
+    WORKFLOW(3, "DAG执行"),
     ;
 
     private final Integer type;

@@ -27,4 +27,9 @@ public class DecisionConfig {
      */
     private Integer logicalCondition;
 
+    /**
+     * 是否为其他情况
+     */
+    private Integer defaultDecision;
+
 }
