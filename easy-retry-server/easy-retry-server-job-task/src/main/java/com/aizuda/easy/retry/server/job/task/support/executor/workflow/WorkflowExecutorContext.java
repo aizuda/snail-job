@@ -46,7 +46,7 @@ public class WorkflowExecutorContext {
     /**
      * 客户端返回的结果
      */
-    private String result;
+    private String taskResult;
 
     /**
      * 失败策略 1、跳过 2、阻塞

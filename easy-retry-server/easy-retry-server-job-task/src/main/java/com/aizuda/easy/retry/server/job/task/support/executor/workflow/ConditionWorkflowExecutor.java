@@ -19,6 +19,7 @@ import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskMappe
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTaskBatch;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -77,7 +78,9 @@ public class ConditionWorkflowExecutor extends AbstractWorkflowExecutor {
                             .select(JobTask::getResultMessage)
                             .eq(JobTask::getTaskBatchId, context.getTaskBatchId()));
 
+                    List<String> taskResult = Lists.newArrayList();
                     for (JobTask jobTask : jobTasks) {
+                        taskResult.add(jobTask.getResultMessage());
                         boolean execResult = (Boolean) Optional.ofNullable(expressionEngine.eval(decisionConfig.getNodeExpression(), jobTask.getResultMessage())).orElse(Boolean.FALSE);
 
                         if (Objects.equals(decisionConfig.getLogicalCondition(), LogicalConditionEnum.AND.getCode())) {
@@ -90,12 +93,12 @@ public class ConditionWorkflowExecutor extends AbstractWorkflowExecutor {
                         }
 
                         log.info("执行条件表达式：[{}]，参数: [{}] 结果：[{}]", decisionConfig.getNodeExpression(), jobTask.getResultMessage(), result);
-
                     }
 
+                    context.setTaskResult(JsonUtil.toJsonString(taskResult));
                     result = tempResult;
                 } catch (Exception e) {
-                    log.error("执行条件表达式解析异常. 表达式:[{}]，参数: [{}]", decisionConfig.getNodeExpression(), context.getResult(), e);
+                    log.error("执行条件表达式解析异常. 表达式:[{}]，参数: [{}]", decisionConfig.getNodeExpression(), context.getTaskResult(), e);
                     taskBatchStatus = JobTaskBatchStatusEnum.FAIL.getStatus();
                     operationReason = JobOperationReasonEnum.WORKFLOW_CONDITION_NODE_EXECUTOR_ERROR.getReason();
                     jobTaskStatus = JobTaskStatusEnum.FAIL.getStatus();
@@ -114,6 +117,7 @@ public class ConditionWorkflowExecutor extends AbstractWorkflowExecutor {
         context.setOperationReason(operationReason);
         context.setJobTaskStatus(jobTaskStatus);
         context.setLogMessage(message);
+
     }
 
     @Override
