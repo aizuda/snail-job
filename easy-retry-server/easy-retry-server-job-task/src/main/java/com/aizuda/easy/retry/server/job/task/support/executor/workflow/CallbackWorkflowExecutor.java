@@ -77,6 +77,7 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
                 .eq(JobTask::getTaskBatchId, context.getTaskBatchId()));
         List<CallbackParamsDTO> callbackParamsList = WorkflowTaskConverter.INSTANCE.toCallbackParamsDTO(jobTasks);
 
+        context.setTaskResult(JsonUtil.toJsonString(callbackParamsList));
         String result = null;
         try {
             Map<String, String> uriVariables = new HashMap<>();
@@ -87,7 +88,7 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
             result = exchange.getBody();
             log.info("回调结果. webHook:[{}]，参数: [{}]", decisionConfig.getWebhook(), result);
         } catch (Exception e) {
-            log.error("回调异常. webHook:[{}]，参数: [{}]", decisionConfig.getWebhook(), context.getResult(), e);
+            log.error("回调异常. webHook:[{}]，参数: [{}]", decisionConfig.getWebhook(), context.getTaskResult(), e);
             taskBatchStatus = JobTaskBatchStatusEnum.FAIL.getStatus();
             operationReason = JobOperationReasonEnum.WORKFLOW_CALLBACK_NODE_EXECUTOR_ERROR.getReason();
             jobTaskStatus = JobTaskStatusEnum.FAIL.getStatus();
