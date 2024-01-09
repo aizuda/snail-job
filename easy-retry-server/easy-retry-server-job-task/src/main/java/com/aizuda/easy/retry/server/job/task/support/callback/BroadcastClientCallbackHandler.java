@@ -4,7 +4,7 @@ import akka.actor.ActorRef;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.server.job.task.dto.JobExecutorResultDTO;
-import com.aizuda.easy.retry.common.core.enums.TaskTypeEnum;
+import com.aizuda.easy.retry.common.core.enums.JobTaskTypeEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -18,8 +18,8 @@ import org.springframework.stereotype.Component;
 public class BroadcastClientCallbackHandler extends AbstractClientCallbackHandler {
 
     @Override
-    public TaskTypeEnum getTaskInstanceType() {
-        return TaskTypeEnum.BROADCAST;
+    public JobTaskTypeEnum getTaskInstanceType() {
+        return JobTaskTypeEnum.BROADCAST;
     }
 
     @Override

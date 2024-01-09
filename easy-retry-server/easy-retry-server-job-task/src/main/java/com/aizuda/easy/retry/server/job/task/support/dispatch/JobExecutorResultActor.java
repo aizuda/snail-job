@@ -3,7 +3,7 @@ package com.aizuda.easy.retry.server.job.task.support.dispatch;
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import cn.hutool.core.lang.Assert;
-import com.aizuda.easy.retry.common.core.enums.TaskTypeEnum;
+import com.aizuda.easy.retry.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
@@ -73,7 +73,7 @@ public class JobExecutorResultActor extends AbstractActor {
                         if (complete) {
                             // 尝试停止任务
                             // 若是集群任务则客户端会主动关闭
-                            if (result.getTaskType() != TaskTypeEnum.CLUSTER.getType()) {
+                            if (result.getTaskType() != JobTaskTypeEnum.CLUSTER.getType()) {
                                 JobTaskStopHandler instanceInterrupt = JobTaskStopFactory.getJobTaskStop(result.getTaskType());
                                 TaskStopJobContext stopJobContext = JobTaskConverter.INSTANCE.toStopJobContext(result);
                                 stopJobContext.setNeedUpdateTaskStatus(Boolean.FALSE);

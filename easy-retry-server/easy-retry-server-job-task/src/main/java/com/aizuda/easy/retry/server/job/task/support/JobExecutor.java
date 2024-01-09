@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.server.job.task.support;
 
-import com.aizuda.easy.retry.common.core.enums.TaskTypeEnum;
+import com.aizuda.easy.retry.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.easy.retry.server.job.task.support.executor.job.JobExecutorContext;
 
 /**
@@ -10,7 +10,7 @@ import com.aizuda.easy.retry.server.job.task.support.executor.job.JobExecutorCon
  */
 public interface JobExecutor {
 
-    TaskTypeEnum getTaskInstanceType();
+    JobTaskTypeEnum getTaskInstanceType();
 
     void execute(JobExecutorContext context);
 }

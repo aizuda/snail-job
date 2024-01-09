@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.server.job.task.support;
 
-import com.aizuda.easy.retry.common.core.enums.TaskTypeEnum;
+import com.aizuda.easy.retry.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.easy.retry.server.job.task.support.callback.ClientCallbackContext;
 
 /**
@@ -10,7 +10,7 @@ import com.aizuda.easy.retry.server.job.task.support.callback.ClientCallbackCont
  */
 public interface ClientCallbackHandler {
 
-    TaskTypeEnum getTaskInstanceType();
+    JobTaskTypeEnum getTaskInstanceType();
 
     void callback(ClientCallbackContext context);
 }

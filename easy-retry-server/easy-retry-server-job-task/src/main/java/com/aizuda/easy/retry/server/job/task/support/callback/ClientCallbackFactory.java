@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.server.job.task.support.callback;
 
-import com.aizuda.easy.retry.common.core.enums.TaskTypeEnum;
+import com.aizuda.easy.retry.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.easy.retry.server.job.task.support.ClientCallbackHandler;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,13 +12,13 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ClientCallbackFactory {
 
-    private static final ConcurrentHashMap<TaskTypeEnum, ClientCallbackHandler> CACHE = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<JobTaskTypeEnum, ClientCallbackHandler> CACHE = new ConcurrentHashMap<>();
 
-    public static void registerJobExecutor(TaskTypeEnum taskInstanceType, ClientCallbackHandler callbackHandler) {
+    public static void registerJobExecutor(JobTaskTypeEnum taskInstanceType, ClientCallbackHandler callbackHandler) {
         CACHE.put(taskInstanceType, callbackHandler);
     }
 
     public static ClientCallbackHandler getClientCallback(Integer type) {
-        return CACHE.get(TaskTypeEnum.valueOf(type));
+        return CACHE.get(JobTaskTypeEnum.valueOf(type));
     }
 }

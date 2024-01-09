@@ -3,7 +3,7 @@ package com.aizuda.easy.retry.server.job.task.support.generator.task;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.enums.JobTaskStatusEnum;
-import com.aizuda.easy.retry.common.core.enums.TaskTypeEnum;
+import com.aizuda.easy.retry.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
 import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
@@ -36,8 +36,8 @@ public class BroadcastTaskGenerator extends AbstractJobTaskGenerator {
     private JobTaskMapper jobTaskMapper;
 
     @Override
-    public TaskTypeEnum getTaskInstanceType() {
-        return TaskTypeEnum.BROADCAST;
+    public JobTaskTypeEnum getTaskInstanceType() {
+        return JobTaskTypeEnum.BROADCAST;
     }
 
     @Override

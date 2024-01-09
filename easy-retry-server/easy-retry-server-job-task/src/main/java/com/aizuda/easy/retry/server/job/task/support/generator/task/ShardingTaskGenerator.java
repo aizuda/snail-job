@@ -10,7 +10,7 @@ import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.handler.ClientNodeAllocateHandler;
 import com.aizuda.easy.retry.server.common.util.ClientInfoUtils;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
-import com.aizuda.easy.retry.common.core.enums.TaskTypeEnum;
+import com.aizuda.easy.retry.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
 import com.google.common.collect.Lists;
@@ -39,8 +39,8 @@ public class ShardingTaskGenerator extends AbstractJobTaskGenerator {
     private JobTaskMapper jobTaskMapper;
 
     @Override
-    public TaskTypeEnum getTaskInstanceType() {
-        return TaskTypeEnum.SHARDING;
+    public JobTaskTypeEnum getTaskInstanceType() {
+        return JobTaskTypeEnum.SHARDING;
     }
 
     @Override

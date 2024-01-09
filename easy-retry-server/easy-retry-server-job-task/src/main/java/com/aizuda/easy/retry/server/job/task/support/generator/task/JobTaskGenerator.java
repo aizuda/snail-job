@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.server.job.task.support.generator.task;
 
-import com.aizuda.easy.retry.common.core.enums.TaskTypeEnum;
+import com.aizuda.easy.retry.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
 
 import java.util.List;
@@ -12,7 +12,7 @@ import java.util.List;
  */
 public interface JobTaskGenerator {
 
-    TaskTypeEnum getTaskInstanceType();
+    JobTaskTypeEnum getTaskInstanceType();
 
     List<JobTask> generate(JobTaskGenerateContext context);
 
