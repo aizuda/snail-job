@@ -2,8 +2,13 @@ package com.aizuda.easy.retry.server.web.service.impl;
 
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
+import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
+import com.aizuda.easy.retry.common.core.util.JsonUtil;
+import com.aizuda.easy.retry.server.common.dto.CallbackConfig;
+import com.aizuda.easy.retry.server.common.dto.DecisionConfig;
+import com.aizuda.easy.retry.server.common.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.server.job.task.dto.JobTaskPrepareDTO;
@@ -23,11 +28,14 @@ import com.aizuda.easy.retry.template.datasource.persistence.dataobject.JobBatch
 import com.aizuda.easy.retry.template.datasource.persistence.dataobject.JobBatchResponseDO;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskBatchMapper;
+import com.aizuda.easy.retry.template.datasource.persistence.mapper.WorkflowNodeMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTaskBatch;
+import com.aizuda.easy.retry.template.datasource.persistence.po.WorkflowNode;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.google.common.collect.Lists;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -42,12 +50,12 @@ import java.util.Objects;
  * @since ：2.4.0
  */
 @Service
+@RequiredArgsConstructor
 public class JobBatchServiceImpl implements JobBatchService {
 
-    @Autowired
-    private JobTaskBatchMapper jobTaskBatchMapper;
-    @Autowired
-    private JobMapper jobMapper;
+    private final JobTaskBatchMapper jobTaskBatchMapper;
+    private final JobMapper jobMapper;
+    private final WorkflowNodeMapper workflowNodeMapper;
 
     @Override
     public PageResult<List<JobBatchResponseVO>> getJobBatchPage(final JobBatchQueryVO queryVO) {
@@ -78,10 +86,11 @@ public class JobBatchServiceImpl implements JobBatchService {
         jobBatchQueryDO.setTaskBatchStatus(queryVO.getTaskBatchStatus());
         jobBatchQueryDO.setGroupNames(groupNames);
         jobBatchQueryDO.setNamespaceId(userSessionVO.getNamespaceId());
-        List<JobBatchResponseDO> batchResponseDOList = jobTaskBatchMapper.selectJobBatchPageList(pageDTO, jobBatchQueryDO);
+        List<JobBatchResponseDO> batchResponseDOList = jobTaskBatchMapper.selectJobBatchPageList(pageDTO,
+            jobBatchQueryDO);
 
         List<JobBatchResponseVO> batchResponseVOList = JobBatchResponseVOConverter.INSTANCE.toJobBatchResponseVOs(
-                batchResponseDOList);
+            batchResponseDOList);
 
         return new PageResult<>(pageDTO, batchResponseVOList);
     }
@@ -93,8 +102,28 @@ public class JobBatchServiceImpl implements JobBatchService {
             return null;
         }
 
-        Job job = jobMapper.selectById(jobTaskBatch.getJobId());
-        return JobBatchResponseVOConverter.INSTANCE.toJobBatchResponseVO(jobTaskBatch, job);
+        if (jobTaskBatch.getTaskType().equals(TaskTypeEnum.JOB.getType())) {
+            Job job = jobMapper.selectById(jobTaskBatch.getJobId());
+            return JobBatchResponseVOConverter.INSTANCE.toJobBatchResponseVO(jobTaskBatch, job);
+        }
+
+        JobBatchResponseVO jobBatchResponseVO = JobBatchResponseVOConverter.INSTANCE.toJobBatchResponseVO(jobTaskBatch);
+
+        // 回调节点
+        if (SystemConstants.CALLBACK_JOB_ID.equals(jobTaskBatch.getJobId())) {
+            WorkflowNode workflowNode = workflowNodeMapper.selectById(jobTaskBatch.getWorkflowNodeId());
+            jobBatchResponseVO.setJobName(workflowNode.getNodeName());
+            jobBatchResponseVO.setCallback(JsonUtil.parseObject(workflowNode.getNodeInfo(), CallbackConfig.class));
+        }
+
+        // 条件节点
+        if (SystemConstants.DECISION_JOB_ID.equals(jobTaskBatch.getJobId())) {
+            WorkflowNode workflowNode = workflowNodeMapper.selectById(jobTaskBatch.getWorkflowNodeId());
+            jobBatchResponseVO.setJobName(workflowNode.getNodeName());
+            jobBatchResponseVO.setDecision(JsonUtil.parseObject(workflowNode.getNodeInfo(), DecisionConfig.class));
+        }
+
+        return jobBatchResponseVO;
     }
 
     @Override

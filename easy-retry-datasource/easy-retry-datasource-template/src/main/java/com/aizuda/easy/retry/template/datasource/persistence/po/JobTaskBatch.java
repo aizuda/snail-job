@@ -79,6 +79,11 @@ public class JobTaskBatch implements Serializable {
     private Long executionAt;
 
     /**
+     * 任务类型 3、JOB任务 4、WORKFLOW任务
+     */
+    private Integer taskType;
+
+    /**
      * 操作原因
      */
     private Integer operationReason;

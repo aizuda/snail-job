@@ -5,7 +5,7 @@ import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
-import com.aizuda.easy.retry.server.common.enums.JobExecuteStrategyEnum;
+import com.aizuda.easy.retry.server.common.enums.JobTaskExecutorSceneEnum;
 import com.aizuda.easy.retry.server.common.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
@@ -49,6 +49,9 @@ public class JobTaskBatchGenerator {
 
         // 生成一个新的任务
         JobTaskBatch jobTaskBatch = JobTaskConverter.INSTANCE.toJobTaskBatch(context);
+        JobTaskExecutorSceneEnum jobTaskExecutorSceneEnum = JobTaskExecutorSceneEnum.get(
+            context.getTaskExecutorScene());
+        jobTaskBatch.setTaskType(jobTaskExecutorSceneEnum.getTaskType().getType());
         jobTaskBatch.setCreateDt(LocalDateTime.now());
 
         // 无执行的节点
@@ -60,13 +63,12 @@ public class JobTaskBatchGenerator {
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                 @Override
                 public void afterCompletion(int status) {
-
                     if (Objects.nonNull(context.getWorkflowNodeId()) && Objects.nonNull(context.getWorkflowTaskBatchId())) {
                         // 若是工作流则开启下一个任务
                         try {
                             WorkflowNodeTaskExecuteDTO taskExecuteDTO = new WorkflowNodeTaskExecuteDTO();
                             taskExecuteDTO.setWorkflowTaskBatchId(context.getWorkflowTaskBatchId());
-                            taskExecuteDTO.setExecuteStrategy(JobExecuteStrategyEnum.AUTO.getType());
+                            taskExecuteDTO.setTaskExecutorScene(JobTaskExecutorSceneEnum.AUTO_JOB.getType());
                             taskExecuteDTO.setParentId(context.getWorkflowNodeId());
                             ActorRef actorRef = ActorGenerator.workflowTaskExecutorActor();
                             actorRef.tell(taskExecuteDTO, actorRef);
@@ -104,7 +106,7 @@ public class JobTaskBatchGenerator {
         JobTimerTaskDTO jobTimerTaskDTO = new JobTimerTaskDTO();
         jobTimerTaskDTO.setTaskBatchId(jobTaskBatch.getId());
         jobTimerTaskDTO.setJobId(context.getJobId());
-        jobTimerTaskDTO.setExecuteStrategy(context.getExecuteStrategy());
+        jobTimerTaskDTO.setTaskExecutorScene(context.getTaskExecutorScene());
         jobTimerTaskDTO.setWorkflowTaskBatchId(context.getWorkflowTaskBatchId());
         jobTimerTaskDTO.setWorkflowNodeId(context.getWorkflowNodeId());
         JobTimerWheel.register(TaskTypeEnum.JOB.getType(), jobTaskBatch.getId(),

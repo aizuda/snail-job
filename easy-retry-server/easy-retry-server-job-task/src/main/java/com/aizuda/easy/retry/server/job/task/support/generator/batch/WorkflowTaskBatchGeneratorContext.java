@@ -40,7 +40,7 @@ public class WorkflowTaskBatchGeneratorContext {
     /**
      * 执行策略 1、auto 2、manual 3、workflow
      */
-    private Integer executeStrategy;
+    private Integer taskExecutorScene;
 
     /**
      * 流程信息

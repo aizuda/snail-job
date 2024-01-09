@@ -2,7 +2,7 @@ package com.aizuda.easy.retry.server.job.task.support.timer;
 
 import akka.actor.ActorRef;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
-import com.aizuda.easy.retry.server.common.enums.JobExecuteStrategyEnum;
+import com.aizuda.easy.retry.server.common.enums.JobTaskExecutorSceneEnum;
 import com.aizuda.easy.retry.server.common.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.job.task.dto.JobTaskPrepareDTO;
 import com.aizuda.easy.retry.server.job.task.dto.JobTimerTaskDTO;
@@ -31,7 +31,7 @@ public class ResidentJobTimerTask implements TimerTask {
             // 清除时间轮的缓存
             JobTimerWheel.clearCache(TaskTypeEnum.JOB.getType(), jobTimerTaskDTO.getTaskBatchId());
             JobTaskPrepareDTO jobTaskPrepare = JobTaskConverter.INSTANCE.toJobTaskPrepare(job);
-            jobTaskPrepare.setExecuteStrategy(JobExecuteStrategyEnum.AUTO.getType());
+            jobTaskPrepare.setTaskExecutorScene(JobTaskExecutorSceneEnum.AUTO_JOB.getType());
             // 执行预处理阶段
             ActorRef actorRef = ActorGenerator.jobTaskPrepareActor();
             actorRef.tell(jobTaskPrepare, actorRef);

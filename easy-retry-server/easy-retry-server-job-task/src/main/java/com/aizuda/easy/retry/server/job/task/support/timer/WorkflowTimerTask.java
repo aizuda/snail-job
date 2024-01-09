@@ -9,8 +9,6 @@ import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
-import com.aizuda.easy.retry.server.job.task.dto.JobTimerTaskDTO;
-import com.aizuda.easy.retry.server.job.task.dto.TaskExecuteDTO;
 import com.aizuda.easy.retry.server.job.task.dto.WorkflowNodeTaskExecuteDTO;
 import com.aizuda.easy.retry.server.job.task.dto.WorkflowTimerTaskDTO;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.WorkflowTaskBatchMapper;
@@ -47,7 +45,7 @@ public class WorkflowTimerTask implements TimerTask {
             WorkflowNodeTaskExecuteDTO taskExecuteDTO = new WorkflowNodeTaskExecuteDTO();
             taskExecuteDTO.setWorkflowTaskBatchId(workflowTimerTaskDTO.getWorkflowTaskBatchId());
             taskExecuteDTO.setWorkflowId(workflowTimerTaskDTO.getWorkflowId());
-            taskExecuteDTO.setExecuteStrategy(workflowTimerTaskDTO.getExecuteStrategy());
+            taskExecuteDTO.setTaskExecutorScene(workflowTimerTaskDTO.getTaskExecutorScene());
             taskExecuteDTO.setParentId(SystemConstants.ROOT);
             ActorRef actorRef = ActorGenerator.workflowTaskExecutorActor();
             actorRef.tell(taskExecuteDTO, actorRef);

@@ -92,4 +92,10 @@ public class WorkflowExecutorContext {
      * 日志信息
      */
     private String logMessage;
+
+    /**
+     * 执行策略 1、auto 2、manual 3、workflow
+     */
+    private Integer taskExecutorScene;
+
 }
