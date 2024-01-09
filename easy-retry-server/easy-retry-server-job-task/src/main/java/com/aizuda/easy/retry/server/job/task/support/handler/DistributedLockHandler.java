@@ -1,9 +1,7 @@
 package com.aizuda.easy.retry.server.job.task.support.handler;
 
 import cn.hutool.core.lang.Assert;
-import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
-import com.aizuda.easy.retry.server.common.Lifecycle;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.dto.LockConfig;
 import com.aizuda.easy.retry.server.common.enums.UnLockOperationEnum;

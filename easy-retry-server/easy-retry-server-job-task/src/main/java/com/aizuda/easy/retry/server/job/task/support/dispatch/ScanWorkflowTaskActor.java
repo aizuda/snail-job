@@ -11,7 +11,7 @@ import com.aizuda.easy.retry.server.common.cache.CacheConsumerGroup;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.dto.PartitionTask;
 import com.aizuda.easy.retry.server.common.dto.ScanTask;
-import com.aizuda.easy.retry.server.common.enums.JobExecuteStrategyEnum;
+import com.aizuda.easy.retry.server.common.enums.JobTaskExecutorSceneEnum;
 import com.aizuda.easy.retry.server.common.strategy.WaitStrategies;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.server.common.util.PartitionTaskUtils;
@@ -60,7 +60,7 @@ public class ScanWorkflowTaskActor extends AbstractActor {
     }
 
     private void doScan(ScanTask scanTask) {
-        long total = PartitionTaskUtils.process(startId -> listAvailableJobs(startId, scanTask),
+        PartitionTaskUtils.process(startId -> listAvailableJobs(startId, scanTask),
                 this::processPartitionTasks, 0);
     }
 
@@ -79,7 +79,7 @@ public class ScanWorkflowTaskActor extends AbstractActor {
         for (final WorkflowTaskPrepareDTO waitExecTask : waitExecWorkflows) {
             // 执行预处理阶段
             ActorRef actorRef = ActorGenerator.workflowTaskPrepareActor();
-            waitExecTask.setExecuteStrategy(JobExecuteStrategyEnum.AUTO.getType());
+            waitExecTask.setTaskExecutorScene(JobTaskExecutorSceneEnum.AUTO_JOB.getType());
             actorRef.tell(waitExecTask, actorRef);
         }
     }

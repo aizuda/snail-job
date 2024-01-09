@@ -11,7 +11,7 @@ import com.aizuda.easy.retry.server.common.cache.CacheConsumerGroup;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.dto.PartitionTask;
 import com.aizuda.easy.retry.server.common.dto.ScanTask;
-import com.aizuda.easy.retry.server.common.enums.JobExecuteStrategyEnum;
+import com.aizuda.easy.retry.server.common.enums.JobTaskExecutorSceneEnum;
 import com.aizuda.easy.retry.server.common.enums.TriggerTypeEnum;
 import com.aizuda.easy.retry.server.common.strategy.WaitStrategies;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
@@ -24,7 +24,6 @@ import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
-import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -92,7 +91,7 @@ public class ScanJobTaskActor extends AbstractActor {
         for (final JobTaskPrepareDTO waitExecJob : waitExecJobs) {
             // 执行预处理阶段
             ActorRef actorRef = ActorGenerator.jobTaskPrepareActor();
-            waitExecJob.setExecuteStrategy(JobExecuteStrategyEnum.AUTO.getType());
+            waitExecJob.setTaskExecutorScene(JobTaskExecutorSceneEnum.AUTO_JOB.getType());
             actorRef.tell(waitExecJob, actorRef);
         }
     }

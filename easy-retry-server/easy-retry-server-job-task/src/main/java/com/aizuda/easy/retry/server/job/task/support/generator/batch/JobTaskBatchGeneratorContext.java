@@ -2,8 +2,6 @@ package com.aizuda.easy.retry.server.job.task.support.generator.batch;
 
 import lombok.Data;
 
-import java.time.LocalDateTime;
-
 /**
  * @author www.byteblogs.com
  * @date 2023-10-02 13:12:48
@@ -43,7 +41,7 @@ public class JobTaskBatchGeneratorContext {
     /**
      * 执行策略 1、auto 2、manual 3、workflow
      */
-    private Integer executeStrategy;
+    private Integer taskExecutorScene;
 
     /**
      * 工作流任务批次id

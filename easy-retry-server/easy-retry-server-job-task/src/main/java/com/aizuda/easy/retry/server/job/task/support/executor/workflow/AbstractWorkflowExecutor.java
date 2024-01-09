@@ -3,21 +3,21 @@ package com.aizuda.easy.retry.server.job.task.support.executor.workflow;
 import akka.actor.ActorRef;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
-import com.aizuda.easy.retry.common.core.constant.SystemConstants;
+import com.aizuda.easy.retry.common.core.enums.JobArgsTypeEnum;
 import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
-import com.aizuda.easy.retry.server.common.enums.JobExecuteStrategyEnum;
+import com.aizuda.easy.retry.server.common.enums.JobTaskExecutorSceneEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.job.task.dto.WorkflowNodeTaskExecuteDTO;
-import com.aizuda.easy.retry.server.job.task.support.LockExecutor;
 import com.aizuda.easy.retry.server.job.task.support.WorkflowExecutor;
 import com.aizuda.easy.retry.server.job.task.support.WorkflowTaskConverter;
 import com.aizuda.easy.retry.server.job.task.support.generator.batch.JobTaskBatchGenerator;
 import com.aizuda.easy.retry.server.job.task.support.generator.batch.JobTaskBatchGeneratorContext;
 import com.aizuda.easy.retry.server.job.task.support.handler.DistributedLockHandler;
 import com.aizuda.easy.retry.server.job.task.support.handler.WorkflowBatchHandler;
+import com.aizuda.easy.retry.server.retry.task.support.dispatch.task.TaskExecutorSceneEnum;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskBatchMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
@@ -26,7 +26,12 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
 import java.text.MessageFormat;
@@ -52,6 +57,8 @@ public abstract class AbstractWorkflowExecutor implements WorkflowExecutor, Init
     private WorkflowBatchHandler workflowBatchHandler;
     @Autowired
     private JobTaskMapper jobTaskMapper;
+    @Autowired
+    private TransactionTemplate transactionTemplate;
 
     @Override
     @Transactional
@@ -69,16 +76,20 @@ public abstract class AbstractWorkflowExecutor implements WorkflowExecutor, Init
                     return;
                 }
 
-                if (!preValidate(context)) {
-                    return;
-                }
+                transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+                    @Override
+                    protected void doInTransactionWithoutResult(final TransactionStatus status) {
 
-                beforeExecute(context);
+                        if (!preValidate(context)) {
+                            return;
+                        }
+                        beforeExecute(context);
 
-                doExecute(context);
+                        doExecute(context);
 
-                afterExecute(context);
-
+                        afterExecute(context);
+                    }
+                });
             });
 
     }
@@ -91,6 +102,7 @@ public abstract class AbstractWorkflowExecutor implements WorkflowExecutor, Init
             generatorContext.setTaskBatchStatus(JobTaskBatchStatusEnum.CANCEL.getStatus());
             generatorContext.setOperationReason(JobOperationReasonEnum.WORKFLOW_NODE_NO_OPERATION_REQUIRED.getReason());
             generatorContext.setJobId(context.getJobId());
+            generatorContext.setTaskExecutorScene(context.getTaskExecutorScene());
             jobTaskBatchGenerator.generateJobTaskBatch(generatorContext);
             try {
                 workflowBatchHandler.complete(context.getWorkflowTaskBatchId());
@@ -118,17 +130,22 @@ public abstract class AbstractWorkflowExecutor implements WorkflowExecutor, Init
     }
 
     protected void workflowTaskExecutor(WorkflowExecutorContext context) {
-        try {
-            WorkflowNodeTaskExecuteDTO taskExecuteDTO = new WorkflowNodeTaskExecuteDTO();
-            taskExecuteDTO.setWorkflowTaskBatchId(context.getWorkflowTaskBatchId());
-            taskExecuteDTO.setExecuteStrategy(JobExecuteStrategyEnum.AUTO.getType());
-            taskExecuteDTO.setParentId(context.getWorkflowNodeId());
-            taskExecuteDTO.setTaskBatchId(context.getTaskBatchId());
-            ActorRef actorRef = ActorGenerator.workflowTaskExecutorActor();
-            actorRef.tell(taskExecuteDTO, actorRef);
-        } catch (Exception e) {
-            log.error("工作流执行失败", e);
-        }
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCompletion(int status) {
+                try {
+                    WorkflowNodeTaskExecuteDTO taskExecuteDTO = new WorkflowNodeTaskExecuteDTO();
+                    taskExecuteDTO.setWorkflowTaskBatchId(context.getWorkflowTaskBatchId());
+                    taskExecuteDTO.setTaskExecutorScene(context.getTaskExecutorScene());
+                    taskExecuteDTO.setParentId(context.getWorkflowNodeId());
+                    taskExecuteDTO.setTaskBatchId(context.getTaskBatchId());
+                    ActorRef actorRef = ActorGenerator.workflowTaskExecutorActor();
+                    actorRef.tell(taskExecuteDTO, actorRef);
+                } catch (Exception e) {
+                    log.error("工作流执行失败", e);
+                }
+            }
+        });
     }
 
     protected JobTask generateJobTask(WorkflowExecutorContext context, JobTaskBatch jobTaskBatch) {
@@ -139,7 +156,7 @@ public abstract class AbstractWorkflowExecutor implements WorkflowExecutor, Init
         jobTask.setJobId(context.getJobId());
         jobTask.setClientInfo(StrUtil.EMPTY);
         jobTask.setTaskBatchId(jobTaskBatch.getId());
-        jobTask.setArgsType(1);
+        jobTask.setArgsType(JobArgsTypeEnum.TEXT.getArgsType());
         jobTask.setArgsStr(Optional.ofNullable(context.getTaskResult()).orElse(StrUtil.EMPTY));
         jobTask.setTaskStatus(context.getJobTaskStatus());
         jobTask.setResultMessage(String.valueOf(context.getEvaluationResult()));

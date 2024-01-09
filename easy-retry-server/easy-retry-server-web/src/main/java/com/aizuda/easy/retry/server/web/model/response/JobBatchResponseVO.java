@@ -1,5 +1,8 @@
 package com.aizuda.easy.retry.server.web.model.response;
 
+import com.aizuda.easy.retry.server.common.config.SystemProperties.Callback;
+import com.aizuda.easy.retry.server.common.dto.CallbackConfig;
+import com.aizuda.easy.retry.server.common.dto.DecisionConfig;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -58,4 +61,14 @@ public class JobBatchResponseVO {
      * 执行器名称
      */
     private String executorInfo;
+
+    /**
+     * 工作流的回调节点信息
+     */
+    private CallbackConfig callback;
+
+    /**
+     * 工作流的决策节点信息
+     */
+    private DecisionConfig decision;
 }

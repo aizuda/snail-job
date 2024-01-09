@@ -7,7 +7,7 @@ import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
-import com.aizuda.easy.retry.server.common.enums.JobExecuteStrategyEnum;
+import com.aizuda.easy.retry.server.common.enums.JobTaskExecutorSceneEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.server.job.task.dto.JobTaskPrepareDTO;
@@ -250,7 +250,7 @@ public class WorkflowBatchHandler {
                 // 重新尝试执行, 重新生成任务批次
                 WorkflowNodeTaskExecuteDTO taskExecuteDTO = new WorkflowNodeTaskExecuteDTO();
                 taskExecuteDTO.setWorkflowTaskBatchId(workflowTaskBatchId);
-                taskExecuteDTO.setExecuteStrategy(JobExecuteStrategyEnum.WORKFLOW.getType());
+                taskExecuteDTO.setTaskExecutorScene(JobTaskExecutorSceneEnum.AUTO_WORKFLOW.getType());
                 taskExecuteDTO.setParentId(parentId);
                 ActorRef actorRef = ActorGenerator.workflowTaskExecutorActor();
                 actorRef.tell(taskExecuteDTO, actorRef);
@@ -261,7 +261,7 @@ public class WorkflowBatchHandler {
                 // 生成任务批次
                 Job job = jobMapper.selectById(jobTaskBatch.getJobId());
                 JobTaskPrepareDTO jobTaskPrepare = JobTaskConverter.INSTANCE.toJobTaskPrepare(job);
-                jobTaskPrepare.setExecuteStrategy(JobExecuteStrategyEnum.WORKFLOW.getType());
+                jobTaskPrepare.setTaskExecutorScene(JobTaskExecutorSceneEnum.AUTO_WORKFLOW.getType());
                 jobTaskPrepare.setNextTriggerAt(DateUtils.toNowMilli() + DateUtils.toNowMilli() % 1000);
                 jobTaskPrepare.setWorkflowTaskBatchId(workflowTaskBatchId);
                 jobTaskPrepare.setParentWorkflowNodeId(parentId);

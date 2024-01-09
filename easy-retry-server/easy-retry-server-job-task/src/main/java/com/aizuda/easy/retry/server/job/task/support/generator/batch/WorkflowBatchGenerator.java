@@ -1,16 +1,12 @@
 package com.aizuda.easy.retry.server.job.task.support.generator.batch;
 
 import cn.hutool.core.lang.Assert;
-import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
-import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
 import com.aizuda.easy.retry.server.common.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
-import com.aizuda.easy.retry.server.job.task.dto.JobTimerTaskDTO;
 import com.aizuda.easy.retry.server.job.task.dto.WorkflowTimerTaskDTO;
 import com.aizuda.easy.retry.server.job.task.support.WorkflowTaskConverter;
-import com.aizuda.easy.retry.server.job.task.support.timer.JobTimerTask;
 import com.aizuda.easy.retry.server.job.task.support.timer.JobTimerWheel;
 import com.aizuda.easy.retry.server.job.task.support.timer.WorkflowTimerTask;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.WorkflowTaskBatchMapper;
@@ -19,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -55,7 +50,7 @@ public class WorkflowBatchGenerator {
         WorkflowTimerTaskDTO workflowTimerTaskDTO = new WorkflowTimerTaskDTO();
         workflowTimerTaskDTO.setWorkflowTaskBatchId(workflowTaskBatch.getId());
         workflowTimerTaskDTO.setWorkflowId(context.getWorkflowId());
-        workflowTimerTaskDTO.setExecuteStrategy(context.getExecuteStrategy());
+        workflowTimerTaskDTO.setTaskExecutorScene(context.getTaskExecutorScene());
         JobTimerWheel.register(TaskTypeEnum.WORKFLOW.getType(), workflowTaskBatch.getId(),
             new WorkflowTimerTask(workflowTimerTaskDTO), delay, TimeUnit.MILLISECONDS);
     }

@@ -5,7 +5,7 @@ import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskStatusEnum;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
-import com.aizuda.easy.retry.server.common.enums.JobExecuteStrategyEnum;
+import com.aizuda.easy.retry.server.common.enums.JobTaskExecutorSceneEnum;
 import com.aizuda.easy.retry.server.job.task.dto.CompleteJobBatchDTO;
 import com.aizuda.easy.retry.server.job.task.dto.WorkflowNodeTaskExecuteDTO;
 import com.aizuda.easy.retry.server.job.task.support.event.JobTaskFailAlarmEvent;
@@ -80,7 +80,7 @@ public class JobTaskBatchHandler {
             try {
                 WorkflowNodeTaskExecuteDTO taskExecuteDTO = new WorkflowNodeTaskExecuteDTO();
                 taskExecuteDTO.setWorkflowTaskBatchId(completeJobBatchDTO.getWorkflowTaskBatchId());
-                taskExecuteDTO.setExecuteStrategy(JobExecuteStrategyEnum.AUTO.getType());
+                taskExecuteDTO.setTaskExecutorScene(JobTaskExecutorSceneEnum.AUTO_WORKFLOW.getType());
                 taskExecuteDTO.setParentId(completeJobBatchDTO.getWorkflowNodeId());
                 // 这里取第一个的任务执行结果
                 taskExecuteDTO.setTaskBatchId(completeJobBatchDTO.getTaskBatchId());

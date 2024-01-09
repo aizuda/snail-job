@@ -2,8 +2,6 @@ package com.aizuda.easy.retry.server.job.task.dto;
 
 import lombok.Data;
 
-import java.time.LocalDateTime;
-
 /**
  * @author www.byteblogs.com
  * @date 2023-09-25 22:42:21
@@ -55,7 +53,7 @@ public class JobTaskPrepareDTO {
     /**
      * 执行策略 1、auto 2、manual 3、workflow
      */
-    private Integer executeStrategy;
+    private Integer taskExecutorScene;
 
     /**
      * 工作流任务批次id

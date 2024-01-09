@@ -58,7 +58,7 @@ Easy-RETRY 是一个针对业务系统重试流量的治理平台，其自身具
 - [HelloWorld](https://www.easyretry.com/pages/da9ecc/)
 
 ## 应用实例
-- [easy-retry-demo](https://gitee.com/zhangyutongxue/easy-retry-demo)
+- [easy-retry-demo](https://gitee.com/byteblogs168/easy-retry-demo.git)
 
 ## 期望
 欢迎提出更好的意见，帮助完善 Easy-Retry
