@@ -5,7 +5,6 @@ import com.aizuda.easy.retry.client.job.core.Scanner;
 import com.aizuda.easy.retry.client.job.core.annotation.JobExecutor;
 import com.aizuda.easy.retry.client.job.core.cache.JobExecutorInfoCache;
 import com.aizuda.easy.retry.client.job.core.dto.JobArgs;
-import com.aizuda.easy.retry.client.job.core.dto.JobContext;
 import com.aizuda.easy.retry.client.job.core.dto.JobExecutorInfo;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import lombok.extern.slf4j.Slf4j;

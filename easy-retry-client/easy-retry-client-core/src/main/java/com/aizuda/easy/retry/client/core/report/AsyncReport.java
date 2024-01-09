@@ -2,8 +2,8 @@ package com.aizuda.easy.retry.client.core.report;
 
 import com.aizuda.easy.retry.client.common.Lifecycle;
 import com.aizuda.easy.retry.client.common.config.EasyRetryProperties;
+import com.aizuda.easy.retry.client.common.window.SlidingWindow;
 import com.aizuda.easy.retry.client.core.retryer.RetryerInfo;
-import com.aizuda.easy.retry.client.core.window.SlidingWindow;
 import com.aizuda.easy.retry.server.model.dto.RetryTaskDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,9 +1,10 @@
-package com.aizuda.easy.retry.client.core.client;
+package com.aizuda.easy.retry.client.common.client;
 
 import com.aizuda.easy.retry.client.common.annotation.Mapping;
 import com.aizuda.easy.retry.client.common.netty.RequestMethod;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants.HTTP_PATH;
 import com.aizuda.easy.retry.common.core.model.NettyResult;
+import com.aizuda.easy.retry.server.model.dto.LogTaskDTO;
 import com.aizuda.easy.retry.server.model.dto.RetryTaskDTO;
 
 import java.util.List;
@@ -23,5 +24,8 @@ public interface NettyClient {
 
     @Mapping(method = RequestMethod.POST, path = HTTP_PATH.BATCH_REPORT)
     NettyResult reportRetryInfo(List<RetryTaskDTO> list);
+
+    @Mapping(method = RequestMethod.POST, path = HTTP_PATH.BATCH_LOG_REPORT)
+    NettyResult reportLogTask(List<LogTaskDTO> list);
 
 }

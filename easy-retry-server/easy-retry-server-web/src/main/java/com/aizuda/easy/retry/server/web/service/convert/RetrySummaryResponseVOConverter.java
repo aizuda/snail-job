@@ -5,8 +5,6 @@ import com.aizuda.easy.retry.template.datasource.persistence.dataobject.Dashboar
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
-import java.util.List;
-
 /**
  * @author zhengweilin
  * @version 1.0.0
@@ -18,6 +16,4 @@ public interface RetrySummaryResponseVOConverter {
     RetrySummaryResponseVOConverter INSTANCE = Mappers.getMapper(RetrySummaryResponseVOConverter.class);
 
     DashboardCardResponseVO.RetryTask toRetryTask(DashboardCardResponseDO.RetryTask retryTask);
-
-    List<DashboardCardResponseVO.RetryTaskBar> toRetryTaskBar(List<DashboardCardResponseDO.RetryTaskBar> retryTaskBarList);
 }

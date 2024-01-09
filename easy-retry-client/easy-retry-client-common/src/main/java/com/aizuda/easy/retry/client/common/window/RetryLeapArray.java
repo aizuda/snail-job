@@ -1,4 +1,4 @@
-package com.aizuda.easy.retry.client.core.window;
+package com.aizuda.easy.retry.client.common.window;
 
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.common.core.window.LeapArray;

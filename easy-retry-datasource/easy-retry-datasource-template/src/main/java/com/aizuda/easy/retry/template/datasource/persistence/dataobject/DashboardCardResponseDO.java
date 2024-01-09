@@ -3,7 +3,7 @@ package com.aizuda.easy.retry.template.datasource.persistence.dataobject;
 import lombok.Data;
 
 import java.math.BigDecimal;
-import java.util.List;
+import java.time.LocalDateTime;
 
 /**
  * @author: wodeyangzipingpingwuqi
@@ -22,11 +22,6 @@ public class DashboardCardResponseDO {
      */
     private RetryTask retryTask;
 
-    /**
-     * 重试任务折线图
-     */
-    private List<RetryTaskBar> retryTaskBarList;
-
     @Data
     public static class RetryTask {
 
@@ -44,6 +39,9 @@ public class DashboardCardResponseDO {
 
         // 暂停重试
         private Long suspendNum;
+
+        // 触发时间
+        private LocalDateTime triggerAt;
     }
 
     @Data
@@ -60,18 +58,5 @@ public class DashboardCardResponseDO {
         private Integer totalNum;
         // 成功率
         private BigDecimal successRate;
-    }
-
-    @Data
-    public static class RetryTaskBar {
-        /**
-         * 时间x轴
-         */
-        private String x;
-
-        /**
-         * 任务总数y轴
-         */
-        private Long taskTotal;
     }
 }

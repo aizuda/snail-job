@@ -1,0 +1,8 @@
+com.aizuda.easy.retry.client.common.log.dialect.logtube.LogTubeLogFactory
+com.aizuda.easy.retry.client.common.log.dialect.slf4j.Slf4jLogFactory
+com.aizuda.easy.retry.client.common.log.dialect.log4j2.Log4j2LogFactory
+com.aizuda.easy.retry.client.common.log.dialect.log4j.Log4jLogFactory
+com.aizuda.easy.retry.client.common.log.dialect.commons.ApacheCommonsLogFactory
+com.aizuda.easy.retry.client.common.log.dialect.tinylog.TinyLogFactory
+com.aizuda.easy.retry.client.common.log.dialect.tinylog.TinyLog2Factory
+com.aizuda.easy.retry.client.common.log.dialect.jboss.JbossLogFactory

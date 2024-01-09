@@ -33,6 +33,7 @@ public interface SystemConstants {
      * 心跳
      */
     interface BEAT {
+
         /**
          * PING
          */
@@ -65,17 +66,22 @@ public interface SystemConstants {
         String BATCH_REPORT = "/batch/report";
 
         /**
+         * 批量日志上报
+         */
+        String BATCH_LOG_REPORT = "/batch/server/reportLog";
+
+        /**
          * 上报job的运行结果
          */
         String REPORT_JOB_DISPATCH_RESULT = "/report/dispatch/result";
     }
 
     String LOGO = "  ___                ___     _            \n" +
-                    " | __|__ _ ____  _  | _ \\___| |_ _ _ _  _ \n" +
-                    " | _|/ _` (_-< || | |   / -_)  _| '_| || |\n" +
-                    " |___\\__,_/__/\\_, | |_|_\\___|\\__|_|  \\_, |\n" +
-                    "              |__/                   |__/ \n" +
-                    " :: Easy Retry ::                     (v{})       \n";
+        " | __|__ _ ____  _  | _ \\___| |_ _ _ _  _ \n" +
+        " | _|/ _` (_-< || | |   / -_)  _| '_| || |\n" +
+        " |___\\__,_/__/\\_, | |_|_\\___|\\__|_|  \\_, |\n" +
+        "              |__/                   |__/ \n" +
+        " :: Easy Retry ::                     (v{})       \n";
 
     /**
      * 调度时长
@@ -85,22 +91,22 @@ public interface SystemConstants {
     /**
      * 延迟30s为了尽可能保障集群节点都启动完成在进行rebalance
      */
-   Long SCHEDULE_INITIAL_DELAY = 30L;
+    Long SCHEDULE_INITIAL_DELAY = 30L;
 
     /**
      * 默认名称空间
      */
-   String DEFAULT_NAMESPACE = "764d604ec6fc45f68cd92514c40e9e1a";
+    String DEFAULT_NAMESPACE = "764d604ec6fc45f68cd92514c40e9e1a";
 
     /**
      * AT 所有人
      */
-   String AT_ALL = "all";
+    String AT_ALL = "all";
 
     /**
      * 根节点
      */
-   Long ROOT = -1L;
+    Long ROOT = -1L;
 
     /**
      * 系统内置的决策任务ID

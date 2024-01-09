@@ -1,18 +1,15 @@
 package com.aizuda.easy.retry.client.job.core.client;
 
+import com.aizuda.easy.retry.client.common.dto.JobContext;
 import com.aizuda.easy.retry.client.job.core.IJobExecutor;
 import com.aizuda.easy.retry.client.job.core.cache.JobExecutorInfoCache;
 import com.aizuda.easy.retry.client.job.core.cache.ThreadPoolCache;
+import com.aizuda.easy.retry.client.job.core.dto.JobExecutorInfo;
 import com.aizuda.easy.retry.client.job.core.executor.AbstractJobExecutor;
 import com.aizuda.easy.retry.client.job.core.executor.AnnotationJobExecutor;
-import com.aizuda.easy.retry.client.job.core.dto.JobContext;
-import com.aizuda.easy.retry.client.job.core.dto.JobExecutorInfo;
-import com.aizuda.easy.retry.client.job.core.executor.JobExecutorFutureCallback;
-import com.aizuda.easy.retry.client.model.ExecuteResult;
-import com.aizuda.easy.retry.client.model.request.DispatchJobRequest;
 import com.aizuda.easy.retry.client.model.StopJobDTO;
+import com.aizuda.easy.retry.client.model.request.DispatchJobRequest;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
-import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.common.core.model.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
@@ -59,6 +56,7 @@ public class JobEndPoint {
     private static JobContext buildJobContext(DispatchJobRequest dispatchJob) {
         JobContext jobContext = new JobContext();
         jobContext.setJobId(dispatchJob.getJobId());
+        jobContext.setNamespaceId(dispatchJob.getNamespaceId());
         jobContext.setTaskId(dispatchJob.getTaskId());
         jobContext.setTaskBatchId(dispatchJob.getTaskBatchId());
         jobContext.setGroupName(dispatchJob.getGroupName());

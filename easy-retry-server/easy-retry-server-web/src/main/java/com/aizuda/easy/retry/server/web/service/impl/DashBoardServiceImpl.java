@@ -13,14 +13,17 @@ import com.aizuda.easy.retry.server.web.model.base.PageResult;
 import com.aizuda.easy.retry.server.web.model.enums.DateTypeEnum;
 import com.aizuda.easy.retry.server.web.model.request.ServerNodeQueryVO;
 import com.aizuda.easy.retry.server.web.model.request.UserSessionVO;
-import com.aizuda.easy.retry.server.web.model.response.*;
+import com.aizuda.easy.retry.server.web.model.response.DashboardCardResponseVO;
+import com.aizuda.easy.retry.server.web.model.response.DashboardLineResponseVO;
+import com.aizuda.easy.retry.server.web.model.response.DashboardRetryLineResponseVO;
+import com.aizuda.easy.retry.server.web.model.response.ServerNodeResponseVO;
 import com.aizuda.easy.retry.server.web.service.DashBoardService;
 import com.aizuda.easy.retry.server.web.service.convert.*;
 import com.aizuda.easy.retry.server.web.util.UserSessionUtils;
 import com.aizuda.easy.retry.template.datasource.persistence.dataobject.ActivePodQuantityResponseDO;
 import com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardCardResponseDO;
-import com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO;
 import com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardLineResponseDO;
+import com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobSummaryMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetrySummaryMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.ServerNodeMapper;
@@ -38,7 +41,9 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.text.MessageFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -79,7 +84,22 @@ public class DashBoardServiceImpl implements DashBoardService {
         // 定时任务
         dashboardCardResponseVO.setJobTask(JobSummaryResponseVOConverter.INSTANCE.toTaskJob(jobSummaryMapper.toJobTask(namespaceId, groupNames)));
         // 重试任务柱状图
-        dashboardCardResponseVO.setRetryTaskBarList(RetrySummaryResponseVOConverter.INSTANCE.toRetryTaskBar(retrySummaryMapper.retryTaskBarList(namespaceId, groupNames)));
+        HashMap<LocalDateTime, DashboardCardResponseVO.RetryTaskBar> retryTaskBarMap = new HashMap<>();
+        for (int i = 0; i < 7; i++) {
+            DashboardCardResponseVO.RetryTaskBar retryTaskBar = new DashboardCardResponseVO.RetryTaskBar().setX(LocalDateTime.of(LocalDate.now(), LocalTime.MIN).plusDays(-i).toLocalDate().toString()).setTaskTotal(0L);
+            retryTaskBarMap.put(LocalDateTime.of(LocalDate.now(), LocalTime.MIN).plusDays(-i), retryTaskBar);
+        }
+
+        List<DashboardCardResponseDO.RetryTask> retryTaskList = retrySummaryMapper.retryTaskBarList(namespaceId, groupNames);
+        Map<LocalDateTime, LongSummaryStatistics> summaryStatisticsMap = retryTaskList.stream().collect(Collectors.groupingBy(DashboardCardResponseDO.RetryTask::getTriggerAt,
+                Collectors.summarizingLong(i -> i.getMaxCountNum() + i.getRunningNum() + i.getSuspendNum() + i.getFinishNum())));
+        for (Map.Entry<LocalDateTime, LongSummaryStatistics> map : summaryStatisticsMap.entrySet()) {
+            if (retryTaskBarMap.containsKey(LocalDateTime.of(map.getKey().toLocalDate(), LocalTime.MIN))) {
+                DashboardCardResponseVO.RetryTaskBar retryTaskBar = retryTaskBarMap.get(LocalDateTime.of(map.getKey().toLocalDate(), LocalTime.MIN));
+                retryTaskBar.setX(map.getKey().toLocalDate().toString()).setTaskTotal(map.getValue().getSum());
+            }
+        }
+        dashboardCardResponseVO.setRetryTaskBarList(new ArrayList<>(retryTaskBarMap.values()));
         // 在线Pods
         List<ActivePodQuantityResponseDO> activePodQuantityDO = serverNodeMapper.countActivePod(Lists.newArrayList(userSessionVO.getNamespaceId(), ServerRegister.NAMESPACE_ID));
         Map<Integer, Long> map = activePodQuantityDO.stream().collect(Collectors.toMap(ActivePodQuantityResponseDO::getNodeType, ActivePodQuantityResponseDO::getTotal));

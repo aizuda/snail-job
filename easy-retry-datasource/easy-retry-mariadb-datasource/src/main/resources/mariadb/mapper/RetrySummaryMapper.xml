@@ -57,33 +57,18 @@
     </select>
 
     <select id="retryTaskBarList"
-            resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardCardResponseDO$RetryTaskBar">
-        SELECT tmp.date AS x, ifnull(b.taskTotal, 0) AS taskTotal
-        FROM (SELECT curdate() AS date
-              UNION ALL
-              SELECT DATE_SUB(CURDATE(), INTERVAL 1 DAY) AS date
-              UNION ALL
-              SELECT DATE_SUB(CURDATE(), interval 2 day) AS date
-              UNION ALL
-              SELECT DATE_SUB(CURDATE(), interval 3 day) AS date
-              UNION ALL
-              SELECT DATE_SUB(CURDATE(), interval 4 day) AS date
-              UNION ALL
-              SELECT DATE_SUB(CURDATE(), interval 5 day) AS date
-              UNION ALL
-              SELECT DATE_SUB(CURDATE(), interval 6 day) AS date) tmp
-                 LEFT JOIN (SELECT DATE (trigger_at) AS triggerAt,
-             SUM(running_num + finish_num + max_count_num + suspend_num) AS taskTotal FROM retry_summary
+            resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardCardResponseDO$RetryTask">
+        SELECT
+        trigger_at, running_num, finish_num, max_count_num, suspend_num
+        FROM retry_summary
         WHERE namespace_id = #{namespaceId}
         <if test="groupNames != null and groupNames.size > 0">
             AND group_name IN
-            <foreach collection="groupNames" item="groupName"  open="("  separator="," close=")">
+            <foreach collection="groupNames" item="groupName" open="(" separator="," close=")">
                 #{groupName}
             </foreach>
         </if>
-        GROUP BY triggerAt
-            ) b
-        ON tmp.date = b.triggerAt
+        ORDER BY id DESC LIMIT 7
     </select>
 
     <select id="retryLineList"

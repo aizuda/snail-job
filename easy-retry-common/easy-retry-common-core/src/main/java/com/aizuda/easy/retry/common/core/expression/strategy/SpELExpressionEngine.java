@@ -18,7 +18,7 @@ import java.util.Map;
  */
 public class SpELExpressionEngine extends AbstractExpressionEngine {
 
-    private final static ExpressionParser ENGINE = new SpelExpressionParser();
+    private static final ExpressionParser ENGINE = new SpelExpressionParser();
 
     @Override
     protected Object doEval(String expression, Map<String, Object> context) {

@@ -25,7 +25,7 @@ public interface RetrySummaryMapper extends BaseMapper<RetrySummary> {
 
     DashboardCardResponseDO.RetryTask retryTask(@Param("namespaceId") String namespaceId, @Param("groupNames") List<String> groupNames);
 
-    List<DashboardCardResponseDO.RetryTaskBar> retryTaskBarList(@Param("namespaceId") String namespaceId, @Param("groupNames") List<String> groupNames);
+    List<DashboardCardResponseDO.RetryTask> retryTaskBarList(@Param("namespaceId") String namespaceId, @Param("groupNames") List<String> groupNames);
 
     IPage<DashboardRetryLineResponseDO.Task> retryTaskList(@Param("namespaceId") String namespaceId, @Param("groupNames") List<String> groupNames, Page<Object> page);
 

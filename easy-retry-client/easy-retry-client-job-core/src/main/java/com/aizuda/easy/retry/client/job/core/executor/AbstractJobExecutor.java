@@ -1,10 +1,11 @@
 package com.aizuda.easy.retry.client.job.core.executor;
 
+import com.aizuda.easy.retry.client.common.dto.JobContext;
+import com.aizuda.easy.retry.client.common.util.ThreadLocalLogUtil;
 import com.aizuda.easy.retry.client.job.core.IJobExecutor;
 import com.aizuda.easy.retry.client.job.core.cache.FutureCache;
 import com.aizuda.easy.retry.client.job.core.cache.ThreadPoolCache;
 import com.aizuda.easy.retry.client.job.core.dto.JobArgs;
-import com.aizuda.easy.retry.client.job.core.dto.JobContext;
 import com.aizuda.easy.retry.client.job.core.dto.ShardingJobArgs;
 import com.aizuda.easy.retry.client.job.core.timer.StopTaskTimerTask;
 import com.aizuda.easy.retry.client.job.core.timer.TimerManager;
@@ -47,6 +48,9 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
             } else {
                 jobArgs = buildJobArgs(jobContext);
             }
+
+            // 初始化调度信息（日志上报LogUtil）
+            ThreadLocalLogUtil.setContext(jobContext);
 
             return doJobExecute(jobArgs);
         });

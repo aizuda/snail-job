@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.server.web.model.response;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -77,6 +78,7 @@ public class DashboardCardResponseVO {
     }
 
     @Data
+    @Accessors(chain = true)
     public static class RetryTaskBar {
         /**
          * 时间x轴
