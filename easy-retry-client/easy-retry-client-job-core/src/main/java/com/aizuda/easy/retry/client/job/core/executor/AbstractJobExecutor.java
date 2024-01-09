@@ -9,14 +9,13 @@ import com.aizuda.easy.retry.client.job.core.dto.ShardingJobArgs;
 import com.aizuda.easy.retry.client.job.core.timer.StopTaskTimerTask;
 import com.aizuda.easy.retry.client.job.core.timer.TimerManager;
 import com.aizuda.easy.retry.client.model.ExecuteResult;
-import com.aizuda.easy.retry.common.core.enums.TaskTypeEnum;
+import com.aizuda.easy.retry.common.core.enums.JobTaskTypeEnum;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.concurrent.Callable;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -43,7 +42,7 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
         // 执行任务
         ListenableFuture<ExecuteResult> submit = decorator.submit(() -> {
             JobArgs jobArgs;
-            if (jobContext.getTaskType() == TaskTypeEnum.SHARDING.getType()) {
+            if (jobContext.getTaskType() == JobTaskTypeEnum.SHARDING.getType()) {
                 jobArgs = buildShardingJobArgs(jobContext);
             } else {
                 jobArgs = buildJobArgs(jobContext);

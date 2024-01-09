@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.server.job.task.support.generator.task;
 
-import com.aizuda.easy.retry.common.core.enums.TaskTypeEnum;
+import com.aizuda.easy.retry.common.core.enums.JobTaskTypeEnum;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -11,13 +11,13 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class JobTaskGeneratorFactory {
 
-    private static final ConcurrentHashMap<TaskTypeEnum, JobTaskGenerator> CACHE = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<JobTaskTypeEnum, JobTaskGenerator> CACHE = new ConcurrentHashMap<>();
 
-    public static void registerTaskInstance(TaskTypeEnum taskInstanceType, JobTaskGenerator generator) {
+    public static void registerTaskInstance(JobTaskTypeEnum taskInstanceType, JobTaskGenerator generator) {
         CACHE.put(taskInstanceType, generator);
     }
 
     public static JobTaskGenerator getTaskInstance(Integer type) {
-        return CACHE.get(TaskTypeEnum.valueOf(type));
+        return CACHE.get(JobTaskTypeEnum.valueOf(type));
     }
 }

@@ -5,7 +5,7 @@ import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.util.ClientInfoUtils;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.server.job.task.dto.RealJobExecutorDTO;
-import com.aizuda.easy.retry.common.core.enums.TaskTypeEnum;
+import com.aizuda.easy.retry.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -23,8 +23,8 @@ public class ClusterJobExecutor extends AbstractJobExecutor {
 
 
     @Override
-    public TaskTypeEnum getTaskInstanceType() {
-        return TaskTypeEnum.CLUSTER;
+    public JobTaskTypeEnum getTaskInstanceType() {
+        return JobTaskTypeEnum.CLUSTER;
     }
 
     @Override

@@ -366,6 +366,7 @@ CREATE TABLE `job_task_batch`
     `task_batch_status`       tinyint(4)          NOT NULL DEFAULT '0' COMMENT '任务批次状态 0、失败 1、成功',
     `operation_reason`        tinyint(4)          NOT NULL DEFAULT '0' COMMENT '操作原因',
     `execution_at`            bigint(13)          NOT NULL DEFAULT '0' COMMENT '任务执行时间',
+    `task_type`               tinyint(4)          NOT NULL DEFAULT '3' COMMENT '任务类型 3、JOB任务 4、WORKFLOW任务',
     `parent_id`               varchar(64)         NOT NULL DEFAULT '' COMMENT '父节点',
     `create_dt`               datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_dt`               datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',

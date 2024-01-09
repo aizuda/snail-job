@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.server.job.task.support;
 
-import com.aizuda.easy.retry.common.core.enums.TaskTypeEnum;
+import com.aizuda.easy.retry.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.easy.retry.server.job.task.support.stop.TaskStopJobContext;
 
 /**
@@ -10,7 +10,7 @@ import com.aizuda.easy.retry.server.job.task.support.stop.TaskStopJobContext;
  */
 public interface JobTaskStopHandler {
 
-    TaskTypeEnum getTaskType();
+    JobTaskTypeEnum getTaskType();
 
     void stop(TaskStopJobContext context);
 

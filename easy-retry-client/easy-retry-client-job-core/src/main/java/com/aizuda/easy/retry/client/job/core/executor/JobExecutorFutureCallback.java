@@ -8,7 +8,7 @@ import com.aizuda.easy.retry.client.model.ExecuteResult;
 import com.aizuda.easy.retry.client.model.request.DispatchJobResultRequest;
 import com.aizuda.easy.retry.common.core.enums.JobTaskStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
-import com.aizuda.easy.retry.common.core.enums.TaskTypeEnum;
+import com.aizuda.easy.retry.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.model.NettyResult;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
@@ -62,7 +62,7 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
     }
 
     private void stopThreadPool() {
-        if (jobContext.getTaskType() == TaskTypeEnum.CLUSTER.getType()) {
+        if (jobContext.getTaskType() == JobTaskTypeEnum.CLUSTER.getType()) {
             ThreadPoolCache.stopThreadPool(jobContext.getTaskBatchId());
         }
     }

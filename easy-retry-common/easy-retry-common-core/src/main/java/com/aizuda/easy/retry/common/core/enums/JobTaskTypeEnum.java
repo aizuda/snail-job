@@ -11,7 +11,7 @@ import lombok.Getter;
  */
 @AllArgsConstructor
 @Getter
-public enum TaskTypeEnum {
+public enum JobTaskTypeEnum {
 
     CLUSTER(1),
     BROADCAST(2),
@@ -19,8 +19,8 @@ public enum TaskTypeEnum {
 
     private final int type;
 
-    public static TaskTypeEnum valueOf(int type) {
-        for (TaskTypeEnum value : TaskTypeEnum.values()) {
+    public static JobTaskTypeEnum valueOf(int type) {
+        for (JobTaskTypeEnum value : JobTaskTypeEnum.values()) {
             if (value.getType() == type) {
                 return value;
             }
