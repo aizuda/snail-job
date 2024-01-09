@@ -10,6 +10,7 @@ import org.springframework.core.env.Environment;
  * @author: www.byteblogs.com
  * @date : 2021-11-19 16:27
  */
+@Deprecated
 public class LogUtils {
 
     private LogUtils() {

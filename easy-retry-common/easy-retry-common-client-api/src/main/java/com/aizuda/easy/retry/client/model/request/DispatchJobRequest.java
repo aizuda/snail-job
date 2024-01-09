@@ -12,6 +12,9 @@ import javax.validation.constraints.NotNull;
 @Data
 public class DispatchJobRequest {
 
+    @NotNull(message = "namespaceId 不能为空")
+    private String namespaceId;
+
     @NotNull(message = "jobId 不能为空")
     private Long jobId;
 

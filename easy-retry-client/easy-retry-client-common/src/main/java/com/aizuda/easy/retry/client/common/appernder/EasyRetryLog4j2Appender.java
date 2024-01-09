@@ -1,0 +1,115 @@
+package com.aizuda.easy.retry.client.common.appernder;
+
+import com.aizuda.easy.retry.client.common.dto.LogContentDTO;
+import com.aizuda.easy.retry.client.common.report.AsyncReportLog;
+import com.aizuda.easy.retry.client.common.util.ThreadLocalLogUtil;
+import com.aizuda.easy.retry.common.core.context.SpringContext;
+import com.aizuda.easy.retry.server.model.dto.constant.LogFieldConstant;
+import org.apache.logging.log4j.core.Filter;
+import org.apache.logging.log4j.core.Layout;
+import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.appender.AbstractAppender;
+import org.apache.logging.log4j.core.config.plugins.Plugin;
+import org.apache.logging.log4j.core.config.plugins.PluginAttribute;
+import org.apache.logging.log4j.core.config.plugins.PluginElement;
+import org.apache.logging.log4j.core.config.plugins.PluginFactory;
+import org.apache.logging.log4j.core.util.Booleans;
+import org.apache.logging.log4j.core.util.Throwables;
+import org.slf4j.MDC;
+
+import java.io.Serializable;
+import java.util.Objects;
+
+/**
+ * @author wodeyangzipingpingwuqi
+ * @date 2024-01-02
+ * @since 2.6.0
+ */
+@Plugin(name = "EasyRetryLog4j2Appender", category = "Core", elementType = "appender", printObject = true)
+public class EasyRetryLog4j2Appender extends AbstractAppender {
+
+    @Override
+    public void append(LogEvent event) {
+
+        // Not job context
+        if (Objects.isNull(ThreadLocalLogUtil.getContext()) || Objects.isNull(MDC.get(LogFieldConstant.MDC_REMOTE))) {
+            return;
+        }
+
+        MDC.remove(LogFieldConstant.MDC_REMOTE);
+        LogContentDTO logContentDTO = new LogContentDTO();
+        logContentDTO.addTimeStamp(event.getTimeMillis());
+        logContentDTO.addLevelField(event.getLevel().name());
+        logContentDTO.addThreadField(event.getThreadName());
+        logContentDTO.addLocationField(getLocationField(event));
+        logContentDTO.addThrowableField(getThrowableField(event));
+        logContentDTO.addMessageField(event.getMessage().getFormattedMessage());
+
+        // slidingWindow syncReportLog
+        SpringContext.getBeanByType(AsyncReportLog.class).syncReportLog(logContentDTO);
+    }
+
+    protected EasyRetryLog4j2Appender(String name, Filter filter, Layout<? extends Serializable> layout, boolean ignoreExceptions) {
+        super(name, filter, layout, ignoreExceptions);
+    }
+
+    /**
+     * Create Log4j2Appender
+     *
+     * @param name       name
+     * @param filter     filter
+     * @param layout     layout
+     * @param ignore     ignore
+     * @param timeFormat time format
+     * @param timeZone   time zone
+     * @return Log4j2Appender
+     */
+    @PluginFactory
+    public static EasyRetryLog4j2Appender create(
+            @PluginAttribute("name") final String name,
+            @PluginElement("Filter") final Filter filter,
+            @PluginElement("Layout") Layout<? extends Serializable> layout,
+            @PluginAttribute("ignoreExceptions") final String ignore,
+            @PluginAttribute("timeFormat") final String timeFormat,
+            @PluginAttribute("timeZone") final String timeZone
+    ) {
+        boolean ignoreExceptions = Booleans.parseBoolean(ignore, false);
+        EasyRetryLog4j2Appender log4j2Appender = new EasyRetryLog4j2Appender(name, filter, layout, ignoreExceptions);
+        return log4j2Appender;
+    }
+
+    private String getLocationField(LogEvent event) {
+        StackTraceElement source = event.getSource();
+        if (source == null && (!event.isIncludeLocation())) {
+            event.setIncludeLocation(true);
+            source = event.getSource();
+            event.setIncludeLocation(false);
+        }
+        return source == null ? "Unknown(Unknown Source)" : source.toString();
+    }
+
+    private String getThrowableField(LogEvent event) {
+        String throwable = getThrowableStr(event.getThrown());
+        if (throwable != null) {
+            return throwable;
+        }
+        return null;
+    }
+
+    private String getThrowableStr(Throwable throwable) {
+        if (throwable == null) {
+            return null;
+        }
+        StringBuilder sb = new StringBuilder();
+        boolean isFirst = true;
+        for (String s : Throwables.toStringList(throwable)) {
+            if (isFirst) {
+                isFirst = false;
+            } else {
+                sb.append(System.getProperty("line.separator"));
+            }
+            sb.append(s);
+        }
+        return sb.toString();
+    }
+}

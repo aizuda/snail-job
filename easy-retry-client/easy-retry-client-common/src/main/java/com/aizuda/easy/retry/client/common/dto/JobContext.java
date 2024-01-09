@@ -1,4 +1,4 @@
-package com.aizuda.easy.retry.client.job.core.dto;
+package com.aizuda.easy.retry.client.common.dto;
 
 import lombok.Data;
 
@@ -19,13 +19,12 @@ public class JobContext {
 
     private Long taskId;
 
+    private String namespaceId;
+
     private String groupName;
 
     private String executorInfo;
 
-    /**
-     * 任务类型
-     */
     private Integer taskType;
 
     private Integer parallelNum;

@@ -2,7 +2,6 @@ package com.aizuda.easy.retry.client.job.core.executor;
 
 import com.aizuda.easy.retry.client.job.core.cache.JobExecutorInfoCache;
 import com.aizuda.easy.retry.client.job.core.dto.JobArgs;
-import com.aizuda.easy.retry.client.job.core.dto.JobContext;
 import com.aizuda.easy.retry.client.job.core.dto.JobExecutorInfo;
 import com.aizuda.easy.retry.client.model.ExecuteResult;
 import org.springframework.stereotype.Component;

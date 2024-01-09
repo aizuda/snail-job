@@ -1,15 +1,19 @@
-package com.aizuda.easy.retry.client.core.window;
+package com.aizuda.easy.retry.client.common.window;
 
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.client.common.log.Local;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.common.core.window.Listener;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -23,7 +27,6 @@ import java.util.concurrent.locks.ReentrantLock;
  * @date : 2023-07-23 13:38
  * @since 2.1.0
  */
-@Slf4j
 public class SlidingWindow<T> {
 
     /**
@@ -104,8 +107,7 @@ public class SlidingWindow<T> {
                     ConcurrentLinkedQueue<T> list = new ConcurrentLinkedQueue<>();
                     list.add(data);
 
-                    LogUtils
-                        .info(log, "添加新数据 [{}] [{}] size:[{}]", windowPeriod, Thread.currentThread().getName(), list.size());
+                    Local.info("添加新数据 [{}] [{}] size:[{}]", windowPeriod, Thread.currentThread().getName(), list.size());
                     saveData.put(windowPeriod, list);
 
                     // 扫描n-1个窗口，是否过期，过期则删除
@@ -133,7 +135,7 @@ public class SlidingWindow<T> {
      */
     private void alarmWindowTotal() {
         if (saveData.size() > windowTotalThreshold) {
-            log.warn("当前存活的窗口数量过多 总量:[{}] > 阈值:[{}] ", saveData.size(), windowTotalThreshold);
+            Local.warn("当前存活的窗口数量过多 总量:[{}] > 阈值:[{}] ", saveData.size(), windowTotalThreshold);
         }
     }
 
@@ -197,7 +199,7 @@ public class SlidingWindow<T> {
             }
 
         } catch (Exception e) {
-            log.error("到达总量窗口期通知异常", e);
+            Local.error("到达总量窗口期通知异常", e);
         } finally {
             NOTICE_LOCK.unlock();
         }
@@ -213,7 +215,7 @@ public class SlidingWindow<T> {
 
         LocalDateTime currentTime = LocalDateTime.now().minus(duration * 2, chronoUnit);
         if (windowPeriod.isBefore(currentTime)) {
-            LogUtils.info(log, "删除过期窗口 windowPeriod:[{}] currentTime:[{}]", windowPeriod, currentTime);
+            Local.info("删除过期窗口 windowPeriod:[{}] currentTime:[{}]", windowPeriod, currentTime);
             saveData.remove(windowPeriod);
         }
 
@@ -269,7 +271,7 @@ public class SlidingWindow<T> {
         removeInvalidWindow(windowPeriod);
 
         if (windowPeriod.isBefore(condition)) {
-            LogUtils.info(log, "到达时间窗口期 [{}] [{}]", windowPeriod, JsonUtil.toJsonString(saveData));
+            Local.info("到达时间窗口期 [{}] [{}]", windowPeriod, JsonUtil.toJsonString(saveData));
             doHandlerListener(windowPeriod);
         }
     }
@@ -292,7 +294,7 @@ public class SlidingWindow<T> {
             try {
                 extract(LocalDateTime.now().minus(duration, chronoUnit));
             } catch (Exception e) {
-                log.error("滑动窗口异常", e);
+                Local.error("滑动窗口异常", e);
             }
         }, 1, 1, TimeUnit.SECONDS);
     }

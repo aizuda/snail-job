@@ -8,6 +8,7 @@ import com.aizuda.easy.retry.server.job.task.support.generator.task.JobTaskGener
 import com.aizuda.easy.retry.server.job.task.support.callback.ClientCallbackContext;
 import com.aizuda.easy.retry.server.job.task.support.executor.job.JobExecutorContext;
 import com.aizuda.easy.retry.server.job.task.support.stop.TaskStopJobContext;
+import com.aizuda.easy.retry.server.model.dto.LogTaskDTO;
 import com.aizuda.easy.retry.server.job.task.support.block.job.BlockStrategies;
 import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobLogMessage;
@@ -36,7 +37,7 @@ public interface JobTaskConverter {
     JobTaskPrepareDTO toJobTaskPrepare(JobPartitionTaskDTO job);
 
     @Mappings(
-        @Mapping(source = "id", target = "jobId")
+            @Mapping(source = "id", target = "jobId")
     )
     JobTaskPrepareDTO toJobTaskPrepare(Job job);
 
@@ -51,11 +52,18 @@ public interface JobTaskConverter {
     BlockStrategies.BlockStrategyContext toBlockStrategyContext(JobTaskPrepareDTO prepareDTO);
 
     TaskStopJobContext toStopJobContext(BlockStrategies.BlockStrategyContext context);
+
     TaskStopJobContext toStopJobContext(JobExecutorResultDTO context);
+
     TaskStopJobContext toStopJobContext(Job job);
+
     TaskStopJobContext toStopJobContext(JobTaskPrepareDTO context);
 
     JobLogMessage toJobLogMessage(JobLogDTO jobLogDTO);
+
+    JobLogMessage toJobLogMessage(LogTaskDTO logTaskDTO);
+
+    JobLogDTO toJobLogDTO(JobExecutorContext context);
 
     JobLogDTO toJobLogDTO(JobExecutorResultDTO resultDTO);
 
@@ -84,7 +92,7 @@ public interface JobTaskConverter {
     JobExecutorResultDTO toJobExecutorResultDTO(ClientCallbackContext context);
 
     @Mappings(
-        @Mapping(source = "id", target = "taskId")
+            @Mapping(source = "id", target = "taskId")
     )
     JobExecutorResultDTO toJobExecutorResultDTO(JobTask jobTask);
 

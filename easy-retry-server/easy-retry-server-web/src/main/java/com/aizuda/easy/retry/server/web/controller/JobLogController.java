@@ -18,13 +18,13 @@ import java.util.List;
  * @since ： 2.4.0
  */
 @RestController
-@RequestMapping("/job/log")
+@RequestMapping("/job")
 public class JobLogController {
 
     @Autowired
     private JobLogService jobLogService;
 
-    @GetMapping("/list")
+    @GetMapping("/log/list")
     @LoginRequired
     public PageResult<List<JobLogResponseVO>> getJobLogPage(JobLogQueryVO jobQueryVO) {
         return jobLogService.getJobLogPage(jobQueryVO);

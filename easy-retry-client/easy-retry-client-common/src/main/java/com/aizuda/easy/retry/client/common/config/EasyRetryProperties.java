@@ -50,6 +50,11 @@ public class EasyRetryProperties {
     private SlidingWindowConfig slidingWindow = new SlidingWindowConfig();
 
     /**
+     * 重试、调度日志远程上报滑动窗口配置
+     */
+    private LogSlidingWindowConfig logSlidingWindow = new LogSlidingWindowConfig();
+
+    /**
      * 服务端配置
      */
     private ServerConfig server = new ServerConfig();
@@ -69,6 +74,31 @@ public class EasyRetryProperties {
 
     @Data
     public static class SlidingWindowConfig {
+
+        /**
+         * 总量窗口期阈值
+         */
+        private int totalThreshold = 50;
+
+        /**
+         * 窗口数量预警
+         */
+        private int windowTotalThreshold = 150;
+
+        /**
+         * 窗口期时间长度
+         */
+        private long duration = 10;
+
+        /**
+         * 窗口期单位
+         */
+        private ChronoUnit chronoUnit = ChronoUnit.SECONDS;
+
+    }
+
+    @Data
+    public static class LogSlidingWindowConfig {
 
         /**
          * 总量窗口期阈值

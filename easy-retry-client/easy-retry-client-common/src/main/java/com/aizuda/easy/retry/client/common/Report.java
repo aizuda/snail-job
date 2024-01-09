@@ -1,6 +1,4 @@
-package com.aizuda.easy.retry.client.core;
-
-import com.aizuda.easy.retry.client.core.retryer.RetryerInfo;
+package com.aizuda.easy.retry.client.common;
 
 /**
  * @author www.byteblogs.com

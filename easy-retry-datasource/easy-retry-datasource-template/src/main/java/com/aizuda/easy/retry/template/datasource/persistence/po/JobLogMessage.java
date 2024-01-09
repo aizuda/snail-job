@@ -62,9 +62,18 @@ public class JobLogMessage implements Serializable {
     private LocalDateTime createDt;
 
     /**
+     * 日志数量
+     */
+    private Integer logNum;
+
+    /**
      * 调度信息
      */
     private String message;
 
+    /**
+     * 真实上报时间
+     */
+    private Long realTime;
 
 }

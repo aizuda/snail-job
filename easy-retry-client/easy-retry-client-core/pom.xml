@@ -33,11 +33,6 @@
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
-        <!-- guava retry -->
-        <dependency>
-            <groupId>com.github.rholder</groupId>
-            <artifactId>guava-retrying</artifactId>
-        </dependency>
         <dependency>
             <groupId>com.aizuda</groupId>
             <artifactId>easy-retry-common-core</artifactId>
