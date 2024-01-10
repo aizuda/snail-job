@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.server.job.task.support.dispatch;
 
 import akka.actor.AbstractActor;
 import cn.hutool.core.util.StrUtil;
+import com.aizuda.easy.retry.common.core.log.LogContentDTO;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
@@ -15,8 +16,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * @author www.byteblogs.com
@@ -33,15 +33,25 @@ public class JobLogActor extends AbstractActor {
 
     @Override
     public Receive createReceive() {
-        return receiveBuilder().match(JobLogDTO.class, (jobLogDTO -> {
-            try {
-                saveLogMessage(jobLogDTO);
-            } catch (Exception e) {
-                log.error("保存日志异常.", e);
-            } finally {
-                getContext().stop(getSelf());
-            }
-        })).build();
+        return receiveBuilder()
+                .match(List.class, (list -> {
+                    try {
+                        jobLogMessageMapper.batchInsert(list);
+                    } catch (Exception e) {
+                        log.error("保存客户端日志异常.", e);
+                    } finally {
+                        getContext().stop(getSelf());
+                    }
+                }))
+                .match(JobLogDTO.class, (jobLogDTO -> {
+                    try {
+                        saveLogMessage(jobLogDTO);
+                    } catch (Exception e) {
+                        log.error("保存日志异常.", e);
+                    } finally {
+                        getContext().stop(getSelf());
+                    }
+                })).build();
 
     }
 

@@ -6,7 +6,7 @@ import com.aizuda.easy.retry.client.job.core.annotation.JobExecutor;
 import com.aizuda.easy.retry.client.job.core.cache.JobExecutorInfoCache;
 import com.aizuda.easy.retry.client.job.core.dto.JobArgs;
 import com.aizuda.easy.retry.client.job.core.dto.JobExecutorInfo;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -51,7 +51,7 @@ public class JobExecutorScanner implements Scanner, ApplicationContextAware {
                         (MethodIntrospector.MetadataLookup<JobExecutor>) method -> AnnotatedElementUtils
                                 .findMergedAnnotation(method, JobExecutor.class));
             } catch (Throwable ex) {
-                LogUtils.error(log, "{} JobExecutor加载异常：{}", beanDefinitionName, ex);
+                EasyRetryLog.LOCAL.error("{} JobExecutor加载异常：{}", beanDefinitionName, ex);
             }
 
             String executorClassName = bean.getClass().getName();

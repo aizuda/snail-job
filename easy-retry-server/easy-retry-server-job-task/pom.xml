@@ -45,6 +45,7 @@
             <groupId>com.aizuda</groupId>
             <artifactId>easy-retry-common-client-api</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct</artifactId>
@@ -60,6 +61,12 @@
         <dependency>
             <groupId>com.aizuda</groupId>
             <artifactId>easy-retry-server-retry-task</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.projectlombok</groupId>
+                    <artifactId>lombok</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.googlecode.aviator</groupId>
@@ -78,6 +85,17 @@
             </exclusions>
         </dependency>
 
+        <!-- 上报日志，采用logback打印，排除log4j2 -->
+        <dependency>
+            <groupId>com.aizuda</groupId>
+            <artifactId>easy-retry-common-log</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-log4j2</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
