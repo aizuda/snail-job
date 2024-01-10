@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.server.model.dto;
 
+import com.aizuda.easy.retry.common.core.log.TaskLogFieldDTO;
 import lombok.Data;
 
 import java.io.Serializable;

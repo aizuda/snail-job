@@ -1,6 +1,5 @@
 package com.aizuda.easy.retry.client.job.core.executor;
 
-import com.aizuda.easy.retry.client.common.dto.JobContext;
 import com.aizuda.easy.retry.client.common.util.ThreadLocalLogUtil;
 import com.aizuda.easy.retry.client.job.core.IJobExecutor;
 import com.aizuda.easy.retry.client.job.core.cache.FutureCache;
@@ -11,6 +10,7 @@ import com.aizuda.easy.retry.client.job.core.timer.StopTaskTimerTask;
 import com.aizuda.easy.retry.client.job.core.timer.TimerManager;
 import com.aizuda.easy.retry.client.model.ExecuteResult;
 import com.aizuda.easy.retry.common.core.enums.JobTaskTypeEnum;
+import com.aizuda.easy.retry.common.core.model.JobContext;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;

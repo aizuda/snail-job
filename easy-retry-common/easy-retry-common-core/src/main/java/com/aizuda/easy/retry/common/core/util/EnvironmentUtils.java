@@ -19,10 +19,10 @@ public class EnvironmentUtils {
      *
      * @return
      */
-    private static Boolean getLogStatus() {
+    public static Boolean getLogStatus() {
 
         Environment environment = SpringContext.CONTEXT.getBean(Environment.class);
-        return environment.getProperty("flaky.retry.log.status", Boolean.class, Boolean.TRUE);
+        return environment.getProperty("easy.retry.log.status", Boolean.class, Boolean.TRUE);
     }
 
     /**

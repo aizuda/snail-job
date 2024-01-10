@@ -4,7 +4,7 @@ import lombok.Data;
 
 /**
  * @author zhengweilin
- * @version 1.0.0
+ * @version 2.6.0
  * @date 2023/11/28
  */
 @Data

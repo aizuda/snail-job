@@ -1,17 +1,19 @@
 package com.aizuda.easy.retry.server.starter.server.handler;
 
+import akka.actor.ActorRef;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.net.url.UrlQuery;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.core.log.TaskLogFieldDTO;
 import com.aizuda.easy.retry.common.core.model.EasyRetryRequest;
 import com.aizuda.easy.retry.common.core.model.NettyResult;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
+import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.handler.PostHttpRequestHandler;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.server.model.dto.LogTaskDTO;
-import com.aizuda.easy.retry.server.model.dto.TaskLogFieldDTO;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobLogMessageMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobLogMessage;
 import io.netty.handler.codec.http.HttpHeaders;
@@ -80,7 +82,8 @@ public class ReportLogHttpRequestHandler extends PostHttpRequestHandler {
         }
 
         // 批量新增日志数据
-        jobLogMessageMapper.batchInsert(jobLogMessageList);
+        ActorRef actorRef = ActorGenerator.jobLogActor();
+        actorRef.tell(jobLogMessageList, actorRef);
         return JsonUtil.toJsonString(new NettyResult(StatusEnum.YES.getStatus(), "Batch Log Retry Data Upload Processed Successfully", Boolean.TRUE, retryRequest.getReqId()));
     }
 }

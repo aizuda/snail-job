@@ -1,7 +1,5 @@
 package com.aizuda.easy.retry.client.job.core.executor;
 
-import com.aizuda.easy.retry.client.common.dto.JobContext;
-import com.aizuda.easy.retry.client.common.log.Remote;
 import com.aizuda.easy.retry.client.common.proxy.RequestBuilder;
 import com.aizuda.easy.retry.client.common.util.ThreadLocalLogUtil;
 import com.aizuda.easy.retry.client.job.core.cache.ThreadPoolCache;
@@ -9,11 +7,13 @@ import com.aizuda.easy.retry.client.job.core.client.JobNettyClient;
 import com.aizuda.easy.retry.client.model.ExecuteResult;
 import com.aizuda.easy.retry.client.model.request.DispatchJobResultRequest;
 import com.aizuda.easy.retry.common.core.enums.JobTaskStatusEnum;
-import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskTypeEnum;
+import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.core.model.JobContext;
 import com.aizuda.easy.retry.common.core.model.NettyResult;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.google.common.util.concurrent.FutureCallback;
 import lombok.extern.slf4j.Slf4j;
 
@@ -41,7 +41,7 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
     @Override
     public void onSuccess(ExecuteResult result) {
         // 上报执行成功
-        Remote.warn("任务执行成功 taskBatchId:[{}] [{}]", jobContext.getTaskBatchId(), JsonUtil.toJsonString(result));
+        EasyRetryLog.LOCAL.warn("任务执行成功 taskBatchId:[{}] [{}]", jobContext.getTaskBatchId(), JsonUtil.toJsonString(result));
 
         if (Objects.isNull(result)) {
             result = ExecuteResult.success();
@@ -57,7 +57,7 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
         try {
             CLIENT.dispatchResult(buildDispatchJobResultRequest(result, taskStatus));
         } catch (Exception e) {
-            Remote.error("执行结果上报异常.[{}]", jobContext.getTaskId(), e);
+            EasyRetryLog.LOCAL.error("执行结果上报异常.[{}]", jobContext.getTaskId(), e);
         } finally {
             stopThreadPool();
             ThreadLocalLogUtil.removeContext();
@@ -81,7 +81,7 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
                     buildDispatchJobResultRequest(failure, JobTaskStatusEnum.FAIL.getStatus())
             );
         } catch (Exception e) {
-            log.error("执行结果上报异常.[{}]", jobContext.getTaskId(), e);
+            EasyRetryLog.LOCAL.error("执行结果上报异常.[{}]", jobContext.getTaskId(), e);
         } finally {
             stopThreadPool();
             ThreadLocalLogUtil.removeContext();

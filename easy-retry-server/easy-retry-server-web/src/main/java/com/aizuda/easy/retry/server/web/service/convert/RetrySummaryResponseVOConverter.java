@@ -7,7 +7,7 @@ import org.mapstruct.factory.Mappers;
 
 /**
  * @author zhengweilin
- * @version 1.0.0
+ * @version 2.6.0
  * @date 2023/11/24
  */
 @Mapper

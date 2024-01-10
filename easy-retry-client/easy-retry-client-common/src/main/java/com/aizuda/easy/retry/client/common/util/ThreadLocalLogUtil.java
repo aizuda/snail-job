@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.client.common.util;
 
-import com.aizuda.easy.retry.client.common.dto.JobContext;
+
+import com.aizuda.easy.retry.common.core.model.JobContext;
 
 /**
  * @author wodeyangzipingpingwuqi·

@@ -78,11 +78,16 @@
         <appender-ref ref ="fileError"/>
     </appender>
 
+    <!-- EasyRetry appender -->
+    <appender name="easyLogServerAppender" class="com.aizuda.easy.retry.server.job.task.support.appender.EasyRetryServerLogbackAppender">
+    </appender>
+
     <!-- 控制台输出日志级别 -->
     <root level="info">
         <appender-ref ref="stdout" />
         <appender-ref ref="asyncInfo" />
         <appender-ref ref="asyncWarn" />
         <appender-ref ref="asyncError" />
+        <appender-ref ref="easyLogServerAppender" />
     </root>
 </configuration>

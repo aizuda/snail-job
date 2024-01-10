@@ -1,7 +1,7 @@
 package com.aizuda.easy.retry.client.job.core;
 
 
-import com.aizuda.easy.retry.client.common.dto.JobContext;
+import com.aizuda.easy.retry.common.core.model.JobContext;
 
 /**
  * job执行者

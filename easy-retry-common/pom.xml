@@ -22,6 +22,7 @@
         <module>easy-retry-common-server-api</module>
         <module>easy-retry-common-client-api</module>
         <module>easy-retry-common-core</module>
+        <module>easy-retry-common-log</module>
     </modules>
 
 </project>

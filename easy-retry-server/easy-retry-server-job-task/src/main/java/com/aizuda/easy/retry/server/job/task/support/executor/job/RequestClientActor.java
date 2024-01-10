@@ -12,12 +12,12 @@ import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
 import com.aizuda.easy.retry.server.common.client.RequestBuilder;
 import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
-import com.aizuda.easy.retry.server.job.task.support.ClientCallbackHandler;
-import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.server.job.task.client.JobRpcClient;
 import com.aizuda.easy.retry.server.job.task.dto.JobExecutorResultDTO;
 import com.aizuda.easy.retry.server.job.task.dto.JobLogDTO;
 import com.aizuda.easy.retry.server.job.task.dto.RealJobExecutorDTO;
+import com.aizuda.easy.retry.server.job.task.support.ClientCallbackHandler;
+import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.server.job.task.support.callback.ClientCallbackContext;
 import com.aizuda.easy.retry.server.job.task.support.callback.ClientCallbackFactory;
 import com.github.rholder.retry.Attempt;
@@ -69,8 +69,7 @@ public class RequestClientActor extends AbstractActor {
             // 构建请求客户端对象
             JobRpcClient rpcClient = buildRpcClient(registerNodeInfo, realJobExecutorDTO);
             Result<Boolean> dispatch = rpcClient.dispatch(dispatchJobRequest);
-            if (dispatch.getStatus() == StatusEnum.YES.getStatus() && Objects.equals(dispatch.getData(),
-                    Boolean.TRUE)) {
+            if (dispatch.getStatus() == StatusEnum.YES.getStatus() && Objects.equals(dispatch.getData(), Boolean.TRUE)) {
                 jobLogDTO.setMessage("任务调度成功");
                 ActorRef actorRef = ActorGenerator.jobLogActor();
                 actorRef.tell(jobLogDTO, actorRef);
