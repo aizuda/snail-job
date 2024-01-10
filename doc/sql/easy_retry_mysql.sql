@@ -319,6 +319,8 @@ CREATE TABLE `job_log_message`
     `task_batch_id` bigint(20)          NOT NULL COMMENT '任务批次id',
     `task_id`       bigint(20)          NOT NULL COMMENT '调度任务id',
     `message`       text                NOT NULL COMMENT '调度信息',
+    `log_num`       int(11)             NULL     DEFAULT NULL COMMENT '日志数量',
+    `real_time`     bigint(13)          NULL     DEFAULT NULL COMMENT '上报时间',
     `create_dt`     datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `ext_attrs`     varchar(256)        NULL     default '' COMMENT '扩展字段',
     PRIMARY KEY (`id`),

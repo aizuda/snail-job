@@ -117,9 +117,6 @@ public class JdbcLockProvider extends AbstractLockProvider implements Lifecycle 
 
     @Override
     public void start() {
-        // 删除已经过期的锁记录
-        distributedLockMapper.delete(new LambdaQueryWrapper<DistributedLock>()
-            .le(DistributedLock::getLockUntil, LocalDateTime.now().minusSeconds(10)));
     }
 
     @Override

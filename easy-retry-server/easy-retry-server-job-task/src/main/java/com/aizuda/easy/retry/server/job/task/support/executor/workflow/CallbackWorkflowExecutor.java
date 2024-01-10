@@ -8,11 +8,13 @@ import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.WorkflowNodeTypeEnum;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.client.RequestInterceptor;
 import com.aizuda.easy.retry.server.common.dto.CallbackConfig;
 import com.aizuda.easy.retry.server.common.enums.ContentTypeEnum;
 import com.aizuda.easy.retry.server.job.task.dto.JobLogDTO;
+import com.aizuda.easy.retry.server.job.task.dto.LogMetaDTO;
 import com.aizuda.easy.retry.server.job.task.support.WorkflowTaskConverter;
 import com.aizuda.easy.retry.server.model.dto.CallbackParamsDTO;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskMapper;
@@ -120,15 +122,24 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
         JobTask jobTask = generateJobTask(context, jobTaskBatch);
 
         // 保存执行的日志
-        JobLogDTO jobLogDTO = new JobLogDTO();
-        // TODO 等实时日志处理完毕后，再处理
-        jobLogDTO.setMessage(context.getLogMessage());
-        jobLogDTO.setTaskId(jobTask.getId());
-        jobLogDTO.setJobId(SystemConstants.CALLBACK_JOB_ID);
-        jobLogDTO.setGroupName(context.getGroupName());
-        jobLogDTO.setNamespaceId(context.getNamespaceId());
-        jobLogDTO.setTaskBatchId(jobTaskBatch.getId());
-        ActorRef actorRef = ActorGenerator.jobLogActor();
-        actorRef.tell(jobLogDTO, actorRef);
+//        JobLogDTO jobLogDTO = new JobLogDTO();
+//        // TODO 等实时日志处理完毕后，再处理
+//        jobLogDTO.setMessage(context.getLogMessage());
+//        jobLogDTO.setTaskId(jobTask.getId());
+//        jobLogDTO.setJobId(SystemConstants.CALLBACK_JOB_ID);
+//        jobLogDTO.setGroupName(context.getGroupName());
+//        jobLogDTO.setNamespaceId(context.getNamespaceId());
+//        jobLogDTO.setTaskBatchId(jobTaskBatch.getId());
+//        ActorRef actorRef = ActorGenerator.jobLogActor();
+//        actorRef.tell(jobLogDTO, actorRef);
+
+        LogMetaDTO logMetaDTO = new LogMetaDTO();
+        logMetaDTO.setNamespaceId(context.getNamespaceId());
+        logMetaDTO.setGroupName(context.getGroupName());
+        logMetaDTO.setTaskBatchId(context.getTaskBatchId());
+        logMetaDTO.setJobId(SystemConstants.CALLBACK_JOB_ID);
+        logMetaDTO.setTaskId(jobTask.getId());
+
+        EasyRetryLog.REMOTE.info("回调成功. logMeta:<|>{}<|>", logMetaDTO);
     }
 }

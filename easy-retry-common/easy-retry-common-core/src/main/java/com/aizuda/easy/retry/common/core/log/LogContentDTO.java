@@ -59,39 +59,4 @@ public class LogContentDTO {
         this.addField(LogFieldConstant.THROWABLE, throwable);
     }
 
-    public void addLogField(String log) {
-        this.addField(LogFieldConstant.LOG, log);
-    }
-
-    public void addJobIdField(Long jobInstanceId) {
-        this.addField(LogFieldConstant.JOB_ID, String.valueOf(jobInstanceId));
-    }
-
-    public void addJobInstanceIdField(Long jobInstanceId) {
-        this.addField(LogFieldConstant.JOB_INSTANCE_ID, String.valueOf(jobInstanceId));
-    }
-
-    public void addJobInstanceTaskIdField(Long taskId) {
-        this.addField(LogFieldConstant.JOB_INSTANCE_TASK_ID, String.valueOf(taskId));
-    }
-
-    public void addJobDispatchVersionTaskIdField(Long version) {
-        this.addField(LogFieldConstant.JOB_DISPATCH_VERSION, String.valueOf(version));
-    }
-
-    public void addTaskIdField(String taskId) {
-        this.addField(LogFieldConstant.TASK_ID, taskId);
-    }
-
-    public void addCircleIdField(Long circleId) {
-        this.addField(LogFieldConstant.CIRCLE_ID, String.valueOf(circleId));
-    }
-
-    public void addDelayTopic(String topic) {
-        this.addField(LogFieldConstant.DELAY_TOPIC, topic);
-    }
-
-    public void addWorkerAddressField(String workerAddress) {
-        this.addField(LogFieldConstant.WORKER_ADDRESS, workerAddress);
-    }
 }
