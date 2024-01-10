@@ -89,6 +89,13 @@ public class DistributedLockHandler {
         return lock;
     }
 
+    /**
+     * TODO 超时处理、自旋处理
+     *
+     * @param lockName
+     * @param lockAtMost
+     * @param lockExecutor
+     */
     public void lockAndProcessAfterUnlockDel(String lockName, String lockAtMost, LockExecutor lockExecutor) {
         LockConfig lockConfig = new LockConfig(LocalDateTime.now(), lockName, Duration.parse(lockAtMost),
             Duration.ofMillis(1),

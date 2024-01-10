@@ -1,14 +1,15 @@
 package com.aizuda.easy.retry.server.job.task.dto;
 
+import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import lombok.Data;
 
 /**
- * @author www.byteblogs.com
- * @date 2023-10-03 22:34:14
- * @since 2.4.0
+ * @author xiaowoniu
+ * @date 2024-01-10 22:56:33
+ * @since 2.6.0
  */
 @Data
-public class JobLogDTO {
+public class LogMetaDTO {
 
     /**
      * 命名空间
@@ -35,15 +36,8 @@ public class JobLogDTO {
      */
     private Long taskId;
 
-
-    /**
-     * 调度信息
-     */
-    private String message;
-
-    /**
-     * 真实上报时间
-     */
-    private Long realTime;
-
+    @Override
+    public String toString() {
+        return JsonUtil.toJsonString(taskBatchId);
+    }
 }
