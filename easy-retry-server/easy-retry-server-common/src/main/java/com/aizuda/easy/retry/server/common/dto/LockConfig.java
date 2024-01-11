@@ -1,47 +1,24 @@
 package com.aizuda.easy.retry.server.common.dto;
 
-import cn.hutool.core.lang.Assert;
-import com.aizuda.easy.retry.server.common.enums.UnLockOperationEnum;
-import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
-
 import java.time.Duration;
 import java.time.LocalDateTime;
 
 /**
+ * 分布式锁配置
+ *
  * @author: www.byteblogs.com
  * @date : 2023-07-21 08:43
  * @since 2.1.0
  */
 public class LockConfig {
 
-    private final LocalDateTime createDt;
+    private LocalDateTime createDt;
 
-    private final String lockName;
+    private String lockName;
 
-    private final Duration lockAtMost;
+    private Duration lockAtMost;
 
-    private final Duration lockAtLeast;
-
-    private final UnLockOperationEnum unLockOperation;
-
-    public LockConfig(final LocalDateTime createDt,
-        final String lockName,
-        final Duration lockAtMost,
-        final Duration lockAtLeast,
-        final UnLockOperationEnum unLockOperation) {
-        this.lockName = lockName;
-        this.lockAtMost = lockAtMost;
-        this.lockAtLeast = lockAtLeast;
-        this.createDt = createDt;
-        this.unLockOperation = unLockOperation;
-        Assert.notNull(createDt, () -> new EasyRetryServerException("createDt can not be null."));
-        Assert.notBlank(lockName, () -> new EasyRetryServerException("lockName can not be null."));
-        Assert.notNull(lockAtMost, () -> new EasyRetryServerException("lockAtMost can not be null. lockName:[{}]", lockName));
-        Assert.isFalse(lockAtMost.isNegative(), () -> new EasyRetryServerException("lockAtMost  is negative. lockName:[{}]", lockName));
-        Assert.notNull(lockAtLeast, () -> new EasyRetryServerException("lockAtLeast can not be null. lockName:[{}]", lockName));
-        Assert.isFalse(lockAtLeast.compareTo(lockAtMost) > 0, () -> new EasyRetryServerException("lockAtLeast is longer than lockAtMost for lock. lockName:[{}]", lockName));
-        Assert.notNull(unLockOperation, () -> new EasyRetryServerException("unLockOperation can not be null. lockName:[{}]", lockName));
-    }
+    private Duration lockAtLeast;
 
     public LocalDateTime getCreateDt() {
         return createDt;
@@ -51,12 +28,24 @@ public class LockConfig {
         return lockName;
     }
 
-    public LocalDateTime getLockAtMost() {
-        return createDt.plus(lockAtMost);
+    public void setCreateDt(LocalDateTime createDt) {
+        this.createDt = createDt;
     }
 
-    public UnLockOperationEnum getUnLockOperation() {
-        return unLockOperation;
+    public void setLockName(String lockName) {
+        this.lockName = lockName;
+    }
+
+    public void setLockAtMost(Duration lockAtMost) {
+        this.lockAtMost = lockAtMost;
+    }
+
+    public void setLockAtLeast(Duration lockAtLeast) {
+        this.lockAtLeast = lockAtLeast;
+    }
+
+    public LocalDateTime getLockAtMost() {
+        return createDt.plus(lockAtMost);
     }
 
     public LocalDateTime getLockAtLeast() {

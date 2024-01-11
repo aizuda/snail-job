@@ -35,8 +35,11 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.time.Duration;
+import java.time.temporal.TemporalAmount;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author xiaowoniu
@@ -63,34 +66,34 @@ public abstract class AbstractWorkflowExecutor implements WorkflowExecutor, Init
     @Override
     @Transactional
     public void execute(WorkflowExecutorContext context) {
-        distributedLockHandler.lockAndProcessAfterUnlockDel(
-            MessageFormat.format(KEY, context.getWorkflowTaskBatchId(), context.getWorkflowNodeId()), "PT5S",
-            () -> {
+        distributedLockHandler.lockWithDisposableAndRetry(
+                () -> {
 
-                Long total = jobTaskBatchMapper.selectCount(new LambdaQueryWrapper<JobTaskBatch>()
-                    .eq(JobTaskBatch::getWorkflowTaskBatchId, context.getWorkflowTaskBatchId())
-                    .eq(JobTaskBatch::getWorkflowNodeId, context.getWorkflowNodeId())
-                );
-                if (total > 0) {
-                    log.warn("任务节点[{}]已被执行，请勿重复执行", context.getWorkflowNodeId());
-                    return;
-                }
-
-                transactionTemplate.execute(new TransactionCallbackWithoutResult() {
-                    @Override
-                    protected void doInTransactionWithoutResult(final TransactionStatus status) {
-
-                        if (!preValidate(context)) {
-                            return;
-                        }
-                        beforeExecute(context);
-
-                        doExecute(context);
-
-                        afterExecute(context);
+                    Long total = jobTaskBatchMapper.selectCount(new LambdaQueryWrapper<JobTaskBatch>()
+                            .eq(JobTaskBatch::getWorkflowTaskBatchId, context.getWorkflowTaskBatchId())
+                            .eq(JobTaskBatch::getWorkflowNodeId, context.getWorkflowNodeId())
+                    );
+                    if (total > 0) {
+                        log.warn("任务节点[{}]已被执行，请勿重复执行", context.getWorkflowNodeId());
+                        return;
                     }
-                });
-            });
+
+                    transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+                        @Override
+                        protected void doInTransactionWithoutResult(final TransactionStatus status) {
+
+                            if (!preValidate(context)) {
+                                return;
+                            }
+                            beforeExecute(context);
+
+                            doExecute(context);
+
+                            afterExecute(context);
+                        }
+                    });
+                }, MessageFormat.format(KEY, context.getWorkflowTaskBatchId(), context.getWorkflowNodeId()),
+                Duration.ofSeconds(5), Duration.ofSeconds(1), 3);
 
     }
 

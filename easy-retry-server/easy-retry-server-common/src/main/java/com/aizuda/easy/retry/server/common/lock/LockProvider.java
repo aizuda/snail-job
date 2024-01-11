@@ -3,6 +3,8 @@ package com.aizuda.easy.retry.server.common.lock;
 
 import com.aizuda.easy.retry.server.common.dto.LockConfig;
 
+import java.time.Duration;
+
 /**
  * @author www.byteblogs.com
  * @date 2023-07-20 22:45:41
@@ -10,10 +12,10 @@ import com.aizuda.easy.retry.server.common.dto.LockConfig;
  */
 public interface LockProvider {
 
-    boolean supports(String storageMedium);
+    boolean lock(Duration lockAtLeast, Duration lockAtMost);
 
-    boolean lock(LockConfig lockConfig);
+    boolean lock(Duration lockAtMost);
 
-    boolean unlock(LockConfig lockConfig);
+    boolean unlock();
 
 }

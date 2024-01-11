@@ -1,20 +1,18 @@
 package com.aizuda.easy.retry.server.job.task.support.handler;
 
-import cn.hutool.core.lang.Assert;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
-import com.aizuda.easy.retry.server.common.config.SystemProperties;
-import com.aizuda.easy.retry.server.common.dto.LockConfig;
-import com.aizuda.easy.retry.server.common.enums.UnLockOperationEnum;
-import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
+import com.aizuda.easy.retry.server.common.lock.LockBuilder;
 import com.aizuda.easy.retry.server.common.lock.LockProvider;
 import com.aizuda.easy.retry.server.job.task.support.LockExecutor;
+import com.github.rholder.retry.Retryer;
+import com.github.rholder.retry.RetryerBuilder;
+import com.github.rholder.retry.StopStrategies;
+import com.github.rholder.retry.WaitStrategies;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author: xiaowoniu
@@ -25,68 +23,33 @@ import java.util.List;
 @Slf4j
 public class DistributedLockHandler {
 
-    @Autowired
-    private SystemProperties systemProperties;
-    @Autowired
-    private List<LockProvider> lockProviders;
+    public void lockWithDisposableAndRetry(LockExecutor lockExecutor,
+                                           String lockName, Duration lockAtMost,
+                                           Duration sleepTime, Integer maxRetryTimes) {
+        LockProvider lockProvider = LockBuilder.newBuilder()
+                .withDisposable(lockName)
+                .build();
 
-    public boolean tryLock(String lockName, String lockAtMost) {
+        Retryer<Boolean> retryer = RetryerBuilder.<Boolean>newBuilder()
+                .retryIfResult(result -> false)
+                .withWaitStrategy(WaitStrategies.fixedWait(sleepTime.toMillis(), TimeUnit.MILLISECONDS))
+                .withStopStrategy(StopStrategies.stopAfterAttempt(maxRetryTimes))
+                .build();
 
-        Assert.notBlank(lockAtMost, () -> new EasyRetryServerException("lockAtLeast can not be null."));
-        Assert.notBlank(lockName, () -> new EasyRetryServerException("lockName can not be null."));
-
-        LockConfig lockConfig = new LockConfig(LocalDateTime.now(), lockName, Duration.parse(lockAtMost),
-            Duration.ofMillis(1),
-            UnLockOperationEnum.UPDATE);
-
-        LockProvider lockProvider = getLockAccess();
         boolean lock = false;
         try {
-            lock = lockProvider.lock(lockConfig);
+            lock = retryer.call(() -> lockProvider.lock(lockAtMost));
+            if (lock) {
+                lockExecutor.execute();
+            }
         } catch (Exception e) {
-            LogUtils.error(log, this.getClass().getName() + " execute error. lockName:[{}]", lockName, e);
+            EasyRetryLog.LOCAL.error("lock execute error. lockName:[{}]", lockName, e);
+        } finally {
+            if (lock) {
+                lockProvider.unlock();
+            }
         }
 
-        return lock;
-    }
-
-    public boolean unlockAndDel(String lockName) {
-        Assert.notBlank(lockName, () -> new EasyRetryServerException("lockName can not be null."));
-
-        LockConfig lockConfig = new LockConfig(LocalDateTime.now(),
-            lockName,
-            Duration.ofSeconds(1), Duration.ofSeconds(0),
-            UnLockOperationEnum.DELETE);
-
-        LockProvider lockProvider = getLockAccess();
-        boolean lock = false;
-        try {
-            lockProvider.unlock(lockConfig);
-        } catch (Exception e) {
-            LogUtils.error(log, this.getClass().getName() + " execute error. lockName:[{}]", lockName, e);
-        }
-
-        return lock;
-    }
-
-    public boolean unlockAndUpdate(String lockName, String lockAtLeast) {
-
-        Assert.notBlank(lockAtLeast, () -> new EasyRetryServerException("lockAtLeast can not be null."));
-        Assert.notBlank(lockName, () -> new EasyRetryServerException("lockName can not be null."));
-
-        LockConfig lockConfig = new LockConfig(LocalDateTime.now(), lockName, Duration.ofSeconds(0),
-            Duration.parse(lockAtLeast),
-            UnLockOperationEnum.UPDATE);
-
-        LockProvider lockProvider = getLockAccess();
-        boolean lock = false;
-        try {
-            lock = lockProvider.unlock(lockConfig);
-        } catch (Exception e) {
-            LogUtils.error(log, this.getClass().getName() + " execute error. lockName:[{}]", lockName, e);
-        }
-
-        return lock;
     }
 
     /**
@@ -96,54 +59,25 @@ public class DistributedLockHandler {
      * @param lockAtMost
      * @param lockExecutor
      */
-    public void lockAndProcessAfterUnlockDel(String lockName, String lockAtMost, LockExecutor lockExecutor) {
-        LockConfig lockConfig = new LockConfig(LocalDateTime.now(), lockName, Duration.parse(lockAtMost),
-            Duration.ofMillis(1),
-            UnLockOperationEnum.DELETE);
+    public void lockWithDisposable(String lockName, Duration lockAtMost, LockExecutor lockExecutor) {
 
-        LockProvider lockProvider = getLockAccess();
+        LockProvider lockProvider = LockBuilder.newBuilder()
+                .withDisposable(lockName)
+                .build();
+
         boolean lock = false;
         try {
-            lock = lockProvider.lock(lockConfig);
+            lock = lockProvider.lock(lockAtMost);
             if (lock) {
                 lockExecutor.execute();
             }
         } catch (Exception e) {
-            LogUtils.error(log, this.getClass().getName() + " execute error. lockName:[{}]", lockName, e);
+            EasyRetryLog.LOCAL.error("lock execute error. lockName:[{}]", lockName, e);
         } finally {
             if (lock) {
-                lockProvider.unlock(lockConfig);
+                lockProvider.unlock();
             }
         }
-
-    }
-
-    public void lockAndProcessAfterUnlockUpdate(String lockName, String lockAtMost, String lockAtLeast,
-        LockExecutor lockExecutor) {
-        LockConfig lockConfig = new LockConfig(LocalDateTime.now(), lockName, Duration.parse(lockAtMost),
-            Duration.parse(lockAtLeast),
-            UnLockOperationEnum.UPDATE);
-
-        LockProvider lockProvider = getLockAccess();
-        boolean lock = false;
-        try {
-            lock = lockProvider.lock(lockConfig);
-            if (lock) {
-                lockExecutor.execute();
-            }
-        } catch (Exception e) {
-            LogUtils.error(log, this.getClass().getName() + " execute error. lockName:[{}]", lockName, e);
-        } finally {
-            if (lock) {
-                lockProvider.unlock(lockConfig);
-            }
-        }
-    }
-
-    private LockProvider getLockAccess() {
-        return lockProviders.stream()
-            .filter(lockProvider -> lockProvider.supports(systemProperties.getDbType().getDb()))
-            .findFirst().orElseThrow(() -> new EasyRetryServerException("未找到合适锁处理器"));
     }
 
 }
