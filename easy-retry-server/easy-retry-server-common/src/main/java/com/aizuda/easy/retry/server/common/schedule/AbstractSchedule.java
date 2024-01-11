@@ -4,9 +4,8 @@ import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.server.common.Schedule;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
-import com.aizuda.easy.retry.server.common.dto.LockConfig;
-import com.aizuda.easy.retry.server.common.enums.UnLockOperationEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
+import com.aizuda.easy.retry.server.common.lock.LockBuilder;
 import com.aizuda.easy.retry.server.common.lock.LockProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +13,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.TaskScheduler;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -43,14 +41,12 @@ public abstract class AbstractSchedule implements Schedule {
         Assert.notBlank(lockAtLeast, () -> new EasyRetryServerException("lockAtLeast can not be null."));
         Assert.notBlank(lockName, () -> new EasyRetryServerException("lockName can not be null."));
 
-        LockConfig lockConfig = new LockConfig(LocalDateTime.now(), lockName, Duration.parse(lockAtMost),
-            Duration.parse(lockAtLeast),
-            UnLockOperationEnum.UPDATE);
-
-        LockProvider lockProvider = getLockAccess();
+        LockProvider lockProvider = LockBuilder.newBuilder()
+                .withResident(lockName)
+                .build();
         boolean lock = false;
         try {
-            lock = lockProvider.lock(lockConfig);
+            lock = lockProvider.lock(Duration.parse(lockAtLeast), Duration.parse(lockAtMost));
             if (lock) {
                 doExecute();
             }
@@ -58,7 +54,7 @@ public abstract class AbstractSchedule implements Schedule {
             LogUtils.error(log, this.getClass().getName() + " execute error. lockName:[{}]", lockName, e);
         } finally {
             if (lock) {
-                lockProvider.unlock(lockConfig);
+                lockProvider.unlock();
             }
         }
 
@@ -72,10 +68,5 @@ public abstract class AbstractSchedule implements Schedule {
 
     protected abstract String lockAtLeast();
 
-    private LockProvider getLockAccess() {
-        return lockProviders.stream()
-                .filter(lockProvider -> lockProvider.supports(systemProperties.getDbType().getDb()))
-                .findFirst().orElseThrow(() -> new EasyRetryServerException("未找到合适锁处理器"));
-    }
 
 }

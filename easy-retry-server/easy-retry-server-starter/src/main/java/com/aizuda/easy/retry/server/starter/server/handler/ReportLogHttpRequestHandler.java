@@ -4,22 +4,20 @@ import akka.actor.ActorRef;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.net.url.UrlQuery;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.log.TaskLogFieldDTO;
 import com.aizuda.easy.retry.common.core.model.EasyRetryRequest;
 import com.aizuda.easy.retry.common.core.model.NettyResult;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.handler.PostHttpRequestHandler;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.server.model.dto.LogTaskDTO;
-import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobLogMessageMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobLogMessage;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,9 +41,6 @@ import static com.aizuda.easy.retry.common.core.constant.SystemConstants.HTTP_PA
 @Slf4j
 public class ReportLogHttpRequestHandler extends PostHttpRequestHandler {
 
-    @Autowired
-    private JobLogMessageMapper jobLogMessageMapper;
-
     @Override
     public boolean supports(String path) {
         return BATCH_LOG_REPORT.equals(path);
@@ -60,7 +55,7 @@ public class ReportLogHttpRequestHandler extends PostHttpRequestHandler {
     @Transactional
     public String doHandler(String content, UrlQuery urlQuery, HttpHeaders headers) {
 
-        LogUtils.info(log, "Begin Handler Log Report Data. <|>{}<|>", content);
+        EasyRetryLog.LOCAL.info("Begin Handler Log Report Data. [{}]", content);
         EasyRetryRequest retryRequest = JsonUtil.parseObject(content, EasyRetryRequest.class);
         Object[] args = retryRequest.getArgs();
 

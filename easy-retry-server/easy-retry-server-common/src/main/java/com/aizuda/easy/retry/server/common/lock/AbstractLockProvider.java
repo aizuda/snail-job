@@ -1,11 +1,11 @@
 package com.aizuda.easy.retry.server.common.lock;
 
+import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.server.common.cache.CacheLockRecord;
 import com.aizuda.easy.retry.server.common.dto.LockConfig;
-import com.aizuda.easy.retry.template.datasource.enums.DbTypeEnum;
+import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 
-import java.util.Arrays;
-import java.util.List;
+import java.time.Duration;
 
 /**
  * @author www.byteblogs.com
@@ -13,13 +13,24 @@ import java.util.List;
  * @since 2.1.0
  */
 public abstract class AbstractLockProvider implements LockProvider {
-    protected static final List<String> ALLOW_DB =  Arrays.asList(DbTypeEnum.MYSQL.getDb(),
-            DbTypeEnum.MARIADB.getDb(),
-            DbTypeEnum.POSTGRES.getDb());
-    @Override
-    public boolean lock(final LockConfig lockConfig) {
 
+    @Override
+    public boolean lock(Duration lockAtMost) {
+        return lock(lockAtMost, lockAtMost);
+    }
+
+    @Override
+    public boolean lock(Duration lockAtLeast, Duration lockAtMost) {
+        LockConfig lockConfig = LockManager.getLockConfig();
         String lockName = lockConfig.getLockName();
+
+        Assert.notNull(lockAtMost, () -> new EasyRetryServerException("lockAtMost can not be null. lockName:[{}]", lockName));
+        Assert.isFalse(lockAtMost.isNegative(), () -> new EasyRetryServerException("lockAtMost  is negative. lockName:[{}]", lockName));
+        Assert.notNull(lockAtLeast, () -> new EasyRetryServerException("lockAtLeast can not be null. lockName:[{}]", lockName));
+        Assert.isFalse(lockAtLeast.compareTo(lockAtMost) > 0, () -> new EasyRetryServerException("lockAtLeast is longer than lockAtMost for lock. lockName:[{}]", lockName));
+
+        LockManager.setLockAtLeast(lockAtLeast);
+        LockManager.setLockAtLeast(lockAtMost);
 
         boolean tryToCreateLockRecord = !CacheLockRecord.lockRecordRecentlyCreated(lockName);
         if (tryToCreateLockRecord) {
@@ -43,14 +54,27 @@ public abstract class AbstractLockProvider implements LockProvider {
     }
 
     protected boolean doLockAfter(LockConfig lockConfig) {
-        return updateRecord(lockConfig);
+        return renewal(lockConfig);
     }
 
     protected boolean doLock(final LockConfig lockConfig) {
-        return insertRecord(lockConfig);
+        return createLock(lockConfig);
     }
 
-    protected abstract boolean insertRecord(final LockConfig lockConfig);
+    @Override
+    public boolean unlock() {
+        try {
+            LockConfig lockConfig = LockManager.getLockConfig();
+            return doUnlock(lockConfig);
+        } finally {
+            LockManager.clear();
+        }
 
-    protected abstract boolean updateRecord(final LockConfig lockConfig);
+    }
+
+    protected abstract boolean doUnlock(LockConfig lockConfig);
+
+    protected abstract boolean createLock(final LockConfig lockConfig);
+
+    protected abstract boolean renewal(final LockConfig lockConfig);
 }
