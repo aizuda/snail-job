@@ -8,12 +8,14 @@ import com.aizuda.easy.retry.common.core.enums.*;
 import com.aizuda.easy.retry.common.core.expression.ExpressionEngine;
 import com.aizuda.easy.retry.common.core.expression.ExpressionFactory;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.dto.DecisionConfig;
 import com.aizuda.easy.retry.server.common.enums.ExpressionTypeEnum;
 import com.aizuda.easy.retry.server.common.enums.LogicalConditionEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.job.task.dto.JobLogDTO;
+import com.aizuda.easy.retry.server.job.task.dto.LogMetaDTO;
 import com.aizuda.easy.retry.server.job.task.support.expression.ExpressionInvocationHandler;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
@@ -132,16 +134,12 @@ public class ConditionWorkflowExecutor extends AbstractWorkflowExecutor {
 
         JobTask jobTask = generateJobTask(context, jobTaskBatch);
 
-        // 保存执行的日志
-        JobLogDTO jobLogDTO = new JobLogDTO();
-        // TODO 等实时日志处理完毕后，再处理
-        jobLogDTO.setMessage(context.getLogMessage());
-        jobLogDTO.setTaskId(jobTask.getId());
-        jobLogDTO.setJobId(SystemConstants.DECISION_JOB_ID);
-        jobLogDTO.setGroupName(context.getGroupName());
-        jobLogDTO.setNamespaceId(context.getNamespaceId());
-        jobLogDTO.setTaskBatchId(jobTaskBatch.getId());
-        ActorRef actorRef = ActorGenerator.jobLogActor();
-        actorRef.tell(jobLogDTO, actorRef);
+        LogMetaDTO logMetaDTO = new LogMetaDTO();
+        logMetaDTO.setNamespaceId(context.getNamespaceId());
+        logMetaDTO.setGroupName(context.getGroupName());
+        logMetaDTO.setTaskBatchId(jobTaskBatch.getId());
+        logMetaDTO.setJobId(SystemConstants.DECISION_JOB_ID);
+        logMetaDTO.setTaskId(jobTask.getId());
+        EasyRetryLog.REMOTE.info("workflowNodeId:[{}]决策完成. <|>{}<|>",  context.getWorkflowNodeId(), logMetaDTO);
     }
 }

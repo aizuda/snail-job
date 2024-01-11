@@ -22,6 +22,7 @@ import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTaskBatch;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -121,25 +122,12 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
 
         JobTask jobTask = generateJobTask(context, jobTaskBatch);
 
-        // 保存执行的日志
-//        JobLogDTO jobLogDTO = new JobLogDTO();
-//        // TODO 等实时日志处理完毕后，再处理
-//        jobLogDTO.setMessage(context.getLogMessage());
-//        jobLogDTO.setTaskId(jobTask.getId());
-//        jobLogDTO.setJobId(SystemConstants.CALLBACK_JOB_ID);
-//        jobLogDTO.setGroupName(context.getGroupName());
-//        jobLogDTO.setNamespaceId(context.getNamespaceId());
-//        jobLogDTO.setTaskBatchId(jobTaskBatch.getId());
-//        ActorRef actorRef = ActorGenerator.jobLogActor();
-//        actorRef.tell(jobLogDTO, actorRef);
-
         LogMetaDTO logMetaDTO = new LogMetaDTO();
         logMetaDTO.setNamespaceId(context.getNamespaceId());
         logMetaDTO.setGroupName(context.getGroupName());
-        logMetaDTO.setTaskBatchId(context.getTaskBatchId());
+        logMetaDTO.setTaskBatchId(jobTaskBatch.getId());
         logMetaDTO.setJobId(SystemConstants.CALLBACK_JOB_ID);
         logMetaDTO.setTaskId(jobTask.getId());
-
-        EasyRetryLog.REMOTE.info("回调成功. logMeta:<|>{}<|>", logMetaDTO);
+        EasyRetryLog.REMOTE.info("workflowNodeId:[{}] 回调成功. <|>{}<|>", context.getWorkflowNodeId(), logMetaDTO);
     }
 }

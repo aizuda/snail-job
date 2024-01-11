@@ -10,6 +10,7 @@ import ch.qos.logback.core.UnsynchronizedAppenderBase;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.constant.LogFieldConstant;
 import com.aizuda.easy.retry.common.core.log.LogContentDTO;
+import com.aizuda.easy.retry.common.core.log.TaskLogFieldDTO;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
@@ -22,9 +23,11 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * @author wodeyangzipingpingwuqi
@@ -34,48 +37,45 @@ import java.util.regex.Pattern;
 public class EasyRetryServerLogbackAppender<E> extends UnsynchronizedAppenderBase<E> {
 
     @Override
-    public void start() {
-        super.start();
-    }
-
-    @Override
     protected void append(E eventObject) {
 
         // Not job context
-        if (!(eventObject instanceof LoggingEvent) || Objects.isNull(MDC.getMDCAdapter().get(LogFieldConstant.MDC_REMOTE))) {
+        if (!(eventObject instanceof LoggingEvent) || Objects.isNull(
+            MDC.getMDCAdapter().get(LogFieldConstant.MDC_REMOTE))) {
             return;
         }
 
+        MDC.getMDCAdapter().remove(LogFieldConstant.MDC_REMOTE);
         // Prepare processing
         ((LoggingEvent) eventObject).prepareForDeferredProcessing();
         LoggingEvent event = (LoggingEvent) eventObject;
 
+        LogContentDTO logContentDTO = new LogContentDTO();
+        logContentDTO.addTimeStamp(event.getTimeStamp());
+        logContentDTO.addLevelField(event.getLevel().levelStr);
+        logContentDTO.addThreadField(event.getThreadName());
+        logContentDTO.addLocationField(getLocationField(event));
+        logContentDTO.addThrowableField(getThrowableField(event));
+
         LogMetaDTO logMetaDTO = null;
         try {
-           // 第一种是MDC
-            String logMetaStr = MDC.getMDCAdapter().get(LogFieldConstant.LOG_META);
-            if (StrUtil.isNotBlank(logMetaStr)) {
-                logMetaDTO = JsonUtil.parseObject(logMetaStr, LogMetaDTO.class);
-            } else {
-                // 第二种规则是按照正则匹配
-                String patternString = "<\\|>(.*?)<\\|>";
-                Pattern pattern = Pattern.compile(patternString);
-                Matcher matcher = pattern.matcher(event.getFormattedMessage());
-                while (matcher.find()) {
-                    String extractedData = matcher.group(1);
-                    if (StrUtil.isBlank(extractedData)) {
-                        continue;
-                    }
-
-                    logMetaDTO = JsonUtil.parseObject(extractedData, LogMetaDTO.class);
+            String patternString = "<\\|>(.*?)<\\|>";
+            Pattern pattern = Pattern.compile(patternString);
+            Matcher matcher = pattern.matcher(event.getFormattedMessage());
+            while (matcher.find()) {
+                String extractedData = matcher.group(1);
+                if (StrUtil.isBlank(extractedData)) {
+                    continue;
                 }
+
+                logMetaDTO = JsonUtil.parseObject(extractedData, LogMetaDTO.class);
+                String message = event.getFormattedMessage().replaceFirst(patternString, StrUtil.EMPTY);
+                logContentDTO.addMessageField(message);
+                break;
             }
 
         } catch (Exception e) {
             EasyRetryLog.LOCAL.error("日志解析失败. msg:[{}]", event.getFormattedMessage(), e);
-        } finally {
-            MDC.getMDCAdapter().remove(LogFieldConstant.MDC_REMOTE);
-            MDC.getMDCAdapter().remove(LogFieldConstant.LOG_META);
         }
 
         if (Objects.isNull(logMetaDTO)) {
@@ -83,17 +83,30 @@ public class EasyRetryServerLogbackAppender<E> extends UnsynchronizedAppenderBas
         }
 
         // 保存执行的日志
+        saveLog(logContentDTO, logMetaDTO);
+    }
+
+    /**
+     * 保存日志
+     *
+     * @param logContentDTO 日志内容
+     * @param logMetaDTO 日志元数据
+     */
+    private void saveLog(final LogContentDTO logContentDTO, final LogMetaDTO logMetaDTO) {
         JobLogDTO jobLogDTO = new JobLogDTO();
-        jobLogDTO.setMessage(event.getFormattedMessage());
+        Map<String, String> messageMap = logContentDTO.getFieldList()
+            .stream()
+            .filter(logTaskDTO_ -> !Objects.isNull(logTaskDTO_.getValue()))
+            .collect(Collectors.toMap(TaskLogFieldDTO::getName, TaskLogFieldDTO::getValue));
+        jobLogDTO.setMessage(JsonUtil.toJsonString(messageMap));
         jobLogDTO.setTaskId(logMetaDTO.getTaskId());
         jobLogDTO.setJobId(logMetaDTO.getJobId());
         jobLogDTO.setGroupName(logMetaDTO.getGroupName());
         jobLogDTO.setNamespaceId(logMetaDTO.getNamespaceId());
         jobLogDTO.setTaskBatchId(logMetaDTO.getTaskBatchId());
-        jobLogDTO.setRealTime(DateUtils.toNowMilli());
+        jobLogDTO.setRealTime(logContentDTO.getTimeStamp());
         ActorRef actorRef = ActorGenerator.jobLogActor();
         actorRef.tell(jobLogDTO, actorRef);
-
     }
 
     private String getThrowableField(LoggingEvent event) {

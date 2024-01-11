@@ -5,7 +5,9 @@ import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -22,6 +24,13 @@ public class LogContentDTO {
         this.fieldList = new ArrayList<>();
     }
 
+    public Map<String, String> toMap() {
+        return fieldList
+            .stream()
+            .filter(logTaskDTO_ -> !Objects.isNull(logTaskDTO_.getValue()))
+            .collect(Collectors.toMap(TaskLogFieldDTO::getName, TaskLogFieldDTO::getValue));
+    }
+
     public void addField(String name, String value) {
         fieldList.add(new TaskLogFieldDTO(name, value));
     }
@@ -36,7 +45,8 @@ public class LogContentDTO {
 
     public Long getTimeStamp() {
         return Long.parseLong(fieldList.stream().filter(taskLogFieldDTO -> !Objects.isNull(taskLogFieldDTO.getValue()))
-                .collect(Collectors.toMap(TaskLogFieldDTO::getName, TaskLogFieldDTO::getValue)).get(LogFieldConstant.TIME_STAMP));
+            .collect(Collectors.toMap(TaskLogFieldDTO::getName, TaskLogFieldDTO::getValue))
+            .get(LogFieldConstant.TIME_STAMP));
     }
 
     public void addLevelField(String level) {

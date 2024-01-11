@@ -38,6 +38,6 @@ public class LogMetaDTO {
 
     @Override
     public String toString() {
-        return JsonUtil.toJsonString(taskBatchId);
+        return JsonUtil.toJsonString(this);
     }
 }
