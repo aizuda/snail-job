@@ -3,6 +3,7 @@ package com.aizuda.easy.retry.server.web.model.response;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * @author: www.byteblogs.com
@@ -14,41 +15,12 @@ public class JobLogResponseVO {
 
     private Long id;
 
-    private Long key;
+    private Long nextStartId;
 
-    /**
-     * 组名称
-     */
-    private String groupName;
+    private List message;
 
-    /**
-     * 任务信息id
-     */
-    private Long jobId;
+    private boolean isFinished;
 
-    /**
-     * 任务实例id
-     */
-    private Long taskBatchId;
-
-    /**
-     * 调度任务id
-     */
-    private Long taskId;
-
-    /**
-     * 创建时间
-     */
-    private LocalDateTime createDt;
-
-    /**
-     * 客户端信息
-     */
-    private String clientAddress;
-
-    /**
-     * 调度信息
-     */
-    private String message;
+    private Integer fromIndex;
 
 }

@@ -13,5 +13,5 @@ import java.util.List;
  */
 public interface JobLogService {
 
-    PageResult<List<JobLogResponseVO>> getJobLogPage(JobLogQueryVO jobQueryVO);
+    JobLogResponseVO getJobLogPage(JobLogQueryVO jobQueryVO);
 }

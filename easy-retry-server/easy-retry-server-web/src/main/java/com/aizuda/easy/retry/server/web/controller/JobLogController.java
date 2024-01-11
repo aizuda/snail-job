@@ -26,7 +26,7 @@ public class JobLogController {
 
     @GetMapping("/log/list")
     @LoginRequired
-    public PageResult<List<JobLogResponseVO>> getJobLogPage(JobLogQueryVO jobQueryVO) {
+    public JobLogResponseVO getJobLogPage(JobLogQueryVO jobQueryVO) {
         return jobLogService.getJobLogPage(jobQueryVO);
     }
 
