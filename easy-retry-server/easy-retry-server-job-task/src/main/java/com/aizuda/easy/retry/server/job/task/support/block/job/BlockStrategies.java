@@ -11,6 +11,7 @@ import com.aizuda.easy.retry.server.job.task.support.generator.batch.JobTaskBatc
 import com.aizuda.easy.retry.server.job.task.support.stop.JobTaskStopFactory;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskStopHandler;
 import com.aizuda.easy.retry.server.job.task.support.stop.TaskStopJobContext;
+import com.aizuda.easy.retry.server.retry.task.support.dispatch.task.TaskExecutorSceneEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -80,6 +81,11 @@ public class BlockStrategies {
         private Long nextTriggerAt;
 
         private Integer operationReason;
+
+        /**
+         * 执行策略 1、auto 2、manual 3、workflow
+         */
+        private Integer taskExecutorScene;
 
     }
 

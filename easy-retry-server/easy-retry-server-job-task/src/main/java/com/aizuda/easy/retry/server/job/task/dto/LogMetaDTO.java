@@ -36,6 +36,11 @@ public class LogMetaDTO {
      */
     private Long taskId;
 
+    /**
+     * 时间
+     */
+    private Long timestamp;
+
     @Override
     public String toString() {
         return JsonUtil.toJsonString(this);

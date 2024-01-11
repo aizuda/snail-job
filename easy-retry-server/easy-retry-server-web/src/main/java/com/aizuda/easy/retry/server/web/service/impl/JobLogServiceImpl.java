@@ -1,12 +1,9 @@
 package com.aizuda.easy.retry.server.web.service.impl;
 
-import cn.hutool.core.util.ArrayUtil;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
-import com.aizuda.easy.retry.server.web.model.base.PageResult;
 import com.aizuda.easy.retry.server.web.model.request.JobLogQueryVO;
 import com.aizuda.easy.retry.server.web.model.response.JobLogResponseVO;
 import com.aizuda.easy.retry.server.web.service.JobLogService;
-import com.aizuda.easy.retry.server.web.service.convert.JobLogResponseVOConverter;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobLogMessageMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobLogMessage;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -17,8 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -42,8 +37,6 @@ public class JobLogServiceImpl implements JobLogService {
         queryWrapper
             .select(JobLogMessage::getId, JobLogMessage::getLogNum)
             .ge(JobLogMessage::getId, queryVO.getStartId())
-            .eq(JobLogMessage::getJobId, queryVO.getJobId())
-            .eq(JobLogMessage::getTaskBatchId, queryVO.getTaskBatchId())
             .eq(JobLogMessage::getTaskId, queryVO.getTaskId());
 
         queryWrapper.orderByAsc(JobLogMessage::getRealTime).orderByDesc(JobLogMessage::getId);
