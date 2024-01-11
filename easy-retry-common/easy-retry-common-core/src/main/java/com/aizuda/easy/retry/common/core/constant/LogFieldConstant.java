@@ -6,7 +6,7 @@ package com.aizuda.easy.retry.common.core.constant;
  * @since 2.6.0
  */
 public class LogFieldConstant {
-    
+
     public static final String MDC_REMOTE = "remote";
 
     public static final String TIME = "time";
@@ -17,6 +17,5 @@ public class LogFieldConstant {
     public static final String LEVEL = "level";
     public static final String LOCATION = "location";
     public static final String THROWABLE = "throwable";
-    public static final String LOG_META = "log_meta";
 
 }
