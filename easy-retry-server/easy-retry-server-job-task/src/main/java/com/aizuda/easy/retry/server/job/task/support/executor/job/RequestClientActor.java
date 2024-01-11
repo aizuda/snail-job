@@ -4,10 +4,12 @@ import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import com.aizuda.easy.retry.client.model.ExecuteResult;
 import com.aizuda.easy.retry.client.model.request.DispatchJobRequest;
+import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.JobTaskStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.model.Result;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
 import com.aizuda.easy.retry.server.common.client.RequestBuilder;
@@ -15,6 +17,7 @@ import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.job.task.client.JobRpcClient;
 import com.aizuda.easy.retry.server.job.task.dto.JobExecutorResultDTO;
 import com.aizuda.easy.retry.server.job.task.dto.JobLogDTO;
+import com.aizuda.easy.retry.server.job.task.dto.LogMetaDTO;
 import com.aizuda.easy.retry.server.job.task.dto.RealJobExecutorDTO;
 import com.aizuda.easy.retry.server.job.task.support.ClientCallbackHandler;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
@@ -62,7 +65,6 @@ public class RequestClientActor extends AbstractActor {
             return;
         }
 
-        JobLogDTO jobLogDTO = JobTaskConverter.INSTANCE.toJobLogDTO(realJobExecutorDTO);
         DispatchJobRequest dispatchJobRequest = JobTaskConverter.INSTANCE.toDispatchJobRequest(realJobExecutorDTO);
 
         try {
@@ -70,9 +72,8 @@ public class RequestClientActor extends AbstractActor {
             JobRpcClient rpcClient = buildRpcClient(registerNodeInfo, realJobExecutorDTO);
             Result<Boolean> dispatch = rpcClient.dispatch(dispatchJobRequest);
             if (dispatch.getStatus() == StatusEnum.YES.getStatus() && Objects.equals(dispatch.getData(), Boolean.TRUE)) {
-                jobLogDTO.setMessage("任务调度成功");
-                ActorRef actorRef = ActorGenerator.jobLogActor();
-                actorRef.tell(jobLogDTO, actorRef);
+                LogMetaDTO logMetaDTO = JobTaskConverter.INSTANCE.toJobLogDTO(realJobExecutorDTO);
+                EasyRetryLog.REMOTE.info("taskId:[{}] 任务调度成功. <|>{}<|>", logMetaDTO.getTaskId(), logMetaDTO);
             } else {
                 // 客户端返回失败，则认为任务执行失败
                 ClientCallbackHandler clientCallback = ClientCallbackFactory.getClientCallback(realJobExecutorDTO.getTaskType());

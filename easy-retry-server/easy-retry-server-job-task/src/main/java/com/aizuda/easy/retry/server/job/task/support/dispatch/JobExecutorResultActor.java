@@ -6,9 +6,12 @@ import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
+import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.server.job.task.dto.CompleteJobBatchDTO;
+import com.aizuda.easy.retry.server.job.task.dto.LogMetaDTO;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.server.job.task.dto.JobExecutorResultDTO;
 import com.aizuda.easy.retry.server.job.task.dto.JobLogDTO;
@@ -28,6 +31,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 /**
@@ -84,11 +88,11 @@ public class JobExecutorResultActor extends AbstractActor {
                     }
                 });
 
-                JobLogDTO jobLogDTO = JobTaskConverter.INSTANCE.toJobLogDTO(result);
-                jobLogDTO.setMessage(result.getMessage());
-                jobLogDTO.setTaskId(result.getTaskId());
-                ActorRef actorRef = ActorGenerator.jobLogActor();
-                actorRef.tell(jobLogDTO, actorRef);
+                LogMetaDTO logMetaDTO = JobTaskConverter.INSTANCE.toJobLogDTO(result);
+                // 防止客户端日志还未上报完成，导致日志时序错误
+                logMetaDTO.setTimestamp(DateUtils.toEpochMilli(LocalDateTime.now().plusHours(1)));
+                EasyRetryLog.REMOTE.info("taskId:[{}] 任务执行成功. <|>{}<|>", logMetaDTO.getTaskId(), logMetaDTO);
+
             } catch (Exception e) {
                 LogUtils.error(log, " job executor result exception. [{}]", result, e);
             } finally {
