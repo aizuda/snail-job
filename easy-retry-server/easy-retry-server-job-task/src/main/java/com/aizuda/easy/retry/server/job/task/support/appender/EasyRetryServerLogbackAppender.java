@@ -18,6 +18,7 @@ import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.server.job.task.dto.JobLogDTO;
 import com.aizuda.easy.retry.server.job.task.dto.LogMetaDTO;
 import com.aizuda.easy.retry.server.model.dto.RetryTaskDTO;
+import com.google.common.collect.Lists;
 import org.slf4j.MDC;
 import org.springframework.util.CollectionUtils;
 
@@ -98,7 +99,7 @@ public class EasyRetryServerLogbackAppender<E> extends UnsynchronizedAppenderBas
             .stream()
             .filter(logTaskDTO_ -> !Objects.isNull(logTaskDTO_.getValue()))
             .collect(Collectors.toMap(TaskLogFieldDTO::getName, TaskLogFieldDTO::getValue));
-        jobLogDTO.setMessage(JsonUtil.toJsonString(messageMap));
+        jobLogDTO.setMessage(JsonUtil.toJsonString(Lists.newArrayList(messageMap)));
         jobLogDTO.setTaskId(logMetaDTO.getTaskId());
         jobLogDTO.setJobId(logMetaDTO.getJobId());
         jobLogDTO.setGroupName(logMetaDTO.getGroupName());
