@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.server.common.schedule;
 
 import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.Schedule;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
@@ -26,10 +27,6 @@ public abstract class AbstractSchedule implements Schedule {
     @Autowired
     @Qualifier("scheduledExecutorService")
     protected TaskScheduler taskScheduler;
-    @Autowired
-    private List<LockProvider> lockProviders;
-    @Autowired
-    private SystemProperties systemProperties;
 
     @Override
     public void execute() {

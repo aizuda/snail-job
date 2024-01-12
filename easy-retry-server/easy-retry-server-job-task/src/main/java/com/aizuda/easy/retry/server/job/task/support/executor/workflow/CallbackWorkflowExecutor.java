@@ -7,6 +7,7 @@ import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.WorkflowNodeTypeEnum;
+import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
@@ -91,7 +92,9 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
             result = exchange.getBody();
             log.info("回调结果. webHook:[{}]，参数: [{}]", decisionConfig.getWebhook(), result);
         } catch (Exception e) {
-            log.error("回调异常. webHook:[{}]，参数: [{}]", decisionConfig.getWebhook(), context.getTaskResult(), e);
+//            log.error("回调异常. webHook:[{}]，参数: [{}]", decisionConfig.getWebhook(), context.getTaskResult(), e);
+
+            EasyRetryLog.LOCAL.error("回调异常. webHook:[{}]，参数: [{}]", decisionConfig.getWebhook(), context.getTaskResult(), e);
             taskBatchStatus = JobTaskBatchStatusEnum.FAIL.getStatus();
             operationReason = JobOperationReasonEnum.WORKFLOW_CALLBACK_NODE_EXECUTOR_ERROR.getReason();
             jobTaskStatus = JobTaskStatusEnum.FAIL.getStatus();

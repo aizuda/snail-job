@@ -1,9 +1,8 @@
 package com.aizuda.easy.retry.server.common.lock.persistence;
 
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.Lifecycle;
 import com.aizuda.easy.retry.server.common.cache.CacheLockRecord;
-import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.dto.LockConfig;
 import com.aizuda.easy.retry.server.common.register.ServerRegister;
 import com.aizuda.easy.retry.template.datasource.enums.DbTypeEnum;
@@ -11,7 +10,8 @@ import com.aizuda.easy.retry.template.datasource.persistence.mapper.DistributedL
 import com.aizuda.easy.retry.template.datasource.persistence.po.DistributedLock;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
@@ -32,19 +32,18 @@ import java.util.List;
  * @since 2.1.0
  */
 @Component
+@Order(Ordered.HIGHEST_PRECEDENCE)
 @RequiredArgsConstructor
-@Slf4j
 public class JdbcLockProvider implements LockStorage, Lifecycle {
 
     private final DistributedLockMapper distributedLockMapper;
-    private final SystemProperties systemProperties;
     protected static final List<String> ALLOW_DB = Arrays.asList(DbTypeEnum.MYSQL.getDb(),
             DbTypeEnum.MARIADB.getDb(),
             DbTypeEnum.POSTGRES.getDb());
 
     @Override
     public boolean supports(final String storageMedium) {
-        return ALLOW_DB.contains(systemProperties.getDbType().getDb());
+        return ALLOW_DB.contains(storageMedium);
     }
 
     @Override
@@ -62,7 +61,7 @@ public class JdbcLockProvider implements LockStorage, Lifecycle {
         } catch (DuplicateKeyException | ConcurrencyFailureException | TransactionSystemException e) {
             return false;
         } catch (DataIntegrityViolationException | BadSqlGrammarException | UncategorizedSQLException e) {
-            LogUtils.error(log, "Unexpected exception. lockName:[{}]", lockConfig.getLockName(), e);
+            EasyRetryLog.LOCAL.error("Unexpected exception. lockName:[{}]", lockConfig.getLockName(), e);
             return false;
         }
     }
@@ -94,7 +93,7 @@ public class JdbcLockProvider implements LockStorage, Lifecycle {
                 return distributedLockMapper.delete(new LambdaUpdateWrapper<DistributedLock>()
                         .eq(DistributedLock::getName, lockName)) > 0;
             } catch (Exception e) {
-                LogUtils.error(log, "unlock error. retrying attempt [{}] ", i, e);
+                EasyRetryLog.LOCAL.error("unlock error. retrying attempt [{}] ", i, e);
             }
         }
 
@@ -114,7 +113,7 @@ public class JdbcLockProvider implements LockStorage, Lifecycle {
                 return distributedLockMapper.update(distributedLock, new LambdaUpdateWrapper<DistributedLock>()
                         .eq(DistributedLock::getName, lockName)) > 0;
             } catch (Exception e) {
-                LogUtils.error(log, "unlock error. retrying attempt [{}] ", i, e);
+                EasyRetryLog.LOCAL.error("unlock error. retrying attempt [{}] ", i, e);
             }
         }
 

@@ -11,6 +11,7 @@ import org.slf4j.spi.LocationAwareLogger;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * <a href="http://www.slf4j.org/">SLF4J</a> log.<br>
@@ -126,7 +127,12 @@ public class Slf4jLog extends AbstractLog {
             if (this.isLocationAwareLogger) {
                 locationAwareLog((LocationAwareLogger) this.logger, fqcn, LocationAwareLogger.ERROR_INT, t, format, remote, arguments);
             } else {
-                logger.error(StrUtil.format(format, arguments), t);
+                if (Objects.nonNull(t)) {
+                    logger.error(format, t);
+                } else {
+                    logger.error(format, arguments);
+                }
+
             }
         }
     }
@@ -178,7 +184,7 @@ public class Slf4jLog extends AbstractLog {
             map.put(LogFieldConstant.MDC_REMOTE, remote.toString());
             MDC.getMDCAdapter().setContextMap(map);
         }
-        logger.log(null, fqcn, level_int, StrUtil.format(msgTemplate, arguments), null, t);
+        logger.log(null, fqcn, level_int, msgTemplate, arguments, t);
     }
 
     /**

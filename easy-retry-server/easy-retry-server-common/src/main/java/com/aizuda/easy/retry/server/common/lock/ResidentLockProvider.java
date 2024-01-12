@@ -13,13 +13,13 @@ public class ResidentLockProvider extends AbstractLockProvider {
 
 
     @Override
-    protected boolean doUnlock(LockConfig lockConfig) {
-        return doUnlockWithUpdate(lockConfig);
+    protected void doUnlock(LockConfig lockConfig) {
+        doUnlockWithUpdate(lockConfig);
     }
 
-    protected boolean doUnlockWithUpdate(LockConfig lockConfig) {
+    protected void doUnlockWithUpdate(LockConfig lockConfig) {
         LockStorage lockStorage = LockStorageFactory.getLockStorage();
-        return lockStorage.releaseLockWithUpdate(lockConfig.getLockName(), lockConfig.getLockAtLeast());
+        lockStorage.releaseLockWithUpdate(lockConfig.getLockName(), lockConfig.getLockAtLeast());
     }
 
 

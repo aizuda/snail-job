@@ -1,10 +1,10 @@
 package com.aizuda.easy.retry.server.common.cache;
 
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.Lifecycle;
+import com.aizuda.easy.retry.server.common.lock.LockManager;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -18,7 +18,6 @@ import java.time.Duration;
  * @date 2023-07-20 22:53:21
  * @since 2.1.0
  */
-@Slf4j
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class CacheLockRecord implements Lifecycle {
@@ -38,6 +37,7 @@ public class CacheLockRecord implements Lifecycle {
 
     public static void remove(String lockName) {
         CACHE.invalidate(lockName);
+        LockManager.clear();
     }
 
     public static void clear() {
@@ -46,7 +46,7 @@ public class CacheLockRecord implements Lifecycle {
 
     @Override
     public void start() {
-        LogUtils.info(log, "CacheLockRecord start");
+        EasyRetryLog.LOCAL.info("CacheLockRecord start");
         CACHE = CacheBuilder.newBuilder()
                 // 设置并发级别为cpu核心数
                 .concurrencyLevel(Runtime.getRuntime().availableProcessors())

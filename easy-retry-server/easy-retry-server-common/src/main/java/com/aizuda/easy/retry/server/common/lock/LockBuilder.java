@@ -21,7 +21,6 @@ public final class LockBuilder {
         return new LockBuilder();
     }
 
-
     public LockBuilder withResident(String lockName) {
         this.lockName = lockName;
         resident = Boolean.TRUE;
