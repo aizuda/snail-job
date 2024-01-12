@@ -31,7 +31,7 @@ public class WorkflowBatchController {
         return workflowBatchService.listPage(queryVO);
     }
 
-//    @LoginRequired
+    @LoginRequired
     @GetMapping("{id}")
     public WorkflowDetailResponseVO getWorkflowBatchDetail(@PathVariable("id") Long id) {
         return workflowBatchService.getWorkflowBatchDetail(id);

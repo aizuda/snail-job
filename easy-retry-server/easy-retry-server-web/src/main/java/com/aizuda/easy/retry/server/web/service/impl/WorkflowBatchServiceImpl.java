@@ -3,6 +3,7 @@ package com.aizuda.easy.retry.server.web.service.impl;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
+import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.server.common.dto.JobTaskConfig;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
@@ -128,17 +129,19 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
                         nodeInfo.setJobBatchList(JobBatchResponseVOConverter.INSTANCE.jobTaskBatchToJobBatchResponseVOs(jobTaskBatchList));
                         // 取第最新的一条状态
                         nodeInfo.setTaskBatchStatus(jobTaskBatchList.get(0).getTaskBatchStatus());
-
                         if (jobTaskBatchList.stream()
-                                .map(JobTaskBatch::getOperationReason)
                                 .filter(Objects::nonNull)
-                                .anyMatch(i -> i == JobOperationReasonEnum.WORKFLOW_NODE_NO_OPERATION_REQUIRED.getReason())) {
+                                .anyMatch(WorkflowBatchServiceImpl::isNoOperation)) {
                             // 当前节点下面的所有节点都是无需处理的节点
                             Set<Long> allDescendants = MutableGraphCache.getAllDescendants(graph, nodeInfo.getId());
                             allNoOperationNode.addAll(allDescendants);
                         } else {
                             // 删除被误添加的节点
                             allNoOperationNode.remove(nodeInfo.getId());
+                        }
+                    } else {
+                        if (JobTaskBatchStatusEnum.NOT_SUCCESS.contains(workflowTaskBatch.getTaskBatchStatus())) {
+                            allNoOperationNode.add(nodeInfo.getId());
                         }
                     }
                 })
@@ -167,6 +170,11 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
         }
 
         return responseVO;
+    }
+
+    private static boolean isNoOperation(JobTaskBatch i) {
+        return i.getOperationReason() == JobOperationReasonEnum.WORKFLOW_NODE_NO_OPERATION_REQUIRED.getReason()
+            || i.getTaskBatchStatus() == JobTaskBatchStatusEnum.STOP.getStatus();
     }
 
 }
