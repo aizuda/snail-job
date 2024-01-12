@@ -30,7 +30,7 @@ public abstract class AbstractLockProvider implements LockProvider {
         Assert.isFalse(lockAtLeast.compareTo(lockAtMost) > 0, () -> new EasyRetryServerException("lockAtLeast is longer than lockAtMost for lock. lockName:[{}]", lockName));
 
         LockManager.setLockAtLeast(lockAtLeast);
-        LockManager.setLockAtLeast(lockAtMost);
+        LockManager.setLockAtMost(lockAtMost);
 
         boolean tryToCreateLockRecord = !CacheLockRecord.lockRecordRecentlyCreated(lockName);
         if (tryToCreateLockRecord) {
@@ -42,15 +42,22 @@ public abstract class AbstractLockProvider implements LockProvider {
             CacheLockRecord.addLockRecord(lockName);
         }
 
+        boolean lock = false;
         try {
-            return doLockAfter(lockConfig);
+            lock = doLockAfter(lockConfig);
         } catch (Exception e) {
             if (tryToCreateLockRecord) {
                 CacheLockRecord.remove(lockName);
             }
 
             throw e;
+        } finally {
+            if (!lock) {
+                LockManager.clear();
+            }
         }
+
+        return lock;
     }
 
     protected boolean doLockAfter(LockConfig lockConfig) {
@@ -62,17 +69,18 @@ public abstract class AbstractLockProvider implements LockProvider {
     }
 
     @Override
-    public boolean unlock() {
+    public void unlock() {
         try {
             LockConfig lockConfig = LockManager.getLockConfig();
-            return doUnlock(lockConfig);
+            Assert.notNull(lockConfig, () -> new EasyRetryServerException("lockConfig can not be null."));
+            doUnlock(lockConfig);
         } finally {
             LockManager.clear();
         }
 
     }
 
-    protected abstract boolean doUnlock(LockConfig lockConfig);
+    protected abstract void doUnlock(LockConfig lockConfig);
 
     protected abstract boolean createLock(final LockConfig lockConfig);
 

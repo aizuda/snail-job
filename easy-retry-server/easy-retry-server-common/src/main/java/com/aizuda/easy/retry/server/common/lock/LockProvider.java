@@ -1,8 +1,6 @@
 package com.aizuda.easy.retry.server.common.lock;
 
 
-import com.aizuda.easy.retry.server.common.dto.LockConfig;
-
 import java.time.Duration;
 
 /**
@@ -16,6 +14,6 @@ public interface LockProvider {
 
     boolean lock(Duration lockAtMost);
 
-    boolean unlock();
+    void unlock();
 
 }
