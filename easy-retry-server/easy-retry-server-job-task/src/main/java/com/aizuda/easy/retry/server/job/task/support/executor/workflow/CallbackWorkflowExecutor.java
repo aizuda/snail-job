@@ -14,8 +14,10 @@ import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.client.RequestInterceptor;
 import com.aizuda.easy.retry.server.common.dto.CallbackConfig;
 import com.aizuda.easy.retry.server.common.enums.ContentTypeEnum;
+import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.job.task.dto.JobLogDTO;
 import com.aizuda.easy.retry.server.job.task.dto.LogMetaDTO;
+import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.server.job.task.support.WorkflowTaskConverter;
 import com.aizuda.easy.retry.server.model.dto.CallbackParamsDTO;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskMapper;
@@ -32,6 +34,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -108,7 +111,6 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
         context.setJobTaskStatus(jobTaskStatus);
         context.setEvaluationResult(result);
         context.setLogMessage(message);
-
     }
 
 
@@ -129,6 +131,14 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
         logMetaDTO.setTaskBatchId(jobTaskBatch.getId());
         logMetaDTO.setJobId(SystemConstants.CALLBACK_JOB_ID);
         logMetaDTO.setTaskId(jobTask.getId());
-        EasyRetryLog.REMOTE.info("workflowNodeId:[{}] 回调成功. <|>{}<|>", context.getWorkflowNodeId(), logMetaDTO);
+        if (jobTaskBatch.getTaskBatchStatus() == JobTaskStatusEnum.SUCCESS.getStatus()) {
+            EasyRetryLog.REMOTE.info("workflowNodeId:[{}] 回调成功. <|>{}<|>", context.getWorkflowNodeId(), logMetaDTO);
+        } else {
+            EasyRetryLog.REMOTE.info("workflowNodeId:[{}] 回调失败. 失败原因:[{}] <|>{}<|>", context.getWorkflowNodeId(),
+                    context.getLogMessage(), logMetaDTO);
+
+            // 尝试完成任务
+            workflowBatchHandler.complete(context.getWorkflowTaskBatchId());
+        }
     }
 }

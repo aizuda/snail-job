@@ -57,7 +57,7 @@ public abstract class AbstractWorkflowExecutor implements WorkflowExecutor, Init
     @Autowired
     private JobTaskBatchGenerator jobTaskBatchGenerator;
     @Autowired
-    private WorkflowBatchHandler workflowBatchHandler;
+    protected WorkflowBatchHandler workflowBatchHandler;
     @Autowired
     private JobTaskMapper jobTaskMapper;
     @Autowired
@@ -107,12 +107,7 @@ public abstract class AbstractWorkflowExecutor implements WorkflowExecutor, Init
             generatorContext.setJobId(context.getJobId());
             generatorContext.setTaskExecutorScene(context.getTaskExecutorScene());
             jobTaskBatchGenerator.generateJobTaskBatch(generatorContext);
-            try {
-                workflowBatchHandler.complete(context.getWorkflowTaskBatchId());
-            } catch (IOException e) {
-                throw new EasyRetryServerException("工作流完成处理异常", e);
-            }
-
+            workflowBatchHandler.complete(context.getWorkflowTaskBatchId());
             return false;
         }
 

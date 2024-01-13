@@ -52,15 +52,14 @@ import static com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum.NOT
 public class WorkflowBatchHandler {
 
     private final WorkflowTaskBatchMapper workflowTaskBatchMapper;
-    private final WorkflowNodeMapper workflowNodeMapper;
     private final JobMapper jobMapper;
     private final JobTaskBatchMapper jobTaskBatchMapper;
 
-    public boolean complete(Long workflowTaskBatchId) throws IOException {
+    public boolean complete(Long workflowTaskBatchId) {
         return complete(workflowTaskBatchId, null);
     }
 
-    public boolean complete(Long workflowTaskBatchId, WorkflowTaskBatch workflowTaskBatch) throws IOException {
+    public boolean complete(Long workflowTaskBatchId, WorkflowTaskBatch workflowTaskBatch)  {
         workflowTaskBatch = Optional.ofNullable(workflowTaskBatch)
                 .orElseGet(() -> workflowTaskBatchMapper.selectById(workflowTaskBatchId));
         Assert.notNull(workflowTaskBatch, () -> new EasyRetryServerException("任务不存在"));
@@ -82,10 +81,6 @@ public class WorkflowBatchHandler {
                 jobTaskBatch -> JobTaskBatchStatusEnum.NOT_COMPLETE.contains(jobTaskBatch.getTaskBatchStatus()))) {
             return false;
         }
-
-        List<WorkflowNode> workflowNodes = workflowNodeMapper.selectList(new LambdaQueryWrapper<WorkflowNode>()
-                .eq(WorkflowNode::getWorkflowNodeStatus, StatusEnum.YES.getStatus())
-                .in(WorkflowNode::getId, graph.nodes()));
 
         Map<Long, List<JobTaskBatch>> currentWorkflowNodeMap = jobTaskBatches.stream()
                 .collect(Collectors.groupingBy(JobTaskBatch::getWorkflowNodeId));
