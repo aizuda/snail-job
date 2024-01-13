@@ -39,41 +39,36 @@ public class RunningWorkflowPrepareHandler extends AbstractWorkflowPrePareHandle
     protected void doHandler(WorkflowTaskPrepareDTO prepare) {
         log.info("存在运行中的任务. prepare:[{}]", JsonUtil.toJsonString(prepare));
 
-        try {
-            // 1. 若DAG已经支持完成了，由于异常原因导致的没有更新成终态此次进行一次更新操作
-            int blockStrategy = prepare.getBlockStrategy();
-            if (workflowBatchHandler.complete(prepare.getWorkflowTaskBatchId())) {
-                // 开启新的任务
-                blockStrategy =  BlockStrategyEnum.CONCURRENCY.getBlockStrategy();
-            } else {
-                // 计算超时时间
-                long delay = DateUtils.toNowMilli() - prepare.getExecutionAt();
 
-                // 2. 判断DAG是否已经支持超时
-                // 计算超时时间，到达超时时间中断任务
-                if (delay > DateUtils.toEpochMilli(prepare.getExecutorTimeout())) {
-                    log.info("任务执行超时.workflowTaskBatchId:[{}] delay:[{}] executorTimeout:[{}]",
+        // 1. 若DAG已经支持完成了，由于异常原因导致的没有更新成终态此次进行一次更新操作
+        int blockStrategy = prepare.getBlockStrategy();
+        if (workflowBatchHandler.complete(prepare.getWorkflowTaskBatchId())) {
+            // 开启新的任务
+            blockStrategy = BlockStrategyEnum.CONCURRENCY.getBlockStrategy();
+        } else {
+            // 计算超时时间
+            long delay = DateUtils.toNowMilli() - prepare.getExecutionAt();
+
+            // 2. 判断DAG是否已经支持超时
+            // 计算超时时间，到达超时时间中断任务
+            if (delay > DateUtils.toEpochMilli(prepare.getExecutorTimeout())) {
+                log.info("任务执行超时.workflowTaskBatchId:[{}] delay:[{}] executorTimeout:[{}]",
                         prepare.getWorkflowTaskBatchId(), delay, DateUtils.toEpochMilli(prepare.getExecutorTimeout()));
-                    // 超时停止任务
-                    workflowBatchHandler.stop(prepare.getWorkflowTaskBatchId(), JobOperationReasonEnum.EXECUTE_TIMEOUT.getReason());
-                }
+                // 超时停止任务
+                workflowBatchHandler.stop(prepare.getWorkflowTaskBatchId(), JobOperationReasonEnum.EXECUTE_TIMEOUT.getReason());
             }
-
-            // 仅是超时检测的，不执行阻塞策略
-            if (prepare.isOnlyTimeoutCheck()) {
-                return;
-            }
-
-            // 3. 支持阻塞策略同JOB逻辑一致
-            BlockStrategy blockStrategyInterface = WorkflowBlockStrategyFactory.getJobTaskStop(blockStrategy);
-            WorkflowBlockStrategyContext workflowBlockStrategyContext = WorkflowTaskConverter.INSTANCE.toWorkflowBlockStrategyContext(
-                prepare);
-            blockStrategyInterface.block(workflowBlockStrategyContext);
-        } catch (IOException e) {
-            log.error("更新任务状态失败. prepare:[{}]", JsonUtil.toJsonString(prepare), e);
-
         }
 
+        // 仅是超时检测的，不执行阻塞策略
+        if (prepare.isOnlyTimeoutCheck()) {
+            return;
+        }
+
+        // 3. 支持阻塞策略同JOB逻辑一致
+        BlockStrategy blockStrategyInterface = WorkflowBlockStrategyFactory.getJobTaskStop(blockStrategy);
+        WorkflowBlockStrategyContext workflowBlockStrategyContext = WorkflowTaskConverter.INSTANCE.toWorkflowBlockStrategyContext(
+                prepare);
+        blockStrategyInterface.block(workflowBlockStrategyContext);
 
     }
 }
