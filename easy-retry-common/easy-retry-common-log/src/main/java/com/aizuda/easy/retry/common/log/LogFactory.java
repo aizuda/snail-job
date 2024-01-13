@@ -181,4 +181,16 @@ public abstract class LogFactory {
         return (null != url) ? new JdkLogFactory() : new ConsoleLogFactory();
     }
     // ------------------------------------------------------------------------- Static end
+
+    public static final Throwable extractThrowable(Object... arguments) {
+        if (arguments == null || arguments.length == 0) {
+            return null;
+        }
+
+        final Object lastEntry = arguments[arguments.length - 1];
+        if (lastEntry instanceof Throwable) {
+            return (Throwable) lastEntry;
+        }
+        return null;
+    }
 }

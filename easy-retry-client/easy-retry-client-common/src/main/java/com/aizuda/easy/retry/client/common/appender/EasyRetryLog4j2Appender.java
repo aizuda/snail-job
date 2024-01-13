@@ -5,6 +5,7 @@ import com.aizuda.easy.retry.client.common.report.AsyncReportLog;
 import com.aizuda.easy.retry.client.common.util.ThreadLocalLogUtil;
 import com.aizuda.easy.retry.common.core.constant.LogFieldConstant;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
+import org.apache.log4j.MDC;
 import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.Layout;
 import org.apache.logging.log4j.core.LogEvent;
@@ -15,7 +16,6 @@ import org.apache.logging.log4j.core.config.plugins.PluginElement;
 import org.apache.logging.log4j.core.config.plugins.PluginFactory;
 import org.apache.logging.log4j.core.util.Booleans;
 import org.apache.logging.log4j.core.util.Throwables;
-import org.slf4j.MDC;
 
 import java.io.Serializable;
 import java.util.Objects;
