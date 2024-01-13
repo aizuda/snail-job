@@ -3,6 +3,8 @@ package com.aizuda.easy.retry.server.model.dto;
 import lombok.Data;
 
 /**
+ * 工作流回调节点参数模型
+ *
  * @author: xiaowoniu
  * @date : 2024-01-02
  * @since : 2.6.0

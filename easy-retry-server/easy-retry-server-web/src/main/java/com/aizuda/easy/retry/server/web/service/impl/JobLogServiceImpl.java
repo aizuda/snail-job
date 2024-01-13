@@ -1,14 +1,18 @@
 package com.aizuda.easy.retry.server.web.service.impl;
 
+import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.web.model.request.JobLogQueryVO;
 import com.aizuda.easy.retry.server.web.model.response.JobLogResponseVO;
 import com.aizuda.easy.retry.server.web.service.JobLogService;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobLogMessageMapper;
+import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskBatchMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobLogMessage;
+import com.aizuda.easy.retry.template.datasource.persistence.po.JobTaskBatch;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.google.common.collect.Lists;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -23,10 +27,10 @@ import java.util.stream.Collectors;
  * @since ：2.4.0
  */
 @Service
+@RequiredArgsConstructor
 public class JobLogServiceImpl implements JobLogService {
-
-    @Autowired
-    private JobLogMessageMapper jobLogMessageMapper;
+    private final JobLogMessageMapper jobLogMessageMapper;
+    private final JobTaskBatchMapper jobTaskBatchMapper;
 
     @Override
     public JobLogResponseVO getJobLogPage(final JobLogQueryVO queryVO) {
@@ -35,16 +39,25 @@ public class JobLogServiceImpl implements JobLogService {
 
         LambdaQueryWrapper<JobLogMessage> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper
-            .select(JobLogMessage::getId, JobLogMessage::getLogNum)
-            .ge(JobLogMessage::getId, queryVO.getStartId())
-            .eq(JobLogMessage::getTaskId, queryVO.getTaskId());
+                .select(JobLogMessage::getId, JobLogMessage::getLogNum)
+                .ge(JobLogMessage::getId, queryVO.getStartId())
+                .eq(JobLogMessage::getTaskId, queryVO.getTaskId());
 
         queryWrapper.orderByAsc(JobLogMessage::getRealTime).orderByDesc(JobLogMessage::getId);
         PageDTO<JobLogMessage> selectPage = jobLogMessageMapper.selectPage(pageDTO, queryWrapper);
         List<JobLogMessage> records = selectPage.getRecords();
         if (CollectionUtils.isEmpty(records)) {
+
+            Long count = jobTaskBatchMapper.selectCount(
+                    new LambdaQueryWrapper<JobTaskBatch>()
+                            .in(JobTaskBatch::getTaskBatchStatus, JobTaskBatchStatusEnum.COMPLETED)
+            );
+
             JobLogResponseVO jobLogResponseVO = new JobLogResponseVO();
-            jobLogResponseVO.setFinished(Boolean.TRUE);
+            if (count > 0) {
+                jobLogResponseVO.setFinished(Boolean.TRUE);
+            }
+
             return jobLogResponseVO;
         }
 
@@ -70,7 +83,7 @@ public class JobLogServiceImpl implements JobLogService {
             List<String> originalList = JsonUtil.parseObject(jobLogMessage.getMessage(), List.class);
             int size = originalList.size() - fromIndex;
             List<String> pageList = originalList.stream().skip(fromIndex).limit(queryVO.getSize())
-                .collect(Collectors.toList());
+                    .collect(Collectors.toList());
 
             if (messages.size() + size >= queryVO.getSize()) {
                 messages.addAll(pageList);

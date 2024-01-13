@@ -11,6 +11,7 @@ import com.aizuda.easy.retry.client.model.request.DispatchJobRequest;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.model.JobContext;
 import com.aizuda.easy.retry.common.core.model.Result;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,19 +37,26 @@ public class JobEndPoint {
         JobContext jobContext = buildJobContext(dispatchJob);
         JobExecutorInfo jobExecutorInfo = JobExecutorInfoCache.get(jobContext.getExecutorInfo());
         if (Objects.isNull(jobExecutorInfo)) {
+            EasyRetryLog.REMOTE.error("执行器配置有误. executorInfo:[{}]", dispatchJob.getExecutorInfo());
             return new Result<>("执行器配置有误", Boolean.FALSE);
         }
 
-        // 选择执行器
-        Object executor = jobExecutorInfo.getExecutor();
-        IJobExecutor jobExecutor;
-        if (IJobExecutor.class.isAssignableFrom(executor.getClass())) {
-            jobExecutor = (AbstractJobExecutor) executor;
-        } else {
-            jobExecutor = SpringContext.getBeanByType(AnnotationJobExecutor.class);
+        try {
+            // 选择执行器
+            Object executor = jobExecutorInfo.getExecutor();
+            IJobExecutor jobExecutor;
+            if (IJobExecutor.class.isAssignableFrom(executor.getClass())) {
+                jobExecutor = (AbstractJobExecutor) executor;
+            } else {
+                jobExecutor = SpringContext.getBeanByType(AnnotationJobExecutor.class);
+            }
+
+            jobExecutor.jobExecute(jobContext);
+        } catch (Exception e) {
+            EasyRetryLog.REMOTE.error("客户端发生非预期异常. taskBatchId:[{}]", dispatchJob.getTaskBatchId());
+            throw e;
         }
 
-        jobExecutor.jobExecute(jobContext);
 
         return new Result<>(Boolean.TRUE);
     }

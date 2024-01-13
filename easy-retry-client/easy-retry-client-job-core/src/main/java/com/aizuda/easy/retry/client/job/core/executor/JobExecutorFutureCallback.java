@@ -30,7 +30,7 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
 
     private static final JobNettyClient CLIENT = RequestBuilder.<JobNettyClient, NettyResult>newBuilder()
             .client(JobNettyClient.class)
-            .callback(nettyResult -> LogUtils.info(log, "Data report successfully requestId:[{}]", nettyResult.getRequestId())).build();
+            .callback(nettyResult -> EasyRetryLog.LOCAL.info("Job execute result report successfully requestId:[{}]", nettyResult.getRequestId())).build();
 
     private final JobContext jobContext;
 
@@ -41,7 +41,7 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
     @Override
     public void onSuccess(ExecuteResult result) {
         // 上报执行成功
-        EasyRetryLog.LOCAL.warn("任务执行成功 taskBatchId:[{}] [{}]", jobContext.getTaskBatchId(), JsonUtil.toJsonString(result));
+        EasyRetryLog.REMOTE.info("任务执行成功 taskBatchId:[{}] [{}]", jobContext.getTaskBatchId(), JsonUtil.toJsonString(result));
 
         if (Objects.isNull(result)) {
             result = ExecuteResult.success();
@@ -57,7 +57,7 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
         try {
             CLIENT.dispatchResult(buildDispatchJobResultRequest(result, taskStatus));
         } catch (Exception e) {
-            EasyRetryLog.LOCAL.error("执行结果上报异常.[{}]", jobContext.getTaskId(), e);
+            EasyRetryLog.REMOTE.error("执行结果上报异常.[{}]", jobContext.getTaskId(), e);
         } finally {
             stopThreadPool();
             ThreadLocalLogUtil.removeContext();
@@ -67,7 +67,7 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
     @Override
     public void onFailure(final Throwable t) {
         // 上报执行失败
-        log.error("任务执行失败 任务执行成功 taskBatchId:[{}]", jobContext.getTaskBatchId(), t);
+        EasyRetryLog.REMOTE.error("任务执行失败 taskBatchId:[{}]", jobContext.getTaskBatchId(), t);
         try {
 
             ExecuteResult failure = ExecuteResult.failure();
@@ -81,7 +81,7 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
                     buildDispatchJobResultRequest(failure, JobTaskStatusEnum.FAIL.getStatus())
             );
         } catch (Exception e) {
-            EasyRetryLog.LOCAL.error("执行结果上报异常.[{}]", jobContext.getTaskId(), e);
+            EasyRetryLog.REMOTE.error("执行结果上报异常.[{}]", jobContext.getTaskId(), e);
         } finally {
             stopThreadPool();
             ThreadLocalLogUtil.removeContext();
