@@ -1,7 +1,10 @@
 package com.aizuda.easy.retry.common.log.dialect.log4j2;
 
 import cn.hutool.core.util.StrUtil;
+import com.aizuda.easy.retry.common.core.constant.LogFieldConstant;
 import com.aizuda.easy.retry.common.log.AbstractLog;
+import com.aizuda.easy.retry.common.log.LogFactory;
+import org.apache.log4j.MDC;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -113,7 +116,7 @@ public class Log4j2Log extends AbstractLog {
             default:
                 throw new Error(StrUtil.format("Can not identify level: {}", level));
         }
-        logIfEnabled(fqcn, log4j2Level, t, format, arguments);
+        logIfEnabled(fqcn, log4j2Level, t, format, remote, arguments);
     }
 
     // ------------------------------------------------------------------------- Private method
@@ -128,12 +131,20 @@ public class Log4j2Log extends AbstractLog {
      * @param msgTemplate 消息模板
      * @param arguments   参数
      */
-    private void logIfEnabled(String fqcn, Level level, Throwable t, String msgTemplate, Object... arguments) {
+    private void logIfEnabled(String fqcn, Level level, Throwable t, String msgTemplate, Boolean remote, Object... arguments) {
         if (this.logger.isEnabled(level)) {
+
+            if (remote) {
+                MDC.put(LogFieldConstant.MDC_REMOTE, remote.toString());
+            }
             if (this.logger instanceof AbstractLogger) {
                 ((AbstractLogger) this.logger).logIfEnabled(fqcn, level, null, StrUtil.format(msgTemplate, arguments), t);
             } else {
                 // FQCN无效
+                //this.logger.log(level, StrUtil.format(msgTemplate, arguments), t);
+                if (t == null) {
+                    t = LogFactory.extractThrowable(arguments);
+                }
                 this.logger.log(level, StrUtil.format(msgTemplate, arguments), t);
             }
         }

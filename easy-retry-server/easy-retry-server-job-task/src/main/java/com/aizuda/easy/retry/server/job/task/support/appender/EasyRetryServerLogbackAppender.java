@@ -22,10 +22,7 @@ import com.google.common.collect.Lists;
 import org.slf4j.MDC;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -52,7 +49,6 @@ public class EasyRetryServerLogbackAppender<E> extends UnsynchronizedAppenderBas
         LoggingEvent event = (LoggingEvent) eventObject;
 
         LogContentDTO logContentDTO = new LogContentDTO();
-        logContentDTO.addTimeStamp(event.getTimeStamp());
         logContentDTO.addLevelField(event.getLevel().levelStr);
         logContentDTO.addThreadField(event.getThreadName());
         logContentDTO.addLocationField(getLocationField(event));
@@ -72,6 +68,7 @@ public class EasyRetryServerLogbackAppender<E> extends UnsynchronizedAppenderBas
                 logMetaDTO = JsonUtil.parseObject(extractedData, LogMetaDTO.class);
                 String message = event.getFormattedMessage().replaceFirst(patternString, StrUtil.EMPTY);
                 logContentDTO.addMessageField(message);
+                logContentDTO.addTimeStamp(Optional.ofNullable(logMetaDTO.getTimestamp()).orElse(event.getTimeStamp()));
                 break;
             }
 
