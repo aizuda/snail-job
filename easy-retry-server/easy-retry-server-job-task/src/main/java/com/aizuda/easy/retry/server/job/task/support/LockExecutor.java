@@ -6,7 +6,6 @@ package com.aizuda.easy.retry.server.job.task.support;
  * @since : 2.6.0
  */
 @FunctionalInterface
-
 public interface LockExecutor {
     void execute();
 }
