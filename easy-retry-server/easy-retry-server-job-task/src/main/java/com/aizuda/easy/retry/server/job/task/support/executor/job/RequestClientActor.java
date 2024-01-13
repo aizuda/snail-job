@@ -14,6 +14,7 @@ import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
 import com.aizuda.easy.retry.server.common.client.RequestBuilder;
 import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
+import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.server.job.task.client.JobRpcClient;
 import com.aizuda.easy.retry.server.job.task.dto.JobExecutorResultDTO;
 import com.aizuda.easy.retry.server.job.task.dto.JobLogDTO;
@@ -69,10 +70,12 @@ public class RequestClientActor extends AbstractActor {
 
         try {
             // 构建请求客户端对象
+            Long timestamp = DateUtils.toNowMilli();
             JobRpcClient rpcClient = buildRpcClient(registerNodeInfo, realJobExecutorDTO);
             Result<Boolean> dispatch = rpcClient.dispatch(dispatchJobRequest);
             if (dispatch.getStatus() == StatusEnum.YES.getStatus() && Objects.equals(dispatch.getData(), Boolean.TRUE)) {
                 LogMetaDTO logMetaDTO = JobTaskConverter.INSTANCE.toJobLogDTO(realJobExecutorDTO);
+                logMetaDTO.setTimestamp(timestamp);
                 EasyRetryLog.REMOTE.info("taskId:[{}] 任务调度成功. <|>{}<|>", logMetaDTO.getTaskId(), logMetaDTO);
             } else {
                 // 客户端返回失败，则认为任务执行失败

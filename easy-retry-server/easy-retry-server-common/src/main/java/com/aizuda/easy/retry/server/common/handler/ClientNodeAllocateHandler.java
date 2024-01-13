@@ -1,13 +1,13 @@
 package com.aizuda.easy.retry.server.common.handler;
 
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.ClientLoadBalance;
 import com.aizuda.easy.retry.server.common.allocate.client.ClientLoadBalanceManager;
 import com.aizuda.easy.retry.server.common.allocate.client.ClientLoadBalanceManager.AllocationAlgorithmEnum;
-import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
+import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
-import lombok.extern.slf4j.Slf4j;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -22,11 +22,9 @@ import java.util.stream.Stream;
  * @date : 2023-01-10 14:18
  */
 @Component
-@Slf4j
+@RequiredArgsConstructor
 public class ClientNodeAllocateHandler {
-
-    @Autowired
-    protected AccessTemplate accessTemplate;
+    private final AccessTemplate accessTemplate;
 
     /**
      * 获取分配的节点
@@ -39,7 +37,7 @@ public class ClientNodeAllocateHandler {
 
         Set<RegisterNodeInfo> serverNodes = CacheRegisterTable.getServerNodeSet(groupName, namespaceId);
         if (CollectionUtils.isEmpty(serverNodes)) {
-            LogUtils.warn(log, "client node is null. groupName:[{}]", groupName);
+            EasyRetryLog.LOCAL.warn("client node is null. groupName:[{}]", groupName);
             return null;
         }
 

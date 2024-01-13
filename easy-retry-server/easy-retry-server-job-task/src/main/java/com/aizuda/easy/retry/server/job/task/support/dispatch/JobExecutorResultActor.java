@@ -88,10 +88,10 @@ public class JobExecutorResultActor extends AbstractActor {
                     }
                 });
 
-                LogMetaDTO logMetaDTO = JobTaskConverter.INSTANCE.toJobLogDTO(result);
-                // 防止客户端日志还未上报完成，导致日志时序错误
-                logMetaDTO.setTimestamp(DateUtils.toEpochMilli(LocalDateTime.now().plusHours(1)));
-                EasyRetryLog.REMOTE.info("taskId:[{}] 任务执行成功. <|>{}<|>", logMetaDTO.getTaskId(), logMetaDTO);
+//                LogMetaDTO logMetaDTO = JobTaskConverter.INSTANCE.toJobLogDTO(result);
+//                // 防止客户端日志还未上报完成，导致日志时序错误
+//                logMetaDTO.setTimestamp(DateUtils.toEpochMilli(LocalDateTime.now().plusHours(1)));
+//                EasyRetryLog.REMOTE.info("taskId:[{}] 任务执行成功. <|>{}<|>", logMetaDTO.getTaskId(), logMetaDTO);
 
             } catch (Exception e) {
                 LogUtils.error(log, " job executor result exception. [{}]", result, e);

@@ -2,8 +2,10 @@ package com.aizuda.easy.retry.server.job.task.support.callback;
 
 import akka.actor.ActorRef;
 import com.aizuda.easy.retry.common.core.enums.JobTaskStatusEnum;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.util.ClientInfoUtils;
+import com.aizuda.easy.retry.server.job.task.dto.LogMetaDTO;
 import com.aizuda.easy.retry.server.job.task.dto.RealJobExecutorDTO;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.server.job.task.dto.JobExecutorResultDTO;
@@ -39,30 +41,7 @@ public class BroadcastClientCallbackHandler extends AbstractClientCallbackHandle
 
     @Override
     protected void doCallback(final ClientCallbackContext context) {
-        if (context.getTaskStatus().equals(JobTaskStatusEnum.FAIL.getStatus())) {
-            JobTask jobTask = jobTaskMapper.selectById(context.getTaskId());
-            Job job = jobMapper.selectById(context.getJobId());
-            if (jobTask == null || job == null) {
-                return;
-            }
-            if (jobTask.getRetryCount() < job.getMaxRetryTimes()) {
-                // 更新重试次数
-                JobTask updateJobTask = new JobTask();
-                updateJobTask.setRetryCount(1);
-                boolean success = SqlHelper.retBool(jobTaskMapper.update(updateJobTask, Wrappers.<JobTask>lambdaUpdate()
-                        .lt(JobTask::getRetryCount, job.getMaxRetryTimes())
-                        .eq(JobTask::getId, context.getTaskId())
-                ));
-                if (success) {
-                    RealJobExecutorDTO realJobExecutor = JobTaskConverter.INSTANCE.toRealJobExecutorDTO(JobTaskConverter.INSTANCE.toJobExecutorContext(job), jobTask);
-                    realJobExecutor.setClientId(ClientInfoUtils.clientId(jobTask.getClientInfo()));
-                    ActorRef actorRef = ActorGenerator.jobRealTaskExecutorActor();
-                    actorRef.tell(realJobExecutor, actorRef);
-                    // TODO 记录日志
-                }
-                return;
-            }
-        }
+
         JobExecutorResultDTO jobExecutorResultDTO = JobTaskConverter.INSTANCE.toJobExecutorResultDTO(context);
         jobExecutorResultDTO.setTaskId(context.getTaskId());
         jobExecutorResultDTO.setMessage(context.getExecuteResult().getMessage());

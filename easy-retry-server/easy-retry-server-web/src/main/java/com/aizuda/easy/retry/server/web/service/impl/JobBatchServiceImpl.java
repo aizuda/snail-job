@@ -102,25 +102,26 @@ public class JobBatchServiceImpl implements JobBatchService {
             return null;
         }
 
-        if (jobTaskBatch.getTaskType().equals(TaskTypeEnum.JOB.getType())) {
-            Job job = jobMapper.selectById(jobTaskBatch.getJobId());
-            return JobBatchResponseVOConverter.INSTANCE.toJobBatchResponseVO(jobTaskBatch, job);
-        }
+        Job job = jobMapper.selectById(jobTaskBatch.getJobId());
+        JobBatchResponseVO jobBatchResponseVO = JobBatchResponseVOConverter.INSTANCE.toJobBatchResponseVO(jobTaskBatch, job);
 
-        JobBatchResponseVO jobBatchResponseVO = JobBatchResponseVOConverter.INSTANCE.toJobBatchResponseVO(jobTaskBatch);
-
-        // 回调节点
-        if (SystemConstants.CALLBACK_JOB_ID.equals(jobTaskBatch.getJobId())) {
+        if (jobTaskBatch.getTaskType().equals(TaskTypeEnum.WORKFLOW.getType())) {
             WorkflowNode workflowNode = workflowNodeMapper.selectById(jobTaskBatch.getWorkflowNodeId());
-            jobBatchResponseVO.setJobName(workflowNode.getNodeName());
-            jobBatchResponseVO.setCallback(JsonUtil.parseObject(workflowNode.getNodeInfo(), CallbackConfig.class));
-        }
+            jobBatchResponseVO.setNodeName(workflowNode.getNodeName());
 
-        // 条件节点
-        if (SystemConstants.DECISION_JOB_ID.equals(jobTaskBatch.getJobId())) {
-            WorkflowNode workflowNode = workflowNodeMapper.selectById(jobTaskBatch.getWorkflowNodeId());
-            jobBatchResponseVO.setJobName(workflowNode.getNodeName());
-            jobBatchResponseVO.setDecision(JsonUtil.parseObject(workflowNode.getNodeInfo(), DecisionConfig.class));
+            // 回调节点
+            if (SystemConstants.CALLBACK_JOB_ID.equals(jobTaskBatch.getJobId())) {
+                jobBatchResponseVO.setCallback(JsonUtil.parseObject(workflowNode.getNodeInfo(), CallbackConfig.class));
+                jobBatchResponseVO.setExecutionAt(jobTaskBatch.getCreateDt());
+                return jobBatchResponseVO;
+            }
+
+            // 条件节点
+            if (SystemConstants.DECISION_JOB_ID.equals(jobTaskBatch.getJobId())) {
+                jobBatchResponseVO.setDecision(JsonUtil.parseObject(workflowNode.getNodeInfo(), DecisionConfig.class));
+                jobBatchResponseVO.setExecutionAt(jobTaskBatch.getCreateDt());
+                return jobBatchResponseVO;
+            }
         }
 
         return jobBatchResponseVO;

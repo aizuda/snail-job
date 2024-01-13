@@ -1,6 +1,8 @@
 package com.aizuda.easy.retry.server.job.task.support.callback;
 
 import com.aizuda.easy.retry.client.model.ExecuteResult;
+import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
+import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
 import lombok.Data;
 
 /**
@@ -34,6 +36,12 @@ public class ClientCallbackContext {
     private Integer taskStatus;
 
     private ExecuteResult executeResult;
+
+    private String clientInfo;
+
+    private Job job;
+
+    private JobTask jobTask;
 
 
 }

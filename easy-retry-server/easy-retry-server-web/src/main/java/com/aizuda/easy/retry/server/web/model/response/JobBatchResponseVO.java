@@ -28,6 +28,11 @@ public class JobBatchResponseVO {
     private String jobName;
 
     /**
+     * 工作流节点名称
+     */
+    private String nodeName;
+
+    /**
      * 任务信息id
      */
     private Long jobId;

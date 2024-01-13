@@ -63,7 +63,7 @@ public interface JobTaskConverter {
 
     JobLogMessage toJobLogMessage(LogTaskDTO logTaskDTO);
 
-    JobLogDTO toJobLogDTO(JobExecutorContext context);
+    LogMetaDTO toJobLogDTO(ClientCallbackContext context);
 
     LogMetaDTO toJobLogDTO(JobExecutorResultDTO resultDTO);
 

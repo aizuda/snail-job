@@ -31,6 +31,7 @@ import com.aizuda.easy.retry.server.web.model.request.SystemUserQueryVO;
 import com.aizuda.easy.retry.server.web.model.request.SystemUserRequestVO;
 import com.aizuda.easy.retry.server.web.model.response.SystemUserResponseVO;
 import com.google.common.collect.Lists;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,18 +49,14 @@ import java.util.stream.Collectors;
  * @since 2022-03-05
  */
 @Service
+@RequiredArgsConstructor
 public class SystemUserServiceImpl implements SystemUserService {
+    public static final long EXPIRE_TIME = 3600 * 24 * 1000;
 
-    public static final long EXPIRE_TIME = 3600 * 7 * 1000;
-
-    @Autowired
-    private SystemUserMapper systemUserMapper;
-    @Autowired
-    private SystemUserPermissionMapper systemUserPermissionMapper;
-    @Autowired
-    private NamespaceMapper namespaceMapper;
-    @Autowired
-    private SystemProperties systemProperties;
+    private final SystemUserMapper systemUserMapper;
+    private final SystemUserPermissionMapper systemUserPermissionMapper;
+    private final NamespaceMapper namespaceMapper;
+    private final SystemProperties systemProperties;
 
     @Override
     public SystemUserResponseVO login(SystemUserRequestVO requestVO) {

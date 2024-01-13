@@ -45,40 +45,6 @@ public class ShardingClientCallbackHandler extends AbstractClientCallbackHandler
 
     @Override
     protected void doCallback(final ClientCallbackContext context) {
-        if (context.getTaskStatus().equals(JobTaskStatusEnum.FAIL.getStatus())) {
-            JobTask jobTask = jobTaskMapper.selectById(context.getTaskId());
-            Job job = jobMapper.selectById(context.getJobId());
-            if (jobTask == null || job == null) {
-                return;
-            }
-            if (jobTask.getRetryCount() < job.getMaxRetryTimes()) {
-                Set<RegisterNodeInfo> nodes = CacheRegisterTable.getServerNodeSet(context.getGroupName(), context.getNamespaceId());
-                if (CollUtil.isEmpty(nodes)) {
-                    log.error("无可执行的客户端信息. jobId:[{}]", context.getJobId());
-                    return;
-                }
-                RegisterNodeInfo serverNode = RandomUtil.randomEle(nodes.toArray(new RegisterNodeInfo[0]));
-                String newClient = ClientInfoUtils.generate(serverNode);
-                // 更新重试次数
-                JobTask updateJobTask = new JobTask();
-                updateJobTask.setClientInfo(newClient);
-                updateJobTask.setRetryCount(1);
-                boolean success = SqlHelper.retBool(
-                        jobTaskMapper.update(updateJobTask, Wrappers.<JobTask>lambdaUpdate()
-                                .lt(JobTask::getRetryCount, job.getMaxRetryTimes())
-                                .eq(JobTask::getId, context.getTaskId())
-                        )
-                );
-                if (success) {
-                    RealJobExecutorDTO realJobExecutor = JobTaskConverter.INSTANCE.toRealJobExecutorDTO(JobTaskConverter.INSTANCE.toJobExecutorContext(job), jobTask);
-                    realJobExecutor.setClientId(ClientInfoUtils.clientId(newClient));
-                    ActorRef actorRef = ActorGenerator.jobRealTaskExecutorActor();
-                    actorRef.tell(realJobExecutor, actorRef);
-                    // TODO 记录日志
-                }
-                return;
-            }
-        }
 
         JobExecutorResultDTO jobExecutorResultDTO = JobTaskConverter.INSTANCE.toJobExecutorResultDTO(context);
         jobExecutorResultDTO.setTaskId(context.getTaskId());
@@ -90,4 +56,15 @@ public class ShardingClientCallbackHandler extends AbstractClientCallbackHandler
         actorRef.tell(jobExecutorResultDTO, actorRef);
     }
 
+    @Override
+    protected String chooseNewClient(ClientCallbackContext context) {
+        Set<RegisterNodeInfo> nodes = CacheRegisterTable.getServerNodeSet(context.getGroupName(), context.getNamespaceId());
+        if (CollUtil.isEmpty(nodes)) {
+            log.error("无可执行的客户端信息. jobId:[{}]", context.getJobId());
+            return null;
+        }
+
+        RegisterNodeInfo serverNode = RandomUtil.randomEle(nodes.toArray(new RegisterNodeInfo[0]));
+        return ClientInfoUtils.generate(serverNode);
+    }
 }
