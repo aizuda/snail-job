@@ -74,7 +74,7 @@ public class WorkflowExecutorActor extends AbstractActor {
         }).build();
     }
 
-    private void doExecutor(WorkflowNodeTaskExecuteDTO taskExecute) throws IOException {
+    private void doExecutor(WorkflowNodeTaskExecuteDTO taskExecute) {
         WorkflowTaskBatch workflowTaskBatch = workflowTaskBatchMapper.selectById(taskExecute.getWorkflowTaskBatchId());
         Assert.notNull(workflowTaskBatch, () -> new EasyRetryServerException("任务不存在"));
 

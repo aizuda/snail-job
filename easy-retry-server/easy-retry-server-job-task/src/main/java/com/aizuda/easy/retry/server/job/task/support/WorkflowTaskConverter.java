@@ -34,6 +34,11 @@ public interface WorkflowTaskConverter {
     )
     WorkflowTaskPrepareDTO toWorkflowTaskPrepareDTO(WorkflowPartitionTaskDTO workflowPartitionTaskDTO);
 
+    @Mappings(
+            @Mapping(source = "id", target = "workflowId")
+    )
+    WorkflowTaskPrepareDTO toWorkflowTaskPrepareDTO(Workflow workflow);
+
     WorkflowTaskBatchGeneratorContext toWorkflowTaskBatchGeneratorContext(WorkflowTaskPrepareDTO workflowTaskPrepareDTO);
 
     WorkflowTaskBatch toWorkflowTaskBatch(WorkflowTaskBatchGeneratorContext context);

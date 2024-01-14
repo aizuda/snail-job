@@ -3,6 +3,8 @@ package com.aizuda.easy.retry.server.job.task.support.dispatch;
 import akka.actor.AbstractActor;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
+import com.aizuda.easy.retry.server.common.enums.JobTaskExecutorSceneEnum;
+import com.aizuda.easy.retry.server.common.enums.TaskTypeEnum;
 import com.aizuda.easy.retry.server.job.task.dto.JobTaskPrepareDTO;
 import com.aizuda.easy.retry.server.job.task.support.JobPrePareHandler;
 import com.aizuda.easy.retry.server.job.task.support.prepare.job.TerminalJobPrepareHandler;
@@ -50,11 +52,18 @@ public class JobTaskPrepareActor extends AbstractActor {
     }
 
     private void doPrepare(JobTaskPrepareDTO prepare) {
+        LambdaQueryWrapper<JobTaskBatch> queryWrapper = new LambdaQueryWrapper<JobTaskBatch>()
+                .eq(JobTaskBatch::getJobId, prepare.getJobId())
+                .in(JobTaskBatch::getTaskBatchStatus, NOT_COMPLETE);
+
+        JobTaskExecutorSceneEnum jobTaskExecutorSceneEnum = JobTaskExecutorSceneEnum.get(
+                prepare.getTaskExecutorScene());
+        if (TaskTypeEnum.WORKFLOW.getType().equals(jobTaskExecutorSceneEnum.getTaskType().getType())) {
+            queryWrapper.eq(JobTaskBatch::getWorkflowNodeId, prepare.getWorkflowNodeId());
+        }
 
         List<JobTaskBatch> notCompleteJobTaskBatchList = jobTaskBatchMapper
-                .selectList(new LambdaQueryWrapper<JobTaskBatch>()
-                .eq(JobTaskBatch::getJobId, prepare.getJobId())
-                .in(JobTaskBatch::getTaskBatchStatus, NOT_COMPLETE));
+                .selectList(queryWrapper);
 
         // 说明所以任务已经完成
         if (CollectionUtils.isEmpty(notCompleteJobTaskBatchList)) {

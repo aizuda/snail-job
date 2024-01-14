@@ -7,10 +7,7 @@ import com.aizuda.easy.retry.server.web.model.response.WorkflowBatchResponseVO;
 import com.aizuda.easy.retry.server.web.model.response.WorkflowDetailResponseVO;
 import com.aizuda.easy.retry.server.web.service.WorkflowBatchService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -35,5 +32,10 @@ public class WorkflowBatchController {
     @GetMapping("{id}")
     public WorkflowDetailResponseVO getWorkflowBatchDetail(@PathVariable("id") Long id) {
         return workflowBatchService.getWorkflowBatchDetail(id);
+    }
+
+    @PostMapping("/stop/{id}")
+    public Boolean stop(@PathVariable("id") Long id) {
+        return workflowBatchService.stop(id);
     }
 }

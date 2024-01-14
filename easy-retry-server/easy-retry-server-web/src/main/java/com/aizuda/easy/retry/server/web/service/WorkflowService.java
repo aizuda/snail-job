@@ -27,4 +27,6 @@ public interface WorkflowService {
     Boolean updateStatus(Long id);
 
     Boolean deleteById(Long id);
+
+    Boolean trigger(Long id);
 }

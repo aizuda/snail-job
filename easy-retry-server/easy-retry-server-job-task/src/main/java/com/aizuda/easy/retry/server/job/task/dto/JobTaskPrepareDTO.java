@@ -51,7 +51,7 @@ public class JobTaskPrepareDTO {
     private boolean onlyTimeoutCheck;
 
     /**
-     * 执行策略 1、auto 2、manual 3、workflow
+     * 执行策略 1、auto_job 2、manual_job 3、auto_workflow 4、manual_workflow
      */
     private Integer taskExecutorScene;
 

@@ -68,7 +68,7 @@ public interface SystemConstants {
         /**
          * 批量日志上报
          */
-        String BATCH_LOG_REPORT = "/batch/server/reportLog";
+        String BATCH_LOG_REPORT = "/batch/server/report/log";
 
         /**
          * 上报job的运行结果
