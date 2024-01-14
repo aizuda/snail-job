@@ -17,7 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -48,13 +50,17 @@ public class JobLogServiceImpl implements JobLogService {
         List<JobLogMessage> records = selectPage.getRecords();
         if (CollectionUtils.isEmpty(records)) {
 
-            Long count = jobTaskBatchMapper.selectCount(
+            JobTaskBatch jobTaskBatch = jobTaskBatchMapper.selectOne(
                     new LambdaQueryWrapper<JobTaskBatch>()
-                            .in(JobTaskBatch::getTaskBatchStatus, JobTaskBatchStatusEnum.COMPLETED)
+                            .eq(JobTaskBatch::getId, queryVO.getTaskBatchId())
             );
 
             JobLogResponseVO jobLogResponseVO = new JobLogResponseVO();
-            if (count > 0) {
+
+            if (Objects.nonNull(jobTaskBatch) &&
+                    JobTaskBatchStatusEnum.COMPLETED.contains(jobTaskBatch.getTaskBatchStatus())
+                    && jobTaskBatch.getUpdateDt().plusSeconds(15).isBefore(LocalDateTime.now())
+            ) {
                 jobLogResponseVO.setFinished(Boolean.TRUE);
             }
 

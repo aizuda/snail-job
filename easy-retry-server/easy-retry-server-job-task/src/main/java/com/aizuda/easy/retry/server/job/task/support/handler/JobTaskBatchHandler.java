@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -91,6 +92,7 @@ public class JobTaskBatchHandler {
             }
         }
 
+        jobTaskBatch.setUpdateDt(LocalDateTime.now());
         return 1 == jobTaskBatchMapper.update(jobTaskBatch,
                 new LambdaUpdateWrapper<JobTaskBatch>()
                         .eq(JobTaskBatch::getId, completeJobBatchDTO.getTaskBatchId())
