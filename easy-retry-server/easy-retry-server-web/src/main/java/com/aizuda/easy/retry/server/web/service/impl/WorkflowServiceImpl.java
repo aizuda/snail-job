@@ -8,11 +8,18 @@ import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.WaitStrategy;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
+import com.aizuda.easy.retry.server.common.enums.JobTaskExecutorSceneEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.strategy.WaitStrategies;
+import com.aizuda.easy.retry.server.common.util.CronUtils;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.server.common.util.GraphUtils;
+import com.aizuda.easy.retry.server.job.task.dto.WorkflowPartitionTaskDTO;
+import com.aizuda.easy.retry.server.job.task.dto.WorkflowTaskPrepareDTO;
+import com.aizuda.easy.retry.server.job.task.support.WorkflowPrePareHandler;
+import com.aizuda.easy.retry.server.job.task.support.WorkflowTaskConverter;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
+import com.aizuda.easy.retry.server.web.model.request.SceneConfigRequestVO;
 import com.aizuda.easy.retry.server.web.model.request.UserSessionVO;
 import com.aizuda.easy.retry.server.web.model.request.WorkflowQueryVO;
 import com.aizuda.easy.retry.server.web.model.request.WorkflowRequestVO;
@@ -34,6 +41,8 @@ import com.google.common.graph.GraphBuilder;
 import com.google.common.graph.MutableGraph;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,6 +64,8 @@ public class WorkflowServiceImpl implements WorkflowService {
     private final WorkflowNodeMapper workflowNodeMapper;
     private final SystemProperties systemProperties;
     private final WorkflowHandler workflowHandler;
+    @Lazy
+    private final WorkflowPrePareHandler terminalWorkflowPrepareHandler;
 
     @Override
     @Transactional
@@ -93,11 +104,27 @@ public class WorkflowServiceImpl implements WorkflowService {
     }
 
     private static Long calculateNextTriggerAt(final WorkflowRequestVO workflowRequestVO, Long time) {
+        checkExecuteInterval(workflowRequestVO);
+
         WaitStrategy waitStrategy = WaitStrategies.WaitStrategyEnum.getWaitStrategy(workflowRequestVO.getTriggerType());
         WaitStrategies.WaitStrategyContext waitStrategyContext = new WaitStrategies.WaitStrategyContext();
         waitStrategyContext.setTriggerInterval(workflowRequestVO.getTriggerInterval());
         waitStrategyContext.setNextTriggerAt(time);
         return waitStrategy.computeTriggerTime(waitStrategyContext);
+    }
+
+    private static void checkExecuteInterval(WorkflowRequestVO requestVO) {
+        if (Lists.newArrayList(WaitStrategies.WaitStrategyEnum.FIXED.getType(),
+                        WaitStrategies.WaitStrategyEnum.RANDOM.getType())
+                .contains(requestVO.getTriggerType())) {
+            if (Integer.parseInt(requestVO.getTriggerInterval()) < 10) {
+                throw new EasyRetryServerException("触发间隔不得小于10");
+            }
+        } else if (requestVO.getTriggerType() == WaitStrategies.WaitStrategyEnum.CRON.getType()) {
+            if (CronUtils.getExecuteInterval(requestVO.getTriggerInterval()) < 10 * 1000) {
+                throw new EasyRetryServerException("触发间隔不得小于10");
+            }
+        }
     }
 
     @Override
@@ -178,10 +205,11 @@ public class WorkflowServiceImpl implements WorkflowService {
         workflow = new Workflow();
         workflow.setId(workflowRequestVO.getId());
         workflow.setVersion(version);
+        workflow.setNextTriggerAt(calculateNextTriggerAt(workflowRequestVO, DateUtils.toNowMilli()));
         workflow.setFlowInfo(JsonUtil.toJsonString(GraphUtils.serializeGraphToJson(graph)));
         Assert.isTrue(workflowMapper.update(workflow, new LambdaQueryWrapper<Workflow>()
-            .eq(Workflow::getId, workflow.getId())
-            .eq(Workflow::getVersion, version)
+                .eq(Workflow::getId, workflow.getId())
+                .eq(Workflow::getVersion, version)
         ) > 0, () -> new EasyRetryServerException("更新失败"));
 
         return Boolean.TRUE;
@@ -210,6 +238,21 @@ public class WorkflowServiceImpl implements WorkflowService {
         workflow.setId(id);
         workflow.setDeleted(StatusEnum.YES.getStatus());
         return 1 == workflowMapper.updateById(workflow);
+    }
+
+    @Override
+    public Boolean trigger(Long id) {
+        Workflow workflow = workflowMapper.selectById(id);
+        Assert.notNull(workflow, () -> new EasyRetryServerException("workflow can not be null."));
+
+        WorkflowTaskPrepareDTO prepareDTO = WorkflowTaskConverter.INSTANCE.toWorkflowTaskPrepareDTO(workflow);
+        // 设置now表示立即执行
+        prepareDTO.setNextTriggerAt(DateUtils.toNowMilli());
+        prepareDTO.setTaskExecutorScene(JobTaskExecutorSceneEnum.MANUAL_WORKFLOW.getType());
+
+        terminalWorkflowPrepareHandler.handler(prepareDTO);
+
+        return Boolean.TRUE;
     }
 
 }

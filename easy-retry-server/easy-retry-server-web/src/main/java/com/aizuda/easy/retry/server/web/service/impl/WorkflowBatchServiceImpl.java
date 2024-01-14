@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.server.web.service.impl;
 
+import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
@@ -8,6 +9,7 @@ import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.server.common.dto.JobTaskConfig;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.job.task.support.cache.MutableGraphCache;
+import com.aizuda.easy.retry.server.job.task.support.handler.WorkflowBatchHandler;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
 import com.aizuda.easy.retry.server.web.model.request.UserSessionVO;
 import com.aizuda.easy.retry.server.web.model.request.WorkflowBatchQueryVO;
@@ -59,6 +61,7 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
     private final WorkflowNodeMapper workflowNodeMapper;
     private final JobTaskBatchMapper jobTaskBatchMapper;
     private final WorkflowHandler workflowHandler;
+    private final WorkflowBatchHandler workflowBatchHandler;
 
     @Override
     public PageResult<List<WorkflowBatchResponseVO>> listPage(WorkflowBatchQueryVO queryVO) {
@@ -170,6 +173,15 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
         }
 
         return responseVO;
+    }
+
+    @Override
+    public Boolean stop(Long id) {
+        WorkflowTaskBatch workflowTaskBatch = workflowTaskBatchMapper.selectById(id);
+        Assert.notNull(workflowTaskBatch, () -> new EasyRetryServerException("workflow batch can not be null."));
+
+        workflowBatchHandler.stop(id, JobOperationReasonEnum.MANNER_STOP.getReason());
+        return Boolean.TRUE;
     }
 
     private static boolean isNoOperation(JobTaskBatch i) {

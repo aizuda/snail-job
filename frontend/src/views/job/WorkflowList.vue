@@ -151,7 +151,7 @@
 import ATextarea from 'ant-design-vue/es/input/TextArea'
 import AInput from 'ant-design-vue/es/input/Input'
 import { STable, Drawer } from '@/components'
-import { workflowListPage, triggerJob, updateWorkflowStatus, delWorkflow } from '@/api/jobApi'
+import { workflowListPage, updateWorkflowStatus, delWorkflow, triggerWorkflow } from '@/api/jobApi'
 import { getAllGroupNameList } from '@/api/manage'
 import enums from '@/utils/jobEnum'
 import JobInfo from '@/views/job/JobInfo'
@@ -291,7 +291,7 @@ export default {
     },
     handleOk (record) {},
     handleTrigger (record) {
-      triggerJob(record.id).then((res) => {
+      triggerWorkflow(record.id).then((res) => {
         const { status } = res
         if (status === 0) {
           this.$message.error('执行失败')

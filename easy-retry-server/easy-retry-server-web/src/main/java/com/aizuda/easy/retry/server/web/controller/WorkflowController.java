@@ -62,24 +62,9 @@ public class WorkflowController {
         return workflowService.deleteById(id);
     }
 
-    @PostMapping("/start")
-    public void startWorkflow() {
-
-    }
-
-    @PostMapping("/stop")
-    public void stopWorkflow() {
-
-    }
-
-    @PostMapping("/pause")
-    public void pauseWorkflow() {
-
-    }
-
-    @PostMapping("/resume")
-    public void resumeWorkflow() {
-
+    @PostMapping("/trigger/{id}")
+    public Boolean trigger(@PathVariable("id") Long id) {
+        return workflowService.trigger(id);
     }
 
 

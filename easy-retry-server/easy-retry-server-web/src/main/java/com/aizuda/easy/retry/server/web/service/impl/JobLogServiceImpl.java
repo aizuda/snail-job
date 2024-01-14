@@ -43,6 +43,8 @@ public class JobLogServiceImpl implements JobLogService {
         queryWrapper
                 .select(JobLogMessage::getId, JobLogMessage::getLogNum)
                 .ge(JobLogMessage::getId, queryVO.getStartId())
+                .ge(JobLogMessage::getTaskBatchId, queryVO.getTaskBatchId())
+                .ge(JobLogMessage::getJobId, queryVO.getJobId())
                 .eq(JobLogMessage::getTaskId, queryVO.getTaskId());
 
         queryWrapper.orderByAsc(JobLogMessage::getRealTime).orderByDesc(JobLogMessage::getId);

@@ -107,7 +107,7 @@
 import ATextarea from 'ant-design-vue/es/input/TextArea'
 import AInput from 'ant-design-vue/es/input/Input'
 import { Drawer, STable } from '@/components'
-import { workflowBatchListPage, jobNameList } from '@/api/jobApi'
+import { workflowBatchListPage, jobNameList, stopWorkflowBatch } from '@/api/jobApi'
 import { getAllGroupNameList } from '@/api/manage'
 import JobBatchInfo from '@/views/job/JobBatchInfo'
 const enums = require('@/utils/jobEnum')
@@ -218,15 +218,6 @@ export default {
     getAllGroupNameList().then((res) => {
       this.groupNameList = res.data
     })
-
-    // jobNameList({ jobId: jobId }).then(res => {
-    //   this.jobNameList = res.data
-    //   console.log(jobId)
-    //   if (jobId) {
-    //     this.queryParam['jobId'] = this.jobNameList[0].id
-    //     this.$refs.table.refresh(true)
-    //   }
-    // })
   },
   methods: {
     handleSearch (value) {
@@ -246,15 +237,15 @@ export default {
     },
     handleOk (record) {},
     handleStop (record) {
-      // stop(record.id).then((res) => {
-      //   const { status } = res
-      //   if (status === 0) {
-      //     this.$message.error('停止失败')
-      //   } else {
-      //     this.$refs.table.refresh(true)
-      //     this.$message.success('停止成功')
-      //   }
-      // })
+      stopWorkflowBatch(record.id).then((res) => {
+        const { status } = res
+        if (status === 0) {
+          this.$message.error('停止失败')
+        } else {
+          this.$refs.table.refresh(true)
+          this.$message.success('停止成功')
+        }
+      })
     },
     refreshTable (v) {
       this.$refs.table.refresh(true)

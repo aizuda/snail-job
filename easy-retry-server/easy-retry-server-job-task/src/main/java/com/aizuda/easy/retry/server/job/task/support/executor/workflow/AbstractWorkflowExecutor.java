@@ -163,7 +163,7 @@ public abstract class AbstractWorkflowExecutor implements WorkflowExecutor, Init
     }
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         WorkflowExecutorFactory.registerJobExecutor(getWorkflowNodeType(), this);
     }
 }

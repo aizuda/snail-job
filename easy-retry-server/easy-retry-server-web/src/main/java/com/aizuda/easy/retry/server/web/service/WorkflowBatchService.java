@@ -18,4 +18,5 @@ public interface WorkflowBatchService {
 
     WorkflowDetailResponseVO getWorkflowBatchDetail(Long id);
 
+    Boolean stop(Long id);
 }

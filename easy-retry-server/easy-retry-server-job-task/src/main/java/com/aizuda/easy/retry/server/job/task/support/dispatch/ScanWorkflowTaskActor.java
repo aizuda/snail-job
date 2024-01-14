@@ -60,7 +60,7 @@ public class ScanWorkflowTaskActor extends AbstractActor {
     }
 
     private void doScan(ScanTask scanTask) {
-        PartitionTaskUtils.process(startId -> listAvailableJobs(startId, scanTask),
+        PartitionTaskUtils.process(startId -> listAvailableWorkflows(startId, scanTask),
                 this::processPartitionTasks, 0);
     }
 
@@ -70,7 +70,7 @@ public class ScanWorkflowTaskActor extends AbstractActor {
         long now = DateUtils.toNowMilli();
         for (PartitionTask partitionTask : partitionTasks) {
             WorkflowPartitionTaskDTO workflowPartitionTaskDTO = (WorkflowPartitionTaskDTO) partitionTask;
-            processJob(workflowPartitionTaskDTO, waitUpdateJobs, waitExecWorkflows, now);
+            processWorkflow(workflowPartitionTaskDTO, waitUpdateJobs, waitExecWorkflows, now);
         }
 
         // 批量更新
@@ -84,8 +84,8 @@ public class ScanWorkflowTaskActor extends AbstractActor {
         }
     }
 
-    private void processJob(WorkflowPartitionTaskDTO partitionTask, List<Workflow> waitUpdateWorkflows,
-                            List<WorkflowTaskPrepareDTO> waitExecJobs, long now) {
+    private void processWorkflow(WorkflowPartitionTaskDTO partitionTask, List<Workflow> waitUpdateWorkflows,
+                                 List<WorkflowTaskPrepareDTO> waitExecJobs, long now) {
         CacheConsumerGroup.addOrUpdate(partitionTask.getGroupName(), partitionTask.getNamespaceId());
 
         Workflow workflow = new Workflow();
@@ -116,7 +116,7 @@ public class ScanWorkflowTaskActor extends AbstractActor {
         return waitStrategy.computeTriggerTime(waitStrategyContext);
     }
 
-    private List<WorkflowPartitionTaskDTO> listAvailableJobs(Long startId, ScanTask scanTask) {
+    private List<WorkflowPartitionTaskDTO> listAvailableWorkflows(Long startId, ScanTask scanTask) {
         if (CollectionUtils.isEmpty(scanTask.getBuckets())) {
             return Collections.emptyList();
         }
