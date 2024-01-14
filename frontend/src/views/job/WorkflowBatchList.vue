@@ -75,7 +75,7 @@
       :scroll="{ x: 1500 }"
     >
       <span slot="serial" slot-scope="record">
-        <a href="#" @click="handlerOpenDrawer(record)">{{ record.id }}</a>
+        {{ record.id }}
       </span>
       <span slot="taskBatchStatus" slot-scope="text">
         <a-tag :color="taskBatchStatus[text].color">
@@ -100,19 +100,6 @@
         </template>
       </span>
     </s-table>
-
-    <Drawer
-      title="任务详情"
-      placement="right"
-      :width="800"
-      :visibleAmplify="true"
-      :visible="openDrawer"
-      @closeDrawer="onClose"
-      @handlerAmplify="handleInfo"
-    >
-      <job-batch-info ref="jobBatchInfoRef" :showHeader="false" :column="2"/>
-    </Drawer>
-
   </a-card>
 </template>
 

@@ -4,6 +4,8 @@ import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.WorkflowNodeTypeEnum;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
+import com.aizuda.easy.retry.server.common.dto.CallbackConfig;
+import com.aizuda.easy.retry.server.common.dto.DecisionConfig;
 import com.aizuda.easy.retry.server.common.dto.JobTaskConfig;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.web.model.request.WorkflowRequestVO;
@@ -142,16 +144,26 @@ public class WorkflowHandler {
                 workflowNode.setVersion(version);
                 if (WorkflowNodeTypeEnum.DECISION.getType() == nodeConfig.getNodeType()) {
                     workflowNode.setJobId(SystemConstants.DECISION_JOB_ID);
-                    workflowNode.setNodeInfo(JsonUtil.toJsonString(nodeInfo.getDecision()));
+                    DecisionConfig decision = nodeInfo.getDecision();
+                    Assert.notNull(decision, () -> new EasyRetryServerException("【{}】配置信息不能为空", nodeInfo.getNodeName()));
+                    Assert.notBlank(decision.getNodeExpression(), ()-> new EasyRetryServerException("【{}】表达式不能为空", nodeInfo.getNodeName()));
+                    workflowNode.setNodeInfo(JsonUtil.toJsonString(decision));
                 }
 
                 if (WorkflowNodeTypeEnum.CALLBACK.getType() == nodeConfig.getNodeType()) {
                     workflowNode.setJobId(SystemConstants.CALLBACK_JOB_ID);
-                    workflowNode.setNodeInfo(JsonUtil.toJsonString(nodeInfo.getCallback()));
+                    CallbackConfig callback = nodeInfo.getCallback();
+                    Assert.notNull(callback, () -> new EasyRetryServerException("【{}】配置信息不能为空", nodeInfo.getNodeName()));
+                    Assert.notBlank(callback.getWebhook(), () -> new EasyRetryServerException("【{}】webhook不能为空", nodeInfo.getNodeName()));
+                    Assert.notNull(callback.getContentType(), () -> new EasyRetryServerException("【{}】请求类型不能为空", nodeInfo.getNodeName()));
+                    Assert.notBlank(callback.getSecret(), () -> new EasyRetryServerException("【{}】秘钥不能为空", nodeInfo.getNodeName()));
+                    workflowNode.setNodeInfo(JsonUtil.toJsonString(callback));
                 }
 
                 if (WorkflowNodeTypeEnum.JOB_TASK.getType() == nodeConfig.getNodeType()) {
                     JobTaskConfig jobTask = nodeInfo.getJobTask();
+                    Assert.notNull(jobTask, () -> new EasyRetryServerException("【{}】配置信息不能为空", nodeInfo.getNodeName()));
+                    Assert.notNull(jobTask.getJobId(), () -> new EasyRetryServerException("【{}】所属任务不能为空", nodeInfo.getNodeName()));
                     workflowNode.setJobId(jobTask.getJobId());
                 }
 
@@ -163,8 +175,6 @@ public class WorkflowHandler {
                     // 添加边
                     graph.putEdge(parentId, workflowNode.getId());
                 }
-                log.info("workflowNodeId:[{}] parentIds:[{}]",
-                        workflowNode.getId(), JsonUtil.toJsonString(parentIds));
                 WorkflowRequestVO.NodeConfig childNode = nodeInfo.getChildNode();
                 if (Objects.nonNull(childNode) && !CollectionUtils.isEmpty(childNode.getConditionNodes())) {
                     buildGraph(Lists.newArrayList(workflowNode.getId()), deque, groupName, workflowId, childNode,
