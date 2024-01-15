@@ -3,6 +3,8 @@ package com.aizuda.easy.retry.common.core.util;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import org.springframework.core.env.Environment;
 
+import java.util.Objects;
+
 /**
  * 获取环境信息
  *
@@ -10,8 +12,6 @@ import org.springframework.core.env.Environment;
  * @date : 2021-12-01 14:27
  */
 public class EnvironmentUtils {
-
-    private static final Environment environment = SpringContext.CONTEXT.getBean(Environment.class);
     public static final String DEFAULT_ENV = "default ";
 
     /**
@@ -21,8 +21,12 @@ public class EnvironmentUtils {
      */
     public static Boolean getLogStatus() {
 
-        Environment environment = SpringContext.CONTEXT.getBean(Environment.class);
-        return environment.getProperty("easy.retry.log.status", Boolean.class, Boolean.TRUE);
+        Environment environment = SpringContext.getBean(Environment.class);
+        if (Objects.nonNull(environment)) {
+            return environment.getProperty("easy.retry.log.status", Boolean.class, Boolean.TRUE);
+        }
+
+        return Boolean.TRUE;
     }
 
     /**
@@ -32,6 +36,11 @@ public class EnvironmentUtils {
      */
     public static String getActiveProfile() {
 
+        Environment environment = SpringContext.getBean(Environment.class);
+        if (Objects.isNull(environment)) {
+            return DEFAULT_ENV;
+        }
+
         String[] activeProfiles = environment.getActiveProfiles();
         if (activeProfiles.length == 0) {
             return DEFAULT_ENV;
@@ -39,7 +48,7 @@ public class EnvironmentUtils {
 
         StringBuilder envs = new StringBuilder();
         for (String activeProfile : activeProfiles) {
-            envs.append(activeProfile + " ");
+            envs.append(activeProfile).append(" ");
         }
         return envs.toString();
     }

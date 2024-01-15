@@ -127,7 +127,7 @@ public final class Remote {
             return;
         }
 
-        warn(com.aizuda.easy.retry.common.log.LogFactory.get(LogCaller.getCallerCaller()), format, arguments);
+        warn(LogFactory.get(LogCaller.getCallerCaller()), format, arguments);
     }
 
     /**
@@ -143,7 +143,7 @@ public final class Remote {
             return;
         }
 
-        warn(com.aizuda.easy.retry.common.log.LogFactory.get(LogCaller.getCallerCaller()), e, StrUtil.format(format, arguments));
+        warn(LogFactory.get(LogCaller.getCallerCaller()), e, StrUtil.format(format, arguments));
     }
 
     /**
@@ -205,7 +205,7 @@ public final class Remote {
             return;
         }
 
-        error(com.aizuda.easy.retry.common.log.LogFactory.get(LogCaller.getCallerCaller()), format, arguments);
+        error(LogFactory.get(LogCaller.getCallerCaller()), format, arguments);
     }
 
     /**
@@ -221,7 +221,7 @@ public final class Remote {
             return;
         }
 
-        error(com.aizuda.easy.retry.common.log.LogFactory.get(LogCaller.getCallerCaller()), e, format, arguments);
+        error(LogFactory.get(LogCaller.getCallerCaller()), e, format, arguments);
     }
 
     /**
@@ -245,7 +245,7 @@ public final class Remote {
      * @param format    格式文本，{} 代表变量
      * @param arguments 变量对应的参数
      */
-    public void error(com.aizuda.easy.retry.common.log.Log log, String format, Object... arguments) {
+    public void error(Log log, String format, Object... arguments) {
         if (!EnvironmentUtils.getLogStatus()) {
             return;
         }
@@ -261,7 +261,7 @@ public final class Remote {
      * @param format    格式文本，{} 代表变量
      * @param arguments 变量对应的参数
      */
-    public void error(com.aizuda.easy.retry.common.log.Log log, Throwable e, String format, Object... arguments) {
+    public void error(Log log, Throwable e, String format, Object... arguments) {
         if (!EnvironmentUtils.getLogStatus()) {
             return;
         }
@@ -284,6 +284,6 @@ public final class Remote {
             return;
         }
 
-        com.aizuda.easy.retry.common.log.LogFactory.get(LogCaller.getCallerCaller()).log(FQCN, level, t, format, true, arguments);
+        LogFactory.get(LogCaller.getCallerCaller()).log(FQCN, level, t, format, true, arguments);
     }
 }
