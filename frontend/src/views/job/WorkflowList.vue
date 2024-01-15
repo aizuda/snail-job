@@ -313,6 +313,7 @@ export default {
       })
     },
     handleCopy (record) {
+      this.$router.push({ path: '/job/workflow/copy', query: { id: record.id } })
     },
     handleDel (record) {
       delWorkflow(record.id).then((res) => {

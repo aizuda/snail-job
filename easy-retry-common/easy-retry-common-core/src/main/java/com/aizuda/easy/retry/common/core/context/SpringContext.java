@@ -32,8 +32,17 @@ public class SpringContext implements ApplicationContextAware {
     public static synchronized <T> T getBean(String name) {
         try {
             return (T) CONTEXT.getBean(name);
-        } catch (BeansException var2) {
-            log.error(" BeanName:{} not exist，Exception => {}", name, var2.getMessage());
+        } catch (BeansException | NullPointerException exception) {
+            log.error(" BeanName:{} not exist，Exception => {}", name, exception.getMessage());
+            return null;
+        }
+    }
+
+    public static synchronized <T> T getBean(Class<T> requiredType) {
+        try {
+            return CONTEXT.getBean(requiredType);
+        } catch (BeansException | NullPointerException exception) {
+            log.error(" BeanName:{} not exist，Exception => {}", requiredType.getName(), exception.getMessage());
             return null;
         }
     }
@@ -41,8 +50,8 @@ public class SpringContext implements ApplicationContextAware {
     public static synchronized <T> T getBean(String name, Class<T> requiredType) {
         try {
             return CONTEXT.getBean(name, requiredType);
-        } catch (BeansException | NullPointerException var3) {
-            log.error(" BeanName:{} not exist，Exception => {}", name, var3.getMessage());
+        } catch (BeansException | NullPointerException exception) {
+            log.error(" BeanName:{} not exist，Exception => {}", name, exception.getMessage());
             return null;
         }
     }

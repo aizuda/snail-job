@@ -1,6 +1,5 @@
 package com.aizuda.easy.retry.common.log;
 
-import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.util.EnvironmentUtils;
 import com.aizuda.easy.retry.common.log.lang.LogCaller;
 import com.aizuda.easy.retry.common.log.level.Level;
@@ -63,7 +62,7 @@ public final class Local {
             return;
         }
 
-        debug(LogFactory.get(LogCaller.getCallerCaller()), format, false, arguments);
+        debug(LogFactory.get(LogCaller.getCallerCaller()), format, arguments);
     }
 
     /**
@@ -127,7 +126,7 @@ public final class Local {
             return;
         }
 
-        warn(LogFactory.get(LogCaller.getCallerCaller()), format, false, arguments);
+        warn(LogFactory.get(LogCaller.getCallerCaller()), format, arguments);
     }
 
     /**
@@ -143,7 +142,7 @@ public final class Local {
             return;
         }
 
-        warn(LogFactory.get(LogCaller.getCallerCaller()), e, StrUtil.format(format, arguments), false);
+        warn(LogFactory.get(LogCaller.getCallerCaller()), e, format, arguments);
     }
 
     /**
@@ -235,7 +234,7 @@ public final class Local {
             return;
         }
 
-        error(log, e, e.getMessage(), false);
+        error(log, e, e.getMessage());
     }
 
     /**
