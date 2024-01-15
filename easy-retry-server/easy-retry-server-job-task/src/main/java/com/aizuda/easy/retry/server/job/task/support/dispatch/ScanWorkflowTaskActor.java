@@ -18,7 +18,10 @@ import com.aizuda.easy.retry.server.common.util.PartitionTaskUtils;
 import com.aizuda.easy.retry.server.job.task.dto.WorkflowPartitionTaskDTO;
 import com.aizuda.easy.retry.server.job.task.dto.WorkflowTaskPrepareDTO;
 import com.aizuda.easy.retry.server.job.task.support.WorkflowTaskConverter;
+import com.aizuda.easy.retry.template.datasource.persistence.mapper.GroupConfigMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.WorkflowMapper;
+import com.aizuda.easy.retry.template.datasource.persistence.po.GroupConfig;
+import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
 import com.aizuda.easy.retry.template.datasource.persistence.po.Workflow;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
@@ -32,6 +35,7 @@ import org.springframework.util.CollectionUtils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author xiaowoniu
@@ -45,6 +49,7 @@ import java.util.List;
 public class ScanWorkflowTaskActor extends AbstractActor {
     private final WorkflowMapper workflowMapper;
     private final SystemProperties systemProperties;
+    private final GroupConfigMapper groupConfigMapper;
 
     @Override
     public Receive createReceive() {
@@ -133,6 +138,16 @@ public class ScanWorkflowTaskActor extends AbstractActor {
                         .ge(Workflow::getId, startId)
                         .orderByAsc(Workflow::getId)
         ).getRecords();
+
+        // 过滤已关闭的组
+        if (!CollectionUtils.isEmpty(workflows)) {
+            List<String> groupConfigs = groupConfigMapper.selectList(new LambdaQueryWrapper<GroupConfig>()
+                    .select(GroupConfig::getGroupName)
+                    .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus())
+                    .eq(GroupConfig::getGroupName, workflows.stream().map(Workflow::getGroupName).collect(Collectors.toList())))
+                .stream().map(GroupConfig::getGroupName).collect(Collectors.toList());
+            workflows = workflows.stream().filter(workflow -> groupConfigs.contains(workflow.getGroupName())).collect(Collectors.toList());
+        }
 
         return WorkflowTaskConverter.INSTANCE.toWorkflowPartitionTaskList(workflows);
     }

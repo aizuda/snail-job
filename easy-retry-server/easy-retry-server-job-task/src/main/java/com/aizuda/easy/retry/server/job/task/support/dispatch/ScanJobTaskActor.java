@@ -20,10 +20,13 @@ import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.server.job.task.dto.JobPartitionTaskDTO;
 import com.aizuda.easy.retry.server.job.task.dto.JobTaskPrepareDTO;
 import com.aizuda.easy.retry.server.job.task.support.cache.ResidentTaskCache;
+import com.aizuda.easy.retry.template.datasource.persistence.mapper.GroupConfigMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobMapper;
+import com.aizuda.easy.retry.template.datasource.persistence.po.GroupConfig;
 import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -32,6 +35,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
@@ -44,12 +48,12 @@ import java.util.*;
 @Component(ActorGenerator.SCAN_JOB_ACTOR)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Slf4j
+@RequiredArgsConstructor
 public class ScanJobTaskActor extends AbstractActor {
 
-    @Autowired
-    private JobMapper jobMapper;
-    @Autowired
-    private SystemProperties systemProperties;
+    private final JobMapper jobMapper;
+    private final SystemProperties systemProperties;
+    private final GroupConfigMapper groupConfigMapper;
 
     @Override
     public Receive createReceive() {
@@ -71,7 +75,7 @@ public class ScanJobTaskActor extends AbstractActor {
         }
 
         long total = PartitionTaskUtils.process(startId -> listAvailableJobs(startId, scanTask),
-                this::processJobPartitionTasks, 0);
+            this::processJobPartitionTasks, 0);
 
         log.info("job scan end. total:[{}]", total);
     }
@@ -97,7 +101,7 @@ public class ScanJobTaskActor extends AbstractActor {
     }
 
     private void processJob(JobPartitionTaskDTO partitionTask, final List<Job> waitUpdateJobs,
-                            final List<JobTaskPrepareDTO> waitExecJobs, long now) {
+        final List<JobTaskPrepareDTO> waitExecJobs, long now) {
         CacheConsumerGroup.addOrUpdate(partitionTask.getGroupName(), partitionTask.getNamespaceId());
 
         Job job = new Job();
@@ -113,7 +117,7 @@ public class ScanJobTaskActor extends AbstractActor {
             triggerTask = Objects.isNull(nextTriggerAt);
             // 若出现常驻任务时间为null或者常驻任务的内存时间长期未更新, 刷新为now
             if (Objects.isNull(nextTriggerAt)
-                    || (nextTriggerAt + DateUtils.toEpochMilli(SystemConstants.SCHEDULE_PERIOD)) < now) {
+                || (nextTriggerAt + DateUtils.toEpochMilli(SystemConstants.SCHEDULE_PERIOD)) < now) {
                 nextTriggerAt = now;
             }
         }
@@ -158,18 +162,29 @@ public class ScanJobTaskActor extends AbstractActor {
         }
 
         List<Job> jobs = jobMapper.selectPage(new PageDTO<>(0, systemProperties.getJobPullPageSize()),
-                new LambdaQueryWrapper<Job>()
-                        .select(Job::getGroupName, Job::getNextTriggerAt, Job::getBlockStrategy, Job::getTriggerType,
-                                Job::getTriggerInterval, Job::getExecutorTimeout, Job::getTaskType, Job::getResident,
-                                Job::getId, Job::getNamespaceId)
-                        .eq(Job::getJobStatus, StatusEnum.YES.getStatus())
-                        .eq(Job::getDeleted, StatusEnum.NO.getStatus())
-                        .ne(Job::getTriggerType,TriggerTypeEnum.WORKFLOW.getType())
-                        .in(Job::getBucketIndex, scanTask.getBuckets())
-                        .le(Job::getNextTriggerAt, DateUtils.toNowMilli() + DateUtils.toEpochMilli(SystemConstants.SCHEDULE_PERIOD))
-                        .ge(Job::getId, startId)
-                        .orderByAsc(Job::getId)
+            new LambdaQueryWrapper<Job>()
+                .select(Job::getGroupName, Job::getNextTriggerAt, Job::getBlockStrategy, Job::getTriggerType,
+                    Job::getTriggerInterval, Job::getExecutorTimeout, Job::getTaskType, Job::getResident,
+                    Job::getId, Job::getNamespaceId)
+                .eq(Job::getJobStatus, StatusEnum.YES.getStatus())
+                .eq(Job::getDeleted, StatusEnum.NO.getStatus())
+                .ne(Job::getTriggerType, TriggerTypeEnum.WORKFLOW.getType())
+                .in(Job::getBucketIndex, scanTask.getBuckets())
+                .le(Job::getNextTriggerAt,
+                    DateUtils.toNowMilli() + DateUtils.toEpochMilli(SystemConstants.SCHEDULE_PERIOD))
+                .ge(Job::getId, startId)
+                .orderByAsc(Job::getId)
         ).getRecords();
+
+        // 过滤已关闭的组
+        if (!CollectionUtils.isEmpty(jobs)) {
+            List<String> groupConfigs = groupConfigMapper.selectList(new LambdaQueryWrapper<GroupConfig>()
+                    .select(GroupConfig::getGroupName)
+                    .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus())
+                    .eq(GroupConfig::getGroupName, jobs.stream().map(Job::getGroupName).collect(Collectors.toList())))
+                .stream().map(GroupConfig::getGroupName).collect(Collectors.toList());
+            jobs = jobs.stream().filter(job -> groupConfigs.contains(job.getGroupName())).collect(Collectors.toList());
+        }
 
         return JobTaskConverter.INSTANCE.toJobPartitionTasks(jobs);
     }

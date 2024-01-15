@@ -23,10 +23,12 @@ import com.aizuda.easy.retry.server.web.service.handler.WorkflowHandler;
 import com.aizuda.easy.retry.server.web.util.UserSessionUtils;
 import com.aizuda.easy.retry.template.datasource.persistence.dataobject.WorkflowBatchQueryDO;
 import com.aizuda.easy.retry.template.datasource.persistence.dataobject.WorkflowBatchResponseDO;
+import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskBatchMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.WorkflowMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.WorkflowNodeMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.WorkflowTaskBatchMapper;
+import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTaskBatch;
 import com.aizuda.easy.retry.template.datasource.persistence.po.Workflow;
 import com.aizuda.easy.retry.template.datasource.persistence.po.WorkflowNode;
@@ -62,6 +64,7 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
     private final JobTaskBatchMapper jobTaskBatchMapper;
     private final WorkflowHandler workflowHandler;
     private final WorkflowBatchHandler workflowBatchHandler;
+    private final JobMapper jobMapper;
 
     @Override
     public PageResult<List<WorkflowBatchResponseVO>> listPage(WorkflowBatchQueryVO queryVO) {
@@ -102,7 +105,10 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
     @Override
     public WorkflowDetailResponseVO getWorkflowBatchDetail(Long id) {
 
-        WorkflowTaskBatch workflowTaskBatch = workflowTaskBatchMapper.selectById(id);
+        WorkflowTaskBatch workflowTaskBatch = workflowTaskBatchMapper.selectOne(
+            new LambdaQueryWrapper<WorkflowTaskBatch>()
+                .eq(WorkflowTaskBatch::getId, id)
+                .eq(WorkflowTaskBatch::getNamespaceId, UserSessionUtils.currentUserSession().getNamespaceId()));
         if (Objects.isNull(workflowTaskBatch)) {
             return null;
         }
@@ -113,6 +119,12 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
         List<WorkflowNode> workflowNodes = workflowNodeMapper.selectList(new LambdaQueryWrapper<WorkflowNode>()
                 .eq(WorkflowNode::getDeleted, StatusEnum.NO.getStatus())
                 .eq(WorkflowNode::getWorkflowId, workflow.getId()));
+
+        List<Long> jobIds = workflowNodes.stream().map(WorkflowNode::getJobId).collect(Collectors.toList());
+        List<Job> jobs = jobMapper.selectList(new LambdaQueryWrapper<Job>()
+            .in(Job::getId, new HashSet<>(jobIds)));
+
+        Map<Long, Job> jobMap = jobs.stream().collect(Collectors.toMap(Job::getId, job -> job));
 
         List<JobTaskBatch> alJobTaskBatchList = jobTaskBatchMapper.selectList(new LambdaQueryWrapper<JobTaskBatch>()
                 .eq(JobTaskBatch::getWorkflowTaskBatchId, id).orderByDesc(JobTaskBatch::getId));
@@ -127,6 +139,12 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
         Set<Long> allNoOperationNode = Sets.newHashSet();
         Map<Long, WorkflowDetailResponseVO.NodeInfo> workflowNodeMap = nodeInfos.stream()
                 .peek(nodeInfo -> {
+
+                    JobTaskConfig jobTask = nodeInfo.getJobTask();
+                    if(Objects.nonNull(jobTask)) {
+                        jobTask.setJobName(jobMap.getOrDefault(jobTask.getJobId(), new Job()).getJobName());
+                    }
+
                     List<JobTaskBatch> jobTaskBatchList = jobTaskBatchMap.get(nodeInfo.getId());
                     if (!CollectionUtils.isEmpty(jobTaskBatchList)) {
                         nodeInfo.setJobBatchList(JobBatchResponseVOConverter.INSTANCE.jobTaskBatchToJobBatchResponseVOs(jobTaskBatchList));
