@@ -275,7 +275,7 @@ export default {
       this.$router.push({ path: '/job/workflow/edit', query: { id: record.id } })
     },
     goJobBatchList (record) {
-      this.$router.push({ path: '/job/batch/list', query: { jobId: record.id } })
+      this.$router.push({ path: '/job/workflow/batch/list', query: { workflowId: record.id } })
     },
     handleNew () {
       this.$router.push({ path: '/job/workflow/edit' })

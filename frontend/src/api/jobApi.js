@@ -39,10 +39,19 @@ const jobApi = {
   updateStatus: '/workflow/update/status/',
   delWorkflow: '/workflow/',
   triggerWorkflow: '/workflow/trigger/',
-  stopWorkflowBatch: '/workflow/batch/stop/'
+  stopWorkflowBatch: '/workflow/batch/stop/',
+  workflowNameList: '/workflow/workflow-name/list'
 }
 
 export default jobApi
+
+export function workflowNameList (parameter) {
+  return request({
+    url: jobApi.workflowNameList,
+    method: 'get',
+    params: parameter
+  })
+}
 
 export function stopWorkflowBatch (id) {
   return request({

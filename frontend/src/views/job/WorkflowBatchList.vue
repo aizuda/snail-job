@@ -18,7 +18,7 @@
             <a-form-item label="任务名称">
               <a-select
                 show-search
-                v-model="queryParam.jobId"
+                v-model="queryParam.workflowId"
                 placeholder="请输入任务名称"
                 :default-active-first-option="false"
                 :show-arrow="true"
@@ -27,8 +27,8 @@
                 @search="handleSearch"
                 @change="handleChange"
               >
-                <a-select-option v-for="(item, index) in jobNameList" :value="item.id" :key="index">
-                  {{ item.jobName }}
+                <a-select-option v-for="(item, index) in workflowNameList" :value="item.id" :key="index">
+                  {{ item.workflowName }}
                 </a-select-option>
 
               </a-select>
@@ -107,7 +107,7 @@
 import ATextarea from 'ant-design-vue/es/input/TextArea'
 import AInput from 'ant-design-vue/es/input/Input'
 import { Drawer, STable } from '@/components'
-import { workflowBatchListPage, jobNameList, stopWorkflowBatch } from '@/api/jobApi'
+import { workflowBatchListPage, stopWorkflowBatch, workflowNameList } from '@/api/jobApi'
 import { getAllGroupNameList } from '@/api/manage'
 import JobBatchInfo from '@/views/job/JobBatchInfo'
 const enums = require('@/utils/jobEnum')
@@ -209,7 +209,7 @@ export default {
       },
       optionAlertShow: false,
       groupNameList: [],
-      jobNameList: [],
+      workflowNameList: [],
       openDrawer: false,
       currentShowRecord: null
     }
@@ -218,11 +218,20 @@ export default {
     getAllGroupNameList().then((res) => {
       this.groupNameList = res.data
     })
+
+    const workflowId = this.$route.query.workflowId
+    workflowNameList({ workflowId: workflowId }).then(res => {
+      this.workflowNameList = res.data
+      if (workflowId) {
+        this.queryParam['workflowId'] = this.workflowNameList[0].id
+        this.$refs.table.refresh(true)
+      }
+    })
   },
   methods: {
     handleSearch (value) {
-      jobNameList({ keywords: value }).then(res => {
-        this.jobNameList = res.data
+      workflowNameList({ keywords: value }).then(res => {
+        this.workflowNameList = res.data
       })
     },
     handleChange (value) {

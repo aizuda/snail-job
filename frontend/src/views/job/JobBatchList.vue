@@ -44,21 +44,6 @@
             </a-form-item>
           </a-col>
           <template v-if="advanced">
-            <!--            <a-col :md="8" :sm="24">-->
-            <!--              <a-form-item label="业务编号">-->
-            <!--                <a-input v-model="queryParam.bizNo" placeholder="请输入业务编号" allowClear />-->
-            <!--              </a-form-item>-->
-            <!--            </a-col>-->
-            <!--            <a-col :md="8" :sm="24">-->
-            <!--              <a-form-item label="幂等id">-->
-            <!--                <a-input v-model="queryParam.idempotentId" placeholder="请输入幂等id" allowClear />-->
-            <!--              </a-form-item>-->
-            <!--            </a-col>-->
-            <!--            <a-col :md="8" :sm="24">-->
-            <!--              <a-form-item label="UniqueId">-->
-            <!--                <a-input v-model="queryParam.uniqueId" placeholder="请输入唯一id" allowClear/>-->
-            <!--              </a-form-item>-->
-            <!--            </a-col>-->
           </template>
           <a-col :md="(!advanced && 8) || 24" :sm="24">
             <span
@@ -215,7 +200,6 @@ export default {
       ],
       // 加载数据方法 必须为 Promise 对象
       loadData: (parameter) => {
-        // this.queryParam['jobId'] = this.$route.query.jobId
         return jobBatchList(Object.assign(parameter, this.queryParam)).then((res) => {
           return res
         })
@@ -251,7 +235,6 @@ export default {
     const jobId = this.$route.query.jobId
     jobNameList({ jobId: jobId }).then(res => {
       this.jobNameList = res.data
-      console.log(jobId)
       if (jobId) {
         this.queryParam['jobId'] = this.jobNameList[0].id
         this.$refs.table.refresh(true)
