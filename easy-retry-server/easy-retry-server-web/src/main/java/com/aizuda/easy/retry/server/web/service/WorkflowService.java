@@ -29,4 +29,6 @@ public interface WorkflowService {
     Boolean deleteById(Long id);
 
     Boolean trigger(Long id);
+
+    List<WorkflowResponseVO> getWorkflowNameList(String keywords, Long workflowId);
 }

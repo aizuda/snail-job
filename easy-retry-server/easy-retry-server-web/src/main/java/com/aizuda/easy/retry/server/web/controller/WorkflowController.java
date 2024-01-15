@@ -29,7 +29,7 @@ public class WorkflowController {
     private final WorkflowService workflowService;
 
     @PostMapping
-    @LoginRequired(role = RoleEnum.USER)
+    @LoginRequired(role = RoleEnum.ADMIN)
     public Boolean saveWorkflow(@RequestBody @Validated WorkflowRequestVO workflowRequestVO) {
         return workflowService.saveWorkflow(workflowRequestVO);
     }
@@ -41,7 +41,7 @@ public class WorkflowController {
     }
 
     @PutMapping
-    @LoginRequired(role = RoleEnum.USER)
+    @LoginRequired(role = RoleEnum.ADMIN)
     public Boolean updateWorkflow(@RequestBody @Validated WorkflowRequestVO workflowRequestVO) {
         return workflowService.updateWorkflow(workflowRequestVO);
     }
@@ -53,19 +53,29 @@ public class WorkflowController {
     }
 
     @PutMapping("/update/status/{id}")
+    @LoginRequired(role = RoleEnum.ADMIN)
     public Boolean updateStatus(@PathVariable("id") Long id) {
         return workflowService.updateStatus(id);
     }
 
     @DeleteMapping("/{id}")
+    @LoginRequired(role = RoleEnum.ADMIN)
     public Boolean deleteById(@PathVariable("id") Long id) {
         return workflowService.deleteById(id);
     }
 
     @PostMapping("/trigger/{id}")
+    @LoginRequired(role = RoleEnum.USER)
     public Boolean trigger(@PathVariable("id") Long id) {
         return workflowService.trigger(id);
     }
 
+    @GetMapping("/workflow-name/list")
+    @LoginRequired(role = RoleEnum.USER)
+    public List<WorkflowResponseVO> getWorkflowNameList(
+            @RequestParam(value = "keywords", required = false) String keywords,
+            @RequestParam(value = "workflowId", required = false) Long workflowId) {
+        return workflowService.getWorkflowNameList(keywords, workflowId);
+    }
 
 }
