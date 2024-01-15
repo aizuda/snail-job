@@ -15,7 +15,10 @@ public class JobTaskConfig {
     /**
      * 任务ID
      */
-    @NotNull(message = "任务ID不能为空")
     private Long jobId;
 
+    /**
+     * 任务名称
+     */
+    private String jobName;
 }
