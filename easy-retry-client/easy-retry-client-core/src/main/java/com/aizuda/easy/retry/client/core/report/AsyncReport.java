@@ -4,6 +4,7 @@ import com.aizuda.easy.retry.client.common.Lifecycle;
 import com.aizuda.easy.retry.client.common.config.EasyRetryProperties;
 import com.aizuda.easy.retry.client.common.window.SlidingWindow;
 import com.aizuda.easy.retry.client.core.retryer.RetryerInfo;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.model.dto.RetryTaskDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,6 @@ import java.util.concurrent.TimeUnit;
  * @since 1.3.0
  */
 @Component
-@Slf4j
 public class AsyncReport extends AbstractReport implements Lifecycle {
 
     @Autowired
@@ -67,10 +67,10 @@ public class AsyncReport extends AbstractReport implements Lifecycle {
 
     @Override
     public void close() {
-        log.info("AsyncReport about to shutdown");
+        EasyRetryLog.LOCAL.info("AsyncReport about to shutdown");
         if (Objects.nonNull(slidingWindow)) {
             slidingWindow.end();
         }
-        log.info("AsyncReport has been shutdown");
+        EasyRetryLog.LOCAL.info("AsyncReport has been shutdown");
     }
 }

@@ -1,7 +1,7 @@
 package com.aizuda.easy.retry.server.common.cache;
 
 import akka.actor.ActorRef;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.Lifecycle;
 import com.aizuda.easy.retry.server.common.enums.TaskTypeEnum;
 import com.google.common.cache.Cache;
@@ -44,7 +44,7 @@ public class CacheGroupScanActor implements Lifecycle {
 
     @Override
     public void start() {
-        LogUtils.info(log, "CacheGroupScanActor start");
+       EasyRetryLog.LOCAL.info("CacheGroupScanActor start");
         CACHE = CacheBuilder.newBuilder()
             // 设置并发级别为cpu核心数
             .concurrencyLevel(Runtime.getRuntime().availableProcessors())
@@ -53,7 +53,7 @@ public class CacheGroupScanActor implements Lifecycle {
 
     @Override
     public void close() {
-        LogUtils.info(log, "CacheGroupScanActor stop");
+       EasyRetryLog.LOCAL.info("CacheGroupScanActor stop");
         CACHE.invalidateAll();
     }
 }

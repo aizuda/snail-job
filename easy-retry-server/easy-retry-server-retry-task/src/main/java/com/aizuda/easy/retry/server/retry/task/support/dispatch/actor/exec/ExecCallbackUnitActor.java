@@ -6,7 +6,7 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.client.model.RetryCallbackDTO;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
@@ -91,7 +91,7 @@ public class ExecCallbackUnitActor extends AbstractActor {
                 }
 
             } catch (Exception e) {
-                LogUtils.error(log, "callback client error. retryTask:[{}]", JsonUtil.toJsonString(retryTask), e);
+                EasyRetryLog.LOCAL.error("callback client error. retryTask:[{}]", JsonUtil.toJsonString(retryTask), e);
                 retryTaskLog.setMessage(StringUtils.isBlank(e.getMessage()) ? StrUtil.EMPTY : e.getMessage());
             } finally {
 

@@ -3,14 +3,14 @@ package com.aizuda.easy.retry.server.starter.dispatch;
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.cache.CacheConsumerGroup;
 import com.aizuda.easy.retry.server.common.cache.CacheGroupScanActor;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
+import com.aizuda.easy.retry.server.common.dto.ScanTask;
 import com.aizuda.easy.retry.server.common.enums.SystemModeEnum;
 import com.aizuda.easy.retry.server.common.enums.TaskTypeEnum;
-import com.aizuda.easy.retry.server.common.dto.ScanTask;
 import com.aizuda.easy.retry.server.retry.task.support.cache.CacheGroupRateLimiter;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.ServerNodeMapper;
@@ -20,8 +20,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.google.common.cache.Cache;
 import com.google.common.util.concurrent.RateLimiter;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -40,7 +38,6 @@ import java.util.Objects;
  */
 @Component(ActorGenerator.SCAN_BUCKET_ACTOR)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-@Slf4j
 @RequiredArgsConstructor
 public class ConsumerBucketActor extends AbstractActor {
     private final AccessTemplate accessTemplate;
@@ -56,7 +53,7 @@ public class ConsumerBucketActor extends AbstractActor {
             try {
                 doDispatch(consumerBucket);
             } catch (Exception e) {
-                LogUtils.error(log, "Data dispatcher processing exception. [{}]", consumerBucket, e);
+                EasyRetryLog.LOCAL.error("Data dispatcher processing exception. [{}]", consumerBucket, e);
             }
 
         }).build();
@@ -92,7 +89,7 @@ public class ConsumerBucketActor extends AbstractActor {
                                 .in(GroupConfig::getBucketIndex, consumerBucket.getBuckets())
                 );
             } catch (Exception e) {
-                log.error("生成重试任务异常.", e);
+                EasyRetryLog.LOCAL.error("生成重试任务异常.", e);
             }
 
             if (!CollectionUtils.isEmpty(groupConfigs)) {

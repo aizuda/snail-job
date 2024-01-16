@@ -1,9 +1,9 @@
 package com.aizuda.easy.retry.client.common.appender;
 
-import com.aizuda.easy.retry.client.common.dto.LogContentDTO;
 import com.aizuda.easy.retry.client.common.report.AsyncReportLog;
 import com.aizuda.easy.retry.client.common.util.ThreadLocalLogUtil;
-import com.aizuda.easy.retry.common.core.constant.LogFieldConstant;
+import com.aizuda.easy.retry.common.log.dto.LogContentDTO;
+import com.aizuda.easy.retry.common.log.constant.LogFieldConstant;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.MDC;

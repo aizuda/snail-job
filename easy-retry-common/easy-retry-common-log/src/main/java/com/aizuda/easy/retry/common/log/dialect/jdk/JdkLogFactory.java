@@ -4,8 +4,8 @@ package com.aizuda.easy.retry.common.log.dialect.jdk;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.lang.Console;
-import com.aizuda.easy.retry.common.log.Log;
-import com.aizuda.easy.retry.common.log.LogFactory;
+import com.aizuda.easy.retry.common.log.dialect.Log;
+import com.aizuda.easy.retry.common.log.factory.LogFactory;
 
 import java.io.InputStream;
 import java.util.logging.LogManager;

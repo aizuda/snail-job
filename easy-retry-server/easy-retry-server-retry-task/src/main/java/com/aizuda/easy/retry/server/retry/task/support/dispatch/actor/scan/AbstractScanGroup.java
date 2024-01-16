@@ -4,7 +4,7 @@ import akka.actor.AbstractActor;
 import cn.hutool.core.lang.Pair;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.dto.PartitionTask;
 import com.aizuda.easy.retry.server.common.dto.ScanTask;
@@ -65,7 +65,7 @@ public abstract class AbstractScanGroup extends AbstractActor {
             try {
                 doScan(config);
             } catch (Exception e) {
-                LogUtils.error(log, "Data scanner processing exception. [{}]", config, e);
+                EasyRetryLog.LOCAL.error("Data scanner processing exception. [{}]", config, e);
             }
 
             // 获取结束时间

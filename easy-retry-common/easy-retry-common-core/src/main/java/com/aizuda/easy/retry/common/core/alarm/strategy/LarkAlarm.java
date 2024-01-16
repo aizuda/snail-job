@@ -9,7 +9,7 @@ import com.aizuda.easy.retry.common.core.alarm.AlarmContext;
 import com.aizuda.easy.retry.common.core.alarm.LarkAttribute;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.AlarmTypeEnum;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
@@ -66,11 +66,10 @@ public class LarkAlarm extends AbstractAlarm<AlarmContext> {
             HttpRequest post = HttpUtil.createPost(larkAttribute.getWebhookUrl());
             HttpRequest request = post.body(JsonUtil.toJsonString(builder), ContentType.JSON.toString());
             HttpResponse execute = request.execute();
-            LogUtils.debug(log, JsonUtil.toJsonString(execute));
             if (execute.isOk()) {
                 return true;
             }
-            LogUtils.error(log, "发送lark消息失败:{}", execute.body());
+            EasyRetryLog.LOCAL.error("发送lark消息失败:{}", execute.body());
             return false;
         } catch (Exception e) {
             log.error("发送lark消息失败", e);

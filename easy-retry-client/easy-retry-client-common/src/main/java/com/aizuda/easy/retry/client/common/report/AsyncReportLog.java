@@ -3,10 +3,11 @@ package com.aizuda.easy.retry.client.common.report;
 import com.aizuda.easy.retry.client.common.Lifecycle;
 import com.aizuda.easy.retry.client.common.Report;
 import com.aizuda.easy.retry.client.common.config.EasyRetryProperties;
-import com.aizuda.easy.retry.client.common.dto.LogContentDTO;
 import com.aizuda.easy.retry.client.common.util.ThreadLocalLogUtil;
 import com.aizuda.easy.retry.client.common.window.SlidingWindow;
 import com.aizuda.easy.retry.common.core.model.JobContext;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
+import com.aizuda.easy.retry.common.log.dto.LogContentDTO;
 import com.aizuda.easy.retry.server.model.dto.LogTaskDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,11 +60,11 @@ public class AsyncReportLog implements Lifecycle, Report {
 
     @Override
     public void close() {
-        log.info("AsyncReport Log about to shutdown");
+        EasyRetryLog.LOCAL.info("AsyncReport Log about to shutdown");
         if (Objects.nonNull(slidingWindow)) {
             slidingWindow.end();
         }
-        log.info("AsyncReport Log has been shutdown");
+        EasyRetryLog.LOCAL.info("AsyncReport Log has been shutdown");
     }
 
     /**

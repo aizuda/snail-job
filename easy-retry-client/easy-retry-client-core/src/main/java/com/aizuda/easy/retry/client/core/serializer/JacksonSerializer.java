@@ -1,7 +1,7 @@
 package com.aizuda.easy.retry.client.core.serializer;
 
 import com.aizuda.easy.retry.client.core.RetryArgSerializer;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -37,7 +37,7 @@ public class JacksonSerializer implements RetryArgSerializer {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode jsonNode = JsonUtil.toJson(infoStr);
         if (Objects.isNull(jsonNode)) {
-            LogUtils.warn(log, "jsonNode is null. infoStr:[{}]", infoStr);
+           EasyRetryLog.LOCAL.warn("jsonNode is null. infoStr:[{}]", infoStr);
             return params;
         }
 

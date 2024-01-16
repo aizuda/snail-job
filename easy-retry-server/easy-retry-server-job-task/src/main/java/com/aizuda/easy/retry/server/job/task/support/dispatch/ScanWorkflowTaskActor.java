@@ -4,7 +4,7 @@ import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.WaitStrategy;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.cache.CacheConsumerGroup;
@@ -58,7 +58,7 @@ public class ScanWorkflowTaskActor extends AbstractActor {
             try {
                 doScan(config);
             } catch (Exception e) {
-                LogUtils.error(log, "Data scanner processing exception. [{}]", config, e);
+                EasyRetryLog.LOCAL.error("Data scanner processing exception. [{}]", config, e);
             }
 
         }).build();

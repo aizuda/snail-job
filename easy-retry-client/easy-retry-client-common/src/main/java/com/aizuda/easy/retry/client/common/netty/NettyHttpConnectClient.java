@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.client.common.netty;
 
 import com.aizuda.easy.retry.client.common.Lifecycle;
 import com.aizuda.easy.retry.client.common.config.EasyRetryProperties;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -28,7 +29,6 @@ import java.util.concurrent.TimeUnit;
  * @date : 2022-03-07 18:24
  * @since 1.0.0
  */
-@Slf4j
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class NettyHttpConnectClient implements Lifecycle, ApplicationContextAware {
@@ -65,7 +65,7 @@ public class NettyHttpConnectClient implements Lifecycle, ApplicationContextAwar
             // 开启连接服务端
             connect();
         } catch (Exception e) {
-            log.error("Client start exception", e);
+            EasyRetryLog.LOCAL.error("Client start exception", e);
         }
     }
 
@@ -84,7 +84,7 @@ public class NettyHttpConnectClient implements Lifecycle, ApplicationContextAwar
             if (notTimeout) {
                 // 连接成功
                 if (channel != null && channel.isActive()) {
-                    log.info("netty client started {} connect to server", channel.localAddress());
+                    EasyRetryLog.LOCAL.info("netty client started {} connect to server", channel.localAddress());
                     NettyChannel.setChannel(getChannel());
                     return;
                 }
@@ -94,7 +94,7 @@ public class NettyHttpConnectClient implements Lifecycle, ApplicationContextAwar
                     exceptionHandler(cause);
                 }
             } else {
-                log.warn("connect remote host[{}] timeout {}s", channel.remoteAddress(), 30);
+                EasyRetryLog.LOCAL.warn("connect remote host[{}] timeout {}s", channel.remoteAddress(), 30);
             }
         } catch (Exception e) {
             exceptionHandler(e);
@@ -116,7 +116,7 @@ public class NettyHttpConnectClient implements Lifecycle, ApplicationContextAwar
             } else {
                 channel = channelFuture.channel();
                 if (channel != null && channel.isActive()) {
-                    log.info("Netty client {} reconnect to server", channel.localAddress());
+                    EasyRetryLog.LOCAL.info("Netty client {} reconnect to server", channel.localAddress());
                     NettyChannel.setChannel(getChannel());
                 }
             }
@@ -130,11 +130,11 @@ public class NettyHttpConnectClient implements Lifecycle, ApplicationContextAwar
      */
     private void exceptionHandler(Throwable cause) {
         if (cause instanceof ConnectException) {
-            log.error("connect error:{}", cause.getMessage());
+            EasyRetryLog.LOCAL.error("connect error:{}", cause.getMessage());
         } else if (cause instanceof ClosedChannelException) {
-            log.error("connect error:{}", "client has destroy");
+            EasyRetryLog.LOCAL.error("connect error:{}", "client has destroy");
         } else {
-            log.error("connect error:", cause);
+            EasyRetryLog.LOCAL.error("connect error:", cause);
         }
     }
 

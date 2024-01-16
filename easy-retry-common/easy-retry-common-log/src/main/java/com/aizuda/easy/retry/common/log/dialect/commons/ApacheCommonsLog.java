@@ -1,7 +1,7 @@
 package com.aizuda.easy.retry.common.log.dialect.commons;
 
 import cn.hutool.core.util.StrUtil;
-import com.aizuda.easy.retry.common.log.AbstractLog;
+import com.aizuda.easy.retry.common.log.dialect.AbstractLog;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -12,7 +12,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public class ApacheCommonsLog extends AbstractLog {
 	private static final long serialVersionUID = -6843151523380063975L;
-	
+
 	private final transient Log logger;
 	private final String name;
 
@@ -93,7 +93,7 @@ public class ApacheCommonsLog extends AbstractLog {
 	@Override
 	public void warn(Throwable t, String format, Boolean remote, Object... arguments) {
 	}
-	
+
 	@Override
 	public void warn(String fqcn, Throwable t, String format, Boolean remote, Object... arguments) {
 		// fqcn此处无效
@@ -114,9 +114,9 @@ public class ApacheCommonsLog extends AbstractLog {
 		if(isErrorEnabled()){
 			logger.warn(StrUtil.format(format, arguments), t);
 		}
-		
+
 	}
-	
+
 	// ------------------------------------------------------------------------- Log
 	@Override
 	public void log(String fqcn, com.aizuda.easy.retry.common.log.level.Level level, Throwable t, String format, Boolean remote, Object... arguments) {

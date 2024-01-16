@@ -7,7 +7,7 @@ import com.aizuda.easy.retry.client.core.callback.RetryCompleteCallback;
 import com.aizuda.easy.retry.client.core.retryer.RetryType;
 import com.aizuda.easy.retry.client.core.retryer.RetryerInfo;
 import com.aizuda.easy.retry.client.core.strategy.ExecutorMethod;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.BeansException;
@@ -53,7 +53,7 @@ public class RetryableScanner implements Scanner, ApplicationContextAware {
                     (MethodIntrospector.MetadataLookup<Retryable>) method -> AnnotatedElementUtils
                         .findMergedAnnotation(method, Retryable.class));
             } catch (Throwable ex) {
-                LogUtils.error(log, "{}重试信息加载报错：{}", beanDefinitionName, ex);
+                EasyRetryLog.LOCAL.error("{}重试信息加载报错：{}", beanDefinitionName, ex);
             }
             if (annotatedMethods == null || annotatedMethods.isEmpty()) {
                 continue;

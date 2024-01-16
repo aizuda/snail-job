@@ -20,7 +20,7 @@ import com.aizuda.easy.retry.client.model.RetryCallbackDTO;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.enums.RetryResultStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.core.model.IdempotentIdContext;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
@@ -247,7 +247,7 @@ public class RetryEndPoint {
                 executorMethod.getName());
             idempotentId = (String) ReflectionUtils.invokeMethod(method, generate, idempotentIdContext);
         } catch (Exception exception) {
-            LogUtils.error(log, "幂等id生成异常：{},{}", scene, argsStr, exception);
+            EasyRetryLog.LOCAL.error("幂等id生成异常：{},{}", scene, argsStr, exception);
             throw new EasyRetryClientException("idempotentId生成异常：{},{}", scene, argsStr);
         }
 

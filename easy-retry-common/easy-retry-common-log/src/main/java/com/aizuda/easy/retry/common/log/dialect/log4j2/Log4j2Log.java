@@ -1,9 +1,9 @@
 package com.aizuda.easy.retry.common.log.dialect.log4j2;
 
 import cn.hutool.core.util.StrUtil;
-import com.aizuda.easy.retry.common.core.constant.LogFieldConstant;
-import com.aizuda.easy.retry.common.log.AbstractLog;
-import com.aizuda.easy.retry.common.log.LogFactory;
+import com.aizuda.easy.retry.common.log.dialect.AbstractLog;
+import com.aizuda.easy.retry.common.log.factory.LogFactory;
+import com.aizuda.easy.retry.common.log.constant.LogFieldConstant;
 import org.apache.log4j.MDC;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;

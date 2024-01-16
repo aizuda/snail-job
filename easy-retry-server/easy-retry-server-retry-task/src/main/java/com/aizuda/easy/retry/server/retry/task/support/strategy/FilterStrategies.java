@@ -2,7 +2,7 @@ package com.aizuda.easy.retry.server.retry.task.support.strategy;
 
 import cn.hutool.core.lang.Pair;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
 import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.common.dto.DistributeInstance;
@@ -221,7 +221,7 @@ public class FilterStrategies {
             Boolean result = Boolean.TRUE;
             RateLimiter rateLimiter = CacheGroupRateLimiter.getRateLimiterByKey(serverNode.getHostId());
             if (Objects.nonNull(rateLimiter) && !rateLimiter.tryAcquire(100, TimeUnit.MILLISECONDS)) {
-                LogUtils.error(log, "该POD:[{}]已到达最大限流阈值，本次重试不执行", serverNode.getHostId());
+                EasyRetryLog.LOCAL.error("该POD:[{}]已到达最大限流阈值，本次重试不执行", serverNode.getHostId());
                 description.append(MessageFormat.format("该POD:[{0}]已到达最大限流阈值，本次重试不执行.uniqueId:[{1}]", serverNode.getHostId(), retryTask.getUniqueId()));
                 result = Boolean.FALSE;
             }

@@ -2,7 +2,7 @@ package com.aizuda.easy.retry.server.retry.task.support.listener;
 
 import com.aizuda.easy.retry.common.core.alarm.AlarmContext;
 import com.aizuda.easy.retry.common.core.enums.NotifySceneEnum;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.core.util.EnvironmentUtils;
 import com.aizuda.easy.retry.common.core.util.HostUtils;
 import com.aizuda.easy.retry.server.common.AlarmInfoConverter;
@@ -73,7 +73,7 @@ public class RetryTaskFailMoreThresholdAlarmListener extends
     @Override
     public void onApplicationEvent(RetryTaskFailMoreThresholdAlarmEvent event) {
         if (!queue.offer(event.getRetryTask())) {
-            LogUtils.warn(log, "任务失败数量超过阈值告警队列已满");
+           EasyRetryLog.LOCAL.warn("任务失败数量超过阈值告警队列已满");
         }
     }
 
@@ -98,7 +98,7 @@ public class RetryTaskFailMoreThresholdAlarmListener extends
 
     @Override
     protected void startLog() {
-        LogUtils.info(log, "RetryTaskFailMoreThresholdAlarmListener started");
+       EasyRetryLog.LOCAL.info("RetryTaskFailMoreThresholdAlarmListener started");
     }
 
     @Override

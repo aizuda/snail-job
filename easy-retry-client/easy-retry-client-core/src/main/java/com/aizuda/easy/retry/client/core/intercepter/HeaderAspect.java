@@ -2,7 +2,7 @@ package com.aizuda.easy.retry.client.core.intercepter;
 
 import com.aizuda.easy.retry.client.core.intercepter.RetrySiteSnapshot.EnumStage;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.core.model.EasyRetryHeaders;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import jakarta.servlet.http.HttpServletResponse;
@@ -39,7 +39,7 @@ public class HeaderAspect {
             // 标记进入方法的时间
             RetrySiteSnapshot.setEntryMethodTime(System.currentTimeMillis());
 
-            LogUtils.info(log, "easy-retry request header :[{}]", xRetry);
+           EasyRetryLog.LOCAL.info("easy-retry request header :[{}]", xRetry);
             RetrySiteSnapshot.setRetryHeader(JsonUtil.parseObject(xRetry, EasyRetryHeaders.class));
         }
     }

@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.server.job.task.support.schedule;
 
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.Lifecycle;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.dto.PartitionTask;
@@ -81,9 +81,9 @@ public class JobClearLogSchedule extends AbstractSchedule implements Lifecycle {
             total = PartitionTaskUtils.process(startId -> jobTaskBatchList(startId, endTime),
                     this::processJobLogPartitionTasks, 0);
 
-            LogUtils.debug(log, "Job clear success total:[{}]", total);
+            EasyRetryLog.LOCAL.debug("Job clear success total:[{}]", total);
         } catch (Exception e) {
-            LogUtils.error(log, "job clear log error", e);
+            EasyRetryLog.LOCAL.error("job clear log error", e);
         } finally {
             // update clean time
             lastCleanLogTime = System.currentTimeMillis();

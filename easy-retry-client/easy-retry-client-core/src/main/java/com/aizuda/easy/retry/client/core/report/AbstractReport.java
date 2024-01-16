@@ -11,7 +11,7 @@ import com.aizuda.easy.retry.client.core.exception.EasyRetryClientException;
 import com.aizuda.easy.retry.client.core.intercepter.RetrySiteSnapshot;
 import com.aizuda.easy.retry.client.core.loader.EasyRetrySpiLoader;
 import com.aizuda.easy.retry.client.core.retryer.RetryerInfo;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.core.model.IdempotentIdContext;
 import com.aizuda.easy.retry.server.model.dto.RetryTaskDTO;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +35,7 @@ public abstract class AbstractReport implements Report {
         Assert.notNull(retryerInfo, () -> new EasyRetryClientException("retryerInfo is null"));
 
         if (RetrySiteSnapshot.getStage().equals(RetrySiteSnapshot.EnumStage.REMOTE.getStage()) && !retryerInfo.isForceReport()) {
-            LogUtils.info(log, "Successfully reported, no need to repeat reporting. scene:[{}] targetClassName:[{}] args:[{}]",
+           EasyRetryLog.LOCAL.info("Successfully reported, no need to repeat reporting. scene:[{}] targetClassName:[{}] args:[{}]",
                     retryerInfo.getScene(), retryerInfo.getExecutorClassName(), params);
             return Boolean.TRUE;
         }
@@ -66,7 +66,7 @@ public abstract class AbstractReport implements Report {
             IdempotentIdContext idempotentIdContext = new IdempotentIdContext(scene, targetClassName, args, executorMethod.getName());
             idempotentId = (String) ReflectionUtils.invokeMethod(method, generate, idempotentIdContext);
         } catch (Exception exception) {
-            LogUtils.error(log, "幂等id生成异常：{},{}", scene, args, exception);
+            EasyRetryLog.LOCAL.error("幂等id生成异常：{},{}", scene, args, exception);
             throw new EasyRetryClientException("idempotentId生成异常：{},{}", scene, args);
         }
 

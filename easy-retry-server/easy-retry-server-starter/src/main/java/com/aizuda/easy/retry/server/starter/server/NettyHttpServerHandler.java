@@ -8,13 +8,11 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpUtil;
 import io.netty.util.CharsetUtil;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author: www.byteblogs.com
  * @date : 2022-03-07 16:03
  */
-@Slf4j
 public class NettyHttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
     public NettyHttpServerHandler() {

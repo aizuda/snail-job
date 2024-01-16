@@ -1,8 +1,8 @@
-package com.aizuda.easy.retry.common.log;
+package com.aizuda.easy.retry.common.log.dialect;
 
 
+import com.aizuda.easy.retry.common.log.factory.LogFactory;
 import com.aizuda.easy.retry.common.log.lang.LogCaller;
-import com.aizuda.easy.retry.common.log.level.*;
 import com.aizuda.easy.retry.common.log.level.DebugLog;
 import com.aizuda.easy.retry.common.log.level.ErrorLog;
 import com.aizuda.easy.retry.common.log.level.InfoLog;

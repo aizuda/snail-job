@@ -1,7 +1,7 @@
 package com.aizuda.easy.retry.common.log.dialect.slf4j;
 
-import com.aizuda.easy.retry.common.log.Log;
-import com.aizuda.easy.retry.common.log.LogFactory;
+import com.aizuda.easy.retry.common.log.dialect.Log;
+import com.aizuda.easy.retry.common.log.factory.LogFactory;
 import org.slf4j.LoggerFactory;
 import org.slf4j.helpers.NOPLoggerFactory;
 
@@ -29,7 +29,7 @@ public class Slf4jLogFactory extends LogFactory {
     public Slf4jLogFactory(boolean failIfNOP) {
         super("Slf4j");
         checkLogExist(LoggerFactory.class);
-        if (false == failIfNOP) {
+        if (!failIfNOP) {
             return;
         }
 

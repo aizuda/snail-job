@@ -4,7 +4,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.StrUtil;
-import com.aizuda.easy.retry.common.log.AbstractLog;
+import com.aizuda.easy.retry.common.log.dialect.AbstractLog;
 import com.aizuda.easy.retry.common.log.level.Level;
 
 /**

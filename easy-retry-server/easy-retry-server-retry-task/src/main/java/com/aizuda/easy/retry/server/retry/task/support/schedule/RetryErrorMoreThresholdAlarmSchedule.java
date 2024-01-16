@@ -5,7 +5,7 @@ import com.aizuda.easy.retry.common.core.alarm.AlarmContext;
 import com.aizuda.easy.retry.common.core.alarm.EasyRetryAlarmFactory;
 import com.aizuda.easy.retry.common.core.enums.NotifySceneEnum;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.core.util.EnvironmentUtils;
 import com.aizuda.easy.retry.common.core.util.HostUtils;
 import com.aizuda.easy.retry.server.common.Lifecycle;
@@ -71,7 +71,7 @@ public class RetryErrorMoreThresholdAlarmSchedule extends AbstractSchedule imple
 
     @Override
     protected void doExecute() {
-        LogUtils.info(log, "retryErrorMoreThreshold time[{}] ip:[{}]", LocalDateTime.now(), HostUtils.getIp());
+       EasyRetryLog.LOCAL.info("retryErrorMoreThreshold time[{}] ip:[{}]", LocalDateTime.now(), HostUtils.getIp());
         PartitionTaskUtils.process(this::getNotifyConfigPartitions, this::doHandler, 0);
     }
 

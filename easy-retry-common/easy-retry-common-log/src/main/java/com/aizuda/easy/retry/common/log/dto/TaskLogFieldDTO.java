@@ -1,6 +1,4 @@
-package com.aizuda.easy.retry.common.core.log;
-
-import lombok.Data;
+package com.aizuda.easy.retry.common.log.dto;
 
 import java.io.Serializable;
 
@@ -9,7 +7,6 @@ import java.io.Serializable;
  * @version 2.6.0
  * @date 2023/12/27
  */
-@Data
 public class TaskLogFieldDTO implements Serializable {
 
     private String name;
@@ -26,5 +23,13 @@ public class TaskLogFieldDTO implements Serializable {
     public TaskLogFieldDTO(String name, String value) {
         this.name = name;
         this.value = value;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getValue() {
+        return value;
     }
 }

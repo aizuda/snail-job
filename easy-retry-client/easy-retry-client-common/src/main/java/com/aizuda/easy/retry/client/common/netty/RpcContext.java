@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.client.common.netty;
 
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.core.model.EasyRetryRequest;
 import com.aizuda.easy.retry.common.core.model.NettyResult;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +35,7 @@ public class RpcContext {
             // 异步请求进行回调
             Optional.ofNullable(getConsumer(requestId)).ifPresent(consumer -> consumer.accept(nettyResult));
         } catch (Exception e) {
-            LogUtils.error(log, "回调处理失败 requestId:[{}]",requestId, e );
+            EasyRetryLog.LOCAL.error("回调处理失败 requestId:[{}]",requestId, e );
         } finally {
             COMPLETABLE_FUTURE.remove(requestId);
             CALLBACK_CONSUMER.remove(requestId);

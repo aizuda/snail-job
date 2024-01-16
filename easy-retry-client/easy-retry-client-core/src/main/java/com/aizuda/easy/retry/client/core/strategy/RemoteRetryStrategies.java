@@ -3,17 +3,22 @@ package com.aizuda.easy.retry.client.core.strategy;
 import com.aizuda.easy.retry.client.core.RetryExecutor;
 import com.aizuda.easy.retry.client.core.RetryExecutorParameter;
 import com.aizuda.easy.retry.client.core.intercepter.RetrySiteSnapshot;
+import com.github.rholder.retry.*;
+import com.google.common.base.Predicate;
 import com.aizuda.easy.retry.client.core.retryer.RetryType;
 import com.aizuda.easy.retry.client.core.retryer.RetryerInfo;
 import com.aizuda.easy.retry.client.core.retryer.RetryerResultContext;
 import com.aizuda.easy.retry.common.core.enums.RetryResultStatusEnum;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
-import com.github.rholder.retry.*;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -42,7 +47,7 @@ public class RemoteRetryStrategies extends AbstractRetryStrategies {
     @Override
     protected Consumer<Object> doRetrySuccessConsumer(RetryerResultContext context) {
         return o -> {
-            LogUtils.debug(log, "RemoteRetryStrategies doRetrySuccessConsumer ");
+            EasyRetryLog.LOCAL.debug("RemoteRetryStrategies doRetrySuccessConsumer ");
         };
     }
 
@@ -75,7 +80,7 @@ public class RemoteRetryStrategies extends AbstractRetryStrategies {
     @Override
     protected Consumer<Throwable> doGetRetryErrorConsumer(RetryerInfo retryerInfo, Object[] params) {
         return throwable -> {
-            LogUtils.debug(log, "RemoteRetryStrategies doGetRetryErrorConsumer ");
+            EasyRetryLog.LOCAL.debug("RemoteRetryStrategies doGetRetryErrorConsumer ");
         };
     }
 
@@ -103,13 +108,15 @@ public class RemoteRetryStrategies extends AbstractRetryStrategies {
                 return Collections.singletonList(new RetryListener() {
                     @Override
                     public <V> void onRetry(Attempt<V> attempt) {
-                        Integer attemptNumber = RetrySiteSnapshot.getAttemptNumber();
+                        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+                        HttpServletRequest request = Objects.requireNonNull(attributes).getRequest();
+                        Integer attemptNumber = (Integer) request.getAttribute("attemptNumber");
                         if (attempt.hasResult()) {
-                            LogUtils.info(log, "easy-retry 远程重试成功，第[{}]次调度", attemptNumber);
+                           EasyRetryLog.LOCAL.info("easy-retry 远程重试成功，第[{}]次调度", attemptNumber);
                         }
 
                         if (attempt.hasException()) {
-                            LogUtils.error(log, "easy-retry 远程重试失败，第[{}]次调度 ", attemptNumber, attempt.getExceptionCause());
+                            EasyRetryLog.LOCAL.error("easy-retry 远程重试失败，第[{}]次调度 ", attemptNumber, attempt.getExceptionCause());
                         }
 
                     }

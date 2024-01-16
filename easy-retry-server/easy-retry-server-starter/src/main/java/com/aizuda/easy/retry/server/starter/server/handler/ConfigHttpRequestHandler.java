@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.server.starter.server.handler;
 
 import cn.hutool.core.net.url.UrlQuery;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.handler.GetHttpRequestHandler;
 import com.aizuda.easy.retry.server.model.dto.ConfigDTO;
 import com.aizuda.easy.retry.common.core.enums.HeadersEnum;
@@ -40,7 +41,7 @@ public class ConfigHttpRequestHandler extends GetHttpRequestHandler {
 
     @Override
     public String doHandler(String content, UrlQuery urlQuery, HttpHeaders headers) {
-        log.info("版本同步 content:[{}]", urlQuery.toString());
+        EasyRetryLog.LOCAL.info("版本同步 content:[{}]", urlQuery.toString());
         EasyRetryRequest retryRequest = JsonUtil.parseObject(content, EasyRetryRequest.class);
         String groupName = headers.get(HeadersEnum.GROUP_NAME.getKey());
         String namespace = headers.get(HeadersEnum.NAMESPACE.getKey());

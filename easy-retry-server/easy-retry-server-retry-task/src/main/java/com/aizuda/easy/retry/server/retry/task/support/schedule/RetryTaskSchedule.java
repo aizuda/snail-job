@@ -2,7 +2,7 @@ package com.aizuda.easy.retry.server.retry.task.support.schedule;
 
 import cn.hutool.core.lang.Pair;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.Lifecycle;
 import com.aizuda.easy.retry.server.common.schedule.AbstractSchedule;
 import com.aizuda.easy.retry.server.retry.task.service.RetryService;
@@ -63,7 +63,7 @@ public class RetryTaskSchedule extends AbstractSchedule implements Lifecycle {
             }
 
         } catch (Exception e) {
-            LogUtils.error(log, "clearFinishAndMoveDeadLetterRetryTask 失败", e);
+            EasyRetryLog.LOCAL.error("clearFinishAndMoveDeadLetterRetryTask 失败", e);
         }
     }
 

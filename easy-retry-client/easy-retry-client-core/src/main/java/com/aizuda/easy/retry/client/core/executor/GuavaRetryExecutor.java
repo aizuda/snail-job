@@ -4,7 +4,7 @@ import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.client.core.RetryExecutorParameter;
 import com.aizuda.easy.retry.client.core.cache.RetryerInfoCache;
 import com.aizuda.easy.retry.client.core.exception.EasyRetryClientException;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.github.rholder.retry.RetryException;
 import com.github.rholder.retry.RetryListener;
 import com.github.rholder.retry.Retryer;
@@ -57,7 +57,7 @@ public class GuavaRetryExecutor extends AbstractRetryExecutor<WaitStrategy, Stop
             retrySuccess.accept(result);
         } catch (RetryException e){
             // 重试完成，仍然失败
-            LogUtils.error(log, "业务系统重试异常：",e.getLastFailedAttempt().getExceptionCause());
+            EasyRetryLog.LOCAL.error("业务系统重试异常：",e.getLastFailedAttempt().getExceptionCause());
             retryError.accept(e.getLastFailedAttempt().getExceptionCause());
         }
 

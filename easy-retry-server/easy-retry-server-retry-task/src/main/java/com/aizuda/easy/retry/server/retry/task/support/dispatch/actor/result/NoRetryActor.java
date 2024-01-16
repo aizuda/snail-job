@@ -3,7 +3,7 @@ package com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.result;
 import akka.actor.AbstractActor;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.lang.Pair;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.IdempotentStrategy;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
@@ -54,7 +54,7 @@ public class NoRetryActor extends AbstractActor {
                         new EasyRetryServerException("更新重试任务失败. groupName:[{}] uniqueId:[{}]",
                                 retryTask.getGroupName(), retryTask.getUniqueId()));
             } catch (Exception e) {
-                LogUtils.error(log, "更新重试任务失败", e);
+                EasyRetryLog.LOCAL.error("更新重试任务失败", e);
             } finally {
                 // 清除幂等标识位
                 idempotentStrategy.clear(Pair.of(retryTask.getGroupName(), retryTask.getNamespaceId()), retryTask.getId());

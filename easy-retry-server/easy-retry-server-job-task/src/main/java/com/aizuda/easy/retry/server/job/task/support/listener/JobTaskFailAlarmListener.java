@@ -3,7 +3,7 @@ package com.aizuda.easy.retry.server.job.task.support.listener;
 import com.aizuda.easy.retry.common.core.alarm.AlarmContext;
 import com.aizuda.easy.retry.common.core.alarm.EasyRetryAlarmFactory;
 import com.aizuda.easy.retry.common.core.enums.JobNotifySceneEnum;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.core.util.EnvironmentUtils;
 import com.aizuda.easy.retry.server.common.AlarmInfoConverter;
 import com.aizuda.easy.retry.server.common.alarm.AbstractJobAlarm;
@@ -80,7 +80,7 @@ public class JobTaskFailAlarmListener extends AbstractJobAlarm<JobTaskFailAlarmE
 
     @Override
     protected void startLog() {
-        LogUtils.info(log, "JobTaskFailAlarmListener started");
+       EasyRetryLog.LOCAL.info("JobTaskFailAlarmListener started");
     }
 
     @Override
@@ -92,7 +92,7 @@ public class JobTaskFailAlarmListener extends AbstractJobAlarm<JobTaskFailAlarmE
     @Override
     public void onApplicationEvent(JobTaskFailAlarmEvent event) {
         if (!queue.offer(event.getJobTaskBatchId())) {
-            LogUtils.warn(log, "JOB任务执行失败告警队列已满");
+           EasyRetryLog.LOCAL.warn("JOB任务执行失败告警队列已满");
         }
     }
 }

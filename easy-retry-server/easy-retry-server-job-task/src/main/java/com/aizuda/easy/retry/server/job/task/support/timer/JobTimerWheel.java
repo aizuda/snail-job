@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.server.job.task.support.timer;
 
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.Lifecycle;
 import com.aizuda.easy.retry.server.job.task.support.idempotent.TimerIdempotent;
 import io.netty.util.HashedWheelTimer;
@@ -50,7 +50,7 @@ public class JobTimerWheel implements Lifecycle {
                 timer.newTimeout(task, delay, unit);
                 idempotent.set(uniqueId, uniqueId);
             } catch (Exception e) {
-                LogUtils.error(log, "加入时间轮失败. uniqueId:[{}]", uniqueId, e);
+                EasyRetryLog.LOCAL.error("加入时间轮失败. uniqueId:[{}]", uniqueId, e);
             }
         }
     }

@@ -1,8 +1,9 @@
 package com.aizuda.easy.retry.common.core.alarm;
 
 import cn.hutool.extra.mail.MailAccount;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -14,6 +15,7 @@ import java.util.regex.Pattern;
  * @author: www.byteblogs.com
  * @date : 2022-05-04 16:13
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Slf4j
 public class EmailAttribute extends MailAccount {
@@ -34,8 +36,7 @@ public class EmailAttribute extends MailAccount {
                 continue;
             }
 
-            LogUtils.warn(log, "邮箱地址: [{}] 地址有误", s);
-
+           EasyRetryLog.LOCAL.warn("邮箱地址: [{}] 地址有误", s);
         }
 
         return emailList;

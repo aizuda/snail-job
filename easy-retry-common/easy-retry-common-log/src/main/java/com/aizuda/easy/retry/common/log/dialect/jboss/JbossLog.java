@@ -1,7 +1,7 @@
 package com.aizuda.easy.retry.common.log.dialect.jboss;
 
 import cn.hutool.core.util.StrUtil;
-import com.aizuda.easy.retry.common.log.AbstractLog;
+import com.aizuda.easy.retry.common.log.dialect.AbstractLog;
 import com.aizuda.easy.retry.common.log.level.Level;
 import org.jboss.logging.Logger;
 

@@ -1,9 +1,10 @@
-package com.aizuda.easy.retry.common.log;
+package com.aizuda.easy.retry.common.log.factory;
 
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.lang.caller.CallerUtil;
 import cn.hutool.core.map.SafeConcurrentHashMap;
 import cn.hutool.core.util.ServiceLoaderUtil;
+import com.aizuda.easy.retry.common.log.dialect.Log;
 import com.aizuda.easy.retry.common.log.dialect.console.ConsoleLogFactory;
 import com.aizuda.easy.retry.common.log.dialect.jdk.JdkLogFactory;
 
@@ -24,7 +25,7 @@ public abstract class LogFactory {
     /**
      * 日志对象缓存
      */
-    private final Map<Object, com.aizuda.easy.retry.common.log.Log> logCache;
+    private final Map<Object, Log> logCache;
 
     /**
      * 构造
@@ -52,7 +53,7 @@ public abstract class LogFactory {
      * @param name 日志对象名
      * @return 日志对象
      */
-    public com.aizuda.easy.retry.common.log.Log getLog(String name) {
+    public Log getLog(String name) {
         return logCache.computeIfAbsent(name, o -> createLog((String) o));
     }
 
@@ -62,7 +63,7 @@ public abstract class LogFactory {
      * @param clazz 日志对应类
      * @return 日志对象
      */
-    public com.aizuda.easy.retry.common.log.Log getLog(Class<?> clazz) {
+    public Log getLog(Class<?> clazz) {
         return logCache.computeIfAbsent(clazz, o -> createLog((Class<?>) o));
     }
 
@@ -72,7 +73,7 @@ public abstract class LogFactory {
      * @param name 日志对象名
      * @return 日志对象
      */
-    public abstract com.aizuda.easy.retry.common.log.Log createLog(String name);
+    public abstract Log createLog(String name);
 
     /**
      * 创建日志对象
@@ -80,7 +81,7 @@ public abstract class LogFactory {
      * @param clazz 日志对应类
      * @return 日志对象
      */
-    public abstract com.aizuda.easy.retry.common.log.Log createLog(Class<?> clazz);
+    public abstract Log createLog(Class<?> clazz);
 
     /**
      * 检查日志实现是否存在<br>
@@ -99,7 +100,7 @@ public abstract class LogFactory {
      * @return 当前使用的日志工厂
      */
     public static LogFactory getCurrentLogFactory() {
-        return com.aizuda.easy.retry.common.log.GlobalLogFactory.get();
+        return GlobalLogFactory.get();
     }
 
     /**
@@ -109,7 +110,7 @@ public abstract class LogFactory {
      * @return 自定义的日志工厂类
      */
     public static LogFactory setCurrentLogFactory(Class<? extends LogFactory> logFactoryClass) {
-        return com.aizuda.easy.retry.common.log.GlobalLogFactory.set(logFactoryClass);
+        return GlobalLogFactory.set(logFactoryClass);
     }
 
     /**
@@ -119,7 +120,7 @@ public abstract class LogFactory {
      * @return 自定义的日志工厂类
      */
     public static LogFactory setCurrentLogFactory(LogFactory logFactory) {
-        return com.aizuda.easy.retry.common.log.GlobalLogFactory.set(logFactory);
+        return GlobalLogFactory.set(logFactory);
     }
 
     /**
@@ -128,7 +129,7 @@ public abstract class LogFactory {
      * @param name 日志对象名
      * @return 日志对象
      */
-    public static com.aizuda.easy.retry.common.log.Log get(String name) {
+    public static Log get(String name) {
         return getCurrentLogFactory().getLog(name);
     }
 
@@ -138,14 +139,14 @@ public abstract class LogFactory {
      * @param clazz 日志对应类
      * @return 日志对象
      */
-    public static com.aizuda.easy.retry.common.log.Log get(Class<?> clazz) {
+    public static Log get(Class<?> clazz) {
         return getCurrentLogFactory().getLog(clazz);
     }
 
     /**
      * @return 获得调用者的日志
      */
-    public static com.aizuda.easy.retry.common.log.Log get() {
+    public static Log get() {
         return get(CallerUtil.getCallerCaller());
     }
 
@@ -182,7 +183,7 @@ public abstract class LogFactory {
     }
     // ------------------------------------------------------------------------- Static end
 
-    public static final Throwable extractThrowable(Object... arguments) {
+    public final static Throwable extractThrowable(Object... arguments) {
         if (arguments == null || arguments.length == 0) {
             return null;
         }
@@ -193,4 +194,5 @@ public abstract class LogFactory {
         }
         return null;
     }
+
 }

@@ -1,8 +1,8 @@
 package com.aizuda.easy.retry.common.log.dialect.tinylog;
 
 
-import com.aizuda.easy.retry.common.log.Log;
-import com.aizuda.easy.retry.common.log.LogFactory;
+import com.aizuda.easy.retry.common.log.dialect.Log;
+import com.aizuda.easy.retry.common.log.factory.LogFactory;
 
 /**
  * <a href="http://www.tinylog.org/">TinyLog2</a> log.<br>

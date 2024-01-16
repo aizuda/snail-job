@@ -7,7 +7,7 @@ import com.aizuda.easy.retry.client.common.exception.EasyRetryClientException;
 import com.aizuda.easy.retry.client.common.exception.EasyRetryClientTimeOutException;
 import com.aizuda.easy.retry.client.common.netty.NettyChannel;
 import com.aizuda.easy.retry.client.common.netty.RpcContext;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.core.model.EasyRetryRequest;
 import io.netty.handler.codec.http.HttpMethod;
 import lombok.extern.slf4j.Slf4j;
@@ -64,7 +64,7 @@ public class ClientInvokeHandler<R> implements InvocationHandler {
             sw.stop();
         }
 
-        LogUtils.info(log,"request complete requestId:[{}] 耗时:[{}ms]", easyRetryRequest.getReqId(), sw.getTotalTimeMillis());
+       EasyRetryLog.LOCAL.info("request complete requestId:[{}] 耗时:[{}ms]", easyRetryRequest.getReqId(), sw.getTotalTimeMillis());
         if (async) {
             return null;
         } else {

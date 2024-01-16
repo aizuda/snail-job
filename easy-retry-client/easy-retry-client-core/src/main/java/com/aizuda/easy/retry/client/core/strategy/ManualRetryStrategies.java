@@ -7,7 +7,7 @@ import com.aizuda.easy.retry.client.core.retryer.RetryType;
 import com.aizuda.easy.retry.client.core.retryer.RetryerInfo;
 import com.aizuda.easy.retry.client.core.retryer.RetryerResultContext;
 import com.aizuda.easy.retry.common.core.enums.RetryResultStatusEnum;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.github.rholder.retry.Attempt;
 import com.github.rholder.retry.RetryListener;
 import com.github.rholder.retry.StopStrategies;
@@ -42,7 +42,7 @@ public class ManualRetryStrategies extends AbstractRetryStrategies {
     @Override
     protected Consumer<Object> doRetrySuccessConsumer(final RetryerResultContext context) {
         return o -> {
-            LogUtils.debug(log, "ManualRetryStrategies doRetrySuccessConsumer ");
+            EasyRetryLog.LOCAL.debug("ManualRetryStrategies doRetrySuccessConsumer ");
         };
     }
 
@@ -80,7 +80,7 @@ public class ManualRetryStrategies extends AbstractRetryStrategies {
     @Override
     protected Consumer<Throwable> doGetRetryErrorConsumer(final RetryerInfo retryerInfo, final Object[] params) {
         return throwable -> {
-            LogUtils.debug(log, "ManualRetryStrategies doGetRetryErrorConsumer ");
+            EasyRetryLog.LOCAL.debug("ManualRetryStrategies doGetRetryErrorConsumer ");
         };
     }
 
@@ -111,11 +111,11 @@ public class ManualRetryStrategies extends AbstractRetryStrategies {
                     @Override
                     public <V> void onRetry(Attempt<V> attempt) {
                         if (attempt.hasResult()) {
-                            LogUtils.info(log, "easy-retry 手动创建重试数据成功，第[{}]次调度", attempt.getAttemptNumber());
+                           EasyRetryLog.LOCAL.info("easy-retry 手动创建重试数据成功，第[{}]次调度", attempt.getAttemptNumber());
                         }
 
                         if (attempt.hasException()) {
-                            LogUtils.error(log, "easy-retry 手动创建重试数据失败，第[{}]次调度 ", attempt.getAttemptNumber(),
+                            EasyRetryLog.LOCAL.error("easy-retry 手动创建重试数据失败，第[{}]次调度 ", attempt.getAttemptNumber(),
                                 attempt.getExceptionCause());
                         }
 

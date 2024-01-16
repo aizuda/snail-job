@@ -2,7 +2,7 @@ package com.aizuda.easy.retry.common.log.dialect.tinylog;
 
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
-import com.aizuda.easy.retry.common.log.AbstractLog;
+import com.aizuda.easy.retry.common.log.dialect.AbstractLog;
 import org.pmw.tinylog.Level;
 import org.pmw.tinylog.LogEntryForwarder;
 import org.pmw.tinylog.Logger;

@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.server.common.cache;
 
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.Lifecycle;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -39,12 +39,12 @@ public class CacheConsumerGroup implements Lifecycle {
      * @return 缓存对象
      */
     public static synchronized void addOrUpdate(String groupName, String namespaceId) {
-//        LogUtils.info(log, "add consumer cache. groupName:[{}]", groupName);
+//       EasyRetryLog.LOCAL.info("add consumer cache. groupName:[{}]", groupName);
         CACHE.put(groupName, namespaceId);
     }
 
     public static void remove(String groupName) {
-        LogUtils.info(log, "Remove consumer cache. groupName:[{}]", groupName);
+       EasyRetryLog.LOCAL.info("Remove consumer cache. groupName:[{}]", groupName);
         CACHE.invalidate(groupName);
     }
 
@@ -54,7 +54,7 @@ public class CacheConsumerGroup implements Lifecycle {
 
     @Override
     public void start() {
-        LogUtils.info(log, "CacheRegisterTable start");
+       EasyRetryLog.LOCAL.info("CacheRegisterTable start");
         CACHE = CacheBuilder.newBuilder()
                 // 设置并发级别为cpu核心数
                 .concurrencyLevel(Runtime.getRuntime().availableProcessors())
@@ -65,7 +65,7 @@ public class CacheConsumerGroup implements Lifecycle {
 
     @Override
     public void close() {
-        LogUtils.info(log, "CacheRegisterTable stop");
+       EasyRetryLog.LOCAL.info("CacheRegisterTable stop");
         CACHE.invalidateAll();
     }
 }
