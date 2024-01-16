@@ -65,7 +65,8 @@ public class JobLogServiceImpl implements JobLogService {
             ) {
                 jobLogResponseVO.setFinished(Boolean.TRUE);
             }
-
+            jobLogResponseVO.setNextStartId(queryVO.getStartId());
+            jobLogResponseVO.setFromIndex(0);
             return jobLogResponseVO;
         }
 

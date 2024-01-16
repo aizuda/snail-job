@@ -130,7 +130,10 @@ export default {
       // 高级搜索 展开/关闭
       advanced: false,
       // 查询参数
-      queryParam: {},
+      queryParam: {
+        startId: 0,
+        fromIndex: 0
+      },
       data: [],
       logData: [],
       taskStatus: enums.taskStatus,
@@ -236,7 +239,9 @@ export default {
         await this.fetchLog({
           taskBatchId: record.taskBatchId,
           jobId: record.jobId,
-          taskId: record.id
+          taskId: record.id,
+          startId: 0,
+          fromIndex: 0
         }, record)
         this.$forceUpdate()
       }
