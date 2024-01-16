@@ -7,7 +7,7 @@ import com.aizuda.easy.retry.client.core.callback.RetryCompleteCallback;
 import com.aizuda.easy.retry.client.core.retryer.RetryType;
 import com.aizuda.easy.retry.client.core.retryer.RetryerInfo;
 import com.aizuda.easy.retry.client.core.strategy.ExecutorMethod;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import lombok.extern.slf4j.Slf4j;
 import cn.hutool.core.util.StrUtil;
 import org.springframework.aop.support.AopUtils;
@@ -87,7 +87,7 @@ public class ExecutorMethodScanner implements Scanner, ApplicationContextAware {
                 unit
             );
         }catch (Exception e) {
-            LogUtils.error(log, "{}重试信息加载报错：{}", executor.getClass().getName(), e);
+            EasyRetryLog.LOCAL.error("{}重试信息加载报错：{}", executor.getClass().getName(), e);
         }
 
         return null;

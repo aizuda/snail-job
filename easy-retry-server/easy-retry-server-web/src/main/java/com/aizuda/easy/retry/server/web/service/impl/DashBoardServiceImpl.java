@@ -2,7 +2,7 @@ package com.aizuda.easy.retry.server.web.service.impl;
 
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.enums.NodeTypeEnum;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.dto.DistributeInstance;
@@ -217,7 +217,7 @@ public class DashBoardServiceImpl implements DashBoardService {
                             .collect(Collectors.toCollection(LinkedHashSet::new)));
                 }
             } catch (Exception e) {
-                LogUtils.error(log, "Failed to retrieve consumer group for node [{}:{}].", serverNodeResponseVO.getHostIp(), serverNodeExtAttrs.getWebPort());
+                EasyRetryLog.LOCAL.error("Failed to retrieve consumer group for node [{}:{}].", serverNodeResponseVO.getHostIp(), serverNodeExtAttrs.getWebPort());
             }
         }
         return new PageResult<>(serverNodePageDTO, serverNodeResponseVOS);

@@ -3,7 +3,7 @@ package com.aizuda.easy.retry.client.core.plugin;
 import com.aizuda.easy.retry.client.core.exception.EasyRetryClientException;
 import com.aizuda.easy.retry.client.core.intercepter.RetrySiteSnapshot;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.core.model.EasyRetryHeaders;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -37,10 +37,10 @@ public class RequestHeaderPlugins {
             long callRemoteTime = System.currentTimeMillis();
             Long entryMethodTime = RetrySiteSnapshot.getEntryMethodTime();
             if (Objects.isNull(entryMethodTime)) {
-                LogUtils.warn(log, "entry method time is null. easyRetryId:[{}]", retryHeader.getEasyRetryId());
+               EasyRetryLog.LOCAL.warn("entry method time is null. easyRetryId:[{}]", retryHeader.getEasyRetryId());
             } else {
                 long transmitTime = retryHeader.getDdl() - (callRemoteTime - entryMethodTime);
-                LogUtils.info(log, "RPC传递header头 callRemoteTime:[{}] - entryMethodTime:[{}] = transmitTime:[{}]", callRemoteTime, entryMethodTime, transmitTime);
+               EasyRetryLog.LOCAL.info("RPC传递header头 callRemoteTime:[{}] - entryMethodTime:[{}] = transmitTime:[{}]", callRemoteTime, entryMethodTime, transmitTime);
                 if (transmitTime > 0) {
                     retryHeader.setDdl(transmitTime);
                     // 重新刷新进入时间

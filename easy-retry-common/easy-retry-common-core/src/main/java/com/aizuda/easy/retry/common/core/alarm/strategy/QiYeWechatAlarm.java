@@ -6,7 +6,7 @@ import cn.hutool.http.*;
 import com.aizuda.easy.retry.common.core.alarm.AlarmContext;
 import com.aizuda.easy.retry.common.core.alarm.QiYeWechatAttribute;
 import com.aizuda.easy.retry.common.core.enums.AlarmTypeEnum;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.core.util.DingDingUtils;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import lombok.Data;
@@ -56,11 +56,11 @@ public class QiYeWechatAlarm extends AbstractAlarm<AlarmContext> {
             HttpRequest post = HttpUtil.createPost(webhookUrl);
             HttpRequest request = post.body(JsonUtil.toJsonString(map), ContentType.JSON.toString());
             HttpResponse execute = request.execute();
-            LogUtils.debug(log, JsonUtil.toJsonString(execute));
+            EasyRetryLog.LOCAL.debug(JsonUtil.toJsonString(execute));
             if (execute.isOk()) {
                 return true;
             }
-            LogUtils.error(log, "发送企业微信消息失败:{}", execute.body());
+            EasyRetryLog.LOCAL.error("发送企业微信消息失败:{}", execute.body());
             return false;
         } catch (Exception e) {
             log.error("发送企业微信消息失败", e);

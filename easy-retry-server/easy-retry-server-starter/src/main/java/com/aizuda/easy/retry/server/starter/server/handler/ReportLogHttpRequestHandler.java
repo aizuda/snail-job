@@ -4,7 +4,7 @@ import akka.actor.ActorRef;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.net.url.UrlQuery;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
-import com.aizuda.easy.retry.common.core.log.TaskLogFieldDTO;
+import com.aizuda.easy.retry.common.log.dto.TaskLogFieldDTO;
 import com.aizuda.easy.retry.common.core.model.EasyRetryRequest;
 import com.aizuda.easy.retry.common.core.model.NettyResult;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
@@ -17,7 +17,6 @@ import com.aizuda.easy.retry.server.model.dto.LogTaskDTO;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobLogMessage;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,7 +37,6 @@ import static com.aizuda.easy.retry.common.core.constant.SystemConstants.HTTP_PA
  * @since 1.0.0
  */
 @Component
-@Slf4j
 public class ReportLogHttpRequestHandler extends PostHttpRequestHandler {
 
     @Override

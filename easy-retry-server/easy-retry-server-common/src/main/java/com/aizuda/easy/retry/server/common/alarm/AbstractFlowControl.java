@@ -5,7 +5,7 @@ import com.aizuda.easy.retry.common.core.alarm.AlarmContext;
 import com.aizuda.easy.retry.common.core.alarm.EasyRetryAlarmFactory;
 import com.aizuda.easy.retry.common.core.enums.NotifySceneEnum;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.cache.CacheNotifyRateLimiter;
 import com.aizuda.easy.retry.server.common.dto.AlarmInfo;
 import com.aizuda.easy.retry.server.common.dto.NotifyConfigInfo;

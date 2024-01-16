@@ -1,7 +1,7 @@
 package com.aizuda.easy.retry.server.retry.task.support.handler;
 
 import cn.hutool.core.lang.Pair;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.server.common.Lifecycle;
 import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
@@ -72,10 +72,10 @@ public class ConfigVersionSyncHandler implements Lifecycle, Runnable {
                 String format = MessageFormat.format(URL, registerNodeInfo.getHostIp(), registerNodeInfo.getHostPort().toString(),
                     registerNodeInfo.getContextPath());
                 Result result = restTemplate.postForObject(format, configDTO, Result.class);
-                LogUtils.info(log, "同步结果 [{}]", result);
+               EasyRetryLog.LOCAL.info("同步结果 [{}]", result);
             }
         } catch (Exception e) {
-            LogUtils.error(log, "version sync error. groupName:[{}]", groupName, e);
+            EasyRetryLog.LOCAL.error("version sync error. groupName:[{}]", groupName, e);
         }
     }
 
@@ -103,9 +103,9 @@ public class ConfigVersionSyncHandler implements Lifecycle, Runnable {
                     syncVersion(task.getGroupName(), task.getNamespaceId());
                 }
             } catch (InterruptedException e) {
-                LogUtils.info(log, "[{}] thread stop.", Thread.currentThread().getName());
+               EasyRetryLog.LOCAL.info("[{}] thread stop.", Thread.currentThread().getName());
             } catch (Exception e) {
-                LogUtils.error(log, "client refresh expireAt error.", e);
+                EasyRetryLog.LOCAL.error("client refresh expireAt error.", e);
             } finally {
                 try {
                     // 防止刷的过快，休眠1s

@@ -7,7 +7,7 @@ import com.aizuda.easy.retry.client.common.config.EasyRetryProperties;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.enums.HeadersEnum;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.core.util.HostUtils;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
@@ -61,7 +61,7 @@ public class NettyChannel {
     public static void send(HttpMethod method, String url, String body) throws InterruptedException {
 
         if (Objects.isNull(CHANNEL)) {
-            LogUtils.error(log, "send message but channel is null url:[{}] method:[{}] body:[{}] ", url, method, body);
+            EasyRetryLog.LOCAL.error("send message but channel is null url:[{}] method:[{}] body:[{}] ", url, method, body);
             return;
         }
 
@@ -75,7 +75,7 @@ public class NettyChannel {
         // server配置不能为空
         EasyRetryProperties.ServerConfig serverConfig = easyRetryProperties.getServer();
         if (Objects.isNull(serverConfig)) {
-            LogUtils.error(log, "easy retry server config is null");
+            EasyRetryLog.LOCAL.error("easy retry server config is null");
             return;
         }
 

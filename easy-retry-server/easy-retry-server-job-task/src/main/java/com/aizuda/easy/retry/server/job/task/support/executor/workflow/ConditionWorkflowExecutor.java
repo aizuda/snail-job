@@ -140,6 +140,13 @@ public class ConditionWorkflowExecutor extends AbstractWorkflowExecutor {
         logMetaDTO.setTaskBatchId(jobTaskBatch.getId());
         logMetaDTO.setJobId(SystemConstants.DECISION_JOB_ID);
         logMetaDTO.setTaskId(jobTask.getId());
-        EasyRetryLog.REMOTE.info("workflowNodeId:[{}]决策完成. <|>{}<|>",  context.getWorkflowNodeId(), logMetaDTO);
+        if (jobTaskBatch.getTaskBatchStatus() == JobTaskStatusEnum.SUCCESS.getStatus()) {
+            EasyRetryLog.REMOTE.info("workflowNodeId:[{}]决策完成. 决策结果:[{}] <|>{}<|>",
+                context.getWorkflowNodeId(), context.getEvaluationResult(), logMetaDTO);
+        } else {
+            EasyRetryLog.REMOTE.error("workflowNodeId:[{}] 决策失败. 失败原因:[{}] <|>{}<|>",  context.getWorkflowNodeId(),
+                context.getLogMessage(), logMetaDTO);
+
+        }
     }
 }

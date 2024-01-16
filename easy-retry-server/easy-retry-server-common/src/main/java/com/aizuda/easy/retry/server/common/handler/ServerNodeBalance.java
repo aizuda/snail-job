@@ -3,7 +3,7 @@ package com.aizuda.easy.retry.server.common.handler;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.NodeTypeEnum;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.Lifecycle;
 import com.aizuda.easy.retry.server.common.allocate.server.AllocateMessageQueueAveragely;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
@@ -60,7 +60,7 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
     private List<Integer> bucketList;
 
     public void doBalance() {
-        LogUtils.info(log, "rebalance start");
+       EasyRetryLog.LOCAL.info("rebalance start");
         DistributeInstance.RE_BALANCE_ING.set(Boolean.TRUE);
 
         try {
@@ -69,7 +69,7 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
             Set<String> podIpSet = CacheRegisterTable.getPodIdSet(ServerRegister.GROUP_NAME, ServerRegister.NAMESPACE_ID);
 
             if (CollectionUtils.isEmpty(podIpSet)) {
-                LogUtils.error(log, "server node is empty");
+                EasyRetryLog.LOCAL.error("server node is empty");
             }
 
             // 删除本地缓存的消费桶的信息
@@ -84,9 +84,9 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
             // 重新覆盖本地分配的组信息
             DistributeInstance.INSTANCE.setConsumerBucket(allocate);
 
-            LogUtils.info(log, "rebalance complete. allocate:[{}]", allocate);
+           EasyRetryLog.LOCAL.info("rebalance complete. allocate:[{}]", allocate);
         } catch (Exception e) {
-            LogUtils.error(log, "rebalance error. ", e);
+            EasyRetryLog.LOCAL.error("rebalance error. ", e);
         } finally {
             DistributeInstance.RE_BALANCE_ING.set(Boolean.FALSE);
         }
@@ -102,7 +102,7 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
             bucketList.add(i);
         }
 
-        LogUtils.info(log, "ServerNodeBalance start");
+       EasyRetryLog.LOCAL.info("ServerNodeBalance start");
         thread = new Thread(this, "server-node-balance");
         thread.start();
     }
@@ -136,16 +136,16 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
         // 停止定时任务
         thread.interrupt();
 
-        LogUtils.info(log, "ServerNodeBalance start. ");
+       EasyRetryLog.LOCAL.info("ServerNodeBalance start. ");
         int i = serverNodeMapper
                 .delete(new LambdaQueryWrapper<ServerNode>().eq(ServerNode::getHostId, ServerRegister.CURRENT_CID));
         if (1 == i) {
-            LogUtils.info(log, "delete node success. [{}]", ServerRegister.CURRENT_CID);
+           EasyRetryLog.LOCAL.info("delete node success. [{}]", ServerRegister.CURRENT_CID);
         } else {
-            LogUtils.info(log, "delete node  error. [{}]", ServerRegister.CURRENT_CID);
+           EasyRetryLog.LOCAL.info("delete node  error. [{}]", ServerRegister.CURRENT_CID);
         }
 
-        LogUtils.info(log, "ServerNodeBalance close complete");
+       EasyRetryLog.LOCAL.info("ServerNodeBalance close complete");
     }
 
     @Override
@@ -212,10 +212,10 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
                 }
 
             } catch (InterruptedException e) {
-                LogUtils.info(log, "check balance stop");
+               EasyRetryLog.LOCAL.info("check balance stop");
                 Thread.currentThread().interrupt();
             } catch (Exception e) {
-                LogUtils.error(log, "check balance error", e);
+                EasyRetryLog.LOCAL.error("check balance error", e);
             } finally {
                 try {
                     TimeUnit.SECONDS.sleep(systemProperties.getLoadBalanceCycleTime());
@@ -230,7 +230,7 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
     private boolean isNodeNotMatch(Set<String> remoteHostIds, Set<String> localHostIds) {
         boolean b = !remoteHostIds.containsAll(localHostIds);
         if (b) {
-            LogUtils.info(log, "判断远程节点是不是和本地节点一致. remoteHostIds:[{}] localHostIds:[{}]",
+           EasyRetryLog.LOCAL.info("判断远程节点是不是和本地节点一致. remoteHostIds:[{}] localHostIds:[{}]",
                     localHostIds,
                     remoteHostIds);
         }
@@ -240,7 +240,7 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
     private boolean isNodeSizeNotEqual(int localNodeSize, int remoteNodeSize) {
         boolean b = localNodeSize != remoteNodeSize;
         if (b) {
-            LogUtils.info(log, "存在远程和本地缓存的节点的数量不一致则触发rebalance. localNodeSize:[{}] remoteNodeSize:[{}]",
+           EasyRetryLog.LOCAL.info("存在远程和本地缓存的节点的数量不一致则触发rebalance. localNodeSize:[{}] remoteNodeSize:[{}]",
                     localNodeSize,
                     remoteNodeSize);
         }
@@ -250,7 +250,7 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
     private boolean isGroupSizeNotEqual(List<GroupConfig> removeGroupConfig, Set<String> allGroup) {
         boolean b = allGroup.size() != removeGroupConfig.size();
         if (b) {
-            LogUtils.info(log, "若存在远程和本地缓存的组的数量不一致则触发rebalance. localGroupSize:[{}] remoteGroupSize:[{}]",
+           EasyRetryLog.LOCAL.info("若存在远程和本地缓存的组的数量不一致则触发rebalance. localGroupSize:[{}] remoteGroupSize:[{}]",
                     allGroup.size(),
                     removeGroupConfig.size());
         }

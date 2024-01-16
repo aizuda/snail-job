@@ -4,7 +4,7 @@ import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.common.core.enums.JobTaskTypeEnum;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
@@ -94,7 +94,7 @@ public class JobExecutorResultActor extends AbstractActor {
 //                EasyRetryLog.REMOTE.info("taskId:[{}] 任务执行成功. <|>{}<|>", logMetaDTO.getTaskId(), logMetaDTO);
 
             } catch (Exception e) {
-                LogUtils.error(log, " job executor result exception. [{}]", result, e);
+                EasyRetryLog.LOCAL.error(" job executor result exception. [{}]", result, e);
             } finally {
                 getContext().stop(getSelf());
             }

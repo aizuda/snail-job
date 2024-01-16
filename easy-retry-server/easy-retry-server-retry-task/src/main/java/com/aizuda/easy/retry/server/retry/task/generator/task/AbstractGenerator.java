@@ -5,7 +5,7 @@ import cn.hutool.core.lang.Pair;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.enums.DelayLevelEnum;
 import com.aizuda.easy.retry.server.common.enums.TaskTypeEnum;
@@ -55,7 +55,7 @@ public abstract class AbstractGenerator implements TaskGenerator {
     @Override
     @Transactional
     public void taskGenerator(TaskContext taskContext) {
-        LogUtils.info(log, "received report data. {}", JsonUtil.toJsonString(taskContext));
+       EasyRetryLog.LOCAL.info("received report data. {}", JsonUtil.toJsonString(taskContext));
 
         SceneConfig sceneConfig = checkAndInitScene(taskContext);
 
@@ -124,7 +124,7 @@ public abstract class AbstractGenerator implements TaskGenerator {
                                 && taskContext.getSceneName().equals(retryTask.getSceneName())).collect(Collectors.toList());
         // 说明存在相同的任务
         if (!CollectionUtils.isEmpty(list)) {
-            LogUtils.warn(log, "interrupted reporting in retrying task. [{}]", JsonUtil.toJsonString(taskInfo));
+           EasyRetryLog.LOCAL.warn("interrupted reporting in retrying task. [{}]", JsonUtil.toJsonString(taskInfo));
             return Pair.of(waitInsertTasks, waitInsertTaskLogs);
         }
 

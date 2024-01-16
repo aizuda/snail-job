@@ -1,7 +1,9 @@
-package com.aizuda.easy.retry.common.log;
+package com.aizuda.easy.retry.common.log.strategy;
 
 import cn.hutool.core.util.StrUtil;
-import com.aizuda.easy.retry.common.core.util.EnvironmentUtils;
+import com.aizuda.easy.retry.common.log.dialect.Log;
+import com.aizuda.easy.retry.common.log.factory.GlobalLogFactory;
+import com.aizuda.easy.retry.common.log.factory.LogFactory;
 import com.aizuda.easy.retry.common.log.lang.LogCaller;
 import com.aizuda.easy.retry.common.log.level.Level;
 
@@ -27,11 +29,11 @@ public final class Remote {
      * @param arguments 变量对应的参数
      */
     public void trace(String format, Object... arguments) {
-        if (!EnvironmentUtils.getLogStatus()) {
+        if (!GlobalLogFactory.logSwitch()) {
             return;
         }
 
-        trace(com.aizuda.easy.retry.common.log.LogFactory.get(LogCaller.getCallerCaller()), format, arguments);
+        trace(LogFactory.get(LogCaller.getCallerCaller()), format, arguments);
     }
 
     /**
@@ -41,8 +43,8 @@ public final class Remote {
      * @param format    格式文本，{} 代表变量
      * @param arguments 变量对应的参数
      */
-    public void trace(com.aizuda.easy.retry.common.log.Log log, String format, Object... arguments) {
-        if (!EnvironmentUtils.getLogStatus()) {
+    public void trace(Log log, String format, Object... arguments) {
+        if (!GlobalLogFactory.logSwitch()) {
             return;
         }
 
@@ -59,11 +61,11 @@ public final class Remote {
      * @param arguments 变量对应的参数
      */
     public void debug(String format, Object... arguments) {
-        if (!EnvironmentUtils.getLogStatus()) {
+        if (!GlobalLogFactory.logSwitch()) {
             return;
         }
 
-        debug(com.aizuda.easy.retry.common.log.LogFactory.get(LogCaller.getCallerCaller()), format, arguments);
+        debug(LogFactory.get(LogCaller.getCallerCaller()), format, arguments);
     }
 
     /**
@@ -73,8 +75,8 @@ public final class Remote {
      * @param format    格式文本，{} 代表变量
      * @param arguments 变量对应的参数
      */
-    public void debug(com.aizuda.easy.retry.common.log.Log log, String format, Object... arguments) {
-        if (!EnvironmentUtils.getLogStatus()) {
+    public void debug(Log log, String format, Object... arguments) {
+        if (!GlobalLogFactory.logSwitch()) {
             return;
         }
 
@@ -91,11 +93,11 @@ public final class Remote {
      * @param arguments 变量对应的参数
      */
     public void info(String format, Object... arguments) {
-        if (!EnvironmentUtils.getLogStatus()) {
+        if (!GlobalLogFactory.logSwitch()) {
             return;
         }
 
-        info(com.aizuda.easy.retry.common.log.LogFactory.get(LogCaller.getCallerCaller()), format, arguments);
+        info(LogFactory.get(LogCaller.getCallerCaller()), format, arguments);
     }
 
     /**
@@ -105,8 +107,8 @@ public final class Remote {
      * @param format    格式文本，{} 代表变量
      * @param arguments 变量对应的参数
      */
-    public void info(com.aizuda.easy.retry.common.log.Log log, String format, Object... arguments) {
-        if (!EnvironmentUtils.getLogStatus()) {
+    public void info(Log log, String format, Object... arguments) {
+        if (!GlobalLogFactory.logSwitch()) {
             return;
         }
 
@@ -123,7 +125,7 @@ public final class Remote {
      * @param arguments 变量对应的参数
      */
     public void warn(String format, Object... arguments) {
-        if (!EnvironmentUtils.getLogStatus()) {
+        if (!GlobalLogFactory.logSwitch()) {
             return;
         }
 
@@ -139,7 +141,7 @@ public final class Remote {
      * @param arguments 变量对应的参数
      */
     public void warn(Throwable e, String format, Object... arguments) {
-        if (!EnvironmentUtils.getLogStatus()) {
+        if (!GlobalLogFactory.logSwitch()) {
             return;
         }
 
@@ -153,8 +155,8 @@ public final class Remote {
      * @param format    格式文本，{} 代表变量
      * @param arguments 变量对应的参数
      */
-    public void warn(com.aizuda.easy.retry.common.log.Log log, String format, Object... arguments) {
-        if (!EnvironmentUtils.getLogStatus()) {
+    public void warn(Log log, String format, Object... arguments) {
+        if (!GlobalLogFactory.logSwitch()) {
             return;
         }
 
@@ -169,8 +171,8 @@ public final class Remote {
      * @param format    格式文本，{} 代表变量
      * @param arguments 变量对应的参数
      */
-    public void warn(com.aizuda.easy.retry.common.log.Log log, Throwable e, String format, Object... arguments) {
-        if (!EnvironmentUtils.getLogStatus()) {
+    public void warn(Log log, Throwable e, String format, Object... arguments) {
+        if (!GlobalLogFactory.logSwitch()) {
             return;
         }
 
@@ -186,11 +188,11 @@ public final class Remote {
      * @param e 需在日志中堆栈打印的异常
      */
     public void error(Throwable e) {
-        if (!EnvironmentUtils.getLogStatus()) {
+        if (!GlobalLogFactory.logSwitch()) {
             return;
         }
 
-        error(com.aizuda.easy.retry.common.log.LogFactory.get(LogCaller.getCallerCaller()), e);
+        error(LogFactory.get(LogCaller.getCallerCaller()), e);
     }
 
     /**
@@ -201,7 +203,7 @@ public final class Remote {
      * @param arguments 变量对应的参数
      */
     public void error(String format, Object... arguments) {
-        if (!EnvironmentUtils.getLogStatus()) {
+        if (!GlobalLogFactory.logSwitch()) {
             return;
         }
 
@@ -217,7 +219,7 @@ public final class Remote {
      * @param arguments 变量对应的参数
      */
     public void error(Throwable e, String format, Object... arguments) {
-        if (!EnvironmentUtils.getLogStatus()) {
+        if (!GlobalLogFactory.logSwitch()) {
             return;
         }
 
@@ -230,8 +232,8 @@ public final class Remote {
      * @param log 日志对象
      * @param e   需在日志中堆栈打印的异常
      */
-    public void error(com.aizuda.easy.retry.common.log.Log log, Throwable e) {
-        if (!EnvironmentUtils.getLogStatus()) {
+    public void error(Log log, Throwable e) {
+        if (!GlobalLogFactory.logSwitch()) {
             return;
         }
 
@@ -246,7 +248,7 @@ public final class Remote {
      * @param arguments 变量对应的参数
      */
     public void error(Log log, String format, Object... arguments) {
-        if (!EnvironmentUtils.getLogStatus()) {
+        if (!GlobalLogFactory.logSwitch()) {
             return;
         }
 
@@ -262,7 +264,7 @@ public final class Remote {
      * @param arguments 变量对应的参数
      */
     public void error(Log log, Throwable e, String format, Object... arguments) {
-        if (!EnvironmentUtils.getLogStatus()) {
+        if (!GlobalLogFactory.logSwitch()) {
             return;
         }
 
@@ -280,7 +282,7 @@ public final class Remote {
      * @param arguments 变量对应的参数
      */
     public void log(Level level, Throwable t, String format, Object... arguments) {
-        if (!EnvironmentUtils.getLogStatus()) {
+        if (!GlobalLogFactory.logSwitch()) {
             return;
         }
 

@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.server.common.cache;
 
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.Lifecycle;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -54,7 +54,7 @@ public class CacheNotifyRateLimiter implements Lifecycle {
 
     @Override
     public void start() {
-        LogUtils.info(log, "CacheNotifyRateLimiter start");
+       EasyRetryLog.LOCAL.info("CacheNotifyRateLimiter start");
         CACHE = CacheBuilder.newBuilder()
                 // 设置并发级别为cpu核心数
                 .concurrencyLevel(Runtime.getRuntime().availableProcessors())
@@ -64,6 +64,6 @@ public class CacheNotifyRateLimiter implements Lifecycle {
 
     @Override
     public void close() {
-        LogUtils.info(log, "CacheNotifyRateLimiter stop");
+       EasyRetryLog.LOCAL.info("CacheNotifyRateLimiter stop");
     }
 }

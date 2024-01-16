@@ -4,7 +4,7 @@ import cn.hutool.core.net.url.UrlQuery;
 import com.aizuda.easy.retry.client.model.request.DispatchJobResultRequest;
 import com.aizuda.easy.retry.common.core.enums.HeadersEnum;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.core.model.EasyRetryRequest;
 import com.aizuda.easy.retry.common.core.model.NettyResult;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
@@ -41,7 +41,7 @@ public class ReportDispatchResultPostHttpRequestHandler extends PostHttpRequestH
 
     @Override
     public String doHandler(String content, UrlQuery query, HttpHeaders headers) {
-        LogUtils.info(log, "Client Callback Request. content:[{}]", content);
+       EasyRetryLog.LOCAL.info("Client Callback Request. content:[{}]", content);
 
         EasyRetryRequest retryRequest = JsonUtil.parseObject(content, EasyRetryRequest.class);
         Object[] args = retryRequest.getArgs();

@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.server.starter.server;
 
-
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.Lifecycle;
@@ -14,7 +14,6 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -28,7 +27,6 @@ import org.springframework.stereotype.Component;
  * @since 1.0.0
  */
 @Component
-@Slf4j
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class NettyHttpServer implements Runnable, Lifecycle {
 
@@ -62,16 +60,16 @@ public class NettyHttpServer implements Runnable, Lifecycle {
             // 在特定端口绑定并启动服务器 默认是1788
             ChannelFuture future = bootstrap.bind(systemProperties.getNettyPort()).sync();
 
-            log.info("------> easy-retry remoting server start success, nettype = {}, port = {}",
+            EasyRetryLog.LOCAL.info("------> easy-retry remoting server start success, nettype = {}, port = {}",
                 NettyHttpServer.class.getName(), systemProperties.getNettyPort());
 
             started = true;
             future.channel().closeFuture().sync();
 
         } catch (InterruptedException e) {
-            log.info("--------> easy-retry remoting server stop.");
+            EasyRetryLog.LOCAL.info("--------> easy-retry remoting server stop.");
         } catch (Exception e) {
-            log.error("--------> easy-retry remoting server error.", e);
+            EasyRetryLog.LOCAL.error("--------> easy-retry remoting server error.", e);
             started = false;
             throw new EasyRetryServerException("easy-retry server start error");
         } finally {

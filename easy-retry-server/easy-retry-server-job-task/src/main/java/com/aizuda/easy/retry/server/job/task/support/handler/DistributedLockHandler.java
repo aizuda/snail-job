@@ -4,6 +4,7 @@ import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.lock.LockBuilder;
 import com.aizuda.easy.retry.server.common.lock.LockProvider;
 import com.aizuda.easy.retry.server.job.task.support.LockExecutor;
+import com.github.rholder.retry.RetryException;
 import com.github.rholder.retry.Retryer;
 import com.github.rholder.retry.RetryerBuilder;
 import com.github.rholder.retry.StopStrategies;
@@ -43,7 +44,13 @@ public class DistributedLockHandler {
                 lockExecutor.execute();
             }
         } catch (Exception e) {
-            EasyRetryLog.LOCAL.error("lock execute error. lockName:[{}]", lockName, e);
+            Throwable throwable = e;
+            if (e.getClass().isAssignableFrom(RetryException.class)) {
+                RetryException re = (RetryException) e;
+                throwable = re.getLastFailedAttempt().getExceptionCause();
+            }
+
+            EasyRetryLog.LOCAL.error("lock execute error. lockName:[{}]", lockName, throwable);
         } finally {
             if (lock) {
                 lockProvider.unlock();

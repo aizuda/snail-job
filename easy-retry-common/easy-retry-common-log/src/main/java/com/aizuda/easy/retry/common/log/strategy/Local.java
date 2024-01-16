@@ -1,6 +1,8 @@
-package com.aizuda.easy.retry.common.log;
+package com.aizuda.easy.retry.common.log.strategy;
 
-import com.aizuda.easy.retry.common.core.util.EnvironmentUtils;
+import com.aizuda.easy.retry.common.log.dialect.Log;
+import com.aizuda.easy.retry.common.log.factory.GlobalLogFactory;
+import com.aizuda.easy.retry.common.log.factory.LogFactory;
 import com.aizuda.easy.retry.common.log.lang.LogCaller;
 import com.aizuda.easy.retry.common.log.level.Level;
 
@@ -26,7 +28,7 @@ public final class Local {
      * @param arguments 变量对应的参数
      */
     public void trace(String format, Object... arguments) {
-        if (!EnvironmentUtils.getLogStatus()) {
+        if (!GlobalLogFactory.logSwitch()) {
             return;
         }
 
@@ -41,7 +43,7 @@ public final class Local {
      * @param arguments 变量对应的参数
      */
     public void trace(Log log, String format, Object... arguments) {
-        if (!EnvironmentUtils.getLogStatus()) {
+        if (!GlobalLogFactory.logSwitch()) {
             return;
         }
 
@@ -58,7 +60,7 @@ public final class Local {
      * @param arguments 变量对应的参数
      */
     public void debug(String format, Object... arguments) {
-        if (!EnvironmentUtils.getLogStatus()) {
+        if (!GlobalLogFactory.logSwitch()) {
             return;
         }
 
@@ -73,7 +75,7 @@ public final class Local {
      * @param arguments 变量对应的参数
      */
     public void debug(Log log, String format, Object... arguments) {
-        if (!EnvironmentUtils.getLogStatus()) {
+        if (!GlobalLogFactory.logSwitch()) {
             return;
         }
 
@@ -90,7 +92,7 @@ public final class Local {
      * @param arguments 变量对应的参数
      */
     public void info(String format, Object... arguments) {
-        if (!EnvironmentUtils.getLogStatus()) {
+        if (!GlobalLogFactory.logSwitch()) {
             return;
         }
 
@@ -105,7 +107,7 @@ public final class Local {
      * @param arguments 变量对应的参数
      */
     public void info(Log log, String format, Object... arguments) {
-        if (!EnvironmentUtils.getLogStatus()) {
+        if (!GlobalLogFactory.logSwitch()) {
             return;
         }
 
@@ -122,7 +124,7 @@ public final class Local {
      * @param arguments 变量对应的参数
      */
     public void warn(String format, Object... arguments) {
-        if (!EnvironmentUtils.getLogStatus()) {
+        if (!GlobalLogFactory.logSwitch()) {
             return;
         }
 
@@ -138,7 +140,7 @@ public final class Local {
      * @param arguments 变量对应的参数
      */
     public void warn(Throwable e, String format, Object... arguments) {
-        if (!EnvironmentUtils.getLogStatus()) {
+        if (!GlobalLogFactory.logSwitch()) {
             return;
         }
 
@@ -153,7 +155,7 @@ public final class Local {
      * @param arguments 变量对应的参数
      */
     public void warn(Log log, String format, Object... arguments) {
-        if (!EnvironmentUtils.getLogStatus()) {
+        if (!GlobalLogFactory.logSwitch()) {
             return;
         }
 
@@ -169,7 +171,7 @@ public final class Local {
      * @param arguments 变量对应的参数
      */
     public void warn(Log log, Throwable e, String format, Object... arguments) {
-        if (!EnvironmentUtils.getLogStatus()) {
+        if (!GlobalLogFactory.logSwitch()) {
             return;
         }
 
@@ -185,7 +187,7 @@ public final class Local {
      * @param e 需在日志中堆栈打印的异常
      */
     public void error(Throwable e) {
-        if (!EnvironmentUtils.getLogStatus()) {
+        if (!GlobalLogFactory.logSwitch()) {
             return;
         }
 
@@ -200,7 +202,7 @@ public final class Local {
      * @param arguments 变量对应的参数
      */
     public void error(String format, Object... arguments) {
-        if (!EnvironmentUtils.getLogStatus()) {
+        if (!GlobalLogFactory.logSwitch()) {
             return;
         }
 
@@ -216,7 +218,7 @@ public final class Local {
      * @param arguments 变量对应的参数
      */
     public void error(Throwable e, String format, Object... arguments) {
-        if (!EnvironmentUtils.getLogStatus()) {
+        if (!GlobalLogFactory.logSwitch()) {
             return;
         }
 
@@ -230,7 +232,7 @@ public final class Local {
      * @param e   需在日志中堆栈打印的异常
      */
     public void error(Log log, Throwable e) {
-        if (!EnvironmentUtils.getLogStatus()) {
+        if (!GlobalLogFactory.logSwitch()) {
             return;
         }
 
@@ -245,7 +247,7 @@ public final class Local {
      * @param arguments 变量对应的参数
      */
     public void error(Log log, String format, Object... arguments) {
-        if (!EnvironmentUtils.getLogStatus()) {
+        if (!GlobalLogFactory.logSwitch()) {
             return;
         }
 
@@ -261,7 +263,7 @@ public final class Local {
      * @param arguments 变量对应的参数
      */
     public void error(Log log, Throwable e, String format, Object... arguments) {
-        if (!EnvironmentUtils.getLogStatus()) {
+        if (!GlobalLogFactory.logSwitch()) {
             return;
         }
 
@@ -279,7 +281,7 @@ public final class Local {
      * @param arguments 变量对应的参数
      */
     public void log(Level level, Throwable t, String format, Boolean remote, Object... arguments) {
-        if (!EnvironmentUtils.getLogStatus()) {
+        if (!GlobalLogFactory.logSwitch()) {
             return;
         }
 

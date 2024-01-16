@@ -3,7 +3,7 @@ package com.aizuda.easy.retry.client.common.netty;
 import com.aizuda.easy.retry.client.common.proxy.RequestBuilder;
 import com.aizuda.easy.retry.client.common.NettyClient;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants.BEAT;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.core.model.NettyResult;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import io.netty.channel.ChannelHandlerContext;
@@ -33,7 +33,7 @@ public class NettyHttpClientHandler extends SimpleChannelInboundHandler<FullHttp
 
         client = RequestBuilder.<NettyClient, NettyResult>newBuilder()
             .client(NettyClient.class)
-            .callback(nettyResult -> LogUtils.info(log,"heartbeat check requestId:[{}]", nettyResult.getRequestId()))
+            .callback(nettyResult ->EasyRetryLog.LOCAL.info("heartbeat check requestId:[{}]", nettyResult.getRequestId()))
             .build();
 
         this.nettyHttpConnectClient = nettyHttpConnectClient;
@@ -47,7 +47,7 @@ public class NettyHttpClientHandler extends SimpleChannelInboundHandler<FullHttp
         String content = response.content().toString(CharsetUtil.UTF_8);
         HttpHeaders headers = response.headers();
 
-        LogUtils.info(log, "Receive server data content:[{}], headers:[{}]", content, headers);
+       EasyRetryLog.LOCAL.info("Receive server data content:[{}], headers:[{}]", content, headers);
         NettyResult nettyResult = JsonUtil.parseObject(content, NettyResult.class);
         RpcContext.invoke(nettyResult.getRequestId(), nettyResult);
 
@@ -56,17 +56,17 @@ public class NettyHttpClientHandler extends SimpleChannelInboundHandler<FullHttp
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
         super.channelRegistered(ctx);
-        LogUtils.debug(log, "channelRegistered");
+        EasyRetryLog.LOCAL.debug("channelRegistered");
     }
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
-        LogUtils.debug(log, "channelUnregistered");
+        EasyRetryLog.LOCAL.debug("channelUnregistered");
         ctx.channel().eventLoop().schedule(() -> {
             try {
                 nettyHttpConnectClient.reconnect();
             } catch (Exception e) {
-                LogUtils.error(log, "reconnect error ", e);
+                EasyRetryLog.LOCAL.error("reconnect error ", e);
             }
 
         }, 10, TimeUnit.SECONDS);
@@ -77,36 +77,36 @@ public class NettyHttpClientHandler extends SimpleChannelInboundHandler<FullHttp
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
-        LogUtils.debug(log, "channelActive");
+        EasyRetryLog.LOCAL.debug("channelActive");
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
-        LogUtils.debug(log,"channelInactive");
+        EasyRetryLog.LOCAL.debug("channelInactive");
     }
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
         super.channelReadComplete(ctx);
-        LogUtils.debug(log,"channelReadComplete");
+        EasyRetryLog.LOCAL.debug("channelReadComplete");
     }
 
     @Override
     public void channelWritabilityChanged(ChannelHandlerContext ctx) throws Exception {
         super.channelWritabilityChanged(ctx);
-        LogUtils.debug(log,"channelWritabilityChanged");
+        EasyRetryLog.LOCAL.debug("channelWritabilityChanged");
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        LogUtils.error(log,"easy-retry netty-http client exception", cause);
+        EasyRetryLog.LOCAL.error("easy-retry netty-http client exception", cause);
         super.exceptionCaught(ctx, cause);
     }
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-        LogUtils.debug(log,"userEventTriggered");
+        EasyRetryLog.LOCAL.debug("userEventTriggered");
         if (evt instanceof IdleStateEvent) {
             client.beat(BEAT.PING);
         } else {

@@ -4,7 +4,7 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.net.url.UrlQuery;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.enums.HeadersEnum;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.core.model.EasyRetryRequest;
 import com.aizuda.easy.retry.common.core.model.NettyResult;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
@@ -63,7 +63,7 @@ public class ReportRetryInfoHttpRequestHandler extends PostHttpRequestHandler {
     @Override
     @Transactional
     public String doHandler(String content, UrlQuery urlQuery, HttpHeaders  headers) {
-        LogUtils.info(log, "Batch Report Retry Data. content:[{}]", content);
+       EasyRetryLog.LOCAL.info("Batch Report Retry Data. content:[{}]", content);
 
         EasyRetryRequest retryRequest = JsonUtil.parseObject(content, EasyRetryRequest.class);
         Object[] args = retryRequest.getArgs();
@@ -80,7 +80,7 @@ public class ReportRetryInfoHttpRequestHandler extends PostHttpRequestHandler {
             Assert.notEmpty(args, () -> new EasyRetryServerException("上报的数据不能为空. reqId:[{}]", retryRequest.getReqId()));
             List<RetryTaskDTO> retryTaskList = JsonUtil.parseList(JsonUtil.toJsonString(args[0]), RetryTaskDTO.class);
 
-            LogUtils.info(log, "begin handler report data. <|>{}<|>", JsonUtil.toJsonString(retryTaskList));
+           EasyRetryLog.LOCAL.info("begin handler report data. <|>{}<|>", JsonUtil.toJsonString(retryTaskList));
 
             Set<String> set = retryTaskList.stream().map(RetryTaskDTO::getGroupName).collect(Collectors.toSet());
             Assert.isTrue(set.size() <= 1, () -> new EasyRetryServerException("批量上报数据,同一批次只能是相同的组. reqId:[{}]", retryRequest.getReqId()));
@@ -104,7 +104,7 @@ public class ReportRetryInfoHttpRequestHandler extends PostHttpRequestHandler {
                     @Override
                     public <V> void onRetry(final Attempt<V> attempt) {
                         if (attempt.hasException()) {
-                            LogUtils.error(log, "数据上报发生异常执行重试. reqId:[{}] count:[{}]",
+                            EasyRetryLog.LOCAL.error("数据上报发生异常执行重试. reqId:[{}] count:[{}]",
                                 retryRequest.getReqId(), attempt.getAttemptNumber(), attempt.getExceptionCause());
                         }
                     }
@@ -137,7 +137,7 @@ public class ReportRetryInfoHttpRequestHandler extends PostHttpRequestHandler {
                 throwable = re.getLastFailedAttempt().getExceptionCause();
             }
 
-            LogUtils.error(log, "Batch Report Retry Data Error. <|>{}<|>", args[0], throwable);
+            EasyRetryLog.LOCAL.error("Batch Report Retry Data Error. <|>{}<|>", args[0], throwable);
             return JsonUtil.toJsonString(new NettyResult(StatusEnum.YES.getStatus(), throwable.getMessage(), Boolean.FALSE, retryRequest.getReqId()));
         }
     }

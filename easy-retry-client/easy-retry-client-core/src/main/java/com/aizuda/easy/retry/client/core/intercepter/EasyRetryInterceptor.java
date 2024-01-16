@@ -16,7 +16,7 @@ import com.aizuda.easy.retry.common.core.alarm.EasyRetryAlarmFactory;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.enums.NotifySceneEnum;
 import com.aizuda.easy.retry.common.core.enums.RetryResultStatusEnum;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.core.model.EasyRetryHeaders;
 import com.aizuda.easy.retry.common.core.util.EnvironmentUtils;
 import com.aizuda.easy.retry.common.core.util.HostUtils;
@@ -69,7 +69,7 @@ public class EasyRetryInterceptor implements MethodInterceptor, AfterAdvice, Ser
 
         String traceId = UUID.randomUUID().toString();
 
-        LogUtils.debug(log, "Start entering the around method traceId:[{}]", traceId);
+        EasyRetryLog.LOCAL.debug("Start entering the around method traceId:[{}]", traceId);
         Retryable retryable = getAnnotationParameter(invocation.getMethod());
         String executorClassName = invocation.getThis().getClass().getName();
         String methodEntrance = getMethodEntrance(retryable, executorClassName);
@@ -86,14 +86,14 @@ public class EasyRetryInterceptor implements MethodInterceptor, AfterAdvice, Ser
             throwable = t;
         } finally {
 
-            LogUtils.debug(log, "Start retrying. traceId:[{}] scene:[{}] executorClassName:[{}]", traceId,
+            EasyRetryLog.LOCAL.debug("Start retrying. traceId:[{}] scene:[{}] executorClassName:[{}]", traceId,
                 retryable.scene(), executorClassName);
             // 入口则开始处理重试
             retryerResultContext = doHandlerRetry(invocation, traceId, retryable, executorClassName, methodEntrance,
                 throwable);
         }
 
-        LogUtils.debug(log, "Method return value is [{}]. traceId:[{}]", result, traceId, throwable);
+        EasyRetryLog.LOCAL.debug("Method return value is [{}]. traceId:[{}]", result, traceId, throwable);
 
         // 若是重试完成了, 则判断是否返回重试完成后的数据
         if (Objects.nonNull(retryerResultContext)) {
@@ -135,23 +135,23 @@ public class EasyRetryInterceptor implements MethodInterceptor, AfterAdvice, Ser
             || !validate(throwable, RetryerInfoCache.get(retryable.scene(), executorClassName))
         ) {
             if (!RetrySiteSnapshot.isMethodEntrance(methodEntrance)) {
-                LogUtils.debug(log, "Non-method entry does not enable local retries. traceId:[{}] [{}]", traceId,
+                EasyRetryLog.LOCAL.debug("Non-method entry does not enable local retries. traceId:[{}] [{}]", traceId,
                     RetrySiteSnapshot.getMethodEntrance());
             } else if (RetrySiteSnapshot.isRunning()) {
-                LogUtils.debug(log, "Existing running retry tasks do not enable local retries. traceId:[{}] [{}]",
+                EasyRetryLog.LOCAL.debug("Existing running retry tasks do not enable local retries. traceId:[{}] [{}]",
                     traceId, EnumStage.valueOfStage(RetrySiteSnapshot.getStage()));
             } else if (Objects.isNull(throwable)) {
-                LogUtils.debug(log, "No exception, no local retries. traceId:[{}]", traceId);
+                EasyRetryLog.LOCAL.debug("No exception, no local retries. traceId:[{}]", traceId);
             } else if (RetrySiteSnapshot.isRetryFlow()) {
-                LogUtils.debug(log, "Retry traffic does not enable local retries. traceId:[{}] [{}]", traceId,
+                EasyRetryLog.LOCAL.debug("Retry traffic does not enable local retries. traceId:[{}] [{}]", traceId,
                     RetrySiteSnapshot.getRetryHeader());
             } else if (RetrySiteSnapshot.isRetryForStatusCode()) {
-                LogUtils.debug(log, "Existing exception retry codes do not enable local retries. traceId:[{}]",
+                EasyRetryLog.LOCAL.debug("Existing exception retry codes do not enable local retries. traceId:[{}]",
                     traceId);
             } else if (!validate(throwable, RetryerInfoCache.get(retryable.scene(), executorClassName))) {
-                LogUtils.debug(log, "Exception mismatch. traceId:[{}]", traceId);
+                EasyRetryLog.LOCAL.debug("Exception mismatch. traceId:[{}]", traceId);
             } else {
-                LogUtils.debug(log, "Unknown situations do not enable local retry scenarios. traceId:[{}]", traceId);
+                EasyRetryLog.LOCAL.debug("Unknown situations do not enable local retry scenarios. traceId:[{}]", traceId);
             }
             return null;
         }
@@ -170,14 +170,14 @@ public class EasyRetryInterceptor implements MethodInterceptor, AfterAdvice, Ser
             RetryerResultContext context = retryStrategy.openRetry(retryable.scene(), executorClassName,
                 point.getArguments());
             if (RetryResultStatusEnum.SUCCESS.getStatus().equals(context.getRetryResultStatusEnum().getStatus())) {
-                LogUtils.debug(log, "local retry successful. traceId:[{}] result:[{}]", traceId, context.getResult());
+                EasyRetryLog.LOCAL.debug("local retry successful. traceId:[{}] result:[{}]", traceId, context.getResult());
             } else {
-                LogUtils.info(log, "local retry result. traceId:[{}] throwable:[{}]", traceId, context.getThrowable());
+               EasyRetryLog.LOCAL.info("local retry result. traceId:[{}] throwable:[{}]", traceId, context.getThrowable());
             }
 
             return context;
         } catch (Exception e) {
-            LogUtils.error(log, "retry component handling exception，traceId:[{}]", traceId, e);
+            EasyRetryLog.LOCAL.error("retry component handling exception，traceId:[{}]", traceId, e);
 
             // 预警
             sendMessage(e);
@@ -219,7 +219,7 @@ public class EasyRetryInterceptor implements MethodInterceptor, AfterAdvice, Ser
                 alarmType.asyncSendMessage(context);
             }
         } catch (Exception e1) {
-            LogUtils.error(log, "Client failed to send component exception alert.", e1);
+            EasyRetryLog.LOCAL.error("Client failed to send component exception alert.", e1);
         }
 
     }

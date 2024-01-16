@@ -7,7 +7,7 @@ import com.aizuda.easy.retry.client.model.request.DispatchJobRequest;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.JobTaskStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
@@ -110,7 +110,7 @@ public class RequestClientActor extends AbstractActor {
         public <V> void onRetry(final Attempt<V> attempt) {
             // 负载节点
             if (attempt.hasException()) {
-                LogUtils.error(log, "任务调度失败. taskInstanceId:[{}] count:[{}]",
+                EasyRetryLog.LOCAL.error("任务调度失败. taskInstanceId:[{}] count:[{}]",
                         realJobExecutorDTO.getTaskBatchId(), attempt.getAttemptNumber(), attempt.getExceptionCause());
                 ClientCallbackHandler clientCallback = ClientCallbackFactory.getClientCallback(realJobExecutorDTO.getTaskType());
                 ClientCallbackContext context = JobTaskConverter.INSTANCE.toClientCallbackContext(realJobExecutorDTO);

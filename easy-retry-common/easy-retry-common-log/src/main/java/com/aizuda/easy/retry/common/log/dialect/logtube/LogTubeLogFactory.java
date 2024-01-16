@@ -1,7 +1,7 @@
 package com.aizuda.easy.retry.common.log.dialect.logtube;
 
-import com.aizuda.easy.retry.common.log.Log;
-import com.aizuda.easy.retry.common.log.LogFactory;
+import com.aizuda.easy.retry.common.log.dialect.Log;
+import com.aizuda.easy.retry.common.log.factory.LogFactory;
 import io.github.logtube.Logtube;
 
 /**

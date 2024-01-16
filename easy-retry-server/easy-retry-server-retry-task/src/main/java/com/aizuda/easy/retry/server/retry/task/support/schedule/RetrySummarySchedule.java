@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.server.retry.task.support.schedule;
 
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.Lifecycle;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.schedule.AbstractSchedule;
@@ -68,10 +68,10 @@ public class RetrySummarySchedule extends AbstractSchedule implements Lifecycle 
                 // insertOrUpdate
                 List<RetrySummary> retrySummaryList = retrySummaryList(todayFrom, dashboardRetryResponseDOList);
                 int totalRetrySummary = retrySummaryMapper.insertOrUpdate(retrySummaryList);
-                LogUtils.debug(log, "retry summary dashboard success todayFrom:[{}] todayTo:[{}] total:[{}]", todayFrom, todayTo, totalRetrySummary);
+                EasyRetryLog.LOCAL.debug("retry summary dashboard success todayFrom:[{}] todayTo:[{}] total:[{}]", todayFrom, todayTo, totalRetrySummary);
             }
         } catch (Exception e) {
-            LogUtils.error(log, "retry summary dashboard log error", e);
+            EasyRetryLog.LOCAL.error("retry summary dashboard log error", e);
         }
     }
 

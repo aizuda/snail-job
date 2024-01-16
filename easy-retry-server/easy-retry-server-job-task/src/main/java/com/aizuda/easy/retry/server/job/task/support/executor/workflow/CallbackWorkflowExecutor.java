@@ -1,32 +1,31 @@
 package com.aizuda.easy.retry.server.job.task.support.executor.workflow;
 
-import akka.actor.ActorRef;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.WorkflowNodeTypeEnum;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.common.log.EasyRetryLog;
-import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.client.RequestInterceptor;
 import com.aizuda.easy.retry.server.common.dto.CallbackConfig;
 import com.aizuda.easy.retry.server.common.enums.ContentTypeEnum;
-import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
-import com.aizuda.easy.retry.server.job.task.dto.JobLogDTO;
 import com.aizuda.easy.retry.server.job.task.dto.LogMetaDTO;
-import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.server.job.task.support.WorkflowTaskConverter;
 import com.aizuda.easy.retry.server.model.dto.CallbackParamsDTO;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTaskBatch;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.github.rholder.retry.Attempt;
+import com.github.rholder.retry.RetryException;
+import com.github.rholder.retry.RetryListener;
+import com.github.rholder.retry.Retryer;
+import com.github.rholder.retry.RetryerBuilder;
+import com.github.rholder.retry.StopStrategies;
+import com.github.rholder.retry.WaitStrategies;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -34,10 +33,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author xiaowoniu
@@ -46,7 +45,6 @@ import java.util.Map;
  */
 @Component
 @RequiredArgsConstructor
-@Slf4j
 public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
     private static final String SECRET = "secret";
     private static final String CALLBACK_TIMEOUT = "10";
@@ -89,17 +87,36 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
         try {
             Map<String, String> uriVariables = new HashMap<>();
             uriVariables.put(SECRET, decisionConfig.getSecret());
-            // TODO 添加重试
-            ResponseEntity<String> exchange = restTemplate.exchange(decisionConfig.getWebhook(), HttpMethod.POST,
-                new HttpEntity<>(callbackParamsList, requestHeaders), String.class, uriVariables);
-            result = exchange.getBody();
-            log.info("回调结果. webHook:[{}]，参数: [{}]", decisionConfig.getWebhook(), result);
+            Retryer<ResponseEntity<String>> retryer = RetryerBuilder.<ResponseEntity<String>>newBuilder()
+                .retryIfException(throwable -> true)
+                .withWaitStrategy(WaitStrategies.fixedWait(150, TimeUnit.MILLISECONDS))
+                .withStopStrategy(StopStrategies.stopAfterAttempt(10))
+                .withRetryListener(new RetryListener() {
+                    @Override
+                    public <V> void onRetry(final Attempt<V> attempt) {
+                        EasyRetryLog.LOCAL.error("回调接口第 【{}】 重试. 回调配置信息: [{}]", attempt.getAttemptNumber(), JsonUtil.toJsonString(decisionConfig));
+                    }
+                }).build();
+
+            ResponseEntity<String> response = retryer.call(
+                () -> restTemplate.exchange(decisionConfig.getWebhook(), HttpMethod.POST,
+                    new HttpEntity<>(callbackParamsList, requestHeaders), String.class, uriVariables));
+
+            result = response.getBody();
+            EasyRetryLog.LOCAL.info("回调结果. webHook:[{}]，结果: [{}]", decisionConfig.getWebhook(), result);
         } catch (Exception e) {
-            EasyRetryLog.REMOTE.error("回调异常. webHook:[{}]，参数: [{}]", decisionConfig.getWebhook(), context.getTaskResult(), e);
+            EasyRetryLog.LOCAL.error("回调异常. webHook:[{}]，参数: [{}]", decisionConfig.getWebhook(), context.getTaskResult(), e);
             taskBatchStatus = JobTaskBatchStatusEnum.FAIL.getStatus();
             operationReason = JobOperationReasonEnum.WORKFLOW_CALLBACK_NODE_EXECUTOR_ERROR.getReason();
             jobTaskStatus = JobTaskStatusEnum.FAIL.getStatus();
-            message = e.getMessage();
+
+            Throwable throwable = e;
+            if (e.getClass().isAssignableFrom(RetryException.class)) {
+                RetryException re = (RetryException) e;
+                throwable = re.getLastFailedAttempt().getExceptionCause();
+            }
+
+            message = throwable.getMessage();
         }
 
         if (JobTaskBatchStatusEnum.SUCCESS.getStatus() == taskBatchStatus) {
@@ -132,9 +149,10 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
         logMetaDTO.setJobId(SystemConstants.CALLBACK_JOB_ID);
         logMetaDTO.setTaskId(jobTask.getId());
         if (jobTaskBatch.getTaskBatchStatus() == JobTaskStatusEnum.SUCCESS.getStatus()) {
-            EasyRetryLog.REMOTE.info("workflowNodeId:[{}] 回调成功. <|>{}<|>", context.getWorkflowNodeId(), logMetaDTO);
+            EasyRetryLog.REMOTE.info("workflowNodeId:[{}] 回调成功. 回调参数:[{}] 回调结果:[{}] <|>{}<|>",
+                context.getWorkflowNodeId(), context.getTaskResult(), context.getTaskResult(), logMetaDTO);
         } else {
-            EasyRetryLog.REMOTE.info("workflowNodeId:[{}] 回调失败. 失败原因:[{}] <|>{}<|>", context.getWorkflowNodeId(),
+            EasyRetryLog.REMOTE.error("workflowNodeId:[{}] 回调失败. 失败原因:[{}] <|>{}<|>", context.getWorkflowNodeId(),
                     context.getLogMessage(), logMetaDTO);
 
             // 尝试完成任务

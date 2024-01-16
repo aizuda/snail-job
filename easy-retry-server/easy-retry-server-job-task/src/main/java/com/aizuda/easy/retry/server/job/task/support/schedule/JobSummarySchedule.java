@@ -1,7 +1,7 @@
 package com.aizuda.easy.retry.server.job.task.support.schedule;
 
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.Lifecycle;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
@@ -70,10 +70,10 @@ public class JobSummarySchedule extends AbstractSchedule implements Lifecycle {
                 // insertOrUpdate
                 List<JobSummary> jobSummaryList = jobSummaryList(todayFrom, summaryResponseDOList);
                  int totalJobSummary = jobSummaryMapper.insertOrUpdate(jobSummaryList);
-                LogUtils.debug(log, "job summary dashboard success todayFrom:[{}] todayTo:[{}] total:[{}]", todayFrom, todayTo, totalJobSummary);
+                EasyRetryLog.LOCAL.debug("job summary dashboard success todayFrom:[{}] todayTo:[{}] total:[{}]", todayFrom, todayTo, totalJobSummary);
             }
         } catch (Exception e) {
-            LogUtils.error(log, "job summary dashboard log error", e);
+            EasyRetryLog.LOCAL.error("job summary dashboard log error", e);
         }
     }
 

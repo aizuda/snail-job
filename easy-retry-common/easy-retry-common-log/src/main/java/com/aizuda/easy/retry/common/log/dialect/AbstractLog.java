@@ -1,4 +1,4 @@
-package com.aizuda.easy.retry.common.log;
+package com.aizuda.easy.retry.common.log.dialect;
 
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.util.StrUtil;

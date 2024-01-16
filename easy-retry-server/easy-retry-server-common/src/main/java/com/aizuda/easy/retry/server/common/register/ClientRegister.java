@@ -2,7 +2,7 @@ package com.aizuda.easy.retry.server.common.register;
 
 import com.aizuda.easy.retry.common.core.constant.SystemConstants.HTTP_PATH;
 import com.aizuda.easy.retry.common.core.enums.NodeTypeEnum;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.cache.CacheConsumerGroup;
 import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
@@ -108,7 +108,7 @@ public class ClientRegister extends AbstractRegister implements Runnable {
             } catch (InterruptedException ignored) {
                 Thread.currentThread().interrupt();
             } catch (Exception e) {
-                LogUtils.error(log, "client refresh expireAt error.");
+                EasyRetryLog.LOCAL.error("client refresh expireAt error.");
             } finally {
                 // 防止刷的过快
                 try {

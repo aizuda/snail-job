@@ -2,7 +2,7 @@ package com.aizuda.easy.retry.common.core.util;
 
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.dingtalk.api.DefaultDingTalkClient;
 import com.dingtalk.api.DingTalkClient;
 import com.dingtalk.api.request.OapiRobotSendRequest;
@@ -71,7 +71,7 @@ public class DingDingUtils {
 
             return true;
         } catch (Exception e) {
-            LogUtils.error(log, "dingDingProcessNotify", e);
+            EasyRetryLog.LOCAL.error("dingDingProcessNotify", e);
         }
 
         return false;

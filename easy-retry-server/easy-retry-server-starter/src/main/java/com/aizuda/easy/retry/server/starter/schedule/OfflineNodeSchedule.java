@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.server.starter.schedule;
 
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.Lifecycle;
 import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
@@ -55,7 +56,7 @@ public class OfflineNodeSchedule extends AbstractSchedule implements Lifecycle {
             }
 
         } catch (Exception e) {
-            LogUtils.error(log, "clearOfflineNode 失败", e);
+            EasyRetryLog.LOCAL.error("clearOfflineNode 失败", e);
         }
     }
 

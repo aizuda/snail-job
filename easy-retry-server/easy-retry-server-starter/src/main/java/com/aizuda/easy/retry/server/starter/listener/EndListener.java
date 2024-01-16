@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.server.starter.listener;
 
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.Lifecycle;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +25,7 @@ public class EndListener implements ApplicationListener<ContextClosedEvent> {
 
     @Override
     public void onApplicationEvent(ContextClosedEvent event) {
-        LogUtils.info(log, "EASY-RETRY-SERVER 停止");
+        EasyRetryLog.LOCAL.info("EASY-RETRY-SERVER 停止");
         lifecycleList.forEach(Lifecycle::close);
     }
 }

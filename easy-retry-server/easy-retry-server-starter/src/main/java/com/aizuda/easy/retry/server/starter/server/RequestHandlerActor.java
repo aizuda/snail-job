@@ -5,7 +5,7 @@ import cn.hutool.core.net.url.UrlBuilder;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.enums.HeadersEnum;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.HttpRequestHandler;
@@ -50,7 +50,7 @@ public class RequestHandlerActor extends AbstractActor {
 
             final String uri = nettyHttpRequest.getUri();
             if (StrUtil.isBlank(uri)) {
-                LogUtils.error(log, "uri can not be null");
+                EasyRetryLog.LOCAL.error("uri can not be null");
                 return;
             }
 
@@ -65,7 +65,7 @@ public class RequestHandlerActor extends AbstractActor {
             try {
                 result = doProcess(uri, content, method, headers);
             } catch (Exception e) {
-                LogUtils.error(log, "http request error. [{}]", nettyHttpRequest.getContent(), e);
+                EasyRetryLog.LOCAL.error("http request error. [{}]", nettyHttpRequest.getContent(), e);
                 result = JsonUtil.toJsonString(new Result<>(0, e.getMessage()));
                 throw e;
             } finally {
@@ -100,7 +100,7 @@ public class RequestHandlerActor extends AbstractActor {
         registerContext.setNamespaceId(namespace);
         boolean result = register.register(registerContext);
         if (!result) {
-            LogUtils.warn(log, "client register error. groupName:[{}]", groupName);
+           EasyRetryLog.LOCAL.warn("client register error. groupName:[{}]", groupName);
         }
 
 

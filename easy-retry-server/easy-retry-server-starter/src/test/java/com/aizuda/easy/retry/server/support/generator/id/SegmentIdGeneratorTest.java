@@ -1,7 +1,7 @@
 package com.aizuda.easy.retry.server.support.generator.id;
 
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.generator.id.IdGenerator;
 import lombok.extern.slf4j.Slf4j;
@@ -44,7 +44,7 @@ public class SegmentIdGeneratorTest {
                     count.countDown();
 
                     String id = idGenerator.idGenerator("example_group", SystemConstants.DEFAULT_NAMESPACE);
-                    LogUtils.info(log, "id:[{}]", id);
+                   EasyRetryLog.LOCAL.info("id:[{}]", id);
                     if (Long.parseLong(id) < 0) {
                         throw new EasyRetryServerException("exception id");
                     } else if (idSet.contains(id)) {

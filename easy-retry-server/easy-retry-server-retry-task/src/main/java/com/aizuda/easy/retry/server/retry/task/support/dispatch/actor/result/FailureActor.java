@@ -5,7 +5,7 @@ import akka.actor.ActorRef;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.lang.Pair;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.IdempotentStrategy;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
@@ -59,7 +59,7 @@ public class FailureActor extends AbstractActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder().match(RetryTask.class, retryTask -> {
-            LogUtils.info(log, "FailureActor params:[{}]", retryTask);
+           EasyRetryLog.LOCAL.info("FailureActor params:[{}]", retryTask);
 
 
             try {
@@ -95,7 +95,7 @@ public class FailureActor extends AbstractActor {
                     }
                 });
             } catch (Exception e) {
-                LogUtils.error(log, "更新重试任务失败", e);
+                EasyRetryLog.LOCAL.error("更新重试任务失败", e);
             } finally {
                 // 清除幂等标识位
                 idempotentStrategy.clear(Pair.of(retryTask.getGroupName(), retryTask.getNamespaceId()), retryTask.getId());

@@ -1,8 +1,7 @@
 package com.aizuda.easy.retry.common.log.dialect.console;
 
-
-import com.aizuda.easy.retry.common.log.Log;
-import com.aizuda.easy.retry.common.log.LogFactory;
+import com.aizuda.easy.retry.common.log.dialect.Log;
+import com.aizuda.easy.retry.common.log.factory.LogFactory;
 
 /**
  * 利用System.out.println()打印彩色日志
@@ -12,7 +11,7 @@ import com.aizuda.easy.retry.common.log.LogFactory;
 public class ConsoleColorLogFactory extends LogFactory {
 
 	public ConsoleColorLogFactory() {
-		super("Hutool Console Color Logging");
+		super("Console Color Logging");
 	}
 
 	@Override

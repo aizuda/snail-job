@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.server.model.dto;
 
-import com.aizuda.easy.retry.common.core.log.TaskLogFieldDTO;
+import com.aizuda.easy.retry.common.log.dto.TaskLogFieldDTO;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -65,5 +65,5 @@ public class LogTaskDTO implements Serializable {
      * 日志模型集合
      */
     private List<TaskLogFieldDTO> fieldList;
-    
+
 }

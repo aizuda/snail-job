@@ -1,7 +1,7 @@
 package com.aizuda.easy.retry.server.common.generator.id;
 
 import cn.hutool.core.lang.Pair;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.Lifecycle;
 import com.aizuda.easy.retry.server.common.enums.IdGeneratorModeEnum;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
@@ -74,17 +74,17 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
 
     @Override
     public void start() {
-        LogUtils.info(log, "SegmentIdGenerator start");
+       EasyRetryLog.LOCAL.info("SegmentIdGenerator start");
         // 确保加载到kv后才初始化成功
         updateCacheFromDb();
         initOK = true;
         updateCacheFromDbAtEveryMinute();
-        LogUtils.info(log, "SegmentIdGenerator start end");
+       EasyRetryLog.LOCAL.info("SegmentIdGenerator start end");
     }
 
     @Override
     public void close() {
-        LogUtils.info(log, "SegmentIdGenerator close");
+       EasyRetryLog.LOCAL.info("SegmentIdGenerator close");
     }
 
     public static class UpdateThreadFactory implements ThreadFactory {
@@ -142,7 +142,7 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
                 segment.setMax(0);
                 segment.setStep(0);
                 cache.put(tag, buffer);
-                LogUtils.info(log, "Add tag {} from db to IdCache, SegmentBuffer {}", tag, buffer);
+               EasyRetryLog.LOCAL.info("Add tag {} from db to IdCache, SegmentBuffer {}", tag, buffer);
             }
             //cache中已失效的tags从cache删除
             for (int i = 0; i < dbTags.size(); i++) {
@@ -153,10 +153,10 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
             }
             for (Pair<String, String> tag : removeTagsSet) {
                 cache.remove(tag);
-                LogUtils.info(log, "Remove tag {} from IdCache", tag);
+               EasyRetryLog.LOCAL.info("Remove tag {} from IdCache", tag);
             }
         } catch (Exception e) {
-            LogUtils.warn(log, "update cache from db exception", e);
+           EasyRetryLog.LOCAL.warn("update cache from db exception", e);
         } finally {
             sw.stop("updateCacheFromDb");
         }
@@ -175,10 +175,10 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
                     if (!buffer.isInitOk()) {
                         try {
                             updateSegmentFromDb(key, buffer.getCurrent());
-                            LogUtils.info(log, "Init buffer. Update key {} {} from db", key, buffer.getCurrent());
+                           EasyRetryLog.LOCAL.info("Init buffer. Update key {} {} from db", key, buffer.getCurrent());
                             buffer.setInitOk(true);
                         } catch (Exception e) {
-                            LogUtils.warn(log, "Init buffer {} exception", buffer.getCurrent(), e);
+                           EasyRetryLog.LOCAL.warn("Init buffer {} exception", buffer.getCurrent(), e);
                         }
                     }
                 }
@@ -216,7 +216,7 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
             } else {
                 nextStep = nextStep / 2 >= buffer.getMinStep() ? nextStep / 2 : nextStep;
             }
-            LogUtils.info(log, "leafKey[{}], step[{}], duration[{}mins], nextStep[{}]", key, buffer.getStep(), String.format("%.2f", ((double) duration / (1000 * 60))), nextStep);
+           EasyRetryLog.LOCAL.info("leafKey[{}], step[{}], duration[{}mins], nextStep[{}]", key, buffer.getStep(), String.format("%.2f", ((double) duration / (1000 * 60))), nextStep);
 
             sequenceAllocMapper.updateMaxIdByCustomStep(nextStep, key.getKey(), key.getValue());
             sequenceAlloc = sequenceAllocMapper
@@ -244,9 +244,9 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
                         try {
                             updateSegmentFromDb(buffer.getKey(), next);
                             updateOk = true;
-                            LogUtils.info(log, "update segment {} from db {}", buffer.getKey(), next);
+                           EasyRetryLog.LOCAL.info("update segment {} from db {}", buffer.getKey(), next);
                         } catch (Exception e) {
-                            LogUtils.warn(log, buffer.getKey() + " updateSegmentFromDb exception", e);
+                           EasyRetryLog.LOCAL.warn(buffer.getKey() + " updateSegmentFromDb exception", e);
                         } finally {
                             if (updateOk) {
                                 buffer.wLock().lock();
@@ -278,7 +278,7 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
                     buffer.switchPos();
                     buffer.setNextReady(false);
                 } else {
-                    LogUtils.error(log, "Both two segments in {} are not ready!", buffer);
+                    EasyRetryLog.LOCAL.error("Both two segments in {} are not ready!", buffer);
                     return Long.toString(EXCEPTION_ID_TWO_SEGMENTS_ARE_NULL);
                 }
             } finally {
@@ -296,7 +296,7 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
                     TimeUnit.MILLISECONDS.sleep(20);
                     break;
                 } catch (InterruptedException e) {
-                    LogUtils.warn(log, "Thread {} Interrupted", Thread.currentThread().getName());
+                   EasyRetryLog.LOCAL.warn("Thread {} Interrupted", Thread.currentThread().getName());
                     break;
                 }
             }

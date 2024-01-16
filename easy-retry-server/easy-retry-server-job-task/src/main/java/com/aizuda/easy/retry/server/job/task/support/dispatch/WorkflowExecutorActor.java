@@ -5,7 +5,7 @@ import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.common.core.enums.FailStrategyEnum;
 import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
@@ -65,7 +65,7 @@ public class WorkflowExecutorActor extends AbstractActor {
             try {
                 doExecutor(taskExecute);
             } catch (Exception e) {
-                LogUtils.error(log, "workflow executor exception. [{}]", taskExecute, e);
+                EasyRetryLog.LOCAL.error("workflow executor exception. [{}]", taskExecute, e);
                 handlerTaskBatch(taskExecute, JobTaskBatchStatusEnum.FAIL.getStatus(), JobOperationReasonEnum.TASK_EXECUTE_ERROR.getReason());
                 // TODO 发送通知
             } finally {

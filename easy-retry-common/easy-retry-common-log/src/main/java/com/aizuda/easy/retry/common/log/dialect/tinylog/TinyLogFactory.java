@@ -1,8 +1,7 @@
 package com.aizuda.easy.retry.common.log.dialect.tinylog;
 
-
-import com.aizuda.easy.retry.common.log.Log;
-import com.aizuda.easy.retry.common.log.LogFactory;
+import com.aizuda.easy.retry.common.log.dialect.Log;
+import com.aizuda.easy.retry.common.log.factory.LogFactory;
 
 /**
  * <a href="http://www.tinylog.org/">TinyLog</a> log.<br>
@@ -21,12 +20,12 @@ public class TinyLogFactory extends LogFactory {
 
     @Override
     public Log createLog(String name) {
-        return new com.aizuda.easy.retry.common.log.dialect.tinylog.TinyLog(name);
+        return new TinyLog(name);
     }
 
     @Override
     public Log createLog(Class<?> clazz) {
-        return new com.aizuda.easy.retry.common.log.dialect.tinylog.TinyLog(clazz);
+        return new TinyLog(clazz);
     }
 
 }

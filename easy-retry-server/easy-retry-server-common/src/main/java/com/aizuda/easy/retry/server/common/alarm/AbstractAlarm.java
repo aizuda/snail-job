@@ -4,7 +4,7 @@ import com.aizuda.easy.retry.common.core.alarm.Alarm;
 import com.aizuda.easy.retry.common.core.alarm.AlarmContext;
 import com.aizuda.easy.retry.common.core.alarm.EasyRetryAlarmFactory;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.Lifecycle;
 import com.aizuda.easy.retry.server.common.dto.AlarmInfo;
 import com.aizuda.easy.retry.server.common.dto.NotifyConfigInfo;
@@ -68,10 +68,10 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
                     }
                 });
             } catch (InterruptedException e) {
-                LogUtils.info(log, "retry task fail dead letter alarm stop");
+               EasyRetryLog.LOCAL.info("retry task fail dead letter alarm stop");
                 Thread.currentThread().interrupt();
             } catch (Exception e) {
-                LogUtils.error(log, "RetryTaskFailDeadLetterAlarmListener queue poll Exception", e);
+                EasyRetryLog.LOCAL.error("RetryTaskFailDeadLetterAlarmListener queue poll Exception", e);
             }
         }
     }

@@ -1,7 +1,7 @@
 package com.aizuda.easy.retry.common.log.dialect.jdk;
 
 import cn.hutool.core.util.StrUtil;
-import com.aizuda.easy.retry.common.log.AbstractLog;
+import com.aizuda.easy.retry.common.log.dialect.AbstractLog;
 
 import java.util.logging.Level;
 import java.util.logging.LogRecord;

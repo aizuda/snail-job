@@ -12,7 +12,7 @@ import com.aizuda.easy.retry.common.core.alarm.AlarmContext;
 import com.aizuda.easy.retry.common.core.alarm.EasyRetryAlarmFactory;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.enums.NotifySceneEnum;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.core.model.NettyResult;
 import com.aizuda.easy.retry.common.core.util.EnvironmentUtils;
 import com.aizuda.easy.retry.common.core.util.HostUtils;
@@ -51,7 +51,7 @@ public class ReportListener implements Listener<RetryTaskDTO> {
 
     private static final NettyClient CLIENT = RequestBuilder.<NettyClient, NettyResult>newBuilder()
         .client(NettyClient.class)
-        .callback(nettyResult -> LogUtils.info(log, "Data report successfully requestId:[{}]", nettyResult.getRequestId())).build();
+        .callback(nettyResult ->EasyRetryLog.LOCAL.info("Data report successfully requestId:[{}]", nettyResult.getRequestId())).build();
 
     @Override
     public void handler(List<RetryTaskDTO> list) {
@@ -62,15 +62,15 @@ public class ReportListener implements Listener<RetryTaskDTO> {
 
         try {
             retryExecutor.call(retryer, () -> {
-                LogUtils.info(log, "Batch asynchronous reporting ... <|>{}<|>", JsonUtil.toJsonString(list));
+               EasyRetryLog.LOCAL.info("Batch asynchronous reporting ... <|>{}<|>", JsonUtil.toJsonString(list));
                 CLIENT.reportRetryInfo(list);
                 return null;
             }, throwable -> {
-                LogUtils.error(log,"Data report failed. <|>{}<|>", JsonUtil.toJsonString(list));
+                EasyRetryLog.LOCAL.error("Data report failed. <|>{}<|>", JsonUtil.toJsonString(list));
                 sendMessage(throwable);
-            }, o -> LogUtils.info(log,"Data report successful retry：<|>{}<|>", JsonUtil.toJsonString(list)));
+            }, o ->EasyRetryLog.LOCAL.info("Data report successful retry：<|>{}<|>", JsonUtil.toJsonString(list)));
         } catch (Exception e) {
-            LogUtils.error(log,"Data report failed. <|>{}<|>", JsonUtil.toJsonString(list), e);
+            EasyRetryLog.LOCAL.error("Data report failed. <|>{}<|>", JsonUtil.toJsonString(list), e);
         }
     }
 
@@ -94,7 +94,7 @@ public class ReportListener implements Listener<RetryTaskDTO> {
                     public <V> void onRetry(Attempt<V> attempt) {
 
                         if (attempt.hasException()) {
-                            LogUtils.error(log,"EasyRetry上报异常数据时接口发生异常，第[{}]次尝试上报 ", attempt.getAttemptNumber(), attempt.getExceptionCause());
+                            EasyRetryLog.LOCAL.error("EasyRetry上报异常数据时接口发生异常，第[{}]次尝试上报 ", attempt.getAttemptNumber(), attempt.getExceptionCause());
                         }
 
                     }
@@ -128,7 +128,7 @@ public class ReportListener implements Listener<RetryTaskDTO> {
             Alarm<AlarmContext> alarmType = easyRetryAlarmFactory.getAlarmType(notifyAttribute.getNotifyType());
             alarmType.asyncSendMessage(context);
         } catch (Exception e1) {
-            LogUtils.error(log, "客户端发送组件异常告警失败", e1);
+            EasyRetryLog.LOCAL.error("客户端发送组件异常告警失败", e1);
         }
 
     }

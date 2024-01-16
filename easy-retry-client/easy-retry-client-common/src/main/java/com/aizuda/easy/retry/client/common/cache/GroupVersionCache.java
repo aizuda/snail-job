@@ -4,9 +4,10 @@ import com.aizuda.easy.retry.client.common.Lifecycle;
 import com.aizuda.easy.retry.client.common.NettyClient;
 import com.aizuda.easy.retry.client.common.proxy.RequestBuilder;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.core.model.NettyResult;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.model.dto.ConfigDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
@@ -83,7 +84,7 @@ public class GroupVersionCache implements Lifecycle {
                 .client(NettyClient.class)
                 .callback(nettyResult -> {
                     if (Objects.isNull(nettyResult.getData())) {
-                        LogUtils.error(log, "获取配置结果为null");
+                        EasyRetryLog.LOCAL.error("获取配置结果为null");
                         return;
                     }
 
@@ -92,7 +93,7 @@ public class GroupVersionCache implements Lifecycle {
                 .build();
             client.getConfig(0);
         } catch (Exception e) {
-            LogUtils.error(log, "同步版本失败", e);
+            EasyRetryLog.LOCAL.error("同步版本失败", e);
         }
     }
 

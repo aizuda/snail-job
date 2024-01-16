@@ -1,8 +1,8 @@
 package com.aizuda.easy.retry.common.log.dialect.jboss;
 
 
-import com.aizuda.easy.retry.common.log.Log;
-import com.aizuda.easy.retry.common.log.LogFactory;
+import com.aizuda.easy.retry.common.log.dialect.Log;
+import com.aizuda.easy.retry.common.log.factory.LogFactory;
 
 /**
  * <a href="https://github.com/jboss-logging">Jboss-Logging</a> log.

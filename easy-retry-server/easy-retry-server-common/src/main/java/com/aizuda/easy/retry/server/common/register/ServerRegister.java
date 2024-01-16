@@ -4,7 +4,7 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.enums.NodeTypeEnum;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.core.util.HostUtils;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.Register;
@@ -109,7 +109,7 @@ public class ServerRegister extends AbstractRegister {
                 }
             }
         } catch (Exception e) {
-            LogUtils.error(log, "刷新客户端失败", e);
+            EasyRetryLog.LOCAL.error("刷新客户端失败", e);
         }
     }
 
@@ -120,7 +120,7 @@ public class ServerRegister extends AbstractRegister {
 
     @Override
     public void start() {
-        LogUtils.info(log, "ServerRegister start");
+       EasyRetryLog.LOCAL.info("ServerRegister start");
 
         Register register = SpringContext.getBean(ServerRegister.BEAN_NAME, Register.class);
         serverRegisterNode.scheduleAtFixedRate(()->{
@@ -131,6 +131,6 @@ public class ServerRegister extends AbstractRegister {
 
     @Override
     public void close() {
-        LogUtils.info(log, "ServerRegister close");
+       EasyRetryLog.LOCAL.info("ServerRegister close");
     }
 }

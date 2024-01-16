@@ -2,7 +2,7 @@ package com.aizuda.easy.retry.common.log.dialect.logtube;
 
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.util.StrUtil;
-import com.aizuda.easy.retry.common.log.AbstractLog;
+import com.aizuda.easy.retry.common.log.dialect.AbstractLog;
 import com.aizuda.easy.retry.common.log.level.Level;
 import io.github.logtube.Logtube;
 import io.github.logtube.core.IEventLogger;

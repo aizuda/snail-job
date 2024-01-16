@@ -2,7 +2,8 @@ package com.aizuda.easy.retry.server.starter.dispatch;
 
 import akka.actor.ActorRef;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.Lifecycle;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.dto.DistributeInstance;
@@ -54,7 +55,7 @@ public class DispatchService implements Lifecycle {
             try {
                 // 当正在rebalance时延迟10s，尽量等待所有节点都完成rebalance
                 if (DistributeInstance.RE_BALANCE_ING.get()) {
-                    LogUtils.info(log, "正在rebalance中....");
+                   EasyRetryLog.LOCAL.info("正在rebalance中....");
                     TimeUnit.SECONDS.sleep(INITIAL_DELAY);
                 }
 
@@ -66,7 +67,7 @@ public class DispatchService implements Lifecycle {
                 }
 
             } catch (Exception e) {
-                LogUtils.error(log, "分发异常", e);
+                EasyRetryLog.LOCAL.error("分发异常", e);
             }
 
 

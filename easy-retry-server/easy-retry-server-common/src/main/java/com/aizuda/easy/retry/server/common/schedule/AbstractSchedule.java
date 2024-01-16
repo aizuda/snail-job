@@ -1,7 +1,7 @@
 package com.aizuda.easy.retry.server.common.schedule;
 
 import cn.hutool.core.lang.Assert;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.Schedule;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
@@ -48,7 +48,7 @@ public abstract class AbstractSchedule implements Schedule {
                 doExecute();
             }
         } catch (Exception e) {
-            LogUtils.error(log, this.getClass().getName() + " execute error. lockName:[{}]", lockName, e);
+            EasyRetryLog.LOCAL.error(this.getClass().getName() + " execute error. lockName:[{}]", lockName, e);
         } finally {
             if (lock) {
                 lockProvider.unlock();

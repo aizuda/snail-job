@@ -3,7 +3,7 @@ package com.aizuda.easy.retry.server.common.cache;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.enums.NodeTypeEnum;
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.Lifecycle;
 import com.aizuda.easy.retry.server.common.RegisterNodeInfoConverter;
 import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
@@ -162,7 +162,7 @@ public class CacheRegisterTable implements Lifecycle {
             serverNode.getHostId());
         // 不存在则初始化
         if (Objects.isNull(registerNodeInfo)) {
-            LogUtils.warn(log, "node not exists. groupName:[{}] hostId:[{}]", serverNode.getGroupName(),
+           EasyRetryLog.LOCAL.warn("node not exists. groupName:[{}] hostId:[{}]", serverNode.getGroupName(),
                 serverNode.getHostId());
         } else {
             // 存在则刷新过期时间
@@ -180,7 +180,7 @@ public class CacheRegisterTable implements Lifecycle {
             getKey(serverNode.getGroupName(), serverNode.getNamespaceId()));
         RegisterNodeInfo registerNodeInfo;
         if (Objects.isNull(concurrentMap)) {
-            LogUtils.info(log, "Add cache. groupName:[{}] namespaceId:[{}] hostId:[{}]", serverNode.getGroupName(),
+           EasyRetryLog.LOCAL.info("Add cache. groupName:[{}] namespaceId:[{}] hostId:[{}]", serverNode.getGroupName(),
                 serverNode.getNamespaceId(), serverNode.getHostId());
             concurrentMap = new ConcurrentHashMap<>();
             registerNodeInfo = RegisterNodeInfoConverter.INSTANCE.toRegisterNodeInfo(serverNode);
@@ -225,13 +225,13 @@ public class CacheRegisterTable implements Lifecycle {
             return;
         }
 
-        LogUtils.info(log, "Remove cache. groupName:[{}] hostId:[{}]", groupName, hostId);
+       EasyRetryLog.LOCAL.info("Remove cache. groupName:[{}] hostId:[{}]", groupName, hostId);
         concurrentMap.remove(hostId);
     }
 
     @Override
     public void start() {
-        LogUtils.info(log, "CacheRegisterTable start");
+       EasyRetryLog.LOCAL.info("CacheRegisterTable start");
         CACHE = CacheBuilder.newBuilder()
             // 设置并发级别为cpu核心数
             .concurrencyLevel(Runtime.getRuntime().availableProcessors())
@@ -243,7 +243,7 @@ public class CacheRegisterTable implements Lifecycle {
 
     @Override
     public void close() {
-        LogUtils.info(log, "CacheRegisterTable stop");
+       EasyRetryLog.LOCAL.info("CacheRegisterTable stop");
         CACHE.invalidateAll();
     }
 }

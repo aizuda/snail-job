@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.server.common.register;
 
-import com.aizuda.easy.retry.common.core.log.LogUtils;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.Lifecycle;
 import com.aizuda.easy.retry.server.common.Register;
 import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
@@ -55,7 +55,7 @@ public abstract class AbstractRegister implements Register, Lifecycle {
             }
 
         }catch (Exception e) {
-            LogUtils.error(log,"注册节点失败", e);
+            EasyRetryLog.LOCAL.error("注册节点失败", e);
         }
     }
 

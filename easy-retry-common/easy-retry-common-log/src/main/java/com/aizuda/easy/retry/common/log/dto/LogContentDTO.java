@@ -1,11 +1,10 @@
-package com.aizuda.easy.retry.client.common.dto;
+package com.aizuda.easy.retry.common.log.dto;
 
-import com.aizuda.easy.retry.common.core.constant.LogFieldConstant;
-import com.aizuda.easy.retry.common.core.log.TaskLogFieldDTO;
-import lombok.Data;
+import com.aizuda.easy.retry.common.log.constant.LogFieldConstant;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -14,7 +13,6 @@ import java.util.stream.Collectors;
  * @date 2023-12-27
  * @since 2.6.0
  */
-@Data
 public class LogContentDTO {
 
     private List<TaskLogFieldDTO> fieldList;
@@ -23,8 +21,33 @@ public class LogContentDTO {
         this.fieldList = new ArrayList<>();
     }
 
+    public List<TaskLogFieldDTO> getFieldList() {
+        return fieldList;
+    }
+
+    public Map<String, String> toMap() {
+        return fieldList
+            .stream()
+            .filter(logTaskDTO_ -> !Objects.isNull(logTaskDTO_.getValue()))
+            .collect(Collectors.toMap(TaskLogFieldDTO::getName, TaskLogFieldDTO::getValue));
+    }
+
     public void addField(String name, String value) {
         fieldList.add(new TaskLogFieldDTO(name, value));
+    }
+
+    public void addTimeField(String time) {
+        this.addField(LogFieldConstant.TIME, time);
+    }
+
+    public void addTimeStamp(Long timeStamp) {
+        this.addField(LogFieldConstant.TIME_STAMP, String.valueOf(timeStamp));
+    }
+
+    public Long getTimeStamp() {
+        return Long.parseLong(fieldList.stream().filter(taskLogFieldDTO -> !Objects.isNull(taskLogFieldDTO.getValue()))
+            .collect(Collectors.toMap(TaskLogFieldDTO::getName, TaskLogFieldDTO::getValue))
+            .get(LogFieldConstant.TIME_STAMP));
     }
 
     public void addLevelField(String level) {
@@ -47,12 +70,4 @@ public class LogContentDTO {
         this.addField(LogFieldConstant.THROWABLE, throwable);
     }
 
-    public void addTimeStamp(Long timeStamp) {
-        this.addField(LogFieldConstant.TIME_STAMP, String.valueOf(timeStamp));
-    }
-
-    public Long getTimeStamp() {
-        return Long.parseLong(fieldList.stream().filter(taskLogFieldDTO -> !Objects.isNull(taskLogFieldDTO.getValue()))
-                .collect(Collectors.toMap(TaskLogFieldDTO::getName, TaskLogFieldDTO::getValue)).get(LogFieldConstant.TIME_STAMP));
-    }
 }
