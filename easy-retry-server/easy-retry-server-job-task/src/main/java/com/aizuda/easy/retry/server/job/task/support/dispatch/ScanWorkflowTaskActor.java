@@ -144,7 +144,7 @@ public class ScanWorkflowTaskActor extends AbstractActor {
             List<String> groupConfigs = groupConfigMapper.selectList(new LambdaQueryWrapper<GroupConfig>()
                     .select(GroupConfig::getGroupName)
                     .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus())
-                    .eq(GroupConfig::getGroupName, workflows.stream().map(Workflow::getGroupName).collect(Collectors.toList())))
+                    .in(GroupConfig::getGroupName, workflows.stream().map(Workflow::getGroupName).collect(Collectors.toList())))
                 .stream().map(GroupConfig::getGroupName).collect(Collectors.toList());
             workflows = workflows.stream().filter(workflow -> groupConfigs.contains(workflow.getGroupName())).collect(Collectors.toList());
         }
