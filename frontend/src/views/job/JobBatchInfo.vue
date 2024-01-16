@@ -99,7 +99,9 @@ export default {
         this.jobBatchInfo = res.data
         this.queryParam = {
           groupName: this.jobBatchInfo.groupName,
-          taskBatchId: id
+          taskBatchId: id,
+          startId: 0,
+          fromIndex: 0
         }
         this.$refs.JobTaskListRef.refreshTable(this.queryParam)
       })
