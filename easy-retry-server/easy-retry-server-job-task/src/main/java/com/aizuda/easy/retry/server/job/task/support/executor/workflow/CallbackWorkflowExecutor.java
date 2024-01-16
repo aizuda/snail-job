@@ -46,6 +46,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 @RequiredArgsConstructor
 public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
+
     private static final String SECRET = "secret";
     private static final String CALLBACK_TIMEOUT = "10";
     private final RestTemplate restTemplate;
@@ -78,8 +79,8 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
         requestHeaders.set(RequestInterceptor.TIMEOUT_TIME, CALLBACK_TIMEOUT);
 
         List<JobTask> jobTasks = jobTaskMapper.selectList(new LambdaQueryWrapper<JobTask>()
-                .select(JobTask::getResultMessage, JobTask::getClientInfo)
-                .eq(JobTask::getTaskBatchId, context.getTaskBatchId()));
+            .select(JobTask::getResultMessage, JobTask::getClientInfo)
+            .eq(JobTask::getTaskBatchId, context.getTaskBatchId()));
         List<CallbackParamsDTO> callbackParamsList = WorkflowTaskConverter.INSTANCE.toCallbackParamsDTO(jobTasks);
 
         context.setTaskResult(JsonUtil.toJsonString(callbackParamsList));
@@ -94,7 +95,10 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
                 .withRetryListener(new RetryListener() {
                     @Override
                     public <V> void onRetry(final Attempt<V> attempt) {
-                        EasyRetryLog.LOCAL.error("回调接口第 【{}】 重试. 回调配置信息: [{}]", attempt.getAttemptNumber(), JsonUtil.toJsonString(decisionConfig));
+                        if (attempt.hasException()) {
+                            EasyRetryLog.LOCAL.error("回调接口第 【{}】 重试. 回调配置信息: [{}]",
+                                attempt.getAttemptNumber(), JsonUtil.toJsonString(decisionConfig));
+                        }
                     }
                 }).build();
 
@@ -105,7 +109,8 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
             result = response.getBody();
             EasyRetryLog.LOCAL.info("回调结果. webHook:[{}]，结果: [{}]", decisionConfig.getWebhook(), result);
         } catch (Exception e) {
-            EasyRetryLog.LOCAL.error("回调异常. webHook:[{}]，参数: [{}]", decisionConfig.getWebhook(), context.getTaskResult(), e);
+            EasyRetryLog.LOCAL.error("回调异常. webHook:[{}]，参数: [{}]", decisionConfig.getWebhook(),
+                context.getTaskResult(), e);
             taskBatchStatus = JobTaskBatchStatusEnum.FAIL.getStatus();
             operationReason = JobOperationReasonEnum.WORKFLOW_CALLBACK_NODE_EXECUTOR_ERROR.getReason();
             jobTaskStatus = JobTaskStatusEnum.FAIL.getStatus();
@@ -152,8 +157,9 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
             EasyRetryLog.REMOTE.info("workflowNodeId:[{}] 回调成功. 回调参数:[{}] 回调结果:[{}] <|>{}<|>",
                 context.getWorkflowNodeId(), context.getTaskResult(), context.getTaskResult(), logMetaDTO);
         } else {
-            EasyRetryLog.REMOTE.error("workflowNodeId:[{}] 回调失败. 失败原因:[{}] <|>{}<|>", context.getWorkflowNodeId(),
-                    context.getLogMessage(), logMetaDTO);
+            EasyRetryLog.REMOTE.error("workflowNodeId:[{}] 回调失败. 失败原因:[{}] <|>{}<|>",
+                context.getWorkflowNodeId(),
+                context.getLogMessage(), logMetaDTO);
 
             // 尝试完成任务
             workflowBatchHandler.complete(context.getWorkflowTaskBatchId());
