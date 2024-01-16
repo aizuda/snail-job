@@ -13,4 +13,9 @@ import lombok.EqualsAndHashCode;
 @Data
 public class WorkflowQueryVO extends BaseQueryVO {
 
+    private String groupName;
+
+    private String workflowName;
+
+    private Integer workflowStatus;
 }
