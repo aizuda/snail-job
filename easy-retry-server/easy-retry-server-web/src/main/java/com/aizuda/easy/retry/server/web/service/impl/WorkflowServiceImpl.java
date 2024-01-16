@@ -192,6 +192,19 @@ public class WorkflowServiceImpl implements WorkflowService {
         LambdaQueryWrapper<Workflow> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Workflow::getDeleted, StatusEnum.NO.getStatus());
         queryWrapper.eq(Workflow::getNamespaceId, userSessionVO.getNamespaceId());
+
+        if (StrUtil.isNotBlank(queryVO.getGroupName())) {
+            queryWrapper.eq(Workflow::getGroupName, queryVO.getGroupName());
+        }
+
+        if (StrUtil.isNotBlank(queryVO.getWorkflowName())) {
+            queryWrapper.like(Workflow::getWorkflowName, queryVO.getWorkflowName());
+        }
+
+        if (Objects.nonNull(queryVO.getWorkflowStatus())) {
+            queryWrapper.eq(Workflow::getWorkflowStatus, queryVO.getWorkflowStatus());
+        }
+
         queryWrapper.orderByDesc(Workflow::getId);
         PageDTO<Workflow> page = workflowMapper.selectPage(pageDTO, queryWrapper);
 
