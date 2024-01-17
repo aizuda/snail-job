@@ -80,6 +80,9 @@
       rowKey="id"
       @expand="getRows"
     >
+      <span slot="log" slot-scope="text, record">
+        <a @click="getLogRows(record)">点击查看</a>
+      </span>
       <span slot="serial" slot-scope="text, record">
         {{ record.id }}
       </span>
@@ -91,20 +94,8 @@
       <span slot="clientInfo" slot-scope="text">
         {{ text !== '' ? text.split('@')[1] : '' }}
       </span>
-
-      <a-table
-        slot="expandedRowRender"
-        slot-scope="record"
-        :columns="logColumns"
-        :data-source="record.logData"
-        :pagination="false"
-        rowKey="id"
-      >
-        <span slot="serial" slot-scope="text, record">
-          {{ record.id }}
-        </span>
-      </a-table>
     </a-table>
+    <job-batch-log v-if="logOpen && record" :open.sync="logOpen" :record="record" />
   </a-card>
 </template>
 
@@ -115,10 +106,12 @@ import { STable } from '@/components'
 import { jobLogList, jobTaskList } from '@/api/jobApi'
 import enums from '@/utils/jobEnum'
 import moment from 'moment/moment'
+import JobBatchLog from './JobBatchLog'
 
 export default {
   name: 'JobTaskList',
   components: {
+    JobBatchLog,
     AInput,
     ATextarea,
     STable
@@ -129,6 +122,8 @@ export default {
       visible: false,
       // 高级搜索 展开/关闭
       advanced: false,
+      logOpen: false,
+      record: {},
       // 查询参数
       queryParam: {
         startId: 0,
@@ -139,6 +134,11 @@ export default {
       taskStatus: enums.taskStatus,
       // 表头
       columns: [
+        {
+          title: '日志',
+          scopedSlots: { customRender: 'log' },
+          width: '5%'
+        },
         {
           title: 'ID',
           scopedSlots: { customRender: 'serial' },
@@ -275,6 +275,10 @@ export default {
     onSelectChange (selectedRowKeys, selectedRows) {
       this.selectedRowKeys = selectedRowKeys
       this.selectedRows = selectedRows
+    },
+    getLogRows (task) {
+      this.record = task
+      this.logOpen = true
     }
   }
 }

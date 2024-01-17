@@ -147,6 +147,8 @@ public class WorkflowHandler {
                     DecisionConfig decision = nodeInfo.getDecision();
                     Assert.notNull(decision, () -> new EasyRetryServerException("【{}】配置信息不能为空", nodeInfo.getNodeName()));
                     Assert.notBlank(decision.getNodeExpression(), ()-> new EasyRetryServerException("【{}】表达式不能为空", nodeInfo.getNodeName()));
+                    Assert.notNull(decision.getDefaultDecision(), () -> new EasyRetryServerException("【{}】默认决策不能为空", nodeInfo.getNodeName()));
+                    Assert.notNull(decision.getExpressionType(), () -> new EasyRetryServerException("【{}】表达式类型不能为空", nodeInfo.getNodeName()));
                     workflowNode.setNodeInfo(JsonUtil.toJsonString(decision));
                 }
 

@@ -1,0 +1,264 @@
+<template>
+  <a-modal
+    :visible="visible"
+    width="100%"
+    wrap-class-name="full-modal"
+    :footer="null"
+    title="日志详情"
+    @cancel="onCancel">
+    <div class="log">
+      <div class="scroller">
+        <div class="gutters">
+          <div style="margin-top: 4px"></div>
+          <div v-for="(log, index) in logList" :key="index">
+            <div class="gutter-element">{{ index + 1 }}</div>
+            <div style="height: 25px"></div>
+          </div>
+        </div>
+        <div class="content">
+          <div class="line" v-for="log in logList" :key="log.time_stamp">
+            <div class="flex">
+              <div class="text" style="color: #2db7f5">{{ timestampToDate(log.time_stamp) }}</div>
+              <div class="text" :style="{ color: LevelEnum[log.level].color }">
+                {{ log.level.length === 4 ? log.level + '\t' : log.level }}
+              </div>
+              <div class="text" style="color: #00a3a3">[{{ log.thread }}]</div>
+              <div class="text" style="color: #a771bf; font-weight: 500">{{ log.location }}</div>
+              <div class="text">:</div>
+            </div>
+            <div class="text" style="font-size: 16px">{{ log.message }}</div>
+          </div>
+          <div style="text-align: center; width: 100vw">
+            <a-spin :indicator="indicator" :spinning="!finished"/>
+          </div>
+        </div>
+      </div>
+    </div>
+  </a-modal>
+</template>
+
+<script>
+import request from '@/utils/request'
+
+export default {
+  name: 'JobBatchLog',
+  components: {},
+  props: {
+    open: {
+      type: Boolean,
+      default: false
+    },
+    record: {
+      type: Object,
+      default: () => {}
+    },
+    value: {
+      type: Array,
+      default: () => []
+    }
+  },
+  watch: {
+    value: {
+      deep: true,
+      immediate: true,
+      handler (val) {
+        this.logList = val
+      }
+    },
+    open: {
+      deep: true,
+      immediate: true,
+      handler (val) {
+        this.visible = val
+      }
+    }
+  },
+  data () {
+    return {
+      visible: false,
+      finished: false,
+      logList: [],
+      interval: null,
+      startId: 0,
+      fromIndex: 0,
+      indicator: <a-icon type="loading" style="font-size: 24px; color: '#d9d9d9'" spin/>,
+      LevelEnum: {
+        DEBUG: {
+          name: 'DEBUG',
+          color: '#2647cc'
+        },
+        INFO: {
+          name: 'INFO',
+          color: '#5c962c'
+        },
+        WARN: {
+          name: 'WARN',
+          color: '#da9816'
+        },
+        ERROR: {
+          name: 'ERROR',
+          color: '#dc3f41'
+        }
+      }
+    }
+  },
+  mounted () {
+    this.getLogList()
+    this.interval = setInterval(() => {
+      this.getLogList()
+    }, 1000)
+  },
+  methods: {
+    onCancel () {
+      clearInterval(this.interval)
+      this.$emit('update:open', false)
+    },
+    getLogList () {
+      if (!this.finished) {
+        request(
+          {
+            url: '/job/log/list',
+            method: 'get',
+            params: {
+              taskBatchId: this.record.taskBatchId,
+              jobId: this.record.jobId,
+              taskId: this.record.id,
+              startId: this.startId,
+              fromIndex: this.fromIndex,
+              size: 50
+            }
+          }
+        )
+          .then((res) => {
+            this.finished = res.data.finished
+            this.startId = res.data.nextStartId
+            this.fromIndex = res.data.fromIndex
+            if (res.data.message) {
+              this.logList.push(...res.data.message)
+            }
+          })
+          .catch(() => {
+            this.finished = true
+          })
+      } else {
+        clearInterval(this.interval)
+      }
+    },
+    timestampToDate (timestamp) {
+      const date = new Date(Number.parseInt(timestamp.toString()))
+      const year = date.getFullYear()
+      const month =
+        (date.getMonth() + 1).toString().length === 1 ? '0' + (date.getMonth() + 1) : (date.getMonth() + 1).toString()
+      const day = date.getDate()
+      const hours = date.getHours()
+      const minutes = date.getMinutes().toString().length === 1 ? '0' + date.getMinutes() : date.getMinutes().toString()
+      const seconds = date.getSeconds().toString().length === 1 ? '0' + date.getSeconds() : date.getSeconds().toString()
+      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+    }
+  }
+}
+</script>
+
+<style scoped lang="less">
+.log {
+  height: calc(100vh - 56px);
+  color: #abb2bf;
+  background-color: #282c34;
+  position: relative !important;
+  box-sizing: border-box;
+  display: flex !important;
+  flex-direction: column;
+
+  .scroller {
+    height: 100%;
+    overflow: auto;
+    display: flex !important;
+    align-items: flex-start !important;
+    font-family: monospace;
+    line-height: 1.4;
+    position: relative;
+    z-index: 0;
+
+    .gutters {
+      min-height: 108px;
+      position: sticky;
+      background-color: #1e1f22;
+      color: #7d8799;
+      border: none;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      box-sizing: border-box;
+      inset-inline-start: 0;
+      z-index: 200;
+
+      .gutter-element {
+        height: 25px;
+        font-size: 14px;
+        padding: 0 8px 0 5px;
+        min-width: 20px;
+        text-align: right;
+        white-space: nowrap;
+        box-sizing: border-box;
+        color: #7d8799;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+      }
+    }
+
+    .content {
+      tab-size: 4;
+      caret-color: transparent !important;
+      margin: 0;
+      flex-grow: 2;
+      flex-shrink: 0;
+      // display: block;
+      white-space: pre;
+      word-wrap: normal;
+      box-sizing: border-box;
+      min-height: 100%;
+      padding: 4px 8px;
+      outline: none;
+      color: #bcbec4;
+
+      .line {
+        height: 25px;
+        caret-color: transparent !important;
+        font-size: 16px;
+        // background-color: #6699ff0b;
+        display: contents;
+        padding: 0 2px 0 6px;
+
+        .flex{
+          display: flex;
+          align-items: center;
+          gap: 5px;
+        }
+
+        .text {
+          font-size: 16px;
+          height: 25px;
+        }
+      }
+    }
+  }
+}
+
+/deep/ .ant-modal {
+  max-width: 100%;
+  top: 0;
+  padding-bottom: 0;
+  margin: 0;
+}
+/deep/ .ant-modal-content {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh);
+}
+/deep/ .ant-modal-body {
+  flex: 1;
+  padding: 0;
+}
+</style>
