@@ -4,6 +4,9 @@ import cn.hutool.core.util.StrUtil;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * 标识某个操作的具体原因
  *
@@ -29,11 +32,18 @@ public enum JobOperationReasonEnum {
     WORKFLOW_CALLBACK_NODE_EXECUTOR_ERROR(11, "回调节点执行异常"),
     WORKFLOW_NODE_NO_OPERATION_REQUIRED(12, "无需处理"),
     WORKFLOW_NODE_EXECUTOR_ERROR_SKIP(13, "节点处理失败并跳过"),
+    WORKFLOW_DECISION_FOR_FALSE(14, "判定未通过"),
 
 
     ;
 
     private final int reason;
     private final String desc;
+
+    /**
+     * 工作流后续节点跳过执行配置
+     */
+    public static final List<Integer> WORKFLOW_SUCCESSOR_SKIP_EXECUTE = Arrays.asList(
+        WORKFLOW_NODE_NO_OPERATION_REQUIRED.getReason(), WORKFLOW_DECISION_FOR_FALSE.getReason());
 
 }
