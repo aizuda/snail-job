@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.server.web.service;
 
+import com.aizuda.easy.retry.server.common.dto.DecisionConfig;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
 import com.aizuda.easy.retry.server.web.model.request.WorkflowQueryVO;
 import com.aizuda.easy.retry.server.web.model.request.WorkflowRequestVO;
@@ -31,4 +32,6 @@ public interface WorkflowService {
     Boolean trigger(Long id);
 
     List<WorkflowResponseVO> getWorkflowNameList(String keywords, Long workflowId);
+
+    void checkNodeExpression(DecisionConfig decisionConfig);
 }

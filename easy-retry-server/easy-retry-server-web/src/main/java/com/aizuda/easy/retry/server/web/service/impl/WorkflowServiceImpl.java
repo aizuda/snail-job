@@ -5,10 +5,14 @@ import cn.hutool.core.util.HashUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
+import com.aizuda.easy.retry.common.core.expression.ExpressionEngine;
+import com.aizuda.easy.retry.common.core.expression.ExpressionFactory;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.WaitStrategy;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
+import com.aizuda.easy.retry.server.common.dto.DecisionConfig;
 import com.aizuda.easy.retry.server.common.dto.JobTaskConfig;
+import com.aizuda.easy.retry.server.common.enums.ExpressionTypeEnum;
 import com.aizuda.easy.retry.server.common.enums.JobTaskExecutorSceneEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.strategy.WaitStrategies;
@@ -19,6 +23,7 @@ import com.aizuda.easy.retry.server.job.task.dto.WorkflowPartitionTaskDTO;
 import com.aizuda.easy.retry.server.job.task.dto.WorkflowTaskPrepareDTO;
 import com.aizuda.easy.retry.server.job.task.support.WorkflowPrePareHandler;
 import com.aizuda.easy.retry.server.job.task.support.WorkflowTaskConverter;
+import com.aizuda.easy.retry.server.job.task.support.expression.ExpressionInvocationHandler;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
 import com.aizuda.easy.retry.server.web.model.request.SceneConfigRequestVO;
 import com.aizuda.easy.retry.server.web.model.request.UserSessionVO;
@@ -318,6 +323,15 @@ public class WorkflowServiceImpl implements WorkflowService {
         PageDTO<Workflow> selectPage = workflowMapper.selectPage(pageDTO, queryWrapper);
 
         return WorkflowConverter.INSTANCE.toWorkflowResponseVO(selectPage.getRecords());
+    }
+
+    @Override
+    public void checkNodeExpression(DecisionConfig decisionConfig) {
+        ExpressionEngine realExpressionEngine = ExpressionTypeEnum.valueOf(decisionConfig.getExpressionType());
+        Assert.notNull(realExpressionEngine, () -> new EasyRetryServerException("表达式引擎不存在"));
+        ExpressionInvocationHandler invocationHandler = new ExpressionInvocationHandler(realExpressionEngine);
+        ExpressionEngine expressionEngine = ExpressionFactory.getExpressionEngine(invocationHandler);
+        expressionEngine.eval(decisionConfig.getNodeExpression(), new HashMap<>());
     }
 
 }

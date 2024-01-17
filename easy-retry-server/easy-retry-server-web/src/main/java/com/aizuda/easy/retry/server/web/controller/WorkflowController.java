@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.server.web.controller;
 
+import com.aizuda.easy.retry.server.common.dto.DecisionConfig;
 import com.aizuda.easy.retry.server.web.annotation.LoginRequired;
 import com.aizuda.easy.retry.server.web.annotation.RoleEnum;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
@@ -76,6 +77,12 @@ public class WorkflowController {
             @RequestParam(value = "keywords", required = false) String keywords,
             @RequestParam(value = "workflowId", required = false) Long workflowId) {
         return workflowService.getWorkflowNameList(keywords, workflowId);
+    }
+
+    @PostMapping("/check-node-expression")
+    @LoginRequired(role = RoleEnum.ADMIN)
+    public void checkNodeExpression(@RequestBody DecisionConfig decisionConfig) {
+        workflowService.checkNodeExpression(decisionConfig);
     }
 
 }
