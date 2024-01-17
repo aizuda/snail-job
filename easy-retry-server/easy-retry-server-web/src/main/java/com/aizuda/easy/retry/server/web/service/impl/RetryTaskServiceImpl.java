@@ -4,6 +4,7 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.client.model.GenerateRetryIdempotentIdDTO;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
+import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.WaitStrategy;
@@ -41,6 +42,7 @@ import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
 import com.aizuda.easy.retry.template.datasource.access.TaskAccess;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskLogMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskLogMessageMapper;
+import com.aizuda.easy.retry.template.datasource.persistence.po.GroupConfig;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLog;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLogMessage;
@@ -349,10 +351,19 @@ public class RetryTaskServiceImpl implements RetryTaskService {
 
     @Override
     public boolean manualTriggerRetryTask(ManualTriggerTaskRequestVO requestVO) {
+        String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
+
+        long count = accessTemplate.getGroupConfigAccess().count(new LambdaQueryWrapper<GroupConfig>()
+            .eq(GroupConfig::getGroupName, requestVO.getGroupName())
+            .eq(GroupConfig::getNamespaceId, namespaceId)
+            .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus())
+        );
+
+        Assert.isTrue(count > 0, () -> new EasyRetryServerException("组:[{}]已经关闭，不支持手动执行.", requestVO.getGroupName()));
 
         List<String> uniqueIds = requestVO.getUniqueIds();
 
-        String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
+
         List<RetryTask> list = accessTemplate.getRetryTaskAccess().list(
                 requestVO.getGroupName(), namespaceId,
                 new LambdaQueryWrapper<RetryTask>()
@@ -377,6 +388,13 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         List<String> uniqueIds = requestVO.getUniqueIds();
 
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
+        long count = accessTemplate.getGroupConfigAccess().count(new LambdaQueryWrapper<GroupConfig>()
+            .eq(GroupConfig::getGroupName, requestVO.getGroupName())
+            .eq(GroupConfig::getNamespaceId, namespaceId)
+            .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus())
+        );
+
+        Assert.isTrue(count > 0, () -> new EasyRetryServerException("组:[{}]已经关闭，不支持手动执行.", requestVO.getGroupName()));
 
         List<RetryTask> list = accessTemplate.getRetryTaskAccess().list(requestVO.getGroupName(), namespaceId,
                 new LambdaQueryWrapper<RetryTask>()
