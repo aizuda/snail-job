@@ -483,7 +483,7 @@ CREATE TABLE `workflow_node`
     `workflow_id`          bigint(20)          NOT NULL COMMENT '工作流ID',
     `node_type`            tinyint(4)          NOT NULL DEFAULT 1 COMMENT '1、任务节点 2、条件节点',
     `expression_type`      tinyint(4)          NOT NULL DEFAULT 0 COMMENT '1、SpEl、2、Aviator 3、QL',
-    `fail_strategy`        tinyint(4)          NOT NULL DEFAULT 0 COMMENT '失败策略 1、跳过 2、阻塞',
+    `fail_strategy`        tinyint(4)          NOT NULL DEFAULT 1 COMMENT '失败策略 1、跳过 2、阻塞',
     `workflow_node_status` tinyint(4)          NOT NULL DEFAULT 1 COMMENT '工作流节点状态 0、关闭、1、开启',
     `priority_level`       int(11)             NOT NULL DEFAULT 1 COMMENT '优先级',
     `node_info`            text                         DEFAULT NULL COMMENT '节点信息 ',
