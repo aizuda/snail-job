@@ -203,7 +203,7 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
     }
 
     private static boolean isNoOperation(JobTaskBatch i) {
-        return i.getOperationReason() == JobOperationReasonEnum.WORKFLOW_NODE_NO_OPERATION_REQUIRED.getReason()
+        return JobOperationReasonEnum.WORKFLOW_SUCCESSOR_SKIP_EXECUTE.contains(i.getOperationReason())
             || i.getTaskBatchStatus() == JobTaskBatchStatusEnum.STOP.getStatus();
     }
 

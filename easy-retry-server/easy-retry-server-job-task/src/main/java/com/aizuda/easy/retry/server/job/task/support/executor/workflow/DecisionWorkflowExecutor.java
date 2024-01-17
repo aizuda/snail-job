@@ -1,6 +1,5 @@
 package com.aizuda.easy.retry.server.job.task.support.executor.workflow;
 
-import akka.actor.ActorRef;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
@@ -9,12 +8,10 @@ import com.aizuda.easy.retry.common.core.expression.ExpressionEngine;
 import com.aizuda.easy.retry.common.core.expression.ExpressionFactory;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.common.log.EasyRetryLog;
-import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.dto.DecisionConfig;
 import com.aizuda.easy.retry.server.common.enums.ExpressionTypeEnum;
 import com.aizuda.easy.retry.server.common.enums.LogicalConditionEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
-import com.aizuda.easy.retry.server.job.task.dto.JobLogDTO;
 import com.aizuda.easy.retry.server.job.task.dto.LogMetaDTO;
 import com.aizuda.easy.retry.server.job.task.support.expression.ExpressionInvocationHandler;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskMapper;
@@ -38,7 +35,7 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class ConditionWorkflowExecutor extends AbstractWorkflowExecutor {
+public class DecisionWorkflowExecutor extends AbstractWorkflowExecutor {
     private final JobTaskMapper jobTaskMapper;
 
     @Override
@@ -102,6 +99,9 @@ public class ConditionWorkflowExecutor extends AbstractWorkflowExecutor {
 
                     context.setTaskResult(JsonUtil.toJsonString(taskResult));
                     result = Optional.ofNullable(tempResult).orElse(Boolean.FALSE);
+                    if (!result) {
+                        operationReason = JobOperationReasonEnum.WORKFLOW_DECISION_FOR_FALSE.getReason();
+                    }
                 } catch (Exception e) {
                     log.error("执行条件表达式解析异常. 表达式:[{}]，参数: [{}]", decisionConfig.getNodeExpression(), context.getTaskResult(), e);
                     taskBatchStatus = JobTaskBatchStatusEnum.FAIL.getStatus();
@@ -109,10 +109,12 @@ public class ConditionWorkflowExecutor extends AbstractWorkflowExecutor {
                     jobTaskStatus = JobTaskStatusEnum.FAIL.getStatus();
                     message = e.getMessage();
                 }
+            } else {
+                result = Boolean.TRUE;
             }
         }
 
-        if (JobTaskBatchStatusEnum.SUCCESS.getStatus() == taskBatchStatus) {
+        if (JobTaskBatchStatusEnum.SUCCESS.getStatus() == taskBatchStatus && result) {
             workflowTaskExecutor(context);
         }
 

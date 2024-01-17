@@ -108,7 +108,7 @@ public class WorkflowExecutorActor extends AbstractActor {
                 parentJobTaskBatchList.stream()
                         .map(JobTaskBatch::getOperationReason)
                         .filter(Objects::nonNull)
-                        .anyMatch(i -> i == JobOperationReasonEnum.WORKFLOW_NODE_NO_OPERATION_REQUIRED.getReason())) {
+                        .anyMatch(JobOperationReasonEnum.WORKFLOW_SUCCESSOR_SKIP_EXECUTE::contains)) {
             workflowBatchHandler.complete(taskExecute.getWorkflowTaskBatchId(), workflowTaskBatch);
             return;
         }

@@ -133,7 +133,7 @@ public class WorkflowBatchHandler {
 
             for (JobTaskBatch jobTaskBatch : jobTaskBatchList) {
                 // 只要是无需处理的说明后面的子节点都不需要处理了，isNeedProcess为false
-                if (JobOperationReasonEnum.WORKFLOW_NODE_NO_OPERATION_REQUIRED.getReason() == jobTaskBatch.getOperationReason()) {
+                if (JobOperationReasonEnum.WORKFLOW_SUCCESSOR_SKIP_EXECUTE.contains(jobTaskBatch.getOperationReason())) {
                     isNeedProcess = false;
                     continue;
                 }
