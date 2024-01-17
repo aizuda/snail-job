@@ -111,9 +111,7 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
             message = throwable.getMessage();
         }
 
-        if (JobTaskBatchStatusEnum.SUCCESS.getStatus() == taskBatchStatus) {
-            workflowTaskExecutor(context);
-        }
+        workflowTaskExecutor(context);
 
         context.setTaskBatchStatus(taskBatchStatus);
         context.setOperationReason(operationReason);

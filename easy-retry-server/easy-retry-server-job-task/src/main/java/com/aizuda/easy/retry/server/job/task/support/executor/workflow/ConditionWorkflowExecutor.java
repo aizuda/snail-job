@@ -66,8 +66,6 @@ public class ConditionWorkflowExecutor extends AbstractWorkflowExecutor {
             jobTaskStatus = JobTaskStatusEnum.CANCEL.getStatus();
             operationReason = JobOperationReasonEnum.WORKFLOW_NODE_NO_OPERATION_REQUIRED.getReason();
         } else {
-            boolean tempResult = Boolean.TRUE;
-
             DecisionConfig decisionConfig = JsonUtil.parseObject(context.getNodeInfo(), DecisionConfig.class);
             if (StatusEnum.NO.getStatus().equals(decisionConfig.getDefaultDecision())) {
                 try {
@@ -80,10 +78,15 @@ public class ConditionWorkflowExecutor extends AbstractWorkflowExecutor {
                             .select(JobTask::getResultMessage)
                             .eq(JobTask::getTaskBatchId, context.getTaskBatchId()));
 
+                    Boolean tempResult = null;
                     List<String> taskResult = Lists.newArrayList();
                     for (JobTask jobTask : jobTasks) {
                         taskResult.add(jobTask.getResultMessage());
                         boolean execResult = (Boolean) Optional.ofNullable(expressionEngine.eval(decisionConfig.getNodeExpression(), jobTask.getResultMessage())).orElse(Boolean.FALSE);
+
+                        if (Objects.isNull(tempResult)) {
+                            tempResult = execResult;
+                        }
 
                         if (Objects.equals(decisionConfig.getLogicalCondition(), LogicalConditionEnum.AND.getCode())) {
                             tempResult = tempResult && execResult;
@@ -98,7 +101,7 @@ public class ConditionWorkflowExecutor extends AbstractWorkflowExecutor {
                     }
 
                     context.setTaskResult(JsonUtil.toJsonString(taskResult));
-                    result = tempResult;
+                    result = Optional.ofNullable(tempResult).orElse(Boolean.FALSE);
                 } catch (Exception e) {
                     log.error("执行条件表达式解析异常. 表达式:[{}]，参数: [{}]", decisionConfig.getNodeExpression(), context.getTaskResult(), e);
                     taskBatchStatus = JobTaskBatchStatusEnum.FAIL.getStatus();
@@ -142,11 +145,11 @@ public class ConditionWorkflowExecutor extends AbstractWorkflowExecutor {
         logMetaDTO.setTaskId(jobTask.getId());
         if (jobTaskBatch.getTaskBatchStatus() == JobTaskStatusEnum.SUCCESS.getStatus()
             || JobOperationReasonEnum.WORKFLOW_NODE_NO_OPERATION_REQUIRED.getReason() == context.getOperationReason()) {
-            EasyRetryLog.REMOTE.info("workflowNodeId:[{}]决策完成. 决策结果:[{}] <|>{}<|>",
-                context.getWorkflowNodeId(), context.getEvaluationResult(), logMetaDTO);
+            EasyRetryLog.REMOTE.info("workflowNodeId:[{}]决策完成. 上下文:[{}] 决策结果:[{}] <|>{}<|>",
+                context.getWorkflowNodeId(), context.getTaskResult(), context.getEvaluationResult(), logMetaDTO);
         } else {
-            EasyRetryLog.REMOTE.error("workflowNodeId:[{}] 决策失败. 失败原因:[{}] <|>{}<|>",  context.getWorkflowNodeId(),
-                context.getLogMessage(), logMetaDTO);
+            EasyRetryLog.REMOTE.error("workflowNodeId:[{}] 决策失败. 上下文:[{}] 失败原因:[{}] <|>{}<|>",
+                context.getWorkflowNodeId(), context.getTaskResult(), context.getLogMessage(), logMetaDTO);
 
         }
     }
