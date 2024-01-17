@@ -18,6 +18,8 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
@@ -43,7 +45,7 @@ public class JobTaskBatchHandler {
 
         List<JobTask> jobTasks = jobTaskMapper.selectList(
             new LambdaQueryWrapper<JobTask>()
-                    .select(JobTask::getTaskStatus, JobTask::getResultMessage)
+                .select(JobTask::getTaskStatus, JobTask::getResultMessage)
                 .eq(JobTask::getTaskBatchId, completeJobBatchDTO.getTaskBatchId()));
 
         JobTaskBatch jobTaskBatch = new JobTaskBatch();
@@ -76,27 +78,34 @@ public class JobTaskBatchHandler {
             jobTaskBatch.setOperationReason(completeJobBatchDTO.getJobOperationReason());
         }
 
-        if (Objects.nonNull(completeJobBatchDTO.getWorkflowNodeId()) && Objects.nonNull(completeJobBatchDTO.getWorkflowTaskBatchId())) {
-            // 若是工作流则开启下一个任务
-            try {
-                WorkflowNodeTaskExecuteDTO taskExecuteDTO = new WorkflowNodeTaskExecuteDTO();
-                taskExecuteDTO.setWorkflowTaskBatchId(completeJobBatchDTO.getWorkflowTaskBatchId());
-                taskExecuteDTO.setTaskExecutorScene(JobTaskExecutorSceneEnum.AUTO_WORKFLOW.getType());
-                taskExecuteDTO.setParentId(completeJobBatchDTO.getWorkflowNodeId());
-                // 这里取第一个的任务执行结果
-                taskExecuteDTO.setTaskBatchId(completeJobBatchDTO.getTaskBatchId());
-                ActorRef actorRef = ActorGenerator.workflowTaskExecutorActor();
-                actorRef.tell(taskExecuteDTO, actorRef);
-            } catch (Exception e) {
-                log.error("任务调度执行失败", e);
-            }
+        if (Objects.nonNull(completeJobBatchDTO.getWorkflowNodeId()) && Objects.nonNull(
+            completeJobBatchDTO.getWorkflowTaskBatchId())) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCompletion(int status) {
+                     // 若是工作流则开启下一个任务
+                    try {
+                        WorkflowNodeTaskExecuteDTO taskExecuteDTO = new WorkflowNodeTaskExecuteDTO();
+                        taskExecuteDTO.setWorkflowTaskBatchId(completeJobBatchDTO.getWorkflowTaskBatchId());
+                        taskExecuteDTO.setTaskExecutorScene(JobTaskExecutorSceneEnum.AUTO_WORKFLOW.getType());
+                        taskExecuteDTO.setParentId(completeJobBatchDTO.getWorkflowNodeId());
+                        // 这里取第一个的任务执行结果
+                        taskExecuteDTO.setTaskBatchId(completeJobBatchDTO.getTaskBatchId());
+                        ActorRef actorRef = ActorGenerator.workflowTaskExecutorActor();
+                        actorRef.tell(taskExecuteDTO, actorRef);
+                    } catch (Exception e) {
+                        log.error("任务调度执行失败", e);
+                    }
+                }
+            });
+
         }
 
         jobTaskBatch.setUpdateDt(LocalDateTime.now());
         return 1 == jobTaskBatchMapper.update(jobTaskBatch,
-                new LambdaUpdateWrapper<JobTaskBatch>()
-                        .eq(JobTaskBatch::getId, completeJobBatchDTO.getTaskBatchId())
-                        .in(JobTaskBatch::getTaskBatchStatus, JobTaskStatusEnum.NOT_COMPLETE)
+            new LambdaUpdateWrapper<JobTaskBatch>()
+                .eq(JobTaskBatch::getId, completeJobBatchDTO.getTaskBatchId())
+                .in(JobTaskBatch::getTaskBatchStatus, JobTaskStatusEnum.NOT_COMPLETE)
         );
 
     }

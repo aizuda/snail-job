@@ -31,9 +31,11 @@ import com.aizuda.easy.retry.server.web.service.WorkflowService;
 import com.aizuda.easy.retry.server.web.service.convert.WorkflowConverter;
 import com.aizuda.easy.retry.server.web.service.handler.WorkflowHandler;
 import com.aizuda.easy.retry.server.web.util.UserSessionUtils;
+import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.WorkflowMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.WorkflowNodeMapper;
+import com.aizuda.easy.retry.template.datasource.persistence.po.GroupConfig;
 import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
 import com.aizuda.easy.retry.template.datasource.persistence.po.Workflow;
 import com.aizuda.easy.retry.template.datasource.persistence.po.WorkflowNode;
@@ -70,7 +72,7 @@ public class WorkflowServiceImpl implements WorkflowService {
     @Lazy
     private final WorkflowPrePareHandler terminalWorkflowPrepareHandler;
     private final JobMapper jobMapper;
-
+    private final AccessTemplate accessTemplate;
 
     @Override
     @Transactional
@@ -279,6 +281,14 @@ public class WorkflowServiceImpl implements WorkflowService {
     public Boolean trigger(Long id) {
         Workflow workflow = workflowMapper.selectById(id);
         Assert.notNull(workflow, () -> new EasyRetryServerException("workflow can not be null."));
+
+        long count = accessTemplate.getGroupConfigAccess().count(new LambdaQueryWrapper<GroupConfig>()
+            .eq(GroupConfig::getGroupName, workflow.getGroupName())
+            .eq(GroupConfig::getNamespaceId, workflow.getNamespaceId())
+            .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus())
+        );
+
+        Assert.isTrue(count > 0, () -> new EasyRetryServerException("组:[{}]已经关闭，不支持手动执行.", workflow.getGroupName()));
 
         WorkflowTaskPrepareDTO prepareDTO = WorkflowTaskConverter.INSTANCE.toWorkflowTaskPrepareDTO(workflow);
         // 设置now表示立即执行
