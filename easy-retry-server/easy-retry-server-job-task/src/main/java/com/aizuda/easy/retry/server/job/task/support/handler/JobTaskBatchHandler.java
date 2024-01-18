@@ -91,7 +91,6 @@ public class JobTaskBatchHandler {
                         taskExecuteDTO.setWorkflowTaskBatchId(completeJobBatchDTO.getWorkflowTaskBatchId());
                         taskExecuteDTO.setTaskExecutorScene(JobTaskExecutorSceneEnum.AUTO_WORKFLOW.getType());
                         taskExecuteDTO.setParentId(completeJobBatchDTO.getWorkflowNodeId());
-                        // 这里取第一个的任务执行结果
                         taskExecuteDTO.setTaskBatchId(completeJobBatchDTO.getTaskBatchId());
                         ActorRef actorRef = ActorGenerator.workflowTaskExecutorActor();
                         actorRef.tell(taskExecuteDTO, actorRef);
