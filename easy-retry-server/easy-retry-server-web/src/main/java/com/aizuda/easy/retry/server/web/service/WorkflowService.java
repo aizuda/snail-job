@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.server.web.service;
 
+import cn.hutool.core.lang.Pair;
 import com.aizuda.easy.retry.server.common.dto.DecisionConfig;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
 import com.aizuda.easy.retry.server.web.model.request.WorkflowQueryVO;
@@ -33,5 +34,5 @@ public interface WorkflowService {
 
     List<WorkflowResponseVO> getWorkflowNameList(String keywords, Long workflowId);
 
-    void checkNodeExpression(DecisionConfig decisionConfig);
+    Pair<Integer, String> checkNodeExpression(DecisionConfig decisionConfig);
 }

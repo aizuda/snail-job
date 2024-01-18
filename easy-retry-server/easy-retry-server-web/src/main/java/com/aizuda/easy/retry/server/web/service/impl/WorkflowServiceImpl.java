@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.server.web.service.impl;
 
 import cn.hutool.core.lang.Assert;
+import cn.hutool.core.lang.Pair;
 import cn.hutool.core.util.HashUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
@@ -8,6 +9,7 @@ import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.common.core.expression.ExpressionEngine;
 import com.aizuda.easy.retry.common.core.expression.ExpressionFactory;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.WaitStrategy;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.dto.DecisionConfig;
@@ -326,12 +328,19 @@ public class WorkflowServiceImpl implements WorkflowService {
     }
 
     @Override
-    public void checkNodeExpression(DecisionConfig decisionConfig) {
-        ExpressionEngine realExpressionEngine = ExpressionTypeEnum.valueOf(decisionConfig.getExpressionType());
-        Assert.notNull(realExpressionEngine, () -> new EasyRetryServerException("表达式引擎不存在"));
-        ExpressionInvocationHandler invocationHandler = new ExpressionInvocationHandler(realExpressionEngine);
-        ExpressionEngine expressionEngine = ExpressionFactory.getExpressionEngine(invocationHandler);
-        expressionEngine.eval(decisionConfig.getNodeExpression(), new HashMap<>());
+    public Pair<Integer, String> checkNodeExpression(DecisionConfig decisionConfig) {
+        try {
+            ExpressionEngine realExpressionEngine = ExpressionTypeEnum.valueOf(decisionConfig.getExpressionType());
+            Assert.notNull(realExpressionEngine, () -> new EasyRetryServerException("表达式引擎不存在"));
+            ExpressionInvocationHandler invocationHandler = new ExpressionInvocationHandler(realExpressionEngine);
+            ExpressionEngine expressionEngine = ExpressionFactory.getExpressionEngine(invocationHandler);
+            expressionEngine.eval(decisionConfig.getNodeExpression(), StrUtil.EMPTY);
+        } catch (Exception e) {
+            EasyRetryLog.LOCAL.error("表达式异常. [{}]", decisionConfig.getNodeExpression(), e);
+            return Pair.of(StatusEnum.NO.getStatus(), e.getMessage());
+        }
+
+        return Pair.of(StatusEnum.YES.getStatus(), StrUtil.EMPTY);
     }
 
 }
