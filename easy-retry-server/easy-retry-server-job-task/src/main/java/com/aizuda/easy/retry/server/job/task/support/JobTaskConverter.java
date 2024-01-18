@@ -3,13 +3,13 @@ package com.aizuda.easy.retry.server.job.task.support;
 import com.aizuda.easy.retry.client.model.request.DispatchJobRequest;
 import com.aizuda.easy.retry.client.model.request.DispatchJobResultRequest;
 import com.aizuda.easy.retry.server.job.task.dto.*;
+import com.aizuda.easy.retry.server.job.task.support.block.job.BlockStrategyContext;
 import com.aizuda.easy.retry.server.job.task.support.generator.batch.JobTaskBatchGeneratorContext;
 import com.aizuda.easy.retry.server.job.task.support.generator.task.JobTaskGenerateContext;
 import com.aizuda.easy.retry.server.job.task.support.callback.ClientCallbackContext;
 import com.aizuda.easy.retry.server.job.task.support.executor.job.JobExecutorContext;
 import com.aizuda.easy.retry.server.job.task.support.stop.TaskStopJobContext;
 import com.aizuda.easy.retry.server.model.dto.LogTaskDTO;
-import com.aizuda.easy.retry.server.job.task.support.block.job.BlockStrategies;
 import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobLogMessage;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
@@ -43,18 +43,21 @@ public interface JobTaskConverter {
 
     JobTaskBatchGeneratorContext toJobTaskGeneratorContext(JobTaskPrepareDTO jobTaskPrepareDTO);
 
-    JobTaskBatchGeneratorContext toJobTaskGeneratorContext(BlockStrategies.BlockStrategyContext context);
+    JobTaskBatchGeneratorContext toJobTaskGeneratorContext(BlockStrategyContext context);
 
     JobTaskGenerateContext toJobTaskInstanceGenerateContext(JobExecutorContext context);
 
     JobTask toJobTaskInstance(JobTaskGenerateContext context);
 
-    BlockStrategies.BlockStrategyContext toBlockStrategyContext(JobTaskPrepareDTO prepareDTO);
+    BlockStrategyContext toBlockStrategyContext(JobTaskPrepareDTO prepareDTO);
 
-    TaskStopJobContext toStopJobContext(BlockStrategies.BlockStrategyContext context);
+    TaskStopJobContext toStopJobContext(BlockStrategyContext context);
 
     TaskStopJobContext toStopJobContext(JobExecutorResultDTO context);
 
+    @Mappings(
+        @Mapping(source = "id", target = "jobId")
+    )
     TaskStopJobContext toStopJobContext(Job job);
 
     TaskStopJobContext toStopJobContext(JobTaskPrepareDTO context);

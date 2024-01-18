@@ -10,12 +10,11 @@ import com.aizuda.easy.retry.server.job.task.support.WorkflowTaskConverter;
 import com.aizuda.easy.retry.server.job.task.support.block.workflow.WorkflowBlockStrategyContext;
 import com.aizuda.easy.retry.server.job.task.support.block.workflow.WorkflowBlockStrategyFactory;
 import com.aizuda.easy.retry.server.job.task.support.handler.WorkflowBatchHandler;
-import com.aizuda.easy.retry.server.job.task.support.block.job.BlockStrategies.BlockStrategyEnum;
+import com.aizuda.easy.retry.server.job.task.enums.BlockStrategyEnum;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.util.Objects;
 
 /**
@@ -65,7 +64,7 @@ public class RunningWorkflowPrepareHandler extends AbstractWorkflowPrePareHandle
         }
 
         // 3. 支持阻塞策略同JOB逻辑一致
-        BlockStrategy blockStrategyInterface = WorkflowBlockStrategyFactory.getJobTaskStop(blockStrategy);
+        BlockStrategy blockStrategyInterface = WorkflowBlockStrategyFactory.getBlockStrategy(blockStrategy);
         WorkflowBlockStrategyContext workflowBlockStrategyContext = WorkflowTaskConverter.INSTANCE.toWorkflowBlockStrategyContext(
                 prepare);
         blockStrategyInterface.block(workflowBlockStrategyContext);

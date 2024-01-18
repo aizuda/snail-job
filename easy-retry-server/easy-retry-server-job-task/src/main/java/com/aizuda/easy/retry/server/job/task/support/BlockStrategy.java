@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.server.job.task.support;
 
-import com.aizuda.easy.retry.server.job.task.support.block.job.BlockStrategies.BlockStrategyContext;
+import com.aizuda.easy.retry.server.job.task.support.block.job.BlockStrategyContext;
 
 /**
  * @author: www.byteblogs.com

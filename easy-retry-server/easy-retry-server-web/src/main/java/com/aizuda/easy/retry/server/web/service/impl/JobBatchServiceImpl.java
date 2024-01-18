@@ -137,10 +137,7 @@ public class JobBatchServiceImpl implements JobBatchService {
 
         JobTaskStopHandler jobTaskStop = JobTaskStopFactory.getJobTaskStop(job.getTaskType());
 
-        TaskStopJobContext taskStopJobContext = new TaskStopJobContext();
-        taskStopJobContext.setJobId(job.getId());
-        taskStopJobContext.setTaskType(job.getTaskType());
-        taskStopJobContext.setGroupName(job.getGroupName());
+        TaskStopJobContext taskStopJobContext = JobTaskConverter.INSTANCE.toStopJobContext(job);
         taskStopJobContext.setJobOperationReason(JobOperationReasonEnum.MANNER_STOP.getReason());
         taskStopJobContext.setTaskBatchId(jobTaskBatch.getId());
         taskStopJobContext.setForceStop(Boolean.TRUE);
