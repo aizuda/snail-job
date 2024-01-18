@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.server.job.task.support.expression;
 
 import cn.hutool.core.util.StrUtil;
+import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.exception.EasyRetryCommonException;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
@@ -32,7 +33,11 @@ public class ExpressionInvocationHandler implements InvocationHandler {
             String params = (String) expressionParams[0];
             Map<String, Object> contextMap = new HashMap<>();
             if (StrUtil.isNotBlank(params)) {
-                contextMap = JsonUtil.parseHashMap(params);
+                try {
+                    contextMap = JsonUtil.parseHashMap(params);
+                } catch (Exception e) {
+                    contextMap.put(SystemConstants.SINGLE_PARAM, params);
+                }
             }
 
             args[1] = new Object[]{contextMap};
