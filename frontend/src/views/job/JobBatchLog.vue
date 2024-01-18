@@ -180,7 +180,7 @@ export default {
     z-index: 0;
 
     .gutters {
-      min-height: 108px;
+      min-height: 100%;
       position: sticky;
       background-color: #1e1f22;
       color: #7d8799;
@@ -188,7 +188,6 @@ export default {
       flex-shrink: 0;
       display: flex;
       flex-direction: column;
-      height: 100%;
       box-sizing: border-box;
       inset-inline-start: 0;
       z-index: 200;

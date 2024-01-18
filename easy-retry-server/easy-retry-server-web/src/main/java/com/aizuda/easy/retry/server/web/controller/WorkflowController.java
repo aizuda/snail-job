@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.server.web.controller;
 
+import cn.hutool.core.lang.Pair;
 import com.aizuda.easy.retry.server.common.dto.DecisionConfig;
 import com.aizuda.easy.retry.server.web.annotation.LoginRequired;
 import com.aizuda.easy.retry.server.web.annotation.RoleEnum;
@@ -74,15 +75,15 @@ public class WorkflowController {
     @GetMapping("/workflow-name/list")
     @LoginRequired(role = RoleEnum.USER)
     public List<WorkflowResponseVO> getWorkflowNameList(
-            @RequestParam(value = "keywords", required = false) String keywords,
-            @RequestParam(value = "workflowId", required = false) Long workflowId) {
+        @RequestParam(value = "keywords", required = false) String keywords,
+        @RequestParam(value = "workflowId", required = false) Long workflowId) {
         return workflowService.getWorkflowNameList(keywords, workflowId);
     }
 
     @PostMapping("/check-node-expression")
     @LoginRequired(role = RoleEnum.ADMIN)
-    public void checkNodeExpression(@RequestBody DecisionConfig decisionConfig) {
-        workflowService.checkNodeExpression(decisionConfig);
+    public Pair<Integer, String> checkNodeExpression(@RequestBody DecisionConfig decisionConfig) {
+        return workflowService.checkNodeExpression(decisionConfig);
     }
 
 }
