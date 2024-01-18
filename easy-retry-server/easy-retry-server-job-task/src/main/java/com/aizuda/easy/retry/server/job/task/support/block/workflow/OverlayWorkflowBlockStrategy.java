@@ -4,7 +4,7 @@ import com.aizuda.easy.retry.server.job.task.support.WorkflowTaskConverter;
 import com.aizuda.easy.retry.server.job.task.support.generator.batch.WorkflowBatchGenerator;
 import com.aizuda.easy.retry.server.job.task.support.generator.batch.WorkflowTaskBatchGeneratorContext;
 import com.aizuda.easy.retry.server.job.task.support.handler.WorkflowBatchHandler;
-import com.aizuda.easy.retry.server.job.task.support.block.job.BlockStrategies.BlockStrategyEnum;
+import com.aizuda.easy.retry.server.job.task.enums.BlockStrategyEnum;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

@@ -1,8 +1,8 @@
 package com.aizuda.easy.retry.server.job.task.support.block.workflow;
 
 import com.aizuda.easy.retry.server.job.task.support.BlockStrategy;
-import com.aizuda.easy.retry.server.job.task.support.block.job.BlockStrategies.BlockStrategyContext;
-import com.aizuda.easy.retry.server.job.task.support.block.job.BlockStrategies.BlockStrategyEnum;
+import com.aizuda.easy.retry.server.job.task.support.block.job.BlockStrategyContext;
+import com.aizuda.easy.retry.server.job.task.enums.BlockStrategyEnum;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +27,6 @@ public abstract class AbstractWorkflowBlockStrategy implements BlockStrategy, In
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        WorkflowBlockStrategyFactory.registerTaskStop(blockStrategyEnum(), this);
+        WorkflowBlockStrategyFactory.registerBlockStrategy(blockStrategyEnum(), this);
     }
 }

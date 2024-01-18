@@ -9,10 +9,11 @@ import com.aizuda.easy.retry.server.job.task.support.BlockStrategy;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.server.job.task.dto.JobTaskPrepareDTO;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskStopHandler;
+import com.aizuda.easy.retry.server.job.task.support.block.job.BlockStrategyContext;
+import com.aizuda.easy.retry.server.job.task.support.block.job.JobBlockStrategyFactory;
 import com.aizuda.easy.retry.server.job.task.support.stop.JobTaskStopFactory;
 import com.aizuda.easy.retry.server.job.task.support.stop.TaskStopJobContext;
-import com.aizuda.easy.retry.server.job.task.support.block.job.BlockStrategies;
-import com.aizuda.easy.retry.server.job.task.support.block.job.BlockStrategies.BlockStrategyEnum;
+import com.aizuda.easy.retry.server.job.task.enums.BlockStrategyEnum;
 import com.aizuda.easy.retry.server.job.task.support.handler.JobTaskBatchHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,9 +70,9 @@ public class RunningJobPrepareHandler extends AbstractJobPrePareHandler {
             return;
         }
 
-        BlockStrategies.BlockStrategyContext blockStrategyContext = JobTaskConverter.INSTANCE.toBlockStrategyContext(prepare);
+        BlockStrategyContext blockStrategyContext = JobTaskConverter.INSTANCE.toBlockStrategyContext(prepare);
         blockStrategyContext.setOperationReason(jobOperationReasonEnum.getReason());
-        BlockStrategy blockStrategyInterface = BlockStrategies.BlockStrategyEnum.getBlockStrategy(blockStrategy);
+        BlockStrategy blockStrategyInterface = JobBlockStrategyFactory.getBlockStrategy(blockStrategy);
         blockStrategyInterface.block(blockStrategyContext);
 
     }

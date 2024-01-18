@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.server.job.task.support.block.workflow;
 
-import com.aizuda.easy.retry.server.job.task.support.block.job.BlockStrategies.BlockStrategyContext;
+import com.aizuda.easy.retry.server.job.task.support.block.job.BlockStrategyContext;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -28,8 +28,4 @@ public class WorkflowBlockStrategyContext extends BlockStrategyContext  {
      */
     private String flowInfo;
 
-    /**
-     * 执行策略 1、auto 2、manual 3、workflow
-     */
-    private Integer taskExecutorScene;
 }

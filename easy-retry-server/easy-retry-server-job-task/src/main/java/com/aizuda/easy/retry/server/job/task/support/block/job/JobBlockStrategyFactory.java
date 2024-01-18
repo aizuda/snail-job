@@ -1,4 +1,4 @@
-package com.aizuda.easy.retry.server.job.task.support.block.workflow;
+package com.aizuda.easy.retry.server.job.task.support.block.job;
 
 import com.aizuda.easy.retry.server.job.task.support.BlockStrategy;
 import com.aizuda.easy.retry.server.job.task.enums.BlockStrategyEnum;
@@ -7,13 +7,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author: xiaowoniu
- * @date : 2023-12-26
+ * @date : 2023-01-18
  * @since : 2.6.0
  */
-public final class WorkflowBlockStrategyFactory {
+public final class JobBlockStrategyFactory {
     private static final ConcurrentHashMap<BlockStrategyEnum, BlockStrategy> CACHE = new ConcurrentHashMap<>();
 
-    private WorkflowBlockStrategyFactory() {
+    private JobBlockStrategyFactory() {
     }
 
     static void registerBlockStrategy(BlockStrategyEnum blockStrategyEnum, BlockStrategy blockStrategy) {
