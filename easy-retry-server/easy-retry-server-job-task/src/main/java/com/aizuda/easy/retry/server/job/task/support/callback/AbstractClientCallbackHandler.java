@@ -48,6 +48,8 @@ public abstract class AbstractClientCallbackHandler implements ClientCallbackHan
                 JobTask jobTask = context.getJobTask();
                 RealJobExecutorDTO realJobExecutor = JobTaskConverter.INSTANCE.toRealJobExecutorDTO(JobTaskConverter.INSTANCE.toJobExecutorContext(job), jobTask);
                 realJobExecutor.setClientId(ClientInfoUtils.clientId(context.getClientInfo()));
+                realJobExecutor.setWorkflowNodeId(context.getWorkflowNodeId());
+                realJobExecutor.setWorkflowTaskBatchId(context.getWorkflowTaskBatchId());
                 ActorRef actorRef = ActorGenerator.jobRealTaskExecutorActor();
                 actorRef.tell(realJobExecutor, actorRef);
                 LogMetaDTO logMetaDTO = JobTaskConverter.INSTANCE.toJobLogDTO(context);

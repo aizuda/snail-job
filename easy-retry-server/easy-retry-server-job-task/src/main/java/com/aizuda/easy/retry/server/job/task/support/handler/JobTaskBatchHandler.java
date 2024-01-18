@@ -18,6 +18,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.CollectionUtils;
@@ -41,6 +42,7 @@ public class JobTaskBatchHandler {
     @Autowired
     private JobTaskBatchMapper jobTaskBatchMapper;
 
+    @Transactional
     public boolean complete(CompleteJobBatchDTO completeJobBatchDTO) {
 
         List<JobTask> jobTasks = jobTaskMapper.selectList(
