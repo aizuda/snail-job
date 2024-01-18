@@ -55,6 +55,8 @@ public class ActorGenerator {
     private static final String JOB_TASK_EXECUTOR_DISPATCHER = "akka.actor.job-task-executor-dispatcher";
     private static final String JOB_TASK_EXECUTOR_RESULT_DISPATCHER = "akka.actor.job-task-executor-result-dispatcher";
     private static final String JOB_TASK_EXECUTOR_CALL_CLIENT_DISPATCHER = "akka.actor.job-task-executor-call-client-dispatcher";
+    private static final String WORKFLOW_TASK_DISPATCHER = "akka.actor.workflow-task-prepare-dispatcher";
+    private static final String WORKFLOW_TASK_EXECUTOR_DISPATCHER = "akka.actor.workflow-task-executor-dispatcher";
 
     /*----------------------------------------分布式任务调度 END----------------------------------------*/
 
@@ -203,7 +205,7 @@ public class ActorGenerator {
      */
     public static ActorRef workflowTaskPrepareActor() {
         return getJobActorSystem().actorOf(getSpringExtension().props(WORKFLOW_TASK_PREPARE_ACTOR)
-            .withDispatcher(JOB_TASK_DISPATCHER));
+            .withDispatcher(WORKFLOW_TASK_DISPATCHER));
     }
 
     /**
@@ -228,7 +230,7 @@ public class ActorGenerator {
         return getJobActorSystem()
             .actorOf(getSpringExtension()
                 .props(WORKFLOW_EXECUTOR_ACTOR)
-                .withDispatcher(JOB_TASK_EXECUTOR_DISPATCHER)
+                .withDispatcher(WORKFLOW_TASK_EXECUTOR_DISPATCHER)
             );
     }
 

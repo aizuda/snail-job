@@ -5,7 +5,6 @@ import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.enums.JobTaskStatusEnum;
 import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
-import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.common.util.ClientInfoUtils;
 import com.aizuda.easy.retry.server.job.task.dto.LogMetaDTO;
 import com.aizuda.easy.retry.server.job.task.dto.RealJobExecutorDTO;
@@ -104,33 +103,6 @@ public abstract class AbstractClientCallbackHandler implements ClientCallbackHan
 
     protected String chooseNewClient(ClientCallbackContext context) {
         return null;
-    }
-
-    private void failRetry(ClientCallbackContext context) {
-
-        if (context.getTaskStatus().equals(JobTaskStatusEnum.FAIL.getStatus())) {
-            JobTask jobTask = jobTaskMapper.selectById(context.getTaskId());
-            Job job = jobMapper.selectById(context.getJobId());
-            if (jobTask == null || job == null) {
-                return;
-            }
-
-            if (jobTask.getRetryCount() < job.getMaxRetryTimes()) {
-                // 更新重试次数
-                JobTask updateJobTask = new JobTask();
-                updateJobTask.setRetryCount(1);
-                boolean success = SqlHelper.retBool(jobTaskMapper.update(updateJobTask, Wrappers.<JobTask>lambdaUpdate()
-                        .lt(JobTask::getRetryCount, job.getMaxRetryTimes())
-                        .eq(JobTask::getId, context.getTaskId())
-                ));
-
-                if (success) {
-
-                }
-
-                return;
-            }
-        }
     }
 
     protected abstract void doCallback(ClientCallbackContext context);
