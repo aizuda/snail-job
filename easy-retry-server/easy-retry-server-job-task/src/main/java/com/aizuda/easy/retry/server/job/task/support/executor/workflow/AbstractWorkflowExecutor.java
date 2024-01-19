@@ -8,7 +8,6 @@ import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
-import com.aizuda.easy.retry.server.common.enums.JobTaskExecutorSceneEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.job.task.dto.WorkflowNodeTaskExecuteDTO;
 import com.aizuda.easy.retry.server.job.task.support.WorkflowExecutor;
@@ -17,7 +16,6 @@ import com.aizuda.easy.retry.server.job.task.support.generator.batch.JobTaskBatc
 import com.aizuda.easy.retry.server.job.task.support.generator.batch.JobTaskBatchGeneratorContext;
 import com.aizuda.easy.retry.server.job.task.support.handler.DistributedLockHandler;
 import com.aizuda.easy.retry.server.job.task.support.handler.WorkflowBatchHandler;
-import com.aizuda.easy.retry.server.retry.task.support.dispatch.task.TaskExecutorSceneEnum;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskBatchMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
@@ -33,13 +31,10 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.io.IOException;
 import java.text.MessageFormat;
 import java.time.Duration;
-import java.time.temporal.TemporalAmount;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author xiaowoniu
@@ -98,19 +93,6 @@ public abstract class AbstractWorkflowExecutor implements WorkflowExecutor, Init
     }
 
     protected boolean preValidate(WorkflowExecutorContext context) {
-
-        // 无需处理
-        if (Objects.equals(context.getWorkflowNodeStatus(), StatusEnum.NO.getStatus())) {
-            JobTaskBatchGeneratorContext generatorContext = WorkflowTaskConverter.INSTANCE.toJobTaskBatchGeneratorContext(context);
-            generatorContext.setTaskBatchStatus(JobTaskBatchStatusEnum.CANCEL.getStatus());
-            generatorContext.setOperationReason(JobOperationReasonEnum.WORKFLOW_NODE_NO_OPERATION_REQUIRED.getReason());
-            generatorContext.setJobId(context.getJobId());
-            generatorContext.setTaskExecutorScene(context.getTaskExecutorScene());
-            jobTaskBatchGenerator.generateJobTaskBatch(generatorContext);
-            workflowBatchHandler.complete(context.getWorkflowTaskBatchId());
-            return false;
-        }
-
         return doPreValidate(context);
     }
 
@@ -160,6 +142,20 @@ public abstract class AbstractWorkflowExecutor implements WorkflowExecutor, Init
         jobTask.setResultMessage(String.valueOf(context.getEvaluationResult()));
         Assert.isTrue(1 == jobTaskMapper.insert(jobTask), () -> new EasyRetryServerException("新增任务实例失败"));
         return jobTask;
+    }
+
+    public void generate(WorkflowExecutorContext context) {
+        if (Objects.equals(context.getWorkflowNodeStatus(), StatusEnum.YES.getStatus())) {
+            return;
+        }
+
+        JobTaskBatchGeneratorContext generatorContext = WorkflowTaskConverter.INSTANCE.toJobTaskBatchGeneratorContext(context);
+        generatorContext.setTaskBatchStatus(JobTaskBatchStatusEnum.CANCEL.getStatus());
+        generatorContext.setOperationReason(JobOperationReasonEnum.WORKFLOW_NODE_CLOSED_SKIP_EXECUTION.getReason());
+        generatorContext.setJobId(context.getJobId());
+        generatorContext.setTaskExecutorScene(context.getTaskExecutorScene());
+        jobTaskBatchGenerator.generateJobTaskBatch(generatorContext);
+        workflowBatchHandler.complete(context.getWorkflowTaskBatchId());
     }
 
     @Override

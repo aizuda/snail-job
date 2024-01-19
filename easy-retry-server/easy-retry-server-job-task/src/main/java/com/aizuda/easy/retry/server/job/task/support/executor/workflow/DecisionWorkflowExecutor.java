@@ -61,7 +61,7 @@ public class DecisionWorkflowExecutor extends AbstractWorkflowExecutor {
             // 多个条件节点直接是或的关系，只要一个成功其他节点就取消且是无需处理状态
             taskBatchStatus = JobTaskBatchStatusEnum.CANCEL.getStatus();
             jobTaskStatus = JobTaskStatusEnum.CANCEL.getStatus();
-            operationReason = JobOperationReasonEnum.WORKFLOW_NODE_NO_OPERATION_REQUIRED.getReason();
+            operationReason = JobOperationReasonEnum.WORKFLOW_NODE_NO_REQUIRED.getReason();
         } else {
             DecisionConfig decisionConfig = JsonUtil.parseObject(context.getNodeInfo(), DecisionConfig.class);
             if (StatusEnum.NO.getStatus().equals(decisionConfig.getDefaultDecision())) {
@@ -100,12 +100,12 @@ public class DecisionWorkflowExecutor extends AbstractWorkflowExecutor {
                     context.setTaskResult(JsonUtil.toJsonString(taskResult));
                     result = Optional.ofNullable(tempResult).orElse(Boolean.FALSE);
                     if (!result) {
-                        operationReason = JobOperationReasonEnum.WORKFLOW_DECISION_FOR_FALSE.getReason();
+                        operationReason = JobOperationReasonEnum.WORKFLOW_DECISION_FAILED.getReason();
                     }
                 } catch (Exception e) {
                     log.error("执行条件表达式解析异常. 表达式:[{}]，参数: [{}]", decisionConfig.getNodeExpression(), context.getTaskResult(), e);
                     taskBatchStatus = JobTaskBatchStatusEnum.FAIL.getStatus();
-                    operationReason = JobOperationReasonEnum.WORKFLOW_CONDITION_NODE_EXECUTOR_ERROR.getReason();
+                    operationReason = JobOperationReasonEnum.WORKFLOW_CONDITION_NODE_EXECUTION_ERROR.getReason();
                     jobTaskStatus = JobTaskStatusEnum.FAIL.getStatus();
                     message = e.getMessage();
                 }
@@ -146,7 +146,7 @@ public class DecisionWorkflowExecutor extends AbstractWorkflowExecutor {
         logMetaDTO.setJobId(SystemConstants.DECISION_JOB_ID);
         logMetaDTO.setTaskId(jobTask.getId());
         if (jobTaskBatch.getTaskBatchStatus() == JobTaskStatusEnum.SUCCESS.getStatus()
-            || JobOperationReasonEnum.WORKFLOW_NODE_NO_OPERATION_REQUIRED.getReason() == context.getOperationReason()) {
+            || JobOperationReasonEnum.WORKFLOW_NODE_NO_REQUIRED.getReason() == context.getOperationReason()) {
             EasyRetryLog.REMOTE.info("workflowNodeId:[{}]决策完成. 上下文:[{}] 决策结果:[{}] <|>{}<|>",
                 context.getWorkflowNodeId(), context.getTaskResult(), context.getEvaluationResult(), logMetaDTO);
         } else {

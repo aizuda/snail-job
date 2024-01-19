@@ -3,7 +3,7 @@ package com.aizuda.easy.retry.common.log.dialect.log4j;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.log.dialect.AbstractLog;
 import com.aizuda.easy.retry.common.log.factory.LogFactory;
-import com.aizuda.easy.retry.common.log.constant.LogFieldConstant;
+import com.aizuda.easy.retry.common.log.constant.LogFieldConstants;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.MDC;
@@ -117,7 +117,7 @@ public class Log4jLog extends AbstractLog {
 
         if (logger.isEnabledFor(log4jLevel)) {
             if (remote) {
-                MDC.put(LogFieldConstant.MDC_REMOTE, remote.toString());
+                MDC.put(LogFieldConstants.MDC_REMOTE, remote.toString());
             }
             if (t == null) {
                 t = LogFactory.extractThrowable(arguments);

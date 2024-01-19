@@ -5,7 +5,6 @@ import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
-import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.enums.JobTaskExecutorSceneEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
@@ -19,11 +18,9 @@ import com.aizuda.easy.retry.server.job.task.support.stop.JobTaskStopFactory;
 import com.aizuda.easy.retry.server.job.task.support.stop.TaskStopJobContext;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskBatchMapper;
-import com.aizuda.easy.retry.template.datasource.persistence.mapper.WorkflowNodeMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.WorkflowTaskBatchMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTaskBatch;
-import com.aizuda.easy.retry.template.datasource.persistence.po.WorkflowNode;
 import com.aizuda.easy.retry.template.datasource.persistence.po.WorkflowTaskBatch;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.google.common.collect.Lists;
@@ -105,7 +102,8 @@ public class WorkflowBatchHandler {
             for (JobTaskBatch jobTaskBatch : jobTaskBatchList) {
                 if (JobTaskBatchStatusEnum.NOT_SUCCESS.contains(jobTaskBatch.getTaskBatchStatus())) {
                     // 只要叶子节点不是无需处理的都是失败
-                    if (JobOperationReasonEnum.WORKFLOW_NODE_NO_OPERATION_REQUIRED.getReason() != jobTaskBatch.getOperationReason()) {
+                    if (JobOperationReasonEnum.WORKFLOW_NODE_NO_REQUIRED.getReason() != jobTaskBatch.getOperationReason()
+                        && JobOperationReasonEnum.WORKFLOW_NODE_CLOSED_SKIP_EXECUTION.getReason() != jobTaskBatch.getOperationReason()) {
                         taskStatus = JobTaskBatchStatusEnum.FAIL.getStatus();
                     }
                 }
@@ -133,7 +131,7 @@ public class WorkflowBatchHandler {
 
             for (JobTaskBatch jobTaskBatch : jobTaskBatchList) {
                 // 只要是无需处理的说明后面的子节点都不需要处理了，isNeedProcess为false
-                if (JobOperationReasonEnum.WORKFLOW_SUCCESSOR_SKIP_EXECUTE.contains(jobTaskBatch.getOperationReason())) {
+                if (JobOperationReasonEnum.WORKFLOW_SUCCESSOR_SKIP_EXECUTION.contains(jobTaskBatch.getOperationReason())) {
                     isNeedProcess = false;
                     continue;
                 }
@@ -229,7 +227,7 @@ public class WorkflowBatchHandler {
         // 判定条件节点是否已经执行完成
         JobTaskBatch parentJobTaskBatch = jobTaskBatchMap.get(parentId);
         if (Objects.nonNull(parentJobTaskBatch) &&
-                JobOperationReasonEnum.WORKFLOW_NODE_NO_OPERATION_REQUIRED.getReason()
+                JobOperationReasonEnum.WORKFLOW_NODE_NO_REQUIRED.getReason()
                         == parentJobTaskBatch.getOperationReason()) {
             return;
         }

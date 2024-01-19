@@ -59,7 +59,7 @@ public class RunningJobPrepareHandler extends AbstractJobPrePareHandler {
                 // 超时停止任务
                 JobTaskStopHandler instanceInterrupt = JobTaskStopFactory.getJobTaskStop(prepare.getTaskType());
                 TaskStopJobContext stopJobContext = JobTaskConverter.INSTANCE.toStopJobContext(prepare);
-                stopJobContext.setJobOperationReason(JobOperationReasonEnum.EXECUTE_TIMEOUT.getReason());
+                stopJobContext.setJobOperationReason(JobOperationReasonEnum.TASK_EXECUTION_TIMEOUT.getReason());
                 stopJobContext.setNeedUpdateTaskStatus(Boolean.TRUE);
                 instanceInterrupt.stop(stopJobContext);
             }

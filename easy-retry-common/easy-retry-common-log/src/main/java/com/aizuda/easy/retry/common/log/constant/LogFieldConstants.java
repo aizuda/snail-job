@@ -5,10 +5,9 @@ package com.aizuda.easy.retry.common.log.constant;
  * @date 2023-12-27
  * @since 2.6.0
  */
-public interface LogFieldConstant {
+public interface LogFieldConstants {
 
     String MDC_REMOTE = "remote";
-
     String TIME = "time";
     String TIME_STAMP = "time_stamp";
     String THREAD = "thread";

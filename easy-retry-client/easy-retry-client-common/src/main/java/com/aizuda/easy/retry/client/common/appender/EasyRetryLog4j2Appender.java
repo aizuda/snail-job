@@ -3,7 +3,7 @@ package com.aizuda.easy.retry.client.common.appender;
 import com.aizuda.easy.retry.client.common.report.AsyncReportLog;
 import com.aizuda.easy.retry.client.common.util.ThreadLocalLogUtil;
 import com.aizuda.easy.retry.common.log.dto.LogContentDTO;
-import com.aizuda.easy.retry.common.log.constant.LogFieldConstant;
+import com.aizuda.easy.retry.common.log.constant.LogFieldConstants;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import org.apache.log4j.MDC;
 import org.apache.logging.log4j.core.Filter;
@@ -32,11 +32,11 @@ public class EasyRetryLog4j2Appender extends AbstractAppender {
     public void append(LogEvent event) {
 
         // Not job context
-        if (Objects.isNull(ThreadLocalLogUtil.getContext()) || Objects.isNull(MDC.get(LogFieldConstant.MDC_REMOTE))) {
+        if (Objects.isNull(ThreadLocalLogUtil.getContext()) || Objects.isNull(MDC.get(LogFieldConstants.MDC_REMOTE))) {
             return;
         }
 
-        MDC.remove(LogFieldConstant.MDC_REMOTE);
+        MDC.remove(LogFieldConstants.MDC_REMOTE);
         LogContentDTO logContentDTO = new LogContentDTO();
         logContentDTO.addTimeStamp(event.getTimeMillis());
         logContentDTO.addLevelField(event.getLevel().name());

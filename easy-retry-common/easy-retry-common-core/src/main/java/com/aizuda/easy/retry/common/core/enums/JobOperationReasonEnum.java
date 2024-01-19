@@ -19,20 +19,20 @@ import java.util.List;
 public enum JobOperationReasonEnum {
 
     NONE(0, StrUtil.EMPTY),
-    EXECUTE_TIMEOUT(1, "任务执行超时"),
+    TASK_EXECUTION_TIMEOUT(1, "任务执行超时"),
     NOT_CLIENT(2, "无客户端节点"),
     JOB_CLOSED(3, "JOB已关闭"),
     JOB_DISCARD(4, "任务丢弃"),
     JOB_OVERLAY(5, "任务被覆盖"),
-    NOT_EXECUTE_TASK(6, "无可执行任务项"),
-    TASK_EXECUTE_ERROR(7, "任务执行期间发生非预期异常"),
+    NOT_EXECUTION_TASK(6, "无可执行任务项"),
+    TASK_EXECUTION_ERROR(7, "任务执行期间发生非预期异常"),
     MANNER_STOP(8, "手动停止"),
-    WORKFLOW_CONDITION_NODE_EXECUTOR_ERROR(9, "条件节点执行异常"),
+    WORKFLOW_CONDITION_NODE_EXECUTION_ERROR(9, "条件节点执行异常"),
     JOB_TASK_INTERRUPTED(10, "任务中断"),
-    WORKFLOW_CALLBACK_NODE_EXECUTOR_ERROR(11, "回调节点执行异常"),
-    WORKFLOW_NODE_NO_OPERATION_REQUIRED(12, "无需处理"),
-    WORKFLOW_NODE_EXECUTOR_ERROR_SKIP(13, "节点处理失败并跳过"),
-    WORKFLOW_DECISION_FOR_FALSE(14, "判定未通过"),
+    WORKFLOW_CALLBACK_NODE_EXECUTION_ERROR(11, "回调节点执行异常"),
+    WORKFLOW_NODE_NO_REQUIRED(12, "无需处理"),
+    WORKFLOW_NODE_CLOSED_SKIP_EXECUTION(13, "节点关闭跳过执行"),
+    WORKFLOW_DECISION_FAILED(14, "判定未通过"),
 
 
     ;
@@ -43,8 +43,8 @@ public enum JobOperationReasonEnum {
     /**
      * 工作流后续节点跳过执行配置
      */
-    public static final List<Integer> WORKFLOW_SUCCESSOR_SKIP_EXECUTE = Arrays.asList(
-        WORKFLOW_NODE_NO_OPERATION_REQUIRED.getReason(), WORKFLOW_DECISION_FOR_FALSE.getReason(),
-            WORKFLOW_CONDITION_NODE_EXECUTOR_ERROR.reason);
+    public static final List<Integer> WORKFLOW_SUCCESSOR_SKIP_EXECUTION = Arrays.asList(
+        WORKFLOW_NODE_NO_REQUIRED.getReason(), WORKFLOW_DECISION_FAILED.getReason(),
+            WORKFLOW_CONDITION_NODE_EXECUTION_ERROR.reason);
 
 }

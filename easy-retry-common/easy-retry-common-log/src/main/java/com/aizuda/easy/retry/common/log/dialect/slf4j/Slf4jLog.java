@@ -2,7 +2,7 @@ package com.aizuda.easy.retry.common.log.dialect.slf4j;
 
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.log.dialect.AbstractLog;
-import com.aizuda.easy.retry.common.log.constant.LogFieldConstant;
+import com.aizuda.easy.retry.common.log.constant.LogFieldConstants;
 import com.aizuda.easy.retry.common.log.level.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -220,7 +220,7 @@ public class Slf4jLog extends AbstractLog {
     private void setContextMap(Boolean remote) {
         if (remote) {
             Map<String, String> map = new LinkedHashMap<>();
-            map.put(LogFieldConstant.MDC_REMOTE, remote.toString());
+            map.put(LogFieldConstants.MDC_REMOTE, remote.toString());
             MDC.setContextMap(map);
         }
     }

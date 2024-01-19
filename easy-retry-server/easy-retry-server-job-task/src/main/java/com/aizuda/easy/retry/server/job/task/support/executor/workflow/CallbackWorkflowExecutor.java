@@ -5,6 +5,7 @@ import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskStatusEnum;
+import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.common.core.enums.WorkflowNodeTypeEnum;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.common.log.EasyRetryLog;
@@ -36,6 +37,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -65,12 +67,29 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
     @Override
     protected void doExecute(WorkflowExecutorContext context) {
 
-        CallbackConfig decisionConfig = JsonUtil.parseObject(context.getNodeInfo(), CallbackConfig.class);
-        int taskBatchStatus = JobTaskBatchStatusEnum.SUCCESS.getStatus();
-        int operationReason = JobOperationReasonEnum.NONE.getReason();
-        int jobTaskStatus = JobTaskStatusEnum.SUCCESS.getStatus();
+        // 初始化上下状态
+        context.setTaskBatchStatus(JobTaskBatchStatusEnum.SUCCESS.getStatus());
+        context.setOperationReason(JobOperationReasonEnum.NONE.getReason());
+        context.setJobTaskStatus(JobTaskStatusEnum.SUCCESS.getStatus());
 
+        if (Objects.equals(context.getWorkflowNodeStatus(), StatusEnum.NO.getStatus())) {
+            context.setTaskBatchStatus(JobTaskBatchStatusEnum.CANCEL.getStatus());
+            context.setOperationReason(JobOperationReasonEnum.WORKFLOW_NODE_CLOSED_SKIP_EXECUTION.getReason());
+            context.setJobTaskStatus(JobTaskStatusEnum.CANCEL.getStatus());
+        } else {
+            invokeCallback(context);
+        }
+
+        // 执行下一个节点
+        workflowTaskExecutor(context);
+
+    }
+
+    private void invokeCallback(WorkflowExecutorContext context) {
+
+        CallbackConfig decisionConfig = JsonUtil.parseObject(context.getNodeInfo(), CallbackConfig.class);
         String message = StrUtil.EMPTY;
+        String result = null;
 
         HttpHeaders requestHeaders = new HttpHeaders();
         requestHeaders.set(SECRET, decisionConfig.getSecret());
@@ -79,28 +98,29 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
         requestHeaders.set(RequestInterceptor.TIMEOUT_TIME, CALLBACK_TIMEOUT);
 
         List<JobTask> jobTasks = jobTaskMapper.selectList(new LambdaQueryWrapper<JobTask>()
-                .select(JobTask::getResultMessage, JobTask::getClientInfo)
-                .eq(JobTask::getTaskBatchId, context.getTaskBatchId()));
+            .select(JobTask::getResultMessage, JobTask::getClientInfo)
+            .eq(JobTask::getTaskBatchId, context.getTaskBatchId()));
         List<CallbackParamsDTO> callbackParamsList = WorkflowTaskConverter.INSTANCE.toCallbackParamsDTO(jobTasks);
 
         context.setTaskResult(JsonUtil.toJsonString(callbackParamsList));
-        String result = null;
+
         try {
             Map<String, String> uriVariables = new HashMap<>();
             uriVariables.put(SECRET, decisionConfig.getSecret());
 
             ResponseEntity<String> response = buildRetryer(decisionConfig).call(
-                    () -> restTemplate.exchange(decisionConfig.getWebhook(), HttpMethod.POST,
-                            new HttpEntity<>(callbackParamsList, requestHeaders), String.class, uriVariables));
+                () -> restTemplate.exchange(decisionConfig.getWebhook(), HttpMethod.POST,
+                    new HttpEntity<>(callbackParamsList, requestHeaders), String.class, uriVariables));
 
             result = response.getBody();
             EasyRetryLog.LOCAL.info("回调结果. webHook:[{}]，结果: [{}]", decisionConfig.getWebhook(), result);
         } catch (Exception e) {
             EasyRetryLog.LOCAL.error("回调异常. webHook:[{}]，参数: [{}]", decisionConfig.getWebhook(),
-                    context.getTaskResult(), e);
-            taskBatchStatus = JobTaskBatchStatusEnum.FAIL.getStatus();
-            operationReason = JobOperationReasonEnum.WORKFLOW_CALLBACK_NODE_EXECUTOR_ERROR.getReason();
-            jobTaskStatus = JobTaskStatusEnum.FAIL.getStatus();
+                context.getTaskResult(), e);
+
+            context.setTaskBatchStatus(JobTaskBatchStatusEnum.FAIL.getStatus());
+            context.setOperationReason(JobOperationReasonEnum.WORKFLOW_CALLBACK_NODE_EXECUTION_ERROR.getReason());
+            context.setJobTaskStatus(JobTaskStatusEnum.FAIL.getStatus());
 
             Throwable throwable = e;
             if (e.getClass().isAssignableFrom(RetryException.class)) {
@@ -111,13 +131,9 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
             message = throwable.getMessage();
         }
 
-        workflowTaskExecutor(context);
-
-        context.setTaskBatchStatus(taskBatchStatus);
-        context.setOperationReason(operationReason);
-        context.setJobTaskStatus(jobTaskStatus);
         context.setEvaluationResult(result);
         context.setLogMessage(message);
+
     }
 
     private static Retryer<ResponseEntity<String>> buildRetryer(CallbackConfig decisionConfig) {
@@ -136,7 +152,6 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
                 }).build();
         return retryer;
     }
-
 
     @Override
     protected boolean doPreValidate(WorkflowExecutorContext context) {
