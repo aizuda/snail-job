@@ -14,6 +14,8 @@ import com.aizuda.easy.retry.server.common.dto.CallbackConfig;
 import com.aizuda.easy.retry.server.common.enums.ContentTypeEnum;
 import com.aizuda.easy.retry.server.job.task.dto.LogMetaDTO;
 import com.aizuda.easy.retry.server.job.task.support.WorkflowTaskConverter;
+import com.aizuda.easy.retry.server.job.task.support.generator.batch.JobTaskBatchGenerator;
+import com.aizuda.easy.retry.server.job.task.support.generator.batch.JobTaskBatchGeneratorContext;
 import com.aizuda.easy.retry.server.model.dto.CallbackParamsDTO;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
@@ -98,8 +100,8 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
         requestHeaders.set(RequestInterceptor.TIMEOUT_TIME, CALLBACK_TIMEOUT);
 
         List<JobTask> jobTasks = jobTaskMapper.selectList(new LambdaQueryWrapper<JobTask>()
-            .select(JobTask::getResultMessage, JobTask::getClientInfo)
-            .eq(JobTask::getTaskBatchId, context.getTaskBatchId()));
+                .select(JobTask::getResultMessage, JobTask::getClientInfo)
+                .eq(JobTask::getTaskBatchId, context.getTaskBatchId()));
         List<CallbackParamsDTO> callbackParamsList = WorkflowTaskConverter.INSTANCE.toCallbackParamsDTO(jobTasks);
 
         context.setTaskResult(JsonUtil.toJsonString(callbackParamsList));
@@ -109,14 +111,14 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
             uriVariables.put(SECRET, decisionConfig.getSecret());
 
             ResponseEntity<String> response = buildRetryer(decisionConfig).call(
-                () -> restTemplate.exchange(decisionConfig.getWebhook(), HttpMethod.POST,
-                    new HttpEntity<>(callbackParamsList, requestHeaders), String.class, uriVariables));
+                    () -> restTemplate.exchange(decisionConfig.getWebhook(), HttpMethod.POST,
+                            new HttpEntity<>(callbackParamsList, requestHeaders), String.class, uriVariables));
 
             result = response.getBody();
             EasyRetryLog.LOCAL.info("回调结果. webHook:[{}]，结果: [{}]", decisionConfig.getWebhook(), result);
         } catch (Exception e) {
             EasyRetryLog.LOCAL.error("回调异常. webHook:[{}]，参数: [{}]", decisionConfig.getWebhook(),
-                context.getTaskResult(), e);
+                    context.getTaskResult(), e);
 
             context.setTaskBatchStatus(JobTaskBatchStatusEnum.FAIL.getStatus());
             context.setOperationReason(JobOperationReasonEnum.WORKFLOW_CALLBACK_NODE_EXECUTION_ERROR.getReason());
@@ -171,15 +173,15 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
         logMetaDTO.setJobId(SystemConstants.CALLBACK_JOB_ID);
         logMetaDTO.setTaskId(jobTask.getId());
         if (jobTaskBatch.getTaskBatchStatus() == JobTaskStatusEnum.SUCCESS.getStatus()) {
-            EasyRetryLog.REMOTE.info("回调成功. \n workflowNodeId:{} \n回调参数:{} \n回调结果:[{}] <|>{}<|>",
+            EasyRetryLog.REMOTE.info("节点[{}]回调成功.\n回调参数:{} \n回调结果:[{}] <|>{}<|>",
                     context.getWorkflowNodeId(), context.getTaskResult(), context.getEvaluationResult(), logMetaDTO);
+        } else if (jobTaskBatch.getTaskBatchStatus() == JobTaskStatusEnum.CANCEL.getStatus()) {
+            EasyRetryLog.REMOTE.warn("节点[{}]取消回调. 取消原因: 任务状态已关闭 <|>{}<|>",
+                    context.getWorkflowNodeId(), logMetaDTO);
         } else {
-            EasyRetryLog.REMOTE.error(" 回调失败.\n workflowNodeId:{} \n失败原因:{} <|>{}<|>",
+            EasyRetryLog.REMOTE.error("节点[{}]回调失败.\n失败原因:{} <|>{}<|>",
                     context.getWorkflowNodeId(),
                     context.getLogMessage(), logMetaDTO);
-
-            // 尝试完成任务
-            workflowBatchHandler.complete(context.getWorkflowTaskBatchId());
         }
     }
 }

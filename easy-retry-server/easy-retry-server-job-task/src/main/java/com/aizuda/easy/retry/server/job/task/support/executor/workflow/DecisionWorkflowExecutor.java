@@ -147,10 +147,10 @@ public class DecisionWorkflowExecutor extends AbstractWorkflowExecutor {
         logMetaDTO.setTaskId(jobTask.getId());
         if (jobTaskBatch.getTaskBatchStatus() == JobTaskStatusEnum.SUCCESS.getStatus()
             || JobOperationReasonEnum.WORKFLOW_NODE_NO_REQUIRED.getReason() == context.getOperationReason()) {
-            EasyRetryLog.REMOTE.info("workflowNodeId:[{}]决策完成. 上下文:[{}] 决策结果:[{}] <|>{}<|>",
+            EasyRetryLog.REMOTE.info("节点Id:[{}] 决策完成. 上下文:[{}] 决策结果:[{}] <|>{}<|>",
                 context.getWorkflowNodeId(), context.getTaskResult(), context.getEvaluationResult(), logMetaDTO);
         } else {
-            EasyRetryLog.REMOTE.error("workflowNodeId:[{}] 决策失败. 上下文:[{}] 失败原因:[{}] <|>{}<|>",
+            EasyRetryLog.REMOTE.error("节点Id:[{}] 决策失败. 上下文:[{}] 失败原因:[{}] <|>{}<|>",
                 context.getWorkflowNodeId(), context.getTaskResult(), context.getLogMessage(), logMetaDTO);
 
         }

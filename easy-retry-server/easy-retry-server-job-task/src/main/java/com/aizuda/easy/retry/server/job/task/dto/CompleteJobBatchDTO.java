@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.server.job.task.dto;
 
 import lombok.Data;
 
+
 /**
  * @author xiaowoniu
  * @date 2023-12-24 23:00:24
