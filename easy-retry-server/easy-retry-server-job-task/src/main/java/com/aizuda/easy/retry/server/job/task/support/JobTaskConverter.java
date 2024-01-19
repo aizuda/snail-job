@@ -4,6 +4,7 @@ import com.aizuda.easy.retry.client.model.request.DispatchJobRequest;
 import com.aizuda.easy.retry.client.model.request.DispatchJobResultRequest;
 import com.aizuda.easy.retry.server.job.task.dto.*;
 import com.aizuda.easy.retry.server.job.task.support.block.job.BlockStrategyContext;
+import com.aizuda.easy.retry.server.job.task.support.executor.workflow.WorkflowExecutorContext;
 import com.aizuda.easy.retry.server.job.task.support.generator.batch.JobTaskBatchGeneratorContext;
 import com.aizuda.easy.retry.server.job.task.support.generator.task.JobTaskGenerateContext;
 import com.aizuda.easy.retry.server.job.task.support.callback.ClientCallbackContext;
@@ -32,14 +33,21 @@ public interface JobTaskConverter {
     JobTaskConverter INSTANCE = Mappers.getMapper(JobTaskConverter.class);
 
     @Mappings(
-            @Mapping(source = "id", target = "jobId")
+        @Mapping(source = "id", target = "jobId")
     )
     JobTaskPrepareDTO toJobTaskPrepare(JobPartitionTaskDTO job);
 
     @Mappings(
-            @Mapping(source = "id", target = "jobId")
+        @Mapping(source = "id", target = "jobId")
     )
     JobTaskPrepareDTO toJobTaskPrepare(Job job);
+
+    @Mappings({
+        @Mapping(source = "job.id", target = "jobId"),
+        @Mapping(source = "job.namespaceId", target = "namespaceId"),
+        @Mapping(source = "job.groupName", target = "groupName")
+    })
+    JobTaskPrepareDTO toJobTaskPrepare(Job job, WorkflowExecutorContext context);
 
     JobTaskBatchGeneratorContext toJobTaskGeneratorContext(JobTaskPrepareDTO jobTaskPrepareDTO);
 
@@ -79,14 +87,14 @@ public interface JobTaskConverter {
     DispatchJobRequest toDispatchJobRequest(RealJobExecutorDTO realJobExecutorDTO);
 
     @Mappings({
-            @Mapping(source = "jobTask.groupName", target = "groupName"),
-            @Mapping(source = "jobTask.jobId", target = "jobId"),
-            @Mapping(source = "jobTask.taskBatchId", target = "taskBatchId"),
-            @Mapping(source = "jobTask.id", target = "taskId"),
-            @Mapping(source = "jobTask.argsStr", target = "argsStr"),
-            @Mapping(source = "jobTask.argsType", target = "argsType"),
-            @Mapping(source = "jobTask.extAttrs", target = "extAttrs"),
-            @Mapping(source = "jobTask.namespaceId", target = "namespaceId")
+        @Mapping(source = "jobTask.groupName", target = "groupName"),
+        @Mapping(source = "jobTask.jobId", target = "jobId"),
+        @Mapping(source = "jobTask.taskBatchId", target = "taskBatchId"),
+        @Mapping(source = "jobTask.id", target = "taskId"),
+        @Mapping(source = "jobTask.argsStr", target = "argsStr"),
+        @Mapping(source = "jobTask.argsType", target = "argsType"),
+        @Mapping(source = "jobTask.extAttrs", target = "extAttrs"),
+        @Mapping(source = "jobTask.namespaceId", target = "namespaceId")
     })
     RealJobExecutorDTO toRealJobExecutorDTO(JobExecutorContext context, JobTask jobTask);
 
@@ -95,7 +103,7 @@ public interface JobTaskConverter {
     JobExecutorResultDTO toJobExecutorResultDTO(ClientCallbackContext context);
 
     @Mappings(
-            @Mapping(source = "id", target = "taskId")
+        @Mapping(source = "id", target = "taskId")
     )
     JobExecutorResultDTO toJobExecutorResultDTO(JobTask jobTask);
 

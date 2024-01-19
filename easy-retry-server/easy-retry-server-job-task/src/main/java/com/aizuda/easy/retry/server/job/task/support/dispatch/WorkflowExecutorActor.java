@@ -35,7 +35,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -66,7 +65,7 @@ public class WorkflowExecutorActor extends AbstractActor {
                 doExecutor(taskExecute);
             } catch (Exception e) {
                 EasyRetryLog.LOCAL.error("workflow executor exception. [{}]", taskExecute, e);
-                handlerTaskBatch(taskExecute, JobTaskBatchStatusEnum.FAIL.getStatus(), JobOperationReasonEnum.TASK_EXECUTE_ERROR.getReason());
+                handlerTaskBatch(taskExecute, JobTaskBatchStatusEnum.FAIL.getStatus(), JobOperationReasonEnum.TASK_EXECUTION_ERROR.getReason());
                 // TODO 发送通知
             } finally {
                 getContext().stop(getSelf());
@@ -108,7 +107,7 @@ public class WorkflowExecutorActor extends AbstractActor {
                 parentJobTaskBatchList.stream()
                         .map(JobTaskBatch::getOperationReason)
                         .filter(Objects::nonNull)
-                        .anyMatch(JobOperationReasonEnum.WORKFLOW_SUCCESSOR_SKIP_EXECUTE::contains)) {
+                        .anyMatch(JobOperationReasonEnum.WORKFLOW_SUCCESSOR_SKIP_EXECUTION::contains)) {
             workflowBatchHandler.complete(taskExecute.getWorkflowTaskBatchId(), workflowTaskBatch);
             return;
         }

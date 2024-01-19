@@ -8,7 +8,7 @@ import ch.qos.logback.classic.spi.ThrowableProxyUtil;
 import ch.qos.logback.core.CoreConstants;
 import ch.qos.logback.core.UnsynchronizedAppenderBase;
 import cn.hutool.core.util.StrUtil;
-import com.aizuda.easy.retry.common.log.constant.LogFieldConstant;
+import com.aizuda.easy.retry.common.log.constant.LogFieldConstants;
 import com.aizuda.easy.retry.common.log.dto.LogContentDTO;
 import com.aizuda.easy.retry.common.log.dto.TaskLogFieldDTO;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
@@ -36,11 +36,11 @@ public class EasyRetryServerLogbackAppender<E> extends UnsynchronizedAppenderBas
 
         // Not job context
         if (!(eventObject instanceof LoggingEvent) || Objects.isNull(
-            MDC.getMDCAdapter().get(LogFieldConstant.MDC_REMOTE))) {
+            MDC.getMDCAdapter().get(LogFieldConstants.MDC_REMOTE))) {
             return;
         }
 
-        MDC.getMDCAdapter().remove(LogFieldConstant.MDC_REMOTE);
+        MDC.getMDCAdapter().remove(LogFieldConstants.MDC_REMOTE);
         // Prepare processing
         ((LoggingEvent) eventObject).prepareForDeferredProcessing();
         LoggingEvent event = (LoggingEvent) eventObject;

@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.common.log.dto;
 
-import com.aizuda.easy.retry.common.log.constant.LogFieldConstant;
+import com.aizuda.easy.retry.common.log.constant.LogFieldConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,37 +37,37 @@ public class LogContentDTO {
     }
 
     public void addTimeField(String time) {
-        this.addField(LogFieldConstant.TIME, time);
+        this.addField(LogFieldConstants.TIME, time);
     }
 
     public void addTimeStamp(Long timeStamp) {
-        this.addField(LogFieldConstant.TIME_STAMP, String.valueOf(timeStamp));
+        this.addField(LogFieldConstants.TIME_STAMP, String.valueOf(timeStamp));
     }
 
     public Long getTimeStamp() {
         return Long.parseLong(fieldList.stream().filter(taskLogFieldDTO -> !Objects.isNull(taskLogFieldDTO.getValue()))
             .collect(Collectors.toMap(TaskLogFieldDTO::getName, TaskLogFieldDTO::getValue))
-            .get(LogFieldConstant.TIME_STAMP));
+            .get(LogFieldConstants.TIME_STAMP));
     }
 
     public void addLevelField(String level) {
-        this.addField(LogFieldConstant.LEVEL, level);
+        this.addField(LogFieldConstants.LEVEL, level);
     }
 
     public void addThreadField(String thread) {
-        this.addField(LogFieldConstant.THREAD, thread);
+        this.addField(LogFieldConstants.THREAD, thread);
     }
 
     public void addMessageField(String message) {
-        this.addField(LogFieldConstant.MESSAGE, message);
+        this.addField(LogFieldConstants.MESSAGE, message);
     }
 
     public void addLocationField(String location) {
-        this.addField(LogFieldConstant.LOCATION, location);
+        this.addField(LogFieldConstants.LOCATION, location);
     }
 
     public void addThrowableField(String throwable) {
-        this.addField(LogFieldConstant.THROWABLE, throwable);
+        this.addField(LogFieldConstants.THROWABLE, throwable);
     }
 
 }

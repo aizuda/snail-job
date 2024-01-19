@@ -9,7 +9,7 @@ import ch.qos.logback.core.UnsynchronizedAppenderBase;
 import com.aizuda.easy.retry.client.common.report.AsyncReportLog;
 import com.aizuda.easy.retry.client.common.util.ThreadLocalLogUtil;
 import com.aizuda.easy.retry.common.log.dto.LogContentDTO;
-import com.aizuda.easy.retry.common.log.constant.LogFieldConstant;
+import com.aizuda.easy.retry.common.log.constant.LogFieldConstants;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import org.slf4j.MDC;
 
@@ -33,11 +33,11 @@ public class EasyRetryLogbackAppender<E> extends UnsynchronizedAppenderBase<E> {
         // Not job context
         if (!(eventObject instanceof LoggingEvent)
                 || Objects.isNull(ThreadLocalLogUtil.getContext())
-                || Objects.isNull(MDC.get(LogFieldConstant.MDC_REMOTE))) {
+                || Objects.isNull(MDC.get(LogFieldConstants.MDC_REMOTE))) {
             return;
         }
 
-        MDC.remove(LogFieldConstant.MDC_REMOTE);
+        MDC.remove(LogFieldConstants.MDC_REMOTE);
         LogContentDTO logContentDTO = new LogContentDTO();
 
         // Prepare processing

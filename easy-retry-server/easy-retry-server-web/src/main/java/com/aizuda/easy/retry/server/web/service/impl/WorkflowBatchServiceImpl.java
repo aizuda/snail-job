@@ -40,8 +40,6 @@ import com.google.common.collect.Sets;
 import com.google.common.graph.MutableGraph;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -178,7 +176,7 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
             // 只为前端展示提供
             nodeInfo.setTaskBatchStatus(NOT_HANDLE_STATUS);
             jobBatchResponseVO.setTaskBatchStatus(NOT_HANDLE_STATUS);
-            jobBatchResponseVO.setOperationReason(JobOperationReasonEnum.WORKFLOW_NODE_NO_OPERATION_REQUIRED.getReason());
+            jobBatchResponseVO.setOperationReason(JobOperationReasonEnum.WORKFLOW_NODE_NO_REQUIRED.getReason());
             nodeInfo.setJobBatchList(Lists.newArrayList(jobBatchResponseVO));
         }
         try {
@@ -203,7 +201,7 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
     }
 
     private static boolean isNoOperation(JobTaskBatch i) {
-        return JobOperationReasonEnum.WORKFLOW_SUCCESSOR_SKIP_EXECUTE.contains(i.getOperationReason())
+        return JobOperationReasonEnum.WORKFLOW_SUCCESSOR_SKIP_EXECUTION.contains(i.getOperationReason())
             || i.getTaskBatchStatus() == JobTaskBatchStatusEnum.STOP.getStatus();
     }
 

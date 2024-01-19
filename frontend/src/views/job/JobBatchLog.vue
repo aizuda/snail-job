@@ -7,32 +7,32 @@
     title="日志详情"
     @cancel="onCancel">
     <div class="log">
-      <div class="scroller">
-        <div class="gutters">
-          <div style="margin-top: 4px"></div>
-          <div v-for="(log, index) in logList" :key="index">
-            <div class="gutter-element">{{ index + 1 }}</div>
-            <div style="height: 25px"></div>
-          </div>
-        </div>
-        <div class="content">
-          <div class="line" v-for="log in logList" :key="log.time_stamp">
-            <div class="flex">
-              <div class="text" style="color: #2db7f5">{{ timestampToDate(log.time_stamp) }}</div>
-              <div class="text" :style="{ color: LevelEnum[log.level].color }">
-                {{ log.level.length === 4 ? log.level + '\t' : log.level }}
+      <table class="scroller">
+        <tbody>
+        <tr v-for="(log, index) in logList" :key="index">
+          <td class="index">
+            {{ index + 1 }}
+          </td>
+          <td>
+            <div class="content">
+              <div class="line">
+                <div class="flex">
+                  <div class="text" style="color: #2db7f5">{{ timestampToDate(log.time_stamp) }}</div>
+                  <div class="text" :style="{ color: LevelEnum[log.level].color }">
+                    {{ log.level.length === 4 ? log.level + ' ' : log.level }}
+                  </div>
+                  <div class="text" style="color: #00a3a3">[{{ log.thread }}]</div>
+                  <div class="text" style="color: #a771bf; font-weight: 500">{{ log.location }}</div>
+                  <div class="text">:</div>
+                </div>
+                <div class="text" style="font-size: 16px">{{ log.message }}</div>
+                <div class="text" style="font-size: 16px">{{ log.throwable }}</div>
               </div>
-              <div class="text" style="color: #00a3a3">[{{ log.thread }}]</div>
-              <div class="text" style="color: #a771bf; font-weight: 500">{{ log.location }}</div>
-              <div class="text">:</div>
             </div>
-            <div class="text" style="font-size: 16px">{{ log.message }}</div>
-          </div>
-          <div style="text-align: center; width: 100vw">
-            <a-spin :indicator="indicator" :spinning="!finished"/>
-          </div>
-        </div>
-      </div>
+          </td>
+        </tr>
+        </tbody>
+      </table>
     </div>
   </a-modal>
 </template>
@@ -179,6 +179,19 @@ export default {
     position: relative;
     z-index: 0;
 
+    .index{
+      width: 32px;
+      min-width: 32px;
+      height: 100%;
+      background-color: #1e1f22;
+      color: #7d8799;
+      text-align: center;
+      vertical-align: top;
+      padding-top: 4px;
+      font-size: 16px;
+      z-index: 200;
+    }
+
     .gutters {
       min-height: 100%;
       position: sticky;
@@ -211,13 +224,13 @@ export default {
       tab-size: 4;
       caret-color: transparent !important;
       margin: 0;
-      flex-grow: 2;
-      flex-shrink: 0;
+      //flex-grow: 2;
+      //flex-shrink: 0;
       // display: block;
       white-space: pre;
-      word-wrap: normal;
-      box-sizing: border-box;
-      min-height: 100%;
+      //word-wrap: normal;
+      //box-sizing: border-box;
+      //min-height: 100%;
       padding: 4px 8px;
       outline: none;
       color: #bcbec4;
@@ -238,7 +251,6 @@ export default {
 
         .text {
           font-size: 16px;
-          height: 25px;
         }
       }
     }
