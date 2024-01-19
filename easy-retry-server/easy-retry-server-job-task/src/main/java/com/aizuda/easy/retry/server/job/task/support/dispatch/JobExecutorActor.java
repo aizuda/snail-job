@@ -178,6 +178,7 @@ public class JobExecutorActor extends AbstractActor {
         if (Objects.isNull(job)
             || JobTaskExecutorSceneEnum.MANUAL_JOB.getType().equals(taskExecuteDTO.getTaskExecutorScene())
             || JobTaskExecutorSceneEnum.AUTO_WORKFLOW.getType().equals(taskExecuteDTO.getTaskExecutorScene())
+            || JobTaskExecutorSceneEnum.MANUAL_WORKFLOW.getType().equals(taskExecuteDTO.getTaskExecutorScene())
             // 是否是常驻任务
             || Objects.equals(StatusEnum.NO.getStatus(), job.getResident())
         ) {

@@ -68,7 +68,7 @@ public class JobTaskBatchGenerator {
                         try {
                             WorkflowNodeTaskExecuteDTO taskExecuteDTO = new WorkflowNodeTaskExecuteDTO();
                             taskExecuteDTO.setWorkflowTaskBatchId(context.getWorkflowTaskBatchId());
-                            taskExecuteDTO.setTaskExecutorScene(JobTaskExecutorSceneEnum.AUTO_JOB.getType());
+                            taskExecuteDTO.setTaskExecutorScene(context.getTaskExecutorScene());
                             taskExecuteDTO.setParentId(context.getWorkflowNodeId());
                             ActorRef actorRef = ActorGenerator.workflowTaskExecutorActor();
                             actorRef.tell(taskExecuteDTO, actorRef);
