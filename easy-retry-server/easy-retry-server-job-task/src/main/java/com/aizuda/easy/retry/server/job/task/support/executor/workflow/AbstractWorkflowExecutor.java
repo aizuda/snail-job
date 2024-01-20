@@ -167,20 +167,6 @@ public abstract class AbstractWorkflowExecutor implements WorkflowExecutor, Init
         return jobTask;
     }
 
-    public void generate(WorkflowExecutorContext context) {
-        if (Objects.equals(context.getWorkflowNodeStatus(), StatusEnum.YES.getStatus())) {
-            return;
-        }
-
-        JobTaskBatchGeneratorContext generatorContext = WorkflowTaskConverter.INSTANCE.toJobTaskBatchGeneratorContext(context);
-        generatorContext.setTaskBatchStatus(JobTaskBatchStatusEnum.CANCEL.getStatus());
-        generatorContext.setOperationReason(JobOperationReasonEnum.WORKFLOW_NODE_CLOSED_SKIP_EXECUTION.getReason());
-        generatorContext.setJobId(context.getJobId());
-        generatorContext.setTaskExecutorScene(context.getTaskExecutorScene());
-        jobTaskBatchGenerator.generateJobTaskBatch(generatorContext);
-        workflowBatchHandler.complete(context.getWorkflowTaskBatchId());
-    }
-
     @Override
     public void afterPropertiesSet() {
         WorkflowExecutorFactory.registerJobExecutor(getWorkflowNodeType(), this);

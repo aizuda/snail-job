@@ -22,6 +22,7 @@ import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.Objects;
@@ -74,27 +75,30 @@ public class DecisionWorkflowExecutor extends AbstractWorkflowExecutor {
                     List<JobTask> jobTasks = jobTaskMapper.selectList(new LambdaQueryWrapper<JobTask>()
                             .select(JobTask::getResultMessage)
                             .eq(JobTask::getTaskBatchId, context.getTaskBatchId()));
-
-                    Boolean tempResult = null;
                     List<String> taskResult = Lists.newArrayList();
-                    for (JobTask jobTask : jobTasks) {
-                        taskResult.add(jobTask.getResultMessage());
-                        boolean execResult = (Boolean) Optional.ofNullable(expressionEngine.eval(decisionConfig.getNodeExpression(), jobTask.getResultMessage())).orElse(Boolean.FALSE);
+                    Boolean tempResult = null;
+                    if (CollectionUtils.isEmpty(jobTasks)) {
+                        tempResult = (Boolean) Optional.ofNullable(expressionEngine.eval(decisionConfig.getNodeExpression(), StrUtil.EMPTY)).orElse(Boolean.FALSE);
+                    } else {
+                        for (JobTask jobTask : jobTasks) {
+                            taskResult.add(jobTask.getResultMessage());
+                            boolean execResult = (Boolean) Optional.ofNullable(expressionEngine.eval(decisionConfig.getNodeExpression(), jobTask.getResultMessage())).orElse(Boolean.FALSE);
 
-                        if (Objects.isNull(tempResult)) {
-                            tempResult = execResult;
-                        }
-
-                        if (Objects.equals(decisionConfig.getLogicalCondition(), LogicalConditionEnum.AND.getCode())) {
-                            tempResult = tempResult && execResult;
-                        } else {
-                            tempResult = tempResult || execResult;
-                            if (tempResult) {
-                                break;
+                            if (Objects.isNull(tempResult)) {
+                                tempResult = execResult;
                             }
-                        }
 
-                        log.info("执行条件表达式：[{}]，参数: [{}] 结果：[{}]", decisionConfig.getNodeExpression(), jobTask.getResultMessage(), result);
+                            if (Objects.equals(decisionConfig.getLogicalCondition(), LogicalConditionEnum.AND.getCode())) {
+                                tempResult = tempResult && execResult;
+                            } else {
+                                tempResult = tempResult || execResult;
+                                if (tempResult) {
+                                    break;
+                                }
+                            }
+
+                            log.info("执行条件表达式：[{}]，参数: [{}] 结果：[{}]", decisionConfig.getNodeExpression(), jobTask.getResultMessage(), result);
+                        }
                     }
 
                     context.setTaskResult(JsonUtil.toJsonString(taskResult));

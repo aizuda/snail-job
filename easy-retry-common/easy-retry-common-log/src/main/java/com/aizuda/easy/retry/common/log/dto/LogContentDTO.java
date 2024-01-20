@@ -36,10 +36,6 @@ public class LogContentDTO {
         fieldList.add(new TaskLogFieldDTO(name, value));
     }
 
-    public void addTimeField(String time) {
-        this.addField(LogFieldConstants.TIME, time);
-    }
-
     public void addTimeStamp(Long timeStamp) {
         this.addField(LogFieldConstants.TIME_STAMP, String.valueOf(timeStamp));
     }

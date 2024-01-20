@@ -49,11 +49,9 @@ public abstract class AbstractClientCallbackHandler implements ClientCallbackHan
                 realJobExecutor.setClientId(ClientInfoUtils.clientId(context.getClientInfo()));
                 realJobExecutor.setWorkflowNodeId(context.getWorkflowNodeId());
                 realJobExecutor.setWorkflowTaskBatchId(context.getWorkflowTaskBatchId());
+                realJobExecutor.setRetryCount(jobTask.getRetryCount() + 1);
                 ActorRef actorRef = ActorGenerator.jobRealTaskExecutorActor();
                 actorRef.tell(realJobExecutor, actorRef);
-                LogMetaDTO logMetaDTO = JobTaskConverter.INSTANCE.toJobLogDTO(context);
-                EasyRetryLog.REMOTE.info("任务执行/调度失败执行重试. 重试次数:[{}] <|>{}<|>",
-                        jobTask.getRetryCount() + 1, logMetaDTO);
                 return;
             }
         }

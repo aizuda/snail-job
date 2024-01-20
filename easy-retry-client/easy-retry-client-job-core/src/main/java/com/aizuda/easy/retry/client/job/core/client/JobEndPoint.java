@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.client.job.core.client;
 
+import com.aizuda.easy.retry.client.common.util.ThreadLocalLogUtil;
 import com.aizuda.easy.retry.client.job.core.IJobExecutor;
 import com.aizuda.easy.retry.client.job.core.cache.JobExecutorInfoCache;
 import com.aizuda.easy.retry.client.job.core.cache.ThreadPoolCache;
@@ -34,14 +35,23 @@ public class JobEndPoint {
     @PostMapping("/dispatch/v1")
     public Result<Boolean> dispatchJob(@RequestBody @Validated DispatchJobRequest dispatchJob) {
 
-        JobContext jobContext = buildJobContext(dispatchJob);
-        JobExecutorInfo jobExecutorInfo = JobExecutorInfoCache.get(jobContext.getExecutorInfo());
-        if (Objects.isNull(jobExecutorInfo)) {
-            EasyRetryLog.REMOTE.error("执行器配置有误. executorInfo:[{}]", dispatchJob.getExecutorInfo());
-            return new Result<>("执行器配置有误", Boolean.FALSE);
-        }
-
         try {
+            JobContext jobContext = buildJobContext(dispatchJob);
+
+            // 初始化调度信息（日志上报LogUtil）
+            ThreadLocalLogUtil.setContext(jobContext);
+
+            if (Objects.nonNull(dispatchJob.getRetryCount()) && dispatchJob.getRetryCount() > 0) {
+                EasyRetryLog.REMOTE.info("任务执行/调度失败执行重试. 重试次数:[{}]",
+                        dispatchJob.getRetryCount());
+            }
+
+            JobExecutorInfo jobExecutorInfo = JobExecutorInfoCache.get(jobContext.getExecutorInfo());
+            if (Objects.isNull(jobExecutorInfo)) {
+                EasyRetryLog.REMOTE.error("执行器配置有误. executorInfo:[{}]", dispatchJob.getExecutorInfo());
+                return new Result<>("执行器配置有误", Boolean.FALSE);
+            }
+
             // 选择执行器
             Object executor = jobExecutorInfo.getExecutor();
             IJobExecutor jobExecutor;
@@ -51,12 +61,16 @@ public class JobEndPoint {
                 jobExecutor = SpringContext.getBeanByType(AnnotationJobExecutor.class);
             }
 
+            EasyRetryLog.REMOTE.info("批次:[{}] 任务调度成功. ", dispatchJob.getTaskBatchId());
+
             jobExecutor.jobExecute(jobContext);
+
         } catch (Exception e) {
             EasyRetryLog.REMOTE.error("客户端发生非预期异常. taskBatchId:[{}]", dispatchJob.getTaskBatchId());
             throw e;
+        } finally {
+            ThreadLocalLogUtil.removeContext();
         }
-
 
         return new Result<>(Boolean.TRUE);
     }

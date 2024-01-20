@@ -62,6 +62,8 @@ public class RealJobExecutorDTO extends BaseDTO {
      */
     private Integer retryInterval;
 
+    private Integer retryCount;
+
     private Integer shardingTotal;
 
     private Integer shardingIndex;
