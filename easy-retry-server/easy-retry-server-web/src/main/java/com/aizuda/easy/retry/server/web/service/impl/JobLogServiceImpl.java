@@ -2,6 +2,8 @@ package com.aizuda.easy.retry.server.web.service.impl;
 
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
+import com.aizuda.easy.retry.common.log.constant.LogFieldConstants;
+import com.aizuda.easy.retry.common.log.dto.LogContentDTO;
 import com.aizuda.easy.retry.server.web.model.request.JobLogQueryVO;
 import com.aizuda.easy.retry.server.web.model.response.JobLogResponseVO;
 import com.aizuda.easy.retry.server.web.service.JobLogService;
@@ -18,9 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -85,7 +85,7 @@ public class JobLogServiceImpl implements JobLogService {
         }
 
         long nextStartId = 0;
-        List<String> messages = Lists.newArrayList();
+        List<Map<String, String>> messages = Lists.newArrayList();
         List<JobLogMessage> jobLogMessages = jobLogMessageMapper.selectList(
                 new LambdaQueryWrapper<JobLogMessage>()
                         .in(JobLogMessage::getId, ids)
@@ -95,9 +95,9 @@ public class JobLogServiceImpl implements JobLogService {
 
         for (final JobLogMessage jobLogMessage : jobLogMessages) {
 
-            List<String> originalList = JsonUtil.parseObject(jobLogMessage.getMessage(), List.class);
+            List<Map<String, String>> originalList = JsonUtil.parseObject(jobLogMessage.getMessage(), List.class);
             int size = originalList.size() - fromIndex;
-            List<String> pageList = originalList.stream().skip(fromIndex).limit(queryVO.getSize())
+            List<Map<String, String>> pageList = originalList.stream().skip(fromIndex).limit(queryVO.getSize())
                     .collect(Collectors.toList());
 
             if (messages.size() + size >= queryVO.getSize()) {
@@ -111,6 +111,18 @@ public class JobLogServiceImpl implements JobLogService {
             nextStartId = jobLogMessage.getId() + 1;
             fromIndex = 0;
         }
+
+        messages = messages.stream().sorted((o1, o2) -> {
+            long value = Long.parseLong(o1.get(LogFieldConstants.TIME_STAMP)) - Long.parseLong(o2.get(LogFieldConstants.TIME_STAMP));
+
+            if (value > 0) {
+                return 1;
+            } else if (value < 0) {
+                return -1;
+            }
+
+            return 0;
+        }).collect(Collectors.toList());
 
         JobLogResponseVO jobLogResponseVO = new JobLogResponseVO();
         jobLogResponseVO.setMessage(messages);

@@ -113,7 +113,7 @@ public class EasyRetryProperties {
         /**
          * 窗口期时间长度
          */
-        private long duration = 10;
+        private long duration = 5;
 
         /**
          * 窗口期单位

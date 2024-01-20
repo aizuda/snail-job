@@ -70,13 +70,10 @@ public class RequestClientActor extends AbstractActor {
 
         try {
             // 构建请求客户端对象
-            Long timestamp = DateUtils.toNowMilli();
             JobRpcClient rpcClient = buildRpcClient(registerNodeInfo, realJobExecutorDTO);
             Result<Boolean> dispatch = rpcClient.dispatch(dispatchJobRequest);
             if (dispatch.getStatus() == StatusEnum.YES.getStatus() && Objects.equals(dispatch.getData(), Boolean.TRUE)) {
-                LogMetaDTO logMetaDTO = JobTaskConverter.INSTANCE.toJobLogDTO(realJobExecutorDTO);
-                logMetaDTO.setTimestamp(timestamp);
-                EasyRetryLog.REMOTE.info("taskId:[{}] 任务调度成功. <|>{}<|>", logMetaDTO.getTaskId(), logMetaDTO);
+                EasyRetryLog.LOCAL.info("taskId:[{}] 任务调度成功.", realJobExecutorDTO.getTaskId());
             } else {
                 // 客户端返回失败，则认为任务执行失败
                 ClientCallbackHandler clientCallback = ClientCallbackFactory.getClientCallback(realJobExecutorDTO.getTaskType());
@@ -87,13 +84,16 @@ public class RequestClientActor extends AbstractActor {
             }
 
         } catch (Exception e) {
-            log.error("调用客户端失败.", e);
-            Throwable throwable;
+            Throwable throwable = e;
             if (e.getClass().isAssignableFrom(RetryException.class)) {
                 RetryException re = (RetryException) e;
                 throwable = re.getLastFailedAttempt().getExceptionCause();
                 taskExecuteFailure(realJobExecutorDTO, throwable.getMessage());
             }
+
+            LogMetaDTO logMetaDTO = JobTaskConverter.INSTANCE.toJobLogDTO(realJobExecutorDTO);
+            logMetaDTO.setTimestamp( DateUtils.toNowMilli());
+            EasyRetryLog.REMOTE.error("taskId:[{}] 任务调度成功. <|>{}<|>", logMetaDTO.getTaskId(), logMetaDTO, throwable);
         }
 
     }

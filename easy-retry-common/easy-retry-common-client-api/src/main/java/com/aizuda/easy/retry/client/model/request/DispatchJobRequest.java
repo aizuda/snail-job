@@ -52,5 +52,6 @@ public class DispatchJobRequest {
 
     private Long workflowNodeId;
 
+    private Integer retryCount;
 
 }
