@@ -37,6 +37,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum.WORKFLOW_SUCCESSOR_SKIP_EXECUTION;
 import static com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum.NOT_COMPLETE;
 
 /**
@@ -56,7 +57,7 @@ public class WorkflowBatchHandler {
         return complete(workflowTaskBatchId, null);
     }
 
-    public boolean complete(Long workflowTaskBatchId, WorkflowTaskBatch workflowTaskBatch)  {
+    public boolean complete(Long workflowTaskBatchId, WorkflowTaskBatch workflowTaskBatch) {
         workflowTaskBatch = Optional.ofNullable(workflowTaskBatch)
                 .orElseGet(() -> workflowTaskBatchMapper.selectById(workflowTaskBatchId));
         Assert.notNull(workflowTaskBatch, () -> new EasyRetryServerException("任务不存在"));
@@ -103,7 +104,7 @@ public class WorkflowBatchHandler {
                 if (JobTaskBatchStatusEnum.NOT_SUCCESS.contains(jobTaskBatch.getTaskBatchStatus())) {
                     // 只要叶子节点不是无需处理的都是失败
                     if (JobOperationReasonEnum.WORKFLOW_NODE_NO_REQUIRED.getReason() != jobTaskBatch.getOperationReason()
-                        && JobOperationReasonEnum.WORKFLOW_NODE_CLOSED_SKIP_EXECUTION.getReason() != jobTaskBatch.getOperationReason()) {
+                            && JobOperationReasonEnum.WORKFLOW_NODE_CLOSED_SKIP_EXECUTION.getReason() != jobTaskBatch.getOperationReason()) {
                         taskStatus = JobTaskBatchStatusEnum.FAIL.getStatus();
                     }
                 }
@@ -131,7 +132,7 @@ public class WorkflowBatchHandler {
 
             for (JobTaskBatch jobTaskBatch : jobTaskBatchList) {
                 // 只要是无需处理的说明后面的子节点都不需要处理了，isNeedProcess为false
-                if (JobOperationReasonEnum.WORKFLOW_SUCCESSOR_SKIP_EXECUTION.contains(jobTaskBatch.getOperationReason())) {
+                if (WORKFLOW_SUCCESSOR_SKIP_EXECUTION.contains(jobTaskBatch.getOperationReason())) {
                     isNeedProcess = false;
                     continue;
                 }
@@ -227,8 +228,7 @@ public class WorkflowBatchHandler {
         // 判定条件节点是否已经执行完成
         JobTaskBatch parentJobTaskBatch = jobTaskBatchMap.get(parentId);
         if (Objects.nonNull(parentJobTaskBatch) &&
-                JobOperationReasonEnum.WORKFLOW_NODE_NO_REQUIRED.getReason()
-                        == parentJobTaskBatch.getOperationReason()) {
+                WORKFLOW_SUCCESSOR_SKIP_EXECUTION.contains(parentJobTaskBatch.getOperationReason())) {
             return;
         }
 
