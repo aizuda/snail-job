@@ -47,7 +47,7 @@ public class JobLogServiceImpl implements JobLogService {
                 .ge(JobLogMessage::getJobId, queryVO.getJobId())
                 .eq(JobLogMessage::getTaskId, queryVO.getTaskId());
 
-        queryWrapper.orderByAsc(JobLogMessage::getRealTime).orderByDesc(JobLogMessage::getId);
+        queryWrapper.orderByAsc(JobLogMessage::getRealTime).orderByAsc(JobLogMessage::getId);
         PageDTO<JobLogMessage> selectPage = jobLogMessageMapper.selectPage(pageDTO, queryWrapper);
         List<JobLogMessage> records = selectPage.getRecords();
         if (CollectionUtils.isEmpty(records)) {
@@ -86,7 +86,13 @@ public class JobLogServiceImpl implements JobLogService {
 
         long nextStartId = 0;
         List<String> messages = Lists.newArrayList();
-        List<JobLogMessage> jobLogMessages = jobLogMessageMapper.selectBatchIds(ids);
+        List<JobLogMessage> jobLogMessages = jobLogMessageMapper.selectList(
+                new LambdaQueryWrapper<JobLogMessage>()
+                        .in(JobLogMessage::getId, ids)
+                        .orderByAsc(JobLogMessage::getRealTime)
+                        .orderByAsc(JobLogMessage::getId)
+        );
+
         for (final JobLogMessage jobLogMessage : jobLogMessages) {
 
             List<String> originalList = JsonUtil.parseObject(jobLogMessage.getMessage(), List.class);

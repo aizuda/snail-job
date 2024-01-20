@@ -98,4 +98,8 @@ public class WorkflowExecutorContext {
      */
     private Integer taskExecutorScene;
 
+    /**
+     * 1、任务节点 2、条件节点 3、回调节点
+     */
+    private Integer nodeType;
 }

@@ -3,10 +3,7 @@ package com.aizuda.easy.retry.server.job.task.support.executor.workflow;
 import akka.actor.ActorRef;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
-import com.aizuda.easy.retry.common.core.enums.JobArgsTypeEnum;
-import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
-import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
-import com.aizuda.easy.retry.common.core.enums.StatusEnum;
+import com.aizuda.easy.retry.common.core.enums.*;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.job.task.dto.WorkflowNodeTaskExecuteDTO;
@@ -30,11 +27,15 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.util.CollectionUtils;
 
 import java.text.MessageFormat;
 import java.time.Duration;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+
+import static com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum.WORKFLOW_SUCCESSOR_SKIP_EXECUTION;
 
 /**
  * @author xiaowoniu
@@ -64,10 +65,32 @@ public abstract class AbstractWorkflowExecutor implements WorkflowExecutor, Init
         distributedLockHandler.lockWithDisposableAndRetry(
                 () -> {
 
-                    Long total = jobTaskBatchMapper.selectCount(new LambdaQueryWrapper<JobTaskBatch>()
-                            .eq(JobTaskBatch::getWorkflowTaskBatchId, context.getWorkflowTaskBatchId())
-                            .eq(JobTaskBatch::getWorkflowNodeId, context.getWorkflowNodeId())
-                    );
+                    long total = 0;
+                    // 条件节点存在并发问题，需要特殊处理
+                    if (WorkflowNodeTypeEnum.DECISION.getType() == context.getNodeType()) {
+                        List<JobTaskBatch> jobTaskBatches = jobTaskBatchMapper.selectList(new LambdaQueryWrapper<JobTaskBatch>()
+                                .select(JobTaskBatch::getOperationReason)
+                                .eq(JobTaskBatch::getWorkflowTaskBatchId, context.getWorkflowTaskBatchId())
+                                .eq(JobTaskBatch::getWorkflowNodeId, context.getWorkflowNodeId())
+                        );
+
+                        if (!CollectionUtils.isEmpty(jobTaskBatches)) {
+                            total = jobTaskBatches.size();
+                            JobTaskBatch jobTaskBatch = jobTaskBatches.get(0);
+                            if (WORKFLOW_SUCCESSOR_SKIP_EXECUTION.contains(jobTaskBatch.getOperationReason())) {
+                                context.setEvaluationResult(Boolean.FALSE);
+                            } else {
+                                context.setEvaluationResult(Boolean.TRUE);
+                            }
+                        }
+
+                    } else {
+                        total = jobTaskBatchMapper.selectCount(new LambdaQueryWrapper<JobTaskBatch>()
+                                .eq(JobTaskBatch::getWorkflowTaskBatchId, context.getWorkflowTaskBatchId())
+                                .eq(JobTaskBatch::getWorkflowNodeId, context.getWorkflowNodeId())
+                        );
+                    }
+
                     if (total > 0) {
                         log.warn("任务节点[{}]已被执行，请勿重复执行", context.getWorkflowNodeId());
                         return;
