@@ -88,12 +88,14 @@ public class RequestClientActor extends AbstractActor {
             if (e.getClass().isAssignableFrom(RetryException.class)) {
                 RetryException re = (RetryException) e;
                 throwable = re.getLastFailedAttempt().getExceptionCause();
-                taskExecuteFailure(realJobExecutorDTO, throwable.getMessage());
             }
 
             LogMetaDTO logMetaDTO = JobTaskConverter.INSTANCE.toJobLogDTO(realJobExecutorDTO);
             logMetaDTO.setTimestamp( DateUtils.toNowMilli());
-            EasyRetryLog.REMOTE.error("taskId:[{}] 任务调度成功. <|>{}<|>", logMetaDTO.getTaskId(), logMetaDTO, throwable);
+            EasyRetryLog.REMOTE.error("taskId:[{}] 任务调度失败. <|>{}<|>", logMetaDTO.getTaskId(), logMetaDTO, throwable);
+
+            taskExecuteFailure(realJobExecutorDTO, throwable.getMessage());
+
         }
 
     }
@@ -135,10 +137,7 @@ public class RequestClientActor extends AbstractActor {
 
     private static void taskExecuteFailure(RealJobExecutorDTO realJobExecutorDTO, String message) {
         ActorRef actorRef = ActorGenerator.jobTaskExecutorResultActor();
-        JobExecutorResultDTO jobExecutorResultDTO = new JobExecutorResultDTO();
-        jobExecutorResultDTO.setTaskId(realJobExecutorDTO.getTaskId());
-        jobExecutorResultDTO.setJobId(realJobExecutorDTO.getJobId());
-        jobExecutorResultDTO.setTaskBatchId(realJobExecutorDTO.getTaskBatchId());
+        JobExecutorResultDTO jobExecutorResultDTO = JobTaskConverter.INSTANCE.toJobExecutorResultDTO(realJobExecutorDTO);
         jobExecutorResultDTO.setTaskStatus(JobTaskStatusEnum.FAIL.getStatus());
         jobExecutorResultDTO.setMessage(message);
         actorRef.tell(jobExecutorResultDTO, actorRef);

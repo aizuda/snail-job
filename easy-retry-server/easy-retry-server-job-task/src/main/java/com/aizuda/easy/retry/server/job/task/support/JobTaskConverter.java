@@ -107,6 +107,8 @@ public interface JobTaskConverter {
     )
     JobExecutorResultDTO toJobExecutorResultDTO(JobTask jobTask);
 
+    JobExecutorResultDTO toJobExecutorResultDTO(RealJobExecutorDTO realJobExecutorDTO);
+
     RealStopTaskInstanceDTO toRealStopTaskInstanceDTO(TaskStopJobContext context);
 
     List<JobPartitionTaskDTO> toJobPartitionTasks(List<Job> jobs);

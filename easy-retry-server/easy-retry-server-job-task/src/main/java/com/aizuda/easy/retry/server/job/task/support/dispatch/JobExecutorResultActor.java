@@ -16,6 +16,8 @@ import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.server.job.task.dto.JobExecutorResultDTO;
 import com.aizuda.easy.retry.server.job.task.dto.JobLogDTO;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskStopHandler;
+import com.aizuda.easy.retry.server.job.task.support.LockExecutor;
+import com.aizuda.easy.retry.server.job.task.support.handler.DistributedLockHandler;
 import com.aizuda.easy.retry.server.job.task.support.handler.JobTaskBatchHandler;
 import com.aizuda.easy.retry.server.job.task.support.stop.JobTaskStopFactory;
 import com.aizuda.easy.retry.server.job.task.support.stop.TaskStopJobContext;
@@ -31,6 +33,8 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.text.MessageFormat;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -43,13 +47,15 @@ import java.util.Objects;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Slf4j
 public class JobExecutorResultActor extends AbstractActor {
-
+    private static final String KEY = "job_complete_{0}_{1}";
     @Autowired
     private JobTaskMapper jobTaskMapper;
     @Autowired
     private TransactionTemplate transactionTemplate;
     @Autowired
     private JobTaskBatchHandler jobTaskBatchHandler;
+    @Autowired
+    private DistributedLockHandler distributedLockHandler;
 
     @Override
     public Receive createReceive() {
@@ -69,30 +75,26 @@ public class JobExecutorResultActor extends AbstractActor {
                                         new LambdaUpdateWrapper<JobTask>().eq(JobTask::getId, result.getTaskId())),
                                 ()-> new EasyRetryServerException("更新任务实例失败"));
 
-
-
-                        // 更新批次上的状态
-                        CompleteJobBatchDTO completeJobBatchDTO = JobTaskConverter.INSTANCE.toCompleteJobBatchDTO(result);
-                        boolean complete = jobTaskBatchHandler.complete(completeJobBatchDTO);
-                        if (complete) {
-                            // 尝试停止任务
-                            // 若是集群任务则客户端会主动关闭
-                            if (result.getTaskType() != JobTaskTypeEnum.CLUSTER.getType()) {
-                                JobTaskStopHandler instanceInterrupt = JobTaskStopFactory.getJobTaskStop(result.getTaskType());
-                                TaskStopJobContext stopJobContext = JobTaskConverter.INSTANCE.toStopJobContext(result);
-                                stopJobContext.setNeedUpdateTaskStatus(Boolean.FALSE);
-                                stopJobContext.setForceStop(Boolean.TRUE);
-                                instanceInterrupt.stop(stopJobContext);
+                        // 存在并发问题
+                        distributedLockHandler.lockWithDisposableAndRetry(() -> {
+                            // 更新批次上的状态
+                            CompleteJobBatchDTO completeJobBatchDTO = JobTaskConverter.INSTANCE.toCompleteJobBatchDTO(result);
+                            boolean complete = jobTaskBatchHandler.complete(completeJobBatchDTO);
+                            if (complete) {
+                                // 尝试停止任务
+                                // 若是集群任务则客户端会主动关闭
+                                if (result.getTaskType() != JobTaskTypeEnum.CLUSTER.getType()) {
+                                    JobTaskStopHandler instanceInterrupt = JobTaskStopFactory.getJobTaskStop(result.getTaskType());
+                                    TaskStopJobContext stopJobContext = JobTaskConverter.INSTANCE.toStopJobContext(result);
+                                    stopJobContext.setNeedUpdateTaskStatus(Boolean.FALSE);
+                                    stopJobContext.setForceStop(Boolean.TRUE);
+                                    instanceInterrupt.stop(stopJobContext);
+                                }
                             }
-                        }
+                        }, MessageFormat.format(KEY, result.getTaskBatchId(), result.getJobId()), Duration.ofSeconds(3), Duration.ofSeconds(1), 3);
+
                     }
                 });
-
-//                LogMetaDTO logMetaDTO = JobTaskConverter.INSTANCE.toJobLogDTO(result);
-//                // 防止客户端日志还未上报完成，导致日志时序错误
-//                logMetaDTO.setTimestamp(DateUtils.toEpochMilli(LocalDateTime.now().plusHours(1)));
-//                EasyRetryLog.REMOTE.info("taskId:[{}] 任务执行成功. <|>{}<|>", logMetaDTO.getTaskId(), logMetaDTO);
-
             } catch (Exception e) {
                 EasyRetryLog.LOCAL.error(" job executor result exception. [{}]", result, e);
             } finally {
