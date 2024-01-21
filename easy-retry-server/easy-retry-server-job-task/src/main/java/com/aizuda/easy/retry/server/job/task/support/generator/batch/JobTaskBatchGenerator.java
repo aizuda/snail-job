@@ -60,25 +60,6 @@ public class JobTaskBatchGenerator {
             jobTaskBatch.setTaskBatchStatus(JobTaskBatchStatusEnum.CANCEL.getStatus());
             jobTaskBatch.setOperationReason(JobOperationReasonEnum.NOT_CLIENT.getReason());
 
-            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-                @Override
-                public void afterCompletion(int status) {
-                    if (Objects.nonNull(context.getWorkflowNodeId()) && Objects.nonNull(context.getWorkflowTaskBatchId())) {
-                        // 若是工作流则开启下一个任务
-                        try {
-                            WorkflowNodeTaskExecuteDTO taskExecuteDTO = new WorkflowNodeTaskExecuteDTO();
-                            taskExecuteDTO.setWorkflowTaskBatchId(context.getWorkflowTaskBatchId());
-                            taskExecuteDTO.setTaskExecutorScene(context.getTaskExecutorScene());
-                            taskExecuteDTO.setParentId(context.getWorkflowNodeId());
-                            ActorRef actorRef = ActorGenerator.workflowTaskExecutorActor();
-                            actorRef.tell(taskExecuteDTO, actorRef);
-                        } catch (Exception e) {
-                            log.error("任务调度执行失败", e);
-                        }
-                    }
-                }
-            });
-
         } else {
             // 生成一个新的任务
             jobTaskBatch.setTaskBatchStatus(Optional.ofNullable(context.getTaskBatchStatus()).orElse(JobTaskBatchStatusEnum.WAITING.getStatus()));
@@ -98,6 +79,25 @@ public class JobTaskBatchGenerator {
 
         // 非待处理状态无需进入时间轮中
         if (JobTaskBatchStatusEnum.WAITING.getStatus() != jobTaskBatch.getTaskBatchStatus()) {
+
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCompletion(int status) {
+                    if (Objects.nonNull(context.getWorkflowNodeId()) && Objects.nonNull(context.getWorkflowTaskBatchId())) {
+                        // 若是工作流则开启下一个任务
+                        try {
+                            WorkflowNodeTaskExecuteDTO taskExecuteDTO = new WorkflowNodeTaskExecuteDTO();
+                            taskExecuteDTO.setWorkflowTaskBatchId(context.getWorkflowTaskBatchId());
+                            taskExecuteDTO.setTaskExecutorScene(context.getTaskExecutorScene());
+                            taskExecuteDTO.setParentId(context.getWorkflowNodeId());
+                            ActorRef actorRef = ActorGenerator.workflowTaskExecutorActor();
+                            actorRef.tell(taskExecuteDTO, actorRef);
+                        } catch (Exception e) {
+                            log.error("任务调度执行失败", e);
+                        }
+                    }
+                }
+            });
             return jobTaskBatch;
         }
 

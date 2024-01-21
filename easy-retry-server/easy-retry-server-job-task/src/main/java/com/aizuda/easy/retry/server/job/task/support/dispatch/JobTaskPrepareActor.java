@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
+
 import static com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum.NOT_COMPLETE;
 
 /**
@@ -60,6 +61,9 @@ public class JobTaskPrepareActor extends AbstractActor {
                 prepare.getTaskExecutorScene());
         if (TaskTypeEnum.WORKFLOW.getType().equals(jobTaskExecutorSceneEnum.getTaskType().getType())) {
             queryWrapper.eq(JobTaskBatch::getWorkflowNodeId, prepare.getWorkflowNodeId());
+            queryWrapper.eq(JobTaskBatch::getTaskType, TaskTypeEnum.WORKFLOW.getType());
+        } else {
+            queryWrapper.eq(JobTaskBatch::getTaskType, TaskTypeEnum.JOB.getType());
         }
 
         List<JobTaskBatch> notCompleteJobTaskBatchList = jobTaskBatchMapper
@@ -75,7 +79,7 @@ public class JobTaskPrepareActor extends AbstractActor {
             for (JobTaskBatch jobTaskBatch : notCompleteJobTaskBatchList) {
                 prepare.setExecutionAt(jobTaskBatch.getExecutionAt());
                 prepare.setTaskBatchId(jobTaskBatch.getId());
-                prepare.setWorkflowTaskBatchId(jobTaskBatch.getWorkflowTaskBatchId());
+                prepare.setWorkflowTaskBatchId(prepare.getWorkflowTaskBatchId());
                 prepare.setWorkflowNodeId(jobTaskBatch.getWorkflowNodeId());
                 prepare.setOnlyTimeoutCheck(onlyTimeoutCheck);
                 for (JobPrePareHandler prePareHandler : prePareHandlers) {
