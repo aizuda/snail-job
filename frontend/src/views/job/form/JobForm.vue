@@ -210,7 +210,7 @@
           <a-col :lg="6" :md="12" :sm="24">
             <a-form-item label="最大重试次数">
               <a-input-number
-                :min="1"
+                :min="0"
                 v-decorator="[
                   'maxRetryTimes',
                   {
