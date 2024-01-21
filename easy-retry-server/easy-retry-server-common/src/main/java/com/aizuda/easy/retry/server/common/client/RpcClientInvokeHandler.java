@@ -214,8 +214,8 @@ public class RpcClientInvokeHandler implements InvocationHandler {
     private Retryer<Result> buildResultRetryer() {
         Retryer<Result> retryer = RetryerBuilder.<Result>newBuilder()
             .retryIfException(throwable -> failRetry)
-            .withStopStrategy(StopStrategies.stopAfterAttempt(retryTimes))
-            .withWaitStrategy(WaitStrategies.fixedWait(retryInterval, TimeUnit.SECONDS))
+            .withStopStrategy(StopStrategies.stopAfterAttempt(retryTimes <= 0 ? 1 : retryTimes))
+            .withWaitStrategy(WaitStrategies.fixedWait(Math.max(retryInterval, 0), TimeUnit.SECONDS))
             .withRetryListener(retryListener)
             .build();
         return retryer;
