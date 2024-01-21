@@ -60,7 +60,6 @@ public abstract class AbstractWorkflowExecutor implements WorkflowExecutor, Init
     private TransactionTemplate transactionTemplate;
 
     @Override
-    @Transactional
     public void execute(WorkflowExecutorContext context) {
         distributedLockHandler.lockWithDisposableAndRetry(
                 () -> {
@@ -111,7 +110,7 @@ public abstract class AbstractWorkflowExecutor implements WorkflowExecutor, Init
                         }
                     });
                 }, MessageFormat.format(KEY, context.getWorkflowTaskBatchId(), context.getWorkflowNodeId()),
-                Duration.ofSeconds(5), Duration.ofSeconds(1), 3);
+                Duration.ofSeconds(6), Duration.ofSeconds(2), 12);
 
     }
 

@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.server.common.lock.persistence;
 
+import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.Lifecycle;
 import com.aizuda.easy.retry.server.common.cache.CacheLockRecord;
@@ -18,7 +19,12 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.UncategorizedSQLException;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSystemException;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -48,76 +54,90 @@ public class JdbcLockProvider implements LockStorage, Lifecycle {
 
     @Override
     public boolean createLock(LockConfig lockConfig) {
-        try {
-            LocalDateTime now = lockConfig.getCreateDt();
-            DistributedLock distributedLock = new DistributedLock();
-            distributedLock.setName(lockConfig.getLockName());
-            distributedLock.setLockedBy(ServerRegister.CURRENT_CID);
-            distributedLock.setLockedAt(now);
-            distributedLock.setLockUntil(lockConfig.getLockAtMost());
-            distributedLock.setCreateDt(now);
-            distributedLock.setUpdateDt(now);
-            return distributedLockMapper.insert(distributedLock) > 0;
-        } catch (DuplicateKeyException | ConcurrencyFailureException | TransactionSystemException e) {
-            return false;
-        } catch (DataIntegrityViolationException | BadSqlGrammarException | UncategorizedSQLException e) {
-            EasyRetryLog.LOCAL.error("Unexpected exception. lockName:[{}]", lockConfig.getLockName(), e);
-            return false;
-        }
+        TransactionTemplate transactionTemplate = SpringContext.getBean(TransactionTemplate.class);
+        transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_NOT_SUPPORTED);
+        return Boolean.TRUE.equals(transactionTemplate.execute(status -> {
+            try {
+                LocalDateTime now = lockConfig.getCreateDt();
+                DistributedLock distributedLock = new DistributedLock();
+                distributedLock.setName(lockConfig.getLockName());
+                distributedLock.setLockedBy(ServerRegister.CURRENT_CID);
+                distributedLock.setLockedAt(now);
+                distributedLock.setLockUntil(lockConfig.getLockAtMost());
+                distributedLock.setCreateDt(now);
+                distributedLock.setUpdateDt(now);
+                return distributedLockMapper.insert(distributedLock) > 0;
+            } catch (DuplicateKeyException | ConcurrencyFailureException | TransactionSystemException e) {
+                return false;
+            } catch (DataIntegrityViolationException | BadSqlGrammarException | UncategorizedSQLException e) {
+                EasyRetryLog.LOCAL.error("Unexpected exception. lockName:[{}]", lockConfig.getLockName(), e);
+                return false;
+            }
+        }));
+
     }
 
     @Override
     public boolean renewal(LockConfig lockConfig) {
-        LocalDateTime now = lockConfig.getCreateDt();
-        DistributedLock distributedLock = new DistributedLock();
-        distributedLock.setLockedBy(ServerRegister.CURRENT_CID);
-        distributedLock.setLockedAt(now);
-        distributedLock.setLockUntil(lockConfig.getLockAtMost());
-        distributedLock.setName(lockConfig.getLockName());
-        try {
-            return distributedLockMapper.update(distributedLock, new LambdaUpdateWrapper<DistributedLock>()
-                    .eq(DistributedLock::getName, lockConfig.getLockName())
-                    .le(DistributedLock::getLockUntil, now)) > 0;
-        } catch (ConcurrencyFailureException | DataIntegrityViolationException | TransactionSystemException |
-                 UncategorizedSQLException e) {
-            return false;
-        }
+        TransactionTemplate transactionTemplate = SpringContext.getBean(TransactionTemplate.class);
+        transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_NOT_SUPPORTED);
+        return Boolean.TRUE.equals(transactionTemplate.execute(status -> {
+            LocalDateTime now = lockConfig.getCreateDt();
+            DistributedLock distributedLock = new DistributedLock();
+            distributedLock.setLockedBy(ServerRegister.CURRENT_CID);
+            distributedLock.setLockedAt(now);
+            distributedLock.setLockUntil(lockConfig.getLockAtMost());
+            distributedLock.setName(lockConfig.getLockName());
+            try {
+                return distributedLockMapper.update(distributedLock, new LambdaUpdateWrapper<DistributedLock>()
+                        .eq(DistributedLock::getName, lockConfig.getLockName())
+                        .le(DistributedLock::getLockUntil, now)) > 0;
+            } catch (ConcurrencyFailureException | DataIntegrityViolationException | TransactionSystemException |
+                     UncategorizedSQLException e) {
+                return false;
+            }
+        }));
     }
 
     @Override
     public boolean releaseLockWithDelete(String lockName) {
-
-        for (int i = 0; i < 10; i++) {
-            try {
-                CacheLockRecord.remove(lockName);
-                return distributedLockMapper.delete(new LambdaUpdateWrapper<DistributedLock>()
-                        .eq(DistributedLock::getName, lockName)) > 0;
-            } catch (Exception e) {
-                EasyRetryLog.LOCAL.error("unlock error. retrying attempt [{}] ", i, e);
+        TransactionTemplate transactionTemplate = SpringContext.getBean(TransactionTemplate.class);
+        transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_NOT_SUPPORTED);
+        return Boolean.TRUE.equals(transactionTemplate.execute(status -> {
+            for (int i = 0; i < 10; i++) {
+                try {
+                    return distributedLockMapper.delete(new LambdaUpdateWrapper<DistributedLock>()
+                            .eq(DistributedLock::getName, lockName)) > 0;
+                } catch (Exception e) {
+                    EasyRetryLog.LOCAL.error("unlock error. retrying attempt [{}] ", i, e);
+                } finally {
+                    CacheLockRecord.remove(lockName);
+                }
             }
-        }
-
-        return false;
+            return false;
+        }));
     }
 
     @Override
     public boolean releaseLockWithUpdate(String lockName, LocalDateTime lockAtLeast) {
-
+        TransactionTemplate transactionTemplate = SpringContext.getBean(TransactionTemplate.class);
+        transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_NOT_SUPPORTED);
         LocalDateTime now = LocalDateTime.now();
-
-        for (int i = 0; i < 10; i++) {
-            try {
-                DistributedLock distributedLock = new DistributedLock();
-                distributedLock.setLockedBy(ServerRegister.CURRENT_CID);
-                distributedLock.setLockUntil(now.isBefore(lockAtLeast) ? lockAtLeast : now);
-                return distributedLockMapper.update(distributedLock, new LambdaUpdateWrapper<DistributedLock>()
-                        .eq(DistributedLock::getName, lockName)) > 0;
-            } catch (Exception e) {
-                EasyRetryLog.LOCAL.error("unlock error. retrying attempt [{}] ", i, e);
+        return Boolean.TRUE.equals(transactionTemplate.execute(status -> {
+            for (int i = 0; i < 10; i++) {
+                try {
+                    DistributedLock distributedLock = new DistributedLock();
+                    distributedLock.setLockedBy(ServerRegister.CURRENT_CID);
+                    distributedLock.setLockUntil(now.isBefore(lockAtLeast) ? lockAtLeast : now);
+                    return distributedLockMapper.update(distributedLock, new LambdaUpdateWrapper<DistributedLock>()
+                            .eq(DistributedLock::getName, lockName)) > 0;
+                } catch (Exception e) {
+                    EasyRetryLog.LOCAL.error("unlock error. retrying attempt [{}] ", i, e);
+                }
             }
-        }
 
-        return false;
+            return false;
+        }));
     }
 
     @Override
@@ -129,6 +149,6 @@ public class JdbcLockProvider implements LockStorage, Lifecycle {
     public void close() {
         // 删除当前节点获取的锁记录
         distributedLockMapper.delete(new LambdaUpdateWrapper<DistributedLock>()
-            .eq(DistributedLock::getLockedBy, ServerRegister.CURRENT_CID));
+                .eq(DistributedLock::getLockedBy, ServerRegister.CURRENT_CID));
     }
 }

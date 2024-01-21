@@ -1,9 +1,11 @@
 package com.aizuda.easy.retry.server.common.lock;
 
 import cn.hutool.core.lang.Assert;
+import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.server.common.cache.CacheLockRecord;
 import com.aizuda.easy.retry.server.common.dto.LockConfig;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.Duration;
 
@@ -31,7 +33,6 @@ public abstract class AbstractLockProvider implements LockProvider {
 
         LockManager.setLockAtLeast(lockAtLeast);
         LockManager.setLockAtMost(lockAtMost);
-
         boolean tryToCreateLockRecord = !CacheLockRecord.lockRecordRecentlyCreated(lockName);
         if (tryToCreateLockRecord) {
             if (doLock(lockConfig)) {
@@ -42,7 +43,7 @@ public abstract class AbstractLockProvider implements LockProvider {
             CacheLockRecord.addLockRecord(lockName);
         }
 
-        boolean lock = false;
+        boolean lock;
         try {
             lock = doLockAfter(lockConfig);
         } catch (Exception e) {
@@ -51,10 +52,6 @@ public abstract class AbstractLockProvider implements LockProvider {
             }
 
             throw e;
-        } finally {
-            if (!lock) {
-                LockManager.clear();
-            }
         }
 
         return lock;

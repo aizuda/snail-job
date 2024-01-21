@@ -61,6 +61,7 @@ public class JobTaskPrepareActor extends AbstractActor {
                 prepare.getTaskExecutorScene());
         if (TaskTypeEnum.WORKFLOW.getType().equals(jobTaskExecutorSceneEnum.getTaskType().getType())) {
             queryWrapper.eq(JobTaskBatch::getWorkflowNodeId, prepare.getWorkflowNodeId());
+            queryWrapper.eq(JobTaskBatch::getWorkflowTaskBatchId, prepare.getWorkflowTaskBatchId());
             queryWrapper.eq(JobTaskBatch::getTaskType, TaskTypeEnum.WORKFLOW.getType());
         } else {
             queryWrapper.eq(JobTaskBatch::getTaskType, TaskTypeEnum.JOB.getType());

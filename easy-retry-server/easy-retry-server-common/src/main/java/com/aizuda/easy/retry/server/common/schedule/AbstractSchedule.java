@@ -7,6 +7,7 @@ import com.aizuda.easy.retry.server.common.Schedule;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.lock.LockBuilder;
+import com.aizuda.easy.retry.server.common.lock.LockManager;
 import com.aizuda.easy.retry.server.common.lock.LockProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +53,8 @@ public abstract class AbstractSchedule implements Schedule {
         } finally {
             if (lock) {
                 lockProvider.unlock();
+            } else {
+                LockManager.clear();
             }
         }
 
