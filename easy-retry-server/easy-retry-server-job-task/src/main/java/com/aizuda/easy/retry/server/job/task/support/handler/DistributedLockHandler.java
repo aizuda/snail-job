@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.server.job.task.support.handler;
 
 import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.lock.LockBuilder;
+import com.aizuda.easy.retry.server.common.lock.LockManager;
 import com.aizuda.easy.retry.server.common.lock.LockProvider;
 import com.aizuda.easy.retry.server.job.task.support.LockExecutor;
 import com.github.rholder.retry.Attempt;
@@ -13,9 +14,10 @@ import com.github.rholder.retry.StopStrategies;
 import com.github.rholder.retry.WaitStrategies;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -54,10 +56,16 @@ public class DistributedLockHandler {
             .withRetryListener(new RetryListener() {
                 @Override
                 public <V> void onRetry(final Attempt<V> attempt) {
-                    if (!attempt.hasResult()) {
-                        EasyRetryLog.LOCAL.warn("第【{}】次尝试获取锁. lockName:[{}]",
-                            attempt.getAttemptNumber(), lockName);
+                    Object result = null;
+                    if (attempt.hasResult()) {
+                        try {
+                            result = attempt.get();
+                        } catch (ExecutionException ignored) {
+                        }
                     }
+
+                    EasyRetryLog.LOCAL.info("第【{}】次尝试获取锁. lockName:[{}] result:[{}] treadName:[{}]",
+                            attempt.getAttemptNumber(), lockName, result, Thread.currentThread().getName());
                 }
             }).build();
 
@@ -71,13 +79,20 @@ public class DistributedLockHandler {
             Throwable throwable = e;
             if (e.getClass().isAssignableFrom(RetryException.class)) {
                 RetryException re = (RetryException) e;
-                throwable = re.getLastFailedAttempt().getExceptionCause();
+                Attempt<?> lastFailedAttempt = re.getLastFailedAttempt();
+                if (lastFailedAttempt.hasException()) {
+                    throwable = lastFailedAttempt.getExceptionCause();
+                }
             }
 
             EasyRetryLog.LOCAL.error("lock execute error. lockName:[{}]", lockName, throwable);
         } finally {
             if (lock) {
+                EasyRetryLog.LOCAL.info("[{}] 锁已释放", lockName);
                 lockProvider.unlock();
+            } else {
+                // 未获取到锁直接清除线程中存储的锁信息
+                LockManager.clear();
             }
         }
 
@@ -90,6 +105,7 @@ public class DistributedLockHandler {
      * @param lockName 锁名称
      * @param lockAtMost 锁超时时间
      */
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public void lockWithDisposable(String lockName, Duration lockAtMost, LockExecutor lockExecutor) {
 
         LockProvider lockProvider = LockBuilder.newBuilder()
@@ -107,6 +123,9 @@ public class DistributedLockHandler {
         } finally {
             if (lock) {
                 lockProvider.unlock();
+            } else {
+                // 未获取到锁直接清除线程中存储的锁信息
+                LockManager.clear();
             }
         }
     }

@@ -45,6 +45,6 @@ public enum JobOperationReasonEnum {
      */
     public static final List<Integer> WORKFLOW_SUCCESSOR_SKIP_EXECUTION = Arrays.asList(
         WORKFLOW_NODE_NO_REQUIRED.getReason(), WORKFLOW_DECISION_FAILED.getReason(),
-            WORKFLOW_CONDITION_NODE_EXECUTION_ERROR.reason);
+            WORKFLOW_CONDITION_NODE_EXECUTION_ERROR.getReason());
 
 }

@@ -9,28 +9,28 @@
     <div class="log">
       <table class="scroller">
         <tbody>
-        <tr v-for="(log, index) in logList" :key="index">
-          <td class="index">
-            {{ index + 1 }}
-          </td>
-          <td>
-            <div class="content">
-              <div class="line">
-                <div class="flex">
-                  <div class="text" style="color: #2db7f5">{{ timestampToDate(log.time_stamp) }}</div>
-                  <div class="text" :style="{ color: LevelEnum[log.level].color }">
-                    {{ log.level.length === 4 ? log.level + ' ' : log.level }}
+          <tr v-for="(log, index) in logList" :key="index">
+            <td class="index">
+              {{ index + 1 }}
+            </td>
+            <td>
+              <div class="content">
+                <div class="line">
+                  <div class="flex">
+                    <div class="text" style="color: #2db7f5">{{ timestampToDate(log.time_stamp) }}</div>
+                    <div class="text" :style="{ color: LevelEnum[log.level].color }">
+                      {{ log.level.length === 4 ? log.level + ' ' : log.level }}
+                    </div>
+                    <div class="text" style="color: #00a3a3">[{{ log.thread }}]</div>
+                    <div class="text" style="color: #a771bf; font-weight: 500">{{ log.location }}</div>
+                    <div class="text">:</div>
                   </div>
-                  <div class="text" style="color: #00a3a3">[{{ log.thread }}]</div>
-                  <div class="text" style="color: #a771bf; font-weight: 500">{{ log.location }}</div>
-                  <div class="text">:</div>
+                  <div class="text" style="font-size: 16px">{{ log.message }}</div>
+                  <div class="text" style="font-size: 16px">{{ log.throwable }}</div>
                 </div>
-                <div class="text" style="font-size: 16px">{{ log.message }}</div>
-                <div class="text" style="font-size: 16px">{{ log.throwable }}</div>
               </div>
-            </div>
-          </td>
-        </tr>
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -135,6 +135,7 @@ export default {
             this.fromIndex = res.data.fromIndex
             if (res.data.message) {
               this.logList.push(...res.data.message)
+              this.logList.sort((a, b) => a.time_stamp - b.time_stamp)
             }
           })
           .catch(() => {
@@ -153,7 +154,7 @@ export default {
       const hours = date.getHours()
       const minutes = date.getMinutes().toString().length === 1 ? '0' + date.getMinutes() : date.getMinutes().toString()
       const seconds = date.getSeconds().toString().length === 1 ? '0' + date.getSeconds() : date.getSeconds().toString()
-      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${date.getMilliseconds()}`
     }
   }
 }

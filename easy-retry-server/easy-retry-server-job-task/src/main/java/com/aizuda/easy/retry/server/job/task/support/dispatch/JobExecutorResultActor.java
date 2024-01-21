@@ -73,26 +73,16 @@ public class JobExecutorResultActor extends AbstractActor {
 
                         Assert.isTrue(1 == jobTaskMapper.update(jobTask,
                                         new LambdaUpdateWrapper<JobTask>().eq(JobTask::getId, result.getTaskId())),
-                                ()-> new EasyRetryServerException("更新任务实例失败"));
-
-                        // 存在并发问题
-                        distributedLockHandler.lockWithDisposableAndRetry(() -> {
-                            // 更新批次上的状态
-                            CompleteJobBatchDTO completeJobBatchDTO = JobTaskConverter.INSTANCE.toCompleteJobBatchDTO(result);
-                            boolean complete = jobTaskBatchHandler.complete(completeJobBatchDTO);
-                            if (complete) {
-                                // 尝试停止任务
-                                // 若是集群任务则客户端会主动关闭
-                                if (result.getTaskType() != JobTaskTypeEnum.CLUSTER.getType()) {
-                                    JobTaskStopHandler instanceInterrupt = JobTaskStopFactory.getJobTaskStop(result.getTaskType());
-                                    TaskStopJobContext stopJobContext = JobTaskConverter.INSTANCE.toStopJobContext(result);
-                                    stopJobContext.setNeedUpdateTaskStatus(Boolean.FALSE);
-                                    stopJobContext.setForceStop(Boolean.TRUE);
-                                    instanceInterrupt.stop(stopJobContext);
-                                }
-                            }
-                        }, MessageFormat.format(KEY, result.getTaskBatchId(), result.getJobId()), Duration.ofSeconds(3), Duration.ofSeconds(1), 3);
-
+                                () -> new EasyRetryServerException("更新任务实例失败"));
+                        // 先尝试完成，若已完成则不需要通过获取分布式锁来完成
+                        boolean tryCompleteAndStop = tryCompleteAndStop(result);
+                        if (!tryCompleteAndStop) {
+                            // 存在并发问题
+                            distributedLockHandler.lockWithDisposableAndRetry(() -> {
+                                tryCompleteAndStop(result);
+                            }, MessageFormat.format(KEY, result.getTaskBatchId(),
+                                    result.getJobId()), Duration.ofSeconds(3), Duration.ofSeconds(1), 6);
+                        }
                     }
                 });
             } catch (Exception e) {
@@ -102,5 +92,24 @@ public class JobExecutorResultActor extends AbstractActor {
             }
 
         }).build();
+
+    }
+
+    private boolean tryCompleteAndStop(JobExecutorResultDTO result) {
+        CompleteJobBatchDTO completeJobBatchDTO = JobTaskConverter.INSTANCE.toCompleteJobBatchDTO(result);
+        boolean complete = jobTaskBatchHandler.complete(completeJobBatchDTO);
+        if (complete) {
+            // 尝试停止任务
+            // 若是集群任务则客户端会主动关闭
+            if (result.getTaskType() != JobTaskTypeEnum.CLUSTER.getType()) {
+                JobTaskStopHandler instanceInterrupt = JobTaskStopFactory.getJobTaskStop(result.getTaskType());
+                TaskStopJobContext stopJobContext = JobTaskConverter.INSTANCE.toStopJobContext(result);
+                stopJobContext.setNeedUpdateTaskStatus(Boolean.FALSE);
+                stopJobContext.setForceStop(Boolean.TRUE);
+                instanceInterrupt.stop(stopJobContext);
+            }
+        }
+
+        return complete;
     }
 }
