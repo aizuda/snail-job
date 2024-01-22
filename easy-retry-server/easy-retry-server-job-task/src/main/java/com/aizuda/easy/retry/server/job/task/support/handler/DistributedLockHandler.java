@@ -88,8 +88,8 @@ public class DistributedLockHandler {
             EasyRetryLog.LOCAL.error("lock execute error. lockName:[{}]", lockName, throwable);
         } finally {
             if (lock) {
-                EasyRetryLog.LOCAL.info("[{}] 锁已释放", lockName);
                 lockProvider.unlock();
+                EasyRetryLog.LOCAL.info("[{}] 锁已释放", lockName);
             } else {
                 // 未获取到锁直接清除线程中存储的锁信息
                 LockManager.clear();
@@ -122,6 +122,7 @@ public class DistributedLockHandler {
             EasyRetryLog.LOCAL.error("lock execute error. lockName:[{}]", lockName, e);
         } finally {
             if (lock) {
+                EasyRetryLog.LOCAL.info("[{}] 锁已释放", lockName);
                 lockProvider.unlock();
             } else {
                 // 未获取到锁直接清除线程中存储的锁信息

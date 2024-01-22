@@ -12,6 +12,11 @@ import com.aizuda.easy.retry.server.common.lock.persistence.LockStorageFactory;
 public class DisposableLockProvider extends AbstractLockProvider {
 
     @Override
+    protected boolean doLockAfter(final LockConfig lockConfig) {
+        return Boolean.FALSE;
+    }
+
+    @Override
     protected void doUnlock(LockConfig lockConfig) {
         doUnlockWithDelete(lockConfig);
     }

@@ -37,7 +37,6 @@ public final class LockBuilder {
         Assert.notBlank(lockName, () -> new EasyRetryServerException("lockName can not be null."));
 
         LockManager.initialize();
-        LockManager.setCreateDt(LocalDateTime.now());
         LockManager.setLockName(lockName);
         if (resident) {
             return new ResidentLockProvider();
