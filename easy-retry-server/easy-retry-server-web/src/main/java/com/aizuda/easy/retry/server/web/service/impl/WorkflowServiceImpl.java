@@ -246,7 +246,7 @@ public class WorkflowServiceImpl implements WorkflowService {
         log.info("图构建完成. graph:[{}]", graph);
 
         // 保存图信息
-        workflow = new Workflow();
+        workflow = WorkflowConverter.INSTANCE.toWorkflow(workflowRequestVO);;
         workflow.setId(workflowRequestVO.getId());
         workflow.setVersion(version);
         workflow.setNextTriggerAt(calculateNextTriggerAt(workflowRequestVO, DateUtils.toNowMilli()));
