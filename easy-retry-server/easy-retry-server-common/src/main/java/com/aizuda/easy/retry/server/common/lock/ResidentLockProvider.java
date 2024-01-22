@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.server.common.lock;
 
+import com.aizuda.easy.retry.server.common.cache.CacheLockRecord;
 import com.aizuda.easy.retry.server.common.dto.LockConfig;
 import com.aizuda.easy.retry.server.common.lock.persistence.LockStorage;
 import com.aizuda.easy.retry.server.common.lock.persistence.LockStorageFactory;
@@ -11,6 +12,22 @@ import com.aizuda.easy.retry.server.common.lock.persistence.LockStorageFactory;
  */
 public class ResidentLockProvider extends AbstractLockProvider {
 
+    @Override
+    protected boolean doLockAfter(final LockConfig lockConfig) {
+        String lockName = lockConfig.getLockName();
+        boolean lock;
+        try {
+            lock = renewal(lockConfig);
+            if (lock) {
+                CacheLockRecord.addLockRecord(lockName);
+            }
+        } catch (Exception e) {
+            CacheLockRecord.remove(lockName);
+            throw e;
+        }
+
+        return lock;
+    }
 
     @Override
     protected void doUnlock(LockConfig lockConfig) {
@@ -21,7 +38,6 @@ public class ResidentLockProvider extends AbstractLockProvider {
         LockStorage lockStorage = LockStorageFactory.getLockStorage();
         lockStorage.releaseLockWithUpdate(lockConfig.getLockName(), lockConfig.getLockAtLeast());
     }
-
 
     @Override
     protected boolean createLock(LockConfig lockConfig) {
