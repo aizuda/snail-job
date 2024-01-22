@@ -18,10 +18,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author www.byteblogs.com
@@ -49,8 +48,15 @@ public class BroadcastTaskGenerator extends AbstractJobTaskGenerator {
             return Lists.newArrayList();
         }
 
+        Set<String> clientInfoSet = new HashSet<>(serverNodes.size());
         List<JobTask> jobTasks = new ArrayList<>(serverNodes.size());
         for (RegisterNodeInfo serverNode : serverNodes) {
+            // 若存在相同的IP信息则去重
+            String address = serverNode.address();
+            if (clientInfoSet.contains(address)) {
+                continue;
+            }
+
             JobTask jobTask = JobTaskConverter.INSTANCE.toJobTaskInstance(context);
             jobTask.setClientInfo(ClientInfoUtils.generate(serverNode));
             jobTask.setArgsType(context.getArgsType());
@@ -58,6 +64,7 @@ public class BroadcastTaskGenerator extends AbstractJobTaskGenerator {
             jobTask.setTaskStatus(JobTaskStatusEnum.RUNNING.getStatus());
             jobTask.setResultMessage(Optional.ofNullable(jobTask.getResultMessage()).orElse(StrUtil.EMPTY));
             Assert.isTrue(1 == jobTaskMapper.insert(jobTask), () -> new EasyRetryServerException("新增任务实例失败"));
+            clientInfoSet.add(address);
             jobTasks.add(jobTask);
         }
 
