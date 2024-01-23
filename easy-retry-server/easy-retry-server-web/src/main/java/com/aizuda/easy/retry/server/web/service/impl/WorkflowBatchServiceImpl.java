@@ -56,6 +56,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class WorkflowBatchServiceImpl implements WorkflowBatchService {
     private static final Integer NOT_HANDLE_STATUS = 99;
+    private static final Integer WORKFLOW_DECISION_FAILED_STATUS = 98;
     private final WorkflowTaskBatchMapper workflowTaskBatchMapper;
     private final WorkflowMapper workflowMapper;
     private final WorkflowNodeMapper workflowNodeMapper;
@@ -147,7 +148,12 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
                     if (!CollectionUtils.isEmpty(jobTaskBatchList)) {
                         nodeInfo.setJobBatchList(JobBatchResponseVOConverter.INSTANCE.jobTaskBatchToJobBatchResponseVOs(jobTaskBatchList));
                         // 取第最新的一条状态
-                        nodeInfo.setTaskBatchStatus(jobTaskBatchList.get(0).getTaskBatchStatus());
+                        JobTaskBatch jobTaskBatch = jobTaskBatchList.get(0);
+                        if (JobOperationReasonEnum.WORKFLOW_DECISION_FAILED.getReason() == jobTaskBatch.getOperationReason()) {
+                            // 前端展示使用
+                            jobTaskBatch.setTaskBatchStatus(WORKFLOW_DECISION_FAILED_STATUS);
+                        }
+
                         if (jobTaskBatchList.stream()
                                 .filter(Objects::nonNull)
                                 .anyMatch(WorkflowBatchServiceImpl::isNoOperation)) {
