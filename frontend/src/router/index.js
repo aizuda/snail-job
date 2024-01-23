@@ -13,6 +13,6 @@ Vue.use(Router)
 
 export default new Router({
   base: '/easy-retry/',
-  mode: 'history',
+  mode: 'hash',
   routes: constantRouterMap
 })
