@@ -151,7 +151,9 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
                         JobTaskBatch jobTaskBatch = jobTaskBatchList.get(0);
                         if (JobOperationReasonEnum.WORKFLOW_DECISION_FAILED.getReason() == jobTaskBatch.getOperationReason()) {
                             // 前端展示使用
-                            jobTaskBatch.setTaskBatchStatus(WORKFLOW_DECISION_FAILED_STATUS);
+                            nodeInfo.setTaskBatchStatus(WORKFLOW_DECISION_FAILED_STATUS);
+                        } else {
+                            nodeInfo.setTaskBatchStatus(jobTaskBatch.getTaskBatchStatus());
                         }
 
                         if (jobTaskBatchList.stream()

@@ -1,7 +1,7 @@
 <template>
   <iframe
     ref="iframe"
-    :src="`/lib?id=${id}&x1c2Hdd6=${value}`"
+    :src="`${mode === 'production' ? baseUrl : ''}/lib/index.html?id=${id}&mode=${mode}&x1c2Hdd6=${value}`"
     marginwidth="0"
     frameborder="no"
     :style="`width: 100%;height:calc(99vh - 60px)`"
@@ -20,7 +20,9 @@ export default {
   },
   data () {
     return {
-      id: ''
+      id: '',
+      mode: process.env.NODE_ENV,
+      baseUrl: process.env.VUE_APP_API_BASE_URL
     }
   },
   mounted () {
