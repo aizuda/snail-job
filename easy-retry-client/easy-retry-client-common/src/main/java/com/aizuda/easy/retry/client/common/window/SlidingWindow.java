@@ -155,6 +155,9 @@ public class SlidingWindow<T> {
     private void oldWindowAdd(T data) {
 
         LocalDateTime windowPeriod = getNewWindowPeriod();
+        if (Objects.isNull(windowPeriod)) {
+            return;
+        }
 
         ConcurrentLinkedQueue<T> list = saveData.get(windowPeriod);
         list.add(data);
@@ -222,7 +225,13 @@ public class SlidingWindow<T> {
      * @return 窗口期时间
      */
     private LocalDateTime getOldWindowPeriod() {
-        return saveData.firstKey();
+        try {
+            return saveData.firstKey();
+        } catch (NoSuchElementException e) {
+            EasyRetryLog.LOCAL.error("第一个窗口异常. saveData:[{}]", JsonUtil.toJsonString(saveData));
+            return null;
+        }
+
     }
 
     /**
@@ -231,7 +240,12 @@ public class SlidingWindow<T> {
      * @return 窗口期时间
      */
     private LocalDateTime getNewWindowPeriod() {
-        return saveData.lastKey();
+        try {
+            return saveData.lastKey();
+        } catch (NoSuchElementException e) {
+            EasyRetryLog.LOCAL.error("第后一个窗口异常. saveData:[{}]", JsonUtil.toJsonString(saveData));
+            return null;
+        }
     }
 
     /**
@@ -241,11 +255,15 @@ public class SlidingWindow<T> {
      */
     private boolean isOpenNewWindow(LocalDateTime now) {
 
-        if (saveData.size() == 0) {
+        if (saveData.isEmpty()) {
             return true;
         }
 
         LocalDateTime windowPeriod = getNewWindowPeriod();
+        if (Objects.isNull(windowPeriod)) {
+            return true;
+        }
+
         return windowPeriod.isBefore(now);
     }
 
@@ -256,11 +274,14 @@ public class SlidingWindow<T> {
      */
     private void extract(LocalDateTime condition) {
 
-        if (saveData.size() == 0) {
+        if (saveData.isEmpty()) {
             return;
         }
 
         LocalDateTime windowPeriod = getOldWindowPeriod();
+        if (Objects.isNull(windowPeriod)) {
+            return;
+        }
 
         // 删除过期窗口期数据
         removeInvalidWindow(windowPeriod);
