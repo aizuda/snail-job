@@ -49,10 +49,14 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
                 jobArgs = buildJobArgs(jobContext);
             }
 
-            // 初始化调度信息（日志上报LogUtil）
-            ThreadLocalLogUtil.setContext(jobContext);
+            try {
+                // 初始化调度信息（日志上报LogUtil）
+                ThreadLocalLogUtil.setContext(jobContext);
+                return doJobExecute(jobArgs);
+            } finally {
+                ThreadLocalLogUtil.removeContext();
+            }
 
-            return doJobExecute(jobArgs);
         });
 
         FutureCache.addFuture(jobContext.getTaskBatchId(), submit);

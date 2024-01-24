@@ -40,35 +40,44 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
 
     @Override
     public void onSuccess(ExecuteResult result) {
-        // 上报执行成功
-        EasyRetryLog.REMOTE.info("任务执行成功 taskBatchId:[{}] [{}]", jobContext.getTaskBatchId(), JsonUtil.toJsonString(result));
-
-        if (Objects.isNull(result)) {
-            result = ExecuteResult.success();
-        }
-
-        int taskStatus;
-        if (result.getStatus() == StatusEnum.NO.getStatus()) {
-            taskStatus = JobTaskStatusEnum.FAIL.getStatus();
-        } else {
-            taskStatus = JobTaskStatusEnum.SUCCESS.getStatus();
-        }
 
         try {
+            // 初始化调度信息（日志上报LogUtil）
+            ThreadLocalLogUtil.setContext(jobContext);
+
+            // 上报执行成功
+            EasyRetryLog.REMOTE.info("任务执行成功 taskBatchId:[{}] [{}]", jobContext.getTaskBatchId(),
+                JsonUtil.toJsonString(result));
+
+            if (Objects.isNull(result)) {
+                result = ExecuteResult.success();
+            }
+
+            int taskStatus;
+            if (result.getStatus() == StatusEnum.NO.getStatus()) {
+                taskStatus = JobTaskStatusEnum.FAIL.getStatus();
+            } else {
+                taskStatus = JobTaskStatusEnum.SUCCESS.getStatus();
+            }
+
             CLIENT.dispatchResult(buildDispatchJobResultRequest(result, taskStatus));
         } catch (Exception e) {
             EasyRetryLog.REMOTE.error("执行结果上报异常.[{}]", jobContext.getTaskId(), e);
         } finally {
-            stopThreadPool();
             ThreadLocalLogUtil.removeContext();
+            stopThreadPool();
         }
     }
 
     @Override
     public void onFailure(final Throwable t) {
-        // 上报执行失败
-        EasyRetryLog.REMOTE.error("任务执行失败 taskBatchId:[{}]", jobContext.getTaskBatchId(), t);
+
         try {
+            // 初始化调度信息（日志上报LogUtil）
+            ThreadLocalLogUtil.setContext(jobContext);
+
+            // 上报执行失败
+            EasyRetryLog.REMOTE.error("任务执行失败 taskBatchId:[{}]", jobContext.getTaskBatchId(), t);
 
             ExecuteResult failure = ExecuteResult.failure();
             if (t instanceof CancellationException) {
@@ -78,13 +87,13 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
             }
 
             CLIENT.dispatchResult(
-                    buildDispatchJobResultRequest(failure, JobTaskStatusEnum.FAIL.getStatus())
+                buildDispatchJobResultRequest(failure, JobTaskStatusEnum.FAIL.getStatus())
             );
         } catch (Exception e) {
             EasyRetryLog.REMOTE.error("执行结果上报异常.[{}]", jobContext.getTaskId(), e);
         } finally {
-            stopThreadPool();
             ThreadLocalLogUtil.removeContext();
+            stopThreadPool();
         }
     }
 
