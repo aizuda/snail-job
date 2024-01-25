@@ -81,6 +81,7 @@ export default {
       interval: null,
       startId: 0,
       fromIndex: 0,
+      controller: new AbortController(),
       indicator: <a-icon type="loading" style="font-size: 24px; color: '#d9d9d9'" spin/>,
       LevelEnum: {
         DEBUG: {
@@ -104,46 +105,53 @@ export default {
   },
   mounted () {
     this.getLogList()
-    this.interval = setInterval(() => {
-      this.getLogList()
-    }, 1000)
+  },
+  beforeDestroy () {
+    this.stopLog()
   },
   methods: {
     onCancel () {
-      clearInterval(this.interval)
+      this.stopLog()
       this.$emit('update:open', false)
     },
+    stopLog () {
+      this.finished = true
+      this.controller.abort()
+      clearTimeout(this.interval)
+      this.interval = undefined
+    },
     getLogList () {
-      if (!this.finished) {
-        request(
-          {
-            url: '/job/log/list',
-            method: 'get',
-            params: {
-              taskBatchId: this.record.taskBatchId,
-              jobId: this.record.jobId,
-              taskId: this.record.id,
-              startId: this.startId,
-              fromIndex: this.fromIndex,
-              size: 50
-            }
+      request(
+        {
+          url: '/job/log/list',
+          method: 'get',
+          params: {
+            taskBatchId: this.record.taskBatchId,
+            jobId: this.record.jobId,
+            taskId: this.record.id,
+            startId: this.startId,
+            fromIndex: this.fromIndex,
+            size: 50
+          },
+          signal: this.controller.signal
+        }
+      )
+        .then((res) => {
+          this.finished = res.data.finished
+          this.startId = res.data.nextStartId
+          this.fromIndex = res.data.fromIndex
+          if (res.data.message) {
+            this.logList.push(...res.data.message)
+            this.logList.sort((a, b) => a.time_stamp - b.time_stamp)
           }
-        )
-          .then((res) => {
-            this.finished = res.data.finished
-            this.startId = res.data.nextStartId
-            this.fromIndex = res.data.fromIndex
-            if (res.data.message) {
-              this.logList.push(...res.data.message)
-              this.logList.sort((a, b) => a.time_stamp - b.time_stamp)
-            }
-          })
-          .catch(() => {
-            this.finished = true
-          })
-      } else {
-        clearInterval(this.interval)
-      }
+          if (!this.finished) {
+            clearTimeout(this.interval)
+            this.interval = setTimeout(this.getLogList, 1000)
+          }
+        })
+        .catch(() => {
+          this.finished = true
+        })
     },
     timestampToDate (timestamp) {
       const date = new Date(Number.parseInt(timestamp.toString()))

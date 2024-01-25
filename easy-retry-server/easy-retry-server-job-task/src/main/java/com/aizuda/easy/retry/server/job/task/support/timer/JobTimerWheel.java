@@ -28,7 +28,7 @@ public class JobTimerWheel implements Lifecycle {
     private static final String THREAD_NAME_PREFIX = "job-task-timer-wheel-";
     private static HashedWheelTimer timer = null;
     private static final ThreadPoolExecutor executor =
-            new ThreadPoolExecutor(16, 16, 10, TimeUnit.SECONDS,
+            new ThreadPoolExecutor(32, 32, 10, TimeUnit.SECONDS,
                     new LinkedBlockingQueue<>(), new CustomizableThreadFactory(THREAD_NAME_PREFIX));
 
     private static final TimerIdempotent idempotent = new TimerIdempotent();
@@ -44,8 +44,8 @@ public class JobTimerWheel implements Lifecycle {
     public static void register(Integer taskType, Long uniqueId, TimerTask task, long delay, TimeUnit unit) {
 
         if (!isExisted(taskType, uniqueId)) {
+            log.info("加入时间轮. delay:[{}ms] taskType:[{}] uniqueId:[{}]", delay, taskType, uniqueId);
             delay = delay < 0 ? 0 : delay;
-            log.info("加入时间轮. delay:[{}ms] uniqueId:[{}]", delay, uniqueId);
             try {
                 timer.newTimeout(task, delay, unit);
                 idempotent.set(uniqueId, uniqueId);

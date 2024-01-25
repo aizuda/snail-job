@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.server.job.task.support.dispatch;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
+import cn.hutool.core.util.RandomUtil;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.common.log.EasyRetryLog;
@@ -21,7 +22,6 @@ import com.aizuda.easy.retry.server.job.task.support.WorkflowTaskConverter;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.GroupConfigMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.WorkflowMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.GroupConfig;
-import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
 import com.aizuda.easy.retry.template.datasource.persistence.po.Workflow;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
@@ -32,9 +32,11 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 /**
@@ -75,6 +77,7 @@ public class ScanWorkflowTaskActor extends AbstractActor {
         long now = DateUtils.toNowMilli();
         for (PartitionTask partitionTask : partitionTasks) {
             WorkflowPartitionTaskDTO workflowPartitionTaskDTO = (WorkflowPartitionTaskDTO) partitionTask;
+            log.warn("监控时间. workflowId:[{}] now:[{}], dbnextTriggerAt:[{}]", workflowPartitionTaskDTO.getId(), now, workflowPartitionTaskDTO.getNextTriggerAt());
             processWorkflow(workflowPartitionTaskDTO, waitUpdateJobs, waitExecWorkflows, now);
         }
 
@@ -82,6 +85,8 @@ public class ScanWorkflowTaskActor extends AbstractActor {
         workflowMapper.updateBatchNextTriggerAtById(waitUpdateJobs);
 
         for (final WorkflowTaskPrepareDTO waitExecTask : waitExecWorkflows) {
+
+            log.warn("监控时间. workflowId:[{}] now:[{}], nextTriggerAt:[{}]", waitExecTask.getWorkflowId(), now, waitExecTask.getNextTriggerAt());
             // 执行预处理阶段
             ActorRef actorRef = ActorGenerator.workflowTaskPrepareActor();
             waitExecTask.setTaskExecutorScene(JobTaskExecutorSceneEnum.AUTO_WORKFLOW.getType());
@@ -93,13 +98,14 @@ public class ScanWorkflowTaskActor extends AbstractActor {
                                  List<WorkflowTaskPrepareDTO> waitExecJobs, long now) {
         CacheConsumerGroup.addOrUpdate(partitionTask.getGroupName(), partitionTask.getNamespaceId());
 
-        Workflow workflow = new Workflow();
-        workflow.setId(partitionTask.getId());
-
         // 更新下次触发时间
         Long nextTriggerAt = calculateNextTriggerTime(partitionTask, now);
+
+        Workflow workflow = new Workflow();
+        workflow.setId(partitionTask.getId());
         workflow.setNextTriggerAt(nextTriggerAt);
         waitUpdateWorkflows.add(workflow);
+
         waitExecJobs.add(WorkflowTaskConverter.INSTANCE.toWorkflowTaskPrepareDTO(partitionTask));
 
     }
@@ -108,7 +114,8 @@ public class ScanWorkflowTaskActor extends AbstractActor {
 
         long nextTriggerAt = partitionTask.getNextTriggerAt();
         if ((nextTriggerAt + DateUtils.toEpochMilli(SystemConstants.SCHEDULE_PERIOD)) < now) {
-            nextTriggerAt = now;
+            long randomMs = (long) (RandomUtil.randomDouble(0, 4, 2, RoundingMode.UP) * 1000);
+            nextTriggerAt = now + randomMs;
             partitionTask.setNextTriggerAt(nextTriggerAt);
         }
 
