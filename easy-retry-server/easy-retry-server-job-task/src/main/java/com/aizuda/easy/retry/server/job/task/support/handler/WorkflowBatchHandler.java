@@ -215,10 +215,10 @@ public class WorkflowBatchHandler {
         // 说明没有后继节点了, 此时需要判断整个DAG是否全部执行完成
         List<JobTaskBatch> jobTaskBatches = jobTaskBatchMapper.selectList(new LambdaQueryWrapper<JobTaskBatch>()
                 .eq(JobTaskBatch::getWorkflowTaskBatchId, workflowTaskBatchId)
-                .in(JobTaskBatch::getWorkflowNodeId, graph.nodes())
+                .in(JobTaskBatch::getWorkflowNodeId, graph.nodes()).orderByDesc(JobTaskBatch::getId)
         );
 
-        Map<Long, JobTaskBatch> jobTaskBatchMap = jobTaskBatches.stream().collect(Collectors.toMap(JobTaskBatch::getWorkflowNodeId, i -> i));
+        Map<Long, JobTaskBatch> jobTaskBatchMap = jobTaskBatches.stream().collect(Collectors.toMap(JobTaskBatch::getWorkflowNodeId, i -> i, (i,j) -> i));
 
         checkWorkflowExecutor(SystemConstants.ROOT, workflowTaskBatchId, graph, jobTaskBatchMap);
     }
@@ -257,6 +257,7 @@ public class WorkflowBatchHandler {
                 jobTaskPrepare.setTaskExecutorScene(JobTaskExecutorSceneEnum.AUTO_WORKFLOW.getType());
                 jobTaskPrepare.setNextTriggerAt(DateUtils.toNowMilli() + DateUtils.toNowMilli() % 1000);
                 jobTaskPrepare.setWorkflowTaskBatchId(workflowTaskBatchId);
+                jobTaskPrepare.setWorkflowNodeId(successor);
                 jobTaskPrepare.setParentWorkflowNodeId(parentId);
                 // 执行预处理阶段
                 ActorRef actorRef = ActorGenerator.jobTaskPrepareActor();

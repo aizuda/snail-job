@@ -35,6 +35,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -62,7 +63,9 @@ public class WorkflowExecutorActor extends AbstractActor {
         return receiveBuilder().match(WorkflowNodeTaskExecuteDTO.class, taskExecute -> {
             log.info("工作流开始执行. [{}]", JsonUtil.toJsonString(taskExecute));
             try {
+
                 doExecutor(taskExecute);
+
             } catch (Exception e) {
                 EasyRetryLog.LOCAL.error("workflow executor exception. [{}]", taskExecute, e);
                 handlerTaskBatch(taskExecute, JobTaskBatchStatusEnum.FAIL.getStatus(), JobOperationReasonEnum.TASK_EXECUTION_ERROR.getReason());
@@ -76,6 +79,8 @@ public class WorkflowExecutorActor extends AbstractActor {
     private void doExecutor(WorkflowNodeTaskExecuteDTO taskExecute) {
         WorkflowTaskBatch workflowTaskBatch = workflowTaskBatchMapper.selectById(taskExecute.getWorkflowTaskBatchId());
         Assert.notNull(workflowTaskBatch, () -> new EasyRetryServerException("任务不存在"));
+
+        handlerTaskBatch(taskExecute, JobTaskBatchStatusEnum.RUNNING.getStatus(), JobOperationReasonEnum.NONE.getReason());
 
         // 获取DAG图
         String flowInfo = workflowTaskBatch.getFlowInfo();
@@ -168,8 +173,10 @@ public class WorkflowExecutorActor extends AbstractActor {
         jobTaskBatch.setExecutionAt(DateUtils.toNowMilli());
         jobTaskBatch.setTaskBatchStatus(taskStatus);
         jobTaskBatch.setOperationReason(operationReason);
+        jobTaskBatch.setUpdateDt(LocalDateTime.now());
         Assert.isTrue(1 == workflowTaskBatchMapper.updateById(jobTaskBatch),
                 () -> new EasyRetryServerException("更新任务失败"));
 
     }
+
 }
