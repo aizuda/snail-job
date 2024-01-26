@@ -50,7 +50,6 @@ public class ReportLogHttpRequestHandler extends PostHttpRequestHandler {
     }
 
     @Override
-    @Transactional
     public String doHandler(String content, UrlQuery urlQuery, HttpHeaders headers) {
 
         EasyRetryLog.LOCAL.info("Begin Handler Log Report Data. [{}]", content);
