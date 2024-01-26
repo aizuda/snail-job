@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.server.job.task.support.dispatch;
 
 import akka.actor.AbstractActor;
 import cn.hutool.core.lang.Assert;
+import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.FailStrategyEnum;
 import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
@@ -80,7 +81,9 @@ public class WorkflowExecutorActor extends AbstractActor {
         WorkflowTaskBatch workflowTaskBatch = workflowTaskBatchMapper.selectById(taskExecute.getWorkflowTaskBatchId());
         Assert.notNull(workflowTaskBatch, () -> new EasyRetryServerException("任务不存在"));
 
-        handlerTaskBatch(taskExecute, JobTaskBatchStatusEnum.RUNNING.getStatus(), JobOperationReasonEnum.NONE.getReason());
+        if (SystemConstants.ROOT.equals(taskExecute.getParentId()) && JobTaskBatchStatusEnum.WAITING.getStatus() == workflowTaskBatch.getTaskBatchStatus()) {
+            handlerTaskBatch(taskExecute, JobTaskBatchStatusEnum.RUNNING.getStatus(), JobOperationReasonEnum.NONE.getReason());
+        }
 
         // 获取DAG图
         String flowInfo = workflowTaskBatch.getFlowInfo();

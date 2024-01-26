@@ -62,29 +62,24 @@ public class JobExecutorResultActor extends AbstractActor {
         return receiveBuilder().match(JobExecutorResultDTO.class, result -> {
             log.info("更新任务状态. 参数:[{}]", JsonUtil.toJsonString(result));
             try {
-                transactionTemplate.execute(new TransactionCallbackWithoutResult() {
-                    @Override
-                    protected void doInTransactionWithoutResult(final TransactionStatus status) {
-                        JobTask jobTask = new JobTask();
-                        jobTask.setTaskStatus(result.getTaskStatus());
-                        if (Objects.nonNull(result.getResult())) {
-                            jobTask.setResultMessage(JsonUtil.toJsonString(result.getResult()));
-                        }
+                JobTask jobTask = new JobTask();
+                jobTask.setTaskStatus(result.getTaskStatus());
+                if (Objects.nonNull(result.getResult())) {
+                    jobTask.setResultMessage(JsonUtil.toJsonString(result.getResult()));
+                }
 
-                        Assert.isTrue(1 == jobTaskMapper.update(jobTask,
-                                        new LambdaUpdateWrapper<JobTask>().eq(JobTask::getId, result.getTaskId())),
-                                () -> new EasyRetryServerException("更新任务实例失败"));
-                        // 先尝试完成，若已完成则不需要通过获取分布式锁来完成
-                        boolean tryCompleteAndStop = tryCompleteAndStop(result);
-                        if (!tryCompleteAndStop) {
-                            // 存在并发问题
-                            distributedLockHandler.lockWithDisposableAndRetry(() -> {
-                                tryCompleteAndStop(result);
-                            }, MessageFormat.format(KEY, result.getTaskBatchId(),
-                                    result.getJobId()), Duration.ofSeconds(3), Duration.ofSeconds(1), 6);
-                        }
-                    }
-                });
+                Assert.isTrue(1 == jobTaskMapper.update(jobTask,
+                        new LambdaUpdateWrapper<JobTask>().eq(JobTask::getId, result.getTaskId())),
+                    () -> new EasyRetryServerException("更新任务实例失败"));
+                // 先尝试完成，若已完成则不需要通过获取分布式锁来完成
+                boolean tryCompleteAndStop = tryCompleteAndStop(result);
+                if (!tryCompleteAndStop) {
+                    // 存在并发问题
+                    distributedLockHandler.lockWithDisposableAndRetry(() -> {
+                        tryCompleteAndStop(result);
+                    }, MessageFormat.format(KEY, result.getTaskBatchId(),
+                        result.getJobId()), Duration.ofSeconds(2), Duration.ofSeconds(1), 3);
+                }
             } catch (Exception e) {
                 EasyRetryLog.LOCAL.error(" job executor result exception. [{}]", result, e);
             } finally {
