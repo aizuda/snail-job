@@ -12,7 +12,7 @@ import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
 import com.aizuda.easy.retry.server.common.client.RequestBuilder;
 import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.common.enums.TaskGeneratorSceneEnum;
-import com.aizuda.easy.retry.server.common.enums.TaskTypeEnum;
+import com.aizuda.easy.retry.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.strategy.WaitStrategies.WaitStrategyContext;
 import com.aizuda.easy.retry.server.common.strategy.WaitStrategies.WaitStrategyEnum;
@@ -368,7 +368,7 @@ public class RetryTaskServiceImpl implements RetryTaskService {
                 requestVO.getGroupName(), namespaceId,
                 new LambdaQueryWrapper<RetryTask>()
                         .eq(RetryTask::getNamespaceId, namespaceId)
-                        .eq(RetryTask::getTaskType, TaskTypeEnum.RETRY.getType())
+                        .eq(RetryTask::getTaskType, SyetemTaskTypeEnum.RETRY.getType())
                         .in(RetryTask::getUniqueId, uniqueIds));
         Assert.notEmpty(list, () -> new EasyRetryServerException("没有可执行的任务"));
 
@@ -399,7 +399,7 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         List<RetryTask> list = accessTemplate.getRetryTaskAccess().list(requestVO.getGroupName(), namespaceId,
                 new LambdaQueryWrapper<RetryTask>()
                         .eq(RetryTask::getNamespaceId, namespaceId)
-                        .eq(RetryTask::getTaskType, TaskTypeEnum.CALLBACK.getType())
+                        .eq(RetryTask::getTaskType, SyetemTaskTypeEnum.CALLBACK.getType())
                         .in(RetryTask::getUniqueId, uniqueIds));
         Assert.notEmpty(list, () -> new EasyRetryServerException("没有可执行的任务"));
 

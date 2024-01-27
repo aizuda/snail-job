@@ -5,6 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
+import com.aizuda.easy.retry.common.core.enums.JobTaskStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.server.common.dto.JobTaskConfig;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
@@ -105,9 +106,9 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
     public WorkflowDetailResponseVO getWorkflowBatchDetail(Long id) {
 
         WorkflowTaskBatch workflowTaskBatch = workflowTaskBatchMapper.selectOne(
-            new LambdaQueryWrapper<WorkflowTaskBatch>()
-                .eq(WorkflowTaskBatch::getId, id)
-                .eq(WorkflowTaskBatch::getNamespaceId, UserSessionUtils.currentUserSession().getNamespaceId()));
+                new LambdaQueryWrapper<WorkflowTaskBatch>()
+                        .eq(WorkflowTaskBatch::getId, id)
+                        .eq(WorkflowTaskBatch::getNamespaceId, UserSessionUtils.currentUserSession().getNamespaceId()));
         if (Objects.isNull(workflowTaskBatch)) {
             return null;
         }
@@ -121,7 +122,7 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
 
         List<Long> jobIds = workflowNodes.stream().map(WorkflowNode::getJobId).collect(Collectors.toList());
         List<Job> jobs = jobMapper.selectList(new LambdaQueryWrapper<Job>()
-            .in(Job::getId, new HashSet<>(jobIds)));
+                .in(Job::getId, new HashSet<>(jobIds)));
 
         Map<Long, Job> jobMap = jobs.stream().collect(Collectors.toMap(Job::getId, job -> job));
 
@@ -140,13 +141,15 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
                 .peek(nodeInfo -> {
 
                     JobTaskConfig jobTask = nodeInfo.getJobTask();
-                    if(Objects.nonNull(jobTask)) {
+                    if (Objects.nonNull(jobTask)) {
                         jobTask.setJobName(jobMap.getOrDefault(jobTask.getJobId(), new Job()).getJobName());
                     }
 
                     List<JobTaskBatch> jobTaskBatchList = jobTaskBatchMap.get(nodeInfo.getId());
                     if (!CollectionUtils.isEmpty(jobTaskBatchList)) {
+                        jobTaskBatchList = jobTaskBatchList.stream().sorted(Comparator.comparingInt(JobTaskBatch::getTaskBatchStatus)).collect(Collectors.toList());
                         nodeInfo.setJobBatchList(JobBatchResponseVOConverter.INSTANCE.jobTaskBatchToJobBatchResponseVOs(jobTaskBatchList));
+
                         // 取第最新的一条状态
                         JobTaskBatch jobTaskBatch = jobTaskBatchList.get(0);
                         if (JobOperationReasonEnum.WORKFLOW_DECISION_FAILED.getReason() == jobTaskBatch.getOperationReason()) {
@@ -166,6 +169,7 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
                             // 删除被误添加的节点
                             allNoOperationNode.remove(nodeInfo.getId());
                         }
+
                     } else {
                         if (JobTaskBatchStatusEnum.NOT_SUCCESS.contains(workflowTaskBatch.getTaskBatchStatus())) {
                             allNoOperationNode.add(nodeInfo.getId());
@@ -210,7 +214,7 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
 
     private static boolean isNoOperation(JobTaskBatch i) {
         return JobOperationReasonEnum.WORKFLOW_SUCCESSOR_SKIP_EXECUTION.contains(i.getOperationReason())
-            || i.getTaskBatchStatus() == JobTaskBatchStatusEnum.STOP.getStatus();
+                || i.getTaskBatchStatus() == JobTaskBatchStatusEnum.STOP.getStatus();
     }
 
 }

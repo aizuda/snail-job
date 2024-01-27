@@ -5,6 +5,7 @@ import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
+import com.aizuda.easy.retry.common.core.enums.JobTaskStatusEnum;
 import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.enums.JobTaskExecutorSceneEnum;
@@ -102,13 +103,19 @@ public class WorkflowBatchHandler {
                 }
             }
 
-            // 判定叶子节点的状态
-            for (JobTaskBatch jobTaskBatch : jobTaskBatchList) {
-                if (JobTaskBatchStatusEnum.NOT_SUCCESS.contains(jobTaskBatch.getTaskBatchStatus())) {
-                    // 只要叶子节点不是无需处理的都是失败
-                    if (JobOperationReasonEnum.WORKFLOW_NODE_NO_REQUIRED.getReason() != jobTaskBatch.getOperationReason()
-                            && JobOperationReasonEnum.WORKFLOW_NODE_CLOSED_SKIP_EXECUTION.getReason() != jobTaskBatch.getOperationReason()) {
-                        taskStatus = JobTaskBatchStatusEnum.FAIL.getStatus();
+            boolean isMatchSuccess = jobTaskBatchList.stream()
+                    .anyMatch(jobTaskBatch -> JobTaskStatusEnum.SUCCESS.getStatus() == jobTaskBatch.getTaskBatchStatus());
+            if (!isMatchSuccess) {
+                // 判定叶子节点的状态
+                for (JobTaskBatch jobTaskBatch : jobTaskBatchList) {
+                    if (jobTaskBatch.getTaskBatchStatus() == JobTaskBatchStatusEnum.SUCCESS.getStatus()) {
+                        break;
+                    } else if (JobTaskBatchStatusEnum.NOT_SUCCESS.contains(jobTaskBatch.getTaskBatchStatus())) {
+                        // 只要叶子节点不是无需处理的都是失败
+                        if (JobOperationReasonEnum.WORKFLOW_NODE_NO_REQUIRED.getReason() != jobTaskBatch.getOperationReason()
+                                && JobOperationReasonEnum.WORKFLOW_NODE_CLOSED_SKIP_EXECUTION.getReason() != jobTaskBatch.getOperationReason()) {
+                            taskStatus = JobTaskBatchStatusEnum.FAIL.getStatus();
+                        }
                     }
                 }
             }

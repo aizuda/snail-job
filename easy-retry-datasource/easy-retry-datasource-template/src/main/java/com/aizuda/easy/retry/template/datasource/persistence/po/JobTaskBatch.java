@@ -81,13 +81,13 @@ public class JobTaskBatch implements Serializable {
     /**
      * 任务类型 3、JOB任务 4、WORKFLOW任务
      */
-    private Integer taskType;
+    private Integer systemTaskType;
+
 
     /**
      * 操作原因
      */
     private Integer operationReason;
-
     /**
      * 修改时间
      */

@@ -2,7 +2,7 @@ package com.aizuda.easy.retry.server.job.task.support.generator.batch;
 
 import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
-import com.aizuda.easy.retry.server.common.enums.TaskTypeEnum;
+import com.aizuda.easy.retry.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.server.job.task.dto.WorkflowTimerTaskDTO;
@@ -51,7 +51,7 @@ public class WorkflowBatchGenerator {
         workflowTimerTaskDTO.setWorkflowTaskBatchId(workflowTaskBatch.getId());
         workflowTimerTaskDTO.setWorkflowId(context.getWorkflowId());
         workflowTimerTaskDTO.setTaskExecutorScene(context.getTaskExecutorScene());
-        JobTimerWheel.register(TaskTypeEnum.WORKFLOW.getType(), workflowTaskBatch.getId(),
+        JobTimerWheel.register(SyetemTaskTypeEnum.WORKFLOW.getType(), workflowTaskBatch.getId(),
             new WorkflowTimerTask(workflowTimerTaskDTO), delay, TimeUnit.MILLISECONDS);
     }
 }
