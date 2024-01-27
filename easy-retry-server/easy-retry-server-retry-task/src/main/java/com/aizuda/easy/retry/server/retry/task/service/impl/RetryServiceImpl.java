@@ -4,7 +4,7 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
-import com.aizuda.easy.retry.server.common.enums.TaskTypeEnum;
+import com.aizuda.easy.retry.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.retry.task.service.RetryDeadLetterConverter;
 import com.aizuda.easy.retry.server.retry.task.service.RetryService;
@@ -53,7 +53,7 @@ public class RetryServiceImpl implements RetryService {
                         .eq(RetryTask::getNamespaceId, namespaceId)
                         .in(RetryTask::getRetryStatus, RetryStatusEnum.MAX_COUNT.getStatus(),
                                 RetryStatusEnum.FINISH.getStatus())
-                        .eq(RetryTask::getTaskType, TaskTypeEnum.CALLBACK.getType())
+                        .eq(RetryTask::getTaskType, SyetemTaskTypeEnum.CALLBACK.getType())
                         .eq(RetryTask::getGroupName, groupName)).getRecords();
 
         if (CollectionUtils.isEmpty(callbackRetryTasks)) {
@@ -68,7 +68,7 @@ public class RetryServiceImpl implements RetryService {
         List<RetryTask> retryTasks = accessTemplate.getRetryTaskAccess()
                 .list(groupName, namespaceId, new LambdaQueryWrapper<RetryTask>()
                         .eq(RetryTask::getNamespaceId, namespaceId)
-                        .eq(RetryTask::getTaskType, TaskTypeEnum.RETRY.getType())
+                        .eq(RetryTask::getTaskType, SyetemTaskTypeEnum.RETRY.getType())
                         .in(RetryTask::getUniqueId, uniqueIdSet)
                 );
 

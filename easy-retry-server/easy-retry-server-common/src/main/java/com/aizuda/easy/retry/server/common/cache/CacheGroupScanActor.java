@@ -3,7 +3,7 @@ package com.aizuda.easy.retry.server.common.cache;
 import akka.actor.ActorRef;
 import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.Lifecycle;
-import com.aizuda.easy.retry.server.common.enums.TaskTypeEnum;
+import com.aizuda.easy.retry.server.common.enums.SyetemTaskTypeEnum;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import lombok.Data;
@@ -29,7 +29,7 @@ public class CacheGroupScanActor implements Lifecycle {
      *
      * @return 缓存对象
      */
-    public static ActorRef get(String groupName, TaskTypeEnum typeEnum) {
+    public static ActorRef get(String groupName, SyetemTaskTypeEnum typeEnum) {
         return CACHE.getIfPresent(groupName.concat(typeEnum.name()));
     }
 
@@ -38,7 +38,7 @@ public class CacheGroupScanActor implements Lifecycle {
      *
      * @return 缓存对象
      */
-    public static void put(String groupName, TaskTypeEnum typeEnum, ActorRef actorRef) {
+    public static void put(String groupName, SyetemTaskTypeEnum typeEnum, ActorRef actorRef) {
         CACHE.put(groupName.concat(typeEnum.name()), actorRef);
     }
 

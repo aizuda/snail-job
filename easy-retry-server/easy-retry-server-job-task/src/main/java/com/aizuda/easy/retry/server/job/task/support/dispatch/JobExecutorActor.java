@@ -13,7 +13,7 @@ import com.aizuda.easy.retry.server.common.WaitStrategy;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
 import com.aizuda.easy.retry.server.common.enums.JobTaskExecutorSceneEnum;
-import com.aizuda.easy.retry.server.common.enums.TaskTypeEnum;
+import com.aizuda.easy.retry.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.strategy.WaitStrategies;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
@@ -153,7 +153,7 @@ public class JobExecutorActor extends AbstractActor {
                 @Override
                 public void afterCompletion(int status) {
                     // 清除时间轮的缓存
-                    JobTimerWheel.clearCache(TaskTypeEnum.JOB.getType(), taskExecute.getTaskBatchId());
+                    JobTimerWheel.clearCache(SyetemTaskTypeEnum.JOB.getType(), taskExecute.getTaskBatchId());
                     //方法内容
                     doHandlerResidentTask(job, taskExecute);
                 }
@@ -208,7 +208,7 @@ public class JobExecutorActor extends AbstractActor {
         log.info("常驻任务监控. 任务时间差:[{}] 取余:[{}]", milliseconds, DateUtils.toNowMilli() % 1000);
         job.setNextTriggerAt(nextTriggerAt);
 
-        JobTimerWheel.register(TaskTypeEnum.JOB.getType(), jobTimerTaskDTO.getTaskBatchId(), timerTask, milliseconds - DateUtils.toNowMilli() % 1000, TimeUnit.MILLISECONDS);
+        JobTimerWheel.register(SyetemTaskTypeEnum.JOB.getType(), jobTimerTaskDTO.getTaskBatchId(), timerTask, milliseconds - DateUtils.toNowMilli() % 1000, TimeUnit.MILLISECONDS);
         ResidentTaskCache.refresh(job.getId(), nextTriggerAt);
     }
 }

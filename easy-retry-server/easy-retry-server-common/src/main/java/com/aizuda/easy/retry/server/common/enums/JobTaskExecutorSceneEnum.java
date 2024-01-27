@@ -14,14 +14,14 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum JobTaskExecutorSceneEnum {
-    AUTO_JOB(1, TaskTypeEnum.JOB),
-    MANUAL_JOB(2,  TaskTypeEnum.JOB),
-    AUTO_WORKFLOW(3, TaskTypeEnum.WORKFLOW),
-    MANUAL_WORKFLOW(4, TaskTypeEnum.WORKFLOW),
+    AUTO_JOB(1, SyetemTaskTypeEnum.JOB),
+    MANUAL_JOB(2,  SyetemTaskTypeEnum.JOB),
+    AUTO_WORKFLOW(3, SyetemTaskTypeEnum.WORKFLOW),
+    MANUAL_WORKFLOW(4, SyetemTaskTypeEnum.WORKFLOW),
     ;
 
     private final Integer type;
-    private final TaskTypeEnum taskType;
+    private final SyetemTaskTypeEnum systemTaskType;
 
     /**
      * 根据给定的类型获取对应的触发器类型枚举

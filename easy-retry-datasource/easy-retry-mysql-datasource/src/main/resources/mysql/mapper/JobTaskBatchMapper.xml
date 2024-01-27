@@ -20,7 +20,7 @@
         FROM job_task_batch a join job b on a.job_id = b.id
         <where>
             a.namespace_id = #{queryDO.namespaceId}
-            and a.task_type = 3
+            and a.system_task_type = 3
             <if test="queryDO.jobId != null">
                 and a.job_id = #{queryDO.jobId}
             </if>

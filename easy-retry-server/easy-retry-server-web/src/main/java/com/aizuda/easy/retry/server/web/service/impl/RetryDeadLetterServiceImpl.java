@@ -5,9 +5,8 @@ import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
 
 import com.aizuda.easy.retry.server.common.WaitStrategy;
-import com.aizuda.easy.retry.server.common.enums.TaskTypeEnum;
+import com.aizuda.easy.retry.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
-import com.aizuda.easy.retry.server.common.strategy.WaitStrategies;
 import com.aizuda.easy.retry.server.common.strategy.WaitStrategies.WaitStrategyContext;
 import com.aizuda.easy.retry.server.common.strategy.WaitStrategies.WaitStrategyEnum;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
@@ -37,12 +36,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -138,7 +134,7 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
 
             RetryTask retryTask = RetryTaskConverter.INSTANCE.toRetryTask(retryDeadLetter);
             retryTask.setRetryStatus(RetryStatusEnum.RUNNING.getStatus());
-            retryTask.setTaskType(TaskTypeEnum.RETRY.getType());
+            retryTask.setTaskType(SyetemTaskTypeEnum.RETRY.getType());
 
             WaitStrategyContext waitStrategyContext = new WaitStrategyContext();
             waitStrategyContext.setNextTriggerAt(LocalDateTime.now());

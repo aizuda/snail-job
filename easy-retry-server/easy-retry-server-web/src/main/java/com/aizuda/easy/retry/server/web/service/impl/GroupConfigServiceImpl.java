@@ -339,14 +339,14 @@ public class GroupConfigServiceImpl implements GroupConfigService {
             String schema = connection.getSchema();
 
             // https://gitee.com/aizuda/easy-retry/issues/I8DAMH
-            String sql =  MessageFormatter.arrayFormat("SELECT table_name\n"
-                + "FROM information_schema.tables\n"
-                + "WHERE table_name LIKE 'retry_task_%' AND table_schema = '{}' and table_catalog = '{}'", new Object[]{schema, catalog}).getMessage();
+            String sql = MessageFormatter.arrayFormat("SELECT table_name\n"
+                    + "FROM information_schema.tables\n"
+                    + "WHERE table_name LIKE 'retry_task_%' AND (table_schema = '{}' OR table_schema = '{}' OR table_catalog = '{}' OR table_catalog = '{}')", new Object[]{schema, catalog, schema, catalog}).getMessage();
 
             List<String> tableList = jdbcTemplate.queryForList(sql, String.class);
             return tableList.stream().map(ReUtil::getFirstNumber).filter(i ->
-                    !Objects.isNull(i) && i <= systemProperties.getTotalPartition()).distinct()
-                .collect(Collectors.toList());
+                            !Objects.isNull(i) && i <= systemProperties.getTotalPartition()).distinct()
+                    .collect(Collectors.toList());
         } catch (SQLException ignored) {
         } finally {
             if (Objects.nonNull(connection)) {

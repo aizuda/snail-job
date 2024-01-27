@@ -77,7 +77,6 @@ public class ScanWorkflowTaskActor extends AbstractActor {
         long now = DateUtils.toNowMilli();
         for (PartitionTask partitionTask : partitionTasks) {
             WorkflowPartitionTaskDTO workflowPartitionTaskDTO = (WorkflowPartitionTaskDTO) partitionTask;
-            log.warn("监控时间. workflowId:[{}] now:[{}], dbnextTriggerAt:[{}]", workflowPartitionTaskDTO.getId(), now, workflowPartitionTaskDTO.getNextTriggerAt());
             processWorkflow(workflowPartitionTaskDTO, waitUpdateJobs, waitExecWorkflows, now);
         }
 
@@ -85,8 +84,6 @@ public class ScanWorkflowTaskActor extends AbstractActor {
         workflowMapper.updateBatchNextTriggerAtById(waitUpdateJobs);
 
         for (final WorkflowTaskPrepareDTO waitExecTask : waitExecWorkflows) {
-
-            log.warn("监控时间. workflowId:[{}] now:[{}], nextTriggerAt:[{}]", waitExecTask.getWorkflowId(), now, waitExecTask.getNextTriggerAt());
             // 执行预处理阶段
             ActorRef actorRef = ActorGenerator.workflowTaskPrepareActor();
             waitExecTask.setTaskExecutorScene(JobTaskExecutorSceneEnum.AUTO_WORKFLOW.getType());

@@ -10,7 +10,7 @@ import com.aizuda.easy.retry.server.common.cache.CacheGroupScanActor;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.dto.ScanTask;
 import com.aizuda.easy.retry.server.common.enums.SystemModeEnum;
-import com.aizuda.easy.retry.server.common.enums.TaskTypeEnum;
+import com.aizuda.easy.retry.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.easy.retry.server.retry.task.support.cache.CacheGroupRateLimiter;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.ServerNodeMapper;
@@ -70,11 +70,11 @@ public class ConsumerBucketActor extends AbstractActor {
             scanTask.setBuckets(consumerBucket.getBuckets());
 
             // 扫描定时任务数据
-            ActorRef scanJobActorRef = cacheActorRef(DEFAULT_JOB_KEY, TaskTypeEnum.JOB);
+            ActorRef scanJobActorRef = cacheActorRef(DEFAULT_JOB_KEY, SyetemTaskTypeEnum.JOB);
             scanJobActorRef.tell(scanTask, scanJobActorRef);
 
             // 扫描DAG工作流任务数据
-            ActorRef scanWorkflowActorRef = cacheActorRef(DEFAULT_WORKFLOW_KEY, TaskTypeEnum.WORKFLOW);
+            ActorRef scanWorkflowActorRef = cacheActorRef(DEFAULT_WORKFLOW_KEY, SyetemTaskTypeEnum.WORKFLOW);
             scanWorkflowActorRef.tell(scanTask, scanWorkflowActorRef);
         }
 
@@ -120,11 +120,11 @@ public class ConsumerBucketActor extends AbstractActor {
         cacheRateLimiter(groupName);
 
         // 扫描重试数据
-        ActorRef scanRetryActorRef = cacheActorRef(groupName, TaskTypeEnum.RETRY);
+        ActorRef scanRetryActorRef = cacheActorRef(groupName, SyetemTaskTypeEnum.RETRY);
         scanRetryActorRef.tell(scanTask, scanRetryActorRef);
 
         // 扫描回调数据
-        ActorRef scanCallbackActorRef = cacheActorRef(groupName, TaskTypeEnum.CALLBACK);
+        ActorRef scanCallbackActorRef = cacheActorRef(groupName, SyetemTaskTypeEnum.CALLBACK);
         scanCallbackActorRef.tell(scanTask, scanCallbackActorRef);
 
     }
@@ -148,7 +148,7 @@ public class ConsumerBucketActor extends AbstractActor {
     /**
      * 缓存Actor对象
      */
-    private ActorRef cacheActorRef(String groupName, TaskTypeEnum typeEnum) {
+    private ActorRef cacheActorRef(String groupName, SyetemTaskTypeEnum typeEnum) {
         ActorRef scanActorRef = CacheGroupScanActor.get(groupName, typeEnum);
         if (Objects.isNull(scanActorRef)) {
             scanActorRef = typeEnum.getActorRef().get();

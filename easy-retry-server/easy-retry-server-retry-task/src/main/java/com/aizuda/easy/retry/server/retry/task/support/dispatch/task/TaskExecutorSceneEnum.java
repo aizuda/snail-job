@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.server.retry.task.support.dispatch.task;
 
-import com.aizuda.easy.retry.server.common.enums.TaskTypeEnum;
+import com.aizuda.easy.retry.server.common.enums.SyetemTaskTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -12,13 +12,13 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum TaskExecutorSceneEnum {
-    AUTO_RETRY(1, TaskTypeEnum.RETRY),
-    MANUAL_RETRY(2,  TaskTypeEnum.RETRY),
-    AUTO_CALLBACK(3, TaskTypeEnum.CALLBACK),
-    MANUAL_CALLBACK(4, TaskTypeEnum.CALLBACK);
+    AUTO_RETRY(1, SyetemTaskTypeEnum.RETRY),
+    MANUAL_RETRY(2,  SyetemTaskTypeEnum.RETRY),
+    AUTO_CALLBACK(3, SyetemTaskTypeEnum.CALLBACK),
+    MANUAL_CALLBACK(4, SyetemTaskTypeEnum.CALLBACK);
 
     private final int scene;
-    private final TaskTypeEnum taskType;
+    private final SyetemTaskTypeEnum taskType;
 
 
 }

@@ -4,7 +4,7 @@ import akka.actor.AbstractActor;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.enums.JobTaskExecutorSceneEnum;
-import com.aizuda.easy.retry.server.common.enums.TaskTypeEnum;
+import com.aizuda.easy.retry.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.easy.retry.server.job.task.dto.JobTaskPrepareDTO;
 import com.aizuda.easy.retry.server.job.task.support.JobPrePareHandler;
 import com.aizuda.easy.retry.server.job.task.support.prepare.job.TerminalJobPrepareHandler;
@@ -59,12 +59,12 @@ public class JobTaskPrepareActor extends AbstractActor {
 
         JobTaskExecutorSceneEnum jobTaskExecutorSceneEnum = JobTaskExecutorSceneEnum.get(
                 prepare.getTaskExecutorScene());
-        if (TaskTypeEnum.WORKFLOW.getType().equals(jobTaskExecutorSceneEnum.getTaskType().getType())) {
+        if (SyetemTaskTypeEnum.WORKFLOW.getType().equals(jobTaskExecutorSceneEnum.getSystemTaskType().getType())) {
             queryWrapper.eq(JobTaskBatch::getWorkflowNodeId, prepare.getWorkflowNodeId());
             queryWrapper.eq(JobTaskBatch::getWorkflowTaskBatchId, prepare.getWorkflowTaskBatchId());
-            queryWrapper.eq(JobTaskBatch::getTaskType, TaskTypeEnum.WORKFLOW.getType());
+            queryWrapper.eq(JobTaskBatch::getSystemTaskType, SyetemTaskTypeEnum.WORKFLOW.getType());
         } else {
-            queryWrapper.eq(JobTaskBatch::getTaskType, TaskTypeEnum.JOB.getType());
+            queryWrapper.eq(JobTaskBatch::getSystemTaskType, SyetemTaskTypeEnum.JOB.getType());
         }
 
         List<JobTaskBatch> notCompleteJobTaskBatchList = jobTaskBatchMapper

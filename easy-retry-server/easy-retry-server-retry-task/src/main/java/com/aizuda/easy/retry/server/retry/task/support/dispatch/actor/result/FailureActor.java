@@ -9,7 +9,7 @@ import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.IdempotentStrategy;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
-import com.aizuda.easy.retry.server.common.enums.TaskTypeEnum;
+import com.aizuda.easy.retry.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.retry.task.support.RetryTaskLogConverter;
 import com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.log.RetryTaskLogDTO;
@@ -73,7 +73,7 @@ public class FailureActor extends AbstractActor {
                     protected void doInTransactionWithoutResult(TransactionStatus status) {
 
                         Integer maxRetryCount;
-                        if (TaskTypeEnum.CALLBACK.getType().equals(retryTask.getTaskType())) {
+                        if (SyetemTaskTypeEnum.CALLBACK.getType().equals(retryTask.getTaskType())) {
                             maxRetryCount = systemProperties.getCallback().getMaxCount();
                         } else {
                             maxRetryCount = sceneConfig.getMaxRetryCount();

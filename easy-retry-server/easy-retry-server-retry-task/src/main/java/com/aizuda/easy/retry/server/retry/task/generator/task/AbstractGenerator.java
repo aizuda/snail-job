@@ -8,7 +8,7 @@ import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.enums.DelayLevelEnum;
-import com.aizuda.easy.retry.server.common.enums.TaskTypeEnum;
+import com.aizuda.easy.retry.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.generator.id.IdGenerator;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
@@ -26,7 +26,6 @@ import com.aizuda.easy.retry.template.datasource.persistence.po.GroupConfig;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLog;
 import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
-import com.aizuda.easy.retry.template.datasource.utils.RequestDataHelper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,7 +75,7 @@ public abstract class AbstractGenerator implements TaskGenerator {
                         .eq(RetryTask::getGroupName, taskContext.getGroupName())
                         .eq(RetryTask::getSceneName, taskContext.getSceneName())
                         .eq(RetryTask::getRetryStatus, RetryStatusEnum.RUNNING.getStatus())
-                        .eq(RetryTask::getTaskType, TaskTypeEnum.RETRY.getType())
+                        .eq(RetryTask::getTaskType, SyetemTaskTypeEnum.RETRY.getType())
                         .in(RetryTask::getIdempotentId, idempotentIdSet));
 
         Map<String/*幂等ID*/, List<RetryTask>> retryTaskMap = retryTasks.stream()
@@ -131,7 +130,7 @@ public abstract class AbstractGenerator implements TaskGenerator {
         RetryTask retryTask = RetryTaskConverter.INSTANCE.toRetryTask(taskInfo);
         retryTask.setNamespaceId(taskContext.getNamespaceId());
         retryTask.setUniqueId(getIdGenerator(taskContext.getGroupName(), taskContext.getNamespaceId()));
-        retryTask.setTaskType(TaskTypeEnum.RETRY.getType());
+        retryTask.setTaskType(SyetemTaskTypeEnum.RETRY.getType());
         retryTask.setGroupName(taskContext.getGroupName());
         retryTask.setSceneName(taskContext.getSceneName());
         retryTask.setRetryStatus(initStatus(taskContext));
@@ -153,7 +152,7 @@ public abstract class AbstractGenerator implements TaskGenerator {
 
         // 初始化日志
         RetryTaskLog retryTaskLog = RetryTaskLogConverter.INSTANCE.toRetryTask(retryTask);
-        retryTaskLog.setTaskType(TaskTypeEnum.RETRY.getType());
+        retryTaskLog.setTaskType(SyetemTaskTypeEnum.RETRY.getType());
         retryTaskLog.setCreateDt(now);
         waitInsertTaskLogs.add(retryTaskLog);
 
