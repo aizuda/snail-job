@@ -105,8 +105,7 @@ public class DistributedLockHandler {
      * @param lockName 锁名称
      * @param lockAtMost 锁超时时间
      */
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public void lockWithDisposable(String lockName, Duration lockAtMost, LockExecutor lockExecutor) {
+    public void lockWithDisposable(LockExecutor lockExecutor, String lockName, Duration lockAtMost) {
 
         LockProvider lockProvider = LockBuilder.newBuilder()
             .withDisposable(lockName)
@@ -122,8 +121,8 @@ public class DistributedLockHandler {
             EasyRetryLog.LOCAL.error("lock execute error. lockName:[{}]", lockName, e);
         } finally {
             if (lock) {
-                EasyRetryLog.LOCAL.info("[{}] 锁已释放", lockName);
                 lockProvider.unlock();
+                EasyRetryLog.LOCAL.info("[{}] 锁已释放", lockName);
             } else {
                 // 未获取到锁直接清除线程中存储的锁信息
                 LockManager.clear();

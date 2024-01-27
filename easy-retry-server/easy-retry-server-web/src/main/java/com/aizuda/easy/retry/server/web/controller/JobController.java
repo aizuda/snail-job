@@ -79,9 +79,10 @@ public class JobController {
     @LoginRequired
     public List<JobResponseVO> getJobNameList(
             @RequestParam(value = "keywords", required = false) String keywords,
-            @RequestParam(value = "jobId", required = false) Long jobId
+            @RequestParam(value = "jobId", required = false) Long jobId,
+            @RequestParam(value = "groupName", required = false) String groupName
     ) {
-        return jobService.getJobNameList(keywords, jobId);
+        return jobService.getJobNameList(keywords, jobId, groupName);
     }
 
     @PostMapping("/trigger/{jobId}")

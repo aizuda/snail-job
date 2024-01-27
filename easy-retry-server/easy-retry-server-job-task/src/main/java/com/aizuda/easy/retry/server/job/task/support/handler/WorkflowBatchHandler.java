@@ -5,6 +5,7 @@ import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.enums.JobTaskExecutorSceneEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
@@ -27,6 +28,8 @@ import com.google.common.collect.Lists;
 import com.google.common.graph.MutableGraph;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
@@ -218,7 +221,7 @@ public class WorkflowBatchHandler {
                 .in(JobTaskBatch::getWorkflowNodeId, graph.nodes()).orderByDesc(JobTaskBatch::getId)
         );
 
-        Map<Long, JobTaskBatch> jobTaskBatchMap = jobTaskBatches.stream().collect(Collectors.toMap(JobTaskBatch::getWorkflowNodeId, i -> i, (i,j) -> i));
+        Map<Long, JobTaskBatch> jobTaskBatchMap = jobTaskBatches.stream().collect(Collectors.toMap(JobTaskBatch::getWorkflowNodeId, i -> i, (i, j) -> i));
 
         checkWorkflowExecutor(SystemConstants.ROOT, workflowTaskBatchId, graph, jobTaskBatchMap);
     }
@@ -245,8 +248,10 @@ public class WorkflowBatchHandler {
                 taskExecuteDTO.setWorkflowTaskBatchId(workflowTaskBatchId);
                 taskExecuteDTO.setTaskExecutorScene(JobTaskExecutorSceneEnum.AUTO_WORKFLOW.getType());
                 taskExecuteDTO.setParentId(parentId);
-                ActorRef actorRef = ActorGenerator.workflowTaskExecutorActor();
-                actorRef.tell(taskExecuteDTO, actorRef);
+                if (Objects.nonNull(parentJobTaskBatch)) {
+                    taskExecuteDTO.setTaskBatchId(parentJobTaskBatch.getId());
+                }
+                openNextNode(taskExecuteDTO);
                 break;
             }
 
@@ -270,5 +275,30 @@ public class WorkflowBatchHandler {
         }
     }
 
+    public void openNextNode(WorkflowNodeTaskExecuteDTO taskExecuteDTO) {
+        if (Objects.isNull(taskExecuteDTO.getParentId()) || Objects.isNull(taskExecuteDTO.getWorkflowTaskBatchId())) {
+            return;
+        }
 
+        // 若是工作流则开启下一个任务
+        if (TransactionSynchronizationManager.isActualTransactionActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCompletion(int status) {
+                    tellWorkflowTaskExecutor(taskExecuteDTO);
+                }
+            });
+        } else {
+            tellWorkflowTaskExecutor(taskExecuteDTO);
+        }
+    }
+
+    private void tellWorkflowTaskExecutor(WorkflowNodeTaskExecuteDTO taskExecuteDTO) {
+        try {
+            ActorRef actorRef = ActorGenerator.workflowTaskExecutorActor();
+            actorRef.tell(taskExecuteDTO, actorRef);
+        } catch (Exception e) {
+            EasyRetryLog.LOCAL.error("任务调度执行失败", e);
+        }
+    }
 }

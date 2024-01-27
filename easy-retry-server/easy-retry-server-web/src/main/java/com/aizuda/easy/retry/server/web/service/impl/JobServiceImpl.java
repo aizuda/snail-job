@@ -34,8 +34,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
@@ -106,12 +104,18 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public List<JobResponseVO> getJobNameList(String keywords, Long jobId) {
+    public List<JobResponseVO> getJobNameList(String keywords, Long jobId, String groupName) {
 
+        UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
         LambdaQueryWrapper<Job> queryWrapper = new LambdaQueryWrapper<Job>()
-            .select(Job::getId, Job::getJobName);
+                .select(Job::getId, Job::getJobName);
+        queryWrapper.eq(Job::getNamespaceId, userSessionVO.getNamespaceId());
         if (StrUtil.isNotBlank(keywords)) {
             queryWrapper.like(Job::getJobName, keywords.trim() + "%");
+        }
+
+        if (StrUtil.isNotBlank(groupName)) {
+            queryWrapper.eq(Job::getGroupName, groupName);
         }
 
         if (Objects.nonNull(jobId)) {
@@ -129,7 +133,7 @@ public class JobServiceImpl implements JobService {
         // 判断常驻任务
         Job job = updateJobResident(jobRequestVO);
         job.setBucketIndex(HashUtil.bkdrHash(jobRequestVO.getGroupName() + jobRequestVO.getJobName())
-            % systemProperties.getBucketTotal());
+                % systemProperties.getBucketTotal());
         job.setNextTriggerAt(calculateNextTriggerAt(jobRequestVO, DateUtils.toNowMilli()));
         job.setNamespaceId(UserSessionUtils.currentUserSession().getNamespaceId());
         return 1 == jobMapper.insert(job);
@@ -151,18 +155,18 @@ public class JobServiceImpl implements JobService {
             job.setNextTriggerAt(0L);
             // 非常驻任务 > 非常驻任务
         } else if (Objects.equals(job.getResident(), StatusEnum.NO.getStatus()) && Objects.equals(
-            updateJob.getResident(),
-            StatusEnum.NO.getStatus())) {
+                updateJob.getResident(),
+                StatusEnum.NO.getStatus())) {
             updateJob.setNextTriggerAt(calculateNextTriggerAt(jobRequestVO, DateUtils.toNowMilli()));
         } else if (Objects.equals(job.getResident(), StatusEnum.YES.getStatus()) && Objects.equals(
-            updateJob.getResident(), StatusEnum.NO.getStatus())) {
+                updateJob.getResident(), StatusEnum.NO.getStatus())) {
             // 常驻任务的触发时间
             long time = Optional.ofNullable(ResidentTaskCache.get(jobRequestVO.getId()))
-                .orElse(DateUtils.toNowMilli());
+                    .orElse(DateUtils.toNowMilli());
             updateJob.setNextTriggerAt(calculateNextTriggerAt(jobRequestVO, time));
             // 老的是不是常驻任务 新的是常驻任务 需要使用当前时间计算下次触发时间
         } else if (Objects.equals(job.getResident(), StatusEnum.NO.getStatus()) && Objects.equals(
-            updateJob.getResident(), StatusEnum.YES.getStatus())) {
+                updateJob.getResident(), StatusEnum.YES.getStatus())) {
             updateJob.setNextTriggerAt(DateUtils.toNowMilli());
         }
 
@@ -230,9 +234,9 @@ public class JobServiceImpl implements JobService {
         Assert.notNull(job, () -> new EasyRetryServerException("job can not be null."));
 
         long count = accessTemplate.getGroupConfigAccess().count(new LambdaQueryWrapper<GroupConfig>()
-            .eq(GroupConfig::getGroupName, job.getGroupName())
-            .eq(GroupConfig::getNamespaceId, job.getNamespaceId())
-            .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus())
+                .eq(GroupConfig::getGroupName, job.getGroupName())
+                .eq(GroupConfig::getNamespaceId, job.getNamespaceId())
+                .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus())
         );
 
         Assert.isTrue(count > 0, () -> new EasyRetryServerException("组:[{}]已经关闭，不支持手动执行.", job.getGroupName()));
@@ -250,10 +254,11 @@ public class JobServiceImpl implements JobService {
     public List<JobResponseVO> getJobList(String groupName) {
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
         List<Job> jobs = jobMapper.selectList(new LambdaQueryWrapper<Job>()
-            .select(Job::getId, Job::getJobName)
-            .eq(Job::getNamespaceId, namespaceId)
-            .eq(Job::getGroupName, groupName)
-            .orderByDesc(Job::getCreateDt));
+                .select(Job::getId, Job::getJobName)
+                .eq(Job::getNamespaceId, namespaceId)
+                .eq(Job::getGroupName, groupName)
+                .eq(Job::getDeleted, StatusEnum.NO.getStatus())
+                .orderByDesc(Job::getCreateDt));
         List<JobResponseVO> jobResponseList = JobResponseVOConverter.INSTANCE.toJobResponseVOs(jobs);
         return jobResponseList;
     }

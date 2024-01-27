@@ -1,10 +1,8 @@
 package com.aizuda.easy.retry.server.job.task.support.handler;
 
-import akka.actor.ActorRef;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskStatusEnum;
-import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.enums.JobTaskExecutorSceneEnum;
 import com.aizuda.easy.retry.server.job.task.dto.CompleteJobBatchDTO;
 import com.aizuda.easy.retry.server.job.task.dto.WorkflowNodeTaskExecuteDTO;
@@ -15,12 +13,10 @@ import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTaskBatch;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
@@ -34,13 +30,13 @@ import java.util.stream.Collectors;
  * @date : 2023-10-10 16:50
  */
 @Component
+@RequiredArgsConstructor
 @Slf4j
 public class JobTaskBatchHandler {
+    private final JobTaskMapper jobTaskMapper;
+    private final JobTaskBatchMapper jobTaskBatchMapper;
+    private final WorkflowBatchHandler workflowBatchHandler;
 
-    @Autowired
-    private JobTaskMapper jobTaskMapper;
-    @Autowired
-    private JobTaskBatchMapper jobTaskBatchMapper;
 
     @Transactional
     public boolean complete(CompleteJobBatchDTO completeJobBatchDTO) {
@@ -80,27 +76,12 @@ public class JobTaskBatchHandler {
             jobTaskBatch.setOperationReason(completeJobBatchDTO.getJobOperationReason());
         }
 
-        if (Objects.nonNull(completeJobBatchDTO.getWorkflowNodeId()) && Objects.nonNull(
-            completeJobBatchDTO.getWorkflowTaskBatchId())) {
-            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-                @Override
-                public void afterCompletion(int status) {
-                     // 若是工作流则开启下一个任务
-                    try {
-                        WorkflowNodeTaskExecuteDTO taskExecuteDTO = new WorkflowNodeTaskExecuteDTO();
-                        taskExecuteDTO.setWorkflowTaskBatchId(completeJobBatchDTO.getWorkflowTaskBatchId());
-                        taskExecuteDTO.setTaskExecutorScene(JobTaskExecutorSceneEnum.AUTO_WORKFLOW.getType());
-                        taskExecuteDTO.setParentId(completeJobBatchDTO.getWorkflowNodeId());
-                        taskExecuteDTO.setTaskBatchId(completeJobBatchDTO.getTaskBatchId());
-                        ActorRef actorRef = ActorGenerator.workflowTaskExecutorActor();
-                        actorRef.tell(taskExecuteDTO, actorRef);
-                    } catch (Exception e) {
-                        log.error("任务调度执行失败", e);
-                    }
-                }
-            });
-
-        }
+        WorkflowNodeTaskExecuteDTO taskExecuteDTO = new WorkflowNodeTaskExecuteDTO();
+        taskExecuteDTO.setWorkflowTaskBatchId(completeJobBatchDTO.getWorkflowTaskBatchId());
+        taskExecuteDTO.setTaskExecutorScene(JobTaskExecutorSceneEnum.AUTO_WORKFLOW.getType());
+        taskExecuteDTO.setParentId(completeJobBatchDTO.getWorkflowNodeId());
+        taskExecuteDTO.setTaskBatchId(completeJobBatchDTO.getTaskBatchId());
+        workflowBatchHandler.openNextNode(taskExecuteDTO);
 
         jobTaskBatch.setUpdateDt(LocalDateTime.now());
         return 1 == jobTaskBatchMapper.update(jobTaskBatch,

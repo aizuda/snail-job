@@ -13,11 +13,13 @@ import com.aizuda.easy.retry.server.job.task.dto.JobTimerTaskDTO;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.easy.retry.server.job.task.dto.WorkflowNodeTaskExecuteDTO;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
+import com.aizuda.easy.retry.server.job.task.support.handler.WorkflowBatchHandler;
 import com.aizuda.easy.retry.server.job.task.support.timer.JobTimerTask;
 import com.aizuda.easy.retry.server.job.task.support.timer.JobTimerWheel;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskBatchMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTaskBatch;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
@@ -39,10 +41,11 @@ import java.util.concurrent.TimeUnit;
  */
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class JobTaskBatchGenerator {
 
-    @Autowired
-    private JobTaskBatchMapper jobTaskBatchMapper;
+    private final JobTaskBatchMapper jobTaskBatchMapper;
+    private final WorkflowBatchHandler workflowBatchHandler;
 
     @Transactional
     public JobTaskBatch generateJobTaskBatch(JobTaskBatchGeneratorContext context) {
@@ -79,18 +82,12 @@ public class JobTaskBatchGenerator {
 
         // 非待处理状态无需进入时间轮中
         if (JobTaskBatchStatusEnum.WAITING.getStatus() != jobTaskBatch.getTaskBatchStatus()) {
-
-            if (TransactionSynchronizationManager.isActualTransactionActive()) {
-                TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-                    @Override
-                    public void afterCompletion(int status) {
-                        openNextNode(context);
-                    }
-                });
-            } else {
-                openNextNode(context);
-            }
-
+            WorkflowNodeTaskExecuteDTO taskExecuteDTO = new WorkflowNodeTaskExecuteDTO();
+            taskExecuteDTO.setWorkflowTaskBatchId(context.getWorkflowTaskBatchId());
+            taskExecuteDTO.setTaskExecutorScene(context.getTaskExecutorScene());
+            taskExecuteDTO.setParentId(context.getWorkflowNodeId());
+            taskExecuteDTO.setTaskBatchId(jobTaskBatch.getId());
+            workflowBatchHandler.openNextNode(taskExecuteDTO);
 
             return jobTaskBatch;
         }
@@ -107,26 +104,6 @@ public class JobTaskBatchGenerator {
                 new JobTimerTask(jobTimerTaskDTO), delay, TimeUnit.MILLISECONDS);
 
         return jobTaskBatch;
-    }
-
-    /**
-     * 工作流开启下一个节点
-     * @param context
-     */
-    private static void openNextNode(final JobTaskBatchGeneratorContext context) {
-        if (Objects.nonNull(context.getWorkflowNodeId()) && Objects.nonNull(context.getWorkflowTaskBatchId())) {
-            // 若是工作流则开启下一个任务
-            try {
-                WorkflowNodeTaskExecuteDTO taskExecuteDTO = new WorkflowNodeTaskExecuteDTO();
-                taskExecuteDTO.setWorkflowTaskBatchId(context.getWorkflowTaskBatchId());
-                taskExecuteDTO.setTaskExecutorScene(context.getTaskExecutorScene());
-                taskExecuteDTO.setParentId(context.getWorkflowNodeId());
-                ActorRef actorRef = ActorGenerator.workflowTaskExecutorActor();
-                actorRef.tell(taskExecuteDTO, actorRef);
-            } catch (Exception e) {
-                log.error("任务调度执行失败", e);
-            }
-        }
     }
 
 }
