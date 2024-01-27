@@ -11,11 +11,6 @@ import lombok.Data;
 public class WorkflowNodeTaskExecuteDTO {
 
     /**
-     * 工作流id
-     */
-    private Long workflowId;
-
-    /**
      * 工作流任务批次id
      */
     private Long workflowTaskBatchId;

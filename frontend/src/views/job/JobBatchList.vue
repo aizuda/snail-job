@@ -26,6 +26,7 @@
                 :not-found-content="null"
                 @search="handleSearch"
                 @change="handleChange"
+                allowClear
               >
                 <a-select-option v-for="(item, index) in jobNameList" :value="item.id" :key="index">
                   {{ item.jobName }}
@@ -243,7 +244,7 @@ export default {
   },
   methods: {
     handleSearch (value) {
-      jobNameList({ keywords: value }).then(res => {
+      jobNameList({ keywords: value, groupName: this.queryParam.groupName }).then(res => {
         this.jobNameList = res.data
       })
     },

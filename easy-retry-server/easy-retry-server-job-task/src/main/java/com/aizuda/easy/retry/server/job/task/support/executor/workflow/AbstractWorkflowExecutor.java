@@ -61,9 +61,8 @@ public abstract class AbstractWorkflowExecutor implements WorkflowExecutor, Init
 
     @Override
     public void execute(WorkflowExecutorContext context) {
-        distributedLockHandler.lockWithDisposableAndRetry(
+        distributedLockHandler.lockWithDisposable(
                 () -> {
-
                     long total = 0;
                     // 条件节点存在并发问题，需要特殊处理
                     if (WorkflowNodeTypeEnum.DECISION.getType() == context.getNodeType()) {
@@ -110,7 +109,7 @@ public abstract class AbstractWorkflowExecutor implements WorkflowExecutor, Init
                         }
                     });
                 }, MessageFormat.format(KEY, context.getWorkflowTaskBatchId(), context.getWorkflowNodeId()),
-                Duration.ofSeconds(6), Duration.ofSeconds(2), 12);
+                Duration.ofSeconds(10));
 
     }
 
@@ -132,22 +131,12 @@ public abstract class AbstractWorkflowExecutor implements WorkflowExecutor, Init
     }
 
     protected void workflowTaskExecutor(WorkflowExecutorContext context) {
-        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-            @Override
-            public void afterCompletion(int status) {
-                try {
-                    WorkflowNodeTaskExecuteDTO taskExecuteDTO = new WorkflowNodeTaskExecuteDTO();
-                    taskExecuteDTO.setWorkflowTaskBatchId(context.getWorkflowTaskBatchId());
-                    taskExecuteDTO.setTaskExecutorScene(context.getTaskExecutorScene());
-                    taskExecuteDTO.setParentId(context.getWorkflowNodeId());
-                    taskExecuteDTO.setTaskBatchId(context.getTaskBatchId());
-                    ActorRef actorRef = ActorGenerator.workflowTaskExecutorActor();
-                    actorRef.tell(taskExecuteDTO, actorRef);
-                } catch (Exception e) {
-                    log.error("工作流执行失败", e);
-                }
-            }
-        });
+        WorkflowNodeTaskExecuteDTO taskExecuteDTO = new WorkflowNodeTaskExecuteDTO();
+        taskExecuteDTO.setWorkflowTaskBatchId(context.getWorkflowTaskBatchId());
+        taskExecuteDTO.setTaskExecutorScene(context.getTaskExecutorScene());
+        taskExecuteDTO.setParentId(context.getWorkflowNodeId());
+        taskExecuteDTO.setTaskBatchId(context.getTaskBatchId());
+        workflowBatchHandler.openNextNode(taskExecuteDTO);
     }
 
     protected JobTask generateJobTask(WorkflowExecutorContext context, JobTaskBatch jobTaskBatch) {

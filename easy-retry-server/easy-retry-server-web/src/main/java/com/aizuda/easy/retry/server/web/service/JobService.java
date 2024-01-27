@@ -31,7 +31,7 @@ public interface JobService {
 
     List<String> getTimeByCron(String cron);
 
-    List<JobResponseVO> getJobNameList(String keywords, Long jobId);
+    List<JobResponseVO> getJobNameList(String keywords, Long jobId, String groupName);
 
     boolean trigger(Long jobId);
 
