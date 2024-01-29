@@ -398,7 +398,7 @@ CREATE TABLE job
     namespace_id     VARCHAR(64) NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
     group_name       VARCHAR(64)  NOT NULL,
     job_name         VARCHAR(64)  NOT NULL,
-    args_str         TEXT         NOT NULL,
+    args_str         TEXT         NOT NULL DEFAULT '',
     args_type        SMALLINT     NOT NULL DEFAULT 1,
     next_trigger_at  BIGINT       NOT NULL,
     job_status       SMALLINT     NOT NULL DEFAULT 1,
@@ -462,7 +462,9 @@ CREATE TABLE job_log_message
     job_id        BIGINT      NOT NULL,
     task_batch_id BIGINT      NOT NULL,
     task_id       BIGINT      NOT NULL,
-    message       TEXT        NOT NULL,
+    message       TEXT    NOT NULL,
+    log_num       INT         NOT NULL DEFAULT 1,
+    real_time     BIGINT      NOT NULL DEFAULT 0,
     ext_attrs     VARCHAR(256)         DEFAULT '',
     create_dt     TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -478,6 +480,8 @@ COMMENT ON COLUMN "job_log_message"."job_id" IS '任务信息id';
 COMMENT ON COLUMN "job_log_message"."task_batch_id" IS '任务批次id';
 COMMENT ON COLUMN "job_log_message"."task_id" IS '调度任务id';
 COMMENT ON COLUMN "job_log_message"."message" IS '调度信息';
+COMMENT ON COLUMN "job_log_message"."log_num" IS '日志序号';
+COMMENT ON COLUMN "job_log_message"."real_time" IS '实际时间';
 COMMENT ON COLUMN "job_log_message"."create_dt" IS '创建时间';
 COMMENT ON COLUMN "job_log_message"."ext_attrs" IS '扩展字段';
 COMMENT ON TABLE "job_log_message" IS '调度日志';
@@ -524,29 +528,39 @@ COMMENT ON TABLE "job_task" IS '任务实例';
 
 CREATE TABLE job_task_batch
 (
-    id                BIGSERIAL PRIMARY KEY,
-    namespace_id      VARCHAR(64) NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
-    group_name        VARCHAR(64) NOT NULL,
-    job_id            BIGINT      NOT NULL,
-    parent_id         VARCHAR(64) NOT NULL DEFAULT '',
-    task_batch_status SMALLINT    NOT NULL DEFAULT 0,
-    operation_reason  SMALLINT    NOT NULL DEFAULT 0,
-    execution_at      BIGINT      NOT NULL DEFAULT 0,
-    ext_attrs         VARCHAR(256)         DEFAULT '',
-    deleted           SMALLINT    NOT NULL DEFAULT 0,
-    create_dt         TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    update_dt         TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP
+    id                      BIGSERIAL PRIMARY KEY,
+    namespace_id            VARCHAR(64) NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
+    group_name              VARCHAR(64) NOT NULL,
+    job_id                  BIGINT      NOT NULL,
+    workflow_node_id        BIGINT      NOT NULL DEFAULT 0,
+    parent_workflow_node_id BIGINT      NOT NULL DEFAULT 0,
+    workflow_task_batch_id  BIGINT      NOT NULL DEFAULT 0,
+    parent_id               VARCHAR(64) NOT NULL DEFAULT '',
+    task_batch_status       SMALLINT    NOT NULL DEFAULT 0,
+    operation_reason        SMALLINT    NOT NULL DEFAULT 0,
+    execution_at            BIGINT      NOT NULL DEFAULT 0,
+    system_task_type        SMALLINT    NOT NULL DEFAULT 3,
+    ext_attrs               VARCHAR(256)         DEFAULT '',
+    deleted                 SMALLINT    NOT NULL DEFAULT 0,
+    create_dt               TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_dt               TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX "idx_namespace_id_group_name_to_job_task_batch" ON "job_task_batch" ("namespace_id", "group_name");
 CREATE INDEX "idx_job_id_task_batch_status_to_job_task_batch" ON "job_task_batch" ("job_id", "task_batch_status");
 CREATE INDEX "idx_create_dt_to_job_task_batch" ON "job_task_batch" ("create_dt");
+CREATE INDEX "idx_workflow_task_batch_id_workflow_node_id" ON "job_task_batch" ("workflow_task_batch_id", "workflow_node_id");
+
 COMMENT ON COLUMN "job_task_batch"."id" IS '主键';
 COMMENT ON COLUMN "job_task_batch"."namespace_id" IS '命名空间id';
 COMMENT ON COLUMN "job_task_batch"."group_name" IS '组名称';
 COMMENT ON COLUMN "job_task_batch"."job_id" IS '任务信息id';
 COMMENT ON COLUMN "job_task_batch"."task_batch_status" IS '任务批次状态 0、失败 1、成功';
 COMMENT ON COLUMN "job_task_batch"."operation_reason" IS '操作原因';
+COMMENT ON COLUMN "job_task_batch"."workflow_node_id" IS '工作流节点id';
+COMMENT ON COLUMN "job_task_batch"."parent_workflow_node_id" IS '父节点';
+COMMENT ON COLUMN "job_task_batch"."workflow_task_batch_id" IS '任务批次id';
+COMMENT ON COLUMN "job_task_batch"."system_task_type" IS '任务类型 0、系统任务 1、业务任务';
 COMMENT ON COLUMN "job_task_batch"."execution_at" IS '任务执行时间';
 COMMENT ON COLUMN "job_task_batch"."parent_id" IS '父节点';
 COMMENT ON COLUMN "job_task_batch"."deleted" IS '逻辑删除 1、删除';
@@ -557,20 +571,20 @@ COMMENT ON TABLE "job_task" IS '任务批次';
 
 CREATE TABLE job_notify_config
 (
-    id               BIGSERIAL PRIMARY KEY,
-    namespace_id      VARCHAR(64) NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
-    group_name       VARCHAR(64)  NOT NULL,
-    job_id            BIGINT      NOT NULL,
-    notify_status    SMALLINT  NOT NULL DEFAULT 0,
-    notify_type      SMALLINT     NOT NULL DEFAULT 0,
-    notify_attribute VARCHAR(512) NOT NULL,
-    notify_threshold INT          NOT NULL DEFAULT 0,
-    notify_scene     SMALLINT     NOT NULL DEFAULT 0,
-    rate_limiter_status    SMALLINT  NOT NULL DEFAULT 0,
+    id                     BIGSERIAL PRIMARY KEY,
+    namespace_id           VARCHAR(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
+    group_name             VARCHAR(64)  NOT NULL,
+    job_id                 BIGINT       NOT NULL,
+    notify_status          SMALLINT     NOT NULL DEFAULT 0,
+    notify_type            SMALLINT     NOT NULL DEFAULT 0,
+    notify_attribute       VARCHAR(512) NOT NULL,
+    notify_threshold       INT          NOT NULL DEFAULT 0,
+    notify_scene           SMALLINT     NOT NULL DEFAULT 0,
+    rate_limiter_status    SMALLINT     NOT NULL DEFAULT 0,
     rate_limiter_threshold INT          NOT NULL DEFAULT 0,
-    description      VARCHAR(256) NOT NULL DEFAULT '',
-    create_dt        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    update_dt        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
+    description            VARCHAR(256) NOT NULL DEFAULT '',
+    create_dt              TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_dt              TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX idx_namespace_id_group_name_job_id_job_notify_config ON job_notify_config (namespace_id, group_name, job_id);
@@ -655,3 +669,128 @@ COMMENT ON COLUMN "job_summary"."stop_reason" IS '失败原因';
 COMMENT ON COLUMN "job_summary"."cancel_num" IS '执行失败-日志数量';
 COMMENT ON COLUMN "job_summary"."cancel_reason" IS '失败原因';
 COMMENT ON TABLE "job_summary" IS 'DashBoard_Job';
+
+CREATE TABLE workflow
+(
+    id               BIGSERIAL PRIMARY KEY,
+    workflow_name    varchar(64)  NOT NULL,
+    namespace_id     varchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
+    group_name       varchar(64)  NOT NULL,
+    workflow_status  smallint     NOT NULL DEFAULT 1,
+    trigger_type     smallint     NOT NULL,
+    trigger_interval varchar(255) NOT NULL,
+    next_trigger_at  BIGINT       NOT NULL,
+    block_strategy   smallint     NOT NULL DEFAULT 1,
+    executor_timeout INT          NOT NULL DEFAULT 0,
+    description      varchar(256) NOT NULL DEFAULT '',
+    flow_info        text                  DEFAULT NULL,
+    bucket_index     INT          NOT NULL DEFAULT 0,
+    version          INT          NOT NULL,
+    create_dt        timestamp    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_dt        timestamp    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted          smallint     NOT NULL DEFAULT 0,
+    ext_attrs        varchar(256) NULL DEFAULT ''
+);
+
+
+CREATE INDEX idx_create_dt_workflow ON workflow (create_dt);
+CREATE INDEX idx_namespace_id_group_name ON workflow (namespace_id, group_name);
+
+COMMENT ON TABLE workflow IS '工作流';
+COMMENT ON COLUMN workflow.id IS '主键';
+COMMENT ON COLUMN workflow.workflow_name IS '工作流名称';
+COMMENT ON COLUMN workflow.namespace_id IS '命名空间id';
+COMMENT ON COLUMN workflow.group_name IS '组名称';
+COMMENT ON COLUMN workflow.workflow_status IS '工作流状态 0、关闭、1、开启';
+COMMENT ON COLUMN workflow.trigger_type IS '触发类型 1.CRON 表达式 2. 固定时间';
+COMMENT ON COLUMN workflow.trigger_interval IS '间隔时长';
+COMMENT ON COLUMN workflow.next_trigger_at IS '下次触发时间';
+COMMENT ON COLUMN workflow.block_strategy IS '阻塞策略 1、丢弃 2、覆盖 3、并行';
+COMMENT ON COLUMN workflow.executor_timeout IS '任务执行超时时间，单位秒';
+COMMENT ON COLUMN workflow.description IS '描述';
+COMMENT ON COLUMN workflow.flow_info IS '流程信息';
+COMMENT ON COLUMN workflow.bucket_index IS 'bucket';
+COMMENT ON COLUMN workflow.version IS '版本号';
+COMMENT ON COLUMN workflow.create_dt IS '创建时间';
+COMMENT ON COLUMN workflow.update_dt IS '修改时间';
+COMMENT ON COLUMN workflow.deleted IS '逻辑删除 1、删除';
+COMMENT ON COLUMN workflow.ext_attrs IS '扩展字段';
+
+CREATE TABLE workflow_node
+(
+    id                   BIGSERIAL PRIMARY KEY,
+    namespace_id         VARCHAR(64) NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
+    node_name            VARCHAR(64) NOT NULL,
+    group_name           VARCHAR(64) NOT NULL,
+    job_id               BIGINT      NOT NULL,
+    workflow_id          BIGINT      NOT NULL,
+    node_type            SMALLINT    NOT NULL DEFAULT 1,
+    expression_type      SMALLINT    NOT NULL DEFAULT 0,
+    fail_strategy        SMALLINT    NOT NULL DEFAULT 1,
+    workflow_node_status SMALLINT    NOT NULL DEFAULT 1,
+    priority_level       INT         NOT NULL DEFAULT 1,
+    node_info            TEXT                 DEFAULT NULL,
+    version              INT         NOT NULL,
+    create_dt            TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_dt            TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted              SMALLINT    NOT NULL DEFAULT 0,
+    ext_attrs            VARCHAR(256) NULL DEFAULT ''
+);
+
+CREATE INDEX idx_create_dt_workflow_node ON workflow_node (create_dt);
+CREATE INDEX idx_namespace_id_group_name ON workflow_node (namespace_id, group_name);
+
+COMMENT ON TABLE workflow_node IS '工作流节点';
+COMMENT ON COLUMN workflow_node.id IS '主键';
+COMMENT ON COLUMN workflow_node.namespace_id IS '命名空间id';
+COMMENT ON COLUMN workflow_node.node_name IS '节点名称';
+COMMENT ON COLUMN workflow_node.group_name IS '组名称';
+COMMENT ON COLUMN workflow_node.job_id IS '任务信息id';
+COMMENT ON COLUMN workflow_node.workflow_id IS '工作流ID';
+COMMENT ON COLUMN workflow_node.node_type IS '1、任务节点 2、条件节点';
+COMMENT ON COLUMN workflow_node.expression_type IS '1、SpEl、2、Aviator 3、QL';
+COMMENT ON COLUMN workflow_node.fail_strategy IS '失败策略 1、跳过 2、阻塞';
+COMMENT ON COLUMN workflow_node.workflow_node_status IS '工作流节点状态 0、关闭、1、开启';
+COMMENT ON COLUMN workflow_node.priority_level IS '优先级';
+COMMENT ON COLUMN workflow_node.node_info IS '节点信息';
+COMMENT ON COLUMN workflow_node.version IS '版本号';
+COMMENT ON COLUMN workflow_node.create_dt IS '创建时间';
+COMMENT ON COLUMN workflow_node.update_dt IS '修改时间';
+COMMENT ON COLUMN workflow_node.deleted IS '逻辑删除 1、删除';
+COMMENT ON COLUMN workflow_node.ext_attrs IS '扩展字段';
+
+CREATE TABLE workflow_task_batch
+(
+    id                BIGSERIAL PRIMARY KEY,
+    namespace_id      VARCHAR(64) NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
+    group_name        VARCHAR(64) NOT NULL,
+    workflow_id       BIGINT      NOT NULL,
+    task_batch_status SMALLINT    NOT NULL DEFAULT 0,
+    operation_reason  SMALLINT    NOT NULL DEFAULT 0,
+    flow_info         TEXT                 DEFAULT NULL,
+    execution_at      BIGINT      NOT NULL DEFAULT 0,
+    create_dt         TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_dt         TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted           SMALLINT    NOT NULL DEFAULT 0,
+    ext_attrs         VARCHAR(256) NULL DEFAULT ''
+);
+
+CREATE INDEX idx_job_id_task_batch_status_workflow_task_batch ON workflow_task_batch (workflow_id, task_batch_status);
+CREATE INDEX idx_create_dt_workflow_task_batch ON workflow_task_batch (create_dt);
+CREATE INDEX idx_namespace_id_group_name_workflow_task_batch ON workflow_task_batch (namespace_id, group_name);
+
+COMMENT ON TABLE workflow_task_batch IS '工作流批次';
+COMMENT ON COLUMN workflow_task_batch.id IS '主键';
+COMMENT ON COLUMN workflow_task_batch.namespace_id IS '命名空间id';
+COMMENT ON COLUMN workflow_task_batch.group_name IS '组名称';
+COMMENT ON COLUMN workflow_task_batch.workflow_id IS '工作流任务id';
+COMMENT ON COLUMN workflow_task_batch.task_batch_status IS '任务批次状态 0、失败 1、成功';
+COMMENT ON COLUMN workflow_task_batch.operation_reason IS '操作原因';
+COMMENT ON COLUMN workflow_task_batch.flow_info IS '流程信息';
+COMMENT ON COLUMN workflow_task_batch.execution_at IS '任务执行时间';
+COMMENT ON COLUMN workflow_task_batch.create_dt IS '创建时间';
+COMMENT ON COLUMN workflow_task_batch.update_dt IS '修改时间';
+COMMENT ON COLUMN workflow_task_batch.deleted IS '逻辑删除 1、删除';
+COMMENT ON COLUMN workflow_task_batch.ext_attrs IS '扩展字段';
+
+

@@ -378,7 +378,7 @@ CREATE TABLE `job_task_batch`
     KEY `idx_job_id_task_batch_status` (`job_id`, `task_batch_status`),
     KEY `idx_create_dt` (`create_dt`),
     KEY `idx_namespace_id_group_name` (`namespace_id`, `group_name`),
-    KEY `idx_workflow_task_batch_id_task_batch_status` (`workflow_task_batch_id`,`workflow_node_id`)
+    KEY `idx_workflow_task_batch_id_workflow_node_id` (`workflow_task_batch_id`,`workflow_node_id`)
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 0
   DEFAULT CHARSET = utf8mb4 COMMENT ='任务批次';
