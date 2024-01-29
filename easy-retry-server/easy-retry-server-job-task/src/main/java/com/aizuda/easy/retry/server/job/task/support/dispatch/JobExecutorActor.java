@@ -28,8 +28,10 @@ import com.aizuda.easy.retry.server.job.task.support.executor.job.JobExecutorCon
 import com.aizuda.easy.retry.server.job.task.support.executor.job.JobExecutorFactory;
 import com.aizuda.easy.retry.server.job.task.support.timer.JobTimerWheel;
 import com.aizuda.easy.retry.server.job.task.support.timer.ResidentJobTimerTask;
+import com.aizuda.easy.retry.template.datasource.persistence.mapper.GroupConfigMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskBatchMapper;
+import com.aizuda.easy.retry.template.datasource.persistence.po.GroupConfig;
 import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTaskBatch;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -64,6 +66,8 @@ public class JobExecutorActor extends AbstractActor {
     private JobTaskBatchMapper jobTaskBatchMapper;
     @Autowired
     private TransactionTemplate transactionTemplate;
+    @Autowired
+    private GroupConfigMapper groupConfigMapper;
 
     @Override
     public Receive createReceive() {
@@ -182,6 +186,14 @@ public class JobExecutorActor extends AbstractActor {
             // 是否是常驻任务
             || Objects.equals(StatusEnum.NO.getStatus(), job.getResident())
         ) {
+            return;
+        }
+
+        long count = groupConfigMapper.selectCount(new LambdaQueryWrapper<GroupConfig>()
+            .eq(GroupConfig::getNamespaceId, job.getNamespaceId())
+            .eq(GroupConfig::getGroupName, job.getGroupName())
+            .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus()));
+        if (count == 0) {
             return;
         }
 
