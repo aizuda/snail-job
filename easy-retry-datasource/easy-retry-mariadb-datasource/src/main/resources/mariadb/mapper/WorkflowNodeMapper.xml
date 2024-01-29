@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aizuda.easy.retry.template.datasource.persistence.mapper.WorkflowNodeMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.aizuda.easy.retry.template.datasource.persistence.po.WorkflowNode">
+        <id column="id" property="id" />
+        <result column="namespace_id" property="namespaceId" />
+        <result column="group_name" property="groupName" />
+        <result column="job_id" property="jobId" />
+        <result column="node_type" property="nodeType" />
+        <result column="expression_type" property="expressionType" />
+        <result column="fail_strategy" property="failStrategy" />
+        <result column="workflow_node_status" property="workflowNodeStatus" />
+        <result column="node_expression" property="nodeExpression" />
+        <result column="create_dt" property="createDt" />
+        <result column="update_dt" property="updateDt" />
+        <result column="deleted" property="deleted" />
+        <result column="ext_attrs" property="extAttrs" />
+    </resultMap>
+
+</mapper>

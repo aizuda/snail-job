@@ -161,9 +161,7 @@ public class WorkflowBatchHandler {
         jobTaskBatch.setId(workflowTaskBatchId);
         jobTaskBatch.setTaskBatchStatus(taskStatus);
         jobTaskBatch.setOperationReason(operationReason);
-        Assert.isTrue(1 == workflowTaskBatchMapper.updateById(jobTaskBatch),
-                () -> new EasyRetryServerException("更新任务失败"));
-
+        workflowTaskBatchMapper.updateById(jobTaskBatch);
     }
 
     public void stop(Long workflowTaskBatchId, Integer operationReason) {
