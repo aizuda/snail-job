@@ -24,7 +24,6 @@
 
     <properties>
         <java.version>17</java.version>
-        <maven.deploy.skip>true</maven.deploy.skip>
         <org.mapstruct.version>1.5.3.Final</org.mapstruct.version>
         <akka.version>2.6.21</akka.version>
         <java-jwt.version>4.4.0</java-jwt.version>

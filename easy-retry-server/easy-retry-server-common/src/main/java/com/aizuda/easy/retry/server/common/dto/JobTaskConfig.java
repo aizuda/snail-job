@@ -2,8 +2,6 @@ package com.aizuda.easy.retry.server.common.dto;
 
 import lombok.Data;
 
-import javax.validation.constraints.NotNull;
-
 /**
  * @author xiaowoniu
  * @date 2023-12-30 21:42:59

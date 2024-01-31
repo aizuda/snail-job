@@ -1,3 +1,0 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-      com.aizuda.easy.retry.common.log.CommonLogConfigure
-
