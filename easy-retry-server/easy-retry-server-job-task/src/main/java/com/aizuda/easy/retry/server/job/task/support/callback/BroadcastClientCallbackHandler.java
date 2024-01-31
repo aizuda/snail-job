@@ -3,6 +3,8 @@ package com.aizuda.easy.retry.server.job.task.support.callback;
 import akka.actor.ActorRef;
 import com.aizuda.easy.retry.common.core.enums.JobTaskStatusEnum;
 import com.aizuda.easy.retry.common.log.EasyRetryLog;
+import com.aizuda.easy.retry.common.log.lang.StackTraceCaller;
+import com.aizuda.easy.retry.common.log.lang.StackWalkerCaller;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.util.ClientInfoUtils;
 import com.aizuda.easy.retry.server.job.task.dto.LogMetaDTO;
@@ -28,6 +30,14 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class BroadcastClientCallbackHandler extends AbstractClientCallbackHandler {
+    public static void main(String[] args) {
+        StackTraceCaller securityManagerCaller = new StackTraceCaller();
+        StackWalkerCaller stackWalkerCaller = new StackWalkerCaller();
+        Class<?> callerCaller = stackWalkerCaller.getCallerCaller();
+        EasyRetryLog.LOCAL.info("aaa");
+        System.out.println(callerCaller);
+        System.out.println(securityManagerCaller.getCallerCaller());
+    }
 
     @Autowired
     private JobTaskMapper jobTaskMapper;

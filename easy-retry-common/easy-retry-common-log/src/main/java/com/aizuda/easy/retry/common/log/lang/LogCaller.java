@@ -83,7 +83,7 @@ public class LogCaller {
     private static Caller tryCreateCaller() {
         Caller caller;
         try {
-            caller = new SecurityManagerCaller();
+            caller = new StackWalkerCaller();
             if (null != caller.getCaller() && null != caller.getCallerCaller()) {
                 return caller;
             }

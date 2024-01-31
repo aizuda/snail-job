@@ -9,6 +9,7 @@ import java.io.Serializable;
  *
  * @author wodeyangzipingpingwuqi
  */
+@Deprecated
 public class SecurityManagerCaller extends SecurityManager implements Caller, Serializable {
 	private static final long serialVersionUID = 1L;
 
