@@ -76,6 +76,11 @@ public class MutableGraphCache {
         return descendants;
     }
 
+    public static Set<Long> getBrotherNode(MutableGraph<Long> graph, Long nodeId) {
+        Set<Long> predecessors = graph.predecessors(nodeId);
+        return graph.successors(predecessors.stream().findFirst().get());
+    }
+
     private static void getAllDescendantsHelper(MutableGraph<Long> graph, Long parentId, Set<Long> descendants) {
         Set<Long> successors = graph.successors(parentId);
         descendants.addAll(successors);
@@ -84,4 +89,5 @@ public class MutableGraphCache {
             getAllDescendantsHelper(graph, successor, descendants);
         }
     }
+
 }

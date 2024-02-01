@@ -61,7 +61,7 @@ public abstract class AbstractWorkflowExecutor implements WorkflowExecutor, Init
 
     @Override
     public void execute(WorkflowExecutorContext context) {
-        distributedLockHandler.lockWithDisposable(
+        distributedLockHandler.lockWithDisposableAndRetry(
                 () -> {
                     long total = 0;
                     // 条件节点存在并发问题，需要特殊处理
@@ -109,7 +109,7 @@ public abstract class AbstractWorkflowExecutor implements WorkflowExecutor, Init
                         }
                     });
                 }, MessageFormat.format(KEY, context.getWorkflowTaskBatchId(), context.getWorkflowNodeId()),
-                Duration.ofSeconds(10));
+                Duration.ofSeconds(10), Duration.ofSeconds(3), 16);
 
     }
 

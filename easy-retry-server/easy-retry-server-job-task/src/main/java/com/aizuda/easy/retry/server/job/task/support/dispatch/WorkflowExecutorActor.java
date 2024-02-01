@@ -53,6 +53,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 public class WorkflowExecutorActor extends AbstractActor {
+
     private final WorkflowTaskBatchMapper workflowTaskBatchMapper;
     private final WorkflowNodeMapper workflowNodeMapper;
     private final JobMapper jobMapper;
@@ -69,7 +70,8 @@ public class WorkflowExecutorActor extends AbstractActor {
 
             } catch (Exception e) {
                 EasyRetryLog.LOCAL.error("workflow executor exception. [{}]", taskExecute, e);
-                handlerTaskBatch(taskExecute, JobTaskBatchStatusEnum.FAIL.getStatus(), JobOperationReasonEnum.TASK_EXECUTION_ERROR.getReason());
+                handlerTaskBatch(taskExecute, JobTaskBatchStatusEnum.FAIL.getStatus(),
+                    JobOperationReasonEnum.TASK_EXECUTION_ERROR.getReason());
                 // TODO 发送通知
             } finally {
                 getContext().stop(getSelf());
@@ -95,37 +97,41 @@ public class WorkflowExecutorActor extends AbstractActor {
             return;
         }
 
+        Set<Long> brotherNode = MutableGraphCache.getBrotherNode(graph, taskExecute.getParentId());
         // 添加父节点，为了判断父节点的处理状态
         List<JobTaskBatch> allJobTaskBatchList = jobTaskBatchMapper.selectList(new LambdaQueryWrapper<JobTaskBatch>()
-                .select(JobTaskBatch::getWorkflowTaskBatchId, JobTaskBatch::getWorkflowNodeId,
-                        JobTaskBatch::getTaskBatchStatus, JobTaskBatch::getOperationReason)
-                .eq(JobTaskBatch::getWorkflowTaskBatchId, workflowTaskBatch.getId())
-                .in(JobTaskBatch::getWorkflowNodeId, Sets.union(successors, Sets.newHashSet(taskExecute.getParentId())))
+            .select(JobTaskBatch::getWorkflowTaskBatchId, JobTaskBatch::getWorkflowNodeId,
+                JobTaskBatch::getTaskBatchStatus, JobTaskBatch::getOperationReason)
+            .eq(JobTaskBatch::getWorkflowTaskBatchId, workflowTaskBatch.getId())
+            .in(JobTaskBatch::getWorkflowNodeId,
+                Sets.union(successors, Sets.newHashSet(taskExecute.getParentId(), brotherNode)))
         );
 
         List<WorkflowNode> workflowNodes = workflowNodeMapper.selectList(new LambdaQueryWrapper<WorkflowNode>()
-                .in(WorkflowNode::getId, Sets.union(successors, Sets.newHashSet(taskExecute.getParentId())))
-                .orderByAsc(WorkflowNode::getPriorityLevel));
+            .in(WorkflowNode::getId, Sets.union(successors, Sets.newHashSet(taskExecute.getParentId())))
+            .orderByAsc(WorkflowNode::getPriorityLevel));
 
-        Map<Long, List<JobTaskBatch>> jobTaskBatchMap = allJobTaskBatchList.stream().collect(Collectors.groupingBy(JobTaskBatch::getWorkflowNodeId));
-        Map<Long, WorkflowNode> workflowNodeMap = workflowNodes.stream().collect(Collectors.toMap(WorkflowNode::getId, i -> i));
+        Map<Long, List<JobTaskBatch>> jobTaskBatchMap = allJobTaskBatchList.stream()
+            .collect(Collectors.groupingBy(JobTaskBatch::getWorkflowNodeId));
+        Map<Long, WorkflowNode> workflowNodeMap = workflowNodes.stream()
+            .collect(Collectors.toMap(WorkflowNode::getId, i -> i));
         List<JobTaskBatch> parentJobTaskBatchList = jobTaskBatchMap.get(taskExecute.getParentId());
 
         // 如果父节点是无需处理则不再继续执行
         if (!CollectionUtils.isEmpty(parentJobTaskBatchList) &&
-                parentJobTaskBatchList.stream()
-                        .map(JobTaskBatch::getOperationReason)
-                        .filter(Objects::nonNull)
-                        .anyMatch(JobOperationReasonEnum.WORKFLOW_SUCCESSOR_SKIP_EXECUTION::contains)) {
+            parentJobTaskBatchList.stream()
+                .map(JobTaskBatch::getOperationReason)
+                .filter(Objects::nonNull)
+                .anyMatch(JobOperationReasonEnum.WORKFLOW_SUCCESSOR_SKIP_EXECUTION::contains)) {
             workflowBatchHandler.complete(taskExecute.getWorkflowTaskBatchId(), workflowTaskBatch);
             return;
         }
 
         // 失败策略处理
         if (!CollectionUtils.isEmpty(parentJobTaskBatchList)
-                && parentJobTaskBatchList.stream()
-                .map(JobTaskBatch::getTaskBatchStatus)
-                .anyMatch(i -> i != JobTaskBatchStatusEnum.SUCCESS.getStatus())) {
+            && parentJobTaskBatchList.stream()
+            .map(JobTaskBatch::getTaskBatchStatus)
+            .anyMatch(i -> i != JobTaskBatchStatusEnum.SUCCESS.getStatus())) {
             // 判断是否继续处理，根据失败策略
             WorkflowNode workflowNode = workflowNodeMap.get(taskExecute.getParentId());
             // 失败了阻塞策略
@@ -134,11 +140,17 @@ public class WorkflowExecutorActor extends AbstractActor {
             }
         }
 
+        if (!brotherNodeIsComplete(taskExecute, brotherNode, jobTaskBatchMap)) {
+            return;
+        }
+
         // 去掉父节点
-        workflowNodes = workflowNodes.stream().filter(workflowNode -> !workflowNode.getId().equals(taskExecute.getParentId())).collect(
+        workflowNodes = workflowNodes.stream()
+            .filter(workflowNode -> !workflowNode.getId().equals(taskExecute.getParentId())).collect(
                 Collectors.toList());
 
-        List<Job> jobs = jobMapper.selectBatchIds(workflowNodes.stream().map(WorkflowNode::getJobId).collect(Collectors.toSet()));
+        List<Job> jobs = jobMapper.selectBatchIds(
+            workflowNodes.stream().map(WorkflowNode::getJobId).collect(Collectors.toSet()));
         Map<Long, Job> jobMap = jobs.stream().collect(Collectors.toMap(Job::getId, i -> i));
 
         // 只会条件节点会使用
@@ -169,6 +181,31 @@ public class WorkflowExecutorActor extends AbstractActor {
 
     }
 
+    private boolean brotherNodeIsComplete(WorkflowNodeTaskExecuteDTO taskExecute, Set<Long> brotherNode,
+        Map<Long, List<JobTaskBatch>> jobTaskBatchMap) {
+
+        if (SystemConstants.ROOT.equals(taskExecute.getParentId())) {
+            return Boolean.TRUE;
+        }
+
+        // 判断所有节点是否都完成
+        for (final Long nodeId : brotherNode) {
+            List<JobTaskBatch> jobTaskBatches = jobTaskBatchMap.get(nodeId);
+            // 说明此节点未执行, 继续等待执行完成
+            if (CollectionUtils.isEmpty(jobTaskBatches)) {
+                return Boolean.FALSE;
+            }
+
+            boolean isCompleted = jobTaskBatches.stream().anyMatch(
+                jobTaskBatch -> JobTaskBatchStatusEnum.NOT_COMPLETE.contains(jobTaskBatch.getTaskBatchStatus()));
+            if (isCompleted) {
+                return Boolean.FALSE;
+            }
+        }
+
+        return Boolean.TRUE;
+    }
+
     private void handlerTaskBatch(WorkflowNodeTaskExecuteDTO taskExecute, int taskStatus, int operationReason) {
 
         WorkflowTaskBatch jobTaskBatch = new WorkflowTaskBatch();
@@ -178,7 +215,7 @@ public class WorkflowExecutorActor extends AbstractActor {
         jobTaskBatch.setOperationReason(operationReason);
         jobTaskBatch.setUpdateDt(LocalDateTime.now());
         Assert.isTrue(1 == workflowTaskBatchMapper.updateById(jobTaskBatch),
-                () -> new EasyRetryServerException("更新任务失败"));
+            () -> new EasyRetryServerException("更新任务失败"));
 
     }
 

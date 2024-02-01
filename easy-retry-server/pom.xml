@@ -27,7 +27,6 @@
         <org.mapstruct.version>1.5.3.Final</org.mapstruct.version>
         <akka.version>2.6.21</akka.version>
         <java-jwt.version>4.4.0</java-jwt.version>
-        <okhttp.version>5.0.0-alpha.11</okhttp.version>
         <perf4j.version>0.9.16</perf4j.version>
         <guava.version>32.0.0-jre</guava.version>
     </properties>
@@ -83,8 +82,10 @@
             </dependency>
             <dependency>
                 <groupId>com.squareup.okhttp3</groupId>
-                <artifactId>okhttp</artifactId>
+                <artifactId>okhttp-bom</artifactId>
                 <version>${okhttp.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>org.mapstruct</groupId>

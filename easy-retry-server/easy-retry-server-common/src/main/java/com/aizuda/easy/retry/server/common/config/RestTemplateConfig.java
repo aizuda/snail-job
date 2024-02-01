@@ -1,12 +1,12 @@
 package com.aizuda.easy.retry.server.common.config;
 
 import com.aizuda.easy.retry.server.common.client.RequestInterceptor;
+import com.aizuda.easy.retry.server.common.okhttp.OkHttp3ClientHttpRequestFactory;
 import okhttp3.ConnectionPool;
 import okhttp3.OkHttpClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.http.client.OkHttp3ClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.concurrent.TimeUnit;
@@ -22,7 +22,6 @@ public class RestTemplateConfig {
     public RestTemplate restTemplate(ClientHttpRequestFactory factory) {
         return new RestTemplate(factory);
     }
-
 
     @Bean
     public ClientHttpRequestFactory okHttp3ClientHttpRequestFactory() {
