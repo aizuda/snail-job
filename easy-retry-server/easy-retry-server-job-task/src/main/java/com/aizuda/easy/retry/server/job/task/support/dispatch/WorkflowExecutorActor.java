@@ -98,13 +98,15 @@ public class WorkflowExecutorActor extends AbstractActor {
         }
 
         Set<Long> brotherNode = MutableGraphCache.getBrotherNode(graph, taskExecute.getParentId());
+        Sets.SetView<Long> union = Sets.union(successors, brotherNode);
+
         // 添加父节点，为了判断父节点的处理状态
         List<JobTaskBatch> allJobTaskBatchList = jobTaskBatchMapper.selectList(new LambdaQueryWrapper<JobTaskBatch>()
             .select(JobTaskBatch::getWorkflowTaskBatchId, JobTaskBatch::getWorkflowNodeId,
                 JobTaskBatch::getTaskBatchStatus, JobTaskBatch::getOperationReason)
             .eq(JobTaskBatch::getWorkflowTaskBatchId, workflowTaskBatch.getId())
             .in(JobTaskBatch::getWorkflowNodeId,
-                Sets.union(successors, Sets.newHashSet(taskExecute.getParentId(), brotherNode)))
+                Sets.union(union, Sets.newHashSet(taskExecute.getParentId())))
         );
 
         List<WorkflowNode> workflowNodes = workflowNodeMapper.selectList(new LambdaQueryWrapper<WorkflowNode>()
@@ -193,12 +195,14 @@ public class WorkflowExecutorActor extends AbstractActor {
             List<JobTaskBatch> jobTaskBatches = jobTaskBatchMap.get(nodeId);
             // 说明此节点未执行, 继续等待执行完成
             if (CollectionUtils.isEmpty(jobTaskBatches)) {
+                EasyRetryLog.LOCAL.info("存在未完成的兄弟节点. [{}]", nodeId);
                 return Boolean.FALSE;
             }
 
             boolean isCompleted = jobTaskBatches.stream().anyMatch(
                 jobTaskBatch -> JobTaskBatchStatusEnum.NOT_COMPLETE.contains(jobTaskBatch.getTaskBatchStatus()));
             if (isCompleted) {
+                EasyRetryLog.LOCAL.info("存在未完成的兄弟节点. [{}]", nodeId);
                 return Boolean.FALSE;
             }
         }

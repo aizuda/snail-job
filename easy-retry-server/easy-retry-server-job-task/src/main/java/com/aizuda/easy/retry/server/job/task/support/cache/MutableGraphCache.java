@@ -4,6 +4,7 @@ import com.aizuda.easy.retry.server.common.util.GraphUtils;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.common.graph.MutableGraph;
 import org.springframework.util.CollectionUtils;
 
@@ -78,6 +79,9 @@ public class MutableGraphCache {
 
     public static Set<Long> getBrotherNode(MutableGraph<Long> graph, Long nodeId) {
         Set<Long> predecessors = graph.predecessors(nodeId);
+        if (CollectionUtils.isEmpty(predecessors)) {
+            return Sets.newHashSet();
+        }
         return graph.successors(predecessors.stream().findFirst().get());
     }
 
