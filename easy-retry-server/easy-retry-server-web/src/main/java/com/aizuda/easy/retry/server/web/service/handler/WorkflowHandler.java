@@ -23,6 +23,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.stream.Collectors;
 
 /**
  * @author xiaowoniu
@@ -62,7 +63,7 @@ public class WorkflowHandler {
         // 是否挂载子节点
         boolean mount = false;
 
-        for (Long successor : successors) {
+        for (Long successor : Sets.newTreeSet(successors)) {
             Set<Long> predecessors = graph.predecessors(successor);
             WorkflowDetailResponseVO.NodeInfo nodeInfo = workflowNodeMap.get(successor);
             currentConfig.setNodeType(nodeInfo.getNodeType());
@@ -73,7 +74,7 @@ public class WorkflowHandler {
                 // 查找predecessors的公共祖先节点
                 Map<Long, Set<Long>> sets = new HashMap<>();
                 for (final Long predecessor : predecessors) {
-                    Set<Long> set = Sets.newHashSet();
+                    Set<Long> set = Sets.newTreeSet();
                     sets.put(predecessor, set);
                     findCommonAncestor(predecessor, set, graph);
                 }
@@ -83,8 +84,9 @@ public class WorkflowHandler {
                     intersection = Sets.intersection(value, intersection);
                 }
 
-                Long commonAncestor = new ArrayList<>(intersection).get(intersection.size() - 1);
-                WorkflowDetailResponseVO.NodeConfig parentNodeConfig = nodeConfigMap.get(graph.successors(commonAncestor).stream().findFirst().get());
+                Long commonAncestor = intersection.stream().toList().get(intersection.size() - 1);
+                WorkflowDetailResponseVO.NodeConfig parentNodeConfig = nodeConfigMap.get(
+                        Sets.newTreeSet(graph.successors(commonAncestor)).stream().findFirst().get());
                 parentNodeConfig.setChildNode(currentConfig);
                 mount = false;
             } else {
@@ -136,6 +138,7 @@ public class WorkflowHandler {
         // 获取节点信息
         List<WorkflowRequestVO.NodeInfo> conditionNodes = nodeConfig.getConditionNodes();
         if (!CollectionUtils.isEmpty(conditionNodes)) {
+            conditionNodes = conditionNodes.stream().sorted(Comparator.comparing(WorkflowRequestVO.NodeInfo::getPriorityLevel)).collect(Collectors.toList());
             for (final WorkflowRequestVO.NodeInfo nodeInfo : conditionNodes) {
                 WorkflowNode workflowNode = WorkflowConverter.INSTANCE.toWorkflowNode(nodeInfo);
                 workflowNode.setWorkflowId(workflowId);
@@ -146,7 +149,7 @@ public class WorkflowHandler {
                     workflowNode.setJobId(SystemConstants.DECISION_JOB_ID);
                     DecisionConfig decision = nodeInfo.getDecision();
                     Assert.notNull(decision, () -> new EasyRetryServerException("【{}】配置信息不能为空", nodeInfo.getNodeName()));
-                    Assert.notBlank(decision.getNodeExpression(), ()-> new EasyRetryServerException("【{}】表达式不能为空", nodeInfo.getNodeName()));
+                    Assert.notBlank(decision.getNodeExpression(), () -> new EasyRetryServerException("【{}】表达式不能为空", nodeInfo.getNodeName()));
                     Assert.notNull(decision.getDefaultDecision(), () -> new EasyRetryServerException("【{}】默认决策不能为空", nodeInfo.getNodeName()));
                     Assert.notNull(decision.getExpressionType(), () -> new EasyRetryServerException("【{}】表达式类型不能为空", nodeInfo.getNodeName()));
                     workflowNode.setNodeInfo(JsonUtil.toJsonString(decision));
