@@ -132,6 +132,7 @@ public class WorkflowServiceImpl implements WorkflowService {
             }
         })).incidentEdgeOrder(ElementOrder.stable()).allowsSelfLoops(false).build();
     }
+
     private static Long calculateNextTriggerAt(final WorkflowRequestVO workflowRequestVO, Long time) {
         checkExecuteInterval(workflowRequestVO);
 
