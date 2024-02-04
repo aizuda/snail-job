@@ -8,8 +8,11 @@ import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.model.EasyRetryHeaders;
 import lombok.Getter;
 
+import java.util.Deque;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Stack;
+import java.util.concurrent.LinkedBlockingDeque;
 
 /**
  * 重试现场记录器
@@ -27,7 +30,7 @@ public class RetrySiteSnapshot {
     /**
      * 标记重试方法入口
      */
-    private static final RetrySiteSnapshotContext<String> RETRY_CLASS_METHOD_ENTRANCE = EasyRetrySpiLoader.loadRetrySiteSnapshotContext();
+    private static final RetrySiteSnapshotContext<Deque<String>> RETRY_CLASS_METHOD_ENTRANCE = EasyRetrySpiLoader.loadRetrySiteSnapshotContext();
 
     /**
      * 重试状态
@@ -37,18 +40,18 @@ public class RetrySiteSnapshot {
     /**
      * 重试请求头
      */
-    private static final RetrySiteSnapshotContext<EasyRetryHeaders> RETRY_HEADER =  EasyRetrySpiLoader.loadRetrySiteSnapshotContext();
+    private static final RetrySiteSnapshotContext<EasyRetryHeaders> RETRY_HEADER = EasyRetrySpiLoader.loadRetrySiteSnapshotContext();
 
     /**
      * 状态码
      */
-    private static final RetrySiteSnapshotContext<String> RETRY_STATUS_CODE =  EasyRetrySpiLoader.loadRetrySiteSnapshotContext();
+    private static final RetrySiteSnapshotContext<String> RETRY_STATUS_CODE = EasyRetrySpiLoader.loadRetrySiteSnapshotContext();
 
     /**
      * 进入方法入口时间标记
      */
-    private static final RetrySiteSnapshotContext<Long> ENTRY_METHOD_TIME =  EasyRetrySpiLoader.loadRetrySiteSnapshotContext();
-    private static final RetrySiteSnapshotContext<Integer> ATTEMPT_NUMBER =  EasyRetrySpiLoader.loadRetrySiteSnapshotContext();
+    private static final RetrySiteSnapshotContext<Long> ENTRY_METHOD_TIME = EasyRetrySpiLoader.loadRetrySiteSnapshotContext();
+    private static final RetrySiteSnapshotContext<Integer> ATTEMPT_NUMBER = EasyRetrySpiLoader.loadRetrySiteSnapshotContext();
 
     public static Integer getAttemptNumber() {
         return ATTEMPT_NUMBER.get();
@@ -71,15 +74,32 @@ public class RetrySiteSnapshot {
     }
 
     public static String getMethodEntrance() {
-        return RETRY_CLASS_METHOD_ENTRANCE.get();
+        Deque<String> stack = RETRY_CLASS_METHOD_ENTRANCE.get();
+        return stack.peek();
     }
 
     public static void setMethodEntrance(String methodEntrance) {
-        RETRY_CLASS_METHOD_ENTRANCE.set(methodEntrance);
+        Deque<String> stack = RETRY_CLASS_METHOD_ENTRANCE.get();
+        if (Objects.isNull(RETRY_CLASS_METHOD_ENTRANCE.get())) {
+            stack = new LinkedBlockingDeque<>();
+        }
+
+        stack.push(methodEntrance);
+        RETRY_CLASS_METHOD_ENTRANCE.set(stack);
     }
 
     public static void removeMethodEntrance() {
-        RETRY_CLASS_METHOD_ENTRANCE.remove();
+        Deque<String> stack = RETRY_CLASS_METHOD_ENTRANCE.get();
+        if (Objects.isNull(stack)) {
+            return;
+        }
+
+        if (stack.isEmpty()) {
+            RETRY_CLASS_METHOD_ENTRANCE.remove();
+            return;
+        }
+
+        stack.pop();
     }
 
     public static boolean isMethodEntrance(String methodEntrance) {
