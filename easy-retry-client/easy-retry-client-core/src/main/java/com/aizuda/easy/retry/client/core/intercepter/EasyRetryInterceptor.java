@@ -3,6 +3,7 @@ package com.aizuda.easy.retry.client.core.intercepter;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.client.common.config.EasyRetryProperties;
+import com.aizuda.easy.retry.client.core.annotation.Propagation;
 import com.aizuda.easy.retry.client.core.annotation.Retryable;
 import com.aizuda.easy.retry.client.common.cache.GroupVersionCache;
 import com.aizuda.easy.retry.client.core.cache.RetryerInfoCache;
@@ -73,8 +74,13 @@ public class EasyRetryInterceptor implements MethodInterceptor, AfterAdvice, Ser
         Retryable retryable = getAnnotationParameter(invocation.getMethod());
         String executorClassName = invocation.getThis().getClass().getName();
         String methodEntrance = getMethodEntrance(retryable, executorClassName);
-        if (StrUtil.isBlank(RetrySiteSnapshot.getMethodEntrance())) {
+
+        if (Propagation.REQUIRES_NEW.equals(retryable.propagation())) {
             RetrySiteSnapshot.setMethodEntrance(methodEntrance);
+        } else if (!RetrySiteSnapshot.existedMethodEntrance()) {
+            RetrySiteSnapshot.setMethodEntrance(methodEntrance);
+        } else {
+            EasyRetryLog.LOCAL.info("无需设置入口标志:[{}]", traceId);
         }
 
         Throwable throwable = null;
@@ -110,6 +116,11 @@ public class EasyRetryInterceptor implements MethodInterceptor, AfterAdvice, Ser
 
                 return retryerResultContext.getResult();
             }
+        }
+
+        // 无需开启重试的场景，需要清除缓存信息
+        if ((RetrySiteSnapshot.isMethodEntrance(methodEntrance) && !RetrySiteSnapshot.isRunning())) {
+            RetrySiteSnapshot.removeAll();
         }
 
         if (throwable != null) {
