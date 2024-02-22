@@ -10,8 +10,11 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class WorkflowNodeServiceImpl implements WorkflowNodeService {
+
     @Override
     public Boolean stop(Long id) {
+        // 调用JOB的停止接口
+        // 继续执行后续的任务
         return null;
     }
 
