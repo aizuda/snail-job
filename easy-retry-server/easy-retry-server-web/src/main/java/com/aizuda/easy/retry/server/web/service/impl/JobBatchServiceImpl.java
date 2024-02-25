@@ -2,15 +2,25 @@ package com.aizuda.easy.retry.server.web.service.impl;
 
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
+import com.aizuda.easy.retry.client.model.ExecuteResult;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
+import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
+import com.aizuda.easy.retry.common.core.enums.JobTaskStatusEnum;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.dto.CallbackConfig;
 import com.aizuda.easy.retry.server.common.dto.DecisionConfig;
 import com.aizuda.easy.retry.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
+import com.aizuda.easy.retry.server.job.task.dto.TaskExecuteDTO;
+import com.aizuda.easy.retry.server.job.task.support.ClientCallbackHandler;
+import com.aizuda.easy.retry.server.job.task.support.JobExecutor;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskStopHandler;
+import com.aizuda.easy.retry.server.job.task.support.callback.ClientCallbackContext;
+import com.aizuda.easy.retry.server.job.task.support.callback.ClientCallbackFactory;
+import com.aizuda.easy.retry.server.job.task.support.executor.job.JobExecutorContext;
+import com.aizuda.easy.retry.server.job.task.support.executor.job.JobExecutorFactory;
 import com.aizuda.easy.retry.server.job.task.support.stop.JobTaskStopFactory;
 import com.aizuda.easy.retry.server.job.task.support.stop.TaskStopJobContext;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
@@ -24,14 +34,19 @@ import com.aizuda.easy.retry.template.datasource.persistence.dataobject.JobBatch
 import com.aizuda.easy.retry.template.datasource.persistence.dataobject.JobBatchResponseDO;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskBatchMapper;
+import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.WorkflowNodeMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
+import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTaskBatch;
 import com.aizuda.easy.retry.template.datasource.persistence.po.WorkflowNode;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
@@ -49,6 +64,7 @@ public class JobBatchServiceImpl implements JobBatchService {
     private final JobTaskBatchMapper jobTaskBatchMapper;
     private final JobMapper jobMapper;
     private final WorkflowNodeMapper workflowNodeMapper;
+    private final JobTaskMapper jobTaskMapper;
 
     @Override
     public PageResult<List<JobBatchResponseVO>> getJobBatchPage(final JobBatchQueryVO queryVO) {
@@ -80,10 +96,10 @@ public class JobBatchServiceImpl implements JobBatchService {
         jobBatchQueryDO.setGroupNames(groupNames);
         jobBatchQueryDO.setNamespaceId(userSessionVO.getNamespaceId());
         List<JobBatchResponseDO> batchResponseDOList = jobTaskBatchMapper.selectJobBatchPageList(pageDTO,
-            jobBatchQueryDO);
+                jobBatchQueryDO);
 
         List<JobBatchResponseVO> batchResponseVOList = JobBatchResponseVOConverter.INSTANCE.toJobBatchResponseVOs(
-            batchResponseDOList);
+                batchResponseDOList);
 
         return new PageResult<>(pageDTO, batchResponseVOList);
     }
@@ -140,5 +156,51 @@ public class JobBatchServiceImpl implements JobBatchService {
 
         return Boolean.TRUE;
     }
+
+    @Override
+    @Transactional
+    public Boolean retry(Long taskBatchId) {
+        JobTaskBatch jobTaskBatch = jobTaskBatchMapper.selectOne(new LambdaQueryWrapper<JobTaskBatch>()
+                .eq(JobTaskBatch::getId, taskBatchId)
+                .in(JobTaskBatch::getTaskBatchStatus, JobTaskBatchStatusEnum.NOT_SUCCESS)
+        );
+        Assert.notNull(jobTaskBatch, () -> new EasyRetryServerException("job batch can not be null."));
+
+        // 重置状态为运行中
+        jobTaskBatch.setTaskBatchStatus(JobTaskBatchStatusEnum.RUNNING.getStatus());
+
+        Assert.isTrue(jobTaskBatchMapper.updateById(jobTaskBatch) > 0,
+                () -> new EasyRetryServerException("update job batch to running failed."));
+
+        Job job = jobMapper.selectById(jobTaskBatch.getJobId());
+        Assert.notNull(job, () -> new EasyRetryServerException("job can not be null."));
+
+        List<JobTask> jobTasks = jobTaskMapper.selectList(new LambdaQueryWrapper<JobTask>()
+                .in(JobTask::getTaskStatus, Lists.newArrayList(
+                        JobTaskStatusEnum.FAIL.getStatus(),
+                        JobTaskStatusEnum.STOP.getStatus(),
+                        JobTaskStatusEnum.CANCEL.getStatus()
+                        )
+                )
+                .eq(JobTask::getTaskBatchId, taskBatchId));
+        Assert.notEmpty(jobTasks, () -> new EasyRetryServerException("job task is empty."));
+
+        for (JobTask jobTask : jobTasks) {
+            jobTask.setTaskStatus(JobTaskStatusEnum.RUNNING.getStatus());
+            Assert.isTrue(jobTaskMapper.updateById(jobTask) > 0,
+                    () -> new EasyRetryServerException("update job task to running failed."));
+            // 模拟失败重试
+            ClientCallbackHandler clientCallback = ClientCallbackFactory.getClientCallback(job.getTaskType());
+            ClientCallbackContext context = JobTaskConverter.INSTANCE.toClientCallbackContext(job);
+            context.setTaskBatchId(jobTaskBatch.getId());
+            context.setTaskId(jobTask.getId());
+            context.setTaskStatus(JobTaskStatusEnum.FAIL.getStatus());
+            context.setExecuteResult(ExecuteResult.failure(null, "手动重试"));
+            clientCallback.callback(context);
+        }
+
+        return Boolean.TRUE;
+    }
+
 
 }

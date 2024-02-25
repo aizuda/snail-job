@@ -53,7 +53,10 @@ public interface JobTaskConverter {
 
     JobTaskBatchGeneratorContext toJobTaskGeneratorContext(BlockStrategyContext context);
 
-    JobTaskGenerateContext toJobTaskInstanceGenerateContext(JobExecutorContext context);
+    @Mappings(
+            @Mapping(source = "id", target = "jobId")
+    )
+    JobTaskGenerateContext toJobTaskInstanceGenerateContext(Job job);
 
     JobTask toJobTaskInstance(JobTaskGenerateContext context);
 
@@ -74,15 +77,16 @@ public interface JobTaskConverter {
 
     JobLogMessage toJobLogMessage(LogTaskDTO logTaskDTO);
 
-    LogMetaDTO toJobLogDTO(ClientCallbackContext context);
-
-    LogMetaDTO toJobLogDTO(JobExecutorResultDTO resultDTO);
-
     LogMetaDTO toJobLogDTO(BaseDTO baseDTO);
 
     ClientCallbackContext toClientCallbackContext(DispatchJobResultRequest request);
 
     ClientCallbackContext toClientCallbackContext(RealJobExecutorDTO request);
+
+    @Mappings(
+            @Mapping(source = "id", target = "jobId")
+    )
+    ClientCallbackContext toClientCallbackContext(Job job);
 
     DispatchJobRequest toDispatchJobRequest(RealJobExecutorDTO realJobExecutorDTO);
 
@@ -98,6 +102,9 @@ public interface JobTaskConverter {
     })
     RealJobExecutorDTO toRealJobExecutorDTO(JobExecutorContext context, JobTask jobTask);
 
+    @Mappings(
+            @Mapping(source = "id", target = "jobId")
+    )
     JobExecutorContext toJobExecutorContext(Job job);
 
     JobExecutorResultDTO toJobExecutorResultDTO(ClientCallbackContext context);

@@ -6,7 +6,7 @@ package com.aizuda.easy.retry.server.web.service;
  * @since 2.6.0
  */
 public interface WorkflowNodeService {
-    Boolean stop(Long id);
+    Boolean stop(Long nodeId, Long workflowTaskBatchId);
 
-    Boolean retry(Long id);
+    Boolean retry(Long id, Long workflowTaskBatchId);
 }

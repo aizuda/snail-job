@@ -16,6 +16,7 @@ const jobApi = {
   jobBatchList: '/job/batch/list',
   jobBatchDetail: '/job/batch/',
   stop: '/job/batch/stop/',
+  retry: '/job/batch/retry/',
 
   // 通知
   jobNotifyConfigPageList: '/job/notify/config/page/list',
@@ -45,6 +46,12 @@ const jobApi = {
 
 export default jobApi
 
+export function retry (id) {
+  return request({
+    url: jobApi.retry + id,
+    method: 'post'
+  })
+}
 export function workflowNameList (parameter) {
   return request({
     url: jobApi.workflowNameList,

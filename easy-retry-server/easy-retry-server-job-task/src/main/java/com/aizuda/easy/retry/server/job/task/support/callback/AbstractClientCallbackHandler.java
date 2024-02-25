@@ -30,9 +30,9 @@ import java.util.Objects;
 public abstract class AbstractClientCallbackHandler implements ClientCallbackHandler, InitializingBean {
 
     @Autowired
-    private JobTaskMapper jobTaskMapper;
+    protected JobTaskMapper jobTaskMapper;
     @Autowired
-    private JobMapper jobMapper;
+    protected JobMapper jobMapper;
 
     @Override
     @Transactional
