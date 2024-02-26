@@ -80,7 +80,7 @@ public class EasyRetryInterceptor implements MethodInterceptor, AfterAdvice, Ser
         } else if (!RetrySiteSnapshot.existedMethodEntrance()) {
             RetrySiteSnapshot.setMethodEntrance(methodEntrance);
         } else {
-            EasyRetryLog.LOCAL.info("无需设置入口标志:[{}]", traceId);
+            EasyRetryLog.LOCAL.debug("No need to set entrance signs:[{}]", traceId);
         }
 
         Throwable throwable = null;

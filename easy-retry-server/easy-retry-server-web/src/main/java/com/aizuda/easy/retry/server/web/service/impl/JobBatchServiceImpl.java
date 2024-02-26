@@ -29,6 +29,7 @@ import com.aizuda.easy.retry.server.web.model.request.UserSessionVO;
 import com.aizuda.easy.retry.server.web.model.response.JobBatchResponseVO;
 import com.aizuda.easy.retry.server.web.service.JobBatchService;
 import com.aizuda.easy.retry.server.web.service.convert.JobBatchResponseVOConverter;
+import com.aizuda.easy.retry.server.web.service.handler.JobHandler;
 import com.aizuda.easy.retry.server.web.util.UserSessionUtils;
 import com.aizuda.easy.retry.template.datasource.persistence.dataobject.JobBatchQueryDO;
 import com.aizuda.easy.retry.template.datasource.persistence.dataobject.JobBatchResponseDO;
@@ -64,7 +65,7 @@ public class JobBatchServiceImpl implements JobBatchService {
     private final JobTaskBatchMapper jobTaskBatchMapper;
     private final JobMapper jobMapper;
     private final WorkflowNodeMapper workflowNodeMapper;
-    private final JobTaskMapper jobTaskMapper;
+    private final JobHandler jobHandler;
 
     @Override
     public PageResult<List<JobBatchResponseVO>> getJobBatchPage(final JobBatchQueryVO queryVO) {
@@ -138,68 +139,13 @@ public class JobBatchServiceImpl implements JobBatchService {
 
     @Override
     public boolean stop(Long taskBatchId) {
-        JobTaskBatch jobTaskBatch = jobTaskBatchMapper.selectById(taskBatchId);
-        Assert.notNull(jobTaskBatch, () -> new EasyRetryServerException("job batch can not be null."));
-
-        Job job = jobMapper.selectById(jobTaskBatch.getJobId());
-        Assert.notNull(job, () -> new EasyRetryServerException("job can not be null."));
-
-        JobTaskStopHandler jobTaskStop = JobTaskStopFactory.getJobTaskStop(job.getTaskType());
-
-        TaskStopJobContext taskStopJobContext = JobTaskConverter.INSTANCE.toStopJobContext(job);
-        taskStopJobContext.setJobOperationReason(JobOperationReasonEnum.MANNER_STOP.getReason());
-        taskStopJobContext.setTaskBatchId(jobTaskBatch.getId());
-        taskStopJobContext.setForceStop(Boolean.TRUE);
-        taskStopJobContext.setNeedUpdateTaskStatus(Boolean.TRUE);
-
-        jobTaskStop.stop(taskStopJobContext);
-
-        return Boolean.TRUE;
+        return jobHandler.stop(taskBatchId);
     }
 
     @Override
     @Transactional
     public Boolean retry(Long taskBatchId) {
-        JobTaskBatch jobTaskBatch = jobTaskBatchMapper.selectOne(new LambdaQueryWrapper<JobTaskBatch>()
-                .eq(JobTaskBatch::getId, taskBatchId)
-                .in(JobTaskBatch::getTaskBatchStatus, JobTaskBatchStatusEnum.NOT_SUCCESS)
-        );
-        Assert.notNull(jobTaskBatch, () -> new EasyRetryServerException("job batch can not be null."));
-
-        // 重置状态为运行中
-        jobTaskBatch.setTaskBatchStatus(JobTaskBatchStatusEnum.RUNNING.getStatus());
-
-        Assert.isTrue(jobTaskBatchMapper.updateById(jobTaskBatch) > 0,
-                () -> new EasyRetryServerException("update job batch to running failed."));
-
-        Job job = jobMapper.selectById(jobTaskBatch.getJobId());
-        Assert.notNull(job, () -> new EasyRetryServerException("job can not be null."));
-
-        List<JobTask> jobTasks = jobTaskMapper.selectList(new LambdaQueryWrapper<JobTask>()
-                .in(JobTask::getTaskStatus, Lists.newArrayList(
-                        JobTaskStatusEnum.FAIL.getStatus(),
-                        JobTaskStatusEnum.STOP.getStatus(),
-                        JobTaskStatusEnum.CANCEL.getStatus()
-                        )
-                )
-                .eq(JobTask::getTaskBatchId, taskBatchId));
-        Assert.notEmpty(jobTasks, () -> new EasyRetryServerException("job task is empty."));
-
-        for (JobTask jobTask : jobTasks) {
-            jobTask.setTaskStatus(JobTaskStatusEnum.RUNNING.getStatus());
-            Assert.isTrue(jobTaskMapper.updateById(jobTask) > 0,
-                    () -> new EasyRetryServerException("update job task to running failed."));
-            // 模拟失败重试
-            ClientCallbackHandler clientCallback = ClientCallbackFactory.getClientCallback(job.getTaskType());
-            ClientCallbackContext context = JobTaskConverter.INSTANCE.toClientCallbackContext(job);
-            context.setTaskBatchId(jobTaskBatch.getId());
-            context.setTaskId(jobTask.getId());
-            context.setTaskStatus(JobTaskStatusEnum.FAIL.getStatus());
-            context.setExecuteResult(ExecuteResult.failure(null, "手动重试"));
-            clientCallback.callback(context);
-        }
-
-        return Boolean.TRUE;
+        return jobHandler.retry(taskBatchId);
     }
 
 

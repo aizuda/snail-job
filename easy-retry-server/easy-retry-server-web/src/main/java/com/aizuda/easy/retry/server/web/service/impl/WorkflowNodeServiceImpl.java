@@ -20,6 +20,7 @@ import com.aizuda.easy.retry.server.job.task.support.handler.WorkflowBatchHandle
 import com.aizuda.easy.retry.server.job.task.support.stop.JobTaskStopFactory;
 import com.aizuda.easy.retry.server.job.task.support.stop.TaskStopJobContext;
 import com.aizuda.easy.retry.server.web.service.WorkflowNodeService;
+import com.aizuda.easy.retry.server.web.service.handler.JobHandler;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskBatchMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskMapper;
@@ -41,19 +42,20 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class WorkflowNodeServiceImpl implements WorkflowNodeService {
+
     private final JobTaskBatchMapper jobTaskBatchMapper;
     private final JobMapper jobMapper;
     private final WorkflowBatchHandler workflowBatchHandler;
-    private final JobTaskMapper jobTaskMapper;
+    private final JobHandler jobHandler;
 
     @Override
     public Boolean stop(Long nodeId, Long workflowTaskBatchId) {
         // 调用JOB的停止接口
         List<JobTaskBatch> jobTaskBatches = jobTaskBatchMapper.selectList(
-                new LambdaQueryWrapper<JobTaskBatch>()
-                        .eq(JobTaskBatch::getWorkflowNodeId, nodeId)
-                        .eq(JobTaskBatch::getWorkflowTaskBatchId, workflowTaskBatchId)
-                        .in(JobTaskBatch::getTaskBatchStatus, JobTaskBatchStatusEnum.NOT_COMPLETE)
+            new LambdaQueryWrapper<JobTaskBatch>()
+                .eq(JobTaskBatch::getWorkflowNodeId, nodeId)
+                .eq(JobTaskBatch::getWorkflowTaskBatchId, workflowTaskBatchId)
+                .in(JobTaskBatch::getTaskBatchStatus, JobTaskBatchStatusEnum.NOT_COMPLETE)
         );
 
         if (CollectionUtils.isEmpty(jobTaskBatches)) {
@@ -61,19 +63,7 @@ public class WorkflowNodeServiceImpl implements WorkflowNodeService {
         }
 
         for (JobTaskBatch jobTaskBatch : jobTaskBatches) {
-
-            Job job = jobMapper.selectById(jobTaskBatch.getJobId());
-            Assert.notNull(job, () -> new EasyRetryServerException("job can not be null."));
-
-            JobTaskStopHandler jobTaskStop = JobTaskStopFactory.getJobTaskStop(job.getTaskType());
-
-            TaskStopJobContext taskStopJobContext = JobTaskConverter.INSTANCE.toStopJobContext(job);
-            taskStopJobContext.setJobOperationReason(JobOperationReasonEnum.MANNER_STOP.getReason());
-            taskStopJobContext.setTaskBatchId(jobTaskBatch.getId());
-            taskStopJobContext.setForceStop(Boolean.TRUE);
-            taskStopJobContext.setNeedUpdateTaskStatus(Boolean.TRUE);
-
-            jobTaskStop.stop(taskStopJobContext);
+            jobHandler.stop(jobTaskBatch.getId());
         }
 
         // 继续执行后续的任务
@@ -92,44 +82,17 @@ public class WorkflowNodeServiceImpl implements WorkflowNodeService {
 
         // 调用JOB的停止接口
         List<JobTaskBatch> jobTaskBatches = jobTaskBatchMapper.selectList(
-                new LambdaQueryWrapper<JobTaskBatch>()
-                        .select(JobTaskBatch::getId)
-                        .eq(JobTaskBatch::getWorkflowNodeId, nodeId)
-                        .eq(JobTaskBatch::getWorkflowTaskBatchId, workflowTaskBatchId)
-                        .in(JobTaskBatch::getTaskBatchStatus, JobTaskBatchStatusEnum.NOT_SUCCESS)
+            new LambdaQueryWrapper<JobTaskBatch>()
+                .select(JobTaskBatch::getId)
+                .eq(JobTaskBatch::getWorkflowNodeId, nodeId)
+                .eq(JobTaskBatch::getWorkflowTaskBatchId, workflowTaskBatchId)
+                .in(JobTaskBatch::getTaskBatchStatus, JobTaskBatchStatusEnum.NOT_SUCCESS)
         );
+
         Assert.notEmpty(jobTaskBatches, () -> new EasyRetryServerException("job task batch is empty."));
 
         for (JobTaskBatch jobTaskBatch : jobTaskBatches) {
-
-            Job job = jobMapper.selectById(jobTaskBatch.getJobId());
-            Assert.notNull(job, () -> new EasyRetryServerException("job can not be null."));
-
-            List<JobTask> jobTasks = jobTaskMapper.selectList(new LambdaQueryWrapper<JobTask>()
-                    .select(JobTask::getId)
-                    .eq(JobTask::getTaskBatchId, jobTaskBatch.getId()));
-            Assert.notEmpty(jobTasks, () -> new EasyRetryServerException("job task is empty."));
-
-            for (JobTask jobTask : jobTasks) {
-                // 模拟失败重试
-                ClientCallbackHandler clientCallback = ClientCallbackFactory.getClientCallback(job.getTaskType());
-                ClientCallbackContext context = JobTaskConverter.INSTANCE.toClientCallbackContext(job);
-                context.setTaskBatchId(jobTaskBatch.getId());
-                context.setTaskId(jobTask.getId());
-                context.setTaskStatus(JobTaskStatusEnum.FAIL.getStatus());
-                context.setExecuteResult(ExecuteResult.failure(null, "手动重试"));
-                clientCallback.callback(context);
-            }
-
-//            JobExecutor jobExecutor = JobExecutorFactory.getJobExecutor(job.getTaskType());
-//
-//            JobExecutorContext context = JobTaskConverter.INSTANCE.toJobExecutorContext(job);
-//            context.setTaskList(jobTaRFGVTBCD67YFGVTBUE8SDsks);
-//            context.setTaskBatchId(jobTaskBatch.getId());
-//            context.setWorkflowTaskBatchId(workflowTaskBatchId);
-//            context.setWorkflowNodeId(nodeId);
-//            jobExecutor.execute(context);
-
+            jobHandler.retry(jobTaskBatch.getId(), nodeId, workflowTaskBatchId);
         }
 
         return Boolean.TRUE;
