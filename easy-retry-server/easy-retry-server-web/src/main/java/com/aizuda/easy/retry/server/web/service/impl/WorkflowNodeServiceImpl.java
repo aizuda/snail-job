@@ -30,6 +30,7 @@ import com.aizuda.easy.retry.template.datasource.persistence.po.JobTaskBatch;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
@@ -49,6 +50,7 @@ public class WorkflowNodeServiceImpl implements WorkflowNodeService {
     private final JobHandler jobHandler;
 
     @Override
+    @Transactional
     public Boolean stop(Long nodeId, Long workflowTaskBatchId) {
         // 调用JOB的停止接口
         List<JobTaskBatch> jobTaskBatches = jobTaskBatchMapper.selectList(
@@ -78,6 +80,7 @@ public class WorkflowNodeServiceImpl implements WorkflowNodeService {
     }
 
     @Override
+    @Transactional
     public Boolean retry(Long nodeId, Long workflowTaskBatchId) {
 
         // 调用JOB的停止接口

@@ -1,11 +1,15 @@
 package com.aizuda.easy.retry.server.web.service.handler;
 
+import akka.actor.ActorRef;
 import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.client.model.ExecuteResult;
 import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskStatusEnum;
+import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
+import com.aizuda.easy.retry.server.common.enums.JobTaskExecutorSceneEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
+import com.aizuda.easy.retry.server.job.task.dto.TaskExecuteDTO;
 import com.aizuda.easy.retry.server.job.task.support.ClientCallbackHandler;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskStopHandler;
@@ -24,6 +28,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 
@@ -60,16 +65,27 @@ public class JobHandler {
         Assert.notNull(job, () -> new EasyRetryServerException("job can not be null."));
 
         List<JobTask> jobTasks = jobTaskMapper.selectList(new LambdaQueryWrapper<JobTask>()
-            .in(JobTask::getTaskStatus, Lists.newArrayList(
-                    JobTaskStatusEnum.FAIL.getStatus(),
-                    JobTaskStatusEnum.STOP.getStatus(),
-                    JobTaskStatusEnum.CANCEL.getStatus()
-                )
-            )
             .eq(JobTask::getTaskBatchId, taskBatchId));
-        Assert.notEmpty(jobTasks, () -> new EasyRetryServerException("job task is empty."));
+
+        //  若任务项为空则生成
+        if (CollectionUtils.isEmpty(jobTasks)) {
+            TaskExecuteDTO taskExecuteDTO = new TaskExecuteDTO();
+            taskExecuteDTO.setTaskBatchId(taskBatchId);
+            taskExecuteDTO.setJobId(jobTaskBatch.getJobId());
+            taskExecuteDTO.setTaskExecutorScene(JobTaskExecutorSceneEnum.MANUAL_JOB.getType());
+            taskExecuteDTO.setWorkflowTaskBatchId(workflowTaskBatchId);
+            taskExecuteDTO.setWorkflowNodeId(workflowNodeId);
+            ActorRef actorRef = ActorGenerator.jobTaskExecutorActor();
+            actorRef.tell(taskExecuteDTO, actorRef);
+
+            return Boolean.TRUE;
+        }
 
         for (JobTask jobTask : jobTasks) {
+            if (jobTask.getTaskStatus() == JobTaskStatusEnum.RUNNING.getStatus()) {
+                continue;
+            }
+
             jobTask.setTaskStatus(JobTaskStatusEnum.RUNNING.getStatus());
             Assert.isTrue(jobTaskMapper.updateById(jobTask) > 0,
                 () -> new EasyRetryServerException("update job task to running failed."));
