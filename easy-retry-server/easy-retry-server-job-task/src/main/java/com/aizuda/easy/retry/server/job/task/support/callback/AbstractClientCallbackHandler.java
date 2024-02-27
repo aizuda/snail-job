@@ -71,6 +71,8 @@ public abstract class AbstractClientCallbackHandler implements ClientCallbackHan
             updateJobTask.setClientInfo(newClient);
             // 覆盖老的的客户端信息
             context.setClientInfo(newClient);
+        } else {
+            context.setClientInfo(context.getJobTask().getClientInfo());
         }
 
         Job job = context.getJob();
@@ -83,6 +85,14 @@ public abstract class AbstractClientCallbackHandler implements ClientCallbackHan
 
     private boolean isNeedRetry(ClientCallbackContext context) {
 
+        JobTask jobTask = jobTaskMapper.selectById(context.getTaskId());
+        Job job = jobMapper.selectById(context.getJobId());
+        context.setJob(job);
+        context.setJobTask(jobTask);
+        if (Objects.isNull(jobTask) || Objects.isNull(job)) {
+            return Boolean.FALSE;
+        }
+
         // 手动重试策略
         if (Objects.nonNull(context.getRetryScene())
             && Objects.equals(JobRetrySceneEnum.MANUAL.getRetryScene(), context.getRetryScene())
@@ -91,17 +101,7 @@ public abstract class AbstractClientCallbackHandler implements ClientCallbackHan
         }
 
         if (context.getTaskStatus().equals(JobTaskStatusEnum.FAIL.getStatus())) {
-
-            JobTask jobTask = jobTaskMapper.selectById(context.getTaskId());
-            Job job = jobMapper.selectById(context.getJobId());
-            if (Objects.isNull(jobTask) || Objects.isNull(job)) {
-                return Boolean.FALSE;
-            }
-
             if (jobTask.getRetryCount() < job.getMaxRetryTimes()) {
-                context.setClientInfo(jobTask.getClientInfo());
-                context.setJob(job);
-                context.setJobTask(jobTask);
                 context.setRetryScene(JobRetrySceneEnum.AUTO.getRetryScene());
                 return Boolean.TRUE;
             }

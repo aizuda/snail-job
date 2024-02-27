@@ -71,8 +71,6 @@
       :rowKey="(record) => record.id"
       :columns="columns"
       :data="loadData"
-      :alert="options.alert"
-      :rowSelection="options.rowSelection"
       :scroll="{ x: 1500 }"
     >
       <span slot="serial" slot-scope="record">
@@ -279,7 +277,7 @@ export default {
         if (status === 0) {
           this.$message.error('停止失败')
         } else {
-          this.$refs.table.refresh(true)
+          this.$refs.table.refresh(false)
           this.$message.success('停止成功')
         }
       })
@@ -290,7 +288,7 @@ export default {
         if (status === 0) {
           this.$message.error('重试失败')
         } else {
-          this.$refs.table.refresh(true)
+          this.$refs.table.refresh(false)
           this.$message.success('重试成功')
         }
       })

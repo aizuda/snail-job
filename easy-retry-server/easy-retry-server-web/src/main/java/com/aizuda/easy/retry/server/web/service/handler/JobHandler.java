@@ -49,10 +49,11 @@ public class JobHandler {
     public Boolean retry(Long taskBatchId) {
         return retry(taskBatchId, null, null);
     }
-    public Boolean retry (Long taskBatchId, Long workflowNodeId, Long workflowTaskBatchId) {
+
+    public Boolean retry(Long taskBatchId, Long workflowNodeId, Long workflowTaskBatchId) {
         JobTaskBatch jobTaskBatch = jobTaskBatchMapper.selectOne(new LambdaQueryWrapper<JobTaskBatch>()
-            .eq(JobTaskBatch::getId, taskBatchId)
-            .in(JobTaskBatch::getTaskBatchStatus, JobTaskBatchStatusEnum.NOT_SUCCESS)
+                .eq(JobTaskBatch::getId, taskBatchId)
+                .in(JobTaskBatch::getTaskBatchStatus, JobTaskBatchStatusEnum.NOT_SUCCESS)
         );
         Assert.notNull(jobTaskBatch, () -> new EasyRetryServerException("job batch can not be null."));
 
@@ -60,13 +61,15 @@ public class JobHandler {
         jobTaskBatch.setTaskBatchStatus(JobTaskBatchStatusEnum.RUNNING.getStatus());
 
         Assert.isTrue(jobTaskBatchMapper.updateById(jobTaskBatch) > 0,
-            () -> new EasyRetryServerException("update job batch to running failed."));
+                () -> new EasyRetryServerException("update job batch to running failed."));
 
         Job job = jobMapper.selectById(jobTaskBatch.getJobId());
         Assert.notNull(job, () -> new EasyRetryServerException("job can not be null."));
 
-        List<JobTask> jobTasks = jobTaskMapper.selectList(new LambdaQueryWrapper<JobTask>()
-            .eq(JobTask::getTaskBatchId, taskBatchId));
+        List<JobTask> jobTasks = jobTaskMapper.selectList(
+                new LambdaQueryWrapper<JobTask>()
+                        .select(JobTask::getId, JobTask::getTaskStatus)
+                        .eq(JobTask::getTaskBatchId, taskBatchId));
 
         //  若任务项为空则生成
         if (CollectionUtils.isEmpty(jobTasks)) {
@@ -89,7 +92,7 @@ public class JobHandler {
 
             jobTask.setTaskStatus(JobTaskStatusEnum.RUNNING.getStatus());
             Assert.isTrue(jobTaskMapper.updateById(jobTask) > 0,
-                () -> new EasyRetryServerException("update job task to running failed."));
+                    () -> new EasyRetryServerException("update job task to running failed."));
             // 模拟失败重试
             ClientCallbackHandler clientCallback = ClientCallbackFactory.getClientCallback(job.getTaskType());
             ClientCallbackContext context = JobTaskConverter.INSTANCE.toClientCallbackContext(job);
@@ -106,7 +109,7 @@ public class JobHandler {
         return Boolean.TRUE;
     }
 
-    public Boolean stop (Long taskBatchId) {
+    public Boolean stop(Long taskBatchId) {
 
         JobTaskBatch jobTaskBatch = jobTaskBatchMapper.selectById(taskBatchId);
         Assert.notNull(jobTaskBatch, () -> new EasyRetryServerException("job batch can not be null."));

@@ -45,8 +45,6 @@
         :rowKey="(record) => record.id"
         :columns="notifyColumns"
         :data="loadData"
-        :alert="options.alert"
-        :rowSelection="options.rowSelection"
       >
         <span slot="notifyType" slot-scope="text">
           <a-tag :color="notifyTypeList[text].color">

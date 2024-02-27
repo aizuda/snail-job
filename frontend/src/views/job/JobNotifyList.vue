@@ -62,10 +62,10 @@
         :rowKey="(record) => record.id"
         :columns="notifyColumns"
         :data="loadData"
-        :alert="options.alert"
-        :rowSelection="options.rowSelection"
       >
-
+        <span slot="serial" slot-scope="record">
+          {{ record.id }}
+        </span>
         <span slot="notifyType" slot-scope="text">
           <a-tag :color="notifyTypeList[text].color">
             {{ notifyTypeList[text].name }}
@@ -110,6 +110,11 @@ export default {
   data () {
     return {
       notifyColumns: [
+        {
+          title: 'ID',
+          scopedSlots: { customRender: 'serial' },
+          fixed: 'left'
+        },
         {
           title: '组名',
           dataIndex: 'groupName',

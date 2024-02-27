@@ -21,8 +21,8 @@ const jobApi = {
   // 通知
   jobNotifyConfigPageList: '/job/notify/config/page/list',
   jobNotifyConfigDetail: '/job/notify/config/',
-  saveJobNotify: '/job/notify/config/',
-  updateJobNotify: '/job/notify/config/',
+  saveJobNotify: '/job/notify/config',
+  updateJobNotify: '/job/notify/config',
 
   // 任务
   jobTaskList: '/job/task/list',
