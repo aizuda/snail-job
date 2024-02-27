@@ -10,6 +10,7 @@ import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.enums.JobTaskExecutorSceneEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.job.task.dto.TaskExecuteDTO;
+import com.aizuda.easy.retry.server.job.task.enums.JobRetrySceneEnum;
 import com.aizuda.easy.retry.server.job.task.support.ClientCallbackHandler;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskStopHandler;
@@ -97,6 +98,7 @@ public class JobHandler {
             context.setWorkflowTaskBatchId(workflowTaskBatchId);
             context.setTaskId(jobTask.getId());
             context.setTaskStatus(JobTaskStatusEnum.FAIL.getStatus());
+            context.setRetryScene(JobRetrySceneEnum.MANUAL.getRetryScene());
             context.setExecuteResult(ExecuteResult.failure(null, "手动重试"));
             clientCallback.callback(context);
         }

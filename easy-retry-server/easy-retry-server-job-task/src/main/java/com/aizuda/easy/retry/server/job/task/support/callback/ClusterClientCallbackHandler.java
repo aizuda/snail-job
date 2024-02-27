@@ -19,6 +19,7 @@ import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.toolkit.SqlHelper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -33,14 +34,9 @@ import java.util.Set;
  */
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class ClusterClientCallbackHandler extends AbstractClientCallbackHandler {
-
-    @Autowired
-    private ClientNodeAllocateHandler clientNodeAllocateHandler;
-    @Autowired
-    private JobTaskMapper jobTaskMapper;
-    @Autowired
-    private JobMapper jobMapper;
+    private final ClientNodeAllocateHandler clientNodeAllocateHandler;
 
     @Override
     public JobTaskTypeEnum getTaskInstanceType() {

@@ -116,6 +116,8 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
         dispatchJobRequest.setTaskType(jobContext.getTaskType());
         dispatchJobRequest.setExecuteResult(executeResult);
         dispatchJobRequest.setTaskStatus(status);
+        dispatchJobRequest.setRetry(jobContext.isRetry());
+        dispatchJobRequest.setRetryScene(jobContext.getRetryScene());
         return dispatchJobRequest;
     }
 }

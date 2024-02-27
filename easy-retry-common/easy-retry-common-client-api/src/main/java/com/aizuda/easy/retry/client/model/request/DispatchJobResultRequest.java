@@ -31,4 +31,14 @@ public class DispatchJobResultRequest {
 
     private ExecuteResult executeResult;
 
+    /**
+     * 重试场景 auto、manual
+     */
+    private Integer retryScene;
+
+    /**
+     * 是否是重试流量
+     */
+    private boolean isRetry;
+
 }

@@ -89,6 +89,8 @@ public class JobEndPoint {
         jobContext.setArgsStr(dispatchJob.getArgsStr());
         jobContext.setWorkflowNodeId(dispatchJob.getWorkflowNodeId());
         jobContext.setWorkflowTaskBatchId(dispatchJob.getWorkflowTaskBatchId());
+        jobContext.setRetry(dispatchJob.isRetry());
+        jobContext.setRetryScene(dispatchJob.getRetryScene());
         return jobContext;
     }
 

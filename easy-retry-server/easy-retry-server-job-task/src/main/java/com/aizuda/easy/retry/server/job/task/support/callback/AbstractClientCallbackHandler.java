@@ -8,6 +8,7 @@ import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.util.ClientInfoUtils;
 import com.aizuda.easy.retry.server.job.task.dto.LogMetaDTO;
 import com.aizuda.easy.retry.server.job.task.dto.RealJobExecutorDTO;
+import com.aizuda.easy.retry.server.job.task.enums.JobRetrySceneEnum;
 import com.aizuda.easy.retry.server.job.task.support.ClientCallbackHandler;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobMapper;
@@ -50,6 +51,8 @@ public abstract class AbstractClientCallbackHandler implements ClientCallbackHan
                 realJobExecutor.setWorkflowNodeId(context.getWorkflowNodeId());
                 realJobExecutor.setWorkflowTaskBatchId(context.getWorkflowTaskBatchId());
                 realJobExecutor.setRetryCount(jobTask.getRetryCount() + 1);
+                realJobExecutor.setRetry(Boolean.TRUE);
+                realJobExecutor.setRetryScene(context.getRetryScene());
                 ActorRef actorRef = ActorGenerator.jobRealTaskExecutorActor();
                 actorRef.tell(realJobExecutor, actorRef);
                 return;
@@ -80,6 +83,13 @@ public abstract class AbstractClientCallbackHandler implements ClientCallbackHan
 
     private boolean isNeedRetry(ClientCallbackContext context) {
 
+        // 手动重试策略
+        if (Objects.nonNull(context.getRetryScene())
+            && Objects.equals(JobRetrySceneEnum.MANUAL.getRetryScene(), context.getRetryScene())
+            && !context.isRetry()) {
+            return Boolean.TRUE;
+        }
+
         if (context.getTaskStatus().equals(JobTaskStatusEnum.FAIL.getStatus())) {
 
             JobTask jobTask = jobTaskMapper.selectById(context.getTaskId());
@@ -92,6 +102,7 @@ public abstract class AbstractClientCallbackHandler implements ClientCallbackHan
                 context.setClientInfo(jobTask.getClientInfo());
                 context.setJob(job);
                 context.setJobTask(jobTask);
+                context.setRetryScene(JobRetrySceneEnum.AUTO.getRetryScene());
                 return Boolean.TRUE;
             }
         }
@@ -99,9 +110,7 @@ public abstract class AbstractClientCallbackHandler implements ClientCallbackHan
         return Boolean.FALSE;
     }
 
-    protected String chooseNewClient(ClientCallbackContext context) {
-        return null;
-    }
+    protected abstract String chooseNewClient(ClientCallbackContext context);
 
     protected abstract void doCallback(ClientCallbackContext context);
 
