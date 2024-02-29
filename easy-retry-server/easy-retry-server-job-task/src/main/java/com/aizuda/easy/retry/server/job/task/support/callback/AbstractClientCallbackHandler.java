@@ -15,6 +15,7 @@ import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.toolkit.SqlHelper;
 import org.springframework.beans.factory.InitializingBean;
@@ -76,10 +77,14 @@ public abstract class AbstractClientCallbackHandler implements ClientCallbackHan
         }
 
         Job job = context.getJob();
-        return SqlHelper.retBool(jobTaskMapper.update(updateJobTask, Wrappers.<JobTask>lambdaUpdate()
-                .lt(JobTask::getRetryCount, job.getMaxRetryTimes())
-                .eq(JobTask::getId, context.getTaskId())
-        ));
+        LambdaUpdateWrapper<JobTask> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(JobTask::getId, context.getTaskId());
+        if (Objects.isNull(context.getRetryScene())
+                || Objects.equals(JobRetrySceneEnum.AUTO.getRetryScene(), context.getRetryScene())) {
+            updateWrapper.lt(JobTask::getRetryCount, job.getMaxRetryTimes());
+        }
+
+        return SqlHelper.retBool(jobTaskMapper.update(updateJobTask,updateWrapper));
 
     }
 
