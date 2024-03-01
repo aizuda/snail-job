@@ -113,7 +113,7 @@
                 ]" />
 
               <a-input
-                v-if="triggerTypeValue === '1'"
+                v-if="triggerTypeValue === '3'"
                 @click="handlerCron"
                 placeholder="请输入间隔时长"
                 v-decorator="[
@@ -122,7 +122,7 @@
                 ]" />
 
               <a-input
-                v-if="triggerTypeValue === '3'"
+                v-if="triggerTypeValue === '99'"
                 disabled
                 placeholder=""
                 v-decorator="[
@@ -406,7 +406,7 @@ export default {
     },
     handlerCron () {
       const triggerType = this.form.getFieldValue('triggerType')
-      if (triggerType === '1') {
+      if (triggerType === '3') {
         let triggerInterval = this.form.getFieldValue('triggerInterval')
         if (triggerInterval === null || triggerInterval === '') {
           triggerInterval = '* * * * * ?'
@@ -477,7 +477,7 @@ export default {
             values['argsStr'] = JSON.stringify(this.argsStrValue)
           }
 
-          if (this.triggerTypeValue === '3') {
+          if (this.triggerTypeValue === '99') {
             values['triggerInterval'] = '0'
           }
 
@@ -515,7 +515,7 @@ export default {
         this.triggerTypeValue = formData.triggerType
         this.taskTypeValue = formData.taskType
 
-        if (this.triggerTypeValue === '3') {
+        if (this.triggerTypeValue === '99') {
           formData.triggerInterval = null
         }
 

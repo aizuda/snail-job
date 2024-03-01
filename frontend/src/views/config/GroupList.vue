@@ -37,7 +37,7 @@
       :data="loadData"
       :alert="options.alert"
       :rowSelection="options.rowSelection"
-      :scroll="{ x: 1800 }"
+      :scroll="{ x: 2000 }"
     >
       <span slot="groupName" slot-scope="text, record">
         <a href="#" @click="handlerOpenDrawer(record)">{{ text }}</a>

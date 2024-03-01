@@ -43,7 +43,6 @@ public class JobRequestVO {
     /**
      * 参数类型 text/json
      */
-//    @NotNull(message = "argsType 不能为空")
     private Integer argsType;
 
     /**

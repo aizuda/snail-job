@@ -129,13 +129,12 @@
           >
             <a href="javascript:;" v-if="record.workflowStatus === 0">删除</a>
           </a-popconfirm>
-          <a-divider type="vertical" v-if="record.workflowStatus === 0"/>
+          <a-divider type="vertical" v-if="record.workflowStatus === 0 && $auth('job.del')"/>
           <a-popconfirm
             title="是否复制此工作流?"
             ok-text="复制"
             cancel-text="取消"
             @confirm="handleCopy(record)"
-            v-if="$auth('job.del')"
           >
             <a href="javascript:;">复制</a>
           </a-popconfirm>

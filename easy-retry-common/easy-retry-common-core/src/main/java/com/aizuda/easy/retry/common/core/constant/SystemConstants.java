@@ -122,4 +122,10 @@ public interface SystemConstants {
      * 客户端返回的非json对象，单值比如 "aa", 123等
      */
     String SINGLE_PARAM = "SINGLE_PARAM";
+
+    /**
+     * 工作流触发类型
+     * 仅表示定时任务类型为工作流
+     */
+    Integer WORKFLOW_TRIGGER_TYPE = 99;
 }

@@ -35,6 +35,7 @@ public class WorkflowBatchController {
     }
 
     @PostMapping("/stop/{id}")
+    @LoginRequired
     public Boolean stop(@PathVariable("id") Long id) {
         return workflowBatchService.stop(id);
     }

@@ -12,7 +12,6 @@ import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.dto.PartitionTask;
 import com.aizuda.easy.retry.server.common.dto.ScanTask;
 import com.aizuda.easy.retry.server.common.enums.JobTaskExecutorSceneEnum;
-import com.aizuda.easy.retry.server.common.enums.TriggerTypeEnum;
 import com.aizuda.easy.retry.server.common.strategy.WaitStrategies;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.server.common.util.PartitionTaskUtils;
@@ -168,7 +167,7 @@ public class ScanJobTaskActor extends AbstractActor {
                     Job::getId, Job::getNamespaceId)
                 .eq(Job::getJobStatus, StatusEnum.YES.getStatus())
                 .eq(Job::getDeleted, StatusEnum.NO.getStatus())
-                .ne(Job::getTriggerType, TriggerTypeEnum.WORKFLOW.getType())
+                .ne(Job::getTriggerType, SystemConstants.WORKFLOW_TRIGGER_TYPE)
                 .in(Job::getBucketIndex, scanTask.getBuckets())
                 .le(Job::getNextTriggerAt,
                     DateUtils.toNowMilli() + DateUtils.toEpochMilli(SystemConstants.SCHEDULE_PERIOD))
