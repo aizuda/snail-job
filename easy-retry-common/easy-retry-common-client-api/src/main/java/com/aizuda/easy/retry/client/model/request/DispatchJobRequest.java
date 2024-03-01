@@ -11,7 +11,7 @@ import lombok.Data;
 @Data
 public class DispatchJobRequest {
 
-    @NotNull(message = "namespaceId 不能为空")
+    @NotBlank(message = "namespaceId 不能为空")
     private String namespaceId;
 
     @NotNull(message = "jobId 不能为空")
@@ -29,7 +29,7 @@ public class DispatchJobRequest {
     @NotBlank(message = "group 不能为空")
     private String groupName;
 
-    @NotBlank(message = "parallelNum 不能为空")
+    @NotNull(message = "parallelNum 不能为空")
     private Integer parallelNum;
 
     @NotNull(message = "executorType 不能为空")
@@ -38,7 +38,7 @@ public class DispatchJobRequest {
     @NotBlank(message = "executorInfo 不能为空")
     private String executorInfo;
 
-    @NotBlank(message = "executorTimeout 不能为空")
+    @NotNull(message = "executorTimeout 不能为空")
     private Integer executorTimeout;
 
     private String argsStr;

@@ -24,15 +24,15 @@ const enums = {
     }
   },
   triggerType: {
-    '1': {
-      'name': 'CRON表达式',
-      'color': '#d06892'
-    },
     '2': {
       'name': '固定时间',
       'color': '#f5a22d'
     },
     '3': {
+      'name': 'CRON表达式',
+      'color': '#d06892'
+    },
+    '99': {
       'name': '工作流',
       'color': '#76f52d'
     }

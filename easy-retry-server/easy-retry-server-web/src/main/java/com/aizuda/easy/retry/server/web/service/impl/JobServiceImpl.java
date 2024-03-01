@@ -3,11 +3,11 @@ package com.aizuda.easy.retry.server.web.service.impl;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.HashUtil;
 import cn.hutool.core.util.StrUtil;
+import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.server.common.WaitStrategy;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.enums.JobTaskExecutorSceneEnum;
-import com.aizuda.easy.retry.server.common.enums.TriggerTypeEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.strategy.WaitStrategies;
 import com.aizuda.easy.retry.server.common.util.CronUtils;
@@ -151,7 +151,7 @@ public class JobServiceImpl implements JobService {
         updateJob.setNamespaceId(job.getNamespaceId());
 
         // 工作流任务
-        if (Objects.equals(jobRequestVO.getTriggerType(), TriggerTypeEnum.WORKFLOW.getType())) {
+        if (Objects.equals(jobRequestVO.getTriggerType(), SystemConstants.WORKFLOW_TRIGGER_TYPE)) {
             job.setNextTriggerAt(0L);
             // 非常驻任务 > 非常驻任务
         } else if (Objects.equals(job.getResident(), StatusEnum.NO.getStatus()) && Objects.equals(
@@ -174,7 +174,7 @@ public class JobServiceImpl implements JobService {
     }
 
     private static Long calculateNextTriggerAt(final JobRequestVO jobRequestVO, Long time) {
-        if (Objects.equals(jobRequestVO.getTriggerType(), TriggerTypeEnum.WORKFLOW.getType())) {
+        if (Objects.equals(jobRequestVO.getTriggerType(), SystemConstants.WORKFLOW_TRIGGER_TYPE)) {
             return 0L;
         }
 
@@ -189,7 +189,7 @@ public class JobServiceImpl implements JobService {
     public Job updateJobResident(JobRequestVO jobRequestVO) {
         Job job = JobConverter.INSTANCE.toJob(jobRequestVO);
         job.setResident(StatusEnum.NO.getStatus());
-        if (Objects.equals(jobRequestVO.getTriggerType(), TriggerTypeEnum.WORKFLOW.getType())) {
+        if (Objects.equals(jobRequestVO.getTriggerType(), SystemConstants.WORKFLOW_TRIGGER_TYPE)) {
             return job;
         }
 
