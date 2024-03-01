@@ -43,7 +43,6 @@ public class JobRequestVO {
     /**
      * 参数类型 text/json
      */
-//    @NotNull(message = "argsType 不能为空")
     private Integer argsType;
 
     /**
@@ -65,7 +64,7 @@ public class JobRequestVO {
     private String executorInfo;
 
     /**
-     * 触发类型 1.CRON 表达式 2. 固定时间
+     * 触发类型 2. 固定时间 3.CRON 表达式 99.工作流
      */
     @NotNull(message = "triggerType 不能为空")
     private Integer triggerType;
