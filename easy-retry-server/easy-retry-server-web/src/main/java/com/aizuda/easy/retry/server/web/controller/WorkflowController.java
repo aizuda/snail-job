@@ -31,7 +31,7 @@ public class WorkflowController {
     private final WorkflowService workflowService;
 
     @PostMapping
-    @LoginRequired(role = RoleEnum.ADMIN)
+    @LoginRequired(role = RoleEnum.USER)
     public Boolean saveWorkflow(@RequestBody @Validated WorkflowRequestVO workflowRequestVO) {
         return workflowService.saveWorkflow(workflowRequestVO);
     }
@@ -43,7 +43,7 @@ public class WorkflowController {
     }
 
     @PutMapping
-    @LoginRequired(role = RoleEnum.ADMIN)
+    @LoginRequired(role = RoleEnum.USER)
     public Boolean updateWorkflow(@RequestBody @Validated WorkflowRequestVO workflowRequestVO) {
         return workflowService.updateWorkflow(workflowRequestVO);
     }
@@ -55,7 +55,7 @@ public class WorkflowController {
     }
 
     @PutMapping("/update/status/{id}")
-    @LoginRequired(role = RoleEnum.ADMIN)
+    @LoginRequired(role = RoleEnum.USER)
     public Boolean updateStatus(@PathVariable("id") Long id) {
         return workflowService.updateStatus(id);
     }
@@ -81,7 +81,7 @@ public class WorkflowController {
     }
 
     @PostMapping("/check-node-expression")
-    @LoginRequired(role = RoleEnum.ADMIN)
+    @LoginRequired(role = RoleEnum.USER)
     public Pair<Integer, String> checkNodeExpression(@RequestBody DecisionConfig decisionConfig) {
         return workflowService.checkNodeExpression(decisionConfig);
     }
