@@ -7,29 +7,23 @@ import com.aizuda.easy.retry.common.core.enums.NotifySceneEnum;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.core.util.EnvironmentUtils;
-import com.aizuda.easy.retry.common.core.util.HostUtils;
+import com.aizuda.easy.retry.common.core.util.NetUtil;
 import com.aizuda.easy.retry.server.common.Lifecycle;
 import com.aizuda.easy.retry.server.common.dto.PartitionTask;
 import com.aizuda.easy.retry.server.common.schedule.AbstractSchedule;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.server.common.util.PartitionTaskUtils;
 import com.aizuda.easy.retry.server.retry.task.dto.NotifyConfigPartitionTask;
-import com.aizuda.easy.retry.server.retry.task.dto.RetryPartitionTask;
 import com.aizuda.easy.retry.server.retry.task.support.RetryTaskConverter;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
 import com.aizuda.easy.retry.template.datasource.access.TaskAccess;
 import com.aizuda.easy.retry.template.datasource.persistence.po.NotifyConfig;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryDeadLetter;
-import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLog;
-import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -71,7 +65,7 @@ public class RetryErrorMoreThresholdAlarmSchedule extends AbstractSchedule imple
 
     @Override
     protected void doExecute() {
-       EasyRetryLog.LOCAL.info("retryErrorMoreThreshold time[{}] ip:[{}]", LocalDateTime.now(), HostUtils.getIp());
+       EasyRetryLog.LOCAL.info("retryErrorMoreThreshold time[{}] ip:[{}]", LocalDateTime.now(), NetUtil.getLocalIpStr());
         PartitionTaskUtils.process(this::getNotifyConfigPartitions, this::doHandler, 0);
     }
 

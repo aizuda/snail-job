@@ -1,6 +1,6 @@
 <template>
-  <a-spin :spinning="spinning" tip=" 工作流正在加载中">
-    <a-icon slot="indicator" type="loading" style="font-size: 58px; top: 39%" spin />
+  <a-spin :spinning="spinning" tip="工作流加载中">
+    <a-icon slot="indicator" type="loading" style="font-size: 18px; top: 39%" spin />
     <iframe
       ref="iframe"
       :src="`${mode === 'production' ? baseUrl : ''}/lib/index.html?id=${id}&mode=${mode}&x1c2Hdd6=${value}`"
@@ -27,7 +27,7 @@ export default {
       spinning: true,
       mode: process.env.NODE_ENV,
       baseUrl: process.env.VUE_APP_API_BASE_URL,
-      indicator: <a-icon type="loading" style="font-size: 36px" spin />
+      indicator: <a-icon type="loading" style="font-size: 18px" spin />
     }
   },
   mounted () {

@@ -13,7 +13,7 @@ import com.aizuda.easy.retry.common.core.enums.NotifySceneEnum;
 import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.core.model.NettyResult;
 import com.aizuda.easy.retry.common.core.util.EnvironmentUtils;
-import com.aizuda.easy.retry.common.core.util.HostUtils;
+import com.aizuda.easy.retry.common.core.util.NetUtil;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.model.dto.ConfigDTO;
 import com.aizuda.easy.retry.server.model.dto.RetryTaskDTO;
@@ -99,7 +99,7 @@ public class SyncReport extends AbstractReport {
             AlarmContext context = AlarmContext.build()
                     .text(reportErrorTextMessageFormatter,
                             EnvironmentUtils.getActiveProfile(),
-                            HostUtils.getIp(),
+                            NetUtil.getLocalIpStr(),
                             easyRetryProperties.getNamespace(),
                             EasyRetryProperties.getGroup(),
                             LocalDateTime.now().format(formatter),

@@ -14,8 +14,6 @@ import java.time.LocalDateTime;
 @Data
 public class RegisterNodeInfo implements Comparable<RegisterNodeInfo> {
 
-    private static final String URL = "http://{0}:{1}/{2}";
-
     private String namespaceId;
 
     private String groupName;
@@ -31,10 +29,6 @@ public class RegisterNodeInfo implements Comparable<RegisterNodeInfo> {
     private Integer nodeType;
 
     private String contextPath;
-
-    public String fullUrl() {
-        return MessageFormat.format(URL, hostIp, hostPort.toString(), contextPath);
-    }
 
     public String address() {
         return MessageFormat.format("{0}:{1}", hostIp, hostPort.toString());
