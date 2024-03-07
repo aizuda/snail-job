@@ -1,9 +1,9 @@
-FROM --platform=$BUILDPLATFORM openjdk:8-jdk-alpine as builder
+FROM --platform=$BUILDPLATFORM amazoncorretto:17 as builder
 WORKDIR /
 
 ADD ./target/easy-retry-server-exec.jar easy-retry-server.jar
 
-FROM --platform=$BUILDPLATFORM openjdk:8-jdk-alpine
+FROM --platform=$BUILDPLATFORM amazoncorretto:17
 MAINTAINER www.byteblogs.com
 LABEL server-name=easy-retry-server
 
