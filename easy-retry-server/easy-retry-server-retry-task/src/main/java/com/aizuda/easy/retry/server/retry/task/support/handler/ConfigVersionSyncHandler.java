@@ -38,6 +38,7 @@ public class ConfigVersionSyncHandler implements Lifecycle, Runnable {
     private RestTemplate restTemplate;
     @Autowired
     protected AccessTemplate accessTemplate;
+    private static final String SYNC_VERSION_V1 =  "/retry/sync/version/v1";
 
     /**
      * 添加任务
@@ -71,7 +72,7 @@ public class ConfigVersionSyncHandler implements Lifecycle, Runnable {
 
                 String url = NetUtil.getUrl(registerNodeInfo.getHostIp(), registerNodeInfo.getHostPort(),
                         registerNodeInfo.getContextPath());
-                Result result = restTemplate.postForObject(url, configDTO, Result.class);
+                Result result = restTemplate.postForObject(url.concat(SYNC_VERSION_V1), configDTO, Result.class);
                EasyRetryLog.LOCAL.info("同步结果 [{}]", result);
             }
         } catch (Exception e) {
