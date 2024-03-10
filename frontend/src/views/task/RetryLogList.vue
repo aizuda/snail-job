@@ -54,8 +54,6 @@
       rowKey="key"
       :columns="columns"
       :data="loadData"
-      :alert="options.alert"
-      :rowSelection="options.rowSelection"
       :scroll="{ x: 2000 }"
     >
       <span slot="uniqueId" slot-scope="text, record">

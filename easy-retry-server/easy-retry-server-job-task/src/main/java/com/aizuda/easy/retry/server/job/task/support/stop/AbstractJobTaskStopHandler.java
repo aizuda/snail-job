@@ -1,13 +1,16 @@
 package com.aizuda.easy.retry.server.job.task.support.stop;
 
 import akka.actor.ActorRef;
+import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskStatusEnum;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.server.job.task.dto.JobExecutorResultDTO;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskStopHandler;
+import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskBatchMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
+import com.aizuda.easy.retry.template.datasource.persistence.po.JobTaskBatch;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +27,8 @@ public abstract class AbstractJobTaskStopHandler implements JobTaskStopHandler, 
 
     @Autowired
     private JobTaskMapper jobTaskMapper;
+    @Autowired
+    private JobTaskBatchMapper jobTaskBatchMapper;
 
     protected abstract void doStop(TaskStopJobContext context);
 
@@ -40,6 +45,11 @@ public abstract class AbstractJobTaskStopHandler implements JobTaskStopHandler, 
         List<JobTask> jobTasks = jobTaskMapper.selectList(queryWrapper);
 
         if (CollectionUtils.isEmpty(jobTasks)) {
+            // 若没有任务项，直接变更状态为已停止
+            JobTaskBatch jobTaskBatch = new JobTaskBatch();
+            jobTaskBatch.setId(context.getTaskBatchId());
+            jobTaskBatch.setTaskBatchStatus(JobTaskBatchStatusEnum.STOP.getStatus());
+            jobTaskBatchMapper.updateById(jobTaskBatch);
             return;
         }
 

@@ -121,6 +121,11 @@ public @interface Retryable {
      */
     TimeUnit unit() default TimeUnit.MILLISECONDS;
 
-
+    /**
+     * 重试传播机制
+     *
+     * @return Propagation
+     */
+    Propagation propagation() default Propagation.REQUIRED;
 }
 

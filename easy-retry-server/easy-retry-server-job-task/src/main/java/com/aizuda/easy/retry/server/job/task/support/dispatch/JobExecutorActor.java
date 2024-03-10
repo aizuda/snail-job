@@ -26,6 +26,10 @@ import com.aizuda.easy.retry.server.job.task.support.cache.ResidentTaskCache;
 import com.aizuda.easy.retry.server.job.task.support.event.JobTaskFailAlarmEvent;
 import com.aizuda.easy.retry.server.job.task.support.executor.job.JobExecutorContext;
 import com.aizuda.easy.retry.server.job.task.support.executor.job.JobExecutorFactory;
+import com.aizuda.easy.retry.server.job.task.support.generator.task.JobTaskGenerateContext;
+import com.aizuda.easy.retry.server.job.task.support.generator.task.JobTaskGenerator;
+import com.aizuda.easy.retry.server.job.task.support.generator.task.JobTaskGeneratorFactory;
+import com.aizuda.easy.retry.server.job.task.support.handler.WorkflowBatchHandler;
 import com.aizuda.easy.retry.server.job.task.support.timer.JobTimerWheel;
 import com.aizuda.easy.retry.server.job.task.support.timer.ResidentJobTimerTask;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.GroupConfigMapper;
@@ -33,9 +37,12 @@ import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskBatchMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.GroupConfig;
 import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
+import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTaskBatch;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -48,6 +55,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -59,15 +67,13 @@ import java.util.concurrent.TimeUnit;
 @Component(ActorGenerator.JOB_EXECUTOR_ACTOR)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Slf4j
+@RequiredArgsConstructor
 public class JobExecutorActor extends AbstractActor {
-    @Autowired
-    private JobMapper jobMapper;
-    @Autowired
-    private JobTaskBatchMapper jobTaskBatchMapper;
-    @Autowired
-    private TransactionTemplate transactionTemplate;
-    @Autowired
-    private GroupConfigMapper groupConfigMapper;
+    private final JobMapper jobMapper;
+    private final JobTaskBatchMapper jobTaskBatchMapper;
+    private final TransactionTemplate transactionTemplate;
+    private final GroupConfigMapper groupConfigMapper;
+    private final WorkflowBatchHandler workflowBatchHandler;
 
     @Override
     public Receive createReceive() {
@@ -112,27 +118,13 @@ public class JobExecutorActor extends AbstractActor {
                     job.getNamespaceId()))) {
                 taskStatus = JobTaskBatchStatusEnum.CANCEL.getStatus();
                 operationReason = JobOperationReasonEnum.NOT_CLIENT.getReason();
-                TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-                    @Override
-                    public void afterCompletion(int status) {
 
-                        if (Objects.nonNull(taskExecute.getWorkflowNodeId()) && Objects.nonNull(taskExecute.getWorkflowTaskBatchId())) {
-                            // 若是工作流则开启下一个任务
-                            try {
-                                WorkflowNodeTaskExecuteDTO taskExecuteDTO = new WorkflowNodeTaskExecuteDTO();
-                                taskExecuteDTO.setWorkflowTaskBatchId(taskExecute.getWorkflowTaskBatchId());
-                                taskExecuteDTO.setTaskExecutorScene(taskExecute.getTaskExecutorScene());
-                                taskExecuteDTO.setParentId(taskExecute.getWorkflowNodeId());
-                                taskExecuteDTO.setTaskBatchId(taskExecute.getTaskBatchId());
-                                ActorRef actorRef = ActorGenerator.workflowTaskExecutorActor();
-                                actorRef.tell(taskExecuteDTO, actorRef);
-                            } catch (Exception e) {
-                                log.error("任务调度执行失败", e);
-                            }
-                        }
-                    }
-                });
-
+                WorkflowNodeTaskExecuteDTO taskExecuteDTO = new WorkflowNodeTaskExecuteDTO();
+                taskExecuteDTO.setWorkflowTaskBatchId(taskExecute.getWorkflowTaskBatchId());
+                taskExecuteDTO.setTaskExecutorScene(taskExecute.getTaskExecutorScene());
+                taskExecuteDTO.setParentId(taskExecute.getWorkflowNodeId());
+                taskExecuteDTO.setTaskBatchId(taskExecute.getTaskBatchId());
+                workflowBatchHandler.openNextNode(taskExecuteDTO);
             }
 
             // 更新状态
@@ -143,14 +135,18 @@ public class JobExecutorActor extends AbstractActor {
                 return;
             }
 
+            // 生成任务
+            JobTaskGenerator taskInstance = JobTaskGeneratorFactory.getTaskInstance(job.getTaskType());
+            JobTaskGenerateContext instanceGenerateContext = JobTaskConverter.INSTANCE.toJobTaskInstanceGenerateContext(job);
+            instanceGenerateContext.setTaskBatchId(taskExecute.getTaskBatchId());
+            List<JobTask> taskList = taskInstance.generate(instanceGenerateContext);
+            if (CollectionUtils.isEmpty(taskList)) {
+                return;
+            }
+
             // 执行任务
             JobExecutor jobExecutor = JobExecutorFactory.getJobExecutor(job.getTaskType());
-            JobExecutorContext context = JobTaskConverter.INSTANCE.toJobExecutorContext(job);
-            context.setTaskBatchId(taskExecute.getTaskBatchId());
-            context.setJobId(job.getId());
-            context.setWorkflowTaskBatchId(taskExecute.getWorkflowTaskBatchId());
-            context.setWorkflowNodeId(taskExecute.getWorkflowNodeId());
-            jobExecutor.execute(context);
+            jobExecutor.execute(buildJobExecutorContext(taskExecute, job, taskList));
         } finally {
             log.info("准备执行任务完成.[{}]", JsonUtil.toJsonString(taskExecute));
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
@@ -164,6 +160,17 @@ public class JobExecutorActor extends AbstractActor {
             });
         }
 
+    }
+
+    @NotNull
+    private static JobExecutorContext buildJobExecutorContext(TaskExecuteDTO taskExecute, Job job, List<JobTask> taskList) {
+        JobExecutorContext context = JobTaskConverter.INSTANCE.toJobExecutorContext(job);
+        context.setTaskList(taskList);
+        context.setTaskBatchId(taskExecute.getTaskBatchId());
+        context.setJobId(job.getId());
+        context.setWorkflowTaskBatchId(taskExecute.getWorkflowTaskBatchId());
+        context.setWorkflowNodeId(taskExecute.getWorkflowNodeId());
+        return context;
     }
 
     private void handlerTaskBatch(TaskExecuteDTO taskExecute, int taskStatus, int operationReason) {

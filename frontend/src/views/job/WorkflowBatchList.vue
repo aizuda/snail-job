@@ -70,8 +70,6 @@
       :rowKey="(record) => record.id"
       :columns="columns"
       :data="loadData"
-      :alert="options.alert"
-      :rowSelection="options.rowSelection"
       :scroll="{ x: 1500 }"
     >
       <span slot="serial" slot-scope="record">

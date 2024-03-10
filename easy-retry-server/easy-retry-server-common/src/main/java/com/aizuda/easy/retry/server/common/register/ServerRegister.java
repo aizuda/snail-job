@@ -5,7 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.enums.NodeTypeEnum;
 import com.aizuda.easy.retry.common.log.EasyRetryLog;
-import com.aizuda.easy.retry.common.core.util.HostUtils;
+import com.aizuda.easy.retry.common.core.util.NetUtil;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.Register;
 import com.aizuda.easy.retry.server.common.cache.CacheConsumerGroup;
@@ -72,7 +72,7 @@ public class ServerRegister extends AbstractRegister {
 
         context.setGroupName(GROUP_NAME);
         context.setHostId(CURRENT_CID);
-        context.setHostIp(HostUtils.getIp());
+        context.setHostIp(NetUtil.getLocalIpStr());
         context.setHostPort(systemProperties.getNettyPort());
         context.setContextPath(Optional.ofNullable(serverProperties.getServlet().getContextPath()).orElse(StrUtil.EMPTY));
         context.setNamespaceId(NAMESPACE_ID);

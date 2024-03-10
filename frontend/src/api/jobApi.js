@@ -4,8 +4,8 @@ const jobApi = {
   jobPageList: '/job/page/list',
   jobList: '/job/list',
   jobDetail: '/job/',
-  saveJob: '/job/',
-  updateJob: '/job/',
+  saveJob: '/job',
+  updateJob: '/job',
   updateJobStatus: '/job/status',
   delJob: '/job/',
   timeByCron: '/job/cron',
@@ -16,12 +16,13 @@ const jobApi = {
   jobBatchList: '/job/batch/list',
   jobBatchDetail: '/job/batch/',
   stop: '/job/batch/stop/',
+  retry: '/job/batch/retry/',
 
   // 通知
   jobNotifyConfigPageList: '/job/notify/config/page/list',
   jobNotifyConfigDetail: '/job/notify/config/',
-  saveJobNotify: '/job/notify/config/',
-  updateJobNotify: '/job/notify/config/',
+  saveJobNotify: '/job/notify/config',
+  updateJobNotify: '/job/notify/config',
 
   // 任务
   jobTaskList: '/job/task/list',
@@ -45,6 +46,12 @@ const jobApi = {
 
 export default jobApi
 
+export function retry (id) {
+  return request({
+    url: jobApi.retry + id,
+    method: 'post'
+  })
+}
 export function workflowNameList (parameter) {
   return request({
     url: jobApi.workflowNameList,

@@ -36,4 +36,14 @@ public class JobContext {
     private Integer executorTimeout;
 
     private String argsStr;
+
+    /**
+     * 重试场景 auto、manual
+     */
+    private Integer retryScene;
+
+    /**
+     * 是否是重试流量
+     */
+    private boolean isRetry;
 }

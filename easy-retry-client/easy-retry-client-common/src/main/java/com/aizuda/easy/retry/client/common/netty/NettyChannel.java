@@ -8,7 +8,7 @@ import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.enums.HeadersEnum;
 import com.aizuda.easy.retry.common.log.EasyRetryLog;
-import com.aizuda.easy.retry.common.core.util.HostUtils;
+import com.aizuda.easy.retry.common.core.util.NetUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
@@ -41,7 +41,7 @@ public class NettyChannel {
 
     static {
         PORT = Integer.parseInt(System.getProperty("easy-retry.port", String.valueOf(8080)));
-        HOST = System.getProperty("easy-retry.host", HostUtils.getIp());
+        HOST = System.getProperty("easy-retry.host", NetUtil.getLocalIpStr());
     }
 
     private static Channel CHANNEL;

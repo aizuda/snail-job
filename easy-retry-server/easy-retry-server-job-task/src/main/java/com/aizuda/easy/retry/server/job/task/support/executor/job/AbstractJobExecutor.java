@@ -22,17 +22,6 @@ public abstract class AbstractJobExecutor implements JobExecutor, InitializingBe
     @Override
     @Transactional
     public void execute(JobExecutorContext context) {
-
-        // 生成任务
-        JobTaskGenerator taskInstance = JobTaskGeneratorFactory.getTaskInstance(getTaskInstanceType().getType());
-        JobTaskGenerateContext instanceGenerateContext = JobTaskConverter.INSTANCE.toJobTaskInstanceGenerateContext(context);
-        List<JobTask> taskList = taskInstance.generate(instanceGenerateContext);
-        if (CollectionUtils.isEmpty(taskList)) {
-            return;
-        }
-
-        context.setTaskList(taskList);
-
         doExecute(context);
     }
 

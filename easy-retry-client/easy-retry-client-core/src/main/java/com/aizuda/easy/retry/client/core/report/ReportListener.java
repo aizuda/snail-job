@@ -15,7 +15,7 @@ import com.aizuda.easy.retry.common.core.enums.NotifySceneEnum;
 import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.core.model.NettyResult;
 import com.aizuda.easy.retry.common.core.util.EnvironmentUtils;
-import com.aizuda.easy.retry.common.core.util.HostUtils;
+import com.aizuda.easy.retry.common.core.util.NetUtil;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.common.core.window.Listener;
 import com.aizuda.easy.retry.server.model.dto.ConfigDTO;
@@ -116,7 +116,7 @@ public class ReportListener implements Listener<RetryTaskDTO> {
             AlarmContext context = AlarmContext.build()
                     .text(reportErrorTextMessageFormatter,
                             EnvironmentUtils.getActiveProfile(),
-                            HostUtils.getIp(),
+                            NetUtil.getLocalIpStr(),
                             properties.getNamespace(),
                             EasyRetryProperties.getGroup(),
                             LocalDateTime.now().format(formatter),

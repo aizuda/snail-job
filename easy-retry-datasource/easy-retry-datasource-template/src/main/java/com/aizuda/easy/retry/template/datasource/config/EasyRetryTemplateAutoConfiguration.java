@@ -1,5 +1,7 @@
 package com.aizuda.easy.retry.template.datasource.config;
 
+import com.aizuda.easy.retry.template.datasource.access.Access;
+import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
 import com.aizuda.easy.retry.template.datasource.enums.DbTypeEnum;
 import com.aizuda.easy.retry.template.datasource.utils.RequestDataHelper;
 import com.baomidou.mybatisplus.autoconfigure.MybatisPlusProperties;
@@ -27,7 +29,7 @@ import java.util.List;
  * @date : 2023-08-04 12:37
  */
 @Configuration
-@ComponentScan("com.aizuda.easy.retry.template.datasource.*")
+@ComponentScan("com.aizuda.easy.retry.template.datasource.**")
 @MapperScan(value = "com.aizuda.easy.retry.template.datasource.persistence.mapper", sqlSessionTemplateRef  = "sqlSessionTemplate")
 public class EasyRetryTemplateAutoConfiguration {
     @Bean("sqlSessionFactory")

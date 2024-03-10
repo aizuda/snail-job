@@ -3,6 +3,7 @@ package com.aizuda.easy.retry.client.core.intercepter;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.client.common.config.EasyRetryProperties;
+import com.aizuda.easy.retry.client.core.annotation.Propagation;
 import com.aizuda.easy.retry.client.core.annotation.Retryable;
 import com.aizuda.easy.retry.client.common.cache.GroupVersionCache;
 import com.aizuda.easy.retry.client.core.cache.RetryerInfoCache;
@@ -19,13 +20,15 @@ import com.aizuda.easy.retry.common.core.enums.RetryResultStatusEnum;
 import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.core.model.EasyRetryHeaders;
 import com.aizuda.easy.retry.common.core.util.EnvironmentUtils;
-import com.aizuda.easy.retry.common.core.util.HostUtils;
+import com.aizuda.easy.retry.common.core.util.NetUtil;
 import com.aizuda.easy.retry.server.model.dto.ConfigDTO;
 import com.google.common.base.Defaults;
 import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.AfterAdvice;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.env.StandardEnvironment;
@@ -73,8 +76,13 @@ public class EasyRetryInterceptor implements MethodInterceptor, AfterAdvice, Ser
         Retryable retryable = getAnnotationParameter(invocation.getMethod());
         String executorClassName = invocation.getThis().getClass().getName();
         String methodEntrance = getMethodEntrance(retryable, executorClassName);
-        if (StrUtil.isBlank(RetrySiteSnapshot.getMethodEntrance())) {
+
+        if (Propagation.REQUIRES_NEW.equals(retryable.propagation())) {
             RetrySiteSnapshot.setMethodEntrance(methodEntrance);
+        } else if (!RetrySiteSnapshot.existedMethodEntrance()) {
+            RetrySiteSnapshot.setMethodEntrance(methodEntrance);
+        } else {
+            EasyRetryLog.LOCAL.debug("No need to set entrance signs:[{}]", traceId);
         }
 
         Throwable throwable = null;
@@ -110,6 +118,11 @@ public class EasyRetryInterceptor implements MethodInterceptor, AfterAdvice, Ser
 
                 return retryerResultContext.getResult();
             }
+        }
+
+        // 无需开启重试的场景，需要清除缓存信息
+        if ((RetrySiteSnapshot.isMethodEntrance(methodEntrance) && !RetrySiteSnapshot.isRunning())) {
+            RetrySiteSnapshot.removeAll();
         }
 
         if (throwable != null) {
@@ -207,7 +220,7 @@ public class EasyRetryInterceptor implements MethodInterceptor, AfterAdvice, Ser
                 AlarmContext context = AlarmContext.build()
                         .text(retryErrorMoreThresholdTextMessageFormatter,
                                 EnvironmentUtils.getActiveProfile(),
-                                HostUtils.getIp(),
+                                NetUtil.getLocalIpStr(),
                                 standardEnvironment.getProperty("easy-retry.namespace", StrUtil.EMPTY),
                                 EasyRetryProperties.getGroup(),
                                 LocalDateTime.now().format(formatter),

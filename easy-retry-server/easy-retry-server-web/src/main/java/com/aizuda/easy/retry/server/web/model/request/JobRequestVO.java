@@ -2,9 +2,9 @@ package com.aizuda.easy.retry.server.web.model.request;
 
 import lombok.Data;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 
 /**
  * @author www.byteblogs.com
@@ -64,7 +64,7 @@ public class JobRequestVO {
     private String executorInfo;
 
     /**
-     * 触发类型 1.CRON 表达式 2. 固定时间
+     * 触发类型 2. 固定时间 3.CRON 表达式 99.工作流
      */
     @NotNull(message = "triggerType 不能为空")
     private Integer triggerType;

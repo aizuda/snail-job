@@ -40,4 +40,11 @@ public class JobBatchController {
         return jobBatchService.stop(taskBatchId);
     }
 
+
+    @PostMapping("/retry/{taskBatchId}")
+    @LoginRequired
+    public Boolean retry(@PathVariable("taskBatchId") Long taskBatchId) {
+        return jobBatchService.retry(taskBatchId);
+    }
+
 }

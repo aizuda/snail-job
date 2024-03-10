@@ -33,11 +33,6 @@ import java.util.Set;
 @Slf4j
 public class ShardingClientCallbackHandler extends AbstractClientCallbackHandler {
 
-    @Autowired
-    private JobTaskMapper jobTaskMapper;
-    @Autowired
-    private JobMapper jobMapper;
-
     @Override
     public JobTaskTypeEnum getTaskInstanceType() {
         return JobTaskTypeEnum.SHARDING;

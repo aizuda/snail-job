@@ -3,9 +3,8 @@ package com.aizuda.easy.retry.server.web.model.request;
 import com.aizuda.easy.retry.server.common.enums.IdGeneratorModeEnum;
 import lombok.Data;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
+import jakarta.validation.constraints.*;
+import java.util.List;
 
 /**
  * 组、场景、通知配置类

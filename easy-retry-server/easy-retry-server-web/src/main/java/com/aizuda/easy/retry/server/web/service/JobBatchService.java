@@ -19,4 +19,5 @@ public interface JobBatchService {
 
     boolean stop(Long taskBatchId);
 
+    Boolean retry(Long taskBatchId);
 }

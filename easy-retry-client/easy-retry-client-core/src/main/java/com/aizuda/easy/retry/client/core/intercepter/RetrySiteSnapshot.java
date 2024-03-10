@@ -1,15 +1,18 @@
 package com.aizuda.easy.retry.client.core.intercepter;
 
-import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.client.core.RetrySiteSnapshotContext;
 import com.aizuda.easy.retry.client.core.exception.EasyRetryClientException;
 import com.aizuda.easy.retry.client.core.loader.EasyRetrySpiLoader;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.model.EasyRetryHeaders;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.Deque;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 重试现场记录器
@@ -27,7 +30,7 @@ public class RetrySiteSnapshot {
     /**
      * 标记重试方法入口
      */
-    private static final RetrySiteSnapshotContext<String> RETRY_CLASS_METHOD_ENTRANCE = EasyRetrySpiLoader.loadRetrySiteSnapshotContext();
+    private static final RetrySiteSnapshotContext<Deque<MethodEntranceMeta>> RETRY_CLASS_METHOD_ENTRANCE = EasyRetrySpiLoader.loadRetrySiteSnapshotContext();
 
     /**
      * 重试状态
@@ -37,17 +40,30 @@ public class RetrySiteSnapshot {
     /**
      * 重试请求头
      */
-    private static final RetrySiteSnapshotContext<EasyRetryHeaders> RETRY_HEADER =  EasyRetrySpiLoader.loadRetrySiteSnapshotContext();
+    private static final RetrySiteSnapshotContext<EasyRetryHeaders> RETRY_HEADER = EasyRetrySpiLoader.loadRetrySiteSnapshotContext();
 
     /**
      * 状态码
      */
-    private static final RetrySiteSnapshotContext<String> RETRY_STATUS_CODE =  EasyRetrySpiLoader.loadRetrySiteSnapshotContext();
+    private static final RetrySiteSnapshotContext<String> RETRY_STATUS_CODE = EasyRetrySpiLoader.loadRetrySiteSnapshotContext();
 
     /**
      * 进入方法入口时间标记
      */
-    private static final RetrySiteSnapshotContext<Long> ENTRY_METHOD_TIME =  EasyRetrySpiLoader.loadRetrySiteSnapshotContext();
+    private static final RetrySiteSnapshotContext<Long> ENTRY_METHOD_TIME = EasyRetrySpiLoader.loadRetrySiteSnapshotContext();
+    private static final RetrySiteSnapshotContext<Integer> ATTEMPT_NUMBER = EasyRetrySpiLoader.loadRetrySiteSnapshotContext();
+
+    public static Integer getAttemptNumber() {
+        return ATTEMPT_NUMBER.get();
+    }
+
+    public static void setAttemptNumber(Integer attemptNumber) {
+        ATTEMPT_NUMBER.set(attemptNumber);
+    }
+
+    public static void removeAttemptNumber() {
+        ATTEMPT_NUMBER.remove();
+    }
 
     public static Integer getStage() {
         return RETRY_STAGE.get();
@@ -58,23 +74,67 @@ public class RetrySiteSnapshot {
     }
 
     public static String getMethodEntrance() {
-        return RETRY_CLASS_METHOD_ENTRANCE.get();
+        Deque<MethodEntranceMeta> stack = RETRY_CLASS_METHOD_ENTRANCE.get();
+        if (Objects.isNull(stack) || Objects.isNull(stack.peek())) {
+            return null;
+        }
+
+        return stack.peek().methodEntrance;
+    }
+
+    public static boolean existedMethodEntrance() {
+        Deque<MethodEntranceMeta> stack = RETRY_CLASS_METHOD_ENTRANCE.get();
+        if (Objects.isNull(stack)) {
+            return Boolean.FALSE;
+        }
+
+        MethodEntranceMeta meta = stack.peek();
+        if(Objects.isNull(meta)) {
+            return Boolean.FALSE;
+        }
+
+        return Boolean.TRUE;
     }
 
     public static void setMethodEntrance(String methodEntrance) {
-        RETRY_CLASS_METHOD_ENTRANCE.set(methodEntrance);
+        Deque<MethodEntranceMeta> stack = RETRY_CLASS_METHOD_ENTRANCE.get();
+        if (Objects.isNull(RETRY_CLASS_METHOD_ENTRANCE.get())) {
+            stack = new LinkedBlockingDeque<>();
+            RETRY_CLASS_METHOD_ENTRANCE.set(stack);
+        }
+
+        MethodEntranceMeta meta;
+        if (!isRunning() && !isRetryFlow()) {
+            meta = new MethodEntranceMeta(methodEntrance);
+            stack.push(meta);
+        }
     }
 
     public static void removeMethodEntrance() {
-        RETRY_CLASS_METHOD_ENTRANCE.remove();
+        Deque<MethodEntranceMeta> stack = RETRY_CLASS_METHOD_ENTRANCE.get();
+        if (Objects.isNull(stack)) {
+            return;
+        }
+
+        if (stack.isEmpty()) {
+            RETRY_CLASS_METHOD_ENTRANCE.remove();
+            return;
+        }
+
+        if (!isRunning() && !isRetryFlow()) {
+            stack.pop();
+        }
+
     }
 
     public static boolean isMethodEntrance(String methodEntrance) {
-        if (StrUtil.isBlank(getMethodEntrance())) {
-            return false;
+        Deque<MethodEntranceMeta> stack = RETRY_CLASS_METHOD_ENTRANCE.get();
+        if (Objects.isNull(stack) || Objects.isNull(stack.peek())) {
+            return Boolean.FALSE;
         }
 
-        return getMethodEntrance().equals(methodEntrance);
+        MethodEntranceMeta peek = stack.peek();
+        return methodEntrance.equals(peek.methodEntrance);
     }
 
     public static Integer getStatus() {
@@ -154,12 +214,12 @@ public class RetrySiteSnapshot {
     public static void removeAll() {
 
         removeStatus();
-        removeMethodEntrance();
         removeStage();
-
+        removeAttemptNumber();
         removeEntryMethodTime();
         removeRetryHeader();
         removeRetryStatusCode();
+        removeMethodEntrance();
     }
 
     /**
@@ -225,6 +285,15 @@ public class RetrySiteSnapshot {
             this.status = status;
         }
 
+    }
+
+    @Getter
+    @AllArgsConstructor
+    public static class MethodEntranceMeta {
+
+//        private AtomicInteger depth;
+
+        private String methodEntrance;
     }
 
 }

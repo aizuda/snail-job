@@ -71,8 +71,6 @@
       :rowKey="(record) => record.id"
       :columns="columns"
       :data="loadData"
-      :alert="options.alert"
-      :rowSelection="options.rowSelection"
       :scroll="{ x: 1500 }"
     >
       <span slot="serial" slot-scope="record">
@@ -100,6 +98,20 @@
           </a-popconfirm>
         </template>
       </span>
+      <span slot="action" slot-scope="text, record">
+        <template>
+          <a @click="handleInfo(record)">详情</a>
+          <a-divider type="vertical" />
+          <a-popconfirm
+            title="是否重试?"
+            ok-text="重试"
+            cancel-text="取消"
+            @confirm="handleRetry(record)"
+          >
+            <a href="javascript:;" v-if="record.taskBatchStatus === 4 || record.taskBatchStatus === 5 || record.taskBatchStatus === 6">重试</a>
+          </a-popconfirm>
+        </template>
+      </span>
     </s-table>
 
     <Drawer
@@ -121,7 +133,7 @@
 import ATextarea from 'ant-design-vue/es/input/TextArea'
 import AInput from 'ant-design-vue/es/input/Input'
 import { Drawer, STable } from '@/components'
-import { jobBatchList, jobNameList, stop } from '@/api/jobApi'
+import { jobBatchList, jobNameList, stop, retry } from '@/api/jobApi'
 import { getAllGroupNameList } from '@/api/manage'
 import JobBatchInfo from '@/views/job/JobBatchInfo'
 const enums = require('@/utils/jobEnum')
@@ -265,8 +277,19 @@ export default {
         if (status === 0) {
           this.$message.error('停止失败')
         } else {
-          this.$refs.table.refresh(true)
+          this.$refs.table.refresh(false)
           this.$message.success('停止成功')
+        }
+      })
+    },
+    handleRetry (record) {
+      retry(record.id).then((res) => {
+        const { status } = res
+        if (status === 0) {
+          this.$message.error('重试失败')
+        } else {
+          this.$refs.table.refresh(false)
+          this.$message.success('重试成功')
         }
       })
     },

@@ -8,12 +8,14 @@ import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.util.ClientInfoUtils;
 import com.aizuda.easy.retry.server.job.task.dto.LogMetaDTO;
 import com.aizuda.easy.retry.server.job.task.dto.RealJobExecutorDTO;
+import com.aizuda.easy.retry.server.job.task.enums.JobRetrySceneEnum;
 import com.aizuda.easy.retry.server.job.task.support.ClientCallbackHandler;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.toolkit.SqlHelper;
 import org.springframework.beans.factory.InitializingBean;
@@ -30,9 +32,9 @@ import java.util.Objects;
 public abstract class AbstractClientCallbackHandler implements ClientCallbackHandler, InitializingBean {
 
     @Autowired
-    private JobTaskMapper jobTaskMapper;
+    protected JobTaskMapper jobTaskMapper;
     @Autowired
-    private JobMapper jobMapper;
+    protected JobMapper jobMapper;
 
     @Override
     @Transactional
@@ -50,6 +52,8 @@ public abstract class AbstractClientCallbackHandler implements ClientCallbackHan
                 realJobExecutor.setWorkflowNodeId(context.getWorkflowNodeId());
                 realJobExecutor.setWorkflowTaskBatchId(context.getWorkflowTaskBatchId());
                 realJobExecutor.setRetryCount(jobTask.getRetryCount() + 1);
+                realJobExecutor.setRetry(Boolean.TRUE);
+                realJobExecutor.setRetryScene(context.getRetryScene());
                 ActorRef actorRef = ActorGenerator.jobRealTaskExecutorActor();
                 actorRef.tell(realJobExecutor, actorRef);
                 return;
@@ -68,30 +72,42 @@ public abstract class AbstractClientCallbackHandler implements ClientCallbackHan
             updateJobTask.setClientInfo(newClient);
             // 覆盖老的的客户端信息
             context.setClientInfo(newClient);
+        } else {
+            context.setClientInfo(context.getJobTask().getClientInfo());
         }
 
         Job job = context.getJob();
-        return SqlHelper.retBool(jobTaskMapper.update(updateJobTask, Wrappers.<JobTask>lambdaUpdate()
-                .lt(JobTask::getRetryCount, job.getMaxRetryTimes())
-                .eq(JobTask::getId, context.getTaskId())
-        ));
+        LambdaUpdateWrapper<JobTask> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(JobTask::getId, context.getTaskId());
+        if (Objects.isNull(context.getRetryScene())
+                || Objects.equals(JobRetrySceneEnum.AUTO.getRetryScene(), context.getRetryScene())) {
+            updateWrapper.lt(JobTask::getRetryCount, job.getMaxRetryTimes());
+        }
+
+        return SqlHelper.retBool(jobTaskMapper.update(updateJobTask,updateWrapper));
 
     }
 
     private boolean isNeedRetry(ClientCallbackContext context) {
 
+        JobTask jobTask = jobTaskMapper.selectById(context.getTaskId());
+        Job job = jobMapper.selectById(context.getJobId());
+        context.setJob(job);
+        context.setJobTask(jobTask);
+        if (Objects.isNull(jobTask) || Objects.isNull(job)) {
+            return Boolean.FALSE;
+        }
+
+        // 手动重试策略
+        if (Objects.nonNull(context.getRetryScene())
+            && Objects.equals(JobRetrySceneEnum.MANUAL.getRetryScene(), context.getRetryScene())
+            && !context.isRetry()) {
+            return Boolean.TRUE;
+        }
+
         if (context.getTaskStatus().equals(JobTaskStatusEnum.FAIL.getStatus())) {
-
-            JobTask jobTask = jobTaskMapper.selectById(context.getTaskId());
-            Job job = jobMapper.selectById(context.getJobId());
-            if (Objects.isNull(jobTask) || Objects.isNull(job)) {
-                return Boolean.FALSE;
-            }
-
             if (jobTask.getRetryCount() < job.getMaxRetryTimes()) {
-                context.setClientInfo(jobTask.getClientInfo());
-                context.setJob(job);
-                context.setJobTask(jobTask);
+                context.setRetryScene(JobRetrySceneEnum.AUTO.getRetryScene());
                 return Boolean.TRUE;
             }
         }
@@ -99,9 +115,7 @@ public abstract class AbstractClientCallbackHandler implements ClientCallbackHan
         return Boolean.FALSE;
     }
 
-    protected String chooseNewClient(ClientCallbackContext context) {
-        return null;
-    }
+    protected abstract String chooseNewClient(ClientCallbackContext context);
 
     protected abstract void doCallback(ClientCallbackContext context);
 

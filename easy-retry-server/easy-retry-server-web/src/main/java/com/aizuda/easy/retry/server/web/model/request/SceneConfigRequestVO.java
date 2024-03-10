@@ -3,7 +3,7 @@ package com.aizuda.easy.retry.server.web.model.request;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import lombok.Data;
 
-import javax.validation.constraints.*;
+import jakarta.validation.constraints.*;
 
 /**
  * @author www.byteblogs.com

@@ -62,7 +62,10 @@ public class RequestClientActor extends AbstractActor {
                 realJobExecutorDTO.getNamespaceId(),
                 realJobExecutorDTO.getClientId());
         if (Objects.isNull(registerNodeInfo)) {
-            taskExecuteFailure(realJobExecutorDTO, "无可执行的客户端");
+            taskExecuteFailure(realJobExecutorDTO, "客户端不存在");
+            LogMetaDTO logMetaDTO = JobTaskConverter.INSTANCE.toJobLogDTO(realJobExecutorDTO);
+            logMetaDTO.setTimestamp( DateUtils.toNowMilli());
+            EasyRetryLog.REMOTE.error("taskId:[{}] 任务调度失败. 失败原因: 无可执行的客户端 <|>{}<|>", realJobExecutorDTO.getTaskId(), logMetaDTO);
             return;
         }
 

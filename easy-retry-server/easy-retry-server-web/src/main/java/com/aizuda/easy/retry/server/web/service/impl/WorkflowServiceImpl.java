@@ -49,6 +49,8 @@ import com.aizuda.easy.retry.template.datasource.persistence.po.WorkflowNode;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.google.common.collect.Lists;
+import com.google.common.graph.ElementOrder;
+import com.google.common.graph.Graph;
 import com.google.common.graph.GraphBuilder;
 import com.google.common.graph.MutableGraph;
 import lombok.RequiredArgsConstructor;
@@ -85,7 +87,8 @@ public class WorkflowServiceImpl implements WorkflowService {
     @Transactional
     public boolean saveWorkflow(WorkflowRequestVO workflowRequestVO) {
         log.info("保存工作流信息：{}", JsonUtil.toJsonString(workflowRequestVO));
-        MutableGraph<Long> graph = GraphBuilder.directed().allowsSelfLoops(false).build();
+        MutableGraph<Long> graph = createGraph();
+
         // 添加虚拟头节点
         graph.addNode(SystemConstants.ROOT);
 
@@ -116,6 +119,18 @@ public class WorkflowServiceImpl implements WorkflowService {
         workflow.setFlowInfo(JsonUtil.toJsonString(GraphUtils.serializeGraphToJson(graph)));
         Assert.isTrue(1 == workflowMapper.updateById(workflow), () -> new EasyRetryServerException("保存工作流图失败"));
         return true;
+    }
+
+    private MutableGraph<Long> createGraph() {
+        return GraphBuilder.directed().nodeOrder(ElementOrder.sorted((Comparator<Long>) (o1, o2) -> {
+            if (o1 - o2 > 0) {
+                return 1;
+            } else if (o1 - o2 < 0) {
+                return -1;
+            } else {
+                return 0;
+            }
+        })).incidentEdgeOrder(ElementOrder.stable()).allowsSelfLoops(false).build();
     }
 
     private static Long calculateNextTriggerAt(final WorkflowRequestVO workflowRequestVO, Long time) {
@@ -231,7 +246,8 @@ public class WorkflowServiceImpl implements WorkflowService {
         Workflow workflow = workflowMapper.selectById(workflowRequestVO.getId());
         Assert.notNull(workflow, () -> new EasyRetryServerException("工作流不存在"));
 
-        MutableGraph<Long> graph = GraphBuilder.directed().allowsSelfLoops(false).build();
+        MutableGraph<Long> graph = createGraph();
+
         // 添加虚拟头节点
         graph.addNode(SystemConstants.ROOT);
 

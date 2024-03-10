@@ -6,7 +6,7 @@ import cn.hutool.core.util.URLUtil;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.model.Result;
-import com.aizuda.easy.retry.common.core.util.HostUtils;
+import com.aizuda.easy.retry.common.core.util.NetUtil;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
 import com.aizuda.easy.retry.server.common.client.annotation.Body;
@@ -53,8 +53,6 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 public class RpcClientInvokeHandler implements InvocationHandler {
-
-    public static final String URL = "http://{0}:{1}/{2}";
 
     private final String groupName;
     private String hostId;
@@ -113,7 +111,7 @@ public class RpcClientInvokeHandler implements InvocationHandler {
         int size = serverNodeSet.size();
         for (int count = 1; count <= size; count++) {
             log.info("Start request client. count:[{}] clientId:[{}] clientAddr:[{}:{}] serverIp:[{}]", count, hostId,
-                hostIp, hostPort, HostUtils.getIp());
+                hostIp, hostPort, NetUtil.getLocalIpStr());
             Result result = requestRemote(method, args, annotation, count);
             if (Objects.nonNull(result)) {
                 return result;
@@ -159,14 +157,14 @@ public class RpcClientInvokeHandler implements InvocationHandler {
             });
 
             log.info("Request client success. count:[{}] clientId:[{}] clientAddr:[{}:{}] serverIp:[{}]", count, hostId,
-                hostIp, hostPort, HostUtils.getIp());
+                hostIp, hostPort, NetUtil.getLocalIpStr());
 
             return result;
         } catch (RestClientException ex) {
             // 网络异常
             if (ex instanceof ResourceAccessException && failover) {
                 log.error("request client I/O error, count:[{}] clientId:[{}] clientAddr:[{}:{}] serverIp:[{}]", count,
-                    hostId, hostIp, hostPort, HostUtils.getIp(), ex);
+                    hostId, hostIp, hostPort, NetUtil.getLocalIpStr(), ex);
 
                 // 进行路由剔除处理
                 CacheRegisterTable.remove(groupName, namespaceId, hostId);
@@ -188,12 +186,12 @@ public class RpcClientInvokeHandler implements InvocationHandler {
             } else {
                 // 其他异常继续抛出
                 log.error("request client error.count:[{}] clientId:[{}] clientAddr:[{}:{}] serverIp:[{}]", count,
-                    hostId, hostIp, hostPort, HostUtils.getIp(), ex);
+                    hostId, hostIp, hostPort, NetUtil.getLocalIpStr(), ex);
                 throw ex;
             }
         } catch (Exception ex) {
             log.error("request client unknown exception. count:[{}] clientId:[{}] clientAddr:[{}:{}] serverIp:[{}]",
-                count, hostId, hostIp, hostPort, HostUtils.getIp(), ex);
+                count, hostId, hostIp, hostPort, NetUtil.getLocalIpStr(), ex);
 
             Throwable throwable = ex;
             if (ex.getClass().isAssignableFrom(RetryException.class)) {
@@ -223,7 +221,8 @@ public class RpcClientInvokeHandler implements InvocationHandler {
 
     private StringBuilder getUrl(Mapping mapping, Map<String, Object> paramMap) {
         StringBuilder url = new StringBuilder();
-        String format = MessageFormat.format(URL, hostIp, hostPort.toString(), contextPath).replaceAll("/+$", StrUtil.EMPTY);
+
+        String format = NetUtil.getUrl(hostIp, hostPort, contextPath).replaceAll("/+$", StrUtil.EMPTY);
         url.append(format).append(StrUtil.SLASH).append(mapping.path().replaceFirst("^/+", StrUtil.EMPTY));
         if (!CollectionUtils.isEmpty(paramMap)) {
             String query = URLUtil.buildQuery(paramMap, null);

@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.server.retry.task.support.handler;
 
 import cn.hutool.core.lang.Pair;
+import com.aizuda.easy.retry.common.core.util.NetUtil;
 import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.server.common.Lifecycle;
@@ -32,13 +33,12 @@ import java.util.concurrent.TimeUnit;
 public class ConfigVersionSyncHandler implements Lifecycle, Runnable {
 
     private static final LinkedBlockingQueue<ConfigSyncTask> QUEUE = new LinkedBlockingQueue<>(256);
-
-    public static final String URL = "http://{0}:{1}/{2}/retry/sync/version/v1";
     public Thread THREAD = null;
     @Autowired
     private RestTemplate restTemplate;
     @Autowired
     protected AccessTemplate accessTemplate;
+    private static final String SYNC_VERSION_V1 =  "/retry/sync/version/v1";
 
     /**
      * 添加任务
@@ -69,9 +69,10 @@ public class ConfigVersionSyncHandler implements Lifecycle, Runnable {
             // 同步版本到每个客户端节点
             for (final RegisterNodeInfo registerNodeInfo : serverNodeSet) {
                 ConfigDTO configDTO = accessTemplate.getGroupConfigAccess().getConfigInfo(groupName, namespaceId);
-                String format = MessageFormat.format(URL, registerNodeInfo.getHostIp(), registerNodeInfo.getHostPort().toString(),
-                    registerNodeInfo.getContextPath());
-                Result result = restTemplate.postForObject(format, configDTO, Result.class);
+
+                String url = NetUtil.getUrl(registerNodeInfo.getHostIp(), registerNodeInfo.getHostPort(),
+                        registerNodeInfo.getContextPath());
+                Result result = restTemplate.postForObject(url.concat(SYNC_VERSION_V1), configDTO, Result.class);
                EasyRetryLog.LOCAL.info("同步结果 [{}]", result);
             }
         } catch (Exception e) {

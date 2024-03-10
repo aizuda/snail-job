@@ -3,8 +3,8 @@ package com.aizuda.easy.retry.server.web.model.request;
 import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
 import lombok.Data;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Pattern;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 
 /**
  * 更新重试任务模型

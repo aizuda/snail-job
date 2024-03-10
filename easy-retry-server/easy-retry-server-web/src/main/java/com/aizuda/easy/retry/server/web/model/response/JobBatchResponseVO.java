@@ -76,4 +76,14 @@ public class JobBatchResponseVO {
      * 工作流的决策节点信息
      */
     private DecisionConfig decision;
+
+    /**
+     * 工作流批次id
+     */
+    private Long workflowTaskBatchId;
+
+    /**
+     * 工作流节点id
+     */
+    private Long workflowNodeId;
 }

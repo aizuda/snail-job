@@ -2,7 +2,7 @@ package com.aizuda.easy.retry.server.web.model.request;
 
 import lombok.Data;
 
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 
 /**
  * @author: xiaowoniu

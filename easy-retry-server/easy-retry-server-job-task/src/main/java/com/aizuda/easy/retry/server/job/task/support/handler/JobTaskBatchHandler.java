@@ -87,7 +87,7 @@ public class JobTaskBatchHandler {
         return 1 == jobTaskBatchMapper.update(jobTaskBatch,
             new LambdaUpdateWrapper<JobTaskBatch>()
                 .eq(JobTaskBatch::getId, completeJobBatchDTO.getTaskBatchId())
-                .in(JobTaskBatch::getTaskBatchStatus, JobTaskStatusEnum.NOT_COMPLETE)
+                .in(JobTaskBatch::getTaskBatchStatus, JobTaskBatchStatusEnum.NOT_COMPLETE)
         );
 
     }

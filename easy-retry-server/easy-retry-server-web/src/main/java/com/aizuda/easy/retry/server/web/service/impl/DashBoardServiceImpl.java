@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.server.web.service.impl;
 
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.enums.NodeTypeEnum;
+import com.aizuda.easy.retry.common.core.util.NetUtil;
 import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
@@ -34,6 +35,7 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.google.common.collect.Lists;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -55,21 +57,13 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class DashBoardServiceImpl implements DashBoardService {
-
-    public static final String URL = "http://{0}:{1}/{2}/dashboard/consumer/bucket";
-
-    @Autowired
-    private ServerNodeMapper serverNodeMapper;
-
-    @Autowired
-    private RestTemplate restTemplate;
-
-    @Autowired
-    private JobSummaryMapper jobSummaryMapper;
-
-    @Autowired
-    private RetrySummaryMapper retrySummaryMapper;
+    private final ServerNodeMapper serverNodeMapper;
+    private final RestTemplate restTemplate;
+    private final JobSummaryMapper jobSummaryMapper;
+    private final RetrySummaryMapper retrySummaryMapper;
+    private static final String DASHBOARD_CONSUMER_BUCKET = "/dashboard/consumer/bucket";
 
     @Override
     public DashboardCardResponseVO taskRetryJob() {
@@ -207,9 +201,8 @@ public class DashBoardServiceImpl implements DashBoardService {
             ServerNodeExtAttrs serverNodeExtAttrs = JsonUtil.parseObject(serverNodeResponseVO.getExtAttrs(), ServerNodeExtAttrs.class);
             try {
                 // 从远程节点取
-                String format = MessageFormat
-                        .format(URL, serverNodeResponseVO.getHostIp(), serverNodeExtAttrs.getWebPort().toString(), serverNodeResponseVO.getContextPath());
-                Result<List<Integer>> result = restTemplate.getForObject(format, Result.class);
+               String url = NetUtil.getUrl(serverNodeResponseVO.getHostIp(), serverNodeExtAttrs.getWebPort(), serverNodeResponseVO.getContextPath());
+                Result<List<Integer>> result = restTemplate.getForObject(url.concat(DASHBOARD_CONSUMER_BUCKET), Result.class);
                 List<Integer> data = result.getData();
                 if (!CollectionUtils.isEmpty(data)) {
                     serverNodeResponseVO.setConsumerBuckets(data.stream()

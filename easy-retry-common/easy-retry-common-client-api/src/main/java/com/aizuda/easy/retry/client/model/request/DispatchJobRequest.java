@@ -1,9 +1,8 @@
 package com.aizuda.easy.retry.client.model.request;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 
 /**
  * @author: www.byteblogs.com
@@ -53,5 +52,15 @@ public class DispatchJobRequest {
     private Long workflowNodeId;
 
     private Integer retryCount;
+
+    /**
+     * 重试场景 auto、manual
+     */
+    private Integer retryScene;
+
+    /**
+     * 是否是重试流量
+     */
+    private boolean isRetry;
 
 }
