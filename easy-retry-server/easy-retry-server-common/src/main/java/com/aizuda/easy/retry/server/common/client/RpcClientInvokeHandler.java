@@ -110,7 +110,7 @@ public class RpcClientInvokeHandler implements InvocationHandler {
         // 最多调用size次
         int size = serverNodeSet.size();
         for (int count = 1; count <= size; count++) {
-            log.info("Start request client. count:[{}] clientId:[{}] clientAddr:[{}:{}] serverIp:[{}]", count, hostId,
+            log.debug("Start request client. count:[{}] clientId:[{}] clientAddr:[{}:{}] serverIp:[{}]", count, hostId,
                 hostIp, hostPort, NetUtil.getLocalIpStr());
             Result result = requestRemote(method, args, annotation, count);
             if (Objects.nonNull(result)) {
@@ -156,7 +156,7 @@ public class RpcClientInvokeHandler implements InvocationHandler {
                 return Objects.requireNonNull(response.getBody());
             });
 
-            log.info("Request client success. count:[{}] clientId:[{}] clientAddr:[{}:{}] serverIp:[{}]", count, hostId,
+            log.debug("Request client success. count:[{}] clientId:[{}] clientAddr:[{}:{}] serverIp:[{}]", count, hostId,
                 hostIp, hostPort, NetUtil.getLocalIpStr());
 
             return result;

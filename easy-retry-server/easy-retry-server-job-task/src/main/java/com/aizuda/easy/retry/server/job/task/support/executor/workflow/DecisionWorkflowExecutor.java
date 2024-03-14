@@ -97,7 +97,7 @@ public class DecisionWorkflowExecutor extends AbstractWorkflowExecutor {
                                 }
                             }
 
-                            log.info("执行条件表达式：[{}]，参数: [{}] 结果：[{}]", decisionConfig.getNodeExpression(), jobTask.getResultMessage(), result);
+                            log.debug("执行条件表达式：[{}]，参数: [{}] 结果：[{}]", decisionConfig.getNodeExpression(), jobTask.getResultMessage(), result);
                         }
                     }
 

@@ -9,8 +9,6 @@ import com.aizuda.easy.retry.template.datasource.persistence.mapper.SequenceAllo
 import com.aizuda.easy.retry.template.datasource.persistence.po.SequenceAlloc;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
-import org.perf4j.StopWatch;
-import org.perf4j.slf4j.Slf4JStopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -112,7 +110,6 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
     }
 
     private void updateCacheFromDb() {
-        StopWatch sw = new Slf4JStopWatch();
         try {
             List<SequenceAlloc> sequenceAllocs = sequenceAllocMapper
                     .selectList(new LambdaQueryWrapper<SequenceAlloc>().select(SequenceAlloc::getGroupName));
@@ -142,7 +139,7 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
                 segment.setMax(0);
                 segment.setStep(0);
                 cache.put(tag, buffer);
-               EasyRetryLog.LOCAL.info("Add tag {} from db to IdCache, SegmentBuffer {}", tag, buffer);
+               EasyRetryLog.LOCAL.debug("Add tag {} from db to IdCache, SegmentBuffer {}", tag, buffer);
             }
             //cache中已失效的tags从cache删除
             for (int i = 0; i < dbTags.size(); i++) {
@@ -153,12 +150,10 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
             }
             for (Pair<String, String> tag : removeTagsSet) {
                 cache.remove(tag);
-               EasyRetryLog.LOCAL.info("Remove tag {} from IdCache", tag);
+               EasyRetryLog.LOCAL.debug("Remove tag {} from IdCache", tag);
             }
         } catch (Exception e) {
-           EasyRetryLog.LOCAL.warn("update cache from db exception", e);
-        } finally {
-            sw.stop("updateCacheFromDb");
+           EasyRetryLog.LOCAL.error("update cache from db exception", e);
         }
     }
 
@@ -175,10 +170,10 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
                     if (!buffer.isInitOk()) {
                         try {
                             updateSegmentFromDb(key, buffer.getCurrent());
-                           EasyRetryLog.LOCAL.info("Init buffer. Update key {} {} from db", key, buffer.getCurrent());
+                            EasyRetryLog.LOCAL.debug("Init buffer. Update key {} {} from db", key, buffer.getCurrent());
                             buffer.setInitOk(true);
                         } catch (Exception e) {
-                           EasyRetryLog.LOCAL.warn("Init buffer {} exception", buffer.getCurrent(), e);
+                           EasyRetryLog.LOCAL.error("Init buffer {} exception", buffer.getCurrent(), e);
                         }
                     }
                 }
@@ -216,7 +211,7 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
             } else {
                 nextStep = nextStep / 2 >= buffer.getMinStep() ? nextStep / 2 : nextStep;
             }
-           EasyRetryLog.LOCAL.info("leafKey[{}], step[{}], duration[{}mins], nextStep[{}]", key, buffer.getStep(), String.format("%.2f", ((double) duration / (1000 * 60))), nextStep);
+           EasyRetryLog.LOCAL.debug("leafKey[{}], step[{}], duration[{}mins], nextStep[{}]", key, buffer.getStep(), String.format("%.2f", ((double) duration / (1000 * 60))), nextStep);
 
             sequenceAllocMapper.updateMaxIdByCustomStep(nextStep, key.getKey(), key.getValue());
             sequenceAlloc = sequenceAllocMapper
@@ -244,7 +239,7 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
                         try {
                             updateSegmentFromDb(buffer.getKey(), next);
                             updateOk = true;
-                           EasyRetryLog.LOCAL.info("update segment {} from db {}", buffer.getKey(), next);
+                           EasyRetryLog.LOCAL.debug("update segment {} from db {}", buffer.getKey(), next);
                         } catch (Exception e) {
                            EasyRetryLog.LOCAL.warn(buffer.getKey() + " updateSegmentFromDb exception", e);
                         } finally {

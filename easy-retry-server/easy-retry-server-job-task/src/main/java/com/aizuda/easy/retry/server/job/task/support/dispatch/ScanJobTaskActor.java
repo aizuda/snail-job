@@ -76,7 +76,7 @@ public class ScanJobTaskActor extends AbstractActor {
         long total = PartitionTaskUtils.process(startId -> listAvailableJobs(startId, scanTask),
             this::processJobPartitionTasks, 0);
 
-        log.info("job scan end. total:[{}]", total);
+        log.debug("job scan end. total:[{}]", total);
     }
 
     private void processJobPartitionTasks(List<? extends PartitionTask> partitionTasks) {

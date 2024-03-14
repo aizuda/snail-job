@@ -30,7 +30,7 @@ public class WaitJobPrepareHandler extends AbstractJobPrePareHandler {
 
     @Override
     protected void doHandler(JobTaskPrepareDTO jobPrepareDTO) {
-        log.info("存在待处理任务. taskBatchId:[{}]", jobPrepareDTO.getTaskBatchId());
+        log.debug("存在待处理任务. taskBatchId:[{}]", jobPrepareDTO.getTaskBatchId());
 
         // 若时间轮中数据不存在则重新加入
         if (!JobTimerWheel.isExisted(SyetemTaskTypeEnum.JOB.getType(), jobPrepareDTO.getTaskBatchId())) {

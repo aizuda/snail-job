@@ -58,7 +58,7 @@ public class JobExecutorResultActor extends AbstractActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder().match(JobExecutorResultDTO.class, result -> {
-            log.info("更新任务状态. 参数:[{}]", JsonUtil.toJsonString(result));
+            log.debug("更新任务状态. 参数:[{}]", JsonUtil.toJsonString(result));
             try {
                 JobTask jobTask = new JobTask();
                 jobTask.setTaskStatus(result.getTaskStatus());

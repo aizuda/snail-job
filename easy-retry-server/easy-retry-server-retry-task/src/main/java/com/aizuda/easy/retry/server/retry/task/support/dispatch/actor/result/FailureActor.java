@@ -59,7 +59,7 @@ public class FailureActor extends AbstractActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder().match(RetryTask.class, retryTask -> {
-           EasyRetryLog.LOCAL.info("FailureActor params:[{}]", retryTask);
+           EasyRetryLog.LOCAL.debug("FailureActor params:[{}]", retryTask);
 
 
             try {

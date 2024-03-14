@@ -35,7 +35,7 @@ public class TerminalJobPrepareHandler extends AbstractJobPrePareHandler {
 
     @Override
     protected void doHandler(JobTaskPrepareDTO jobPrepareDTO) {
-        log.info("无处理中的数据. jobId:[{}]", jobPrepareDTO.getJobId());
+        log.debug("无处理中的数据. jobId:[{}]", jobPrepareDTO.getJobId());
 
         // 生成任务批次
         jobTaskBatchGenerator.generateJobTaskBatch(JobTaskConverter.INSTANCE.toJobTaskGeneratorContext(jobPrepareDTO));

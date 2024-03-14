@@ -44,7 +44,7 @@ public class JobTimerWheel implements Lifecycle {
     public static void register(Integer taskType, Long uniqueId, TimerTask task, long delay, TimeUnit unit) {
 
         if (!isExisted(taskType, uniqueId)) {
-            log.info("加入时间轮. delay:[{}ms] taskType:[{}] uniqueId:[{}]", delay, taskType, uniqueId);
+            log.debug("加入时间轮. delay:[{}ms] taskType:[{}] uniqueId:[{}]", delay, taskType, uniqueId);
             delay = delay < 0 ? 0 : delay;
             try {
                 timer.newTimeout(task, delay, unit);

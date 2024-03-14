@@ -26,7 +26,7 @@ public class WorkflowTimerTask implements TimerTask {
     @Override
     public void run(final Timeout timeout) throws Exception {
         // 执行任务调度
-        log.info("开始执行任务调度. 当前时间:[{}] taskId:[{}]", LocalDateTime.now(), workflowTimerTaskDTO.getWorkflowTaskBatchId());
+        log.debug("开始执行任务调度. 当前时间:[{}] taskId:[{}]", LocalDateTime.now(), workflowTimerTaskDTO.getWorkflowTaskBatchId());
 
         try {
 

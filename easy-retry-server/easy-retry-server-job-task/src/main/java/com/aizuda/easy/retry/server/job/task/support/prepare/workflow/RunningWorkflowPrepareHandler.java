@@ -36,7 +36,7 @@ public class RunningWorkflowPrepareHandler extends AbstractWorkflowPrePareHandle
 
     @Override
     protected void doHandler(WorkflowTaskPrepareDTO prepare) {
-        log.info("存在运行中的任务. prepare:[{}]", JsonUtil.toJsonString(prepare));
+        log.debug("存在运行中的任务. prepare:[{}]", JsonUtil.toJsonString(prepare));
 
 
         // 1. 若DAG已经支持完成了，由于异常原因导致的没有更新成终态此次进行一次更新操作

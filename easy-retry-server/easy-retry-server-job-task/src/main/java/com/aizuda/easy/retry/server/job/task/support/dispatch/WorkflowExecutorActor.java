@@ -63,7 +63,7 @@ public class WorkflowExecutorActor extends AbstractActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder().match(WorkflowNodeTaskExecuteDTO.class, taskExecute -> {
-            log.info("工作流开始执行. [{}]", JsonUtil.toJsonString(taskExecute));
+            log.debug("工作流开始执行. [{}]", JsonUtil.toJsonString(taskExecute));
             try {
 
                 doExecutor(taskExecute);
@@ -195,14 +195,14 @@ public class WorkflowExecutorActor extends AbstractActor {
             List<JobTaskBatch> jobTaskBatches = jobTaskBatchMap.get(nodeId);
             // 说明此节点未执行, 继续等待执行完成
             if (CollectionUtils.isEmpty(jobTaskBatches)) {
-                EasyRetryLog.LOCAL.info("存在未完成的兄弟节点. [{}]", nodeId);
+                EasyRetryLog.LOCAL.debug("存在未完成的兄弟节点. [{}]", nodeId);
                 return Boolean.FALSE;
             }
 
             boolean isCompleted = jobTaskBatches.stream().anyMatch(
                 jobTaskBatch -> JobTaskBatchStatusEnum.NOT_COMPLETE.contains(jobTaskBatch.getTaskBatchStatus()));
             if (isCompleted) {
-                EasyRetryLog.LOCAL.info("存在未完成的兄弟节点. [{}]", nodeId);
+                EasyRetryLog.LOCAL.debug("存在未完成的兄弟节点. [{}]", nodeId);
                 return Boolean.FALSE;
             }
         }

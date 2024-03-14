@@ -64,7 +64,7 @@ public class DistributedLockHandler {
                         }
                     }
 
-                    EasyRetryLog.LOCAL.info("第【{}】次尝试获取锁. lockName:[{}] result:[{}] treadName:[{}]",
+                    EasyRetryLog.LOCAL.debug("第【{}】次尝试获取锁. lockName:[{}] result:[{}] treadName:[{}]",
                             attempt.getAttemptNumber(), lockName, result, Thread.currentThread().getName());
                 }
             }).build();
@@ -89,7 +89,7 @@ public class DistributedLockHandler {
         } finally {
             if (lock) {
                 lockProvider.unlock();
-                EasyRetryLog.LOCAL.info("[{}] 锁已释放", lockName);
+                EasyRetryLog.LOCAL.debug("[{}] 锁已释放", lockName);
             } else {
                 // 未获取到锁直接清除线程中存储的锁信息
                 LockManager.clear();
@@ -122,7 +122,7 @@ public class DistributedLockHandler {
         } finally {
             if (lock) {
                 lockProvider.unlock();
-                EasyRetryLog.LOCAL.info("[{}] 锁已释放", lockName);
+                EasyRetryLog.LOCAL.debug("[{}] 锁已释放", lockName);
             } else {
                 // 未获取到锁直接清除线程中存储的锁信息
                 LockManager.clear();

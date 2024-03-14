@@ -79,7 +79,7 @@ public class JobExecutorActor extends AbstractActor {
     public Receive createReceive() {
         return receiveBuilder().match(TaskExecuteDTO.class, taskExecute -> {
             try {
-                log.info("准备执行任务. [{}] [{}]", LocalDateTime.now(), JsonUtil.toJsonString(taskExecute));
+                log.debug("准备执行任务. [{}] [{}]", LocalDateTime.now(), JsonUtil.toJsonString(taskExecute));
                 transactionTemplate.execute(new TransactionCallbackWithoutResult() {
                     @Override
                     protected void doInTransactionWithoutResult(final TransactionStatus status) {
@@ -148,7 +148,7 @@ public class JobExecutorActor extends AbstractActor {
             JobExecutor jobExecutor = JobExecutorFactory.getJobExecutor(job.getTaskType());
             jobExecutor.execute(buildJobExecutorContext(taskExecute, job, taskList));
         } finally {
-            log.info("准备执行任务完成.[{}]", JsonUtil.toJsonString(taskExecute));
+            log.debug("准备执行任务完成.[{}]", JsonUtil.toJsonString(taskExecute));
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                 @Override
                 public void afterCompletion(int status) {
@@ -224,7 +224,7 @@ public class JobExecutorActor extends AbstractActor {
         // 获取时间差的毫秒数
         long milliseconds = nextTriggerAt - preTriggerAt;
 
-        log.info("常驻任务监控. 任务时间差:[{}] 取余:[{}]", milliseconds, DateUtils.toNowMilli() % 1000);
+        log.debug("常驻任务监控. 任务时间差:[{}] 取余:[{}]", milliseconds, DateUtils.toNowMilli() % 1000);
         job.setNextTriggerAt(nextTriggerAt);
 
         JobTimerWheel.register(SyetemTaskTypeEnum.JOB.getType(), jobTimerTaskDTO.getTaskBatchId(), timerTask, milliseconds - DateUtils.toNowMilli() % 1000, TimeUnit.MILLISECONDS);

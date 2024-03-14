@@ -63,7 +63,7 @@ public class ReportRetryInfoHttpRequestHandler extends PostHttpRequestHandler {
     @Override
     @Transactional
     public String doHandler(String content, UrlQuery urlQuery, HttpHeaders  headers) {
-       EasyRetryLog.LOCAL.info("Batch Report Retry Data. content:[{}]", content);
+       EasyRetryLog.LOCAL.debug("Batch Report Retry Data. content:[{}]", content);
 
         EasyRetryRequest retryRequest = JsonUtil.parseObject(content, EasyRetryRequest.class);
         Object[] args = retryRequest.getArgs();

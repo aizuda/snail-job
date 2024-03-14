@@ -54,7 +54,7 @@ public abstract class AbstractGenerator implements TaskGenerator {
     @Override
     @Transactional
     public void taskGenerator(TaskContext taskContext) {
-       EasyRetryLog.LOCAL.info("received report data. {}", JsonUtil.toJsonString(taskContext));
+       EasyRetryLog.LOCAL.debug("received report data. {}", JsonUtil.toJsonString(taskContext));
 
         SceneConfig sceneConfig = checkAndInitScene(taskContext);
 

@@ -53,7 +53,7 @@ public class FinishActor extends AbstractActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder().match(RetryTask.class, retryTask -> {
-           EasyRetryLog.LOCAL.info("FinishActor params:[{}]", retryTask);
+           EasyRetryLog.LOCAL.debug("FinishActor params:[{}]", retryTask);
 
             retryTask.setRetryStatus(RetryStatusEnum.FINISH.getStatus());
 

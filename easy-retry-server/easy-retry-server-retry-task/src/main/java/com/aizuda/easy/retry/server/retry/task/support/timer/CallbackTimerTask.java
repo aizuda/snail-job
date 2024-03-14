@@ -33,7 +33,7 @@ public class CallbackTimerTask extends AbstractTimerTask {
 
     @Override
     protected void doRun(final Timeout timeout) {
-        log.info("回调任务执行 {}", LocalDateTime.now());
+        log.debug("回调任务执行 {}", LocalDateTime.now());
         AccessTemplate accessTemplate = SpringContext.getBeanByType(AccessTemplate.class);
         TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();
         RetryTask retryTask = retryTaskAccess.one(context.getGroupName(), context.getNamespaceId(),

@@ -31,7 +31,7 @@ public class WaiWorkflowPrepareHandler extends AbstractWorkflowPrePareHandler {
 
     @Override
     protected void doHandler(WorkflowTaskPrepareDTO workflowTaskPrepareDTO) {
-        log.info("存在待处理任务. workflowTaskBatchId:[{}]", workflowTaskPrepareDTO.getWorkflowTaskBatchId());
+        log.debug("存在待处理任务. workflowTaskBatchId:[{}]", workflowTaskPrepareDTO.getWorkflowTaskBatchId());
 
         // 若时间轮中数据不存在则重新加入
         if (!JobTimerWheel.isExisted(SyetemTaskTypeEnum.WORKFLOW.getType(), workflowTaskPrepareDTO.getWorkflowTaskBatchId())) {

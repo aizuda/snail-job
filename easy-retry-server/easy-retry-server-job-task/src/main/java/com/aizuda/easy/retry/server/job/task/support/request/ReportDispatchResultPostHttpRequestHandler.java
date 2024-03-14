@@ -41,7 +41,7 @@ public class ReportDispatchResultPostHttpRequestHandler extends PostHttpRequestH
 
     @Override
     public String doHandler(String content, UrlQuery query, HttpHeaders headers) {
-       EasyRetryLog.LOCAL.info("Client Callback Request. content:[{}]", content);
+       EasyRetryLog.LOCAL.debug("Client Callback Request. content:[{}]", content);
 
         EasyRetryRequest retryRequest = JsonUtil.parseObject(content, EasyRetryRequest.class);
         Object[] args = retryRequest.getArgs();
