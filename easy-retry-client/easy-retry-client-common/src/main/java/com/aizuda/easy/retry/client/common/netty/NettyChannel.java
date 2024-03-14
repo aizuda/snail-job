@@ -31,20 +31,71 @@ import java.util.Optional;
  */
 @Slf4j
 public class NettyChannel {
-
     private NettyChannel() {
     }
+
+    private static Channel CHANNEL;
+
+    /**
+     * 服务端端口
+     */
+    private static final String EASY_RETRY_SERVER_PORT = "easy-retry.server.port";
+    /**
+     * 服务端host
+     */
+    private static final String EASY_RETRY_SERVER_HOST = "easy-retry.server.host";
+
+    /**
+     * 客户端端口
+     */
+    private static final String EASY_RETRY_CLIENT_PORT = "easy-retry.port";
+    /**
+     * 客户端host
+     */
+    private static final String EASY_RETRY_CLIENT_HOST = "easy-retry.host";
 
     private static final String HOST_ID = IdUtil.getSnowflake().nextIdStr();
     private static final int PORT;
     private static final String HOST;
 
     static {
-        PORT = Integer.parseInt(System.getProperty("easy-retry.port", String.valueOf(8080)));
-        HOST = System.getProperty("easy-retry.host", NetUtil.getLocalIpStr());
+        PORT = Integer.parseInt(System.getProperty(EASY_RETRY_CLIENT_PORT, String.valueOf(8080)));
+        HOST = System.getProperty(EASY_RETRY_CLIENT_HOST, NetUtil.getLocalIpStr());
     }
 
-    private static Channel CHANNEL;
+    /**
+     * 获取服务端端口
+     *
+     * @return port
+     */
+    public static int getServerPort() {
+        EasyRetryProperties easyRetryProperties = SpringContext.CONTEXT.getBean(EasyRetryProperties.class);
+        EasyRetryProperties.ServerConfig serverConfig = easyRetryProperties.getServer();
+
+        String port = System.getProperty(EASY_RETRY_SERVER_PORT);
+        if (StrUtil.isBlank(port)) {
+            System.setProperty(EASY_RETRY_SERVER_PORT, String.valueOf(serverConfig.getPort()));
+        }
+
+        return Integer.parseInt(System.getProperty(EASY_RETRY_SERVER_PORT));
+    }
+
+    /**
+     * 获取服务端host
+     *
+     * @return host
+     */
+    public static String getServerHost() {
+        EasyRetryProperties easyRetryProperties = SpringContext.CONTEXT.getBean(EasyRetryProperties.class);
+        EasyRetryProperties.ServerConfig serverConfig = easyRetryProperties.getServer();
+
+        String host = System.getProperty(EASY_RETRY_SERVER_HOST);
+        if (StrUtil.isBlank(host)) {
+            System.setProperty(EASY_RETRY_SERVER_HOST, serverConfig.getHost());
+        }
+
+        return System.getProperty(EASY_RETRY_SERVER_HOST);
+    }
 
     public static void setChannel(Channel channel) {
         NettyChannel.CHANNEL = channel;

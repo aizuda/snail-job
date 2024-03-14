@@ -1,8 +1,10 @@
 package com.aizuda.easy.retry.client.common.netty;
 
+import com.aizuda.easy.retry.client.common.event.ChannelReconnectEvent;
 import com.aizuda.easy.retry.client.common.proxy.RequestBuilder;
 import com.aizuda.easy.retry.client.common.NettyClient;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants.BEAT;
+import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.core.model.NettyResult;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
@@ -64,6 +66,8 @@ public class NettyHttpClientHandler extends SimpleChannelInboundHandler<FullHttp
         EasyRetryLog.LOCAL.debug("channelUnregistered");
         ctx.channel().eventLoop().schedule(() -> {
             try {
+                // 抛出重连事件
+                SpringContext.CONTEXT.publishEvent(new ChannelReconnectEvent());
                 nettyHttpConnectClient.reconnect();
             } catch (Exception e) {
                 EasyRetryLog.LOCAL.error("reconnect error ", e);

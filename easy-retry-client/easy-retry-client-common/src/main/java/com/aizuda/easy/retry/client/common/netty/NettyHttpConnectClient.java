@@ -42,13 +42,10 @@ public class NettyHttpConnectClient implements Lifecycle, ApplicationContextAwar
     public void start() {
 
         try {
-            EasyRetryProperties easyRetryProperties = applicationContext.getBean(EasyRetryProperties.class);
-
-            EasyRetryProperties.ServerConfig server = easyRetryProperties.getServer();
             final NettyHttpConnectClient thisClient = this;
             bootstrap.group(nioEventLoopGroup)
                     .channel(NioSocketChannel.class)
-                    .remoteAddress(server.getHost(), server.getPort())
+                    .remoteAddress(NettyChannel.getServerHost(), NettyChannel.getServerPort())
                     .handler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         public void initChannel(SocketChannel channel) throws Exception {
@@ -108,7 +105,9 @@ public class NettyHttpConnectClient implements Lifecycle, ApplicationContextAwar
      * 重连
      */
     public void reconnect() {
-        ChannelFuture channelFuture = bootstrap.connect();
+        ChannelFuture channelFuture = bootstrap
+                .remoteAddress(NettyChannel.getServerHost(), NettyChannel.getServerPort())
+                .connect();
         channelFuture.addListener((ChannelFutureListener) future -> {
             Throwable cause = future.cause();
             if (cause != null) {
