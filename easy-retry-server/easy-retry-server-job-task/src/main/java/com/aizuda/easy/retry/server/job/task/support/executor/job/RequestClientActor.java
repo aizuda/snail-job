@@ -32,6 +32,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Objects;
 
 /**
@@ -56,6 +57,7 @@ public class RequestClientActor extends AbstractActor {
     }
 
     private void doExecute(RealJobExecutorDTO realJobExecutorDTO) {
+        long nowMilli = DateUtils.toNowMilli();
         // 检查客户端是否存在
         RegisterNodeInfo registerNodeInfo = CacheRegisterTable.getServerNode(
                 realJobExecutorDTO.getGroupName(),
@@ -64,8 +66,13 @@ public class RequestClientActor extends AbstractActor {
         if (Objects.isNull(registerNodeInfo)) {
             taskExecuteFailure(realJobExecutorDTO, "客户端不存在");
             LogMetaDTO logMetaDTO = JobTaskConverter.INSTANCE.toJobLogDTO(realJobExecutorDTO);
-            logMetaDTO.setTimestamp( DateUtils.toNowMilli());
-            EasyRetryLog.REMOTE.error("taskId:[{}] 任务调度失败. 失败原因: 无可执行的客户端 <|>{}<|>", realJobExecutorDTO.getTaskId(), logMetaDTO);
+            logMetaDTO.setTimestamp(nowMilli);
+            if (realJobExecutorDTO.isRetry()) {
+                EasyRetryLog.REMOTE.error("taskId:[{}] 任务调度失败执行重试. 失败原因: 无可执行的客户端. 重试次数:[{}]. <|>{}<|>",
+                        realJobExecutorDTO.getTaskId(), realJobExecutorDTO.getRetryCount(), logMetaDTO);
+            } else {
+                EasyRetryLog.REMOTE.error("taskId:[{}] 任务调度失败. 失败原因: 无可执行的客户端 <|>{}<|>", realJobExecutorDTO.getTaskId(), logMetaDTO);
+            }
             return;
         }
 
@@ -93,9 +100,19 @@ public class RequestClientActor extends AbstractActor {
                 throwable = re.getLastFailedAttempt().getExceptionCause();
             }
 
+            if (e.getClass().isAssignableFrom(UndeclaredThrowableException.class)) {
+                UndeclaredThrowableException re = (UndeclaredThrowableException) e;
+                throwable = re.getUndeclaredThrowable();
+            }
+
             LogMetaDTO logMetaDTO = JobTaskConverter.INSTANCE.toJobLogDTO(realJobExecutorDTO);
-            logMetaDTO.setTimestamp( DateUtils.toNowMilli());
-            EasyRetryLog.REMOTE.error("taskId:[{}] 任务调度失败. <|>{}<|>", logMetaDTO.getTaskId(), logMetaDTO, throwable);
+            logMetaDTO.setTimestamp(nowMilli);
+            if (realJobExecutorDTO.isRetry()) {
+                EasyRetryLog.REMOTE.error("taskId:[{}] 任务调度失败执行重试 重试次数:[{}]. <|>{}<|>", logMetaDTO.getTaskId(),
+                        realJobExecutorDTO.getRetryCount(), logMetaDTO, throwable);
+            } else {
+                EasyRetryLog.REMOTE.error("taskId:[{}] 任务调度失败. <|>{}<|>", logMetaDTO.getTaskId(), logMetaDTO, throwable);
+            }
 
             taskExecuteFailure(realJobExecutorDTO, throwable.getMessage());
 
@@ -129,11 +146,12 @@ public class RequestClientActor extends AbstractActor {
     private JobRpcClient buildRpcClient(RegisterNodeInfo registerNodeInfo, RealJobExecutorDTO realJobExecutorDTO) {
 
        int maxRetryTimes = realJobExecutorDTO.getMaxRetryTimes();
+        boolean retry = realJobExecutorDTO.isRetry();
         return RequestBuilder.<JobRpcClient, Result>newBuilder()
                 .nodeInfo(registerNodeInfo)
                 .namespaceId(registerNodeInfo.getNamespaceId())
-                .failRetry(maxRetryTimes > 0)
-                .retryTimes(realJobExecutorDTO.getMaxRetryTimes())
+                .failRetry(maxRetryTimes > 0 && !retry)
+                .retryTimes(maxRetryTimes)
                 .retryInterval(realJobExecutorDTO.getRetryInterval())
                 .retryListener(new JobExecutorRetryListener(realJobExecutorDTO))
                 .client(JobRpcClient.class)
