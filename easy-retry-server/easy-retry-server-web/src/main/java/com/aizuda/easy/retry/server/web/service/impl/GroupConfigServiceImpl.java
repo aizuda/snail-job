@@ -24,6 +24,7 @@ import com.aizuda.easy.retry.template.datasource.access.TaskAccess;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.SequenceAllocMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.ServerNodeMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.*;
+import com.baomidou.mybatisplus.autoconfigure.MybatisPlusProperties;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
@@ -70,6 +71,8 @@ public class GroupConfigServiceImpl implements GroupConfigService {
     private SystemProperties systemProperties;
     @Autowired
     private JdbcTemplate jdbcTemplate;
+    @Autowired
+    private MybatisPlusProperties mybatisPlusProperties;
 
     @Override
     @Transactional
@@ -338,10 +341,12 @@ public class GroupConfigServiceImpl implements GroupConfigService {
             String catalog = connection.getCatalog();
             String schema = connection.getSchema();
 
+            String tablePrefix = Optional.ofNullable(mybatisPlusProperties.getGlobalConfig().getDbConfig().getTablePrefix()).orElse(StrUtil.EMPTY);
             // https://gitee.com/aizuda/easy-retry/issues/I8DAMH
             String sql = MessageFormatter.arrayFormat("SELECT table_name\n"
                     + "FROM information_schema.tables\n"
-                    + "WHERE table_name LIKE 'retry_task_%' AND (table_schema = '{}' OR table_schema = '{}' OR table_catalog = '{}' OR table_catalog = '{}')", new Object[]{schema, catalog, schema, catalog}).getMessage();
+                    + "WHERE table_name LIKE '{}retry_task_%' AND (table_schema = '{}' OR table_schema = '{}' OR table_catalog = '{}' OR table_catalog = '{}')",
+                    new Object[]{tablePrefix, schema, catalog, schema, catalog}).getMessage();
 
             List<String> tableList = jdbcTemplate.queryForList(sql, String.class);
             return tableList.stream().map(ReUtil::getFirstNumber).filter(i ->

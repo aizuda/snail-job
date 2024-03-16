@@ -1,7 +1,6 @@
 package com.aizuda.easy.retry.template.datasource.config;
 
-import com.aizuda.easy.retry.template.datasource.access.Access;
-import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
+import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.template.datasource.enums.DbTypeEnum;
 import com.aizuda.easy.retry.template.datasource.utils.RequestDataHelper;
 import com.baomidou.mybatisplus.autoconfigure.MybatisPlusProperties;
@@ -23,6 +22,7 @@ import javax.sql.DataSource;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author: www.byteblogs.com
@@ -56,7 +56,8 @@ public class EasyRetryTemplateAutoConfiguration {
     @Bean
     public MybatisPlusInterceptor mybatisPlusInterceptor(Environment environment) {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
-        interceptor.addInnerInterceptor(dynamicTableNameInnerInterceptor());
+        String tablePrefix = Optional.ofNullable(environment.getProperty("mybatis-plus.global-config.db-config.table-prefix")).orElse(StrUtil.EMPTY);
+        interceptor.addInnerInterceptor(dynamicTableNameInnerInterceptor(tablePrefix));
         String dbType = environment.getProperty("easy-retry.db-type");
         DbTypeEnum dbTypeEnum = DbTypeEnum.modeOf(dbType);
         interceptor.addInnerInterceptor(new PaginationInnerInterceptor(dbTypeEnum.getMpDbType()));
@@ -64,15 +65,16 @@ public class EasyRetryTemplateAutoConfiguration {
         return interceptor;
     }
 
-    public DynamicTableNameInnerInterceptor dynamicTableNameInnerInterceptor() {
+    public DynamicTableNameInnerInterceptor dynamicTableNameInnerInterceptor(String tablePrefix) {
         DynamicTableNameInnerInterceptor dynamicTableNameInnerInterceptor = new DynamicTableNameInnerInterceptor();
         dynamicTableNameInnerInterceptor.setTableNameHandler((sql, tableName) -> {
-            if (!TABLES.contains(tableName)) {
-                return tableName;
+            if (TABLES.contains(tableName)) {
+                Integer partition = RequestDataHelper.getPartition();
+                RequestDataHelper.remove();
+                tableName = tableName + StrUtil.UNDERLINE + partition;
             }
-            Integer partition = RequestDataHelper.getPartition();
-            RequestDataHelper.remove();
-            return tableName + "_"+ partition;
+
+            return tableName.startsWith(tablePrefix) ? tableName : tablePrefix + tableName;
         });
 
         return dynamicTableNameInnerInterceptor;

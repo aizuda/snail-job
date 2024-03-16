@@ -32,6 +32,7 @@ mybatis-plus:
       capital-mode: false
       logic-delete-value: 1
       logic-not-delete-value: 0
+#      table-prefix: er_
   configuration:
     map-underscore-to-camel-case: true
     cache-enabled: true
