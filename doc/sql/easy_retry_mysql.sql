@@ -1,9 +1,8 @@
-DROP
-    DATABASE IF EXISTS easy_retry;
-CREATE
-    DATABASE easy_retry;
-USE
-    easy_retry;
+SET NAMES utf8mb4;
+
+DROP DATABASE IF EXISTS easy_retry;
+CREATE DATABASE easy_retry;
+USE easy_retry;
 
 CREATE TABLE `namespace`
 (
