@@ -75,7 +75,7 @@ CREATE TABLE notify_config
     update_dt              TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_namespace_id_group_name ON notify_config (namespace_id, group_name);
+CREATE INDEX idx_namespace_id_group_name_notify_config ON notify_config (namespace_id, group_name);
 
 COMMENT ON COLUMN "notify_config"."id" IS '主键';
 COMMENT ON COLUMN "notify_config"."group_name" IS '组名称';
@@ -567,7 +567,7 @@ COMMENT ON COLUMN "job_task_batch"."deleted" IS '逻辑删除 1、删除';
 COMMENT ON COLUMN "job_task_batch"."create_dt" IS '创建时间';
 COMMENT ON COLUMN "job_task_batch"."update_dt" IS '创建时间';
 COMMENT ON COLUMN "job_task_batch"."ext_attrs" IS '扩展字段';
-COMMENT ON TABLE "job_task" IS '任务批次';
+COMMENT ON TABLE "job_task_batch" IS '任务批次';
 
 CREATE TABLE job_notify_config
 (
@@ -694,7 +694,7 @@ CREATE TABLE workflow
 
 
 CREATE INDEX idx_create_dt_workflow ON workflow (create_dt);
-CREATE INDEX idx_namespace_id_group_name ON workflow (namespace_id, group_name);
+CREATE INDEX idx_namespace_id_group_name_workflow ON workflow (namespace_id, group_name);
 
 COMMENT ON TABLE workflow IS '工作流';
 COMMENT ON COLUMN workflow.id IS '主键';
@@ -738,7 +738,7 @@ CREATE TABLE workflow_node
 );
 
 CREATE INDEX idx_create_dt_workflow_node ON workflow_node (create_dt);
-CREATE INDEX idx_namespace_id_group_name ON workflow_node (namespace_id, group_name);
+CREATE INDEX idx_namespace_id_group_name_workflow_node ON workflow_node (namespace_id, group_name);
 
 COMMENT ON TABLE workflow_node IS '工作流节点';
 COMMENT ON COLUMN workflow_node.id IS '主键';
