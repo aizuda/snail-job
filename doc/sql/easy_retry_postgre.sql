@@ -590,7 +590,7 @@ CREATE TABLE job_notify_config
 CREATE INDEX idx_namespace_id_group_name_job_id_job_notify_config ON job_notify_config (namespace_id, group_name, job_id);
 
 COMMENT ON COLUMN "job_notify_config"."id" IS '主键';
-COMMENT ON COLUMN "job_task"."namespace_id" IS '命名空间id';
+COMMENT ON COLUMN "job_notify_config"."namespace_id" IS '命名空间id';
 COMMENT ON COLUMN "job_notify_config"."group_name" IS '组名称';
 COMMENT ON COLUMN "job_notify_config"."job_id" IS '任务信息id';
 COMMENT ON COLUMN "job_notify_config"."notify_status" IS '通知状态 0、未启用 1、启用';
