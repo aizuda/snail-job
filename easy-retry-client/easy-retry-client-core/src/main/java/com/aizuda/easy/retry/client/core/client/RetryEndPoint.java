@@ -63,6 +63,7 @@ public class RetryEndPoint {
 
         RetryerInfo retryerInfo = RetryerInfoCache.get(executeReqDto.getScene(), executeReqDto.getExecutorName());
         if (Objects.isNull(retryerInfo)) {
+            EasyRetryLog.REMOTE.error("场景:[{}]配置不存在, 请检查您的场景和执行器是否存在", executeReqDto.getScene());
             throw new EasyRetryClientException("场景:[{}]配置不存在, 请检查您的场景和执行器是否存在", executeReqDto.getScene());
         }
 
@@ -73,6 +74,7 @@ public class RetryEndPoint {
             deSerialize = (Object[]) retryArgSerializer.deSerialize(executeReqDto.getArgsStr(),
                 retryerInfo.getExecutor().getClass(), retryerInfo.getMethod());
         } catch (JsonProcessingException e) {
+            EasyRetryLog.REMOTE.error("参数解析异常", e);
             throw new EasyRetryClientException("参数解析异常", e);
         }
 
@@ -86,8 +88,6 @@ public class RetryEndPoint {
 
             if (RetrySiteSnapshot.isRetryForStatusCode()) {
                 executeRespDto.setStatusCode(RetryResultStatusEnum.STOP.getStatus());
-
-                // TODO 需要标记是哪个系统不需要重试
                 executeRespDto.setExceptionMsg("下游标记不需要重试");
             } else {
                 executeRespDto.setStatusCode(retryerResultContext.getRetryResultStatusEnum().getStatus());
@@ -98,6 +98,14 @@ public class RetryEndPoint {
             executeRespDto.setUniqueId(executeReqDto.getUniqueId());
             if (Objects.nonNull(retryerResultContext.getResult())) {
                 executeRespDto.setResultJson(JsonUtil.toJsonString(retryerResultContext.getResult()));
+            }
+
+            if (Objects.equals(RetryResultStatusEnum.SUCCESS.getStatus(), executeRespDto.getStatusCode())) {
+                EasyRetryLog.REMOTE.info("remote retry complete. count:[{}] result:[{}]", executeReqDto.getRetryCount(), executeRespDto.getResultJson());
+            } if (Objects.equals(RetryResultStatusEnum.STOP.getStatus(), executeRespDto.getStatusCode())) {
+                EasyRetryLog.REMOTE.info("remote retry complete. count:[{}] exceptionMsg:[{}]", executeReqDto.getRetryCount(), executeRespDto.getExceptionMsg());
+            } else {
+                EasyRetryLog.REMOTE.info("remote retry complete. count:[{}] ", executeReqDto.getRetryCount(), retryerResultContext.getThrowable());
             }
 
         } finally {

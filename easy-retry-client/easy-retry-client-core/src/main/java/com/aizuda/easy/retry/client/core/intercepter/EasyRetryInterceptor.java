@@ -185,7 +185,7 @@ public class EasyRetryInterceptor implements MethodInterceptor, AfterAdvice, Ser
             if (RetryResultStatusEnum.SUCCESS.getStatus().equals(context.getRetryResultStatusEnum().getStatus())) {
                 EasyRetryLog.LOCAL.debug("local retry successful. traceId:[{}] result:[{}]", traceId, context.getResult());
             } else {
-               EasyRetryLog.LOCAL.info("local retry result. traceId:[{}] throwable:[{}]", traceId, context.getThrowable());
+               EasyRetryLog.LOCAL.debug("local retry result. traceId:[{}] throwable:[{}]", traceId, context.getThrowable());
             }
 
             return context;
