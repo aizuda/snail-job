@@ -30,7 +30,7 @@ CREATE TABLE group_config
     id                BIGSERIAL PRIMARY KEY,
     namespace_id      VARCHAR(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
     group_name        VARCHAR(64)  NOT NULL,
-    description       VARCHAR(256) NOT NULL,
+    description       VARCHAR(256) DEFAULT '',
     group_status      SMALLINT     NOT NULL DEFAULT 0,
     version           INT          NOT NULL,
     group_partition   INT          NOT NULL,
@@ -792,5 +792,3 @@ COMMENT ON COLUMN workflow_task_batch.create_dt IS '创建时间';
 COMMENT ON COLUMN workflow_task_batch.update_dt IS '修改时间';
 COMMENT ON COLUMN workflow_task_batch.deleted IS '逻辑删除 1、删除';
 COMMENT ON COLUMN workflow_task_batch.ext_attrs IS '扩展字段';
-
-
