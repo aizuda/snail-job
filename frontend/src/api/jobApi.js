@@ -3,24 +3,24 @@ const jobApi = {
   // 任务信息
   jobPageList: '/job/page/list',
   jobList: '/job/list',
-  jobDetail: '/job/',
+  jobDetail: '/job',
   saveJob: '/job',
   updateJob: '/job',
   updateJobStatus: '/job/status',
-  delJob: '/job/',
+  delJob: '/job',
   timeByCron: '/job/cron',
   jobNameList: '/job/job-name/list',
-  triggerJob: '/job/trigger/',
+  triggerJob: '/job/trigger',
 
   // 任务批次
   jobBatchList: '/job/batch/list',
-  jobBatchDetail: '/job/batch/',
-  stop: '/job/batch/stop/',
-  retry: '/job/batch/retry/',
+  jobBatchDetail: '/job/batch',
+  stop: '/job/batch/stop',
+  retry: '/job/batch/retry',
 
   // 通知
   jobNotifyConfigPageList: '/job/notify/config/page/list',
-  jobNotifyConfigDetail: '/job/notify/config/',
+  jobNotifyConfigDetail: '/job/notify/config',
   saveJobNotify: '/job/notify/config',
   updateJobNotify: '/job/notify/config',
 
@@ -36,11 +36,11 @@ const jobApi = {
   updateWorkflow: '/workflow',
   workflowDetail: '/workflow',
   workflowBatchListPage: '/workflow/batch/page/list',
-  workflowBatchDetail: '/workflow/batch/',
-  updateStatus: '/workflow/update/status/',
-  delWorkflow: '/workflow/',
-  triggerWorkflow: '/workflow/trigger/',
-  stopWorkflowBatch: '/workflow/batch/stop/',
+  workflowBatchDetail: '/workflow/batch',
+  updateStatus: '/workflow/update/status',
+  delWorkflow: '/workflow',
+  triggerWorkflow: '/workflow/trigger',
+  stopWorkflowBatch: '/workflow/batch/stop',
   workflowNameList: '/workflow/workflow-name/list'
 }
 
@@ -48,7 +48,7 @@ export default jobApi
 
 export function retry (id) {
   return request({
-    url: jobApi.retry + id,
+    url: `${jobApi.retry}/${id}`,
     method: 'post'
   })
 }
@@ -62,35 +62,35 @@ export function workflowNameList (parameter) {
 
 export function stopWorkflowBatch (id) {
   return request({
-    url: jobApi.stopWorkflowBatch + id,
+    url: `${jobApi.stopWorkflowBatch}/${id}`,
     method: 'post'
   })
 }
 
 export function triggerWorkflow (id) {
   return request({
-    url: jobApi.triggerWorkflow + id,
+    url: `${jobApi.triggerWorkflow}/${id}`,
     method: 'post'
   })
 }
 
 export function delWorkflow (id) {
   return request({
-    url: jobApi.delWorkflow + id,
+    url: `${jobApi.delWorkflow}/${id}`,
     method: 'delete'
   })
 }
 
 export function updateWorkflowStatus (id) {
   return request({
-    url: jobApi.updateStatus + id,
+    url: `${jobApi.updateStatus}/${id}`,
     method: 'put'
   })
 }
 
 export function workflowBatchDetail (id) {
   return request({
-    url: jobApi.workflowBatchDetail + id,
+    url: `${jobApi.workflowBatchDetail}/${id}`,
     method: 'get'
   })
 }
@@ -113,7 +113,7 @@ export function workflowListPage (parameter) {
 
 export function triggerJob (id) {
   return request({
-    url: jobApi.triggerJob + id,
+    url: `${jobApi.triggerJob}/${id}`,
     method: 'post'
   })
 }
@@ -143,7 +143,7 @@ export function timeByCron (parameter) {
 
 export function delJob (id) {
   return request({
-    url: jobApi.delJob + id,
+    url: `${jobApi.delJob}/${id}`,
     method: 'delete'
   })
 }
@@ -182,7 +182,7 @@ export function jobBatchList (parameter) {
 
 export function jobBatchDetail (id) {
   return request({
-    url: jobApi.jobBatchDetail + id,
+    url: `${jobApi.jobBatchDetail}/${id}`,
     method: 'get'
   })
 }
@@ -205,7 +205,7 @@ export function getJobList (parameter) {
 
 export function getJobDetail (id) {
   return request({
-    url: jobApi.jobDetail + id,
+    url: `${jobApi.jobDetail}/${id}`,
     method: 'get'
   })
 }
@@ -235,7 +235,7 @@ export function jobNotifyConfigPageList (parameter) {
 }
 export function getJobNotifyConfigDetail (id) {
   return request({
-    url: jobApi.jobNotifyConfigDetail + id,
+    url: `${jobApi.jobNotifyConfigDetail}/${id}`,
     method: 'get'
   })
 }

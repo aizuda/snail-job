@@ -4,15 +4,15 @@ const retryApi = {
   // -------------- 场景配置 -------------------
   scenePageList: '/scene-config/page/list',
   sceneList: '/scene-config/list',
-  sceneDetail: '/scene-config/',
+  sceneDetail: '/scene-config',
   saveScene: '/scene-config',
   updateScene: '/scene-config',
 
   // -------------- 通知配置 -------------------
   notifyConfigList: '/notify-config/list',
-  notifyConfigDetail: '/notify-config/',
-  saveNotify: '/notify-config/',
-  updateNotify: '/notify-config/'
+  notifyConfigDetail: '/notify-config',
+  saveNotify: '/notify-config',
+  updateNotify: '/notify-config'
 
 }
 
@@ -28,7 +28,7 @@ export function getNotifyConfigList (parameter) {
 
 export function getNotifyConfigDetail (id) {
   return request({
-    url: retryApi.notifyConfigDetail + id,
+    url: `${retryApi.notifyConfigDetail}/${id}`,
     method: 'get'
   })
 }
@@ -68,7 +68,7 @@ export function sceneList (parameter) {
 
 export function getSceneDetail (id) {
   return request({
-    url: retryApi.sceneDetail + id,
+    url: `${retryApi.sceneDetail}/${id}`,
     method: 'get'
   })
 }

@@ -19,7 +19,7 @@ const api = {
   allGroupConfigList: `/group/all/group-config/list`,
   onlinePods: `/group/on-line/pods/`,
   retryTaskPage: '/retry-task/list',
-  retryTaskById: '/retry-task/',
+  retryTaskById: '/retry-task',
   saveRetryTask: '/retry-task',
   batchSaveRetryTask: '/retry-task/batch',
   idempotentIdGenerate: '/retry-task/generate/idempotent-id',
@@ -30,19 +30,19 @@ const api = {
   manualTriggerCallbackTask: '/retry-task/manual/trigger/callback/task',
   retryTaskLogPage: '/retry-task-log/list',
   retryTaskLogMessagePage: '/retry-task-log/message/list',
-  retryTaskLogById: '/retry-task-log/',
+  retryTaskLogById: '/retry-task-log',
   retryDeadLetterPage: '/retry-dead-letter/list',
-  retryDeadLetterById: '/retry-dead-letter/',
+  retryDeadLetterById: '/retry-dead-letter',
   retryDeadLetterRollback: '/retry-dead-letter/batch/rollback',
   deleteRetryDeadLetter: '/retry-dead-letter/batch',
   scenePageList: '/scene-config/page/list',
   sceneList: '/scene-config/list',
   notifyConfigList: '/notify-config/list',
   userPageList: '/user/page/list',
-  delUser: '/user/',
+  delUser: '/user',
   saveUser: '/user',
   systemUserByUserName: '/user/username/user-info',
-  systemUserPermissionByUserId: '/user-permissions/',
+  systemUserPermissionByUserId: '/user-permissions',
   partitionTableList: '/group/partition-table/list',
   totalPartition: '/group/partition',
   systemVersion: '/system/version',
@@ -51,7 +51,7 @@ const api = {
   addNamespace: '/namespace',
   updateNamespace: '/namespace',
   namespaceList: '/namespace/list',
-  delNamespace: '/namespace/',
+  delNamespace: '/namespace',
   allNamespace: '/namespace/all'
 }
 
@@ -81,7 +81,7 @@ export function getAllNamespace () {
 
 export function delNamespace (id) {
   return request({
-    url: api.delNamespace + id,
+    url: `${api.delNamespace}/${id}`,
     method: 'delete'
   })
 }
@@ -112,7 +112,7 @@ export function namespaceList (parameter) {
 
 export function delUser (id) {
   return request({
-    url: api.delUser + id,
+    url: `${api.delUser}/${id}`,
     method: 'delete'
   })
 }
@@ -244,7 +244,7 @@ export function getRetryTaskPage (parameter) {
 
 export function getRetryTaskById (id, parameter) {
   return request({
-    url: api.retryTaskById + id,
+    url: `${api.retryTaskById}/${id}`,
     method: 'get',
     params: parameter
   })
@@ -300,7 +300,7 @@ export function getRetryTaskLogPage (parameter) {
 
 export function getRetryTaskLogById (id) {
   return request({
-    url: api.retryTaskLogById + id,
+    url: `${api.retryTaskLogById}/${id}`,
     method: 'get'
   })
 }
@@ -315,7 +315,7 @@ export function getRetryDeadLetterPage (parameter) {
 
 export function getRetryDeadLetterById (id, parameter) {
   return request({
-    url: api.retryDeadLetterById + id,
+    url: `${api.retryDeadLetterById}/${id}`,
     method: 'get',
     params: parameter
   })
@@ -355,7 +355,7 @@ export function getSystemUserByUserName (parameter) {
 
 export function getSystemUserPermissionByUserId (id) {
   return request({
-    url: api.systemUserPermissionByUserId + id,
+    url: `${api.systemUserPermissionByUserId}/${id}`,
     method: 'get'
   })
 }
@@ -370,7 +370,7 @@ export function getNotifyConfigList (parameter) {
 
 export function getGroupConfigByGroupName (groupName) {
   return request({
-    url: api.groupConfigByGroupName + `/${groupName}`,
+    url: `${api.groupConfigByGroupName}/${groupName}`,
     method: 'get'
   })
 }
