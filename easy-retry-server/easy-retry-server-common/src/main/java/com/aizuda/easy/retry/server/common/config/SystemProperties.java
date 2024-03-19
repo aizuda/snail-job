@@ -64,6 +64,16 @@ public class SystemProperties {
     private int logStorage = 90;
 
     /**
+     * 合并日志默认保存天数
+     */
+    private int mergeLogDays = 1;
+
+    /**
+     * 合并日志默认的条数
+     */
+    private int mergeLogNum = 500;
+
+    /**
      * 数据库类型
      */
     private DbTypeEnum dbType = DbTypeEnum.MYSQL;

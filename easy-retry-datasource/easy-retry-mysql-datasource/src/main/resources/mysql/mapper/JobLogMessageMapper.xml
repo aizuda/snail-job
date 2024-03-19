@@ -35,4 +35,19 @@
             )
         </foreach>
     </insert>
+
+    <update id="batchUpdate" parameterType="java.util.List">
+        UPDATE job_log_message jlm,
+        (
+        <foreach collection="list" item="item" index="index" separator=" UNION ALL ">
+            SELECT
+            #{item.message} AS message,
+            #{item.logNum} AS log_num,
+            #{item.id} AS id
+        </foreach>
+        ) tt
+        SET
+        jlm.message = tt.message, jlm.log_num = tt.log_num
+        WHERE jlm.id = tt.id
+    </update>
 </mapper>
