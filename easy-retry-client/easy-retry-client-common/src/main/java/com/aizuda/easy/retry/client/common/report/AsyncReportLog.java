@@ -24,7 +24,7 @@ import java.util.Objects;
  */
 @Component
 @Slf4j
-public class AsyncReportLog implements Lifecycle, Report {
+public class AsyncReportLog implements Lifecycle {
 
     @Autowired
     private EasyRetryProperties easyRetryProperties;
@@ -84,15 +84,5 @@ public class AsyncReportLog implements Lifecycle, Report {
         logTaskDTO.setGroupName(context.getGroupName());
         logTaskDTO.setFieldList(logContentDTO.getFieldList());
         return logTaskDTO;
-    }
-
-    @Override
-    public boolean supports(boolean async) {
-        return false;
-    }
-
-    @Override
-    public boolean report(String scene, String targetClassName, Object[] args) {
-        return false;
     }
 }

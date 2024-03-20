@@ -27,7 +27,7 @@ public class EasyRetryServerApplication {
         return args -> {
             // 最长自旋10秒，保证nettyHttpServer启动完成
             int waitCount = 0;
-            while (!nettyHttpServer.isStarted() || waitCount > 100) {
+            while (!nettyHttpServer.isStarted() && waitCount < 100) {
                 log.info("--------> easy-retry netty server is staring....");
                 TimeUnit.MILLISECONDS.sleep(100);
                 waitCount++;

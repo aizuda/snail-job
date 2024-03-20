@@ -17,11 +17,6 @@ import java.util.List;
 public class LogTaskDTO implements Serializable {
 
     /**
-     * 主键
-     */
-    private Long id;
-
-    /**
      * 命名空间
      */
     private String namespaceId;
@@ -34,16 +29,19 @@ public class LogTaskDTO implements Serializable {
     /**
      * 任务信息id
      */
+    @Deprecated
     private Long jobId;
 
     /**
      * 任务实例id
      */
+    @Deprecated
     private Long taskBatchId;
 
     /**
      * 调度任务id
      */
+    @Deprecated
     private Long taskId;
 
     /**
