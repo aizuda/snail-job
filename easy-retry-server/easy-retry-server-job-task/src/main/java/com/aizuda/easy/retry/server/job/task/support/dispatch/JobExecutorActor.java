@@ -12,6 +12,7 @@ import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.WaitStrategy;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
+import com.aizuda.easy.retry.server.common.dto.DistributeInstance;
 import com.aizuda.easy.retry.server.common.enums.JobTaskExecutorSceneEnum;
 import com.aizuda.easy.retry.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
@@ -192,6 +193,8 @@ public class JobExecutorActor extends AbstractActor {
             || JobTaskExecutorSceneEnum.MANUAL_WORKFLOW.getType().equals(taskExecuteDTO.getTaskExecutorScene())
             // 是否是常驻任务
             || Objects.equals(StatusEnum.NO.getStatus(), job.getResident())
+            // 防止任务已经分配到其他节点导致的任务重复执行
+            || !DistributeInstance.INSTANCE.getConsumerBucket().contains(job.getBucketIndex())
         ) {
             return;
         }
