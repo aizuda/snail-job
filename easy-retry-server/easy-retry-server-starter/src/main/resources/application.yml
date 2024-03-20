@@ -7,11 +7,22 @@ spring:
     active: dev
   datasource:
     name: easy_retry
-    url:  jdbc:mysql://localhost:3306/easy_retry?useSSL=false&characterEncoding=utf8&useUnicode=true
+    ## mysql
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/easy_retry?useSSL=false&characterEncoding=utf8&useUnicode=true
     username: root
     password: root
+    ## postgres
+#    driver-class-name: org.postgresql.Driver
+#    url: jdbc:postgresql://localhost:5432/postgres?useUnicode=true&characterEncoding=utf8&useSSL=true&autoReconnect=true&reWriteBatchedInserts=true
+#    username: root
+#    password: root
+    ## Oracle
+#    driver-class-name: oracle.jdbc.OracleDriver
+#    url: jdbc:oracle:thin:@//localhost:1521/XEPDB1
+#    username: root
+#    password: root
     type: com.zaxxer.hikari.HikariDataSource
-    driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       connection-timeout: 30000
       minimum-idle: 5
@@ -20,10 +31,11 @@ spring:
       idle-timeout: 30000
       pool-name: easy_retry
       max-lifetime: 1800000
-      connection-test-query: SELECT 1
+#      connection-test-query: SELECT 1
   web:
     resources:
       static-locations: classpath:admin/
+
 mybatis-plus:
   typeAliasesPackage: com.aizuda.easy.retry.template.datasource.persistence.po
   global-config:
@@ -37,7 +49,10 @@ mybatis-plus:
     map-underscore-to-camel-case: true
     cache-enabled: true
 logging:
-  config: classpath:logback-boot.xml
+    config: classpath:logback-boot.xml
+#    level:
+#    ## 方便调试 SQL
+#        com.aizuda.easy.retry.template.datasource.persistence.mapper: debug
 
 easy-retry:
   retry-pull-page-size: 1000 # 拉取重试数据的每批次的大小
@@ -53,6 +68,3 @@ easy-retry:
   db-type: mysql #当前使用的数据库
   mode: all
   retry-max-pull-count: 10
-
-
-

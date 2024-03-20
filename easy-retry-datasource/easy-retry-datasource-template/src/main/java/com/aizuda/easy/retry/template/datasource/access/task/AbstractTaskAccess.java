@@ -20,9 +20,11 @@ public abstract class AbstractTaskAccess<T> implements TaskAccess<T> {
 
     @Autowired
     protected Environment environment;
-    protected static final List<String> ALLOW_DB =  Arrays.asList(DbTypeEnum.MYSQL.getDb(),
-            DbTypeEnum.MARIADB.getDb(),
-            DbTypeEnum.POSTGRES.getDb());
+
+    protected static final List<String> ALLOW_DB = Arrays.asList(DbTypeEnum.MYSQL.getDb(),
+        DbTypeEnum.MARIADB.getDb(),
+        DbTypeEnum.POSTGRES.getDb(),
+        DbTypeEnum.ORACLE.getDb());
 
     protected DbTypeEnum getDbType() {
         String dbType = environment.getProperty("easy-retry.db-type");
@@ -32,7 +34,7 @@ public abstract class AbstractTaskAccess<T> implements TaskAccess<T> {
     /**
      * 设置分区
      *
-     * @param groupName 组名称
+     * @param groupName   组名称
      * @param namespaceId 命名空间id
      */
     public void setPartition(String groupName, String namespaceId) {

@@ -20,10 +20,7 @@ import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.UncategorizedSQLException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSystemException;
-import org.springframework.transaction.support.TransactionCallback;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.LocalDateTime;
@@ -42,10 +39,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class JdbcLockProvider implements LockStorage, Lifecycle {
 
-    private final DistributedLockMapper distributedLockMapper;
     protected static final List<String> ALLOW_DB = Arrays.asList(DbTypeEnum.MYSQL.getDb(),
-            DbTypeEnum.MARIADB.getDb(),
-            DbTypeEnum.POSTGRES.getDb());
+        DbTypeEnum.MARIADB.getDb(),
+        DbTypeEnum.POSTGRES.getDb(),
+        DbTypeEnum.ORACLE.getDb());
+
+    private final DistributedLockMapper distributedLockMapper;
 
     @Override
     public boolean supports(final String storageMedium) {
@@ -90,8 +89,8 @@ public class JdbcLockProvider implements LockStorage, Lifecycle {
             distributedLock.setName(lockConfig.getLockName());
             try {
                 return distributedLockMapper.update(distributedLock, new LambdaUpdateWrapper<DistributedLock>()
-                        .eq(DistributedLock::getName, lockConfig.getLockName())
-                        .le(DistributedLock::getLockUntil, now)) > 0;
+                    .eq(DistributedLock::getName, lockConfig.getLockName())
+                    .le(DistributedLock::getLockUntil, now)) > 0;
             } catch (ConcurrencyFailureException | DataIntegrityViolationException | TransactionSystemException |
                      UncategorizedSQLException e) {
                 return false;
@@ -107,7 +106,7 @@ public class JdbcLockProvider implements LockStorage, Lifecycle {
             for (int i = 0; i < 10; i++) {
                 try {
                     return distributedLockMapper.delete(new LambdaUpdateWrapper<DistributedLock>()
-                            .eq(DistributedLock::getName, lockName)) > 0;
+                        .eq(DistributedLock::getName, lockName)) > 0;
                 } catch (Exception e) {
                     EasyRetryLog.LOCAL.error("unlock error. retrying attempt [{}] ", i, e);
                 } finally {
@@ -130,7 +129,7 @@ public class JdbcLockProvider implements LockStorage, Lifecycle {
                     distributedLock.setLockedBy(ServerRegister.CURRENT_CID);
                     distributedLock.setLockUntil(now.isBefore(lockAtLeast) ? lockAtLeast : now);
                     return distributedLockMapper.update(distributedLock, new LambdaUpdateWrapper<DistributedLock>()
-                            .eq(DistributedLock::getName, lockName)) > 0;
+                        .eq(DistributedLock::getName, lockName)) > 0;
                 } catch (Exception e) {
                     EasyRetryLog.LOCAL.error("unlock error. retrying attempt [{}] ", i, e);
                 }
@@ -149,6 +148,6 @@ public class JdbcLockProvider implements LockStorage, Lifecycle {
     public void close() {
         // 删除当前节点获取的锁记录
         distributedLockMapper.delete(new LambdaUpdateWrapper<DistributedLock>()
-                .eq(DistributedLock::getLockedBy, ServerRegister.CURRENT_CID));
+            .eq(DistributedLock::getLockedBy, ServerRegister.CURRENT_CID));
     }
 }

@@ -1,0 +1,56 @@
+version: "3.4"
+
+name: easy-retry
+
+volumes:
+    mysql: { }
+    postgres: { }
+    oracle: { }
+
+services:
+    mysql:
+        image: mysql:8.0.33
+        restart: unless-stopped
+        environment:
+            TZ: Asia/Shanghai
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: easy_retry
+        ports:
+            - "3306:3306"
+        volumes:
+            - mysql:/var/lib/mysql/
+            # 注入初始化脚本
+            - ../sql/easy_retry_mysql.sql:/docker-entrypoint-initdb.d/init.sql:ro
+        command:
+            --default-authentication-plugin=mysql_native_password
+            --character-set-server=utf8mb4
+            --collation-server=utf8mb4_general_ci
+            --explicit_defaults_for_timestamp=true
+            --lower_case_table_names=1
+
+    postgres:
+        image: postgres:14.2
+        environment:
+            POSTGRES_USER: root
+            POSTGRES_PASSWORD: root
+            POSTGRES_DB: postgres
+        ports:
+            - "5432:5432"
+        volumes:
+            - postgres:/var/lib/postgresql/data
+            # 注入初始化脚本
+            - ../sql/easy_retry_postgre.sql:/docker-entrypoint-initdb.d/init.sql:ro
+
+    oracle:
+        image: gvenzl/oracle-xe:18-slim-faststart
+        environment:
+            ## 登录信息 SID: XE user: system password: oracle
+            ORACLE_PASSWORD: oracle
+        ports:
+            - "1521:1521"
+        volumes:
+            - oracle:/u01/app/oracle/oradata
+            - ../sql/easy_retry_oracle.sql:/tmp/schema.sql:ro
+            # 创建app用户: root/root@//localhost/XEPDB1
+            - ./oracle/1_create_user.sql:/docker-entrypoint-initdb.d/1_create_user.sql:ro
+            - ./oracle/2_create_schema.sh:/docker-entrypoint-initdb.d/2_create_schema.sh:ro

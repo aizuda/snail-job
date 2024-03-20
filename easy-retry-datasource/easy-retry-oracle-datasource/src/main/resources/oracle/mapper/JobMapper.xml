@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aizuda.easy.retry.template.datasource.persistence.mapper.JobMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.aizuda.easy.retry.template.datasource.persistence.po.Job">
+        <id column="id" property="id"/>
+        <result column="group_name" property="groupName"/>
+        <result column="job_name" property="jobName"/>
+        <result column="args_str" property="argsStr"/>
+        <result column="args_type" property="argsType"/>
+        <result column="ext_attrs" property="extAttrs"/>
+        <result column="next_trigger_at" property="nextTriggerAt"/>
+        <result column="job_status" property="jobStatus"/>
+        <result column="route_key" property="routeKey"/>
+        <result column="executor_type" property="executorType"/>
+        <result column="executor_info" property="executorInfo"/>
+        <result column="block_strategy" property="blockStrategy"/>
+        <result column="executor_timeout" property="executorTimeout"/>
+        <result column="max_retry_times" property="maxRetryTimes"/>
+        <result column="retry_interval" property="retryInterval"/>
+        <result column="bucket_index" property="bucketIndex"/>
+        <result column="description" property="description"/>
+        <result column="create_dt" property="createDt"/>
+        <result column="update_dt" property="updateDt"/>
+        <result column="deleted" property="deleted"/>
+    </resultMap>
+
+    <update id="updateBatchNextTriggerAtById" parameterType="java.util.List">
+        MERGE INTO job dest
+        USING (
+            <foreach collection="list" item="item" index="index" separator=" UNION ALL ">
+                SELECT
+                    #{item.nextTriggerAt} AS next_trigger_at,
+                    #{item.id} AS id
+                FROM DUAL
+            </foreach>
+        ) src
+        ON (dest.id = src.id)
+        WHEN MATCHED THEN
+        UPDATE SET dest.next_trigger_at = src.next_trigger_at
+    </update>
+
+</mapper>

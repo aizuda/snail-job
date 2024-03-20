@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aizuda.easy.retry.template.datasource.persistence.mapper.WorkflowTaskBatchMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.aizuda.easy.retry.template.datasource.persistence.po.WorkflowTaskBatch">
+        <id column="id" property="id"/>
+        <result column="namespace_id" property="namespaceId"/>
+        <result column="group_name" property="groupName"/>
+        <result column="workflow_id" property="workflowId"/>
+        <result column="task_batch_status" property="taskBatchStatus"/>
+        <result column="operation_reason" property="operationReason"/>
+        <result column="execution_at" property="executionAt"/>
+        <result column="create_dt" property="createDt"/>
+        <result column="update_dt" property="updateDt"/>
+        <result column="deleted" property="deleted"/>
+        <result column="ext_attrs" property="extAttrs"/>
+    </resultMap>
+
+    <select id="selectWorkflowBatchPageList"
+            parameterType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.WorkflowBatchQueryDO"
+            resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.WorkflowBatchResponseDO">
+        SELECT a.*, b.workflow_name
+          FROM workflow_task_batch a
+              JOIN workflow b ON a.workflow_id = b.id
+        <where>
+            a.namespace_id = #{queryDO.namespaceId}
+            <if test="queryDO.workflowId != null">
+                AND a.workflow_id = #{queryDO.workflowId}
+            </if>
+            <if test="queryDO.groupNames != null and queryDO.groupNames.size > 0">
+                AND a.group_name IN
+                <foreach collection="queryDO.groupNames" item="groupName"  open="("  separator="," close=")">
+                    #{groupName}
+                </foreach>
+            </if>
+            <if test="queryDO.taskBatchStatus != null">
+                AND task_batch_status = #{queryDO.taskBatchStatus}
+            </if>
+            <if test="queryDO.workflowName != null">
+                AND b.workflow_name LIKE #{queryDO.workflowName}
+            </if>
+            AND a.deleted = 0
+        </where>
+        ORDER BY a.id DESC
+    </select>
+
+</mapper>

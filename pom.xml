@@ -91,6 +91,11 @@
                 <version>${revision}</version>
             </dependency>
             <dependency>
+                <groupId>com.aizuda</groupId>
+                <artifactId>easy-retry-oracle-datasource</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
                 <groupId>cn.hutool</groupId>
                 <artifactId>hutool-http</artifactId>
                 <version>${hutool-all.version}</version>

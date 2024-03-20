@@ -36,9 +36,11 @@ public abstract class AbstractConfigAccess<T> implements ConfigAccess<T> {
     protected GroupConfigMapper groupConfigMapper;
     @Autowired
     protected Environment environment;
+
     protected static final List<String> ALLOW_DB = Arrays.asList(DbTypeEnum.MYSQL.getDb(),
         DbTypeEnum.MARIADB.getDb(),
-        DbTypeEnum.POSTGRES.getDb());
+        DbTypeEnum.POSTGRES.getDb(),
+        DbTypeEnum.ORACLE.getDb());
 
     protected DbTypeEnum getDbType() {
         String dbType = environment.getProperty("easy-retry.db-type");
