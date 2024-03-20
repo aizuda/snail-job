@@ -31,7 +31,6 @@ spring:
       idle-timeout: 30000
       pool-name: easy_retry
       max-lifetime: 1800000
-#      connection-test-query: SELECT 1
   web:
     resources:
       static-locations: classpath:admin/

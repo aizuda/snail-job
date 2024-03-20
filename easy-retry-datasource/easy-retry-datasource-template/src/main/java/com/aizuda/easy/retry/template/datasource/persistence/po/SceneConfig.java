@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.template.datasource.persistence.po;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
  * @since 2.5.0
  */
 @Data
+@TableName("scene_config")
 public class SceneConfig implements Serializable {
 
     @TableId(value = "id", type = IdType.AUTO)
