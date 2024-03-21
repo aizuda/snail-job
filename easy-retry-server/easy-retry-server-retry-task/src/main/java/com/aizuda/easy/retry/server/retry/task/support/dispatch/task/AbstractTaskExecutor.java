@@ -2,11 +2,15 @@ package com.aizuda.easy.retry.server.retry.task.support.dispatch.task;
 
 import akka.actor.ActorRef;
 import cn.hutool.core.lang.Pair;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.handler.ClientNodeAllocateHandler;
 import com.aizuda.easy.retry.server.common.IdempotentStrategy;
+import com.aizuda.easy.retry.server.common.util.DateUtils;
+import com.aizuda.easy.retry.server.retry.task.dto.LogMetaDTO;
 import com.aizuda.easy.retry.server.retry.task.support.RetryContext;
+import com.aizuda.easy.retry.server.retry.task.support.RetryTaskConverter;
 import com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.log.RetryTaskLogDTO;
 import com.aizuda.easy.retry.server.retry.task.support.retry.RetryExecutor;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
@@ -66,14 +70,18 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, Initializing
                 retryTask.getUniqueId(), pair.getValue().toString());
 
             // 记录日志
-            RetryTaskLogDTO retryTaskLog = new RetryTaskLogDTO();
-            retryTaskLog.setGroupName(retryTask.getGroupName());
-            retryTaskLog.setUniqueId(retryTask.getUniqueId());
-            retryTaskLog.setRetryStatus(retryTask.getRetryStatus());
-            retryTaskLog.setMessage(pair.getValue().toString());
-            retryTaskLog.setTriggerTime(LocalDateTime.now());
-            ActorRef actorRef = ActorGenerator.logActor();
-            actorRef.tell(retryTaskLog, actorRef);
+//            RetryTaskLogDTO retryTaskLog = new RetryTaskLogDTO();
+//            retryTaskLog.setGroupName(retryTask.getGroupName());
+//            retryTaskLog.setUniqueId(retryTask.getUniqueId());
+//            retryTaskLog.setRetryStatus(retryTask.getRetryStatus());
+//            retryTaskLog.setMessage(pair.getValue().toString());
+//            retryTaskLog.setTriggerTime(LocalDateTime.now());
+//            ActorRef actorRef = ActorGenerator.logActor();
+
+            LogMetaDTO logMetaDTO = RetryTaskConverter.INSTANCE.toLogMetaDTO(retryTask);
+            logMetaDTO.setTimestamp(DateUtils.toNowMilli());
+            EasyRetryLog.REMOTE.error("触发条件不满足 原因: [{}] <|>{}<|>", pair.getValue().toString(), logMetaDTO);
+
 
             return false;
         }

@@ -7,6 +7,7 @@ import ch.qos.logback.classic.spi.ThrowableProxyUtil;
 import ch.qos.logback.core.CoreConstants;
 import ch.qos.logback.core.UnsynchronizedAppenderBase;
 import com.aizuda.easy.retry.client.common.report.AsyncReportLog;
+import com.aizuda.easy.retry.client.common.report.LogReportFactory;
 import com.aizuda.easy.retry.client.common.util.ThreadLocalLogUtil;
 import com.aizuda.easy.retry.common.log.dto.LogContentDTO;
 import com.aizuda.easy.retry.common.log.constant.LogFieldConstants;
@@ -14,6 +15,7 @@ import com.aizuda.easy.retry.common.core.context.SpringContext;
 import org.slf4j.MDC;
 
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * @author wodeyangzipingpingwuqi
@@ -52,7 +54,7 @@ public class EasyRetryLogbackAppender<E> extends UnsynchronizedAppenderBase<E> {
         logContentDTO.addThrowableField(getThrowableField(event));
 
         // slidingWindow syncReportLog
-        SpringContext.getBeanByType(AsyncReportLog.class).syncReportLog(logContentDTO);
+        Optional.ofNullable(LogReportFactory.get()).ifPresent(logReport -> logReport.report(logContentDTO));
     }
 
     private String getThrowableField(LoggingEvent event) {

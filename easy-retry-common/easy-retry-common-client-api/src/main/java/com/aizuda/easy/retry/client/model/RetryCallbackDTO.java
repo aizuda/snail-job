@@ -27,4 +27,6 @@ public class RetryCallbackDTO {
     private Integer retryStatus;
     @NotBlank(message = "uniqueId 不能为空")
     private String uniqueId;
+    @NotBlank(message = "namespaceId 不能为空")
+    private String namespaceId;
 }

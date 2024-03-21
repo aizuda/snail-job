@@ -27,11 +27,11 @@ public abstract class AbstractRetryExecutor<BR, SR> implements RetryExecutor<BR,
 
         Class<? extends ExecutorMethod> retryMethodClass = retryerInfo.getExecutorMethod();
         if (retryMethodClass.isAssignableFrom(ExecutorAnnotationMethod.class)) {
-           EasyRetryLog.LOCAL.info("执行注解重试方法：{},参数为：{}", retryMethodClass.getName(), JsonUtil.toJsonString(params));
+           EasyRetryLog.LOCAL.debug("执行注解重试方法：{},参数为：{}", retryMethodClass.getName(), JsonUtil.toJsonString(params));
             ExecutorAnnotationMethod retryAnnotationMethod = new ExecutorAnnotationMethod(retryerInfo);
             return retryAnnotationMethod.doExecute(params);
         } else {
-           EasyRetryLog.LOCAL.info("执行自定义重试方法：{},参数为：{}", retryMethodClass.getName(), JsonUtil.toJsonString(params));
+           EasyRetryLog.LOCAL.debug("执行自定义重试方法：{},参数为：{}", retryMethodClass.getName(), JsonUtil.toJsonString(params));
             ExecutorMethod executorMethod = SpringContext.getBeanByType(retryMethodClass);
             return executorMethod.doExecute(params);
         }

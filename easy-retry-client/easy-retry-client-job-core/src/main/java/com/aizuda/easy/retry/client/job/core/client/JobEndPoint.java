@@ -7,12 +7,14 @@ import com.aizuda.easy.retry.client.job.core.cache.ThreadPoolCache;
 import com.aizuda.easy.retry.client.job.core.dto.JobExecutorInfo;
 import com.aizuda.easy.retry.client.job.core.executor.AbstractJobExecutor;
 import com.aizuda.easy.retry.client.job.core.executor.AnnotationJobExecutor;
+import com.aizuda.easy.retry.client.job.core.log.JobLogMeta;
 import com.aizuda.easy.retry.client.model.StopJobDTO;
 import com.aizuda.easy.retry.client.model.request.DispatchJobRequest;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.model.JobContext;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.common.log.EasyRetryLog;
+import com.aizuda.easy.retry.common.log.enums.LogTypeEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -39,7 +41,7 @@ public class JobEndPoint {
             JobContext jobContext = buildJobContext(dispatchJob);
 
             // 初始化调度信息（日志上报LogUtil）
-            ThreadLocalLogUtil.setContext(jobContext);
+            initLogContext(jobContext);
 
             if (Objects.nonNull(dispatchJob.getRetryCount()) && dispatchJob.getRetryCount() > 0) {
                 EasyRetryLog.REMOTE.info("任务执行/调度失败执行重试. 重试次数:[{}]",
@@ -74,6 +76,17 @@ public class JobEndPoint {
 
         return new Result<>(Boolean.TRUE);
     }
+
+    private void initLogContext(JobContext jobContext) {
+        JobLogMeta logMeta = new JobLogMeta();
+        logMeta.setNamespaceId(jobContext.getNamespaceId());
+        logMeta.setTaskId(jobContext.getTaskId());
+        logMeta.setGroupName(jobContext.getGroupName());
+        logMeta.setJobId(jobContext.getJobId());
+        logMeta.setTaskBatchId(jobContext.getTaskBatchId());
+        ThreadLocalLogUtil.initLogInfo(logMeta, LogTypeEnum.JOB);
+    }
+
 
     private static JobContext buildJobContext(DispatchJobRequest dispatchJob) {
         JobContext jobContext = new JobContext();

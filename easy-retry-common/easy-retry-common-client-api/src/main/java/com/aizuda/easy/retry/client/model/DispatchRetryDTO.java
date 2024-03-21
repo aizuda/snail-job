@@ -13,6 +13,10 @@ import lombok.Data;
  */
 @Data
 public class DispatchRetryDTO {
+    @NotBlank(message = "namespaceId 不能为空")
+    private String namespaceId;
+    @NotBlank(message = "group 不能为空")
+    private String groupName;
     @NotBlank(message = "scene 不能为空")
     private String scene;
     @NotBlank(message = "参数 不能为空")

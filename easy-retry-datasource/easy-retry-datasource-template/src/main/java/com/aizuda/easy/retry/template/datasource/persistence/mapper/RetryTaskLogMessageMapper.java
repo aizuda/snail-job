@@ -1,8 +1,11 @@
 package com.aizuda.easy.retry.template.datasource.persistence.mapper;
 
+import com.aizuda.easy.retry.template.datasource.persistence.po.JobLogMessage;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLogMessage;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
+
+import java.util.List;
 
 /**
  * <p>
@@ -15,4 +18,7 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface RetryTaskLogMessageMapper extends BaseMapper<RetryTaskLogMessage> {
 
+    int batchInsert(List<RetryTaskLogMessage> list);
+
+    int batchUpdate(List<RetryTaskLogMessage> list);
 }

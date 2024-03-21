@@ -4,6 +4,7 @@ import com.aizuda.easy.retry.client.common.proxy.RequestBuilder;
 import com.aizuda.easy.retry.client.common.util.ThreadLocalLogUtil;
 import com.aizuda.easy.retry.client.job.core.cache.ThreadPoolCache;
 import com.aizuda.easy.retry.client.job.core.client.JobNettyClient;
+import com.aizuda.easy.retry.client.job.core.log.JobLogMeta;
 import com.aizuda.easy.retry.client.model.ExecuteResult;
 import com.aizuda.easy.retry.client.model.request.DispatchJobResultRequest;
 import com.aizuda.easy.retry.common.core.enums.JobTaskStatusEnum;
@@ -13,7 +14,7 @@ import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.core.model.JobContext;
 import com.aizuda.easy.retry.common.core.model.NettyResult;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
-import com.aizuda.easy.retry.common.log.EasyRetryLog;
+import com.aizuda.easy.retry.common.log.enums.LogTypeEnum;
 import com.google.common.util.concurrent.FutureCallback;
 import lombok.extern.slf4j.Slf4j;
 
@@ -43,7 +44,7 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
 
         try {
             // 初始化调度信息（日志上报LogUtil）
-            ThreadLocalLogUtil.setContext(jobContext);
+            initLogContext();
 
             // 上报执行成功
             EasyRetryLog.REMOTE.info("任务执行成功 taskBatchId:[{}] [{}]", jobContext.getTaskBatchId(),
@@ -74,7 +75,7 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
 
         try {
             // 初始化调度信息（日志上报LogUtil）
-            ThreadLocalLogUtil.setContext(jobContext);
+            initLogContext();
 
             // 上报执行失败
             EasyRetryLog.REMOTE.error("任务执行失败 taskBatchId:[{}]", jobContext.getTaskBatchId(), t);
@@ -95,6 +96,16 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
             ThreadLocalLogUtil.removeContext();
             stopThreadPool();
         }
+    }
+
+    private void initLogContext() {
+        JobLogMeta logMeta = new JobLogMeta();
+        logMeta.setNamespaceId(jobContext.getNamespaceId());
+        logMeta.setTaskId(jobContext.getTaskId());
+        logMeta.setGroupName(jobContext.getGroupName());
+        logMeta.setJobId(jobContext.getJobId());
+        logMeta.setTaskBatchId(jobContext.getTaskBatchId());
+        ThreadLocalLogUtil.initLogInfo(logMeta, LogTypeEnum.JOB);
     }
 
     private void stopThreadPool() {

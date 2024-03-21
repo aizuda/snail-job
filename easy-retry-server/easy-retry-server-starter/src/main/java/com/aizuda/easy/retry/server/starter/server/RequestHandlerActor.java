@@ -103,7 +103,6 @@ public class RequestHandlerActor extends AbstractActor {
            EasyRetryLog.LOCAL.warn("client register error. groupName:[{}]", groupName);
         }
 
-
         UrlBuilder builder = UrlBuilder.ofHttp(uri);
         Collection<HttpRequestHandler> httpRequestHandlers = SpringContext.CONTEXT
             .getBeansOfType(HttpRequestHandler.class).values();

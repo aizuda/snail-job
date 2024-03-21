@@ -9,5 +9,7 @@ import com.aizuda.easy.retry.common.log.dto.LogContentDTO;
  */
 public interface LogReport {
 
+    boolean supports();
+
     void report(LogContentDTO logContentDTO);
 }

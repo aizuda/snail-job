@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.client.common.appender;
 
 import com.aizuda.easy.retry.client.common.report.AsyncReportLog;
+import com.aizuda.easy.retry.client.common.report.LogReportFactory;
 import com.aizuda.easy.retry.client.common.util.ThreadLocalLogUtil;
 import com.aizuda.easy.retry.common.log.dto.LogContentDTO;
 import com.aizuda.easy.retry.common.log.constant.LogFieldConstants;
@@ -19,6 +20,7 @@ import org.apache.logging.log4j.core.util.Throwables;
 
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * @author wodeyangzipingpingwuqi
@@ -46,7 +48,7 @@ public class EasyRetryLog4j2Appender extends AbstractAppender {
         logContentDTO.addMessageField(event.getMessage().getFormattedMessage());
 
         // slidingWindow syncReportLog
-        SpringContext.getBeanByType(AsyncReportLog.class).syncReportLog(logContentDTO);
+        Optional.ofNullable(LogReportFactory.get()).ifPresent(logReport -> logReport.report(logContentDTO));
     }
 
     protected EasyRetryLog4j2Appender(String name, Filter filter, Layout<? extends Serializable> layout, boolean ignoreExceptions) {

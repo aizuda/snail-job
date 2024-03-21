@@ -1,6 +1,8 @@
 package com.aizuda.easy.retry.server.retry.task.support;
 
+import com.aizuda.easy.retry.server.model.dto.RetryLogTaskDTO;
 import com.aizuda.easy.retry.server.model.dto.RetryTaskDTO;
+import com.aizuda.easy.retry.server.retry.task.dto.LogMetaDTO;
 import com.aizuda.easy.retry.server.retry.task.dto.NotifyConfigPartitionTask;
 import com.aizuda.easy.retry.server.retry.task.dto.RetryPartitionTask;
 import com.aizuda.easy.retry.server.retry.task.generator.task.TaskContext;
@@ -9,6 +11,7 @@ import com.aizuda.easy.retry.template.datasource.persistence.po.NotifyConfig;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryDeadLetter;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLog;
+import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLogMessage;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
@@ -45,4 +48,9 @@ public interface RetryTaskConverter {
     RetryTimerContext toRetryTimerContext(RetryPartitionTask retryPartitionTask);
 
     List<NotifyConfigPartitionTask> toNotifyConfigPartitionTask(List<NotifyConfig> notifyConfigs);
+
+    RetryTaskLogMessage toRetryTaskLogMessage(RetryLogTaskDTO retryLogTaskDTO);
+
+    LogMetaDTO toLogMetaDTO(RetryTask retryTask);
+
 }

@@ -49,4 +49,9 @@ public class RetryTaskLogDTO {
      */
     private String clientInfo;
 
+    /**
+     * 真实上报时间
+     */
+    private Long realTime;
+
 }

@@ -6,11 +6,13 @@ import com.aizuda.easy.retry.client.job.core.cache.FutureCache;
 import com.aizuda.easy.retry.client.job.core.cache.ThreadPoolCache;
 import com.aizuda.easy.retry.client.job.core.dto.JobArgs;
 import com.aizuda.easy.retry.client.job.core.dto.ShardingJobArgs;
+import com.aizuda.easy.retry.client.job.core.log.JobLogMeta;
 import com.aizuda.easy.retry.client.job.core.timer.StopTaskTimerTask;
 import com.aizuda.easy.retry.client.job.core.timer.TimerManager;
 import com.aizuda.easy.retry.client.model.ExecuteResult;
 import com.aizuda.easy.retry.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.easy.retry.common.core.model.JobContext;
+import com.aizuda.easy.retry.common.log.enums.LogTypeEnum;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
@@ -51,7 +53,7 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
 
             try {
                 // 初始化调度信息（日志上报LogUtil）
-                ThreadLocalLogUtil.setContext(jobContext);
+                initLogContext(jobContext);
                 return doJobExecute(jobArgs);
             } finally {
                 ThreadLocalLogUtil.removeContext();
@@ -61,6 +63,16 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
 
         FutureCache.addFuture(jobContext.getTaskBatchId(), submit);
         Futures.addCallback(submit, new JobExecutorFutureCallback(jobContext), decorator);
+    }
+
+    private void initLogContext(JobContext jobContext) {
+        JobLogMeta logMeta = new JobLogMeta();
+        logMeta.setNamespaceId(jobContext.getNamespaceId());
+        logMeta.setTaskId(jobContext.getTaskId());
+        logMeta.setGroupName(jobContext.getGroupName());
+        logMeta.setJobId(jobContext.getJobId());
+        logMeta.setTaskBatchId(jobContext.getTaskBatchId());
+        ThreadLocalLogUtil.initLogInfo(logMeta, LogTypeEnum.JOB);
     }
 
     private static JobArgs buildJobArgs(JobContext jobContext) {

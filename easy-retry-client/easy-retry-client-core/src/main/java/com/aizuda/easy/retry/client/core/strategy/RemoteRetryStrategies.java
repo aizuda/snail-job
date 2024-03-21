@@ -108,9 +108,7 @@ public class RemoteRetryStrategies extends AbstractRetryStrategies {
                 return Collections.singletonList(new RetryListener() {
                     @Override
                     public <V> void onRetry(Attempt<V> attempt) {
-                        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-                        HttpServletRequest request = Objects.requireNonNull(attributes).getRequest();
-                        Integer attemptNumber = (Integer) request.getAttribute("attemptNumber");
+                        Integer attemptNumber = RetrySiteSnapshot.getAttemptNumber();
                         if (attempt.hasResult()) {
                            EasyRetryLog.LOCAL.info("easy-retry 远程重试成功，第[{}]次调度", attemptNumber);
                         }

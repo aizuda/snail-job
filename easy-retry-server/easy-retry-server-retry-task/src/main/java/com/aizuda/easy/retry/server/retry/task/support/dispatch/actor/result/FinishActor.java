@@ -13,7 +13,10 @@ import com.aizuda.easy.retry.server.retry.task.support.RetryTaskLogConverter;
 import com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.log.RetryTaskLogDTO;
 import com.aizuda.easy.retry.server.retry.task.support.handler.CallbackRetryTaskHandler;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
+import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskLogMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
+import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLog;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -40,6 +43,7 @@ import java.time.LocalDateTime;
 @Slf4j
 public class FinishActor extends AbstractActor {
 
+
     @Autowired
     private AccessTemplate accessTemplate;
     @Autowired
@@ -49,6 +53,8 @@ public class FinishActor extends AbstractActor {
     @Autowired
     @Qualifier("retryIdempotentStrategyHandler")
     private IdempotentStrategy<Pair<String/*groupName*/, String/*namespaceId*/>, Long> idempotentStrategy;
+    @Autowired
+    private RetryTaskLogMapper retryTaskLogMapper;
 
     @Override
     public Receive createReceive() {
@@ -70,6 +76,15 @@ public class FinishActor extends AbstractActor {
 
                         // 创建一个回调任务
                         callbackRetryTaskHandler.create(retryTask);
+
+                        // 变动日志的状态
+                        RetryTaskLog retryTaskLog = new RetryTaskLog();
+                        retryTaskLog.setRetryStatus(retryTask.getRetryStatus());
+                        retryTaskLogMapper.update(retryTaskLog, new LambdaUpdateWrapper<RetryTaskLog>()
+                            .eq(RetryTaskLog::getNamespaceId, retryTask.getNamespaceId())
+                            .eq(RetryTaskLog::getUniqueId, retryTask.getUniqueId())
+                            .eq(RetryTaskLog::getGroupName, retryTask.getGroupName()));
+
                     }
                 });
 
@@ -78,11 +93,6 @@ public class FinishActor extends AbstractActor {
             } finally {
                 // 清除幂等标识位
                 idempotentStrategy.clear(Pair.of(retryTask.getGroupName(), retryTask.getNamespaceId()), retryTask.getId());
-
-                RetryTaskLogDTO retryTaskLogDTO = RetryTaskLogConverter.INSTANCE.toRetryTaskLogDTO(retryTask);
-                retryTaskLogDTO.setMessage("任务已经执行成功了.");
-                ActorRef actorRef = ActorGenerator.logActor();
-                actorRef.tell(retryTaskLogDTO, actorRef);
 
                 getContext().stop(getSelf());
 

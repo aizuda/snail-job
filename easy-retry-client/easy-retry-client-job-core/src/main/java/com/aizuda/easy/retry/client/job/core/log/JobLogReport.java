@@ -2,9 +2,9 @@ package com.aizuda.easy.retry.client.job.core.log;
 
 import com.aizuda.easy.retry.client.common.report.AbstractLogReport;
 import com.aizuda.easy.retry.client.common.util.ThreadLocalLogUtil;
-import com.aizuda.easy.retry.common.core.model.JobContext;
 import com.aizuda.easy.retry.common.log.dto.LogContentDTO;
-import com.aizuda.easy.retry.server.model.dto.LogTaskDTO;
+import com.aizuda.easy.retry.common.log.enums.LogTypeEnum;
+import com.aizuda.easy.retry.server.model.dto.JobLogTaskDTO;
 import org.springframework.stereotype.Component;
 
 /**
@@ -12,14 +12,20 @@ import org.springframework.stereotype.Component;
  * @date 2024-03-20 23:25:24
  * @since 3.2.0
  */
-//@Component
-public class JobLogReport extends AbstractLogReport {
-    @Override
-    protected LogTaskDTO buildLogTaskDTO(LogContentDTO logContentDTO) {
-        JobContext context = ThreadLocalLogUtil.getContext();
+@Component
+public class JobLogReport extends AbstractLogReport<JobLogTaskDTO> {
 
-        LogTaskDTO logTaskDTO = new LogTaskDTO();
+    @Override
+    public boolean supports () {
+        return LogTypeEnum.JOB == ThreadLocalLogUtil.getLogType();
+    }
+
+    @Override
+    protected JobLogTaskDTO buildLogTaskDTO(LogContentDTO logContentDTO) {
+        JobLogMeta context = (JobLogMeta) ThreadLocalLogUtil.getContext();
+        JobLogTaskDTO logTaskDTO = new JobLogTaskDTO();
         logTaskDTO.setJobId(context.getJobId());
+        logTaskDTO.setLogType(LogTypeEnum.JOB.name());
         logTaskDTO.setTaskId(context.getTaskId());
         logTaskDTO.setTaskBatchId(context.getTaskBatchId());
         logTaskDTO.setRealTime(logContentDTO.getTimeStamp());

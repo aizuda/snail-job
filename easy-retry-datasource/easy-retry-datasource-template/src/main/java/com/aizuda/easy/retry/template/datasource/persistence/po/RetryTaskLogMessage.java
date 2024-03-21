@@ -59,4 +59,15 @@ public class RetryTaskLogMessage implements Serializable {
      * 异常信息
      */
     private String message;
+
+    /**
+     * 日志数量
+     */
+    private Integer logNum;
+
+
+    /**
+     * 真实上报时间
+     */
+    private Long realTime;
 }

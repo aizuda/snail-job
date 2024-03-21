@@ -57,7 +57,7 @@ public class GuavaRetryExecutor extends AbstractRetryExecutor<WaitStrategy, Stop
             retrySuccess.accept(result);
         } catch (RetryException e){
             // 重试完成，仍然失败
-            EasyRetryLog.LOCAL.error("业务系统重试异常：",e.getLastFailedAttempt().getExceptionCause());
+            EasyRetryLog.LOCAL.debug("业务系统重试异常：",e.getLastFailedAttempt().getExceptionCause());
             retryError.accept(e.getLastFailedAttempt().getExceptionCause());
         }
 

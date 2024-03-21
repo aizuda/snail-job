@@ -17,6 +17,11 @@ import java.util.List;
 public class LogTaskDTO implements Serializable {
 
     /**
+     * 日志类型
+     */
+    private String logType;
+
+    /**
      * 命名空间
      */
     private String namespaceId;
@@ -44,15 +49,15 @@ public class LogTaskDTO implements Serializable {
     @Deprecated
     private Long taskId;
 
-    /**
-     * 创建时间
-     */
-    private LocalDateTime createDt;
-
-    /**
-     * 调度信息
-     */
-    private String message;
+//    /**
+//     * 创建时间
+//     */
+//    private LocalDateTime createDt;
+//
+//    /**
+//     * 调度信息
+//     */
+//    private String message;
 
     /**
      * 上报时间

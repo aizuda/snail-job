@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.client.common.appender;
 
 import com.aizuda.easy.retry.client.common.report.AsyncReportLog;
+import com.aizuda.easy.retry.client.common.report.LogReportFactory;
 import com.aizuda.easy.retry.client.common.util.ThreadLocalLogUtil;
 import com.aizuda.easy.retry.common.log.dto.LogContentDTO;
 import com.aizuda.easy.retry.common.log.constant.LogFieldConstants;
@@ -11,6 +12,7 @@ import org.apache.log4j.spi.LoggingEvent;
 import org.apache.log4j.spi.ThrowableInformation;
 
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * @author wodeyangzipingpingwuqi
@@ -42,7 +44,7 @@ public class EasyRetryLog4jAppender extends AppenderSkeleton {
         logContentDTO.addThrowableField(getThrowableField(event));
 
         // slidingWindow syncReportLog
-        SpringContext.getBeanByType(AsyncReportLog.class).syncReportLog(logContentDTO);
+        Optional.ofNullable(LogReportFactory.get()).ifPresent(logReport -> logReport.report(logContentDTO));
     }
 
     @Override

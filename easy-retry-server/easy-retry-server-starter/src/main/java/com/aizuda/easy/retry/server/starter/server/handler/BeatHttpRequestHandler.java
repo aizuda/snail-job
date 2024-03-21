@@ -37,7 +37,7 @@ public class BeatHttpRequestHandler extends GetHttpRequestHandler {
 
     @Override
     public String doHandler(String content, UrlQuery query, HttpHeaders headers) {
-        EasyRetryLog.LOCAL.info("Beat check content:[{}]", content);
+        EasyRetryLog.LOCAL.debug("Beat check content:[{}]", content);
         EasyRetryRequest retryRequest = JsonUtil.parseObject(content, EasyRetryRequest.class);
        return JsonUtil.toJsonString(new NettyResult(PONG, retryRequest.getReqId()));
     }

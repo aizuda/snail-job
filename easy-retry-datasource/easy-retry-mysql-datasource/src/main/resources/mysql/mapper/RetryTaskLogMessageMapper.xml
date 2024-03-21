@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskLogMessageMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLogMessage">
+        <id column="id" property="id" />
+        <result column="group_name" property="groupName" />
+        <result column="unique_id" property="uniqueId" />
+        <result column="create_dt" property="createDt" />
+        <result column="log_num" property="logNum"/>
+        <result column="message" property="message"/>
+        <result column="real_time" property="realTime"/>
+        <result column="client_info" property="clientInfo"/>
+    </resultMap>
+    <!-- 定义批量新增的 SQL 映射 -->
+    <insert id="batchInsert" parameterType="java.util.List">
+        INSERT INTO retry_task_log_message (namespace_id, group_name, unique_id, log_num, message,
+        create_dt, real_time, client_info)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.namespaceId},
+            #{item.groupName},
+            #{item.uniqueId},
+            #{item.logNum},
+            #{item.message},
+            #{item.createDt},
+            #{item.realTime},
+            #{item.clientInfo}
+            )
+        </foreach>
+    </insert>
+
+    <update id="batchUpdate" parameterType="java.util.List">
+        UPDATE retry_task_log_message jlm,
+        (
+        <foreach collection="list" item="item" index="index" separator=" UNION ALL ">
+            SELECT
+            #{item.message} AS message,
+            #{item.logNum} AS log_num,
+            #{item.id} AS id
+        </foreach>
+        ) tt
+        SET
+        jlm.message = tt.message, jlm.log_num = tt.log_num
+        WHERE jlm.id = tt.id
+    </update>
+
+</mapper>

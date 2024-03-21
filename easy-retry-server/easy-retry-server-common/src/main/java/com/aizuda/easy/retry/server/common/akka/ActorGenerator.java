@@ -31,7 +31,7 @@ public class ActorGenerator {
     public static final String NO_RETRY_ACTOR = "NoRetryActor";
     public static final String EXEC_CALLBACK_UNIT_ACTOR = "ExecCallbackUnitActor";
     public static final String EXEC_UNIT_ACTOR = "ExecUnitActor";
-    public static final String LOG_ACTOR = "LogActor";
+    public static final String LOG_ACTOR = "RetryLogActor";
 
     private static final String RETRY_TASK_EXECUTOR_DISPATCHER = "akka.actor.retry-task-executor-dispatcher";
     private static final String RETRY_TASK_EXECUTOR_RESULT_DISPATCHER = "akka.actor.retry-task-executor-result-dispatcher";

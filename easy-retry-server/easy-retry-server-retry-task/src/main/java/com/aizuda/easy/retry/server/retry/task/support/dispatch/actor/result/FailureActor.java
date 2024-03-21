@@ -11,13 +11,17 @@ import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
+import com.aizuda.easy.retry.server.retry.task.dto.LogMetaDTO;
 import com.aizuda.easy.retry.server.retry.task.support.RetryTaskLogConverter;
 import com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.log.RetryTaskLogDTO;
 import com.aizuda.easy.retry.server.retry.task.support.event.RetryTaskFailMoreThresholdAlarmEvent;
 import com.aizuda.easy.retry.server.retry.task.support.handler.CallbackRetryTaskHandler;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
+import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskLogMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
+import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLog;
 import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -55,12 +59,12 @@ public class FailureActor extends AbstractActor {
     @Autowired
     @Qualifier("retryIdempotentStrategyHandler")
     private IdempotentStrategy<Pair<String/*groupName*/, String/*namespaceId*/>, Long> idempotentStrategy;
-
+    @Autowired
+    private RetryTaskLogMapper retryTaskLogMapper;
     @Override
     public Receive createReceive() {
         return receiveBuilder().match(RetryTask.class, retryTask -> {
            EasyRetryLog.LOCAL.debug("FailureActor params:[{}]", retryTask);
-
 
             try {
                 // 超过最大等级
@@ -91,6 +95,14 @@ public class FailureActor extends AbstractActor {
                                 () -> new EasyRetryServerException("更新重试任务失败. groupName:[{}] uniqueId:[{}]",
                                         retryTask.getGroupName(), retryTask.getUniqueId()));
 
+                        // 变动日志的状态
+                        RetryTaskLog retryTaskLog = new RetryTaskLog();
+                        retryTaskLog.setRetryStatus(retryTask.getRetryStatus());
+                        retryTaskLogMapper.update(retryTaskLog, new LambdaUpdateWrapper<RetryTaskLog>()
+                            .eq(RetryTaskLog::getNamespaceId, retryTask.getNamespaceId())
+                            .eq(RetryTaskLog::getUniqueId, retryTask.getUniqueId())
+                            .eq(RetryTaskLog::getGroupName, retryTask.getGroupName()));
+
                         context.publishEvent(new RetryTaskFailMoreThresholdAlarmEvent(retryTask));
                     }
                 });
@@ -99,15 +111,6 @@ public class FailureActor extends AbstractActor {
             } finally {
                 // 清除幂等标识位
                 idempotentStrategy.clear(Pair.of(retryTask.getGroupName(), retryTask.getNamespaceId()), retryTask.getId());
-
-                if (RetryStatusEnum.MAX_COUNT.getStatus().equals(retryTask.getRetryStatus())) {
-
-                    RetryTaskLogDTO retryTaskLogDTO = RetryTaskLogConverter.INSTANCE.toRetryTaskLogDTO(retryTask);
-                    retryTaskLogDTO.setMessage("任务已经到达最大执行次数了.");
-                    ActorRef actorRef = ActorGenerator.logActor();
-                    actorRef.tell(retryTaskLogDTO, actorRef);
-                }
-
                 getContext().stop(getSelf());
             }
 

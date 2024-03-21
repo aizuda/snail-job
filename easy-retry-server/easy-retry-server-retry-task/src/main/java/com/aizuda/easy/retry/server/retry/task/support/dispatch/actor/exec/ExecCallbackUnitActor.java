@@ -14,7 +14,10 @@ import com.aizuda.easy.retry.server.common.client.RequestBuilder;
 import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.util.ClientInfoUtils;
+import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.server.retry.task.client.RetryRpcClient;
+import com.aizuda.easy.retry.server.retry.task.dto.LogMetaDTO;
+import com.aizuda.easy.retry.server.retry.task.support.RetryTaskConverter;
 import com.aizuda.easy.retry.server.retry.task.support.RetryTaskLogConverter;
 import com.aizuda.easy.retry.server.retry.task.support.context.CallbackRetryContext;
 import com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.log.RetryTaskLogDTO;
@@ -62,9 +65,9 @@ public class ExecCallbackUnitActor extends AbstractActor {
             RegisterNodeInfo serverNode = context.getServerNode();
             SceneConfig sceneConfig = context.getSceneConfig();
 
-            RetryTaskLogDTO retryTaskLog = RetryTaskLogConverter.INSTANCE.toRetryTaskLogDTO(retryTask);
-            retryTaskLog.setTriggerTime(LocalDateTime.now());
-            retryTaskLog.setClientInfo(ClientInfoUtils.generate(serverNode));
+//            RetryTaskLogDTO retryTaskLog = RetryTaskLogConverter.INSTANCE.toRetryTaskLogDTO(retryTask);
+//            retryTaskLog.setTriggerTime(LocalDateTime.now());
+//            retryTaskLog.setClientInfo(ClientInfoUtils.generate(serverNode));
 
             try {
 
@@ -80,23 +83,24 @@ public class ExecCallbackUnitActor extends AbstractActor {
                                 message = "回调客户端失败: 异常信息为空";
                             }
                         }
-                        retryTaskLog.setMessage(message);
+//                        retryTaskLog.setMessage(message);
                         return result;
                     });
                     if (context.hasException()) {
-                        retryTaskLog.setMessage(context.getException().getMessage());
+//                        retryTaskLog.setMessage(context.getException().getMessage());
                     }
                 } else {
-                    retryTaskLog.setMessage("There are currently no available client PODs.");
+//                    retryTaskLog.setMessage("There are currently no available client PODs.");
                 }
 
             } catch (Exception e) {
-                EasyRetryLog.LOCAL.error("callback client error. retryTask:[{}]", JsonUtil.toJsonString(retryTask), e);
-                retryTaskLog.setMessage(StringUtils.isBlank(e.getMessage()) ? StrUtil.EMPTY : e.getMessage());
+                LogMetaDTO logMetaDTO = RetryTaskConverter.INSTANCE.toLogMetaDTO(retryTask);
+                logMetaDTO.setTimestamp(DateUtils.toNowMilli());
+                EasyRetryLog.REMOTE.error("请求客户端异常. <|>{}<|>",  retryTask.getUniqueId(), logMetaDTO, e);//                retryTaskLog.setMessage(StringUtils.isBlank(e.getMessage()) ? StrUtil.EMPTY : e.getMessage());
             } finally {
 
-                ActorRef actorRef = ActorGenerator.logActor();
-                actorRef.tell(retryTaskLog, actorRef);
+//                ActorRef actorRef = ActorGenerator.logActor();
+//                actorRef.tell(retryTaskLog, actorRef);
 
                 getContext().stop(getSelf());
 
@@ -135,6 +139,7 @@ public class ExecCallbackUnitActor extends AbstractActor {
         retryCallbackDTO.setGroup(callbackTask.getGroupName());
         retryCallbackDTO.setExecutorName(callbackTask.getExecutorName());
         retryCallbackDTO.setUniqueId(callbackTask.getUniqueId());
+        retryCallbackDTO.setNamespaceId(callbackTask.getNamespaceId());
 
         RetryRpcClient rpcClient = RequestBuilder.<RetryRpcClient, Result>newBuilder()
                 .nodeInfo(serverNode)

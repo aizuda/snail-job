@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.client.core.client;
 
 import cn.hutool.core.lang.Assert;
+import com.aizuda.easy.retry.client.common.util.ThreadLocalLogUtil;
 import com.aizuda.easy.retry.client.core.IdempotentIdGenerate;
 import com.aizuda.easy.retry.client.core.RetryArgSerializer;
 import com.aizuda.easy.retry.client.common.cache.GroupVersionCache;
@@ -9,6 +10,7 @@ import com.aizuda.easy.retry.client.core.callback.RetryCompleteCallback;
 import com.aizuda.easy.retry.client.core.exception.EasyRetryClientException;
 import com.aizuda.easy.retry.client.core.intercepter.RetrySiteSnapshot;
 import com.aizuda.easy.retry.client.core.loader.EasyRetrySpiLoader;
+import com.aizuda.easy.retry.client.core.log.RetryLogMeta;
 import com.aizuda.easy.retry.client.core.retryer.RetryerInfo;
 import com.aizuda.easy.retry.client.core.retryer.RetryerResultContext;
 import com.aizuda.easy.retry.client.core.serializer.JacksonSerializer;
@@ -24,6 +26,7 @@ import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.core.model.IdempotentIdContext;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
+import com.aizuda.easy.retry.common.log.enums.LogTypeEnum;
 import com.aizuda.easy.retry.server.model.dto.ConfigDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
@@ -64,7 +67,8 @@ public class RetryEndPoint {
         RetryerInfo retryerInfo = RetryerInfoCache.get(executeReqDto.getScene(), executeReqDto.getExecutorName());
         if (Objects.isNull(retryerInfo)) {
             EasyRetryLog.REMOTE.error("场景:[{}]配置不存在, 请检查您的场景和执行器是否存在", executeReqDto.getScene());
-            throw new EasyRetryClientException("场景:[{}]配置不存在, 请检查您的场景和执行器是否存在", executeReqDto.getScene());
+            throw new EasyRetryClientException("场景:[{}]配置不存在, 请检查您的场景和执行器是否存在",
+                executeReqDto.getScene());
         }
 
         RetryArgSerializer retryArgSerializer = EasyRetrySpiLoader.loadRetryArgSerializer();
@@ -82,6 +86,13 @@ public class RetryEndPoint {
 
         try {
             RetrySiteSnapshot.setAttemptNumber(executeReqDto.getRetryCount());
+
+            // 初始化实时日志上下文
+            RetryLogMeta retryLogMeta = new RetryLogMeta();
+            retryLogMeta.setGroupName(executeReqDto.getGroupName());
+            retryLogMeta.setNamespaceId(executeReqDto.getNamespaceId());
+            retryLogMeta.setUniqueId(executeReqDto.getUniqueId());
+            ThreadLocalLogUtil.initLogInfo(retryLogMeta, LogTypeEnum.RETRY);
 
             RetryerResultContext retryerResultContext = retryStrategy.openRetry(executeReqDto.getScene(),
                 executeReqDto.getExecutorName(), deSerialize);
@@ -101,15 +112,20 @@ public class RetryEndPoint {
             }
 
             if (Objects.equals(RetryResultStatusEnum.SUCCESS.getStatus(), executeRespDto.getStatusCode())) {
-                EasyRetryLog.REMOTE.info("remote retry complete. count:[{}] result:[{}]", executeReqDto.getRetryCount(), executeRespDto.getResultJson());
-            } if (Objects.equals(RetryResultStatusEnum.STOP.getStatus(), executeRespDto.getStatusCode())) {
-                EasyRetryLog.REMOTE.info("remote retry complete. count:[{}] exceptionMsg:[{}]", executeReqDto.getRetryCount(), executeRespDto.getExceptionMsg());
+                EasyRetryLog.REMOTE.info("remote retry complete. count:[{}] result:[{}]", executeReqDto.getRetryCount(),
+                    executeRespDto.getResultJson());
+            }
+            if (Objects.equals(RetryResultStatusEnum.STOP.getStatus(), executeRespDto.getStatusCode())) {
+                EasyRetryLog.REMOTE.warn("remote retry complete. count:[{}] exceptionMsg:[{}]",
+                    executeReqDto.getRetryCount(), executeRespDto.getExceptionMsg());
             } else {
-                EasyRetryLog.REMOTE.info("remote retry complete. count:[{}] ", executeReqDto.getRetryCount(), retryerResultContext.getThrowable());
+                EasyRetryLog.REMOTE.error("remote retry complete. count:[{}] ", executeReqDto.getRetryCount(),
+                    retryerResultContext.getThrowable());
             }
 
         } finally {
             RetrySiteSnapshot.removeAll();
+            ThreadLocalLogUtil.removeAll();
         }
 
         return new Result<>(executeRespDto);
@@ -126,27 +142,39 @@ public class RetryEndPoint {
 
     @PostMapping("/callback/v1")
     public Result callback(@RequestBody @Validated RetryCallbackDTO callbackDTO) {
-        RetryerInfo retryerInfo = RetryerInfoCache.get(callbackDTO.getScene(), callbackDTO.getExecutorName());
-        if (Objects.isNull(retryerInfo)) {
-            throw new EasyRetryClientException("场景:[{}]配置不存在, 请检查您的场景和执行器是否存在", callbackDTO.getScene());
-        }
 
-        RetryArgSerializer retryArgSerializer = EasyRetrySpiLoader.loadRetryArgSerializer();
-
-        Object[] deSerialize;
+        RetryerInfo retryerInfo = null;
+        Object[] deSerialize = null;
         try {
+
+            // 初始化实时日志上下文
+            RetryLogMeta retryLogMeta = new RetryLogMeta();
+            retryLogMeta.setGroupName(callbackDTO.getGroup());
+            retryLogMeta.setNamespaceId(callbackDTO.getNamespaceId());
+            retryLogMeta.setUniqueId(callbackDTO.getUniqueId());
+            ThreadLocalLogUtil.initLogInfo(retryLogMeta, LogTypeEnum.RETRY);
+
+            retryerInfo = RetryerInfoCache.get(callbackDTO.getScene(), callbackDTO.getExecutorName());
+            if (Objects.isNull(retryerInfo)) {
+                EasyRetryLog.REMOTE.error("场景:[{}]配置不存在, 请检查您的场景和执行器是否存在", callbackDTO.getScene());
+                return new Result(0, "回调失败");
+            }
+
+            RetryArgSerializer retryArgSerializer = EasyRetrySpiLoader.loadRetryArgSerializer();
+
             deSerialize = (Object[]) retryArgSerializer.deSerialize(callbackDTO.getArgsStr(),
                 retryerInfo.getExecutor().getClass(), retryerInfo.getMethod());
-        } catch (JsonProcessingException e) {
-            throw new EasyRetryClientException("参数解析异常", e);
-        }
 
-        try {
             // 以Spring Bean模式回调
             return doCallbackForSpringBean(callbackDTO, retryerInfo, deSerialize);
+        } catch (JsonProcessingException e) {
+            EasyRetryLog.REMOTE.error("参数解析异常", e);
+            return new Result(0, "回调失败");
         } catch (NoSuchBeanDefinitionException e) {
             // 若不是SpringBean 则直接反射以普通类调用
             return doCallbackForOrdinaryClass(callbackDTO, retryerInfo, deSerialize);
+        } finally {
+            ThreadLocalLogUtil.removeAll();
         }
     }
 
@@ -196,7 +224,8 @@ public class RetryEndPoint {
      * @param deSerialize 参数信息
      * @return Result
      */
-    private Result doCallbackForSpringBean(RetryCallbackDTO callbackDTO, RetryerInfo retryerInfo, Object[] deSerialize) {
+    private Result doCallbackForSpringBean(RetryCallbackDTO callbackDTO, RetryerInfo retryerInfo,
+        Object[] deSerialize) {
         Class<? extends RetryCompleteCallback> retryCompleteCallbackClazz = retryerInfo.getRetryCompleteCallback();
 
         RetryCompleteCallback retryCompleteCallback = SpringContext.getBeanByType(retryCompleteCallbackClazz);
