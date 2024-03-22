@@ -22,5 +22,4 @@ public interface RetryTaskLogResponseVOConverter {
 
     List<RetryTaskLogResponseVO> batchConvert(List<RetryTaskLog> retryTaskLogs);
 
-    List<RetryTaskLogMessageResponseVO> toRetryTaskLogMessageResponseVO(List<RetryTaskLogMessage> retryTaskLogs);
 }

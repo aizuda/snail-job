@@ -36,7 +36,7 @@ public class RetryTaskLogController {
 
     @LoginRequired
     @GetMapping("/message/list")
-    public PageResult<List<RetryTaskLogMessageResponseVO>> getRetryTaskLogPage(RetryTaskLogMessageQueryVO queryVO) {
+    public RetryTaskLogMessageResponseVO getRetryTaskLogPage(RetryTaskLogMessageQueryVO queryVO) {
         return retryTaskLogService.getRetryTaskLogMessagePage(queryVO);
     }
 

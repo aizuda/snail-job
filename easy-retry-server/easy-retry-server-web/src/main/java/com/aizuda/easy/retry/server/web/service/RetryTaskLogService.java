@@ -17,7 +17,7 @@ public interface RetryTaskLogService {
 
     PageResult<List<RetryTaskLogResponseVO>> getRetryTaskLogPage(RetryTaskLogQueryVO queryVO);
 
-    PageResult<List<RetryTaskLogMessageResponseVO>> getRetryTaskLogMessagePage(RetryTaskLogMessageQueryVO queryVO);
+    RetryTaskLogMessageResponseVO getRetryTaskLogMessagePage(RetryTaskLogMessageQueryVO queryVO);
 
     RetryTaskLogResponseVO getRetryTaskLogById(Long id);
 
