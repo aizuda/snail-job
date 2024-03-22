@@ -95,13 +95,15 @@ public class RetryTaskLogServiceImpl implements RetryTaskLogService {
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
 
         PageDTO<RetryTaskLogMessage> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
-        LambdaQueryWrapper<RetryTaskLogMessage> retryTaskLogLambdaQueryWrapper = new LambdaQueryWrapper<>();
-        retryTaskLogLambdaQueryWrapper.eq(RetryTaskLogMessage::getNamespaceId, namespaceId);
-        retryTaskLogLambdaQueryWrapper.eq(RetryTaskLogMessage::getUniqueId, queryVO.getUniqueId());
-        retryTaskLogLambdaQueryWrapper.eq(RetryTaskLogMessage::getGroupName, queryVO.getGroupName());
-        retryTaskLogLambdaQueryWrapper.orderByAsc(RetryTaskLogMessage::getId).orderByAsc(RetryTaskLogMessage::getRealTime);
+        LambdaQueryWrapper<RetryTaskLogMessage> wrapper = new LambdaQueryWrapper<>();
+        wrapper.select(RetryTaskLogMessage::getId, RetryTaskLogMessage::getLogNum);
+        wrapper.ge(RetryTaskLogMessage::getId, queryVO.getStartId());
+        wrapper.eq(RetryTaskLogMessage::getNamespaceId, namespaceId);
+        wrapper.eq(RetryTaskLogMessage::getUniqueId, queryVO.getUniqueId());
+        wrapper.eq(RetryTaskLogMessage::getGroupName, queryVO.getGroupName());
+        wrapper.orderByAsc(RetryTaskLogMessage::getId).orderByAsc(RetryTaskLogMessage::getRealTime);
 
-        PageDTO<RetryTaskLogMessage> selectPage = retryTaskLogMessageMapper.selectPage(pageDTO, retryTaskLogLambdaQueryWrapper.orderByDesc(RetryTaskLogMessage::getCreateDt));
+        PageDTO<RetryTaskLogMessage> selectPage = retryTaskLogMessageMapper.selectPage(pageDTO, wrapper.orderByDesc(RetryTaskLogMessage::getCreateDt));
 
         List<RetryTaskLogMessage> records = selectPage.getRecords();
 

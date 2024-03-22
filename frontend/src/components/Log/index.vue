@@ -1,31 +1,40 @@
+<!-- eslint-disable -->
 <template>
-  <a-modal
-    :visible="visible"
-    width="100%"
-    wrap-class-name="full-modal"
-    :footer="null"
-    title="日志详情"
-    @cancel="onCancel">
-    <log :value="value" />
-  </a-modal>
+  <div class="log">
+    <table class="scroller">
+      <tbody>
+      <tr v-for="(log, index) in logList" :key="index">
+        <td class="index">
+          {{ index + 1 }}
+        </td>
+        <td>
+          <div class="content">
+            <div class="line">
+              <div class="flex">
+                <div class="text" style="color: #2db7f5">{{ timestampToDate(log.time_stamp) }}</div>
+                <div class="text" :style="{ color: LevelEnum[log.level].color }">
+                  {{ log.level.length === 4 ? log.level + ' ' : log.level }}
+                </div>
+                <div class="text" style="color: #00a3a3">[{{ log.thread }}]</div>
+                <div class="text" style="color: #a771bf; font-weight: 500">{{ log.location }}</div>
+                <div class="text">:</div>
+              </div>
+              <div class="text" style="font-size: 16px">{{ log.message }}</div>
+              <div class="text" style="font-size: 16px">{{ log.throwable }}</div>
+            </div>
+          </div>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
 </template>
 
 <script>
-import request from '@/utils/request'
-import Log from '@/components/Log/index.vue'
-
 export default {
-  name: 'JobBatchLog',
-  components: { Log },
+  name: 'Log',
+  components: {},
   props: {
-    open: {
-      type: Boolean,
-      default: false
-    },
-    record: {
-      type: Object,
-      default: () => {}
-    },
     value: {
       type: Array,
       default: () => []
@@ -38,75 +47,43 @@ export default {
       handler (val) {
         this.logList = val
       }
-    },
-    open: {
-      deep: true,
-      immediate: true,
-      handler (val) {
-        this.visible = val
-      }
     }
   },
   data () {
     return {
-      visible: false,
-      finished: false,
       logList: [],
-      interval: null,
-      startId: 0,
-      fromIndex: 0,
-      controller: new AbortController()
+      indicator: <a-icon type="loading" style="font-size: 24px; color: '#d9d9d9'" spin/>,
+      LevelEnum: {
+        DEBUG: {
+          name: 'DEBUG',
+          color: '#2647cc'
+        },
+        INFO: {
+          name: 'INFO',
+          color: '#5c962c'
+        },
+        WARN: {
+          name: 'WARN',
+          color: '#da9816'
+        },
+        ERROR: {
+          name: 'ERROR',
+          color: '#dc3f41'
+        }
+      }
     }
   },
-  mounted () {
-    this.getLogList()
-  },
-  beforeDestroy () {
-    this.stopLog()
-  },
   methods: {
-    onCancel () {
-      this.stopLog()
-      this.$emit('update:open', false)
-    },
-    stopLog () {
-      this.finished = true
-      this.controller.abort()
-      clearTimeout(this.interval)
-      this.interval = undefined
-    },
-    getLogList () {
-      request(
-        {
-          url: '/job/log/list',
-          method: 'get',
-          params: {
-            taskBatchId: this.record.taskBatchId,
-            jobId: this.record.jobId,
-            taskId: this.record.id,
-            startId: this.startId,
-            fromIndex: this.fromIndex,
-            size: 50
-          },
-          signal: this.controller.signal
-        }
-      )
-        .then((res) => {
-          this.finished = res.data.finished
-          this.startId = res.data.nextStartId
-          this.fromIndex = res.data.fromIndex
-          if (res.data.message) {
-            this.logList.push(...res.data.message)
-            this.logList.sort((a, b) => a.time_stamp - b.time_stamp)
-          }
-          if (!this.finished) {
-            clearTimeout(this.interval)
-            this.interval = setTimeout(this.getLogList, 1000)
-          }
-        })
-        .catch(() => {
-          this.finished = true
-        })
+    timestampToDate (timestamp) {
+      const date = new Date(Number.parseInt(timestamp.toString()))
+      const year = date.getFullYear()
+      const month =
+        (date.getMonth() + 1).toString().length === 1 ? '0' + (date.getMonth() + 1) : (date.getMonth() + 1).toString()
+      const day = date.getDate()
+      const hours = date.getHours()
+      const minutes = date.getMinutes().toString().length === 1 ? '0' + date.getMinutes() : date.getMinutes().toString()
+      const seconds = date.getSeconds().toString().length === 1 ? '0' + date.getSeconds() : date.getSeconds().toString()
+      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${date.getMilliseconds()}`
     }
   }
 }

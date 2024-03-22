@@ -3,8 +3,8 @@
     <page-header-wrapper @back="() => $router.replace('/retry/log/list')" style="margin: -24px -1px 0" v-if="showHeader">
       <div></div>
     </page-header-wrapper>
-    <a-card :bordered="false">
-      <a-descriptions title="" :column="column" bordered v-if="retryInfo !== null">
+    <a-card :bordered="false" :loading="loading">
+      <a-descriptions title="" :column="column" bordered>
         <a-descriptions-item label="组名称">
           {{ retryInfo.groupName }}
         </a-descriptions-item>
@@ -21,11 +21,11 @@
           {{ retryInfo.bizNo }}
         </a-descriptions-item>
         <a-descriptions-item label="当前重试状态 | 数据类型">
-          <a-tag color="red">
+          <a-tag v-if="retryInfo.taskType" color="red">
             {{ retryStatus[retryInfo.retryStatus] }}
           </a-tag>
           <a-divider type="vertical" />
-          <a-tag :color="taskType[retryInfo.taskType].color">
+          <a-tag v-if="retryInfo.taskType" :color="taskType[retryInfo.taskType].color">
             {{ taskType[retryInfo.taskType].name }}
           </a-tag>
         </a-descriptions-item>
@@ -43,19 +43,19 @@
         </a-descriptions-item>
       </a-descriptions>
     </a-card>
-    <RetryTaskLogMessageList ref="retryTaskLogMessageListRef" />
+    <RetryTaskLogMessage :value="retryInfo" />
   </div>
 </template>
 
 <script>
 import { getRetryTaskLogById } from '@/api/manage'
 import { STable } from '@/components'
-import RetryTaskLogMessageList from '@/views/task/RetryTaskLogMessageList'
+import RetryTaskLogMessage from '@/views/task/RetryTaskLogMessage'
 
 export default {
   name: 'RetryLogInfo',
   components: {
-    RetryTaskLogMessageList,
+    RetryTaskLogMessage,
     STable
   },
   props: {
@@ -70,7 +70,8 @@ export default {
   },
   data () {
     return {
-      retryInfo: null,
+      loading: true,
+      retryInfo: {},
       retryStatus: {
         '0': '处理中',
         '1': '处理成功',
@@ -99,10 +100,11 @@ export default {
       getRetryTaskLogById(id).then(res => {
         this.retryInfo = res.data
         this.queryParam = {
-          groupName: this.retryInfo.groupName,
-          uniqueId: this.retryInfo.uniqueId
+          groupName: res.data.groupName,
+          uniqueId: res.data.uniqueId
         }
-        this.$refs.retryTaskLogMessageListRef.refreshTable(this.queryParam)
+      }).finally(() => {
+        this.loading = false
       })
     }
 

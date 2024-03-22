@@ -3,7 +3,7 @@
     <page-header-wrapper @back="() => $router.replace('/retry/list')" style="margin: -24px -1px 0" v-if="showHeader">
       <div></div>
     </page-header-wrapper>
-    <a-card :bordered="false" v-if="retryTaskInfo !== null">
+    <a-card :bordered="false" :loading="loading">
       <a-descriptions title="" :column="column" bordered>
         <a-descriptions-item label="组名称">
           {{ retryTaskInfo.groupName }}
@@ -24,11 +24,11 @@
           {{ retryTaskInfo.retryCount }}
         </a-descriptions-item>
         <a-descriptions-item label="重试状态 | 数据类型">
-          <a-tag color="red">
+          <a-tag v-if="retryTaskInfo.retryStatus" color="red">
             {{ retryStatus[retryTaskInfo.retryStatus] }}
           </a-tag>
           <a-divider type="vertical" />
-          <a-tag :color="taskType[retryTaskInfo.taskType].color">
+          <a-tag v-if="retryTaskInfo.retryStatus" :color="taskType[retryTaskInfo.taskType].color">
             {{ taskType[retryTaskInfo.taskType].name }}
           </a-tag>
         </a-descriptions-item>
@@ -49,18 +49,18 @@
         </a-descriptions-item>
       </a-descriptions>
     </a-card>
-    <RetryTaskLogMessageList ref="retryTaskLogMessageListRef" />
+    <RetryTaskLogMessage :value="retryTaskInfo" />
   </div>
 </template>
 
 <script>
 import { getRetryTaskById } from '@/api/manage'
-import RetryTaskLogMessageList from './RetryTaskLogMessageList'
+import RetryTaskLogMessage from './RetryTaskLogMessage'
 
 export default {
   name: 'RetryTaskInfo',
   components: {
-    RetryTaskLogMessageList
+    RetryTaskLogMessage
   },
   props: {
     showHeader: {
@@ -74,7 +74,8 @@ export default {
   },
   data () {
     return {
-      retryTaskInfo: null,
+      loading: true,
+      retryTaskInfo: {},
       retryStatus: {
         '0': '处理中',
         '1': '处理成功',
@@ -112,7 +113,8 @@ export default {
           groupName: this.retryTaskInfo.groupName,
           uniqueId: this.retryTaskInfo.uniqueId
         }
-        this.$refs.retryTaskLogMessageListRef.refreshTable(this.queryParam)
+      }).finally(() => {
+        this.loading = false
       })
     }
   }
