@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.client.core.strategy;
 
-import com.aizuda.easy.retry.client.common.Report;
+import com.aizuda.easy.retry.client.core.Report;
 import com.aizuda.easy.retry.client.common.cache.GroupVersionCache;
 import com.aizuda.easy.retry.client.common.config.EasyRetryProperties;
 import com.aizuda.easy.retry.client.core.RetryExecutor;

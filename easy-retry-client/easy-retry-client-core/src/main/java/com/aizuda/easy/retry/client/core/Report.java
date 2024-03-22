@@ -1,4 +1,4 @@
-package com.aizuda.easy.retry.client.common;
+package com.aizuda.easy.retry.client.core;
 
 /**
  * @author www.byteblogs.com

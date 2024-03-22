@@ -1,4 +1,4 @@
-package com.aizuda.easy.retry.client.common.report;
+package com.aizuda.easy.retry.client.common.log.report;
 
 import com.aizuda.easy.retry.client.common.client.NettyClient;
 import com.aizuda.easy.retry.client.common.proxy.RequestBuilder;

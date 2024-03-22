@@ -1,7 +1,7 @@
 package com.aizuda.easy.retry.client.core.log;
 
-import com.aizuda.easy.retry.client.common.report.AbstractLogReport;
-import com.aizuda.easy.retry.client.common.util.ThreadLocalLogUtil;
+import com.aizuda.easy.retry.client.common.log.report.AbstractLogReport;
+import com.aizuda.easy.retry.client.common.log.support.EasyRetryLogManager;
 import com.aizuda.easy.retry.common.log.dto.LogContentDTO;
 import com.aizuda.easy.retry.common.log.enums.LogTypeEnum;
 import com.aizuda.easy.retry.server.model.dto.RetryLogTaskDTO;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 public class RetryLogReport extends AbstractLogReport<RetryLogTaskDTO> {
     @Override
     protected RetryLogTaskDTO buildLogTaskDTO(LogContentDTO logContentDTO) {
-        RetryLogMeta context = (RetryLogMeta) ThreadLocalLogUtil.getContext();
+        RetryLogMeta context = (RetryLogMeta) EasyRetryLogManager.getLogMeta();
         RetryLogTaskDTO logTaskDTO = new RetryLogTaskDTO();
         logTaskDTO.setLogType(LogTypeEnum.RETRY.name());
         logTaskDTO.setUniqueId(context.getUniqueId());
@@ -29,6 +29,6 @@ public class RetryLogReport extends AbstractLogReport<RetryLogTaskDTO> {
 
     @Override
     public boolean supports() {
-        return LogTypeEnum.RETRY == ThreadLocalLogUtil.getLogType();
+        return LogTypeEnum.RETRY == EasyRetryLogManager.getLogType();
     }
 }

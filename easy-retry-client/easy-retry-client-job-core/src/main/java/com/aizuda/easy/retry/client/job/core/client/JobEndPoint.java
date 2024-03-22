@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.client.job.core.client;
 
-import com.aizuda.easy.retry.client.common.util.ThreadLocalLogUtil;
+import com.aizuda.easy.retry.client.common.log.support.EasyRetryLogManager;
 import com.aizuda.easy.retry.client.job.core.IJobExecutor;
 import com.aizuda.easy.retry.client.job.core.cache.JobExecutorInfoCache;
 import com.aizuda.easy.retry.client.job.core.cache.ThreadPoolCache;
@@ -71,7 +71,7 @@ public class JobEndPoint {
             EasyRetryLog.REMOTE.error("客户端发生非预期异常. taskBatchId:[{}]", dispatchJob.getTaskBatchId());
             throw e;
         } finally {
-            ThreadLocalLogUtil.removeContext();
+            EasyRetryLogManager.removeLogMeta();
         }
 
         return new Result<>(Boolean.TRUE);
@@ -84,7 +84,7 @@ public class JobEndPoint {
         logMeta.setGroupName(jobContext.getGroupName());
         logMeta.setJobId(jobContext.getJobId());
         logMeta.setTaskBatchId(jobContext.getTaskBatchId());
-        ThreadLocalLogUtil.initLogInfo(logMeta, LogTypeEnum.JOB);
+        EasyRetryLogManager.initLogInfo(logMeta, LogTypeEnum.JOB);
     }
 
 

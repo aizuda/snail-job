@@ -1,11 +1,9 @@
 package com.aizuda.easy.retry.client.common.appender;
 
-import com.aizuda.easy.retry.client.common.report.AsyncReportLog;
-import com.aizuda.easy.retry.client.common.report.LogReportFactory;
-import com.aizuda.easy.retry.client.common.util.ThreadLocalLogUtil;
+import com.aizuda.easy.retry.client.common.log.report.LogReportFactory;
+import com.aizuda.easy.retry.client.common.log.support.EasyRetryLogManager;
 import com.aizuda.easy.retry.common.log.dto.LogContentDTO;
 import com.aizuda.easy.retry.common.log.constant.LogFieldConstants;
-import com.aizuda.easy.retry.common.core.context.SpringContext;
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.MDC;
 import org.apache.log4j.spi.LoggingEvent;
@@ -30,7 +28,7 @@ public class EasyRetryLog4jAppender extends AppenderSkeleton {
     protected void append(LoggingEvent event) {
 
         // Not job context
-        if (Objects.isNull(ThreadLocalLogUtil.getContext()) || Objects.isNull(MDC.get(LogFieldConstants.MDC_REMOTE))) {
+        if (Objects.isNull(EasyRetryLogManager.getLogMeta()) || Objects.isNull(MDC.get(LogFieldConstants.MDC_REMOTE))) {
             return;
         }
 

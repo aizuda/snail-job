@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.client.job.core.executor;
 
-import com.aizuda.easy.retry.client.common.util.ThreadLocalLogUtil;
+import com.aizuda.easy.retry.client.common.log.support.EasyRetryLogManager;
 import com.aizuda.easy.retry.client.job.core.IJobExecutor;
 import com.aizuda.easy.retry.client.job.core.cache.FutureCache;
 import com.aizuda.easy.retry.client.job.core.cache.ThreadPoolCache;
@@ -56,7 +56,7 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
                 initLogContext(jobContext);
                 return doJobExecute(jobArgs);
             } finally {
-                ThreadLocalLogUtil.removeContext();
+                EasyRetryLogManager.removeLogMeta();
             }
 
         });
@@ -72,7 +72,7 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
         logMeta.setGroupName(jobContext.getGroupName());
         logMeta.setJobId(jobContext.getJobId());
         logMeta.setTaskBatchId(jobContext.getTaskBatchId());
-        ThreadLocalLogUtil.initLogInfo(logMeta, LogTypeEnum.JOB);
+        EasyRetryLogManager.initLogInfo(logMeta, LogTypeEnum.JOB);
     }
 
     private static JobArgs buildJobArgs(JobContext jobContext) {

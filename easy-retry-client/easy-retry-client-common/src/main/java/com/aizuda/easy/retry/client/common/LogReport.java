@@ -1,4 +1,4 @@
-package com.aizuda.easy.retry.client.common.report;
+package com.aizuda.easy.retry.client.common;
 
 import com.aizuda.easy.retry.common.log.dto.LogContentDTO;
 

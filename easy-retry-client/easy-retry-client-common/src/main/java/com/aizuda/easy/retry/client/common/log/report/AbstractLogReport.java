@@ -1,6 +1,7 @@
-package com.aizuda.easy.retry.client.common.report;
+package com.aizuda.easy.retry.client.common.log.report;
 
 import com.aizuda.easy.retry.client.common.Lifecycle;
+import com.aizuda.easy.retry.client.common.LogReport;
 import com.aizuda.easy.retry.client.common.config.EasyRetryProperties;
 import com.aizuda.easy.retry.client.common.window.SlidingWindow;
 import com.aizuda.easy.retry.common.core.window.Listener;

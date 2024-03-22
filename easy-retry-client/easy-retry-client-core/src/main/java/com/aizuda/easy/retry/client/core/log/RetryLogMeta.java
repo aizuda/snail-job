@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.client.core.log;
 
-import com.aizuda.easy.retry.client.common.report.LogMeta;
+import com.aizuda.easy.retry.client.common.log.report.LogMeta;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

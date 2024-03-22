@@ -1,7 +1,7 @@
 package com.aizuda.easy.retry.client.job.core.executor;
 
 import com.aizuda.easy.retry.client.common.proxy.RequestBuilder;
-import com.aizuda.easy.retry.client.common.util.ThreadLocalLogUtil;
+import com.aizuda.easy.retry.client.common.log.support.EasyRetryLogManager;
 import com.aizuda.easy.retry.client.job.core.cache.ThreadPoolCache;
 import com.aizuda.easy.retry.client.job.core.client.JobNettyClient;
 import com.aizuda.easy.retry.client.job.core.log.JobLogMeta;
@@ -65,7 +65,7 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
         } catch (Exception e) {
             EasyRetryLog.REMOTE.error("执行结果上报异常.[{}]", jobContext.getTaskId(), e);
         } finally {
-            ThreadLocalLogUtil.removeContext();
+            EasyRetryLogManager.removeLogMeta();
             stopThreadPool();
         }
     }
@@ -93,7 +93,7 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
         } catch (Exception e) {
             EasyRetryLog.REMOTE.error("执行结果上报异常.[{}]", jobContext.getTaskId(), e);
         } finally {
-            ThreadLocalLogUtil.removeContext();
+            EasyRetryLogManager.removeLogMeta();
             stopThreadPool();
         }
     }
@@ -105,7 +105,7 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
         logMeta.setGroupName(jobContext.getGroupName());
         logMeta.setJobId(jobContext.getJobId());
         logMeta.setTaskBatchId(jobContext.getTaskBatchId());
-        ThreadLocalLogUtil.initLogInfo(logMeta, LogTypeEnum.JOB);
+        EasyRetryLogManager.initLogInfo(logMeta, LogTypeEnum.JOB);
     }
 
     private void stopThreadPool() {

@@ -1,7 +1,7 @@
 package com.aizuda.easy.retry.client.job.core.log;
 
-import com.aizuda.easy.retry.client.common.report.AbstractLogReport;
-import com.aizuda.easy.retry.client.common.util.ThreadLocalLogUtil;
+import com.aizuda.easy.retry.client.common.log.report.AbstractLogReport;
+import com.aizuda.easy.retry.client.common.log.support.EasyRetryLogManager;
 import com.aizuda.easy.retry.common.log.dto.LogContentDTO;
 import com.aizuda.easy.retry.common.log.enums.LogTypeEnum;
 import com.aizuda.easy.retry.server.model.dto.JobLogTaskDTO;
@@ -17,12 +17,12 @@ public class JobLogReport extends AbstractLogReport<JobLogTaskDTO> {
 
     @Override
     public boolean supports () {
-        return LogTypeEnum.JOB == ThreadLocalLogUtil.getLogType();
+        return LogTypeEnum.JOB == EasyRetryLogManager.getLogType();
     }
 
     @Override
     protected JobLogTaskDTO buildLogTaskDTO(LogContentDTO logContentDTO) {
-        JobLogMeta context = (JobLogMeta) ThreadLocalLogUtil.getContext();
+        JobLogMeta context = (JobLogMeta) EasyRetryLogManager.getLogMeta();
         JobLogTaskDTO logTaskDTO = new JobLogTaskDTO();
         logTaskDTO.setJobId(context.getJobId());
         logTaskDTO.setLogType(LogTypeEnum.JOB.name());

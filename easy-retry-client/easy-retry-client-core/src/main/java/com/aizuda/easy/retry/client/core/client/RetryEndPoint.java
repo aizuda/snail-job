@@ -1,7 +1,7 @@
 package com.aizuda.easy.retry.client.core.client;
 
 import cn.hutool.core.lang.Assert;
-import com.aizuda.easy.retry.client.common.util.ThreadLocalLogUtil;
+import com.aizuda.easy.retry.client.common.log.support.EasyRetryLogManager;
 import com.aizuda.easy.retry.client.core.IdempotentIdGenerate;
 import com.aizuda.easy.retry.client.core.RetryArgSerializer;
 import com.aizuda.easy.retry.client.common.cache.GroupVersionCache;
@@ -92,7 +92,7 @@ public class RetryEndPoint {
             retryLogMeta.setGroupName(executeReqDto.getGroupName());
             retryLogMeta.setNamespaceId(executeReqDto.getNamespaceId());
             retryLogMeta.setUniqueId(executeReqDto.getUniqueId());
-            ThreadLocalLogUtil.initLogInfo(retryLogMeta, LogTypeEnum.RETRY);
+            EasyRetryLogManager.initLogInfo(retryLogMeta, LogTypeEnum.RETRY);
 
             RetryerResultContext retryerResultContext = retryStrategy.openRetry(executeReqDto.getScene(),
                 executeReqDto.getExecutorName(), deSerialize);
@@ -125,7 +125,7 @@ public class RetryEndPoint {
 
         } finally {
             RetrySiteSnapshot.removeAll();
-            ThreadLocalLogUtil.removeAll();
+            EasyRetryLogManager.removeAll();
         }
 
         return new Result<>(executeRespDto);
@@ -152,7 +152,7 @@ public class RetryEndPoint {
             retryLogMeta.setGroupName(callbackDTO.getGroup());
             retryLogMeta.setNamespaceId(callbackDTO.getNamespaceId());
             retryLogMeta.setUniqueId(callbackDTO.getUniqueId());
-            ThreadLocalLogUtil.initLogInfo(retryLogMeta, LogTypeEnum.RETRY);
+            EasyRetryLogManager.initLogInfo(retryLogMeta, LogTypeEnum.RETRY);
 
             retryerInfo = RetryerInfoCache.get(callbackDTO.getScene(), callbackDTO.getExecutorName());
             if (Objects.isNull(retryerInfo)) {
@@ -174,7 +174,7 @@ public class RetryEndPoint {
             // 若不是SpringBean 则直接反射以普通类调用
             return doCallbackForOrdinaryClass(callbackDTO, retryerInfo, deSerialize);
         } finally {
-            ThreadLocalLogUtil.removeAll();
+            EasyRetryLogManager.removeAll();
         }
     }
 
