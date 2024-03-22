@@ -14,7 +14,6 @@ import lombok.EqualsAndHashCode;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-@Builder
 public class RetryLogMetaDTO extends LogMetaDTO {
 
     public RetryLogMetaDTO () {
