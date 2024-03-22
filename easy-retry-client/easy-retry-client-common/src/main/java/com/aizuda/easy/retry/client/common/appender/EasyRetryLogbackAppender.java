@@ -8,6 +8,7 @@ import ch.qos.logback.core.CoreConstants;
 import ch.qos.logback.core.UnsynchronizedAppenderBase;
 import com.aizuda.easy.retry.client.common.log.report.LogReportFactory;
 import com.aizuda.easy.retry.client.common.log.support.EasyRetryLogManager;
+import com.aizuda.easy.retry.client.common.netty.NettyChannel;
 import com.aizuda.easy.retry.common.log.dto.LogContentDTO;
 import com.aizuda.easy.retry.common.log.constant.LogFieldConstants;
 import org.slf4j.MDC;
@@ -50,6 +51,8 @@ public class EasyRetryLogbackAppender<E> extends UnsynchronizedAppenderBase<E> {
         logContentDTO.addMessageField(event.getFormattedMessage());
         logContentDTO.addLocationField(getLocationField(event));
         logContentDTO.addThrowableField(getThrowableField(event));
+        logContentDTO.addHostField(NettyChannel.getClientHost());
+        logContentDTO.addPortField(NettyChannel.getClientPort());
 
         // slidingWindow syncReportLog
         Optional.ofNullable(LogReportFactory.get()).ifPresent(logReport -> logReport.report(logContentDTO));

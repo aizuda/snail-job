@@ -15,5 +15,7 @@ public interface LogFieldConstants {
     String LEVEL = "level";
     String LOCATION = "location";
     String THROWABLE = "throwable";
+    String HOST = "host";
+    String PORT = "port";
 
 }

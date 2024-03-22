@@ -66,4 +66,12 @@ public class LogContentDTO {
         this.addField(LogFieldConstants.THROWABLE, throwable);
     }
 
+    public void addHostField(String host) {
+        this.addField(LogFieldConstants.HOST, host);
+    }
+
+    public void addPortField(Integer port) {
+        this.addField(LogFieldConstants.PORT, String.valueOf(port));
+    }
+
 }

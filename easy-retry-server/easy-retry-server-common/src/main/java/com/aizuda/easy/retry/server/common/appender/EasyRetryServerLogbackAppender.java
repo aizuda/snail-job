@@ -7,11 +7,14 @@ import ch.qos.logback.classic.spi.ThrowableProxyUtil;
 import ch.qos.logback.core.CoreConstants;
 import ch.qos.logback.core.UnsynchronizedAppenderBase;
 import cn.hutool.core.util.StrUtil;
+import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
+import com.aizuda.easy.retry.common.core.util.NetUtil;
 import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.log.constant.LogFieldConstants;
 import com.aizuda.easy.retry.common.log.dto.LogContentDTO;
 import com.aizuda.easy.retry.server.common.LogStorage;
+import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.dto.LogMetaDTO;
 import com.aizuda.easy.retry.server.common.log.LogStorageFactory;
 import org.slf4j.MDC;
@@ -47,6 +50,8 @@ public class EasyRetryServerLogbackAppender<E> extends UnsynchronizedAppenderBas
         logContentDTO.addThreadField(event.getThreadName());
         logContentDTO.addLocationField(getLocationField(event));
         logContentDTO.addThrowableField(getThrowableField(event));
+        logContentDTO.addHostField(NetUtil.getLocalIpStr());
+        logContentDTO.addPortField(SpringContext.getBean(SystemProperties.class).getNettyPort());
 
         LogMetaDTO logMetaDTO = null;
         try {
