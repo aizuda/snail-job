@@ -1,7 +1,6 @@
 package com.aizuda.easy.retry.server.job.task.support.executor.workflow;
 
 import akka.actor.ActorRef;
-import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.JobTaskStatusEnum;
@@ -9,14 +8,10 @@ import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.common.core.enums.WorkflowNodeTypeEnum;
 import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
-import com.aizuda.easy.retry.server.common.enums.JobTaskExecutorSceneEnum;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
+import com.aizuda.easy.retry.server.job.task.dto.JobLogMetaDTO;
 import com.aizuda.easy.retry.server.job.task.dto.JobTaskPrepareDTO;
-import com.aizuda.easy.retry.server.job.task.dto.LogMetaDTO;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
-import com.aizuda.easy.retry.server.job.task.support.WorkflowTaskConverter;
-import com.aizuda.easy.retry.server.job.task.support.generator.batch.JobTaskBatchGenerator;
-import com.aizuda.easy.retry.server.job.task.support.generator.batch.JobTaskBatchGeneratorContext;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTaskBatch;
 import lombok.RequiredArgsConstructor;
@@ -52,15 +47,15 @@ public class JobTaskWorkflowExecutor extends AbstractWorkflowExecutor {
         JobTaskBatch jobTaskBatch = generateJobTaskBatch(context);
         JobTask jobTask = generateJobTask(context, jobTaskBatch);
 
-        LogMetaDTO logMetaDTO = new LogMetaDTO();
-        logMetaDTO.setNamespaceId(context.getNamespaceId());
-        logMetaDTO.setGroupName(context.getGroupName());
-        logMetaDTO.setTaskBatchId(jobTaskBatch.getId());
-        logMetaDTO.setJobId(context.getJobId());
-        logMetaDTO.setTaskId(jobTask.getId());
+        JobLogMetaDTO jobLogMetaDTO = new JobLogMetaDTO();
+        jobLogMetaDTO.setNamespaceId(context.getNamespaceId());
+        jobLogMetaDTO.setGroupName(context.getGroupName());
+        jobLogMetaDTO.setTaskBatchId(jobTaskBatch.getId());
+        jobLogMetaDTO.setJobId(context.getJobId());
+        jobLogMetaDTO.setTaskId(jobTask.getId());
 
         EasyRetryLog.REMOTE.warn("节点[{}]已取消任务执行. 取消原因: 任务已关闭. <|>{}<|>",
-                context.getWorkflowNodeId(), logMetaDTO);
+                context.getWorkflowNodeId(), jobLogMetaDTO);
     }
 
     @Override

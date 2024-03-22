@@ -12,7 +12,7 @@ import com.aizuda.easy.retry.server.common.dto.DecisionConfig;
 import com.aizuda.easy.retry.server.common.enums.ExpressionTypeEnum;
 import com.aizuda.easy.retry.server.common.enums.LogicalConditionEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
-import com.aizuda.easy.retry.server.job.task.dto.LogMetaDTO;
+import com.aizuda.easy.retry.server.job.task.dto.JobLogMetaDTO;
 import com.aizuda.easy.retry.server.job.task.support.expression.ExpressionInvocationHandler;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
@@ -143,19 +143,19 @@ public class DecisionWorkflowExecutor extends AbstractWorkflowExecutor {
 
         JobTask jobTask = generateJobTask(context, jobTaskBatch);
 
-        LogMetaDTO logMetaDTO = new LogMetaDTO();
-        logMetaDTO.setNamespaceId(context.getNamespaceId());
-        logMetaDTO.setGroupName(context.getGroupName());
-        logMetaDTO.setTaskBatchId(jobTaskBatch.getId());
-        logMetaDTO.setJobId(SystemConstants.DECISION_JOB_ID);
-        logMetaDTO.setTaskId(jobTask.getId());
+        JobLogMetaDTO jobLogMetaDTO = new JobLogMetaDTO();
+        jobLogMetaDTO.setNamespaceId(context.getNamespaceId());
+        jobLogMetaDTO.setGroupName(context.getGroupName());
+        jobLogMetaDTO.setTaskBatchId(jobTaskBatch.getId());
+        jobLogMetaDTO.setJobId(SystemConstants.DECISION_JOB_ID);
+        jobLogMetaDTO.setTaskId(jobTask.getId());
         if (jobTaskBatch.getTaskBatchStatus() == JobTaskStatusEnum.SUCCESS.getStatus()
             || JobOperationReasonEnum.WORKFLOW_NODE_NO_REQUIRED.getReason() == context.getOperationReason()) {
             EasyRetryLog.REMOTE.info("节点Id:[{}] 决策完成. 上下文:[{}] 决策结果:[{}] <|>{}<|>",
-                context.getWorkflowNodeId(), context.getTaskResult(), context.getEvaluationResult(), logMetaDTO);
+                context.getWorkflowNodeId(), context.getTaskResult(), context.getEvaluationResult(), jobLogMetaDTO);
         } else {
             EasyRetryLog.REMOTE.error("节点Id:[{}] 决策失败. 上下文:[{}] 失败原因:[{}] <|>{}<|>",
-                context.getWorkflowNodeId(), context.getTaskResult(), context.getLogMessage(), logMetaDTO);
+                context.getWorkflowNodeId(), context.getTaskResult(), context.getLogMessage(), jobLogMetaDTO);
 
         }
     }

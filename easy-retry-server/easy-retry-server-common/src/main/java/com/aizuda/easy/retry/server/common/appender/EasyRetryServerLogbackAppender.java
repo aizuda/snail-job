@@ -1,6 +1,5 @@
-package com.aizuda.easy.retry.server.job.task.support.appender;
+package com.aizuda.easy.retry.server.common.appender;
 
-import akka.actor.ActorRef;
 import ch.qos.logback.classic.spi.IThrowableProxy;
 import ch.qos.logback.classic.spi.LoggingEvent;
 import ch.qos.logback.classic.spi.StackTraceElementProxy;
@@ -8,21 +7,19 @@ import ch.qos.logback.classic.spi.ThrowableProxyUtil;
 import ch.qos.logback.core.CoreConstants;
 import ch.qos.logback.core.UnsynchronizedAppenderBase;
 import cn.hutool.core.util.StrUtil;
-import com.aizuda.easy.retry.common.log.constant.LogFieldConstants;
-import com.aizuda.easy.retry.common.log.dto.LogContentDTO;
-import com.aizuda.easy.retry.common.log.dto.TaskLogFieldDTO;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.common.log.EasyRetryLog;
-import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
-import com.aizuda.easy.retry.server.job.task.dto.JobLogDTO;
-import com.aizuda.easy.retry.server.job.task.dto.LogMetaDTO;
-import com.google.common.collect.Lists;
+import com.aizuda.easy.retry.common.log.constant.LogFieldConstants;
+import com.aizuda.easy.retry.common.log.dto.LogContentDTO;
+import com.aizuda.easy.retry.server.common.LogStorage;
+import com.aizuda.easy.retry.server.common.dto.LogMetaDTO;
+import com.aizuda.easy.retry.server.common.log.LogStorageFactory;
 import org.slf4j.MDC;
 
-import java.util.*;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * @author wodeyangzipingpingwuqi
@@ -88,20 +85,11 @@ public class EasyRetryServerLogbackAppender<E> extends UnsynchronizedAppenderBas
      * @param logMetaDTO 日志元数据
      */
     private void saveLog(final LogContentDTO logContentDTO, final LogMetaDTO logMetaDTO) {
-        JobLogDTO jobLogDTO = new JobLogDTO();
-        Map<String, String> messageMap = logContentDTO.getFieldList()
-            .stream()
-            .filter(logTaskDTO_ -> !Objects.isNull(logTaskDTO_.getValue()))
-            .collect(Collectors.toMap(TaskLogFieldDTO::getName, TaskLogFieldDTO::getValue));
-        jobLogDTO.setMessage(JsonUtil.toJsonString(Lists.newArrayList(messageMap)));
-        jobLogDTO.setTaskId(logMetaDTO.getTaskId());
-        jobLogDTO.setJobId(logMetaDTO.getJobId());
-        jobLogDTO.setGroupName(logMetaDTO.getGroupName());
-        jobLogDTO.setNamespaceId(logMetaDTO.getNamespaceId());
-        jobLogDTO.setTaskBatchId(logMetaDTO.getTaskBatchId());
-        jobLogDTO.setRealTime(logContentDTO.getTimeStamp());
-        ActorRef actorRef = ActorGenerator.jobLogActor();
-        actorRef.tell(jobLogDTO, actorRef);
+
+        LogStorage logStorage = LogStorageFactory.get(logMetaDTO.getLogType());
+        if (Objects.nonNull(logStorage)) {
+            logStorage.storage(logContentDTO, logMetaDTO);
+        }
     }
 
     private String getThrowableField(LoggingEvent event) {

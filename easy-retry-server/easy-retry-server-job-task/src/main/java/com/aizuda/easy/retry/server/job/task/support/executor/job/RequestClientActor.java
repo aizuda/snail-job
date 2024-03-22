@@ -4,12 +4,10 @@ import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import com.aizuda.easy.retry.client.model.ExecuteResult;
 import com.aizuda.easy.retry.client.model.request.DispatchJobRequest;
-import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.JobTaskStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.core.model.Result;
-import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
 import com.aizuda.easy.retry.server.common.client.RequestBuilder;
@@ -17,8 +15,7 @@ import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.server.job.task.client.JobRpcClient;
 import com.aizuda.easy.retry.server.job.task.dto.JobExecutorResultDTO;
-import com.aizuda.easy.retry.server.job.task.dto.JobLogDTO;
-import com.aizuda.easy.retry.server.job.task.dto.LogMetaDTO;
+import com.aizuda.easy.retry.server.job.task.dto.JobLogMetaDTO;
 import com.aizuda.easy.retry.server.job.task.dto.RealJobExecutorDTO;
 import com.aizuda.easy.retry.server.job.task.support.ClientCallbackHandler;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
@@ -65,13 +62,14 @@ public class RequestClientActor extends AbstractActor {
                 realJobExecutorDTO.getClientId());
         if (Objects.isNull(registerNodeInfo)) {
             taskExecuteFailure(realJobExecutorDTO, "客户端不存在");
-            LogMetaDTO logMetaDTO = JobTaskConverter.INSTANCE.toJobLogDTO(realJobExecutorDTO);
-            logMetaDTO.setTimestamp(nowMilli);
+            JobLogMetaDTO jobLogMetaDTO = JobTaskConverter.INSTANCE.toJobLogDTO(realJobExecutorDTO);
+            jobLogMetaDTO.setTimestamp(nowMilli);
             if (realJobExecutorDTO.isRetry()) {
                 EasyRetryLog.REMOTE.error("taskId:[{}] 任务调度失败执行重试. 失败原因: 无可执行的客户端. 重试次数:[{}]. <|>{}<|>",
-                        realJobExecutorDTO.getTaskId(), realJobExecutorDTO.getRetryCount(), logMetaDTO);
+                        realJobExecutorDTO.getTaskId(), realJobExecutorDTO.getRetryCount(), jobLogMetaDTO);
             } else {
-                EasyRetryLog.REMOTE.error("taskId:[{}] 任务调度失败. 失败原因: 无可执行的客户端 <|>{}<|>", realJobExecutorDTO.getTaskId(), logMetaDTO);
+                EasyRetryLog.REMOTE.error("taskId:[{}] 任务调度失败. 失败原因: 无可执行的客户端 <|>{}<|>", realJobExecutorDTO.getTaskId(),
+                    jobLogMetaDTO);
             }
             return;
         }
@@ -105,13 +103,14 @@ public class RequestClientActor extends AbstractActor {
                 throwable = re.getUndeclaredThrowable();
             }
 
-            LogMetaDTO logMetaDTO = JobTaskConverter.INSTANCE.toJobLogDTO(realJobExecutorDTO);
-            logMetaDTO.setTimestamp(nowMilli);
+            JobLogMetaDTO jobLogMetaDTO = JobTaskConverter.INSTANCE.toJobLogDTO(realJobExecutorDTO);
+            jobLogMetaDTO.setTimestamp(nowMilli);
             if (realJobExecutorDTO.isRetry()) {
-                EasyRetryLog.REMOTE.error("taskId:[{}] 任务调度失败执行重试 重试次数:[{}]. <|>{}<|>", logMetaDTO.getTaskId(),
-                        realJobExecutorDTO.getRetryCount(), logMetaDTO, throwable);
+                EasyRetryLog.REMOTE.error("taskId:[{}] 任务调度失败执行重试 重试次数:[{}]. <|>{}<|>", jobLogMetaDTO.getTaskId(),
+                        realJobExecutorDTO.getRetryCount(), jobLogMetaDTO, throwable);
             } else {
-                EasyRetryLog.REMOTE.error("taskId:[{}] 任务调度失败. <|>{}<|>", logMetaDTO.getTaskId(), logMetaDTO, throwable);
+                EasyRetryLog.REMOTE.error("taskId:[{}] 任务调度失败. <|>{}<|>", jobLogMetaDTO.getTaskId(),
+                    jobLogMetaDTO, throwable);
             }
 
             taskExecuteFailure(realJobExecutorDTO, throwable.getMessage());

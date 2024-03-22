@@ -3,15 +3,13 @@ package com.aizuda.easy.retry.server.retry.task.support.dispatch.task;
 import akka.actor.ActorRef;
 import cn.hutool.core.lang.Pair;
 import com.aizuda.easy.retry.common.log.EasyRetryLog;
-import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.handler.ClientNodeAllocateHandler;
 import com.aizuda.easy.retry.server.common.IdempotentStrategy;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
-import com.aizuda.easy.retry.server.retry.task.dto.LogMetaDTO;
+import com.aizuda.easy.retry.server.retry.task.dto.RetryLogMetaDTO;
 import com.aizuda.easy.retry.server.retry.task.support.RetryContext;
 import com.aizuda.easy.retry.server.retry.task.support.RetryTaskConverter;
-import com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.log.RetryTaskLogDTO;
 import com.aizuda.easy.retry.server.retry.task.support.retry.RetryExecutor;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
@@ -20,8 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-
-import java.time.LocalDateTime;
 
 /**
  *
@@ -78,9 +74,9 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, Initializing
 //            retryTaskLog.setTriggerTime(LocalDateTime.now());
 //            ActorRef actorRef = ActorGenerator.logActor();
 
-            LogMetaDTO logMetaDTO = RetryTaskConverter.INSTANCE.toLogMetaDTO(retryTask);
-            logMetaDTO.setTimestamp(DateUtils.toNowMilli());
-            EasyRetryLog.REMOTE.error("触发条件不满足 原因: [{}] <|>{}<|>", pair.getValue().toString(), logMetaDTO);
+            RetryLogMetaDTO retryLogMetaDTO = RetryTaskConverter.INSTANCE.toLogMetaDTO(retryTask);
+            retryLogMetaDTO.setTimestamp(DateUtils.toNowMilli());
+            EasyRetryLog.REMOTE.error("触发条件不满足 原因: [{}] <|>{}<|>", pair.getValue().toString(), retryLogMetaDTO);
 
 
             return false;

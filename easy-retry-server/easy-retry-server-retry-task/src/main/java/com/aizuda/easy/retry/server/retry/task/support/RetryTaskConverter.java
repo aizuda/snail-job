@@ -2,7 +2,7 @@ package com.aizuda.easy.retry.server.retry.task.support;
 
 import com.aizuda.easy.retry.server.model.dto.RetryLogTaskDTO;
 import com.aizuda.easy.retry.server.model.dto.RetryTaskDTO;
-import com.aizuda.easy.retry.server.retry.task.dto.LogMetaDTO;
+import com.aizuda.easy.retry.server.retry.task.dto.RetryLogMetaDTO;
 import com.aizuda.easy.retry.server.retry.task.dto.NotifyConfigPartitionTask;
 import com.aizuda.easy.retry.server.retry.task.dto.RetryPartitionTask;
 import com.aizuda.easy.retry.server.retry.task.generator.task.TaskContext;
@@ -51,6 +51,6 @@ public interface RetryTaskConverter {
 
     RetryTaskLogMessage toRetryTaskLogMessage(RetryLogTaskDTO retryLogTaskDTO);
 
-    LogMetaDTO toLogMetaDTO(RetryTask retryTask);
+    RetryLogMetaDTO toLogMetaDTO(RetryTask retryTask);
 
 }

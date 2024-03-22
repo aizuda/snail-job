@@ -12,10 +12,8 @@ import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.client.RequestInterceptor;
 import com.aizuda.easy.retry.server.common.dto.CallbackConfig;
 import com.aizuda.easy.retry.server.common.enums.ContentTypeEnum;
-import com.aizuda.easy.retry.server.job.task.dto.LogMetaDTO;
+import com.aizuda.easy.retry.server.job.task.dto.JobLogMetaDTO;
 import com.aizuda.easy.retry.server.job.task.support.WorkflowTaskConverter;
-import com.aizuda.easy.retry.server.job.task.support.generator.batch.JobTaskBatchGenerator;
-import com.aizuda.easy.retry.server.job.task.support.generator.batch.JobTaskBatchGeneratorContext;
 import com.aizuda.easy.retry.server.model.dto.CallbackParamsDTO;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
@@ -166,22 +164,22 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
 
         JobTask jobTask = generateJobTask(context, jobTaskBatch);
 
-        LogMetaDTO logMetaDTO = new LogMetaDTO();
-        logMetaDTO.setNamespaceId(context.getNamespaceId());
-        logMetaDTO.setGroupName(context.getGroupName());
-        logMetaDTO.setTaskBatchId(jobTaskBatch.getId());
-        logMetaDTO.setJobId(SystemConstants.CALLBACK_JOB_ID);
-        logMetaDTO.setTaskId(jobTask.getId());
+        JobLogMetaDTO jobLogMetaDTO = new JobLogMetaDTO();
+        jobLogMetaDTO.setNamespaceId(context.getNamespaceId());
+        jobLogMetaDTO.setGroupName(context.getGroupName());
+        jobLogMetaDTO.setTaskBatchId(jobTaskBatch.getId());
+        jobLogMetaDTO.setJobId(SystemConstants.CALLBACK_JOB_ID);
+        jobLogMetaDTO.setTaskId(jobTask.getId());
         if (jobTaskBatch.getTaskBatchStatus() == JobTaskStatusEnum.SUCCESS.getStatus()) {
             EasyRetryLog.REMOTE.info("节点[{}]回调成功.\n回调参数:{} \n回调结果:[{}] <|>{}<|>",
-                    context.getWorkflowNodeId(), context.getTaskResult(), context.getEvaluationResult(), logMetaDTO);
+                    context.getWorkflowNodeId(), context.getTaskResult(), context.getEvaluationResult(), jobLogMetaDTO);
         } else if (jobTaskBatch.getTaskBatchStatus() == JobTaskStatusEnum.CANCEL.getStatus()) {
             EasyRetryLog.REMOTE.warn("节点[{}]取消回调. 取消原因: 任务状态已关闭 <|>{}<|>",
-                    context.getWorkflowNodeId(), logMetaDTO);
+                    context.getWorkflowNodeId(), jobLogMetaDTO);
         } else {
             EasyRetryLog.REMOTE.error("节点[{}]回调失败.\n失败原因:{} <|>{}<|>",
                     context.getWorkflowNodeId(),
-                    context.getLogMessage(), logMetaDTO);
+                    context.getLogMessage(), jobLogMetaDTO);
         }
     }
 }

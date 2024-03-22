@@ -79,9 +79,7 @@
     </appender>
 
     <!-- EasyRetry appender -->
-    <appender name="easyLogServerAppender" class="com.aizuda.easy.retry.server.job.task.support.appender.EasyRetryServerLogbackAppender">
-    </appender>
-    <appender name="easyRetryLogServerAppender" class="com.aizuda.easy.retry.server.retry.task.support.appender.EasyRetryServerLogbackAppender">
+    <appender name="easyLogServerAppender" class="com.aizuda.easy.retry.server.common.appender.EasyRetryServerLogbackAppender">
     </appender>
 
     <!-- 控制台输出日志级别 -->
@@ -91,6 +89,5 @@
         <appender-ref ref="asyncWarn" />
         <appender-ref ref="asyncError" />
         <appender-ref ref="easyLogServerAppender" />
-        <appender-ref ref="easyRetryLogServerAppender" />
     </root>
 </configuration>

@@ -1,7 +1,7 @@
-package com.aizuda.easy.retry.server.retry.task.dto;
+package com.aizuda.easy.retry.server.common.dto;
 
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
-import lombok.Builder;
+import com.aizuda.easy.retry.common.log.enums.LogTypeEnum;
 import lombok.Data;
 
 /**
@@ -10,7 +10,6 @@ import lombok.Data;
  * @since 3.2.0
  */
 @Data
-@Builder
 public class LogMetaDTO {
 
     /**
@@ -24,17 +23,12 @@ public class LogMetaDTO {
     private String groupName;
 
     /**
-     * 组名称
-     */
-    private String uniqueId;
-
-    /**
      * 时间
      */
     private Long timestamp;
 
-    @Override
-    public String toString() {
-        return JsonUtil.toJsonString(this);
-    }
+    /**
+     * 日志类型
+     */
+    private LogTypeEnum logType;
 }
