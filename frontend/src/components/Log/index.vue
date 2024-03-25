@@ -15,6 +15,12 @@
                 <div class="text" :style="{ color: LevelEnum[log.level].color }">
                   {{ log.level.length === 4 ? log.level + ' ' : log.level }}
                 </div>
+                <div v-if="log.host" class="text" style="color: #00a3a3">
+                  [
+                  {{ log.host }}
+                  <template v-if="log.port">:{{ log.port }}</template>
+                  ]
+                </div>
                 <div class="text" style="color: #00a3a3">[{{ log.thread }}]</div>
                 <div class="text" style="color: #a771bf; font-weight: 500">{{ log.location }}</div>
                 <div class="text">:</div>
