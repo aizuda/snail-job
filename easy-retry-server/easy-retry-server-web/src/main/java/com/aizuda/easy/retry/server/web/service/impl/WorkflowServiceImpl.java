@@ -336,7 +336,8 @@ public class WorkflowServiceImpl implements WorkflowService {
             queryWrapper.eq(Workflow::getId, workflowId);
         }
 
-        queryWrapper.eq(Workflow::getDeleted, StatusEnum.NO.getStatus());
+        queryWrapper.eq(Workflow::getDeleted, StatusEnum.NO.getStatus())
+            .orderByAsc(Workflow::getId); // SQLServer 分页必须 ORDER BY
         PageDTO<Workflow> pageDTO = new PageDTO<>(1, 20);
         PageDTO<Workflow> selectPage = workflowMapper.selectPage(pageDTO, queryWrapper);
 

@@ -39,10 +39,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class JdbcLockProvider implements LockStorage, Lifecycle {
 
-    protected static final List<String> ALLOW_DB = Arrays.asList(DbTypeEnum.MYSQL.getDb(),
+    protected static final List<String> ALLOW_DB = Arrays.asList(
+        DbTypeEnum.MYSQL.getDb(),
         DbTypeEnum.MARIADB.getDb(),
         DbTypeEnum.POSTGRES.getDb(),
-        DbTypeEnum.ORACLE.getDb());
+        DbTypeEnum.ORACLE.getDb(),
+        DbTypeEnum.SQLSERVER.getDb());
 
     private final DistributedLockMapper distributedLockMapper;
 

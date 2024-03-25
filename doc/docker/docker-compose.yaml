@@ -6,6 +6,7 @@ volumes:
     mysql: { }
     postgres: { }
     oracle: { }
+    sqlserver: { }
 
 services:
     mysql:
@@ -54,3 +55,17 @@ services:
             # 创建app用户: root/root@//localhost/XEPDB1
             - ./oracle/1_create_user.sql:/docker-entrypoint-initdb.d/1_create_user.sql:ro
             - ./oracle/2_create_schema.sh:/docker-entrypoint-initdb.d/2_create_schema.sh:ro
+
+    sqlserver:
+        image: mcr.microsoft.com/mssql/server:2017-latest
+        environment:
+            TZ: Asia/Shanghai
+            ACCEPT_EULA: "Y"
+            SA_PASSWORD: "EasyRetry@24"
+        ports:
+            - "1433:1433"
+        volumes:
+            - sqlserver:/var/opt/mssql
+            - ../sql/easy_retry_sqlserver.sql:/tmp/schema.sql:ro
+            # docker compose exec sqlserver bash /tmp/create_schema.sh
+            - ./sqlserver/create_schema.sh:/tmp/create_schema.sh:ro

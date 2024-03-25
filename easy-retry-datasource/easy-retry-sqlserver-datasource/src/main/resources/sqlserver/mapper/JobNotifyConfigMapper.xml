@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aizuda.easy.retry.template.datasource.persistence.mapper.JobNotifyConfigMapper">
+    <resultMap id="BaseResultMap" type="com.aizuda.easy.retry.template.datasource.persistence.po.JobNotifyConfig">
+        <id column="id" jdbcType="BIGINT" property="id" />
+        <result column="namespace_id" jdbcType="VARCHAR" property="namespaceId" />
+        <result column="group_name" jdbcType="VARCHAR" property="groupName" />
+        <result column="job_id" jdbcType="BIGINT" property="jobId" />
+        <result column="notify_status" jdbcType="TINYINT" property="notifyStatus" />
+        <result column="notify_type" jdbcType="TINYINT" property="notifyType" />
+        <result column="notify_attribute" jdbcType="VARCHAR" property="notifyAttribute" />
+        <result column="notify_threshold" jdbcType="TINYINT" property="notifyThreshold" />
+        <result column="notify_scene" jdbcType="TINYINT" property="notifyScene" />
+        <result column="rate_limiter_status" jdbcType="TINYINT" property="rateLimiterStatus" />
+        <result column="rate_limiter_threshold" jdbcType="TINYINT" property="rateLimiterThreshold" />
+        <result column="description" jdbcType="VARCHAR" property="description" />
+        <result column="create_dt" jdbcType="TIMESTAMP" property="createDt" />
+        <result column="update_dt" jdbcType="TIMESTAMP" property="updateDt" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,namespace_id, group_name,job_id,notify_status,notify_type, notify_attribute, notify_threshold, notify_scene,rate_limiter_status,rate_limiter_threshold, description,
+        create_dt, update_dt
+    </sql>
+
+    <select id="selectJobNotifyConfigList"
+          resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.JobNotifyConfigResponseDO">
+        SELECT a.*,
+               b.job_name
+          FROM job_notify_config a
+              JOIN job b ON a.job_id = b.id
+            <where>
+                a.namespace_id = #{queryDO.namespaceId}
+                <if test="queryDO.jobId != null">
+                    AND a.job_id = #{queryDO.jobId}
+                </if>
+                <if test="queryDO.groupNames != null and queryDO.groupNames.size > 0">
+                    AND a.group_name IN
+                        <foreach collection="queryDO.groupNames" item="groupName" open="("  separator="," close=")">
+                            #{groupName}
+                        </foreach>
+                </if>
+            </where>
+        ORDER BY a.id DESC
+        </select>
+</mapper>

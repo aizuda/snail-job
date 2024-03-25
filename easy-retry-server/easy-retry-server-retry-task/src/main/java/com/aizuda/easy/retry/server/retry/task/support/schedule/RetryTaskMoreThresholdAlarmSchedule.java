@@ -105,7 +105,8 @@ public class RetryTaskMoreThresholdAlarmSchedule extends AbstractSchedule implem
         List<NotifyConfig> notifyConfigs = accessTemplate.getNotifyConfigAccess()
                 .listPage(new PageDTO<>(startId, 1000), new LambdaQueryWrapper<NotifyConfig>()
                         .eq(NotifyConfig::getNotifyStatus, StatusEnum.YES.getStatus())
-                        .eq(NotifyConfig::getNotifyScene, NotifySceneEnum.MAX_RETRY.getNotifyScene()))
+                        .eq(NotifyConfig::getNotifyScene, NotifySceneEnum.MAX_RETRY.getNotifyScene())
+                        .orderByDesc(NotifyConfig::getId)) // SQLServer 分页必须 ORDER BY
                 .getRecords();
 
         return RetryTaskConverter.INSTANCE.toNotifyConfigPartitionTask(notifyConfigs);

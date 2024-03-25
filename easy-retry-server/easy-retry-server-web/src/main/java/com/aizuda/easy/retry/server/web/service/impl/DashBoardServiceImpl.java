@@ -2,10 +2,11 @@ package com.aizuda.easy.retry.server.web.service.impl;
 
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.enums.NodeTypeEnum;
-import com.aizuda.easy.retry.common.core.util.NetUtil;
-import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
+import com.aizuda.easy.retry.common.core.util.NetUtil;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
+import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.dto.DistributeInstance;
 import com.aizuda.easy.retry.server.common.dto.ServerNodeExtAttrs;
 import com.aizuda.easy.retry.server.common.register.ServerRegister;
@@ -21,6 +22,7 @@ import com.aizuda.easy.retry.server.web.model.response.ServerNodeResponseVO;
 import com.aizuda.easy.retry.server.web.service.DashBoardService;
 import com.aizuda.easy.retry.server.web.service.convert.*;
 import com.aizuda.easy.retry.server.web.util.UserSessionUtils;
+import com.aizuda.easy.retry.template.datasource.enums.DbTypeEnum;
 import com.aizuda.easy.retry.template.datasource.persistence.dataobject.ActivePodQuantityResponseDO;
 import com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardCardResponseDO;
 import com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardLineResponseDO;
@@ -37,12 +39,10 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
 
-import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -59,11 +59,14 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 public class DashBoardServiceImpl implements DashBoardService {
+
+    private static final String DASHBOARD_CONSUMER_BUCKET = "/dashboard/consumer/bucket";
+
+    private final SystemProperties systemProperties;
     private final ServerNodeMapper serverNodeMapper;
     private final RestTemplate restTemplate;
     private final JobSummaryMapper jobSummaryMapper;
     private final RetrySummaryMapper retrySummaryMapper;
-    private static final String DASHBOARD_CONSUMER_BUCKET = "/dashboard/consumer/bucket";
 
     @Override
     public DashboardCardResponseVO taskRetryJob() {
@@ -86,7 +89,7 @@ public class DashBoardServiceImpl implements DashBoardService {
 
         List<DashboardCardResponseDO.RetryTask> retryTaskList = retrySummaryMapper.retryTaskBarList(namespaceId, groupNames);
         Map<LocalDateTime, LongSummaryStatistics> summaryStatisticsMap = retryTaskList.stream().collect(Collectors.groupingBy(DashboardCardResponseDO.RetryTask::getTriggerAt,
-                Collectors.summarizingLong(i -> i.getMaxCountNum() + i.getRunningNum() + i.getSuspendNum() + i.getFinishNum())));
+            Collectors.summarizingLong(i -> i.getMaxCountNum() + i.getRunningNum() + i.getSuspendNum() + i.getFinishNum())));
         for (Map.Entry<LocalDateTime, LongSummaryStatistics> map : summaryStatisticsMap.entrySet()) {
             if (retryTaskBarMap.containsKey(LocalDateTime.of(map.getKey().toLocalDate(), LocalTime.MIN))) {
                 DashboardCardResponseVO.RetryTaskBar retryTaskBar = retryTaskBarMap.get(LocalDateTime.of(map.getKey().toLocalDate(), LocalTime.MIN));
@@ -115,7 +118,12 @@ public class DashBoardServiceImpl implements DashBoardService {
         List<String> groupNames = userSessionVO.isUser() ? userSessionVO.getGroupNames() : new ArrayList<>();
         DashboardRetryLineResponseVO dashboardRetryLineResponseVO = new DashboardRetryLineResponseVO();
         // 重试任务列表
-        IPage<DashboardRetryLineResponseDO.Task> IPage = retrySummaryMapper.retryTaskList(namespaceId, groupNames, new Page<>(baseQueryVO.getPage(), baseQueryVO.getSize()));
+        Page<Object> pager = new Page<>(baseQueryVO.getPage(), baseQueryVO.getSize());
+        // 针对SQL Server的分页COUNT, 自定义statement ID
+        if (DbTypeEnum.SQLSERVER.equals(systemProperties.getDbType())) {
+            pager.setCountId("sqlServer_jobTaskList_Count");
+        }
+        IPage<DashboardRetryLineResponseDO.Task> IPage = retrySummaryMapper.retryTaskList(namespaceId, groupNames, pager);
         List<DashboardRetryLineResponseVO.Task> taskList = JobSummaryResponseVOConverter.INSTANCE.toDashboardRetryLineResponseVO(IPage.getRecords());
         PageResult<List<DashboardRetryLineResponseVO.Task>> pageResult = new PageResult<>(new PageDTO(IPage.getCurrent(), IPage.getSize(), IPage.getTotal()), taskList);
         dashboardRetryLineResponseVO.setTaskList(pageResult);
@@ -146,7 +154,12 @@ public class DashBoardServiceImpl implements DashBoardService {
         List<String> groupNames = userSessionVO.isUser() ? userSessionVO.getGroupNames() : new ArrayList<>();
         DashboardRetryLineResponseVO dashboardRetryLineResponseVO = new DashboardRetryLineResponseVO();
         // 重试任务列表
-        IPage<DashboardRetryLineResponseDO.Task> IPage = jobSummaryMapper.jobTaskList(namespaceId, groupNames, new Page<>(baseQueryVO.getPage(), baseQueryVO.getSize()));
+        Page<Object> pager = new Page<>(baseQueryVO.getPage(), baseQueryVO.getSize());
+        // 针对SQL Server的分页COUNT, 自定义statement ID
+        if (DbTypeEnum.SQLSERVER.equals(systemProperties.getDbType())) {
+            pager.setCountId("sqlServer_jobTaskList_Count");
+        }
+        IPage<DashboardRetryLineResponseDO.Task> IPage = jobSummaryMapper.jobTaskList(namespaceId, groupNames, pager);
         List<DashboardRetryLineResponseVO.Task> taskList = JobSummaryResponseVOConverter.INSTANCE.toDashboardRetryLineResponseVO(IPage.getRecords());
         PageResult<List<DashboardRetryLineResponseVO.Task>> pageResult = new PageResult<>(new PageDTO(IPage.getCurrent(), IPage.getSize(), IPage.getTotal()), taskList);
         dashboardRetryLineResponseVO.setTaskList(pageResult);
@@ -174,7 +187,7 @@ public class DashBoardServiceImpl implements DashBoardService {
 
         LambdaQueryWrapper<ServerNode> serverNodeLambdaQueryWrapper = new LambdaQueryWrapper<>();
         serverNodeLambdaQueryWrapper.in(ServerNode::getNamespaceId, Lists.newArrayList(
-                UserSessionUtils.currentUserSession().getNamespaceId(), ServerRegister.NAMESPACE_ID
+            UserSessionUtils.currentUserSession().getNamespaceId(), ServerRegister.NAMESPACE_ID
         ));
         if (StrUtil.isNotBlank(queryVO.getGroupName())) {
             serverNodeLambdaQueryWrapper.eq(ServerNode::getGroupName, queryVO.getGroupName());
@@ -201,13 +214,13 @@ public class DashBoardServiceImpl implements DashBoardService {
             ServerNodeExtAttrs serverNodeExtAttrs = JsonUtil.parseObject(serverNodeResponseVO.getExtAttrs(), ServerNodeExtAttrs.class);
             try {
                 // 从远程节点取
-               String url = NetUtil.getUrl(serverNodeResponseVO.getHostIp(), serverNodeExtAttrs.getWebPort(), serverNodeResponseVO.getContextPath());
+                String url = NetUtil.getUrl(serverNodeResponseVO.getHostIp(), serverNodeExtAttrs.getWebPort(), serverNodeResponseVO.getContextPath());
                 Result<List<Integer>> result = restTemplate.getForObject(url.concat(DASHBOARD_CONSUMER_BUCKET), Result.class);
                 List<Integer> data = result.getData();
                 if (!CollectionUtils.isEmpty(data)) {
                     serverNodeResponseVO.setConsumerBuckets(data.stream()
-                            .sorted(Integer::compareTo)
-                            .collect(Collectors.toCollection(LinkedHashSet::new)));
+                        .sorted(Integer::compareTo)
+                        .collect(Collectors.toCollection(LinkedHashSet::new)));
                 }
             } catch (Exception e) {
                 EasyRetryLog.LOCAL.error("Failed to retrieve consumer group for node [{}:{}].", serverNodeResponseVO.getHostIp(), serverNodeExtAttrs.getWebPort());

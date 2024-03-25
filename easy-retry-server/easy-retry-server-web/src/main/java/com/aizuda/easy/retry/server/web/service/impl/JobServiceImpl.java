@@ -122,7 +122,8 @@ public class JobServiceImpl implements JobService {
             queryWrapper.eq(Job::getId, jobId);
         }
 
-        queryWrapper.eq(Job::getDeleted, StatusEnum.NO.getStatus());
+        queryWrapper.eq(Job::getDeleted, StatusEnum.NO.getStatus())
+            .orderByAsc(Job::getId); // SQLServer 分页必须 ORDER BY
         PageDTO<Job> pageDTO = new PageDTO<>(1, 20);
         PageDTO<Job> selectPage = jobMapper.selectPage(pageDTO, queryWrapper);
         return JobResponseVOConverter.INSTANCE.toJobResponseVOs(selectPage.getRecords());

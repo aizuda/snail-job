@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aizuda.easy.retry.template.datasource.persistence.mapper.JobSummaryMapper">
+    <resultMap id="BaseResultMap" type="com.aizuda.easy.retry.template.datasource.persistence.po.JobSummary">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="namespace_id" jdbcType="TINYINT" property="namespaceId"/>
+        <result column="group_name" jdbcType="TINYINT" property="groupName"/>
+        <result column="job_id" jdbcType="TINYINT" property="jobId"/>
+        <result column="trigger_at" jdbcType="TIMESTAMP" property="triggerAt"/>
+        <result column="success_num" jdbcType="TINYINT" property="successNum"/>
+        <result column="fail_num" jdbcType="TINYINT" property="failNum"/>
+        <result column="fail_reason" jdbcType="VARCHAR" property="failReason"/>
+        <result column="stop_num" jdbcType="TINYINT" property="stopNum"/>
+        <result column="stop_reason" jdbcType="VARCHAR" property="stopReason"/>
+        <result column="cancel_num" jdbcType="TINYINT" property="cancelNum"/>
+        <result column="cancel_reason" jdbcType="VARCHAR" property="cancelReason"/>
+        <result column="create_dt" jdbcType="TIMESTAMP" property="createDt"/>
+        <result column="update_dt" jdbcType="TIMESTAMP" property="updateDt"/>
+    </resultMap>
+
+    <insert id="insertOrUpdate" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
+        MERGE INTO job_summary AS target
+        USING (
+            VALUES
+                <foreach collection="list" item="item" separator=",">
+                    (
+                        #{item.namespaceId},
+                        #{item.groupName},
+                        #{item.jobId},
+                        #{item.triggerAt},
+                        #{item.successNum},
+                        #{item.failNum},
+                        #{item.failReason},
+                        #{item.stopNum},
+                        #{item.stopReason},
+                        #{item.cancelNum},
+                        #{item.cancelReason}
+                    )
+                </foreach>
+        ) AS source (namespace_id, group_name, job_id, trigger_at,
+                     success_num, fail_num, fail_reason, stop_num, stop_reason, cancel_num, cancel_reason)
+        ON target.namespace_id = source.namespace_id
+            AND target.job_id = source.job_id
+        WHEN MATCHED THEN
+            UPDATE SET
+                target.success_num = source.success_num,
+                target.fail_num = source.fail_num,
+                target.fail_reason = source.fail_reason,
+                target.stop_num = source.stop_num,
+                target.stop_reason = source.stop_reason,
+                target.cancel_num = source.cancel_num,
+                target.cancel_reason = source.cancel_reason
+        WHEN NOT MATCHED THEN
+            INSERT (namespace_id, group_name, job_id, trigger_at,
+                    success_num, fail_num, fail_reason, stop_num, stop_reason, cancel_num, cancel_reason)
+            VALUES (source.namespace_id, source.group_name, source.job_id, source.trigger_at,
+                    source.success_num, source.fail_num, source.fail_reason, source.stop_num, source.stop_reason,
+                    source.cancel_num, source.cancel_reason);
+    </insert>
+
+    <select id="jobLineList"
+            resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardLineResponseDO">
+        SELECT
+            createDt,
+            ISNULL(SUM(success_num), 0) AS success,
+            ISNULL(SUM(stop_num), 0) AS stop,
+            ISNULL(SUM(cancel_num), 0) AS cancel,
+            ISNULL(SUM(fail_num), 0) AS fail,
+            ISNULL(SUM(success_num + fail_num + stop_num + cancel_num), 0) AS total
+        FROM (
+            SELECT
+                <choose>
+                    <when test="type == 'DAY'">
+                        FORMAT(create_dt,'HH24')
+                    </when>
+                    <when test="type == 'WEEK'">
+                        FORMAT(create_dt,'yyyy-MM-dd')
+                    </when>
+                    <when test="type =='MONTH'">
+                        FORMAT(create_dt,'yyyy-MM-dd')
+                    </when>
+                    <when test="type == 'YEAR'">
+                        FORMAT(create_dt,'yyyy-MM')
+                    </when>
+                    <otherwise>
+                        FORMAT(create_dt,'yyyy-MM-dd')
+                    </otherwise>
+                </choose> AS createDt,
+                success_num,
+                stop_num,
+                cancel_num,
+                fail_num
+            FROM job_summary
+            <where>
+                <if test="groupNames != null and groupNames.size > 0">
+                    AND group_name IN
+                    <foreach collection="groupNames" item="groupName" open="(" separator="," close=")">
+                        #{groupName}
+                    </foreach>
+                </if>
+                <if test="groupName != null and groupName != '' ">
+                    AND group_name = #{groupName}
+                </if>
+                AND namespace_id = #{namespaceId}
+                AND trigger_at BETWEEN #{from} AND #{to}
+            </where>
+        ) AS subquery
+        GROUP BY createDt
+    </select>
+
+    <select id="toJobTask"
+            resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardCardResponseDO$JobTask">
+        SELECT
+            ISNULL(sum(success_num), 0) AS successNum,
+            ISNULL(sum(stop_num), 0) AS stopNum,
+            ISNULL(sum(cancel_num), 0) AS cancelNum,
+            ISNULL(sum(fail_num), 0) AS failNum,
+            ISNULL(sum(success_num + fail_num + stop_num + cancel_num), 0) AS totalNum
+        FROM job_summary
+        WHERE namespace_id = #{namespaceId}
+        <if test="groupNames != null and groupNames.size > 0">
+            AND group_name IN
+            <foreach collection="groupNames" item="groupName" open="(" separator="," close=")">
+                #{groupName}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="dashboardRank"
+            resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO$Rank">
+        SELECT TOP 10
+            CONCAT(group_name, '/', (SELECT job_name FROM job WHERE id=job_id)) name,
+            SUM(fail_num) AS total
+        FROM job_summary
+        <where>
+            <if test="groupNames != null and groupNames.size > 0">
+                AND group_name IN
+                <foreach collection="groupNames" item="groupName" open="(" separator="," close=")">
+                    #{groupName}
+                </foreach>
+            </if>
+            <if test="groupName != '' and groupName != null">
+                AND group_name = #{groupName}
+            </if>
+            AND trigger_at BETWEEN #{startTime} AND #{endTime}
+            AND namespace_id = #{namespaceId}
+        </where>
+        GROUP BY namespace_id, group_name, job_id
+        HAVING SUM(fail_num) > 0
+        ORDER BY name DESC
+    </select>
+
+    <!--  SQL Server GROUP BY 的分页必须 ORDER BY xxx -->
+    <select id="jobTaskList"
+            resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO$Task">
+        SELECT
+            group_name                                        AS groupName,
+            SUM(CASE WHEN (job_status = 1) THEN 1 ELSE 0 END) AS run,
+            COUNT(*)                                          AS total
+        FROM job
+        WHERE namespace_id = #{namespaceId}
+            <if test="groupNames != null and groupNames.size > 0">
+                AND group_name IN
+                    <foreach collection="groupNames" item="groupName"  open="("  separator="," close=")">
+                        #{groupName}
+                    </foreach>
+            </if>
+        GROUP BY namespace_id, group_name
+        ORDER BY group_name
+    </select>
+
+    <!--  用于 jobTaskList 分页的 COUNT,
+        SQL Server SELECT COUNT(*) FROM (... ORDER BY ) 会报错 -->
+    <select id="sqlServer_jobTaskList_Count"
+            resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO$Task">
+        SELECT COUNT(DISTINCT group_name)
+         FROM job
+        WHERE namespace_id = #{namespaceId}
+            <if test="groupNames != null and groupNames.size > 0">
+                AND group_name IN
+                <foreach collection="groupNames" item="groupName"  open="("  separator="," close=")">
+                    #{groupName}
+                </foreach>
+            </if>
+    </select>
+</mapper>

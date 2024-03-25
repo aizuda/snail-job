@@ -41,6 +41,7 @@ public class JobTaskServiceImpl implements JobTaskService {
             queryWrapper.eq(JobTask::getTaskBatchId, queryVO.getTaskBatchId());
         }
 
+        queryWrapper.orderByAsc(JobTask::getJobId); // SQLServer 分页必须 ORDER BY
         PageDTO<JobTask> selectPage = jobTaskMapper.selectPage(pageDTO, queryWrapper);
 
         List<JobTaskResponseVO> jobTaskResponseVOs = JobTaskResponseVOConverter.INSTANCE.toJobTaskResponseVOs(

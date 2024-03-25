@@ -22,6 +22,11 @@ spring:
 #    url: jdbc:oracle:thin:@//localhost:1521/XEPDB1
 #    username: root
 #    password: root
+    ## SQL Server
+#    driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
+#    url: jdbc:sqlserver://localhost:1433;DatabaseName=easy_retry;SelectMethod=cursor;encrypt=false;rewriteBatchedStatements=true
+#    username: SA
+#    password: EasyRetry@24
     type: com.zaxxer.hikari.HikariDataSource
     hikari:
       connection-timeout: 30000

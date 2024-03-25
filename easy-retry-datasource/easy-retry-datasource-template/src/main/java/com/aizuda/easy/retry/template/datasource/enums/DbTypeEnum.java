@@ -20,7 +20,8 @@ public enum DbTypeEnum {
     MYSQL("mysql", "MySql数据库", DbType.MYSQL),
     MARIADB("mariadb", "MariaDB数据库", DbType.MARIADB),
     POSTGRES("postgres", "Postgres数据库", DbType.POSTGRE_SQL),
-    ORACLE("oracle", "Oracle数据库", DbType.ORACLE_12C);
+    ORACLE("oracle", "Oracle数据库", DbType.ORACLE_12C),
+    SQLSERVER("sqlserver", "SQLServer数据库", DbType.SQL_SERVER);
 
     private final String db;
     private final String desc;

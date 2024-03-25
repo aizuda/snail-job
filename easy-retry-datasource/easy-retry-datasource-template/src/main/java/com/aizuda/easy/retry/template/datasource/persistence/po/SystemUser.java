@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
  * @author www.byteblogs.com
  * @since 2022-03-05
  */
-@TableName("system_user")
+@TableName("system_user") // NOTE: system_user表是SQL Server系统函数, 这里需要修改为 system_user_, [system_user]不支持子查询
 @Data
 public class SystemUser implements Serializable {
 
@@ -32,10 +32,5 @@ public class SystemUser implements Serializable {
     private LocalDateTime createDt;
 
     private LocalDateTime updateDt;
-
-    public Long getId() {
-        return id;
-    }
-
 
 }

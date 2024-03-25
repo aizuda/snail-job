@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskMapper">
+    <resultMap id="BaseResultMap" type="com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask">
+        <id column="id" jdbcType="BIGINT" property="id" />
+        <result column="namespace_id" jdbcType="VARCHAR" property="namespaceId"/>
+        <result column="unique_id" jdbcType="VARCHAR" property="uniqueId"/>
+        <result column="group_name" jdbcType="VARCHAR" property="groupName" />
+        <result column="scene_name" jdbcType="VARCHAR" property="sceneName" />
+        <result column="idempotent_id" jdbcType="VARCHAR" property="idempotentId" />
+        <result column="biz_no" jdbcType="VARCHAR" property="bizNo" />
+        <result column="executor_name" jdbcType="VARCHAR" property="executorName" />
+        <result column="args_str" jdbcType="VARCHAR" property="argsStr" />
+        <result column="ext_attrs" jdbcType="VARCHAR" property="extAttrs" />
+        <result column="next_trigger_at" jdbcType="TIMESTAMP" property="nextTriggerAt" />
+        <result column="retry_count" jdbcType="TINYINT" property="retryCount" />
+        <result column="retry_status" jdbcType="TINYINT" property="retryStatus" />
+        <result column="task_type" jdbcType="TINYINT" property="taskType"/>
+        <result column="create_dt" jdbcType="TIMESTAMP" property="createDt" />
+        <result column="update_dt" jdbcType="TIMESTAMP" property="updateDt" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, namespace_id, unique_id, group_name, scene_name, idempotent_id, biz_no, executor_name, args_str, ext_attrs, next_trigger_at, retry_count, retry_status,
+        create_dt, update_dt, task_type
+    </sql>
+
+    <!-- 定义批量新增的 SQL 映射 -->
+    <insert id="batchInsert" parameterType="java.util.List">
+        INSERT INTO retry_task (namespace_id, unique_id, group_name, scene_name, idempotent_id, biz_no, executor_name, args_str, ext_attrs, next_trigger_at, task_type, retry_status, create_dt)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+                #{item.namespaceId},
+                #{item.uniqueId},
+                #{item.groupName},
+                #{item.sceneName},
+                #{item.idempotentId},
+                #{item.bizNo},
+                #{item.executorName},
+                #{item.argsStr},
+                #{item.extAttrs},
+                #{item.nextTriggerAt},
+                #{item.taskType},
+                #{item.retryStatus},
+                #{item.createDt}
+            )
+        </foreach>
+    </insert>
+
+    <update id="updateBatchNextTriggerAtById" parameterType="java.util.List">
+        UPDATE target
+            SET target.next_trigger_at = src.next_trigger_at
+        FROM retry_task_${partition} as target
+                JOIN (
+                    <foreach collection="list" item="item" index="index" separator=" UNION ALL ">
+                        SELECT
+                        #{item.nextTriggerAt} AS next_trigger_at,
+                        #{item.id} AS id
+                    </foreach>
+                ) AS src
+                ON target.id = src.id;
+    </update>
+</mapper>

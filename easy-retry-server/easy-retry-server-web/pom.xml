@@ -60,6 +60,10 @@
             <artifactId>easy-retry-oracle-datasource</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.aizuda</groupId>
+            <artifactId>easy-retry-sqlserver-datasource</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct</artifactId>
         </dependency>

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aizuda.easy.retry.template.datasource.persistence.mapper.ServerNodeMapper">
+    <resultMap id="BaseResultMap" type="com.aizuda.easy.retry.template.datasource.persistence.po.ServerNode">
+        <id column="id" jdbcType="BIGINT" property="id" />
+        <result column="namespace_id" jdbcType="VARCHAR" property="namespaceId" />
+        <result column="group_name" jdbcType="VARCHAR" property="groupName" />
+        <result column="host_id" jdbcType="VARCHAR" property="hostId" />
+        <result column="host_ip" jdbcType="VARCHAR" property="hostIp" />
+        <result column="host_port" jdbcType="INTEGER" property="hostPort" />
+        <result column="expire_at" jdbcType="TIMESTAMP" property="expireAt" />
+        <result column="node_type" jdbcType="TINYINT" property="nodeType" />
+        <result column="context_path" jdbcType="VARCHAR" property="contextPath" />
+        <result column="ext_attrs" jdbcType="VARCHAR" property="extAttrs" />
+        <result column="create_dt" jdbcType="TIMESTAMP" property="createDt" />
+        <result column="update_dt" jdbcType="TIMESTAMP" property="updateDt" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, namespace_id, group_name, context_path, host_id, host_ip, host_port, expire_at, node_type,create_dt,update_dt
+    </sql>
+
+    <insert id="insertOrUpdate" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
+        MERGE INTO server_node AS target
+        USING (
+            VALUES
+            <foreach collection="records" item="item" index="index" separator=",">
+                (
+                    #{item.namespaceId,jdbcType=VARCHAR}, #{item.groupName,jdbcType=VARCHAR},
+                    #{item.hostId,jdbcType=VARCHAR}, #{item.hostIp,jdbcType=VARCHAR}, #{item.hostPort,jdbcType=INTEGER},
+                    #{item.expireAt,jdbcType=TIMESTAMP}, #{item.nodeType,jdbcType=TINYINT}, #{item.extAttrs,jdbcType=VARCHAR},
+                    #{item.contextPath,jdbcType=VARCHAR}, #{item.createDt,jdbcType=TIMESTAMP}
+                )
+            </foreach>
+        ) AS source (namespace_id, group_name, host_id, host_ip, host_port,
+                     expire_at, node_type, ext_attrs, context_path, create_dt)
+        ON target.namespace_id = source.namespace_id
+            AND target.group_name = source.group_name
+            AND target.host_id = source.host_id
+        WHEN MATCHED THEN
+            UPDATE SET
+                target.expire_at = source.expire_at, target.update_dt = GETDATE()
+        WHEN NOT MATCHED THEN
+            INSERT (namespace_id, group_name, host_id, host_ip, host_port,
+                    expire_at, node_type, ext_attrs, context_path, create_dt, update_dt)
+                VALUES (source.namespace_id, source.group_name, source.host_id, source.host_ip, source.host_port,
+                        source.expire_at, source.node_type, source.ext_attrs, source.context_path, source.create_dt, GETDATE());
+    </insert>
+
+    <delete id="deleteByExpireAt">
+        DELETE FROM server_node
+        WHERE expire_at &lt;= #{endTime,jdbcType=TIMESTAMP}
+    </delete>
+
+    <select id="countActivePod"
+          resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.ActivePodQuantityResponseDO">
+        SELECT
+            node_type AS nodeType,
+            COUNT(*) AS total
+        FROM server_node
+        WHERE namespace_id IN
+            <foreach collection="namespaceIds" item="namespaceId" separator="," open="(" close=")">
+                #{namespaceId}
+            </foreach>
+        GROUP BY node_type
+    </select>
+</mapper>

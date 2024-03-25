@@ -25,6 +25,7 @@
         <module>easy-retry-mysql-datasource</module>
         <module>easy-retry-postgres-datasource</module>
         <module>easy-retry-oracle-datasource</module>
+        <module>easy-retry-sqlserver-datasource</module>
         <module>easy-retry-datasource-template</module>
     </modules>
 
