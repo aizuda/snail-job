@@ -129,4 +129,6 @@ public interface JobTaskConverter {
 
     CompleteJobBatchDTO completeJobBatchDTO(JobTaskPrepareDTO jobTaskPrepareDTO);
 
+    JobLogMessage toJobLogMessage(JobLogMessage jobLogMessage);
+
 }

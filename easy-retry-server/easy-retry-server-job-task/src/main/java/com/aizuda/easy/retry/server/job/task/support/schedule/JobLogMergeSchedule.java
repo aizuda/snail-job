@@ -168,11 +168,12 @@ public class JobLogMergeSchedule extends AbstractSchedule implements Lifecycle {
                         systemProperties.getMergeLogNum());
 
                     for (int i = 0; i < partitionMessages.size(); i++) {
-                        JobLogMessage jobLogMessage = jobLogMessageMap.getValue().get(i);
-                        // 剔除不需要删除的数据
-                        jobLogMessageDeleteBatchIds.remove(jobLogMessage.getId());
+                        // 深拷贝
+                        JobLogMessage jobLogMessage = JobTaskConverter.INSTANCE.toJobLogMessage( jobLogMessageMap.getValue().get(0));
+                        List<String> messages = partitionMessages.get(i);
 
-                        jobLogMessage.setMessage(JsonUtil.toJsonString(partitionMessages.get(0)));
+                        jobLogMessage.setLogNum(messages.size());
+                        jobLogMessage.setMessage(JsonUtil.toJsonString(messages));
                         jobLogMessageUpdateList.add(jobLogMessage);
                     }
 
