@@ -9,6 +9,9 @@ import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.dto.DistributeInstance;
 import com.aizuda.easy.retry.server.common.dto.ServerNodeExtAttrs;
+import com.aizuda.easy.retry.server.common.enums.DashboardLineEnum;
+import com.aizuda.easy.retry.server.common.enums.SyetemTaskTypeEnum;
+import com.aizuda.easy.retry.server.common.enums.SystemModeEnum;
 import com.aizuda.easy.retry.server.common.register.ServerRegister;
 import com.aizuda.easy.retry.server.web.model.base.BaseQueryVO;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
@@ -77,9 +80,17 @@ public class DashBoardServiceImpl implements DashBoardService {
         List<String> groupNames = userSessionVO.isUser() ? userSessionVO.getGroupNames() : new ArrayList<>();
         DashboardCardResponseVO dashboardCardResponseVO = new DashboardCardResponseVO();
         // 重试任务
-        dashboardCardResponseVO.setRetryTask(RetrySummaryResponseVOConverter.INSTANCE.toRetryTask(retrySummaryMapper.retryTask(namespaceId, groupNames)));
+        DashboardCardResponseDO.RetryTask retryTaskDO = retrySummaryMapper.retryTask(namespaceId, groupNames);
+        DashboardCardResponseVO.RetryTask retryTaskVO = RetrySummaryResponseVOConverter.INSTANCE.toRetryTask(retryTaskDO);
+        dashboardCardResponseVO.setRetryTask(retryTaskVO);
         // 定时任务
-        dashboardCardResponseVO.setJobTask(JobSummaryResponseVOConverter.INSTANCE.toTaskJob(jobSummaryMapper.toJobTask(namespaceId, groupNames)));
+        DashboardCardResponseDO.JobTask jobTaskDO = jobSummaryMapper.toJobTask(SyetemTaskTypeEnum.JOB.getType(), namespaceId, groupNames);
+        DashboardCardResponseVO.JobTask jobTaskVO = JobSummaryResponseVOConverter.INSTANCE.toTaskJob(jobTaskDO);
+        dashboardCardResponseVO.setJobTask(jobTaskVO);
+        // 工作流任务
+        DashboardCardResponseDO.JobTask workFlowTaskDO = jobSummaryMapper.toJobTask(SyetemTaskTypeEnum.WORKFLOW.getType(), namespaceId, groupNames);
+        DashboardCardResponseVO.WorkFlowTask workFlowTaskVO = JobSummaryResponseVOConverter.INSTANCE.toWorkFlowTask(workFlowTaskDO);
+        dashboardCardResponseVO.setWorkFlowTask(workFlowTaskVO);
         // 重试任务柱状图
         HashMap<LocalDateTime, DashboardCardResponseVO.RetryTaskBar> retryTaskBarMap = new HashMap<>();
         for (int i = 0; i < 7; i++) {
@@ -89,7 +100,7 @@ public class DashBoardServiceImpl implements DashBoardService {
 
         List<DashboardCardResponseDO.RetryTask> retryTaskList = retrySummaryMapper.retryTaskBarList(namespaceId, groupNames);
         Map<LocalDateTime, LongSummaryStatistics> summaryStatisticsMap = retryTaskList.stream().collect(Collectors.groupingBy(DashboardCardResponseDO.RetryTask::getTriggerAt,
-            Collectors.summarizingLong(i -> i.getMaxCountNum() + i.getRunningNum() + i.getSuspendNum() + i.getFinishNum())));
+                Collectors.summarizingLong(i -> i.getMaxCountNum() + i.getRunningNum() + i.getSuspendNum() + i.getFinishNum())));
         for (Map.Entry<LocalDateTime, LongSummaryStatistics> map : summaryStatisticsMap.entrySet()) {
             if (retryTaskBarMap.containsKey(LocalDateTime.of(map.getKey().toLocalDate(), LocalTime.MIN))) {
                 DashboardCardResponseVO.RetryTaskBar retryTaskBar = retryTaskBarMap.get(LocalDateTime.of(map.getKey().toLocalDate(), LocalTime.MIN));
@@ -146,7 +157,7 @@ public class DashBoardServiceImpl implements DashBoardService {
     }
 
     @Override
-    public DashboardRetryLineResponseVO jobLineList(BaseQueryVO baseQueryVO, String groupName, String type, String startTime, String endTime) {
+    public DashboardRetryLineResponseVO jobLineList(BaseQueryVO baseQueryVO, String mode, String groupName, String type, String startTime, String endTime) {
 
         // 查询登录用户权限
         UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
@@ -159,6 +170,8 @@ public class DashBoardServiceImpl implements DashBoardService {
         if (DbTypeEnum.SQLSERVER.equals(systemProperties.getDbType())) {
             pager.setCountId("sqlServer_jobTaskList_Count");
         }
+        // 任务类型
+        Integer systemTaskType = SystemModeEnum.JOB.name().equals(mode) ? SyetemTaskTypeEnum.JOB.getType() : SyetemTaskTypeEnum.WORKFLOW.getType();
         IPage<DashboardRetryLineResponseDO.Task> IPage = jobSummaryMapper.jobTaskList(namespaceId, groupNames, pager);
         List<DashboardRetryLineResponseVO.Task> taskList = JobSummaryResponseVOConverter.INSTANCE.toDashboardRetryLineResponseVO(IPage.getRecords());
         PageResult<List<DashboardRetryLineResponseVO.Task>> pageResult = new PageResult<>(new PageDTO(IPage.getCurrent(), IPage.getSize(), IPage.getTotal()), taskList);
@@ -168,14 +181,14 @@ public class DashBoardServiceImpl implements DashBoardService {
         DateTypeEnum dateTypeEnum = DateTypeEnum.valueOf(type);
         LocalDateTime startDateTime = dateTypeEnum.getStartTime().apply(StrUtil.isNotBlank(startTime) ? LocalDateTime.parse(startTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) : null);
         LocalDateTime endDateTime = dateTypeEnum.getEndTime().apply(StrUtil.isNotBlank(endTime) ? LocalDateTime.parse(endTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) : null);
-        List<DashboardLineResponseDO> dashboardLineResponseDOList = jobSummaryMapper.jobLineList(namespaceId, groupNames, groupName, type, startDateTime, endDateTime);
+        List<DashboardLineResponseDO> dashboardLineResponseDOList = jobSummaryMapper.jobLineList(systemTaskType, namespaceId, groupNames, groupName, DashboardLineEnum.modeOf(type).getDateFormat(), startDateTime, endDateTime);
         List<DashboardLineResponseVO> dashboardLineResponseVOList = DispatchQuantityResponseVOConverter.INSTANCE.toDashboardLineResponseVO(dashboardLineResponseDOList);
         dateTypeEnum.getConsumer().accept(dashboardLineResponseVOList);
         dashboardLineResponseVOList.sort(Comparator.comparing(a -> a.getCreateDt()));
         dashboardRetryLineResponseVO.setDashboardLineResponseDOList(dashboardLineResponseVOList);
 
         // 排行榜
-        List<DashboardRetryLineResponseDO.Rank> rankList = jobSummaryMapper.dashboardRank(namespaceId, groupNames, groupName, startDateTime, endDateTime);
+        List<DashboardRetryLineResponseDO.Rank> rankList = jobSummaryMapper.dashboardRank(systemTaskType, namespaceId, groupNames, groupName, startDateTime, endDateTime);
         List<DashboardRetryLineResponseVO.Rank> ranks = SceneQuantityRankResponseVOConverter.INSTANCE.toDashboardRetryLineResponseVORank(rankList);
         dashboardRetryLineResponseVO.setRankList(ranks);
         return dashboardRetryLineResponseVO;
@@ -187,7 +200,7 @@ public class DashBoardServiceImpl implements DashBoardService {
 
         LambdaQueryWrapper<ServerNode> serverNodeLambdaQueryWrapper = new LambdaQueryWrapper<>();
         serverNodeLambdaQueryWrapper.in(ServerNode::getNamespaceId, Lists.newArrayList(
-            UserSessionUtils.currentUserSession().getNamespaceId(), ServerRegister.NAMESPACE_ID
+                UserSessionUtils.currentUserSession().getNamespaceId(), ServerRegister.NAMESPACE_ID
         ));
         if (StrUtil.isNotBlank(queryVO.getGroupName())) {
             serverNodeLambdaQueryWrapper.eq(ServerNode::getGroupName, queryVO.getGroupName());
@@ -219,8 +232,8 @@ public class DashBoardServiceImpl implements DashBoardService {
                 List<Integer> data = result.getData();
                 if (!CollectionUtils.isEmpty(data)) {
                     serverNodeResponseVO.setConsumerBuckets(data.stream()
-                        .sorted(Integer::compareTo)
-                        .collect(Collectors.toCollection(LinkedHashSet::new)));
+                            .sorted(Integer::compareTo)
+                            .collect(Collectors.toCollection(LinkedHashSet::new)));
                 }
             } catch (Exception e) {
                 EasyRetryLog.LOCAL.error("Failed to retrieve consumer group for node [{}:{}].", serverNodeResponseVO.getHostIp(), serverNodeExtAttrs.getWebPort());

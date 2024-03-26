@@ -20,7 +20,7 @@
 
     <insert id="insertOrUpdate" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO
-        job_summary (namespace_id, group_name, job_id, trigger_at,
+        job_summary (namespace_id, group_name, job_id, trigger_at, system_task_type,
         success_num,fail_num,fail_reason,stop_num,stop_reason, cancel_num,cancel_reason)
         VALUES
         <foreach collection="list" item="item" separator=",">
@@ -29,6 +29,7 @@
             #{item.groupName},
             #{item.jobId},
             #{item.triggerAt},
+            #{item.systemTaskType},
             #{item.successNum},
             #{item.failNum},
             #{item.failReason},
@@ -51,28 +52,11 @@
     <select id="jobLineList"
             resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardLineResponseDO">
         SELECT
-        <choose>
-            <when test="type == 'DAY'">
-                DATE_FORMAT(create_dt,'%H')
-            </when>
-            <when test="type == 'WEEK'">
-                DATE_FORMAT(create_dt,'%Y-%m-%d')
-            </when>
-            <when test="type =='MONTH'">
-                DATE_FORMAT(create_dt,'%Y-%m-%d')
-            </when>
-            <when test="type == 'YEAR'">
-                DATE_FORMAT(create_dt,'%Y-%m')
-            </when>
-            <otherwise>
-                DATE_FORMAT(create_dt,'%Y-%m-%d')
-            </otherwise>
-        </choose>
-        AS createDt,
-        ifnull(SUM(success_num), 0) AS success,
-        ifnull(SUM(stop_num), 0) AS stop,
-        ifnull(SUM(cancel_num), 0) AS cancel,
-        ifnull(SUM(fail_num), 0) AS fail,
+        DATE_FORMAT(trigger_at, #{dateFormat})                         AS createDt,
+        ifnull(SUM(success_num), 0)                                    AS success,
+        ifnull(SUM(stop_num), 0)                                       AS stop,
+        ifnull(SUM(cancel_num), 0)                                     AS cancel,
+        ifnull(SUM(fail_num), 0)                                       AS fail,
         ifnull(SUM(success_num + fail_num + stop_num + cancel_num), 0) AS total
         FROM job_summary
         <where>
@@ -85,20 +69,21 @@
             <if test="groupName != null and groupName != '' ">
                 AND group_name = #{groupName}
             </if>
-            AND namespace_id = #{namespaceId} AND trigger_at BETWEEN #{from} AND #{to}
+            AND system_task_type = #{systemTaskType} AND namespace_id = #{namespaceId} AND trigger_at BETWEEN #{from} AND #{to}
         </where>
-        GROUP BY createDt
+        GROUP BY DATE_FORMAT(trigger_at, #{dateFormat})
     </select>
 
     <select id="toJobTask"
             resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardCardResponseDO$JobTask">
-        SELECT ifnull(sum(success_num), 0) AS successNum,
+        SELECT
+        ifnull(sum(success_num), 0) AS successNum,
         ifnull(sum(stop_num), 0) AS stopNum,
         ifnull(sum(cancel_num), 0) AS cancelNum,
         ifnull(sum(fail_num), 0) AS failNum,
         ifnull(sum(success_num + fail_num + stop_num + cancel_num), 0) AS totalNum
         FROM job_summary
-        WHERE namespace_id = #{namespaceId}
+        WHERE system_task_type = #{systemTaskType} AND namespace_id = #{namespaceId}
         <if test="groupNames != null and groupNames.size > 0">
             AND group_name IN
             <foreach collection="groupNames" item="groupName" open="(" separator="," close=")">
@@ -110,7 +95,12 @@
     <select id="dashboardRank"
             resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO$Rank">
         SELECT
-        CONCAT(group_name, '/', (SELECT job_name FROM job WHERE id=job_id)) `name`,
+        <if test="systemTaskType == 3">
+            CONCAT(group_name, '/', (SELECT job_name FROM job WHERE id = job_id)) `name`,
+        </if>
+        <if test="systemTaskType == 4">
+        CONCAT(group_name, '/', (SELECT workflow_name FROM workflow WHERE id = job_id)) `name`,
+        </if>
         SUM(fail_num) AS total FROM job_summary
         <where>
             <if test="groupNames != null and groupNames.size > 0">
@@ -124,6 +114,7 @@
             </if>
             AND trigger_at >= #{startTime} AND trigger_at &lt;= #{endTime}
         </where>
+        AND system_task_type = #{systemTaskType}
         AND namespace_id = #{namespaceId}
         GROUP BY namespace_id, group_name, job_id
         HAVING total > 0

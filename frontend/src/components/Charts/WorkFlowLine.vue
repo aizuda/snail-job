@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div id="jobViewData"></div>
+    <div id="workFlowViewData"></div>
   </div>
 </template>
 
@@ -11,7 +11,7 @@ import { getDashboardJobLine } from '@/api/manage'
 const DataSet = require('@antv/data-set')
 
 export default {
-  name: 'JobLine',
+  name: 'WorkFlowLine',
   data () {
     return {
       viewRecords: [],
@@ -20,7 +20,7 @@ export default {
     }
   },
   mounted () {
-    this.getDashboardJobLine('JOB', '')
+    this.getDashboardJobLine('WORKFLOW', '')
     this.createView()
   },
   methods: {
@@ -32,7 +32,7 @@ export default {
         'startTime': startTime,
         'endTime': endTime
       }).then(res => {
-        this.$bus.$emit('job', res)
+        this.$bus.$emit('WORKFLOW', res)
         this.viewCharts(res.data.dashboardLineResponseDOList)
       })
     },
@@ -77,7 +77,7 @@ export default {
     },
     createView () {
       this.chart = new G2.Chart({
-        container: 'jobViewData',
+        container: 'workFlowViewData',
         forceFit: true,
         height: 410,
         padding: [20, 90, 60, 50]

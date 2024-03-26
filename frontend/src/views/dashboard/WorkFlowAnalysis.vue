@@ -2,7 +2,7 @@
   <div class="antd-pro-pages-dashboard-analysis-twoColLayout" :class="!isMobile && 'desktop'">
     <a-row>
       <a-col :xl="16" :lg="12" :md="12" :sm="24" :xs="24">
-        <g2-job-line ref="jobViewChart" name="G2JobLine" />
+        <g2-work-flow-line ref="workFlowViewChart" name="G2WorkFlowLine" />
       </a-col>
       <a-col :xl="8" :lg="12" :md="12" :sm="24" :xs="24">
         <rank-list title="失败任务排名" :list="rankList" />
@@ -49,14 +49,14 @@ import {
 } from '@/components'
 import { getAllGroupNameList, getDashboardJobLine } from '@/api/manage'
 import { baseMixin } from '@/store/app-mixin'
-import G2JobLine from '@/components/Charts/JobLine.vue'
+import G2WorkFlowLine from '@/components/Charts/WorkFlowLine.vue'
 import moment from 'moment'
 
 export default {
-  name: 'JobAnalysis',
+  name: 'WorkFlowAnalysis',
   mixins: [ baseMixin ],
   components: {
-    G2JobLine,
+    G2WorkFlowLine,
     RankList,
     STable
   },
@@ -110,7 +110,7 @@ export default {
     }
   },
   mounted () {
-    this.$bus.$on('job', (res) => {
+    this.$bus.$on('WORKFLOW', (res) => {
       this.total = 0
       this.success = 0
       this.fail = 0
@@ -138,19 +138,19 @@ export default {
     dataHandler (mode, type) {
       this.mode = mode
       this.type = type
-      this.$refs.jobViewChart.getDashboardJobLine(this.mode, this.groupName, this.type, this.startTime, this.endTime)
+      this.$refs.workFlowViewChart.getDashboardJobLine(this.mode, this.groupName, this.type, this.startTime, this.endTime)
     },
     handleChange (mode, value) {
       this.mode = mode
       this.groupName = value
-      this.$refs.jobViewChart.getDashboardJobLine(this.mode, this.groupName, this.type, this.startTime, this.endTime)
+      this.$refs.workFlowViewChart.getDashboardJobLine(this.mode, this.groupName, this.type, this.startTime, this.endTime)
     },
     dateChange (mode, date, dateString) {
       this.mode = mode
       this.startTime = dateString[0]
       this.endTime = dateString[1]
       this.type = this.startTime === '' ? 'WEEK' : 'OTHERS'
-      this.$refs.jobViewChart.getDashboardJobLine(this.mode, this.groupName, this.type, this.startTime, this.endTime)
+      this.$refs.workFlowViewChart.getDashboardJobLine(this.mode, this.groupName, this.type, this.startTime, this.endTime)
     }
   },
   created () {

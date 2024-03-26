@@ -29,6 +29,11 @@ public interface JobSummaryResponseVOConverter {
     })
     DashboardCardResponseVO.JobTask toTaskJob(DashboardCardResponseDO.JobTask jobTask);
 
+    @Mappings({
+            @Mapping(target = "successRate", expression = "java(JobSummaryResponseVOConverter.toSuccessRate(jobTask.getSuccessNum(), jobTask.getTotalNum()))")
+    })
+    DashboardCardResponseVO.WorkFlowTask toWorkFlowTask(DashboardCardResponseDO.JobTask jobTask);
+
     List<DashboardRetryLineResponseVO.Task> toDashboardRetryLineResponseVO(List<DashboardRetryLineResponseDO.Task> taskList);
 
     static BigDecimal toSuccessRate(Integer successNum, Integer totalNum) {

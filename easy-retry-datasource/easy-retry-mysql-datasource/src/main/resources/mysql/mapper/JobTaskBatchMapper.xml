@@ -55,9 +55,25 @@
                SUM(CASE WHEN (task_batch_status = 5) THEN 1 ELSE 0 END) AS stopNum,
                SUM(CASE WHEN (task_batch_status = 4) THEN 1 ELSE 0 END) AS failNum
         FROM job_task_batch
-        WHERE create_dt BETWEEN #{from} AND #{to}
+        WHERE system_task_type = #{systemTaskType} AND create_dt BETWEEN #{from} AND #{to}
         GROUP BY namespace_id, group_name, job_id, task_batch_status, operation_reason
+    </select>
 
+    <select id="summaryWorkflowTaskBatchList"
+            resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.JobBatchSummaryResponseDO">
+        SELECT namespace_id                                             AS namespaceId,
+               workflow_id                                              AS jobId,
+               group_name                                               AS groupName,
+               task_batch_status                                        AS taskBatchStatus,
+               operation_reason                                         AS operationReason,
+               COUNT(operation_reason)                                  AS operationReasonTotal,
+               SUM(CASE WHEN (task_batch_status = 3) THEN 1 ELSE 0 END) AS successNum,
+               SUM(CASE WHEN (task_batch_status = 6) THEN 1 ELSE 0 END) AS cancelNum,
+               SUM(CASE WHEN (task_batch_status = 5) THEN 1 ELSE 0 END) AS stopNum,
+               SUM(CASE WHEN (task_batch_status = 4) THEN 1 ELSE 0 END) AS failNum
+        FROM workflow_task_batch
+        WHERE create_dt BETWEEN #{from} AND #{to}
+        GROUP BY namespace_id, group_name, workflow_id, task_batch_status, operation_reason
     </select>
 
     <select id="selectJobBatchListByIds"

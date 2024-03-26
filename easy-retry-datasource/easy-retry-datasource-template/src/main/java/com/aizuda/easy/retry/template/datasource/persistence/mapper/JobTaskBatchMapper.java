@@ -27,5 +27,7 @@ public interface JobTaskBatchMapper extends BaseMapper<JobTaskBatch> {
 
     List<JobBatchResponseDO> selectJobBatchListByIds(@Param("ids") List<Long> ids);
 
-    List<JobBatchSummaryResponseDO> summaryJobBatchList(@Param("from") LocalDateTime todayFrom, @Param("to") LocalDateTime to);
+    List<JobBatchSummaryResponseDO> summaryJobBatchList(@Param("systemTaskType") Integer systemTaskType, @Param("from") LocalDateTime todayFrom, @Param("to") LocalDateTime to);
+
+    List<JobBatchSummaryResponseDO> summaryWorkflowTaskBatchList(@Param("from") LocalDateTime todayFrom, @Param("to") LocalDateTime to);
 }

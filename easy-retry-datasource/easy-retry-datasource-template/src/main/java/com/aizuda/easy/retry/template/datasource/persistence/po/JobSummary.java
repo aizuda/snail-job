@@ -92,4 +92,8 @@ public class JobSummary implements Serializable {
      */
     private LocalDateTime updateDt;
 
+    /**
+     * 任务类型 3、JOB任务 4、WORKFLOW任务
+     */
+    private Integer systemTaskType;
 }

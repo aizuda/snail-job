@@ -30,6 +30,11 @@ public class JobBatchSummaryResponseDO {
     private Long jobId;
 
     /**
+     * 工作流任务id
+     */
+    //private Long workflowId;
+
+    /**
      * 任务批次状态
      */
     private int taskBatchStatus;

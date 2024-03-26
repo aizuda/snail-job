@@ -1,7 +1,7 @@
 <template>
   <div>
     <a-row :gutter="24">
-      <a-col :sm="24" :md="12" :xl="8" :style="{ marginBottom: '24px' }">
+      <a-col :sm="24" :md="12" :xl="6" :style="{ marginBottom: '24px' }">
         <chart-card :loading="loading" :title="$t('dashboard.analysis.total-sales')" :total="retryTask.totalNum">
           <a-tooltip title="总任务量: 重试/回调任务量" slot="action">
             <a-icon type="info-circle-o" />
@@ -31,7 +31,7 @@
           </template>
         </chart-card>
       </a-col>
-      <a-col :sm="24" :md="12" :xl="8" :style="{ marginBottom: '24px' }">
+      <a-col :sm="24" :md="12" :xl="6" :style="{ marginBottom: '24px' }">
         <chart-card :loading="loading" title="定时任务" :total="jobTask.totalNum">
           <a-tooltip title="成功率:总完成/总调度量;" slot="action">
             <a-icon type="info-circle-o" />
@@ -56,7 +56,34 @@
           </template>
         </chart-card>
       </a-col>
-      <a-col :sm="24" :md="12" :xl="8" :style="{ marginBottom: '24px' }">
+
+      <a-col :sm="24" :md="12" :xl="6" :style="{ marginBottom: '24px' }">
+        <chart-card :loading="loading" title="工作流任务" :total="workFlowTask.totalNum"><!-- -->
+          <a-tooltip title="成功率:总完成/总调度量;" slot="action">
+            <a-icon type="info-circle-o" />
+          </a-tooltip>
+          <div>
+            <a-tooltip title="成功率">
+              <a-progress stroke-linecap="square" :percent="workFlowTask.successRate" />
+            </a-tooltip>
+          </div>
+          <template slot="footer">
+            {{ $t('dashboard.analysis.job_success') }}
+            <span>{{ workFlowTask.successNum }}</span>
+            <a-divider type="vertical" />
+            {{ $t('dashboard.analysis.job_fail') }}
+            <span>{{ workFlowTask.failNum }}</span>
+            <a-divider type="vertical" />
+            {{ $t('dashboard.analysis.job_stop') }}
+            <span>{{ workFlowTask.stopNum }}</span>
+            <a-divider type="vertical" />
+            {{ $t('dashboard.analysis.job_cancel') }}
+            <span>{{ workFlowTask.cancelNum }}</span>
+          </template>
+        </chart-card>
+      </a-col>
+
+      <a-col :sm="24" :md="12" :xl="6" :style="{ marginBottom: '24px' }">
         <a href="#" @click="jumpPosList">
           <chart-card :loading="loading" title="总在线机器" :total="onLineService.total">
             <a-tooltip title="总在线机器:注册到系统的客户端和服务端之和" slot="action" >
@@ -103,6 +130,11 @@
               <job-analysis ref="jobAnalysisRef"/>
             </div>
           </a-tab-pane>
+          <a-tab-pane :tab="$t('dashboard.analysis.work-flow-job')" key="WORKFLOW">
+            <div>
+              <work-flow-analysis ref="workFlowAnalysisRef"/>
+            </div>
+          </a-tab-pane>
         </a-tabs>
       </div>
     </a-card>
@@ -123,6 +155,7 @@ import {
 import { getAllGroupNameList, getDashboardTaskRetryJob } from '@/api/manage'
 import RetryAnalysis from '@/views/dashboard/RetryAnalysis.vue'
 import JobAnalysis from '@/views/dashboard/JobAnalysis.vue'
+import WorkFlowAnalysis from '@/views/dashboard/WorkFlowAnalysis.vue'
 import { APP_MODE } from '@/store/mutation-types'
 import storage from 'store'
 import moment from 'moment'
@@ -132,6 +165,7 @@ export default {
   components: {
     RetryAnalysis,
     JobAnalysis,
+    WorkFlowAnalysis,
     ChartCard,
     MiniArea,
     MiniProgress,
@@ -163,6 +197,14 @@ export default {
         stopNum: 0,
         totalNum: 0
       },
+      workFlowTask: {
+        successRate: 0,
+        successNum: 0,
+        failNum: 0,
+        cancelNum: 0,
+        stopNum: 0,
+        totalNum: 0
+      },
       onLineService: {
         clientTotal: 0,
         serverTotal: 0,
@@ -182,20 +224,39 @@ export default {
     },
     dataHandler (type) {
       this.type = type
-      this.mode === 'ALL' || this.mode === 'RETRY' ? this.$refs.retryAnalysisRef.dataHandler(this.type) : this.$refs.jobAnalysisRef.dataHandler(this.type)
+      if (this.mode === 'ALL' || this.mode === 'RETRY') {
+        this.$refs.retryAnalysisRef.dataHandler(this.type)
+      } else if (this.mode === 'JOB') {
+        this.$refs.jobAnalysisRef.dataHandler(this.mode, this.type)
+      } else if (this.mode === 'WORKFLOW') {
+        this.$refs.workFlowAnalysisRef.dataHandler(this.mode, this.type)
+      }
     },
     dateChange (date, dateString) {
-      this.mode === 'ALL' || this.mode === 'RETRY' ? this.$refs.retryAnalysisRef.dateChange(date, dateString) : this.$refs.jobAnalysisRef.dateChange(date, dateString)
+      if (this.mode === 'ALL' || this.mode === 'RETRY') {
+        this.$refs.retryAnalysisRef.dateChange(date, dateString)
+      } else if (this.mode === 'JOB') {
+        this.$refs.jobAnalysisRef.dateChange(this.mode, date, dateString)
+      } else if (this.mode === 'WORKFLOW') {
+        this.$refs.workFlowAnalysisRef.dateChange(this.mode, date, dateString)
+      }
     },
     handleChange (value) {
-      this.mode === 'ALL' || this.mode === 'RETRY' ? this.$refs.retryAnalysisRef.handleChange(value) : this.$refs.jobAnalysisRef.handleChange(value)
+      if (this.mode === 'ALL' || this.mode === 'RETRY') {
+        this.$refs.retryAnalysisRef.handleChange(value)
+      } else if (this.mode === 'JOB') {
+        this.$refs.jobAnalysisRef.handleChange(this.mode, value)
+      } else if (this.mode === 'WORKFLOW') {
+        this.$refs.workFlowAnalysisRef.handleChange(this.mode, value)
+      }
     }
   },
   created () {
     this.mode = storage.get(APP_MODE)
     getDashboardTaskRetryJob().then(res => {
-      this.retryTask = res.data.retryTask
       this.jobTask = res.data.jobTask
+      this.retryTask = res.data.retryTask
+      this.workFlowTask = res.data.workFlowTask
       this.onLineService = res.data.onLineService
       this.retryTaskBarList = res.data.retryTaskBarList
     })

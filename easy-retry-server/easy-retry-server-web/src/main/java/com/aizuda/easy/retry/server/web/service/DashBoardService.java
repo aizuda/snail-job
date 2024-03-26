@@ -19,7 +19,7 @@ public interface DashBoardService {
 
     DashboardRetryLineResponseVO retryLineList(BaseQueryVO baseQueryVO, String groupName, String type, String startTime, String endTime);
 
-    DashboardRetryLineResponseVO jobLineList(BaseQueryVO baseQueryVO, String groupName, String type, String startTime, String endTime);
+    DashboardRetryLineResponseVO jobLineList(BaseQueryVO baseQueryVO, String mode, String groupName, String type, String startTime, String endTime);
 
     PageResult<List<ServerNodeResponseVO>> pods(ServerNodeQueryVO serverNodeQueryVO);
 }

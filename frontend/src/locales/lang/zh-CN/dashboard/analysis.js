@@ -8,6 +8,7 @@ export default {
   'dashboard.analysis.job_stop': '停止',
   'dashboard.analysis.job_cancel': '取消',
   'dashboard.analysis.visits': '定时任务',
+  'dashboard.analysis.work-flow-job': '工作流任务',
   'dashboard.analysis.visits-trend': '访问量趋势',
   'dashboard.analysis.visits-ranking': '门店访问量排名',
   'dashboard.analysis.day-visits': '日访问量',

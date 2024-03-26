@@ -1,8 +1,8 @@
 package com.aizuda.easy.retry.server.job.task.support.schedule;
 
 import com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum;
-import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.Lifecycle;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.dto.JobTaskBatchReason;
@@ -16,7 +16,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.time.*;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -26,12 +29,12 @@ import java.util.stream.Collectors;
  * Job Dashboard
  *
  * @author: wodeyangzipingpingwuqi
- * @date : 2023-11-21 11:15
- * @since 2.5.0
+ * @date : 2024-03-25 10:16
+ * @since 3.2.0
  */
 @Component
 @Slf4j
-public class JobSummarySchedule extends AbstractSchedule implements Lifecycle {
+public class WorkflowJobSummarySchedule extends AbstractSchedule implements Lifecycle {
 
     @Autowired
     private JobTaskBatchMapper jobTaskBatchMapper;
@@ -42,7 +45,7 @@ public class JobSummarySchedule extends AbstractSchedule implements Lifecycle {
 
     @Override
     public String lockName() {
-        return "jobSummaryDashboard";
+        return "workflowJobSummarySchedule";
     }
 
     @Override
@@ -63,18 +66,18 @@ public class JobSummarySchedule extends AbstractSchedule implements Lifecycle {
                 // 定时按日实时查询统计数据（00:00:00 - 23:59:59）
                 LocalDateTime todayFrom = LocalDateTime.of(LocalDate.now(), LocalTime.MIN).plusDays(-i);
                 LocalDateTime todayTo = LocalDateTime.of(LocalDate.now(), LocalTime.MAX).plusDays(-i);
-                List<JobBatchSummaryResponseDO> summaryResponseDOList = jobTaskBatchMapper.summaryJobBatchList(SyetemTaskTypeEnum.JOB.getType(), todayFrom, todayTo);
-                if (summaryResponseDOList == null || summaryResponseDOList.size() < 1) {
+                List<JobBatchSummaryResponseDO> summaryWorkflowResponseDOList = jobTaskBatchMapper.summaryWorkflowTaskBatchList(todayFrom, todayTo);
+                if (summaryWorkflowResponseDOList == null || summaryWorkflowResponseDOList.size() < 1) {
                     continue;
                 }
 
                 // insertOrUpdate
-                List<JobSummary> jobSummaryList = jobSummaryList(todayFrom, summaryResponseDOList);
+                List<JobSummary> jobSummaryList = jobSummaryList(todayFrom, summaryWorkflowResponseDOList);
                 int totalJobSummary = jobSummaryMapper.insertOrUpdate(jobSummaryList);
-                EasyRetryLog.LOCAL.debug("job summary dashboard success todayFrom:[{}] todayTo:[{}] total:[{}]", todayFrom, todayTo, totalJobSummary);
+                EasyRetryLog.LOCAL.debug("workflow job summary dashboard success todayFrom:[{}] todayTo:[{}] total:[{}]", todayFrom, todayTo, totalJobSummary);
             }
         } catch (Exception e) {
-            EasyRetryLog.LOCAL.error("job summary dashboard log error", e);
+            EasyRetryLog.LOCAL.error("workflow job summary dashboard log error", e);
         }
     }
 
@@ -87,7 +90,7 @@ public class JobSummarySchedule extends AbstractSchedule implements Lifecycle {
             jobSummary.setTriggerAt(triggerAt);
             jobSummary.setNamespaceId(job.getValue().get(0).getNamespaceId());
             jobSummary.setGroupName(job.getValue().get(0).getGroupName());
-            jobSummary.setSystemTaskType(SyetemTaskTypeEnum.JOB.getType());
+            jobSummary.setSystemTaskType(SyetemTaskTypeEnum.WORKFLOW.getType());
             jobSummary.setSuccessNum(job.getValue().stream().mapToInt(JobBatchSummaryResponseDO::getSuccessNum).sum());
             jobSummary.setFailNum(job.getValue().stream().mapToInt(JobBatchSummaryResponseDO::getFailNum).sum());
             jobSummary.setStopNum(job.getValue().stream().mapToInt(JobBatchSummaryResponseDO::getStopNum).sum());
@@ -122,7 +125,7 @@ public class JobSummarySchedule extends AbstractSchedule implements Lifecycle {
 
     @Override
     public void start() {
-        taskScheduler.scheduleAtFixedRate(this::execute, Duration.parse("PT1M"));
+        taskScheduler.scheduleAtFixedRate(this::execute, Duration.parse("PT1H"));
     }
 
     @Override

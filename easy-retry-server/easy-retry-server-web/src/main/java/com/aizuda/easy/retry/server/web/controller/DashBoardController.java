@@ -51,12 +51,13 @@ public class DashBoardController {
     @LoginRequired
     @GetMapping("/job/line")
     public DashboardRetryLineResponseVO jobLineList(BaseQueryVO baseQueryVO,
+                                                    @RequestParam(value = "mode", required = false) String mode,
                                                     @RequestParam(value = "groupName", required = false) String groupName,
                                                     @RequestParam(value = "type", required = false, defaultValue = "WEEK") String type,
                                                     @RequestParam(value = "startTime", required = false) String startTime,
                                                     @RequestParam(value = "endTime", required = false) String endTime
     ) {
-        return dashBoardService.jobLineList(baseQueryVO, groupName, type, startTime, endTime);
+        return dashBoardService.jobLineList(baseQueryVO, mode, groupName, type, startTime, endTime);
     }
 
     @LoginRequired

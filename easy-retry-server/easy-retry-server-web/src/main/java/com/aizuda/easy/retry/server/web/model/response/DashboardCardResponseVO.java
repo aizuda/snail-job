@@ -19,6 +19,11 @@ public class DashboardCardResponseVO {
     private JobTask jobTask;
 
     /**
+     * 工作流任务
+     */
+    private WorkFlowTask workFlowTask;
+
+    /**
      * 重试任务
      */
     private RetryTask retryTask;
@@ -63,6 +68,22 @@ public class DashboardCardResponseVO {
 
     @Data
     public static class JobTask {
+        //成功
+        private Integer successNum;
+        //失败
+        private Integer failNum;
+        //取消
+        private Integer cancelNum;
+        //停止
+        private Integer stopNum;
+        // 总数
+        private Integer totalNum;
+        // 成功率
+        private BigDecimal successRate;
+    }
+
+    @Data
+    public static class WorkFlowTask {
         //成功
         private Integer successNum;
         //失败
