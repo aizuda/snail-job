@@ -115,7 +115,7 @@ public class JobLogMergeSchedule extends AbstractSchedule implements Lifecycle {
         List<JobTaskBatch> jobTaskBatchList = jobTaskBatchMapper.selectPage(
                 new Page<>(0, 1000),
                 new LambdaUpdateWrapper<JobTaskBatch>().ge(JobTaskBatch::getId, startId)
-                        .eq(JobTaskBatch::getTaskBatchStatus, JobTaskBatchStatusEnum.SUCCESS.getStatus())
+                        .in(JobTaskBatch::getTaskBatchStatus, JobTaskBatchStatusEnum.COMPLETED)
                         .le(JobTaskBatch::getCreateDt, endTime)).getRecords();
         return JobTaskConverter.INSTANCE.toJobTaskBatchPartitionTasks(jobTaskBatchList);
     }
@@ -144,48 +144,46 @@ public class JobLogMergeSchedule extends AbstractSchedule implements Lifecycle {
                 }
 
                 List<Map.Entry<Long, List<JobLogMessage>>> jobLogMessageGroupList = jobLogMessageList.stream().collect(
-                        groupingBy(JobLogMessage::getTaskId)).entrySet().stream()
+                                groupingBy(JobLogMessage::getTaskId)).entrySet().stream()
                         .filter(entry -> entry.getValue().size() >= 2).collect(toList());
 
                 for (Map.Entry<Long/*taskId*/, List<JobLogMessage>> jobLogMessageMap : jobLogMessageGroupList) {
                     List<Long> jobLogMessageDeleteBatchIds = new ArrayList<>();
-                    List<JobLogMessage> jobLogMessageUpdateList = new ArrayList<>();
+                    List<JobLogMessage> jobLogMessageInsertBatchIds = new ArrayList<>();
 
                     List<String> mergeMessages = jobLogMessageMap.getValue().stream().map(k -> {
-                            jobLogMessageDeleteBatchIds.add(k.getId());
-                            return JsonUtil.parseObject(k.getMessage(), List.class);
-                        })
-                        .reduce((a, b) -> {
-                            // 合并日志信息
-                            List<String> list = new ArrayList<>();
-                            list.addAll(a);
-                            list.addAll(b);
-                            return list;
-                        }).get();
+                                jobLogMessageDeleteBatchIds.add(k.getId());
+                                return JsonUtil.parseObject(k.getMessage(), List.class);
+                            })
+                            .reduce((a, b) -> {
+                                // 合并日志信息
+                                List<String> list = new ArrayList<>();
+                                list.addAll(a);
+                                list.addAll(b);
+                                return list;
+                            }).get();
 
                     // 500条数据为一个批次
-                    List<List<String>> partitionMessages = Lists.partition(mergeMessages,
-                        systemProperties.getMergeLogNum());
+                    List<List<String>> partitionMessages = Lists.partition(mergeMessages, systemProperties.getMergeLogNum());
 
                     for (int i = 0; i < partitionMessages.size(); i++) {
                         // 深拷贝
-                        JobLogMessage jobLogMessage = JobTaskConverter.INSTANCE.toJobLogMessage( jobLogMessageMap.getValue().get(0));
+                        JobLogMessage jobLogMessage = JobTaskConverter.INSTANCE.toJobLogMessage(jobLogMessageMap.getValue().get(0));
                         List<String> messages = partitionMessages.get(i);
 
                         jobLogMessage.setLogNum(messages.size());
                         jobLogMessage.setMessage(JsonUtil.toJsonString(messages));
-                        jobLogMessageUpdateList.add(jobLogMessage);
+                        jobLogMessageInsertBatchIds.add(jobLogMessage);
                     }
 
                     // 批量删除、更新日志
                     if (CollectionUtil.isNotEmpty(jobLogMessageDeleteBatchIds)) {
                         jobLogMessageMapper.deleteBatchIds(jobLogMessageDeleteBatchIds);
                     }
-                    if (CollectionUtil.isNotEmpty(jobLogMessageUpdateList)) {
-                        jobLogMessageMapper.batchUpdate(jobLogMessageUpdateList);
+                    if (CollectionUtil.isNotEmpty(jobLogMessageInsertBatchIds)) {
+                        jobLogMessageMapper.batchInsert(jobLogMessageInsertBatchIds);
                     }
                 }
-
             }
         });
     }

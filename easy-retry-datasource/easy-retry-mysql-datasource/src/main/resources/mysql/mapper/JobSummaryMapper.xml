@@ -5,8 +5,9 @@
         <id column="id" jdbcType="BIGINT" property="id"/>
         <result column="namespace_id" jdbcType="TINYINT" property="namespaceId"/>
         <result column="group_name" jdbcType="TINYINT" property="groupName"/>
-        <result column="job_id" jdbcType="TINYINT" property="jobId"/>
+        <result column="business_id" jdbcType="TINYINT" property="businessId"/>
         <result column="trigger_at" jdbcType="TIMESTAMP" property="triggerAt"/>
+        <result column="system_task_type" jdbcType="TINYINT" property="systemTaskType"/>
         <result column="success_num" jdbcType="TINYINT" property="successNum"/>
         <result column="fail_num" jdbcType="TINYINT" property="failNum"/>
         <result column="fail_reason" jdbcType="VARCHAR" property="failReason"/>
@@ -20,14 +21,14 @@
 
     <insert id="insertOrUpdate" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO
-        job_summary (namespace_id, group_name, job_id, trigger_at, system_task_type,
+        job_summary (namespace_id, group_name, business_id, trigger_at, system_task_type,
         success_num,fail_num,fail_reason,stop_num,stop_reason, cancel_num,cancel_reason)
         VALUES
         <foreach collection="list" item="item" separator=",">
             (
             #{item.namespaceId},
             #{item.groupName},
-            #{item.jobId},
+            #{item.businessId},
             #{item.triggerAt},
             #{item.systemTaskType},
             #{item.successNum},
@@ -96,10 +97,10 @@
             resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO$Rank">
         SELECT
         <if test="systemTaskType == 3">
-            CONCAT(group_name, '/', (SELECT job_name FROM job WHERE id = job_id)) `name`,
+            CONCAT(group_name, '/', (SELECT job_name FROM job WHERE id = business_id)) name,
         </if>
         <if test="systemTaskType == 4">
-        CONCAT(group_name, '/', (SELECT workflow_name FROM workflow WHERE id = job_id)) `name`,
+        CONCAT(group_name, '/', (SELECT workflow_name FROM workflow WHERE id = business_id)) name,
         </if>
         SUM(fail_num) AS total FROM job_summary
         <where>
@@ -116,7 +117,7 @@
         </where>
         AND system_task_type = #{systemTaskType}
         AND namespace_id = #{namespaceId}
-        GROUP BY namespace_id, group_name, job_id
+        GROUP BY namespace_id, group_name, business_id
         HAVING total > 0
         ORDER BY total DESC LIMIT 10
     </select>

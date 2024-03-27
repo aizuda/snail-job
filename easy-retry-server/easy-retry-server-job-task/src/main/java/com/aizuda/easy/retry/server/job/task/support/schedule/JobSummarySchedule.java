@@ -83,7 +83,7 @@ public class JobSummarySchedule extends AbstractSchedule implements Lifecycle {
         Map<Long, List<JobBatchSummaryResponseDO>> jobIdListMap = summaryResponseDOList.parallelStream().collect(Collectors.groupingBy(JobBatchSummaryResponseDO::getJobId));
         for (Map.Entry<Long, List<JobBatchSummaryResponseDO>> job : jobIdListMap.entrySet()) {
             JobSummary jobSummary = new JobSummary();
-            jobSummary.setJobId(job.getKey());
+            jobSummary.setBusinessId(job.getKey());
             jobSummary.setTriggerAt(triggerAt);
             jobSummary.setNamespaceId(job.getValue().get(0).getNamespaceId());
             jobSummary.setGroupName(job.getValue().get(0).getGroupName());

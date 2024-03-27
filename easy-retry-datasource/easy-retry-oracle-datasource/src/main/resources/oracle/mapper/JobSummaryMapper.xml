@@ -5,8 +5,9 @@
         <id column="id" jdbcType="BIGINT" property="id"/>
         <result column="namespace_id" jdbcType="TINYINT" property="namespaceId"/>
         <result column="group_name" jdbcType="TINYINT" property="groupName"/>
-        <result column="job_id" jdbcType="TINYINT" property="jobId"/>
+        <result column="business_id" jdbcType="TINYINT" property="businessId"/>
         <result column="trigger_at" jdbcType="TIMESTAMP" property="triggerAt"/>
+        <result column="system_task_type" jdbcType="TINYINT" property="systemTaskType"/>
         <result column="success_num" jdbcType="TINYINT" property="successNum"/>
         <result column="fail_num" jdbcType="TINYINT" property="failNum"/>
         <result column="fail_reason" jdbcType="VARCHAR" property="failReason"/>
@@ -23,21 +24,22 @@
             USING (
                 <foreach collection="list" item="item" separator=" UNION ALL ">
                     SELECT
-                        #{item.namespaceId} AS namespace_id,
-                        #{item.groupName} AS group_name,
-                        #{item.jobId} AS job_id,
-                        #{item.triggerAt} AS trigger_at,
-                        #{item.successNum} AS success_num,
-                        #{item.failNum} AS fail_num,
-                        #{item.failReason} AS fail_reason,
-                        #{item.stopNum} AS stop_num,
-                        #{item.stopReason} AS stop_reason,
-                        #{item.cancelNum} AS cancel_num,
-                        #{item.cancelReason} AS cancel_reason
+                        #{item.namespaceId}    AS namespace_id,
+                        #{item.groupName}      AS group_name,
+                        #{item.businessId}     AS business_id,
+                        #{item.triggerAt}      AS trigger_at,
+                        #{item.systemTaskType} AS system_task_type,
+                        #{item.successNum}     AS success_num,
+                        #{item.failNum}        AS fail_num,
+                        #{item.failReason}     AS fail_reason,
+                        #{item.stopNum}        AS stop_num,
+                        #{item.stopReason}     AS stop_reason,
+                        #{item.cancelNum}      AS cancel_num,
+                        #{item.cancelReason}   AS cancel_reason
                     FROM DUAL
                 </foreach>
             ) src
-            ON (dest.job_id = src.job_id AND dest.trigger_at = src.trigger_at)
+            ON (dest.job_id = src.job_id AND dest.trigger_at = src.trigger_at AND dest.system_task_type = src.system_task_type)
         WHEN MATCHED THEN
             UPDATE SET
                 dest.success_num = src.success_num,
@@ -48,7 +50,7 @@
                 dest.cancel_num = src.cancel_num,
                 dest.cancel_reason = src.cancel_reason
         WHEN NOT MATCHED THEN
-            INSERT (namespace_id, group_name, job_id, trigger_at,
+            INSERT (namespace_id, group_name, business_id, trigger_at, system_task_type,
                     success_num,fail_num,fail_reason,stop_num,stop_reason, cancel_num,cancel_reason)
             VALUES
                 <foreach collection="list" item="item" separator=",">
@@ -57,6 +59,7 @@
                         #{item.groupName},
                         #{item.jobId},
                         #{item.triggerAt},
+                        #{item.systemTaskType},
                         #{item.successNum},
                         #{item.failNum},
                         #{item.failReason},
@@ -72,32 +75,15 @@
             resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardLineResponseDO">
         SELECT
             createDt,
-            COALESCE(SUM(success_num), 0) AS success,
-            COALESCE(SUM(fail_num), 0) AS failNum,
-            COALESCE(SUM(stop_num), 0) AS stop,
-            COALESCE(SUM(cancel_num), 0) AS cancel,
-            COALESCE(SUM(fail_num + stop_num + cancel_num), 0) AS fail,
+            COALESCE(SUM(success_num), 0)                                    AS success,
+            COALESCE(SUM(fail_num), 0)                                       AS failNum,
+            COALESCE(SUM(stop_num), 0)                                       AS stop,
+            COALESCE(SUM(cancel_num), 0)                                     AS cancel,
+            COALESCE(SUM(fail_num + stop_num + cancel_num), 0)               AS fail,
             COALESCE(SUM(success_num + fail_num + stop_num + cancel_num), 0) AS total
         FROM (
             SELECT
-                <choose>
-                    <when test="type == 'DAY'">
-                        TO_CHAR(create_dt, 'HH24')
-                    </when>
-                    <when test="type == 'WEEK'">
-                        TO_CHAR(create_dt, 'yyyy-MM-dd')
-                    </when>
-                    <when test="type =='MONTH'">
-                        TO_CHAR(create_dt, 'yyyy-MM-dd')
-                    </when>
-                    <when test="type == 'YEAR'">
-                        TO_CHAR(create_dt, 'yyyy-MM')
-                    </when>
-                    <otherwise>
-                        TO_CHAR(create_dt, 'yyyy-MM-dd')
-                    </otherwise>
-                </choose>
-                AS createDt,
+                DATE_FORMAT(trigger_at, #{dateFormat}) AS createDt,
                 success_num,
                 fail_num,
                 stop_num,
@@ -113,10 +99,10 @@
                 <if test="groupName != null and groupName != '' ">
                     AND group_name = #{groupName}
                 </if>
-                AND namespace_id = #{namespaceId} AND trigger_at BETWEEN #{from} AND #{to}
+                AND system_task_type = #{systemTaskType} AND namespace_id = #{namespaceId} AND trigger_at BETWEEN #{from} AND #{to}
             </where>
         )
-        GROUP BY createDt
+        GROUP BY DATE_FORMAT(trigger_at, #{dateFormat})
     </select>
 
     <select id="toJobTask"
@@ -127,7 +113,7 @@
                COALESCE(sum(fail_num), 0)                                       AS failNum,
                COALESCE(sum(success_num + fail_num + stop_num + cancel_num), 0) AS totalNum
         FROM job_summary
-        WHERE namespace_id = #{namespaceId}
+        WHERE system_task_type = #{systemTaskType} AND namespace_id = #{namespaceId}
         <if test="groupNames != null and groupNames.size > 0">
             AND group_name IN
             <foreach collection="groupNames" item="groupName" open="(" separator="," close=")">
@@ -141,7 +127,12 @@
         SELECT * FROM
         (
             SELECT
-                group_name || '/' || (SELECT job_name FROM job WHERE id=job_id) AS name,
+                <if test="systemTaskType == 3">
+                    group_name || '/' || (SELECT job_name FROM job WHERE id = business_id) AS name,
+                </if>
+                <if test="systemTaskType == 4">
+                    group_name || '/' || (SELECT workflow_name FROM workflow WHERE id = business_id) AS name,
+                </if>
                 SUM(fail_num) AS total
             FROM job_summary
             <where>
@@ -156,8 +147,9 @@
                 </if>
                 AND trigger_at BETWEEN #{startTime} AND #{endTime}
             </where>
+            AND system_task_type = #{systemTaskType}
             AND namespace_id = #{namespaceId}
-            GROUP BY namespace_id, group_name, job_id
+            GROUP BY namespace_id, group_name, business_id
             HAVING SUM(fail_num) > 0
             ORDER BY total DESC
         )

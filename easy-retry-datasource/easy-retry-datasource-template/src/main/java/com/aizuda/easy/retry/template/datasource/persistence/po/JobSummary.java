@@ -40,7 +40,7 @@ public class JobSummary implements Serializable {
     /**
      * '任务信息id'
      */
-    private Long jobId;
+    private Long businessId;
 
     /**
      * '统计时间'

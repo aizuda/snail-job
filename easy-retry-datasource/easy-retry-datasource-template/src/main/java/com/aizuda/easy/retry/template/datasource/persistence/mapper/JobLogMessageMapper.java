@@ -18,6 +18,4 @@ import java.util.List;
 public interface JobLogMessageMapper extends BaseMapper<JobLogMessage> {
 
     int batchInsert(List<JobLogMessage> list);
-
-    int batchUpdate(List<JobLogMessage> list);
 }

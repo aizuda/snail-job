@@ -5,8 +5,9 @@
         <id column="id" jdbcType="BIGINT" property="id"/>
         <result column="namespace_id" jdbcType="TINYINT" property="namespaceId"/>
         <result column="group_name" jdbcType="TINYINT" property="groupName"/>
-        <result column="job_id" jdbcType="TINYINT" property="jobId"/>
+        <result column="business_id" jdbcType="TINYINT" property="businessId"/>
         <result column="trigger_at" jdbcType="TIMESTAMP" property="triggerAt"/>
+        <result column="system_task_type" jdbcType="TINYINT" property="systemTaskType"/>
         <result column="success_num" jdbcType="TINYINT" property="successNum"/>
         <result column="fail_num" jdbcType="TINYINT" property="failNum"/>
         <result column="fail_reason" jdbcType="VARCHAR" property="failReason"/>
@@ -26,8 +27,9 @@
                     (
                         #{item.namespaceId},
                         #{item.groupName},
-                        #{item.jobId},
+                        #{item.businessId},
                         #{item.triggerAt},
+                        #{item.systemTaskType},
                         #{item.successNum},
                         #{item.failNum},
                         #{item.failReason},
@@ -37,10 +39,10 @@
                         #{item.cancelReason}
                     )
                 </foreach>
-        ) AS source (namespace_id, group_name, job_id, trigger_at,
+        ) AS source (namespace_id, group_name, business_id, trigger_at, system_task_type,
                      success_num, fail_num, fail_reason, stop_num, stop_reason, cancel_num, cancel_reason)
         ON target.namespace_id = source.namespace_id
-            AND target.job_id = source.job_id
+            AND target.business_id = source.business_id
         WHEN MATCHED THEN
             UPDATE SET
                 target.success_num = source.success_num,
@@ -51,9 +53,9 @@
                 target.cancel_num = source.cancel_num,
                 target.cancel_reason = source.cancel_reason
         WHEN NOT MATCHED THEN
-            INSERT (namespace_id, group_name, job_id, trigger_at,
+            INSERT (namespace_id, group_name, business_id, trigger_at, system_task_type,
                     success_num, fail_num, fail_reason, stop_num, stop_reason, cancel_num, cancel_reason)
-            VALUES (source.namespace_id, source.group_name, source.job_id, source.trigger_at,
+            VALUES (source.namespace_id, source.group_name, source.business_id, source.trigger_at, source.system_task_type,
                     source.success_num, source.fail_num, source.fail_reason, source.stop_num, source.stop_reason,
                     source.cancel_num, source.cancel_reason);
     </insert>
@@ -62,30 +64,14 @@
             resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardLineResponseDO">
         SELECT
             createDt,
-            ISNULL(SUM(success_num), 0) AS success,
-            ISNULL(SUM(stop_num), 0) AS stop,
-            ISNULL(SUM(cancel_num), 0) AS cancel,
-            ISNULL(SUM(fail_num), 0) AS fail,
+            ISNULL(SUM(success_num), 0)                                    AS success,
+            ISNULL(SUM(stop_num), 0)                                       AS stop,
+            ISNULL(SUM(cancel_num), 0)                                     AS cancel,
+            ISNULL(SUM(fail_num), 0)                                       AS fail,
             ISNULL(SUM(success_num + fail_num + stop_num + cancel_num), 0) AS total
         FROM (
             SELECT
-                <choose>
-                    <when test="type == 'DAY'">
-                        FORMAT(create_dt,'HH24')
-                    </when>
-                    <when test="type == 'WEEK'">
-                        FORMAT(create_dt,'yyyy-MM-dd')
-                    </when>
-                    <when test="type =='MONTH'">
-                        FORMAT(create_dt,'yyyy-MM-dd')
-                    </when>
-                    <when test="type == 'YEAR'">
-                        FORMAT(create_dt,'yyyy-MM')
-                    </when>
-                    <otherwise>
-                        FORMAT(create_dt,'yyyy-MM-dd')
-                    </otherwise>
-                </choose> AS createDt,
+                DATE_FORMAT(trigger_at, #{dateFormat}) AS createDt,
                 success_num,
                 stop_num,
                 cancel_num,
@@ -101,11 +87,12 @@
                 <if test="groupName != null and groupName != '' ">
                     AND group_name = #{groupName}
                 </if>
+                AND system_task_type = #{systemTaskType}
                 AND namespace_id = #{namespaceId}
                 AND trigger_at BETWEEN #{from} AND #{to}
             </where>
         ) AS subquery
-        GROUP BY createDt
+        GROUP BY DATE_FORMAT(trigger_at, #{dateFormat})
     </select>
 
     <select id="toJobTask"
@@ -117,7 +104,7 @@
             ISNULL(sum(fail_num), 0) AS failNum,
             ISNULL(sum(success_num + fail_num + stop_num + cancel_num), 0) AS totalNum
         FROM job_summary
-        WHERE namespace_id = #{namespaceId}
+        WHERE system_task_type = #{systemTaskType} AND namespace_id = #{namespaceId}
         <if test="groupNames != null and groupNames.size > 0">
             AND group_name IN
             <foreach collection="groupNames" item="groupName" open="(" separator="," close=")">
@@ -129,7 +116,13 @@
     <select id="dashboardRank"
             resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO$Rank">
         SELECT TOP 10
-            CONCAT(group_name, '/', (SELECT job_name FROM job WHERE id=job_id)) name,
+
+            <if test="systemTaskType == 3">
+                CONCAT(group_name, '/', (SELECT job_name FROM job WHERE id = business_id)) name,
+            </if>
+            <if test="systemTaskType == 4">
+                CONCAT(group_name, '/', (SELECT workflow_name FROM workflow WHERE id = business_id)) name,
+            </if>
             SUM(fail_num) AS total
         FROM job_summary
         <where>
@@ -144,8 +137,9 @@
             </if>
             AND trigger_at BETWEEN #{startTime} AND #{endTime}
             AND namespace_id = #{namespaceId}
+            AND system_task_type = #{systemTaskType}
         </where>
-        GROUP BY namespace_id, group_name, job_id
+        GROUP BY namespace_id, group_name, business_id
         HAVING SUM(fail_num) > 0
         ORDER BY name DESC
     </select>
