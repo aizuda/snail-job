@@ -19,7 +19,7 @@ import java.util.Objects;
 public enum DbTypeEnum {
     MYSQL("mysql", "MySql数据库", DbType.MYSQL),
     MARIADB("mariadb", "MariaDB数据库", DbType.MARIADB),
-    POSTGRES("postgres", "Postgres数据库", DbType.POSTGRE_SQL),
+    POSTGRES("postgresql", "Postgres数据库", DbType.POSTGRE_SQL),
     ORACLE("oracle", "Oracle数据库", DbType.ORACLE_12C),
     SQLSERVER("sqlserver", "SQLServer数据库", DbType.SQL_SERVER);
 
@@ -29,7 +29,7 @@ public enum DbTypeEnum {
 
     public static DbTypeEnum modeOf(String db) {
         for (DbTypeEnum value : DbTypeEnum.values()) {
-            if (Objects.equals(value.getDb(), db)) {
+            if (db.contains(value.getDb())) {
                 return value;
             }
         }

@@ -75,7 +75,10 @@ public class SystemProperties {
 
     /**
      * 数据库类型
+     *
+     * @deprecated 废弃 新版本通过数据源url自动判断
      */
+    @Deprecated
     private DbTypeEnum dbType = DbTypeEnum.MYSQL;
 
     /**

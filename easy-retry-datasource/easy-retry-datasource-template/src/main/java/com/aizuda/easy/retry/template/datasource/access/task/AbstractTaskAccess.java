@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.template.datasource.access.task;
 
 import com.aizuda.easy.retry.template.datasource.access.TaskAccess;
 import com.aizuda.easy.retry.template.datasource.enums.DbTypeEnum;
+import com.aizuda.easy.retry.template.datasource.utils.DbUtils;
 import com.aizuda.easy.retry.template.datasource.utils.RequestDataHelper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -18,9 +19,6 @@ import java.util.List;
  */
 public abstract class AbstractTaskAccess<T> implements TaskAccess<T> {
 
-    @Autowired
-    protected Environment environment;
-
     protected static final List<String> ALLOW_DB = Arrays.asList(
         DbTypeEnum.MYSQL.getDb(),
         DbTypeEnum.MARIADB.getDb(),
@@ -29,8 +27,7 @@ public abstract class AbstractTaskAccess<T> implements TaskAccess<T> {
         DbTypeEnum.SQLSERVER.getDb());
 
     protected DbTypeEnum getDbType() {
-        String dbType = environment.getProperty("easy-retry.db-type");
-        return DbTypeEnum.modeOf(dbType);
+        return DbUtils.getDbType();
     }
 
     /**

@@ -133,7 +133,7 @@ public class RpcClientInvokeHandler implements InvocationHandler {
                 Assert.notNull(parasResult.body, () -> new EasyRetryServerException("body cannot be null"));
             }
 
-            RestTemplate restTemplate = SpringContext.CONTEXT.getBean(RestTemplate.class);
+            RestTemplate restTemplate = SpringContext.getBean(RestTemplate.class);
 
             Retryer<Result> retryer = buildResultRetryer();
 
@@ -169,7 +169,7 @@ public class RpcClientInvokeHandler implements InvocationHandler {
                 // 进行路由剔除处理
                 CacheRegisterTable.remove(groupName, namespaceId, hostId);
                 // 重新选一个可用的客户端节点
-                ClientNodeAllocateHandler clientNodeAllocateHandler = SpringContext.CONTEXT.getBean(
+                ClientNodeAllocateHandler clientNodeAllocateHandler = SpringContext.getBean(
                     ClientNodeAllocateHandler.class);
                 RegisterNodeInfo serverNode = clientNodeAllocateHandler.getServerNode(allocKey, groupName, namespaceId,
                     routeKey);

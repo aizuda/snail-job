@@ -6,7 +6,6 @@ import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.common.core.util.NetUtil;
 import com.aizuda.easy.retry.common.log.EasyRetryLog;
-import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.dto.DistributeInstance;
 import com.aizuda.easy.retry.server.common.dto.ServerNodeExtAttrs;
 import com.aizuda.easy.retry.server.common.enums.DashboardLineEnum;
@@ -34,6 +33,7 @@ import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobSummaryMa
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetrySummaryMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.ServerNodeMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.ServerNode;
+import com.aizuda.easy.retry.template.datasource.utils.DbUtils;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
@@ -65,7 +65,6 @@ public class DashBoardServiceImpl implements DashBoardService {
 
     private static final String DASHBOARD_CONSUMER_BUCKET = "/dashboard/consumer/bucket";
 
-    private final SystemProperties systemProperties;
     private final ServerNodeMapper serverNodeMapper;
     private final RestTemplate restTemplate;
     private final JobSummaryMapper jobSummaryMapper;
@@ -131,7 +130,7 @@ public class DashBoardServiceImpl implements DashBoardService {
         // 重试任务列表
         Page<Object> pager = new Page<>(baseQueryVO.getPage(), baseQueryVO.getSize());
         // 针对SQL Server的分页COUNT, 自定义statement ID
-        if (DbTypeEnum.SQLSERVER.equals(systemProperties.getDbType())) {
+        if (DbTypeEnum.SQLSERVER == DbUtils.getDbType()) {
             pager.setCountId("sqlServer_jobTaskList_Count");
         }
         IPage<DashboardRetryLineResponseDO.Task> IPage = retrySummaryMapper.retryTaskList(namespaceId, groupNames, pager);
@@ -167,7 +166,7 @@ public class DashBoardServiceImpl implements DashBoardService {
         // 重试任务列表
         Page<Object> pager = new Page<>(baseQueryVO.getPage(), baseQueryVO.getSize());
         // 针对SQL Server的分页COUNT, 自定义statement ID
-        if (DbTypeEnum.SQLSERVER.equals(systemProperties.getDbType())) {
+        if (DbTypeEnum.SQLSERVER == DbUtils.getDbType()) {
             pager.setCountId("sqlServer_jobTaskList_Count");
         }
         // 任务类型

@@ -91,7 +91,7 @@ public class JobExecutorActor extends AbstractActor {
             } catch (Exception e) {
                 EasyRetryLog.LOCAL.error("job executor exception. [{}]", taskExecute, e);
                 handlerTaskBatch(taskExecute, JobTaskBatchStatusEnum.FAIL.getStatus(), JobOperationReasonEnum.TASK_EXECUTION_ERROR.getReason());
-                SpringContext.CONTEXT.publishEvent(new JobTaskFailAlarmEvent(taskExecute.getTaskBatchId()));
+                SpringContext.getContext().publishEvent(new JobTaskFailAlarmEvent(taskExecute.getTaskBatchId()));
             } finally {
                 getContext().stop(getSelf());
             }

@@ -1,9 +1,8 @@
 package com.aizuda.easy.retry.server.common.lock.persistence;
 
-import com.aizuda.easy.retry.common.core.context.SpringContext;
-import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
-import com.aizuda.easy.retry.server.common.lock.LockProvider;
+import com.aizuda.easy.retry.template.datasource.enums.DbTypeEnum;
+import com.aizuda.easy.retry.template.datasource.utils.DbUtils;
 import com.google.common.collect.Lists;
 
 import java.util.List;
@@ -22,9 +21,9 @@ public final class LockStorageFactory {
     }
 
     public static LockStorage getLockStorage() {
-        SystemProperties systemProperties = SpringContext.getBeanByType(SystemProperties.class);
+        DbTypeEnum db = DbUtils.getDbType();
         return LOCK_STORAGES.stream()
-                .filter(lockProvider -> lockProvider.supports(systemProperties.getDbType().getDb()))
+                .filter(lockProvider -> lockProvider.supports(db.getDb()))
                 .findFirst().orElseThrow(() -> new EasyRetryServerException("未找到合适锁处理器"));
     }
 

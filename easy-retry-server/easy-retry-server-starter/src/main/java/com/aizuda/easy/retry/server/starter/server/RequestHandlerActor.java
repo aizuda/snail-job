@@ -104,7 +104,7 @@ public class RequestHandlerActor extends AbstractActor {
         }
 
         UrlBuilder builder = UrlBuilder.ofHttp(uri);
-        Collection<HttpRequestHandler> httpRequestHandlers = SpringContext.CONTEXT
+        Collection<HttpRequestHandler> httpRequestHandlers = SpringContext.getContext()
             .getBeansOfType(HttpRequestHandler.class).values();
         for (HttpRequestHandler httpRequestHandler : httpRequestHandlers) {
             if (httpRequestHandler.supports(builder.getPathStr()) && method.name()

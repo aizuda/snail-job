@@ -2,6 +2,7 @@ package com.aizuda.easy.retry.template.datasource.config;
 
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.template.datasource.enums.DbTypeEnum;
+import com.aizuda.easy.retry.template.datasource.utils.DbUtils;
 import com.aizuda.easy.retry.template.datasource.utils.RequestDataHelper;
 import com.baomidou.mybatisplus.autoconfigure.MybatisPlusProperties;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
@@ -36,8 +37,7 @@ public class EasyRetryTemplateAutoConfiguration {
     public SqlSessionFactory sqlSessionFactory(DataSource dataSource, Environment environment, MybatisPlusInterceptor mybatisPlusInterceptor, MybatisPlusProperties mybatisPlusProperties) throws Exception {
         MybatisSqlSessionFactoryBean factoryBean = new MybatisSqlSessionFactoryBean();
         factoryBean.setDataSource(dataSource);
-        String dbType = environment.getProperty("easy-retry.db-type");
-        DbTypeEnum dbTypeEnum = DbTypeEnum.modeOf(dbType);
+        DbTypeEnum dbTypeEnum = DbUtils.getDbType();
         factoryBean.setMapperLocations(new PathMatchingResourcePatternResolver().getResources(MessageFormat.format("classpath*:/{0}/mapper/*.xml", dbTypeEnum.getDb())));
         factoryBean.setPlugins(mybatisPlusInterceptor);
         factoryBean.setTypeAliasesPackage(mybatisPlusProperties.getTypeAliasesPackage());
@@ -58,8 +58,7 @@ public class EasyRetryTemplateAutoConfiguration {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
         String tablePrefix = Optional.ofNullable(environment.getProperty("mybatis-plus.global-config.db-config.table-prefix")).orElse(StrUtil.EMPTY);
         interceptor.addInnerInterceptor(dynamicTableNameInnerInterceptor(tablePrefix));
-        String dbType = environment.getProperty("easy-retry.db-type");
-        DbTypeEnum dbTypeEnum = DbTypeEnum.modeOf(dbType);
+        DbTypeEnum dbTypeEnum = DbUtils.getDbType();
         interceptor.addInnerInterceptor(new PaginationInnerInterceptor(dbTypeEnum.getMpDbType()));
 
         return interceptor;

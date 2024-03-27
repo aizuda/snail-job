@@ -12,6 +12,7 @@ import com.aizuda.easy.retry.template.datasource.persistence.mapper.SceneConfigM
 import com.aizuda.easy.retry.template.datasource.persistence.po.GroupConfig;
 import com.aizuda.easy.retry.template.datasource.persistence.po.NotifyConfig;
 import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
+import com.aizuda.easy.retry.template.datasource.utils.DbUtils;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -34,8 +35,6 @@ public abstract class AbstractConfigAccess<T> implements ConfigAccess<T> {
     protected SceneConfigMapper sceneConfigMapper;
     @Autowired
     protected GroupConfigMapper groupConfigMapper;
-    @Autowired
-    protected Environment environment;
 
     protected static final List<String> ALLOW_DB = Arrays.asList(
         DbTypeEnum.MYSQL.getDb(),
@@ -45,8 +44,7 @@ public abstract class AbstractConfigAccess<T> implements ConfigAccess<T> {
         DbTypeEnum.SQLSERVER.getDb());
 
     protected DbTypeEnum getDbType() {
-        String dbType = environment.getProperty("easy-retry.db-type");
-        return DbTypeEnum.modeOf(dbType);
+        return DbUtils.getDbType();
     }
 
     protected List<NotifyConfig> getByGroupIdAndNotifyScene(String groupName, Integer notifyScene, String namespaceId) {

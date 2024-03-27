@@ -65,7 +65,7 @@ public class JobTaskBatchHandler {
 
         if (failCount > 0) {
             jobTaskBatch.setTaskBatchStatus(JobTaskBatchStatusEnum.FAIL.getStatus());
-            SpringContext.CONTEXT.publishEvent(new JobTaskFailAlarmEvent(completeJobBatchDTO.getTaskBatchId()));
+            SpringContext.getContext().publishEvent(new JobTaskFailAlarmEvent(completeJobBatchDTO.getTaskBatchId()));
         } else if (stopCount > 0) {
             jobTaskBatch.setTaskBatchStatus(JobTaskBatchStatusEnum.STOP.getStatus());
         } else {
