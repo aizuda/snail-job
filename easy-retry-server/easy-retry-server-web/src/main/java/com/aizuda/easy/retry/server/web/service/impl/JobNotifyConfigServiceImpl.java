@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.server.web.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
@@ -13,14 +14,12 @@ import com.aizuda.easy.retry.server.web.service.JobNotifyConfigService;
 import com.aizuda.easy.retry.server.web.service.convert.JobNotifyConfigConverter;
 import com.aizuda.easy.retry.server.web.service.convert.JobNotifyConfigResponseVOConverter;
 import com.aizuda.easy.retry.server.web.util.UserSessionUtils;
-import com.aizuda.easy.retry.template.datasource.persistence.dataobject.JobBatchQueryDO;
-import com.aizuda.easy.retry.template.datasource.persistence.dataobject.JobBatchResponseDO;
 import com.aizuda.easy.retry.template.datasource.persistence.dataobject.JobNotifyConfigQueryDO;
 import com.aizuda.easy.retry.template.datasource.persistence.dataobject.JobNotifyConfigResponseDO;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobNotifyConfigMapper;
-import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobNotifyConfig;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,8 +45,8 @@ public class JobNotifyConfigServiceImpl implements JobNotifyConfigService {
     public PageResult<List<JobNotifyConfigResponseVO>> getJobNotifyConfigList(JobNotifyConfigQueryVO queryVO) {
         PageDTO<JobNotifyConfig> pageDTO = new PageDTO<>();
         UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
-        JobNotifyConfigQueryDO jobNotifyConfigQueryDO = new JobNotifyConfigQueryDO();
-        jobNotifyConfigQueryDO.setNamespaceId(userSessionVO.getNamespaceId());
+        JobNotifyConfigQueryDO queryDO = new JobNotifyConfigQueryDO();
+        queryDO.setNamespaceId(userSessionVO.getNamespaceId());
 
         List<String> groupNames = Lists.newArrayList();
         if (userSessionVO.isUser()) {
@@ -63,11 +62,16 @@ public class JobNotifyConfigServiceImpl implements JobNotifyConfigService {
             }
         }
 
-        jobNotifyConfigQueryDO.setGroupNames(groupNames);
+        queryDO.setGroupNames(groupNames);
         if (Objects.nonNull(queryVO.getJobId())) {
-            jobNotifyConfigQueryDO.setJobId(queryVO.getJobId());
+            queryDO.setJobId(queryVO.getJobId());
         }
-        List<JobNotifyConfigResponseDO> batchResponseDOList = jobNotifyConfigMapper.selectJobNotifyConfigList(pageDTO, jobNotifyConfigQueryDO);
+        QueryWrapper<JobNotifyConfig> queryWrapper = new QueryWrapper<JobNotifyConfig>()
+                .eq("a.namespace_id", queryDO.getNamespaceId())
+                .eq(queryDO.getJobId() != null, "a.job_id", queryDO.getJobId())
+                .in(CollUtil.isNotEmpty(queryDO.getGroupNames()), "a.group_name", queryDO.getGroupNames())
+                .orderByDesc("a.id");
+        List<JobNotifyConfigResponseDO> batchResponseDOList = jobNotifyConfigMapper.selectJobNotifyConfigList(pageDTO, queryWrapper);
         return new PageResult<>(pageDTO, JobNotifyConfigResponseVOConverter.INSTANCE.batchConvert(batchResponseDOList));
     }
 

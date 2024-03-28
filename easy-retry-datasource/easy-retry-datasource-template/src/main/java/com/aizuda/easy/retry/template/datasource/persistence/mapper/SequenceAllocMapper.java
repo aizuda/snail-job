@@ -17,20 +17,4 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface SequenceAllocMapper extends BaseMapper<SequenceAlloc> {
 
-    /**
-     * 更新业务类型下的最大id
-     *
-     * @param step      步长
-     * @param groupName
-     * @return 更新结果
-     */
-    Integer updateMaxIdByCustomStep(@Param("step") Integer step, @Param("groupName") String groupName, @Param("namespaceId") String namespaceId);
-
-    /**
-     * 更新最大id
-     *
-     * @param groupName 组名称
-     * @return 更新结果
-     */
-    Integer updateMaxId(@Param("groupName") String groupName, @Param("namespaceId") String namespaceId);
 }

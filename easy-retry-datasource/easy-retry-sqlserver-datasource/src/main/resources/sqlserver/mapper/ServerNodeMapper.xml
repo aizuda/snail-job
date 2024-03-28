@@ -47,21 +47,12 @@
                         source.expire_at, source.node_type, source.ext_attrs, source.context_path, source.create_dt, GETDATE());
     </insert>
 
-    <delete id="deleteByExpireAt">
-        DELETE FROM server_node
-        WHERE expire_at &lt;= #{endTime,jdbcType=TIMESTAMP}
-    </delete>
-
     <select id="countActivePod"
           resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.ActivePodQuantityResponseDO">
         SELECT
             node_type AS nodeType,
             COUNT(*) AS total
         FROM server_node
-        WHERE namespace_id IN
-            <foreach collection="namespaceIds" item="namespaceId" separator="," open="(" close=")">
-                #{namespaceId}
-            </foreach>
-        GROUP BY node_type
+        ${ew.customSqlSegment}
     </select>
 </mapper>

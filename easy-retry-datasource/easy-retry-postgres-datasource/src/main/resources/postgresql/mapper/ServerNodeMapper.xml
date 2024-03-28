@@ -30,18 +30,10 @@
         ON CONFLICT (host_id, host_ip) DO UPDATE SET expire_at = EXCLUDED.expire_at
 
     </insert>
-    <delete id="deleteByExpireAt">
-        delete
-        from server_node
-        where expire_at &lt;= #{endTime,jdbcType=TIMESTAMP}
-    </delete>
     <select id="countActivePod"
             resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.ActivePodQuantityResponseDO">
         SELECT node_type as nodeType, count(*) as total
-        from server_node where namespace_id in
-        <foreach collection="namespaceIds" item="namespaceId" separator="," open="(" close=")">
-            #{namespaceId}
-        </foreach>
-        GROUP BY node_type
+        from server_node
+        ${ew.customSqlSegment}
     </select>
 </mapper>

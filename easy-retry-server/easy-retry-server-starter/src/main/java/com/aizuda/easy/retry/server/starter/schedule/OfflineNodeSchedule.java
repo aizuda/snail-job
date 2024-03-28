@@ -8,6 +8,8 @@ import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
 import com.aizuda.easy.retry.server.common.register.ServerRegister;
 import com.aizuda.easy.retry.server.common.schedule.AbstractSchedule;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.ServerNodeMapper;
+import com.aizuda.easy.retry.template.datasource.persistence.po.ServerNode;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -41,7 +43,7 @@ public class OfflineNodeSchedule extends AbstractSchedule implements Lifecycle {
                 ServerRegister.DELAY_TIME + (ServerRegister.DELAY_TIME / 3));
 
             // 先删除DB中需要下线的机器
-            serverNodeMapper.deleteByExpireAt(endTime);
+            serverNodeMapper.delete(new LambdaQueryWrapper<ServerNode>().le(ServerNode::getExpireAt, endTime));
 
             Set<RegisterNodeInfo> allPods = CacheRegisterTable.getAllPods();
             Set<RegisterNodeInfo> waitOffline = allPods.stream().filter(registerNodeInfo -> registerNodeInfo.getExpireAt().isBefore(endTime)).collect(

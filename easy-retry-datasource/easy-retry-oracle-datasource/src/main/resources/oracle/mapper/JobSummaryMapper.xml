@@ -89,18 +89,7 @@
                 stop_num,
                 cancel_num
             FROM job_summary
-            <where>
-                <if test="groupNames != null and groupNames.size > 0">
-                    AND group_name IN
-                    <foreach collection="groupNames" item="groupName" open="(" separator="," close=")">
-                        #{groupName}
-                    </foreach>
-                </if>
-                <if test="groupName != null and groupName != '' ">
-                    AND group_name = #{groupName}
-                </if>
-                AND system_task_type = #{systemTaskType} AND namespace_id = #{namespaceId} AND trigger_at BETWEEN #{from} AND #{to}
-            </where>
+            ${ew.customSqlSegment}
         )
         GROUP BY DATE_FORMAT(trigger_at, #{dateFormat})
     </select>
@@ -113,13 +102,7 @@
                COALESCE(sum(fail_num), 0)                                       AS failNum,
                COALESCE(sum(success_num + fail_num + stop_num + cancel_num), 0) AS totalNum
         FROM job_summary
-        WHERE system_task_type = #{systemTaskType} AND namespace_id = #{namespaceId}
-        <if test="groupNames != null and groupNames.size > 0">
-            AND group_name IN
-            <foreach collection="groupNames" item="groupName" open="(" separator="," close=")">
-                #{groupName}
-            </foreach>
-        </if>
+        ${ew.customSqlSegment}
     </select>
 
     <select id="dashboardRank"
@@ -135,21 +118,7 @@
                 </if>
                 SUM(fail_num) AS total
             FROM job_summary
-            <where>
-                <if test="groupNames != null and groupNames.size > 0">
-                    AND group_name IN
-                    <foreach collection="groupNames" item="groupName" open="(" separator="," close=")">
-                        #{groupName}
-                    </foreach>
-                </if>
-                <if test="groupName != '' and groupName != null">
-                    AND group_name = #{groupName}
-                </if>
-                AND trigger_at BETWEEN #{startTime} AND #{endTime}
-            </where>
-            AND system_task_type = #{systemTaskType}
-            AND namespace_id = #{namespaceId}
-            GROUP BY namespace_id, group_name, business_id
+            ${ew.customSqlSegment}
             HAVING SUM(fail_num) > 0
             ORDER BY total DESC
         )
@@ -162,13 +131,7 @@
                SUM(CASE WHEN (job_status = 1) THEN 1 ELSE 0 END) AS run,
                COUNT(*)                                          AS total
         FROM job
-        WHERE namespace_id = #{namespaceId}
-        <if test="groupNames != null and groupNames.size > 0">
-            AND group_name IN
-            <foreach collection="groupNames" item="groupName" open="(" separator="," close=")">
-                #{groupName}
-            </foreach>
-        </if>
+        ${ew.customSqlSegment}
         GROUP BY namespace_id, group_name
     </select>
 </mapper>

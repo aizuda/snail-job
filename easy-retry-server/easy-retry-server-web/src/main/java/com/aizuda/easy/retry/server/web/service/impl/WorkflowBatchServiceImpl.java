@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.server.web.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
@@ -35,6 +36,7 @@ import com.aizuda.easy.retry.template.datasource.persistence.po.Workflow;
 import com.aizuda.easy.retry.template.datasource.persistence.po.WorkflowNode;
 import com.aizuda.easy.retry.template.datasource.persistence.po.WorkflowTaskBatch;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -85,16 +87,24 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
             }
         }
 
-        WorkflowBatchQueryDO workflowBatchQueryDO = new WorkflowBatchQueryDO();
+        WorkflowBatchQueryDO queryDO = new WorkflowBatchQueryDO();
         if (StrUtil.isNotBlank(queryVO.getWorkflowName())) {
-            workflowBatchQueryDO.setWorkflowName(queryVO.getWorkflowName() + "%");
+            queryDO.setWorkflowName(queryVO.getWorkflowName() + "%");
         }
 
-        workflowBatchQueryDO.setWorkflowId(queryVO.getWorkflowId());
-        workflowBatchQueryDO.setTaskBatchStatus(queryVO.getTaskBatchStatus());
-        workflowBatchQueryDO.setGroupNames(groupNames);
-        workflowBatchQueryDO.setNamespaceId(userSessionVO.getNamespaceId());
-        List<WorkflowBatchResponseDO> batchResponseDOList = workflowTaskBatchMapper.selectWorkflowBatchPageList(pageDTO, workflowBatchQueryDO);
+        queryDO.setWorkflowId(queryVO.getWorkflowId());
+        queryDO.setTaskBatchStatus(queryVO.getTaskBatchStatus());
+        queryDO.setGroupNames(groupNames);
+        queryDO.setNamespaceId(userSessionVO.getNamespaceId());
+        QueryWrapper<WorkflowTaskBatch> wrapper = new QueryWrapper<WorkflowTaskBatch>()
+                .eq("a.namespace_id", queryDO.getNamespaceId())
+                .eq(queryDO.getWorkflowId() != null, "a.workflow_id", queryVO.getWorkflowId())
+                .in(CollUtil.isNotEmpty(groupNames), "a.group_name", groupNames)
+                .eq(queryDO.getTaskBatchStatus() != null, "task_batch_status", queryDO.getTaskBatchStatus())
+                .eq(StrUtil.isNotBlank(queryDO.getWorkflowName()), "b.workflow_name", queryDO.getWorkflowName())
+                .eq("a.deleted", 0)
+                .orderByDesc("a.id");
+        List<WorkflowBatchResponseDO> batchResponseDOList = workflowTaskBatchMapper.selectWorkflowBatchPageList(pageDTO, wrapper);
 
         List<WorkflowBatchResponseVO> batchResponseVOList =
                 WorkflowConverter.INSTANCE.toWorkflowBatchResponseVO(batchResponseDOList);

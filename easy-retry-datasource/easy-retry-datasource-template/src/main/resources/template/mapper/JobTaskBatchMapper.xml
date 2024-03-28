@@ -18,28 +18,7 @@
         resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.JobBatchResponseDO">
         SELECT a.*, b.job_name, b.task_type, b.block_strategy, b.trigger_type
         FROM job_task_batch a join job b on a.job_id = b.id
-        <where>
-            a.namespace_id = #{queryDO.namespaceId}
-            and a.system_task_type = 3
-            <if test="queryDO.jobId != null">
-                and a.job_id = #{queryDO.jobId}
-            </if>
-            <if test="queryDO.groupNames != null and queryDO.groupNames.size > 0">
-                and a.group_name IN
-                <foreach collection="queryDO.groupNames" item="groupName"  open="("  separator="," close=")">
-                    #{groupName}
-                </foreach>
-            </if>
-            <if test="queryDO.taskBatchStatus != null">
-                and task_batch_status = #{queryDO.taskBatchStatus}
-            </if>
-            <if test="queryDO.jobName != null">
-                and job_name like #{queryDO.jobName}
-            </if>
-         and a.deleted = 0
-        order by a.id desc
-        </where>
-
+        ${ew.customSqlSegment}
     </select>
 
     <select id="summaryJobBatchList"
@@ -55,8 +34,7 @@
                SUM(CASE WHEN (task_batch_status = 5) THEN 1 ELSE 0 END) AS stopNum,
                SUM(CASE WHEN (task_batch_status = 4) THEN 1 ELSE 0 END) AS failNum
         FROM job_task_batch
-        WHERE system_task_type = #{systemTaskType} AND create_dt BETWEEN #{from} AND #{to}
-        GROUP BY namespace_id, group_name, job_id, task_batch_status, operation_reason
+        ${ew.customSqlSegment}
     </select>
 
     <select id="summaryWorkflowTaskBatchList"
@@ -72,20 +50,13 @@
                SUM(CASE WHEN (task_batch_status = 5) THEN 1 ELSE 0 END) AS stopNum,
                SUM(CASE WHEN (task_batch_status = 4) THEN 1 ELSE 0 END) AS failNum
         FROM workflow_task_batch
-        WHERE create_dt BETWEEN #{from} AND #{to}
-        GROUP BY namespace_id, group_name, workflow_id, task_batch_status, operation_reason
+        ${ew.customSqlSegment}
     </select>
 
     <select id="selectJobBatchListByIds"
             resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.JobBatchResponseDO">
         SELECT a.*, b.job_name, b.task_type, b.block_strategy, b.trigger_type,b.executor_info,b.args_str
         FROM job_task_batch a join job b on a.job_id = b.id
-        <where>
-            a.id in
-            <foreach collection="ids" item="id" separator="," open="(" close=")">
-                #{id}
-            </foreach>
-            and a.deleted = 0
-        </where>
+        ${ew.customSqlSegment}
     </select>
 </mapper>

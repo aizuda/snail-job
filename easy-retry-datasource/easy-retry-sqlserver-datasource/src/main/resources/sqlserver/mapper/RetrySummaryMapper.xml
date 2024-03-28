@@ -59,13 +59,7 @@
             ISNULL(SUM(suspend_num), 0) AS suspendNum,
             ISNULL(SUM(running_num + finish_num + max_count_num + suspend_num), 0) AS totalNum
         FROM retry_summary
-        WHERE namespace_id = #{namespaceId}
-        <if test="groupNames != null and groupNames.size > 0">
-            AND group_name IN
-            <foreach collection="groupNames" item="groupName" open="(" separator="," close=")">
-                #{groupName}
-            </foreach>
-        </if>
+        ${ew.customSqlSegment}
     </select>
 
     <select id="retryTaskBarList"
@@ -77,15 +71,7 @@
             max_count_num,
             suspend_num
         FROM retry_summary
-        WHERE
-            namespace_id = #{namespaceId}
-            <if test="groupNames != null and groupNames.size > 0">
-                AND group_name IN
-                <foreach collection="groupNames" item="groupName" open="(" separator="," close=")">
-                    #{groupName}
-                </foreach>
-            </if>
-        ORDER BY id DESC
+        ${ew.customSqlSegment}
     </select>
 
     <select id="retryLineList"
@@ -121,19 +107,7 @@
                 max_count_num,
                 suspend_num
             FROM retry_summary
-            <where>
-                <if test="groupNames != null and groupNames.size > 0">
-                    AND group_name IN
-                        <foreach collection="groupNames" item="groupName" open="(" separator="," close=")">
-                            #{groupName}
-                        </foreach>
-                </if>
-                <if test="groupName != null and groupName != '' ">
-                    AND group_name = #{groupName}
-                </if>
-                AND namespace_id = #{namespaceId}
-                AND trigger_at BETWEEN #{from} AND #{to}
-            </where>
+            ${ew.customSqlSegment}
         ) AS subquery
         GROUP BY createDt
     </select>
@@ -144,20 +118,7 @@
             CONCAT(group_name, '/', scene_name) AS name,
             SUM(running_num + finish_num + max_count_num + suspend_num) AS total
         FROM retry_summary
-        <where>
-            <if test="groupNames != null and groupNames.size > 0">
-                AND group_name IN
-                <foreach collection="groupNames" item="groupName" open="(" separator="," close=")">
-                    #{groupName}
-                </foreach>
-            </if>
-            <if test="groupName != '' and groupName != null">
-                AND group_name = #{groupName}
-            </if>
-            AND namespace_id = #{namespaceId}
-            AND trigger_at BETWEEN #{startTime} AND  #{endTime}
-        </where>
-        GROUP BY namespace_id, group_name, scene_name
+        ${ew.customSqlSegment}
         HAVING SUM(running_num + finish_num + max_count_num + suspend_num) > 0
         ORDER BY total DESC
     </select>
@@ -170,14 +131,7 @@
             SUM(CASE WHEN (scene_status = 1) THEN 1 ELSE 0 END) AS run,
             COUNT(*) AS total
         FROM scene_config
-        WHERE
-            namespace_id = #{namespaceId}
-            <if test="groupNames != null and groupNames.size > 0">
-                AND group_name IN
-                    <foreach collection="groupNames" item="groupName" open="(" separator="," close=")">
-                        #{groupName}
-                    </foreach>
-            </if>
+        ${ew.customSqlSegment}
         GROUP BY namespace_id, group_name
         ORDER BY group_name
     </select>
@@ -186,13 +140,7 @@
      SQL Server SELECT COUNT(*) FROM (... ORDER BY group_name) 会报错 -->
     <select id="sqlServer_jobTaskList_Count" resultType="java.lang.Integer">
         SELECT COUNT(DISTINCT group_name)
-          FROM scene_config
-         WHERE namespace_id = #{namespaceId}
-            <if test="groupNames != null and groupNames.size > 0">
-                AND group_name IN
-                <foreach collection="groupNames" item="groupName" open="(" separator="," close=")">
-                    #{groupName}
-                </foreach>
-            </if>
+        FROM scene_config
+        ${ew.customSqlSegment}
     </select>
 </mapper>

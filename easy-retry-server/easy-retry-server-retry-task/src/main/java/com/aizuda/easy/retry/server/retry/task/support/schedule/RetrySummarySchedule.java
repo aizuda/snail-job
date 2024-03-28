@@ -8,6 +8,8 @@ import com.aizuda.easy.retry.template.datasource.persistence.dataobject.Dashboar
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetrySummaryMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskLogMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetrySummary;
+import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLog;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -60,7 +62,10 @@ public class RetrySummarySchedule extends AbstractSchedule implements Lifecycle 
                 // 重试按日实时查询统计数据（00:00:00 - 23:59:59）
                 LocalDateTime todayFrom = LocalDateTime.of(LocalDate.now(), LocalTime.MIN).plusDays(-i);
                 LocalDateTime todayTo = LocalDateTime.of(LocalDate.now(), LocalTime.MAX).plusDays(-i);
-                List<DashboardRetryResponseDO> dashboardRetryResponseDOList = retryTaskLogMapper.retrySummaryRetryTaskLogList(todayFrom, todayTo);
+                LambdaQueryWrapper<RetryTaskLog> wrapper = new LambdaQueryWrapper<RetryTaskLog>()
+                        .between(RetryTaskLog::getCreateDt, todayFrom, todayTo)
+                        .groupBy(RetryTaskLog::getNamespaceId, RetryTaskLog::getGroupName, RetryTaskLog::getSceneName);
+                List<DashboardRetryResponseDO> dashboardRetryResponseDOList = retryTaskLogMapper.retrySummaryRetryTaskLogList(wrapper);
                 if (dashboardRetryResponseDOList == null || dashboardRetryResponseDOList.size() < 1) {
                     continue;
                 }

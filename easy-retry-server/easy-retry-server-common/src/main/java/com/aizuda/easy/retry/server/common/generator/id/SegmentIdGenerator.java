@@ -8,16 +8,13 @@ import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.SequenceAllocMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.SequenceAlloc;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -186,13 +183,18 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
     public void updateSegmentFromDb(Pair<String, String> key, Segment segment) {
         SegmentBuffer buffer = segment.getBuffer();
         SequenceAlloc sequenceAlloc;
+        LambdaUpdateWrapper<SequenceAlloc> wrapper = new LambdaUpdateWrapper<SequenceAlloc>()
+                .set(SequenceAlloc::getMaxId, "max_id + step")
+                .set(SequenceAlloc::getUpdateDt, new Date())
+                .eq(SequenceAlloc::getGroupName, key.getKey())
+                .eq(SequenceAlloc::getNamespaceId, key.getValue());
         if (!buffer.isInitOk()) {
-            sequenceAllocMapper.updateMaxId(key.getKey(), key.getValue());
+            sequenceAllocMapper.update(wrapper);
             sequenceAlloc = sequenceAllocMapper.selectOne(new LambdaQueryWrapper<SequenceAlloc>().eq(SequenceAlloc::getGroupName, key));
             buffer.setStep(sequenceAlloc.getStep());
             buffer.setMinStep(sequenceAlloc.getStep());//leafAlloc中的step为DB中的step
         } else if (buffer.getUpdateTimestamp() == 0) {
-            sequenceAllocMapper.updateMaxId(key.getKey(), key.getValue());
+            sequenceAllocMapper.update(wrapper);
             sequenceAlloc = sequenceAllocMapper.selectOne(new LambdaQueryWrapper<SequenceAlloc>().eq(SequenceAlloc::getGroupName, key));
             buffer.setUpdateTimestamp(System.currentTimeMillis());
             buffer.setStep(sequenceAlloc.getStep());
@@ -211,9 +213,13 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
             } else {
                 nextStep = nextStep / 2 >= buffer.getMinStep() ? nextStep / 2 : nextStep;
             }
-           EasyRetryLog.LOCAL.debug("leafKey[{}], step[{}], duration[{}mins], nextStep[{}]", key, buffer.getStep(), String.format("%.2f", ((double) duration / (1000 * 60))), nextStep);
-
-            sequenceAllocMapper.updateMaxIdByCustomStep(nextStep, key.getKey(), key.getValue());
+            EasyRetryLog.LOCAL.debug("leafKey[{}], step[{}], duration[{}mins], nextStep[{}]", key, buffer.getStep(), String.format("%.2f", ((double) duration / (1000 * 60))), nextStep);
+            LambdaUpdateWrapper<SequenceAlloc> wrapper1 = new LambdaUpdateWrapper<SequenceAlloc>()
+                    .set(SequenceAlloc::getMaxId, "max_id + " + nextStep)
+                    .set(SequenceAlloc::getUpdateDt, new Date())
+                    .eq(SequenceAlloc::getGroupName, key.getKey())
+                    .eq(SequenceAlloc::getNamespaceId, key.getValue());
+            sequenceAllocMapper.update(wrapper1);
             sequenceAlloc = sequenceAllocMapper
                     .selectOne(new LambdaQueryWrapper<SequenceAlloc>().eq(SequenceAlloc::getGroupName, key));
             buffer.setUpdateTimestamp(System.currentTimeMillis());

@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.server.web.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.client.model.ExecuteResult;
@@ -42,6 +43,7 @@ import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTaskBatch;
 import com.aizuda.easy.retry.template.datasource.persistence.po.WorkflowNode;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
@@ -87,17 +89,25 @@ public class JobBatchServiceImpl implements JobBatchService {
             }
         }
 
-        JobBatchQueryDO jobBatchQueryDO = new JobBatchQueryDO();
+        JobBatchQueryDO queryDO = new JobBatchQueryDO();
         if (StrUtil.isNotBlank(queryVO.getJobName())) {
-            jobBatchQueryDO.setJobName(queryVO.getJobName() + "%");
+            queryDO.setJobName(queryVO.getJobName() + "%");
         }
 
-        jobBatchQueryDO.setJobId(queryVO.getJobId());
-        jobBatchQueryDO.setTaskBatchStatus(queryVO.getTaskBatchStatus());
-        jobBatchQueryDO.setGroupNames(groupNames);
-        jobBatchQueryDO.setNamespaceId(userSessionVO.getNamespaceId());
-        List<JobBatchResponseDO> batchResponseDOList = jobTaskBatchMapper.selectJobBatchPageList(pageDTO,
-                jobBatchQueryDO);
+        queryDO.setJobId(queryVO.getJobId());
+        queryDO.setTaskBatchStatus(queryVO.getTaskBatchStatus());
+        queryDO.setGroupNames(groupNames);
+        queryDO.setNamespaceId(userSessionVO.getNamespaceId());
+        QueryWrapper<JobTaskBatch> wrapper = new QueryWrapper<JobTaskBatch>()
+                .eq("a.namespace_id", queryDO.getNamespaceId())
+                .eq("a.system_task_type", 3)
+                .eq(queryDO.getJobId() != null, "a.job_id", queryDO.getJobId())
+                .in(CollUtil.isNotEmpty(queryDO.getGroupNames()), "a.group_name", queryDO.getGroupNames())
+                .eq(queryDO.getTaskBatchStatus() != null, "task_batch_status", queryDO.getTaskBatchStatus())
+                .eq(StrUtil.isNotBlank(queryDO.getJobName()), "job_name", queryDO.getJobName())
+                .eq("a.deleted", 0)
+                .orderByDesc("a.id");
+        List<JobBatchResponseDO> batchResponseDOList = jobTaskBatchMapper.selectJobBatchPageList(pageDTO, wrapper);
 
         List<JobBatchResponseVO> batchResponseVOList = JobBatchResponseVOConverter.INSTANCE.toJobBatchResponseVOs(
                 batchResponseDOList);

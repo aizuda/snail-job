@@ -11,15 +11,4 @@
         <result column="update_dt" property="updateDt" />
     </resultMap>
 
-    <update id="updateMaxIdByCustomStep">
-        UPDATE sequence_alloc
-        SET max_id = max_id + #{step}, update_dt = now()
-        WHERE group_name = #{groupName} and namespace_id = #{namespaceId}
-    </update>
-
-    <update id="updateMaxId">
-        UPDATE sequence_alloc
-        SET max_id = max_id + step, update_dt = now()
-        WHERE group_name = #{groupName} and namespace_id = #{namespaceId}
-    </update>
 </mapper>

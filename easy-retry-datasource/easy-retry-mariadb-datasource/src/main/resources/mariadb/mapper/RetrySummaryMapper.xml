@@ -47,13 +47,7 @@
                ifnull(sum(suspend_num), 0)                                            AS suspendNum,
                ifnull(sum(running_num + finish_num + max_count_num + suspend_num), 0) AS totalNum
         FROM retry_summary
-        WHERE namespace_id = #{namespaceId}
-        <if test="groupNames != null and groupNames.size > 0">
-            AND group_name IN
-            <foreach collection="groupNames" item="groupName"  open="("  separator="," close=")">
-                #{groupName}
-            </foreach>
-        </if>
+        ${ew.customSqlSegment}
     </select>
 
     <select id="retryTaskBarList"
@@ -61,14 +55,8 @@
         SELECT
         trigger_at, running_num, finish_num, max_count_num, suspend_num
         FROM retry_summary
-        WHERE namespace_id = #{namespaceId}
-        <if test="groupNames != null and groupNames.size > 0">
-            AND group_name IN
-            <foreach collection="groupNames" item="groupName" open="(" separator="," close=")">
-                #{groupName}
-            </foreach>
-        </if>
-        ORDER BY id DESC LIMIT 7
+        ${ew.customSqlSegment}
+        LIMIT 7
     </select>
 
     <select id="retryLineList"
@@ -98,18 +86,7 @@
         ifnull(SUM(suspend_num), 0) AS suspendNum,
         ifnull(SUM(finish_num + running_num + max_count_num + suspend_num), 0) AS total
         FROM retry_summary
-        <where>
-            <if test="groupNames != null and groupNames.size > 0">
-                AND group_name IN
-                <foreach collection="groupNames" item="groupName"  open="("  separator="," close=")">
-                    #{groupName}
-                </foreach>
-            </if>
-            <if test="groupName != null and groupName != '' ">
-                AND group_name = #{groupName}
-            </if>
-            AND namespace_id = #{namespaceId} AND trigger_at BETWEEN #{from} AND #{to}
-        </where>
+        ${ew.customSqlSegment}
         GROUP BY createDt
     </select>
 
@@ -117,21 +94,9 @@
             resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO$Rank">
         SELECT
         CONCAT(group_name, '/', scene_name) `name`,
-        SUM(running_num + finish_num + max_count_num + suspend_num) AS total FROM retry_summary
-        <where>
-            <if test="groupNames != null and groupNames.size > 0">
-                AND group_name IN
-                <foreach collection="groupNames" item="groupName"  open="("  separator="," close=")">
-                    #{groupName}
-                </foreach>
-            </if>
-            <if test="groupName != '' and groupName != null">
-                AND group_name = #{groupName}
-            </if>
-            AND namespace_id = #{namespaceId}
-            AND trigger_at >= #{startTime} AND trigger_at &lt;= #{endTime}
-        </where>
-        GROUP BY namespace_id, group_name, scene_name
+        SUM(running_num + finish_num + max_count_num + suspend_num) AS total
+        FROM retry_summary
+        ${ew.customSqlSegment}
         HAVING total > 0
         ORDER BY total DESC LIMIT 10
     </select>
@@ -143,12 +108,7 @@
                count(*)                                            AS total
         FROM scene_config
         WHERE namespace_id = #{namespaceId}
-        <if test="groupNames != null and groupNames.size > 0">
-            AND group_name IN
-            <foreach collection="groupNames" item="groupName"  open="("  separator="," close=")">
-                #{groupName}
-            </foreach>
-        </if>
+        ${ew.customSqlSegment}
         GROUP BY namespace_id, group_name
     </select>
 </mapper>

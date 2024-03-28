@@ -77,20 +77,7 @@
                 cancel_num,
                 fail_num
             FROM job_summary
-            <where>
-                <if test="groupNames != null and groupNames.size > 0">
-                    AND group_name IN
-                    <foreach collection="groupNames" item="groupName" open="(" separator="," close=")">
-                        #{groupName}
-                    </foreach>
-                </if>
-                <if test="groupName != null and groupName != '' ">
-                    AND group_name = #{groupName}
-                </if>
-                AND system_task_type = #{systemTaskType}
-                AND namespace_id = #{namespaceId}
-                AND trigger_at BETWEEN #{from} AND #{to}
-            </where>
+            ${ew.customSqlSegment}
         ) AS subquery
         GROUP BY DATE_FORMAT(trigger_at, #{dateFormat})
     </select>
@@ -104,13 +91,7 @@
             ISNULL(sum(fail_num), 0) AS failNum,
             ISNULL(sum(success_num + fail_num + stop_num + cancel_num), 0) AS totalNum
         FROM job_summary
-        WHERE system_task_type = #{systemTaskType} AND namespace_id = #{namespaceId}
-        <if test="groupNames != null and groupNames.size > 0">
-            AND group_name IN
-            <foreach collection="groupNames" item="groupName" open="(" separator="," close=")">
-                #{groupName}
-            </foreach>
-        </if>
+        ${ew.customSqlSegment}
     </select>
 
     <select id="dashboardRank"
@@ -125,21 +106,7 @@
             </if>
             SUM(fail_num) AS total
         FROM job_summary
-        <where>
-            <if test="groupNames != null and groupNames.size > 0">
-                AND group_name IN
-                <foreach collection="groupNames" item="groupName" open="(" separator="," close=")">
-                    #{groupName}
-                </foreach>
-            </if>
-            <if test="groupName != '' and groupName != null">
-                AND group_name = #{groupName}
-            </if>
-            AND trigger_at BETWEEN #{startTime} AND #{endTime}
-            AND namespace_id = #{namespaceId}
-            AND system_task_type = #{systemTaskType}
-        </where>
-        GROUP BY namespace_id, group_name, business_id
+        ${ew.customSqlSegment}
         HAVING SUM(fail_num) > 0
         ORDER BY name DESC
     </select>
@@ -152,13 +119,7 @@
             SUM(CASE WHEN (job_status = 1) THEN 1 ELSE 0 END) AS run,
             COUNT(*)                                          AS total
         FROM job
-        WHERE namespace_id = #{namespaceId}
-            <if test="groupNames != null and groupNames.size > 0">
-                AND group_name IN
-                    <foreach collection="groupNames" item="groupName"  open="("  separator="," close=")">
-                        #{groupName}
-                    </foreach>
-            </if>
+        ${ew.customSqlSegment}
         GROUP BY namespace_id, group_name
         ORDER BY group_name
     </select>
@@ -169,12 +130,6 @@
             resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO$Task">
         SELECT COUNT(DISTINCT group_name)
          FROM job
-        WHERE namespace_id = #{namespaceId}
-            <if test="groupNames != null and groupNames.size > 0">
-                AND group_name IN
-                <foreach collection="groupNames" item="groupName"  open="("  separator="," close=")">
-                    #{groupName}
-                </foreach>
-            </if>
+        ${ew.customSqlSegment}
     </select>
 </mapper>

@@ -25,18 +25,6 @@
           resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.JobNotifyConfigResponseDO">
     SELECT a.*, b.job_name
     FROM job_notify_config a join job b on a.job_id = b.id
-    <where>
-      a.namespace_id = #{queryDO.namespaceId}
-      <if test="queryDO.jobId != null">
-        and a.job_id = #{queryDO.jobId}
-      </if>
-      <if test="queryDO.groupNames != null and queryDO.groupNames.size > 0">
-        and a.group_name IN
-        <foreach collection="queryDO.groupNames" item="groupName"  open="("  separator="," close=")">
-          #{groupName}
-        </foreach>
-      </if>
-      order by a.id desc
-    </where>
+    ${ew.customSqlSegment}
   </select>
 </mapper>

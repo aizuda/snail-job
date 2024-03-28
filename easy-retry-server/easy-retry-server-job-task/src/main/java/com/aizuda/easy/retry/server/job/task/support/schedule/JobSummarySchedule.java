@@ -12,6 +12,8 @@ import com.aizuda.easy.retry.template.datasource.persistence.dataobject.JobBatch
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobSummaryMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskBatchMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobSummary;
+import com.aizuda.easy.retry.template.datasource.persistence.po.JobTaskBatch;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -63,7 +65,12 @@ public class JobSummarySchedule extends AbstractSchedule implements Lifecycle {
                 // 定时按日实时查询统计数据（00:00:00 - 23:59:59）
                 LocalDateTime todayFrom = LocalDateTime.of(LocalDate.now(), LocalTime.MIN).plusDays(-i);
                 LocalDateTime todayTo = LocalDateTime.of(LocalDate.now(), LocalTime.MAX).plusDays(-i);
-                List<JobBatchSummaryResponseDO> summaryResponseDOList = jobTaskBatchMapper.summaryJobBatchList(SyetemTaskTypeEnum.JOB.getType(), todayFrom, todayTo);
+                LambdaQueryWrapper<JobTaskBatch> wrapper = new LambdaQueryWrapper<JobTaskBatch>()
+                        .eq(JobTaskBatch::getSystemTaskType, SyetemTaskTypeEnum.JOB.getType())
+                        .between(JobTaskBatch::getCreateDt, todayFrom, todayTo)
+                        .groupBy(JobTaskBatch::getNamespaceId, JobTaskBatch::getGroupName,
+                                JobTaskBatch::getJobId, JobTaskBatch::getTaskBatchStatus, JobTaskBatch::getOperationReason);
+                List<JobBatchSummaryResponseDO> summaryResponseDOList = jobTaskBatchMapper.summaryJobBatchList(wrapper);
                 if (summaryResponseDOList == null || summaryResponseDOList.size() < 1) {
                     continue;
                 }

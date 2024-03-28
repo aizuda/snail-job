@@ -13,6 +13,8 @@ import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.server.job.task.support.event.JobTaskFailAlarmEvent;
 import com.aizuda.easy.retry.template.datasource.persistence.dataobject.JobBatchResponseDO;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskBatchMapper;
+import com.aizuda.easy.retry.template.datasource.persistence.po.JobTaskBatch;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,8 +59,9 @@ public class JobTaskFailAlarmListener extends AbstractJobAlarm<JobTaskFailAlarmE
         // 拉取200条
         List<Long> jobTaskBatchIds = Lists.newArrayList(jobTaskBatchId);
         queue.drainTo(jobTaskBatchIds, 200);
-
-        List<JobBatchResponseDO> jobTaskBatchList = jobTaskBatchMapper.selectJobBatchListByIds(jobTaskBatchIds);
+        QueryWrapper<JobTaskBatch> wrapper = new QueryWrapper<JobTaskBatch>()
+                .in("a.id", jobTaskBatchIds).eq("a.deleted", 0);
+        List<JobBatchResponseDO> jobTaskBatchList = jobTaskBatchMapper.selectJobBatchListByIds(wrapper);
         return AlarmInfoConverter.INSTANCE.toJobAlarmInfos(jobTaskBatchList);
     }
 

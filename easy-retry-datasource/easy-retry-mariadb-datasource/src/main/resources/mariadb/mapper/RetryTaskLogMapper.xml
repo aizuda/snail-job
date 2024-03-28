@@ -43,7 +43,6 @@
                SUM(CASE WHEN (retry_status = 2) THEN 1 ELSE 0 END) AS maxCountNum,
                SUM(CASE WHEN (retry_status = 3) THEN 1 ELSE 0 END) AS suspendNum
         FROM retry_task_log
-        WHERE create_dt between #{from} and #{to}
-        GROUP BY namespace_id, group_name, scene_name
+        ${ew.customSqlSegment}
     </select>
 </mapper>

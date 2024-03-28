@@ -7,7 +7,6 @@
     <result column="group_status" jdbcType="TINYINT" property="groupStatus" />
     <result column="version" jdbcType="TINYINT" property="version" />
     <result column="group_partition" jdbcType="TINYINT" property="groupPartition" />
-    <result column="route_key" jdbcType="TINYINT" property="routeKey" />
     <result column="id_generator_mode" jdbcType="TINYINT" property="idGeneratorMode" />
     <result column="init_scene" jdbcType="TINYINT" property="initScene" />
     <result column="description" jdbcType="TINYINT" property="description" />
@@ -15,7 +14,7 @@
     <result column="update_dt" jdbcType="TIMESTAMP" property="updateDt" />
   </resultMap>
   <sql id="Base_Column_List">
-    id, `group_name`, group_status, version, `group_partition`, route_key, id_generator_mode, init_scene， description, create_dt, update_dt
+    id, `group_name`, group_status, version, `group_partition`, id_generator_mode, init_scene， description, create_dt, update_dt
   </sql>
 
 </mapper>

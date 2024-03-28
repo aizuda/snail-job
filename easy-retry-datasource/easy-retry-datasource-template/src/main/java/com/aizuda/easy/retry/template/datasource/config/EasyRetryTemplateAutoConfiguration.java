@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.template.datasource.config;
 
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.template.datasource.enums.DbTypeEnum;
 import com.aizuda.easy.retry.template.datasource.utils.DbUtils;
@@ -17,10 +18,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import javax.sql.DataSource;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -38,7 +41,13 @@ public class EasyRetryTemplateAutoConfiguration {
         MybatisSqlSessionFactoryBean factoryBean = new MybatisSqlSessionFactoryBean();
         factoryBean.setDataSource(dataSource);
         DbTypeEnum dbTypeEnum = DbUtils.getDbType();
-        factoryBean.setMapperLocations(new PathMatchingResourcePatternResolver().getResources(MessageFormat.format("classpath*:/{0}/mapper/*.xml", dbTypeEnum.getDb())));
+        PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+        Resource[] resources1 = resolver.getResources("classpath*:/template/mapper/*.xml");
+        Resource[] resources2 = resolver.getResources(MessageFormat.format("classpath*:/{0}/mapper/*.xml", dbTypeEnum.getDb()));
+        List<Resource> resources = new ArrayList<>();
+        resources.addAll(Arrays.asList(resources1));
+        resources.addAll(Arrays.asList(resources2));
+        factoryBean.setMapperLocations(resources.toArray(new Resource[0]));
         factoryBean.setPlugins(mybatisPlusInterceptor);
         factoryBean.setTypeAliasesPackage(mybatisPlusProperties.getTypeAliasesPackage());
         factoryBean.setGlobalConfig(mybatisPlusProperties.getGlobalConfig());

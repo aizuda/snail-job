@@ -4,6 +4,8 @@ import com.aizuda.easy.retry.template.datasource.persistence.dataobject.Workflow
 import com.aizuda.easy.retry.template.datasource.persistence.dataobject.WorkflowBatchResponseDO;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTaskBatch;
 import com.aizuda.easy.retry.template.datasource.persistence.po.WorkflowTaskBatch;
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import org.apache.ibatis.annotations.Mapper;
@@ -22,5 +24,5 @@ import java.util.List;
 @Mapper
 public interface WorkflowTaskBatchMapper extends BaseMapper<WorkflowTaskBatch> {
 
-    List<WorkflowBatchResponseDO> selectWorkflowBatchPageList(PageDTO<JobTaskBatch> pageDTO,@Param("queryDO") WorkflowBatchQueryDO workflowBatchQueryDO);
+    List<WorkflowBatchResponseDO> selectWorkflowBatchPageList(PageDTO<JobTaskBatch> pageDTO,@Param("ew") Wrapper<WorkflowTaskBatch> wrapper);
 }
