@@ -412,7 +412,7 @@ CREATE TABLE `job_summary`
     `id`            bigint unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
     `namespace_id`  VARCHAR(64)     NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' COMMENT '命名空间id',
     `group_name`    VARCHAR(64)     NOT NULL DEFAULT '' COMMENT '组名称',
-ji    `business_id`   bigint          NOT NULL COMMENT '业务id (job_id或workflow_id)',
+    `business_id`   bigint          NOT NULL COMMENT '业务id (job_id或workflow_id)',
     `trigger_at`    datetime        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '统计时间',
     `success_num`   int             NOT NULL DEFAULT '0' COMMENT '执行成功-日志数量',
     `fail_num`      int             NOT NULL DEFAULT '0' COMMENT '执行失败-日志数量',
