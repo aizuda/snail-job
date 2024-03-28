@@ -69,7 +69,7 @@ public class NettyChannel {
      * @return port
      */
     public static int getServerPort() {
-        EasyRetryProperties easyRetryProperties = SpringContext.CONTEXT.getBean(EasyRetryProperties.class);
+        EasyRetryProperties easyRetryProperties = SpringContext.getContext().getBean(EasyRetryProperties.class);
         EasyRetryProperties.ServerConfig serverConfig = easyRetryProperties.getServer();
 
         String port = System.getProperty(EASY_RETRY_SERVER_PORT);
@@ -86,7 +86,7 @@ public class NettyChannel {
      * @return host
      */
     public static String getServerHost() {
-        EasyRetryProperties easyRetryProperties = SpringContext.CONTEXT.getBean(EasyRetryProperties.class);
+        EasyRetryProperties easyRetryProperties = SpringContext.getBean(EasyRetryProperties.class);
         EasyRetryProperties.ServerConfig serverConfig = easyRetryProperties.getServer();
 
         String host = System.getProperty(EASY_RETRY_SERVER_HOST);
@@ -103,7 +103,7 @@ public class NettyChannel {
      * @return 客户端IP
      */
     public static String getClientHost() {
-        EasyRetryProperties easyRetryProperties = SpringContext.CONTEXT.getBean(EasyRetryProperties.class);
+        EasyRetryProperties easyRetryProperties = SpringContext.getBean(EasyRetryProperties.class);
 
         String host = easyRetryProperties.getHost();
         // 获取客户端指定的IP地址
@@ -120,8 +120,8 @@ public class NettyChannel {
      * @return port 端口
      */
     public static Integer getClientPort() {
-        EasyRetryProperties easyRetryProperties = SpringContext.CONTEXT.getBean(EasyRetryProperties.class);
-        ServerProperties serverProperties = SpringContext.CONTEXT.getBean(ServerProperties.class);
+        EasyRetryProperties easyRetryProperties = SpringContext.getBean(EasyRetryProperties.class);
+        ServerProperties serverProperties = SpringContext.getBean(ServerProperties.class);
 
         Integer port = easyRetryProperties.getPort();
         // 获取客户端指定的端口
@@ -156,8 +156,8 @@ public class NettyChannel {
         FullHttpRequest request = new DefaultFullHttpRequest(
                 HttpVersion.HTTP_1_1, method, url, Unpooled.wrappedBuffer(body.getBytes(StandardCharsets.UTF_8)));
 
-        ServerProperties serverProperties = SpringContext.CONTEXT.getBean(ServerProperties.class);
-        EasyRetryProperties easyRetryProperties = SpringContext.CONTEXT.getBean(EasyRetryProperties.class);
+        ServerProperties serverProperties = SpringContext.getBean(ServerProperties.class);
+        EasyRetryProperties easyRetryProperties = SpringContext.getBean(EasyRetryProperties.class);
 
         // server配置不能为空
         EasyRetryProperties.ServerConfig serverConfig = easyRetryProperties.getServer();

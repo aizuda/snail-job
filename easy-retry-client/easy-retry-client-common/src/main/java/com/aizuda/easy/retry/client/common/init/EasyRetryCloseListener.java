@@ -6,6 +6,7 @@ import com.aizuda.easy.retry.client.common.event.EasyRetryClosingEvent;
 import com.aizuda.easy.retry.client.common.event.EasyRetryStartingEvent;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.util.EasyRetryVersion;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
@@ -22,18 +23,17 @@ import java.util.List;
  * @since 1.0.0
  */
 @Component
+@RequiredArgsConstructor
 @Slf4j
 public class EasyRetryCloseListener implements ApplicationListener<ContextClosedEvent> {
-
-    @Autowired
-    private List<Lifecycle> lifecycleList;
+    private final List<Lifecycle> lifecycleList;
 
     @Override
     public void onApplicationEvent(ContextClosedEvent event) {
         log.info("Easy-Retry client about to shutdown v{}", EasyRetryVersion.getVersion());
-        SpringContext.CONTEXT.publishEvent(new EasyRetryClosingEvent());
+        SpringContext.getContext().publishEvent(new EasyRetryClosingEvent());
         lifecycleList.forEach(Lifecycle::close);
-        SpringContext.CONTEXT.publishEvent(new EasyRetryClosedEvent());
+        SpringContext.getContext().publishEvent(new EasyRetryClosedEvent());
         log.info("Easy-Retry client closed successfully v{}", EasyRetryVersion.getVersion());
     }
 }

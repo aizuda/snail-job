@@ -67,7 +67,7 @@ public class NettyHttpClientHandler extends SimpleChannelInboundHandler<FullHttp
         ctx.channel().eventLoop().schedule(() -> {
             try {
                 // 抛出重连事件
-                SpringContext.CONTEXT.publishEvent(new ChannelReconnectEvent());
+                SpringContext.getContext().publishEvent(new ChannelReconnectEvent());
                 nettyHttpConnectClient.reconnect();
             } catch (Exception e) {
                 EasyRetryLog.LOCAL.error("reconnect error ", e);

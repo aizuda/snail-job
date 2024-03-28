@@ -412,7 +412,7 @@ CREATE TABLE `job_summary`
     `id`            bigint unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
     `namespace_id`  VARCHAR(64)     NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' COMMENT '命名空间id',
     `group_name`    VARCHAR(64)     NOT NULL DEFAULT '' COMMENT '组名称',
-    `job_id`        bigint          NOT NULL COMMENT '任务信息id',
+ji    `business_id`   bigint          NOT NULL COMMENT '业务id (job_id或workflow_id)',
     `trigger_at`    datetime        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '统计时间',
     `success_num`   int             NOT NULL DEFAULT '0' COMMENT '执行成功-日志数量',
     `fail_num`      int             NOT NULL DEFAULT '0' COMMENT '执行失败-日志数量',
@@ -424,8 +424,8 @@ CREATE TABLE `job_summary`
     `create_dt`     datetime        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_dt`     datetime        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     PRIMARY KEY (`id`),
-    KEY `idx_namespace_id_group_name_job_id` (`namespace_id`, `group_name`, job_id),
-    UNIQUE KEY `uk_job_id_trigger_at` (`job_id`, `trigger_at`) USING BTREE
+    KEY `idx_namespace_id_group_name_business_id` (`namespace_id`, `group_name`, business_id),
+    UNIQUE KEY `uk_business_id_trigger_at` (`business_id`, `trigger_at`) USING BTREE
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 1
   DEFAULT CHARSET = utf8mb4 COMMENT ='DashBoard_Job';

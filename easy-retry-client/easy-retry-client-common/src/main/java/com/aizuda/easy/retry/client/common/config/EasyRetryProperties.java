@@ -123,7 +123,7 @@ public class EasyRetryProperties {
     }
 
     public static String getGroup() {
-        EasyRetryProperties properties = SpringContext.CONTEXT.getBean(EasyRetryProperties.class);
+        EasyRetryProperties properties = SpringContext.getBean(EasyRetryProperties.class);
         return Objects.requireNonNull(properties).group;
     }
 }

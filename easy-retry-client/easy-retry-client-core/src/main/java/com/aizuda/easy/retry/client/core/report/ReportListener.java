@@ -112,7 +112,7 @@ public class ReportListener implements Listener<RetryTaskDTO> {
                 return;
             }
 
-            EasyRetryProperties properties = SpringContext.CONTEXT.getBean(EasyRetryProperties.class);
+            EasyRetryProperties properties = SpringContext.getBean(EasyRetryProperties.class);
             AlarmContext context = AlarmContext.build()
                     .text(reportErrorTextMessageFormatter,
                             EnvironmentUtils.getActiveProfile(),

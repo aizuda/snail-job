@@ -37,9 +37,9 @@ public class EasyRetryStartListener implements ApplicationRunner {
 
         System.out.println(MessageFormatter.format(SystemConstants.LOGO, EasyRetryVersion.getVersion()).getMessage());
         EasyRetryLog.LOCAL.info("Easy-Retry client is preparing to start... v{}", EasyRetryVersion.getVersion());
-        SpringContext.CONTEXT.publishEvent(new EasyRetryStartingEvent());
+        SpringContext.getContext().publishEvent(new EasyRetryStartingEvent());
         lifecycleList.forEach(Lifecycle::start);
-        SpringContext.CONTEXT.publishEvent(new EasyRetryStartedEvent());
+        SpringContext.getContext().publishEvent(new EasyRetryStartedEvent());
         isStarted = true;
         EasyRetryLog.LOCAL.info("Easy-Retry client started successfully v{}", EasyRetryVersion.getVersion());
     }
