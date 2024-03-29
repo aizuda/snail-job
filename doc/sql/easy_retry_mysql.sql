@@ -159,8 +159,8 @@ CREATE TABLE `retry_task_log_message`
     `unique_id`    varchar(64)         NOT NULL COMMENT '同组下id唯一',
     `create_dt`    datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `message`      text                NOT NULL COMMENT '异常信息',
-    `log_num`       int(11)             NOT NULL DEFAULT 1 COMMENT '日志数量',
-    `real_time`     bigint(13)          NOT NULL DEFAULT 0 COMMENT '上报时间',
+    `log_num`      int(11)             NOT NULL DEFAULT 1 COMMENT '日志数量',
+    `real_time`    bigint(13)          NOT NULL DEFAULT 0 COMMENT '上报时间',
     `client_info`  varchar(128)                 DEFAULT NULL COMMENT '客户端地址 clientId#ip:port',
     PRIMARY KEY (`id`),
     KEY `idx_namespace_id_group_name_scene_name` (`namespace_id`, `group_name`, `unique_id`),
@@ -380,7 +380,7 @@ CREATE TABLE `job_task_batch`
     KEY `idx_job_id_task_batch_status` (`job_id`, `task_batch_status`),
     KEY `idx_create_dt` (`create_dt`),
     KEY `idx_namespace_id_group_name` (`namespace_id`, `group_name`),
-    KEY `idx_workflow_task_batch_id_workflow_node_id` (`workflow_task_batch_id`,`workflow_node_id`)
+    KEY `idx_workflow_task_batch_id_workflow_node_id` (`workflow_task_batch_id`, `workflow_node_id`)
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 0
   DEFAULT CHARSET = utf8mb4 COMMENT ='任务批次';
@@ -409,20 +409,21 @@ CREATE TABLE `job_notify_config`
 
 CREATE TABLE `job_summary`
 (
-    `id`            bigint unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `namespace_id`  VARCHAR(64)     NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' COMMENT '命名空间id',
-    `group_name`    VARCHAR(64)     NOT NULL DEFAULT '' COMMENT '组名称',
-    `business_id`   bigint          NOT NULL COMMENT '业务id (job_id或workflow_id)',
-    `trigger_at`    datetime        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '统计时间',
-    `success_num`   int             NOT NULL DEFAULT '0' COMMENT '执行成功-日志数量',
-    `fail_num`      int             NOT NULL DEFAULT '0' COMMENT '执行失败-日志数量',
-    `fail_reason`   varchar(512)    NOT NULL DEFAULT '' COMMENT '失败原因',
-    `stop_num`      int             NOT NULL DEFAULT '0' COMMENT '执行失败-日志数量',
-    `stop_reason`   varchar(512)    NOT NULL DEFAULT '' COMMENT '失败原因',
-    `cancel_num`    int             NOT NULL DEFAULT '0' COMMENT '执行失败-日志数量',
-    `cancel_reason` varchar(512)    NOT NULL DEFAULT '' COMMENT '失败原因',
-    `create_dt`     datetime        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_dt`     datetime        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+    `id`               bigint unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `namespace_id`     VARCHAR(64)     NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' COMMENT '命名空间id',
+    `group_name`       VARCHAR(64)     NOT NULL DEFAULT '' COMMENT '组名称',
+    `business_id`      bigint          NOT NULL COMMENT '业务id (job_id或workflow_id)',
+    `system_task_type` tinyint(4)      NOT NULL DEFAULT '3' COMMENT '任务类型 3、JOB任务 4、WORKFLOW任务',
+    `trigger_at`       datetime        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '统计时间',
+    `success_num`      int             NOT NULL DEFAULT '0' COMMENT '执行成功-日志数量',
+    `fail_num`         int             NOT NULL DEFAULT '0' COMMENT '执行失败-日志数量',
+    `fail_reason`      varchar(512)    NOT NULL DEFAULT '' COMMENT '失败原因',
+    `stop_num`         int             NOT NULL DEFAULT '0' COMMENT '执行失败-日志数量',
+    `stop_reason`      varchar(512)    NOT NULL DEFAULT '' COMMENT '失败原因',
+    `cancel_num`       int             NOT NULL DEFAULT '0' COMMENT '执行失败-日志数量',
+    `cancel_reason`    varchar(512)    NOT NULL DEFAULT '' COMMENT '失败原因',
+    `create_dt`        datetime        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_dt`        datetime        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     PRIMARY KEY (`id`),
     KEY `idx_namespace_id_group_name_business_id` (`namespace_id`, `group_name`, business_id),
     UNIQUE KEY `uk_business_id_trigger_at` (`business_id`, `trigger_at`) USING BTREE

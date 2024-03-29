@@ -19,30 +19,30 @@
     <!-- 定义批量新增的 SQL 映射 -->
     <insert id="batchInsert" parameterType="java.util.List">
         INSERT INTO job_log_message
-        (
-        namespace_id,
-        group_name,
-        job_id,
-        task_batch_id,
-        task_id,
-        log_num,
-        message,
-        create_dt,
-        real_time
-        )
-        VALUES
-        <foreach collection="list" item="item" separator=",">
             (
-            #{item.namespaceId},
-            #{item.groupName},
-            #{item.jobId},
-            #{item.taskBatchId},
-            #{item.taskId},
-            #{item.logNum},
-            #{item.message},
-            #{item.createDt},
-            #{item.realTime}
+                namespace_id,
+                group_name,
+                job_id,
+                task_batch_id,
+                task_id,
+                log_num,
+                message,
+                create_dt,
+                real_time
             )
-        </foreach>
+        VALUES
+            <foreach collection="list" item="item" separator=",">
+                (
+                    #{item.namespaceId},
+                    #{item.groupName},
+                    #{item.jobId},
+                    #{item.taskBatchId},
+                    #{item.taskId},
+                    #{item.logNum},
+                    #{item.message},
+                    #{item.createDt},
+                    #{item.realTime}
+                )
+            </foreach>
     </insert>
 </mapper>

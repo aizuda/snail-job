@@ -17,8 +17,8 @@
 
     <insert id="insertOrUpdate" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO
-        retry_summary (namespace_id, group_name, scene_name, trigger_at, running_num, finish_num, max_count_num,
-        suspend_num)
+            retry_summary (namespace_id, group_name, scene_name, trigger_at, running_num, finish_num, max_count_num,
+                           suspend_num)
         VALUES
         <foreach collection="list" item="item" separator=",">
             (
@@ -33,28 +33,30 @@
             )
         </foreach>
         ON DUPLICATE KEY UPDATE
-        running_num = values(`running_num`),
-        finish_num = values(`finish_num`),
-        max_count_num = values(`max_count_num`),
-        suspend_num = values(`suspend_num`)
+            running_num = values(`running_num`),
+            finish_num = values(`finish_num`),
+            max_count_num = values(`max_count_num`),
+            suspend_num = values(`suspend_num`)
     </insert>
 
     <select id="retryTask"
             resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardCardResponseDO$RetryTask">
-        SELECT
-        IFNULL(SUM(running_num), 0) AS runningNum,
-        IFNULL(SUM(finish_num), 0) AS finishNum,
-        IFNULL(SUM(max_count_num), 0) AS maxCountNum,
-        IFNULL(SUM(suspend_num), 0) AS suspendNum,
-        IFNULL(SUM(running_num + finish_num + max_count_num + suspend_num), 0) AS totalNum
+        SELECT IFNULL(SUM(running_num), 0)                                            AS runningNum,
+               IFNULL(SUM(finish_num), 0)                                             AS finishNum,
+               IFNULL(SUM(max_count_num), 0)                                          AS maxCountNum,
+               IFNULL(SUM(suspend_num), 0)                                            AS suspendNum,
+               IFNULL(SUM(running_num + finish_num + max_count_num + suspend_num), 0) AS totalNum
         FROM retry_summary
         ${ew.customSqlSegment}
     </select>
 
     <select id="retryTaskBarList"
             resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardCardResponseDO$RetryTask">
-        SELECT
-        trigger_at, running_num, finish_num, max_count_num, suspend_num
+        SELECT trigger_at,
+               running_num,
+               finish_num,
+               max_count_num,
+               suspend_num
         FROM retry_summary
         ${ew.customSqlSegment}
         LIMIT 7
@@ -63,29 +65,29 @@
     <select id="retryLineList"
             resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardLineResponseDO">
         SELECT
-        <choose>
-            <when test="type == 'DAY'">
-                DATE_FORMAT(create_dt,'%H')
-            </when>
-            <when test="type == 'WEEK'">
-                DATE_FORMAT(create_dt,'%Y-%m-%d')
-            </when>
-            <when test="type =='MONTH'">
-                DATE_FORMAT(create_dt,'%Y-%m-%d')
-            </when>
-            <when test="type == 'YEAR'">
-                DATE_FORMAT(create_dt,'%Y-%m')
-            </when>
-            <otherwise>
-                DATE_FORMAT(create_dt,'%Y-%m-%d')
-            </otherwise>
-        </choose>
-        AS createDt,
-        IFNULL(SUM(finish_num), 0) AS successNum,
-        IFNULL(SUM(running_num), 0) AS runningNum,
-        IFNULL(SUM(max_count_num), 0) AS maxCountNum,
-        IFNULL(SUM(suspend_num), 0) AS suspendNum,
-        IFNULL(SUM(finish_num + running_num + max_count_num + suspend_num), 0) AS total
+            <choose>
+                <when test="type == 'DAY'">
+                    DATE_FORMAT(create_dt,'%H')
+                </when>
+                <when test="type == 'WEEK'">
+                    DATE_FORMAT(create_dt,'%Y-%m-%d')
+                </when>
+                <when test="type =='MONTH'">
+                    DATE_FORMAT(create_dt,'%Y-%m-%d')
+                </when>
+                <when test="type == 'YEAR'">
+                    DATE_FORMAT(create_dt,'%Y-%m')
+                </when>
+                <otherwise>
+                    DATE_FORMAT(create_dt,'%Y-%m-%d')
+                </otherwise>
+            </choose>
+            AS createDt,
+            IFNULL(SUM(finish_num), 0) AS successNum,
+            IFNULL(SUM(running_num), 0) AS runningNum,
+            IFNULL(SUM(max_count_num), 0) AS maxCountNum,
+            IFNULL(SUM(suspend_num), 0) AS suspendNum,
+            IFNULL(SUM(finish_num + running_num + max_count_num + suspend_num), 0) AS total
         FROM retry_summary
         ${ew.customSqlSegment}
         GROUP BY createDt
@@ -93,20 +95,20 @@
 
     <select id="dashboardRank"
             resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO$Rank">
-        SELECT
-        CONCAT(group_name, '/', scene_name) `name`,
-        SUM(running_num + finish_num + max_count_num + suspend_num) AS total
+        SELECT CONCAT(group_name, '/', scene_name)                            `name`,
+               SUM(running_num + finish_num + max_count_num + suspend_num) AS total
         FROM retry_summary
         ${ew.customSqlSegment}
         HAVING total > 0
-        ORDER BY total DESC LIMIT 10
+        ORDER BY total DESC
+        LIMIT 10
     </select>
 
     <select id="retryTaskList"
             resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO$Task">
-        SELECT group_name AS groupName,
-        SUM(CASE WHEN (scene_status = 1) THEN 1 ELSE 0 END) AS run,
-        COUNT(*) AS total
+        SELECT group_name                                          AS groupName,
+               SUM(CASE WHEN (scene_status = 1) THEN 1 ELSE 0 END) AS run,
+               COUNT(*)                                            AS total
         FROM scene_config
         ${ew.customSqlSegment}
         GROUP BY namespace_id, group_name

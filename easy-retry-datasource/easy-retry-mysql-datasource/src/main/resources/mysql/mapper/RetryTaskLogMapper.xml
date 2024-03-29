@@ -17,9 +17,8 @@
         <result column="create_dt" jdbcType="TIMESTAMP" property="createDt"/>
     </resultMap>
     <sql id="Base_Column_List">
-        id
-        , unique_id, group_name, scene_name, idempotent_id, biz_no, executor_name, args_str, ext_attrs, retry_status,
-    create_dt, task_type, namespace_id
+        id, unique_id, group_name, scene_name, idempotent_id, biz_no, executor_name, args_str, ext_attrs, retry_status,
+        create_dt, task_type, namespace_id
     </sql>
 
     <!-- 定义批量新增的 SQL 映射 -->

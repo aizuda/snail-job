@@ -9,6 +9,7 @@ import com.aizuda.easy.retry.common.core.util.NetUtil;
 import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.dto.DistributeInstance;
 import com.aizuda.easy.retry.server.common.dto.ServerNodeExtAttrs;
+import com.aizuda.easy.retry.server.common.enums.DashboardLineEnum;
 import com.aizuda.easy.retry.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.easy.retry.server.common.enums.SystemModeEnum;
 import com.aizuda.easy.retry.server.common.register.ServerRegister;
@@ -164,10 +165,10 @@ public class DashBoardServiceImpl implements DashBoardService {
         LocalDateTime endDateTime = dateTypeEnum.getEndTime().apply(StrUtil.isNotBlank(endTime) ? LocalDateTime.parse(endTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) : null);
         LambdaQueryWrapper<RetrySummary> wrapper1 = new LambdaQueryWrapper<RetrySummary>()
                 .in(CollUtil.isNotEmpty(groupNames), RetrySummary::getGroupName, groupNames)
-                .eq(StrUtil.isNotBlank(groupName), RetrySummary::getGroupName, groupNames)
+                .eq(StrUtil.isNotBlank(groupName), RetrySummary::getGroupName, groupName)
                 .eq(RetrySummary::getNamespaceId, namespaceId)
                 .between(RetrySummary::getTriggerAt, startDateTime, endDateTime);
-        List<DashboardLineResponseDO> dashboardRetryLinkeResponseDOList = retrySummaryMapper.retryLineList(wrapper1);
+        List<DashboardLineResponseDO> dashboardRetryLinkeResponseDOList = retrySummaryMapper.retryLineList(type, wrapper1);
         List<DashboardLineResponseVO> dashboardLineResponseVOList = DispatchQuantityResponseVOConverter.INSTANCE.toDashboardLineResponseVO(dashboardRetryLinkeResponseDOList);
         dateTypeEnum.getConsumer().accept(dashboardLineResponseVOList);
         dashboardLineResponseVOList.sort(Comparator.comparing(a -> a.getCreateDt()));
@@ -221,7 +222,7 @@ public class DashBoardServiceImpl implements DashBoardService {
                 .eq(JobSummary::getSystemTaskType, systemTaskType)
                 .eq(JobSummary::getNamespaceId, namespaceId)
                 .between(JobSummary::getTriggerAt, startDateTime, endDateTime);
-        List<DashboardLineResponseDO> dashboardLineResponseDOList = jobSummaryMapper.jobLineList(queryWrapper);
+        List<DashboardLineResponseDO> dashboardLineResponseDOList = jobSummaryMapper.jobLineList(DashboardLineEnum.modeOf(type).getDateFormat(), queryWrapper);
         List<DashboardLineResponseVO> dashboardLineResponseVOList = DispatchQuantityResponseVOConverter.INSTANCE.toDashboardLineResponseVO(dashboardLineResponseDOList);
         dateTypeEnum.getConsumer().accept(dashboardLineResponseVOList);
         dashboardLineResponseVOList.sort(Comparator.comparing(a -> a.getCreateDt()));
@@ -235,7 +236,7 @@ public class DashBoardServiceImpl implements DashBoardService {
                 .eq(JobSummary::getSystemTaskType, systemTaskType)
                 .eq(JobSummary::getNamespaceId, namespaceId)
                 .groupBy(JobSummary::getNamespaceId, JobSummary::getGroupName, JobSummary::getBusinessId);
-        List<DashboardRetryLineResponseDO.Rank> rankList = jobSummaryMapper.dashboardRank(wrapper);
+        List<DashboardRetryLineResponseDO.Rank> rankList = jobSummaryMapper.dashboardRank(systemTaskType, wrapper);
         List<DashboardRetryLineResponseVO.Rank> ranks = SceneQuantityRankResponseVOConverter.INSTANCE.toDashboardRetryLineResponseVORank(rankList);
         dashboardRetryLineResponseVO.setRankList(ranks);
         return dashboardRetryLineResponseVO;

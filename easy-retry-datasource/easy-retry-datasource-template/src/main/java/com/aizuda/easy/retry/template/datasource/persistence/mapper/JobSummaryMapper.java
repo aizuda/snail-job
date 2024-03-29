@@ -4,7 +4,6 @@ import com.aizuda.easy.retry.template.datasource.persistence.dataobject.Dashboar
 import com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardLineResponseDO;
 import com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO;
 import com.aizuda.easy.retry.template.datasource.persistence.po.Job;
-import com.aizuda.easy.retry.template.datasource.persistence.po.JobNotifyConfig;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobSummary;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
@@ -13,7 +12,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -28,9 +26,9 @@ public interface JobSummaryMapper extends BaseMapper<JobSummary> {
 
     IPage<DashboardRetryLineResponseDO.Task> jobTaskList(@Param("ew") Wrapper<Job> wrapper, Page<Object> page);
 
-    List<DashboardLineResponseDO> jobLineList(@Param("ew") Wrapper<JobSummary> wrapper);
+    List<DashboardLineResponseDO> jobLineList(String dateFormat, @Param("ew") Wrapper<JobSummary> wrapper);
 
-    List<DashboardRetryLineResponseDO.Rank> dashboardRank(@Param("ew") Wrapper<JobSummary> wrapper);
+    List<DashboardRetryLineResponseDO.Rank> dashboardRank(Integer systemTaskType, @Param("ew") Wrapper<JobSummary> wrapper);
 
     DashboardCardResponseDO.JobTask toJobTask(@Param("ew") Wrapper<JobSummary> wrapper);
 }

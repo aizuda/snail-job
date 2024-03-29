@@ -20,45 +20,44 @@
     </resultMap>
 
     <insert id="insertOrUpdate" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO
-        job_summary (namespace_id, group_name, business_id, trigger_at, system_task_type,
-        success_num,fail_num,fail_reason,stop_num,stop_reason, cancel_num,cancel_reason)
+        INSERT INTO job_summary (namespace_id, group_name, business_id, trigger_at, system_task_type,
+                                 success_num,fail_num,fail_reason,stop_num,stop_reason, cancel_num,cancel_reason)
         VALUES
-        <foreach collection="list" item="item" separator=",">
-            (
-            #{item.namespaceId},
-            #{item.groupName},
-            #{item.businessId},
-            #{item.triggerAt},
-            #{item.systemTaskType},
-            #{item.successNum},
-            #{item.failNum},
-            #{item.failReason},
-            #{item.stopNum},
-            #{item.stopReason},
-            #{item.cancelNum},
-            #{item.cancelReason}
-            )
-        </foreach>
+            <foreach collection="list" item="item" separator=",">
+                (
+                    #{item.namespaceId},
+                    #{item.groupName},
+                    #{item.businessId},
+                    #{item.triggerAt},
+                    #{item.systemTaskType},
+                    #{item.successNum},
+                    #{item.failNum},
+                    #{item.failReason},
+                    #{item.stopNum},
+                    #{item.stopReason},
+                    #{item.cancelNum},
+                    #{item.cancelReason}
+                )
+            </foreach>
         ON DUPLICATE KEY UPDATE
-        success_num = values(`success_num`),
-        fail_num = values(`fail_num`),
-        fail_reason = values(`fail_reason`),
-        stop_num = values(`stop_num`),
-        stop_reason = values(`stop_reason`),
-        cancel_num = values(`cancel_num`),
-        cancel_reason = values(`cancel_reason`)
+            success_num = VALUES(`success_num`),
+            fail_num = VALUES(`fail_num`),
+            fail_reason = VALUES(`fail_reason`),
+            stop_num = VALUES(`stop_num`),
+            stop_reason = VALUES(`stop_reason`),
+            cancel_num = VALUES(`cancel_num`),
+            cancel_reason = VALUES(`cancel_reason`)
     </insert>
 
     <select id="jobLineList"
             resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardLineResponseDO">
         SELECT
-        DATE_FORMAT(trigger_at, #{dateFormat})                         AS createDt,
-        ifnull(SUM(success_num), 0)                                    AS success,
-        ifnull(SUM(stop_num), 0)                                       AS stop,
-        ifnull(SUM(cancel_num), 0)                                     AS cancel,
-        ifnull(SUM(fail_num), 0)                                       AS fail,
-        ifnull(SUM(success_num + fail_num + stop_num + cancel_num), 0) AS total
+            DATE_FORMAT(trigger_at, #{dateFormat})                         AS createDt,
+            IFNULL(SUM(success_num), 0)                                    AS success,
+            IFNULL(SUM(stop_num), 0)                                       AS stop,
+            IFNULL(SUM(cancel_num), 0)                                     AS cancel,
+            IFNULL(SUM(fail_num), 0)                                       AS fail,
+            IFNULL(SUM(success_num + fail_num + stop_num + cancel_num), 0) AS total
         FROM job_summary
         ${ew.customSqlSegment}
         GROUP BY DATE_FORMAT(trigger_at, #{dateFormat})
@@ -67,11 +66,11 @@
     <select id="toJobTask"
             resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardCardResponseDO$JobTask">
         SELECT
-        ifnull(sum(success_num), 0) AS successNum,
-        ifnull(sum(stop_num), 0) AS stopNum,
-        ifnull(sum(cancel_num), 0) AS cancelNum,
-        ifnull(sum(fail_num), 0) AS failNum,
-        ifnull(sum(success_num + fail_num + stop_num + cancel_num), 0) AS totalNum
+            IFNULL(SUM(success_num), 0) AS successNum,
+            IFNULL(SUM(stop_num), 0) AS stopNum,
+            IFNULL(SUM(cancel_num), 0) AS cancelNum,
+            IFNULL(SUM(fail_num), 0) AS failNum,
+            IFNULL(SUM(success_num + fail_num + stop_num + cancel_num), 0) AS totalNum
         FROM job_summary
         ${ew.customSqlSegment}
     </select>
@@ -83,19 +82,21 @@
             CONCAT(group_name, '/', (SELECT job_name FROM job WHERE id = business_id)) name,
         </if>
         <if test="systemTaskType == 4">
-        CONCAT(group_name, '/', (SELECT workflow_name FROM workflow WHERE id = business_id)) name,
+            CONCAT(group_name, '/', (SELECT workflow_name FROM workflow WHERE id = business_id)) name,
         </if>
-        SUM(fail_num) AS total FROM job_summary
+            SUM(fail_num) AS total
+        FROM job_summary
         ${ew.customSqlSegment}
         HAVING total > 0
-        ORDER BY total DESC LIMIT 10
+        ORDER BY total DESC
+        LIMIT 10
     </select>
 
     <select id="jobTaskList"
             resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO$Task">
         SELECT group_name                                        AS groupName,
                SUM(CASE WHEN (job_status = 1) THEN 1 ELSE 0 END) AS run,
-               count(*)                                          AS total
+               COUNT(*)                                          AS total
         FROM job
         ${ew.customSqlSegment}
         GROUP BY namespace_id, group_name
