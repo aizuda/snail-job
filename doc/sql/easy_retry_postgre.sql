@@ -28,17 +28,17 @@ VALUES ('Default', '764d604ec6fc45f68cd92514c40e9e1a', now(), now(), 0);
 CREATE TABLE group_config
 (
     id                BIGSERIAL PRIMARY KEY,
-    namespace_id      VARCHAR(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
-    group_name        VARCHAR(64)  NOT NULL,
-    description       VARCHAR(256) DEFAULT '',
-    group_status      SMALLINT     NOT NULL DEFAULT 0,
-    version           INT          NOT NULL,
-    group_partition   INT          NOT NULL,
-    id_generator_mode SMALLINT     NOT NULL DEFAULT 1,
-    init_scene        SMALLINT     NOT NULL DEFAULT 0,
-    bucket_index      INT          NOT NULL DEFAULT 0,
-    create_dt         TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    update_dt         TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
+    namespace_id      VARCHAR(64) NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
+    group_name        VARCHAR(64) NOT NULL,
+    description       VARCHAR(256)         DEFAULT '',
+    group_status      SMALLINT    NOT NULL DEFAULT 0,
+    version           INT         NOT NULL,
+    group_partition   INT         NOT NULL,
+    id_generator_mode SMALLINT    NOT NULL DEFAULT 1,
+    init_scene        SMALLINT    NOT NULL DEFAULT 0,
+    bucket_index      INT         NOT NULL DEFAULT 0,
+    create_dt         TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_dt         TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE UNIQUE INDEX "uk_namespace_id_group_name_group_config" ON "group_config" ("namespace_id", "group_name");
@@ -189,7 +189,9 @@ CREATE TABLE retry_task_log
     ext_attrs     TEXT         NOT NULL,
     retry_status  SMALLINT     NOT NULL DEFAULT 0,
     task_type     SMALLINT     NOT NULL DEFAULT 1,
-    create_dt     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
+    create_dt     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_dt     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
+
 );
 
 CREATE INDEX "idx_group_name_scene_name_retry_task_log" ON "retry_task_log" ("namespace_id", "group_name", "scene_name");
@@ -212,6 +214,7 @@ COMMENT ON COLUMN "retry_task_log"."ext_attrs" IS '扩展字段';
 COMMENT ON COLUMN "retry_task_log"."retry_status" IS '重试状态 0、重试中 1、成功 2、最大次数';
 COMMENT ON COLUMN "retry_task_log"."task_type" IS '任务类型 1、重试数据 2、回调数据';
 COMMENT ON COLUMN "retry_task_log"."create_dt" IS '创建时间';
+COMMENT ON COLUMN "retry_task_log"."update_dt" IS '修改时间';
 COMMENT ON TABLE "retry_task_log" IS '任务日志基础信息表';
 
 CREATE TABLE retry_task_log_message
@@ -254,7 +257,7 @@ CREATE TABLE scene_config
     update_dt        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE UNIQUE INDEX "uk_namespace_id_group_name_scene_name" ON "scene_config" ("namespace_id", "group_name","scene_name");
+CREATE UNIQUE INDEX "uk_namespace_id_group_name_scene_name" ON "scene_config" ("namespace_id", "group_name", "scene_name");
 COMMENT ON COLUMN "scene_config"."id" IS '主键';
 COMMENT ON COLUMN "scene_config"."namespace_id" IS '命名空间id';
 COMMENT ON COLUMN "scene_config"."scene_name" IS '场景名称';
@@ -287,8 +290,8 @@ CREATE TABLE server_node
     update_dt    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE UNIQUE INDEX "uk_host_id_host_ip" ON "server_node" ("host_id","host_ip");
-CREATE INDEX "idx_expire_at_node_type" ON "server_node" ("expire_at","node_type");
+CREATE UNIQUE INDEX "uk_host_id_host_ip" ON "server_node" ("host_id", "host_ip");
+CREATE INDEX "idx_expire_at_node_type" ON "server_node" ("expire_at", "node_type");
 CREATE INDEX "idx_namespace_id_group_name_server_node" ON "server_node" ("namespace_id", "group_name");
 
 COMMENT ON COLUMN "server_node"."id" IS '主键';
@@ -316,7 +319,8 @@ CREATE TABLE distributed_lock
     update_dt  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-ALTER TABLE distributed_lock ADD CONSTRAINT uk_name UNIQUE (name);
+ALTER TABLE distributed_lock
+    ADD CONSTRAINT uk_name UNIQUE (name);
 
 COMMENT ON COLUMN "distributed_lock"."id" IS '主键';
 COMMENT ON COLUMN "distributed_lock"."name" IS '锁名称';
@@ -361,7 +365,7 @@ CREATE TABLE system_user_permission
     update_dt      TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE UNIQUE INDEX "uk_namespace_id_group_name_system_user_id" ON "system_user_permission" ("namespace_id","group_name","system_user_id");
+CREATE UNIQUE INDEX "uk_namespace_id_group_name_system_user_id" ON "system_user_permission" ("namespace_id", "group_name", "system_user_id");
 COMMENT ON COLUMN "system_user_permission"."id" IS '主键';
 COMMENT ON COLUMN "system_user_permission"."namespace_id" IS '命名空间id';
 COMMENT ON COLUMN "system_user_permission"."group_name" IS '组名称';
@@ -395,7 +399,7 @@ COMMENT ON TABLE "sequence_alloc" IS '号段模式序号ID分配表';
 CREATE TABLE job
 (
     id               BIGSERIAL PRIMARY KEY,
-    namespace_id     VARCHAR(64) NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
+    namespace_id     VARCHAR(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
     group_name       VARCHAR(64)  NOT NULL,
     job_name         VARCHAR(64)  NOT NULL,
     args_str         TEXT         NOT NULL DEFAULT '',
@@ -462,7 +466,7 @@ CREATE TABLE job_log_message
     job_id        BIGINT      NOT NULL,
     task_batch_id BIGINT      NOT NULL,
     task_id       BIGINT      NOT NULL,
-    message       TEXT    NOT NULL,
+    message       TEXT        NOT NULL,
     log_num       INT         NOT NULL DEFAULT 1,
     real_time     BIGINT      NOT NULL DEFAULT 0,
     ext_attrs     VARCHAR(256)         DEFAULT '',
@@ -637,29 +641,31 @@ COMMENT ON TABLE "retry_summary" IS 'DashBoard_Retry';
 
 CREATE TABLE job_summary
 (
-    id            BIGSERIAL PRIMARY KEY,
-    namespace_id  VARCHAR(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
-    group_name    VARCHAR(64)  NOT NULL DEFAULT '',
-    job_id        BIGINT       NOT NULL,
-    trigger_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    success_num   INT          NOT NULL DEFAULT 0,
-    fail_num      INT          NOT NULL DEFAULT 0,
-    fail_reason   VARCHAR(512) NOT NULL DEFAULT '',
-    stop_num      INT          NOT NULL DEFAULT 0,
-    stop_reason   VARCHAR(512) NOT NULL DEFAULT '',
-    cancel_num    INT          NOT NULL DEFAULT 0,
-    cancel_reason VARCHAR(512) NOT NULL DEFAULT '',
-    create_dt     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    update_dt     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
+    id               BIGSERIAL PRIMARY KEY,
+    namespace_id     VARCHAR(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
+    group_name       VARCHAR(64)  NOT NULL DEFAULT '',
+    business_id      BIGINT       NOT NULL,
+    system_task_type SMALLINT     NOT NULL DEFAULT '3',
+    trigger_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    success_num      INT          NOT NULL DEFAULT 0,
+    fail_num         INT          NOT NULL DEFAULT 0,
+    fail_reason      VARCHAR(512) NOT NULL DEFAULT '',
+    stop_num         INT          NOT NULL DEFAULT 0,
+    stop_reason      VARCHAR(512) NOT NULL DEFAULT '',
+    cancel_num       INT          NOT NULL DEFAULT 0,
+    cancel_reason    VARCHAR(512) NOT NULL DEFAULT '',
+    create_dt        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_dt        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE UNIQUE INDEX uk_job_id_trigger_at ON job_summary ("job_id", "trigger_at");
-CREATE INDEX idx_namespace_id_group_name_job_id ON job_summary ("namespace_id", "group_name", "job_id");
+CREATE UNIQUE INDEX uk_job_id_trigger_at ON job_summary ("business_id", "trigger_at");
+CREATE INDEX idx_namespace_id_group_name_job_id ON job_summary ("namespace_id", "group_name", "business_id");
 
 COMMENT ON COLUMN "job_summary"."id" IS '主键';
 COMMENT ON COLUMN "job_summary"."namespace_id" IS '命名空间id';
 COMMENT ON COLUMN "job_summary"."group_name" IS '组名称';
-COMMENT ON COLUMN "job_summary"."job_id" IS '任务信息id';
+COMMENT ON COLUMN "job_summary"."business_id" IS '业务id (job_id或workflow_id)';
+COMMENT ON COLUMN "job_summary"."system_task_type" IS '任务类型 3、JOB任务 4、WORKFLOW任务';
 COMMENT ON COLUMN "job_summary"."trigger_at" IS '统计时间';
 COMMENT ON COLUMN "job_summary"."success_num" IS '执行成功-日志数量';
 COMMENT ON COLUMN "job_summary"."fail_num" IS '执行失败-日志数量';
@@ -689,7 +695,7 @@ CREATE TABLE workflow
     create_dt        timestamp    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_dt        timestamp    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted          smallint     NOT NULL DEFAULT 0,
-    ext_attrs        varchar(256) NULL DEFAULT ''
+    ext_attrs        varchar(256) NULL     DEFAULT ''
 );
 
 
@@ -719,22 +725,22 @@ COMMENT ON COLUMN workflow.ext_attrs IS '扩展字段';
 CREATE TABLE workflow_node
 (
     id                   BIGSERIAL PRIMARY KEY,
-    namespace_id         VARCHAR(64) NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
-    node_name            VARCHAR(64) NOT NULL,
-    group_name           VARCHAR(64) NOT NULL,
-    job_id               BIGINT      NOT NULL,
-    workflow_id          BIGINT      NOT NULL,
-    node_type            SMALLINT    NOT NULL DEFAULT 1,
-    expression_type      SMALLINT    NOT NULL DEFAULT 0,
-    fail_strategy        SMALLINT    NOT NULL DEFAULT 1,
-    workflow_node_status SMALLINT    NOT NULL DEFAULT 1,
-    priority_level       INT         NOT NULL DEFAULT 1,
-    node_info            TEXT                 DEFAULT NULL,
-    version              INT         NOT NULL,
-    create_dt            TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    update_dt            TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    deleted              SMALLINT    NOT NULL DEFAULT 0,
-    ext_attrs            VARCHAR(256) NULL DEFAULT ''
+    namespace_id         VARCHAR(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
+    node_name            VARCHAR(64)  NOT NULL,
+    group_name           VARCHAR(64)  NOT NULL,
+    job_id               BIGINT       NOT NULL,
+    workflow_id          BIGINT       NOT NULL,
+    node_type            SMALLINT     NOT NULL DEFAULT 1,
+    expression_type      SMALLINT     NOT NULL DEFAULT 0,
+    fail_strategy        SMALLINT     NOT NULL DEFAULT 1,
+    workflow_node_status SMALLINT     NOT NULL DEFAULT 1,
+    priority_level       INT          NOT NULL DEFAULT 1,
+    node_info            TEXT                  DEFAULT NULL,
+    version              INT          NOT NULL,
+    create_dt            TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_dt            TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted              SMALLINT     NOT NULL DEFAULT 0,
+    ext_attrs            VARCHAR(256) NULL     DEFAULT ''
 );
 
 CREATE INDEX idx_create_dt_workflow_node ON workflow_node (create_dt);
@@ -762,17 +768,17 @@ COMMENT ON COLUMN workflow_node.ext_attrs IS '扩展字段';
 CREATE TABLE workflow_task_batch
 (
     id                BIGSERIAL PRIMARY KEY,
-    namespace_id      VARCHAR(64) NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
-    group_name        VARCHAR(64) NOT NULL,
-    workflow_id       BIGINT      NOT NULL,
-    task_batch_status SMALLINT    NOT NULL DEFAULT 0,
-    operation_reason  SMALLINT    NOT NULL DEFAULT 0,
-    flow_info         TEXT                 DEFAULT NULL,
-    execution_at      BIGINT      NOT NULL DEFAULT 0,
-    create_dt         TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    update_dt         TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    deleted           SMALLINT    NOT NULL DEFAULT 0,
-    ext_attrs         VARCHAR(256) NULL DEFAULT ''
+    namespace_id      VARCHAR(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
+    group_name        VARCHAR(64)  NOT NULL,
+    workflow_id       BIGINT       NOT NULL,
+    task_batch_status SMALLINT     NOT NULL DEFAULT 0,
+    operation_reason  SMALLINT     NOT NULL DEFAULT 0,
+    flow_info         TEXT                  DEFAULT NULL,
+    execution_at      BIGINT       NOT NULL DEFAULT 0,
+    create_dt         TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_dt         TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted           SMALLINT     NOT NULL DEFAULT 0,
+    ext_attrs         VARCHAR(256) NULL     DEFAULT ''
 );
 
 CREATE INDEX idx_job_id_task_batch_status_workflow_task_batch ON workflow_task_batch (workflow_id, task_batch_status);

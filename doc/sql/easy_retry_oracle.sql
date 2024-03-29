@@ -194,7 +194,8 @@ CREATE TABLE retry_task_log
     ext_attrs     CLOB          DEFAULT '',
     retry_status  SMALLINT      DEFAULT 0,
     task_type     SMALLINT      DEFAULT 1,
-    create_dt     TIMESTAMP     DEFAULT CURRENT_TIMESTAMP
+    create_dt     TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
+    update_dt     TIMESTAMP     DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX idx_retry_task_log_1 ON retry_task_log (namespace_id, group_name, scene_name);
@@ -218,6 +219,7 @@ COMMENT ON COLUMN retry_task_log.ext_attrs IS '扩展字段';
 COMMENT ON COLUMN retry_task_log.retry_status IS '重试状态 0、重试中 1、成功 2、最大次数';
 COMMENT ON COLUMN retry_task_log.task_type IS '任务类型 1、重试数据 2、回调数据';
 COMMENT ON COLUMN retry_task_log.create_dt IS '创建时间';
+COMMENT ON COLUMN retry_task_log.update_dt IS '修改时间';
 
 -- retry_task_log_message
 CREATE TABLE retry_task_log_message
@@ -657,30 +659,32 @@ COMMENT ON COLUMN retry_summary.update_dt IS '修改时间';
 -- job_summary
 CREATE TABLE job_summary
 (
-    id            NUMBER GENERATED ALWAYS AS IDENTITY,
-    namespace_id  VARCHAR2(64)  DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
-    group_name    VARCHAR2(64)  DEFAULT '',
-    job_id        NUMBER(20) NOT NULL,
-    trigger_at    TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
-    success_num   INT           DEFAULT 0,
-    fail_num      INT           DEFAULT 0,
-    fail_reason   VARCHAR2(512) DEFAULT '',
-    stop_num      INT           DEFAULT 0,
-    stop_reason   VARCHAR2(512) DEFAULT '',
-    cancel_num    INT           DEFAULT 0,
-    cancel_reason VARCHAR2(512) DEFAULT '',
-    create_dt     TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
-    update_dt     TIMESTAMP     DEFAULT CURRENT_TIMESTAMP
+    id               NUMBER GENERATED ALWAYS AS IDENTITY,
+    namespace_id     VARCHAR2(64)  DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
+    group_name       VARCHAR2(64)  DEFAULT '',
+    business_id      NUMBER(20) NOT NULL,
+    system_task_type SMALLINT      DEFAULT '3',
+    trigger_at       TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
+    success_num      INT           DEFAULT 0,
+    fail_num         INT           DEFAULT 0,
+    fail_reason      VARCHAR2(512) DEFAULT '',
+    stop_num         INT           DEFAULT 0,
+    stop_reason      VARCHAR2(512) DEFAULT '',
+    cancel_num       INT           DEFAULT 0,
+    cancel_reason    VARCHAR2(512) DEFAULT '',
+    create_dt        TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
+    update_dt        TIMESTAMP     DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE UNIQUE INDEX uk_job_summary_1 ON job_summary (job_id, trigger_at);
-CREATE INDEX idx_job_summary_1 ON job_summary (namespace_id, group_name, job_id);
+CREATE UNIQUE INDEX uk_job_summary_1 ON job_summary (business_id, trigger_at);
+CREATE INDEX idx_job_summary_1 ON job_summary (namespace_id, group_name, business_id);
 
 COMMENT ON TABLE job_summary IS 'DashBoard_Job';
 COMMENT ON COLUMN job_summary.id IS '主键';
 COMMENT ON COLUMN job_summary.namespace_id IS '命名空间id';
 COMMENT ON COLUMN job_summary.group_name IS '组名称';
-COMMENT ON COLUMN job_summary.job_id IS '任务信息id';
+COMMENT ON COLUMN job_summary.business_id IS '业务id (job_id或workflow_id)';
+COMMENT ON COLUMN job_summary.system_task_type IS '任务类型 3、JOB任务 4、WORKFLOW任务';
 COMMENT ON COLUMN job_summary.trigger_at IS '统计时间';
 COMMENT ON COLUMN job_summary.success_num IS '执行成功-日志数量';
 COMMENT ON COLUMN job_summary.fail_num IS '执行失败-日志数量';

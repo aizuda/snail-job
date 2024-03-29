@@ -647,26 +647,27 @@ GO
 -- job_summary
 CREATE TABLE [job_summary]
 (
-    [id]            bigint PRIMARY KEY IDENTITY,
-    [namespace_id]  nvarchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
-    [group_name]    nvarchar(64)  NOT NULL,
-    [job_id]        bigint        NOT NULL,
-    [trigger_at]    datetime2     NOT NULL,
-    [success_num]   int           NOT NULL DEFAULT '0',
-    [fail_num]      int           NOT NULL DEFAULT '0',
-    [fail_reason]   nvarchar(512) NOT NULL DEFAULT '',
-    [stop_num]      int           NOT NULL DEFAULT '0',
-    [stop_reason]   nvarchar(512) NOT NULL DEFAULT '',
-    [cancel_num]    int           NOT NULL DEFAULT '0',
-    [cancel_reason] nvarchar(512) NOT NULL DEFAULT '',
-    [create_dt]     datetime2     NOT NULL DEFAULT GETDATE(),
-    [update_dt]     datetime2     NOT NULL DEFAULT GETDATE()
+    [id]               bigint PRIMARY KEY IDENTITY,
+    [namespace_id]     nvarchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
+    [group_name]       nvarchar(64)  NOT NULL,
+    [business_id]      bigint        NOT NULL,
+    [system_task_type] tinyint       NOT NULL DEFAULT '3',
+    [trigger_at]       datetime2     NOT NULL,
+    [success_num]      int           NOT NULL DEFAULT '0',
+    [fail_num]         int           NOT NULL DEFAULT '0',
+    [fail_reason]      nvarchar(512) NOT NULL DEFAULT '',
+    [stop_num]         int           NOT NULL DEFAULT '0',
+    [stop_reason]      nvarchar(512) NOT NULL DEFAULT '',
+    [cancel_num]       int           NOT NULL DEFAULT '0',
+    [cancel_reason]    nvarchar(512) NOT NULL DEFAULT '',
+    [create_dt]        datetime2     NOT NULL DEFAULT GETDATE(),
+    [update_dt]        datetime2     NOT NULL DEFAULT GETDATE()
 )
 GO
 
-CREATE UNIQUE NONCLUSTERED INDEX [uk_job_id_trigger_at] ON [job_summary] ([job_id] ASC, [trigger_at] ASC)
+CREATE UNIQUE NONCLUSTERED INDEX [uk_job_id_trigger_at] ON [job_summary] ([business_id] ASC, [trigger_at] ASC)
 GO
-CREATE NONCLUSTERED INDEX [idx_namespace_id_group_name_job_id] ON [job_summary] ([namespace_id] ASC, [group_name] ASC, [job_id] ASC)
+CREATE NONCLUSTERED INDEX [idx_namespace_id_group_name_job_id] ON [job_summary] ([namespace_id] ASC, [group_name] ASC, [business_id] ASC)
 GO
 
 EXEC sp_addextendedproperty
@@ -688,6 +689,20 @@ EXEC sp_addextendedproperty
      'SCHEMA', N'dbo',
      'TABLE', N'job_summary',
      'COLUMN', N'group_name'
+GO
+
+EXEC sp_addextendedproperty
+     'MS_Description', N'业务id (job_id或workflow_id)',
+     'SCHEMA', N'dbo',
+     'TABLE', N'job_summary',
+     'COLUMN', N'business_id'
+GO
+
+EXEC sp_addextendedproperty
+     'MS_Description', N'任务类型 3、JOB任务 4、WORKFLOW任务',
+     'SCHEMA', N'dbo',
+     'TABLE', N'job_summary',
+     'COLUMN', N'system_task_type'
 GO
 
 EXEC sp_addextendedproperty
@@ -1661,7 +1676,8 @@ CREATE TABLE [retry_task_log]
     [ext_attrs]     nvarchar(max) NOT NULL,
     [retry_status]  tinyint       NOT NULL DEFAULT '0',
     [task_type]     tinyint       NOT NULL DEFAULT '1',
-    [create_dt]     datetime2     NOT NULL DEFAULT GETDATE()
+    [create_dt]     datetime2     NOT NULL DEFAULT GETDATE(),
+    [update_dt]     datetime2     NOT NULL DEFAULT GETDATE()
 )
 GO
 
@@ -1767,6 +1783,13 @@ EXEC sp_addextendedproperty
      'SCHEMA', N'dbo',
      'TABLE', N'retry_task_log',
      'COLUMN', N'create_dt'
+GO
+
+EXEC sp_addextendedproperty
+     'MS_Description', N'修改时间',
+     'SCHEMA', N'dbo',
+     'TABLE', N'retry_task_log',
+     'COLUMN', N'update_dt'
 GO
 
 EXEC sp_addextendedproperty
