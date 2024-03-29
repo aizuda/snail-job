@@ -349,15 +349,15 @@ public class GroupConfigServiceImpl implements GroupConfigService {
             String catalog = connection.getCatalog();
             String schema = connection.getSchema();
 
+            String tablePrefix = Optional.ofNullable(mybatisPlusProperties.getGlobalConfig().getDbConfig().getTablePrefix()).orElse(StrUtil.EMPTY);
+            String tableNamePattern = MessageFormat.format("{0}retry_task_%", tablePrefix);
             DbTypeEnum dbType = DbUtils.getDbType();
             if (DbTypeEnum.ORACLE.getDb().equals(dbType.getDb())) {
-                catalog = Optional.ofNullable(catalog).orElse(StrUtil.EMPTY).toUpperCase();
-                schema = Optional.ofNullable(schema).orElse(StrUtil.EMPTY).toUpperCase();
+                tableNamePattern = tableNamePattern.toUpperCase();
             }
 
             DatabaseMetaData metaData = connection.getMetaData();
-            String tablePrefix = Optional.ofNullable(mybatisPlusProperties.getGlobalConfig().getDbConfig().getTablePrefix()).orElse(StrUtil.EMPTY);
-            ResultSet tables = metaData.getTables(catalog.toUpperCase(), schema.toUpperCase(), MessageFormat.format("{0}retry_task_%", tablePrefix), new String[]{"TABLE"});
+            ResultSet tables = metaData.getTables(catalog, schema, tableNamePattern, new String[]{"TABLE"});
 
             // 输出表名
             List<String> tableList = new ArrayList<>();
