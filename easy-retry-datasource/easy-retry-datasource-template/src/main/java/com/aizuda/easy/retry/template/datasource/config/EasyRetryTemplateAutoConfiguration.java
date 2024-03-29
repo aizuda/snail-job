@@ -60,7 +60,7 @@ public class EasyRetryTemplateAutoConfiguration {
         return new SqlSessionTemplate(sqlSessionFactory);
     }
 
-    private final static List<String> TABLES = Arrays.asList("retry_task", "retry_dead_letter");
+    private static final  List<String> TABLES = Arrays.asList("retry_task", "retry_dead_letter");
 
     @Bean
     public MybatisPlusInterceptor mybatisPlusInterceptor(Environment environment) {

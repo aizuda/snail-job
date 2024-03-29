@@ -18,10 +18,4 @@
         id, name, lock_until, locked_at, locked_by, create_dt, update_dt
     </sql>
 
-    <update id="updateTest">
-        update distributed_lock set locked_by = #{lockedBy},
-                                    lock_until = #{lockUntil},
-                                    locked_at = #{lockedAt}
-        where name = #{name} and lock_until <![CDATA[ <= ]]>  #{lockedAt}
-    </update>
 </mapper>

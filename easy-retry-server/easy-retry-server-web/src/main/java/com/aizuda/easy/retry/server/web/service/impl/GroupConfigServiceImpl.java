@@ -21,15 +21,17 @@ import com.aizuda.easy.retry.server.web.util.UserSessionUtils;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
 import com.aizuda.easy.retry.template.datasource.access.ConfigAccess;
 import com.aizuda.easy.retry.template.datasource.access.TaskAccess;
+import com.aizuda.easy.retry.template.datasource.enums.DbTypeEnum;
+import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.SequenceAllocMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.ServerNodeMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.*;
+import com.aizuda.easy.retry.template.datasource.utils.DbUtils;
 import com.baomidou.mybatisplus.autoconfigure.MybatisPlusProperties;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.google.common.collect.Lists;
-import org.slf4j.helpers.MessageFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.jdbc.BadSqlGrammarException;
@@ -40,7 +42,10 @@ import org.springframework.util.CollectionUtils;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -73,6 +78,8 @@ public class GroupConfigServiceImpl implements GroupConfigService {
     private JdbcTemplate jdbcTemplate;
     @Autowired
     private MybatisPlusProperties mybatisPlusProperties;
+    @Autowired
+    private RetryTaskMapper retryTaskMapper;
 
     @Override
     @Transactional
@@ -334,6 +341,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
 
     @Override
     public List<Integer> getTablePartitionList() {
+
         DataSource dataSource = jdbcTemplate.getDataSource();
         Connection connection = null;
         try {
@@ -341,14 +349,23 @@ public class GroupConfigServiceImpl implements GroupConfigService {
             String catalog = connection.getCatalog();
             String schema = connection.getSchema();
 
-            String tablePrefix = Optional.ofNullable(mybatisPlusProperties.getGlobalConfig().getDbConfig().getTablePrefix()).orElse(StrUtil.EMPTY);
-            // https://gitee.com/aizuda/easy-retry/issues/I8DAMH
-            String sql = MessageFormatter.arrayFormat("SELECT table_name\n"
-                    + "FROM information_schema.tables\n"
-                    + "WHERE table_name LIKE '{}retry_task_%' AND (table_schema = '{}' OR table_schema = '{}' OR table_catalog = '{}' OR table_catalog = '{}')",
-                    new Object[]{tablePrefix, schema, catalog, schema, catalog}).getMessage();
+            DbTypeEnum dbType = DbUtils.getDbType();
+            if (DbTypeEnum.ORACLE.getDb().equals(dbType.getDb())) {
+                catalog = Optional.ofNullable(catalog).orElse(StrUtil.EMPTY).toUpperCase();
+                schema = Optional.ofNullable(schema).orElse(StrUtil.EMPTY).toUpperCase();
+            }
 
-            List<String> tableList = jdbcTemplate.queryForList(sql, String.class);
+            DatabaseMetaData metaData = connection.getMetaData();
+            String tablePrefix = Optional.ofNullable(mybatisPlusProperties.getGlobalConfig().getDbConfig().getTablePrefix()).orElse(StrUtil.EMPTY);
+            ResultSet tables = metaData.getTables(catalog.toUpperCase(), schema.toUpperCase(), MessageFormat.format("{0}retry_task_%", tablePrefix), new String[]{"TABLE"});
+
+            // 输出表名
+            List<String> tableList = new ArrayList<>();
+            while (tables.next()) {
+                String tableName = tables.getString("TABLE_NAME");
+                tableList.add(tableName);
+            }
+
             return tableList.stream().map(ReUtil::getFirstNumber).filter(i ->
                             !Objects.isNull(i) && i <= systemProperties.getTotalPartition()).distinct()
                     .collect(Collectors.toList());
