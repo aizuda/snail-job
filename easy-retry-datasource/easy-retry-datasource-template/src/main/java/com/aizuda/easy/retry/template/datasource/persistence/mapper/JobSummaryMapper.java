@@ -26,9 +26,9 @@ public interface JobSummaryMapper extends BaseMapper<JobSummary> {
 
     IPage<DashboardRetryLineResponseDO.Task> jobTaskList(@Param("ew") Wrapper<Job> wrapper, Page<Object> page);
 
-    List<DashboardLineResponseDO> jobLineList(String dateFormat, @Param("ew") Wrapper<JobSummary> wrapper);
+    List<DashboardLineResponseDO> jobLineList( @Param("dateFormat") String dateFormat, @Param("ew") Wrapper<JobSummary> wrapper);
 
-    List<DashboardRetryLineResponseDO.Rank> dashboardRank(Integer systemTaskType, @Param("ew") Wrapper<JobSummary> wrapper);
+    List<DashboardRetryLineResponseDO.Rank> dashboardRank( @Param("systemTaskType") Integer systemTaskType, @Param("ew") Wrapper<JobSummary> wrapper);
 
     DashboardCardResponseDO.JobTask toJobTask(@Param("ew") Wrapper<JobSummary> wrapper);
 }

@@ -32,7 +32,7 @@ public interface RetrySummaryMapper extends BaseMapper<RetrySummary> {
 
     IPage<DashboardRetryLineResponseDO.Task> retryTaskList(@Param("ew") Wrapper<SceneConfig> wrapper, Page<Object> page);
 
-    List<DashboardLineResponseDO> retryLineList(String type, @Param("ew") Wrapper<RetrySummary> wrapper);
+    List<DashboardLineResponseDO> retryLineList(@Param("type") String type, @Param("ew") Wrapper<RetrySummary> wrapper);
 
     List<DashboardRetryLineResponseDO.Rank> dashboardRank(@Param("ew") Wrapper<RetrySummary> wrapper);
 }
