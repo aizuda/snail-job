@@ -35,6 +35,12 @@ public class EasyRetryProperties {
     private String group;
 
     /**
+     * 令牌
+     * 若不填则默认为 SystemConstants::DEFAULT_TOKEN
+     */
+    private String token;
+
+    /**
      * 指定客户端IP，默认取本地IP
      */
     private String host;

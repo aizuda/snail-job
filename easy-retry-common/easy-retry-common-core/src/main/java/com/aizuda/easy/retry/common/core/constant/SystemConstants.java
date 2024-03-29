@@ -99,6 +99,11 @@ public interface SystemConstants {
     String DEFAULT_NAMESPACE = "764d604ec6fc45f68cd92514c40e9e1a";
 
     /**
+     * 默认Token
+     */
+    String DEFAULT_TOKEN = "ER_cKqBTPzCsWA3VyuCfFoccmuIEGXjr5KT";
+
+    /**
      * AT 所有人
      */
     String AT_ALL = "all";

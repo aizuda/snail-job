@@ -78,8 +78,6 @@ public class GroupConfigServiceImpl implements GroupConfigService {
     private JdbcTemplate jdbcTemplate;
     @Autowired
     private MybatisPlusProperties mybatisPlusProperties;
-    @Autowired
-    private RetryTaskMapper retryTaskMapper;
 
     @Override
     @Transactional
@@ -137,6 +135,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
         groupConfig.setDescription(Optional.ofNullable(groupConfigRequestVO.getDescription()).orElse(StrUtil.EMPTY));
         // 使用@TableField(value = "version", update= "%s+1") 进行更新version, 这里必须初始化一个值
         groupConfig.setVersion(1);
+        groupConfig.setToken(null);
         Assert.isTrue(systemProperties.getTotalPartition() > groupConfigRequestVO.getGroupPartition(),
                 () -> new EasyRetryServerException("分区超过最大分区. [{}]", systemProperties.getTotalPartition() - 1));
         Assert.isTrue(groupConfigRequestVO.getGroupPartition() >= 0,
@@ -226,6 +225,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
         groupConfig.setVersion(1);
         groupConfig.setNamespaceId(systemUser.getNamespaceId());
         groupConfig.setGroupName(groupConfigRequestVO.getGroupName());
+        groupConfig.setToken(groupConfigRequestVO.getToken());
         groupConfig.setDescription(Optional.ofNullable(groupConfigRequestVO.getDescription()).orElse(StrUtil.EMPTY));
         if (Objects.isNull(groupConfigRequestVO.getGroupPartition())) {
             groupConfig.setGroupPartition(

@@ -24,6 +24,11 @@ public class GroupConfigRequestVO {
     private Integer groupStatus;
 
     /**
+     * 令牌
+     */
+    private String token;
+
+    /**
      * 描述
      */
     private String description;

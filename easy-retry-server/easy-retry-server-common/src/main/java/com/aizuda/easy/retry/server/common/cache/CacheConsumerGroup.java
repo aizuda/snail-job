@@ -39,12 +39,11 @@ public class CacheConsumerGroup implements Lifecycle {
      * @return 缓存对象
      */
     public static synchronized void addOrUpdate(String groupName, String namespaceId) {
-//       EasyRetryLog.LOCAL.info("add consumer cache. groupName:[{}]", groupName);
         CACHE.put(groupName, namespaceId);
     }
 
     public static void remove(String groupName) {
-       EasyRetryLog.LOCAL.info("Remove consumer cache. groupName:[{}]", groupName);
+        EasyRetryLog.LOCAL.debug("Remove consumer cache. groupName:[{}]", groupName);
         CACHE.invalidate(groupName);
     }
 
@@ -54,7 +53,7 @@ public class CacheConsumerGroup implements Lifecycle {
 
     @Override
     public void start() {
-       EasyRetryLog.LOCAL.info("CacheRegisterTable start");
+        EasyRetryLog.LOCAL.info("CacheRegisterTable start");
         CACHE = CacheBuilder.newBuilder()
                 // 设置并发级别为cpu核心数
                 .concurrencyLevel(Runtime.getRuntime().availableProcessors())
@@ -65,7 +64,7 @@ public class CacheConsumerGroup implements Lifecycle {
 
     @Override
     public void close() {
-       EasyRetryLog.LOCAL.info("CacheRegisterTable stop");
+        EasyRetryLog.LOCAL.info("CacheRegisterTable stop");
         CACHE.invalidateAll();
     }
 }

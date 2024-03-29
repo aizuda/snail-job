@@ -18,6 +18,7 @@ public enum HeadersEnum {
     VERSION("version"),
     HOST("Host"),
     NAMESPACE("namespace"),
+    TOKEN("token"),
         ;
 
     private final String key;

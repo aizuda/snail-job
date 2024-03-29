@@ -19,6 +19,9 @@
         <a-descriptions-item label="描述" span="3">
           {{ groupInfo.description }}
         </a-descriptions-item>
+        <a-descriptions-item label="Token" span="3">
+          {{ groupInfo.token }}
+        </a-descriptions-item>
         <a-descriptions-item label="OnLine机器" span="3">
           <a-tag color="blue" v-for="item in podInfo" :key="item">
             {{ item }}

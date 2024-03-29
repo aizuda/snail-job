@@ -58,6 +58,22 @@
             </a-row>
             <a-row class="form-row" :gutter="16">
               <a-col :lg="24" :md="24" :sm="24">
+                <a-form-item label="Token">
+                  <a-input
+                    placeholder="请输入Token"
+                    :maxLength="64"
+                    :disabled="this.id > 0"
+                    v-decorator="[
+                      'token',
+                      {rules: [{ required: true, message: '请输入Token', whitespace: true}]}
+                    ]" >
+                    <a-icon slot="addonAfter" type="sync" @click="getToken()" v-if="!this.id"/>
+                  </a-input>
+                </a-form-item>
+              </a-col>
+            </a-row>
+            <a-row class="form-row" :gutter="16">
+              <a-col :lg="24" :md="24" :sm="24">
                 <a-form-item label="描述">
                   <a-textarea
                     placeholder="请输入描述"
@@ -224,7 +240,7 @@ export default {
       new Promise((resolve) => {
         setTimeout(resolve, 100)
       }).then(() => {
-        const formData = pick(data, ['id', 'groupName', 'groupStatus', 'description', 'groupPartition', 'idGeneratorMode', 'initScene'])
+        const formData = pick(data, ['id', 'groupName', 'groupStatus', 'description', 'groupPartition', 'idGeneratorMode', 'initScene', 'token'])
         formData.groupStatus = formData.groupStatus.toString()
         formData.idGeneratorMode = formData.idGeneratorMode.toString()
         formData.initScene = formData.initScene.toString()
@@ -232,6 +248,20 @@ export default {
 
         form.setFieldsValue(formData)
       })
+    },
+    getToken () {
+      const { form } = this
+      const token = this.generatePassword(32)
+      form.setFieldsValue({ token: token })
+    },
+    generatePassword (length) {
+      const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
+      let password = 'ER_'
+      for (let i = 0; i < length; i++) {
+        const randomNumber = Math.floor(Math.random() * chars.length)
+        password += chars.substring(randomNumber, randomNumber + 1)
+      }
+      return password
     }
   }
 }

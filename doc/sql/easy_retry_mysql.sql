@@ -29,6 +29,7 @@ CREATE TABLE `group_config`
     `namespace_id`      varchar(64)         NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' COMMENT '命名空间id',
     `group_name`        varchar(64)         NOT NULL DEFAULT '' COMMENT '组名称',
     `description`       varchar(256)        NOT NULL DEFAULT '' COMMENT '组描述',
+    `token`             varchar(256)        NOT NULL DEFAULT 'ER_cKqBTPzCsWA3VyuCfFoccmuIEGXjr5KT' COMMENT 'token',
     `group_status`      tinyint(4)          NOT NULL DEFAULT '0' COMMENT '组状态 0、未启用 1、启用',
     `version`           int(11)             NOT NULL COMMENT '版本号',
     `group_partition`   int(11)             NOT NULL COMMENT '分区',

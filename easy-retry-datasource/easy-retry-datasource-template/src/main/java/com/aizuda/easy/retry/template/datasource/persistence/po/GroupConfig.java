@@ -33,6 +33,8 @@ public class GroupConfig implements Serializable {
 
     private Integer bucketIndex;
 
+    private String token;
+
     private String description;
 
     private LocalDateTime createDt;
