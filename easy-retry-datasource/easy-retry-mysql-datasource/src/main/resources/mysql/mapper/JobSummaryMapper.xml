@@ -19,7 +19,7 @@
         <result column="update_dt" jdbcType="TIMESTAMP" property="updateDt"/>
     </resultMap>
 
-    <insert id="insertOrUpdate" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
+    <insert id="batchInsert" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO job_summary (namespace_id, group_name, business_id, trigger_at, system_task_type,
                                  success_num,fail_num,fail_reason,stop_num,stop_reason, cancel_num,cancel_reason)
         VALUES
@@ -39,15 +39,33 @@
                     #{item.cancelReason}
                 )
             </foreach>
-        ON DUPLICATE KEY UPDATE
-            success_num = VALUES(`success_num`),
-            fail_num = VALUES(`fail_num`),
-            fail_reason = VALUES(`fail_reason`),
-            stop_num = VALUES(`stop_num`),
-            stop_reason = VALUES(`stop_reason`),
-            cancel_num = VALUES(`cancel_num`),
-            cancel_reason = VALUES(`cancel_reason`)
     </insert>
+    <update id="batchUpdate" parameterType="java.util.List">
+        UPDATE job_summary rt,
+        (
+        <foreach collection="list" item="item" index="index" separator=" UNION ALL ">
+            SELECT
+            #{item.successNum} AS success_num,
+            #{item.failNum} AS fail_num,
+            #{item.failReason} AS fail_reason,
+            #{item.stopNum} AS stop_num,
+            #{item.stopReason} AS stop_reason,
+            #{item.cancelNum} AS cancel_num,
+            #{item.cancelReason} AS cancel_reason,
+            #{item.triggerAt} AS trigger_at,
+            #{item.businessId} AS business_id
+        </foreach>
+        ) tt
+        SET
+        rt.success_num = tt.success_num,
+        rt.fail_num = tt.fail_num,
+        rt.fail_reason = tt.fail_reason,
+        rt.stop_num = tt.stop_num,
+        rt.stop_reason = tt.stop_reason,
+        rt.cancel_num = tt.cancel_num,
+        rt.cancel_reason = tt.cancel_reason
+        WHERE rt.trigger_at = tt.trigger_at and rt.business_id = tt.business_id
+    </update>
 
     <select id="jobLineList"
             resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardLineResponseDO">

@@ -8,6 +8,7 @@ import com.aizuda.easy.retry.template.datasource.persistence.mapper.ServerNodeMa
 import com.aizuda.easy.retry.template.datasource.persistence.po.ServerNode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -41,22 +42,25 @@ public abstract class AbstractRegister implements Register, Lifecycle {
 
     protected void refreshExpireAt(List<ServerNode> serverNodes) {
 
-        try {
-
-            for (final ServerNode serverNode : serverNodes) {
-                serverNode.setExpireAt(getExpireAt());
-            }
-
-            serverNodeMapper.insertOrUpdate(serverNodes);
-
-            for (final ServerNode serverNode : serverNodes) {
-                // 刷新本地缓存过期时间
-                CacheRegisterTable.refreshExpireAt(serverNode);
-            }
-
-        }catch (Exception e) {
-            EasyRetryLog.LOCAL.error("注册节点失败", e);
+        for (final ServerNode serverNode : serverNodes) {
+            serverNode.setExpireAt(getExpireAt());
         }
+
+        // 批量更新
+        if (serverNodes.size() != serverNodeMapper.batchUpdateExpireAt(serverNodes)) {
+            try {
+                serverNodeMapper.batchInsert(serverNodes);
+            } catch (DuplicateKeyException ignored) {
+            } catch (Exception e) {
+                EasyRetryLog.LOCAL.error("注册节点失败", e);
+            }
+        }
+
+        for (final ServerNode serverNode : serverNodes) {
+            // 刷新本地缓存过期时间
+            CacheRegisterTable.refreshExpireAt(serverNode);
+        }
+
     }
 
     protected abstract void beforeProcessor(RegisterContext context);
@@ -84,7 +88,6 @@ public abstract class AbstractRegister implements Register, Lifecycle {
 
 
     protected abstract Integer getNodeType();
-
 
 
 }

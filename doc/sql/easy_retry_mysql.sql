@@ -29,7 +29,7 @@ CREATE TABLE `group_config`
     `namespace_id`      varchar(64)         NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' COMMENT '命名空间id',
     `group_name`        varchar(64)         NOT NULL DEFAULT '' COMMENT '组名称',
     `description`       varchar(256)        NOT NULL DEFAULT '' COMMENT '组描述',
-    `token`             varchar(256)        NOT NULL DEFAULT 'ER_cKqBTPzCsWA3VyuCfFoccmuIEGXjr5KT' COMMENT 'token',
+    `token`             varchar(64)        NOT NULL DEFAULT 'ER_cKqBTPzCsWA3VyuCfFoccmuIEGXjr5KT' COMMENT 'token',
     `group_status`      tinyint(4)          NOT NULL DEFAULT '0' COMMENT '组状态 0、未启用 1、启用',
     `version`           int(11)             NOT NULL COMMENT '版本号',
     `group_partition`   int(11)             NOT NULL COMMENT '分区',
@@ -426,6 +426,7 @@ CREATE TABLE `job_summary`
     `create_dt`        datetime        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_dt`        datetime        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     PRIMARY KEY (`id`),
+    KEY `idx_trigger_at` (`trigger_at`),
     KEY `idx_namespace_id_group_name_business_id` (`namespace_id`, `group_name`, business_id),
     UNIQUE KEY `uk_business_id_trigger_at` (`business_id`, `trigger_at`) USING BTREE
 ) ENGINE = InnoDB
@@ -446,6 +447,7 @@ CREATE TABLE `retry_summary`
     `create_dt`     datetime        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_dt`     datetime        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     PRIMARY KEY (`id`),
+    KEY `idx_trigger_at` (`trigger_at`),
     UNIQUE KEY `uk_scene_name_trigger_at` (`namespace_id`, `group_name`, `scene_name`, `trigger_at`) USING BTREE
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 1

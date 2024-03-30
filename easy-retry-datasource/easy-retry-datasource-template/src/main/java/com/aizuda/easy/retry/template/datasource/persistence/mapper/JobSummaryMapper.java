@@ -22,7 +22,10 @@ import java.util.List;
 @Mapper
 public interface JobSummaryMapper extends BaseMapper<JobSummary> {
 
-    int insertOrUpdate(@Param("list") List<JobSummary> list);
+    int batchInsert(@Param("list") List<JobSummary> list);
+
+    int batchUpdate(@Param("list") List<JobSummary> list);
+
 
     IPage<DashboardRetryLineResponseDO.Task> jobTaskList(@Param("ew") Wrapper<Job> wrapper, Page<Object> page);
 

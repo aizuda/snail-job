@@ -24,7 +24,9 @@ import java.util.List;
 @Mapper
 public interface RetrySummaryMapper extends BaseMapper<RetrySummary> {
 
-    int insertOrUpdate(@Param("list") List<RetrySummary> list);
+    int batchInsert(@Param("list") List<RetrySummary> list);
+
+    int batchUpdate(@Param("list") List<RetrySummary> list);
 
     DashboardCardResponseDO.RetryTask retryTask(@Param("ew") Wrapper<RetrySummary> wrapper);
 
