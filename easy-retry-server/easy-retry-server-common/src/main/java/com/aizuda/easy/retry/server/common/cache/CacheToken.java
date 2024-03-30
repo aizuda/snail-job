@@ -1,18 +1,18 @@
 package com.aizuda.easy.retry.server.common.cache;
 
-import cn.hutool.core.lang.Pair;
+import cn.hutool.core.util.StrUtil;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.Lifecycle;
+import com.aizuda.easy.retry.server.common.triple.Pair;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
 import com.aizuda.easy.retry.template.datasource.persistence.po.GroupConfig;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import org.springframework.stereotype.Component;
 
 import java.util.Objects;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -20,26 +20,31 @@ import java.util.concurrent.TimeUnit;
  * @date 2024-03-29 23:15:26
  * @since 3.2.0
  */
+@Component
 public class CacheToken implements Lifecycle {
 
-    private static Cache<Pair<String/*groupName*/, String/*namespaceId*/> , String/*Token*/> CACHE;
+    private static Cache<Pair<String/*groupName*/, String/*namespaceId*/>, String/*Token*/> CACHE;
 
     public static void add(String groupName, String namespaceId,  String token) {
         CACHE.put(Pair.of(groupName, namespaceId), token);
     }
 
-    public static String get(String groupName, String namespaceId) throws ExecutionException {
-       return CACHE.get(Pair.of(groupName, namespaceId), () -> {
-           AccessTemplate template = SpringContext.getBean(AccessTemplate.class);
-           GroupConfig config = template.getGroupConfigAccess().getGroupConfigByGroupName(groupName, namespaceId);
-           if (Objects.isNull(config)) {
-              return SystemConstants.DEFAULT_TOKEN;
-           }
+    public static String get(String groupName, String namespaceId) {
 
-           String token = config.getToken();
-           add(groupName, namespaceId, token);
-           return token;
-       });
+        String token = CACHE.getIfPresent(Pair.of(groupName, namespaceId));
+        if (StrUtil.isBlank(token)) {
+            // 从DB获取数据
+            AccessTemplate template = SpringContext.getBean(AccessTemplate.class);
+            GroupConfig config = template.getGroupConfigAccess().getGroupConfigByGroupName(groupName, namespaceId);
+            if (Objects.isNull(config)) {
+                return SystemConstants.DEFAULT_TOKEN;
+            }
+
+            token = config.getToken();
+            add(groupName, namespaceId, token);
+        }
+
+        return token;
     }
 
     @Override

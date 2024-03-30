@@ -1,21 +1,18 @@
 package com.aizuda.easy.retry.server.retry.task.support.handler;
 
-import cn.hutool.core.lang.Pair;
-import com.aizuda.easy.retry.common.core.util.NetUtil;
 import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.server.common.Lifecycle;
+import com.aizuda.easy.retry.server.common.client.RequestBuilder;
 import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.model.dto.ConfigDTO;
 import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
+import com.aizuda.easy.retry.server.retry.task.client.RetryRpcClient;
 import com.aizuda.easy.retry.server.retry.task.dto.ConfigSyncTask;
 import com.aizuda.easy.retry.template.datasource.access.AccessTemplate;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
-import java.text.MessageFormat;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -29,16 +26,11 @@ import java.util.concurrent.TimeUnit;
  * @since 1.6.0
  */
 @Component
-@Slf4j
+@RequiredArgsConstructor
 public class ConfigVersionSyncHandler implements Lifecycle, Runnable {
-
     private static final LinkedBlockingQueue<ConfigSyncTask> QUEUE = new LinkedBlockingQueue<>(256);
     public Thread THREAD = null;
-    @Autowired
-    private RestTemplate restTemplate;
-    @Autowired
-    protected AccessTemplate accessTemplate;
-    private static final String SYNC_VERSION_V1 =  "/retry/sync/version/v1";
+    protected final AccessTemplate accessTemplate;
 
     /**
      * 添加任务
@@ -59,8 +51,8 @@ public class ConfigVersionSyncHandler implements Lifecycle, Runnable {
     /**
      * 同步版本
      *
-     * @param groupName
-     * @param namespaceId
+     * @param groupName 组
+     * @param namespaceId 空间id
      */
     public void syncVersion(String groupName, final String namespaceId) {
 
@@ -69,11 +61,11 @@ public class ConfigVersionSyncHandler implements Lifecycle, Runnable {
             // 同步版本到每个客户端节点
             for (final RegisterNodeInfo registerNodeInfo : serverNodeSet) {
                 ConfigDTO configDTO = accessTemplate.getGroupConfigAccess().getConfigInfo(groupName, namespaceId);
-
-                String url = NetUtil.getUrl(registerNodeInfo.getHostIp(), registerNodeInfo.getHostPort(),
-                        registerNodeInfo.getContextPath());
-                Result result = restTemplate.postForObject(url.concat(SYNC_VERSION_V1), configDTO, Result.class);
-               EasyRetryLog.LOCAL.info("同步结果 [{}]", result);
+                RetryRpcClient rpcClient = RequestBuilder.<RetryRpcClient, Result>newBuilder()
+                    .nodeInfo(registerNodeInfo)
+                    .client(RetryRpcClient.class)
+                    .build();
+               EasyRetryLog.LOCAL.info("同步结果 [{}]", rpcClient.syncConfig(configDTO));
             }
         } catch (Exception e) {
             EasyRetryLog.LOCAL.error("version sync error. groupName:[{}]", groupName, e);
@@ -111,8 +103,7 @@ public class ConfigVersionSyncHandler implements Lifecycle, Runnable {
                 try {
                     // 防止刷的过快，休眠1s
                     TimeUnit.SECONDS.sleep(1);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                } catch (InterruptedException ignored) {
                 }
             }
         }

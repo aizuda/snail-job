@@ -182,7 +182,7 @@ public class NettyChannel {
                 .set(HeadersEnum.HOST.getKey(), serverConfig.getHost())
                 .set(HeadersEnum.NAMESPACE.getKey(), Optional.ofNullable(easyRetryProperties.getNamespace()).orElse(
                     SystemConstants.DEFAULT_NAMESPACE))
-                .set(HeadersEnum.TOKEN.getKey(), Optional.ofNullable(easyRetryProperties.getNamespace()).orElse(
+                .set(HeadersEnum.TOKEN.getKey(), Optional.ofNullable(easyRetryProperties.getToken()).orElse(
                         SystemConstants.DEFAULT_TOKEN))
         ;
 

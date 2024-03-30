@@ -1,5 +1,6 @@
 package com.aizuda.easy.retry.client.job.core.client;
 
+import com.aizuda.easy.retry.client.common.annotation.Authentication;
 import com.aizuda.easy.retry.client.common.log.support.EasyRetryLogManager;
 import com.aizuda.easy.retry.client.job.core.IJobExecutor;
 import com.aizuda.easy.retry.client.job.core.cache.JobExecutorInfoCache;
@@ -35,6 +36,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 public class JobEndPoint {
 
     @PostMapping("/dispatch/v1")
+    @Authentication
     public Result<Boolean> dispatchJob(@RequestBody @Validated DispatchJobRequest dispatchJob) {
 
         try {
@@ -108,6 +110,7 @@ public class JobEndPoint {
     }
 
     @PostMapping("/stop/v1")
+    @Authentication
     public Result<Boolean> stopJob(@RequestBody @Validated StopJobDTO interruptJob) {
         ThreadPoolExecutor threadPool = ThreadPoolCache.getThreadPool(interruptJob.getTaskBatchId());
         if (Objects.isNull(threadPool) || threadPool.isShutdown() || threadPool.isTerminated()) {

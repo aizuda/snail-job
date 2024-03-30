@@ -7,6 +7,9 @@ import com.google.common.cache.CacheBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
@@ -21,14 +24,14 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class CacheConsumerGroup implements Lifecycle {
 
-    private static Cache<String /*groupName*/, String/*namespaceId*/> CACHE;
+    private static Cache<String /*groupName*/, Set<String>/*namespaceId*/> CACHE;
 
     /**
      * 获取所有缓存
      *
      * @return 缓存对象
      */
-    public static ConcurrentMap<String, String> getAllConsumerGroupName() {
+    public static ConcurrentMap<String, Set<String>> getAllConsumerGroupName() {
         return CACHE.asMap();
     }
 
@@ -39,7 +42,9 @@ public class CacheConsumerGroup implements Lifecycle {
      * @return 缓存对象
      */
     public static synchronized void addOrUpdate(String groupName, String namespaceId) {
-        CACHE.put(groupName, namespaceId);
+        Set<String> namespaceIds = Optional.ofNullable(CACHE.getIfPresent(groupName)).orElseGet(HashSet::new);
+        namespaceIds.add(namespaceId);
+        CACHE.put(groupName, namespaceIds);
     }
 
     public static void remove(String groupName) {

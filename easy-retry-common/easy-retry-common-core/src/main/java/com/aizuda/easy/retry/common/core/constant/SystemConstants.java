@@ -133,4 +133,9 @@ public interface SystemConstants {
      * 仅表示定时任务类型为工作流
      */
     Integer WORKFLOW_TRIGGER_TYPE = 99;
+
+    /**
+     * Easy Retry 认证Token
+     */
+    String EASY_RETRY_AUTH_TOKEN= "ER-TOKEN";
 }

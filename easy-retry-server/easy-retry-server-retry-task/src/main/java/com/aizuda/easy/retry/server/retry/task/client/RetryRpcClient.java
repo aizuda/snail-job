@@ -12,6 +12,7 @@ import com.aizuda.easy.retry.server.common.client.RequestMethod;
 import com.aizuda.easy.retry.server.common.client.annotation.Body;
 import com.aizuda.easy.retry.server.common.client.annotation.Header;
 import com.aizuda.easy.retry.server.common.client.annotation.Mapping;
+import com.aizuda.easy.retry.server.model.dto.ConfigDTO;
 
 /**
  * 调用客户端接口
@@ -30,5 +31,8 @@ public interface RetryRpcClient {
 
     @Mapping(path = "/retry/generate/idempotent-id/v1", method = RequestMethod.POST)
     Result generateIdempotentId(@Body GenerateRetryIdempotentIdDTO retryCallbackDTO);
+
+    @Mapping(path = "/retry/sync/version/v1")
+    Result syncConfig(@Body ConfigDTO configDTO);
 
 }

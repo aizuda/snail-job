@@ -1,5 +1,7 @@
 package com.aizuda.easy.retry.server.common.triple;
 
+import java.io.Serial;
+
 /**
  * @author: xiaowoniu
  * @date : 2023-11-24 08:56
@@ -7,11 +9,12 @@ package com.aizuda.easy.retry.server.common.triple;
  */
 public final class ImmutableTriple<L, M, R> extends Triple<L, M, R> {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
-    public final L left;
-    public final M middle;
-    public final R right;
+    private final L left;
+    private final M middle;
+    private final R right;
 
     public static <L, M, R> ImmutableTriple<L, M, R> of(final L left, final M middle, final R right) {
         return new ImmutableTriple<>(left, middle, right);

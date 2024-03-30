@@ -11,6 +11,7 @@ import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.HttpRequestHandler;
 import com.aizuda.easy.retry.server.common.Register;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
+import com.aizuda.easy.retry.server.common.cache.CacheToken;
 import com.aizuda.easy.retry.server.common.dto.NettyHttpRequest;
 import com.aizuda.easy.retry.server.common.register.ClientRegister;
 import com.aizuda.easy.retry.server.common.register.RegisterContext;
@@ -88,6 +89,12 @@ public class RequestHandlerActor extends AbstractActor {
         String groupName = headers.get(HeadersEnum.GROUP_NAME.getKey());
         String contextPath = headers.get(HeadersEnum.CONTEXT_PATH.getKey());
         String namespace = headers.get(HeadersEnum.NAMESPACE.getKey());
+        String token = headers.get(HeadersEnum.TOKEN.getKey());
+
+        if (!CacheToken.get(groupName, namespace).equals(token)) {
+            EasyRetryLog.LOCAL.error("Token authentication failed. [{}]", token);
+            return JsonUtil.toJsonString(new Result<>(0, "Token authentication failed"));
+        }
 
         // 注册版本
         RegisterContext registerContext = new RegisterContext();
@@ -102,6 +109,8 @@ public class RequestHandlerActor extends AbstractActor {
         if (!result) {
            EasyRetryLog.LOCAL.warn("client register error. groupName:[{}]", groupName);
         }
+
+
 
         UrlBuilder builder = UrlBuilder.ofHttp(uri);
         Collection<HttpRequestHandler> httpRequestHandlers = SpringContext.getContext()

@@ -136,7 +136,6 @@ public class ExecCallbackUnitActor extends AbstractActor {
 
         RetryRpcClient rpcClient = RequestBuilder.<RetryRpcClient, Result>newBuilder()
                 .nodeInfo(serverNode)
-                .namespaceId(serverNode.getNamespaceId())
                 .failover(Boolean.TRUE)
                 .routeKey(sceneConfig.getRouteKey())
                 .allocKey(sceneConfig.getSceneName())

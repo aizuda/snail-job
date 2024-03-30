@@ -249,7 +249,6 @@ public class RetryTaskServiceImpl implements RetryTaskService {
 
         RetryRpcClient rpcClient = RequestBuilder.<RetryRpcClient, Result>newBuilder()
                 .nodeInfo(serverNode)
-                .namespaceId(serverNode.getNamespaceId())
                 .client(RetryRpcClient.class)
                 .build();
 

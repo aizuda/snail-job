@@ -148,7 +148,6 @@ public class RequestClientActor extends AbstractActor {
         boolean retry = realJobExecutorDTO.isRetry();
         return RequestBuilder.<JobRpcClient, Result>newBuilder()
                 .nodeInfo(registerNodeInfo)
-                .namespaceId(registerNodeInfo.getNamespaceId())
                 .failRetry(maxRetryTimes > 0 && !retry)
                 .retryTimes(maxRetryTimes)
                 .retryInterval(realJobExecutorDTO.getRetryInterval())

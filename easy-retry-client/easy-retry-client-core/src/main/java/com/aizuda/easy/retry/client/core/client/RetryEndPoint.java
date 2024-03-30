@@ -1,6 +1,7 @@
 package com.aizuda.easy.retry.client.core.client;
 
 import cn.hutool.core.lang.Assert;
+import com.aizuda.easy.retry.client.common.annotation.Authentication;
 import com.aizuda.easy.retry.client.common.log.support.EasyRetryLogManager;
 import com.aizuda.easy.retry.client.core.IdempotentIdGenerate;
 import com.aizuda.easy.retry.client.core.RetryArgSerializer;
@@ -62,6 +63,7 @@ public class RetryEndPoint {
      * 服务端调度重试入口
      */
     @PostMapping("/dispatch/v1")
+    @Authentication
     public Result<DispatchRetryResultDTO> dispatch(@RequestBody @Validated DispatchRetryDTO executeReqDto) {
 
         RetryerInfo retryerInfo = RetryerInfoCache.get(executeReqDto.getScene(), executeReqDto.getExecutorName());
@@ -135,12 +137,14 @@ public class RetryEndPoint {
      * 同步版本
      */
     @PostMapping("/sync/version/v1")
+    @Authentication
     public Result syncVersion(@RequestBody ConfigDTO configDTO) {
         GroupVersionCache.configDTO = configDTO;
         return new Result();
     }
 
     @PostMapping("/callback/v1")
+    @Authentication
     public Result callback(@RequestBody @Validated RetryCallbackDTO callbackDTO) {
 
         RetryerInfo retryerInfo = null;
@@ -252,6 +256,7 @@ public class RetryEndPoint {
      * @return idempotentId
      */
     @PostMapping("/generate/idempotent-id/v1")
+    @Authentication
     public Result<String> idempotentIdGenerate(
         @RequestBody @Validated GenerateRetryIdempotentIdDTO generateRetryIdempotentIdDTO) {
 

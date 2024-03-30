@@ -17,6 +17,7 @@ public abstract class GetHttpRequestHandler implements HttpRequestHandler {
     @Override
     public String doHandler(String content, UrlBuilder builder, HttpHeaders headers) {
         UrlQuery query = builder.getQuery();
+
         return doHandler(content, query, headers);
     }
 

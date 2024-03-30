@@ -16,7 +16,9 @@ import com.aizuda.easy.retry.server.common.handler.ServerNodeBalance;
 import com.aizuda.easy.retry.template.datasource.persistence.po.ServerNode;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.stereotype.Component;
@@ -26,10 +28,12 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * 服务端注册
@@ -96,8 +100,20 @@ public class ServerRegister extends AbstractRegister {
         try {
             // 同步当前POD消费的组的节点信息
             // netty的client只会注册到一个服务端，若组分配的和client连接的不是一个POD则会导致当前POD没有其他客户端的注册信息
-            ConcurrentMap<String /*groupName*/, String/*namespaceId*/> allConsumerGroupName = CacheConsumerGroup.getAllConsumerGroupName();
+            ConcurrentMap<String /*groupName*/, Set<String>/*namespaceId*/> allConsumerGroupName = CacheConsumerGroup.getAllConsumerGroupName();
             if (!CollectionUtils.isEmpty(allConsumerGroupName)) {
+
+                Set<String> namespaceIdSets = allConsumerGroupName.values().stream().reduce((a, b) -> {
+                    Set<String> set = Sets.newHashSet();
+                    set.addAll(a);
+                    set.addAll(b);
+                    return set;
+                }).orElse(Sets.newHashSet());
+
+                if (CollectionUtils.isEmpty(namespaceIdSets)) {
+                    return;
+                }
+
                 List<ServerNode> serverNodes = serverNodeMapper.selectList(
                     new LambdaQueryWrapper<ServerNode>()
                         .eq(ServerNode::getNodeType, NodeTypeEnum.CLIENT.getType())

@@ -9,6 +9,7 @@ import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.common.core.util.NetUtil;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
+import com.aizuda.easy.retry.server.common.cache.CacheToken;
 import com.aizuda.easy.retry.server.common.client.annotation.Body;
 import com.aizuda.easy.retry.server.common.client.annotation.Header;
 import com.aizuda.easy.retry.server.common.client.annotation.Mapping;
@@ -141,6 +142,9 @@ public class RpcClientInvokeHandler implements InvocationHandler {
             if (Objects.nonNull(executorTimeout)) {
                 requestHeaders.set(RequestInterceptor.TIMEOUT_TIME, String.valueOf(executorTimeout));
             }
+
+            // 统一设置Token
+            requestHeaders.set(SystemConstants.EASY_RETRY_AUTH_TOKEN, CacheToken.get(groupName, namespaceId));
 
             Result result = retryer.call(() -> {
                 ResponseEntity<Result> response = restTemplate.exchange(

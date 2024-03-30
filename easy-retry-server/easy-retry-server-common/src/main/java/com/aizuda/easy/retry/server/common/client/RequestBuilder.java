@@ -27,7 +27,6 @@ public class RequestBuilder<T, R> {
     private int routeKey;
     private String allocKey;
     private Integer executorTimeout;
-    private String namespaceId;
 
     public static <T, R> RequestBuilder<T, R> newBuilder() {
         return new RequestBuilder<>();
@@ -88,18 +87,13 @@ public class RequestBuilder<T, R> {
         return this;
     }
 
-    public RequestBuilder<T, R> namespaceId(String namespaceId) {
-        this.namespaceId = namespaceId;
-        return this;
-    }
-
     public T build() {
         if (Objects.isNull(clintInterface)) {
             throw new EasyRetryServerException("clintInterface cannot be null");
         }
 
         Assert.notNull(nodeInfo, () -> new EasyRetryServerException("nodeInfo cannot be null"));
-        Assert.notBlank(namespaceId, () -> new EasyRetryServerException("namespaceId cannot be null"));
+        Assert.notBlank(nodeInfo.getNamespaceId(), () -> new EasyRetryServerException("namespaceId cannot be null"));
 
         if (failover) {
             Assert.isTrue(routeKey > 0, () -> new EasyRetryServerException("routeKey cannot be null"));
@@ -113,7 +107,7 @@ public class RequestBuilder<T, R> {
 
         RpcClientInvokeHandler clientInvokeHandler = new RpcClientInvokeHandler(
                 nodeInfo.getGroupName(), nodeInfo, failRetry, retryTimes, retryInterval,
-                retryListener, routeKey, allocKey, failover, executorTimeout, namespaceId);
+                retryListener, routeKey, allocKey, failover, executorTimeout, nodeInfo.getNamespaceId());
 
         return (T) Proxy.newProxyInstance(clintInterface.getClassLoader(),
                 new Class[]{clintInterface}, clientInvokeHandler);
