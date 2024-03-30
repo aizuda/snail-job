@@ -53,16 +53,16 @@
     <select id="jobLineList"
             resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardLineResponseDO">
         SELECT
-        DATE_FORMAT(trigger_at, #{dateFormat})                           AS createDt,
-        COALESCE(SUM(success_num), 0)                                    AS success,
-        COALESCE(SUM(fail_num), 0)                                       AS failNum,
-        COALESCE(SUM(stop_num), 0)                                       AS stop,
-        COALESCE(SUM(cancel_num), 0)                                     AS cancel,
-        COALESCE(SUM(fail_num + stop_num + cancel_num), 0)               AS fail,
-        COALESCE(SUM(success_num + fail_num + stop_num + cancel_num), 0) AS total
+            TO_CHAR(trigger_at, #{dateFormat})                               AS createDt,
+            COALESCE(SUM(success_num), 0)                                    AS success,
+            COALESCE(SUM(fail_num), 0)                                       AS failNum,
+            COALESCE(SUM(stop_num), 0)                                       AS stop,
+            COALESCE(SUM(cancel_num), 0)                                     AS cancel,
+            COALESCE(SUM(fail_num + stop_num + cancel_num), 0)               AS fail,
+            COALESCE(SUM(success_num + fail_num + stop_num + cancel_num), 0) AS total
         FROM job_summary
         ${ew.customSqlSegment}
-        GROUP BY DATE_FORMAT(trigger_at, #{dateFormat})
+        GROUP BY createDt
     </select>
 
     <select id="toJobTask"
@@ -79,13 +79,14 @@
     <select id="dashboardRank"
             resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO$Rank">
         SELECT
-        <if test="systemTaskType == 3">
-            CONCAT(group_name, '/', (SELECT job_name FROM job WHERE id = business_id)) name,
-        </if>
-        <if test="systemTaskType == 4">
-            CONCAT(group_name, '/', (SELECT workflow_name FROM workflow WHERE id = business_id)) name,
-        </if>
-        SUM(fail_num) AS total FROM job_summary
+            <if test="systemTaskType == 3">
+                CONCAT(group_name, '/', (SELECT job_name FROM job WHERE id = business_id)) name,
+            </if>
+            <if test="systemTaskType == 4">
+                CONCAT(group_name, '/', (SELECT workflow_name FROM workflow WHERE id = business_id)) name,
+            </if>
+            SUM(fail_num) AS total
+        FROM job_summary
         ${ew.customSqlSegment}
         HAVING SUM(fail_num) > 0
         ORDER BY total DESC LIMIT 10

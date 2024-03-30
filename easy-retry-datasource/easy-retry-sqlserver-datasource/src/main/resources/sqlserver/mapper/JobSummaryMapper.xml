@@ -71,7 +71,7 @@
             ISNULL(SUM(success_num + fail_num + stop_num + cancel_num), 0) AS total
         FROM (
             SELECT
-                DATE_FORMAT(trigger_at, #{dateFormat}) AS createDt,
+                FORMAT(trigger_at, #{dateFormat}) AS createDt,
                 success_num,
                 stop_num,
                 cancel_num,
@@ -79,7 +79,7 @@
             FROM job_summary
             ${ew.customSqlSegment}
         ) AS subquery
-        GROUP BY DATE_FORMAT(trigger_at, #{dateFormat})
+        GROUP BY createDt
     </select>
 
     <select id="toJobTask"

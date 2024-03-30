@@ -222,7 +222,7 @@ public class DashBoardServiceImpl implements DashBoardService {
                 .eq(JobSummary::getSystemTaskType, systemTaskType)
                 .eq(JobSummary::getNamespaceId, namespaceId)
                 .between(JobSummary::getTriggerAt, startDateTime, endDateTime);
-        List<DashboardLineResponseDO> dashboardLineResponseDOList = jobSummaryMapper.jobLineList(DashboardLineEnum.modeOf(type).getDateFormat(), queryWrapper);
+        List<DashboardLineResponseDO> dashboardLineResponseDOList = jobSummaryMapper.jobLineList(DashboardLineEnum.dateFormat(type), queryWrapper);
         List<DashboardLineResponseVO> dashboardLineResponseVOList = DispatchQuantityResponseVOConverter.INSTANCE.toDashboardLineResponseVO(dashboardLineResponseDOList);
         dateTypeEnum.getConsumer().accept(dashboardLineResponseVOList);
         dashboardLineResponseVOList.sort(Comparator.comparing(a -> a.getCreateDt()));
@@ -289,4 +289,5 @@ public class DashBoardServiceImpl implements DashBoardService {
         }
         return new PageResult<>(serverNodePageDTO, serverNodeResponseVOS);
     }
+
 }

@@ -83,7 +83,7 @@
             COALESCE(SUM(success_num + fail_num + stop_num + cancel_num), 0) AS total
         FROM (
             SELECT
-                DATE_FORMAT(trigger_at, #{dateFormat}) AS createDt,
+                TO_CHAR(trigger_at, #{dateFormat}) AS createDt,
                 success_num,
                 fail_num,
                 stop_num,
@@ -91,7 +91,7 @@
             FROM job_summary
             ${ew.customSqlSegment}
         )
-        GROUP BY DATE_FORMAT(trigger_at, #{dateFormat})
+        GROUP BY createDt
     </select>
 
     <select id="toJobTask"
