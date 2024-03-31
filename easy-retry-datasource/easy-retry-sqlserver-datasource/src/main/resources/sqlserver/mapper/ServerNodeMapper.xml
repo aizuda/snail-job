@@ -20,32 +20,42 @@
         id, namespace_id, group_name, context_path, host_id, host_ip, host_port, expire_at, node_type,create_dt,update_dt
     </sql>
 
-    <insert id="insertOrUpdate" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
-        MERGE INTO server_node AS target
-        USING (
-            VALUES
+    <insert id="batchInsert" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO server_node (namespace_id, group_name, host_id, host_ip, host_port,
+                                 expire_at, node_type, ext_attrs, context_path, create_dt)
+        VALUES
             <foreach collection="records" item="item" index="index" separator=",">
                 (
-                    #{item.namespaceId,jdbcType=VARCHAR}, #{item.groupName,jdbcType=VARCHAR},
-                    #{item.hostId,jdbcType=VARCHAR}, #{item.hostIp,jdbcType=VARCHAR}, #{item.hostPort,jdbcType=INTEGER},
-                    #{item.expireAt,jdbcType=TIMESTAMP}, #{item.nodeType,jdbcType=TINYINT}, #{item.extAttrs,jdbcType=VARCHAR},
-                    #{item.contextPath,jdbcType=VARCHAR}, #{item.createDt,jdbcType=TIMESTAMP}
+                    #{item.namespaceId,jdbcType=VARCHAR},
+                    #{item.groupName,jdbcType=VARCHAR},
+                    #{item.hostId,jdbcType=VARCHAR},
+                    #{item.hostIp,jdbcType=VARCHAR},
+                    #{item.hostPort,jdbcType=INTEGER},
+                    #{item.expireAt,jdbcType=TIMESTAMP},
+                    #{item.nodeType,jdbcType=TINYINT},
+                    #{item.extAttrs,jdbcType=VARCHAR},
+                    #{item.contextPath,jdbcType=VARCHAR},
+                    #{item.createDt,jdbcType=TIMESTAMP}
                 )
             </foreach>
-        ) AS source (namespace_id, group_name, host_id, host_ip, host_port,
-                     expire_at, node_type, ext_attrs, context_path, create_dt)
-        ON target.namespace_id = source.namespace_id
-            AND target.group_name = source.group_name
-            AND target.host_id = source.host_id
-        WHEN MATCHED THEN
-            UPDATE SET
-                target.expire_at = source.expire_at, target.update_dt = GETDATE()
-        WHEN NOT MATCHED THEN
-            INSERT (namespace_id, group_name, host_id, host_ip, host_port,
-                    expire_at, node_type, ext_attrs, context_path, create_dt, update_dt)
-                VALUES (source.namespace_id, source.group_name, source.host_id, source.host_ip, source.host_port,
-                        source.expire_at, source.node_type, source.ext_attrs, source.context_path, source.create_dt, GETDATE());
     </insert>
+
+    <update id="batchUpdateExpireAt" parameterType="java.util.List">
+        UPDATE server_node
+           SET expire_at = src.expire_at,
+               context_path = src.context_path
+          FROM server_node AS dest
+               JOIN (
+                 <foreach collection="list" item="item" index="index" separator=" UNION ALL ">
+                     SELECT
+                         #{item.expireAt} AS expire_at,
+                         #{item.contextPath} AS context_path,
+                         #{item.hostId} AS host_id,
+                         #{item.hostIp} AS host_ip
+                 </foreach>
+               ) AS src
+               ON (dest.host_id = src.host_id AND dest.host_ip = src.host_ip)
+    </update>
 
     <select id="countActivePod"
           resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.ActivePodQuantityResponseDO">

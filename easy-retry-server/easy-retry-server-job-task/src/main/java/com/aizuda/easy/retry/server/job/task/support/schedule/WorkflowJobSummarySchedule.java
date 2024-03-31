@@ -13,11 +13,9 @@ import com.aizuda.easy.retry.template.datasource.persistence.dataobject.JobBatch
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobSummaryMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskBatchMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobSummary;
-import com.aizuda.easy.retry.template.datasource.persistence.po.JobTaskBatch;
 import com.aizuda.easy.retry.template.datasource.persistence.po.WorkflowTaskBatch;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -31,7 +29,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -91,6 +88,7 @@ public class WorkflowJobSummarySchedule extends AbstractSchedule implements Life
 
                 List<JobSummary> jobSummaries = jobSummaryMapper.selectList(new LambdaQueryWrapper<JobSummary>()
                     .eq(JobSummary::getTriggerAt, todayFrom)
+                    .eq(JobSummary::getSystemTaskType, SyetemTaskTypeEnum.WORKFLOW.getType())
                     .in(JobSummary::getBusinessId, jobSummaryList.stream().map(JobSummary::getBusinessId).collect(
                         Collectors.toSet())));
 
@@ -130,7 +128,7 @@ public class WorkflowJobSummarySchedule extends AbstractSchedule implements Life
     }
 
     private List<JobSummary> jobSummaryList(LocalDateTime triggerAt,
-        List<JobBatchSummaryResponseDO> summaryResponseDOList) {
+                                            List<JobBatchSummaryResponseDO> summaryResponseDOList) {
         List<JobSummary> jobSummaryList = new ArrayList<>();
         Map<Long, List<JobBatchSummaryResponseDO>> jobIdListMap = summaryResponseDOList.parallelStream()
             .collect(Collectors.groupingBy(JobBatchSummaryResponseDO::getJobId));
@@ -165,7 +163,7 @@ public class WorkflowJobSummarySchedule extends AbstractSchedule implements Life
      * @return
      */
     private List<JobTaskBatchReason> jobTaskBatchReasonList(int jobTaskBatchStatus,
-        List<JobBatchSummaryResponseDO> jobBatchSummaryResponseDOList) {
+                                                            List<JobBatchSummaryResponseDO> jobBatchSummaryResponseDOList) {
         List<JobTaskBatchReason> jobTaskBatchReasonArrayList = new ArrayList<>();
         List<JobBatchSummaryResponseDO> summaryResponseDOList = jobBatchSummaryResponseDOList.stream()
             .filter(i -> jobTaskBatchStatus == i.getTaskBatchStatus()).collect(Collectors.toList());
@@ -180,7 +178,7 @@ public class WorkflowJobSummarySchedule extends AbstractSchedule implements Life
 
     @Override
     public void start() {
-        taskScheduler.scheduleAtFixedRate(this::execute, Duration.parse("PT1H"));
+        taskScheduler.scheduleAtFixedRate(this::execute, Duration.parse("PT1M"));
     }
 
     @Override

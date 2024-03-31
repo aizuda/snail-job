@@ -15,40 +15,54 @@
         <result column="update_dt" jdbcType="TIMESTAMP" property="updateDt"/>
     </resultMap>
 
-    <insert id="insertOrUpdate" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
-        MERGE INTO retry_summary AS target
-        USING (
-            VALUES
-            <foreach collection="list" item="item" separator=",">
-                (
-                    #{item.namespaceId},
-                    #{item.groupName},
-                    #{item.sceneName},
-                    #{item.triggerAt},
-                    #{item.runningNum},
-                    #{item.finishNum},
-                    #{item.maxCountNum},
-                    #{item.suspendNum}
-                )
-            </foreach>
-        ) AS source (namespace_id, group_name, scene_name, trigger_at,
-                     running_num, finish_num, max_count_num, suspend_num)
-        ON target.namespace_id = source.namespace_id
-            AND target.group_name = source.group_name
-            AND target.scene_name = source.scene_name
-            AND target.trigger_at = source.trigger_at
-        WHEN MATCHED THEN
-            UPDATE SET
-                target.running_num = source.running_num,
-                target.finish_num = source.finish_num,
-                target.max_count_num = source.max_count_num,
-                target.suspend_num = source.suspend_num
-        WHEN NOT MATCHED THEN
-            INSERT (namespace_id, group_name, scene_name, trigger_at,
-                    running_num, finish_num, max_count_num, suspend_num)
-            VALUES (source.namespace_id, source.group_name, source.scene_name, source.trigger_at,
-                    source.running_num, source.finish_num, source.max_count_num, source.suspend_num);
+    <insert id="batchInsert" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO job_summary (namespace_id, group_name, business_id, trigger_at, system_task_type,
+                                 success_num,fail_num,fail_reason,stop_num,stop_reason, cancel_num,cancel_reason)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.namespaceId},
+            #{item.groupName},
+            #{item.businessId},
+            #{item.triggerAt},
+            #{item.systemTaskType},
+            #{item.successNum},
+            #{item.failNum},
+            #{item.failReason},
+            #{item.stopNum},
+            #{item.stopReason},
+            #{item.cancelNum},
+            #{item.cancelReason}
+            )
+        </foreach>
     </insert>
+
+    <update id="batchUpdate" parameterType="java.util.List">
+        UPDATE job_summary
+           SET success_num = src.success_num,
+               fail_num = src.fail_num,
+               fail_reason = src.fail_reason,
+               stop_num = src.stop_num,
+               stop_reason = src.stop_reason,
+               cancel_num = src.cancel_num,
+               cancel_reason = src.cancel_reason
+          FROM job_summary AS dest
+               JOIN (
+                <foreach collection="list" item="item" index="index" separator=" UNION ALL ">
+                    SELECT
+                        #{item.successNum} AS success_num,
+                        #{item.failNum} AS fail_num,
+                        #{item.failReason} AS fail_reason,
+                        #{item.stopNum} AS stop_num,
+                        #{item.stopReason} AS stop_reason,
+                        #{item.cancelNum} AS cancel_num,
+                        #{item.cancelReason} AS cancel_reason,
+                        #{item.triggerAt} AS trigger_at,
+                        #{item.businessId} AS business_id
+                </foreach>
+            ) AS src
+            ON (dest.trigger_at = src.trigger_at AND dest.business_id = src.business_id)
+    </update>
 
     <select id="retryTask"
             resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardCardResponseDO$RetryTask">
@@ -85,23 +99,7 @@
             ISNULL(SUM(finish_num + running_num + max_count_num + suspend_num), 0) AS total
         FROM (
             SELECT
-                <choose>
-                    <when test="type == 'DAY'">
-                        FORMAT(create_dt, 'HH24')
-                    </when>
-                    <when test="type == 'WEEK'">
-                        FORMAT(create_dt, 'yyyy-MM-dd')
-                    </when>
-                    <when test="type =='MONTH'">
-                        FORMAT(create_dt, 'yyyy-MM-dd')
-                    </when>
-                    <when test="type == 'YEAR'">
-                        FORMAT(create_dt, 'yyyy-MM')
-                    </when>
-                    <otherwise>
-                        FORMAT(create_dt,'yyyy-MM-dd')
-                    </otherwise>
-                </choose> AS createDt,
+                FORMAT(create_dt, #{dateFormat}) AS createDt,
                 finish_num,
                 running_num,
                 max_count_num,

@@ -168,7 +168,7 @@ public class DashBoardServiceImpl implements DashBoardService {
                 .eq(StrUtil.isNotBlank(groupName), RetrySummary::getGroupName, groupName)
                 .eq(RetrySummary::getNamespaceId, namespaceId)
                 .between(RetrySummary::getTriggerAt, startDateTime, endDateTime);
-        List<DashboardLineResponseDO> dashboardRetryLinkeResponseDOList = retrySummaryMapper.retryLineList(type, wrapper1);
+        List<DashboardLineResponseDO> dashboardRetryLinkeResponseDOList = retrySummaryMapper.retryLineList(DashboardLineEnum.dateFormat(type), wrapper1);
         List<DashboardLineResponseVO> dashboardLineResponseVOList = DispatchQuantityResponseVOConverter.INSTANCE.toDashboardLineResponseVO(dashboardRetryLinkeResponseDOList);
         dateTypeEnum.getConsumer().accept(dashboardLineResponseVOList);
         dashboardLineResponseVOList.sort(Comparator.comparing(a -> a.getCreateDt()));

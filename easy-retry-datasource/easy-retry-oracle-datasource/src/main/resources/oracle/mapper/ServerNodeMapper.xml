@@ -19,39 +19,35 @@
         id, group_name, context_path, host_id, host_ip, host_port, expire_at, node_type,create_dt,update_dt
     </sql>
 
-    <insert id="insertOrUpdate" parameterType="com.aizuda.easy.retry.template.datasource.persistence.po.ServerNode"
-            useGeneratedKeys="false" keyProperty="id">
-        MERGE INTO server_node dest
-            USING(
-                <foreach collection="records" item="item" index="index" separator=" UNION ALL ">
-                    SELECT
-                        #{item.namespaceId,jdbcType=VARCHAR} AS namespace_id,
-                        #{item.groupName,jdbcType=VARCHAR} AS group_name,
-                        #{item.hostId,jdbcType=VARCHAR} AS host_id,
-                        #{item.hostIp,jdbcType=VARCHAR} AS host_ip,
-                        #{item.hostPort,jdbcType=INTEGER} AS host_port,
-                        #{item.expireAt,jdbcType=TIMESTAMP} AS expire_at,
-                        #{item.nodeType,jdbcType=TINYINT} AS node_type,
-                        #{item.extAttrs,jdbcType=VARCHAR} AS ext_attrs,
-                        #{item.contextPath,jdbcType=VARCHAR} AS context_path,
-                        #{item.createDt,jdbcType=TIMESTAMP} AS create_dt
-                    FROM DUAL
-                </foreach>
-            ) src
-            ON( dest.host_id = src.host_id AND dest.host_ip = src.host_ip)
-        WHEN MATCHED THEN
-            UPDATE SET expire_at = src.expire_at
-        WHEN NOT MATCHED THEN
-            INSERT (namespace_id, group_name, host_id, host_ip, host_port,
-                    expire_at, node_type, ext_attrs, context_path, create_dt)
-            VALUES
-                <foreach collection="records" item="item" index="index" separator=",">
-                    (#{item.namespaceId,jdbcType=VARCHAR}, #{item.groupName,jdbcType=VARCHAR}, #{item.hostId,jdbcType=VARCHAR}, #{item.hostIp,jdbcType=VARCHAR},
-                     #{item.hostPort,jdbcType=INTEGER}, #{item.expireAt,jdbcType=TIMESTAMP}, #{item.nodeType,jdbcType=TINYINT},
-                     #{item.extAttrs,jdbcType=VARCHAR}, #{item.contextPath,jdbcType=VARCHAR}, #{item.createDt,jdbcType=TIMESTAMP})
-                </foreach>
-
+    <insert id="batchInsert" parameterType="java.util.List" useGeneratedKeys="false" keyProperty="id">
+        <!-- useGeneratedKeys="false" 否则报错ORA-00933: SQL command not properly ended -->
+        INSERT INTO server_node (namespace_id, group_name, host_id, host_ip, host_port,
+                                 expire_at, node_type, ext_attrs, context_path, create_dt)
+        <foreach collection="records" item="item" index="index" separator=" UNION ">
+            SELECT
+                #{item.namespaceId,jdbcType=VARCHAR},
+                #{item.groupName,jdbcType=VARCHAR},
+                #{item.hostId,jdbcType=VARCHAR},
+                #{item.hostIp,jdbcType=VARCHAR},
+                #{item.hostPort,jdbcType=INTEGER},
+                #{item.expireAt,jdbcType=TIMESTAMP},
+                #{item.nodeType,jdbcType=TINYINT},
+                #{item.extAttrs,jdbcType=VARCHAR},
+                #{item.contextPath,jdbcType=VARCHAR},
+                #{item.createDt,jdbcType=TIMESTAMP}
+            FROM DUAL
+        </foreach>
     </insert>
+
+    <update id="batchUpdateExpireAt" parameterType="java.util.List">
+        <foreach collection="list" item="item" open="BEGIN" separator=";" close=";END;">
+            UPDATE server_node
+               SET expire_at = #{item.expireAt},
+                   context_path =  #{item.contextPath}
+             WHERE host_id = #{item.hostId}
+               AND host_ip = #{item.hostIp}
+        </foreach>
+    </update>
 
     <select id="countActivePod"
             resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.ActivePodQuantityResponseDO">

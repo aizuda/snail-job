@@ -87,6 +87,7 @@ public class JobSummarySchedule extends AbstractSchedule implements Lifecycle {
 
                 List<JobSummary> jobSummaries = jobSummaryMapper.selectList(new LambdaQueryWrapper<JobSummary>()
                     .eq(JobSummary::getTriggerAt, todayFrom)
+                    .eq(JobSummary::getSystemTaskType, SyetemTaskTypeEnum.JOB.getType())
                     .in(JobSummary::getBusinessId, jobSummaryList.stream().map(JobSummary::getBusinessId).collect(
                         Collectors.toSet())));
 

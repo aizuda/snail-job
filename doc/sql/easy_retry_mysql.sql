@@ -428,7 +428,7 @@ CREATE TABLE `job_summary`
     PRIMARY KEY (`id`),
     KEY `idx_trigger_at` (`trigger_at`),
     KEY `idx_namespace_id_group_name_business_id` (`namespace_id`, `group_name`, business_id),
-    UNIQUE KEY `uk_business_id_trigger_at` (`business_id`, `trigger_at`) USING BTREE
+    UNIQUE KEY `uk_system_task_type_business_id_trigger_at` (`system_task_type`, `business_id`, `trigger_at`) USING BTREE
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 1
   DEFAULT CHARSET = utf8mb4 COMMENT ='DashBoard_Job';

@@ -19,46 +19,54 @@
         <result column="update_dt" jdbcType="TIMESTAMP" property="updateDt"/>
     </resultMap>
 
-    <insert id="insertOrUpdate" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
-        MERGE INTO job_summary AS target
-        USING (
-            VALUES
-                <foreach collection="list" item="item" separator=",">
-                    (
-                        #{item.namespaceId},
-                        #{item.groupName},
-                        #{item.businessId},
-                        #{item.triggerAt},
-                        #{item.systemTaskType},
-                        #{item.successNum},
-                        #{item.failNum},
-                        #{item.failReason},
-                        #{item.stopNum},
-                        #{item.stopReason},
-                        #{item.cancelNum},
-                        #{item.cancelReason}
-                    )
-                </foreach>
-        ) AS source (namespace_id, group_name, business_id, trigger_at, system_task_type,
-                     success_num, fail_num, fail_reason, stop_num, stop_reason, cancel_num, cancel_reason)
-        ON target.namespace_id = source.namespace_id
-            AND target.business_id = source.business_id
-        WHEN MATCHED THEN
-            UPDATE SET
-                target.success_num = source.success_num,
-                target.fail_num = source.fail_num,
-                target.fail_reason = source.fail_reason,
-                target.stop_num = source.stop_num,
-                target.stop_reason = source.stop_reason,
-                target.cancel_num = source.cancel_num,
-                target.cancel_reason = source.cancel_reason
-        WHEN NOT MATCHED THEN
-            INSERT (namespace_id, group_name, business_id, trigger_at, system_task_type,
-                    success_num, fail_num, fail_reason, stop_num, stop_reason, cancel_num, cancel_reason)
-            VALUES (source.namespace_id, source.group_name, source.business_id, source.trigger_at, source.system_task_type,
-                    source.success_num, source.fail_num, source.fail_reason, source.stop_num, source.stop_reason,
-                    source.cancel_num, source.cancel_reason);
+    <insert id="batchInsert" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO job_summary (namespace_id, group_name, business_id, trigger_at, system_task_type,
+                                 success_num,fail_num,fail_reason,stop_num,stop_reason, cancel_num,cancel_reason)
+        VALUES
+            <foreach collection="list" item="item" separator=",">
+                (
+                    #{item.namespaceId},
+                    #{item.groupName},
+                    #{item.businessId},
+                    #{item.triggerAt},
+                    #{item.systemTaskType},
+                    #{item.successNum},
+                    #{item.failNum},
+                    #{item.failReason},
+                    #{item.stopNum},
+                    #{item.stopReason},
+                    #{item.cancelNum},
+                    #{item.cancelReason}
+                )
+            </foreach>
     </insert>
+
+    <update id="batchUpdate" parameterType="java.util.List">
+        UPDATE job_summary
+           SET success_num = src.success_num,
+               fail_num = src.fail_num,
+               fail_reason = src.fail_reason,
+               stop_num = src.stop_num,
+               stop_reason = src.stop_reason,
+               cancel_num = src.cancel_num,
+               cancel_reason = src.cancel_reason
+          FROM job_summary AS dest
+               JOIN (
+                   <foreach collection="list" item="item" index="index" separator=" UNION ALL ">
+                       SELECT
+                           #{item.successNum} AS success_num,
+                           #{item.failNum} AS fail_num,
+                           #{item.failReason} AS fail_reason,
+                           #{item.stopNum} AS stop_num,
+                           #{item.stopReason} AS stop_reason,
+                           #{item.cancelNum} AS cancel_num,
+                           #{item.cancelReason} AS cancel_reason,
+                           #{item.triggerAt} AS trigger_at,
+                           #{item.businessId} AS business_id
+                   </foreach>
+               ) AS src
+               ON (dest.trigger_at = src.trigger_at AND dest.business_id = src.business_id)
+    </update>
 
     <select id="jobLineList"
             resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardLineResponseDO">

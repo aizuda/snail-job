@@ -33,6 +33,7 @@ CREATE TABLE group_config
     namespace_id      VARCHAR2(64)  DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
     group_name        VARCHAR2(64) NOT NULL,
     description       VARCHAR2(256) DEFAULT '',
+    token             VARCHAR2(64)  DEFAULT 'ER_cKqBTPzCsWA3VyuCfFoccmuIEGXjr5KT',
     group_status      SMALLINT      DEFAULT 0,
     version           INT          NOT NULL,
     group_partition   INT          NOT NULL,
@@ -50,6 +51,7 @@ COMMENT ON COLUMN group_config.id IS '主键';
 COMMENT ON COLUMN group_config.namespace_id IS '命名空间';
 COMMENT ON COLUMN group_config.group_name IS '组名称';
 COMMENT ON COLUMN group_config.description IS '组描述';
+COMMENT ON COLUMN group_config.token IS 'token';
 COMMENT ON COLUMN group_config.group_status IS '组状态 0、未启用 1、启用';
 COMMENT ON COLUMN group_config.version IS '版本号';
 COMMENT ON COLUMN group_config.group_partition IS '分区';
@@ -676,7 +678,7 @@ CREATE TABLE job_summary
     update_dt        TIMESTAMP     DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE UNIQUE INDEX uk_job_summary_1 ON job_summary (business_id, trigger_at);
+CREATE UNIQUE INDEX uk_job_summary_1 ON job_summary (system_task_type, business_id, trigger_at);
 CREATE INDEX idx_job_summary_1 ON job_summary (namespace_id, group_name, business_id);
 
 COMMENT ON TABLE job_summary IS 'DashBoard_Job';

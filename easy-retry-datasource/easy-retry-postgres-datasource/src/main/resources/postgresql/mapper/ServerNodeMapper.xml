@@ -17,19 +17,44 @@
     <sql id="Base_Column_List">
         id, group_name, context_path, host_id, host_ip, host_port, expire_at, node_type,create_dt,update_dt
     </sql>
-    <insert id="insertOrUpdate" parameterType="com.aizuda.easy.retry.template.datasource.persistence.po.ServerNode"
-            useGeneratedKeys="true" keyProperty="id">
+
+    <insert id="batchInsert" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO server_node (namespace_id, group_name, host_id, host_ip, host_port,
                                  expire_at, node_type, ext_attrs, context_path, create_dt)
         VALUES
-        <foreach collection="records" item="item" index="index" separator=",">
-            (#{item.namespaceId,jdbcType=VARCHAR}, #{item.groupName,jdbcType=VARCHAR}, #{item.hostId,jdbcType=VARCHAR}, #{item.hostIp,jdbcType=VARCHAR},
-            #{item.hostPort,jdbcType=INTEGER}, #{item.expireAt,jdbcType=TIMESTAMP}, #{item.nodeType,jdbcType=TINYINT},
-            #{item.extAttrs,jdbcType=VARCHAR},  #{item.contextPath,jdbcType=VARCHAR},  #{item.createDt,jdbcType=TIMESTAMP})
-        </foreach>
-        ON CONFLICT (host_id, host_ip) DO UPDATE SET expire_at = EXCLUDED.expire_at
-
+            <foreach collection="records" item="item" index="index" separator=",">
+                (
+                    #{item.namespaceId,jdbcType=VARCHAR},
+                    #{item.groupName,jdbcType=VARCHAR},
+                    #{item.hostId,jdbcType=VARCHAR},
+                    #{item.hostIp,jdbcType=VARCHAR},
+                    #{item.hostPort,jdbcType=INTEGER},
+                    #{item.expireAt,jdbcType=TIMESTAMP},
+                    #{item.nodeType,jdbcType=TINYINT},
+                    #{item.extAttrs,jdbcType=VARCHAR},
+                    #{item.contextPath,jdbcType=VARCHAR},
+                    #{item.createDt,jdbcType=TIMESTAMP}
+                )
+            </foreach>
     </insert>
+
+    <update id="batchUpdateExpireAt" parameterType="java.util.List">
+        UPDATE server_node AS rt
+           SET expire_at = tt.expire_at,
+               context_path = tt.context_path
+          FROM (
+                <foreach collection="list" item="item" index="index" separator=" UNION ALL ">
+                    SELECT
+                        #{item.expireAt} AS expire_at,
+                        #{item.contextPath} AS context_path,
+                        #{item.hostId} AS host_id,
+                        #{item.hostIp} AS host_ip
+                </foreach>
+            ) AS tt
+        WHERE rt.host_id = tt.host_id
+          AND rt.host_ip = tt.host_ip
+    </update>
+
     <select id="countActivePod"
             resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.ActivePodQuantityResponseDO">
         SELECT node_type as nodeType, count(*) as total

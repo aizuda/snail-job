@@ -15,49 +15,36 @@
         <result column="update_dt" jdbcType="TIMESTAMP" property="updateDt"/>
     </resultMap>
 
-    <insert id="insertOrUpdate" parameterType="java.util.List" useGeneratedKeys="false" keyProperty="id">
-        MERGE INTO retry_summary dest
-            USING (
-                    <foreach collection="list" item="item" separator=" UNION ALL ">
-                        SELECT
-                            #{item.namespaceId} AS namespace_id,
-                            #{item.groupName} AS group_name,
-                            #{item.sceneName} AS scene_name,
-                            #{item.triggerAt} AS trigger_at,
-                            #{item.runningNum} AS running_num,
-                            #{item.finishNum} AS finish_num,
-                            #{item.maxCountNum} AS max_count_num,
-                            #{item.suspendNum AS suspend_num}
-                        FROM DUAL
-                    </foreach>
-                    ) src
-              ON (dest.namespace_id = src.namespace_id
-                    AND dest.group_name = src.group_name
-                    AND dest.scene_name = src.scene_name
-                    AND dest.trigger_at = src.trigger_at)
-        WHEN MATCHED THEN
-            UPDATE SET
-                dest.running_num = src.running_num,
-                dest.finish_num = src.finish_num,
-                dest.max_count_num = src.max_count_num,
-                dest.suspend_num = src.suspend_num
-        WHEN NOT MATCHED THEN
-            INSERT (namespace_id, group_name, scene_name, trigger_at,
-                    running_num, finish_num, max_count_num, suspend_num)
-            VALUES
-                <foreach collection="list" item="item" separator=",">
-                    (
-                        #{item.namespaceId},
-                        #{item.groupName},
-                        #{item.sceneName},
-                        #{item.triggerAt},
-                        #{item.runningNum},
-                        #{item.finishNum},
-                        #{item.maxCountNum},
-                        #{item.suspendNum}
-                    )
-                </foreach>
+    <insert id="batchInsert" parameterType="java.util.List" useGeneratedKeys="false" keyProperty="id">
+        INSERT INTO retry_summary (namespace_id, group_name, scene_name, trigger_at,
+                                   running_num, finish_num, max_count_num, suspend_num)
+        <foreach collection="list" item="item" separator="UNION ALL">
+            SELECT
+                #{item.namespaceId},
+                #{item.groupName},
+                #{item.sceneName},
+                #{item.triggerAt},
+                #{item.runningNum},
+                #{item.finishNum},
+                #{item.maxCountNum},
+                #{item.suspendNum}
+            FROM DUAL
+        </foreach>
     </insert>
+
+    <update id="batchUpdate" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" open="BEGIN" separator=";" close=";END;">
+            UPDATE retry_summary
+               SET running_num = #{item.runningNum},
+                   finish_num = #{item.finishNum},
+                   max_count_num = #{item.maxCountNum},
+                   suspend_num = #{item.suspendNum}
+             WHERE trigger_at = #{item.triggerAt}
+               AND group_name = #{item.groupName}
+               AND namespace_id = #{item.namespaceId}
+               AND scene_name = #{item.sceneName}
+        </foreach>
+    </update>
 
     <select id="retryTask"
             resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardCardResponseDO$RetryTask">
@@ -75,8 +62,7 @@
         SELECT *
           FROM
             (
-                SELECT
-                        trigger_at, running_num, finish_num, max_count_num, suspend_num
+                SELECT trigger_at, running_num, finish_num, max_count_num, suspend_num
                 FROM retry_summary
                 ${ew.customSqlSegment}
             )
@@ -86,35 +72,18 @@
     <select id="retryLineList"
             resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardLineResponseDO">
         SELECT createDt,
-            COALESCE(SUM(finish_num), 0) AS successNum,
-            COALESCE(SUM(running_num), 0) AS runningNum,
-            COALESCE(SUM(max_count_num), 0) AS maxCountNum,
-            COALESCE(SUM(suspend_num), 0) AS suspendNum,
-            COALESCE(SUM(finish_num + running_num + max_count_num + suspend_num), 0) AS total
+            COALESCE(SUM(finish_num), 0)                                                AS successNum,
+            COALESCE(SUM(running_num), 0)                                               AS runningNum,
+            COALESCE(SUM(max_count_num), 0)                                             AS maxCountNum,
+            COALESCE(SUM(suspend_num), 0)                                               AS suspendNum,
+            COALESCE(SUM(finish_num + running_num + max_count_num + suspend_num), 0)    AS total
         FROM (
             SELECT
-            <choose>
-                <when test="type == 'DAY'">
-                    TO_CHAR(create_dt, 'HH24')
-                </when>
-                <when test="type == 'WEEK'">
-                    TO_CHAR(create_dt, 'yyyy-MM-dd')
-                </when>
-                <when test="type =='MONTH'">
-                    TO_CHAR(create_dt, 'yyyy-MM-dd')
-                </when>
-                <when test="type == 'YEAR'">
-                    TO_CHAR(create_dt, 'yyyy-MM')
-                </when>
-                <otherwise>
-                    TO_CHAR(create_dt, 'yyyy-MM-dd')
-                </otherwise>
-            </choose>
-            AS createDt,
-            finish_num,
-            running_num,
-            max_count_num,
-            suspend_num
+                TO_CHAR(create_dt, #{dateFormat}) AS createDt,
+                finish_num,
+                running_num,
+                max_count_num,
+                suspend_num
             FROM retry_summary
             ${ew.customSqlSegment}
         )

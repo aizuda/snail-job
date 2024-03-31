@@ -40,31 +40,32 @@
                 )
             </foreach>
     </insert>
+
     <update id="batchUpdate" parameterType="java.util.List">
         UPDATE job_summary rt,
-        (
-        <foreach collection="list" item="item" index="index" separator=" UNION ALL ">
-            SELECT
-            #{item.successNum} AS success_num,
-            #{item.failNum} AS fail_num,
-            #{item.failReason} AS fail_reason,
-            #{item.stopNum} AS stop_num,
-            #{item.stopReason} AS stop_reason,
-            #{item.cancelNum} AS cancel_num,
-            #{item.cancelReason} AS cancel_reason,
-            #{item.triggerAt} AS trigger_at,
-            #{item.businessId} AS business_id
-        </foreach>
-        ) tt
-        SET
-        rt.success_num = tt.success_num,
-        rt.fail_num = tt.fail_num,
-        rt.fail_reason = tt.fail_reason,
-        rt.stop_num = tt.stop_num,
-        rt.stop_reason = tt.stop_reason,
-        rt.cancel_num = tt.cancel_num,
-        rt.cancel_reason = tt.cancel_reason
-        WHERE rt.trigger_at = tt.trigger_at and rt.business_id = tt.business_id
+               (
+                   <foreach collection="list" item="item" index="index" separator=" UNION ALL ">
+                       SELECT
+                           #{item.successNum} AS success_num,
+                           #{item.failNum} AS fail_num,
+                           #{item.failReason} AS fail_reason,
+                           #{item.stopNum} AS stop_num,
+                           #{item.stopReason} AS stop_reason,
+                           #{item.cancelNum} AS cancel_num,
+                           #{item.cancelReason} AS cancel_reason,
+                           #{item.triggerAt} AS trigger_at,
+                           #{item.businessId} AS business_id
+                   </foreach>
+               ) tt
+           SET rt.success_num = tt.success_num,
+               rt.fail_num = tt.fail_num,
+               rt.fail_reason = tt.fail_reason,
+               rt.stop_num = tt.stop_num,
+               rt.stop_reason = tt.stop_reason,
+               rt.cancel_num = tt.cancel_num,
+               rt.cancel_reason = tt.cancel_reason
+         WHERE rt.trigger_at = tt.trigger_at
+           AND rt.business_id = tt.business_id
     </update>
 
     <select id="jobLineList"

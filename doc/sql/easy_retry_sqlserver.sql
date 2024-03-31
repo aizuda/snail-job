@@ -1,17 +1,17 @@
 -- distributed_lock
-CREATE TABLE [distributed_lock]
+CREATE TABLE distributed_lock
 (
-    [id]         bigint PRIMARY KEY IDENTITY,
-    [name]       nvarchar(64)  NOT NULL,
-    [lock_until] datetime2     NOT NULL DEFAULT GETDATE(),
-    [locked_at]  datetime2     NOT NULL DEFAULT GETDATE(),
-    [locked_by]  nvarchar(255) NOT NULL,
-    [create_dt]  datetime2     NOT NULL DEFAULT GETDATE(),
-    [update_dt]  datetime2     NOT NULL DEFAULT GETDATE()
+    id         bigint PRIMARY KEY IDENTITY,
+    name       nvarchar(64)  NOT NULL,
+    lock_until datetime2     NOT NULL DEFAULT GETDATE(),
+    locked_at  datetime2     NOT NULL DEFAULT GETDATE(),
+    locked_by  nvarchar(255) NOT NULL,
+    create_dt  datetime2     NOT NULL DEFAULT GETDATE(),
+    update_dt  datetime2     NOT NULL DEFAULT GETDATE()
 )
 GO
 
-CREATE UNIQUE NONCLUSTERED INDEX [uk_name] ON [distributed_lock] ([name] ASC)
+CREATE UNIQUE NONCLUSTERED INDEX uk_name ON distributed_lock (name ASC)
 GO
 
 EXEC sp_addextendedproperty
@@ -70,24 +70,25 @@ EXEC sp_addextendedproperty
 GO
 
 -- group_config
-CREATE TABLE [group_config]
+CREATE TABLE group_config
 (
-    [id]                bigint PRIMARY KEY IDENTITY,
-    [namespace_id]      nvarchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
-    [group_name]        nvarchar(64)  NOT NULL DEFAULT '',
-    [description]       nvarchar(256) NOT NULL DEFAULT '',
-    [group_status]      tinyint       NOT NULL DEFAULT '0',
-    [version]           int           NOT NULL,
-    [group_partition]   int           NOT NULL,
-    [id_generator_mode] tinyint       NOT NULL DEFAULT '1',
-    [init_scene]        tinyint       NOT NULL DEFAULT '0',
-    [bucket_index]      int           NOT NULL DEFAULT '0',
-    [create_dt]         datetime2     NOT NULL DEFAULT GETDATE(),
-    [update_dt]         datetime2     NOT NULL DEFAULT GETDATE()
+    id                bigint PRIMARY KEY IDENTITY,
+    namespace_id      nvarchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
+    group_name        nvarchar(64)  NOT NULL DEFAULT '',
+    description       nvarchar(256) NOT NULL DEFAULT '',
+    token             nvarchar(64)  NOT NULL DEFAULT 'ER_cKqBTPzCsWA3VyuCfFoccmuIEGXjr5KT',
+    group_status      tinyint       NOT NULL DEFAULT '0',
+    version           int           NOT NULL,
+    group_partition   int           NOT NULL,
+    id_generator_mode tinyint       NOT NULL DEFAULT '1',
+    init_scene        tinyint       NOT NULL DEFAULT '0',
+    bucket_index      int           NOT NULL DEFAULT '0',
+    create_dt         datetime2     NOT NULL DEFAULT GETDATE(),
+    update_dt         datetime2     NOT NULL DEFAULT GETDATE()
 )
 GO
 
-CREATE UNIQUE NONCLUSTERED INDEX [uk_namespace_id_group_name] ON [group_config] ([namespace_id] ASC, [group_name] ASC)
+CREATE UNIQUE NONCLUSTERED INDEX uk_namespace_id_group_name ON group_config (namespace_id ASC, group_name ASC)
 GO
 
 EXEC sp_addextendedproperty
@@ -116,6 +117,13 @@ EXEC sp_addextendedproperty
      'SCHEMA', N'dbo',
      'TABLE', N'group_config',
      'COLUMN', N'description'
+GO
+
+EXEC sp_addextendedproperty
+     'MS_Description', N'token',
+     'SCHEMA', N'dbo',
+     'TABLE', N'group_config',
+     'COLUMN', N'token'
 GO
 
 EXEC sp_addextendedproperty
@@ -181,42 +189,42 @@ EXEC sp_addextendedproperty
 GO
 
 -- job
-CREATE TABLE [job]
+CREATE TABLE job
 (
-    [id]               bigint PRIMARY KEY IDENTITY,
-    [namespace_id]     nvarchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
-    [group_name]       nvarchar(64)  NOT NULL,
-    [job_name]         nvarchar(64)  NOT NULL,
-    [args_str]         nvarchar(max) NULL,
-    [args_type]        tinyint       NOT NULL DEFAULT '1',
-    [next_trigger_at]  bigint        NOT NULL,
-    [job_status]       tinyint       NOT NULL DEFAULT '1',
-    [task_type]        tinyint       NOT NULL DEFAULT '1',
-    [route_key]        tinyint       NOT NULL DEFAULT '4',
-    [executor_type]    tinyint       NOT NULL DEFAULT '1',
-    [executor_info]    nvarchar(255) NULL     DEFAULT '',
-    [trigger_type]     tinyint       NOT NULL,
-    [trigger_interval] nvarchar(255) NOT NULL,
-    [block_strategy]   tinyint       NOT NULL DEFAULT '1',
-    [executor_timeout] int           NOT NULL DEFAULT '0',
-    [max_retry_times]  int           NOT NULL DEFAULT '0',
-    [parallel_num]     int           NOT NULL DEFAULT '1',
-    [retry_interval]   int           NOT NULL DEFAULT '0',
-    [bucket_index]     int           NOT NULL DEFAULT '0',
-    [resident]         tinyint       NOT NULL DEFAULT '0',
-    [description]      nvarchar(256) NOT NULL DEFAULT '',
-    [ext_attrs]        nvarchar(256) NULL     DEFAULT '',
-    [create_dt]        datetime2              DEFAULT GETDATE(),
-    [update_dt]        datetime2              DEFAULT GETDATE(),
-    [deleted]          BIT           NOT NULL DEFAULT 0
+    id               bigint PRIMARY KEY IDENTITY,
+    namespace_id     nvarchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
+    group_name       nvarchar(64)  NOT NULL,
+    job_name         nvarchar(64)  NOT NULL,
+    args_str         nvarchar(max) NULL,
+    args_type        tinyint       NOT NULL DEFAULT '1',
+    next_trigger_at  bigint        NOT NULL,
+    job_status       tinyint       NOT NULL DEFAULT '1',
+    task_type        tinyint       NOT NULL DEFAULT '1',
+    route_key        tinyint       NOT NULL DEFAULT '4',
+    executor_type    tinyint       NOT NULL DEFAULT '1',
+    executor_info    nvarchar(255) NULL     DEFAULT '',
+    trigger_type     tinyint       NOT NULL,
+    trigger_interval nvarchar(255) NOT NULL,
+    block_strategy   tinyint       NOT NULL DEFAULT '1',
+    executor_timeout int           NOT NULL DEFAULT '0',
+    max_retry_times  int           NOT NULL DEFAULT '0',
+    parallel_num     int           NOT NULL DEFAULT '1',
+    retry_interval   int           NOT NULL DEFAULT '0',
+    bucket_index     int           NOT NULL DEFAULT '0',
+    resident         tinyint       NOT NULL DEFAULT '0',
+    description      nvarchar(256) NOT NULL DEFAULT '',
+    ext_attrs        nvarchar(256) NULL     DEFAULT '',
+    create_dt        datetime2              DEFAULT GETDATE(),
+    update_dt        datetime2              DEFAULT GETDATE(),
+    deleted          BIT           NOT NULL DEFAULT 0
 )
 GO
 
-CREATE NONCLUSTERED INDEX [idx_namespace_id_group_name] ON [job] ([namespace_id] ASC, [group_name] ASC)
+CREATE NONCLUSTERED INDEX idx_namespace_id_group_name ON job (namespace_id ASC, group_name ASC)
 GO
-CREATE NONCLUSTERED INDEX [idx_job_status_bucket_index] ON [job] ([job_status] ASC, [bucket_index] ASC)
+CREATE NONCLUSTERED INDEX idx_job_status_bucket_index ON job (job_status ASC, bucket_index ASC)
 GO
-CREATE NONCLUSTERED INDEX [idx_create_dt] ON [job] ([create_dt] ASC)
+CREATE NONCLUSTERED INDEX idx_create_dt ON job (create_dt ASC)
 GO
 
 EXEC sp_addextendedproperty
@@ -409,27 +417,27 @@ GO
 
 
 -- job_log_message
-CREATE TABLE [job_log_message]
+CREATE TABLE job_log_message
 (
-    [id]            bigint PRIMARY KEY IDENTITY,
-    [namespace_id]  nvarchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
-    [group_name]    nvarchar(64)  NOT NULL,
-    [job_id]        bigint        NOT NULL,
-    [task_batch_id] bigint        NOT NULL,
-    [task_id]       bigint        NOT NULL,
-    [message]       nvarchar(max) NOT NULL,
-    [log_num]       int           NOT NULL DEFAULT '1',
-    [real_time]     bigint        NOT NULL DEFAULT '0',
-    [create_dt]     datetime2     NOT NULL DEFAULT GETDATE(),
-    [ext_attrs]     nvarchar(256) NULL     DEFAULT ''
+    id            bigint PRIMARY KEY IDENTITY,
+    namespace_id  nvarchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
+    group_name    nvarchar(64)  NOT NULL,
+    job_id        bigint        NOT NULL,
+    task_batch_id bigint        NOT NULL,
+    task_id       bigint        NOT NULL,
+    message       nvarchar(max) NOT NULL,
+    log_num       int           NOT NULL DEFAULT '1',
+    real_time     bigint        NOT NULL DEFAULT '0',
+    create_dt     datetime2     NOT NULL DEFAULT GETDATE(),
+    ext_attrs     nvarchar(256) NULL     DEFAULT ''
 )
 GO
 
-CREATE NONCLUSTERED INDEX [idx_task_batch_id_task_id] ON [job_log_message] ([task_batch_id] ASC, [task_id] ASC)
+CREATE NONCLUSTERED INDEX idx_task_batch_id_task_id ON job_log_message (task_batch_id ASC, task_id ASC)
 GO
-CREATE NONCLUSTERED INDEX [idx_create_dt] ON [job_log_message] ([create_dt] ASC)
+CREATE NONCLUSTERED INDEX idx_create_dt ON job_log_message (create_dt ASC)
 GO
-CREATE NONCLUSTERED INDEX [idx_namespace_id_group_name] ON [job_log_message] ([namespace_id] ASC, [group_name] ASC)
+CREATE NONCLUSTERED INDEX idx_namespace_id_group_name ON job_log_message (namespace_id ASC, group_name ASC)
 GO
 
 EXEC sp_addextendedproperty
@@ -517,26 +525,26 @@ GO
 
 
 -- job_notify_config
-CREATE TABLE [job_notify_config]
+CREATE TABLE job_notify_config
 (
-    [id]                     bigint PRIMARY KEY IDENTITY,
-    [namespace_id]           nvarchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
-    [group_name]             nvarchar(64)  NOT NULL,
-    [job_id]                 bigint        NOT NULL,
-    [notify_status]          tinyint       NOT NULL DEFAULT '0',
-    [notify_type]            tinyint       NOT NULL DEFAULT '0',
-    [notify_attribute]       nvarchar(512) NOT NULL,
-    [notify_threshold]       int           NOT NULL DEFAULT '0',
-    [notify_scene]           tinyint       NOT NULL DEFAULT '0',
-    [rate_limiter_status]    tinyint       NOT NULL DEFAULT '0',
-    [rate_limiter_threshold] int           NOT NULL DEFAULT '0',
-    [description]            nvarchar(256) NOT NULL DEFAULT '',
-    [create_dt]              datetime2     NOT NULL DEFAULT GETDATE(),
-    [update_dt]              datetime2     NOT NULL DEFAULT GETDATE()
+    id                     bigint PRIMARY KEY IDENTITY,
+    namespace_id           nvarchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
+    group_name             nvarchar(64)  NOT NULL,
+    job_id                 bigint        NOT NULL,
+    notify_status          tinyint       NOT NULL DEFAULT '0',
+    notify_type            tinyint       NOT NULL DEFAULT '0',
+    notify_attribute       nvarchar(512) NOT NULL,
+    notify_threshold       int           NOT NULL DEFAULT '0',
+    notify_scene           tinyint       NOT NULL DEFAULT '0',
+    rate_limiter_status    tinyint       NOT NULL DEFAULT '0',
+    rate_limiter_threshold int           NOT NULL DEFAULT '0',
+    description            nvarchar(256) NOT NULL DEFAULT '',
+    create_dt              datetime2     NOT NULL DEFAULT GETDATE(),
+    update_dt              datetime2     NOT NULL DEFAULT GETDATE()
 )
 GO
 
-CREATE NONCLUSTERED INDEX [idx_namespace_id_group_name_job_id] ON [job_notify_config] ([namespace_id] ASC, [group_name] ASC, [job_id] ASC)
+CREATE NONCLUSTERED INDEX idx_namespace_id_group_name_job_id ON job_notify_config (namespace_id ASC, group_name ASC, job_id ASC)
 GO
 
 EXEC sp_addextendedproperty
@@ -645,29 +653,29 @@ GO
 
 
 -- job_summary
-CREATE TABLE [job_summary]
+CREATE TABLE job_summary
 (
-    [id]               bigint PRIMARY KEY IDENTITY,
-    [namespace_id]     nvarchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
-    [group_name]       nvarchar(64)  NOT NULL,
-    [business_id]      bigint        NOT NULL,
-    [system_task_type] tinyint       NOT NULL DEFAULT '3',
-    [trigger_at]       datetime2     NOT NULL,
-    [success_num]      int           NOT NULL DEFAULT '0',
-    [fail_num]         int           NOT NULL DEFAULT '0',
-    [fail_reason]      nvarchar(512) NOT NULL DEFAULT '',
-    [stop_num]         int           NOT NULL DEFAULT '0',
-    [stop_reason]      nvarchar(512) NOT NULL DEFAULT '',
-    [cancel_num]       int           NOT NULL DEFAULT '0',
-    [cancel_reason]    nvarchar(512) NOT NULL DEFAULT '',
-    [create_dt]        datetime2     NOT NULL DEFAULT GETDATE(),
-    [update_dt]        datetime2     NOT NULL DEFAULT GETDATE()
+    id               bigint PRIMARY KEY IDENTITY,
+    namespace_id     nvarchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
+    group_name       nvarchar(64)  NOT NULL,
+    business_id      bigint        NOT NULL,
+    system_task_type tinyint       NOT NULL DEFAULT '3',
+    trigger_at       datetime2     NOT NULL,
+    success_num      int           NOT NULL DEFAULT '0',
+    fail_num         int           NOT NULL DEFAULT '0',
+    fail_reason      nvarchar(512) NOT NULL DEFAULT '',
+    stop_num         int           NOT NULL DEFAULT '0',
+    stop_reason      nvarchar(512) NOT NULL DEFAULT '',
+    cancel_num       int           NOT NULL DEFAULT '0',
+    cancel_reason    nvarchar(512) NOT NULL DEFAULT '',
+    create_dt        datetime2     NOT NULL DEFAULT GETDATE(),
+    update_dt        datetime2     NOT NULL DEFAULT GETDATE()
 )
 GO
 
-CREATE UNIQUE NONCLUSTERED INDEX [uk_job_id_trigger_at] ON [job_summary] ([business_id] ASC, [trigger_at] ASC)
+CREATE UNIQUE NONCLUSTERED INDEX uk_system_task_type_business_id_trigger_at ON job_summary (system_task_type ASC, business_id ASC, trigger_at ASC)
 GO
-CREATE NONCLUSTERED INDEX [idx_namespace_id_group_name_job_id] ON [job_summary] ([namespace_id] ASC, [group_name] ASC, [business_id] ASC)
+CREATE NONCLUSTERED INDEX idx_namespace_id_group_name_job_id ON job_summary (namespace_id ASC, group_name ASC, business_id ASC)
 GO
 
 EXEC sp_addextendedproperty
@@ -790,31 +798,31 @@ GO
 
 
 -- job_task
-CREATE TABLE [job_task]
+CREATE TABLE job_task
 (
-    [id]             bigint PRIMARY KEY IDENTITY,
-    [namespace_id]   nvarchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
-    [group_name]     nvarchar(64)  NOT NULL,
-    [job_id]         bigint        NOT NULL,
-    [task_batch_id]  bigint        NOT NULL,
-    [parent_id]      bigint        NOT NULL DEFAULT '0',
-    [task_status]    tinyint       NOT NULL DEFAULT '0',
-    [retry_count]    int           NOT NULL DEFAULT '0',
-    [client_info]    nvarchar(128) NULL,
-    [result_message] nvarchar(max) NOT NULL,
-    [args_str]       nvarchar(max) NULL,
-    [args_type]      tinyint       NOT NULL DEFAULT '1',
-    [ext_attrs]      nvarchar(256) NULL     DEFAULT '',
-    [create_dt]      datetime2     NOT NULL DEFAULT GETDATE(),
-    [update_dt]      datetime2     NOT NULL DEFAULT GETDATE()
+    id             bigint PRIMARY KEY IDENTITY,
+    namespace_id   nvarchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
+    group_name     nvarchar(64)  NOT NULL,
+    job_id         bigint        NOT NULL,
+    task_batch_id  bigint        NOT NULL,
+    parent_id      bigint        NOT NULL DEFAULT '0',
+    task_status    tinyint       NOT NULL DEFAULT '0',
+    retry_count    int           NOT NULL DEFAULT '0',
+    client_info    nvarchar(128) NULL,
+    result_message nvarchar(max) NOT NULL,
+    args_str       nvarchar(max) NULL,
+    args_type      tinyint       NOT NULL DEFAULT '1',
+    ext_attrs      nvarchar(256) NULL     DEFAULT '',
+    create_dt      datetime2     NOT NULL DEFAULT GETDATE(),
+    update_dt      datetime2     NOT NULL DEFAULT GETDATE()
 )
 GO
 
-CREATE NONCLUSTERED INDEX [idx_task_batch_id_task_status] ON [job_task] ([task_batch_id] ASC, [task_status] ASC)
+CREATE NONCLUSTERED INDEX idx_task_batch_id_task_status ON job_task (task_batch_id ASC, task_status ASC)
 GO
-CREATE NONCLUSTERED INDEX [idx_create_dt] ON [job_task] ([create_dt] ASC)
+CREATE NONCLUSTERED INDEX idx_create_dt ON job_task (create_dt ASC)
 GO
-CREATE NONCLUSTERED INDEX [idx_namespace_id_group_name] ON [job_task] ([namespace_id] ASC, [group_name] ASC)
+CREATE NONCLUSTERED INDEX idx_namespace_id_group_name ON job_task (namespace_id ASC, group_name ASC)
 GO
 
 EXEC sp_addextendedproperty
@@ -929,34 +937,34 @@ EXEC sp_addextendedproperty
 GO
 
 -- job_task_batch
-CREATE TABLE [job_task_batch]
+CREATE TABLE job_task_batch
 (
-    [id]                      bigint PRIMARY KEY IDENTITY,
-    [namespace_id]            nvarchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
-    [group_name]              nvarchar(64)  NOT NULL,
-    [job_id]                  bigint        NOT NULL,
-    [workflow_node_id]        bigint        NOT NULL DEFAULT '0',
-    [parent_workflow_node_id] bigint        NOT NULL DEFAULT '0',
-    [workflow_task_batch_id]  bigint        NOT NULL DEFAULT '0',
-    [task_batch_status]       tinyint       NOT NULL DEFAULT '0',
-    [operation_reason]        tinyint       NOT NULL DEFAULT '0',
-    [execution_at]            bigint        NOT NULL DEFAULT '0',
-    [system_task_type]        tinyint       NOT NULL DEFAULT '3',
-    [parent_id]               nvarchar(64)  NOT NULL DEFAULT '',
-    [create_dt]               datetime2     NOT NULL DEFAULT GETDATE(),
-    [update_dt]               datetime2     NOT NULL DEFAULT GETDATE(),
-    [deleted]                 BIT                    DEFAULT 0,
-    [ext_attrs]               nvarchar(256) NULL     DEFAULT ''
+    id                      bigint PRIMARY KEY IDENTITY,
+    namespace_id            nvarchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
+    group_name              nvarchar(64)  NOT NULL,
+    job_id                  bigint        NOT NULL,
+    workflow_node_id        bigint        NOT NULL DEFAULT '0',
+    parent_workflow_node_id bigint        NOT NULL DEFAULT '0',
+    workflow_task_batch_id  bigint        NOT NULL DEFAULT '0',
+    task_batch_status       tinyint       NOT NULL DEFAULT '0',
+    operation_reason        tinyint       NOT NULL DEFAULT '0',
+    execution_at            bigint        NOT NULL DEFAULT '0',
+    system_task_type        tinyint       NOT NULL DEFAULT '3',
+    parent_id               nvarchar(64)  NOT NULL DEFAULT '',
+    create_dt               datetime2     NOT NULL DEFAULT GETDATE(),
+    update_dt               datetime2     NOT NULL DEFAULT GETDATE(),
+    deleted                 BIT                    DEFAULT 0,
+    ext_attrs               nvarchar(256) NULL     DEFAULT ''
 )
 GO
 
-CREATE NONCLUSTERED INDEX [idx_job_id_task_batch_status] ON [job_task_batch] ([job_id] ASC, [task_batch_status] ASC)
+CREATE NONCLUSTERED INDEX idx_job_id_task_batch_status ON job_task_batch (job_id ASC, task_batch_status ASC)
 GO
-CREATE NONCLUSTERED INDEX [idx_create_dt] ON [job_task_batch] ([create_dt] ASC)
+CREATE NONCLUSTERED INDEX idx_create_dt ON job_task_batch (create_dt ASC)
 GO
-CREATE NONCLUSTERED INDEX [idx_namespace_id_group_name] ON [job_task_batch] ([namespace_id] ASC, [group_name] ASC)
+CREATE NONCLUSTERED INDEX idx_namespace_id_group_name ON job_task_batch (namespace_id ASC, group_name ASC)
 GO
-CREATE NONCLUSTERED INDEX [idx_workflow_task_batch_id_workflow_node_id] ON [job_task_batch] ([workflow_task_batch_id] ASC, [workflow_node_id] ASC)
+CREATE NONCLUSTERED INDEX idx_workflow_task_batch_id_workflow_node_id ON job_task_batch (workflow_task_batch_id ASC, workflow_node_id ASC)
 GO
 
 EXEC sp_addextendedproperty
@@ -1078,21 +1086,21 @@ EXEC sp_addextendedproperty
 GO
 
 -- namespace
-CREATE TABLE [namespace]
+CREATE TABLE namespace
 (
-    [id]          bigint PRIMARY KEY IDENTITY,
-    [name]        nvarchar(64)  NOT NULL,
-    [unique_id]   nvarchar(64)  NOT NULL,
-    [description] nvarchar(256) NOT NULL DEFAULT '',
-    [create_dt]   datetime2     NOT NULL DEFAULT GETDATE(),
-    [update_dt]   datetime2     NOT NULL DEFAULT GETDATE(),
-    [deleted]     BIT           NOT NULL DEFAULT 0
+    id          bigint PRIMARY KEY IDENTITY,
+    name        nvarchar(64)  NOT NULL,
+    unique_id   nvarchar(64)  NOT NULL,
+    description nvarchar(256) NOT NULL DEFAULT '',
+    create_dt   datetime2     NOT NULL DEFAULT GETDATE(),
+    update_dt   datetime2     NOT NULL DEFAULT GETDATE(),
+    deleted     BIT           NOT NULL DEFAULT 0
 )
 GO
 
-CREATE UNIQUE NONCLUSTERED INDEX [uk_unique_id] ON [namespace] ([unique_id] ASC)
+CREATE UNIQUE NONCLUSTERED INDEX uk_unique_id ON namespace (unique_id ASC)
 GO
-CREATE NONCLUSTERED INDEX [idx_name] ON [namespace] ([name] ASC)
+CREATE NONCLUSTERED INDEX idx_name ON namespace (name ASC)
 GO
 
 EXEC sp_addextendedproperty
@@ -1150,32 +1158,32 @@ EXEC sp_addextendedproperty
      'TABLE', N'namespace'
 GO
 
-INSERT INTO [namespace] ([name], [unique_id], [description], [create_dt], [update_dt], [deleted])
+INSERT INTO namespace (name, unique_id, description, create_dt, update_dt, deleted)
 VALUES (N'Default', N'764d604ec6fc45f68cd92514c40e9e1a', N'', N'2024-03-16 10:27:36', N'2024-03-16 10:27:36',
         N'0')
 GO
 
 -- notify_config
-CREATE TABLE [notify_config]
+CREATE TABLE notify_config
 (
-    [id]                     bigint PRIMARY KEY IDENTITY,
-    [namespace_id]           nvarchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
-    [group_name]             nvarchar(64)  NOT NULL,
-    [scene_name]             nvarchar(64)  NOT NULL,
-    [notify_status]          tinyint       NOT NULL DEFAULT '0',
-    [notify_type]            tinyint       NOT NULL DEFAULT '0',
-    [notify_attribute]       nvarchar(512) NOT NULL,
-    [notify_threshold]       int           NOT NULL DEFAULT '0',
-    [notify_scene]           tinyint       NOT NULL DEFAULT '0',
-    [rate_limiter_status]    tinyint       NOT NULL DEFAULT '0',
-    [rate_limiter_threshold] int           NOT NULL DEFAULT '0',
-    [description]            nvarchar(256) NOT NULL DEFAULT '',
-    [create_dt]              datetime2     NOT NULL DEFAULT GETDATE(),
-    [update_dt]              datetime2     NOT NULL DEFAULT GETDATE()
+    id                     bigint PRIMARY KEY IDENTITY,
+    namespace_id           nvarchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
+    group_name             nvarchar(64)  NOT NULL,
+    scene_name             nvarchar(64)  NOT NULL,
+    notify_status          tinyint       NOT NULL DEFAULT '0',
+    notify_type            tinyint       NOT NULL DEFAULT '0',
+    notify_attribute       nvarchar(512) NOT NULL,
+    notify_threshold       int           NOT NULL DEFAULT '0',
+    notify_scene           tinyint       NOT NULL DEFAULT '0',
+    rate_limiter_status    tinyint       NOT NULL DEFAULT '0',
+    rate_limiter_threshold int           NOT NULL DEFAULT '0',
+    description            nvarchar(256) NOT NULL DEFAULT '',
+    create_dt              datetime2     NOT NULL DEFAULT GETDATE(),
+    update_dt              datetime2     NOT NULL DEFAULT GETDATE()
 )
 GO
 
-CREATE NONCLUSTERED INDEX [idx_namespace_id_group_name_scene_name] ON [notify_config] ([namespace_id] ASC, [group_name] ASC, [scene_name] ASC)
+CREATE NONCLUSTERED INDEX idx_namespace_id_group_name_scene_name ON notify_config (namespace_id ASC, group_name ASC, scene_name ASC)
 GO
 
 EXEC sp_addextendedproperty
@@ -1283,32 +1291,32 @@ EXEC sp_addextendedproperty
 GO
 
 -- retry_dead_letter_0
-CREATE TABLE [retry_dead_letter_0]
+CREATE TABLE retry_dead_letter_0
 (
-    [id]            bigint PRIMARY KEY IDENTITY,
-    [namespace_id]  nvarchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
-    [unique_id]     nvarchar(64)  NOT NULL,
-    [group_name]    nvarchar(64)  NOT NULL,
-    [scene_name]    nvarchar(64)  NOT NULL,
-    [idempotent_id] nvarchar(64)  NOT NULL,
-    [biz_no]        nvarchar(64)  NOT NULL DEFAULT '',
-    [executor_name] nvarchar(512) NOT NULL DEFAULT '',
-    [args_str]      nvarchar(max) NOT NULL,
-    [ext_attrs]     nvarchar(max) NOT NULL,
-    [task_type]     tinyint       NOT NULL DEFAULT '1',
-    [create_dt]     datetime2     NOT NULL DEFAULT GETDATE()
+    id            bigint PRIMARY KEY IDENTITY,
+    namespace_id  nvarchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
+    unique_id     nvarchar(64)  NOT NULL,
+    group_name    nvarchar(64)  NOT NULL,
+    scene_name    nvarchar(64)  NOT NULL,
+    idempotent_id nvarchar(64)  NOT NULL,
+    biz_no        nvarchar(64)  NOT NULL DEFAULT '',
+    executor_name nvarchar(512) NOT NULL DEFAULT '',
+    args_str      nvarchar(max) NOT NULL,
+    ext_attrs     nvarchar(max) NOT NULL,
+    task_type     tinyint       NOT NULL DEFAULT '1',
+    create_dt     datetime2     NOT NULL DEFAULT GETDATE()
 )
 GO
 
-CREATE UNIQUE NONCLUSTERED INDEX [uk_namespace_id_group_name_unique_id] ON [retry_dead_letter_0] ([namespace_id] ASC, [group_name] ASC, [unique_id] ASC)
+CREATE UNIQUE NONCLUSTERED INDEX uk_namespace_id_group_name_unique_id ON retry_dead_letter_0 (namespace_id ASC, group_name ASC, unique_id ASC)
 GO
-CREATE NONCLUSTERED INDEX [idx_namespace_id_group_name_scene_name] ON [retry_dead_letter_0] ([namespace_id] ASC, [group_name] ASC, [scene_name] ASC)
+CREATE NONCLUSTERED INDEX idx_namespace_id_group_name_scene_name ON retry_dead_letter_0 (namespace_id ASC, group_name ASC, scene_name ASC)
 GO
-CREATE NONCLUSTERED INDEX [idx_idempotent_id] ON [retry_dead_letter_0] ([idempotent_id] ASC)
+CREATE NONCLUSTERED INDEX idx_idempotent_id ON retry_dead_letter_0 (idempotent_id ASC)
 GO
-CREATE NONCLUSTERED INDEX [idx_biz_no] ON [retry_dead_letter_0] ([biz_no] ASC)
+CREATE NONCLUSTERED INDEX idx_biz_no ON retry_dead_letter_0 (biz_no ASC)
 GO
-CREATE NONCLUSTERED INDEX [idx_create_dt] ON [retry_dead_letter_0] ([create_dt] ASC)
+CREATE NONCLUSTERED INDEX idx_create_dt ON retry_dead_letter_0 (create_dt ASC)
 GO
 
 EXEC sp_addextendedproperty
@@ -1403,24 +1411,24 @@ GO
 
 
 -- retry_summary
-CREATE TABLE [retry_summary]
+CREATE TABLE retry_summary
 (
-    [id]            bigint PRIMARY KEY IDENTITY,
-    [namespace_id]  nvarchar(64) NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
-    [group_name]    nvarchar(64) NOT NULL DEFAULT '',
-    [scene_name]    nvarchar(50) NOT NULL DEFAULT '',
-    [trigger_at]    datetime2    NOT NULL DEFAULT GETDATE(),
-    [running_num]   int          NOT NULL DEFAULT '0',
-    [finish_num]    int          NOT NULL DEFAULT '0',
-    [max_count_num] int          NOT NULL DEFAULT '0',
-    [suspend_num]   int          NOT NULL DEFAULT '0',
-    [create_dt]     datetime2    NOT NULL DEFAULT GETDATE(),
-    [update_dt]     datetime2    NOT NULL DEFAULT GETDATE()
+    id            bigint PRIMARY KEY IDENTITY,
+    namespace_id  nvarchar(64) NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
+    group_name    nvarchar(64) NOT NULL DEFAULT '',
+    scene_name    nvarchar(50) NOT NULL DEFAULT '',
+    trigger_at    datetime2    NOT NULL DEFAULT GETDATE(),
+    running_num   int          NOT NULL DEFAULT '0',
+    finish_num    int          NOT NULL DEFAULT '0',
+    max_count_num int          NOT NULL DEFAULT '0',
+    suspend_num   int          NOT NULL DEFAULT '0',
+    create_dt     datetime2    NOT NULL DEFAULT GETDATE(),
+    update_dt     datetime2    NOT NULL DEFAULT GETDATE()
 )
 GO
 
-CREATE UNIQUE NONCLUSTERED INDEX [uk_scene_name_trigger_at] ON [retry_summary] ([namespace_id] ASC, [group_name] ASC,
-                                                                                [scene_name] ASC, [trigger_at] ASC)
+CREATE UNIQUE NONCLUSTERED INDEX uk_scene_name_trigger_at ON retry_summary (namespace_id ASC, group_name ASC,
+                                                                            scene_name ASC, trigger_at ASC)
 GO
 
 EXEC sp_addextendedproperty
@@ -1507,40 +1515,40 @@ EXEC sp_addextendedproperty
 GO
 
 -- retry_task_0
-CREATE TABLE [retry_task_0]
+CREATE TABLE retry_task_0
 (
-    [id]              bigint PRIMARY KEY IDENTITY,
-    [namespace_id]    nvarchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
-    [unique_id]       nvarchar(64)  NOT NULL,
-    [group_name]      nvarchar(64)  NOT NULL,
-    [scene_name]      nvarchar(64)  NOT NULL,
-    [idempotent_id]   nvarchar(64)  NOT NULL,
-    [biz_no]          nvarchar(64)  NOT NULL DEFAULT '',
-    [executor_name]   nvarchar(512) NOT NULL DEFAULT '',
-    [args_str]        nvarchar(max) NOT NULL,
-    [ext_attrs]       nvarchar(max) NOT NULL,
-    [next_trigger_at] datetime2     NOT NULL,
-    [retry_count]     int           NOT NULL DEFAULT '0',
-    [retry_status]    tinyint       NOT NULL DEFAULT '0',
-    [task_type]       tinyint       NOT NULL DEFAULT '1',
-    [create_dt]       datetime2     NOT NULL DEFAULT GETDATE(),
-    [update_dt]       datetime2     NOT NULL DEFAULT GETDATE()
+    id              bigint PRIMARY KEY IDENTITY,
+    namespace_id    nvarchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
+    unique_id       nvarchar(64)  NOT NULL,
+    group_name      nvarchar(64)  NOT NULL,
+    scene_name      nvarchar(64)  NOT NULL,
+    idempotent_id   nvarchar(64)  NOT NULL,
+    biz_no          nvarchar(64)  NOT NULL DEFAULT '',
+    executor_name   nvarchar(512) NOT NULL DEFAULT '',
+    args_str        nvarchar(max) NOT NULL,
+    ext_attrs       nvarchar(max) NOT NULL,
+    next_trigger_at datetime2     NOT NULL,
+    retry_count     int           NOT NULL DEFAULT '0',
+    retry_status    tinyint       NOT NULL DEFAULT '0',
+    task_type       tinyint       NOT NULL DEFAULT '1',
+    create_dt       datetime2     NOT NULL DEFAULT GETDATE(),
+    update_dt       datetime2     NOT NULL DEFAULT GETDATE()
 )
 GO
 
-CREATE UNIQUE NONCLUSTERED INDEX [uk_name_unique_id] ON [retry_task_0] ([namespace_id] ASC, [group_name] ASC, [unique_id] ASC)
+CREATE UNIQUE NONCLUSTERED INDEX uk_name_unique_id ON retry_task_0 (namespace_id ASC, group_name ASC, unique_id ASC)
 GO
-CREATE NONCLUSTERED INDEX [idx_namespace_id_group_name_scene_name] ON [retry_task_0] ([namespace_id] ASC, [group_name] ASC, [scene_name] ASC)
+CREATE NONCLUSTERED INDEX idx_namespace_id_group_name_scene_name ON retry_task_0 (namespace_id ASC, group_name ASC, scene_name ASC)
 GO
-CREATE NONCLUSTERED INDEX [idx_namespace_id_group_name_task_type] ON [retry_task_0] ([namespace_id] ASC, [group_name] ASC, [task_type] ASC)
+CREATE NONCLUSTERED INDEX idx_namespace_id_group_name_task_type ON retry_task_0 (namespace_id ASC, group_name ASC, task_type ASC)
 GO
-CREATE NONCLUSTERED INDEX [idx_namespace_id_group_name_retry_status] ON [retry_task_0] ([namespace_id] ASC, [group_name] ASC, [retry_status] ASC)
+CREATE NONCLUSTERED INDEX idx_namespace_id_group_name_retry_status ON retry_task_0 (namespace_id ASC, group_name ASC, retry_status ASC)
 GO
-CREATE NONCLUSTERED INDEX [idx_idempotent_id] ON [retry_task_0] ([idempotent_id] ASC)
+CREATE NONCLUSTERED INDEX idx_idempotent_id ON retry_task_0 (idempotent_id ASC)
 GO
-CREATE NONCLUSTERED INDEX [idx_biz_no] ON [retry_task_0] ([biz_no] ASC)
+CREATE NONCLUSTERED INDEX idx_biz_no ON retry_task_0 (biz_no ASC)
 GO
-CREATE NONCLUSTERED INDEX [idx_create_dt] ON [retry_task_0] ([create_dt] ASC)
+CREATE NONCLUSTERED INDEX idx_create_dt ON retry_task_0 (create_dt ASC)
 GO
 
 EXEC sp_addextendedproperty
@@ -1662,36 +1670,36 @@ EXEC sp_addextendedproperty
 GO
 
 -- retry_task_log
-CREATE TABLE [retry_task_log]
+CREATE TABLE retry_task_log
 (
-    [id]            bigint PRIMARY KEY IDENTITY,
-    [namespace_id]  nvarchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
-    [unique_id]     nvarchar(64)  NOT NULL,
-    [group_name]    nvarchar(64)  NOT NULL,
-    [scene_name]    nvarchar(64)  NOT NULL,
-    [idempotent_id] nvarchar(64)  NOT NULL,
-    [biz_no]        nvarchar(64)  NOT NULL DEFAULT '',
-    [executor_name] nvarchar(512) NOT NULL DEFAULT '',
-    [args_str]      nvarchar(max) NOT NULL,
-    [ext_attrs]     nvarchar(max) NOT NULL,
-    [retry_status]  tinyint       NOT NULL DEFAULT '0',
-    [task_type]     tinyint       NOT NULL DEFAULT '1',
-    [create_dt]     datetime2     NOT NULL DEFAULT GETDATE(),
-    [update_dt]     datetime2     NOT NULL DEFAULT GETDATE()
+    id            bigint PRIMARY KEY IDENTITY,
+    namespace_id  nvarchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
+    unique_id     nvarchar(64)  NOT NULL,
+    group_name    nvarchar(64)  NOT NULL,
+    scene_name    nvarchar(64)  NOT NULL,
+    idempotent_id nvarchar(64)  NOT NULL,
+    biz_no        nvarchar(64)  NOT NULL DEFAULT '',
+    executor_name nvarchar(512) NOT NULL DEFAULT '',
+    args_str      nvarchar(max) NOT NULL,
+    ext_attrs     nvarchar(max) NOT NULL,
+    retry_status  tinyint       NOT NULL DEFAULT '0',
+    task_type     tinyint       NOT NULL DEFAULT '1',
+    create_dt     datetime2     NOT NULL DEFAULT GETDATE(),
+    update_dt     datetime2     NOT NULL DEFAULT GETDATE()
 )
 GO
 
-CREATE NONCLUSTERED INDEX [idx_group_name_scene_name] ON [retry_task_log] ([namespace_id] ASC, [group_name] ASC, [scene_name] ASC)
+CREATE NONCLUSTERED INDEX idx_group_name_scene_name ON retry_task_log (namespace_id ASC, group_name ASC, scene_name ASC)
 GO
-CREATE NONCLUSTERED INDEX [idx_retry_status] ON [retry_task_log] ([retry_status] ASC)
+CREATE NONCLUSTERED INDEX idx_retry_status ON retry_task_log (retry_status ASC)
 GO
-CREATE NONCLUSTERED INDEX [idx_idempotent_id] ON [retry_task_log] ([idempotent_id] ASC)
+CREATE NONCLUSTERED INDEX idx_idempotent_id ON retry_task_log (idempotent_id ASC)
 GO
-CREATE NONCLUSTERED INDEX [idx_unique_id] ON [retry_task_log] ([unique_id] ASC)
+CREATE NONCLUSTERED INDEX idx_unique_id ON retry_task_log (unique_id ASC)
 GO
-CREATE NONCLUSTERED INDEX [idx_biz_no] ON [retry_task_log] ([biz_no] ASC)
+CREATE NONCLUSTERED INDEX idx_biz_no ON retry_task_log (biz_no ASC)
 GO
-CREATE NONCLUSTERED INDEX [idx_create_dt] ON [retry_task_log] ([create_dt] ASC)
+CREATE NONCLUSTERED INDEX idx_create_dt ON retry_task_log (create_dt ASC)
 GO
 
 EXEC sp_addextendedproperty
@@ -1799,21 +1807,21 @@ EXEC sp_addextendedproperty
 GO
 
 -- retry_task_log_message
-CREATE TABLE [retry_task_log_message]
+CREATE TABLE retry_task_log_message
 (
-    [id]           bigint PRIMARY KEY IDENTITY,
-    [namespace_id] nvarchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
-    [group_name]   nvarchar(64)  NOT NULL,
-    [unique_id]    nvarchar(64)  NOT NULL,
-    [create_dt]    datetime2     NOT NULL DEFAULT GETDATE(),
-    [message]      nvarchar(max) NOT NULL,
-    [client_info]  nvarchar(128) NULL
+    id           bigint PRIMARY KEY IDENTITY,
+    namespace_id nvarchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
+    group_name   nvarchar(64)  NOT NULL,
+    unique_id    nvarchar(64)  NOT NULL,
+    create_dt    datetime2     NOT NULL DEFAULT GETDATE(),
+    message      nvarchar(max) NOT NULL,
+    client_info  nvarchar(128) NULL
 )
 GO
 
-CREATE NONCLUSTERED INDEX [idx_namespace_id_group_name_scene_name] ON [retry_task_log_message] ([namespace_id] ASC, [group_name] ASC, [unique_id] ASC)
+CREATE NONCLUSTERED INDEX idx_namespace_id_group_name_scene_name ON retry_task_log_message (namespace_id ASC, group_name ASC, unique_id ASC)
 GO
-CREATE NONCLUSTERED INDEX [idx_create_dt] ON [retry_task_log_message] ([create_dt] ASC)
+CREATE NONCLUSTERED INDEX idx_create_dt ON retry_task_log_message (create_dt ASC)
 GO
 
 EXEC sp_addextendedproperty
@@ -1872,26 +1880,26 @@ EXEC sp_addextendedproperty
 GO
 
 -- scene_config
-CREATE TABLE [scene_config]
+CREATE TABLE scene_config
 (
-    [id]               bigint IDENTITY,
-    [namespace_id]     nvarchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
-    [scene_name]       nvarchar(64)  NOT NULL,
-    [group_name]       nvarchar(64)  NOT NULL,
-    [scene_status]     tinyint       NOT NULL DEFAULT '0',
-    [max_retry_count]  int           NOT NULL DEFAULT '5',
-    [back_off]         tinyint       NOT NULL DEFAULT '1',
-    [trigger_interval] nvarchar(16)  NOT NULL DEFAULT '',
-    [deadline_request] bigint        NOT NULL DEFAULT '60000',
-    [executor_timeout] int           NOT NULL DEFAULT '5',
-    [route_key]        tinyint       NOT NULL DEFAULT '4',
-    [description]      nvarchar(256) NOT NULL DEFAULT '',
-    [create_dt]        datetime2     NOT NULL DEFAULT GETDATE(),
-    [update_dt]        datetime2     NOT NULL DEFAULT GETDATE()
+    id               bigint IDENTITY,
+    namespace_id     nvarchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
+    scene_name       nvarchar(64)  NOT NULL,
+    group_name       nvarchar(64)  NOT NULL,
+    scene_status     tinyint       NOT NULL DEFAULT '0',
+    max_retry_count  int           NOT NULL DEFAULT '5',
+    back_off         tinyint       NOT NULL DEFAULT '1',
+    trigger_interval nvarchar(16)  NOT NULL DEFAULT '',
+    deadline_request bigint        NOT NULL DEFAULT '60000',
+    executor_timeout int           NOT NULL DEFAULT '5',
+    route_key        tinyint       NOT NULL DEFAULT '4',
+    description      nvarchar(256) NOT NULL DEFAULT '',
+    create_dt        datetime2     NOT NULL DEFAULT GETDATE(),
+    update_dt        datetime2     NOT NULL DEFAULT GETDATE()
 )
 GO
 
-CREATE UNIQUE NONCLUSTERED INDEX [uk_namespace_id_group_name_scene_name] ON [scene_config] ([namespace_id] ASC, [group_name] ASC, [scene_name] ASC)
+CREATE UNIQUE NONCLUSTERED INDEX uk_namespace_id_group_name_scene_name ON scene_config (namespace_id ASC, group_name ASC, scene_name ASC)
 GO
 
 EXEC sp_addextendedproperty
@@ -1999,18 +2007,18 @@ EXEC sp_addextendedproperty
 GO
 
 -- sequence_alloc
-CREATE TABLE [sequence_alloc]
+CREATE TABLE sequence_alloc
 (
-    [id]           bigint PRIMARY KEY IDENTITY,
-    [namespace_id] nvarchar(64) NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
-    [group_name]   nvarchar(64) NOT NULL DEFAULT '',
-    [max_id]       bigint       NOT NULL DEFAULT '1',
-    [step]         int          NOT NULL DEFAULT '100',
-    [update_dt]    datetime2    NOT NULL DEFAULT GETDATE()
+    id           bigint PRIMARY KEY IDENTITY,
+    namespace_id nvarchar(64) NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
+    group_name   nvarchar(64) NOT NULL DEFAULT '',
+    max_id       bigint       NOT NULL DEFAULT '1',
+    step         int          NOT NULL DEFAULT '100',
+    update_dt    datetime2    NOT NULL DEFAULT GETDATE()
 )
 GO
 
-CREATE UNIQUE NONCLUSTERED INDEX [uk_namespace_id_group_name] ON [sequence_alloc] ([namespace_id] ASC, [group_name] ASC)
+CREATE UNIQUE NONCLUSTERED INDEX uk_namespace_id_group_name ON sequence_alloc (namespace_id ASC, group_name ASC)
 GO
 
 EXEC sp_addextendedproperty
@@ -2062,28 +2070,28 @@ EXEC sp_addextendedproperty
 GO
 
 -- server_node
-CREATE TABLE [server_node]
+CREATE TABLE server_node
 (
-    [id]           bigint PRIMARY KEY IDENTITY,
-    [namespace_id] nvarchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
-    [group_name]   nvarchar(64)  NOT NULL,
-    [host_id]      nvarchar(64)  NOT NULL,
-    [host_ip]      nvarchar(64)  NOT NULL,
-    [context_path] nvarchar(256) NOT NULL DEFAULT '/',
-    [host_port]    int           NOT NULL,
-    [expire_at]    datetime2     NOT NULL,
-    [node_type]    tinyint       NOT NULL,
-    [ext_attrs]    nvarchar(256) NULL     DEFAULT '',
-    [create_dt]    datetime2     NOT NULL DEFAULT GETDATE(),
-    [update_dt]    datetime2     NOT NULL DEFAULT GETDATE()
+    id           bigint PRIMARY KEY IDENTITY,
+    namespace_id nvarchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
+    group_name   nvarchar(64)  NOT NULL,
+    host_id      nvarchar(64)  NOT NULL,
+    host_ip      nvarchar(64)  NOT NULL,
+    context_path nvarchar(256) NOT NULL DEFAULT '/',
+    host_port    int           NOT NULL,
+    expire_at    datetime2     NOT NULL,
+    node_type    tinyint       NOT NULL,
+    ext_attrs    nvarchar(256) NULL     DEFAULT '',
+    create_dt    datetime2     NOT NULL DEFAULT GETDATE(),
+    update_dt    datetime2     NOT NULL DEFAULT GETDATE()
 )
 GO
 
-CREATE UNIQUE NONCLUSTERED INDEX [uk_host_id_host_ip] ON [server_node] ([host_id] ASC, [host_ip] ASC)
+CREATE UNIQUE NONCLUSTERED INDEX uk_host_id_host_ip ON server_node (host_id ASC, host_ip ASC)
 GO
-CREATE NONCLUSTERED INDEX [idx_namespace_id_group_name] ON [server_node] ([namespace_id] ASC, [group_name] ASC)
+CREATE NONCLUSTERED INDEX idx_namespace_id_group_name ON server_node (namespace_id ASC, group_name ASC)
 GO
-CREATE NONCLUSTERED INDEX [idx_expire_at_node_type] ON [server_node] ([expire_at] ASC, [node_type] ASC)
+CREATE NONCLUSTERED INDEX idx_expire_at_node_type ON server_node (expire_at ASC, node_type ASC)
 GO
 
 EXEC sp_addextendedproperty
@@ -2177,18 +2185,18 @@ EXEC sp_addextendedproperty
 GO
 
 -- system_user_
-CREATE TABLE [system_user_]
+CREATE TABLE system_user_
 (
-    [id]        bigint PRIMARY KEY IDENTITY,
-    [username]  nvarchar(64)  NOT NULL,
-    [password]  nvarchar(128) NOT NULL,
-    [role]      tinyint       NOT NULL DEFAULT '0',
-    [create_dt] datetime2     NOT NULL DEFAULT GETDATE(),
-    [update_dt] datetime2     NOT NULL DEFAULT GETDATE()
+    id        bigint PRIMARY KEY IDENTITY,
+    username  nvarchar(64)  NOT NULL,
+    password  nvarchar(128) NOT NULL,
+    role      tinyint       NOT NULL DEFAULT '0',
+    create_dt datetime2     NOT NULL DEFAULT GETDATE(),
+    update_dt datetime2     NOT NULL DEFAULT GETDATE()
 )
 GO
 
-CREATE UNIQUE NONCLUSTERED INDEX [uk_username] ON [system_user_] ([username] ASC)
+CREATE UNIQUE NONCLUSTERED INDEX uk_username ON system_user_ (username ASC)
 GO
 
 EXEC sp_addextendedproperty
@@ -2240,24 +2248,24 @@ EXEC sp_addextendedproperty
 GO
 
 
-INSERT INTO [system_user_] ([username], [password], [role], [create_dt], [update_dt])
+INSERT INTO system_user_ (username, password, role, create_dt, update_dt)
 VALUES (N'admin', N'465c194afb65670f38322df087f0a9bb225cc257e43eb4ac5a0c98ef5b3173ac', N'2',
         N'2024-03-16 10:27:36', N'2024-03-16 10:27:36')
 GO
 
 -- system_user_permission
-CREATE TABLE [system_user_permission]
+CREATE TABLE system_user_permission
 (
-    [id]             bigint PRIMARY KEY IDENTITY,
-    [group_name]     nvarchar(64) NOT NULL,
-    [namespace_id]   nvarchar(64) NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
-    [system_user_id] bigint       NOT NULL,
-    [create_dt]      datetime2    NOT NULL DEFAULT GETDATE(),
-    [update_dt]      datetime2    NOT NULL DEFAULT GETDATE()
+    id             bigint PRIMARY KEY IDENTITY,
+    group_name     nvarchar(64) NOT NULL,
+    namespace_id   nvarchar(64) NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
+    system_user_id bigint       NOT NULL,
+    create_dt      datetime2    NOT NULL DEFAULT GETDATE(),
+    update_dt      datetime2    NOT NULL DEFAULT GETDATE()
 )
 GO
 
-CREATE UNIQUE NONCLUSTERED INDEX [uk_namespace_id_group_name_system_user_id] ON [system_user_permission] ([namespace_id] ASC, [group_name] ASC, [system_user_id] ASC)
+CREATE UNIQUE NONCLUSTERED INDEX uk_namespace_id_group_name_system_user_id ON system_user_permission (namespace_id ASC, group_name ASC, system_user_id ASC)
 GO
 
 EXEC sp_addextendedproperty
@@ -2310,32 +2318,32 @@ GO
 
 
 -- workflow
-CREATE TABLE [workflow]
+CREATE TABLE workflow
 (
-    [id]               bigint IDENTITY,
-    [workflow_name]    nvarchar(64)  NOT NULL,
-    [namespace_id]     nvarchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
-    [group_name]       nvarchar(64)  NOT NULL,
-    [workflow_status]  tinyint       NOT NULL DEFAULT '1',
-    [trigger_type]     tinyint       NOT NULL,
-    [trigger_interval] nvarchar(255) NOT NULL,
-    [next_trigger_at]  bigint        NOT NULL,
-    [block_strategy]   tinyint       NOT NULL DEFAULT '1',
-    [executor_timeout] int           NOT NULL DEFAULT '0',
-    [description]      nvarchar(256) NOT NULL DEFAULT '',
-    [flow_info]        nvarchar(max) NULL     DEFAULT NULL,
-    [bucket_index]     int           NOT NULL DEFAULT '0',
-    [version]          int           NOT NULL,
-    [create_dt]        datetime2     NOT NULL DEFAULT GETDATE(),
-    [update_dt]        datetime2     NOT NULL DEFAULT GETDATE(),
-    [deleted]          BIT                    DEFAULT 0,
-    [ext_attrs]        nvarchar(256) NULL
+    id               bigint IDENTITY,
+    workflow_name    nvarchar(64)  NOT NULL,
+    namespace_id     nvarchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
+    group_name       nvarchar(64)  NOT NULL,
+    workflow_status  tinyint       NOT NULL DEFAULT '1',
+    trigger_type     tinyint       NOT NULL,
+    trigger_interval nvarchar(255) NOT NULL,
+    next_trigger_at  bigint        NOT NULL,
+    block_strategy   tinyint       NOT NULL DEFAULT '1',
+    executor_timeout int           NOT NULL DEFAULT '0',
+    description      nvarchar(256) NOT NULL DEFAULT '',
+    flow_info        nvarchar(max) NULL     DEFAULT NULL,
+    bucket_index     int           NOT NULL DEFAULT '0',
+    version          int           NOT NULL,
+    create_dt        datetime2     NOT NULL DEFAULT GETDATE(),
+    update_dt        datetime2     NOT NULL DEFAULT GETDATE(),
+    deleted          BIT                    DEFAULT 0,
+    ext_attrs        nvarchar(256) NULL
 )
 GO
 
-CREATE NONCLUSTERED INDEX [idx_create_dt] ON [workflow] ([create_dt] ASC)
+CREATE NONCLUSTERED INDEX idx_create_dt ON workflow (create_dt ASC)
 GO
-CREATE NONCLUSTERED INDEX [idx_namespace_id_group_name] ON [workflow] ([namespace_id] ASC, [group_name] ASC)
+CREATE NONCLUSTERED INDEX idx_namespace_id_group_name ON workflow (namespace_id ASC, group_name ASC)
 GO
 
 
@@ -2472,31 +2480,31 @@ EXEC sp_addextendedproperty
 GO
 
 -- workflow_node
-CREATE TABLE [workflow_node]
+CREATE TABLE workflow_node
 (
-    [id]                   bigint PRIMARY KEY IDENTITY,
-    [namespace_id]         nvarchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
-    [node_name]            nvarchar(64)  NOT NULL,
-    [group_name]           nvarchar(64)  NOT NULL,
-    [job_id]               bigint        NOT NULL,
-    [workflow_id]          bigint        NOT NULL,
-    [node_type]            tinyint       NOT NULL DEFAULT '1',
-    [expression_type]      tinyint       NOT NULL DEFAULT '0',
-    [fail_strategy]        tinyint       NOT NULL DEFAULT '1',
-    [workflow_node_status] tinyint       NOT NULL DEFAULT '1',
-    [priority_level]       int           NOT NULL DEFAULT '1',
-    [node_info]            nvarchar(max) NULL     DEFAULT NULL,
-    [version]              int           NOT NULL,
-    [create_dt]            datetime2     NOT NULL DEFAULT GETDATE(),
-    [update_dt]            datetime2     NOT NULL DEFAULT GETDATE(),
-    [deleted]              BIT                    DEFAULT 0,
-    [ext_attrs]            nvarchar(256) NULL     DEFAULT ''
+    id                   bigint PRIMARY KEY IDENTITY,
+    namespace_id         nvarchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
+    node_name            nvarchar(64)  NOT NULL,
+    group_name           nvarchar(64)  NOT NULL,
+    job_id               bigint        NOT NULL,
+    workflow_id          bigint        NOT NULL,
+    node_type            tinyint       NOT NULL DEFAULT '1',
+    expression_type      tinyint       NOT NULL DEFAULT '0',
+    fail_strategy        tinyint       NOT NULL DEFAULT '1',
+    workflow_node_status tinyint       NOT NULL DEFAULT '1',
+    priority_level       int           NOT NULL DEFAULT '1',
+    node_info            nvarchar(max) NULL     DEFAULT NULL,
+    version              int           NOT NULL,
+    create_dt            datetime2     NOT NULL DEFAULT GETDATE(),
+    update_dt            datetime2     NOT NULL DEFAULT GETDATE(),
+    deleted              BIT                    DEFAULT 0,
+    ext_attrs            nvarchar(256) NULL     DEFAULT ''
 )
 GO
 
-CREATE NONCLUSTERED INDEX [idx_create_dt] ON [workflow_node] ([create_dt] ASC)
+CREATE NONCLUSTERED INDEX idx_create_dt ON workflow_node (create_dt ASC)
 GO
-CREATE NONCLUSTERED INDEX [idx_namespace_id_group_name] ON [workflow_node] ([namespace_id] ASC, [group_name] ASC)
+CREATE NONCLUSTERED INDEX idx_namespace_id_group_name ON workflow_node (namespace_id ASC, group_name ASC)
 GO
 
 EXEC sp_addextendedproperty
@@ -2625,28 +2633,28 @@ EXEC sp_addextendedproperty
 GO
 
 -- workflow_task_batch
-CREATE TABLE [workflow_task_batch]
+CREATE TABLE workflow_task_batch
 (
-    [id]                bigint PRIMARY KEY IDENTITY,
-    [namespace_id]      nvarchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
-    [group_name]        nvarchar(64)  NOT NULL,
-    [workflow_id]       bigint        NOT NULL,
-    [task_batch_status] tinyint       NOT NULL DEFAULT '0',
-    [operation_reason]  tinyint       NOT NULL DEFAULT '0',
-    [flow_info]         nvarchar(max) NULL     DEFAULT NULL,
-    [execution_at]      bigint        NOT NULL DEFAULT '0',
-    [create_dt]         datetime2     NOT NULL DEFAULT GETDATE(),
-    [update_dt]         datetime2     NOT NULL DEFAULT GETDATE(),
-    [deleted]           BIT                    DEFAULT 0,
-    [ext_attrs]         nvarchar(256) NULL     DEFAULT ''
+    id                bigint PRIMARY KEY IDENTITY,
+    namespace_id      nvarchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
+    group_name        nvarchar(64)  NOT NULL,
+    workflow_id       bigint        NOT NULL,
+    task_batch_status tinyint       NOT NULL DEFAULT '0',
+    operation_reason  tinyint       NOT NULL DEFAULT '0',
+    flow_info         nvarchar(max) NULL     DEFAULT NULL,
+    execution_at      bigint        NOT NULL DEFAULT '0',
+    create_dt         datetime2     NOT NULL DEFAULT GETDATE(),
+    update_dt         datetime2     NOT NULL DEFAULT GETDATE(),
+    deleted           BIT                    DEFAULT 0,
+    ext_attrs         nvarchar(256) NULL     DEFAULT ''
 )
 GO
 
-CREATE NONCLUSTERED INDEX [idx_job_id_task_batch_status] ON [workflow_task_batch] ([workflow_id] ASC, [task_batch_status] ASC)
+CREATE NONCLUSTERED INDEX idx_job_id_task_batch_status ON workflow_task_batch (workflow_id ASC, task_batch_status ASC)
 GO
-CREATE NONCLUSTERED INDEX [idx_create_dt] ON [workflow_task_batch] ([create_dt] ASC)
+CREATE NONCLUSTERED INDEX idx_create_dt ON workflow_task_batch (create_dt ASC)
 GO
-CREATE NONCLUSTERED INDEX [idx_namespace_id_group_name] ON [workflow_task_batch] ([namespace_id] ASC, [group_name] ASC)
+CREATE NONCLUSTERED INDEX idx_namespace_id_group_name ON workflow_task_batch (namespace_id ASC, group_name ASC)
 GO
 
 EXEC sp_addextendedproperty
