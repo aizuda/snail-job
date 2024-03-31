@@ -673,9 +673,9 @@ CREATE TABLE job_summary
 )
 GO
 
-CREATE UNIQUE NONCLUSTERED INDEX uk_system_task_type_business_id_trigger_at ON job_summary (system_task_type ASC, business_id ASC, trigger_at ASC)
+CREATE UNIQUE NONCLUSTERED INDEX uk_trigger_at_system_task_type_business_id ON job_summary (trigger_at ASC, system_task_type ASC, business_id ASC)
 GO
-CREATE NONCLUSTERED INDEX idx_namespace_id_group_name_job_id ON job_summary (namespace_id ASC, group_name ASC, business_id ASC)
+CREATE NONCLUSTERED INDEX idx_namespace_id_group_name_business_id ON job_summary (namespace_id ASC, group_name ASC, business_id ASC)
 GO
 
 EXEC sp_addextendedproperty
@@ -711,13 +711,6 @@ EXEC sp_addextendedproperty
      'SCHEMA', N'dbo',
      'TABLE', N'job_summary',
      'COLUMN', N'system_task_type'
-GO
-
-EXEC sp_addextendedproperty
-     'MS_Description', N'任务信息id',
-     'SCHEMA', N'dbo',
-     'TABLE', N'job_summary',
-     'COLUMN', N'job_id'
 GO
 
 EXEC sp_addextendedproperty

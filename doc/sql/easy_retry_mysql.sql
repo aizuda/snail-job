@@ -426,9 +426,8 @@ CREATE TABLE `job_summary`
     `create_dt`        datetime        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_dt`        datetime        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     PRIMARY KEY (`id`),
-    KEY `idx_trigger_at` (`trigger_at`),
     KEY `idx_namespace_id_group_name_business_id` (`namespace_id`, `group_name`, business_id),
-    UNIQUE KEY `uk_system_task_type_business_id_trigger_at` (`system_task_type`, `business_id`, `trigger_at`) USING BTREE
+    UNIQUE KEY `uk_trigger_at_system_task_type_business_id` (`trigger_at`, `system_task_type`, `business_id`) USING BTREE
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 1
   DEFAULT CHARSET = utf8mb4 COMMENT ='DashBoard_Job';

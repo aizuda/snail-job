@@ -678,7 +678,7 @@ CREATE TABLE job_summary
     update_dt        TIMESTAMP     DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE UNIQUE INDEX uk_job_summary_1 ON job_summary (system_task_type, business_id, trigger_at);
+CREATE UNIQUE INDEX uk_job_summary_1 ON job_summary (trigger_at, system_task_type, business_id);
 CREATE INDEX idx_job_summary_1 ON job_summary (namespace_id, group_name, business_id);
 
 COMMENT ON TABLE job_summary IS 'DashBoard_Job';

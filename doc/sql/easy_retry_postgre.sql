@@ -660,7 +660,7 @@ CREATE TABLE job_summary
     update_dt        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE UNIQUE INDEX uk_system_task_type_business_id_trigger_at ON job_summary (system_task_type, business_id, trigger_at);
+CREATE UNIQUE INDEX uk_trigger_at_system_task_type_business_id ON job_summary (trigger_at, system_task_type, business_id);
 CREATE INDEX idx_namespace_id_group_name_job_id ON job_summary (namespace_id, group_name, business_id);
 
 COMMENT ON COLUMN job_summary.id IS '主键';
