@@ -122,6 +122,8 @@ public class ServerRegister extends AbstractRegister {
                 for (final ServerNode node : serverNodes) {
                     // 刷新全量本地缓存
                     CacheRegisterTable.addOrUpdate(node);
+                    // 刷新过期时间
+                    CacheConsumerGroup.addOrUpdate(node.getGroupName(), node.getNamespaceId());
                 }
             }
         } catch (Exception e) {

@@ -52,7 +52,6 @@
         </foreach>
         ) tt
         SET rt.expire_at = tt.expire_at, rt.context_path = tt.context_path,
-        rt.context_path = tt.context_path
         WHERE rt.host_id = tt.host_id and rt.host_ip = tt.host_ip
     </update>
     <select id="countActivePod"
