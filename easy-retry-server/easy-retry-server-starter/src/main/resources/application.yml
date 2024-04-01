@@ -27,6 +27,11 @@ spring:
 #    url: jdbc:sqlserver://localhost:1433;DatabaseName=easy_retry;SelectMethod=cursor;encrypt=false;rewriteBatchedStatements=true
 #    username: SA
 #    password: EasyRetry@24
+      ## mariadb
+#    driver-class-name: org.mariadb.jdbc.Driver
+#    url: jdbc:mariadb://localhost:3308/easy_retry?useSSL=false&characterEncoding=utf8&useUnicode=true
+#    username: root
+#    password: root
     type: com.zaxxer.hikari.HikariDataSource
     hikari:
       connection-timeout: 30000

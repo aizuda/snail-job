@@ -7,6 +7,7 @@ volumes:
     postgres: { }
     oracle: { }
     sqlserver: { }
+    mariadb: { }
 
 services:
     mysql:
@@ -69,3 +70,17 @@ services:
             - ../sql/easy_retry_sqlserver.sql:/tmp/schema.sql:ro
             # docker compose exec sqlserver bash /tmp/create_schema.sh
             - ./sqlserver/create_schema.sh:/tmp/create_schema.sh:ro
+
+    mariadb:
+        image: mariadb:10.11.7
+        restart: unless-stopped
+        environment:
+            TZ: Asia/Shanghai
+            MARIADB_ROOT_PASSWORD: root
+            MARIADB_DATABASE: easy_retry
+        ports:
+            - "3308:3306"
+        volumes:
+            - mariadb:/var/lib/mysql/
+            # 注入初始化脚本, mysql
+            - ../sql/easy_retry_mysql.sql:/docker-entrypoint-initdb.d/init.sql:ro

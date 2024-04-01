@@ -23,50 +23,49 @@
         INSERT INTO job_summary (namespace_id, group_name, business_id, trigger_at, system_task_type,
                                  success_num,fail_num,fail_reason,stop_num,stop_reason, cancel_num,cancel_reason)
         VALUES
-        <foreach collection="list" item="item" separator=",">
-            (
-            #{item.namespaceId},
-            #{item.groupName},
-            #{item.businessId},
-            #{item.triggerAt},
-            #{item.systemTaskType},
-            #{item.successNum},
-            #{item.failNum},
-            #{item.failReason},
-            #{item.stopNum},
-            #{item.stopReason},
-            #{item.cancelNum},
-            #{item.cancelReason}
-            )
-        </foreach>
+            <foreach collection="list" item="item" separator=",">
+                (
+                    #{item.namespaceId},
+                    #{item.groupName},
+                    #{item.businessId},
+                    #{item.triggerAt},
+                    #{item.systemTaskType},
+                    #{item.successNum},
+                    #{item.failNum},
+                    #{item.failReason},
+                    #{item.stopNum},
+                    #{item.stopReason},
+                    #{item.cancelNum},
+                    #{item.cancelReason}
+                )
+            </foreach>
     </insert>
 
     <update id="batchUpdate" parameterType="java.util.List">
         UPDATE job_summary rt,
-            (
-                <foreach collection="list" item="item" index="index" separator=" UNION ALL ">
-                    SELECT
-                    #{item.successNum} AS success_num,
-                    #{item.failNum} AS fail_num,
-                    #{item.failReason} AS fail_reason,
-                    #{item.stopNum} AS stop_num,
-                    #{item.stopReason} AS stop_reason,
-                    #{item.cancelNum} AS cancel_num,
-                    #{item.cancelReason} AS cancel_reason,
-                    #{item.triggerAt} AS trigger_at,
-                    #{item.businessId} AS business_id
-                </foreach>
-            ) tt
-        SET
-            rt.success_num = tt.success_num,
-            rt.fail_num = tt.fail_num,
-            rt.fail_reason = tt.fail_reason,
-            rt.stop_num = tt.stop_num,
-            rt.stop_reason = tt.stop_reason,
-            rt.cancel_num = tt.cancel_num,
-            rt.cancel_reason = tt.cancel_reason
-        WHERE rt.trigger_at = tt.trigger_at
-          AND rt.business_id = tt.business_id
+               (
+                   <foreach collection="list" item="item" index="index" separator=" UNION ALL ">
+                       SELECT
+                           #{item.successNum} AS success_num,
+                           #{item.failNum} AS fail_num,
+                           #{item.failReason} AS fail_reason,
+                           #{item.stopNum} AS stop_num,
+                           #{item.stopReason} AS stop_reason,
+                           #{item.cancelNum} AS cancel_num,
+                           #{item.cancelReason} AS cancel_reason,
+                           #{item.triggerAt} AS trigger_at,
+                           #{item.businessId} AS business_id
+                   </foreach>
+               ) tt
+           SET rt.success_num = tt.success_num,
+               rt.fail_num = tt.fail_num,
+               rt.fail_reason = tt.fail_reason,
+               rt.stop_num = tt.stop_num,
+               rt.stop_reason = tt.stop_reason,
+               rt.cancel_num = tt.cancel_num,
+               rt.cancel_reason = tt.cancel_reason
+         WHERE rt.trigger_at = tt.trigger_at
+           AND rt.business_id = tt.business_id
     </update>
 
     <select id="jobLineList"
@@ -74,10 +73,9 @@
         SELECT
             DATE_FORMAT(trigger_at, #{dateFormat})                         AS createDt,
             IFNULL(SUM(success_num), 0)                                    AS success,
-            IFNULL(SUM(fail_num), 0)                                       AS failNum,
             IFNULL(SUM(stop_num), 0)                                       AS stop,
             IFNULL(SUM(cancel_num), 0)                                     AS cancel,
-            IFNULL(SUM(fail_num + stop_num + cancel_num), 0)               AS fail,
+            IFNULL(SUM(fail_num), 0)                                       AS fail,
             IFNULL(SUM(success_num + fail_num + stop_num + cancel_num), 0) AS total
         FROM job_summary
         ${ew.customSqlSegment}
@@ -86,11 +84,12 @@
 
     <select id="toJobTask"
             resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardCardResponseDO$JobTask">
-        SELECT IFNULL(sum(success_num), 0)                                    AS successNum,
-               IFNULL(sum(stop_num), 0)                                       AS stopNum,
-               IFNULL(sum(cancel_num), 0)                                     AS cancelNum,
-               IFNULL(sum(fail_num), 0)                                       AS failNum,
-               IFNULL(sum(success_num + fail_num + stop_num + cancel_num), 0) AS totalNum
+        SELECT
+            IFNULL(SUM(success_num), 0) AS successNum,
+            IFNULL(SUM(stop_num), 0) AS stopNum,
+            IFNULL(SUM(cancel_num), 0) AS cancelNum,
+            IFNULL(SUM(fail_num), 0) AS failNum,
+            IFNULL(SUM(success_num + fail_num + stop_num + cancel_num), 0) AS totalNum
         FROM job_summary
         ${ew.customSqlSegment}
     </select>
@@ -104,10 +103,12 @@
         <if test="systemTaskType == 4">
             CONCAT(group_name, '/', (SELECT workflow_name FROM workflow WHERE id = business_id)) name,
         </if>
-        SUM(fail_num) AS total FROM job_summary
+            SUM(fail_num) AS total
+        FROM job_summary
         ${ew.customSqlSegment}
         HAVING total > 0
-        ORDER BY total DESC LIMIT 10
+        ORDER BY total DESC
+        LIMIT 10
     </select>
 
     <select id="jobTaskList"

@@ -31,18 +31,16 @@
       (#{item.namespaceId}, #{item.uniqueId}, #{item.groupName}, #{item.sceneName}, #{item.idempotentId}, #{item.bizNo}, #{item.executorName}, #{item.argsStr}, #{item.extAttrs}, #{item.nextTriggerAt}, #{item.taskType}, #{item.retryStatus}, #{item.createDt})
     </foreach>
   </insert>
-
   <update id="updateBatchNextTriggerAtById" parameterType="java.util.List">
-    update retry_task_${partition} rt,
-    (
-    <foreach collection="list" item="item" index="index" separator=" union all ">
-      select
-      #{item.nextTriggerAt} as next_trigger_at,
-      #{item.id} as id
-    </foreach>
-    ) tt
-    set
-    rt.next_trigger_at = tt.next_trigger_at
-    where rt.id = tt.id
+    UPDATE retry_task_${partition} rt,
+        (
+            <foreach collection="list" item="item" index="index" separator=" UNION ALL ">
+                SELECT
+                  #{item.nextTriggerAt} AS next_trigger_at,
+                  #{item.id} AS id
+            </foreach>
+        ) tt
+    SET rt.next_trigger_at = tt.next_trigger_at
+    WHERE rt.id = tt.id
   </update>
 </mapper>
