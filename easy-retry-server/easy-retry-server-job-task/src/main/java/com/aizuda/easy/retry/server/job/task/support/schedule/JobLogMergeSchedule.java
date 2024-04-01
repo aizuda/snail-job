@@ -22,12 +22,14 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.common.collect.Lists;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.util.CollectionUtils;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -50,18 +52,13 @@ import static java.util.stream.Collectors.*;
  */
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class JobLogMergeSchedule extends AbstractSchedule implements Lifecycle {
 
-    @Autowired
-    private SystemProperties systemProperties;
-    @Autowired
-    private JobTaskBatchMapper jobTaskBatchMapper;
-    @Autowired
-    private JobTaskMapper jobTaskMapper;
-    @Autowired
-    private JobLogMessageMapper jobLogMessageMapper;
-    @Autowired
-    private TransactionTemplate transactionTemplate;
+    private final SystemProperties systemProperties;
+    private final JobTaskBatchMapper jobTaskBatchMapper;
+    private final JobLogMessageMapper jobLogMessageMapper;
+    private final TransactionTemplate transactionTemplate;
 
     // last merge log time
     private static Long lastMergeLogTime = 0L;
@@ -92,7 +89,7 @@ public class JobLogMergeSchedule extends AbstractSchedule implements Lifecycle {
             long total;
             LocalDateTime endTime = LocalDateTime.now().minusDays(systemProperties.getMergeLogDays());
             total = PartitionTaskUtils.process(startId -> jobTaskBatchList(startId, endTime),
-                    this::processJobLogPartitionTasks, 0);
+                this::processJobLogPartitionTasks, 0);
 
             EasyRetryLog.LOCAL.debug("job merge success total:[{}]", total);
         } catch (Exception e) {
@@ -113,10 +110,10 @@ public class JobLogMergeSchedule extends AbstractSchedule implements Lifecycle {
     private List<JobPartitionTaskDTO> jobTaskBatchList(Long startId, LocalDateTime endTime) {
 
         List<JobTaskBatch> jobTaskBatchList = jobTaskBatchMapper.selectPage(
-                new Page<>(0, 1000),
-                new LambdaUpdateWrapper<JobTaskBatch>().ge(JobTaskBatch::getId, startId)
-                        .in(JobTaskBatch::getTaskBatchStatus, JobTaskBatchStatusEnum.COMPLETED)
-                        .le(JobTaskBatch::getCreateDt, endTime)).getRecords();
+            new Page<>(0, 1000),
+            new LambdaUpdateWrapper<JobTaskBatch>().ge(JobTaskBatch::getId, startId)
+                .in(JobTaskBatch::getTaskBatchStatus, JobTaskBatchStatusEnum.COMPLETED)
+                .le(JobTaskBatch::getCreateDt, endTime)).getRecords();
         return JobTaskConverter.INSTANCE.toJobTaskBatchPartitionTasks(jobTaskBatchList);
     }
 
@@ -127,54 +124,56 @@ public class JobLogMergeSchedule extends AbstractSchedule implements Lifecycle {
      */
     public void processJobLogPartitionTasks(List<? extends PartitionTask> partitionTasks) {
 
-        transactionTemplate.execute(new TransactionCallbackWithoutResult() {
-            @Override
-            protected void doInTransactionWithoutResult(final TransactionStatus status) {
+        // Waiting for merge JobTaskBatchList
+        List<Long> ids = partitionTasks.stream().map(PartitionTask::getId).collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(ids)) {
+            return;
+        }
 
-                // Waiting for merge JobTaskBatchList
-                List<Long> ids = partitionTasks.stream().map(PartitionTask::getId).collect(Collectors.toList());
-                if (ids == null || ids.isEmpty()) {
-                    return;
-                }
+        // Waiting for deletion JobLogMessageList
+        List<JobLogMessage> jobLogMessageList = jobLogMessageMapper.selectList(
+            new LambdaQueryWrapper<JobLogMessage>().in(JobLogMessage::getTaskBatchId, ids));
+        if (CollectionUtils.isEmpty(jobLogMessageList)) {
+            return;
+        }
 
-                // Waiting for deletion JobLogMessageList
-                List<JobLogMessage> jobLogMessageList = jobLogMessageMapper.selectList(new LambdaQueryWrapper<JobLogMessage>().in(JobLogMessage::getTaskBatchId, ids));
-                if (jobLogMessageList == null || jobLogMessageList.isEmpty()) {
-                    return;
-                }
+        List<Map.Entry<Long, List<JobLogMessage>>> jobLogMessageGroupList = jobLogMessageList.stream().collect(
+                groupingBy(JobLogMessage::getTaskId)).entrySet().stream()
+            .filter(entry -> entry.getValue().size() >= 2).collect(toList());
 
-                List<Map.Entry<Long, List<JobLogMessage>>> jobLogMessageGroupList = jobLogMessageList.stream().collect(
-                                groupingBy(JobLogMessage::getTaskId)).entrySet().stream()
-                        .filter(entry -> entry.getValue().size() >= 2).collect(toList());
+        for (Map.Entry<Long/*taskId*/, List<JobLogMessage>> jobLogMessageMap : jobLogMessageGroupList) {
+            List<Long> jobLogMessageDeleteBatchIds = new ArrayList<>();
+            List<JobLogMessage> jobLogMessageInsertBatchIds = new ArrayList<>();
 
-                for (Map.Entry<Long/*taskId*/, List<JobLogMessage>> jobLogMessageMap : jobLogMessageGroupList) {
-                    List<Long> jobLogMessageDeleteBatchIds = new ArrayList<>();
-                    List<JobLogMessage> jobLogMessageInsertBatchIds = new ArrayList<>();
+            List<String> mergeMessages = jobLogMessageMap.getValue().stream().map(k -> {
+                    jobLogMessageDeleteBatchIds.add(k.getId());
+                    return JsonUtil.parseObject(k.getMessage(), List.class);
+                })
+                .reduce((a, b) -> {
+                    // 合并日志信息
+                    List<String> list = new ArrayList<>();
+                    list.addAll(a);
+                    list.addAll(b);
+                    return list;
+                }).get();
 
-                    List<String> mergeMessages = jobLogMessageMap.getValue().stream().map(k -> {
-                                jobLogMessageDeleteBatchIds.add(k.getId());
-                                return JsonUtil.parseObject(k.getMessage(), List.class);
-                            })
-                            .reduce((a, b) -> {
-                                // 合并日志信息
-                                List<String> list = new ArrayList<>();
-                                list.addAll(a);
-                                list.addAll(b);
-                                return list;
-                            }).get();
+            // 500条数据为一个批次
+            List<List<String>> partitionMessages = Lists.partition(mergeMessages, systemProperties.getMergeLogNum());
 
-                    // 500条数据为一个批次
-                    List<List<String>> partitionMessages = Lists.partition(mergeMessages, systemProperties.getMergeLogNum());
+            for (List<String> partitionMessage : partitionMessages) {
+                // 深拷贝
+                JobLogMessage jobLogMessage = JobTaskConverter.INSTANCE.toJobLogMessage(
+                    jobLogMessageMap.getValue().get(0));
 
-                    for (int i = 0; i < partitionMessages.size(); i++) {
-                        // 深拷贝
-                        JobLogMessage jobLogMessage = JobTaskConverter.INSTANCE.toJobLogMessage(jobLogMessageMap.getValue().get(0));
-                        List<String> messages = partitionMessages.get(i);
+                jobLogMessage.setLogNum(partitionMessage.size());
+                jobLogMessage.setMessage(JsonUtil.toJsonString(partitionMessage));
+                jobLogMessageInsertBatchIds.add(jobLogMessage);
+            }
 
-                        jobLogMessage.setLogNum(messages.size());
-                        jobLogMessage.setMessage(JsonUtil.toJsonString(messages));
-                        jobLogMessageInsertBatchIds.add(jobLogMessage);
-                    }
+            transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+            transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+                @Override
+                protected void doInTransactionWithoutResult(final TransactionStatus status) {
 
                     // 批量删除、更新日志
                     if (CollectionUtil.isNotEmpty(jobLogMessageDeleteBatchIds)) {
@@ -184,8 +183,9 @@ public class JobLogMergeSchedule extends AbstractSchedule implements Lifecycle {
                         jobLogMessageMapper.batchInsert(jobLogMessageInsertBatchIds);
                     }
                 }
-            }
-        });
+            });
+        }
+
     }
 
     @Override

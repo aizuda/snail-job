@@ -32,7 +32,7 @@ public interface RetryRpcClient {
     @Mapping(path = "/retry/generate/idempotent-id/v1", method = RequestMethod.POST)
     Result generateIdempotentId(@Body GenerateRetryIdempotentIdDTO retryCallbackDTO);
 
-    @Mapping(path = "/retry/sync/version/v1")
+    @Mapping(path = "/retry/sync/version/v1", method = RequestMethod.POST)
     Result syncConfig(@Body ConfigDTO configDTO);
 
 }

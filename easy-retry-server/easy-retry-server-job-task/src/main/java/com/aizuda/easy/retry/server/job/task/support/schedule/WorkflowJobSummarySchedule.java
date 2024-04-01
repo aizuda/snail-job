@@ -16,6 +16,7 @@ import com.aizuda.easy.retry.template.datasource.persistence.po.JobSummary;
 import com.aizuda.easy.retry.template.datasource.persistence.po.WorkflowTaskBatch;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.google.common.collect.Lists;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -40,14 +41,11 @@ import java.util.stream.Collectors;
  */
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class WorkflowJobSummarySchedule extends AbstractSchedule implements Lifecycle {
-
-    @Autowired
-    private JobTaskBatchMapper jobTaskBatchMapper;
-    @Autowired
-    private JobSummaryMapper jobSummaryMapper;
-    @Autowired
-    private SystemProperties systemProperties;
+    private final JobTaskBatchMapper jobTaskBatchMapper;
+    private final JobSummaryMapper jobSummaryMapper;
+    private final SystemProperties systemProperties;
 
     @Override
     public String lockName() {

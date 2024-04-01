@@ -29,9 +29,10 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -90,7 +91,7 @@ public class RetryLogMergeSchedule extends AbstractSchedule implements Lifecycle
             // merge job log
             long total;
             LocalDateTime endTime = LocalDateTime.now().minusDays(systemProperties.getMergeLogDays());
-            total = PartitionTaskUtils.process(startId -> jobTaskBatchList(startId, endTime),
+            total = PartitionTaskUtils.process(startId -> retryLogList(startId, endTime),
                 this::processJobLogPartitionTasks, 0);
 
             EasyRetryLog.LOCAL.debug("job merge success total:[{}]", total);
@@ -109,7 +110,7 @@ public class RetryLogMergeSchedule extends AbstractSchedule implements Lifecycle
      * @param endTime
      * @return
      */
-    private List<RetryMergePartitionTaskDTO> jobTaskBatchList(Long startId, LocalDateTime endTime) {
+    private List<RetryMergePartitionTaskDTO> retryLogList(Long startId, LocalDateTime endTime) {
 
         List<RetryTaskLog> jobTaskBatchList = retryTaskLogMapper.selectPage(
             new Page<>(0, 1000),
@@ -129,62 +130,62 @@ public class RetryLogMergeSchedule extends AbstractSchedule implements Lifecycle
      */
     public void processJobLogPartitionTasks(List<? extends PartitionTask> partitionTasks) {
 
-        transactionTemplate.execute(new TransactionCallbackWithoutResult() {
-            @Override
-            protected void doInTransactionWithoutResult(final TransactionStatus status) {
+        // Waiting for merge RetryTaskLog
+        List<String> ids = partitionTasks.stream().map(PartitionTask::getUniqueId).collect(Collectors.toList());
+        if (CollectionUtil.isEmpty(ids)) {
+            return;
+        }
 
-                // Waiting for merge RetryTaskLog
-                List<String> ids = partitionTasks.stream().map(PartitionTask::getUniqueId).collect(Collectors.toList());
-                if (CollectionUtil.isEmpty(ids)) {
-                    return;
-                }
+        // Waiting for deletion RetryTaskLogMessage
+        List<RetryTaskLogMessage> retryLogMessageList = retryTaskLogMessageMapper.selectList(
+            new LambdaQueryWrapper<RetryTaskLogMessage>().in(RetryTaskLogMessage::getUniqueId, ids));
+        if (CollectionUtil.isEmpty(retryLogMessageList)) {
+            return;
+        }
 
-                // Waiting for deletion RetryTaskLogMessage
-                List<RetryTaskLogMessage> retryLogMessageList = retryTaskLogMessageMapper.selectList(
-                    new LambdaQueryWrapper<RetryTaskLogMessage>().in(RetryTaskLogMessage::getUniqueId, ids));
-                if (CollectionUtil.isEmpty(retryLogMessageList)) {
-                    return;
-                }
+        List<Map.Entry<Triple<String, String, String>, List<RetryTaskLogMessage>>> jobLogMessageGroupList = retryLogMessageList.stream()
+            .collect(
+                groupingBy(message -> Triple.of(message.getNamespaceId(), message.getGroupName(),
+                    message.getUniqueId())))
+            .entrySet().stream()
+            .filter(entry -> entry.getValue().size() >= 2).collect(toList());
 
-                List<Map.Entry<Triple<String, String, String>, List<RetryTaskLogMessage>>> jobLogMessageGroupList = retryLogMessageList.stream()
-                    .collect(
-                        groupingBy(message -> Triple.of(message.getNamespaceId(), message.getGroupName(),
-                            message.getUniqueId())))
-                    .entrySet().stream()
-                    .filter(entry -> entry.getValue().size() >= 2).collect(toList());
+        for (Map.Entry<Triple<String, String, String>/*taskId*/, List<RetryTaskLogMessage>> jobLogMessageMap : jobLogMessageGroupList) {
+            List<Long> jobLogMessageDeleteBatchIds = new ArrayList<>();
 
-                for (Map.Entry<Triple<String, String, String>/*taskId*/, List<RetryTaskLogMessage>> jobLogMessageMap : jobLogMessageGroupList) {
-                    List<Long> jobLogMessageDeleteBatchIds = new ArrayList<>();
+            List<String> mergeMessages = jobLogMessageMap.getValue().stream().map(k -> {
+                    jobLogMessageDeleteBatchIds.add(k.getId());
+                    return JsonUtil.parseObject(k.getMessage(), List.class);
+                })
+                .reduce((a, b) -> {
+                    // 合并日志信息
+                    List<String> list = new ArrayList<>();
+                    list.addAll(a);
+                    list.addAll(b);
+                    return list;
+                }).get();
 
-                    List<String> mergeMessages = jobLogMessageMap.getValue().stream().map(k -> {
-                            jobLogMessageDeleteBatchIds.add(k.getId());
-                            return JsonUtil.parseObject(k.getMessage(), List.class);
-                        })
-                        .reduce((a, b) -> {
-                            // 合并日志信息
-                            List<String> list = new ArrayList<>();
-                            list.addAll(a);
-                            list.addAll(b);
-                            return list;
-                        }).get();
+            // 500条数据为一个批次
+            List<List<String>> partitionMessages = Lists.partition(mergeMessages,
+                systemProperties.getMergeLogNum());
 
-                    // 500条数据为一个批次
-                    List<List<String>> partitionMessages = Lists.partition(mergeMessages,
-                        systemProperties.getMergeLogNum());
+            List<RetryTaskLogMessage> jobLogMessageUpdateList = new ArrayList<>();
 
-                    List<RetryTaskLogMessage> jobLogMessageUpdateList = new ArrayList<>();
+            for (int i = 0; i < partitionMessages.size(); i++) {
+                // 深拷贝
+                RetryTaskLogMessage jobLogMessage = RetryTaskLogConverter.INSTANCE.toRetryTaskLogMessage(
+                    jobLogMessageMap.getValue().get(0));
+                List<String> messages = partitionMessages.get(i);
 
-                    for (int i = 0; i < partitionMessages.size(); i++) {
-                        // 深拷贝
-                        RetryTaskLogMessage jobLogMessage = RetryTaskLogConverter.INSTANCE.toRetryTaskLogMessage(
-                            jobLogMessageMap.getValue().get(0));
-                        List<String> messages = partitionMessages.get(i);
+                jobLogMessage.setLogNum(messages.size());
+                jobLogMessage.setMessage(JsonUtil.toJsonString(messages));
+                jobLogMessageUpdateList.add(jobLogMessage);
+            }
 
-                        jobLogMessage.setLogNum(messages.size());
-                        jobLogMessage.setMessage(JsonUtil.toJsonString(messages));
-                        jobLogMessageUpdateList.add(jobLogMessage);
-                    }
-
+            transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+            transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+                @Override
+                protected void doInTransactionWithoutResult(final TransactionStatus status) {
                     // 批量删除、更新日志
                     if (CollectionUtil.isNotEmpty(jobLogMessageDeleteBatchIds)) {
                         retryTaskLogMessageMapper.deleteBatchIds(jobLogMessageDeleteBatchIds);
@@ -193,9 +194,10 @@ public class RetryLogMergeSchedule extends AbstractSchedule implements Lifecycle
                         retryTaskLogMessageMapper.batchInsert(jobLogMessageUpdateList);
                     }
                 }
+            });
+        }
 
-            }
-        });
+
     }
 
     @Override
