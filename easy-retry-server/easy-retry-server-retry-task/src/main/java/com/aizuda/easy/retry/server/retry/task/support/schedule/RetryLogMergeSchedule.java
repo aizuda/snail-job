@@ -182,7 +182,6 @@ public class RetryLogMergeSchedule extends AbstractSchedule implements Lifecycle
                 jobLogMessageUpdateList.add(jobLogMessage);
             }
 
-            transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
             transactionTemplate.execute(new TransactionCallbackWithoutResult() {
                 @Override
                 protected void doInTransactionWithoutResult(final TransactionStatus status) {
@@ -196,8 +195,6 @@ public class RetryLogMergeSchedule extends AbstractSchedule implements Lifecycle
                 }
             });
         }
-
-
     }
 
     @Override

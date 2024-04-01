@@ -170,7 +170,6 @@ public class JobLogMergeSchedule extends AbstractSchedule implements Lifecycle {
                 jobLogMessageInsertBatchIds.add(jobLogMessage);
             }
 
-            transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
             transactionTemplate.execute(new TransactionCallbackWithoutResult() {
                 @Override
                 protected void doInTransactionWithoutResult(final TransactionStatus status) {
