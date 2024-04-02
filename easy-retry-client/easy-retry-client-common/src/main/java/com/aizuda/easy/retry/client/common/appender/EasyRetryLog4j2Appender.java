@@ -105,6 +105,7 @@ public class EasyRetryLog4j2Appender extends AbstractAppender {
         }
         StringBuilder sb = new StringBuilder();
         boolean isFirst = true;
+        int stackDeep = 0;
         for (String s : Throwables.toStringList(throwable)) {
             if (isFirst) {
                 isFirst = false;
@@ -112,6 +113,10 @@ public class EasyRetryLog4j2Appender extends AbstractAppender {
                 sb.append(System.getProperty("line.separator"));
             }
             sb.append(s);
+            // 最多显示30行
+            if (++stackDeep >= 30) {
+                break;
+            }
         }
         return sb.toString();
     }

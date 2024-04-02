@@ -78,11 +78,16 @@ public class EasyRetryLogbackAppender<E> extends UnsynchronizedAppenderBase<E> {
 
     private String formatThrowable(StackTraceElementProxy[] stackTraceElementProxyArray) {
         StringBuilder builder = new StringBuilder();
+        int stackDeep = 0;
         for (StackTraceElementProxy step : stackTraceElementProxyArray) {
             builder.append(CoreConstants.LINE_SEPARATOR);
             String string = step.toString();
             builder.append(CoreConstants.TAB).append(string);
             ThrowableProxyUtil.subjoinPackagingData(builder, step);
+            // 最多显示30行
+            if (++stackDeep >= 30) {
+                break;
+            }
         }
         return builder.toString();
     }
