@@ -104,7 +104,7 @@ public class RetrySummarySchedule extends AbstractSchedule implements Lifecycle 
 
                 List<RetrySummary> waitInserts = Lists.newArrayList();
                 List<RetrySummary> waitUpdates = Lists.newArrayList();
-                for (final RetrySummary retrySummary : retrySummaries) {
+                for (final RetrySummary retrySummary : retrySummaryList) {
                     if (Objects.isNull(summaryMap.get(Triple.of(mergeKey(retrySummary), retrySummary.getSceneName(), retrySummary.getTriggerAt())))) {
                         waitInserts.add(retrySummary);
                     } else {
