@@ -138,4 +138,9 @@ public interface SystemConstants {
      * Easy Retry 认证Token
      */
     String EASY_RETRY_AUTH_TOKEN= "ER-TOKEN";
+
+    /**
+     * 日志类型字段
+     */
+    String JSON_FILED_LOG_TYPE = "logType" ;
 }

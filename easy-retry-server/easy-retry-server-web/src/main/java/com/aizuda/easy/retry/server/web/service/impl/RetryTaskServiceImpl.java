@@ -7,6 +7,7 @@ import com.aizuda.easy.retry.common.core.enums.RetryStatusEnum;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.WaitStrategy;
 import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
 import com.aizuda.easy.retry.server.common.client.RequestBuilder;
@@ -19,9 +20,11 @@ import com.aizuda.easy.retry.server.common.strategy.WaitStrategies.WaitStrategyE
 import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.server.model.dto.RetryTaskDTO;
 import com.aizuda.easy.retry.server.retry.task.client.RetryRpcClient;
+import com.aizuda.easy.retry.server.common.dto.RetryLogMetaDTO;
 import com.aizuda.easy.retry.server.retry.task.generator.task.TaskContext;
 import com.aizuda.easy.retry.server.retry.task.generator.task.TaskGenerator;
 import com.aizuda.easy.retry.server.common.handler.ClientNodeAllocateHandler;
+import com.aizuda.easy.retry.server.retry.task.support.RetryTaskConverter;
 import com.aizuda.easy.retry.server.retry.task.support.dispatch.task.TaskExecutor;
 import com.aizuda.easy.retry.server.retry.task.support.dispatch.task.TaskExecutorSceneEnum;
 import com.aizuda.easy.retry.server.web.model.base.PageResult;
@@ -45,7 +48,6 @@ import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskLog
 import com.aizuda.easy.retry.template.datasource.persistence.po.GroupConfig;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTask;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLog;
-import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLogMessage;
 import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -77,8 +79,6 @@ public class RetryTaskServiceImpl implements RetryTaskService {
 
     @Autowired
     private ClientNodeAllocateHandler clientNodeAllocateHandler;
-    @Autowired
-    private RetryTaskLogMessageMapper retryTaskLogMessageMapper;
     @Autowired
     private RetryTaskLogMapper retryTaskLogMapper;
     @Autowired
@@ -178,12 +178,9 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         }
 
         if (RetryStatusEnum.FINISH.getStatus().equals(retryStatusEnum.getStatus())) {
-            RetryTaskLogMessage retryTaskLogMessage = new RetryTaskLogMessage();
-            retryTaskLogMessage.setUniqueId(retryTask.getUniqueId());
-            retryTaskLogMessage.setGroupName(retryTask.getGroupName());
-            retryTaskLogMessage.setMessage("手动操作完成");
-            retryTaskLogMessage.setCreateDt(LocalDateTime.now());
-            retryTaskLogMessageMapper.insert(retryTaskLogMessage);
+            RetryLogMetaDTO retryLogMetaDTO = RetryTaskConverter.INSTANCE.toLogMetaDTO(retryTask);
+            retryLogMetaDTO.setTimestamp(DateUtils.toNowMilli());
+            EasyRetryLog.REMOTE.info("=============手动操作完成============. <|>{}<|>", retryLogMetaDTO);
         }
 
         RetryTaskLog retryTaskLog = new RetryTaskLog();

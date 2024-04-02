@@ -7,7 +7,7 @@ import com.aizuda.easy.retry.server.common.config.SystemProperties;
 import com.aizuda.easy.retry.server.common.handler.ClientNodeAllocateHandler;
 import com.aizuda.easy.retry.server.common.IdempotentStrategy;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
-import com.aizuda.easy.retry.server.retry.task.dto.RetryLogMetaDTO;
+import com.aizuda.easy.retry.server.common.dto.RetryLogMetaDTO;
 import com.aizuda.easy.retry.server.retry.task.support.RetryContext;
 import com.aizuda.easy.retry.server.retry.task.support.RetryTaskConverter;
 import com.aizuda.easy.retry.server.retry.task.support.retry.RetryExecutor;
@@ -65,19 +65,9 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, Initializing
                 retryTask.getGroupName(),
                 retryTask.getUniqueId(), pair.getValue().toString());
 
-            // 记录日志
-//            RetryTaskLogDTO retryTaskLog = new RetryTaskLogDTO();
-//            retryTaskLog.setGroupName(retryTask.getGroupName());
-//            retryTaskLog.setUniqueId(retryTask.getUniqueId());
-//            retryTaskLog.setRetryStatus(retryTask.getRetryStatus());
-//            retryTaskLog.setMessage(pair.getValue().toString());
-//            retryTaskLog.setTriggerTime(LocalDateTime.now());
-//            ActorRef actorRef = ActorGenerator.logActor();
-
             RetryLogMetaDTO retryLogMetaDTO = RetryTaskConverter.INSTANCE.toLogMetaDTO(retryTask);
             retryLogMetaDTO.setTimestamp(DateUtils.toNowMilli());
             EasyRetryLog.REMOTE.error("触发条件不满足 原因: [{}] <|>{}<|>", pair.getValue().toString(), retryLogMetaDTO);
-
 
             return false;
         }

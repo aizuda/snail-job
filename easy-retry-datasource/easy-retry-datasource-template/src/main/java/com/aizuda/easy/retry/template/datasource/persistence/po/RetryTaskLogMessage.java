@@ -46,11 +46,6 @@ public class RetryTaskLogMessage implements Serializable {
     private String uniqueId;
 
     /**
-     * 客户端信息
-     */
-    private String clientInfo;
-
-    /**
      * 创建时间
      */
     private LocalDateTime createDt;

@@ -12,7 +12,7 @@ import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.client.RequestInterceptor;
 import com.aizuda.easy.retry.server.common.dto.CallbackConfig;
 import com.aizuda.easy.retry.server.common.enums.ContentTypeEnum;
-import com.aizuda.easy.retry.server.job.task.dto.JobLogMetaDTO;
+import com.aizuda.easy.retry.server.common.dto.JobLogMetaDTO;
 import com.aizuda.easy.retry.server.job.task.support.WorkflowTaskConverter;
 import com.aizuda.easy.retry.server.model.dto.CallbackParamsDTO;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskMapper;

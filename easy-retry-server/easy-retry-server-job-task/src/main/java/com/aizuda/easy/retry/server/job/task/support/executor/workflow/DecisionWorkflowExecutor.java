@@ -12,7 +12,7 @@ import com.aizuda.easy.retry.server.common.dto.DecisionConfig;
 import com.aizuda.easy.retry.server.common.enums.ExpressionTypeEnum;
 import com.aizuda.easy.retry.server.common.enums.LogicalConditionEnum;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
-import com.aizuda.easy.retry.server.job.task.dto.JobLogMetaDTO;
+import com.aizuda.easy.retry.server.common.dto.JobLogMetaDTO;
 import com.aizuda.easy.retry.server.job.task.support.expression.ExpressionInvocationHandler;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;

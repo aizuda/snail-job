@@ -1,6 +1,5 @@
 package com.aizuda.easy.retry.template.datasource.persistence.mapper;
 
-import com.aizuda.easy.retry.template.datasource.persistence.po.JobLogMessage;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLogMessage;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;

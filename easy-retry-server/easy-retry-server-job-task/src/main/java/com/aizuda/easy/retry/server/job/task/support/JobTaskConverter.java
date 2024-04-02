@@ -2,7 +2,7 @@ package com.aizuda.easy.retry.server.job.task.support;
 
 import com.aizuda.easy.retry.client.model.request.DispatchJobRequest;
 import com.aizuda.easy.retry.client.model.request.DispatchJobResultRequest;
-import com.aizuda.easy.retry.server.job.task.dto.JobLogMetaDTO;
+import com.aizuda.easy.retry.server.common.dto.JobLogMetaDTO;
 import com.aizuda.easy.retry.server.job.task.dto.*;
 import com.aizuda.easy.retry.server.job.task.support.block.job.BlockStrategyContext;
 import com.aizuda.easy.retry.server.job.task.support.executor.workflow.WorkflowExecutorContext;

@@ -15,7 +15,7 @@ import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.server.job.task.client.JobRpcClient;
 import com.aizuda.easy.retry.server.job.task.dto.JobExecutorResultDTO;
-import com.aizuda.easy.retry.server.job.task.dto.JobLogMetaDTO;
+import com.aizuda.easy.retry.server.common.dto.JobLogMetaDTO;
 import com.aizuda.easy.retry.server.job.task.dto.RealJobExecutorDTO;
 import com.aizuda.easy.retry.server.job.task.support.ClientCallbackHandler;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;

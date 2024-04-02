@@ -11,6 +11,7 @@ import com.aizuda.easy.retry.server.model.dto.JobLogTaskDTO;
 import com.aizuda.easy.retry.server.model.dto.LogTaskDTO;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.JobLogMessageMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobLogMessage;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -34,10 +35,9 @@ import java.util.stream.Collectors;
 @Component(ActorGenerator.JOB_LOG_ACTOR)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Slf4j
+@RequiredArgsConstructor
 public class JobLogActor extends AbstractActor {
-
-    @Autowired
-    private JobLogMessageMapper jobLogMessageMapper;
+    private final JobLogMessageMapper jobLogMessageMapper;
 
     @Override
     public Receive createReceive() {
@@ -89,6 +89,7 @@ public class JobLogActor extends AbstractActor {
     private void saveLogMessage(JobLogDTO jobLogDTO) {
         JobLogMessage jobLogMessage = JobTaskConverter.INSTANCE.toJobLogMessage(jobLogDTO);
         jobLogMessage.setCreateDt(LocalDateTime.now());
+        jobLogMessage.setLogNum(1);
         jobLogMessage.setMessage(Optional.ofNullable(jobLogDTO.getMessage()).orElse(StrUtil.EMPTY));
         jobLogMessage.setTaskId(Optional.ofNullable(jobLogMessage.getTaskId()).orElse(0L));
         jobLogMessageMapper.insert(jobLogMessage);

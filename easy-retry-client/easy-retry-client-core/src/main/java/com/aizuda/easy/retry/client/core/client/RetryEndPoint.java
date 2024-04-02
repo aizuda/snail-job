@@ -114,15 +114,17 @@ public class RetryEndPoint {
             }
 
             if (Objects.equals(RetryResultStatusEnum.SUCCESS.getStatus(), executeRespDto.getStatusCode())) {
-                EasyRetryLog.REMOTE.info("remote retry complete. count:[{}] result:[{}]", executeReqDto.getRetryCount(),
+                EasyRetryLog.REMOTE.info("remote retry【SUCCESS】. count:[{}] result:[{}]", executeReqDto.getRetryCount(),
                     executeRespDto.getResultJson());
-            }
-            if (Objects.equals(RetryResultStatusEnum.STOP.getStatus(), executeRespDto.getStatusCode())) {
-                EasyRetryLog.REMOTE.warn("remote retry complete. count:[{}] exceptionMsg:[{}]",
+            } else if (Objects.equals(RetryResultStatusEnum.STOP.getStatus(), executeRespDto.getStatusCode())) {
+                EasyRetryLog.REMOTE.warn("remote retry 【STOP】. count:[{}] exceptionMsg:[{}]",
                     executeReqDto.getRetryCount(), executeRespDto.getExceptionMsg());
-            } else {
-                EasyRetryLog.REMOTE.error("remote retry complete. count:[{}] ", executeReqDto.getRetryCount(),
+            } else if (Objects.equals(RetryResultStatusEnum.FAILURE.getStatus(), executeRespDto.getStatusCode())) {
+                EasyRetryLog.REMOTE.error("remote retry 【FAILURE】. count:[{}] ", executeReqDto.getRetryCount(),
                     retryerResultContext.getThrowable());
+            } else {
+                EasyRetryLog.REMOTE.error("remote retry 【UNKNOWN】. count:[{}] result:[{}]", executeReqDto.getRetryCount(),
+                    executeRespDto.getResultJson(), retryerResultContext.getThrowable());
             }
 
         } finally {

@@ -9,7 +9,7 @@ import com.aizuda.easy.retry.server.common.LogStorage;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.dto.LogMetaDTO;
 import com.aizuda.easy.retry.server.common.log.LogStorageFactory;
-import com.aizuda.easy.retry.server.retry.task.dto.RetryLogMetaDTO;
+import com.aizuda.easy.retry.server.common.dto.RetryLogMetaDTO;
 import com.aizuda.easy.retry.server.retry.task.support.dispatch.actor.log.RetryTaskLogDTO;
 import com.google.common.collect.Lists;
 import org.springframework.beans.factory.InitializingBean;
@@ -29,24 +29,24 @@ public class RetryLogStorage implements LogStorage, InitializingBean {
 
     @Override
     public LogTypeEnum logType() {
-        return LogTypeEnum.JOB;
+        return LogTypeEnum.RETRY;
     }
 
     @Override
     public void storage(final LogContentDTO logContentDTO, final LogMetaDTO logMetaDTO) {
         RetryLogMetaDTO retryLogMetaDTO = (RetryLogMetaDTO) logMetaDTO;
-        RetryTaskLogDTO jobLogDTO = new RetryTaskLogDTO();
+        RetryTaskLogDTO retryTaskLogDTO = new RetryTaskLogDTO();
         Map<String, String> messageMap = logContentDTO.getFieldList()
             .stream()
             .filter(logTaskDTO_ -> !Objects.isNull(logTaskDTO_.getValue()))
             .collect(Collectors.toMap(TaskLogFieldDTO::getName, TaskLogFieldDTO::getValue));
-        jobLogDTO.setMessage(JsonUtil.toJsonString(Lists.newArrayList(messageMap)));
-        jobLogDTO.setGroupName(retryLogMetaDTO.getGroupName());
-        jobLogDTO.setNamespaceId(retryLogMetaDTO.getNamespaceId());
-        jobLogDTO.setUniqueId(retryLogMetaDTO.getUniqueId());
-        jobLogDTO.setRealTime(retryLogMetaDTO.getTimestamp());
-        ActorRef actorRef = ActorGenerator.jobLogActor();
-        actorRef.tell(jobLogDTO, actorRef);
+        retryTaskLogDTO.setMessage(JsonUtil.toJsonString(Lists.newArrayList(messageMap)));
+        retryTaskLogDTO.setGroupName(retryLogMetaDTO.getGroupName());
+        retryTaskLogDTO.setNamespaceId(retryLogMetaDTO.getNamespaceId());
+        retryTaskLogDTO.setUniqueId(retryLogMetaDTO.getUniqueId());
+        retryTaskLogDTO.setRealTime(retryLogMetaDTO.getTimestamp());
+        ActorRef actorRef = ActorGenerator.logActor();
+        actorRef.tell(retryTaskLogDTO, actorRef);
     }
 
     @Override

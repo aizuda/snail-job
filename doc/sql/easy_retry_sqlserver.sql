@@ -1807,8 +1807,7 @@ CREATE TABLE retry_task_log_message
     group_name   nvarchar(64)  NOT NULL,
     unique_id    nvarchar(64)  NOT NULL,
     create_dt    datetime2     NOT NULL DEFAULT GETDATE(),
-    message      nvarchar(max) NOT NULL,
-    client_info  nvarchar(128) NULL
+    message      nvarchar(max) NOT NULL
 )
 GO
 
@@ -1857,13 +1856,6 @@ EXEC sp_addextendedproperty
      'SCHEMA', N'dbo',
      'TABLE', N'retry_task_log_message',
      'COLUMN', N'message'
-GO
-
-EXEC sp_addextendedproperty
-     'MS_Description', N'客户端地址 clientId#ip:port',
-     'SCHEMA', N'dbo',
-     'TABLE', N'retry_task_log_message',
-     'COLUMN', N'client_info'
 GO
 
 EXEC sp_addextendedproperty

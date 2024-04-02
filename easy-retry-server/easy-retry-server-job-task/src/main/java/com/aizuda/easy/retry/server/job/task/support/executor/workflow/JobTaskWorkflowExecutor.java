@@ -9,7 +9,7 @@ import com.aizuda.easy.retry.common.core.enums.WorkflowNodeTypeEnum;
 import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
-import com.aizuda.easy.retry.server.job.task.dto.JobLogMetaDTO;
+import com.aizuda.easy.retry.server.common.dto.JobLogMetaDTO;
 import com.aizuda.easy.retry.server.job.task.dto.JobTaskPrepareDTO;
 import com.aizuda.easy.retry.server.job.task.support.JobTaskConverter;
 import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;

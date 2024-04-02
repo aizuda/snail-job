@@ -5,7 +5,7 @@ import cn.hutool.core.lang.Pair;
 import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
-import com.aizuda.easy.retry.server.retry.task.dto.RetryLogMetaDTO;
+import com.aizuda.easy.retry.server.common.dto.RetryLogMetaDTO;
 import com.aizuda.easy.retry.server.retry.task.support.FilterStrategy;
 import com.aizuda.easy.retry.server.retry.task.support.RetryContext;
 import com.aizuda.easy.retry.server.retry.task.support.RetryTaskConverter;

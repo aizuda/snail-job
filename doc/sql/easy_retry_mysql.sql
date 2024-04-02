@@ -161,8 +161,7 @@ CREATE TABLE `retry_task_log_message`
     `create_dt`    datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `message`      longtext                NOT NULL COMMENT '异常信息',
     `log_num`      int(11)             NOT NULL DEFAULT 1 COMMENT '日志数量',
-    `real_time`    bigint(13)          NOT NULL DEFAULT 0 COMMENT '上报时间',
-    `client_info`  varchar(128)                 DEFAULT NULL COMMENT '客户端地址 clientId#ip:port',
+    `real_time`    bigint(13)          NOT NULL DEFAULT 0 COMMENT '上报时间'
     PRIMARY KEY (`id`),
     KEY `idx_namespace_id_group_name_scene_name` (`namespace_id`, `group_name`, `unique_id`),
     KEY `idx_create_dt` (`create_dt`)

@@ -5,6 +5,7 @@ import com.aizuda.easy.retry.server.common.LogStorage;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author: xiaowoniu
@@ -13,7 +14,8 @@ import java.util.Map;
  */
 public final class LogStorageFactory {
 
-    private static final Map<LogTypeEnum, LogStorage> LOG_STORAGE = new HashMap<>();
+    private LogStorageFactory() {}
+    private static final Map<LogTypeEnum, LogStorage> LOG_STORAGE = new ConcurrentHashMap<>();
 
     public static void register(LogTypeEnum logType, LogStorage logStorage) {
         LOG_STORAGE.put(logType, logStorage);

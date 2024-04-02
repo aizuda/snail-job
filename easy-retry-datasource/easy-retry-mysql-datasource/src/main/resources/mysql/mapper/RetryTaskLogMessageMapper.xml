@@ -11,12 +11,11 @@
         <result column="log_num" property="logNum"/>
         <result column="message" property="message"/>
         <result column="real_time" property="realTime"/>
-        <result column="client_info" property="clientInfo"/>
     </resultMap>
     <!-- 定义批量新增的 SQL 映射 -->
     <insert id="batchInsert" parameterType="java.util.List">
         INSERT INTO retry_task_log_message (namespace_id, group_name, unique_id, log_num, message,
-                                            create_dt, real_time, client_info)
+                                            create_dt, real_time)
         VALUES
             <foreach collection="list" item="item" separator=",">
                 (
@@ -26,8 +25,7 @@
                     #{item.logNum},
                     #{item.message},
                     #{item.createDt},
-                    #{item.realTime},
-                    #{item.clientInfo}
+                    #{item.realTime}
                 )
             </foreach>
     </insert>

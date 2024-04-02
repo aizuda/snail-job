@@ -3,6 +3,7 @@ package com.aizuda.easy.retry.server.starter.server.handler;
 import akka.actor.ActorRef;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.net.url.UrlQuery;
+import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.enums.HeadersEnum;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.common.core.model.EasyRetryRequest;
@@ -25,6 +26,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
+import java.util.Objects;
 
 import static com.aizuda.easy.retry.common.core.constant.SystemConstants.HTTP_PATH.BATCH_LOG_REPORT;
 
@@ -52,7 +54,7 @@ public class ReportLogHttpRequestHandler extends PostHttpRequestHandler {
     @Override
     public String doHandler(String content, UrlQuery urlQuery, HttpHeaders headers) {
 
-        EasyRetryLog.LOCAL.info("Begin Handler Log Report Data. [{}]", content);
+        EasyRetryLog.LOCAL.debug("Begin Handler Log Report Data. [{}]", content);
         EasyRetryRequest retryRequest = JsonUtil.parseObject(content, EasyRetryRequest.class);
         Object[] args = retryRequest.getArgs();
 
@@ -62,11 +64,13 @@ public class ReportLogHttpRequestHandler extends PostHttpRequestHandler {
         List<RetryLogTaskDTO> retryTasks = Lists.newArrayList();
         List<JobLogTaskDTO> jobTasks = Lists.newArrayList();
         for (final JsonNode node : jsonNode) {
-            if (node.findValue(JSON_FILED).asText().equals(LogTypeEnum.JOB.name())) {
+            JsonNode value = node.findValue(SystemConstants.JSON_FILED_LOG_TYPE);
+            if (Objects.isNull(value) || value.asText().equals(LogTypeEnum.JOB.name())) {
                 jobTasks.add(JsonUtil.parseObject(node.toPrettyString(), JobLogTaskDTO.class));
+                continue;
             }
 
-            if (node.findValue(JSON_FILED).asText().equals(LogTypeEnum.RETRY.name())) {
+            if (value.asText().equals(LogTypeEnum.RETRY.name())) {
                 retryTasks.add(JsonUtil.parseObject(node.toPrettyString(), RetryLogTaskDTO.class));
             }
         }
@@ -78,10 +82,6 @@ public class ReportLogHttpRequestHandler extends PostHttpRequestHandler {
         }
 
         if (!CollectionUtils.isEmpty(retryTasks)) {
-            String clintInfo = getClientInfo(headers);
-            for (final RetryLogTaskDTO retryTask : retryTasks) {
-                retryTask.setClientInfo(clintInfo);
-            }
             ActorRef actorRef = ActorGenerator.logActor();
             actorRef.tell(retryTasks, actorRef);
         }

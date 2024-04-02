@@ -11,4 +11,35 @@
         <result column="message" property="message" />
     </resultMap>
 
+    <insert id="batchInsert" parameterType="java.util.List">
+        INSERT INTO retry_task_log_message (namespace_id, group_name, unique_id, log_num, message,
+        create_dt, real_time)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.namespaceId},
+            #{item.groupName},
+            #{item.uniqueId},
+            #{item.logNum},
+            #{item.message},
+            #{item.createDt},
+            #{item.realTime}
+            )
+        </foreach>
+    </insert>
+
+    <update id="batchUpdate" parameterType="java.util.List">
+        UPDATE retry_task_log_message jlm,
+        (
+        <foreach collection="list" item="item" index="index" separator=" UNION ALL ">
+            SELECT
+            #{item.message} AS message,
+            #{item.logNum} AS log_num,
+            #{item.id} AS id
+        </foreach>
+        ) tt
+        SET jlm.message = tt.message, jlm.log_num = tt.log_num
+        WHERE jlm.id = tt.id
+    </update>
+
 </mapper>

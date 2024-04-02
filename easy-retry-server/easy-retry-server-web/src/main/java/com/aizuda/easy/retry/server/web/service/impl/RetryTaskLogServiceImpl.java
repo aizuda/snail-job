@@ -146,11 +146,6 @@ public class RetryTaskLogServiceImpl implements RetryTaskLogService {
             int size = originalList.size() - fromIndex;
             List<Map<String, String>> pageList = originalList.stream().skip(fromIndex).limit(queryVO.getSize())
                 .collect(Collectors.toList());
-
-            Map<String, String> map = new HashMap<>(1);
-            map.put("clientInfo", retryTaskLogMessage.getClientInfo());
-            originalList.add(map);
-
             if (messages.size() + size >= queryVO.getSize()) {
                 messages.addAll(pageList);
                 nextStartId = retryTaskLogMessage.getId();
@@ -161,8 +156,6 @@ public class RetryTaskLogServiceImpl implements RetryTaskLogService {
             messages.addAll(pageList);
             nextStartId = retryTaskLogMessage.getId() + 1;
             fromIndex = 0;
-
-
         }
 
         messages = messages.stream().sorted((o1, o2) -> {

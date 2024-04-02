@@ -117,7 +117,7 @@ public class ServerRegister extends AbstractRegister {
                 List<ServerNode> serverNodes = serverNodeMapper.selectList(
                     new LambdaQueryWrapper<ServerNode>()
                         .eq(ServerNode::getNodeType, NodeTypeEnum.CLIENT.getType())
-                        .in(ServerNode::getNamespaceId, new HashSet<>(allConsumerGroupName.values()))
+                        .in(ServerNode::getNamespaceId, namespaceIdSets)
                         .in(ServerNode::getGroupName, allConsumerGroupName.keySet()));
                 for (final ServerNode node : serverNodes) {
                     // 刷新全量本地缓存

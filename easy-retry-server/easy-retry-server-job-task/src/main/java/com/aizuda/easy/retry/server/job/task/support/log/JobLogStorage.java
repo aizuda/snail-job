@@ -10,7 +10,7 @@ import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.dto.LogMetaDTO;
 import com.aizuda.easy.retry.server.common.log.LogStorageFactory;
 import com.aizuda.easy.retry.server.job.task.dto.JobLogDTO;
-import com.aizuda.easy.retry.server.job.task.dto.JobLogMetaDTO;
+import com.aizuda.easy.retry.server.common.dto.JobLogMetaDTO;
 import com.google.common.collect.Lists;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;

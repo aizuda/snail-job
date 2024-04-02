@@ -9,6 +9,7 @@ import com.aizuda.easy.retry.server.model.dto.RetryLogTaskDTO;
 import com.aizuda.easy.retry.server.retry.task.support.RetryTaskConverter;
 import com.aizuda.easy.retry.template.datasource.persistence.mapper.RetryTaskLogMessageMapper;
 import com.aizuda.easy.retry.template.datasource.persistence.po.RetryTaskLogMessage;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -33,11 +34,9 @@ import java.util.stream.Collectors;
  */
 @Component(ActorGenerator.LOG_ACTOR)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-@Slf4j
+@RequiredArgsConstructor
 public class RetryLogActor extends AbstractActor {
-
-    @Autowired
-    private RetryTaskLogMessageMapper retryTaskLogMessageMapper;
+    private final RetryTaskLogMessageMapper retryTaskLogMessageMapper;
 
     @Override
     public Receive createReceive() {
@@ -88,8 +87,10 @@ public class RetryLogActor extends AbstractActor {
         RetryTaskLogMessage retryTaskLogMessage = new RetryTaskLogMessage();
         retryTaskLogMessage.setUniqueId(retryTaskLogDTO.getUniqueId());
         retryTaskLogMessage.setGroupName(retryTaskLogDTO.getGroupName());
-        retryTaskLogMessage.setClientInfo(retryTaskLogDTO.getClientInfo());
+//        retryTaskLogMessage.setClientInfo(retryTaskLogDTO.getClientInfo());
         retryTaskLogMessage.setNamespaceId(retryTaskLogDTO.getNamespaceId());
+        retryTaskLogMessage.setLogNum(1);
+        retryTaskLogMessage.setRealTime(retryTaskLogDTO.getRealTime());
         String errorMessage = retryTaskLogDTO.getMessage();
         retryTaskLogMessage.setMessage(
                 StrUtil.isBlank(errorMessage) ? StrUtil.EMPTY : errorMessage);

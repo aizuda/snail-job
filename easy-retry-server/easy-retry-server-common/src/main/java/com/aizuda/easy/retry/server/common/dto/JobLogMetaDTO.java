@@ -1,29 +1,39 @@
-package com.aizuda.easy.retry.server.retry.task.dto;
+package com.aizuda.easy.retry.server.common.dto;
 
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.common.log.enums.LogTypeEnum;
 import com.aizuda.easy.retry.server.common.dto.LogMetaDTO;
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
  * @author xiaowoniu
  * @date 2024-01-10 22:56:33
- * @since 3.2.0
+ * @since 2.6.0
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class RetryLogMetaDTO extends LogMetaDTO {
+public class JobLogMetaDTO extends LogMetaDTO {
 
-    public RetryLogMetaDTO () {
-        setLogType(LogTypeEnum.RETRY);
+    public JobLogMetaDTO () {
+        setLogType(LogTypeEnum.JOB);
     }
 
     /**
-     * 组名称
+     * 任务信息id
      */
-    private String uniqueId;
+    private Long jobId;
+
+    /**
+     * 任务实例id
+     */
+    private Long taskBatchId;
+
+    /**
+     * 调度任务id
+     */
+    private Long taskId;
+
 
     @Override
     public String toString() {

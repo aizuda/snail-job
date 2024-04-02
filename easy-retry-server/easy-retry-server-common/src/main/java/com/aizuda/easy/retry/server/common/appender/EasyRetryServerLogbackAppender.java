@@ -7,16 +7,21 @@ import ch.qos.logback.classic.spi.ThrowableProxyUtil;
 import ch.qos.logback.core.CoreConstants;
 import ch.qos.logback.core.UnsynchronizedAppenderBase;
 import cn.hutool.core.util.StrUtil;
+import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.common.core.util.NetUtil;
 import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.log.constant.LogFieldConstants;
 import com.aizuda.easy.retry.common.log.dto.LogContentDTO;
+import com.aizuda.easy.retry.common.log.enums.LogTypeEnum;
 import com.aizuda.easy.retry.server.common.LogStorage;
 import com.aizuda.easy.retry.server.common.config.SystemProperties;
+import com.aizuda.easy.retry.server.common.dto.JobLogMetaDTO;
 import com.aizuda.easy.retry.server.common.dto.LogMetaDTO;
+import com.aizuda.easy.retry.server.common.dto.RetryLogMetaDTO;
 import com.aizuda.easy.retry.server.common.log.LogStorageFactory;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.slf4j.MDC;
 
 import java.util.Objects;
@@ -64,23 +69,37 @@ public class EasyRetryServerLogbackAppender<E> extends UnsynchronizedAppenderBas
                     continue;
                 }
 
-                logMetaDTO = JsonUtil.parseObject(extractedData, LogMetaDTO.class);
+                JsonNode jsonNode = JsonUtil.toJson(extractedData);
+                if (!jsonNode.has(SystemConstants.JSON_FILED_LOG_TYPE)) {
+                    return;
+                }
+
+                String name = jsonNode.get(SystemConstants.JSON_FILED_LOG_TYPE).asText();
+                if (LogTypeEnum.RETRY.equals(LogTypeEnum.valueOf(name))) {
+                    logMetaDTO = JsonUtil.parseObject(extractedData, RetryLogMetaDTO.class);
+                } else if (LogTypeEnum.JOB.equals(LogTypeEnum.valueOf(name))) {
+                    logMetaDTO = JsonUtil.parseObject(extractedData, JobLogMetaDTO.class);
+                } else {
+                    throw new IllegalArgumentException("logType is not support");
+                }
+
                 String message = event.getFormattedMessage().replaceFirst(patternString, StrUtil.EMPTY);
                 logContentDTO.addMessageField(message);
                 logContentDTO.addTimeStamp(Optional.ofNullable(logMetaDTO.getTimestamp()).orElse(event.getTimeStamp()));
                 break;
             }
 
+            if (Objects.isNull(logMetaDTO)) {
+                return;
+            }
+
+            // 保存执行的日志
+            saveLog(logContentDTO, logMetaDTO);
+
         } catch (Exception e) {
             EasyRetryLog.LOCAL.error("日志解析失败. msg:[{}]", event.getFormattedMessage(), e);
         }
 
-        if (Objects.isNull(logMetaDTO)) {
-            return;
-        }
-
-        // 保存执行的日志
-        saveLog(logContentDTO, logMetaDTO);
     }
 
     /**
