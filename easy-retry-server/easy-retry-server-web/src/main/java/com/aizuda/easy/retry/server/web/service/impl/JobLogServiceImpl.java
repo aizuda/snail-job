@@ -103,7 +103,7 @@ public class JobLogServiceImpl implements JobLogService {
             if (messages.size() + size >= queryVO.getSize()) {
                 messages.addAll(pageList);
                 nextStartId = jobLogMessage.getId();
-                fromIndex = Math.min(fromIndex + queryVO.getSize(), originalList.size() - 1);
+                fromIndex = Math.min(fromIndex + queryVO.getSize(), originalList.size() - 1) + 1;
                 break;
             }
 

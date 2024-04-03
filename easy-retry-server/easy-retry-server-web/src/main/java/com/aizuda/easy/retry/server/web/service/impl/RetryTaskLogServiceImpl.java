@@ -149,7 +149,7 @@ public class RetryTaskLogServiceImpl implements RetryTaskLogService {
             if (messages.size() + size >= queryVO.getSize()) {
                 messages.addAll(pageList);
                 nextStartId = retryTaskLogMessage.getId();
-                fromIndex = Math.min(fromIndex + queryVO.getSize(), originalList.size() - 1);
+                fromIndex = Math.min(fromIndex + queryVO.getSize(), originalList.size() - 1) + 1;
                 break;
             }
 
