@@ -16,11 +16,14 @@
         <result column="deleted" property="deleted"/>
         <result column="ext_attrs" property="extAttrs"/>
     </resultMap>
+
     <select id="selectWorkflowBatchPageList"
             parameterType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.WorkflowBatchQueryDO"
             resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.WorkflowBatchResponseDO">
-        SELECT a.*, b.workflow_name
-        FROM workflow_task_batch a join workflow b on a.workflow_id = b.id
+        SELECT a.*,
+               b.workflow_name
+          FROM workflow_task_batch a
+                JOIN workflow b ON a.workflow_id = b.id
         ${ew.customSqlSegment}
     </select>
 

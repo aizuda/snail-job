@@ -12,6 +12,7 @@
         <result column="message" property="message"/>
         <result column="real_time" property="realTime"/>
     </resultMap>
+
     <!-- 定义批量新增的 SQL 映射 -->
     <insert id="batchInsert" parameterType="java.util.List">
         INSERT INTO retry_task_log_message (namespace_id, group_name, unique_id, log_num, message,
@@ -32,16 +33,16 @@
 
     <update id="batchUpdate" parameterType="java.util.List">
         UPDATE retry_task_log_message jlm,
-            (
-                <foreach collection="list" item="item" index="index" separator=" UNION ALL ">
-                    SELECT
-                        #{item.message} AS message,
-                        #{item.logNum} AS log_num,
-                        #{item.id} AS id
-                </foreach>
-            ) tt
-        SET jlm.message = tt.message, jlm.log_num = tt.log_num
-        WHERE jlm.id = tt.id
+               (
+                   <foreach collection="list" item="item" index="index" separator="UNION ALL">
+                       SELECT
+                           #{item.message} AS message,
+                           #{item.logNum} AS log_num,
+                           #{item.id} AS id
+                   </foreach>
+               ) tt
+           SET jlm.message = tt.message, jlm.log_num = tt.log_num
+         WHERE jlm.id = tt.id
     </update>
 
 </mapper>

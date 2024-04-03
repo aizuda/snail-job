@@ -30,7 +30,7 @@
         UPDATE job AS rt
         SET next_trigger_at = tt.next_trigger_at
         FROM (
-        <foreach collection="list" item="item" index="index" separator=" union all ">
+        <foreach collection="list" item="item" index="index" separator="UNION ALL">
             select
             #{item.nextTriggerAt} as next_trigger_at,
             #{item.id} as id

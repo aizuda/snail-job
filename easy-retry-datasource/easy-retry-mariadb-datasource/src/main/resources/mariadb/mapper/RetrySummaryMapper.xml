@@ -36,19 +36,19 @@
 
     <update id="batchUpdate" parameterType="java.util.List">
         UPDATE retry_summary rt,
-                (
-                    <foreach collection="list" item="item" index="index" separator=" UNION ALL ">
-                        SELECT
-                            #{item.runningNum} AS running_num,
-                            #{item.finishNum} AS finish_num,
-                            #{item.maxCountNum} AS max_count_num,
-                            #{item.suspendNum} AS suspend_num,
-                            #{item.triggerAt} AS trigger_at,
-                            #{item.sceneName} AS scene_name,
-                            #{item.namespaceId} AS namespace_id,
-                            #{item.groupName} AS group_name
-                    </foreach>
-                ) tt
+               (
+                   <foreach collection="list" item="item" index="index" separator="UNION ALL">
+                       SELECT
+                           #{item.runningNum} AS running_num,
+                           #{item.finishNum} AS finish_num,
+                           #{item.maxCountNum} AS max_count_num,
+                           #{item.suspendNum} AS suspend_num,
+                           #{item.triggerAt} AS trigger_at,
+                           #{item.sceneName} AS scene_name,
+                           #{item.namespaceId} AS namespace_id,
+                           #{item.groupName} AS group_name
+                   </foreach>
+               ) tt
            SET rt.running_num = tt.running_num,
                rt.finish_num = tt.finish_num,
                rt.max_count_num = tt.max_count_num,

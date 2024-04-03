@@ -13,11 +13,17 @@
         <result column="update_dt" property="updateDt" />
         <result column="deleted" property="deleted" />
     </resultMap>
+
     <select id="selectJobBatchPageList"
         parameterType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.JobBatchQueryDO"
         resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.JobBatchResponseDO">
-        SELECT a.*, b.job_name, b.task_type, b.block_strategy, b.trigger_type
-        FROM job_task_batch a join job b on a.job_id = b.id
+        SELECT a.*,
+               b.job_name,
+               b.task_type,
+               b.block_strategy,
+               b.trigger_type
+          FROM job_task_batch a
+                JOIN job b ON a.job_id = b.id
         ${ew.customSqlSegment}
     </select>
 
@@ -55,8 +61,15 @@
 
     <select id="selectJobBatchListByIds"
             resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.JobBatchResponseDO">
-        SELECT a.*, b.job_name, b.task_type, b.block_strategy, b.trigger_type,b.executor_info,b.args_str
-        FROM job_task_batch a join job b on a.job_id = b.id
+        SELECT a.*,
+               b.job_name,
+               b.task_type,
+               b.block_strategy,
+               b.trigger_type,
+               b.executor_info,
+               b.args_str
+          FROM job_task_batch a
+                JOIN job b ON a.job_id = b.id
         ${ew.customSqlSegment}
     </select>
 </mapper>

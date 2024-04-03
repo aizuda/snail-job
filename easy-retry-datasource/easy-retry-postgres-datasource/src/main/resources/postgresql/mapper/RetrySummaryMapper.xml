@@ -40,7 +40,7 @@
                max_count_num = tt.max_count_num,
                suspend_num = tt.suspend_num
           FROM (
-                <foreach collection="list" item="item" index="index" separator=" UNION ALL ">
+                <foreach collection="list" item="item" index="index" separator="UNION ALL">
                     SELECT
                         #{item.runningNum} AS running_num,
                         #{item.finishNum} AS finish_num,

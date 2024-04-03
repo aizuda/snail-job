@@ -43,7 +43,7 @@
            SET expire_at = tt.expire_at,
                context_path = tt.context_path
           FROM (
-                <foreach collection="list" item="item" index="index" separator=" UNION ALL ">
+                <foreach collection="list" item="item" index="index" separator="UNION ALL">
                     SELECT
                         #{item.expireAt} AS expire_at,
                         #{item.contextPath} AS context_path,

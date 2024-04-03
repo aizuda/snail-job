@@ -17,18 +17,10 @@
     </resultMap>
 
     <update id="updateBatchNextTriggerAtById" parameterType="java.util.List">
-        MERGE INTO workflow dest
-        USING (
-            <foreach collection="list" item="item" index="index" separator=" UNION ALL ">
-                SELECT
-                    #{item.nextTriggerAt} AS next_trigger_at,
-                    #{item.id} AS id
-                FROM DUAL
-            </foreach>
-        ) src
-        ON (dest.id = src.id)
-        WHEN MATCHED THEN
-        UPDATE SET
-            dest.next_trigger_at = src.next_trigger_at
+        <foreach collection="list" item="item" open="BEGIN" separator=";" close=";END;">
+            UPDATE workflow
+               SET next_trigger_at = #{item.nextTriggerAt}
+             WHERE id = #{item.id}
+        </foreach>
     </update>
 </mapper>

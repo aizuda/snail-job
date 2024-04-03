@@ -21,7 +21,7 @@
             SET workflow.next_trigger_at = src.next_trigger_at
         FROM workflow
         JOIN (
-            <foreach collection="list" item="item" index="index" separator=" UNION ALL ">
+            <foreach collection="list" item="item" index="index" separator="UNION ALL">
                 SELECT
                     #{item.nextTriggerAt} AS next_trigger_at,
                     #{item.id} AS id

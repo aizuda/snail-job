@@ -44,7 +44,7 @@
     <update id="batchUpdate" parameterType="java.util.List">
         UPDATE job_summary rt,
                (
-                   <foreach collection="list" item="item" index="index" separator=" UNION ALL ">
+                   <foreach collection="list" item="item" index="index" separator="UNION ALL">
                        SELECT
                            #{item.successNum} AS success_num,
                            #{item.failNum} AS fail_num,

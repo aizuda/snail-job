@@ -51,7 +51,7 @@
                cancel_num = tt.cancel_num,
                cancel_reason = tt.cancel_reason
           FROM (
-                <foreach collection="list" item="item" index="index" separator=" UNION ALL ">
+                <foreach collection="list" item="item" index="index" separator="UNION ALL">
                     SELECT
                         #{item.successNum} AS success_num,
                         #{item.failNum} AS fail_num,

@@ -29,7 +29,7 @@
     <update id="updateBatchNextTriggerAtById" parameterType="java.util.List">
         UPDATE job rt,
             (
-                <foreach collection="list" item="item" index="index" separator=" UNION ALL ">
+                <foreach collection="list" item="item" index="index" separator="UNION ALL">
                     SELECT
                         #{item.nextTriggerAt} AS next_trigger_at,
                         #{item.id} AS id

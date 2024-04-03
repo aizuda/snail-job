@@ -23,7 +23,7 @@
         <!-- useGeneratedKeys="false" 否则报错ORA-00933: SQL command not properly ended -->
         INSERT INTO server_node (namespace_id, group_name, host_id, host_ip, host_port,
                                  expire_at, node_type, ext_attrs, context_path, create_dt)
-        <foreach collection="records" item="item" index="index" separator=" UNION ">
+        <foreach collection="records" item="item" index="index" separator="UNION ALL">
             SELECT
                 #{item.namespaceId,jdbcType=VARCHAR},
                 #{item.groupName,jdbcType=VARCHAR},

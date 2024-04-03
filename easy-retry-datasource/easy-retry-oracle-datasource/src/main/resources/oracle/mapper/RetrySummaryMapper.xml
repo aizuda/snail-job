@@ -94,16 +94,14 @@
             resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO$Rank">
         SELECT
             *
-          FROM
-            (
+          FROM (
                 SELECT
                     group_name || '/' || scene_name AS name,
                     SUM(running_num + finish_num + max_count_num + suspend_num) AS total
                 FROM retry_summary
                 ${ew.customSqlSegment}
                 HAVING SUM(running_num + finish_num + max_count_num + suspend_num) > 0
-                ORDER BY SUM(running_num + finish_num + max_count_num + suspend_num) DESC
-            )
+                ORDER BY SUM(running_num + finish_num + max_count_num + suspend_num) DESC)
         WHERE ROWNUM <![CDATA[ <= ]]> 10
     </select>
 

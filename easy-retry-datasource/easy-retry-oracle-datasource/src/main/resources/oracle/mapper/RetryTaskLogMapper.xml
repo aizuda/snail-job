@@ -23,18 +23,16 @@
     </sql>
 
     <!-- 定义批量新增的 SQL 映射 -->
-    <insert id="batchInsert" parameterType="java.util.List">
-        INSERT ALL
-        <foreach collection="list" item="item" separator="">
-            INTO retry_task_log (unique_id, group_name, scene_name, idempotent_id, biz_no, executor_name,
-                                        args_str, ext_attrs, task_type, create_dt, namespace_id)
-            VALUES (
+    <insert id="batchInsert" parameterType="java.util.List" useGeneratedKeys="false" keyProperty="id">
+        INSERT INTO retry_task_log (unique_id, group_name, scene_name, idempotent_id, biz_no, executor_name,
+                                    args_str, ext_attrs, task_type, create_dt, namespace_id)
+        <foreach collection="list" item="item" separator="UNION ALL">
+            SELECT
                 #{item.uniqueId}, #{item.groupName}, #{item.sceneName}, #{item.idempotentId},
                 #{item.bizNo}, #{item.executorName}, #{item.argsStr}, #{item.extAttrs},
                 #{item.taskType}, #{item.createDt}, #{item.namespaceId}
-            )
+            FROM DUAL
         </foreach>
-        SELECT * FROM DUAL
     </insert>
 
     <!-- 重试统计 -->

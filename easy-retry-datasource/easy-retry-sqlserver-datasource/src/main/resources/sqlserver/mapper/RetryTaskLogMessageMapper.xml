@@ -8,9 +8,12 @@
         <result column="group_name" property="groupName" />
         <result column="unique_id" property="uniqueId" />
         <result column="create_dt" property="createDt" />
-        <result column="message" property="message" />
+        <result column="log_num" property="logNum"/>
+        <result column="message" property="message"/>
+        <result column="real_time" property="realTime"/>
     </resultMap>
 
+    <!-- 定义批量新增的 SQL 映射 -->
     <insert id="batchInsert" parameterType="java.util.List">
         INSERT INTO retry_task_log_message (namespace_id, group_name, unique_id, log_num, message,
                                             create_dt, real_time)
@@ -29,17 +32,18 @@
     </insert>
 
     <update id="batchUpdate" parameterType="java.util.List">
-        UPDATE retry_task_log_message jlm,
-                (
+        UPDATE retry_task_log_message
+           SET message = src.message, log_num = src.log_num
+          FROM retry_task_log_message AS dest
+                JOIN (
                     <foreach collection="list" item="item" index="index" separator="UNION ALL">
                         SELECT
                             #{item.message} AS message,
                             #{item.logNum} AS log_num,
                             #{item.id} AS id
                     </foreach>
-                ) tt
-           SET jlm.message = tt.message, jlm.log_num = tt.log_num
-         WHERE jlm.id = tt.id
+                ) AS src
+                ON dest.id = src.id
     </update>
 
 </mapper>

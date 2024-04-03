@@ -52,7 +52,7 @@
                cancel_reason = src.cancel_reason
           FROM job_summary AS dest
                JOIN (
-                   <foreach collection="list" item="item" index="index" separator=" UNION ALL ">
+                   <foreach collection="list" item="item" index="index" separator="UNION ALL">
                        SELECT
                            #{item.successNum} AS success_num,
                            #{item.failNum} AS fail_num,

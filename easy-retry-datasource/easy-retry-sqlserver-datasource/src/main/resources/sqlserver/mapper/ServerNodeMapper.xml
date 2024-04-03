@@ -46,7 +46,7 @@
                context_path = src.context_path
           FROM server_node AS dest
                JOIN (
-                 <foreach collection="list" item="item" index="index" separator=" UNION ALL ">
+                 <foreach collection="list" item="item" index="index" separator="UNION ALL">
                      SELECT
                          #{item.expireAt} AS expire_at,
                          #{item.contextPath} AS context_path,

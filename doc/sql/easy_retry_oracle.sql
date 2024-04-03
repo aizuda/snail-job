@@ -231,7 +231,9 @@ CREATE TABLE retry_task_log_message
     group_name   VARCHAR2(64) NOT NULL,
     unique_id    VARCHAR2(64) NOT NULL,
     create_dt    TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
-    message      CLOB          DEFAULT ''
+    message      CLOB          DEFAULT '',
+    log_num      INT           DEFAULT 1,
+    real_time    NUMERIC(13)   DEFAULT 0
 );
 
 CREATE INDEX idx_retry_task_log_message_1 ON retry_task_log_message (namespace_id, group_name, unique_id);
@@ -244,6 +246,8 @@ COMMENT ON COLUMN retry_task_log_message.group_name IS '组名称';
 COMMENT ON COLUMN retry_task_log_message.unique_id IS '同组下id唯一';
 COMMENT ON COLUMN retry_task_log_message.create_dt IS '创建时间';
 COMMENT ON COLUMN retry_task_log_message.message IS '异常信息';
+COMMENT ON COLUMN retry_task_log_message.log_num IS '日志数量';
+COMMENT ON COLUMN retry_task_log_message.real_time IS '上报时间';
 
 -- scene_config
 CREATE TABLE scene_config

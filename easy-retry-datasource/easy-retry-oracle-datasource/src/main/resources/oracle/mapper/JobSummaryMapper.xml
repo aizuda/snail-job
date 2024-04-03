@@ -22,7 +22,7 @@
     <insert id="batchInsert" parameterType="java.util.List" useGeneratedKeys="false" keyProperty="id">
         INSERT INTO job_summary (namespace_id, group_name, business_id, trigger_at, system_task_type,
                                  success_num,fail_num,fail_reason,stop_num,stop_reason, cancel_num,cancel_reason)
-        <foreach collection="list" item="item" separator=" UNION ALL ">
+        <foreach collection="list" item="item" separator="UNION ALL">
             SELECT
                 #{item.namespaceId},
                 #{item.groupName},
@@ -91,21 +91,19 @@
 
     <select id="dashboardRank"
             resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO$Rank">
-        SELECT * FROM
-        (
-            SELECT
-                <if test="systemTaskType == 3">
-                    group_name || '/' || (SELECT job_name FROM job WHERE id = business_id) AS name,
-                </if>
-                <if test="systemTaskType == 4">
-                    group_name || '/' || (SELECT workflow_name FROM workflow WHERE id = business_id) AS name,
-                </if>
-                SUM(fail_num) AS total
-            FROM job_summary
-            ${ew.customSqlSegment}
-            HAVING SUM(fail_num) > 0
-            ORDER BY total DESC
-        )
+        SELECT * FROM (
+                SELECT
+                    <if test="systemTaskType == 3">
+                        group_name || '/' || (SELECT job_name FROM job WHERE id = business_id) AS name,
+                    </if>
+                    <if test="systemTaskType == 4">
+                        group_name || '/' || (SELECT workflow_name FROM workflow WHERE id = business_id) AS name,
+                    </if>
+                    SUM(fail_num) AS total
+                FROM job_summary
+                ${ew.customSqlSegment}
+                HAVING SUM(fail_num) > 0
+                ORDER BY total DESC)
         WHERE ROWNUM <![CDATA[ <= ]]> 10
     </select>
 
