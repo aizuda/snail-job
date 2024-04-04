@@ -147,16 +147,18 @@ public class DashBoardServiceImpl implements DashBoardService {
         DashboardRetryLineResponseVO dashboardRetryLineResponseVO = new DashboardRetryLineResponseVO();
         // 重试任务列表
         Page<Object> pager = new Page<>(baseQueryVO.getPage(), baseQueryVO.getSize());
-        // 针对SQL Server的分页COUNT, 自定义statement ID
-        if (DbTypeEnum.SQLSERVER == DbUtils.getDbType()) {
-            pager.setCountId("sqlServer_jobTaskList_Count");
-        }
         LambdaQueryWrapper<SceneConfig> wrapper = new LambdaQueryWrapper<SceneConfig>()
                 .eq(SceneConfig::getNamespaceId, namespaceId)
                 .in(CollUtil.isNotEmpty(groupNames), SceneConfig::getGroupName, groupNames);
-        IPage<DashboardRetryLineResponseDO.Task> IPage = retrySummaryMapper.retryTaskList(wrapper, pager);
-        List<DashboardRetryLineResponseVO.Task> taskList = JobSummaryResponseVOConverter.INSTANCE.toDashboardRetryLineResponseVO(IPage.getRecords());
-        PageResult<List<DashboardRetryLineResponseVO.Task>> pageResult = new PageResult<>(new PageDTO(IPage.getCurrent(), IPage.getSize(), IPage.getTotal()), taskList);
+        // 针对SQL Server的分页COUNT, 自定义statement ID
+        if (DbTypeEnum.SQLSERVER == DbUtils.getDbType()) {
+            pager.setSearchCount(false);
+            pager.setTotal(retrySummaryMapper.countRetryTask(wrapper));
+        }
+
+        IPage<DashboardRetryLineResponseDO.Task> page = retrySummaryMapper.retryTaskList(wrapper, pager);
+        List<DashboardRetryLineResponseVO.Task> taskList = JobSummaryResponseVOConverter.INSTANCE.toDashboardRetryLineResponseVO(page.getRecords());
+        PageResult<List<DashboardRetryLineResponseVO.Task>> pageResult = new PageResult<>(new PageDTO(pager.getCurrent(), pager.getSize(), pager.getTotal()), taskList);
         dashboardRetryLineResponseVO.setTaskList(pageResult);
 
         // 折线图
@@ -198,18 +200,20 @@ public class DashBoardServiceImpl implements DashBoardService {
         DashboardRetryLineResponseVO dashboardRetryLineResponseVO = new DashboardRetryLineResponseVO();
         // 重试任务列表
         Page<Object> pager = new Page<>(baseQueryVO.getPage(), baseQueryVO.getSize());
-        // 针对SQL Server的分页COUNT, 自定义statement ID
-        if (DbTypeEnum.SQLSERVER == DbUtils.getDbType()) {
-            pager.setCountId("sqlServer_jobTaskList_Count");
-        }
         // 任务类型
         Integer systemTaskType = SystemModeEnum.JOB.name().equals(mode) ? SyetemTaskTypeEnum.JOB.getType() : SyetemTaskTypeEnum.WORKFLOW.getType();
         LambdaQueryWrapper<Job> wrapper1 = new LambdaQueryWrapper<Job>()
                 .eq(Job::getNamespaceId, namespaceId)
                 .in(CollUtil.isNotEmpty(groupNames), Job::getGroupName, groupNames);
-        IPage<DashboardRetryLineResponseDO.Task> IPage = jobSummaryMapper.jobTaskList(wrapper1, pager);
-        List<DashboardRetryLineResponseVO.Task> taskList = JobSummaryResponseVOConverter.INSTANCE.toDashboardRetryLineResponseVO(IPage.getRecords());
-        PageResult<List<DashboardRetryLineResponseVO.Task>> pageResult = new PageResult<>(new PageDTO(IPage.getCurrent(), IPage.getSize(), IPage.getTotal()), taskList);
+        // 针对SQL Server的分页COUNT, 自定义statement ID
+        if (DbTypeEnum.SQLSERVER == DbUtils.getDbType()) {
+            pager.setSearchCount(false);
+            pager.setTotal(jobSummaryMapper.countJobTask(wrapper1));
+        }
+
+        IPage<DashboardRetryLineResponseDO.Task> page = jobSummaryMapper.jobTaskList(wrapper1, pager);
+        List<DashboardRetryLineResponseVO.Task> taskList = JobSummaryResponseVOConverter.INSTANCE.toDashboardRetryLineResponseVO(page.getRecords());
+        PageResult<List<DashboardRetryLineResponseVO.Task>> pageResult = new PageResult<>(new PageDTO(pager.getCurrent(), pager.getSize(), pager.getTotal()), taskList);
         dashboardRetryLineResponseVO.setTaskList(pageResult);
 
         // 折线图

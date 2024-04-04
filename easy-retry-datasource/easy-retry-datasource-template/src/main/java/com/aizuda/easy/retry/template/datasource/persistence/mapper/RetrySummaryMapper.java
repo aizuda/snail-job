@@ -37,4 +37,6 @@ public interface RetrySummaryMapper extends BaseMapper<RetrySummary> {
     List<DashboardLineResponseDO> retryLineList(@Param("dateFormat") String dateFormat, @Param("ew") Wrapper<RetrySummary> wrapper);
 
     List<DashboardRetryLineResponseDO.Rank> dashboardRank(@Param("ew") Wrapper<RetrySummary> wrapper);
+
+    long countRetryTask(@Param("ew") Wrapper<SceneConfig> wrapper);
 }

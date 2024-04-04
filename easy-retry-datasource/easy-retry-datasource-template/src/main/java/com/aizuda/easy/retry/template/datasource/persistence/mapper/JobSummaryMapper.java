@@ -34,4 +34,6 @@ public interface JobSummaryMapper extends BaseMapper<JobSummary> {
     List<DashboardRetryLineResponseDO.Rank> dashboardRank( @Param("systemTaskType") Integer systemTaskType, @Param("ew") Wrapper<JobSummary> wrapper);
 
     DashboardCardResponseDO.JobTask toJobTask(@Param("ew") Wrapper<JobSummary> wrapper);
+
+    long countJobTask(@Param("ew") Wrapper<Job> wrapper);
 }

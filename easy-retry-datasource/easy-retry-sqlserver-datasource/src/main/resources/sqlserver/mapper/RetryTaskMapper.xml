@@ -49,16 +49,16 @@
     </insert>
 
     <update id="updateBatchNextTriggerAtById" parameterType="java.util.List">
-        UPDATE target
-            SET target.next_trigger_at = src.next_trigger_at
+        UPDATE retry_task_${partition}
+        SET next_trigger_at = src.next_trigger_at
         FROM retry_task_${partition} as target
-                JOIN (
-                    <foreach collection="list" item="item" index="index" separator="UNION ALL">
-                        SELECT
-                        #{item.nextTriggerAt} AS next_trigger_at,
-                        #{item.id} AS id
-                    </foreach>
-                ) AS src
-                ON target.id = src.id;
+        JOIN (
+        <foreach collection="list" item="item" index="index" separator="UNION ALL">
+            SELECT
+            #{item.nextTriggerAt} AS next_trigger_at,
+            #{item.id} AS id
+        </foreach>
+        ) AS src
+        ON target.id = src.id;
     </update>
 </mapper>

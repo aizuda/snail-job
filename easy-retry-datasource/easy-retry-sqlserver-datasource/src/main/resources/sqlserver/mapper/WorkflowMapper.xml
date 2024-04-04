@@ -18,14 +18,14 @@
 
     <update id="updateBatchNextTriggerAtById" parameterType="java.util.List">
         UPDATE workflow
-            SET workflow.next_trigger_at = src.next_trigger_at
-        FROM workflow
+        SET next_trigger_at = src.next_trigger_at
+        FROM workflow dest
         JOIN (
-            <foreach collection="list" item="item" index="index" separator="UNION ALL">
-                SELECT
-                    #{item.nextTriggerAt} AS next_trigger_at,
-                    #{item.id} AS id
-            </foreach>
-        ) AS src ON workflow.id = src.id;
+        <foreach collection="list" item="item" index="index" separator="UNION ALL">
+            SELECT
+            #{item.nextTriggerAt} AS next_trigger_at,
+            #{item.id} AS id
+        </foreach>
+        ) AS src ON dest.id = src.id;
     </update>
 </mapper>

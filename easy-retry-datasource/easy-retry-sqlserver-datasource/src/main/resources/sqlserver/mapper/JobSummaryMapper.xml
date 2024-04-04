@@ -134,8 +134,7 @@
 
     <!--  用于 jobTaskList 分页的 COUNT,
         SQL Server SELECT COUNT(*) FROM (... ORDER BY ) 会报错 -->
-    <select id="sqlServer_jobTaskList_Count"
-            resultType="com.aizuda.easy.retry.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO$Task">
+    <select id="countJobTask" resultType="long">
         SELECT COUNT(DISTINCT group_name)
          FROM job
         ${ew.customSqlSegment}

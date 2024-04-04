@@ -16,52 +16,47 @@
     </resultMap>
 
     <insert id="batchInsert" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO job_summary (namespace_id, group_name, business_id, trigger_at, system_task_type,
-                                 success_num,fail_num,fail_reason,stop_num,stop_reason, cancel_num,cancel_reason)
+        INSERT INTO
+        retry_summary (namespace_id, group_name, scene_name, trigger_at, running_num, finish_num, max_count_num,
+        suspend_num)
         VALUES
         <foreach collection="list" item="item" separator=",">
             (
             #{item.namespaceId},
             #{item.groupName},
-            #{item.businessId},
+            #{item.sceneName},
             #{item.triggerAt},
-            #{item.systemTaskType},
-            #{item.successNum},
-            #{item.failNum},
-            #{item.failReason},
-            #{item.stopNum},
-            #{item.stopReason},
-            #{item.cancelNum},
-            #{item.cancelReason}
+            #{item.runningNum},
+            #{item.finishNum},
+            #{item.maxCountNum},
+            #{item.suspendNum}
             )
         </foreach>
     </insert>
 
     <update id="batchUpdate" parameterType="java.util.List">
-        UPDATE job_summary
-           SET success_num = src.success_num,
-               fail_num = src.fail_num,
-               fail_reason = src.fail_reason,
-               stop_num = src.stop_num,
-               stop_reason = src.stop_reason,
-               cancel_num = src.cancel_num,
-               cancel_reason = src.cancel_reason
-          FROM job_summary AS dest
-               JOIN (
-                <foreach collection="list" item="item" index="index" separator="UNION ALL">
-                    SELECT
-                        #{item.successNum} AS success_num,
-                        #{item.failNum} AS fail_num,
-                        #{item.failReason} AS fail_reason,
-                        #{item.stopNum} AS stop_num,
-                        #{item.stopReason} AS stop_reason,
-                        #{item.cancelNum} AS cancel_num,
-                        #{item.cancelReason} AS cancel_reason,
-                        #{item.triggerAt} AS trigger_at,
-                        #{item.businessId} AS business_id
-                </foreach>
-            ) AS src
-            ON (dest.trigger_at = src.trigger_at AND dest.business_id = src.business_id)
+        UPDATE retry_summary
+        SET running_num = src.running_num,
+        finish_num = src.finish_num,
+        max_count_num = src.max_count_num,
+        suspend_num = src.suspend_num
+        FROM retry_summary AS dest
+        JOIN (
+        <foreach collection="list" item="item" index="index" separator="UNION ALL">
+            SELECT
+            #{item.runningNum} AS running_num,
+            #{item.finishNum} AS finish_num,
+            #{item.maxCountNum} AS max_count_num,
+            #{item.suspendNum} AS suspend_num,
+            #{item.triggerAt} AS trigger_at,
+            #{item.sceneName} AS scene_name,
+            #{item.namespaceId} AS namespace_id,
+            #{item.groupName} AS group_name
+        </foreach>
+        ) AS src
+        ON (dest.trigger_at = src.trigger_at AND dest.group_name = src.group_name
+        AND dest.scene_name = src.scene_name AND dest.namespace_id = src.namespace_id
+        )
     </update>
 
     <select id="retryTask"
@@ -136,7 +131,7 @@
 
     <!--  用于 retryTaskList 分页的 自定义 COUNT,
      SQL Server SELECT COUNT(*) FROM (... ORDER BY group_name) 会报错 -->
-    <select id="sqlServer_jobTaskList_Count" resultType="java.lang.Integer">
+    <select id="countRetryTask" resultType="long">
         SELECT COUNT(DISTINCT group_name)
         FROM scene_config
         ${ew.customSqlSegment}
