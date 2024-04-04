@@ -53,7 +53,7 @@ services:
         volumes:
             - oracle:/u01/app/oracle/oradata
             - ../sql/easy_retry_oracle.sql:/tmp/schema.sql:ro
-            # 创建app用户: root/root@//localhost/XEPDB1
+            # 创建app用户: easy_retry/EasyRetry@//localhost/XEPDB1
             - ./oracle/1_create_user.sql:/docker-entrypoint-initdb.d/1_create_user.sql:ro
             - ./oracle/2_create_schema.sh:/docker-entrypoint-initdb.d/2_create_schema.sh:ro
 

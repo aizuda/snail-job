@@ -20,8 +20,8 @@ spring:
     ## Oracle
 #    driver-class-name: oracle.jdbc.OracleDriver
 #    url: jdbc:oracle:thin:@//localhost:1521/XEPDB1
-#    username: root
-#    password: root
+#    username: easy_retry
+#    password: EasyRetry
     ## SQL Server
 #    driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
 #    url: jdbc:sqlserver://localhost:1433;DatabaseName=easy_retry;SelectMethod=cursor;encrypt=false;rewriteBatchedStatements=true
