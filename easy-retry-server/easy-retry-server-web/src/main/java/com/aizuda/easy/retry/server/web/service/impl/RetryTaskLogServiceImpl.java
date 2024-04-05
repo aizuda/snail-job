@@ -91,6 +91,12 @@ public class RetryTaskLogServiceImpl implements RetryTaskLogService {
     @Override
     public RetryTaskLogMessageResponseVO getRetryTaskLogMessagePage(
          RetryTaskLogMessageQueryVO queryVO) {
+        if (StrUtil.isBlank(queryVO.getUniqueId()) || StrUtil.isBlank(queryVO.getGroupName())) {
+            RetryTaskLogMessageResponseVO jobLogResponseVO = new RetryTaskLogMessageResponseVO();
+            jobLogResponseVO.setNextStartId(0L);
+            jobLogResponseVO.setFromIndex(0);
+            return jobLogResponseVO;
+        }
 
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
 
