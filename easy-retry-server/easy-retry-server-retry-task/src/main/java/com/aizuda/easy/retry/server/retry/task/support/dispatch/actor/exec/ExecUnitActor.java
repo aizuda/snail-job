@@ -50,10 +50,6 @@ public class ExecUnitActor extends AbstractActor {
             RegisterNodeInfo serverNode = context.getServerNode();
             SceneConfig sceneConfig = context.getSceneConfig();
 
-//            RetryTaskLogDTO retryTaskLog = RetryTaskLogConverter.INSTANCE.toRetryTaskLogDTO(retryTask);
-//            retryTaskLog.setTriggerTime(LocalDateTime.now());
-//            retryTaskLog.setClientInfo(ClientInfoUtils.generate(serverNode));
-
             try {
 
                 if (Objects.nonNull(serverNode)) {
@@ -61,42 +57,16 @@ public class ExecUnitActor extends AbstractActor {
                     retryExecutor.call((Callable<Result<DispatchRetryResultDTO>>) () -> {
 
                         Result<DispatchRetryResultDTO> result = callClient(retryTask, serverNode, sceneConfig);
-
                         // 回调接口请求成功，处理返回值
                         if (StatusEnum.YES.getStatus() != result.getStatus()) {
-                            if (StrUtil.isNotBlank(result.getMessage())) {
-//                                retryTaskLog.setMessage(result.getMessage());
-                            } else {
-//                                retryTaskLog.setMessage("客户端执行失败: 异常信息为空");
-                            }
                         } else {
                             DispatchRetryResultDTO data = JsonUtil.parseObject(JsonUtil.toJsonString(result.getData()), DispatchRetryResultDTO.class);
                             result.setData(data);
-                            if (Objects.nonNull(data)) {
-                                if (RetryResultStatusEnum.FAILURE.getStatus().equals(data.getStatusCode())) {
-                                    if (StrUtil.isNotBlank(data.getExceptionMsg())) {
-//                                        retryTaskLog.setMessage(data.getExceptionMsg());
-                                    } else {
-//                                        retryTaskLog.setMessage("客户端重试失败: 异常信息为空");
-                                    }
-                                } else if (RetryResultStatusEnum.STOP.getStatus().equals(data.getStatusCode())) {
-//                                    retryTaskLog.setMessage("客户端主动停止任务");
-                                } else {
-//                                    retryTaskLog.setMessage("客户端执行成功");
-                                }
-                            }
-
                         }
 
                         return result;
                     });
 
-                    // 请求发生异常
-                    if (context.hasException()) {
-//                        retryTaskLog.setMessage(context.getException().getMessage());
-                    }
-                } else {
-//                    retryTaskLog.setMessage("There are currently no available client PODs.");
                 }
 
             } catch (Exception e) {
@@ -104,9 +74,6 @@ public class ExecUnitActor extends AbstractActor {
                 retryLogMetaDTO.setTimestamp(DateUtils.toNowMilli());
                 EasyRetryLog.REMOTE.error("请求客户端异常. <|>{}<|>",  retryTask.getUniqueId(), retryLogMetaDTO, e);
             } finally {
-
-//                ActorRef actorRef = ActorGenerator.logActor();
-//                actorRef.tell(retryTaskLog, actorRef);
                 getContext().stop(getSelf());
 
             }

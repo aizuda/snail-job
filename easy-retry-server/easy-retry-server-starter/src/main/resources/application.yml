@@ -2,6 +2,7 @@ server:
   port: 8080
   servlet:
     context-path: /easy-retry
+
 spring:
   profiles:
     active: dev
@@ -14,7 +15,7 @@ spring:
     password: root
     ## postgres
 #    driver-class-name: org.postgresql.Driver
-#    url: jdbc:postgresql://localhost:5432/postgres?useUnicode=true&characterEncoding=utf8&useSSL=true&autoReconnect=true&reWriteBatchedInserts=true
+#    url: jdbc:postgresql://localhost:5432/easy_retry?useUnicode=true&characterEncoding=utf8&useSSL=true&autoReconnect=true&reWriteBatchedInserts=true
 #    username: root
 #    password: root
     ## Oracle
@@ -22,7 +23,7 @@ spring:
 #    url: jdbc:oracle:thin:@//localhost:1521/XEPDB1
 #    username: easy_retry
 #    password: EasyRetry
-    ## SQL Server
+    ## SQL Server 注意:由于system_user为SQLServer系统函数，因此SQLServer需要启用前缀配置，请配置mybatis-plus.global-config.db-config.table-prefix: er_
 #    driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
 #    url: jdbc:sqlserver://localhost:1433;DatabaseName=easy_retry;SelectMethod=cursor;encrypt=false;rewriteBatchedStatements=true
 #    username: SA
@@ -53,10 +54,11 @@ mybatis-plus:
       capital-mode: false
       logic-delete-value: 1
       logic-not-delete-value: 0
-#      table-prefix: er_
+#      table-prefix: er_ # SQLServer 请打开该配置
   configuration:
     map-underscore-to-camel-case: true
     cache-enabled: true
+
 logging:
     config: classpath:logback-boot.xml
 #    level:
@@ -74,6 +76,5 @@ easy-retry:
   callback: # 回调配置
     max-count: 288 #回调最大执行次数
     trigger-interval: 900 #间隔时间
-  db-type: mysql #当前使用的数据库
   mode: all
   retry-max-pull-count: 10

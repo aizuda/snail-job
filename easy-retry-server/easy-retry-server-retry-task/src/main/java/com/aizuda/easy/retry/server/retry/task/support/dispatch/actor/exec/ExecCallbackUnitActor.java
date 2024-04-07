@@ -67,34 +67,15 @@ public class ExecCallbackUnitActor extends AbstractActor {
                 if (Objects.nonNull(serverNode)) {
                     retryExecutor.call((Callable<Result<Void>>) () -> {
                         Result<Void> result = callClient(retryTask, serverNode, sceneConfig);
-
-                        String message = "回调客户端成功";
-                        if (StatusEnum.YES.getStatus() != result.getStatus()) {
-                            if (StrUtil.isNotBlank(result.getMessage())) {
-                                message = result.getMessage();
-                            } else {
-                                message = "回调客户端失败: 异常信息为空";
-                            }
-                        }
-//                        retryTaskLog.setMessage(message);
                         return result;
                     });
-                    if (context.hasException()) {
-//                        retryTaskLog.setMessage(context.getException().getMessage());
-                    }
-                } else {
-//                    retryTaskLog.setMessage("There are currently no available client PODs.");
                 }
 
             } catch (Exception e) {
                 RetryLogMetaDTO retryLogMetaDTO = RetryTaskConverter.INSTANCE.toLogMetaDTO(retryTask);
                 retryLogMetaDTO.setTimestamp(DateUtils.toNowMilli());
-                EasyRetryLog.REMOTE.error("请求客户端异常. <|>{}<|>",  retryTask.getUniqueId(), retryLogMetaDTO, e);//                retryTaskLog.setMessage(StringUtils.isBlank(e.getMessage()) ? StrUtil.EMPTY : e.getMessage());
+                EasyRetryLog.REMOTE.error("请求客户端异常. <|>{}<|>",  retryTask.getUniqueId(), retryLogMetaDTO, e);
             } finally {
-
-//                ActorRef actorRef = ActorGenerator.logActor();
-//                actorRef.tell(retryTaskLog, actorRef);
-
                 getContext().stop(getSelf());
 
             }

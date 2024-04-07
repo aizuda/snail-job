@@ -24,7 +24,7 @@ public class SceneConfigRequestVO {
     @NotNull(message = "场景状态不能为空")
     private Integer sceneStatus;
 
-    @Max(message = "最大重试次数", value = 99)
+    @Max(message = "最大重试次数", value = 9999999)
     @Min(message = "最小重试次数", value = 0)
     private Integer maxRetryCount;
 

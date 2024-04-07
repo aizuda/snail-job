@@ -35,7 +35,7 @@ services:
         environment:
             POSTGRES_USER: root
             POSTGRES_PASSWORD: root
-            POSTGRES_DB: postgres
+            POSTGRES_DB: easy_retry
         ports:
             - "5432:5432"
         volumes:
