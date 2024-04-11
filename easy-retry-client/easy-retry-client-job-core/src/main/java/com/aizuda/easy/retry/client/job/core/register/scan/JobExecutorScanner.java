@@ -35,12 +35,12 @@ public class JobExecutorScanner implements Scanner, ApplicationContextAware {
 
     @Override
     public List<JobExecutorInfo> doScan() {
-        return scanRetryAbleMethod();
+        return scanJobExecutor();
     }
 
-    private List<JobExecutorInfo> scanRetryAbleMethod() {
+    private List<JobExecutorInfo> scanJobExecutor() {
 
-        List<JobExecutorInfo> retryerInfoList = new ArrayList<>();
+        List<JobExecutorInfo> jobExecutorInfoList = new ArrayList<>();
         String[] beanDefinitionNames = applicationContext.getBeanNamesForType(Object.class, false, true);
         for (String beanDefinitionName : beanDefinitionNames) {
             Object bean = applicationContext.getBean(beanDefinitionName);
@@ -59,7 +59,7 @@ public class JobExecutorScanner implements Scanner, ApplicationContextAware {
             // 通过实现接口进行注册
             if (IJobExecutor.class.isAssignableFrom(bean.getClass())) {
                 if (!JobExecutorInfoCache.isExisted(executorClassName)) {
-                    retryerInfoList.add(new JobExecutorInfo(executorClassName, ReflectionUtils.findMethod(bean.getClass(), "jobExecute"), bean));
+                    jobExecutorInfoList.add(new JobExecutorInfo(executorClassName, ReflectionUtils.findMethod(bean.getClass(), "jobExecute"), bean));
                 }
 
             }
@@ -80,7 +80,7 @@ public class JobExecutorScanner implements Scanner, ApplicationContextAware {
                                     method,
                                     bean
                             );
-                    retryerInfoList.add(jobExecutorInfo);
+                    jobExecutorInfoList.add(jobExecutorInfo);
                 }
 
             }
@@ -103,11 +103,11 @@ public class JobExecutorScanner implements Scanner, ApplicationContextAware {
                                 executeMethod,
                                 bean
                         );
-                retryerInfoList.add(jobExecutorInfo);
+                jobExecutorInfoList.add(jobExecutorInfo);
             }
         }
 
-        return retryerInfoList;
+        return jobExecutorInfoList;
     }
 
     @Override

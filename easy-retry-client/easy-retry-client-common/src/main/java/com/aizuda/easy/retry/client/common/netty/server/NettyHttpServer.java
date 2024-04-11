@@ -1,9 +1,9 @@
-package com.aizuda.easy.retry.server.starter.server;
+package com.aizuda.easy.retry.client.common.netty.server;
 
+import com.aizuda.easy.retry.client.common.Lifecycle;
+import com.aizuda.easy.retry.client.common.config.EasyRetryProperties;
+import com.aizuda.easy.retry.client.common.exception.EasyRetryClientException;
 import com.aizuda.easy.retry.common.log.EasyRetryLog;
-import com.aizuda.easy.retry.server.common.config.SystemProperties;
-import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
-import com.aizuda.easy.retry.server.common.Lifecycle;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -32,7 +32,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @Getter
 public class NettyHttpServer implements Runnable, Lifecycle {
-    private final SystemProperties systemProperties;
+    private final EasyRetryProperties easyRetryProperties;
     private Thread thread = null;
     private volatile boolean started = false;
 
@@ -63,21 +63,21 @@ public class NettyHttpServer implements Runnable, Lifecycle {
                     }
                 });
 
-            // 在特定端口绑定并启动服务器 默认是1788
-            ChannelFuture future = bootstrap.bind(systemProperties.getNettyPort()).sync();
+            // 在特定端口绑定并启动服务器 默认是1789
+            ChannelFuture future = bootstrap.bind(easyRetryProperties.getPort()).sync();
 
-            EasyRetryLog.LOCAL.info("------> easy-retry remoting server start success, nettype = {}, port = {}",
-                NettyHttpServer.class.getName(), systemProperties.getNettyPort());
+            EasyRetryLog.LOCAL.info("------> easy-retry client remoting server start success, nettype = {}, port = {}",
+                NettyHttpServer.class.getName(), easyRetryProperties.getPort());
 
             started = true;
             future.channel().closeFuture().sync();
 
         } catch (InterruptedException e) {
-            EasyRetryLog.LOCAL.info("--------> easy-retry remoting server stop.");
+            EasyRetryLog.LOCAL.info("--------> easy-retry client remoting server stop.");
         } catch (Exception e) {
-            EasyRetryLog.LOCAL.error("--------> easy-retry remoting server error.", e);
+            EasyRetryLog.LOCAL.error("--------> easy-retry client remoting server error.", e);
             started = false;
-            throw new EasyRetryServerException("easy-retry server start error");
+            throw new EasyRetryClientException("easy-retry client server start error");
         } finally {
             // 当服务器正常关闭时，关闭EventLoopGroups以释放资源。
             workerGroup.shutdownGracefully();

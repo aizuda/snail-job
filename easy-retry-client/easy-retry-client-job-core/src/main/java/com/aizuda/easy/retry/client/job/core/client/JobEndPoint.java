@@ -1,7 +1,10 @@
 package com.aizuda.easy.retry.client.job.core.client;
 
 import com.aizuda.easy.retry.client.common.annotation.Authentication;
+import com.aizuda.easy.retry.client.common.annotation.Mapping;
+import com.aizuda.easy.retry.client.common.annotation.SnailEndPoint;
 import com.aizuda.easy.retry.client.common.log.support.EasyRetryLogManager;
+import com.aizuda.easy.retry.client.common.netty.RequestMethod;
 import com.aizuda.easy.retry.client.job.core.IJobExecutor;
 import com.aizuda.easy.retry.client.job.core.cache.JobExecutorInfoCache;
 import com.aizuda.easy.retry.client.job.core.cache.ThreadPoolCache;
@@ -16,12 +19,9 @@ import com.aizuda.easy.retry.common.core.model.JobContext;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.log.enums.LogTypeEnum;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Objects;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -30,13 +30,10 @@ import java.util.concurrent.ThreadPoolExecutor;
  * @author: www.byteblogs.com
  * @date : 2023-09-27 16:33
  */
-@RestController
-@RequestMapping("/job")
-@Slf4j
+@SnailEndPoint
 public class JobEndPoint {
 
-    @PostMapping("/dispatch/v1")
-    @Authentication
+    @Mapping(path = "/job/dispatch/v1", method = RequestMethod.POST)
     public Result<Boolean> dispatchJob(@RequestBody @Validated DispatchJobRequest dispatchJob) {
 
         try {

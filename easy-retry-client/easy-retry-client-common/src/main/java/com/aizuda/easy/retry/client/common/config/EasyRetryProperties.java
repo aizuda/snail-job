@@ -48,7 +48,7 @@ public class EasyRetryProperties {
     /**
      * 指定客户端端口
      */
-    private Integer port;
+    private int port = 1789;
 
     /**
      * 远程上报滑动窗口配置

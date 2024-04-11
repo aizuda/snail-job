@@ -5,6 +5,7 @@ import com.aizuda.easy.retry.client.common.exception.EasyRetryClientException;
 import com.aizuda.easy.retry.client.job.core.Scanner;
 import com.aizuda.easy.retry.client.job.core.cache.JobExecutorInfoCache;
 import com.aizuda.easy.retry.client.job.core.dto.JobExecutorInfo;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -16,10 +17,9 @@ import java.util.Objects;
  * @date : 2022-02-10 09:12
  */
 @Component
+@RequiredArgsConstructor
 public class JobExecutorRegistrar implements Lifecycle {
-
-    @Autowired
-    private List<Scanner> scanners;
+    private final List<Scanner> scanners;
 
     public void registerRetryHandler(JobExecutorInfo jobExecutorInfo) {
 
