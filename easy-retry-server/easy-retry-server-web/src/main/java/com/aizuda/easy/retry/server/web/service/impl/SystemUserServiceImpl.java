@@ -62,7 +62,8 @@ public class SystemUserServiceImpl implements SystemUserService {
     public SystemUserResponseVO login(SystemUserRequestVO requestVO) {
 
         SystemUser systemUser = systemUserMapper.selectOne(
-                new LambdaQueryWrapper<SystemUser>().eq(SystemUser::getUsername, requestVO.getUsername()));
+                new LambdaQueryWrapper<SystemUser>()
+                    .eq(SystemUser::getUsername, requestVO.getUsername().trim()));
         if (Objects.isNull(systemUser)) {
             throw new EasyRetryServerException("用户名或密码错误");
         }
