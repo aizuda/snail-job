@@ -1,6 +1,5 @@
 package com.aizuda.easy.retry.client.job.core.client;
 
-import com.aizuda.easy.retry.client.common.annotation.Authentication;
 import com.aizuda.easy.retry.client.common.annotation.Mapping;
 import com.aizuda.easy.retry.client.common.annotation.SnailEndPoint;
 import com.aizuda.easy.retry.client.common.log.support.EasyRetryLogManager;
@@ -12,6 +11,7 @@ import com.aizuda.easy.retry.client.job.core.dto.JobExecutorInfo;
 import com.aizuda.easy.retry.client.job.core.executor.AbstractJobExecutor;
 import com.aizuda.easy.retry.client.job.core.executor.AnnotationJobExecutor;
 import com.aizuda.easy.retry.client.job.core.log.JobLogMeta;
+import com.aizuda.easy.retry.client.model.DispatchRetryDTO;
 import com.aizuda.easy.retry.client.model.StopJobDTO;
 import com.aizuda.easy.retry.client.model.request.DispatchJobRequest;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
@@ -19,11 +19,15 @@ import com.aizuda.easy.retry.common.core.model.JobContext;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.log.enums.LogTypeEnum;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ThreadPoolExecutor;
 
 /**
@@ -34,7 +38,14 @@ import java.util.concurrent.ThreadPoolExecutor;
 public class JobEndPoint {
 
     @Mapping(path = "/job/dispatch/v1", method = RequestMethod.POST)
-    public Result<Boolean> dispatchJob(@RequestBody @Validated DispatchJobRequest dispatchJob) {
+    public Result<Boolean> dispatchJob(DispatchJobRequest dispatchJob) {
+
+        ValidatorFactory vf = Validation.buildDefaultValidatorFactory();
+        Validator validator = vf.getValidator();
+        Set<ConstraintViolation<DispatchJobRequest>> set = validator.validate(dispatchJob);
+        for (final ConstraintViolation<DispatchJobRequest> violation : set) {
+            return new Result<>(violation.getMessage(), Boolean.FALSE);
+        }
 
         try {
             JobContext jobContext = buildJobContext(dispatchJob);
@@ -44,7 +55,7 @@ public class JobEndPoint {
 
             if (Objects.nonNull(dispatchJob.getRetryCount()) && dispatchJob.getRetryCount() > 0) {
                 EasyRetryLog.REMOTE.info("任务执行/调度失败执行重试. 重试次数:[{}]",
-                        dispatchJob.getRetryCount());
+                    dispatchJob.getRetryCount());
             }
 
             JobExecutorInfo jobExecutorInfo = JobExecutorInfoCache.get(jobContext.getExecutorInfo());
@@ -106,9 +117,16 @@ public class JobEndPoint {
         return jobContext;
     }
 
-    @PostMapping("/stop/v1")
-    @Authentication
-    public Result<Boolean> stopJob(@RequestBody @Validated StopJobDTO interruptJob) {
+    @Mapping(path = "/stop/v1", method = RequestMethod.POST)
+    public Result<Boolean> stopJob(StopJobDTO interruptJob) {
+
+        ValidatorFactory vf = Validation.buildDefaultValidatorFactory();
+        Validator validator = vf.getValidator();
+        Set<ConstraintViolation<StopJobDTO>> set = validator.validate(interruptJob);
+        for (final ConstraintViolation<StopJobDTO> violation : set) {
+            return new Result<>(violation.getMessage(), Boolean.FALSE);
+        }
+
         ThreadPoolExecutor threadPool = ThreadPoolCache.getThreadPool(interruptJob.getTaskBatchId());
         if (Objects.isNull(threadPool) || threadPool.isShutdown() || threadPool.isTerminated()) {
             return new Result<>(Boolean.TRUE);

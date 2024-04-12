@@ -1,8 +1,10 @@
 package com.aizuda.easy.retry.client.core.client;
 
 import cn.hutool.core.lang.Assert;
-import com.aizuda.easy.retry.client.common.annotation.Authentication;
+import com.aizuda.easy.retry.client.common.annotation.Mapping;
+import com.aizuda.easy.retry.client.common.annotation.SnailEndPoint;
 import com.aizuda.easy.retry.client.common.log.support.EasyRetryLogManager;
+import com.aizuda.easy.retry.client.common.netty.RequestMethod;
 import com.aizuda.easy.retry.client.core.IdempotentIdGenerate;
 import com.aizuda.easy.retry.client.core.RetryArgSerializer;
 import com.aizuda.easy.retry.client.common.cache.GroupVersionCache;
@@ -30,19 +32,19 @@ import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.common.log.enums.LogTypeEnum;
 import com.aizuda.easy.retry.server.model.dto.ConfigDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import lombok.extern.slf4j.Slf4j;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.util.ReflectionUtils;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 import java.lang.reflect.Method;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * 服务端调调用客户端进行重试流量下发、配置变更通知等操作
@@ -50,9 +52,7 @@ import java.util.Objects;
  * @author: www.byteblogs.com
  * @date : 2022-03-09 16:33
  */
-@RestController
-@RequestMapping("/retry")
-@Slf4j
+@SnailEndPoint
 public class RetryEndPoint {
 
     @Autowired
@@ -62,9 +62,15 @@ public class RetryEndPoint {
     /**
      * 服务端调度重试入口
      */
-    @PostMapping("/dispatch/v1")
-    @Authentication
-    public Result<DispatchRetryResultDTO> dispatch(@RequestBody @Validated DispatchRetryDTO executeReqDto) {
+    @Mapping(path = "/retry/dispatch/v1", method = RequestMethod.POST)
+    public Result<DispatchRetryResultDTO> dispatch(DispatchRetryDTO executeReqDto) {
+
+        ValidatorFactory vf = Validation.buildDefaultValidatorFactory();
+        Validator validator = vf.getValidator();
+        Set<ConstraintViolation<DispatchRetryDTO>> set = validator.validate(executeReqDto);
+        for (final ConstraintViolation<DispatchRetryDTO> violation : set) {
+            return new Result<>(violation.getMessage(), null);
+        }
 
         RetryerInfo retryerInfo = RetryerInfoCache.get(executeReqDto.getScene(), executeReqDto.getExecutorName());
         if (Objects.isNull(retryerInfo)) {
@@ -144,16 +150,21 @@ public class RetryEndPoint {
     /**
      * 同步版本
      */
-    @PostMapping("/sync/version/v1")
-    @Authentication
-    public Result syncVersion(@RequestBody ConfigDTO configDTO) {
+    @Mapping(path = "/retry/sync/version/v1", method = RequestMethod.POST)
+    public Result syncVersion(ConfigDTO configDTO) {
         GroupVersionCache.configDTO = configDTO;
         return new Result();
     }
 
-    @PostMapping("/callback/v1")
-    @Authentication
-    public Result callback(@RequestBody @Validated RetryCallbackDTO callbackDTO) {
+    @Mapping(path = "/retry/callback/v1", method = RequestMethod.POST)
+    public Result callback(RetryCallbackDTO callbackDTO) {
+
+        ValidatorFactory vf = Validation.buildDefaultValidatorFactory();
+        Validator validator = vf.getValidator();
+        Set<ConstraintViolation<RetryCallbackDTO>> set = validator.validate(callbackDTO);
+        for (final ConstraintViolation<RetryCallbackDTO> violation : set) {
+            return new Result<>(violation.getMessage(), null);
+        }
 
         RetryerInfo retryerInfo = null;
         Object[] deSerialize = null;
@@ -264,9 +275,15 @@ public class RetryEndPoint {
      * @return idempotentId
      */
     @PostMapping("/generate/idempotent-id/v1")
-    @Authentication
     public Result<String> idempotentIdGenerate(
-        @RequestBody @Validated GenerateRetryIdempotentIdDTO generateRetryIdempotentIdDTO) {
+       GenerateRetryIdempotentIdDTO generateRetryIdempotentIdDTO) {
+
+        ValidatorFactory vf = Validation.buildDefaultValidatorFactory();
+        Validator validator = vf.getValidator();
+        Set<ConstraintViolation<GenerateRetryIdempotentIdDTO>> set = validator.validate(generateRetryIdempotentIdDTO);
+        for (final ConstraintViolation<GenerateRetryIdempotentIdDTO> violation : set) {
+            return new Result<>(violation.getMessage(), null);
+        }
 
         String scene = generateRetryIdempotentIdDTO.getScene();
         String executorName = generateRetryIdempotentIdDTO.getExecutorName();

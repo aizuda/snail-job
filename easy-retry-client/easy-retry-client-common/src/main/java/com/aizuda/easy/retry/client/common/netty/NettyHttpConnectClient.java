@@ -10,6 +10,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.timeout.IdleStateHandler;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Component;
 
 import java.net.ConnectException;
 import java.nio.channels.ClosedChannelException;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -29,14 +31,14 @@ import java.util.concurrent.TimeUnit;
  * @date : 2022-03-07 18:24
  * @since 1.0.0
  */
+@Getter
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
-public class NettyHttpConnectClient implements Lifecycle, ApplicationContextAware {
+public class NettyHttpConnectClient implements Lifecycle {
 
-    private ApplicationContext applicationContext;
-    private static NioEventLoopGroup nioEventLoopGroup = new NioEventLoopGroup();
-    private static Bootstrap bootstrap = new Bootstrap();
-    private volatile Channel channel;
+    private static final NioEventLoopGroup nioEventLoopGroup = new NioEventLoopGroup();
+    private static final Bootstrap bootstrap = new Bootstrap();
+    private Channel channel;
 
     @Override
     public void start() {
@@ -97,8 +99,10 @@ public class NettyHttpConnectClient implements Lifecycle, ApplicationContextAwar
             exceptionHandler(e);
         }
 
-        channel.close();
-
+        // 若连接失败尝试关闭改channel
+        if (Objects.nonNull(channel)) {
+            channel.close();
+        }
     }
 
     /**
@@ -143,17 +147,7 @@ public class NettyHttpConnectClient implements Lifecycle, ApplicationContextAwar
         if (channel != null) {
             channel.close();
         }
-        if (nioEventLoopGroup != null) {
-            nioEventLoopGroup.shutdownGracefully();
-        }
+        nioEventLoopGroup.shutdownGracefully();
     }
 
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
-    }
-
-    public Channel getChannel() {
-        return channel;
-    }
 }

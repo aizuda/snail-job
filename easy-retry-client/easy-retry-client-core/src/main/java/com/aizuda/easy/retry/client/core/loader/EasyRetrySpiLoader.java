@@ -1,6 +1,5 @@
 package com.aizuda.easy.retry.client.core.loader;
 
-import cn.hutool.core.lang.Pair;
 import cn.hutool.core.util.ServiceLoaderUtil;
 import com.aizuda.easy.retry.client.core.expression.ExpressionInvocationHandler;
 import com.aizuda.easy.retry.common.core.expression.ExpressionEngine;

@@ -8,6 +8,7 @@ import com.aizuda.easy.retry.client.job.core.dto.JobArgs;
 import com.aizuda.easy.retry.client.job.core.dto.JobExecutorInfo;
 import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -54,14 +55,14 @@ public class JobExecutorScanner implements Scanner, ApplicationContextAware {
                 EasyRetryLog.LOCAL.error("{} JobExecutor加载异常：{}", beanDefinitionName, ex);
             }
 
-            String executorClassName = bean.getClass().getName();
+            Class executorNotProxy = AopProxyUtils.ultimateTargetClass(bean);
+            String executorClassName = executorNotProxy.getName();
 
             // 通过实现接口进行注册
             if (IJobExecutor.class.isAssignableFrom(bean.getClass())) {
                 if (!JobExecutorInfoCache.isExisted(executorClassName)) {
                     jobExecutorInfoList.add(new JobExecutorInfo(executorClassName, ReflectionUtils.findMethod(bean.getClass(), "jobExecute"), bean));
                 }
-
             }
 
             // 扫描类的注解

@@ -1,11 +1,13 @@
 package com.aizuda.easy.retry.common.core.model;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * @author: www.byteblogs.com
  * @date : 2022-02-16 14:07
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class NettyResult extends Result<Object> {
 

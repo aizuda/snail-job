@@ -3,11 +3,13 @@ package com.aizuda.easy.retry.client.common.netty.server;
 import com.aizuda.easy.retry.client.common.annotation.Mapping;
 import com.aizuda.easy.retry.client.common.annotation.SnailEndPoint;
 import com.aizuda.easy.retry.common.log.EasyRetryLog;
+import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -20,6 +22,7 @@ import java.util.Objects;
  * @date 2024-04-11 22:29:07
  * @since 3.3.0
  */
+@Component
 public class SnailEndPointScanner implements ApplicationContextAware {
 
     private ApplicationContext context;
@@ -33,7 +36,8 @@ public class SnailEndPointScanner implements ApplicationContextAware {
         String[] beanDefinitionNames = context.getBeanNamesForType(Object.class, false, true);
         for (String beanDefinitionName : beanDefinitionNames) {
             Object bean = context.getBean(beanDefinitionName);
-            String executorClassName = bean.getClass().getName();
+            Class executorNotProxy = AopProxyUtils.ultimateTargetClass(bean);
+            String executorClassName = executorNotProxy.getName();
 
             // 扫描类的注解
             SnailEndPoint jobExecutor = bean.getClass().getAnnotation(SnailEndPoint.class);

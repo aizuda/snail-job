@@ -1,13 +1,16 @@
 package com.aizuda.easy.retry.server.common.client;
 
+import cn.hutool.core.date.StopWatch;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
+import com.aizuda.easy.retry.common.core.model.EasyRetryRequest;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.common.core.util.NetUtil;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
+import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
 import com.aizuda.easy.retry.server.common.cache.CacheToken;
 import com.aizuda.easy.retry.server.common.client.annotation.Body;
@@ -17,18 +20,22 @@ import com.aizuda.easy.retry.server.common.client.annotation.Param;
 import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.common.exception.EasyRetryServerException;
 import com.aizuda.easy.retry.server.common.handler.ClientNodeAllocateHandler;
+import com.aizuda.easy.retry.server.common.netty.client.NettyChannel;
+import com.aizuda.easy.retry.server.common.netty.client.RpcContext;
 import com.github.rholder.retry.RetryException;
 import com.github.rholder.retry.RetryListener;
 import com.github.rholder.retry.Retryer;
 import com.github.rholder.retry.RetryerBuilder;
 import com.github.rholder.retry.StopStrategies;
 import com.github.rholder.retry.WaitStrategies;
+import io.netty.handler.codec.http.CombinedHttpHeaders;
+import io.netty.handler.codec.http.DefaultHttpHeaders;
+import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpMethod;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.ResourceAccessException;
@@ -42,8 +49,12 @@ import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * 请求处理器
@@ -68,8 +79,8 @@ public class RpcClientInvokeHandler implements InvocationHandler {
     private final Integer routeKey;
     private final String allocKey;
     private final Integer executorTimeout;
-
     private final String namespaceId;
+    private final boolean async;
 
     public RpcClientInvokeHandler(final String groupName, final RegisterNodeInfo registerNodeInfo,
         final boolean failRetry, final int retryTimes,
@@ -89,6 +100,7 @@ public class RpcClientInvokeHandler implements InvocationHandler {
         this.allocKey = allocKey;
         this.executorTimeout = executorTimeout;
         this.namespaceId = namespaceId;
+        this.async = false;
     }
 
     @Override
@@ -134,33 +146,56 @@ public class RpcClientInvokeHandler implements InvocationHandler {
                 Assert.notNull(parasResult.body, () -> new EasyRetryServerException("body cannot be null"));
             }
 
-            RestTemplate restTemplate = SpringContext.getBean(RestTemplate.class);
-
             Retryer<Result> retryer = buildResultRetryer();
 
             HttpHeaders requestHeaders = parasResult.requestHeaders;
-            if (Objects.nonNull(executorTimeout)) {
-                requestHeaders.set(RequestInterceptor.TIMEOUT_TIME, String.valueOf(executorTimeout));
-            }
-
             // 统一设置Token
             requestHeaders.set(SystemConstants.EASY_RETRY_AUTH_TOKEN, CacheToken.get(groupName, namespaceId));
 
+            EasyRetryRequest easyRetryRequest = new EasyRetryRequest(args);
             Result result = retryer.call(() -> {
-                ResponseEntity<Result> response = restTemplate.exchange(
-                    // 拼接 url?a=1&b=1
-                    getUrl(mapping, parasResult.paramMap).toString(),
-                    // post or get
-                    HttpMethod.valueOf(mapping.method().name()),
-                    // body
-                    new HttpEntity<>(parasResult.body, parasResult.requestHeaders),
-                    // 返回值类型
-                    Result.class);
 
-                return Objects.requireNonNull(response.getBody());
+                StopWatch sw = new StopWatch();
+
+                sw.start("request start " + easyRetryRequest.getReqId());
+
+                CompletableFuture completableFuture = null;
+                if (async) {
+//                    RpcContext.setCompletableFuture(easyRetryRequest.getReqId(), null);
+                } else {
+                    completableFuture = new CompletableFuture<>();
+                    RpcContext.setCompletableFuture(easyRetryRequest.getReqId(), completableFuture);
+                }
+
+                try {
+                    NettyChannel.send(hostId, hostIp, hostPort,
+                        HttpMethod.valueOf(mapping.method().name()),  // 拼接 url?a=1&b=1
+                        mapping.path(), easyRetryRequest.toString(), requestHeaders);
+                } finally {
+                    sw.stop();
+                }
+
+                EasyRetryLog.LOCAL.debug("request complete requestId:[{}] 耗时:[{}ms]", easyRetryRequest.getReqId(),
+                    sw.getTotalTimeMillis());
+                if (async) {
+                    return null;
+                } else {
+                    Assert.notNull(completableFuture, () -> new EasyRetryServerException("completableFuture is null"));
+                    try {
+                        return (Result) completableFuture.get(Optional.ofNullable(executorTimeout).orElse(20), TimeUnit.SECONDS);
+                    } catch (ExecutionException e) {
+                        throw new EasyRetryServerException("Request to remote interface exception. path:[{}]",
+                            mapping.path());
+                    } catch (TimeoutException e) {
+                        throw new EasyRetryServerException("Request to remote interface timed out. path:[{}]",
+                            mapping.path());
+                    }
+                }
+
             });
 
-            log.debug("Request client success. count:[{}] clientId:[{}] clientAddr:[{}:{}] serverIp:[{}]", count, hostId,
+            log.debug("Request client success. count:[{}] clientId:[{}] clientAddr:[{}:{}] serverIp:[{}]", count,
+                hostId,
                 hostIp, hostPort, NetUtil.getLocalIpStr());
 
             return result;
@@ -239,7 +274,7 @@ public class RpcClientInvokeHandler implements InvocationHandler {
     private ParseParasResult doParseParams(Method method, Object[] args) {
 
         Object body = null;
-        HttpHeaders requestHeaders = new HttpHeaders();
+        DefaultHttpHeaders requestHeaders = new DefaultHttpHeaders();
         Map<String, Object> paramMap = new HashMap<>();
         // 解析参数
         Parameter[] parameters = method.getParameters();
@@ -267,7 +302,7 @@ public class RpcClientInvokeHandler implements InvocationHandler {
     private static class ParseParasResult {
 
         private Object body = null;
-        private HttpHeaders requestHeaders;
+        private DefaultHttpHeaders requestHeaders;
         private Map<String, Object> paramMap;
     }
 }
