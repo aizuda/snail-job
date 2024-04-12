@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 /**
  * JOB任务扫描
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2023-09-22 09:08
  * @since 2.4.0
  */

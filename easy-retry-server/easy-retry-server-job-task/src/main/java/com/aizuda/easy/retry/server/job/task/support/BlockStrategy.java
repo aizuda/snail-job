@@ -3,7 +3,7 @@ package com.aizuda.easy.retry.server.job.task.support;
 import com.aizuda.easy.retry.server.job.task.support.block.job.BlockStrategyContext;
 
 /**
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2023-09-25 17:53
  * @since : 1.0.0
  */

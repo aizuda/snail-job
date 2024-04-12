@@ -30,7 +30,7 @@ import java.util.List;
 /**
  * 重试数据管理接口
  *
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2022-02-27
  */
 @RestController

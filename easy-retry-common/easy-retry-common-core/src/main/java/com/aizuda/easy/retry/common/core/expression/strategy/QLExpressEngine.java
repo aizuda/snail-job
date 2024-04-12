@@ -10,7 +10,7 @@ import java.util.Map;
 /**
  * QL表达式解析器
  *
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-09-10 17:40:34
  * @since 2.3.0
  */

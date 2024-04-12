@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * 广播模式
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2023-09-27 09:48
  * @since 2.4.0
  */

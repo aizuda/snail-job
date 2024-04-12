@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * 批量回滚死信表数据
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2023-04-30 22:30
  */
 @Data

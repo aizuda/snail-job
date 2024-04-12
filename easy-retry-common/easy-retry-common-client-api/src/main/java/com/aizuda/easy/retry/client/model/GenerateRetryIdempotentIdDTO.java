@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 /**
  * 生成idempotentId模型
  *
- * @auther www.byteblogs.com
+ * @auther opensnail
  * @date 2022/03/25 10:06
  */
 @Data

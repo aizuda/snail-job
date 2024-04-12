@@ -25,7 +25,7 @@ import static com.aizuda.easy.retry.common.core.enums.JobTaskBatchStatusEnum.NOT
 /**
  * 调度任务准备阶段
  *
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-09-25 22:20:53
  * @since 2.4.0
  */

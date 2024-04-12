@@ -2,7 +2,7 @@ package com.aizuda.easy.retry.client.core.report;
 
 import com.aizuda.easy.retry.client.common.cache.GroupVersionCache;
 import com.aizuda.easy.retry.client.common.config.EasyRetryProperties;
-import com.aizuda.easy.retry.client.common.proxy.RequestBuilder;
+import com.aizuda.easy.retry.client.common.rpc.client.RequestBuilder;
 import com.aizuda.easy.retry.client.common.client.NettyClient;
 import com.aizuda.easy.retry.client.core.retryer.RetryerInfo;
 import com.aizuda.easy.retry.common.core.alarm.Alarm;
@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * 同步上报数据
  *
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-05-15
  * @since 1.3.0
  */

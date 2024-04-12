@@ -13,7 +13,7 @@ import org.mapstruct.factory.Mappers;
 import java.util.List;
 
 /**
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2023-05-05 16:15
  */
 @Mapper

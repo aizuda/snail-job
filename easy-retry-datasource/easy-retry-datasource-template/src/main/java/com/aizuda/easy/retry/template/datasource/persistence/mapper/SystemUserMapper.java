@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 
 /**
- * @author www.byteblogs.com
+ * @author opensnail
  * @since 2022-03-05
  */
 @Mapper

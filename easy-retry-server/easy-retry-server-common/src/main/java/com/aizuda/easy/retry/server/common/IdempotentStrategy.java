@@ -3,7 +3,7 @@ package com.aizuda.easy.retry.server.common;
 /**
  * 幂等策略
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2021-11-23 09:20
  */
 public interface IdempotentStrategy<T, V> {

@@ -9,7 +9,7 @@ import java.lang.annotation.*;
 /**
  * 在启动类上添加EnableEasyRetry注解开启Easy Retry功能
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2021-12-31 18:45
  */
 @Target({ElementType.TYPE})

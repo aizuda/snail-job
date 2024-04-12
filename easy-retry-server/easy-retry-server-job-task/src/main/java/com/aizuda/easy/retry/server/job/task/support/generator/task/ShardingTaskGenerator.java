@@ -25,7 +25,7 @@ import java.util.*;
  * 分片参数格式
  * 0=参数1;1=参数2;
  *
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-10-02 21:37:22
  * @since 2.4.0
  */

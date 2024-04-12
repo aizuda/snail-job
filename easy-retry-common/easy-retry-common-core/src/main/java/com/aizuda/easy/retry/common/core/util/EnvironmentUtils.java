@@ -8,7 +8,7 @@ import java.util.Objects;
 /**
  * 获取环境信息
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2021-12-01 14:27
  */
 public class EnvironmentUtils {

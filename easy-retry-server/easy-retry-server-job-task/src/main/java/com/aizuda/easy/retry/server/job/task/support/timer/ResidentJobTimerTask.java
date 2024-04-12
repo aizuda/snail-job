@@ -14,7 +14,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-10-20 23:09:13
  * @since 2.4.0
  */

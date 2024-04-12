@@ -3,7 +3,7 @@ package com.aizuda.easy.retry.client.core.event;
 /**
  *
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2022-03-03 15:50
  */
 public interface EasyRetryListener {

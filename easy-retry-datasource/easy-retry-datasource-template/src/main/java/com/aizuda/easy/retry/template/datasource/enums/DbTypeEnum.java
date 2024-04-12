@@ -10,7 +10,7 @@ import java.util.Objects;
 /**
  * DB数据库类型
  *
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-06-04
  * @since 2.1.0
  */

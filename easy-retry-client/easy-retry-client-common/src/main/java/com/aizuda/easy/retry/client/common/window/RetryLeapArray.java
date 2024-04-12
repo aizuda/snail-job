@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 /**
  * 通过滑动窗口上报异常数据
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2022-05-28 15:07
  */
 @Slf4j

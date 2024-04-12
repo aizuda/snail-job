@@ -6,7 +6,7 @@ import org.springframework.beans.factory.InitializingBean;
 import java.util.List;
 
 /**
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-10-02 13:08:14
  * @since 2.4.0
  */

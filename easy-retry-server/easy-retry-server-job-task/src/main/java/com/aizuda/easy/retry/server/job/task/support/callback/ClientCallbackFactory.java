@@ -6,7 +6,7 @@ import com.aizuda.easy.retry.server.job.task.support.ClientCallbackHandler;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-10-02 13:04:09
  * @since 2.4.0
  */

@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2022-05-17 09:01
  */
 public class ResponseHeaderPlugins {

@@ -12,7 +12,7 @@ import java.util.function.LongFunction;
 import java.util.function.Predicate;
 
 /**
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2023-10-11 10:58
  * @since : 2.4.0
  */

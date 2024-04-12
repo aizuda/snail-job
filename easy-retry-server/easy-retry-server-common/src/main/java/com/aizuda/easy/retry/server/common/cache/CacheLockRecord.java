@@ -14,7 +14,7 @@ import java.time.Duration;
 /**
  * 缓存本地的分布式锁的名称
  *
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-07-20 22:53:21
  * @since 2.1.0
  */

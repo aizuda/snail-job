@@ -6,7 +6,7 @@ import lombok.Getter;
 import org.springframework.stereotype.Component;
 
 /**
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2022-03-12 10:20
  */
 public class ClientLoadBalanceManager {

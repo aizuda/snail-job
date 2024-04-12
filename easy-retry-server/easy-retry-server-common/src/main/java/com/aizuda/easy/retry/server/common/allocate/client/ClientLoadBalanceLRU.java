@@ -10,7 +10,7 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2022-03-12 09:55
  */
 public class ClientLoadBalanceLRU implements ClientLoadBalance {

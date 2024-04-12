@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 /**
  * 默认接口
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2022-03-28 22:17
  */
 @Controller

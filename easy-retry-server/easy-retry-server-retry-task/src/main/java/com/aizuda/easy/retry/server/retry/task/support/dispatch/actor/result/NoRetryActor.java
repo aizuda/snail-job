@@ -23,7 +23,7 @@ import java.time.LocalDateTime;
 /**
  * 不重试,只更新下次触发时间
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2022-04-14 16:11
  * @since 1.0.0
  */

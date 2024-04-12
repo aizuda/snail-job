@@ -7,7 +7,7 @@ import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 
 /**
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2022-03-03 14:54
  */
 public interface RetryExecutor<BR, SR> {

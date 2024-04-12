@@ -19,7 +19,7 @@ import org.springframework.util.CollectionUtils;
 import java.util.List;
 
 /**
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-10-03 09:48:10
  * @since 2.4.0
  */

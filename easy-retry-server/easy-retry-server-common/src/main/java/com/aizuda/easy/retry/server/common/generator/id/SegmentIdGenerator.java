@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
  * 特别声明: 此算法来自美团的leaf号段模式
  * see： https://github.com/Meituan-Dianping/Leaf/blob/master/leaf-server/src/main/java/com/sankuai/inf/leaf/server/service/SegmentService.java
  *
- *  @author www.byteblogs.com
+ *  @author opensnail
  * @date 2023-05-04
  * @since 1.2.0
  */

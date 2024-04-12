@@ -3,7 +3,7 @@ package com.aizuda.easy.retry.client.common.exception;
 import com.aizuda.easy.retry.common.core.exception.BaseEasyRetryException;
 
 /**
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2022-03-03 14:49
  */
 public class EasyRetryClientTimeOutException extends BaseEasyRetryException {

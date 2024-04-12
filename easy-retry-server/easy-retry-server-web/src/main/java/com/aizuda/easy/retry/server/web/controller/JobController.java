@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-10-11 22:18:29
  * @since 2.4.0
  */

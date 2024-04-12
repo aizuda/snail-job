@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 import java.util.Objects;
 
 /**
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-10-03 23:12:12
  * @since 2.4.0
  */

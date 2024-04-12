@@ -21,7 +21,7 @@ import java.util.Set;
 /**
  * 仪表盘接口
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2022-04-22 20:17
  */
 @RestController

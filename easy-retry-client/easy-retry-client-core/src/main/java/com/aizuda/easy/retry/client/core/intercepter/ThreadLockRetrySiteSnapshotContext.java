@@ -7,7 +7,7 @@ import com.aizuda.easy.retry.client.core.exception.EasyRetryClientException;
 /**
  * ThreadLocal实现类
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2023-08-09 16:34
  * @since 2.2.0
  */

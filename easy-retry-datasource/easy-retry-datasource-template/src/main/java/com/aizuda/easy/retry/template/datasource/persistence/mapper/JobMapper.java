@@ -13,7 +13,7 @@ import java.util.List;
  * 任务信息 Mapper 接口
  * </p>
  *
- * @author www.byteblogs.com
+ * @author opensnail
  * @since 2023-09-24
  */
 @Mapper

@@ -7,7 +7,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-11-22 23:14:53
  * @since 2.4.0
  */

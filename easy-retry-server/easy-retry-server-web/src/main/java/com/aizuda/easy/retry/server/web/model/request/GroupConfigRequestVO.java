@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * 组、场景、通知配置类
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2021-11-22 13:45
  * @since 1.0.0
  */

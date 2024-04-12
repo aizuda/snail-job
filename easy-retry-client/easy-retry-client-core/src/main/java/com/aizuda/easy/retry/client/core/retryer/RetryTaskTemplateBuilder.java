@@ -9,7 +9,7 @@ import com.aizuda.easy.retry.common.core.context.SpringContext;
 /**
  * 构建重试模板对象
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2023-05-10 10:17
  */
 public class RetryTaskTemplateBuilder {

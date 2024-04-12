@@ -13,7 +13,7 @@ import lombok.Setter;
  * 任务实例
  * </p>
  *
- * @author www.byteblogs.com
+ * @author opensnail
  * @since 2023-09-24
  */
 @Getter

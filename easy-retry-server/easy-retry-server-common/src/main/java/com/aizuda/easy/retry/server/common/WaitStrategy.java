@@ -5,7 +5,7 @@ import com.aizuda.easy.retry.server.common.strategy.WaitStrategies.WaitStrategyC
 /**
  * 等待策略（退避策略）
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2021-11-29 18:18
  */
 public interface WaitStrategy {

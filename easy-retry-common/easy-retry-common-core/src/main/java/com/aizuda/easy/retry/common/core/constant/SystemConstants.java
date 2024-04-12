@@ -3,7 +3,7 @@ package com.aizuda.easy.retry.common.core.constant;
 /**
  * 系统通用常量
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2022-04-17 10:47
  * @since 1.0.0
  */

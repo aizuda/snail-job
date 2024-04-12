@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-09-10 12:31:17
  * @since 2.3.0
  */

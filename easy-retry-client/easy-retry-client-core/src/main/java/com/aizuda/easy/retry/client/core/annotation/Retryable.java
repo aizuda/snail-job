@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * 重试接入入口
  *
- * @author www.byteblogs.com
+ * @author opensnail
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)

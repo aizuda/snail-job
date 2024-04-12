@@ -6,7 +6,7 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2022-03-03 17:43
  * @since : 2.4.0
  */

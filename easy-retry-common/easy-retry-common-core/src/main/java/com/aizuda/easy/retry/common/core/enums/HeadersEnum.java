@@ -3,7 +3,7 @@ package com.aizuda.easy.retry.common.core.enums;
 import lombok.Getter;
 
 /**
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2022-03-11 19:44
  */
 @Getter

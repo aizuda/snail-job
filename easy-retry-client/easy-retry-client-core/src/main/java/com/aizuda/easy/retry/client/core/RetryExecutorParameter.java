@@ -5,7 +5,7 @@ import com.github.rholder.retry.RetryListener;
 import java.util.List;
 
 /**
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2022-03-04 09:03
  */
 public interface RetryExecutorParameter<BR, SR> {

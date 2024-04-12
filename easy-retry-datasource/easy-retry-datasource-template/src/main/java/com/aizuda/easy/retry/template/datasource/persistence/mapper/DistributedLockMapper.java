@@ -8,7 +8,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * 锁定表 Mapper 接口
  * </p>
  *
- * @author www.byteblogs.com
+ * @author opensnail
  * @since 2023-07-20
  */
 public interface DistributedLockMapper extends BaseMapper<DistributedLock> {

@@ -11,7 +11,7 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-06-04
  * @since 2.0
  */

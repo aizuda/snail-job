@@ -3,7 +3,7 @@ package com.aizuda.easy.retry.template.datasource.enums;
 /**
  * 数据操作类型
  *
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-08-06 10:01:38
  * @since 2.2.0
  */

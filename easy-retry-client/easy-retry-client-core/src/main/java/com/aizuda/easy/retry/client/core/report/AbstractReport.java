@@ -22,7 +22,7 @@ import java.lang.reflect.Method;
 /**
  * 上报抽象类
  *
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-05-15
  * @since 1.3.0
  */

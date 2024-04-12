@@ -9,7 +9,7 @@ import jakarta.validation.constraints.Pattern;
 /**
  * 解析参数模型
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date: 2023-07-15 23:15
  */
 @Data

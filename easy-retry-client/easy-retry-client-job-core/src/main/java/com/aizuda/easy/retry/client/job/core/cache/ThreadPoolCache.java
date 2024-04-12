@@ -14,7 +14,7 @@ import java.util.function.Supplier;
 
 /**
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2023-09-27 17:12
  * @since : 2.4.0
  */

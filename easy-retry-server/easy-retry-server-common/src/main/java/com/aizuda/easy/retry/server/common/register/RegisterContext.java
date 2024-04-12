@@ -5,7 +5,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 /**
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-06-07
  * @since 2.0
  */

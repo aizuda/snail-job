@@ -39,7 +39,7 @@ import static com.aizuda.easy.retry.common.core.constant.SystemConstants.HTTP_PA
 /**
  * 处理上报数据
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2022-03-07 16:39
  * @since 1.0.0
  */

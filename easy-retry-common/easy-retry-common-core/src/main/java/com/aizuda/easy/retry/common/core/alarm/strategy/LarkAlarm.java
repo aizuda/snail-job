@@ -27,7 +27,7 @@ import java.util.Map;
 /**
  * 飞书通知
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2021-11-25 09:20
  * @since 1.4.0
  */

@@ -3,7 +3,7 @@ package com.aizuda.easy.retry.server.retry.task.support.handler;
 import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.server.common.Lifecycle;
-import com.aizuda.easy.retry.server.common.client.RequestBuilder;
+import com.aizuda.easy.retry.server.common.rpc.client.RequestBuilder;
 import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.model.dto.ConfigDTO;
 import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * 版本同步
  *
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-06-10
  * @since 1.6.0
  */

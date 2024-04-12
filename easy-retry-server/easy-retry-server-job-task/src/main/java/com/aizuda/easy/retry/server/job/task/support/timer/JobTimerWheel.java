@@ -16,7 +16,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2023-09-22 17:03
  * @since : 2.4.0
  */

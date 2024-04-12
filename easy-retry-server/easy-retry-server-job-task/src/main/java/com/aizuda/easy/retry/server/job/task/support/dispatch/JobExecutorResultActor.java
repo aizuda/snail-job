@@ -29,7 +29,7 @@ import java.time.Duration;
 import java.util.Objects;
 
 /**
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-10-05 17:16:35
  * @since 2.4.0
  */

@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 /**
  * 缓存组组限流组件
  *
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2022-21-58
  * @since 2.0
  */

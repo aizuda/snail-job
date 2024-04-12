@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * 扫描手动注入重试方法
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2023-05-10 11:10
  */
 @Component

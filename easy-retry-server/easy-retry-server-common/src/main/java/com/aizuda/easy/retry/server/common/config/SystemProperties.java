@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 /**
  * 系统配置
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2021-12-21 10:19
  */
 @Configuration

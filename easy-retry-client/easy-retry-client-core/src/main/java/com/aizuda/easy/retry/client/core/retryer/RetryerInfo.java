@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * 定义重试场景的信息
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2022-03-03 15:06
  * @since 1.0.0
  */

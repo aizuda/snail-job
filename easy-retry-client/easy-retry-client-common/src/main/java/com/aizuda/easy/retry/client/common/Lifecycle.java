@@ -3,7 +3,7 @@ package com.aizuda.easy.retry.client.common;
 /**
  * 组件生命周期
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2021-11-19 14:43
  */
 public interface Lifecycle {

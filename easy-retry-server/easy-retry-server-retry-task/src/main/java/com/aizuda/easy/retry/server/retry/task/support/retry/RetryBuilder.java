@@ -12,7 +12,7 @@ import java.util.*;
 /**
  * 重试构建
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2021-11-29 18:42
  */
 public class RetryBuilder<V> {

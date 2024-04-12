@@ -6,7 +6,7 @@ import com.aizuda.easy.retry.client.core.intercepter.ThreadLockRetrySiteSnapshot
  * 重试现场记录上下文
  * 默认实现see: {@link ThreadLockRetrySiteSnapshotContext}
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2023-08-09 16:25
  */
 public interface RetrySiteSnapshotContext<T> {

@@ -4,7 +4,7 @@ import com.aizuda.easy.retry.common.core.enums.RetryResultStatusEnum;
 import lombok.Data;
 
 /**
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2022-03-04 14:52
  */
 @Data

@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * 通过平均算法分配bucketList
  *
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2021-03-01
  */
 @SuppressWarnings({"squid:S3358"})

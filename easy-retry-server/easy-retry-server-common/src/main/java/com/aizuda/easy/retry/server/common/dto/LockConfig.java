@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 /**
  * 分布式锁配置
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2023-07-21 08:43
  * @since 2.1.0
  */

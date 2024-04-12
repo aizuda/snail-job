@@ -16,7 +16,7 @@ import java.util.Objects;
 /**
  * 处理处于已完成 {@link JobTaskBatchStatusEnum::COMPLETED} 状态的任务
  *
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-10-02 10:16:28
  * @since 2.4.0
  */

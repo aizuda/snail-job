@@ -8,7 +8,7 @@ import org.mapstruct.factory.Mappers;
 import java.util.List;
 
 /**
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-07-16 22:09:40
  * @since 2.1.0
  */

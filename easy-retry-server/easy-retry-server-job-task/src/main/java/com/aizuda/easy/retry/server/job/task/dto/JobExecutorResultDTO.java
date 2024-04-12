@@ -3,7 +3,7 @@ package com.aizuda.easy.retry.server.job.task.dto;
 import lombok.Data;
 
 /**
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-10-05 17:18:38
  * @since 2.4.0
  */

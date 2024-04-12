@@ -1,7 +1,7 @@
 package com.aizuda.easy.retry.server.common;
 
 /**
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2023-07-21 13:02
  * @since 2.1.0
  */

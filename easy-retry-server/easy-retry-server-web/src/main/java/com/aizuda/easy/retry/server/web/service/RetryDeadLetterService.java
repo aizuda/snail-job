@@ -9,7 +9,7 @@ import com.aizuda.easy.retry.server.web.model.response.RetryDeadLetterResponseVO
 import java.util.List;
 
 /**
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2022-02-28 09:34
  */
 public interface RetryDeadLetterService {

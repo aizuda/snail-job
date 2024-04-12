@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * 生成 {@link WaitStrategy} 实例.
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2021-11-29 18:19
  */
 public class WaitStrategies {

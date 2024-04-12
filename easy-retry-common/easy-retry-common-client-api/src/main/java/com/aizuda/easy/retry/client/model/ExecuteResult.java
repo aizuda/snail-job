@@ -3,7 +3,7 @@ package com.aizuda.easy.retry.client.model;
 import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 
 /**
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2023-09-27 09:43
  * @since 2.4.0
  */

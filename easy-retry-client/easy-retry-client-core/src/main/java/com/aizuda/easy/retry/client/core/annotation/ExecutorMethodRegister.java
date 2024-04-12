@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * 在使用手动生成重试任务时，通过ExecutorMethodRegister配置注册重试场景
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2023-05-10 09:39
  * @since 1.3.0
  */

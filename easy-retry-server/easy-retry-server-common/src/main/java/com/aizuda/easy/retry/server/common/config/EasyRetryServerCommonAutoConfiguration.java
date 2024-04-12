@@ -9,7 +9,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 /**
  * web访问模块
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2023-09-19 09:21
  * @since : 2.4.0
  */

@@ -5,7 +5,7 @@ import lombok.Data;
 /**
  * 服务端节点扩展参数
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2023-06-29 15:54
  */
 @Data

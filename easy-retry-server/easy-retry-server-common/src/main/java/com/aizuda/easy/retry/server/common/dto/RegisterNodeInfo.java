@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 /**
  * 注册的节点信息
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2023-06-09 11:02
  */
 @Data

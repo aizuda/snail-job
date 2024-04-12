@@ -5,7 +5,7 @@ import com.google.common.collect.Table;
 import com.aizuda.easy.retry.client.core.retryer.RetryerInfo;
 
 /**
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2022-03-03 17:43
  */
 public class RetryerInfoCache {

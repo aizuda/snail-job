@@ -10,7 +10,7 @@ import java.util.Map;
 /**
  * Aviator 表达式
  *
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-09-10 17:34:07
  * @since 2.3.0
  */

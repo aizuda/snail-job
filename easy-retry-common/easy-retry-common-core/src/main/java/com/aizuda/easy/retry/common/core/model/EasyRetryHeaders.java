@@ -6,7 +6,7 @@ import lombok.Data;
 /**
  * easy-retry 请求头信息
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2022-04-16 22:20
  */
 @Data

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
  *
  * 扩展组件，ApplicationContext会在SpringBoot初始化的时候加载进来
  * 构造Props,用于生产ActorRef
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2021-02-10
  */
 @Component

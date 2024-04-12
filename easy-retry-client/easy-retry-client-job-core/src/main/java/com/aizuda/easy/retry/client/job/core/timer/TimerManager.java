@@ -8,7 +8,7 @@ import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-10-08 22:23:57
  * @since 2.4.0
  */

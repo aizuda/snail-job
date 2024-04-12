@@ -7,7 +7,7 @@ import java.util.Random;
 import java.util.TreeSet;
 
 /**
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2022-03-11 22:00
  */
 public class ClientLoadBalanceRandom implements ClientLoadBalance {

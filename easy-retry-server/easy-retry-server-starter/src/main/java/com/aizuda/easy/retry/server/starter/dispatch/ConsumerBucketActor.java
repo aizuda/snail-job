@@ -32,7 +32,7 @@ import java.util.Objects;
  * 消费当前节点分配的bucket并生成扫描任务
  * <p>
  *
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-09-21 23:47:23
  * @since 2.4.0
  */

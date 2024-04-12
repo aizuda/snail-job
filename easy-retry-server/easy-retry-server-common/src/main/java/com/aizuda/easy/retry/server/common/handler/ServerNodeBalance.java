@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 /**
  * 负责处理组或者节点变化时，重新分配组在不同的节点上消费
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2023-06-08 15:58
  * @since 1.6.0
  */

@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
  * 锁定表
  * </p>
  *
- * @author www.byteblogs.com
+ * @author opensnail
  * @since 2023-07-20
  */
 @Getter

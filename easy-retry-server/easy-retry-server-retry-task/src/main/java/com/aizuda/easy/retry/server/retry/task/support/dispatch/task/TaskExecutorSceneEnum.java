@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-09-23 08:49:21
  * @since 2.4.0
  */

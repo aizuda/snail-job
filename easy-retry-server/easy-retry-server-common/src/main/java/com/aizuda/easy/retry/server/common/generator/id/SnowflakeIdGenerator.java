@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
  * 使用hutool自带的雪花算法生成id
  * 若出现时间回拨问题则直接报错 {@link Snowflake#tilNextMillis(long)}
  *
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-05-04
  * @since 1.2.0
  */

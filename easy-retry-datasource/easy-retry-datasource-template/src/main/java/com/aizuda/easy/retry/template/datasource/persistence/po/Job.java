@@ -15,7 +15,7 @@ import lombok.Setter;
  * 任务信息
  * </p>
  *
- * @author www.byteblogs.com
+ * @author opensnail
  * @since 2023-09-24
  */
 @Getter

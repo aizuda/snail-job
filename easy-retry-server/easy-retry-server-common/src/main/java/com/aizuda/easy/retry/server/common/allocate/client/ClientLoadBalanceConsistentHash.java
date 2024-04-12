@@ -10,7 +10,7 @@ import java.util.Collection;
 import java.util.TreeSet;
 
 /**
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2022-03-11 21:32
  */
 public class ClientLoadBalanceConsistentHash implements ClientLoadBalance {

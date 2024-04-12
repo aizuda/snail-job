@@ -4,7 +4,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2021-11-25 10:52
  */
 @Configuration

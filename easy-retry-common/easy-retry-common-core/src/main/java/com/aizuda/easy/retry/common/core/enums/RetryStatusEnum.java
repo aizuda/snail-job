@@ -8,7 +8,7 @@ import java.util.Objects;
 /**
  * 重试状态终态枚举
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2021-11-03 11:05
  */
 @Getter

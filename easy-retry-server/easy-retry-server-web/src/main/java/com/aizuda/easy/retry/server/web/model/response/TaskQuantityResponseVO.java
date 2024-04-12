@@ -3,7 +3,7 @@ package com.aizuda.easy.retry.server.web.model.response;
 import lombok.Data;
 
 /**
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2022-04-22 20:27
  */
 @Data

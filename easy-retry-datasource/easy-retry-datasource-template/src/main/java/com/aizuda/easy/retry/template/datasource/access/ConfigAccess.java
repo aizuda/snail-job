@@ -15,7 +15,7 @@ import java.util.Set;
 /**
  * 获取配置通道
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2022-01-05 09:06
  */
 public interface ConfigAccess<T> extends Access<T>  {

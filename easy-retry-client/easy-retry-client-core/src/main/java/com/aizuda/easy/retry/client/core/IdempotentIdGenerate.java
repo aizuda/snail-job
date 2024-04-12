@@ -14,7 +14,7 @@ import com.aizuda.easy.retry.common.core.model.IdempotentIdContext;
  * 时刻4:  idempotentId: A1 重试完成, 状态为已完成
  * 时刻5: 上报一个异常 idempotentId: A1 状态为重试中, 新增一条重试任务
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2022-03-08 09:42
  */
 public interface IdempotentIdGenerate {

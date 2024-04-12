@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 /**
  * POD注册表
  *
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2021-10-30
  * @since 1.6.0
  */

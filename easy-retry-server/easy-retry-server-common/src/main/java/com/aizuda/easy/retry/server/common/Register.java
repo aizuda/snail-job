@@ -4,7 +4,7 @@ import com.aizuda.easy.retry.common.core.enums.NodeTypeEnum;
 import com.aizuda.easy.retry.server.common.register.RegisterContext;
 
 /**
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-06-07
  * @since 2.0
  */

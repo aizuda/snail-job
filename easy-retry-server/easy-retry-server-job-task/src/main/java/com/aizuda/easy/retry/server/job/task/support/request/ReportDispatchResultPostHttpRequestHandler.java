@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
 import static com.aizuda.easy.retry.common.core.constant.SystemConstants.HTTP_PATH.REPORT_JOB_DISPATCH_RESULT;
 
 /**
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-09-30 23:01:58
  * @since 2.4.0
  */

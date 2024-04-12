@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * 负责EasyRetry系统任务分发调度
  *
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-09-21 23:36:47
  * @since 2.4.0
  */

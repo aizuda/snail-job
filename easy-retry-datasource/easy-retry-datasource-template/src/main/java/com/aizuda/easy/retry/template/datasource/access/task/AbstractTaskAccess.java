@@ -14,7 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2021-11-24 14:27
  */
 public abstract class AbstractTaskAccess<T> implements TaskAccess<T> {

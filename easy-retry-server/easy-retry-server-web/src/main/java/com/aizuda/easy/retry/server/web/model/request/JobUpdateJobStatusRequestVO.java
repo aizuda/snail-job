@@ -5,7 +5,7 @@ import lombok.Data;
 import jakarta.validation.constraints.NotNull;
 
 /**
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-10-15 16:06:20
  * @since 2.4.0
  */

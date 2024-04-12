@@ -4,7 +4,7 @@ WORKDIR /
 ADD ./target/easy-retry-server-exec.jar easy-retry-server.jar
 
 FROM --platform=$BUILDPLATFORM amazoncorretto:17
-MAINTAINER www.byteblogs.com
+MAINTAINER opensnail
 LABEL server-name=easy-retry-server
 
 #对外暴漏的端口号

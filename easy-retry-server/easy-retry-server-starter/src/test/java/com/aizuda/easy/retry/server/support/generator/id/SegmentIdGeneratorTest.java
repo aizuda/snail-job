@@ -17,7 +17,7 @@ import java.util.concurrent.CountDownLatch;
 /**
  * 测试多线程情况下号段模式的运行情况
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2023-05-06 09:16
  * @since 1.2.0
  */

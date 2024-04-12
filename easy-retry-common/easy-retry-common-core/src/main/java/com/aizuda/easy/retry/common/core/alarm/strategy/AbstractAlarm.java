@@ -7,7 +7,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2021-11-25 09:19
  */
 public abstract class AbstractAlarm<T> implements Alarm<T> {

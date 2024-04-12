@@ -6,7 +6,7 @@ import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
 import java.util.List;
 
 /**
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-10-02 10:43:58
  * @since 2.4.0
  */

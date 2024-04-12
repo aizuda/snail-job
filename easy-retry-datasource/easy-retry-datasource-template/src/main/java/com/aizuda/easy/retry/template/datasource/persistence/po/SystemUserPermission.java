@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 /**
  * 系统用户权限表
  *
- * @author www.byteblogs.com
+ * @author opensnail
  * @since 2022-03-05
  */
 @TableName("system_user_permission")

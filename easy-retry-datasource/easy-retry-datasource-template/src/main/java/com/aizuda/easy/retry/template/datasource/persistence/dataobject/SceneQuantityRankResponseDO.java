@@ -3,7 +3,7 @@ package com.aizuda.easy.retry.template.datasource.persistence.dataobject;
 import lombok.Data;
 
 /**
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2022-04-23 10:56
  */
 @Data

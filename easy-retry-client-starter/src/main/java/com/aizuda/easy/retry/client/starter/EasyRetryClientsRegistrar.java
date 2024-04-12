@@ -12,7 +12,7 @@ import java.util.Map;
 /**
  * Easy Retry 客户端注册器
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2022-03-04 18:44
  */
 public class EasyRetryClientsRegistrar implements ImportBeanDefinitionRegistrar, EnvironmentAware {

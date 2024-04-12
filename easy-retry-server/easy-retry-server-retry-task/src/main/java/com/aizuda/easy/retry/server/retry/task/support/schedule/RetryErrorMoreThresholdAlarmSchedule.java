@@ -33,7 +33,7 @@ import java.util.List;
 /**
  * 监控重试失败数据总量是否到达阈值
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2023-07-21 17:25
  * @since 2.1.0
  */

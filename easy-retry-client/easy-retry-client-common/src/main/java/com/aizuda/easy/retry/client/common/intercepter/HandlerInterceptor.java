@@ -1,8 +1,8 @@
 package com.aizuda.easy.retry.client.common.intercepter;
 
-import com.aizuda.easy.retry.client.common.netty.server.EndPointInfo;
-import com.aizuda.easy.retry.client.common.netty.server.HttpRequest;
-import com.aizuda.easy.retry.client.common.netty.server.HttpResponse;
+import com.aizuda.easy.retry.client.common.rpc.supports.scan.EndPointInfo;
+import com.aizuda.easy.retry.client.common.rpc.supports.http.HttpRequest;
+import com.aizuda.easy.retry.client.common.rpc.supports.http.HttpResponse;
 
 /**
  * @author: opensnail

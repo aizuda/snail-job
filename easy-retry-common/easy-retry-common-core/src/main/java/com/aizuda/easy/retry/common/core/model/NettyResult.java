@@ -2,13 +2,15 @@ package com.aizuda.easy.retry.common.core.model;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.experimental.Accessors;
 
 /**
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2022-02-16 14:07
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
+@Accessors(chain = true)
 public class NettyResult extends Result<Object> {
 
     private long requestId;

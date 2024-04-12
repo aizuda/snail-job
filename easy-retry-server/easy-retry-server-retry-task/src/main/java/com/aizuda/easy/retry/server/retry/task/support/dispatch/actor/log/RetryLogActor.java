@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 /**
  * 处理日志信息
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2023-06-16 11:33
  * @since 2.0.0
  */

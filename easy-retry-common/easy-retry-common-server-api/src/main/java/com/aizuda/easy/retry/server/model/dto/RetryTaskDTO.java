@@ -6,7 +6,7 @@ import java.io.Serializable;
 /**
  * 重试上报DTO
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2021-11-25 14:11
  */
 @Data

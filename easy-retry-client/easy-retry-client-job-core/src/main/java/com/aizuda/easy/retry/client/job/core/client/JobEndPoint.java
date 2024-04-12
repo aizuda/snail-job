@@ -3,7 +3,7 @@ package com.aizuda.easy.retry.client.job.core.client;
 import com.aizuda.easy.retry.client.common.annotation.Mapping;
 import com.aizuda.easy.retry.client.common.annotation.SnailEndPoint;
 import com.aizuda.easy.retry.client.common.log.support.EasyRetryLogManager;
-import com.aizuda.easy.retry.client.common.netty.RequestMethod;
+import com.aizuda.easy.retry.client.common.rpc.client.RequestMethod;
 import com.aizuda.easy.retry.client.job.core.IJobExecutor;
 import com.aizuda.easy.retry.client.job.core.cache.JobExecutorInfoCache;
 import com.aizuda.easy.retry.client.job.core.cache.ThreadPoolCache;
@@ -11,7 +11,6 @@ import com.aizuda.easy.retry.client.job.core.dto.JobExecutorInfo;
 import com.aizuda.easy.retry.client.job.core.executor.AbstractJobExecutor;
 import com.aizuda.easy.retry.client.job.core.executor.AnnotationJobExecutor;
 import com.aizuda.easy.retry.client.job.core.log.JobLogMeta;
-import com.aizuda.easy.retry.client.model.DispatchRetryDTO;
 import com.aizuda.easy.retry.client.model.StopJobDTO;
 import com.aizuda.easy.retry.client.model.request.DispatchJobRequest;
 import com.aizuda.easy.retry.common.core.context.SpringContext;
@@ -23,15 +22,13 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ThreadPoolExecutor;
 
 /**
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2023-09-27 16:33
  */
 @SnailEndPoint

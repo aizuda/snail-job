@@ -15,7 +15,7 @@ import java.util.Objects;
 /**
  * 组分区处理类
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2022-02-28 17:18
  * @since 1.0.0
  */

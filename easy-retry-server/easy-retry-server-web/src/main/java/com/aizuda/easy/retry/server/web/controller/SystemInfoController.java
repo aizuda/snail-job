@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 系统信息
  *
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-05-07
  * @since 1.2.0
  */

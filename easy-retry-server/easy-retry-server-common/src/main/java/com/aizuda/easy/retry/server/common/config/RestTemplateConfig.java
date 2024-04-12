@@ -1,7 +1,7 @@
 package com.aizuda.easy.retry.server.common.config;
 
-import com.aizuda.easy.retry.server.common.client.RequestInterceptor;
-import com.aizuda.easy.retry.server.common.okhttp.OkHttp3ClientHttpRequestFactory;
+import com.aizuda.easy.retry.server.common.rpc.okhttp.RequestInterceptor;
+import com.aizuda.easy.retry.server.common.rpc.okhttp.OkHttp3ClientHttpRequestFactory;
 import okhttp3.ConnectionPool;
 import okhttp3.OkHttpClient;
 import org.springframework.context.annotation.Bean;
@@ -12,7 +12,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2022-03-09 14:19
  */
 @Configuration

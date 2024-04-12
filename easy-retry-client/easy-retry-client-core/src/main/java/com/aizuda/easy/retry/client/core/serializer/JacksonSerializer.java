@@ -16,7 +16,7 @@ import java.util.Objects;
 /**
  * Jackson序列化
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2022-03-07 15:08
  */
 @Slf4j

@@ -37,7 +37,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-07-16 11:52:39
  * @since 2.1.0
  */

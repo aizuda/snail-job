@@ -4,7 +4,7 @@ package com.aizuda.easy.retry.server.common.lock;
 import java.time.Duration;
 
 /**
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-07-20 22:45:41
  * @since 2.1.0
  */

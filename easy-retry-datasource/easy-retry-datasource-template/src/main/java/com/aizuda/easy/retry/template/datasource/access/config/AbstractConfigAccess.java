@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 /**
  * 获取配置通道通用模板
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2022-01-05 09:12
  */
 public abstract class AbstractConfigAccess<T> implements ConfigAccess<T> {

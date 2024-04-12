@@ -9,7 +9,7 @@ import org.apache.ibatis.annotations.Mapper;
  * 系统用户权限表 Mapper 接口
  * </p>
  *
- * @author www.byteblogs.com
+ * @author opensnail
  * @since 2022-03-05
  */
 @Mapper

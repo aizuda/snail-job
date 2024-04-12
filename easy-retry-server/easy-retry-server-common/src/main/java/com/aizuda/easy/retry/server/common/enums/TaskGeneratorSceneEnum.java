@@ -7,7 +7,7 @@ import lombok.Getter;
 /**
  * id生成模式
  *
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-05-04
  * @since 2.0
  */

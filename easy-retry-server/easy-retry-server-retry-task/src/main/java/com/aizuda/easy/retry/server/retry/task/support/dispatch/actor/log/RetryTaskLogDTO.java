@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 /**
  * 日志上下文模型
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2023-06-16 14:14
  * @since 2.0.0
  */

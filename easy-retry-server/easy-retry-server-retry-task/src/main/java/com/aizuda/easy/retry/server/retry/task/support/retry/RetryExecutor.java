@@ -19,7 +19,7 @@ import java.util.concurrent.Callable;
 /**
  * 重试执行器
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2021-11-29 18:57
  */
 @Slf4j

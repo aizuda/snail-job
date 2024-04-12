@@ -6,7 +6,7 @@ import com.aizuda.easy.retry.server.retry.task.generator.task.TaskContext;
 /**
  * 任务生成器
  *
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-07-16 11:42:38
  * @since 2.1.0
  */

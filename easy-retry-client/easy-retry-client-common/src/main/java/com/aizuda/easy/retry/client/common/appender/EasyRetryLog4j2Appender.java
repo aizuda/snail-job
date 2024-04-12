@@ -2,7 +2,7 @@ package com.aizuda.easy.retry.client.common.appender;
 
 import com.aizuda.easy.retry.client.common.log.report.LogReportFactory;
 import com.aizuda.easy.retry.client.common.log.support.EasyRetryLogManager;
-import com.aizuda.easy.retry.client.common.netty.NettyChannel;
+import com.aizuda.easy.retry.client.common.rpc.client.NettyChannel;
 import com.aizuda.easy.retry.common.log.dto.LogContentDTO;
 import com.aizuda.easy.retry.common.log.constant.LogFieldConstants;
 import org.apache.log4j.MDC;

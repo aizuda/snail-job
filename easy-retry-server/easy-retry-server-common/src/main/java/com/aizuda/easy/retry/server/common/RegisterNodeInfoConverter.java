@@ -6,7 +6,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
 /**
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2023-06-09 11:07
  * @since 1.6.0
  */

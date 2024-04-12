@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * 异步上报数据
  *
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-05-15
  * @since 1.3.0
  */

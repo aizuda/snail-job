@@ -4,7 +4,7 @@ import com.aizuda.easy.retry.server.web.model.base.BaseQueryVO;
 import lombok.Data;
 
 /**
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2022-02-28 09:45
  */
 @Data

@@ -7,7 +7,7 @@ import com.aizuda.easy.retry.template.datasource.persistence.po.JobTask;
 import lombok.Data;
 
 /**
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-10-03 23:13:05
  * @since 2.4.0
  */

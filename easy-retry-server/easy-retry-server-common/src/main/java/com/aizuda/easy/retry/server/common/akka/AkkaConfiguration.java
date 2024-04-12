@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 /**
  * 创建ActorSystem，并将其放入到spring管理，初始化ApplicationContext
  *
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2021-11-20
  */
 @Configuration

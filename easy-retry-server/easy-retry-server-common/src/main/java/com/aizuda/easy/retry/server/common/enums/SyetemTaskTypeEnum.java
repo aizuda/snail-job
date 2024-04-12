@@ -8,7 +8,7 @@ import lombok.Getter;
 import java.util.function.Supplier;
 
 /**
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-06-04
  * @since 2.0
  */

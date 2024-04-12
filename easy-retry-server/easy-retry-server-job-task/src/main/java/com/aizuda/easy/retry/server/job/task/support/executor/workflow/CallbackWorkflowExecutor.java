@@ -9,7 +9,7 @@ import com.aizuda.easy.retry.common.core.enums.StatusEnum;
 import com.aizuda.easy.retry.common.core.enums.WorkflowNodeTypeEnum;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import com.aizuda.easy.retry.common.log.EasyRetryLog;
-import com.aizuda.easy.retry.server.common.client.RequestInterceptor;
+import com.aizuda.easy.retry.server.common.rpc.okhttp.RequestInterceptor;
 import com.aizuda.easy.retry.server.common.dto.CallbackConfig;
 import com.aizuda.easy.retry.server.common.enums.ContentTypeEnum;
 import com.aizuda.easy.retry.server.common.dto.JobLogMetaDTO;

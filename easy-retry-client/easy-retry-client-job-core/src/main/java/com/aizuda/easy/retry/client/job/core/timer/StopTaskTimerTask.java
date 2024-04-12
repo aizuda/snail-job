@@ -5,7 +5,7 @@ import io.netty.util.Timeout;
 import io.netty.util.TimerTask;
 
 /**
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-10-08 22:28:53
  * @since 2.4.0
  */

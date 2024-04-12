@@ -8,7 +8,7 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-09-11 22:00:26
  * @since 2.3.0
  */

@@ -9,7 +9,7 @@ import com.aizuda.easy.retry.server.web.model.response.GroupConfigResponseVO;
 import java.util.List;
 
 /**
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2021-11-22 14:53
  */
 public interface GroupConfigService {

@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.client.common.annotation;
 
-import com.aizuda.easy.retry.client.common.netty.RequestMethod;
+import com.aizuda.easy.retry.client.common.rpc.client.RequestMethod;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
 /**
  * 接口定义
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2023-05-11 22:32
  * @since 1.3.0
  */
@@ -23,7 +23,7 @@ public @interface Mapping {
     /**
      * 请求类型
      */
-    RequestMethod method() default RequestMethod.GET;
+    RequestMethod method() default RequestMethod.POST;
 
     /**
      * 请求路径

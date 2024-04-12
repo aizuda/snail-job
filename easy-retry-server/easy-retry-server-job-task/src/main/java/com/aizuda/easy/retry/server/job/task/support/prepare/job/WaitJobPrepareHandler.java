@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * 处理处于{@link JobTaskBatchStatusEnum::WAIT}状态的任务
  *
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-10-05 18:29:22
  * @since 2.4.0
  */

@@ -19,7 +19,7 @@ import java.util.Objects;
 /**
  * 服务间调用传递请求头和响应头
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2022-04-18 09:19
  * @since 1.0.0
  */

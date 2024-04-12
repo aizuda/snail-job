@@ -18,7 +18,7 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * 滑动窗口组件
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2023-07-23 13:38
  * @since 2.1.0
  */

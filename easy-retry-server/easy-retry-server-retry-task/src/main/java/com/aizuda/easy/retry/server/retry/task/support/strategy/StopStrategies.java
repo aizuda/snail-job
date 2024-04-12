@@ -13,7 +13,7 @@ import java.util.Objects;
 /**
  * 生成 {@link StopStrategy} 实例.
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2021-11-29 19:22
  */
 public class StopStrategies {

@@ -8,7 +8,7 @@ import com.aizuda.easy.retry.template.datasource.persistence.po.SceneConfig;
 import java.util.Set;
 
 /**
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2021-11-29 18:35
  */
 public interface RetryContext<V> {

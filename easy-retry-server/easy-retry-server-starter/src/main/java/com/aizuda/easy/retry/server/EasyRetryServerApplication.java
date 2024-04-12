@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.server;
 
-import com.aizuda.easy.retry.server.starter.server.NettyHttpServer;
+import com.aizuda.easy.retry.server.common.rpc.server.NettyHttpServer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;

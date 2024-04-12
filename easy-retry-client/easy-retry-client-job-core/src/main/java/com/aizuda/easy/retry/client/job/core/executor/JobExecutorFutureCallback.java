@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.client.job.core.executor;
 
-import com.aizuda.easy.retry.client.common.proxy.RequestBuilder;
+import com.aizuda.easy.retry.client.common.rpc.client.RequestBuilder;
 import com.aizuda.easy.retry.client.common.log.support.EasyRetryLogManager;
 import com.aizuda.easy.retry.client.job.core.cache.ThreadPoolCache;
 import com.aizuda.easy.retry.client.job.core.client.JobNettyClient;
@@ -22,7 +22,7 @@ import java.util.Objects;
 import java.util.concurrent.CancellationException;
 
 /**
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2023-10-08 16:44
  * @since : 2.4.0
  */

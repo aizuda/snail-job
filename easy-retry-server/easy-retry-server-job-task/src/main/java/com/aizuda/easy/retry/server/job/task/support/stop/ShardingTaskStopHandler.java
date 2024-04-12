@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-10-02 12:59:53
  * @since 2.4.0
  */

@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * GroupConfigVO装换为GroupConfig
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2021-11-26 13:55
  */
 @Mapper

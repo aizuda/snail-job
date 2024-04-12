@@ -8,7 +8,7 @@ import com.aizuda.easy.retry.server.web.model.response.SceneConfigResponseVO;
 import java.util.List;
 
 /**
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2022-03-03 10:54
  */
 public interface SceneConfigService {

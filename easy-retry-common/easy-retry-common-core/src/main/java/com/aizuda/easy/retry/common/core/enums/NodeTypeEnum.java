@@ -5,7 +5,7 @@ import lombok.Getter;
 /**
  * 服务节点类型
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2021-11-26 18:01
  */
 @Getter

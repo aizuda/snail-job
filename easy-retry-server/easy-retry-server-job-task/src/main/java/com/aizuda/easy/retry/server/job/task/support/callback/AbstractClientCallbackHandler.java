@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Objects;
 
 /**
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-10-03 23:12:33
  * @since 2.4.0
  */

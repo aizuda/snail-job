@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 /**
  * 删除重试完成的和重试到达最大重试次数的数据迁移到死信队列表
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2023-07-21 17:19
  * @since 2.1.0
  */

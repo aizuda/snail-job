@@ -1,7 +1,7 @@
 package com.aizuda.easy.retry.client.core.retryer;
 
 /**
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2022-03-03 15:14
  */
 public enum RetryType {

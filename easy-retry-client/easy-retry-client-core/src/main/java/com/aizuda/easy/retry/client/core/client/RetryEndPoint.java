@@ -4,7 +4,7 @@ import cn.hutool.core.lang.Assert;
 import com.aizuda.easy.retry.client.common.annotation.Mapping;
 import com.aizuda.easy.retry.client.common.annotation.SnailEndPoint;
 import com.aizuda.easy.retry.client.common.log.support.EasyRetryLogManager;
-import com.aizuda.easy.retry.client.common.netty.RequestMethod;
+import com.aizuda.easy.retry.client.common.rpc.client.RequestMethod;
 import com.aizuda.easy.retry.client.core.IdempotentIdGenerate;
 import com.aizuda.easy.retry.client.core.RetryArgSerializer;
 import com.aizuda.easy.retry.client.common.cache.GroupVersionCache;
@@ -49,7 +49,7 @@ import java.util.Set;
 /**
  * 服务端调调用客户端进行重试流量下发、配置变更通知等操作
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2022-03-09 16:33
  */
 @SnailEndPoint

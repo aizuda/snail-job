@@ -4,20 +4,18 @@ import com.aizuda.easy.retry.client.model.DispatchRetryDTO;
 import com.aizuda.easy.retry.client.model.DispatchRetryResultDTO;
 import com.aizuda.easy.retry.client.model.GenerateRetryIdempotentIdDTO;
 import com.aizuda.easy.retry.client.model.RetryCallbackDTO;
-import com.aizuda.easy.retry.client.model.StopJobDTO;
-import com.aizuda.easy.retry.client.model.request.DispatchJobRequest;
 import com.aizuda.easy.retry.common.core.model.EasyRetryHeaders;
 import com.aizuda.easy.retry.common.core.model.Result;
-import com.aizuda.easy.retry.server.common.client.RequestMethod;
-import com.aizuda.easy.retry.server.common.client.annotation.Body;
-import com.aizuda.easy.retry.server.common.client.annotation.Header;
-import com.aizuda.easy.retry.server.common.client.annotation.Mapping;
+import com.aizuda.easy.retry.server.common.rpc.client.RequestMethod;
+import com.aizuda.easy.retry.server.common.rpc.client.annotation.Body;
+import com.aizuda.easy.retry.server.common.rpc.client.annotation.Header;
+import com.aizuda.easy.retry.server.common.rpc.client.annotation.Mapping;
 import com.aizuda.easy.retry.server.model.dto.ConfigDTO;
 
 /**
  * 调用客户端接口
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2023-06-19 15:40
  * @since 2.0.0
  */

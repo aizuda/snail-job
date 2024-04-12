@@ -11,7 +11,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-10-19 21:54:57
  * @since 2.4.0
  */

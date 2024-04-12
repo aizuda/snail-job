@@ -10,7 +10,7 @@ import org.apache.ibatis.annotations.Param;
  * 号段模式序号ID分配表 Mapper 接口
  * </p>
  *
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-05-05
  * @since 1.2.0
  */

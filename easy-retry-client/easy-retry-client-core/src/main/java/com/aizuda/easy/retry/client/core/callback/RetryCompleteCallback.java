@@ -1,7 +1,7 @@
 package com.aizuda.easy.retry.client.core.callback;
 
 /**
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2023-01-10 14:46
  */
 public interface RetryCompleteCallback {

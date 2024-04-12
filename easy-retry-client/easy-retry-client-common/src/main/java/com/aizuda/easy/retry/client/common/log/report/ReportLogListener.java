@@ -1,7 +1,7 @@
 package com.aizuda.easy.retry.client.common.log.report;
 
 import com.aizuda.easy.retry.client.common.client.NettyClient;
-import com.aizuda.easy.retry.client.common.proxy.RequestBuilder;
+import com.aizuda.easy.retry.client.common.rpc.client.RequestBuilder;
 import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.core.model.NettyResult;
 import com.aizuda.easy.retry.common.core.window.Listener;
@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * 批量异步上报
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2022-03-08 13:54
  * @since 1.0.0
  */

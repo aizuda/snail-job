@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * 获取重试数据通道
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2021-11-19 11:39
  */
 public interface TaskAccess<T> extends Access<T> {

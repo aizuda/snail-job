@@ -19,7 +19,7 @@ import java.util.function.Consumer;
 /**
  * Guava 重试执行器
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2022-03-03 18:07
  * @since 1.3.0
  */

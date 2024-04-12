@@ -5,7 +5,7 @@ import com.aizuda.easy.retry.client.model.StopJobDTO;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
-import com.aizuda.easy.retry.server.common.client.RequestBuilder;
+import com.aizuda.easy.retry.server.common.rpc.client.RequestBuilder;
 import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.job.task.client.JobRpcClient;
 import com.aizuda.easy.retry.server.job.task.dto.RealStopTaskInstanceDTO;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 import java.util.Objects;
 
 /**
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2023-10-07 10:45
  * @since : 2.4.0
  */

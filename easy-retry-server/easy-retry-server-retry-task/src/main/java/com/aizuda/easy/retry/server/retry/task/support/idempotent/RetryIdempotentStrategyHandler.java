@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * 重试任务幂等校验器
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2021-11-23 09:26
  */
 @Component

@@ -3,7 +3,7 @@ package com.aizuda.easy.retry.common.core.enums;
 /**
  * 预警类型
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2021-11-25 09:19
  */
 public enum AlarmTypeEnum {

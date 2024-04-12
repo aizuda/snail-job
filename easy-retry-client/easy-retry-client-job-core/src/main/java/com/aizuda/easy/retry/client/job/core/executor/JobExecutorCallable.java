@@ -5,7 +5,7 @@ import com.aizuda.easy.retry.client.model.ExecuteResult;
 import java.util.concurrent.Callable;
 
 /**
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-10-08 22:48:44
  * @since 2.4.0
  */

@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * 生成 {@link FilterStrategy} 实例.
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2021-11-30 10:03
  */
 @Slf4j

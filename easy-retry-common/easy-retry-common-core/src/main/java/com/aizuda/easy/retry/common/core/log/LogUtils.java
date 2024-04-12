@@ -7,7 +7,7 @@ import org.springframework.core.env.Environment;
 /**
  * 全局日志
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2021-11-19 16:27
  */
 @Deprecated

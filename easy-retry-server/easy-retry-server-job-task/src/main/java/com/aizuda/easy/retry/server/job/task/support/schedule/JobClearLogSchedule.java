@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 /**
  * Job清理日志 一小时运行一次
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2023-07-21 13:32
  * @since 2.1.0
  */

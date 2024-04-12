@@ -9,7 +9,7 @@ import com.aizuda.easy.retry.server.web.model.response.RetryTaskLogResponseVO;
 import java.util.List;
 
 /**
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2022-02-27
  * @since 2.0
  */

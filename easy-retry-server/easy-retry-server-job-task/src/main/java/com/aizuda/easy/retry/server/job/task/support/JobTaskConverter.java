@@ -24,7 +24,7 @@ import org.mapstruct.factory.Mappers;
 import java.util.List;
 
 /**
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2021-11-26 15:22
  * @since : 2.5.0
  */

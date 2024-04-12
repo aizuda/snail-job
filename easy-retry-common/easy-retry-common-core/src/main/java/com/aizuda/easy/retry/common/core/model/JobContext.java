@@ -3,7 +3,7 @@ package com.aizuda.easy.retry.common.core.model;
 import lombok.Data;
 
 /**
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2023-09-27 09:40
  */
 @Data

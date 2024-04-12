@@ -7,7 +7,7 @@ import org.hibernate.validator.constraints.NotBlank;
 /**
  * 重试数据模型
  *
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-09-29
  * @since 2.0
  */

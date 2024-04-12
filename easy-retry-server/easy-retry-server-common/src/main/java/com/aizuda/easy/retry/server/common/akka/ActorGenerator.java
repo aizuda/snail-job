@@ -8,7 +8,7 @@ import com.aizuda.easy.retry.common.core.context.SpringContext;
 /**
  * Actor生成器
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2021-11-30 11:14
  */
 public class ActorGenerator {

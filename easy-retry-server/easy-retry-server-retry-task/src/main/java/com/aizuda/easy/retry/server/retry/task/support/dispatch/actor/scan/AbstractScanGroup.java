@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 /**
  * 数据扫描模板类
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2023-06-05 15:44
  * @since 1.5.0
  */

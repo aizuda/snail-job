@@ -24,7 +24,7 @@ import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-08-23
  */
 //@Configuration

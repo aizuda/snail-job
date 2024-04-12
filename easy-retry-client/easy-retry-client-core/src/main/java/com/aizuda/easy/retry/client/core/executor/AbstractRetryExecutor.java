@@ -10,7 +10,7 @@ import com.aizuda.easy.retry.common.core.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2022-03-03 18:08
  */
 @Slf4j

@@ -5,7 +5,7 @@ import cn.hutool.core.lang.Pair;
 /**
  * 重试过滤策略，为了判断哪些重试数据符合条件
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2021-11-29 18:45
  */
 public interface FilterStrategy {

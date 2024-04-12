@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
  * 号段模式序号ID分配表
  * </p>
  *
- * @author www.byteblogs.com
+ * @author opensnail
  * @since 2023-05-05
  */
 @Getter

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 /**
  * 客户端上报任务生成器
  *
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-07-16 11:51:56
  * @since 2.1.0
  */

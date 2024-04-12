@@ -15,7 +15,7 @@ import java.util.Objects;
 /**
  * Hessian序列化
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2022-03-07 15:08
  */
 public class HessianSerializer implements RetryArgSerializer {

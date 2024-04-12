@@ -27,7 +27,7 @@ import java.util.function.Consumer;
 /**
  * 手动执行重试
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2023-05-15 18:19
  */
 @Component

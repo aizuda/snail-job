@@ -10,7 +10,7 @@ import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.core.model.Result;
 import com.aizuda.easy.retry.server.common.akka.ActorGenerator;
 import com.aizuda.easy.retry.server.common.cache.CacheRegisterTable;
-import com.aizuda.easy.retry.server.common.client.RequestBuilder;
+import com.aizuda.easy.retry.server.common.rpc.client.RequestBuilder;
 import com.aizuda.easy.retry.server.common.dto.RegisterNodeInfo;
 import com.aizuda.easy.retry.server.common.util.DateUtils;
 import com.aizuda.easy.retry.server.job.task.client.JobRpcClient;
@@ -33,7 +33,7 @@ import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Objects;
 
 /**
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-10-06 16:42:08
  * @since 2.4.0
  */

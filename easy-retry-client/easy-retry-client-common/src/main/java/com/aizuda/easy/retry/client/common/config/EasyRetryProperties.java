@@ -13,7 +13,7 @@ import java.util.Objects;
 /**
  * easy retry 客户端配置
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2022-03-04 15:53
  * @since 1.0.0
  */

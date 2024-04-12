@@ -11,7 +11,7 @@ import java.util.List;
  * 重试日志异常信息记录表 Mapper 接口
  * </p>
  *
- * @author www.byteblogs.com
+ * @author opensnail
  * @since 2023-06-16
  */
 @Mapper

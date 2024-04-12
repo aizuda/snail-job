@@ -3,7 +3,7 @@ package com.aizuda.easy.retry.server.common.generator.id;
 /**
  * 分布式Id生成器
  *
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-05-04
  * @since 2.0
  */

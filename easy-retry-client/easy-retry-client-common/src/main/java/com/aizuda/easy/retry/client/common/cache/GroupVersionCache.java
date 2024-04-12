@@ -2,12 +2,11 @@ package com.aizuda.easy.retry.client.common.cache;
 
 import com.aizuda.easy.retry.client.common.Lifecycle;
 import com.aizuda.easy.retry.client.common.NettyClient;
-import com.aizuda.easy.retry.client.common.proxy.RequestBuilder;
+import com.aizuda.easy.retry.client.common.rpc.client.RequestBuilder;
 import com.aizuda.easy.retry.common.core.constant.SystemConstants;
 import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.common.core.model.NettyResult;
 import com.aizuda.easy.retry.common.core.util.JsonUtil;
-import com.aizuda.easy.retry.common.log.EasyRetryLog;
 import com.aizuda.easy.retry.server.model.dto.ConfigDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
@@ -20,7 +19,7 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2022-05-02 21:06
  */
 @Component

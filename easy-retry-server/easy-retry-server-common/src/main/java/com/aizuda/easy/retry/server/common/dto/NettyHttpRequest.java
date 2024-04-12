@@ -9,7 +9,7 @@ import io.netty.handler.codec.http.HttpMethod;
 /**
  * netty客户端请求模型
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2023-07-24 09:32
  */
 @Data

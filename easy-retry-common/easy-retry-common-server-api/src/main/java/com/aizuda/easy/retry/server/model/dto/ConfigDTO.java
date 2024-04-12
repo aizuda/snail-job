@@ -10,7 +10,7 @@ import java.util.Set;
 /**
  * 同步的配置数据结构
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2021-11-22 13:45
  */
 @Data

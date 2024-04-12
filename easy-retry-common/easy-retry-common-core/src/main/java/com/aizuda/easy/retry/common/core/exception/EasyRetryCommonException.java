@@ -4,7 +4,7 @@ package com.aizuda.easy.retry.common.core.exception;
 /**
  * 异常信息
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2021-11-19 15:01
  */
 public class EasyRetryCommonException extends BaseEasyRetryException {

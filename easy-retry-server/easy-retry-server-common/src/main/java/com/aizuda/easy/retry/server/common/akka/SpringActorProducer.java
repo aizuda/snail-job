@@ -5,7 +5,7 @@ import akka.actor.IndirectActorProducer;
 import org.springframework.context.ApplicationContext;
 
 /**
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2021-02-10
  */
 public class SpringActorProducer implements IndirectActorProducer {

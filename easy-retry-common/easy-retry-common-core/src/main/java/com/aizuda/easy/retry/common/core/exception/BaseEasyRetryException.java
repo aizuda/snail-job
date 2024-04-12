@@ -5,7 +5,7 @@ import org.slf4j.helpers.MessageFormatter;
 /**
  * 异常信息
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2021-11-19 15:01
  */
 public class BaseEasyRetryException extends RuntimeException {

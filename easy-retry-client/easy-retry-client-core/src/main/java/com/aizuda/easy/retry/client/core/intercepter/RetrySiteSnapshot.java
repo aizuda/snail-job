@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * 重试现场记录器
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2022-03-03 13:42
  */
 public class RetrySiteSnapshot {

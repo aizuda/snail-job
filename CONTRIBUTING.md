@@ -87,7 +87,7 @@ We use [Gitee Issues](https://gitee.com/aizuda/easy-retry/issues) and [Pull Requ
 ```
  /**
   * 这是你对这个类的描述，如比较长，多行也行
-  * @author www.byteblogs.com
+  * @author opensnail
   * @since 1.5.1
   */
  public class YourClass{

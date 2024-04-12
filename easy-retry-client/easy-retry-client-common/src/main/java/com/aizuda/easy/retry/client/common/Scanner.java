@@ -1,6 +1,6 @@
 package com.aizuda.easy.retry.client.common;
 
-import com.aizuda.easy.retry.client.common.netty.server.EndPointInfo;
+import com.aizuda.easy.retry.client.common.rpc.supports.scan.EndPointInfo;
 
 import java.util.List;
 

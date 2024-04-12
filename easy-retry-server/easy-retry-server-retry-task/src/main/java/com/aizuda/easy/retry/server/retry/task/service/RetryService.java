@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * 重试服务层
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2021-11-26 15:17
  */
 public interface RetryService {

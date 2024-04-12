@@ -31,7 +31,7 @@ import java.util.List;
 /**
  * 基于DB实现的分布式锁
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2023-07-21 08:34
  * @since 2.1.0
  */

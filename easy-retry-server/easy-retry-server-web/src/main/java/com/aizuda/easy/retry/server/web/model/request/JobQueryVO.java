@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-10-11 22:28:07
  * @since 2.4.0
  */

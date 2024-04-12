@@ -5,7 +5,7 @@ import java.lang.annotation.*;
 /**
  * job执行者
  *
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-09-26 23:19:01
  * @since 2.4.0
  */

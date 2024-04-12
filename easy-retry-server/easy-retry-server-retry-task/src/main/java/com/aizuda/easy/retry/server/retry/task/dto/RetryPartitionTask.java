@@ -7,7 +7,7 @@ import lombok.EqualsAndHashCode;
 import java.time.LocalDateTime;
 
 /**
- * @author www.byteblogs.com
+ * @author opensnail
  * @date 2023-10-25 22:23:24
  * @since 2.4.0
  */

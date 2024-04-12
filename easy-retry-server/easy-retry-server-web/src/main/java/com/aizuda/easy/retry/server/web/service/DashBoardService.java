@@ -10,7 +10,7 @@ import com.aizuda.easy.retry.server.web.model.response.ServerNodeResponseVO;
 import java.util.List;
 
 /**
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2022-04-22 20:19
  */
 public interface DashBoardService {

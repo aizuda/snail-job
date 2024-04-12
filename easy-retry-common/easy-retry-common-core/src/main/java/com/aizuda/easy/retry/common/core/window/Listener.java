@@ -6,7 +6,7 @@ import java.util.List;
  * 滑动窗口监听器
  *
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2021-12-02 14:36
  */
 public interface Listener<T> {

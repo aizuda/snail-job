@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * 死信队列接口
  *
- * @author: www.byteblogs.com
+ * @author: opensnail
  * @date : 2022-02-28 15:38
  */
 @RestController
