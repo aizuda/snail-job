@@ -65,7 +65,6 @@ public class SnailJobTemplateAutoConfiguration {
         return new SqlSessionTemplate(sqlSessionFactory);
     }
 
-    private static final  List<String> TABLES = Arrays.asList("retry_task", "retry_dead_letter");
 
     @Bean
     public MybatisPlusInterceptor mybatisPlusInterceptor(Environment environment) {
