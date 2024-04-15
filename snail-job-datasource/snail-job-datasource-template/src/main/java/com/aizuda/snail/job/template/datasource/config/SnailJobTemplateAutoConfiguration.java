@@ -32,8 +32,8 @@ import java.util.Optional;
  * @date : 2023-08-04 12:37
  */
 @Configuration
-@ComponentScan("com.aizuda.snail.job.template.datasource.**")
-@MapperScan(value = "com.aizuda.snail.job.template.datasource.persistence.mapper", sqlSessionTemplateRef  = "sqlSessionTemplate")
+@ComponentScan("com.aizuda.snailjob.template.datasource.**")
+@MapperScan(value = "com.aizuda.snailjob.template.datasource.persistence.mapper", sqlSessionTemplateRef  = "sqlSessionTemplate")
 public class SnailJobTemplateAutoConfiguration {
 
     /**
@@ -65,6 +65,7 @@ public class SnailJobTemplateAutoConfiguration {
         return new SqlSessionTemplate(sqlSessionFactory);
     }
 
+    private static final  List<String> TABLES = Arrays.asList("retry_task", "retry_dead_letter");
 
     @Bean
     public MybatisPlusInterceptor mybatisPlusInterceptor(Environment environment) {
