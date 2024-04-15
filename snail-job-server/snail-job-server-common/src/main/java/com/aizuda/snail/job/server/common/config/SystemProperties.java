@@ -18,12 +18,6 @@ import org.springframework.context.annotation.Configuration;
 public class SystemProperties {
 
     /**
-     * 拉取数据天数
-     */
-    @Deprecated
-    private int lastDays = 30;
-
-    /**
      * 重试每次拉取的条数
      */
     private int retryPullPageSize = 1000;

@@ -14,7 +14,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 import java.lang.annotation.Annotation;
 
 @Slf4j
-@ControllerAdvice(basePackages = {"com.aizuda.easy.retry.server"})
+@ControllerAdvice(basePackages = {"com.aizuda.snail.job.server"})
 public class GlobalRestfulResponseBodyAdvice implements ResponseBodyAdvice<Object> {
 
     @Override

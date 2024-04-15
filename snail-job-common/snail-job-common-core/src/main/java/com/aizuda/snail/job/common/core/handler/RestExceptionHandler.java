@@ -30,10 +30,7 @@ import java.util.stream.Collectors;
  * @date: 2019/09/30 17:02
  */
 @ControllerAdvice(basePackages = {
-        "com.aizuda.easy.retry.client.core",
-        "com.aizuda.easy.retry.client.job.core",
-        "com.aizuda.easy.retry.client.common",
-        "com.aizuda.easy.retry.server",
+        "com.aizuda.easy.retry.server"
 } )
 @Slf4j
 @ResponseBody

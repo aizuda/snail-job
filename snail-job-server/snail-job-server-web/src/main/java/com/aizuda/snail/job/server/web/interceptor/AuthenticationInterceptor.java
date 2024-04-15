@@ -41,8 +41,8 @@ import java.util.stream.Collectors;
 @Configuration
 public class AuthenticationInterceptor implements HandlerInterceptor {
 
-    public static final String AUTHENTICATION = "snail-job-AUTH";
-    public static final String NAMESPACE_ID = "snail-job-NAMESPACE-ID";
+    public static final String AUTHENTICATION = "SNAIL-JOB-AUTH";
+    public static final String NAMESPACE_ID = "SNAIL-JOB-NAMESPACE-ID";
 
     @Autowired
     private SystemUserMapper systemUserMapper;
