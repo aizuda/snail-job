@@ -24,11 +24,11 @@
         <div class="footer">
           <div class="links">
             <a href="mailto:598092184@qq.com" target="_blank" style="margin: 10px"><icon-font style="fontSize: 20px" type="icon-youxiang" /></a>
-            <a href="https://github.com/aizuda/easy-retry" target="_blank" style="margin: 10px"><icon-font style="fontSize: 20px" type="icon-github2" /> </a>
-            <a href="https://gitee.com/aizuda/easy-retry" target="_blank" style="margin: 10px">   <icon-font style="fontSize: 20px" type="icon-GITEE" /></a>
+            <a href="https://github.com/aizuda/snail-job" target="_blank" style="margin: 10px"><icon-font style="fontSize: 20px" type="icon-github2" /> </a>
+            <a href="https://gitee.com/aizuda/snail-job" target="_blank" style="margin: 10px">   <icon-font style="fontSize: 20px" type="icon-GITEE" /></a>
           </div>
           <div class="copyright">
-            Copyright &copy; {{ year }} Easy-Retry   <span class="desc" style="font-size: 16px; font-weight: 600;">v{{ version }}</span>
+            Copyright &copy; {{ year }} snail-job   <span class="desc" style="font-size: 16px; font-weight: 600;">v{{ version }}</span>
           </div>
         </div>
       </div>

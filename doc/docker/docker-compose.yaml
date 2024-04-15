@@ -1,6 +1,6 @@
 version: "3.4"
 
-name: easy-retry
+name: snail-job
 
 volumes:
     mysql: { }

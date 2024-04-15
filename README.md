@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://www.easyretry.com">
-   <img alt="Easy-Retry-Logo" src="doc/images/logo.png" width="350px">
+   <img alt="snail-job-Logo" src="doc/images/logo.png" width="350px">
   </a>
 </p>
 
@@ -27,7 +27,7 @@
 ![img.png](doc/images/retry-strategy.png)
 
 # 🍀 特性
-Easy-RETRY 是一个针对业务系统重试流量的治理平台，其自身具有高可用高性能高负载的特点，服务特性有：
+snail-job 是一个针对业务系统重试流量的治理平台，其自身具有高可用高性能高负载的特点，服务特性有：
 + 支持千万级别的重试流量分派
 + 支持流量容量扩容，自动识别并处理
 + 支持流量处理节点水平扩容
@@ -40,7 +40,7 @@ Easy-RETRY 是一个针对业务系统重试流量的治理平台，其自身具
 - https://www.easyretry.com/pages/406a68/
 
 # 流量管理平台预览
-地址: <http://preview.easyretry.com/easy-retry/>
+地址: <http://preview.easyretry.com/snail-job/>
 账号: developer
 密码: 123456
 
@@ -58,10 +58,10 @@ Easy-RETRY 是一个针对业务系统重试流量的治理平台，其自身具
 - [HelloWorld](https://www.easyretry.com/pages/da9ecc/)
 
 ## 应用实例
-- [easy-retry-demo](https://gitee.com/byteblogs168/easy-retry-demo.git)
+- [snail-job-demo](https://gitee.com/byteblogs168/snail-job-demo.git)
 
 ## 期望
-欢迎提出更好的意见，帮助完善 Easy-Retry
+欢迎提出更好的意见，帮助完善 snail-job
 
 ## 版权
-[Apache-2.0](https://gitee.com/aizuda/easy-retry/blob/master/LICENSE)
+[Apache-2.0](https://gitee.com/aizuda/snail-job/blob/master/LICENSE)

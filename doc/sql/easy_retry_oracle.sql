@@ -294,7 +294,6 @@ CREATE TABLE server_node
     group_name   VARCHAR2(64) NOT NULL,
     host_id      VARCHAR2(64) NOT NULL,
     host_ip      VARCHAR2(64) NOT NULL,
-    context_path VARCHAR2(256) DEFAULT '/',
     host_port    INT          NOT NULL,
     expire_at    TIMESTAMP    NOT NULL,
     node_type    SMALLINT     NOT NULL,
@@ -313,7 +312,6 @@ COMMENT ON COLUMN server_node.group_name IS '组名称';
 COMMENT ON COLUMN server_node.namespace_id IS '命名空间id';
 COMMENT ON COLUMN server_node.host_id IS '主机id';
 COMMENT ON COLUMN server_node.host_ip IS '机器ip';
-COMMENT ON COLUMN server_node.context_path IS '客户端上下文路径 server.servlet.context-path';
 COMMENT ON COLUMN server_node.host_port IS '机器端口';
 COMMENT ON COLUMN server_node.expire_at IS '过期时间';
 COMMENT ON COLUMN server_node.node_type IS '节点类型 1、客户端 2、是服务端';

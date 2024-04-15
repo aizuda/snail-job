@@ -1,0 +1,18 @@
+{
+  "groups": [
+    {
+      "name": "snail-job",
+      "type": "com.aizuda.snail.job.server.common.config.SystemProperties",
+      "sourceType": "com.aizuda.snail.job.server.common.config.SystemProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "snail-job.callback",
+      "type": "com.aizuda.snail.job.server.common.config.SystemProperties$Callback",
+      "defaultValue": "30",
+      "description": "服务端的地址，若服务端集群部署则此处配置域名",
+      "sourceType": "com.aizuda.snail.job.server.common.config.SystemProperties$Callback"
+    }
+  ]
+}

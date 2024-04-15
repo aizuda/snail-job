@@ -35,14 +35,7 @@
         {{ index + 1 }}
       </span>
       <span slot="contextPath" slot-scope="text, record">
-        <div v-if="record.nodeType === 1">
-          Path:
-          <a-tag color="#108ee9" >
-            {{ text }}
-          </a-tag>
-        </div>
-
-        <div v-else>
+        <div v-if="record.nodeType === 2">
           Bucket:
           <a-popover placement="topLeft">
             <template slot="content">
@@ -115,13 +108,6 @@ export default {
           title: 'Port',
           dataIndex: 'hostPort',
           width: '8%'
-        },
-        {
-          title: '路径/组',
-          dataIndex: 'contextPath',
-          scopedSlots: { customRender: 'contextPath' },
-          ellipsis: true,
-          width: '22%'
         },
         {
           title: '更新时间',

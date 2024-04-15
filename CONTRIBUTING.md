@@ -1,13 +1,13 @@
 
 <p align="center">
   <a href="https://www.easyretry.com">
-   <img alt="Easy-Retry-Logo" src="doc/images/logo.png">
+   <img alt="snail-job-Logo" src="doc/images/logo.png">
   </a>
 </p>
 
-# Contributing to Easy-Retry
-> 欢迎来到 Easy-Retry！本文档是有关如何向 Easy-Retry 做出贡献的指南。如果您发现不正确或遗漏的内容，请留下评论/建议。
-> 希望各位热爱开源的同学来共同维护 Easy-Retry，让 Easy-Retry 变的越来越好。
+# Contributing to snail-job
+> 欢迎来到 snail-job！本文档是有关如何向 snail-job 做出贡献的指南。如果您发现不正确或遗漏的内容，请留下评论/建议。
+> 希望各位热爱开源的同学来共同维护 snail-job，让 snail-job 变的越来越好。
 
 ## Before you get started
 
@@ -24,7 +24,7 @@ You should have JDK 1.8 or later installed in your system.
 
 ## How can I become a Committer
 需要你对开源有热情，技术扎实，有一颗用爱发电的心。
-你需要加入Easy-Retry的社区群，如何加入请参考[加入社区讨论]，然后私聊我们，表示有意成为开发者。
+你需要加入snail-job的社区群，如何加入请参考[加入社区讨论]，然后私聊我们，表示有意成为开发者。
 你需要熟读源码，理解核心代码的逻辑。
 然后可以去issue页 (opens new window)查看issue列表并进行认领。
 或者你有相关建议自己进行创建issue并进行修复也是可以的。
@@ -33,7 +33,7 @@ You should have JDK 1.8 or later installed in your system.
 
 
 ## Gitee workflow
-Easy-Retry的PR统一在Gitee平台上进行提交。
+snail-job的PR统一在Gitee平台上进行提交。
 我们使用 dev 分支作为开发分支，这表明这是一个不稳定的分支.
 
 以下是contributors的工作流程:
@@ -63,10 +63,10 @@ Easy-Retry的PR统一在Gitee平台上进行提交。
 
 #### Open an issue / PR
 
-We use [Gitee Issues](https://gitee.com/aizuda/easy-retry/issues) and [Pull Requests](https://gitee.com/aizuda/easy-retry/pulls) for trackers.
+We use [Gitee Issues](https://gitee.com/aizuda/snail-job/issues) and [Pull Requests](https://gitee.com/aizuda/snail-job/pulls) for trackers.
 
 如果您在文档中发现拼写错误，在代码中发现错误，或者想要新功能，或者想要提供建议，
-您可以通过[在 Gitee 上打开问题](https://gitee.com/aizuda/easy-retry/issues/new) 进行提交。
+您可以通过[在 Gitee 上打开问题](https://gitee.com/aizuda/snail-job/issues/new) 进行提交。
 请遵循问题模板中的指导消息。
 
 如果您想做出贡献，请遵循[贡献工作流程](#gitee-workflow)并创建新的拉取请求。

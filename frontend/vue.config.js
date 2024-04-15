@@ -106,7 +106,7 @@ const vueConfig = {
     // If you want to turn on the proxy, please remove the mockjs /src/main.js
     proxy: {
       '/api': {
-        target: 'http://localhost:8080/easy-retry',
+        target: 'http://localhost:8080/snail-job',
         pathRewrite: { '^/api': '/' },
         ws: false,
         changeOrigin: true
@@ -119,8 +119,8 @@ const vueConfig = {
   lintOnSave: undefined,
   // babel-loader no-ignore node_modules/*
   transpileDependencies: [],
-  publicPath: '/easy-retry/',
-  outputDir: '../easy-retry-server/easy-retry-server-starter/src/main/resources/admin'
+  publicPath: '/snail-job/',
+  outputDir: '../snail-job-server/snail-job-server-starter/src/main/resources/admin'
 }
 
 // preview.pro.loacg.com only do not use in your production;

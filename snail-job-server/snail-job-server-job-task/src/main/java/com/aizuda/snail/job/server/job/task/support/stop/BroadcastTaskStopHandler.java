@@ -1,0 +1,40 @@
+package com.aizuda.snail.job.server.job.task.support.stop;
+
+import akka.actor.ActorRef;
+import com.aizuda.snail.job.server.common.akka.ActorGenerator;
+import com.aizuda.snail.job.server.common.util.ClientInfoUtils;
+import com.aizuda.snail.job.server.job.task.support.JobTaskConverter;
+import com.aizuda.snail.job.server.job.task.dto.RealStopTaskInstanceDTO;
+import com.aizuda.snail.job.common.core.enums.JobTaskTypeEnum;
+import com.aizuda.snail.job.template.datasource.persistence.po.JobTask;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
+/**
+ * @author opensnail
+ * @date 2023-10-02 12:59:53
+ * @since 2.4.0
+ */
+@Component
+@Slf4j
+public class BroadcastTaskStopHandler extends AbstractJobTaskStopHandler {
+
+    @Override
+    public JobTaskTypeEnum getTaskType() {
+        return JobTaskTypeEnum.BROADCAST;
+    }
+
+    @Override
+    public void doStop(TaskStopJobContext context) {
+
+        for (final JobTask jobTask : context.getJobTasks()) {
+            RealStopTaskInstanceDTO taskInstanceDTO = JobTaskConverter.INSTANCE.toRealStopTaskInstanceDTO(context);
+            taskInstanceDTO.setClientId(ClientInfoUtils.clientId(jobTask.getClientInfo()));
+
+            ActorRef actorRef = ActorGenerator.jobRealStopTaskInstanceActor();
+            actorRef.tell(taskInstanceDTO, actorRef);
+        }
+
+    }
+
+}

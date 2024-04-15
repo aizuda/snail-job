@@ -1,0 +1,31 @@
+{
+  "groups": [
+    {
+      "name": "snail-job",
+      "type": "com.aizuda.snail.job.client.common.config.SnailJobProperties",
+      "sourceType": "com.aizuda.snail.job.client.common.config.SnailJobProperties"
+    },
+    {
+      "name": "snail-job.server",
+      "sourceMethod": "getServer()",
+      "type": "com.aizuda.snail.job.client.common.config.SnailJobProperties$ServerConfig",
+      "sourceType": "com.aizuda.snail.job.client.common.config.SnailJobProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "snail-job.server.host",
+      "type": "java.lang.String",
+      "defaultValue": "127.0.0.1",
+      "description": "服务端的地址，若服务端集群部署则此处配置域名",
+      "sourceType": "com.aizuda.snail.job.client.common.config.SnailJobProperties$ServerConfig"
+    },
+    {
+      "name": "snail-job.server.port",
+      "type": "com.aizuda.snail.job.client.common.config.SnailJobProperties.ServerConfig",
+      "sourceType": "com.aizuda.snail.job.client.common.config.SnailJobProperties",
+      "description": "服务端netty的端口号",
+      "defaultValue": "1788"
+    }
+  ]
+}

@@ -1,0 +1,2 @@
+com.aizuda.snail.job.client.starter.SnailJobClientJobCoreAutoConfiguration
+com.aizuda.snail.job.client.starter.SnailJobClientRetryCoreAutoConfiguration

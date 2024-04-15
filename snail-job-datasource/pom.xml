@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.aizuda</groupId>
+        <artifactId>snail-job</artifactId>
+        <version>${revision}</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>snail-job-datasource</artifactId>
+    <name>snail-job-datasource</name>
+    <description>snail-job-datasource</description>
+    <packaging>pom</packaging>
+
+    <properties>
+        <java.version>17</java.version>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+    </properties>
+
+    <modules>
+        <module>snail-job-mariadb-datasource</module>
+        <module>snail-job-mysql-datasource</module>
+        <module>snail-job-postgres-datasource</module>
+        <module>snail-job-oracle-datasource</module>
+        <module>snail-job-sqlserver-datasource</module>
+        <module>snail-job-datasource-template</module>
+    </modules>
+
+</project>

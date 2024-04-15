@@ -12,7 +12,7 @@ Router.prototype.push = function push (location, onResolve, onReject) {
 Vue.use(Router)
 
 export default new Router({
-  base: '/easy-retry/',
+  base: '/snail-job/',
   mode: 'hash',
   routes: constantRouterMap
 })

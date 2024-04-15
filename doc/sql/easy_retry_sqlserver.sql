@@ -2078,7 +2078,6 @@ CREATE TABLE server_node
     group_name   nvarchar(64)  NOT NULL,
     host_id      nvarchar(64)  NOT NULL,
     host_ip      nvarchar(64)  NOT NULL,
-    context_path nvarchar(256) NOT NULL DEFAULT '/',
     host_port    int           NOT NULL,
     expire_at    datetime2     NOT NULL,
     node_type    tinyint       NOT NULL,
@@ -2128,13 +2127,6 @@ EXEC sp_addextendedproperty
      'SCHEMA', N'dbo',
      'TABLE', N'server_node',
      'COLUMN', N'host_ip'
-GO
-
-EXEC sp_addextendedproperty
-     'MS_Description', N'客户端上下文路径 server.servlet.context-path',
-     'SCHEMA', N'dbo',
-     'TABLE', N'server_node',
-     'COLUMN', N'context_path'
 GO
 
 EXEC sp_addextendedproperty
