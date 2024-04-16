@@ -4,7 +4,6 @@ import com.aizuda.snailjob.common.core.exception.AbstractError;
 import com.aizuda.snailjob.common.core.exception.BaseSnailJobException;
 import com.aizuda.snailjob.common.core.exception.SnailJobAuthenticationException;
 import com.aizuda.snailjob.common.core.model.Result;
-import com.aizuda.snailjob.common.core.model.Result;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
@@ -57,7 +56,7 @@ public class RestExceptionHandler {
      * @param ex
      * @return
      */
-    @ExceptionHandler({BaseSnailJobException.class, SnailJobAuthenticationException.class})
+    @ExceptionHandler({BaseSnailJobException.class})
     public Result onBusinessException(BaseSnailJobException ex) {
         log.error("异常类 businessException", ex);
         if (ex instanceof final SnailJobAuthenticationException authenticationException) {
@@ -65,17 +64,6 @@ public class RestExceptionHandler {
         }
 
         return new Result<String>(0, ex.getMessage());
-    }
-
-    /**
-     * 业务异常
-     *
-     * @param ex
-     * @return
-     */
-    @ExceptionHandler({SnailJobAuthenticationException.class})
-    public Result onBusinessException(SnailJobAuthenticationException ex) {
-        return new Result<String>(ex.getErrorCode(), ex.getMessage());
     }
 
     /**
