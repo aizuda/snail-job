@@ -47,14 +47,13 @@ spring:
       static-locations: classpath:admin/
 
 mybatis-plus:
-  typeAliasesPackage: com.aizuda.snail.job.template.datasource.persistence.po
+  typeAliasesPackage: com.aizuda.snailjob.template.datasource.persistence.po
   global-config:
     db-config:
       where-strategy: NOT_EMPTY
       capital-mode: false
       logic-delete-value: 1
       logic-not-delete-value: 0
-#      table-prefix: er_ # SQLServer 请打开该配置
   configuration:
     map-underscore-to-camel-case: true
     cache-enabled: true
@@ -63,7 +62,7 @@ logging:
     config: classpath:logback-boot.xml
 #    level:
 #    ## 方便调试 SQL
-#        com.aizuda.snail.job.template.datasource.persistence.mapper: debug
+#        com.aizuda.snailjob.template.datasource.persistence.mapper: debug
 
 snail-job:
   retry-pull-page-size: 1000 # 拉取重试数据的每批次的大小

@@ -189,7 +189,7 @@
 
     <scm>
         <url>https://github.com/byteblogs168/snail-job</url>
-        <connection>https://gitee.com/aizuda/snail-job.git</connection>
+        <connection>https://gitee.com.aizuda.snailjob.git</connection>
         <developerConnection>https://gitee.com/aizuda/</developerConnection>
     </scm>
 

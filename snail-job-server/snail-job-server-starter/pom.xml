@@ -90,7 +90,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>com.aizuda.snail.job.server.SnailJobServerApplication</mainClass>
+                    <mainClass>com.aizuda.snailjob.server.SnailJobServerApplication</mainClass>
                     <classifier>exec</classifier>
                 </configuration>
                 <executions>

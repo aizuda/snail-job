@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.aizuda.snail.job.template.datasource.persistence.mapper.JobSummaryMapper">
-    <resultMap id="BaseResultMap" type="com.aizuda.snail.job.template.datasource.persistence.po.JobSummary">
+<mapper namespace="com.aizuda.snailjob.template.datasource.persistence.mapper.JobSummaryMapper">
+    <resultMap id="BaseResultMap" type="com.aizuda.snailjob.template.datasource.persistence.po.JobSummary">
         <id column="id" jdbcType="BIGINT" property="id"/>
         <result column="namespace_id" jdbcType="TINYINT" property="namespaceId"/>
         <result column="group_name" jdbcType="TINYINT" property="groupName"/>
@@ -56,7 +56,7 @@
     </update>
 
     <select id="jobLineList"
-            resultType="com.aizuda.snail.job.template.datasource.persistence.dataobject.DashboardLineResponseDO">
+            resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardLineResponseDO">
         SELECT
             createDt,
             COALESCE(SUM(success_num), 0)                                    AS success,
@@ -79,7 +79,7 @@
     </select>
 
     <select id="toJobTask"
-            resultType="com.aizuda.snail.job.template.datasource.persistence.dataobject.DashboardCardResponseDO$JobTask">
+            resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardCardResponseDO$JobTask">
         SELECT COALESCE(sum(success_num), 0)                                    AS successNum,
                COALESCE(sum(stop_num), 0)                                       AS stopNum,
                COALESCE(sum(cancel_num), 0)                                     AS cancelNum,
@@ -90,7 +90,7 @@
     </select>
 
     <select id="dashboardRank"
-            resultType="com.aizuda.snail.job.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO$Rank">
+            resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO$Rank">
         SELECT * FROM (
                 SELECT
                     <if test="systemTaskType == 3">
@@ -108,7 +108,7 @@
     </select>
 
     <select id="jobTaskList"
-            resultType="com.aizuda.snail.job.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO$Task">
+            resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO$Task">
         SELECT group_name                                        AS groupName,
                SUM(CASE WHEN (job_status = 1) THEN 1 ELSE 0 END) AS run,
                COUNT(*)                                          AS total

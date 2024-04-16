@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-   com.aizuda.snail.job.server.retry.task.SnailJobServerRetryTaskStarter
+   com.aizuda.snailjob.server.retry.task.SnailJobServerRetryTaskStarter

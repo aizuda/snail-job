@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.aizuda.snail.job.template.datasource.persistence.mapper.JobNotifyConfigMapper">
-    <resultMap id="BaseResultMap" type="com.aizuda.snail.job.template.datasource.persistence.po.JobNotifyConfig">
+<mapper namespace="com.aizuda.snailjob.template.datasource.persistence.mapper.JobNotifyConfigMapper">
+    <resultMap id="BaseResultMap" type="com.aizuda.snailjob.template.datasource.persistence.po.JobNotifyConfig">
         <id column="id" jdbcType="BIGINT" property="id" />
         <result column="namespace_id" jdbcType="VARCHAR" property="namespaceId" />
         <result column="group_name" jdbcType="VARCHAR" property="groupName" />
@@ -24,7 +24,7 @@
     </sql>
 
     <select id="selectJobNotifyConfigList"
-            resultType="com.aizuda.snail.job.template.datasource.persistence.dataobject.JobNotifyConfigResponseDO">
+            resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.JobNotifyConfigResponseDO">
         SELECT a.*, b.job_name
           FROM sj_job_notify_config a
                 JOIN sj_job b ON a.job_id = b.id

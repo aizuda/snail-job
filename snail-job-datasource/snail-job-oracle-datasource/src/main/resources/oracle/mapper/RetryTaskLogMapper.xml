@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.aizuda.snail.job.template.datasource.persistence.mapper.RetryTaskLogMapper">
-    <resultMap id="BaseResultMap" type="com.aizuda.snail.job.template.datasource.persistence.po.RetryTaskLog">
+<mapper namespace="com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskLogMapper">
+    <resultMap id="BaseResultMap" type="com.aizuda.snailjob.template.datasource.persistence.po.RetryTaskLog">
         <id column="id" jdbcType="BIGINT" property="id"/>
         <result column="unique_id" jdbcType="VARCHAR" property="uniqueId"/>
         <result column="namespace_id" jdbcType="VARCHAR" property="namespaceId"/>
@@ -37,7 +37,7 @@
 
     <!-- 重试统计 -->
     <select id="retrySummaryRetryTaskLogList"
-        resultType="com.aizuda.snail.job.template.datasource.persistence.dataobject.DashboardRetryResponseDO">
+        resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardRetryResponseDO">
         SELECT namespace_id                                        AS namespaceId,
                group_name                                          AS groupName,
                scene_name                                          AS sceneName,

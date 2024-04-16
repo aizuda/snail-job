@@ -1,8 +1,8 @@
-com.aizuda.snail.job.common.log.dialect.logtube.LogTubeLogFactory
-com.aizuda.snail.job.common.log.dialect.slf4j.Slf4jLogFactory
-com.aizuda.snail.job.common.log.dialect.log4j2.Log4j2LogFactory
-com.aizuda.snail.job.common.log.dialect.log4j.Log4jLogFactory
-com.aizuda.snail.job.common.log.dialect.commons.ApacheCommonsLogFactory
-com.aizuda.snail.job.common.log.dialect.tinylog.TinyLogFactory
-com.aizuda.snail.job.common.log.dialect.tinylog.TinyLog2Factory
-com.aizuda.snail.job.common.log.dialect.jboss.JbossLogFactory
+com.aizuda.snailjob.common.log.dialect.logtube.LogTubeLogFactory
+com.aizuda.snailjob.common.log.dialect.slf4j.Slf4jLogFactory
+com.aizuda.snailjob.common.log.dialect.log4j2.Log4j2LogFactory
+com.aizuda.snailjob.common.log.dialect.log4j.Log4jLogFactory
+com.aizuda.snailjob.common.log.dialect.commons.ApacheCommonsLogFactory
+com.aizuda.snailjob.common.log.dialect.tinylog.TinyLogFactory
+com.aizuda.snailjob.common.log.dialect.tinylog.TinyLog2Factory
+com.aizuda.snailjob.common.log.dialect.jboss.JbossLogFactory

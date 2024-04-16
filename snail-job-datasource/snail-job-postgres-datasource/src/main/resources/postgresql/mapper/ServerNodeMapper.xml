@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.aizuda.snail.job.template.datasource.persistence.mapper.ServerNodeMapper">
-    <resultMap id="BaseResultMap" type="com.aizuda.snail.job.template.datasource.persistence.po.ServerNode">
+<mapper namespace="com.aizuda.snailjob.template.datasource.persistence.mapper.ServerNodeMapper">
+    <resultMap id="BaseResultMap" type="com.aizuda.snailjob.template.datasource.persistence.po.ServerNode">
         <id column="id" jdbcType="BIGINT" property="id"/>
         <result column="group_name" jdbcType="VARCHAR" property="groupName"/>
         <result column="host_id" jdbcType="VARCHAR" property="hostId"/>
@@ -52,7 +52,7 @@
     </update>
 
     <select id="countActivePod"
-            resultType="com.aizuda.snail.job.template.datasource.persistence.dataobject.ActivePodQuantityResponseDO">
+            resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.ActivePodQuantityResponseDO">
         SELECT node_type as nodeType, count(*) as total
         from server_node
         ${ew.customSqlSegment}

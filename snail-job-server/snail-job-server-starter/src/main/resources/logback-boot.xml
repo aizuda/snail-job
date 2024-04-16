@@ -78,8 +78,8 @@
         <appender-ref ref ="fileError"/>
     </appender>
 
-    <!-- EasyRetry appender -->
-    <appender name="easyLogServerAppender" class="com.aizuda.snail.job.server.common.appender.EasyRetryServerLogbackAppender">
+    <!-- SnailJob appender -->
+    <appender name="snailJobLogServerAppender" class="com.aizuda.snailjob.server.common.appender.SnailJobServerLogbackAppender">
     </appender>
 
     <!-- 控制台输出日志级别 -->
@@ -88,6 +88,6 @@
         <appender-ref ref="asyncInfo" />
         <appender-ref ref="asyncWarn" />
         <appender-ref ref="asyncError" />
-        <appender-ref ref="easyLogServerAppender" />
+        <appender-ref ref="snailJobLogServerAppender" />
     </root>
 </configuration>

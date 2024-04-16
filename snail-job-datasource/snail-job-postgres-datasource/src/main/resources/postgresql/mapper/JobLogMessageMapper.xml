@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.aizuda.snail.job.template.datasource.persistence.mapper.JobLogMessageMapper">
+<mapper namespace="com.aizuda.snailjob.template.datasource.persistence.mapper.JobLogMessageMapper">
 
     <!-- 通用查询映射结果 -->
-    <resultMap id="BaseResultMap" type="com.aizuda.snail.job.template.datasource.persistence.po.JobLogMessage">
+    <resultMap id="BaseResultMap" type="com.aizuda.snailjob.template.datasource.persistence.po.JobLogMessage">
         <id column="id" property="id"/>
         <result column="namespace_id" property="namespaceId"/>
         <result column="group_name" property="groupName"/>

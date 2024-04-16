@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.aizuda.snail.job.template.datasource.persistence.mapper.WorkflowTaskBatchMapper">
+<mapper namespace="com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowTaskBatchMapper">
 
     <!-- 通用查询映射结果 -->
-    <resultMap id="BaseResultMap" type="com.aizuda.snail.job.template.datasource.persistence.po.WorkflowTaskBatch">
+    <resultMap id="BaseResultMap" type="com.aizuda.snailjob.template.datasource.persistence.po.WorkflowTaskBatch">
         <id column="id" property="id"/>
         <result column="namespace_id" property="namespaceId"/>
         <result column="group_name" property="groupName"/>
@@ -18,8 +18,8 @@
     </resultMap>
 
     <select id="selectWorkflowBatchPageList"
-            parameterType="com.aizuda.snail.job.template.datasource.persistence.dataobject.WorkflowBatchQueryDO"
-            resultType="com.aizuda.snail.job.template.datasource.persistence.dataobject.WorkflowBatchResponseDO">
+            parameterType="com.aizuda.snailjob.template.datasource.persistence.dataobject.WorkflowBatchQueryDO"
+            resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.WorkflowBatchResponseDO">
         SELECT a.*,
                b.workflow_name
           FROM sj_workflow_task_batch a
