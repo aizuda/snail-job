@@ -1,12 +1,8 @@
 package com.aizuda.snailjob.client.starter;
 
 import com.aizuda.snailjob.client.core.annotation.Retryable;
-import com.aizuda.snailjob.client.core.intercepter.SnailJobInterceptor;
-import com.aizuda.snailjob.client.core.intercepter.SnailJobPointcutAdvisor;
-import com.aizuda.snailjob.client.core.strategy.RetryStrategy;
-import com.aizuda.snailjob.client.core.annotation.Retryable;
-import com.aizuda.snailjob.client.core.intercepter.SnailJobInterceptor;
-import com.aizuda.snailjob.client.core.intercepter.SnailJobPointcutAdvisor;
+import com.aizuda.snailjob.client.core.intercepter.SnailRetryInterceptor;
+import com.aizuda.snailjob.client.core.intercepter.SnailRetryPointcutAdvisor;
 import com.aizuda.snailjob.client.core.strategy.RetryStrategy;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.aop.Advisor;
@@ -26,14 +22,14 @@ public class SnailJobClientRetryCoreAutoConfiguration {
     @Bean
     @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     public Advisor snailJobPointcutAdvisor(MethodInterceptor snailJobInterceptor) {
-        return new SnailJobPointcutAdvisor(snailJobInterceptor);
+        return new SnailRetryPointcutAdvisor(snailJobInterceptor);
     }
 
     @Bean
     @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     public MethodInterceptor snailJobInterceptor(StandardEnvironment standardEnvironment,
                                                  @Lazy RetryStrategy localRetryStrategies) {
-        return new SnailJobInterceptor(standardEnvironment, localRetryStrategies);
+        return new SnailRetryInterceptor(standardEnvironment, localRetryStrategies);
     }
 
 }

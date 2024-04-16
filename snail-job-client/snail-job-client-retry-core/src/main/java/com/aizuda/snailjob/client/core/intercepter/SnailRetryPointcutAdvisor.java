@@ -29,13 +29,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 //@Configuration
 @Slf4j
-public class SnailJobPointcutAdvisor extends AbstractPointcutAdvisor implements IntroductionAdvisor, BeanFactoryAware, InitializingBean {
+public class SnailRetryPointcutAdvisor extends AbstractPointcutAdvisor implements IntroductionAdvisor, BeanFactoryAware, InitializingBean {
     private Advice advice;
     private Pointcut pointcut;
     private BeanFactory beanFactory;
     private MethodInterceptor snailJobInterceptor;
 
-    public SnailJobPointcutAdvisor(MethodInterceptor methodInterceptor) {
+    public SnailRetryPointcutAdvisor(MethodInterceptor methodInterceptor) {
         this.snailJobInterceptor = methodInterceptor;
     }
 
@@ -77,7 +77,7 @@ public class SnailJobPointcutAdvisor extends AbstractPointcutAdvisor implements 
     }
 
     protected Pointcut buildPointcut() {
-        return new SnailJobAnnotationMethodPointcut(Retryable.class);
+        return new SnailRetryAnnotationMethodPointcut(Retryable.class);
     }
 
     @Override
@@ -85,13 +85,13 @@ public class SnailJobPointcutAdvisor extends AbstractPointcutAdvisor implements 
         return pointcut;
     }
 
-    private static final class SnailJobAnnotationMethodPointcut extends StaticMethodMatcherPointcut {
+    private static final class SnailRetryAnnotationMethodPointcut extends StaticMethodMatcherPointcut {
 
         private final MethodMatcher methodResolver;
 
-        SnailJobAnnotationMethodPointcut(Class<? extends Annotation> annotationType) {
+        SnailRetryAnnotationMethodPointcut(Class<? extends Annotation> annotationType) {
             this.methodResolver = new AnnotationMethodMatcher(annotationType, true);
-            setClassFilter(new SnailJobAnnotationClassOrMethodFilter(annotationType));
+            setClassFilter(new SnailRetryAnnotationClassOrMethodFilter(annotationType));
         }
 
         @Override
@@ -104,20 +104,20 @@ public class SnailJobPointcutAdvisor extends AbstractPointcutAdvisor implements 
             if (this == other) {
                 return true;
             }
-            if (!(other instanceof SnailJobAnnotationMethodPointcut)) {
+            if (!(other instanceof SnailRetryAnnotationMethodPointcut)) {
                 return false;
             }
-            SnailJobAnnotationMethodPointcut otherAdvisor = (SnailJobAnnotationMethodPointcut) other;
+            SnailRetryAnnotationMethodPointcut otherAdvisor = (SnailRetryAnnotationMethodPointcut) other;
             return ObjectUtils.nullSafeEquals(this.methodResolver, otherAdvisor.methodResolver);
         }
 
     }
 
-    private static final class SnailJobAnnotationClassOrMethodFilter extends AnnotationClassFilter {
+    private static final class SnailRetryAnnotationClassOrMethodFilter extends AnnotationClassFilter {
 
         private final AnnotationMethodsResolver methodResolver;
 
-        SnailJobAnnotationClassOrMethodFilter(Class<? extends Annotation> annotationType) {
+        SnailRetryAnnotationClassOrMethodFilter(Class<? extends Annotation> annotationType) {
             super(annotationType, true);
             this.methodResolver = new AnnotationMethodsResolver(annotationType);
         }

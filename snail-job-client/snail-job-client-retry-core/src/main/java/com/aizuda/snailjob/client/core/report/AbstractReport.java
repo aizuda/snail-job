@@ -3,19 +3,17 @@ package com.aizuda.snailjob.client.core.report;
 import cn.hutool.core.lang.Assert;
 import com.aizuda.snailjob.client.core.Report;
 import com.aizuda.snailjob.client.common.config.SnailJobProperties;
-import com.aizuda.snailjob.client.core.exception.SnailJobClientException;
+import com.aizuda.snailjob.client.core.exception.SnailRetryClientException;
 import com.aizuda.snailjob.common.core.expression.ExpressionEngine;
 import com.aizuda.snailjob.client.core.IdempotentIdGenerate;
 import com.aizuda.snailjob.client.core.RetryArgSerializer;
 import com.aizuda.snailjob.client.core.cache.RetryerInfoCache;
 import com.aizuda.snailjob.client.core.intercepter.RetrySiteSnapshot;
-import com.aizuda.snailjob.client.core.loader.SnailJobSpiLoader;
+import com.aizuda.snailjob.client.core.loader.SnailRetrySpiLoader;
 import com.aizuda.snailjob.client.core.retryer.RetryerInfo;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.common.core.model.IdempotentIdContext;
 import com.aizuda.snailjob.server.model.dto.RetryTaskDTO;
-import com.aizuda.snailjob.client.core.exception.SnailJobClientException;
-import com.aizuda.snailjob.client.core.intercepter.RetrySiteSnapshot;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.ReflectionUtils;
 
@@ -34,7 +32,7 @@ public abstract class AbstractReport implements Report {
     @Override
     public boolean report(String scene, final String targetClassName, final Object[] params) {
         RetryerInfo retryerInfo = RetryerInfoCache.get(scene, targetClassName);
-        Assert.notNull(retryerInfo, () -> new SnailJobClientException("retryerInfo is null"));
+        Assert.notNull(retryerInfo, () -> new SnailRetryClientException("retryerInfo is null"));
 
         if (RetrySiteSnapshot.getStage().equals(RetrySiteSnapshot.EnumStage.REMOTE.getStage()) && !retryerInfo.isForceReport()) {
            SnailJobLog.LOCAL.info("Successfully reported, no need to repeat reporting. scene:[{}] targetClassName:[{}] args:[{}]",
@@ -69,10 +67,10 @@ public abstract class AbstractReport implements Report {
             idempotentId = (String) ReflectionUtils.invokeMethod(method, generate, idempotentIdContext);
         } catch (Exception exception) {
             SnailJobLog.LOCAL.error("幂等id生成异常：{},{}", scene, args, exception);
-            throw new SnailJobClientException("idempotentId生成异常：{},{}", scene, args);
+            throw new SnailRetryClientException("idempotentId生成异常：{},{}", scene, args);
         }
 
-        RetryArgSerializer retryArgSerializer = SnailJobSpiLoader.loadRetryArgSerializer();
+        RetryArgSerializer retryArgSerializer = SnailRetrySpiLoader.loadRetryArgSerializer();
 
         String serialize = retryArgSerializer.serialize(args);
         retryTaskDTO.setIdempotentId(idempotentId);
@@ -82,7 +80,7 @@ public abstract class AbstractReport implements Report {
         retryTaskDTO.setSceneName(scene);
 
         String expression = retryerInfo.getBizNo();
-        ExpressionEngine expressionEngine = SnailJobSpiLoader.loadExpressionEngine();
+        ExpressionEngine expressionEngine = SnailRetrySpiLoader.loadExpressionEngine();
         retryTaskDTO.setBizNo((String) expressionEngine.eval(expression, args, executorMethod));
         return retryTaskDTO;
     }

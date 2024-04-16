@@ -1,6 +1,5 @@
 package com.aizuda.snailjob.client.core.intercepter;
 
-import com.aizuda.snailjob.client.core.intercepter.RetrySiteSnapshot.EnumStage;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.common.core.model.SnailJobHeaders;
@@ -26,7 +25,7 @@ import java.util.Objects;
 @Aspect
 @Component
 @Slf4j
-public class HeaderAspect {
+public class SnailRetryHeaderAspect {
 
     public void before() {
         if (skip()) {
@@ -86,7 +85,7 @@ public class HeaderAspect {
             return;
         }
 
-        // 服务端重试的在com.aizuda.snailjob.client.core.client.RetryEndPoint.dispatch 中进行清除threadLocal
+        // 服务端重试的在com.aizuda.snailjob.client.core.client.SnailRetryEndPoint.dispatch 中进行清除threadLocal
         if (Objects.nonNull(RetrySiteSnapshot.getStage()) && RetrySiteSnapshot.EnumStage.REMOTE.getStage() == RetrySiteSnapshot.getStage()) {
             return;
         }

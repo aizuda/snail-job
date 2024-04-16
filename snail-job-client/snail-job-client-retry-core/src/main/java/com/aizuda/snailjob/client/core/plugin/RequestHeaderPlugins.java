@@ -1,13 +1,11 @@
 package com.aizuda.snailjob.client.core.plugin;
 
-import com.aizuda.snailjob.client.core.exception.SnailJobClientException;
+import com.aizuda.snailjob.client.core.exception.SnailRetryClientException;
 import com.aizuda.snailjob.client.core.intercepter.RetrySiteSnapshot;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.common.core.model.SnailJobHeaders;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
-import com.aizuda.snailjob.client.core.exception.SnailJobClientException;
-import com.aizuda.snailjob.client.core.intercepter.RetrySiteSnapshot;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
@@ -48,7 +46,7 @@ public class RequestHeaderPlugins {
                     // 重新刷新进入时间
                     RetrySiteSnapshot.setEntryMethodTime(System.currentTimeMillis());
                 } else {
-                    throw new SnailJobClientException("调用链超时, 不在继续调用后面请求");
+                    throw new SnailRetryClientException("调用链超时, 不在继续调用后面请求");
                 }
             }
 

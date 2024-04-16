@@ -10,9 +10,9 @@ import com.aizuda.snailjob.client.core.RetryArgSerializer;
 import com.aizuda.snailjob.client.common.cache.GroupVersionCache;
 import com.aizuda.snailjob.client.core.cache.RetryerInfoCache;
 import com.aizuda.snailjob.client.core.callback.RetryCompleteCallback;
-import com.aizuda.snailjob.client.core.exception.SnailJobClientException;
+import com.aizuda.snailjob.client.core.exception.SnailRetryClientException;
 import com.aizuda.snailjob.client.core.intercepter.RetrySiteSnapshot;
-import com.aizuda.snailjob.client.core.loader.SnailJobSpiLoader;
+import com.aizuda.snailjob.client.core.loader.SnailRetrySpiLoader;
 import com.aizuda.snailjob.client.core.log.RetryLogMeta;
 import com.aizuda.snailjob.client.core.retryer.RetryerInfo;
 import com.aizuda.snailjob.client.core.retryer.RetryerResultContext;
@@ -31,17 +31,6 @@ import com.aizuda.snailjob.common.core.model.Result;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.enums.LogTypeEnum;
 import com.aizuda.snailjob.server.model.dto.ConfigDTO;
-import com.aizuda.snailjob.client.common.log.support.SnailJobLogManager;
-import com.aizuda.snailjob.client.common.rpc.client.RequestMethod;
-import com.aizuda.snailjob.client.core.cache.RetryerInfoCache;
-import com.aizuda.snailjob.client.core.callback.RetryCompleteCallback;
-import com.aizuda.snailjob.client.core.exception.SnailJobClientException;
-import com.aizuda.snailjob.client.core.intercepter.RetrySiteSnapshot;
-import com.aizuda.snailjob.client.core.log.RetryLogMeta;
-import com.aizuda.snailjob.client.core.retryer.RetryerInfo;
-import com.aizuda.snailjob.client.core.retryer.RetryerResultContext;
-import com.aizuda.snailjob.client.core.serializer.JacksonSerializer;
-import com.aizuda.snailjob.client.core.strategy.RetryStrategy;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
@@ -64,7 +53,7 @@ import java.util.Set;
  * @date : 2022-03-09 16:33
  */
 @SnailEndPoint
-public class RetryEndPoint {
+public class SnailRetryEndPoint {
 
     @Autowired
     @Qualifier("remoteRetryStrategies")
@@ -86,11 +75,11 @@ public class RetryEndPoint {
         RetryerInfo retryerInfo = RetryerInfoCache.get(executeReqDto.getScene(), executeReqDto.getExecutorName());
         if (Objects.isNull(retryerInfo)) {
             SnailJobLog.REMOTE.error("场景:[{}]配置不存在, 请检查您的场景和执行器是否存在", executeReqDto.getScene());
-            throw new SnailJobClientException("场景:[{}]配置不存在, 请检查您的场景和执行器是否存在",
+            throw new SnailRetryClientException("场景:[{}]配置不存在, 请检查您的场景和执行器是否存在",
                 executeReqDto.getScene());
         }
 
-        RetryArgSerializer retryArgSerializer = SnailJobSpiLoader.loadRetryArgSerializer();
+        RetryArgSerializer retryArgSerializer = SnailRetrySpiLoader.loadRetryArgSerializer();
 
         Object[] deSerialize;
         try {
@@ -98,7 +87,7 @@ public class RetryEndPoint {
                 retryerInfo.getExecutor().getClass(), retryerInfo.getMethod());
         } catch (JsonProcessingException e) {
             SnailJobLog.REMOTE.error("参数解析异常", e);
-            throw new SnailJobClientException("参数解析异常", e);
+            throw new SnailRetryClientException("参数解析异常", e);
         }
 
         DispatchRetryResultDTO executeRespDto = new DispatchRetryResultDTO();
@@ -194,7 +183,7 @@ public class RetryEndPoint {
                 return new Result(0, "回调失败");
             }
 
-            RetryArgSerializer retryArgSerializer = SnailJobSpiLoader.loadRetryArgSerializer();
+            RetryArgSerializer retryArgSerializer = SnailRetrySpiLoader.loadRetryArgSerializer();
 
             deSerialize = (Object[]) retryArgSerializer.deSerialize(callbackDTO.getArgsStr(),
                 retryerInfo.getExecutor().getClass(), retryerInfo.getMethod());
@@ -237,10 +226,10 @@ public class RetryEndPoint {
                         Object[].class);
                     break;
                 default:
-                    throw new SnailJobClientException("回调状态异常");
+                    throw new SnailRetryClientException("回调状态异常");
             }
 
-            Assert.notNull(method, () -> new SnailJobClientException("no such method"));
+            Assert.notNull(method, () -> new SnailRetryClientException("no such method"));
             ReflectionUtils.invokeMethod(method, retryCompleteCallback, retryerInfo.getScene(),
                 retryerInfo.getExecutorClassName(), deSerialize);
             return new Result(1, "回调成功");
@@ -273,7 +262,7 @@ public class RetryEndPoint {
                     deSerialize);
                 break;
             default:
-                throw new SnailJobClientException("回调状态异常");
+                throw new SnailRetryClientException("回调状态异常");
         }
 
         return new Result(1, "回调成功");
@@ -302,7 +291,7 @@ public class RetryEndPoint {
 
         RetryerInfo retryerInfo = RetryerInfoCache.get(scene, executorName);
         Assert.notNull(retryerInfo,
-            () -> new SnailJobClientException("重试信息不存在 scene:[{}] executorName:[{}]", scene, executorName));
+            () -> new SnailRetryClientException("重试信息不存在 scene:[{}] executorName:[{}]", scene, executorName));
 
         Method executorMethod = retryerInfo.getMethod();
 
@@ -313,7 +302,7 @@ public class RetryEndPoint {
             deSerialize = (Object[]) retryArgSerializer.deSerialize(argsStr, retryerInfo.getExecutor().getClass(),
                 retryerInfo.getMethod());
         } catch (JsonProcessingException e) {
-            throw new SnailJobClientException("参数解析异常", e);
+            throw new SnailRetryClientException("参数解析异常", e);
         }
 
         String idempotentId;
@@ -326,7 +315,7 @@ public class RetryEndPoint {
             idempotentId = (String) ReflectionUtils.invokeMethod(method, generate, idempotentIdContext);
         } catch (Exception exception) {
             SnailJobLog.LOCAL.error("幂等id生成异常：{},{}", scene, argsStr, exception);
-            throw new SnailJobClientException("idempotentId生成异常：{},{}", scene, argsStr);
+            throw new SnailRetryClientException("idempotentId生成异常：{},{}", scene, argsStr);
         }
 
         return new Result<>(idempotentId);

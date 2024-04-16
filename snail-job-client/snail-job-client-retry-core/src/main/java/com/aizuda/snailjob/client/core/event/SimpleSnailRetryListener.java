@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
  * @date : 2022-03-04 16:55
  */
 @Slf4j
-public class SimpleSnailJobListener implements SnailJobListener {
+public class SimpleSnailRetryListener implements SnailJobListener {
 
     @Override
     public void beforeRetry(String sceneName, String executorClassName, Object[] params) {

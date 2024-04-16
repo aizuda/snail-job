@@ -2,14 +2,13 @@ package com.aizuda.snailjob.client.core.strategy;
 
 import com.aizuda.snailjob.client.core.RetryExecutor;
 import com.aizuda.snailjob.client.core.RetryExecutorParameter;
-import com.aizuda.snailjob.client.core.exception.SnailJobClientException;
+import com.aizuda.snailjob.client.core.exception.SnailRetryClientException;
 import com.aizuda.snailjob.client.core.intercepter.RetrySiteSnapshot;
 import com.aizuda.snailjob.client.core.retryer.RetryType;
 import com.aizuda.snailjob.client.core.retryer.RetryerInfo;
 import com.aizuda.snailjob.client.core.retryer.RetryerResultContext;
 import com.aizuda.snailjob.common.core.enums.RetryResultStatusEnum;
 import com.aizuda.snailjob.common.log.SnailJobLog;
-import com.aizuda.snailjob.client.core.intercepter.RetrySiteSnapshot;
 import com.github.rholder.retry.Attempt;
 import com.github.rholder.retry.RetryListener;
 import com.github.rholder.retry.StopStrategies;
@@ -128,7 +127,7 @@ public class LocalRetryStrategies extends AbstractRetryStrategies {
                 RetrySiteSnapshot.setStage(RetrySiteSnapshot.EnumStage.REMOTE.getStage());
                 return () -> null;
             default:
-                throw new SnailJobClientException("异常重试模式 [{}]", retryType.name());
+                throw new SnailRetryClientException("异常重试模式 [{}]", retryType.name());
         }
 
     }
@@ -164,7 +163,7 @@ public class LocalRetryStrategies extends AbstractRetryStrategies {
                                     SnailJobLog.LOCAL.error("[{}] 上报服务端执行失败，第[{}]次重试", retryerInfo.getScene(),  attempt.getAttemptNumber());
                                     break;
                                 default:
-                                    throw new SnailJobClientException("异常重试模式 [{}]", retryType.name());
+                                    throw new SnailRetryClientException("异常重试模式 [{}]", retryType.name());
 
                             }
                         } else {
@@ -178,7 +177,7 @@ public class LocalRetryStrategies extends AbstractRetryStrategies {
                                    SnailJobLog.LOCAL.info("[{}] 上报服务端执行成功.", retryerInfo.getScene());
                                     break;
                                 default:
-                                    throw new SnailJobClientException("异常重试模式 [{}]", retryType.name());
+                                    throw new SnailRetryClientException("异常重试模式 [{}]", retryType.name());
 
                             }
                         }

@@ -1,8 +1,8 @@
 package com.aizuda.snailjob.client.core.intercepter;
 
 import com.aizuda.snailjob.client.core.RetrySiteSnapshotContext;
-import com.aizuda.snailjob.client.core.exception.SnailJobClientException;
-import com.aizuda.snailjob.client.core.loader.SnailJobSpiLoader;
+import com.aizuda.snailjob.client.core.exception.SnailRetryClientException;
+import com.aizuda.snailjob.client.core.loader.SnailRetrySpiLoader;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.model.SnailJobHeaders;
 import lombok.AllArgsConstructor;
@@ -24,33 +24,33 @@ public class RetrySiteSnapshot {
     /**
      * 重试阶段，1-内存重试阶段，2-服务端重试阶段
      */
-    private static final RetrySiteSnapshotContext<Integer> RETRY_STAGE = SnailJobSpiLoader.loadRetrySiteSnapshotContext();
+    private static final RetrySiteSnapshotContext<Integer> RETRY_STAGE = SnailRetrySpiLoader.loadRetrySiteSnapshotContext();
 
     /**
      * 标记重试方法入口
      */
-    private static final RetrySiteSnapshotContext<Deque<MethodEntranceMeta>> RETRY_CLASS_METHOD_ENTRANCE = SnailJobSpiLoader.loadRetrySiteSnapshotContext();
+    private static final RetrySiteSnapshotContext<Deque<MethodEntranceMeta>> RETRY_CLASS_METHOD_ENTRANCE = SnailRetrySpiLoader.loadRetrySiteSnapshotContext();
 
     /**
      * 重试状态
      */
-    private static final RetrySiteSnapshotContext<Integer> RETRY_STATUS = SnailJobSpiLoader.loadRetrySiteSnapshotContext();
+    private static final RetrySiteSnapshotContext<Integer> RETRY_STATUS = SnailRetrySpiLoader.loadRetrySiteSnapshotContext();
 
     /**
      * 重试请求头
      */
-    private static final RetrySiteSnapshotContext<SnailJobHeaders> RETRY_HEADER = SnailJobSpiLoader.loadRetrySiteSnapshotContext();
+    private static final RetrySiteSnapshotContext<SnailJobHeaders> RETRY_HEADER = SnailRetrySpiLoader.loadRetrySiteSnapshotContext();
 
     /**
      * 状态码
      */
-    private static final RetrySiteSnapshotContext<String> RETRY_STATUS_CODE = SnailJobSpiLoader.loadRetrySiteSnapshotContext();
+    private static final RetrySiteSnapshotContext<String> RETRY_STATUS_CODE = SnailRetrySpiLoader.loadRetrySiteSnapshotContext();
 
     /**
      * 进入方法入口时间标记
      */
-    private static final RetrySiteSnapshotContext<Long> ENTRY_METHOD_TIME = SnailJobSpiLoader.loadRetrySiteSnapshotContext();
-    private static final RetrySiteSnapshotContext<Integer> ATTEMPT_NUMBER = SnailJobSpiLoader.loadRetrySiteSnapshotContext();
+    private static final RetrySiteSnapshotContext<Long> ENTRY_METHOD_TIME = SnailRetrySpiLoader.loadRetrySiteSnapshotContext();
+    private static final RetrySiteSnapshotContext<Integer> ATTEMPT_NUMBER = SnailRetrySpiLoader.loadRetrySiteSnapshotContext();
 
     public static Integer getAttemptNumber() {
         return ATTEMPT_NUMBER.get();
@@ -256,7 +256,7 @@ public class RetrySiteSnapshot {
                 }
             }
 
-            throw new SnailJobClientException("unsupported stage");
+            throw new SnailRetryClientException("unsupported stage");
         }
 
     }

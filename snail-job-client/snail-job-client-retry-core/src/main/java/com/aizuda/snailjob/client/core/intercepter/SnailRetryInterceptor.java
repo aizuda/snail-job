@@ -7,7 +7,6 @@ import com.aizuda.snailjob.client.core.annotation.Propagation;
 import com.aizuda.snailjob.client.core.annotation.Retryable;
 import com.aizuda.snailjob.client.common.cache.GroupVersionCache;
 import com.aizuda.snailjob.client.core.cache.RetryerInfoCache;
-import com.aizuda.snailjob.client.core.intercepter.RetrySiteSnapshot.EnumStage;
 import com.aizuda.snailjob.client.core.retryer.RetryerInfo;
 import com.aizuda.snailjob.client.core.retryer.RetryerResultContext;
 import com.aizuda.snailjob.client.core.strategy.RetryStrategy;
@@ -45,7 +44,7 @@ import java.util.UUID;
  * @date 2023-08-23
  */
 @Slf4j
-public class SnailJobInterceptor implements MethodInterceptor, AfterAdvice, Serializable, Ordered {
+public class SnailRetryInterceptor implements MethodInterceptor, AfterAdvice, Serializable, Ordered {
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private static String retryErrorMoreThresholdTextMessageFormatter =
@@ -59,7 +58,7 @@ public class SnailJobInterceptor implements MethodInterceptor, AfterAdvice, Seri
     private final StandardEnvironment standardEnvironment;
     private final RetryStrategy retryStrategy;
 
-    public SnailJobInterceptor(StandardEnvironment standardEnvironment,
+    public SnailRetryInterceptor(StandardEnvironment standardEnvironment,
                                RetryStrategy localRetryStrategies) {
         this.standardEnvironment = standardEnvironment;
         this.retryStrategy = localRetryStrategies;

@@ -8,8 +8,7 @@ import com.aizuda.snailjob.client.core.RetryExecutorParameter;
 import com.aizuda.snailjob.client.core.event.SnailJobListener;
 import com.aizuda.snailjob.client.core.executor.GuavaRetryExecutor;
 import com.aizuda.snailjob.client.core.intercepter.RetrySiteSnapshot;
-import com.aizuda.snailjob.client.core.intercepter.RetrySiteSnapshot.EnumStatus;
-import com.aizuda.snailjob.client.core.loader.SnailJobSpiLoader;
+import com.aizuda.snailjob.client.core.loader.SnailRetrySpiLoader;
 import com.aizuda.snailjob.client.core.retryer.RetryerInfo;
 import com.aizuda.snailjob.client.core.retryer.RetryerResultContext;
 import com.aizuda.snailjob.common.core.alarm.Alarm;
@@ -20,10 +19,6 @@ import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.common.core.util.EnvironmentUtils;
 import com.aizuda.snailjob.common.core.util.NetUtil;
 import com.aizuda.snailjob.server.model.dto.ConfigDTO;
-import com.aizuda.snailjob.client.core.executor.GuavaRetryExecutor;
-import com.aizuda.snailjob.client.core.intercepter.RetrySiteSnapshot;
-import com.aizuda.snailjob.client.core.retryer.RetryerInfo;
-import com.aizuda.snailjob.client.core.retryer.RetryerResultContext;
 import com.github.rholder.retry.Retryer;
 import com.github.rholder.retry.StopStrategy;
 import com.github.rholder.retry.WaitStrategy;
@@ -53,7 +48,7 @@ public abstract class AbstractRetryStrategies implements RetryStrategy {
                     "> 异常:{}  \n"
             ;
 
-    private final List<SnailJobListener> snailJobListeners = SnailJobSpiLoader.loadSnailJobListener();
+    private final List<SnailJobListener> snailJobListeners = SnailRetrySpiLoader.loadSnailJobListener();
 
     @Autowired
     private SnailJobAlarmFactory snailJobAlarmFactory;

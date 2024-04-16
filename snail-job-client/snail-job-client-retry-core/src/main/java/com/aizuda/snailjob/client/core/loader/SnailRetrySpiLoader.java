@@ -5,15 +5,10 @@ import com.aizuda.snailjob.client.core.expression.ExpressionInvocationHandler;
 import com.aizuda.snailjob.common.core.expression.ExpressionEngine;
 import com.aizuda.snailjob.client.core.RetryArgSerializer;
 import com.aizuda.snailjob.client.core.event.SnailJobListener;
-import com.aizuda.snailjob.client.core.event.SimpleSnailJobListener;
+import com.aizuda.snailjob.client.core.event.SimpleSnailRetryListener;
 import com.aizuda.snailjob.client.core.RetrySiteSnapshotContext;
 import com.aizuda.snailjob.common.core.expression.ExpressionFactory;
 import com.aizuda.snailjob.common.core.expression.strategy.SpELExpressionEngine;
-import com.aizuda.snailjob.client.core.intercepter.ThreadLockRetrySiteSnapshotContext;
-import com.aizuda.snailjob.client.core.serializer.JacksonSerializer;
-import com.aizuda.snailjob.client.core.event.SimpleSnailJobListener;
-import com.aizuda.snailjob.client.core.event.SnailJobListener;
-import com.aizuda.snailjob.client.core.expression.ExpressionInvocationHandler;
 import com.aizuda.snailjob.client.core.intercepter.ThreadLockRetrySiteSnapshotContext;
 import com.aizuda.snailjob.client.core.serializer.JacksonSerializer;
 import org.springframework.util.CollectionUtils;
@@ -29,9 +24,9 @@ import java.util.Optional;
  * @date : 2023-08-07 18:05
  * @since 2.2.0
  */
-public class SnailJobSpiLoader {
+public class SnailRetrySpiLoader {
 
-    private SnailJobSpiLoader() {}
+    private SnailRetrySpiLoader() {}
 
     /**
      * 加载参数序列化SPI类
@@ -47,12 +42,12 @@ public class SnailJobSpiLoader {
      * 加载重试监听器SPI类
      * 执行顺序按照文件中定义的实现类的先后顺序
      *
-     * @return {@link SimpleSnailJobListener} 默认序列化类为SimpleSnailJobListener
+     * @return {@link SimpleSnailRetryListener} 默认序列化类为SimpleSnailJobListener
      */
     public static List<SnailJobListener> loadSnailJobListener() {
         List<SnailJobListener> snailJobListeners = ServiceLoaderUtil.loadList(SnailJobListener.class);
         if (CollectionUtils.isEmpty(snailJobListeners)) {
-            return Collections.singletonList(new SimpleSnailJobListener());
+            return Collections.singletonList(new SimpleSnailRetryListener());
         }
 
         return snailJobListeners;

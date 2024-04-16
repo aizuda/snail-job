@@ -3,9 +3,8 @@ package com.aizuda.snailjob.client.core.executor;
 import cn.hutool.core.lang.Assert;
 import com.aizuda.snailjob.client.core.RetryExecutorParameter;
 import com.aizuda.snailjob.client.core.cache.RetryerInfoCache;
-import com.aizuda.snailjob.client.core.exception.SnailJobClientException;
+import com.aizuda.snailjob.client.core.exception.SnailRetryClientException;
 import com.aizuda.snailjob.common.log.SnailJobLog;
-import com.aizuda.snailjob.client.core.exception.SnailJobClientException;
 import com.github.rholder.retry.RetryException;
 import com.github.rholder.retry.RetryListener;
 import com.github.rholder.retry.Retryer;
@@ -29,7 +28,7 @@ public class GuavaRetryExecutor extends AbstractRetryExecutor<WaitStrategy, Stop
 
     public GuavaRetryExecutor(String sceneName, String executorClassName) {
         retryerInfo = RetryerInfoCache.get(sceneName, executorClassName);
-        Assert.notNull(retryerInfo, () -> new SnailJobClientException("retryerInfo is null sceneName:[{}] executorClassName:[{}]", sceneName, executorClassName));
+        Assert.notNull(retryerInfo, () -> new SnailRetryClientException("retryerInfo is null sceneName:[{}] executorClassName:[{}]", sceneName, executorClassName));
     }
 
     public GuavaRetryExecutor() {
