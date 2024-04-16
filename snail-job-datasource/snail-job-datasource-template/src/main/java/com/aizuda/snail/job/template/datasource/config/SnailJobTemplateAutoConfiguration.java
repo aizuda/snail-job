@@ -32,9 +32,15 @@ import java.util.Optional;
  * @date : 2023-08-04 12:37
  */
 @Configuration
-@ComponentScan("com.aizuda.easy.retry.template.datasource.**")
-@MapperScan(value = "com.aizuda.easy.retry.template.datasource.persistence.mapper", sqlSessionTemplateRef  = "sqlSessionTemplate")
-public class EasyRetryTemplateAutoConfiguration {
+@ComponentScan("com.aizuda.snail.job.template.datasource.**")
+@MapperScan(value = "com.aizuda.snail.job.template.datasource.persistence.mapper", sqlSessionTemplateRef  = "sqlSessionTemplate")
+public class SnailJobTemplateAutoConfiguration {
+
+    /**
+     * 采用后缀分区的数据库表清单
+     */
+    private static final  List<String> TABLES_WITH_PARTITION = Arrays.asList("sj_retry_task", "sj_retry_dead_letter");
+
     @Bean("sqlSessionFactory")
     public SqlSessionFactory sqlSessionFactory(DataSource dataSource, Environment environment, MybatisPlusInterceptor mybatisPlusInterceptor, MybatisPlusProperties mybatisPlusProperties) throws Exception {
         MybatisSqlSessionFactoryBean factoryBean = new MybatisSqlSessionFactoryBean();
@@ -59,7 +65,6 @@ public class EasyRetryTemplateAutoConfiguration {
         return new SqlSessionTemplate(sqlSessionFactory);
     }
 
-    private static final  List<String> TABLES = Arrays.asList("retry_task", "retry_dead_letter");
 
     @Bean
     public MybatisPlusInterceptor mybatisPlusInterceptor(Environment environment) {
@@ -75,7 +80,7 @@ public class EasyRetryTemplateAutoConfiguration {
     public DynamicTableNameInnerInterceptor dynamicTableNameInnerInterceptor(String tablePrefix) {
         DynamicTableNameInnerInterceptor dynamicTableNameInnerInterceptor = new DynamicTableNameInnerInterceptor();
         dynamicTableNameInnerInterceptor.setTableNameHandler((sql, tableName) -> {
-            if (TABLES.contains(tableName)) {
+            if (TABLES_WITH_PARTITION.contains(tableName)) {
                 Integer partition = RequestDataHelper.getPartition();
                 RequestDataHelper.remove();
                 tableName = tableName + StrUtil.UNDERLINE + partition;

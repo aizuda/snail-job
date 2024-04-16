@@ -9,9 +9,17 @@ import lombok.Data;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+/**
+ * 组配置
+ *
+ * @author opensnail
+ * @since 2023-01-14
+ */
 @Data
-@TableName("group_config")
+@TableName("sj_group_config")
 public class GroupConfig implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
@@ -26,7 +34,7 @@ public class GroupConfig implements Serializable {
 
     private Integer idGeneratorMode;
 
-    @TableField(value = "version", update= "%s+1")
+    @TableField(value = "version", update = "%s+1")
     private Integer version;
 
     private Integer initScene;
@@ -40,8 +48,5 @@ public class GroupConfig implements Serializable {
     private LocalDateTime createDt;
 
     private LocalDateTime updateDt;
-
-    private static final long serialVersionUID = 1L;
-
 
 }

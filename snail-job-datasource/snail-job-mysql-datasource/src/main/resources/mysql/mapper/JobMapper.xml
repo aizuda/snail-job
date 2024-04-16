@@ -27,7 +27,7 @@
     </resultMap>
 
     <update id="updateBatchNextTriggerAtById" parameterType="java.util.List">
-        UPDATE job rt,
+        UPDATE sj_job rt,
             (
                 <foreach collection="list" item="item" index="index" separator="UNION ALL">
                     SELECT

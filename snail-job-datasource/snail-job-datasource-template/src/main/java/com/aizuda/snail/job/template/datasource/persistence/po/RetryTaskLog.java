@@ -8,9 +8,17 @@ import lombok.Data;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+/**
+ * 重试任务日志
+ *
+ * @author opensnail
+ * @since 2023-01-14
+ */
 @Data
-@TableName("retry_task_log")
+@TableName("sj_retry_task_log")
 public class RetryTaskLog implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
@@ -40,7 +48,5 @@ public class RetryTaskLog implements Serializable {
     private LocalDateTime createDt;
 
     private LocalDateTime updateDt;
-
-    private static final long serialVersionUID = 1L;
 
 }

@@ -3,24 +3,19 @@ package com.aizuda.snail.job.template.datasource.persistence.po;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
-import lombok.Getter;
-import lombok.Setter;
-
 /**
- * <p>
  * 调度日志
- * </p>
  *
  * @author opensnail
  * @since 2023-09-24
  */
-@Getter
-@Setter
-@TableName("job_log_message")
+@Data
+@TableName("sj_job_log_message")
 public class JobLogMessage implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -57,11 +52,6 @@ public class JobLogMessage implements Serializable {
     private Long taskId;
 
     /**
-     * 创建时间
-     */
-    private LocalDateTime createDt;
-
-    /**
      * 日志数量
      */
     private Integer logNum;
@@ -75,5 +65,10 @@ public class JobLogMessage implements Serializable {
      * 真实上报时间
      */
     private Long realTime;
+
+    /**
+     * 创建时间
+     */
+    private LocalDateTime createDt;
 
 }

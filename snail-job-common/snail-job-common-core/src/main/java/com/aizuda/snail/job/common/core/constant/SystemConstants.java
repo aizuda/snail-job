@@ -135,9 +135,9 @@ public interface SystemConstants {
     Integer WORKFLOW_TRIGGER_TYPE = 99;
 
     /**
-     * Easy Retry 认证Token
+     * Snail Job 认证Token
      */
-    String EASY_RETRY_AUTH_TOKEN= "ER-TOKEN";
+    String SNAIL_JOB_AUTH_TOKEN = "SJ-TOKEN";
 
     /**
      * 日志类型字段

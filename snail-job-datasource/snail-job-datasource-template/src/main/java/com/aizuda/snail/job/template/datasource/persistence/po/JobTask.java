@@ -1,24 +1,22 @@
 package com.aizuda.snail.job.template.datasource.persistence.po;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
-import lombok.Getter;
-import lombok.Setter;
-
 /**
- * <p>
  * 任务实例
- * </p>
  *
  * @author opensnail
  * @since 2023-09-24
  */
-@Getter
-@Setter
-@TableName("job_task")
+@Data
+@TableName("sj_job_task")
 public class JobTask implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -62,7 +60,7 @@ public class JobTask implements Serializable {
     /**
      * 重试次数
      */
-    @TableField(value = "retry_count", update= "%s+1")
+    @TableField(value = "retry_count", update = "%s+1")
     private Integer retryCount;
 
     /**
@@ -99,6 +97,5 @@ public class JobTask implements Serializable {
      * 修改时间
      */
     private LocalDateTime updateDt;
-
 
 }

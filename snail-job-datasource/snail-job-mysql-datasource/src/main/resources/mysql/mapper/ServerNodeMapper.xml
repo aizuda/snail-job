@@ -21,7 +21,7 @@
     </sql>
 
     <insert id="batchInsert" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO server_node (namespace_id, group_name, host_id, host_ip, host_port,
+        INSERT INTO sj_server_node (namespace_id, group_name, host_id, host_ip, host_port,
                                  expire_at, node_type, ext_attrs, create_dt)
         VALUES
             <foreach collection="records" item="item" index="index" separator=",">
@@ -40,7 +40,7 @@
     </insert>
 
     <update id="batchUpdateExpireAt" parameterType="java.util.List">
-        UPDATE server_node rt,
+        UPDATE sj_server_node rt,
                (
                     <foreach collection="list" item="item" index="index" separator="UNION ALL">
                         SELECT
@@ -58,7 +58,7 @@
         resultType="com.aizuda.snail.job.template.datasource.persistence.dataobject.ActivePodQuantityResponseDO">
         SELECT node_type AS nodeType,
                COUNT(*)  AS total
-          FROM server_node
+          FROM sj_server_node
         ${ew.customSqlSegment}
     </select>
 </mapper>

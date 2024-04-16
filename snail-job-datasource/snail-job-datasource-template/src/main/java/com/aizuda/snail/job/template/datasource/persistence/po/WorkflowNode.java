@@ -3,22 +3,19 @@ package com.aizuda.snail.job.template.datasource.persistence.po;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import lombok.Getter;
-import lombok.Setter;
 
 /**
- * <p>
  * 工作流节点
- * </p>
  *
  * @author xiaowoniu
  * @since 2023-12-12
  */
-@Getter
-@Setter
-@TableName("workflow_node")
+@Data
+@TableName("sj_workflow_node")
 public class WorkflowNode implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -85,6 +82,16 @@ public class WorkflowNode implements Serializable {
     private Integer version;
 
     /**
+     * 扩展字段
+     */
+    private String extAttrs;
+
+    /**
+     * 逻辑删除 1、删除
+     */
+    private Integer deleted;
+
+    /**
      * 创建时间
      */
     private LocalDateTime createDt;
@@ -94,13 +101,4 @@ public class WorkflowNode implements Serializable {
      */
     private LocalDateTime updateDt;
 
-    /**
-     * 逻辑删除 1、删除
-     */
-    private Integer deleted;
-
-    /**
-     * 扩展字段
-     */
-    private String extAttrs;
 }

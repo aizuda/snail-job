@@ -9,13 +9,17 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
+ * 场景配置
+ *
  * @author zuojunlin
  * @date 2023-11-19 22:05:25
  * @since 2.5.0
  */
 @Data
-@TableName("scene_config")
+@TableName("sj_scene_config")
 public class SceneConfig implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
@@ -46,8 +50,5 @@ public class SceneConfig implements Serializable {
     private LocalDateTime createDt;
 
     private LocalDateTime updateDt;
-
-    private static final long serialVersionUID = 1L;
-
 
 }

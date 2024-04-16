@@ -7,30 +7,30 @@ spring:
   profiles:
     active: dev
   datasource:
-    name: easy_retry
+    name: snail_job
     ## mysql
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/easy_retry?useSSL=false&characterEncoding=utf8&useUnicode=true
+    url: jdbc:mysql://localhost:3306/snail_job?useSSL=false&characterEncoding=utf8&useUnicode=true
     username: root
     password: root
     ## postgres
 #    driver-class-name: org.postgresql.Driver
-#    url: jdbc:postgresql://localhost:5432/easy_retry?useUnicode=true&characterEncoding=utf8&useSSL=true&autoReconnect=true&reWriteBatchedInserts=true
+#    url: jdbc:postgresql://localhost:5432/snail_job?useUnicode=true&characterEncoding=utf8&useSSL=true&autoReconnect=true&reWriteBatchedInserts=true
 #    username: root
 #    password: root
     ## Oracle
 #    driver-class-name: oracle.jdbc.OracleDriver
 #    url: jdbc:oracle:thin:@//localhost:1521/XEPDB1
-#    username: easy_retry
-#    password: EasyRetry
+#    username: snail_job
+#    password: SnailJob
     ## SQL Server 注意:由于system_user为SQLServer系统函数，因此SQLServer需要启用前缀配置，请配置mybatis-plus.global-config.db-config.table-prefix: er_
 #    driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
-#    url: jdbc:sqlserver://localhost:1433;DatabaseName=easy_retry;SelectMethod=cursor;encrypt=false;rewriteBatchedStatements=true
+#    url: jdbc:sqlserver://localhost:1433;DatabaseName=snail_job;SelectMethod=cursor;encrypt=false;rewriteBatchedStatements=true
 #    username: SA
-#    password: EasyRetry@24
+#    password: SnailJob@24
       ## mariadb
 #    driver-class-name: org.mariadb.jdbc.Driver
-#    url: jdbc:mariadb://localhost:3308/easy_retry?useSSL=false&characterEncoding=utf8&useUnicode=true
+#    url: jdbc:mariadb://localhost:3308/snail_job?useSSL=false&characterEncoding=utf8&useUnicode=true
 #    username: root
 #    password: root
     type: com.zaxxer.hikari.HikariDataSource
@@ -40,14 +40,14 @@ spring:
       maximum-pool-size: 20
       auto-commit: true
       idle-timeout: 30000
-      pool-name: easy_retry
+      pool-name: snail_job
       max-lifetime: 1800000
   web:
     resources:
       static-locations: classpath:admin/
 
 mybatis-plus:
-  typeAliasesPackage: com.aizuda.easy.retry.template.datasource.persistence.po
+  typeAliasesPackage: com.aizuda.snail.job.template.datasource.persistence.po
   global-config:
     db-config:
       where-strategy: NOT_EMPTY
@@ -63,7 +63,7 @@ logging:
     config: classpath:logback-boot.xml
 #    level:
 #    ## 方便调试 SQL
-#        com.aizuda.easy.retry.template.datasource.persistence.mapper: debug
+#        com.aizuda.snail.job.template.datasource.persistence.mapper: debug
 
 snail-job:
   retry-pull-page-size: 1000 # 拉取重试数据的每批次的大小

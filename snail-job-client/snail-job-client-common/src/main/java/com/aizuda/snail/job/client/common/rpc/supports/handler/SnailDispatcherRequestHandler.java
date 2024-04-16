@@ -53,7 +53,7 @@ public class SnailDispatcherRequestHandler {
         Result resultObj = null;
         Exception e = null;
         try {
-            String easyRetryAuth = request.getHeaders().getAsString(SystemConstants.EASY_RETRY_AUTH_TOKEN);
+            String easyRetryAuth = request.getHeaders().getAsString(SystemConstants.SNAIL_JOB_AUTH_TOKEN);
             String configToken = Optional.ofNullable(snailJobProperties.getToken()).orElse(SystemConstants.DEFAULT_TOKEN);
             if (!configToken.equals(easyRetryAuth)) {
                 throw new EasyRetryClientException("认证失败.【请检查配置的Token是否正确】");

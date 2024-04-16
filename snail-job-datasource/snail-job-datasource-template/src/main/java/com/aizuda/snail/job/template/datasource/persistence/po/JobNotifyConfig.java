@@ -8,9 +8,17 @@ import lombok.Data;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+/**
+ * 任务通知配置
+ *
+ * @author opensnail
+ * @since 2023-12-03
+ */
 @Data
-@TableName("job_notify_config")
+@TableName("sj_job_notify_config")
 public class JobNotifyConfig implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
@@ -40,8 +48,5 @@ public class JobNotifyConfig implements Serializable {
     private LocalDateTime createDt;
 
     private LocalDateTime updateDt;
-
-    private static final long serialVersionUID = 1L;
-
 
 }

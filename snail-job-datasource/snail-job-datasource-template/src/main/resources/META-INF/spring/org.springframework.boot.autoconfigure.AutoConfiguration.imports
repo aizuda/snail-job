@@ -1,1 +1,1 @@
-com.aizuda.snail.job.template.datasource.config.EasyRetryTemplateAutoConfiguration
+com.aizuda.snail.job.template.datasource.config.SnailJobTemplateAutoConfiguration

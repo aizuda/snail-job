@@ -2,25 +2,20 @@ package com.aizuda.snail.job.template.datasource.persistence.po;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
-import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Getter;
-import lombok.Setter;
-
 /**
- * <p>
  * 任务信息
- * </p>
  *
  * @author opensnail
  * @since 2023-09-24
  */
-@Getter
-@Setter
-@TableName("job")
+@Data
+@TableName("sj_job")
 public class Job implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -142,6 +137,11 @@ public class Job implements Serializable {
     private String description;
 
     /**
+     * 逻辑删除 1、删除
+     */
+    private Integer deleted;
+
+    /**
      * 创建时间
      */
     private LocalDateTime createDt;
@@ -150,11 +150,5 @@ public class Job implements Serializable {
      * 修改时间
      */
     private LocalDateTime updateDt;
-
-    /**
-     * 逻辑删除 1、删除
-     */
-    private Integer deleted;
-
 
 }

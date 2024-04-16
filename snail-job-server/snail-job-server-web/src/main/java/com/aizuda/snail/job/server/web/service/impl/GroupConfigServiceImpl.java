@@ -344,7 +344,6 @@ public class GroupConfigServiceImpl implements GroupConfigService {
 
     @Override
     public List<Integer> getTablePartitionList() {
-
         DataSource dataSource = jdbcTemplate.getDataSource();
         Connection connection = null;
         try {
@@ -352,8 +351,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
             String catalog = connection.getCatalog();
             String schema = connection.getSchema();
 
-            String tablePrefix = Optional.ofNullable(mybatisPlusProperties.getGlobalConfig().getDbConfig().getTablePrefix()).orElse(StrUtil.EMPTY);
-            String tableNamePattern = MessageFormat.format("{0}retry_task_%", tablePrefix);
+            String tableNamePattern = "sj_retry_task_%";
             DbTypeEnum dbType = DbUtils.getDbType();
             if (DbTypeEnum.ORACLE.getDb().equals(dbType.getDb())) {
                 tableNamePattern = tableNamePattern.toUpperCase();

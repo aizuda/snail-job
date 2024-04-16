@@ -3,23 +3,19 @@ package com.aizuda.snail.job.template.datasource.persistence.po;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * <p>
  * 重试日志异常信息记录表
- * </p>
  *
  * @author opensnail
  * @since 2023-06-16
  */
-@Getter
-@Setter
-@TableName("retry_task_log_message")
+@Data
+@TableName("sj_retry_task_log_message")
 public class RetryTaskLogMessage implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -46,11 +42,6 @@ public class RetryTaskLogMessage implements Serializable {
     private String uniqueId;
 
     /**
-     * 创建时间
-     */
-    private LocalDateTime createDt;
-
-    /**
      * 异常信息
      */
     private String message;
@@ -60,9 +51,14 @@ public class RetryTaskLogMessage implements Serializable {
      */
     private Integer logNum;
 
-
     /**
      * 真实上报时间
      */
     private Long realTime;
+
+    /**
+     * 创建时间
+     */
+    private LocalDateTime createDt;
+
 }

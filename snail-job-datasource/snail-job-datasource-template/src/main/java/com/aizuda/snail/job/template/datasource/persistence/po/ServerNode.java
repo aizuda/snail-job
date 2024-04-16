@@ -8,9 +8,17 @@ import lombok.Data;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+/**
+ * 服务器节点
+ *
+ * @author opensnail
+ * @since 2023-01-14
+ */
 @Data
-@TableName("server_node")
+@TableName("sj_server_node")
 public class ServerNode implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
@@ -34,7 +42,5 @@ public class ServerNode implements Serializable {
     private LocalDateTime createDt;
 
     private LocalDateTime updateDt;
-
-    private static final long serialVersionUID = 1L;
 
 }

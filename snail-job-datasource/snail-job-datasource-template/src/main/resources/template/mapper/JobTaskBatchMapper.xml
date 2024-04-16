@@ -22,8 +22,8 @@
                b.task_type,
                b.block_strategy,
                b.trigger_type
-          FROM job_task_batch a
-                JOIN job b ON a.job_id = b.id
+          FROM sj_job_task_batch a
+                JOIN sj_job b ON a.job_id = b.id
         ${ew.customSqlSegment}
     </select>
 
@@ -39,7 +39,7 @@
                SUM(CASE WHEN (task_batch_status = 6) THEN 1 ELSE 0 END) AS cancelNum,
                SUM(CASE WHEN (task_batch_status = 5) THEN 1 ELSE 0 END) AS stopNum,
                SUM(CASE WHEN (task_batch_status = 4) THEN 1 ELSE 0 END) AS failNum
-        FROM job_task_batch
+        FROM sj_job_task_batch
         ${ew.customSqlSegment}
     </select>
 
@@ -55,7 +55,7 @@
                SUM(CASE WHEN (task_batch_status = 6) THEN 1 ELSE 0 END) AS cancelNum,
                SUM(CASE WHEN (task_batch_status = 5) THEN 1 ELSE 0 END) AS stopNum,
                SUM(CASE WHEN (task_batch_status = 4) THEN 1 ELSE 0 END) AS failNum
-        FROM workflow_task_batch
+        FROM sj_workflow_task_batch
         ${ew.customSqlSegment}
     </select>
 
@@ -68,8 +68,8 @@
                b.trigger_type,
                b.executor_info,
                b.args_str
-          FROM job_task_batch a
-                JOIN job b ON a.job_id = b.id
+          FROM sj_job_task_batch a
+                JOIN sj_job b ON a.job_id = b.id
         ${ew.customSqlSegment}
     </select>
 </mapper>

@@ -1,1 +1,1 @@
-sqlplus -s easy_retry/EasyRetry@//localhost/XEPDB1 @/tmp/schema.sql
+sqlplus -s snail_job/SnailJob@//localhost/XEPDB1 @/tmp/schema.sql

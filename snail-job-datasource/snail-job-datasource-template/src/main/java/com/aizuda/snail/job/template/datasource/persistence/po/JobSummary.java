@@ -3,20 +3,20 @@ package com.aizuda.snail.job.template.datasource.persistence.po;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
+ * 任务统计
+ *
  * @author zhengweilin
  * @version 2.6.0
  * @date 2023/11/22
  */
-@Getter
-@Setter
-@TableName("job_summary")
+@Data
+@TableName("sj_job_summary")
 public class JobSummary implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -83,6 +83,11 @@ public class JobSummary implements Serializable {
     private String cancelReason;
 
     /**
+     * 任务类型 3、JOB任务 4、WORKFLOW任务
+     */
+    private Integer systemTaskType;
+
+    /**
      * 创建时间
      */
     private LocalDateTime createDt;
@@ -92,8 +97,4 @@ public class JobSummary implements Serializable {
      */
     private LocalDateTime updateDt;
 
-    /**
-     * 任务类型 3、JOB任务 4、WORKFLOW任务
-     */
-    private Integer systemTaskType;
 }

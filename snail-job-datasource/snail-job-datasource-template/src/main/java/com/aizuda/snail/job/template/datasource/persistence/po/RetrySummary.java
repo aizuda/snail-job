@@ -3,8 +3,7 @@ package com.aizuda.snail.job.template.datasource.persistence.po;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -14,9 +13,8 @@ import java.time.LocalDateTime;
  * @version 2.6.0
  * @date 2023/11/28
  */
-@Getter
-@Setter
-@TableName("retry_summary")
+@Data
+@TableName("sj_retry_summary")
 public class RetrySummary implements Serializable {
 
     private static final long serialVersionUID = 1L;

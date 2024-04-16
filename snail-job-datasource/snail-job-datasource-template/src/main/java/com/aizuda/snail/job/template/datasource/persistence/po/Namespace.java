@@ -3,22 +3,19 @@ package com.aizuda.snail.job.template.datasource.persistence.po;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import lombok.Getter;
-import lombok.Setter;
 
 /**
- * <p>
  * 命名空间
- * </p>
  *
  * @author xiaowoniu
  * @since 2023-11-21
  */
-@Getter
-@Setter
-@TableName("namespace")
+@Data
+@TableName("sj_namespace")
 public class Namespace implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -40,6 +37,11 @@ public class Namespace implements Serializable {
     private String uniqueId;
 
     /**
+     * 逻辑删除 1、删除
+     */
+    private Integer deleted;
+
+    /**
      * 创建时间
      */
     private LocalDateTime createDt;
@@ -49,8 +51,4 @@ public class Namespace implements Serializable {
      */
     private LocalDateTime updateDt;
 
-    /**
-     * 逻辑删除 1、删除
-     */
-    private Integer deleted;
 }

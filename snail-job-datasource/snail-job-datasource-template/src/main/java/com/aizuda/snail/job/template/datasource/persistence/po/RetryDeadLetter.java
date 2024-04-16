@@ -9,8 +9,10 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Data
-@TableName("retry_dead_letter")
+@TableName("sj_retry_dead_letter")
 public class RetryDeadLetter implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
@@ -36,7 +38,5 @@ public class RetryDeadLetter implements Serializable {
     private Integer taskType;
 
     private LocalDateTime createDt;
-
-    private static final long serialVersionUID = 1L;
 
 }

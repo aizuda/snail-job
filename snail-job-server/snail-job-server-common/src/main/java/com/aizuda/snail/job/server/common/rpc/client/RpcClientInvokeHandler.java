@@ -140,7 +140,7 @@ public class RpcClientInvokeHandler implements InvocationHandler {
 
             HttpHeaders requestHeaders = parasResult.requestHeaders;
             // 统一设置Token
-            requestHeaders.set(SystemConstants.EASY_RETRY_AUTH_TOKEN, CacheToken.get(groupName, namespaceId));
+            requestHeaders.set(SystemConstants.SNAIL_JOB_AUTH_TOKEN, CacheToken.get(groupName, namespaceId));
 
             EasyRetryRequest easyRetryRequest = new EasyRetryRequest(args);
             Result result = retryer.call(() -> {

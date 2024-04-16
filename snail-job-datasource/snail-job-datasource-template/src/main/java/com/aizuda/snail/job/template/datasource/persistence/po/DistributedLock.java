@@ -3,23 +3,19 @@ package com.aizuda.snail.job.template.datasource.persistence.po;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * <p>
  * 锁定表
- * </p>
  *
  * @author opensnail
  * @since 2023-07-20
  */
-@Getter
-@Setter
-@TableName("distributed_lock")
+@Data
+@TableName("sj_distributed_lock")
 public class DistributedLock implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -59,6 +55,5 @@ public class DistributedLock implements Serializable {
      * 修改时间
      */
     private LocalDateTime updateDt;
-
 
 }

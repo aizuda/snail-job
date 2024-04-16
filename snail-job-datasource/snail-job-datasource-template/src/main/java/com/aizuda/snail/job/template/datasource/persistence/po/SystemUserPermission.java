@@ -14,8 +14,8 @@ import java.time.LocalDateTime;
  * @author opensnail
  * @since 2022-03-05
  */
-@TableName("system_user_permission")
 @Data
+@TableName("sj_system_user_permission")
 public class SystemUserPermission implements Serializable {
 
     private static final long serialVersionUID = 1L;

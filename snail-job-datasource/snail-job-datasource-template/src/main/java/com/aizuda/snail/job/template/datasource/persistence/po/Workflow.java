@@ -4,23 +4,21 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import lombok.Getter;
-import lombok.Setter;
 
 /**
- * <p>
- * 工作流
+ * * 工作流
  * </p>
  *
  * @author : xiaowoniu
  * @date : 2023-12-12
  * @since : 2.6.0
  */
-@Getter
-@Setter
-@TableName("workflow")
+@Data
+@TableName("sj_workflow")
 public class Workflow implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -94,8 +92,18 @@ public class Workflow implements Serializable {
     /**
      * 版本号
      */
-    @TableField(value = "version", update= "%s+1")
+    @TableField(value = "version", update = "%s+1")
     private Integer version;
+
+    /**
+     * 扩展字段
+     */
+    private String extAttrs;
+
+    /**
+     * 逻辑删除 1、删除
+     */
+    private Integer deleted;
 
     /**
      * 创建时间
@@ -107,13 +115,4 @@ public class Workflow implements Serializable {
      */
     private LocalDateTime updateDt;
 
-    /**
-     * 逻辑删除 1、删除
-     */
-    private Integer deleted;
-
-    /**
-     * 扩展字段
-     */
-    private String extAttrs;
 }

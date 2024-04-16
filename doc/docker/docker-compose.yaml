@@ -16,13 +16,13 @@ services:
         environment:
             TZ: Asia/Shanghai
             MYSQL_ROOT_PASSWORD: root
-            MYSQL_DATABASE: easy_retry
+            MYSQL_DATABASE: snail_job
         ports:
             - "3306:3306"
         volumes:
             - mysql:/var/lib/mysql/
             # 注入初始化脚本
-            - ../sql/easy_retry_mysql.sql:/docker-entrypoint-initdb.d/init.sql:ro
+            - ../sql/snail_job_mysql.sql:/docker-entrypoint-initdb.d/init.sql:ro
         command:
             --default-authentication-plugin=mysql_native_password
             --character-set-server=utf8mb4
@@ -35,13 +35,13 @@ services:
         environment:
             POSTGRES_USER: root
             POSTGRES_PASSWORD: root
-            POSTGRES_DB: easy_retry
+            POSTGRES_DB: snail_job
         ports:
             - "5432:5432"
         volumes:
             - postgres:/var/lib/postgresql/data
             # 注入初始化脚本
-            - ../sql/easy_retry_postgre.sql:/docker-entrypoint-initdb.d/init.sql:ro
+            - ../sql/snail_job_postgre.sql:/docker-entrypoint-initdb.d/init.sql:ro
 
     oracle:
         image: gvenzl/oracle-xe:18-slim-faststart
@@ -52,8 +52,8 @@ services:
             - "1521:1521"
         volumes:
             - oracle:/u01/app/oracle/oradata
-            - ../sql/easy_retry_oracle.sql:/tmp/schema.sql:ro
-            # 创建app用户: easy_retry/EasyRetry@//localhost/XEPDB1
+            - ../sql/snail_job_oracle.sql:/tmp/schema.sql:ro
+            # 创建app用户: snail_job/SnailJob@//localhost/XEPDB1
             - ./oracle/1_create_user.sql:/docker-entrypoint-initdb.d/1_create_user.sql:ro
             - ./oracle/2_create_schema.sh:/docker-entrypoint-initdb.d/2_create_schema.sh:ro
 
@@ -62,12 +62,12 @@ services:
         environment:
             TZ: Asia/Shanghai
             ACCEPT_EULA: "Y"
-            SA_PASSWORD: "EasyRetry@24"
+            SA_PASSWORD: "SnailJob@24"
         ports:
             - "1433:1433"
         volumes:
             - sqlserver:/var/opt/mssql
-            - ../sql/easy_retry_sqlserver.sql:/tmp/schema.sql:ro
+            - ../sql/snail_job_sqlserver.sql:/tmp/schema.sql:ro
             # docker compose exec sqlserver bash /tmp/create_schema.sh
             - ./sqlserver/create_schema.sh:/tmp/create_schema.sh:ro
 
@@ -77,10 +77,10 @@ services:
         environment:
             TZ: Asia/Shanghai
             MARIADB_ROOT_PASSWORD: root
-            MARIADB_DATABASE: easy_retry
+            MARIADB_DATABASE: snail_job
         ports:
             - "3308:3306"
         volumes:
             - mariadb:/var/lib/mysql/
             # 注入初始化脚本, mysql
-            - ../sql/easy_retry_mysql.sql:/docker-entrypoint-initdb.d/init.sql:ro
+            - ../sql/snail_job_mysql.sql:/docker-entrypoint-initdb.d/init.sql:ro

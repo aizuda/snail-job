@@ -3,23 +3,19 @@ package com.aizuda.snail.job.template.datasource.persistence.po;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * <p>
  * 号段模式序号ID分配表
- * </p>
  *
  * @author opensnail
  * @since 2023-05-05
  */
-@Getter
-@Setter
-@TableName("sequence_alloc")
+@Data
+@TableName("sj_sequence_alloc")
 public class SequenceAlloc implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -35,6 +31,9 @@ public class SequenceAlloc implements Serializable {
      */
     private String groupName;
 
+    /**
+     * 命名空间ID
+     */
     private String namespaceId;
 
     /**
