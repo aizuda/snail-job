@@ -16,7 +16,7 @@ import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskLogMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTaskLog;
-import com.aizuda.snailjob.template.datasource.persistence.po.SceneConfig;
+import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,7 +64,7 @@ public class FailureActor extends AbstractActor {
 
             try {
                 // 超过最大等级
-                SceneConfig sceneConfig =
+                RetrySceneConfig retrySceneConfig =
                         accessTemplate.getSceneConfigAccess().getSceneConfigByGroupNameAndSceneName(retryTask.getGroupName(), retryTask.getSceneName(),
                             retryTask.getNamespaceId());
 
@@ -76,7 +76,7 @@ public class FailureActor extends AbstractActor {
                         if (SyetemTaskTypeEnum.CALLBACK.getType().equals(retryTask.getTaskType())) {
                             maxRetryCount = systemProperties.getCallback().getMaxCount();
                         } else {
-                            maxRetryCount = sceneConfig.getMaxRetryCount();
+                            maxRetryCount = retrySceneConfig.getMaxRetryCount();
                         }
 
                         if (maxRetryCount <= retryTask.getRetryCount()) {

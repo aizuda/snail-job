@@ -9,6 +9,7 @@ import com.aizuda.snailjob.server.common.Lifecycle;
 import com.aizuda.snailjob.server.common.alarm.AbstractRetryAlarm;
 import com.aizuda.snailjob.server.common.dto.NotifyConfigInfo;
 import com.aizuda.snailjob.server.common.dto.RetryAlarmInfo;
+import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.retry.task.support.event.RetryTaskFailMoreThresholdAlarmEvent;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
@@ -86,6 +87,11 @@ public class RetryTaskFailMoreThresholdAlarmListener extends
     @Override
     protected void startLog() {
        SnailJobLog.LOCAL.info("RetryTaskFailMoreThresholdAlarmListener started");
+    }
+
+    @Override
+    protected List<SyetemTaskTypeEnum> getSystemTaskType() {
+        return Lists.newArrayList(SyetemTaskTypeEnum.RETRY);
     }
 
     @Override

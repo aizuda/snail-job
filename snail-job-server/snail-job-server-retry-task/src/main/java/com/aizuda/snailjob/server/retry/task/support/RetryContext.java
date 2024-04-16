@@ -3,7 +3,7 @@ package com.aizuda.snailjob.server.retry.task.support;
 import com.aizuda.snailjob.server.common.WaitStrategy;
 import com.aizuda.snailjob.server.common.dto.RegisterNodeInfo;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
-import com.aizuda.snailjob.template.datasource.persistence.po.SceneConfig;
+import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
 
 import java.util.Set;
 
@@ -81,5 +81,5 @@ public interface RetryContext<V> {
      *
      * @return 路由策略
      */
-    SceneConfig sceneConfig();
+    RetrySceneConfig sceneConfig();
 }

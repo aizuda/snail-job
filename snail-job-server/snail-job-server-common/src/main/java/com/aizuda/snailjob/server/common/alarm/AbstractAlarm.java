@@ -5,13 +5,20 @@ import com.aizuda.snailjob.common.core.alarm.AlarmContext;
 import com.aizuda.snailjob.common.core.alarm.SnailJobAlarmFactory;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.log.SnailJobLog;
+import com.aizuda.snailjob.server.common.AlarmInfoConverter;
 import com.aizuda.snailjob.server.common.Lifecycle;
+import com.aizuda.snailjob.server.common.cache.CacheNotifyRateLimiter;
 import com.aizuda.snailjob.server.common.dto.AlarmInfo;
 import com.aizuda.snailjob.server.common.dto.NotifyConfigInfo;
+import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
+import com.aizuda.snailjob.server.common.triple.ImmutableTriple;
 import com.aizuda.snailjob.server.common.triple.Triple;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import com.aizuda.snailjob.server.common.triple.Triple;
+import com.aizuda.snailjob.template.datasource.persistence.po.NotifyConfig;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.RateLimiter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +26,10 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.util.CollectionUtils;
 
+import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @author xiaowoniu
@@ -28,7 +37,7 @@ import java.util.concurrent.TimeUnit;
  * @since 2.5.0
  */
 @Slf4j
-public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmInfo, T> extends AbstractFlowControl<E> implements ApplicationListener<E>, Runnable,
+public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmInfo> implements ApplicationListener<E>, Runnable,
     Lifecycle {
 
     @Autowired
@@ -53,14 +62,14 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
                 // 获取所有的组名称
                 Set<String> groupNames = new HashSet<>();
                 // 获取所有的场景名称
-                Set<T> sceneNames = new HashSet<>();
+                Set<String> sceneNames = new HashSet<>();
 
                 // 转换AlarmDTO 为了下面循环发送使用
-                Map<Triple<String, String, T>, List<A>> waitSendAlarmInfos = convertAlarmDTO(
+                Map<Triple<String, String, String>, List<A>> waitSendAlarmInfos = convertAlarmDTO(
                         alarmInfos, namespaceIds, groupNames, sceneNames);
 
                 // 批量获取通知配置
-                Map<Triple<String, String, T>, List<NotifyConfigInfo>> notifyConfig = obtainNotifyConfig(namespaceIds, groupNames, sceneNames);
+                Map<Triple<String, String, String>, List<NotifyConfigInfo>> notifyConfig = obtainNotifyConfig(namespaceIds, groupNames, sceneNames);
 
                 // 循环发送消息
                 waitSendAlarmInfos.forEach((key, list) -> {
@@ -78,12 +87,39 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
         }
     }
 
-    protected abstract Map<Triple<String, String, T>, List<A>> convertAlarmDTO(List<A> alarmData, Set<String> namespaceIds, Set<String> groupNames, Set<T> sceneNames);
+    protected Map<Triple<String, String, String>, List<NotifyConfigInfo>> obtainNotifyConfig(Set<String> namespaceIds, Set<String> groupNames, Set<String> businessIds) {
 
-    protected abstract Map<Triple<String/*命名空间*/, String/*组名称*/, T/*场景名称ORJobId*/>,
-            List<NotifyConfigInfo>> obtainNotifyConfig(Set<String> namespaceIds,
-                                                       Set<String> groupNames,
-                                                       Set<T> sceneNames);
+        // 批量获取所需的通知配置
+        List<NotifyConfig> notifyConfigs =  accessTemplate.getNotifyConfigAccess().list(
+            new LambdaQueryWrapper<NotifyConfig>()
+                .eq(NotifyConfig::getNotifyStatus, StatusEnum.YES.getStatus())
+                .in(NotifyConfig::getSystemTaskType, getSystemTaskType())
+                .eq(NotifyConfig::getNotifyScene, getNotifyScene())
+                .in(NotifyConfig::getNamespaceId, namespaceIds)
+                .in(NotifyConfig::getGroupName, groupNames)
+                .in(NotifyConfig::getBusinessId, businessIds)
+        );
+        if (CollectionUtils.isEmpty(notifyConfigs)) {
+            return Maps.newHashMap();
+        }
+
+        List<NotifyConfigInfo> notifyConfigInfos = AlarmInfoConverter.INSTANCE.retryToNotifyConfigInfos(notifyConfigs);
+
+        return notifyConfigInfos.stream()
+            .collect(Collectors.groupingBy(i -> {
+
+                String namespaceId = i.getNamespaceId();
+                String groupName = i.getGroupName();
+
+                return ImmutableTriple.of(namespaceId, groupName, i.getBusinessId());
+            }));
+
+    }
+
+    protected abstract List<SyetemTaskTypeEnum> getSystemTaskType();
+
+    protected abstract Map<Triple<String, String, String>, List<A>> convertAlarmDTO(List<A> alarmData, Set<String> namespaceIds, Set<String> groupNames, Set<String> sceneNames);
+
 
     protected abstract List<A> poll() throws InterruptedException;
 
@@ -111,11 +147,10 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
         for (final NotifyConfigInfo notifyConfig : notifyConfigsList) {
             if (Objects.equals(notifyConfig.getRateLimiterStatus(), StatusEnum.YES.getStatus())) {
                 // 限流
-                RateLimiter rateLimiter = getRateLimiter(rateLimiterKey(notifyConfig),
+                RateLimiter rateLimiter = getRateLimiter(String.valueOf(notifyConfig.getId()),
                         notifyConfig.getRateLimiterThreshold());
                 // 每秒发送rateLimiterThreshold个告警
-                if (Objects.nonNull(rateLimiter) && !RateLimiter.create(notifyConfig.getRateLimiterThreshold())
-                        .tryAcquire(1, TimeUnit.SECONDS)) {
+                if (Objects.nonNull(rateLimiter) && !rateLimiter.tryAcquire(1, TimeUnit.SECONDS)) {
                     continue;
                 }
             }
@@ -133,7 +168,14 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
         }
     }
 
-    protected abstract String rateLimiterKey(NotifyConfigInfo notifyConfig);
+    protected RateLimiter getRateLimiter(String key, double rateLimiterThreshold) {
+        RateLimiter rateLimiter = CacheNotifyRateLimiter.getRateLimiterByKey(key);
+        if (Objects.isNull(rateLimiter) || rateLimiter.getRate() != rateLimiterThreshold) {
+            CacheNotifyRateLimiter.put(key, RateLimiter.create(rateLimiterThreshold));
+        }
+
+        return rateLimiter;
+    }
 
     protected abstract int getNotifyScene();
 }

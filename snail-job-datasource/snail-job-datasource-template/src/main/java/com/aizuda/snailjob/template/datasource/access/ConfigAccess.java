@@ -4,12 +4,7 @@ import com.aizuda.snailjob.common.core.enums.NotifySceneEnum;
 import com.aizuda.snailjob.server.model.dto.ConfigDTO;
 import com.aizuda.snailjob.template.datasource.persistence.po.GroupConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.NotifyConfig;
-import com.aizuda.snailjob.template.datasource.persistence.po.SceneConfig;
-import com.aizuda.snailjob.common.core.enums.NotifySceneEnum;
-import com.aizuda.snailjob.server.model.dto.ConfigDTO;
-import com.aizuda.snailjob.template.datasource.persistence.po.GroupConfig;
-import com.aizuda.snailjob.template.datasource.persistence.po.NotifyConfig;
-import com.aizuda.snailjob.template.datasource.persistence.po.SceneConfig;
+import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
@@ -45,9 +40,9 @@ public interface ConfigAccess<T> extends Access<T>  {
      * @param groupName   组名称
      * @param sceneName   场景名称
      * @param namespaceId 命名空间
-     * @return {@link SceneConfig} 场景配置
+     * @return {@link RetrySceneConfig} 场景配置
      */
-    SceneConfig getSceneConfigByGroupNameAndSceneName(String groupName, String sceneName, String namespaceId);
+    RetrySceneConfig getSceneConfigByGroupNameAndSceneName(String groupName, String sceneName, String namespaceId);
 
     /**
      * 获取通知配置
@@ -83,9 +78,9 @@ public interface ConfigAccess<T> extends Access<T>  {
      * 获取场景配置
      *
      * @param groupName     组名称
-     * @return {@link SceneConfig} 场景配置
+     * @return {@link RetrySceneConfig} 场景配置
      */
-    List<SceneConfig> getSceneConfigByGroupName(String groupName);
+    List<RetrySceneConfig> getSceneConfigByGroupName(String groupName);
 
     /**
      * 获取已开启的组配置信息
@@ -113,7 +108,7 @@ public interface ConfigAccess<T> extends Access<T>  {
      *
      * @return 场景配置列表
      */
-    List<SceneConfig> getAllConfigSceneList();
+    List<RetrySceneConfig> getAllConfigSceneList();
 
     /**
      * 获取配置版本号

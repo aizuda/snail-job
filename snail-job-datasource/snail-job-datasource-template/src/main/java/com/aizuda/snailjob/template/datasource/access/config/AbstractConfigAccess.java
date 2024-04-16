@@ -11,18 +11,8 @@ import com.aizuda.snailjob.template.datasource.persistence.mapper.NotifyConfigMa
 import com.aizuda.snailjob.template.datasource.persistence.mapper.SceneConfigMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.GroupConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.NotifyConfig;
-import com.aizuda.snailjob.template.datasource.persistence.po.SceneConfig;
+import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
 import com.aizuda.snailjob.template.datasource.utils.DbUtils;
-import com.aizuda.snailjob.common.core.enums.NodeTypeEnum;
-import com.aizuda.snailjob.common.core.enums.NotifySceneEnum;
-import com.aizuda.snailjob.common.core.enums.StatusEnum;
-import com.aizuda.snailjob.server.model.dto.ConfigDTO;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.GroupConfigMapper;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.NotifyConfigMapper;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.SceneConfigMapper;
-import com.aizuda.snailjob.template.datasource.persistence.po.GroupConfig;
-import com.aizuda.snailjob.template.datasource.persistence.po.NotifyConfig;
-import com.aizuda.snailjob.template.datasource.persistence.po.SceneConfig;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
@@ -68,20 +58,20 @@ public abstract class AbstractConfigAccess<T> implements ConfigAccess<T> {
         Integer notifyScene) {
         return notifyConfigMapper.selectList(
             new LambdaQueryWrapper<NotifyConfig>().eq(NotifyConfig::getGroupName, groupName)
-                .eq(NotifyConfig::getSceneName, sceneName)
+                .eq(NotifyConfig::getBusinessId, sceneName)
                 .eq(NotifyConfig::getNotifyScene, notifyScene));
     }
 
-    protected SceneConfig getByGroupNameAndSceneName(String groupName, String sceneName, String namespaceId) {
-        return sceneConfigMapper.selectOne(new LambdaQueryWrapper<SceneConfig>()
-            .eq(SceneConfig::getNamespaceId, namespaceId)
-            .eq(SceneConfig::getGroupName, groupName)
-            .eq(SceneConfig::getSceneName, sceneName));
+    protected RetrySceneConfig getByGroupNameAndSceneName(String groupName, String sceneName, String namespaceId) {
+        return sceneConfigMapper.selectOne(new LambdaQueryWrapper<RetrySceneConfig>()
+            .eq(RetrySceneConfig::getNamespaceId, namespaceId)
+            .eq(RetrySceneConfig::getGroupName, groupName)
+            .eq(RetrySceneConfig::getSceneName, sceneName));
     }
 
-    protected List<SceneConfig> getSceneConfigs(String groupName) {
-        return sceneConfigMapper.selectList(new LambdaQueryWrapper<SceneConfig>()
-            .eq(SceneConfig::getGroupName, groupName));
+    protected List<RetrySceneConfig> getSceneConfigs(String groupName) {
+        return sceneConfigMapper.selectList(new LambdaQueryWrapper<RetrySceneConfig>()
+            .eq(RetrySceneConfig::getGroupName, groupName));
     }
 
     protected GroupConfig getByGroupName(String groupName, final String namespaceId) {
@@ -109,7 +99,7 @@ public abstract class AbstractConfigAccess<T> implements ConfigAccess<T> {
     }
 
     @Override
-    public SceneConfig getSceneConfigByGroupNameAndSceneName(String groupName, String sceneName, String namespaceId) {
+    public RetrySceneConfig getSceneConfigByGroupNameAndSceneName(String groupName, String sceneName, String namespaceId) {
         return getByGroupNameAndSceneName(groupName, sceneName, namespaceId);
     }
 
@@ -130,7 +120,7 @@ public abstract class AbstractConfigAccess<T> implements ConfigAccess<T> {
     }
 
     @Override
-    public List<SceneConfig> getSceneConfigByGroupName(String groupName) {
+    public List<RetrySceneConfig> getSceneConfigByGroupName(String groupName) {
         return getSceneConfigs(groupName);
     }
 
@@ -148,20 +138,20 @@ public abstract class AbstractConfigAccess<T> implements ConfigAccess<T> {
             return Collections.EMPTY_SET;
         }
 
-        LambdaQueryWrapper<SceneConfig> sceneConfigLambdaQueryWrapper = new LambdaQueryWrapper<SceneConfig>()
-            .select(SceneConfig::getSceneName)
-            .eq(SceneConfig::getGroupName, groupName);
+        LambdaQueryWrapper<RetrySceneConfig> sceneConfigLambdaQueryWrapper = new LambdaQueryWrapper<RetrySceneConfig>()
+            .select(RetrySceneConfig::getSceneName)
+            .eq(RetrySceneConfig::getGroupName, groupName);
 
         if (StatusEnum.YES.getStatus().equals(groupConfig.getGroupStatus())) {
-            sceneConfigLambdaQueryWrapper.eq(SceneConfig::getSceneStatus, StatusEnum.NO.getStatus());
+            sceneConfigLambdaQueryWrapper.eq(RetrySceneConfig::getSceneStatus, StatusEnum.NO.getStatus());
         }
 
-        List<SceneConfig> sceneConfigs = sceneConfigMapper.selectList(sceneConfigLambdaQueryWrapper);
-        if (CollectionUtils.isEmpty(sceneConfigs)) {
+        List<RetrySceneConfig> retrySceneConfigs = sceneConfigMapper.selectList(sceneConfigLambdaQueryWrapper);
+        if (CollectionUtils.isEmpty(retrySceneConfigs)) {
             return Collections.EMPTY_SET;
         }
 
-        return sceneConfigs.stream().map(SceneConfig::getSceneName).collect(Collectors.toSet());
+        return retrySceneConfigs.stream().map(RetrySceneConfig::getSceneName).collect(Collectors.toSet());
     }
 
     @Override
@@ -178,9 +168,9 @@ public abstract class AbstractConfigAccess<T> implements ConfigAccess<T> {
     }
 
     @Override
-    public List<SceneConfig> getAllConfigSceneList() {
-        List<SceneConfig> allSystemConfigSceneList = sceneConfigMapper.selectList(
-            new LambdaQueryWrapper<SceneConfig>().orderByAsc(SceneConfig::getId));
+    public List<RetrySceneConfig> getAllConfigSceneList() {
+        List<RetrySceneConfig> allSystemConfigSceneList = sceneConfigMapper.selectList(
+            new LambdaQueryWrapper<RetrySceneConfig>().orderByAsc(RetrySceneConfig::getId));
         if (CollectionUtils.isEmpty(allSystemConfigSceneList)) {
             return Collections.EMPTY_LIST;
         }
@@ -226,10 +216,10 @@ public abstract class AbstractConfigAccess<T> implements ConfigAccess<T> {
 
         configDTO.setNotifyList(notifies);
 
-        List<SceneConfig> sceneConfig = getSceneConfigByGroupName(groupName);
+        List<RetrySceneConfig> retrySceneConfig = getSceneConfigByGroupName(groupName);
 
         List<ConfigDTO.Scene> sceneList = new ArrayList<>();
-        for (SceneConfig config : sceneConfig) {
+        for (RetrySceneConfig config : retrySceneConfig) {
             ConfigDTO.Scene scene = new ConfigDTO.Scene();
             scene.setSceneName(config.getSceneName());
             scene.setDdl(config.getDeadlineRequest());

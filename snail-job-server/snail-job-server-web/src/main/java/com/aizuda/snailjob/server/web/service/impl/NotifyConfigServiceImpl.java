@@ -16,10 +16,9 @@ import com.aizuda.snailjob.server.web.util.UserSessionUtils;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import com.aizuda.snailjob.template.datasource.access.ConfigAccess;
 import com.aizuda.snailjob.template.datasource.persistence.po.NotifyConfig;
-import com.aizuda.snailjob.server.web.service.convert.NotifyConfigResponseVOConverter;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -30,10 +29,9 @@ import java.util.List;
  * @date : 2022-03-03 11:17
  */
 @Service
+@RequiredArgsConstructor
 public class NotifyConfigServiceImpl implements NotifyConfigService {
-
-    @Autowired
-    private AccessTemplate accessTemplate;
+    private final AccessTemplate accessTemplate;
 
     @Override
     public PageResult<List<NotifyConfigResponseVO>> getNotifyConfigList(NotifyConfigQueryVO queryVO) {
@@ -51,7 +49,7 @@ public class NotifyConfigServiceImpl implements NotifyConfigService {
             queryWrapper.eq(NotifyConfig::getGroupName, queryVO.getGroupName());
         }
         if (StrUtil.isNotBlank(queryVO.getSceneName())) {
-            queryWrapper.eq(NotifyConfig::getSceneName, queryVO.getSceneName());
+            queryWrapper.eq(NotifyConfig::getBusinessId, queryVO.getSceneName());
         }
 
         queryWrapper.orderByDesc(NotifyConfig::getId);

@@ -3,11 +3,7 @@ package com.aizuda.snailjob.template.datasource.persistence.mapper;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardCardResponseDO;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardLineResponseDO;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetrySummary;
-import com.aizuda.snailjob.template.datasource.persistence.po.SceneConfig;
-import com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO.Rank;
-import com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO.Task;
-import com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardCardResponseDO;
-import com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardLineResponseDO;
+import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
@@ -34,11 +30,11 @@ public interface RetrySummaryMapper extends BaseMapper<RetrySummary> {
 
     List<DashboardCardResponseDO.RetryTask> retryTaskBarList(@Param("ew") Wrapper<RetrySummary> wrapper);
 
-    IPage<DashboardRetryLineResponseDO.Task> retryTaskList(@Param("ew") Wrapper<SceneConfig> wrapper, Page<Object> page);
+    IPage<DashboardRetryLineResponseDO.Task> retryTaskList(@Param("ew") Wrapper<RetrySceneConfig> wrapper, Page<Object> page);
 
     List<DashboardLineResponseDO> retryLineList(@Param("dateFormat") String dateFormat, @Param("ew") Wrapper<RetrySummary> wrapper);
 
     List<DashboardRetryLineResponseDO.Rank> dashboardRank(@Param("ew") Wrapper<RetrySummary> wrapper);
 
-    long countRetryTask(@Param("ew") Wrapper<SceneConfig> wrapper);
+    long countRetryTask(@Param("ew") Wrapper<RetrySceneConfig> wrapper);
 }

@@ -12,8 +12,8 @@ import com.aizuda.snailjob.server.retry.task.support.RetryContext;
 import com.aizuda.snailjob.server.retry.task.support.RetryTaskConverter;
 import com.aizuda.snailjob.server.retry.task.support.retry.RetryExecutor;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
+import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
-import com.aizuda.snailjob.template.datasource.persistence.po.SceneConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,11 +44,11 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, Initializing
         // 重试次数累加
         retryCountIncrement(retryTask);
 
-        SceneConfig sceneConfig = accessTemplate.getSceneConfigAccess().getSceneConfigByGroupNameAndSceneName(retryTask.getGroupName(), retryTask.getSceneName(),
+        RetrySceneConfig retrySceneConfig = accessTemplate.getSceneConfigAccess().getSceneConfigByGroupNameAndSceneName(retryTask.getGroupName(), retryTask.getSceneName(),
             retryTask.getNamespaceId());
 
-        RetryContext retryContext = builderRetryContext(retryTask.getGroupName(), retryTask, sceneConfig);
-        RetryExecutor executor = builderResultRetryExecutor(retryContext, sceneConfig);
+        RetryContext retryContext = builderRetryContext(retryTask.getGroupName(), retryTask, retrySceneConfig);
+        RetryExecutor executor = builderResultRetryExecutor(retryContext, retrySceneConfig);
 
         if (!preCheck(retryContext, executor)) {
             return;
@@ -92,10 +92,10 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, Initializing
     }
 
     protected abstract RetryContext builderRetryContext(String groupName, RetryTask retryTask,
-        final SceneConfig sceneConfig);
+        final RetrySceneConfig retrySceneConfig);
 
     protected abstract RetryExecutor builderResultRetryExecutor(RetryContext retryContext,
-        final SceneConfig sceneConfig);
+        final RetrySceneConfig retrySceneConfig);
 
     protected abstract ActorRef getActorRef();
 

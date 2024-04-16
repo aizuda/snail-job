@@ -16,7 +16,7 @@ import com.aizuda.snailjob.server.retry.task.support.strategy.FilterStrategies;
 import com.aizuda.snailjob.server.retry.task.support.strategy.StopStrategies;
 import com.aizuda.snailjob.server.common.strategy.WaitStrategies;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
-import com.aizuda.snailjob.template.datasource.persistence.po.SceneConfig;
+import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
 import org.springframework.stereotype.Component;
 
 /**
@@ -32,21 +32,21 @@ public class ManualRetryTaskExecutor extends AbstractTaskExecutor {
     @Override
     protected RetryContext<Result<DispatchRetryResultDTO>> builderRetryContext(final String groupName,
         final RetryTask retryTask,
-        final SceneConfig sceneConfig) {
+        final RetrySceneConfig retrySceneConfig) {
         MaxAttemptsPersistenceRetryContext<Result<DispatchRetryResultDTO>> retryContext = new MaxAttemptsPersistenceRetryContext<>();
         retryContext.setRetryTask(retryTask);
         retryContext.setSceneBlacklist(
-            accessTemplate.getSceneConfigAccess().getBlacklist(groupName, sceneConfig.getNamespaceId()));
+            accessTemplate.getSceneConfigAccess().getBlacklist(groupName, retrySceneConfig.getNamespaceId()));
         retryContext.setServerNode(
             clientNodeAllocateHandler.getServerNode(retryTask.getSceneName(),
-                retryTask.getGroupName(), retryTask.getNamespaceId(), sceneConfig.getRouteKey()));
-        retryContext.setSceneConfig(sceneConfig);
+                retryTask.getGroupName(), retryTask.getNamespaceId(), retrySceneConfig.getRouteKey()));
+        retryContext.setRetrySceneConfig(retrySceneConfig);
         return retryContext;
     }
 
     @Override
     protected RetryExecutor<Result<DispatchRetryResultDTO>> builderResultRetryExecutor(RetryContext retryContext,
-        final SceneConfig sceneConfig) {
+        final RetrySceneConfig retrySceneConfig) {
 
         RetryTask retryTask = retryContext.getRetryTask();
         return RetryBuilder.<Result>newBuilder()
@@ -69,9 +69,9 @@ public class ManualRetryTaskExecutor extends AbstractTaskExecutor {
 
     private WaitStrategy getWaitWaitStrategy(String groupName, String sceneName, String namespaceId) {
 
-        SceneConfig sceneConfig = accessTemplate.getSceneConfigAccess()
+        RetrySceneConfig retrySceneConfig = accessTemplate.getSceneConfigAccess()
             .getSceneConfigByGroupNameAndSceneName(groupName, sceneName, namespaceId);
-        Integer backOff = sceneConfig.getBackOff();
+        Integer backOff = retrySceneConfig.getBackOff();
 
         return WaitStrategies.WaitStrategyEnum.getWaitStrategy(backOff);
     }

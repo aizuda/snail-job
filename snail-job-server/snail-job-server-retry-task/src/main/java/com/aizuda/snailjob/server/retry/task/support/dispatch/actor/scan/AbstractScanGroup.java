@@ -18,8 +18,8 @@ import com.aizuda.snailjob.server.retry.task.support.dispatch.task.TaskExecutorS
 import com.aizuda.snailjob.server.retry.task.support.timer.RetryTimerWheel;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskMapper;
+import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
-import com.aizuda.snailjob.template.datasource.persistence.po.SceneConfig;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import io.netty.util.TimerTask;
@@ -116,17 +116,17 @@ public abstract class AbstractScanGroup extends AbstractActor {
     private void processRetryPartitionTasks(List<? extends PartitionTask> partitionTasks, final ScanTask scanTask) {
 
         // 批次查询场景
-        Map<String, SceneConfig> sceneConfigMap = getSceneConfigMap(partitionTasks, scanTask);
+        Map<String, RetrySceneConfig> sceneConfigMap = getSceneConfigMap(partitionTasks, scanTask);
 
         List<RetryTask> waitUpdateRetryTasks = new ArrayList<>();
         for (PartitionTask task : partitionTasks) {
             RetryPartitionTask retryPartitionTask = (RetryPartitionTask) task;
-            SceneConfig sceneConfig = sceneConfigMap.get(retryPartitionTask.getSceneName());
-            if (Objects.isNull(sceneConfig)) {
+            RetrySceneConfig retrySceneConfig = sceneConfigMap.get(retryPartitionTask.getSceneName());
+            if (Objects.isNull(retrySceneConfig)) {
                 continue;
             }
 
-            RetryTask retryTask = processRetryTask(retryPartitionTask, sceneConfig);
+            RetryTask retryTask = processRetryTask(retryPartitionTask, retrySceneConfig);
             waitUpdateRetryTasks.add(retryTask);
         }
 
@@ -147,22 +147,22 @@ public abstract class AbstractScanGroup extends AbstractActor {
 
     }
 
-    private Map<String, SceneConfig> getSceneConfigMap(final List<? extends PartitionTask> partitionTasks, ScanTask scanTask) {
+    private Map<String, RetrySceneConfig> getSceneConfigMap(final List<? extends PartitionTask> partitionTasks, ScanTask scanTask) {
         Set<String> sceneNameSet = partitionTasks.stream()
                 .map(partitionTask -> ((RetryPartitionTask) partitionTask).getSceneName()).collect(Collectors.toSet());
-        List<SceneConfig> sceneConfigs = accessTemplate.getSceneConfigAccess()
-                .list(new LambdaQueryWrapper<SceneConfig>()
-                        .select(SceneConfig::getBackOff, SceneConfig::getTriggerInterval, SceneConfig::getSceneName)
-                        .eq(SceneConfig::getNamespaceId, scanTask.getNamespaceId())
-                        .eq(SceneConfig::getGroupName, scanTask.getGroupName())
-                        .in(SceneConfig::getSceneName, sceneNameSet));
-        return sceneConfigs.stream()
-                .collect(Collectors.toMap(SceneConfig::getSceneName, i -> i));
+        List<RetrySceneConfig> retrySceneConfigs = accessTemplate.getSceneConfigAccess()
+                .list(new LambdaQueryWrapper<RetrySceneConfig>()
+                        .select(RetrySceneConfig::getBackOff, RetrySceneConfig::getTriggerInterval, RetrySceneConfig::getSceneName)
+                        .eq(RetrySceneConfig::getNamespaceId, scanTask.getNamespaceId())
+                        .eq(RetrySceneConfig::getGroupName, scanTask.getGroupName())
+                        .in(RetrySceneConfig::getSceneName, sceneNameSet));
+        return retrySceneConfigs.stream()
+                .collect(Collectors.toMap(RetrySceneConfig::getSceneName, i -> i));
     }
 
-    private RetryTask processRetryTask(RetryPartitionTask partitionTask, SceneConfig sceneConfig) {
+    private RetryTask processRetryTask(RetryPartitionTask partitionTask, RetrySceneConfig retrySceneConfig) {
         RetryTask retryTask = new RetryTask();
-        retryTask.setNextTriggerAt(calculateNextTriggerTime(partitionTask, sceneConfig));
+        retryTask.setNextTriggerAt(calculateNextTriggerTime(partitionTask, retrySceneConfig));
         retryTask.setId(partitionTask.getId());
         return retryTask;
     }
@@ -174,7 +174,7 @@ public abstract class AbstractScanGroup extends AbstractActor {
     protected abstract void putLastId(String groupName, Long lastId);
 
     protected abstract LocalDateTime calculateNextTriggerTime(RetryPartitionTask partitionTask,
-                                                              final SceneConfig sceneConfig);
+                                                              final RetrySceneConfig retrySceneConfig);
 
     protected abstract TimerTask timerTask(RetryPartitionTask partitionTask);
 

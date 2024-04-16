@@ -11,7 +11,7 @@ import com.aizuda.snailjob.server.common.strategy.WaitStrategies.WaitStrategyCon
 import com.aizuda.snailjob.server.common.strategy.WaitStrategies.WaitStrategyEnum;
 import com.aizuda.snailjob.server.retry.task.support.timer.RetryTimerContext;
 import com.aizuda.snailjob.server.retry.task.support.timer.RetryTimerTask;
-import com.aizuda.snailjob.template.datasource.persistence.po.SceneConfig;
+import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
 import io.netty.util.TimerTask;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -59,7 +59,7 @@ public class ScanRetryTaskActor extends AbstractScanGroup {
     }
 
     @Override
-    protected LocalDateTime calculateNextTriggerTime(RetryPartitionTask partitionTask, final SceneConfig sceneConfig) {
+    protected LocalDateTime calculateNextTriggerTime(RetryPartitionTask partitionTask, final RetrySceneConfig retrySceneConfig) {
         // 更新下次触发时间
 
         WaitStrategyContext waitStrategyContext = new WaitStrategyContext();
@@ -71,10 +71,10 @@ public class ScanRetryTaskActor extends AbstractScanGroup {
         }
 
         waitStrategyContext.setNextTriggerAt(DateUtils.toEpochMilli(nextTriggerAt));
-        waitStrategyContext.setTriggerInterval(sceneConfig.getTriggerInterval());
+        waitStrategyContext.setTriggerInterval(retrySceneConfig.getTriggerInterval());
         waitStrategyContext.setDelayLevel(partitionTask.getRetryCount() + 1);
         // 更新触发时间, 任务进入时间轮
-        WaitStrategy waitStrategy = WaitStrategyEnum.getWaitStrategy(sceneConfig.getBackOff());
+        WaitStrategy waitStrategy = WaitStrategyEnum.getWaitStrategy(retrySceneConfig.getBackOff());
         return DateUtils.toLocalDateTime(waitStrategy.computeTriggerTime(waitStrategyContext));
     }
 

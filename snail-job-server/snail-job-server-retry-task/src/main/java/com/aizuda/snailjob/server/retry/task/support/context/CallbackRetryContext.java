@@ -4,7 +4,7 @@ import com.aizuda.snailjob.server.common.dto.RegisterNodeInfo;
 import com.aizuda.snailjob.server.retry.task.support.RetryContext;
 import com.aizuda.snailjob.server.common.WaitStrategy;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
-import com.aizuda.snailjob.template.datasource.persistence.po.SceneConfig;
+import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
 import lombok.Data;
 
 import java.util.Objects;
@@ -51,7 +51,7 @@ public class CallbackRetryContext<V> implements RetryContext<V> {
     /**
      * 场景配置
      */
-    private SceneConfig sceneConfig;
+    private RetrySceneConfig retrySceneConfig;
 
     @Override
     public boolean hasException() {
@@ -59,8 +59,8 @@ public class CallbackRetryContext<V> implements RetryContext<V> {
     }
 
     @Override
-    public SceneConfig sceneConfig() {
-        return sceneConfig;
+    public RetrySceneConfig sceneConfig() {
+        return retrySceneConfig;
     }
 
 }

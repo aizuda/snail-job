@@ -16,8 +16,8 @@ import java.time.LocalDateTime;
  * @since 2.5.0
  */
 @Data
-@TableName("sj_scene_config")
-public class SceneConfig implements Serializable {
+@TableName("sj_retry_scene_config")
+public class RetrySceneConfig implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

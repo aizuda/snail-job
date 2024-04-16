@@ -2,6 +2,7 @@ package com.aizuda.snailjob.server.web.interceptor;
 
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
+import com.aizuda.snailjob.common.core.exception.SnailJobAuthenticationException;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.web.model.request.UserSessionVO;
 import com.aizuda.snailjob.server.web.annotation.LoginRequired;
@@ -23,6 +24,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.HandlerMethod;
@@ -41,17 +43,13 @@ import java.util.stream.Collectors;
  * @date:2023-04-26 12:52
  */
 @Configuration
+@RequiredArgsConstructor
 public class AuthenticationInterceptor implements HandlerInterceptor {
-
     public static final String AUTHENTICATION = "SNAIL-JOB-AUTH";
     public static final String NAMESPACE_ID = "SNAIL-JOB-NAMESPACE-ID";
-
-    @Autowired
-    private SystemUserMapper systemUserMapper;
-    @Autowired
-    private NamespaceMapper namespaceMapper;
-    @Autowired
-    private SystemUserPermissionMapper systemUserPermissionMapper;
+    private final SystemUserMapper systemUserMapper;
+    private final NamespaceMapper namespaceMapper;
+    private final SystemUserPermissionMapper systemUserPermissionMapper;
 
     @Override
     public boolean preHandle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object object) throws Exception {
@@ -75,11 +73,11 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         if (loginRequired.required()) {
             // 执行认证
             if (token == null) {
-                throw new SnailJobServerException("登陆过期，请重新登陆");
+                throw new SnailJobAuthenticationException("登陆过期，请重新登陆");
             }
 
             if (StrUtil.isBlank(namespaceId)) {
-                throw new SnailJobServerException("{} 命名空间不存在", namespaceId);
+                throw new SnailJobAuthenticationException("{} 命名空间不存在", namespaceId);
             }
 
             // 获取 token 中的 user id
@@ -87,12 +85,12 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
             try {
                 systemUser = JsonUtil.parseObject(JWT.decode(token).getAudience().get(0), SystemUser.class);
             } catch (JWTDecodeException j) {
-                throw new SnailJobServerException("登陆过期，请重新登陆");
+                throw new SnailJobAuthenticationException("登陆过期，请重新登陆");
             }
 
             systemUser = systemUserMapper.selectById(systemUser.getId());
             if (Objects.isNull(systemUser)) {
-                throw new SnailJobServerException("用户不存在");
+                throw new SnailJobAuthenticationException("用户不存在");
             }
 
             Long count = namespaceMapper.selectCount(
@@ -122,7 +120,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
             try {
                 jwtVerifier.verify(token);
             } catch (JWTVerificationException e) {
-                throw new SnailJobServerException("登陆过期，请重新登陆");
+                throw new SnailJobAuthenticationException("登陆过期，请重新登陆");
             }
 
             RoleEnum role = loginRequired.role();
@@ -132,7 +130,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
 
             if (role == RoleEnum.ADMIN) {
                 if (role != RoleEnum.getEnumTypeMap().get(systemUser.getRole())) {
-                    throw new SnailJobServerException("不具备访问权限");
+                    throw new SnailJobAuthenticationException("不具备访问权限");
                 }
             }
 

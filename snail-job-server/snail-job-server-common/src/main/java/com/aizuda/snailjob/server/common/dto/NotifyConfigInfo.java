@@ -16,11 +16,11 @@ public class NotifyConfigInfo {
 
     private String groupName;
 
-    // job告警时使用
-    private Long jobId;
+    // 业务id (scene_name或job_id或workflow_id)
+    private String businessId;
 
-    // retry告警时使用
-    private String sceneName;
+    // 任务类型 1、重试任务 2、回调任务、 3、JOB任务 4、WORKFLOW任务
+    private Integer systemTaskType;
 
     private Integer notifyStatus;
 

@@ -19,7 +19,7 @@ import com.aizuda.snailjob.server.retry.task.support.retry.RetryExecutor;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import com.aizuda.snailjob.template.datasource.access.TaskAccess;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
-import com.aizuda.snailjob.template.datasource.persistence.po.SceneConfig;
+import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +54,7 @@ public class ExecCallbackUnitActor extends AbstractActor {
             CallbackRetryContext context = (CallbackRetryContext) retryExecutor.getRetryContext();
             RetryTask retryTask = context.getRetryTask();
             RegisterNodeInfo serverNode = context.getServerNode();
-            SceneConfig sceneConfig = context.getSceneConfig();
+            RetrySceneConfig retrySceneConfig = context.getRetrySceneConfig();
 
 //            RetryTaskLogDTO retryTaskLog = RetryTaskLogConverter.INSTANCE.toRetryTaskLogDTO(retryTask);
 //            retryTaskLog.setTriggerTime(LocalDateTime.now());
@@ -64,7 +64,7 @@ public class ExecCallbackUnitActor extends AbstractActor {
 
                 if (Objects.nonNull(serverNode)) {
                     retryExecutor.call((Callable<Result<Void>>) () -> {
-                        Result<Void> result = callClient(retryTask, serverNode, sceneConfig);
+                        Result<Void> result = callClient(retryTask, serverNode, retrySceneConfig);
                         return result;
                     });
                 }
@@ -87,7 +87,7 @@ public class ExecCallbackUnitActor extends AbstractActor {
      * @param callbackTask {@link RetryTask} 回调任务
      * @return 重试结果返回值
      */
-    private Result callClient(RetryTask callbackTask, RegisterNodeInfo serverNode, SceneConfig sceneConfig) {
+    private Result callClient(RetryTask callbackTask, RegisterNodeInfo serverNode, RetrySceneConfig retrySceneConfig) {
 
         String retryTaskUniqueId = callbackRetryTaskHandler.getRetryTaskUniqueId(callbackTask.getUniqueId());
 
@@ -116,9 +116,9 @@ public class ExecCallbackUnitActor extends AbstractActor {
         RetryRpcClient rpcClient = RequestBuilder.<RetryRpcClient, Result>newBuilder()
                 .nodeInfo(serverNode)
                 .failover(Boolean.TRUE)
-                .routeKey(sceneConfig.getRouteKey())
-                .allocKey(sceneConfig.getSceneName())
-                .executorTimeout(sceneConfig.getExecutorTimeout())
+                .routeKey(retrySceneConfig.getRouteKey())
+                .allocKey(retrySceneConfig.getSceneName())
+                .executorTimeout(retrySceneConfig.getExecutorTimeout())
                 .client(RetryRpcClient.class)
                 .build();
         return rpcClient.callback(retryCallbackDTO);

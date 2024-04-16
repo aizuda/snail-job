@@ -45,18 +45,9 @@ import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import com.aizuda.snailjob.template.datasource.access.TaskAccess;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskLogMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.GroupConfig;
+import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTaskLog;
-import com.aizuda.snailjob.template.datasource.persistence.po.SceneConfig;
-import com.aizuda.snailjob.server.common.rpc.client.RequestBuilder;
-import com.aizuda.snailjob.server.retry.task.client.RetryRpcClient;
-import com.aizuda.snailjob.server.retry.task.generator.task.TaskContext;
-import com.aizuda.snailjob.server.retry.task.generator.task.TaskGenerator;
-import com.aizuda.snailjob.server.retry.task.support.RetryTaskConverter;
-import com.aizuda.snailjob.server.retry.task.support.dispatch.task.TaskExecutor;
-import com.aizuda.snailjob.server.retry.task.support.dispatch.task.TaskExecutorSceneEnum;
-import com.aizuda.snailjob.server.web.service.convert.RetryTaskResponseVOConverter;
-import com.aizuda.snailjob.server.web.service.convert.TaskContextConverter;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
@@ -175,13 +166,13 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         // 若恢复重试则需要重新计算下次触发时间
         if (RetryStatusEnum.RUNNING.getStatus().equals(retryStatusEnum.getStatus())) {
 
-            SceneConfig sceneConfig = accessTemplate.getSceneConfigAccess()
+            RetrySceneConfig retrySceneConfig = accessTemplate.getSceneConfigAccess()
                     .getSceneConfigByGroupNameAndSceneName(retryTask.getGroupName(), retryTask.getSceneName(), namespaceId);
             WaitStrategyContext waitStrategyContext = new WaitStrategyContext();
             waitStrategyContext.setNextTriggerAt(DateUtils.toNowMilli());
-            waitStrategyContext.setTriggerInterval(sceneConfig.getTriggerInterval());
+            waitStrategyContext.setTriggerInterval(retrySceneConfig.getTriggerInterval());
             waitStrategyContext.setDelayLevel(retryTask.getRetryCount() + 1);
-            WaitStrategy waitStrategy = WaitStrategyEnum.getWaitStrategy(sceneConfig.getBackOff());
+            WaitStrategy waitStrategy = WaitStrategyEnum.getWaitStrategy(retrySceneConfig.getBackOff());
             retryTask.setNextTriggerAt(DateUtils.toLocalDateTime(waitStrategy.computeTriggerTime(waitStrategyContext)));
         }
 
@@ -238,12 +229,12 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         Assert.notEmpty(serverNodes,
                 () -> new SnailJobServerException("生成idempotentId失败: 不存在活跃的客户端节点"));
 
-        SceneConfig sceneConfig = accessTemplate.getSceneConfigAccess()
+        RetrySceneConfig retrySceneConfig = accessTemplate.getSceneConfigAccess()
                 .getSceneConfigByGroupNameAndSceneName(generateRetryIdempotentIdVO.getGroupName(),
                         generateRetryIdempotentIdVO.getSceneName(), namespaceId);
 
-        RegisterNodeInfo serverNode = clientNodeAllocateHandler.getServerNode(sceneConfig.getSceneName(),
-                sceneConfig.getGroupName(), sceneConfig.getNamespaceId(), sceneConfig.getRouteKey());
+        RegisterNodeInfo serverNode = clientNodeAllocateHandler.getServerNode(retrySceneConfig.getSceneName(),
+                retrySceneConfig.getGroupName(), retrySceneConfig.getNamespaceId(), retrySceneConfig.getRouteKey());
 
         // 委托客户端生成idempotentId
         GenerateRetryIdempotentIdDTO generateRetryIdempotentIdDTO = new GenerateRetryIdempotentIdDTO();

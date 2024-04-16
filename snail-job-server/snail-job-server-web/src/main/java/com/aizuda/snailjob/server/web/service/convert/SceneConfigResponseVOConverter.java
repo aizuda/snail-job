@@ -1,7 +1,7 @@
 package com.aizuda.snailjob.server.web.service.convert;
 
 import com.aizuda.snailjob.server.web.model.response.SceneConfigResponseVO;
-import com.aizuda.snailjob.template.datasource.persistence.po.SceneConfig;
+import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
@@ -16,7 +16,7 @@ public interface SceneConfigResponseVOConverter {
 
     SceneConfigResponseVOConverter INSTANCE = Mappers.getMapper(SceneConfigResponseVOConverter.class);
 
-    SceneConfigResponseVO convert(SceneConfig sceneConfig);
+    SceneConfigResponseVO convert(RetrySceneConfig retrySceneConfig);
 
-    List<SceneConfigResponseVO> batchConvert(List<SceneConfig> sceneConfigs);
+    List<SceneConfigResponseVO> batchConvert(List<RetrySceneConfig> retrySceneConfigs);
 }

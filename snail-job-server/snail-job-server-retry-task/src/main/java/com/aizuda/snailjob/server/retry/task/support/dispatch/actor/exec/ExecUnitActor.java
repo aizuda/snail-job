@@ -18,7 +18,7 @@ import com.aizuda.snailjob.server.retry.task.support.RetryTaskConverter;
 import com.aizuda.snailjob.server.retry.task.support.context.MaxAttemptsPersistenceRetryContext;
 import com.aizuda.snailjob.server.retry.task.support.retry.RetryExecutor;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
-import com.aizuda.snailjob.template.datasource.persistence.po.SceneConfig;
+import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -46,7 +46,7 @@ public class ExecUnitActor extends AbstractActor {
             MaxAttemptsPersistenceRetryContext context = (MaxAttemptsPersistenceRetryContext) retryExecutor.getRetryContext();
             RetryTask retryTask = context.getRetryTask();
             RegisterNodeInfo serverNode = context.getServerNode();
-            SceneConfig sceneConfig = context.getSceneConfig();
+            RetrySceneConfig retrySceneConfig = context.getRetrySceneConfig();
 
             try {
 
@@ -54,7 +54,7 @@ public class ExecUnitActor extends AbstractActor {
 
                     retryExecutor.call((Callable<Result<DispatchRetryResultDTO>>) () -> {
 
-                        Result<DispatchRetryResultDTO> result = callClient(retryTask, serverNode, sceneConfig);
+                        Result<DispatchRetryResultDTO> result = callClient(retryTask, serverNode, retrySceneConfig);
                         // 回调接口请求成功，处理返回值
                         if (StatusEnum.YES.getStatus() != result.getStatus()) {
                         } else {
@@ -85,7 +85,7 @@ public class ExecUnitActor extends AbstractActor {
      * @param retryTask {@link RetryTask} 需要重试的数据
      * @return 重试结果返回值
      */
-    private Result<DispatchRetryResultDTO> callClient(RetryTask retryTask, RegisterNodeInfo serverNode, SceneConfig sceneConfig) {
+    private Result<DispatchRetryResultDTO> callClient(RetryTask retryTask, RegisterNodeInfo serverNode, RetrySceneConfig retrySceneConfig) {
 
         DispatchRetryDTO dispatchRetryDTO = new DispatchRetryDTO();
         dispatchRetryDTO.setIdempotentId(retryTask.getIdempotentId());
@@ -106,8 +106,8 @@ public class ExecUnitActor extends AbstractActor {
                 .nodeInfo(serverNode)
                 .failover(Boolean.TRUE)
                 .allocKey(retryTask.getSceneName())
-                .routeKey(sceneConfig.getRouteKey())
-                .executorTimeout(sceneConfig.getExecutorTimeout())
+                .routeKey(retrySceneConfig.getRouteKey())
+                .executorTimeout(retrySceneConfig.getExecutorTimeout())
                 .client(RetryRpcClient.class)
                 .build();
 

@@ -40,12 +40,10 @@ import com.aizuda.snailjob.template.datasource.persistence.mapper.RetrySummaryMa
 import com.aizuda.snailjob.template.datasource.persistence.mapper.ServerNodeMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.Job;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobSummary;
+import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetrySummary;
-import com.aizuda.snailjob.template.datasource.persistence.po.SceneConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.ServerNode;
 import com.aizuda.snailjob.template.datasource.utils.DbUtils;
-import com.aizuda.snailjob.server.web.model.response.DashboardLineResponseVO;
-import com.aizuda.snailjob.server.web.service.convert.*;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
@@ -160,9 +158,9 @@ public class DashBoardServiceImpl implements DashBoardService {
         DashboardRetryLineResponseVO dashboardRetryLineResponseVO = new DashboardRetryLineResponseVO();
         // 重试任务列表
         Page<Object> pager = new Page<>(baseQueryVO.getPage(), baseQueryVO.getSize());
-        LambdaQueryWrapper<SceneConfig> wrapper = new LambdaQueryWrapper<SceneConfig>()
-                .eq(SceneConfig::getNamespaceId, namespaceId)
-                .in(CollUtil.isNotEmpty(groupNames), SceneConfig::getGroupName, groupNames);
+        LambdaQueryWrapper<RetrySceneConfig> wrapper = new LambdaQueryWrapper<RetrySceneConfig>()
+                .eq(RetrySceneConfig::getNamespaceId, namespaceId)
+                .in(CollUtil.isNotEmpty(groupNames), RetrySceneConfig::getGroupName, groupNames);
         // 针对SQL Server的分页COUNT, 自定义statement ID
         if (DbTypeEnum.SQLSERVER == DbUtils.getDbType()) {
             pager.setSearchCount(false);

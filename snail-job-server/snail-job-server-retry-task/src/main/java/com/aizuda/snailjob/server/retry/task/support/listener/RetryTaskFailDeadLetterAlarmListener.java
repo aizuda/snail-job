@@ -9,6 +9,7 @@ import com.aizuda.snailjob.server.common.Lifecycle;
 import com.aizuda.snailjob.server.common.alarm.AbstractRetryAlarm;
 import com.aizuda.snailjob.server.common.dto.NotifyConfigInfo;
 import com.aizuda.snailjob.server.common.dto.RetryAlarmInfo;
+import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.retry.task.support.event.RetryTaskFailDeadLetterAlarmEvent;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryDeadLetter;
@@ -45,6 +46,11 @@ public class RetryTaskFailDeadLetterAlarmListener extends AbstractRetryAlarm<Ret
                     "> 场景名称:{}  \n" +
                     "> 业务数据:{}  \n" +
                     "> 时间:{}  \n";
+
+    @Override
+    protected List<SyetemTaskTypeEnum> getSystemTaskType() {
+        return Lists.newArrayList(SyetemTaskTypeEnum.RETRY);
+    }
 
     @Override
     protected List<RetryAlarmInfo> poll() throws InterruptedException {

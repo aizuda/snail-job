@@ -12,7 +12,7 @@ import com.aizuda.snailjob.server.retry.task.support.strategy.FilterStrategies;
 import com.aizuda.snailjob.server.retry.task.support.strategy.StopStrategies;
 import com.aizuda.snailjob.server.common.strategy.WaitStrategies;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
-import com.aizuda.snailjob.template.datasource.persistence.po.SceneConfig;
+import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
 import org.springframework.stereotype.Component;
 
 /**
@@ -27,22 +27,22 @@ public class CallbackTaskExecutor extends AbstractTaskExecutor {
 
     @Override
     protected RetryContext builderRetryContext(final String groupName, final RetryTask retryTask,
-                                               final SceneConfig sceneConfig) {
+                                               final RetrySceneConfig retrySceneConfig) {
 
         CallbackRetryContext<Result> retryContext = new CallbackRetryContext<>();
         retryContext.setRetryTask(retryTask);
-        retryContext.setSceneBlacklist(accessTemplate.getSceneConfigAccess().getBlacklist(groupName, sceneConfig.getNamespaceId()));
+        retryContext.setSceneBlacklist(accessTemplate.getSceneConfigAccess().getBlacklist(groupName, retrySceneConfig.getNamespaceId()));
         retryContext.setServerNode(
                 clientNodeAllocateHandler.getServerNode(retryTask.getSceneName(),
                         retryTask.getGroupName(),
                         retryTask.getNamespaceId(),
-                        sceneConfig.getRouteKey()));
-        retryContext.setSceneConfig(sceneConfig);
+                        retrySceneConfig.getRouteKey()));
+        retryContext.setRetrySceneConfig(retrySceneConfig);
         return retryContext;
     }
 
     @Override
-    protected RetryExecutor builderResultRetryExecutor(RetryContext retryContext, final SceneConfig sceneConfig) {
+    protected RetryExecutor builderResultRetryExecutor(RetryContext retryContext, final RetrySceneConfig retrySceneConfig) {
         return RetryBuilder.<Result>newBuilder()
                 .withStopStrategy(StopStrategies.stopException())
                 .withStopStrategy(StopStrategies.stopResultStatus())

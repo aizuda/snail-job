@@ -12,7 +12,6 @@ import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.generator.id.IdGenerator;
 import com.aizuda.snailjob.server.common.util.DateUtils;
-import com.aizuda.snailjob.server.retry.task.generator.task.TaskContext.TaskInfo;
 import com.aizuda.snailjob.server.retry.task.support.RetryTaskConverter;
 import com.aizuda.snailjob.server.retry.task.support.RetryTaskLogConverter;
 import com.aizuda.snailjob.server.common.WaitStrategy;
@@ -23,9 +22,9 @@ import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import com.aizuda.snailjob.template.datasource.access.TaskAccess;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskLogMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.GroupConfig;
+import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTaskLog;
-import com.aizuda.snailjob.template.datasource.persistence.po.SceneConfig;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +55,7 @@ public abstract class AbstractGenerator implements TaskGenerator {
     public void taskGenerator(TaskContext taskContext) {
        SnailJobLog.LOCAL.debug("received report data. {}", JsonUtil.toJsonString(taskContext));
 
-        SceneConfig sceneConfig = checkAndInitScene(taskContext);
+        RetrySceneConfig retrySceneConfig = checkAndInitScene(taskContext);
 
         //客户端上报任务根据幂等id去重
         List<TaskContext.TaskInfo> taskInfos = taskContext.getTaskInfos().stream().collect(Collectors.collectingAndThen(
@@ -86,7 +85,7 @@ public abstract class AbstractGenerator implements TaskGenerator {
         LocalDateTime now = LocalDateTime.now();
         for (TaskContext.TaskInfo taskInfo : taskInfos) {
             Pair<List<RetryTask>, List<RetryTaskLog>> pair = doConvertTask(retryTaskMap, taskContext, now, taskInfo,
-                    sceneConfig);
+                retrySceneConfig);
             waitInsertTasks.addAll(pair.getKey());
             waitInsertTaskLogs.addAll(pair.getValue());
         }
@@ -107,11 +106,11 @@ public abstract class AbstractGenerator implements TaskGenerator {
      * @param retryTaskMap
      * @param now
      * @param taskInfo
-     * @param sceneConfig
+     * @param retrySceneConfig
      */
     private Pair<List<RetryTask>, List<RetryTaskLog>> doConvertTask(Map<String/*幂等ID*/, List<RetryTask>> retryTaskMap,
                                                                     TaskContext taskContext, LocalDateTime now,
-                                                                    TaskContext.TaskInfo taskInfo, SceneConfig sceneConfig) {
+                                                                    TaskContext.TaskInfo taskInfo, RetrySceneConfig retrySceneConfig) {
         List<RetryTask> waitInsertTasks = new ArrayList<>();
         List<RetryTaskLog> waitInsertTaskLogs = new ArrayList<>();
 
@@ -144,9 +143,9 @@ public abstract class AbstractGenerator implements TaskGenerator {
 
         WaitStrategyContext waitStrategyContext = new WaitStrategyContext();
         waitStrategyContext.setNextTriggerAt(now);
-        waitStrategyContext.setTriggerInterval(sceneConfig.getTriggerInterval());
+        waitStrategyContext.setTriggerInterval(retrySceneConfig.getTriggerInterval());
         waitStrategyContext.setDelayLevel(1);
-        WaitStrategy waitStrategy = WaitStrategyEnum.getWaitStrategy(sceneConfig.getBackOff());
+        WaitStrategy waitStrategy = WaitStrategyEnum.getWaitStrategy(retrySceneConfig.getBackOff());
         retryTask.setNextTriggerAt(DateUtils.toLocalDateTime(waitStrategy.computeTriggerTime(waitStrategyContext)));
         waitInsertTasks.add(retryTask);
 
@@ -161,11 +160,11 @@ public abstract class AbstractGenerator implements TaskGenerator {
 
     protected abstract Integer initStatus(TaskContext taskContext);
 
-    private SceneConfig checkAndInitScene(TaskContext taskContext) {
-        SceneConfig sceneConfig = accessTemplate.getSceneConfigAccess()
+    private RetrySceneConfig checkAndInitScene(TaskContext taskContext) {
+        RetrySceneConfig retrySceneConfig = accessTemplate.getSceneConfigAccess()
                 .getSceneConfigByGroupNameAndSceneName(taskContext.getGroupName(), taskContext.getSceneName(),
                         taskContext.getNamespaceId());
-        if (Objects.isNull(sceneConfig)) {
+        if (Objects.isNull(retrySceneConfig)) {
 
             GroupConfig groupConfig = accessTemplate.getGroupConfigAccess()
                     .getGroupConfigByGroupName(taskContext.getGroupName(), taskContext.getNamespaceId());
@@ -180,11 +179,11 @@ public abstract class AbstractGenerator implements TaskGenerator {
                         taskContext.getGroupName(), taskContext.getSceneName());
             } else {
                 // 若配置了默认初始化场景配置，则发现上报数据的时候未配置场景，默认生成一个场景
-                sceneConfig = initScene(taskContext.getGroupName(), taskContext.getSceneName(), taskContext.getNamespaceId());
+                retrySceneConfig = initScene(taskContext.getGroupName(), taskContext.getSceneName(), taskContext.getNamespaceId());
             }
         }
 
-        return sceneConfig;
+        return retrySceneConfig;
 
     }
 
@@ -195,18 +194,18 @@ public abstract class AbstractGenerator implements TaskGenerator {
      * @param groupName 组名称
      * @param sceneName 场景名称
      */
-    private SceneConfig initScene(String groupName, String sceneName, String namespaceId) {
-        SceneConfig sceneConfig = new SceneConfig();
-        sceneConfig.setNamespaceId(namespaceId);
-        sceneConfig.setGroupName(groupName);
-        sceneConfig.setSceneName(sceneName);
-        sceneConfig.setSceneStatus(StatusEnum.YES.getStatus());
-        sceneConfig.setBackOff(WaitStrategies.WaitStrategyEnum.DELAY_LEVEL.getType());
-        sceneConfig.setMaxRetryCount(DelayLevelEnum._21.getLevel());
-        sceneConfig.setDescription("自动初始化场景");
-        Assert.isTrue(1 == accessTemplate.getSceneConfigAccess().insert(sceneConfig),
+    private RetrySceneConfig initScene(String groupName, String sceneName, String namespaceId) {
+        RetrySceneConfig retrySceneConfig = new RetrySceneConfig();
+        retrySceneConfig.setNamespaceId(namespaceId);
+        retrySceneConfig.setGroupName(groupName);
+        retrySceneConfig.setSceneName(sceneName);
+        retrySceneConfig.setSceneStatus(StatusEnum.YES.getStatus());
+        retrySceneConfig.setBackOff(WaitStrategies.WaitStrategyEnum.DELAY_LEVEL.getType());
+        retrySceneConfig.setMaxRetryCount(DelayLevelEnum._21.getLevel());
+        retrySceneConfig.setDescription("自动初始化场景");
+        Assert.isTrue(1 == accessTemplate.getSceneConfigAccess().insert(retrySceneConfig),
                 () -> new SnailJobServerException("init scene error"));
-        return sceneConfig;
+        return retrySceneConfig;
     }
 
     /**

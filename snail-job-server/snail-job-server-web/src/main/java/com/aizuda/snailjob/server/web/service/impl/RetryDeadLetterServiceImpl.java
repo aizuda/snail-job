@@ -24,11 +24,9 @@ import com.aizuda.snailjob.template.datasource.access.ConfigAccess;
 import com.aizuda.snailjob.template.datasource.access.TaskAccess;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskLogMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryDeadLetter;
+import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTaskLog;
-import com.aizuda.snailjob.template.datasource.persistence.po.SceneConfig;
-import com.aizuda.snailjob.server.retry.task.support.RetryTaskConverter;
-import com.aizuda.snailjob.server.web.service.convert.RetryDeadLetterResponseVOConverter;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
@@ -117,21 +115,21 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
 
         Assert.notEmpty(retryDeadLetterList, () -> new SnailJobServerException("数据不存在"));
 
-        ConfigAccess<SceneConfig> sceneConfigAccess = accessTemplate.getSceneConfigAccess();
+        ConfigAccess<RetrySceneConfig> sceneConfigAccess = accessTemplate.getSceneConfigAccess();
         Set<String> sceneNameSet = retryDeadLetterList.stream().map(RetryDeadLetter::getSceneName)
                 .collect(Collectors.toSet());
-        List<SceneConfig> sceneConfigs = sceneConfigAccess.list(new LambdaQueryWrapper<SceneConfig>()
-                .eq(SceneConfig::getNamespaceId, namespaceId)
-                .in(SceneConfig::getSceneName, sceneNameSet));
+        List<RetrySceneConfig> retrySceneConfigs = sceneConfigAccess.list(new LambdaQueryWrapper<RetrySceneConfig>()
+                .eq(RetrySceneConfig::getNamespaceId, namespaceId)
+                .in(RetrySceneConfig::getSceneName, sceneNameSet));
 
-        Map<String, SceneConfig> sceneConfigMap = sceneConfigs.stream().collect(Collectors.toMap((sceneConfig) ->
+        Map<String, RetrySceneConfig> sceneConfigMap = retrySceneConfigs.stream().collect(Collectors.toMap((sceneConfig) ->
                 sceneConfig.getGroupName() + sceneConfig.getSceneName(), Function.identity()));
 
         List<RetryTask> waitRollbackList = new ArrayList<>();
         for (RetryDeadLetter retryDeadLetter : retryDeadLetterList) {
-            SceneConfig sceneConfig = sceneConfigMap.get(
+            RetrySceneConfig retrySceneConfig = sceneConfigMap.get(
                     retryDeadLetter.getGroupName() + retryDeadLetter.getSceneName());
-            Assert.notNull(sceneConfig,
+            Assert.notNull(retrySceneConfig,
                     () -> new SnailJobServerException("未查询到场景. [{}]", retryDeadLetter.getSceneName()));
 
             RetryTask retryTask = RetryTaskConverter.INSTANCE.toRetryTask(retryDeadLetter);
@@ -140,9 +138,9 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
 
             WaitStrategyContext waitStrategyContext = new WaitStrategyContext();
             waitStrategyContext.setNextTriggerAt(LocalDateTime.now());
-            waitStrategyContext.setTriggerInterval(sceneConfig.getTriggerInterval());
+            waitStrategyContext.setTriggerInterval(retrySceneConfig.getTriggerInterval());
             waitStrategyContext.setDelayLevel(1);
-            WaitStrategy waitStrategy = WaitStrategyEnum.getWaitStrategy(sceneConfig.getBackOff());
+            WaitStrategy waitStrategy = WaitStrategyEnum.getWaitStrategy(retrySceneConfig.getBackOff());
             retryTask.setNextTriggerAt(DateUtils.toLocalDateTime(waitStrategy.computeTriggerTime(waitStrategyContext)));
             retryTask.setCreateDt(LocalDateTime.now());
             waitRollbackList.add(retryTask);

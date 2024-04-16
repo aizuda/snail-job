@@ -8,6 +8,8 @@ import com.aizuda.snailjob.server.common.AlarmInfoConverter;
 import com.aizuda.snailjob.server.common.alarm.AbstractJobAlarm;
 import com.aizuda.snailjob.server.common.dto.JobAlarmInfo;
 import com.aizuda.snailjob.server.common.dto.NotifyConfigInfo;
+import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
+import com.aizuda.snailjob.server.common.triple.Triple;
 import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.job.task.support.event.JobTaskFailAlarmEvent;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.JobBatchResponseDO;
@@ -15,11 +17,14 @@ import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskBatchMa
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.common.collect.Lists;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 
 
@@ -31,16 +36,14 @@ import java.util.concurrent.LinkedBlockingQueue;
  * @since 2.5.0
  */
 @Component
-@Slf4j
+@RequiredArgsConstructor
 public class JobTaskFailAlarmListener extends AbstractJobAlarm<JobTaskFailAlarmEvent> {
-
-    @Autowired
-    private JobTaskBatchMapper jobTaskBatchMapper;
+    private final JobTaskBatchMapper jobTaskBatchMapper;
 
     /**
      * job任务失败数据
      */
-    private LinkedBlockingQueue<Long> queue = new LinkedBlockingQueue<>(1000);
+    private final LinkedBlockingQueue<Long> queue = new LinkedBlockingQueue<>(1000);
 
     private static String jobTaskFailTextMessagesFormatter =
             "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 Job任务执行失败</font> \n" +
@@ -90,6 +93,10 @@ public class JobTaskFailAlarmListener extends AbstractJobAlarm<JobTaskFailAlarmE
         return JobNotifySceneEnum.JOB_TASK_ERROR.getNotifyScene();
     }
 
+    @Override
+    protected List<SyetemTaskTypeEnum> getSystemTaskType() {
+        return Lists.newArrayList(SyetemTaskTypeEnum.JOB);
+    }
 
     @Override
     public void onApplicationEvent(JobTaskFailAlarmEvent event) {

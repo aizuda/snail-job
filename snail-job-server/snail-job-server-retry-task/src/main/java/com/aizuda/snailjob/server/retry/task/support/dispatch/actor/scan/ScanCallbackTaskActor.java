@@ -10,7 +10,7 @@ import com.aizuda.snailjob.server.common.strategy.WaitStrategies.WaitStrategyCon
 import com.aizuda.snailjob.server.common.strategy.WaitStrategies.WaitStrategyEnum;
 import com.aizuda.snailjob.server.retry.task.support.timer.CallbackTimerTask;
 import com.aizuda.snailjob.server.retry.task.support.timer.RetryTimerContext;
-import com.aizuda.snailjob.template.datasource.persistence.po.SceneConfig;
+import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
 import io.netty.util.TimerTask;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -59,7 +59,7 @@ public class ScanCallbackTaskActor extends AbstractScanGroup {
 
     @Override
     protected LocalDateTime calculateNextTriggerTime(final RetryPartitionTask partitionTask,
-        final SceneConfig sceneConfig) {
+        final RetrySceneConfig retrySceneConfig) {
 
         long triggerInterval = systemProperties.getCallback().getTriggerInterval();
         WaitStrategy waitStrategy = WaitStrategyEnum.getWaitStrategy(WaitStrategyEnum.FIXED.getType());

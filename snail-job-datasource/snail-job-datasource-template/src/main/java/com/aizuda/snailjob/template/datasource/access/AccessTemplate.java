@@ -11,15 +11,7 @@ import com.aizuda.snailjob.template.datasource.persistence.po.GroupConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.NotifyConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryDeadLetter;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
-import com.aizuda.snailjob.template.datasource.persistence.po.SceneConfig;
-import com.aizuda.snailjob.template.datasource.access.config.GroupConfigAccess;
-import com.aizuda.snailjob.template.datasource.access.config.NotifyConfigAccess;
-import com.aizuda.snailjob.template.datasource.access.config.SceneConfigAccess;
-import com.aizuda.snailjob.template.datasource.access.task.RetryDeadLetterTaskAccess;
-import com.aizuda.snailjob.template.datasource.access.task.RetryTaskAccess;
-import com.aizuda.snailjob.template.datasource.enums.OperationTypeEnum;
-import com.aizuda.snailjob.template.datasource.exception.SnailJobDatasourceException;
-import com.aizuda.snailjob.template.datasource.persistence.po.*;
+import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -76,8 +68,8 @@ public class AccessTemplate {
      *
      * @return {@link SceneConfigAccess} 获取场景配置操作类
      */
-    public ConfigAccess<SceneConfig> getSceneConfigAccess() {
-        return (ConfigAccess<SceneConfig>) Optional.ofNullable(REGISTER_ACCESS.get(OperationTypeEnum.SCENE.name()))
+    public ConfigAccess<RetrySceneConfig> getSceneConfigAccess() {
+        return (ConfigAccess<RetrySceneConfig>) Optional.ofNullable(REGISTER_ACCESS.get(OperationTypeEnum.SCENE.name()))
             .orElseThrow(() -> new SnailJobDatasourceException("not supports operation type"));
 
     }

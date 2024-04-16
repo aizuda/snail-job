@@ -20,7 +20,17 @@ public class NotifyConfigRequestVO {
     @Pattern(regexp = "^[A-Za-z0-9_]{1,64}$", message = "仅支持长度为1~64字符且类型为数字、字母和下划线")
     private String groupName;
 
-    private String sceneName;
+    /**
+     * 业务id (scene_name或job_id或workflow_id)
+     */
+    @NotBlank(message = "业务id不能为空")
+    private String businessId;
+
+    /**
+     * 任务类型 1、重试任务 2、回调任务、 3、JOB任务 4、WORKFLOW任务
+     */
+    @NotNull(message = "任务类型不能为空")
+    private Integer systemTaskType;
 
     @NotNull(message = "通知状态不能为空")
     private Integer notifyStatus;
