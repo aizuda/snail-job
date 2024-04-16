@@ -61,10 +61,6 @@
         </dependency>
         <dependency>
             <groupId>com.aizuda</groupId>
-            <artifactId>snail-job-common-client-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.aizuda</groupId>
             <artifactId>snail-job-datasource-template</artifactId>
         </dependency>
         <dependency>
