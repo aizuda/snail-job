@@ -11,6 +11,7 @@ import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.NotifyConfigQueryVO;
 import com.aizuda.snailjob.server.web.model.request.NotifyConfigRequestVO;
 import com.aizuda.snailjob.server.web.model.response.NotifyConfigResponseVO;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -25,10 +26,9 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/notify-config")
+@RequiredArgsConstructor
 public class NotifyConfigController {
-
-    @Autowired
-    private NotifyConfigService notifyConfigService;
+    private final NotifyConfigService notifyConfigService;
 
     @LoginRequired
     @GetMapping("list")
