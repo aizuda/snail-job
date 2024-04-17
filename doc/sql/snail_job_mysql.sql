@@ -53,7 +53,7 @@ CREATE TABLE `sj_notify_config`
     `business_id`            varchar(64)  NOT NULL COMMENT '业务id (job_id或workflow_id或scene_name)',
     `system_task_type`       tinyint(4) NOT NULL DEFAULT 3 COMMENT '任务类型 1. 重试任务 2. 重试回调 3、JOB任务 4、WORKFLOW任务',
     `notify_status`          tinyint(4) NOT NULL DEFAULT 0 COMMENT '通知状态 0、未启用 1、启用',
-    `recipient_ids`          varchar(128) NOT NULL DEFAULT 0 COMMENT '接收人id列表',
+    `recipient_ids`          varchar(128) NOT NULL COMMENT '接收人id列表',
     `notify_threshold`       int(11) NOT NULL DEFAULT 0 COMMENT '通知阈值',
     `notify_scene`           tinyint(4) NOT NULL DEFAULT 0 COMMENT '通知场景',
     `rate_limiter_status`    tinyint(4) NOT NULL DEFAULT 0 COMMENT '限流状态 0、未启用 1、启用',
@@ -80,7 +80,7 @@ CREATE TABLE `sj_notify_recipient`
     `create_dt`        datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_dt`        datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     PRIMARY KEY (`id`),
-    KEY                `idx_namespace_id_group_name_scene_name` (`namespace_id`, `group_name`, `business_id`)
+    KEY                `idx_namespace_id_group_name` (`namespace_id`, `group_name`)
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 0
   DEFAULT CHARSET = utf8mb4 COMMENT ='告警通知接收人'
