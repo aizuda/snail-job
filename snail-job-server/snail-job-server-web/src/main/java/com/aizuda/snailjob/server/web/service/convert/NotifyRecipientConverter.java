@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.web.service.convert;
 
+import com.aizuda.snailjob.server.web.model.request.NotifyRecipientRequestVO;
 import com.aizuda.snailjob.server.web.model.response.NotifyRecipientResponseVO;
 import com.aizuda.snailjob.template.datasource.persistence.po.NotifyRecipient;
 import org.mapstruct.Mapper;
@@ -13,10 +14,11 @@ import java.util.List;
  * @since sj_1.0.0
  */
 @Mapper
-public interface NotifyRecipientResponseVOConverter {
+public interface NotifyRecipientConverter {
 
-    NotifyRecipientResponseVOConverter INSTANCE = Mappers.getMapper(NotifyRecipientResponseVOConverter.class);
+    NotifyRecipientConverter INSTANCE = Mappers.getMapper(NotifyRecipientConverter.class);
 
     List<NotifyRecipientResponseVO> toNotifyRecipientResponseVOs(List<NotifyRecipient> notifyRecipients);
 
+    NotifyRecipient toNotifyRecipient(NotifyRecipientRequestVO requestVO);
 }

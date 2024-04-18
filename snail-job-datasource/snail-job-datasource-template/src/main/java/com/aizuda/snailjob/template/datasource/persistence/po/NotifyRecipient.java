@@ -38,11 +38,6 @@ public class NotifyRecipient implements Serializable {
     private String namespaceId;
 
     /**
-     * 组名称
-     */
-    private String groupName;
-
-    /**
      * 接收人名称
      */
     private String recipientName;

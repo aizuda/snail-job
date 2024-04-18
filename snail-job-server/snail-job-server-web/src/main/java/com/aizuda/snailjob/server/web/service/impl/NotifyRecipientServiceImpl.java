@@ -1,11 +1,12 @@
 package com.aizuda.snailjob.server.web.service.impl;
 
+import cn.hutool.core.lang.Assert;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.NotifyRecipientQueryVO;
 import com.aizuda.snailjob.server.web.model.request.NotifyRecipientRequestVO;
 import com.aizuda.snailjob.server.web.model.response.NotifyRecipientResponseVO;
 import com.aizuda.snailjob.server.web.service.NotifyRecipientService;
-import com.aizuda.snailjob.server.web.service.convert.NotifyRecipientResponseVOConverter;
+import com.aizuda.snailjob.server.web.service.convert.NotifyRecipientConverter;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.NotifyRecipientMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.NotifyRecipient;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -31,16 +32,16 @@ public class NotifyRecipientServiceImpl implements NotifyRecipientService {
 
         PageDTO<NotifyRecipient> notifyRecipientPageDTO = notifyRecipientMapper.selectPage(pageDTO, new LambdaQueryWrapper<>());
 
-        return new PageResult<>(pageDTO, NotifyRecipientResponseVOConverter.INSTANCE.toNotifyRecipientResponseVOs(notifyRecipientPageDTO.getRecords()));
+        return new PageResult<>(pageDTO, NotifyRecipientConverter.INSTANCE.toNotifyRecipientResponseVOs(notifyRecipientPageDTO.getRecords()));
     }
 
     @Override
     public Boolean saveNotifyRecipient(NotifyRecipientRequestVO requestVO) {
-        return null;
+        return 1 == notifyRecipientMapper.insert(NotifyRecipientConverter.INSTANCE.toNotifyRecipient(requestVO));
     }
 
     @Override
     public Boolean updateNotifyRecipient(NotifyRecipientRequestVO requestVO) {
-        return null;
+        return 1 == notifyRecipientMapper.updateById(NotifyRecipientConverter.INSTANCE.toNotifyRecipient(requestVO));
     }
 }
