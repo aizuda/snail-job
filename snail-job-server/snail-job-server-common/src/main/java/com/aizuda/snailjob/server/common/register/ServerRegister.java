@@ -131,9 +131,12 @@ public class ServerRegister extends AbstractRegister {
     public void start() {
        SnailJobLog.LOCAL.info("ServerRegister start");
 
-        Register register = SpringContext.getBean(ServerRegister.BEAN_NAME, Register.class);
         serverRegisterNode.scheduleAtFixedRate(()->{
-            register.register(new RegisterContext());
+            try {
+                this.register(new RegisterContext());
+            } catch (Exception e) {
+                SnailJobLog.LOCAL.error("服务端注册失败", e);
+            }
         }, 0, DELAY_TIME * 2 / 3, TimeUnit.SECONDS);
 
     }

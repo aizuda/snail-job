@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.web.service.impl;
 
+import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.NotifyRecipientQueryVO;
 import com.aizuda.snailjob.server.web.model.request.NotifyRecipientRequestVO;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author opensnail
@@ -29,6 +31,14 @@ public class NotifyRecipientServiceImpl implements NotifyRecipientService {
     public PageResult<List<NotifyRecipientResponseVO>> getNotifyRecipientList(NotifyRecipientQueryVO queryVO) {
         PageDTO<NotifyRecipient> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
         LambdaQueryWrapper<NotifyRecipient> queryWrapper = new LambdaQueryWrapper<>();
+        if (StrUtil.isNotBlank(queryVO.getRecipientName())) {
+            queryWrapper.likeRight(NotifyRecipient::getRecipientName, queryVO.getRecipientName());
+        }
+
+        if (Objects.nonNull(queryVO.getNotifyType())) {
+            queryWrapper.likeRight(NotifyRecipient::getNotifyType, queryVO.getNotifyType());
+        }
+
         queryWrapper.orderByDesc(NotifyRecipient::getCreateDt);
         PageDTO<NotifyRecipient> notifyRecipientPageDTO = notifyRecipientMapper.selectPage(pageDTO, queryWrapper);
 

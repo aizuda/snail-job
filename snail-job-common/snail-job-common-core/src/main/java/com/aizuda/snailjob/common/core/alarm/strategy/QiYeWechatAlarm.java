@@ -30,7 +30,7 @@ public class QiYeWechatAlarm extends AbstractAlarm<AlarmContext> {
 
     @Override
     public Integer getAlarmType() {
-        return AlarmTypeEnum.QI_YE_WECHAT.getValue();
+        return AlarmTypeEnum.WE_COM.getValue();
     }
 
     @Override

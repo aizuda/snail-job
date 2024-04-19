@@ -19,9 +19,9 @@ public enum AlarmTypeEnum {
     EMAIL(2),
 
     /**
-     * 企业通知
+     * 企业微信通知
      */
-    QI_YE_WECHAT(3),
+    WE_COM(3),
 
     /**
      * 飞书
