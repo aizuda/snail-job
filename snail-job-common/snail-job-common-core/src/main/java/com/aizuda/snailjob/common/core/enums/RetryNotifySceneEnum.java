@@ -10,7 +10,7 @@ import lombok.Getter;
  * @since : 1.0.0
  */
 @Getter
-public enum NotifySceneEnum {
+public enum RetryNotifySceneEnum {
 
     MAX_RETRY(1, "场景重试数量超过阈值", NodeTypeEnum.SERVER),
 
@@ -40,7 +40,7 @@ public enum NotifySceneEnum {
      */
     private final String desc;
 
-    NotifySceneEnum(int notifyScene, String desc, NodeTypeEnum nodeType) {
+    RetryNotifySceneEnum(int notifyScene, String desc, NodeTypeEnum nodeType) {
         this.notifyScene = notifyScene;
         this.desc = desc;
         this.nodeType = nodeType;
@@ -53,8 +53,8 @@ public enum NotifySceneEnum {
      * @param nodeType 触发通知节点类型
      * @return this
      */
-    public static NotifySceneEnum getNotifyScene(int notifyScene, NodeTypeEnum nodeType) {
-        for (NotifySceneEnum sceneEnum : NotifySceneEnum.values()) {
+    public static RetryNotifySceneEnum getNotifyScene(int notifyScene, NodeTypeEnum nodeType) {
+        for (RetryNotifySceneEnum sceneEnum : RetryNotifySceneEnum.values()) {
             if (sceneEnum.getNotifyScene() == notifyScene && sceneEnum.nodeType.getType().equals(nodeType.getType())) {
                 return sceneEnum;
             }

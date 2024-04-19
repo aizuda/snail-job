@@ -11,7 +11,7 @@ import com.aizuda.snailjob.common.core.alarm.Alarm;
 import com.aizuda.snailjob.common.core.alarm.AlarmContext;
 import com.aizuda.snailjob.common.core.alarm.SnailJobAlarmFactory;
 import com.aizuda.snailjob.common.core.context.SpringContext;
-import com.aizuda.snailjob.common.core.enums.NotifySceneEnum;
+import com.aizuda.snailjob.common.core.enums.RetryNotifySceneEnum;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.common.core.model.NettyResult;
 import com.aizuda.snailjob.common.core.util.EnvironmentUtils;
@@ -20,7 +20,6 @@ import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.window.Listener;
 import com.aizuda.snailjob.server.model.dto.ConfigDTO;
 import com.aizuda.snailjob.server.model.dto.RetryTaskDTO;
-import com.aizuda.snailjob.client.common.rpc.client.RequestBuilder;
 import com.github.rholder.retry.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -108,7 +107,7 @@ public class ReportListener implements Listener<RetryTaskDTO> {
     private void sendMessage(Throwable e) {
 
         try {
-            ConfigDTO.Notify notifyAttribute = GroupVersionCache.getNotifyAttribute(NotifySceneEnum.CLIENT_REPORT_ERROR.getNotifyScene());
+            ConfigDTO.Notify notifyAttribute = GroupVersionCache.getNotifyAttribute(RetryNotifySceneEnum.CLIENT_REPORT_ERROR.getNotifyScene());
             if (Objects.isNull(notifyAttribute)) {
                 return;
             }

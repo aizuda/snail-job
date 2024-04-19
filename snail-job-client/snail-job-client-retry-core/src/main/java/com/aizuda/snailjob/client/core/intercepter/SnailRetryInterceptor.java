@@ -14,7 +14,7 @@ import com.aizuda.snailjob.common.core.alarm.Alarm;
 import com.aizuda.snailjob.common.core.alarm.AlarmContext;
 import com.aizuda.snailjob.common.core.alarm.SnailJobAlarmFactory;
 import com.aizuda.snailjob.common.core.context.SpringContext;
-import com.aizuda.snailjob.common.core.enums.NotifySceneEnum;
+import com.aizuda.snailjob.common.core.enums.RetryNotifySceneEnum;
 import com.aizuda.snailjob.common.core.enums.RetryResultStatusEnum;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.common.core.model.SnailJobHeaders;
@@ -212,7 +212,7 @@ public class SnailRetryInterceptor implements MethodInterceptor, AfterAdvice, Se
 
         try {
             ConfigDTO.Notify notifyAttribute = GroupVersionCache.getNotifyAttribute(
-                    NotifySceneEnum.CLIENT_COMPONENT_ERROR.getNotifyScene());
+                    RetryNotifySceneEnum.CLIENT_COMPONENT_ERROR.getNotifyScene());
             if (Objects.nonNull(notifyAttribute)) {
                 AlarmContext context = AlarmContext.build()
                         .text(retryErrorMoreThresholdTextMessageFormatter,

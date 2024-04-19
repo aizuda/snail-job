@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.template.datasource.access;
 
-import com.aizuda.snailjob.common.core.enums.NotifySceneEnum;
+import com.aizuda.snailjob.common.core.enums.RetryNotifySceneEnum;
 import com.aizuda.snailjob.server.model.dto.ConfigDTO;
 import com.aizuda.snailjob.template.datasource.persistence.po.GroupConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.NotifyConfig;
@@ -48,7 +48,7 @@ public interface ConfigAccess<T> extends Access<T>  {
      * 获取通知配置
      *
      * @param groupName     组名称
-     * @param notifyScene {@link NotifySceneEnum} 场景类型
+     * @param notifyScene {@link RetryNotifySceneEnum} 场景类型
      * @return {@link NotifyConfig} 场景配置
      */
     List<NotifyConfig> getNotifyConfigByGroupName(String groupName,Integer notifyScene, String namespaceId);
@@ -59,7 +59,7 @@ public interface ConfigAccess<T> extends Access<T>  {
      *
      * @param groupName     组名称
      * @param groupName     场景名称
-     * @param notifyScene {@link NotifySceneEnum} 场景类型
+     * @param notifyScene {@link RetryNotifySceneEnum} 场景类型
      * @return {@link NotifyConfig} 场景配置
      */
     @Deprecated

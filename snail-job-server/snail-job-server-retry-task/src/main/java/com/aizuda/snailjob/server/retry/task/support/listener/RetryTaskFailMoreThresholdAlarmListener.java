@@ -1,7 +1,7 @@
 package com.aizuda.snailjob.server.retry.task.support.listener;
 
 import com.aizuda.snailjob.common.core.alarm.AlarmContext;
-import com.aizuda.snailjob.common.core.enums.NotifySceneEnum;
+import com.aizuda.snailjob.common.core.enums.RetryNotifySceneEnum;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.common.core.util.EnvironmentUtils;
 import com.aizuda.snailjob.server.common.AlarmInfoConverter;
@@ -96,6 +96,6 @@ public class RetryTaskFailMoreThresholdAlarmListener extends
 
     @Override
     protected int getNotifyScene() {
-        return NotifySceneEnum.RETRY_TASK_REACH_THRESHOLD.getNotifyScene();
+        return RetryNotifySceneEnum.RETRY_TASK_REACH_THRESHOLD.getNotifyScene();
     }
 }

@@ -3,7 +3,7 @@ package com.aizuda.snailjob.server.retry.task.support.schedule;
 import com.aizuda.snailjob.common.core.alarm.Alarm;
 import com.aizuda.snailjob.common.core.alarm.AlarmContext;
 import com.aizuda.snailjob.common.core.alarm.SnailJobAlarmFactory;
-import com.aizuda.snailjob.common.core.enums.NotifySceneEnum;
+import com.aizuda.snailjob.common.core.enums.RetryNotifySceneEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.common.core.util.EnvironmentUtils;
@@ -109,7 +109,7 @@ public class RetryErrorMoreThresholdAlarmSchedule extends AbstractSchedule imple
         List<NotifyConfig> notifyConfigs = accessTemplate.getNotifyConfigAccess()
                 .listPage(new PageDTO<>(startId, 1000), new LambdaQueryWrapper<NotifyConfig>()
                         .eq(NotifyConfig::getNotifyStatus, StatusEnum.YES.getStatus())
-                        .eq(NotifyConfig::getNotifyScene, NotifySceneEnum.MAX_RETRY_ERROR.getNotifyScene()))
+                        .eq(NotifyConfig::getNotifyScene, RetryNotifySceneEnum.MAX_RETRY_ERROR.getNotifyScene()))
                 .getRecords();
 
         return RetryTaskConverter.INSTANCE.toNotifyConfigPartitionTask(notifyConfigs);

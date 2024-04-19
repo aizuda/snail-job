@@ -1,7 +1,7 @@
 package com.aizuda.snailjob.template.datasource.access.config;
 
 import com.aizuda.snailjob.common.core.enums.NodeTypeEnum;
-import com.aizuda.snailjob.common.core.enums.NotifySceneEnum;
+import com.aizuda.snailjob.common.core.enums.RetryNotifySceneEnum;
 import com.aizuda.snailjob.server.model.dto.ConfigDTO;
 import com.aizuda.snailjob.template.datasource.access.ConfigAccess;
 import com.aizuda.snailjob.template.datasource.enums.DbTypeEnum;
@@ -200,7 +200,7 @@ public abstract class AbstractConfigAccess<T> implements ConfigAccess<T> {
         for (NotifyConfig notifyConfig : notifyList) {
 
             // 只选择客户端的通知配置即可
-            NotifySceneEnum notifyScene = NotifySceneEnum.getNotifyScene(notifyConfig.getNotifyScene(),
+            RetryNotifySceneEnum notifyScene = RetryNotifySceneEnum.getNotifyScene(notifyConfig.getNotifyScene(),
                 NodeTypeEnum.CLIENT);
             if (Objects.isNull(notifyScene)) {
                 continue;

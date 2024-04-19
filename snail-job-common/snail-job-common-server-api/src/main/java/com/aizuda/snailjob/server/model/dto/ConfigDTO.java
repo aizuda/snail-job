@@ -2,7 +2,7 @@ package com.aizuda.snailjob.server.model.dto;
 
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.enums.AlarmTypeEnum;
-import com.aizuda.snailjob.common.core.enums.NotifySceneEnum;
+import com.aizuda.snailjob.common.core.enums.RetryNotifySceneEnum;
 import lombok.Data;
 import java.util.List;
 import java.util.Set;
@@ -69,7 +69,7 @@ public class ConfigDTO {
         private Integer notifyThreshold;
 
         /**
-         * 场景场景 {@link NotifySceneEnum}
+         * 场景场景 {@link RetryNotifySceneEnum}
          */
         private Integer notifyScene;
     }
