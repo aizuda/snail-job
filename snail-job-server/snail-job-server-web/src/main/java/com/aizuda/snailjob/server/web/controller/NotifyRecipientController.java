@@ -1,8 +1,10 @@
 package com.aizuda.snailjob.server.web.controller;
 
+import com.aizuda.snailjob.server.web.annotation.LoginRequired;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.NotifyRecipientQueryVO;
 import com.aizuda.snailjob.server.web.model.request.NotifyRecipientRequestVO;
+import com.aizuda.snailjob.server.web.model.response.CommonLabelValueResponseVO;
 import com.aizuda.snailjob.server.web.model.response.NotifyRecipientResponseVO;
 import com.aizuda.snailjob.server.web.service.NotifyRecipientService;
 import lombok.RequiredArgsConstructor;
@@ -26,17 +28,26 @@ public class NotifyRecipientController {
     private final NotifyRecipientService notifyRecipientService;
 
     @PostMapping
+    @LoginRequired
     public Boolean saveNotifyRecipient(@RequestBody @Validated NotifyRecipientRequestVO requestVO) {
         return notifyRecipientService.saveNotifyRecipient(requestVO);
     }
 
     @PutMapping
+    @LoginRequired
     public Boolean updateNotifyRecipient(@RequestBody @Validated NotifyRecipientRequestVO requestVO) {
         return notifyRecipientService.updateNotifyRecipient(requestVO);
     }
 
     @GetMapping("/page/list")
-    public PageResult<List<NotifyRecipientResponseVO>> getNotifyRecipientList(NotifyRecipientQueryVO queryVO) {
-        return notifyRecipientService.getNotifyRecipientList(queryVO);
+    @LoginRequired
+    public PageResult<List<NotifyRecipientResponseVO>> getNotifyRecipientPageList(NotifyRecipientQueryVO queryVO) {
+        return notifyRecipientService.getNotifyRecipientPageList(queryVO);
+    }
+
+    @GetMapping("/list")
+    @LoginRequired
+    public List<CommonLabelValueResponseVO> getNotifyRecipientList() {
+        return notifyRecipientService.getNotifyRecipientList();
     }
 }

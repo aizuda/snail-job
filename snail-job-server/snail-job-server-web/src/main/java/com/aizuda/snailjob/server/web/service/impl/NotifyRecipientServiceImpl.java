@@ -4,6 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.NotifyRecipientQueryVO;
 import com.aizuda.snailjob.server.web.model.request.NotifyRecipientRequestVO;
+import com.aizuda.snailjob.server.web.model.response.CommonLabelValueResponseVO;
 import com.aizuda.snailjob.server.web.model.response.NotifyRecipientResponseVO;
 import com.aizuda.snailjob.server.web.service.NotifyRecipientService;
 import com.aizuda.snailjob.server.web.service.convert.NotifyRecipientConverter;
@@ -28,7 +29,7 @@ public class NotifyRecipientServiceImpl implements NotifyRecipientService {
     private final NotifyRecipientMapper notifyRecipientMapper;
 
     @Override
-    public PageResult<List<NotifyRecipientResponseVO>> getNotifyRecipientList(NotifyRecipientQueryVO queryVO) {
+    public PageResult<List<NotifyRecipientResponseVO>> getNotifyRecipientPageList(NotifyRecipientQueryVO queryVO) {
         PageDTO<NotifyRecipient> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
         LambdaQueryWrapper<NotifyRecipient> queryWrapper = new LambdaQueryWrapper<>();
         if (StrUtil.isNotBlank(queryVO.getRecipientName())) {
@@ -53,5 +54,14 @@ public class NotifyRecipientServiceImpl implements NotifyRecipientService {
     @Override
     public Boolean updateNotifyRecipient(NotifyRecipientRequestVO requestVO) {
         return 1 == notifyRecipientMapper.updateById(NotifyRecipientConverter.INSTANCE.toNotifyRecipient(requestVO));
+    }
+
+    @Override
+    public List<CommonLabelValueResponseVO> getNotifyRecipientList() {
+
+        LambdaQueryWrapper<NotifyRecipient> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.select(NotifyRecipient::getRecipientName, NotifyRecipient::getId);
+        List<NotifyRecipient> notifyRecipients = notifyRecipientMapper.selectList(queryWrapper);
+        return NotifyRecipientConverter.INSTANCE.toCommonLabelValueResponseVOs(notifyRecipients);
     }
 }

@@ -15,16 +15,6 @@ public class NotifyRecipientResponseVO {
     private Long id;
 
     /**
-     * 命名空间id
-     */
-    private String namespaceId;
-
-    /**
-     * 组名称
-     */
-    private String groupName;
-
-    /**
      * 接收人名称
      */
     private String recipientName;
