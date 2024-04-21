@@ -8,6 +8,7 @@ import com.aizuda.snailjob.server.web.model.response.CommonLabelValueResponseVO;
 import com.aizuda.snailjob.server.web.model.response.NotifyRecipientResponseVO;
 import com.aizuda.snailjob.server.web.service.NotifyRecipientService;
 import com.aizuda.snailjob.server.web.service.convert.NotifyRecipientConverter;
+import com.aizuda.snailjob.server.web.util.UserSessionUtils;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.NotifyRecipientMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.NotifyRecipient;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -48,12 +49,18 @@ public class NotifyRecipientServiceImpl implements NotifyRecipientService {
 
     @Override
     public Boolean saveNotifyRecipient(NotifyRecipientRequestVO requestVO) {
-        return 1 == notifyRecipientMapper.insert(NotifyRecipientConverter.INSTANCE.toNotifyRecipient(requestVO));
+        String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
+        NotifyRecipient notifyRecipient = NotifyRecipientConverter.INSTANCE.toNotifyRecipient(requestVO);
+        notifyRecipient.setNamespaceId(namespaceId);
+        return 1 == notifyRecipientMapper.insert(notifyRecipient);
     }
 
     @Override
     public Boolean updateNotifyRecipient(NotifyRecipientRequestVO requestVO) {
-        return 1 == notifyRecipientMapper.updateById(NotifyRecipientConverter.INSTANCE.toNotifyRecipient(requestVO));
+        String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
+        NotifyRecipient notifyRecipient = NotifyRecipientConverter.INSTANCE.toNotifyRecipient(requestVO);
+        notifyRecipient.setNamespaceId(namespaceId);
+        return 1 == notifyRecipientMapper.updateById(notifyRecipient);
     }
 
     @Override
