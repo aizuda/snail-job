@@ -274,7 +274,7 @@ public class SnailRetryEndPoint {
      * @param generateRetryIdempotentIdDTO 生成idempotentId模型
      * @return idempotentId
      */
-    @PostMapping("/generate/idempotent-id/v1")
+    @Mapping(path = "/retry/generate/idempotent-id/v1", method = RequestMethod.POST)
     public Result<String> idempotentIdGenerate(
        GenerateRetryIdempotentIdDTO generateRetryIdempotentIdDTO) {
 
