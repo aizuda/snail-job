@@ -99,6 +99,10 @@ public class SceneConfigServiceImpl implements SceneConfigService {
         RetrySceneConfig retrySceneConfig = SceneConfigConverter.INSTANCE.toSceneConfigRequestVO(requestVO);
         retrySceneConfig.setCreateDt(LocalDateTime.now());
         retrySceneConfig.setNamespaceId(namespaceId);
+        if (requestVO.getBackOff() == WaitStrategies.WaitStrategyEnum.DELAY_LEVEL.getType()) {
+            retrySceneConfig.setTriggerInterval(StrUtil.EMPTY);
+        }
+
         Assert.isTrue(1 == sceneConfigAccess.insert(retrySceneConfig),
                 () -> new SnailJobServerException("failed to insert scene. retrySceneConfig:[{}]",
                         JsonUtil.toJsonString(retrySceneConfig)));

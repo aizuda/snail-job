@@ -38,11 +38,6 @@ public class SystemProperties {
     private int nettyPort = 1788;
 
     /**
-     * 分区数
-     */
-    private int totalPartition = 32;
-
-    /**
      * 一个客户端每秒最多接收的重试数量指令
      */
     private int limiter = 100;

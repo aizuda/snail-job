@@ -94,12 +94,12 @@ public class GroupConfigServiceImpl implements GroupConfigService {
                 () -> new SnailJobServerException("GroupName已经存在 {}", groupConfigRequestVO.getGroupName()));
 
         // 保存组配置
-        doSaveGroupConfig(systemUser, groupConfigRequestVO);
+        Boolean isSuccess = doSaveGroupConfig(systemUser, groupConfigRequestVO);
 
         // 保存生成唯一id配置
         doSaveSequenceAlloc(systemUser, groupConfigRequestVO);
 
-        return Boolean.TRUE;
+        return isSuccess;
     }
 
     /**
@@ -123,6 +123,11 @@ public class GroupConfigServiceImpl implements GroupConfigService {
     @Transactional
     public Boolean updateGroup(GroupConfigRequestVO groupConfigRequestVO) {
 
+        List<Integer> tablePartitionList = getTablePartitionList();
+        if (CollectionUtils.isEmpty(tablePartitionList)) {
+            return Boolean.FALSE;
+        }
+
         String groupName = groupConfigRequestVO.getGroupName();
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
 
@@ -140,8 +145,8 @@ public class GroupConfigServiceImpl implements GroupConfigService {
         // 使用@TableField(value = "version", update= "%s+1") 进行更新version, 这里必须初始化一个值
         groupConfig.setVersion(1);
         groupConfig.setToken(null);
-        Assert.isTrue(systemProperties.getTotalPartition() > groupConfigRequestVO.getGroupPartition(),
-                () -> new SnailJobServerException("分区超过最大分区. [{}]", systemProperties.getTotalPartition() - 1));
+        Assert.isTrue(tablePartitionList.contains(groupConfigRequestVO.getGroupPartition()),
+                () -> new SnailJobServerException("分区不存在. [{}]", tablePartitionList));
         Assert.isTrue(groupConfigRequestVO.getGroupPartition() >= 0,
                 () -> new SnailJobServerException("分区不能是负数."));
 
@@ -223,7 +228,12 @@ public class GroupConfigServiceImpl implements GroupConfigService {
         return pageResult;
     }
 
-    private void doSaveGroupConfig(UserSessionVO systemUser, GroupConfigRequestVO groupConfigRequestVO) {
+    private boolean doSaveGroupConfig(UserSessionVO systemUser, GroupConfigRequestVO groupConfigRequestVO) {
+        List<Integer> tablePartitionList = getTablePartitionList();
+        if (CollectionUtils.isEmpty(tablePartitionList)) {
+            return Boolean.FALSE;
+        }
+
         GroupConfig groupConfig = GroupConfigConverter.INSTANCE.convert(groupConfigRequestVO);
         groupConfig.setCreateDt(LocalDateTime.now());
         groupConfig.setVersion(1);
@@ -233,10 +243,10 @@ public class GroupConfigServiceImpl implements GroupConfigService {
         groupConfig.setDescription(Optional.ofNullable(groupConfigRequestVO.getDescription()).orElse(StrUtil.EMPTY));
         if (Objects.isNull(groupConfigRequestVO.getGroupPartition())) {
             groupConfig.setGroupPartition(
-                    HashUtil.bkdrHash(groupConfigRequestVO.getGroupName()) % systemProperties.getTotalPartition());
+                    HashUtil.bkdrHash(groupConfigRequestVO.getGroupName()) % tablePartitionList.size());
         } else {
-            Assert.isTrue(systemProperties.getTotalPartition() > groupConfigRequestVO.getGroupPartition(),
-                    () -> new SnailJobServerException("分区超过最大分区. [{}]", systemProperties.getTotalPartition() - 1));
+            Assert.isTrue(tablePartitionList.contains(groupConfigRequestVO.getGroupPartition()),
+                    () -> new SnailJobServerException("分区不存在. [{}]", tablePartitionList));
             Assert.isTrue(groupConfigRequestVO.getGroupPartition() >= 0,
                     () -> new SnailJobServerException("分区不能是负数."));
         }
@@ -249,6 +259,8 @@ public class GroupConfigServiceImpl implements GroupConfigService {
 
         // 校验retry_task_x和retry_dead_letter_x是否存在
         checkGroupPartition(groupConfig, systemUser.getNamespaceId());
+
+        return Boolean.TRUE;
     }
 
     /**
@@ -369,7 +381,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
             }
 
             return tableList.stream().map(ReUtil::getFirstNumber).filter(i ->
-                            !Objects.isNull(i) && i <= systemProperties.getTotalPartition()).distinct()
+                            !Objects.isNull(i)).distinct()
                     .collect(Collectors.toList());
         } catch (SQLException ignored) {
         } finally {
@@ -381,12 +393,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
             }
         }
 
-        // 兜底
-        List<Integer> tableList = Lists.newArrayList();
-        for (int i = 0; i < systemProperties.getTotalPartition(); i++) {
-            tableList.add(i);
-        }
-        return tableList;
+        return Lists.newArrayList();
     }
 
 }
