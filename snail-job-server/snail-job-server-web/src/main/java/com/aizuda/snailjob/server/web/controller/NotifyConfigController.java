@@ -6,13 +6,7 @@ import com.aizuda.snailjob.server.web.model.request.NotifyConfigQueryVO;
 import com.aizuda.snailjob.server.web.model.request.NotifyConfigRequestVO;
 import com.aizuda.snailjob.server.web.model.response.NotifyConfigResponseVO;
 import com.aizuda.snailjob.server.web.service.NotifyConfigService;
-import com.aizuda.snailjob.server.web.annotation.LoginRequired;
-import com.aizuda.snailjob.server.web.model.base.PageResult;
-import com.aizuda.snailjob.server.web.model.request.NotifyConfigQueryVO;
-import com.aizuda.snailjob.server.web.model.request.NotifyConfigRequestVO;
-import com.aizuda.snailjob.server.web.model.response.NotifyConfigResponseVO;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 

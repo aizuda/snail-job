@@ -6,10 +6,6 @@ import com.aizuda.snailjob.server.web.model.request.WorkflowBatchQueryVO;
 import com.aizuda.snailjob.server.web.model.response.WorkflowBatchResponseVO;
 import com.aizuda.snailjob.server.web.model.response.WorkflowDetailResponseVO;
 import com.aizuda.snailjob.server.web.service.WorkflowBatchService;
-import com.aizuda.snailjob.server.web.model.base.PageResult;
-import com.aizuda.snailjob.server.web.model.request.WorkflowBatchQueryVO;
-import com.aizuda.snailjob.server.web.model.response.WorkflowBatchResponseVO;
-import com.aizuda.snailjob.server.web.model.response.WorkflowDetailResponseVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

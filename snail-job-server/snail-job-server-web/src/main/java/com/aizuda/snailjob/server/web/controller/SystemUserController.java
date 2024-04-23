@@ -1,21 +1,15 @@
 package com.aizuda.snailjob.server.web.controller;
 
-import com.aizuda.snailjob.server.web.model.request.UserSessionVO;
-import com.aizuda.snailjob.server.web.model.response.PermissionsResponseVO;
-import com.aizuda.snailjob.server.web.service.SystemUserService;
-import com.aizuda.snailjob.server.web.model.base.PageResult;
-import com.aizuda.snailjob.server.web.model.request.SystemUserQueryVO;
-import com.aizuda.snailjob.server.web.model.request.SystemUserRequestVO;
-import com.aizuda.snailjob.server.web.annotation.LoginUser;
 import com.aizuda.snailjob.server.web.annotation.LoginRequired;
+import com.aizuda.snailjob.server.web.annotation.LoginUser;
 import com.aizuda.snailjob.server.web.annotation.RoleEnum;
-import com.aizuda.snailjob.server.web.model.response.SystemUserResponseVO;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.SystemUserQueryVO;
 import com.aizuda.snailjob.server.web.model.request.SystemUserRequestVO;
 import com.aizuda.snailjob.server.web.model.request.UserSessionVO;
 import com.aizuda.snailjob.server.web.model.response.PermissionsResponseVO;
 import com.aizuda.snailjob.server.web.model.response.SystemUserResponseVO;
+import com.aizuda.snailjob.server.web.service.SystemUserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

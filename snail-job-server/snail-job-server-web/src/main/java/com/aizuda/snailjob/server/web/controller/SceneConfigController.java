@@ -1,11 +1,5 @@
 package com.aizuda.snailjob.server.web.controller;
 
-import com.aizuda.snailjob.server.web.model.base.PageResult;
-import com.aizuda.snailjob.server.web.model.request.SceneConfigQueryVO;
-import com.aizuda.snailjob.server.web.model.request.SceneConfigRequestVO;
-import com.aizuda.snailjob.server.web.model.response.SceneConfigResponseVO;
-import com.aizuda.snailjob.server.web.annotation.LoginRequired;
-import com.aizuda.snailjob.server.web.service.SceneConfigService;
 import com.aizuda.snailjob.server.web.annotation.LoginRequired;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.SceneConfigQueryVO;

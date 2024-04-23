@@ -12,9 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 public class WebController {
 
-    @RequestMapping(value = {
-            "/admin"
-    })
+    @RequestMapping(value = {"/admin"})
     public String fowardIndex() {
         return "index";
     }

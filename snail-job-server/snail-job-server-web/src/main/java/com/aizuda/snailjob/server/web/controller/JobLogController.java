@@ -4,8 +4,6 @@ import com.aizuda.snailjob.server.web.annotation.LoginRequired;
 import com.aizuda.snailjob.server.web.model.request.JobLogQueryVO;
 import com.aizuda.snailjob.server.web.model.response.JobLogResponseVO;
 import com.aizuda.snailjob.server.web.service.JobLogService;
-import com.aizuda.snailjob.server.web.model.request.JobLogQueryVO;
-import com.aizuda.snailjob.server.web.model.response.JobLogResponseVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

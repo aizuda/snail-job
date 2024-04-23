@@ -7,12 +7,6 @@ import com.aizuda.snailjob.server.web.model.request.JobRequestVO;
 import com.aizuda.snailjob.server.web.model.request.JobUpdateJobStatusRequestVO;
 import com.aizuda.snailjob.server.web.model.response.JobResponseVO;
 import com.aizuda.snailjob.server.web.service.JobService;
-import com.aizuda.snailjob.server.web.annotation.LoginRequired;
-import com.aizuda.snailjob.server.web.model.base.PageResult;
-import com.aizuda.snailjob.server.web.model.request.JobQueryVO;
-import com.aizuda.snailjob.server.web.model.request.JobRequestVO;
-import com.aizuda.snailjob.server.web.model.request.JobUpdateJobStatusRequestVO;
-import com.aizuda.snailjob.server.web.model.response.JobResponseVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -82,9 +76,9 @@ public class JobController {
     @GetMapping("/job-name/list")
     @LoginRequired
     public List<JobResponseVO> getJobNameList(
-            @RequestParam(value = "keywords", required = false) String keywords,
-            @RequestParam(value = "jobId", required = false) Long jobId,
-            @RequestParam(value = "groupName", required = false) String groupName
+        @RequestParam(value = "keywords", required = false) String keywords,
+        @RequestParam(value = "jobId", required = false) Long jobId,
+        @RequestParam(value = "groupName", required = false) String groupName
     ) {
         return jobService.getJobNameList(keywords, jobId, groupName);
     }
