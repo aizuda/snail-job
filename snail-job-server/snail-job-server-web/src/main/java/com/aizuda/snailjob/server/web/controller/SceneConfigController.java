@@ -44,6 +44,12 @@ public class SceneConfigController {
     }
 
     @LoginRequired
+    @PutMapping("/{id}/status/{status}")
+    public Boolean updateStatus(@PathVariable("id") Long id, @PathVariable("status") Integer status) {
+        return sceneConfigService.updateStatus(id, status);
+    }
+
+    @LoginRequired
     @PostMapping
     public Boolean saveSceneConfig(@RequestBody @Validated SceneConfigRequestVO requestVO) {
         return sceneConfigService.saveSceneConfig(requestVO);

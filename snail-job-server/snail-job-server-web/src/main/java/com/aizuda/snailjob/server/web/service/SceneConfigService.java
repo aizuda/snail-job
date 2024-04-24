@@ -4,10 +4,6 @@ import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.SceneConfigQueryVO;
 import com.aizuda.snailjob.server.web.model.request.SceneConfigRequestVO;
 import com.aizuda.snailjob.server.web.model.response.SceneConfigResponseVO;
-import com.aizuda.snailjob.server.web.model.base.PageResult;
-import com.aizuda.snailjob.server.web.model.request.SceneConfigQueryVO;
-import com.aizuda.snailjob.server.web.model.request.SceneConfigRequestVO;
-import com.aizuda.snailjob.server.web.model.response.SceneConfigResponseVO;
 
 import java.util.List;
 
@@ -26,4 +22,6 @@ public interface SceneConfigService {
     Boolean updateSceneConfig(SceneConfigRequestVO requestVO);
 
     SceneConfigResponseVO getSceneConfigDetail(Long id);
+
+    boolean updateStatus(Long id, final Integer status);
 }

@@ -152,4 +152,18 @@ public class SceneConfigServiceImpl implements SceneConfigService {
                 .eq(RetrySceneConfig::getId, id));
         return SceneConfigResponseVOConverter.INSTANCE.convert(retrySceneConfig);
     }
+
+    @Override
+    public boolean updateStatus(final Long id, final Integer status) {
+
+        String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
+
+        RetrySceneConfig config = new RetrySceneConfig();
+        config.setSceneStatus(status);
+
+        return 1 == accessTemplate.getSceneConfigAccess().update(config,
+            new LambdaUpdateWrapper<RetrySceneConfig>()
+                .eq(RetrySceneConfig::getId, id)
+                .eq(RetrySceneConfig::getNamespaceId, namespaceId));
+    }
 }
