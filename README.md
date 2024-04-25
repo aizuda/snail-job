@@ -14,7 +14,7 @@
 
 > ✅️ 可重放，可管控、为提高分布式业务系统一致性的分布式任务重试平台 <br/>
 > ✅️ 支持秒级、可中断、可编排的高性能分布式任务调度平台
-
+> 
 </p>
 
 # 🌸 简介
@@ -64,4 +64,11 @@ snail-job 是一个针对业务系统重试流量的治理平台，其自身具�
 欢迎提出更好的意见，帮助完善 snail-job
 
 ## 版权
-[Apache-2.0](https://gitee.com/aizuda/snail-job/blob/master/LICENSE)
+Aizuda/SnailJob 采用[APACHE LICENSE 2.0](https://gitee.com/aizuda/snail-job/blob/master/LICENSE)开源协议，您在使用过程中，需要注意以下几点:
+
+1. Aizuda/SnailJob已申请知识产权保护,二次开发如用于开源竞品请先联系群主沟通，禁止任何变相的二开行为，未经审核视为侵权;
+2. 不得修改产品相关代码的源码头注释和出处;
+3. 不得进行简单修改包装声称是自己的产品;
+4. 不得应用于危害国家安全、荣誉和利益的行为，不能以任何形式用于非法目的;
+
+

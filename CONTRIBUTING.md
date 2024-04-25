@@ -13,7 +13,7 @@
 
 ### 设置您的开发环境
 
-You should have JDK 1.8 or later installed in your system.
+You should have JDK 17 or later installed in your system.
 
 ## Contributing
 
