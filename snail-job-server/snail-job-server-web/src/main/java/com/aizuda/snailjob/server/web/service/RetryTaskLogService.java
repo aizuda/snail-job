@@ -12,6 +12,7 @@ import com.aizuda.snailjob.server.web.model.response.RetryTaskLogMessageResponse
 import com.aizuda.snailjob.server.web.model.response.RetryTaskLogResponseVO;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author opensnail
@@ -26,4 +27,7 @@ public interface RetryTaskLogService {
 
     RetryTaskLogResponseVO getRetryTaskLogById(Long id);
 
+    boolean deleteById(Long id);
+
+    boolean batchDelete(Set<Long> ids);
 }

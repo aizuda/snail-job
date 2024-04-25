@@ -8,12 +8,15 @@ import com.aizuda.snailjob.server.web.model.response.RetryTaskLogMessageResponse
 import com.aizuda.snailjob.server.web.model.response.RetryTaskLogResponseVO;
 import com.aizuda.snailjob.server.web.service.RetryTaskLogService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * 重试日志接口
@@ -44,5 +47,17 @@ public class RetryTaskLogController {
     @GetMapping("{id}")
     public RetryTaskLogResponseVO getRetryTaskLogById(@PathVariable("id") Long id) {
         return retryTaskLogService.getRetryTaskLogById(id);
+    }
+
+    @LoginRequired
+    @DeleteMapping("{id}")
+    public Boolean deleteById(@PathVariable("id") Long id) {
+        return retryTaskLogService.deleteById(id);
+    }
+
+    @LoginRequired
+    @DeleteMapping("ids")
+    public Boolean batchDelete(@RequestBody Set<Long> ids) {
+        return retryTaskLogService.batchDelete(ids);
     }
 }

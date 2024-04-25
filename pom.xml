@@ -182,14 +182,14 @@
 
     <licenses>
         <license>
-            <name>GNU General Public License v3.0</name>
-            <url>https://www.gnu.org/licenses/gpl-3.0.txt</url>
+            <name>Apache License 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0</url>
         </license>
     </licenses>
 
     <scm>
-        <url>https://github.com/byteblogs168/snail-job</url>
-        <connection>https://gitee.com.aizuda.snailjob.git</connection>
+        <url>https://gitee.com/aizuda/snail-job</url>
+        <connection>https://gitee.com/aizuda/snail-job</connection>
         <developerConnection>https://gitee.com/aizuda/</developerConnection>
     </scm>
 
