@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.web.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.HashUtil;
 import cn.hutool.core.util.ReUtil;
@@ -22,9 +23,11 @@ import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import com.aizuda.snailjob.template.datasource.access.ConfigAccess;
 import com.aizuda.snailjob.template.datasource.access.TaskAccess;
 import com.aizuda.snailjob.template.datasource.enums.DbTypeEnum;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.NamespaceMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.SequenceAllocMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.ServerNodeMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.GroupConfig;
+import com.aizuda.snailjob.template.datasource.persistence.po.Namespace;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryDeadLetter;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
 import com.aizuda.snailjob.template.datasource.persistence.po.SequenceAlloc;
@@ -37,6 +40,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.google.common.collect.Lists;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.jdbc.BadSqlGrammarException;
@@ -53,6 +57,7 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -65,23 +70,17 @@ import java.util.stream.Collectors;
  * @since 1.0.0
  */
 @Service
+@RequiredArgsConstructor
 public class GroupConfigServiceImpl implements GroupConfigService {
 
-    @Autowired
-    private ServerNodeMapper serverNodeMapper;
-    @Autowired
-    private AccessTemplate accessTemplate;
-    @Autowired
-    private SequenceAllocMapper sequenceAllocMapper;
-    @Autowired
+    private final ServerNodeMapper serverNodeMapper;
+    private final AccessTemplate accessTemplate;
+    private final SequenceAllocMapper sequenceAllocMapper;
     @Lazy
-    private ConfigVersionSyncHandler configVersionSyncHandler;
-    @Autowired
-    private SystemProperties systemProperties;
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-    @Autowired
-    private MybatisPlusProperties mybatisPlusProperties;
+    private final ConfigVersionSyncHandler configVersionSyncHandler;
+    private final SystemProperties systemProperties;
+    private final JdbcTemplate jdbcTemplate;
+    private final NamespaceMapper namespaceMapper;
 
     @Override
     @Transactional
@@ -315,16 +314,29 @@ public class GroupConfigServiceImpl implements GroupConfigService {
 
     @Override
     public List<GroupConfigResponseVO> getAllGroupConfigList(final List<String> namespaceIds) {
-        if (CollectionUtils.isEmpty(namespaceIds)) {
-            return new ArrayList<>();
-        }
 
         ConfigAccess<GroupConfig> groupConfigAccess = accessTemplate.getGroupConfigAccess();
 
         List<GroupConfig> groupConfigs = groupConfigAccess.list(new LambdaQueryWrapper<GroupConfig>()
                 .select(GroupConfig::getGroupName, GroupConfig::getNamespaceId)
-                .in(GroupConfig::getNamespaceId, namespaceIds));
-        return GroupConfigResponseVOConverter.INSTANCE.toGroupConfigResponseVO(groupConfigs);
+                .in(CollectionUtil.isNotEmpty(namespaceIds), GroupConfig::getNamespaceId, namespaceIds));
+        if (CollectionUtils.isEmpty(groupConfigs)) {
+            return new ArrayList<>();
+        }
+
+        List<Namespace> namespaces = namespaceMapper.selectList(new LambdaQueryWrapper<Namespace>()
+            .in(Namespace::getUniqueId, groupConfigs.stream().map(GroupConfig::getNamespaceId).collect(Collectors.toList())));
+
+        Map<String, String> namespaceMap = namespaces.stream()
+            .collect(Collectors.toMap(Namespace::getUniqueId, Namespace::getName));
+
+        List<GroupConfigResponseVO> groupConfigResponses = GroupConfigResponseVOConverter.INSTANCE.toGroupConfigResponseVO(
+            groupConfigs);
+        for (final GroupConfigResponseVO groupConfigResponseVO : groupConfigResponses) {
+            groupConfigResponseVO.setNamespaceName(namespaceMap.get(groupConfigResponseVO.getNamespaceId()));
+        }
+
+        return groupConfigResponses;
     }
 
     @Override
