@@ -48,4 +48,10 @@ public class NotifyConfigController {
     public Boolean updateNotify(@RequestBody @Validated NotifyConfigRequestVO requestVO) {
         return notifyConfigService.updateNotify(requestVO);
     }
+
+    @LoginRequired
+    @PutMapping("/{id}/status/{status}")
+    public Boolean updateStatus(@PathVariable("id") Long id, @PathVariable("status") Integer status) {
+        return notifyConfigService.updateStatus(id, status);
+    }
 }
