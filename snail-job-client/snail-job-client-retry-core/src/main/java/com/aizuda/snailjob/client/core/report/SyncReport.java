@@ -16,7 +16,9 @@ import com.aizuda.snailjob.common.core.util.EnvironmentUtils;
 import com.aizuda.snailjob.common.core.util.NetUtil;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.server.model.dto.ConfigDTO;
+import com.aizuda.snailjob.server.model.dto.ConfigDTO.Notify.Recipient;
 import com.aizuda.snailjob.server.model.dto.RetryTaskDTO;
+import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -24,7 +26,9 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -91,25 +95,29 @@ public class SyncReport extends AbstractReport {
     private void sendMessage(Throwable e) {
 
         try {
-            ConfigDTO.Notify notifyAttribute = GroupVersionCache.getNotifyAttribute(RetryNotifySceneEnum.CLIENT_REPORT_ERROR.getNotifyScene());
-            if (Objects.isNull(notifyAttribute)) {
+            ConfigDTO.Notify notify = GroupVersionCache.getNotifyAttribute(RetryNotifySceneEnum.CLIENT_REPORT_ERROR.getNotifyScene());
+            if (Objects.isNull(notify)) {
                 return;
             }
 
-            AlarmContext context = AlarmContext.build()
+            List<Recipient> recipients = Optional.ofNullable(notify.getRecipients()).orElse(Lists.newArrayList());
+            for (final Recipient recipient : recipients) {
+                AlarmContext context = AlarmContext.build()
                     .text(reportErrorTextMessageFormatter,
-                            EnvironmentUtils.getActiveProfile(),
-                            NetUtil.getLocalIpStr(),
-                            snailJobProperties.getNamespace(),
-                            SnailJobProperties.getGroup(),
-                            LocalDateTime.now().format(formatter),
-                            e.getMessage())
+                        EnvironmentUtils.getActiveProfile(),
+                        NetUtil.getLocalIpStr(),
+                        snailJobProperties.getNamespace(),
+                        SnailJobProperties.getGroup(),
+                        LocalDateTime.now().format(formatter),
+                        e.getMessage())
                     .title("同步上报异常:[{}]", SnailJobProperties.getGroup())
-                    .notifyAttribute(notifyAttribute.getNotifyAttribute());
+                    .notifyAttribute(recipient.getNotifyAttribute());
 
-            SnailJobAlarmFactory snailJobAlarmFactory = SpringContext.getBeanByType(SnailJobAlarmFactory.class);
-            Alarm<AlarmContext> alarmType = snailJobAlarmFactory.getAlarmType(notifyAttribute.getNotifyType());
-            alarmType.asyncSendMessage(context);
+                SnailJobAlarmFactory snailJobAlarmFactory = SpringContext.getBeanByType(SnailJobAlarmFactory.class);
+                Alarm<AlarmContext> alarmType = snailJobAlarmFactory.getAlarmType(recipient.getNotifyType());
+                alarmType.asyncSendMessage(context);
+            }
+
         } catch (Exception e1) {
             SnailJobLog.LOCAL.error("客户端发送组件异常告警失败", e1);
         }

@@ -60,14 +60,6 @@ public class GroupVersionCache implements Lifecycle {
         return SystemConstants.DEFAULT_DDL;
     }
 
-    public static Set<String> getSceneBlacklist() {
-        if (Objects.isNull(CONFIG)) {
-            return new HashSet<>();
-        }
-
-        return CONFIG.getSceneBlacklist();
-    }
-
     public static ConfigDTO.Notify getNotifyAttribute(Integer notifyScene) {
         List<ConfigDTO.Notify> notifyList = CONFIG.getNotifyList();
         for (ConfigDTO.Notify notify : notifyList) {

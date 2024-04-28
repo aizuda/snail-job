@@ -4,21 +4,26 @@ import com.aizuda.snailjob.common.core.alarm.Alarm;
 import com.aizuda.snailjob.common.core.alarm.AlarmContext;
 import com.aizuda.snailjob.common.core.alarm.SnailJobAlarmFactory;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
+import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.AlarmInfoConverter;
 import com.aizuda.snailjob.server.common.Lifecycle;
 import com.aizuda.snailjob.server.common.cache.CacheNotifyRateLimiter;
 import com.aizuda.snailjob.server.common.dto.AlarmInfo;
 import com.aizuda.snailjob.server.common.dto.NotifyConfigInfo;
+import com.aizuda.snailjob.server.common.dto.NotifyConfigInfo.RecipientInfo;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.triple.ImmutableTriple;
 import com.aizuda.snailjob.server.common.triple.Triple;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import com.aizuda.snailjob.server.common.triple.Triple;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.NotifyRecipientMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.NotifyConfig;
+import com.aizuda.snailjob.template.datasource.persistence.po.NotifyRecipient;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.RateLimiter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,9 +47,11 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
 
     @Autowired
     private SnailJobAlarmFactory snailJobAlarmFactory;
-
     @Autowired
     protected AccessTemplate accessTemplate;
+    @Autowired
+    protected NotifyRecipientMapper recipientMapper;
+
 
     @Override
     public void run() {
@@ -103,15 +110,40 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
             return Maps.newHashMap();
         }
 
+        Set<Long> recipientIds = notifyConfigs.stream()
+            .map(config -> {
+                return new HashSet<>(JsonUtil.parseList(config.getRecipientIds(), Long.class));
+            })
+            .reduce((a, b) -> {
+                HashSet<Long> set = Sets.newHashSet();
+                set.addAll(a);
+                set.addAll(b);
+                return set;
+            }).orElse(new HashSet<>());
+
+        List<NotifyRecipient> notifyRecipients = recipientMapper.selectBatchIds(recipientIds);
+        Map<Long, NotifyRecipient> recipientMap = notifyRecipients.stream()
+            .collect(Collectors.toMap(NotifyRecipient::getId, i->i));
+
         List<NotifyConfigInfo> notifyConfigInfos = AlarmInfoConverter.INSTANCE.retryToNotifyConfigInfos(notifyConfigs);
 
         return notifyConfigInfos.stream()
             .collect(Collectors.groupingBy(i -> {
 
-                String namespaceId = i.getNamespaceId();
-                String groupName = i.getGroupName();
+                List<RecipientInfo> recipients = i.getRecipientIds().stream().map(recipientId -> {
+                    NotifyRecipient notifyRecipient = recipientMap.get(recipientId);
+                    if (Objects.isNull(notifyRecipient)) {
+                        return null;
+                    }
 
-                return ImmutableTriple.of(namespaceId, groupName, i.getBusinessId());
+                    RecipientInfo notifyConfigInfo = new RecipientInfo();
+                    notifyConfigInfo.setNotifyAttribute(notifyRecipient.getNotifyAttribute());
+                    notifyConfigInfo.setNotifyType(notifyRecipient.getNotifyType());
+                    return notifyConfigInfo;
+                }).collect(Collectors.toList());
+                i.setRecipientInfos(recipients);
+
+                return ImmutableTriple.of(i.getNamespaceId(), i.getGroupName(), i.getBusinessId());
             }));
 
     }
@@ -161,10 +193,17 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
                  }
             }
 
-            AlarmContext context = buildAlarmContext(alarmDTO, notifyConfig);
-            Alarm<AlarmContext> alarmType = snailJobAlarmFactory.getAlarmType(
-                    notifyConfig.getNotifyType());
-            alarmType.asyncSendMessage(context);
+            for (final RecipientInfo recipientInfo : notifyConfig.getRecipientInfos()) {
+                if (Objects.isNull(recipientInfo)) {
+                    continue;
+                }
+                AlarmContext context = buildAlarmContext(alarmDTO, notifyConfig);
+                context.setNotifyAttribute(recipientInfo.getNotifyAttribute());
+                Alarm<AlarmContext> alarmType = snailJobAlarmFactory.getAlarmType(
+                    recipientInfo.getNotifyType());
+                alarmType.asyncSendMessage(context);
+            }
+
         }
     }
 

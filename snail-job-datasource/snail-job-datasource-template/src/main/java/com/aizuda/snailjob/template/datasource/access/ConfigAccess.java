@@ -20,12 +20,6 @@ import java.util.Set;
  */
 public interface ConfigAccess<T> extends Access<T>  {
 
-    /**
-     * 获取所有组id列表
-     *
-     * @return 组id列表
-     */
-    Set<String> getGroupNameList(String namespaceId);
 
     /**
      * 根据组id获取缓存上下文
@@ -44,26 +38,6 @@ public interface ConfigAccess<T> extends Access<T>  {
      */
     RetrySceneConfig getSceneConfigByGroupNameAndSceneName(String groupName, String sceneName, String namespaceId);
 
-    /**
-     * 获取通知配置
-     *
-     * @param groupName     组名称
-     * @param notifyScene {@link RetryNotifySceneEnum} 场景类型
-     * @return {@link NotifyConfig} 场景配置
-     */
-    List<NotifyConfig> getNotifyConfigByGroupName(String groupName,Integer notifyScene, String namespaceId);
-
-
-    /**
-     * 获取通知配置
-     *
-     * @param groupName     组名称
-     * @param groupName     场景名称
-     * @param notifyScene {@link RetryNotifySceneEnum} 场景类型
-     * @return {@link NotifyConfig} 场景配置
-     */
-    @Deprecated
-    List<NotifyConfig> getNotifyConfigByGroupNameAndSceneName(String groupName, String sceneName, Integer notifyScene);
 
     /**
      * 获取通知配置
@@ -81,12 +55,6 @@ public interface ConfigAccess<T> extends Access<T>  {
      * @return {@link RetrySceneConfig} 场景配置
      */
     List<RetrySceneConfig> getSceneConfigByGroupName(String groupName);
-
-    /**
-     * 获取已开启的组配置信息
-     *
-     */
-    List<GroupConfig> getAllOpenGroupConfig(String namespaceId);
 
     /**
      * 场景黑名单

@@ -1,5 +1,7 @@
 package com.aizuda.snailjob.server.common;
 
+import cn.hutool.core.util.StrUtil;
+import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.server.common.dto.JobAlarmInfo;
 import com.aizuda.snailjob.server.common.dto.NotifyConfigInfo;
 import com.aizuda.snailjob.server.common.dto.RetryAlarmInfo;
@@ -16,7 +18,9 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.mapstruct.factory.Mappers;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author xiaowoniu
@@ -41,6 +45,19 @@ public interface AlarmInfoConverter {
     List<RetryAlarmInfo> deadLetterToAlarmInfo(List<RetryDeadLetter> retryDeadLetters);
 
     List<NotifyConfigInfo> retryToNotifyConfigInfos(List<NotifyConfig> notifyConfigs);
+
+    @Mappings({
+        @Mapping(target = "recipientIds", expression = "java(AlarmInfoConverter.toNotifyRecipientIds(notifyConfig.getRecipientIds()))")
+    })
+    NotifyConfigInfo retryToNotifyConfigInfos(NotifyConfig notifyConfig);
+
+    static Set<Long> toNotifyRecipientIds(String notifyRecipientIdsStr) {
+        if (StrUtil.isBlank(notifyRecipientIdsStr)) {
+            return new HashSet<>();
+        }
+
+        return new HashSet<>(JsonUtil.parseList(notifyRecipientIdsStr, Long.class));
+    }
 
     List<NotifyConfigInfo> jobToNotifyConfigInfos(List<JobNotifyConfig> notifyConfigs);
 

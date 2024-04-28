@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.common.core.alarm;
 
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -10,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author: opensnail
  * @date : 2021-11-25 09:20
  */
+@Getter
 @Component
 public class SnailJobAlarmFactory {
 
@@ -20,10 +22,6 @@ public class SnailJobAlarmFactory {
         for (Map.Entry<String, Alarm> entry : map.entrySet()) {
             alarmMap.put(entry.getValue().getAlarmType(), entry.getValue());
         }
-    }
-
-    public Map<Integer, Alarm> getAlarmMap() {
-        return alarmMap;
     }
 
     public Alarm getAlarmType(Integer alarmType) {

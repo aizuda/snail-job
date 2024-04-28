@@ -19,9 +19,11 @@ import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.common.core.util.EnvironmentUtils;
 import com.aizuda.snailjob.common.core.util.NetUtil;
 import com.aizuda.snailjob.server.model.dto.ConfigDTO;
+import com.aizuda.snailjob.server.model.dto.ConfigDTO.Notify.Recipient;
 import com.github.rholder.retry.Retryer;
 import com.github.rholder.retry.StopStrategy;
 import com.github.rholder.retry.WaitStrategy;
+import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -29,6 +31,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 
@@ -175,21 +178,24 @@ public abstract class AbstractRetryStrategies implements RetryStrategy {
     private void sendMessage(Exception e) {
 
         try {
-            ConfigDTO.Notify notifyAttribute = GroupVersionCache.getNotifyAttribute(RetryNotifySceneEnum.CLIENT_COMPONENT_ERROR.getNotifyScene());
-            if (Objects.nonNull(notifyAttribute)) {
-                AlarmContext context = AlarmContext.build()
-                        .text(retryErrorMoreThresholdTextMessageFormatter,
-                                EnvironmentUtils.getActiveProfile(),
-                                NetUtil.getLocalIpStr(),
-                                snailJobProperties.getNamespace(),
-                                SnailJobProperties.getGroup(),
-                                LocalDateTime.now().format(formatter),
-                                e.getMessage())
-                        .title("retry component handling exception:[{}]", SnailJobProperties.getGroup())
-                        .notifyAttribute(notifyAttribute.getNotifyAttribute());
+            ConfigDTO.Notify notify = GroupVersionCache.getNotifyAttribute(RetryNotifySceneEnum.CLIENT_COMPONENT_ERROR.getNotifyScene());
+            if (Objects.nonNull(notify)) {
+                List<Recipient> recipients = Optional.ofNullable(notify.getRecipients()).orElse(Lists.newArrayList());
 
-                Alarm<AlarmContext> alarmType = snailJobAlarmFactory.getAlarmType(notifyAttribute.getNotifyType());
-                alarmType.asyncSendMessage(context);
+                for (final Recipient recipient : recipients) {
+                    AlarmContext context = AlarmContext.build()
+                        .text(retryErrorMoreThresholdTextMessageFormatter,
+                            EnvironmentUtils.getActiveProfile(),
+                            NetUtil.getLocalIpStr(),
+                            snailJobProperties.getNamespace(),
+                            SnailJobProperties.getGroup(),
+                            LocalDateTime.now().format(formatter),
+                            e.getMessage())
+                        .title("retry component handling exception:[{}]", SnailJobProperties.getGroup())
+                        .notifyAttribute(recipient.getNotifyAttribute());
+                    Alarm<AlarmContext> alarmType = snailJobAlarmFactory.getAlarmType(recipient.getNotifyType());
+                    alarmType.asyncSendMessage(context);
+                }
             }
         } catch (Exception e1) {
             SnailJobLog.LOCAL.error("Client failed to send component exception alert.", e1);

@@ -27,11 +27,6 @@ public class ConfigDTO {
     private List<Notify> notifyList;
 
     /**
-     * 场景黑名单
-     */
-    private Set<String> sceneBlacklist;
-
-    /**
      * 版本号
      */
     private Integer version;
@@ -54,14 +49,9 @@ public class ConfigDTO {
     public static class Notify {
 
         /**
-         * 通知类型 {@link AlarmTypeEnum}
+         * 通知人
          */
-        private Integer notifyType;
-
-        /**
-         * 通知地址
-         */
-        private String notifyAttribute;
+        private List<Recipient> recipients;
 
         /**
          * 触发阈值
@@ -72,6 +62,21 @@ public class ConfigDTO {
          * 场景场景 {@link RetryNotifySceneEnum}
          */
         private Integer notifyScene;
+
+        @Data
+        public static class Recipient {
+
+            /**
+             * 通知类型 {@link AlarmTypeEnum}
+             */
+            private Integer notifyType;
+
+            /**
+             * 通知地址
+             */
+            private String notifyAttribute;
+
+        }
     }
 
 

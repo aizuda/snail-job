@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 @TableName("sj_notify_config")
 public class NotifyConfig implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @TableId(value = "id", type = IdType.AUTO)
@@ -33,9 +35,7 @@ public class NotifyConfig implements Serializable {
 
     private Integer notifyStatus;
 
-    private Integer notifyType;
-
-    private String notifyAttribute;
+    private String recipientIds;
 
     private Integer notifyThreshold;
 

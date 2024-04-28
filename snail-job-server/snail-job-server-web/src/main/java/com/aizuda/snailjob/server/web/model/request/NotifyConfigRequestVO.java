@@ -1,10 +1,14 @@
 package com.aizuda.snailjob.server.web.model.request;
 
+import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author opensnail
@@ -35,11 +39,8 @@ public class NotifyConfigRequestVO {
     @NotNull(message = "通知状态不能为空")
     private Integer notifyStatus;
 
-    @NotNull(message = "通知类型不能为空")
-    private Integer notifyType;
-
-    @NotBlank(message = "通知属性不能为空")
-    private String notifyAttribute;
+    @NotEmpty(message = "通知人列表")
+    private Set<Long> notifyRecipientIds;
 
     private Integer notifyThreshold;
 

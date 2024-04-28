@@ -79,8 +79,7 @@ public class JobTaskFailAlarmListener extends AbstractJobAlarm<JobTaskFailAlarmE
                         alarmDTO.getExecutorInfo(),
                         alarmDTO.getArgsStr(),
                         DateUtils.toNowFormat(DateUtils.NORM_DATETIME_PATTERN))
-                .title("{}环境 JOB任务失败", EnvironmentUtils.getActiveProfile())
-                .notifyAttribute(notifyConfig.getNotifyAttribute());
+                .title("{}环境 JOB任务失败", EnvironmentUtils.getActiveProfile());
     }
 
     @Override

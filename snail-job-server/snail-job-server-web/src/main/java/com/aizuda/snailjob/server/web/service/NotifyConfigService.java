@@ -24,4 +24,7 @@ public interface NotifyConfigService {
     Boolean updateNotify(NotifyConfigRequestVO requestVO);
 
     NotifyConfigResponseVO getNotifyConfigDetail(Long id);
+
+    Boolean updateStatus(Long id, Integer status);
+
 }
