@@ -3,35 +3,32 @@ package com.aizuda.snailjob.server.web.service.impl;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
+import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.server.common.config.SystemProperties;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
+import com.aizuda.snailjob.server.web.annotation.RoleEnum;
+import com.aizuda.snailjob.server.web.model.base.PageResult;
+import com.aizuda.snailjob.server.web.model.request.SystemUserQueryVO;
+import com.aizuda.snailjob.server.web.model.request.SystemUserRequestVO;
 import com.aizuda.snailjob.server.web.model.request.UserPermissionRequestVO;
 import com.aizuda.snailjob.server.web.model.request.UserSessionVO;
 import com.aizuda.snailjob.server.web.model.response.PermissionsResponseVO;
+import com.aizuda.snailjob.server.web.model.response.SystemUserResponseVO;
+import com.aizuda.snailjob.server.web.service.SystemUserService;
 import com.aizuda.snailjob.server.web.service.convert.NamespaceResponseVOConverter;
 import com.aizuda.snailjob.server.web.service.convert.PermissionsResponseVOConverter;
+import com.aizuda.snailjob.server.web.service.convert.SystemUserResponseVOConverter;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.NamespaceMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.SystemUserMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.SystemUserPermissionMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.Namespace;
 import com.aizuda.snailjob.template.datasource.persistence.po.SystemUser;
 import com.aizuda.snailjob.template.datasource.persistence.po.SystemUserPermission;
-import com.aizuda.snailjob.server.web.service.SystemUserService;
-import com.aizuda.snailjob.server.web.model.response.PermissionsResponseVO;
-import com.aizuda.snailjob.server.web.service.convert.NamespaceResponseVOConverter;
-import com.aizuda.snailjob.server.web.service.convert.PermissionsResponseVOConverter;
-import com.aizuda.snailjob.server.web.service.convert.SystemUserResponseVOConverter;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
-import com.aizuda.snailjob.common.core.util.JsonUtil;
-import com.aizuda.snailjob.server.web.service.convert.SystemUserResponseVOConverter;
-import com.aizuda.snailjob.server.web.annotation.RoleEnum;
-import com.aizuda.snailjob.server.web.model.base.PageResult;
-import com.aizuda.snailjob.server.web.model.request.SystemUserQueryVO;
-import com.aizuda.snailjob.server.web.model.request.SystemUserRequestVO;
-import com.aizuda.snailjob.server.web.model.response.SystemUserResponseVO;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -63,15 +60,9 @@ public class SystemUserServiceImpl implements SystemUserService {
     public SystemUserResponseVO login(SystemUserRequestVO requestVO) {
 
         SystemUser systemUser = systemUserMapper.selectOne(
-                new LambdaQueryWrapper<SystemUser>()
-                        .eq(SystemUser::getUsername, requestVO.getUsername().trim()));
-        if (Objects.isNull(systemUser)) {
-            throw new SnailJobServerException("用户名或密码错误");
-        }
-
-        if (!SecureUtil.sha256(requestVO.getPassword()).equals(systemUser.getPassword())) {
-            throw new SnailJobServerException("用户名或密码错误");
-        }
+            new LambdaQueryWrapper<SystemUser>()
+                .eq(SystemUser::getUsername, requestVO.getUsername().trim()));
+        validateUserPassword(requestVO, systemUser);
 
         String token = getToken(systemUser);
 
@@ -84,23 +75,33 @@ public class SystemUserServiceImpl implements SystemUserService {
         return systemUserResponseVO;
     }
 
+    private static void validateUserPassword(SystemUserRequestVO requestVO, SystemUser systemUser) {
+        if (Objects.isNull(systemUser)) {
+            throw new SnailJobServerException("用户名或密码错误");
+        }
+
+        if (!SecureUtil.sha256(requestVO.getPassword()).equals(systemUser.getPassword())) {
+            throw new SnailJobServerException("用户名或密码错误");
+        }
+    }
+
     private void getPermission(Integer role, Long userId, final SystemUserResponseVO systemUserResponseVO) {
 
         LambdaQueryWrapper<Namespace> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.select(Namespace::getId, Namespace::getUniqueId, Namespace::getName);
         if (RoleEnum.USER.getRoleId().equals(role)) {
             List<SystemUserPermission> systemUserPermissions = systemUserPermissionMapper.selectList(
-                    new LambdaQueryWrapper<SystemUserPermission>()
-                            .select(SystemUserPermission::getNamespaceId)
-                            .eq(SystemUserPermission::getSystemUserId, userId)
-                            .groupBy(SystemUserPermission::getNamespaceId));
+                new LambdaQueryWrapper<SystemUserPermission>()
+                    .select(SystemUserPermission::getNamespaceId)
+                    .eq(SystemUserPermission::getSystemUserId, userId)
+                    .groupBy(SystemUserPermission::getNamespaceId));
             queryWrapper.in(Namespace::getUniqueId, systemUserPermissions.stream()
-                    .map(SystemUserPermission::getNamespaceId).collect(Collectors.toList()));
+                .map(SystemUserPermission::getNamespaceId).collect(Collectors.toList()));
         }
 
         List<Namespace> namespaces = namespaceMapper.selectList(queryWrapper);
         systemUserResponseVO.setNamespaceIds(
-                NamespaceResponseVOConverter.INSTANCE.toNamespaceResponseVOs(namespaces));
+            NamespaceResponseVOConverter.INSTANCE.toNamespaceResponseVOs(namespaces));
     }
 
     @Override
@@ -117,7 +118,7 @@ public class SystemUserServiceImpl implements SystemUserService {
     @Transactional
     public void addUser(SystemUserRequestVO requestVO) {
         long count = systemUserMapper.selectCount(
-                new LambdaQueryWrapper<SystemUser>().eq(SystemUser::getUsername, requestVO.getUsername()));
+            new LambdaQueryWrapper<SystemUser>().eq(SystemUser::getUsername, requestVO.getUsername()));
         if (count > 0) {
             throw new SnailJobServerException("该用户已存在");
         }
@@ -141,7 +142,7 @@ public class SystemUserServiceImpl implements SystemUserService {
             systemUserPermission.setGroupName(permission.getGroupName());
             systemUserPermission.setNamespaceId(permission.getNamespaceId());
             Assert.isTrue(1 == systemUserPermissionMapper.insert(systemUserPermission),
-                    () -> new SnailJobServerException("新增用户权限失败"));
+                () -> new SnailJobServerException("新增用户权限失败"));
         }
 
     }
@@ -150,14 +151,14 @@ public class SystemUserServiceImpl implements SystemUserService {
     @Transactional
     public void update(SystemUserRequestVO requestVO) {
         SystemUser systemUser = systemUserMapper.selectOne(
-                new LambdaQueryWrapper<SystemUser>().eq(SystemUser::getId, requestVO.getId()));
+            new LambdaQueryWrapper<SystemUser>().eq(SystemUser::getId, requestVO.getId()));
         if (Objects.isNull(systemUser)) {
             throw new SnailJobServerException("该用户不存在");
         }
 
         if (!systemUser.getUsername().equals(requestVO.getUsername())) {
             long count = systemUserMapper.selectCount(
-                    new LambdaQueryWrapper<SystemUser>().eq(SystemUser::getUsername, requestVO.getUsername()));
+                new LambdaQueryWrapper<SystemUser>().eq(SystemUser::getUsername, requestVO.getUsername()));
             if (count > 0) {
                 throw new SnailJobServerException("该用户已存在");
             }
@@ -179,7 +180,7 @@ public class SystemUserServiceImpl implements SystemUserService {
         }
 
         systemUserPermissionMapper.delete(new LambdaQueryWrapper<SystemUserPermission>()
-                .eq(SystemUserPermission::getSystemUserId, systemUser.getId()));
+            .eq(SystemUserPermission::getSystemUserId, systemUser.getId()));
 
         for (UserPermissionRequestVO permission : permissions) {
             SystemUserPermission systemUserPermission = new SystemUserPermission();
@@ -187,41 +188,41 @@ public class SystemUserServiceImpl implements SystemUserService {
             systemUserPermission.setGroupName(permission.getGroupName());
             systemUserPermission.setNamespaceId(permission.getNamespaceId());
             Assert.isTrue(1 == systemUserPermissionMapper.insert(systemUserPermission),
-                    () -> new SnailJobServerException("更新用户权限失败"));
+                () -> new SnailJobServerException("更新用户权限失败"));
         }
     }
 
     @Override
     public PageResult<List<SystemUserResponseVO>> getSystemUserPageList(SystemUserQueryVO queryVO) {
         PageDTO<SystemUser> userPageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
-
-        LambdaQueryWrapper<SystemUser> systemUserLambdaQueryWrapper = new LambdaQueryWrapper<>();
-
-        if (StrUtil.isNotBlank(queryVO.getUsername())) {
-            systemUserLambdaQueryWrapper.like(SystemUser::getUsername, "%" + queryVO.getUsername() + "%");
-        }
-
         userPageDTO = systemUserMapper.selectPage(userPageDTO,
-                systemUserLambdaQueryWrapper.orderByDesc(SystemUser::getId));
+            Wrappers.<SystemUser>lambdaQuery()
+                .likeRight(StrUtil.isNotBlank(queryVO.getUsername()), SystemUser::getUsername, queryVO.getUsername())
+                .orderByDesc(SystemUser::getId));
+
+        if (CollectionUtils.isEmpty(userPageDTO.getRecords())) {
+            return new PageResult<>(userPageDTO, Collections.emptyList());
+        }
 
         List<SystemUserResponseVO> userResponseVOList = SystemUserResponseVOConverter.INSTANCE.batchConvert(
-                userPageDTO.getRecords());
-        if (CollectionUtils.isEmpty(userResponseVOList)) {
-            return new PageResult<>(userPageDTO, userResponseVOList);
-        }
-
+            userPageDTO.getRecords());
         List<SystemUserPermission> userPermissions = systemUserPermissionMapper.selectList(
-                new LambdaQueryWrapper<SystemUserPermission>()
-                        .in(SystemUserPermission::getSystemUserId,
-                                userResponseVOList.stream().map(SystemUserResponseVO::getId).collect(Collectors.toSet())));
+            Wrappers.<SystemUserPermission>lambdaQuery()
+                    .in(SystemUserPermission::getSystemUserId,
+                        userResponseVOList.stream().map(SystemUserResponseVO::getId).collect(Collectors.toSet())));
 
-        LambdaQueryWrapper<Namespace> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.select(Namespace::getId, Namespace::getUniqueId, Namespace::getName);
-        queryWrapper.in(Namespace::getUniqueId, userPermissions.stream().map(SystemUserPermission::getNamespaceId).collect(Collectors.toSet()));
-        List<Namespace> namespaces = namespaceMapper.selectList(queryWrapper);
+        Set<String> uniqueIds = userPermissions.stream()
+            .map(SystemUserPermission::getNamespaceId)
+            .collect(Collectors.toSet());
+
+        // TODO: uniqueIds可能为空
+        List<Namespace> namespaces = namespaceMapper.selectList(Wrappers.<Namespace>lambdaQuery()
+                .select(Namespace::getId, Namespace::getUniqueId, Namespace::getName)
+                .in(Namespace::getUniqueId, uniqueIds));
         Map<String, String> namespaceMap = namespaces.stream().collect(Collectors.toMap(Namespace::getUniqueId, Namespace::getName));
 
-        Map<Long, List<SystemUserPermission>> userPermissionsMap = userPermissions.stream().collect(Collectors.groupingBy(SystemUserPermission::getSystemUserId));
+        Map<Long, List<SystemUserPermission>> userPermissionsMap = userPermissions.stream()
+                .collect(Collectors.groupingBy(SystemUserPermission::getSystemUserId));
         userResponseVOList.stream()
                 .filter(systemUserResponseVO -> systemUserResponseVO.getRole().equals(RoleEnum.USER.getRoleId()))
                 .forEach(systemUserResponseVO -> {
@@ -236,8 +237,8 @@ public class SystemUserServiceImpl implements SystemUserService {
                         permissionsResponseVOS.add(responseVO);
                     }
 
-                    systemUserResponseVO.setPermissions(permissionsResponseVOS);
-                });
+                systemUserResponseVO.setPermissions(permissionsResponseVOS);
+            });
 
         return new PageResult<>(userPageDTO, userResponseVOList);
     }
