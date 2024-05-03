@@ -6,6 +6,7 @@ package com.aizuda.snailjob.common.log.level;
  * @author wodeyangzipingpingwuqi
  */
 public interface TraceLog {
+
     /**
      * @return TRACE 等级是否开启
      */
@@ -16,7 +17,7 @@ public interface TraceLog {
      *
      * @param t 错误对象
      */
-    void trace(Throwable t, Boolean remote);
+    void trace(Boolean remote, Throwable t);
 
     /**
      * 打印 TRACE 等级的日志
@@ -24,24 +25,29 @@ public interface TraceLog {
      * @param format    消息模板
      * @param arguments 参数
      */
-    void trace(String format, Boolean remote, Object... arguments);
-
-    /**
-     * 打印 TRACE 等级的日志
-     *
-     * @param t         错误对象
-     * @param format    消息模板
-     * @param arguments 参数
-     */
-    void trace(Throwable t, String format, Boolean remote, Object... arguments);
+    void trace(Boolean remote, String format, Object... arguments);
 
     /**
      * 打印 TRACE 等级的日志
      *
      * @param fqcn      完全限定类名(Fully Qualified Class Name)，用于定位日志位置
-     * @param t         错误对象
      * @param format    消息模板
      * @param arguments 参数
      */
-    void trace(String fqcn, Throwable t, String format, Boolean remote, Object... arguments);
+    void trace(Boolean remote, String fqcn, String format, Object... arguments);
+
+    /**
+     * 打印 TRACE 等级的日志
+     *
+     * @param msg 错误对象
+     */
+    void trace(Boolean remote, String msg);
+
+    /**
+     * 打印 TRACE 等级的日志
+     *
+     * @param msg 错误对象
+     * @param t   错误对象
+     */
+    void trace(Boolean remote, String msg, Throwable t);
 }

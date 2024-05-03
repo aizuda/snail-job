@@ -2,7 +2,7 @@ package com.aizuda.snailjob.common.core.alarm.strategy;
 
 import com.aizuda.snailjob.common.core.enums.AlarmTypeEnum;
 import com.aizuda.snailjob.common.core.alarm.AlarmContext;
-import com.aizuda.snailjob.common.core.alarm.DingDingAttribute;
+import com.aizuda.snailjob.common.core.alarm.attribute.DingDingAttribute;
 import com.aizuda.snailjob.common.core.util.DingDingUtils;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import org.springframework.stereotype.Component;

@@ -1,4 +1,4 @@
-package com.aizuda.snailjob.common.core.alarm;
+package com.aizuda.snailjob.common.core.alarm.attribute;
 
 import lombok.Data;
 

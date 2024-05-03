@@ -9,9 +9,11 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.slf4j.spi.LocationAwareLogger;
 
+import java.io.Serial;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Objects;
+
+import static com.aizuda.snailjob.common.log.factory.LogFactory.extractThrowable;
 
 /**
  * <a href="http://www.slf4j.org/">SLF4J</a> log.<br>
@@ -53,18 +55,17 @@ public class Slf4jLog extends AbstractLog {
         return logger.isTraceEnabled();
     }
 
+
     @Override
-    public void trace(String fqcn, Throwable t, String format, Boolean remote, Object... arguments) {
+    public void trace(Boolean remote, String fqcn, String format, Object... arguments) {
         if (isTraceEnabled()) {
             setContextMap(remote);
             if (this.isLocationAwareLogger) {
-                locationAwareLog((LocationAwareLogger) this.logger, fqcn, LocationAwareLogger.TRACE_INT, t, format, arguments);
+                locationAwareLog((LocationAwareLogger) this.logger, fqcn, LocationAwareLogger.TRACE_INT,
+                    extractThrowable(arguments), format,
+                    arguments);
             } else {
-                if (Objects.nonNull(t)) {
-                    this.logger.trace(StrUtil.format(format, arguments), t);
-                } else {
-                    this.logger.trace(format, arguments);
-                }
+                this.logger.trace(format, arguments);
             }
         }
     }
@@ -76,17 +77,15 @@ public class Slf4jLog extends AbstractLog {
     }
 
     @Override
-    public void debug(String fqcn, Throwable t, String format, Boolean remote, Object... arguments) {
+    public void debug(Boolean remote, String fqcn, String format, Object... arguments) {
         if (isDebugEnabled()) {
             setContextMap(remote);
             if (this.isLocationAwareLogger) {
-                locationAwareLog((LocationAwareLogger) this.logger, fqcn, LocationAwareLogger.DEBUG_INT, t, format, arguments);
+                locationAwareLog((LocationAwareLogger) this.logger, fqcn, LocationAwareLogger.DEBUG_INT,
+                    extractThrowable(arguments), format,
+                    arguments);
             } else {
-                if (Objects.nonNull(t)) {
-                    this.logger.debug(StrUtil.format(format, arguments), t);
-                } else {
-                    this.logger.debug(format, arguments);
-                }
+                this.logger.debug(format, arguments);
             }
         }
     }
@@ -98,17 +97,15 @@ public class Slf4jLog extends AbstractLog {
     }
 
     @Override
-    public void info(String fqcn, Throwable t, String format, Boolean remote, Object... arguments) {
+    public void info(Boolean remote, String fqcn, String format, Object... arguments) {
         if (isInfoEnabled()) {
             setContextMap(remote);
             if (this.isLocationAwareLogger) {
-                locationAwareLog((LocationAwareLogger) this.logger, fqcn, LocationAwareLogger.INFO_INT, t, format, arguments);
+                locationAwareLog((LocationAwareLogger) this.logger, fqcn, LocationAwareLogger.INFO_INT,
+                    extractThrowable(arguments), format,
+                    arguments);
             } else {
-                if (Objects.nonNull(t)) {
-                    this.logger.info(StrUtil.format(format, arguments), t);
-                } else {
-                    this.logger.info(format, arguments);
-                }
+                this.logger.info(format, arguments);
             }
         }
     }
@@ -120,17 +117,15 @@ public class Slf4jLog extends AbstractLog {
     }
 
     @Override
-    public void warn(String fqcn, Throwable t, String format, Boolean remote, Object... arguments) {
+    public void warn(Boolean remote, String fqcn, String format, Object... arguments) {
         if (isWarnEnabled()) {
             setContextMap(remote);
             if (this.isLocationAwareLogger) {
-                locationAwareLog((LocationAwareLogger) this.logger, fqcn, LocationAwareLogger.WARN_INT, t, format, arguments);
+                locationAwareLog((LocationAwareLogger) this.logger, fqcn, LocationAwareLogger.WARN_INT,
+                    extractThrowable(arguments), format,
+                    arguments);
             } else {
-                if (Objects.nonNull(t)) {
-                    this.logger.warn(StrUtil.format(format, arguments), t);
-                } else {
-                    this.logger.warn(format, arguments);
-                }
+                this.logger.warn(format, arguments);
             }
         }
     }
@@ -141,40 +136,40 @@ public class Slf4jLog extends AbstractLog {
         return logger.isErrorEnabled();
     }
 
+
     @Override
-    public void error(String fqcn, Throwable t, String format, Boolean remote, Object... arguments) {
+    public void error(Boolean remote, String fqcn, String format, Object... arguments) {
         if (isErrorEnabled()) {
             setContextMap(remote);
             if (this.isLocationAwareLogger) {
-                locationAwareLog((LocationAwareLogger) this.logger, fqcn, LocationAwareLogger.ERROR_INT, t, format, arguments);
+                locationAwareLog((LocationAwareLogger) this.logger, fqcn, LocationAwareLogger.ERROR_INT,
+                    extractThrowable(arguments), format,
+                    arguments);
             } else {
-                if (Objects.nonNull(t)) {
-                    this.logger.error(StrUtil.format(format, arguments), t);
-                } else {
-                    this.logger.error(format, arguments);
-                }
+                this.logger.error(format, arguments);
             }
         }
     }
 
+
     // ------------------------------------------------------------------------- Log
     @Override
-    public void log(String fqcn, Level level, Throwable t, String format, Boolean remote, Object... arguments) {
+    public void log(Level level, Boolean remote, String fqcn, String format, Object... arguments) {
         switch (level) {
             case TRACE:
-                trace(fqcn, t, format, remote, arguments);
+                trace(remote, fqcn, format, arguments);
                 break;
             case DEBUG:
-                debug(fqcn, t, format, remote, arguments);
+                debug(remote, fqcn, format, arguments);
                 break;
             case INFO:
-                info(fqcn, t, format, remote, arguments);
+                info(remote, fqcn, format, arguments);
                 break;
             case WARN:
-                warn(fqcn, t, format, remote, arguments);
+                warn(remote, fqcn, format, arguments);
                 break;
             case ERROR:
-                error(fqcn, t, format, remote, arguments);
+                error(remote, fqcn, format, arguments);
                 break;
             case OFF:
                 break;
@@ -186,8 +181,7 @@ public class Slf4jLog extends AbstractLog {
     // -------------------------------------------------------------------------------------------------- Private method
 
     /**
-     * 打印日志<br>
-     * 此方法用于兼容底层日志实现，通过传入当前包装类名，以解决打印日志中行号错误问题
+     * 打印日志<br> 此方法用于兼容底层日志实现，通过传入当前包装类名，以解决打印日志中行号错误问题
      *
      * @param logger      {@link LocationAwareLogger} 实现
      * @param fqcn        完全限定类名(Fully Qualified Class Name)，用于纠正定位错误行号
@@ -196,7 +190,8 @@ public class Slf4jLog extends AbstractLog {
      * @param msgTemplate 消息模板
      * @param arguments   参数
      */
-    private void locationAwareLog(LocationAwareLogger logger, String fqcn, int level_int, Throwable t, String msgTemplate, Object[] arguments) {
+    private void locationAwareLog(LocationAwareLogger logger, String fqcn, int level_int, Throwable t,
+        String msgTemplate, Object[] arguments) {
         // ((LocationAwareLogger)this.logger).log(null, fqcn, level_int, msgTemplate, arguments, t);
         // 由于slf4j-log4j12中此方法的实现存在bug，故在此拼接参数
         logger.log(null, fqcn, level_int, msgTemplate, arguments, t);

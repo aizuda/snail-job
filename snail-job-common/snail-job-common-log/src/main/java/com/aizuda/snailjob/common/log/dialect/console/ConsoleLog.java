@@ -13,6 +13,7 @@ import com.aizuda.snailjob.common.log.level.Level;
  * @author wodeyangzipingpingwuqi
  */
 public class ConsoleLog extends AbstractLog {
+
     private static final long serialVersionUID = -6843151523380063975L;
 
     private static final String logFormat = "[{date}] [{level}] {name}: {msg}";
@@ -63,8 +64,8 @@ public class ConsoleLog extends AbstractLog {
     }
 
     @Override
-    public void trace(String fqcn, Throwable t, String format, Boolean remote, Object... arguments) {
-        log(fqcn, Level.TRACE, t, format, remote, arguments);
+    public void trace(Boolean remote, String fqcn, String format, Object... arguments) {
+        log(Level.TRACE, remote, fqcn, format, arguments);
     }
 
     //------------------------------------------------------------------------- Debug
@@ -74,8 +75,8 @@ public class ConsoleLog extends AbstractLog {
     }
 
     @Override
-    public void debug(String fqcn, Throwable t, String format, Boolean remote, Object... arguments) {
-        log(fqcn, Level.DEBUG, t, format, remote, arguments);
+    public void debug(Boolean remote, String fqcn, String format, Object... arguments) {
+        log(Level.DEBUG, remote, fqcn, format, arguments);
     }
 
     //------------------------------------------------------------------------- Info
@@ -85,8 +86,8 @@ public class ConsoleLog extends AbstractLog {
     }
 
     @Override
-    public void info(String fqcn, Throwable t, String format, Boolean remote, Object... arguments) {
-        log(fqcn, Level.INFO, t, format, remote, arguments);
+    public void info(Boolean remote, String fqcn, String format, Object... arguments) {
+        log(Level.INFO, remote, fqcn, format, arguments);
     }
 
     //------------------------------------------------------------------------- Warn
@@ -96,8 +97,8 @@ public class ConsoleLog extends AbstractLog {
     }
 
     @Override
-    public void warn(String fqcn, Throwable t, String format, Boolean remote, Object... arguments) {
-        log(fqcn, Level.WARN, t, format, remote, arguments);
+    public void warn(Boolean remote, String fqcn, String format, Object... arguments) {
+        log(Level.WARN, remote, fqcn, format, arguments);
     }
 
     //------------------------------------------------------------------------- Error
@@ -107,32 +108,31 @@ public class ConsoleLog extends AbstractLog {
     }
 
     @Override
-    public void error(String fqcn, Throwable t, String format, Boolean remote, Object... arguments) {
-        log(fqcn, Level.ERROR, t, format, remote, arguments);
+    public void error(Boolean remote, String fqcn, String format, Object... arguments) {
+        log(Level.ERROR, remote, fqcn, format, arguments);
     }
 
     //------------------------------------------------------------------------- Log
     @Override
-    public void log(String fqcn, Level level, Throwable t, String format, Boolean remote, Object... arguments) {
+    public void log(Level level, Boolean remote, String fqcn, String format, Object... arguments) {
         // fqcn 无效
-        if (false == isEnabled(level)) {
+        if (!isEnabled(level)) {
             return;
         }
 
-
         final Dict dict = Dict.create()
-                .set("date", DateUtil.now())
-                .set("level", level.toString())
-                .set("name", this.name)
-                .set("msg", StrUtil.format(format, arguments));
+            .set("date", DateUtil.now())
+            .set("level", level.toString())
+            .set("name", this.name)
+            .set("msg", StrUtil.format(format, arguments));
 
         final String logMsg = StrUtil.format(logFormat, dict);
 
         //WARN以上级别打印至System.err
         if (level.ordinal() >= Level.WARN.ordinal()) {
-            Console.error(t, logMsg);
+            Console.error(ConsoleLogFactory.extractThrowable(arguments), logMsg);
         } else {
-            Console.log(t, logMsg);
+            Console.log(ConsoleLogFactory.extractThrowable(arguments), logMsg);
         }
     }
 

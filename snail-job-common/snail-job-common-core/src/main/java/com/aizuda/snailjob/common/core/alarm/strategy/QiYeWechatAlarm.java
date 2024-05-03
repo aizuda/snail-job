@@ -4,7 +4,7 @@ import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.*;
 import com.aizuda.snailjob.common.core.alarm.AlarmContext;
-import com.aizuda.snailjob.common.core.alarm.QiYeWechatAttribute;
+import com.aizuda.snailjob.common.core.alarm.attribute.QiYeWechatAttribute;
 import com.aizuda.snailjob.common.core.enums.AlarmTypeEnum;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.common.core.util.DingDingUtils;

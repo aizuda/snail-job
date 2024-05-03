@@ -3,9 +3,12 @@ package com.aizuda.snailjob.common.log.dialect.jdk;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.log.dialect.AbstractLog;
 
+import java.io.Serial;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
+
+import static com.aizuda.snailjob.common.log.factory.LogFactory.extractThrowable;
 
 /**
  * <a href="http://java.sun.com/javase/6/docs/technotes/guides/logging/index.html">java.util.logging</a> log.
@@ -13,6 +16,8 @@ import java.util.logging.Logger;
  * @author wodeyangzipingpingwuqi
  */
 public class JdkLog extends AbstractLog {
+
+    @Serial
     private static final long serialVersionUID = -6843151523380063975L;
 
     private final transient Logger logger;
@@ -42,8 +47,8 @@ public class JdkLog extends AbstractLog {
     }
 
     @Override
-    public void trace(String fqcn, Throwable t, String format, Boolean remote, Object... arguments) {
-        logIfEnabled(fqcn, Level.FINEST, t, format, arguments);
+    public void trace(Boolean remote, String fqcn, String format, Object... arguments) {
+        logIfEnabled(Level.FINEST, fqcn, format, arguments);
     }
 
     // ------------------------------------------------------------------------- Debug
@@ -53,8 +58,8 @@ public class JdkLog extends AbstractLog {
     }
 
     @Override
-    public void debug(String fqcn, Throwable t, String format, Boolean remote, Object... arguments) {
-        logIfEnabled(fqcn, Level.FINE, t, format, arguments);
+    public void debug(Boolean remote, String fqcn, String format, Object... arguments) {
+        logIfEnabled(Level.FINE, fqcn, format, arguments);
     }
 
     // ------------------------------------------------------------------------- Info
@@ -64,8 +69,8 @@ public class JdkLog extends AbstractLog {
     }
 
     @Override
-    public void info(String fqcn, Throwable t, String format, Boolean remote, Object... arguments) {
-        logIfEnabled(fqcn, Level.INFO, t, format, arguments);
+    public void info(Boolean remote, String fqcn, String format, Object... arguments) {
+        logIfEnabled(Level.INFO, fqcn, format, arguments);
     }
 
     // ------------------------------------------------------------------------- Warn
@@ -75,8 +80,8 @@ public class JdkLog extends AbstractLog {
     }
 
     @Override
-    public void warn(String fqcn, Throwable t, String format, Boolean remote, Object... arguments) {
-        logIfEnabled(fqcn, Level.WARNING, t, format, arguments);
+    public void warn(Boolean remote, String fqcn, String format, Object... arguments) {
+        logIfEnabled(Level.WARNING, fqcn, format, arguments);
     }
 
     // ------------------------------------------------------------------------- Error
@@ -86,13 +91,14 @@ public class JdkLog extends AbstractLog {
     }
 
     @Override
-    public void error(String fqcn, Throwable t, String format, Boolean remote, Object... arguments) {
-        logIfEnabled(fqcn, Level.SEVERE, t, format, arguments);
+    public void error(Boolean remote, String fqcn, String format, Object... arguments) {
+        logIfEnabled(Level.SEVERE, fqcn, format, arguments);
     }
 
     // ------------------------------------------------------------------------- Log
     @Override
-    public void log(String fqcn, com.aizuda.snailjob.common.log.level.Level level, Throwable t, String format, Boolean remote, Object... arguments) {
+    public void log(com.aizuda.snailjob.common.log.level.Level level, Boolean remote, String fqcn, String format,
+        Object... arguments) {
         Level jdkLevel;
         switch (level) {
             case TRACE:
@@ -113,7 +119,7 @@ public class JdkLog extends AbstractLog {
             default:
                 throw new Error(StrUtil.format("Can not identify level: {}", level));
         }
-        logIfEnabled(fqcn, jdkLevel, t, format, arguments);
+        logIfEnabled(jdkLevel, fqcn, format, arguments);
     }
 
     // ------------------------------------------------------------------------- Private method
@@ -123,15 +129,14 @@ public class JdkLog extends AbstractLog {
      *
      * @param callerFQCN 调用者的完全限定类名(Fully Qualified Class Name)
      * @param level      等级
-     * @param throwable  异常对象
      * @param format     消息模板
      * @param arguments  参数
      */
-    private void logIfEnabled(String callerFQCN, Level level, Throwable throwable, String format, Object[] arguments) {
+    private void logIfEnabled(Level level, String callerFQCN, String format, Object... arguments) {
         if (logger.isLoggable(level)) {
             LogRecord record = new LogRecord(level, StrUtil.format(format, arguments));
             record.setLoggerName(getName());
-            record.setThrown(throwable);
+            record.setThrown(extractThrowable(arguments));
             fillCallerData(callerFQCN, record);
             logger.log(record);
         }

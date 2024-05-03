@@ -14,6 +14,7 @@ import org.apache.log4j.MDC;
  * @author wodeyangzipingpingwuqi
  */
 public class Log4jLog extends AbstractLog {
+
     private static final long serialVersionUID = -6843151523380063975L;
 
     private final Logger logger;
@@ -43,8 +44,8 @@ public class Log4jLog extends AbstractLog {
     }
 
     @Override
-    public void trace(String fqcn, Throwable t, String format, Boolean remote, Object... arguments) {
-        log(fqcn, com.aizuda.snailjob.common.log.level.Level.TRACE, t, format, remote, arguments);
+    public void trace(Boolean remote, String fqcn, String format, Object... arguments) {
+        log(com.aizuda.snailjob.common.log.level.Level.TRACE, remote, fqcn, format, arguments);
     }
 
     // ------------------------------------------------------------------------- Debug
@@ -54,8 +55,8 @@ public class Log4jLog extends AbstractLog {
     }
 
     @Override
-    public void debug(String fqcn, Throwable t, String format, Boolean remote, Object... arguments) {
-        log(fqcn, com.aizuda.snailjob.common.log.level.Level.DEBUG, t, format, remote, arguments);
+    public void debug(Boolean remote, String fqcn, String format, Object... arguments) {
+        log(com.aizuda.snailjob.common.log.level.Level.DEBUG, remote, fqcn, format, arguments);
     }
 
     // ------------------------------------------------------------------------- Info
@@ -65,8 +66,8 @@ public class Log4jLog extends AbstractLog {
     }
 
     @Override
-    public void info(String fqcn, Throwable t, String format, Boolean remote, Object... arguments) {
-        log(fqcn, com.aizuda.snailjob.common.log.level.Level.INFO, t, format, remote, arguments);
+    public void info(Boolean remote, String fqcn, String format, Object... arguments) {
+        log(com.aizuda.snailjob.common.log.level.Level.INFO, remote, fqcn, format, arguments);
     }
 
     // ------------------------------------------------------------------------- Warn
@@ -76,8 +77,8 @@ public class Log4jLog extends AbstractLog {
     }
 
     @Override
-    public void warn(String fqcn, Throwable t, String format, Boolean remote, Object... arguments) {
-        log(fqcn, com.aizuda.snailjob.common.log.level.Level.WARN, t, format, remote, arguments);
+    public void warn(Boolean remote, String fqcn, String format, Object... arguments) {
+        log(com.aizuda.snailjob.common.log.level.Level.WARN, remote, fqcn, format, arguments);
     }
 
     // ------------------------------------------------------------------------- Error
@@ -87,13 +88,14 @@ public class Log4jLog extends AbstractLog {
     }
 
     @Override
-    public void error(String fqcn, Throwable t, String format, Boolean remote, Object... arguments) {
-        log(fqcn, com.aizuda.snailjob.common.log.level.Level.ERROR, t, format, remote, arguments);
+    public void error(Boolean remote, String fqcn, String format, Object... arguments) {
+        log(com.aizuda.snailjob.common.log.level.Level.ERROR, remote, fqcn, format, arguments);
     }
 
     // ------------------------------------------------------------------------- Log
     @Override
-    public void log(String fqcn, com.aizuda.snailjob.common.log.level.Level level, Throwable t, String format, Boolean remote, Object... arguments) {
+    public void log(com.aizuda.snailjob.common.log.level.Level level, Boolean remote, String fqcn, String format,
+        Object... arguments) {
         org.apache.log4j.Level log4jLevel;
         switch (level) {
             case TRACE:
@@ -119,10 +121,8 @@ public class Log4jLog extends AbstractLog {
             if (remote) {
                 MDC.put(LogFieldConstants.MDC_REMOTE, remote.toString());
             }
-            if (t == null) {
-                t = LogFactory.extractThrowable(arguments);
-            }
-            logger.log(fqcn, log4jLevel, StrUtil.format(format, arguments), t);
+
+            logger.log(fqcn, log4jLevel, StrUtil.format(format, arguments), LogFactory.extractThrowable(arguments));
         }
     }
 }

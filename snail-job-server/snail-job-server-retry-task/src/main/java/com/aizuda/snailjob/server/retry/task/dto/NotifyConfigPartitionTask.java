@@ -1,8 +1,13 @@
 package com.aizuda.snailjob.server.retry.task.dto;
 
+import com.aizuda.snailjob.server.common.dto.NotifyConfigInfo;
+import com.aizuda.snailjob.server.common.dto.NotifyConfigInfo.RecipientInfo;
 import com.aizuda.snailjob.server.common.dto.PartitionTask;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author xiaowoniu
@@ -20,11 +25,9 @@ public class NotifyConfigPartitionTask extends PartitionTask {
 
     private String sceneName;
 
+    private Set<Long> recipientIds;
+
     private Integer notifyStatus;
-
-    private Integer notifyType;
-
-    private String notifyAttribute;
 
     private Integer notifyThreshold;
 
@@ -33,5 +36,15 @@ public class NotifyConfigPartitionTask extends PartitionTask {
     private Integer rateLimiterStatus;
 
     private Integer rateLimiterThreshold;
+
+    private List<RecipientInfo> recipientInfos;
+
+    @Data
+    public static class RecipientInfo {
+
+        private Integer notifyType;
+
+        private String notifyAttribute;
+    }
 
 }

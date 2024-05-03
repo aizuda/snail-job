@@ -13,6 +13,12 @@
       "defaultValue": "30",
       "description": "服务端的地址，若服务端集群部署则此处配置域名",
       "sourceType": "com.aizuda.snailjob.server.common.config.SystemProperties"
+    },
+    {
+      "name": "snail-job.mail",
+      "type": "com.aizuda.snailjob.common.core.alarm.email.MailProperties",
+      "description": "邮箱配置",
+      "sourceType": "com.aizuda.snailjob.server.common.config.SystemProperties"
     }
   ]
 }

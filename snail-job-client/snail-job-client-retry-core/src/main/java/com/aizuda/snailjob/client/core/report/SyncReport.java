@@ -113,8 +113,7 @@ public class SyncReport extends AbstractReport {
                     .title("同步上报异常:[{}]", SnailJobProperties.getGroup())
                     .notifyAttribute(recipient.getNotifyAttribute());
 
-                SnailJobAlarmFactory snailJobAlarmFactory = SpringContext.getBeanByType(SnailJobAlarmFactory.class);
-                Alarm<AlarmContext> alarmType = snailJobAlarmFactory.getAlarmType(recipient.getNotifyType());
+                Alarm<AlarmContext> alarmType = SnailJobAlarmFactory.getAlarmType(recipient.getNotifyType());
                 alarmType.asyncSendMessage(context);
             }
 

@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.client.common.config;
 
+import com.aizuda.snailjob.common.core.alarm.email.MailProperties;
 import com.aizuda.snailjob.common.core.context.SpringContext;
 import lombok.Data;
 import lombok.Getter;
@@ -175,4 +176,9 @@ public class SnailJobProperties {
         SnailJobProperties properties = SpringContext.getBean(SnailJobProperties.class);
         return Objects.requireNonNull(properties).group;
     }
+
+    /**
+     * 邮件配置
+     */
+    private MailProperties mail = new MailProperties();
 }

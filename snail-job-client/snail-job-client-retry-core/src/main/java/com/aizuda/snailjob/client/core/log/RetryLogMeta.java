@@ -1,7 +1,6 @@
 package com.aizuda.snailjob.client.core.log;
 
 import com.aizuda.snailjob.client.common.log.report.LogMeta;
-import com.aizuda.snailjob.client.common.log.report.LogMeta;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

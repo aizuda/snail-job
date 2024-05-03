@@ -1,9 +1,10 @@
 package com.aizuda.snailjob.server.common.config;
 
+import com.aizuda.snailjob.common.core.alarm.email.MailProperties;
 import com.aizuda.snailjob.server.common.enums.SystemModeEnum;
-import com.aizuda.snailjob.template.datasource.enums.DbTypeEnum;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -63,14 +64,6 @@ public class SystemProperties {
     private int mergeLogNum = 500;
 
     /**
-     * 数据库类型
-     *
-     * @deprecated 废弃 新版本通过数据源url自动判断
-     */
-    @Deprecated
-    private DbTypeEnum dbType = DbTypeEnum.MYSQL;
-
-    /**
      * 负载均衡周期时间
      */
     private int loadBalanceCycleTime = 10;
@@ -120,5 +113,11 @@ public class SystemProperties {
      * Dashboard 任务容错天数
      */
     private int summaryDay = 7;
+
+    /**
+     * 邮件配置
+     */
+    @NestedConfigurationProperty
+    private MailProperties mail = new MailProperties();
 
 }

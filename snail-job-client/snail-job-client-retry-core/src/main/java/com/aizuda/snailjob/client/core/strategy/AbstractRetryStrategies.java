@@ -54,8 +54,6 @@ public abstract class AbstractRetryStrategies implements RetryStrategy {
     private final List<SnailJobListener> snailJobListeners = SnailRetrySpiLoader.loadSnailJobListener();
 
     @Autowired
-    private SnailJobAlarmFactory snailJobAlarmFactory;
-    @Autowired
     private List<Report> reports;
     @Autowired
     private SnailJobProperties snailJobProperties;
@@ -193,7 +191,7 @@ public abstract class AbstractRetryStrategies implements RetryStrategy {
                             e.getMessage())
                         .title("retry component handling exception:[{}]", SnailJobProperties.getGroup())
                         .notifyAttribute(recipient.getNotifyAttribute());
-                    Alarm<AlarmContext> alarmType = snailJobAlarmFactory.getAlarmType(recipient.getNotifyType());
+                    Alarm<AlarmContext> alarmType = SnailJobAlarmFactory.getAlarmType(recipient.getNotifyType());
                     alarmType.asyncSendMessage(context);
                 }
             }

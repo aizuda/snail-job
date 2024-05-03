@@ -46,8 +46,6 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
     Lifecycle {
 
     @Autowired
-    private SnailJobAlarmFactory snailJobAlarmFactory;
-    @Autowired
     protected AccessTemplate accessTemplate;
     @Autowired
     protected NotifyRecipientMapper recipientMapper;
@@ -199,7 +197,7 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
                 }
                 AlarmContext context = buildAlarmContext(alarmDTO, notifyConfig);
                 context.setNotifyAttribute(recipientInfo.getNotifyAttribute());
-                Alarm<AlarmContext> alarmType = snailJobAlarmFactory.getAlarmType(
+                Alarm<AlarmContext> alarmType = SnailJobAlarmFactory.getAlarmType(
                     recipientInfo.getNotifyType());
                 alarmType.asyncSendMessage(context);
             }

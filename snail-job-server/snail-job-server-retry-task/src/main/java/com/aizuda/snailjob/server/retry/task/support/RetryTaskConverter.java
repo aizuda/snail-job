@@ -1,5 +1,8 @@
 package com.aizuda.snailjob.server.retry.task.support;
 
+import cn.hutool.core.util.StrUtil;
+import com.aizuda.snailjob.common.core.util.JsonUtil;
+import com.aizuda.snailjob.server.common.dto.NotifyConfigInfo;
 import com.aizuda.snailjob.server.model.dto.RetryLogTaskDTO;
 import com.aizuda.snailjob.server.model.dto.RetryTaskDTO;
 import com.aizuda.snailjob.server.common.dto.RetryLogMetaDTO;
@@ -19,7 +22,9 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.mapstruct.factory.Mappers;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author: opensnail
@@ -50,6 +55,19 @@ public interface RetryTaskConverter {
     RetryTimerContext toRetryTimerContext(RetryPartitionTask retryPartitionTask);
 
     List<NotifyConfigPartitionTask> toNotifyConfigPartitionTask(List<NotifyConfig> notifyConfigs);
+
+    @Mappings({
+        @Mapping(target = "recipientIds", expression = "java(RetryTaskConverter.toNotifyRecipientIds(notifyConfig.getRecipientIds()))")
+    })
+    NotifyConfigPartitionTask toNotifyConfigPartitionTask(NotifyConfig notifyConfig);
+
+    static Set<Long> toNotifyRecipientIds(String notifyRecipientIdsStr) {
+        if (StrUtil.isBlank(notifyRecipientIdsStr)) {
+            return new HashSet<>();
+        }
+
+        return new HashSet<>(JsonUtil.parseList(notifyRecipientIdsStr, Long.class));
+    }
 
     RetryTaskLogMessage toRetryTaskLogMessage(RetryLogTaskDTO retryLogTaskDTO);
 

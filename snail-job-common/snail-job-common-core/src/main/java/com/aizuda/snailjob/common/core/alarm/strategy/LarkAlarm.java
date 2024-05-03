@@ -6,7 +6,7 @@ import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
 import com.aizuda.snailjob.common.core.alarm.AlarmContext;
-import com.aizuda.snailjob.common.core.alarm.LarkAttribute;
+import com.aizuda.snailjob.common.core.alarm.attribute.LarkAttribute;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.enums.AlarmTypeEnum;
 import com.aizuda.snailjob.common.log.SnailJobLog;

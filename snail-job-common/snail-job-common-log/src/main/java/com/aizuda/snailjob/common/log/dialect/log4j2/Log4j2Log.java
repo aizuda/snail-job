@@ -10,12 +10,16 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.spi.AbstractLogger;
 
+import java.io.Serial;
+
 /**
  * <a href="http://logging.apache.org/log4j/2.x/index.html">Apache Log4J 2</a> log.<br>
  *
  * @author wodeyangzipingpingwuqi
  */
 public class Log4j2Log extends AbstractLog {
+
+    @Serial
     private static final long serialVersionUID = -6843151523380063975L;
 
     private final transient Logger logger;
@@ -45,8 +49,8 @@ public class Log4j2Log extends AbstractLog {
     }
 
     @Override
-    public void trace(String fqcn, Throwable t, String format, Boolean remote, Object... arguments) {
-        logIfEnabled(fqcn, Level.TRACE, t, format, remote, arguments);
+    public void trace(Boolean remote, String fqcn, String format, Object... arguments) {
+        logIfEnabled(Level.TRACE, remote, fqcn, format, arguments);
     }
 
     // ------------------------------------------------------------------------- Debug
@@ -56,8 +60,8 @@ public class Log4j2Log extends AbstractLog {
     }
 
     @Override
-    public void debug(String fqcn, Throwable t, String format, Boolean remote, Object... arguments) {
-        logIfEnabled(fqcn, Level.DEBUG, t, format, remote, arguments);
+    public void debug(Boolean remote, String fqcn, String format, Object... arguments) {
+        logIfEnabled(Level.DEBUG, remote, fqcn, format, arguments);
     }
 
     // ------------------------------------------------------------------------- Info
@@ -67,8 +71,8 @@ public class Log4j2Log extends AbstractLog {
     }
 
     @Override
-    public void info(String fqcn, Throwable t, String format, Boolean remote, Object... arguments) {
-        logIfEnabled(fqcn, Level.INFO, t, format, remote, arguments);
+    public void info(Boolean remote, String fqcn, String format, Object... arguments) {
+        logIfEnabled(Level.INFO, remote, fqcn, format, arguments);
     }
 
     // ------------------------------------------------------------------------- Warn
@@ -78,8 +82,8 @@ public class Log4j2Log extends AbstractLog {
     }
 
     @Override
-    public void warn(String fqcn, Throwable t, String format, Boolean remote, Object... arguments) {
-        logIfEnabled(fqcn, Level.WARN, t, format, remote, arguments);
+    public void warn(Boolean remote, String fqcn, String format, Object... arguments) {
+        logIfEnabled(Level.WARN, remote, fqcn, format, arguments);
     }
 
     // ------------------------------------------------------------------------- Error
@@ -89,13 +93,14 @@ public class Log4j2Log extends AbstractLog {
     }
 
     @Override
-    public void error(String fqcn, Throwable t, String format, Boolean remote, Object... arguments) {
-        logIfEnabled(fqcn, Level.ERROR, t, format, remote, arguments);
+    public void error(Boolean remote, String fqcn, String format, Object... arguments) {
+        logIfEnabled(Level.ERROR, remote, fqcn, format, arguments);
     }
 
     // ------------------------------------------------------------------------- Log
     @Override
-    public void log(String fqcn, com.aizuda.snailjob.common.log.level.Level level, Throwable t, String format, Boolean remote, Object... arguments) {
+    public void log(com.aizuda.snailjob.common.log.level.Level level, Boolean remote, String fqcn, String format,
+        Object... arguments) {
         Level log4j2Level;
         switch (level) {
             case TRACE:
@@ -116,36 +121,32 @@ public class Log4j2Log extends AbstractLog {
             default:
                 throw new Error(StrUtil.format("Can not identify level: {}", level));
         }
-        logIfEnabled(fqcn, log4j2Level, t, format, remote, arguments);
+        logIfEnabled(log4j2Level, remote, fqcn, format, arguments);
     }
 
     // ------------------------------------------------------------------------- Private method
 
     /**
-     * 打印日志<br>
-     * 此方法用于兼容底层日志实现，通过传入当前包装类名，以解决打印日志中行号错误问题
+     * 打印日志<br> 此方法用于兼容底层日志实现，通过传入当前包装类名，以解决打印日志中行号错误问题
      *
      * @param fqcn        完全限定类名(Fully Qualified Class Name)，用于纠正定位错误行号
      * @param level       日志级别，使用org.apache.logging.log4j.Level中的常量
-     * @param t           异常
      * @param msgTemplate 消息模板
      * @param arguments   参数
      */
-    private void logIfEnabled(String fqcn, Level level, Throwable t, String msgTemplate, Boolean remote, Object... arguments) {
+    private void logIfEnabled(Level level, Boolean remote, String fqcn, String msgTemplate,
+        Object... arguments) {
         if (this.logger.isEnabled(level)) {
 
             if (remote) {
                 MDC.put(LogFieldConstants.MDC_REMOTE, remote.toString());
             }
             if (this.logger instanceof AbstractLogger) {
-                ((AbstractLogger) this.logger).logIfEnabled(fqcn, level, null, StrUtil.format(msgTemplate, arguments), t);
+                ((AbstractLogger) this.logger).logIfEnabled(fqcn, level, null, StrUtil.format(msgTemplate, arguments),
+                    LogFactory.extractThrowable(arguments));
             } else {
                 // FQCN无效
-                //this.logger.log(level, StrUtil.format(msgTemplate, arguments), t);
-                if (t == null) {
-                    t = LogFactory.extractThrowable(arguments);
-                }
-                this.logger.log(level, StrUtil.format(msgTemplate, arguments), t);
+                this.logger.log(level, StrUtil.format(msgTemplate, arguments), LogFactory.extractThrowable(arguments));
             }
         }
     }

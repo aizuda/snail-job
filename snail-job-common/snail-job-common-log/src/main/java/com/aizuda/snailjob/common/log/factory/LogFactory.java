@@ -7,9 +7,6 @@ import cn.hutool.core.util.ServiceLoaderUtil;
 import com.aizuda.snailjob.common.log.dialect.Log;
 import com.aizuda.snailjob.common.log.dialect.console.ConsoleLogFactory;
 import com.aizuda.snailjob.common.log.dialect.jdk.JdkLogFactory;
-import com.aizuda.snailjob.common.log.dialect.Log;
-import com.aizuda.snailjob.common.log.dialect.console.ConsoleLogFactory;
-import com.aizuda.snailjob.common.log.dialect.jdk.JdkLogFactory;
 
 import java.net.URL;
 import java.util.Map;
@@ -186,7 +183,7 @@ public abstract class LogFactory {
     }
     // ------------------------------------------------------------------------- Static end
 
-    public final static Throwable extractThrowable(Object... arguments) {
+    public static Throwable extractThrowable(Object... arguments) {
         if (arguments == null || arguments.length == 0) {
             return null;
         }

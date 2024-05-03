@@ -5,7 +5,6 @@ import com.aizuda.snailjob.client.common.SnailLogContext;
 import com.aizuda.snailjob.client.common.log.context.ThreadLocalLogContext;
 import com.aizuda.snailjob.client.common.log.report.LogMeta;
 import com.aizuda.snailjob.common.log.enums.LogTypeEnum;
-import com.aizuda.snailjob.client.common.log.report.LogMeta;
 
 import java.util.Optional;
 

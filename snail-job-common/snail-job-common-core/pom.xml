@@ -55,16 +55,16 @@
             <artifactId>hutool-http</artifactId>
         </dependency>
         <dependency>
-            <groupId>cn.hutool</groupId>
-            <artifactId>hutool-extra</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>cn.hutool</groupId>
-            <artifactId>hutool-crypto</artifactId>
-        </dependency>
-        <dependency>
             <groupId>jakarta.validation</groupId>
             <artifactId>jakarta.validation-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.mail</groupId>
+            <artifactId>jakarta.mail-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.angus</groupId>
+            <artifactId>jakarta.mail</artifactId>
         </dependency>
         <dependency>
             <groupId>com.googlecode.aviator</groupId>

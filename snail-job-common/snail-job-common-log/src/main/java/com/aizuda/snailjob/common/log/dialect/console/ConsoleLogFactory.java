@@ -1,6 +1,5 @@
 package com.aizuda.snailjob.common.log.dialect.console;
 
-
 import com.aizuda.snailjob.common.log.dialect.Log;
 import com.aizuda.snailjob.common.log.factory.LogFactory;
 
@@ -12,7 +11,7 @@ import com.aizuda.snailjob.common.log.factory.LogFactory;
 public class ConsoleLogFactory extends LogFactory {
 
     public ConsoleLogFactory() {
-        super("Hutool Console Logging");
+        super("Snail Job Console Logging");
     }
 
     @Override

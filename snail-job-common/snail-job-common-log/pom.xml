@@ -32,28 +32,6 @@
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-extra</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>org.jboss.logging</groupId>
-            <artifactId>jboss-logging</artifactId>
-            <optional>true</optional>
-        </dependency>
-
-        <dependency>
-            <groupId>io.github.logtube</groupId>
-            <artifactId>logtube</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.tinylog</groupId>
-            <artifactId>tinylog</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.tinylog</groupId>
-            <artifactId>tinylog-api</artifactId>
-            <optional>true</optional>
-        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-log4j2</artifactId>
@@ -62,12 +40,6 @@
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-            <version>1.2</version>
             <optional>true</optional>
         </dependency>
     </dependencies>

@@ -83,6 +83,10 @@
             <groupId>com.aizuda</groupId>
             <artifactId>snail-job-server-job-task</artifactId>
         </dependency>
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-crypto</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

@@ -1,15 +1,5 @@
 package com.aizuda.snailjob.common.log.factory;
 
-
-import com.aizuda.snailjob.common.log.dialect.commons.ApacheCommonsLogFactory;
-import com.aizuda.snailjob.common.log.dialect.console.ConsoleLogFactory;
-import com.aizuda.snailjob.common.log.dialect.jdk.JdkLogFactory;
-import com.aizuda.snailjob.common.log.dialect.log4j.Log4jLogFactory;
-import com.aizuda.snailjob.common.log.dialect.log4j2.Log4j2LogFactory;
-import com.aizuda.snailjob.common.log.dialect.slf4j.Slf4jLogFactory;
-import com.aizuda.snailjob.common.log.dialect.commons.ApacheCommonsLogFactory;
-import com.aizuda.snailjob.common.log.dialect.console.ConsoleLogFactory;
-import com.aizuda.snailjob.common.log.dialect.jdk.JdkLogFactory;
 import com.aizuda.snailjob.common.log.dialect.log4j.Log4jLogFactory;
 import com.aizuda.snailjob.common.log.dialect.log4j2.Log4j2LogFactory;
 import com.aizuda.snailjob.common.log.dialect.slf4j.Slf4jLogFactory;
@@ -58,9 +48,6 @@ public class GlobalLogFactory {
      * @see Slf4jLogFactory
      * @see Log4jLogFactory
      * @see Log4j2LogFactory
-     * @see ApacheCommonsLogFactory
-     * @see JdkLogFactory
-     * @see ConsoleLogFactory
      */
     public static LogFactory set(Class<? extends LogFactory> logFactoryClass) {
         try {
@@ -78,12 +65,9 @@ public class GlobalLogFactory {
      * @see Slf4jLogFactory
      * @see Log4jLogFactory
      * @see Log4j2LogFactory
-     * @see ApacheCommonsLogFactory
-     * @see JdkLogFactory
-     * @see ConsoleLogFactory
      */
     public static LogFactory set(LogFactory logFactory) {
-        logFactory.getLog(GlobalLogFactory.class).debug("Custom Use [{}] Logger.", false, logFactory.name);
+        logFactory.getLog(GlobalLogFactory.class).debug(false, "Custom Use [{}] Logger.", logFactory.name);
         currentLogFactory = logFactory;
         return currentLogFactory;
     }
@@ -96,7 +80,7 @@ public class GlobalLogFactory {
     public static Boolean logSwitch() {
 
         if (Objects.nonNull(environment)) {
-            return environment.getProperty("snail.job.log.status", Boolean.class, Boolean.TRUE);
+            return environment.getProperty("snail-job.log.status", Boolean.class, Boolean.TRUE);
         }
 
         return Boolean.TRUE;

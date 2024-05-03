@@ -231,7 +231,7 @@ public class SnailRetryInterceptor implements MethodInterceptor, AfterAdvice, Se
                         .title("retry component handling exception:[{}]", SnailJobProperties.getGroup())
                         .notifyAttribute(recipient.getNotifyAttribute());
 
-                    Alarm<AlarmContext> alarmType = SpringContext.getBeanByType(SnailJobAlarmFactory.class).getAlarmType(recipient.getNotifyType());
+                    Alarm<AlarmContext> alarmType = SnailJobAlarmFactory.getAlarmType(recipient.getNotifyType());
                     alarmType.asyncSendMessage(context);
                 }
 
