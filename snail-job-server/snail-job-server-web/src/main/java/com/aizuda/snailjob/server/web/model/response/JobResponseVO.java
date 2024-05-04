@@ -52,7 +52,7 @@ public class JobResponseVO {
     /**
      * 执行器路由策略
      */
-    private String routeKey;
+    private Integer routeKey;
 
     /**
      * 执行器类型 1、Java
