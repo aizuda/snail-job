@@ -96,7 +96,7 @@ public class RetryErrorMoreThresholdAlarmSchedule extends AbstractSchedule imple
             new LambdaQueryWrapper<RetryDeadLetter>().
                 between(RetryDeadLetter::getCreateDt, now.minusMinutes(30), now)
                 .eq(RetryDeadLetter::getGroupName, partitionTask.getGroupName())
-                .eq(RetryDeadLetter::getSceneName, partitionTask.getSceneName()));
+                .eq(RetryDeadLetter::getSceneName, partitionTask.getBusinessId()));
         if (count >= partitionTask.getNotifyThreshold()) {
             List<RecipientInfo> recipientInfos = partitionTask.getRecipientInfos();
             for (final RecipientInfo recipientInfo : recipientInfos) {
@@ -110,7 +110,7 @@ public class RetryErrorMoreThresholdAlarmSchedule extends AbstractSchedule imple
                         count,
                         partitionTask.getNamespaceId(),
                         partitionTask.getGroupName(),
-                        partitionTask.getSceneName(),
+                        partitionTask.getBusinessId(),
                         DateUtils.format(now.minusMinutes(30),
                             DateUtils.NORM_DATETIME_PATTERN),
                         DateUtils.toNowFormat(DateUtils.NORM_DATETIME_PATTERN), count)

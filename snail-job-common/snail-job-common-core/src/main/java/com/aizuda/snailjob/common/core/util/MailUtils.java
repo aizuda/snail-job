@@ -5,7 +5,6 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.CharUtil;
 import cn.hutool.core.util.StrUtil;
-import com.aizuda.snailjob.common.core.context.SpringContext;
 import com.aizuda.snailjob.common.core.alarm.email.Mail;
 import com.aizuda.snailjob.common.core.alarm.email.MailAccount;
 import com.aizuda.snailjob.common.core.alarm.email.UserPassAuthenticator;
@@ -27,13 +26,20 @@ import java.util.Map;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MailUtils {
 
-    private static final MailAccount ACCOUNT = SpringContext.getBean(MailAccount.class);
+    private static MailAccount account;
 
     /**
      * 获取邮件发送实例
      */
     public static MailAccount getMailAccount() {
-        return ACCOUNT;
+        return account;
+    }
+
+    /**
+     * 获取邮件发送实例
+     */
+    public static void setMailAccount(MailAccount account) {
+        MailUtils.account = account;
     }
 
     /**
@@ -43,10 +49,10 @@ public class MailUtils {
      * @param pass 授权码
      */
     public static MailAccount getMailAccount(String from, String user, String pass) {
-        ACCOUNT.setFrom(StrUtil.blankToDefault(from, ACCOUNT.getFrom()));
-        ACCOUNT.setUser(StrUtil.blankToDefault(user, ACCOUNT.getUser()));
-        ACCOUNT.setPass(StrUtil.blankToDefault(pass, ACCOUNT.getPass()));
-        return ACCOUNT;
+        account.setFrom(StrUtil.blankToDefault(from, account.getFrom()));
+        account.setUser(StrUtil.blankToDefault(user, account.getUser()));
+        account.setPass(StrUtil.blankToDefault(pass, account.getPass()));
+        return account;
     }
 
     /**

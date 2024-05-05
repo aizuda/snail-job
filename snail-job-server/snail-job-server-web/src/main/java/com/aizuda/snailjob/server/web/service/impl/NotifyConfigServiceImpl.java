@@ -196,4 +196,10 @@ public class NotifyConfigServiceImpl implements NotifyConfigService {
                 .eq(NotifyConfig::getId, id)
             );
     }
+
+    @Override
+    public Boolean batchDeleteNotify(final Set<Long> ids) {
+        return ids.size() == accessTemplate.getNotifyConfigAccess()
+            .delete(new LambdaQueryWrapper<NotifyConfig>().in(NotifyConfig::getId, ids));
+    }
 }

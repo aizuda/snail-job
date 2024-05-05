@@ -78,6 +78,7 @@ public class EmailAlarm extends AbstractAlarm<AlarmContext> {
         }
 
         mailAccount = initMailAccount(mailProperties);
+        MailUtils.setMailAccount(mailAccount);
     }
 
     private MailAccount initMailAccount(MailProperties mailProperties) {

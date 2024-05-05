@@ -11,6 +11,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * 通知配置接口
@@ -36,7 +37,6 @@ public class NotifyConfigController {
         return notifyConfigService.getNotifyConfigDetail(id);
     }
 
-
     @LoginRequired
     @PostMapping
     public Boolean saveNotify(@RequestBody @Validated NotifyConfigRequestVO requestVO) {
@@ -53,5 +53,11 @@ public class NotifyConfigController {
     @PutMapping("/{id}/status/{status}")
     public Boolean updateStatus(@PathVariable("id") Long id, @PathVariable("status") Integer status) {
         return notifyConfigService.updateStatus(id, status);
+    }
+
+    @LoginRequired
+    @DeleteMapping("ids")
+    public Boolean batchDeleteNotify(@RequestBody Set<Long> ids) {
+        return notifyConfigService.batchDeleteNotify(ids);
     }
 }

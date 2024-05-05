@@ -1,7 +1,5 @@
 package com.aizuda.snailjob.server.retry.task.dto;
 
-import com.aizuda.snailjob.server.common.dto.NotifyConfigInfo;
-import com.aizuda.snailjob.server.common.dto.NotifyConfigInfo.RecipientInfo;
 import com.aizuda.snailjob.server.common.dto.PartitionTask;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -18,12 +16,11 @@ import java.util.Set;
 @Data
 public class NotifyConfigPartitionTask extends PartitionTask {
 
-
     private String namespaceId;
 
     private String groupName;
 
-    private String sceneName;
+    private String businessId;
 
     private Set<Long> recipientIds;
 

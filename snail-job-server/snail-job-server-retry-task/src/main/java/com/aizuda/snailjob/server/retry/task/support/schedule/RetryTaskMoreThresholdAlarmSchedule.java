@@ -1,6 +1,5 @@
 package com.aizuda.snailjob.server.retry.task.support.schedule;
 
-import com.aizuda.snailjob.common.core.alarm.Alarm;
 import com.aizuda.snailjob.common.core.alarm.AlarmContext;
 import com.aizuda.snailjob.common.core.alarm.SnailJobAlarmFactory;
 import com.aizuda.snailjob.common.core.enums.RetryNotifySceneEnum;
@@ -10,6 +9,7 @@ import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.EnvironmentUtils;
 import com.aizuda.snailjob.server.common.Lifecycle;
 import com.aizuda.snailjob.server.common.dto.PartitionTask;
+import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.schedule.AbstractSchedule;
 import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.common.util.PartitionTaskUtils;
@@ -89,7 +89,7 @@ public class RetryTaskMoreThresholdAlarmSchedule extends AbstractSchedule implem
                 new LambdaQueryWrapper<RetryTask>()
                     .eq(RetryTask::getNamespaceId, partitionTask.getNamespaceId())
                     .eq(RetryTask::getGroupName, partitionTask.getGroupName())
-                    .eq(RetryTask::getSceneName, partitionTask.getSceneName())
+                    .eq(RetryTask::getSceneName, partitionTask.getBusinessId())
                     .eq(RetryTask::getRetryStatus, RetryStatusEnum.RUNNING.getStatus()));
         if (count >= partitionTask.getNotifyThreshold()) {
 
@@ -105,7 +105,7 @@ public class RetryTaskMoreThresholdAlarmSchedule extends AbstractSchedule implem
                         count,
                         partitionTask.getNamespaceId(),
                         partitionTask.getGroupName(),
-                        partitionTask.getSceneName(),
+                        partitionTask.getBusinessId(),
                         DateUtils.toNowFormat(DateUtils.NORM_DATETIME_PATTERN),
                         count)
                     .title("{}环境 场景重试数量超过阈值", EnvironmentUtils.getActiveProfile())
@@ -123,6 +123,7 @@ public class RetryTaskMoreThresholdAlarmSchedule extends AbstractSchedule implem
         List<NotifyConfig> notifyConfigs = accessTemplate.getNotifyConfigAccess()
             .listPage(new PageDTO<>(startId, 1000), new LambdaQueryWrapper<NotifyConfig>()
                 .eq(NotifyConfig::getNotifyStatus, StatusEnum.YES.getStatus())
+                .eq(NotifyConfig::getSystemTaskType, SyetemTaskTypeEnum.RETRY.getType())
                 .eq(NotifyConfig::getNotifyScene, RetryNotifySceneEnum.MAX_RETRY.getNotifyScene())
                 .orderByDesc(NotifyConfig::getId)) // SQLServer 分页必须 ORDER BY
             .getRecords();

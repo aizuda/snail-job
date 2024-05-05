@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * @author opensnail
@@ -27,6 +28,7 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class NotifyRecipientServiceImpl implements NotifyRecipientService {
+
     private final NotifyRecipientMapper notifyRecipientMapper;
 
     @Override
@@ -44,7 +46,8 @@ public class NotifyRecipientServiceImpl implements NotifyRecipientService {
         queryWrapper.orderByDesc(NotifyRecipient::getCreateDt);
         PageDTO<NotifyRecipient> notifyRecipientPageDTO = notifyRecipientMapper.selectPage(pageDTO, queryWrapper);
 
-        return new PageResult<>(pageDTO, NotifyRecipientConverter.INSTANCE.toNotifyRecipientResponseVOs(notifyRecipientPageDTO.getRecords()));
+        return new PageResult<>(pageDTO,
+            NotifyRecipientConverter.INSTANCE.toNotifyRecipientResponseVOs(notifyRecipientPageDTO.getRecords()));
     }
 
     @Override
@@ -70,5 +73,10 @@ public class NotifyRecipientServiceImpl implements NotifyRecipientService {
         queryWrapper.select(NotifyRecipient::getRecipientName, NotifyRecipient::getId);
         List<NotifyRecipient> notifyRecipients = notifyRecipientMapper.selectList(queryWrapper);
         return NotifyRecipientConverter.INSTANCE.toCommonLabelValueResponseVOs(notifyRecipients);
+    }
+
+    @Override
+    public Boolean batchDeleteByIds(final Set<Long> ids) {
+        return ids.size() == notifyRecipientMapper.deleteBatchIds(ids);
     }
 }

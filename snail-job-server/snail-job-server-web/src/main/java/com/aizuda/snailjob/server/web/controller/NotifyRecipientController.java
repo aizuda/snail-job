@@ -12,6 +12,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * <p>
@@ -49,5 +50,11 @@ public class NotifyRecipientController {
     @LoginRequired
     public List<CommonLabelValueResponseVO> getNotifyRecipientList() {
         return notifyRecipientService.getNotifyRecipientList();
+    }
+
+    @DeleteMapping("/ids")
+    @LoginRequired
+    public Boolean batchDeleteByIds(@RequestBody Set<Long> ids) {
+        return notifyRecipientService.batchDeleteByIds(ids);
     }
 }

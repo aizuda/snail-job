@@ -7,6 +7,7 @@ import com.aizuda.snailjob.server.web.model.response.CommonLabelValueResponseVO;
 import com.aizuda.snailjob.server.web.model.response.NotifyRecipientResponseVO;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author opensnail
@@ -23,4 +24,5 @@ public interface NotifyRecipientService {
 
     List<CommonLabelValueResponseVO> getNotifyRecipientList();
 
+    Boolean batchDeleteByIds(Set<Long> ids);
 }
