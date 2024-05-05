@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -51,6 +52,9 @@ public class RetryTaskFailMoreThresholdAlarmListener extends
     protected List<RetryAlarmInfo> poll() throws InterruptedException {
         // 无数据时阻塞线程
         RetryTask retryTask = queue.poll(100, TimeUnit.MILLISECONDS);
+        if (Objects.isNull(retryTask)) {
+            return Lists.newArrayList();
+        }
 
         // 拉取100条
         List<RetryTask> lists = Lists.newArrayList(retryTask);
