@@ -21,7 +21,9 @@
                b.job_name,
                b.task_type,
                b.block_strategy,
-               b.trigger_type
+               b.trigger_type,
+               b.executor_type,
+               b.executor_info
           FROM sj_job_task_batch a
                 JOIN sj_job b ON a.job_id = b.id
         ${ew.customSqlSegment}
