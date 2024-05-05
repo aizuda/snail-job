@@ -15,7 +15,6 @@ import com.aizuda.snailjob.server.web.service.JobBatchService;
 import com.aizuda.snailjob.server.web.service.convert.JobBatchResponseVOConverter;
 import com.aizuda.snailjob.server.web.service.handler.JobHandler;
 import com.aizuda.snailjob.server.web.util.UserSessionUtils;
-import com.aizuda.snailjob.template.datasource.persistence.dataobject.JobBatchQueryDO;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.JobBatchResponseDO;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskBatchMapper;
@@ -23,16 +22,14 @@ import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowNodeMa
 import com.aizuda.snailjob.template.datasource.persistence.po.Job;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch;
 import com.aizuda.snailjob.template.datasource.persistence.po.WorkflowNode;
-import com.aizuda.snailjob.server.web.service.convert.JobBatchResponseVOConverter;
-import com.aizuda.snailjob.server.web.service.handler.JobHandler;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -52,47 +49,28 @@ public class JobBatchServiceImpl implements JobBatchService {
 
     @Override
     public PageResult<List<JobBatchResponseVO>> getJobBatchPage(final JobBatchQueryVO queryVO) {
-
         PageDTO<JobTaskBatch> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
 
         UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
-        List<String> groupNames = Lists.newArrayList();
-        if (userSessionVO.isUser()) {
-            groupNames = userSessionVO.getGroupNames();
+        List<String> groupNames = UserSessionUtils.getGroupNames(queryVO.getGroupName());
+
+        // 如果当前用户为普通用户, 且计算后组名条件为空, 不能查询
+        if (userSessionVO.isUser() && CollUtil.isEmpty(groupNames)) {
+            return new PageResult<>(pageDTO, Collections.emptyList());
         }
 
-        if (StrUtil.isNotBlank(queryVO.getGroupName())) {
-            // 说明当前组不在用户配置的权限中
-            if (!CollectionUtils.isEmpty(groupNames) && !groupNames.contains(queryVO.getGroupName())) {
-                return new PageResult<>(pageDTO, Lists.newArrayList());
-            } else {
-                groupNames = Lists.newArrayList(queryVO.getGroupName());
-            }
-        }
-
-        JobBatchQueryDO queryDO = new JobBatchQueryDO();
-        if (StrUtil.isNotBlank(queryVO.getJobName())) {
-            queryDO.setJobName(queryVO.getJobName() + "%");
-        }
-
-        queryDO.setJobId(queryVO.getJobId());
-        queryDO.setTaskBatchStatus(queryVO.getTaskBatchStatus());
-        queryDO.setGroupNames(groupNames);
-        queryDO.setNamespaceId(userSessionVO.getNamespaceId());
         QueryWrapper<JobTaskBatch> wrapper = new QueryWrapper<JobTaskBatch>()
-                .eq("a.namespace_id", queryDO.getNamespaceId())
-                .eq("a.system_task_type", 3)
-                .eq(queryDO.getJobId() != null, "a.job_id", queryDO.getJobId())
-                .in(CollUtil.isNotEmpty(queryDO.getGroupNames()), "a.group_name", queryDO.getGroupNames())
-                .eq(queryDO.getTaskBatchStatus() != null, "task_batch_status", queryDO.getTaskBatchStatus())
-                .eq(StrUtil.isNotBlank(queryDO.getJobName()), "job_name", queryDO.getJobName())
-                .eq("a.deleted", 0)
-                .orderByDesc("a.id");
+            .eq("a.namespace_id", userSessionVO.getNamespaceId())
+            .eq("a.system_task_type", SyetemTaskTypeEnum.JOB.getType())
+            .eq(queryVO.getJobId() != null, "a.job_id", queryVO.getJobId())
+            .in(CollUtil.isNotEmpty(groupNames), "a.group_name", groupNames)
+            .eq(queryVO.getTaskBatchStatus() != null, "task_batch_status", queryVO.getTaskBatchStatus())
+            .likeRight(StrUtil.isNotBlank(queryVO.getJobName()), "job_name", queryVO.getJobName())
+            .eq("a.deleted", 0)
+            .orderByDesc("a.id");
         List<JobBatchResponseDO> batchResponseDOList = jobTaskBatchMapper.selectJobBatchPageList(pageDTO, wrapper);
-
         List<JobBatchResponseVO> batchResponseVOList = JobBatchResponseVOConverter.INSTANCE.toJobBatchResponseVOs(
-                batchResponseDOList);
-
+            batchResponseDOList);
         return new PageResult<>(pageDTO, batchResponseVOList);
     }
 
