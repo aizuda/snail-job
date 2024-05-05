@@ -16,7 +16,6 @@ import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.triple.ImmutableTriple;
 import com.aizuda.snailjob.server.common.triple.Triple;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
-import com.aizuda.snailjob.server.common.triple.Triple;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.NotifyRecipientMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.NotifyConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.NotifyRecipient;
@@ -31,7 +30,6 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.util.CollectionUtils;
 
-import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -122,6 +120,10 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
         List<NotifyRecipient> notifyRecipients = recipientMapper.selectBatchIds(recipientIds);
         Map<Long, NotifyRecipient> recipientMap = notifyRecipients.stream()
             .collect(Collectors.toMap(NotifyRecipient::getId, i->i));
+
+        if (CollectionUtils.isEmpty(recipientIds)) {
+            return Maps.newHashMap();
+        }
 
         List<NotifyConfigInfo> notifyConfigInfos = AlarmInfoConverter.INSTANCE.retryToNotifyConfigInfos(notifyConfigs);
 

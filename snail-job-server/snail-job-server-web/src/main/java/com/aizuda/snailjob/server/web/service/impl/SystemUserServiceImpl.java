@@ -215,10 +215,13 @@ public class SystemUserServiceImpl implements SystemUserService {
             .map(SystemUserPermission::getNamespaceId)
             .collect(Collectors.toSet());
 
-        // TODO: uniqueIds可能为空
-        List<Namespace> namespaces = namespaceMapper.selectList(Wrappers.<Namespace>lambdaQuery()
+        List<Namespace> namespaces = Lists.newArrayList();
+        if (!CollectionUtils.isEmpty(uniqueIds)) {
+            namespaces = namespaceMapper.selectList(Wrappers.<Namespace>lambdaQuery()
                 .select(Namespace::getId, Namespace::getUniqueId, Namespace::getName)
                 .in(Namespace::getUniqueId, uniqueIds));
+        }
+
         Map<String, String> namespaceMap = namespaces.stream().collect(Collectors.toMap(Namespace::getUniqueId, Namespace::getName));
 
         Map<Long, List<SystemUserPermission>> userPermissionsMap = userPermissions.stream()

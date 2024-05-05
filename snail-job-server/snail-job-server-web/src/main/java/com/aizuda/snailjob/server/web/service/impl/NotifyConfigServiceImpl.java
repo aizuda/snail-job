@@ -27,6 +27,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
@@ -145,6 +146,10 @@ public class NotifyConfigServiceImpl implements NotifyConfigService {
                 set.addAll(b);
                 return set;
             }).orElse(new HashSet<>());
+        if (CollectionUtils.isEmpty(recipientIds)) {
+            return Maps.newHashMap();
+        }
+
         List<NotifyRecipient> notifyRecipients = notifyRecipientMapper.selectBatchIds(recipientIds);
         return notifyRecipients.stream()
             .collect(Collectors.toMap(NotifyRecipient::getId, NotifyRecipient::getRecipientName));
