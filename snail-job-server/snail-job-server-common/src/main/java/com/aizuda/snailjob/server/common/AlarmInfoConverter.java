@@ -5,14 +5,13 @@ import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.server.common.dto.JobAlarmInfo;
 import com.aizuda.snailjob.server.common.dto.NotifyConfigInfo;
 import com.aizuda.snailjob.server.common.dto.RetryAlarmInfo;
+import com.aizuda.snailjob.server.common.dto.WorkflowAlarmInfo;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.JobBatchResponseDO;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobNotifyConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.NotifyConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryDeadLetter;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
-import com.aizuda.snailjob.server.common.dto.JobAlarmInfo;
-import com.aizuda.snailjob.server.common.dto.NotifyConfigInfo;
-import com.aizuda.snailjob.server.common.dto.RetryAlarmInfo;
+import com.aizuda.snailjob.template.datasource.persistence.po.WorkflowTaskBatch;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
@@ -62,5 +61,7 @@ public interface AlarmInfoConverter {
     List<NotifyConfigInfo> jobToNotifyConfigInfos(List<JobNotifyConfig> notifyConfigs);
 
     List<JobAlarmInfo> toJobAlarmInfos(List<JobBatchResponseDO> jobBatchResponse);
+
+    List<WorkflowAlarmInfo> toWorkflowAlarmInfos(List<WorkflowTaskBatch> jobBatchResponse);
 
 }

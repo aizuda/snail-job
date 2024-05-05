@@ -26,10 +26,13 @@ import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.RateLimiter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.CollectionUtils;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -40,60 +43,64 @@ import java.util.stream.Collectors;
  * @since 2.5.0
  */
 @Slf4j
-public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmInfo> implements ApplicationListener<E>, Runnable,
+public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmInfo> implements ApplicationListener<E>,
+    Runnable,
     Lifecycle {
 
+    @Autowired
+    @Qualifier("alarmExecutorService")
+    protected TaskScheduler taskScheduler;
     @Autowired
     protected AccessTemplate accessTemplate;
     @Autowired
     protected NotifyRecipientMapper recipientMapper;
 
-
     @Override
     public void run() {
-        while (!Thread.currentThread().isInterrupted()) {
 
-            try {
-                // 从队列获取数据
-                List<A> alarmInfos = poll();
-                if (CollectionUtils.isEmpty(alarmInfos)) {
-                    continue;
-                }
-
-                // 获取所有的命名空间
-                Set<String> namespaceIds = new HashSet<>();
-                // 获取所有的组名称
-                Set<String> groupNames = new HashSet<>();
-                // 获取所有的场景名称
-                Set<String> sceneNames = new HashSet<>();
-
-                // 转换AlarmDTO 为了下面循环发送使用
-                Map<Triple<String, String, String>, List<A>> waitSendAlarmInfos = convertAlarmDTO(
-                        alarmInfos, namespaceIds, groupNames, sceneNames);
-
-                // 批量获取通知配置
-                Map<Triple<String, String, String>, List<NotifyConfigInfo>> notifyConfig = obtainNotifyConfig(namespaceIds, groupNames, sceneNames);
-
-                // 循环发送消息
-                waitSendAlarmInfos.forEach((key, list) -> {
-                    List<NotifyConfigInfo> notifyConfigsList = notifyConfig.getOrDefault(key, Lists.newArrayList());
-                    for (A alarmDTO : list) {
-                        sendAlarm(notifyConfigsList, alarmDTO);
-                    }
-                });
-            } catch (InterruptedException e) {
-               SnailJobLog.LOCAL.info("retry task fail dead letter alarm stop");
-                Thread.currentThread().interrupt();
-            } catch (Exception e) {
-                SnailJobLog.LOCAL.error("RetryTaskFailDeadLetterAlarmListener queue poll Exception", e);
+        try {
+            // 从队列获取数据
+            List<A> alarmInfos = poll();
+            if (CollectionUtils.isEmpty(alarmInfos)) {
+                return;
             }
+
+            // 获取所有的命名空间
+            Set<String> namespaceIds = new HashSet<>();
+            // 获取所有的组名称
+            Set<String> groupNames = new HashSet<>();
+            // 获取所有的场景名称
+            Set<String> businessIds = new HashSet<>();
+
+            // 转换AlarmDTO 为了下面循环发送使用
+            Map<Triple<String, String, String>, List<A>> waitSendAlarmInfos = convertAlarmDTO(
+                alarmInfos, namespaceIds, groupNames, businessIds);
+
+            // 批量获取通知配置
+            Map<Triple<String, String, String>, List<NotifyConfigInfo>> notifyConfig = obtainNotifyConfig(namespaceIds,
+                groupNames, businessIds);
+
+            // 循环发送消息
+            waitSendAlarmInfos.forEach((key, list) -> {
+                List<NotifyConfigInfo> notifyConfigsList = notifyConfig.getOrDefault(key, Lists.newArrayList());
+                for (A alarmDTO : list) {
+                    sendAlarm(notifyConfigsList, alarmDTO);
+                }
+            });
+        } catch (InterruptedException e) {
+            SnailJobLog.LOCAL.info("retry task fail dead letter alarm stop");
+            Thread.currentThread().interrupt();
+        } catch (Exception e) {
+            SnailJobLog.LOCAL.error("RetryTaskFailDeadLetterAlarmListener queue poll Exception", e);
         }
+
     }
 
-    protected Map<Triple<String, String, String>, List<NotifyConfigInfo>> obtainNotifyConfig(Set<String> namespaceIds, Set<String> groupNames, Set<String> businessIds) {
+    protected Map<Triple<String, String, String>, List<NotifyConfigInfo>> obtainNotifyConfig(Set<String> namespaceIds,
+        Set<String> groupNames, Set<String> businessIds) {
 
         // 批量获取所需的通知配置
-        List<NotifyConfig> notifyConfigs =  accessTemplate.getNotifyConfigAccess().list(
+        List<NotifyConfig> notifyConfigs = accessTemplate.getNotifyConfigAccess().list(
             new LambdaQueryWrapper<NotifyConfig>()
                 .eq(NotifyConfig::getNotifyStatus, StatusEnum.YES.getStatus())
                 .in(NotifyConfig::getSystemTaskType, getSystemTaskType())
@@ -119,7 +126,7 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
 
         List<NotifyRecipient> notifyRecipients = recipientMapper.selectBatchIds(recipientIds);
         Map<Long, NotifyRecipient> recipientMap = notifyRecipients.stream()
-            .collect(Collectors.toMap(NotifyRecipient::getId, i->i));
+            .collect(Collectors.toMap(NotifyRecipient::getId, i -> i));
 
         if (CollectionUtils.isEmpty(recipientIds)) {
             return Maps.newHashMap();
@@ -150,29 +157,23 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
 
     protected abstract List<SyetemTaskTypeEnum> getSystemTaskType();
 
-    protected abstract Map<Triple<String, String, String>, List<A>> convertAlarmDTO(List<A> alarmData, Set<String> namespaceIds, Set<String> groupNames, Set<String> sceneNames);
-
+    protected abstract Map<Triple<String, String, String>, List<A>> convertAlarmDTO(List<A> alarmData,
+        Set<String> namespaceIds, Set<String> groupNames, Set<String> sceneNames);
 
     protected abstract List<A> poll() throws InterruptedException;
 
     protected abstract AlarmContext buildAlarmContext(A alarmDTO, NotifyConfigInfo notifyConfig);
 
-    private Thread thread;
-
     @Override
     public void start() {
-        thread = new Thread(this);
-        thread.start();
         startLog();
+        taskScheduler.scheduleAtFixedRate(this, Duration.parse("PT1S"));
     }
 
     protected abstract void startLog();
 
     @Override
     public void close() {
-        if (Objects.nonNull(thread)) {
-            thread.interrupt();
-        }
     }
 
     protected void sendAlarm(List<NotifyConfigInfo> notifyConfigsList, A alarmDTO) {
@@ -180,7 +181,7 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
             if (Objects.equals(notifyConfig.getRateLimiterStatus(), StatusEnum.YES.getStatus())) {
                 // 限流
                 RateLimiter rateLimiter = getRateLimiter(String.valueOf(notifyConfig.getId()),
-                        notifyConfig.getRateLimiterThreshold());
+                    notifyConfig.getRateLimiterThreshold());
                 // 每秒发送rateLimiterThreshold个告警
                 if (Objects.nonNull(rateLimiter) && !rateLimiter.tryAcquire(1, TimeUnit.SECONDS)) {
                     continue;
@@ -188,9 +189,9 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
             }
 
             if (Objects.nonNull(alarmDTO.getCount()) && Objects.nonNull(notifyConfig.getNotifyThreshold())) {
-                 if (notifyConfig.getNotifyThreshold() >= alarmDTO.getCount()) {
-                     continue;
-                 }
+                if (notifyConfig.getNotifyThreshold() >= alarmDTO.getCount()) {
+                    continue;
+                }
             }
 
             for (final RecipientInfo recipientInfo : notifyConfig.getRecipientInfos()) {
@@ -199,9 +200,9 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
                 }
                 AlarmContext context = buildAlarmContext(alarmDTO, notifyConfig);
                 context.setNotifyAttribute(recipientInfo.getNotifyAttribute());
-                Alarm<AlarmContext> alarmType = SnailJobAlarmFactory.getAlarmType(
+                Alarm<AlarmContext> alarm = SnailJobAlarmFactory.getAlarmType(
                     recipientInfo.getNotifyType());
-                alarmType.asyncSendMessage(context);
+                alarm.asyncSendMessage(context);
             }
 
         }

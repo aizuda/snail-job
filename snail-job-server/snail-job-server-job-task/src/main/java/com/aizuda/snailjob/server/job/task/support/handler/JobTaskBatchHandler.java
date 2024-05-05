@@ -6,7 +6,7 @@ import com.aizuda.snailjob.common.core.enums.JobTaskStatusEnum;
 import com.aizuda.snailjob.server.common.enums.JobTaskExecutorSceneEnum;
 import com.aizuda.snailjob.server.job.task.dto.CompleteJobBatchDTO;
 import com.aizuda.snailjob.server.job.task.dto.WorkflowNodeTaskExecuteDTO;
-import com.aizuda.snailjob.server.job.task.support.event.JobTaskFailAlarmEvent;
+import com.aizuda.snailjob.server.job.task.support.alarm.event.JobTaskFailAlarmEvent;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskBatchMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTask;

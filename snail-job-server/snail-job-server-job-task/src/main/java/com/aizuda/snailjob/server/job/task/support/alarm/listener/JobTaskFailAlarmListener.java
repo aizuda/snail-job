@@ -1,31 +1,28 @@
-package com.aizuda.snailjob.server.job.task.support.listener;
+package com.aizuda.snailjob.server.job.task.support.alarm.listener;
 
 import com.aizuda.snailjob.common.core.alarm.AlarmContext;
 import com.aizuda.snailjob.common.core.enums.JobNotifySceneEnum;
-import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.common.core.util.EnvironmentUtils;
+import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.AlarmInfoConverter;
 import com.aizuda.snailjob.server.common.alarm.AbstractJobAlarm;
 import com.aizuda.snailjob.server.common.dto.JobAlarmInfo;
 import com.aizuda.snailjob.server.common.dto.NotifyConfigInfo;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
-import com.aizuda.snailjob.server.common.triple.Triple;
 import com.aizuda.snailjob.server.common.util.DateUtils;
-import com.aizuda.snailjob.server.job.task.support.event.JobTaskFailAlarmEvent;
+import com.aizuda.snailjob.server.job.task.support.alarm.event.JobTaskFailAlarmEvent;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.JobBatchResponseDO;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskBatchMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.Objects;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -38,6 +35,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 @Component
 @RequiredArgsConstructor
 public class JobTaskFailAlarmListener extends AbstractJobAlarm<JobTaskFailAlarmEvent> {
+
     private final JobTaskBatchMapper jobTaskBatchMapper;
 
     /**
@@ -45,24 +43,29 @@ public class JobTaskFailAlarmListener extends AbstractJobAlarm<JobTaskFailAlarmE
      */
     private final LinkedBlockingQueue<Long> queue = new LinkedBlockingQueue<>(1000);
 
-    private static String jobTaskFailTextMessagesFormatter =
-            "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 Job任务执行失败</font> \n" +
-                    "> 空间ID:{}  \n" +
-                    "> 组名称:{}  \n" +
-                    "> 任务名称:{}  \n" +
-                    "> 执行器名称:{}  \n" +
-                    "> 方法参数:{}  \n" +
-                    "> 时间:{}  \n";
+    private static final String MESSAGES_FORMATTER = """
+           <font face=微软雅黑 color=#ff0000 size=4>{}环境 Job任务执行失败</font>\s
+                    > 空间ID:{} \s
+                    > 组名称:{} \s
+                    > 任务名称:{} \s
+                    > 执行器名称:{} \s
+                    > 方法参数:{} \s
+                    > 时间:{};
+        """;
 
     @Override
     protected List<JobAlarmInfo> poll() throws InterruptedException {
         // 无数据时阻塞线程
-        Long jobTaskBatchId = queue.take();
+        Long jobTaskBatchId = queue.poll(100, TimeUnit.MILLISECONDS);
+        if (Objects.isNull(jobTaskBatchId)) {
+            return Lists.newArrayList();
+        }
+
         // 拉取200条
         List<Long> jobTaskBatchIds = Lists.newArrayList(jobTaskBatchId);
         queue.drainTo(jobTaskBatchIds, 200);
         QueryWrapper<JobTaskBatch> wrapper = new QueryWrapper<JobTaskBatch>()
-                .in("a.id", jobTaskBatchIds).eq("a.deleted", 0);
+            .in("a.id", jobTaskBatchIds).eq("a.deleted", 0);
         List<JobBatchResponseDO> jobTaskBatchList = jobTaskBatchMapper.selectJobBatchListByIds(wrapper);
         return AlarmInfoConverter.INSTANCE.toJobAlarmInfos(jobTaskBatchList);
     }
@@ -71,7 +74,7 @@ public class JobTaskFailAlarmListener extends AbstractJobAlarm<JobTaskFailAlarmE
     protected AlarmContext buildAlarmContext(JobAlarmInfo alarmDTO, NotifyConfigInfo notifyConfig) {
         // 预警
         return AlarmContext.build()
-                .text(jobTaskFailTextMessagesFormatter,
+                .text(MESSAGES_FORMATTER,
                         EnvironmentUtils.getActiveProfile(),
                         alarmDTO.getNamespaceId(),
                         alarmDTO.getGroupName(),
@@ -84,7 +87,7 @@ public class JobTaskFailAlarmListener extends AbstractJobAlarm<JobTaskFailAlarmE
 
     @Override
     protected void startLog() {
-       SnailJobLog.LOCAL.info("JobTaskFailAlarmListener started");
+        SnailJobLog.LOCAL.info("JobTaskFailAlarmListener started");
     }
 
     @Override
@@ -100,7 +103,7 @@ public class JobTaskFailAlarmListener extends AbstractJobAlarm<JobTaskFailAlarmE
     @Override
     public void onApplicationEvent(JobTaskFailAlarmEvent event) {
         if (!queue.offer(event.getJobTaskBatchId())) {
-           SnailJobLog.LOCAL.warn("JOB任务执行失败告警队列已满");
+            SnailJobLog.LOCAL.warn("JOB任务执行失败告警队列已满");
         }
     }
 }

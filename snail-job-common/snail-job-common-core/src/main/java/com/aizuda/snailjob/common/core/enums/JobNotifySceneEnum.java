@@ -11,7 +11,14 @@ import lombok.Getter;
 @Getter
 public enum JobNotifySceneEnum {
 
-    JOB_TASK_ERROR(1, "JOB任务执行失败", NodeTypeEnum.SERVER);
+    /********************************Job****************************************/
+    JOB_TASK_ERROR(1, "JOB任务执行失败",  NodeTypeEnum.SERVER),
+
+
+    /********************************Workflow****************************************/
+    WORKFLOW_TASK_ERROR(100, "Workflow任务执行失败", NodeTypeEnum.SERVER),
+    WORKFLOW_TASK_CALLBACK_ERROR(101, "回调节点任务执行失败", NodeTypeEnum.SERVER)
+    ;
 
     /**
      * 通知场景

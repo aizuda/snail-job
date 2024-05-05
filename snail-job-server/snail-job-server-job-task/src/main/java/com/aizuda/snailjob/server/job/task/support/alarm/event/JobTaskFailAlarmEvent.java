@@ -1,4 +1,4 @@
-package com.aizuda.snailjob.server.job.task.support.event;
+package com.aizuda.snailjob.server.job.task.support.alarm.event;
 
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;

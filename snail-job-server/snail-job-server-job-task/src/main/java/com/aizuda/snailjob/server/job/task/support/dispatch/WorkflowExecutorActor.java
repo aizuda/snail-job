@@ -3,6 +3,7 @@ package com.aizuda.snailjob.server.job.task.support.dispatch;
 import akka.actor.AbstractActor;
 import cn.hutool.core.lang.Assert;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
+import com.aizuda.snailjob.common.core.context.SpringContext;
 import com.aizuda.snailjob.common.core.enums.FailStrategyEnum;
 import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
@@ -14,6 +15,8 @@ import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.job.task.dto.WorkflowNodeTaskExecuteDTO;
 import com.aizuda.snailjob.server.job.task.support.WorkflowExecutor;
 import com.aizuda.snailjob.server.job.task.support.WorkflowTaskConverter;
+import com.aizuda.snailjob.server.job.task.support.alarm.event.JobTaskFailAlarmEvent;
+import com.aizuda.snailjob.server.job.task.support.alarm.event.WorkflowTaskFailAlarmEvent;
 import com.aizuda.snailjob.server.job.task.support.cache.MutableGraphCache;
 import com.aizuda.snailjob.server.job.task.support.executor.workflow.WorkflowExecutorContext;
 import com.aizuda.snailjob.server.job.task.support.executor.workflow.WorkflowExecutorFactory;
@@ -74,7 +77,7 @@ public class WorkflowExecutorActor extends AbstractActor {
                 SnailJobLog.LOCAL.error("workflow executor exception. [{}]", taskExecute, e);
                 handlerTaskBatch(taskExecute, JobTaskBatchStatusEnum.FAIL.getStatus(),
                     JobOperationReasonEnum.TASK_EXECUTION_ERROR.getReason());
-                // TODO 发送通知
+                SpringContext.getContext().publishEvent(new WorkflowTaskFailAlarmEvent(taskExecute.getTaskBatchId()));
             } finally {
                 getContext().stop(getSelf());
             }

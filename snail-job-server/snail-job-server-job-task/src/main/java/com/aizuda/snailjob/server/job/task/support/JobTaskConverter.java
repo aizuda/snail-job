@@ -2,6 +2,7 @@ package com.aizuda.snailjob.server.job.task.support;
 
 import com.aizuda.snailjob.client.model.request.DispatchJobRequest;
 import com.aizuda.snailjob.client.model.request.DispatchJobResultRequest;
+import com.aizuda.snailjob.server.common.dto.JobAlarmInfo;
 import com.aizuda.snailjob.server.common.dto.JobLogMetaDTO;
 import com.aizuda.snailjob.server.job.task.dto.BaseDTO;
 import com.aizuda.snailjob.server.job.task.dto.CompleteJobBatchDTO;
@@ -10,6 +11,7 @@ import com.aizuda.snailjob.server.job.task.dto.JobTaskPrepareDTO;
 import com.aizuda.snailjob.server.job.task.dto.RealJobExecutorDTO;
 import com.aizuda.snailjob.server.job.task.dto.RealStopTaskInstanceDTO;
 import com.aizuda.snailjob.server.job.task.support.block.job.BlockStrategyContext;
+import com.aizuda.snailjob.server.job.task.support.alarm.event.JobTaskFailAlarmEvent;
 import com.aizuda.snailjob.server.job.task.support.executor.workflow.WorkflowExecutorContext;
 import com.aizuda.snailjob.server.job.task.support.generator.batch.JobTaskBatchGeneratorContext;
 import com.aizuda.snailjob.server.job.task.support.generator.task.JobTaskGenerateContext;
@@ -23,13 +25,6 @@ import com.aizuda.snailjob.template.datasource.persistence.po.Job;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobLogMessage;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTask;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch;
-import com.aizuda.snailjob.server.job.task.support.block.job.BlockStrategyContext;
-import com.aizuda.snailjob.server.job.task.support.callback.ClientCallbackContext;
-import com.aizuda.snailjob.server.job.task.support.executor.job.JobExecutorContext;
-import com.aizuda.snailjob.server.job.task.support.executor.workflow.WorkflowExecutorContext;
-import com.aizuda.snailjob.server.job.task.support.generator.batch.JobTaskBatchGeneratorContext;
-import com.aizuda.snailjob.server.job.task.support.generator.task.JobTaskGenerateContext;
-import com.aizuda.snailjob.server.job.task.support.stop.TaskStopJobContext;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
@@ -144,5 +139,7 @@ public interface JobTaskConverter {
     CompleteJobBatchDTO completeJobBatchDTO(JobTaskPrepareDTO jobTaskPrepareDTO);
 
     JobLogMessage toJobLogMessage(JobLogMessage jobLogMessage);
+
+    List<JobAlarmInfo> toJobAlarmInfos(List<JobTaskFailAlarmEvent> events);
 
 }

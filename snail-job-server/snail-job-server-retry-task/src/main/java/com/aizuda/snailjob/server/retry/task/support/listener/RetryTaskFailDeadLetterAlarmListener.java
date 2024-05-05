@@ -56,7 +56,7 @@ public class RetryTaskFailDeadLetterAlarmListener extends
     @Override
     protected List<RetryAlarmInfo> poll() throws InterruptedException {
 
-        List<RetryDeadLetter> allRetryDeadLetterList = queue.poll(5, TimeUnit.SECONDS);
+        List<RetryDeadLetter> allRetryDeadLetterList = queue.poll(100, TimeUnit.MILLISECONDS);
         if (CollectionUtils.isEmpty(allRetryDeadLetterList)) {
             return Lists.newArrayList();
         }

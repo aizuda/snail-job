@@ -24,4 +24,12 @@ public class SnailJobServerCommonAutoConfiguration {
         scheduler.setThreadNamePrefix("snail-job-scheduled-thread-");
         return scheduler;
     }
+
+    @Bean
+    public TaskScheduler alarmExecutorService() {
+        ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+        scheduler.setPoolSize(4);
+        scheduler.setThreadNamePrefix("snail-job-alarm-thread-");
+        return scheduler;
+    }
 }

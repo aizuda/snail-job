@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 重试任务失败数量超过阈值监听器
@@ -49,7 +50,7 @@ public class RetryTaskFailMoreThresholdAlarmListener extends
     @Override
     protected List<RetryAlarmInfo> poll() throws InterruptedException {
         // 无数据时阻塞线程
-        RetryTask retryTask = queue.take();
+        RetryTask retryTask = queue.poll(100, TimeUnit.MILLISECONDS);
 
         // 拉取100条
         List<RetryTask> lists = Lists.newArrayList(retryTask);
