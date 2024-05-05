@@ -30,12 +30,6 @@ import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.GroupConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.Job;
-import com.aizuda.snailjob.server.job.task.dto.JobTaskPrepareDTO;
-import com.aizuda.snailjob.server.job.task.support.JobPrePareHandler;
-import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
-import com.aizuda.snailjob.server.job.task.support.cache.ResidentTaskCache;
-import com.aizuda.snailjob.server.web.service.convert.JobConverter;
-import com.aizuda.snailjob.server.web.service.convert.JobResponseVOConverter;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import lombok.RequiredArgsConstructor;
@@ -63,34 +57,33 @@ public class JobServiceImpl implements JobService {
     private final JobPrePareHandler terminalJobPrepareHandler;
     private final AccessTemplate accessTemplate;
 
+    private static Long calculateNextTriggerAt(final JobRequestVO jobRequestVO, Long time) {
+        if (Objects.equals(jobRequestVO.getTriggerType(), SystemConstants.WORKFLOW_TRIGGER_TYPE)) {
+            return 0L;
+        }
+
+        WaitStrategy waitStrategy = WaitStrategies.WaitStrategyEnum.getWaitStrategy(jobRequestVO.getTriggerType());
+        WaitStrategies.WaitStrategyContext waitStrategyContext = new WaitStrategies.WaitStrategyContext();
+        waitStrategyContext.setTriggerInterval(jobRequestVO.getTriggerInterval());
+        waitStrategyContext.setNextTriggerAt(time);
+        return waitStrategy.computeTriggerTime(waitStrategyContext);
+    }
+
     @Override
     public PageResult<List<JobResponseVO>> getJobPage(JobQueryVO queryVO) {
 
         PageDTO<Job> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
         UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
-        LambdaQueryWrapper<Job> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Job::getDeleted, StatusEnum.NO.getStatus());
-        queryWrapper.eq(Job::getNamespaceId, userSessionVO.getNamespaceId());
-
-        if (userSessionVO.isUser()) {
-            queryWrapper.in(Job::getGroupName, userSessionVO.getGroupNames());
-        }
-
-        if (StrUtil.isNotBlank(queryVO.getGroupName())) {
-            queryWrapper.eq(Job::getGroupName, queryVO.getGroupName());
-        }
-
-        if (StrUtil.isNotBlank(queryVO.getJobName())) {
-            queryWrapper.like(Job::getJobName, queryVO.getJobName().trim() + "%");
-        }
-
-        if (Objects.nonNull(queryVO.getJobStatus())) {
-            queryWrapper.eq(Job::getJobStatus, queryVO.getJobStatus());
-        }
-
-        queryWrapper.eq(Job::getDeleted, StatusEnum.NO.getStatus());
-        queryWrapper.orderByDesc(Job::getId);
-        PageDTO<Job> selectPage = jobMapper.selectPage(pageDTO, queryWrapper);
+        LambdaQueryWrapper<Job> wrapper = new LambdaQueryWrapper<Job>()
+            .eq(Job::getDeleted, StatusEnum.NO.getStatus())
+            .eq(Job::getNamespaceId, userSessionVO.getNamespaceId())
+            .in(userSessionVO.isUser(), Job::getGroupName, userSessionVO.getGroupNames())
+            .eq(StrUtil.isNotBlank(queryVO.getGroupName()), Job::getGroupName, queryVO.getGroupName())
+            .likeRight(StrUtil.isNotBlank(queryVO.getJobName()), Job::getJobName, queryVO.getJobName().trim())
+            .eq(Objects.nonNull(queryVO.getJobStatus()), Job::getJobStatus, queryVO.getJobStatus())
+            .eq(Job::getDeleted, StatusEnum.NO.getStatus())
+            .orderByDesc(Job::getId);
+        PageDTO<Job> selectPage = jobMapper.selectPage(pageDTO, wrapper);
 
         List<JobResponseVO> jobResponseList = JobResponseVOConverter.INSTANCE.toJobResponseVOs(selectPage.getRecords());
 
@@ -99,7 +92,6 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public JobResponseVO getJobDetail(Long id) {
-
         Job job = jobMapper.selectById(id);
         return JobResponseVOConverter.INSTANCE.toJobResponseVO(job);
     }
@@ -114,21 +106,12 @@ public class JobServiceImpl implements JobService {
 
         UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
         LambdaQueryWrapper<Job> queryWrapper = new LambdaQueryWrapper<Job>()
-                .select(Job::getId, Job::getJobName);
-        queryWrapper.eq(Job::getNamespaceId, userSessionVO.getNamespaceId());
-        if (StrUtil.isNotBlank(keywords)) {
-            queryWrapper.like(Job::getJobName, keywords.trim() + "%");
-        }
-
-        if (StrUtil.isNotBlank(groupName)) {
-            queryWrapper.eq(Job::getGroupName, groupName);
-        }
-
-        if (Objects.nonNull(jobId)) {
-            queryWrapper.eq(Job::getId, jobId);
-        }
-
-        queryWrapper.eq(Job::getDeleted, StatusEnum.NO.getStatus())
+            .select(Job::getId, Job::getJobName)
+            .eq(Job::getNamespaceId, userSessionVO.getNamespaceId())
+            .likeRight(StrUtil.isNotBlank(keywords.trim()), Job::getJobName, keywords.trim())
+            .eq(StrUtil.isNotBlank(groupName), Job::getGroupName, groupName)
+            .eq(Objects.nonNull(jobId), Job::getId, jobId)
+            .eq(Job::getDeleted, StatusEnum.NO.getStatus())
             .orderByAsc(Job::getId); // SQLServer 分页必须 ORDER BY
         PageDTO<Job> pageDTO = new PageDTO<>(1, 20);
         PageDTO<Job> selectPage = jobMapper.selectPage(pageDTO, queryWrapper);
@@ -140,7 +123,7 @@ public class JobServiceImpl implements JobService {
         // 判断常驻任务
         Job job = updateJobResident(jobRequestVO);
         job.setBucketIndex(HashUtil.bkdrHash(jobRequestVO.getGroupName() + jobRequestVO.getJobName())
-                % systemProperties.getBucketTotal());
+            % systemProperties.getBucketTotal());
         job.setNextTriggerAt(calculateNextTriggerAt(jobRequestVO, DateUtils.toNowMilli()));
         job.setNamespaceId(UserSessionUtils.currentUserSession().getNamespaceId());
         return 1 == jobMapper.insert(job);
@@ -162,34 +145,22 @@ public class JobServiceImpl implements JobService {
             job.setNextTriggerAt(0L);
             // 非常驻任务 > 非常驻任务
         } else if (Objects.equals(job.getResident(), StatusEnum.NO.getStatus()) && Objects.equals(
-                updateJob.getResident(),
-                StatusEnum.NO.getStatus())) {
+            updateJob.getResident(),
+            StatusEnum.NO.getStatus())) {
             updateJob.setNextTriggerAt(calculateNextTriggerAt(jobRequestVO, DateUtils.toNowMilli()));
         } else if (Objects.equals(job.getResident(), StatusEnum.YES.getStatus()) && Objects.equals(
-                updateJob.getResident(), StatusEnum.NO.getStatus())) {
+            updateJob.getResident(), StatusEnum.NO.getStatus())) {
             // 常驻任务的触发时间
             long time = Optional.ofNullable(ResidentTaskCache.get(jobRequestVO.getId()))
-                    .orElse(DateUtils.toNowMilli());
+                .orElse(DateUtils.toNowMilli());
             updateJob.setNextTriggerAt(calculateNextTriggerAt(jobRequestVO, time));
             // 老的是不是常驻任务 新的是常驻任务 需要使用当前时间计算下次触发时间
         } else if (Objects.equals(job.getResident(), StatusEnum.NO.getStatus()) && Objects.equals(
-                updateJob.getResident(), StatusEnum.YES.getStatus())) {
+            updateJob.getResident(), StatusEnum.YES.getStatus())) {
             updateJob.setNextTriggerAt(DateUtils.toNowMilli());
         }
 
         return 1 == jobMapper.updateById(updateJob);
-    }
-
-    private static Long calculateNextTriggerAt(final JobRequestVO jobRequestVO, Long time) {
-        if (Objects.equals(jobRequestVO.getTriggerType(), SystemConstants.WORKFLOW_TRIGGER_TYPE)) {
-            return 0L;
-        }
-
-        WaitStrategy waitStrategy = WaitStrategies.WaitStrategyEnum.getWaitStrategy(jobRequestVO.getTriggerType());
-        WaitStrategies.WaitStrategyContext waitStrategyContext = new WaitStrategies.WaitStrategyContext();
-        waitStrategyContext.setTriggerInterval(jobRequestVO.getTriggerInterval());
-        waitStrategyContext.setNextTriggerAt(time);
-        return waitStrategy.computeTriggerTime(waitStrategyContext);
     }
 
     @Override
@@ -241,9 +212,9 @@ public class JobServiceImpl implements JobService {
         Assert.notNull(job, () -> new SnailJobServerException("job can not be null."));
 
         long count = accessTemplate.getGroupConfigAccess().count(new LambdaQueryWrapper<GroupConfig>()
-                .eq(GroupConfig::getGroupName, job.getGroupName())
-                .eq(GroupConfig::getNamespaceId, job.getNamespaceId())
-                .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus())
+            .eq(GroupConfig::getGroupName, job.getGroupName())
+            .eq(GroupConfig::getNamespaceId, job.getNamespaceId())
+            .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus())
         );
 
         Assert.isTrue(count > 0, () -> new SnailJobServerException("组:[{}]已经关闭，不支持手动执行.", job.getGroupName()));
@@ -261,11 +232,11 @@ public class JobServiceImpl implements JobService {
     public List<JobResponseVO> getJobList(String groupName) {
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
         List<Job> jobs = jobMapper.selectList(new LambdaQueryWrapper<Job>()
-                .select(Job::getId, Job::getJobName)
-                .eq(Job::getNamespaceId, namespaceId)
-                .eq(Job::getGroupName, groupName)
-                .eq(Job::getDeleted, StatusEnum.NO.getStatus())
-                .orderByDesc(Job::getCreateDt));
+            .select(Job::getId, Job::getJobName)
+            .eq(Job::getNamespaceId, namespaceId)
+            .eq(Job::getGroupName, groupName)
+            .eq(Job::getDeleted, StatusEnum.NO.getStatus())
+            .orderByDesc(Job::getCreateDt));
         List<JobResponseVO> jobResponseList = JobResponseVOConverter.INSTANCE.toJobResponseVOs(jobs);
         return jobResponseList;
     }
