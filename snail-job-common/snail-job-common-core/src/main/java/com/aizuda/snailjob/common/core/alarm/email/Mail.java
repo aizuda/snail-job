@@ -4,6 +4,7 @@ import cn.hutool.core.builder.Builder;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IORuntimeException;
 import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
@@ -22,6 +23,7 @@ import jakarta.mail.util.ByteArrayDataSource;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * 邮件发送客户端
@@ -89,32 +91,17 @@ public class Mail implements Builder<MimeMessage> {
         return new Mail(mailAccount);
     }
 
-    /**
-     * 创建邮件客户端，使用全局邮件帐户
-     *
-     * @return Mail
-     */
-    public static Mail create() {
-        return new Mail();
-    }
 
     // --------------------------------------------------------------- Constructor start
 
     /**
-     * 构造，使用全局邮件帐户
-     */
-    public Mail() {
-        this(GlobalMailAccount.INSTANCE.getAccount());
-    }
-
-    /**
      * 构造
      *
-     * @param mailAccount 邮件帐户，如果为null使用默认配置文件的全局邮件配置
+     * @param mailAccount 邮件帐户
      */
     public Mail(MailAccount mailAccount) {
-        mailAccount = (null != mailAccount) ? mailAccount : GlobalMailAccount.INSTANCE.getAccount();
-        this.mailAccount = mailAccount.defaultIfEmpty();
+        Assert.notNull(mailAccount, () -> new MailException("邮件账号不能为空"));
+        this.mailAccount = mailAccount;
     }
     // --------------------------------------------------------------- Constructor end
 

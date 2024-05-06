@@ -116,6 +116,11 @@
                 <version>${hutool-all.version}</version>
             </dependency>
             <dependency>
+                <groupId>cn.hutool</groupId>
+                <artifactId>hutool-core</artifactId>
+                <version>${hutool-all.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.aizuda</groupId>
                 <artifactId>snail-job-client-retry-core</artifactId>
                 <version>${revision}</version>

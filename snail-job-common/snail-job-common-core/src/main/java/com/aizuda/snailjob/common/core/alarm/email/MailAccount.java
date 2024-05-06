@@ -3,7 +3,6 @@ package com.aizuda.snailjob.common.core.alarm.email;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.setting.Setting;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -39,13 +38,9 @@ public class MailAccount implements Serializable {
 
     // System Properties
     private static final String SPLIT_LONG_PARAMS = "mail.mime.splitlongparameters";
-    //private static final String ENCODE_FILE_NAME = "mail.mime.encodefilename";
-    //private static final String CHARSET = "mail.mime.charset";
 
     // 其他
     private static final String MAIL_DEBUG = "mail.debug";
-
-    public static final String[] MAIL_SETTING_PATHS = new String[]{"config/mail.setting", "config/mailAccount.setting", "mail.setting"};
 
     /**
      * SMTP服务器域名
@@ -142,23 +137,6 @@ public class MailAccount implements Serializable {
     public MailAccount() {
     }
 
-    /**
-     * 构造
-     *
-     * @param settingPath 配置文件路径
-     */
-    public MailAccount(String settingPath) {
-        this(new Setting(settingPath));
-    }
-
-    /**
-     * 构造
-     *
-     * @param setting 配置文件
-     */
-    public MailAccount(Setting setting) {
-        setting.toBean(this);
-    }
 
     // -------------------------------------------------------------- Constructor end
 
