@@ -79,7 +79,7 @@ public class JobServiceImpl implements JobService {
             .eq(Job::getNamespaceId, userSessionVO.getNamespaceId())
             .in(userSessionVO.isUser(), Job::getGroupName, userSessionVO.getGroupNames())
             .eq(StrUtil.isNotBlank(queryVO.getGroupName()), Job::getGroupName, queryVO.getGroupName())
-            .likeRight(StrUtil.isNotBlank(queryVO.getJobName()), Job::getJobName, queryVO.getJobName().trim())
+            .likeRight(StrUtil.isNotBlank(queryVO.getJobName()), Job::getJobName, StrUtil.trim(queryVO.getJobName()))
             .eq(Objects.nonNull(queryVO.getJobStatus()), Job::getJobStatus, queryVO.getJobStatus())
             .eq(Job::getDeleted, StatusEnum.NO.getStatus())
             .orderByDesc(Job::getId);
@@ -108,7 +108,7 @@ public class JobServiceImpl implements JobService {
         LambdaQueryWrapper<Job> queryWrapper = new LambdaQueryWrapper<Job>()
             .select(Job::getId, Job::getJobName)
             .eq(Job::getNamespaceId, userSessionVO.getNamespaceId())
-            .likeRight(StrUtil.isNotBlank(keywords.trim()), Job::getJobName, keywords.trim())
+            .likeRight(StrUtil.isNotBlank(keywords), Job::getJobName, StrUtil.trim(keywords))
             .eq(StrUtil.isNotBlank(groupName), Job::getGroupName, groupName)
             .eq(Objects.nonNull(jobId), Job::getId, jobId)
             .eq(Job::getDeleted, StatusEnum.NO.getStatus())
