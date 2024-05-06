@@ -116,7 +116,7 @@ public class JobEndPoint {
         return jobContext;
     }
 
-    @Mapping(path = "/stop/v1", method = RequestMethod.POST)
+    @Mapping(path = "/job/stop/v1", method = RequestMethod.POST)
     public Result<Boolean> stopJob(StopJobDTO interruptJob) {
 
         ValidatorFactory vf = Validation.buildDefaultValidatorFactory();
