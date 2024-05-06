@@ -25,6 +25,13 @@ public final class UserSessionVO {
     private List<String> groupNames;
 
     /**
+     * 是否是管理员用户
+     */
+    public boolean isAdmin() {
+        return Objects.equals(this.role, RoleEnum.ADMIN.getRoleId());
+    }
+
+    /**
      * 是否是普通用户
      */
     public boolean isUser() {
