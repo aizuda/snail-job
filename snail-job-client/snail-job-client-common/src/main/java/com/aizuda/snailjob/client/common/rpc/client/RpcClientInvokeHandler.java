@@ -25,7 +25,6 @@ import java.util.function.Consumer;
  * @date : 2023-05-11 21:45
  * @since 1.3.0
  */
-@Slf4j
 public class RpcClientInvokeHandler<R> implements InvocationHandler {
 
     private final Consumer<R> consumer;
@@ -62,7 +61,7 @@ public class RpcClientInvokeHandler<R> implements InvocationHandler {
             sw.stop();
         }
 
-       SnailJobLog.LOCAL.info("request complete requestId:[{}] 耗时:[{}ms]", snailJobRequest.getReqId(), sw.getTotalTimeMillis());
+       SnailJobLog.LOCAL.debug("request complete requestId:[{}] 耗时:[{}ms]", snailJobRequest.getReqId(), sw.getTotalTimeMillis());
         if (async) {
             return null;
         } else {

@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
  * 特别声明: 此算法来自美团的leaf号段模式
  * see： https://github.com/Meituan-Dianping/Leaf/blob/master/leaf-server/src/main/java/com/sankuai/inf/leaf/server/service/SegmentService.java
  *
- *  @author opensnail
+ * @author opensnail
  * @date 2023-05-04
  * @since 1.2.0
  */
@@ -69,17 +69,17 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
 
     @Override
     public void start() {
-       SnailJobLog.LOCAL.info("SegmentIdGenerator start");
+        SnailJobLog.LOCAL.info("SegmentIdGenerator start");
         // 确保加载到kv后才初始化成功
         updateCacheFromDb();
         initOK = true;
         updateCacheFromDbAtEveryMinute();
-       SnailJobLog.LOCAL.info("SegmentIdGenerator start end");
+        SnailJobLog.LOCAL.info("SegmentIdGenerator start end");
     }
 
     @Override
     public void close() {
-       SnailJobLog.LOCAL.info("SegmentIdGenerator close");
+        SnailJobLog.LOCAL.info("SegmentIdGenerator close");
     }
 
     public static class UpdateThreadFactory implements ThreadFactory {
@@ -109,7 +109,8 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
     private void updateCacheFromDb() {
         try {
             List<SequenceAlloc> sequenceAllocs = sequenceAllocMapper
-                    .selectList(new LambdaQueryWrapper<SequenceAlloc>().select(SequenceAlloc::getGroupName));
+                    .selectList(new LambdaQueryWrapper<SequenceAlloc>()
+                            .select(SequenceAlloc::getGroupName, SequenceAlloc::getNamespaceId));
             if (CollectionUtils.isEmpty(sequenceAllocs)) {
                 return;
             }
@@ -136,7 +137,7 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
                 segment.setMax(0);
                 segment.setStep(0);
                 cache.put(tag, buffer);
-               SnailJobLog.LOCAL.debug("Add tag {} from db to IdCache, SegmentBuffer {}", tag, buffer);
+                SnailJobLog.LOCAL.debug("Add tag {} from db to IdCache, SegmentBuffer {}", tag, buffer);
             }
             //cache中已失效的tags从cache删除
             for (int i = 0; i < dbTags.size(); i++) {
@@ -147,10 +148,10 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
             }
             for (Pair<String, String> tag : removeTagsSet) {
                 cache.remove(tag);
-               SnailJobLog.LOCAL.debug("Remove tag {} from IdCache", tag);
+                SnailJobLog.LOCAL.debug("Remove tag {} from IdCache", tag);
             }
         } catch (Exception e) {
-           SnailJobLog.LOCAL.error("update cache from db exception", e);
+            SnailJobLog.LOCAL.error("update cache from db exception", e);
         }
     }
 
@@ -170,7 +171,7 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
                             SnailJobLog.LOCAL.debug("Init buffer. Update key {} {} from db", key, buffer.getCurrent());
                             buffer.setInitOk(true);
                         } catch (Exception e) {
-                           SnailJobLog.LOCAL.error("Init buffer {} exception", buffer.getCurrent(), e);
+                            SnailJobLog.LOCAL.error("Init buffer {} exception", buffer.getCurrent(), e);
                         }
                     }
                 }
@@ -184,18 +185,24 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
         SegmentBuffer buffer = segment.getBuffer();
         SequenceAlloc sequenceAlloc;
         LambdaUpdateWrapper<SequenceAlloc> wrapper = new LambdaUpdateWrapper<SequenceAlloc>()
-                .set(SequenceAlloc::getMaxId, "max_id + step")
+                .setSql("max_id = max_id + step")
                 .set(SequenceAlloc::getUpdateDt, new Date())
                 .eq(SequenceAlloc::getGroupName, key.getKey())
                 .eq(SequenceAlloc::getNamespaceId, key.getValue());
         if (!buffer.isInitOk()) {
             sequenceAllocMapper.update(wrapper);
-            sequenceAlloc = sequenceAllocMapper.selectOne(new LambdaQueryWrapper<SequenceAlloc>().eq(SequenceAlloc::getGroupName, key));
+            sequenceAlloc = sequenceAllocMapper.selectOne(new LambdaQueryWrapper<SequenceAlloc>()
+                    .eq(SequenceAlloc::getGroupName, key.getKey())
+                    .eq(SequenceAlloc::getNamespaceId, key.getValue())
+            );
             buffer.setStep(sequenceAlloc.getStep());
             buffer.setMinStep(sequenceAlloc.getStep());//leafAlloc中的step为DB中的step
         } else if (buffer.getUpdateTimestamp() == 0) {
             sequenceAllocMapper.update(wrapper);
-            sequenceAlloc = sequenceAllocMapper.selectOne(new LambdaQueryWrapper<SequenceAlloc>().eq(SequenceAlloc::getGroupName, key));
+            sequenceAlloc = sequenceAllocMapper.selectOne(new LambdaQueryWrapper<SequenceAlloc>()
+                    .eq(SequenceAlloc::getGroupName, key.getKey())
+                    .eq(SequenceAlloc::getNamespaceId, key.getValue())
+            );
             buffer.setUpdateTimestamp(System.currentTimeMillis());
             buffer.setStep(sequenceAlloc.getStep());
             buffer.setMinStep(sequenceAlloc.getStep());//leafAlloc中的step为DB中的step
@@ -215,13 +222,15 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
             }
             SnailJobLog.LOCAL.debug("leafKey[{}], step[{}], duration[{}mins], nextStep[{}]", key, buffer.getStep(), String.format("%.2f", ((double) duration / (1000 * 60))), nextStep);
             LambdaUpdateWrapper<SequenceAlloc> wrapper1 = new LambdaUpdateWrapper<SequenceAlloc>()
-                    .set(SequenceAlloc::getMaxId, "max_id + " + nextStep)
+                    .setSql("max_id = max_id + " + nextStep)
                     .set(SequenceAlloc::getUpdateDt, new Date())
                     .eq(SequenceAlloc::getGroupName, key.getKey())
                     .eq(SequenceAlloc::getNamespaceId, key.getValue());
             sequenceAllocMapper.update(wrapper1);
-            sequenceAlloc = sequenceAllocMapper
-                    .selectOne(new LambdaQueryWrapper<SequenceAlloc>().eq(SequenceAlloc::getGroupName, key));
+            sequenceAlloc = sequenceAllocMapper.selectOne(new LambdaQueryWrapper<SequenceAlloc>()
+                    .eq(SequenceAlloc::getGroupName, key.getKey())
+                    .eq(SequenceAlloc::getNamespaceId, key.getValue())
+            );
             buffer.setUpdateTimestamp(System.currentTimeMillis());
             buffer.setStep(nextStep);
             buffer.setMinStep(sequenceAlloc.getStep());//leafAlloc的step为DB中的step
@@ -245,9 +254,9 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
                         try {
                             updateSegmentFromDb(buffer.getKey(), next);
                             updateOk = true;
-                           SnailJobLog.LOCAL.debug("update segment {} from db {}", buffer.getKey(), next);
+                            SnailJobLog.LOCAL.debug("update segment {} from db {}", buffer.getKey(), next);
                         } catch (Exception e) {
-                           SnailJobLog.LOCAL.warn(buffer.getKey() + " updateSegmentFromDb exception", e);
+                            SnailJobLog.LOCAL.warn(buffer.getKey() + " updateSegmentFromDb exception", e);
                         } finally {
                             if (updateOk) {
                                 buffer.wLock().lock();
@@ -297,7 +306,7 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
                     TimeUnit.MILLISECONDS.sleep(20);
                     break;
                 } catch (InterruptedException e) {
-                   SnailJobLog.LOCAL.warn("Thread {} Interrupted", Thread.currentThread().getName());
+                    SnailJobLog.LOCAL.warn("Thread {} Interrupted", Thread.currentThread().getName());
                     break;
                 }
             }
