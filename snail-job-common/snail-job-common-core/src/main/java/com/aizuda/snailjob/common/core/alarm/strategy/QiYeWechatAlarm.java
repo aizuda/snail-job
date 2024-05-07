@@ -34,12 +34,6 @@ public class QiYeWechatAlarm extends AbstractAlarm<AlarmContext> {
     }
 
     @Override
-    public boolean asyncSendMessage(AlarmContext context) {
-        threadPoolExecutor.execute(() -> syncSendMessage(context));
-        return true;
-    }
-
-    @Override
     public boolean syncSendMessage(AlarmContext context) {
         try {
             QiYeWechatAttribute qiYeWechatAttribute = JsonUtil.parseObject(context.getNotifyAttribute(), QiYeWechatAttribute.class);

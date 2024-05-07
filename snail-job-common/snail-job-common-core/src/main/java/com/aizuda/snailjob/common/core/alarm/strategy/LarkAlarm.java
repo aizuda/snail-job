@@ -44,13 +44,6 @@ public class LarkAlarm extends AbstractAlarm<AlarmContext> {
     }
 
     @Override
-    public boolean asyncSendMessage(AlarmContext context) {
-        threadPoolExecutor.execute(() -> syncSendMessage(context));
-
-        return true;
-    }
-
-    @Override
     public boolean syncSendMessage(AlarmContext context) {
         try {
             LarkAttribute larkAttribute = JsonUtil.parseObject(context.getNotifyAttribute(), LarkAttribute.class);

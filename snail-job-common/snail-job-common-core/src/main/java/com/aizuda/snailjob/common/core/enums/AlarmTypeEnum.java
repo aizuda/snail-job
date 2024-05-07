@@ -27,6 +27,11 @@ public enum AlarmTypeEnum {
      * 飞书
      */
     LARK(4),
+
+    /**
+     * Webhook
+     */
+    WEBHOOK(5),
     ;
 
     private final int value;

@@ -1,4 +1,4 @@
-package com.aizuda.snailjob.server.common.enums;
+package com.aizuda.snailjob.common.core.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

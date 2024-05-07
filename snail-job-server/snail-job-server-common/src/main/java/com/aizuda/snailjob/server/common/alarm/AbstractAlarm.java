@@ -103,7 +103,7 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
         List<NotifyConfig> notifyConfigs = accessTemplate.getNotifyConfigAccess().list(
             new LambdaQueryWrapper<NotifyConfig>()
                 .eq(NotifyConfig::getNotifyStatus, StatusEnum.YES.getStatus())
-                .in(NotifyConfig::getSystemTaskType, getSystemTaskType())
+                .in(NotifyConfig::getSystemTaskType, getSystemTaskType().stream().map(i -> i.getType()).collect(Collectors.toList()))
                 .eq(NotifyConfig::getNotifyScene, getNotifyScene())
                 .in(NotifyConfig::getNamespaceId, namespaceIds)
                 .in(NotifyConfig::getGroupName, groupNames)
