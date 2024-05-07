@@ -4,6 +4,7 @@ import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import com.aizuda.snailjob.client.model.ExecuteResult;
 import com.aizuda.snailjob.client.model.request.DispatchJobRequest;
+import com.aizuda.snailjob.common.core.context.SpringContext;
 import com.aizuda.snailjob.common.core.enums.JobTaskStatusEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.log.SnailJobLog;
@@ -19,6 +20,7 @@ import com.aizuda.snailjob.server.common.dto.JobLogMetaDTO;
 import com.aizuda.snailjob.server.job.task.dto.RealJobExecutorDTO;
 import com.aizuda.snailjob.server.job.task.support.ClientCallbackHandler;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
+import com.aizuda.snailjob.server.job.task.support.alarm.event.JobTaskFailAlarmEvent;
 import com.aizuda.snailjob.server.job.task.support.callback.ClientCallbackContext;
 import com.aizuda.snailjob.server.job.task.support.callback.ClientCallbackFactory;
 import com.github.rholder.retry.Attempt;
@@ -92,15 +94,15 @@ public class RequestClientActor extends AbstractActor {
             }
 
         } catch (Exception e) {
-            Throwable throwable = e;
+            Throwable throwable;
             if (e.getClass().isAssignableFrom(RetryException.class)) {
                 RetryException re = (RetryException) e;
                 throwable = re.getLastFailedAttempt().getExceptionCause();
-            }
-
-            if (e.getClass().isAssignableFrom(UndeclaredThrowableException.class)) {
+            } else if (e.getClass().isAssignableFrom(UndeclaredThrowableException.class)) {
                 UndeclaredThrowableException re = (UndeclaredThrowableException) e;
                 throwable = re.getUndeclaredThrowable();
+            } else {
+                throwable = e;
             }
 
             JobLogMetaDTO jobLogMetaDTO = JobTaskConverter.INSTANCE.toJobLogDTO(realJobExecutorDTO);
@@ -114,7 +116,7 @@ public class RequestClientActor extends AbstractActor {
             }
 
             taskExecuteFailure(realJobExecutorDTO, throwable.getMessage());
-
+            SpringContext.getContext().publishEvent(new JobTaskFailAlarmEvent(dispatchJobRequest.getTaskBatchId()));
         }
 
     }

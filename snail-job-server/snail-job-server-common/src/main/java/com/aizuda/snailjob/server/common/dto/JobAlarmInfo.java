@@ -27,7 +27,14 @@ public class JobAlarmInfo extends AlarmInfo {
      */
     private String executorInfo;
 
-
+    /**
+     * 执行参数
+     */
     private String argsStr;
+
+    /**
+     * 操作原因
+     */
+    private Integer operationReason;
 
 }

@@ -25,11 +25,14 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.RateLimiter;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.scheduling.TaskScheduler;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalApplicationListener;
 import org.springframework.util.CollectionUtils;
 
 import java.time.Duration;
@@ -43,7 +46,8 @@ import java.util.stream.Collectors;
  * @since 2.5.0
  */
 @Slf4j
-public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmInfo> implements ApplicationListener<E>,
+public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmInfo> implements
+    TransactionalApplicationListener<E>,
     Runnable,
     Lifecycle {
 
@@ -218,6 +222,12 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
     }
 
     protected abstract int getNotifyScene();
+
+    @NotNull
+    @Override
+    public TransactionPhase getTransactionPhase() {
+        return TransactionPhase.AFTER_COMPLETION;
+    }
 }
 
 

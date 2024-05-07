@@ -6,6 +6,7 @@ import lombok.Getter;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 标识某个操作的具体原因
@@ -47,4 +48,10 @@ public enum JobOperationReasonEnum {
         WORKFLOW_NODE_NO_REQUIRED.getReason(), WORKFLOW_DECISION_FAILED.getReason(),
             WORKFLOW_CONDITION_NODE_EXECUTION_ERROR.getReason());
 
+    public static JobOperationReasonEnum getByReason(Integer reason) {
+        if (Objects.isNull(reason)) {
+            return NONE;
+        }
+        return Arrays.stream(values()).filter(e -> reason.equals(e.reason)).findFirst().orElse(NONE);
+    }
 }

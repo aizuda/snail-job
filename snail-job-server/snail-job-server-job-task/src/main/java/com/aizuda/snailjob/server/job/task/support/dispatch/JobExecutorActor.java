@@ -182,6 +182,10 @@ public class JobExecutorActor extends AbstractActor {
         Assert.isTrue(1 == jobTaskBatchMapper.updateById(jobTaskBatch),
                 () -> new SnailJobServerException("更新任务失败"));
 
+        if (JobTaskBatchStatusEnum.NOT_SUCCESS.contains(taskStatus)) {
+            SpringContext.getContext().publishEvent(new JobTaskFailAlarmEvent(taskExecute.getTaskBatchId()));
+        }
+
     }
 
     private void doHandlerResidentTask(Job job, TaskExecuteDTO taskExecuteDTO) {
