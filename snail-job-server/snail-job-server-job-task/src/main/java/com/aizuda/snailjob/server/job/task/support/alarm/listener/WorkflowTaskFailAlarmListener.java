@@ -88,7 +88,7 @@ public class WorkflowTaskFailAlarmListener extends AbstractWorkflowAlarm<Workflo
     }
 
     @Override
-    public void onApplicationEvent(WorkflowTaskFailAlarmEvent event) {
+    public void doOnApplicationEvent(WorkflowTaskFailAlarmEvent event) {
         if (!queue.offer(event.getWorkflowTaskBatchId())) {
             SnailJobLog.LOCAL.warn("Workflow任务执行失败告警队列已满");
         }

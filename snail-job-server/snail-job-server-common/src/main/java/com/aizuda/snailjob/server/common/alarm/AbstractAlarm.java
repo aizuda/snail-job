@@ -33,6 +33,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalApplicationListener;
+import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.util.CollectionUtils;
 
 import java.time.Duration;
@@ -46,8 +47,7 @@ import java.util.stream.Collectors;
  * @since 2.5.0
  */
 @Slf4j
-public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmInfo> implements
-    TransactionalApplicationListener<E>,
+public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmInfo> implements ApplicationListener<E>,
     Runnable,
     Lifecycle {
 
@@ -223,11 +223,13 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
 
     protected abstract int getNotifyScene();
 
-    @NotNull
     @Override
-    public TransactionPhase getTransactionPhase() {
-        return TransactionPhase.AFTER_COMPLETION;
+    @TransactionalEventListener(fallbackExecution = true, phase = TransactionPhase.AFTER_COMPLETION)
+    public void onApplicationEvent(@NotNull E event) {
+        doOnApplicationEvent(event);
     }
+
+    protected abstract void doOnApplicationEvent(E event);
 }
 
 

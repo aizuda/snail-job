@@ -65,7 +65,7 @@ public class RetryTaskFailDeadLetterAlarmListener extends
     }
 
     @Override
-    public void onApplicationEvent(RetryTaskFailDeadLetterAlarmEvent event) {
+    public void doOnApplicationEvent(RetryTaskFailDeadLetterAlarmEvent event) {
         if (!queue.offer(event.getRetryDeadLetters())) {
             SnailJobLog.LOCAL.warn("任务重试失败进入死信队列告警队列已满");
         }

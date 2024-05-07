@@ -106,7 +106,7 @@ public class JobTaskFailAlarmListener extends AbstractJobAlarm<JobTaskFailAlarmE
     }
 
     @Override
-    public void onApplicationEvent(JobTaskFailAlarmEvent event) {
+    public void doOnApplicationEvent(JobTaskFailAlarmEvent event) {
         if (!queue.offer(event.getJobTaskBatchId())) {
             SnailJobLog.LOCAL.warn("JOB任务执行失败告警队列已满");
         }
