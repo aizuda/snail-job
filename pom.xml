@@ -33,6 +33,7 @@
         <logtube.version>0.45.0</logtube.version>
         <log4j.version>1.2.17</log4j.version>
         <commons-logging.version>1.2</commons-logging.version>
+        <jakarta-validation.version>3.0.2</jakarta-validation.version>
     </properties>
 
     <modules>
@@ -140,6 +141,11 @@
                 <groupId>com.baomidou</groupId>
                 <artifactId>mybatis-plus-boot-starter</artifactId>
                 <version>${mybatis-plus.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.validation</groupId>
+                <artifactId>jakarta.validation-api</artifactId>
+                <version>${jakarta-validation.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.github.rholder</groupId>
