@@ -44,7 +44,6 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
 
-    private static final String SECRET = "secret";
     private static final String CALLBACK_TIMEOUT = "10";
     private final RestTemplate restTemplate;
     private final JobTaskMapper jobTaskMapper;
@@ -87,7 +86,7 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
         String result = null;
 
         HttpHeaders requestHeaders = new HttpHeaders();
-        requestHeaders.set(SECRET, decisionConfig.getSecret());
+        requestHeaders.set(SystemConstants.SECRET, decisionConfig.getSecret());
         requestHeaders.setContentType(ContentTypeEnum.valueOf(decisionConfig.getContentType()).getMediaType());
         // 设置回调超时时间
         requestHeaders.set(RequestInterceptor.TIMEOUT_TIME, CALLBACK_TIMEOUT);
@@ -101,7 +100,7 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
 
         try {
             Map<String, String> uriVariables = new HashMap<>();
-            uriVariables.put(SECRET, decisionConfig.getSecret());
+            uriVariables.put(SystemConstants.SECRET, decisionConfig.getSecret());
 
             ResponseEntity<String> response = buildRetryer(decisionConfig).call(
                     () -> restTemplate.exchange(decisionConfig.getWebhook(), HttpMethod.POST,

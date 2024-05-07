@@ -146,4 +146,9 @@ public interface SystemConstants {
      * 日志类型字段
      */
     String JSON_FILED_LOG_TYPE = "logType" ;
+
+    /**
+     * Webhook告警、工作流回调请求密钥
+     */
+    String SECRET = "secret" ;
 }

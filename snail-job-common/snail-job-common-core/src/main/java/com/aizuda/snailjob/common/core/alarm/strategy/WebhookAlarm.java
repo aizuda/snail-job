@@ -5,6 +5,7 @@ import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
 import com.aizuda.snailjob.common.core.alarm.AlarmContext;
 import com.aizuda.snailjob.common.core.alarm.attribute.WebhookAttribute;
+import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.enums.AlarmTypeEnum;
 import com.aizuda.snailjob.common.core.enums.ContentTypeEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
@@ -39,7 +40,7 @@ public class WebhookAlarm extends AbstractAlarm<AlarmContext> {
 
                 HttpRequest post = HttpUtil.createPost(webhookAttribute.getWebhookUrl());
                 HttpRequest request = post.body(JsonUtil.toJsonString(webhookMessage), ContentTypeEnum.valueOf(webhookAttribute.getContentType()).getMediaType().toString())
-                        .header("secret", webhookAttribute.getSecret());
+                        .header(SystemConstants.SECRET, webhookAttribute.getSecret());
                 HttpResponse execute = request.execute();
                 if (execute.isOk()) {
                     return true;
