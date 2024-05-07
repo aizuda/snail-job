@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
  * @since 2.5.0
  */
 @Slf4j
-public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmInfo> implements ApplicationListener<E>,
+public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmInfo> implements
     Runnable,
     Lifecycle {
 
@@ -223,7 +223,6 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
 
     protected abstract int getNotifyScene();
 
-    @Override
     @TransactionalEventListener(fallbackExecution = true, phase = TransactionPhase.AFTER_COMPLETION)
     public void onApplicationEvent(@NotNull E event) {
         doOnApplicationEvent(event);
