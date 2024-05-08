@@ -10,7 +10,6 @@ import com.aizuda.snailjob.client.core.cache.RetryerInfoCache;
 import com.aizuda.snailjob.client.core.retryer.RetryerInfo;
 import com.aizuda.snailjob.client.core.retryer.RetryerResultContext;
 import com.aizuda.snailjob.client.core.strategy.RetryStrategy;
-import com.aizuda.snailjob.common.core.alarm.Alarm;
 import com.aizuda.snailjob.common.core.alarm.AlarmContext;
 import com.aizuda.snailjob.common.core.alarm.SnailJobAlarmFactory;
 import com.aizuda.snailjob.common.core.context.SpringContext;
@@ -52,18 +51,18 @@ public class SnailRetryInterceptor implements MethodInterceptor, AfterAdvice, Se
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private static String retryErrorMoreThresholdTextMessageFormatter =
-            "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 重试组件异常</font>  \n" +
-                    "> IP:{}  \n" +
-                    "> 空间ID:{}  \n" +
-                    "> 名称:{}  \n" +
-                    "> 时间:{}  \n" +
-                    "> 异常:{}  \n";
+        "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 重试组件异常</font>  \n" +
+            "> IP:{}  \n" +
+            "> 空间ID:{}  \n" +
+            "> 名称:{}  \n" +
+            "> 时间:{}  \n" +
+            "> 异常:{}  \n";
 
     private final StandardEnvironment standardEnvironment;
     private final RetryStrategy retryStrategy;
 
     public SnailRetryInterceptor(StandardEnvironment standardEnvironment,
-                               RetryStrategy localRetryStrategies) {
+        RetryStrategy localRetryStrategies) {
         this.standardEnvironment = standardEnvironment;
         this.retryStrategy = localRetryStrategies;
     }
@@ -165,7 +164,8 @@ public class SnailRetryInterceptor implements MethodInterceptor, AfterAdvice, Se
             } else if (!validate(throwable, RetryerInfoCache.get(retryable.scene(), executorClassName))) {
                 SnailJobLog.LOCAL.debug("Exception mismatch. traceId:[{}]", traceId);
             } else {
-                SnailJobLog.LOCAL.debug("Unknown situations do not enable local retry scenarios. traceId:[{}]", traceId);
+                SnailJobLog.LOCAL.debug("Unknown situations do not enable local retry scenarios. traceId:[{}]",
+                    traceId);
             }
             return null;
         }
@@ -184,9 +184,11 @@ public class SnailRetryInterceptor implements MethodInterceptor, AfterAdvice, Se
             RetryerResultContext context = retryStrategy.openRetry(retryable.scene(), executorClassName,
                 point.getArguments());
             if (RetryResultStatusEnum.SUCCESS.getStatus().equals(context.getRetryResultStatusEnum().getStatus())) {
-                SnailJobLog.LOCAL.debug("local retry successful. traceId:[{}] result:[{}]", traceId, context.getResult());
+                SnailJobLog.LOCAL.debug("local retry successful. traceId:[{}] result:[{}]", traceId,
+                    context.getResult());
             } else {
-               SnailJobLog.LOCAL.debug("local retry result. traceId:[{}] throwable:[{}]", traceId, context.getThrowable());
+                SnailJobLog.LOCAL.debug("local retry result. traceId:[{}] throwable:[{}]", traceId,
+                    context.getThrowable());
             }
 
             return context;
@@ -215,24 +217,28 @@ public class SnailRetryInterceptor implements MethodInterceptor, AfterAdvice, Se
     private void sendMessage(Exception e) {
 
         try {
-            ConfigDTO.Notify notify = GroupVersionCache.getNotifyAttribute(
-                    RetryNotifySceneEnum.CLIENT_COMPONENT_ERROR.getNotifyScene());
+            ConfigDTO.Notify notify = GroupVersionCache.getRetryNotifyAttribute(
+                RetryNotifySceneEnum.CLIENT_COMPONENT_ERROR.getNotifyScene());
             if (Objects.nonNull(notify)) {
+                SnailJobProperties snailJobProperties = SpringContext.getBean(SnailJobProperties.class);
+                if (Objects.isNull(snailJobProperties)) {
+                    return;
+                }
                 List<Recipient> recipients = Optional.ofNullable(notify.getRecipients()).orElse(Lists.newArrayList());
                 for (final Recipient recipient : recipients) {
                     AlarmContext context = AlarmContext.build()
                         .text(retryErrorMoreThresholdTextMessageFormatter,
                             EnvironmentUtils.getActiveProfile(),
                             NetUtil.getLocalIpStr(),
-                            standardEnvironment.getProperty("snail-job.namespace", StrUtil.EMPTY),
-                            SnailJobProperties.getGroup(),
+                            snailJobProperties.getNamespace(),
+                            snailJobProperties.getGroup(),
                             LocalDateTime.now().format(formatter),
                             e.getMessage())
-                        .title("retry component handling exception:[{}]", SnailJobProperties.getGroup())
+                        .title("retry component handling exception:[{}]", snailJobProperties.getGroup())
                         .notifyAttribute(recipient.getNotifyAttribute());
 
-                    Alarm<AlarmContext> alarmType = SnailJobAlarmFactory.getAlarmType(recipient.getNotifyType());
-                    alarmType.asyncSendMessage(context);
+                    Optional.ofNullable(SnailJobAlarmFactory.getAlarmType(recipient.getNotifyType()))
+                        .ifPresent(alarm -> alarm.asyncSendMessage(context));
                 }
 
             }

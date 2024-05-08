@@ -14,7 +14,9 @@ import com.aizuda.snailjob.client.core.retryer.RetryerInfo;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.common.core.model.IdempotentIdContext;
 import com.aizuda.snailjob.server.model.dto.RetryTaskDTO;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Method;
@@ -28,6 +30,8 @@ import java.lang.reflect.Method;
  */
 @Slf4j
 public abstract class AbstractReport implements Report {
+    @Autowired
+    protected SnailJobProperties snailJobProperties;
 
     @Override
     public boolean report(String scene, final String targetClassName, final Object[] params) {
@@ -76,7 +80,7 @@ public abstract class AbstractReport implements Report {
         retryTaskDTO.setIdempotentId(idempotentId);
         retryTaskDTO.setExecutorName(targetClassName);
         retryTaskDTO.setArgsStr(serialize);
-        retryTaskDTO.setGroupName(SnailJobProperties.getGroup());
+        retryTaskDTO.setGroupName(snailJobProperties.getGroup());
         retryTaskDTO.setSceneName(scene);
 
         String expression = retryerInfo.getBizNo();

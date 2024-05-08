@@ -56,11 +56,6 @@ public interface SystemConstants {
         String BEAT = "/beat";
 
         /**
-         * 同步配置
-         */
-        String CONFIG = "/config";
-
-        /**
          * 批量上报
          */
         String BATCH_REPORT = "/batch/report";
@@ -74,6 +69,37 @@ public interface SystemConstants {
          * 上报job的运行结果
          */
         String REPORT_JOB_DISPATCH_RESULT = "/report/dispatch/result";
+
+        /**
+         * 执行任务
+         */
+        String JOB_DISPATCH = "/job/dispatch/v1";
+
+        /**
+         * 停止任务
+         */
+        String JOB_STOP = "/job/stop/v1";
+
+        /**
+         * 同步配置
+         */
+        String SYNC_CONFIG = "/sync/version";
+
+        /**
+         * 重试分发
+         */
+        String RETRY_DISPATCH = "/retry/dispatch/v1";
+
+        /**
+         * 重试回调
+         */
+        String RETRY_CALLBACK = "/retry/callback/v1";
+
+        /**
+         * 获取重试幂等id
+         */
+        String RETRY_GENERATE_IDEM_ID = "/retry/generate/idempotent-id/v1";
+
     }
 
     String LOGO = """

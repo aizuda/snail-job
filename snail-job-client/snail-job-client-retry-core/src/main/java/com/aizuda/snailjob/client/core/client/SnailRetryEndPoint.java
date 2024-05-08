@@ -22,6 +22,7 @@ import com.aizuda.snailjob.client.model.DispatchRetryDTO;
 import com.aizuda.snailjob.client.model.DispatchRetryResultDTO;
 import com.aizuda.snailjob.client.model.GenerateRetryIdempotentIdDTO;
 import com.aizuda.snailjob.client.model.RetryCallbackDTO;
+import com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH;
 import com.aizuda.snailjob.common.core.context.SpringContext;
 import com.aizuda.snailjob.common.core.enums.RetryResultStatusEnum;
 import com.aizuda.snailjob.common.core.enums.RetryStatusEnum;
@@ -46,6 +47,10 @@ import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.Set;
 
+import static com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH.RETRY_CALLBACK;
+import static com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH.RETRY_DISPATCH;
+import static com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH.RETRY_GENERATE_IDEM_ID;
+
 /**
  * 服务端调调用客户端进行重试流量下发、配置变更通知等操作
  *
@@ -62,7 +67,7 @@ public class SnailRetryEndPoint {
     /**
      * 服务端调度重试入口
      */
-    @Mapping(path = "/retry/dispatch/v1", method = RequestMethod.POST)
+    @Mapping(path = RETRY_DISPATCH, method = RequestMethod.POST)
     public Result<DispatchRetryResultDTO> dispatch(DispatchRetryDTO executeReqDto) {
 
         ValidatorFactory vf = Validation.buildDefaultValidatorFactory();
@@ -147,16 +152,8 @@ public class SnailRetryEndPoint {
         return new Result<>(executeRespDto);
     }
 
-    /**
-     * 同步版本
-     */
-    @Mapping(path = "/retry/sync/version/v1", method = RequestMethod.POST)
-    public Result syncVersion(ConfigDTO configDTO) {
-        GroupVersionCache.setConfig(configDTO);
-        return new Result();
-    }
 
-    @Mapping(path = "/retry/callback/v1", method = RequestMethod.POST)
+    @Mapping(path = RETRY_CALLBACK, method = RequestMethod.POST)
     public Result callback(RetryCallbackDTO callbackDTO) {
 
         ValidatorFactory vf = Validation.buildDefaultValidatorFactory();
@@ -274,7 +271,7 @@ public class SnailRetryEndPoint {
      * @param generateRetryIdempotentIdDTO 生成idempotentId模型
      * @return idempotentId
      */
-    @Mapping(path = "/retry/generate/idempotent-id/v1", method = RequestMethod.POST)
+    @Mapping(path = RETRY_GENERATE_IDEM_ID, method = RequestMethod.POST)
     public Result<String> idempotentIdGenerate(
        GenerateRetryIdempotentIdDTO generateRetryIdempotentIdDTO) {
 

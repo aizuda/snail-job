@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.template.datasource.access.config;
 
+import com.aizuda.snailjob.common.core.enums.JobNotifySceneEnum;
 import com.aizuda.snailjob.common.core.enums.NodeTypeEnum;
 import com.aizuda.snailjob.common.core.enums.RetryNotifySceneEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
@@ -169,16 +170,18 @@ public abstract class AbstractConfigAccess<T> implements ConfigAccess<T> {
         for (NotifyConfig notifyConfig : notifyList) {
 
             // 只选择客户端的通知配置即可
-            RetryNotifySceneEnum notifyScene = RetryNotifySceneEnum.getNotifyScene(notifyConfig.getNotifyScene(),
+            RetryNotifySceneEnum retryNotifyScene = RetryNotifySceneEnum.getNotifyScene(notifyConfig.getNotifyScene(),
                 NodeTypeEnum.CLIENT);
-            if (Objects.isNull(notifyScene)) {
+            JobNotifySceneEnum jobNotifyScene = JobNotifySceneEnum.getJobNotifyScene(notifyConfig.getNotifyScene(),
+                NodeTypeEnum.CLIENT);
+            if (Objects.isNull(retryNotifyScene) && Objects.isNull(jobNotifyScene)) {
                 continue;
             }
 
             String recipientIds = notifyConfig.getRecipientIds();
             List<NotifyRecipient> notifyRecipients = notifyRecipientMapper.selectBatchIds(
                 JsonUtil.parseList(recipientIds, Long.class));
-            notifies.add(getNotify(notifyConfig, notifyRecipients));
+            notifies.add(getNotify(notifyConfig, notifyRecipients, retryNotifyScene, jobNotifyScene));
         }
 
         configDTO.setNotifyList(notifies);
@@ -197,7 +200,8 @@ public abstract class AbstractConfigAccess<T> implements ConfigAccess<T> {
         return configDTO;
     }
 
-    private static Notify getNotify(final NotifyConfig notifyConfig, final List<NotifyRecipient> notifyRecipients) {
+    private static Notify getNotify(final NotifyConfig notifyConfig, final List<NotifyRecipient> notifyRecipients,
+        final RetryNotifySceneEnum retryNotifyScene, final JobNotifySceneEnum jobNotifyScene) {
         List<Recipient> recipients = new ArrayList<>();
         for (final NotifyRecipient notifyRecipient : notifyRecipients) {
             Recipient recipient = new Recipient();
@@ -207,7 +211,14 @@ public abstract class AbstractConfigAccess<T> implements ConfigAccess<T> {
         }
 
         Notify notify = new Notify();
-        notify.setNotifyScene(notifyConfig.getNotifyScene());
+        if (Objects.nonNull(retryNotifyScene)) {
+            notify.setRetryNotifyScene(retryNotifyScene.getNotifyScene());
+        }
+
+        if (Objects.nonNull(jobNotifyScene)) {
+            notify.setJobNotifyScene(jobNotifyScene.getNotifyScene());
+        }
+
         notify.setNotifyThreshold(notifyConfig.getNotifyThreshold());
         notify.setRecipients(recipients);
         return notify;

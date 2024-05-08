@@ -9,6 +9,9 @@ import com.aizuda.snailjob.server.common.rpc.client.annotation.Mapping;
 import com.aizuda.snailjob.server.common.rpc.client.annotation.Body;
 import com.aizuda.snailjob.server.common.rpc.client.annotation.Mapping;
 
+import static com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH.JOB_DISPATCH;
+import static com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH.JOB_STOP;
+
 /**
  * 调用客户端接口
  *
@@ -18,10 +21,10 @@ import com.aizuda.snailjob.server.common.rpc.client.annotation.Mapping;
  */
 public interface JobRpcClient {
 
-    @Mapping(path = "/job/stop/v1", method = RequestMethod.POST)
+    @Mapping(path = JOB_STOP, method = RequestMethod.POST)
     Result<Boolean> stop(@Body StopJobDTO stopJobDTO);
 
-    @Mapping(path = "/job/dispatch/v1", method = RequestMethod.POST)
+    @Mapping(path = JOB_DISPATCH, method = RequestMethod.POST)
     Result<Boolean> dispatch(@Body DispatchJobRequest dispatchJobRequest);
 
 }

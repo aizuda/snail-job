@@ -8,16 +8,12 @@ import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.common.core.model.NettyResult;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.server.model.dto.ConfigDTO;
-import com.aizuda.snailjob.client.common.rpc.client.RequestBuilder;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * @author: opensnail
@@ -25,7 +21,6 @@ import java.util.Set;
  */
 @Component
 @Order
-@Slf4j
 public class GroupVersionCache implements Lifecycle {
 
     private static ConfigDTO CONFIG;
@@ -60,10 +55,22 @@ public class GroupVersionCache implements Lifecycle {
         return SystemConstants.DEFAULT_DDL;
     }
 
-    public static ConfigDTO.Notify getNotifyAttribute(Integer notifyScene) {
+    public static ConfigDTO.Notify getRetryNotifyAttribute(Integer notifyScene) {
         List<ConfigDTO.Notify> notifyList = CONFIG.getNotifyList();
         for (ConfigDTO.Notify notify : notifyList) {
-            if (notify.getNotifyScene().equals(notifyScene)) {
+            if (notify.getRetryNotifyScene().equals(notifyScene)) {
+                return notify;
+            }
+        }
+
+        return null;
+    }
+
+
+    public static ConfigDTO.Notify getJobNotifyAttribute(Integer notifyScene) {
+        List<ConfigDTO.Notify> notifyList = CONFIG.getNotifyList();
+        for (ConfigDTO.Notify notify : notifyList) {
+            if (notify.getJobNotifyScene().equals(notifyScene)) {
                 return notify;
             }
         }

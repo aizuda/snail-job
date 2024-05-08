@@ -11,7 +11,6 @@ import com.aizuda.snailjob.client.core.intercepter.RetrySiteSnapshot;
 import com.aizuda.snailjob.client.core.loader.SnailRetrySpiLoader;
 import com.aizuda.snailjob.client.core.retryer.RetryerInfo;
 import com.aizuda.snailjob.client.core.retryer.RetryerResultContext;
-import com.aizuda.snailjob.common.core.alarm.Alarm;
 import com.aizuda.snailjob.common.core.alarm.AlarmContext;
 import com.aizuda.snailjob.common.core.alarm.SnailJobAlarmFactory;
 import com.aizuda.snailjob.common.core.enums.RetryNotifySceneEnum;
@@ -42,7 +41,7 @@ import java.util.function.Consumer;
 @Slf4j
 public abstract class AbstractRetryStrategies implements RetryStrategy {
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    private static String retryErrorMoreThresholdTextMessageFormatter =
+    private static String TEXT_MESSAGE_FORMATTER =
             "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 重试组件异常</font>  \n" +
                     "> IP:{}  \n" +
                     "> 空间ID:{}  \n" +
@@ -176,23 +175,22 @@ public abstract class AbstractRetryStrategies implements RetryStrategy {
     private void sendMessage(Exception e) {
 
         try {
-            ConfigDTO.Notify notify = GroupVersionCache.getNotifyAttribute(RetryNotifySceneEnum.CLIENT_COMPONENT_ERROR.getNotifyScene());
+            ConfigDTO.Notify notify = GroupVersionCache.getRetryNotifyAttribute(RetryNotifySceneEnum.CLIENT_COMPONENT_ERROR.getNotifyScene());
             if (Objects.nonNull(notify)) {
                 List<Recipient> recipients = Optional.ofNullable(notify.getRecipients()).orElse(Lists.newArrayList());
 
                 for (final Recipient recipient : recipients) {
                     AlarmContext context = AlarmContext.build()
-                        .text(retryErrorMoreThresholdTextMessageFormatter,
+                        .text(TEXT_MESSAGE_FORMATTER,
                             EnvironmentUtils.getActiveProfile(),
                             NetUtil.getLocalIpStr(),
                             snailJobProperties.getNamespace(),
-                            SnailJobProperties.getGroup(),
+                            snailJobProperties.getGroup(),
                             LocalDateTime.now().format(formatter),
                             e.getMessage())
-                        .title("retry component handling exception:[{}]", SnailJobProperties.getGroup())
+                        .title("retry component handling exception:[{}]", snailJobProperties.getGroup())
                         .notifyAttribute(recipient.getNotifyAttribute());
-                    Alarm<AlarmContext> alarmType = SnailJobAlarmFactory.getAlarmType(recipient.getNotifyType());
-                    alarmType.asyncSendMessage(context);
+                    Optional.ofNullable(SnailJobAlarmFactory.getAlarmType(recipient.getNotifyType())).ifPresent(alarm -> alarm.asyncSendMessage(context));
                 }
             }
         } catch (Exception e1) {

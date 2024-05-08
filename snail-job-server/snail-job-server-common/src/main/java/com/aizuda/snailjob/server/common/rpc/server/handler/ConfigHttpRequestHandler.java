@@ -1,6 +1,7 @@
 package com.aizuda.snailjob.server.common.rpc.server.handler;
 
 import cn.hutool.core.net.url.UrlQuery;
+import com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.handler.GetHttpRequestHandler;
 import com.aizuda.snailjob.server.model.dto.ConfigDTO;
@@ -14,8 +15,6 @@ import io.netty.handler.codec.http.HttpMethod;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import static com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH.CONFIG;
-
 /**
  * @author: opensnail
  * @date : 2022-03-07 16:29
@@ -28,7 +27,7 @@ public class ConfigHttpRequestHandler extends GetHttpRequestHandler {
 
     @Override
     public boolean supports(String path) {
-        return CONFIG.equals(path);
+        return HTTP_PATH.SYNC_CONFIG.equals(path);
     }
 
     @Override

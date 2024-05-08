@@ -29,6 +29,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ThreadPoolExecutor;
 
+import static com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH.JOB_DISPATCH;
+import static com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH.JOB_STOP;
+
 /**
  * @author: opensnail
  * @date : 2023-09-27 16:33
@@ -36,7 +39,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 @SnailEndPoint
 public class JobEndPoint {
 
-    @Mapping(path = "/job/dispatch/v1", method = RequestMethod.POST)
+    @Mapping(path = JOB_DISPATCH, method = RequestMethod.POST)
     public Result<Boolean> dispatchJob(DispatchJobRequest dispatchJob) {
 
         ValidatorFactory vf = Validation.buildDefaultValidatorFactory();
@@ -116,7 +119,7 @@ public class JobEndPoint {
         return jobContext;
     }
 
-    @Mapping(path = "/job/stop/v1", method = RequestMethod.POST)
+    @Mapping(path = JOB_STOP, method = RequestMethod.POST)
     public Result<Boolean> stopJob(StopJobDTO interruptJob) {
 
         ValidatorFactory vf = Validation.buildDefaultValidatorFactory();

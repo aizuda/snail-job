@@ -174,7 +174,7 @@ public class NettyChannel {
                 .set(HttpHeaderNames.CONTENT_LENGTH, request.content().readableBytes())
                 .set(HeadersEnum.HOST_ID.getKey(), HOST_ID)
                 .set(HeadersEnum.HOST_IP.getKey(), getClientHost())
-                .set(HeadersEnum.GROUP_NAME.getKey(), SnailJobProperties.getGroup())
+                .set(HeadersEnum.GROUP_NAME.getKey(), snailJobProperties.getGroup())
                 .set(HeadersEnum.HOST_PORT.getKey(), getClientPort())
                 .set(HeadersEnum.VERSION.getKey(), GroupVersionCache.getVersion())
                 .set(HeadersEnum.HOST.getKey(), serverConfig.getHost())

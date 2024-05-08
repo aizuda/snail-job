@@ -15,6 +15,10 @@ import com.aizuda.snailjob.server.common.rpc.client.annotation.Body;
 import com.aizuda.snailjob.server.common.rpc.client.annotation.Header;
 import com.aizuda.snailjob.server.common.rpc.client.annotation.Mapping;
 
+import static com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH.RETRY_CALLBACK;
+import static com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH.RETRY_DISPATCH;
+import static com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH.RETRY_GENERATE_IDEM_ID;
+
 /**
  * 调用客户端接口
  *
@@ -24,16 +28,13 @@ import com.aizuda.snailjob.server.common.rpc.client.annotation.Mapping;
  */
 public interface RetryRpcClient {
 
-    @Mapping(path = "/retry/dispatch/v1", method = RequestMethod.POST)
+    @Mapping(path = RETRY_DISPATCH, method = RequestMethod.POST)
     Result<DispatchRetryResultDTO> dispatch(@Body DispatchRetryDTO dispatchRetryDTO, @Header SnailJobHeaders headers);
 
-    @Mapping(path = "/retry/callback/v1", method = RequestMethod.POST)
+    @Mapping(path = RETRY_CALLBACK, method = RequestMethod.POST)
     Result callback(@Body RetryCallbackDTO retryCallbackDTO);
 
-    @Mapping(path = "/retry/generate/idempotent-id/v1", method = RequestMethod.POST)
+    @Mapping(path = RETRY_GENERATE_IDEM_ID, method = RequestMethod.POST)
     Result generateIdempotentId(@Body GenerateRetryIdempotentIdDTO retryCallbackDTO);
-
-    @Mapping(path = "/retry/sync/version/v1", method = RequestMethod.POST)
-    Result syncConfig(@Body ConfigDTO configDTO);
 
 }

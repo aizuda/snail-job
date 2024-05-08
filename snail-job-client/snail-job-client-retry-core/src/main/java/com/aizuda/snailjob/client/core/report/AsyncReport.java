@@ -20,9 +20,7 @@ import java.util.concurrent.TimeUnit;
  * @since 1.3.0
  */
 @Component
-@RequiredArgsConstructor
 public class AsyncReport extends AbstractReport implements Lifecycle {
-    private final SnailJobProperties snailJobProperties;
     private SlidingWindow<RetryTaskDTO> slidingWindow;
     @Override
     public boolean supports(boolean async) {

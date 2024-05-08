@@ -17,7 +17,7 @@ import com.aizuda.snailjob.client.common.rpc.client.RequestMethod;
  */
 public interface NettyClient {
 
-    @Mapping(method = RequestMethod.GET, path = HTTP_PATH.CONFIG)
+    @Mapping(method = RequestMethod.GET, path = HTTP_PATH.SYNC_CONFIG)
     Result getConfig(Integer version);
 
     @Mapping(method = RequestMethod.GET, path = HTTP_PATH.BEAT)

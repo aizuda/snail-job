@@ -2,10 +2,10 @@ package com.aizuda.snailjob.server.model.dto;
 
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.enums.AlarmTypeEnum;
+import com.aizuda.snailjob.common.core.enums.JobNotifySceneEnum;
 import com.aizuda.snailjob.common.core.enums.RetryNotifySceneEnum;
 import lombok.Data;
 import java.util.List;
-import java.util.Set;
 
 /**
  * 同步的配置数据结构
@@ -59,9 +59,14 @@ public class ConfigDTO {
         private Integer notifyThreshold;
 
         /**
-         * 场景场景 {@link RetryNotifySceneEnum}
+         * 重试通知场景 {@link RetryNotifySceneEnum}
          */
-        private Integer notifyScene;
+        private Integer retryNotifyScene;
+
+        /**
+         * 定时任务&工作流通知场景 {@link JobNotifySceneEnum}
+         */
+        private Integer jobNotifyScene;
 
         @Data
         public static class Recipient {

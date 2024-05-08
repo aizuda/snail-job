@@ -65,47 +65,51 @@ public class ConsumerBucketActor extends AbstractActor {
             return;
         }
 
-        if (SystemModeEnum.isJob(systemProperties.getMode())) {
+        // 扫描job && workflow
+        doScanJobAndWorkflow(consumerBucket);
 
-            ScanTask scanTask = new ScanTask();
-            scanTask.setBuckets(consumerBucket.getBuckets());
+        // 扫描重试
+        doScanRetry(consumerBucket);
+    }
 
-            // 扫描定时任务数据
-            ActorRef scanJobActorRef = cacheActorRef(DEFAULT_JOB_KEY, SyetemTaskTypeEnum.JOB);
-            scanJobActorRef.tell(scanTask, scanJobActorRef);
-
-            // 扫描DAG工作流任务数据
-            ActorRef scanWorkflowActorRef = cacheActorRef(DEFAULT_WORKFLOW_KEY, SyetemTaskTypeEnum.WORKFLOW);
-            scanWorkflowActorRef.tell(scanTask, scanWorkflowActorRef);
+    private void doScanRetry(final ConsumerBucket consumerBucket) {
+        List<GroupConfig> groupConfigs = null;
+        try {
+            // 查询桶对应组信息
+            groupConfigs = accessTemplate.getGroupConfigAccess().list(
+                    new LambdaQueryWrapper<GroupConfig>()
+                            .select(GroupConfig::getGroupName, GroupConfig::getGroupPartition, GroupConfig::getNamespaceId)
+                            .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus())
+                            .in(GroupConfig::getBucketIndex, consumerBucket.getBuckets())
+            );
+        } catch (Exception e) {
+            SnailJobLog.LOCAL.error("生成重试任务异常.", e);
         }
 
-        if (SystemModeEnum.isRetry(systemProperties.getMode())) {
-            List<GroupConfig> groupConfigs = null;
-            try {
-                // 查询桶对应组信息
-                groupConfigs = accessTemplate.getGroupConfigAccess().list(
-                        new LambdaQueryWrapper<GroupConfig>()
-                                .select(GroupConfig::getGroupName, GroupConfig::getGroupPartition, GroupConfig::getNamespaceId)
-                                .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus())
-                                .in(GroupConfig::getBucketIndex, consumerBucket.getBuckets())
-                );
-            } catch (Exception e) {
-                SnailJobLog.LOCAL.error("生成重试任务异常.", e);
-            }
-
-            if (!CollectionUtils.isEmpty(groupConfigs)) {
-                for (final GroupConfig groupConfig : groupConfigs) {
-                    CacheConsumerGroup.addOrUpdate(groupConfig.getGroupName(), groupConfig.getNamespaceId());
-                    ScanTask scanTask = new ScanTask();
-                    scanTask.setNamespaceId(groupConfig.getNamespaceId());
-                    scanTask.setGroupName(groupConfig.getGroupName());
-                    scanTask.setBuckets(consumerBucket.getBuckets());
-                    scanTask.setGroupPartition(groupConfig.getGroupPartition());
-                    produceScanActorTask(scanTask);
-                }
+        if (!CollectionUtils.isEmpty(groupConfigs)) {
+            for (final GroupConfig groupConfig : groupConfigs) {
+                CacheConsumerGroup.addOrUpdate(groupConfig.getGroupName(), groupConfig.getNamespaceId());
+                ScanTask scanTask = new ScanTask();
+                scanTask.setNamespaceId(groupConfig.getNamespaceId());
+                scanTask.setGroupName(groupConfig.getGroupName());
+                scanTask.setBuckets(consumerBucket.getBuckets());
+                scanTask.setGroupPartition(groupConfig.getGroupPartition());
+                produceScanActorTask(scanTask);
             }
         }
+    }
 
+    private void doScanJobAndWorkflow(final ConsumerBucket consumerBucket) {
+        ScanTask scanTask = new ScanTask();
+        scanTask.setBuckets(consumerBucket.getBuckets());
+
+        // 扫描定时任务数据
+        ActorRef scanJobActorRef = cacheActorRef(DEFAULT_JOB_KEY, SyetemTaskTypeEnum.JOB);
+        scanJobActorRef.tell(scanTask, scanJobActorRef);
+
+        // 扫描DAG工作流任务数据
+        ActorRef scanWorkflowActorRef = cacheActorRef(DEFAULT_WORKFLOW_KEY, SyetemTaskTypeEnum.WORKFLOW);
+        scanWorkflowActorRef.tell(scanTask, scanWorkflowActorRef);
     }
 
     /**

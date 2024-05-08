@@ -68,7 +68,6 @@ public class SystemUserServiceImpl implements SystemUserService {
 
         SystemUserResponseVO systemUserResponseVO = SystemUserResponseVOConverter.INSTANCE.convert(systemUser);
         systemUserResponseVO.setToken(token);
-        systemUserResponseVO.setMode(systemProperties.getMode().name());
 
         getPermission(systemUser.getRole(), systemUser.getId(), systemUserResponseVO);
 
@@ -107,7 +106,6 @@ public class SystemUserServiceImpl implements SystemUserService {
     @Override
     public SystemUserResponseVO getUserInfo(UserSessionVO systemUser) {
         SystemUserResponseVO systemUserResponseVO = SystemUserResponseVOConverter.INSTANCE.convert(systemUser);
-        systemUserResponseVO.setMode(systemProperties.getMode().name());
 
         getPermission(systemUser.getRole(), systemUser.getId(), systemUserResponseVO);
 

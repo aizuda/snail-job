@@ -1,14 +1,14 @@
-package com.aizuda.snailjob.server.retry.task.support.handler;
+package com.aizuda.snailjob.server.common.handler;
 
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.common.core.model.Result;
 import com.aizuda.snailjob.server.common.Lifecycle;
+import com.aizuda.snailjob.server.common.client.CommonRpcClient;
+import com.aizuda.snailjob.server.common.dto.ConfigSyncTask;
 import com.aizuda.snailjob.server.common.rpc.client.RequestBuilder;
 import com.aizuda.snailjob.server.common.dto.RegisterNodeInfo;
 import com.aizuda.snailjob.server.model.dto.ConfigDTO;
 import com.aizuda.snailjob.server.common.cache.CacheRegisterTable;
-import com.aizuda.snailjob.server.retry.task.client.RetryRpcClient;
-import com.aizuda.snailjob.server.retry.task.dto.ConfigSyncTask;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -61,9 +61,9 @@ public class ConfigVersionSyncHandler implements Lifecycle, Runnable {
             // 同步版本到每个客户端节点
             for (final RegisterNodeInfo registerNodeInfo : serverNodeSet) {
                 ConfigDTO configDTO = accessTemplate.getGroupConfigAccess().getConfigInfo(groupName, namespaceId);
-                RetryRpcClient rpcClient = RequestBuilder.<RetryRpcClient, Result>newBuilder()
+                CommonRpcClient rpcClient = RequestBuilder.<CommonRpcClient, Result>newBuilder()
                     .nodeInfo(registerNodeInfo)
-                    .client(RetryRpcClient.class)
+                    .client(CommonRpcClient.class)
                     .build();
                SnailJobLog.LOCAL.info("同步结果 [{}]", rpcClient.syncConfig(configDTO));
             }

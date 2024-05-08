@@ -74,5 +74,4 @@ snail-job:
   callback: # 回调配置
     max-count: 288 #回调最大执行次数
     trigger-interval: 900 #间隔时间
-  mode: all
   retry-max-pull-count: 10

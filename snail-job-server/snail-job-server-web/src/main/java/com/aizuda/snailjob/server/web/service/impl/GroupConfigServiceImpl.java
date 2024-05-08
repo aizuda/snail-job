@@ -7,9 +7,8 @@ import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.server.common.config.SystemProperties;
 import com.aizuda.snailjob.server.common.enums.IdGeneratorModeEnum;
-import com.aizuda.snailjob.server.common.enums.SystemModeEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
-import com.aizuda.snailjob.server.retry.task.support.handler.ConfigVersionSyncHandler;
+import com.aizuda.snailjob.server.common.handler.ConfigVersionSyncHandler;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.GroupConfigQueryVO;
 import com.aizuda.snailjob.server.web.model.request.GroupConfigRequestVO;
@@ -33,15 +32,11 @@ import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
 import com.aizuda.snailjob.template.datasource.persistence.po.SequenceAlloc;
 import com.aizuda.snailjob.template.datasource.persistence.po.ServerNode;
 import com.aizuda.snailjob.template.datasource.utils.DbUtils;
-import com.aizuda.snailjob.server.retry.task.support.handler.ConfigVersionSyncHandler;
-import com.aizuda.snailjob.server.web.service.convert.GroupConfigConverter;
-import com.baomidou.mybatisplus.autoconfigure.MybatisPlusProperties;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -159,15 +154,12 @@ public class GroupConfigServiceImpl implements GroupConfigService {
             () -> new SnailJobServerException("exception occurred while adding group. groupConfigVO[{}]",
                 groupConfigRequestVO));
 
-        if (SystemModeEnum.isRetry(systemProperties.getMode())) {
-            // 同步版本， 版本为0代表需要同步到客户端
-            boolean add = configVersionSyncHandler.addSyncTask(groupName, namespaceId, 0);
-            // 若添加失败则强制发起同步
-            if (!add) {
-                configVersionSyncHandler.syncVersion(groupName, namespaceId);
-            }
+        // 同步版本， 版本为0代表需要同步到客户端
+        boolean add = configVersionSyncHandler.addSyncTask(groupName, namespaceId, 0);
+        // 若添加失败则强制发起同步
+        if (!add) {
+            configVersionSyncHandler.syncVersion(groupName, namespaceId);
         }
-
         return Boolean.TRUE;
     }
 

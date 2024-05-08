@@ -1,4 +1,4 @@
-package com.aizuda.snailjob.server.retry.task.dto;
+package com.aizuda.snailjob.server.common.dto;
 
 import lombok.Data;
 

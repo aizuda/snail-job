@@ -1,6 +1,5 @@
 package com.aizuda.snailjob.server.retry.task;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
@@ -11,7 +10,6 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @ComponentScan("com.aizuda.snailjob.server.retry.task.*")
-@ConditionalOnExpression("'${snail-job.mode}'.equals('retry') or '${snail-job.mode}'.equals('all')")
 public class SnailJobServerRetryTaskStarter {
 
 }

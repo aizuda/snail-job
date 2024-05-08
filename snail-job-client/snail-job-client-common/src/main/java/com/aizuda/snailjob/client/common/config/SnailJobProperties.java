@@ -172,11 +172,6 @@ public class SnailJobProperties {
         private SlidingWindowConfig reportSlidingWindow = new SlidingWindowConfig();
     }
 
-    public static String getGroup() {
-        SnailJobProperties properties = SpringContext.getBean(SnailJobProperties.class);
-        return Objects.requireNonNull(properties).group;
-    }
-
     /**
      * 邮件配置
      */

@@ -7,7 +7,6 @@ import com.aizuda.snailjob.client.core.RetryExecutorParameter;
 import com.aizuda.snailjob.client.common.cache.GroupVersionCache;
 import com.aizuda.snailjob.client.common.client.NettyClient;
 import com.aizuda.snailjob.client.core.executor.GuavaRetryExecutor;
-import com.aizuda.snailjob.common.core.alarm.Alarm;
 import com.aizuda.snailjob.common.core.alarm.AlarmContext;
 import com.aizuda.snailjob.common.core.alarm.SnailJobAlarmFactory;
 import com.aizuda.snailjob.common.core.context.SpringContext;
@@ -110,12 +109,15 @@ public class ReportListener implements Listener<RetryTaskDTO> {
     private void sendMessage(Throwable e) {
 
         try {
-            ConfigDTO.Notify notify = GroupVersionCache.getNotifyAttribute(RetryNotifySceneEnum.CLIENT_REPORT_ERROR.getNotifyScene());
+            ConfigDTO.Notify notify = GroupVersionCache.getRetryNotifyAttribute(RetryNotifySceneEnum.CLIENT_REPORT_ERROR.getNotifyScene());
             if (Objects.isNull(notify)) {
                 return;
             }
 
             SnailJobProperties properties = SpringContext.getBean(SnailJobProperties.class);
+            if (Objects.isNull(properties)) {
+                return;
+            }
             List<Recipient> recipients = Optional.ofNullable(notify.getRecipients()).orElse(Lists.newArrayList());
             for (final Recipient recipient : recipients) {
                 AlarmContext context = AlarmContext.build()
@@ -123,14 +125,12 @@ public class ReportListener implements Listener<RetryTaskDTO> {
                         EnvironmentUtils.getActiveProfile(),
                         NetUtil.getLocalIpStr(),
                         properties.getNamespace(),
-                        SnailJobProperties.getGroup(),
+                        properties.getGroup(),
                         LocalDateTime.now().format(formatter),
                         e.getMessage())
-                    .title("上报异常:[{}]", SnailJobProperties.getGroup())
+                    .title("上报异常:[{}]", properties.getGroup())
                     .notifyAttribute(recipient.getNotifyAttribute());
-
-                Alarm<AlarmContext> alarmType = SnailJobAlarmFactory.getAlarmType(recipient.getNotifyType());
-                alarmType.asyncSendMessage(context);
+                Optional.ofNullable(SnailJobAlarmFactory.getAlarmType(recipient.getNotifyType())).ifPresent(alarm -> alarm.asyncSendMessage(context));
             }
 
         } catch (Exception e1) {

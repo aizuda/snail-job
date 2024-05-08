@@ -79,14 +79,6 @@ public class SystemProperties {
     private Callback callback = new Callback();
 
     /**
-     * 系统模式:
-     * RETRY: 分布式重试重
-     * JOB: 分布式定时任务
-     * ALL: 分布式重试重 && 分布式定时任务
-     */
-    private SystemModeEnum mode = SystemModeEnum.ALL;
-
-    /**
      * 回调配置
      */
     @Data
