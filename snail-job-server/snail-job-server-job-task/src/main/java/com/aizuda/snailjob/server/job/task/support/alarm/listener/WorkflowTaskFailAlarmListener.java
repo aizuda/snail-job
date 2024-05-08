@@ -2,6 +2,7 @@ package com.aizuda.snailjob.server.job.task.support.alarm.listener;
 
 import com.aizuda.snailjob.common.core.alarm.AlarmContext;
 import com.aizuda.snailjob.common.core.enums.JobNotifySceneEnum;
+import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.snailjob.common.core.util.EnvironmentUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.AlarmInfoConverter;
@@ -11,8 +12,11 @@ import com.aizuda.snailjob.server.common.dto.WorkflowAlarmInfo;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.job.task.support.alarm.event.WorkflowTaskFailAlarmEvent;
+import com.aizuda.snailjob.template.datasource.persistence.dataobject.WorkflowBatchResponseDO;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowTaskBatchMapper;
+import com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch;
 import com.aizuda.snailjob.template.datasource.persistence.po.WorkflowTaskBatch;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -41,6 +45,7 @@ public class WorkflowTaskFailAlarmListener extends AbstractWorkflowAlarm<Workflo
                     > 空间ID:{} \s
                     > 组名称:{} \s
                     > 工作流名称:{} \s
+                    > 失败原因:{} \s
                     > 时间:{};
         """;
 
@@ -53,14 +58,19 @@ public class WorkflowTaskFailAlarmListener extends AbstractWorkflowAlarm<Workflo
         }
 
         // 拉取200条
-        List<Long> jobTaskBatchIds = Lists.newArrayList(workflowTaskBatchId);
-        queue.drainTo(jobTaskBatchIds, 200);
-        List<WorkflowTaskBatch> workflowTaskBatches = workflowTaskBatchMapper.selectBatchIds(jobTaskBatchIds);
+        List<Long> workflowTaskBatchIds = Lists.newArrayList(workflowTaskBatchId);
+        queue.drainTo(workflowTaskBatchIds, 200);
+
+        QueryWrapper<WorkflowTaskBatch> wrapper = new QueryWrapper<WorkflowTaskBatch>()
+            .in("a.id", workflowTaskBatchIds).eq("a.deleted", 0);
+        List<WorkflowBatchResponseDO> workflowTaskBatches = workflowTaskBatchMapper.selectWorkflowBatchPageList(wrapper);
         return AlarmInfoConverter.INSTANCE.toWorkflowAlarmInfos(workflowTaskBatches);
     }
 
     @Override
     protected AlarmContext buildAlarmContext(WorkflowAlarmInfo alarmDTO, NotifyConfigInfo notifyConfig) {
+        String desc = JobOperationReasonEnum.getByReason(alarmDTO.getOperationReason()).getDesc();
+
         // 预警
         return AlarmContext.build()
             .text(MESSAGES_FORMATTER,
@@ -68,6 +78,7 @@ public class WorkflowTaskFailAlarmListener extends AbstractWorkflowAlarm<Workflo
                 alarmDTO.getNamespaceId(),
                 alarmDTO.getGroupName(),
                 alarmDTO.getWorkflowName(),
+                desc,
                 DateUtils.toNowFormat(DateUtils.NORM_DATETIME_PATTERN))
             .title("{}环境 Workflow任务执行失败", EnvironmentUtils.getActiveProfile());
     }

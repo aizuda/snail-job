@@ -1,13 +1,10 @@
 package com.aizuda.snailjob.server.common.alarm;
 
 import com.aizuda.snailjob.server.common.dto.JobAlarmInfo;
-import com.aizuda.snailjob.server.common.dto.NotifyConfigInfo;
-import com.aizuda.snailjob.server.common.enums.SystemModeEnum;
 import com.aizuda.snailjob.server.common.triple.ImmutableTriple;
 import com.aizuda.snailjob.server.common.triple.Triple;
 import org.springframework.context.ApplicationEvent;
 
-import java.text.MessageFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;

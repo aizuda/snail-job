@@ -15,6 +15,11 @@ public class WorkflowBatchResponseDO {
     private Long id;
 
     /**
+     * 命名空间id
+     */
+    private String namespaceId;
+
+    /**
      * 组名称
      */
     private String groupName;

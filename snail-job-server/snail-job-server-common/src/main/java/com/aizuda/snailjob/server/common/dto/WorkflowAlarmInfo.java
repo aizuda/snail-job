@@ -24,4 +24,9 @@ public class WorkflowAlarmInfo extends AlarmInfo {
      */
     private Long workflowId;
 
+    /**
+     * 操作原因
+     */
+    private Integer operationReason;
+
 }

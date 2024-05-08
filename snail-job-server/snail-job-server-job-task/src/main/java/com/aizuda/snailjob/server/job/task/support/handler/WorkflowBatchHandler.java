@@ -3,6 +3,7 @@ package com.aizuda.snailjob.server.job.task.support.handler;
 import akka.actor.ActorRef;
 import cn.hutool.core.lang.Assert;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
+import com.aizuda.snailjob.common.core.context.SpringContext;
 import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskStatusEnum;
@@ -15,6 +16,7 @@ import com.aizuda.snailjob.server.job.task.dto.JobTaskPrepareDTO;
 import com.aizuda.snailjob.server.job.task.dto.WorkflowNodeTaskExecuteDTO;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
 import com.aizuda.snailjob.server.job.task.support.JobTaskStopHandler;
+import com.aizuda.snailjob.server.job.task.support.alarm.event.WorkflowTaskFailAlarmEvent;
 import com.aizuda.snailjob.server.job.task.support.cache.MutableGraphCache;
 import com.aizuda.snailjob.server.job.task.support.stop.JobTaskStopFactory;
 import com.aizuda.snailjob.server.job.task.support.stop.TaskStopJobContext;
@@ -115,6 +117,7 @@ public class WorkflowBatchHandler {
                         if (JobOperationReasonEnum.WORKFLOW_NODE_NO_REQUIRED.getReason() != jobTaskBatch.getOperationReason()
                                 && JobOperationReasonEnum.WORKFLOW_NODE_CLOSED_SKIP_EXECUTION.getReason() != jobTaskBatch.getOperationReason()) {
                             taskStatus = JobTaskBatchStatusEnum.FAIL.getStatus();
+                            SpringContext.getContext().publishEvent(new WorkflowTaskFailAlarmEvent(workflowTaskBatchId));
                         }
                     }
                 }
@@ -178,6 +181,7 @@ public class WorkflowBatchHandler {
         Assert.isTrue(1 == workflowTaskBatchMapper.updateById(workflowTaskBatch),
                 () -> new SnailJobServerException("停止工作流批次失败. id:[{}]",
                         workflowTaskBatchId));
+        SpringContext.getContext().publishEvent(new WorkflowTaskFailAlarmEvent(workflowTaskBatchId));
 
         // 关闭已经触发的任务
         List<JobTaskBatch> jobTaskBatches = jobTaskBatchMapper.selectList(new LambdaQueryWrapper<JobTaskBatch>()

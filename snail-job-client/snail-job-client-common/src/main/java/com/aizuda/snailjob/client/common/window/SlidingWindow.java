@@ -102,7 +102,7 @@ public class SlidingWindow<T> {
                     ConcurrentLinkedQueue<T> list = new ConcurrentLinkedQueue<>();
                     list.add(data);
 
-                    SnailJobLog.LOCAL.info("添加新数据 [{}] [{}] size:[{}]", windowPeriod, Thread.currentThread().getName(), list.size());
+                    SnailJobLog.LOCAL.debug("添加新数据 [{}] [{}] size:[{}]", windowPeriod, Thread.currentThread().getName(), list.size());
                     saveData.put(windowPeriod, list);
 
                     // 扫描n-1个窗口，是否过期，过期则删除
@@ -213,7 +213,7 @@ public class SlidingWindow<T> {
 
         LocalDateTime currentTime = LocalDateTime.now().minus(duration * 2, chronoUnit);
         if (windowPeriod.isBefore(currentTime)) {
-            SnailJobLog.LOCAL.info("删除过期窗口 windowPeriod:[{}] currentTime:[{}]", windowPeriod, currentTime);
+            SnailJobLog.LOCAL.debug("删除过期窗口 windowPeriod:[{}] currentTime:[{}]", windowPeriod, currentTime);
             saveData.remove(windowPeriod);
         }
 
@@ -287,7 +287,7 @@ public class SlidingWindow<T> {
         removeInvalidWindow(windowPeriod);
 
         if (windowPeriod.isBefore(condition)) {
-            SnailJobLog.LOCAL.info("到达时间窗口期 [{}] [{}]", windowPeriod, JsonUtil.toJsonString(saveData));
+            SnailJobLog.LOCAL.debug("到达时间窗口期 [{}] [{}]", windowPeriod, JsonUtil.toJsonString(saveData));
             doHandlerListener(windowPeriod);
         }
     }

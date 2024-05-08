@@ -29,10 +29,8 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEvent;
-import org.springframework.context.ApplicationListener;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.transaction.event.TransactionPhase;
-import org.springframework.transaction.event.TransactionalApplicationListener;
 import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.util.CollectionUtils;
 

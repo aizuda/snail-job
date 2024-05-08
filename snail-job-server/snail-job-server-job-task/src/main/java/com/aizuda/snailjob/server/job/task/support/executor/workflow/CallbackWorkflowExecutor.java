@@ -2,6 +2,7 @@ package com.aizuda.snailjob.server.job.task.support.executor.workflow;
 
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
+import com.aizuda.snailjob.common.core.context.SpringContext;
 import com.aizuda.snailjob.common.core.enums.*;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
@@ -9,6 +10,7 @@ import com.aizuda.snailjob.server.common.rpc.okhttp.RequestInterceptor;
 import com.aizuda.snailjob.server.common.dto.CallbackConfig;
 import com.aizuda.snailjob.server.common.dto.JobLogMetaDTO;
 import com.aizuda.snailjob.server.job.task.support.WorkflowTaskConverter;
+import com.aizuda.snailjob.server.job.task.support.alarm.event.WorkflowTaskFailAlarmEvent;
 import com.aizuda.snailjob.server.model.dto.CallbackParamsDTO;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTask;
@@ -123,6 +125,7 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
             }
 
             message = throwable.getMessage();
+            SpringContext.getContext().publishEvent(new WorkflowTaskFailAlarmEvent(context.getWorkflowTaskBatchId()));
         }
 
         context.setEvaluationResult(result);
