@@ -71,9 +71,6 @@ public class ReportRetryInfoHttpRequestHandler extends PostHttpRequestHandler {
 
         try {
 
-            // 同步版本
-            syncConfig(headers);
-
             TaskGenerator taskGenerator = taskGenerators.stream()
                 .filter(t -> t.supports(TaskGeneratorSceneEnum.CLIENT_REPORT.getScene()))
                 .findFirst().orElseThrow(() -> new SnailJobServerException("没有匹配的任务生成器"));
@@ -143,10 +140,4 @@ public class ReportRetryInfoHttpRequestHandler extends PostHttpRequestHandler {
         }
     }
 
-    private void syncConfig(HttpHeaders headers) {
-        ConfigVersionSyncHandler syncHandler = SpringContext.getBeanByType(ConfigVersionSyncHandler.class);
-        Integer clientVersion = headers.getInt(HeadersEnum.VERSION.getKey());
-        String namespace = headers.getAsString(HeadersEnum.NAMESPACE.getKey());
-        syncHandler.addSyncTask(headers.get(HeadersEnum.GROUP_NAME.getKey()), namespace, clientVersion);
-    }
 }

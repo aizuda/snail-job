@@ -13,12 +13,14 @@ import com.aizuda.snailjob.server.web.model.response.NotifyConfigResponseVO;
 import com.aizuda.snailjob.server.web.service.NotifyConfigService;
 import com.aizuda.snailjob.server.web.service.convert.NotifyConfigConverter;
 import com.aizuda.snailjob.server.web.service.convert.NotifyConfigResponseVOConverter;
+import com.aizuda.snailjob.server.web.service.handler.SyncConfigHandler;
 import com.aizuda.snailjob.server.web.util.UserSessionUtils;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import com.aizuda.snailjob.template.datasource.access.ConfigAccess;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.NotifyRecipientMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowMapper;
+import com.aizuda.snailjob.template.datasource.persistence.po.GroupConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.Job;
 import com.aizuda.snailjob.template.datasource.persistence.po.NotifyConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.NotifyRecipient;
@@ -192,14 +194,28 @@ public class NotifyConfigServiceImpl implements NotifyConfigService {
 
     @Override
     public Boolean updateStatus(final Long id, final Integer status) {
+
+        String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
+        NotifyConfig notifyConfig = accessTemplate.getNotifyConfigAccess().one(
+            new LambdaQueryWrapper<NotifyConfig>()
+                .eq(NotifyConfig::getId, id)
+                .eq(NotifyConfig::getNamespaceId, namespaceId)
+        );
+        Assert.notNull(notifyConfig, () -> new SnailJobServerException("通知配置不存在"));
+
+        // 同步配置到客户端
+        SyncConfigHandler.addSyncTask(notifyConfig.getGroupName(), namespaceId);
+
         NotifyConfig config = new NotifyConfig();
         config.setNotifyStatus(status);
         config.setUpdateDt(LocalDateTime.now());
-        return 1 == accessTemplate.getNotifyConfigAccess()
+        int update = accessTemplate.getNotifyConfigAccess()
             .update(config, new LambdaUpdateWrapper<NotifyConfig>()
-                .eq(NotifyConfig::getNamespaceId, UserSessionUtils.currentUserSession().getNamespaceId())
+                .eq(NotifyConfig::getNamespaceId, namespaceId)
                 .eq(NotifyConfig::getId, id)
             );
+
+        return 1 == update;
     }
 
     @Override

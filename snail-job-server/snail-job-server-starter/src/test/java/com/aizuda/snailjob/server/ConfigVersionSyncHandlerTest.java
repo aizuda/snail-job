@@ -13,7 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 public class ConfigVersionSyncHandlerTest {
 
 //    @Autowired
-//    private ConfigVersionSyncHandler configVersionSyncHandler;
+//    private SyncConfigHandler configVersionSyncHandler;
 //
 //    @SneakyThrows
 //    @Test

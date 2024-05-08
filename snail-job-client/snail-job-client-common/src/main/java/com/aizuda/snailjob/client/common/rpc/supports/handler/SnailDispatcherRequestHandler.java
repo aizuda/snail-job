@@ -5,7 +5,7 @@ import cn.hutool.core.util.ServiceLoaderUtil;
 import com.aizuda.snailjob.client.common.cache.EndPointInfoCache;
 import com.aizuda.snailjob.client.common.config.SnailJobProperties;
 import com.aizuda.snailjob.client.common.exception.SnailJobClientException;
-import com.aizuda.snailjob.client.common.intercepter.HandlerInterceptor;
+import com.aizuda.snailjob.client.common.HandlerInterceptor;
 import com.aizuda.snailjob.client.common.rpc.client.RequestMethod;
 import com.aizuda.snailjob.client.common.rpc.supports.scan.EndPointInfo;
 import com.aizuda.snailjob.client.common.rpc.supports.http.HttpRequest;

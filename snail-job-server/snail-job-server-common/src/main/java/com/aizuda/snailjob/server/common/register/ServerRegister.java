@@ -2,12 +2,10 @@ package com.aizuda.snailjob.server.common.register;
 
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
-import com.aizuda.snailjob.common.core.context.SpringContext;
 import com.aizuda.snailjob.common.core.enums.NodeTypeEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.NetUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
-import com.aizuda.snailjob.server.common.Register;
 import com.aizuda.snailjob.server.common.cache.CacheConsumerGroup;
 import com.aizuda.snailjob.server.common.cache.CacheRegisterTable;
 import com.aizuda.snailjob.server.common.config.SystemProperties;

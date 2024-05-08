@@ -76,7 +76,9 @@ public abstract class AbstractConfigAccess<T> implements ConfigAccess<T> {
         return notifyConfigMapper.selectList(
             new LambdaQueryWrapper<NotifyConfig>()
                 .eq(NotifyConfig::getNamespaceId, namespaceId)
-                .eq(NotifyConfig::getGroupName, groupName));
+                .eq(NotifyConfig::getGroupName, groupName)
+                .eq(NotifyConfig::getNotifyStatus, StatusEnum.YES.getStatus())
+        );
     }
 
 

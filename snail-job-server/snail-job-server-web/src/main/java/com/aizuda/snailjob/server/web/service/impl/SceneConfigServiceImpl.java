@@ -14,6 +14,7 @@ import com.aizuda.snailjob.server.web.model.response.SceneConfigResponseVO;
 import com.aizuda.snailjob.server.web.service.SceneConfigService;
 import com.aizuda.snailjob.server.web.service.convert.SceneConfigConverter;
 import com.aizuda.snailjob.server.web.service.convert.SceneConfigResponseVOConverter;
+import com.aizuda.snailjob.server.web.service.handler.SyncConfigHandler;
 import com.aizuda.snailjob.server.web.util.UserSessionUtils;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import com.aizuda.snailjob.template.datasource.access.ConfigAccess;
@@ -22,7 +23,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.google.common.collect.Lists;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -34,10 +35,9 @@ import java.util.Optional;
  * @date : 2022-03-03 10:55
  */
 @Service
+@RequiredArgsConstructor
 public class SceneConfigServiceImpl implements SceneConfigService {
-
-    @Autowired
-    private AccessTemplate accessTemplate;
+    private final AccessTemplate accessTemplate;
 
     @Override
     public PageResult<List<SceneConfigResponseVO>> getSceneConfigPageList(SceneConfigQueryVO queryVO) {
@@ -106,6 +106,10 @@ public class SceneConfigServiceImpl implements SceneConfigService {
         Assert.isTrue(1 == sceneConfigAccess.insert(retrySceneConfig),
                 () -> new SnailJobServerException("failed to insert scene. retrySceneConfig:[{}]",
                         JsonUtil.toJsonString(retrySceneConfig)));
+
+        // 同步配置到客户端
+        SyncConfigHandler.addSyncTask(requestVO.getGroupName(), namespaceId);
+
         return Boolean.TRUE;
     }
 
@@ -143,6 +147,9 @@ public class SceneConfigServiceImpl implements SceneConfigService {
                                 .eq(RetrySceneConfig::getSceneName, requestVO.getSceneName())),
                 () -> new SnailJobServerException("failed to update scene. retrySceneConfig:[{}]",
                         JsonUtil.toJsonString(retrySceneConfig)));
+
+        // 同步配置到客户端
+        SyncConfigHandler.addSyncTask(requestVO.getGroupName(), namespaceId);
         return Boolean.TRUE;
     }
 
