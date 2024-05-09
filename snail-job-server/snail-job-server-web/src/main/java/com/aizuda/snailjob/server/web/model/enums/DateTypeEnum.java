@@ -1,19 +1,18 @@
 package com.aizuda.snailjob.server.web.model.enums;
 
-import com.aizuda.snailjob.server.web.model.response.DashboardLineResponseVO;
+import cn.hutool.core.date.LocalDateTimeUtil;
+import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.server.web.model.response.DashboardLineResponseVO;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * @author: byteblogs
@@ -23,160 +22,112 @@ public enum DateTypeEnum {
     /**
      * 天（按小时）
      */
-    DAY(dashboardLineResponseVOList -> {
-        Map<String, DashboardLineResponseVO> dashboardLineResponseVOMap = dashboardLineResponseVOList.stream().collect(Collectors.toMap(DashboardLineResponseVO::getCreateDt, i -> i));
-        for (int i = 0; i <= LocalDateTime.now().with(TemporalAdjusters.lastDayOfMonth()).getHour(); i++) {
-
-            String format = LocalDateTime.of(LocalDate.now(), LocalTime.MIN).plusHours(i).format(DateTimeFormatter.ofPattern("HH"));
-            DashboardLineResponseVO dashboardLineResponseVO = dashboardLineResponseVOMap.get(format);
-            if (Objects.isNull(dashboardLineResponseVO)) {
-                dashboardLineResponseVO = new DashboardLineResponseVO()
-                        .setTotal(0L)
-                        .setTotalNum(0L)
-                        .setFail(0L)
-                        .setFailNum(0L)
-                        .setMaxCountNum(0L)
-                        .setRunningNum(0L)
-                        .setSuccess(0L)
-                        .setSuccessNum(0L)
-                        .setSuspendNum(0L)
-                        .setStop(0L)
-                        .setCancel(0L)
-                        .setCreateDt(format);
-                dashboardLineResponseVOList.add(dashboardLineResponseVO);
+    DAY(
+        voList -> {
+            Map<String, DashboardLineResponseVO> responseVoMap = StreamUtils.toIdentityMap(voList,
+                DashboardLineResponseVO::getCreateDt);
+            int hourNow = LocalDateTime.now().getHour();
+            for (int hourOffset = 0; hourOffset <= hourNow; hourOffset++) {
+                String createDt = LocalDateTime.now().plusHours(hourOffset).format(DateTimeFormatter.ofPattern("HH"));
+                if (!responseVoMap.containsKey(createDt)) {
+                    voList.add(buildZeroedVoWithCreateDt(createDt));
+                }
             }
-        }
-    }, (startTime) -> {
-        return Objects.isNull(startTime) ?
-                LocalDateTime.of(LocalDate.now(), LocalTime.MIN.withNano(0)) :
-                LocalDateTime.of(startTime.toLocalDate(), LocalTime.MIN.withNano(0));
-    }, (endTime) -> {
-        return Objects.isNull(endTime) ?
-                LocalDateTime.of(LocalDate.now(), LocalTime.MAX.withNano(0)) :
-                LocalDateTime.of(endTime.toLocalDate(), LocalTime.MAX.withNano(0));
-    }),
+        },
+        (startTime) -> LocalDateTimeUtil.beginOfDay(Optional.ofNullable(startTime).orElse(LocalDateTime.now())),
+        (endTime) -> LocalDateTimeUtil.endOfDay(Optional.ofNullable(endTime).orElse(LocalDateTime.now()))
+    ),
+
     /**
      * 周
      */
-    WEEK(dashboardLineResponseVOList -> {
-        Map<String, DashboardLineResponseVO> dispatchQuantityResponseVOMap = dashboardLineResponseVOList.stream().collect(Collectors.toMap(DashboardLineResponseVO::getCreateDt, i -> i));
-        for (int i = 0; i < 7; i++) {
-
-            String format = LocalDateTime.of(LocalDate.now().minusDays(i), LocalTime.MIN).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-            DashboardLineResponseVO dashboardLineResponseVO = dispatchQuantityResponseVOMap.get(format);
-            if (Objects.isNull(dashboardLineResponseVO)) {
-                dashboardLineResponseVO = new DashboardLineResponseVO()
-                        .setTotal(0L)
-                        .setTotalNum(0L)
-                        .setFail(0L)
-                        .setFailNum(0L)
-                        .setMaxCountNum(0L)
-                        .setRunningNum(0L)
-                        .setSuccess(0L)
-                        .setSuccessNum(0L)
-                        .setSuspendNum(0L)
-                        .setStop(0L)
-                        .setCancel(0L)
-                        .setCreateDt(format);
-                dashboardLineResponseVOList.add(dashboardLineResponseVO);
+    WEEK(
+        voList -> {
+            Map<String, DashboardLineResponseVO> responseVoMap = StreamUtils.toIdentityMap(
+                voList, DashboardLineResponseVO::getCreateDt);
+            for (int dayOffset = 0; dayOffset < 7; dayOffset++) {
+                String createDt = LocalDateTime.now().minusDays(dayOffset).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                if (!responseVoMap.containsKey(createDt)) {
+                    voList.add(buildZeroedVoWithCreateDt(createDt));
+                }
             }
-        }
-    }, (startTime) -> {
-        return Objects.isNull(startTime) ?
-                LocalDateTime.of(LocalDate.now().minusDays(7), LocalTime.MIN.withNano(0)) :
-                LocalDateTime.of(startTime.toLocalDate().minusDays(7), LocalTime.MIN.withNano(0));
-    }, (endTime) -> {
-        return Objects.isNull(endTime) ?
-                LocalDateTime.of(LocalDate.now(), LocalTime.MAX.withNano(0)) :
-                LocalDateTime.of(endTime.toLocalDate(), LocalTime.MAX.withNano(0));
-    }),
+        },
+        (startTime) -> LocalDateTimeUtil.beginOfDay(Optional.ofNullable(startTime).orElse(LocalDateTime.now()).minusDays(7)),
+        (endTime) -> LocalDateTimeUtil.endOfDay(Optional.ofNullable(endTime).orElse(LocalDateTime.now()))
+    ),
 
     /**
      * 月
      */
-    MONTH(dashboardLineResponseVOList -> {
-        Map<String, DashboardLineResponseVO> dispatchQuantityResponseVOMap = dashboardLineResponseVOList.stream().collect(Collectors.toMap(DashboardLineResponseVO::getCreateDt, i -> i));
-        for (int i = 0; i < LocalDateTime.now().with(TemporalAdjusters.lastDayOfMonth()).getDayOfMonth(); i++) {
-
-            String format = LocalDateTime.of(LocalDate.now().minusDays(i), LocalTime.MIN).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-            DashboardLineResponseVO dashboardLineResponseVO = dispatchQuantityResponseVOMap.get(format);
-            if (Objects.isNull(dashboardLineResponseVO)) {
-                dashboardLineResponseVO = new DashboardLineResponseVO()
-                        .setTotal(0L)
-                        .setTotalNum(0L)
-                        .setFail(0L)
-                        .setFailNum(0L)
-                        .setMaxCountNum(0L)
-                        .setRunningNum(0L)
-                        .setSuccess(0L)
-                        .setSuccessNum(0L)
-                        .setSuspendNum(0L)
-                        .setStop(0L)
-                        .setCancel(0L)
-                        .setCreateDt(format);
-                dashboardLineResponseVOList.add(dashboardLineResponseVO);
+    MONTH(
+        voList -> {
+            Map<String, DashboardLineResponseVO> responseVoMap = StreamUtils.toIdentityMap(
+                voList, DashboardLineResponseVO::getCreateDt);
+            int lastDayOfMonth = LocalDateTime.now().with(TemporalAdjusters.lastDayOfMonth()).getDayOfMonth();
+            for (int dayOffset = 0; dayOffset < lastDayOfMonth; dayOffset++) {
+                String createDt = LocalDate.now().minusDays(dayOffset).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                if (!responseVoMap.containsKey(createDt)) {
+                    voList.add(buildZeroedVoWithCreateDt(createDt));
+                }
             }
-        }
-    }, (startTime) -> {
-        return Objects.isNull(startTime) ?
-                LocalDateTime.of(LocalDate.now().minusMonths(1), LocalTime.MIN.withNano(0)) :
-                LocalDateTime.of(startTime.toLocalDate().minusMonths(1), LocalTime.MIN.withNano(0));
-    }, (endTime) -> {
-        return Objects.isNull(endTime) ?
-                LocalDateTime.of(LocalDate.now(), LocalTime.MAX.withNano(0)) :
-                LocalDateTime.of(endTime.toLocalDate(), LocalTime.MAX.withNano(0));
-    }),
+        },
+        (startTime) -> LocalDateTimeUtil.beginOfDay(Optional.ofNullable(startTime).orElse(LocalDateTime.now()).minusMonths(1)),
+        (endTime) -> LocalDateTimeUtil.endOfDay(Optional.ofNullable(endTime).orElse(LocalDateTime.now()))
+    ),
 
     /**
      * 年
      */
-    YEAR(dashboardLineResponseVOList -> {
-        Map<String, DashboardLineResponseVO> dispatchQuantityResponseVOMap = dashboardLineResponseVOList.stream().collect(Collectors.toMap(DashboardLineResponseVO::getCreateDt, i -> i));
-        for (int i = 0; i < 12; i++) {
-
-            String format = LocalDateTime.of(LocalDate.now().minusMonths(i), LocalTime.MIN).format(DateTimeFormatter.ofPattern("yyyy-MM"));
-            DashboardLineResponseVO dashboardLineResponseVO = dispatchQuantityResponseVOMap.get(format);
-            if (Objects.isNull(dashboardLineResponseVO)) {
-                dashboardLineResponseVO = new DashboardLineResponseVO()
-                        .setTotal(0L)
-                        .setTotalNum(0L)
-                        .setFail(0L)
-                        .setFailNum(0L)
-                        .setMaxCountNum(0L)
-                        .setRunningNum(0L)
-                        .setSuccess(0L)
-                        .setSuccessNum(0L)
-                        .setSuspendNum(0L)
-                        .setStop(0L)
-                        .setCancel(0L)
-                        .setCreateDt(format);
-                dashboardLineResponseVOList.add(dashboardLineResponseVO);
+    YEAR(
+        voList -> {
+            Map<String, DashboardLineResponseVO> responseVoMap = StreamUtils.toIdentityMap(
+                voList, DashboardLineResponseVO::getCreateDt);
+            for (int monthOffset = 0; monthOffset < 12; monthOffset++) {
+                String createDt = LocalDateTime.now().minusMonths(monthOffset).format(DateTimeFormatter.ofPattern("yyyy-MM"));
+                if (!responseVoMap.containsKey(createDt)) {
+                    voList.add(buildZeroedVoWithCreateDt(createDt));
+                }
             }
-        }
-    }, (startTime) -> {
-        return LocalDateTime.of(LocalDate.now().with(TemporalAdjusters.firstDayOfYear()), LocalTime.MIN.withNano(0));
-    }, (endTime) -> {
-        return LocalDateTime.of(LocalDate.now().with(TemporalAdjusters.lastDayOfYear()), LocalTime.MAX.withNano(0));
-    }),
+        },
+        (startTime) -> LocalDateTimeUtil.beginOfDay(LocalDateTime.now().with(TemporalAdjusters.firstDayOfYear())),
+        (endTime) -> LocalDateTimeUtil.endOfDay(LocalDateTime.now().with(TemporalAdjusters.lastDayOfYear()))
+    ),
 
     /**
      * 其他类型
      */
-    OTHERS(dashboardLineResponseVOList -> {
-    }, (startTime) -> {
-        return LocalDateTime.of(startTime.toLocalDate(), LocalTime.MIN.withNano(0));
-    }, (endTime) -> {
-        return LocalDateTime.of(endTime.toLocalDate(), LocalTime.MAX.withNano(0));
-    });
+    OTHERS(
+        voList -> {
+        },
+        (startTime) -> LocalDateTimeUtil.beginOfDay(startTime),
+        (endTime) -> LocalDateTimeUtil.endOfDay(endTime));
 
     private Consumer<List<DashboardLineResponseVO>> consumer;
     private Function<LocalDateTime, LocalDateTime> startTime;
     private Function<LocalDateTime, LocalDateTime> endTime;
 
-    DateTypeEnum(Consumer<List<DashboardLineResponseVO>> listConsumer, Function<LocalDateTime, LocalDateTime> startTime, Function<LocalDateTime, LocalDateTime> endTime) {
-        this.consumer = listConsumer;
+    DateTypeEnum(Consumer<List<DashboardLineResponseVO>> consumer,
+                 Function<LocalDateTime, LocalDateTime> startTime,
+                 Function<LocalDateTime, LocalDateTime> endTime) {
+        this.consumer = consumer;
         this.startTime = startTime;
         this.endTime = endTime;
+    }
+
+    private static DashboardLineResponseVO buildZeroedVoWithCreateDt(String createDt) {
+        return new DashboardLineResponseVO()
+            .setTotal(0L)
+            .setTotalNum(0L)
+            .setFail(0L)
+            .setFailNum(0L)
+            .setMaxCountNum(0L)
+            .setRunningNum(0L)
+            .setSuccess(0L)
+            .setSuccessNum(0L)
+            .setSuspendNum(0L)
+            .setStop(0L)
+            .setCancel(0L)
+            .setCreateDt(createDt);
     }
 
     public Function<LocalDateTime, LocalDateTime> getStartTime() {
