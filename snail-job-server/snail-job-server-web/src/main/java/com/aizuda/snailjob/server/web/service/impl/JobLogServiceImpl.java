@@ -9,7 +9,6 @@ import com.aizuda.snailjob.template.datasource.persistence.mapper.JobLogMessageM
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskBatchMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobLogMessage;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch;
-import com.aizuda.snailjob.server.web.model.response.JobLogResponseVO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.google.common.collect.Lists;
@@ -96,7 +95,7 @@ public class JobLogServiceImpl implements JobLogService {
             List<Map<String, String>> originalList = JsonUtil.parseObject(jobLogMessage.getMessage(), List.class);
             int size = originalList.size() - fromIndex;
             List<Map<String, String>> pageList = originalList.stream().skip(fromIndex).limit(queryVO.getSize())
-                    .collect(Collectors.toList());
+                .collect(Collectors.toList());
 
             if (messages.size() + size >= queryVO.getSize()) {
                 messages.addAll(pageList);
@@ -110,17 +109,9 @@ public class JobLogServiceImpl implements JobLogService {
             fromIndex = 0;
         }
 
-        messages = messages.stream().sorted((o1, o2) -> {
-            long value = Long.parseLong(o1.get(LogFieldConstants.TIME_STAMP)) - Long.parseLong(o2.get(LogFieldConstants.TIME_STAMP));
-
-            if (value > 0) {
-                return 1;
-            } else if (value < 0) {
-                return -1;
-            }
-
-            return 0;
-        }).collect(Collectors.toList());
+        messages = messages.stream()
+            .sorted(Comparator.comparingLong(o -> Long.parseLong(o.get(LogFieldConstants.TIME_STAMP))))
+            .collect(Collectors.toList());
 
         JobLogResponseVO jobLogResponseVO = new JobLogResponseVO();
         jobLogResponseVO.setMessage(messages);

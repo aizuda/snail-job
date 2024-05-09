@@ -6,33 +6,28 @@ import com.aizuda.snailjob.common.core.enums.RetryStatusEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.constant.LogFieldConstants;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
+import com.aizuda.snailjob.server.web.model.base.PageResult;
+import com.aizuda.snailjob.server.web.model.request.RetryTaskLogMessageQueryVO;
+import com.aizuda.snailjob.server.web.model.request.RetryTaskLogQueryVO;
 import com.aizuda.snailjob.server.web.model.request.UserSessionVO;
-import com.aizuda.snailjob.server.web.util.UserSessionUtils;
 import com.aizuda.snailjob.server.web.model.response.RetryTaskLogMessageResponseVO;
+import com.aizuda.snailjob.server.web.model.response.RetryTaskLogResponseVO;
+import com.aizuda.snailjob.server.web.service.RetryTaskLogService;
 import com.aizuda.snailjob.server.web.service.convert.RetryTaskLogResponseVOConverter;
+import com.aizuda.snailjob.server.web.util.UserSessionUtils;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskLogMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskLogMessageMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTaskLog;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTaskLogMessage;
-import com.aizuda.snailjob.server.web.model.request.RetryTaskLogMessageQueryVO;
-import com.aizuda.snailjob.server.web.service.convert.RetryTaskLogResponseVOConverter;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
-import com.aizuda.snailjob.server.web.model.base.PageResult;
-import com.aizuda.snailjob.server.web.service.RetryTaskLogService;
-import com.aizuda.snailjob.server.web.model.request.RetryTaskLogQueryVO;
-import com.aizuda.snailjob.server.web.model.response.RetryTaskLogResponseVO;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -164,18 +159,9 @@ public class RetryTaskLogServiceImpl implements RetryTaskLogService {
             fromIndex = 0;
         }
 
-        messages = messages.stream().sorted((o1, o2) -> {
-            long value = Long.parseLong(o1.get(LogFieldConstants.TIME_STAMP)) - Long.parseLong(
-                o2.get(LogFieldConstants.TIME_STAMP));
-
-            if (value > 0) {
-                return 1;
-            } else if (value < 0) {
-                return -1;
-            }
-
-            return 0;
-        }).collect(Collectors.toList());
+        messages = messages.stream()
+            .sorted(Comparator.comparingLong(o -> Long.parseLong(o.get(LogFieldConstants.TIME_STAMP))))
+            .collect(Collectors.toList());
 
         RetryTaskLogMessageResponseVO responseVO = new RetryTaskLogMessageResponseVO();
         responseVO.setMessage(messages);
