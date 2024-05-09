@@ -16,6 +16,8 @@ import com.aizuda.snailjob.template.datasource.persistence.po.RetryDeadLetter;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
@@ -65,6 +67,7 @@ public class RetryTaskFailDeadLetterAlarmListener extends
     }
 
     @Override
+    @TransactionalEventListener(fallbackExecution = true, phase = TransactionPhase.AFTER_COMPLETION)
     public void doOnApplicationEvent(RetryTaskFailDeadLetterAlarmEvent event) {
         if (!queue.offer(event.getRetryDeadLetters())) {
             SnailJobLog.LOCAL.warn("任务重试失败进入死信队列告警队列已满");

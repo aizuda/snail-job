@@ -20,6 +20,8 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.util.List;
 import java.util.Objects;
@@ -106,6 +108,7 @@ public class JobTaskFailAlarmListener extends AbstractJobAlarm<JobTaskFailAlarmE
     }
 
     @Override
+    @TransactionalEventListener(fallbackExecution = true, phase = TransactionPhase.AFTER_COMPLETION)
     public void doOnApplicationEvent(JobTaskFailAlarmEvent event) {
         if (!queue.offer(event.getJobTaskBatchId())) {
             SnailJobLog.LOCAL.warn("JOB任务执行失败告警队列已满");

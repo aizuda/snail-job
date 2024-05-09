@@ -16,6 +16,8 @@ import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.util.List;
 import java.util.Objects;
@@ -64,6 +66,7 @@ public class RetryTaskFailMoreThresholdAlarmListener extends
     }
 
     @Override
+    @TransactionalEventListener(fallbackExecution = true, phase = TransactionPhase.AFTER_COMPLETION)
     public void doOnApplicationEvent(RetryTaskFailMoreThresholdAlarmEvent event) {
         if (!queue.offer(event.getRetryTask())) {
             SnailJobLog.LOCAL.warn("任务失败数量超过阈值告警队列已满");

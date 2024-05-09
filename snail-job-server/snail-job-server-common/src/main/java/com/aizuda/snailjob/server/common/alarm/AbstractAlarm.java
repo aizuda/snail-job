@@ -221,11 +221,6 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
 
     protected abstract int getNotifyScene();
 
-    @TransactionalEventListener(fallbackExecution = true, phase = TransactionPhase.AFTER_COMPLETION)
-    public void onApplicationEvent(@NotNull E event) {
-        doOnApplicationEvent(event);
-    }
-
     protected abstract void doOnApplicationEvent(E event);
 }
 
