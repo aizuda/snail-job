@@ -37,7 +37,6 @@ public class ConfigHttpRequestHandler extends GetHttpRequestHandler {
 
     @Override
     public String doHandler(String content, UrlQuery urlQuery, HttpHeaders headers) {
-        SnailJobLog.LOCAL.info("版本同步 content:[{}]", urlQuery.toString());
         SnailJobRequest retryRequest = JsonUtil.parseObject(content, SnailJobRequest.class);
         String groupName = headers.get(HeadersEnum.GROUP_NAME.getKey());
         String namespace = headers.get(HeadersEnum.NAMESPACE.getKey());

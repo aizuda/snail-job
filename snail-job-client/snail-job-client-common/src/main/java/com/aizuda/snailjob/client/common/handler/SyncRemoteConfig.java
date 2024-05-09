@@ -31,23 +31,18 @@ public class SyncRemoteConfig implements Lifecycle {
 
         SCHEDULE_EXECUTOR.scheduleAtFixedRate(() -> {
             try {
-                try {
-                    NettyClient client = RequestBuilder.<NettyClient, NettyResult>newBuilder()
-                        .client(NettyClient.class)
-                        .callback(nettyResult -> {
-                            if (Objects.isNull(nettyResult.getData())) {
-                                SnailJobLog.LOCAL.error("获取配置结果为null");
-                                return;
-                            }
+                NettyClient client = RequestBuilder.<NettyClient, NettyResult>newBuilder()
+                    .client(NettyClient.class)
+                    .callback(nettyResult -> {
+                        if (Objects.isNull(nettyResult.getData())) {
+                            SnailJobLog.LOCAL.error("获取配置结果为null");
+                            return;
+                        }
 
-                            GroupVersionCache.setConfig(
-                                JsonUtil.parseObject(nettyResult.getData().toString(), ConfigDTO.class));
-                        })
-                        .build();
-                    client.getConfig(0);
-                } catch (Exception e) {
-                    SnailJobLog.LOCAL.error("同步版本失败", e);
-                }
+                        GroupVersionCache.setConfig(
+                            JsonUtil.parseObject(nettyResult.getData().toString(), ConfigDTO.class));
+                    }).build();
+                client.syncRemoteConfig();
             } catch (Exception e) {
                 SnailJobLog.LOCAL.error("通知配置失败", e);
             }

@@ -4,8 +4,6 @@ import com.aizuda.snailjob.client.common.annotation.Mapping;
 import com.aizuda.snailjob.client.common.rpc.client.RequestMethod;
 import com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH;
 import com.aizuda.snailjob.common.core.model.Result;
-import com.aizuda.snailjob.client.common.annotation.Mapping;
-import com.aizuda.snailjob.client.common.rpc.client.RequestMethod;
 
 
 /**
@@ -18,7 +16,7 @@ import com.aizuda.snailjob.client.common.rpc.client.RequestMethod;
 public interface NettyClient {
 
     @Mapping(method = RequestMethod.GET, path = HTTP_PATH.SYNC_CONFIG)
-    Result getConfig(Integer version);
+    Result syncRemoteConfig();
 
     @Mapping(method = RequestMethod.GET, path = HTTP_PATH.BEAT)
     Result beat(String mark);
