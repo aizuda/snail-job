@@ -25,5 +25,5 @@ public interface WorkflowTaskBatchMapper extends BaseMapper<WorkflowTaskBatch> {
 
     List<WorkflowBatchResponseDO> selectWorkflowBatchPageList(PageDTO<JobTaskBatch> pageDTO, @Param("ew") Wrapper<WorkflowTaskBatch> wrapper);
 
-    List<WorkflowBatchResponseDO> selectWorkflowBatchPageList(@Param("ew") Wrapper<WorkflowTaskBatch> wrapper);
+    List<WorkflowBatchResponseDO> selectWorkflowBatchList(@Param("ew") Wrapper<WorkflowTaskBatch> wrapper);
 }

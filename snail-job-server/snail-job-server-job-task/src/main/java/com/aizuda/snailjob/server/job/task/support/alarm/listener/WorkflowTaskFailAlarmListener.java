@@ -65,7 +65,7 @@ public class WorkflowTaskFailAlarmListener extends AbstractWorkflowAlarm<Workflo
 
         QueryWrapper<WorkflowTaskBatch> wrapper = new QueryWrapper<WorkflowTaskBatch>()
             .in("a.id", workflowTaskBatchIds).eq("a.deleted", 0);
-        List<WorkflowBatchResponseDO> workflowTaskBatches = workflowTaskBatchMapper.selectWorkflowBatchPageList(wrapper);
+        List<WorkflowBatchResponseDO> workflowTaskBatches = workflowTaskBatchMapper.selectWorkflowBatchList(wrapper);
         return AlarmInfoConverter.INSTANCE.toWorkflowAlarmInfos(workflowTaskBatches);
     }
 
