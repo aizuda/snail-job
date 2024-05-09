@@ -5,8 +5,9 @@ import com.aizuda.snailjob.common.core.alarm.SnailJobAlarmFactory;
 import com.aizuda.snailjob.common.core.enums.RetryNotifySceneEnum;
 import com.aizuda.snailjob.common.core.enums.RetryStatusEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
-import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.EnvironmentUtils;
+import com.aizuda.snailjob.common.core.util.JsonUtil;
+import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.server.common.Lifecycle;
 import com.aizuda.snailjob.server.common.dto.PartitionTask;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
@@ -24,7 +25,6 @@ import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -32,13 +32,9 @@ import org.springframework.util.CollectionUtils;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+
 
 /**
  * 监控重试表中数据总量是否到达阈值
@@ -52,7 +48,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class RetryTaskMoreThresholdAlarmSchedule extends AbstractSchedule implements Lifecycle {
 
-    private static String retryTaskMoreThresholdTextMessageFormatter =
+    private static final String retryTaskMoreThresholdTextMessageFormatter =
         "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 场景重试数量超过{}个</font>  \n" +
             "> 空间ID:{}  \n" +
             "> 组名称:{}  \n" +
@@ -110,9 +106,8 @@ public class RetryTaskMoreThresholdAlarmSchedule extends AbstractSchedule implem
                         count)
                     .title("{}环境 场景重试数量超过阈值", EnvironmentUtils.getActiveProfile())
                     .notifyAttribute(recipientInfo.getNotifyAttribute());
-                 Optional.ofNullable(SnailJobAlarmFactory.getAlarmType(recipientInfo.getNotifyType())).ifPresent(alarmType -> {
-                    alarmType.asyncSendMessage(context);
-                });
+                Optional.ofNullable(SnailJobAlarmFactory.getAlarmType(recipientInfo.getNotifyType()))
+                    .ifPresent(alarmType -> alarmType.asyncSendMessage(context));
 
             }
         }
@@ -127,46 +122,35 @@ public class RetryTaskMoreThresholdAlarmSchedule extends AbstractSchedule implem
                 .eq(NotifyConfig::getNotifyScene, RetryNotifySceneEnum.MAX_RETRY.getNotifyScene())
                 .orderByDesc(NotifyConfig::getId)) // SQLServer 分页必须 ORDER BY
             .getRecords();
-        if (CollectionUtils.isEmpty(notifyConfigs)) {
-            return Lists.newArrayList();
-        }
 
         Set<Long> recipientIds = notifyConfigs.stream()
-            .map(config -> new HashSet<>(JsonUtil.parseList(config.getRecipientIds(), Long.class)))
-            .reduce((a, b) -> {
-                HashSet<Long> set = Sets.newHashSet();
-                set.addAll(a);
-                set.addAll(b);
-                return set;
-            }).orElse(new HashSet<>());
+            .flatMap(config -> JsonUtil.parseList(config.getRecipientIds(), Long.class).stream())
+            .collect(Collectors.toSet());
+
         if (CollectionUtils.isEmpty(recipientIds)) {
             return Lists.newArrayList();
         }
 
-        List<NotifyRecipient> notifyRecipients = recipientMapper.selectBatchIds(recipientIds);
-        Map<Long, NotifyRecipient> recipientMap = notifyRecipients.stream()
-            .collect(Collectors.toMap(NotifyRecipient::getId, i -> i));
+        Map<Long, NotifyRecipient> recipientMap = StreamUtils.toIdentityMap(
+            recipientMapper.selectBatchIds(recipientIds), NotifyRecipient::getId);
 
         List<NotifyConfigPartitionTask> notifyConfigPartitionTasks = RetryTaskConverter.INSTANCE.toNotifyConfigPartitionTask(
             notifyConfigs);
-        for (final NotifyConfigPartitionTask notifyConfigPartitionTask : notifyConfigPartitionTasks) {
+        notifyConfigPartitionTasks.forEach(task -> {
+            List<RecipientInfo> recipientList = StreamUtils.toList(task.getRecipientIds(), recipientId -> {
+                NotifyRecipient notifyRecipient = recipientMap.get(recipientId);
+                if (Objects.isNull(notifyRecipient)) {
+                    return null;
+                }
 
-            List<RecipientInfo> recipientList = notifyConfigPartitionTask.getRecipientIds().stream()
-                .map(recipientId -> {
-                    NotifyRecipient notifyRecipient = recipientMap.get(recipientId);
-                    if (Objects.isNull(notifyRecipient)) {
-                        return null;
-                    }
+                RecipientInfo recipientInfo = new RecipientInfo();
+                recipientInfo.setNotifyType(notifyRecipient.getNotifyType());
+                recipientInfo.setNotifyAttribute(notifyRecipient.getNotifyAttribute());
 
-                    RecipientInfo recipientInfo = new RecipientInfo();
-                    recipientInfo.setNotifyType(notifyRecipient.getNotifyType());
-                    recipientInfo.setNotifyAttribute(notifyRecipient.getNotifyAttribute());
-
-                    return recipientInfo;
-                }).collect(Collectors.toList());
-
-            notifyConfigPartitionTask.setRecipientInfos(recipientList);
-        }
+                return recipientInfo;
+            });
+            task.setRecipientInfos(recipientList);
+        });
 
         return notifyConfigPartitionTasks;
     }

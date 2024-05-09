@@ -1,19 +1,19 @@
 package com.aizuda.snailjob.server.common.handler;
 
 import com.aizuda.snailjob.common.core.enums.NodeTypeEnum;
+import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.Lifecycle;
 import com.aizuda.snailjob.server.common.allocate.server.AllocateMessageQueueAveragely;
+import com.aizuda.snailjob.server.common.cache.CacheRegisterTable;
 import com.aizuda.snailjob.server.common.config.SystemProperties;
 import com.aizuda.snailjob.server.common.dto.DistributeInstance;
 import com.aizuda.snailjob.server.common.dto.RegisterNodeInfo;
-import com.aizuda.snailjob.server.common.cache.CacheRegisterTable;
 import com.aizuda.snailjob.server.common.register.ServerRegister;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.ServerNodeMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.GroupConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.ServerNode;
-import com.aizuda.snailjob.server.common.allocate.server.AllocateMessageQueueAveragely;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +58,7 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
     private List<Integer> bucketList;
 
     public void doBalance() {
-       SnailJobLog.LOCAL.info("rebalance start");
+        SnailJobLog.LOCAL.info("rebalance start");
         DistributeInstance.RE_BALANCE_ING.set(Boolean.TRUE);
 
         try {
@@ -77,12 +77,12 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
             }
 
             List<Integer> allocate = new AllocateMessageQueueAveragely()
-                    .allocate(ServerRegister.CURRENT_CID, bucketList, new ArrayList<>(podIpSet));
+                .allocate(ServerRegister.CURRENT_CID, bucketList, new ArrayList<>(podIpSet));
 
             // 重新覆盖本地分配的组信息
             DistributeInstance.INSTANCE.setConsumerBucket(allocate);
 
-           SnailJobLog.LOCAL.info("rebalance complete. allocate:[{}]", allocate);
+            SnailJobLog.LOCAL.info("rebalance complete. allocate:[{}]", allocate);
         } catch (Exception e) {
             SnailJobLog.LOCAL.error("rebalance error. ", e);
         } finally {
@@ -100,7 +100,7 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
             bucketList.add(i);
         }
 
-       SnailJobLog.LOCAL.info("ServerNodeBalance start");
+        SnailJobLog.LOCAL.info("ServerNodeBalance start");
         thread = new Thread(this, "server-node-balance");
         thread.start();
     }
@@ -134,16 +134,16 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
         // 停止定时任务
         thread.interrupt();
 
-       SnailJobLog.LOCAL.info("ServerNodeBalance start. ");
+        SnailJobLog.LOCAL.info("ServerNodeBalance start. ");
         int i = serverNodeMapper
-                .delete(new LambdaQueryWrapper<ServerNode>().eq(ServerNode::getHostId, ServerRegister.CURRENT_CID));
+            .delete(new LambdaQueryWrapper<ServerNode>().eq(ServerNode::getHostId, ServerRegister.CURRENT_CID));
         if (1 == i) {
-           SnailJobLog.LOCAL.info("delete node success. [{}]", ServerRegister.CURRENT_CID);
+            SnailJobLog.LOCAL.info("delete node success. [{}]", ServerRegister.CURRENT_CID);
         } else {
-           SnailJobLog.LOCAL.info("delete node  error. [{}]", ServerRegister.CURRENT_CID);
+            SnailJobLog.LOCAL.info("delete node  error. [{}]", ServerRegister.CURRENT_CID);
         }
 
-       SnailJobLog.LOCAL.info("ServerNodeBalance close complete");
+        SnailJobLog.LOCAL.info("ServerNodeBalance close complete");
     }
 
     @Override
@@ -158,24 +158,23 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
             try {
 
                 List<ServerNode> remotePods = serverNodeMapper.selectList(new LambdaQueryWrapper<ServerNode>()
-                        .ge(ServerNode::getExpireAt, LocalDateTime.now())
-                        .eq(ServerNode::getNodeType, NodeTypeEnum.SERVER.getType()));
+                    .ge(ServerNode::getExpireAt, LocalDateTime.now())
+                    .eq(ServerNode::getNodeType, NodeTypeEnum.SERVER.getType()));
 
                 // 获取缓存中的节点
                 ConcurrentMap<String/*hostId*/, RegisterNodeInfo> concurrentMap = Optional.ofNullable(CacheRegisterTable
-                        .get(ServerRegister.GROUP_NAME, ServerRegister.NAMESPACE_ID)).orElse(new ConcurrentHashMap<>());
+                    .get(ServerRegister.GROUP_NAME, ServerRegister.NAMESPACE_ID)).orElse(new ConcurrentHashMap<>());
 
-                Set<String> remoteHostIds = remotePods.stream().map(ServerNode::getHostId).collect(Collectors.toSet());
+                Set<String> remoteHostIds = StreamUtils.toSet(remotePods, ServerNode::getHostId);
 
-                Set<String> localHostIds = concurrentMap.values().stream().map(RegisterNodeInfo::getHostId)
-                        .collect(Collectors.toSet());
+                Set<String> localHostIds = StreamUtils.toSet(concurrentMap.values(), RegisterNodeInfo::getHostId);
 
                 // 无缓存的节点触发refreshCache
                 if (CollectionUtils.isEmpty(concurrentMap)
-                        // 节点数量不一致触发
-                        || isNodeSizeNotEqual(concurrentMap.size(), remotePods.size())
-                        // 判断远程节点是不是和本地节点一致的，如果不一致则重新分配
-                        || isNodeNotMatch(remoteHostIds, localHostIds)) {
+                    // 节点数量不一致触发
+                    || isNodeSizeNotEqual(concurrentMap.size(), remotePods.size())
+                    // 判断远程节点是不是和本地节点一致的，如果不一致则重新分配
+                    || isNodeNotMatch(remoteHostIds, localHostIds)) {
 
                     // 删除本地缓存以下线的节点信息
                     removeNode(concurrentMap, remoteHostIds, localHostIds);
@@ -196,12 +195,12 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
 
                     // 再次获取最新的节点信息
                     concurrentMap = CacheRegisterTable
-                            .get(ServerRegister.GROUP_NAME, ServerRegister.NAMESPACE_ID);
+                        .get(ServerRegister.GROUP_NAME, ServerRegister.NAMESPACE_ID);
 
                     // 找出过期的节点
                     Set<RegisterNodeInfo> expireNodeSet = concurrentMap.values().stream()
-                            .filter(registerNodeInfo -> registerNodeInfo.getExpireAt().isBefore(LocalDateTime.now()))
-                            .collect(Collectors.toSet());
+                        .filter(registerNodeInfo -> registerNodeInfo.getExpireAt().isBefore(LocalDateTime.now()))
+                        .collect(Collectors.toSet());
                     for (final RegisterNodeInfo registerNodeInfo : expireNodeSet) {
                         // 删除过期的节点信息
                         CacheRegisterTable.remove(registerNodeInfo.getGroupName(), registerNodeInfo.getNamespaceId(), registerNodeInfo.getHostId());
@@ -210,7 +209,7 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
                 }
 
             } catch (InterruptedException e) {
-               SnailJobLog.LOCAL.info("check balance stop");
+                SnailJobLog.LOCAL.info("check balance stop");
                 Thread.currentThread().interrupt();
             } catch (Exception e) {
                 SnailJobLog.LOCAL.error("check balance error", e);
@@ -228,9 +227,9 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
     private boolean isNodeNotMatch(Set<String> remoteHostIds, Set<String> localHostIds) {
         boolean b = !remoteHostIds.containsAll(localHostIds);
         if (b) {
-           SnailJobLog.LOCAL.info("判断远程节点是不是和本地节点一致. remoteHostIds:[{}] localHostIds:[{}]",
-                    localHostIds,
-                    remoteHostIds);
+            SnailJobLog.LOCAL.info("判断远程节点是不是和本地节点一致. remoteHostIds:[{}] localHostIds:[{}]",
+                localHostIds,
+                remoteHostIds);
         }
         return b;
     }
@@ -238,9 +237,9 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
     private boolean isNodeSizeNotEqual(int localNodeSize, int remoteNodeSize) {
         boolean b = localNodeSize != remoteNodeSize;
         if (b) {
-           SnailJobLog.LOCAL.info("存在远程和本地缓存的节点的数量不一致则触发rebalance. localNodeSize:[{}] remoteNodeSize:[{}]",
-                    localNodeSize,
-                    remoteNodeSize);
+            SnailJobLog.LOCAL.info("存在远程和本地缓存的节点的数量不一致则触发rebalance. localNodeSize:[{}] remoteNodeSize:[{}]",
+                localNodeSize,
+                remoteNodeSize);
         }
         return b;
     }
@@ -248,9 +247,9 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
     private boolean isGroupSizeNotEqual(List<GroupConfig> removeGroupConfig, Set<String> allGroup) {
         boolean b = allGroup.size() != removeGroupConfig.size();
         if (b) {
-           SnailJobLog.LOCAL.info("若存在远程和本地缓存的组的数量不一致则触发rebalance. localGroupSize:[{}] remoteGroupSize:[{}]",
-                    allGroup.size(),
-                    removeGroupConfig.size());
+            SnailJobLog.LOCAL.info("若存在远程和本地缓存的组的数量不一致则触发rebalance. localGroupSize:[{}] remoteGroupSize:[{}]",
+                allGroup.size(),
+                removeGroupConfig.size());
         }
         return b;
     }

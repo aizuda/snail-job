@@ -1,8 +1,9 @@
 package com.aizuda.snailjob.server.job.task.support.schedule;
 
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
-import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
+import com.aizuda.snailjob.common.core.util.StreamUtils;
+import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.Lifecycle;
 import com.aizuda.snailjob.server.common.config.SystemProperties;
 import com.aizuda.snailjob.server.common.dto.JobTaskBatchReason;
@@ -21,7 +22,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import java.time.*;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -85,13 +89,10 @@ public class JobSummarySchedule extends AbstractSchedule implements Lifecycle {
                 List<JobSummary> jobSummaries = jobSummaryMapper.selectList(new LambdaQueryWrapper<JobSummary>()
                     .eq(JobSummary::getTriggerAt, todayFrom)
                     .eq(JobSummary::getSystemTaskType, SyetemTaskTypeEnum.JOB.getType())
-                    .in(JobSummary::getBusinessId, jobSummaryList.stream().map(JobSummary::getBusinessId).collect(
-                        Collectors.toSet())));
+                    .in(JobSummary::getBusinessId, StreamUtils.toSet(jobSummaryList, JobSummary::getBusinessId)));
 
-                Map<Pair<Long, LocalDateTime>, JobSummary> summaryMap = jobSummaries.stream()
-                    .collect(
-                        Collectors.toMap(jobSummary -> Pair.of(jobSummary.getBusinessId(), jobSummary.getTriggerAt()),
-                            k -> k));
+                Map<Pair<Long, LocalDateTime>, JobSummary> summaryMap = StreamUtils.toIdentityMap(jobSummaries,
+                    jobSummary -> Pair.of(jobSummary.getBusinessId(), jobSummary.getTriggerAt()));
 
                 List<JobSummary> waitInserts = Lists.newArrayList();
                 List<JobSummary> waitUpdates = Lists.newArrayList();
@@ -124,7 +125,7 @@ public class JobSummarySchedule extends AbstractSchedule implements Lifecycle {
     }
 
     private List<JobSummary> jobSummaryList(LocalDateTime triggerAt,
-        List<JobBatchSummaryResponseDO> summaryResponseDOList) {
+                                            List<JobBatchSummaryResponseDO> summaryResponseDOList) {
         List<JobSummary> jobSummaryList = new ArrayList<>();
         Map<Long, List<JobBatchSummaryResponseDO>> jobIdListMap = summaryResponseDOList.parallelStream()
             .collect(Collectors.groupingBy(JobBatchSummaryResponseDO::getJobId));
@@ -159,7 +160,7 @@ public class JobSummarySchedule extends AbstractSchedule implements Lifecycle {
      * @return
      */
     private List<JobTaskBatchReason> jobTaskBatchReasonList(int jobTaskBatchStatus,
-        List<JobBatchSummaryResponseDO> jobBatchSummaryResponseDOList) {
+                                                            List<JobBatchSummaryResponseDO> jobBatchSummaryResponseDOList) {
         List<JobTaskBatchReason> jobTaskBatchReasonArrayList = new ArrayList<>();
         List<JobBatchSummaryResponseDO> summaryResponseDOList = jobBatchSummaryResponseDOList.stream()
             .filter(i -> jobTaskBatchStatus == i.getTaskBatchStatus()).collect(Collectors.toList());

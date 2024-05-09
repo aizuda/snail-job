@@ -7,35 +7,29 @@ import com.aizuda.snailjob.common.core.enums.RetryStatusEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.model.Result;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
+import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.WaitStrategy;
 import com.aizuda.snailjob.server.common.cache.CacheRegisterTable;
-import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
-import com.aizuda.snailjob.server.common.rpc.client.RequestBuilder;
 import com.aizuda.snailjob.server.common.dto.RegisterNodeInfo;
-import com.aizuda.snailjob.server.common.enums.TaskGeneratorSceneEnum;
+import com.aizuda.snailjob.server.common.dto.RetryLogMetaDTO;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
+import com.aizuda.snailjob.server.common.enums.TaskGeneratorSceneEnum;
+import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
+import com.aizuda.snailjob.server.common.handler.ClientNodeAllocateHandler;
+import com.aizuda.snailjob.server.common.rpc.client.RequestBuilder;
 import com.aizuda.snailjob.server.common.strategy.WaitStrategies.WaitStrategyContext;
 import com.aizuda.snailjob.server.common.strategy.WaitStrategies.WaitStrategyEnum;
 import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.model.dto.RetryTaskDTO;
 import com.aizuda.snailjob.server.retry.task.client.RetryRpcClient;
-import com.aizuda.snailjob.server.common.dto.RetryLogMetaDTO;
 import com.aizuda.snailjob.server.retry.task.generator.task.TaskContext;
 import com.aizuda.snailjob.server.retry.task.generator.task.TaskGenerator;
-import com.aizuda.snailjob.server.common.handler.ClientNodeAllocateHandler;
 import com.aizuda.snailjob.server.retry.task.support.RetryTaskConverter;
 import com.aizuda.snailjob.server.retry.task.support.dispatch.task.TaskExecutor;
 import com.aizuda.snailjob.server.retry.task.support.dispatch.task.TaskExecutorSceneEnum;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
-import com.aizuda.snailjob.server.web.model.request.BatchDeleteRetryTaskVO;
-import com.aizuda.snailjob.server.web.model.request.GenerateRetryIdempotentIdVO;
-import com.aizuda.snailjob.server.web.model.request.ManualTriggerTaskRequestVO;
-import com.aizuda.snailjob.server.web.model.request.ParseLogsVO;
-import com.aizuda.snailjob.server.web.model.request.RetryTaskQueryVO;
-import com.aizuda.snailjob.server.web.model.request.RetryTaskSaveRequestVO;
-import com.aizuda.snailjob.server.web.model.request.RetryTaskUpdateExecutorNameRequestVO;
-import com.aizuda.snailjob.server.web.model.request.RetryTaskUpdateStatusRequestVO;
+import com.aizuda.snailjob.server.web.model.request.*;
 import com.aizuda.snailjob.server.web.model.response.RetryTaskResponseVO;
 import com.aizuda.snailjob.server.web.service.RetryTaskService;
 import com.aizuda.snailjob.server.web.service.convert.RetryTaskResponseVOConverter;
@@ -58,15 +52,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * @author opensnail
@@ -120,23 +108,23 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         }
 
         retryTaskLambdaQueryWrapper.select(RetryTask::getId, RetryTask::getBizNo, RetryTask::getIdempotentId,
-                RetryTask::getGroupName, RetryTask::getNextTriggerAt, RetryTask::getRetryCount,
-                RetryTask::getRetryStatus, RetryTask::getUpdateDt, RetryTask::getSceneName, RetryTask::getUniqueId,
-                RetryTask::getTaskType);
+            RetryTask::getGroupName, RetryTask::getNextTriggerAt, RetryTask::getRetryCount,
+            RetryTask::getRetryStatus, RetryTask::getUpdateDt, RetryTask::getSceneName, RetryTask::getUniqueId,
+            RetryTask::getTaskType);
         pageDTO = accessTemplate.getRetryTaskAccess()
-                .listPage(queryVO.getGroupName(), namespaceId,
-                        pageDTO,
-                        retryTaskLambdaQueryWrapper.orderByDesc(RetryTask::getCreateDt));
+            .listPage(queryVO.getGroupName(), namespaceId,
+                pageDTO,
+                retryTaskLambdaQueryWrapper.orderByDesc(RetryTask::getCreateDt));
         return new PageResult<>(pageDTO,
-                RetryTaskResponseVOConverter.INSTANCE.toRetryTaskResponseVO(pageDTO.getRecords()));
+            RetryTaskResponseVOConverter.INSTANCE.toRetryTaskResponseVO(pageDTO.getRecords()));
     }
 
     @Override
     public RetryTaskResponseVO getRetryTaskById(String groupName, Long id) {
         TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();
         RetryTask retryTask = retryTaskAccess.one(groupName, UserSessionUtils.currentUserSession().getNamespaceId(),
-                new LambdaQueryWrapper<RetryTask>()
-                        .eq(RetryTask::getId, id));
+            new LambdaQueryWrapper<RetryTask>()
+                .eq(RetryTask::getId, id));
         return RetryTaskResponseVOConverter.INSTANCE.toRetryTaskResponseVO(retryTask);
     }
 
@@ -153,9 +141,9 @@ public class RetryTaskServiceImpl implements RetryTaskService {
 
         TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();
         RetryTask retryTask = retryTaskAccess.one(requestVO.getGroupName(), namespaceId,
-                new LambdaQueryWrapper<RetryTask>()
-                        .eq(RetryTask::getNamespaceId, namespaceId)
-                        .eq(RetryTask::getId, requestVO.getId()));
+            new LambdaQueryWrapper<RetryTask>()
+                .eq(RetryTask::getNamespaceId, namespaceId)
+                .eq(RetryTask::getId, requestVO.getId()));
         if (Objects.isNull(retryTask)) {
             throw new SnailJobServerException("未查询到重试任务");
         }
@@ -167,7 +155,7 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         if (RetryStatusEnum.RUNNING.getStatus().equals(retryStatusEnum.getStatus())) {
 
             RetrySceneConfig retrySceneConfig = accessTemplate.getSceneConfigAccess()
-                    .getSceneConfigByGroupNameAndSceneName(retryTask.getGroupName(), retryTask.getSceneName(), namespaceId);
+                .getSceneConfigByGroupNameAndSceneName(retryTask.getGroupName(), retryTask.getSceneName(), namespaceId);
             WaitStrategyContext waitStrategyContext = new WaitStrategyContext();
             waitStrategyContext.setNextTriggerAt(DateUtils.toNowMilli());
             waitStrategyContext.setTriggerInterval(retrySceneConfig.getTriggerInterval());
@@ -201,8 +189,8 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         }
 
         TaskGenerator taskGenerator = taskGenerators.stream()
-                .filter(t -> t.supports(TaskGeneratorSceneEnum.MANA_SINGLE.getScene()))
-                .findFirst().orElseThrow(() -> new SnailJobServerException("没有匹配的任务生成器"));
+            .filter(t -> t.supports(TaskGeneratorSceneEnum.MANA_SINGLE.getScene()))
+            .findFirst().orElseThrow(() -> new SnailJobServerException("没有匹配的任务生成器"));
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
 
         TaskContext taskContext = new TaskContext();
@@ -211,7 +199,7 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         taskContext.setInitStatus(retryTaskRequestVO.getRetryStatus());
         taskContext.setNamespaceId(namespaceId);
         taskContext.setTaskInfos(
-                Collections.singletonList(TaskContextConverter.INSTANCE.toTaskContextInfo(retryTaskRequestVO)));
+            Collections.singletonList(TaskContextConverter.INSTANCE.toTaskContextInfo(retryTaskRequestVO)));
 
         // 生成任务
         taskGenerator.taskGenerator(taskContext);
@@ -224,17 +212,17 @@ public class RetryTaskServiceImpl implements RetryTaskService {
 
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
         Set<RegisterNodeInfo> serverNodes = CacheRegisterTable.getServerNodeSet(
-                generateRetryIdempotentIdVO.getGroupName(),
-                namespaceId);
+            generateRetryIdempotentIdVO.getGroupName(),
+            namespaceId);
         Assert.notEmpty(serverNodes,
-                () -> new SnailJobServerException("生成idempotentId失败: 不存在活跃的客户端节点"));
+            () -> new SnailJobServerException("生成idempotentId失败: 不存在活跃的客户端节点"));
 
         RetrySceneConfig retrySceneConfig = accessTemplate.getSceneConfigAccess()
-                .getSceneConfigByGroupNameAndSceneName(generateRetryIdempotentIdVO.getGroupName(),
-                        generateRetryIdempotentIdVO.getSceneName(), namespaceId);
+            .getSceneConfigByGroupNameAndSceneName(generateRetryIdempotentIdVO.getGroupName(),
+                generateRetryIdempotentIdVO.getSceneName(), namespaceId);
 
         RegisterNodeInfo serverNode = clientNodeAllocateHandler.getServerNode(retrySceneConfig.getSceneName(),
-                retrySceneConfig.getGroupName(), retrySceneConfig.getNamespaceId(), retrySceneConfig.getRouteKey());
+            retrySceneConfig.getGroupName(), retrySceneConfig.getNamespaceId(), retrySceneConfig.getRouteKey());
 
         // 委托客户端生成idempotentId
         GenerateRetryIdempotentIdDTO generateRetryIdempotentIdDTO = new GenerateRetryIdempotentIdDTO();
@@ -244,15 +232,15 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         generateRetryIdempotentIdDTO.setExecutorName(generateRetryIdempotentIdVO.getExecutorName());
 
         RetryRpcClient rpcClient = RequestBuilder.<RetryRpcClient, Result>newBuilder()
-                .nodeInfo(serverNode)
-                .client(RetryRpcClient.class)
-                .build();
+            .nodeInfo(serverNode)
+            .client(RetryRpcClient.class)
+            .build();
 
         Result result = rpcClient.generateIdempotentId(generateRetryIdempotentIdDTO);
 
         Assert.notNull(result, () -> new SnailJobServerException("idempotentId生成失败"));
         Assert.isTrue(1 == result.getStatus(),
-                () -> new SnailJobServerException("idempotentId生成失败:请确保参数与执行器名称正确"));
+            () -> new SnailJobServerException("idempotentId生成失败:请确保参数与执行器名称正确"));
 
         return (String) result.getData();
     }
@@ -269,10 +257,10 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         // 根据重试数据id，更新执行器名称
         TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();
         return retryTaskAccess.update(requestVO.getGroupName(), namespaceId, retryTask,
-                new LambdaUpdateWrapper<RetryTask>()
-                        .eq(RetryTask::getNamespaceId, namespaceId)
-                        .eq(RetryTask::getGroupName, requestVO.getGroupName())
-                        .in(RetryTask::getId, requestVO.getIds()));
+            new LambdaUpdateWrapper<RetryTask>()
+                .eq(RetryTask::getNamespaceId, namespaceId)
+                .eq(RetryTask::getGroupName, requestVO.getGroupName())
+                .in(RetryTask::getId, requestVO.getIds()));
     }
 
     @Override
@@ -280,10 +268,10 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
         return retryTaskAccess.delete(requestVO.getGroupName(), namespaceId,
-                new LambdaQueryWrapper<RetryTask>()
-                        .eq(RetryTask::getNamespaceId, namespaceId)
-                        .eq(RetryTask::getGroupName, requestVO.getGroupName())
-                        .in(RetryTask::getId, requestVO.getIds()));
+            new LambdaQueryWrapper<RetryTask>()
+                .eq(RetryTask::getNamespaceId, namespaceId)
+                .eq(RetryTask::getGroupName, requestVO.getGroupName())
+                .in(RetryTask::getId, requestVO.getIds()));
     }
 
     @Override
@@ -317,15 +305,14 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         Assert.isTrue(waitInsertList.size() <= 500, () -> new SnailJobServerException("最多只能处理500条数据"));
 
         TaskGenerator taskGenerator = taskGenerators.stream()
-                .filter(t -> t.supports(TaskGeneratorSceneEnum.MANA_BATCH.getScene()))
-                .findFirst().orElseThrow(() -> new SnailJobServerException("没有匹配的任务生成器"));
+            .filter(t -> t.supports(TaskGeneratorSceneEnum.MANA_BATCH.getScene()))
+            .findFirst().orElseThrow(() -> new SnailJobServerException("没有匹配的任务生成器"));
 
         boolean allMatch = waitInsertList.stream()
-                .allMatch(retryTaskDTO -> retryTaskDTO.getGroupName().equals(parseLogsVO.getGroupName()));
+            .allMatch(retryTaskDTO -> retryTaskDTO.getGroupName().equals(parseLogsVO.getGroupName()));
         Assert.isTrue(allMatch, () -> new SnailJobServerException("存在数据groupName不匹配，请检查您的数据"));
 
-        Map<String, List<RetryTaskDTO>> map = waitInsertList.stream()
-                .collect(Collectors.groupingBy(RetryTaskDTO::getSceneName));
+        Map<String, List<RetryTaskDTO>> map = StreamUtils.groupByKey(waitInsertList, RetryTaskDTO::getSceneName);
 
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
 
@@ -360,11 +347,11 @@ public class RetryTaskServiceImpl implements RetryTaskService {
 
 
         List<RetryTask> list = accessTemplate.getRetryTaskAccess().list(
-                requestVO.getGroupName(), namespaceId,
-                new LambdaQueryWrapper<RetryTask>()
-                        .eq(RetryTask::getNamespaceId, namespaceId)
-                        .eq(RetryTask::getTaskType, SyetemTaskTypeEnum.RETRY.getType())
-                        .in(RetryTask::getUniqueId, uniqueIds));
+            requestVO.getGroupName(), namespaceId,
+            new LambdaQueryWrapper<RetryTask>()
+                .eq(RetryTask::getNamespaceId, namespaceId)
+                .eq(RetryTask::getTaskType, SyetemTaskTypeEnum.RETRY.getType())
+                .in(RetryTask::getUniqueId, uniqueIds));
         Assert.notEmpty(list, () -> new SnailJobServerException("没有可执行的任务"));
 
         for (RetryTask retryTask : list) {
@@ -392,10 +379,10 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         Assert.isTrue(count > 0, () -> new SnailJobServerException("组:[{}]已经关闭，不支持手动执行.", requestVO.getGroupName()));
 
         List<RetryTask> list = accessTemplate.getRetryTaskAccess().list(requestVO.getGroupName(), namespaceId,
-                new LambdaQueryWrapper<RetryTask>()
-                        .eq(RetryTask::getNamespaceId, namespaceId)
-                        .eq(RetryTask::getTaskType, SyetemTaskTypeEnum.CALLBACK.getType())
-                        .in(RetryTask::getUniqueId, uniqueIds));
+            new LambdaQueryWrapper<RetryTask>()
+                .eq(RetryTask::getNamespaceId, namespaceId)
+                .eq(RetryTask::getTaskType, SyetemTaskTypeEnum.CALLBACK.getType())
+                .in(RetryTask::getUniqueId, uniqueIds));
         Assert.notEmpty(list, () -> new SnailJobServerException("没有可执行的任务"));
 
         for (RetryTask retryTask : list) {

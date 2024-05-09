@@ -5,6 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.enums.NodeTypeEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.NetUtil;
+import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.cache.CacheConsumerGroup;
 import com.aizuda.snailjob.server.common.cache.CacheRegisterTable;
@@ -13,7 +14,6 @@ import com.aizuda.snailjob.server.common.dto.ServerNodeExtAttrs;
 import com.aizuda.snailjob.template.datasource.persistence.po.ServerNode;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.stereotype.Component;
@@ -39,7 +39,7 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class ServerRegister extends AbstractRegister {
     public static final String BEAN_NAME = "serverRegister";
-    private final ScheduledExecutorService serverRegisterNode = Executors.newSingleThreadScheduledExecutor(r -> new Thread(r,"server-register-node"));
+    private final ScheduledExecutorService serverRegisterNode = Executors.newSingleThreadScheduledExecutor(r -> new Thread(r, "server-register-node"));
     public static final int DELAY_TIME = 30;
     public static final String CURRENT_CID;
     public static final String GROUP_NAME = "DEFAULT_SERVER";
@@ -91,14 +91,7 @@ public class ServerRegister extends AbstractRegister {
             // netty的client只会注册到一个服务端，若组分配的和client连接的不是一个POD则会导致当前POD没有其他客户端的注册信息
             ConcurrentMap<String /*groupName*/, Set<String>/*namespaceId*/> allConsumerGroupName = CacheConsumerGroup.getAllConsumerGroupName();
             if (!CollectionUtils.isEmpty(allConsumerGroupName)) {
-
-                Set<String> namespaceIdSets = allConsumerGroupName.values().stream().reduce((a, b) -> {
-                    Set<String> set = Sets.newHashSet();
-                    set.addAll(a);
-                    set.addAll(b);
-                    return set;
-                }).orElse(Sets.newHashSet());
-
+                Set<String> namespaceIdSets = StreamUtils.toSetByFlatMap(allConsumerGroupName.values(), Set::stream);
                 if (CollectionUtils.isEmpty(namespaceIdSets)) {
                     return;
                 }
@@ -127,9 +120,9 @@ public class ServerRegister extends AbstractRegister {
 
     @Override
     public void start() {
-       SnailJobLog.LOCAL.info("ServerRegister start");
+        SnailJobLog.LOCAL.info("ServerRegister start");
 
-        serverRegisterNode.scheduleAtFixedRate(()->{
+        serverRegisterNode.scheduleAtFixedRate(() -> {
             try {
                 this.register(new RegisterContext());
             } catch (Exception e) {
@@ -141,6 +134,6 @@ public class ServerRegister extends AbstractRegister {
 
     @Override
     public void close() {
-       SnailJobLog.LOCAL.info("ServerRegister close");
+        SnailJobLog.LOCAL.info("ServerRegister close");
     }
 }

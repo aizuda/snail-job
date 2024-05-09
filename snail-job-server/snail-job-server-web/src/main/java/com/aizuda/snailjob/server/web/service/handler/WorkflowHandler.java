@@ -10,12 +10,11 @@ import com.aizuda.snailjob.server.common.dto.JobTaskConfig;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.web.model.request.WorkflowRequestVO;
 import com.aizuda.snailjob.server.web.model.response.WorkflowDetailResponseVO;
-import com.aizuda.snailjob.server.web.service.convert.WorkflowConverter;
 import com.aizuda.snailjob.server.web.model.response.WorkflowDetailResponseVO.NodeConfig;
 import com.aizuda.snailjob.server.web.model.response.WorkflowDetailResponseVO.NodeInfo;
+import com.aizuda.snailjob.server.web.service.convert.WorkflowConverter;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowNodeMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.WorkflowNode;
-import com.aizuda.snailjob.server.web.service.convert.WorkflowConverter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.graph.MutableGraph;
@@ -50,9 +49,9 @@ public class WorkflowHandler {
      * @return 构建的节点配置
      */
     public NodeConfig buildNodeConfig(MutableGraph<Long> graph,
-                                                               Long parentId,
-                                                               Map<Long, NodeConfig> nodeConfigMap,
-                                                               Map<Long, NodeInfo> workflowNodeMap) {
+                                      Long parentId,
+                                      Map<Long, NodeConfig> nodeConfigMap,
+                                      Map<Long, NodeInfo> workflowNodeMap) {
 
         Set<Long> successors = graph.successors(parentId);
         if (CollectionUtils.isEmpty(successors)) {
@@ -89,7 +88,7 @@ public class WorkflowHandler {
 
                 Long commonAncestor = intersection.stream().toList().get(intersection.size() - 1);
                 NodeConfig parentNodeConfig = nodeConfigMap.get(
-                        Sets.newTreeSet(graph.successors(commonAncestor)).stream().findFirst().get());
+                    Sets.newTreeSet(graph.successors(commonAncestor)).stream().findFirst().get());
                 parentNodeConfig.setChildNode(currentConfig);
                 mount = false;
             } else {
@@ -141,7 +140,9 @@ public class WorkflowHandler {
         // 获取节点信息
         List<WorkflowRequestVO.NodeInfo> conditionNodes = nodeConfig.getConditionNodes();
         if (!CollectionUtils.isEmpty(conditionNodes)) {
-            conditionNodes = conditionNodes.stream().sorted(Comparator.comparing(WorkflowRequestVO.NodeInfo::getPriorityLevel)).collect(Collectors.toList());
+            conditionNodes = conditionNodes.stream()
+                .sorted(Comparator.comparing(WorkflowRequestVO.NodeInfo::getPriorityLevel))
+                .collect(Collectors.toList());
             for (final WorkflowRequestVO.NodeInfo nodeInfo : conditionNodes) {
                 WorkflowNode workflowNode = WorkflowConverter.INSTANCE.toWorkflowNode(nodeInfo);
                 workflowNode.setWorkflowId(workflowId);
@@ -176,7 +177,7 @@ public class WorkflowHandler {
                 }
 
                 Assert.isTrue(1 == workflowNodeMapper.insert(workflowNode),
-                        () -> new SnailJobServerException("新增工作流节点失败"));
+                    () -> new SnailJobServerException("新增工作流节点失败"));
                 // 添加节点
                 graph.addNode(workflowNode.getId());
                 for (final Long parentId : parentIds) {
@@ -186,7 +187,7 @@ public class WorkflowHandler {
                 WorkflowRequestVO.NodeConfig childNode = nodeInfo.getChildNode();
                 if (Objects.nonNull(childNode) && !CollectionUtils.isEmpty(childNode.getConditionNodes())) {
                     buildGraph(Lists.newArrayList(workflowNode.getId()), deque, groupName, workflowId, childNode,
-                            graph, version);
+                        graph, version);
                 } else {
                     if (WorkflowNodeTypeEnum.DECISION.getType() == nodeConfig.getNodeType()) {
                         throw new SnailJobServerException("决策节点不能作为叶子节点");

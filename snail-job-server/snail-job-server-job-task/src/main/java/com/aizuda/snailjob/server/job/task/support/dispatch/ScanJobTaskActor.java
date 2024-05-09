@@ -4,6 +4,7 @@ import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
+import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.WaitStrategy;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
@@ -15,9 +16,9 @@ import com.aizuda.snailjob.server.common.enums.JobTaskExecutorSceneEnum;
 import com.aizuda.snailjob.server.common.strategy.WaitStrategies;
 import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.common.util.PartitionTaskUtils;
-import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
 import com.aizuda.snailjob.server.job.task.dto.JobPartitionTaskDTO;
 import com.aizuda.snailjob.server.job.task.dto.JobTaskPrepareDTO;
+import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
 import com.aizuda.snailjob.server.job.task.support.cache.ResidentTaskCache;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.GroupConfigMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobMapper;
@@ -32,7 +33,10 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 
@@ -99,7 +103,7 @@ public class ScanJobTaskActor extends AbstractActor {
     }
 
     private void processJob(JobPartitionTaskDTO partitionTask, final List<Job> waitUpdateJobs,
-        final List<JobTaskPrepareDTO> waitExecJobs, long now) {
+                            final List<JobTaskPrepareDTO> waitExecJobs, long now) {
         CacheConsumerGroup.addOrUpdate(partitionTask.getGroupName(), partitionTask.getNamespaceId());
 
         Job job = new Job();
@@ -176,11 +180,11 @@ public class ScanJobTaskActor extends AbstractActor {
 
         // 过滤已关闭的组
         if (!CollectionUtils.isEmpty(jobs)) {
-            List<String> groupConfigs = groupConfigMapper.selectList(new LambdaQueryWrapper<GroupConfig>()
+            List<String> groupConfigs = StreamUtils.toList(groupConfigMapper.selectList(new LambdaQueryWrapper<GroupConfig>()
                     .select(GroupConfig::getGroupName)
                     .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus())
-                    .in(GroupConfig::getGroupName, jobs.stream().map(Job::getGroupName).collect(Collectors.toList())))
-                .stream().map(GroupConfig::getGroupName).collect(Collectors.toList());
+                    .in(GroupConfig::getGroupName, StreamUtils.toSet(jobs, Job::getGroupName))),
+                GroupConfig::getGroupName);
             jobs = jobs.stream().filter(job -> groupConfigs.contains(job.getGroupName())).collect(Collectors.toList());
         }
 

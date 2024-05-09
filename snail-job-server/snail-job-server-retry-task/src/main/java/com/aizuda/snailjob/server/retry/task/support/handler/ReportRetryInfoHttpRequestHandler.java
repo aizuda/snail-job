@@ -2,16 +2,15 @@ package com.aizuda.snailjob.server.retry.task.support.handler;
 
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.net.url.UrlQuery;
-import com.aizuda.snailjob.common.core.context.SpringContext;
 import com.aizuda.snailjob.common.core.enums.HeadersEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.model.NettyResult;
 import com.aizuda.snailjob.common.core.model.SnailJobRequest;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
+import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.enums.TaskGeneratorSceneEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
-import com.aizuda.snailjob.server.common.handler.ConfigVersionSyncHandler;
 import com.aizuda.snailjob.server.common.handler.PostHttpRequestHandler;
 import com.aizuda.snailjob.server.model.dto.RetryTaskDTO;
 import com.aizuda.snailjob.server.retry.task.generator.task.TaskContext;
@@ -33,7 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import static com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH.BATCH_REPORT;
 
@@ -80,21 +78,18 @@ public class ReportRetryInfoHttpRequestHandler extends PostHttpRequestHandler {
 
             SnailJobLog.LOCAL.info("begin handler report data. <|>{}<|>", JsonUtil.toJsonString(retryTaskList));
 
-            Set<String> set = retryTaskList.stream().map(RetryTaskDTO::getGroupName).collect(Collectors.toSet());
+            Set<String> set = StreamUtils.toSet(retryTaskList, RetryTaskDTO::getGroupName);
             Assert.isTrue(set.size() <= 1, () -> new SnailJobServerException("批量上报数据,同一批次只能是相同的组. reqId:[{}]", retryRequest.getReqId()));
 
-            Map<String, List<RetryTaskDTO>> map = retryTaskList.stream().collect(Collectors.groupingBy(RetryTaskDTO::getSceneName));
+            Map<String, List<RetryTaskDTO>> map = StreamUtils.groupByKey(retryTaskList, RetryTaskDTO::getSceneName);
 
             Retryer<Object> retryer = RetryerBuilder.newBuilder()
                 .retryIfException(throwable -> {
                     // 若是数据库异常则重试
-                    if (throwable instanceof DuplicateKeyException
+                    return throwable instanceof DuplicateKeyException
                         || throwable instanceof TransactionSystemException
                         || throwable instanceof ConcurrencyFailureException
-                        || throwable instanceof IOException) {
-                        return true;
-                    }
-                    return false;
+                        || throwable instanceof IOException;
                 })
                 .withStopStrategy(StopStrategies.stopAfterAttempt(5))
                 .withWaitStrategy(WaitStrategies.fixedWait(1, TimeUnit.SECONDS))

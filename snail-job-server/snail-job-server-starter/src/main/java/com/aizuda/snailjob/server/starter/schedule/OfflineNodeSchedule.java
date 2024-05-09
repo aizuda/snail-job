@@ -1,9 +1,10 @@
 package com.aizuda.snailjob.server.starter.schedule;
 
+import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.Lifecycle;
-import com.aizuda.snailjob.server.common.dto.RegisterNodeInfo;
 import com.aizuda.snailjob.server.common.cache.CacheRegisterTable;
+import com.aizuda.snailjob.server.common.dto.RegisterNodeInfo;
 import com.aizuda.snailjob.server.common.register.ServerRegister;
 import com.aizuda.snailjob.server.common.schedule.AbstractSchedule;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.ServerNodeMapper;
@@ -47,7 +48,7 @@ public class OfflineNodeSchedule extends AbstractSchedule implements Lifecycle {
             Set<RegisterNodeInfo> allPods = CacheRegisterTable.getAllPods();
             Set<RegisterNodeInfo> waitOffline = allPods.stream().filter(registerNodeInfo -> registerNodeInfo.getExpireAt().isBefore(endTime)).collect(
                 Collectors.toSet());
-            Set<String> podIds = waitOffline.stream().map(RegisterNodeInfo::getHostId).collect(Collectors.toSet());
+            Set<String> podIds = StreamUtils.toSet(waitOffline, RegisterNodeInfo::getHostId);
             if (CollectionUtils.isEmpty(podIds)) {
                 return;
             }

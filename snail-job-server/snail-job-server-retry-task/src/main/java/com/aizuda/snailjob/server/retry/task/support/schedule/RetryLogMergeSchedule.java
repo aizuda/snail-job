@@ -3,6 +3,7 @@ package com.aizuda.snailjob.server.retry.task.support.schedule;
 import cn.hutool.core.collection.CollectionUtil;
 import com.aizuda.snailjob.common.core.enums.RetryStatusEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
+import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.Lifecycle;
 import com.aizuda.snailjob.server.common.config.SystemProperties;
@@ -32,7 +33,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
@@ -122,7 +122,7 @@ public class RetryLogMergeSchedule extends AbstractSchedule implements Lifecycle
     public void processJobLogPartitionTasks(List<? extends PartitionTask> partitionTasks) {
 
         // Waiting for merge RetryTaskLog
-        List<String> ids = partitionTasks.stream().map(PartitionTask::getUniqueId).collect(Collectors.toList());
+        List<String> ids = StreamUtils.toList(partitionTasks, PartitionTask::getUniqueId);
         if (CollectionUtil.isEmpty(ids)) {
             return;
         }

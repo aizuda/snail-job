@@ -5,6 +5,7 @@ import com.aizuda.snailjob.common.core.alarm.AlarmContext;
 import com.aizuda.snailjob.common.core.alarm.SnailJobAlarmFactory;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
+import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.AlarmInfoConverter;
 import com.aizuda.snailjob.server.common.Lifecycle;
@@ -22,16 +23,12 @@ import com.aizuda.snailjob.template.datasource.persistence.po.NotifyRecipient;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.RateLimiter;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.scheduling.TaskScheduler;
-import org.springframework.transaction.event.TransactionPhase;
-import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.util.CollectionUtils;
 
 import java.time.Duration;
@@ -99,13 +96,13 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
     }
 
     protected Map<Triple<String, String, String>, List<NotifyConfigInfo>> obtainNotifyConfig(Set<String> namespaceIds,
-        Set<String> groupNames, Set<String> businessIds) {
+                                                                                             Set<String> groupNames, Set<String> businessIds) {
 
         // 批量获取所需的通知配置
         List<NotifyConfig> notifyConfigs = accessTemplate.getNotifyConfigAccess().list(
             new LambdaQueryWrapper<NotifyConfig>()
                 .eq(NotifyConfig::getNotifyStatus, StatusEnum.YES.getStatus())
-                .in(NotifyConfig::getSystemTaskType, getSystemTaskType().stream().map(i -> i.getType()).collect(Collectors.toList()))
+                .in(NotifyConfig::getSystemTaskType, StreamUtils.toList(getSystemTaskType(), SyetemTaskTypeEnum::getType))
                 .eq(NotifyConfig::getNotifyScene, getNotifyScene())
                 .in(NotifyConfig::getNamespaceId, namespaceIds)
                 .in(NotifyConfig::getGroupName, groupNames)
@@ -116,19 +113,11 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
         }
 
         Set<Long> recipientIds = notifyConfigs.stream()
-            .map(config -> {
-                return new HashSet<>(JsonUtil.parseList(config.getRecipientIds(), Long.class));
-            })
-            .reduce((a, b) -> {
-                HashSet<Long> set = Sets.newHashSet();
-                set.addAll(a);
-                set.addAll(b);
-                return set;
-            }).orElse(new HashSet<>());
+            .flatMap(config -> JsonUtil.parseList(config.getRecipientIds(), Long.class).stream())
+            .collect(Collectors.toSet());
 
         List<NotifyRecipient> notifyRecipients = recipientMapper.selectBatchIds(recipientIds);
-        Map<Long, NotifyRecipient> recipientMap = notifyRecipients.stream()
-            .collect(Collectors.toMap(NotifyRecipient::getId, i -> i));
+        Map<Long, NotifyRecipient> recipientMap = StreamUtils.toIdentityMap(notifyRecipients, NotifyRecipient::getId);
 
         if (CollectionUtils.isEmpty(recipientIds)) {
             return Maps.newHashMap();
@@ -136,31 +125,31 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
 
         List<NotifyConfigInfo> notifyConfigInfos = AlarmInfoConverter.INSTANCE.retryToNotifyConfigInfos(notifyConfigs);
 
-        return notifyConfigInfos.stream()
-            .collect(Collectors.groupingBy(i -> {
+        return StreamUtils.groupByKey(notifyConfigInfos, configInfo -> {
+            List<RecipientInfo> recipients = StreamUtils.toList(configInfo.getRecipientIds(), recipientId -> {
+                NotifyRecipient notifyRecipient = recipientMap.get(recipientId);
+                if (Objects.isNull(notifyRecipient)) {
+                    return null;
+                }
 
-                List<RecipientInfo> recipients = i.getRecipientIds().stream().map(recipientId -> {
-                    NotifyRecipient notifyRecipient = recipientMap.get(recipientId);
-                    if (Objects.isNull(notifyRecipient)) {
-                        return null;
-                    }
+                RecipientInfo notifyConfigInfo = new RecipientInfo();
+                notifyConfigInfo.setNotifyAttribute(notifyRecipient.getNotifyAttribute());
+                notifyConfigInfo.setNotifyType(notifyRecipient.getNotifyType());
+                return notifyConfigInfo;
+            });
+            configInfo.setRecipientInfos(recipients);
 
-                    RecipientInfo notifyConfigInfo = new RecipientInfo();
-                    notifyConfigInfo.setNotifyAttribute(notifyRecipient.getNotifyAttribute());
-                    notifyConfigInfo.setNotifyType(notifyRecipient.getNotifyType());
-                    return notifyConfigInfo;
-                }).collect(Collectors.toList());
-                i.setRecipientInfos(recipients);
-
-                return ImmutableTriple.of(i.getNamespaceId(), i.getGroupName(), i.getBusinessId());
-            }));
+            return ImmutableTriple.of(configInfo.getNamespaceId(),
+                configInfo.getGroupName(),
+                configInfo.getBusinessId());
+        });
 
     }
 
     protected abstract List<SyetemTaskTypeEnum> getSystemTaskType();
 
     protected abstract Map<Triple<String, String, String>, List<A>> convertAlarmDTO(List<A> alarmData,
-        Set<String> namespaceIds, Set<String> groupNames, Set<String> sceneNames);
+                                                                                    Set<String> namespaceIds, Set<String> groupNames, Set<String> sceneNames);
 
     protected abstract List<A> poll() throws InterruptedException;
 

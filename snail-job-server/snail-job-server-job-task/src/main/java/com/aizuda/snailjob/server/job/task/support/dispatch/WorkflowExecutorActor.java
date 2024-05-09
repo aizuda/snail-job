@@ -7,15 +7,15 @@ import com.aizuda.snailjob.common.core.context.SpringContext;
 import com.aizuda.snailjob.common.core.enums.FailStrategyEnum;
 import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
-import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
+import com.aizuda.snailjob.common.core.util.StreamUtils;
+import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.job.task.dto.WorkflowNodeTaskExecuteDTO;
 import com.aizuda.snailjob.server.job.task.support.WorkflowExecutor;
 import com.aizuda.snailjob.server.job.task.support.WorkflowTaskConverter;
-import com.aizuda.snailjob.server.job.task.support.alarm.event.JobTaskFailAlarmEvent;
 import com.aizuda.snailjob.server.job.task.support.alarm.event.WorkflowTaskFailAlarmEvent;
 import com.aizuda.snailjob.server.job.task.support.cache.MutableGraphCache;
 import com.aizuda.snailjob.server.job.task.support.executor.workflow.WorkflowExecutorContext;
@@ -29,8 +29,6 @@ import com.aizuda.snailjob.template.datasource.persistence.po.Job;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch;
 import com.aizuda.snailjob.template.datasource.persistence.po.WorkflowNode;
 import com.aizuda.snailjob.template.datasource.persistence.po.WorkflowTaskBatch;
-import com.aizuda.snailjob.server.job.task.support.executor.workflow.WorkflowExecutorContext;
-import com.aizuda.snailjob.server.job.task.support.executor.workflow.WorkflowExecutorFactory;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.google.common.collect.Sets;
 import com.google.common.graph.MutableGraph;
@@ -118,10 +116,8 @@ public class WorkflowExecutorActor extends AbstractActor {
             .in(WorkflowNode::getId, Sets.union(successors, Sets.newHashSet(taskExecute.getParentId())))
             .orderByAsc(WorkflowNode::getPriorityLevel));
 
-        Map<Long, List<JobTaskBatch>> jobTaskBatchMap = allJobTaskBatchList.stream()
-            .collect(Collectors.groupingBy(JobTaskBatch::getWorkflowNodeId));
-        Map<Long, WorkflowNode> workflowNodeMap = workflowNodes.stream()
-            .collect(Collectors.toMap(WorkflowNode::getId, i -> i));
+        Map<Long, List<JobTaskBatch>> jobTaskBatchMap = StreamUtils.groupByKey(allJobTaskBatchList, JobTaskBatch::getWorkflowNodeId);
+        Map<Long, WorkflowNode> workflowNodeMap = StreamUtils.toIdentityMap(workflowNodes, WorkflowNode::getId);
         List<JobTaskBatch> parentJobTaskBatchList = jobTaskBatchMap.get(taskExecute.getParentId());
 
         // 如果父节点是无需处理则不再继续执行
@@ -156,9 +152,8 @@ public class WorkflowExecutorActor extends AbstractActor {
             .filter(workflowNode -> !workflowNode.getId().equals(taskExecute.getParentId())).collect(
                 Collectors.toList());
 
-        List<Job> jobs = jobMapper.selectBatchIds(
-            workflowNodes.stream().map(WorkflowNode::getJobId).collect(Collectors.toSet()));
-        Map<Long, Job> jobMap = jobs.stream().collect(Collectors.toMap(Job::getId, i -> i));
+        List<Job> jobs = jobMapper.selectBatchIds(StreamUtils.toSet(workflowNodes, WorkflowNode::getJobId));
+        Map<Long, Job> jobMap = StreamUtils.toIdentityMap(jobs, Job::getId);
 
         // 只会条件节点会使用
         Object evaluationResult = null;
@@ -189,7 +184,7 @@ public class WorkflowExecutorActor extends AbstractActor {
     }
 
     private boolean brotherNodeIsComplete(WorkflowNodeTaskExecuteDTO taskExecute, Set<Long> brotherNode,
-        Map<Long, List<JobTaskBatch>> jobTaskBatchMap) {
+                                          Map<Long, List<JobTaskBatch>> jobTaskBatchMap) {
 
         if (SystemConstants.ROOT.equals(taskExecute.getParentId())) {
             return Boolean.TRUE;

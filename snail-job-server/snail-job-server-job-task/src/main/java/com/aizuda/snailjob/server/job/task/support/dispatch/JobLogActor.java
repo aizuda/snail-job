@@ -3,6 +3,7 @@ package com.aizuda.snailjob.server.job.task.support.dispatch;
 import akka.actor.AbstractActor;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
+import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.dto.TaskLogFieldDTO;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.job.task.dto.JobLogDTO;
@@ -18,11 +19,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -48,18 +45,17 @@ public class JobLogActor extends AbstractActor {
 
                     List<JobLogTaskDTO> jobLogTasks = (List<JobLogTaskDTO>) list;
                     Map<Long, List<JobLogTaskDTO>> logTaskDTOMap = jobLogTasks.
-                    stream().collect(Collectors.groupingBy(JobLogTaskDTO::getTaskId, Collectors.toList()));
+                        stream().collect(Collectors.groupingBy(JobLogTaskDTO::getTaskId, Collectors.toList()));
 
                     List<JobLogMessage> jobLogMessageList = new ArrayList<>();
                     for (List<JobLogTaskDTO> logTaskDTOList : logTaskDTOMap.values()) {
                         JobLogMessage jobLogMessage = JobTaskConverter.INSTANCE.toJobLogMessage(logTaskDTOList.get(0));
                         jobLogMessage.setCreateDt(LocalDateTime.now());
                         jobLogMessage.setLogNum(logTaskDTOList.size());
-                        List<Map<String, String>> messageMapList = logTaskDTOList.stream()
-                            .map(taskDTO -> taskDTO.getFieldList()
+                        List<Map<String, String>> messageMapList = StreamUtils.toList(logTaskDTOList,
+                            taskDTO -> taskDTO.getFieldList()
                                 .stream().filter(logTaskDTO_ -> !Objects.isNull(logTaskDTO_.getValue()))
-                                .collect(Collectors.toMap(TaskLogFieldDTO::getName, TaskLogFieldDTO::getValue)))
-                            .collect(Collectors.toList());
+                                .collect(Collectors.toMap(TaskLogFieldDTO::getName, TaskLogFieldDTO::getValue)));
                         jobLogMessage.setMessage(JsonUtil.toJsonString(messageMapList));
 
                         jobLogMessageList.add(jobLogMessage);

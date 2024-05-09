@@ -1,11 +1,13 @@
 package com.aizuda.snailjob.server.web.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.enums.NodeTypeEnum;
 import com.aizuda.snailjob.common.core.model.Result;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.NetUtil;
+import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.dto.DistributeInstance;
 import com.aizuda.snailjob.server.common.dto.ServerNodeExtAttrs;
@@ -21,15 +23,11 @@ import com.aizuda.snailjob.server.web.model.request.UserSessionVO;
 import com.aizuda.snailjob.server.web.model.response.DashboardCardResponseVO;
 import com.aizuda.snailjob.server.web.model.response.DashboardLineResponseVO;
 import com.aizuda.snailjob.server.web.model.response.DashboardRetryLineResponseVO;
+import com.aizuda.snailjob.server.web.model.response.DashboardRetryLineResponseVO.Task;
 import com.aizuda.snailjob.server.web.model.response.ServerNodeResponseVO;
 import com.aizuda.snailjob.server.web.service.DashBoardService;
+import com.aizuda.snailjob.server.web.service.convert.*;
 import com.aizuda.snailjob.server.web.util.UserSessionUtils;
-import com.aizuda.snailjob.server.web.model.response.DashboardRetryLineResponseVO.Task;
-import com.aizuda.snailjob.server.web.service.convert.DispatchQuantityResponseVOConverter;
-import com.aizuda.snailjob.server.web.service.convert.JobSummaryResponseVOConverter;
-import com.aizuda.snailjob.server.web.service.convert.RetrySummaryResponseVOConverter;
-import com.aizuda.snailjob.server.web.service.convert.SceneQuantityRankResponseVOConverter;
-import com.aizuda.snailjob.server.web.service.convert.ServerNodeResponseVOConverter;
 import com.aizuda.snailjob.template.datasource.enums.DbTypeEnum;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.ActivePodQuantityResponseDO;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardCardResponseDO;
@@ -38,11 +36,7 @@ import com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardR
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobSummaryMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.RetrySummaryMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.ServerNodeMapper;
-import com.aizuda.snailjob.template.datasource.persistence.po.Job;
-import com.aizuda.snailjob.template.datasource.persistence.po.JobSummary;
-import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
-import com.aizuda.snailjob.template.datasource.persistence.po.RetrySummary;
-import com.aizuda.snailjob.template.datasource.persistence.po.ServerNode;
+import com.aizuda.snailjob.template.datasource.persistence.po.*;
 import com.aizuda.snailjob.template.datasource.utils.DbUtils;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -92,24 +86,24 @@ public class DashBoardServiceImpl implements DashBoardService {
         DashboardCardResponseVO dashboardCardResponseVO = new DashboardCardResponseVO();
         // 重试任务
         LambdaQueryWrapper<RetrySummary> wrapper2 = new LambdaQueryWrapper<RetrySummary>()
-                .eq(RetrySummary::getNamespaceId, namespaceId)
-                .in(CollUtil.isNotEmpty(groupNames), RetrySummary::getGroupName, groupNames);
+            .eq(RetrySummary::getNamespaceId, namespaceId)
+            .in(CollUtil.isNotEmpty(groupNames), RetrySummary::getGroupName, groupNames);
         DashboardCardResponseDO.RetryTask retryTaskDO = retrySummaryMapper.retryTask(wrapper2);
         DashboardCardResponseVO.RetryTask retryTaskVO = RetrySummaryResponseVOConverter.INSTANCE.toRetryTask(retryTaskDO);
         dashboardCardResponseVO.setRetryTask(retryTaskVO);
         // 定时任务
         LambdaQueryWrapper<JobSummary> wrapper = new LambdaQueryWrapper<JobSummary>()
-                .eq(JobSummary::getSystemTaskType, SyetemTaskTypeEnum.JOB.getType())
-                .eq(JobSummary::getNamespaceId, namespaceId)
-                .in(CollUtil.isNotEmpty(groupNames), JobSummary::getGroupName, groupNames);
+            .eq(JobSummary::getSystemTaskType, SyetemTaskTypeEnum.JOB.getType())
+            .eq(JobSummary::getNamespaceId, namespaceId)
+            .in(CollUtil.isNotEmpty(groupNames), JobSummary::getGroupName, groupNames);
         DashboardCardResponseDO.JobTask jobTaskDO = jobSummaryMapper.toJobTask(wrapper);
         DashboardCardResponseVO.JobTask jobTaskVO = JobSummaryResponseVOConverter.INSTANCE.toTaskJob(jobTaskDO);
         dashboardCardResponseVO.setJobTask(jobTaskVO);
         // 工作流任务
         LambdaQueryWrapper<JobSummary> wrapper1 = new LambdaQueryWrapper<JobSummary>()
-                .eq(JobSummary::getSystemTaskType, SyetemTaskTypeEnum.WORKFLOW.getType())
-                .eq(JobSummary::getNamespaceId, namespaceId)
-                .in(CollUtil.isNotEmpty(groupNames), JobSummary::getGroupName, groupNames);
+            .eq(JobSummary::getSystemTaskType, SyetemTaskTypeEnum.WORKFLOW.getType())
+            .eq(JobSummary::getNamespaceId, namespaceId)
+            .in(CollUtil.isNotEmpty(groupNames), JobSummary::getGroupName, groupNames);
         DashboardCardResponseDO.JobTask workFlowTaskDO = jobSummaryMapper.toJobTask(wrapper1);
         DashboardCardResponseVO.WorkFlowTask workFlowTaskVO = JobSummaryResponseVOConverter.INSTANCE.toWorkFlowTask(workFlowTaskDO);
         dashboardCardResponseVO.setWorkFlowTask(workFlowTaskVO);
@@ -119,26 +113,28 @@ public class DashBoardServiceImpl implements DashBoardService {
             DashboardCardResponseVO.RetryTaskBar retryTaskBar = new DashboardCardResponseVO.RetryTaskBar().setX(LocalDateTime.of(LocalDate.now(), LocalTime.MIN).plusDays(-i).toLocalDate().toString()).setTaskTotal(0L);
             retryTaskBarMap.put(LocalDateTime.of(LocalDate.now(), LocalTime.MIN).plusDays(-i), retryTaskBar);
         }
-        LambdaQueryWrapper<RetrySummary> wrapper3 = new LambdaQueryWrapper<RetrySummary>()
+
+        List<DashboardCardResponseDO.RetryTask> retryTaskList = retrySummaryMapper.retryTaskBarList(
+            new LambdaQueryWrapper<RetrySummary>()
                 .eq(RetrySummary::getNamespaceId, namespaceId)
                 .in(CollUtil.isNotEmpty(groupNames), RetrySummary::getGroupName, groupNames)
-                .orderByDesc(RetrySummary::getId);
-        List<DashboardCardResponseDO.RetryTask> retryTaskList = retrySummaryMapper.retryTaskBarList(wrapper3);
-        Map<LocalDateTime, LongSummaryStatistics> summaryStatisticsMap = retryTaskList.stream().collect(Collectors.groupingBy(DashboardCardResponseDO.RetryTask::getTriggerAt,
+                .orderByDesc(RetrySummary::getId));
+        Map<LocalDateTime, LongSummaryStatistics> summaryStatisticsMap = retryTaskList.stream()
+            .collect(Collectors.groupingBy(DashboardCardResponseDO.RetryTask::getTriggerAt,
                 Collectors.summarizingLong(i -> i.getMaxCountNum() + i.getRunningNum() + i.getSuspendNum() + i.getFinishNum())));
         for (Map.Entry<LocalDateTime, LongSummaryStatistics> map : summaryStatisticsMap.entrySet()) {
             if (retryTaskBarMap.containsKey(LocalDateTime.of(map.getKey().toLocalDate(), LocalTime.MIN))) {
-                DashboardCardResponseVO.RetryTaskBar retryTaskBar = retryTaskBarMap.get(LocalDateTime.of(map.getKey().toLocalDate(), LocalTime.MIN));
+                DashboardCardResponseVO.RetryTaskBar retryTaskBar = retryTaskBarMap.get(LocalDateTimeUtil.beginOfDay(map.getKey()));
                 retryTaskBar.setX(map.getKey().toLocalDate().toString()).setTaskTotal(map.getValue().getSum());
             }
         }
         dashboardCardResponseVO.setRetryTaskBarList(new ArrayList<>(retryTaskBarMap.values()));
         // 在线Pods
         LambdaQueryWrapper<ServerNode> wrapper4 = new LambdaQueryWrapper<ServerNode>()
-                .in(ServerNode::getNamespaceId, Lists.newArrayList(userSessionVO.getNamespaceId(), ServerRegister.NAMESPACE_ID))
-                .groupBy(ServerNode::getNodeType);
+            .in(ServerNode::getNamespaceId, Lists.newArrayList(userSessionVO.getNamespaceId(), ServerRegister.NAMESPACE_ID))
+            .groupBy(ServerNode::getNodeType);
         List<ActivePodQuantityResponseDO> activePodQuantityDO = serverNodeMapper.countActivePod(wrapper4);
-        Map<Integer, Long> map = activePodQuantityDO.stream().collect(Collectors.toMap(ActivePodQuantityResponseDO::getNodeType, ActivePodQuantityResponseDO::getTotal));
+        Map<Integer, Long> map = StreamUtils.toMap(activePodQuantityDO, ActivePodQuantityResponseDO::getNodeType, ActivePodQuantityResponseDO::getTotal);
         Long clientTotal = map.getOrDefault(NodeTypeEnum.CLIENT.getType(), 0L);
         Long serverTotal = map.getOrDefault(NodeTypeEnum.SERVER.getType(), 0L);
         dashboardCardResponseVO.getOnLineService().setServerTotal(serverTotal);

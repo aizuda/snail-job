@@ -5,6 +5,7 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.HashUtil;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
+import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.server.common.config.SystemProperties;
 import com.aizuda.snailjob.server.common.enums.IdGeneratorModeEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
@@ -25,12 +26,7 @@ import com.aizuda.snailjob.template.datasource.enums.DbTypeEnum;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.NamespaceMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.SequenceAllocMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.ServerNodeMapper;
-import com.aizuda.snailjob.template.datasource.persistence.po.GroupConfig;
-import com.aizuda.snailjob.template.datasource.persistence.po.Namespace;
-import com.aizuda.snailjob.template.datasource.persistence.po.RetryDeadLetter;
-import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
-import com.aizuda.snailjob.template.datasource.persistence.po.SequenceAlloc;
-import com.aizuda.snailjob.template.datasource.persistence.po.ServerNode;
+import com.aizuda.snailjob.template.datasource.persistence.po.*;
 import com.aizuda.snailjob.template.datasource.utils.DbUtils;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -50,11 +46,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -316,12 +308,11 @@ public class GroupConfigServiceImpl implements GroupConfigService {
             return new ArrayList<>();
         }
 
-        List<Namespace> namespaces = namespaceMapper.selectList(new LambdaQueryWrapper<Namespace>()
-            .in(Namespace::getUniqueId,
-                groupConfigs.stream().map(GroupConfig::getNamespaceId).collect(Collectors.toList())));
+        List<Namespace> namespaces = namespaceMapper.selectList(
+            new LambdaQueryWrapper<Namespace>()
+                .in(Namespace::getUniqueId, StreamUtils.toSet(groupConfigs, GroupConfig::getNamespaceId)));
 
-        Map<String, String> namespaceMap = namespaces.stream()
-            .collect(Collectors.toMap(Namespace::getUniqueId, Namespace::getName));
+        Map<String, String> namespaceMap = StreamUtils.toMap(namespaces, Namespace::getUniqueId, Namespace::getName);
 
         List<GroupConfigResponseVO> groupConfigResponses = GroupConfigResponseVOConverter.INSTANCE.toGroupConfigResponseVO(
             groupConfigs);
@@ -342,12 +333,10 @@ public class GroupConfigServiceImpl implements GroupConfigService {
 
         ConfigAccess<GroupConfig> groupConfigAccess = accessTemplate.getGroupConfigAccess();
         List<GroupConfig> groupConfigs = groupConfigAccess.list(new LambdaQueryWrapper<GroupConfig>()
-                .eq(GroupConfig::getNamespaceId, userSessionVO.getNamespaceId())
-                .select(GroupConfig::getGroupName))
-            .stream()
-            .collect(Collectors.toList());
+            .eq(GroupConfig::getNamespaceId, userSessionVO.getNamespaceId())
+            .select(GroupConfig::getGroupName));
 
-        return groupConfigs.stream().map(GroupConfig::getGroupName).collect(Collectors.toList());
+        return StreamUtils.toList(groupConfigs, GroupConfig::getGroupName);
     }
 
     @Override
@@ -356,8 +345,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
             new LambdaQueryWrapper<ServerNode>()
                 .eq(ServerNode::getNamespaceId, UserSessionUtils.currentUserSession().getNamespaceId())
                 .eq(ServerNode::getGroupName, groupName));
-        return serverNodes.stream().map(serverNode -> serverNode.getHostIp() + ":" + serverNode.getHostPort())
-            .collect(Collectors.toList());
+        return StreamUtils.toList(serverNodes, serverNode -> serverNode.getHostIp() + ":" + serverNode.getHostPort());
     }
 
     @Override

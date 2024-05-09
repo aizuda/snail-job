@@ -4,6 +4,7 @@ import com.aizuda.snailjob.common.core.exception.AbstractError;
 import com.aizuda.snailjob.common.core.exception.BaseSnailJobException;
 import com.aizuda.snailjob.common.core.exception.SnailJobAuthenticationException;
 import com.aizuda.snailjob.common.core.model.Result;
+import com.aizuda.snailjob.common.core.util.StreamUtils;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +24,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * @description: 400 统一异常处理
@@ -88,10 +88,7 @@ public class RestExceptionHandler {
     public Result onConstraintViolationException(ConstraintViolationException e) {
         Set<ConstraintViolation<?>> constraintViolations = e.getConstraintViolations();
         if (!CollectionUtils.isEmpty(constraintViolations)) {
-            String errorMessage = constraintViolations
-                .stream()
-                .map(ConstraintViolation::getMessage)
-                .collect(Collectors.joining(";"));
+            String errorMessage = StreamUtils.join(constraintViolations, ConstraintViolation::getMessage, ";");
             return new Result(0, errorMessage);
         }
 

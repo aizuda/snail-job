@@ -1,6 +1,7 @@
 package com.aizuda.snailjob.server.common.generator.id;
 
 import cn.hutool.core.lang.Pair;
+import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.Lifecycle;
 import com.aizuda.snailjob.server.common.enums.IdGeneratorModeEnum;
@@ -15,15 +16,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 
 /**
  * 特别声明: 此算法来自美团的leaf号段模式
@@ -58,11 +52,11 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
      */
     private static final long SEGMENT_DURATION = 15 * 60 * 1000L;
 
-    private ThreadPoolExecutor service = new ThreadPoolExecutor(5, 10, 60L, TimeUnit.SECONDS,
-            new LinkedBlockingDeque<>(5000), new UpdateThreadFactory());
+    private final ThreadPoolExecutor service = new ThreadPoolExecutor(5, 10, 60L, TimeUnit.SECONDS,
+        new LinkedBlockingDeque<>(5000), new UpdateThreadFactory());
 
     private volatile boolean initOK = false;
-    private Map<Pair<String, String>, SegmentBuffer> cache = new ConcurrentHashMap<>();
+    private final Map<Pair<String, String>, SegmentBuffer> cache = new ConcurrentHashMap<>();
 
     @Autowired
     private SequenceAllocMapper sequenceAllocMapper;
@@ -82,20 +76,6 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
         SnailJobLog.LOCAL.info("SegmentIdGenerator close");
     }
 
-    public static class UpdateThreadFactory implements ThreadFactory {
-
-        private static int threadInitNumber = 0;
-
-        private static synchronized int nextThreadNum() {
-            return threadInitNumber++;
-        }
-
-        @Override
-        public Thread newThread(Runnable r) {
-            return new Thread(r, "Thread-Segment-Update-" + nextThreadNum());
-        }
-    }
-
     private void updateCacheFromDbAtEveryMinute() {
         ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(r -> {
             Thread t = new Thread(r);
@@ -109,15 +89,14 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
     private void updateCacheFromDb() {
         try {
             List<SequenceAlloc> sequenceAllocs = sequenceAllocMapper
-                    .selectList(new LambdaQueryWrapper<SequenceAlloc>()
-                            .select(SequenceAlloc::getGroupName, SequenceAlloc::getNamespaceId));
+                .selectList(new LambdaQueryWrapper<SequenceAlloc>()
+                    .select(SequenceAlloc::getGroupName, SequenceAlloc::getNamespaceId));
             if (CollectionUtils.isEmpty(sequenceAllocs)) {
                 return;
             }
 
-            List<Pair<String, String>> dbTags = sequenceAllocs.stream()
-                    .map(sequenceAlloc -> Pair.of(sequenceAlloc.getGroupName(), sequenceAlloc.getNamespaceId()))
-                    .collect(Collectors.toList());
+            List<Pair<String, String>> dbTags = StreamUtils.toList(sequenceAllocs,
+                sequenceAlloc -> Pair.of(sequenceAlloc.getGroupName(), sequenceAlloc.getNamespaceId()));
 
             List<Pair<String, String>> cacheTags = new ArrayList<>(cache.keySet());
             Set<Pair<String, String>> insertTagsSet = new HashSet<>(dbTags);
@@ -125,9 +104,7 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
             //db中新加的tags灌进cache
             for (int i = 0; i < cacheTags.size(); i++) {
                 Pair<String, String> tmp = cacheTags.get(i);
-                if (insertTagsSet.contains(tmp)) {
-                    insertTagsSet.remove(tmp);
-                }
+                insertTagsSet.remove(tmp);
             }
             for (Pair<String, String> tag : insertTagsSet) {
                 SegmentBuffer buffer = new SegmentBuffer();
@@ -142,9 +119,7 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
             //cache中已失效的tags从cache删除
             for (int i = 0; i < dbTags.size(); i++) {
                 Pair<String, String> tmp = dbTags.get(i);
-                if (removeTagsSet.contains(tmp)) {
-                    removeTagsSet.remove(tmp);
-                }
+                removeTagsSet.remove(tmp);
             }
             for (Pair<String, String> tag : removeTagsSet) {
                 cache.remove(tag);
@@ -185,23 +160,23 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
         SegmentBuffer buffer = segment.getBuffer();
         SequenceAlloc sequenceAlloc;
         LambdaUpdateWrapper<SequenceAlloc> wrapper = new LambdaUpdateWrapper<SequenceAlloc>()
-                .setSql("max_id = max_id + step")
-                .set(SequenceAlloc::getUpdateDt, new Date())
-                .eq(SequenceAlloc::getGroupName, key.getKey())
-                .eq(SequenceAlloc::getNamespaceId, key.getValue());
+            .setSql("max_id = max_id + step")
+            .set(SequenceAlloc::getUpdateDt, new Date())
+            .eq(SequenceAlloc::getGroupName, key.getKey())
+            .eq(SequenceAlloc::getNamespaceId, key.getValue());
         if (!buffer.isInitOk()) {
             sequenceAllocMapper.update(wrapper);
             sequenceAlloc = sequenceAllocMapper.selectOne(new LambdaQueryWrapper<SequenceAlloc>()
-                    .eq(SequenceAlloc::getGroupName, key.getKey())
-                    .eq(SequenceAlloc::getNamespaceId, key.getValue())
+                .eq(SequenceAlloc::getGroupName, key.getKey())
+                .eq(SequenceAlloc::getNamespaceId, key.getValue())
             );
             buffer.setStep(sequenceAlloc.getStep());
             buffer.setMinStep(sequenceAlloc.getStep());//leafAlloc中的step为DB中的step
         } else if (buffer.getUpdateTimestamp() == 0) {
             sequenceAllocMapper.update(wrapper);
             sequenceAlloc = sequenceAllocMapper.selectOne(new LambdaQueryWrapper<SequenceAlloc>()
-                    .eq(SequenceAlloc::getGroupName, key.getKey())
-                    .eq(SequenceAlloc::getNamespaceId, key.getValue())
+                .eq(SequenceAlloc::getGroupName, key.getKey())
+                .eq(SequenceAlloc::getNamespaceId, key.getValue())
             );
             buffer.setUpdateTimestamp(System.currentTimeMillis());
             buffer.setStep(sequenceAlloc.getStep());
@@ -222,14 +197,14 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
             }
             SnailJobLog.LOCAL.debug("leafKey[{}], step[{}], duration[{}mins], nextStep[{}]", key, buffer.getStep(), String.format("%.2f", ((double) duration / (1000 * 60))), nextStep);
             LambdaUpdateWrapper<SequenceAlloc> wrapper1 = new LambdaUpdateWrapper<SequenceAlloc>()
-                    .setSql("max_id = max_id + " + nextStep)
-                    .set(SequenceAlloc::getUpdateDt, new Date())
-                    .eq(SequenceAlloc::getGroupName, key.getKey())
-                    .eq(SequenceAlloc::getNamespaceId, key.getValue());
+                .setSql("max_id = max_id + " + nextStep)
+                .set(SequenceAlloc::getUpdateDt, new Date())
+                .eq(SequenceAlloc::getGroupName, key.getKey())
+                .eq(SequenceAlloc::getNamespaceId, key.getValue());
             sequenceAllocMapper.update(wrapper1);
             sequenceAlloc = sequenceAllocMapper.selectOne(new LambdaQueryWrapper<SequenceAlloc>()
-                    .eq(SequenceAlloc::getGroupName, key.getKey())
-                    .eq(SequenceAlloc::getNamespaceId, key.getValue())
+                .eq(SequenceAlloc::getGroupName, key.getKey())
+                .eq(SequenceAlloc::getNamespaceId, key.getValue())
             );
             buffer.setUpdateTimestamp(System.currentTimeMillis());
             buffer.setStep(nextStep);
@@ -322,6 +297,20 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
     public String idGenerator(String groupName, String namespaceId) {
         String time = DateUtils.format(DateUtils.toNowLocalDateTime(), DateUtils.PURE_DATETIME_MS_PATTERN);
         return time.concat(get(groupName, namespaceId));
+    }
+
+    public static class UpdateThreadFactory implements ThreadFactory {
+
+        private static int threadInitNumber = 0;
+
+        private static synchronized int nextThreadNum() {
+            return threadInitNumber++;
+        }
+
+        @Override
+        public Thread newThread(Runnable r) {
+            return new Thread(r, "Thread-Segment-Update-" + nextThreadNum());
+        }
     }
 
 }

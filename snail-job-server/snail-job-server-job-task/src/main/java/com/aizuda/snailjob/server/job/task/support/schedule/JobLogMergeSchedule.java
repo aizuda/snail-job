@@ -3,6 +3,7 @@ package com.aizuda.snailjob.server.job.task.support.schedule;
 import cn.hutool.core.collection.CollectionUtil;
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
+import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.Lifecycle;
 import com.aizuda.snailjob.server.common.config.SystemProperties;
@@ -32,9 +33,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
 
 /**
  * jogLogMessage 日志合并归档
@@ -118,7 +119,7 @@ public class JobLogMergeSchedule extends AbstractSchedule implements Lifecycle {
     public void processJobLogPartitionTasks(List<? extends PartitionTask> partitionTasks) {
 
         // Waiting for merge JobTaskBatchList
-        List<Long> ids = partitionTasks.stream().map(PartitionTask::getId).collect(Collectors.toList());
+        List<Long> ids = StreamUtils.toList(partitionTasks, PartitionTask::getId);
         if (CollectionUtils.isEmpty(ids)) {
             return;
         }

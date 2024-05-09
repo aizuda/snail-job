@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.job.task.support.schedule;
 
+import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.Lifecycle;
 import com.aizuda.snailjob.server.common.config.SystemProperties;
@@ -27,7 +28,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Job清理日志 一小时运行一次
@@ -80,7 +80,7 @@ public class JobClearLogSchedule extends AbstractSchedule implements Lifecycle {
             long total;
             LocalDateTime endTime = LocalDateTime.now().minusDays(systemProperties.getLogStorage());
             total = PartitionTaskUtils.process(startId -> jobTaskBatchList(startId, endTime),
-                    this::processJobLogPartitionTasks, 0);
+                this::processJobLogPartitionTasks, 0);
 
             SnailJobLog.LOCAL.debug("Job clear success total:[{}]", total);
         } catch (Exception e) {
@@ -101,9 +101,9 @@ public class JobClearLogSchedule extends AbstractSchedule implements Lifecycle {
     private List<JobPartitionTaskDTO> jobTaskBatchList(Long startId, LocalDateTime endTime) {
 
         List<JobTaskBatch> jobTaskBatchList = jobTaskBatchMapper.selectPage(
-                new Page<>(0, 1000),
-                new LambdaUpdateWrapper<JobTaskBatch>().ge(JobTaskBatch::getId, startId)
-                        .le(JobTaskBatch::getCreateDt, endTime)).getRecords();
+            new Page<>(0, 1000),
+            new LambdaUpdateWrapper<JobTaskBatch>().ge(JobTaskBatch::getId, startId)
+                .le(JobTaskBatch::getCreateDt, endTime)).getRecords();
         return JobTaskConverter.INSTANCE.toJobTaskBatchPartitionTasks(jobTaskBatchList);
     }
 
@@ -119,7 +119,7 @@ public class JobClearLogSchedule extends AbstractSchedule implements Lifecycle {
             protected void doInTransactionWithoutResult(final TransactionStatus status) {
 
                 // Waiting for deletion JobTaskBatchList
-                List<Long> ids = partitionTasks.stream().map(i -> i.getId()).collect(Collectors.toList());
+                List<Long> ids = StreamUtils.toList(partitionTasks, PartitionTask::getId);
                 if (ids == null || ids.size() == 0) {
                     return;
                 }
@@ -130,7 +130,7 @@ public class JobClearLogSchedule extends AbstractSchedule implements Lifecycle {
                 if (jobTaskList == null || jobTaskList.size() == 0) {
                     return;
                 }
-                List<Long> jobTaskListIds = jobTaskList.stream().map(i -> i.getId()).collect(Collectors.toList());
+                List<Long> jobTaskListIds = StreamUtils.toList(jobTaskList, JobTask::getId);
                 jobTaskMapper.deleteBatchIds(jobTaskListIds);
 
                 // Waiting for deletion JobLogMessageList
@@ -138,7 +138,7 @@ public class JobClearLogSchedule extends AbstractSchedule implements Lifecycle {
                 if (jobLogMessageList == null || jobLogMessageList.size() == 0) {
                     return;
                 }
-                List<Long> jobLogMessageListIds = jobLogMessageList.stream().map(i -> i.getId()).collect(Collectors.toList());
+                List<Long> jobLogMessageListIds = StreamUtils.toList(jobLogMessageList, JobLogMessage::getId);
                 jobTaskMapper.deleteBatchIds(jobLogMessageListIds);
             }
         });

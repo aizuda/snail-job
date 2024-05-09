@@ -2,6 +2,7 @@ package com.aizuda.snailjob.server.job.task.support.schedule;
 
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
+import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.Lifecycle;
 import com.aizuda.snailjob.server.common.config.SystemProperties;
@@ -86,13 +87,10 @@ public class WorkflowJobSummarySchedule extends AbstractSchedule implements Life
                 List<JobSummary> jobSummaries = jobSummaryMapper.selectList(new LambdaQueryWrapper<JobSummary>()
                     .eq(JobSummary::getTriggerAt, todayFrom)
                     .eq(JobSummary::getSystemTaskType, SyetemTaskTypeEnum.WORKFLOW.getType())
-                    .in(JobSummary::getBusinessId, jobSummaryList.stream().map(JobSummary::getBusinessId).collect(
-                        Collectors.toSet())));
+                    .in(JobSummary::getBusinessId, StreamUtils.toSet(jobSummaryList, JobSummary::getBusinessId)));
 
-                Map<Pair<Long, LocalDateTime>, JobSummary> summaryMap = jobSummaries.stream()
-                    .collect(
-                        Collectors.toMap(jobSummary -> Pair.of(jobSummary.getBusinessId(), jobSummary.getTriggerAt()),
-                            k -> k));
+                Map<Pair<Long, LocalDateTime>, JobSummary> summaryMap = StreamUtils.toIdentityMap(jobSummaries,
+                    jobSummary -> Pair.of(jobSummary.getBusinessId(), jobSummary.getTriggerAt()));
 
                 List<JobSummary> waitInserts = Lists.newArrayList();
                 List<JobSummary> waitUpdates = Lists.newArrayList();

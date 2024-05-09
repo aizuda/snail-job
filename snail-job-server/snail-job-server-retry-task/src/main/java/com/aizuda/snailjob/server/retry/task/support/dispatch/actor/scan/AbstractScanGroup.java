@@ -4,6 +4,7 @@ import akka.actor.AbstractActor;
 import cn.hutool.core.lang.Pair;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.enums.RetryStatusEnum;
+import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.config.SystemProperties;
 import com.aizuda.snailjob.server.common.dto.PartitionTask;
@@ -32,7 +33,6 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 
 /**
  * 数据扫描模板类
@@ -92,21 +92,21 @@ public abstract class AbstractScanGroup extends AbstractActor {
 
         AtomicInteger count = new AtomicInteger(0);
         long total = PartitionTaskUtils.process(
-                startId -> listAvailableTasks(groupName, namespaceId, startId, taskActuatorScene().getTaskType().getType()),
-                partitionTasks1 -> processRetryPartitionTasks(partitionTasks1, scanTask), partitionTasks -> {
-                    if (CollectionUtils.isEmpty(partitionTasks)) {
-                        putLastId(scanTask.getGroupName(), 0L);
-                        return Boolean.TRUE;
-                    }
+            startId -> listAvailableTasks(groupName, namespaceId, startId, taskActuatorScene().getTaskType().getType()),
+            partitionTasks1 -> processRetryPartitionTasks(partitionTasks1, scanTask), partitionTasks -> {
+                if (CollectionUtils.isEmpty(partitionTasks)) {
+                    putLastId(scanTask.getGroupName(), 0L);
+                    return Boolean.TRUE;
+                }
 
-                    // 超过最大的拉取次数则中断
-                    if (count.incrementAndGet() >= prePullCount().get()) {
-                        putLastId(scanTask.getGroupName(), partitionTasks.get(partitionTasks.size() - 1).getId());
-                        return Boolean.TRUE;
-                    }
+                // 超过最大的拉取次数则中断
+                if (count.incrementAndGet() >= prePullCount().get()) {
+                    putLastId(scanTask.getGroupName(), partitionTasks.get(partitionTasks.size() - 1).getId());
+                    return Boolean.TRUE;
+                }
 
-                    return false;
-                }, lastId);
+                return false;
+            }, lastId);
 
 //        log.warn(this.getClass().getName() + " retry scan end. groupName:[{}] startId:[{}] preCostTime:[{}] total:[{}] realPullCount:[{}]",
 //                groupName, lastId, preCostTime().get(), total, count.get());
@@ -138,26 +138,25 @@ public abstract class AbstractScanGroup extends AbstractActor {
             RetryPartitionTask retryPartitionTask = (RetryPartitionTask) partitionTask;
             long delay = DateUtils.toEpochMilli(retryPartitionTask.getNextTriggerAt()) - nowMilli - nowMilli % 100;
             RetryTimerWheel.register(
-                    Pair.of(retryPartitionTask.getGroupName(), retryPartitionTask.getNamespaceId()),
-                    retryPartitionTask.getUniqueId(),
-                    timerTask(retryPartitionTask),
-                    delay,
-                    TimeUnit.MILLISECONDS);
+                Pair.of(retryPartitionTask.getGroupName(), retryPartitionTask.getNamespaceId()),
+                retryPartitionTask.getUniqueId(),
+                timerTask(retryPartitionTask),
+                delay,
+                TimeUnit.MILLISECONDS);
         }
 
     }
 
     private Map<String, RetrySceneConfig> getSceneConfigMap(final List<? extends PartitionTask> partitionTasks, ScanTask scanTask) {
-        Set<String> sceneNameSet = partitionTasks.stream()
-                .map(partitionTask -> ((RetryPartitionTask) partitionTask).getSceneName()).collect(Collectors.toSet());
+        Set<String> sceneNameSet = StreamUtils.toSet(partitionTasks,
+            partitionTask -> ((RetryPartitionTask) partitionTask).getSceneName());
         List<RetrySceneConfig> retrySceneConfigs = accessTemplate.getSceneConfigAccess()
-                .list(new LambdaQueryWrapper<RetrySceneConfig>()
-                        .select(RetrySceneConfig::getBackOff, RetrySceneConfig::getTriggerInterval, RetrySceneConfig::getSceneName)
-                        .eq(RetrySceneConfig::getNamespaceId, scanTask.getNamespaceId())
-                        .eq(RetrySceneConfig::getGroupName, scanTask.getGroupName())
-                        .in(RetrySceneConfig::getSceneName, sceneNameSet));
-        return retrySceneConfigs.stream()
-                .collect(Collectors.toMap(RetrySceneConfig::getSceneName, i -> i));
+            .list(new LambdaQueryWrapper<RetrySceneConfig>()
+                .select(RetrySceneConfig::getBackOff, RetrySceneConfig::getTriggerInterval, RetrySceneConfig::getSceneName)
+                .eq(RetrySceneConfig::getNamespaceId, scanTask.getNamespaceId())
+                .eq(RetrySceneConfig::getGroupName, scanTask.getGroupName())
+                .in(RetrySceneConfig::getSceneName, sceneNameSet));
+        return StreamUtils.toIdentityMap(retrySceneConfigs, RetrySceneConfig::getSceneName);
     }
 
     private RetryTask processRetryTask(RetryPartitionTask partitionTask, RetrySceneConfig retrySceneConfig) {
@@ -184,19 +183,19 @@ public abstract class AbstractScanGroup extends AbstractActor {
 
     public List<RetryPartitionTask> listAvailableTasks(String groupName, String namespaceId, Long lastId, Integer taskType) {
         List<RetryTask> retryTasks = accessTemplate.getRetryTaskAccess()
-                .listPage(groupName, namespaceId, new PageDTO<>(0, systemProperties.getRetryPullPageSize()),
-                        new LambdaQueryWrapper<RetryTask>()
-                                .select(RetryTask::getId, RetryTask::getNextTriggerAt, RetryTask::getUniqueId,
-                                        RetryTask::getGroupName, RetryTask::getRetryCount, RetryTask::getSceneName,
-                                        RetryTask::getNamespaceId)
-                                .eq(RetryTask::getRetryStatus, RetryStatusEnum.RUNNING.getStatus())
-                                .eq(RetryTask::getGroupName, groupName)
-                                .eq(RetryTask::getNamespaceId, namespaceId)
-                                .eq(RetryTask::getTaskType, taskType)
-                                .le(RetryTask::getNextTriggerAt, LocalDateTime.now().plusSeconds(SystemConstants.SCHEDULE_PERIOD))
-                                .gt(RetryTask::getId, lastId)
-                                .orderByAsc(RetryTask::getId))
-                .getRecords();
+            .listPage(groupName, namespaceId, new PageDTO<>(0, systemProperties.getRetryPullPageSize()),
+                new LambdaQueryWrapper<RetryTask>()
+                    .select(RetryTask::getId, RetryTask::getNextTriggerAt, RetryTask::getUniqueId,
+                        RetryTask::getGroupName, RetryTask::getRetryCount, RetryTask::getSceneName,
+                        RetryTask::getNamespaceId)
+                    .eq(RetryTask::getRetryStatus, RetryStatusEnum.RUNNING.getStatus())
+                    .eq(RetryTask::getGroupName, groupName)
+                    .eq(RetryTask::getNamespaceId, namespaceId)
+                    .eq(RetryTask::getTaskType, taskType)
+                    .le(RetryTask::getNextTriggerAt, LocalDateTime.now().plusSeconds(SystemConstants.SCHEDULE_PERIOD))
+                    .gt(RetryTask::getId, lastId)
+                    .orderByAsc(RetryTask::getId))
+            .getRecords();
 
         return RetryTaskConverter.INSTANCE.toRetryPartitionTasks(retryTasks);
     }

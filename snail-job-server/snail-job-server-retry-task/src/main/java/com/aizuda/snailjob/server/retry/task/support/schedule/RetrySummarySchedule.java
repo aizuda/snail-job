@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.retry.task.support.schedule;
 
+import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.Lifecycle;
 import com.aizuda.snailjob.server.common.config.SystemProperties;
@@ -22,12 +23,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
 
 /**
  * Retry Dashboard
@@ -71,8 +67,8 @@ public class RetrySummarySchedule extends AbstractSchedule implements Lifecycle 
                 LocalDateTime todayFrom = LocalDateTime.of(LocalDate.now(), LocalTime.MIN).plusDays(-i);
                 LocalDateTime todayTo = LocalDateTime.of(LocalDate.now(), LocalTime.MAX).plusDays(-i);
                 LambdaQueryWrapper<RetryTaskLog> wrapper = new LambdaQueryWrapper<RetryTaskLog>()
-                        .between(RetryTaskLog::getCreateDt, todayFrom, todayTo)
-                        .groupBy(RetryTaskLog::getNamespaceId, RetryTaskLog::getGroupName, RetryTaskLog::getSceneName);
+                    .between(RetryTaskLog::getCreateDt, todayFrom, todayTo)
+                    .groupBy(RetryTaskLog::getNamespaceId, RetryTaskLog::getGroupName, RetryTaskLog::getSceneName);
                 List<DashboardRetryResponseDO> dashboardRetryResponseDOList = retryTaskLogMapper.retrySummaryRetryTaskLogList(wrapper);
                 if (CollectionUtils.isEmpty(dashboardRetryResponseDOList)) {
                     continue;
@@ -97,8 +93,9 @@ public class RetrySummarySchedule extends AbstractSchedule implements Lifecycle 
                     .eq(RetrySummary::getTriggerAt, todayFrom)
                 );
 
-                Map<Triple<String, String, LocalDateTime>, RetrySummary> summaryMap = retrySummaries.stream()
-                    .collect(Collectors.toMap(retrySummary -> Triple.of(mergeKey(retrySummary), retrySummary.getSceneName(), retrySummary.getTriggerAt()), k -> k));
+                Map<Triple<String, String, LocalDateTime>, RetrySummary> summaryMap = StreamUtils.toIdentityMap(
+                    retrySummaries,
+                    retrySummary -> Triple.of(mergeKey(retrySummary), retrySummary.getSceneName(), retrySummary.getTriggerAt()));
 
                 List<RetrySummary> waitInserts = Lists.newArrayList();
                 List<RetrySummary> waitUpdates = Lists.newArrayList();
@@ -112,7 +109,7 @@ public class RetrySummarySchedule extends AbstractSchedule implements Lifecycle 
 
                 int insertTotalRetrySummary = 0;
                 if (!CollectionUtils.isEmpty(waitInserts)) {
-                    insertTotalRetrySummary =  retrySummaryMapper.batchInsert(waitInserts);
+                    insertTotalRetrySummary = retrySummaryMapper.batchInsert(waitInserts);
                 }
 
                 int updateTotalRetrySummary = 0;

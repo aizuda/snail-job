@@ -3,6 +3,7 @@ package com.aizuda.snailjob.server.web.service.impl;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
+import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
@@ -29,7 +30,6 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
@@ -86,9 +86,8 @@ public class NotifyConfigServiceImpl implements NotifyConfigService {
         Map<Long, String> jobNameMap = getJobNameMap(notifyConfigResponseVOS);
         Map<Long, String> workflowNameMap = getWorkflowNameMap(notifyConfigResponseVOS);
         for (final NotifyConfigResponseVO notifyConfigResponseVO : notifyConfigResponseVOS) {
-            notifyConfigResponseVO.setRecipientNames(notifyConfigResponseVO.getRecipientIds()
-                .stream().map(recipientId -> recipientNameMap.getOrDefault(recipientId, StrUtil.EMPTY))
-                .collect(Collectors.toSet()));
+            notifyConfigResponseVO.setRecipientNames(StreamUtils.toSet(notifyConfigResponseVO.getRecipientIds(),
+                recipientId -> recipientNameMap.getOrDefault(recipientId, StrUtil.EMPTY)));
 
             if (Objects.equals(notifyConfigResponseVO.getSystemTaskType(), SyetemTaskTypeEnum.RETRY.getType()) ||
                 Objects.equals(notifyConfigResponseVO.getSystemTaskType(), SyetemTaskTypeEnum.CALLBACK.getType())) {
@@ -113,7 +112,7 @@ public class NotifyConfigServiceImpl implements NotifyConfigService {
             .collect(Collectors.toSet());
         if (!CollectionUtils.isEmpty(workflowIds)) {
             List<Workflow> workflows = workflowMapper.selectBatchIds(workflowIds);
-            return workflows.stream().collect(Collectors.toMap(Workflow::getId, Workflow::getWorkflowName));
+            return StreamUtils.toMap(workflows, Workflow::getId, Workflow::getWorkflowName);
         }
 
         return new HashMap<>();
@@ -126,7 +125,7 @@ public class NotifyConfigServiceImpl implements NotifyConfigService {
             .collect(Collectors.toSet());
         if (!CollectionUtils.isEmpty(jobIds)) {
             List<Job> jobs = jobMapper.selectBatchIds(jobIds);
-            return jobs.stream().collect(Collectors.toMap(Job::getId, Job::getJobName));
+            return StreamUtils.toMap(jobs, Job::getId, Job::getJobName);
         }
 
         return new HashMap<>();
@@ -135,20 +134,15 @@ public class NotifyConfigServiceImpl implements NotifyConfigService {
     @NotNull
     private Map<Long, String> getRecipientNameMap(final List<NotifyConfigResponseVO> notifyConfigResponseVOS) {
         Set<Long> recipientIds = notifyConfigResponseVOS.stream()
-            .map(NotifyConfigResponseVO::getRecipientIds)
-            .reduce((a, b) -> {
-                HashSet<Long> set = Sets.newHashSet();
-                set.addAll(a);
-                set.addAll(b);
-                return set;
-            }).orElse(new HashSet<>());
+            .flatMap(config -> config.getRecipientIds().stream())
+            .collect(Collectors.toSet());
+
         if (CollectionUtils.isEmpty(recipientIds)) {
             return Maps.newHashMap();
         }
 
         List<NotifyRecipient> notifyRecipients = notifyRecipientMapper.selectBatchIds(recipientIds);
-        return notifyRecipients.stream()
-            .collect(Collectors.toMap(NotifyRecipient::getId, NotifyRecipient::getRecipientName));
+        return StreamUtils.toMap(notifyRecipients, NotifyRecipient::getId, NotifyRecipient::getRecipientName);
     }
 
     @Override

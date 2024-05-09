@@ -2,6 +2,7 @@ package com.aizuda.snailjob.server.common.cache;
 
 import com.aizuda.snailjob.common.core.context.SpringContext;
 import com.aizuda.snailjob.common.core.enums.NodeTypeEnum;
+import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.Lifecycle;
 import com.aizuda.snailjob.server.common.RegisterNodeInfoConverter;
@@ -10,8 +11,6 @@ import com.aizuda.snailjob.server.common.register.ServerRegister;
 import com.aizuda.snailjob.server.common.triple.Pair;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.ServerNodeMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.ServerNode;
-import com.aizuda.snailjob.server.common.register.ServerRegister;
-import com.aizuda.snailjob.server.common.triple.Pair;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -28,7 +27,6 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * POD注册表
@@ -144,8 +142,7 @@ public class CacheRegisterTable implements Lifecycle {
      * @return 缓存对象
      */
     public static Set<String> getPodIdSet(String groupName, String namespaceId) {
-        return getServerNodeSet(groupName, namespaceId).stream()
-            .map(RegisterNodeInfo::getHostId).collect(Collectors.toSet());
+        return StreamUtils.toSet(getServerNodeSet(groupName, namespaceId), RegisterNodeInfo::getHostId);
     }
 
 

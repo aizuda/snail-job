@@ -5,6 +5,7 @@ import akka.actor.ActorRef;
 import cn.hutool.core.util.RandomUtil;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
+import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.WaitStrategy;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
@@ -67,7 +68,7 @@ public class ScanWorkflowTaskActor extends AbstractActor {
 
     private void doScan(ScanTask scanTask) {
         PartitionTaskUtils.process(startId -> listAvailableWorkflows(startId, scanTask),
-                this::processPartitionTasks, 0);
+            this::processPartitionTasks, 0);
     }
 
     private void processPartitionTasks(List<? extends PartitionTask> partitionTasks) {
@@ -130,25 +131,25 @@ public class ScanWorkflowTaskActor extends AbstractActor {
         }
 
         List<Workflow> workflows = workflowMapper.selectPage(new PageDTO<>(0, systemProperties.getJobPullPageSize()),
-                new LambdaQueryWrapper<Workflow>()
-                        .select(Workflow::getId, Workflow::getGroupName, Workflow::getNextTriggerAt, Workflow::getTriggerType,
-                                Workflow::getTriggerInterval, Workflow::getExecutorTimeout, Workflow::getNamespaceId,
-                                Workflow::getFlowInfo, Workflow::getBlockStrategy)
-                        .eq(Workflow::getWorkflowStatus, StatusEnum.YES.getStatus())
-                        .eq(Workflow::getDeleted, StatusEnum.NO.getStatus())
-                        .in(Workflow::getBucketIndex, scanTask.getBuckets())
-                        .le(Workflow::getNextTriggerAt, DateUtils.toNowMilli() + DateUtils.toEpochMilli(SystemConstants.SCHEDULE_PERIOD))
-                        .ge(Workflow::getId, startId)
-                        .orderByAsc(Workflow::getId)
+            new LambdaQueryWrapper<Workflow>()
+                .select(Workflow::getId, Workflow::getGroupName, Workflow::getNextTriggerAt, Workflow::getTriggerType,
+                    Workflow::getTriggerInterval, Workflow::getExecutorTimeout, Workflow::getNamespaceId,
+                    Workflow::getFlowInfo, Workflow::getBlockStrategy)
+                .eq(Workflow::getWorkflowStatus, StatusEnum.YES.getStatus())
+                .eq(Workflow::getDeleted, StatusEnum.NO.getStatus())
+                .in(Workflow::getBucketIndex, scanTask.getBuckets())
+                .le(Workflow::getNextTriggerAt, DateUtils.toNowMilli() + DateUtils.toEpochMilli(SystemConstants.SCHEDULE_PERIOD))
+                .ge(Workflow::getId, startId)
+                .orderByAsc(Workflow::getId)
         ).getRecords();
 
         // 过滤已关闭的组
         if (!CollectionUtils.isEmpty(workflows)) {
-            List<String> groupConfigs = groupConfigMapper.selectList(new LambdaQueryWrapper<GroupConfig>()
+            List<String> groupConfigs = StreamUtils.toList(groupConfigMapper.selectList(new LambdaQueryWrapper<GroupConfig>()
                     .select(GroupConfig::getGroupName)
                     .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus())
-                    .in(GroupConfig::getGroupName, workflows.stream().map(Workflow::getGroupName).collect(Collectors.toList())))
-                .stream().map(GroupConfig::getGroupName).collect(Collectors.toList());
+                    .in(GroupConfig::getGroupName, StreamUtils.toSet(workflows, Workflow::getGroupName))),
+                GroupConfig::getGroupName);
             workflows = workflows.stream().filter(workflow -> groupConfigs.contains(workflow.getGroupName())).collect(Collectors.toList());
         }
 

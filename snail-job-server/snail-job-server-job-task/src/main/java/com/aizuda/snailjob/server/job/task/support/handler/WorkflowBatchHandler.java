@@ -7,6 +7,7 @@ import com.aizuda.snailjob.common.core.context.SpringContext;
 import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskStatusEnum;
+import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.common.enums.JobTaskExecutorSceneEnum;
@@ -36,12 +37,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
 
 import static com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum.WORKFLOW_SUCCESSOR_SKIP_EXECUTION;
 import static com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum.NOT_COMPLETE;
@@ -59,79 +55,8 @@ public class WorkflowBatchHandler {
     private final JobMapper jobMapper;
     private final JobTaskBatchMapper jobTaskBatchMapper;
 
-    public boolean complete(Long workflowTaskBatchId) {
-        return complete(workflowTaskBatchId, null);
-    }
-
-    public boolean complete(Long workflowTaskBatchId, WorkflowTaskBatch workflowTaskBatch) {
-        workflowTaskBatch = Optional.ofNullable(workflowTaskBatch)
-                .orElseGet(() -> workflowTaskBatchMapper.selectById(workflowTaskBatchId));
-        Assert.notNull(workflowTaskBatch, () -> new SnailJobServerException("任务不存在"));
-
-        String flowInfo = workflowTaskBatch.getFlowInfo();
-        MutableGraph<Long> graph = MutableGraphCache.getOrDefault(workflowTaskBatchId, flowInfo);
-
-        // 说明没有后继节点了, 此时需要判断整个DAG是否全部执行完成
-        List<JobTaskBatch> jobTaskBatches = jobTaskBatchMapper.selectList(new LambdaQueryWrapper<JobTaskBatch>()
-                .eq(JobTaskBatch::getWorkflowTaskBatchId, workflowTaskBatch.getId())
-                .in(JobTaskBatch::getWorkflowNodeId, graph.nodes())
-        );
-
-        if (CollectionUtils.isEmpty(jobTaskBatches)) {
-            return false;
-        }
-
-        if (jobTaskBatches.stream().anyMatch(
-                jobTaskBatch -> JobTaskBatchStatusEnum.NOT_COMPLETE.contains(jobTaskBatch.getTaskBatchStatus()))) {
-            return false;
-        }
-
-        Map<Long, List<JobTaskBatch>> currentWorkflowNodeMap = jobTaskBatches.stream()
-                .collect(Collectors.groupingBy(JobTaskBatch::getWorkflowNodeId));
-
-        // 判定最后的工作流批次状态
-        int taskStatus = JobTaskBatchStatusEnum.SUCCESS.getStatus();
-        int operationReason = JobOperationReasonEnum.NONE.getReason();
-
-        // 判定所有的叶子节点是否完成
-        List<Long> leaves = MutableGraphCache.getLeaves(workflowTaskBatchId, flowInfo);
-        for (Long leaf : leaves) {
-            List<JobTaskBatch> jobTaskBatchList = currentWorkflowNodeMap.getOrDefault(leaf, Lists.newArrayList());
-            if (CollectionUtils.isEmpty(jobTaskBatchList)) {
-                boolean isNeedProcess = checkLeafCompleted(graph, currentWorkflowNodeMap, graph.predecessors(leaf));
-                // 说明当前叶子节点需要处理，但是未处理返回false
-                if (isNeedProcess) {
-                    return false;
-                }
-            }
-
-            boolean isMatchSuccess = jobTaskBatchList.stream()
-                    .anyMatch(jobTaskBatch -> JobTaskStatusEnum.SUCCESS.getStatus() == jobTaskBatch.getTaskBatchStatus());
-            if (!isMatchSuccess) {
-                // 判定叶子节点的状态
-                for (JobTaskBatch jobTaskBatch : jobTaskBatchList) {
-                    if (jobTaskBatch.getTaskBatchStatus() == JobTaskBatchStatusEnum.SUCCESS.getStatus()) {
-                        break;
-                    } else if (JobTaskBatchStatusEnum.NOT_SUCCESS.contains(jobTaskBatch.getTaskBatchStatus())) {
-                        // 只要叶子节点不是无需处理的都是失败
-                        if (JobOperationReasonEnum.WORKFLOW_NODE_NO_REQUIRED.getReason() != jobTaskBatch.getOperationReason()
-                                && JobOperationReasonEnum.WORKFLOW_NODE_CLOSED_SKIP_EXECUTION.getReason() != jobTaskBatch.getOperationReason()) {
-                            taskStatus = JobTaskBatchStatusEnum.FAIL.getStatus();
-                            SpringContext.getContext().publishEvent(new WorkflowTaskFailAlarmEvent(workflowTaskBatchId));
-                        }
-                    }
-                }
-            }
-        }
-
-        handlerTaskBatch(workflowTaskBatchId, taskStatus, operationReason);
-
-        return true;
-
-    }
-
     private static boolean checkLeafCompleted(MutableGraph<Long> graph, Map<Long,
-            List<JobTaskBatch>> currentWorkflowNodeMap, Set<Long> parentIds) {
+        List<JobTaskBatch>> currentWorkflowNodeMap, Set<Long> parentIds) {
 
         // 判定子节点是否需要处理
         boolean isNeedProcess = true;
@@ -158,6 +83,77 @@ public class WorkflowBatchHandler {
         return isNeedProcess;
     }
 
+    public boolean complete(Long workflowTaskBatchId) {
+        return complete(workflowTaskBatchId, null);
+    }
+
+    public boolean complete(Long workflowTaskBatchId, WorkflowTaskBatch workflowTaskBatch) {
+        workflowTaskBatch = Optional.ofNullable(workflowTaskBatch)
+            .orElseGet(() -> workflowTaskBatchMapper.selectById(workflowTaskBatchId));
+        Assert.notNull(workflowTaskBatch, () -> new SnailJobServerException("任务不存在"));
+
+        String flowInfo = workflowTaskBatch.getFlowInfo();
+        MutableGraph<Long> graph = MutableGraphCache.getOrDefault(workflowTaskBatchId, flowInfo);
+
+        // 说明没有后继节点了, 此时需要判断整个DAG是否全部执行完成
+        List<JobTaskBatch> jobTaskBatches = jobTaskBatchMapper.selectList(new LambdaQueryWrapper<JobTaskBatch>()
+            .eq(JobTaskBatch::getWorkflowTaskBatchId, workflowTaskBatch.getId())
+            .in(JobTaskBatch::getWorkflowNodeId, graph.nodes())
+        );
+
+        if (CollectionUtils.isEmpty(jobTaskBatches)) {
+            return false;
+        }
+
+        if (jobTaskBatches.stream().anyMatch(
+            jobTaskBatch -> JobTaskBatchStatusEnum.NOT_COMPLETE.contains(jobTaskBatch.getTaskBatchStatus()))) {
+            return false;
+        }
+
+        Map<Long, List<JobTaskBatch>> currentWorkflowNodeMap = StreamUtils.groupByKey(jobTaskBatches,
+            JobTaskBatch::getWorkflowNodeId);
+
+        // 判定最后的工作流批次状态
+        int taskStatus = JobTaskBatchStatusEnum.SUCCESS.getStatus();
+        int operationReason = JobOperationReasonEnum.NONE.getReason();
+
+        // 判定所有的叶子节点是否完成
+        List<Long> leaves = MutableGraphCache.getLeaves(workflowTaskBatchId, flowInfo);
+        for (Long leaf : leaves) {
+            List<JobTaskBatch> jobTaskBatchList = currentWorkflowNodeMap.getOrDefault(leaf, Lists.newArrayList());
+            if (CollectionUtils.isEmpty(jobTaskBatchList)) {
+                boolean isNeedProcess = checkLeafCompleted(graph, currentWorkflowNodeMap, graph.predecessors(leaf));
+                // 说明当前叶子节点需要处理，但是未处理返回false
+                if (isNeedProcess) {
+                    return false;
+                }
+            }
+
+            boolean isMatchSuccess = jobTaskBatchList.stream()
+                .anyMatch(jobTaskBatch -> JobTaskStatusEnum.SUCCESS.getStatus() == jobTaskBatch.getTaskBatchStatus());
+            if (!isMatchSuccess) {
+                // 判定叶子节点的状态
+                for (JobTaskBatch jobTaskBatch : jobTaskBatchList) {
+                    if (jobTaskBatch.getTaskBatchStatus() == JobTaskBatchStatusEnum.SUCCESS.getStatus()) {
+                        break;
+                    } else if (JobTaskBatchStatusEnum.NOT_SUCCESS.contains(jobTaskBatch.getTaskBatchStatus())) {
+                        // 只要叶子节点不是无需处理的都是失败
+                        if (JobOperationReasonEnum.WORKFLOW_NODE_NO_REQUIRED.getReason() != jobTaskBatch.getOperationReason()
+                            && JobOperationReasonEnum.WORKFLOW_NODE_CLOSED_SKIP_EXECUTION.getReason() != jobTaskBatch.getOperationReason()) {
+                            taskStatus = JobTaskBatchStatusEnum.FAIL.getStatus();
+                            SpringContext.getContext().publishEvent(new WorkflowTaskFailAlarmEvent(workflowTaskBatchId));
+                        }
+                    }
+                }
+            }
+        }
+
+        handlerTaskBatch(workflowTaskBatchId, taskStatus, operationReason);
+
+        return true;
+
+    }
+
     private void handlerTaskBatch(Long workflowTaskBatchId, int taskStatus, int operationReason) {
 
         WorkflowTaskBatch jobTaskBatch = new WorkflowTaskBatch();
@@ -169,7 +165,7 @@ public class WorkflowBatchHandler {
 
     public void stop(Long workflowTaskBatchId, Integer operationReason) {
         if (Objects.isNull(operationReason)
-                || operationReason == JobOperationReasonEnum.NONE.getReason()) {
+            || operationReason == JobOperationReasonEnum.NONE.getReason()) {
             operationReason = JobOperationReasonEnum.JOB_OVERLAY.getReason();
         }
 
@@ -179,23 +175,22 @@ public class WorkflowBatchHandler {
         workflowTaskBatch.setId(workflowTaskBatchId);
         // 先停止执行中的批次
         Assert.isTrue(1 == workflowTaskBatchMapper.updateById(workflowTaskBatch),
-                () -> new SnailJobServerException("停止工作流批次失败. id:[{}]",
-                        workflowTaskBatchId));
+            () -> new SnailJobServerException("停止工作流批次失败. id:[{}]",
+                workflowTaskBatchId));
         SpringContext.getContext().publishEvent(new WorkflowTaskFailAlarmEvent(workflowTaskBatchId));
 
         // 关闭已经触发的任务
         List<JobTaskBatch> jobTaskBatches = jobTaskBatchMapper.selectList(new LambdaQueryWrapper<JobTaskBatch>()
-                .in(JobTaskBatch::getTaskBatchStatus, NOT_COMPLETE)
-                .eq(JobTaskBatch::getWorkflowTaskBatchId, workflowTaskBatchId));
+            .in(JobTaskBatch::getTaskBatchStatus, NOT_COMPLETE)
+            .eq(JobTaskBatch::getWorkflowTaskBatchId, workflowTaskBatchId));
 
         if (CollectionUtils.isEmpty(jobTaskBatches)) {
             return;
         }
 
-        List<Job> jobs = jobMapper.selectBatchIds(
-                jobTaskBatches.stream().map(JobTaskBatch::getJobId).collect(Collectors.toSet()));
+        List<Job> jobs = jobMapper.selectBatchIds(StreamUtils.toSet(jobTaskBatches, JobTaskBatch::getJobId));
 
-        Map<Long, Job> jobMap = jobs.stream().collect(Collectors.toMap(Job::getId, i -> i));
+        Map<Long, Job> jobMap = StreamUtils.toIdentityMap(jobs, Job::getId);
         for (final JobTaskBatch jobTaskBatch : jobTaskBatches) {
 
             Job job = jobMap.get(jobTaskBatch.getJobId());
@@ -215,7 +210,7 @@ public class WorkflowBatchHandler {
 
     public void checkWorkflowExecutor(Long workflowTaskBatchId, WorkflowTaskBatch workflowTaskBatch) throws IOException {
         workflowTaskBatch = Optional.ofNullable(workflowTaskBatch)
-                .orElseGet(() -> workflowTaskBatchMapper.selectById(workflowTaskBatchId));
+            .orElseGet(() -> workflowTaskBatchMapper.selectById(workflowTaskBatchId));
         Assert.notNull(workflowTaskBatch, () -> new SnailJobServerException("任务不存在"));
         String flowInfo = workflowTaskBatch.getFlowInfo();
         MutableGraph<Long> graph = MutableGraphCache.getOrDefault(workflowTaskBatchId, flowInfo);
@@ -226,11 +221,11 @@ public class WorkflowBatchHandler {
 
         // 说明没有后继节点了, 此时需要判断整个DAG是否全部执行完成
         List<JobTaskBatch> jobTaskBatches = jobTaskBatchMapper.selectList(new LambdaQueryWrapper<JobTaskBatch>()
-                .eq(JobTaskBatch::getWorkflowTaskBatchId, workflowTaskBatchId)
-                .in(JobTaskBatch::getWorkflowNodeId, graph.nodes()).orderByDesc(JobTaskBatch::getId)
+            .eq(JobTaskBatch::getWorkflowTaskBatchId, workflowTaskBatchId)
+            .in(JobTaskBatch::getWorkflowNodeId, graph.nodes()).orderByDesc(JobTaskBatch::getId)
         );
 
-        Map<Long, JobTaskBatch> jobTaskBatchMap = jobTaskBatches.stream().collect(Collectors.toMap(JobTaskBatch::getWorkflowNodeId, i -> i, (i, j) -> i));
+        Map<Long, JobTaskBatch> jobTaskBatchMap = StreamUtils.toIdentityMap(jobTaskBatches, JobTaskBatch::getWorkflowNodeId);
 
         checkWorkflowExecutor(SystemConstants.ROOT, workflowTaskBatchId, graph, jobTaskBatchMap);
     }
@@ -240,7 +235,7 @@ public class WorkflowBatchHandler {
         // 判定条件节点是否已经执行完成
         JobTaskBatch parentJobTaskBatch = jobTaskBatchMap.get(parentId);
         if (Objects.nonNull(parentJobTaskBatch) &&
-                WORKFLOW_SUCCESSOR_SKIP_EXECUTION.contains(parentJobTaskBatch.getOperationReason())) {
+            WORKFLOW_SUCCESSOR_SKIP_EXECUTION.contains(parentJobTaskBatch.getOperationReason())) {
             return;
         }
 

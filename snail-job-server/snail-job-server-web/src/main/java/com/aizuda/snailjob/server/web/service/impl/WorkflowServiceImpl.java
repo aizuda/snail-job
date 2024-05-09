@@ -9,6 +9,7 @@ import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.expression.ExpressionEngine;
 import com.aizuda.snailjob.common.core.expression.ExpressionFactory;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
+import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.WaitStrategy;
 import com.aizuda.snailjob.server.common.config.SystemProperties;
@@ -44,12 +45,6 @@ import com.aizuda.snailjob.template.datasource.persistence.po.GroupConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.Job;
 import com.aizuda.snailjob.template.datasource.persistence.po.Workflow;
 import com.aizuda.snailjob.template.datasource.persistence.po.WorkflowNode;
-import com.aizuda.snailjob.server.job.task.dto.WorkflowTaskPrepareDTO;
-import com.aizuda.snailjob.server.job.task.support.WorkflowPrePareHandler;
-import com.aizuda.snailjob.server.job.task.support.WorkflowTaskConverter;
-import com.aizuda.snailjob.server.job.task.support.expression.ExpressionInvocationHandler;
-import com.aizuda.snailjob.server.web.service.convert.WorkflowConverter;
-import com.aizuda.snailjob.server.web.service.handler.WorkflowHandler;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.google.common.collect.Lists;
@@ -178,11 +173,11 @@ public class WorkflowServiceImpl implements WorkflowService {
             .eq(WorkflowNode::getWorkflowId, id)
             .orderByAsc(WorkflowNode::getPriorityLevel));
 
-        List<Long> jobIds = workflowNodes.stream().map(WorkflowNode::getJobId).collect(Collectors.toList());
+        List<Long> jobIds = StreamUtils.toList(workflowNodes, WorkflowNode::getJobId);
         List<Job> jobs = jobMapper.selectList(new LambdaQueryWrapper<Job>()
             .in(Job::getId, new HashSet<>(jobIds)));
 
-        Map<Long, Job> jobMap = jobs.stream().collect(Collectors.toMap(Job::getId, job -> job));
+        Map<Long, Job> jobMap = StreamUtils.toIdentityMap(jobs, Job::getId);
 
         List<WorkflowDetailResponseVO.NodeInfo> nodeInfos = WorkflowConverter.INSTANCE.toNodeInfo(workflowNodes);
 
@@ -264,7 +259,7 @@ public class WorkflowServiceImpl implements WorkflowService {
         log.info("图构建完成. graph:[{}]", graph);
 
         // 保存图信息
-        workflow = WorkflowConverter.INSTANCE.toWorkflow(workflowRequestVO);;
+        workflow = WorkflowConverter.INSTANCE.toWorkflow(workflowRequestVO);
         workflow.setId(workflowRequestVO.getId());
         workflow.setVersion(version);
         workflow.setNextTriggerAt(calculateNextTriggerAt(workflowRequestVO, DateUtils.toNowMilli()));
@@ -329,7 +324,7 @@ public class WorkflowServiceImpl implements WorkflowService {
     public List<WorkflowResponseVO> getWorkflowNameList(String keywords, Long workflowId) {
 
         LambdaQueryWrapper<Workflow> queryWrapper = new LambdaQueryWrapper<Workflow>()
-                .select(Workflow::getId, Workflow::getWorkflowName);
+            .select(Workflow::getId, Workflow::getWorkflowName);
         if (StrUtil.isNotBlank(keywords)) {
             queryWrapper.like(Workflow::getWorkflowName, keywords.trim() + "%");
         }

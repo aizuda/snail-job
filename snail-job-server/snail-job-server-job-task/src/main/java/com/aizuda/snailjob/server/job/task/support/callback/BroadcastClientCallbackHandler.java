@@ -3,6 +3,7 @@ package com.aizuda.snailjob.server.job.task.support.callback;
 import akka.actor.ActorRef;
 import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
+import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.common.cache.CacheRegisterTable;
 import com.aizuda.snailjob.server.common.dto.RegisterNodeInfo;
@@ -18,7 +19,6 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * @author: opensnail
@@ -62,12 +62,10 @@ public class BroadcastClientCallbackHandler extends AbstractClientCallbackHandle
         RegisterNodeInfo serverNode = CacheRegisterTable.getServerNode(context.getGroupName(), context.getNamespaceId(), clientId);
         if (Objects.isNull(serverNode)) {
             List<JobTask> jobTasks = jobTaskMapper.selectList(new LambdaQueryWrapper<JobTask>()
-                    .eq(JobTask::getTaskBatchId, context.getTaskBatchId()));
+                .eq(JobTask::getTaskBatchId, context.getTaskBatchId()));
 
-            Set<String> clientIdList = jobTasks.stream()
-                    .map(jobTask1 -> ClientInfoUtils.clientId(jobTask1.getClientInfo()))
-                    .collect(Collectors.toSet());
-            Set<String> remoteClientIdSet = nodes.stream().map(RegisterNodeInfo::getHostId).collect(Collectors.toSet());
+            Set<String> clientIdList = StreamUtils.toSet(jobTasks, jobTask1 -> ClientInfoUtils.clientId(jobTask1.getClientInfo()));
+            Set<String> remoteClientIdSet = StreamUtils.toSet(nodes, RegisterNodeInfo::getHostId);
             Sets.SetView<String> diff = Sets.difference(remoteClientIdSet, clientIdList);
 
             String newClientId = CollUtil.getFirst(diff.stream().iterator());
