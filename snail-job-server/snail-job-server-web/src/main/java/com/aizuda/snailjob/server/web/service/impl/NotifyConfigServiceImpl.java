@@ -20,7 +20,6 @@ import com.aizuda.snailjob.template.datasource.access.ConfigAccess;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.NotifyRecipientMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowMapper;
-import com.aizuda.snailjob.template.datasource.persistence.po.GroupConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.Job;
 import com.aizuda.snailjob.template.datasource.persistence.po.NotifyConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.NotifyRecipient;
@@ -37,12 +36,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -161,7 +155,7 @@ public class NotifyConfigServiceImpl implements NotifyConfigService {
     public Boolean saveNotify(NotifyConfigRequestVO requestVO) {
         NotifyConfig notifyConfig = NotifyConfigConverter.INSTANCE.toNotifyConfig(requestVO);
         notifyConfig.setCreateDt(LocalDateTime.now());
-        notifyConfig.setRecipientIds(JsonUtil.toJsonString(requestVO.getNotifyRecipientIds()));
+        notifyConfig.setRecipientIds(JsonUtil.toJsonString(requestVO.getRecipientIds()));
         notifyConfig.setNamespaceId(UserSessionUtils.currentUserSession().getNamespaceId());
         ConfigAccess<NotifyConfig> notifyConfigAccess = accessTemplate.getNotifyConfigAccess();
 
@@ -175,7 +169,7 @@ public class NotifyConfigServiceImpl implements NotifyConfigService {
     public Boolean updateNotify(NotifyConfigRequestVO requestVO) {
         Assert.notNull(requestVO.getId(), () -> new SnailJobServerException("参数异常"));
         NotifyConfig notifyConfig = NotifyConfigConverter.INSTANCE.toNotifyConfig(requestVO);
-        notifyConfig.setRecipientIds(JsonUtil.toJsonString(requestVO.getNotifyRecipientIds()));
+        notifyConfig.setRecipientIds(JsonUtil.toJsonString(requestVO.getRecipientIds()));
 
         // 防止被覆盖
         notifyConfig.setNamespaceId(null);

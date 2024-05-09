@@ -1,13 +1,11 @@
 package com.aizuda.snailjob.server.web.model.request;
 
-import jakarta.validation.constraints.NotEmpty;
-import lombok.Data;
-
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import lombok.Data;
 
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -40,7 +38,7 @@ public class NotifyConfigRequestVO {
     private Integer notifyStatus;
 
     @NotEmpty(message = "通知人列表")
-    private Set<Long> notifyRecipientIds;
+    private Set<Long> recipientIds;
 
     private Integer notifyThreshold;
 

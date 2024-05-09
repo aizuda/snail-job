@@ -20,11 +20,6 @@ public interface NotifyConfigConverter {
 
     NotifyConfigConverter INSTANCE = Mappers.getMapper(NotifyConfigConverter.class);
 
-    @Mappings({
-        @Mapping(target = "recipientIds", expression = "java(NotifyConfigConverter.toNotifyRecipientIdsStr(notifyConfigVO.getNotifyRecipientIds()))")
-    })
-    NotifyConfig toNotifyConfig(NotifyConfigRequestVO notifyConfigVO);
-
     static String toNotifyRecipientIdsStr(Set<Long> notifyRecipientIds) {
         if (CollectionUtils.isEmpty(notifyRecipientIds)) {
             return null;
@@ -32,4 +27,9 @@ public interface NotifyConfigConverter {
 
         return JsonUtil.toJsonString(notifyRecipientIds);
     }
+
+    @Mappings({
+        @Mapping(target = "recipientIds", expression = "java(NotifyConfigConverter.toNotifyRecipientIdsStr(notifyConfigVO.getRecipientIds()))")
+    })
+    NotifyConfig toNotifyConfig(NotifyConfigRequestVO notifyConfigVO);
 }
