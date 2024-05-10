@@ -83,7 +83,7 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
         List<WorkflowBatchResponseDO> batchResponseDOList = workflowTaskBatchMapper.selectWorkflowBatchPageList(pageDTO, wrapper);
 
         List<WorkflowBatchResponseVO> batchResponseVOList =
-            WorkflowConverter.INSTANCE.convertListToWorkflowBatchResponseList(batchResponseDOList);
+            WorkflowConverter.INSTANCE.convertListToWorkflowBatchList(batchResponseDOList);
 
         return new PageResult<>(pageDTO, batchResponseVOList);
     }
@@ -138,7 +138,7 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
                     jobTaskBatchList = jobTaskBatchList.stream()
                         .sorted(Comparator.comparingInt(JobTaskBatch::getTaskBatchStatus))
                         .collect(Collectors.toList());
-                    nodeInfo.setJobBatchList(JobBatchResponseVOConverter.INSTANCE.convertListToJobBatchResponseList(jobTaskBatchList));
+                    nodeInfo.setJobBatchList(JobBatchResponseVOConverter.INSTANCE.convertListToJobBatchList(jobTaskBatchList));
 
                     // 取第最新的一条状态
                     JobTaskBatch jobTaskBatch = jobTaskBatchList.get(0);

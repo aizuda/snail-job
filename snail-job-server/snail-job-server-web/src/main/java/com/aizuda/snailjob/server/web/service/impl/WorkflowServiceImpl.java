@@ -215,7 +215,7 @@ public class WorkflowServiceImpl implements WorkflowService {
                 .eq(Objects.nonNull(queryVO.getWorkflowStatus()), Workflow::getWorkflowStatus, queryVO.getWorkflowStatus())
                 .orderByDesc(Workflow::getId));
 
-        List<WorkflowResponseVO> jobResponseList = WorkflowConverter.INSTANCE.convertListToWorkflowResponseList(page.getRecords());
+        List<WorkflowResponseVO> jobResponseList = WorkflowConverter.INSTANCE.convertListToWorkflowList(page.getRecords());
 
         return new PageResult<>(pageDTO, jobResponseList);
     }
@@ -320,7 +320,7 @@ public class WorkflowServiceImpl implements WorkflowService {
                 .eq(Workflow::getDeleted, StatusEnum.NO.getStatus())
                 .orderByAsc(Workflow::getId));
 
-        return WorkflowConverter.INSTANCE.convertListToWorkflowResponseList(selectPage.getRecords());
+        return WorkflowConverter.INSTANCE.convertListToWorkflowList(selectPage.getRecords());
     }
 
     @Override

@@ -65,7 +65,7 @@ public class NotifyRecipientServiceImpl implements NotifyRecipientService {
         List<NotifyRecipient> notifyRecipients = notifyRecipientMapper.selectList(
             new LambdaQueryWrapper<NotifyRecipient>()
                 .select(NotifyRecipient::getRecipientName, NotifyRecipient::getId));
-        return NotifyRecipientConverter.INSTANCE.convertListToCommonLabelValueResponseList(notifyRecipients);
+        return NotifyRecipientConverter.INSTANCE.convertListToCommonLabelValueList(notifyRecipients);
     }
 
     @Override

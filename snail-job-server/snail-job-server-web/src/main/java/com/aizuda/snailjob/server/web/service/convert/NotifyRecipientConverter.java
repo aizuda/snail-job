@@ -25,7 +25,7 @@ public interface NotifyRecipientConverter {
 
     NotifyRecipient convert(NotifyRecipientRequestVO requestVO);
 
-    List<CommonLabelValueResponseVO> convertListToCommonLabelValueResponseList(List<NotifyRecipient> notifyRecipients);
+    List<CommonLabelValueResponseVO> convertListToCommonLabelValueList(List<NotifyRecipient> notifyRecipients);
 
     @Mappings({
         @Mapping(target = "label", source = "recipientName"),

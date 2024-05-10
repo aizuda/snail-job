@@ -48,14 +48,14 @@ public interface WorkflowConverter {
     })
     WorkflowDetailResponseVO.NodeInfo convert(WorkflowNode workflowNode);
 
-    List<WorkflowResponseVO> convertListToWorkflowResponseList(List<Workflow> workflowList);
+    List<WorkflowResponseVO> convertListToWorkflowList(List<Workflow> workflowList);
 
     @Mappings({
         @Mapping(target = "nextTriggerAt", expression = "java(WorkflowConverter.toLocalDateTime(workflow.getNextTriggerAt()))")
     })
-    WorkflowResponseVO convertToWorkflowResponseVO(Workflow workflow);
+    WorkflowResponseVO convertToWorkflow(Workflow workflow);
 
-    List<WorkflowBatchResponseVO> convertListToWorkflowBatchResponseList(List<WorkflowBatchResponseDO> workflowBatchResponseList);
+    List<WorkflowBatchResponseVO> convertListToWorkflowBatchList(List<WorkflowBatchResponseDO> workflowBatchResponseList);
 
     @Mappings({
             @Mapping(source = "workflowTaskBatch.groupName", target = "groupName"),
