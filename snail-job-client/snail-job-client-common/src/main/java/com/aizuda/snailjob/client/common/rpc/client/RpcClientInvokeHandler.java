@@ -72,6 +72,8 @@ public class RpcClientInvokeHandler<R> implements InvocationHandler {
                 throw new SnailJobClientException("Request to remote interface exception. path:[{}]",  annotation.path());
             } catch (TimeoutException e) {
                 throw new SnailJobClientTimeOutException("Request to remote interface timed out. path:[{}]", annotation.path());
+            } finally {
+                RpcContext.remove(snailJobRequest.getReqId());
             }
         }
 

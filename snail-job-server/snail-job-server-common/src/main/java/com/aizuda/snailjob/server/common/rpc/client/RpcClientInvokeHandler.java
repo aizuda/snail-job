@@ -60,7 +60,6 @@ public class RpcClientInvokeHandler implements InvocationHandler {
     private String hostId;
     private String hostIp;
     private Integer hostPort;
-    private String contextPath;
     private final boolean failRetry;
     private final int retryTimes;
     private final int retryInterval;
@@ -80,7 +79,6 @@ public class RpcClientInvokeHandler implements InvocationHandler {
         this.hostId = registerNodeInfo.getHostId();
         this.hostPort = registerNodeInfo.getHostPort();
         this.hostIp = registerNodeInfo.getHostIp();
-        this.contextPath = registerNodeInfo.getContextPath();
         this.failRetry = failRetry;
         this.retryTimes = retryTimes;
         this.retryInterval = retryInterval;
@@ -150,6 +148,7 @@ public class RpcClientInvokeHandler implements InvocationHandler {
                 sw.start("request start " + snailJobRequest.getReqId());
 
                 CompletableFuture completableFuture = null;
+                // 暂不支持异步
                 if (async) {
 //                    RpcContext.setCompletableFuture(snailJobRequest.getReqId(), null);
                 } else {
@@ -179,6 +178,8 @@ public class RpcClientInvokeHandler implements InvocationHandler {
                     } catch (TimeoutException e) {
                         throw new SnailJobServerException("Request to remote interface timed out. path:[{}]",
                             mapping.path());
+                    } finally {
+                        RpcContext.remove(snailJobRequest.getReqId());
                     }
                 }
 
@@ -210,7 +211,6 @@ public class RpcClientInvokeHandler implements InvocationHandler {
                 this.hostId = serverNode.getHostId();
                 this.hostPort = serverNode.getHostPort();
                 this.hostIp = serverNode.getHostIp();
-                this.contextPath = serverNode.getContextPath();
 
             } else {
                 // 其他异常继续抛出

@@ -19,7 +19,8 @@ import java.util.function.Consumer;
  * @since 1.3.0
  */
 @Slf4j
-public class RpcContext {
+public final class RpcContext {
+    private RpcContext() {}
 
     private static final ConcurrentMap<Long, CompletableFuture> COMPLETABLE_FUTURE = new ConcurrentHashMap<>();
 
@@ -36,10 +37,14 @@ public class RpcContext {
         } catch (Exception e) {
             SnailJobLog.LOCAL.error("回调处理失败 requestId:[{}]",requestId, e );
         } finally {
-            COMPLETABLE_FUTURE.remove(requestId);
-            CALLBACK_CONSUMER.remove(requestId);
+            remove(requestId);
         }
 
+    }
+
+    public static void remove(Long requestId) {
+        COMPLETABLE_FUTURE.remove(requestId);
+        CALLBACK_CONSUMER.remove(requestId);
     }
 
     public static <R> void setCompletableFuture(long id, CompletableFuture<R> completableFuture, Consumer<R> callable) {
