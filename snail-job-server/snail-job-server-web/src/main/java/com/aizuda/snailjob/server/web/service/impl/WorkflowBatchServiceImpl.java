@@ -23,7 +23,6 @@ import com.aizuda.snailjob.server.web.service.convert.JobBatchResponseVOConverte
 import com.aizuda.snailjob.server.web.service.convert.WorkflowConverter;
 import com.aizuda.snailjob.server.web.service.handler.WorkflowHandler;
 import com.aizuda.snailjob.server.web.util.UserSessionUtils;
-import com.aizuda.snailjob.template.datasource.persistence.dataobject.WorkflowBatchQueryDO;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.WorkflowBatchResponseDO;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.*;
 import com.aizuda.snailjob.template.datasource.persistence.po.*;
@@ -39,6 +38,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -106,14 +106,16 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
             .eq(WorkflowNode::getDeleted, StatusEnum.NO.getStatus())
             .eq(WorkflowNode::getWorkflowId, workflow.getId()));
 
-        List<Long> jobIds = StreamUtils.toList(workflowNodes, WorkflowNode::getJobId);
-        List<Job> jobs = jobMapper.selectList(new LambdaQueryWrapper<Job>()
-            .in(Job::getId, new HashSet<>(jobIds)));
+        List<Job> jobs = jobMapper.selectList(
+            new LambdaQueryWrapper<Job>()
+                .in(Job::getId, StreamUtils.toSet(workflowNodes, WorkflowNode::getJobId)));
 
         Map<Long, Job> jobMap = StreamUtils.toIdentityMap(jobs, Job::getId);
 
-        List<JobTaskBatch> alJobTaskBatchList = jobTaskBatchMapper.selectList(new LambdaQueryWrapper<JobTaskBatch>()
-            .eq(JobTaskBatch::getWorkflowTaskBatchId, id).orderByDesc(JobTaskBatch::getId));
+        List<JobTaskBatch> alJobTaskBatchList = jobTaskBatchMapper.selectList(
+            new LambdaQueryWrapper<JobTaskBatch>()
+                .eq(JobTaskBatch::getWorkflowTaskBatchId, id)
+                .orderByDesc(JobTaskBatch::getId));
 
         Map<Long, List<JobTaskBatch>> jobTaskBatchMap = StreamUtils.groupByKey(alJobTaskBatchList,
             JobTaskBatch::getWorkflowNodeId);
@@ -133,7 +135,9 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
 
                 List<JobTaskBatch> jobTaskBatchList = jobTaskBatchMap.get(nodeInfo.getId());
                 if (!CollectionUtils.isEmpty(jobTaskBatchList)) {
-                    jobTaskBatchList = jobTaskBatchList.stream().sorted(Comparator.comparingInt(JobTaskBatch::getTaskBatchStatus)).collect(Collectors.toList());
+                    jobTaskBatchList = jobTaskBatchList.stream()
+                        .sorted(Comparator.comparingInt(JobTaskBatch::getTaskBatchStatus))
+                        .collect(Collectors.toList());
                     nodeInfo.setJobBatchList(JobBatchResponseVOConverter.INSTANCE.jobTaskBatchToJobBatchResponseVOs(jobTaskBatchList));
 
                     // 取第最新的一条状态
@@ -162,7 +166,7 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
                     }
                 }
             })
-            .collect(Collectors.toMap(WorkflowDetailResponseVO.NodeInfo::getId, i -> i));
+            .collect(Collectors.toMap(WorkflowDetailResponseVO.NodeInfo::getId, Function.identity()));
 
         for (Long noOperationNodeId : allNoOperationNode) {
             WorkflowDetailResponseVO.NodeInfo nodeInfo = workflowNodeMap.get(noOperationNodeId);
@@ -179,7 +183,8 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
         }
         try {
             // 反序列化构建图
-            WorkflowDetailResponseVO.NodeConfig config = workflowHandler.buildNodeConfig(graph, SystemConstants.ROOT, new HashMap<>(), workflowNodeMap);
+            WorkflowDetailResponseVO.NodeConfig config = workflowHandler.buildNodeConfig(graph, SystemConstants.ROOT,
+                new HashMap<>(), workflowNodeMap);
             responseVO.setNodeConfig(config);
         } catch (Exception e) {
             log.error("反序列化失败. json:[{}]", flowInfo, e);
