@@ -5,7 +5,6 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
-import com.aizuda.snailjob.server.common.config.SystemProperties;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.web.annotation.RoleEnum;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
@@ -54,7 +53,6 @@ public class SystemUserServiceImpl implements SystemUserService {
     private final SystemUserMapper systemUserMapper;
     private final SystemUserPermissionMapper systemUserPermissionMapper;
     private final NamespaceMapper namespaceMapper;
-    private final SystemProperties systemProperties;
 
     private static void validateUserPassword(SystemUserRequestVO requestVO, SystemUser systemUser) {
         if (Objects.isNull(systemUser)) {

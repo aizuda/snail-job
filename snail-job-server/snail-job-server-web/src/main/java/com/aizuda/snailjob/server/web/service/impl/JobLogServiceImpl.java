@@ -36,28 +36,26 @@ public class JobLogServiceImpl implements JobLogService {
 
         PageDTO<JobLogMessage> pageDTO = new PageDTO<>(1, queryVO.getSize());
 
-        LambdaQueryWrapper<JobLogMessage> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper
+        PageDTO<JobLogMessage> selectPage = jobLogMessageMapper.selectPage(pageDTO,
+            new LambdaQueryWrapper<JobLogMessage>()
                 .select(JobLogMessage::getId, JobLogMessage::getLogNum)
                 .ge(JobLogMessage::getId, queryVO.getStartId())
                 .ge(JobLogMessage::getTaskBatchId, queryVO.getTaskBatchId())
                 .ge(JobLogMessage::getJobId, queryVO.getJobId())
-                .eq(JobLogMessage::getTaskId, queryVO.getTaskId());
-
-        queryWrapper.orderByAsc(JobLogMessage::getId).orderByAsc(JobLogMessage::getRealTime);
-        PageDTO<JobLogMessage> selectPage = jobLogMessageMapper.selectPage(pageDTO, queryWrapper);
+                .eq(JobLogMessage::getTaskId, queryVO.getTaskId())
+                .orderByAsc(JobLogMessage::getId).orderByAsc(JobLogMessage::getRealTime));
         List<JobLogMessage> records = selectPage.getRecords();
         if (CollectionUtils.isEmpty(records)) {
 
             JobTaskBatch jobTaskBatch = jobTaskBatchMapper.selectOne(
-                    new LambdaQueryWrapper<JobTaskBatch>()
-                            .eq(JobTaskBatch::getId, queryVO.getTaskBatchId())
+                new LambdaQueryWrapper<JobTaskBatch>()
+                    .eq(JobTaskBatch::getId, queryVO.getTaskBatchId())
             );
 
             JobLogResponseVO jobLogResponseVO = new JobLogResponseVO();
 
             if (Objects.isNull(jobTaskBatch)
-                    || jobTaskBatch.getUpdateDt().plusSeconds(15).isBefore(LocalDateTime.now())
+                || jobTaskBatch.getUpdateDt().plusSeconds(15).isBefore(LocalDateTime.now())
             ) {
                 jobLogResponseVO.setFinished(Boolean.TRUE);
             }
@@ -84,10 +82,10 @@ public class JobLogServiceImpl implements JobLogService {
         long nextStartId = 0;
         List<Map<String, String>> messages = Lists.newArrayList();
         List<JobLogMessage> jobLogMessages = jobLogMessageMapper.selectList(
-                new LambdaQueryWrapper<JobLogMessage>()
-                        .in(JobLogMessage::getId, ids)
-                        .orderByAsc(JobLogMessage::getId)
-                        .orderByAsc(JobLogMessage::getRealTime)
+            new LambdaQueryWrapper<JobLogMessage>()
+                .in(JobLogMessage::getId, ids)
+                .orderByAsc(JobLogMessage::getId)
+                .orderByAsc(JobLogMessage::getRealTime)
         );
 
         for (final JobLogMessage jobLogMessage : jobLogMessages) {

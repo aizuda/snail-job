@@ -13,7 +13,7 @@ import com.aizuda.snailjob.server.web.service.NamespaceService;
 import com.aizuda.snailjob.server.web.service.convert.NamespaceResponseVOConverter;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.NamespaceMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.Namespace;
-import com.aizuda.snailjob.server.web.service.convert.NamespaceResponseVOConverter;
+
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,9 +36,10 @@ public class NamespaceServiceImpl implements NamespaceService {
     public Boolean saveNamespace(final NamespaceRequestVO namespaceRequestVO) {
 
         if (StrUtil.isNotBlank(namespaceRequestVO.getUniqueId())) {
-            Assert.isTrue(namespaceMapper.selectCount(new LambdaQueryWrapper<Namespace>()
-                            .eq(Namespace::getUniqueId, namespaceRequestVO.getUniqueId())) == 0,
-                    () -> new SnailJobServerException("空间唯一标记已经存在 {}", namespaceRequestVO.getUniqueId()));
+            Assert.isTrue(namespaceMapper.selectCount(
+                    new LambdaQueryWrapper<Namespace>()
+                        .eq(Namespace::getUniqueId, namespaceRequestVO.getUniqueId())) == 0,
+                () -> new SnailJobServerException("空间唯一标记已经存在 {}", namespaceRequestVO.getUniqueId()));
         }
 
         Namespace namespace = new Namespace();
@@ -66,17 +67,15 @@ public class NamespaceServiceImpl implements NamespaceService {
     public PageResult<List<NamespaceResponseVO>> getNamespacePage(final NamespaceQueryVO queryVO) {
 
         PageDTO<Namespace> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
+        String keywords = StrUtil.trim(queryVO.getKeyword());
 
-        LambdaQueryWrapper<Namespace> queryWrapper = new LambdaQueryWrapper<>();
-        if (StrUtil.isNotBlank(queryVO.getKeyword())) {
-            queryWrapper.like(Namespace::getName, queryVO.getKeyword().trim() + "%")
-                    .or().like(Namespace::getUniqueId, queryVO.getKeyword().trim() + "%")
-            ;
-        }
-
-        queryWrapper.eq(Namespace::getDeleted, StatusEnum.NO.getStatus());
-        queryWrapper.orderByDesc(Namespace::getId);
-        PageDTO<Namespace> selectPage = namespaceMapper.selectPage(pageDTO, queryWrapper);
+        PageDTO<Namespace> selectPage = namespaceMapper.selectPage(pageDTO,
+            new LambdaQueryWrapper<Namespace>()
+                .eq(Namespace::getDeleted, StatusEnum.NO.getStatus())
+                .and(StrUtil.isNotBlank(keywords), w ->
+                    w.likeRight(Namespace::getName, keywords)
+                        .or().likeRight(Namespace::getUniqueId, keywords))
+                .orderByDesc(Namespace::getId));
         return new PageResult<>(pageDTO,
             NamespaceResponseVOConverter.INSTANCE.toNamespaceResponseVOs(selectPage.getRecords()));
     }

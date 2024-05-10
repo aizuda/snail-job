@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.web.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.enums.RetryStatusEnum;
@@ -25,7 +26,6 @@ import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -47,35 +47,21 @@ public class RetryTaskLogServiceImpl implements RetryTaskLogService {
         UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
         String namespaceId = userSessionVO.getNamespaceId();
         PageDTO<RetryTaskLog> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
-        LambdaQueryWrapper<RetryTaskLog> retryTaskLogLambdaQueryWrapper = new LambdaQueryWrapper<>();
-        retryTaskLogLambdaQueryWrapper.eq(RetryTaskLog::getNamespaceId, namespaceId);
-
-        if (userSessionVO.isUser()) {
-            retryTaskLogLambdaQueryWrapper.in(RetryTaskLog::getGroupName, userSessionVO.getGroupNames());
-        }
-
-        if (StrUtil.isNotBlank(queryVO.getGroupName())) {
-            retryTaskLogLambdaQueryWrapper.eq(RetryTaskLog::getGroupName, queryVO.getGroupName());
-        }
-        if (StrUtil.isNotBlank(queryVO.getSceneName())) {
-            retryTaskLogLambdaQueryWrapper.eq(RetryTaskLog::getSceneName, queryVO.getSceneName());
-        }
-        if (StrUtil.isNotBlank(queryVO.getBizNo())) {
-            retryTaskLogLambdaQueryWrapper.eq(RetryTaskLog::getBizNo, queryVO.getBizNo());
-        }
-        if (StrUtil.isNotBlank(queryVO.getUniqueId())) {
-            retryTaskLogLambdaQueryWrapper.eq(RetryTaskLog::getUniqueId, queryVO.getUniqueId());
-        }
-        if (StrUtil.isNotBlank(queryVO.getIdempotentId())) {
-            retryTaskLogLambdaQueryWrapper.eq(RetryTaskLog::getIdempotentId, queryVO.getIdempotentId());
-        }
-
-        retryTaskLogLambdaQueryWrapper.select(RetryTaskLog::getGroupName, RetryTaskLog::getId,
-            RetryTaskLog::getSceneName,
-            RetryTaskLog::getIdempotentId, RetryTaskLog::getBizNo, RetryTaskLog::getRetryStatus,
-            RetryTaskLog::getCreateDt, RetryTaskLog::getUniqueId, RetryTaskLog::getTaskType);
+        LambdaQueryWrapper<RetryTaskLog> retryTaskLogLambdaQueryWrapper = new LambdaQueryWrapper<RetryTaskLog>()
+            .eq(RetryTaskLog::getNamespaceId, namespaceId)
+            .in(userSessionVO.isUser(), RetryTaskLog::getGroupName, userSessionVO.getGroupNames())
+            .eq(StrUtil.isNotBlank(queryVO.getGroupName()), RetryTaskLog::getGroupName, queryVO.getGroupName())
+            .eq(StrUtil.isNotBlank(queryVO.getSceneName()), RetryTaskLog::getSceneName, queryVO.getSceneName())
+            .eq(StrUtil.isNotBlank(queryVO.getBizNo()), RetryTaskLog::getBizNo, queryVO.getBizNo())
+            .eq(StrUtil.isNotBlank(queryVO.getUniqueId()), RetryTaskLog::getUniqueId, queryVO.getUniqueId())
+            .eq(StrUtil.isNotBlank(queryVO.getIdempotentId()), RetryTaskLog::getIdempotentId, queryVO.getIdempotentId())
+            .select(RetryTaskLog::getGroupName, RetryTaskLog::getId,
+                RetryTaskLog::getSceneName,
+                RetryTaskLog::getIdempotentId, RetryTaskLog::getBizNo, RetryTaskLog::getRetryStatus,
+                RetryTaskLog::getCreateDt, RetryTaskLog::getUniqueId, RetryTaskLog::getTaskType)
+            .orderByDesc(RetryTaskLog::getCreateDt);
         PageDTO<RetryTaskLog> retryTaskLogPageDTO = retryTaskLogMapper.selectPage(pageDTO,
-            retryTaskLogLambdaQueryWrapper.orderByDesc(RetryTaskLog::getCreateDt));
+            retryTaskLogLambdaQueryWrapper);
 
         return new PageResult<>(
             retryTaskLogPageDTO,
@@ -95,27 +81,23 @@ public class RetryTaskLogServiceImpl implements RetryTaskLogService {
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
 
         PageDTO<RetryTaskLogMessage> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
-        LambdaQueryWrapper<RetryTaskLogMessage> wrapper = new LambdaQueryWrapper<>();
-        wrapper.select(RetryTaskLogMessage::getId, RetryTaskLogMessage::getLogNum);
-        wrapper.ge(RetryTaskLogMessage::getId, queryVO.getStartId());
-        wrapper.eq(RetryTaskLogMessage::getNamespaceId, namespaceId);
-        wrapper.eq(RetryTaskLogMessage::getUniqueId, queryVO.getUniqueId());
-        wrapper.eq(RetryTaskLogMessage::getGroupName, queryVO.getGroupName());
-        wrapper.orderByAsc(RetryTaskLogMessage::getId).orderByAsc(RetryTaskLogMessage::getRealTime);
-
         PageDTO<RetryTaskLogMessage> selectPage = retryTaskLogMessageMapper.selectPage(pageDTO,
-            wrapper.orderByDesc(RetryTaskLogMessage::getCreateDt));
+            new LambdaQueryWrapper<RetryTaskLogMessage>()
+                .select(RetryTaskLogMessage::getId, RetryTaskLogMessage::getLogNum)
+                .ge(RetryTaskLogMessage::getId, queryVO.getStartId())
+                .eq(RetryTaskLogMessage::getNamespaceId, namespaceId)
+                .eq(RetryTaskLogMessage::getUniqueId, queryVO.getUniqueId())
+                .eq(RetryTaskLogMessage::getGroupName, queryVO.getGroupName())
+                .orderByAsc(RetryTaskLogMessage::getId).orderByAsc(RetryTaskLogMessage::getRealTime)
+                .orderByDesc(RetryTaskLogMessage::getCreateDt));
 
         List<RetryTaskLogMessage> records = selectPage.getRecords();
 
-        if (CollectionUtils.isEmpty(records)) {
-
-            RetryTaskLogMessageResponseVO jobLogResponseVO = new RetryTaskLogMessageResponseVO();
-
-            jobLogResponseVO.setFinished(Boolean.TRUE);
-            jobLogResponseVO.setNextStartId(queryVO.getStartId());
-            jobLogResponseVO.setFromIndex(0);
-            return jobLogResponseVO;
+        if (CollUtil.isEmpty(records)) {
+            return new RetryTaskLogMessageResponseVO()
+                .setFinished(Boolean.TRUE)
+                .setNextStartId(queryVO.getStartId())
+                .setFromIndex(0);
         }
 
         Integer fromIndex = Optional.ofNullable(queryVO.getFromIndex()).orElse(0);
@@ -202,20 +184,20 @@ public class RetryTaskLogServiceImpl implements RetryTaskLogService {
     public boolean batchDelete(final Set<Long> ids) {
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
 
-        List<RetryTaskLog> retryTaskLogs = retryTaskLogMapper.selectList(new LambdaQueryWrapper<RetryTaskLog>()
-            .eq(RetryTaskLog::getRetryStatus, RetryStatusEnum.FINISH.getStatus())
-            .eq(RetryTaskLog::getNamespaceId, namespaceId)
-            .in(RetryTaskLog::getId, ids)
-        );
+        List<RetryTaskLog> retryTaskLogs = retryTaskLogMapper.selectList(
+            new LambdaQueryWrapper<RetryTaskLog>()
+                .eq(RetryTaskLog::getRetryStatus, RetryStatusEnum.FINISH.getStatus())
+                .eq(RetryTaskLog::getNamespaceId, namespaceId)
+                .in(RetryTaskLog::getId, ids));
         Assert.notEmpty(retryTaskLogs, () -> new SnailJobServerException("数据不存在"));
         Assert.isTrue(retryTaskLogs.size() == ids.size(), () -> new SnailJobServerException("数据不存在"));
 
         for (final RetryTaskLog retryTaskLog : retryTaskLogs) {
-            retryTaskLogMessageMapper.delete(new LambdaQueryWrapper<RetryTaskLogMessage>()
-                .eq(RetryTaskLogMessage::getNamespaceId, namespaceId)
-                .eq(RetryTaskLogMessage::getGroupName, retryTaskLog.getGroupName())
-                .eq(RetryTaskLogMessage::getUniqueId, retryTaskLog.getUniqueId())
-            );
+            retryTaskLogMessageMapper.delete(
+                new LambdaQueryWrapper<RetryTaskLogMessage>()
+                    .eq(RetryTaskLogMessage::getNamespaceId, namespaceId)
+                    .eq(RetryTaskLogMessage::getGroupName, retryTaskLog.getGroupName())
+                    .eq(RetryTaskLogMessage::getUniqueId, retryTaskLog.getUniqueId()));
         }
         return 1 == retryTaskLogMapper.deleteBatchIds(ids);
     }

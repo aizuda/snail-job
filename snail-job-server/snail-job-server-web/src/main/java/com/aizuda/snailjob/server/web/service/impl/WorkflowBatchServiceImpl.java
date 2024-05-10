@@ -65,35 +65,19 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
         PageDTO<JobTaskBatch> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
 
         UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
-        List<String> groupNames = Lists.newArrayList();
-        if (userSessionVO.isUser()) {
-            groupNames = userSessionVO.getGroupNames();
+        List<String> groupNames = UserSessionUtils.getGroupNames(queryVO.getGroupName());
+
+        // 如果当前用户为普通用户, 且计算后组名条件为空, 不能查询
+        if (userSessionVO.isUser() && CollUtil.isEmpty(groupNames)) {
+            return new PageResult<>(pageDTO, Collections.emptyList());
         }
 
-        if (StrUtil.isNotBlank(queryVO.getGroupName())) {
-            // 说明当前组不在用户配置的权限中
-            if (!CollectionUtils.isEmpty(groupNames) && !groupNames.contains(queryVO.getGroupName())) {
-                return new PageResult<>(pageDTO, Lists.newArrayList());
-            } else {
-                groupNames = Lists.newArrayList(queryVO.getGroupName());
-            }
-        }
-
-        WorkflowBatchQueryDO queryDO = new WorkflowBatchQueryDO();
-        if (StrUtil.isNotBlank(queryVO.getWorkflowName())) {
-            queryDO.setWorkflowName(queryVO.getWorkflowName() + "%");
-        }
-
-        queryDO.setWorkflowId(queryVO.getWorkflowId());
-        queryDO.setTaskBatchStatus(queryVO.getTaskBatchStatus());
-        queryDO.setGroupNames(groupNames);
-        queryDO.setNamespaceId(userSessionVO.getNamespaceId());
         QueryWrapper<WorkflowTaskBatch> wrapper = new QueryWrapper<WorkflowTaskBatch>()
-            .eq("a.namespace_id", queryDO.getNamespaceId())
-            .eq(queryDO.getWorkflowId() != null, "a.workflow_id", queryVO.getWorkflowId())
+            .eq("a.namespace_id", userSessionVO.getNamespaceId())
+            .eq(queryVO.getWorkflowId() != null, "a.workflow_id", queryVO.getWorkflowId())
             .in(CollUtil.isNotEmpty(groupNames), "a.group_name", groupNames)
-            .eq(queryDO.getTaskBatchStatus() != null, "task_batch_status", queryDO.getTaskBatchStatus())
-            .eq(StrUtil.isNotBlank(queryDO.getWorkflowName()), "b.workflow_name", queryDO.getWorkflowName())
+            .eq(queryVO.getTaskBatchStatus() != null, "task_batch_status", queryVO.getTaskBatchStatus())
+            .likeRight(StrUtil.isNotBlank(queryVO.getWorkflowName()), "b.workflow_name", queryVO.getWorkflowName())
             .eq("a.deleted", 0)
             .orderByDesc("a.id");
         List<WorkflowBatchResponseDO> batchResponseDOList = workflowTaskBatchMapper.selectWorkflowBatchPageList(pageDTO, wrapper);

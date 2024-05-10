@@ -56,34 +56,20 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
     public PageResult<List<RetryDeadLetterResponseVO>> getRetryDeadLetterPage(RetryDeadLetterQueryVO queryVO) {
 
         PageDTO<RetryDeadLetter> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
-
         if (StrUtil.isBlank(queryVO.getGroupName())) {
             return new PageResult<>(pageDTO, new ArrayList<>());
         }
-
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
-        LambdaQueryWrapper<RetryDeadLetter> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(RetryDeadLetter::getNamespaceId, namespaceId);
-        queryWrapper.eq(RetryDeadLetter::getGroupName, queryVO.getGroupName());
-
-        if (StrUtil.isNotBlank(queryVO.getSceneName())) {
-            queryWrapper.eq(RetryDeadLetter::getSceneName, queryVO.getSceneName());
-        }
-
-        if (StrUtil.isNotBlank(queryVO.getBizNo())) {
-            queryWrapper.eq(RetryDeadLetter::getBizNo, queryVO.getBizNo());
-        }
-
-        if (StrUtil.isNotBlank(queryVO.getIdempotentId())) {
-            queryWrapper.eq(RetryDeadLetter::getIdempotentId, queryVO.getIdempotentId());
-        }
-
-        if (StrUtil.isNotBlank(queryVO.getUniqueId())) {
-            queryWrapper.eq(RetryDeadLetter::getUniqueId, queryVO.getUniqueId());
-        }
 
         PageDTO<RetryDeadLetter> retryDeadLetterPageDTO = accessTemplate.getRetryDeadLetterAccess()
-            .listPage(queryVO.getGroupName(), namespaceId, pageDTO, queryWrapper);
+            .listPage(queryVO.getGroupName(), namespaceId, pageDTO,
+                new LambdaQueryWrapper<RetryDeadLetter>()
+                    .eq(RetryDeadLetter::getNamespaceId, namespaceId)
+                    .eq(RetryDeadLetter::getGroupName, queryVO.getGroupName())
+                    .eq(StrUtil.isNotBlank(queryVO.getSceneName()), RetryDeadLetter::getSceneName, queryVO.getSceneName())
+                    .eq(StrUtil.isNotBlank(queryVO.getBizNo()), RetryDeadLetter::getBizNo, queryVO.getBizNo())
+                    .eq(StrUtil.isNotBlank(queryVO.getIdempotentId()), RetryDeadLetter::getIdempotentId, queryVO.getIdempotentId())
+                    .eq(StrUtil.isNotBlank(queryVO.getUniqueId()), RetryDeadLetter::getUniqueId, queryVO.getUniqueId()));
 
         return new PageResult<>(retryDeadLetterPageDTO,
             RetryDeadLetterResponseVOConverter.INSTANCE.batchConvert(retryDeadLetterPageDTO.getRecords()));

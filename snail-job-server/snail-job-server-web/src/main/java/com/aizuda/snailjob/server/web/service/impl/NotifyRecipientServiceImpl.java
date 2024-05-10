@@ -34,17 +34,11 @@ public class NotifyRecipientServiceImpl implements NotifyRecipientService {
     @Override
     public PageResult<List<NotifyRecipientResponseVO>> getNotifyRecipientPageList(NotifyRecipientQueryVO queryVO) {
         PageDTO<NotifyRecipient> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
-        LambdaQueryWrapper<NotifyRecipient> queryWrapper = new LambdaQueryWrapper<>();
-        if (StrUtil.isNotBlank(queryVO.getRecipientName())) {
-            queryWrapper.likeRight(NotifyRecipient::getRecipientName, queryVO.getRecipientName());
-        }
-
-        if (Objects.nonNull(queryVO.getNotifyType())) {
-            queryWrapper.likeRight(NotifyRecipient::getNotifyType, queryVO.getNotifyType());
-        }
-
-        queryWrapper.orderByDesc(NotifyRecipient::getCreateDt);
-        PageDTO<NotifyRecipient> notifyRecipientPageDTO = notifyRecipientMapper.selectPage(pageDTO, queryWrapper);
+        PageDTO<NotifyRecipient> notifyRecipientPageDTO = notifyRecipientMapper.selectPage(pageDTO,
+            new LambdaQueryWrapper<NotifyRecipient>()
+                .likeRight(StrUtil.isNotBlank(queryVO.getRecipientName()), NotifyRecipient::getRecipientName, queryVO.getRecipientName())
+                .likeRight(Objects.nonNull(queryVO.getNotifyType()), NotifyRecipient::getNotifyType, queryVO.getNotifyType())
+                .orderByDesc(NotifyRecipient::getCreateDt));
 
         return new PageResult<>(pageDTO,
             NotifyRecipientConverter.INSTANCE.toNotifyRecipientResponseVOs(notifyRecipientPageDTO.getRecords()));
@@ -68,10 +62,9 @@ public class NotifyRecipientServiceImpl implements NotifyRecipientService {
 
     @Override
     public List<CommonLabelValueResponseVO> getNotifyRecipientList() {
-
-        LambdaQueryWrapper<NotifyRecipient> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.select(NotifyRecipient::getRecipientName, NotifyRecipient::getId);
-        List<NotifyRecipient> notifyRecipients = notifyRecipientMapper.selectList(queryWrapper);
+        List<NotifyRecipient> notifyRecipients = notifyRecipientMapper.selectList(
+            new LambdaQueryWrapper<NotifyRecipient>()
+                .select(NotifyRecipient::getRecipientName, NotifyRecipient::getId));
         return NotifyRecipientConverter.INSTANCE.toCommonLabelValueResponseVOs(notifyRecipients);
     }
 

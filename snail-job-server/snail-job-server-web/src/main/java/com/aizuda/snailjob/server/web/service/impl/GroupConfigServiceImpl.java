@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.web.service.impl;
 
-import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.HashUtil;
 import cn.hutool.core.util.ReUtil;
@@ -171,22 +171,15 @@ public class GroupConfigServiceImpl implements GroupConfigService {
 
         UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
         String namespaceId = userSessionVO.getNamespaceId();
-        LambdaQueryWrapper<GroupConfig> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(GroupConfig::getNamespaceId, namespaceId);
-
-        if (userSessionVO.isUser()) {
-            queryWrapper.in(GroupConfig::getGroupName, userSessionVO.getGroupNames());
-        }
-
-        if (StrUtil.isNotBlank(queryVO.getGroupName())) {
-            queryWrapper.like(GroupConfig::getGroupName, queryVO.getGroupName() + "%");
-        }
 
         ConfigAccess<GroupConfig> groupConfigAccess = accessTemplate.getGroupConfigAccess();
-
-        queryWrapper.orderByDesc(GroupConfig::getId);
         PageDTO<GroupConfig> groupConfigPageDTO = groupConfigAccess.listPage(
-            new PageDTO<>(queryVO.getPage(), queryVO.getSize()), queryWrapper);
+            new PageDTO<>(queryVO.getPage(), queryVO.getSize()),
+            new LambdaQueryWrapper<GroupConfig>()
+                .eq(GroupConfig::getNamespaceId, namespaceId)
+                .in(userSessionVO.isUser(), GroupConfig::getGroupName, userSessionVO.getGroupNames())
+                .likeRight(StrUtil.isNotBlank(queryVO.getGroupName()), GroupConfig::getGroupName, StrUtil.trim(queryVO.getGroupName()))
+                .orderByDesc(GroupConfig::getId));
         List<GroupConfig> records = groupConfigPageDTO.getRecords();
         if (CollectionUtils.isEmpty(records)) {
             return new PageResult<>(groupConfigPageDTO.getCurrent(), groupConfigPageDTO.getSize(),
@@ -301,11 +294,12 @@ public class GroupConfigServiceImpl implements GroupConfigService {
 
         ConfigAccess<GroupConfig> groupConfigAccess = accessTemplate.getGroupConfigAccess();
 
-        List<GroupConfig> groupConfigs = groupConfigAccess.list(new LambdaQueryWrapper<GroupConfig>()
-            .select(GroupConfig::getGroupName, GroupConfig::getNamespaceId)
-            .in(CollectionUtil.isNotEmpty(namespaceIds), GroupConfig::getNamespaceId, namespaceIds));
-        if (CollectionUtils.isEmpty(groupConfigs)) {
-            return new ArrayList<>();
+        List<GroupConfig> groupConfigs = groupConfigAccess.list(
+            new LambdaQueryWrapper<GroupConfig>()
+                .select(GroupConfig::getGroupName, GroupConfig::getNamespaceId)
+                .in(CollUtil.isNotEmpty(namespaceIds), GroupConfig::getNamespaceId, namespaceIds));
+        if (CollUtil.isEmpty(groupConfigs)) {
+            return Collections.emptyList();
         }
 
         List<Namespace> namespaces = namespaceMapper.selectList(

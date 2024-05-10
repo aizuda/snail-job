@@ -74,16 +74,16 @@ public class JobServiceImpl implements JobService {
 
         PageDTO<Job> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
         UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
-        LambdaQueryWrapper<Job> wrapper = new LambdaQueryWrapper<Job>()
-            .eq(Job::getDeleted, StatusEnum.NO.getStatus())
-            .eq(Job::getNamespaceId, userSessionVO.getNamespaceId())
-            .in(userSessionVO.isUser(), Job::getGroupName, userSessionVO.getGroupNames())
-            .eq(StrUtil.isNotBlank(queryVO.getGroupName()), Job::getGroupName, queryVO.getGroupName())
-            .likeRight(StrUtil.isNotBlank(queryVO.getJobName()), Job::getJobName, StrUtil.trim(queryVO.getJobName()))
-            .eq(Objects.nonNull(queryVO.getJobStatus()), Job::getJobStatus, queryVO.getJobStatus())
-            .eq(Job::getDeleted, StatusEnum.NO.getStatus())
-            .orderByDesc(Job::getId);
-        PageDTO<Job> selectPage = jobMapper.selectPage(pageDTO, wrapper);
+        PageDTO<Job> selectPage = jobMapper.selectPage(pageDTO,
+            new LambdaQueryWrapper<Job>()
+                .eq(Job::getDeleted, StatusEnum.NO.getStatus())
+                .eq(Job::getNamespaceId, userSessionVO.getNamespaceId())
+                .in(userSessionVO.isUser(), Job::getGroupName, userSessionVO.getGroupNames())
+                .eq(StrUtil.isNotBlank(queryVO.getGroupName()), Job::getGroupName, queryVO.getGroupName())
+                .likeRight(StrUtil.isNotBlank(queryVO.getJobName()), Job::getJobName, StrUtil.trim(queryVO.getJobName()))
+                .eq(Objects.nonNull(queryVO.getJobStatus()), Job::getJobStatus, queryVO.getJobStatus())
+                .eq(Job::getDeleted, StatusEnum.NO.getStatus())
+                .orderByDesc(Job::getId));
 
         List<JobResponseVO> jobResponseList = JobResponseVOConverter.INSTANCE.toJobResponseVOs(selectPage.getRecords());
 
@@ -105,16 +105,17 @@ public class JobServiceImpl implements JobService {
     public List<JobResponseVO> getJobNameList(String keywords, Long jobId, String groupName) {
 
         UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
-        LambdaQueryWrapper<Job> queryWrapper = new LambdaQueryWrapper<Job>()
-            .select(Job::getId, Job::getJobName)
-            .eq(Job::getNamespaceId, userSessionVO.getNamespaceId())
-            .likeRight(StrUtil.isNotBlank(keywords), Job::getJobName, StrUtil.trim(keywords))
-            .eq(StrUtil.isNotBlank(groupName), Job::getGroupName, groupName)
-            .eq(Objects.nonNull(jobId), Job::getId, jobId)
-            .eq(Job::getDeleted, StatusEnum.NO.getStatus())
-            .orderByAsc(Job::getId); // SQLServer 分页必须 ORDER BY
-        PageDTO<Job> pageDTO = new PageDTO<>(1, 20);
-        PageDTO<Job> selectPage = jobMapper.selectPage(pageDTO, queryWrapper);
+        PageDTO<Job> selectPage = jobMapper.selectPage(
+            new PageDTO<>(1, 20),
+            new LambdaQueryWrapper<Job>()
+                .select(Job::getId, Job::getJobName)
+                .eq(Job::getNamespaceId, userSessionVO.getNamespaceId())
+                .likeRight(StrUtil.isNotBlank(keywords), Job::getJobName, StrUtil.trim(keywords))
+                .eq(StrUtil.isNotBlank(groupName), Job::getGroupName, groupName)
+                .eq(Objects.nonNull(jobId), Job::getId, jobId)
+                .eq(Job::getDeleted, StatusEnum.NO.getStatus())
+                // SQLServer 分页必须 ORDER BY
+                .orderByAsc(Job::getId));
         return JobResponseVOConverter.INSTANCE.toJobResponseVOs(selectPage.getRecords());
     }
 
@@ -231,12 +232,13 @@ public class JobServiceImpl implements JobService {
     @Override
     public List<JobResponseVO> getJobList(String groupName) {
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
-        List<Job> jobs = jobMapper.selectList(new LambdaQueryWrapper<Job>()
-            .select(Job::getId, Job::getJobName)
-            .eq(Job::getNamespaceId, namespaceId)
-            .eq(Job::getGroupName, groupName)
-            .eq(Job::getDeleted, StatusEnum.NO.getStatus())
-            .orderByDesc(Job::getCreateDt));
+        List<Job> jobs = jobMapper.selectList(
+            new LambdaQueryWrapper<Job>()
+                .select(Job::getId, Job::getJobName)
+                .eq(Job::getNamespaceId, namespaceId)
+                .eq(Job::getGroupName, groupName)
+                .eq(Job::getDeleted, StatusEnum.NO.getStatus())
+                .orderByDesc(Job::getCreateDt));
         List<JobResponseVO> jobResponseList = JobResponseVOConverter.INSTANCE.toJobResponseVOs(jobs);
         return jobResponseList;
     }

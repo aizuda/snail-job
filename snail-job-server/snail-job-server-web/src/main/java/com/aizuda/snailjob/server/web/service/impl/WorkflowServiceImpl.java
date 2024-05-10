@@ -80,6 +80,30 @@ public class WorkflowServiceImpl implements WorkflowService {
     private final JobMapper jobMapper;
     private final AccessTemplate accessTemplate;
 
+    private static Long calculateNextTriggerAt(final WorkflowRequestVO workflowRequestVO, Long time) {
+        checkExecuteInterval(workflowRequestVO);
+
+        WaitStrategy waitStrategy = WaitStrategies.WaitStrategyEnum.getWaitStrategy(workflowRequestVO.getTriggerType());
+        WaitStrategies.WaitStrategyContext waitStrategyContext = new WaitStrategies.WaitStrategyContext();
+        waitStrategyContext.setTriggerInterval(workflowRequestVO.getTriggerInterval());
+        waitStrategyContext.setNextTriggerAt(time);
+        return waitStrategy.computeTriggerTime(waitStrategyContext);
+    }
+
+    private static void checkExecuteInterval(WorkflowRequestVO requestVO) {
+        if (Lists.newArrayList(WaitStrategies.WaitStrategyEnum.FIXED.getType(),
+                WaitStrategies.WaitStrategyEnum.RANDOM.getType())
+            .contains(requestVO.getTriggerType())) {
+            if (Integer.parseInt(requestVO.getTriggerInterval()) < 10) {
+                throw new SnailJobServerException("触发间隔不得小于10");
+            }
+        } else if (requestVO.getTriggerType() == WaitStrategies.WaitStrategyEnum.CRON.getType()) {
+            if (CronUtils.getExecuteInterval(requestVO.getTriggerInterval()) < 10 * 1000) {
+                throw new SnailJobServerException("触发间隔不得小于10");
+            }
+        }
+    }
+
     @Override
     @Transactional
     public boolean saveWorkflow(WorkflowRequestVO workflowRequestVO) {
@@ -119,39 +143,11 @@ public class WorkflowServiceImpl implements WorkflowService {
     }
 
     private MutableGraph<Long> createGraph() {
-        return GraphBuilder.directed().nodeOrder(ElementOrder.sorted((Comparator<Long>) (o1, o2) -> {
-            if (o1 - o2 > 0) {
-                return 1;
-            } else if (o1 - o2 < 0) {
-                return -1;
-            } else {
-                return 0;
-            }
-        })).incidentEdgeOrder(ElementOrder.stable()).allowsSelfLoops(false).build();
-    }
-
-    private static Long calculateNextTriggerAt(final WorkflowRequestVO workflowRequestVO, Long time) {
-        checkExecuteInterval(workflowRequestVO);
-
-        WaitStrategy waitStrategy = WaitStrategies.WaitStrategyEnum.getWaitStrategy(workflowRequestVO.getTriggerType());
-        WaitStrategies.WaitStrategyContext waitStrategyContext = new WaitStrategies.WaitStrategyContext();
-        waitStrategyContext.setTriggerInterval(workflowRequestVO.getTriggerInterval());
-        waitStrategyContext.setNextTriggerAt(time);
-        return waitStrategy.computeTriggerTime(waitStrategyContext);
-    }
-
-    private static void checkExecuteInterval(WorkflowRequestVO requestVO) {
-        if (Lists.newArrayList(WaitStrategies.WaitStrategyEnum.FIXED.getType(),
-                WaitStrategies.WaitStrategyEnum.RANDOM.getType())
-            .contains(requestVO.getTriggerType())) {
-            if (Integer.parseInt(requestVO.getTriggerInterval()) < 10) {
-                throw new SnailJobServerException("触发间隔不得小于10");
-            }
-        } else if (requestVO.getTriggerType() == WaitStrategies.WaitStrategyEnum.CRON.getType()) {
-            if (CronUtils.getExecuteInterval(requestVO.getTriggerInterval()) < 10 * 1000) {
-                throw new SnailJobServerException("触发间隔不得小于10");
-            }
-        }
+        return GraphBuilder.directed()
+            .nodeOrder(ElementOrder.sorted(Long::compare))
+            .incidentEdgeOrder(ElementOrder.stable())
+            .allowsSelfLoops(false)
+            .build();
     }
 
     @Override
@@ -210,24 +206,14 @@ public class WorkflowServiceImpl implements WorkflowService {
         PageDTO<Workflow> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
 
         UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
-        LambdaQueryWrapper<Workflow> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Workflow::getDeleted, StatusEnum.NO.getStatus());
-        queryWrapper.eq(Workflow::getNamespaceId, userSessionVO.getNamespaceId());
-
-        if (StrUtil.isNotBlank(queryVO.getGroupName())) {
-            queryWrapper.eq(Workflow::getGroupName, queryVO.getGroupName());
-        }
-
-        if (StrUtil.isNotBlank(queryVO.getWorkflowName())) {
-            queryWrapper.like(Workflow::getWorkflowName, queryVO.getWorkflowName());
-        }
-
-        if (Objects.nonNull(queryVO.getWorkflowStatus())) {
-            queryWrapper.eq(Workflow::getWorkflowStatus, queryVO.getWorkflowStatus());
-        }
-
-        queryWrapper.orderByDesc(Workflow::getId);
-        PageDTO<Workflow> page = workflowMapper.selectPage(pageDTO, queryWrapper);
+        PageDTO<Workflow> page = workflowMapper.selectPage(pageDTO,
+            new LambdaQueryWrapper<Workflow>()
+                .eq(Workflow::getDeleted, StatusEnum.NO.getStatus())
+                .eq(Workflow::getNamespaceId, userSessionVO.getNamespaceId())
+                .eq(StrUtil.isNotBlank(queryVO.getGroupName()), Workflow::getGroupName, queryVO.getGroupName())
+                .like(StrUtil.isNotBlank(queryVO.getWorkflowName()), Workflow::getWorkflowName, queryVO.getWorkflowName())
+                .eq(Objects.nonNull(queryVO.getWorkflowStatus()), Workflow::getWorkflowStatus, queryVO.getWorkflowStatus())
+                .orderByDesc(Workflow::getId));
 
         List<WorkflowResponseVO> jobResponseList = WorkflowConverter.INSTANCE.toWorkflowResponseVO(page.getRecords());
 
@@ -322,21 +308,14 @@ public class WorkflowServiceImpl implements WorkflowService {
 
     @Override
     public List<WorkflowResponseVO> getWorkflowNameList(String keywords, Long workflowId) {
-
-        LambdaQueryWrapper<Workflow> queryWrapper = new LambdaQueryWrapper<Workflow>()
-            .select(Workflow::getId, Workflow::getWorkflowName);
-        if (StrUtil.isNotBlank(keywords)) {
-            queryWrapper.like(Workflow::getWorkflowName, keywords.trim() + "%");
-        }
-
-        if (Objects.nonNull(workflowId)) {
-            queryWrapper.eq(Workflow::getId, workflowId);
-        }
-
-        queryWrapper.eq(Workflow::getDeleted, StatusEnum.NO.getStatus())
-            .orderByAsc(Workflow::getId); // SQLServer 分页必须 ORDER BY
-        PageDTO<Workflow> pageDTO = new PageDTO<>(1, 20);
-        PageDTO<Workflow> selectPage = workflowMapper.selectPage(pageDTO, queryWrapper);
+        PageDTO<Workflow> selectPage = workflowMapper.selectPage(
+            new PageDTO<>(1, 20),
+            new LambdaQueryWrapper<Workflow>()
+                .select(Workflow::getId, Workflow::getWorkflowName)
+                .likeRight(StrUtil.isNotBlank(keywords), Workflow::getWorkflowName, StrUtil.trim(keywords))
+                .eq(Objects.nonNull(workflowId), Workflow::getId, workflowId)
+                .eq(Workflow::getDeleted, StatusEnum.NO.getStatus())
+                .orderByAsc(Workflow::getId));
 
         return WorkflowConverter.INSTANCE.toWorkflowResponseVO(selectPage.getRecords());
     }

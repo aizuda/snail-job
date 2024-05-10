@@ -38,6 +38,7 @@ import org.springframework.util.CollectionUtils;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author: opensnail
@@ -57,22 +58,13 @@ public class NotifyConfigServiceImpl implements NotifyConfigService {
         PageDTO<NotifyConfig> pageDTO = new PageDTO<>();
 
         UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
-        LambdaQueryWrapper<NotifyConfig> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(NotifyConfig::getNamespaceId, userSessionVO.getNamespaceId());
-
-        if (userSessionVO.isUser()) {
-            queryWrapper.in(NotifyConfig::getGroupName, userSessionVO.getGroupNames());
-        }
-
-        if (StrUtil.isNotBlank(queryVO.getGroupName())) {
-            queryWrapper.eq(NotifyConfig::getGroupName, queryVO.getGroupName());
-        }
-        if (StrUtil.isNotBlank(queryVO.getSceneName())) {
-            queryWrapper.eq(NotifyConfig::getBusinessId, queryVO.getSceneName());
-        }
-
-        queryWrapper.orderByDesc(NotifyConfig::getId);
-        List<NotifyConfig> notifyConfigs = accessTemplate.getNotifyConfigAccess().listPage(pageDTO, queryWrapper)
+        List<NotifyConfig> notifyConfigs = accessTemplate.getNotifyConfigAccess().listPage(pageDTO,
+                new LambdaQueryWrapper<NotifyConfig>()
+                    .eq(NotifyConfig::getNamespaceId, userSessionVO.getNamespaceId())
+                    .in(userSessionVO.isUser(), NotifyConfig::getGroupName, userSessionVO.getGroupNames())
+                    .eq(StrUtil.isNotBlank(queryVO.getGroupName()), NotifyConfig::getGroupName, queryVO.getGroupName())
+                    .eq(StrUtil.isNotBlank(queryVO.getSceneName()), NotifyConfig::getBusinessId, queryVO.getSceneName())
+                    .orderByDesc(NotifyConfig::getId))
             .getRecords();
 
         if (CollectionUtils.isEmpty(notifyConfigs)) {
@@ -133,9 +125,8 @@ public class NotifyConfigServiceImpl implements NotifyConfigService {
 
     @NotNull
     private Map<Long, String> getRecipientNameMap(final List<NotifyConfigResponseVO> notifyConfigResponseVOS) {
-        Set<Long> recipientIds = notifyConfigResponseVOS.stream()
-            .flatMap(config -> config.getRecipientIds().stream())
-            .collect(Collectors.toSet());
+        Set<Long> recipientIds = StreamUtils.toSetByFlatMap(notifyConfigResponseVOS,
+            NotifyConfigResponseVO::getRecipientIds, Collection::stream);
 
         if (CollectionUtils.isEmpty(recipientIds)) {
             return Maps.newHashMap();

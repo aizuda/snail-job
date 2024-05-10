@@ -82,39 +82,24 @@ public class RetryTaskServiceImpl implements RetryTaskService {
 
         PageDTO<RetryTask> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
-
-        LambdaQueryWrapper<RetryTask> retryTaskLambdaQueryWrapper = new LambdaQueryWrapper<>();
-        retryTaskLambdaQueryWrapper.eq(RetryTask::getNamespaceId, namespaceId);
-        if (StrUtil.isNotBlank(queryVO.getGroupName())) {
-            retryTaskLambdaQueryWrapper.eq(RetryTask::getGroupName, queryVO.getGroupName());
-        } else {
+        if (StrUtil.isBlank(queryVO.getGroupName())) {
             return new PageResult<>(pageDTO, new ArrayList<>());
         }
 
-        if (StrUtil.isNotBlank(queryVO.getSceneName())) {
-            retryTaskLambdaQueryWrapper.eq(RetryTask::getSceneName, queryVO.getSceneName());
-        }
-        if (StrUtil.isNotBlank(queryVO.getBizNo())) {
-            retryTaskLambdaQueryWrapper.eq(RetryTask::getBizNo, queryVO.getBizNo());
-        }
-        if (StrUtil.isNotBlank(queryVO.getIdempotentId())) {
-            retryTaskLambdaQueryWrapper.eq(RetryTask::getIdempotentId, queryVO.getIdempotentId());
-        }
-        if (StrUtil.isNotBlank(queryVO.getUniqueId())) {
-            retryTaskLambdaQueryWrapper.eq(RetryTask::getUniqueId, queryVO.getUniqueId());
-        }
-        if (Objects.nonNull(queryVO.getRetryStatus())) {
-            retryTaskLambdaQueryWrapper.eq(RetryTask::getRetryStatus, queryVO.getRetryStatus());
-        }
-
-        retryTaskLambdaQueryWrapper.select(RetryTask::getId, RetryTask::getBizNo, RetryTask::getIdempotentId,
-            RetryTask::getGroupName, RetryTask::getNextTriggerAt, RetryTask::getRetryCount,
-            RetryTask::getRetryStatus, RetryTask::getUpdateDt, RetryTask::getSceneName, RetryTask::getUniqueId,
-            RetryTask::getTaskType);
-        pageDTO = accessTemplate.getRetryTaskAccess()
-            .listPage(queryVO.getGroupName(), namespaceId,
-                pageDTO,
-                retryTaskLambdaQueryWrapper.orderByDesc(RetryTask::getCreateDt));
+        LambdaQueryWrapper<RetryTask> queryWrapper = new LambdaQueryWrapper<RetryTask>()
+            .eq(RetryTask::getNamespaceId, namespaceId)
+            .eq(RetryTask::getGroupName, queryVO.getGroupName())
+            .eq(StrUtil.isNotBlank(queryVO.getSceneName()), RetryTask::getSceneName, queryVO.getSceneName())
+            .eq(StrUtil.isNotBlank(queryVO.getBizNo()), RetryTask::getBizNo, queryVO.getBizNo())
+            .eq(StrUtil.isNotBlank(queryVO.getIdempotentId()), RetryTask::getIdempotentId, queryVO.getIdempotentId())
+            .eq(StrUtil.isNotBlank(queryVO.getUniqueId()), RetryTask::getUniqueId, queryVO.getUniqueId())
+            .eq(Objects.nonNull(queryVO.getRetryStatus()), RetryTask::getRetryStatus, queryVO.getRetryStatus())
+            .select(RetryTask::getId, RetryTask::getBizNo, RetryTask::getIdempotentId,
+                RetryTask::getGroupName, RetryTask::getNextTriggerAt, RetryTask::getRetryCount,
+                RetryTask::getRetryStatus, RetryTask::getUpdateDt, RetryTask::getSceneName, RetryTask::getUniqueId,
+                RetryTask::getTaskType)
+            .orderByDesc(RetryTask::getCreateDt);
+        pageDTO = accessTemplate.getRetryTaskAccess().listPage(queryVO.getGroupName(), namespaceId, pageDTO, queryWrapper);
         return new PageResult<>(pageDTO,
             RetryTaskResponseVOConverter.INSTANCE.toRetryTaskResponseVO(pageDTO.getRecords()));
     }
