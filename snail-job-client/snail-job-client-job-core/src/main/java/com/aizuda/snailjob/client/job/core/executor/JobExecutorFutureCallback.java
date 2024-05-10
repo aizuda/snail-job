@@ -45,19 +45,23 @@ import java.util.concurrent.CancellationException;
 public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> {
 
     private static final String TEXT_MESSAGE_FORMATTER = """
-        <font face="微软雅黑" color=#ff0000 size=4>{}环境 执行结果上报异常</font> \s
+        <font face="微软雅黑" color=#ff0000 size=4>{}环境 定时任务上报异常</font> \s
          > IP:{}   \s
          > 空间ID:{}  \s
          > 名称:{}   \s
          > 时间:{}   \s
-         > 结果:{}   \s
          > 异常:{} \s
         \s""";
 
     private static final JobNettyClient CLIENT = RequestBuilder.<JobNettyClient, NettyResult>newBuilder()
         .client(JobNettyClient.class)
-        .callback(nettyResult -> SnailJobLog.LOCAL.info("Job execute result report successfully requestId:[{}]",
-            nettyResult.getRequestId())).build();
+        .callback(nettyResult -> {
+            if (nettyResult.getStatus() == StatusEnum.NO.getStatus()) {
+                sendMessage(nettyResult.getMessage());
+            }
+            SnailJobLog.LOCAL.debug("Job execute result report successfully requestId:[{}]",
+                nettyResult.getRequestId());
+        }).build();
 
     private final JobContext jobContext;
 
@@ -90,7 +94,7 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
             CLIENT.dispatchResult(buildDispatchJobResultRequest(result, taskStatus));
         } catch (Exception e) {
             SnailJobLog.REMOTE.error("执行结果上报异常.[{}]", jobContext.getTaskId(), e);
-            sendMessage(result, e);
+            sendMessage(e.getMessage());
         } finally {
             SnailJobLogManager.removeLogMeta();
             stopThreadPool();
@@ -118,7 +122,7 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
             );
         } catch (Exception e) {
             SnailJobLog.REMOTE.error("执行结果上报异常.[{}]", jobContext.getTaskId(), e);
-            sendMessage(failure, e);
+            sendMessage(e.getMessage());
         } finally {
             SnailJobLogManager.removeLogMeta();
             stopThreadPool();
@@ -159,7 +163,7 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
         return dispatchJobRequest;
     }
 
-    private void sendMessage(final ExecuteResult result, Exception e) {
+    private static void sendMessage(String message) {
 
         try {
             SnailJobProperties snailJobProperties = SpringContext.getBean(SnailJobProperties.class);
@@ -178,8 +182,7 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
                             snailJobProperties.getNamespace(),
                             snailJobProperties.getGroup(),
                             LocalDateTime.now().format(DatePattern.NORM_DATETIME_FORMATTER),
-                            JsonUtil.toJsonString(result),
-                            e.getMessage())
+                            message)
                         .title("定时任务执行结果上报异常:[{}]", snailJobProperties.getGroup())
                         .notifyAttribute(recipient.getNotifyAttribute());
 
