@@ -133,8 +133,8 @@ public class WorkflowServiceImpl implements WorkflowService {
             workflowRequestVO.getGroupName(),
             workflow.getId(), nodeConfig, graph,
             workflow.getVersion());
-
         log.info("图构建完成. graph:[{}]", graph);
+
         // 保存图信息
         workflow.setVersion(null);
         workflow.setFlowInfo(JsonUtil.toJsonString(GraphUtils.serializeGraphToJson(graph)));
@@ -250,10 +250,12 @@ public class WorkflowServiceImpl implements WorkflowService {
         workflow.setVersion(version);
         workflow.setNextTriggerAt(calculateNextTriggerAt(workflowRequestVO, DateUtils.toNowMilli()));
         workflow.setFlowInfo(JsonUtil.toJsonString(GraphUtils.serializeGraphToJson(graph)));
-        Assert.isTrue(workflowMapper.update(workflow, new LambdaQueryWrapper<Workflow>()
-            .eq(Workflow::getId, workflow.getId())
-            .eq(Workflow::getVersion, version)
-        ) > 0, () -> new SnailJobServerException("更新失败"));
+        Assert.isTrue(
+            workflowMapper.update(workflow,
+                new LambdaQueryWrapper<Workflow>()
+                    .eq(Workflow::getId, workflow.getId())
+                    .eq(Workflow::getVersion, version)) > 0,
+            () -> new SnailJobServerException("更新失败"));
 
         return Boolean.TRUE;
     }
@@ -288,10 +290,11 @@ public class WorkflowServiceImpl implements WorkflowService {
         Workflow workflow = workflowMapper.selectById(id);
         Assert.notNull(workflow, () -> new SnailJobServerException("workflow can not be null."));
 
-        long count = accessTemplate.getGroupConfigAccess().count(new LambdaQueryWrapper<GroupConfig>()
-            .eq(GroupConfig::getGroupName, workflow.getGroupName())
-            .eq(GroupConfig::getNamespaceId, workflow.getNamespaceId())
-            .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus())
+        long count = accessTemplate.getGroupConfigAccess().count(
+            new LambdaQueryWrapper<GroupConfig>()
+                .eq(GroupConfig::getGroupName, workflow.getGroupName())
+                .eq(GroupConfig::getNamespaceId, workflow.getNamespaceId())
+                .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus())
         );
 
         Assert.isTrue(count > 0, () -> new SnailJobServerException("组:[{}]已经关闭，不支持手动执行.", workflow.getGroupName()));
