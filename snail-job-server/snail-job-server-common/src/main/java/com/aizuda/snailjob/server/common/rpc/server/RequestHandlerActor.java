@@ -5,6 +5,9 @@ import cn.hutool.core.net.url.UrlBuilder;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.context.SpringContext;
 import com.aizuda.snailjob.common.core.enums.HeadersEnum;
+import com.aizuda.snailjob.common.core.enums.StatusEnum;
+import com.aizuda.snailjob.common.core.model.NettyResult;
+import com.aizuda.snailjob.common.core.model.SnailJobRequest;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.common.core.model.Result;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
@@ -67,8 +70,8 @@ public class RequestHandlerActor extends AbstractActor {
                 result = doProcess(uri, content, method, headers);
             } catch (Exception e) {
                 SnailJobLog.LOCAL.error("http request error. [{}]", nettyHttpRequest.getContent(), e);
-                result = JsonUtil.toJsonString(new Result<>(0, e.getMessage()));
-                throw e;
+                SnailJobRequest retryRequest = JsonUtil.parseObject(content, SnailJobRequest.class);
+                result = JsonUtil.toJsonString(new NettyResult(StatusEnum.NO.getStatus(), e.getMessage(), null, retryRequest.getReqId()));
             } finally {
                 writeResponse(channelHandlerContext, keepAlive, result);
                 getContext().stop(getSelf());
@@ -108,8 +111,6 @@ public class RequestHandlerActor extends AbstractActor {
            SnailJobLog.LOCAL.warn("client register error. groupName:[{}]", groupName);
         }
 
-
-
         UrlBuilder builder = UrlBuilder.ofHttp(uri);
         Collection<HttpRequestHandler> httpRequestHandlers = SpringContext.getContext()
             .getBeansOfType(HttpRequestHandler.class).values();
@@ -127,11 +128,10 @@ public class RequestHandlerActor extends AbstractActor {
      * write response
      */
     private void writeResponse(ChannelHandlerContext ctx, boolean keepAlive, String responseJson) {
-        // write response
         FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK,
-            Unpooled.copiedBuffer(responseJson, CharsetUtil.UTF_8));   //  Unpooled.wrappedBuffer(responseJson)
+            Unpooled.copiedBuffer(responseJson, CharsetUtil.UTF_8));
         response.headers().set(HttpHeaderNames.CONTENT_TYPE,
-            HttpHeaderValues.APPLICATION_JSON);       // HttpHeaderValues.TEXT_PLAIN.toString()
+            HttpHeaderValues.APPLICATION_JSON);
         response.headers().set(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
         if (keepAlive) {
             response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);

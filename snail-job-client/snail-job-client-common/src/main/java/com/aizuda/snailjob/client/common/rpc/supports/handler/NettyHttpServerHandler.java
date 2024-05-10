@@ -3,6 +3,7 @@ package com.aizuda.snailjob.client.common.rpc.supports.handler;
 import com.aizuda.snailjob.client.common.config.SnailJobProperties;
 import com.aizuda.snailjob.client.common.config.SnailJobProperties.DispatcherThreadPool;
 import com.aizuda.snailjob.client.common.rpc.supports.http.HttpResponse;
+import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.model.SnailJobRequest;
 import com.aizuda.snailjob.common.core.model.NettyResult;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
@@ -64,7 +65,7 @@ public class NettyHttpServerHandler extends SimpleChannelInboundHandler<FullHttp
                 nettyResult = dispatcher.dispatch(nettyHttpRequest);
             } catch (Exception e) {
                 SnailJobRequest retryRequest = JsonUtil.parseObject(content, SnailJobRequest.class);
-                nettyResult = new NettyResult(0, e.getMessage(), null, retryRequest.getReqId());
+                nettyResult = new NettyResult(StatusEnum.NO.getStatus(), e.getMessage(), null, retryRequest.getReqId());
             } finally {
                 writeResponse(channelHandlerContext,
                     HttpUtil.isKeepAlive(fullHttpRequest),

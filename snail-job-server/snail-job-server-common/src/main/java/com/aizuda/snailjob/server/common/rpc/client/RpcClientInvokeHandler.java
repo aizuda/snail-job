@@ -147,21 +147,20 @@ public class RpcClientInvokeHandler implements InvocationHandler {
 
                 sw.start("request start " + snailJobRequest.getReqId());
 
-                CompletableFuture completableFuture = null;
-                // 暂不支持异步
-                if (async) {
-//                    RpcContext.setCompletableFuture(snailJobRequest.getReqId(), null);
-                } else {
-                    completableFuture = new CompletableFuture<>();
-                    RpcContext.setCompletableFuture(snailJobRequest.getReqId(), completableFuture);
-                }
-
                 try {
                     NettyChannel.send(hostId, hostIp, hostPort,
                         HttpMethod.valueOf(mapping.method().name()),  // 拼接 url?a=1&b=1
                         mapping.path(), snailJobRequest.toString(), requestHeaders);
                 } finally {
                     sw.stop();
+                }
+
+                CompletableFuture completableFuture = null;
+                if (async) {
+//                    RpcContext.setCompletableFuture(snailJobRequest.getReqId(), null);
+                } else {
+                    completableFuture = new CompletableFuture<>();
+                    RpcContext.setCompletableFuture(snailJobRequest.getReqId(), completableFuture);
                 }
 
                 SnailJobLog.LOCAL.debug("request complete requestId:[{}] 耗时:[{}ms]", snailJobRequest.getReqId(),

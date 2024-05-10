@@ -47,18 +47,18 @@ public class RpcClientInvokeHandler<R> implements InvocationHandler {
 
         sw.start("request start " + snailJobRequest.getReqId());
 
+        try {
+            NettyChannel.send(HttpMethod.valueOf(annotation.method().name()), annotation.path(), snailJobRequest.toString());
+        } finally {
+            sw.stop();
+        }
+
         CompletableFuture<R> completableFuture = null;
         if (async) {
             RpcContext.setCompletableFuture(snailJobRequest.getReqId(), consumer);
         } else {
             completableFuture = new CompletableFuture<>();
             RpcContext.setCompletableFuture(snailJobRequest.getReqId(), completableFuture);
-        }
-
-        try {
-            NettyChannel.send(HttpMethod.valueOf(annotation.method().name()), annotation.path(), snailJobRequest.toString());
-        } finally {
-            sw.stop();
         }
 
        SnailJobLog.LOCAL.debug("request complete requestId:[{}] 耗时:[{}ms]", snailJobRequest.getReqId(), sw.getTotalTimeMillis());
