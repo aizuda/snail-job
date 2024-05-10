@@ -34,8 +34,8 @@ public enum DateTypeEnum {
                 }
             }
         },
-        (startTime) -> LocalDateTimeUtil.beginOfDay(Optional.ofNullable(startTime).orElse(LocalDateTime.now())),
-        (endTime) -> LocalDateTimeUtil.endOfDay(Optional.ofNullable(endTime).orElse(LocalDateTime.now()))
+        (startTime) -> LocalDateTimeUtil.beginOfDay(startTime),
+        (endTime) -> LocalDateTimeUtil.endOfDay(endTime)
     ),
 
     /**
@@ -52,8 +52,8 @@ public enum DateTypeEnum {
                 }
             }
         },
-        (startTime) -> LocalDateTimeUtil.beginOfDay(Optional.ofNullable(startTime).orElse(LocalDateTime.now()).minusDays(7)),
-        (endTime) -> LocalDateTimeUtil.endOfDay(Optional.ofNullable(endTime).orElse(LocalDateTime.now()))
+        (startTime) -> LocalDateTimeUtil.beginOfDay(startTime).minusDays(7),
+        (endTime) -> LocalDateTimeUtil.endOfDay(endTime)
     ),
 
     /**
@@ -71,8 +71,8 @@ public enum DateTypeEnum {
                 }
             }
         },
-        (startTime) -> LocalDateTimeUtil.beginOfDay(Optional.ofNullable(startTime).orElse(LocalDateTime.now()).minusMonths(1)),
-        (endTime) -> LocalDateTimeUtil.endOfDay(Optional.ofNullable(endTime).orElse(LocalDateTime.now()))
+        (startTime) -> LocalDateTimeUtil.beginOfDay(startTime).minusMonths(1),
+        (endTime) -> LocalDateTimeUtil.endOfDay(endTime)
     ),
 
     /**

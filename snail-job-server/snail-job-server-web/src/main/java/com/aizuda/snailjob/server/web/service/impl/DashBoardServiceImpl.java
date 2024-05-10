@@ -179,8 +179,14 @@ public class DashBoardServiceImpl implements DashBoardService {
 
         // 折线图
         DateTypeEnum dateTypeEnum = DateTypeEnum.valueOf(type);
-        LocalDateTime startDateTime = dateTypeEnum.getStartTime().apply(StrUtil.isNotBlank(startTime) ? LocalDateTime.parse(startTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) : null);
-        LocalDateTime endDateTime = dateTypeEnum.getEndTime().apply(StrUtil.isNotBlank(endTime) ? LocalDateTime.parse(endTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) : null);
+        LocalDateTime startDateTime = dateTypeEnum.getStartTime().apply(
+            StrUtil.isNotBlank(startTime) ?
+                LocalDateTime.parse(startTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) :
+                LocalDateTime.now());
+        LocalDateTime endDateTime = dateTypeEnum.getEndTime().apply(
+            StrUtil.isNotBlank(endTime) ?
+                LocalDateTime.parse(endTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) :
+                LocalDateTime.now());
         List<DashboardLineResponseDO> dashboardRetryLinkeResponseDOList = retrySummaryMapper.retryLineList(
             DashboardLineEnum.dateFormat(type),
             new LambdaQueryWrapper<RetrySummary>()
@@ -241,8 +247,14 @@ public class DashBoardServiceImpl implements DashBoardService {
 
         // 折线图
         DateTypeEnum dateTypeEnum = DateTypeEnum.valueOf(type);
-        LocalDateTime startDateTime = dateTypeEnum.getStartTime().apply(StrUtil.isNotBlank(startTime) ? LocalDateTime.parse(startTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) : null);
-        LocalDateTime endDateTime = dateTypeEnum.getEndTime().apply(StrUtil.isNotBlank(endTime) ? LocalDateTime.parse(endTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) : null);
+        LocalDateTime startDateTime = dateTypeEnum.getStartTime().apply(
+            StrUtil.isNotBlank(startTime) ?
+                LocalDateTime.parse(startTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) :
+                LocalDateTime.now());
+        LocalDateTime endDateTime = dateTypeEnum.getEndTime().apply(
+            StrUtil.isNotBlank(endTime) ?
+                LocalDateTime.parse(endTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) :
+                LocalDateTime.now());
         List<DashboardLineResponseDO> dashboardLineResponseDOList = jobSummaryMapper.jobLineList(
             DashboardLineEnum.dateFormat(type),
             new LambdaQueryWrapper<JobSummary>()
