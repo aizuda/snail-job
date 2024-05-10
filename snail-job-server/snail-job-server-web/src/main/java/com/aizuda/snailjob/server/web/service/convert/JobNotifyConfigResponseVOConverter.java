@@ -19,5 +19,5 @@ public interface JobNotifyConfigResponseVOConverter {
 
     JobNotifyConfigResponseVO convert(JobNotifyConfig jobNotifyConfig);
 
-    List<JobNotifyConfigResponseVO> batchConvert(List<JobNotifyConfigResponseDO> jobNotifyConfigs);
+    List<JobNotifyConfigResponseVO> convertList(List<JobNotifyConfigResponseDO> jobNotifyConfigs);
 }

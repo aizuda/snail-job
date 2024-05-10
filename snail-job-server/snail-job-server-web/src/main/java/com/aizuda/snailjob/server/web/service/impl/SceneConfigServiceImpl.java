@@ -69,7 +69,7 @@ public class SceneConfigServiceImpl implements SceneConfigService {
                     RetrySceneConfig::getSceneName, StrUtil.trim(queryVO.getSceneName()))
                 .orderByDesc(RetrySceneConfig::getCreateDt));
 
-        return new PageResult<>(pageDTO, SceneConfigResponseVOConverter.INSTANCE.batchConvert(pageDTO.getRecords()));
+        return new PageResult<>(pageDTO, SceneConfigResponseVOConverter.INSTANCE.convertList(pageDTO.getRecords()));
 
     }
 
@@ -86,7 +86,7 @@ public class SceneConfigServiceImpl implements SceneConfigService {
                     RetrySceneConfig::getDescription, RetrySceneConfig::getMaxRetryCount)
                 .orderByDesc(RetrySceneConfig::getCreateDt));
 
-        return SceneConfigResponseVOConverter.INSTANCE.batchConvert(retrySceneConfigs);
+        return SceneConfigResponseVOConverter.INSTANCE.convertList(retrySceneConfigs);
     }
 
     @Override
@@ -103,7 +103,7 @@ public class SceneConfigServiceImpl implements SceneConfigService {
 
         ), () -> new SnailJobServerException("场景名称重复. {}", requestVO.getSceneName()));
 
-        RetrySceneConfig retrySceneConfig = SceneConfigConverter.INSTANCE.toSceneConfigRequestVO(requestVO);
+        RetrySceneConfig retrySceneConfig = SceneConfigConverter.INSTANCE.convert(requestVO);
         retrySceneConfig.setCreateDt(LocalDateTime.now());
         retrySceneConfig.setNamespaceId(namespaceId);
         if (requestVO.getBackOff() == WaitStrategies.WaitStrategyEnum.DELAY_LEVEL.getType()) {
@@ -123,7 +123,7 @@ public class SceneConfigServiceImpl implements SceneConfigService {
     @Override
     public Boolean updateSceneConfig(SceneConfigRequestVO requestVO) {
         checkExecuteInterval(requestVO);
-        RetrySceneConfig retrySceneConfig = SceneConfigConverter.INSTANCE.toSceneConfigRequestVO(requestVO);
+        RetrySceneConfig retrySceneConfig = SceneConfigConverter.INSTANCE.convert(requestVO);
         // 防止更新
         retrySceneConfig.setSceneName(null);
         retrySceneConfig.setGroupName(null);

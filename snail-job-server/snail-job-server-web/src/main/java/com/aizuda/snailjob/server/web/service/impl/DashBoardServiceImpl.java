@@ -89,7 +89,7 @@ public class DashBoardServiceImpl implements DashBoardService {
             new LambdaQueryWrapper<RetrySummary>()
                 .eq(RetrySummary::getNamespaceId, namespaceId)
                 .in(CollUtil.isNotEmpty(groupNames), RetrySummary::getGroupName, groupNames));
-        DashboardCardResponseVO.RetryTask retryTaskVO = RetrySummaryResponseVOConverter.INSTANCE.toRetryTask(retryTaskDO);
+        DashboardCardResponseVO.RetryTask retryTaskVO = RetrySummaryResponseVOConverter.INSTANCE.convert(retryTaskDO);
         responseVO.setRetryTask(retryTaskVO);
 
         // 定时任务
@@ -98,7 +98,7 @@ public class DashBoardServiceImpl implements DashBoardService {
                 .eq(JobSummary::getSystemTaskType, SyetemTaskTypeEnum.JOB.getType())
                 .eq(JobSummary::getNamespaceId, namespaceId)
                 .in(CollUtil.isNotEmpty(groupNames), JobSummary::getGroupName, groupNames));
-        DashboardCardResponseVO.JobTask jobTaskVO = JobSummaryResponseVOConverter.INSTANCE.toTaskJob(jobTaskDO);
+        DashboardCardResponseVO.JobTask jobTaskVO = JobSummaryResponseVOConverter.INSTANCE.convert(jobTaskDO);
         responseVO.setJobTask(jobTaskVO);
 
         // 工作流任务
@@ -107,7 +107,7 @@ public class DashBoardServiceImpl implements DashBoardService {
                 .eq(JobSummary::getSystemTaskType, SyetemTaskTypeEnum.WORKFLOW.getType())
                 .eq(JobSummary::getNamespaceId, namespaceId)
                 .in(CollUtil.isNotEmpty(groupNames), JobSummary::getGroupName, groupNames));
-        DashboardCardResponseVO.WorkFlowTask workFlowTaskVO = JobSummaryResponseVOConverter.INSTANCE.toWorkFlowTask(workFlowTaskDO);
+        DashboardCardResponseVO.WorkFlowTask workFlowTaskVO = JobSummaryResponseVOConverter.INSTANCE.convertToWorkFlowTask(workFlowTaskDO);
         responseVO.setWorkFlowTask(workFlowTaskVO);
 
         // 重试任务柱状图
@@ -171,7 +171,7 @@ public class DashBoardServiceImpl implements DashBoardService {
         }
 
         IPage<DashboardRetryLineResponseDO.Task> page = retrySummaryMapper.retryTaskList(wrapper, pager);
-        List<DashboardRetryLineResponseVO.Task> taskList = JobSummaryResponseVOConverter.INSTANCE.toDashboardRetryLineResponseVO(page.getRecords());
+        List<DashboardRetryLineResponseVO.Task> taskList = JobSummaryResponseVOConverter.INSTANCE.convertList(page.getRecords());
         PageResult<List<Task>> pageResult = new PageResult<>(
             new PageDTO(pager.getCurrent(), pager.getSize(), pager.getTotal()),
             taskList);
@@ -188,7 +188,7 @@ public class DashBoardServiceImpl implements DashBoardService {
                 .eq(StrUtil.isNotBlank(groupName), RetrySummary::getGroupName, groupName)
                 .eq(RetrySummary::getNamespaceId, namespaceId)
                 .between(RetrySummary::getTriggerAt, startDateTime, endDateTime));
-        List<DashboardLineResponseVO> dashboardLineResponseVOList = DispatchQuantityResponseVOConverter.INSTANCE.toDashboardLineResponseVO(dashboardRetryLinkeResponseDOList);
+        List<DashboardLineResponseVO> dashboardLineResponseVOList = DispatchQuantityResponseVOConverter.INSTANCE.convertList(dashboardRetryLinkeResponseDOList);
         dateTypeEnum.getConsumer().accept(dashboardLineResponseVOList);
         dashboardLineResponseVOList.sort(Comparator.comparing(a -> a.getCreateDt()));
         responseVO.setDashboardLineResponseDOList(dashboardLineResponseVOList);
@@ -202,7 +202,7 @@ public class DashBoardServiceImpl implements DashBoardService {
                 .ge(RetrySummary::getTriggerAt, startDateTime)
                 .le(RetrySummary::getTriggerAt, endDateTime)
                 .groupBy(RetrySummary::getNamespaceId, RetrySummary::getGroupName, RetrySummary::getSceneName));
-        List<DashboardRetryLineResponseVO.Rank> ranks = SceneQuantityRankResponseVOConverter.INSTANCE.toDashboardRetryLineResponseVORank(rankList);
+        List<DashboardRetryLineResponseVO.Rank> ranks = SceneQuantityRankResponseVOConverter.INSTANCE.convertList(rankList);
         responseVO.setRankList(ranks);
         return responseVO;
     }
@@ -233,7 +233,7 @@ public class DashBoardServiceImpl implements DashBoardService {
         }
 
         IPage<DashboardRetryLineResponseDO.Task> page = jobSummaryMapper.jobTaskList(wrapper, pager);
-        List<DashboardRetryLineResponseVO.Task> taskList = JobSummaryResponseVOConverter.INSTANCE.toDashboardRetryLineResponseVO(page.getRecords());
+        List<DashboardRetryLineResponseVO.Task> taskList = JobSummaryResponseVOConverter.INSTANCE.convertList(page.getRecords());
         PageResult<List<DashboardRetryLineResponseVO.Task>> pageResult = new PageResult<>(
             new PageDTO(pager.getCurrent(), pager.getSize(), pager.getTotal()),
             taskList);
@@ -251,7 +251,7 @@ public class DashBoardServiceImpl implements DashBoardService {
                 .eq(JobSummary::getSystemTaskType, systemTaskType)
                 .eq(JobSummary::getNamespaceId, namespaceId)
                 .between(JobSummary::getTriggerAt, startDateTime, endDateTime));
-        List<DashboardLineResponseVO> dashboardLineResponseVOList = DispatchQuantityResponseVOConverter.INSTANCE.toDashboardLineResponseVO(dashboardLineResponseDOList);
+        List<DashboardLineResponseVO> dashboardLineResponseVOList = DispatchQuantityResponseVOConverter.INSTANCE.convertList(dashboardLineResponseDOList);
         dateTypeEnum.getConsumer().accept(dashboardLineResponseVOList);
         dashboardLineResponseVOList.sort(Comparator.comparing(DashboardLineResponseVO::getCreateDt));
         responseVO.setDashboardLineResponseDOList(dashboardLineResponseVOList);
@@ -266,7 +266,7 @@ public class DashBoardServiceImpl implements DashBoardService {
                 .eq(JobSummary::getSystemTaskType, systemTaskType)
                 .eq(JobSummary::getNamespaceId, namespaceId)
                 .groupBy(JobSummary::getNamespaceId, JobSummary::getGroupName, JobSummary::getBusinessId));
-        List<DashboardRetryLineResponseVO.Rank> ranks = SceneQuantityRankResponseVOConverter.INSTANCE.toDashboardRetryLineResponseVORank(rankList);
+        List<DashboardRetryLineResponseVO.Rank> ranks = SceneQuantityRankResponseVOConverter.INSTANCE.convertList(rankList);
         responseVO.setRankList(ranks);
         return responseVO;
     }
@@ -282,7 +282,7 @@ public class DashBoardServiceImpl implements DashBoardService {
             .ge(ServerNode::getExpireAt, LocalDateTime.now().minusSeconds(ServerRegister.DELAY_TIME + (ServerRegister.DELAY_TIME / 3)))
             .orderByDesc(ServerNode::getNodeType);
         PageDTO<ServerNode> serverNodePageDTO = serverNodeMapper.selectPage(pageDTO, serverNodeLambdaQueryWrapper);
-        List<ServerNodeResponseVO> responseVOList = ServerNodeResponseVOConverter.INSTANCE.toServerNodeResponseVO(serverNodePageDTO.getRecords());
+        List<ServerNodeResponseVO> responseVOList = ServerNodeResponseVOConverter.INSTANCE.convertList(serverNodePageDTO.getRecords());
 
         for (final ServerNodeResponseVO serverNodeResponseVO : responseVOList) {
             if (NodeTypeEnum.CLIENT.getType().equals(serverNodeResponseVO.getNodeType())) {

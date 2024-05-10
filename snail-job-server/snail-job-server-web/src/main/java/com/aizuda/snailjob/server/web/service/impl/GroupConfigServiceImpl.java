@@ -189,7 +189,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
         PageResult<List<GroupConfigResponseVO>> pageResult = new PageResult<>(groupConfigPageDTO.getCurrent(),
             groupConfigPageDTO.getSize(), groupConfigPageDTO.getTotal());
 
-        List<GroupConfigResponseVO> responseVOList = GroupConfigResponseVOConverter.INSTANCE.toGroupConfigResponseVO(
+        List<GroupConfigResponseVO> responseVOList = GroupConfigResponseVOConverter.INSTANCE.convertList(
             records);
 
         for (GroupConfigResponseVO groupConfigResponseVO : responseVOList) {
@@ -279,7 +279,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
                 .eq(GroupConfig::getNamespaceId, UserSessionUtils.currentUserSession().getNamespaceId())
                 .eq(GroupConfig::getGroupName, groupName));
 
-        GroupConfigResponseVO groupConfigResponseVO = GroupConfigResponseVOConverter.INSTANCE.toGroupConfigResponseVO(
+        GroupConfigResponseVO groupConfigResponseVO = GroupConfigResponseVOConverter.INSTANCE.convert(
             groupConfig);
 
         Optional.ofNullable(IdGeneratorModeEnum.modeOf(groupConfig.getIdGeneratorMode())).ifPresent(idGeneratorMode -> {
@@ -308,7 +308,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
 
         Map<String, String> namespaceMap = StreamUtils.toMap(namespaces, Namespace::getUniqueId, Namespace::getName);
 
-        List<GroupConfigResponseVO> groupConfigResponses = GroupConfigResponseVOConverter.INSTANCE.toGroupConfigResponseVO(
+        List<GroupConfigResponseVO> groupConfigResponses = GroupConfigResponseVOConverter.INSTANCE.convertList(
             groupConfigs);
         for (final GroupConfigResponseVO groupConfigResponseVO : groupConfigResponses) {
             groupConfigResponseVO.setNamespaceName(namespaceMap.get(groupConfigResponseVO.getNamespaceId()));

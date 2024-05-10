@@ -83,7 +83,7 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
         List<WorkflowBatchResponseDO> batchResponseDOList = workflowTaskBatchMapper.selectWorkflowBatchPageList(pageDTO, wrapper);
 
         List<WorkflowBatchResponseVO> batchResponseVOList =
-            WorkflowConverter.INSTANCE.toWorkflowBatchResponseVO(batchResponseDOList);
+            WorkflowConverter.INSTANCE.convertListToWorkflowBatchResponseList(batchResponseDOList);
 
         return new PageResult<>(pageDTO, batchResponseVOList);
     }
@@ -101,7 +101,7 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
 
         Workflow workflow = workflowMapper.selectById(workflowTaskBatch.getWorkflowId());
 
-        WorkflowDetailResponseVO responseVO = WorkflowConverter.INSTANCE.toWorkflowDetailResponseVO(workflow);
+        WorkflowDetailResponseVO responseVO = WorkflowConverter.INSTANCE.convert(workflow);
         List<WorkflowNode> workflowNodes = workflowNodeMapper.selectList(new LambdaQueryWrapper<WorkflowNode>()
             .eq(WorkflowNode::getDeleted, StatusEnum.NO.getStatus())
             .eq(WorkflowNode::getWorkflowId, workflow.getId()));
@@ -119,7 +119,7 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
 
         Map<Long, List<JobTaskBatch>> jobTaskBatchMap = StreamUtils.groupByKey(alJobTaskBatchList,
             JobTaskBatch::getWorkflowNodeId);
-        List<WorkflowDetailResponseVO.NodeInfo> nodeInfos = WorkflowConverter.INSTANCE.toNodeInfo(workflowNodes);
+        List<WorkflowDetailResponseVO.NodeInfo> nodeInfos = WorkflowConverter.INSTANCE.convertList(workflowNodes);
 
         String flowInfo = workflowTaskBatch.getFlowInfo();
         MutableGraph<Long> graph = MutableGraphCache.getOrDefault(id, flowInfo);
@@ -138,7 +138,7 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
                     jobTaskBatchList = jobTaskBatchList.stream()
                         .sorted(Comparator.comparingInt(JobTaskBatch::getTaskBatchStatus))
                         .collect(Collectors.toList());
-                    nodeInfo.setJobBatchList(JobBatchResponseVOConverter.INSTANCE.jobTaskBatchToJobBatchResponseVOs(jobTaskBatchList));
+                    nodeInfo.setJobBatchList(JobBatchResponseVOConverter.INSTANCE.convertListToJobBatchResponseList(jobTaskBatchList));
 
                     // 取第最新的一条状态
                     JobTaskBatch jobTaskBatch = jobTaskBatchList.get(0);

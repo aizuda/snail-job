@@ -25,12 +25,12 @@ public interface JobResponseVOConverter {
 //    @Mappings({
 //        @Mapping(source = "nextTriggerAt", target = "nextTriggerAt", expression = "java(DateUtils.toLocalDateTime())")
 //    })
-    List<JobResponseVO> toJobResponseVOs(List<Job> jobs);
+    List<JobResponseVO> convertList(List<Job> jobs);
 
     @Mappings({
         @Mapping(target = "nextTriggerAt", expression = "java(JobResponseVOConverter.toLocalDateTime(job.getNextTriggerAt()))")
     })
-    JobResponseVO toJobResponseVO(Job job);
+    JobResponseVO convert(Job job);
 
     static LocalDateTime toLocalDateTime(Long nextTriggerAt) {
         if (Objects.isNull(nextTriggerAt) || nextTriggerAt == 0) {

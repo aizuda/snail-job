@@ -33,29 +33,29 @@ public interface WorkflowConverter {
 
     WorkflowConverter INSTANCE = Mappers.getMapper(WorkflowConverter.class);
 
-    Workflow toWorkflow(WorkflowRequestVO workflowRequestVO);
+    Workflow convert(WorkflowRequestVO workflowRequestVO);
 
-    WorkflowNode toWorkflowNode(WorkflowRequestVO.NodeInfo nodeInfo);
+    WorkflowNode convert(WorkflowRequestVO.NodeInfo nodeInfo);
 
-    WorkflowDetailResponseVO toWorkflowDetailResponseVO(Workflow workflow);
+    WorkflowDetailResponseVO convert(Workflow workflow);
 
-    List<WorkflowDetailResponseVO.NodeInfo> toNodeInfo(List<WorkflowNode> workflowNodes);
+    List<WorkflowDetailResponseVO.NodeInfo> convertList(List<WorkflowNode> workflowNodes);
 
     @Mappings({
             @Mapping(target = "decision", expression = "java(WorkflowConverter.parseDecisionConfig(workflowNode))"),
             @Mapping(target = "callback", expression = "java(WorkflowConverter.parseCallbackConfig(workflowNode))"),
             @Mapping(target = "jobTask", expression = "java(WorkflowConverter.parseJobTaskConfig(workflowNode))")
     })
-    WorkflowDetailResponseVO.NodeInfo toNodeInfo(WorkflowNode workflowNode);
+    WorkflowDetailResponseVO.NodeInfo convert(WorkflowNode workflowNode);
 
-    List<WorkflowResponseVO> toWorkflowResponseVO(List<Workflow> workflowList);
+    List<WorkflowResponseVO> convertListToWorkflowResponseList(List<Workflow> workflowList);
 
     @Mappings({
         @Mapping(target = "nextTriggerAt", expression = "java(WorkflowConverter.toLocalDateTime(workflow.getNextTriggerAt()))")
     })
-    WorkflowResponseVO toWorkflowResponseVO(Workflow workflow);
+    WorkflowResponseVO convertToWorkflowResponseVO(Workflow workflow);
 
-    List<WorkflowBatchResponseVO> toWorkflowBatchResponseVO(List<WorkflowBatchResponseDO> workflowBatchResponseList);
+    List<WorkflowBatchResponseVO> convertListToWorkflowBatchResponseList(List<WorkflowBatchResponseDO> workflowBatchResponseList);
 
     @Mappings({
             @Mapping(source = "workflowTaskBatch.groupName", target = "groupName"),
@@ -63,7 +63,7 @@ public interface WorkflowConverter {
             @Mapping(source = "workflowTaskBatch.createDt", target = "createDt"),
             @Mapping(target = "executionAt", expression = "java(WorkflowConverter.toLocalDateTime(workflowTaskBatch.getExecutionAt()))")
     })
-    WorkflowBatchResponseVO toWorkflowBatchResponseVO(WorkflowTaskBatch workflowTaskBatch, Workflow workflow);
+    WorkflowBatchResponseVO convert(WorkflowTaskBatch workflowTaskBatch, Workflow workflow);
 
     static LocalDateTime toLocalDateTime(Long nextTriggerAt) {
         if (Objects.isNull(nextTriggerAt) || nextTriggerAt == 0) {

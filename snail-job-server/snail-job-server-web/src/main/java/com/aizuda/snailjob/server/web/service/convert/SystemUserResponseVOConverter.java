@@ -22,5 +22,5 @@ public interface SystemUserResponseVOConverter {
 
     SystemUserResponseVO convert(SystemUser systemUser);
 
-    List<SystemUserResponseVO> batchConvert(List<SystemUser> systemUsers);
+    List<SystemUserResponseVO> convertList(List<SystemUser> systemUsers);
 }

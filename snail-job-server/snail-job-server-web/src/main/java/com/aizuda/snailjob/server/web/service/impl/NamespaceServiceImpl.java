@@ -77,7 +77,7 @@ public class NamespaceServiceImpl implements NamespaceService {
                         .or().likeRight(Namespace::getUniqueId, keywords))
                 .orderByDesc(Namespace::getId));
         return new PageResult<>(pageDTO,
-            NamespaceResponseVOConverter.INSTANCE.toNamespaceResponseVOs(selectPage.getRecords()));
+            NamespaceResponseVOConverter.INSTANCE.convertList(selectPage.getRecords()));
     }
 
     @Override
@@ -91,6 +91,6 @@ public class NamespaceServiceImpl implements NamespaceService {
             new LambdaQueryWrapper<Namespace>()
                 .select(Namespace::getName, Namespace::getUniqueId)
         );
-        return NamespaceResponseVOConverter.INSTANCE.toNamespaceResponseVOs(namespaces);
+        return NamespaceResponseVOConverter.INSTANCE.convertList(namespaces);
     }
 }

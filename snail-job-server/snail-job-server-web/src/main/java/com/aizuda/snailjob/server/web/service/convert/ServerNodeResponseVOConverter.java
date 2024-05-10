@@ -17,6 +17,6 @@ public interface ServerNodeResponseVOConverter {
 
     ServerNodeResponseVOConverter INSTANCE = Mappers.getMapper(ServerNodeResponseVOConverter.class);
 
-    List<ServerNodeResponseVO> toServerNodeResponseVO(List<ServerNode> serverNodes);
+    List<ServerNodeResponseVO> convertList(List<ServerNode> serverNodes);
 
 }

@@ -18,5 +18,5 @@ public interface SceneConfigResponseVOConverter {
 
     SceneConfigResponseVO convert(RetrySceneConfig retrySceneConfig);
 
-    List<SceneConfigResponseVO> batchConvert(List<RetrySceneConfig> retrySceneConfigs);
+    List<SceneConfigResponseVO> convertList(List<RetrySceneConfig> retrySceneConfigs);
 }

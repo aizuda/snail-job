@@ -21,15 +21,15 @@ public interface NotifyRecipientConverter {
 
     NotifyRecipientConverter INSTANCE = Mappers.getMapper(NotifyRecipientConverter.class);
 
-    List<NotifyRecipientResponseVO> toNotifyRecipientResponseVOs(List<NotifyRecipient> notifyRecipients);
+    List<NotifyRecipientResponseVO> convertList(List<NotifyRecipient> notifyRecipients);
 
-    NotifyRecipient toNotifyRecipient(NotifyRecipientRequestVO requestVO);
+    NotifyRecipient convert(NotifyRecipientRequestVO requestVO);
 
-    List<CommonLabelValueResponseVO> toCommonLabelValueResponseVOs(List<NotifyRecipient> notifyRecipients);
+    List<CommonLabelValueResponseVO> convertListToCommonLabelValueResponseList(List<NotifyRecipient> notifyRecipients);
 
     @Mappings({
         @Mapping(target = "label", source = "recipientName"),
         @Mapping(target = "value", source = "id")
     })
-    CommonLabelValueResponseVO toCommonLabelValueResponseVO(NotifyRecipient notifyRecipient);
+    CommonLabelValueResponseVO convert(NotifyRecipient notifyRecipient);
 }

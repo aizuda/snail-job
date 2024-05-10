@@ -101,7 +101,7 @@ public class RetryTaskServiceImpl implements RetryTaskService {
             .orderByDesc(RetryTask::getCreateDt);
         pageDTO = accessTemplate.getRetryTaskAccess().listPage(queryVO.getGroupName(), namespaceId, pageDTO, queryWrapper);
         return new PageResult<>(pageDTO,
-            RetryTaskResponseVOConverter.INSTANCE.toRetryTaskResponseVO(pageDTO.getRecords()));
+            RetryTaskResponseVOConverter.INSTANCE.convertList(pageDTO.getRecords()));
     }
 
     @Override
@@ -110,7 +110,7 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         RetryTask retryTask = retryTaskAccess.one(groupName, UserSessionUtils.currentUserSession().getNamespaceId(),
             new LambdaQueryWrapper<RetryTask>()
                 .eq(RetryTask::getId, id));
-        return RetryTaskResponseVOConverter.INSTANCE.toRetryTaskResponseVO(retryTask);
+        return RetryTaskResponseVOConverter.INSTANCE.convert(retryTask);
     }
 
     @Override
@@ -184,7 +184,7 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         taskContext.setInitStatus(retryTaskRequestVO.getRetryStatus());
         taskContext.setNamespaceId(namespaceId);
         taskContext.setTaskInfos(
-            Collections.singletonList(TaskContextConverter.INSTANCE.toTaskContextInfo(retryTaskRequestVO)));
+            Collections.singletonList(TaskContextConverter.INSTANCE.convert(retryTaskRequestVO)));
 
         // 生成任务
         taskGenerator.taskGenerator(taskContext);
@@ -307,7 +307,7 @@ public class RetryTaskServiceImpl implements RetryTaskService {
             taskContext.setGroupName(parseLogsVO.getGroupName());
             taskContext.setNamespaceId(namespaceId);
             taskContext.setInitStatus(parseLogsVO.getRetryStatus());
-            taskContext.setTaskInfos(TaskContextConverter.INSTANCE.toTaskContextInfo(retryTaskDTOS));
+            taskContext.setTaskInfos(TaskContextConverter.INSTANCE.convert(retryTaskDTOS));
 
             // 生成任务
             taskGenerator.taskGenerator(taskContext);

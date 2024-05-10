@@ -85,7 +85,7 @@ public class JobServiceImpl implements JobService {
                 .eq(Job::getDeleted, StatusEnum.NO.getStatus())
                 .orderByDesc(Job::getId));
 
-        List<JobResponseVO> jobResponseList = JobResponseVOConverter.INSTANCE.toJobResponseVOs(selectPage.getRecords());
+        List<JobResponseVO> jobResponseList = JobResponseVOConverter.INSTANCE.convertList(selectPage.getRecords());
 
         return new PageResult<>(pageDTO, jobResponseList);
     }
@@ -93,7 +93,7 @@ public class JobServiceImpl implements JobService {
     @Override
     public JobResponseVO getJobDetail(Long id) {
         Job job = jobMapper.selectById(id);
-        return JobResponseVOConverter.INSTANCE.toJobResponseVO(job);
+        return JobResponseVOConverter.INSTANCE.convert(job);
     }
 
     @Override
@@ -116,7 +116,7 @@ public class JobServiceImpl implements JobService {
                 .eq(Job::getDeleted, StatusEnum.NO.getStatus())
                 // SQLServer 分页必须 ORDER BY
                 .orderByAsc(Job::getId));
-        return JobResponseVOConverter.INSTANCE.toJobResponseVOs(selectPage.getRecords());
+        return JobResponseVOConverter.INSTANCE.convertList(selectPage.getRecords());
     }
 
     @Override
@@ -166,7 +166,7 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public Job updateJobResident(JobRequestVO jobRequestVO) {
-        Job job = JobConverter.INSTANCE.toJob(jobRequestVO);
+        Job job = JobConverter.INSTANCE.convert(jobRequestVO);
         job.setResident(StatusEnum.NO.getStatus());
         if (Objects.equals(jobRequestVO.getTriggerType(), SystemConstants.WORKFLOW_TRIGGER_TYPE)) {
             return job;
@@ -239,7 +239,7 @@ public class JobServiceImpl implements JobService {
                 .eq(Job::getGroupName, groupName)
                 .eq(Job::getDeleted, StatusEnum.NO.getStatus())
                 .orderByDesc(Job::getCreateDt));
-        List<JobResponseVO> jobResponseList = JobResponseVOConverter.INSTANCE.toJobResponseVOs(jobs);
+        List<JobResponseVO> jobResponseList = JobResponseVOConverter.INSTANCE.convertList(jobs);
         return jobResponseList;
     }
 }

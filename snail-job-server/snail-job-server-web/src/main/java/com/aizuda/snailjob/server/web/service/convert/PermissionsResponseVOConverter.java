@@ -17,6 +17,6 @@ public interface PermissionsResponseVOConverter {
 
     PermissionsResponseVOConverter INSTANCE = Mappers.getMapper(PermissionsResponseVOConverter.class);
 
-    List<PermissionsResponseVO> toPermissionsResponseVOs(List<SystemUserPermission> systemUserPermissionList);
+    List<PermissionsResponseVO> convertList(List<SystemUserPermission> systemUserPermissionList);
 
 }

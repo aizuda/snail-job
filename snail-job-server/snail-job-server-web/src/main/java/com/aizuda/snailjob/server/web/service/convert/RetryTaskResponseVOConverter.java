@@ -17,7 +17,7 @@ public interface RetryTaskResponseVOConverter {
 
     RetryTaskResponseVOConverter INSTANCE = Mappers.getMapper(RetryTaskResponseVOConverter.class);
 
-    RetryTaskResponseVO toRetryTaskResponseVO(RetryTask retryTask);
+    RetryTaskResponseVO convert(RetryTask retryTask);
 
-    List<RetryTaskResponseVO> toRetryTaskResponseVO(List<RetryTask> retryTasks);
+    List<RetryTaskResponseVO> convertList(List<RetryTask> retryTasks);
 }

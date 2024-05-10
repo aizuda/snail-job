@@ -65,7 +65,7 @@ public class RetryTaskLogServiceImpl implements RetryTaskLogService {
 
         return new PageResult<>(
             retryTaskLogPageDTO,
-            RetryTaskLogResponseVOConverter.INSTANCE.batchConvert(retryTaskLogPageDTO.getRecords()));
+            RetryTaskLogResponseVOConverter.INSTANCE.convertList(retryTaskLogPageDTO.getRecords()));
     }
 
     @Override

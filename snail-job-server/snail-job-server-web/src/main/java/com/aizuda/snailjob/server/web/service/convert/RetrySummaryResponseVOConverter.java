@@ -15,5 +15,5 @@ public interface RetrySummaryResponseVOConverter {
 
     RetrySummaryResponseVOConverter INSTANCE = Mappers.getMapper(RetrySummaryResponseVOConverter.class);
 
-    RetryTask toRetryTask(DashboardCardResponseDO.RetryTask retryTask);
+    RetryTask convert(DashboardCardResponseDO.RetryTask retryTask);
 }

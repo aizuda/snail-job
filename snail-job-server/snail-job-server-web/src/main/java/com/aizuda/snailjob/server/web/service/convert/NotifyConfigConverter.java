@@ -31,5 +31,5 @@ public interface NotifyConfigConverter {
     @Mappings({
         @Mapping(target = "recipientIds", expression = "java(NotifyConfigConverter.toNotifyRecipientIdsStr(notifyConfigVO.getRecipientIds()))")
     })
-    NotifyConfig toNotifyConfig(NotifyConfigRequestVO notifyConfigVO);
+    NotifyConfig convert(NotifyConfigRequestVO notifyConfigVO);
 }

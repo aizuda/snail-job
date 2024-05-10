@@ -17,7 +17,7 @@ public interface GroupConfigResponseVOConverter {
 
     GroupConfigResponseVOConverter INSTANCE = Mappers.getMapper(GroupConfigResponseVOConverter.class);
 
-    GroupConfigResponseVO toGroupConfigResponseVO(GroupConfig groupConfig);
+    GroupConfigResponseVO convert(GroupConfig groupConfig);
 
-    List<GroupConfigResponseVO> toGroupConfigResponseVO(List<GroupConfig> groupConfigs);
+    List<GroupConfigResponseVO> convertList(List<GroupConfig> groupConfigs);
 }

@@ -18,6 +18,6 @@ public interface RetryTaskLogResponseVOConverter {
 
     RetryTaskLogResponseVO convert(RetryTaskLog retryTaskLog);
 
-    List<RetryTaskLogResponseVO> batchConvert(List<RetryTaskLog> retryTaskLogs);
+    List<RetryTaskLogResponseVO> convertList(List<RetryTaskLog> retryTaskLogs);
 
 }

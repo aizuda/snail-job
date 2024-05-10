@@ -14,6 +14,6 @@ public interface SceneConfigConverter {
 
     SceneConfigConverter INSTANCE = Mappers.getMapper(SceneConfigConverter.class);
 
-    RetrySceneConfig toSceneConfigRequestVO(SceneConfigRequestVO requestVO);
+    RetrySceneConfig convert(SceneConfigRequestVO requestVO);
 
 }

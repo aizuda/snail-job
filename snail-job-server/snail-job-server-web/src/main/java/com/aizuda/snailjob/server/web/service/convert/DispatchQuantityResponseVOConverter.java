@@ -17,5 +17,5 @@ public interface DispatchQuantityResponseVOConverter {
 
     DispatchQuantityResponseVOConverter INSTANCE = Mappers.getMapper(DispatchQuantityResponseVOConverter.class);
 
-    List<DashboardLineResponseVO> toDashboardLineResponseVO(List<DashboardLineResponseDO> dashboardLineResponseDOList);
+    List<DashboardLineResponseVO> convertList(List<DashboardLineResponseDO> dashboardLineResponseDOList);
 }

@@ -20,5 +20,5 @@ public interface GroupConfigConverter {
 
     GroupConfig convert(GroupConfigRequestVO groupConfigRequestVO);
 
-    List<GroupConfig> batchConvert(List<GroupConfigRequestVO> groupConfigRequestVOS);
+    List<GroupConfig> convertList(List<GroupConfigRequestVO> groupConfigRequestVOS);
 }

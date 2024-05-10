@@ -144,7 +144,7 @@ public class WorkflowHandler {
                 .sorted(Comparator.comparing(WorkflowRequestVO.NodeInfo::getPriorityLevel))
                 .collect(Collectors.toList());
             for (final WorkflowRequestVO.NodeInfo nodeInfo : conditionNodes) {
-                WorkflowNode workflowNode = WorkflowConverter.INSTANCE.toWorkflowNode(nodeInfo);
+                WorkflowNode workflowNode = WorkflowConverter.INSTANCE.convert(nodeInfo);
                 workflowNode.setWorkflowId(workflowId);
                 workflowNode.setGroupName(groupName);
                 workflowNode.setNodeType(nodeConfig.getNodeType());

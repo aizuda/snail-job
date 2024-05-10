@@ -24,19 +24,19 @@ public interface JobBatchResponseVOConverter {
 
     JobBatchResponseVOConverter INSTANCE = Mappers.getMapper(JobBatchResponseVOConverter.class);
 
-    List<JobBatchResponseVO> toJobBatchResponseVOs(List<JobBatchResponseDO> jobBatches);
+    List<JobBatchResponseVO> convertList(List<JobBatchResponseDO> jobBatches);
 
     @Mappings({
         @Mapping(target = "executionAt", expression = "java(JobBatchResponseVOConverter.toLocalDateTime(jobBatchResponseDO.getExecutionAt()))")
     })
-    JobBatchResponseVO toJobBatchResponseVO(JobBatchResponseDO jobBatchResponseDO);
+    JobBatchResponseVO convert(JobBatchResponseDO jobBatchResponseDO);
 
-    List<JobBatchResponseVO> jobTaskBatchToJobBatchResponseVOs(List<JobTaskBatch> jobTaskBatchList);
+    List<JobBatchResponseVO> convertListToJobBatchResponseList(List<JobTaskBatch> jobTaskBatchList);
 
     @Mappings({
             @Mapping(target = "executionAt", expression = "java(JobBatchResponseVOConverter.toLocalDateTime(jobTaskBatch.getExecutionAt()))")
     })
-    JobBatchResponseVO toJobBatchResponseVO(JobTaskBatch jobTaskBatch);
+    JobBatchResponseVO convert(JobTaskBatch jobTaskBatch);
 
     @Mappings({
         @Mapping(source = "jobBatch.groupName", target = "groupName"),
@@ -44,7 +44,7 @@ public interface JobBatchResponseVOConverter {
         @Mapping(source = "jobBatch.createDt", target = "createDt"),
         @Mapping(target = "executionAt", expression = "java(JobBatchResponseVOConverter.toLocalDateTime(jobBatch.getExecutionAt()))")
     })
-    JobBatchResponseVO toJobBatchResponseVO(JobTaskBatch jobBatch, Job job);
+    JobBatchResponseVO convert(JobTaskBatch jobBatch, Job job);
 
     static LocalDateTime toLocalDateTime(Long nextTriggerAt) {
         if (Objects.isNull(nextTriggerAt) || nextTriggerAt == 0) {

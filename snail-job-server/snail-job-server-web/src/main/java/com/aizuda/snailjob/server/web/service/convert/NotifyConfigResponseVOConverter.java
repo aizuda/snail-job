@@ -27,7 +27,7 @@ public interface NotifyConfigResponseVOConverter {
     })
     NotifyConfigResponseVO convert(NotifyConfig notifyConfig);
 
-    List<NotifyConfigResponseVO> batchConvert(List<NotifyConfig> notifyConfigs);
+    List<NotifyConfigResponseVO> convertList(List<NotifyConfig> notifyConfigs);
 
     static Set<Long> toNotifyRecipientIds(String notifyRecipientIdsStr) {
         if (StrUtil.isBlank(notifyRecipientIdsStr)) {

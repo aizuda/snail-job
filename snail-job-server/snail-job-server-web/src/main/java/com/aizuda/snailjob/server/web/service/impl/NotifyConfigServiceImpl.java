@@ -38,7 +38,6 @@ import org.springframework.util.CollectionUtils;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * @author: opensnail
@@ -71,7 +70,7 @@ public class NotifyConfigServiceImpl implements NotifyConfigService {
             return new PageResult<>(pageDTO, Lists.newArrayList());
         }
 
-        List<NotifyConfigResponseVO> notifyConfigResponseVOS = NotifyConfigResponseVOConverter.INSTANCE.batchConvert(
+        List<NotifyConfigResponseVO> notifyConfigResponseVOS = NotifyConfigResponseVOConverter.INSTANCE.convertList(
             notifyConfigs);
 
         Map<Long, String> recipientNameMap = getRecipientNameMap(notifyConfigResponseVOS);
@@ -138,7 +137,7 @@ public class NotifyConfigServiceImpl implements NotifyConfigService {
 
     @Override
     public Boolean saveNotify(NotifyConfigRequestVO requestVO) {
-        NotifyConfig notifyConfig = NotifyConfigConverter.INSTANCE.toNotifyConfig(requestVO);
+        NotifyConfig notifyConfig = NotifyConfigConverter.INSTANCE.convert(requestVO);
         notifyConfig.setCreateDt(LocalDateTime.now());
         notifyConfig.setRecipientIds(JsonUtil.toJsonString(requestVO.getRecipientIds()));
         notifyConfig.setNamespaceId(UserSessionUtils.currentUserSession().getNamespaceId());
@@ -153,7 +152,7 @@ public class NotifyConfigServiceImpl implements NotifyConfigService {
     @Override
     public Boolean updateNotify(NotifyConfigRequestVO requestVO) {
         Assert.notNull(requestVO.getId(), () -> new SnailJobServerException("参数异常"));
-        NotifyConfig notifyConfig = NotifyConfigConverter.INSTANCE.toNotifyConfig(requestVO);
+        NotifyConfig notifyConfig = NotifyConfigConverter.INSTANCE.convert(requestVO);
         notifyConfig.setRecipientIds(JsonUtil.toJsonString(requestVO.getRecipientIds()));
 
         // 防止被覆盖

@@ -97,7 +97,7 @@ public class SystemUserServiceImpl implements SystemUserService {
 
         List<Namespace> namespaces = namespaceMapper.selectList(queryWrapper);
         systemUserResponseVO.setNamespaceIds(
-            NamespaceResponseVOConverter.INSTANCE.toNamespaceResponseVOs(namespaces));
+            NamespaceResponseVOConverter.INSTANCE.convertList(namespaces));
     }
 
     @Override
@@ -199,7 +199,7 @@ public class SystemUserServiceImpl implements SystemUserService {
             return new PageResult<>(userPageDTO, Collections.emptyList());
         }
 
-        List<SystemUserResponseVO> userResponseVOList = SystemUserResponseVOConverter.INSTANCE.batchConvert(
+        List<SystemUserResponseVO> userResponseVOList = SystemUserResponseVOConverter.INSTANCE.convertList(
             userPageDTO.getRecords());
         List<SystemUserPermission> userPermissions = systemUserPermissionMapper.selectList(
             Wrappers.<SystemUserPermission>lambdaQuery()
@@ -253,7 +253,7 @@ public class SystemUserServiceImpl implements SystemUserService {
             new LambdaQueryWrapper<SystemUserPermission>()
                 .select(SystemUserPermission::getNamespaceId, SystemUserPermission::getGroupName)
                 .eq(SystemUserPermission::getSystemUserId, responseVO.getId()));
-        responseVO.setPermissions(PermissionsResponseVOConverter.INSTANCE.toPermissionsResponseVOs(systemUserPermissions));
+        responseVO.setPermissions(PermissionsResponseVOConverter.INSTANCE.convertList(systemUserPermissions));
 
 
         return responseVO;

@@ -28,14 +28,14 @@ public interface JobSummaryResponseVOConverter {
     @Mappings({
             @Mapping(target = "successRate", expression = "java(JobSummaryResponseVOConverter.toSuccessRate(jobTask.getSuccessNum(), jobTask.getTotalNum()))")
     })
-    JobTask toTaskJob(DashboardCardResponseDO.JobTask jobTask);
+    JobTask convert(DashboardCardResponseDO.JobTask jobTask);
 
     @Mappings({
             @Mapping(target = "successRate", expression = "java(JobSummaryResponseVOConverter.toSuccessRate(jobTask.getSuccessNum(), jobTask.getTotalNum()))")
     })
-    WorkFlowTask toWorkFlowTask(DashboardCardResponseDO.JobTask jobTask);
+    WorkFlowTask convertToWorkFlowTask(DashboardCardResponseDO.JobTask jobTask);
 
-    List<Task> toDashboardRetryLineResponseVO(List<DashboardRetryLineResponseDO.Task> taskList);
+    List<Task> convertList(List<DashboardRetryLineResponseDO.Task> taskList);
 
     static BigDecimal toSuccessRate(Integer successNum, Integer totalNum) {
         if (Objects.isNull(totalNum) || totalNum == 0) {

@@ -41,13 +41,13 @@ public class NotifyRecipientServiceImpl implements NotifyRecipientService {
                 .orderByDesc(NotifyRecipient::getCreateDt));
 
         return new PageResult<>(pageDTO,
-            NotifyRecipientConverter.INSTANCE.toNotifyRecipientResponseVOs(notifyRecipientPageDTO.getRecords()));
+            NotifyRecipientConverter.INSTANCE.convertList(notifyRecipientPageDTO.getRecords()));
     }
 
     @Override
     public Boolean saveNotifyRecipient(NotifyRecipientRequestVO requestVO) {
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
-        NotifyRecipient notifyRecipient = NotifyRecipientConverter.INSTANCE.toNotifyRecipient(requestVO);
+        NotifyRecipient notifyRecipient = NotifyRecipientConverter.INSTANCE.convert(requestVO);
         notifyRecipient.setNamespaceId(namespaceId);
         return 1 == notifyRecipientMapper.insert(notifyRecipient);
     }
@@ -55,7 +55,7 @@ public class NotifyRecipientServiceImpl implements NotifyRecipientService {
     @Override
     public Boolean updateNotifyRecipient(NotifyRecipientRequestVO requestVO) {
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
-        NotifyRecipient notifyRecipient = NotifyRecipientConverter.INSTANCE.toNotifyRecipient(requestVO);
+        NotifyRecipient notifyRecipient = NotifyRecipientConverter.INSTANCE.convert(requestVO);
         notifyRecipient.setNamespaceId(namespaceId);
         return 1 == notifyRecipientMapper.updateById(notifyRecipient);
     }
@@ -65,7 +65,7 @@ public class NotifyRecipientServiceImpl implements NotifyRecipientService {
         List<NotifyRecipient> notifyRecipients = notifyRecipientMapper.selectList(
             new LambdaQueryWrapper<NotifyRecipient>()
                 .select(NotifyRecipient::getRecipientName, NotifyRecipient::getId));
-        return NotifyRecipientConverter.INSTANCE.toCommonLabelValueResponseVOs(notifyRecipients);
+        return NotifyRecipientConverter.INSTANCE.convertListToCommonLabelValueResponseList(notifyRecipients);
     }
 
     @Override

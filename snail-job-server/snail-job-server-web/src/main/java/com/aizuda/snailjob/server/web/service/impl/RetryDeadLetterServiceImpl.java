@@ -72,7 +72,7 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
                     .eq(StrUtil.isNotBlank(queryVO.getUniqueId()), RetryDeadLetter::getUniqueId, queryVO.getUniqueId()));
 
         return new PageResult<>(retryDeadLetterPageDTO,
-            RetryDeadLetterResponseVOConverter.INSTANCE.batchConvert(retryDeadLetterPageDTO.getRecords()));
+            RetryDeadLetterResponseVOConverter.INSTANCE.convertList(retryDeadLetterPageDTO.getRecords()));
     }
 
     @Override

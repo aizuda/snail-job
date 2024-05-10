@@ -18,5 +18,5 @@ public interface RetryDeadLetterResponseVOConverter {
 
     RetryDeadLetterResponseVO convert(RetryDeadLetter retryDeadLetter);
 
-    List<RetryDeadLetterResponseVO> batchConvert(List<RetryDeadLetter> retryDeadLetters);
+    List<RetryDeadLetterResponseVO> convertList(List<RetryDeadLetter> retryDeadLetters);
 }

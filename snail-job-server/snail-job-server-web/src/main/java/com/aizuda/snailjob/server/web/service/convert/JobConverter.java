@@ -15,6 +15,6 @@ public interface JobConverter {
 
     JobConverter INSTANCE = Mappers.getMapper(JobConverter.class);
 
-    Job toJob(JobRequestVO jobRequestVO);
+    Job convert(JobRequestVO jobRequestVO);
 
 }

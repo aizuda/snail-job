@@ -38,7 +38,7 @@ public class JobTaskServiceImpl implements JobTaskService {
                 // SQLServer 分页必须 ORDER BY
                 .orderByAsc(JobTask::getJobId));
 
-        List<JobTaskResponseVO> jobTaskResponseVOs = JobTaskResponseVOConverter.INSTANCE.toJobTaskResponseVOs(
+        List<JobTaskResponseVO> jobTaskResponseVOs = JobTaskResponseVOConverter.INSTANCE.convertList(
             selectPage.getRecords());
         for (JobTaskResponseVO jobTaskResponseVO : jobTaskResponseVOs) {
             jobTaskResponseVO.setKey(jobTaskResponseVO.getId());

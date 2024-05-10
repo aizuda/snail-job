@@ -114,7 +114,7 @@ public class WorkflowServiceImpl implements WorkflowService {
         graph.addNode(SystemConstants.ROOT);
 
         // 组装工作流信息
-        Workflow workflow = WorkflowConverter.INSTANCE.toWorkflow(workflowRequestVO);
+        Workflow workflow = WorkflowConverter.INSTANCE.convert(workflowRequestVO);
         workflow.setVersion(1);
         workflow.setNextTriggerAt(calculateNextTriggerAt(workflowRequestVO, DateUtils.toNowMilli()));
         workflow.setFlowInfo(StrUtil.EMPTY);
@@ -162,7 +162,7 @@ public class WorkflowServiceImpl implements WorkflowService {
             return null;
         }
 
-        WorkflowDetailResponseVO responseVO = WorkflowConverter.INSTANCE.toWorkflowDetailResponseVO(workflow);
+        WorkflowDetailResponseVO responseVO = WorkflowConverter.INSTANCE.convert(workflow);
         List<WorkflowNode> workflowNodes = workflowNodeMapper.selectList(new LambdaQueryWrapper<WorkflowNode>()
             .eq(WorkflowNode::getDeleted, 0)
             .eq(WorkflowNode::getVersion, workflow.getVersion())
@@ -175,7 +175,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 
         Map<Long, Job> jobMap = StreamUtils.toIdentityMap(jobs, Job::getId);
 
-        List<WorkflowDetailResponseVO.NodeInfo> nodeInfos = WorkflowConverter.INSTANCE.toNodeInfo(workflowNodes);
+        List<WorkflowDetailResponseVO.NodeInfo> nodeInfos = WorkflowConverter.INSTANCE.convertList(workflowNodes);
 
         Map<Long, WorkflowDetailResponseVO.NodeInfo> workflowNodeMap = nodeInfos.stream()
             .peek(nodeInfo -> {
@@ -215,7 +215,7 @@ public class WorkflowServiceImpl implements WorkflowService {
                 .eq(Objects.nonNull(queryVO.getWorkflowStatus()), Workflow::getWorkflowStatus, queryVO.getWorkflowStatus())
                 .orderByDesc(Workflow::getId));
 
-        List<WorkflowResponseVO> jobResponseList = WorkflowConverter.INSTANCE.toWorkflowResponseVO(page.getRecords());
+        List<WorkflowResponseVO> jobResponseList = WorkflowConverter.INSTANCE.convertListToWorkflowResponseList(page.getRecords());
 
         return new PageResult<>(pageDTO, jobResponseList);
     }
@@ -245,7 +245,7 @@ public class WorkflowServiceImpl implements WorkflowService {
         log.info("图构建完成. graph:[{}]", graph);
 
         // 保存图信息
-        workflow = WorkflowConverter.INSTANCE.toWorkflow(workflowRequestVO);
+        workflow = WorkflowConverter.INSTANCE.convert(workflowRequestVO);
         workflow.setId(workflowRequestVO.getId());
         workflow.setVersion(version);
         workflow.setNextTriggerAt(calculateNextTriggerAt(workflowRequestVO, DateUtils.toNowMilli()));
@@ -320,7 +320,7 @@ public class WorkflowServiceImpl implements WorkflowService {
                 .eq(Workflow::getDeleted, StatusEnum.NO.getStatus())
                 .orderByAsc(Workflow::getId));
 
-        return WorkflowConverter.INSTANCE.toWorkflowResponseVO(selectPage.getRecords());
+        return WorkflowConverter.INSTANCE.convertListToWorkflowResponseList(selectPage.getRecords());
     }
 
     @Override

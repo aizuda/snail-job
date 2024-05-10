@@ -17,5 +17,5 @@ public interface NamespaceResponseVOConverter {
 
     NamespaceResponseVOConverter INSTANCE = Mappers.getMapper(NamespaceResponseVOConverter.class);
 
-    List<NamespaceResponseVO> toNamespaceResponseVOs(List<Namespace> namespaces);
+    List<NamespaceResponseVO> convertList(List<Namespace> namespaces);
 }

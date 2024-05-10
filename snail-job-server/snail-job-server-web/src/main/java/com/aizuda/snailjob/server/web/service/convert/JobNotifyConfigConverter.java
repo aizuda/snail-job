@@ -14,5 +14,5 @@ public interface JobNotifyConfigConverter {
 
     JobNotifyConfigConverter INSTANCE = Mappers.getMapper(JobNotifyConfigConverter.class);
 
-    JobNotifyConfig toJobNotifyConfig(JobNotifyConfigRequestVO jobNotifyConfigVO);
+    JobNotifyConfig convert(JobNotifyConfigRequestVO jobNotifyConfigVO);
 }

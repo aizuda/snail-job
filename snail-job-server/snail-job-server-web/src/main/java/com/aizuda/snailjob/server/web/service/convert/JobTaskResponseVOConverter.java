@@ -22,5 +22,5 @@ public interface JobTaskResponseVOConverter {
     @Mappings(
             @Mapping(source = "id", target = "key")
     )
-    List<JobTaskResponseVO> toJobTaskResponseVOs(List<JobTask> jobTasks);
+    List<JobTaskResponseVO> convertList(List<JobTask> jobTasks);
 }

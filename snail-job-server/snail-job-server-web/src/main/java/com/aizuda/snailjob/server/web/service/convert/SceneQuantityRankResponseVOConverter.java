@@ -17,5 +17,5 @@ public interface SceneQuantityRankResponseVOConverter {
 
     SceneQuantityRankResponseVOConverter INSTANCE = Mappers.getMapper(SceneQuantityRankResponseVOConverter.class);
 
-    List<Rank> toDashboardRetryLineResponseVORank(List<DashboardRetryLineResponseDO.Rank> rankList);
+    List<Rank> convertList(List<DashboardRetryLineResponseDO.Rank> rankList);
 }
