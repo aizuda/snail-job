@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.context.annotation.Configuration;
 
 import java.time.temporal.ChronoUnit;
@@ -71,6 +72,12 @@ public class SnailJobProperties {
      * 重试模块配置
      */
     private Retry retry = new Retry();
+
+    /**
+     * 邮件配置
+     */
+    @NestedConfigurationProperty
+    private MailProperties mail = new MailProperties();
 
     @Data
     public static class ServerConfig {
@@ -172,8 +179,4 @@ public class SnailJobProperties {
         private SlidingWindowConfig reportSlidingWindow = new SlidingWindowConfig();
     }
 
-    /**
-     * 邮件配置
-     */
-    private MailProperties mail = new MailProperties();
 }
