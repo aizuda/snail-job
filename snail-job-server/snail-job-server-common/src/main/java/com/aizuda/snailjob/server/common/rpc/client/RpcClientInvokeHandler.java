@@ -5,6 +5,7 @@ import cn.hutool.core.lang.Assert;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.context.SpringContext;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
+import com.aizuda.snailjob.common.core.exception.SnailJobRemotingTimeOutException;
 import com.aizuda.snailjob.common.core.model.NettyResult;
 import com.aizuda.snailjob.common.core.model.SnailJobRequest;
 import com.aizuda.snailjob.common.core.model.Result;
@@ -171,15 +172,7 @@ public class RpcClientInvokeHandler implements InvocationHandler {
                     return null;
                 } else {
                     Assert.notNull(newFuture, () -> new SnailJobServerException("completableFuture is null"));
-                    try {
-                        return (Result) newFuture.get(Integer.MAX_VALUE, TimeUnit.MILLISECONDS);
-                    } catch (ExecutionException e) {
-                        throw new SnailJobServerException("Request to remote interface exception. path:[{}]",
-                            mapping.path());
-                    } catch (TimeoutException e) {
-                        throw new SnailJobServerException("Request to remote interface timed out. path:[{}]",
-                            mapping.path());
-                    }
+                    return (Result) newFuture.get(Integer.MAX_VALUE, TimeUnit.MILLISECONDS);
                 }
 
             });
@@ -189,9 +182,9 @@ public class RpcClientInvokeHandler implements InvocationHandler {
                 hostIp, hostPort, NetUtil.getLocalIpStr());
 
             return result;
-        } catch (RestClientException ex) {
-            // 网络异常
-            if (ex instanceof ResourceAccessException && failover) {
+        } catch (ExecutionException ex) {
+            // 网络异常 TimeoutException |
+            if (ex.getCause() instanceof SnailJobRemotingTimeOutException && failover) {
                 log.error("request client I/O error, count:[{}] clientId:[{}] clientAddr:[{}:{}] serverIp:[{}]", count,
                     hostId, hostIp, hostPort, NetUtil.getLocalIpStr(), ex);
 
@@ -204,7 +197,7 @@ public class RpcClientInvokeHandler implements InvocationHandler {
                     routeKey);
                 // 这里表示无可用节点
                 if (Objects.isNull(serverNode)) {
-                    throw ex;
+                    throw ex.getCause();
                 }
 
                 this.hostId = serverNode.getHostId();
@@ -215,7 +208,7 @@ public class RpcClientInvokeHandler implements InvocationHandler {
                 // 其他异常继续抛出
                 log.error("request client error.count:[{}] clientId:[{}] clientAddr:[{}:{}] serverIp:[{}]", count,
                     hostId, hostIp, hostPort, NetUtil.getLocalIpStr(), ex);
-                throw ex;
+                throw ex.getCause();
             }
         } catch (Exception ex) {
             log.error("request client unknown exception. count:[{}] clientId:[{}] clientAddr:[{}:{}] serverIp:[{}]",
@@ -225,7 +218,7 @@ public class RpcClientInvokeHandler implements InvocationHandler {
             if (ex.getClass().isAssignableFrom(RetryException.class)) {
                 RetryException re = (RetryException) ex;
                 throwable = re.getLastFailedAttempt().getExceptionCause();
-                if (throwable instanceof ResourceAccessException) {
+                if (throwable.getCause() instanceof SnailJobRemotingTimeOutException) {
                     // 若重试之后该接口仍然有问题，进行路由剔除处理
                     CacheRegisterTable.remove(groupName, namespaceId, hostId);
                 }

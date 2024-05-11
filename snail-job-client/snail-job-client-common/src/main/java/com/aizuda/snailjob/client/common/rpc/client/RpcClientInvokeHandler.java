@@ -6,6 +6,7 @@ import com.aizuda.snailjob.client.common.annotation.Mapping;
 import com.aizuda.snailjob.client.common.exception.SnailJobClientException;
 import com.aizuda.snailjob.client.common.exception.SnailJobClientTimeOutException;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
+import com.aizuda.snailjob.common.core.exception.SnailJobRemotingTimeOutException;
 import com.aizuda.snailjob.common.core.model.NettyResult;
 import com.aizuda.snailjob.common.core.model.Result;
 import com.aizuda.snailjob.common.core.rpc.RpcContext;
@@ -44,7 +45,7 @@ public class RpcClientInvokeHandler<R extends Result<Object>> implements Invocat
     }
 
     @Override
-    public R invoke(final Object proxy, final Method method, final Object[] args) throws InterruptedException {
+    public R invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
         StopWatch sw = new StopWatch();
         Mapping annotation = method.getAnnotation(Mapping.class);
         SnailJobRequest snailJobRequest = new SnailJobRequest(args);
@@ -78,7 +79,7 @@ public class RpcClientInvokeHandler<R extends Result<Object>> implements Invocat
             try {
                 return newFuture.get(Integer.MAX_VALUE, TimeUnit.MILLISECONDS);
             } catch (ExecutionException e) {
-                throw new SnailJobClientException("Request to remote interface exception. path:[{}]",  annotation.path());
+                throw e.getCause();
             } catch (TimeoutException e) {
                 throw new SnailJobClientTimeOutException("Request to remote interface timed out. path:[{}]", annotation.path());
             }
