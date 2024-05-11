@@ -5,14 +5,18 @@ import cn.hutool.core.lang.Assert;
 import com.aizuda.snailjob.client.common.annotation.Mapping;
 import com.aizuda.snailjob.client.common.exception.SnailJobClientException;
 import com.aizuda.snailjob.client.common.exception.SnailJobClientTimeOutException;
+import com.aizuda.snailjob.common.core.enums.StatusEnum;
+import com.aizuda.snailjob.common.core.model.NettyResult;
+import com.aizuda.snailjob.common.core.model.Result;
+import com.aizuda.snailjob.common.core.rpc.RpcContext;
+import com.aizuda.snailjob.common.core.rpc.SnailJobFuture;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.common.core.model.SnailJobRequest;
 import io.netty.handler.codec.http.HttpMethod;
-import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.util.concurrent.CompletableFuture;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -25,7 +29,7 @@ import java.util.function.Consumer;
  * @date : 2023-05-11 21:45
  * @since 1.3.0
  */
-public class RpcClientInvokeHandler<R> implements InvocationHandler {
+public class RpcClientInvokeHandler<R extends Result<Object>> implements InvocationHandler {
 
     private final Consumer<R> consumer;
     private final boolean async;
@@ -47,33 +51,36 @@ public class RpcClientInvokeHandler<R> implements InvocationHandler {
 
         sw.start("request start " + snailJobRequest.getReqId());
 
+        SnailJobFuture<R> newFuture = SnailJobFuture.newFuture(snailJobRequest.getReqId(),
+            timeout,
+            unit);
+        RpcContext.setFuture(newFuture);
+
         try {
             NettyChannel.send(HttpMethod.valueOf(annotation.method().name()), annotation.path(), snailJobRequest.toString());
         } finally {
             sw.stop();
         }
 
-        CompletableFuture<R> completableFuture = null;
+        SnailJobLog.LOCAL.debug("request complete requestId:[{}] 耗时:[{}ms]", snailJobRequest.getReqId(), sw.getTotalTimeMillis());
         if (async) {
-            RpcContext.setCompletableFuture(snailJobRequest.getReqId(), consumer);
-        } else {
-            completableFuture = new CompletableFuture<>();
-            RpcContext.setCompletableFuture(snailJobRequest.getReqId(), completableFuture);
-        }
-
-       SnailJobLog.LOCAL.debug("request complete requestId:[{}] 耗时:[{}ms]", snailJobRequest.getReqId(), sw.getTotalTimeMillis());
-        if (async) {
+            newFuture.whenComplete((r, t) -> {
+                if (Objects.nonNull(t)) {
+                    consumer.accept(
+                        (R) new NettyResult(StatusEnum.NO.getStatus(), t.getMessage(), null, snailJobRequest.getReqId()));
+                } else {
+                    consumer.accept(r);
+                }
+            });
             return null;
         } else {
-            Assert.notNull(completableFuture, () -> new SnailJobClientException("completableFuture is null"));
+            Assert.notNull(newFuture, () -> new SnailJobClientException("completableFuture is null"));
             try {
-                return completableFuture.get(timeout, unit);
+                return newFuture.get(Integer.MAX_VALUE, TimeUnit.MILLISECONDS);
             } catch (ExecutionException e) {
                 throw new SnailJobClientException("Request to remote interface exception. path:[{}]",  annotation.path());
             } catch (TimeoutException e) {
                 throw new SnailJobClientTimeOutException("Request to remote interface timed out. path:[{}]", annotation.path());
-            } finally {
-                RpcContext.remove(snailJobRequest.getReqId());
             }
         }
 

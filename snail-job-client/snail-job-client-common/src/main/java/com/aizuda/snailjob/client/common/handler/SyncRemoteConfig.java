@@ -33,6 +33,7 @@ public class SyncRemoteConfig implements Lifecycle {
             try {
                 NettyClient client = RequestBuilder.<NettyClient, NettyResult>newBuilder()
                     .client(NettyClient.class)
+                    .timeout(1000L)
                     .callback(nettyResult -> {
                         if (Objects.isNull(nettyResult.getData())) {
                             SnailJobLog.LOCAL.error("获取配置结果为null");

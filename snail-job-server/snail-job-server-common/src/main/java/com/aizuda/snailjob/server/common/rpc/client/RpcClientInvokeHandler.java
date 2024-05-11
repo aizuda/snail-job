@@ -4,8 +4,12 @@ import cn.hutool.core.date.StopWatch;
 import cn.hutool.core.lang.Assert;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.context.SpringContext;
+import com.aizuda.snailjob.common.core.enums.StatusEnum;
+import com.aizuda.snailjob.common.core.model.NettyResult;
 import com.aizuda.snailjob.common.core.model.SnailJobRequest;
 import com.aizuda.snailjob.common.core.model.Result;
+import com.aizuda.snailjob.common.core.rpc.RpcContext;
+import com.aizuda.snailjob.common.core.rpc.SnailJobFuture;
 import com.aizuda.snailjob.common.core.util.NetUtil;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
@@ -147,6 +151,11 @@ public class RpcClientInvokeHandler implements InvocationHandler {
 
                 sw.start("request start " + snailJobRequest.getReqId());
 
+                SnailJobFuture newFuture = SnailJobFuture.newFuture(snailJobRequest.getReqId(),
+                    Optional.ofNullable(executorTimeout).orElse(20),
+                    TimeUnit.SECONDS);
+                RpcContext.setFuture(newFuture);
+
                 try {
                     NettyChannel.send(hostId, hostIp, hostPort,
                         HttpMethod.valueOf(mapping.method().name()),  // 拼接 url?a=1&b=1
@@ -155,30 +164,21 @@ public class RpcClientInvokeHandler implements InvocationHandler {
                     sw.stop();
                 }
 
-                CompletableFuture completableFuture = null;
-                if (async) {
-//                    RpcContext.setCompletableFuture(snailJobRequest.getReqId(), null);
-                } else {
-                    completableFuture = new CompletableFuture<>();
-                    RpcContext.setCompletableFuture(snailJobRequest.getReqId(), completableFuture);
-                }
-
                 SnailJobLog.LOCAL.debug("request complete requestId:[{}] 耗时:[{}ms]", snailJobRequest.getReqId(),
                     sw.getTotalTimeMillis());
                 if (async) {
+                   // 暂时不支持异步调用
                     return null;
                 } else {
-                    Assert.notNull(completableFuture, () -> new SnailJobServerException("completableFuture is null"));
+                    Assert.notNull(newFuture, () -> new SnailJobServerException("completableFuture is null"));
                     try {
-                        return (Result) completableFuture.get(Optional.ofNullable(executorTimeout).orElse(20), TimeUnit.SECONDS);
+                        return (Result) newFuture.get(Integer.MAX_VALUE, TimeUnit.MILLISECONDS);
                     } catch (ExecutionException e) {
                         throw new SnailJobServerException("Request to remote interface exception. path:[{}]",
                             mapping.path());
                     } catch (TimeoutException e) {
                         throw new SnailJobServerException("Request to remote interface timed out. path:[{}]",
                             mapping.path());
-                    } finally {
-                        RpcContext.remove(snailJobRequest.getReqId());
                     }
                 }
 

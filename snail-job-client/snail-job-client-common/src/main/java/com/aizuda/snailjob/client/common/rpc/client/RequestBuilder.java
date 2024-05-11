@@ -1,6 +1,7 @@
 package com.aizuda.snailjob.client.common.rpc.client;
 
 import com.aizuda.snailjob.client.common.exception.SnailJobClientException;
+import com.aizuda.snailjob.common.core.model.Result;
 
 import java.lang.reflect.Proxy;
 import java.util.Objects;
@@ -14,7 +15,7 @@ import java.util.function.Consumer;
  * @date : 2023-05-12 16:47
  * @since 1.3.0
  */
-public class RequestBuilder<T, R> {
+public class RequestBuilder<T, R extends Result<Object>> {
 
     private Class<T> clintInterface;
 
@@ -22,11 +23,11 @@ public class RequestBuilder<T, R> {
 
     private boolean async = true;
 
-    private long timeout = 60*1000;
+    private long timeout = 60 * 1000;
 
     private TimeUnit unit = TimeUnit.MILLISECONDS;
 
-    public static <T, R> RequestBuilder<T, R> newBuilder() {
+    public static <T, R extends Result<Object>> RequestBuilder<T, R> newBuilder() {
         return new RequestBuilder<>();
     }
 
