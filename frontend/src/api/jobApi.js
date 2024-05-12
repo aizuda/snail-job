@@ -120,7 +120,7 @@ export function triggerJob (id) {
 
 export function stop (id) {
   return request({
-    url: jobApi.stop + id,
+    url: `jobApi.stop/${id}`,
     method: 'post'
   })
 }
