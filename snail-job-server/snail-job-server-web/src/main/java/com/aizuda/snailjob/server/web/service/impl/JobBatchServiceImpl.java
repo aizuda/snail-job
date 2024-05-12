@@ -93,8 +93,9 @@ public class JobBatchServiceImpl implements JobBatchService {
                 jobBatchResponseVO.setExecutionAt(jobTaskBatch.getCreateDt());
                 return jobBatchResponseVO;
             }
+
             // 条件节点
-            else if (SystemConstants.DECISION_JOB_ID.equals(jobTaskBatch.getJobId())) {
+            if (SystemConstants.DECISION_JOB_ID.equals(jobTaskBatch.getJobId())) {
                 jobBatchResponseVO.setDecision(JsonUtil.parseObject(workflowNode.getNodeInfo(), DecisionConfig.class));
                 jobBatchResponseVO.setExecutionAt(jobTaskBatch.getCreateDt());
                 return jobBatchResponseVO;
