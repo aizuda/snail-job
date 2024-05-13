@@ -30,6 +30,7 @@ services:
 
     postgres:
         image: postgres:14.2
+        restart: unless-stopped
         environment:
             POSTGRES_USER: root
             POSTGRES_PASSWORD: root
@@ -43,6 +44,7 @@ services:
 
     oracle:
         image: gvenzl/oracle-xe:18-slim-faststart
+        restart: unless-stopped
         environment:
             ## 登录信息 SID: XE user: system password: oracle
             ORACLE_PASSWORD: oracle
@@ -56,6 +58,7 @@ services:
 
     sqlserver:
         image: mcr.microsoft.com/mssql/server:2017-latest
+        restart: unless-stopped
         environment:
             TZ: Asia/Shanghai
             ACCEPT_EULA: "Y"
