@@ -27,9 +27,9 @@
     </resultMap>
 
     <update id="updateBatchNextTriggerAtById" parameterType="java.util.List">
-        UPDATE job
+        UPDATE sj_job
            SET next_trigger_at = src.next_trigger_at
-          FROM job AS dest
+          FROM sj_job AS dest
                JOIN (
                    <foreach collection="list" item="item" index="index" separator="UNION ALL">
                        SELECT

@@ -21,7 +21,7 @@
     </sql>
 
     <insert id="insertBatch">
-        INSERT INTO retry_dead_letter (namespace_id, unique_id, group_name, scene_name,
+        INSERT INTO sj_retry_dead_letter (namespace_id, unique_id, group_name, scene_name,
                                        idempotent_id, biz_no, executor_name, args_str,
                                        ext_attrs, create_dt)
         values

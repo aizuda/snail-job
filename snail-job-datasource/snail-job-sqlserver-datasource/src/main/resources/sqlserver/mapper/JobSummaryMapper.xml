@@ -20,7 +20,7 @@
     </resultMap>
 
     <insert id="batchInsert" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO job_summary (namespace_id, group_name, business_id, trigger_at, system_task_type,
+        INSERT INTO sj_job_summary (namespace_id, group_name, business_id, trigger_at, system_task_type,
                                  success_num,fail_num,fail_reason,stop_num,stop_reason, cancel_num,cancel_reason)
         VALUES
             <foreach collection="list" item="item" separator=",">
@@ -42,7 +42,7 @@
     </insert>
 
     <update id="batchUpdate" parameterType="java.util.List">
-        UPDATE job_summary
+        UPDATE sj_job_summary
            SET success_num = src.success_num,
                fail_num = src.fail_num,
                fail_reason = src.fail_reason,
@@ -50,7 +50,7 @@
                stop_reason = src.stop_reason,
                cancel_num = src.cancel_num,
                cancel_reason = src.cancel_reason
-          FROM job_summary AS dest
+          FROM sj_job_summary AS dest
                JOIN (
                    <foreach collection="list" item="item" index="index" separator="UNION ALL">
                        SELECT
@@ -84,7 +84,7 @@
                 stop_num,
                 cancel_num,
                 fail_num
-            FROM job_summary
+            FROM sj_job_summary
             ${ew.customSqlSegment}
         ) AS subquery
         GROUP BY createDt
@@ -98,22 +98,21 @@
             ISNULL(sum(cancel_num), 0) AS cancelNum,
             ISNULL(sum(fail_num), 0) AS failNum,
             ISNULL(sum(success_num + fail_num + stop_num + cancel_num), 0) AS totalNum
-        FROM job_summary
+        FROM sj_job_summary
         ${ew.customSqlSegment}
     </select>
 
     <select id="dashboardRank"
             resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO$Rank">
         SELECT TOP 10
-
             <if test="systemTaskType == 3">
-                CONCAT(group_name, '/', (SELECT job_name FROM job WHERE id = business_id)) name,
+                CONCAT(group_name, '/', (SELECT job_name FROM sj_job WHERE id = business_id)) name,
             </if>
             <if test="systemTaskType == 4">
-                CONCAT(group_name, '/', (SELECT workflow_name FROM workflow WHERE id = business_id)) name,
+                CONCAT(group_name, '/', (SELECT workflow_name FROM sj_workflow WHERE id = business_id)) name,
             </if>
             SUM(fail_num) AS total
-        FROM job_summary
+        FROM sj_job_summary
         ${ew.customSqlSegment}
         HAVING SUM(fail_num) > 0
         ORDER BY name DESC
@@ -126,7 +125,7 @@
             group_name                                        AS groupName,
             SUM(CASE WHEN (job_status = 1) THEN 1 ELSE 0 END) AS run,
             COUNT(*)                                          AS total
-        FROM job
+        FROM sj_job
         ${ew.customSqlSegment}
         GROUP BY namespace_id, group_name
         ORDER BY group_name
@@ -136,7 +135,7 @@
         SQL Server SELECT COUNT(*) FROM (... ORDER BY ) 会报错 -->
     <select id="countJobTask" resultType="long">
         SELECT COUNT(DISTINCT group_name)
-         FROM job
+         FROM sj_job
         ${ew.customSqlSegment}
     </select>
 </mapper>

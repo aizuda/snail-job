@@ -17,9 +17,9 @@
     </resultMap>
 
     <update id="updateBatchNextTriggerAtById" parameterType="java.util.List">
-        UPDATE workflow
+        UPDATE sj_workflow
         SET next_trigger_at = src.next_trigger_at
-        FROM workflow dest
+        FROM sj_workflow dest
         JOIN (
         <foreach collection="list" item="item" index="index" separator="UNION ALL">
             SELECT
