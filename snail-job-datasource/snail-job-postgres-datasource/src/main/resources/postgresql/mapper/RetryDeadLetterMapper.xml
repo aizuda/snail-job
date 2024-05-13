@@ -19,21 +19,22 @@
     id, namespace_id, unique_id, group_name, scene_name, idempotent_id, biz_no, executor_name, args_str, ext_attrs, create_dt, task_type
   </sql>
   <insert id="insertBatch">
-    insert into retry_dead_letter (namespace_id, unique_id, group_name, scene_name,
-    idempotent_id, biz_no, executor_name, args_str,
-                                              ext_attrs, create_dt
-    )
-    values
+    INSERT INTO sj_retry_dead_letter (namespace_id, unique_id, group_name, scene_name,
+                                      idempotent_id, biz_no, executor_name, args_str,
+                                      ext_attrs, create_dt)
+    VALUES
           <foreach collection="retryDeadLetters" item="retryDeadLetter" separator=",">
-            (#{retryDeadLetter.namespaceId,jdbcType=VARCHAR},  #{retryDeadLetter.uniqueId,jdbcType=VARCHAR}, #{retryDeadLetter.groupName,jdbcType=VARCHAR}, #{retryDeadLetter.sceneName,jdbcType=VARCHAR},
+            (
+              #{retryDeadLetter.namespaceId,jdbcType=VARCHAR},  #{retryDeadLetter.uniqueId,jdbcType=VARCHAR},
+              #{retryDeadLetter.groupName,jdbcType=VARCHAR}, #{retryDeadLetter.sceneName,jdbcType=VARCHAR},
             #{retryDeadLetter.idempotentId,jdbcType=VARCHAR}, #{retryDeadLetter.bizNo,jdbcType=VARCHAR},  #{retryDeadLetter.executorName,jdbcType=VARCHAR}, #{retryDeadLetter.argsStr,jdbcType=VARCHAR},
             #{retryDeadLetter.extAttrs,jdbcType=VARCHAR}, #{retryDeadLetter.createDt,jdbcType=TIMESTAMP})
           </foreach>
   </insert>
   <select id="countRetryDeadLetterByCreateAt" resultType="int">
-    select
-      count(*)
-    from retry_dead_letter_${partition} where create_dt>= #{startTime} and create_dt &lt;=#{endTime}
+    SELECT count(*)
+      FROM sj_retry_dead_letter_${partition}
+     WHERE create_dt>= #{startTime} and create_dt &lt;=#{endTime}
   </select>
 
 </mapper>

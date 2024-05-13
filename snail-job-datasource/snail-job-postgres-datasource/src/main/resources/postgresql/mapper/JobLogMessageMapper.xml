@@ -17,7 +17,7 @@
     </resultMap>
     <!-- 定义批量新增的 SQL 映射 -->
     <insert id="batchInsert" parameterType="java.util.List">
-        INSERT INTO job_log_message
+        INSERT INTO sj_job_log_message
         (
         namespace_id,
         group_name,
