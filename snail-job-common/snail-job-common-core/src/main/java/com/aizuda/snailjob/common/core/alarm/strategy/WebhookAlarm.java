@@ -34,24 +34,21 @@ public class WebhookAlarm extends AbstractAlarm<AlarmContext> {
     public boolean syncSendMessage(AlarmContext alarmContext) {
 
         WebhookAttribute webhookAttribute = JsonUtil.parseObject(alarmContext.getNotifyAttribute(), WebhookAttribute.class);
-        for (int i = 0; i < 2; i++) {
-            try {
-                WebhookMessage webhookMessage = WebhookMessage.builder().text(alarmContext.getTitle()).build();
+        try {
+            WebhookMessage webhookMessage = WebhookMessage.builder().text(alarmContext.getTitle()).build();
 
-                HttpRequest post = HttpUtil.createPost(webhookAttribute.getWebhookUrl());
-                HttpRequest request = post.body(JsonUtil.toJsonString(webhookMessage), ContentTypeEnum.valueOf(webhookAttribute.getContentType()).getMediaType().toString())
-                        .header(SystemConstants.SECRET, webhookAttribute.getSecret());
-                HttpResponse execute = request.execute();
-                if (execute.isOk()) {
-                    return true;
-                }
-                SnailJobLog.LOCAL.info("发送Webhook告警结果. webHook:[{}]，结果: [{}]", webhookAttribute.getWebhookUrl(), execute.body());
-                break;
-            } catch (Exception e) {
-                SnailJobLog.LOCAL.error("发送Webhook告警异常. webHook:[{}]", webhookAttribute, e);
+            HttpRequest post = HttpUtil.createPost(webhookAttribute.getWebhookUrl());
+            HttpRequest request = post.body(JsonUtil.toJsonString(webhookMessage), ContentTypeEnum.valueOf(webhookAttribute.getContentType()).getMediaType().toString())
+                    .header(SystemConstants.SECRET, webhookAttribute.getSecret());
+            HttpResponse execute = request.execute();
+            SnailJobLog.LOCAL.info("发送Webhook告警结果. webHook:[{}]，结果: [{}]", webhookAttribute.getWebhookUrl(), execute.body());
+            if (execute.isOk()) {
+                return true;
             }
+        } catch (Exception e) {
+            SnailJobLog.LOCAL.error("发送Webhook告警异常. webHook:[{}]", webhookAttribute, e);
+            return false;
         }
-
         return true;
     }
 
@@ -71,4 +68,3 @@ public class WebhookAlarm extends AbstractAlarm<AlarmContext> {
         return true;
     }
 }
-

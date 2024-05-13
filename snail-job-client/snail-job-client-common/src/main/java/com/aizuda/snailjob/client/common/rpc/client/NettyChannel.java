@@ -4,19 +4,15 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.client.common.cache.GroupVersionCache;
 import com.aizuda.snailjob.client.common.config.SnailJobProperties;
+import com.aizuda.snailjob.client.common.exception.SnailJobRemoteException;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.context.SpringContext;
 import com.aizuda.snailjob.common.core.enums.HeadersEnum;
-import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.common.core.util.NetUtil;
+import com.aizuda.snailjob.common.log.SnailJobLog;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
-import io.netty.handler.codec.http.DefaultFullHttpRequest;
-import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.HttpHeaderNames;
-import io.netty.handler.codec.http.HttpHeaderValues;
-import io.netty.handler.codec.http.HttpMethod;
-import io.netty.handler.codec.http.HttpVersion;
+import io.netty.handler.codec.http.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 
@@ -179,12 +175,16 @@ public class NettyChannel {
                 .set(HeadersEnum.VERSION.getKey(), GroupVersionCache.getVersion())
                 .set(HeadersEnum.HOST.getKey(), serverConfig.getHost())
                 .set(HeadersEnum.NAMESPACE.getKey(), Optional.ofNullable(snailJobProperties.getNamespace()).orElse(
-                    SystemConstants.DEFAULT_NAMESPACE))
+                        SystemConstants.DEFAULT_NAMESPACE))
                 .set(HeadersEnum.TOKEN.getKey(), Optional.ofNullable(snailJobProperties.getToken()).orElse(
                         SystemConstants.DEFAULT_TOKEN))
         ;
 
         //发送数据
-        CHANNEL.writeAndFlush(request).sync();
+        try {
+            CHANNEL.writeAndFlush(request).sync();
+        } catch (Exception exception) {
+            throw new SnailJobRemoteException("网络异常");
+        }
     }
 }
