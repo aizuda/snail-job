@@ -1,11 +1,9 @@
-version: "3.4"
 
 name: snail-job
 
 volumes:
     mysql: { }
     postgres: { }
-    oracle: { }
     sqlserver: { }
     mariadb: { }
 
@@ -51,7 +49,6 @@ services:
         ports:
             - "1521:1521"
         volumes:
-            - oracle:/u01/app/oracle/oradata
             - ../sql/snail_job_oracle.sql:/tmp/schema.sql:ro
             # 创建app用户: snail_job/SnailJob@//localhost/XEPDB1
             - ./oracle/1_create_user.sql:/docker-entrypoint-initdb.d/1_create_user.sql:ro
