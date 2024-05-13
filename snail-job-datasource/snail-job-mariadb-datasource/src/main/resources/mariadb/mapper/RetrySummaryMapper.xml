@@ -16,9 +16,8 @@
     </resultMap>
 
     <insert id="batchInsert" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO
-            retry_summary (namespace_id, group_name, scene_name, trigger_at, running_num, finish_num, max_count_num,
-                           suspend_num)
+        INSERT INTO sj_retry_summary (namespace_id, group_name, scene_name, trigger_at,
+                                      running_num, finish_num, max_count_num, suspend_num)
         VALUES
             <foreach collection="list" item="item" separator=",">
                 (
@@ -35,7 +34,7 @@
     </insert>
 
     <update id="batchUpdate" parameterType="java.util.List">
-        UPDATE retry_summary rt,
+        UPDATE sj_retry_summary rt,
                (
                    <foreach collection="list" item="item" index="index" separator="UNION ALL">
                        SELECT
@@ -66,7 +65,7 @@
                IFNULL(SUM(max_count_num), 0)                                          AS maxCountNum,
                IFNULL(SUM(suspend_num), 0)                                            AS suspendNum,
                IFNULL(SUM(running_num + finish_num + max_count_num + suspend_num), 0) AS totalNum
-        FROM retry_summary
+        FROM sj_retry_summary
         ${ew.customSqlSegment}
     </select>
 
@@ -77,7 +76,7 @@
                finish_num,
                max_count_num,
                suspend_num
-        FROM retry_summary
+        FROM sj_retry_summary
         ${ew.customSqlSegment}
         LIMIT 7
     </select>
@@ -91,7 +90,7 @@
             IFNULL(SUM(max_count_num), 0) AS maxCountNum,
             IFNULL(SUM(suspend_num), 0) AS suspendNum,
             IFNULL(SUM(finish_num + running_num + max_count_num + suspend_num), 0) AS total
-        FROM retry_summary
+        FROM sj_retry_summary
         ${ew.customSqlSegment}
         GROUP BY createDt
     </select>
@@ -100,7 +99,7 @@
             resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO$Rank">
         SELECT CONCAT(group_name, '/', scene_name)                            `name`,
                SUM(running_num + finish_num + max_count_num + suspend_num) AS total
-        FROM retry_summary
+        FROM sj_retry_summary
         ${ew.customSqlSegment}
         HAVING total > 0
         ORDER BY total DESC
@@ -112,7 +111,7 @@
         SELECT group_name                                          AS groupName,
                SUM(CASE WHEN (scene_status = 1) THEN 1 ELSE 0 END) AS run,
                COUNT(*)                                            AS total
-        FROM scene_config
+        FROM sj_retry_scene_config
         ${ew.customSqlSegment}
         GROUP BY namespace_id, group_name
     </select>
