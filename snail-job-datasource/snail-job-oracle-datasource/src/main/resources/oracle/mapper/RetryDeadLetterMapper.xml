@@ -22,7 +22,7 @@
     </sql>
 
     <insert id="insertBatch"  parameterType="java.util.List" useGeneratedKeys="false" keyProperty="id">
-        INSERT INTO retry_dead_letter (namespace_id, unique_id, group_name, scene_name,
+        INSERT INTO sj_retry_dead_letter (namespace_id, unique_id, group_name, scene_name,
                                        idempotent_id, biz_no, executor_name, args_str,
                                        ext_attrs, create_dt)
         <foreach collection="retryDeadLetters" item="retryDeadLetter" separator="UNION ALL">
@@ -38,7 +38,7 @@
 
     <select id="countRetryDeadLetterByCreateAt" resultType="int">
         SELECT COUNT(*)
-          FROM retry_dead_letter_${partition}
+          FROM sj_retry_dead_letter_${partition}
          WHERE create_dt BETWEEN #{startTime} AND #{endTime}
     </select>
 

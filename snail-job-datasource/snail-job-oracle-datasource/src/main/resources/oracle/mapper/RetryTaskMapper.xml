@@ -27,7 +27,7 @@
 
     <!-- 定义批量新增的 SQL 映射 -->
     <insert id="batchInsert" parameterType="java.util.List">
-        INSERT INTO retry_task (namespace_id, unique_id, group_name, scene_name, idempotent_id, biz_no,
+        INSERT INTO sj_retry_task (namespace_id, unique_id, group_name, scene_name, idempotent_id, biz_no,
                                 executor_name, args_str, ext_attrs, next_trigger_at, task_type, retry_status, create_dt)
         <foreach collection="list" item="item" separator="UNION ALL">
             SELECT
@@ -40,7 +40,7 @@
 
     <update id="updateBatchNextTriggerAtById" parameterType="java.util.List">
         <foreach collection="list" item="item" index="index" open="BEGIN" separator=";" close=";END;">
-            UPDATE retry_task_${partition}
+            UPDATE sj_retry_task_${partition}
                SET next_trigger_at = #{item.nextTriggerAt}
              WHERE id = #{item.id}
         </foreach>

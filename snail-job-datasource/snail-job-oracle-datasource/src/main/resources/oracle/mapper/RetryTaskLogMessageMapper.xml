@@ -12,7 +12,7 @@
     </resultMap>
 
     <insert id="batchInsert" parameterType="java.util.List">
-        INSERT INTO retry_task_log_message (namespace_id, group_name, unique_id, log_num, message,
+        INSERT INTO sj_retry_task_log_message (namespace_id, group_name, unique_id, log_num, message,
                                             create_dt, real_time)
             <foreach collection="list" item="item" separator="UNION ALL">
                 SELECT
@@ -29,7 +29,7 @@
 
     <update id="batchUpdate" parameterType="java.util.List">
         <foreach collection="list" item="item" index="index" open="BEGIN" separator=";" close=";END;">
-            UPDATE retry_task_log_message
+            UPDATE sj_retry_task_log_message
                SET message = #{item.message}, log_num = #{item.logNum}
              WHERE id = #{item.id}
         </foreach>
