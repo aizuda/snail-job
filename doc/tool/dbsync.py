@@ -411,6 +411,8 @@ class OracleConvertor(Convertor):
             type = col["type"].lower()
             full_type = self.translate_type(type, col["size"])
             nullable = "NULL" if col["nullable"] else "NOT NULL"
+            # Oracle的 INSERT '' 不能通过NOT NULL校验，因此对文字类型字段覆写为 NULL
+            nullable = "NULL" if type in ("varchar", "text", "longtext") else nullable
             default = f"DEFAULT {col['default']}" if col["default"] is not None else ""
             # Oracle 中 size 不能作为字段名
             field_name = '"size"' if name == "size" else name
