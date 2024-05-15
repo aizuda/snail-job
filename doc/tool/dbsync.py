@@ -607,7 +607,7 @@ GO
             # SQLServer: 字符串前加N，hack，是否存在替换字符串内容的风险
             insert_script = (
                 insert_script.replace(", '", ", N'")
-                .replace("VALUES ('", "VALUES (N')")
+                .replace("VALUES ('", "VALUES (N'")
                 .replace("(id, ", "(")
                 .replace("VALUES (1, ", "VALUES (")
                 .replace("now(), ", "getdate(), ")

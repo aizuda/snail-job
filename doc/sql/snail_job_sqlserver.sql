@@ -2,7 +2,7 @@
  SnailJob Database Transfer Tool
  Source Server Type    : MySQL
  Target Server Type    : Microsoft SQL Server
- Date: 2024-05-13 23:03:34
+ Date: 2024-05-15 12:54:43
 */
 
 
@@ -1264,7 +1264,7 @@ EXEC sp_addextendedproperty
 GO
 
 INSERT INTO sj_system_user (username, password, role)
-VALUES (N')admin', N'465c194afb65670f38322df087f0a9bb225cc257e43eb4ac5a0c98ef5b3173ac', 2)
+VALUES (N'admin', N'465c194afb65670f38322df087f0a9bb225cc257e43eb4ac5a0c98ef5b3173ac', 2)
 GO
 
 -- sj_system_user_permission
