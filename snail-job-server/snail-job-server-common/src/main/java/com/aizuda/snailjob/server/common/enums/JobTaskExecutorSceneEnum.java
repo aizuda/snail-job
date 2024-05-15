@@ -16,7 +16,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum JobTaskExecutorSceneEnum {
     AUTO_JOB(1, SyetemTaskTypeEnum.JOB),
-    MANUAL_JOB(2,  SyetemTaskTypeEnum.JOB),
+    MANUAL_JOB(2, SyetemTaskTypeEnum.JOB),
     AUTO_WORKFLOW(3, SyetemTaskTypeEnum.WORKFLOW),
     MANUAL_WORKFLOW(4, SyetemTaskTypeEnum.WORKFLOW),
     ;
@@ -33,7 +33,7 @@ public enum JobTaskExecutorSceneEnum {
      */
     public static JobTaskExecutorSceneEnum get(Integer type) {
         for (JobTaskExecutorSceneEnum jobTaskExecutorSceneEnum : JobTaskExecutorSceneEnum.values()) {
-            if(jobTaskExecutorSceneEnum.getType().equals(type)) {
+            if (jobTaskExecutorSceneEnum.getType().equals(type)) {
                 return jobTaskExecutorSceneEnum;
             }
         }

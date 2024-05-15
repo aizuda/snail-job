@@ -14,7 +14,7 @@ import java.util.Map;
  * @date 2023-09-10 17:40:34
  * @since 2.3.0
  */
-public class QLExpressEngine extends AbstractExpressionEngine  {
+public class QLExpressEngine extends AbstractExpressionEngine {
 
     private static final ExpressRunner ENGINE = new ExpressRunner();
 

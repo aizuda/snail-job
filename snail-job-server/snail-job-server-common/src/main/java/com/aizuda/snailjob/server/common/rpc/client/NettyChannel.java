@@ -97,8 +97,8 @@ public class NettyChannel {
 
         try {
             ChannelFuture channelFuture = bootstrap
-                .remoteAddress(ip, port)
-                .connect();
+                    .remoteAddress(ip, port)
+                    .connect();
 
             boolean notTimeout = channelFuture.awaitUninterruptibly(30, TimeUnit.SECONDS);
             Channel channel = channelFuture.channel();

@@ -8,13 +8,7 @@ import com.aizuda.snailjob.client.core.retryer.RetryerInfo;
 import com.aizuda.snailjob.client.core.retryer.RetryerResultContext;
 import com.aizuda.snailjob.common.core.enums.RetryResultStatusEnum;
 import com.aizuda.snailjob.common.log.SnailJobLog;
-import com.aizuda.snailjob.client.core.intercepter.RetrySiteSnapshot;
-import com.github.rholder.retry.Attempt;
-import com.github.rholder.retry.RetryListener;
-import com.github.rholder.retry.StopStrategies;
-import com.github.rholder.retry.StopStrategy;
-import com.github.rholder.retry.WaitStrategies;
-import com.github.rholder.retry.WaitStrategy;
+import com.github.rholder.retry.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -111,12 +105,12 @@ public class ManualRetryStrategies extends AbstractRetryStrategies {
                     @Override
                     public <V> void onRetry(Attempt<V> attempt) {
                         if (attempt.hasResult()) {
-                           SnailJobLog.LOCAL.info("snail-job 手动创建重试数据成功，第[{}]次调度", attempt.getAttemptNumber());
+                            SnailJobLog.LOCAL.info("snail-job 手动创建重试数据成功，第[{}]次调度", attempt.getAttemptNumber());
                         }
 
                         if (attempt.hasException()) {
                             SnailJobLog.LOCAL.error("snail-job 手动创建重试数据失败，第[{}]次调度 ", attempt.getAttemptNumber(),
-                                attempt.getExceptionCause());
+                                    attempt.getExceptionCause());
                         }
 
                     }

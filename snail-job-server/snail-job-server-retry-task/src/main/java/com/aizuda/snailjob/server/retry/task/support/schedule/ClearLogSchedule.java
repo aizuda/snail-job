@@ -74,7 +74,7 @@ public class ClearLogSchedule extends AbstractSchedule implements Lifecycle {
             // clean retry log
             LocalDateTime endTime = LocalDateTime.now().minusDays(systemProperties.getLogStorage());
             long total = PartitionTaskUtils.process(startId -> retryTaskBatchList(startId, endTime),
-                this::processRetryLogPartitionTasks, 0);
+                    this::processRetryLogPartitionTasks, 0);
 
             SnailJobLog.LOCAL.debug("Retry clear success total:[{}]", total);
         } catch (Exception e) {

@@ -4,29 +4,29 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.aizuda.snailjob.template.datasource.persistence.po.Workflow">
-        <id column="id" property="id" />
-        <result column="namespace_id" property="namespaceId" />
-        <result column="group_name" property="groupName" />
-        <result column="workflow_status" property="workflowStatus" />
-        <result column="next_trigger_at" property="nextTriggerAt" />
-        <result column="flow_info" property="flowInfo" />
-        <result column="create_dt" property="createDt" />
-        <result column="update_dt" property="updateDt" />
-        <result column="deleted" property="deleted" />
-        <result column="ext_attrs" property="extAttrs" />
+        <id column="id" property="id"/>
+        <result column="namespace_id" property="namespaceId"/>
+        <result column="group_name" property="groupName"/>
+        <result column="workflow_status" property="workflowStatus"/>
+        <result column="next_trigger_at" property="nextTriggerAt"/>
+        <result column="flow_info" property="flowInfo"/>
+        <result column="create_dt" property="createDt"/>
+        <result column="update_dt" property="updateDt"/>
+        <result column="deleted" property="deleted"/>
+        <result column="ext_attrs" property="extAttrs"/>
     </resultMap>
 
     <update id="updateBatchNextTriggerAtById" parameterType="java.util.List">
         UPDATE sj_workflow rt,
-               (
-                   <foreach collection="list" item="item" index="index" separator="UNION ALL">
-                       SELECT
-                           #{item.nextTriggerAt} AS next_trigger_at,
-                           #{item.id} AS id
-                   </foreach>
-               ) tt
-           SET rt.next_trigger_at = tt.next_trigger_at
-         WHERE rt.id = tt.id
+        (
+        <foreach collection="list" item="item" index="index" separator="UNION ALL">
+            SELECT
+            #{item.nextTriggerAt} AS next_trigger_at,
+            #{item.id} AS id
+        </foreach>
+        ) tt
+        SET rt.next_trigger_at = tt.next_trigger_at
+        WHERE rt.id = tt.id
     </update>
 
 </mapper>

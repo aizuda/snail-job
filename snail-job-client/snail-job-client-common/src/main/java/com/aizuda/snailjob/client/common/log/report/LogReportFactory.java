@@ -12,13 +12,14 @@ import java.util.List;
  */
 public final class LogReportFactory {
 
-   private static final List<LogReport> REPORTS = Lists.newArrayList();
+    private static final List<LogReport> REPORTS = Lists.newArrayList();
+
     private LogReportFactory() {
     }
 
     static void add(LogReport logReport) {
         REPORTS.add(logReport);
-   }
+    }
 
     public static LogReport get() {
 

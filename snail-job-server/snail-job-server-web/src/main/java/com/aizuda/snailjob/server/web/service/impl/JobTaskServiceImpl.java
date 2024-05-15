@@ -32,14 +32,14 @@ public class JobTaskServiceImpl implements JobTaskService {
         PageDTO<JobTask> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
 
         PageDTO<JobTask> selectPage = jobTaskMapper.selectPage(pageDTO,
-            new LambdaQueryWrapper<JobTask>()
-                .eq(Objects.nonNull(queryVO.getJobId()), JobTask::getJobId, queryVO.getJobId())
-                .eq(Objects.nonNull(queryVO.getTaskBatchId()), JobTask::getTaskBatchId, queryVO.getTaskBatchId())
-                // SQLServer 分页必须 ORDER BY
-                .orderByAsc(JobTask::getJobId));
+                new LambdaQueryWrapper<JobTask>()
+                        .eq(Objects.nonNull(queryVO.getJobId()), JobTask::getJobId, queryVO.getJobId())
+                        .eq(Objects.nonNull(queryVO.getTaskBatchId()), JobTask::getTaskBatchId, queryVO.getTaskBatchId())
+                        // SQLServer 分页必须 ORDER BY
+                        .orderByAsc(JobTask::getJobId));
 
         List<JobTaskResponseVO> jobTaskResponseVOs = JobTaskResponseVOConverter.INSTANCE.convertList(
-            selectPage.getRecords());
+                selectPage.getRecords());
         for (JobTaskResponseVO jobTaskResponseVO : jobTaskResponseVOs) {
             jobTaskResponseVO.setKey(jobTaskResponseVO.getId());
         }

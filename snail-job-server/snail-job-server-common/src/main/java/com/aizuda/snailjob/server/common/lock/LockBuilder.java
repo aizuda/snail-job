@@ -29,7 +29,7 @@ public final class LockBuilder {
     public LockBuilder withDisposable(String lockName) {
         this.lockName = lockName;
         resident = Boolean.FALSE;
-       return this;
+        return this;
     }
 
     public LockProvider build() {

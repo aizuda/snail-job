@@ -13,8 +13,6 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 /**
-
- *
  * @author opensnail
  * @date 2023-10-06 17:33:51
  * @since 2.4.0

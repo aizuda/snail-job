@@ -57,16 +57,17 @@ public class FailureActor extends AbstractActor {
     private IdempotentStrategy<Pair<String/*groupName*/, String/*namespaceId*/>, Long> idempotentStrategy;
     @Autowired
     private RetryTaskLogMapper retryTaskLogMapper;
+
     @Override
     public Receive createReceive() {
         return receiveBuilder().match(RetryTask.class, retryTask -> {
-           SnailJobLog.LOCAL.debug("FailureActor params:[{}]", retryTask);
+            SnailJobLog.LOCAL.debug("FailureActor params:[{}]", retryTask);
 
             try {
                 // 超过最大等级
                 RetrySceneConfig retrySceneConfig =
                         accessTemplate.getSceneConfigAccess().getSceneConfigByGroupNameAndSceneName(retryTask.getGroupName(), retryTask.getSceneName(),
-                            retryTask.getNamespaceId());
+                                retryTask.getNamespaceId());
 
                 transactionTemplate.execute(new TransactionCallbackWithoutResult() {
                     @Override
@@ -95,9 +96,9 @@ public class FailureActor extends AbstractActor {
                         RetryTaskLog retryTaskLog = new RetryTaskLog();
                         retryTaskLog.setRetryStatus(retryTask.getRetryStatus());
                         retryTaskLogMapper.update(retryTaskLog, new LambdaUpdateWrapper<RetryTaskLog>()
-                            .eq(RetryTaskLog::getNamespaceId, retryTask.getNamespaceId())
-                            .eq(RetryTaskLog::getUniqueId, retryTask.getUniqueId())
-                            .eq(RetryTaskLog::getGroupName, retryTask.getGroupName()));
+                                .eq(RetryTaskLog::getNamespaceId, retryTask.getNamespaceId())
+                                .eq(RetryTaskLog::getUniqueId, retryTask.getUniqueId())
+                                .eq(RetryTaskLog::getGroupName, retryTask.getGroupName()));
 
                         context.publishEvent(new RetryTaskFailMoreThresholdAlarmEvent(retryTask));
                     }

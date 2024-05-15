@@ -18,8 +18,6 @@ import com.aizuda.snailjob.common.core.model.JobContext;
 import com.aizuda.snailjob.common.core.model.Result;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.common.log.enums.LogTypeEnum;
-import com.aizuda.snailjob.client.job.core.executor.AbstractJobExecutor;
-import com.aizuda.snailjob.client.job.core.executor.AnnotationJobExecutor;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -57,7 +55,7 @@ public class JobEndPoint {
 
             if (Objects.nonNull(dispatchJob.getRetryCount()) && dispatchJob.getRetryCount() > 0) {
                 SnailJobLog.REMOTE.info("任务执行/调度失败执行重试. 重试次数:[{}]",
-                    dispatchJob.getRetryCount());
+                        dispatchJob.getRetryCount());
             }
 
             JobExecutorInfo jobExecutorInfo = JobExecutorInfoCache.get(jobContext.getExecutorInfo());

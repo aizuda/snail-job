@@ -1,7 +1,6 @@
 package com.aizuda.snailjob.client.core.cache;
 
 import com.aizuda.snailjob.client.core.retryer.RetryerInfo;
-import com.aizuda.snailjob.client.core.retryer.RetryerInfo;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 
@@ -14,7 +13,7 @@ public class RetryerInfoCache {
     private static Table<String, String, RetryerInfo> RETRY_HANDLER_REPOSITORY = HashBasedTable.create();
 
     public static RetryerInfo put(RetryerInfo retryerInfo) {
-       return RETRY_HANDLER_REPOSITORY.put(retryerInfo.getScene(), retryerInfo.getExecutorClassName(), retryerInfo);
+        return RETRY_HANDLER_REPOSITORY.put(retryerInfo.getScene(), retryerInfo.getExecutorClassName(), retryerInfo);
     }
 
     public static RetryerInfo get(String sceneName, String executorClassName) {

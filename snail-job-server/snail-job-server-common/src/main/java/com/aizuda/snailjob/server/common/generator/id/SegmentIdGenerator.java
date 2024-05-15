@@ -53,7 +53,7 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
     private static final long SEGMENT_DURATION = 15 * 60 * 1000L;
 
     private final ThreadPoolExecutor service = new ThreadPoolExecutor(5, 10, 60L, TimeUnit.SECONDS,
-        new LinkedBlockingDeque<>(5000), new UpdateThreadFactory());
+            new LinkedBlockingDeque<>(5000), new UpdateThreadFactory());
 
     private volatile boolean initOK = false;
     private final Map<Pair<String, String>, SegmentBuffer> cache = new ConcurrentHashMap<>();
@@ -89,14 +89,14 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
     private void updateCacheFromDb() {
         try {
             List<SequenceAlloc> sequenceAllocs = sequenceAllocMapper
-                .selectList(new LambdaQueryWrapper<SequenceAlloc>()
-                    .select(SequenceAlloc::getGroupName, SequenceAlloc::getNamespaceId));
+                    .selectList(new LambdaQueryWrapper<SequenceAlloc>()
+                            .select(SequenceAlloc::getGroupName, SequenceAlloc::getNamespaceId));
             if (CollectionUtils.isEmpty(sequenceAllocs)) {
                 return;
             }
 
             List<Pair<String, String>> dbTags = StreamUtils.toList(sequenceAllocs,
-                sequenceAlloc -> Pair.of(sequenceAlloc.getGroupName(), sequenceAlloc.getNamespaceId()));
+                    sequenceAlloc -> Pair.of(sequenceAlloc.getGroupName(), sequenceAlloc.getNamespaceId()));
 
             List<Pair<String, String>> cacheTags = new ArrayList<>(cache.keySet());
             Set<Pair<String, String>> insertTagsSet = new HashSet<>(dbTags);
@@ -160,23 +160,23 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
         SegmentBuffer buffer = segment.getBuffer();
         SequenceAlloc sequenceAlloc;
         LambdaUpdateWrapper<SequenceAlloc> wrapper = new LambdaUpdateWrapper<SequenceAlloc>()
-            .setSql("max_id = max_id + step")
-            .set(SequenceAlloc::getUpdateDt, new Date())
-            .eq(SequenceAlloc::getGroupName, key.getKey())
-            .eq(SequenceAlloc::getNamespaceId, key.getValue());
+                .setSql("max_id = max_id + step")
+                .set(SequenceAlloc::getUpdateDt, new Date())
+                .eq(SequenceAlloc::getGroupName, key.getKey())
+                .eq(SequenceAlloc::getNamespaceId, key.getValue());
         if (!buffer.isInitOk()) {
             sequenceAllocMapper.update(wrapper);
             sequenceAlloc = sequenceAllocMapper.selectOne(new LambdaQueryWrapper<SequenceAlloc>()
-                .eq(SequenceAlloc::getGroupName, key.getKey())
-                .eq(SequenceAlloc::getNamespaceId, key.getValue())
+                    .eq(SequenceAlloc::getGroupName, key.getKey())
+                    .eq(SequenceAlloc::getNamespaceId, key.getValue())
             );
             buffer.setStep(sequenceAlloc.getStep());
             buffer.setMinStep(sequenceAlloc.getStep());//leafAlloc中的step为DB中的step
         } else if (buffer.getUpdateTimestamp() == 0) {
             sequenceAllocMapper.update(wrapper);
             sequenceAlloc = sequenceAllocMapper.selectOne(new LambdaQueryWrapper<SequenceAlloc>()
-                .eq(SequenceAlloc::getGroupName, key.getKey())
-                .eq(SequenceAlloc::getNamespaceId, key.getValue())
+                    .eq(SequenceAlloc::getGroupName, key.getKey())
+                    .eq(SequenceAlloc::getNamespaceId, key.getValue())
             );
             buffer.setUpdateTimestamp(System.currentTimeMillis());
             buffer.setStep(sequenceAlloc.getStep());
@@ -197,14 +197,14 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
             }
             SnailJobLog.LOCAL.debug("leafKey[{}], step[{}], duration[{}mins], nextStep[{}]", key, buffer.getStep(), String.format("%.2f", ((double) duration / (1000 * 60))), nextStep);
             LambdaUpdateWrapper<SequenceAlloc> wrapper1 = new LambdaUpdateWrapper<SequenceAlloc>()
-                .setSql("max_id = max_id + " + nextStep)
-                .set(SequenceAlloc::getUpdateDt, new Date())
-                .eq(SequenceAlloc::getGroupName, key.getKey())
-                .eq(SequenceAlloc::getNamespaceId, key.getValue());
+                    .setSql("max_id = max_id + " + nextStep)
+                    .set(SequenceAlloc::getUpdateDt, new Date())
+                    .eq(SequenceAlloc::getGroupName, key.getKey())
+                    .eq(SequenceAlloc::getNamespaceId, key.getValue());
             sequenceAllocMapper.update(wrapper1);
             sequenceAlloc = sequenceAllocMapper.selectOne(new LambdaQueryWrapper<SequenceAlloc>()
-                .eq(SequenceAlloc::getGroupName, key.getKey())
-                .eq(SequenceAlloc::getNamespaceId, key.getValue())
+                    .eq(SequenceAlloc::getGroupName, key.getKey())
+                    .eq(SequenceAlloc::getNamespaceId, key.getValue())
             );
             buffer.setUpdateTimestamp(System.currentTimeMillis());
             buffer.setStep(nextStep);

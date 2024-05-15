@@ -13,7 +13,7 @@ import lombok.Getter;
 @Getter
 public enum TaskExecutorSceneEnum {
     AUTO_RETRY(1, SyetemTaskTypeEnum.RETRY),
-    MANUAL_RETRY(2,  SyetemTaskTypeEnum.RETRY),
+    MANUAL_RETRY(2, SyetemTaskTypeEnum.RETRY),
     AUTO_CALLBACK(3, SyetemTaskTypeEnum.CALLBACK),
     MANUAL_CALLBACK(4, SyetemTaskTypeEnum.CALLBACK);
 

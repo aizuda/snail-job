@@ -13,7 +13,9 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class LogStorageFactory {
 
-    private LogStorageFactory() {}
+    private LogStorageFactory() {
+    }
+
     private static final Map<LogTypeEnum, LogStorage> LOG_STORAGE = new ConcurrentHashMap<>();
 
     public static void register(LogTypeEnum logType, LogStorage logStorage) {

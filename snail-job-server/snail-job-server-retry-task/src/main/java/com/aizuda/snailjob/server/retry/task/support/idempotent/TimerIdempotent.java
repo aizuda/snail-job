@@ -22,9 +22,9 @@ public class TimerIdempotent implements IdempotentStrategy<Pair<String/*groupNam
 
     static {
         cache = CacheBuilder.newBuilder()
-            .concurrencyLevel(16) // 并发级别
-            .expireAfterWrite(20, TimeUnit.SECONDS)
-            .build();
+                .concurrencyLevel(16) // 并发级别
+                .expireAfterWrite(20, TimeUnit.SECONDS)
+                .build();
     }
 
     @Override
@@ -39,7 +39,7 @@ public class TimerIdempotent implements IdempotentStrategy<Pair<String/*groupNam
 
     @Override
     public String get(Pair<String/*groupName*/, String/*namespaceId*/> pair) {
-       throw new UnsupportedOperationException("不支持此操作");
+        throw new UnsupportedOperationException("不支持此操作");
     }
 
     @Override

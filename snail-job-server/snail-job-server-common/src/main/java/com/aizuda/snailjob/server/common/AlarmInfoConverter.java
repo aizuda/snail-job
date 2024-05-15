@@ -47,7 +47,7 @@ public interface AlarmInfoConverter {
     List<NotifyConfigInfo> retryToNotifyConfigInfos(List<NotifyConfig> notifyConfigs);
 
     @Mappings({
-        @Mapping(target = "recipientIds", expression = "java(AlarmInfoConverter.toNotifyRecipientIds(notifyConfig.getRecipientIds()))")
+            @Mapping(target = "recipientIds", expression = "java(AlarmInfoConverter.toNotifyRecipientIds(notifyConfig.getRecipientIds()))")
     })
     NotifyConfigInfo retryToNotifyConfigInfos(NotifyConfig notifyConfig);
 

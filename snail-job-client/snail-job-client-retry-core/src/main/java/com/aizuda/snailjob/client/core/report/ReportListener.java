@@ -1,22 +1,22 @@
 package com.aizuda.snailjob.client.core.report;
 
+import com.aizuda.snailjob.client.common.cache.GroupVersionCache;
+import com.aizuda.snailjob.client.common.client.NettyClient;
 import com.aizuda.snailjob.client.common.config.SnailJobProperties;
 import com.aizuda.snailjob.client.common.rpc.client.RequestBuilder;
 import com.aizuda.snailjob.client.core.RetryExecutor;
 import com.aizuda.snailjob.client.core.RetryExecutorParameter;
-import com.aizuda.snailjob.client.common.cache.GroupVersionCache;
-import com.aizuda.snailjob.client.common.client.NettyClient;
 import com.aizuda.snailjob.client.core.executor.GuavaRetryExecutor;
 import com.aizuda.snailjob.common.core.alarm.AlarmContext;
 import com.aizuda.snailjob.common.core.alarm.SnailJobAlarmFactory;
 import com.aizuda.snailjob.common.core.context.SpringContext;
 import com.aizuda.snailjob.common.core.enums.RetryNotifySceneEnum;
-import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.common.core.model.NettyResult;
 import com.aizuda.snailjob.common.core.util.EnvironmentUtils;
-import com.aizuda.snailjob.common.core.util.NetUtil;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
+import com.aizuda.snailjob.common.core.util.NetUtil;
 import com.aizuda.snailjob.common.core.window.Listener;
+import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.model.dto.ConfigDTO;
 import com.aizuda.snailjob.server.model.dto.ConfigDTO.Notify.Recipient;
 import com.aizuda.snailjob.server.model.dto.RetryTaskDTO;
@@ -48,12 +48,11 @@ public class ReportListener implements Listener<RetryTaskDTO> {
                     "> 空间ID:{}  \n" +
                     "> 名称:{}  \n" +
                     "> 时间:{}  \n" +
-                    "> 异常:{}  \n"
-            ;
+                    "> 异常:{}  \n";
 
     private static final NettyClient CLIENT = RequestBuilder.<NettyClient, NettyResult>newBuilder()
-        .client(NettyClient.class)
-        .callback(nettyResult -> SnailJobLog.LOCAL.info("Data report successfully requestId:[{}]", nettyResult.getRequestId())).build();
+            .client(NettyClient.class)
+            .callback(nettyResult -> SnailJobLog.LOCAL.info("Data report successfully requestId:[{}]", nettyResult.getRequestId())).build();
 
     @Override
     public void handler(List<RetryTaskDTO> list) {
@@ -64,7 +63,7 @@ public class ReportListener implements Listener<RetryTaskDTO> {
 
         try {
             retryExecutor.call(retryer, () -> {
-               SnailJobLog.LOCAL.info("Batch asynchronous reporting ... <|>{}<|>", JsonUtil.toJsonString(list));
+                SnailJobLog.LOCAL.info("Batch asynchronous reporting ... <|>{}<|>", JsonUtil.toJsonString(list));
                 CLIENT.reportRetryInfo(list);
                 return null;
             }, throwable -> {
@@ -121,15 +120,15 @@ public class ReportListener implements Listener<RetryTaskDTO> {
             List<Recipient> recipients = Optional.ofNullable(notify.getRecipients()).orElse(Lists.newArrayList());
             for (final Recipient recipient : recipients) {
                 AlarmContext context = AlarmContext.build()
-                    .text(reportErrorTextMessageFormatter,
-                        EnvironmentUtils.getActiveProfile(),
-                        NetUtil.getLocalIpStr(),
-                        properties.getNamespace(),
-                        properties.getGroup(),
-                        LocalDateTime.now().format(formatter),
-                        e.getMessage())
-                    .title("上报异常:[{}]", properties.getGroup())
-                    .notifyAttribute(recipient.getNotifyAttribute());
+                        .text(reportErrorTextMessageFormatter,
+                                EnvironmentUtils.getActiveProfile(),
+                                NetUtil.getLocalIpStr(),
+                                properties.getNamespace(),
+                                properties.getGroup(),
+                                LocalDateTime.now().format(formatter),
+                                e.getMessage())
+                        .title("上报异常:[{}]", properties.getGroup())
+                        .notifyAttribute(recipient.getNotifyAttribute());
                 Optional.ofNullable(SnailJobAlarmFactory.getAlarmType(recipient.getNotifyType())).ifPresent(alarm -> alarm.asyncSendMessage(context));
             }
 

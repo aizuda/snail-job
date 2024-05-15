@@ -45,7 +45,7 @@ public enum JobOperationReasonEnum {
      * 工作流后续节点跳过执行配置
      */
     public static final List<Integer> WORKFLOW_SUCCESSOR_SKIP_EXECUTION = Arrays.asList(
-        WORKFLOW_NODE_NO_REQUIRED.getReason(), WORKFLOW_DECISION_FAILED.getReason(),
+            WORKFLOW_NODE_NO_REQUIRED.getReason(), WORKFLOW_DECISION_FAILED.getReason(),
             WORKFLOW_CONDITION_NODE_EXECUTION_ERROR.getReason());
 
     public static JobOperationReasonEnum getByReason(Integer reason) {

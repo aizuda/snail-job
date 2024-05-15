@@ -17,6 +17,7 @@ public class StackWalkerCaller implements Caller, Serializable {
     private static final long serialVersionUID = 1L;
 
     private static final int OFFSET = 2;
+
     @Override
     public Class<?> getCallerCaller() {
 

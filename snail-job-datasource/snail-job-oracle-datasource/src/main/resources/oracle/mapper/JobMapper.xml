@@ -29,8 +29,8 @@
     <update id="updateBatchNextTriggerAtById" parameterType="java.util.List">
         <foreach collection="list" item="item" open="BEGIN" separator=";" close=";END;">
             UPDATE sj_job
-               SET next_trigger_at = #{item.nextTriggerAt}
-             WHERE id = #{item.id}
+            SET next_trigger_at = #{item.nextTriggerAt}
+            WHERE id = #{item.id}
         </foreach>
     </update>
 

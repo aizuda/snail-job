@@ -1,6 +1,7 @@
 package com.aizuda.snailjob.template.datasource.persistence.dataobject;
 
 import lombok.Data;
+
 import java.time.LocalDateTime;
 
 /**

@@ -58,38 +58,38 @@ public class NotifyConfigServiceImpl implements NotifyConfigService {
 
         UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
         List<NotifyConfig> notifyConfigs = accessTemplate.getNotifyConfigAccess().listPage(pageDTO,
-                new LambdaQueryWrapper<NotifyConfig>()
-                    .eq(NotifyConfig::getNamespaceId, userSessionVO.getNamespaceId())
-                    .in(userSessionVO.isUser(), NotifyConfig::getGroupName, userSessionVO.getGroupNames())
-                    .eq(StrUtil.isNotBlank(queryVO.getGroupName()), NotifyConfig::getGroupName, queryVO.getGroupName())
-                    .eq(StrUtil.isNotBlank(queryVO.getSceneName()), NotifyConfig::getBusinessId, queryVO.getSceneName())
-                    .orderByDesc(NotifyConfig::getId))
-            .getRecords();
+                        new LambdaQueryWrapper<NotifyConfig>()
+                                .eq(NotifyConfig::getNamespaceId, userSessionVO.getNamespaceId())
+                                .in(userSessionVO.isUser(), NotifyConfig::getGroupName, userSessionVO.getGroupNames())
+                                .eq(StrUtil.isNotBlank(queryVO.getGroupName()), NotifyConfig::getGroupName, queryVO.getGroupName())
+                                .eq(StrUtil.isNotBlank(queryVO.getSceneName()), NotifyConfig::getBusinessId, queryVO.getSceneName())
+                                .orderByDesc(NotifyConfig::getId))
+                .getRecords();
 
         if (CollectionUtils.isEmpty(notifyConfigs)) {
             return new PageResult<>(pageDTO, Lists.newArrayList());
         }
 
         List<NotifyConfigResponseVO> notifyConfigResponseVOS = NotifyConfigResponseVOConverter.INSTANCE.convertList(
-            notifyConfigs);
+                notifyConfigs);
 
         Map<Long, String> recipientNameMap = getRecipientNameMap(notifyConfigResponseVOS);
         Map<Long, String> jobNameMap = getJobNameMap(notifyConfigResponseVOS);
         Map<Long, String> workflowNameMap = getWorkflowNameMap(notifyConfigResponseVOS);
         for (final NotifyConfigResponseVO notifyConfigResponseVO : notifyConfigResponseVOS) {
             notifyConfigResponseVO.setRecipientNames(StreamUtils.toSet(notifyConfigResponseVO.getRecipientIds(),
-                recipientId -> recipientNameMap.getOrDefault(recipientId, StrUtil.EMPTY)));
+                    recipientId -> recipientNameMap.getOrDefault(recipientId, StrUtil.EMPTY)));
 
             if (Objects.equals(notifyConfigResponseVO.getSystemTaskType(), SyetemTaskTypeEnum.RETRY.getType()) ||
-                Objects.equals(notifyConfigResponseVO.getSystemTaskType(), SyetemTaskTypeEnum.CALLBACK.getType())) {
+                    Objects.equals(notifyConfigResponseVO.getSystemTaskType(), SyetemTaskTypeEnum.CALLBACK.getType())) {
                 notifyConfigResponseVO.setBusinessName(notifyConfigResponseVO.getBusinessId());
             } else if (Objects.equals(notifyConfigResponseVO.getSystemTaskType(), SyetemTaskTypeEnum.JOB.getType())) {
                 notifyConfigResponseVO.setBusinessName(
-                    jobNameMap.get(Long.parseLong(notifyConfigResponseVO.getBusinessId())));
+                        jobNameMap.get(Long.parseLong(notifyConfigResponseVO.getBusinessId())));
             } else if (Objects.equals(notifyConfigResponseVO.getSystemTaskType(),
-                SyetemTaskTypeEnum.WORKFLOW.getType())) {
+                    SyetemTaskTypeEnum.WORKFLOW.getType())) {
                 notifyConfigResponseVO.setBusinessName(
-                    workflowNameMap.get(Long.parseLong(notifyConfigResponseVO.getBusinessId())));
+                        workflowNameMap.get(Long.parseLong(notifyConfigResponseVO.getBusinessId())));
             }
         }
 
@@ -98,9 +98,9 @@ public class NotifyConfigServiceImpl implements NotifyConfigService {
 
     private Map<Long, String> getWorkflowNameMap(final List<NotifyConfigResponseVO> notifyConfigResponseVOS) {
         Set<Long> workflowIds = notifyConfigResponseVOS.stream().filter(responseVO ->
-                responseVO.getSystemTaskType().equals(SyetemTaskTypeEnum.WORKFLOW.getType()))
-            .map(responseVO -> Long.parseLong(responseVO.getBusinessId()))
-            .collect(Collectors.toSet());
+                        responseVO.getSystemTaskType().equals(SyetemTaskTypeEnum.WORKFLOW.getType()))
+                .map(responseVO -> Long.parseLong(responseVO.getBusinessId()))
+                .collect(Collectors.toSet());
         if (!CollectionUtils.isEmpty(workflowIds)) {
             List<Workflow> workflows = workflowMapper.selectBatchIds(workflowIds);
             return StreamUtils.toMap(workflows, Workflow::getId, Workflow::getWorkflowName);
@@ -111,9 +111,9 @@ public class NotifyConfigServiceImpl implements NotifyConfigService {
 
     private Map<Long, String> getJobNameMap(final List<NotifyConfigResponseVO> notifyConfigResponseVOS) {
         Set<Long> jobIds = notifyConfigResponseVOS.stream().filter(responseVO ->
-                responseVO.getSystemTaskType().equals(SyetemTaskTypeEnum.JOB.getType()))
-            .map(responseVO -> Long.parseLong(responseVO.getBusinessId()))
-            .collect(Collectors.toSet());
+                        responseVO.getSystemTaskType().equals(SyetemTaskTypeEnum.JOB.getType()))
+                .map(responseVO -> Long.parseLong(responseVO.getBusinessId()))
+                .collect(Collectors.toSet());
         if (!CollectionUtils.isEmpty(jobIds)) {
             List<Job> jobs = jobMapper.selectBatchIds(jobIds);
             return StreamUtils.toMap(jobs, Job::getId, Job::getJobName);
@@ -125,7 +125,7 @@ public class NotifyConfigServiceImpl implements NotifyConfigService {
     @NotNull
     private Map<Long, String> getRecipientNameMap(final List<NotifyConfigResponseVO> notifyConfigResponseVOS) {
         Set<Long> recipientIds = StreamUtils.toSetByFlatMap(notifyConfigResponseVOS,
-            NotifyConfigResponseVO::getRecipientIds, Collection::stream);
+                NotifyConfigResponseVO::getRecipientIds, Collection::stream);
 
         if (CollectionUtils.isEmpty(recipientIds)) {
             return Maps.newHashMap();
@@ -144,8 +144,8 @@ public class NotifyConfigServiceImpl implements NotifyConfigService {
         ConfigAccess<NotifyConfig> notifyConfigAccess = accessTemplate.getNotifyConfigAccess();
 
         Assert.isTrue(1 == notifyConfigAccess.insert(notifyConfig),
-            () -> new SnailJobServerException("failed to insert notify. sceneConfig:[{}]",
-                JsonUtil.toJsonString(notifyConfig)));
+                () -> new SnailJobServerException("failed to insert notify. sceneConfig:[{}]",
+                        JsonUtil.toJsonString(notifyConfig)));
         return Boolean.TRUE;
     }
 
@@ -158,15 +158,15 @@ public class NotifyConfigServiceImpl implements NotifyConfigService {
         // 防止被覆盖
         notifyConfig.setNamespaceId(null);
         Assert.isTrue(1 == accessTemplate.getNotifyConfigAccess().updateById(notifyConfig),
-            () -> new SnailJobServerException("failed to update notify. sceneConfig:[{}]",
-                JsonUtil.toJsonString(notifyConfig)));
+                () -> new SnailJobServerException("failed to update notify. sceneConfig:[{}]",
+                        JsonUtil.toJsonString(notifyConfig)));
         return Boolean.TRUE;
     }
 
     @Override
     public NotifyConfigResponseVO getNotifyConfigDetail(Long id) {
         NotifyConfig notifyConfig = accessTemplate.getNotifyConfigAccess().one(new LambdaQueryWrapper<NotifyConfig>()
-            .eq(NotifyConfig::getId, id));
+                .eq(NotifyConfig::getId, id));
         return NotifyConfigResponseVOConverter.INSTANCE.convert(notifyConfig);
     }
 
@@ -175,9 +175,9 @@ public class NotifyConfigServiceImpl implements NotifyConfigService {
 
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
         NotifyConfig notifyConfig = accessTemplate.getNotifyConfigAccess().one(
-            new LambdaQueryWrapper<NotifyConfig>()
-                .eq(NotifyConfig::getId, id)
-                .eq(NotifyConfig::getNamespaceId, namespaceId)
+                new LambdaQueryWrapper<NotifyConfig>()
+                        .eq(NotifyConfig::getId, id)
+                        .eq(NotifyConfig::getNamespaceId, namespaceId)
         );
         Assert.notNull(notifyConfig, () -> new SnailJobServerException("通知配置不存在"));
 
@@ -188,10 +188,10 @@ public class NotifyConfigServiceImpl implements NotifyConfigService {
         config.setNotifyStatus(status);
         config.setUpdateDt(LocalDateTime.now());
         int update = accessTemplate.getNotifyConfigAccess()
-            .update(config, new LambdaUpdateWrapper<NotifyConfig>()
-                .eq(NotifyConfig::getNamespaceId, namespaceId)
-                .eq(NotifyConfig::getId, id)
-            );
+                .update(config, new LambdaUpdateWrapper<NotifyConfig>()
+                        .eq(NotifyConfig::getNamespaceId, namespaceId)
+                        .eq(NotifyConfig::getId, id)
+                );
 
         return 1 == update;
     }
@@ -199,6 +199,6 @@ public class NotifyConfigServiceImpl implements NotifyConfigService {
     @Override
     public Boolean batchDeleteNotify(final Set<Long> ids) {
         return ids.size() == accessTemplate.getNotifyConfigAccess()
-            .delete(new LambdaQueryWrapper<NotifyConfig>().in(NotifyConfig::getId, ids));
+                .delete(new LambdaQueryWrapper<NotifyConfig>().in(NotifyConfig::getId, ids));
     }
 }

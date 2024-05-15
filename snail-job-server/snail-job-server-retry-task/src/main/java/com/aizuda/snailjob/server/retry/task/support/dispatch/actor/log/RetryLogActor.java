@@ -39,35 +39,35 @@ public class RetryLogActor extends AbstractActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder().match(List.class,
-            list -> {
-                if (CollectionUtils.isEmpty(list)) {
-                    return;
-                }
-                saveRetryTaskLogMessage((List<RetryLogTaskDTO>) list);
-                getContext().stop(getSelf());
-            }).match(RetryTaskLogDTO.class,
-            retryTaskLogDTO -> {
-                saveRetryTaskLogMessage(retryTaskLogDTO);
-                getContext().stop(getSelf());
-            }).build();
+                list -> {
+                    if (CollectionUtils.isEmpty(list)) {
+                        return;
+                    }
+                    saveRetryTaskLogMessage((List<RetryLogTaskDTO>) list);
+                    getContext().stop(getSelf());
+                }).match(RetryTaskLogDTO.class,
+                retryTaskLogDTO -> {
+                    saveRetryTaskLogMessage(retryTaskLogDTO);
+                    getContext().stop(getSelf());
+                }).build();
     }
 
     private void saveRetryTaskLogMessage(final List<RetryLogTaskDTO> list) {
 
         List<RetryLogTaskDTO> jobLogTasks = list;
         Map<String, List<RetryLogTaskDTO>> logTaskDTOMap = jobLogTasks.
-            stream().collect(Collectors.groupingBy(RetryLogTaskDTO::getUniqueId, Collectors.toList()));
+                stream().collect(Collectors.groupingBy(RetryLogTaskDTO::getUniqueId, Collectors.toList()));
         List<RetryTaskLogMessage> retryTaskLogMessages = new ArrayList<>();
         for (List<RetryLogTaskDTO> logTaskDTOList : logTaskDTOMap.values()) {
             RetryTaskLogMessage retryTaskLogMessage = RetryTaskConverter.INSTANCE.toRetryTaskLogMessage(
-                logTaskDTOList.get(0));
+                    logTaskDTOList.get(0));
             retryTaskLogMessage.setCreateDt(LocalDateTime.now());
             retryTaskLogMessage.setLogNum(logTaskDTOList.size());
             List<Map<String, String>> messageMapList = logTaskDTOList.stream()
-                .map(taskDTO -> taskDTO.getFieldList()
-                    .stream().filter(logTaskDTO_ -> !Objects.isNull(logTaskDTO_.getValue()))
-                    .collect(Collectors.toMap(TaskLogFieldDTO::getName, TaskLogFieldDTO::getValue)))
-                .collect(Collectors.toList());
+                    .map(taskDTO -> taskDTO.getFieldList()
+                            .stream().filter(logTaskDTO_ -> !Objects.isNull(logTaskDTO_.getValue()))
+                            .collect(Collectors.toMap(TaskLogFieldDTO::getName, TaskLogFieldDTO::getValue)))
+                    .collect(Collectors.toList());
             retryTaskLogMessage.setMessage(JsonUtil.toJsonString(messageMapList));
 
             retryTaskLogMessages.add(retryTaskLogMessage);

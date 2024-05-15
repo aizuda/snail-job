@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class DiscardBlockStrategy extends AbstracJobBlockStrategy {
     private final JobTaskBatchGenerator jobTaskBatchGenerator;
+
     @Override
     public void doBlock(final BlockStrategyContext context) {
         // 重新生成任务

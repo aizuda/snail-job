@@ -4,12 +4,11 @@ import com.aizuda.snailjob.client.core.RetryExecutor;
 import com.aizuda.snailjob.client.core.RetryExecutorParameter;
 import com.aizuda.snailjob.client.core.intercepter.RetrySiteSnapshot;
 import com.aizuda.snailjob.client.core.retryer.RetryType;
-import com.aizuda.snailjob.client.core.retryer.RetryerResultContext;
-import com.aizuda.snailjob.client.core.intercepter.RetrySiteSnapshot;
-import com.github.rholder.retry.*;
 import com.aizuda.snailjob.client.core.retryer.RetryerInfo;
+import com.aizuda.snailjob.client.core.retryer.RetryerResultContext;
 import com.aizuda.snailjob.common.core.enums.RetryResultStatusEnum;
 import com.aizuda.snailjob.common.log.SnailJobLog;
+import com.github.rholder.retry.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -106,7 +105,7 @@ public class RemoteRetryStrategies extends AbstractRetryStrategies {
                     public <V> void onRetry(Attempt<V> attempt) {
                         Integer attemptNumber = RetrySiteSnapshot.getAttemptNumber();
                         if (attempt.hasResult()) {
-                           SnailJobLog.LOCAL.info("snail-job 远程重试成功，第[{}]次调度", attemptNumber);
+                            SnailJobLog.LOCAL.info("snail-job 远程重试成功，第[{}]次调度", attemptNumber);
                         }
 
                         if (attempt.hasException()) {

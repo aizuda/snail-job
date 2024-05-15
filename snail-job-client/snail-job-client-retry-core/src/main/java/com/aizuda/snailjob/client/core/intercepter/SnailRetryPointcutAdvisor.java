@@ -60,7 +60,7 @@ public class SnailRetryPointcutAdvisor extends AbstractPointcutAdvisor implement
 
     @Override
     public Class<?>[] getInterfaces() {
-        return new Class[] { Retryable.class };
+        return new Class[]{Retryable.class};
     }
 
     @Override

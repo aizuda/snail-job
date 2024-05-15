@@ -17,11 +17,9 @@ package com.aizuda.snailjob.client.core.annotation;
 
 
 import com.aizuda.snailjob.client.core.IdempotentIdGenerate;
-import com.aizuda.snailjob.client.core.generator.SimpleIdempotentIdGenerate;
-import com.aizuda.snailjob.client.core.strategy.ExecutorAnnotationMethod;
-import com.aizuda.snailjob.client.core.strategy.ExecutorMethod;
 import com.aizuda.snailjob.client.core.callback.RetryCompleteCallback;
 import com.aizuda.snailjob.client.core.callback.SimpleRetryCompleteCallback;
+import com.aizuda.snailjob.client.core.generator.SimpleIdempotentIdGenerate;
 import com.aizuda.snailjob.client.core.retryer.RetryType;
 import com.aizuda.snailjob.client.core.strategy.ExecutorAnnotationMethod;
 import com.aizuda.snailjob.client.core.strategy.ExecutorMethod;
@@ -61,7 +59,6 @@ public @interface Retryable {
 
     /**
      * 重试处理入口，默认为原方法
-     *
      */
     Class<? extends ExecutorMethod> retryMethod() default ExecutorAnnotationMethod.class;
 
@@ -85,13 +82,12 @@ public @interface Retryable {
 
     /**
      * 服务端重试完成(重试成功、重试到达最大次数)回调客户端
-     *
      */
     Class<? extends RetryCompleteCallback> retryCompleteCallback() default SimpleRetryCompleteCallback.class;
 
     /**
      * 用于标识具有业务特点的值, 比如订单号、物流编号等，可以根据具体的业务场景生成，生成规则采用通用成熟的Spel表达式进行解析
-     *
+     * <p>
      * see: <a href="https://docs.spring.io/spring-framework/docs/5.0.0.M5/spring-framework-reference/html/expressions.html">...</a>
      */
     String bizNo() default "";
@@ -109,7 +105,7 @@ public @interface Retryable {
     /**
      * 本地重试完成后是否抛出异常
      * 如果不抛出异常，则调用需要重试方法的方法则感知不到异常信息
-     *
+     * <p>
      * 比如: A->B->C->D->E
      * D需要重试 若配置D不抛异常,则A->B->C无法感知，若有事物则无法回滚
      *

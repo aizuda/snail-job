@@ -41,10 +41,10 @@ public class WorkflowNodeServiceImpl implements WorkflowNodeService {
     public Boolean stop(Long nodeId, Long workflowTaskBatchId) {
         // 调用JOB的停止接口
         List<JobTaskBatch> jobTaskBatches = jobTaskBatchMapper.selectList(
-            new LambdaQueryWrapper<JobTaskBatch>()
-                .eq(JobTaskBatch::getWorkflowNodeId, nodeId)
-                .eq(JobTaskBatch::getWorkflowTaskBatchId, workflowTaskBatchId)
-                .in(JobTaskBatch::getTaskBatchStatus, JobTaskBatchStatusEnum.NOT_COMPLETE)
+                new LambdaQueryWrapper<JobTaskBatch>()
+                        .eq(JobTaskBatch::getWorkflowNodeId, nodeId)
+                        .eq(JobTaskBatch::getWorkflowTaskBatchId, workflowTaskBatchId)
+                        .in(JobTaskBatch::getTaskBatchStatus, JobTaskBatchStatusEnum.NOT_COMPLETE)
         );
 
         if (CollectionUtils.isEmpty(jobTaskBatches)) {
@@ -72,11 +72,11 @@ public class WorkflowNodeServiceImpl implements WorkflowNodeService {
 
         // 调用JOB的停止接口
         List<JobTaskBatch> jobTaskBatches = jobTaskBatchMapper.selectList(
-            new LambdaQueryWrapper<JobTaskBatch>()
-                .select(JobTaskBatch::getId)
-                .eq(JobTaskBatch::getWorkflowNodeId, nodeId)
-                .eq(JobTaskBatch::getWorkflowTaskBatchId, workflowTaskBatchId)
-                .in(JobTaskBatch::getTaskBatchStatus, JobTaskBatchStatusEnum.NOT_SUCCESS)
+                new LambdaQueryWrapper<JobTaskBatch>()
+                        .select(JobTaskBatch::getId)
+                        .eq(JobTaskBatch::getWorkflowNodeId, nodeId)
+                        .eq(JobTaskBatch::getWorkflowTaskBatchId, workflowTaskBatchId)
+                        .in(JobTaskBatch::getTaskBatchStatus, JobTaskBatchStatusEnum.NOT_SUCCESS)
         );
 
         Assert.notEmpty(jobTaskBatches, () -> new SnailJobServerException("job task batch is empty."));

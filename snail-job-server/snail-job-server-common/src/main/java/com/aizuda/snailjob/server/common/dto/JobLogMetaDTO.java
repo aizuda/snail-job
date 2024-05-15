@@ -14,7 +14,7 @@ import lombok.EqualsAndHashCode;
 @Data
 public class JobLogMetaDTO extends LogMetaDTO {
 
-    public JobLogMetaDTO () {
+    public JobLogMetaDTO() {
         setLogType(LogTypeEnum.JOB);
     }
 

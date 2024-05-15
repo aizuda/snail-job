@@ -28,14 +28,14 @@ public abstract class AbstractLockProvider implements LockProvider {
         String lockName = lockConfig.getLockName();
 
         Assert.notNull(lockAtMost,
-            () -> new SnailJobServerException("lockAtMost can not be null. lockName:[{}]", lockName));
+                () -> new SnailJobServerException("lockAtMost can not be null. lockName:[{}]", lockName));
         Assert.isFalse(lockAtMost.isNegative(),
-            () -> new SnailJobServerException("lockAtMost  is negative. lockName:[{}]", lockName));
+                () -> new SnailJobServerException("lockAtMost  is negative. lockName:[{}]", lockName));
         Assert.notNull(lockAtLeast,
-            () -> new SnailJobServerException("lockAtLeast can not be null. lockName:[{}]", lockName));
+                () -> new SnailJobServerException("lockAtLeast can not be null. lockName:[{}]", lockName));
         Assert.isFalse(lockAtLeast.compareTo(lockAtMost) > 0,
-            () -> new SnailJobServerException("lockAtLeast is longer than lockAtMost for lock. lockName:[{}]",
-                lockName));
+                () -> new SnailJobServerException("lockAtLeast is longer than lockAtMost for lock. lockName:[{}]",
+                        lockName));
 
         LockManager.setCreateDt(LocalDateTime.now());
         LockManager.setLockAtLeast(lockAtLeast);

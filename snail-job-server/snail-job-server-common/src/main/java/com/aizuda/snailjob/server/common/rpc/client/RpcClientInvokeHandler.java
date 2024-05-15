@@ -77,9 +77,9 @@ public class RpcClientInvokeHandler implements InvocationHandler {
     private final boolean async;
 
     public RpcClientInvokeHandler(final String groupName, final RegisterNodeInfo registerNodeInfo,
-        final boolean failRetry, final int retryTimes,
-        final int retryInterval, final RetryListener retryListener, final Integer routeKey, final String allocKey,
-        final boolean failover, final Integer executorTimeout, final String namespaceId) {
+                                  final boolean failRetry, final int retryTimes,
+                                  final int retryInterval, final RetryListener retryListener, final Integer routeKey, final String allocKey,
+                                  final boolean failover, final Integer executorTimeout, final String namespaceId) {
         this.groupName = groupName;
         this.hostId = registerNodeInfo.getHostId();
         this.hostPort = registerNodeInfo.getHostPort();
@@ -110,14 +110,14 @@ public class RpcClientInvokeHandler implements InvocationHandler {
 
     @NotNull
     private Result doFailoverHandler(final Method method, final Object[] args, final Mapping annotation)
-        throws Throwable {
+            throws Throwable {
         Set<RegisterNodeInfo> serverNodeSet = CacheRegisterTable.getServerNodeSet(groupName, namespaceId);
 
         // 最多调用size次
         int size = serverNodeSet.size();
         for (int count = 1; count <= size; count++) {
             log.debug("Start request client. count:[{}] clientId:[{}] clientAddr:[{}:{}] serverIp:[{}]", count, hostId,
-                hostIp, hostPort, NetUtil.getLocalIpStr());
+                    hostIp, hostPort, NetUtil.getLocalIpStr());
             Result result = requestRemote(method, args, annotation, count);
             if (Objects.nonNull(result)) {
                 return result;
@@ -153,22 +153,22 @@ public class RpcClientInvokeHandler implements InvocationHandler {
                 sw.start("request start " + snailJobRequest.getReqId());
 
                 SnailJobFuture newFuture = SnailJobFuture.newFuture(snailJobRequest.getReqId(),
-                    Optional.ofNullable(executorTimeout).orElse(20),
-                    TimeUnit.SECONDS);
+                        Optional.ofNullable(executorTimeout).orElse(20),
+                        TimeUnit.SECONDS);
                 RpcContext.setFuture(newFuture);
 
                 try {
                     NettyChannel.send(hostId, hostIp, hostPort,
-                        HttpMethod.valueOf(mapping.method().name()),  // 拼接 url?a=1&b=1
-                        mapping.path(), snailJobRequest.toString(), requestHeaders);
+                            HttpMethod.valueOf(mapping.method().name()),  // 拼接 url?a=1&b=1
+                            mapping.path(), snailJobRequest.toString(), requestHeaders);
                 } finally {
                     sw.stop();
                 }
 
                 SnailJobLog.LOCAL.debug("request complete requestId:[{}] 耗时:[{}ms]", snailJobRequest.getReqId(),
-                    sw.getTotalTimeMillis());
+                        sw.getTotalTimeMillis());
                 if (async) {
-                   // 暂时不支持异步调用
+                    // 暂时不支持异步调用
                     return null;
                 } else {
                     Assert.notNull(newFuture, () -> new SnailJobServerException("completableFuture is null"));
@@ -178,23 +178,23 @@ public class RpcClientInvokeHandler implements InvocationHandler {
             });
 
             log.debug("Request client success. count:[{}] clientId:[{}] clientAddr:[{}:{}] serverIp:[{}]", count,
-                hostId,
-                hostIp, hostPort, NetUtil.getLocalIpStr());
+                    hostId,
+                    hostIp, hostPort, NetUtil.getLocalIpStr());
 
             return result;
         } catch (ExecutionException ex) {
             // 网络异常 TimeoutException |
             if (ex.getCause() instanceof SnailJobRemotingTimeOutException && failover) {
                 log.error("request client I/O error, count:[{}] clientId:[{}] clientAddr:[{}:{}] serverIp:[{}]", count,
-                    hostId, hostIp, hostPort, NetUtil.getLocalIpStr(), ex);
+                        hostId, hostIp, hostPort, NetUtil.getLocalIpStr(), ex);
 
                 // 进行路由剔除处理
                 CacheRegisterTable.remove(groupName, namespaceId, hostId);
                 // 重新选一个可用的客户端节点
                 ClientNodeAllocateHandler clientNodeAllocateHandler = SpringContext.getBean(
-                    ClientNodeAllocateHandler.class);
+                        ClientNodeAllocateHandler.class);
                 RegisterNodeInfo serverNode = clientNodeAllocateHandler.getServerNode(allocKey, groupName, namespaceId,
-                    routeKey);
+                        routeKey);
                 // 这里表示无可用节点
                 if (Objects.isNull(serverNode)) {
                     throw ex.getCause();
@@ -207,12 +207,12 @@ public class RpcClientInvokeHandler implements InvocationHandler {
             } else {
                 // 其他异常继续抛出
                 log.error("request client error.count:[{}] clientId:[{}] clientAddr:[{}:{}] serverIp:[{}]", count,
-                    hostId, hostIp, hostPort, NetUtil.getLocalIpStr(), ex);
+                        hostId, hostIp, hostPort, NetUtil.getLocalIpStr(), ex);
                 throw ex.getCause();
             }
         } catch (Exception ex) {
             log.error("request client unknown exception. count:[{}] clientId:[{}] clientAddr:[{}:{}] serverIp:[{}]",
-                count, hostId, hostIp, hostPort, NetUtil.getLocalIpStr(), ex);
+                    count, hostId, hostIp, hostPort, NetUtil.getLocalIpStr(), ex);
 
             Throwable throwable = ex;
             if (ex.getClass().isAssignableFrom(RetryException.class)) {
@@ -232,11 +232,11 @@ public class RpcClientInvokeHandler implements InvocationHandler {
 
     private Retryer<Result> buildResultRetryer() {
         Retryer<Result> retryer = RetryerBuilder.<Result>newBuilder()
-            .retryIfException(throwable -> failRetry)
-            .withStopStrategy(StopStrategies.stopAfterAttempt(retryTimes <= 0 ? 1 : retryTimes))
-            .withWaitStrategy(WaitStrategies.fixedWait(Math.max(retryInterval, 0), TimeUnit.SECONDS))
-            .withRetryListener(retryListener)
-            .build();
+                .retryIfException(throwable -> failRetry)
+                .withStopStrategy(StopStrategies.stopAfterAttempt(retryTimes <= 0 ? 1 : retryTimes))
+                .withWaitStrategy(WaitStrategies.fixedWait(Math.max(retryInterval, 0), TimeUnit.SECONDS))
+                .withRetryListener(retryListener)
+                .build();
         return retryer;
     }
 

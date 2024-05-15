@@ -34,21 +34,21 @@ import java.util.concurrent.TimeUnit;
 @Component
 @Slf4j
 public class RetryTaskFailMoreThresholdAlarmListener extends
-    AbstractRetryAlarm<RetryTaskFailMoreThresholdAlarmEvent> implements Runnable, Lifecycle {
+        AbstractRetryAlarm<RetryTaskFailMoreThresholdAlarmEvent> implements Runnable, Lifecycle {
 
     /**
      * 重试任务失败数量超过阈值告警数据
      */
     private LinkedBlockingQueue<RetryTask> queue = new LinkedBlockingQueue<>(1000);
     private static String retryTaskFailMoreThresholdMessagesFormatter =
-        "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 任务重试次数超过{}个</font>  \n" +
-            "> 空间ID:{}  \n" +
-            "> 组名称:{}  \n" +
-            "> 执行器名称:{}  \n" +
-            "> 场景名称:{}  \n" +
-            "> 重试次数:{}  \n" +
-            "> 业务数据:{}  \n" +
-            "> 时间:{}  \n";
+            "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 任务重试次数超过{}个</font>  \n" +
+                    "> 空间ID:{}  \n" +
+                    "> 组名称:{}  \n" +
+                    "> 执行器名称:{}  \n" +
+                    "> 场景名称:{}  \n" +
+                    "> 重试次数:{}  \n" +
+                    "> 业务数据:{}  \n" +
+                    "> 时间:{}  \n";
 
     @Override
     protected List<RetryAlarmInfo> poll() throws InterruptedException {
@@ -78,17 +78,17 @@ public class RetryTaskFailMoreThresholdAlarmListener extends
 
         // 预警
         return AlarmContext.build().text(retryTaskFailMoreThresholdMessagesFormatter,
-                EnvironmentUtils.getActiveProfile(),
-                notifyConfig.getNotifyThreshold(),
-                retryAlarmInfo.getNamespaceId(),
-                retryAlarmInfo.getGroupName(),
-                retryAlarmInfo.getExecutorName(),
-                retryAlarmInfo.getSceneName(),
-                retryAlarmInfo.getRetryCount(),
-                retryAlarmInfo.getArgsStr(),
-                DateUtils.format(retryAlarmInfo.getCreateDt(), DateUtils.NORM_DATETIME_PATTERN))
-            .title("组:[{}] 场景:[{}] 环境任务重试次数超过阈值", retryAlarmInfo.getGroupName(),
-                retryAlarmInfo.getSceneName());
+                        EnvironmentUtils.getActiveProfile(),
+                        notifyConfig.getNotifyThreshold(),
+                        retryAlarmInfo.getNamespaceId(),
+                        retryAlarmInfo.getGroupName(),
+                        retryAlarmInfo.getExecutorName(),
+                        retryAlarmInfo.getSceneName(),
+                        retryAlarmInfo.getRetryCount(),
+                        retryAlarmInfo.getArgsStr(),
+                        DateUtils.format(retryAlarmInfo.getCreateDt(), DateUtils.NORM_DATETIME_PATTERN))
+                .title("组:[{}] 场景:[{}] 环境任务重试次数超过阈值", retryAlarmInfo.getGroupName(),
+                        retryAlarmInfo.getSceneName());
     }
 
     @Override

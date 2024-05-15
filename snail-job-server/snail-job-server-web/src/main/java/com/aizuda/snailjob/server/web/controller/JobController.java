@@ -76,9 +76,9 @@ public class JobController {
     @GetMapping("/job-name/list")
     @LoginRequired
     public List<JobResponseVO> getJobNameList(
-        @RequestParam(value = "keywords", required = false) String keywords,
-        @RequestParam(value = "jobId", required = false) Long jobId,
-        @RequestParam(value = "groupName", required = false) String groupName
+            @RequestParam(value = "keywords", required = false) String keywords,
+            @RequestParam(value = "jobId", required = false) Long jobId,
+            @RequestParam(value = "groupName", required = false) String groupName
     ) {
         return jobService.getJobNameList(keywords, jobId, groupName);
     }

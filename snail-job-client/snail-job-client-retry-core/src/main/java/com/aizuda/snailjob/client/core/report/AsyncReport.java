@@ -6,7 +6,6 @@ import com.aizuda.snailjob.client.common.window.SlidingWindow;
 import com.aizuda.snailjob.client.core.retryer.RetryerInfo;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.model.dto.RetryTaskDTO;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
@@ -22,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class AsyncReport extends AbstractReport implements Lifecycle {
     private SlidingWindow<RetryTaskDTO> slidingWindow;
+
     @Override
     public boolean supports(boolean async) {
         return async;
@@ -31,7 +31,7 @@ public class AsyncReport extends AbstractReport implements Lifecycle {
     public boolean doReport(RetryerInfo retryerInfo, Object[] params) {
 
         return syncReport(retryerInfo.getScene(), retryerInfo.getExecutorClassName(), params, retryerInfo.getTimeout(),
-            retryerInfo.getUnit());
+                retryerInfo.getUnit());
     }
 
     /**
@@ -50,13 +50,13 @@ public class AsyncReport extends AbstractReport implements Lifecycle {
         SnailJobProperties.SlidingWindowConfig slidingWindowConfig = snailJobProperties.getRetry().getReportSlidingWindow();
 
         slidingWindow = SlidingWindow
-            .Builder
-            .<RetryTaskDTO>newBuilder()
-            .withTotalThreshold(slidingWindowConfig.getTotalThreshold())
-            .withWindowTotalThreshold(slidingWindowConfig.getWindowTotalThreshold())
-            .withDuration(slidingWindowConfig.getDuration(), slidingWindowConfig.getChronoUnit())
-            .withListener(new ReportListener())
-            .build();
+                .Builder
+                .<RetryTaskDTO>newBuilder()
+                .withTotalThreshold(slidingWindowConfig.getTotalThreshold())
+                .withWindowTotalThreshold(slidingWindowConfig.getWindowTotalThreshold())
+                .withDuration(slidingWindowConfig.getDuration(), slidingWindowConfig.getChronoUnit())
+                .withListener(new ReportListener())
+                .build();
 
         slidingWindow.start();
     }

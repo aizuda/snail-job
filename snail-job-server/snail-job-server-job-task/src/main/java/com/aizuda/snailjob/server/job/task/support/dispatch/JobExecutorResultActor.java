@@ -57,16 +57,16 @@ public class JobExecutorResultActor extends AbstractActor {
                 }
 
                 Assert.isTrue(1 == jobTaskMapper.update(jobTask,
-                        new LambdaUpdateWrapper<JobTask>().eq(JobTask::getId, result.getTaskId())),
-                    () -> new SnailJobServerException("更新任务实例失败"));
+                                new LambdaUpdateWrapper<JobTask>().eq(JobTask::getId, result.getTaskId())),
+                        () -> new SnailJobServerException("更新任务实例失败"));
                 // 先尝试完成，若已完成则不需要通过获取分布式锁来完成
                 boolean tryCompleteAndStop = tryCompleteAndStop(result);
-                 if (!tryCompleteAndStop) {
+                if (!tryCompleteAndStop) {
                     // 存在并发问题
                     distributedLockHandler.lockWithDisposableAndRetry(() -> {
                         tryCompleteAndStop(result);
                     }, MessageFormat.format(KEY, result.getTaskBatchId(),
-                        result.getJobId()), Duration.ofSeconds(1), Duration.ofSeconds(1), 3);
+                            result.getJobId()), Duration.ofSeconds(1), Duration.ofSeconds(1), 3);
                 }
             } catch (Exception e) {
                 SnailJobLog.LOCAL.error(" job executor result exception. [{}]", result, e);

@@ -12,7 +12,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 /**
  * 特别声明: 此算法来自美团的leaf号段模式
  * see： https://github.com/Meituan-Dianping/Leaf/blob/master/leaf-server/src/main/java/com/sankuai/inf/leaf/server/service/SegmentService.java
- *
  */
 @Data
 public class SegmentBuffer {

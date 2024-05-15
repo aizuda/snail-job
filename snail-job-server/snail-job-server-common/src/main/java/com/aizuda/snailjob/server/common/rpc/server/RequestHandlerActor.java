@@ -82,7 +82,7 @@ public class RequestHandlerActor extends AbstractActor {
     }
 
     private String doProcess(String uri, String content, HttpMethod method,
-        HttpHeaders headers) {
+                             HttpHeaders headers) {
 
         Register register = SpringContext.getBean(ClientRegister.BEAN_NAME, Register.class);
 
@@ -108,15 +108,15 @@ public class RequestHandlerActor extends AbstractActor {
         registerContext.setNamespaceId(namespace);
         boolean result = register.register(registerContext);
         if (!result) {
-           SnailJobLog.LOCAL.warn("client register error. groupName:[{}]", groupName);
+            SnailJobLog.LOCAL.warn("client register error. groupName:[{}]", groupName);
         }
 
         UrlBuilder builder = UrlBuilder.ofHttp(uri);
         Collection<HttpRequestHandler> httpRequestHandlers = SpringContext.getContext()
-            .getBeansOfType(HttpRequestHandler.class).values();
+                .getBeansOfType(HttpRequestHandler.class).values();
         for (HttpRequestHandler httpRequestHandler : httpRequestHandlers) {
             if (httpRequestHandler.supports(builder.getPathStr()) && method.name()
-                .equals(httpRequestHandler.method().name())) {
+                    .equals(httpRequestHandler.method().name())) {
                 return httpRequestHandler.doHandler(content, builder, headers);
             }
         }
@@ -129,9 +129,9 @@ public class RequestHandlerActor extends AbstractActor {
      */
     private void writeResponse(ChannelHandlerContext ctx, boolean keepAlive, String responseJson) {
         FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK,
-            Unpooled.copiedBuffer(responseJson, CharsetUtil.UTF_8));
+                Unpooled.copiedBuffer(responseJson, CharsetUtil.UTF_8));
         response.headers().set(HttpHeaderNames.CONTENT_TYPE,
-            HttpHeaderValues.APPLICATION_JSON);
+                HttpHeaderValues.APPLICATION_JSON);
         response.headers().set(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
         if (keepAlive) {
             response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);

@@ -4,12 +4,12 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.aizuda.snailjob.template.datasource.persistence.po.Namespace">
-        <id column="id" property="id" />
-        <result column="name" property="name" />
-        <result column="unique_id" property="uniqueId" />
-        <result column="create_dt" property="createDt" />
-        <result column="update_dt" property="updateDt" />
-        <result column="deleted" property="deleted" />
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="unique_id" property="uniqueId"/>
+        <result column="create_dt" property="createDt"/>
+        <result column="update_dt" property="updateDt"/>
+        <result column="deleted" property="deleted"/>
     </resultMap>
 
 </mapper>

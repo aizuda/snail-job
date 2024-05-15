@@ -59,7 +59,7 @@ public class ScanCallbackTaskActor extends AbstractScanGroup {
 
     @Override
     protected LocalDateTime calculateNextTriggerTime(final RetryPartitionTask partitionTask,
-        final RetrySceneConfig retrySceneConfig) {
+                                                     final RetrySceneConfig retrySceneConfig) {
 
         long triggerInterval = systemProperties.getCallback().getTriggerInterval();
         WaitStrategy waitStrategy = WaitStrategyEnum.getWaitStrategy(WaitStrategyEnum.FIXED.getType());

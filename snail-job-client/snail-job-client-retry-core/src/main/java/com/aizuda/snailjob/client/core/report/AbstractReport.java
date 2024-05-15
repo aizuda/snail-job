@@ -1,20 +1,19 @@
 package com.aizuda.snailjob.client.core.report;
 
 import cn.hutool.core.lang.Assert;
-import com.aizuda.snailjob.client.core.Report;
 import com.aizuda.snailjob.client.common.config.SnailJobProperties;
-import com.aizuda.snailjob.client.core.exception.SnailRetryClientException;
-import com.aizuda.snailjob.common.core.expression.ExpressionEngine;
 import com.aizuda.snailjob.client.core.IdempotentIdGenerate;
+import com.aizuda.snailjob.client.core.Report;
 import com.aizuda.snailjob.client.core.RetryArgSerializer;
 import com.aizuda.snailjob.client.core.cache.RetryerInfoCache;
+import com.aizuda.snailjob.client.core.exception.SnailRetryClientException;
 import com.aizuda.snailjob.client.core.intercepter.RetrySiteSnapshot;
 import com.aizuda.snailjob.client.core.loader.SnailRetrySpiLoader;
 import com.aizuda.snailjob.client.core.retryer.RetryerInfo;
-import com.aizuda.snailjob.common.log.SnailJobLog;
+import com.aizuda.snailjob.common.core.expression.ExpressionEngine;
 import com.aizuda.snailjob.common.core.model.IdempotentIdContext;
+import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.model.dto.RetryTaskDTO;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ReflectionUtils;
@@ -39,7 +38,7 @@ public abstract class AbstractReport implements Report {
         Assert.notNull(retryerInfo, () -> new SnailRetryClientException("retryerInfo is null"));
 
         if (RetrySiteSnapshot.getStage().equals(RetrySiteSnapshot.EnumStage.REMOTE.getStage()) && !retryerInfo.isForceReport()) {
-           SnailJobLog.LOCAL.info("Successfully reported, no need to repeat reporting. scene:[{}] targetClassName:[{}] args:[{}]",
+            SnailJobLog.LOCAL.info("Successfully reported, no need to repeat reporting. scene:[{}] targetClassName:[{}] args:[{}]",
                     retryerInfo.getScene(), retryerInfo.getExecutorClassName(), params);
             return Boolean.TRUE;
         }

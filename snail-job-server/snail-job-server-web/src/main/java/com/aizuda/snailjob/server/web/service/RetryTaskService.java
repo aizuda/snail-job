@@ -29,7 +29,7 @@ public interface RetryTaskService {
      * 通过重试任务表id获取重试任务信息
      *
      * @param groupName 组名称
-     * @param id 重试任务表id
+     * @param id        重试任务表id
      * @return 重试任务
      */
     RetryTaskResponseVO getRetryTaskById(String groupName, Long id);

@@ -80,7 +80,7 @@ public class JobClearLogSchedule extends AbstractSchedule implements Lifecycle {
             long total;
             LocalDateTime endTime = LocalDateTime.now().minusDays(systemProperties.getLogStorage());
             total = PartitionTaskUtils.process(startId -> jobTaskBatchList(startId, endTime),
-                this::processJobLogPartitionTasks, 0);
+                    this::processJobLogPartitionTasks, 0);
 
             SnailJobLog.LOCAL.debug("Job clear success total:[{}]", total);
         } catch (Exception e) {
@@ -101,9 +101,9 @@ public class JobClearLogSchedule extends AbstractSchedule implements Lifecycle {
     private List<JobPartitionTaskDTO> jobTaskBatchList(Long startId, LocalDateTime endTime) {
 
         List<JobTaskBatch> jobTaskBatchList = jobTaskBatchMapper.selectPage(
-            new Page<>(0, 1000),
-            new LambdaUpdateWrapper<JobTaskBatch>().ge(JobTaskBatch::getId, startId)
-                .le(JobTaskBatch::getCreateDt, endTime)).getRecords();
+                new Page<>(0, 1000),
+                new LambdaUpdateWrapper<JobTaskBatch>().ge(JobTaskBatch::getId, startId)
+                        .le(JobTaskBatch::getCreateDt, endTime)).getRecords();
         return JobTaskConverter.INSTANCE.toJobTaskBatchPartitionTasks(jobTaskBatchList);
     }
 

@@ -74,8 +74,8 @@ public class WorkflowController {
     @GetMapping("/workflow-name/list")
     @LoginRequired(role = RoleEnum.USER)
     public List<WorkflowResponseVO> getWorkflowNameList(
-        @RequestParam(value = "keywords", required = false) String keywords,
-        @RequestParam(value = "workflowId", required = false) Long workflowId) {
+            @RequestParam(value = "keywords", required = false) String keywords,
+            @RequestParam(value = "workflowId", required = false) Long workflowId) {
         return workflowService.getWorkflowNameList(keywords, workflowId);
     }
 

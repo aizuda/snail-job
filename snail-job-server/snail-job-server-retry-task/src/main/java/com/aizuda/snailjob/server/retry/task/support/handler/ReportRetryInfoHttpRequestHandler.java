@@ -70,8 +70,8 @@ public class ReportRetryInfoHttpRequestHandler extends PostHttpRequestHandler {
         try {
 
             TaskGenerator taskGenerator = taskGenerators.stream()
-                .filter(t -> t.supports(TaskGeneratorSceneEnum.CLIENT_REPORT.getScene()))
-                .findFirst().orElseThrow(() -> new SnailJobServerException("没有匹配的任务生成器"));
+                    .filter(t -> t.supports(TaskGeneratorSceneEnum.CLIENT_REPORT.getScene()))
+                    .findFirst().orElseThrow(() -> new SnailJobServerException("没有匹配的任务生成器"));
 
             Assert.notEmpty(args, () -> new SnailJobServerException("上报的数据不能为空. reqId:[{}]", retryRequest.getReqId()));
             List<RetryTaskDTO> retryTaskList = JsonUtil.parseList(JsonUtil.toJsonString(args[0]), RetryTaskDTO.class);
@@ -84,25 +84,25 @@ public class ReportRetryInfoHttpRequestHandler extends PostHttpRequestHandler {
             Map<String, List<RetryTaskDTO>> map = StreamUtils.groupByKey(retryTaskList, RetryTaskDTO::getSceneName);
 
             Retryer<Object> retryer = RetryerBuilder.newBuilder()
-                .retryIfException(throwable -> {
-                    // 若是数据库异常则重试
-                    return throwable instanceof DuplicateKeyException
-                        || throwable instanceof TransactionSystemException
-                        || throwable instanceof ConcurrencyFailureException
-                        || throwable instanceof IOException;
-                })
-                .withStopStrategy(StopStrategies.stopAfterAttempt(5))
-                .withWaitStrategy(WaitStrategies.fixedWait(1, TimeUnit.SECONDS))
-                .withRetryListener(new RetryListener() {
-                    @Override
-                    public <V> void onRetry(final Attempt<V> attempt) {
-                        if (attempt.hasException()) {
-                            SnailJobLog.LOCAL.error("数据上报发生异常执行重试. reqId:[{}] count:[{}]",
-                                retryRequest.getReqId(), attempt.getAttemptNumber(), attempt.getExceptionCause());
+                    .retryIfException(throwable -> {
+                        // 若是数据库异常则重试
+                        return throwable instanceof DuplicateKeyException
+                                || throwable instanceof TransactionSystemException
+                                || throwable instanceof ConcurrencyFailureException
+                                || throwable instanceof IOException;
+                    })
+                    .withStopStrategy(StopStrategies.stopAfterAttempt(5))
+                    .withWaitStrategy(WaitStrategies.fixedWait(1, TimeUnit.SECONDS))
+                    .withRetryListener(new RetryListener() {
+                        @Override
+                        public <V> void onRetry(final Attempt<V> attempt) {
+                            if (attempt.hasException()) {
+                                SnailJobLog.LOCAL.error("数据上报发生异常执行重试. reqId:[{}] count:[{}]",
+                                        retryRequest.getReqId(), attempt.getAttemptNumber(), attempt.getExceptionCause());
+                            }
                         }
-                    }
-                })
-                .build();
+                    })
+                    .build();
 
             String namespaceId = headers.getAsString(HeadersEnum.NAMESPACE.getKey());
 

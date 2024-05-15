@@ -38,7 +38,7 @@ public class ClientLoadBalanceLRU implements ClientLoadBalance {
         }
 
         // 添加新数据
-        for (String address: clientAllAddressSet) {
+        for (String address : clientAllAddressSet) {
             lruItem.computeIfAbsent(address, key -> address);
         }
 

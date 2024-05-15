@@ -43,8 +43,8 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmInfo> implements
-    Runnable,
-    Lifecycle {
+        Runnable,
+        Lifecycle {
 
     @Autowired
     @Qualifier("alarmExecutorService")
@@ -73,11 +73,11 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
 
             // 转换AlarmDTO 为了下面循环发送使用
             Map<Triple<String, String, String>, List<A>> waitSendAlarmInfos = convertAlarmDTO(
-                alarmInfos, namespaceIds, groupNames, businessIds);
+                    alarmInfos, namespaceIds, groupNames, businessIds);
 
             // 批量获取通知配置
             Map<Triple<String, String, String>, List<NotifyConfigInfo>> notifyConfig = obtainNotifyConfig(namespaceIds,
-                groupNames, businessIds);
+                    groupNames, businessIds);
 
             // 循环发送消息
             waitSendAlarmInfos.forEach((key, list) -> {
@@ -100,21 +100,21 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
 
         // 批量获取所需的通知配置
         List<NotifyConfig> notifyConfigs = accessTemplate.getNotifyConfigAccess().list(
-            new LambdaQueryWrapper<NotifyConfig>()
-                .eq(NotifyConfig::getNotifyStatus, StatusEnum.YES.getStatus())
-                .in(NotifyConfig::getSystemTaskType, StreamUtils.toList(getSystemTaskType(), SyetemTaskTypeEnum::getType))
-                .eq(NotifyConfig::getNotifyScene, getNotifyScene())
-                .in(NotifyConfig::getNamespaceId, namespaceIds)
-                .in(NotifyConfig::getGroupName, groupNames)
-                .in(NotifyConfig::getBusinessId, businessIds)
+                new LambdaQueryWrapper<NotifyConfig>()
+                        .eq(NotifyConfig::getNotifyStatus, StatusEnum.YES.getStatus())
+                        .in(NotifyConfig::getSystemTaskType, StreamUtils.toList(getSystemTaskType(), SyetemTaskTypeEnum::getType))
+                        .eq(NotifyConfig::getNotifyScene, getNotifyScene())
+                        .in(NotifyConfig::getNamespaceId, namespaceIds)
+                        .in(NotifyConfig::getGroupName, groupNames)
+                        .in(NotifyConfig::getBusinessId, businessIds)
         );
         if (CollectionUtils.isEmpty(notifyConfigs)) {
             return Maps.newHashMap();
         }
 
         Set<Long> recipientIds = notifyConfigs.stream()
-            .flatMap(config -> JsonUtil.parseList(config.getRecipientIds(), Long.class).stream())
-            .collect(Collectors.toSet());
+                .flatMap(config -> JsonUtil.parseList(config.getRecipientIds(), Long.class).stream())
+                .collect(Collectors.toSet());
 
         List<NotifyRecipient> notifyRecipients = recipientMapper.selectBatchIds(recipientIds);
         Map<Long, NotifyRecipient> recipientMap = StreamUtils.toIdentityMap(notifyRecipients, NotifyRecipient::getId);
@@ -140,8 +140,8 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
             configInfo.setRecipientInfos(recipients);
 
             return ImmutableTriple.of(configInfo.getNamespaceId(),
-                configInfo.getGroupName(),
-                configInfo.getBusinessId());
+                    configInfo.getGroupName(),
+                    configInfo.getBusinessId());
         });
 
     }
@@ -172,7 +172,7 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
             if (Objects.equals(notifyConfig.getRateLimiterStatus(), StatusEnum.YES.getStatus())) {
                 // 限流
                 RateLimiter rateLimiter = getRateLimiter(String.valueOf(notifyConfig.getId()),
-                    notifyConfig.getRateLimiterThreshold());
+                        notifyConfig.getRateLimiterThreshold());
                 // 每秒发送rateLimiterThreshold个告警
                 if (Objects.nonNull(rateLimiter) && !rateLimiter.tryAcquire(1, TimeUnit.SECONDS)) {
                     continue;
@@ -192,7 +192,7 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
                 AlarmContext context = buildAlarmContext(alarmDTO, notifyConfig);
                 context.setNotifyAttribute(recipientInfo.getNotifyAttribute());
                 Alarm<AlarmContext> alarm = SnailJobAlarmFactory.getAlarmType(
-                    recipientInfo.getNotifyType());
+                        recipientInfo.getNotifyType());
                 alarm.asyncSendMessage(context);
             }
 

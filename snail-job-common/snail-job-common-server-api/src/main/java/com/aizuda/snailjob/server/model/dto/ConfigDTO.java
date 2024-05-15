@@ -5,6 +5,7 @@ import com.aizuda.snailjob.common.core.enums.AlarmTypeEnum;
 import com.aizuda.snailjob.common.core.enums.JobNotifySceneEnum;
 import com.aizuda.snailjob.common.core.enums.RetryNotifySceneEnum;
 import lombok.Data;
+
 import java.util.List;
 
 /**

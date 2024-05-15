@@ -68,8 +68,8 @@ public class SystemUserServiceImpl implements SystemUserService {
     public SystemUserResponseVO login(SystemUserRequestVO requestVO) {
 
         SystemUser systemUser = systemUserMapper.selectOne(
-            new LambdaQueryWrapper<SystemUser>()
-                .eq(SystemUser::getUsername, requestVO.getUsername().trim()));
+                new LambdaQueryWrapper<SystemUser>()
+                        .eq(SystemUser::getUsername, requestVO.getUsername().trim()));
         validateUserPassword(requestVO, systemUser);
 
         String token = getToken(systemUser);
@@ -88,16 +88,16 @@ public class SystemUserServiceImpl implements SystemUserService {
         queryWrapper.select(Namespace::getId, Namespace::getUniqueId, Namespace::getName);
         if (RoleEnum.USER.getRoleId().equals(role)) {
             List<SystemUserPermission> systemUserPermissions = systemUserPermissionMapper.selectList(
-                new LambdaQueryWrapper<SystemUserPermission>()
-                    .select(SystemUserPermission::getNamespaceId)
-                    .eq(SystemUserPermission::getSystemUserId, userId)
-                    .groupBy(SystemUserPermission::getNamespaceId));
+                    new LambdaQueryWrapper<SystemUserPermission>()
+                            .select(SystemUserPermission::getNamespaceId)
+                            .eq(SystemUserPermission::getSystemUserId, userId)
+                            .groupBy(SystemUserPermission::getNamespaceId));
             queryWrapper.in(Namespace::getUniqueId, StreamUtils.toSet(systemUserPermissions, SystemUserPermission::getNamespaceId));
         }
 
         List<Namespace> namespaces = namespaceMapper.selectList(queryWrapper);
         systemUserResponseVO.setNamespaceIds(
-            NamespaceResponseVOConverter.INSTANCE.convertList(namespaces));
+                NamespaceResponseVOConverter.INSTANCE.convertList(namespaces));
     }
 
     @Override
@@ -113,7 +113,7 @@ public class SystemUserServiceImpl implements SystemUserService {
     @Transactional
     public void addUser(SystemUserRequestVO requestVO) {
         long count = systemUserMapper.selectCount(
-            new LambdaQueryWrapper<SystemUser>().eq(SystemUser::getUsername, requestVO.getUsername()));
+                new LambdaQueryWrapper<SystemUser>().eq(SystemUser::getUsername, requestVO.getUsername()));
         if (count > 0) {
             throw new SnailJobServerException("该用户已存在");
         }
@@ -137,7 +137,7 @@ public class SystemUserServiceImpl implements SystemUserService {
             systemUserPermission.setGroupName(permission.getGroupName());
             systemUserPermission.setNamespaceId(permission.getNamespaceId());
             Assert.isTrue(1 == systemUserPermissionMapper.insert(systemUserPermission),
-                () -> new SnailJobServerException("新增用户权限失败"));
+                    () -> new SnailJobServerException("新增用户权限失败"));
         }
 
     }
@@ -146,14 +146,14 @@ public class SystemUserServiceImpl implements SystemUserService {
     @Transactional
     public void update(SystemUserRequestVO requestVO) {
         SystemUser systemUser = systemUserMapper.selectOne(
-            new LambdaQueryWrapper<SystemUser>().eq(SystemUser::getId, requestVO.getId()));
+                new LambdaQueryWrapper<SystemUser>().eq(SystemUser::getId, requestVO.getId()));
         if (Objects.isNull(systemUser)) {
             throw new SnailJobServerException("该用户不存在");
         }
 
         if (!systemUser.getUsername().equals(requestVO.getUsername())) {
             long count = systemUserMapper.selectCount(
-                new LambdaQueryWrapper<SystemUser>().eq(SystemUser::getUsername, requestVO.getUsername()));
+                    new LambdaQueryWrapper<SystemUser>().eq(SystemUser::getUsername, requestVO.getUsername()));
             if (count > 0) {
                 throw new SnailJobServerException("该用户已存在");
             }
@@ -175,7 +175,7 @@ public class SystemUserServiceImpl implements SystemUserService {
         }
 
         systemUserPermissionMapper.delete(new LambdaQueryWrapper<SystemUserPermission>()
-            .eq(SystemUserPermission::getSystemUserId, systemUser.getId()));
+                .eq(SystemUserPermission::getSystemUserId, systemUser.getId()));
 
         for (UserPermissionRequestVO permission : permissions) {
             SystemUserPermission systemUserPermission = new SystemUserPermission();
@@ -183,7 +183,7 @@ public class SystemUserServiceImpl implements SystemUserService {
             systemUserPermission.setGroupName(permission.getGroupName());
             systemUserPermission.setNamespaceId(permission.getNamespaceId());
             Assert.isTrue(1 == systemUserPermissionMapper.insert(systemUserPermission),
-                () -> new SnailJobServerException("更新用户权限失败"));
+                    () -> new SnailJobServerException("更新用户权限失败"));
         }
     }
 
@@ -191,49 +191,49 @@ public class SystemUserServiceImpl implements SystemUserService {
     public PageResult<List<SystemUserResponseVO>> getSystemUserPageList(SystemUserQueryVO queryVO) {
         PageDTO<SystemUser> userPageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
         userPageDTO = systemUserMapper.selectPage(userPageDTO,
-            Wrappers.<SystemUser>lambdaQuery()
-                .likeRight(StrUtil.isNotBlank(queryVO.getUsername()), SystemUser::getUsername, queryVO.getUsername())
-                .orderByDesc(SystemUser::getId));
+                Wrappers.<SystemUser>lambdaQuery()
+                        .likeRight(StrUtil.isNotBlank(queryVO.getUsername()), SystemUser::getUsername, queryVO.getUsername())
+                        .orderByDesc(SystemUser::getId));
 
         if (CollectionUtils.isEmpty(userPageDTO.getRecords())) {
             return new PageResult<>(userPageDTO, Collections.emptyList());
         }
 
         List<SystemUserResponseVO> userResponseVOList = SystemUserResponseVOConverter.INSTANCE.convertList(
-            userPageDTO.getRecords());
+                userPageDTO.getRecords());
         List<SystemUserPermission> userPermissions = systemUserPermissionMapper.selectList(
-            Wrappers.<SystemUserPermission>lambdaQuery()
-                .in(SystemUserPermission::getSystemUserId,
-                    StreamUtils.toSet(userResponseVOList, SystemUserResponseVO::getId)));
+                Wrappers.<SystemUserPermission>lambdaQuery()
+                        .in(SystemUserPermission::getSystemUserId,
+                                StreamUtils.toSet(userResponseVOList, SystemUserResponseVO::getId)));
 
         Set<String> uniqueIds = StreamUtils.toSet(userPermissions, SystemUserPermission::getNamespaceId);
 
         List<Namespace> namespaces = Lists.newArrayList();
         if (!CollectionUtils.isEmpty(uniqueIds)) {
             namespaces = namespaceMapper.selectList(Wrappers.<Namespace>lambdaQuery()
-                .select(Namespace::getId, Namespace::getUniqueId, Namespace::getName)
-                .in(Namespace::getUniqueId, uniqueIds));
+                    .select(Namespace::getId, Namespace::getUniqueId, Namespace::getName)
+                    .in(Namespace::getUniqueId, uniqueIds));
         }
 
         Map<String, String> namespaceMap = StreamUtils.toMap(namespaces, Namespace::getUniqueId, Namespace::getName);
 
         Map<Long, List<SystemUserPermission>> userPermissionsMap = StreamUtils.groupByKey(userPermissions, SystemUserPermission::getSystemUserId);
         userResponseVOList.stream()
-            .filter(systemUserResponseVO -> systemUserResponseVO.getRole().equals(RoleEnum.USER.getRoleId()))
-            .forEach(systemUserResponseVO -> {
-                List<SystemUserPermission> userPermissions1 = userPermissionsMap.getOrDefault(systemUserResponseVO.getId(), Lists.newArrayList());
+                .filter(systemUserResponseVO -> systemUserResponseVO.getRole().equals(RoleEnum.USER.getRoleId()))
+                .forEach(systemUserResponseVO -> {
+                    List<SystemUserPermission> userPermissions1 = userPermissionsMap.getOrDefault(systemUserResponseVO.getId(), Lists.newArrayList());
 
-                List<PermissionsResponseVO> permissionsResponseVOS = Lists.newArrayList();
-                for (SystemUserPermission systemUserPermission : userPermissions1) {
-                    PermissionsResponseVO responseVO = new PermissionsResponseVO();
-                    responseVO.setGroupName(systemUserPermission.getGroupName());
-                    responseVO.setNamespaceId(systemUserPermission.getNamespaceId());
-                    responseVO.setNamespaceName(namespaceMap.get(systemUserPermission.getNamespaceId()));
-                    permissionsResponseVOS.add(responseVO);
-                }
+                    List<PermissionsResponseVO> permissionsResponseVOS = Lists.newArrayList();
+                    for (SystemUserPermission systemUserPermission : userPermissions1) {
+                        PermissionsResponseVO responseVO = new PermissionsResponseVO();
+                        responseVO.setGroupName(systemUserPermission.getGroupName());
+                        responseVO.setNamespaceId(systemUserPermission.getNamespaceId());
+                        responseVO.setNamespaceName(namespaceMap.get(systemUserPermission.getNamespaceId()));
+                        permissionsResponseVOS.add(responseVO);
+                    }
 
-                systemUserResponseVO.setPermissions(permissionsResponseVOS);
-            });
+                    systemUserResponseVO.setPermissions(permissionsResponseVOS);
+                });
 
         return new PageResult<>(userPageDTO, userResponseVOList);
     }
@@ -241,7 +241,7 @@ public class SystemUserServiceImpl implements SystemUserService {
     @Override
     public SystemUserResponseVO getSystemUserByUserName(String username) {
         SystemUser systemUser = systemUserMapper.selectOne(
-            new LambdaQueryWrapper<SystemUser>().eq(SystemUser::getUsername, username));
+                new LambdaQueryWrapper<SystemUser>().eq(SystemUser::getUsername, username));
         if (Objects.isNull(systemUser)) {
             throw new SnailJobServerException("用户不存在");
         }
@@ -250,9 +250,9 @@ public class SystemUserServiceImpl implements SystemUserService {
         getPermission(systemUser.getRole(), systemUser.getId(), responseVO);
 
         List<SystemUserPermission> systemUserPermissions = systemUserPermissionMapper.selectList(
-            new LambdaQueryWrapper<SystemUserPermission>()
-                .select(SystemUserPermission::getNamespaceId, SystemUserPermission::getGroupName)
-                .eq(SystemUserPermission::getSystemUserId, responseVO.getId()));
+                new LambdaQueryWrapper<SystemUserPermission>()
+                        .select(SystemUserPermission::getNamespaceId, SystemUserPermission::getGroupName)
+                        .eq(SystemUserPermission::getSystemUserId, responseVO.getId()));
         responseVO.setPermissions(PermissionsResponseVOConverter.INSTANCE.convertList(systemUserPermissions));
 
 
@@ -263,20 +263,20 @@ public class SystemUserServiceImpl implements SystemUserService {
     public List<PermissionsResponseVO> getSystemUserPermissionByUserName(Long id) {
 
         List<SystemUserPermission> systemUserPermissions = systemUserPermissionMapper.selectList(
-            new LambdaQueryWrapper<SystemUserPermission>()
-                .select(SystemUserPermission::getNamespaceId, SystemUserPermission::getGroupName)
-                .eq(SystemUserPermission::getSystemUserId, id));
+                new LambdaQueryWrapper<SystemUserPermission>()
+                        .select(SystemUserPermission::getNamespaceId, SystemUserPermission::getGroupName)
+                        .eq(SystemUserPermission::getSystemUserId, id));
 
         if (CollectionUtils.isEmpty(systemUserPermissions)) {
             return Lists.newArrayList();
         }
 
         Map<String, List<SystemUserPermission>> permissionsMap = StreamUtils.groupByKey(
-            systemUserPermissions, SystemUserPermission::getNamespaceId);
+                systemUserPermissions, SystemUserPermission::getNamespaceId);
 
         List<Namespace> namespaces = namespaceMapper.selectList(new LambdaQueryWrapper<Namespace>()
-            .select(Namespace::getId, Namespace::getUniqueId, Namespace::getName)
-            .in(Namespace::getUniqueId, permissionsMap.keySet()));
+                .select(Namespace::getId, Namespace::getUniqueId, Namespace::getName)
+                .in(Namespace::getUniqueId, permissionsMap.keySet()));
         Map<String, String> map = StreamUtils.toMap(namespaces, Namespace::getUniqueId, Namespace::getName);
 
         List<PermissionsResponseVO> response = new ArrayList<>();
@@ -295,8 +295,8 @@ public class SystemUserServiceImpl implements SystemUserService {
     @Transactional
     public boolean delUser(final Long id) {
         systemUserPermissionMapper.delete(
-            new LambdaQueryWrapper<SystemUserPermission>()
-                .eq(SystemUserPermission::getSystemUserId, id)
+                new LambdaQueryWrapper<SystemUserPermission>()
+                        .eq(SystemUserPermission::getSystemUserId, id)
         );
         return 1 == systemUserMapper.deleteById(id);
     }
@@ -307,7 +307,7 @@ public class SystemUserServiceImpl implements SystemUserService {
     private String getToken(SystemUser systemUser) {
         String sign = systemUser.getPassword();
         return JWT.create().withExpiresAt(new Date(System.currentTimeMillis() + EXPIRE_TIME))
-            .withAudience(JsonUtil.toJsonString(SystemUserResponseVOConverter.INSTANCE.convert(systemUser)))
-            .sign(Algorithm.HMAC256(sign));
+                .withAudience(JsonUtil.toJsonString(SystemUserResponseVOConverter.INSTANCE.convert(systemUser)))
+                .sign(Algorithm.HMAC256(sign));
     }
 }

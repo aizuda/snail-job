@@ -20,7 +20,7 @@ import java.util.List;
  * @since 2.2.0
  */
 @Component
-public class RetryDeadLetterTaskAccess  extends AbstractTaskAccess<RetryDeadLetter> {
+public class RetryDeadLetterTaskAccess extends AbstractTaskAccess<RetryDeadLetter> {
 
     @Autowired
     private RetryDeadLetterMapper retryDeadLetterMapper;
@@ -49,7 +49,7 @@ public class RetryDeadLetterTaskAccess  extends AbstractTaskAccess<RetryDeadLett
 
     @Override
     protected PageDTO<RetryDeadLetter> doListPage(final PageDTO<RetryDeadLetter> PageDTO,
-        final LambdaQueryWrapper<RetryDeadLetter> query) {
+                                                  final LambdaQueryWrapper<RetryDeadLetter> query) {
         return retryDeadLetterMapper.selectPage(PageDTO, query);
     }
 

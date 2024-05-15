@@ -34,7 +34,7 @@ public class ExpressionInvocationHandler implements InvocationHandler {
         }
 
         // 表达式参数 params => 0: 重试方法的参数, 1: 重试方法
-        Object[] params = (Object[])args[1];
+        Object[] params = (Object[]) args[1];
         // 获取参数名称
         String[] paramNameArr = DISCOVERER.getParameterNames((Method) params[1]);
         if (ArrayUtil.isEmpty(paramNameArr)) {
@@ -42,7 +42,7 @@ public class ExpressionInvocationHandler implements InvocationHandler {
         }
 
         // 重试方法的参数
-        Object[] methodArgs =  (Object[]) params[0];
+        Object[] methodArgs = (Object[]) params[0];
         Map<String, Object> context = new HashMap<>(methodArgs.length);
         for (int i = 0; i < paramNameArr.length; i++) {
             context.put(paramNameArr[i], methodArgs[i]);

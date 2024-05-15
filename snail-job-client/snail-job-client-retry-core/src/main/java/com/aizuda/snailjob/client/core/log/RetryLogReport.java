@@ -5,8 +5,6 @@ import com.aizuda.snailjob.client.common.log.support.SnailJobLogManager;
 import com.aizuda.snailjob.common.log.dto.LogContentDTO;
 import com.aizuda.snailjob.common.log.enums.LogTypeEnum;
 import com.aizuda.snailjob.server.model.dto.RetryLogTaskDTO;
-import com.aizuda.snailjob.client.common.log.report.AbstractLogReport;
-import com.aizuda.snailjob.client.common.log.support.SnailJobLogManager;
 import org.springframework.stereotype.Component;
 
 /**

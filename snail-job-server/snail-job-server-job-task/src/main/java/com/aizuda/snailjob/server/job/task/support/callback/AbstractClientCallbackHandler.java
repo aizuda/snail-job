@@ -81,7 +81,7 @@ public abstract class AbstractClientCallbackHandler implements ClientCallbackHan
             updateWrapper.lt(JobTask::getRetryCount, job.getMaxRetryTimes());
         }
 
-        return SqlHelper.retBool(jobTaskMapper.update(updateJobTask,updateWrapper));
+        return SqlHelper.retBool(jobTaskMapper.update(updateJobTask, updateWrapper));
 
     }
 
@@ -97,8 +97,8 @@ public abstract class AbstractClientCallbackHandler implements ClientCallbackHan
 
         // 手动重试策略
         if (Objects.nonNull(context.getRetryScene())
-            && Objects.equals(JobRetrySceneEnum.MANUAL.getRetryScene(), context.getRetryScene())
-            && !context.isRetry()) {
+                && Objects.equals(JobRetrySceneEnum.MANUAL.getRetryScene(), context.getRetryScene())
+                && !context.isRetry()) {
             return Boolean.TRUE;
         }
 

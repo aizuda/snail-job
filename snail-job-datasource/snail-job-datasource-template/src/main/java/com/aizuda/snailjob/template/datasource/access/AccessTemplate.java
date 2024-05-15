@@ -29,6 +29,7 @@ import java.util.Optional;
 @Component
 public class AccessTemplate {
     protected Map<String, Access> REGISTER_ACCESS = new HashMap<>();
+
     public AccessTemplate(List<Access> accesses) {
 
         for (Access access : accesses) {
@@ -48,7 +49,7 @@ public class AccessTemplate {
      */
     public TaskAccess<RetryTask> getRetryTaskAccess() {
         return (TaskAccess<RetryTask>) Optional.ofNullable(REGISTER_ACCESS.get(OperationTypeEnum.RETRY_TASK.name()))
-            .orElseThrow(() -> new SnailJobDatasourceException("not supports operation type"));
+                .orElseThrow(() -> new SnailJobDatasourceException("not supports operation type"));
     }
 
     /**
@@ -58,8 +59,8 @@ public class AccessTemplate {
      */
     public TaskAccess<RetryDeadLetter> getRetryDeadLetterAccess() {
         return (TaskAccess<RetryDeadLetter>) Optional.ofNullable(
-                REGISTER_ACCESS.get(OperationTypeEnum.RETRY_DEAD_LETTER.name()))
-            .orElseThrow(() -> new SnailJobDatasourceException("not supports operation type"));
+                        REGISTER_ACCESS.get(OperationTypeEnum.RETRY_DEAD_LETTER.name()))
+                .orElseThrow(() -> new SnailJobDatasourceException("not supports operation type"));
 
     }
 
@@ -70,7 +71,7 @@ public class AccessTemplate {
      */
     public ConfigAccess<RetrySceneConfig> getSceneConfigAccess() {
         return (ConfigAccess<RetrySceneConfig>) Optional.ofNullable(REGISTER_ACCESS.get(OperationTypeEnum.SCENE.name()))
-            .orElseThrow(() -> new SnailJobDatasourceException("not supports operation type"));
+                .orElseThrow(() -> new SnailJobDatasourceException("not supports operation type"));
 
     }
 
@@ -81,7 +82,7 @@ public class AccessTemplate {
      */
     public ConfigAccess<GroupConfig> getGroupConfigAccess() {
         return (ConfigAccess<GroupConfig>) Optional.ofNullable(REGISTER_ACCESS.get(OperationTypeEnum.GROUP.name()))
-            .orElseThrow(() -> new SnailJobDatasourceException("not supports operation type"));
+                .orElseThrow(() -> new SnailJobDatasourceException("not supports operation type"));
 
     }
 
@@ -92,7 +93,7 @@ public class AccessTemplate {
      */
     public ConfigAccess<NotifyConfig> getNotifyConfigAccess() {
         return (ConfigAccess<NotifyConfig>) Optional.ofNullable(REGISTER_ACCESS.get(OperationTypeEnum.NOTIFY.name()))
-            .orElseThrow(() -> new SnailJobDatasourceException("not supports operation type"));
+                .orElseThrow(() -> new SnailJobDatasourceException("not supports operation type"));
 
     }
 

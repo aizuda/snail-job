@@ -51,7 +51,7 @@ public interface WorkflowConverter {
     List<WorkflowResponseVO> convertListToWorkflowList(List<Workflow> workflowList);
 
     @Mappings({
-        @Mapping(target = "nextTriggerAt", expression = "java(WorkflowConverter.toLocalDateTime(workflow.getNextTriggerAt()))")
+            @Mapping(target = "nextTriggerAt", expression = "java(WorkflowConverter.toLocalDateTime(workflow.getNextTriggerAt()))")
     })
     WorkflowResponseVO convertToWorkflow(Workflow workflow);
 

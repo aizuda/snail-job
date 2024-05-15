@@ -1,8 +1,8 @@
 package com.aizuda.snailjob.client.core.strategy;
 
-import com.aizuda.snailjob.client.core.Report;
 import com.aizuda.snailjob.client.common.cache.GroupVersionCache;
 import com.aizuda.snailjob.client.common.config.SnailJobProperties;
+import com.aizuda.snailjob.client.core.Report;
 import com.aizuda.snailjob.client.core.RetryExecutor;
 import com.aizuda.snailjob.client.core.RetryExecutorParameter;
 import com.aizuda.snailjob.client.core.event.SnailJobListener;
@@ -14,9 +14,9 @@ import com.aizuda.snailjob.client.core.retryer.RetryerResultContext;
 import com.aizuda.snailjob.common.core.alarm.AlarmContext;
 import com.aizuda.snailjob.common.core.alarm.SnailJobAlarmFactory;
 import com.aizuda.snailjob.common.core.enums.RetryNotifySceneEnum;
-import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.common.core.util.EnvironmentUtils;
 import com.aizuda.snailjob.common.core.util.NetUtil;
+import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.model.dto.ConfigDTO;
 import com.aizuda.snailjob.server.model.dto.ConfigDTO.Notify.Recipient;
 import com.github.rholder.retry.Retryer;
@@ -47,8 +47,7 @@ public abstract class AbstractRetryStrategies implements RetryStrategy {
                     "> 空间ID:{}  \n" +
                     "> 名称:{}  \n" +
                     "> 时间:{}  \n" +
-                    "> 异常:{}  \n"
-            ;
+                    "> 异常:{}  \n";
 
     private final List<SnailJobListener> snailJobListeners = SnailRetrySpiLoader.loadSnailJobListener();
 
@@ -88,7 +87,7 @@ public abstract class AbstractRetryStrategies implements RetryStrategy {
             retryerResultContext.setResult(result);
 
         } catch (Exception e) {
-            log.error("重试期间发生非预期异常, sceneName:[{}] executorClassName:[{}]", sceneName, executorClassName,  e);
+            log.error("重试期间发生非预期异常, sceneName:[{}] executorClassName:[{}]", sceneName, executorClassName, e);
             retryerResultContext.setMessage("非预期异常" + e.getMessage());
             // 本地重试状态为失败 远程重试状态为成功
             unexpectedError(e, retryerResultContext);
@@ -135,7 +134,7 @@ public abstract class AbstractRetryStrategies implements RetryStrategy {
             try {
                 for (SnailJobListener snailJobListener : snailJobListeners) {
                     snailJobListener
-                        .failureOnRetry(retryerInfo.getScene(), retryerInfo.getExecutorClassName(), throwable);
+                            .failureOnRetry(retryerInfo.getScene(), retryerInfo.getExecutorClassName(), throwable);
                 }
             } catch (Exception e) {
                 log.error("失败监听者模式 处理失败 ", e);
@@ -150,16 +149,22 @@ public abstract class AbstractRetryStrategies implements RetryStrategy {
     protected abstract void error(RetryerResultContext context);
 
     protected abstract boolean preValidator(RetryerInfo retryerInfo, RetryerResultContext resultContext);
+
     protected abstract void unexpectedError(Exception e, RetryerResultContext retryerResultContext);
+
     protected abstract void success(RetryerResultContext retryerResultContext);
+
     protected abstract Consumer<Throwable> doGetRetryErrorConsumer(RetryerInfo retryerInfo, Object[] params);
-    protected abstract Callable doGetCallable(RetryExecutor<WaitStrategy, StopStrategy> retryExecutor,Object[] params);
+
+    protected abstract Callable doGetCallable(RetryExecutor<WaitStrategy, StopStrategy> retryExecutor, Object[] params);
+
     protected abstract RetryExecutorParameter<WaitStrategy, StopStrategy> getRetryExecutorParameter(RetryerInfo retryerInfo);
+
     /**
      * 上报数据
      *
      * @param retryerInfo 定义重试场景的信息
-     * @param params 执行参数
+     * @param params      执行参数
      */
     protected boolean doReport(final RetryerInfo retryerInfo, final Object[] params) {
 
@@ -181,15 +186,15 @@ public abstract class AbstractRetryStrategies implements RetryStrategy {
 
                 for (final Recipient recipient : recipients) {
                     AlarmContext context = AlarmContext.build()
-                        .text(TEXT_MESSAGE_FORMATTER,
-                            EnvironmentUtils.getActiveProfile(),
-                            NetUtil.getLocalIpStr(),
-                            snailJobProperties.getNamespace(),
-                            snailJobProperties.getGroup(),
-                            LocalDateTime.now().format(formatter),
-                            e.getMessage())
-                        .title("retry component handling exception:[{}]", snailJobProperties.getGroup())
-                        .notifyAttribute(recipient.getNotifyAttribute());
+                            .text(TEXT_MESSAGE_FORMATTER,
+                                    EnvironmentUtils.getActiveProfile(),
+                                    NetUtil.getLocalIpStr(),
+                                    snailJobProperties.getNamespace(),
+                                    snailJobProperties.getGroup(),
+                                    LocalDateTime.now().format(formatter),
+                                    e.getMessage())
+                            .title("retry component handling exception:[{}]", snailJobProperties.getGroup())
+                            .notifyAttribute(recipient.getNotifyAttribute());
                     Optional.ofNullable(SnailJobAlarmFactory.getAlarmType(recipient.getNotifyType())).ifPresent(alarm -> alarm.asyncSendMessage(context));
                 }
             }

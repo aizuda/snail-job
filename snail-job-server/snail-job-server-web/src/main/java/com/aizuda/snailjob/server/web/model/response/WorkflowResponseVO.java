@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
  * @since : 2.6.0
  */
 @Data
-public class WorkflowResponseVO  {
+public class WorkflowResponseVO {
 
     private Long id;
 

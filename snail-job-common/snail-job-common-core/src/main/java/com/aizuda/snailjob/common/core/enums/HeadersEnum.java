@@ -19,7 +19,7 @@ public enum HeadersEnum {
     HOST("Host"),
     NAMESPACE("namespace"),
     TOKEN("token"),
-        ;
+    ;
 
     private final String key;
 

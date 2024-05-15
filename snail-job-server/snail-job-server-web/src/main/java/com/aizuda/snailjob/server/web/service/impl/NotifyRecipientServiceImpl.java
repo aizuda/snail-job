@@ -35,13 +35,13 @@ public class NotifyRecipientServiceImpl implements NotifyRecipientService {
     public PageResult<List<NotifyRecipientResponseVO>> getNotifyRecipientPageList(NotifyRecipientQueryVO queryVO) {
         PageDTO<NotifyRecipient> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
         PageDTO<NotifyRecipient> notifyRecipientPageDTO = notifyRecipientMapper.selectPage(pageDTO,
-            new LambdaQueryWrapper<NotifyRecipient>()
-                .likeRight(StrUtil.isNotBlank(queryVO.getRecipientName()), NotifyRecipient::getRecipientName, queryVO.getRecipientName())
-                .likeRight(Objects.nonNull(queryVO.getNotifyType()), NotifyRecipient::getNotifyType, queryVO.getNotifyType())
-                .orderByDesc(NotifyRecipient::getCreateDt));
+                new LambdaQueryWrapper<NotifyRecipient>()
+                        .likeRight(StrUtil.isNotBlank(queryVO.getRecipientName()), NotifyRecipient::getRecipientName, queryVO.getRecipientName())
+                        .likeRight(Objects.nonNull(queryVO.getNotifyType()), NotifyRecipient::getNotifyType, queryVO.getNotifyType())
+                        .orderByDesc(NotifyRecipient::getCreateDt));
 
         return new PageResult<>(pageDTO,
-            NotifyRecipientConverter.INSTANCE.convertList(notifyRecipientPageDTO.getRecords()));
+                NotifyRecipientConverter.INSTANCE.convertList(notifyRecipientPageDTO.getRecords()));
     }
 
     @Override
@@ -63,8 +63,8 @@ public class NotifyRecipientServiceImpl implements NotifyRecipientService {
     @Override
     public List<CommonLabelValueResponseVO> getNotifyRecipientList() {
         List<NotifyRecipient> notifyRecipients = notifyRecipientMapper.selectList(
-            new LambdaQueryWrapper<NotifyRecipient>()
-                .select(NotifyRecipient::getRecipientName, NotifyRecipient::getId));
+                new LambdaQueryWrapper<NotifyRecipient>()
+                        .select(NotifyRecipient::getRecipientName, NotifyRecipient::getId));
         return NotifyRecipientConverter.INSTANCE.convertListToCommonLabelValueList(notifyRecipients);
     }
 

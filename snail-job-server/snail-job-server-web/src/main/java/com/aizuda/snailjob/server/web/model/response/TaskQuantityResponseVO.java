@@ -18,5 +18,4 @@ public class TaskQuantityResponseVO {
     private Long maxRetryCount;
 
 
-
 }

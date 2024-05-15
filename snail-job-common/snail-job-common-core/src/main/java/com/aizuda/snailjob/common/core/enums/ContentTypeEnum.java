@@ -14,8 +14,7 @@ import org.springframework.http.MediaType;
 public enum ContentTypeEnum {
 
     JSON(1, MediaType.APPLICATION_JSON),
-    FORM(2, MediaType.APPLICATION_FORM_URLENCODED)
-    ;
+    FORM(2, MediaType.APPLICATION_FORM_URLENCODED);
 
     private final Integer type;
     private final MediaType mediaType;

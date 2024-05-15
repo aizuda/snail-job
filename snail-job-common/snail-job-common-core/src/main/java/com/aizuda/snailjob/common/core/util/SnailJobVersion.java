@@ -45,8 +45,7 @@ public final class SnailJobVersion {
             try (JarFile jarFile = new JarFile(new File(codeSourceLocation.toURI()))) {
                 return getImplementationVersion(jarFile);
             }
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             return null;
         }
     }

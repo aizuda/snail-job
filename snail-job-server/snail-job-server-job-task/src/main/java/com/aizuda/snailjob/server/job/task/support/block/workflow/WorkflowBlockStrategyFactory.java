@@ -20,7 +20,7 @@ public final class WorkflowBlockStrategyFactory {
         CACHE.put(blockStrategyEnum, blockStrategy);
     }
 
-    public static BlockStrategy getBlockStrategy(Integer  blockStrategy) {
+    public static BlockStrategy getBlockStrategy(Integer blockStrategy) {
         return CACHE.get(BlockStrategyEnum.valueOf(blockStrategy));
     }
 

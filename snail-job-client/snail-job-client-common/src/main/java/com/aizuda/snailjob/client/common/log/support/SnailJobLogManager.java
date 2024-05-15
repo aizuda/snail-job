@@ -47,15 +47,15 @@ public final class SnailJobLogManager {
         removeLogType();
     }
 
-    public static void setLogType (LogTypeEnum logType) {
+    public static void setLogType(LogTypeEnum logType) {
         LOG_TYPE.set(logType);
     }
 
-    public static LogTypeEnum getLogType () {
+    public static LogTypeEnum getLogType() {
         return LOG_TYPE.get();
     }
 
-    public static void removeLogType () {
+    public static void removeLogType() {
         LOG_TYPE.remove();
     }
 

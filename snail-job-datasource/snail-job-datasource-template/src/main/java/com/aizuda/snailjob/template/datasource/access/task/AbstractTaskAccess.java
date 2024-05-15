@@ -18,11 +18,11 @@ import java.util.List;
 public abstract class AbstractTaskAccess<T> implements TaskAccess<T> {
 
     protected static final List<String> ALLOW_DB = Arrays.asList(
-        DbTypeEnum.MYSQL.getDb(),
-        DbTypeEnum.MARIADB.getDb(),
-        DbTypeEnum.POSTGRES.getDb(),
-        DbTypeEnum.ORACLE.getDb(),
-        DbTypeEnum.SQLSERVER.getDb());
+            DbTypeEnum.MYSQL.getDb(),
+            DbTypeEnum.MARIADB.getDb(),
+            DbTypeEnum.POSTGRES.getDb(),
+            DbTypeEnum.ORACLE.getDb(),
+            DbTypeEnum.SQLSERVER.getDb());
 
     protected DbTypeEnum getDbType() {
         return DbUtils.getDbType();

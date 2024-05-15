@@ -37,6 +37,7 @@ public class ClientRegister extends AbstractRegister implements Runnable {
     public boolean supports(int type) {
         return getNodeType().equals(type);
     }
+
     @Override
     protected void beforeProcessor(RegisterContext context) {
     }
@@ -90,9 +91,9 @@ public class ClientRegister extends AbstractRegister implements Runnable {
 
                     // 去重
                     lists = new ArrayList<>(lists.stream()
-                        .collect(
-                            Collectors.toMap(ServerNode::getHostId, node -> node, (existing, replacement) -> existing))
-                        .values());
+                            .collect(
+                                    Collectors.toMap(ServerNode::getHostId, node -> node, (existing, replacement) -> existing))
+                            .values());
 
                     refreshExpireAt(lists);
                 }

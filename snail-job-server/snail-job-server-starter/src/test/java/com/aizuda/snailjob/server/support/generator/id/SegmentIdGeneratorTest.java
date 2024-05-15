@@ -45,7 +45,7 @@ public class SegmentIdGeneratorTest {
                     count.countDown();
 
                     String id = idGenerator.idGenerator("example_group", SystemConstants.DEFAULT_NAMESPACE);
-                   SnailJobLog.LOCAL.info("id:[{}]", id);
+                    SnailJobLog.LOCAL.info("id:[{}]", id);
                     if (Long.parseLong(id) < 0) {
                         throw new SnailJobServerException("exception id");
                     } else if (idSet.contains(id)) {

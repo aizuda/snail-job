@@ -8,9 +8,9 @@ package com.aizuda.snailjob.client.core;
  */
 public interface RetryOperations {
 
-   /**
-    * 执行重试
-    */
-   void executeRetry();
+    /**
+     * 执行重试
+     */
+    void executeRetry();
 
 }

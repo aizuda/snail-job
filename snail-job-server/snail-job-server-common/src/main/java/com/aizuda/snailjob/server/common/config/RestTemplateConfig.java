@@ -29,20 +29,20 @@ public class RestTemplateConfig {
     public ClientHttpRequestFactory okHttp3ClientHttpRequestFactory() {
 
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
-            // 整个流程耗费的超时时间
-            .callTimeout(60, TimeUnit.SECONDS)
-            // 读取耗时
-            .readTimeout(5000, TimeUnit.MILLISECONDS)
-            // 三次握手 + SSL建立耗时
-            .connectTimeout(5000, TimeUnit.MILLISECONDS)
-            // 写入耗时
-            .writeTimeout(5000, TimeUnit.MILLISECONDS)
-            // 当连接失败，尝试重连
-            .retryOnConnectionFailure(true)
-            // 最大空闲连接数及连接的保活时间进行配置
-            .connectionPool(new ConnectionPool(200, 5, TimeUnit.MINUTES))
-            .addInterceptor(new RequestInterceptor())
-            .build();
+                // 整个流程耗费的超时时间
+                .callTimeout(60, TimeUnit.SECONDS)
+                // 读取耗时
+                .readTimeout(5000, TimeUnit.MILLISECONDS)
+                // 三次握手 + SSL建立耗时
+                .connectTimeout(5000, TimeUnit.MILLISECONDS)
+                // 写入耗时
+                .writeTimeout(5000, TimeUnit.MILLISECONDS)
+                // 当连接失败，尝试重连
+                .retryOnConnectionFailure(true)
+                // 最大空闲连接数及连接的保活时间进行配置
+                .connectionPool(new ConnectionPool(200, 5, TimeUnit.MINUTES))
+                .addInterceptor(new RequestInterceptor())
+                .build();
 
         return new OkHttp3ClientHttpRequestFactory(okHttpClient);
     }

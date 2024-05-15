@@ -18,10 +18,10 @@ import java.util.Set;
 public abstract class AbstractRetryAlarm<E extends ApplicationEvent> extends AbstractAlarm<E, RetryAlarmInfo> {
     @Override
     protected Map<Triple<String, String, String>, List<RetryAlarmInfo>> convertAlarmDTO(
-        List<RetryAlarmInfo> alarmDataList,
-        Set<String> namespaceIds,
-        Set<String> groupNames,
-        Set<String> sceneNames) {
+            List<RetryAlarmInfo> alarmDataList,
+            Set<String> namespaceIds,
+            Set<String> groupNames,
+            Set<String> sceneNames) {
 
         return StreamUtils.groupByKey(alarmDataList, alarmData -> {
 

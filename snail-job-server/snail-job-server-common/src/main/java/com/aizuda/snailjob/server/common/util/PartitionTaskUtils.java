@@ -20,31 +20,33 @@ public class PartitionTaskUtils {
     }
 
     public static long process(LongFunction<List<? extends PartitionTask>> dataSource,
-        Consumer<List<? extends PartitionTask>> task,
-        long startId) {
-        return process(dataSource, task, curStartId -> {}, CollectionUtils::isEmpty, startId);
+                               Consumer<List<? extends PartitionTask>> task,
+                               long startId) {
+        return process(dataSource, task, curStartId -> {
+        }, CollectionUtils::isEmpty, startId);
     }
 
     public static long process(LongFunction<List<? extends PartitionTask>> dataSource,
-        Consumer<List<? extends PartitionTask>> task,
-        Predicate<List<? extends PartitionTask>> stopCondition,
-        long startId) {
-        return process(dataSource, task, curStartId -> {}, stopCondition, startId);
+                               Consumer<List<? extends PartitionTask>> task,
+                               Predicate<List<? extends PartitionTask>> stopCondition,
+                               long startId) {
+        return process(dataSource, task, curStartId -> {
+        }, stopCondition, startId);
     }
 
     public static long process(LongFunction<List<? extends PartitionTask>> dataSource,
-        Consumer<List<? extends PartitionTask>> task,
-        LongConsumer stopAfterProcessor,
-        long startId) {
+                               Consumer<List<? extends PartitionTask>> task,
+                               LongConsumer stopAfterProcessor,
+                               long startId) {
         return process(dataSource, task, stopAfterProcessor, CollectionUtils::isEmpty, startId);
     }
 
     public static long process(
-        LongFunction<List<? extends PartitionTask>> dataSource,
-        Consumer<List<? extends PartitionTask>> task,
-        LongConsumer stopAfterProcessor,
-        Predicate<List<? extends PartitionTask>> stopCondition,
-        long startId) {
+            LongFunction<List<? extends PartitionTask>> dataSource,
+            Consumer<List<? extends PartitionTask>> task,
+            LongConsumer stopAfterProcessor,
+            Predicate<List<? extends PartitionTask>> stopCondition,
+            long startId) {
         int total = 0;
         do {
             List<? extends PartitionTask> products = dataSource.apply(startId);

@@ -7,10 +7,10 @@ import com.aizuda.snailjob.common.log.dto.TaskLogFieldDTO;
 import com.aizuda.snailjob.common.log.enums.LogTypeEnum;
 import com.aizuda.snailjob.server.common.LogStorage;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
+import com.aizuda.snailjob.server.common.dto.JobLogMetaDTO;
 import com.aizuda.snailjob.server.common.dto.LogMetaDTO;
 import com.aizuda.snailjob.server.common.log.LogStorageFactory;
 import com.aizuda.snailjob.server.job.task.dto.JobLogDTO;
-import com.aizuda.snailjob.server.common.dto.JobLogMetaDTO;
 import com.google.common.collect.Lists;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
@@ -38,9 +38,9 @@ public class JobLogStorage implements LogStorage, InitializingBean {
         JobLogMetaDTO jobLogMetaDTO = (JobLogMetaDTO) logMetaDTO;
         JobLogDTO jobLogDTO = new JobLogDTO();
         Map<String, String> messageMap = logContentDTO.getFieldList()
-            .stream()
-            .filter(logTaskDTO_ -> !Objects.isNull(logTaskDTO_.getValue()))
-            .collect(Collectors.toMap(TaskLogFieldDTO::getName, TaskLogFieldDTO::getValue));
+                .stream()
+                .filter(logTaskDTO_ -> !Objects.isNull(logTaskDTO_.getValue()))
+                .collect(Collectors.toMap(TaskLogFieldDTO::getName, TaskLogFieldDTO::getValue));
         jobLogDTO.setMessage(JsonUtil.toJsonString(Lists.newArrayList(messageMap)));
         jobLogDTO.setTaskId(jobLogMetaDTO.getTaskId());
         jobLogDTO.setJobId(jobLogMetaDTO.getJobId());

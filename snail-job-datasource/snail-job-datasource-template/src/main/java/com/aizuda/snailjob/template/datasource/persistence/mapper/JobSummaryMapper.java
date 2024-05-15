@@ -33,7 +33,7 @@ public interface JobSummaryMapper extends BaseMapper<JobSummary> {
 
     List<DashboardLineResponseDO> jobLineList(@Param("dateFormat") String dateFormat, @Param("ew") Wrapper<JobSummary> wrapper);
 
-    List<Rank> dashboardRank( @Param("systemTaskType") Integer systemTaskType, @Param("ew") Wrapper<JobSummary> wrapper);
+    List<Rank> dashboardRank(@Param("systemTaskType") Integer systemTaskType, @Param("ew") Wrapper<JobSummary> wrapper);
 
     DashboardCardResponseDO.JobTask toJobTask(@Param("ew") Wrapper<JobSummary> wrapper);
 

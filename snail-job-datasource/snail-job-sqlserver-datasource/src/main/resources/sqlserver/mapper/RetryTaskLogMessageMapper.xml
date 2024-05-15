@@ -4,10 +4,10 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.aizuda.snailjob.template.datasource.persistence.po.RetryTaskLogMessage">
-        <id column="id" property="id" />
-        <result column="group_name" property="groupName" />
-        <result column="unique_id" property="uniqueId" />
-        <result column="create_dt" property="createDt" />
+        <id column="id" property="id"/>
+        <result column="group_name" property="groupName"/>
+        <result column="unique_id" property="uniqueId"/>
+        <result column="create_dt" property="createDt"/>
         <result column="log_num" property="logNum"/>
         <result column="message" property="message"/>
         <result column="real_time" property="realTime"/>
@@ -16,34 +16,34 @@
     <!-- 定义批量新增的 SQL 映射 -->
     <insert id="batchInsert" parameterType="java.util.List">
         INSERT INTO sj_retry_task_log_message (namespace_id, group_name, unique_id, log_num, message,
-                                            create_dt, real_time)
+        create_dt, real_time)
         VALUES
-            <foreach collection="list" item="item" separator=",">
-                (
-                    #{item.namespaceId},
-                    #{item.groupName},
-                    #{item.uniqueId},
-                    #{item.logNum},
-                    #{item.message},
-                    #{item.createDt},
-                    #{item.realTime}
-                )
-            </foreach>
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.namespaceId},
+            #{item.groupName},
+            #{item.uniqueId},
+            #{item.logNum},
+            #{item.message},
+            #{item.createDt},
+            #{item.realTime}
+            )
+        </foreach>
     </insert>
 
     <update id="batchUpdate" parameterType="java.util.List">
         UPDATE sj_retry_task_log_message
-           SET message = src.message, log_num = src.log_num
-          FROM sj_retry_task_log_message AS dest
-                JOIN (
-                    <foreach collection="list" item="item" index="index" separator="UNION ALL">
-                        SELECT
-                            #{item.message} AS message,
-                            #{item.logNum} AS log_num,
-                            #{item.id} AS id
-                    </foreach>
-                ) AS src
-                ON dest.id = src.id
+        SET message = src.message, log_num = src.log_num
+        FROM sj_retry_task_log_message AS dest
+        JOIN (
+        <foreach collection="list" item="item" index="index" separator="UNION ALL">
+            SELECT
+            #{item.message} AS message,
+            #{item.logNum} AS log_num,
+            #{item.id} AS id
+        </foreach>
+        ) AS src
+        ON dest.id = src.id
     </update>
 
 </mapper>

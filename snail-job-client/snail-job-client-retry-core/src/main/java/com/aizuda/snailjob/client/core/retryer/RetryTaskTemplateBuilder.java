@@ -4,9 +4,6 @@ import com.aizuda.snailjob.client.core.strategy.ExecutorMethod;
 import com.aizuda.snailjob.client.core.strategy.ManualRetryStrategies;
 import com.aizuda.snailjob.client.core.strategy.RetryStrategy;
 import com.aizuda.snailjob.common.core.context.SpringContext;
-import com.aizuda.snailjob.client.core.strategy.ExecutorMethod;
-import com.aizuda.snailjob.client.core.strategy.ManualRetryStrategies;
-import com.aizuda.snailjob.client.core.strategy.RetryStrategy;
 
 /**
  * 构建重试模板对象

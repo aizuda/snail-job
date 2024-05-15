@@ -151,6 +151,6 @@ public class JdbcLockProvider implements LockStorage, Lifecycle {
     private Boolean notSupportedTransaction(TransactionCallback<Boolean> action) {
         TransactionTemplate template = new TransactionTemplate(platformTransactionManager);
         template.setPropagationBehavior(TransactionDefinition.PROPAGATION_NOT_SUPPORTED);
-       return template.execute(action);
+        return template.execute(action);
     }
 }

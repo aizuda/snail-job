@@ -77,7 +77,7 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
             }
 
             List<Integer> allocate = new AllocateMessageQueueAveragely()
-                .allocate(ServerRegister.CURRENT_CID, bucketList, new ArrayList<>(podIpSet));
+                    .allocate(ServerRegister.CURRENT_CID, bucketList, new ArrayList<>(podIpSet));
 
             // 重新覆盖本地分配的组信息
             DistributeInstance.INSTANCE.setConsumerBucket(allocate);
@@ -136,7 +136,7 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
 
         SnailJobLog.LOCAL.info("ServerNodeBalance start. ");
         int i = serverNodeMapper
-            .delete(new LambdaQueryWrapper<ServerNode>().eq(ServerNode::getHostId, ServerRegister.CURRENT_CID));
+                .delete(new LambdaQueryWrapper<ServerNode>().eq(ServerNode::getHostId, ServerRegister.CURRENT_CID));
         if (1 == i) {
             SnailJobLog.LOCAL.info("delete node success. [{}]", ServerRegister.CURRENT_CID);
         } else {
@@ -158,12 +158,12 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
             try {
 
                 List<ServerNode> remotePods = serverNodeMapper.selectList(new LambdaQueryWrapper<ServerNode>()
-                    .ge(ServerNode::getExpireAt, LocalDateTime.now())
-                    .eq(ServerNode::getNodeType, NodeTypeEnum.SERVER.getType()));
+                        .ge(ServerNode::getExpireAt, LocalDateTime.now())
+                        .eq(ServerNode::getNodeType, NodeTypeEnum.SERVER.getType()));
 
                 // 获取缓存中的节点
                 ConcurrentMap<String/*hostId*/, RegisterNodeInfo> concurrentMap = Optional.ofNullable(CacheRegisterTable
-                    .get(ServerRegister.GROUP_NAME, ServerRegister.NAMESPACE_ID)).orElse(new ConcurrentHashMap<>());
+                        .get(ServerRegister.GROUP_NAME, ServerRegister.NAMESPACE_ID)).orElse(new ConcurrentHashMap<>());
 
                 Set<String> remoteHostIds = StreamUtils.toSet(remotePods, ServerNode::getHostId);
 
@@ -171,10 +171,10 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
 
                 // 无缓存的节点触发refreshCache
                 if (CollectionUtils.isEmpty(concurrentMap)
-                    // 节点数量不一致触发
-                    || isNodeSizeNotEqual(concurrentMap.size(), remotePods.size())
-                    // 判断远程节点是不是和本地节点一致的，如果不一致则重新分配
-                    || isNodeNotMatch(remoteHostIds, localHostIds)) {
+                        // 节点数量不一致触发
+                        || isNodeSizeNotEqual(concurrentMap.size(), remotePods.size())
+                        // 判断远程节点是不是和本地节点一致的，如果不一致则重新分配
+                        || isNodeNotMatch(remoteHostIds, localHostIds)) {
 
                     // 删除本地缓存以下线的节点信息
                     removeNode(concurrentMap, remoteHostIds, localHostIds);
@@ -195,12 +195,12 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
 
                     // 再次获取最新的节点信息
                     concurrentMap = CacheRegisterTable
-                        .get(ServerRegister.GROUP_NAME, ServerRegister.NAMESPACE_ID);
+                            .get(ServerRegister.GROUP_NAME, ServerRegister.NAMESPACE_ID);
 
                     // 找出过期的节点
                     Set<RegisterNodeInfo> expireNodeSet = concurrentMap.values().stream()
-                        .filter(registerNodeInfo -> registerNodeInfo.getExpireAt().isBefore(LocalDateTime.now()))
-                        .collect(Collectors.toSet());
+                            .filter(registerNodeInfo -> registerNodeInfo.getExpireAt().isBefore(LocalDateTime.now()))
+                            .collect(Collectors.toSet());
                     for (final RegisterNodeInfo registerNodeInfo : expireNodeSet) {
                         // 删除过期的节点信息
                         CacheRegisterTable.remove(registerNodeInfo.getGroupName(), registerNodeInfo.getNamespaceId(), registerNodeInfo.getHostId());
@@ -228,8 +228,8 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
         boolean b = !remoteHostIds.containsAll(localHostIds);
         if (b) {
             SnailJobLog.LOCAL.info("判断远程节点是不是和本地节点一致. remoteHostIds:[{}] localHostIds:[{}]",
-                localHostIds,
-                remoteHostIds);
+                    localHostIds,
+                    remoteHostIds);
         }
         return b;
     }
@@ -238,8 +238,8 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
         boolean b = localNodeSize != remoteNodeSize;
         if (b) {
             SnailJobLog.LOCAL.info("存在远程和本地缓存的节点的数量不一致则触发rebalance. localNodeSize:[{}] remoteNodeSize:[{}]",
-                localNodeSize,
-                remoteNodeSize);
+                    localNodeSize,
+                    remoteNodeSize);
         }
         return b;
     }
@@ -248,8 +248,8 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
         boolean b = allGroup.size() != removeGroupConfig.size();
         if (b) {
             SnailJobLog.LOCAL.info("若存在远程和本地缓存的组的数量不一致则触发rebalance. localGroupSize:[{}] remoteGroupSize:[{}]",
-                allGroup.size(),
-                removeGroupConfig.size());
+                    allGroup.size(),
+                    removeGroupConfig.size());
         }
         return b;
     }

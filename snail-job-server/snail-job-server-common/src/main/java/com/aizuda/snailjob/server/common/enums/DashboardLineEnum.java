@@ -38,27 +38,39 @@ public enum DashboardLineEnum {
 
         if (DbUtils.getDbType().equals(DbTypeEnum.MYSQL)) {
             switch (mode) {
-                case YEAR: return "%Y-%m";
-                case DAY: return "%H";
-                default: return "%Y-%m-%d";
+                case YEAR:
+                    return "%Y-%m";
+                case DAY:
+                    return "%H";
+                default:
+                    return "%Y-%m-%d";
             }
         } else if (DbUtils.getDbType().equals(DbTypeEnum.MARIADB)) {
             switch (mode) {
-                case YEAR: return "%Y-%m";
-                case DAY: return "%H";
-                default: return "%Y-%m-%d";
+                case YEAR:
+                    return "%Y-%m";
+                case DAY:
+                    return "%H";
+                default:
+                    return "%Y-%m-%d";
             }
         } else if (DbUtils.getDbType().equals(DbTypeEnum.SQLSERVER)) {
             switch (mode) {
-                case YEAR: return "yyyy-MM";
-                case DAY: return "HH";
-                default: return "yyyy-MM-dd";
+                case YEAR:
+                    return "yyyy-MM";
+                case DAY:
+                    return "HH";
+                default:
+                    return "yyyy-MM-dd";
             }
         } else { // Oracle, Postgres
             switch (mode) {
-                case YEAR: return "yyyy-MM";
-                case DAY: return "HH24";
-                default: return "yyyy-MM-dd";
+                case YEAR:
+                    return "yyyy-MM";
+                case DAY:
+                    return "HH24";
+                default:
+                    return "yyyy-MM-dd";
             }
         }
     }

@@ -26,8 +26,8 @@ public class NetUtil {
     /**
      * 获取URL
      *
-     * @param host     主机地址
-     * @param port     端口
+     * @param host        主机地址
+     * @param port        端口
      * @param contextPath 统一后缀
      * @return URL
      */

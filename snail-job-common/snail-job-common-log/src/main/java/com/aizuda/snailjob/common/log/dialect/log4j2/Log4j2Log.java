@@ -100,7 +100,7 @@ public class Log4j2Log extends AbstractLog {
     // ------------------------------------------------------------------------- Log
     @Override
     public void log(com.aizuda.snailjob.common.log.level.Level level, Boolean remote, String fqcn, String format,
-        Object... arguments) {
+                    Object... arguments) {
         Level log4j2Level;
         switch (level) {
             case TRACE:
@@ -135,7 +135,7 @@ public class Log4j2Log extends AbstractLog {
      * @param arguments   参数
      */
     private void logIfEnabled(Level level, Boolean remote, String fqcn, String msgTemplate,
-        Object... arguments) {
+                              Object... arguments) {
         if (this.logger.isEnabled(level)) {
 
             if (remote) {
@@ -143,7 +143,7 @@ public class Log4j2Log extends AbstractLog {
             }
             if (this.logger instanceof AbstractLogger) {
                 ((AbstractLogger) this.logger).logIfEnabled(fqcn, level, null, StrUtil.format(msgTemplate, arguments),
-                    LogFactory.extractThrowable(arguments));
+                        LogFactory.extractThrowable(arguments));
             } else {
                 // FQCN无效
                 this.logger.log(level, StrUtil.format(msgTemplate, arguments), LogFactory.extractThrowable(arguments));

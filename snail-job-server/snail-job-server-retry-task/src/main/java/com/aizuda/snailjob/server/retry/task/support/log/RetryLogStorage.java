@@ -38,9 +38,9 @@ public class RetryLogStorage implements LogStorage, InitializingBean {
         RetryLogMetaDTO retryLogMetaDTO = (RetryLogMetaDTO) logMetaDTO;
         RetryTaskLogDTO retryTaskLogDTO = new RetryTaskLogDTO();
         Map<String, String> messageMap = logContentDTO.getFieldList()
-            .stream()
-            .filter(logTaskDTO_ -> !Objects.isNull(logTaskDTO_.getValue()))
-            .collect(Collectors.toMap(TaskLogFieldDTO::getName, TaskLogFieldDTO::getValue));
+                .stream()
+                .filter(logTaskDTO_ -> !Objects.isNull(logTaskDTO_.getValue()))
+                .collect(Collectors.toMap(TaskLogFieldDTO::getName, TaskLogFieldDTO::getValue));
         retryTaskLogDTO.setMessage(JsonUtil.toJsonString(Lists.newArrayList(messageMap)));
         retryTaskLogDTO.setGroupName(retryLogMetaDTO.getGroupName());
         retryTaskLogDTO.setNamespaceId(retryLogMetaDTO.getNamespaceId());

@@ -21,17 +21,17 @@
             parameterType="com.aizuda.snailjob.template.datasource.persistence.dataobject.WorkflowBatchQueryDO"
             resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.WorkflowBatchResponseDO">
         SELECT a.*,
-               b.workflow_name
-          FROM sj_workflow_task_batch a
-                JOIN sj_workflow b ON a.workflow_id = b.id
+        b.workflow_name
+        FROM sj_workflow_task_batch a
+        JOIN sj_workflow b ON a.workflow_id = b.id
         ${ew.customSqlSegment}
     </select>
     <select id="selectWorkflowBatchList"
-        resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.WorkflowBatchResponseDO">
+            resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.WorkflowBatchResponseDO">
         SELECT a.*,
-               b.workflow_name
+        b.workflow_name
         FROM sj_workflow_task_batch a
-                 JOIN sj_workflow b ON a.workflow_id = b.id
-            ${ew.customSqlSegment}
+        JOIN sj_workflow b ON a.workflow_id = b.id
+        ${ew.customSqlSegment}
     </select>
 </mapper>

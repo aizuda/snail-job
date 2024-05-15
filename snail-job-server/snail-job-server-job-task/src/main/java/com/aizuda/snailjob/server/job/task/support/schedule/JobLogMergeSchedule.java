@@ -83,7 +83,7 @@ public class JobLogMergeSchedule extends AbstractSchedule implements Lifecycle {
             long total;
             LocalDateTime endTime = LocalDateTime.now().minusDays(systemProperties.getMergeLogDays());
             total = PartitionTaskUtils.process(startId -> jobTaskBatchList(startId, endTime),
-                this::processJobLogPartitionTasks, 0);
+                    this::processJobLogPartitionTasks, 0);
 
             SnailJobLog.LOCAL.debug("job merge success total:[{}]", total);
         } catch (Exception e) {
@@ -104,10 +104,10 @@ public class JobLogMergeSchedule extends AbstractSchedule implements Lifecycle {
     private List<JobPartitionTaskDTO> jobTaskBatchList(Long startId, LocalDateTime endTime) {
 
         List<JobTaskBatch> jobTaskBatchList = jobTaskBatchMapper.selectPage(
-            new Page<>(0, 1000),
-            new LambdaUpdateWrapper<JobTaskBatch>().ge(JobTaskBatch::getId, startId)
-                .in(JobTaskBatch::getTaskBatchStatus, JobTaskBatchStatusEnum.COMPLETED)
-                .le(JobTaskBatch::getCreateDt, endTime)).getRecords();
+                new Page<>(0, 1000),
+                new LambdaUpdateWrapper<JobTaskBatch>().ge(JobTaskBatch::getId, startId)
+                        .in(JobTaskBatch::getTaskBatchStatus, JobTaskBatchStatusEnum.COMPLETED)
+                        .le(JobTaskBatch::getCreateDt, endTime)).getRecords();
         return JobTaskConverter.INSTANCE.toJobTaskBatchPartitionTasks(jobTaskBatchList);
     }
 
@@ -126,30 +126,30 @@ public class JobLogMergeSchedule extends AbstractSchedule implements Lifecycle {
 
         // Waiting for deletion JobLogMessageList
         List<JobLogMessage> jobLogMessageList = jobLogMessageMapper.selectList(
-            new LambdaQueryWrapper<JobLogMessage>().in(JobLogMessage::getTaskBatchId, ids));
+                new LambdaQueryWrapper<JobLogMessage>().in(JobLogMessage::getTaskBatchId, ids));
         if (CollectionUtils.isEmpty(jobLogMessageList)) {
             return;
         }
 
         List<Map.Entry<Long, List<JobLogMessage>>> jobLogMessageGroupList = jobLogMessageList.stream().collect(
-                groupingBy(JobLogMessage::getTaskId)).entrySet().stream()
-            .filter(entry -> entry.getValue().size() >= 2).collect(toList());
+                        groupingBy(JobLogMessage::getTaskId)).entrySet().stream()
+                .filter(entry -> entry.getValue().size() >= 2).collect(toList());
 
         for (Map.Entry<Long/*taskId*/, List<JobLogMessage>> jobLogMessageMap : jobLogMessageGroupList) {
             List<Long> jobLogMessageDeleteBatchIds = new ArrayList<>();
             List<JobLogMessage> jobLogMessageInsertBatchIds = new ArrayList<>();
 
             List<String> mergeMessages = jobLogMessageMap.getValue().stream().map(k -> {
-                    jobLogMessageDeleteBatchIds.add(k.getId());
-                    return JsonUtil.parseObject(k.getMessage(), List.class);
-                })
-                .reduce((a, b) -> {
-                    // 合并日志信息
-                    List<String> list = new ArrayList<>();
-                    list.addAll(a);
-                    list.addAll(b);
-                    return list;
-                }).get();
+                        jobLogMessageDeleteBatchIds.add(k.getId());
+                        return JsonUtil.parseObject(k.getMessage(), List.class);
+                    })
+                    .reduce((a, b) -> {
+                        // 合并日志信息
+                        List<String> list = new ArrayList<>();
+                        list.addAll(a);
+                        list.addAll(b);
+                        return list;
+                    }).get();
 
             // 500条数据为一个批次
             List<List<String>> partitionMessages = Lists.partition(mergeMessages, systemProperties.getMergeLogNum());
@@ -157,7 +157,7 @@ public class JobLogMergeSchedule extends AbstractSchedule implements Lifecycle {
             for (List<String> partitionMessage : partitionMessages) {
                 // 深拷贝
                 JobLogMessage jobLogMessage = JobTaskConverter.INSTANCE.toJobLogMessage(
-                    jobLogMessageMap.getValue().get(0));
+                        jobLogMessageMap.getValue().get(0));
 
                 jobLogMessage.setLogNum(partitionMessage.size());
                 jobLogMessage.setMessage(JsonUtil.toJsonString(partitionMessage));

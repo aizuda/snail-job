@@ -4,23 +4,23 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.aizuda.snailjob.template.datasource.persistence.po.Workflow">
-        <id column="id" property="id" />
-        <result column="namespace_id" property="namespaceId" />
-        <result column="group_name" property="groupName" />
-        <result column="workflow_status" property="workflowStatus" />
-        <result column="next_trigger_at" property="nextTriggerAt" />
-        <result column="flow_info" property="flowInfo" />
-        <result column="create_dt" property="createDt" />
-        <result column="update_dt" property="updateDt" />
-        <result column="deleted" property="deleted" />
-        <result column="ext_attrs" property="extAttrs" />
+        <id column="id" property="id"/>
+        <result column="namespace_id" property="namespaceId"/>
+        <result column="group_name" property="groupName"/>
+        <result column="workflow_status" property="workflowStatus"/>
+        <result column="next_trigger_at" property="nextTriggerAt"/>
+        <result column="flow_info" property="flowInfo"/>
+        <result column="create_dt" property="createDt"/>
+        <result column="update_dt" property="updateDt"/>
+        <result column="deleted" property="deleted"/>
+        <result column="ext_attrs" property="extAttrs"/>
     </resultMap>
 
     <update id="updateBatchNextTriggerAtById" parameterType="java.util.List">
         <foreach collection="list" item="item" open="BEGIN" separator=";" close=";END;">
             UPDATE sj_workflow
-               SET next_trigger_at = #{item.nextTriggerAt}
-             WHERE id = #{item.id}
+            SET next_trigger_at = #{item.nextTriggerAt}
+            WHERE id = #{item.id}
         </foreach>
     </update>
 </mapper>

@@ -121,10 +121,10 @@ public class ConsoleLog extends AbstractLog {
         }
 
         final Dict dict = Dict.create()
-            .set("date", DateUtil.now())
-            .set("level", level.toString())
-            .set("name", this.name)
-            .set("msg", StrUtil.format(format, arguments));
+                .set("date", DateUtil.now())
+                .set("level", level.toString())
+                .set("name", this.name)
+                .set("msg", StrUtil.format(format, arguments));
 
         final String logMsg = StrUtil.format(logFormat, dict);
 

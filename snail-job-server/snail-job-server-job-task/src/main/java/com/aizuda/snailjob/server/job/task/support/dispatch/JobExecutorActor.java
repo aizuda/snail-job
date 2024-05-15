@@ -190,21 +190,21 @@ public class JobExecutorActor extends AbstractActor {
 
     private void doHandlerResidentTask(Job job, TaskExecuteDTO taskExecuteDTO) {
         if (Objects.isNull(job)
-            || JobTaskExecutorSceneEnum.MANUAL_JOB.getType().equals(taskExecuteDTO.getTaskExecutorScene())
-            || JobTaskExecutorSceneEnum.AUTO_WORKFLOW.getType().equals(taskExecuteDTO.getTaskExecutorScene())
-            || JobTaskExecutorSceneEnum.MANUAL_WORKFLOW.getType().equals(taskExecuteDTO.getTaskExecutorScene())
-            // 是否是常驻任务
-            || Objects.equals(StatusEnum.NO.getStatus(), job.getResident())
-            // 防止任务已经分配到其他节点导致的任务重复执行
-            || !DistributeInstance.INSTANCE.getConsumerBucket().contains(job.getBucketIndex())
+                || JobTaskExecutorSceneEnum.MANUAL_JOB.getType().equals(taskExecuteDTO.getTaskExecutorScene())
+                || JobTaskExecutorSceneEnum.AUTO_WORKFLOW.getType().equals(taskExecuteDTO.getTaskExecutorScene())
+                || JobTaskExecutorSceneEnum.MANUAL_WORKFLOW.getType().equals(taskExecuteDTO.getTaskExecutorScene())
+                // 是否是常驻任务
+                || Objects.equals(StatusEnum.NO.getStatus(), job.getResident())
+                // 防止任务已经分配到其他节点导致的任务重复执行
+                || !DistributeInstance.INSTANCE.getConsumerBucket().contains(job.getBucketIndex())
         ) {
             return;
         }
 
         long count = groupConfigMapper.selectCount(new LambdaQueryWrapper<GroupConfig>()
-            .eq(GroupConfig::getNamespaceId, job.getNamespaceId())
-            .eq(GroupConfig::getGroupName, job.getGroupName())
-            .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus()));
+                .eq(GroupConfig::getNamespaceId, job.getNamespaceId())
+                .eq(GroupConfig::getGroupName, job.getGroupName())
+                .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus()));
         if (count == 0) {
             return;
         }

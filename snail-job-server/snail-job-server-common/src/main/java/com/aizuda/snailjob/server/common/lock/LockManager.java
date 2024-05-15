@@ -11,9 +11,9 @@ import java.time.LocalDateTime;
  * @since 2.6.0
  */
 public final class LockManager {
-   private static final ThreadLocal<LockConfig> LOCK_CONFIG = new ThreadLocal<>();
+    private static final ThreadLocal<LockConfig> LOCK_CONFIG = new ThreadLocal<>();
 
-   public static LockConfig getLockConfig() {
+    public static LockConfig getLockConfig() {
         return LOCK_CONFIG.get();
     }
 

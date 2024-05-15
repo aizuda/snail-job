@@ -92,8 +92,8 @@ public class WorkflowServiceImpl implements WorkflowService {
 
     private static void checkExecuteInterval(WorkflowRequestVO requestVO) {
         if (Lists.newArrayList(WaitStrategies.WaitStrategyEnum.FIXED.getType(),
-                WaitStrategies.WaitStrategyEnum.RANDOM.getType())
-            .contains(requestVO.getTriggerType())) {
+                        WaitStrategies.WaitStrategyEnum.RANDOM.getType())
+                .contains(requestVO.getTriggerType())) {
             if (Integer.parseInt(requestVO.getTriggerInterval()) < 10) {
                 throw new SnailJobServerException("触发间隔不得小于10");
             }
@@ -119,8 +119,8 @@ public class WorkflowServiceImpl implements WorkflowService {
         workflow.setNextTriggerAt(calculateNextTriggerAt(workflowRequestVO, DateUtils.toNowMilli()));
         workflow.setFlowInfo(StrUtil.EMPTY);
         workflow.setBucketIndex(
-            HashUtil.bkdrHash(workflowRequestVO.getGroupName() + workflowRequestVO.getWorkflowName())
-                % systemProperties.getBucketTotal());
+                HashUtil.bkdrHash(workflowRequestVO.getGroupName() + workflowRequestVO.getWorkflowName())
+                        % systemProperties.getBucketTotal());
         workflow.setNamespaceId(UserSessionUtils.currentUserSession().getNamespaceId());
         Assert.isTrue(1 == workflowMapper.insert(workflow), () -> new SnailJobServerException("新增工作流失败"));
 
@@ -129,10 +129,10 @@ public class WorkflowServiceImpl implements WorkflowService {
 
         // 递归构建图
         workflowHandler.buildGraph(Lists.newArrayList(SystemConstants.ROOT),
-            new LinkedBlockingDeque<>(),
-            workflowRequestVO.getGroupName(),
-            workflow.getId(), nodeConfig, graph,
-            workflow.getVersion());
+                new LinkedBlockingDeque<>(),
+                workflowRequestVO.getGroupName(),
+                workflow.getId(), nodeConfig, graph,
+                workflow.getVersion());
         log.info("图构建完成. graph:[{}]", graph);
 
         // 保存图信息
@@ -144,19 +144,19 @@ public class WorkflowServiceImpl implements WorkflowService {
 
     private MutableGraph<Long> createGraph() {
         return GraphBuilder.directed()
-            .nodeOrder(ElementOrder.sorted(Long::compare))
-            .incidentEdgeOrder(ElementOrder.stable())
-            .allowsSelfLoops(false)
-            .build();
+                .nodeOrder(ElementOrder.sorted(Long::compare))
+                .incidentEdgeOrder(ElementOrder.stable())
+                .allowsSelfLoops(false)
+                .build();
     }
 
     @Override
     public WorkflowDetailResponseVO getWorkflowDetail(Long id) {
 
         Workflow workflow = workflowMapper.selectOne(
-            new LambdaQueryWrapper<Workflow>()
-                .eq(Workflow::getId, id)
-                .eq(Workflow::getNamespaceId, UserSessionUtils.currentUserSession().getNamespaceId())
+                new LambdaQueryWrapper<Workflow>()
+                        .eq(Workflow::getId, id)
+                        .eq(Workflow::getNamespaceId, UserSessionUtils.currentUserSession().getNamespaceId())
         );
         if (Objects.isNull(workflow)) {
             return null;
@@ -164,34 +164,34 @@ public class WorkflowServiceImpl implements WorkflowService {
 
         WorkflowDetailResponseVO responseVO = WorkflowConverter.INSTANCE.convert(workflow);
         List<WorkflowNode> workflowNodes = workflowNodeMapper.selectList(new LambdaQueryWrapper<WorkflowNode>()
-            .eq(WorkflowNode::getDeleted, 0)
-            .eq(WorkflowNode::getVersion, workflow.getVersion())
-            .eq(WorkflowNode::getWorkflowId, id)
-            .orderByAsc(WorkflowNode::getPriorityLevel));
+                .eq(WorkflowNode::getDeleted, 0)
+                .eq(WorkflowNode::getVersion, workflow.getVersion())
+                .eq(WorkflowNode::getWorkflowId, id)
+                .orderByAsc(WorkflowNode::getPriorityLevel));
 
         List<Long> jobIds = StreamUtils.toList(workflowNodes, WorkflowNode::getJobId);
         List<Job> jobs = jobMapper.selectList(new LambdaQueryWrapper<Job>()
-            .in(Job::getId, new HashSet<>(jobIds)));
+                .in(Job::getId, new HashSet<>(jobIds)));
 
         Map<Long, Job> jobMap = StreamUtils.toIdentityMap(jobs, Job::getId);
 
         List<WorkflowDetailResponseVO.NodeInfo> nodeInfos = WorkflowConverter.INSTANCE.convertList(workflowNodes);
 
         Map<Long, WorkflowDetailResponseVO.NodeInfo> workflowNodeMap = nodeInfos.stream()
-            .peek(nodeInfo -> {
-                JobTaskConfig jobTask = nodeInfo.getJobTask();
-                if (Objects.nonNull(jobTask)) {
-                    jobTask.setJobName(jobMap.getOrDefault(jobTask.getJobId(), new Job()).getJobName());
-                }
-            }).collect(Collectors.toMap(WorkflowDetailResponseVO.NodeInfo::getId, i -> i));
+                .peek(nodeInfo -> {
+                    JobTaskConfig jobTask = nodeInfo.getJobTask();
+                    if (Objects.nonNull(jobTask)) {
+                        jobTask.setJobName(jobMap.getOrDefault(jobTask.getJobId(), new Job()).getJobName());
+                    }
+                }).collect(Collectors.toMap(WorkflowDetailResponseVO.NodeInfo::getId, i -> i));
 
         String flowInfo = workflow.getFlowInfo();
         try {
             MutableGraph<Long> graph = GraphUtils.deserializeJsonToGraph(flowInfo);
             // 反序列化构建图
             WorkflowDetailResponseVO.NodeConfig config = workflowHandler.buildNodeConfig(graph, SystemConstants.ROOT,
-                new HashMap<>(),
-                workflowNodeMap);
+                    new HashMap<>(),
+                    workflowNodeMap);
             responseVO.setNodeConfig(config);
         } catch (Exception e) {
             log.error("反序列化失败. json:[{}]", flowInfo, e);
@@ -207,13 +207,13 @@ public class WorkflowServiceImpl implements WorkflowService {
 
         UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
         PageDTO<Workflow> page = workflowMapper.selectPage(pageDTO,
-            new LambdaQueryWrapper<Workflow>()
-                .eq(Workflow::getDeleted, StatusEnum.NO.getStatus())
-                .eq(Workflow::getNamespaceId, userSessionVO.getNamespaceId())
-                .eq(StrUtil.isNotBlank(queryVO.getGroupName()), Workflow::getGroupName, queryVO.getGroupName())
-                .like(StrUtil.isNotBlank(queryVO.getWorkflowName()), Workflow::getWorkflowName, queryVO.getWorkflowName())
-                .eq(Objects.nonNull(queryVO.getWorkflowStatus()), Workflow::getWorkflowStatus, queryVO.getWorkflowStatus())
-                .orderByDesc(Workflow::getId));
+                new LambdaQueryWrapper<Workflow>()
+                        .eq(Workflow::getDeleted, StatusEnum.NO.getStatus())
+                        .eq(Workflow::getNamespaceId, userSessionVO.getNamespaceId())
+                        .eq(StrUtil.isNotBlank(queryVO.getGroupName()), Workflow::getGroupName, queryVO.getGroupName())
+                        .like(StrUtil.isNotBlank(queryVO.getWorkflowName()), Workflow::getWorkflowName, queryVO.getWorkflowName())
+                        .eq(Objects.nonNull(queryVO.getWorkflowStatus()), Workflow::getWorkflowStatus, queryVO.getWorkflowStatus())
+                        .orderByDesc(Workflow::getId));
 
         List<WorkflowResponseVO> jobResponseList = WorkflowConverter.INSTANCE.convertListToWorkflowList(page.getRecords());
 
@@ -240,7 +240,7 @@ public class WorkflowServiceImpl implements WorkflowService {
         int version = workflow.getVersion();
         // 递归构建图
         workflowHandler.buildGraph(Lists.newArrayList(SystemConstants.ROOT), new LinkedBlockingDeque<>(),
-            workflowRequestVO.getGroupName(), workflowRequestVO.getId(), nodeConfig, graph, version + 1);
+                workflowRequestVO.getGroupName(), workflowRequestVO.getId(), nodeConfig, graph, version + 1);
 
         log.info("图构建完成. graph:[{}]", graph);
 
@@ -251,11 +251,11 @@ public class WorkflowServiceImpl implements WorkflowService {
         workflow.setNextTriggerAt(calculateNextTriggerAt(workflowRequestVO, DateUtils.toNowMilli()));
         workflow.setFlowInfo(JsonUtil.toJsonString(GraphUtils.serializeGraphToJson(graph)));
         Assert.isTrue(
-            workflowMapper.update(workflow,
-                new LambdaQueryWrapper<Workflow>()
-                    .eq(Workflow::getId, workflow.getId())
-                    .eq(Workflow::getVersion, version)) > 0,
-            () -> new SnailJobServerException("更新失败"));
+                workflowMapper.update(workflow,
+                        new LambdaQueryWrapper<Workflow>()
+                                .eq(Workflow::getId, workflow.getId())
+                                .eq(Workflow::getVersion, version)) > 0,
+                () -> new SnailJobServerException("更新失败"));
 
         return Boolean.TRUE;
     }
@@ -263,9 +263,9 @@ public class WorkflowServiceImpl implements WorkflowService {
     @Override
     public Boolean updateStatus(Long id) {
         Workflow workflow = workflowMapper.selectOne(
-            new LambdaQueryWrapper<Workflow>()
-                .select(Workflow::getId, Workflow::getWorkflowStatus)
-                .eq(Workflow::getId, id));
+                new LambdaQueryWrapper<Workflow>()
+                        .select(Workflow::getId, Workflow::getWorkflowStatus)
+                        .eq(Workflow::getId, id));
         Assert.notNull(workflow, () -> new SnailJobServerException("工作流不存在"));
 
         if (Objects.equals(workflow.getWorkflowStatus(), StatusEnum.NO.getStatus())) {
@@ -291,10 +291,10 @@ public class WorkflowServiceImpl implements WorkflowService {
         Assert.notNull(workflow, () -> new SnailJobServerException("workflow can not be null."));
 
         long count = accessTemplate.getGroupConfigAccess().count(
-            new LambdaQueryWrapper<GroupConfig>()
-                .eq(GroupConfig::getGroupName, workflow.getGroupName())
-                .eq(GroupConfig::getNamespaceId, workflow.getNamespaceId())
-                .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus())
+                new LambdaQueryWrapper<GroupConfig>()
+                        .eq(GroupConfig::getGroupName, workflow.getGroupName())
+                        .eq(GroupConfig::getNamespaceId, workflow.getNamespaceId())
+                        .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus())
         );
 
         Assert.isTrue(count > 0, () -> new SnailJobServerException("组:[{}]已经关闭，不支持手动执行.", workflow.getGroupName()));
@@ -312,13 +312,13 @@ public class WorkflowServiceImpl implements WorkflowService {
     @Override
     public List<WorkflowResponseVO> getWorkflowNameList(String keywords, Long workflowId) {
         PageDTO<Workflow> selectPage = workflowMapper.selectPage(
-            new PageDTO<>(1, 20),
-            new LambdaQueryWrapper<Workflow>()
-                .select(Workflow::getId, Workflow::getWorkflowName)
-                .likeRight(StrUtil.isNotBlank(keywords), Workflow::getWorkflowName, StrUtil.trim(keywords))
-                .eq(Objects.nonNull(workflowId), Workflow::getId, workflowId)
-                .eq(Workflow::getDeleted, StatusEnum.NO.getStatus())
-                .orderByAsc(Workflow::getId));
+                new PageDTO<>(1, 20),
+                new LambdaQueryWrapper<Workflow>()
+                        .select(Workflow::getId, Workflow::getWorkflowName)
+                        .likeRight(StrUtil.isNotBlank(keywords), Workflow::getWorkflowName, StrUtil.trim(keywords))
+                        .eq(Objects.nonNull(workflowId), Workflow::getId, workflowId)
+                        .eq(Workflow::getDeleted, StatusEnum.NO.getStatus())
+                        .orderByAsc(Workflow::getId));
 
         return WorkflowConverter.INSTANCE.convertListToWorkflowList(selectPage.getRecords());
     }

@@ -12,7 +12,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class JobExecutorInfoCache {
 
-    private JobExecutorInfoCache() {}
+    private JobExecutorInfoCache() {
+    }
 
     private static final ConcurrentHashMap<String, JobExecutorInfo> JOB_EXECUTOR_REPOSITORY = new ConcurrentHashMap<>();
 

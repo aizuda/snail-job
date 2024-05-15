@@ -17,10 +17,9 @@ CREATE TABLE sj_namespace
     create_dt   datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_dt   datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP
 )
-GO
+    GO
 
-CREATE INDEX idx_sj_namespace_01 ON sj_namespace (name)
-GO
+CREATE INDEX idx_sj_namespace_01 ON sj_namespace (name) GO
 
 EXEC sp_addextendedproperty
      'MS_Description', N'主键',
@@ -79,7 +78,7 @@ GO
 
 INSERT INTO sj_namespace (name, unique_id, create_dt, update_dt, deleted)
 VALUES (N'Default', N'764d604ec6fc45f68cd92514c40e9e1a', getdate(), getdate(), 0)
-GO
+    GO
 
 -- sj_group_config
 CREATE TABLE sj_group_config
@@ -98,10 +97,9 @@ CREATE TABLE sj_group_config
     create_dt         datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_dt         datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP
 )
-GO
+    GO
 
-CREATE UNIQUE INDEX uk_sj_group_config_01 ON sj_group_config (namespace_id, group_name)
-GO
+CREATE UNIQUE INDEX uk_sj_group_config_01 ON sj_group_config (namespace_id, group_name) GO
 
 EXEC sp_addextendedproperty
      'MS_Description', N'主键',
@@ -218,10 +216,9 @@ CREATE TABLE sj_notify_config
     create_dt              datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_dt              datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP
 )
-GO
+    GO
 
-CREATE INDEX idx_sj_notify_config_01 ON sj_notify_config (namespace_id, group_name, business_id)
-GO
+CREATE INDEX idx_sj_notify_config_01 ON sj_notify_config (namespace_id, group_name, business_id) GO
 
 EXEC sp_addextendedproperty
      'MS_Description', N'主键',
@@ -339,10 +336,9 @@ CREATE TABLE sj_notify_recipient
     create_dt        datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_dt        datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP
 )
-GO
+    GO
 
-CREATE INDEX idx_sj_notify_recipient_01 ON sj_notify_recipient (namespace_id)
-GO
+CREATE INDEX idx_sj_notify_recipient_01 ON sj_notify_recipient (namespace_id) GO
 
 EXEC sp_addextendedproperty
      'MS_Description', N'主键',
@@ -422,19 +418,18 @@ CREATE TABLE sj_retry_dead_letter_0
     task_type     tinyint       NOT NULL DEFAULT 1,
     create_dt     datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP
 )
-GO
+    GO
 
 CREATE UNIQUE INDEX uk_sj_retry_dead_letter_0_01 ON sj_retry_dead_letter_0 (namespace_id, group_name, unique_id)
-GO
+    GO
 
 CREATE INDEX idx_sj_retry_dead_letter_0_01 ON sj_retry_dead_letter_0 (namespace_id, group_name, scene_name)
-GO
+    GO
 CREATE INDEX idx_sj_retry_dead_letter_0_02 ON sj_retry_dead_letter_0 (idempotent_id)
-GO
+    GO
 CREATE INDEX idx_sj_retry_dead_letter_0_03 ON sj_retry_dead_letter_0 (biz_no)
-GO
-CREATE INDEX idx_sj_retry_dead_letter_0_04 ON sj_retry_dead_letter_0 (create_dt)
-GO
+    GO
+CREATE INDEX idx_sj_retry_dead_letter_0_04 ON sj_retry_dead_letter_0 (create_dt) GO
 
 EXEC sp_addextendedproperty
      'MS_Description', N'主键',
@@ -546,23 +541,22 @@ CREATE TABLE sj_retry_task_0
     create_dt       datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_dt       datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP
 )
-GO
+    GO
 
 CREATE UNIQUE INDEX uk_sj_retry_task_0_01 ON sj_retry_task_0 (namespace_id, group_name, unique_id)
-GO
+    GO
 
 CREATE INDEX idx_sj_retry_task_0_01 ON sj_retry_task_0 (namespace_id, group_name, scene_name)
-GO
+    GO
 CREATE INDEX idx_sj_retry_task_0_02 ON sj_retry_task_0 (namespace_id, group_name, task_type)
-GO
+    GO
 CREATE INDEX idx_sj_retry_task_0_03 ON sj_retry_task_0 (namespace_id, group_name, retry_status)
-GO
+    GO
 CREATE INDEX idx_sj_retry_task_0_04 ON sj_retry_task_0 (idempotent_id)
-GO
+    GO
 CREATE INDEX idx_sj_retry_task_0_05 ON sj_retry_task_0 (biz_no)
-GO
-CREATE INDEX idx_sj_retry_task_0_06 ON sj_retry_task_0 (create_dt)
-GO
+    GO
+CREATE INDEX idx_sj_retry_task_0_06 ON sj_retry_task_0 (create_dt) GO
 
 EXEC sp_addextendedproperty
      'MS_Description', N'主键',
@@ -700,20 +694,19 @@ CREATE TABLE sj_retry_task_log
     create_dt     datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_dt     datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP
 )
-GO
+    GO
 
 CREATE INDEX idx_sj_retry_task_log_01 ON sj_retry_task_log (namespace_id, group_name, scene_name)
-GO
+    GO
 CREATE INDEX idx_sj_retry_task_log_02 ON sj_retry_task_log (retry_status)
-GO
+    GO
 CREATE INDEX idx_sj_retry_task_log_03 ON sj_retry_task_log (idempotent_id)
-GO
+    GO
 CREATE INDEX idx_sj_retry_task_log_04 ON sj_retry_task_log (unique_id)
-GO
+    GO
 CREATE INDEX idx_sj_retry_task_log_05 ON sj_retry_task_log (biz_no)
-GO
-CREATE INDEX idx_sj_retry_task_log_06 ON sj_retry_task_log (create_dt)
-GO
+    GO
+CREATE INDEX idx_sj_retry_task_log_06 ON sj_retry_task_log (create_dt) GO
 
 EXEC sp_addextendedproperty
      'MS_Description', N'主键',
@@ -831,12 +824,11 @@ CREATE TABLE sj_retry_task_log_message
     real_time    bigint        NOT NULL DEFAULT 0,
     create_dt    datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP
 )
-GO
+    GO
 
 CREATE INDEX idx_sj_retry_task_log_message_01 ON sj_retry_task_log_message (namespace_id, group_name, unique_id)
-GO
-CREATE INDEX idx_sj_retry_task_log_message_02 ON sj_retry_task_log_message (create_dt)
-GO
+    GO
+CREATE INDEX idx_sj_retry_task_log_message_02 ON sj_retry_task_log_message (create_dt) GO
 
 EXEC sp_addextendedproperty
      'MS_Description', N'主键',
@@ -918,10 +910,9 @@ CREATE TABLE sj_retry_scene_config
     create_dt        datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_dt        datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP
 )
-GO
+    GO
 
-CREATE UNIQUE INDEX uk_sj_retry_scene_config_01 ON sj_retry_scene_config (namespace_id, group_name, scene_name)
-GO
+CREATE UNIQUE INDEX uk_sj_retry_scene_config_01 ON sj_retry_scene_config (namespace_id, group_name, scene_name) GO
 
 EXEC sp_addextendedproperty
      'MS_Description', N'主键',
@@ -1042,15 +1033,14 @@ CREATE TABLE sj_server_node
     create_dt    datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_dt    datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP
 )
-GO
+    GO
 
 CREATE UNIQUE INDEX uk_sj_server_node_01 ON sj_server_node (host_id, host_ip)
-GO
+    GO
 
 CREATE INDEX idx_sj_server_node_01 ON sj_server_node (namespace_id, group_name)
-GO
-CREATE INDEX idx_sj_server_node_02 ON sj_server_node (expire_at, node_type)
-GO
+    GO
+CREATE INDEX idx_sj_server_node_02 ON sj_server_node (expire_at, node_type) GO
 
 EXEC sp_addextendedproperty
      'MS_Description', N'主键',
@@ -1145,8 +1135,7 @@ CREATE TABLE sj_distributed_lock
     locked_by  nvarchar(255) NOT NULL,
     create_dt  datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_dt  datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP
-)
-GO
+) GO
 
 EXEC sp_addextendedproperty
      'MS_Description', N'主键',
@@ -1212,8 +1201,7 @@ CREATE TABLE sj_system_user
     role      tinyint       NOT NULL DEFAULT 0,
     create_dt datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_dt datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP
-)
-GO
+) GO
 
 EXEC sp_addextendedproperty
      'MS_Description', N'主键',
@@ -1265,7 +1253,7 @@ GO
 
 INSERT INTO sj_system_user (username, password, role)
 VALUES (N'admin', N'465c194afb65670f38322df087f0a9bb225cc257e43eb4ac5a0c98ef5b3173ac', 2)
-GO
+    GO
 
 -- sj_system_user_permission
 CREATE TABLE sj_system_user_permission
@@ -1277,10 +1265,9 @@ CREATE TABLE sj_system_user_permission
     create_dt      datetime2    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_dt      datetime2    NOT NULL DEFAULT CURRENT_TIMESTAMP
 )
-GO
+    GO
 
-CREATE UNIQUE INDEX uk_sj_system_user_permission_01 ON sj_system_user_permission (namespace_id, group_name, system_user_id)
-GO
+CREATE UNIQUE INDEX uk_sj_system_user_permission_01 ON sj_system_user_permission (namespace_id, group_name, system_user_id) GO
 
 EXEC sp_addextendedproperty
      'MS_Description', N'主键',
@@ -1340,10 +1327,9 @@ CREATE TABLE sj_sequence_alloc
     step         int          NOT NULL DEFAULT 100,
     update_dt    datetime2    NOT NULL DEFAULT CURRENT_TIMESTAMP
 )
-GO
+    GO
 
-CREATE UNIQUE INDEX uk_sj_sequence_alloc_01 ON sj_sequence_alloc (namespace_id, group_name)
-GO
+CREATE UNIQUE INDEX uk_sj_sequence_alloc_01 ON sj_sequence_alloc (namespace_id, group_name) GO
 
 EXEC sp_addextendedproperty
      'MS_Description', N'主键',
@@ -1423,14 +1409,13 @@ CREATE TABLE sj_job
     create_dt        datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_dt        datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP
 )
-GO
+    GO
 
 CREATE INDEX idx_sj_job_01 ON sj_job (namespace_id, group_name)
-GO
+    GO
 CREATE INDEX idx_sj_job_02 ON sj_job (job_status, bucket_index)
-GO
-CREATE INDEX idx_sj_job_03 ON sj_job (create_dt)
-GO
+    GO
+CREATE INDEX idx_sj_job_03 ON sj_job (create_dt) GO
 
 EXEC sp_addextendedproperty
      'MS_Description', N'主键',
@@ -1635,14 +1620,13 @@ CREATE TABLE sj_job_log_message
     ext_attrs     nvarchar(256) NULL     DEFAULT '',
     create_dt     datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP
 )
-GO
+    GO
 
 CREATE INDEX idx_sj_job_log_message_01 ON sj_job_log_message (task_batch_id, task_id)
-GO
+    GO
 CREATE INDEX idx_sj_job_log_message_02 ON sj_job_log_message (create_dt)
-GO
-CREATE INDEX idx_sj_job_log_message_03 ON sj_job_log_message (namespace_id, group_name)
-GO
+    GO
+CREATE INDEX idx_sj_job_log_message_03 ON sj_job_log_message (namespace_id, group_name) GO
 
 EXEC sp_addextendedproperty
      'MS_Description', N'主键',
@@ -1746,14 +1730,13 @@ CREATE TABLE sj_job_task
     create_dt      datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_dt      datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP
 )
-GO
+    GO
 
 CREATE INDEX idx_sj_job_task_01 ON sj_job_task (task_batch_id, task_status)
-GO
+    GO
 CREATE INDEX idx_sj_job_task_02 ON sj_job_task (create_dt)
-GO
-CREATE INDEX idx_sj_job_task_03 ON sj_job_task (namespace_id, group_name)
-GO
+    GO
+CREATE INDEX idx_sj_job_task_03 ON sj_job_task (namespace_id, group_name) GO
 
 EXEC sp_addextendedproperty
      'MS_Description', N'主键',
@@ -1886,16 +1869,15 @@ CREATE TABLE sj_job_task_batch
     create_dt               datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_dt               datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP
 )
-GO
+    GO
 
 CREATE INDEX idx_sj_job_task_batch_01 ON sj_job_task_batch (job_id, task_batch_status)
-GO
+    GO
 CREATE INDEX idx_sj_job_task_batch_02 ON sj_job_task_batch (create_dt)
-GO
+    GO
 CREATE INDEX idx_sj_job_task_batch_03 ON sj_job_task_batch (namespace_id, group_name)
-GO
-CREATE INDEX idx_sj_job_task_batch_04 ON sj_job_task_batch (workflow_task_batch_id, workflow_node_id)
-GO
+    GO
+CREATE INDEX idx_sj_job_task_batch_04 ON sj_job_task_batch (workflow_task_batch_id, workflow_node_id) GO
 
 EXEC sp_addextendedproperty
      'MS_Description', N'主键',
@@ -2034,13 +2016,12 @@ CREATE TABLE sj_job_summary
     create_dt        datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_dt        datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP
 )
-GO
+    GO
 
 CREATE UNIQUE INDEX uk_sj_job_summary_01 ON sj_job_summary (trigger_at, system_task_type, business_id)
-GO
+    GO
 
-CREATE INDEX idx_sj_job_summary_01 ON sj_job_summary (namespace_id, group_name, business_id)
-GO
+CREATE INDEX idx_sj_job_summary_01 ON sj_job_summary (namespace_id, group_name, business_id) GO
 
 EXEC sp_addextendedproperty
      'MS_Description', N'主键',
@@ -2168,13 +2149,12 @@ CREATE TABLE sj_retry_summary
     create_dt     datetime2    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_dt     datetime2    NOT NULL DEFAULT CURRENT_TIMESTAMP
 )
-GO
+    GO
 
 CREATE UNIQUE INDEX uk_sj_retry_summary_01 ON sj_retry_summary (namespace_id, group_name, scene_name, trigger_at)
-GO
+    GO
 
-CREATE INDEX idx_sj_retry_summary_01 ON sj_retry_summary (trigger_at)
-GO
+CREATE INDEX idx_sj_retry_summary_01 ON sj_retry_summary (trigger_at) GO
 
 EXEC sp_addextendedproperty
      'MS_Description', N'主键',
@@ -2281,12 +2261,11 @@ CREATE TABLE sj_workflow
     create_dt        datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_dt        datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP
 )
-GO
+    GO
 
 CREATE INDEX idx_sj_workflow_01 ON sj_workflow (create_dt)
-GO
-CREATE INDEX idx_sj_workflow_02 ON sj_workflow (namespace_id, group_name)
-GO
+    GO
+CREATE INDEX idx_sj_workflow_02 ON sj_workflow (namespace_id, group_name) GO
 
 EXEC sp_addextendedproperty
      'MS_Description', N'主键',
@@ -2441,12 +2420,11 @@ CREATE TABLE sj_workflow_node
     create_dt            datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_dt            datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP
 )
-GO
+    GO
 
 CREATE INDEX idx_sj_workflow_node_01 ON sj_workflow_node (create_dt)
-GO
-CREATE INDEX idx_sj_workflow_node_02 ON sj_workflow_node (namespace_id, group_name)
-GO
+    GO
+CREATE INDEX idx_sj_workflow_node_02 ON sj_workflow_node (namespace_id, group_name) GO
 
 EXEC sp_addextendedproperty
      'MS_Description', N'主键',
@@ -2589,14 +2567,13 @@ CREATE TABLE sj_workflow_task_batch
     create_dt         datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_dt         datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP
 )
-GO
+    GO
 
 CREATE INDEX idx_sj_workflow_task_batch_01 ON sj_workflow_task_batch (workflow_id, task_batch_status)
-GO
+    GO
 CREATE INDEX idx_sj_workflow_task_batch_02 ON sj_workflow_task_batch (create_dt)
-GO
-CREATE INDEX idx_sj_workflow_task_batch_03 ON sj_workflow_task_batch (namespace_id, group_name)
-GO
+    GO
+CREATE INDEX idx_sj_workflow_task_batch_03 ON sj_workflow_task_batch (namespace_id, group_name) GO
 
 EXEC sp_addextendedproperty
      'MS_Description', N'主键',

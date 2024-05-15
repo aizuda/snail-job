@@ -16,9 +16,9 @@ public enum RetryNotifySceneEnum {
 
     MAX_RETRY_ERROR(2, "场景重试失败数量超过阈值", NodeTypeEnum.SERVER),
 
-    CLIENT_REPORT_ERROR(3,"客户端上报失败", NodeTypeEnum.CLIENT),
+    CLIENT_REPORT_ERROR(3, "客户端上报失败", NodeTypeEnum.CLIENT),
 
-    CLIENT_COMPONENT_ERROR(4,"客户端组件异常", NodeTypeEnum.CLIENT),
+    CLIENT_COMPONENT_ERROR(4, "客户端组件异常", NodeTypeEnum.CLIENT),
 
     RETRY_TASK_REACH_THRESHOLD(5, "任务重试次数超过阈值", NodeTypeEnum.SERVER),
 
@@ -50,7 +50,7 @@ public enum RetryNotifySceneEnum {
      * 获取通知场景
      *
      * @param notifyScene 场景
-     * @param nodeType 触发通知节点类型
+     * @param nodeType    触发通知节点类型
      * @return this
      */
     public static RetryNotifySceneEnum getNotifyScene(int notifyScene, NodeTypeEnum nodeType) {

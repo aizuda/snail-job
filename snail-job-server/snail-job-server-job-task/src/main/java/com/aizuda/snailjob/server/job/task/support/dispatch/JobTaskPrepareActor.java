@@ -54,11 +54,11 @@ public class JobTaskPrepareActor extends AbstractActor {
 
     private void doPrepare(JobTaskPrepareDTO prepare) {
         LambdaQueryWrapper<JobTaskBatch> queryWrapper = new LambdaQueryWrapper<JobTaskBatch>()
-            .eq(JobTaskBatch::getJobId, prepare.getJobId())
-            .in(JobTaskBatch::getTaskBatchStatus, NOT_COMPLETE);
+                .eq(JobTaskBatch::getJobId, prepare.getJobId())
+                .in(JobTaskBatch::getTaskBatchStatus, NOT_COMPLETE);
 
         JobTaskExecutorSceneEnum jobTaskExecutorSceneEnum = JobTaskExecutorSceneEnum.get(
-            prepare.getTaskExecutorScene());
+                prepare.getTaskExecutorScene());
         if (SyetemTaskTypeEnum.WORKFLOW.getType().equals(jobTaskExecutorSceneEnum.getSystemTaskType().getType())) {
             queryWrapper.eq(JobTaskBatch::getWorkflowNodeId, prepare.getWorkflowNodeId());
             queryWrapper.eq(JobTaskBatch::getWorkflowTaskBatchId, prepare.getWorkflowTaskBatchId());
@@ -68,7 +68,7 @@ public class JobTaskPrepareActor extends AbstractActor {
         }
 
         List<JobTaskBatch> notCompleteJobTaskBatchList = jobTaskBatchMapper
-            .selectList(queryWrapper);
+                .selectList(queryWrapper);
 
         // 说明所以任务已经完成
         if (CollectionUtils.isEmpty(notCompleteJobTaskBatchList)) {

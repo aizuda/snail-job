@@ -26,7 +26,7 @@ public class CacheToken implements Lifecycle {
 
     private static Cache<Pair<String/*groupName*/, String/*namespaceId*/>, String/*Token*/> CACHE;
 
-    public static void add(String groupName, String namespaceId,  String token) {
+    public static void add(String groupName, String namespaceId, String token) {
         CACHE.put(Pair.of(groupName, namespaceId), token);
     }
 

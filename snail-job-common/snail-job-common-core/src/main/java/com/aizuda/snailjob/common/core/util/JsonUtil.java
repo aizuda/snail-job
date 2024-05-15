@@ -27,6 +27,7 @@ public class JsonUtil {
 
     /**
      * 将Java对象转JSON 字符串
+     *
      * @param object
      * @return
      */
@@ -36,6 +37,7 @@ public class JsonUtil {
 
     /**
      * 将JSON 字符串转Java 对象
+     *
      * @param jsonString
      * @param clazz
      * @param <T>
@@ -47,6 +49,7 @@ public class JsonUtil {
 
     /**
      * 将JSON 数组字符串转Java 对象集合
+     *
      * @param jsonString
      * @param clazz
      * @param <T>
@@ -59,6 +62,7 @@ public class JsonUtil {
 
     /**
      * 将JSON字符串转Map 对象
+     *
      * @param jsonString
      * @return
      */
@@ -68,6 +72,7 @@ public class JsonUtil {
 
     /**
      * 将JSON字符串转Map 对象
+     *
      * @param jsonString
      * @return
      */
@@ -78,6 +83,7 @@ public class JsonUtil {
 
     /**
      * 将JSON字符串转Map 对象
+     *
      * @param jsonString
      * @return
      */
@@ -87,6 +93,7 @@ public class JsonUtil {
 
     /**
      * 将JSON字符串转JSON 对象
+     *
      * @param jsonString
      * @return
      */
@@ -96,6 +103,7 @@ public class JsonUtil {
 
     /**
      * 将JSON字符串转JSON 对象
+     *
      * @param object
      * @return
      */
@@ -105,6 +113,7 @@ public class JsonUtil {
 
     /**
      * 将JSON字符串转JSON 对象
+     *
      * @param jsonBytes
      * @return
      */
@@ -173,6 +182,7 @@ public class JsonUtil {
 
         /**
          * 获取对象类型
+         *
          * @param collectionClass
          * @param elementClasses
          * @return
@@ -183,6 +193,7 @@ public class JsonUtil {
 
         /**
          * JAVA 对象转Json 字符串
+         *
          * @param object
          * @return
          */
@@ -196,6 +207,7 @@ public class JsonUtil {
 
         /**
          * Json 字符串转JAVA 对象
+         *
          * @param jsonString
          * @param clazz
          * @param <T>
@@ -205,12 +217,13 @@ public class JsonUtil {
             try {
                 return objectMapper.readValue(jsonString, clazz);
             } catch (Exception e) {
-                throw new SnailJobCommonException("Json转对象失败", jsonString,  e);
+                throw new SnailJobCommonException("Json转对象失败", jsonString, e);
             }
         }
 
         /**
          * Json 字符串转JAVA 对象
+         *
          * @param jsonString
          * @param typeReference
          * @return
@@ -225,6 +238,7 @@ public class JsonUtil {
 
         /**
          * Json 字符串转JAVA 对象
+         *
          * @param jsonString
          * @param javaType
          * @return
@@ -239,6 +253,7 @@ public class JsonUtil {
 
         /**
          * Json 字符串转JSON 对象
+         *
          * @param jsonString
          * @return
          */
@@ -252,6 +267,7 @@ public class JsonUtil {
 
         /**
          * Json 字符串转JSON 对象
+         *
          * @param jsonBytes
          * @return
          */
@@ -265,6 +281,7 @@ public class JsonUtil {
 
         /**
          * Json 字符串转JSON 对象
+         *
          * @param object
          * @return
          */

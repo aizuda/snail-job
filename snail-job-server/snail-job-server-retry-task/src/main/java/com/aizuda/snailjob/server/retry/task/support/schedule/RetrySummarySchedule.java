@@ -67,8 +67,8 @@ public class RetrySummarySchedule extends AbstractSchedule implements Lifecycle 
                 LocalDateTime todayFrom = LocalDateTime.of(LocalDate.now(), LocalTime.MIN).plusDays(-i);
                 LocalDateTime todayTo = LocalDateTime.of(LocalDate.now(), LocalTime.MAX).plusDays(-i);
                 LambdaQueryWrapper<RetryTaskLog> wrapper = new LambdaQueryWrapper<RetryTaskLog>()
-                    .between(RetryTaskLog::getCreateDt, todayFrom, todayTo)
-                    .groupBy(RetryTaskLog::getNamespaceId, RetryTaskLog::getGroupName, RetryTaskLog::getSceneName);
+                        .between(RetryTaskLog::getCreateDt, todayFrom, todayTo)
+                        .groupBy(RetryTaskLog::getNamespaceId, RetryTaskLog::getGroupName, RetryTaskLog::getSceneName);
                 List<DashboardRetryResponseDO> dashboardRetryResponseDOList = retryTaskLogMapper.retrySummaryRetryTaskLogList(wrapper);
                 if (CollectionUtils.isEmpty(dashboardRetryResponseDOList)) {
                     continue;
@@ -87,15 +87,15 @@ public class RetrySummarySchedule extends AbstractSchedule implements Lifecycle 
                 }
 
                 List<RetrySummary> retrySummaries = retrySummaryMapper.selectList(new LambdaQueryWrapper<RetrySummary>()
-                    .in(RetrySummary::getGroupName, groupNames)
-                    .in(RetrySummary::getNamespaceId, namespaceIds)
-                    .in(RetrySummary::getSceneName, sceneNames)
-                    .eq(RetrySummary::getTriggerAt, todayFrom)
+                        .in(RetrySummary::getGroupName, groupNames)
+                        .in(RetrySummary::getNamespaceId, namespaceIds)
+                        .in(RetrySummary::getSceneName, sceneNames)
+                        .eq(RetrySummary::getTriggerAt, todayFrom)
                 );
 
                 Map<Triple<String, String, LocalDateTime>, RetrySummary> summaryMap = StreamUtils.toIdentityMap(
-                    retrySummaries,
-                    retrySummary -> Triple.of(mergeKey(retrySummary), retrySummary.getSceneName(), retrySummary.getTriggerAt()));
+                        retrySummaries,
+                        retrySummary -> Triple.of(mergeKey(retrySummary), retrySummary.getSceneName(), retrySummary.getTriggerAt()));
 
                 List<RetrySummary> waitInserts = Lists.newArrayList();
                 List<RetrySummary> waitUpdates = Lists.newArrayList();

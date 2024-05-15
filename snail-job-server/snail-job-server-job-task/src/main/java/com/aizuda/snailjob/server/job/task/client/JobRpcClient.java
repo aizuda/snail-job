@@ -6,8 +6,6 @@ import com.aizuda.snailjob.common.core.model.Result;
 import com.aizuda.snailjob.server.common.rpc.client.RequestMethod;
 import com.aizuda.snailjob.server.common.rpc.client.annotation.Body;
 import com.aizuda.snailjob.server.common.rpc.client.annotation.Mapping;
-import com.aizuda.snailjob.server.common.rpc.client.annotation.Body;
-import com.aizuda.snailjob.server.common.rpc.client.annotation.Mapping;
 
 import static com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH.JOB_DISPATCH;
 import static com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH.JOB_STOP;

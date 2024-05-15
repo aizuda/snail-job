@@ -6,7 +6,6 @@ import com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH;
 import com.aizuda.snailjob.common.core.model.NettyResult;
 import com.aizuda.snailjob.server.model.dto.LogTaskDTO;
 import com.aizuda.snailjob.server.model.dto.RetryTaskDTO;
-import com.aizuda.snailjob.client.common.rpc.client.RequestMethod;
 
 import java.util.List;
 

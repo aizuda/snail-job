@@ -2,7 +2,6 @@ package com.aizuda.snailjob.client.job.core;
 
 
 import com.aizuda.snailjob.client.job.core.dto.JobExecutorInfo;
-import com.aizuda.snailjob.client.job.core.dto.JobExecutorInfo;
 
 import java.util.List;
 
@@ -12,5 +11,5 @@ import java.util.List;
  */
 public interface Scanner {
 
-	List<JobExecutorInfo> doScan();
+    List<JobExecutorInfo> doScan();
 }

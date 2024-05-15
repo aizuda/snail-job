@@ -43,7 +43,7 @@ public @interface EnableSnailJob {
     /**
      * 控制多个Aop的执行顺序,
      * 需要注意的是这里顺序要比事务的Aop要提前
-     *
+     * <p>
      * see {@link  EnableTransactionManagement#order()}
      * 默认值: Ordered.HIGHEST_PRECEDENCE
      */

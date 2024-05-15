@@ -21,18 +21,18 @@
     <insert id="batchInsert" parameterType="java.util.List" useGeneratedKeys="false" keyProperty="id">
         <!-- useGeneratedKeys="false" 否则报错ORA-00933: SQL command not properly ended -->
         INSERT INTO sj_server_node (namespace_id, group_name, host_id, host_ip, host_port,
-                                 expire_at, node_type, ext_attrs, create_dt)
+        expire_at, node_type, ext_attrs, create_dt)
         <foreach collection="records" item="item" index="index" separator="UNION ALL">
             SELECT
-                #{item.namespaceId,jdbcType=VARCHAR},
-                #{item.groupName,jdbcType=VARCHAR},
-                #{item.hostId,jdbcType=VARCHAR},
-                #{item.hostIp,jdbcType=VARCHAR},
-                #{item.hostPort,jdbcType=INTEGER},
-                #{item.expireAt,jdbcType=TIMESTAMP},
-                #{item.nodeType,jdbcType=TINYINT},
-                #{item.extAttrs,jdbcType=VARCHAR},
-                #{item.createDt,jdbcType=TIMESTAMP}
+            #{item.namespaceId,jdbcType=VARCHAR},
+            #{item.groupName,jdbcType=VARCHAR},
+            #{item.hostId,jdbcType=VARCHAR},
+            #{item.hostIp,jdbcType=VARCHAR},
+            #{item.hostPort,jdbcType=INTEGER},
+            #{item.expireAt,jdbcType=TIMESTAMP},
+            #{item.nodeType,jdbcType=TINYINT},
+            #{item.extAttrs,jdbcType=VARCHAR},
+            #{item.createDt,jdbcType=TIMESTAMP}
             FROM DUAL
         </foreach>
     </insert>
@@ -40,17 +40,17 @@
     <update id="batchUpdateExpireAt" parameterType="java.util.List">
         <foreach collection="list" item="item" open="BEGIN" separator=";" close=";END;">
             UPDATE sj_server_node
-               SET expire_at = #{item.expireAt}
-             WHERE host_id = #{item.hostId}
-               AND host_ip = #{item.hostIp}
+            SET expire_at = #{item.expireAt}
+            WHERE host_id = #{item.hostId}
+            AND host_ip = #{item.hostIp}
         </foreach>
     </update>
 
     <select id="countActivePod"
             resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.ActivePodQuantityResponseDO">
         SELECT
-            node_type AS nodeType,
-            COUNT(*) AS total
+        node_type AS nodeType,
+        COUNT(*) AS total
         FROM sj_server_node
         ${ew.customSqlSegment}
     </select>

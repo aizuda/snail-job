@@ -2,17 +2,17 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.aizuda.snailjob.template.datasource.persistence.mapper.ServerNodeMapper">
     <resultMap id="BaseResultMap" type="com.aizuda.snailjob.template.datasource.persistence.po.ServerNode">
-        <id column="id" jdbcType="BIGINT" property="id" />
-        <result column="namespace_id" jdbcType="VARCHAR" property="namespaceId" />
-        <result column="group_name" jdbcType="VARCHAR" property="groupName" />
-        <result column="host_id" jdbcType="VARCHAR" property="hostId" />
-        <result column="host_ip" jdbcType="VARCHAR" property="hostIp" />
-        <result column="host_port" jdbcType="INTEGER" property="hostPort" />
-        <result column="expire_at" jdbcType="TIMESTAMP" property="expireAt" />
-        <result column="node_type" jdbcType="TINYINT" property="nodeType" />
-        <result column="ext_attrs" jdbcType="VARCHAR" property="extAttrs" />
-        <result column="create_dt" jdbcType="TIMESTAMP" property="createDt" />
-        <result column="update_dt" jdbcType="TIMESTAMP" property="updateDt" />
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="namespace_id" jdbcType="VARCHAR" property="namespaceId"/>
+        <result column="group_name" jdbcType="VARCHAR" property="groupName"/>
+        <result column="host_id" jdbcType="VARCHAR" property="hostId"/>
+        <result column="host_ip" jdbcType="VARCHAR" property="hostIp"/>
+        <result column="host_port" jdbcType="INTEGER" property="hostPort"/>
+        <result column="expire_at" jdbcType="TIMESTAMP" property="expireAt"/>
+        <result column="node_type" jdbcType="TINYINT" property="nodeType"/>
+        <result column="ext_attrs" jdbcType="VARCHAR" property="extAttrs"/>
+        <result column="create_dt" jdbcType="TIMESTAMP" property="createDt"/>
+        <result column="update_dt" jdbcType="TIMESTAMP" property="updateDt"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -21,43 +21,43 @@
 
     <insert id="batchInsert" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO sj_server_node (namespace_id, group_name, host_id, host_ip, host_port,
-                                 expire_at, node_type, ext_attrs, create_dt)
+        expire_at, node_type, ext_attrs, create_dt)
         VALUES
-            <foreach collection="records" item="item" index="index" separator=",">
-                (
-                    #{item.namespaceId,jdbcType=VARCHAR},
-                    #{item.groupName,jdbcType=VARCHAR},
-                    #{item.hostId,jdbcType=VARCHAR},
-                    #{item.hostIp,jdbcType=VARCHAR},
-                    #{item.hostPort,jdbcType=INTEGER},
-                    #{item.expireAt,jdbcType=TIMESTAMP},
-                    #{item.nodeType,jdbcType=TINYINT},
-                    #{item.extAttrs,jdbcType=VARCHAR},
-                    #{item.createDt,jdbcType=TIMESTAMP}
-                )
-            </foreach>
+        <foreach collection="records" item="item" index="index" separator=",">
+            (
+            #{item.namespaceId,jdbcType=VARCHAR},
+            #{item.groupName,jdbcType=VARCHAR},
+            #{item.hostId,jdbcType=VARCHAR},
+            #{item.hostIp,jdbcType=VARCHAR},
+            #{item.hostPort,jdbcType=INTEGER},
+            #{item.expireAt,jdbcType=TIMESTAMP},
+            #{item.nodeType,jdbcType=TINYINT},
+            #{item.extAttrs,jdbcType=VARCHAR},
+            #{item.createDt,jdbcType=TIMESTAMP}
+            )
+        </foreach>
     </insert>
 
     <update id="batchUpdateExpireAt" parameterType="java.util.List">
         UPDATE sj_server_node
-           SET expire_at = src.expire_at
-          FROM sj_server_node AS dest
-               JOIN (
-                 <foreach collection="list" item="item" index="index" separator="UNION ALL">
-                     SELECT
-                         #{item.expireAt} AS expire_at,
-                         #{item.hostId} AS host_id,
-                         #{item.hostIp} AS host_ip
-                 </foreach>
-               ) AS src
-               ON (dest.host_id = src.host_id AND dest.host_ip = src.host_ip)
+        SET expire_at = src.expire_at
+        FROM sj_server_node AS dest
+        JOIN (
+        <foreach collection="list" item="item" index="index" separator="UNION ALL">
+            SELECT
+            #{item.expireAt} AS expire_at,
+            #{item.hostId} AS host_id,
+            #{item.hostIp} AS host_ip
+        </foreach>
+        ) AS src
+        ON (dest.host_id = src.host_id AND dest.host_ip = src.host_ip)
     </update>
 
     <select id="countActivePod"
-          resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.ActivePodQuantityResponseDO">
+            resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.ActivePodQuantityResponseDO">
         SELECT
-            node_type AS nodeType,
-            COUNT(*) AS total
+        node_type AS nodeType,
+        COUNT(*) AS total
         FROM sj_server_node
         ${ew.customSqlSegment}
     </select>

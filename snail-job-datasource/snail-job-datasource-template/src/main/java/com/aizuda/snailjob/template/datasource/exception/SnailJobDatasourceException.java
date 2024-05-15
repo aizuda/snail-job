@@ -15,7 +15,7 @@ public class SnailJobDatasourceException extends BaseSnailJobException {
         super(message);
     }
 
-    public SnailJobDatasourceException(String message, Object ... arguments) {
+    public SnailJobDatasourceException(String message, Object... arguments) {
         super(message, arguments);
     }
 }

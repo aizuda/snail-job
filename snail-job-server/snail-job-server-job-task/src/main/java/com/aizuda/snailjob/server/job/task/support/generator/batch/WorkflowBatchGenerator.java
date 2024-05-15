@@ -29,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class WorkflowBatchGenerator {
     private final WorkflowTaskBatchMapper workflowTaskBatchMapper;
+
     @Transactional
     public void generateJobTaskBatch(WorkflowTaskBatchGeneratorContext context) {
 
@@ -52,6 +53,6 @@ public class WorkflowBatchGenerator {
         workflowTimerTaskDTO.setWorkflowId(context.getWorkflowId());
         workflowTimerTaskDTO.setTaskExecutorScene(context.getTaskExecutorScene());
         JobTimerWheel.register(SyetemTaskTypeEnum.WORKFLOW.getType(), workflowTaskBatch.getId(),
-            new WorkflowTimerTask(workflowTimerTaskDTO), delay, TimeUnit.MILLISECONDS);
+                new WorkflowTimerTask(workflowTimerTaskDTO), delay, TimeUnit.MILLISECONDS);
     }
 }

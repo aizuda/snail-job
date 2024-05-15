@@ -53,7 +53,7 @@ public abstract class AbstractGenerator implements TaskGenerator {
     @Override
     @Transactional
     public void taskGenerator(TaskContext taskContext) {
-       SnailJobLog.LOCAL.debug("received report data. {}", JsonUtil.toJsonString(taskContext));
+        SnailJobLog.LOCAL.debug("received report data. {}", JsonUtil.toJsonString(taskContext));
 
         RetrySceneConfig retrySceneConfig = checkAndInitScene(taskContext);
 
@@ -85,7 +85,7 @@ public abstract class AbstractGenerator implements TaskGenerator {
         LocalDateTime now = LocalDateTime.now();
         for (TaskContext.TaskInfo taskInfo : taskInfos) {
             Pair<List<RetryTask>, List<RetryTaskLog>> pair = doConvertTask(retryTaskMap, taskContext, now, taskInfo,
-                retrySceneConfig);
+                    retrySceneConfig);
             waitInsertTasks.addAll(pair.getKey());
             waitInsertTaskLogs.addAll(pair.getValue());
         }
@@ -122,7 +122,7 @@ public abstract class AbstractGenerator implements TaskGenerator {
                                 && taskContext.getSceneName().equals(retryTask.getSceneName())).collect(Collectors.toList());
         // 说明存在相同的任务
         if (!CollectionUtils.isEmpty(list)) {
-           SnailJobLog.LOCAL.warn("interrupted reporting in retrying task. [{}]", JsonUtil.toJsonString(taskInfo));
+            SnailJobLog.LOCAL.warn("interrupted reporting in retrying task. [{}]", JsonUtil.toJsonString(taskInfo));
             return Pair.of(waitInsertTasks, waitInsertTaskLogs);
         }
 

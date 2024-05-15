@@ -4,9 +4,6 @@ import com.aizuda.snailjob.client.core.RetryOperations;
 import com.aizuda.snailjob.client.core.intercepter.RetrySiteSnapshot;
 import com.aizuda.snailjob.client.core.strategy.ExecutorMethod;
 import com.aizuda.snailjob.client.core.strategy.RetryStrategy;
-import com.aizuda.snailjob.client.core.intercepter.RetrySiteSnapshot;
-import com.aizuda.snailjob.client.core.strategy.ExecutorMethod;
-import com.aizuda.snailjob.client.core.strategy.RetryStrategy;
 
 import java.util.Objects;
 
@@ -43,7 +40,7 @@ public class SnailJobTemplate implements RetryOperations {
     }
 
     protected void setExecutorMethodClass(
-        final Class<? extends ExecutorMethod> executorMethodClass) {
+            final Class<? extends ExecutorMethod> executorMethodClass) {
         this.executorMethodClass = executorMethodClass;
     }
 

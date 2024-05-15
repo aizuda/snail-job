@@ -70,7 +70,7 @@ public class RequestBuilder<T, R extends Result<Object>> {
         RpcClientInvokeHandler<R> rpcClientInvokeHandler = new RpcClientInvokeHandler<>(async, timeout, unit, callback);
 
         return (T) Proxy.newProxyInstance(clintInterface.getClassLoader(),
-            new Class[]{clintInterface}, rpcClientInvokeHandler);
+                new Class[]{clintInterface}, rpcClientInvokeHandler);
     }
 
 }

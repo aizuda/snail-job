@@ -23,7 +23,7 @@ public class SnailEndPointRegistrar implements Lifecycle {
         List<EndPointInfo> endPointInfos = snailEndPointScanner.doScan();
         for (EndPointInfo endPointInfo : endPointInfos) {
             if (EndPointInfoCache.isExisted(endPointInfo.getPath(), endPointInfo.getRequestMethod())) {
-                throw new SnailJobClientException("Duplicate endpoint path: {}" , endPointInfo.getPath());
+                throw new SnailJobClientException("Duplicate endpoint path: {}", endPointInfo.getPath());
             }
 
             EndPointInfoCache.put(endPointInfo);

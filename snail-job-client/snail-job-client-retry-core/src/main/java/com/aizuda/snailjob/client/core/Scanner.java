@@ -1,7 +1,6 @@
 package com.aizuda.snailjob.client.core;
 
 import com.aizuda.snailjob.client.core.retryer.RetryerInfo;
-import com.aizuda.snailjob.client.core.retryer.RetryerInfo;
 
 import java.util.List;
 
@@ -11,5 +10,5 @@ import java.util.List;
  */
 public interface Scanner {
 
-	List<RetryerInfo> doScan();
+    List<RetryerInfo> doScan();
 }

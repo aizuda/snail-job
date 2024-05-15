@@ -36,9 +36,9 @@ public class GroupConfigResponseVO {
 
     private Integer initScene;
 
-     private List<String> onlinePodList;
+    private List<String> onlinePodList;
 
-     private String token;
+    private String token;
 
     private LocalDateTime createDt;
 

@@ -1,7 +1,6 @@
 package com.aizuda.snailjob.common.log.dto;
 
 import com.aizuda.snailjob.common.log.constant.LogFieldConstants;
-import com.aizuda.snailjob.common.log.constant.LogFieldConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,9 +27,9 @@ public class LogContentDTO {
 
     public Map<String, String> toMap() {
         return fieldList
-            .stream()
-            .filter(logTaskDTO_ -> !Objects.isNull(logTaskDTO_.getValue()))
-            .collect(Collectors.toMap(TaskLogFieldDTO::getName, TaskLogFieldDTO::getValue));
+                .stream()
+                .filter(logTaskDTO_ -> !Objects.isNull(logTaskDTO_.getValue()))
+                .collect(Collectors.toMap(TaskLogFieldDTO::getName, TaskLogFieldDTO::getValue));
     }
 
     public void addField(String name, String value) {
@@ -43,8 +42,8 @@ public class LogContentDTO {
 
     public Long getTimeStamp() {
         return Long.parseLong(fieldList.stream().filter(taskLogFieldDTO -> !Objects.isNull(taskLogFieldDTO.getValue()))
-            .collect(Collectors.toMap(TaskLogFieldDTO::getName, TaskLogFieldDTO::getValue))
-            .get(LogFieldConstants.TIME_STAMP));
+                .collect(Collectors.toMap(TaskLogFieldDTO::getName, TaskLogFieldDTO::getValue))
+                .get(LogFieldConstants.TIME_STAMP));
     }
 
     public void addLevelField(String level) {

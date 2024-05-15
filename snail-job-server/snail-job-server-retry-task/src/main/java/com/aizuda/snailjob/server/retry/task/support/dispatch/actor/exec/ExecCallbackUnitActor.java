@@ -72,7 +72,7 @@ public class ExecCallbackUnitActor extends AbstractActor {
             } catch (Exception e) {
                 RetryLogMetaDTO retryLogMetaDTO = RetryTaskConverter.INSTANCE.toLogMetaDTO(retryTask);
                 retryLogMetaDTO.setTimestamp(DateUtils.toNowMilli());
-                SnailJobLog.REMOTE.error("请求客户端异常. <|>{}<|>",  retryTask.getUniqueId(), retryLogMetaDTO, e);
+                SnailJobLog.REMOTE.error("请求客户端异常. <|>{}<|>", retryTask.getUniqueId(), retryLogMetaDTO, e);
             } finally {
                 getContext().stop(getSelf());
 

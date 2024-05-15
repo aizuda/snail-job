@@ -3,8 +3,6 @@ package com.aizuda.snailjob.client.common.cache;
 import cn.hutool.core.lang.Pair;
 import com.aizuda.snailjob.client.common.rpc.client.RequestMethod;
 import com.aizuda.snailjob.client.common.rpc.supports.scan.EndPointInfo;
-import com.aizuda.snailjob.client.common.rpc.client.RequestMethod;
-import com.aizuda.snailjob.client.common.rpc.supports.scan.EndPointInfo;
 
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -16,7 +14,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class EndPointInfoCache {
 
-    private EndPointInfoCache() {}
+    private EndPointInfoCache() {
+    }
 
     private static final ConcurrentHashMap<Pair<String, RequestMethod>, EndPointInfo> ENDPOINT_REPOSITORY = new ConcurrentHashMap<>();
 

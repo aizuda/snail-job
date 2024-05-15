@@ -36,8 +36,8 @@ public final class RpcContext {
 
     static {
         WHEEL_TIMER = new HashedWheelTimer(
-            new CustomizableThreadFactory("snail-job-rpc-timeout-"), 1,
-            TimeUnit.SECONDS, 1024);
+                new CustomizableThreadFactory("snail-job-rpc-timeout-"), 1,
+                TimeUnit.SECONDS, 1024);
     }
 
     private static final ConcurrentMap<Long, SnailJobFuture> COMPLETABLE_FUTURE = new ConcurrentHashMap<>();
@@ -47,13 +47,13 @@ public final class RpcContext {
         try {
             // 同步请求同步返回
             Optional.ofNullable(COMPLETABLE_FUTURE.remove(requestId))
-                .ifPresent(future -> {
-                    if (timeout) {
-                        future.completeExceptionally(new SnailJobRemotingTimeOutException("Request to remote interface timed out."));
-                    } else {
-                        future.complete(nettyResult);
-                    }
-                });
+                    .ifPresent(future -> {
+                        if (timeout) {
+                            future.completeExceptionally(new SnailJobRemotingTimeOutException("Request to remote interface timed out."));
+                        } else {
+                            future.complete(nettyResult);
+                        }
+                    });
 
         } catch (Exception e) {
             SnailJobLog.LOCAL.error("回调处理失败 requestId:[{}]", requestId, e);
@@ -72,9 +72,11 @@ public final class RpcContext {
     public static class TimeoutCheckTask implements TimerTask {
 
         private final Long requestId;
+
         public TimeoutCheckTask(Long requestId) {
             this.requestId = requestId;
         }
+
         @Override
         public void run(final Timeout timeout) throws Exception {
             invoke(requestId, new NettyResult(StatusEnum.NO.getStatus(), "Request to remote interface timed out.", null, requestId), true);

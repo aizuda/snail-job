@@ -19,36 +19,36 @@
 
     <insert id="batchInsert" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO sj_server_node (namespace_id, group_name, host_id, host_ip, host_port,
-                                 expire_at, node_type, ext_attrs, create_dt)
+        expire_at, node_type, ext_attrs, create_dt)
         VALUES
-            <foreach collection="records" item="item" index="index" separator=",">
-                (
-                    #{item.namespaceId,jdbcType=VARCHAR},
-                    #{item.groupName,jdbcType=VARCHAR},
-                    #{item.hostId,jdbcType=VARCHAR},
-                    #{item.hostIp,jdbcType=VARCHAR},
-                    #{item.hostPort,jdbcType=INTEGER},
-                    #{item.expireAt,jdbcType=TIMESTAMP},
-                    #{item.nodeType,jdbcType=TINYINT},
-                    #{item.extAttrs,jdbcType=VARCHAR},
-                    #{item.createDt,jdbcType=TIMESTAMP}
-                )
-            </foreach>
+        <foreach collection="records" item="item" index="index" separator=",">
+            (
+            #{item.namespaceId,jdbcType=VARCHAR},
+            #{item.groupName,jdbcType=VARCHAR},
+            #{item.hostId,jdbcType=VARCHAR},
+            #{item.hostIp,jdbcType=VARCHAR},
+            #{item.hostPort,jdbcType=INTEGER},
+            #{item.expireAt,jdbcType=TIMESTAMP},
+            #{item.nodeType,jdbcType=TINYINT},
+            #{item.extAttrs,jdbcType=VARCHAR},
+            #{item.createDt,jdbcType=TIMESTAMP}
+            )
+        </foreach>
     </insert>
 
     <update id="batchUpdateExpireAt" parameterType="java.util.List">
         UPDATE sj_server_node AS rt
-           SET expire_at = tt.expire_at
-          FROM (
-                <foreach collection="list" item="item" index="index" separator="UNION ALL">
-                    SELECT
-                        #{item.expireAt} AS expire_at,
-                        #{item.hostId} AS host_id,
-                        #{item.hostIp} AS host_ip
-                </foreach>
-            ) AS tt
+        SET expire_at = tt.expire_at
+        FROM (
+        <foreach collection="list" item="item" index="index" separator="UNION ALL">
+            SELECT
+            #{item.expireAt} AS expire_at,
+            #{item.hostId} AS host_id,
+            #{item.hostIp} AS host_ip
+        </foreach>
+        ) AS tt
         WHERE rt.host_id = tt.host_id
-          AND rt.host_ip = tt.host_ip
+        AND rt.host_ip = tt.host_ip
     </update>
 
     <select id="countActivePod"

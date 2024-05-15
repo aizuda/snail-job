@@ -4,8 +4,8 @@ import com.aizuda.snailjob.client.common.config.SnailJobProperties;
 import com.aizuda.snailjob.client.common.config.SnailJobProperties.DispatcherThreadPool;
 import com.aizuda.snailjob.client.common.rpc.supports.http.HttpResponse;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
-import com.aizuda.snailjob.common.core.model.SnailJobRequest;
 import com.aizuda.snailjob.common.core.model.NettyResult;
+import com.aizuda.snailjob.common.core.model.SnailJobRequest;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
@@ -29,16 +29,16 @@ public class NettyHttpServerHandler extends SimpleChannelInboundHandler<FullHttp
     private final SnailDispatcherRequestHandler dispatcher;
 
     public NettyHttpServerHandler(SnailDispatcherRequestHandler snailDispatcherRequestHandler,
-        SnailJobProperties snailJobProperties) {
+                                  SnailJobProperties snailJobProperties) {
         this.dispatcher = snailDispatcherRequestHandler;
 
         // 获取线程池配置
         DispatcherThreadPool threadPool = snailJobProperties.getDispatcherThreadPool();
 
         dispatcherThreadPool = new ThreadPoolExecutor(
-            threadPool.getCorePoolSize(), threadPool.getMaximumPoolSize(), threadPool.getKeepAliveTime(),
-            threadPool.getTimeUnit(), new LinkedBlockingQueue<>(threadPool.getQueueCapacity()),
-            new CustomizableThreadFactory("snail-netty-server-"));
+                threadPool.getCorePoolSize(), threadPool.getMaximumPoolSize(), threadPool.getKeepAliveTime(),
+                threadPool.getTimeUnit(), new LinkedBlockingQueue<>(threadPool.getQueueCapacity()),
+                new CustomizableThreadFactory("snail-netty-server-"));
     }
 
     @Override
@@ -48,15 +48,15 @@ public class NettyHttpServerHandler extends SimpleChannelInboundHandler<FullHttp
         HttpHeaders headers = fullHttpRequest.headers();
         String uri = fullHttpRequest.uri();
         NettyHttpRequest nettyHttpRequest = NettyHttpRequest.builder()
-            .keepAlive(HttpUtil.isKeepAlive(fullHttpRequest))
-            .uri(uri)
-            .channelHandlerContext(channelHandlerContext)
-            .method(fullHttpRequest.method())
-            .headers(headers)
-            .content(content)
-            .httpResponse(new com.aizuda.snailjob.client.common.rpc.supports.http.HttpResponse())
-            .httpRequest(new com.aizuda.snailjob.client.common.rpc.supports.http.HttpRequest(headers, uri))
-            .build();
+                .keepAlive(HttpUtil.isKeepAlive(fullHttpRequest))
+                .uri(uri)
+                .channelHandlerContext(channelHandlerContext)
+                .method(fullHttpRequest.method())
+                .headers(headers)
+                .content(content)
+                .httpResponse(new com.aizuda.snailjob.client.common.rpc.supports.http.HttpResponse())
+                .httpRequest(new com.aizuda.snailjob.client.common.rpc.supports.http.HttpRequest(headers, uri))
+                .build();
 
         // 执行任务
         dispatcherThreadPool.execute(() -> {
@@ -68,21 +68,21 @@ public class NettyHttpServerHandler extends SimpleChannelInboundHandler<FullHttp
                 nettyResult = new NettyResult(StatusEnum.NO.getStatus(), e.getMessage(), null, retryRequest.getReqId());
             } finally {
                 writeResponse(channelHandlerContext,
-                    HttpUtil.isKeepAlive(fullHttpRequest),
-                    nettyHttpRequest.getHttpResponse(),
-                    JsonUtil.toJsonString(nettyResult)
+                        HttpUtil.isKeepAlive(fullHttpRequest),
+                        nettyHttpRequest.getHttpResponse(),
+                        JsonUtil.toJsonString(nettyResult)
                 );
             }
         });
     }
 
     private void writeResponse(ChannelHandlerContext ctx, boolean keepAlive, final HttpResponse httpResponse,
-        String responseJson) {
+                               String responseJson) {
         // write response
         FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK,
-            Unpooled.copiedBuffer(responseJson, CharsetUtil.UTF_8));
+                Unpooled.copiedBuffer(responseJson, CharsetUtil.UTF_8));
         response.headers().set(HttpHeaderNames.CONTENT_TYPE,
-            HttpHeaderValues.APPLICATION_JSON);
+                HttpHeaderValues.APPLICATION_JSON);
         response.headers().set(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
         if (keepAlive) {
             response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);

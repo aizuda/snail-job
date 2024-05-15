@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * @author:  opensnail
+ * @author: opensnail
  * @date : 2023-10-10 17:52
  */
 @EqualsAndHashCode(callSuper = true)

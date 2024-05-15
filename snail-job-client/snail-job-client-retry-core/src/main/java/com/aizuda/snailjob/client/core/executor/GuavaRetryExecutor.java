@@ -5,12 +5,7 @@ import com.aizuda.snailjob.client.core.RetryExecutorParameter;
 import com.aizuda.snailjob.client.core.cache.RetryerInfoCache;
 import com.aizuda.snailjob.client.core.exception.SnailRetryClientException;
 import com.aizuda.snailjob.common.log.SnailJobLog;
-import com.github.rholder.retry.RetryException;
-import com.github.rholder.retry.RetryListener;
-import com.github.rholder.retry.Retryer;
-import com.github.rholder.retry.RetryerBuilder;
-import com.github.rholder.retry.StopStrategy;
-import com.github.rholder.retry.WaitStrategy;
+import com.github.rholder.retry.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.Callable;
@@ -49,15 +44,15 @@ public class GuavaRetryExecutor extends AbstractRetryExecutor<WaitStrategy, Stop
     }
 
     @Override
-    public  <V> V call(Retryer<V> retryer, Callable<V> callable, Consumer<Throwable> retryError, Consumer<V> retrySuccess) throws Exception {
+    public <V> V call(Retryer<V> retryer, Callable<V> callable, Consumer<Throwable> retryError, Consumer<V> retrySuccess) throws Exception {
 
         V result = null;
         try {
             result = retryer.call(callable);
             retrySuccess.accept(result);
-        } catch (RetryException e){
+        } catch (RetryException e) {
             // 重试完成，仍然失败
-            SnailJobLog.LOCAL.debug("业务系统重试异常：",e.getLastFailedAttempt().getExceptionCause());
+            SnailJobLog.LOCAL.debug("业务系统重试异常：", e.getLastFailedAttempt().getExceptionCause());
             retryError.accept(e.getLastFailedAttempt().getExceptionCause());
         }
 

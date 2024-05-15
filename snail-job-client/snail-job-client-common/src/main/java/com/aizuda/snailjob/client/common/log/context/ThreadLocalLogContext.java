@@ -13,10 +13,10 @@ import com.aizuda.snailjob.client.common.exception.SnailJobClientException;
  */
 public class ThreadLocalLogContext<T> implements SnailLogContext<T> {
 
-   private final ThreadLocal<T> threadLocal;
+    private final ThreadLocal<T> threadLocal;
 
     public ThreadLocalLogContext(ThreadLocal<T> threadLocal) {
-        Assert.notNull(threadLocal, ()-> new SnailJobClientException("thread local can not be null"));
+        Assert.notNull(threadLocal, () -> new SnailJobClientException("thread local can not be null"));
         this.threadLocal = threadLocal;
     }
 

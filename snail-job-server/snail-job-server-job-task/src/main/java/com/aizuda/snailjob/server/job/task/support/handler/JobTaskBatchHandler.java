@@ -42,9 +42,9 @@ public class JobTaskBatchHandler {
     public boolean complete(CompleteJobBatchDTO completeJobBatchDTO) {
 
         List<JobTask> jobTasks = jobTaskMapper.selectList(
-            new LambdaQueryWrapper<JobTask>()
-                .select(JobTask::getTaskStatus, JobTask::getResultMessage)
-                .eq(JobTask::getTaskBatchId, completeJobBatchDTO.getTaskBatchId()));
+                new LambdaQueryWrapper<JobTask>()
+                        .select(JobTask::getTaskStatus, JobTask::getResultMessage)
+                        .eq(JobTask::getTaskBatchId, completeJobBatchDTO.getTaskBatchId()));
 
         JobTaskBatch jobTaskBatch = new JobTaskBatch();
         jobTaskBatch.setId(completeJobBatchDTO.getTaskBatchId());
@@ -58,7 +58,7 @@ public class JobTaskBatchHandler {
         }
 
         Map<Integer, Long> statusCountMap = jobTasks.stream()
-            .collect(Collectors.groupingBy(JobTask::getTaskStatus, Collectors.counting()));
+                .collect(Collectors.groupingBy(JobTask::getTaskStatus, Collectors.counting()));
 
         long failCount = statusCountMap.getOrDefault(JobTaskBatchStatusEnum.FAIL.getStatus(), 0L);
         long stopCount = statusCountMap.getOrDefault(JobTaskBatchStatusEnum.STOP.getStatus(), 0L);
@@ -85,9 +85,9 @@ public class JobTaskBatchHandler {
 
         jobTaskBatch.setUpdateDt(LocalDateTime.now());
         return 1 == jobTaskBatchMapper.update(jobTaskBatch,
-            new LambdaUpdateWrapper<JobTaskBatch>()
-                .eq(JobTaskBatch::getId, completeJobBatchDTO.getTaskBatchId())
-                .in(JobTaskBatch::getTaskBatchStatus, JobTaskBatchStatusEnum.NOT_COMPLETE)
+                new LambdaUpdateWrapper<JobTaskBatch>()
+                        .eq(JobTaskBatch::getId, completeJobBatchDTO.getTaskBatchId())
+                        .in(JobTaskBatch::getTaskBatchStatus, JobTaskBatchStatusEnum.NOT_COMPLETE)
         );
 
     }

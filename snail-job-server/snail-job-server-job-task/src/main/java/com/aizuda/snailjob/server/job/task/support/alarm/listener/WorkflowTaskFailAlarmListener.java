@@ -43,13 +43,13 @@ public class WorkflowTaskFailAlarmListener extends AbstractWorkflowAlarm<Workflo
     private final WorkflowTaskBatchMapper workflowTaskBatchMapper;
     private final LinkedBlockingQueue<Long> queue = new LinkedBlockingQueue<>(1000);
     private static final String MESSAGES_FORMATTER = """
-           <font face=微软雅黑 color=#ff0000 size=4>{}环境 Workflow任务执行失败</font>\s
-                    > 空间ID:{} \s
-                    > 组名称:{} \s
-                    > 工作流名称:{} \s
-                    > 失败原因:{} \s
-                    > 时间:{};
-        """;
+               <font face=微软雅黑 color=#ff0000 size=4>{}环境 Workflow任务执行失败</font>\s
+                        > 空间ID:{} \s
+                        > 组名称:{} \s
+                        > 工作流名称:{} \s
+                        > 失败原因:{} \s
+                        > 时间:{};
+            """;
 
     @Override
     protected List<WorkflowAlarmInfo> poll() throws InterruptedException {
@@ -64,7 +64,7 @@ public class WorkflowTaskFailAlarmListener extends AbstractWorkflowAlarm<Workflo
         queue.drainTo(workflowTaskBatchIds, 200);
 
         QueryWrapper<WorkflowTaskBatch> wrapper = new QueryWrapper<WorkflowTaskBatch>()
-            .in("a.id", workflowTaskBatchIds).eq("a.deleted", 0);
+                .in("a.id", workflowTaskBatchIds).eq("a.deleted", 0);
         List<WorkflowBatchResponseDO> workflowTaskBatches = workflowTaskBatchMapper.selectWorkflowBatchList(wrapper);
         return AlarmInfoConverter.INSTANCE.toWorkflowAlarmInfos(workflowTaskBatches);
     }
@@ -75,14 +75,14 @@ public class WorkflowTaskFailAlarmListener extends AbstractWorkflowAlarm<Workflo
 
         // 预警
         return AlarmContext.build()
-            .text(MESSAGES_FORMATTER,
-                EnvironmentUtils.getActiveProfile(),
-                alarmDTO.getNamespaceId(),
-                alarmDTO.getGroupName(),
-                alarmDTO.getWorkflowName(),
-                desc,
-                DateUtils.toNowFormat(DateUtils.NORM_DATETIME_PATTERN))
-            .title("{}环境 Workflow任务执行失败", EnvironmentUtils.getActiveProfile());
+                .text(MESSAGES_FORMATTER,
+                        EnvironmentUtils.getActiveProfile(),
+                        alarmDTO.getNamespaceId(),
+                        alarmDTO.getGroupName(),
+                        alarmDTO.getWorkflowName(),
+                        desc,
+                        DateUtils.toNowFormat(DateUtils.NORM_DATETIME_PATTERN))
+                .title("{}环境 Workflow任务执行失败", EnvironmentUtils.getActiveProfile());
     }
 
     @Override

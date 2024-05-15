@@ -45,16 +45,16 @@ public class CacheGroupScanActor implements Lifecycle {
 
     @Override
     public void start() {
-       SnailJobLog.LOCAL.info("CacheGroupScanActor start");
+        SnailJobLog.LOCAL.info("CacheGroupScanActor start");
         CACHE = CacheBuilder.newBuilder()
-            // 设置并发级别为cpu核心数
-            .concurrencyLevel(Runtime.getRuntime().availableProcessors())
-            .build();
+                // 设置并发级别为cpu核心数
+                .concurrencyLevel(Runtime.getRuntime().availableProcessors())
+                .build();
     }
 
     @Override
     public void close() {
-       SnailJobLog.LOCAL.info("CacheGroupScanActor stop");
+        SnailJobLog.LOCAL.info("CacheGroupScanActor stop");
         CACHE.invalidateAll();
     }
 }

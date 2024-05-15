@@ -8,8 +8,6 @@ import com.aizuda.snailjob.client.common.rpc.supports.handler.NettyHttpServerHan
 import com.aizuda.snailjob.client.common.rpc.supports.handler.SnailDispatcherRequestHandler;
 import com.aizuda.snailjob.common.core.context.SpringContext;
 import com.aizuda.snailjob.common.log.SnailJobLog;
-import com.aizuda.snailjob.client.common.rpc.supports.handler.NettyHttpServerHandler;
-import com.aizuda.snailjob.client.common.rpc.supports.handler.SnailDispatcherRequestHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -44,7 +42,7 @@ public class SnailNettyHttpServer implements Runnable, Lifecycle {
     private volatile boolean started = false;
 
     @Override
-    public void run()  {
+    public void run() {
         // 防止重复启动
         if (started) {
             return;
@@ -57,24 +55,24 @@ public class SnailNettyHttpServer implements Runnable, Lifecycle {
             // start server
             ServerBootstrap bootstrap = new ServerBootstrap();
             bootstrap.group(bossGroup, workerGroup)
-                .channel(NioServerSocketChannel.class)
-                .option(ChannelOption.SO_BACKLOG, 128)
-                .childOption(ChannelOption.SO_KEEPALIVE, true)
-                .childHandler(new ChannelInitializer<SocketChannel>() {
-                    @Override
-                    public void initChannel(SocketChannel channel) throws Exception {
-                        channel.pipeline()
-                            .addLast(new HttpServerCodec())
-                            .addLast(new HttpObjectAggregator(5 * 1024 * 1024))
-                            .addLast(new NettyHttpServerHandler(snailDispatcherRequestHandler, snailJobProperties));
-                    }
-                });
+                    .channel(NioServerSocketChannel.class)
+                    .option(ChannelOption.SO_BACKLOG, 128)
+                    .childOption(ChannelOption.SO_KEEPALIVE, true)
+                    .childHandler(new ChannelInitializer<SocketChannel>() {
+                        @Override
+                        public void initChannel(SocketChannel channel) throws Exception {
+                            channel.pipeline()
+                                    .addLast(new HttpServerCodec())
+                                    .addLast(new HttpObjectAggregator(5 * 1024 * 1024))
+                                    .addLast(new NettyHttpServerHandler(snailDispatcherRequestHandler, snailJobProperties));
+                        }
+                    });
 
             // 在特定端口绑定并启动服务器 默认是1789
             ChannelFuture future = bootstrap.bind(snailJobProperties.getPort()).sync();
 
             SnailJobLog.LOCAL.info("------> snail-job client remoting server start success, nettype = {}, port = {}",
-                SnailNettyHttpServer.class.getName(), snailJobProperties.getPort());
+                    SnailNettyHttpServer.class.getName(), snailJobProperties.getPort());
 
             started = true;
             future.channel().closeFuture().sync();
@@ -96,7 +94,7 @@ public class SnailNettyHttpServer implements Runnable, Lifecycle {
     }
 
     @Override
-    public void start()  {
+    public void start() {
         thread = new Thread(this);
         thread.setDaemon(true);
         thread.start();

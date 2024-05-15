@@ -13,9 +13,9 @@ import java.util.List;
  */
 public interface SceneConfigService {
 
-   PageResult<List<SceneConfigResponseVO>> getSceneConfigPageList(SceneConfigQueryVO groupName);
+    PageResult<List<SceneConfigResponseVO>> getSceneConfigPageList(SceneConfigQueryVO groupName);
 
-   List<SceneConfigResponseVO> getSceneConfigList(String groupName);
+    List<SceneConfigResponseVO> getSceneConfigList(String groupName);
 
     Boolean saveSceneConfig(SceneConfigRequestVO requestVO);
 

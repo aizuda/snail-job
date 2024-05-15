@@ -4,13 +4,13 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.aizuda.snailjob.template.datasource.persistence.po.DistributedLock">
-        <id column="id" property="id" />
-        <result column="name" property="name" />
-        <result column="lock_until" property="lockUntil" />
-        <result column="locked_at" property="lockedAt" />
-        <result column="locked_by" property="lockedBy" />
-        <result column="create_dt" property="createDt" />
-        <result column="update_dt" property="updateDt" />
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="lock_until" property="lockUntil"/>
+        <result column="locked_at" property="lockedAt"/>
+        <result column="locked_by" property="lockedBy"/>
+        <result column="create_dt" property="createDt"/>
+        <result column="update_dt" property="updateDt"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->

@@ -88,7 +88,7 @@ public class WorkflowHandler {
 
                 Long commonAncestor = intersection.stream().toList().get(intersection.size() - 1);
                 NodeConfig parentNodeConfig = nodeConfigMap.get(
-                    Sets.newTreeSet(graph.successors(commonAncestor)).stream().findFirst().get());
+                        Sets.newTreeSet(graph.successors(commonAncestor)).stream().findFirst().get());
                 parentNodeConfig.setChildNode(currentConfig);
                 mount = false;
             } else {
@@ -141,8 +141,8 @@ public class WorkflowHandler {
         List<WorkflowRequestVO.NodeInfo> conditionNodes = nodeConfig.getConditionNodes();
         if (!CollectionUtils.isEmpty(conditionNodes)) {
             conditionNodes = conditionNodes.stream()
-                .sorted(Comparator.comparing(WorkflowRequestVO.NodeInfo::getPriorityLevel))
-                .collect(Collectors.toList());
+                    .sorted(Comparator.comparing(WorkflowRequestVO.NodeInfo::getPriorityLevel))
+                    .collect(Collectors.toList());
             for (final WorkflowRequestVO.NodeInfo nodeInfo : conditionNodes) {
                 WorkflowNode workflowNode = WorkflowConverter.INSTANCE.convert(nodeInfo);
                 workflowNode.setWorkflowId(workflowId);
@@ -177,7 +177,7 @@ public class WorkflowHandler {
                 }
 
                 Assert.isTrue(1 == workflowNodeMapper.insert(workflowNode),
-                    () -> new SnailJobServerException("新增工作流节点失败"));
+                        () -> new SnailJobServerException("新增工作流节点失败"));
                 // 添加节点
                 graph.addNode(workflowNode.getId());
                 for (final Long parentId : parentIds) {
@@ -187,7 +187,7 @@ public class WorkflowHandler {
                 WorkflowRequestVO.NodeConfig childNode = nodeInfo.getChildNode();
                 if (Objects.nonNull(childNode) && !CollectionUtils.isEmpty(childNode.getConditionNodes())) {
                     buildGraph(Lists.newArrayList(workflowNode.getId()), deque, groupName, workflowId, childNode,
-                        graph, version);
+                            graph, version);
                 } else {
                     if (WorkflowNodeTypeEnum.DECISION.getType() == nodeConfig.getNodeType()) {
                         throw new SnailJobServerException("决策节点不能作为叶子节点");

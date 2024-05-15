@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 public class SyncRemoteConfig implements Lifecycle {
 
     private static final ScheduledExecutorService SCHEDULE_EXECUTOR = Executors.newSingleThreadScheduledExecutor(
-        r -> new Thread(r, "sync-remote-config"));
+            r -> new Thread(r, "sync-remote-config"));
 
     @Override
     public void start() {
@@ -32,17 +32,17 @@ public class SyncRemoteConfig implements Lifecycle {
         SCHEDULE_EXECUTOR.scheduleAtFixedRate(() -> {
             try {
                 NettyClient client = RequestBuilder.<NettyClient, NettyResult>newBuilder()
-                    .client(NettyClient.class)
-                    .timeout(1000L)
-                    .callback(nettyResult -> {
-                        if (Objects.isNull(nettyResult.getData())) {
-                            SnailJobLog.LOCAL.error("获取配置结果为null");
-                            return;
-                        }
+                        .client(NettyClient.class)
+                        .timeout(1000L)
+                        .callback(nettyResult -> {
+                            if (Objects.isNull(nettyResult.getData())) {
+                                SnailJobLog.LOCAL.error("获取配置结果为null");
+                                return;
+                            }
 
-                        GroupVersionCache.setConfig(
-                            JsonUtil.parseObject(nettyResult.getData().toString(), ConfigDTO.class));
-                    }).build();
+                            GroupVersionCache.setConfig(
+                                    JsonUtil.parseObject(nettyResult.getData().toString(), ConfigDTO.class));
+                        }).build();
                 client.syncRemoteConfig();
             } catch (Exception e) {
                 SnailJobLog.LOCAL.error("通知配置失败", e);

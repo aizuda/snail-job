@@ -20,21 +20,20 @@ public class NettyHttpServerHandler extends SimpleChannelInboundHandler<FullHttp
 
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, FullHttpRequest fullHttpRequest)
-        throws Exception {
+            throws Exception {
 
         NettyHttpRequest nettyHttpRequest = NettyHttpRequest.builder()
-            .keepAlive(HttpUtil.isKeepAlive(fullHttpRequest))
-            .uri(fullHttpRequest.uri())
-            .channelHandlerContext(channelHandlerContext)
-            .method(fullHttpRequest.method())
-            .headers(fullHttpRequest.headers())
-            .content(fullHttpRequest.content().toString(CharsetUtil.UTF_8))
-            .build();
+                .keepAlive(HttpUtil.isKeepAlive(fullHttpRequest))
+                .uri(fullHttpRequest.uri())
+                .channelHandlerContext(channelHandlerContext)
+                .method(fullHttpRequest.method())
+                .headers(fullHttpRequest.headers())
+                .content(fullHttpRequest.content().toString(CharsetUtil.UTF_8))
+                .build();
 
         ActorRef actorRef = ActorGenerator.requestHandlerActor();
         actorRef.tell(nettyHttpRequest, actorRef);
     }
-
 
 
 }

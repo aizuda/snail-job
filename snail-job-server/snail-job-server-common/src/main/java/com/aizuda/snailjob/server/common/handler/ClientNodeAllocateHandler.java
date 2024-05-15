@@ -44,8 +44,8 @@ public class ClientNodeAllocateHandler {
         String hostId = clientLoadBalanceRandom.route(allocKey, new TreeSet<>(StreamUtils.toSet(serverNodes, RegisterNodeInfo::getHostId)));
 
         Stream<RegisterNodeInfo> registerNodeInfoStream = serverNodes.stream()
-            .filter(s -> s.getHostId().equals(hostId));
+                .filter(s -> s.getHostId().equals(hostId));
         return registerNodeInfoStream.findFirst().orElse(null);
     }
-    
+
 }

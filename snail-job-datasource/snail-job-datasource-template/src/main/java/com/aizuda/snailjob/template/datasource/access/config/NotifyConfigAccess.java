@@ -17,7 +17,7 @@ import java.util.List;
  * @since 2.2.0
  */
 @Component
-public class NotifyConfigAccess extends AbstractConfigAccess<NotifyConfig>  {
+public class NotifyConfigAccess extends AbstractConfigAccess<NotifyConfig> {
 
     @Override
     public boolean supports(String operationType) {

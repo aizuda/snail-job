@@ -7,16 +7,17 @@ import java.util.List;
 
 /**
  * 重试任务失败进入死信队列事件
+ *
  * @author: zuoJunLin
  * @date : 2023-11-20 21:40
  * @since 2.5.0
  */
 public class RetryTaskFailDeadLetterAlarmEvent extends ApplicationEvent {
-   private List<RetryDeadLetter> retryDeadLetters;
+    private List<RetryDeadLetter> retryDeadLetters;
 
     public RetryTaskFailDeadLetterAlarmEvent(List<RetryDeadLetter> retryDeadLetters) {
         super(retryDeadLetters);
-        this.retryDeadLetters=retryDeadLetters;
+        this.retryDeadLetters = retryDeadLetters;
     }
 
     public List<RetryDeadLetter> getRetryDeadLetters() {

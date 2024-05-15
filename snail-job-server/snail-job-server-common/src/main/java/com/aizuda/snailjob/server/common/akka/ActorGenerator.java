@@ -60,7 +60,8 @@ public class ActorGenerator {
 
     /*----------------------------------------分布式任务调度 END----------------------------------------*/
 
-    private ActorGenerator() {}
+    private ActorGenerator() {
+    }
 
     /**
      * 生成重试完成的actor
@@ -68,7 +69,7 @@ public class ActorGenerator {
      * @return actor 引用
      */
     public static ActorRef finishActor() {
-       return getRetryActorSystem().actorOf(getSpringExtension().props(FINISH_ACTOR).withDispatcher(RETRY_TASK_EXECUTOR_RESULT_DISPATCHER));
+        return getRetryActorSystem().actorOf(getSpringExtension().props(FINISH_ACTOR).withDispatcher(RETRY_TASK_EXECUTOR_RESULT_DISPATCHER));
     }
 
     /**
@@ -107,8 +108,8 @@ public class ActorGenerator {
      */
     public static ActorRef execUnitActor() {
         return getRetryActorSystem().actorOf(getSpringExtension()
-            .props(EXEC_UNIT_ACTOR)
-            .withDispatcher(RETRY_TASK_EXECUTOR_DISPATCHER));
+                .props(EXEC_UNIT_ACTOR)
+                .withDispatcher(RETRY_TASK_EXECUTOR_DISPATCHER));
     }
 
     /**
@@ -118,8 +119,8 @@ public class ActorGenerator {
      */
     public static ActorRef scanGroupActor() {
         return getCommonActorSystemSystem().actorOf(getSpringExtension()
-            .props(SCAN_RETRY_GROUP_ACTOR)
-            .withDispatcher(COMMON_SCAN_TASK_DISPATCHER));
+                .props(SCAN_RETRY_GROUP_ACTOR)
+                .withDispatcher(COMMON_SCAN_TASK_DISPATCHER));
     }
 
     /**
@@ -129,8 +130,8 @@ public class ActorGenerator {
      */
     public static ActorRef scanCallbackGroupActor() {
         return getRetryActorSystem().actorOf(getSpringExtension()
-            .props(SCAN_CALLBACK_GROUP_ACTOR)
-            .withDispatcher(COMMON_SCAN_TASK_DISPATCHER));
+                .props(SCAN_CALLBACK_GROUP_ACTOR)
+                .withDispatcher(COMMON_SCAN_TASK_DISPATCHER));
     }
 
     /**
@@ -140,8 +141,8 @@ public class ActorGenerator {
      */
     public static ActorRef scanJobActor() {
         return getCommonActorSystemSystem().actorOf(getSpringExtension()
-            .props(SCAN_JOB_ACTOR)
-            .withDispatcher(COMMON_SCAN_TASK_DISPATCHER));
+                .props(SCAN_JOB_ACTOR)
+                .withDispatcher(COMMON_SCAN_TASK_DISPATCHER));
     }
 
     /**
@@ -162,8 +163,8 @@ public class ActorGenerator {
      */
     public static ActorRef scanBucketActor() {
         return getCommonActorSystemSystem().actorOf(getSpringExtension()
-            .props(SCAN_BUCKET_ACTOR)
-            .withDispatcher(COMMON_SCAN_TASK_DISPATCHER));
+                .props(SCAN_BUCKET_ACTOR)
+                .withDispatcher(COMMON_SCAN_TASK_DISPATCHER));
     }
 
     /**
@@ -173,8 +174,8 @@ public class ActorGenerator {
      */
     public static ActorRef logActor() {
         return getCommonActorSystemSystem().actorOf(getSpringExtension()
-            .props(LOG_ACTOR)
-            .withDispatcher(COMMON_LOG_DISPATCHER));
+                .props(LOG_ACTOR)
+                .withDispatcher(COMMON_LOG_DISPATCHER));
     }
 
     /**
@@ -184,7 +185,7 @@ public class ActorGenerator {
      */
     public static ActorRef requestHandlerActor() {
         return getNettyActorSystem().actorOf(getSpringExtension().props(REQUEST_HANDLER_ACTOR)
-            .withDispatcher(NETTY_RECEIVE_REQUEST_DISPATCHER));
+                .withDispatcher(NETTY_RECEIVE_REQUEST_DISPATCHER));
     }
 
 
@@ -205,7 +206,7 @@ public class ActorGenerator {
      */
     public static ActorRef workflowTaskPrepareActor() {
         return getJobActorSystem().actorOf(getSpringExtension().props(WORKFLOW_TASK_PREPARE_ACTOR)
-            .withDispatcher(WORKFLOW_TASK_DISPATCHER));
+                .withDispatcher(WORKFLOW_TASK_DISPATCHER));
     }
 
     /**
@@ -228,10 +229,10 @@ public class ActorGenerator {
      */
     public static ActorRef workflowTaskExecutorActor() {
         return getJobActorSystem()
-            .actorOf(getSpringExtension()
-                .props(WORKFLOW_EXECUTOR_ACTOR)
-                .withDispatcher(WORKFLOW_TASK_EXECUTOR_DISPATCHER)
-            );
+                .actorOf(getSpringExtension()
+                        .props(WORKFLOW_EXECUTOR_ACTOR)
+                        .withDispatcher(WORKFLOW_TASK_EXECUTOR_DISPATCHER)
+                );
     }
 
     /**
@@ -252,8 +253,8 @@ public class ActorGenerator {
      */
     public static ActorRef jobRealTaskExecutorActor() {
         return getJobActorSystem().actorOf(getSpringExtension()
-            .props(REAL_JOB_EXECUTOR_ACTOR)
-            .withDispatcher(JOB_TASK_EXECUTOR_CALL_CLIENT_DISPATCHER));
+                .props(REAL_JOB_EXECUTOR_ACTOR)
+                .withDispatcher(JOB_TASK_EXECUTOR_CALL_CLIENT_DISPATCHER));
     }
 
     /**
@@ -263,7 +264,7 @@ public class ActorGenerator {
      */
     public static ActorRef jobRealStopTaskInstanceActor() {
         return getJobActorSystem().actorOf(getSpringExtension().props(REAL_STOP_TASK_INSTANCE_ACTOR)
-            .withDispatcher(JOB_TASK_EXECUTOR_CALL_CLIENT_DISPATCHER));
+                .withDispatcher(JOB_TASK_EXECUTOR_CALL_CLIENT_DISPATCHER));
     }
 
     /**
@@ -273,15 +274,16 @@ public class ActorGenerator {
      */
     public static ActorRef jobLogActor() {
         return getCommonActorSystemSystem().actorOf(getSpringExtension().props(JOB_LOG_ACTOR)
-            .withDispatcher(COMMON_LOG_DISPATCHER));
+                .withDispatcher(COMMON_LOG_DISPATCHER));
     }
 
     public static SpringExtension getSpringExtension() {
-       return SpringContext.getBeanByType(SpringExtension.class);
+        return SpringContext.getBeanByType(SpringExtension.class);
     }
 
-   /**
+    /**
      * 重试任务结果分发器
+     *
      * @return
      */
     public static ActorSystem getRetryActorSystem() {

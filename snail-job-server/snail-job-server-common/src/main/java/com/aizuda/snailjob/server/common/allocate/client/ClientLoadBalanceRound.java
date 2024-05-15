@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @date : 2023-10-13 15:43
  * @since : 2.4.0
  */
-public class ClientLoadBalanceRound implements ClientLoadBalance  {
+public class ClientLoadBalanceRound implements ClientLoadBalance {
 
     private static final ConcurrentHashMap<String, AtomicInteger> COUNTER = new ConcurrentHashMap<>();
     private static final int THRESHOLD = Integer.MAX_VALUE - 10000;

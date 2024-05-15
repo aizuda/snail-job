@@ -2,10 +2,10 @@ package com.aizuda.snailjob.client.core.intercepter;
 
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
+import com.aizuda.snailjob.client.common.cache.GroupVersionCache;
 import com.aizuda.snailjob.client.common.config.SnailJobProperties;
 import com.aizuda.snailjob.client.core.annotation.Propagation;
 import com.aizuda.snailjob.client.core.annotation.Retryable;
-import com.aizuda.snailjob.client.common.cache.GroupVersionCache;
 import com.aizuda.snailjob.client.core.cache.RetryerInfoCache;
 import com.aizuda.snailjob.client.core.retryer.RetryerInfo;
 import com.aizuda.snailjob.client.core.retryer.RetryerResultContext;
@@ -15,10 +15,10 @@ import com.aizuda.snailjob.common.core.alarm.SnailJobAlarmFactory;
 import com.aizuda.snailjob.common.core.context.SpringContext;
 import com.aizuda.snailjob.common.core.enums.RetryNotifySceneEnum;
 import com.aizuda.snailjob.common.core.enums.RetryResultStatusEnum;
-import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.common.core.model.SnailJobHeaders;
 import com.aizuda.snailjob.common.core.util.EnvironmentUtils;
 import com.aizuda.snailjob.common.core.util.NetUtil;
+import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.model.dto.ConfigDTO;
 import com.aizuda.snailjob.server.model.dto.ConfigDTO.Notify.Recipient;
 import com.google.common.base.Defaults;
@@ -36,11 +36,7 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * @author opensnail
@@ -51,18 +47,18 @@ public class SnailRetryInterceptor implements MethodInterceptor, AfterAdvice, Se
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private static String retryErrorMoreThresholdTextMessageFormatter =
-        "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 重试组件异常</font>  \n" +
-            "> IP:{}  \n" +
-            "> 空间ID:{}  \n" +
-            "> 名称:{}  \n" +
-            "> 时间:{}  \n" +
-            "> 异常:{}  \n";
+            "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 重试组件异常</font>  \n" +
+                    "> IP:{}  \n" +
+                    "> 空间ID:{}  \n" +
+                    "> 名称:{}  \n" +
+                    "> 时间:{}  \n" +
+                    "> 异常:{}  \n";
 
     private final StandardEnvironment standardEnvironment;
     private final RetryStrategy retryStrategy;
 
     public SnailRetryInterceptor(StandardEnvironment standardEnvironment,
-        RetryStrategy localRetryStrategies) {
+                                 RetryStrategy localRetryStrategies) {
         this.standardEnvironment = standardEnvironment;
         this.retryStrategy = localRetryStrategies;
     }
@@ -95,10 +91,10 @@ public class SnailRetryInterceptor implements MethodInterceptor, AfterAdvice, Se
         } finally {
 
             SnailJobLog.LOCAL.debug("Start retrying. traceId:[{}] scene:[{}] executorClassName:[{}]", traceId,
-                retryable.scene(), executorClassName);
+                    retryable.scene(), executorClassName);
             // 入口则开始处理重试
             retryerResultContext = doHandlerRetry(invocation, traceId, retryable, executorClassName, methodEntrance,
-                throwable);
+                    throwable);
         }
 
         SnailJobLog.LOCAL.debug("Method return value is [{}]. traceId:[{}]", result, traceId, throwable);
@@ -107,8 +103,8 @@ public class SnailRetryInterceptor implements MethodInterceptor, AfterAdvice, Se
         if (Objects.nonNull(retryerResultContext)) {
             // 重试成功直接返回结果 若注解配置了isThrowException=false 则不抛出异常
             if (retryerResultContext.getRetryResultStatusEnum().getStatus()
-                .equals(RetryResultStatusEnum.SUCCESS.getStatus())
-                || !retryable.isThrowException()) {
+                    .equals(RetryResultStatusEnum.SUCCESS.getStatus())
+                    || !retryable.isThrowException()) {
 
                 // 若返回值是NULL且是基本类型则返回默认值
                 Method method = invocation.getMethod();
@@ -135,37 +131,37 @@ public class SnailRetryInterceptor implements MethodInterceptor, AfterAdvice, Se
 
 
     private RetryerResultContext doHandlerRetry(MethodInvocation invocation, String traceId, Retryable retryable,
-        String executorClassName, String methodEntrance, Throwable throwable) {
+                                                String executorClassName, String methodEntrance, Throwable throwable) {
 
         if (!RetrySiteSnapshot.isMethodEntrance(methodEntrance)
-            || RetrySiteSnapshot.isRunning()
-            || Objects.isNull(throwable)
-            // 重试流量不开启重试
-            || RetrySiteSnapshot.isRetryFlow()
-            // 下游响应不重试码，不开启重试
-            || RetrySiteSnapshot.isRetryForStatusCode()
-            // 匹配异常信息
-            || !validate(throwable, RetryerInfoCache.get(retryable.scene(), executorClassName))
+                || RetrySiteSnapshot.isRunning()
+                || Objects.isNull(throwable)
+                // 重试流量不开启重试
+                || RetrySiteSnapshot.isRetryFlow()
+                // 下游响应不重试码，不开启重试
+                || RetrySiteSnapshot.isRetryForStatusCode()
+                // 匹配异常信息
+                || !validate(throwable, RetryerInfoCache.get(retryable.scene(), executorClassName))
         ) {
             if (!RetrySiteSnapshot.isMethodEntrance(methodEntrance)) {
                 SnailJobLog.LOCAL.debug("Non-method entry does not enable local retries. traceId:[{}] [{}]", traceId,
-                    RetrySiteSnapshot.getMethodEntrance());
+                        RetrySiteSnapshot.getMethodEntrance());
             } else if (RetrySiteSnapshot.isRunning()) {
                 SnailJobLog.LOCAL.debug("Existing running retry tasks do not enable local retries. traceId:[{}] [{}]",
-                    traceId, RetrySiteSnapshot.EnumStage.valueOfStage(RetrySiteSnapshot.getStage()));
+                        traceId, RetrySiteSnapshot.EnumStage.valueOfStage(RetrySiteSnapshot.getStage()));
             } else if (Objects.isNull(throwable)) {
                 SnailJobLog.LOCAL.debug("No exception, no local retries. traceId:[{}]", traceId);
             } else if (RetrySiteSnapshot.isRetryFlow()) {
                 SnailJobLog.LOCAL.debug("Retry traffic does not enable local retries. traceId:[{}] [{}]", traceId,
-                    RetrySiteSnapshot.getRetryHeader());
+                        RetrySiteSnapshot.getRetryHeader());
             } else if (RetrySiteSnapshot.isRetryForStatusCode()) {
                 SnailJobLog.LOCAL.debug("Existing exception retry codes do not enable local retries. traceId:[{}]",
-                    traceId);
+                        traceId);
             } else if (!validate(throwable, RetryerInfoCache.get(retryable.scene(), executorClassName))) {
                 SnailJobLog.LOCAL.debug("Exception mismatch. traceId:[{}]", traceId);
             } else {
                 SnailJobLog.LOCAL.debug("Unknown situations do not enable local retry scenarios. traceId:[{}]",
-                    traceId);
+                        traceId);
             }
             return null;
         }
@@ -174,7 +170,7 @@ public class SnailRetryInterceptor implements MethodInterceptor, AfterAdvice, Se
     }
 
     private RetryerResultContext openRetry(MethodInvocation point, String traceId, Retryable retryable,
-        String executorClassName, Throwable throwable) {
+                                           String executorClassName, Throwable throwable) {
 
         try {
 
@@ -182,13 +178,13 @@ public class SnailRetryInterceptor implements MethodInterceptor, AfterAdvice, Se
             initHeaders(retryable);
 
             RetryerResultContext context = retryStrategy.openRetry(retryable.scene(), executorClassName,
-                point.getArguments());
+                    point.getArguments());
             if (RetryResultStatusEnum.SUCCESS.getStatus().equals(context.getRetryResultStatusEnum().getStatus())) {
                 SnailJobLog.LOCAL.debug("local retry successful. traceId:[{}] result:[{}]", traceId,
-                    context.getResult());
+                        context.getResult());
             } else {
                 SnailJobLog.LOCAL.debug("local retry result. traceId:[{}] throwable:[{}]", traceId,
-                    context.getThrowable());
+                        context.getThrowable());
             }
 
             return context;
@@ -218,7 +214,7 @@ public class SnailRetryInterceptor implements MethodInterceptor, AfterAdvice, Se
 
         try {
             ConfigDTO.Notify notify = GroupVersionCache.getRetryNotifyAttribute(
-                RetryNotifySceneEnum.CLIENT_COMPONENT_ERROR.getNotifyScene());
+                    RetryNotifySceneEnum.CLIENT_COMPONENT_ERROR.getNotifyScene());
             if (Objects.nonNull(notify)) {
                 SnailJobProperties snailJobProperties = SpringContext.getBean(SnailJobProperties.class);
                 if (Objects.isNull(snailJobProperties)) {
@@ -227,18 +223,18 @@ public class SnailRetryInterceptor implements MethodInterceptor, AfterAdvice, Se
                 List<Recipient> recipients = Optional.ofNullable(notify.getRecipients()).orElse(Lists.newArrayList());
                 for (final Recipient recipient : recipients) {
                     AlarmContext context = AlarmContext.build()
-                        .text(retryErrorMoreThresholdTextMessageFormatter,
-                            EnvironmentUtils.getActiveProfile(),
-                            NetUtil.getLocalIpStr(),
-                            snailJobProperties.getNamespace(),
-                            snailJobProperties.getGroup(),
-                            LocalDateTime.now().format(formatter),
-                            e.getMessage())
-                        .title("retry component handling exception:[{}]", snailJobProperties.getGroup())
-                        .notifyAttribute(recipient.getNotifyAttribute());
+                            .text(retryErrorMoreThresholdTextMessageFormatter,
+                                    EnvironmentUtils.getActiveProfile(),
+                                    NetUtil.getLocalIpStr(),
+                                    snailJobProperties.getNamespace(),
+                                    snailJobProperties.getGroup(),
+                                    LocalDateTime.now().format(formatter),
+                                    e.getMessage())
+                            .title("retry component handling exception:[{}]", snailJobProperties.getGroup())
+                            .notifyAttribute(recipient.getNotifyAttribute());
 
                     Optional.ofNullable(SnailJobAlarmFactory.getAlarmType(recipient.getNotifyType()))
-                        .ifPresent(alarm -> alarm.asyncSendMessage(context));
+                            .ifPresent(alarm -> alarm.asyncSendMessage(context));
                 }
 
             }
@@ -276,7 +272,7 @@ public class SnailRetryInterceptor implements MethodInterceptor, AfterAdvice, Se
     @Override
     public int getOrder() {
         String order = standardEnvironment
-            .getProperty("snail-job.aop.order", String.valueOf(Ordered.HIGHEST_PRECEDENCE));
+                .getProperty("snail-job.aop.order", String.valueOf(Ordered.HIGHEST_PRECEDENCE));
         return Integer.parseInt(order);
     }
 

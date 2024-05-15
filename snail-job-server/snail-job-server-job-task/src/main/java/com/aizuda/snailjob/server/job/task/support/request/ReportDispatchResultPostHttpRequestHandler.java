@@ -41,7 +41,7 @@ public class ReportDispatchResultPostHttpRequestHandler extends PostHttpRequestH
 
     @Override
     public String doHandler(String content, UrlQuery query, HttpHeaders headers) {
-       SnailJobLog.LOCAL.debug("Client Callback Request. content:[{}]", content);
+        SnailJobLog.LOCAL.debug("Client Callback Request. content:[{}]", content);
 
         SnailJobRequest retryRequest = JsonUtil.parseObject(content, SnailJobRequest.class);
         Object[] args = retryRequest.getArgs();

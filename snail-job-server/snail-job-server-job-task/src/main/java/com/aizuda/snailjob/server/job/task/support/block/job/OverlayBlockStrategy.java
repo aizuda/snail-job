@@ -24,6 +24,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class OverlayBlockStrategy extends AbstracJobBlockStrategy {
     private final JobTaskBatchGenerator jobTaskBatchGenerator;
+
     @Override
     public void doBlock(final BlockStrategyContext context) {
 

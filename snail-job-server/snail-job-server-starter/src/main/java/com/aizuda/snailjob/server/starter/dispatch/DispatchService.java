@@ -54,7 +54,7 @@ public class DispatchService implements Lifecycle {
             try {
                 // 当正在rebalance时延迟10s，尽量等待所有节点都完成rebalance
                 if (DistributeInstance.RE_BALANCE_ING.get()) {
-                   SnailJobLog.LOCAL.info("正在rebalance中....");
+                    SnailJobLog.LOCAL.info("正在rebalance中....");
                     TimeUnit.SECONDS.sleep(INITIAL_DELAY);
                 }
 

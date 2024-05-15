@@ -70,11 +70,11 @@ public class SlidingWindow<T> {
     private static final ReentrantLock NOTICE_LOCK = new ReentrantLock();
 
     public SlidingWindow(int totalThreshold,
-        int windowTotalThreshold,
-        List<Listener<T>> listeners,
-        ScheduledExecutorService threadPoolExecutor,
-        long duration,
-        ChronoUnit chronoUnit) {
+                         int windowTotalThreshold,
+                         List<Listener<T>> listeners,
+                         ScheduledExecutorService threadPoolExecutor,
+                         long duration,
+                         ChronoUnit chronoUnit) {
         this.totalThreshold = totalThreshold;
         this.listeners = listeners;
         this.windowTotalThreshold = windowTotalThreshold;
@@ -444,7 +444,7 @@ public class SlidingWindow<T> {
         public SlidingWindow<T> build() {
             if (Objects.isNull(threadPoolExecutor)) {
                 threadPoolExecutor = Executors
-                    .newSingleThreadScheduledExecutor(r -> new Thread(r, "sliding-window-thread"));
+                        .newSingleThreadScheduledExecutor(r -> new Thread(r, "sliding-window-thread"));
             }
 
             if (CollectionUtils.isEmpty(listeners)) {
@@ -452,7 +452,7 @@ public class SlidingWindow<T> {
             }
 
             return new SlidingWindow<>(totalThreshold, windowTotalThreshold, listeners, threadPoolExecutor, duration,
-                chronoUnit);
+                    chronoUnit);
         }
 
     }

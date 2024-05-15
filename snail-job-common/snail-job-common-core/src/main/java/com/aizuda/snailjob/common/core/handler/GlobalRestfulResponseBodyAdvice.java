@@ -30,7 +30,7 @@ public class GlobalRestfulResponseBodyAdvice implements ResponseBodyAdvice<Objec
         }
 
         if (obj instanceof Result) {
-           return obj;
+            return obj;
         } else {
             return new Result<>("请求成功", obj);
         }

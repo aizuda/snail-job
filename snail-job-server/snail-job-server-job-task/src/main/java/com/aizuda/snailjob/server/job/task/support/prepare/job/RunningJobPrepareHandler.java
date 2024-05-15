@@ -50,7 +50,7 @@ public class RunningJobPrepareHandler extends AbstractJobPrePareHandler {
         CompleteJobBatchDTO completeJobBatchDTO = JobTaskConverter.INSTANCE.completeJobBatchDTO(prepare);
         completeJobBatchDTO.setJobOperationReason(jobOperationReasonEnum.getReason());
         if (jobTaskBatchHandler.complete(completeJobBatchDTO)) {
-            blockStrategy =  BlockStrategyEnum.CONCURRENCY.getBlockStrategy();
+            blockStrategy = BlockStrategyEnum.CONCURRENCY.getBlockStrategy();
         } else {
             // 计算超时时间
             long delay = DateUtils.toNowMilli() - prepare.getExecutionAt();

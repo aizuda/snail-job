@@ -71,7 +71,7 @@ public class RequestClientActor extends AbstractActor {
                         realJobExecutorDTO.getTaskId(), realJobExecutorDTO.getRetryCount(), jobLogMetaDTO);
             } else {
                 SnailJobLog.REMOTE.error("taskId:[{}] 任务调度失败. 失败原因: 无可执行的客户端 <|>{}<|>", realJobExecutorDTO.getTaskId(),
-                    jobLogMetaDTO);
+                        jobLogMetaDTO);
             }
             return;
         }
@@ -112,7 +112,7 @@ public class RequestClientActor extends AbstractActor {
                         realJobExecutorDTO.getRetryCount(), jobLogMetaDTO, throwable);
             } else {
                 SnailJobLog.REMOTE.error("taskId:[{}] 任务调度失败. <|>{}<|>", jobLogMetaDTO.getTaskId(),
-                    jobLogMetaDTO, throwable);
+                        jobLogMetaDTO, throwable);
             }
 
             taskExecuteFailure(realJobExecutorDTO, throwable.getMessage());
@@ -146,7 +146,7 @@ public class RequestClientActor extends AbstractActor {
 
     private JobRpcClient buildRpcClient(RegisterNodeInfo registerNodeInfo, RealJobExecutorDTO realJobExecutorDTO) {
 
-       int maxRetryTimes = realJobExecutorDTO.getMaxRetryTimes();
+        int maxRetryTimes = realJobExecutorDTO.getMaxRetryTimes();
         boolean retry = realJobExecutorDTO.isRetry();
         return RequestBuilder.<JobRpcClient, Result>newBuilder()
                 .nodeInfo(registerNodeInfo)

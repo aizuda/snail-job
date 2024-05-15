@@ -48,7 +48,7 @@ public class JobTaskBatchGenerator {
         // 生成一个新的任务
         JobTaskBatch jobTaskBatch = JobTaskConverter.INSTANCE.toJobTaskBatch(context);
         JobTaskExecutorSceneEnum jobTaskExecutorSceneEnum = JobTaskExecutorSceneEnum.get(
-            context.getTaskExecutorScene());
+                context.getTaskExecutorScene());
         jobTaskBatch.setSystemTaskType(jobTaskExecutorSceneEnum.getSystemTaskType().getType());
         jobTaskBatch.setCreateDt(LocalDateTime.now());
 
@@ -69,8 +69,8 @@ public class JobTaskBatchGenerator {
         } catch (DuplicateKeyException ignored) {
             // 忽略重复的DAG任务
             return jobTaskBatchMapper.selectOne(new LambdaQueryWrapper<JobTaskBatch>()
-                .eq(JobTaskBatch::getWorkflowTaskBatchId, context.getWorkflowTaskBatchId())
-                .eq(JobTaskBatch::getWorkflowNodeId, context.getWorkflowNodeId())
+                    .eq(JobTaskBatch::getWorkflowTaskBatchId, context.getWorkflowTaskBatchId())
+                    .eq(JobTaskBatch::getWorkflowNodeId, context.getWorkflowNodeId())
             );
 
         }

@@ -99,7 +99,7 @@ public class FilterStrategies {
         @Override
         public Pair<Boolean /*是否符合条件*/, StringBuilder/*描述信息*/> filter(RetryContext retryContext) {
             RetryTask retryTask = retryContext.getRetryTask();
-            LocalDateTime nextTriggerAt =retryTask.getNextTriggerAt();
+            LocalDateTime nextTriggerAt = retryTask.getNextTriggerAt();
 
             boolean result = nextTriggerAt.isBefore(LocalDateTime.now());
             StringBuilder description = new StringBuilder();
@@ -195,7 +195,7 @@ public class FilterStrategies {
             if (!result) {
                 // 删除缓存中的失效节点
                 CacheRegisterTable.remove(retryTask.getGroupName(), retryTask.getNamespaceId(), serverNode.getHostId());
-                description.append(MessageFormat.format("DB中未查询到客户端节点. hostId:[{0}] uniqueId:[{1}]",  serverNode.getHostId(), retryTask.getUniqueId()));
+                description.append(MessageFormat.format("DB中未查询到客户端节点. hostId:[{0}] uniqueId:[{1}]", serverNode.getHostId(), retryTask.getUniqueId()));
             }
 
             return Pair.of(result, description);
@@ -243,7 +243,7 @@ public class FilterStrategies {
         @Override
         public Pair<Boolean /*是否符合条件*/, StringBuilder/*描述信息*/> filter(RetryContext retryContext) {
             RetryTask retryTask = retryContext.getRetryTask();
-            boolean result = ! DistributeInstance.RE_BALANCE_ING.get();
+            boolean result = !DistributeInstance.RE_BALANCE_ING.get();
             StringBuilder description = new StringBuilder();
             if (!result) {
                 description.append(MessageFormat.format("系统Rebalancing中数据无法重试.uniqueId:[{0}]", retryTask.getUniqueId()));
@@ -256,7 +256,6 @@ public class FilterStrategies {
             return 1;
         }
     }
-
 
 
 }

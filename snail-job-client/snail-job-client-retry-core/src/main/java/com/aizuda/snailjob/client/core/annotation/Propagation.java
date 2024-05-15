@@ -34,7 +34,6 @@ public enum Propagation {
      * 当设置为REQUIRES_NEW时，
      * 无论当前重试任务是否存在，都会一个新的重试任务。
      */
-    REQUIRES_NEW
-    ;
+    REQUIRES_NEW;
 
 }

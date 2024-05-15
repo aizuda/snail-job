@@ -1,7 +1,6 @@
 package com.aizuda.snailjob.client.common.config;
 
 import com.aizuda.snailjob.common.core.alarm.email.MailProperties;
-import com.aizuda.snailjob.common.core.context.SpringContext;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,7 +9,6 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.context.annotation.Configuration;
 
 import java.time.temporal.ChronoUnit;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -143,7 +141,7 @@ public class SnailJobProperties {
     }
 
     @Data
-    public static class DispatcherThreadPool  {
+    public static class DispatcherThreadPool {
 
         /**
          * 核心线程池

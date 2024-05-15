@@ -57,7 +57,7 @@ public interface RetryTaskConverter {
     List<NotifyConfigPartitionTask> toNotifyConfigPartitionTask(List<NotifyConfig> notifyConfigs);
 
     @Mappings({
-        @Mapping(target = "recipientIds", expression = "java(RetryTaskConverter.toNotifyRecipientIds(notifyConfig.getRecipientIds()))")
+            @Mapping(target = "recipientIds", expression = "java(RetryTaskConverter.toNotifyRecipientIds(notifyConfig.getRecipientIds()))")
     })
     NotifyConfigPartitionTask toNotifyConfigPartitionTask(NotifyConfig notifyConfig);
 

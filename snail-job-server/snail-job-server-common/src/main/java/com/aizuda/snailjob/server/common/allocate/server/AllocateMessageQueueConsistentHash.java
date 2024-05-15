@@ -55,7 +55,7 @@ public class AllocateMessageQueueConsistentHash implements ServerLoadBalance<Str
 
     @Override
     public List<String> allocate(String currentCID, List<String> groupList,
-                                      List<String> serverList) {
+                                 List<String> serverList) {
 
         if (currentCID == null || currentCID.length() < 1) {
             throw new IllegalArgumentException("currentCID is empty");

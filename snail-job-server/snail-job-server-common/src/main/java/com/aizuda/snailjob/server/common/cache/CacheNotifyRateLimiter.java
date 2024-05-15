@@ -48,13 +48,13 @@ public class CacheNotifyRateLimiter implements Lifecycle {
      *
      * @return 缓存对象
      */
-    public static void  put(String key, RateLimiter rateLimiter) {
+    public static void put(String key, RateLimiter rateLimiter) {
         CACHE.put(key, rateLimiter);
     }
 
     @Override
     public void start() {
-       SnailJobLog.LOCAL.info("CacheNotifyRateLimiter start");
+        SnailJobLog.LOCAL.info("CacheNotifyRateLimiter start");
         CACHE = CacheBuilder.newBuilder()
                 // 设置并发级别为cpu核心数
                 .concurrencyLevel(Runtime.getRuntime().availableProcessors())
@@ -64,6 +64,6 @@ public class CacheNotifyRateLimiter implements Lifecycle {
 
     @Override
     public void close() {
-       SnailJobLog.LOCAL.info("CacheNotifyRateLimiter stop");
+        SnailJobLog.LOCAL.info("CacheNotifyRateLimiter stop");
     }
 }

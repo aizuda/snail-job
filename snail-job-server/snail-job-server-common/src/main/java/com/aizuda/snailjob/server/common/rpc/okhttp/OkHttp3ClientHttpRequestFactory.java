@@ -29,27 +29,27 @@ import java.net.URI;
 
 public class OkHttp3ClientHttpRequestFactory implements ClientHttpRequestFactory, DisposableBean {
 
-	private OkHttpClient client;
+    private OkHttpClient client;
 
-	public OkHttp3ClientHttpRequestFactory(OkHttpClient client) {
-		Assert.notNull(client, "OkHttpClient must not be null");
-		this.client = client;
-	}
+    public OkHttp3ClientHttpRequestFactory(OkHttpClient client) {
+        Assert.notNull(client, "OkHttpClient must not be null");
+        this.client = client;
+    }
 
-	@Override
-	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) {
-		return new OkHttp3ClientHttpRequest(this.client, uri, httpMethod);
-	}
+    @Override
+    public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) {
+        return new OkHttp3ClientHttpRequest(this.client, uri, httpMethod);
+    }
 
-	@Override
-	public void destroy() throws IOException {
-		// Clean up the client if we created it in the constructor
-		Cache cache = this.client.cache();
-		if (cache != null) {
-			cache.close();
-		}
-		this.client.dispatcher().executorService().shutdown();
-		this.client.connectionPool().evictAll();
-	}
+    @Override
+    public void destroy() throws IOException {
+        // Clean up the client if we created it in the constructor
+        Cache cache = this.client.cache();
+        if (cache != null) {
+            cache.close();
+        }
+        this.client.dispatcher().executorService().shutdown();
+        this.client.connectionPool().evictAll();
+    }
 
 }

@@ -37,25 +37,25 @@ public class JobLogServiceImpl implements JobLogService {
         PageDTO<JobLogMessage> pageDTO = new PageDTO<>(1, queryVO.getSize());
 
         PageDTO<JobLogMessage> selectPage = jobLogMessageMapper.selectPage(pageDTO,
-            new LambdaQueryWrapper<JobLogMessage>()
-                .select(JobLogMessage::getId, JobLogMessage::getLogNum)
-                .ge(JobLogMessage::getId, queryVO.getStartId())
-                .ge(JobLogMessage::getTaskBatchId, queryVO.getTaskBatchId())
-                .ge(JobLogMessage::getJobId, queryVO.getJobId())
-                .eq(JobLogMessage::getTaskId, queryVO.getTaskId())
-                .orderByAsc(JobLogMessage::getId).orderByAsc(JobLogMessage::getRealTime));
+                new LambdaQueryWrapper<JobLogMessage>()
+                        .select(JobLogMessage::getId, JobLogMessage::getLogNum)
+                        .ge(JobLogMessage::getId, queryVO.getStartId())
+                        .ge(JobLogMessage::getTaskBatchId, queryVO.getTaskBatchId())
+                        .ge(JobLogMessage::getJobId, queryVO.getJobId())
+                        .eq(JobLogMessage::getTaskId, queryVO.getTaskId())
+                        .orderByAsc(JobLogMessage::getId).orderByAsc(JobLogMessage::getRealTime));
         List<JobLogMessage> records = selectPage.getRecords();
         if (CollectionUtils.isEmpty(records)) {
 
             JobTaskBatch jobTaskBatch = jobTaskBatchMapper.selectOne(
-                new LambdaQueryWrapper<JobTaskBatch>()
-                    .eq(JobTaskBatch::getId, queryVO.getTaskBatchId())
+                    new LambdaQueryWrapper<JobTaskBatch>()
+                            .eq(JobTaskBatch::getId, queryVO.getTaskBatchId())
             );
 
             JobLogResponseVO jobLogResponseVO = new JobLogResponseVO();
 
             if (Objects.isNull(jobTaskBatch)
-                || jobTaskBatch.getUpdateDt().plusSeconds(15).isBefore(LocalDateTime.now())
+                    || jobTaskBatch.getUpdateDt().plusSeconds(15).isBefore(LocalDateTime.now())
             ) {
                 jobLogResponseVO.setFinished(Boolean.TRUE);
             }
@@ -82,10 +82,10 @@ public class JobLogServiceImpl implements JobLogService {
         long nextStartId = 0;
         List<Map<String, String>> messages = Lists.newArrayList();
         List<JobLogMessage> jobLogMessages = jobLogMessageMapper.selectList(
-            new LambdaQueryWrapper<JobLogMessage>()
-                .in(JobLogMessage::getId, ids)
-                .orderByAsc(JobLogMessage::getId)
-                .orderByAsc(JobLogMessage::getRealTime)
+                new LambdaQueryWrapper<JobLogMessage>()
+                        .in(JobLogMessage::getId, ids)
+                        .orderByAsc(JobLogMessage::getId)
+                        .orderByAsc(JobLogMessage::getRealTime)
         );
 
         for (final JobLogMessage jobLogMessage : jobLogMessages) {
@@ -93,7 +93,7 @@ public class JobLogServiceImpl implements JobLogService {
             List<Map<String, String>> originalList = JsonUtil.parseObject(jobLogMessage.getMessage(), List.class);
             int size = originalList.size() - fromIndex;
             List<Map<String, String>> pageList = originalList.stream().skip(fromIndex).limit(queryVO.getSize())
-                .collect(Collectors.toList());
+                    .collect(Collectors.toList());
 
             if (messages.size() + size >= queryVO.getSize()) {
                 messages.addAll(pageList);
@@ -108,8 +108,8 @@ public class JobLogServiceImpl implements JobLogService {
         }
 
         messages = messages.stream()
-            .sorted(Comparator.comparingLong(o -> Long.parseLong(o.get(LogFieldConstants.TIME_STAMP))))
-            .collect(Collectors.toList());
+                .sorted(Comparator.comparingLong(o -> Long.parseLong(o.get(LogFieldConstants.TIME_STAMP))))
+                .collect(Collectors.toList());
 
         JobLogResponseVO jobLogResponseVO = new JobLogResponseVO();
         jobLogResponseVO.setMessage(messages);

@@ -48,6 +48,6 @@ public class TimerIdempotent implements IdempotentStrategy<Long, Long> {
     }
 
     private static String getKey(Long key, Long value) {
-        return MessageFormat.format(KEY_FORMAT,key, value);
+        return MessageFormat.format(KEY_FORMAT, key, value);
     }
 }

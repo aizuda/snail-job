@@ -48,15 +48,15 @@ public class JobTaskFailAlarmListener extends AbstractJobAlarm<JobTaskFailAlarmE
     private final LinkedBlockingQueue<Long> queue = new LinkedBlockingQueue<>(1000);
 
     private static final String MESSAGES_FORMATTER = """
-           <font face=微软雅黑 color=#ff0000 size=4>{}环境 Job任务执行失败</font>\s
-                    > 空间ID:{} \s
-                    > 组名称:{} \s
-                    > 任务名称:{} \s
-                    > 执行器名称:{} \s
-                    > 失败原因:{} \s
-                    > 方法参数:{} \s
-                    > 时间:{};
-        """;
+               <font face=微软雅黑 color=#ff0000 size=4>{}环境 Job任务执行失败</font>\s
+                        > 空间ID:{} \s
+                        > 组名称:{} \s
+                        > 任务名称:{} \s
+                        > 执行器名称:{} \s
+                        > 失败原因:{} \s
+                        > 方法参数:{} \s
+                        > 时间:{};
+            """;
 
     @Override
     protected List<JobAlarmInfo> poll() throws InterruptedException {
@@ -70,7 +70,7 @@ public class JobTaskFailAlarmListener extends AbstractJobAlarm<JobTaskFailAlarmE
         List<Long> jobTaskBatchIds = Lists.newArrayList(jobTaskBatchId);
         queue.drainTo(jobTaskBatchIds, 200);
         QueryWrapper<JobTaskBatch> wrapper = new QueryWrapper<JobTaskBatch>()
-            .in("a.id", jobTaskBatchIds).eq("a.deleted", 0);
+                .in("a.id", jobTaskBatchIds).eq("a.deleted", 0);
         List<JobBatchResponseDO> jobTaskBatchList = jobTaskBatchMapper.selectJobBatchListByIds(wrapper);
         return AlarmInfoConverter.INSTANCE.toJobAlarmInfos(jobTaskBatchList);
     }
@@ -80,16 +80,16 @@ public class JobTaskFailAlarmListener extends AbstractJobAlarm<JobTaskFailAlarmE
         String desc = JobOperationReasonEnum.getByReason(alarmDTO.getOperationReason()).getDesc();
         // 预警
         return AlarmContext.build()
-            .text(MESSAGES_FORMATTER,
-                EnvironmentUtils.getActiveProfile(),
-                alarmDTO.getNamespaceId(),
-                alarmDTO.getGroupName(),
-                alarmDTO.getJobName(),
-                alarmDTO.getExecutorInfo(),
-                desc,
-                alarmDTO.getArgsStr(),
-                DateUtils.toNowFormat(DateUtils.NORM_DATETIME_PATTERN))
-            .title("{}环境 JOB任务失败", EnvironmentUtils.getActiveProfile());
+                .text(MESSAGES_FORMATTER,
+                        EnvironmentUtils.getActiveProfile(),
+                        alarmDTO.getNamespaceId(),
+                        alarmDTO.getGroupName(),
+                        alarmDTO.getJobName(),
+                        alarmDTO.getExecutorInfo(),
+                        desc,
+                        alarmDTO.getArgsStr(),
+                        DateUtils.toNowFormat(DateUtils.NORM_DATETIME_PATTERN))
+                .title("{}环境 JOB任务失败", EnvironmentUtils.getActiveProfile());
     }
 
     @Override

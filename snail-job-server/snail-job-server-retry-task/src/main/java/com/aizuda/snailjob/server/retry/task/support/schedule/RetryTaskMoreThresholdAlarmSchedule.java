@@ -49,12 +49,12 @@ import java.util.stream.Collectors;
 public class RetryTaskMoreThresholdAlarmSchedule extends AbstractSchedule implements Lifecycle {
 
     private static final String retryTaskMoreThresholdTextMessageFormatter =
-        "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 场景重试数量超过{}个</font>  \n" +
-            "> 空间ID:{}  \n" +
-            "> 组名称:{}  \n" +
-            "> 场景名称:{}  \n" +
-            "> 告警时间:{}  \n" +
-            "> **共计:{}**  \n";
+            "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 场景重试数量超过{}个</font>  \n" +
+                    "> 空间ID:{}  \n" +
+                    "> 组名称:{}  \n" +
+                    "> 场景名称:{}  \n" +
+                    "> 告警时间:{}  \n" +
+                    "> **共计:{}**  \n";
 
     private final AccessTemplate accessTemplate;
     private final NotifyRecipientMapper recipientMapper;
@@ -81,12 +81,12 @@ public class RetryTaskMoreThresholdAlarmSchedule extends AbstractSchedule implem
 
     private void doSendAlarm(NotifyConfigPartitionTask partitionTask) {
         long count = accessTemplate.getRetryTaskAccess()
-            .count(partitionTask.getGroupName(), partitionTask.getNamespaceId(),
-                new LambdaQueryWrapper<RetryTask>()
-                    .eq(RetryTask::getNamespaceId, partitionTask.getNamespaceId())
-                    .eq(RetryTask::getGroupName, partitionTask.getGroupName())
-                    .eq(RetryTask::getSceneName, partitionTask.getBusinessId())
-                    .eq(RetryTask::getRetryStatus, RetryStatusEnum.RUNNING.getStatus()));
+                .count(partitionTask.getGroupName(), partitionTask.getNamespaceId(),
+                        new LambdaQueryWrapper<RetryTask>()
+                                .eq(RetryTask::getNamespaceId, partitionTask.getNamespaceId())
+                                .eq(RetryTask::getGroupName, partitionTask.getGroupName())
+                                .eq(RetryTask::getSceneName, partitionTask.getBusinessId())
+                                .eq(RetryTask::getRetryStatus, RetryStatusEnum.RUNNING.getStatus()));
         if (count >= partitionTask.getNotifyThreshold()) {
 
             List<RecipientInfo> recipientInfos = partitionTask.getRecipientInfos();
@@ -96,18 +96,18 @@ public class RetryTaskMoreThresholdAlarmSchedule extends AbstractSchedule implem
                 }
                 // 预警
                 AlarmContext context = AlarmContext.build()
-                    .text(retryTaskMoreThresholdTextMessageFormatter,
-                        EnvironmentUtils.getActiveProfile(),
-                        count,
-                        partitionTask.getNamespaceId(),
-                        partitionTask.getGroupName(),
-                        partitionTask.getBusinessId(),
-                        DateUtils.toNowFormat(DateUtils.NORM_DATETIME_PATTERN),
-                        count)
-                    .title("{}环境 场景重试数量超过阈值", EnvironmentUtils.getActiveProfile())
-                    .notifyAttribute(recipientInfo.getNotifyAttribute());
+                        .text(retryTaskMoreThresholdTextMessageFormatter,
+                                EnvironmentUtils.getActiveProfile(),
+                                count,
+                                partitionTask.getNamespaceId(),
+                                partitionTask.getGroupName(),
+                                partitionTask.getBusinessId(),
+                                DateUtils.toNowFormat(DateUtils.NORM_DATETIME_PATTERN),
+                                count)
+                        .title("{}环境 场景重试数量超过阈值", EnvironmentUtils.getActiveProfile())
+                        .notifyAttribute(recipientInfo.getNotifyAttribute());
                 Optional.ofNullable(SnailJobAlarmFactory.getAlarmType(recipientInfo.getNotifyType()))
-                    .ifPresent(alarmType -> alarmType.asyncSendMessage(context));
+                        .ifPresent(alarmType -> alarmType.asyncSendMessage(context));
 
             }
         }
@@ -116,26 +116,26 @@ public class RetryTaskMoreThresholdAlarmSchedule extends AbstractSchedule implem
     private List<NotifyConfigPartitionTask> getNotifyConfigPartitions(Long startId) {
 
         List<NotifyConfig> notifyConfigs = accessTemplate.getNotifyConfigAccess()
-            .listPage(new PageDTO<>(startId, 1000), new LambdaQueryWrapper<NotifyConfig>()
-                .eq(NotifyConfig::getNotifyStatus, StatusEnum.YES.getStatus())
-                .eq(NotifyConfig::getSystemTaskType, SyetemTaskTypeEnum.RETRY.getType())
-                .eq(NotifyConfig::getNotifyScene, RetryNotifySceneEnum.MAX_RETRY.getNotifyScene())
-                .orderByDesc(NotifyConfig::getId)) // SQLServer 分页必须 ORDER BY
-            .getRecords();
+                .listPage(new PageDTO<>(startId, 1000), new LambdaQueryWrapper<NotifyConfig>()
+                        .eq(NotifyConfig::getNotifyStatus, StatusEnum.YES.getStatus())
+                        .eq(NotifyConfig::getSystemTaskType, SyetemTaskTypeEnum.RETRY.getType())
+                        .eq(NotifyConfig::getNotifyScene, RetryNotifySceneEnum.MAX_RETRY.getNotifyScene())
+                        .orderByDesc(NotifyConfig::getId)) // SQLServer 分页必须 ORDER BY
+                .getRecords();
 
         Set<Long> recipientIds = notifyConfigs.stream()
-            .flatMap(config -> JsonUtil.parseList(config.getRecipientIds(), Long.class).stream())
-            .collect(Collectors.toSet());
+                .flatMap(config -> JsonUtil.parseList(config.getRecipientIds(), Long.class).stream())
+                .collect(Collectors.toSet());
 
         if (CollectionUtils.isEmpty(recipientIds)) {
             return Lists.newArrayList();
         }
 
         Map<Long, NotifyRecipient> recipientMap = StreamUtils.toIdentityMap(
-            recipientMapper.selectBatchIds(recipientIds), NotifyRecipient::getId);
+                recipientMapper.selectBatchIds(recipientIds), NotifyRecipient::getId);
 
         List<NotifyConfigPartitionTask> notifyConfigPartitionTasks = RetryTaskConverter.INSTANCE.toNotifyConfigPartitionTask(
-            notifyConfigs);
+                notifyConfigs);
         notifyConfigPartitionTasks.forEach(task -> {
             List<RecipientInfo> recipientList = StreamUtils.toList(task.getRecipientIds(), recipientId -> {
                 NotifyRecipient notifyRecipient = recipientMap.get(recipientId);

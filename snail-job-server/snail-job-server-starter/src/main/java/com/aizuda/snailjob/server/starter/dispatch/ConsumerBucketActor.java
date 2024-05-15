@@ -44,8 +44,8 @@ public class ConsumerBucketActor extends AbstractActor {
     private final AccessTemplate accessTemplate;
     private final ServerNodeMapper serverNodeMapper;
     private final SystemProperties systemProperties;
-    private static final  String DEFAULT_JOB_KEY = "DEFAULT_JOB_KEY";
-    private static final  String DEFAULT_WORKFLOW_KEY = "DEFAULT_JOB_KEY";
+    private static final String DEFAULT_JOB_KEY = "DEFAULT_JOB_KEY";
+    private static final String DEFAULT_WORKFLOW_KEY = "DEFAULT_JOB_KEY";
 
     @Override
     public Receive createReceive() {

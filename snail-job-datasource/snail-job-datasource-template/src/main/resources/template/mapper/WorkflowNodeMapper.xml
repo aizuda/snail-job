@@ -4,19 +4,19 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.aizuda.snailjob.template.datasource.persistence.po.WorkflowNode">
-        <id column="id" property="id" />
-        <result column="namespace_id" property="namespaceId" />
-        <result column="group_name" property="groupName" />
-        <result column="job_id" property="jobId" />
-        <result column="node_type" property="nodeType" />
-        <result column="expression_type" property="expressionType" />
-        <result column="fail_strategy" property="failStrategy" />
-        <result column="workflow_node_status" property="workflowNodeStatus" />
-        <result column="node_expression" property="nodeExpression" />
-        <result column="create_dt" property="createDt" />
-        <result column="update_dt" property="updateDt" />
-        <result column="deleted" property="deleted" />
-        <result column="ext_attrs" property="extAttrs" />
+        <id column="id" property="id"/>
+        <result column="namespace_id" property="namespaceId"/>
+        <result column="group_name" property="groupName"/>
+        <result column="job_id" property="jobId"/>
+        <result column="node_type" property="nodeType"/>
+        <result column="expression_type" property="expressionType"/>
+        <result column="fail_strategy" property="failStrategy"/>
+        <result column="workflow_node_status" property="workflowNodeStatus"/>
+        <result column="node_expression" property="nodeExpression"/>
+        <result column="create_dt" property="createDt"/>
+        <result column="update_dt" property="updateDt"/>
+        <result column="deleted" property="deleted"/>
+        <result column="ext_attrs" property="extAttrs"/>
     </resultMap>
 
 </mapper>

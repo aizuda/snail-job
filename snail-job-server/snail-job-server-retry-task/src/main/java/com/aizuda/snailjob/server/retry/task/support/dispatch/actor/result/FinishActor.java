@@ -56,7 +56,7 @@ public class FinishActor extends AbstractActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder().match(RetryTask.class, retryTask -> {
-           SnailJobLog.LOCAL.debug("FinishActor params:[{}]", retryTask);
+            SnailJobLog.LOCAL.debug("FinishActor params:[{}]", retryTask);
 
             retryTask.setRetryStatus(RetryStatusEnum.FINISH.getStatus());
 
@@ -78,9 +78,9 @@ public class FinishActor extends AbstractActor {
                         RetryTaskLog retryTaskLog = new RetryTaskLog();
                         retryTaskLog.setRetryStatus(retryTask.getRetryStatus());
                         retryTaskLogMapper.update(retryTaskLog, new LambdaUpdateWrapper<RetryTaskLog>()
-                            .eq(RetryTaskLog::getNamespaceId, retryTask.getNamespaceId())
-                            .eq(RetryTaskLog::getUniqueId, retryTask.getUniqueId())
-                            .eq(RetryTaskLog::getGroupName, retryTask.getGroupName()));
+                                .eq(RetryTaskLog::getNamespaceId, retryTask.getNamespaceId())
+                                .eq(RetryTaskLog::getUniqueId, retryTask.getUniqueId())
+                                .eq(RetryTaskLog::getGroupName, retryTask.getGroupName()));
 
                     }
                 });

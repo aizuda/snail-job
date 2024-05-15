@@ -34,7 +34,7 @@ public interface WorkflowTaskConverter {
     List<WorkflowPartitionTaskDTO> toWorkflowPartitionTaskList(List<Workflow> workflowList);
 
     @Mappings(
-        @Mapping(source = "id", target = "workflowId")
+            @Mapping(source = "id", target = "workflowId")
     )
     WorkflowTaskPrepareDTO toWorkflowTaskPrepareDTO(WorkflowPartitionTaskDTO workflowPartitionTaskDTO);
 
@@ -50,7 +50,7 @@ public interface WorkflowTaskConverter {
     JobTaskBatchGeneratorContext toJobTaskBatchGeneratorContext(WorkflowExecutorContext context);
 
     @Mappings(
-        @Mapping(source = "id", target = "workflowNodeId")
+            @Mapping(source = "id", target = "workflowNodeId")
     )
     WorkflowExecutorContext toWorkflowExecutorContext(WorkflowNode workflowNode);
 

@@ -4,15 +4,15 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.aizuda.snailjob.template.datasource.persistence.po.JobTask">
-        <id column="id" property="id" />
-        <result column="group_name" property="groupName" />
-        <result column="job_id" property="jobId" />
-        <result column="task_batch_id" property="taskBatchId" />
-        <result column="parent_id" property="parentId" />
-        <result column="task_status" property="taskStatus" />
-        <result column="result_message" property="resultMessage" />
-        <result column="create_dt" property="createDt" />
-        <result column="update_dt" property="updateDt" />
+        <id column="id" property="id"/>
+        <result column="group_name" property="groupName"/>
+        <result column="job_id" property="jobId"/>
+        <result column="task_batch_id" property="taskBatchId"/>
+        <result column="parent_id" property="parentId"/>
+        <result column="task_status" property="taskStatus"/>
+        <result column="result_message" property="resultMessage"/>
+        <result column="create_dt" property="createDt"/>
+        <result column="update_dt" property="updateDt"/>
     </resultMap>
 
 </mapper>

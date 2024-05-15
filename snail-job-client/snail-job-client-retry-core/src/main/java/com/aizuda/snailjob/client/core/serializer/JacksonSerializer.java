@@ -1,11 +1,11 @@
 package com.aizuda.snailjob.client.core.serializer;
 
 import com.aizuda.snailjob.client.core.RetryArgSerializer;
+import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.aizuda.snailjob.common.core.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Method;
@@ -36,7 +36,7 @@ public class JacksonSerializer implements RetryArgSerializer {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode jsonNode = JsonUtil.toJson(infoStr);
         if (Objects.isNull(jsonNode)) {
-           SnailJobLog.LOCAL.warn("jsonNode is null. infoStr:[{}]", infoStr);
+            SnailJobLog.LOCAL.warn("jsonNode is null. infoStr:[{}]", infoStr);
             return params;
         }
 

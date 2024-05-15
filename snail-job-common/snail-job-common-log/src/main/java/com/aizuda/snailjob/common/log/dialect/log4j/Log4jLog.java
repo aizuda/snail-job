@@ -95,7 +95,7 @@ public class Log4jLog extends AbstractLog {
     // ------------------------------------------------------------------------- Log
     @Override
     public void log(com.aizuda.snailjob.common.log.level.Level level, Boolean remote, String fqcn, String format,
-        Object... arguments) {
+                    Object... arguments) {
         org.apache.log4j.Level log4jLevel;
         switch (level) {
             case TRACE:

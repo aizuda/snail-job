@@ -18,13 +18,14 @@ public class TimerManager {
 
     static {
         wheelTimer = new HashedWheelTimer(
-            new CustomizableThreadFactory("job-task-timer-wheel-"), 1,
-            TimeUnit.SECONDS, 1024);
+                new CustomizableThreadFactory("job-task-timer-wheel-"), 1,
+                TimeUnit.SECONDS, 1024);
     }
+
     private TimerManager() {
     }
 
     public static Timeout add(TimerTask task, long delay, TimeUnit unit) {
-       return wheelTimer.newTimeout(task, delay, unit);
+        return wheelTimer.newTimeout(task, delay, unit);
     }
 }

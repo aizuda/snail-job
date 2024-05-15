@@ -1,7 +1,6 @@
 package com.aizuda.snailjob.client.core.retryer;
 
 import com.aizuda.snailjob.client.core.IdempotentIdGenerate;
-import com.aizuda.snailjob.client.core.strategy.ExecutorMethod;
 import com.aizuda.snailjob.client.core.callback.RetryCompleteCallback;
 import com.aizuda.snailjob.client.core.strategy.ExecutorMethod;
 import lombok.AllArgsConstructor;

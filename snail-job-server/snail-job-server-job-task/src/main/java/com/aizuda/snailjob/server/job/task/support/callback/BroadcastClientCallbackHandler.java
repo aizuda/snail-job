@@ -62,7 +62,7 @@ public class BroadcastClientCallbackHandler extends AbstractClientCallbackHandle
         RegisterNodeInfo serverNode = CacheRegisterTable.getServerNode(context.getGroupName(), context.getNamespaceId(), clientId);
         if (Objects.isNull(serverNode)) {
             List<JobTask> jobTasks = jobTaskMapper.selectList(new LambdaQueryWrapper<JobTask>()
-                .eq(JobTask::getTaskBatchId, context.getTaskBatchId()));
+                    .eq(JobTask::getTaskBatchId, context.getTaskBatchId()));
 
             Set<String> clientIdList = StreamUtils.toSet(jobTasks, jobTask1 -> ClientInfoUtils.clientId(jobTask1.getClientInfo()));
             Set<String> remoteClientIdSet = StreamUtils.toSet(nodes, RegisterNodeInfo::getHostId);

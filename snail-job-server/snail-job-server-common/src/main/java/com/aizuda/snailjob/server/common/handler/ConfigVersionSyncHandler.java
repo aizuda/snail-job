@@ -35,7 +35,7 @@ public class ConfigVersionSyncHandler implements Lifecycle, Runnable {
     /**
      * 添加任务
      *
-     * @param groupName 组
+     * @param groupName      组
      * @param currentVersion 当前版本号
      * @return false-队列容量已满， true-添加成功
      */
@@ -51,7 +51,7 @@ public class ConfigVersionSyncHandler implements Lifecycle, Runnable {
     /**
      * 同步版本
      *
-     * @param groupName 组
+     * @param groupName   组
      * @param namespaceId 空间id
      */
     public void syncVersion(String groupName, final String namespaceId) {
@@ -62,10 +62,10 @@ public class ConfigVersionSyncHandler implements Lifecycle, Runnable {
             for (final RegisterNodeInfo registerNodeInfo : serverNodeSet) {
                 ConfigDTO configDTO = accessTemplate.getGroupConfigAccess().getConfigInfo(groupName, namespaceId);
                 CommonRpcClient rpcClient = RequestBuilder.<CommonRpcClient, Result>newBuilder()
-                    .nodeInfo(registerNodeInfo)
-                    .client(CommonRpcClient.class)
-                    .build();
-               SnailJobLog.LOCAL.info("同步结果 [{}]", rpcClient.syncConfig(configDTO));
+                        .nodeInfo(registerNodeInfo)
+                        .client(CommonRpcClient.class)
+                        .build();
+                SnailJobLog.LOCAL.info("同步结果 [{}]", rpcClient.syncConfig(configDTO));
             }
         } catch (Exception e) {
             SnailJobLog.LOCAL.error("version sync error. groupName:[{}]", groupName, e);
@@ -96,7 +96,7 @@ public class ConfigVersionSyncHandler implements Lifecycle, Runnable {
                     syncVersion(task.getGroupName(), task.getNamespaceId());
                 }
             } catch (InterruptedException e) {
-               SnailJobLog.LOCAL.info("[{}] thread stop.", Thread.currentThread().getName());
+                SnailJobLog.LOCAL.info("[{}] thread stop.", Thread.currentThread().getName());
             } catch (Exception e) {
                 SnailJobLog.LOCAL.error("client refresh expireAt error.", e);
             } finally {

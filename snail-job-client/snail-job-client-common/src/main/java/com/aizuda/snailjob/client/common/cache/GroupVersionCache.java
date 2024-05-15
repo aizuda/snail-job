@@ -11,8 +11,9 @@ import java.util.Objects;
  * @author: opensnail
  * @date : 2022-05-02 21:06
  */
-public final class GroupVersionCache  {
-    private GroupVersionCache() {}
+public final class GroupVersionCache {
+    private GroupVersionCache() {
+    }
 
     private static ConfigDTO CONFIG;
 
@@ -29,7 +30,7 @@ public final class GroupVersionCache  {
 
     public static long getDdl(String sceneName) {
         // 缓存初始化时configDTO值为null,可能造成空指针异常
-        if (Objects.isNull(CONFIG)){
+        if (Objects.isNull(CONFIG)) {
             return SystemConstants.DEFAULT_DDL;
         }
         List<ConfigDTO.Scene> sceneList = CONFIG.getSceneList();

@@ -28,8 +28,8 @@ public interface NotifyRecipientConverter {
     List<CommonLabelValueResponseVO> convertListToCommonLabelValueList(List<NotifyRecipient> notifyRecipients);
 
     @Mappings({
-        @Mapping(target = "label", source = "recipientName"),
-        @Mapping(target = "value", source = "id")
+            @Mapping(target = "label", source = "recipientName"),
+            @Mapping(target = "value", source = "id")
     })
     CommonLabelValueResponseVO convert(NotifyRecipient notifyRecipient);
 }

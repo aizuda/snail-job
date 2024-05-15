@@ -73,17 +73,17 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
         }
 
         QueryWrapper<WorkflowTaskBatch> wrapper = new QueryWrapper<WorkflowTaskBatch>()
-            .eq("a.namespace_id", userSessionVO.getNamespaceId())
-            .eq(queryVO.getWorkflowId() != null, "a.workflow_id", queryVO.getWorkflowId())
-            .in(CollUtil.isNotEmpty(groupNames), "a.group_name", groupNames)
-            .eq(queryVO.getTaskBatchStatus() != null, "task_batch_status", queryVO.getTaskBatchStatus())
-            .likeRight(StrUtil.isNotBlank(queryVO.getWorkflowName()), "b.workflow_name", queryVO.getWorkflowName())
-            .eq("a.deleted", 0)
-            .orderByDesc("a.id");
+                .eq("a.namespace_id", userSessionVO.getNamespaceId())
+                .eq(queryVO.getWorkflowId() != null, "a.workflow_id", queryVO.getWorkflowId())
+                .in(CollUtil.isNotEmpty(groupNames), "a.group_name", groupNames)
+                .eq(queryVO.getTaskBatchStatus() != null, "task_batch_status", queryVO.getTaskBatchStatus())
+                .likeRight(StrUtil.isNotBlank(queryVO.getWorkflowName()), "b.workflow_name", queryVO.getWorkflowName())
+                .eq("a.deleted", 0)
+                .orderByDesc("a.id");
         List<WorkflowBatchResponseDO> batchResponseDOList = workflowTaskBatchMapper.selectWorkflowBatchPageList(pageDTO, wrapper);
 
         List<WorkflowBatchResponseVO> batchResponseVOList =
-            WorkflowConverter.INSTANCE.convertListToWorkflowBatchList(batchResponseDOList);
+                WorkflowConverter.INSTANCE.convertListToWorkflowBatchList(batchResponseDOList);
 
         return new PageResult<>(pageDTO, batchResponseVOList);
     }
@@ -92,9 +92,9 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
     public WorkflowDetailResponseVO getWorkflowBatchDetail(Long id) {
 
         WorkflowTaskBatch workflowTaskBatch = workflowTaskBatchMapper.selectOne(
-            new LambdaQueryWrapper<WorkflowTaskBatch>()
-                .eq(WorkflowTaskBatch::getId, id)
-                .eq(WorkflowTaskBatch::getNamespaceId, UserSessionUtils.currentUserSession().getNamespaceId()));
+                new LambdaQueryWrapper<WorkflowTaskBatch>()
+                        .eq(WorkflowTaskBatch::getId, id)
+                        .eq(WorkflowTaskBatch::getNamespaceId, UserSessionUtils.currentUserSession().getNamespaceId()));
         if (Objects.isNull(workflowTaskBatch)) {
             return null;
         }
@@ -103,22 +103,22 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
 
         WorkflowDetailResponseVO responseVO = WorkflowConverter.INSTANCE.convert(workflow);
         List<WorkflowNode> workflowNodes = workflowNodeMapper.selectList(new LambdaQueryWrapper<WorkflowNode>()
-            .eq(WorkflowNode::getDeleted, StatusEnum.NO.getStatus())
-            .eq(WorkflowNode::getWorkflowId, workflow.getId()));
+                .eq(WorkflowNode::getDeleted, StatusEnum.NO.getStatus())
+                .eq(WorkflowNode::getWorkflowId, workflow.getId()));
 
         List<Job> jobs = jobMapper.selectList(
-            new LambdaQueryWrapper<Job>()
-                .in(Job::getId, StreamUtils.toSet(workflowNodes, WorkflowNode::getJobId)));
+                new LambdaQueryWrapper<Job>()
+                        .in(Job::getId, StreamUtils.toSet(workflowNodes, WorkflowNode::getJobId)));
 
         Map<Long, Job> jobMap = StreamUtils.toIdentityMap(jobs, Job::getId);
 
         List<JobTaskBatch> alJobTaskBatchList = jobTaskBatchMapper.selectList(
-            new LambdaQueryWrapper<JobTaskBatch>()
-                .eq(JobTaskBatch::getWorkflowTaskBatchId, id)
-                .orderByDesc(JobTaskBatch::getId));
+                new LambdaQueryWrapper<JobTaskBatch>()
+                        .eq(JobTaskBatch::getWorkflowTaskBatchId, id)
+                        .orderByDesc(JobTaskBatch::getId));
 
         Map<Long, List<JobTaskBatch>> jobTaskBatchMap = StreamUtils.groupByKey(alJobTaskBatchList,
-            JobTaskBatch::getWorkflowNodeId);
+                JobTaskBatch::getWorkflowNodeId);
         List<WorkflowDetailResponseVO.NodeInfo> nodeInfos = WorkflowConverter.INSTANCE.convertList(workflowNodes);
 
         String flowInfo = workflowTaskBatch.getFlowInfo();
@@ -126,47 +126,47 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
 
         Set<Long> allNoOperationNode = Sets.newHashSet();
         Map<Long, WorkflowDetailResponseVO.NodeInfo> workflowNodeMap = nodeInfos.stream()
-            .peek(nodeInfo -> {
+                .peek(nodeInfo -> {
 
-                JobTaskConfig jobTask = nodeInfo.getJobTask();
-                if (Objects.nonNull(jobTask)) {
-                    jobTask.setJobName(jobMap.getOrDefault(jobTask.getJobId(), new Job()).getJobName());
-                }
+                    JobTaskConfig jobTask = nodeInfo.getJobTask();
+                    if (Objects.nonNull(jobTask)) {
+                        jobTask.setJobName(jobMap.getOrDefault(jobTask.getJobId(), new Job()).getJobName());
+                    }
 
-                List<JobTaskBatch> jobTaskBatchList = jobTaskBatchMap.get(nodeInfo.getId());
-                if (!CollectionUtils.isEmpty(jobTaskBatchList)) {
-                    jobTaskBatchList = jobTaskBatchList.stream()
-                        .sorted(Comparator.comparingInt(JobTaskBatch::getTaskBatchStatus))
-                        .collect(Collectors.toList());
-                    nodeInfo.setJobBatchList(JobBatchResponseVOConverter.INSTANCE.convertListToJobBatchList(jobTaskBatchList));
+                    List<JobTaskBatch> jobTaskBatchList = jobTaskBatchMap.get(nodeInfo.getId());
+                    if (!CollectionUtils.isEmpty(jobTaskBatchList)) {
+                        jobTaskBatchList = jobTaskBatchList.stream()
+                                .sorted(Comparator.comparingInt(JobTaskBatch::getTaskBatchStatus))
+                                .collect(Collectors.toList());
+                        nodeInfo.setJobBatchList(JobBatchResponseVOConverter.INSTANCE.convertListToJobBatchList(jobTaskBatchList));
 
-                    // 取第最新的一条状态
-                    JobTaskBatch jobTaskBatch = jobTaskBatchList.get(0);
-                    if (JobOperationReasonEnum.WORKFLOW_DECISION_FAILED.getReason() == jobTaskBatch.getOperationReason()) {
-                        // 前端展示使用
-                        nodeInfo.setTaskBatchStatus(WORKFLOW_DECISION_FAILED_STATUS);
+                        // 取第最新的一条状态
+                        JobTaskBatch jobTaskBatch = jobTaskBatchList.get(0);
+                        if (JobOperationReasonEnum.WORKFLOW_DECISION_FAILED.getReason() == jobTaskBatch.getOperationReason()) {
+                            // 前端展示使用
+                            nodeInfo.setTaskBatchStatus(WORKFLOW_DECISION_FAILED_STATUS);
+                        } else {
+                            nodeInfo.setTaskBatchStatus(jobTaskBatch.getTaskBatchStatus());
+                        }
+
+                        if (jobTaskBatchList.stream()
+                                .filter(Objects::nonNull)
+                                .anyMatch(WorkflowBatchServiceImpl::isNoOperation)) {
+                            // 当前节点下面的所有节点都是无需处理的节点
+                            Set<Long> allDescendants = MutableGraphCache.getAllDescendants(graph, nodeInfo.getId());
+                            allNoOperationNode.addAll(allDescendants);
+                        } else {
+                            // 删除被误添加的节点
+                            allNoOperationNode.remove(nodeInfo.getId());
+                        }
+
                     } else {
-                        nodeInfo.setTaskBatchStatus(jobTaskBatch.getTaskBatchStatus());
+                        if (JobTaskBatchStatusEnum.NOT_SUCCESS.contains(workflowTaskBatch.getTaskBatchStatus())) {
+                            allNoOperationNode.add(nodeInfo.getId());
+                        }
                     }
-
-                    if (jobTaskBatchList.stream()
-                        .filter(Objects::nonNull)
-                        .anyMatch(WorkflowBatchServiceImpl::isNoOperation)) {
-                        // 当前节点下面的所有节点都是无需处理的节点
-                        Set<Long> allDescendants = MutableGraphCache.getAllDescendants(graph, nodeInfo.getId());
-                        allNoOperationNode.addAll(allDescendants);
-                    } else {
-                        // 删除被误添加的节点
-                        allNoOperationNode.remove(nodeInfo.getId());
-                    }
-
-                } else {
-                    if (JobTaskBatchStatusEnum.NOT_SUCCESS.contains(workflowTaskBatch.getTaskBatchStatus())) {
-                        allNoOperationNode.add(nodeInfo.getId());
-                    }
-                }
-            })
-            .collect(Collectors.toMap(WorkflowDetailResponseVO.NodeInfo::getId, Function.identity()));
+                })
+                .collect(Collectors.toMap(WorkflowDetailResponseVO.NodeInfo::getId, Function.identity()));
 
         for (Long noOperationNodeId : allNoOperationNode) {
             WorkflowDetailResponseVO.NodeInfo nodeInfo = workflowNodeMap.get(noOperationNodeId);
@@ -184,7 +184,7 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
         try {
             // 反序列化构建图
             WorkflowDetailResponseVO.NodeConfig config = workflowHandler.buildNodeConfig(graph, SystemConstants.ROOT,
-                new HashMap<>(), workflowNodeMap);
+                    new HashMap<>(), workflowNodeMap);
             responseVO.setNodeConfig(config);
         } catch (Exception e) {
             log.error("反序列化失败. json:[{}]", flowInfo, e);
@@ -205,7 +205,7 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
 
     private static boolean isNoOperation(JobTaskBatch i) {
         return JobOperationReasonEnum.WORKFLOW_SUCCESSOR_SKIP_EXECUTION.contains(i.getOperationReason())
-            || i.getTaskBatchStatus() == JobTaskBatchStatusEnum.STOP.getStatus();
+                || i.getTaskBatchStatus() == JobTaskBatchStatusEnum.STOP.getStatus();
     }
 
 }

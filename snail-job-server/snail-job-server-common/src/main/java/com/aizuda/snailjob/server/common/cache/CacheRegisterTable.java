@@ -53,11 +53,11 @@ public class CacheRegisterTable implements Lifecycle {
         }
 
         return concurrentMap.values().stream()
-            .map(stringServerNodeConcurrentMap -> new TreeSet(stringServerNodeConcurrentMap.values()))
-            .reduce((s, y) -> {
-                s.addAll(y);
-                return s;
-            }).orElse(new TreeSet<>());
+                .map(stringServerNodeConcurrentMap -> new TreeSet(stringServerNodeConcurrentMap.values()))
+                .reduce((s, y) -> {
+                    s.addAll(y);
+                    return s;
+                }).orElse(new TreeSet<>());
 
     }
 
@@ -81,12 +81,12 @@ public class CacheRegisterTable implements Lifecycle {
             // 此处为了降级，若缓存中没有则取DB中查询
             ServerNodeMapper serverNodeMapper = SpringContext.getBeanByType(ServerNodeMapper.class);
             List<ServerNode> serverNodes = serverNodeMapper.selectList(
-                new LambdaQueryWrapper<ServerNode>()
-                    .eq(ServerNode::getNodeType, NodeTypeEnum.CLIENT.getType())
-                    .eq(ServerNode::getNamespaceId, namespaceId)
-                    .eq(ServerNode::getGroupName, groupName)
-                    .eq(ServerNode::getHostId, hostId)
-                    .orderByDesc(ServerNode::getExpireAt));
+                    new LambdaQueryWrapper<ServerNode>()
+                            .eq(ServerNode::getNodeType, NodeTypeEnum.CLIENT.getType())
+                            .eq(ServerNode::getNamespaceId, namespaceId)
+                            .eq(ServerNode::getGroupName, groupName)
+                            .eq(ServerNode::getHostId, hostId)
+                            .orderByDesc(ServerNode::getExpireAt));
             if (CollectionUtils.isEmpty(serverNodes)) {
                 return null;
             }
@@ -114,10 +114,10 @@ public class CacheRegisterTable implements Lifecycle {
             // 此处为了降级，若缓存中没有则取DB中查询
             ServerNodeMapper serverNodeMapper = SpringContext.getBeanByType(ServerNodeMapper.class);
             List<ServerNode> serverNodes = serverNodeMapper.selectList(
-                new LambdaQueryWrapper<ServerNode>()
-                    .eq(ServerNode::getNodeType, NodeTypeEnum.CLIENT.getType())
-                    .eq(ServerNode::getNamespaceId, namespaceId)
-                    .eq(ServerNode::getGroupName, groupName));
+                    new LambdaQueryWrapper<ServerNode>()
+                            .eq(ServerNode::getNodeType, NodeTypeEnum.CLIENT.getType())
+                            .eq(ServerNode::getNamespaceId, namespaceId)
+                            .eq(ServerNode::getGroupName, groupName));
             for (final ServerNode node : serverNodes) {
                 // 刷新全量本地缓存
                 CacheRegisterTable.addOrUpdate(node);
@@ -153,11 +153,11 @@ public class CacheRegisterTable implements Lifecycle {
      */
     public static synchronized void refreshExpireAt(ServerNode serverNode) {
         RegisterNodeInfo registerNodeInfo = getServerNode(serverNode.getGroupName(), serverNode.getNamespaceId(),
-            serverNode.getHostId());
+                serverNode.getHostId());
         // 不存在则初始化
         if (Objects.isNull(registerNodeInfo)) {
             SnailJobLog.LOCAL.warn("node not exists. groupName:[{}] hostId:[{}]", serverNode.getGroupName(),
-                serverNode.getHostId());
+                    serverNode.getHostId());
         } else {
             // 存在则刷新过期时间
             registerNodeInfo.setExpireAt(serverNode.getExpireAt());
@@ -171,18 +171,18 @@ public class CacheRegisterTable implements Lifecycle {
      */
     public static synchronized void addOrUpdate(ServerNode serverNode) {
         ConcurrentMap<String, RegisterNodeInfo> concurrentMap = CACHE.getIfPresent(
-            getKey(serverNode.getGroupName(), serverNode.getNamespaceId()));
+                getKey(serverNode.getGroupName(), serverNode.getNamespaceId()));
         RegisterNodeInfo registerNodeInfo;
         if (Objects.isNull(concurrentMap)) {
             SnailJobLog.LOCAL.info("Add cache. groupName:[{}] namespaceId:[{}] hostId:[{}]", serverNode.getGroupName(),
-                serverNode.getNamespaceId(), serverNode.getHostId());
+                    serverNode.getNamespaceId(), serverNode.getHostId());
             concurrentMap = new ConcurrentHashMap<>();
             registerNodeInfo = RegisterNodeInfoConverter.INSTANCE.toRegisterNodeInfo(serverNode);
 
         } else {
             // 复用缓存中的对象
             registerNodeInfo = concurrentMap.getOrDefault(serverNode.getHostId(),
-                RegisterNodeInfoConverter.INSTANCE.toRegisterNodeInfo(serverNode));
+                    RegisterNodeInfoConverter.INSTANCE.toRegisterNodeInfo(serverNode));
             registerNodeInfo.setExpireAt(serverNode.getExpireAt());
 
             // 删除过期的节点信息
@@ -201,10 +201,10 @@ public class CacheRegisterTable implements Lifecycle {
      */
     private static void delExpireNode(final ConcurrentMap<String, RegisterNodeInfo> concurrentMap) {
         concurrentMap.values().stream()
-            .filter(registerNodeInfo -> registerNodeInfo.getExpireAt().isBefore(
-                LocalDateTime.now().minusSeconds(ServerRegister.DELAY_TIME + (ServerRegister.DELAY_TIME / 3))))
-            .forEach(registerNodeInfo -> remove(registerNodeInfo.getGroupName(),
-                registerNodeInfo.getNamespaceId(), registerNodeInfo.getHostId()));
+                .filter(registerNodeInfo -> registerNodeInfo.getExpireAt().isBefore(
+                        LocalDateTime.now().minusSeconds(ServerRegister.DELAY_TIME + (ServerRegister.DELAY_TIME / 3))))
+                .forEach(registerNodeInfo -> remove(registerNodeInfo.getGroupName(),
+                        registerNodeInfo.getNamespaceId(), registerNodeInfo.getHostId()));
     }
 
 
@@ -228,11 +228,11 @@ public class CacheRegisterTable implements Lifecycle {
     public void start() {
         SnailJobLog.LOCAL.info("CacheRegisterTable start");
         CACHE = CacheBuilder.newBuilder()
-            // 设置并发级别为cpu核心数
-            .concurrencyLevel(Runtime.getRuntime().availableProcessors())
-            // 设置写缓存后60秒过期
-            .expireAfterWrite(60, TimeUnit.SECONDS)
-            .build();
+                // 设置并发级别为cpu核心数
+                .concurrencyLevel(Runtime.getRuntime().availableProcessors())
+                // 设置写缓存后60秒过期
+                .expireAfterWrite(60, TimeUnit.SECONDS)
+                .build();
     }
 
 

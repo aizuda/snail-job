@@ -23,7 +23,7 @@ public interface NotifyConfigResponseVOConverter {
     NotifyConfigResponseVOConverter INSTANCE = Mappers.getMapper(NotifyConfigResponseVOConverter.class);
 
     @Mappings({
-        @Mapping(target = "recipientIds", expression = "java(NotifyConfigResponseVOConverter.toNotifyRecipientIds(notifyConfig.getRecipientIds()))")
+            @Mapping(target = "recipientIds", expression = "java(NotifyConfigResponseVOConverter.toNotifyRecipientIds(notifyConfig.getRecipientIds()))")
     })
     NotifyConfigResponseVO convert(NotifyConfig notifyConfig);
 

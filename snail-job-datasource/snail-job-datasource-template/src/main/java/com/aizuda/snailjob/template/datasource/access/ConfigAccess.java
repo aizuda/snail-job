@@ -18,7 +18,7 @@ import java.util.Set;
  * @author: opensnail
  * @date : 2022-01-05 09:06
  */
-public interface ConfigAccess<T> extends Access<T>  {
+public interface ConfigAccess<T> extends Access<T> {
 
 
     /**
@@ -51,7 +51,7 @@ public interface ConfigAccess<T> extends Access<T>  {
     /**
      * 获取场景配置
      *
-     * @param groupName     组名称
+     * @param groupName 组名称
      * @return {@link RetrySceneConfig} 场景配置
      */
     List<RetrySceneConfig> getSceneConfigByGroupName(String groupName);

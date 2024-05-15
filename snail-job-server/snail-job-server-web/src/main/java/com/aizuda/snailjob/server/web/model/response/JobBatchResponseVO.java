@@ -52,7 +52,6 @@ public class JobBatchResponseVO {
     private LocalDateTime executionAt;
     /**
      * 操作原因
-
      */
     private Integer operationReason;
 

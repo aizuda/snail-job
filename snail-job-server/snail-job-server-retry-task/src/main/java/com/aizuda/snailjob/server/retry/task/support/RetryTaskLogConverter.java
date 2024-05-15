@@ -23,7 +23,7 @@ public interface RetryTaskLogConverter {
     RetryTaskLogConverter INSTANCE = Mappers.getMapper(RetryTaskLogConverter.class);
 
     @Mappings({
-        @Mapping(target = "id", ignore = true),
+            @Mapping(target = "id", ignore = true),
     })
     RetryTaskLog toRetryTask(RetryTask retryTask);
 

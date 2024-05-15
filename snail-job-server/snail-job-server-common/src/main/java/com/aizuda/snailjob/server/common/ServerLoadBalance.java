@@ -21,20 +21,20 @@ import java.util.List;
 /**
  * 服务端负载均衡分配算法
  */
-public interface ServerLoadBalance<T,D> {
+public interface ServerLoadBalance<T, D> {
 
     /**
-     *  将waitAllocateList通过算法分配到currentCID中
+     * 将waitAllocateList通过算法分配到currentCID中
      *
-     * @param currentCID 当前节点的id
+     * @param currentCID       当前节点的id
      * @param waitAllocateList 待分配的列表
-     * @param nodeList 节点信息
+     * @param nodeList         节点信息
      * @return 当前节点负责消费的桶数量
      */
     List<T> allocate(
-        String currentCID,
-        List<T> waitAllocateList,
-        List<D> nodeList
+            String currentCID,
+            List<T> waitAllocateList,
+            List<D> nodeList
     );
 
     /**

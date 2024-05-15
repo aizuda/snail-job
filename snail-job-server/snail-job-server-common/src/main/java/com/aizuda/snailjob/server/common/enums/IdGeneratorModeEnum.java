@@ -14,7 +14,7 @@ import lombok.Getter;
 @Getter
 public enum IdGeneratorModeEnum {
 
-    SEGMENT(1,"号段模式"),
+    SEGMENT(1, "号段模式"),
     SNOWFLAKE(2, "雪花算法模式");
 
     private final int mode;

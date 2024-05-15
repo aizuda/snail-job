@@ -9,6 +9,7 @@ import org.springframework.context.ApplicationEvent;
  */
 public class SnailChannelReconnectEvent extends ApplicationEvent {
     private static final String SOURCE = "ChannelReconnect";
+
     public SnailChannelReconnectEvent() {
         super(SOURCE);
     }

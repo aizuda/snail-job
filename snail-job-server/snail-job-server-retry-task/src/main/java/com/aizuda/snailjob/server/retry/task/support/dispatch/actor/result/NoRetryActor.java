@@ -50,7 +50,7 @@ public class NoRetryActor extends AbstractActor {
             try {
                 retryTask.setUpdateDt(LocalDateTime.now());
                 Assert.isTrue(1 == accessTemplate.getRetryTaskAccess()
-                        .updateById(retryTask.getGroupName(), retryTask.getNamespaceId() , retryTask), () ->
+                        .updateById(retryTask.getGroupName(), retryTask.getNamespaceId(), retryTask), () ->
                         new SnailJobServerException("更新重试任务失败. groupName:[{}] uniqueId:[{}]",
                                 retryTask.getGroupName(), retryTask.getUniqueId()));
             } catch (Exception e) {

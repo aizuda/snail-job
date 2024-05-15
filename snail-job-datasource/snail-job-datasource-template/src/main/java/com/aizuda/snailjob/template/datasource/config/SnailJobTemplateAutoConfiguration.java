@@ -33,13 +33,13 @@ import java.util.Optional;
  */
 @Configuration
 @ComponentScan("com.aizuda.snailjob.template.datasource.**")
-@MapperScan(value = "com.aizuda.snailjob.template.datasource.persistence.mapper", sqlSessionTemplateRef  = "sqlSessionTemplate")
+@MapperScan(value = "com.aizuda.snailjob.template.datasource.persistence.mapper", sqlSessionTemplateRef = "sqlSessionTemplate")
 public class SnailJobTemplateAutoConfiguration {
 
     /**
      * 采用后缀分区的数据库表清单
      */
-    private static final  List<String> TABLES_WITH_PARTITION = Arrays.asList("sj_retry_task", "sj_retry_dead_letter");
+    private static final List<String> TABLES_WITH_PARTITION = Arrays.asList("sj_retry_task", "sj_retry_dead_letter");
 
     @Bean("sqlSessionFactory")
     public SqlSessionFactory sqlSessionFactory(DataSource dataSource, Environment environment, MybatisPlusInterceptor mybatisPlusInterceptor, MybatisPlusProperties mybatisPlusProperties) throws Exception {

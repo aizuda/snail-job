@@ -98,7 +98,7 @@ public class JdkLog extends AbstractLog {
     // ------------------------------------------------------------------------- Log
     @Override
     public void log(com.aizuda.snailjob.common.log.level.Level level, Boolean remote, String fqcn, String format,
-        Object... arguments) {
+                    Object... arguments) {
         Level jdkLevel;
         switch (level) {
             case TRACE:

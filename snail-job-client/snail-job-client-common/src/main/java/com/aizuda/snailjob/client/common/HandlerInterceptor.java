@@ -1,8 +1,8 @@
 package com.aizuda.snailjob.client.common;
 
-import com.aizuda.snailjob.client.common.rpc.supports.scan.EndPointInfo;
 import com.aizuda.snailjob.client.common.rpc.supports.http.HttpRequest;
 import com.aizuda.snailjob.client.common.rpc.supports.http.HttpResponse;
+import com.aizuda.snailjob.client.common.rpc.supports.scan.EndPointInfo;
 
 /**
  * @author: opensnail

@@ -23,6 +23,7 @@ public abstract class AbstractLogReport<T extends LogTaskDTO> implements Lifecyc
     @Autowired
     private SnailJobProperties snailJobProperties;
     private SlidingWindow<LogTaskDTO> slidingWindow;
+
     @Override
     public void report(LogContentDTO logContentDTO) {
         slidingWindow.add(buildLogTaskDTO(logContentDTO));

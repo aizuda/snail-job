@@ -32,10 +32,10 @@ public class RequestInterceptor implements Interceptor {
             }
 
             return chain
-                .withReadTimeout(timeout, TimeUnit.SECONDS)
-                .withConnectTimeout(timeout, TimeUnit.SECONDS)
-                .withWriteTimeout(timeout, TimeUnit.SECONDS)
-                .proceed(chain.request());
+                    .withReadTimeout(timeout, TimeUnit.SECONDS)
+                    .withConnectTimeout(timeout, TimeUnit.SECONDS)
+                    .withWriteTimeout(timeout, TimeUnit.SECONDS)
+                    .proceed(chain.request());
         }
 
         return chain.proceed(request);

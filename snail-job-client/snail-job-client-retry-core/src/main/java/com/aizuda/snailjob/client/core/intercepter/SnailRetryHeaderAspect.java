@@ -1,9 +1,9 @@
 package com.aizuda.snailjob.client.core.intercepter;
 
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
-import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.common.core.model.SnailJobHeaders;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
+import com.aizuda.snailjob.common.log.SnailJobLog;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -42,7 +42,7 @@ public class SnailRetryHeaderAspect {
             // 标记进入方法的时间
             RetrySiteSnapshot.setEntryMethodTime(System.currentTimeMillis());
 
-           SnailJobLog.LOCAL.info("snail retry request header :[{}]", xRetry);
+            SnailJobLog.LOCAL.info("snail retry request header :[{}]", xRetry);
             RetrySiteSnapshot.setRetryHeader(JsonUtil.parseObject(xRetry, SnailJobHeaders.class));
         }
     }

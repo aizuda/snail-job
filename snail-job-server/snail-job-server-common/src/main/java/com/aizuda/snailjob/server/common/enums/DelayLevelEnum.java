@@ -13,16 +13,16 @@ import java.time.temporal.ChronoUnit;
 @Getter
 public enum DelayLevelEnum {
 
-    _1(1,10, ChronoUnit.SECONDS),
-    _2(2,15, ChronoUnit.SECONDS),
-    _3(3,30, ChronoUnit.SECONDS),
-    _4(4,35, ChronoUnit.SECONDS),
-    _5(5,40, ChronoUnit.SECONDS),
-    _6(6,50, ChronoUnit.SECONDS),
-    _7(7,1, ChronoUnit.MINUTES),
-    _8(8,2, ChronoUnit.MINUTES),
-    _9(9,4, ChronoUnit.MINUTES),
-    _10(10,6, ChronoUnit.MINUTES),
+    _1(1, 10, ChronoUnit.SECONDS),
+    _2(2, 15, ChronoUnit.SECONDS),
+    _3(3, 30, ChronoUnit.SECONDS),
+    _4(4, 35, ChronoUnit.SECONDS),
+    _5(5, 40, ChronoUnit.SECONDS),
+    _6(6, 50, ChronoUnit.SECONDS),
+    _7(7, 1, ChronoUnit.MINUTES),
+    _8(8, 2, ChronoUnit.MINUTES),
+    _9(9, 4, ChronoUnit.MINUTES),
+    _10(10, 6, ChronoUnit.MINUTES),
     _11(11, 8, ChronoUnit.MINUTES),
     _12(12, 10, ChronoUnit.MINUTES),
     _13(13, 20, ChronoUnit.MINUTES),
@@ -77,7 +77,7 @@ public enum DelayLevelEnum {
         }
 
         // 若配置的不存在默认1个小时一次
-       return DelayLevelEnum._15;
+        return DelayLevelEnum._15;
     }
 
 }

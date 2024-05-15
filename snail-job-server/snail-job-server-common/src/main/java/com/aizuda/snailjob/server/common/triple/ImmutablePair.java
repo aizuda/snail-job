@@ -9,7 +9,7 @@ import java.io.Serial;
  * @date : 2024-03-30
  * @since : 3.2.0
  */
-public final class ImmutablePair<L, R> extends Pair<L, R>{
+public final class ImmutablePair<L, R> extends Pair<L, R> {
 
     @Serial
     private static final long serialVersionUID = 4954918890077093841L;
@@ -39,6 +39,7 @@ public final class ImmutablePair<L, R> extends Pair<L, R>{
     public R getRight() {
         return right;
     }
+
     @Override
     public R setValue(final R value) {
         throw new SnailJobCommonException("非法操作");

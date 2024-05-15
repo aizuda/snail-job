@@ -20,8 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
- *
- *
  * @author opensnail
  * @date 2023-09-23 08:02:17
  * @since 2.4.0
@@ -45,7 +43,7 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, Initializing
         retryCountIncrement(retryTask);
 
         RetrySceneConfig retrySceneConfig = accessTemplate.getSceneConfigAccess().getSceneConfigByGroupNameAndSceneName(retryTask.getGroupName(), retryTask.getSceneName(),
-            retryTask.getNamespaceId());
+                retryTask.getNamespaceId());
 
         RetryContext retryContext = builderRetryContext(retryTask.getGroupName(), retryTask, retrySceneConfig);
         RetryExecutor executor = builderResultRetryExecutor(retryContext, retrySceneConfig);
@@ -62,8 +60,8 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, Initializing
         if (!pair.getKey()) {
             RetryTask retryTask = retryContext.getRetryTask();
             log.warn("当前任务不满足执行条件. groupName:[{}] uniqueId:[{}], description:[{}]",
-                retryTask.getGroupName(),
-                retryTask.getUniqueId(), pair.getValue().toString());
+                    retryTask.getGroupName(),
+                    retryTask.getUniqueId(), pair.getValue().toString());
 
             RetryLogMetaDTO retryLogMetaDTO = RetryTaskConverter.INSTANCE.toLogMetaDTO(retryTask);
             retryLogMetaDTO.setTimestamp(DateUtils.toNowMilli());
@@ -92,10 +90,10 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, Initializing
     }
 
     protected abstract RetryContext builderRetryContext(String groupName, RetryTask retryTask,
-        final RetrySceneConfig retrySceneConfig);
+                                                        final RetrySceneConfig retrySceneConfig);
 
     protected abstract RetryExecutor builderResultRetryExecutor(RetryContext retryContext,
-        final RetrySceneConfig retrySceneConfig);
+                                                                final RetrySceneConfig retrySceneConfig);
 
     protected abstract ActorRef getActorRef();
 

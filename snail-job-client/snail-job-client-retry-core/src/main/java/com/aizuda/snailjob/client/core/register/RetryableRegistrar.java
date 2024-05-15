@@ -24,7 +24,7 @@ public class RetryableRegistrar implements Lifecycle {
     public void registerRetryHandler(RetryerInfo retryerInfo) {
 
         if (Objects.nonNull(RetryerInfoCache.get(retryerInfo.getScene(), retryerInfo.getExecutorClassName()))) {
-            throw new SnailRetryClientException("类:[{}]中已经存在场景:[{}]",  retryerInfo.getExecutorClassName(), retryerInfo.getScene());
+            throw new SnailRetryClientException("类:[{}]中已经存在场景:[{}]", retryerInfo.getExecutorClassName(), retryerInfo.getScene());
         }
 
         RetryerInfoCache.put(retryerInfo);

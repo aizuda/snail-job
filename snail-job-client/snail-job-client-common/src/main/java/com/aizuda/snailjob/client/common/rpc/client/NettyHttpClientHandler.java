@@ -1,13 +1,13 @@
 package com.aizuda.snailjob.client.common.rpc.client;
 
-import com.aizuda.snailjob.client.common.event.SnailChannelReconnectEvent;
 import com.aizuda.snailjob.client.common.NettyClient;
+import com.aizuda.snailjob.client.common.event.SnailChannelReconnectEvent;
 import com.aizuda.snailjob.common.core.constant.SystemConstants.BEAT;
 import com.aizuda.snailjob.common.core.context.SpringContext;
-import com.aizuda.snailjob.common.core.rpc.RpcContext;
-import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.common.core.model.NettyResult;
+import com.aizuda.snailjob.common.core.rpc.RpcContext;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
+import com.aizuda.snailjob.common.log.SnailJobLog;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.FullHttpResponse;
@@ -34,10 +34,10 @@ public class NettyHttpClientHandler extends SimpleChannelInboundHandler<FullHttp
     public NettyHttpClientHandler(NettyHttpConnectClient nettyHttpConnectClient) {
 
         client = RequestBuilder.<NettyClient, NettyResult>newBuilder()
-            .client(NettyClient.class)
-            .callback(
-                nettyResult -> SnailJobLog.LOCAL.debug("heartbeat check requestId:[{}]", nettyResult.getRequestId()))
-            .build();
+                .client(NettyClient.class)
+                .callback(
+                        nettyResult -> SnailJobLog.LOCAL.debug("heartbeat check requestId:[{}]", nettyResult.getRequestId()))
+                .build();
 
         this.nettyHttpConnectClient = nettyHttpConnectClient;
     }

@@ -13,10 +13,10 @@ import com.aizuda.snailjob.client.core.exception.SnailRetryClientException;
  */
 public class ThreadLockRetrySiteSnapshotContext<T> implements RetrySiteSnapshotContext<T> {
 
-   private final ThreadLocal<T> threadLocal;
+    private final ThreadLocal<T> threadLocal;
 
     public ThreadLockRetrySiteSnapshotContext(ThreadLocal<T> threadLocal) {
-        Assert.notNull(threadLocal, ()-> new SnailRetryClientException("thread local can not be null"));
+        Assert.notNull(threadLocal, () -> new SnailRetryClientException("thread local can not be null"));
         this.threadLocal = threadLocal;
     }
 

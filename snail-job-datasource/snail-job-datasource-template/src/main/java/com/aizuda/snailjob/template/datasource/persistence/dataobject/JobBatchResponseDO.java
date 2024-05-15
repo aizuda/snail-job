@@ -72,5 +72,4 @@ public class JobBatchResponseDO {
     private String argsStr;
 
 
-
 }

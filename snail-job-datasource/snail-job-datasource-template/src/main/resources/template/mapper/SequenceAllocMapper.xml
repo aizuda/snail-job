@@ -4,11 +4,11 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.aizuda.snailjob.template.datasource.persistence.po.SequenceAlloc">
-        <id column="id" property="id" />
-        <result column="group_name" property="groupName" />
-        <result column="max_id" property="maxId" />
-        <result column="step" property="step" />
-        <result column="update_dt" property="updateDt" />
+        <id column="id" property="id"/>
+        <result column="group_name" property="groupName"/>
+        <result column="max_id" property="maxId"/>
+        <result column="step" property="step"/>
+        <result column="update_dt" property="updateDt"/>
     </resultMap>
 
 </mapper>

@@ -37,9 +37,9 @@ public class NamespaceServiceImpl implements NamespaceService {
 
         if (StrUtil.isNotBlank(namespaceRequestVO.getUniqueId())) {
             Assert.isTrue(namespaceMapper.selectCount(
-                    new LambdaQueryWrapper<Namespace>()
-                        .eq(Namespace::getUniqueId, namespaceRequestVO.getUniqueId())) == 0,
-                () -> new SnailJobServerException("空间唯一标记已经存在 {}", namespaceRequestVO.getUniqueId()));
+                            new LambdaQueryWrapper<Namespace>()
+                                    .eq(Namespace::getUniqueId, namespaceRequestVO.getUniqueId())) == 0,
+                    () -> new SnailJobServerException("空间唯一标记已经存在 {}", namespaceRequestVO.getUniqueId()));
         }
 
         Namespace namespace = new Namespace();
@@ -70,14 +70,14 @@ public class NamespaceServiceImpl implements NamespaceService {
         String keywords = StrUtil.trim(queryVO.getKeyword());
 
         PageDTO<Namespace> selectPage = namespaceMapper.selectPage(pageDTO,
-            new LambdaQueryWrapper<Namespace>()
-                .eq(Namespace::getDeleted, StatusEnum.NO.getStatus())
-                .and(StrUtil.isNotBlank(keywords), w ->
-                    w.likeRight(Namespace::getName, keywords)
-                        .or().likeRight(Namespace::getUniqueId, keywords))
-                .orderByDesc(Namespace::getId));
+                new LambdaQueryWrapper<Namespace>()
+                        .eq(Namespace::getDeleted, StatusEnum.NO.getStatus())
+                        .and(StrUtil.isNotBlank(keywords), w ->
+                                w.likeRight(Namespace::getName, keywords)
+                                        .or().likeRight(Namespace::getUniqueId, keywords))
+                        .orderByDesc(Namespace::getId));
         return new PageResult<>(pageDTO,
-            NamespaceResponseVOConverter.INSTANCE.convertList(selectPage.getRecords()));
+                NamespaceResponseVOConverter.INSTANCE.convertList(selectPage.getRecords()));
     }
 
     @Override
@@ -88,8 +88,8 @@ public class NamespaceServiceImpl implements NamespaceService {
     @Override
     public List<NamespaceResponseVO> getAllNamespace() {
         List<Namespace> namespaces = namespaceMapper.selectList(
-            new LambdaQueryWrapper<Namespace>()
-                .select(Namespace::getName, Namespace::getUniqueId)
+                new LambdaQueryWrapper<Namespace>()
+                        .select(Namespace::getName, Namespace::getUniqueId)
         );
         return NamespaceResponseVOConverter.INSTANCE.convertList(namespaces);
     }

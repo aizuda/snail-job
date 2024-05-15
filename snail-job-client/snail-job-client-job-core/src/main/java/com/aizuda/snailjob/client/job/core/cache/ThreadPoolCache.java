@@ -13,7 +13,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 /**
- *
  * @author: opensnail
  * @date : 2023-09-27 17:12
  * @since : 2.4.0
@@ -35,7 +34,7 @@ public class ThreadPoolCache {
                     new CustomizableThreadFactory(MessageFormat.format("snail-job-job-{0}-", taskBatchId)));
             threadPoolExecutor.allowCoreThreadTimeOut(true);
             return threadPoolExecutor;
-         };
+        };
 
         ThreadPoolExecutor threadPoolExecutor = supplier.get();
         CACHE_THREAD_POOL.putIfAbsent(taskBatchId, threadPoolExecutor);

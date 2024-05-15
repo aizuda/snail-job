@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 public class JobLogReport extends AbstractLogReport<JobLogTaskDTO> {
 
     @Override
-    public boolean supports () {
+    public boolean supports() {
         return LogTypeEnum.JOB == SnailJobLogManager.getLogType();
     }
 

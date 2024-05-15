@@ -44,11 +44,11 @@ public abstract class AbstractConfigAccess<T> implements ConfigAccess<T> {
     protected NotifyRecipientMapper notifyRecipientMapper;
 
     protected static final List<String> ALLOW_DB = Arrays.asList(
-        DbTypeEnum.MYSQL.getDb(),
-        DbTypeEnum.MARIADB.getDb(),
-        DbTypeEnum.POSTGRES.getDb(),
-        DbTypeEnum.ORACLE.getDb(),
-        DbTypeEnum.SQLSERVER.getDb());
+            DbTypeEnum.MYSQL.getDb(),
+            DbTypeEnum.MARIADB.getDb(),
+            DbTypeEnum.POSTGRES.getDb(),
+            DbTypeEnum.ORACLE.getDb(),
+            DbTypeEnum.SQLSERVER.getDb());
 
     protected DbTypeEnum getDbType() {
         return DbUtils.getDbType();
@@ -56,28 +56,28 @@ public abstract class AbstractConfigAccess<T> implements ConfigAccess<T> {
 
     protected RetrySceneConfig getByGroupNameAndSceneName(String groupName, String sceneName, String namespaceId) {
         return sceneConfigMapper.selectOne(new LambdaQueryWrapper<RetrySceneConfig>()
-            .eq(RetrySceneConfig::getNamespaceId, namespaceId)
-            .eq(RetrySceneConfig::getGroupName, groupName)
-            .eq(RetrySceneConfig::getSceneName, sceneName));
+                .eq(RetrySceneConfig::getNamespaceId, namespaceId)
+                .eq(RetrySceneConfig::getGroupName, groupName)
+                .eq(RetrySceneConfig::getSceneName, sceneName));
     }
 
     protected List<RetrySceneConfig> getSceneConfigs(String groupName) {
         return sceneConfigMapper.selectList(new LambdaQueryWrapper<RetrySceneConfig>()
-            .eq(RetrySceneConfig::getGroupName, groupName));
+                .eq(RetrySceneConfig::getGroupName, groupName));
     }
 
     protected GroupConfig getByGroupName(String groupName, final String namespaceId) {
         return groupConfigMapper.selectOne(new LambdaQueryWrapper<GroupConfig>()
-            .eq(GroupConfig::getNamespaceId, namespaceId)
-            .eq(GroupConfig::getGroupName, groupName));
+                .eq(GroupConfig::getNamespaceId, namespaceId)
+                .eq(GroupConfig::getGroupName, groupName));
     }
 
     protected List<NotifyConfig> getNotifyConfigs(String groupName, String namespaceId) {
         return notifyConfigMapper.selectList(
-            new LambdaQueryWrapper<NotifyConfig>()
-                .eq(NotifyConfig::getNamespaceId, namespaceId)
-                .eq(NotifyConfig::getGroupName, groupName)
-                .eq(NotifyConfig::getNotifyStatus, StatusEnum.YES.getStatus())
+                new LambdaQueryWrapper<NotifyConfig>()
+                        .eq(NotifyConfig::getNamespaceId, namespaceId)
+                        .eq(NotifyConfig::getGroupName, groupName)
+                        .eq(NotifyConfig::getNotifyStatus, StatusEnum.YES.getStatus())
         );
     }
 
@@ -112,8 +112,8 @@ public abstract class AbstractConfigAccess<T> implements ConfigAccess<T> {
         }
 
         LambdaQueryWrapper<RetrySceneConfig> sceneConfigLambdaQueryWrapper = new LambdaQueryWrapper<RetrySceneConfig>()
-            .select(RetrySceneConfig::getSceneName)
-            .eq(RetrySceneConfig::getGroupName, groupName);
+                .select(RetrySceneConfig::getSceneName)
+                .eq(RetrySceneConfig::getGroupName, groupName);
 
         if (StatusEnum.YES.getStatus().equals(groupConfig.getGroupStatus())) {
             sceneConfigLambdaQueryWrapper.eq(RetrySceneConfig::getSceneStatus, StatusEnum.NO.getStatus());
@@ -130,9 +130,9 @@ public abstract class AbstractConfigAccess<T> implements ConfigAccess<T> {
     @Override
     public List<GroupConfig> getAllConfigGroupList(String namespaceId) {
         List<GroupConfig> allSystemConfigGroupList = groupConfigMapper.selectList(
-            new LambdaQueryWrapper<GroupConfig>()
-                .eq(GroupConfig::getNamespaceId, namespaceId)
-                .orderByAsc(GroupConfig::getId));
+                new LambdaQueryWrapper<GroupConfig>()
+                        .eq(GroupConfig::getNamespaceId, namespaceId)
+                        .orderByAsc(GroupConfig::getId));
         if (CollectionUtils.isEmpty(allSystemConfigGroupList)) {
             return new ArrayList<>();
         }
@@ -143,7 +143,7 @@ public abstract class AbstractConfigAccess<T> implements ConfigAccess<T> {
     @Override
     public List<RetrySceneConfig> getAllConfigSceneList() {
         List<RetrySceneConfig> allSystemConfigSceneList = sceneConfigMapper.selectList(
-            new LambdaQueryWrapper<RetrySceneConfig>().orderByAsc(RetrySceneConfig::getId));
+                new LambdaQueryWrapper<RetrySceneConfig>().orderByAsc(RetrySceneConfig::getId));
         if (CollectionUtils.isEmpty(allSystemConfigSceneList)) {
             return new ArrayList<>();
         }
@@ -173,16 +173,16 @@ public abstract class AbstractConfigAccess<T> implements ConfigAccess<T> {
 
             // 只选择客户端的通知配置即可
             RetryNotifySceneEnum retryNotifyScene = RetryNotifySceneEnum.getNotifyScene(notifyConfig.getNotifyScene(),
-                NodeTypeEnum.CLIENT);
+                    NodeTypeEnum.CLIENT);
             JobNotifySceneEnum jobNotifyScene = JobNotifySceneEnum.getJobNotifyScene(notifyConfig.getNotifyScene(),
-                NodeTypeEnum.CLIENT);
+                    NodeTypeEnum.CLIENT);
             if (Objects.isNull(retryNotifyScene) && Objects.isNull(jobNotifyScene)) {
                 continue;
             }
 
             String recipientIds = notifyConfig.getRecipientIds();
             List<NotifyRecipient> notifyRecipients = notifyRecipientMapper.selectBatchIds(
-                JsonUtil.parseList(recipientIds, Long.class));
+                    JsonUtil.parseList(recipientIds, Long.class));
             notifies.add(getNotify(notifyConfig, notifyRecipients, retryNotifyScene, jobNotifyScene));
         }
 
@@ -203,7 +203,7 @@ public abstract class AbstractConfigAccess<T> implements ConfigAccess<T> {
     }
 
     private static Notify getNotify(final NotifyConfig notifyConfig, final List<NotifyRecipient> notifyRecipients,
-        final RetryNotifySceneEnum retryNotifyScene, final JobNotifySceneEnum jobNotifyScene) {
+                                    final RetryNotifySceneEnum retryNotifyScene, final JobNotifySceneEnum jobNotifyScene) {
         List<Recipient> recipients = new ArrayList<>();
         for (final NotifyRecipient notifyRecipient : notifyRecipients) {
             Recipient recipient = new Recipient();

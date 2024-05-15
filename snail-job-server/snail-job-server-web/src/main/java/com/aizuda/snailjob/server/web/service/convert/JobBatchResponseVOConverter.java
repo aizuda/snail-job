@@ -27,7 +27,7 @@ public interface JobBatchResponseVOConverter {
     List<JobBatchResponseVO> convertList(List<JobBatchResponseDO> jobBatches);
 
     @Mappings({
-        @Mapping(target = "executionAt", expression = "java(JobBatchResponseVOConverter.toLocalDateTime(jobBatchResponseDO.getExecutionAt()))")
+            @Mapping(target = "executionAt", expression = "java(JobBatchResponseVOConverter.toLocalDateTime(jobBatchResponseDO.getExecutionAt()))")
     })
     JobBatchResponseVO convert(JobBatchResponseDO jobBatchResponseDO);
 
@@ -39,10 +39,10 @@ public interface JobBatchResponseVOConverter {
     JobBatchResponseVO convert(JobTaskBatch jobTaskBatch);
 
     @Mappings({
-        @Mapping(source = "jobBatch.groupName", target = "groupName"),
-        @Mapping(source = "jobBatch.id", target = "id"),
-        @Mapping(source = "jobBatch.createDt", target = "createDt"),
-        @Mapping(target = "executionAt", expression = "java(JobBatchResponseVOConverter.toLocalDateTime(jobBatch.getExecutionAt()))")
+            @Mapping(source = "jobBatch.groupName", target = "groupName"),
+            @Mapping(source = "jobBatch.id", target = "id"),
+            @Mapping(source = "jobBatch.createDt", target = "createDt"),
+            @Mapping(target = "executionAt", expression = "java(JobBatchResponseVOConverter.toLocalDateTime(jobBatch.getExecutionAt()))")
     })
     JobBatchResponseVO convert(JobTaskBatch jobBatch, Job job);
 

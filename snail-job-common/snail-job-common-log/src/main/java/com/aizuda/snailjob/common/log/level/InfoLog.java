@@ -39,15 +39,15 @@ public interface InfoLog {
     /**
      * 打印 INFO 等级的日志
      *
-     * @param msg       日志信息
+     * @param msg 日志信息
      */
     void info(Boolean remote, String msg);
 
     /**
      * 打印 INFO 等级的日志
      *
-     * @param msg       日志信息
-     * @param t         错误对象
+     * @param msg 日志信息
+     * @param t   错误对象
      */
     void info(Boolean remote, String msg, Throwable t);
 

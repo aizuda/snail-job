@@ -49,12 +49,12 @@ public class RetryTaskSchedule extends AbstractSchedule implements Lifecycle {
     protected void doExecute() {
         try {
             Set<Pair<String/*groupName*/, String/*namespaceId*/>> groupNameList = accessTemplate.getGroupConfigAccess()
-                .list(new LambdaQueryWrapper<GroupConfig>()
-                    .select(GroupConfig::getGroupName, GroupConfig::getNamespaceId)
-                    .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus()))
-                .stream()
-                .map(groupConfig -> Pair.of(groupConfig.getGroupName(), groupConfig.getNamespaceId()))
-                .collect(Collectors.toSet());
+                    .list(new LambdaQueryWrapper<GroupConfig>()
+                            .select(GroupConfig::getGroupName, GroupConfig::getNamespaceId)
+                            .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus()))
+                    .stream()
+                    .map(groupConfig -> Pair.of(groupConfig.getGroupName(), groupConfig.getNamespaceId()))
+                    .collect(Collectors.toSet());
 
             for (Pair<String/*groupName*/, String/*namespaceId*/> pair : groupNameList) {
                 retryService.moveDeadLetterAndDelFinish(pair.getKey(), pair.getValue());

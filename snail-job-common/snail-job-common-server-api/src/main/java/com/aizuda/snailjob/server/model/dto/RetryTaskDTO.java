@@ -1,6 +1,7 @@
 package com.aizuda.snailjob.server.model.dto;
 
 import lombok.Data;
+
 import java.io.Serializable;
 
 /**

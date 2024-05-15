@@ -25,6 +25,7 @@ import java.io.IOException;
 public class DiscardWorkflowBlockStrategy extends AbstractWorkflowBlockStrategy {
     private final WorkflowBatchGenerator workflowBatchGenerator;
     private final WorkflowBatchHandler workflowBatchHandler;
+
     @Override
     protected void doBlock(final WorkflowBlockStrategyContext workflowBlockStrategyContext) {
 

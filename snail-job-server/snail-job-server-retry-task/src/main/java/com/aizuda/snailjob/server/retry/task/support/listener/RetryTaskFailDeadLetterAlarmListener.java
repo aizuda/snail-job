@@ -34,7 +34,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 @Slf4j
 public class RetryTaskFailDeadLetterAlarmListener extends
-    AbstractRetryAlarm<RetryTaskFailDeadLetterAlarmEvent> implements Runnable, Lifecycle {
+        AbstractRetryAlarm<RetryTaskFailDeadLetterAlarmEvent> implements Runnable, Lifecycle {
 
     /**
      * 死信告警数据
@@ -42,13 +42,13 @@ public class RetryTaskFailDeadLetterAlarmListener extends
     private LinkedBlockingQueue<List<RetryDeadLetter>> queue = new LinkedBlockingQueue<>(1000);
 
     private static String retryTaskDeadTextMessagesFormatter =
-        "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 重试任务失败进入死信队列</font>  \n" +
-            "> 空间ID:{}  \n" +
-            "> 组名称:{}  \n" +
-            "> 执行器名称:{}  \n" +
-            "> 场景名称:{}  \n" +
-            "> 业务数据:{}  \n" +
-            "> 时间:{}  \n";
+            "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 重试任务失败进入死信队列</font>  \n" +
+                    "> 空间ID:{}  \n" +
+                    "> 组名称:{}  \n" +
+                    "> 执行器名称:{}  \n" +
+                    "> 场景名称:{}  \n" +
+                    "> 业务数据:{}  \n" +
+                    "> 时间:{}  \n";
 
     @Override
     protected List<SyetemTaskTypeEnum> getSystemTaskType() {
@@ -79,15 +79,15 @@ public class RetryTaskFailDeadLetterAlarmListener extends
 
         // 预警
         return AlarmContext.build().text(retryTaskDeadTextMessagesFormatter,
-                EnvironmentUtils.getActiveProfile(),
-                retryAlarmInfo.getNamespaceId(),
-                retryAlarmInfo.getGroupName(),
-                retryAlarmInfo.getExecutorName(),
-                retryAlarmInfo.getSceneName(),
-                retryAlarmInfo.getArgsStr(),
-                DateUtils.format(retryAlarmInfo.getCreateDt(), DateUtils.NORM_DATETIME_PATTERN))
-            .title("组:[{}] 场景:[{}] 环境重试任务失败进入死信队列",
-                retryAlarmInfo.getGroupName(), retryAlarmInfo.getSceneName());
+                        EnvironmentUtils.getActiveProfile(),
+                        retryAlarmInfo.getNamespaceId(),
+                        retryAlarmInfo.getGroupName(),
+                        retryAlarmInfo.getExecutorName(),
+                        retryAlarmInfo.getSceneName(),
+                        retryAlarmInfo.getArgsStr(),
+                        DateUtils.format(retryAlarmInfo.getCreateDt(), DateUtils.NORM_DATETIME_PATTERN))
+                .title("组:[{}] 场景:[{}] 环境重试任务失败进入死信队列",
+                        retryAlarmInfo.getGroupName(), retryAlarmInfo.getSceneName());
     }
 
     @Override

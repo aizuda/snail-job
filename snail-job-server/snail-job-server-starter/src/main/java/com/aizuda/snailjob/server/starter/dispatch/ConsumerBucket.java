@@ -12,5 +12,5 @@ import java.util.Set;
 @Data
 public class ConsumerBucket {
 
-   private Set<Integer> buckets;
+    private Set<Integer> buckets;
 }

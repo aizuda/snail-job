@@ -14,7 +14,7 @@ import lombok.EqualsAndHashCode;
 @Data
 public class RetryLogMetaDTO extends LogMetaDTO {
 
-    public RetryLogMetaDTO () {
+    public RetryLogMetaDTO() {
         setLogType(LogTypeEnum.RETRY);
     }
 

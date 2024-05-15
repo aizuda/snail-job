@@ -35,9 +35,9 @@ public class AllocateMessageQueueAveragely implements ServerLoadBalance<Integer,
          *        index >= mod 其余消费者平均消费剩下的队列
          */
         int averageSize =
-            bucketList.size() <= serverList.size() ? 1
-                : (mod > 0 && index < mod ? bucketList.size() / serverList.size()
-                    + 1 : bucketList.size() / serverList.size());
+                bucketList.size() <= serverList.size() ? 1
+                        : (mod > 0 && index < mod ? bucketList.size() / serverList.size()
+                        + 1 : bucketList.size() / serverList.size());
 
         // 这里开始计算起始坐标
         int startIndex = (mod > 0 && index < mod) ? index * averageSize : index * averageSize + mod;

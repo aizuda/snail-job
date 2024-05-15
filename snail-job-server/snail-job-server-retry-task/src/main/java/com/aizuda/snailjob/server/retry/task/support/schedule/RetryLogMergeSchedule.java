@@ -83,7 +83,7 @@ public class RetryLogMergeSchedule extends AbstractSchedule implements Lifecycle
             long total;
             LocalDateTime endTime = LocalDateTime.now().minusDays(systemProperties.getMergeLogDays());
             total = PartitionTaskUtils.process(startId -> retryLogList(startId, endTime),
-                this::processJobLogPartitionTasks, 0);
+                    this::processJobLogPartitionTasks, 0);
 
             SnailJobLog.LOCAL.debug("job merge success total:[{}]", total);
         } catch (Exception e) {
@@ -104,13 +104,13 @@ public class RetryLogMergeSchedule extends AbstractSchedule implements Lifecycle
     private List<RetryMergePartitionTaskDTO> retryLogList(Long startId, LocalDateTime endTime) {
 
         List<RetryTaskLog> jobTaskBatchList = retryTaskLogMapper.selectPage(
-            new Page<>(0, 1000),
-            new LambdaUpdateWrapper<RetryTaskLog>()
-                .ge(RetryTaskLog::getId, startId)
-                .in(RetryTaskLog::getRetryStatus, Lists.newArrayList(
-                    RetryStatusEnum.FINISH.getStatus(),
-                    RetryStatusEnum.MAX_COUNT.getStatus()))
-                .le(RetryTaskLog::getCreateDt, endTime)).getRecords();
+                new Page<>(0, 1000),
+                new LambdaUpdateWrapper<RetryTaskLog>()
+                        .ge(RetryTaskLog::getId, startId)
+                        .in(RetryTaskLog::getRetryStatus, Lists.newArrayList(
+                                RetryStatusEnum.FINISH.getStatus(),
+                                RetryStatusEnum.MAX_COUNT.getStatus()))
+                        .le(RetryTaskLog::getCreateDt, endTime)).getRecords();
         return RetryTaskLogConverter.INSTANCE.toRetryMergePartitionTaskDTOs(jobTaskBatchList);
     }
 
@@ -129,43 +129,43 @@ public class RetryLogMergeSchedule extends AbstractSchedule implements Lifecycle
 
         // Waiting for deletion RetryTaskLogMessage
         List<RetryTaskLogMessage> retryLogMessageList = retryTaskLogMessageMapper.selectList(
-            new LambdaQueryWrapper<RetryTaskLogMessage>().in(RetryTaskLogMessage::getUniqueId, ids));
+                new LambdaQueryWrapper<RetryTaskLogMessage>().in(RetryTaskLogMessage::getUniqueId, ids));
         if (CollectionUtil.isEmpty(retryLogMessageList)) {
             return;
         }
 
         List<Map.Entry<Triple<String, String, String>, List<RetryTaskLogMessage>>> jobLogMessageGroupList = retryLogMessageList.stream()
-            .collect(
-                groupingBy(message -> Triple.of(message.getNamespaceId(), message.getGroupName(),
-                    message.getUniqueId())))
-            .entrySet().stream()
-            .filter(entry -> entry.getValue().size() >= 2).collect(toList());
+                .collect(
+                        groupingBy(message -> Triple.of(message.getNamespaceId(), message.getGroupName(),
+                                message.getUniqueId())))
+                .entrySet().stream()
+                .filter(entry -> entry.getValue().size() >= 2).collect(toList());
 
         for (Map.Entry<Triple<String, String, String>/*taskId*/, List<RetryTaskLogMessage>> jobLogMessageMap : jobLogMessageGroupList) {
             List<Long> jobLogMessageDeleteBatchIds = new ArrayList<>();
 
             List<String> mergeMessages = jobLogMessageMap.getValue().stream().map(k -> {
-                    jobLogMessageDeleteBatchIds.add(k.getId());
-                    return JsonUtil.parseObject(k.getMessage(), List.class);
-                })
-                .reduce((a, b) -> {
-                    // 合并日志信息
-                    List<String> list = new ArrayList<>();
-                    list.addAll(a);
-                    list.addAll(b);
-                    return list;
-                }).get();
+                        jobLogMessageDeleteBatchIds.add(k.getId());
+                        return JsonUtil.parseObject(k.getMessage(), List.class);
+                    })
+                    .reduce((a, b) -> {
+                        // 合并日志信息
+                        List<String> list = new ArrayList<>();
+                        list.addAll(a);
+                        list.addAll(b);
+                        return list;
+                    }).get();
 
             // 500条数据为一个批次
             List<List<String>> partitionMessages = Lists.partition(mergeMessages,
-                systemProperties.getMergeLogNum());
+                    systemProperties.getMergeLogNum());
 
             List<RetryTaskLogMessage> jobLogMessageUpdateList = new ArrayList<>();
 
             for (int i = 0; i < partitionMessages.size(); i++) {
                 // 深拷贝
                 RetryTaskLogMessage jobLogMessage = RetryTaskLogConverter.INSTANCE.toRetryTaskLogMessage(
-                    jobLogMessageMap.getValue().get(0));
+                        jobLogMessageMap.getValue().get(0));
                 List<String> messages = partitionMessages.get(i);
 
                 jobLogMessage.setLogNum(messages.size());

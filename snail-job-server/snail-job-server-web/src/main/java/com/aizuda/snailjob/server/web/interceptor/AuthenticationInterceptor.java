@@ -90,7 +90,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
             }
 
             Long count = namespaceMapper.selectCount(
-                new LambdaQueryWrapper<Namespace>().eq(Namespace::getUniqueId, namespaceId));
+                    new LambdaQueryWrapper<Namespace>().eq(Namespace::getUniqueId, namespaceId));
             Assert.isTrue(count > 0, () -> new SnailJobServerException("[{}] 命名空间不存在", namespaceId));
             UserSessionVO userSessionVO = new UserSessionVO();
             userSessionVO.setId(systemUser.getId());
@@ -101,10 +101,10 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
             // 普通用户才获取权限
             if (userSessionVO.isUser()) {
                 List<SystemUserPermission> systemUserPermissions = systemUserPermissionMapper.selectList(
-                    new LambdaQueryWrapper<SystemUserPermission>()
-                        .select(SystemUserPermission::getGroupName)
-                        .eq(SystemUserPermission::getSystemUserId, systemUser.getId())
-                        .eq(SystemUserPermission::getNamespaceId, namespaceId)
+                        new LambdaQueryWrapper<SystemUserPermission>()
+                                .select(SystemUserPermission::getGroupName)
+                                .eq(SystemUserPermission::getSystemUserId, systemUser.getId())
+                                .eq(SystemUserPermission::getNamespaceId, namespaceId)
                 );
                 userSessionVO.setGroupNames(StreamUtils.toList(systemUserPermissions, SystemUserPermission::getGroupName));
             }

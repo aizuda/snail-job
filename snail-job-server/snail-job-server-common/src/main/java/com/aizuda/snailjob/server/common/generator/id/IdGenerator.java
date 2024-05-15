@@ -20,7 +20,7 @@ public interface IdGenerator {
     /**
      * 获取分布式id
      *
-     * @param groupName 组
+     * @param groupName   组
      * @param namespaceId 命名空间
      * @return id
      */

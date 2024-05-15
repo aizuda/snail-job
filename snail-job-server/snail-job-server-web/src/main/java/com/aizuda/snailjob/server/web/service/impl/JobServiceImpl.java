@@ -75,15 +75,15 @@ public class JobServiceImpl implements JobService {
         PageDTO<Job> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
         UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
         PageDTO<Job> selectPage = jobMapper.selectPage(pageDTO,
-            new LambdaQueryWrapper<Job>()
-                .eq(Job::getDeleted, StatusEnum.NO.getStatus())
-                .eq(Job::getNamespaceId, userSessionVO.getNamespaceId())
-                .in(userSessionVO.isUser(), Job::getGroupName, userSessionVO.getGroupNames())
-                .eq(StrUtil.isNotBlank(queryVO.getGroupName()), Job::getGroupName, queryVO.getGroupName())
-                .likeRight(StrUtil.isNotBlank(queryVO.getJobName()), Job::getJobName, StrUtil.trim(queryVO.getJobName()))
-                .eq(Objects.nonNull(queryVO.getJobStatus()), Job::getJobStatus, queryVO.getJobStatus())
-                .eq(Job::getDeleted, StatusEnum.NO.getStatus())
-                .orderByDesc(Job::getId));
+                new LambdaQueryWrapper<Job>()
+                        .eq(Job::getDeleted, StatusEnum.NO.getStatus())
+                        .eq(Job::getNamespaceId, userSessionVO.getNamespaceId())
+                        .in(userSessionVO.isUser(), Job::getGroupName, userSessionVO.getGroupNames())
+                        .eq(StrUtil.isNotBlank(queryVO.getGroupName()), Job::getGroupName, queryVO.getGroupName())
+                        .likeRight(StrUtil.isNotBlank(queryVO.getJobName()), Job::getJobName, StrUtil.trim(queryVO.getJobName()))
+                        .eq(Objects.nonNull(queryVO.getJobStatus()), Job::getJobStatus, queryVO.getJobStatus())
+                        .eq(Job::getDeleted, StatusEnum.NO.getStatus())
+                        .orderByDesc(Job::getId));
 
         List<JobResponseVO> jobResponseList = JobResponseVOConverter.INSTANCE.convertList(selectPage.getRecords());
 
@@ -106,16 +106,16 @@ public class JobServiceImpl implements JobService {
 
         UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
         PageDTO<Job> selectPage = jobMapper.selectPage(
-            new PageDTO<>(1, 20),
-            new LambdaQueryWrapper<Job>()
-                .select(Job::getId, Job::getJobName)
-                .eq(Job::getNamespaceId, userSessionVO.getNamespaceId())
-                .likeRight(StrUtil.isNotBlank(keywords), Job::getJobName, StrUtil.trim(keywords))
-                .eq(StrUtil.isNotBlank(groupName), Job::getGroupName, groupName)
-                .eq(Objects.nonNull(jobId), Job::getId, jobId)
-                .eq(Job::getDeleted, StatusEnum.NO.getStatus())
-                // SQLServer 分页必须 ORDER BY
-                .orderByAsc(Job::getId));
+                new PageDTO<>(1, 20),
+                new LambdaQueryWrapper<Job>()
+                        .select(Job::getId, Job::getJobName)
+                        .eq(Job::getNamespaceId, userSessionVO.getNamespaceId())
+                        .likeRight(StrUtil.isNotBlank(keywords), Job::getJobName, StrUtil.trim(keywords))
+                        .eq(StrUtil.isNotBlank(groupName), Job::getGroupName, groupName)
+                        .eq(Objects.nonNull(jobId), Job::getId, jobId)
+                        .eq(Job::getDeleted, StatusEnum.NO.getStatus())
+                        // SQLServer 分页必须 ORDER BY
+                        .orderByAsc(Job::getId));
         return JobResponseVOConverter.INSTANCE.convertList(selectPage.getRecords());
     }
 
@@ -124,7 +124,7 @@ public class JobServiceImpl implements JobService {
         // 判断常驻任务
         Job job = updateJobResident(jobRequestVO);
         job.setBucketIndex(HashUtil.bkdrHash(jobRequestVO.getGroupName() + jobRequestVO.getJobName())
-            % systemProperties.getBucketTotal());
+                % systemProperties.getBucketTotal());
         job.setNextTriggerAt(calculateNextTriggerAt(jobRequestVO, DateUtils.toNowMilli()));
         job.setNamespaceId(UserSessionUtils.currentUserSession().getNamespaceId());
         return 1 == jobMapper.insert(job);
@@ -146,18 +146,18 @@ public class JobServiceImpl implements JobService {
             job.setNextTriggerAt(0L);
             // 非常驻任务 > 非常驻任务
         } else if (Objects.equals(job.getResident(), StatusEnum.NO.getStatus()) && Objects.equals(
-            updateJob.getResident(),
-            StatusEnum.NO.getStatus())) {
+                updateJob.getResident(),
+                StatusEnum.NO.getStatus())) {
             updateJob.setNextTriggerAt(calculateNextTriggerAt(jobRequestVO, DateUtils.toNowMilli()));
         } else if (Objects.equals(job.getResident(), StatusEnum.YES.getStatus()) && Objects.equals(
-            updateJob.getResident(), StatusEnum.NO.getStatus())) {
+                updateJob.getResident(), StatusEnum.NO.getStatus())) {
             // 常驻任务的触发时间
             long time = Optional.ofNullable(ResidentTaskCache.get(jobRequestVO.getId()))
-                .orElse(DateUtils.toNowMilli());
+                    .orElse(DateUtils.toNowMilli());
             updateJob.setNextTriggerAt(calculateNextTriggerAt(jobRequestVO, time));
             // 老的是不是常驻任务 新的是常驻任务 需要使用当前时间计算下次触发时间
         } else if (Objects.equals(job.getResident(), StatusEnum.NO.getStatus()) && Objects.equals(
-            updateJob.getResident(), StatusEnum.YES.getStatus())) {
+                updateJob.getResident(), StatusEnum.YES.getStatus())) {
             updateJob.setNextTriggerAt(DateUtils.toNowMilli());
         }
 
@@ -213,9 +213,9 @@ public class JobServiceImpl implements JobService {
         Assert.notNull(job, () -> new SnailJobServerException("job can not be null."));
 
         long count = accessTemplate.getGroupConfigAccess().count(new LambdaQueryWrapper<GroupConfig>()
-            .eq(GroupConfig::getGroupName, job.getGroupName())
-            .eq(GroupConfig::getNamespaceId, job.getNamespaceId())
-            .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus())
+                .eq(GroupConfig::getGroupName, job.getGroupName())
+                .eq(GroupConfig::getNamespaceId, job.getNamespaceId())
+                .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus())
         );
 
         Assert.isTrue(count > 0, () -> new SnailJobServerException("组:[{}]已经关闭，不支持手动执行.", job.getGroupName()));
@@ -233,12 +233,12 @@ public class JobServiceImpl implements JobService {
     public List<JobResponseVO> getJobList(String groupName) {
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
         List<Job> jobs = jobMapper.selectList(
-            new LambdaQueryWrapper<Job>()
-                .select(Job::getId, Job::getJobName)
-                .eq(Job::getNamespaceId, namespaceId)
-                .eq(Job::getGroupName, groupName)
-                .eq(Job::getDeleted, StatusEnum.NO.getStatus())
-                .orderByDesc(Job::getCreateDt));
+                new LambdaQueryWrapper<Job>()
+                        .select(Job::getId, Job::getJobName)
+                        .eq(Job::getNamespaceId, namespaceId)
+                        .eq(Job::getGroupName, groupName)
+                        .eq(Job::getDeleted, StatusEnum.NO.getStatus())
+                        .orderByDesc(Job::getCreateDt));
         List<JobResponseVO> jobResponseList = JobResponseVOConverter.INSTANCE.convertList(jobs);
         return jobResponseList;
     }

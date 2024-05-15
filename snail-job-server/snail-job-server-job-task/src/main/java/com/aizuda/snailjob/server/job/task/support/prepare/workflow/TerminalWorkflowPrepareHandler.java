@@ -20,6 +20,7 @@ import java.util.Objects;
 @Slf4j
 public class TerminalWorkflowPrepareHandler extends AbstractWorkflowPrePareHandler {
     private final WorkflowBatchGenerator workflowBatchGenerator;
+
     @Override
     public boolean matches(final Integer status) {
         return Objects.isNull(status);

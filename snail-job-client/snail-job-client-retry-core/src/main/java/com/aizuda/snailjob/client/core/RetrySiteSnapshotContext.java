@@ -1,7 +1,6 @@
 package com.aizuda.snailjob.client.core;
 
 import com.aizuda.snailjob.client.core.intercepter.ThreadLockRetrySiteSnapshotContext;
-import com.aizuda.snailjob.client.core.intercepter.ThreadLockRetrySiteSnapshotContext;
 
 /**
  * 重试现场记录上下文

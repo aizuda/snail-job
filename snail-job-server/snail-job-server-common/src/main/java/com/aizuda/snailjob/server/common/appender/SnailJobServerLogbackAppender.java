@@ -41,7 +41,7 @@ public class SnailJobServerLogbackAppender<E> extends UnsynchronizedAppenderBase
 
         // Not job context
         if (!(eventObject instanceof LoggingEvent) || Objects.isNull(
-            MDC.getMDCAdapter().get(LogFieldConstants.MDC_REMOTE))) {
+                MDC.getMDCAdapter().get(LogFieldConstants.MDC_REMOTE))) {
             return;
         }
 
@@ -106,7 +106,7 @@ public class SnailJobServerLogbackAppender<E> extends UnsynchronizedAppenderBase
      * 保存日志
      *
      * @param logContentDTO 日志内容
-     * @param logMetaDTO 日志元数据
+     * @param logMetaDTO    日志元数据
      */
     private void saveLog(final LogContentDTO logContentDTO, final LogMetaDTO logMetaDTO) {
 

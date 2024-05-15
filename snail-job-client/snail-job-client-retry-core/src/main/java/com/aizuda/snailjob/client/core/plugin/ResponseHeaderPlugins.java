@@ -2,7 +2,6 @@ package com.aizuda.snailjob.client.core.plugin;
 
 import com.aizuda.snailjob.client.core.intercepter.RetrySiteSnapshot;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
-import com.aizuda.snailjob.client.core.intercepter.RetrySiteSnapshot;
 
 import java.util.List;
 import java.util.Map;

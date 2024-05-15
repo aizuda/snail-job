@@ -43,7 +43,7 @@ public class CacheGroupRateLimiter implements Lifecycle {
 
     @Override
     public void start() {
-       SnailJobLog.LOCAL.info("CacheGroupRateLimiter start");
+        SnailJobLog.LOCAL.info("CacheGroupRateLimiter start");
         CACHE = CacheBuilder.newBuilder()
                 // 设置并发级别为cpu核心数
                 .concurrencyLevel(Runtime.getRuntime().availableProcessors())
@@ -52,6 +52,6 @@ public class CacheGroupRateLimiter implements Lifecycle {
 
     @Override
     public void close() {
-       SnailJobLog.LOCAL.info("CacheGroupRateLimiter stop");
+        SnailJobLog.LOCAL.info("CacheGroupRateLimiter stop");
     }
 }

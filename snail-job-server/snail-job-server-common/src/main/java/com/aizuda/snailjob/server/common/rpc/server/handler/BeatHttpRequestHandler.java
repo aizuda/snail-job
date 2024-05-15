@@ -37,6 +37,6 @@ public class BeatHttpRequestHandler extends GetHttpRequestHandler {
     public String doHandler(String content, UrlQuery query, HttpHeaders headers) {
         SnailJobLog.LOCAL.debug("Beat check content:[{}]", content);
         SnailJobRequest retryRequest = JsonUtil.parseObject(content, SnailJobRequest.class);
-       return JsonUtil.toJsonString(new NettyResult(PONG, retryRequest.getReqId()));
+        return JsonUtil.toJsonString(new NettyResult(PONG, retryRequest.getReqId()));
     }
 }

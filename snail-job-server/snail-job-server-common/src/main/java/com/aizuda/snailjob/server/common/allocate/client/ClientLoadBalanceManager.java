@@ -27,8 +27,7 @@ public class ClientLoadBalanceManager {
         CONSISTENT_HASH(1, new ClientLoadBalanceConsistentHash(100)),
         RANDOM(2, new ClientLoadBalanceRandom()),
         LRU(3, new ClientLoadBalanceLRU(100)),
-        ROUND(4, new ClientLoadBalanceRound())
-        ;
+        ROUND(4, new ClientLoadBalanceRound());
 
         private final int type;
         private final ClientLoadBalance clientLoadBalance;

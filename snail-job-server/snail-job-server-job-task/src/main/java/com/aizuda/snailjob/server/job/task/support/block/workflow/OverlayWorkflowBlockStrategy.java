@@ -30,7 +30,7 @@ public class OverlayWorkflowBlockStrategy extends AbstractWorkflowBlockStrategy 
 
         // 重新生成一个批次
         WorkflowTaskBatchGeneratorContext workflowTaskBatchGeneratorContext = WorkflowTaskConverter.INSTANCE.toWorkflowTaskBatchGeneratorContext(
-            workflowBlockStrategyContext);
+                workflowBlockStrategyContext);
         workflowBatchGenerator.generateJobTaskBatch(workflowTaskBatchGeneratorContext);
 
     }

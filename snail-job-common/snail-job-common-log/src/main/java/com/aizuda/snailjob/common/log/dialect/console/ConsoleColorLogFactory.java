@@ -10,17 +10,17 @@ import com.aizuda.snailjob.common.log.factory.LogFactory;
  */
 public class ConsoleColorLogFactory extends LogFactory {
 
-	public ConsoleColorLogFactory() {
-		super("Console Color Logging");
-	}
+    public ConsoleColorLogFactory() {
+        super("Console Color Logging");
+    }
 
-	@Override
-	public Log createLog(String name) {
-		return new ConsoleColorLog(name);
-	}
+    @Override
+    public Log createLog(String name) {
+        return new ConsoleColorLog(name);
+    }
 
-	@Override
-	public Log createLog(Class<?> clazz) {
-		return new ConsoleColorLog(clazz);
-	}
+    @Override
+    public Log createLog(Class<?> clazz) {
+        return new ConsoleColorLog(clazz);
+    }
 }

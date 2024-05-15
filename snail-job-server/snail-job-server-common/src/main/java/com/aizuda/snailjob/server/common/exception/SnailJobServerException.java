@@ -15,7 +15,7 @@ public class SnailJobServerException extends BaseSnailJobException {
         super(message);
     }
 
-    public SnailJobServerException(String message, Object ... arguments) {
+    public SnailJobServerException(String message, Object... arguments) {
         super(message, arguments);
     }
 }

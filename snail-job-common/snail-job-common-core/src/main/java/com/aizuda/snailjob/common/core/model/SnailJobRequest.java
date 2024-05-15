@@ -13,26 +13,26 @@ import java.util.concurrent.atomic.AtomicLong;
 @Data
 public class SnailJobRequest {
 
-   private static final AtomicLong REQUEST_ID = new AtomicLong(0);
+    private static final AtomicLong REQUEST_ID = new AtomicLong(0);
 
-   private long reqId;
+    private long reqId;
 
-   private Object[] args;
+    private Object[] args;
 
-   public SnailJobRequest(Object... args) {
-      this.args = args;
-      this.reqId = newId();
-   }
+    public SnailJobRequest(Object... args) {
+        this.args = args;
+        this.reqId = newId();
+    }
 
-   private static long newId() {
-      return REQUEST_ID.getAndIncrement();
-   }
+    private static long newId() {
+        return REQUEST_ID.getAndIncrement();
+    }
 
-   public SnailJobRequest() {
-   }
+    public SnailJobRequest() {
+    }
 
-   @Override
-   public String toString() {
-      return JsonUtil.toJsonString(this);
-   }
+    @Override
+    public String toString() {
+        return JsonUtil.toJsonString(this);
+    }
 }

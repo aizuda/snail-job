@@ -22,7 +22,7 @@ public class BaseSnailJobException extends RuntimeException {
         super(cause);
     }
 
-    public BaseSnailJobException(String message, Object ... arguments) {
+    public BaseSnailJobException(String message, Object... arguments) {
         this(message, getArguments(arguments), getThrowable(arguments));
     }
 
@@ -38,13 +38,13 @@ public class BaseSnailJobException extends RuntimeException {
         super(MessageFormatter.format(message, argument).getMessage());
     }
 
-    public static Object[] getArguments(Object ... arguments) {
+    public static Object[] getArguments(Object... arguments) {
 
         Object argument = arguments[arguments.length - 1];
         if (argument instanceof Throwable) {
 
             Object[] dest = new Object[arguments.length - 1];
-            System.arraycopy(arguments, 0, dest, 0,  arguments.length - 1);
+            System.arraycopy(arguments, 0, dest, 0, arguments.length - 1);
 
             return dest;
         }
@@ -52,7 +52,7 @@ public class BaseSnailJobException extends RuntimeException {
         return arguments;
     }
 
-    public static Throwable getThrowable(Object ... arguments) {
-        return arguments.length == getArguments(arguments).length ? null: (Throwable) arguments[arguments.length - 1];
+    public static Throwable getThrowable(Object... arguments) {
+        return arguments.length == getArguments(arguments).length ? null : (Throwable) arguments[arguments.length - 1];
     }
 }

@@ -30,6 +30,7 @@ import static com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum.NOT_C
 public class WorkflowTaskPrepareActor extends AbstractActor {
     private final List<WorkflowPrePareHandler> workflowPrePareHandlers;
     private final WorkflowTaskBatchMapper workflowTaskBatchMapper;
+
     @Override
     public Receive createReceive() {
         return receiveBuilder().match(WorkflowTaskPrepareDTO.class, workflowTaskPrepareDTO -> {

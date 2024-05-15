@@ -40,14 +40,14 @@ public class OfflineNodeSchedule extends AbstractSchedule implements Lifecycle {
         try {
             // 删除内存缓存的待下线的机器
             LocalDateTime endTime = LocalDateTime.now().minusSeconds(
-                ServerRegister.DELAY_TIME + (ServerRegister.DELAY_TIME / 3));
+                    ServerRegister.DELAY_TIME + (ServerRegister.DELAY_TIME / 3));
 
             // 先删除DB中需要下线的机器
             serverNodeMapper.delete(new LambdaQueryWrapper<ServerNode>().le(ServerNode::getExpireAt, endTime));
 
             Set<RegisterNodeInfo> allPods = CacheRegisterTable.getAllPods();
             Set<RegisterNodeInfo> waitOffline = allPods.stream().filter(registerNodeInfo -> registerNodeInfo.getExpireAt().isBefore(endTime)).collect(
-                Collectors.toSet());
+                    Collectors.toSet());
             Set<String> podIds = StreamUtils.toSet(waitOffline, RegisterNodeInfo::getHostId);
             if (CollectionUtils.isEmpty(podIds)) {
                 return;

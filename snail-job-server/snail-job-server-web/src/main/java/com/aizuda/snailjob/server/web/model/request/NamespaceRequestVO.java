@@ -22,7 +22,7 @@ public class NamespaceRequestVO {
     /**
      * 名称
      */
-    @NotBlank(message= "name 不能为空")
+    @NotBlank(message = "name 不能为空")
     private String name;
 
 }

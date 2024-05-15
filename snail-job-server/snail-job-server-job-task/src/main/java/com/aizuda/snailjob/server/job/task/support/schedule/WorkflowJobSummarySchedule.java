@@ -71,12 +71,12 @@ public class WorkflowJobSummarySchedule extends AbstractSchedule implements Life
                 LocalDateTime todayFrom = LocalDateTime.of(LocalDate.now(), LocalTime.MIN).plusDays(-i);
                 LocalDateTime todayTo = LocalDateTime.of(LocalDate.now(), LocalTime.MAX).plusDays(-i);
                 LambdaQueryWrapper<WorkflowTaskBatch> wrapper = new LambdaQueryWrapper<WorkflowTaskBatch>()
-                    .between(WorkflowTaskBatch::getCreateDt, todayFrom, todayTo)
-                    .groupBy(WorkflowTaskBatch::getNamespaceId, WorkflowTaskBatch::getGroupName,
-                        WorkflowTaskBatch::getWorkflowId, WorkflowTaskBatch::getTaskBatchStatus,
-                        WorkflowTaskBatch::getOperationReason);
+                        .between(WorkflowTaskBatch::getCreateDt, todayFrom, todayTo)
+                        .groupBy(WorkflowTaskBatch::getNamespaceId, WorkflowTaskBatch::getGroupName,
+                                WorkflowTaskBatch::getWorkflowId, WorkflowTaskBatch::getTaskBatchStatus,
+                                WorkflowTaskBatch::getOperationReason);
                 List<JobBatchSummaryResponseDO> summaryWorkflowResponseDOList = jobTaskBatchMapper.summaryWorkflowTaskBatchList(
-                    wrapper);
+                        wrapper);
                 if (CollectionUtils.isEmpty(summaryWorkflowResponseDOList)) {
                     continue;
                 }
@@ -85,18 +85,18 @@ public class WorkflowJobSummarySchedule extends AbstractSchedule implements Life
                 List<JobSummary> jobSummaryList = jobSummaryList(todayFrom, summaryWorkflowResponseDOList);
 
                 List<JobSummary> jobSummaries = jobSummaryMapper.selectList(new LambdaQueryWrapper<JobSummary>()
-                    .eq(JobSummary::getTriggerAt, todayFrom)
-                    .eq(JobSummary::getSystemTaskType, SyetemTaskTypeEnum.WORKFLOW.getType())
-                    .in(JobSummary::getBusinessId, StreamUtils.toSet(jobSummaryList, JobSummary::getBusinessId)));
+                        .eq(JobSummary::getTriggerAt, todayFrom)
+                        .eq(JobSummary::getSystemTaskType, SyetemTaskTypeEnum.WORKFLOW.getType())
+                        .in(JobSummary::getBusinessId, StreamUtils.toSet(jobSummaryList, JobSummary::getBusinessId)));
 
                 Map<Pair<Long, LocalDateTime>, JobSummary> summaryMap = StreamUtils.toIdentityMap(jobSummaries,
-                    jobSummary -> Pair.of(jobSummary.getBusinessId(), jobSummary.getTriggerAt()));
+                        jobSummary -> Pair.of(jobSummary.getBusinessId(), jobSummary.getTriggerAt()));
 
                 List<JobSummary> waitInserts = Lists.newArrayList();
                 List<JobSummary> waitUpdates = Lists.newArrayList();
                 for (final JobSummary jobSummary : jobSummaryList) {
                     if (Objects.isNull(
-                        summaryMap.get(Pair.of(jobSummary.getBusinessId(), jobSummary.getTriggerAt())))) {
+                            summaryMap.get(Pair.of(jobSummary.getBusinessId(), jobSummary.getTriggerAt())))) {
                         waitInserts.add(jobSummary);
                     } else {
                         waitUpdates.add(jobSummary);
@@ -114,8 +114,8 @@ public class WorkflowJobSummarySchedule extends AbstractSchedule implements Life
                 }
 
                 SnailJobLog.LOCAL.debug(
-                    "workflow job summary dashboard success todayFrom:[{}] todayTo:[{}] updateTotalJobSummary:[{}] insertTotalJobSummary:[{}]",
-                    todayFrom, todayTo, updateTotalJobSummary, insertTotalJobSummary);
+                        "workflow job summary dashboard success todayFrom:[{}] todayTo:[{}] updateTotalJobSummary:[{}] insertTotalJobSummary:[{}]",
+                        todayFrom, todayTo, updateTotalJobSummary, insertTotalJobSummary);
             }
         } catch (Exception e) {
             SnailJobLog.LOCAL.error("workflow job summary dashboard log error", e);
@@ -126,7 +126,7 @@ public class WorkflowJobSummarySchedule extends AbstractSchedule implements Life
                                             List<JobBatchSummaryResponseDO> summaryResponseDOList) {
         List<JobSummary> jobSummaryList = new ArrayList<>();
         Map<Long, List<JobBatchSummaryResponseDO>> jobIdListMap = summaryResponseDOList.parallelStream()
-            .collect(Collectors.groupingBy(JobBatchSummaryResponseDO::getJobId));
+                .collect(Collectors.groupingBy(JobBatchSummaryResponseDO::getJobId));
         for (Map.Entry<Long, List<JobBatchSummaryResponseDO>> job : jobIdListMap.entrySet()) {
             JobSummary jobSummary = new JobSummary();
             jobSummary.setBusinessId(job.getKey());
@@ -140,11 +140,11 @@ public class WorkflowJobSummarySchedule extends AbstractSchedule implements Life
             jobSummary.setCancelNum(job.getValue().stream().mapToInt(JobBatchSummaryResponseDO::getCancelNum).sum());
 
             jobSummary.setFailReason(
-                JsonUtil.toJsonString(jobTaskBatchReasonList(JobTaskBatchStatusEnum.FAIL.getStatus(), job.getValue())));
+                    JsonUtil.toJsonString(jobTaskBatchReasonList(JobTaskBatchStatusEnum.FAIL.getStatus(), job.getValue())));
             jobSummary.setStopReason(
-                JsonUtil.toJsonString(jobTaskBatchReasonList(JobTaskBatchStatusEnum.STOP.getStatus(), job.getValue())));
+                    JsonUtil.toJsonString(jobTaskBatchReasonList(JobTaskBatchStatusEnum.STOP.getStatus(), job.getValue())));
             jobSummary.setCancelReason(JsonUtil.toJsonString(
-                jobTaskBatchReasonList(JobTaskBatchStatusEnum.CANCEL.getStatus(), job.getValue())));
+                    jobTaskBatchReasonList(JobTaskBatchStatusEnum.CANCEL.getStatus(), job.getValue())));
             jobSummaryList.add(jobSummary);
         }
         return jobSummaryList;
@@ -161,7 +161,7 @@ public class WorkflowJobSummarySchedule extends AbstractSchedule implements Life
                                                             List<JobBatchSummaryResponseDO> jobBatchSummaryResponseDOList) {
         List<JobTaskBatchReason> jobTaskBatchReasonArrayList = new ArrayList<>();
         List<JobBatchSummaryResponseDO> summaryResponseDOList = jobBatchSummaryResponseDOList.stream()
-            .filter(i -> jobTaskBatchStatus == i.getTaskBatchStatus()).collect(Collectors.toList());
+                .filter(i -> jobTaskBatchStatus == i.getTaskBatchStatus()).collect(Collectors.toList());
         for (JobBatchSummaryResponseDO jobBatchSummaryResponseDO : summaryResponseDOList) {
             JobTaskBatchReason jobTaskBatchReason = new JobTaskBatchReason();
             jobTaskBatchReason.setReason(jobBatchSummaryResponseDO.getOperationReason());

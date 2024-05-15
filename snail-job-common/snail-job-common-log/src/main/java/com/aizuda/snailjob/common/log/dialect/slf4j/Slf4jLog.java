@@ -62,8 +62,8 @@ public class Slf4jLog extends AbstractLog {
             setContextMap(remote);
             if (this.isLocationAwareLogger) {
                 locationAwareLog((LocationAwareLogger) this.logger, fqcn, LocationAwareLogger.TRACE_INT,
-                    extractThrowable(arguments), format,
-                    arguments);
+                        extractThrowable(arguments), format,
+                        arguments);
             } else {
                 this.logger.trace(format, arguments);
             }
@@ -82,8 +82,8 @@ public class Slf4jLog extends AbstractLog {
             setContextMap(remote);
             if (this.isLocationAwareLogger) {
                 locationAwareLog((LocationAwareLogger) this.logger, fqcn, LocationAwareLogger.DEBUG_INT,
-                    extractThrowable(arguments), format,
-                    arguments);
+                        extractThrowable(arguments), format,
+                        arguments);
             } else {
                 this.logger.debug(format, arguments);
             }
@@ -102,8 +102,8 @@ public class Slf4jLog extends AbstractLog {
             setContextMap(remote);
             if (this.isLocationAwareLogger) {
                 locationAwareLog((LocationAwareLogger) this.logger, fqcn, LocationAwareLogger.INFO_INT,
-                    extractThrowable(arguments), format,
-                    arguments);
+                        extractThrowable(arguments), format,
+                        arguments);
             } else {
                 this.logger.info(format, arguments);
             }
@@ -122,8 +122,8 @@ public class Slf4jLog extends AbstractLog {
             setContextMap(remote);
             if (this.isLocationAwareLogger) {
                 locationAwareLog((LocationAwareLogger) this.logger, fqcn, LocationAwareLogger.WARN_INT,
-                    extractThrowable(arguments), format,
-                    arguments);
+                        extractThrowable(arguments), format,
+                        arguments);
             } else {
                 this.logger.warn(format, arguments);
             }
@@ -143,8 +143,8 @@ public class Slf4jLog extends AbstractLog {
             setContextMap(remote);
             if (this.isLocationAwareLogger) {
                 locationAwareLog((LocationAwareLogger) this.logger, fqcn, LocationAwareLogger.ERROR_INT,
-                    extractThrowable(arguments), format,
-                    arguments);
+                        extractThrowable(arguments), format,
+                        arguments);
             } else {
                 this.logger.error(format, arguments);
             }
@@ -191,7 +191,7 @@ public class Slf4jLog extends AbstractLog {
      * @param arguments   参数
      */
     private void locationAwareLog(LocationAwareLogger logger, String fqcn, int level_int, Throwable t,
-        String msgTemplate, Object[] arguments) {
+                                  String msgTemplate, Object[] arguments) {
         // ((LocationAwareLogger)this.logger).log(null, fqcn, level_int, msgTemplate, arguments, t);
         // 由于slf4j-log4j12中此方法的实现存在bug，故在此拼接参数
         logger.log(null, fqcn, level_int, msgTemplate, arguments, t);

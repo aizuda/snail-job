@@ -13,7 +13,7 @@ import java.util.Date;
  */
 public class DateUtils {
 
-   public static final DateTimeFormatter NORM_DATETIME_PATTERN = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    public static final DateTimeFormatter NORM_DATETIME_PATTERN = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public static final DateTimeFormatter PURE_DATETIME_MS_PATTERN = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
 
@@ -46,7 +46,7 @@ public class DateUtils {
         return time.format(dateFormatter);
     }
 
-    public static String toNowFormat( DateTimeFormatter dateFormatter) {
+    public static String toNowFormat(DateTimeFormatter dateFormatter) {
         return format(toNowLocalDateTime(), dateFormatter);
     }
 

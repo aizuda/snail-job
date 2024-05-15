@@ -157,12 +157,12 @@ public class DecisionWorkflowExecutor extends AbstractWorkflowExecutor {
         jobLogMetaDTO.setJobId(SystemConstants.DECISION_JOB_ID);
         jobLogMetaDTO.setTaskId(jobTask.getId());
         if (jobTaskBatch.getTaskBatchStatus() == JobTaskStatusEnum.SUCCESS.getStatus()
-            || JobOperationReasonEnum.WORKFLOW_NODE_NO_REQUIRED.getReason() == context.getOperationReason()) {
+                || JobOperationReasonEnum.WORKFLOW_NODE_NO_REQUIRED.getReason() == context.getOperationReason()) {
             SnailJobLog.REMOTE.info("节点Id:[{}] 决策完成. 上下文:[{}] 决策结果:[{}] <|>{}<|>",
-                context.getWorkflowNodeId(), context.getTaskResult(), context.getEvaluationResult(), jobLogMetaDTO);
+                    context.getWorkflowNodeId(), context.getTaskResult(), context.getEvaluationResult(), jobLogMetaDTO);
         } else {
             SnailJobLog.REMOTE.error("节点Id:[{}] 决策失败. 上下文:[{}] 失败原因:[{}] <|>{}<|>",
-                context.getWorkflowNodeId(), context.getTaskResult(), context.getLogMessage(), jobLogMetaDTO);
+                    context.getWorkflowNodeId(), context.getTaskResult(), context.getLogMessage(), jobLogMetaDTO);
 
         }
     }

@@ -18,11 +18,7 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -50,8 +46,8 @@ public class RetryableScanner implements Scanner, ApplicationContextAware {
             Map<Method, Retryable> annotatedMethods = null;
             try {
                 annotatedMethods = MethodIntrospector.selectMethods(bean.getClass(),
-                    (MethodIntrospector.MetadataLookup<Retryable>) method -> AnnotatedElementUtils
-                        .findMergedAnnotation(method, Retryable.class));
+                        (MethodIntrospector.MetadataLookup<Retryable>) method -> AnnotatedElementUtils
+                                .findMergedAnnotation(method, Retryable.class));
             } catch (Throwable ex) {
                 SnailJobLog.LOCAL.error("{}重试信息加载报错：{}", beanDefinitionName, ex);
             }
@@ -91,23 +87,23 @@ public class RetryableScanner implements Scanner, ApplicationContextAware {
         TimeUnit unit = retryable.unit();
 
         return new RetryerInfo(retryable.scene(),
-            executorClassName,
-            new HashSet<>(Arrays.asList(include)),
-            new HashSet<>(Arrays.asList(exclude)),
-            executor,
-            executorMethodName,
-            retryType,
-            localTimes,
-            localInterval,
-            idempotentIdGenerate,
-            bizNo,
-            retryMethod,
-            throwException,
-            retryCompleteCallback,
-            async,
-            Boolean.FALSE, // 基于注解的上报不允许强制上报
-            timeout,
-            unit
+                executorClassName,
+                new HashSet<>(Arrays.asList(include)),
+                new HashSet<>(Arrays.asList(exclude)),
+                executor,
+                executorMethodName,
+                retryType,
+                localTimes,
+                localInterval,
+                idempotentIdGenerate,
+                bizNo,
+                retryMethod,
+                throwException,
+                retryCompleteCallback,
+                async,
+                Boolean.FALSE, // 基于注解的上报不允许强制上报
+                timeout,
+                unit
         );
     }
 

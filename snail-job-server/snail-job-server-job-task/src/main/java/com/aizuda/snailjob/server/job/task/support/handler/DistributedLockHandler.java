@@ -33,39 +33,39 @@ public class DistributedLockHandler {
     /**
      * 获取分布式锁并支持重试
      *
-     * @param lockExecutor 执行器
-     * @param lockName 锁名称
-     * @param lockAtMost 锁超时时间
-     * @param sleepTime 重试间隔
+     * @param lockExecutor  执行器
+     * @param lockName      锁名称
+     * @param lockAtMost    锁超时时间
+     * @param sleepTime     重试间隔
      * @param maxRetryTimes 重试次数
      */
     public void lockWithDisposableAndRetry(LockExecutor lockExecutor,
-        String lockName, Duration lockAtMost,
-        Duration sleepTime, Integer maxRetryTimes) {
+                                           String lockName, Duration lockAtMost,
+                                           Duration sleepTime, Integer maxRetryTimes) {
         LockProvider lockProvider = LockBuilder.newBuilder()
-            .withDisposable(lockName)
-            .build();
+                .withDisposable(lockName)
+                .build();
 
         Retryer<Boolean> retryer = RetryerBuilder.<Boolean>newBuilder()
-            .retryIfResult(result -> result.equals(Boolean.FALSE))
-            .retryIfException(ex -> true)
-            .withWaitStrategy(WaitStrategies.fixedWait(sleepTime.toMillis(), TimeUnit.MILLISECONDS))
-            .withStopStrategy(StopStrategies.stopAfterAttempt(maxRetryTimes))
-            .withRetryListener(new RetryListener() {
-                @Override
-                public <V> void onRetry(final Attempt<V> attempt) {
-                    Object result = null;
-                    if (attempt.hasResult()) {
-                        try {
-                            result = attempt.get();
-                        } catch (ExecutionException ignored) {
+                .retryIfResult(result -> result.equals(Boolean.FALSE))
+                .retryIfException(ex -> true)
+                .withWaitStrategy(WaitStrategies.fixedWait(sleepTime.toMillis(), TimeUnit.MILLISECONDS))
+                .withStopStrategy(StopStrategies.stopAfterAttempt(maxRetryTimes))
+                .withRetryListener(new RetryListener() {
+                    @Override
+                    public <V> void onRetry(final Attempt<V> attempt) {
+                        Object result = null;
+                        if (attempt.hasResult()) {
+                            try {
+                                result = attempt.get();
+                            } catch (ExecutionException ignored) {
+                            }
                         }
-                    }
 
-                    SnailJobLog.LOCAL.debug("第【{}】次尝试获取锁. lockName:[{}] result:[{}] treadName:[{}]",
-                            attempt.getAttemptNumber(), lockName, result, Thread.currentThread().getName());
-                }
-            }).build();
+                        SnailJobLog.LOCAL.debug("第【{}】次尝试获取锁. lockName:[{}] result:[{}] treadName:[{}]",
+                                attempt.getAttemptNumber(), lockName, result, Thread.currentThread().getName());
+                    }
+                }).build();
 
         boolean lock = false;
         try {
@@ -100,14 +100,14 @@ public class DistributedLockHandler {
      * 获取分布式锁
      *
      * @param lockExecutor 执行器
-     * @param lockName 锁名称
-     * @param lockAtMost 锁超时时间
+     * @param lockName     锁名称
+     * @param lockAtMost   锁超时时间
      */
     public void lockWithDisposable(LockExecutor lockExecutor, String lockName, Duration lockAtMost) {
 
         LockProvider lockProvider = LockBuilder.newBuilder()
-            .withDisposable(lockName)
-            .build();
+                .withDisposable(lockName)
+                .build();
 
         boolean lock = false;
         try {

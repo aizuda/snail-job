@@ -25,7 +25,8 @@ import com.aizuda.snailjob.common.log.strategy.Remote;
  * @author wodeyangzipingpingwuqi
  */
 public final class SnailJobLog {
-    private SnailJobLog() {}
+    private SnailJobLog() {
+    }
 
     public static final Local LOCAL = new Local();
 

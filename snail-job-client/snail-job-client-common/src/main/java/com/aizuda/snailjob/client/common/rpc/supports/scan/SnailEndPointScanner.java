@@ -26,6 +26,7 @@ import java.util.Objects;
 public class SnailEndPointScanner implements ApplicationContextAware {
 
     private ApplicationContext context;
+
     public List<EndPointInfo> doScan() {
         return scanEndPoint();
     }

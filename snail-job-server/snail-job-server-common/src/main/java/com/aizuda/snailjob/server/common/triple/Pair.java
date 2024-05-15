@@ -12,7 +12,7 @@ import java.util.Objects;
  * @date : 2024-03-30
  * @since : 3.2.0
  */
-public abstract class Pair<L, R>  implements Map.Entry<L, R>, Comparable<Pair<L, R>>, Serializable {
+public abstract class Pair<L, R> implements Map.Entry<L, R>, Comparable<Pair<L, R>>, Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -40,7 +40,7 @@ public abstract class Pair<L, R>  implements Map.Entry<L, R>, Comparable<Pair<L,
     @Override
     public int compareTo(final Pair<L, R> other) {
         return new CompareToBuilder().append(getLeft(), other.getLeft())
-            .append(getRight(), other.getRight()).toComparison();
+                .append(getRight(), other.getRight()).toComparison();
     }
 
     @Override
@@ -51,7 +51,7 @@ public abstract class Pair<L, R>  implements Map.Entry<L, R>, Comparable<Pair<L,
         if (obj instanceof Map.Entry<?, ?>) {
             final Map.Entry<?, ?> other = (Map.Entry<?, ?>) obj;
             return Objects.equals(getKey(), other.getKey())
-                && Objects.equals(getValue(), other.getValue());
+                    && Objects.equals(getValue(), other.getValue());
         }
         return false;
     }
@@ -65,7 +65,7 @@ public abstract class Pair<L, R>  implements Map.Entry<L, R>, Comparable<Pair<L,
     @Override
     public int hashCode() {
         return (getKey() == null ? 0 : getKey().hashCode()) ^
-            (getValue() == null ? 0 : getValue().hashCode());
+                (getValue() == null ? 0 : getValue().hashCode());
     }
 
     /**

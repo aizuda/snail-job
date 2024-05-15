@@ -1,9 +1,9 @@
 package com.aizuda.snailjob.client.core.serializer;
 
+import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.client.core.RetryArgSerializer;
 import com.caucho.hessian.io.HessianInput;
 import com.caucho.hessian.io.HessianOutput;
-import cn.hutool.core.util.StrUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

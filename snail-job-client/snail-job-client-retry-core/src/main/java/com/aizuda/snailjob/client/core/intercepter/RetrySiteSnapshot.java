@@ -88,7 +88,7 @@ public class RetrySiteSnapshot {
         }
 
         MethodEntranceMeta meta = stack.peek();
-        if(Objects.isNull(meta)) {
+        if (Objects.isNull(meta)) {
             return Boolean.FALSE;
         }
 
@@ -179,7 +179,7 @@ public class RetrySiteSnapshot {
 
     public static boolean isRetryForStatusCode() {
         return Objects.nonNull(getRetryStatusCode()) && getRetryStatusCode()
-            .equals(SystemConstants.SNAIL_JOB_STATUS_CODE);
+                .equals(SystemConstants.SNAIL_JOB_STATUS_CODE);
     }
 
     public static Long getEntryMethodTime() {

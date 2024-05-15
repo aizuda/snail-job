@@ -28,7 +28,7 @@ public class RetryTimerWheel implements Lifecycle {
     private static HashedWheelTimer timer = null;
     private static final ThreadPoolExecutor executor =
             new ThreadPoolExecutor(16, 16, 10, TimeUnit.SECONDS,
-            new LinkedBlockingQueue<>(), new CustomizableThreadFactory(THREAD_NAME_PREFIX));
+                    new LinkedBlockingQueue<>(), new CustomizableThreadFactory(THREAD_NAME_PREFIX));
 
     private static final TimerIdempotent idempotent = new TimerIdempotent();
 
