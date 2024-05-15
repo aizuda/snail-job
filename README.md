@@ -1,8 +1,8 @@
 
 
 <p align="center">
-  <a href="https://www.easyretry.com">
-   <img alt="snail-job-Logo" src="doc/images/logo.png" width="350px">
+  <a href="https://snailjob.opensnail.com">
+   <img alt="snail-job-Logo" src="doc/images/favicon.svg" width="350px">
   </a>
 </p>
 
@@ -37,7 +37,7 @@ snail-job 是一个针对业务系统重试流量的治理平台，其自身具�
 + 加密通讯，保障信息安全
 
 # 🌺 业务场景
-- https://www.easyretry.com/pages/406a68/
+- https://snailjob.opensnail.com/pages/406a68/
 
 # 流量管理平台预览
 地址: <http://preview.easyretry.com/snail-job/>
@@ -50,15 +50,15 @@ snail-job 是一个针对业务系统重试流量的治理平台，其自身具�
 ## 相关链接
 - [字节跳动: 如何优雅地重试](https://juejin.cn/post/6914091859463634951)
 - [这款分布式重试组件,治好了我的重试强迫症！](https://juejin.cn/post/7249607108043145274)
-- [系统简介](https://www.easyretry.com/pages/d1d1da/)
-- [架构与功能](https://www.easyretry.com/pages/540554/)
+- [系统简介](https://snailjob.opensnail.com/pages/d1d1da/)
+- [架构与功能](https://snailjob.opensnail.com/pages/540554/)
 
 ## 原理
-- [场景应用](https://www.easyretry.com/pages/406a68/)
-- [HelloWorld](https://www.easyretry.com/pages/da9ecc/)
+- [场景应用](https://snailjob.opensnail.com/pages/406a68/)
+- [HelloWorld](https://snailjob.opensnail.com/pages/da9ecc/)
 
 ## 应用实例
-- [snail-job-demo](https://gitee.com/byteblogs168/snail-job-demo.git)
+- [snail-job-demo](https://gitee.com/opensnail/snail-job-demo.git)
 
 ## 期望
 欢迎提出更好的意见，帮助完善 snail-job
