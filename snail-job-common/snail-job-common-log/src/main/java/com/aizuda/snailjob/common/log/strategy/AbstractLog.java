@@ -12,7 +12,7 @@ import com.aizuda.snailjob.common.log.level.Level;
  */
 public abstract class AbstractLog {
     // 完全限定类名
-    private static final String FQCN = Local.class.getName();
+    private static final String FQCN = AbstractLog.class.getName();
     private Boolean isRemote = Boolean.FALSE;
 
     public Boolean getRemote() {
