@@ -1,0 +1,1 @@
+import{_ as e}from"./workflow-iframe.vue_vue_type_script_setup_true_lang-CSvBsu8E.js";import{d as a,o,b as t,f as s,bg as _}from"./index-DQvTTbM-.js";import"./Spin-CfDLM8cK.js";const r={class:"iframe"},n=a({name:"workflow_form_detail",__name:"index",setup(c){return(m,d)=>(o(),t("div",r,[s(e,{value:"kaxC8Iml"})]))}}),l=_(n,[["__scopeId","data-v-8578bda9"]]);export{l as default};
