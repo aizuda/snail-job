@@ -112,7 +112,7 @@
         SELECT group_name                                        AS groupName,
                SUM(CASE WHEN (job_status = 1) THEN 1 ELSE 0 END) AS run,
                COUNT(*)                                          AS total
-        FROM job
+        FROM sj_job
         ${ew.customSqlSegment}
         GROUP BY namespace_id, group_name
     </select>
