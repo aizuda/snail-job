@@ -31,6 +31,8 @@ public interface JobSummaryMapper extends BaseMapper<JobSummary> {
 
     IPage<Task> jobTaskList(@Param("ew") Wrapper<Job> wrapper, Page<Object> page);
 
+    IPage<Task> workflowTaskList(@Param("ew") Wrapper<Job> wrapper, Page<Object> page);
+
     List<DashboardLineResponseDO> jobLineList(@Param("dateFormat") String dateFormat, @Param("ew") Wrapper<JobSummary> wrapper);
 
     List<Rank> dashboardRank(@Param("systemTaskType") Integer systemTaskType, @Param("ew") Wrapper<JobSummary> wrapper);
