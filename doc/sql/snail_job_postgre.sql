@@ -2,7 +2,7 @@
  SnailJob Database Transfer Tool
  Source Server Type    : MySQL
  Target Server Type    : PostgreSQL
- Date: 2024-05-13 22:49:34
+ Date: 2024-05-20 22:02:23
 */
 
 
@@ -122,7 +122,7 @@ CREATE INDEX idx_sj_notify_recipient_01 ON sj_notify_recipient (namespace_id);
 COMMENT ON COLUMN sj_notify_recipient.id IS '主键';
 COMMENT ON COLUMN sj_notify_recipient.namespace_id IS '命名空间id';
 COMMENT ON COLUMN sj_notify_recipient.recipient_name IS '接收人名称';
-COMMENT ON COLUMN sj_notify_recipient.notify_type IS '通知类型 1、钉钉 2、邮件 3、企业微信 4 飞书';
+COMMENT ON COLUMN sj_notify_recipient.notify_type IS '通知类型 1、钉钉 2、邮件 3、企业微信 4 飞书 5 webhook';
 COMMENT ON COLUMN sj_notify_recipient.notify_attribute IS '配置属性';
 COMMENT ON COLUMN sj_notify_recipient.description IS '描述';
 COMMENT ON COLUMN sj_notify_recipient.create_dt IS '创建时间';
