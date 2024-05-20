@@ -14,18 +14,4 @@
         </foreach>
     </insert>
 
-    <!-- 重试统计 -->
-    <select id="retrySummaryRetryTaskLogList"
-            resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardRetryResponseDO">
-        SELECT namespace_id                                        AS namespaceId,
-               group_name                                          AS groupName,
-               scene_name                                          AS sceneName,
-               SUM(CASE WHEN (retry_status = 0) THEN 1 ELSE 0 END) AS runningNum,
-               SUM(CASE WHEN (retry_status = 1) THEN 1 ELSE 0 END) AS finishNum,
-               SUM(CASE WHEN (retry_status = 2) THEN 1 ELSE 0 END) AS maxCountNum,
-               SUM(CASE WHEN (retry_status = 3) THEN 1 ELSE 0 END) AS suspendNum
-        FROM sj_retry_task_log
-        ${ew.customSqlSegment}
-    </select>
-
 </mapper>
