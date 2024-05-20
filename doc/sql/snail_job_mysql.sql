@@ -73,7 +73,7 @@ CREATE TABLE `sj_notify_recipient`
     `id`               bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
     `namespace_id`     varchar(64)         NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' COMMENT '命名空间id',
     `recipient_name`   varchar(64)         NOT NULL COMMENT '接收人名称',
-    `notify_type`      tinyint(4)          NOT NULL DEFAULT 0 COMMENT '通知类型 1、钉钉 2、邮件 3、企业微信 4 飞书',
+    `notify_type`      tinyint(4)          NOT NULL DEFAULT 0 COMMENT '通知类型 1、钉钉 2、邮件 3、企业微信 4 飞书 5 webhook',
     `notify_attribute` varchar(512)        NOT NULL COMMENT '配置属性',
     `description`      varchar(256)        NOT NULL DEFAULT '' COMMENT '描述',
     `create_dt`        datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',

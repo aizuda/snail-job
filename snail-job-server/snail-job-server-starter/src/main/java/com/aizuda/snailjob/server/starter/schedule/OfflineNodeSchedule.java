@@ -18,6 +18,7 @@ import org.springframework.util.CollectionUtils;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -42,8 +43,13 @@ public class OfflineNodeSchedule extends AbstractSchedule implements Lifecycle {
             LocalDateTime endTime = LocalDateTime.now().minusSeconds(
                     ServerRegister.DELAY_TIME + (ServerRegister.DELAY_TIME / 3));
 
-            // 先删除DB中需要下线的机器
-            serverNodeMapper.delete(new LambdaQueryWrapper<ServerNode>().le(ServerNode::getExpireAt, endTime));
+            List<ServerNode> serverNodes = serverNodeMapper.selectList(
+                new LambdaQueryWrapper<ServerNode>().select(ServerNode::getId)
+                    .le(ServerNode::getExpireAt, endTime));
+            if (!CollectionUtils.isEmpty(serverNodes)) {
+                // 先删除DB中需要下线的机器
+                serverNodeMapper.deleteBatchIds(serverNodes.stream().map(ServerNode::getId).collect(Collectors.toSet()));
+            }
 
             Set<RegisterNodeInfo> allPods = CacheRegisterTable.getAllPods();
             Set<RegisterNodeInfo> waitOffline = allPods.stream().filter(registerNodeInfo -> registerNodeInfo.getExpireAt().isBefore(endTime)).collect(
