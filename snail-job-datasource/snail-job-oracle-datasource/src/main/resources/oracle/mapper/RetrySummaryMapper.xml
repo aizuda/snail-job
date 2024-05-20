@@ -35,11 +35,11 @@
 
     <select id="retryTask"
             resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardCardResponseDO$RetryTask">
-        SELECT COALESCE(sum(running_num), 0)                                            AS runningNum,
-               COALESCE(sum(finish_num), 0)                                             AS finishNum,
-               COALESCE(sum(max_count_num), 0)                                          AS maxCountNum,
-               COALESCE(sum(suspend_num), 0)                                            AS suspendNum,
-               COALESCE(sum(running_num + finish_num + max_count_num + suspend_num), 0) AS totalNum
+        SELECT NVL(SUM(running_num), 0)                                            AS runningNum,
+               NVL(SUM(finish_num), 0)                                             AS finishNum,
+               NVL(SUM(max_count_num), 0)                                          AS maxCountNum,
+               NVL(SUM(suspend_num), 0)                                            AS suspendNum,
+               NVL(SUM(running_num + finish_num + max_count_num + suspend_num), 0) AS totalNum
         FROM sj_retry_summary
         ${ew.customSqlSegment}
     </select>
@@ -59,11 +59,11 @@
     <select id="retryLineList"
             resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardLineResponseDO">
         SELECT createDt,
-            COALESCE(SUM(finish_num), 0)                                                AS successNum,
-            COALESCE(SUM(running_num), 0)                                               AS runningNum,
-            COALESCE(SUM(max_count_num), 0)                                             AS maxCountNum,
-            COALESCE(SUM(suspend_num), 0)                                               AS suspendNum,
-            COALESCE(SUM(finish_num + running_num + max_count_num + suspend_num), 0)    AS total
+               NVL(SUM(finish_num), 0)                                                AS successNum,
+               NVL(SUM(running_num), 0)                                               AS runningNum,
+               NVL(SUM(max_count_num), 0)                                             AS maxCountNum,
+               NVL(SUM(suspend_num), 0)                                               AS suspendNum,
+               NVL(SUM(finish_num + running_num + max_count_num + suspend_num), 0)    AS total
         FROM (
             SELECT
                 TO_CHAR(create_dt, #{dateFormat}) AS createDt,

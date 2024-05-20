@@ -42,12 +42,12 @@
             resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardLineResponseDO">
         SELECT
             createDt,
-            COALESCE(SUM(success_num), 0)                                    AS success,
-            COALESCE(SUM(fail_num), 0)                                       AS failNum,
-            COALESCE(SUM(stop_num), 0)                                       AS stop,
-            COALESCE(SUM(cancel_num), 0)                                     AS cancel,
-            COALESCE(SUM(fail_num + stop_num + cancel_num), 0)               AS fail,
-            COALESCE(SUM(success_num + fail_num + stop_num + cancel_num), 0) AS total
+            NVL(SUM(success_num), 0)                                    AS success,
+            NVL(SUM(fail_num), 0)                                       AS failNum,
+            NVL(SUM(stop_num), 0)                                       AS stop,
+            NVL(SUM(cancel_num), 0)                                     AS cancel,
+            NVL(SUM(fail_num + stop_num + cancel_num), 0)               AS fail,
+            NVL(SUM(success_num + fail_num + stop_num + cancel_num), 0) AS total
         FROM (
             SELECT
                 TO_CHAR(trigger_at, #{dateFormat}) AS createDt,
@@ -63,11 +63,11 @@
 
     <select id="toJobTask"
             resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardCardResponseDO$JobTask">
-        SELECT COALESCE(sum(success_num), 0)                                    AS successNum,
-               COALESCE(sum(stop_num), 0)                                       AS stopNum,
-               COALESCE(sum(cancel_num), 0)                                     AS cancelNum,
-               COALESCE(sum(fail_num), 0)                                       AS failNum,
-               COALESCE(sum(success_num + fail_num + stop_num + cancel_num), 0) AS totalNum
+        SELECT NVL(sum(success_num), 0)                                    AS successNum,
+               NVL(sum(stop_num), 0)                                       AS stopNum,
+               NVL(sum(cancel_num), 0)                                     AS cancelNum,
+               NVL(sum(fail_num), 0)                                       AS failNum,
+               NVL(sum(success_num + fail_num + stop_num + cancel_num), 0) AS totalNum
         FROM sj_job_summary
         ${ew.customSqlSegment}
     </select>
