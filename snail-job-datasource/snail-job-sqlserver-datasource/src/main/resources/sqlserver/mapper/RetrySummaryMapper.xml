@@ -92,7 +92,7 @@
     <select id="dashboardRank"
             resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO$Rank">
         SELECT TOP 10
-            CONCAT(group_name, '/', scene_name) AS name,
+            CONCAT(group_name, '/', scene_name)                         AS name,
             SUM(running_num + finish_num + max_count_num + suspend_num) AS total
         FROM sj_retry_summary
         ${ew.customSqlSegment}
