@@ -36,11 +36,4 @@
            AND rt.host_ip = tt.host_ip
     </update>
 
-    <select id="countActivePod"
-        resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.ActivePodQuantityResponseDO">
-        SELECT node_type AS nodeType,
-               COUNT(*)  AS total
-          FROM sj_server_node
-        ${ew.customSqlSegment}
-    </select>
 </mapper>
