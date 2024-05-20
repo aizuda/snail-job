@@ -17,53 +17,53 @@
 
     <insert id="batchInsert" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO sj_retry_summary (namespace_id, group_name, scene_name, trigger_at,
-        running_num, finish_num, max_count_num, suspend_num)
+                                      running_num, finish_num, max_count_num, suspend_num)
         VALUES
         <foreach collection="list" item="item" separator=",">
             (
-            #{item.namespaceId},
-            #{item.groupName},
-            #{item.sceneName},
-            #{item.triggerAt},
-            #{item.runningNum},
-            #{item.finishNum},
-            #{item.maxCountNum},
-            #{item.suspendNum}
+                #{item.namespaceId},
+                #{item.groupName},
+                #{item.sceneName},
+                #{item.triggerAt},
+                #{item.runningNum},
+                #{item.finishNum},
+                #{item.maxCountNum},
+                #{item.suspendNum}
             )
         </foreach>
     </insert>
 
     <update id="batchUpdate" parameterType="java.util.List">
         UPDATE sj_retry_summary
-        SET running_num = src.running_num,
-        finish_num = src.finish_num,
-        max_count_num = src.max_count_num,
-        suspend_num = src.suspend_num
-        FROM sj_retry_summary AS dest
-        JOIN (
-        <foreach collection="list" item="item" index="index" separator="UNION ALL">
-            SELECT
-            #{item.runningNum} AS running_num,
-            #{item.finishNum} AS finish_num,
-            #{item.maxCountNum} AS max_count_num,
-            #{item.suspendNum} AS suspend_num,
-            #{item.triggerAt} AS trigger_at,
-            #{item.sceneName} AS scene_name,
-            #{item.namespaceId} AS namespace_id,
-            #{item.groupName} AS group_name
-        </foreach>
-        ) AS src ON (dest.trigger_at = src.trigger_at AND dest.group_name = src.group_name
-        AND dest.scene_name = src.scene_name AND dest.namespace_id = src.namespace_id)
+           SET running_num = src.running_num,
+               finish_num = src.finish_num,
+               max_count_num = src.max_count_num,
+               suspend_num = src.suspend_num
+          FROM sj_retry_summary AS dest
+                JOIN (
+                <foreach collection="list" item="item" index="index" separator="UNION ALL">
+                    SELECT
+                    #{item.runningNum} AS running_num,
+                    #{item.finishNum} AS finish_num,
+                    #{item.maxCountNum} AS max_count_num,
+                    #{item.suspendNum} AS suspend_num,
+                    #{item.triggerAt} AS trigger_at,
+                    #{item.sceneName} AS scene_name,
+                    #{item.namespaceId} AS namespace_id,
+                    #{item.groupName} AS group_name
+                </foreach>
+                ) AS src ON (dest.trigger_at = src.trigger_at AND dest.group_name = src.group_name
+                        AND dest.scene_name = src.scene_name AND dest.namespace_id = src.namespace_id)
     </update>
 
     <select id="retryTask"
             resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardCardResponseDO$RetryTask">
         SELECT
-        ISNULL(SUM(running_num), 0) AS runningNum,
-        ISNULL(SUM(finish_num), 0) AS finishNum,
-        ISNULL(SUM(max_count_num), 0) AS maxCountNum,
-        ISNULL(SUM(suspend_num), 0) AS suspendNum,
-        ISNULL(SUM(running_num + finish_num + max_count_num + suspend_num), 0) AS totalNum
+            ISNULL(SUM(running_num), 0) AS runningNum,
+            ISNULL(SUM(finish_num), 0) AS finishNum,
+            ISNULL(SUM(max_count_num), 0) AS maxCountNum,
+            ISNULL(SUM(suspend_num), 0) AS suspendNum,
+            ISNULL(SUM(running_num + finish_num + max_count_num + suspend_num), 0) AS totalNum
         FROM sj_retry_summary
         ${ew.customSqlSegment}
     </select>
@@ -71,11 +71,11 @@
     <select id="retryTaskBarList"
             resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardCardResponseDO$RetryTask">
         SELECT TOP 7
-        trigger_at,
-        running_num,
-        finish_num,
-        max_count_num,
-        suspend_num
+            trigger_at,
+            running_num,
+            finish_num,
+            max_count_num,
+            suspend_num
         FROM sj_retry_summary
         ${ew.customSqlSegment}
     </select>
@@ -83,21 +83,21 @@
     <select id="retryLineList"
             resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardLineResponseDO">
         SELECT
-        createDt,
-        ISNULL(SUM(finish_num), 0) AS successNum,
-        ISNULL(SUM(running_num), 0) AS runningNum,
-        ISNULL(SUM(max_count_num), 0) AS maxCountNum,
-        ISNULL(SUM(suspend_num), 0) AS suspendNum,
-        ISNULL(SUM(finish_num + running_num + max_count_num + suspend_num), 0) AS total
+            createDt,
+            ISNULL(SUM(finish_num), 0) AS successNum,
+            ISNULL(SUM(running_num), 0) AS runningNum,
+            ISNULL(SUM(max_count_num), 0) AS maxCountNum,
+            ISNULL(SUM(suspend_num), 0) AS suspendNum,
+            ISNULL(SUM(finish_num + running_num + max_count_num + suspend_num), 0) AS total
         FROM (
-        SELECT
-        FORMAT(create_dt, #{dateFormat}) AS createDt,
-        finish_num,
-        running_num,
-        max_count_num,
-        suspend_num
-        FROM sj_retry_summary
-        ${ew.customSqlSegment}
+            SELECT
+                FORMAT(create_dt, #{dateFormat}) AS createDt,
+                finish_num,
+                running_num,
+                max_count_num,
+                suspend_num
+            FROM sj_retry_summary
+            ${ew.customSqlSegment}
         ) AS subquery
         GROUP BY createDt
     </select>
@@ -105,8 +105,8 @@
     <select id="dashboardRank"
             resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO$Rank">
         SELECT TOP 10
-        CONCAT(group_name, '/', scene_name) AS name,
-        SUM(running_num + finish_num + max_count_num + suspend_num) AS total
+            CONCAT(group_name, '/', scene_name) AS name,
+            SUM(running_num + finish_num + max_count_num + suspend_num) AS total
         FROM sj_retry_summary
         ${ew.customSqlSegment}
         HAVING SUM(running_num + finish_num + max_count_num + suspend_num) > 0
@@ -117,9 +117,9 @@
     <select id="retryTaskList"
             resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO$Task">
         SELECT
-        group_name AS groupName,
-        SUM(CASE WHEN (scene_status = 1) THEN 1 ELSE 0 END) AS run,
-        COUNT(*) AS total
+            group_name AS groupName,
+            SUM(CASE WHEN (scene_status = 1) THEN 1 ELSE 0 END) AS run,
+            COUNT(*) AS total
         FROM sj_retry_scene_config
         ${ew.customSqlSegment}
         GROUP BY namespace_id, group_name

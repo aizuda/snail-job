@@ -21,62 +21,62 @@
 
     <insert id="batchInsert" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO sj_job_summary (namespace_id, group_name, business_id, trigger_at, system_task_type,
-        success_num,fail_num,fail_reason,stop_num,stop_reason, cancel_num,cancel_reason)
+                                 success_num,fail_num,fail_reason,stop_num,stop_reason, cancel_num,cancel_reason)
         VALUES
-        <foreach collection="list" item="item" separator=",">
-            (
-            #{item.namespaceId},
-            #{item.groupName},
-            #{item.businessId},
-            #{item.triggerAt},
-            #{item.systemTaskType},
-            #{item.successNum},
-            #{item.failNum},
-            #{item.failReason},
-            #{item.stopNum},
-            #{item.stopReason},
-            #{item.cancelNum},
-            #{item.cancelReason}
-            )
-        </foreach>
+            <foreach collection="list" item="item" separator=",">
+                (
+                    #{item.namespaceId},
+                    #{item.groupName},
+                    #{item.businessId},
+                    #{item.triggerAt},
+                    #{item.systemTaskType},
+                    #{item.successNum},
+                    #{item.failNum},
+                    #{item.failReason},
+                    #{item.stopNum},
+                    #{item.stopReason},
+                    #{item.cancelNum},
+                    #{item.cancelReason}
+                )
+            </foreach>
     </insert>
 
     <update id="batchUpdate" parameterType="java.util.List">
         UPDATE sj_job_summary rt,
-        (
-        <foreach collection="list" item="item" index="index" separator="UNION ALL">
-            SELECT
-            #{item.successNum} AS success_num,
-            #{item.failNum} AS fail_num,
-            #{item.failReason} AS fail_reason,
-            #{item.stopNum} AS stop_num,
-            #{item.stopReason} AS stop_reason,
-            #{item.cancelNum} AS cancel_num,
-            #{item.cancelReason} AS cancel_reason,
-            #{item.triggerAt} AS trigger_at,
-            #{item.businessId} AS business_id
-        </foreach>
-        ) tt
-        SET rt.success_num = tt.success_num,
-        rt.fail_num = tt.fail_num,
-        rt.fail_reason = tt.fail_reason,
-        rt.stop_num = tt.stop_num,
-        rt.stop_reason = tt.stop_reason,
-        rt.cancel_num = tt.cancel_num,
-        rt.cancel_reason = tt.cancel_reason
-        WHERE rt.trigger_at = tt.trigger_at
-        AND rt.business_id = tt.business_id
+               (
+                   <foreach collection="list" item="item" index="index" separator="UNION ALL">
+                       SELECT
+                           #{item.successNum} AS success_num,
+                           #{item.failNum} AS fail_num,
+                           #{item.failReason} AS fail_reason,
+                           #{item.stopNum} AS stop_num,
+                           #{item.stopReason} AS stop_reason,
+                           #{item.cancelNum} AS cancel_num,
+                           #{item.cancelReason} AS cancel_reason,
+                           #{item.triggerAt} AS trigger_at,
+                           #{item.businessId} AS business_id
+                   </foreach>
+               ) tt
+           SET rt.success_num = tt.success_num,
+               rt.fail_num = tt.fail_num,
+               rt.fail_reason = tt.fail_reason,
+               rt.stop_num = tt.stop_num,
+               rt.stop_reason = tt.stop_reason,
+               rt.cancel_num = tt.cancel_num,
+               rt.cancel_reason = tt.cancel_reason
+         WHERE rt.trigger_at = tt.trigger_at
+           AND rt.business_id = tt.business_id
     </update>
 
     <select id="jobLineList"
             resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardLineResponseDO">
         SELECT
-        DATE_FORMAT(trigger_at, #{dateFormat}) AS createDt,
-        IFNULL(SUM(success_num), 0) AS success,
-        IFNULL(SUM(stop_num), 0) AS stop,
-        IFNULL(SUM(cancel_num), 0) AS cancel,
-        IFNULL(SUM(fail_num), 0) AS fail,
-        IFNULL(SUM(success_num + fail_num + stop_num + cancel_num), 0) AS total
+            DATE_FORMAT(trigger_at, #{dateFormat})                         AS createDt,
+            IFNULL(SUM(success_num), 0)                                    AS success,
+            IFNULL(SUM(stop_num), 0)                                       AS stop,
+            IFNULL(SUM(cancel_num), 0)                                     AS cancel,
+            IFNULL(SUM(fail_num), 0)                                       AS fail,
+            IFNULL(SUM(success_num + fail_num + stop_num + cancel_num), 0) AS total
         FROM sj_job_summary
         ${ew.customSqlSegment}
         GROUP BY DATE_FORMAT(trigger_at, #{dateFormat})
@@ -85,11 +85,11 @@
     <select id="toJobTask"
             resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardCardResponseDO$JobTask">
         SELECT
-        IFNULL(SUM(success_num), 0) AS successNum,
-        IFNULL(SUM(stop_num), 0) AS stopNum,
-        IFNULL(SUM(cancel_num), 0) AS cancelNum,
-        IFNULL(SUM(fail_num), 0) AS failNum,
-        IFNULL(SUM(success_num + fail_num + stop_num + cancel_num), 0) AS totalNum
+            IFNULL(SUM(success_num), 0) AS successNum,
+            IFNULL(SUM(stop_num), 0) AS stopNum,
+            IFNULL(SUM(cancel_num), 0) AS cancelNum,
+            IFNULL(SUM(fail_num), 0) AS failNum,
+            IFNULL(SUM(success_num + fail_num + stop_num + cancel_num), 0) AS totalNum
         FROM sj_job_summary
         ${ew.customSqlSegment}
     </select>
@@ -103,7 +103,7 @@
         <if test="systemTaskType == 4">
             CONCAT(group_name, '/', (SELECT workflow_name FROM sj_workflow WHERE id = business_id)) name,
         </if>
-        SUM(fail_num) AS total
+            SUM(fail_num) AS total
         FROM sj_job_summary
         ${ew.customSqlSegment}
         HAVING total > 0
@@ -113,9 +113,9 @@
 
     <select id="jobTaskList"
             resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO$Task">
-        SELECT group_name AS groupName,
-        SUM(CASE WHEN (job_status = 1) THEN 1 ELSE 0 END) AS run,
-        COUNT(*) AS total
+        SELECT group_name                                        AS groupName,
+               SUM(CASE WHEN (job_status = 1) THEN 1 ELSE 0 END) AS run,
+               COUNT(*)                                          AS total
         FROM sj_job
         ${ew.customSqlSegment}
         GROUP BY namespace_id, group_name

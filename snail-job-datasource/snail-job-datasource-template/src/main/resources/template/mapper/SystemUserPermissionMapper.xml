@@ -4,11 +4,11 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.aizuda.snailjob.template.datasource.persistence.po.SystemUserPermission">
-        <id column="id" property="id"/>
-        <result column="group_name" property="groupName"/>
-        <result column="system_user_id" property="systemUserId"/>
-        <result column="namespace_id" property="namespaceId"/>
-        <result column="create_dt" property="createDt"/>
+        <id column="id" property="id" />
+        <result column="group_name" property="groupName" />
+        <result column="system_user_id" property="systemUserId" />
+        <result column="namespace_id" property="namespaceId" />
+        <result column="create_dt" property="createDt" />
     </resultMap>
 
 </mapper>

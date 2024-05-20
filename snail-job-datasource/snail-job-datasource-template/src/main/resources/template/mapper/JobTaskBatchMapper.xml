@@ -4,59 +4,59 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch">
-        <id column="id" property="id"/>
-        <result column="group_name" property="groupName"/>
-        <result column="job_id" property="jobId"/>
-        <result column="namespace_id" property="namespaceId"/>
-        <result column="task_batch_status" property="taskBatchStatus"/>
-        <result column="create_dt" property="createDt"/>
-        <result column="update_dt" property="updateDt"/>
-        <result column="deleted" property="deleted"/>
+        <id column="id" property="id" />
+        <result column="group_name" property="groupName" />
+        <result column="job_id" property="jobId" />
+        <result column="namespace_id" property="namespaceId" />
+        <result column="task_batch_status" property="taskBatchStatus" />
+        <result column="create_dt" property="createDt" />
+        <result column="update_dt" property="updateDt" />
+        <result column="deleted" property="deleted" />
     </resultMap>
 
     <select id="selectJobBatchPageList"
-            parameterType="com.aizuda.snailjob.template.datasource.persistence.dataobject.JobBatchQueryDO"
-            resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.JobBatchResponseDO">
+        parameterType="com.aizuda.snailjob.template.datasource.persistence.dataobject.JobBatchQueryDO"
+        resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.JobBatchResponseDO">
         SELECT a.*,
-        b.job_name,
-        b.task_type,
-        b.block_strategy,
-        b.trigger_type,
-        b.executor_type,
-        b.executor_info
-        FROM sj_job_task_batch a
-        JOIN sj_job b ON a.job_id = b.id
+               b.job_name,
+               b.task_type,
+               b.block_strategy,
+               b.trigger_type,
+               b.executor_type,
+               b.executor_info
+          FROM sj_job_task_batch a
+                JOIN sj_job b ON a.job_id = b.id
         ${ew.customSqlSegment}
     </select>
 
     <select id="summaryJobBatchList"
             resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.JobBatchSummaryResponseDO">
-        SELECT namespace_id AS namespaceId,
-        job_id AS jobId,
-        group_name AS groupName,
-        task_batch_status AS taskBatchStatus,
-        operation_reason AS operationReason,
-        COUNT(operation_reason) AS operationReasonTotal,
-        SUM(CASE WHEN (task_batch_status = 3) THEN 1 ELSE 0 END) AS successNum,
-        SUM(CASE WHEN (task_batch_status = 6) THEN 1 ELSE 0 END) AS cancelNum,
-        SUM(CASE WHEN (task_batch_status = 5) THEN 1 ELSE 0 END) AS stopNum,
-        SUM(CASE WHEN (task_batch_status = 4) THEN 1 ELSE 0 END) AS failNum
+        SELECT namespace_id                                             AS namespaceId,
+               job_id                                                   AS jobId,
+               group_name                                               AS groupName,
+               task_batch_status                                        AS taskBatchStatus,
+               operation_reason                                         AS operationReason,
+               COUNT(operation_reason)                                  AS operationReasonTotal,
+               SUM(CASE WHEN (task_batch_status = 3) THEN 1 ELSE 0 END) AS successNum,
+               SUM(CASE WHEN (task_batch_status = 6) THEN 1 ELSE 0 END) AS cancelNum,
+               SUM(CASE WHEN (task_batch_status = 5) THEN 1 ELSE 0 END) AS stopNum,
+               SUM(CASE WHEN (task_batch_status = 4) THEN 1 ELSE 0 END) AS failNum
         FROM sj_job_task_batch
         ${ew.customSqlSegment}
     </select>
 
     <select id="summaryWorkflowTaskBatchList"
             resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.JobBatchSummaryResponseDO">
-        SELECT namespace_id AS namespaceId,
-        workflow_id AS jobId,
-        group_name AS groupName,
-        task_batch_status AS taskBatchStatus,
-        operation_reason AS operationReason,
-        COUNT(operation_reason) AS operationReasonTotal,
-        SUM(CASE WHEN (task_batch_status = 3) THEN 1 ELSE 0 END) AS successNum,
-        SUM(CASE WHEN (task_batch_status = 6) THEN 1 ELSE 0 END) AS cancelNum,
-        SUM(CASE WHEN (task_batch_status = 5) THEN 1 ELSE 0 END) AS stopNum,
-        SUM(CASE WHEN (task_batch_status = 4) THEN 1 ELSE 0 END) AS failNum
+        SELECT namespace_id                                             AS namespaceId,
+               workflow_id                                              AS jobId,
+               group_name                                               AS groupName,
+               task_batch_status                                        AS taskBatchStatus,
+               operation_reason                                         AS operationReason,
+               COUNT(operation_reason)                                  AS operationReasonTotal,
+               SUM(CASE WHEN (task_batch_status = 3) THEN 1 ELSE 0 END) AS successNum,
+               SUM(CASE WHEN (task_batch_status = 6) THEN 1 ELSE 0 END) AS cancelNum,
+               SUM(CASE WHEN (task_batch_status = 5) THEN 1 ELSE 0 END) AS stopNum,
+               SUM(CASE WHEN (task_batch_status = 4) THEN 1 ELSE 0 END) AS failNum
         FROM sj_workflow_task_batch
         ${ew.customSqlSegment}
     </select>
@@ -64,14 +64,14 @@
     <select id="selectJobBatchListByIds"
             resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.JobBatchResponseDO">
         SELECT a.*,
-        b.job_name,
-        b.task_type,
-        b.block_strategy,
-        b.trigger_type,
-        b.executor_info,
-        b.args_str
-        FROM sj_job_task_batch a
-        JOIN sj_job b ON a.job_id = b.id
+               b.job_name,
+               b.task_type,
+               b.block_strategy,
+               b.trigger_type,
+               b.executor_info,
+               b.args_str
+          FROM sj_job_task_batch a
+                JOIN sj_job b ON a.job_id = b.id
         ${ew.customSqlSegment}
     </select>
 </mapper>
