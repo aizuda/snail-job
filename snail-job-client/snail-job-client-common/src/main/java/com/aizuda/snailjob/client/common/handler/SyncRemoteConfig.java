@@ -36,7 +36,7 @@ public class SyncRemoteConfig implements Lifecycle {
                         .timeout(1000L)
                         .callback(nettyResult -> {
                             if (Objects.isNull(nettyResult.getData())) {
-                                SnailJobLog.LOCAL.error("获取配置结果为null");
+                                SnailJobLog.LOCAL.debug("获取配置结果为null");
                                 return;
                             }
 
