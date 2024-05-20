@@ -1,14 +1,11 @@
 package com.aizuda.snailjob.server.job.task.support.timer;
 
 import com.aizuda.snailjob.common.log.SnailJobLog;
-import com.aizuda.snailjob.server.common.Lifecycle;
-import com.aizuda.snailjob.server.job.task.support.idempotent.TimerIdempotent;
 import com.aizuda.snailjob.server.job.task.support.idempotent.TimerIdempotent;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.TimerTask;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
-import org.springframework.stereotype.Component;
 
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -19,9 +16,8 @@ import java.util.concurrent.TimeUnit;
  * @date : 2023-09-22 17:03
  * @since : 2.4.0
  */
-@Component
 @Slf4j
-public class JobTimerWheel implements Lifecycle {
+public class JobTimerWheel {
 
     private static final int TICK_DURATION = 100;
     private static final String THREAD_NAME_PREFIX = "job-task-timer-wheel-";
@@ -32,8 +28,7 @@ public class JobTimerWheel implements Lifecycle {
 
     private static final TimerIdempotent idempotent = new TimerIdempotent();
 
-    @Override
-    public void start() {
+    static {
         timer = new HashedWheelTimer(
                 new CustomizableThreadFactory(THREAD_NAME_PREFIX), TICK_DURATION,
                 TimeUnit.MILLISECONDS, 512, true, -1, executor);
@@ -47,7 +42,7 @@ public class JobTimerWheel implements Lifecycle {
             delay = delay < 0 ? 0 : delay;
             try {
                 timer.newTimeout(task, delay, unit);
-                idempotent.set(uniqueId, uniqueId);
+                idempotent.set(taskType, uniqueId);
             } catch (Exception e) {
                 SnailJobLog.LOCAL.error("加入时间轮失败. uniqueId:[{}]", uniqueId, e);
             }
@@ -55,15 +50,11 @@ public class JobTimerWheel implements Lifecycle {
     }
 
     public static boolean isExisted(Integer taskType, Long uniqueId) {
-        return idempotent.isExist(Long.valueOf(taskType), uniqueId);
+        return idempotent.isExist(taskType, uniqueId);
     }
 
     public static void clearCache(Integer taskType, Long uniqueId) {
-        idempotent.clear(Long.valueOf(taskType), uniqueId);
+        idempotent.clear(taskType, uniqueId);
     }
 
-    @Override
-    public void close() {
-        timer.stop();
-    }
 }

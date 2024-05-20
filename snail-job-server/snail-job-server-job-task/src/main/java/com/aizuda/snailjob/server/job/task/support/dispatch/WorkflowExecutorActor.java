@@ -11,6 +11,7 @@ import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
+import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.job.task.dto.WorkflowNodeTaskExecuteDTO;
@@ -21,14 +22,11 @@ import com.aizuda.snailjob.server.job.task.support.cache.MutableGraphCache;
 import com.aizuda.snailjob.server.job.task.support.executor.workflow.WorkflowExecutorContext;
 import com.aizuda.snailjob.server.job.task.support.executor.workflow.WorkflowExecutorFactory;
 import com.aizuda.snailjob.server.job.task.support.handler.WorkflowBatchHandler;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.JobMapper;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskBatchMapper;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowNodeMapper;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowTaskBatchMapper;
-import com.aizuda.snailjob.template.datasource.persistence.po.Job;
-import com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch;
-import com.aizuda.snailjob.template.datasource.persistence.po.WorkflowNode;
-import com.aizuda.snailjob.template.datasource.persistence.po.WorkflowTaskBatch;
+import com.aizuda.snailjob.server.job.task.support.timer.JobTimerWheel;
+import com.aizuda.snailjob.server.job.task.support.timer.WorkflowTimeoutCheckTask;
+import com.aizuda.snailjob.server.job.task.support.timer.WorkflowTimerTask;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.*;
+import com.aizuda.snailjob.template.datasource.persistence.po.*;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.google.common.collect.Sets;
 import com.google.common.graph.MutableGraph;
@@ -44,6 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -59,6 +58,7 @@ public class WorkflowExecutorActor extends AbstractActor {
 
     private final WorkflowTaskBatchMapper workflowTaskBatchMapper;
     private final WorkflowNodeMapper workflowNodeMapper;
+    private final WorkflowMapper workflowMapper;
     private final JobMapper jobMapper;
     private final JobTaskBatchMapper jobTaskBatchMapper;
     private final WorkflowBatchHandler workflowBatchHandler;
@@ -88,6 +88,13 @@ public class WorkflowExecutorActor extends AbstractActor {
 
         if (SystemConstants.ROOT.equals(taskExecute.getParentId()) && JobTaskBatchStatusEnum.WAITING.getStatus() == workflowTaskBatch.getTaskBatchStatus()) {
             handlerTaskBatch(taskExecute, JobTaskBatchStatusEnum.RUNNING.getStatus(), JobOperationReasonEnum.NONE.getReason());
+
+            Workflow workflow = workflowMapper.selectById(workflowTaskBatch.getWorkflowId());
+            JobTimerWheel.clearCache(SyetemTaskTypeEnum.WORKFLOW.getType(), taskExecute.getWorkflowTaskBatchId());
+
+            // 超时检查
+            JobTimerWheel.register(SyetemTaskTypeEnum.WORKFLOW.getType(), taskExecute.getWorkflowTaskBatchId(),
+                    new WorkflowTimeoutCheckTask(taskExecute.getWorkflowTaskBatchId()), workflow.getExecutorTimeout(), TimeUnit.MILLISECONDS);
         }
 
         // 获取DAG图

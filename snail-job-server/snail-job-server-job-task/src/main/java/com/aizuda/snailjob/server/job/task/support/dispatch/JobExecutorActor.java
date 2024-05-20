@@ -32,6 +32,7 @@ import com.aizuda.snailjob.server.job.task.support.generator.task.JobTaskGenerat
 import com.aizuda.snailjob.server.job.task.support.handler.WorkflowBatchHandler;
 import com.aizuda.snailjob.server.job.task.support.timer.JobTimerWheel;
 import com.aizuda.snailjob.server.job.task.support.timer.ResidentJobTimerTask;
+import com.aizuda.snailjob.server.job.task.support.timer.JobTimeoutCheckTask;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.GroupConfigMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskBatchMapper;
@@ -105,10 +106,8 @@ public class JobExecutorActor extends AbstractActor {
         }
 
         Job job = jobMapper.selectOne(queryWrapper.eq(Job::getId, taskExecute.getJobId()));
-
+        int taskStatus = JobTaskBatchStatusEnum.RUNNING.getStatus();
         try {
-
-            int taskStatus = JobTaskBatchStatusEnum.RUNNING.getStatus();
             int operationReason = JobOperationReasonEnum.NONE.getReason();
             if (Objects.isNull(job)) {
                 taskStatus = JobTaskBatchStatusEnum.CANCEL.getStatus();
@@ -153,6 +152,14 @@ public class JobExecutorActor extends AbstractActor {
                 public void afterCompletion(int status) {
                     // 清除时间轮的缓存
                     JobTimerWheel.clearCache(SyetemTaskTypeEnum.JOB.getType(), taskExecute.getTaskBatchId());
+
+                    if (JobTaskBatchStatusEnum.RUNNING.getStatus() == status) {
+                        // 运行中的任务，需要进行超时检查
+                        JobTimerWheel.register(SyetemTaskTypeEnum.JOB.getType(), taskExecute.getTaskBatchId(),
+                                new JobTimeoutCheckTask(taskExecute.getTaskBatchId(), job.getId()),
+                                job.getExecutorTimeout(), TimeUnit.SECONDS);
+                    }
+
                     //方法内容
                     doHandlerResidentTask(job, taskExecute);
                 }

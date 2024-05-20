@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
  * @date 2023-10-19 21:54:57
  * @since 2.4.0
  */
-public class TimerIdempotent implements IdempotentStrategy<Long, Long> {
+public class TimerIdempotent implements IdempotentStrategy<Integer, Long> {
     private static final String KEY_FORMAT = "{0}_{1}_{2}";
 
     private static final Cache<String, Long> cache;
@@ -26,28 +26,28 @@ public class TimerIdempotent implements IdempotentStrategy<Long, Long> {
     }
 
     @Override
-    public boolean set(Long key, Long value) {
+    public boolean set(Integer key, Long value) {
         cache.put(getKey(key, value), value);
         return Boolean.TRUE;
     }
 
     @Override
-    public Long get(Long s) {
+    public Long get(Integer s) {
         throw new UnsupportedOperationException("不支持此操作");
     }
 
     @Override
-    public boolean isExist(Long key, Long value) {
+    public boolean isExist(Integer key, Long value) {
         return cache.asMap().containsKey(getKey(key, value));
     }
 
     @Override
-    public boolean clear(Long key, Long value) {
+    public boolean clear(Integer key, Long value) {
         cache.invalidate(getKey(key, value));
         return Boolean.TRUE;
     }
 
-    private static String getKey(Long key, Long value) {
+    private static String getKey(Integer key, Long value) {
         return MessageFormat.format(KEY_FORMAT, key, value);
     }
 }
