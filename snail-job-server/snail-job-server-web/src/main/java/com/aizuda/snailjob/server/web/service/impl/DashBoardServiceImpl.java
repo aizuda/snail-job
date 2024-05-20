@@ -165,11 +165,10 @@ public class DashBoardServiceImpl implements DashBoardService {
 
                 .eq(RetrySceneConfig::getNamespaceId, namespaceId)
                 .in(CollUtil.isNotEmpty(groupNames), RetrySceneConfig::getGroupName, groupNames);
-        // 针对SQL Server的分页COUNT, 自定义statement ID
-        if (DbTypeEnum.SQLSERVER == DbUtils.getDbType()) {
-            pager.setSearchCount(false);
-            pager.setTotal(retrySummaryMapper.countRetryTask(wrapper));
-        }
+
+        // 针对 Group By 分页自定义countStatement
+        pager.setSearchCount(false);
+        pager.setTotal(retrySummaryMapper.retryTaskListCount(wrapper));
 
         IPage<DashboardRetryLineResponseDO.Task> page = retrySummaryMapper.retryTaskList(wrapper, pager);
         List<DashboardRetryLineResponseVO.Task> taskList = JobSummaryResponseVOConverter.INSTANCE.convertList(page.getRecords());
@@ -234,11 +233,12 @@ public class DashBoardServiceImpl implements DashBoardService {
                 .eq(Job::getDeleted, 0)
                 .eq(Job::getNamespaceId, namespaceId)
                 .in(CollUtil.isNotEmpty(groupNames), Job::getGroupName, groupNames);
-        // 针对SQL Server的分页COUNT, 自定义statement ID
-        if (DbTypeEnum.SQLSERVER == DbUtils.getDbType()) {
-            pager.setSearchCount(false);
-            pager.setTotal(jobSummaryMapper.countJobTask(wrapper));
-        }
+
+        // 针对 Group By 分页自定义countStatement
+        pager.setSearchCount(false);
+        pager.setTotal(SystemModeEnum.JOB.name().equals(mode) ?
+                jobSummaryMapper.jobTaskListCount(wrapper):
+                jobSummaryMapper.workflowTaskListCount(wrapper));
 
         IPage<DashboardRetryLineResponseDO.Task> taskIPage = SystemModeEnum.JOB.name().equals(mode) ?
                 jobSummaryMapper.jobTaskList(wrapper, pager) : jobSummaryMapper.workflowTaskList(wrapper, pager);

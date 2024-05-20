@@ -2,11 +2,10 @@ package com.aizuda.snailjob.template.datasource.persistence.mapper;
 
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardCardResponseDO;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardLineResponseDO;
-import com.aizuda.snailjob.template.datasource.persistence.po.Job;
-import com.aizuda.snailjob.template.datasource.persistence.po.JobSummary;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO.Rank;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO.Task;
-import com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardLineResponseDO;
+import com.aizuda.snailjob.template.datasource.persistence.po.Job;
+import com.aizuda.snailjob.template.datasource.persistence.po.JobSummary;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -28,10 +27,15 @@ public interface JobSummaryMapper extends BaseMapper<JobSummary> {
 
     int batchUpdate(@Param("list") List<JobSummary> list);
 
-
     IPage<Task> jobTaskList(@Param("ew") Wrapper<Job> wrapper, Page<Object> page);
 
+    // jobTaskList 自定义 countStatement
+    long jobTaskListCount(@Param("ew") Wrapper<Job> wrapper);
+
     IPage<Task> workflowTaskList(@Param("ew") Wrapper<Job> wrapper, Page<Object> page);
+
+    // workflowTaskList 自定义 countStatement
+    long workflowTaskListCount(@Param("ew") Wrapper<Job> wrapper);
 
     List<DashboardLineResponseDO> jobLineList(@Param("dateFormat") String dateFormat, @Param("ew") Wrapper<JobSummary> wrapper);
 
@@ -39,5 +43,4 @@ public interface JobSummaryMapper extends BaseMapper<JobSummary> {
 
     DashboardCardResponseDO.JobTask toJobTask(@Param("ew") Wrapper<JobSummary> wrapper);
 
-    long countJobTask(@Param("ew") Wrapper<Job> wrapper);
 }

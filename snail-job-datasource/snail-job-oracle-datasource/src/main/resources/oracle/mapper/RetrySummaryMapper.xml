@@ -105,14 +105,4 @@
         WHERE ROWNUM <![CDATA[ <= ]]> 10
     </select>
 
-    <select id="retryTaskList"
-            resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO$Task">
-        SELECT group_name                                          AS groupName,
-               SUM(CASE WHEN (scene_status = 1) THEN 1 ELSE 0 END) AS run,
-               COUNT(*)                                            AS total
-        FROM sj_retry_scene_config
-        ${ew.customSqlSegment}
-        GROUP BY namespace_id, group_name
-    </select>
-
 </mapper>

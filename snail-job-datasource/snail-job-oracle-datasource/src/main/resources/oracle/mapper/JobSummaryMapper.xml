@@ -1,23 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.aizuda.snailjob.template.datasource.persistence.mapper.JobSummaryMapper">
-    <resultMap id="BaseResultMap" type="com.aizuda.snailjob.template.datasource.persistence.po.JobSummary">
-        <id column="id" jdbcType="BIGINT" property="id"/>
-        <result column="namespace_id" jdbcType="TINYINT" property="namespaceId"/>
-        <result column="group_name" jdbcType="TINYINT" property="groupName"/>
-        <result column="business_id" jdbcType="TINYINT" property="businessId"/>
-        <result column="trigger_at" jdbcType="TIMESTAMP" property="triggerAt"/>
-        <result column="system_task_type" jdbcType="TINYINT" property="systemTaskType"/>
-        <result column="success_num" jdbcType="TINYINT" property="successNum"/>
-        <result column="fail_num" jdbcType="TINYINT" property="failNum"/>
-        <result column="fail_reason" jdbcType="VARCHAR" property="failReason"/>
-        <result column="stop_num" jdbcType="TINYINT" property="stopNum"/>
-        <result column="stop_reason" jdbcType="VARCHAR" property="stopReason"/>
-        <result column="cancel_num" jdbcType="TINYINT" property="cancelNum"/>
-        <result column="cancel_reason" jdbcType="VARCHAR" property="cancelReason"/>
-        <result column="create_dt" jdbcType="TIMESTAMP" property="createDt"/>
-        <result column="update_dt" jdbcType="TIMESTAMP" property="updateDt"/>
-    </resultMap>
 
     <insert id="batchInsert" parameterType="java.util.List" useGeneratedKeys="false" keyProperty="id">
         INSERT INTO sj_job_summary (namespace_id, group_name, business_id, trigger_at, system_task_type,
@@ -107,13 +90,4 @@
         WHERE ROWNUM <![CDATA[ <= ]]> 10
     </select>
 
-    <select id="jobTaskList"
-            resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO$Task">
-        SELECT group_name                                        AS groupName,
-               SUM(CASE WHEN (job_status = 1) THEN 1 ELSE 0 END) AS run,
-               COUNT(*)                                          AS total
-        FROM sj_job
-        ${ew.customSqlSegment}
-        GROUP BY namespace_id, group_name
-    </select>
 </mapper>
