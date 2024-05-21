@@ -1,10 +1,10 @@
 package com.aizuda.snailjob.server.job.task.support.idempotent;
 
 import com.aizuda.snailjob.server.common.IdempotentStrategy;
+import com.aizuda.snailjob.server.common.triple.Pair;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
-import java.text.MessageFormat;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -13,9 +13,8 @@ import java.util.concurrent.TimeUnit;
  * @since 2.4.0
  */
 public class TimerIdempotent implements IdempotentStrategy<Integer, Long> {
-    private static final String KEY_FORMAT = "{0}_{1}_{2}";
 
-    private static final Cache<String, Long> cache;
+    private static final Cache<Pair<Integer/*任务类型: SyetemTaskTypeEnum*/, Long /*批次id*/>, Long> cache;
 
     static {
         cache = CacheBuilder.newBuilder()
@@ -26,8 +25,8 @@ public class TimerIdempotent implements IdempotentStrategy<Integer, Long> {
     }
 
     @Override
-    public boolean set(Integer key, Long value) {
-        cache.put(getKey(key, value), value);
+    public boolean set(Integer type, Long value) {
+        cache.put(getKey(type, value), value);
         return Boolean.TRUE;
     }
 
@@ -37,17 +36,17 @@ public class TimerIdempotent implements IdempotentStrategy<Integer, Long> {
     }
 
     @Override
-    public boolean isExist(Integer key, Long value) {
-        return cache.asMap().containsKey(getKey(key, value));
+    public boolean isExist(Integer type, Long value) {
+        return cache.asMap().containsKey(getKey(type, value));
     }
 
     @Override
-    public boolean clear(Integer key, Long value) {
-        cache.invalidate(getKey(key, value));
+    public boolean clear(Integer type, Long value) {
+        cache.invalidate(getKey(type, value));
         return Boolean.TRUE;
     }
 
-    private static String getKey(Integer key, Long value) {
-        return MessageFormat.format(KEY_FORMAT, key, value);
+    private static Pair<Integer, Long> getKey(Integer type, Long value) {
+        return Pair.of(type, value);
     }
 }

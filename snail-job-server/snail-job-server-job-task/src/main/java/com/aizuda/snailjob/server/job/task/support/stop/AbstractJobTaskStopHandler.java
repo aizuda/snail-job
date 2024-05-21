@@ -51,6 +51,7 @@ public abstract class AbstractJobTaskStopHandler implements JobTaskStopHandler, 
             JobTaskBatch jobTaskBatch = new JobTaskBatch();
             jobTaskBatch.setId(context.getTaskBatchId());
             jobTaskBatch.setTaskBatchStatus(JobTaskBatchStatusEnum.STOP.getStatus());
+            jobTaskBatch.setOperationReason(context.getJobOperationReason());
             jobTaskBatchMapper.updateById(jobTaskBatch);
             return;
         }

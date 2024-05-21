@@ -9,7 +9,6 @@ import com.aizuda.snailjob.server.job.task.dto.JobTimerTaskDTO;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
 import com.aizuda.snailjob.template.datasource.persistence.po.Job;
 import io.netty.util.Timeout;
-import io.netty.util.TimerTask;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -20,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @AllArgsConstructor
-public class ResidentJobTimerTask implements TimerTask {
+public class ResidentJobTimerTask implements TimerTask<Long> {
 
     private JobTimerTaskDTO jobTimerTaskDTO;
     private Job job;
@@ -38,5 +37,10 @@ public class ResidentJobTimerTask implements TimerTask {
         } catch (Exception e) {
             log.error("任务调度执行失败", e);
         }
+    }
+
+    @Override
+    public Long getUniqueId() {
+        return jobTimerTaskDTO.getTaskBatchId();
     }
 }

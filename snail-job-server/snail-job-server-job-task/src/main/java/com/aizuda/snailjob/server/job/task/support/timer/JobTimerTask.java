@@ -5,7 +5,6 @@ import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.job.task.dto.JobTimerTaskDTO;
 import com.aizuda.snailjob.server.job.task.dto.TaskExecuteDTO;
 import io.netty.util.Timeout;
-import io.netty.util.TimerTask;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -18,7 +17,7 @@ import java.time.LocalDateTime;
  */
 @AllArgsConstructor
 @Slf4j
-public class JobTimerTask implements TimerTask {
+public class JobTimerTask implements TimerTask<Long> {
 
     private JobTimerTaskDTO jobTimerTaskDTO;
 
@@ -42,4 +41,8 @@ public class JobTimerTask implements TimerTask {
         }
     }
 
+    @Override
+    public Long getUniqueId() {
+        return jobTimerTaskDTO.getTaskBatchId();
+    }
 }

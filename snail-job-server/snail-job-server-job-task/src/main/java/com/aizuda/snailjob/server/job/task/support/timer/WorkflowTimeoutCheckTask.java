@@ -8,7 +8,6 @@ import com.aizuda.snailjob.server.job.task.support.handler.WorkflowBatchHandler;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowTaskBatchMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.WorkflowTaskBatch;
 import io.netty.util.Timeout;
-import io.netty.util.TimerTask;
 import lombok.AllArgsConstructor;
 
 import java.util.Objects;
@@ -19,7 +18,7 @@ import java.util.Objects;
  * @since sj_1.0.0
  */
 @AllArgsConstructor
-public class WorkflowTimeoutCheckTask implements TimerTask {
+public class WorkflowTimeoutCheckTask implements TimerTask<Long> {
     private final Long workflowTaskBatchId;
     @Override
     public void run(Timeout timeout) throws Exception {
@@ -35,5 +34,10 @@ public class WorkflowTimeoutCheckTask implements TimerTask {
         // 超时停止任务
         workflowBatchHandler.stop(workflowTaskBatchId, JobOperationReasonEnum.TASK_EXECUTION_TIMEOUT.getReason());
         SpringContext.getContext().publishEvent(new WorkflowTaskFailAlarmEvent(workflowTaskBatchId));
+    }
+
+    @Override
+    public Long getUniqueId() {
+        return workflowTaskBatchId;
     }
 }

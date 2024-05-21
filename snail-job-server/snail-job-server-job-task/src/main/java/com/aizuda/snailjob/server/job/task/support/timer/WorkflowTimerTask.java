@@ -6,12 +6,10 @@ import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.job.task.dto.WorkflowNodeTaskExecuteDTO;
 import com.aizuda.snailjob.server.job.task.dto.WorkflowTimerTaskDTO;
 import io.netty.util.Timeout;
-import io.netty.util.TimerTask;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author: xiaowoniu
@@ -20,7 +18,7 @@ import java.util.concurrent.TimeUnit;
  */
 @AllArgsConstructor
 @Slf4j
-public class WorkflowTimerTask implements TimerTask {
+public class WorkflowTimerTask implements TimerTask<Long> {
 
     private WorkflowTimerTaskDTO workflowTimerTaskDTO;
 
@@ -43,4 +41,8 @@ public class WorkflowTimerTask implements TimerTask {
         }
     }
 
+    @Override
+    public Long getUniqueId() {
+        return workflowTimerTaskDTO.getWorkflowTaskBatchId();
+    }
 }

@@ -10,6 +10,7 @@ import com.aizuda.snailjob.server.job.task.support.timer.JobTimerTask;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -41,8 +42,10 @@ public class WaitJobPrepareHandler extends AbstractJobPrePareHandler {
             JobTimerTaskDTO jobTimerTaskDTO = new JobTimerTaskDTO();
             jobTimerTaskDTO.setTaskBatchId(jobPrepareDTO.getTaskBatchId());
             jobTimerTaskDTO.setJobId(jobPrepareDTO.getJobId());
-            JobTimerWheel.register(SyetemTaskTypeEnum.JOB.getType(), jobPrepareDTO.getTaskBatchId(),
-                    new JobTimerTask(jobTimerTaskDTO), delay, TimeUnit.MILLISECONDS);
+
+            JobTimerWheel.registerWithJob(() ->  new JobTimerTask(jobTimerTaskDTO), Duration.ofMillis(delay));
+//            JobTimerWheel.register(SyetemTaskTypeEnum.JOB.getType(), jobPrepareDTO.getTaskBatchId(),
+//                    new JobTimerTask(jobTimerTaskDTO), delay, TimeUnit.MILLISECONDS);
         }
     }
 

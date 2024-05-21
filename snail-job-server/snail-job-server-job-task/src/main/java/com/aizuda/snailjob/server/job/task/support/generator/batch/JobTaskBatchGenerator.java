@@ -24,6 +24,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
@@ -95,8 +96,9 @@ public class JobTaskBatchGenerator {
         jobTimerTaskDTO.setTaskExecutorScene(context.getTaskExecutorScene());
         jobTimerTaskDTO.setWorkflowTaskBatchId(context.getWorkflowTaskBatchId());
         jobTimerTaskDTO.setWorkflowNodeId(context.getWorkflowNodeId());
-        JobTimerWheel.register(SyetemTaskTypeEnum.JOB.getType(), jobTaskBatch.getId(),
-                new JobTimerTask(jobTimerTaskDTO), delay, TimeUnit.MILLISECONDS);
+        JobTimerWheel.registerWithJob(() -> new JobTimerTask(jobTimerTaskDTO), Duration.ofMillis(delay));
+//        JobTimerWheel.register(SyetemTaskTypeEnum.JOB.getType(), jobTaskBatch.getId(),
+//                new JobTimerTask(jobTimerTaskDTO), delay, TimeUnit.MILLISECONDS);
 
         return jobTaskBatch;
     }

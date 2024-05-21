@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -52,7 +53,9 @@ public class WorkflowBatchGenerator {
         workflowTimerTaskDTO.setWorkflowTaskBatchId(workflowTaskBatch.getId());
         workflowTimerTaskDTO.setWorkflowId(context.getWorkflowId());
         workflowTimerTaskDTO.setTaskExecutorScene(context.getTaskExecutorScene());
-        JobTimerWheel.register(SyetemTaskTypeEnum.WORKFLOW.getType(), workflowTaskBatch.getId(),
-                new WorkflowTimerTask(workflowTimerTaskDTO), delay, TimeUnit.MILLISECONDS);
+
+        JobTimerWheel.registerWithWorkflow(() ->  new WorkflowTimerTask(workflowTimerTaskDTO), Duration.ofMillis(delay));
+//        JobTimerWheel.register(SyetemTaskTypeEnum.WORKFLOW.getType(), workflowTaskBatch.getId(),
+//                new WorkflowTimerTask(workflowTimerTaskDTO), delay, TimeUnit.MILLISECONDS);
     }
 }

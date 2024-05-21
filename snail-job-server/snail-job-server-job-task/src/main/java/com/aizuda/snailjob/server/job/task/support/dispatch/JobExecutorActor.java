@@ -54,6 +54,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.CollectionUtils;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -147,17 +148,22 @@ public class JobExecutorActor extends AbstractActor {
             jobExecutor.execute(buildJobExecutorContext(taskExecute, job, taskList));
         } finally {
             log.debug("准备执行任务完成.[{}]", JsonUtil.toJsonString(taskExecute));
+            final int finalTaskStatus = taskStatus;
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                 @Override
                 public void afterCompletion(int status) {
                     // 清除时间轮的缓存
                     JobTimerWheel.clearCache(SyetemTaskTypeEnum.JOB.getType(), taskExecute.getTaskBatchId());
 
-                    if (JobTaskBatchStatusEnum.RUNNING.getStatus() == status) {
+                    if (JobTaskBatchStatusEnum.RUNNING.getStatus() == finalTaskStatus) {
+
                         // 运行中的任务，需要进行超时检查
-                        JobTimerWheel.register(SyetemTaskTypeEnum.JOB.getType(), taskExecute.getTaskBatchId(),
-                                new JobTimeoutCheckTask(taskExecute.getTaskBatchId(), job.getId()),
-                                job.getExecutorTimeout(), TimeUnit.SECONDS);
+                        JobTimerWheel.registerWithJob(() -> new JobTimeoutCheckTask(taskExecute.getTaskBatchId(), job.getId()),
+                            Duration.ofSeconds(job.getExecutorTimeout()));
+
+//                        JobTimerWheel.register(SyetemTaskTypeEnum.JOB.getType(), taskExecute.getTaskBatchId(),
+//                                new JobTimeoutCheckTask(taskExecute.getTaskBatchId(), job.getId()),
+//                                job.getExecutorTimeout(), TimeUnit.SECONDS);
                     }
 
                     //方法内容
@@ -220,7 +226,7 @@ public class JobExecutorActor extends AbstractActor {
         jobTimerTaskDTO.setJobId(taskExecuteDTO.getJobId());
         jobTimerTaskDTO.setTaskBatchId(taskExecuteDTO.getTaskBatchId());
         jobTimerTaskDTO.setTaskExecutorScene(JobTaskExecutorSceneEnum.AUTO_JOB.getType());
-        ResidentJobTimerTask timerTask = new ResidentJobTimerTask(jobTimerTaskDTO, job);
+//        ResidentJobTimerTask timerTask = ;
         WaitStrategy waitStrategy = WaitStrategies.WaitStrategyEnum.getWaitStrategy(job.getTriggerType());
 
         Long preTriggerAt = ResidentTaskCache.get(job.getId());
@@ -238,8 +244,8 @@ public class JobExecutorActor extends AbstractActor {
 
         log.debug("常驻任务监控. 任务时间差:[{}] 取余:[{}]", milliseconds, DateUtils.toNowMilli() % 1000);
         job.setNextTriggerAt(nextTriggerAt);
-
-        JobTimerWheel.register(SyetemTaskTypeEnum.JOB.getType(), jobTimerTaskDTO.getTaskBatchId(), timerTask, milliseconds - DateUtils.toNowMilli() % 1000, TimeUnit.MILLISECONDS);
+        JobTimerWheel.registerWithJob(() -> new ResidentJobTimerTask(jobTimerTaskDTO, job), Duration.ofMillis(milliseconds - DateUtils.toNowMilli() % 1000));
+//        JobTimerWheel.register(SyetemTaskTypeEnum.JOB.getType(), jobTimerTaskDTO.getTaskBatchId(), timerTask, milliseconds - DateUtils.toNowMilli() % 1000, TimeUnit.MILLISECONDS);
         ResidentTaskCache.refresh(job.getId(), nextTriggerAt);
     }
 }

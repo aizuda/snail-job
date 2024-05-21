@@ -4,6 +4,8 @@ import com.aizuda.snailjob.common.core.context.SpringContext;
 import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.snailjob.common.log.SnailJobLog;
+import com.aizuda.snailjob.server.common.dto.JobLogMetaDTO;
+import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
 import com.aizuda.snailjob.server.job.task.support.JobTaskStopHandler;
 import com.aizuda.snailjob.server.job.task.support.alarm.event.JobTaskFailAlarmEvent;
@@ -14,7 +16,6 @@ import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskBatchMa
 import com.aizuda.snailjob.template.datasource.persistence.po.Job;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch;
 import io.netty.util.Timeout;
-import io.netty.util.TimerTask;
 import lombok.AllArgsConstructor;
 
 import java.util.Objects;
@@ -27,7 +28,7 @@ import java.util.Objects;
  * @since sj_1.0.0
  */
 @AllArgsConstructor
-public class JobTimeoutCheckTask implements TimerTask {
+public class JobTimeoutCheckTask implements TimerTask<Long> {
     private final Long taskBatchId;
     private final Long jobId;
 
@@ -52,15 +53,21 @@ public class JobTimeoutCheckTask implements TimerTask {
             return;
         }
 
-        SnailJobLog.LOCAL.info("任务执行超时.taskBatchId:[{}]", taskBatchId);
         // 超时停止任务
         JobTaskStopHandler instanceInterrupt = JobTaskStopFactory.getJobTaskStop(job.getTaskType());
         TaskStopJobContext stopJobContext = JobTaskConverter.INSTANCE.toStopJobContext(job);
         stopJobContext.setJobOperationReason(JobOperationReasonEnum.TASK_EXECUTION_TIMEOUT.getReason());
         stopJobContext.setNeedUpdateTaskStatus(Boolean.TRUE);
+        stopJobContext.setForceStop(Boolean.TRUE);
+        stopJobContext.setTaskBatchId(taskBatchId);
         instanceInterrupt.stop(stopJobContext);
+
         SpringContext.getContext().publishEvent(new JobTaskFailAlarmEvent(taskBatchId));
+        SnailJobLog.REMOTE.info("超时中断.taskBatchId:[{}]", taskBatchId);
     }
 
-
+    @Override
+    public Long getUniqueId() {
+        return taskBatchId;
+    }
 }

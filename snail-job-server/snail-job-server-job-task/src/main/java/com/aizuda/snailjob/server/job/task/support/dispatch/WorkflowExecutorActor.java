@@ -37,6 +37,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -92,9 +93,11 @@ public class WorkflowExecutorActor extends AbstractActor {
             Workflow workflow = workflowMapper.selectById(workflowTaskBatch.getWorkflowId());
             JobTimerWheel.clearCache(SyetemTaskTypeEnum.WORKFLOW.getType(), taskExecute.getWorkflowTaskBatchId());
 
+            JobTimerWheel.registerWithWorkflow(() ->  new WorkflowTimeoutCheckTask(taskExecute.getWorkflowTaskBatchId()),
+                Duration.ofSeconds(workflow.getExecutorTimeout()));
             // 超时检查
-            JobTimerWheel.register(SyetemTaskTypeEnum.WORKFLOW.getType(), taskExecute.getWorkflowTaskBatchId(),
-                    new WorkflowTimeoutCheckTask(taskExecute.getWorkflowTaskBatchId()), workflow.getExecutorTimeout(), TimeUnit.MILLISECONDS);
+//            JobTimerWheel.register(SyetemTaskTypeEnum.WORKFLOW.getType(), taskExecute.getWorkflowTaskBatchId(),
+//                    new WorkflowTimeoutCheckTask(taskExecute.getWorkflowTaskBatchId()), workflow.getExecutorTimeout(), TimeUnit.SECONDS);
         }
 
         // 获取DAG图
