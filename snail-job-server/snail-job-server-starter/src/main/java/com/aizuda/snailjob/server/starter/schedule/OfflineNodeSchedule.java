@@ -1,5 +1,7 @@
 package com.aizuda.snailjob.server.starter.schedule;
 
+import cn.hutool.core.collection.CollStreamUtil;
+import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.Lifecycle;
@@ -46,9 +48,9 @@ public class OfflineNodeSchedule extends AbstractSchedule implements Lifecycle {
             List<ServerNode> serverNodes = serverNodeMapper.selectList(
                 new LambdaQueryWrapper<ServerNode>().select(ServerNode::getId)
                     .le(ServerNode::getExpireAt, endTime));
-            if (!CollectionUtils.isEmpty(serverNodes)) {
+            if (CollUtil.isNotEmpty(serverNodes)) {
                 // 先删除DB中需要下线的机器
-                serverNodeMapper.deleteBatchIds(serverNodes.stream().map(ServerNode::getId).collect(Collectors.toSet()));
+                serverNodeMapper.deleteBatchIds(StreamUtils.toSet(serverNodes, ServerNode::getId));
             }
 
             Set<RegisterNodeInfo> allPods = CacheRegisterTable.getAllPods();
