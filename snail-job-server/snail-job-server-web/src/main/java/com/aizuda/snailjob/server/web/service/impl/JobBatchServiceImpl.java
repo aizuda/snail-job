@@ -59,14 +59,14 @@ public class JobBatchServiceImpl implements JobBatchService {
         }
 
         QueryWrapper<JobTaskBatch> wrapper = new QueryWrapper<JobTaskBatch>()
-                .eq("a.namespace_id", userSessionVO.getNamespaceId())
-                .eq("a.system_task_type", SyetemTaskTypeEnum.JOB.getType())
-                .eq(queryVO.getJobId() != null, "a.job_id", queryVO.getJobId())
-                .in(CollUtil.isNotEmpty(groupNames), "a.group_name", groupNames)
-                .eq(queryVO.getTaskBatchStatus() != null, "task_batch_status", queryVO.getTaskBatchStatus())
-                .likeRight(StrUtil.isNotBlank(queryVO.getJobName()), "job_name", queryVO.getJobName())
-                .eq("a.deleted", 0)
-                .orderByDesc("a.id");
+                .eq("batch.namespace_id", userSessionVO.getNamespaceId())
+                .eq("batch.system_task_type", SyetemTaskTypeEnum.JOB.getType())
+                .eq(queryVO.getJobId() != null, "batch.job_id", queryVO.getJobId())
+                .in(CollUtil.isNotEmpty(groupNames), "batch.group_name", groupNames)
+                .eq(queryVO.getTaskBatchStatus() != null, "batch.task_batch_status", queryVO.getTaskBatchStatus())
+                .likeRight(StrUtil.isNotBlank(queryVO.getJobName()), "job.job_name", queryVO.getJobName())
+                .eq("batch.deleted", 0)
+                .orderByDesc("batch.id");
         List<JobBatchResponseDO> batchResponseDOList = jobTaskBatchMapper.selectJobBatchPageList(pageDTO, wrapper);
         List<JobBatchResponseVO> batchResponseVOList = JobBatchResponseVOConverter.INSTANCE.convertList(
                 batchResponseDOList);

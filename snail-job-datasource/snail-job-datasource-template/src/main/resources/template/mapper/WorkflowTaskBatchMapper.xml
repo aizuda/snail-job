@@ -11,6 +11,7 @@
                 JOIN sj_workflow flow ON batch.workflow_id = flow.id
         ${ew.customSqlSegment}
     </select>
+
     <select id="selectWorkflowBatchList"
         resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.WorkflowBatchResponseDO">
         SELECT batch.*,

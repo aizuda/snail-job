@@ -73,13 +73,13 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
         }
 
         QueryWrapper<WorkflowTaskBatch> wrapper = new QueryWrapper<WorkflowTaskBatch>()
-                .eq("a.namespace_id", userSessionVO.getNamespaceId())
-                .eq(queryVO.getWorkflowId() != null, "a.workflow_id", queryVO.getWorkflowId())
-                .in(CollUtil.isNotEmpty(groupNames), "a.group_name", groupNames)
-                .eq(queryVO.getTaskBatchStatus() != null, "task_batch_status", queryVO.getTaskBatchStatus())
-                .likeRight(StrUtil.isNotBlank(queryVO.getWorkflowName()), "b.workflow_name", queryVO.getWorkflowName())
-                .eq("a.deleted", 0)
-                .orderByDesc("a.id");
+                .eq("batch.namespace_id", userSessionVO.getNamespaceId())
+                .eq(queryVO.getWorkflowId() != null, "batch.workflow_id", queryVO.getWorkflowId())
+                .in(CollUtil.isNotEmpty(groupNames), "batch.group_name", groupNames)
+                .eq(queryVO.getTaskBatchStatus() != null, "batch.task_batch_status", queryVO.getTaskBatchStatus())
+                .likeRight(StrUtil.isNotBlank(queryVO.getWorkflowName()), "flow.workflow_name", queryVO.getWorkflowName())
+                .eq("batch.deleted", 0)
+                .orderByDesc("batch.id");
         List<WorkflowBatchResponseDO> batchResponseDOList = workflowTaskBatchMapper.selectWorkflowBatchPageList(pageDTO, wrapper);
 
         List<WorkflowBatchResponseVO> batchResponseVOList =

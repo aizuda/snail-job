@@ -14,7 +14,6 @@ import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.job.task.support.alarm.event.WorkflowTaskFailAlarmEvent;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.WorkflowBatchResponseDO;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowTaskBatchMapper;
-import com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch;
 import com.aizuda.snailjob.template.datasource.persistence.po.WorkflowTaskBatch;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.common.collect.Lists;
@@ -63,9 +62,10 @@ public class WorkflowTaskFailAlarmListener extends AbstractWorkflowAlarm<Workflo
         List<Long> workflowTaskBatchIds = Lists.newArrayList(workflowTaskBatchId);
         queue.drainTo(workflowTaskBatchIds, 200);
 
-        QueryWrapper<WorkflowTaskBatch> wrapper = new QueryWrapper<WorkflowTaskBatch>()
-                .in("a.id", workflowTaskBatchIds).eq("a.deleted", 0);
-        List<WorkflowBatchResponseDO> workflowTaskBatches = workflowTaskBatchMapper.selectWorkflowBatchList(wrapper);
+        List<WorkflowBatchResponseDO> workflowTaskBatches = workflowTaskBatchMapper.selectWorkflowBatchList(
+                new QueryWrapper<WorkflowTaskBatch>()
+                        .in("batch.id", workflowTaskBatchIds)
+                        .eq("batch.deleted", 0));
         return AlarmInfoConverter.INSTANCE.toWorkflowAlarmInfos(workflowTaskBatches);
     }
 

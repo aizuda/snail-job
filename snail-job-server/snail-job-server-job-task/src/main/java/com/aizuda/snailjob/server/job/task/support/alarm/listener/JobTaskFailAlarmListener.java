@@ -70,7 +70,8 @@ public class JobTaskFailAlarmListener extends AbstractJobAlarm<JobTaskFailAlarmE
         List<Long> jobTaskBatchIds = Lists.newArrayList(jobTaskBatchId);
         queue.drainTo(jobTaskBatchIds, 200);
         QueryWrapper<JobTaskBatch> wrapper = new QueryWrapper<JobTaskBatch>()
-                .in("a.id", jobTaskBatchIds).eq("a.deleted", 0);
+                .in("batch.id", jobTaskBatchIds)
+                .eq("batch.deleted", 0);
         List<JobBatchResponseDO> jobTaskBatchList = jobTaskBatchMapper.selectJobBatchListByIds(wrapper);
         return AlarmInfoConverter.INSTANCE.toJobAlarmInfos(jobTaskBatchList);
     }
