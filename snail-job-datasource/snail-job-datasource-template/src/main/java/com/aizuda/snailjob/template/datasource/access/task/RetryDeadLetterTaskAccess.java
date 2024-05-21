@@ -38,7 +38,7 @@ public class RetryDeadLetterTaskAccess extends AbstractTaskAccess<RetryDeadLette
     }
 
     @Override
-    protected int doBatchInsert(List<RetryDeadLetter> list) {
+    protected int doInsertBatch(List<RetryDeadLetter> list) {
         return retryDeadLetterMapper.insertBatch(list);
     }
 

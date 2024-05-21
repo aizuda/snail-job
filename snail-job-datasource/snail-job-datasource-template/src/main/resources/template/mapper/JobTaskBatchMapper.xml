@@ -17,7 +17,7 @@
         ${ew.customSqlSegment}
     </select>
 
-    <select id="summaryJobBatchList"
+    <select id="selectJobBatchSummaryList"
             resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.JobBatchSummaryResponseDO">
         SELECT namespace_id                                             AS namespaceId,
                job_id                                                   AS jobId,
@@ -33,7 +33,7 @@
         ${ew.customSqlSegment}
     </select>
 
-    <select id="summaryWorkflowTaskBatchList"
+    <select id="selectWorkflowTaskBatchSummaryList"
             resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.JobBatchSummaryResponseDO">
         SELECT namespace_id                                             AS namespaceId,
                workflow_id                                              AS jobId,

@@ -3,7 +3,7 @@
 <mapper namespace="com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskMapper">
 
     <!-- 定义批量新增的 SQL 映射 -->
-    <insert id="batchInsert" parameterType="java.util.List">
+    <insert id="insertBatch" parameterType="java.util.List">
         INSERT INTO sj_retry_task (namespace_id, unique_id, group_name, scene_name, idempotent_id, biz_no, executor_name, args_str, ext_attrs, next_trigger_at, task_type, retry_status, create_dt)
         VALUES
         <foreach collection="list" item="item" separator=",">

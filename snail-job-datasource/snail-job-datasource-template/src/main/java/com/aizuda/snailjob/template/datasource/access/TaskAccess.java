@@ -26,7 +26,7 @@ public interface TaskAccess<T> extends Access<T> {
 
     int insert(String groupName, String namespaceId, T t);
 
-    int batchInsert(String groupName, String namespaceId, List<T> list);
+    int insertBatch(String groupName, String namespaceId, List<T> list);
 
     PageDTO<T> listPage(String groupName, String namespaceId, PageDTO<T> iPage, LambdaQueryWrapper<T> query);
 

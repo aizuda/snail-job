@@ -28,7 +28,6 @@ import com.aizuda.snailjob.server.web.model.response.ServerNodeResponseVO;
 import com.aizuda.snailjob.server.web.service.DashBoardService;
 import com.aizuda.snailjob.server.web.service.convert.*;
 import com.aizuda.snailjob.server.web.util.UserSessionUtils;
-import com.aizuda.snailjob.template.datasource.enums.DbTypeEnum;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.ActivePodQuantityResponseDO;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardCardResponseDO;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardLineResponseDO;
@@ -37,7 +36,6 @@ import com.aizuda.snailjob.template.datasource.persistence.mapper.JobSummaryMapp
 import com.aizuda.snailjob.template.datasource.persistence.mapper.RetrySummaryMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.ServerNodeMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.*;
-import com.aizuda.snailjob.template.datasource.utils.DbUtils;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
@@ -85,7 +83,7 @@ public class DashBoardServiceImpl implements DashBoardService {
         DashboardCardResponseVO responseVO = new DashboardCardResponseVO();
 
         // 重试任务
-        DashboardCardResponseDO.RetryTask retryTaskDO = retrySummaryMapper.retryTask(
+        DashboardCardResponseDO.RetryTask retryTaskDO = retrySummaryMapper.selectRetryTask(
                 new LambdaQueryWrapper<RetrySummary>()
                         .eq(RetrySummary::getNamespaceId, namespaceId)
                         .in(CollUtil.isNotEmpty(groupNames), RetrySummary::getGroupName, groupNames));
@@ -93,7 +91,7 @@ public class DashBoardServiceImpl implements DashBoardService {
         responseVO.setRetryTask(retryTaskVO);
 
         // 定时任务
-        DashboardCardResponseDO.JobTask jobTaskDO = jobSummaryMapper.toJobTask(
+        DashboardCardResponseDO.JobTask jobTaskDO = jobSummaryMapper.selectJobTask(
                 new LambdaQueryWrapper<JobSummary>()
                         .eq(JobSummary::getSystemTaskType, SyetemTaskTypeEnum.JOB.getType())
                         .eq(JobSummary::getNamespaceId, namespaceId)
@@ -102,7 +100,7 @@ public class DashBoardServiceImpl implements DashBoardService {
         responseVO.setJobTask(jobTaskVO);
 
         // 工作流任务
-        DashboardCardResponseDO.JobTask workFlowTaskDO = jobSummaryMapper.toJobTask(
+        DashboardCardResponseDO.JobTask workFlowTaskDO = jobSummaryMapper.selectJobTask(
                 new LambdaQueryWrapper<JobSummary>()
                         .eq(JobSummary::getSystemTaskType, SyetemTaskTypeEnum.WORKFLOW.getType())
                         .eq(JobSummary::getNamespaceId, namespaceId)
@@ -116,7 +114,7 @@ public class DashBoardServiceImpl implements DashBoardService {
             DashboardCardResponseVO.RetryTaskBar retryTaskBar = new DashboardCardResponseVO.RetryTaskBar().setX(LocalDateTime.of(LocalDate.now(), LocalTime.MIN).plusDays(-i).toLocalDate().toString()).setTaskTotal(0L);
             retryTaskBarMap.put(LocalDateTimeUtil.beginOfDay(LocalDateTime.now().minusDays(i)), retryTaskBar);
         }
-        List<DashboardCardResponseDO.RetryTask> retryTaskList = retrySummaryMapper.retryTaskBarList(
+        List<DashboardCardResponseDO.RetryTask> retryTaskList = retrySummaryMapper.selectRetryTaskBarList(
                 new LambdaQueryWrapper<RetrySummary>()
                         .eq(RetrySummary::getNamespaceId, namespaceId)
                         .in(CollUtil.isNotEmpty(groupNames), RetrySummary::getGroupName, groupNames)
@@ -133,7 +131,7 @@ public class DashBoardServiceImpl implements DashBoardService {
         responseVO.setRetryTaskBarList(new ArrayList<>(retryTaskBarMap.values()));
 
         // 在线Pods
-        List<ActivePodQuantityResponseDO> activePodQuantityDO = serverNodeMapper.countActivePod(
+        List<ActivePodQuantityResponseDO> activePodQuantityDO = serverNodeMapper.selectActivePodCount(
                 new LambdaQueryWrapper<ServerNode>()
                         .in(ServerNode::getNamespaceId, Lists.newArrayList(userSessionVO.getNamespaceId(), ServerRegister.NAMESPACE_ID))
                         .groupBy(ServerNode::getNodeType));
@@ -168,9 +166,9 @@ public class DashBoardServiceImpl implements DashBoardService {
 
         // 针对 Group By 分页自定义countStatement
         pager.setSearchCount(false);
-        pager.setTotal(retrySummaryMapper.retryTaskListCount(wrapper));
+        pager.setTotal(retrySummaryMapper.selectRetryTaskListCount(wrapper));
 
-        IPage<DashboardRetryLineResponseDO.Task> page = retrySummaryMapper.retryTaskList(wrapper, pager);
+        IPage<DashboardRetryLineResponseDO.Task> page = retrySummaryMapper.selectRetryTaskList(wrapper, pager);
         List<DashboardRetryLineResponseVO.Task> taskList = JobSummaryResponseVOConverter.INSTANCE.convertList(page.getRecords());
         PageResult<List<Task>> pageResult = new PageResult<>(
                 new PageDTO(pager.getCurrent(), pager.getSize(), pager.getTotal()),
@@ -187,7 +185,7 @@ public class DashBoardServiceImpl implements DashBoardService {
                 StrUtil.isNotBlank(endTime) ?
                         LocalDateTime.parse(endTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) :
                         LocalDateTime.now());
-        List<DashboardLineResponseDO> dashboardRetryLinkeResponseDOList = retrySummaryMapper.retryLineList(
+        List<DashboardLineResponseDO> dashboardRetryLinkeResponseDOList = retrySummaryMapper.selectRetryLineList(
                 DashboardLineEnum.dateFormat(type),
                 new LambdaQueryWrapper<RetrySummary>()
                         .in(CollUtil.isNotEmpty(groupNames), RetrySummary::getGroupName, groupNames)
@@ -200,7 +198,7 @@ public class DashBoardServiceImpl implements DashBoardService {
         responseVO.setDashboardLineResponseDOList(dashboardLineResponseVOList);
 
         // 排行榜
-        List<DashboardRetryLineResponseDO.Rank> rankList = retrySummaryMapper.dashboardRank(
+        List<DashboardRetryLineResponseDO.Rank> rankList = retrySummaryMapper.selectDashboardRankList(
                 new LambdaQueryWrapper<RetrySummary>()
                         .in(CollUtil.isNotEmpty(groupNames), RetrySummary::getGroupName, groupNames)
                         .eq(StrUtil.isNotBlank(groupName), RetrySummary::getGroupName, groupNames)
@@ -237,11 +235,11 @@ public class DashBoardServiceImpl implements DashBoardService {
         // 针对 Group By 分页自定义countStatement
         pager.setSearchCount(false);
         pager.setTotal(SystemModeEnum.JOB.name().equals(mode) ?
-                jobSummaryMapper.jobTaskListCount(wrapper):
-                jobSummaryMapper.workflowTaskListCount(wrapper));
+                jobSummaryMapper.selectJobTaskListCount(wrapper):
+                jobSummaryMapper.selectWorkflowTaskListCount(wrapper));
 
         IPage<DashboardRetryLineResponseDO.Task> taskIPage = SystemModeEnum.JOB.name().equals(mode) ?
-                jobSummaryMapper.jobTaskList(wrapper, pager) : jobSummaryMapper.workflowTaskList(wrapper, pager);
+                jobSummaryMapper.selectJobTaskList(wrapper, pager) : jobSummaryMapper.selectWorkflowTaskList(wrapper, pager);
         List<DashboardRetryLineResponseVO.Task> taskList = JobSummaryResponseVOConverter.INSTANCE.convertList(taskIPage.getRecords());
         PageResult<List<DashboardRetryLineResponseVO.Task>> pageResult = new PageResult<>(
                 new PageDTO(pager.getCurrent(), pager.getSize(), pager.getTotal()),
@@ -258,7 +256,7 @@ public class DashBoardServiceImpl implements DashBoardService {
                 StrUtil.isNotBlank(endTime) ?
                         LocalDateTime.parse(endTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) :
                         LocalDateTime.now());
-        List<DashboardLineResponseDO> dashboardLineResponseDOList = jobSummaryMapper.jobLineList(
+        List<DashboardLineResponseDO> dashboardLineResponseDOList = jobSummaryMapper.selectJobLineList(
                 DashboardLineEnum.dateFormat(type),
                 new LambdaQueryWrapper<JobSummary>()
                         .in(CollUtil.isNotEmpty(groupNames), JobSummary::getGroupName, groupNames)
@@ -272,7 +270,7 @@ public class DashBoardServiceImpl implements DashBoardService {
         responseVO.setDashboardLineResponseDOList(dashboardLineResponseVOList);
 
         // 排行榜
-        List<DashboardRetryLineResponseDO.Rank> rankList = jobSummaryMapper.dashboardRank(
+        List<DashboardRetryLineResponseDO.Rank> rankList = jobSummaryMapper.selectDashboardRankList(
                 systemTaskType,
                 new LambdaQueryWrapper<JobSummary>()
                         .in(CollUtil.isNotEmpty(groupNames), JobSummary::getGroupName, groupNames)

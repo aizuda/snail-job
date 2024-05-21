@@ -3,7 +3,7 @@
 <mapper namespace="com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskLogMessageMapper">
 
     <!-- 定义批量新增的 SQL 映射 -->
-    <insert id="batchInsert" parameterType="java.util.List">
+    <insert id="insertBatch" parameterType="java.util.List">
         INSERT INTO sj_retry_task_log_message (namespace_id, group_name, unique_id, log_num, message,
                                                create_dt, real_time)
         VALUES
@@ -20,7 +20,7 @@
             </foreach>
     </insert>
 
-    <update id="batchUpdate" parameterType="java.util.List">
+    <update id="updateBatch" parameterType="java.util.List">
         UPDATE sj_retry_task_log_message
            SET message = src.message, log_num = src.log_num
           FROM sj_retry_task_log_message AS dest

@@ -4,8 +4,6 @@ import com.aizuda.snailjob.template.datasource.enums.DbTypeEnum;
 import com.aizuda.snailjob.template.datasource.enums.OperationTypeEnum;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskMapper;
-import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
@@ -40,8 +38,8 @@ public class RetryTaskAccess extends AbstractTaskAccess<RetryTask> {
     }
 
     @Override
-    protected int doBatchInsert(List<RetryTask> list) {
-        return retryTaskMapper.batchInsert(list);
+    protected int doInsertBatch(List<RetryTask> list) {
+        return retryTaskMapper.insertBatch(list);
     }
 
     @Override

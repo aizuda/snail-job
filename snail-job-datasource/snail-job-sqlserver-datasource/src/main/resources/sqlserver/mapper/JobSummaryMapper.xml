@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.aizuda.snailjob.template.datasource.persistence.mapper.JobSummaryMapper">
 
-    <insert id="batchInsert" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO sj_job_summary (namespace_id, group_name, business_id, trigger_at, system_task_type,
                                  success_num,fail_num,fail_reason,stop_num,stop_reason, cancel_num,cancel_reason)
         VALUES
@@ -24,7 +24,7 @@
             </foreach>
     </insert>
 
-    <update id="batchUpdate" parameterType="java.util.List">
+    <update id="updateBatch" parameterType="java.util.List">
         UPDATE sj_job_summary
            SET success_num = src.success_num,
                fail_num = src.fail_num,
@@ -50,7 +50,7 @@
                ) AS src ON (dest.trigger_at = src.trigger_at AND dest.business_id = src.business_id)
     </update>
 
-    <select id="jobLineList"
+    <select id="selectJobLineList"
             resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardLineResponseDO">
         SELECT createDt                                                         AS createDt,
                ISNULL(SUM(success_num), 0)                                      AS success,
@@ -70,7 +70,7 @@
         GROUP BY createDt
     </select>
 
-    <select id="toJobTask"
+    <select id="selectJobTask"
             resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardCardResponseDO$JobTask">
         SELECT ISNULL(SUM(success_num), 0)                                      AS successNum,
                ISNULL(SUM(stop_num), 0)                                         AS stopNum,
@@ -81,7 +81,7 @@
         ${ew.customSqlSegment}
     </select>
 
-    <select id="dashboardRank"
+    <select id="selectDashboardRankList"
             resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO$Rank">
         SELECT TOP 10
             <if test="systemTaskType == 3">

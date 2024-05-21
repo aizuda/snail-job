@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.job.task.support.schedule;
 
+import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
@@ -20,7 +21,6 @@ import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -75,9 +75,9 @@ public class WorkflowJobSummarySchedule extends AbstractSchedule implements Life
                         .groupBy(WorkflowTaskBatch::getNamespaceId, WorkflowTaskBatch::getGroupName,
                                 WorkflowTaskBatch::getWorkflowId, WorkflowTaskBatch::getTaskBatchStatus,
                                 WorkflowTaskBatch::getOperationReason);
-                List<JobBatchSummaryResponseDO> summaryWorkflowResponseDOList = jobTaskBatchMapper.summaryWorkflowTaskBatchList(
+                List<JobBatchSummaryResponseDO> summaryWorkflowResponseDOList = jobTaskBatchMapper.selectWorkflowTaskBatchSummaryList(
                         wrapper);
-                if (CollectionUtils.isEmpty(summaryWorkflowResponseDOList)) {
+                if (CollUtil.isEmpty(summaryWorkflowResponseDOList)) {
                     continue;
                 }
 
@@ -104,13 +104,13 @@ public class WorkflowJobSummarySchedule extends AbstractSchedule implements Life
                 }
 
                 int updateTotalJobSummary = 0;
-                if (!CollectionUtils.isEmpty(waitUpdates)) {
-                    updateTotalJobSummary = jobSummaryMapper.batchUpdate(waitUpdates);
+                if (CollUtil.isNotEmpty(waitUpdates)) {
+                    updateTotalJobSummary = jobSummaryMapper.updateBatch(waitUpdates);
                 }
 
                 int insertTotalJobSummary = 0;
-                if (!CollectionUtils.isEmpty(waitInserts)) {
-                    insertTotalJobSummary = jobSummaryMapper.batchInsert(waitInserts);
+                if (CollUtil.isNotEmpty(waitInserts)) {
+                    insertTotalJobSummary = jobSummaryMapper.insertBatch(waitInserts);
                 }
 
                 SnailJobLog.LOCAL.debug(

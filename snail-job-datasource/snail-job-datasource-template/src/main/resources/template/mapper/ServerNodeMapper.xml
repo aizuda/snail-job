@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.aizuda.snailjob.template.datasource.persistence.mapper.ServerNodeMapper">
 
-    <select id="countActivePod"
+    <select id="selectActivePodCount"
             resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.ActivePodQuantityResponseDO">
         SELECT node_type AS nodeType,
                COUNT(*)  AS total

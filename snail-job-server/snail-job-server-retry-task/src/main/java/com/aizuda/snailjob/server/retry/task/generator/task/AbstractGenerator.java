@@ -1,23 +1,25 @@
 package com.aizuda.snailjob.server.retry.task.generator.task;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.lang.Pair;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.enums.RetryStatusEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
-import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
+import com.aizuda.snailjob.common.core.util.StreamUtils;
+import com.aizuda.snailjob.common.log.SnailJobLog;
+import com.aizuda.snailjob.server.common.WaitStrategy;
 import com.aizuda.snailjob.server.common.enums.DelayLevelEnum;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.generator.id.IdGenerator;
-import com.aizuda.snailjob.server.common.util.DateUtils;
-import com.aizuda.snailjob.server.retry.task.support.RetryTaskConverter;
-import com.aizuda.snailjob.server.retry.task.support.RetryTaskLogConverter;
-import com.aizuda.snailjob.server.common.WaitStrategy;
 import com.aizuda.snailjob.server.common.strategy.WaitStrategies;
 import com.aizuda.snailjob.server.common.strategy.WaitStrategies.WaitStrategyContext;
 import com.aizuda.snailjob.server.common.strategy.WaitStrategies.WaitStrategyEnum;
+import com.aizuda.snailjob.server.common.util.DateUtils;
+import com.aizuda.snailjob.server.retry.task.support.RetryTaskConverter;
+import com.aizuda.snailjob.server.retry.task.support.RetryTaskLogConverter;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import com.aizuda.snailjob.template.datasource.access.TaskAccess;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskLogMapper;
@@ -29,7 +31,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -62,8 +63,7 @@ public abstract class AbstractGenerator implements TaskGenerator {
                 Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(TaskContext.TaskInfo::getIdempotentId))),
                 ArrayList::new));
 
-        Set<String> idempotentIdSet = taskInfos.stream().map(TaskContext.TaskInfo::getIdempotentId)
-                .collect(Collectors.toSet());
+        Set<String> idempotentIdSet = StreamUtils.toSet(taskInfos, TaskContext.TaskInfo::getIdempotentId);
 
         TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();
 
@@ -77,8 +77,7 @@ public abstract class AbstractGenerator implements TaskGenerator {
                         .eq(RetryTask::getTaskType, SyetemTaskTypeEnum.RETRY.getType())
                         .in(RetryTask::getIdempotentId, idempotentIdSet));
 
-        Map<String/*幂等ID*/, List<RetryTask>> retryTaskMap = retryTasks.stream()
-                .collect(Collectors.groupingBy(RetryTask::getIdempotentId));
+        Map<String/*幂等ID*/, List<RetryTask>> retryTaskMap = StreamUtils.groupByKey(retryTasks, RetryTask::getIdempotentId);
 
         List<RetryTask> waitInsertTasks = new ArrayList<>();
         List<RetryTaskLog> waitInsertTaskLogs = new ArrayList<>();
@@ -90,15 +89,15 @@ public abstract class AbstractGenerator implements TaskGenerator {
             waitInsertTaskLogs.addAll(pair.getValue());
         }
 
-        if (CollectionUtils.isEmpty(waitInsertTasks)) {
+        if (CollUtil.isEmpty(waitInsertTasks)) {
             return;
         }
 
         Assert.isTrue(
-                waitInsertTasks.size() == retryTaskAccess.batchInsert(taskContext.getGroupName(),
+                waitInsertTasks.size() == retryTaskAccess.insertBatch(taskContext.getGroupName(),
                         taskContext.getNamespaceId(), waitInsertTasks),
                 () -> new SnailJobServerException("failed to report data"));
-        Assert.isTrue(waitInsertTaskLogs.size() == retryTaskLogMapper.batchInsert(waitInsertTaskLogs),
+        Assert.isTrue(waitInsertTaskLogs.size() == retryTaskLogMapper.insertBatch(waitInsertTaskLogs),
                 () -> new SnailJobServerException("新增重试日志失败"));
     }
 
@@ -121,7 +120,7 @@ public abstract class AbstractGenerator implements TaskGenerator {
                                 && taskContext.getNamespaceId().equals(retryTask.getNamespaceId())
                                 && taskContext.getSceneName().equals(retryTask.getSceneName())).collect(Collectors.toList());
         // 说明存在相同的任务
-        if (!CollectionUtils.isEmpty(list)) {
+        if (CollUtil.isNotEmpty(list)) {
             SnailJobLog.LOCAL.warn("interrupted reporting in retrying task. [{}]", JsonUtil.toJsonString(taskInfo));
             return Pair.of(waitInsertTasks, waitInsertTaskLogs);
         }

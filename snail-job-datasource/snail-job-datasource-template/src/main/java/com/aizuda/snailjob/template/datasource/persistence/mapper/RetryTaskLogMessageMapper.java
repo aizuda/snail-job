@@ -17,7 +17,7 @@ import java.util.List;
 @Mapper
 public interface RetryTaskLogMessageMapper extends BaseMapper<RetryTaskLogMessage> {
 
-    int batchInsert(List<RetryTaskLogMessage> list);
+    int insertBatch(List<RetryTaskLogMessage> list);
 
-    int batchUpdate(List<RetryTaskLogMessage> list);
+    int updateBatch(List<RetryTaskLogMessage> list);
 }

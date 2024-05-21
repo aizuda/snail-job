@@ -73,7 +73,7 @@ public class RetryLogActor extends AbstractActor {
             retryTaskLogMessages.add(retryTaskLogMessage);
         }
 
-        retryTaskLogMessageMapper.batchInsert(retryTaskLogMessages);
+        retryTaskLogMessageMapper.insertBatch(retryTaskLogMessages);
     }
 
     /**

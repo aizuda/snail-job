@@ -3,7 +3,7 @@
 <mapper namespace="com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskLogMapper">
 
     <!-- 重试统计 -->
-    <select id="retrySummaryRetryTaskLogList"
+    <select id="selectRetryRetryTaskLogSummaryList"
             resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardRetryResponseDO">
         SELECT namespace_id                                        AS namespaceId,
                group_name                                          AS groupName,

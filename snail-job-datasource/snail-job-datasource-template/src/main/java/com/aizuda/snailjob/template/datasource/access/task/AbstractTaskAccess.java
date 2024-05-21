@@ -71,12 +71,12 @@ public abstract class AbstractTaskAccess<T> implements TaskAccess<T> {
     }
 
     @Override
-    public int batchInsert(String groupName, String namespaceId, List<T> list) {
+    public int insertBatch(String groupName, String namespaceId, List<T> list) {
         setPartition(groupName, namespaceId);
-        return doBatchInsert(list);
+        return doInsertBatch(list);
     }
 
-    protected abstract int doBatchInsert(List<T> list);
+    protected abstract int doInsertBatch(List<T> list);
 
     @Override
     public PageDTO<T> listPage(String groupName, String namespaceId, final PageDTO<T> iPage, final LambdaQueryWrapper<T> query) {

@@ -181,7 +181,7 @@ public class RetryLogMergeSchedule extends AbstractSchedule implements Lifecycle
                         retryTaskLogMessageMapper.deleteBatchIds(jobLogMessageDeleteBatchIds);
                     }
                     if (CollectionUtil.isNotEmpty(jobLogMessageUpdateList)) {
-                        retryTaskLogMessageMapper.batchInsert(jobLogMessageUpdateList);
+                        retryTaskLogMessageMapper.insertBatch(jobLogMessageUpdateList);
                     }
                 }
             });

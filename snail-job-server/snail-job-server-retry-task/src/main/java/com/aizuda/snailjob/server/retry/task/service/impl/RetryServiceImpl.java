@@ -146,7 +146,7 @@ public class RetryServiceImpl implements RetryService {
             retryDeadLetter.setCreateDt(now);
         }
         Assert.isTrue(retryDeadLetters.size() == accessTemplate
-                        .getRetryDeadLetterAccess().batchInsert(groupName, namespaceId, retryDeadLetters),
+                        .getRetryDeadLetterAccess().insertBatch(groupName, namespaceId, retryDeadLetters),
                 () -> new SnailJobServerException("插入死信队列失败 [{}]", JsonUtil.toJsonString(retryDeadLetters)));
 
         TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();

@@ -17,5 +17,5 @@ import java.util.List;
 @Mapper
 public interface JobLogMessageMapper extends BaseMapper<JobLogMessage> {
 
-    int batchInsert(List<JobLogMessage> list);
+    int insertBatch(List<JobLogMessage> list);
 }

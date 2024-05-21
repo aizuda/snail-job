@@ -23,24 +23,24 @@ import java.util.List;
 @Mapper
 public interface JobSummaryMapper extends BaseMapper<JobSummary> {
 
-    int batchInsert(@Param("list") List<JobSummary> list);
+    int insertBatch(@Param("list") List<JobSummary> list);
 
-    int batchUpdate(@Param("list") List<JobSummary> list);
+    int updateBatch(@Param("list") List<JobSummary> list);
 
-    IPage<Task> jobTaskList(@Param("ew") Wrapper<Job> wrapper, Page<Object> page);
+    IPage<Task> selectJobTaskList(@Param("ew") Wrapper<Job> wrapper, Page<Object> page);
 
     // jobTaskList 自定义 countStatement
-    long jobTaskListCount(@Param("ew") Wrapper<Job> wrapper);
+    long selectJobTaskListCount(@Param("ew") Wrapper<Job> wrapper);
 
-    IPage<Task> workflowTaskList(@Param("ew") Wrapper<Job> wrapper, Page<Object> page);
+    IPage<Task> selectWorkflowTaskList(@Param("ew") Wrapper<Job> wrapper, Page<Object> page);
 
     // workflowTaskList 自定义 countStatement
-    long workflowTaskListCount(@Param("ew") Wrapper<Job> wrapper);
+    long selectWorkflowTaskListCount(@Param("ew") Wrapper<Job> wrapper);
 
-    List<DashboardLineResponseDO> jobLineList(@Param("dateFormat") String dateFormat, @Param("ew") Wrapper<JobSummary> wrapper);
+    List<DashboardLineResponseDO> selectJobLineList(@Param("dateFormat") String dateFormat, @Param("ew") Wrapper<JobSummary> wrapper);
 
-    List<Rank> dashboardRank(@Param("systemTaskType") Integer systemTaskType, @Param("ew") Wrapper<JobSummary> wrapper);
+    List<Rank> selectDashboardRankList(@Param("systemTaskType") Integer systemTaskType, @Param("ew") Wrapper<JobSummary> wrapper);
 
-    DashboardCardResponseDO.JobTask toJobTask(@Param("ew") Wrapper<JobSummary> wrapper);
+    DashboardCardResponseDO.JobTask selectJobTask(@Param("ew") Wrapper<JobSummary> wrapper);
 
 }

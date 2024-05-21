@@ -22,20 +22,20 @@ import java.util.List;
 @Mapper
 public interface RetrySummaryMapper extends BaseMapper<RetrySummary> {
 
-    int batchInsert(@Param("list") List<RetrySummary> list);
+    int insertBatch(@Param("list") List<RetrySummary> list);
 
-    int batchUpdate(@Param("list") List<RetrySummary> list);
+    int updateBatch(@Param("list") List<RetrySummary> list);
 
-    DashboardCardResponseDO.RetryTask retryTask(@Param("ew") Wrapper<RetrySummary> wrapper);
+    DashboardCardResponseDO.RetryTask selectRetryTask(@Param("ew") Wrapper<RetrySummary> wrapper);
 
-    List<DashboardCardResponseDO.RetryTask> retryTaskBarList(@Param("ew") Wrapper<RetrySummary> wrapper);
+    List<DashboardCardResponseDO.RetryTask> selectRetryTaskBarList(@Param("ew") Wrapper<RetrySummary> wrapper);
 
-    IPage<DashboardRetryLineResponseDO.Task> retryTaskList(@Param("ew") Wrapper<RetrySceneConfig> wrapper, Page<Object> page);
+    IPage<DashboardRetryLineResponseDO.Task> selectRetryTaskList(@Param("ew") Wrapper<RetrySceneConfig> wrapper, Page<Object> page);
 
-    long retryTaskListCount(@Param("ew") Wrapper<RetrySceneConfig> wrapper);
+    long selectRetryTaskListCount(@Param("ew") Wrapper<RetrySceneConfig> wrapper);
 
-    List<DashboardLineResponseDO> retryLineList(@Param("dateFormat") String dateFormat, @Param("ew") Wrapper<RetrySummary> wrapper);
+    List<DashboardLineResponseDO> selectRetryLineList(@Param("dateFormat") String dateFormat, @Param("ew") Wrapper<RetrySummary> wrapper);
 
-    List<DashboardRetryLineResponseDO.Rank> dashboardRank(@Param("ew") Wrapper<RetrySummary> wrapper);
+    List<DashboardRetryLineResponseDO.Rank> selectDashboardRankList(@Param("ew") Wrapper<RetrySummary> wrapper);
 
 }

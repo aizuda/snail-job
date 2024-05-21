@@ -61,7 +61,7 @@ public class JobLogActor extends AbstractActor {
                             jobLogMessageList.add(jobLogMessage);
                         }
 
-                        jobLogMessageMapper.batchInsert(jobLogMessageList);
+                        jobLogMessageMapper.insertBatch(jobLogMessageList);
                     } catch (Exception e) {
                         log.error("保存客户端日志异常.", e);
                     } finally {

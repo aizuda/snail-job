@@ -131,7 +131,7 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
         }
 
         TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();
-        Assert.isTrue(waitRollbackList.size() == retryTaskAccess.batchInsert(groupName, namespaceId, waitRollbackList),
+        Assert.isTrue(waitRollbackList.size() == retryTaskAccess.insertBatch(groupName, namespaceId, waitRollbackList),
                 () -> new SnailJobServerException("新增重试任务失败"));
 
         Set<Long> waitDelRetryDeadLetterIdSet = StreamUtils.toSet(retryDeadLetterList, RetryDeadLetter::getId);

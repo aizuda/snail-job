@@ -69,7 +69,7 @@ public class RetrySummarySchedule extends AbstractSchedule implements Lifecycle 
                 LambdaQueryWrapper<RetryTaskLog> wrapper = new LambdaQueryWrapper<RetryTaskLog>()
                         .between(RetryTaskLog::getCreateDt, todayFrom, todayTo)
                         .groupBy(RetryTaskLog::getNamespaceId, RetryTaskLog::getGroupName, RetryTaskLog::getSceneName);
-                List<DashboardRetryResponseDO> dashboardRetryResponseDOList = retryTaskLogMapper.retrySummaryRetryTaskLogList(wrapper);
+                List<DashboardRetryResponseDO> dashboardRetryResponseDOList = retryTaskLogMapper.selectRetryRetryTaskLogSummaryList(wrapper);
                 if (CollectionUtils.isEmpty(dashboardRetryResponseDOList)) {
                     continue;
                 }
@@ -109,12 +109,12 @@ public class RetrySummarySchedule extends AbstractSchedule implements Lifecycle 
 
                 int insertTotalRetrySummary = 0;
                 if (!CollectionUtils.isEmpty(waitInserts)) {
-                    insertTotalRetrySummary = retrySummaryMapper.batchInsert(waitInserts);
+                    insertTotalRetrySummary = retrySummaryMapper.insertBatch(waitInserts);
                 }
 
                 int updateTotalRetrySummary = 0;
                 if (!CollectionUtils.isEmpty(waitUpdates)) {
-                    updateTotalRetrySummary = retrySummaryMapper.batchUpdate(waitUpdates);
+                    updateTotalRetrySummary = retrySummaryMapper.updateBatch(waitUpdates);
                 }
 
                 SnailJobLog.LOCAL.debug("retry summary dashboard success todayFrom:[{}] todayTo:[{}] insertTotalRetrySummary:[{}] updateTotalRetrySummary:[{}]", todayFrom, todayTo, insertTotalRetrySummary, updateTotalRetrySummary);

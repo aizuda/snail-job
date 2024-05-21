@@ -78,7 +78,7 @@ public class JobSummarySchedule extends AbstractSchedule implements Lifecycle {
                         .between(JobTaskBatch::getCreateDt, todayFrom, todayTo)
                         .groupBy(JobTaskBatch::getNamespaceId, JobTaskBatch::getGroupName,
                                 JobTaskBatch::getJobId, JobTaskBatch::getTaskBatchStatus, JobTaskBatch::getOperationReason);
-                List<JobBatchSummaryResponseDO> summaryResponseDOList = jobTaskBatchMapper.summaryJobBatchList(wrapper);
+                List<JobBatchSummaryResponseDO> summaryResponseDOList = jobTaskBatchMapper.selectJobBatchSummaryList(wrapper);
                 if (summaryResponseDOList == null || summaryResponseDOList.size() < 1) {
                     continue;
                 }
@@ -107,12 +107,12 @@ public class JobSummarySchedule extends AbstractSchedule implements Lifecycle {
 
                 int updateTotalJobSummary = 0;
                 if (!CollectionUtils.isEmpty(waitUpdates)) {
-                    updateTotalJobSummary = jobSummaryMapper.batchUpdate(waitUpdates);
+                    updateTotalJobSummary = jobSummaryMapper.updateBatch(waitUpdates);
                 }
 
                 int insertTotalJobSummary = 0;
                 if (!CollectionUtils.isEmpty(waitInserts)) {
-                    insertTotalJobSummary = jobSummaryMapper.batchInsert(waitInserts);
+                    insertTotalJobSummary = jobSummaryMapper.insertBatch(waitInserts);
                 }
 
                 SnailJobLog.LOCAL.debug(

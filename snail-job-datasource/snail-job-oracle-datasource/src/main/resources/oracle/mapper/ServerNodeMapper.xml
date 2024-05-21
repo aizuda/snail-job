@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.aizuda.snailjob.template.datasource.persistence.mapper.ServerNodeMapper">
 
-    <insert id="batchInsert" parameterType="java.util.List" useGeneratedKeys="false" keyProperty="id">
+    <insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="false" keyProperty="id">
         <!-- useGeneratedKeys="false" 否则报错ORA-00933: SQL command not properly ended -->
         INSERT INTO sj_server_node (namespace_id, group_name, host_id, host_ip, host_port,
                                     expire_at, node_type, ext_attrs, create_dt)
@@ -21,7 +21,7 @@
         </foreach>
     </insert>
 
-    <update id="batchUpdateExpireAt" parameterType="java.util.List">
+    <update id="updateBatchExpireAt" parameterType="java.util.List">
         <foreach collection="list" item="item" open="BEGIN" separator=";" close=";END;">
             UPDATE sj_server_node
                SET expire_at = #{item.expireAt}

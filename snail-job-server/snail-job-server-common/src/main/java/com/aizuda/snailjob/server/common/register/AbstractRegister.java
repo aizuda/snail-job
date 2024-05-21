@@ -47,9 +47,9 @@ public abstract class AbstractRegister implements Register, Lifecycle {
         }
 
         // 批量更新
-        if (serverNodes.size() != serverNodeMapper.batchUpdateExpireAt(serverNodes)) {
+        if (serverNodes.size() != serverNodeMapper.updateBatchExpireAt(serverNodes)) {
             try {
-                serverNodeMapper.batchInsert(serverNodes);
+                serverNodeMapper.insertBatch(serverNodes);
             } catch (DuplicateKeyException ignored) {
             } catch (Exception e) {
                 SnailJobLog.LOCAL.error("注册节点失败", e);

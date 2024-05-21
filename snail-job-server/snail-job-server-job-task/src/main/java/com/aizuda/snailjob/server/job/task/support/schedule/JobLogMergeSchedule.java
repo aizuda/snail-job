@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.job.task.support.schedule;
 
-import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
@@ -26,7 +26,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.springframework.util.CollectionUtils;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -120,14 +119,14 @@ public class JobLogMergeSchedule extends AbstractSchedule implements Lifecycle {
 
         // Waiting for merge JobTaskBatchList
         List<Long> ids = StreamUtils.toList(partitionTasks, PartitionTask::getId);
-        if (CollectionUtils.isEmpty(ids)) {
+        if (CollUtil.isEmpty(ids)) {
             return;
         }
 
         // Waiting for deletion JobLogMessageList
         List<JobLogMessage> jobLogMessageList = jobLogMessageMapper.selectList(
                 new LambdaQueryWrapper<JobLogMessage>().in(JobLogMessage::getTaskBatchId, ids));
-        if (CollectionUtils.isEmpty(jobLogMessageList)) {
+        if (CollUtil.isEmpty(jobLogMessageList)) {
             return;
         }
 
@@ -169,11 +168,11 @@ public class JobLogMergeSchedule extends AbstractSchedule implements Lifecycle {
                 protected void doInTransactionWithoutResult(final TransactionStatus status) {
 
                     // 批量删除、更新日志
-                    if (CollectionUtil.isNotEmpty(jobLogMessageDeleteBatchIds)) {
+                    if (CollUtil.isNotEmpty(jobLogMessageDeleteBatchIds)) {
                         jobLogMessageMapper.deleteBatchIds(jobLogMessageDeleteBatchIds);
                     }
-                    if (CollectionUtil.isNotEmpty(jobLogMessageInsertBatchIds)) {
-                        jobLogMessageMapper.batchInsert(jobLogMessageInsertBatchIds);
+                    if (CollUtil.isNotEmpty(jobLogMessageInsertBatchIds)) {
+                        jobLogMessageMapper.insertBatch(jobLogMessageInsertBatchIds);
                     }
                 }
             });

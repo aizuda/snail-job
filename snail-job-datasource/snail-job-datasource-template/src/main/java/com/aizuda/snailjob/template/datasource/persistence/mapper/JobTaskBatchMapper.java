@@ -4,7 +4,6 @@ import com.aizuda.snailjob.template.datasource.persistence.dataobject.JobBatchRe
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.JobBatchSummaryResponseDO;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch;
 import com.aizuda.snailjob.template.datasource.persistence.po.WorkflowTaskBatch;
-import com.aizuda.snailjob.template.datasource.persistence.dataobject.JobBatchSummaryResponseDO;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -28,7 +27,7 @@ public interface JobTaskBatchMapper extends BaseMapper<JobTaskBatch> {
 
     List<JobBatchResponseDO> selectJobBatchListByIds(@Param("ew") Wrapper<JobTaskBatch> wrapper);
 
-    List<JobBatchSummaryResponseDO> summaryJobBatchList(@Param("ew") Wrapper<JobTaskBatch> wrapper);
+    List<JobBatchSummaryResponseDO> selectJobBatchSummaryList(@Param("ew") Wrapper<JobTaskBatch> wrapper);
 
-    List<JobBatchSummaryResponseDO> summaryWorkflowTaskBatchList(@Param("ew") Wrapper<WorkflowTaskBatch> wrapper);
+    List<JobBatchSummaryResponseDO> selectWorkflowTaskBatchSummaryList(@Param("ew") Wrapper<WorkflowTaskBatch> wrapper);
 }
