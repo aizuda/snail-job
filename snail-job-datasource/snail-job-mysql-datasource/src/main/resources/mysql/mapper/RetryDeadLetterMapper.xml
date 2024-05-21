@@ -4,8 +4,8 @@
 
   <insert id="insertBatch">
       INSERT INTO sj_retry_dead_letter (namespace_id, unique_id, group_name, scene_name,
-                                     idempotent_id, biz_no, executor_name, args_str,
-                                     ext_attrs, create_dt
+                                        idempotent_id, biz_no, executor_name, args_str,
+                                        ext_attrs, create_dt
       )
       VALUES
           <foreach collection="retryDeadLetters" item="retryDeadLetter" separator=",">

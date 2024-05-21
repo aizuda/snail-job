@@ -5,15 +5,15 @@
     <select id="selectJobBatchPageList"
         parameterType="com.aizuda.snailjob.template.datasource.persistence.dataobject.JobBatchQueryDO"
         resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.JobBatchResponseDO">
-        SELECT a.*,
-               b.job_name,
-               b.task_type,
-               b.block_strategy,
-               b.trigger_type,
-               b.executor_type,
-               b.executor_info
-          FROM sj_job_task_batch a
-                JOIN sj_job b ON a.job_id = b.id
+        SELECT batch.*,
+               job.job_name,
+               job.task_type,
+               job.block_strategy,
+               job.trigger_type,
+               job.executor_type,
+               job.executor_info
+          FROM sj_job_task_batch batch
+                JOIN sj_job job ON batch.job_id = job.id
         ${ew.customSqlSegment}
     </select>
 
@@ -51,15 +51,15 @@
 
     <select id="selectJobBatchListByIds"
             resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.JobBatchResponseDO">
-        SELECT a.*,
-               b.job_name,
-               b.task_type,
-               b.block_strategy,
-               b.trigger_type,
-               b.executor_info,
-               b.args_str
-          FROM sj_job_task_batch a
-                JOIN sj_job b ON a.job_id = b.id
+        SELECT batch.*,
+               job.job_name,
+               job.task_type,
+               job.block_strategy,
+               job.trigger_type,
+               job.executor_info,
+               job.args_str
+          FROM sj_job_task_batch batch
+                JOIN sj_job job ON batch.job_id = job.id
         ${ew.customSqlSegment}
     </select>
 

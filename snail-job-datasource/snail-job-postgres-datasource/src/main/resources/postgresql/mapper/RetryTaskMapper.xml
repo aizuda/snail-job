@@ -23,8 +23,8 @@
           FROM (
                 <foreach collection="list" item="item" index="index" separator="UNION ALL">
                     SELECT
-                    #{item.nextTriggerAt} AS next_trigger_at,
-                    #{item.id} AS id
+                        #{item.id}              AS id,
+                        #{item.nextTriggerAt}   AS next_trigger_at
                 </foreach>
                 ) AS tt
           WHERE rt.id = tt.id

@@ -28,9 +28,9 @@
                JOIN (
                  <foreach collection="list" item="item" index="index" separator="UNION ALL">
                      SELECT
-                         #{item.expireAt}   AS expire_at,
                          #{item.hostId}     AS host_id,
-                         #{item.hostIp}     AS host_ip
+                         #{item.hostIp}     AS host_ip,
+                         #{item.expireAt}   AS expire_at
                  </foreach>
                ) AS src ON (dest.host_id = src.host_id AND dest.host_ip = src.host_ip)
     </update>

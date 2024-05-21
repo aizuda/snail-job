@@ -27,9 +27,9 @@
           FROM (
                 <foreach collection="list" item="item" index="index" separator="UNION ALL">
                     SELECT
-                        #{item.expireAt} AS expire_at,
-                        #{item.hostId} AS host_id,
-                        #{item.hostIp} AS host_ip
+                        #{item.hostId}      AS host_id,
+                        #{item.hostIp}      AS host_ip,
+                        #{item.expireAt}    AS expire_at
                 </foreach>
             ) AS tt
         WHERE rt.host_id = tt.host_id

@@ -20,17 +20,18 @@
     </insert>
 
     <update id="batchUpdate" parameterType="java.util.List">
-        UPDATE sj_retry_task_log_message jlm,
+        UPDATE sj_retry_task_log_message rt,
                 (
                     <foreach collection="list" item="item" index="index" separator="UNION ALL">
                         SELECT
+                            #{item.id} AS id,
                             #{item.message} AS message,
-                            #{item.logNum} AS log_num,
-                            #{item.id} AS id
+                            #{item.logNum} AS log_num
                     </foreach>
                 ) tt
-           SET jlm.message = tt.message, jlm.log_num = tt.log_num
-         WHERE jlm.id = tt.id
+           SET rt.message = tt.message,
+               rt.log_num = tt.log_num
+         WHERE rt.id = tt.id
     </update>
 
 </mapper>

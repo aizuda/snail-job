@@ -2,20 +2,20 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.aizuda.snailjob.template.datasource.persistence.mapper.RetryDeadLetterMapper">
 
-  <insert id="insertBatch">
-    INSERT INTO sj_retry_dead_letter (namespace_id, unique_id, group_name, scene_name,
-                                      idempotent_id, biz_no, executor_name, args_str,
-                                      ext_attrs, create_dt)
-    VALUES
-          <foreach collection="retryDeadLetters" item="retryDeadLetter" separator=",">
-            (
-              #{retryDeadLetter.namespaceId,jdbcType=VARCHAR},  #{retryDeadLetter.uniqueId,jdbcType=VARCHAR},
-              #{retryDeadLetter.groupName,jdbcType=VARCHAR}, #{retryDeadLetter.sceneName,jdbcType=VARCHAR},
-              #{retryDeadLetter.idempotentId,jdbcType=VARCHAR}, #{retryDeadLetter.bizNo,jdbcType=VARCHAR},
-              #{retryDeadLetter.executorName,jdbcType=VARCHAR}, #{retryDeadLetter.argsStr,jdbcType=VARCHAR},
-              #{retryDeadLetter.extAttrs,jdbcType=VARCHAR}, #{retryDeadLetter.createDt,jdbcType=TIMESTAMP}
-            )
-          </foreach>
-  </insert>
+    <insert id="insertBatch">
+        INSERT INTO sj_retry_dead_letter (namespace_id, unique_id, group_name, scene_name,
+                                          idempotent_id, biz_no, executor_name, args_str,
+                                          ext_attrs, create_dt)
+        VALUES
+            <foreach collection="retryDeadLetters" item="retryDeadLetter" separator=",">
+                (
+                    #{retryDeadLetter.namespaceId,jdbcType=VARCHAR}, #{retryDeadLetter.uniqueId,jdbcType=VARCHAR},
+                    #{retryDeadLetter.groupName,jdbcType=VARCHAR}, #{retryDeadLetter.sceneName,jdbcType=VARCHAR},
+                    #{retryDeadLetter.idempotentId,jdbcType=VARCHAR}, #{retryDeadLetter.bizNo,jdbcType=VARCHAR},
+                    #{retryDeadLetter.executorName,jdbcType=VARCHAR}, #{retryDeadLetter.argsStr,jdbcType=VARCHAR},
+                    #{retryDeadLetter.extAttrs,jdbcType=VARCHAR}, #{retryDeadLetter.createDt,jdbcType=TIMESTAMP}
+                )
+            </foreach>
+    </insert>
 
 </mapper>

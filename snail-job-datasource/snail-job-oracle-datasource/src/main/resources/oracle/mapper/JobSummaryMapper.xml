@@ -40,24 +40,23 @@
 
     <select id="jobLineList"
             resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardLineResponseDO">
-        SELECT
-            createDt,
-            NVL(SUM(success_num), 0)                                    AS success,
-            NVL(SUM(fail_num), 0)                                       AS failNum,
-            NVL(SUM(stop_num), 0)                                       AS stop,
-            NVL(SUM(cancel_num), 0)                                     AS cancel,
-            NVL(SUM(fail_num + stop_num + cancel_num), 0)               AS fail,
-            NVL(SUM(success_num + fail_num + stop_num + cancel_num), 0) AS total
-        FROM (
-            SELECT
-                TO_CHAR(trigger_at, #{dateFormat}) AS createDt,
-                success_num,
-                fail_num,
-                stop_num,
-                cancel_num
-            FROM sj_job_summary
-            ${ew.customSqlSegment}
-        )
+        SELECT createDt                                                     AS createDt,
+               NVL(SUM(success_num), 0)                                     AS success,
+               NVL(SUM(fail_num), 0)                                        AS failNum,
+               NVL(SUM(stop_num), 0)                                        AS stop,
+               NVL(SUM(cancel_num), 0)                                      AS cancel,
+               NVL(SUM(fail_num + stop_num + cancel_num), 0)                AS fail,
+               NVL(SUM(success_num + fail_num + stop_num + cancel_num), 0)  AS total
+          FROM (
+                SELECT
+                    TO_CHAR(trigger_at, #{dateFormat}) AS createDt,
+                    success_num,
+                    fail_num,
+                    stop_num,
+                    cancel_num
+                FROM sj_job_summary
+                ${ew.customSqlSegment}
+          )
         GROUP BY createDt
     </select>
 
@@ -77,7 +76,7 @@
         SELECT * FROM (
                 SELECT
                     <if test="systemTaskType == 3">
-                        group_name || '/' || (SELECT job_name FROM sj_job WHERE id = business_id) AS name,
+                        group_name || '/' || (SELECT job_name FROM sj_job WHERE id = business_id)           AS name,
                     </if>
                     <if test="systemTaskType == 4">
                         group_name || '/' || (SELECT workflow_name FROM sj_workflow WHERE id = business_id) AS name,

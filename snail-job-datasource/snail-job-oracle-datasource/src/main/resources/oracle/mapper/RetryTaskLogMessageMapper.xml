@@ -4,7 +4,7 @@
 
     <insert id="batchInsert" parameterType="java.util.List">
         INSERT INTO sj_retry_task_log_message (namespace_id, group_name, unique_id, log_num, message,
-                                            create_dt, real_time)
+                                               create_dt, real_time)
             <foreach collection="list" item="item" separator="UNION ALL">
                 SELECT
                     #{item.namespaceId},

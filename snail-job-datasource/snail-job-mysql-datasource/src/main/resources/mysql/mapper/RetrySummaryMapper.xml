@@ -25,14 +25,14 @@
                (
                    <foreach collection="list" item="item" index="index" separator="UNION ALL">
                        SELECT
-                           #{item.runningNum} AS running_num,
-                           #{item.finishNum} AS finish_num,
-                           #{item.maxCountNum} AS max_count_num,
-                           #{item.suspendNum} AS suspend_num,
-                           #{item.triggerAt} AS trigger_at,
-                           #{item.sceneName} AS scene_name,
-                           #{item.namespaceId} AS namespace_id,
-                           #{item.groupName} AS group_name
+                           #{item.runningNum}       AS running_num,
+                           #{item.finishNum}        AS finish_num,
+                           #{item.maxCountNum}      AS max_count_num,
+                           #{item.suspendNum}       AS suspend_num,
+                           #{item.triggerAt}        AS trigger_at,
+                           #{item.sceneName}        AS scene_name,
+                           #{item.namespaceId}      AS namespace_id,
+                           #{item.groupName}        AS group_name
                    </foreach>
                ) tt
            SET rt.running_num = tt.running_num,
@@ -63,34 +63,33 @@
                finish_num,
                max_count_num,
                suspend_num
-        FROM sj_retry_summary
+          FROM sj_retry_summary
         ${ew.customSqlSegment}
-        LIMIT 7
+         LIMIT 7
     </select>
 
     <select id="retryLineList"
             resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardLineResponseDO">
-        SELECT
-            DATE_FORMAT(create_dt, #{dateFormat}) AS createDt,
-            IFNULL(SUM(finish_num), 0) AS successNum,
-            IFNULL(SUM(running_num), 0) AS runningNum,
-            IFNULL(SUM(max_count_num), 0) AS maxCountNum,
-            IFNULL(SUM(suspend_num), 0) AS suspendNum,
-            IFNULL(SUM(finish_num + running_num + max_count_num + suspend_num), 0) AS total
-        FROM sj_retry_summary
+        SELECT DATE_FORMAT(create_dt, #{dateFormat})                                   AS createDt,
+               IFNULL(SUM(finish_num), 0)                                              AS successNum,
+               IFNULL(SUM(running_num), 0)                                             AS runningNum,
+               IFNULL(SUM(max_count_num), 0)                                           AS maxCountNum,
+               IFNULL(SUM(suspend_num), 0)                                             AS suspendNum,
+               IFNULL(SUM(finish_num + running_num + max_count_num + suspend_num), 0)  AS total
+          FROM sj_retry_summary
         ${ew.customSqlSegment}
-        GROUP BY createDt
+         GROUP BY createDt
     </select>
 
     <select id="dashboardRank"
             resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO$Rank">
-        SELECT CONCAT(group_name, '/', scene_name)                            `name`,
+        SELECT CONCAT(group_name, '/', scene_name)                         AS name,
                SUM(running_num + finish_num + max_count_num + suspend_num) AS total
-        FROM sj_retry_summary
+          FROM sj_retry_summary
         ${ew.customSqlSegment}
         HAVING total > 0
-        ORDER BY total DESC
-        LIMIT 10
+         ORDER BY total DESC
+         LIMIT 10
     </select>
 
 </mapper>

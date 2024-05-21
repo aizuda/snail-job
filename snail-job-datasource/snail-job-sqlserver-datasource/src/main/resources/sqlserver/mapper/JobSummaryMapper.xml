@@ -37,37 +37,34 @@
                JOIN (
                    <foreach collection="list" item="item" index="index" separator="UNION ALL">
                        SELECT
-                           #{item.successNum} AS success_num,
-                           #{item.failNum} AS fail_num,
-                           #{item.failReason} AS fail_reason,
-                           #{item.stopNum} AS stop_num,
-                           #{item.stopReason} AS stop_reason,
-                           #{item.cancelNum} AS cancel_num,
-                           #{item.cancelReason} AS cancel_reason,
-                           #{item.triggerAt} AS trigger_at,
-                           #{item.businessId} AS business_id
+                           #{item.successNum}       AS success_num,
+                           #{item.failNum}          AS fail_num,
+                           #{item.failReason}       AS fail_reason,
+                           #{item.stopNum}          AS stop_num,
+                           #{item.stopReason}       AS stop_reason,
+                           #{item.cancelNum}        AS cancel_num,
+                           #{item.cancelReason}     AS cancel_reason,
+                           #{item.triggerAt}        AS trigger_at,
+                           #{item.businessId}       AS business_id
                    </foreach>
-               ) AS src
-               ON (dest.trigger_at = src.trigger_at AND dest.business_id = src.business_id)
+               ) AS src ON (dest.trigger_at = src.trigger_at AND dest.business_id = src.business_id)
     </update>
 
     <select id="jobLineList"
             resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardLineResponseDO">
-        SELECT
-            createDt,
-            ISNULL(SUM(success_num), 0)                                    AS success,
-            ISNULL(SUM(stop_num), 0)                                       AS stop,
-            ISNULL(SUM(cancel_num), 0)                                     AS cancel,
-            ISNULL(SUM(fail_num), 0)                                       AS fail,
-            ISNULL(SUM(success_num + fail_num + stop_num + cancel_num), 0) AS total
+        SELECT createDt                                                         AS createDt,
+               ISNULL(SUM(success_num), 0)                                      AS success,
+               ISNULL(SUM(stop_num), 0)                                         AS stop,
+               ISNULL(SUM(cancel_num), 0)                                       AS cancel,
+               ISNULL(SUM(fail_num), 0)                                         AS fail,
+               ISNULL(SUM(success_num + fail_num + stop_num + cancel_num), 0)   AS total
         FROM (
-            SELECT
-                FORMAT(trigger_at, #{dateFormat}) AS createDt,
-                success_num,
-                stop_num,
-                cancel_num,
-                fail_num
-            FROM sj_job_summary
+            SELECT FORMAT(trigger_at, #{dateFormat}) AS createDt,
+                   success_num,
+                   stop_num,
+                   cancel_num,
+                   fail_num
+              FROM sj_job_summary
             ${ew.customSqlSegment}
         ) AS subquery
         GROUP BY createDt
@@ -75,13 +72,12 @@
 
     <select id="toJobTask"
             resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardCardResponseDO$JobTask">
-        SELECT
-            ISNULL(sum(success_num), 0) AS successNum,
-            ISNULL(sum(stop_num), 0) AS stopNum,
-            ISNULL(sum(cancel_num), 0) AS cancelNum,
-            ISNULL(sum(fail_num), 0) AS failNum,
-            ISNULL(sum(success_num + fail_num + stop_num + cancel_num), 0) AS totalNum
-        FROM sj_job_summary
+        SELECT ISNULL(SUM(success_num), 0)                                      AS successNum,
+               ISNULL(SUM(stop_num), 0)                                         AS stopNum,
+               ISNULL(SUM(cancel_num), 0)                                       AS cancelNum,
+               ISNULL(SUM(fail_num), 0)                                         AS failNum,
+               ISNULL(SUM(success_num + fail_num + stop_num + cancel_num), 0)   AS totalNum
+          FROM sj_job_summary
         ${ew.customSqlSegment}
     </select>
 
@@ -89,10 +85,10 @@
             resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO$Rank">
         SELECT TOP 10
             <if test="systemTaskType == 3">
-                CONCAT(group_name, '/', (SELECT job_name FROM sj_job WHERE id = business_id)) name,
+                CONCAT(group_name, '/', (SELECT job_name FROM sj_job WHERE id = business_id))           AS name,
             </if>
             <if test="systemTaskType == 4">
-                CONCAT(group_name, '/', (SELECT workflow_name FROM sj_workflow WHERE id = business_id)) name,
+                CONCAT(group_name, '/', (SELECT workflow_name FROM sj_workflow WHERE id = business_id)) AS name,
             </if>
             SUM(fail_num) AS total
         FROM sj_job_summary

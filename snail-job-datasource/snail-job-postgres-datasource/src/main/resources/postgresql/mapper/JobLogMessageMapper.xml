@@ -9,15 +9,15 @@
         VALUES
         <foreach collection="list" item="item" separator=",">
             (
-            #{item.namespaceId},
-            #{item.groupName},
-            #{item.jobId},
-            #{item.taskBatchId},
-            #{item.taskId},
-            #{item.logNum},
-            #{item.message},
-            #{item.createDt},
-            #{item.realTime}
+                #{item.namespaceId},
+                #{item.groupName},
+                #{item.jobId},
+                #{item.taskBatchId},
+                #{item.taskId},
+                #{item.logNum},
+                #{item.message},
+                #{item.createDt},
+                #{item.realTime}
             )
         </foreach>
     </insert>

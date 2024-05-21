@@ -3,7 +3,7 @@
 <mapper namespace="com.aizuda.snailjob.template.datasource.persistence.mapper.ServerNodeMapper">
 
     <insert id="batchInsert" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO server_node (namespace_id, group_name, host_id, host_ip, host_port,
+        INSERT INTO sj_server_node (namespace_id, group_name, host_id, host_ip, host_port,
                                  expire_at, node_type, ext_attrs, create_dt)
         VALUES
             <foreach collection="records" item="item" index="index" separator=",">
@@ -26,9 +26,9 @@
                (
                     <foreach collection="list" item="item" index="index" separator="UNION ALL">
                         SELECT
-                            #{item.expireAt} AS expire_at,
-                            #{item.hostId} AS host_id,
-                            #{item.hostIp} AS host_ip
+                            #{item.hostId}      AS host_id,
+                            #{item.hostIp}      AS host_ip,
+                            #{item.expireAt}    AS expire_at
                     </foreach>
                ) tt
            SET rt.expire_at = tt.expire_at
