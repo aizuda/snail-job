@@ -1,12 +1,12 @@
 package com.aizuda.snailjob.common.core.alarm.strategy;
 
+import com.aizuda.snailjob.common.core.alarm.AlarmContext;
 import com.aizuda.snailjob.common.core.alarm.attribute.EmailAttribute;
 import com.aizuda.snailjob.common.core.alarm.email.MailAccount;
 import com.aizuda.snailjob.common.core.alarm.email.MailProperties;
-import com.aizuda.snailjob.common.core.util.MailUtils;
 import com.aizuda.snailjob.common.core.enums.AlarmTypeEnum;
-import com.aizuda.snailjob.common.core.alarm.AlarmContext;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
+import com.aizuda.snailjob.common.core.util.MailUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

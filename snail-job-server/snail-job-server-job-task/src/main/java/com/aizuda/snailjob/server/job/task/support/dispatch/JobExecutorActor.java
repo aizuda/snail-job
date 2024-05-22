@@ -6,8 +6,8 @@ import com.aizuda.snailjob.common.core.context.SpringContext;
 import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
-import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
+import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.WaitStrategy;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.common.cache.CacheRegisterTable;
@@ -22,17 +22,17 @@ import com.aizuda.snailjob.server.job.task.dto.TaskExecuteDTO;
 import com.aizuda.snailjob.server.job.task.dto.WorkflowNodeTaskExecuteDTO;
 import com.aizuda.snailjob.server.job.task.support.JobExecutor;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
-import com.aizuda.snailjob.server.job.task.support.cache.ResidentTaskCache;
 import com.aizuda.snailjob.server.job.task.support.alarm.event.JobTaskFailAlarmEvent;
+import com.aizuda.snailjob.server.job.task.support.cache.ResidentTaskCache;
 import com.aizuda.snailjob.server.job.task.support.executor.job.JobExecutorContext;
 import com.aizuda.snailjob.server.job.task.support.executor.job.JobExecutorFactory;
 import com.aizuda.snailjob.server.job.task.support.generator.task.JobTaskGenerateContext;
 import com.aizuda.snailjob.server.job.task.support.generator.task.JobTaskGenerator;
 import com.aizuda.snailjob.server.job.task.support.generator.task.JobTaskGeneratorFactory;
 import com.aizuda.snailjob.server.job.task.support.handler.WorkflowBatchHandler;
+import com.aizuda.snailjob.server.job.task.support.timer.JobTimeoutCheckTask;
 import com.aizuda.snailjob.server.job.task.support.timer.JobTimerWheel;
 import com.aizuda.snailjob.server.job.task.support.timer.ResidentJobTimerTask;
-import com.aizuda.snailjob.server.job.task.support.timer.JobTimeoutCheckTask;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.GroupConfigMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskBatchMapper;
@@ -58,7 +58,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author: opensnail
@@ -159,8 +158,8 @@ public class JobExecutorActor extends AbstractActor {
 
                         // 运行中的任务，需要进行超时检查
                         JobTimerWheel.registerWithJob(() -> new JobTimeoutCheckTask(taskExecute.getTaskBatchId(), job.getId()),
-                            // 加500ms是为了让尽量保证客户端自己先超时中断，防止客户端上报成功但是服务端已触发超时中断
-                            Duration.ofMillis(DateUtils.toEpochMilli(job.getExecutorTimeout()) + 500));
+                                // 加500ms是为了让尽量保证客户端自己先超时中断，防止客户端上报成功但是服务端已触发超时中断
+                                Duration.ofMillis(DateUtils.toEpochMilli(job.getExecutorTimeout()) + 500));
 
 //                        JobTimerWheel.register(SyetemTaskTypeEnum.JOB.getType(), taskExecute.getTaskBatchId(),
 //                                new JobTimeoutCheckTask(taskExecute.getTaskBatchId(), job.getId()),

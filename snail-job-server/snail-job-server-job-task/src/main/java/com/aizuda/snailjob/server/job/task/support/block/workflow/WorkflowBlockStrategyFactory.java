@@ -1,7 +1,7 @@
 package com.aizuda.snailjob.server.job.task.support.block.workflow;
 
-import com.aizuda.snailjob.server.job.task.support.BlockStrategy;
 import com.aizuda.snailjob.server.job.task.enums.BlockStrategyEnum;
+import com.aizuda.snailjob.server.job.task.support.BlockStrategy;
 
 import java.util.concurrent.ConcurrentHashMap;
 

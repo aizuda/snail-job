@@ -4,10 +4,6 @@ import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.NotifyConfigQueryVO;
 import com.aizuda.snailjob.server.web.model.request.NotifyConfigRequestVO;
 import com.aizuda.snailjob.server.web.model.response.NotifyConfigResponseVO;
-import com.aizuda.snailjob.server.web.model.base.PageResult;
-import com.aizuda.snailjob.server.web.model.request.NotifyConfigQueryVO;
-import com.aizuda.snailjob.server.web.model.request.NotifyConfigRequestVO;
-import com.aizuda.snailjob.server.web.model.response.NotifyConfigResponseVO;
 
 import java.util.List;
 import java.util.Set;

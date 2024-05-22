@@ -2,7 +2,6 @@ package com.aizuda.snailjob.server.common;
 
 import com.aizuda.snailjob.common.core.enums.NodeTypeEnum;
 import com.aizuda.snailjob.server.common.register.RegisterContext;
-import com.aizuda.snailjob.server.common.register.RegisterContext;
 
 /**
  * @author opensnail

@@ -1,9 +1,8 @@
 package com.aizuda.snailjob.server.job.task.support.prepare.job;
 
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
-import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
 import com.aizuda.snailjob.server.job.task.dto.JobTaskPrepareDTO;
-import com.aizuda.snailjob.server.job.task.support.generator.batch.JobTaskBatchGenerator;
+import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
 import com.aizuda.snailjob.server.job.task.support.generator.batch.JobTaskBatchGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

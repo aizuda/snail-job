@@ -1,7 +1,6 @@
 package com.aizuda.snailjob.template.datasource.exception;
 
 import com.aizuda.snailjob.common.core.exception.BaseSnailJobException;
-import com.aizuda.snailjob.common.core.exception.BaseSnailJobException;
 
 /**
  * 数据源模块异常类

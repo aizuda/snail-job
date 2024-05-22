@@ -1,9 +1,10 @@
 package com.aizuda.snailjob.server.web.model.request;
 
 import com.aizuda.snailjob.server.common.enums.IdGeneratorModeEnum;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.Data;
-
-import jakarta.validation.constraints.*;
 
 /**
  * 组、场景、通知配置类

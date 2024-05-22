@@ -1,7 +1,6 @@
 package com.aizuda.snailjob.template.datasource.enums;
 
 import com.aizuda.snailjob.template.datasource.exception.SnailJobDatasourceException;
-import com.aizuda.snailjob.template.datasource.exception.SnailJobDatasourceException;
 import com.baomidou.mybatisplus.annotation.DbType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

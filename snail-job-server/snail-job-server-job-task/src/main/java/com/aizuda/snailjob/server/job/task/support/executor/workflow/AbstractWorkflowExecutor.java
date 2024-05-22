@@ -2,6 +2,8 @@ package com.aizuda.snailjob.server.job.task.support.executor.workflow;
 
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
+import com.aizuda.snailjob.common.core.enums.JobArgsTypeEnum;
+import com.aizuda.snailjob.common.core.enums.WorkflowNodeTypeEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.job.task.dto.WorkflowNodeTaskExecuteDTO;
 import com.aizuda.snailjob.server.job.task.support.WorkflowExecutor;
@@ -14,10 +16,6 @@ import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskBatchMa
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTask;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch;
-import com.aizuda.snailjob.common.core.enums.JobArgsTypeEnum;
-import com.aizuda.snailjob.common.core.enums.WorkflowNodeTypeEnum;
-import com.aizuda.snailjob.server.job.task.support.generator.batch.JobTaskBatchGenerator;
-import com.aizuda.snailjob.server.job.task.support.generator.batch.JobTaskBatchGeneratorContext;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;

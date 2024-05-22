@@ -3,13 +3,13 @@ package com.aizuda.snailjob.server.job.task.support.callback;
 import akka.actor.ActorRef;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.RandomUtil;
+import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.common.cache.CacheRegisterTable;
 import com.aizuda.snailjob.server.common.dto.RegisterNodeInfo;
 import com.aizuda.snailjob.server.common.util.ClientInfoUtils;
-import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
 import com.aizuda.snailjob.server.job.task.dto.JobExecutorResultDTO;
-import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
+import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 

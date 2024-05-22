@@ -1,15 +1,14 @@
 package com.aizuda.snailjob.common.log.dialect.slf4j;
 
 import cn.hutool.core.util.StrUtil;
-import com.aizuda.snailjob.common.log.dialect.AbstractLog;
 import com.aizuda.snailjob.common.log.constant.LogFieldConstants;
+import com.aizuda.snailjob.common.log.dialect.AbstractLog;
 import com.aizuda.snailjob.common.log.level.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.slf4j.spi.LocationAwareLogger;
 
-import java.io.Serial;
 import java.util.LinkedHashMap;
 import java.util.Map;
 

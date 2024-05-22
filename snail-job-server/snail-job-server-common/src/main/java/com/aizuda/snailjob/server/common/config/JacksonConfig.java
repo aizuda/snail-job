@@ -1,7 +1,7 @@
 package com.aizuda.snailjob.server.common.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;

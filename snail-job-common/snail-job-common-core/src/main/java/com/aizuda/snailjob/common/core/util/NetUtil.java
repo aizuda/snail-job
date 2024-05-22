@@ -1,7 +1,6 @@
 package com.aizuda.snailjob.common.core.util;
 
 import com.aizuda.snailjob.common.core.exception.SnailJobCommonException;
-import com.aizuda.snailjob.common.core.exception.SnailJobCommonException;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;

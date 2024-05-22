@@ -1,10 +1,10 @@
 package com.aizuda.snailjob.server.retry.task.support.retry;
 
+import com.aizuda.snailjob.server.common.WaitStrategy;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.retry.task.support.FilterStrategy;
 import com.aizuda.snailjob.server.retry.task.support.RetryContext;
 import com.aizuda.snailjob.server.retry.task.support.StopStrategy;
-import com.aizuda.snailjob.server.common.WaitStrategy;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;

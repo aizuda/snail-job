@@ -1,7 +1,6 @@
 package com.aizuda.snailjob.common.core.enums;
 
 import com.aizuda.snailjob.common.core.exception.SnailJobCommonException;
-import com.aizuda.snailjob.common.core.exception.SnailJobCommonException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

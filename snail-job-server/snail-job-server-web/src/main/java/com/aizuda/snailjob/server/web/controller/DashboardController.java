@@ -26,7 +26,7 @@ import java.util.Set;
  */
 @RestController
 @RequestMapping("/dashboard")
-public class DashBoardController {
+public class DashboardController {
 
     @Autowired
     private DashBoardService dashBoardService;
@@ -43,8 +43,7 @@ public class DashBoardController {
                                                       @RequestParam(value = "groupName", required = false) String groupName,
                                                       @RequestParam(value = "type", required = false, defaultValue = "WEEK") String type,
                                                       @RequestParam(value = "startTime", required = false) String startTime,
-                                                      @RequestParam(value = "endTime", required = false) String endTime
-    ) {
+                                                      @RequestParam(value = "endTime", required = false) String endTime) {
         return dashBoardService.retryLineList(baseQueryVO, groupName, type, startTime, endTime);
     }
 
@@ -55,8 +54,7 @@ public class DashBoardController {
                                                     @RequestParam(value = "groupName", required = false) String groupName,
                                                     @RequestParam(value = "type", required = false, defaultValue = "WEEK") String type,
                                                     @RequestParam(value = "startTime", required = false) String startTime,
-                                                    @RequestParam(value = "endTime", required = false) String endTime
-    ) {
+                                                    @RequestParam(value = "endTime", required = false) String endTime) {
         return dashBoardService.jobLineList(baseQueryVO, mode, groupName, type, startTime, endTime);
     }
 

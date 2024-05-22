@@ -1,7 +1,6 @@
 package com.aizuda.snailjob.server.common.config;
 
 import com.aizuda.snailjob.common.core.alarm.email.MailProperties;
-import com.aizuda.snailjob.server.common.enums.SystemModeEnum;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;

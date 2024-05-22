@@ -1,7 +1,6 @@
 package com.aizuda.snailjob.server.retry.task.support.timer;
 
 import com.aizuda.snailjob.server.retry.task.support.dispatch.task.TaskExecutorSceneEnum;
-import com.aizuda.snailjob.server.retry.task.support.dispatch.task.TaskExecutorSceneEnum;
 import lombok.Data;
 
 /**

@@ -1,7 +1,6 @@
 package com.aizuda.snailjob.client.starter;
 
 import com.aizuda.snailjob.client.job.core.annotation.JobExecutor;
-import com.aizuda.snailjob.client.job.core.annotation.JobExecutor;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

@@ -4,7 +4,6 @@ import cn.hutool.core.lang.Pair;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.Lifecycle;
 import com.aizuda.snailjob.server.retry.task.support.idempotent.TimerIdempotent;
-import com.aizuda.snailjob.server.retry.task.support.idempotent.TimerIdempotent;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.TimerTask;
 import lombok.extern.slf4j.Slf4j;

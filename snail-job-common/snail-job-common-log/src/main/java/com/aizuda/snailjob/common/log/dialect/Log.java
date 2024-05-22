@@ -3,13 +3,7 @@ package com.aizuda.snailjob.common.log.dialect;
 
 import com.aizuda.snailjob.common.log.factory.LogFactory;
 import com.aizuda.snailjob.common.log.lang.LogCaller;
-import com.aizuda.snailjob.common.log.level.DebugLog;
-import com.aizuda.snailjob.common.log.level.ErrorLog;
-import com.aizuda.snailjob.common.log.level.InfoLog;
-import com.aizuda.snailjob.common.log.level.Level;
-import com.aizuda.snailjob.common.log.level.TraceLog;
-import com.aizuda.snailjob.common.log.level.WarnLog;
-import com.aizuda.snailjob.common.log.level.DebugLog;
+import com.aizuda.snailjob.common.log.level.*;
 
 /**
  * 日志统一接口

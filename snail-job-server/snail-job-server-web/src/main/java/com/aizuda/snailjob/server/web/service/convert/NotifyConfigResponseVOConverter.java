@@ -2,8 +2,8 @@ package com.aizuda.snailjob.server.web.service.convert;
 
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
-import com.aizuda.snailjob.template.datasource.persistence.po.NotifyConfig;
 import com.aizuda.snailjob.server.web.model.response.NotifyConfigResponseVO;
+import com.aizuda.snailjob.template.datasource.persistence.po.NotifyConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;

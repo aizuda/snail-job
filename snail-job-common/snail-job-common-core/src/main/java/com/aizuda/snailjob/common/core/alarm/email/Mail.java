@@ -23,7 +23,6 @@ import jakarta.mail.util.ByteArrayDataSource;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.util.Date;
-import java.util.Objects;
 
 /**
  * 邮件发送客户端

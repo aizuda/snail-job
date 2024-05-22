@@ -1,9 +1,9 @@
 package com.aizuda.snailjob.common.log.dialect.log4j;
 
 import cn.hutool.core.util.StrUtil;
+import com.aizuda.snailjob.common.log.constant.LogFieldConstants;
 import com.aizuda.snailjob.common.log.dialect.AbstractLog;
 import com.aizuda.snailjob.common.log.factory.LogFactory;
-import com.aizuda.snailjob.common.log.constant.LogFieldConstants;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.MDC;

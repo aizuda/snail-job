@@ -1,15 +1,13 @@
 package com.aizuda.snailjob.server.job.task.support.block.job;
 
 import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
+import com.aizuda.snailjob.server.job.task.enums.BlockStrategyEnum;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
 import com.aizuda.snailjob.server.job.task.support.JobTaskStopHandler;
-import com.aizuda.snailjob.server.job.task.enums.BlockStrategyEnum;
 import com.aizuda.snailjob.server.job.task.support.generator.batch.JobTaskBatchGenerator;
 import com.aizuda.snailjob.server.job.task.support.generator.batch.JobTaskBatchGeneratorContext;
 import com.aizuda.snailjob.server.job.task.support.stop.JobTaskStopFactory;
 import com.aizuda.snailjob.server.job.task.support.stop.TaskStopJobContext;
-import com.aizuda.snailjob.server.job.task.support.generator.batch.JobTaskBatchGenerator;
-import com.aizuda.snailjob.server.job.task.support.generator.batch.JobTaskBatchGeneratorContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

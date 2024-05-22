@@ -3,6 +3,7 @@ package com.aizuda.snailjob.server.job.task.support.generator.task;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.enums.JobTaskStatusEnum;
+import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.server.common.cache.CacheRegisterTable;
 import com.aizuda.snailjob.server.common.dto.RegisterNodeInfo;
@@ -10,7 +11,6 @@ import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.handler.ClientNodeAllocateHandler;
 import com.aizuda.snailjob.server.common.util.ClientInfoUtils;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
-import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTask;
 import com.google.common.collect.Lists;
@@ -19,7 +19,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * 分片参数格式

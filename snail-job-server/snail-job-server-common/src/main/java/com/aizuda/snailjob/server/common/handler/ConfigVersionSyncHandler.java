@@ -1,14 +1,14 @@
 package com.aizuda.snailjob.server.common.handler;
 
-import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.common.core.model.Result;
+import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.Lifecycle;
+import com.aizuda.snailjob.server.common.cache.CacheRegisterTable;
 import com.aizuda.snailjob.server.common.client.CommonRpcClient;
 import com.aizuda.snailjob.server.common.dto.ConfigSyncTask;
-import com.aizuda.snailjob.server.common.rpc.client.RequestBuilder;
 import com.aizuda.snailjob.server.common.dto.RegisterNodeInfo;
+import com.aizuda.snailjob.server.common.rpc.client.RequestBuilder;
 import com.aizuda.snailjob.server.model.dto.ConfigDTO;
-import com.aizuda.snailjob.server.common.cache.CacheRegisterTable;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

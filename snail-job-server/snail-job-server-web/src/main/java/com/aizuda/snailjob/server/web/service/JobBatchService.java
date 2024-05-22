@@ -3,9 +3,6 @@ package com.aizuda.snailjob.server.web.service;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.JobBatchQueryVO;
 import com.aizuda.snailjob.server.web.model.response.JobBatchResponseVO;
-import com.aizuda.snailjob.server.web.model.base.PageResult;
-import com.aizuda.snailjob.server.web.model.request.JobBatchQueryVO;
-import com.aizuda.snailjob.server.web.model.response.JobBatchResponseVO;
 
 import java.util.List;
 

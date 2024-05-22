@@ -1,9 +1,8 @@
 package com.aizuda.snailjob.client.model;
 
-import lombok.Data;
-
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.Data;
 
 /**
  * 服务端调度重试入参

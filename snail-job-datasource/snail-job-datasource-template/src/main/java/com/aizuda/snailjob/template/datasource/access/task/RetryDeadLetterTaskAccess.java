@@ -4,8 +4,6 @@ import com.aizuda.snailjob.template.datasource.enums.DbTypeEnum;
 import com.aizuda.snailjob.template.datasource.enums.OperationTypeEnum;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryDeadLetterMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryDeadLetter;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryDeadLetterMapper;
-import com.aizuda.snailjob.template.datasource.persistence.po.RetryDeadLetter;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;

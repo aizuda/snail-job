@@ -1,9 +1,5 @@
 package com.aizuda.snailjob.common.core.alarm;
 
-import lombok.Getter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 

@@ -2,7 +2,6 @@ package com.aizuda.snailjob.template.datasource.utils;
 
 import com.aizuda.snailjob.common.core.context.SpringContext;
 import com.aizuda.snailjob.template.datasource.enums.DbTypeEnum;
-import com.aizuda.snailjob.common.core.context.SpringContext;
 import org.springframework.core.env.Environment;
 
 /**

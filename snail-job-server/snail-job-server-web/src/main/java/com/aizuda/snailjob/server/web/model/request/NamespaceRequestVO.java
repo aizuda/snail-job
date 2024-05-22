@@ -1,8 +1,7 @@
 package com.aizuda.snailjob.server.web.model.request;
 
-import lombok.Data;
-
 import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
 
 /**
  * @author: xiaowoniu

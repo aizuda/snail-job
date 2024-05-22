@@ -2,7 +2,6 @@ package com.aizuda.snailjob.server.web.model.response;
 
 import lombok.Data;
 
-import java.util.List;
 import java.util.Set;
 
 /**

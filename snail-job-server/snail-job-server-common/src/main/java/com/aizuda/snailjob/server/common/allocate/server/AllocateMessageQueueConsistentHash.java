@@ -20,9 +20,6 @@ import com.aizuda.snailjob.server.common.ServerLoadBalance;
 import com.aizuda.snailjob.server.common.allocate.common.ConsistentHashRouter;
 import com.aizuda.snailjob.server.common.allocate.common.HashFunction;
 import com.aizuda.snailjob.server.common.allocate.common.Node;
-import com.aizuda.snailjob.server.common.allocate.common.ConsistentHashRouter;
-import com.aizuda.snailjob.server.common.allocate.common.HashFunction;
-import com.aizuda.snailjob.server.common.allocate.common.Node;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;

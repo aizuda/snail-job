@@ -1,7 +1,6 @@
 package com.aizuda.snailjob.server.web.model.request;
 
 import com.aizuda.snailjob.server.web.model.base.BaseQueryVO;
-import com.aizuda.snailjob.server.web.model.base.BaseQueryVO;
 import lombok.Data;
 
 /**

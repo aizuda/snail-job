@@ -2,8 +2,6 @@ package com.aizuda.snailjob.server.web.service;
 
 import com.aizuda.snailjob.server.web.model.request.JobLogQueryVO;
 import com.aizuda.snailjob.server.web.model.response.JobLogResponseVO;
-import com.aizuda.snailjob.server.web.model.request.JobLogQueryVO;
-import com.aizuda.snailjob.server.web.model.response.JobLogResponseVO;
 
 /**
  * @author: opensnail

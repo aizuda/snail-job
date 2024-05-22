@@ -2,7 +2,6 @@ package com.aizuda.snailjob.server.job.task.support.generator.batch;
 
 import cn.hutool.core.lang.Assert;
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
-import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.job.task.dto.WorkflowTimerTaskDTO;
@@ -18,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author: xiaowoniu
@@ -54,7 +52,7 @@ public class WorkflowBatchGenerator {
         workflowTimerTaskDTO.setWorkflowId(context.getWorkflowId());
         workflowTimerTaskDTO.setTaskExecutorScene(context.getTaskExecutorScene());
 
-        JobTimerWheel.registerWithWorkflow(() ->  new WorkflowTimerTask(workflowTimerTaskDTO), Duration.ofMillis(delay));
+        JobTimerWheel.registerWithWorkflow(() -> new WorkflowTimerTask(workflowTimerTaskDTO), Duration.ofMillis(delay));
 //        JobTimerWheel.register(SyetemTaskTypeEnum.WORKFLOW.getType(), workflowTaskBatch.getId(),
 //                new WorkflowTimerTask(workflowTimerTaskDTO), delay, TimeUnit.MILLISECONDS);
     }

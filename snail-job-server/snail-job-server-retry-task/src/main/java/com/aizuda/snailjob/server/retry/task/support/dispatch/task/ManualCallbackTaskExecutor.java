@@ -4,18 +4,18 @@ import akka.actor.ActorRef;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.lang.Pair;
 import com.aizuda.snailjob.common.core.model.Result;
+import com.aizuda.snailjob.server.common.WaitStrategy;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
+import com.aizuda.snailjob.server.common.strategy.WaitStrategies;
 import com.aizuda.snailjob.server.retry.task.support.RetryContext;
-import com.aizuda.snailjob.server.common.WaitStrategy;
 import com.aizuda.snailjob.server.retry.task.support.context.CallbackRetryContext;
 import com.aizuda.snailjob.server.retry.task.support.retry.RetryBuilder;
 import com.aizuda.snailjob.server.retry.task.support.retry.RetryExecutor;
 import com.aizuda.snailjob.server.retry.task.support.strategy.FilterStrategies;
 import com.aizuda.snailjob.server.retry.task.support.strategy.StopStrategies;
-import com.aizuda.snailjob.server.common.strategy.WaitStrategies;
-import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
+import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
 import org.springframework.stereotype.Component;
 
 /**

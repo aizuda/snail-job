@@ -3,7 +3,6 @@ package com.aizuda.snailjob.server.common;
 import com.aizuda.snailjob.common.log.dto.LogContentDTO;
 import com.aizuda.snailjob.common.log.enums.LogTypeEnum;
 import com.aizuda.snailjob.server.common.dto.LogMetaDTO;
-import com.aizuda.snailjob.server.common.dto.LogMetaDTO;
 
 /**
  * @author: xiaowoniu

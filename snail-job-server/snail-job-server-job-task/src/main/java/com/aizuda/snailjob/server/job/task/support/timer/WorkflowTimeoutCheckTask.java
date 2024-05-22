@@ -21,6 +21,7 @@ import java.util.Objects;
 @AllArgsConstructor
 public class WorkflowTimeoutCheckTask implements TimerTask<Long> {
     private final Long workflowTaskBatchId;
+
     @Override
     public void run(Timeout timeout) throws Exception {
         WorkflowTaskBatchMapper workflowTaskBatchMapper = SpringContext.getBean(WorkflowTaskBatchMapper.class);

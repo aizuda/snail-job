@@ -1,9 +1,8 @@
 package com.aizuda.snailjob.server.web.model.request;
 
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
-import lombok.Data;
-
 import jakarta.validation.constraints.*;
+import lombok.Data;
 
 /**
  * @author opensnail

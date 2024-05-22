@@ -1,11 +1,11 @@
 package com.aizuda.snailjob.server.job.task.support.executor.job;
 
 import akka.actor.ActorRef;
+import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.common.util.ClientInfoUtils;
-import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
 import com.aizuda.snailjob.server.job.task.dto.RealJobExecutorDTO;
-import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
+import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTask;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

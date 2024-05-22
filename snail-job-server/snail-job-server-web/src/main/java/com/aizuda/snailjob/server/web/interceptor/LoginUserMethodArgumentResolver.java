@@ -1,6 +1,5 @@
 package com.aizuda.snailjob.server.web.interceptor;
 
-import com.aizuda.snailjob.server.web.model.request.UserSessionVO;
 import com.aizuda.snailjob.server.web.annotation.LoginUser;
 import com.aizuda.snailjob.server.web.model.request.UserSessionVO;
 import org.springframework.core.MethodParameter;

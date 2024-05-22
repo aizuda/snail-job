@@ -3,7 +3,6 @@ package com.aizuda.snailjob.template.datasource.access.config;
 import com.aizuda.snailjob.template.datasource.enums.DbTypeEnum;
 import com.aizuda.snailjob.template.datasource.enums.OperationTypeEnum;
 import com.aizuda.snailjob.template.datasource.persistence.po.NotifyConfig;
-import com.aizuda.snailjob.template.datasource.persistence.po.NotifyConfig;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;

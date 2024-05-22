@@ -3,8 +3,6 @@ package com.aizuda.snailjob.server.common.lock;
 import com.aizuda.snailjob.server.common.dto.LockConfig;
 import com.aizuda.snailjob.server.common.lock.persistence.LockStorage;
 import com.aizuda.snailjob.server.common.lock.persistence.LockStorageFactory;
-import com.aizuda.snailjob.server.common.lock.persistence.LockStorage;
-import com.aizuda.snailjob.server.common.lock.persistence.LockStorageFactory;
 
 /**
  * @author xiaowoniu

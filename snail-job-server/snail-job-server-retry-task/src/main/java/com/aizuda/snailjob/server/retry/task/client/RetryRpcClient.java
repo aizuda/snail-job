@@ -4,20 +4,14 @@ import com.aizuda.snailjob.client.model.DispatchRetryDTO;
 import com.aizuda.snailjob.client.model.DispatchRetryResultDTO;
 import com.aizuda.snailjob.client.model.GenerateRetryIdempotentIdDTO;
 import com.aizuda.snailjob.client.model.RetryCallbackDTO;
-import com.aizuda.snailjob.common.core.model.SnailJobHeaders;
 import com.aizuda.snailjob.common.core.model.Result;
+import com.aizuda.snailjob.common.core.model.SnailJobHeaders;
 import com.aizuda.snailjob.server.common.rpc.client.RequestMethod;
 import com.aizuda.snailjob.server.common.rpc.client.annotation.Body;
 import com.aizuda.snailjob.server.common.rpc.client.annotation.Header;
 import com.aizuda.snailjob.server.common.rpc.client.annotation.Mapping;
-import com.aizuda.snailjob.server.model.dto.ConfigDTO;
-import com.aizuda.snailjob.server.common.rpc.client.annotation.Body;
-import com.aizuda.snailjob.server.common.rpc.client.annotation.Header;
-import com.aizuda.snailjob.server.common.rpc.client.annotation.Mapping;
 
-import static com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH.RETRY_CALLBACK;
-import static com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH.RETRY_DISPATCH;
-import static com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH.RETRY_GENERATE_IDEM_ID;
+import static com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH.*;
 
 /**
  * 调用客户端接口

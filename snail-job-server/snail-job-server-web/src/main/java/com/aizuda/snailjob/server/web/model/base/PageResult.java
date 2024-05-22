@@ -1,7 +1,7 @@
 package com.aizuda.snailjob.server.web.model.base;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.aizuda.snailjob.common.core.model.Result;
+import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

@@ -2,7 +2,6 @@ package com.aizuda.snailjob.server.common;
 
 import com.aizuda.snailjob.server.common.dto.RegisterNodeInfo;
 import com.aizuda.snailjob.template.datasource.persistence.po.ServerNode;
-import com.aizuda.snailjob.server.common.dto.RegisterNodeInfo;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 

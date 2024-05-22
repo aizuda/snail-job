@@ -6,11 +6,6 @@ import com.aizuda.snailjob.server.web.model.request.JobRequestVO;
 import com.aizuda.snailjob.server.web.model.request.JobUpdateJobStatusRequestVO;
 import com.aizuda.snailjob.server.web.model.response.JobResponseVO;
 import com.aizuda.snailjob.template.datasource.persistence.po.Job;
-import com.aizuda.snailjob.server.web.model.base.PageResult;
-import com.aizuda.snailjob.server.web.model.request.JobQueryVO;
-import com.aizuda.snailjob.server.web.model.request.JobRequestVO;
-import com.aizuda.snailjob.server.web.model.request.JobUpdateJobStatusRequestVO;
-import com.aizuda.snailjob.server.web.model.response.JobResponseVO;
 
 import java.util.List;
 

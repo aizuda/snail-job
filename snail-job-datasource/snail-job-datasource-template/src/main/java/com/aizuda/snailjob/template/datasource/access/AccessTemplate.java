@@ -7,11 +7,7 @@ import com.aizuda.snailjob.template.datasource.access.task.RetryDeadLetterTaskAc
 import com.aizuda.snailjob.template.datasource.access.task.RetryTaskAccess;
 import com.aizuda.snailjob.template.datasource.enums.OperationTypeEnum;
 import com.aizuda.snailjob.template.datasource.exception.SnailJobDatasourceException;
-import com.aizuda.snailjob.template.datasource.persistence.po.GroupConfig;
-import com.aizuda.snailjob.template.datasource.persistence.po.NotifyConfig;
-import com.aizuda.snailjob.template.datasource.persistence.po.RetryDeadLetter;
-import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
-import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
+import com.aizuda.snailjob.template.datasource.persistence.po.*;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;

@@ -1,7 +1,6 @@
 package com.aizuda.snailjob.server.common.allocate.client;
 
 import com.aizuda.snailjob.server.common.ClientLoadBalance;
-import com.aizuda.snailjob.server.common.allocate.client.ClientLoadBalanceManager.AllocationAlgorithmEnum;
 
 import java.util.Random;
 import java.util.TreeSet;

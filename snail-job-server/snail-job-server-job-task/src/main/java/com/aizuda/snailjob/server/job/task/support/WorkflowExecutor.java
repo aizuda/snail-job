@@ -2,7 +2,6 @@ package com.aizuda.snailjob.server.job.task.support;
 
 import com.aizuda.snailjob.common.core.enums.WorkflowNodeTypeEnum;
 import com.aizuda.snailjob.server.job.task.support.executor.workflow.WorkflowExecutorContext;
-import com.aizuda.snailjob.server.job.task.support.executor.workflow.WorkflowExecutorContext;
 
 /**
  * @author opensnail

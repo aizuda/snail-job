@@ -1,7 +1,6 @@
 package com.aizuda.snailjob.common.core.util;
 
 import com.aizuda.snailjob.common.core.context.SpringContext;
-import com.aizuda.snailjob.common.core.context.SpringContext;
 import org.springframework.core.env.Environment;
 
 import java.util.Objects;

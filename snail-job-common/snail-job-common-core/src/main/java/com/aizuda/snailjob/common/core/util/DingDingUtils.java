@@ -3,7 +3,6 @@ package com.aizuda.snailjob.common.core.util;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.log.SnailJobLog;
-import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.dingtalk.api.DefaultDingTalkClient;
 import com.dingtalk.api.DingTalkClient;
 import com.dingtalk.api.request.OapiRobotSendRequest;

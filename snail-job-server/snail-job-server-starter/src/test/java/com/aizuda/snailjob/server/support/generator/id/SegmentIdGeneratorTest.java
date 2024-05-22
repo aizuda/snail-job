@@ -4,7 +4,6 @@ import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.generator.id.IdGenerator;
-import com.aizuda.snailjob.server.common.generator.id.IdGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;

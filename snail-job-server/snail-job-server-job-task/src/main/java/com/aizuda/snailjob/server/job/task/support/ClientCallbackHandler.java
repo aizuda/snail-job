@@ -2,7 +2,6 @@ package com.aizuda.snailjob.server.job.task.support;
 
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.snailjob.server.job.task.support.callback.ClientCallbackContext;
-import com.aizuda.snailjob.server.job.task.support.callback.ClientCallbackContext;
 
 /**
  * @author opensnail

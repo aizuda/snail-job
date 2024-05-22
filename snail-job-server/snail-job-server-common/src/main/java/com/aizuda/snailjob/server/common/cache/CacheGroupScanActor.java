@@ -4,7 +4,6 @@ import akka.actor.ActorRef;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.Lifecycle;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
-import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import lombok.Data;

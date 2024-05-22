@@ -4,8 +4,6 @@ import cn.hutool.core.lang.Assert;
 import com.aizuda.snailjob.server.common.cache.CacheLockRecord;
 import com.aizuda.snailjob.server.common.dto.LockConfig;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
-import com.aizuda.snailjob.server.common.cache.CacheLockRecord;
-import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

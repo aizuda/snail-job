@@ -1,7 +1,6 @@
 package com.aizuda.snailjob.client.model;
 
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
-import com.aizuda.snailjob.common.core.enums.StatusEnum;
 
 /**
  * @author: opensnail

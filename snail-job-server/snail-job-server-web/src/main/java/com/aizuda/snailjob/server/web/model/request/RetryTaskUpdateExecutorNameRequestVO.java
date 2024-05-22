@@ -1,11 +1,10 @@
 package com.aizuda.snailjob.server.web.model.request;
 
 import com.aizuda.snailjob.common.core.enums.RetryStatusEnum;
-import lombok.Data;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
-
 import jakarta.validation.constraints.Pattern;
+import lombok.Data;
 
 import java.util.List;
 

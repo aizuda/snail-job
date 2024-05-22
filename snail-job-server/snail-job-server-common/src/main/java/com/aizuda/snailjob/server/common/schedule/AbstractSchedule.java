@@ -7,7 +7,6 @@ import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.lock.LockBuilder;
 import com.aizuda.snailjob.server.common.lock.LockManager;
 import com.aizuda.snailjob.server.common.lock.LockProvider;
-import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;

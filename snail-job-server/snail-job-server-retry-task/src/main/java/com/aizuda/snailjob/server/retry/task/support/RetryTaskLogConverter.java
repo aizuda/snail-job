@@ -5,7 +5,6 @@ import com.aizuda.snailjob.server.retry.task.support.dispatch.actor.log.RetryTas
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTaskLog;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTaskLogMessage;
-import com.aizuda.snailjob.server.retry.task.support.dispatch.actor.log.RetryTaskLogDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;

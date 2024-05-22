@@ -8,7 +8,6 @@ import com.aizuda.snailjob.server.common.Lifecycle;
 import com.aizuda.snailjob.server.common.triple.Pair;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import com.aizuda.snailjob.template.datasource.persistence.po.GroupConfig;
-import com.aizuda.snailjob.server.common.triple.Pair;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import org.springframework.stereotype.Component;

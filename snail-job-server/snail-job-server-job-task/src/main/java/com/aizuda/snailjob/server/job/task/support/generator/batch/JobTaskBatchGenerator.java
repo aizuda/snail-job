@@ -2,13 +2,12 @@ package com.aizuda.snailjob.server.job.task.support.generator.batch;
 
 import cn.hutool.core.lang.Assert;
 import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
+import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.snailjob.server.common.cache.CacheRegisterTable;
 import com.aizuda.snailjob.server.common.enums.JobTaskExecutorSceneEnum;
-import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.job.task.dto.JobTimerTaskDTO;
-import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.snailjob.server.job.task.dto.WorkflowNodeTaskExecuteDTO;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
 import com.aizuda.snailjob.server.job.task.support.handler.WorkflowBatchHandler;
@@ -28,7 +27,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author opensnail

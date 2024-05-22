@@ -1,9 +1,9 @@
 package com.aizuda.snailjob.server.common.rpc.server;
 
 import com.aizuda.snailjob.common.log.SnailJobLog;
+import com.aizuda.snailjob.server.common.Lifecycle;
 import com.aizuda.snailjob.server.common.config.SystemProperties;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
-import com.aizuda.snailjob.server.common.Lifecycle;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;

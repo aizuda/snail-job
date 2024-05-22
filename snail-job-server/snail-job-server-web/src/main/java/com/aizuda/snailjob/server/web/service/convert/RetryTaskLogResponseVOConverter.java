@@ -1,7 +1,7 @@
 package com.aizuda.snailjob.server.web.service.convert;
 
-import com.aizuda.snailjob.template.datasource.persistence.po.RetryTaskLog;
 import com.aizuda.snailjob.server.web.model.response.RetryTaskLogResponseVO;
+import com.aizuda.snailjob.template.datasource.persistence.po.RetryTaskLog;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 

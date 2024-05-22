@@ -2,13 +2,16 @@ package com.aizuda.snailjob.common.core.alarm.strategy;
 
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.http.*;
+import cn.hutool.http.ContentType;
+import cn.hutool.http.HttpRequest;
+import cn.hutool.http.HttpResponse;
+import cn.hutool.http.HttpUtil;
 import com.aizuda.snailjob.common.core.alarm.AlarmContext;
 import com.aizuda.snailjob.common.core.alarm.attribute.QiYeWechatAttribute;
 import com.aizuda.snailjob.common.core.enums.AlarmTypeEnum;
-import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.common.core.util.DingDingUtils;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
+import com.aizuda.snailjob.common.log.SnailJobLog;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

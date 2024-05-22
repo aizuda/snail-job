@@ -24,7 +24,6 @@ import com.aizuda.snailjob.server.job.task.support.executor.workflow.WorkflowExe
 import com.aizuda.snailjob.server.job.task.support.handler.WorkflowBatchHandler;
 import com.aizuda.snailjob.server.job.task.support.timer.JobTimerWheel;
 import com.aizuda.snailjob.server.job.task.support.timer.WorkflowTimeoutCheckTask;
-import com.aizuda.snailjob.server.job.task.support.timer.WorkflowTimerTask;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.*;
 import com.aizuda.snailjob.template.datasource.persistence.po.*;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -43,7 +42,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -93,8 +91,8 @@ public class WorkflowExecutorActor extends AbstractActor {
             Workflow workflow = workflowMapper.selectById(workflowTaskBatch.getWorkflowId());
             JobTimerWheel.clearCache(SyetemTaskTypeEnum.WORKFLOW.getType(), taskExecute.getWorkflowTaskBatchId());
 
-            JobTimerWheel.registerWithWorkflow(() ->  new WorkflowTimeoutCheckTask(taskExecute.getWorkflowTaskBatchId()),
-                Duration.ofSeconds(workflow.getExecutorTimeout()));
+            JobTimerWheel.registerWithWorkflow(() -> new WorkflowTimeoutCheckTask(taskExecute.getWorkflowTaskBatchId()),
+                    Duration.ofSeconds(workflow.getExecutorTimeout()));
             // 超时检查
 //            JobTimerWheel.register(SyetemTaskTypeEnum.WORKFLOW.getType(), taskExecute.getWorkflowTaskBatchId(),
 //                    new WorkflowTimeoutCheckTask(taskExecute.getWorkflowTaskBatchId()), workflow.getExecutorTimeout(), TimeUnit.SECONDS);

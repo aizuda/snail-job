@@ -3,7 +3,6 @@ package com.aizuda.snailjob.server.job.task.support.prepare.workflow;
 import com.aizuda.snailjob.server.job.task.dto.WorkflowTaskPrepareDTO;
 import com.aizuda.snailjob.server.job.task.support.WorkflowTaskConverter;
 import com.aizuda.snailjob.server.job.task.support.generator.batch.WorkflowBatchGenerator;
-import com.aizuda.snailjob.server.job.task.support.generator.batch.WorkflowBatchGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

@@ -2,9 +2,9 @@ package com.aizuda.snailjob.server.common.dto;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpMethod;
 import lombok.Builder;
 import lombok.Data;
-import io.netty.handler.codec.http.HttpMethod;
 
 /**
  * netty客户端请求模型

@@ -1,14 +1,12 @@
 package com.aizuda.snailjob.server.job.task.support.stop;
 
 import akka.actor.ActorRef;
-import com.aizuda.snailjob.common.core.context.SpringContext;
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskStatusEnum;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
-import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
 import com.aizuda.snailjob.server.job.task.dto.JobExecutorResultDTO;
+import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
 import com.aizuda.snailjob.server.job.task.support.JobTaskStopHandler;
-import com.aizuda.snailjob.server.job.task.support.alarm.event.JobTaskFailAlarmEvent;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskBatchMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTask;

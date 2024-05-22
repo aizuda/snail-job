@@ -235,7 +235,7 @@ public class DashBoardServiceImpl implements DashBoardService {
         // 针对 Group By 分页自定义countStatement
         pager.setSearchCount(false);
         pager.setTotal(SystemModeEnum.JOB.name().equals(mode) ?
-                jobSummaryMapper.selectJobTaskListCount(wrapper):
+                jobSummaryMapper.selectJobTaskListCount(wrapper) :
                 jobSummaryMapper.selectWorkflowTaskListCount(wrapper));
 
         IPage<DashboardRetryLineResponseDO.Task> taskIPage = SystemModeEnum.JOB.name().equals(mode) ?

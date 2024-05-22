@@ -2,7 +2,6 @@ package com.aizuda.snailjob.server.common.lock;
 
 import cn.hutool.core.lang.Assert;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
-import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 
 /**
  * @author xiaowoniu

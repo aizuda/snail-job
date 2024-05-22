@@ -4,7 +4,6 @@ import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.server.model.dto.ConfigDTO;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 

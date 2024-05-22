@@ -12,7 +12,6 @@ import com.aizuda.snailjob.template.datasource.persistence.po.JobNotifyConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.NotifyConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryDeadLetter;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
-import com.aizuda.snailjob.template.datasource.persistence.po.WorkflowTaskBatch;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;

@@ -2,7 +2,6 @@ package com.aizuda.snailjob.server.job.task.support.timer;
 
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
-import com.aizuda.snailjob.server.job.task.dto.JobTimerTaskDTO;
 import com.aizuda.snailjob.server.job.task.support.idempotent.TimerIdempotent;
 import io.netty.util.HashedWheelTimer;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
@@ -12,7 +11,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**

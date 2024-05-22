@@ -1,10 +1,10 @@
 package com.aizuda.snailjob.server.retry.task.support.context;
 
+import com.aizuda.snailjob.server.common.WaitStrategy;
 import com.aizuda.snailjob.server.common.dto.RegisterNodeInfo;
 import com.aizuda.snailjob.server.retry.task.support.RetryContext;
-import com.aizuda.snailjob.server.common.WaitStrategy;
-import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
+import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
 import lombok.Data;
 import lombok.Getter;
 

@@ -4,10 +4,6 @@ import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.NamespaceQueryVO;
 import com.aizuda.snailjob.server.web.model.request.NamespaceRequestVO;
 import com.aizuda.snailjob.server.web.model.response.NamespaceResponseVO;
-import com.aizuda.snailjob.server.web.model.base.PageResult;
-import com.aizuda.snailjob.server.web.model.request.NamespaceQueryVO;
-import com.aizuda.snailjob.server.web.model.request.NamespaceRequestVO;
-import com.aizuda.snailjob.server.web.model.response.NamespaceResponseVO;
 
 import java.util.List;
 

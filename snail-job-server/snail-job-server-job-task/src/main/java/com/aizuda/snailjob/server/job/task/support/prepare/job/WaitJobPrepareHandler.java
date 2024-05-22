@@ -5,13 +5,12 @@ import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.job.task.dto.JobTaskPrepareDTO;
 import com.aizuda.snailjob.server.job.task.dto.JobTimerTaskDTO;
-import com.aizuda.snailjob.server.job.task.support.timer.JobTimerWheel;
 import com.aizuda.snailjob.server.job.task.support.timer.JobTimerTask;
+import com.aizuda.snailjob.server.job.task.support.timer.JobTimerWheel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 处理处于{@link JobTaskBatchStatusEnum::WAIT}状态的任务
@@ -43,7 +42,7 @@ public class WaitJobPrepareHandler extends AbstractJobPrePareHandler {
             jobTimerTaskDTO.setTaskBatchId(jobPrepareDTO.getTaskBatchId());
             jobTimerTaskDTO.setJobId(jobPrepareDTO.getJobId());
 
-            JobTimerWheel.registerWithJob(() ->  new JobTimerTask(jobTimerTaskDTO), Duration.ofMillis(delay));
+            JobTimerWheel.registerWithJob(() -> new JobTimerTask(jobTimerTaskDTO), Duration.ofMillis(delay));
 //            JobTimerWheel.register(SyetemTaskTypeEnum.JOB.getType(), jobPrepareDTO.getTaskBatchId(),
 //                    new JobTimerTask(jobTimerTaskDTO), delay, TimeUnit.MILLISECONDS);
         }

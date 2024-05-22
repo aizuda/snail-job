@@ -1,8 +1,8 @@
 package com.aizuda.snailjob.server.starter.listener;
 
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
-import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.common.core.util.SnailJobVersion;
+import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.Lifecycle;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

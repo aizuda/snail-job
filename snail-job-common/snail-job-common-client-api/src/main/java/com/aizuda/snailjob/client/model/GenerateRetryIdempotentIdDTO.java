@@ -1,8 +1,7 @@
 package com.aizuda.snailjob.client.model;
 
-import lombok.Data;
-
 import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
 
 /**
  * 生成idempotentId模型
