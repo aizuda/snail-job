@@ -44,10 +44,14 @@
                            #{item.stopReason}       AS stop_reason,
                            #{item.cancelNum}        AS cancel_num,
                            #{item.cancelReason}     AS cancel_reason,
-                           #{item.triggerAt}        AS trigger_at,
-                           #{item.businessId}       AS business_id
+                           #{item.systemTaskType}   AS system_task_type,
+                           #{item.businessId}       AS business_id,
+                           #{item.triggerAt}        AS trigger_at
                    </foreach>
-               ) AS src ON (dest.trigger_at = src.trigger_at AND dest.business_id = src.business_id)
+               ) AS src
+             ON (dest.system_task_type = src.system_task_type
+             AND dest.business_id = src.business_id
+             AND dest.trigger_at = src.trigger_at)
     </update>
 
     <select id="selectJobLineList"

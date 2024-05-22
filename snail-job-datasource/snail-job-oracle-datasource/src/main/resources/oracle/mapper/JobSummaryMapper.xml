@@ -4,7 +4,7 @@
 
     <insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="false" keyProperty="id">
         INSERT INTO sj_job_summary (namespace_id, group_name, business_id, trigger_at, system_task_type,
-                                 success_num,fail_num,fail_reason,stop_num,stop_reason, cancel_num,cancel_reason)
+                                    success_num,fail_num,fail_reason,stop_num,stop_reason, cancel_num,cancel_reason)
         <foreach collection="list" item="item" separator="UNION ALL">
             SELECT
                 #{item.namespaceId},
@@ -33,8 +33,9 @@
                    stop_reason = #{item.stopReason},
                    cancel_num = #{item.cancelNum},
                    cancel_reason = #{item.cancelReason}
-             WHERE trigger_at = #{item.triggerAt}
+             WHERE system_task_type = #{item.systemTaskType}
                AND business_id = #{item.businessId}
+               AND trigger_at = #{item.triggerAt}
         </foreach>
     </update>
 

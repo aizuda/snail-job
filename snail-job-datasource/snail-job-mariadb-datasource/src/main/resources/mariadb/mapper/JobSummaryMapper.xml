@@ -36,8 +36,9 @@
                            #{item.stopReason}       AS stop_reason,
                            #{item.cancelNum}        AS cancel_num,
                            #{item.cancelReason}     AS cancel_reason,
-                           #{item.triggerAt}        AS trigger_at,
-                           #{item.businessId}       AS business_id
+                           #{system_task_type}      AS system_task_type,
+                           #{item.businessId}       AS business_id,
+                           #{item.triggerAt}        AS trigger_at
                    </foreach>
                ) tt
            SET rt.success_num = tt.success_num,
@@ -47,8 +48,9 @@
                rt.stop_reason = tt.stop_reason,
                rt.cancel_num = tt.cancel_num,
                rt.cancel_reason = tt.cancel_reason
-         WHERE rt.trigger_at = tt.trigger_at
+         WHERE rt.system_task_type = tt.system_task_type
            AND rt.business_id = tt.business_id
+           AND rt.trigger_at = tt.trigger_at
     </update>
 
     <select id="selectJobLineList"
