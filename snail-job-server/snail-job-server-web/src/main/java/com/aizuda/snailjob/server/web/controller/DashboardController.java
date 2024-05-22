@@ -8,7 +8,7 @@ import com.aizuda.snailjob.server.web.model.request.ServerNodeQueryVO;
 import com.aizuda.snailjob.server.web.model.response.DashboardCardResponseVO;
 import com.aizuda.snailjob.server.web.model.response.DashboardRetryLineResponseVO;
 import com.aizuda.snailjob.server.web.model.response.ServerNodeResponseVO;
-import com.aizuda.snailjob.server.web.service.DashBoardService;
+import com.aizuda.snailjob.server.web.service.DashboardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,7 +29,7 @@ import java.util.Set;
 public class DashboardController {
 
     @Autowired
-    private DashBoardService dashBoardService;
+    private DashboardService dashBoardService;
 
     @LoginRequired
     @GetMapping("/task-retry-job")

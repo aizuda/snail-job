@@ -13,7 +13,7 @@ import java.util.List;
  * @author: opensnail
  * @date : 2022-04-22 20:19
  */
-public interface DashBoardService {
+public interface DashboardService {
 
     DashboardCardResponseVO taskRetryJob();
 

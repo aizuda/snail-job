@@ -25,7 +25,7 @@ import com.aizuda.snailjob.server.web.model.response.DashboardLineResponseVO;
 import com.aizuda.snailjob.server.web.model.response.DashboardRetryLineResponseVO;
 import com.aizuda.snailjob.server.web.model.response.DashboardRetryLineResponseVO.Task;
 import com.aizuda.snailjob.server.web.model.response.ServerNodeResponseVO;
-import com.aizuda.snailjob.server.web.service.DashBoardService;
+import com.aizuda.snailjob.server.web.service.DashboardService;
 import com.aizuda.snailjob.server.web.service.convert.*;
 import com.aizuda.snailjob.server.web.util.UserSessionUtils;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.ActivePodQuantityResponseDO;
@@ -63,7 +63,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class DashBoardServiceImpl implements DashBoardService {
+public class DashboardServiceImpl implements DashboardService {
 
     private static final String DASHBOARD_CONSUMER_BUCKET = "/dashboard/consumer/bucket";
 
@@ -193,7 +193,7 @@ public class DashBoardServiceImpl implements DashBoardService {
                         .between(RetrySummary::getTriggerAt, startDateTime, endDateTime));
         List<DashboardLineResponseVO> dashboardLineResponseVOList = DispatchQuantityResponseVOConverter.INSTANCE.convertList(dashboardRetryLinkeResponseDOList);
         dateTypeEnum.getConsumer().accept(dashboardLineResponseVOList);
-        dashboardLineResponseVOList.sort(Comparator.comparing(a -> a.getCreateDt()));
+        dashboardLineResponseVOList.sort(Comparator.comparing(DashboardLineResponseVO::getCreateDt));
         responseVO.setDashboardLineResponseDOList(dashboardLineResponseVOList);
 
         // 排行榜
