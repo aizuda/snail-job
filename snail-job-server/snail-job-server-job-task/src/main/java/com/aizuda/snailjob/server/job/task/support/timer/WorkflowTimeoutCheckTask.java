@@ -3,6 +3,7 @@ package com.aizuda.snailjob.server.job.task.support.timer;
 import com.aizuda.snailjob.common.core.context.SpringContext;
 import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
+import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.job.task.support.alarm.event.WorkflowTaskFailAlarmEvent;
 import com.aizuda.snailjob.server.job.task.support.handler.WorkflowBatchHandler;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowTaskBatchMapper;
@@ -34,6 +35,7 @@ public class WorkflowTimeoutCheckTask implements TimerTask<Long> {
         // 超时停止任务
         workflowBatchHandler.stop(workflowTaskBatchId, JobOperationReasonEnum.TASK_EXECUTION_TIMEOUT.getReason());
         SpringContext.getContext().publishEvent(new WorkflowTaskFailAlarmEvent(workflowTaskBatchId));
+        SnailJobLog.LOCAL.info("超时中断.workflowTaskBatchId:[{}]", workflowTaskBatchId);
     }
 
     @Override

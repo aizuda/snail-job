@@ -63,7 +63,7 @@ public class JobTimeoutCheckTask implements TimerTask<Long> {
         instanceInterrupt.stop(stopJobContext);
 
         SpringContext.getContext().publishEvent(new JobTaskFailAlarmEvent(taskBatchId));
-        SnailJobLog.REMOTE.info("超时中断.taskBatchId:[{}]", taskBatchId);
+        SnailJobLog.LOCAL.info("超时中断.taskBatchId:[{}]", taskBatchId);
     }
 
     @Override
