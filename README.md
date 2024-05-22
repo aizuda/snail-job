@@ -27,8 +27,12 @@
  https://snailjob.opensnail.com/docs/preview.html
 
 ## 特别用户
-<a href="http://aizuda.com/?from=mp" width="350px">![aizuda.png](doc/images/aizuda.png)</a>
-<a href="https://plus-doc.dromara.org/#/" width="350px">![ryp.png](doc/images/ryp.png)</a>
+<a href="http://aizuda.com/?from=mp" >
+  <img alt="snail-job-Logo" src="doc/images/aizuda.png" width="200px">
+</a>
+<a href="https://plus-doc.dromara.org/#/">
+   <img alt="snail-job-Logo" src="doc/images/ryp.png" width="300px" height="71">
+</a>
 
 ## 相关链接
 
