@@ -2,6 +2,7 @@ package com.aizuda.snailjob.server.starter.dispatch;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
+import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
@@ -22,7 +23,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.Objects;
@@ -59,7 +59,7 @@ public class ConsumerBucketActor extends AbstractActor {
     }
 
     private void doDispatch(final ConsumerBucket consumerBucket) {
-        if (CollectionUtils.isEmpty(consumerBucket.getBuckets())) {
+        if (CollUtil.isEmpty(consumerBucket.getBuckets())) {
             return;
         }
 
@@ -84,7 +84,7 @@ public class ConsumerBucketActor extends AbstractActor {
             SnailJobLog.LOCAL.error("生成重试任务异常.", e);
         }
 
-        if (!CollectionUtils.isEmpty(groupConfigs)) {
+        if (CollUtil.isNotEmpty(groupConfigs)) {
             for (final GroupConfig groupConfig : groupConfigs) {
                 CacheConsumerGroup.addOrUpdate(groupConfig.getGroupName(), groupConfig.getNamespaceId());
                 ScanTask scanTask = new ScanTask();

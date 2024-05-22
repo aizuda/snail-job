@@ -1,12 +1,12 @@
 package com.aizuda.snailjob.client.common.window;
 
+import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.window.LeapArray;
 import com.aizuda.snailjob.common.core.window.Listener;
 import com.aizuda.snailjob.common.core.window.WindowWrap;
 import com.aizuda.snailjob.server.model.dto.RetryTaskDTO;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -48,7 +48,7 @@ public class RetryLeapArray extends LeapArray<ConcurrentLinkedQueue<RetryTaskDTO
         ConcurrentLinkedQueue<RetryTaskDTO> deepCopy = new ConcurrentLinkedQueue<>(windowWrap.value());
         try {
 
-            if (!CollectionUtils.isEmpty(deepCopy)) {
+            if (CollUtil.isNotEmpty(deepCopy)) {
                 for (Listener<RetryTaskDTO> listener : listenerList) {
                     listener.handler(new ArrayList<>(deepCopy));
                 }

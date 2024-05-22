@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.common.core.handler;
 
+import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.common.core.exception.AbstractError;
 import com.aizuda.snailjob.common.core.exception.BaseSnailJobException;
 import com.aizuda.snailjob.common.core.exception.SnailJobAuthenticationException;
@@ -10,7 +11,6 @@ import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -87,7 +87,7 @@ public class RestExceptionHandler {
     @ExceptionHandler(ConstraintViolationException.class)
     public Result onConstraintViolationException(ConstraintViolationException e) {
         Set<ConstraintViolation<?>> constraintViolations = e.getConstraintViolations();
-        if (!CollectionUtils.isEmpty(constraintViolations)) {
+        if (CollUtil.isNotEmpty(constraintViolations)) {
             String errorMessage = StreamUtils.join(constraintViolations, ConstraintViolation::getMessage, ";");
             return new Result(0, errorMessage);
         }
@@ -107,7 +107,7 @@ public class RestExceptionHandler {
         if (result != null && result.hasErrors()) {
             StringBuilder sb = new StringBuilder();
             List<FieldError> errors = result.getFieldErrors();
-            if (!CollectionUtils.isEmpty(errors)) {
+            if (CollUtil.isNotEmpty(errors)) {
                 FieldError error = errors.get(0);
                 String rejectedValue = Objects.toString(error.getRejectedValue(), "");
                 String defMsg = error.getDefaultMessage();

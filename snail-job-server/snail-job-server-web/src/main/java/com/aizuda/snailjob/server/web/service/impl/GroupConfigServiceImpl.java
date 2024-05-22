@@ -40,7 +40,6 @@ import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -113,7 +112,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
     public Boolean updateGroup(GroupConfigRequestVO groupConfigRequestVO) {
 
         List<Integer> tablePartitionList = getTablePartitionList();
-        if (CollectionUtils.isEmpty(tablePartitionList)) {
+        if (CollUtil.isEmpty(tablePartitionList)) {
             return Boolean.FALSE;
         }
 
@@ -185,7 +184,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
                     StrUtil.trim(queryVO.getGroupName()))
                 .orderByDesc(GroupConfig::getId));
         List<GroupConfig> records = groupConfigPageDTO.getRecords();
-        if (CollectionUtils.isEmpty(records)) {
+        if (CollUtil.isEmpty(records)) {
             return new PageResult<>(groupConfigPageDTO.getCurrent(), groupConfigPageDTO.getSize(),
                 groupConfigPageDTO.getTotal());
         }
@@ -210,7 +209,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
 
     private boolean doSaveGroupConfig(final String namespaceId, GroupConfigRequestVO groupConfigRequestVO) {
         List<Integer> tablePartitionList = getTablePartitionList();
-        if (CollectionUtils.isEmpty(tablePartitionList)) {
+        if (CollUtil.isEmpty(tablePartitionList)) {
             return Boolean.FALSE;
         }
 

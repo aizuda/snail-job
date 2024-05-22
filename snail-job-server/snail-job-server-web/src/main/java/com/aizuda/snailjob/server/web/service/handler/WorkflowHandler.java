@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.web.service.handler;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.enums.WorkflowNodeTypeEnum;
@@ -21,7 +22,6 @@ import com.google.common.graph.MutableGraph;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -54,7 +54,7 @@ public class WorkflowHandler {
                                       Map<Long, NodeInfo> workflowNodeMap) {
 
         Set<Long> successors = graph.successors(parentId);
-        if (CollectionUtils.isEmpty(successors)) {
+        if (CollUtil.isEmpty(successors)) {
             return null;
         }
 
@@ -109,7 +109,7 @@ public class WorkflowHandler {
     private void findCommonAncestor(Long predecessor, Set<Long> set, MutableGraph<Long> graph) {
 
         Set<Long> predecessors = graph.predecessors(predecessor);
-        if (CollectionUtils.isEmpty(predecessors)) {
+        if (CollUtil.isEmpty(predecessors)) {
             return;
         }
 
@@ -139,7 +139,7 @@ public class WorkflowHandler {
 
         // 获取节点信息
         List<WorkflowRequestVO.NodeInfo> conditionNodes = nodeConfig.getConditionNodes();
-        if (!CollectionUtils.isEmpty(conditionNodes)) {
+        if (CollUtil.isNotEmpty(conditionNodes)) {
             conditionNodes = conditionNodes.stream()
                     .sorted(Comparator.comparing(WorkflowRequestVO.NodeInfo::getPriorityLevel))
                     .collect(Collectors.toList());
@@ -185,7 +185,7 @@ public class WorkflowHandler {
                     graph.putEdge(parentId, workflowNode.getId());
                 }
                 WorkflowRequestVO.NodeConfig childNode = nodeInfo.getChildNode();
-                if (Objects.nonNull(childNode) && !CollectionUtils.isEmpty(childNode.getConditionNodes())) {
+                if (Objects.nonNull(childNode) && CollUtil.isNotEmpty(childNode.getConditionNodes())) {
                     buildGraph(Lists.newArrayList(workflowNode.getId()), deque, groupName, workflowId, childNode,
                             graph, version);
                 } else {
@@ -200,7 +200,7 @@ public class WorkflowHandler {
         }
 
         WorkflowRequestVO.NodeConfig childNode = nodeConfig.getChildNode();
-        if (Objects.nonNull(childNode) && !CollectionUtils.isEmpty(childNode.getConditionNodes())) {
+        if (Objects.nonNull(childNode) && CollUtil.isNotEmpty(childNode.getConditionNodes())) {
             //  应该是conditionNodes里面叶子节点的选择
             List<Long> list = Lists.newArrayList();
             deque.drainTo(list);

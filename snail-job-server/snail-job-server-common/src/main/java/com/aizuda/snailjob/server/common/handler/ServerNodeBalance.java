@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.common.handler;
 
+import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.common.core.enums.NodeTypeEnum;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
@@ -19,7 +20,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -61,13 +61,13 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
             // 为了保证客户端分配算法的一致性,serverNodes 从数据库从数据获取
             Set<String> podIpSet = CacheRegisterTable.getPodIdSet(ServerRegister.GROUP_NAME, ServerRegister.NAMESPACE_ID);
 
-            if (CollectionUtils.isEmpty(podIpSet)) {
+            if (CollUtil.isEmpty(podIpSet)) {
                 SnailJobLog.LOCAL.error("server node is empty");
             }
 
             // 删除本地缓存的消费桶的信息
             DistributeInstance.INSTANCE.clearConsumerBucket();
-            if (CollectionUtils.isEmpty(podIpSet)) {
+            if (CollUtil.isEmpty(podIpSet)) {
                 return;
             }
 
@@ -165,7 +165,7 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
                 Set<String> localHostIds = StreamUtils.toSet(concurrentMap.values(), RegisterNodeInfo::getHostId);
 
                 // 无缓存的节点触发refreshCache
-                if (CollectionUtils.isEmpty(concurrentMap)
+                if (CollUtil.isEmpty(concurrentMap)
                         // 节点数量不一致触发
                         || isNodeSizeNotEqual(concurrentMap.size(), remotePods.size())
                         // 判断远程节点是不是和本地节点一致的，如果不一致则重新分配

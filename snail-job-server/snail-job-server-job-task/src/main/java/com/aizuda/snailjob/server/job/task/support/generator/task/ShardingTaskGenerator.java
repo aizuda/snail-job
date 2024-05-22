@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.job.task.support.generator.task;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.enums.JobTaskStatusEnum;
@@ -17,7 +18,6 @@ import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +50,7 @@ public class ShardingTaskGenerator extends AbstractJobTaskGenerator {
     public List<JobTask> doGenerate(JobTaskGenerateContext context) {
 
         Set<RegisterNodeInfo> serverNodes = CacheRegisterTable.getServerNodeSet(context.getGroupName(), context.getNamespaceId());
-        if (CollectionUtils.isEmpty(serverNodes)) {
+        if (CollUtil.isEmpty(serverNodes)) {
             log.error("无可执行的客户端信息. jobId:[{}]", context.getJobId());
             return Lists.newArrayList();
         }

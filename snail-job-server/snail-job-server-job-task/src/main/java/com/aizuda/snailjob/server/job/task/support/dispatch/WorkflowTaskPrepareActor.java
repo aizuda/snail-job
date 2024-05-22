@@ -1,6 +1,7 @@
 package com.aizuda.snailjob.server.job.task.support.dispatch;
 
 import akka.actor.AbstractActor;
+import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.job.task.dto.WorkflowTaskPrepareDTO;
 import com.aizuda.snailjob.server.job.task.support.WorkflowPrePareHandler;
@@ -12,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 
@@ -50,7 +50,7 @@ public class WorkflowTaskPrepareActor extends AbstractActor {
                 .in(WorkflowTaskBatch::getTaskBatchStatus, NOT_COMPLETE));
 
         // 则直接创建一个任务批次
-        if (CollectionUtils.isEmpty(workflowTaskBatches)) {
+        if (CollUtil.isEmpty(workflowTaskBatches)) {
             for (WorkflowPrePareHandler workflowPrePareHandler : workflowPrePareHandlers) {
                 // 终态任务
                 if (workflowPrePareHandler.matches(null)) {

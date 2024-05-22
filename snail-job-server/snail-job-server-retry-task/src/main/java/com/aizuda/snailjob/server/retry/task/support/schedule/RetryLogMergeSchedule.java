@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.retry.task.support.schedule;
 
-import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.common.core.enums.RetryStatusEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
@@ -49,13 +49,12 @@ import static java.util.stream.Collectors.toList;
 @RequiredArgsConstructor
 public class RetryLogMergeSchedule extends AbstractSchedule implements Lifecycle {
 
+    // last merge log time
+    private static Long lastMergeLogTime = 0L;
     private final SystemProperties systemProperties;
     private final RetryTaskLogMapper retryTaskLogMapper;
     private final RetryTaskLogMessageMapper retryTaskLogMessageMapper;
     private final TransactionTemplate transactionTemplate;
-
-    // last merge log time
-    private static Long lastMergeLogTime = 0L;
 
     @Override
     public String lockName() {
@@ -123,14 +122,14 @@ public class RetryLogMergeSchedule extends AbstractSchedule implements Lifecycle
 
         // Waiting for merge RetryTaskLog
         List<String> ids = StreamUtils.toList(partitionTasks, PartitionTask::getUniqueId);
-        if (CollectionUtil.isEmpty(ids)) {
+        if (CollUtil.isEmpty(ids)) {
             return;
         }
 
         // Waiting for deletion RetryTaskLogMessage
         List<RetryTaskLogMessage> retryLogMessageList = retryTaskLogMessageMapper.selectList(
                 new LambdaQueryWrapper<RetryTaskLogMessage>().in(RetryTaskLogMessage::getUniqueId, ids));
-        if (CollectionUtil.isEmpty(retryLogMessageList)) {
+        if (CollUtil.isEmpty(retryLogMessageList)) {
             return;
         }
 
@@ -177,10 +176,10 @@ public class RetryLogMergeSchedule extends AbstractSchedule implements Lifecycle
                 @Override
                 protected void doInTransactionWithoutResult(final TransactionStatus status) {
                     // 批量删除、更新日志
-                    if (CollectionUtil.isNotEmpty(jobLogMessageDeleteBatchIds)) {
+                    if (CollUtil.isNotEmpty(jobLogMessageDeleteBatchIds)) {
                         retryTaskLogMessageMapper.deleteBatchIds(jobLogMessageDeleteBatchIds);
                     }
-                    if (CollectionUtil.isNotEmpty(jobLogMessageUpdateList)) {
+                    if (CollUtil.isNotEmpty(jobLogMessageUpdateList)) {
                         retryTaskLogMessageMapper.insertBatch(jobLogMessageUpdateList);
                     }
                 }

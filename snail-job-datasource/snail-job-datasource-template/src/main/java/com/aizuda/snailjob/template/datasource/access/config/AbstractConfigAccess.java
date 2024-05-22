@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.template.datasource.access.config;
 
+import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.common.core.enums.JobNotifySceneEnum;
 import com.aizuda.snailjob.common.core.enums.NodeTypeEnum;
 import com.aizuda.snailjob.common.core.enums.RetryNotifySceneEnum;
@@ -21,7 +22,6 @@ import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
 import com.aizuda.snailjob.template.datasource.utils.DbUtils;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -120,7 +120,7 @@ public abstract class AbstractConfigAccess<T> implements ConfigAccess<T> {
         }
 
         List<RetrySceneConfig> retrySceneConfigs = sceneConfigMapper.selectList(sceneConfigLambdaQueryWrapper);
-        if (CollectionUtils.isEmpty(retrySceneConfigs)) {
+        if (CollUtil.isEmpty(retrySceneConfigs)) {
             return new HashSet<>();
         }
 
@@ -133,7 +133,7 @@ public abstract class AbstractConfigAccess<T> implements ConfigAccess<T> {
                 new LambdaQueryWrapper<GroupConfig>()
                         .eq(GroupConfig::getNamespaceId, namespaceId)
                         .orderByAsc(GroupConfig::getId));
-        if (CollectionUtils.isEmpty(allSystemConfigGroupList)) {
+        if (CollUtil.isEmpty(allSystemConfigGroupList)) {
             return new ArrayList<>();
         }
 
@@ -144,7 +144,7 @@ public abstract class AbstractConfigAccess<T> implements ConfigAccess<T> {
     public List<RetrySceneConfig> getAllConfigSceneList() {
         List<RetrySceneConfig> allSystemConfigSceneList = sceneConfigMapper.selectList(
                 new LambdaQueryWrapper<RetrySceneConfig>().orderByAsc(RetrySceneConfig::getId));
-        if (CollectionUtils.isEmpty(allSystemConfigSceneList)) {
+        if (CollUtil.isEmpty(allSystemConfigSceneList)) {
             return new ArrayList<>();
         }
         return allSystemConfigSceneList;

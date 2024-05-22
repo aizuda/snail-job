@@ -1,6 +1,7 @@
 package com.aizuda.snailjob.server.starter.dispatch;
 
 import akka.actor.ActorRef;
+import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.Lifecycle;
@@ -9,7 +10,6 @@ import com.aizuda.snailjob.server.common.dto.DistributeInstance;
 import com.aizuda.snailjob.template.datasource.persistence.po.GroupConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import java.util.Set;
 import java.util.concurrent.Executors;
@@ -59,7 +59,7 @@ public class DispatchService implements Lifecycle {
                 }
 
                 Set<Integer> currentConsumerBuckets = getConsumerBucket();
-                if (!CollectionUtils.isEmpty(currentConsumerBuckets)) {
+                if (CollUtil.isNotEmpty(currentConsumerBuckets)) {
                     ConsumerBucket scanTaskDTO = new ConsumerBucket();
                     scanTaskDTO.setBuckets(currentConsumerBuckets);
                     actorRef.tell(scanTaskDTO, actorRef);

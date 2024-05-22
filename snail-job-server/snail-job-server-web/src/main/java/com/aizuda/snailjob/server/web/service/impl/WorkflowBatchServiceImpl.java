@@ -35,7 +35,6 @@ import com.google.common.graph.MutableGraph;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.function.Function;
@@ -134,7 +133,7 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
                     }
 
                     List<JobTaskBatch> jobTaskBatchList = jobTaskBatchMap.get(nodeInfo.getId());
-                    if (!CollectionUtils.isEmpty(jobTaskBatchList)) {
+                    if (CollUtil.isNotEmpty(jobTaskBatchList)) {
                         jobTaskBatchList = jobTaskBatchList.stream()
                                 .sorted(Comparator.comparingInt(JobTaskBatch::getTaskBatchStatus))
                                 .collect(Collectors.toList());

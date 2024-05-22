@@ -1,6 +1,7 @@
 package com.aizuda.snailjob.server.job.task.support.dispatch;
 
 import akka.actor.AbstractActor;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.context.SpringContext;
@@ -34,7 +35,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -103,7 +103,7 @@ public class WorkflowExecutorActor extends AbstractActor {
         MutableGraph<Long> graph = MutableGraphCache.getOrDefault(workflowTaskBatch.getId(), flowInfo);
 
         Set<Long> successors = graph.successors(taskExecute.getParentId());
-        if (CollectionUtils.isEmpty(successors)) {
+        if (CollUtil.isEmpty(successors)) {
             workflowBatchHandler.complete(taskExecute.getWorkflowTaskBatchId(), workflowTaskBatch);
             return;
         }
@@ -129,7 +129,7 @@ public class WorkflowExecutorActor extends AbstractActor {
         List<JobTaskBatch> parentJobTaskBatchList = jobTaskBatchMap.get(taskExecute.getParentId());
 
         // 如果父节点是无需处理则不再继续执行
-        if (!CollectionUtils.isEmpty(parentJobTaskBatchList) &&
+        if (CollUtil.isNotEmpty(parentJobTaskBatchList) &&
                 parentJobTaskBatchList.stream()
                         .map(JobTaskBatch::getOperationReason)
                         .filter(Objects::nonNull)
@@ -139,7 +139,7 @@ public class WorkflowExecutorActor extends AbstractActor {
         }
 
         // 失败策略处理
-        if (!CollectionUtils.isEmpty(parentJobTaskBatchList)
+        if (CollUtil.isNotEmpty(parentJobTaskBatchList)
                 && parentJobTaskBatchList.stream()
                 .map(JobTaskBatch::getTaskBatchStatus)
                 .anyMatch(i -> i != JobTaskBatchStatusEnum.SUCCESS.getStatus())) {
@@ -169,7 +169,7 @@ public class WorkflowExecutorActor extends AbstractActor {
 
             // 批次已经存在就不在重复生成
             List<JobTaskBatch> jobTaskBatchList = jobTaskBatchMap.get(workflowNode.getId());
-            if (!CollectionUtils.isEmpty(jobTaskBatchList)) {
+            if (CollUtil.isNotEmpty(jobTaskBatchList)) {
                 continue;
             }
 
@@ -202,7 +202,7 @@ public class WorkflowExecutorActor extends AbstractActor {
         for (final Long nodeId : brotherNode) {
             List<JobTaskBatch> jobTaskBatches = jobTaskBatchMap.get(nodeId);
             // 说明此节点未执行, 继续等待执行完成
-            if (CollectionUtils.isEmpty(jobTaskBatches)) {
+            if (CollUtil.isEmpty(jobTaskBatches)) {
                 SnailJobLog.LOCAL.debug("存在未完成的兄弟节点. [{}]", nodeId);
                 return Boolean.FALSE;
             }

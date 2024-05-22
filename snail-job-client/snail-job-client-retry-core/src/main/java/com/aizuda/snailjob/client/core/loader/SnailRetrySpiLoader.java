@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.client.core.loader;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ServiceLoaderUtil;
 import com.aizuda.snailjob.client.core.RetryArgSerializer;
 import com.aizuda.snailjob.client.core.RetrySiteSnapshotContext;
@@ -11,7 +12,6 @@ import com.aizuda.snailjob.client.core.serializer.JacksonSerializer;
 import com.aizuda.snailjob.common.core.expression.ExpressionEngine;
 import com.aizuda.snailjob.common.core.expression.ExpressionFactory;
 import com.aizuda.snailjob.common.core.expression.strategy.SpELExpressionEngine;
-import org.springframework.util.CollectionUtils;
 
 import java.util.Collections;
 import java.util.List;
@@ -47,7 +47,7 @@ public class SnailRetrySpiLoader {
      */
     public static List<SnailJobListener> loadSnailJobListener() {
         List<SnailJobListener> snailJobListeners = ServiceLoaderUtil.loadList(SnailJobListener.class);
-        if (CollectionUtils.isEmpty(snailJobListeners)) {
+        if (CollUtil.isEmpty(snailJobListeners)) {
             return Collections.singletonList(new SimpleSnailRetryListener());
         }
 

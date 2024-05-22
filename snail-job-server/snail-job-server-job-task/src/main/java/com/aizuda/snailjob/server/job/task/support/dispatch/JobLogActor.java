@@ -1,6 +1,7 @@
 package com.aizuda.snailjob.server.job.task.support.dispatch;
 
 import akka.actor.AbstractActor;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
@@ -16,7 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -39,7 +39,7 @@ public class JobLogActor extends AbstractActor {
         return receiveBuilder()
                 .match(List.class, (list -> {
                     try {
-                        if (CollectionUtils.isEmpty(list)) {
+                        if (CollUtil.isEmpty(list)) {
                             return;
                         }
 

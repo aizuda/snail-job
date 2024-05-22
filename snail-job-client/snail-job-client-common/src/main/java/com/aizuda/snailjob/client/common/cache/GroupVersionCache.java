@@ -1,8 +1,8 @@
 package com.aizuda.snailjob.client.common.cache;
 
+import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.server.model.dto.ConfigDTO;
-import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.Objects;
@@ -34,7 +34,7 @@ public final class GroupVersionCache {
             return SystemConstants.DEFAULT_DDL;
         }
         List<ConfigDTO.Scene> sceneList = CONFIG.getSceneList();
-        if (CollectionUtils.isEmpty(sceneList)) {
+        if (CollUtil.isEmpty(sceneList)) {
             return SystemConstants.DEFAULT_DDL;
         }
 
@@ -49,7 +49,7 @@ public final class GroupVersionCache {
 
     public static ConfigDTO.Notify getRetryNotifyAttribute(Integer notifyScene) {
         List<ConfigDTO.Notify> notifyList = CONFIG.getNotifyList();
-        if (!CollectionUtils.isEmpty(notifyList)) {
+        if (CollUtil.isNotEmpty(notifyList)) {
             for (ConfigDTO.Notify notify : notifyList) {
                 if (Objects.nonNull(notify.getRetryNotifyScene()) && notify.getRetryNotifyScene().equals(notifyScene)) {
                     return notify;
@@ -63,7 +63,7 @@ public final class GroupVersionCache {
 
     public static ConfigDTO.Notify getJobNotifyAttribute(Integer notifyScene) {
         List<ConfigDTO.Notify> notifyList = CONFIG.getNotifyList();
-        if (!CollectionUtils.isEmpty(notifyList)) {
+        if (CollUtil.isNotEmpty(notifyList)) {
             for (ConfigDTO.Notify notify : notifyList) {
                 if (Objects.nonNull(notify.getJobNotifyScene()) && notify.getJobNotifyScene().equals(notifyScene)) {
                     return notify;

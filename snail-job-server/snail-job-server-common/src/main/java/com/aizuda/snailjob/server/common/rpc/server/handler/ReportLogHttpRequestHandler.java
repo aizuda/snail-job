@@ -1,6 +1,7 @@
 package com.aizuda.snailjob.server.common.rpc.server.handler;
 
 import akka.actor.ActorRef;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.net.url.UrlQuery;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
@@ -23,7 +24,6 @@ import com.google.common.collect.Lists;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.Objects;
@@ -74,12 +74,12 @@ public class ReportLogHttpRequestHandler extends PostHttpRequestHandler {
         }
 
         // 批量新增日志数据
-        if (!CollectionUtils.isEmpty(jobTasks)) {
+        if (CollUtil.isNotEmpty(jobTasks)) {
             ActorRef actorRef = ActorGenerator.jobLogActor();
             actorRef.tell(jobTasks, actorRef);
         }
 
-        if (!CollectionUtils.isEmpty(retryTasks)) {
+        if (CollUtil.isNotEmpty(retryTasks)) {
             ActorRef actorRef = ActorGenerator.logActor();
             actorRef.tell(retryTasks, actorRef);
         }

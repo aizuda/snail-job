@@ -1,6 +1,7 @@
 package com.aizuda.snailjob.server.retry.task.support.dispatch.actor.scan;
 
 import akka.actor.AbstractActor;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Pair;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.enums.RetryStatusEnum;
@@ -26,7 +27,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import io.netty.util.TimerTask;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -94,7 +94,7 @@ public abstract class AbstractScanGroup extends AbstractActor {
         long total = PartitionTaskUtils.process(
                 startId -> listAvailableTasks(groupName, namespaceId, startId, taskActuatorScene().getTaskType().getType()),
                 partitionTasks1 -> processRetryPartitionTasks(partitionTasks1, scanTask), partitionTasks -> {
-                    if (CollectionUtils.isEmpty(partitionTasks)) {
+                    if (CollUtil.isEmpty(partitionTasks)) {
                         putLastId(scanTask.getGroupName(), 0L);
                         return Boolean.TRUE;
                     }

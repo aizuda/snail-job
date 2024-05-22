@@ -1,6 +1,7 @@
 package com.aizuda.snailjob.server.job.task.support.dispatch;
 
 import akka.actor.AbstractActor;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import com.aizuda.snailjob.common.core.context.SpringContext;
 import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
@@ -52,7 +53,6 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.springframework.util.CollectionUtils;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -112,7 +112,7 @@ public class JobExecutorActor extends AbstractActor {
             if (Objects.isNull(job)) {
                 taskStatus = JobTaskBatchStatusEnum.CANCEL.getStatus();
                 operationReason = JobOperationReasonEnum.JOB_CLOSED.getReason();
-            } else if (CollectionUtils.isEmpty(CacheRegisterTable.getServerNodeSet(job.getGroupName(),
+            } else if (CollUtil.isEmpty(CacheRegisterTable.getServerNodeSet(job.getGroupName(),
                     job.getNamespaceId()))) {
                 taskStatus = JobTaskBatchStatusEnum.CANCEL.getStatus();
                 operationReason = JobOperationReasonEnum.NOT_CLIENT.getReason();
@@ -138,7 +138,7 @@ public class JobExecutorActor extends AbstractActor {
             JobTaskGenerateContext instanceGenerateContext = JobTaskConverter.INSTANCE.toJobTaskInstanceGenerateContext(job);
             instanceGenerateContext.setTaskBatchId(taskExecute.getTaskBatchId());
             List<JobTask> taskList = taskInstance.generate(instanceGenerateContext);
-            if (CollectionUtils.isEmpty(taskList)) {
+            if (CollUtil.isEmpty(taskList)) {
                 return;
             }
 

@@ -1,10 +1,10 @@
 package com.aizuda.snailjob.client.common.window;
 
+import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.window.Listener;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -141,7 +141,7 @@ public class SlidingWindow<T> {
 
         for (int i = 0; i < saveData.size() - 1; i++) {
             Map.Entry<LocalDateTime, ConcurrentLinkedQueue<T>> firstEntry = saveData.firstEntry();
-            if (CollectionUtils.isEmpty(firstEntry.getValue())) {
+            if (CollUtil.isEmpty(firstEntry.getValue())) {
                 saveData.remove(firstEntry.getKey());
             }
         }
@@ -180,7 +180,7 @@ public class SlidingWindow<T> {
         try {
 
             ConcurrentLinkedQueue<T> list = saveData.get(windowPeriod);
-            if (CollectionUtils.isEmpty(list)) {
+            if (CollUtil.isEmpty(list)) {
                 return;
             }
 
@@ -188,7 +188,7 @@ public class SlidingWindow<T> {
             ConcurrentLinkedQueue<T> deepCopy = new ConcurrentLinkedQueue<>(list);
             clear(windowPeriod, deepCopy);
 
-            if (CollectionUtils.isEmpty(deepCopy)) {
+            if (CollUtil.isEmpty(deepCopy)) {
                 return;
             }
 
@@ -403,7 +403,7 @@ public class SlidingWindow<T> {
          */
         public Builder<T> withListener(Listener<T> listener) {
 
-            if (CollectionUtils.isEmpty(listeners)) {
+            if (CollUtil.isEmpty(listeners)) {
                 listeners = new ArrayList<>();
             }
 
@@ -447,7 +447,7 @@ public class SlidingWindow<T> {
                         .newSingleThreadScheduledExecutor(r -> new Thread(r, "sliding-window-thread"));
             }
 
-            if (CollectionUtils.isEmpty(listeners)) {
+            if (CollUtil.isEmpty(listeners)) {
                 listeners = Collections.EMPTY_LIST;
             }
 
