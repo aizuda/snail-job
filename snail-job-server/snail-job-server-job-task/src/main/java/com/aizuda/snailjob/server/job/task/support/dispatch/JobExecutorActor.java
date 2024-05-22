@@ -159,7 +159,8 @@ public class JobExecutorActor extends AbstractActor {
 
                         // 运行中的任务，需要进行超时检查
                         JobTimerWheel.registerWithJob(() -> new JobTimeoutCheckTask(taskExecute.getTaskBatchId(), job.getId()),
-                            Duration.ofSeconds(job.getExecutorTimeout()));
+                            // 加500ms是为了让尽量保证客户端自己先超时中断，防止客户端上报成功但是服务端已触发超时中断
+                            Duration.ofMillis(DateUtils.toEpochMilli(job.getExecutorTimeout()) + 500));
 
 //                        JobTimerWheel.register(SyetemTaskTypeEnum.JOB.getType(), taskExecute.getTaskBatchId(),
 //                                new JobTimeoutCheckTask(taskExecute.getTaskBatchId(), job.getId()),
@@ -226,7 +227,6 @@ public class JobExecutorActor extends AbstractActor {
         jobTimerTaskDTO.setJobId(taskExecuteDTO.getJobId());
         jobTimerTaskDTO.setTaskBatchId(taskExecuteDTO.getTaskBatchId());
         jobTimerTaskDTO.setTaskExecutorScene(JobTaskExecutorSceneEnum.AUTO_JOB.getType());
-//        ResidentJobTimerTask timerTask = ;
         WaitStrategy waitStrategy = WaitStrategies.WaitStrategyEnum.getWaitStrategy(job.getTriggerType());
 
         Long preTriggerAt = ResidentTaskCache.get(job.getId());
