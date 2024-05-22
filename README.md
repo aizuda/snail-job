@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://snailjob.opensnail.com">
-   <img alt="snail-job-Logo" src="doc/images/favicon.svg" width="350px">
+   <img alt="snail-job-Logo" src="doc/images/favicon.svg" width="200px">
   </a>
 </p>
 
