@@ -36,9 +36,9 @@
                            #{item.stopReason}       AS stop_reason,
                            #{item.cancelNum}        AS cancel_num,
                            #{item.cancelReason}     AS cancel_reason,
-                           #{system_task_type}      AS system_task_type,
-                           #{item.businessId}       AS business_id,
-                           #{item.triggerAt}        AS trigger_at
+                           #{item.systemTaskType}   AS system_task_type,
+                           #{item.triggerAt}        AS trigger_at,
+                           #{item.businessId}       AS business_id
                    </foreach>
                ) tt
            SET rt.success_num = tt.success_num,
