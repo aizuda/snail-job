@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.retry.task.support.schedule;
 
+import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.Lifecycle;
@@ -17,7 +18,6 @@ import com.google.common.collect.Sets;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -70,7 +70,7 @@ public class RetrySummarySchedule extends AbstractSchedule implements Lifecycle 
                         .between(RetryTaskLog::getCreateDt, todayFrom, todayTo)
                         .groupBy(RetryTaskLog::getNamespaceId, RetryTaskLog::getGroupName, RetryTaskLog::getSceneName);
                 List<DashboardRetryResponseDO> dashboardRetryResponseDOList = retryTaskLogMapper.selectRetryRetryTaskLogSummaryList(wrapper);
-                if (CollectionUtils.isEmpty(dashboardRetryResponseDOList)) {
+                if (CollUtil.isEmpty(dashboardRetryResponseDOList)) {
                     continue;
                 }
 
@@ -108,12 +108,12 @@ public class RetrySummarySchedule extends AbstractSchedule implements Lifecycle 
                 }
 
                 int insertTotalRetrySummary = 0;
-                if (!CollectionUtils.isEmpty(waitInserts)) {
+                if (CollUtil.isNotEmpty(waitInserts)) {
                     insertTotalRetrySummary = retrySummaryMapper.insertBatch(waitInserts);
                 }
 
                 int updateTotalRetrySummary = 0;
-                if (!CollectionUtils.isEmpty(waitUpdates)) {
+                if (CollUtil.isNotEmpty(waitUpdates)) {
                     updateTotalRetrySummary = retrySummaryMapper.updateBatch(waitUpdates);
                 }
 

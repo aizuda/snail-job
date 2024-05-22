@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.web.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
@@ -33,7 +34,6 @@ import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 
@@ -127,7 +127,7 @@ public class SystemUserServiceImpl implements SystemUserService {
 
         // 只添加为普通用户添加权限
         List<UserPermissionRequestVO> groupNameList = requestVO.getPermissions();
-        if (CollectionUtils.isEmpty(groupNameList) || RoleEnum.ADMIN.getRoleId().equals(requestVO.getRole())) {
+        if (CollUtil.isEmpty(groupNameList) || RoleEnum.ADMIN.getRoleId().equals(requestVO.getRole())) {
             return;
         }
 
@@ -170,7 +170,7 @@ public class SystemUserServiceImpl implements SystemUserService {
 
         // 只添加为普通用户添加权限
         List<UserPermissionRequestVO> permissions = requestVO.getPermissions();
-        if (CollectionUtils.isEmpty(permissions) || RoleEnum.ADMIN.getRoleId().equals(requestVO.getRole())) {
+        if (CollUtil.isEmpty(permissions) || RoleEnum.ADMIN.getRoleId().equals(requestVO.getRole())) {
             return;
         }
 
@@ -195,7 +195,7 @@ public class SystemUserServiceImpl implements SystemUserService {
                         .likeRight(StrUtil.isNotBlank(queryVO.getUsername()), SystemUser::getUsername, queryVO.getUsername())
                         .orderByDesc(SystemUser::getId));
 
-        if (CollectionUtils.isEmpty(userPageDTO.getRecords())) {
+        if (CollUtil.isEmpty(userPageDTO.getRecords())) {
             return new PageResult<>(userPageDTO, Collections.emptyList());
         }
 
@@ -209,7 +209,7 @@ public class SystemUserServiceImpl implements SystemUserService {
         Set<String> uniqueIds = StreamUtils.toSet(userPermissions, SystemUserPermission::getNamespaceId);
 
         List<Namespace> namespaces = Lists.newArrayList();
-        if (!CollectionUtils.isEmpty(uniqueIds)) {
+        if (CollUtil.isNotEmpty(uniqueIds)) {
             namespaces = namespaceMapper.selectList(Wrappers.<Namespace>lambdaQuery()
                     .select(Namespace::getId, Namespace::getUniqueId, Namespace::getName)
                     .in(Namespace::getUniqueId, uniqueIds));
@@ -267,7 +267,7 @@ public class SystemUserServiceImpl implements SystemUserService {
                         .select(SystemUserPermission::getNamespaceId, SystemUserPermission::getGroupName)
                         .eq(SystemUserPermission::getSystemUserId, id));
 
-        if (CollectionUtils.isEmpty(systemUserPermissions)) {
+        if (CollUtil.isEmpty(systemUserPermissions)) {
             return Lists.newArrayList();
         }
 

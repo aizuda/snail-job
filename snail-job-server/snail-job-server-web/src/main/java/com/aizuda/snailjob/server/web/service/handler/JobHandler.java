@@ -1,6 +1,7 @@
 package com.aizuda.snailjob.server.web.service.handler;
 
 import akka.actor.ActorRef;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import com.aizuda.snailjob.client.model.ExecuteResult;
 import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
@@ -27,7 +28,6 @@ import com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 
@@ -70,7 +70,7 @@ public class JobHandler {
                         .eq(JobTask::getTaskBatchId, taskBatchId));
 
         //  若任务项为空则生成
-        if (CollectionUtils.isEmpty(jobTasks)) {
+        if (CollUtil.isEmpty(jobTasks)) {
             TaskExecuteDTO taskExecuteDTO = new TaskExecuteDTO();
             taskExecuteDTO.setTaskBatchId(taskBatchId);
             taskExecuteDTO.setJobId(jobTaskBatch.getJobId());

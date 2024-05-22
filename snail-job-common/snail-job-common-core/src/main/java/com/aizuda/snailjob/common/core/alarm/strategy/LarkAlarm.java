@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.common.core.alarm.strategy;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.ContentType;
 import cn.hutool.http.HttpRequest;
@@ -16,7 +17,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import java.text.MessageFormat;
 import java.util.Collections;
@@ -110,7 +110,7 @@ public class LarkAlarm extends AbstractAlarm<AlarmContext> {
     }
 
     public String getAtText(String text, List<String> ats) {
-        if (CollectionUtils.isEmpty(ats)) {
+        if (CollUtil.isEmpty(ats)) {
             return "";
         }
 

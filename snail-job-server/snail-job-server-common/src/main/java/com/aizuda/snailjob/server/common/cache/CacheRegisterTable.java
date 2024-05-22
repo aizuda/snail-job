@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.common.cache;
 
+import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.common.core.context.SpringContext;
 import com.aizuda.snailjob.common.core.enums.NodeTypeEnum;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
@@ -17,7 +18,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Sets;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -48,7 +48,7 @@ public class CacheRegisterTable implements Lifecycle {
      */
     public static Set<RegisterNodeInfo> getAllPods() {
         ConcurrentMap<Pair<String, String>, ConcurrentMap<String, RegisterNodeInfo>> concurrentMap = CACHE.asMap();
-        if (CollectionUtils.isEmpty(concurrentMap)) {
+        if (CollUtil.isEmpty(concurrentMap)) {
             return Sets.newHashSet();
         }
 
@@ -87,14 +87,14 @@ public class CacheRegisterTable implements Lifecycle {
                             .eq(ServerNode::getGroupName, groupName)
                             .eq(ServerNode::getHostId, hostId)
                             .orderByDesc(ServerNode::getExpireAt));
-            if (CollectionUtils.isEmpty(serverNodes)) {
+            if (CollUtil.isEmpty(serverNodes)) {
                 return null;
             }
 
             CacheRegisterTable.addOrUpdate(serverNodes.get(0));
 
             concurrentMap = CACHE.getIfPresent(getKey(groupName, namespaceId));
-            if (CollectionUtils.isEmpty(concurrentMap)) {
+            if (CollUtil.isEmpty(concurrentMap)) {
                 return null;
             }
         }
@@ -109,7 +109,7 @@ public class CacheRegisterTable implements Lifecycle {
      */
     public static Set<RegisterNodeInfo> getServerNodeSet(String groupName, String namespaceId) {
         ConcurrentMap<String, RegisterNodeInfo> concurrentMap = CACHE.getIfPresent(getKey(groupName, namespaceId));
-        if (CollectionUtils.isEmpty(concurrentMap)) {
+        if (CollUtil.isEmpty(concurrentMap)) {
 
             // 此处为了降级，若缓存中没有则取DB中查询
             ServerNodeMapper serverNodeMapper = SpringContext.getBeanByType(ServerNodeMapper.class);
@@ -124,7 +124,7 @@ public class CacheRegisterTable implements Lifecycle {
             }
 
             concurrentMap = CACHE.getIfPresent(getKey(groupName, namespaceId));
-            if (CollectionUtils.isEmpty(serverNodes) || CollectionUtils.isEmpty(concurrentMap)) {
+            if (CollUtil.isEmpty(serverNodes) || CollUtil.isEmpty(concurrentMap)) {
                 return Sets.newHashSet();
             }
         }

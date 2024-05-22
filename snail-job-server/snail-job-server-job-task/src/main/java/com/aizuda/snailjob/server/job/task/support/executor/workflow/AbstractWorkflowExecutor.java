@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.job.task.support.executor.workflow;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.enums.JobArgsTypeEnum;
@@ -23,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.springframework.util.CollectionUtils;
 
 import java.text.MessageFormat;
 import java.time.Duration;
@@ -67,7 +67,7 @@ public abstract class AbstractWorkflowExecutor implements WorkflowExecutor, Init
                                 .eq(JobTaskBatch::getWorkflowNodeId, context.getWorkflowNodeId())
                         );
 
-                        if (!CollectionUtils.isEmpty(jobTaskBatches)) {
+                        if (CollUtil.isNotEmpty(jobTaskBatches)) {
                             total = jobTaskBatches.size();
                             JobTaskBatch jobTaskBatch = jobTaskBatches.get(0);
                             if (WORKFLOW_SUCCESSOR_SKIP_EXECUTION.contains(jobTaskBatch.getOperationReason())) {

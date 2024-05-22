@@ -1,12 +1,12 @@
 package com.aizuda.snailjob.server.job.task.support.cache;
 
+import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.server.common.util.GraphUtils;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.graph.MutableGraph;
-import org.springframework.util.CollectionUtils;
 
 import java.util.HashSet;
 import java.util.List;
@@ -63,7 +63,7 @@ public class MutableGraphCache {
         MutableGraph<Long> graph = getOrDefault(workflowBatchId, jsonGraph);
         List<Long> leaves = Lists.newArrayList();
         for (Long node : graph.nodes()) {
-            if (CollectionUtils.isEmpty(graph.successors(node))) {
+            if (CollUtil.isEmpty(graph.successors(node))) {
                 leaves.add(node);
             }
         }
@@ -79,7 +79,7 @@ public class MutableGraphCache {
 
     public static Set<Long> getBrotherNode(MutableGraph<Long> graph, Long nodeId) {
         Set<Long> predecessors = graph.predecessors(nodeId);
-        if (CollectionUtils.isEmpty(predecessors)) {
+        if (CollUtil.isEmpty(predecessors)) {
             return Sets.newHashSet();
         }
         return graph.successors(predecessors.stream().findFirst().get());

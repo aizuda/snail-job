@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.common.generator.id;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Pair;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
@@ -13,7 +14,6 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -91,7 +91,7 @@ public class SegmentIdGenerator implements IdGenerator, Lifecycle {
             List<SequenceAlloc> sequenceAllocs = sequenceAllocMapper
                     .selectList(new LambdaQueryWrapper<SequenceAlloc>()
                             .select(SequenceAlloc::getGroupName, SequenceAlloc::getNamespaceId));
-            if (CollectionUtils.isEmpty(sequenceAllocs)) {
+            if (CollUtil.isEmpty(sequenceAllocs)) {
                 return;
             }
 

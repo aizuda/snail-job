@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.client.common.rpc.supports.handler;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.net.url.UrlBuilder;
 import cn.hutool.core.util.ServiceLoaderUtil;
 import com.aizuda.snailjob.client.common.HandlerInterceptor;
@@ -22,7 +23,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Method;
@@ -108,7 +108,7 @@ public class SnailDispatcherRequestHandler {
 
     private static List<HandlerInterceptor> handlerInterceptors() {
         List<HandlerInterceptor> handlerInterceptors = ServiceLoaderUtil.loadList(HandlerInterceptor.class);
-        if (CollectionUtils.isEmpty(handlerInterceptors)) {
+        if (CollUtil.isEmpty(handlerInterceptors)) {
             return Collections.emptyList();
         }
 

@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.web.service.convert;
 
+import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.server.web.model.request.NotifyConfigRequestVO;
 import com.aizuda.snailjob.template.datasource.persistence.po.NotifyConfig;
@@ -7,7 +8,6 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.mapstruct.factory.Mappers;
-import org.springframework.util.CollectionUtils;
 
 import java.util.Set;
 
@@ -21,7 +21,7 @@ public interface NotifyConfigConverter {
     NotifyConfigConverter INSTANCE = Mappers.getMapper(NotifyConfigConverter.class);
 
     static String toNotifyRecipientIdsStr(Set<Long> notifyRecipientIds) {
-        if (CollectionUtils.isEmpty(notifyRecipientIds)) {
+        if (CollUtil.isEmpty(notifyRecipientIds)) {
             return null;
         }
 

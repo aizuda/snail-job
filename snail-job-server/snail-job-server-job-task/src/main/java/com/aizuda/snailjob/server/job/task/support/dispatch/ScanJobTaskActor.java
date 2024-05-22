@@ -2,6 +2,7 @@ package com.aizuda.snailjob.server.job.task.support.dispatch;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
+import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
@@ -31,7 +32,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -72,7 +72,7 @@ public class ScanJobTaskActor extends AbstractActor {
     }
 
     private void doScan(final ScanTask scanTask) {
-        if (CollectionUtils.isEmpty(scanTask.getBuckets())) {
+        if (CollUtil.isEmpty(scanTask.getBuckets())) {
             return;
         }
 
@@ -159,7 +159,7 @@ public class ScanJobTaskActor extends AbstractActor {
     }
 
     private List<JobPartitionTaskDTO> listAvailableJobs(Long startId, ScanTask scanTask) {
-        if (CollectionUtils.isEmpty(scanTask.getBuckets())) {
+        if (CollUtil.isEmpty(scanTask.getBuckets())) {
             return Collections.emptyList();
         }
 
@@ -179,7 +179,7 @@ public class ScanJobTaskActor extends AbstractActor {
         ).getRecords();
 
         // 过滤已关闭的组
-        if (!CollectionUtils.isEmpty(jobs)) {
+        if (CollUtil.isNotEmpty(jobs)) {
             List<String> groupConfigs = StreamUtils.toList(groupConfigMapper.selectList(new LambdaQueryWrapper<GroupConfig>()
                             .select(GroupConfig::getGroupName)
                             .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus())

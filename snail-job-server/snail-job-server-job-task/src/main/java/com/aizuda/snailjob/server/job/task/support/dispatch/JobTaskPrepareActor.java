@@ -1,6 +1,7 @@
 package com.aizuda.snailjob.server.job.task.support.dispatch;
 
 import akka.actor.AbstractActor;
+import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.common.core.context.SpringContext;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.common.enums.JobTaskExecutorSceneEnum;
@@ -16,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 
@@ -71,7 +71,7 @@ public class JobTaskPrepareActor extends AbstractActor {
                 .selectList(queryWrapper);
 
         // 说明所以任务已经完成
-        if (CollectionUtils.isEmpty(notCompleteJobTaskBatchList)) {
+        if (CollUtil.isEmpty(notCompleteJobTaskBatchList)) {
             TerminalJobPrepareHandler terminalJobPrepareHandler = SpringContext.getBeanByType(TerminalJobPrepareHandler.class);
             terminalJobPrepareHandler.handler(prepare);
         } else {

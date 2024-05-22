@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.job.task.support.handler;
 
+import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.common.core.context.SpringContext;
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskStatusEnum;
@@ -17,7 +18,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -49,7 +49,7 @@ public class JobTaskBatchHandler {
         JobTaskBatch jobTaskBatch = new JobTaskBatch();
         jobTaskBatch.setId(completeJobBatchDTO.getTaskBatchId());
 
-        if (CollectionUtils.isEmpty(jobTasks)) {
+        if (CollUtil.isEmpty(jobTasks)) {
             return false;
         }
 

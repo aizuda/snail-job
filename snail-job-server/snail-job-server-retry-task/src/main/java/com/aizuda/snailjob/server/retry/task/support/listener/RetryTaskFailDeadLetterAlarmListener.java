@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.retry.task.support.listener;
 
+import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.common.core.alarm.AlarmContext;
 import com.aizuda.snailjob.common.core.enums.RetryNotifySceneEnum;
 import com.aizuda.snailjob.common.core.util.EnvironmentUtils;
@@ -18,7 +19,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
-import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -39,9 +39,9 @@ public class RetryTaskFailDeadLetterAlarmListener extends
     /**
      * 死信告警数据
      */
-    private LinkedBlockingQueue<List<RetryDeadLetter>> queue = new LinkedBlockingQueue<>(1000);
+    private final LinkedBlockingQueue<List<RetryDeadLetter>> queue = new LinkedBlockingQueue<>(1000);
 
-    private static String retryTaskDeadTextMessagesFormatter =
+    private static final String retryTaskDeadTextMessagesFormatter =
             "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 重试任务失败进入死信队列</font>  \n" +
                     "> 空间ID:{}  \n" +
                     "> 组名称:{}  \n" +
@@ -59,7 +59,7 @@ public class RetryTaskFailDeadLetterAlarmListener extends
     protected List<RetryAlarmInfo> poll() throws InterruptedException {
 
         List<RetryDeadLetter> allRetryDeadLetterList = queue.poll(100, TimeUnit.MILLISECONDS);
-        if (CollectionUtils.isEmpty(allRetryDeadLetterList)) {
+        if (CollUtil.isEmpty(allRetryDeadLetterList)) {
             return Lists.newArrayList();
         }
 

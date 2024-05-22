@@ -160,7 +160,6 @@ public class DashBoardServiceImpl implements DashBoardService {
         // 重试任务列表
         Page<Object> pager = new Page<>(baseQueryVO.getPage(), baseQueryVO.getSize());
         LambdaQueryWrapper<RetrySceneConfig> wrapper = new LambdaQueryWrapper<RetrySceneConfig>()
-
                 .eq(RetrySceneConfig::getNamespaceId, namespaceId)
                 .in(CollUtil.isNotEmpty(groupNames), RetrySceneConfig::getGroupName, groupNames);
 
@@ -316,7 +315,7 @@ public class DashBoardServiceImpl implements DashBoardService {
                 String url = NetUtil.getUrl(serverNodeResponseVO.getHostIp(), serverNodeExtAttrs.getWebPort(), serverProperties.getServlet().getContextPath());
                 Result<List<Integer>> result = restTemplate.getForObject(url.concat(DASHBOARD_CONSUMER_BUCKET), Result.class);
                 List<Integer> data = result.getData();
-                if (!CollUtil.isEmpty(data)) {
+                if (CollUtil.isNotEmpty(data)) {
                     serverNodeResponseVO.setConsumerBuckets(data.stream()
                             .sorted(Integer::compareTo)
                             .collect(Collectors.toCollection(LinkedHashSet::new)));

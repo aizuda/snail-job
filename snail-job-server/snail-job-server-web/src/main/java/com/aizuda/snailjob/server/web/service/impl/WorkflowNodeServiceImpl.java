@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.web.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.snailjob.server.common.enums.JobTaskExecutorSceneEnum;
@@ -15,7 +16,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 
@@ -44,7 +44,7 @@ public class WorkflowNodeServiceImpl implements WorkflowNodeService {
                         .in(JobTaskBatch::getTaskBatchStatus, JobTaskBatchStatusEnum.NOT_COMPLETE)
         );
 
-        if (CollectionUtils.isEmpty(jobTaskBatches)) {
+        if (CollUtil.isEmpty(jobTaskBatches)) {
             return Boolean.TRUE;
         }
 

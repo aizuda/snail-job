@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.common.register;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.enums.NodeTypeEnum;
@@ -17,7 +18,6 @@ import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -90,9 +90,9 @@ public class ServerRegister extends AbstractRegister {
             // 同步当前POD消费的组的节点信息
             // netty的client只会注册到一个服务端，若组分配的和client连接的不是一个POD则会导致当前POD没有其他客户端的注册信息
             ConcurrentMap<String /*groupName*/, Set<String>/*namespaceId*/> allConsumerGroupName = CacheConsumerGroup.getAllConsumerGroupName();
-            if (!CollectionUtils.isEmpty(allConsumerGroupName)) {
+            if (CollUtil.isNotEmpty(allConsumerGroupName)) {
                 Set<String> namespaceIdSets = StreamUtils.toSetByFlatMap(allConsumerGroupName.values(), Set::stream);
-                if (CollectionUtils.isEmpty(namespaceIdSets)) {
+                if (CollUtil.isEmpty(namespaceIdSets)) {
                     return;
                 }
 
