@@ -32,6 +32,7 @@ import com.aizuda.snailjob.server.job.task.support.generator.task.JobTaskGenerat
 import com.aizuda.snailjob.server.job.task.support.generator.task.JobTaskGeneratorFactory;
 import com.aizuda.snailjob.server.job.task.support.handler.WorkflowBatchHandler;
 import com.aizuda.snailjob.server.job.task.support.timer.JobTimeoutCheckTask;
+import com.aizuda.snailjob.server.job.task.support.timer.JobTimerTask;
 import com.aizuda.snailjob.server.job.task.support.timer.JobTimerWheel;
 import com.aizuda.snailjob.server.job.task.support.timer.ResidentJobTimerTask;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.GroupConfigMapper;
@@ -54,6 +55,7 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.text.MessageFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -152,7 +154,7 @@ public class JobExecutorActor extends AbstractActor {
                 @Override
                 public void afterCompletion(int status) {
                     // 清除时间轮的缓存
-                    JobTimerWheel.clearCache(SyetemTaskTypeEnum.JOB.getType(), taskExecute.getTaskBatchId());
+                    JobTimerWheel.clearCache(MessageFormat.format(JobTimerTask.IDEMPOTENT_KEY_PREFIX, taskExecute.getTaskBatchId()));
 
                     if (JobTaskBatchStatusEnum.RUNNING.getStatus() == finalTaskStatus) {
 
@@ -160,10 +162,6 @@ public class JobExecutorActor extends AbstractActor {
                         JobTimerWheel.registerWithJob(() -> new JobTimeoutCheckTask(taskExecute.getTaskBatchId(), job.getId()),
                                 // 加500ms是为了让尽量保证客户端自己先超时中断，防止客户端上报成功但是服务端已触发超时中断
                                 Duration.ofMillis(DateUtils.toEpochMilli(job.getExecutorTimeout()) + 500));
-
-//                        JobTimerWheel.register(SyetemTaskTypeEnum.JOB.getType(), taskExecute.getTaskBatchId(),
-//                                new JobTimeoutCheckTask(taskExecute.getTaskBatchId(), job.getId()),
-//                                job.getExecutorTimeout(), TimeUnit.SECONDS);
                     }
 
                     //方法内容
@@ -241,9 +239,11 @@ public class JobExecutorActor extends AbstractActor {
         // 获取时间差的毫秒数
         long milliseconds = nextTriggerAt - preTriggerAt;
 
-        log.debug("常驻任务监控. 任务时间差:[{}] 取余:[{}]", milliseconds, DateUtils.toNowMilli() % 1000);
+        Duration duration = Duration.ofMillis(milliseconds - DateUtils.toNowMilli() % 1000);
+
+        log.info("常驻任务监控. [{}] 任务时间差:[{}] 取余:[{}]", duration, milliseconds, DateUtils.toNowMilli() % 1000);
         job.setNextTriggerAt(nextTriggerAt);
-        JobTimerWheel.registerWithJob(() -> new ResidentJobTimerTask(jobTimerTaskDTO, job), Duration.ofMillis(milliseconds - DateUtils.toNowMilli() % 1000));
+        JobTimerWheel.registerWithJob(() -> new ResidentJobTimerTask(jobTimerTaskDTO, job), duration);
 //        JobTimerWheel.register(SyetemTaskTypeEnum.JOB.getType(), jobTimerTaskDTO.getTaskBatchId(), timerTask, milliseconds - DateUtils.toNowMilli() % 1000, TimeUnit.MILLISECONDS);
         ResidentTaskCache.refresh(job.getId(), nextTriggerAt);
     }

@@ -4,6 +4,7 @@ import com.aizuda.snailjob.common.core.context.SpringContext;
 import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.snailjob.common.log.SnailJobLog;
+import com.aizuda.snailjob.server.common.TimerTask;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
 import com.aizuda.snailjob.server.job.task.support.JobTaskStopHandler;
 import com.aizuda.snailjob.server.job.task.support.alarm.event.JobTaskFailAlarmEvent;
@@ -16,6 +17,7 @@ import com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch;
 import io.netty.util.Timeout;
 import lombok.AllArgsConstructor;
 
+import java.text.MessageFormat;
 import java.util.Objects;
 
 /**
@@ -26,7 +28,9 @@ import java.util.Objects;
  * @since sj_1.0.0
  */
 @AllArgsConstructor
-public class JobTimeoutCheckTask implements TimerTask<Long> {
+public class JobTimeoutCheckTask implements TimerTask<String> {
+    private static final String IDEMPOTENT_KEY_PREFIX = "job_timeout_check_{0}";
+
     private final Long taskBatchId;
     private final Long jobId;
 
@@ -65,7 +69,7 @@ public class JobTimeoutCheckTask implements TimerTask<Long> {
     }
 
     @Override
-    public Long getUniqueId() {
-        return taskBatchId;
+    public String idempotentKey() {
+        return MessageFormat.format(IDEMPOTENT_KEY_PREFIX, taskBatchId);
     }
 }

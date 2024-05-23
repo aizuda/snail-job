@@ -1,4 +1,4 @@
-package com.aizuda.snailjob.server.job.task.support.timer;
+package com.aizuda.snailjob.server.common;
 
 /**
  * @author: opensnail
@@ -7,5 +7,5 @@ package com.aizuda.snailjob.server.job.task.support.timer;
  */
 public interface TimerTask<T> extends io.netty.util.TimerTask {
 
-    T getUniqueId();
+    T idempotentKey();
 }

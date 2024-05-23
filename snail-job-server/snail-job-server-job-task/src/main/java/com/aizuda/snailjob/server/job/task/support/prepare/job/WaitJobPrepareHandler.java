@@ -10,6 +10,7 @@ import com.aizuda.snailjob.server.job.task.support.timer.JobTimerWheel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.text.MessageFormat;
 import java.time.Duration;
 
 /**
@@ -33,7 +34,7 @@ public class WaitJobPrepareHandler extends AbstractJobPrePareHandler {
         log.debug("存在待处理任务. taskBatchId:[{}]", jobPrepareDTO.getTaskBatchId());
 
         // 若时间轮中数据不存在则重新加入
-        if (!JobTimerWheel.isExisted(SyetemTaskTypeEnum.JOB.getType(), jobPrepareDTO.getTaskBatchId())) {
+        if (!JobTimerWheel.isExisted(MessageFormat.format(JobTimerTask.IDEMPOTENT_KEY_PREFIX, jobPrepareDTO.getTaskBatchId()))) {
             log.info("存在待处理任务且时间轮中不存在 taskBatchId:[{}]", jobPrepareDTO.getTaskBatchId());
 
             // 进入时间轮
@@ -43,8 +44,6 @@ public class WaitJobPrepareHandler extends AbstractJobPrePareHandler {
             jobTimerTaskDTO.setJobId(jobPrepareDTO.getJobId());
 
             JobTimerWheel.registerWithJob(() -> new JobTimerTask(jobTimerTaskDTO), Duration.ofMillis(delay));
-//            JobTimerWheel.register(SyetemTaskTypeEnum.JOB.getType(), jobPrepareDTO.getTaskBatchId(),
-//                    new JobTimerTask(jobTimerTaskDTO), delay, TimeUnit.MILLISECONDS);
         }
     }
 

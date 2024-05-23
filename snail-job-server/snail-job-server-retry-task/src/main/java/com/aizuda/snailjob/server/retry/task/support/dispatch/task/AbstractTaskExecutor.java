@@ -3,33 +3,30 @@ package com.aizuda.snailjob.server.retry.task.support.dispatch.task;
 import akka.actor.ActorRef;
 import cn.hutool.core.lang.Pair;
 import com.aizuda.snailjob.common.log.SnailJobLog;
-import com.aizuda.snailjob.server.common.IdempotentStrategy;
 import com.aizuda.snailjob.server.common.config.SystemProperties;
 import com.aizuda.snailjob.server.common.dto.RetryLogMetaDTO;
 import com.aizuda.snailjob.server.common.handler.ClientNodeAllocateHandler;
+import com.aizuda.snailjob.server.common.triple.ImmutableTriple;
 import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.retry.task.support.RetryContext;
 import com.aizuda.snailjob.server.retry.task.support.RetryTaskConverter;
+import com.aizuda.snailjob.server.retry.task.support.idempotent.IdempotentHolder;
+import com.aizuda.snailjob.server.retry.task.support.idempotent.RetryIdempotentStrategyHandler;
 import com.aizuda.snailjob.server.retry.task.support.retry.RetryExecutor;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
  * @author opensnail
  * @date 2023-09-23 08:02:17
  * @since 2.4.0
  */
-@Slf4j
 public abstract class AbstractTaskExecutor implements TaskExecutor, InitializingBean {
+    protected final RetryIdempotentStrategyHandler idempotentStrategy = IdempotentHolder.getRetryIdempotent();
 
-    @Autowired
-    @Qualifier("retryIdempotentStrategyHandler")
-    protected IdempotentStrategy<Pair<String/*groupName*/, String/*namespaceId*/>, Long> idempotentStrategy;
     @Autowired
     protected SystemProperties systemProperties;
     @Autowired
@@ -59,7 +56,7 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, Initializing
         Pair<Boolean /*是否符合条件*/, StringBuilder/*描述信息*/> pair = executor.filter();
         if (!pair.getKey()) {
             RetryTask retryTask = retryContext.getRetryTask();
-            log.warn("当前任务不满足执行条件. groupName:[{}] uniqueId:[{}], description:[{}]",
+            SnailJobLog.LOCAL.warn("当前任务不满足执行条件. groupName:[{}] uniqueId:[{}], description:[{}]",
                     retryTask.getGroupName(),
                     retryTask.getUniqueId(), pair.getValue().toString());
 
@@ -83,7 +80,7 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, Initializing
         String groupName = retryTask.getGroupName();
         String namespaceId = retryTask.getNamespaceId();
         Long retryId = retryExecutor.getRetryContext().getRetryTask().getId();
-        idempotentStrategy.set(Pair.of(groupName, namespaceId), retryId);
+        idempotentStrategy.set(ImmutableTriple.of(groupName, namespaceId, retryId).toString());
 
         ActorRef actorRef = getActorRef();
         actorRef.tell(retryExecutor, actorRef);
