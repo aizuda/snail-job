@@ -2,7 +2,6 @@ package com.aizuda.snailjob.server.retry.task.support.dispatch.actor.scan;
 
 import akka.actor.AbstractActor;
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.lang.Pair;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.enums.RetryStatusEnum;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
@@ -24,13 +23,13 @@ import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
-import io.netty.util.TimerTask;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
+import com.aizuda.snailjob.server.common.TimerTask;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -137,12 +136,8 @@ public abstract class AbstractScanGroup extends AbstractActor {
         for (PartitionTask partitionTask : partitionTasks) {
             RetryPartitionTask retryPartitionTask = (RetryPartitionTask) partitionTask;
             long delay = DateUtils.toEpochMilli(retryPartitionTask.getNextTriggerAt()) - nowMilli - nowMilli % 100;
-            RetryTimerWheel.register(
-                    Pair.of(retryPartitionTask.getGroupName(), retryPartitionTask.getNamespaceId()),
-                    retryPartitionTask.getUniqueId(),
-                    timerTask(retryPartitionTask),
-                    delay,
-                    TimeUnit.MILLISECONDS);
+            TimerTask<String> timerTask = timerTask(retryPartitionTask);
+            RetryTimerWheel.register(timerTask.idempotentKey(), timerTask, Duration.ofMillis(delay));
         }
 
     }
@@ -175,7 +170,7 @@ public abstract class AbstractScanGroup extends AbstractActor {
     protected abstract LocalDateTime calculateNextTriggerTime(RetryPartitionTask partitionTask,
                                                               final RetrySceneConfig retrySceneConfig);
 
-    protected abstract TimerTask timerTask(RetryPartitionTask partitionTask);
+    protected abstract TimerTask<String> timerTask(RetryPartitionTask partitionTask);
 
     protected abstract AtomicLong preCostTime();
 

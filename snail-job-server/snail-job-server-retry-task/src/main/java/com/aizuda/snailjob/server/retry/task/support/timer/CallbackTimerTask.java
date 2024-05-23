@@ -2,6 +2,7 @@ package com.aizuda.snailjob.server.retry.task.support.timer;
 
 import com.aizuda.snailjob.common.core.context.SpringContext;
 import com.aizuda.snailjob.common.core.enums.RetryStatusEnum;
+import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.retry.task.support.dispatch.task.TaskActuatorFactory;
 import com.aizuda.snailjob.server.retry.task.support.dispatch.task.TaskExecutor;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
@@ -9,8 +10,8 @@ import com.aizuda.snailjob.template.datasource.access.TaskAccess;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import io.netty.util.Timeout;
-import lombok.extern.slf4j.Slf4j;
 
+import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -18,10 +19,10 @@ import java.util.Objects;
  * @author: opensnail
  * @date : 2023-09-22 17:09
  */
-@Slf4j
 public class CallbackTimerTask extends AbstractTimerTask {
+    public static final String IDEMPOTENT_KEY_PREFIX = "callback_{0}_{1}_{2}";
 
-    private RetryTimerContext context;
+    private final RetryTimerContext context;
 
     public CallbackTimerTask(RetryTimerContext context) {
         this.context = context;
@@ -32,7 +33,7 @@ public class CallbackTimerTask extends AbstractTimerTask {
 
     @Override
     protected void doRun(final Timeout timeout) {
-        log.debug("回调任务执行 {}", LocalDateTime.now());
+        SnailJobLog.LOCAL.debug("回调任务执行 {}", LocalDateTime.now());
         AccessTemplate accessTemplate = SpringContext.getBeanByType(AccessTemplate.class);
         TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();
         RetryTask retryTask = retryTaskAccess.one(context.getGroupName(), context.getNamespaceId(),
@@ -48,4 +49,8 @@ public class CallbackTimerTask extends AbstractTimerTask {
         taskExecutor.actuator(retryTask);
     }
 
+    @Override
+    public String idempotentKey() {
+        return MessageFormat.format(IDEMPOTENT_KEY_PREFIX, context.getGroupName(), context.getNamespaceId(), context.getUniqueId());
+    }
 }

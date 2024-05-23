@@ -1,6 +1,7 @@
 package com.aizuda.snailjob.server.job.task.support.timer;
 
 import akka.actor.ActorRef;
+import com.aizuda.snailjob.server.common.TimerTask;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.job.task.dto.JobTimerTaskDTO;
 import com.aizuda.snailjob.server.job.task.dto.TaskExecuteDTO;
@@ -8,6 +9,7 @@ import io.netty.util.Timeout;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.text.MessageFormat;
 import java.time.LocalDateTime;
 
 /**
@@ -17,8 +19,8 @@ import java.time.LocalDateTime;
  */
 @AllArgsConstructor
 @Slf4j
-public class JobTimerTask implements TimerTask<Long> {
-
+public class JobTimerTask implements TimerTask<String> {
+    public static final String IDEMPOTENT_KEY_PREFIX = "job_{0}";
     private JobTimerTaskDTO jobTimerTaskDTO;
 
     @Override
@@ -42,7 +44,7 @@ public class JobTimerTask implements TimerTask<Long> {
     }
 
     @Override
-    public Long getUniqueId() {
-        return jobTimerTaskDTO.getTaskBatchId();
+    public String idempotentKey() {
+        return MessageFormat.format(IDEMPOTENT_KEY_PREFIX, jobTimerTaskDTO.getTaskBatchId());
     }
 }

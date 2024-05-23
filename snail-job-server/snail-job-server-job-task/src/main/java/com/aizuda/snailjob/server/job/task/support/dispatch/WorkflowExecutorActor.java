@@ -25,6 +25,7 @@ import com.aizuda.snailjob.server.job.task.support.executor.workflow.WorkflowExe
 import com.aizuda.snailjob.server.job.task.support.handler.WorkflowBatchHandler;
 import com.aizuda.snailjob.server.job.task.support.timer.JobTimerWheel;
 import com.aizuda.snailjob.server.job.task.support.timer.WorkflowTimeoutCheckTask;
+import com.aizuda.snailjob.server.job.task.support.timer.WorkflowTimerTask;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.*;
 import com.aizuda.snailjob.template.datasource.persistence.po.*;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -36,6 +37,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import java.text.MessageFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -89,13 +91,10 @@ public class WorkflowExecutorActor extends AbstractActor {
             handlerTaskBatch(taskExecute, JobTaskBatchStatusEnum.RUNNING.getStatus(), JobOperationReasonEnum.NONE.getReason());
 
             Workflow workflow = workflowMapper.selectById(workflowTaskBatch.getWorkflowId());
-            JobTimerWheel.clearCache(SyetemTaskTypeEnum.WORKFLOW.getType(), taskExecute.getWorkflowTaskBatchId());
+            JobTimerWheel.clearCache(MessageFormat.format(WorkflowTimerTask.IDEMPOTENT_KEY_PREFIX, taskExecute.getWorkflowTaskBatchId()));
 
             JobTimerWheel.registerWithWorkflow(() -> new WorkflowTimeoutCheckTask(taskExecute.getWorkflowTaskBatchId()),
                     Duration.ofSeconds(workflow.getExecutorTimeout()));
-            // 超时检查
-//            JobTimerWheel.register(SyetemTaskTypeEnum.WORKFLOW.getType(), taskExecute.getWorkflowTaskBatchId(),
-//                    new WorkflowTimeoutCheckTask(taskExecute.getWorkflowTaskBatchId()), workflow.getExecutorTimeout(), TimeUnit.SECONDS);
         }
 
         // 获取DAG图
