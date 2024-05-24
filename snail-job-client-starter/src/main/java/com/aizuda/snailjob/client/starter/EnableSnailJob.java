@@ -34,13 +34,6 @@ import java.lang.annotation.*;
 public @interface EnableSnailJob {
 
     /**
-     * 表示该重试数据属于哪个系统并且全局唯一
-     *
-     * @return
-     */
-    String group();
-
-    /**
      * 控制多个Aop的执行顺序,
      * 需要注意的是这里顺序要比事务的Aop要提前
      * <p>

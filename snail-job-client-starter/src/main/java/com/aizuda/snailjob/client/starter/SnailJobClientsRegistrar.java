@@ -23,7 +23,6 @@ public class SnailJobClientsRegistrar implements ImportBeanDefinitionRegistrar, 
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
         Map<String, Object> attrs = importingClassMetadata.getAnnotationAttributes(EnableSnailJob.class.getName());
         Map<String, Object> systemEnvironment = standardEnvironment.getSystemProperties();
-        systemEnvironment.put("snail-job.group", attrs.get("group"));
         systemEnvironment.put("snail-job.aop.order", attrs.get("order"));
     }
 
@@ -32,6 +31,7 @@ public class SnailJobClientsRegistrar implements ImportBeanDefinitionRegistrar, 
         StandardEnvironment standardEnvironment = (StandardEnvironment) environment;
         this.standardEnvironment = standardEnvironment;
         Map<String, Object> systemEnvironment = standardEnvironment.getSystemProperties();
+        // 添加了 EnableSnailJob 默认就是开启，无需手动配置
         systemEnvironment.put("snail-job.enabled", true);
     }
 }
