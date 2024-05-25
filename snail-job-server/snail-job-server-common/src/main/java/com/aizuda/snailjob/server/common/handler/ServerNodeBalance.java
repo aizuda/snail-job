@@ -15,6 +15,7 @@ import com.aizuda.snailjob.template.datasource.persistence.mapper.ServerNodeMapp
 import com.aizuda.snailjob.template.datasource.persistence.po.GroupConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.ServerNode;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -38,23 +39,17 @@ import java.util.stream.Collectors;
  * @since 1.6.0
  */
 @Component
-@Slf4j
+@RequiredArgsConstructor
 public class ServerNodeBalance implements Lifecycle, Runnable {
 
     /**
      * 延迟10s为了尽可能保障集群节点都启动完成在进行rebalance
      */
     public static final Long INITIAL_DELAY = 10L;
+    private final ServerNodeMapper serverNodeMapper;
+    private final SystemProperties systemProperties;
 
-    @Autowired
-    protected AccessTemplate accessTemplate;
     private Thread thread = null;
-
-    @Autowired
-    protected ServerNodeMapper serverNodeMapper;
-    @Autowired
-    protected SystemProperties systemProperties;
-
     private List<Integer> bucketList;
 
     public void doBalance() {
@@ -79,7 +74,7 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
             List<Integer> allocate = new AllocateMessageQueueAveragely()
                     .allocate(ServerRegister.CURRENT_CID, bucketList, new ArrayList<>(podIpSet));
 
-            // 重新覆盖本地分配的组信息
+            // 重新覆盖本地分配的bucket
             DistributeInstance.INSTANCE.setConsumerBucket(allocate);
 
             SnailJobLog.LOCAL.info("rebalance complete. allocate:[{}]", allocate);

@@ -6,7 +6,7 @@ import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.common.enums.JobTaskExecutorSceneEnum;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.job.task.dto.JobTaskPrepareDTO;
-import com.aizuda.snailjob.server.job.task.support.JobPrePareHandler;
+import com.aizuda.snailjob.server.job.task.support.JobPrepareHandler;
 import com.aizuda.snailjob.server.job.task.support.prepare.job.TerminalJobPrepareHandler;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskBatchMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch;
@@ -37,7 +37,7 @@ public class JobTaskPrepareActor extends AbstractActor {
     @Autowired
     private JobTaskBatchMapper jobTaskBatchMapper;
     @Autowired
-    private List<JobPrePareHandler> prePareHandlers;
+    private List<JobPrepareHandler> prepareHandlers;
 
     @Override
     public Receive createReceive() {
@@ -73,7 +73,7 @@ public class JobTaskPrepareActor extends AbstractActor {
         // 说明所以任务已经完成
         if (CollectionUtils.isEmpty(notCompleteJobTaskBatchList)) {
             TerminalJobPrepareHandler terminalJobPrepareHandler = SpringContext.getBeanByType(TerminalJobPrepareHandler.class);
-            terminalJobPrepareHandler.handler(prepare);
+            terminalJobPrepareHandler.handle(prepare);
         } else {
 
             boolean onlyTimeoutCheck = false;
@@ -83,9 +83,9 @@ public class JobTaskPrepareActor extends AbstractActor {
                 prepare.setWorkflowTaskBatchId(prepare.getWorkflowTaskBatchId());
                 prepare.setWorkflowNodeId(jobTaskBatch.getWorkflowNodeId());
                 prepare.setOnlyTimeoutCheck(onlyTimeoutCheck);
-                for (JobPrePareHandler prePareHandler : prePareHandlers) {
-                    if (prePareHandler.matches(jobTaskBatch.getTaskBatchStatus())) {
-                        prePareHandler.handler(prepare);
+                for (JobPrepareHandler prepareHandler : prepareHandlers) {
+                    if (prepareHandler.matches(jobTaskBatch.getTaskBatchStatus())) {
+                        prepareHandler.handle(prepare);
                         break;
                     }
                 }

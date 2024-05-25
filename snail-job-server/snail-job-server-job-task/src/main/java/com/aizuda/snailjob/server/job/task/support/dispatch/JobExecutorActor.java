@@ -89,7 +89,7 @@ public class JobExecutorActor extends AbstractActor {
 
             } catch (Exception e) {
                 SnailJobLog.LOCAL.error("job executor exception. [{}]", taskExecute, e);
-                handlerTaskBatch(taskExecute, JobTaskBatchStatusEnum.FAIL.getStatus(), JobOperationReasonEnum.TASK_EXECUTION_ERROR.getReason());
+                handleTaskBatch(taskExecute, JobTaskBatchStatusEnum.FAIL.getStatus(), JobOperationReasonEnum.TASK_EXECUTION_ERROR.getReason());
                 SpringContext.getContext().publishEvent(new JobTaskFailAlarmEvent(taskExecute.getTaskBatchId()));
             } finally {
                 getContext().stop(getSelf());
@@ -126,7 +126,7 @@ public class JobExecutorActor extends AbstractActor {
             }
 
             // 更新状态
-            handlerTaskBatch(taskExecute, taskStatus, operationReason);
+            handleTaskBatch(taskExecute, taskStatus, operationReason);
 
             // 不是运行中的，不需要生产任务
             if (taskStatus != JobTaskBatchStatusEnum.RUNNING.getStatus()) {
@@ -167,7 +167,7 @@ public class JobExecutorActor extends AbstractActor {
                     }
 
                     //方法内容
-                    doHandlerResidentTask(job, taskExecute);
+                    doHandleResidentTask(job, taskExecute);
                 }
             });
         }
@@ -185,7 +185,7 @@ public class JobExecutorActor extends AbstractActor {
         return context;
     }
 
-    private void handlerTaskBatch(TaskExecuteDTO taskExecute, int taskStatus, int operationReason) {
+    private void handleTaskBatch(TaskExecuteDTO taskExecute, int taskStatus, int operationReason) {
 
         JobTaskBatch jobTaskBatch = new JobTaskBatch();
         jobTaskBatch.setId(taskExecute.getTaskBatchId());
@@ -201,7 +201,7 @@ public class JobExecutorActor extends AbstractActor {
 
     }
 
-    private void doHandlerResidentTask(Job job, TaskExecuteDTO taskExecuteDTO) {
+    private void doHandleResidentTask(Job job, TaskExecuteDTO taskExecuteDTO) {
         if (Objects.isNull(job)
                 || JobTaskExecutorSceneEnum.MANUAL_JOB.getType().equals(taskExecuteDTO.getTaskExecutorScene())
                 || JobTaskExecutorSceneEnum.AUTO_WORKFLOW.getType().equals(taskExecuteDTO.getTaskExecutorScene())

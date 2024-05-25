@@ -21,7 +21,7 @@ import java.time.Duration;
  */
 @Component
 @Slf4j
-public class WaitJobPrepareHandler extends AbstractJobPrePareHandler {
+public class WaitJobPrepareHandler extends AbstractJobPrepareHandler {
 
     @Override
     public boolean matches(Integer status) {
@@ -29,7 +29,7 @@ public class WaitJobPrepareHandler extends AbstractJobPrePareHandler {
     }
 
     @Override
-    protected void doHandler(JobTaskPrepareDTO jobPrepareDTO) {
+    protected void doHandle(JobTaskPrepareDTO jobPrepareDTO) {
         log.debug("存在待处理任务. taskBatchId:[{}]", jobPrepareDTO.getTaskBatchId());
 
         // 若时间轮中数据不存在则重新加入

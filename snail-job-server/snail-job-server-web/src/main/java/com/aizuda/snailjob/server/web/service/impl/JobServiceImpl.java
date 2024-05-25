@@ -13,7 +13,7 @@ import com.aizuda.snailjob.server.common.strategy.WaitStrategies;
 import com.aizuda.snailjob.server.common.util.CronUtils;
 import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.job.task.dto.JobTaskPrepareDTO;
-import com.aizuda.snailjob.server.job.task.support.JobPrePareHandler;
+import com.aizuda.snailjob.server.job.task.support.JobPrepareHandler;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
 import com.aizuda.snailjob.server.job.task.support.cache.ResidentTaskCache;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
@@ -54,7 +54,7 @@ public class JobServiceImpl implements JobService {
     private final SystemProperties systemProperties;
     private final JobMapper jobMapper;
     @Lazy
-    private final JobPrePareHandler terminalJobPrepareHandler;
+    private final JobPrepareHandler terminalJobPrepareHandler;
     private final AccessTemplate accessTemplate;
 
     private static Long calculateNextTriggerAt(final JobRequestVO jobRequestVO, Long time) {
@@ -224,7 +224,7 @@ public class JobServiceImpl implements JobService {
         jobTaskPrepare.setNextTriggerAt(DateUtils.toNowMilli());
         jobTaskPrepare.setTaskExecutorScene(JobTaskExecutorSceneEnum.MANUAL_JOB.getType());
         // 创建批次
-        terminalJobPrepareHandler.handler(jobTaskPrepare);
+        terminalJobPrepareHandler.handle(jobTaskPrepare);
 
         return Boolean.TRUE;
     }

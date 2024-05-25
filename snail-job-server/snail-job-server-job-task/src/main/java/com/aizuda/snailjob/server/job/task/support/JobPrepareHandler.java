@@ -7,9 +7,9 @@ import com.aizuda.snailjob.server.job.task.dto.JobTaskPrepareDTO;
  * @date 2023-10-02 09:34:00
  * @since 2.4.0
  */
-public interface JobPrePareHandler {
+public interface JobPrepareHandler {
 
     boolean matches(Integer status);
 
-    void handler(JobTaskPrepareDTO jobPrepareDTO);
+    void handle(JobTaskPrepareDTO jobPrepareDTO);
 }
