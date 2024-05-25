@@ -22,7 +22,7 @@ import java.util.Objects;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @Component
 @Slf4j
-public class TerminalJobPrepareHandler extends AbstractJobPrePareHandler {
+public class TerminalJobPrepareHandler extends AbstractJobPrepareHandler {
 
     @Autowired
     private JobTaskBatchGenerator jobTaskBatchGenerator;
@@ -33,7 +33,7 @@ public class TerminalJobPrepareHandler extends AbstractJobPrePareHandler {
     }
 
     @Override
-    protected void doHandler(JobTaskPrepareDTO jobPrepareDTO) {
+    protected void doHandle(JobTaskPrepareDTO jobPrepareDTO) {
         log.debug("无处理中的数据. jobId:[{}]", jobPrepareDTO.getJobId());
 
         // 生成任务批次

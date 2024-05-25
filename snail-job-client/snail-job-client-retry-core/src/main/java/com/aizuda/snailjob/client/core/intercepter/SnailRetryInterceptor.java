@@ -54,12 +54,10 @@ public class SnailRetryInterceptor implements MethodInterceptor, AfterAdvice, Se
                     "> 时间:{}  \n" +
                     "> 异常:{}  \n";
 
-    private final StandardEnvironment standardEnvironment;
     private final RetryStrategy retryStrategy;
-
-    public SnailRetryInterceptor(StandardEnvironment standardEnvironment,
-                                 RetryStrategy localRetryStrategies) {
-        this.standardEnvironment = standardEnvironment;
+    private final int order;
+    public SnailRetryInterceptor(int order, RetryStrategy localRetryStrategies) {
+        this.order = order;
         this.retryStrategy = localRetryStrategies;
     }
 
@@ -271,9 +269,7 @@ public class SnailRetryInterceptor implements MethodInterceptor, AfterAdvice, Se
 
     @Override
     public int getOrder() {
-        String order = standardEnvironment
-                .getProperty("snail-job.aop.order", String.valueOf(Ordered.HIGHEST_PRECEDENCE));
-        return Integer.parseInt(order);
+        return order;
     }
 
 

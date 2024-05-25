@@ -34,6 +34,20 @@ import java.lang.annotation.*;
 public @interface EnableSnailJob {
 
     /**
+     * 请在服务端提前配置好组,并设置在这里
+     * group的配置支持注解和配置文件两种形式
+     * 配置顺序为注解 > yml
+     * 即: 如果注解内不配置默认取环境变量中的group配置
+     * 比如:
+     * <p>
+     * snail-job.group = snail_job_demo_group
+     * </p>
+     *
+     * @return group
+     */
+    String group() default "";
+
+    /**
      * 控制多个Aop的执行顺序,
      * 需要注意的是这里顺序要比事务的Aop要提前
      * <p>
