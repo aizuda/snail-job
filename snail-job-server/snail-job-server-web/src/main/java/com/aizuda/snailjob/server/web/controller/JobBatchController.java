@@ -5,6 +5,7 @@ import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.JobBatchQueryVO;
 import com.aizuda.snailjob.server.web.model.response.JobBatchResponseVO;
 import com.aizuda.snailjob.server.web.service.JobBatchService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,10 +18,9 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/job/batch")
+@RequiredArgsConstructor
 public class JobBatchController {
-
-    @Autowired
-    private JobBatchService jobBatchService;
+    private final JobBatchService jobBatchService;
 
     @GetMapping("/list")
     @LoginRequired

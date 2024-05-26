@@ -6,6 +6,7 @@ import com.aizuda.snailjob.server.web.model.request.SceneConfigRequestVO;
 import com.aizuda.snailjob.server.web.model.response.SceneConfigResponseVO;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author: opensnail
@@ -24,4 +25,10 @@ public interface SceneConfigService {
     SceneConfigResponseVO getSceneConfigDetail(Long id);
 
     boolean updateStatus(Long id, final Integer status);
+
+    void importSceneConfig(List<SceneConfigRequestVO> requests);
+
+    String exportSceneConfig(Set<Long> sceneIds);
+
+    void batchCopy(Long targetNamespaceId, Set<Long> sceneIds);
 }
