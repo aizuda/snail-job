@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.web.controller;
 
+import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.web.annotation.LoginRequired;
 import com.aizuda.snailjob.server.web.annotation.LoginUser;
 import com.aizuda.snailjob.server.web.annotation.RoleEnum;
@@ -24,6 +25,8 @@ import java.util.List;
  */
 @RestController
 public class SystemUserController {
+
+    private final Long SUPER_ADMIN_ID = 1L;
 
     @Autowired
     private SystemUserService systemUserService;
@@ -54,6 +57,9 @@ public class SystemUserController {
     @LoginRequired(role = RoleEnum.ADMIN)
     @PutMapping("/user")
     public void update(@RequestBody @Valid SystemUserRequestVO requestVO) {
+        if (requestVO.getId() == SUPER_ADMIN_ID && requestVO.getRole().equals(RoleEnum.USER.getRoleId())) {
+            throw new SnailJobServerException("不允许修改超级管理员角色");
+        }
         systemUserService.update(requestVO);
     }
 
@@ -72,6 +78,9 @@ public class SystemUserController {
     @LoginRequired
     @DeleteMapping("/user/{id}")
     public boolean delUser(@PathVariable("id") Long id) {
+        if (id == SUPER_ADMIN_ID) {
+            throw new SnailJobServerException("不允许删除超级管理员");
+        }
         return systemUserService.delUser(id);
     }
 }
