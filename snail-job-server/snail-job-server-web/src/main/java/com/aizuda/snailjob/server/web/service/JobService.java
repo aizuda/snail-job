@@ -6,8 +6,10 @@ import com.aizuda.snailjob.server.web.model.request.JobRequestVO;
 import com.aizuda.snailjob.server.web.model.request.JobUpdateJobStatusRequestVO;
 import com.aizuda.snailjob.server.web.model.response.JobResponseVO;
 import com.aizuda.snailjob.template.datasource.persistence.po.Job;
+import jakarta.validation.Valid;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author opensnail
@@ -36,4 +38,9 @@ public interface JobService {
     boolean trigger(Long jobId);
 
     List<JobResponseVO> getJobList(String groupName);
+
+    void importJobs(List<JobRequestVO> requestList);
+
+    String exportJobs(Set<Long> jobIds);
+
 }
