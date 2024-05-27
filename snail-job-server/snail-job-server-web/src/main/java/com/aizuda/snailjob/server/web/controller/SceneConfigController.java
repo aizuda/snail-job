@@ -1,9 +1,11 @@
 package com.aizuda.snailjob.server.web.controller;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.lang.Assert;
 import com.aizuda.snailjob.common.core.annotation.OriginalControllerReturnValue;
 import com.aizuda.snailjob.common.core.exception.SnailJobCommonException;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
+import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.web.annotation.LoginRequired;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
@@ -96,6 +98,8 @@ public class SceneConfigController {
         JsonNode node = JsonUtil.toJson(file.getBytes());
         List<SceneConfigRequestVO> requestList = JsonUtil.parseList(JsonUtil.toJsonString(node),
                 SceneConfigRequestVO.class);
+
+        Assert.notEmpty(requestList, () -> new SnailJobServerException("导入数据不能为空"));
 
         // 校验参数是否合法
         for (final SceneConfigRequestVO sceneConfigRequestVO : requestList) {
