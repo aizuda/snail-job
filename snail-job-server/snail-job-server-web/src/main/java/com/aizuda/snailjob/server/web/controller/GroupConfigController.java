@@ -101,9 +101,9 @@ public class GroupConfigController {
         return groupConfigService.getTablePartitionList();
     }
 
-    @PostMapping("/import")
+    @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @LoginRequired
-    public void importScene(@RequestParam("file") MultipartFile file) throws IOException {
+    public void importScene(@RequestPart("file") MultipartFile file) throws IOException {
         if (file.isEmpty()) {
             throw new SnailJobCommonException("Please select a file to upload");
         }

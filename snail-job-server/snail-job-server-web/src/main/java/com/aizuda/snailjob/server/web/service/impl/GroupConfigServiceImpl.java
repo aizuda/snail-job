@@ -417,13 +417,9 @@ public class GroupConfigServiceImpl implements GroupConfigService {
         List<GroupConfig> groupConfigs = accessTemplate.getGroupConfigAccess().list(
             new LambdaQueryWrapper<GroupConfig>()
                 .eq(GroupConfig::getNamespaceId, namespaceId)
-                .in(GroupConfig::getId, groupIds)
+                .in(CollUtil.isNotEmpty(groupIds), GroupConfig::getId, groupIds)
         );
 
-        SetView<Long> notExistedGroupIdSet = Sets.difference(groupIds,
-            StreamUtils.toSet(groupConfigs, GroupConfig::getId));
-
-        Assert.isTrue(groupIds.size() == groupConfigs.size(), () -> new SnailJobServerException("导出失败. 组ID{}不存在", notExistedGroupIdSet));
         return JsonUtil.toJsonString(GroupConfigConverter.INSTANCE.toGroupConfigRequestVOs(groupConfigs));
     }
 
