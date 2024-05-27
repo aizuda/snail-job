@@ -57,7 +57,7 @@ public class SystemUserController {
     @LoginRequired(role = RoleEnum.ADMIN)
     @PutMapping("/user")
     public void update(@RequestBody @Valid SystemUserRequestVO requestVO) {
-        if (requestVO.getId() == SUPER_ADMIN_ID && requestVO.getRole().equals(RoleEnum.USER.getRoleId())) {
+        if (requestVO.getId() == SUPER_ADMIN_ID && RoleEnum.isAdmin(requestVO.getRole())) {
             throw new SnailJobServerException("不允许修改超级管理员角色");
         }
         systemUserService.update(requestVO);
