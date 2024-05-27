@@ -194,10 +194,6 @@ public class SceneConfigServiceImpl implements SceneConfigService {
                 .in(CollUtil.isNotEmpty(sceneIds), RetrySceneConfig::getId, sceneIds)
             );
 
-        SetView<Long> notExistedSceneIdSet = Sets.difference(sceneIds,
-            StreamUtils.toSet(sceneConfigs, RetrySceneConfig::getId));
-
-        Assert.isTrue(sceneIds.size() == sceneConfigs.size(), () -> new SnailJobServerException("导出失败. 场景ID{}不存在", notExistedSceneIdSet));
         return JsonUtil.toJsonString(SceneConfigConverter.INSTANCE.toSceneConfigRequestVOs(sceneConfigs));
     }
 
