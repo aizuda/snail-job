@@ -251,7 +251,7 @@ public class JobServiceImpl implements JobService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void importJobs(List<JobRequestVO> requestList) {
-        requestList.forEach(vo -> saveJob(vo));
+        requestList.forEach(this::saveJob);
     }
 
     @Override
