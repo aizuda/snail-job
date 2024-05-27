@@ -102,7 +102,7 @@ public class GroupConfigController {
     }
 
     @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @LoginRequired
+    @LoginRequired(role = RoleEnum.ADMIN)
     public void importScene(@RequestPart("file") MultipartFile file) throws IOException {
         if (file.isEmpty()) {
             throw new SnailJobCommonException("Please select a file to upload");
@@ -119,6 +119,8 @@ public class GroupConfigController {
         List<GroupConfigRequestVO> requestList = JsonUtil.parseList(JsonUtil.toJsonString(node),
             GroupConfigRequestVO.class);
 
+        Assert.notEmpty(requestList, () -> new SnailJobServerException("导入数据不能为空"));
+
         // 校验参数是否合法
         for (final GroupConfigRequestVO groupConfigRequestVO : requestList) {
             ValidatorFactory vf = Validation.buildDefaultValidatorFactory();
@@ -133,10 +135,9 @@ public class GroupConfigController {
     }
 
     @PostMapping("/export")
-    @LoginRequired
+    @LoginRequired(role = RoleEnum.ADMIN)
     @OriginalControllerReturnValue
     public ResponseEntity<String> exportGroup(@RequestBody Set<Long> groupIds) {
-        Assert.notEmpty(groupIds, () -> new SnailJobServerException("参数错误"));
 
         String configs = groupConfigService.exportGroup(groupIds);
         HttpHeaders headers = new HttpHeaders();

@@ -26,6 +26,7 @@ public class GroupConfigRequestVO {
     /**
      * 令牌
      */
+    @NotBlank(message = "令牌不能为空")
     private String token;
 
     /**
@@ -36,17 +37,20 @@ public class GroupConfigRequestVO {
     /**
      * 分区
      */
+    @NotNull(message = "分区不能为空")
     private Integer groupPartition;
 
     /**
      * 唯一id生成模式
      * {@link IdGeneratorModeEnum}
      */
+    @NotNull(message = "id生成模式不能为空")
     private Integer idGeneratorMode;
 
     /**
      * 是否初始化场景
      */
+    @NotNull(message = "初始化场不能为空")
     private Integer initScene;
 
 }
