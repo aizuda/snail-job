@@ -18,7 +18,11 @@ public interface GroupConfigConverter {
 
     GroupConfigConverter INSTANCE = Mappers.getMapper(GroupConfigConverter.class);
 
-    GroupConfig convert(GroupConfigRequestVO groupConfigRequestVO);
+    GroupConfig toGroupConfig(GroupConfigRequestVO groupConfigRequestVO);
 
-    List<GroupConfig> convertList(List<GroupConfigRequestVO> groupConfigRequestVOS);
+    List<GroupConfig> toGroupConfigs(List<GroupConfigRequestVO> groupConfigRequestVOS);
+
+    List<GroupConfigRequestVO> toGroupConfigRequestVOs(List<GroupConfig> groupConfigs);
+
+
 }

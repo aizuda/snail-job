@@ -1,11 +1,8 @@
 package com.aizuda.snailjob.server.web.controller;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.http.server.HttpServerResponse;
-import com.aizuda.snailjob.client.model.request.DispatchJobRequest;
 import com.aizuda.snailjob.common.core.annotation.OriginalControllerReturnValue;
 import com.aizuda.snailjob.common.core.exception.SnailJobCommonException;
-import com.aizuda.snailjob.common.core.model.Result;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.web.annotation.LoginRequired;
@@ -20,7 +17,7 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +27,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -45,7 +41,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class SceneConfigController {
 
-    private final List<String> FILE_EXTENSIONS = List.of("json");
+    private static final List<String> FILE_EXTENSIONS = List.of("json");
     private final SceneConfigService sceneConfigService;
 
     @LoginRequired
@@ -86,8 +82,7 @@ public class SceneConfigController {
 
     @PostMapping("/import")
     @LoginRequired
-    public void importScene(final MultipartFile file)
-        throws IOException {
+    public void importScene(final MultipartFile file) throws IOException {
         if (file.isEmpty()) {
             throw new SnailJobCommonException("Please select a file to upload");
         }
@@ -126,7 +121,7 @@ public class SceneConfigController {
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         // 设置下载时的文件名称
-        String fileName = String.format("%s.json", DateUtils.toNowFormat(DateUtils.PURE_DATETIME_MS_PATTERN));
+        String fileName = String.format("retry-scene-%s.json", DateUtils.toNowFormat(DateUtils.PURE_DATETIME_MS_PATTERN));
         String disposition = "attachment; filename=" +
         new String(fileName.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1);
         headers.add(HttpHeaders.CONTENT_DISPOSITION, disposition);
@@ -135,9 +130,4 @@ public class SceneConfigController {
             .body(configs);
     }
 
-    @LoginRequired
-    @PostMapping("/{targetNamespaceId}/batch/copy")
-    public void batchCopy(@PathVariable("targetNamespaceId") Long targetNamespaceId, @RequestBody Set<Long> sceneIds) {
-        sceneConfigService.batchCopy(targetNamespaceId, sceneIds);
-    }
 }

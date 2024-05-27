@@ -5,6 +5,7 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.HashUtil;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
+import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.server.common.config.SystemProperties;
 import com.aizuda.snailjob.server.common.enums.IdGeneratorModeEnum;
@@ -32,8 +33,9 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import com.google.common.collect.Sets.SetView;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -63,7 +65,6 @@ public class GroupConfigServiceImpl implements GroupConfigService {
     private final ServerNodeMapper serverNodeMapper;
     private final AccessTemplate accessTemplate;
     private final SequenceAllocMapper sequenceAllocMapper;
-    @Lazy
     private final ConfigVersionSyncHandler configVersionSyncHandler;
     private final SystemProperties systemProperties;
     private final JdbcTemplate jdbcTemplate;
@@ -71,19 +72,21 @@ public class GroupConfigServiceImpl implements GroupConfigService {
 
     @Override
     @Transactional
-    public Boolean addGroup(UserSessionVO systemUser, GroupConfigRequestVO groupConfigRequestVO) {
+    public Boolean addGroup(GroupConfigRequestVO groupConfigRequestVO) {
+
+        String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
 
         ConfigAccess<GroupConfig> groupConfigAccess = accessTemplate.getGroupConfigAccess();
         Assert.isTrue(groupConfigAccess.count(new LambdaQueryWrapper<GroupConfig>()
-                        .eq(GroupConfig::getNamespaceId, systemUser.getNamespaceId())
-                        .eq(GroupConfig::getGroupName, groupConfigRequestVO.getGroupName())) == 0,
-                () -> new SnailJobServerException("GroupName已经存在 {}", groupConfigRequestVO.getGroupName()));
+                .eq(GroupConfig::getNamespaceId, namespaceId)
+                .eq(GroupConfig::getGroupName, groupConfigRequestVO.getGroupName())) == 0,
+            () -> new SnailJobServerException("GroupName已经存在 {}", groupConfigRequestVO.getGroupName()));
 
         // 保存组配置
-        Boolean isSuccess = doSaveGroupConfig(systemUser, groupConfigRequestVO);
+        Boolean isSuccess = doSaveGroupConfig(namespaceId, groupConfigRequestVO);
 
         // 保存生成唯一id配置
-        doSaveSequenceAlloc(systemUser, groupConfigRequestVO);
+        doSaveSequenceAlloc(namespaceId, groupConfigRequestVO);
 
         return isSuccess;
     }
@@ -91,18 +94,18 @@ public class GroupConfigServiceImpl implements GroupConfigService {
     /**
      * 保存序号生成规则配置失败
      *
-     * @param systemUser
+     * @param namespaceId          命名空间
      * @param groupConfigRequestVO 组、场景、通知配置类
      */
-    private void doSaveSequenceAlloc(UserSessionVO systemUser, final GroupConfigRequestVO groupConfigRequestVO) {
+    private void doSaveSequenceAlloc(final String namespaceId, final GroupConfigRequestVO groupConfigRequestVO) {
         SequenceAlloc sequenceAlloc = new SequenceAlloc();
         sequenceAlloc.setGroupName(groupConfigRequestVO.getGroupName());
-        sequenceAlloc.setNamespaceId(systemUser.getNamespaceId());
+        sequenceAlloc.setNamespaceId(namespaceId);
         sequenceAlloc.setStep(systemProperties.getStep());
         sequenceAlloc.setUpdateDt(LocalDateTime.now());
         Assert.isTrue(1 == sequenceAllocMapper.insert(sequenceAlloc),
-                () -> new SnailJobServerException("failed to save sequence generation rule configuration [{}].",
-                        groupConfigRequestVO.getGroupName()));
+            () -> new SnailJobServerException("failed to save sequence generation rule configuration [{}].",
+                groupConfigRequestVO.getGroupName()));
     }
 
     @Override
@@ -119,32 +122,32 @@ public class GroupConfigServiceImpl implements GroupConfigService {
 
         ConfigAccess<GroupConfig> groupConfigAccess = accessTemplate.getGroupConfigAccess();
         long count = groupConfigAccess.count(
-                new LambdaQueryWrapper<GroupConfig>()
-                        .eq(GroupConfig::getNamespaceId, namespaceId)
-                        .eq(GroupConfig::getGroupName, groupName));
+            new LambdaQueryWrapper<GroupConfig>()
+                .eq(GroupConfig::getNamespaceId, namespaceId)
+                .eq(GroupConfig::getGroupName, groupName));
         if (count <= 0) {
             return false;
         }
 
-        GroupConfig groupConfig = GroupConfigConverter.INSTANCE.convert(groupConfigRequestVO);
+        GroupConfig groupConfig = GroupConfigConverter.INSTANCE.toGroupConfig(groupConfigRequestVO);
         groupConfig.setDescription(Optional.ofNullable(groupConfigRequestVO.getDescription()).orElse(StrUtil.EMPTY));
         // 使用@TableField(value = "version", update= "%s+1") 进行更新version, 这里必须初始化一个值
         groupConfig.setVersion(1);
         groupConfig.setToken(null);
         Assert.isTrue(tablePartitionList.contains(groupConfigRequestVO.getGroupPartition()),
-                () -> new SnailJobServerException("分区不存在. [{}]", tablePartitionList));
+            () -> new SnailJobServerException("分区不存在. [{}]", tablePartitionList));
         Assert.isTrue(groupConfigRequestVO.getGroupPartition() >= 0,
-                () -> new SnailJobServerException("分区不能是负数."));
+            () -> new SnailJobServerException("分区不能是负数."));
 
         // 校验retry_task_x和retry_dead_letter_x是否存在
         checkGroupPartition(groupConfig, namespaceId);
 
         Assert.isTrue(1 == groupConfigAccess.update(groupConfig,
-                        new LambdaUpdateWrapper<GroupConfig>()
-                                .eq(GroupConfig::getNamespaceId, namespaceId)
-                                .eq(GroupConfig::getGroupName, groupName)),
-                () -> new SnailJobServerException("exception occurred while adding group. groupConfigVO[{}]",
-                        groupConfigRequestVO));
+                new LambdaUpdateWrapper<GroupConfig>()
+                    .eq(GroupConfig::getNamespaceId, namespaceId)
+                    .eq(GroupConfig::getGroupName, groupName)),
+            () -> new SnailJobServerException("exception occurred while adding group. groupConfigVO[{}]",
+                groupConfigRequestVO));
 
         // 同步版本， 版本为0代表需要同步到客户端
         boolean add = configVersionSyncHandler.addSyncTask(groupName, namespaceId, 0);
@@ -161,9 +164,9 @@ public class GroupConfigServiceImpl implements GroupConfigService {
         groupConfig.setGroupStatus(status);
         ConfigAccess<GroupConfig> groupConfigAccess = accessTemplate.getGroupConfigAccess();
         return groupConfigAccess.update(groupConfig,
-                new LambdaUpdateWrapper<GroupConfig>()
-                        .eq(GroupConfig::getNamespaceId, UserSessionUtils.currentUserSession().getNamespaceId())
-                        .eq(GroupConfig::getGroupName, groupName)) == 1;
+            new LambdaUpdateWrapper<GroupConfig>()
+                .eq(GroupConfig::getNamespaceId, UserSessionUtils.currentUserSession().getNamespaceId())
+                .eq(GroupConfig::getGroupName, groupName)) == 1;
     }
 
     @Override
@@ -174,29 +177,30 @@ public class GroupConfigServiceImpl implements GroupConfigService {
 
         ConfigAccess<GroupConfig> groupConfigAccess = accessTemplate.getGroupConfigAccess();
         PageDTO<GroupConfig> groupConfigPageDTO = groupConfigAccess.listPage(
-                new PageDTO<>(queryVO.getPage(), queryVO.getSize()),
-                new LambdaQueryWrapper<GroupConfig>()
-                        .eq(GroupConfig::getNamespaceId, namespaceId)
-                        .in(userSessionVO.isUser(), GroupConfig::getGroupName, userSessionVO.getGroupNames())
-                        .likeRight(StrUtil.isNotBlank(queryVO.getGroupName()), GroupConfig::getGroupName, StrUtil.trim(queryVO.getGroupName()))
-                        .orderByDesc(GroupConfig::getId));
+            new PageDTO<>(queryVO.getPage(), queryVO.getSize()),
+            new LambdaQueryWrapper<GroupConfig>()
+                .eq(GroupConfig::getNamespaceId, namespaceId)
+                .in(userSessionVO.isUser(), GroupConfig::getGroupName, userSessionVO.getGroupNames())
+                .likeRight(StrUtil.isNotBlank(queryVO.getGroupName()), GroupConfig::getGroupName,
+                    StrUtil.trim(queryVO.getGroupName()))
+                .orderByDesc(GroupConfig::getId));
         List<GroupConfig> records = groupConfigPageDTO.getRecords();
         if (CollectionUtils.isEmpty(records)) {
             return new PageResult<>(groupConfigPageDTO.getCurrent(), groupConfigPageDTO.getSize(),
-                    groupConfigPageDTO.getTotal());
+                groupConfigPageDTO.getTotal());
         }
 
         PageResult<List<GroupConfigResponseVO>> pageResult = new PageResult<>(groupConfigPageDTO.getCurrent(),
-                groupConfigPageDTO.getSize(), groupConfigPageDTO.getTotal());
+            groupConfigPageDTO.getSize(), groupConfigPageDTO.getTotal());
 
         List<GroupConfigResponseVO> responseVOList = GroupConfigResponseVOConverter.INSTANCE.convertList(
-                records);
+            records);
 
         for (GroupConfigResponseVO groupConfigResponseVO : responseVOList) {
             Optional.ofNullable(IdGeneratorModeEnum.modeOf(groupConfigResponseVO.getIdGeneratorMode()))
-                    .ifPresent(idGeneratorMode -> {
-                        groupConfigResponseVO.setIdGeneratorModeName(idGeneratorMode.getDesc());
-                    });
+                .ifPresent(idGeneratorMode -> {
+                    groupConfigResponseVO.setIdGeneratorModeName(idGeneratorMode.getDesc());
+                });
         }
 
         pageResult.setData(responseVOList);
@@ -204,37 +208,37 @@ public class GroupConfigServiceImpl implements GroupConfigService {
         return pageResult;
     }
 
-    private boolean doSaveGroupConfig(UserSessionVO systemUser, GroupConfigRequestVO groupConfigRequestVO) {
+    private boolean doSaveGroupConfig(final String namespaceId, GroupConfigRequestVO groupConfigRequestVO) {
         List<Integer> tablePartitionList = getTablePartitionList();
         if (CollectionUtils.isEmpty(tablePartitionList)) {
             return Boolean.FALSE;
         }
 
-        GroupConfig groupConfig = GroupConfigConverter.INSTANCE.convert(groupConfigRequestVO);
+        GroupConfig groupConfig = GroupConfigConverter.INSTANCE.toGroupConfig(groupConfigRequestVO);
         groupConfig.setCreateDt(LocalDateTime.now());
         groupConfig.setVersion(1);
-        groupConfig.setNamespaceId(systemUser.getNamespaceId());
+        groupConfig.setNamespaceId(namespaceId);
         groupConfig.setGroupName(groupConfigRequestVO.getGroupName());
         groupConfig.setToken(groupConfigRequestVO.getToken());
         groupConfig.setDescription(Optional.ofNullable(groupConfigRequestVO.getDescription()).orElse(StrUtil.EMPTY));
         if (Objects.isNull(groupConfigRequestVO.getGroupPartition())) {
             groupConfig.setGroupPartition(
-                    HashUtil.bkdrHash(groupConfigRequestVO.getGroupName()) % tablePartitionList.size());
+                HashUtil.bkdrHash(groupConfigRequestVO.getGroupName()) % tablePartitionList.size());
         } else {
             Assert.isTrue(tablePartitionList.contains(groupConfigRequestVO.getGroupPartition()),
-                    () -> new SnailJobServerException("分区不存在. [{}]", tablePartitionList));
+                () -> new SnailJobServerException("分区不存在. [{}]", tablePartitionList));
             Assert.isTrue(groupConfigRequestVO.getGroupPartition() >= 0,
-                    () -> new SnailJobServerException("分区不能是负数."));
+                () -> new SnailJobServerException("分区不能是负数."));
         }
 
         groupConfig.setBucketIndex(
-                HashUtil.bkdrHash(groupConfigRequestVO.getGroupName()) % systemProperties.getBucketTotal());
+            HashUtil.bkdrHash(groupConfigRequestVO.getGroupName()) % systemProperties.getBucketTotal());
         ConfigAccess<GroupConfig> groupConfigAccess = accessTemplate.getGroupConfigAccess();
         Assert.isTrue(1 == groupConfigAccess.insert(groupConfig),
-                () -> new SnailJobServerException("新增组异常异常 groupConfigVO[{}]", groupConfigRequestVO));
+            () -> new SnailJobServerException("新增组异常异常 groupConfigVO[{}]", groupConfigRequestVO));
 
         // 校验retry_task_x和retry_dead_letter_x是否存在
-        checkGroupPartition(groupConfig, systemUser.getNamespaceId());
+        checkGroupPartition(groupConfig, namespaceId);
 
         return Boolean.TRUE;
     }
@@ -246,12 +250,12 @@ public class GroupConfigServiceImpl implements GroupConfigService {
         try {
             TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();
             retryTaskAccess.count(groupConfig.getGroupName(), namespaceId,
-                    new LambdaQueryWrapper<RetryTask>().eq(RetryTask::getId, 1));
+                new LambdaQueryWrapper<RetryTask>().eq(RetryTask::getId, 1));
         } catch (BadSqlGrammarException e) {
             Optional.ofNullable(e.getMessage()).ifPresent(s -> {
                 if (s.contains("retry_task_" + groupConfig.getGroupPartition()) && s.contains("doesn't exist")) {
                     throw new SnailJobServerException("分区:[{}] '未配置表retry_task_{}', 请联系管理员进行配置",
-                            groupConfig.getGroupPartition(), groupConfig.getGroupPartition());
+                        groupConfig.getGroupPartition(), groupConfig.getGroupPartition());
                 }
             });
         }
@@ -259,12 +263,12 @@ public class GroupConfigServiceImpl implements GroupConfigService {
         try {
             TaskAccess<RetryDeadLetter> retryTaskAccess = accessTemplate.getRetryDeadLetterAccess();
             retryTaskAccess.one(groupConfig.getGroupName(), namespaceId,
-                    new LambdaQueryWrapper<RetryDeadLetter>().eq(RetryDeadLetter::getId, 1));
+                new LambdaQueryWrapper<RetryDeadLetter>().eq(RetryDeadLetter::getId, 1));
         } catch (BadSqlGrammarException e) {
             Optional.ofNullable(e.getMessage()).ifPresent(s -> {
                 if (s.contains("retry_dead_letter_" + groupConfig.getGroupPartition()) && s.contains("doesn't exist")) {
                     throw new SnailJobServerException("分区:[{}] '未配置表retry_dead_letter_{}', 请联系管理员进行配置",
-                            groupConfig.getGroupPartition(), groupConfig.getGroupPartition());
+                        groupConfig.getGroupPartition(), groupConfig.getGroupPartition());
                 }
             });
         }
@@ -275,12 +279,12 @@ public class GroupConfigServiceImpl implements GroupConfigService {
 
         ConfigAccess<GroupConfig> groupConfigAccess = accessTemplate.getGroupConfigAccess();
         GroupConfig groupConfig = groupConfigAccess.one(
-                new LambdaQueryWrapper<GroupConfig>()
-                        .eq(GroupConfig::getNamespaceId, UserSessionUtils.currentUserSession().getNamespaceId())
-                        .eq(GroupConfig::getGroupName, groupName));
+            new LambdaQueryWrapper<GroupConfig>()
+                .eq(GroupConfig::getNamespaceId, UserSessionUtils.currentUserSession().getNamespaceId())
+                .eq(GroupConfig::getGroupName, groupName));
 
         GroupConfigResponseVO groupConfigResponseVO = GroupConfigResponseVOConverter.INSTANCE.convert(
-                groupConfig);
+            groupConfig);
 
         Optional.ofNullable(IdGeneratorModeEnum.modeOf(groupConfig.getIdGeneratorMode())).ifPresent(idGeneratorMode -> {
             groupConfigResponseVO.setIdGeneratorModeName(idGeneratorMode.getDesc());
@@ -295,21 +299,21 @@ public class GroupConfigServiceImpl implements GroupConfigService {
         ConfigAccess<GroupConfig> groupConfigAccess = accessTemplate.getGroupConfigAccess();
 
         List<GroupConfig> groupConfigs = groupConfigAccess.list(
-                new LambdaQueryWrapper<GroupConfig>()
-                        .select(GroupConfig::getGroupName, GroupConfig::getNamespaceId)
-                        .in(CollUtil.isNotEmpty(namespaceIds), GroupConfig::getNamespaceId, namespaceIds));
+            new LambdaQueryWrapper<GroupConfig>()
+                .select(GroupConfig::getGroupName, GroupConfig::getNamespaceId)
+                .in(CollUtil.isNotEmpty(namespaceIds), GroupConfig::getNamespaceId, namespaceIds));
         if (CollUtil.isEmpty(groupConfigs)) {
             return Collections.emptyList();
         }
 
         List<Namespace> namespaces = namespaceMapper.selectList(
-                new LambdaQueryWrapper<Namespace>()
-                        .in(Namespace::getUniqueId, StreamUtils.toSet(groupConfigs, GroupConfig::getNamespaceId)));
+            new LambdaQueryWrapper<Namespace>()
+                .in(Namespace::getUniqueId, StreamUtils.toSet(groupConfigs, GroupConfig::getNamespaceId)));
 
         Map<String, String> namespaceMap = StreamUtils.toMap(namespaces, Namespace::getUniqueId, Namespace::getName);
 
         List<GroupConfigResponseVO> groupConfigResponses = GroupConfigResponseVOConverter.INSTANCE.convertList(
-                groupConfigs);
+            groupConfigs);
         for (final GroupConfigResponseVO groupConfigResponseVO : groupConfigResponses) {
             groupConfigResponseVO.setNamespaceName(namespaceMap.get(groupConfigResponseVO.getNamespaceId()));
         }
@@ -327,8 +331,8 @@ public class GroupConfigServiceImpl implements GroupConfigService {
 
         ConfigAccess<GroupConfig> groupConfigAccess = accessTemplate.getGroupConfigAccess();
         List<GroupConfig> groupConfigs = groupConfigAccess.list(new LambdaQueryWrapper<GroupConfig>()
-                .eq(GroupConfig::getNamespaceId, userSessionVO.getNamespaceId())
-                .select(GroupConfig::getGroupName));
+            .eq(GroupConfig::getNamespaceId, userSessionVO.getNamespaceId())
+            .select(GroupConfig::getGroupName));
 
         return StreamUtils.toList(groupConfigs, GroupConfig::getGroupName);
     }
@@ -336,9 +340,9 @@ public class GroupConfigServiceImpl implements GroupConfigService {
     @Override
     public List<String> getOnlinePods(String groupName) {
         List<ServerNode> serverNodes = serverNodeMapper.selectList(
-                new LambdaQueryWrapper<ServerNode>()
-                        .eq(ServerNode::getNamespaceId, UserSessionUtils.currentUserSession().getNamespaceId())
-                        .eq(ServerNode::getGroupName, groupName));
+            new LambdaQueryWrapper<ServerNode>()
+                .eq(ServerNode::getNamespaceId, UserSessionUtils.currentUserSession().getNamespaceId())
+                .eq(ServerNode::getGroupName, groupName));
         return StreamUtils.toList(serverNodes, serverNode -> serverNode.getHostIp() + ":" + serverNode.getHostPort());
     }
 
@@ -368,8 +372,8 @@ public class GroupConfigServiceImpl implements GroupConfigService {
             }
 
             return tableList.stream().map(ReUtil::getFirstNumber).filter(i ->
-                            !Objects.isNull(i)).distinct()
-                    .collect(Collectors.toList());
+                    !Objects.isNull(i)).distinct()
+                .collect(Collectors.toList());
         } catch (SQLException ignored) {
         } finally {
             if (Objects.nonNull(connection)) {
@@ -381,6 +385,47 @@ public class GroupConfigServiceImpl implements GroupConfigService {
         }
 
         return Lists.newArrayList();
+    }
+
+    @Override
+    @Transactional
+    public void importGroup(final List<GroupConfigRequestVO> requestList) {
+        String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
+
+        Set<String> groupSet = StreamUtils.toSet(requestList, GroupConfigRequestVO::getGroupName);
+        ConfigAccess<GroupConfig> groupConfigAccess = accessTemplate.getGroupConfigAccess();
+        Assert.isTrue(groupConfigAccess.count(new LambdaQueryWrapper<GroupConfig>()
+                .eq(GroupConfig::getNamespaceId, namespaceId)
+                .in(GroupConfig::getGroupName, groupSet)) == 0,
+            () -> new SnailJobServerException("GroupName已经存在 {}", groupSet));
+
+        for (final GroupConfigRequestVO groupConfigRequestVO : requestList) {
+
+            // 保存组配置
+            doSaveGroupConfig(namespaceId, groupConfigRequestVO);
+
+            // 保存生成唯一id配置
+            doSaveSequenceAlloc(namespaceId, groupConfigRequestVO);
+
+        }
+
+    }
+
+    @Override
+    public String exportGroup(final Set<Long> groupIds) {
+        String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
+
+        List<GroupConfig> groupConfigs = accessTemplate.getGroupConfigAccess().list(
+            new LambdaQueryWrapper<GroupConfig>()
+                .eq(GroupConfig::getNamespaceId, namespaceId)
+                .in(GroupConfig::getId, groupIds)
+        );
+
+        SetView<Long> notExistedGroupIdSet = Sets.difference(groupIds,
+            StreamUtils.toSet(groupConfigs, GroupConfig::getId));
+
+        Assert.isTrue(groupIds.size() == groupConfigs.size(), () -> new SnailJobServerException("导出失败. 组ID{}不存在", notExistedGroupIdSet));
+        return JsonUtil.toJsonString(GroupConfigConverter.INSTANCE.toGroupConfigRequestVOs(groupConfigs));
     }
 
 }
