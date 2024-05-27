@@ -30,5 +30,4 @@ public interface SceneConfigService {
 
     String exportSceneConfig(Set<Long> sceneIds);
 
-    void batchCopy(Long targetNamespaceId, Set<Long> sceneIds);
 }

@@ -22,7 +22,6 @@ import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import com.aizuda.snailjob.template.datasource.access.ConfigAccess;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.NamespaceMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.GroupConfig;
-import com.aizuda.snailjob.template.datasource.persistence.po.Namespace;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -31,6 +30,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.units.qual.C;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -190,35 +190,17 @@ public class SceneConfigServiceImpl implements SceneConfigService {
         List<RetrySceneConfig> sceneConfigs = accessTemplate.getSceneConfigAccess()
             .list(new LambdaQueryWrapper<RetrySceneConfig>()
                 .eq(RetrySceneConfig::getNamespaceId, UserSessionUtils.currentUserSession().getNamespaceId())
-                .in(RetrySceneConfig::getId, sceneIds)
+                // TODO 若导出全部需要分页查询，避免一次拉取太多数据
+                .in(CollUtil.isNotEmpty(sceneIds), RetrySceneConfig::getId, sceneIds)
             );
 
-        List<SceneConfigRequestVO> sceneConfigRequestVOs = SceneConfigConverter.INSTANCE.toSceneConfigRequestVOs(
-            sceneConfigs);
-        return JsonUtil.toJsonString(sceneConfigRequestVOs);
+        SetView<Long> notExistedSceneIdSet = Sets.difference(sceneIds,
+            StreamUtils.toSet(sceneConfigs, RetrySceneConfig::getId));
+
+        Assert.isTrue(sceneIds.size() == sceneConfigs.size(), () -> new SnailJobServerException("导出失败. 场景ID{}不存在", notExistedSceneIdSet));
+        return JsonUtil.toJsonString(SceneConfigConverter.INSTANCE.toSceneConfigRequestVOs(sceneConfigs));
     }
 
-    @Override
-    @Transactional
-    public void batchCopy(final Long targetNamespaceId, final Set<Long> sceneIds) {
-        Assert.notEmpty(sceneIds, () -> new SnailJobServerException("参数错误"));
-
-        Namespace namespace = namespaceMapper.selectById(targetNamespaceId);
-        Assert.notNull(namespace, () -> new SnailJobServerException("空间不存在"));
-
-        List<RetrySceneConfig> sceneConfigs = accessTemplate.getSceneConfigAccess()
-            .list(new LambdaQueryWrapper<RetrySceneConfig>()
-                .eq(RetrySceneConfig::getNamespaceId, UserSessionUtils.currentUserSession().getNamespaceId())
-                .in(RetrySceneConfig::getId, sceneIds)
-            );
-
-        Assert.isTrue(sceneIds.size() == sceneConfigs.size(), () -> new SnailJobServerException("存在部分场景配置不存在"));
-
-        List<SceneConfigRequestVO> sceneConfigRequestVOs = SceneConfigConverter.INSTANCE.toSceneConfigRequestVOs(
-            sceneConfigs);
-        // 批量写入
-        batchSaveSceneConfig(sceneConfigRequestVOs, namespace.getUniqueId());
-    }
 
     private void batchSaveSceneConfig(final List<SceneConfigRequestVO> requests, final String namespaceId) {
 
@@ -240,8 +222,8 @@ public class SceneConfigServiceImpl implements SceneConfigService {
         SetView<String> notExistedGroupNameSet = Sets.difference(groupNameSet,
             StreamUtils.toSet(groupConfigs, GroupConfig::getGroupName));
 
-        Assert.notEmpty(notExistedGroupNameSet,
-            () -> new SnailJobServerException("组:{}不存在", notExistedGroupNameSet));
+        Assert.isTrue(CollUtil.isEmpty(notExistedGroupNameSet),
+            () -> new SnailJobServerException("导入失败. 原因: 组{}不存在", notExistedGroupNameSet));
 
         ConfigAccess<RetrySceneConfig> sceneConfigAccess = accessTemplate.getSceneConfigAccess();
         List<RetrySceneConfig> sceneConfigs = sceneConfigAccess.list(
@@ -249,9 +231,9 @@ public class SceneConfigServiceImpl implements SceneConfigService {
                 .select(RetrySceneConfig::getSceneName)
                 .eq(RetrySceneConfig::getNamespaceId, namespaceId)
                 .in(RetrySceneConfig::getGroupName, groupNameSet)
-                .eq(RetrySceneConfig::getSceneName, sceneNameSet));
+                .in(RetrySceneConfig::getSceneName, sceneNameSet));
 
-        Assert.isTrue(CollUtil.isEmpty(sceneConfigs), () -> new SnailJobServerException("场景:{}已存在",
+        Assert.isTrue(CollUtil.isEmpty(sceneConfigs), () -> new SnailJobServerException("导入失败. 原因:场景{}已存在",
             StreamUtils.toSet(sceneConfigs, RetrySceneConfig::getSceneName)));
 
         LocalDateTime now = LocalDateTime.now();

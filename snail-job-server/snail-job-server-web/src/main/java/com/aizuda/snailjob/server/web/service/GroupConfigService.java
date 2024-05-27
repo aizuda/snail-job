@@ -3,10 +3,10 @@ package com.aizuda.snailjob.server.web.service;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.GroupConfigQueryVO;
 import com.aizuda.snailjob.server.web.model.request.GroupConfigRequestVO;
-import com.aizuda.snailjob.server.web.model.request.UserSessionVO;
 import com.aizuda.snailjob.server.web.model.response.GroupConfigResponseVO;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author: opensnail
@@ -14,7 +14,7 @@ import java.util.List;
  */
 public interface GroupConfigService {
 
-    Boolean addGroup(UserSessionVO systemUser, GroupConfigRequestVO groupConfigRequestVO);
+    Boolean addGroup(GroupConfigRequestVO groupConfigRequestVO);
 
     Boolean updateGroup(GroupConfigRequestVO groupConfigRequestVO);
 
@@ -31,4 +31,8 @@ public interface GroupConfigService {
     List<String> getOnlinePods(String groupName);
 
     List<Integer> getTablePartitionList();
+
+    void importGroup(List<GroupConfigRequestVO> requestVOS);
+
+    String exportGroup(Set<Long> groupIds);
 }
