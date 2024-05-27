@@ -80,9 +80,9 @@ public class SceneConfigController {
         return sceneConfigService.updateSceneConfig(requestVO);
     }
 
-    @PostMapping("/import")
     @LoginRequired
-    public void importScene(final MultipartFile file) throws IOException {
+    @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public void importScene(@RequestPart("file") MultipartFile file) throws IOException {
         if (file.isEmpty()) {
             throw new SnailJobCommonException("Please select a file to upload");
         }
@@ -95,7 +95,7 @@ public class SceneConfigController {
 
         JsonNode node = JsonUtil.toJson(file.getBytes());
         List<SceneConfigRequestVO> requestList = JsonUtil.parseList(JsonUtil.toJsonString(node),
-            SceneConfigRequestVO.class);
+                SceneConfigRequestVO.class);
 
         // 校验参数是否合法
         for (final SceneConfigRequestVO sceneConfigRequestVO : requestList) {
@@ -123,11 +123,11 @@ public class SceneConfigController {
         // 设置下载时的文件名称
         String fileName = String.format("retry-scene-%s.json", DateUtils.toNowFormat(DateUtils.PURE_DATETIME_MS_PATTERN));
         String disposition = "attachment; filename=" +
-        new String(fileName.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1);
+                new String(fileName.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1);
         headers.add(HttpHeaders.CONTENT_DISPOSITION, disposition);
         return ResponseEntity.ok()
-            .headers(headers)
-            .body(configs);
+                .headers(headers)
+                .body(configs);
     }
 
 }
