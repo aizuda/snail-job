@@ -31,6 +31,7 @@ import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.common.log.enums.LogTypeEnum;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Valid;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
@@ -38,6 +39,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.validation.annotation.Validated;
 
 import java.lang.reflect.Method;
 import java.util.Objects;
@@ -52,6 +54,7 @@ import static com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH
  * @date : 2022-03-09 16:33
  */
 @SnailEndPoint
+@Validated
 public class SnailRetryEndPoint {
 
     @Autowired
@@ -62,14 +65,7 @@ public class SnailRetryEndPoint {
      * 服务端调度重试入口
      */
     @Mapping(path = RETRY_DISPATCH, method = RequestMethod.POST)
-    public Result<DispatchRetryResultDTO> dispatch(DispatchRetryDTO executeReqDto) {
-
-        ValidatorFactory vf = Validation.buildDefaultValidatorFactory();
-        Validator validator = vf.getValidator();
-        Set<ConstraintViolation<DispatchRetryDTO>> set = validator.validate(executeReqDto);
-        for (final ConstraintViolation<DispatchRetryDTO> violation : set) {
-            return new Result<>(violation.getMessage(), null);
-        }
+    public Result<DispatchRetryResultDTO> dispatch(@Valid DispatchRetryDTO executeReqDto) {
 
         RetryerInfo retryerInfo = RetryerInfoCache.get(executeReqDto.getScene(), executeReqDto.getExecutorName());
         if (Objects.isNull(retryerInfo)) {
@@ -148,7 +144,7 @@ public class SnailRetryEndPoint {
 
 
     @Mapping(path = RETRY_CALLBACK, method = RequestMethod.POST)
-    public Result callback(RetryCallbackDTO callbackDTO) {
+    public Result callback(@Valid RetryCallbackDTO callbackDTO) {
 
         ValidatorFactory vf = Validation.buildDefaultValidatorFactory();
         Validator validator = vf.getValidator();
@@ -266,7 +262,7 @@ public class SnailRetryEndPoint {
      * @return idempotentId
      */
     @Mapping(path = RETRY_GENERATE_IDEM_ID, method = RequestMethod.POST)
-    public Result<String> idempotentIdGenerate(
+    public Result<String> idempotentIdGenerate(@Valid
             GenerateRetryIdempotentIdDTO generateRetryIdempotentIdDTO) {
 
         ValidatorFactory vf = Validation.buildDefaultValidatorFactory();

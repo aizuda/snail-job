@@ -19,9 +19,11 @@ import com.aizuda.snailjob.common.core.model.Result;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.common.log.enums.LogTypeEnum;
 import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Valid;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.Objects;
 import java.util.Set;
@@ -35,17 +37,11 @@ import static com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH
  * @date : 2023-09-27 16:33
  */
 @SnailEndPoint
+@Validated
 public class JobEndPoint {
 
     @Mapping(path = JOB_DISPATCH, method = RequestMethod.POST)
-    public Result<Boolean> dispatchJob(DispatchJobRequest dispatchJob) {
-
-        ValidatorFactory vf = Validation.buildDefaultValidatorFactory();
-        Validator validator = vf.getValidator();
-        Set<ConstraintViolation<DispatchJobRequest>> set = validator.validate(dispatchJob);
-        for (final ConstraintViolation<DispatchJobRequest> violation : set) {
-            return new Result<>(violation.getMessage(), Boolean.FALSE);
-        }
+    public Result<Boolean> dispatchJob(@Valid DispatchJobRequest dispatchJob) {
 
         try {
             JobContext jobContext = buildJobContext(dispatchJob);
@@ -118,7 +114,7 @@ public class JobEndPoint {
     }
 
     @Mapping(path = JOB_STOP, method = RequestMethod.POST)
-    public Result<Boolean> stopJob(StopJobDTO interruptJob) {
+    public Result<Boolean> stopJob(@Valid StopJobDTO interruptJob) {
 
         ValidatorFactory vf = Validation.buildDefaultValidatorFactory();
         Validator validator = vf.getValidator();
