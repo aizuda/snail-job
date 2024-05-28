@@ -7,6 +7,7 @@ import com.aizuda.snailjob.server.web.model.request.JobUpdateJobStatusRequestVO;
 import com.aizuda.snailjob.server.web.model.response.JobResponseVO;
 import com.aizuda.snailjob.template.datasource.persistence.po.Job;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 
 import java.util.List;
 import java.util.Set;
@@ -39,7 +40,7 @@ public interface JobService {
 
     List<JobResponseVO> getJobList(String groupName);
 
-    void importJobs(List<JobRequestVO> requestList);
+    void importJobs(@Valid @NotEmpty(message = "导入数据不能为空") List<JobRequestVO> requestList);
 
     String exportJobs(Set<Long> jobIds);
 
