@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.web.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.client.model.GenerateRetryIdempotentIdDTO;
@@ -49,7 +50,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -281,7 +281,7 @@ public class RetryTaskServiceImpl implements RetryTaskService {
             }
 
             List<RetryTaskDTO> retryTaskList = JsonUtil.parseList(extractedData, RetryTaskDTO.class);
-            if (!CollectionUtils.isEmpty(retryTaskList)) {
+            if (CollUtil.isNotEmpty(retryTaskList)) {
                 waitInsertList.addAll(retryTaskList);
             }
         }

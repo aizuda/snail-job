@@ -2,21 +2,20 @@ package com.aizuda.snailjob.server.retry.task.support.dispatch.actor.result;
 
 import akka.actor.AbstractActor;
 import cn.hutool.core.lang.Assert;
-import cn.hutool.core.lang.Pair;
 import com.aizuda.snailjob.common.core.enums.RetryStatusEnum;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.IdempotentStrategy;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
+import com.aizuda.snailjob.server.common.triple.ImmutableTriple;
 import com.aizuda.snailjob.server.retry.task.support.handler.CallbackRetryTaskHandler;
+import com.aizuda.snailjob.server.retry.task.support.idempotent.IdempotentHolder;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskLogMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTaskLog;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -37,21 +36,13 @@ import java.time.LocalDateTime;
  */
 @Component(ActorGenerator.FINISH_ACTOR)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-@Slf4j
+@RequiredArgsConstructor
 public class FinishActor extends AbstractActor {
-
-
-    @Autowired
-    private AccessTemplate accessTemplate;
-    @Autowired
-    private CallbackRetryTaskHandler callbackRetryTaskHandler;
-    @Autowired
-    private TransactionTemplate transactionTemplate;
-    @Autowired
-    @Qualifier("retryIdempotentStrategyHandler")
-    private IdempotentStrategy<Pair<String/*groupName*/, String/*namespaceId*/>, Long> idempotentStrategy;
-    @Autowired
-    private RetryTaskLogMapper retryTaskLogMapper;
+    private final IdempotentStrategy<String> idempotentStrategy = IdempotentHolder.getRetryIdempotent();
+    private final AccessTemplate accessTemplate;
+    private final CallbackRetryTaskHandler callbackRetryTaskHandler;
+    private final TransactionTemplate transactionTemplate;
+    private final RetryTaskLogMapper retryTaskLogMapper;
 
     @Override
     public Receive createReceive() {
@@ -89,8 +80,8 @@ public class FinishActor extends AbstractActor {
                 SnailJobLog.LOCAL.error("更新重试任务失败", e);
             } finally {
                 // 清除幂等标识位
-                idempotentStrategy.clear(Pair.of(retryTask.getGroupName(), retryTask.getNamespaceId()), retryTask.getId());
-
+                idempotentStrategy.clear(
+                    ImmutableTriple.of(retryTask.getGroupName(), retryTask.getNamespaceId(), retryTask.getId()).toString());
                 getContext().stop(getSelf());
 
             }

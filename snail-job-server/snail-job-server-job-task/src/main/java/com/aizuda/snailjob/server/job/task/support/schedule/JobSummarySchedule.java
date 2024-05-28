@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.job.task.support.schedule;
 
+import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
@@ -20,7 +21,6 @@ import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -106,12 +106,12 @@ public class JobSummarySchedule extends AbstractSchedule implements Lifecycle {
                 }
 
                 int updateTotalJobSummary = 0;
-                if (!CollectionUtils.isEmpty(waitUpdates)) {
+                if (CollUtil.isNotEmpty(waitUpdates)) {
                     updateTotalJobSummary = jobSummaryMapper.updateBatch(waitUpdates);
                 }
 
                 int insertTotalJobSummary = 0;
-                if (!CollectionUtils.isEmpty(waitInserts)) {
+                if (CollUtil.isNotEmpty(waitInserts)) {
                     insertTotalJobSummary = jobSummaryMapper.insertBatch(waitInserts);
                 }
 

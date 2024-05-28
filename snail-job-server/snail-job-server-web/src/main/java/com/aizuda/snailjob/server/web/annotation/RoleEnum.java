@@ -40,6 +40,14 @@ public enum RoleEnum {
         return enumTypeMap;
     }
 
+    public static boolean isAdmin(Integer roleId) {
+        return ADMIN.getRoleId().equals(roleId);
+    }
+
+    public static boolean isUser(Integer roleId) {
+        return USER.getRoleId().equals(roleId);
+    }
+
     public Integer getRoleId() {
         return roleId;
     }

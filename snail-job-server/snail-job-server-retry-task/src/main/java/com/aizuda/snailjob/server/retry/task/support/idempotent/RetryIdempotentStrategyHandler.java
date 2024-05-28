@@ -1,13 +1,10 @@
 package com.aizuda.snailjob.server.retry.task.support.idempotent;
 
-import cn.hutool.core.lang.Pair;
 import com.aizuda.snailjob.server.common.IdempotentStrategy;
-import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import org.springframework.stereotype.Component;
 
-import java.text.MessageFormat;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -17,10 +14,9 @@ import java.util.concurrent.TimeUnit;
  * @date : 2021-11-23 09:26
  */
 @Component
-public class RetryIdempotentStrategyHandler implements IdempotentStrategy<Pair<String/*groupName*/, String/*namespaceId*/>, Long> {
-    private static final String KEY_FORMAT = "{0}_{1}_{2}";
+public class RetryIdempotentStrategyHandler implements IdempotentStrategy<String> {
 
-    private static final Cache<String, Long> cache;
+    private static final Cache<String, String> cache;
 
     static {
         cache = CacheBuilder.newBuilder()
@@ -30,28 +26,21 @@ public class RetryIdempotentStrategyHandler implements IdempotentStrategy<Pair<S
     }
 
     @Override
-    public boolean set(Pair<String/*groupName*/, String/*namespaceId*/> pair, Long value) {
-        cache.put(getKey(pair, value), value);
+    public boolean set(String key) {
+        cache.put(key, key);
         return Boolean.TRUE;
     }
 
+
     @Override
-    public Long get(Pair<String/*groupName*/, String/*namespaceId*/> pair) {
-        throw new SnailJobServerException("不支持的操作");
+    public boolean isExist(String key) {
+        return cache.asMap().containsKey(key);
     }
 
     @Override
-    public boolean isExist(Pair<String/*groupName*/, String/*namespaceId*/> pair, Long value) {
-        return cache.asMap().containsKey(getKey(pair, value));
-    }
-
-    @Override
-    public boolean clear(Pair<String/*groupName*/, String/*namespaceId*/> pair, Long value) {
-        cache.invalidate(getKey(pair, value));
+    public boolean clear(String key) {
+        cache.invalidate(key);
         return Boolean.TRUE;
     }
 
-    private static String getKey(Pair<String/*groupName*/, String/*namespaceId*/> pair, final Long value) {
-        return MessageFormat.format(KEY_FORMAT, pair.getKey(), pair.getValue(), value);
-    }
 }

@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.retry.task.support.dispatch.actor.scan;
 
+import com.aizuda.snailjob.server.common.TimerTask;
 import com.aizuda.snailjob.server.common.WaitStrategy;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.common.strategy.WaitStrategies.WaitStrategyContext;
@@ -11,7 +12,6 @@ import com.aizuda.snailjob.server.retry.task.support.dispatch.task.TaskExecutorS
 import com.aizuda.snailjob.server.retry.task.support.timer.CallbackTimerTask;
 import com.aizuda.snailjob.server.retry.task.support.timer.RetryTimerContext;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
-import io.netty.util.TimerTask;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -72,7 +72,7 @@ public class ScanCallbackTaskActor extends AbstractScanGroup {
     }
 
     @Override
-    protected TimerTask timerTask(final RetryPartitionTask partitionTask) {
+    protected TimerTask<String> timerTask(final RetryPartitionTask partitionTask) {
         RetryTimerContext retryTimerContext = RetryTaskConverter.INSTANCE.toRetryTimerContext(partitionTask);
         retryTimerContext.setScene(taskActuatorScene());
         return new CallbackTimerTask(retryTimerContext);

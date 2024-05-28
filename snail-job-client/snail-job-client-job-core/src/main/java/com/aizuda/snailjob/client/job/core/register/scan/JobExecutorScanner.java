@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.client.job.core.register.scan;
 
+import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.client.job.core.IJobExecutor;
 import com.aizuda.snailjob.client.job.core.Scanner;
 import com.aizuda.snailjob.client.job.core.annotation.JobExecutor;
@@ -15,7 +16,6 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Method;
@@ -86,7 +86,7 @@ public class JobExecutorScanner implements Scanner, ApplicationContextAware {
 
             }
 
-            if (CollectionUtils.isEmpty(annotatedMethods)) {
+            if (CollUtil.isEmpty(annotatedMethods)) {
                 continue;
             }
 

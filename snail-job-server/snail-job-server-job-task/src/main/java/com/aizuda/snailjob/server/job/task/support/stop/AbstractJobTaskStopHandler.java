@@ -1,6 +1,7 @@
 package com.aizuda.snailjob.server.job.task.support.stop;
 
 import akka.actor.ActorRef;
+import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskStatusEnum;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
@@ -14,7 +15,6 @@ import com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 
@@ -44,7 +44,7 @@ public abstract class AbstractJobTaskStopHandler implements JobTaskStopHandler, 
 
         List<JobTask> jobTasks = jobTaskMapper.selectList(queryWrapper);
 
-        if (CollectionUtils.isEmpty(jobTasks)) {
+        if (CollUtil.isEmpty(jobTasks)) {
             // 若没有任务项，直接变更状态为已停止
             JobTaskBatch jobTaskBatch = new JobTaskBatch();
             jobTaskBatch.setId(context.getTaskBatchId());

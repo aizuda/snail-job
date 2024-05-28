@@ -7,6 +7,7 @@ import com.aizuda.snailjob.server.common.IdempotentStrategy;
 import com.aizuda.snailjob.server.common.cache.CacheRegisterTable;
 import com.aizuda.snailjob.server.common.dto.DistributeInstance;
 import com.aizuda.snailjob.server.common.dto.RegisterNodeInfo;
+import com.aizuda.snailjob.server.common.triple.ImmutableTriple;
 import com.aizuda.snailjob.server.retry.task.support.FilterStrategy;
 import com.aizuda.snailjob.server.retry.task.support.RetryContext;
 import com.aizuda.snailjob.server.retry.task.support.cache.CacheGroupRateLimiter;
@@ -49,7 +50,7 @@ public class FilterStrategies {
      *
      * @return {@link BitSetIdempotentFilterStrategies} BitSet幂等的过滤策略
      */
-    public static FilterStrategy bitSetIdempotentFilter(IdempotentStrategy<Pair<String/*groupName*/, String/*namespaceId*/>, Long> idempotentStrategy) {
+    public static FilterStrategy bitSetIdempotentFilter(IdempotentStrategy<String> idempotentStrategy) {
         return new BitSetIdempotentFilterStrategies(idempotentStrategy);
     }
 
@@ -123,17 +124,16 @@ public class FilterStrategies {
      */
     private static final class BitSetIdempotentFilterStrategies implements FilterStrategy {
 
-        private IdempotentStrategy<Pair<String/*groupName*/, String/*namespaceId*/>, Long> idempotentStrategy;
+        private final IdempotentStrategy<String> idempotentStrategy;
 
-        public BitSetIdempotentFilterStrategies(IdempotentStrategy<Pair<String/*groupName*/, String/*namespaceId*/>, Long> idempotentStrategy) {
+        public BitSetIdempotentFilterStrategies(IdempotentStrategy<String> idempotentStrategy) {
             this.idempotentStrategy = idempotentStrategy;
         }
 
         @Override
         public Pair<Boolean /*是否符合条件*/, StringBuilder/*描述信息*/> filter(RetryContext retryContext) {
             RetryTask retryTask = retryContext.getRetryTask();
-
-            boolean result = !idempotentStrategy.isExist(Pair.of(retryTask.getGroupName(), retryTask.getNamespaceId()), retryTask.getId());
+            boolean result = !idempotentStrategy.isExist(ImmutableTriple.of(retryTask.getGroupName(), retryTask.getNamespaceId(), retryTask.getId()).toString());
             StringBuilder description = new StringBuilder();
             if (!result) {
                 description.append(MessageFormat.format("存在执行中的任务.uniqueId:[{0}]", retryTask.getUniqueId()));

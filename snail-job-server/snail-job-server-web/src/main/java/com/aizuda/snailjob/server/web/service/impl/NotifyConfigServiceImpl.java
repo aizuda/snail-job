@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.web.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
@@ -33,7 +34,6 @@ import com.google.common.collect.Maps;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -66,7 +66,7 @@ public class NotifyConfigServiceImpl implements NotifyConfigService {
                                 .orderByDesc(NotifyConfig::getId))
                 .getRecords();
 
-        if (CollectionUtils.isEmpty(notifyConfigs)) {
+        if (CollUtil.isEmpty(notifyConfigs)) {
             return new PageResult<>(pageDTO, Lists.newArrayList());
         }
 
@@ -101,7 +101,7 @@ public class NotifyConfigServiceImpl implements NotifyConfigService {
                         responseVO.getSystemTaskType().equals(SyetemTaskTypeEnum.WORKFLOW.getType()))
                 .map(responseVO -> Long.parseLong(responseVO.getBusinessId()))
                 .collect(Collectors.toSet());
-        if (!CollectionUtils.isEmpty(workflowIds)) {
+        if (CollUtil.isNotEmpty(workflowIds)) {
             List<Workflow> workflows = workflowMapper.selectBatchIds(workflowIds);
             return StreamUtils.toMap(workflows, Workflow::getId, Workflow::getWorkflowName);
         }
@@ -114,7 +114,7 @@ public class NotifyConfigServiceImpl implements NotifyConfigService {
                         responseVO.getSystemTaskType().equals(SyetemTaskTypeEnum.JOB.getType()))
                 .map(responseVO -> Long.parseLong(responseVO.getBusinessId()))
                 .collect(Collectors.toSet());
-        if (!CollectionUtils.isEmpty(jobIds)) {
+        if (CollUtil.isNotEmpty(jobIds)) {
             List<Job> jobs = jobMapper.selectBatchIds(jobIds);
             return StreamUtils.toMap(jobs, Job::getId, Job::getJobName);
         }
@@ -127,7 +127,7 @@ public class NotifyConfigServiceImpl implements NotifyConfigService {
         Set<Long> recipientIds = StreamUtils.toSetByFlatMap(notifyConfigResponseVOS,
                 NotifyConfigResponseVO::getRecipientIds, Collection::stream);
 
-        if (CollectionUtils.isEmpty(recipientIds)) {
+        if (CollUtil.isEmpty(recipientIds)) {
             return Maps.newHashMap();
         }
 

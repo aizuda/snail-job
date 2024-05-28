@@ -4,6 +4,7 @@ import com.aizuda.snailjob.common.core.context.SpringContext;
 import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.snailjob.common.log.SnailJobLog;
+import com.aizuda.snailjob.server.common.TimerTask;
 import com.aizuda.snailjob.server.job.task.support.alarm.event.WorkflowTaskFailAlarmEvent;
 import com.aizuda.snailjob.server.job.task.support.handler.WorkflowBatchHandler;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowTaskBatchMapper;
@@ -11,6 +12,7 @@ import com.aizuda.snailjob.template.datasource.persistence.po.WorkflowTaskBatch;
 import io.netty.util.Timeout;
 import lombok.AllArgsConstructor;
 
+import java.text.MessageFormat;
 import java.util.Objects;
 
 /**
@@ -19,7 +21,9 @@ import java.util.Objects;
  * @since sj_1.0.0
  */
 @AllArgsConstructor
-public class WorkflowTimeoutCheckTask implements TimerTask<Long> {
+public class WorkflowTimeoutCheckTask implements TimerTask<String> {
+    private static final String IDEMPOTENT_KEY_PREFIX = "workflow_timeout_check_{0}";
+
     private final Long workflowTaskBatchId;
 
     @Override
@@ -40,7 +44,7 @@ public class WorkflowTimeoutCheckTask implements TimerTask<Long> {
     }
 
     @Override
-    public Long getUniqueId() {
-        return workflowTaskBatchId;
+    public String idempotentKey() {
+        return MessageFormat.format(IDEMPOTENT_KEY_PREFIX, workflowTaskBatchId);
     }
 }

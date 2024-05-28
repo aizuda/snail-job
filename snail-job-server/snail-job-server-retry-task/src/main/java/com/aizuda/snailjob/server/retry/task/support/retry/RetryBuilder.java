@@ -1,11 +1,11 @@
 package com.aizuda.snailjob.server.retry.task.support.retry;
 
+import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.server.common.WaitStrategy;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.retry.task.support.FilterStrategy;
 import com.aizuda.snailjob.server.retry.task.support.RetryContext;
 import com.aizuda.snailjob.server.retry.task.support.StopStrategy;
-import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 
@@ -32,7 +32,7 @@ public class RetryBuilder<V> {
     }
 
     public RetryBuilder<V> withFilterStrategy(FilterStrategy filterStrategy) {
-        if (CollectionUtils.isEmpty(filterStrategies)) {
+        if (CollUtil.isEmpty(filterStrategies)) {
             filterStrategies = new ArrayList<>();
         }
 
@@ -41,7 +41,7 @@ public class RetryBuilder<V> {
     }
 
     public RetryBuilder<V> withStopStrategy(StopStrategy stopStrategy) {
-        if (CollectionUtils.isEmpty(stopStrategies)) {
+        if (CollUtil.isEmpty(stopStrategies)) {
             stopStrategies = new ArrayList<>();
         }
 
@@ -64,13 +64,13 @@ public class RetryBuilder<V> {
             throw new SnailJobServerException("retryContext 不能为null");
         }
 
-        if (CollectionUtils.isEmpty(stopStrategies)) {
+        if (CollUtil.isEmpty(stopStrategies)) {
             stopStrategies = Collections.EMPTY_LIST;
         } else {
             stopStrategies.sort(Comparator.comparingInt(StopStrategy::order));
         }
 
-        if (CollectionUtils.isEmpty(filterStrategies)) {
+        if (CollUtil.isEmpty(filterStrategies)) {
             filterStrategies = Collections.EMPTY_LIST;
         } else {
             filterStrategies.sort(Comparator.comparingInt(FilterStrategy::order));

@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.retry.task.support.schedule;
 
+import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.common.core.alarm.Alarm;
 import com.aizuda.snailjob.common.core.alarm.AlarmContext;
 import com.aizuda.snailjob.common.core.alarm.SnailJobAlarmFactory;
@@ -30,7 +31,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -128,7 +128,7 @@ public class RetryErrorMoreThresholdAlarmSchedule extends AbstractSchedule imple
                         .eq(NotifyConfig::getNotifyScene, RetryNotifySceneEnum.MAX_RETRY_ERROR.getNotifyScene()))
                 .getRecords();
 
-        if (CollectionUtils.isEmpty(notifyConfigs)) {
+        if (CollUtil.isEmpty(notifyConfigs)) {
             return Lists.newArrayList();
         }
 
@@ -141,7 +141,7 @@ public class RetryErrorMoreThresholdAlarmSchedule extends AbstractSchedule imple
                     return set;
                 }).orElse(new HashSet<>());
 
-        if (CollectionUtils.isEmpty(recipientIds)) {
+        if (CollUtil.isEmpty(recipientIds)) {
             return Lists.newArrayList();
         }
 

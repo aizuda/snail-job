@@ -1,6 +1,7 @@
 package com.aizuda.snailjob.server.job.task.support.handler;
 
 import akka.actor.ActorRef;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.context.SpringContext;
@@ -34,7 +35,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
 import java.util.*;
@@ -62,7 +62,7 @@ public class WorkflowBatchHandler {
         boolean isNeedProcess = true;
         for (Long nodeId : parentIds) {
             List<JobTaskBatch> jobTaskBatchList = currentWorkflowNodeMap.get(nodeId);
-            if (CollectionUtils.isEmpty(jobTaskBatchList)) {
+            if (CollUtil.isEmpty(jobTaskBatchList)) {
                 // 递归查询有执行过的任务批次
                 isNeedProcess = isNeedProcess || checkLeafCompleted(graph, currentWorkflowNodeMap, graph.predecessors(nodeId));
                 continue;
@@ -101,7 +101,7 @@ public class WorkflowBatchHandler {
                 .in(JobTaskBatch::getWorkflowNodeId, graph.nodes())
         );
 
-        if (CollectionUtils.isEmpty(jobTaskBatches)) {
+        if (CollUtil.isEmpty(jobTaskBatches)) {
             return false;
         }
 
@@ -121,7 +121,7 @@ public class WorkflowBatchHandler {
         List<Long> leaves = MutableGraphCache.getLeaves(workflowTaskBatchId, flowInfo);
         for (Long leaf : leaves) {
             List<JobTaskBatch> jobTaskBatchList = currentWorkflowNodeMap.getOrDefault(leaf, Lists.newArrayList());
-            if (CollectionUtils.isEmpty(jobTaskBatchList)) {
+            if (CollUtil.isEmpty(jobTaskBatchList)) {
                 boolean isNeedProcess = checkLeafCompleted(graph, currentWorkflowNodeMap, graph.predecessors(leaf));
                 // 说明当前叶子节点需要处理，但是未处理返回false
                 if (isNeedProcess) {
@@ -184,7 +184,7 @@ public class WorkflowBatchHandler {
                 .in(JobTaskBatch::getTaskBatchStatus, NOT_COMPLETE)
                 .eq(JobTaskBatch::getWorkflowTaskBatchId, workflowTaskBatchId));
 
-        if (CollectionUtils.isEmpty(jobTaskBatches)) {
+        if (CollUtil.isEmpty(jobTaskBatches)) {
             return;
         }
 
@@ -215,7 +215,7 @@ public class WorkflowBatchHandler {
         String flowInfo = workflowTaskBatch.getFlowInfo();
         MutableGraph<Long> graph = MutableGraphCache.getOrDefault(workflowTaskBatchId, flowInfo);
         Set<Long> successors = graph.successors(SystemConstants.ROOT);
-        if (CollectionUtils.isEmpty(successors)) {
+        if (CollUtil.isEmpty(successors)) {
             return;
         }
 
@@ -240,7 +240,7 @@ public class WorkflowBatchHandler {
         }
 
         Set<Long> successors = graph.successors(parentId);
-        if (CollectionUtils.isEmpty(successors)) {
+        if (CollUtil.isEmpty(successors)) {
             return;
         }
 

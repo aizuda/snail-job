@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.web.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.constant.LogFieldConstants;
 import com.aizuda.snailjob.server.web.model.request.JobLogQueryVO;
@@ -14,7 +15,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -45,7 +45,7 @@ public class JobLogServiceImpl implements JobLogService {
                         .eq(JobLogMessage::getTaskId, queryVO.getTaskId())
                         .orderByAsc(JobLogMessage::getId).orderByAsc(JobLogMessage::getRealTime));
         List<JobLogMessage> records = selectPage.getRecords();
-        if (CollectionUtils.isEmpty(records)) {
+        if (CollUtil.isEmpty(records)) {
 
             JobTaskBatch jobTaskBatch = jobTaskBatchMapper.selectOne(
                     new LambdaQueryWrapper<JobTaskBatch>()

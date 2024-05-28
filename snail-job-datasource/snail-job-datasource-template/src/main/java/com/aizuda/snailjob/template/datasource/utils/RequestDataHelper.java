@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.template.datasource.utils;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.context.SpringContext;
 import com.aizuda.snailjob.template.datasource.exception.SnailJobDatasourceException;
@@ -100,7 +101,7 @@ public class RequestDataHelper {
 
     public static Integer getPartition() {
         Map<String, Object> requestData = getRequestData();
-        if (CollectionUtils.isEmpty(requestData)) {
+        if (CollUtil.isEmpty(requestData)) {
             return null;
         }
 

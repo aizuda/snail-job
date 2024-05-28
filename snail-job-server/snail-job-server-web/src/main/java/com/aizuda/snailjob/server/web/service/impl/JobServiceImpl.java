@@ -1,10 +1,12 @@
 package com.aizuda.snailjob.server.web.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.HashUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
+import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.server.common.WaitStrategy;
 import com.aizuda.snailjob.server.common.config.SystemProperties;
 import com.aizuda.snailjob.server.common.enums.JobTaskExecutorSceneEnum;
@@ -36,10 +38,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * @author opensnail
@@ -49,6 +54,7 @@ import java.util.Optional;
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@Validated
 public class JobServiceImpl implements JobService {
 
     private final SystemProperties systemProperties;
@@ -242,4 +248,22 @@ public class JobServiceImpl implements JobService {
         List<JobResponseVO> jobResponseList = JobResponseVOConverter.INSTANCE.convertList(jobs);
         return jobResponseList;
     }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void importJobs(List<JobRequestVO> requestList) {
+        requestList.forEach(this::saveJob);
+    }
+
+    @Override
+    public String exportJobs(Set<Long> jobIds) {
+        if (CollUtil.isEmpty(jobIds)) {
+            return StrUtil.EMPTY;
+        }
+
+        List<Job> jobList = jobMapper.selectBatchIds(jobIds);
+        jobList.forEach(job -> job.setId(null));
+        return JsonUtil.toJsonString(JobConverter.INSTANCE.convertList(jobList));
+    }
+
 }

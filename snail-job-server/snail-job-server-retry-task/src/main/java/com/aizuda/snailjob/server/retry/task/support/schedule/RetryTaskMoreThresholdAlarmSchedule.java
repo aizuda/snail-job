@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.retry.task.support.schedule;
 
+import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.common.core.alarm.AlarmContext;
 import com.aizuda.snailjob.common.core.alarm.SnailJobAlarmFactory;
 import com.aizuda.snailjob.common.core.enums.RetryNotifySceneEnum;
@@ -28,7 +29,6 @@ import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -127,7 +127,7 @@ public class RetryTaskMoreThresholdAlarmSchedule extends AbstractSchedule implem
                 .flatMap(config -> JsonUtil.parseList(config.getRecipientIds(), Long.class).stream())
                 .collect(Collectors.toSet());
 
-        if (CollectionUtils.isEmpty(recipientIds)) {
+        if (CollUtil.isEmpty(recipientIds)) {
             return Lists.newArrayList();
         }
 

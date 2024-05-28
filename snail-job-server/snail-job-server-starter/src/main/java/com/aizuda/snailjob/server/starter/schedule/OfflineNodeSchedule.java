@@ -14,7 +14,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -56,7 +55,7 @@ public class OfflineNodeSchedule extends AbstractSchedule implements Lifecycle {
             Set<RegisterNodeInfo> waitOffline = allPods.stream().filter(registerNodeInfo -> registerNodeInfo.getExpireAt().isBefore(endTime)).collect(
                     Collectors.toSet());
             Set<String> podIds = StreamUtils.toSet(waitOffline, RegisterNodeInfo::getHostId);
-            if (CollectionUtils.isEmpty(podIds)) {
+            if (CollUtil.isEmpty(podIds)) {
                 return;
             }
 

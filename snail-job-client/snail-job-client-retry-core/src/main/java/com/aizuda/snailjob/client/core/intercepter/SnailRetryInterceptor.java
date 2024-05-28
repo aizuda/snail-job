@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.client.core.intercepter;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.client.common.cache.GroupVersionCache;
@@ -30,7 +31,6 @@ import org.springframework.aop.AfterAdvice;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.env.StandardEnvironment;
-import org.springframework.util.CollectionUtils;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
@@ -46,7 +46,7 @@ import java.util.*;
 public class SnailRetryInterceptor implements MethodInterceptor, AfterAdvice, Serializable, Ordered {
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    private static String retryErrorMoreThresholdTextMessageFormatter =
+    private static final String retryErrorMoreThresholdTextMessageFormatter =
             "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 重试组件异常</font>  \n" +
                     "> IP:{}  \n" +
                     "> 空间ID:{}  \n" +
@@ -278,7 +278,7 @@ public class SnailRetryInterceptor implements MethodInterceptor, AfterAdvice, Se
         Set<Class<? extends Throwable>> exclude = retryerInfo.getExclude();
         Set<Class<? extends Throwable>> include = retryerInfo.getInclude();
 
-        if (CollectionUtils.isEmpty(include) && CollectionUtils.isEmpty(exclude)) {
+        if (CollUtil.isEmpty(include) && CollUtil.isEmpty(exclude)) {
             return true;
         }
 
@@ -288,7 +288,7 @@ public class SnailRetryInterceptor implements MethodInterceptor, AfterAdvice, Se
             }
         }
 
-        if (!CollectionUtils.isEmpty(exclude)) {
+        if (CollUtil.isNotEmpty(exclude)) {
             for (Class<? extends Throwable> e : exclude) {
                 if (e.isAssignableFrom(throwable.getClass())) {
                     return false;

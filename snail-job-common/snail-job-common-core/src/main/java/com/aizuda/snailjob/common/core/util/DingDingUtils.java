@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.common.core.util;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.log.SnailJobLog;
@@ -7,7 +8,6 @@ import com.dingtalk.api.DefaultDingTalkClient;
 import com.dingtalk.api.DingTalkClient;
 import com.dingtalk.api.request.OapiRobotSendRequest;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.CollectionUtils;
 
 import java.text.MessageFormat;
 import java.util.List;
@@ -40,14 +40,14 @@ public class DingDingUtils {
         OapiRobotSendRequest.At at = new OapiRobotSendRequest.At();
         at.setAtMobiles(ats);
         request.setAt(at);
-        if (!CollectionUtils.isEmpty(ats)) {
+        if (CollUtil.isNotEmpty(ats)) {
             at.setIsAtAll(ats.stream().map(String::toLowerCase).anyMatch(SystemConstants.AT_ALL::equals));
         }
         return request;
     }
 
     public static String getAtText(List<String> ats, String text, String atLabel) {
-        if (CollectionUtils.isEmpty(ats)) {
+        if (CollUtil.isEmpty(ats)) {
             return text;
         }
         StringBuilder sb = new StringBuilder(text);

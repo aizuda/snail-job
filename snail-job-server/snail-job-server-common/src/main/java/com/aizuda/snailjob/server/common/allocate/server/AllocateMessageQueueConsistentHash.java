@@ -16,11 +16,11 @@
  */
 package com.aizuda.snailjob.server.common.allocate.server;
 
+import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.server.common.ServerLoadBalance;
 import com.aizuda.snailjob.server.common.allocate.common.ConsistentHashRouter;
 import com.aizuda.snailjob.server.common.allocate.common.HashFunction;
 import com.aizuda.snailjob.server.common.allocate.common.Node;
-import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -57,10 +57,10 @@ public class AllocateMessageQueueConsistentHash implements ServerLoadBalance<Str
         if (currentCID == null || currentCID.length() < 1) {
             throw new IllegalArgumentException("currentCID is empty");
         }
-        if (CollectionUtils.isEmpty(groupList)) {
+        if (CollUtil.isEmpty(groupList)) {
             throw new IllegalArgumentException("groupList is null or groupList empty");
         }
-        if (CollectionUtils.isEmpty(serverList)) {
+        if (CollUtil.isEmpty(serverList)) {
             throw new IllegalArgumentException("serverList is null or serverList empty");
         }
 

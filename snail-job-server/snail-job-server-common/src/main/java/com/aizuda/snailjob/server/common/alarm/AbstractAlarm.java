@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.common.alarm;
 
+import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.common.core.alarm.Alarm;
 import com.aizuda.snailjob.common.core.alarm.AlarmContext;
 import com.aizuda.snailjob.common.core.alarm.SnailJobAlarmFactory;
@@ -29,7 +30,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.scheduling.TaskScheduler;
-import org.springframework.util.CollectionUtils;
 
 import java.time.Duration;
 import java.util.*;
@@ -60,7 +60,7 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
         try {
             // 从队列获取数据
             List<A> alarmInfos = poll();
-            if (CollectionUtils.isEmpty(alarmInfos)) {
+            if (CollUtil.isEmpty(alarmInfos)) {
                 return;
             }
 
@@ -108,7 +108,7 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
                         .in(NotifyConfig::getGroupName, groupNames)
                         .in(NotifyConfig::getBusinessId, businessIds)
         );
-        if (CollectionUtils.isEmpty(notifyConfigs)) {
+        if (CollUtil.isEmpty(notifyConfigs)) {
             return Maps.newHashMap();
         }
 
@@ -119,7 +119,7 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
         List<NotifyRecipient> notifyRecipients = recipientMapper.selectBatchIds(recipientIds);
         Map<Long, NotifyRecipient> recipientMap = StreamUtils.toIdentityMap(notifyRecipients, NotifyRecipient::getId);
 
-        if (CollectionUtils.isEmpty(recipientIds)) {
+        if (CollUtil.isEmpty(recipientIds)) {
             return Maps.newHashMap();
         }
 

@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.retry.task.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.enums.RetryStatusEnum;
@@ -22,7 +23,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -61,7 +61,7 @@ public class RetryServiceImpl implements RetryService {
                         .eq(RetryTask::getTaskType, SyetemTaskTypeEnum.CALLBACK.getType())
                         .eq(RetryTask::getGroupName, groupName)).getRecords();
 
-        if (CollectionUtils.isEmpty(callbackRetryTasks)) {
+        if (CollUtil.isEmpty(callbackRetryTasks)) {
             return Boolean.TRUE;
         }
 
@@ -82,7 +82,7 @@ public class RetryServiceImpl implements RetryService {
         List<RetryTask> maxCountRetryTaskList = retryTasks.stream()
                 .filter(retryTask -> retryTask.getRetryStatus().equals(RetryStatusEnum.MAX_COUNT.getStatus())).collect(
                         Collectors.toList());
-        if (!CollectionUtils.isEmpty(maxCountRetryTaskList)) {
+        if (CollUtil.isNotEmpty(maxCountRetryTaskList)) {
             waitMoveDeadLetters.addAll(maxCountRetryTaskList);
         }
 
@@ -90,7 +90,7 @@ public class RetryServiceImpl implements RetryService {
                 .filter(retryTask -> retryTask.getRetryStatus().equals(RetryStatusEnum.MAX_COUNT.getStatus())).collect(
                         Collectors.toList());
 
-        if (!CollectionUtils.isEmpty(maxCountRetryTaskList)) {
+        if (CollUtil.isNotEmpty(maxCountRetryTaskList)) {
             waitMoveDeadLetters.addAll(maxCountCallbackRetryTaskList);
         }
 
@@ -102,7 +102,7 @@ public class RetryServiceImpl implements RetryService {
                 .filter(retryTask -> retryTask.getRetryStatus().equals(RetryStatusEnum.FINISH.getStatus()))
                 .map(RetryTask::getId)
                 .collect(Collectors.toSet());
-        if (!CollectionUtils.isEmpty(finishRetryIdList)) {
+        if (CollUtil.isNotEmpty(finishRetryIdList)) {
             waitDelRetryFinishSet.addAll(finishRetryIdList);
         }
 
@@ -112,11 +112,11 @@ public class RetryServiceImpl implements RetryService {
                 .collect(Collectors.toSet());
 
         // 迁移重试失败的数据
-        if (!CollectionUtils.isEmpty(finishCallbackRetryIdList)) {
+        if (CollUtil.isNotEmpty(finishCallbackRetryIdList)) {
             waitDelRetryFinishSet.addAll(finishCallbackRetryIdList);
         }
 
-        if (CollectionUtils.isEmpty(waitDelRetryFinishSet)) {
+        if (CollUtil.isEmpty(waitDelRetryFinishSet)) {
             return Boolean.TRUE;
         }
 
@@ -136,7 +136,7 @@ public class RetryServiceImpl implements RetryService {
      * @param retryTasks 待迁移数据
      */
     private void moveDeadLetters(String groupName, String namespaceId, List<RetryTask> retryTasks) {
-        if (CollectionUtils.isEmpty(retryTasks)) {
+        if (CollUtil.isEmpty(retryTasks)) {
             return;
         }
 

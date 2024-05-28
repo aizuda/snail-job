@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.job.task.support.executor.workflow;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
@@ -24,7 +25,6 @@ import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.Objects;
@@ -79,7 +79,7 @@ public class DecisionWorkflowExecutor extends AbstractWorkflowExecutor {
                             .eq(JobTask::getTaskBatchId, context.getTaskBatchId()));
                     List<String> taskResult = Lists.newArrayList();
                     Boolean tempResult = null;
-                    if (CollectionUtils.isEmpty(jobTasks)) {
+                    if (CollUtil.isEmpty(jobTasks)) {
                         tempResult = (Boolean) Optional.ofNullable(expressionEngine.eval(decisionConfig.getNodeExpression(), StrUtil.EMPTY)).orElse(Boolean.FALSE);
                     } else {
                         for (JobTask jobTask : jobTasks) {

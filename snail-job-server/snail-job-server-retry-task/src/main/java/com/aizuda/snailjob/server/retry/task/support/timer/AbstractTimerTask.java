@@ -1,8 +1,8 @@
 package com.aizuda.snailjob.server.retry.task.support.timer;
 
 import cn.hutool.core.lang.Pair;
+import com.aizuda.snailjob.server.common.TimerTask;
 import io.netty.util.Timeout;
-import io.netty.util.TimerTask;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
  * @since 2.4.0
  */
 @Slf4j
-public abstract class AbstractTimerTask implements TimerTask {
+public abstract class AbstractTimerTask implements TimerTask<String> {
 
     protected String groupName;
     protected String uniqueId;
@@ -30,7 +30,7 @@ public abstract class AbstractTimerTask implements TimerTask {
             log.error("重试任务执行失败 groupName:[{}] uniqueId:[{}] namespaceId:[{}]", groupName, uniqueId, namespaceId, e);
         } finally {
             // 先清除时间轮的缓存
-            RetryTimerWheel.clearCache(Pair.of(groupName, namespaceId), uniqueId);
+            RetryTimerWheel.clearCache(idempotentKey());
 
         }
     }

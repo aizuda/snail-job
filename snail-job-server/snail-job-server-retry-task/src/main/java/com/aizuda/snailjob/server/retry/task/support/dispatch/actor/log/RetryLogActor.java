@@ -1,6 +1,7 @@
 package com.aizuda.snailjob.server.retry.task.support.dispatch.actor.log;
 
 import akka.actor.AbstractActor;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.dto.TaskLogFieldDTO;
@@ -13,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -36,7 +36,7 @@ public class RetryLogActor extends AbstractActor {
     public Receive createReceive() {
         return receiveBuilder().match(List.class,
                 list -> {
-                    if (CollectionUtils.isEmpty(list)) {
+                    if (CollUtil.isEmpty(list)) {
                         return;
                     }
                     saveRetryTaskLogMessage((List<RetryLogTaskDTO>) list);

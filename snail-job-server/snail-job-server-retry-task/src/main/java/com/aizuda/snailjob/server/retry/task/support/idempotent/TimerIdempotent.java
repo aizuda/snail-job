@@ -1,12 +1,10 @@
 package com.aizuda.snailjob.server.retry.task.support.idempotent;
 
-import cn.hutool.core.lang.Pair;
 import com.aizuda.snailjob.server.common.IdempotentStrategy;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import lombok.extern.slf4j.Slf4j;
 
-import java.text.MessageFormat;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -14,10 +12,8 @@ import java.util.concurrent.TimeUnit;
  * @date 2023-10-19 21:54:57
  * @since 2.4.0
  */
-@Slf4j
-public class TimerIdempotent implements IdempotentStrategy<Pair<String/*groupName*/, String/*namespaceId*/>, String> {
+public class TimerIdempotent implements IdempotentStrategy<String> {
 
-    private static final String KEY_FORMAT = "{0}_{1}_{2}";
     private static final Cache<String, String> cache;
 
     static {
@@ -28,28 +24,19 @@ public class TimerIdempotent implements IdempotentStrategy<Pair<String/*groupNam
     }
 
     @Override
-    public boolean set(Pair<String/*groupName*/, String/*namespaceId*/> pair, String value) {
-        cache.put(getKey(pair, value), value);
+    public boolean set(String key) {
+        cache.put(key, key);
         return Boolean.TRUE;
     }
 
-    private static String getKey(Pair<String/*groupName*/, String/*namespaceId*/> pair, final String value) {
-        return MessageFormat.format(KEY_FORMAT, pair.getKey(), pair.getValue(), value);
+    @Override
+    public boolean isExist(String key) {
+        return cache.asMap().containsKey(key);
     }
 
     @Override
-    public String get(Pair<String/*groupName*/, String/*namespaceId*/> pair) {
-        throw new UnsupportedOperationException("不支持此操作");
-    }
-
-    @Override
-    public boolean isExist(Pair<String/*groupName*/, String/*namespaceId*/> pair, String value) {
-        return cache.asMap().containsKey(getKey(pair, value));
-    }
-
-    @Override
-    public boolean clear(Pair<String/*groupName*/, String/*namespaceId*/> pair, String value) {
-        cache.invalidate(getKey(pair, value));
+    public boolean clear(String key) {
+        cache.invalidate(key);
         return Boolean.TRUE;
     }
 }

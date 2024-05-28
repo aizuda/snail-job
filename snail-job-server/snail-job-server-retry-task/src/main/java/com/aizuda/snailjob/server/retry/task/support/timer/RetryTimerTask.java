@@ -9,20 +9,18 @@ import com.aizuda.snailjob.template.datasource.access.TaskAccess;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import io.netty.util.Timeout;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
 
+import java.text.MessageFormat;
 import java.util.Objects;
 
 /**
  * @author: opensnail
  * @date : 2023-09-22 17:09
  */
-@Data
-@Slf4j
 public class RetryTimerTask extends AbstractTimerTask {
+    public static final String IDEMPOTENT_KEY_PREFIX = "retry_{0}_{1}_{2}";
 
-    private RetryTimerContext context;
+    private final RetryTimerContext context;
 
     public RetryTimerTask(RetryTimerContext context) {
         this.context = context;
@@ -46,5 +44,10 @@ public class RetryTimerTask extends AbstractTimerTask {
         }
         TaskExecutor taskExecutor = TaskActuatorFactory.getTaskActuator(context.getScene());
         taskExecutor.actuator(retryTask);
+    }
+
+    @Override
+    public String idempotentKey() {
+        return MessageFormat.format(IDEMPOTENT_KEY_PREFIX, context.getGroupName(), context.getNamespaceId(), context.getUniqueId());
     }
 }

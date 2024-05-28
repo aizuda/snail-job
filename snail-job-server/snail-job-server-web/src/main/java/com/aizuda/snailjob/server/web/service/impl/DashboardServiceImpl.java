@@ -25,7 +25,7 @@ import com.aizuda.snailjob.server.web.model.response.DashboardLineResponseVO;
 import com.aizuda.snailjob.server.web.model.response.DashboardRetryLineResponseVO;
 import com.aizuda.snailjob.server.web.model.response.DashboardRetryLineResponseVO.Task;
 import com.aizuda.snailjob.server.web.model.response.ServerNodeResponseVO;
-import com.aizuda.snailjob.server.web.service.DashBoardService;
+import com.aizuda.snailjob.server.web.service.DashboardService;
 import com.aizuda.snailjob.server.web.service.convert.*;
 import com.aizuda.snailjob.server.web.util.UserSessionUtils;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.ActivePodQuantityResponseDO;
@@ -63,7 +63,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class DashBoardServiceImpl implements DashBoardService {
+public class DashboardServiceImpl implements DashboardService {
 
     private static final String DASHBOARD_CONSUMER_BUCKET = "/dashboard/consumer/bucket";
 
@@ -160,7 +160,6 @@ public class DashBoardServiceImpl implements DashBoardService {
         // 重试任务列表
         Page<Object> pager = new Page<>(baseQueryVO.getPage(), baseQueryVO.getSize());
         LambdaQueryWrapper<RetrySceneConfig> wrapper = new LambdaQueryWrapper<RetrySceneConfig>()
-
                 .eq(RetrySceneConfig::getNamespaceId, namespaceId)
                 .in(CollUtil.isNotEmpty(groupNames), RetrySceneConfig::getGroupName, groupNames);
 
@@ -194,7 +193,7 @@ public class DashBoardServiceImpl implements DashBoardService {
                         .between(RetrySummary::getTriggerAt, startDateTime, endDateTime));
         List<DashboardLineResponseVO> dashboardLineResponseVOList = DispatchQuantityResponseVOConverter.INSTANCE.convertList(dashboardRetryLinkeResponseDOList);
         dateTypeEnum.getConsumer().accept(dashboardLineResponseVOList);
-        dashboardLineResponseVOList.sort(Comparator.comparing(a -> a.getCreateDt()));
+        dashboardLineResponseVOList.sort(Comparator.comparing(DashboardLineResponseVO::getCreateDt));
         responseVO.setDashboardLineResponseDOList(dashboardLineResponseVOList);
 
         // 排行榜
@@ -316,7 +315,7 @@ public class DashBoardServiceImpl implements DashBoardService {
                 String url = NetUtil.getUrl(serverNodeResponseVO.getHostIp(), serverNodeExtAttrs.getWebPort(), serverProperties.getServlet().getContextPath());
                 Result<List<Integer>> result = restTemplate.getForObject(url.concat(DASHBOARD_CONSUMER_BUCKET), Result.class);
                 List<Integer> data = result.getData();
-                if (!CollUtil.isEmpty(data)) {
+                if (CollUtil.isNotEmpty(data)) {
                     serverNodeResponseVO.setConsumerBuckets(data.stream()
                             .sorted(Integer::compareTo)
                             .collect(Collectors.toCollection(LinkedHashSet::new)));
