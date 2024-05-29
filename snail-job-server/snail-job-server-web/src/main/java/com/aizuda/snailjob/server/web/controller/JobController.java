@@ -101,21 +101,16 @@ public class JobController {
     }
 
     @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @LoginRequired(role = RoleEnum.ADMIN)
+    @LoginRequired
     public void importScene(@RequestPart("file") MultipartFile file) throws IOException {
-        if (file.isEmpty()) {
-            throw new SnailJobCommonException("请选择一个文件上传");
-        }
-        List<JobRequestVO> requestList = ImportUtils.parseList(file, JobRequestVO.class);
-        jobService.importJobs(requestList);
+        jobService.importJobs(ImportUtils.parseList(file, JobRequestVO.class));
     }
 
     @PostMapping("/export")
-    @LoginRequired(role = RoleEnum.ADMIN)
+    @LoginRequired
     @OriginalControllerReturnValue
     public ResponseEntity<String> exportGroup(@RequestBody Set<Long> jobIds) {
-        String jobsJson = jobService.exportJobs(jobIds);
-        return ExportUtils.doExport(jobsJson);
+        return ExportUtils.doExport(jobService.exportJobs(jobIds));
     }
 
 }

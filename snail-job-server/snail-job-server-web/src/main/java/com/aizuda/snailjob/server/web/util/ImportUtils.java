@@ -15,6 +15,10 @@ public class ImportUtils {
     private static final List<String> FILE_EXTENSIONS = List.of("json");
 
     public static @NotNull <VO> List<VO> parseList(MultipartFile file, Class<VO> clazz) throws IOException {
+        if (file.isEmpty()) {
+            throw new SnailJobCommonException("请选择一个文件上传");
+        }
+
         // 保存文件到服务器
         String suffix = FileUtil.getSuffix(file.getOriginalFilename());
         if (!FILE_EXTENSIONS.contains(suffix)) {

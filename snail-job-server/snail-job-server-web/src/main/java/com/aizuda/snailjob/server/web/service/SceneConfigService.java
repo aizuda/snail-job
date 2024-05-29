@@ -1,6 +1,7 @@
 package com.aizuda.snailjob.server.web.service;
 
 import com.aizuda.snailjob.server.web.model.base.PageResult;
+import com.aizuda.snailjob.server.web.model.request.ExportSceneVO;
 import com.aizuda.snailjob.server.web.model.request.SceneConfigQueryVO;
 import com.aizuda.snailjob.server.web.model.request.SceneConfigRequestVO;
 import com.aizuda.snailjob.server.web.model.response.SceneConfigResponseVO;
@@ -8,7 +9,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author: opensnail
@@ -30,6 +30,6 @@ public interface SceneConfigService {
 
     void importSceneConfig(@Valid @NotEmpty(message = "导入数据不能为空") List<SceneConfigRequestVO> requests);
 
-    String exportSceneConfig(Set<Long> sceneIds);
+    String exportSceneConfig(ExportSceneVO exportSceneVO);
 
 }
