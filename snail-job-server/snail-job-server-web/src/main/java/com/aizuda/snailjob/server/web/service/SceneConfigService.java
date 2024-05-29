@@ -4,6 +4,8 @@ import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.SceneConfigQueryVO;
 import com.aizuda.snailjob.server.web.model.request.SceneConfigRequestVO;
 import com.aizuda.snailjob.server.web.model.response.SceneConfigResponseVO;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 
 import java.util.List;
 import java.util.Set;
@@ -26,7 +28,7 @@ public interface SceneConfigService {
 
     boolean updateStatus(Long id, final Integer status);
 
-    void importSceneConfig(List<SceneConfigRequestVO> requests);
+    void importSceneConfig(@Valid @NotEmpty(message = "导入数据不能为空") List<SceneConfigRequestVO> requests);
 
     String exportSceneConfig(Set<Long> sceneIds);
 
