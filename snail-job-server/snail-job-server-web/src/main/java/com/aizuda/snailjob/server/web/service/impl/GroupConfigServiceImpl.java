@@ -14,6 +14,7 @@ import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.handler.ConfigVersionSyncHandler;
 import com.aizuda.snailjob.server.common.util.PartitionTaskUtils;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
+import com.aizuda.snailjob.server.web.model.request.ExportGroupVO;
 import com.aizuda.snailjob.server.web.model.request.GroupConfigQueryVO;
 import com.aizuda.snailjob.server.web.model.request.GroupConfigRequestVO;
 import com.aizuda.snailjob.server.web.model.request.UserSessionVO;
@@ -184,6 +185,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
                 new PageDTO<>(queryVO.getPage(), queryVO.getSize()),
                 new LambdaQueryWrapper<GroupConfig>()
                         .eq(GroupConfig::getNamespaceId, namespaceId)
+                        .eq(Objects.nonNull(queryVO.getGroupStatus()), GroupConfig::getGroupStatus, queryVO.getGroupStatus())
                         .in(userSessionVO.isUser(), GroupConfig::getGroupName, userSessionVO.getGroupNames())
                         .likeRight(StrUtil.isNotBlank(queryVO.getGroupName()), GroupConfig::getGroupName,
                                 StrUtil.trim(queryVO.getGroupName()))
@@ -420,7 +422,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
     }
 
     @Override
-    public String exportGroup(final Set<Long> groupIds) {
+    public String exportGroup(ExportGroupVO exportGroupVO) {
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
 
         List<GroupConfigRequestVO> allRequestList = Lists.newArrayList();
@@ -429,7 +431,9 @@ public class GroupConfigServiceImpl implements GroupConfigService {
                 new LambdaQueryWrapper<GroupConfig>()
                     .ge(GroupConfig::getId, startId)
                     .eq(GroupConfig::getNamespaceId, namespaceId)
-                    .in(CollUtil.isNotEmpty(groupIds), GroupConfig::getId, groupIds)
+                    .eq(Objects.nonNull(exportGroupVO.getGroupStatus()), GroupConfig::getGroupStatus, exportGroupVO.getGroupStatus())
+                    .in(CollUtil.isNotEmpty(exportGroupVO.getGroupIds()), GroupConfig::getId, exportGroupVO.getGroupIds())
+                    .likeRight(StrUtil.isNotBlank(exportGroupVO.getGroupName()), GroupConfig::getGroupName, StrUtil.trim(exportGroupVO.getGroupName()))
                     .orderByAsc(GroupConfig::getId)
             ).getRecords();
             return groupConfigs.stream().map(GroupConfigPartitionTask::new).toList();

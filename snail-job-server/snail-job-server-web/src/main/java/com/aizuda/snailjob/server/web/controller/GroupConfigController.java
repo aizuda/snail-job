@@ -5,6 +5,7 @@ import com.aizuda.snailjob.common.core.exception.SnailJobCommonException;
 import com.aizuda.snailjob.server.web.annotation.LoginRequired;
 import com.aizuda.snailjob.server.web.annotation.RoleEnum;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
+import com.aizuda.snailjob.server.web.model.request.ExportGroupVO;
 import com.aizuda.snailjob.server.web.model.request.GroupConfigQueryVO;
 import com.aizuda.snailjob.server.web.model.request.GroupConfigRequestVO;
 import com.aizuda.snailjob.server.web.model.response.GroupConfigResponseVO;
@@ -20,7 +21,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Set;
 
 /**
  * 重试组接口
@@ -103,7 +103,7 @@ public class GroupConfigController {
     @PostMapping("/export")
     @LoginRequired
     @OriginalControllerReturnValue
-    public ResponseEntity<String> exportGroup(@RequestBody Set<Long> groupIds) {
-        return ExportUtils.doExport(groupConfigService.exportGroup(groupIds));
+    public ResponseEntity<String> exportGroup(@RequestBody ExportGroupVO exportGroupVO) {
+        return ExportUtils.doExport(groupConfigService.exportGroup(exportGroupVO));
     }
 }
