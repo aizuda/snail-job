@@ -4,6 +4,8 @@ import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.GroupConfigQueryVO;
 import com.aizuda.snailjob.server.web.model.request.GroupConfigRequestVO;
 import com.aizuda.snailjob.server.web.model.response.GroupConfigResponseVO;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 
 import java.util.List;
 import java.util.Set;
@@ -32,7 +34,7 @@ public interface GroupConfigService {
 
     List<Integer> getTablePartitionList();
 
-    void importGroup(List<GroupConfigRequestVO> requestVOS);
+    void importGroup(@Valid @NotEmpty(message = "导入数据不能为空") List<GroupConfigRequestVO> requestVOS);
 
     String exportGroup(Set<Long> groupIds);
 }
