@@ -8,9 +8,11 @@ import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.server.common.config.SystemProperties;
+import com.aizuda.snailjob.server.common.dto.PartitionTask;
 import com.aizuda.snailjob.server.common.enums.IdGeneratorModeEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.handler.ConfigVersionSyncHandler;
+import com.aizuda.snailjob.server.common.util.PartitionTaskUtils;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.GroupConfigQueryVO;
 import com.aizuda.snailjob.server.web.model.request.GroupConfigRequestVO;
@@ -33,13 +35,15 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import com.google.common.collect.Sets.SetView;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -59,6 +63,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @RequiredArgsConstructor
+@Validated
 public class GroupConfigServiceImpl implements GroupConfigService {
 
     private final ServerNodeMapper serverNodeMapper;
@@ -418,13 +423,34 @@ public class GroupConfigServiceImpl implements GroupConfigService {
     public String exportGroup(final Set<Long> groupIds) {
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
 
-        List<GroupConfig> groupConfigs = accessTemplate.getGroupConfigAccess().list(
+        List<GroupConfigRequestVO> allRequestList = Lists.newArrayList();
+        PartitionTaskUtils.process((startId -> {
+            List<GroupConfig> groupConfigs = accessTemplate.getGroupConfigAccess().listPage(new PageDTO<>(0, 100),
                 new LambdaQueryWrapper<GroupConfig>()
-                        .eq(GroupConfig::getNamespaceId, namespaceId)
-                        .in(CollUtil.isNotEmpty(groupIds), GroupConfig::getId, groupIds)
-        );
+                    .ge(GroupConfig::getId, startId)
+                    .eq(GroupConfig::getNamespaceId, namespaceId)
+                    .in(CollUtil.isNotEmpty(groupIds), GroupConfig::getId, groupIds)
+                    .orderByAsc(GroupConfig::getId)
+            ).getRecords();
+            return groupConfigs.stream().map(GroupConfigPartitionTask::new).toList();
+        }), partitionTasks -> {
+            List<GroupConfigPartitionTask> configPartitionTasks = (List<GroupConfigPartitionTask>) partitionTasks;
+            List<GroupConfig> configs = configPartitionTasks.stream().map(GroupConfigPartitionTask::getConfig)
+                .collect(Collectors.toList());
+            allRequestList.addAll(GroupConfigConverter.INSTANCE.toGroupConfigRequestVOs(configs));
+        }, 0);
 
-        return JsonUtil.toJsonString(GroupConfigConverter.INSTANCE.toGroupConfigRequestVOs(groupConfigs));
+        return JsonUtil.toJsonString(allRequestList);
     }
 
+    @EqualsAndHashCode(callSuper = true)
+    @Getter
+    private static class GroupConfigPartitionTask extends PartitionTask {
+        // 这里就直接放GroupConfig为了后面若加字段不需要再这里在调整了
+        private final GroupConfig config;
+        public GroupConfigPartitionTask(@NotNull GroupConfig config) {
+            this.config = config;
+            setId(config.getId());
+        }
+    }
 }
