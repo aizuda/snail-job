@@ -1,6 +1,7 @@
 package com.aizuda.snailjob.server.web.service;
 
 import com.aizuda.snailjob.server.web.model.base.PageResult;
+import com.aizuda.snailjob.server.web.model.request.ExportGroupVO;
 import com.aizuda.snailjob.server.web.model.request.GroupConfigQueryVO;
 import com.aizuda.snailjob.server.web.model.request.GroupConfigRequestVO;
 import com.aizuda.snailjob.server.web.model.response.GroupConfigResponseVO;
@@ -36,5 +37,5 @@ public interface GroupConfigService {
 
     void importGroup(@Valid @NotEmpty(message = "导入数据不能为空") List<GroupConfigRequestVO> requestVOS);
 
-    String exportGroup(Set<Long> groupIds);
+    String exportGroup(ExportGroupVO exportGroupVO);
 }
