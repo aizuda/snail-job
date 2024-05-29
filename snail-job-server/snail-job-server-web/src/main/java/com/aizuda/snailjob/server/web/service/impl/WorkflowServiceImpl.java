@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.web.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.lang.Pair;
 import cn.hutool.core.util.HashUtil;
@@ -27,6 +28,7 @@ import com.aizuda.snailjob.server.job.task.support.WorkflowPrePareHandler;
 import com.aizuda.snailjob.server.job.task.support.WorkflowTaskConverter;
 import com.aizuda.snailjob.server.job.task.support.expression.ExpressionInvocationHandler;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
+import com.aizuda.snailjob.server.web.model.request.SceneConfigRequestVO;
 import com.aizuda.snailjob.server.web.model.request.UserSessionVO;
 import com.aizuda.snailjob.server.web.model.request.WorkflowQueryVO;
 import com.aizuda.snailjob.server.web.model.request.WorkflowRequestVO;
@@ -34,20 +36,20 @@ import com.aizuda.snailjob.server.web.model.request.WorkflowRequestVO.NodeConfig
 import com.aizuda.snailjob.server.web.model.response.WorkflowDetailResponseVO;
 import com.aizuda.snailjob.server.web.model.response.WorkflowResponseVO;
 import com.aizuda.snailjob.server.web.service.WorkflowService;
+import com.aizuda.snailjob.server.web.service.convert.SceneConfigConverter;
 import com.aizuda.snailjob.server.web.service.convert.WorkflowConverter;
 import com.aizuda.snailjob.server.web.service.handler.WorkflowHandler;
 import com.aizuda.snailjob.server.web.util.UserSessionUtils;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
+import com.aizuda.snailjob.template.datasource.access.ConfigAccess;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowNodeMapper;
-import com.aizuda.snailjob.template.datasource.persistence.po.GroupConfig;
-import com.aizuda.snailjob.template.datasource.persistence.po.Job;
-import com.aizuda.snailjob.template.datasource.persistence.po.Workflow;
-import com.aizuda.snailjob.template.datasource.persistence.po.WorkflowNode;
+import com.aizuda.snailjob.template.datasource.persistence.po.*;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.common.graph.ElementOrder;
 import com.google.common.graph.GraphBuilder;
 import com.google.common.graph.MutableGraph;
@@ -57,6 +59,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.stream.Collectors;
@@ -339,4 +342,45 @@ public class WorkflowServiceImpl implements WorkflowService {
         return Pair.of(StatusEnum.YES.getStatus(), StrUtil.EMPTY);
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void importWorkflowTask(List<WorkflowRequestVO> requests) {
+        batchSaveWorkflowTask(requests, UserSessionUtils.currentUserSession().getNamespaceId());
+    }
+
+    @Override
+    public String exportWorkflowTask(Set<Long> workflowIds) {
+        List<Workflow> workflowList = workflowMapper.selectList(new LambdaQueryWrapper<Workflow>()
+                .eq(Workflow::getNamespaceId, UserSessionUtils.currentUserSession().getNamespaceId())
+                .eq(Workflow::getDeleted, StatusEnum.NO.getStatus())
+                // TODO 若导出全部需要分页查询，避免一次拉取太多数据
+                .in(CollUtil.isNotEmpty(workflowIds), Workflow::getId, workflowIds)
+        );
+
+        List<WorkflowDetailResponseVO> workflowDetailResponseVOList = workflowList.stream().map(i -> getWorkflowDetail(i.getId())).collect(Collectors.toList());
+        return JsonUtil.toJsonString(workflowDetailResponseVOList);
+    }
+
+    private void batchSaveWorkflowTask(final List<WorkflowRequestVO> workflowRequestVOList, final String namespaceId) {
+
+        Set<String> groupNameSet = workflowRequestVOList.stream().map(i -> i.getGroupName()).collect(Collectors.toSet());
+        List<GroupConfig> groupConfigs = accessTemplate.getGroupConfigAccess()
+                .list(new LambdaQueryWrapper<GroupConfig>()
+                        .select(GroupConfig::getGroupName)
+                        .eq(GroupConfig::getNamespaceId, namespaceId)
+                        .in(GroupConfig::getGroupName, groupNameSet)
+                );
+
+        Sets.SetView<String> notExistedGroupNameSet = Sets.difference(groupNameSet,
+                StreamUtils.toSet(groupConfigs, GroupConfig::getGroupName));
+
+        Assert.isTrue(CollUtil.isEmpty(notExistedGroupNameSet),
+                () -> new SnailJobServerException("导入失败. 原因: 组{}不存在", notExistedGroupNameSet));
+
+        for (final WorkflowRequestVO workflowRequestVO : workflowRequestVOList) {
+            checkExecuteInterval(workflowRequestVO);
+            workflowRequestVO.setId(null);
+            saveWorkflow(workflowRequestVO);
+        }
+    }
 }

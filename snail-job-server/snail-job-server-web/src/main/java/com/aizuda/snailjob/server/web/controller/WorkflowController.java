@@ -1,6 +1,8 @@
 package com.aizuda.snailjob.server.web.controller;
 
 import cn.hutool.core.lang.Pair;
+import com.aizuda.snailjob.common.core.annotation.OriginalControllerReturnValue;
+import com.aizuda.snailjob.common.core.exception.SnailJobCommonException;
 import com.aizuda.snailjob.server.common.dto.DecisionConfig;
 import com.aizuda.snailjob.server.web.annotation.LoginRequired;
 import com.aizuda.snailjob.server.web.annotation.RoleEnum;
@@ -10,12 +12,18 @@ import com.aizuda.snailjob.server.web.model.request.WorkflowRequestVO;
 import com.aizuda.snailjob.server.web.model.response.WorkflowDetailResponseVO;
 import com.aizuda.snailjob.server.web.model.response.WorkflowResponseVO;
 import com.aizuda.snailjob.server.web.service.WorkflowService;
+import com.aizuda.snailjob.server.web.util.ExportUtils;
+import com.aizuda.snailjob.server.web.util.ImportUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author xiaowoniu
@@ -83,6 +91,24 @@ public class WorkflowController {
     @LoginRequired(role = RoleEnum.USER)
     public Pair<Integer, String> checkNodeExpression(@RequestBody DecisionConfig decisionConfig) {
         return workflowService.checkNodeExpression(decisionConfig);
+    }
+
+    @LoginRequired
+    @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public void importScene(@RequestPart("file") MultipartFile file) throws IOException {
+        if (file.isEmpty()) {
+            throw new SnailJobCommonException("请选择一个文件上传");
+        }
+
+        // 写入数据
+        workflowService.importWorkflowTask(ImportUtils.parseList(file, WorkflowRequestVO.class));
+    }
+
+    @LoginRequired
+    @PostMapping("/export")
+    @OriginalControllerReturnValue
+    public ResponseEntity<String> export(@RequestBody Set<Long> workflowIds) {
+        return ExportUtils.doExport(workflowService.exportWorkflowTask(workflowIds));
     }
 
 }
