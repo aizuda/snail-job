@@ -4,6 +4,7 @@ import com.aizuda.snailjob.common.core.annotation.OriginalControllerReturnValue;
 import com.aizuda.snailjob.common.core.exception.SnailJobCommonException;
 import com.aizuda.snailjob.server.web.annotation.LoginRequired;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
+import com.aizuda.snailjob.server.web.model.request.ExportSceneVO;
 import com.aizuda.snailjob.server.web.model.request.SceneConfigQueryVO;
 import com.aizuda.snailjob.server.web.model.request.SceneConfigRequestVO;
 import com.aizuda.snailjob.server.web.model.response.SceneConfigResponseVO;
@@ -72,10 +73,6 @@ public class SceneConfigController {
     @LoginRequired
     @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public void importScene(@RequestPart("file") MultipartFile file) throws IOException {
-        if (file.isEmpty()) {
-            throw new SnailJobCommonException("请选择一个文件上传");
-        }
-
         // 写入数据
         sceneConfigService.importSceneConfig(ImportUtils.parseList(file, SceneConfigRequestVO.class));
     }
@@ -83,9 +80,8 @@ public class SceneConfigController {
     @LoginRequired
     @PostMapping("/export")
     @OriginalControllerReturnValue
-    public ResponseEntity<String> export(@RequestBody Set<Long> sceneIds) {
-        return ExportUtils.doExport(sceneConfigService.exportSceneConfig(sceneIds));
-
+    public ResponseEntity<String> export(@RequestBody ExportSceneVO exportSceneVO) {
+        return ExportUtils.doExport(sceneConfigService.exportSceneConfig(exportSceneVO));
     }
 
 }

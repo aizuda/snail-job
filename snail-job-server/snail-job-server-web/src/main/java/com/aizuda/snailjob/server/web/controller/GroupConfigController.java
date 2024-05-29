@@ -93,10 +93,6 @@ public class GroupConfigController {
     @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @LoginRequired(role = RoleEnum.ADMIN)
     public void importScene(@RequestPart("file") MultipartFile file) throws IOException {
-        if (file.isEmpty()) {
-            throw new SnailJobCommonException("请选择一个文件上传");
-        }
-
         groupConfigService.importGroup(ImportUtils.parseList(file, GroupConfigRequestVO.class));
     }
 

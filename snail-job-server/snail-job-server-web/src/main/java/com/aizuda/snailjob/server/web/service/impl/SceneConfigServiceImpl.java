@@ -5,10 +5,13 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
+import com.aizuda.snailjob.server.common.dto.PartitionTask;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.strategy.WaitStrategies;
 import com.aizuda.snailjob.server.common.util.CronUtils;
+import com.aizuda.snailjob.server.common.util.PartitionTaskUtils;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
+import com.aizuda.snailjob.server.web.model.request.ExportSceneVO;
 import com.aizuda.snailjob.server.web.model.request.SceneConfigQueryVO;
 import com.aizuda.snailjob.server.web.model.request.SceneConfigRequestVO;
 import com.aizuda.snailjob.server.web.model.request.UserSessionVO;
@@ -29,15 +32,16 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author: opensnail
@@ -53,8 +57,8 @@ public class SceneConfigServiceImpl implements SceneConfigService {
 
     private static void checkExecuteInterval(SceneConfigRequestVO requestVO) {
         if (Lists.newArrayList(WaitStrategies.WaitStrategyEnum.FIXED.getType(),
-                WaitStrategies.WaitStrategyEnum.RANDOM.getType())
-            .contains(requestVO.getBackOff())) {
+                        WaitStrategies.WaitStrategyEnum.RANDOM.getType())
+                .contains(requestVO.getBackOff())) {
             if (Integer.parseInt(requestVO.getTriggerInterval()) < 10) {
                 throw new SnailJobServerException("间隔时间不得小于10");
             }
@@ -72,14 +76,15 @@ public class SceneConfigServiceImpl implements SceneConfigService {
         UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
         String namespaceId = userSessionVO.getNamespaceId();
         pageDTO = accessTemplate.getSceneConfigAccess().listPage(pageDTO,
-            new LambdaQueryWrapper<RetrySceneConfig>()
-                .eq(RetrySceneConfig::getNamespaceId, namespaceId)
-                .in(userSessionVO.isUser(), RetrySceneConfig::getGroupName, userSessionVO.getGroupNames())
-                .eq(StrUtil.isNotBlank(queryVO.getGroupName()),
-                    RetrySceneConfig::getGroupName, StrUtil.trim(queryVO.getGroupName()))
-                .eq(StrUtil.isNotBlank(queryVO.getSceneName()),
-                    RetrySceneConfig::getSceneName, StrUtil.trim(queryVO.getSceneName()))
-                .orderByDesc(RetrySceneConfig::getCreateDt));
+                new LambdaQueryWrapper<RetrySceneConfig>()
+                        .eq(RetrySceneConfig::getNamespaceId, namespaceId)
+                        .in(userSessionVO.isUser(), RetrySceneConfig::getGroupName, userSessionVO.getGroupNames())
+                        .eq(Objects.nonNull(queryVO.getSceneStatus()), RetrySceneConfig::getSceneStatus, queryVO.getSceneStatus())
+                        .eq(StrUtil.isNotBlank(queryVO.getGroupName()),
+                                RetrySceneConfig::getGroupName, StrUtil.trim(queryVO.getGroupName()))
+                        .likeRight(StrUtil.isNotBlank(queryVO.getSceneName()),
+                                RetrySceneConfig::getSceneName, StrUtil.trim(queryVO.getSceneName()))
+                        .orderByDesc(RetrySceneConfig::getCreateDt));
 
         return new PageResult<>(pageDTO, SceneConfigResponseVOConverter.INSTANCE.convertList(pageDTO.getRecords()));
 
@@ -91,12 +96,12 @@ public class SceneConfigServiceImpl implements SceneConfigService {
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
 
         List<RetrySceneConfig> retrySceneConfigs = accessTemplate.getSceneConfigAccess()
-            .list(new LambdaQueryWrapper<RetrySceneConfig>()
-                .eq(RetrySceneConfig::getNamespaceId, namespaceId)
-                .eq(RetrySceneConfig::getGroupName, groupName)
-                .select(RetrySceneConfig::getSceneName,
-                    RetrySceneConfig::getDescription, RetrySceneConfig::getMaxRetryCount)
-                .orderByDesc(RetrySceneConfig::getCreateDt));
+                .list(new LambdaQueryWrapper<RetrySceneConfig>()
+                        .eq(RetrySceneConfig::getNamespaceId, namespaceId)
+                        .eq(RetrySceneConfig::getGroupName, groupName)
+                        .select(RetrySceneConfig::getSceneName,
+                                RetrySceneConfig::getDescription, RetrySceneConfig::getMaxRetryCount)
+                        .orderByDesc(RetrySceneConfig::getCreateDt));
 
         return SceneConfigResponseVOConverter.INSTANCE.convertList(retrySceneConfigs);
     }
@@ -108,10 +113,10 @@ public class SceneConfigServiceImpl implements SceneConfigService {
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
         ConfigAccess<RetrySceneConfig> sceneConfigAccess = accessTemplate.getSceneConfigAccess();
         Assert.isTrue(0 == sceneConfigAccess.count(
-            new LambdaQueryWrapper<RetrySceneConfig>()
-                .eq(RetrySceneConfig::getNamespaceId, namespaceId)
-                .eq(RetrySceneConfig::getGroupName, requestVO.getGroupName())
-                .eq(RetrySceneConfig::getSceneName, requestVO.getSceneName())
+                new LambdaQueryWrapper<RetrySceneConfig>()
+                        .eq(RetrySceneConfig::getNamespaceId, namespaceId)
+                        .eq(RetrySceneConfig::getGroupName, requestVO.getGroupName())
+                        .eq(RetrySceneConfig::getSceneName, requestVO.getSceneName())
 
         ), () -> new SnailJobServerException("场景名称重复. {}", requestVO.getSceneName()));
 
@@ -123,8 +128,8 @@ public class SceneConfigServiceImpl implements SceneConfigService {
         }
 
         Assert.isTrue(1 == sceneConfigAccess.insert(retrySceneConfig),
-            () -> new SnailJobServerException("failed to insert scene. retrySceneConfig:[{}]",
-                JsonUtil.toJsonString(retrySceneConfig)));
+                () -> new SnailJobServerException("failed to insert scene. retrySceneConfig:[{}]",
+                        JsonUtil.toJsonString(retrySceneConfig)));
 
         // 同步配置到客户端
         SyncConfigHandler.addSyncTask(requestVO.getGroupName(), namespaceId);
@@ -144,14 +149,14 @@ public class SceneConfigServiceImpl implements SceneConfigService {
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
 
         retrySceneConfig.setTriggerInterval(
-            Optional.ofNullable(retrySceneConfig.getTriggerInterval()).orElse(StrUtil.EMPTY));
+                Optional.ofNullable(retrySceneConfig.getTriggerInterval()).orElse(StrUtil.EMPTY));
         Assert.isTrue(1 == accessTemplate.getSceneConfigAccess().update(retrySceneConfig,
-                new LambdaUpdateWrapper<RetrySceneConfig>()
-                    .eq(RetrySceneConfig::getNamespaceId, namespaceId)
-                    .eq(RetrySceneConfig::getGroupName, requestVO.getGroupName())
-                    .eq(RetrySceneConfig::getSceneName, requestVO.getSceneName())),
-            () -> new SnailJobServerException("failed to update scene. retrySceneConfig:[{}]",
-                JsonUtil.toJsonString(retrySceneConfig)));
+                        new LambdaUpdateWrapper<RetrySceneConfig>()
+                                .eq(RetrySceneConfig::getNamespaceId, namespaceId)
+                                .eq(RetrySceneConfig::getGroupName, requestVO.getGroupName())
+                                .eq(RetrySceneConfig::getSceneName, requestVO.getSceneName())),
+                () -> new SnailJobServerException("failed to update scene. retrySceneConfig:[{}]",
+                        JsonUtil.toJsonString(retrySceneConfig)));
 
         // 同步配置到客户端
         SyncConfigHandler.addSyncTask(requestVO.getGroupName(), namespaceId);
@@ -161,8 +166,8 @@ public class SceneConfigServiceImpl implements SceneConfigService {
     @Override
     public SceneConfigResponseVO getSceneConfigDetail(Long id) {
         RetrySceneConfig retrySceneConfig = accessTemplate.getSceneConfigAccess()
-            .one(new LambdaQueryWrapper<RetrySceneConfig>()
-                .eq(RetrySceneConfig::getId, id));
+                .one(new LambdaQueryWrapper<RetrySceneConfig>()
+                        .eq(RetrySceneConfig::getId, id));
         return SceneConfigResponseVOConverter.INSTANCE.convert(retrySceneConfig);
     }
 
@@ -175,9 +180,9 @@ public class SceneConfigServiceImpl implements SceneConfigService {
         config.setSceneStatus(status);
 
         return 1 == accessTemplate.getSceneConfigAccess().update(config,
-            new LambdaUpdateWrapper<RetrySceneConfig>()
-                .eq(RetrySceneConfig::getId, id)
-                .eq(RetrySceneConfig::getNamespaceId, namespaceId));
+                new LambdaUpdateWrapper<RetrySceneConfig>()
+                        .eq(RetrySceneConfig::getId, id)
+                        .eq(RetrySceneConfig::getNamespaceId, namespaceId));
     }
 
     @Override
@@ -187,17 +192,34 @@ public class SceneConfigServiceImpl implements SceneConfigService {
     }
 
     @Override
-    public String exportSceneConfig(final Set<Long> sceneIds) {
-        List<RetrySceneConfig> sceneConfigs = accessTemplate.getSceneConfigAccess()
-            .list(new LambdaQueryWrapper<RetrySceneConfig>()
-                .eq(RetrySceneConfig::getNamespaceId, UserSessionUtils.currentUserSession().getNamespaceId())
-                // TODO 若导出全部需要分页查询，避免一次拉取太多数据
-                .in(CollUtil.isNotEmpty(sceneIds), RetrySceneConfig::getId, sceneIds)
+    public String exportSceneConfig(final ExportSceneVO exportSceneVO) {
+
+        List<SceneConfigRequestVO> requestList = new ArrayList<>();
+
+        PartitionTaskUtils.process(startId -> {
+            List<RetrySceneConfig> sceneConfigs = accessTemplate.getSceneConfigAccess()
+                    .listPage(new PageDTO<>(0, 500), new LambdaQueryWrapper<RetrySceneConfig>()
+                            .eq(RetrySceneConfig::getNamespaceId, UserSessionUtils.currentUserSession().getNamespaceId())
+                            .eq(Objects.nonNull(exportSceneVO.getSceneStatus()), RetrySceneConfig::getSceneStatus, exportSceneVO.getSceneStatus())
+                            .eq(StrUtil.isNotBlank(exportSceneVO.getGroupName()),
+                                    RetrySceneConfig::getGroupName, StrUtil.trim(exportSceneVO.getGroupName()))
+                            .likeRight(StrUtil.isNotBlank(exportSceneVO.getSceneName()),
+                                    RetrySceneConfig::getSceneName, StrUtil.trim(exportSceneVO.getSceneName()))
+                            .in(CollUtil.isNotEmpty(exportSceneVO.getSceneIds()), RetrySceneConfig::getId, exportSceneVO.getSceneIds())
+                            .ge(RetrySceneConfig::getId, startId)
+                            .orderByAsc(RetrySceneConfig::getId)
+                    ).getRecords();
+
+            return StreamUtils.toList(sceneConfigs, SceneConfigPartitionTask::new);
+        }, partitionTasks -> {
+            List<SceneConfigPartitionTask> partitionTaskList = (List<SceneConfigPartitionTask>) partitionTasks;
+            requestList.addAll(SceneConfigConverter.INSTANCE.toSceneConfigRequestVOs(
+                    StreamUtils.toList(partitionTaskList, SceneConfigPartitionTask::getConfig))
             );
+        }, 0);
 
-        return JsonUtil.toJsonString(SceneConfigConverter.INSTANCE.toSceneConfigRequestVOs(sceneConfigs));
+        return JsonUtil.toJsonString(requestList);
     }
-
 
     private void batchSaveSceneConfig(final List<SceneConfigRequestVO> requests, final String namespaceId) {
 
@@ -210,28 +232,28 @@ public class SceneConfigServiceImpl implements SceneConfigService {
         }
 
         List<GroupConfig> groupConfigs = accessTemplate.getGroupConfigAccess()
-            .list(new LambdaQueryWrapper<GroupConfig>()
-                .select(GroupConfig::getGroupName)
-                .eq(GroupConfig::getNamespaceId, namespaceId)
-                .in(GroupConfig::getGroupName, groupNameSet)
-            );
+                .list(new LambdaQueryWrapper<GroupConfig>()
+                        .select(GroupConfig::getGroupName)
+                        .eq(GroupConfig::getNamespaceId, namespaceId)
+                        .in(GroupConfig::getGroupName, groupNameSet)
+                );
 
         SetView<String> notExistedGroupNameSet = Sets.difference(groupNameSet,
-            StreamUtils.toSet(groupConfigs, GroupConfig::getGroupName));
+                StreamUtils.toSet(groupConfigs, GroupConfig::getGroupName));
 
         Assert.isTrue(CollUtil.isEmpty(notExistedGroupNameSet),
-            () -> new SnailJobServerException("导入失败. 原因: 组{}不存在", notExistedGroupNameSet));
+                () -> new SnailJobServerException("导入失败. 原因: 组{}不存在", notExistedGroupNameSet));
 
         ConfigAccess<RetrySceneConfig> sceneConfigAccess = accessTemplate.getSceneConfigAccess();
         List<RetrySceneConfig> sceneConfigs = sceneConfigAccess.list(
-            new LambdaQueryWrapper<RetrySceneConfig>()
-                .select(RetrySceneConfig::getSceneName)
-                .eq(RetrySceneConfig::getNamespaceId, namespaceId)
-                .in(RetrySceneConfig::getGroupName, groupNameSet)
-                .in(RetrySceneConfig::getSceneName, sceneNameSet));
+                new LambdaQueryWrapper<RetrySceneConfig>()
+                        .select(RetrySceneConfig::getSceneName)
+                        .eq(RetrySceneConfig::getNamespaceId, namespaceId)
+                        .in(RetrySceneConfig::getGroupName, groupNameSet)
+                        .in(RetrySceneConfig::getSceneName, sceneNameSet));
 
         Assert.isTrue(CollUtil.isEmpty(sceneConfigs), () -> new SnailJobServerException("导入失败. 原因:场景{}已存在",
-            StreamUtils.toSet(sceneConfigs, RetrySceneConfig::getSceneName)));
+                StreamUtils.toSet(sceneConfigs, RetrySceneConfig::getSceneName)));
 
         LocalDateTime now = LocalDateTime.now();
         List<RetrySceneConfig> retrySceneConfigs = SceneConfigConverter.INSTANCE.toRetrySceneConfigs(requests);
@@ -242,11 +264,22 @@ public class SceneConfigServiceImpl implements SceneConfigService {
                 retrySceneConfig.setTriggerInterval(StrUtil.EMPTY);
             }
 
-            // TODO 优化成批量插入
             Assert.isTrue(1 == sceneConfigAccess.insert(retrySceneConfig),
-                () -> new SnailJobServerException("failed to insert scene. retrySceneConfig:[{}]",
-                    JsonUtil.toJsonString(retrySceneConfig)));
+                    () -> new SnailJobServerException("failed to insert scene. retrySceneConfig:[{}]",
+                            JsonUtil.toJsonString(retrySceneConfig)));
         }
 
+    }
+
+    @EqualsAndHashCode(callSuper = true)
+    @Getter
+    private static class SceneConfigPartitionTask extends PartitionTask {
+        // 这里就直接放RetrySceneConfig为了后面若加字段不需要再这里在调整了
+        private final RetrySceneConfig config;
+
+        public SceneConfigPartitionTask(@NotNull RetrySceneConfig config) {
+            this.config = config;
+            setId(config.getId());
+        }
     }
 }

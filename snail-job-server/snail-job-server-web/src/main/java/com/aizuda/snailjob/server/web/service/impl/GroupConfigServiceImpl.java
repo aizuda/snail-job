@@ -439,8 +439,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
             return groupConfigs.stream().map(GroupConfigPartitionTask::new).toList();
         }), partitionTasks -> {
             List<GroupConfigPartitionTask> configPartitionTasks = (List<GroupConfigPartitionTask>) partitionTasks;
-            List<GroupConfig> configs = configPartitionTasks.stream().map(GroupConfigPartitionTask::getConfig)
-                .collect(Collectors.toList());
+            List<GroupConfig> configs = StreamUtils.toList(configPartitionTasks, GroupConfigPartitionTask::getConfig);
             allRequestList.addAll(GroupConfigConverter.INSTANCE.toGroupConfigRequestVOs(configs));
         }, 0);
 

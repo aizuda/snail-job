@@ -14,4 +14,5 @@ import lombok.EqualsAndHashCode;
 public class SceneConfigQueryVO extends BaseQueryVO {
     private String groupName;
     private String sceneName;
+    private Integer sceneStatus;
 }
