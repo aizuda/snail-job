@@ -5,6 +5,7 @@ import com.aizuda.snailjob.common.core.exception.SnailJobCommonException;
 import com.aizuda.snailjob.server.web.annotation.LoginRequired;
 import com.aizuda.snailjob.server.web.annotation.RoleEnum;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
+import com.aizuda.snailjob.server.web.model.request.ExportJobVO;
 import com.aizuda.snailjob.server.web.model.request.JobQueryVO;
 import com.aizuda.snailjob.server.web.model.request.JobRequestVO;
 import com.aizuda.snailjob.server.web.model.request.JobUpdateJobStatusRequestVO;
@@ -109,8 +110,8 @@ public class JobController {
     @PostMapping("/export")
     @LoginRequired
     @OriginalControllerReturnValue
-    public ResponseEntity<String> exportGroup(@RequestBody Set<Long> jobIds) {
-        return ExportUtils.doExport(jobService.exportJobs(jobIds));
+    public ResponseEntity<String> exportGroup(@RequestBody ExportJobVO exportJobVO) {
+        return ExportUtils.doExport(jobService.exportJobs(exportJobVO));
     }
 
 }
