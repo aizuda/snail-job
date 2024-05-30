@@ -6,7 +6,9 @@ import org.springframework.http.ResponseEntity;
 
 import java.nio.charset.StandardCharsets;
 
-public class ExportUtils {
+
+public final class ExportUtils {
+    private ExportUtils() {}
 
     public static ResponseEntity<String> doExport(String json) {
         HttpHeaders headers = new HttpHeaders();

@@ -7,6 +7,7 @@ import com.aizuda.snailjob.server.common.dto.DecisionConfig;
 import com.aizuda.snailjob.server.web.annotation.LoginRequired;
 import com.aizuda.snailjob.server.web.annotation.RoleEnum;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
+import com.aizuda.snailjob.server.web.model.request.ExportWorkflowVO;
 import com.aizuda.snailjob.server.web.model.request.WorkflowQueryVO;
 import com.aizuda.snailjob.server.web.model.request.WorkflowRequestVO;
 import com.aizuda.snailjob.server.web.model.response.WorkflowDetailResponseVO;
@@ -96,10 +97,6 @@ public class WorkflowController {
     @LoginRequired
     @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public void importScene(@RequestPart("file") MultipartFile file) throws IOException {
-        if (file.isEmpty()) {
-            throw new SnailJobCommonException("请选择一个文件上传");
-        }
-
         // 写入数据
         workflowService.importWorkflowTask(ImportUtils.parseList(file, WorkflowRequestVO.class));
     }
@@ -107,8 +104,8 @@ public class WorkflowController {
     @LoginRequired
     @PostMapping("/export")
     @OriginalControllerReturnValue
-    public ResponseEntity<String> export(@RequestBody Set<Long> workflowIds) {
-        return ExportUtils.doExport(workflowService.exportWorkflowTask(workflowIds));
+    public ResponseEntity<String> export(@RequestBody ExportWorkflowVO exportWorkflowVO) {
+        return ExportUtils.doExport(workflowService.exportWorkflowTask(exportWorkflowVO));
     }
 
 }
