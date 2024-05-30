@@ -3,6 +3,7 @@ package com.aizuda.snailjob.server.web.service;
 import cn.hutool.core.lang.Pair;
 import com.aizuda.snailjob.server.common.dto.DecisionConfig;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
+import com.aizuda.snailjob.server.web.model.request.ExportWorkflowVO;
 import com.aizuda.snailjob.server.web.model.request.WorkflowQueryVO;
 import com.aizuda.snailjob.server.web.model.request.WorkflowRequestVO;
 import com.aizuda.snailjob.server.web.model.response.WorkflowDetailResponseVO;
@@ -12,7 +13,6 @@ import jakarta.validation.constraints.NotEmpty;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author xiaowoniu
@@ -41,5 +41,6 @@ public interface WorkflowService {
 
     void importWorkflowTask(@Valid @NotEmpty(message = "导入数据不能为空") List<WorkflowRequestVO> requests);
 
-    String exportWorkflowTask(Set<Long> workflowIds);
+    String exportWorkflowTask(ExportWorkflowVO exportWorkflowVO
+    );
 }

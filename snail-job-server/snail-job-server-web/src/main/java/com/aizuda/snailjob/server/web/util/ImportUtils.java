@@ -10,9 +10,10 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 
-public class ImportUtils {
+public final class ImportUtils {
 
     private static final List<String> FILE_EXTENSIONS = List.of("json");
+    private ImportUtils() {}
 
     public static @NotNull <VO> List<VO> parseList(MultipartFile file, Class<VO> clazz) throws IOException {
         if (file.isEmpty()) {
@@ -26,9 +27,7 @@ public class ImportUtils {
         }
 
         JsonNode node = JsonUtil.toJson(file.getBytes());
-        List<VO> requestList = JsonUtil.parseList(JsonUtil.toJsonString(node), clazz);
-
-        return requestList;
+        return JsonUtil.parseList(JsonUtil.toJsonString(node), clazz);
     }
 }
 
