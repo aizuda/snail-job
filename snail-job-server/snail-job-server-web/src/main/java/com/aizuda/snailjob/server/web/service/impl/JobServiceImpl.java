@@ -7,22 +7,22 @@ import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
+import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.server.common.WaitStrategy;
 import com.aizuda.snailjob.server.common.config.SystemProperties;
+import com.aizuda.snailjob.server.common.dto.PartitionTask;
 import com.aizuda.snailjob.server.common.enums.JobTaskExecutorSceneEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.strategy.WaitStrategies;
 import com.aizuda.snailjob.server.common.util.CronUtils;
 import com.aizuda.snailjob.server.common.util.DateUtils;
+import com.aizuda.snailjob.server.common.util.PartitionTaskUtils;
 import com.aizuda.snailjob.server.job.task.dto.JobTaskPrepareDTO;
 import com.aizuda.snailjob.server.job.task.support.JobPrepareHandler;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
 import com.aizuda.snailjob.server.job.task.support.cache.ResidentTaskCache;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
-import com.aizuda.snailjob.server.web.model.request.JobQueryVO;
-import com.aizuda.snailjob.server.web.model.request.JobRequestVO;
-import com.aizuda.snailjob.server.web.model.request.JobUpdateJobStatusRequestVO;
-import com.aizuda.snailjob.server.web.model.request.UserSessionVO;
+import com.aizuda.snailjob.server.web.model.request.*;
 import com.aizuda.snailjob.server.web.model.response.JobResponseVO;
 import com.aizuda.snailjob.server.web.service.JobService;
 import com.aizuda.snailjob.server.web.service.convert.JobConverter;
@@ -34,17 +34,20 @@ import com.aizuda.snailjob.template.datasource.persistence.po.GroupConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.Job;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 
 /**
  * @author opensnail
@@ -82,7 +85,6 @@ public class JobServiceImpl implements JobService {
         UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
         PageDTO<Job> selectPage = jobMapper.selectPage(pageDTO,
                 new LambdaQueryWrapper<Job>()
-                        .eq(Job::getDeleted, StatusEnum.NO.getStatus())
                         .eq(Job::getNamespaceId, userSessionVO.getNamespaceId())
                         .in(userSessionVO.isUser(), Job::getGroupName, userSessionVO.getGroupNames())
                         .eq(StrUtil.isNotBlank(queryVO.getGroupName()), Job::getGroupName, queryVO.getGroupName())
@@ -128,11 +130,13 @@ public class JobServiceImpl implements JobService {
     @Override
     public boolean saveJob(JobRequestVO jobRequestVO) {
         // 判断常驻任务
-        Job job = updateJobResident(jobRequestVO);
+        Job job = JobConverter.INSTANCE.convert(jobRequestVO);
+        job.setResident(isResident(jobRequestVO));
         job.setBucketIndex(HashUtil.bkdrHash(jobRequestVO.getGroupName() + jobRequestVO.getJobName())
                 % systemProperties.getBucketTotal());
         job.setNextTriggerAt(calculateNextTriggerAt(jobRequestVO, DateUtils.toNowMilli()));
         job.setNamespaceId(UserSessionUtils.currentUserSession().getNamespaceId());
+        job.setId(null);
         return 1 == jobMapper.insert(job);
     }
 
@@ -144,7 +148,8 @@ public class JobServiceImpl implements JobService {
         Assert.notNull(job, () -> new SnailJobServerException("更新失败"));
 
         // 判断常驻任务
-        Job updateJob = updateJobResident(jobRequestVO);
+        Job updateJob = JobConverter.INSTANCE.convert(jobRequestVO);
+        updateJob.setResident(isResident(jobRequestVO));
         updateJob.setNamespaceId(job.getNamespaceId());
 
         // 工作流任务
@@ -170,27 +175,24 @@ public class JobServiceImpl implements JobService {
         return 1 == jobMapper.updateById(updateJob);
     }
 
-    @Override
-    public Job updateJobResident(JobRequestVO jobRequestVO) {
-        Job job = JobConverter.INSTANCE.convert(jobRequestVO);
-        job.setResident(StatusEnum.NO.getStatus());
+    private Integer isResident(JobRequestVO jobRequestVO) {
         if (Objects.equals(jobRequestVO.getTriggerType(), SystemConstants.WORKFLOW_TRIGGER_TYPE)) {
-            return job;
+            return StatusEnum.NO.getStatus();
         }
 
         if (jobRequestVO.getTriggerType() == WaitStrategies.WaitStrategyEnum.FIXED.getType()) {
             if (Integer.parseInt(jobRequestVO.getTriggerInterval()) < 10) {
-                job.setResident(StatusEnum.YES.getStatus());
+                return StatusEnum.YES.getStatus();
             }
         } else if (jobRequestVO.getTriggerType() == WaitStrategies.WaitStrategyEnum.CRON.getType()) {
             if (CronUtils.getExecuteInterval(jobRequestVO.getTriggerInterval()) < 10 * 1000) {
-                job.setResident(StatusEnum.YES.getStatus());
+                return StatusEnum.YES.getStatus();
             }
         } else {
             throw new SnailJobServerException("未知触发类型");
         }
 
-        return job;
+        return StatusEnum.NO.getStatus();
     }
 
     @Override
@@ -256,14 +258,42 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public String exportJobs(Set<Long> jobIds) {
-        if (CollUtil.isEmpty(jobIds)) {
-            return StrUtil.EMPTY;
-        }
+    public String exportJobs(ExportJobVO exportJobVO) {
+        String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
 
-        List<Job> jobList = jobMapper.selectBatchIds(jobIds);
-        jobList.forEach(job -> job.setId(null));
-        return JsonUtil.toJsonString(JobConverter.INSTANCE.convertList(jobList));
+        List<JobRequestVO> requestList = new ArrayList<>();
+        PartitionTaskUtils.process(startId -> {
+                    List<Job> jobList = jobMapper.selectPage(new PageDTO<>(0, 100),
+                            new LambdaQueryWrapper<Job>()
+                                    .eq(Job::getNamespaceId, namespaceId)
+                                    .eq(StrUtil.isNotBlank(exportJobVO.getGroupName()), Job::getGroupName, exportJobVO.getGroupName())
+                                    .likeRight(StrUtil.isNotBlank(exportJobVO.getJobName()), Job::getJobName, StrUtil.trim(exportJobVO.getJobName()))
+                                    .eq(Objects.nonNull(exportJobVO.getJobStatus()), Job::getJobStatus, exportJobVO.getJobStatus())
+                                    .in(CollUtil.isNotEmpty(exportJobVO.getJobIds()), Job::getId, exportJobVO.getJobIds())
+                                    .eq(Job::getDeleted, StatusEnum.NO.getStatus())
+                                    .gt(Job::getId, startId)
+                                    .orderByAsc(Job::getId)
+                    ).getRecords();
+                    return StreamUtils.toList(jobList, JobPartitionTask::new);
+                },
+                partitionTasks -> {
+                    List<JobPartitionTask> jobPartitionTasks = (List<JobPartitionTask>) partitionTasks;
+                    requestList.addAll(JobConverter.INSTANCE.convertList(StreamUtils.toList(jobPartitionTasks, JobPartitionTask::getJob)));
+                }, 0);
+
+        return JsonUtil.toJsonString(requestList);
+    }
+
+    @EqualsAndHashCode(callSuper = true)
+    @Getter
+    private static class JobPartitionTask extends PartitionTask {
+        // 这里就直接放GroupConfig为了后面若加字段不需要再这里在调整了
+        private final Job job;
+
+        public JobPartitionTask(@NotNull Job job) {
+            this.job = job;
+            setId(job.getId());
+        }
     }
 
 }

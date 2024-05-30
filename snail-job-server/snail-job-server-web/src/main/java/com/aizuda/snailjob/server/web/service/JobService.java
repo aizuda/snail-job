@@ -1,6 +1,7 @@
 package com.aizuda.snailjob.server.web.service;
 
 import com.aizuda.snailjob.server.web.model.base.PageResult;
+import com.aizuda.snailjob.server.web.model.request.ExportJobVO;
 import com.aizuda.snailjob.server.web.model.request.JobQueryVO;
 import com.aizuda.snailjob.server.web.model.request.JobRequestVO;
 import com.aizuda.snailjob.server.web.model.request.JobUpdateJobStatusRequestVO;
@@ -10,7 +11,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author opensnail
@@ -28,8 +28,6 @@ public interface JobService {
 
     Boolean updateJobStatus(JobUpdateJobStatusRequestVO jobRequestVO);
 
-    Job updateJobResident(JobRequestVO jobRequestVO);
-
     Boolean deleteJobById(Long id);
 
     List<String> getTimeByCron(String cron);
@@ -42,6 +40,6 @@ public interface JobService {
 
     void importJobs(@Valid @NotEmpty(message = "导入数据不能为空") List<JobRequestVO> requestList);
 
-    String exportJobs(Set<Long> jobIds);
+    String exportJobs(ExportJobVO exportJobVO);
 
 }
