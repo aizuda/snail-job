@@ -27,6 +27,7 @@ import com.aizuda.snailjob.server.web.model.response.JobResponseVO;
 import com.aizuda.snailjob.server.web.service.JobService;
 import com.aizuda.snailjob.server.web.service.convert.JobConverter;
 import com.aizuda.snailjob.server.web.service.convert.JobResponseVOConverter;
+import com.aizuda.snailjob.server.web.service.handler.GroupHandler;
 import com.aizuda.snailjob.server.web.util.UserSessionUtils;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobMapper;
@@ -48,6 +49,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * @author opensnail
@@ -62,9 +64,9 @@ public class JobServiceImpl implements JobService {
 
     private final SystemProperties systemProperties;
     private final JobMapper jobMapper;
-    @Lazy
     private final JobPrepareHandler terminalJobPrepareHandler;
     private final AccessTemplate accessTemplate;
+    private final GroupHandler groupHandler;
 
     private static Long calculateNextTriggerAt(final JobRequestVO jobRequestVO, Long time) {
         if (Objects.equals(jobRequestVO.getTriggerType(), SystemConstants.WORKFLOW_TRIGGER_TYPE)) {
@@ -84,14 +86,15 @@ public class JobServiceImpl implements JobService {
         PageDTO<Job> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
         UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
         PageDTO<Job> selectPage = jobMapper.selectPage(pageDTO,
-                new LambdaQueryWrapper<Job>()
-                        .eq(Job::getNamespaceId, userSessionVO.getNamespaceId())
-                        .in(userSessionVO.isUser(), Job::getGroupName, userSessionVO.getGroupNames())
-                        .eq(StrUtil.isNotBlank(queryVO.getGroupName()), Job::getGroupName, queryVO.getGroupName())
-                        .likeRight(StrUtil.isNotBlank(queryVO.getJobName()), Job::getJobName, StrUtil.trim(queryVO.getJobName()))
-                        .eq(Objects.nonNull(queryVO.getJobStatus()), Job::getJobStatus, queryVO.getJobStatus())
-                        .eq(Job::getDeleted, StatusEnum.NO.getStatus())
-                        .orderByDesc(Job::getId));
+            new LambdaQueryWrapper<Job>()
+                .eq(Job::getNamespaceId, userSessionVO.getNamespaceId())
+                .in(userSessionVO.isUser(), Job::getGroupName, userSessionVO.getGroupNames())
+                .eq(StrUtil.isNotBlank(queryVO.getGroupName()), Job::getGroupName, queryVO.getGroupName())
+                .likeRight(StrUtil.isNotBlank(queryVO.getJobName()), Job::getJobName,
+                    StrUtil.trim(queryVO.getJobName()))
+                .eq(Objects.nonNull(queryVO.getJobStatus()), Job::getJobStatus, queryVO.getJobStatus())
+                .eq(Job::getDeleted, StatusEnum.NO.getStatus())
+                .orderByDesc(Job::getId));
 
         List<JobResponseVO> jobResponseList = JobResponseVOConverter.INSTANCE.convertList(selectPage.getRecords());
 
@@ -114,16 +117,16 @@ public class JobServiceImpl implements JobService {
 
         UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
         PageDTO<Job> selectPage = jobMapper.selectPage(
-                new PageDTO<>(1, 20),
-                new LambdaQueryWrapper<Job>()
-                        .select(Job::getId, Job::getJobName)
-                        .eq(Job::getNamespaceId, userSessionVO.getNamespaceId())
-                        .likeRight(StrUtil.isNotBlank(keywords), Job::getJobName, StrUtil.trim(keywords))
-                        .eq(StrUtil.isNotBlank(groupName), Job::getGroupName, groupName)
-                        .eq(Objects.nonNull(jobId), Job::getId, jobId)
-                        .eq(Job::getDeleted, StatusEnum.NO.getStatus())
-                        // SQLServer 分页必须 ORDER BY
-                        .orderByAsc(Job::getId));
+            new PageDTO<>(1, 20),
+            new LambdaQueryWrapper<Job>()
+                .select(Job::getId, Job::getJobName)
+                .eq(Job::getNamespaceId, userSessionVO.getNamespaceId())
+                .likeRight(StrUtil.isNotBlank(keywords), Job::getJobName, StrUtil.trim(keywords))
+                .eq(StrUtil.isNotBlank(groupName), Job::getGroupName, groupName)
+                .eq(Objects.nonNull(jobId), Job::getId, jobId)
+                .eq(Job::getDeleted, StatusEnum.NO.getStatus())
+                // SQLServer 分页必须 ORDER BY
+                .orderByAsc(Job::getId));
         return JobResponseVOConverter.INSTANCE.convertList(selectPage.getRecords());
     }
 
@@ -133,7 +136,7 @@ public class JobServiceImpl implements JobService {
         Job job = JobConverter.INSTANCE.convert(jobRequestVO);
         job.setResident(isResident(jobRequestVO));
         job.setBucketIndex(HashUtil.bkdrHash(jobRequestVO.getGroupName() + jobRequestVO.getJobName())
-                % systemProperties.getBucketTotal());
+                           % systemProperties.getBucketTotal());
         job.setNextTriggerAt(calculateNextTriggerAt(jobRequestVO, DateUtils.toNowMilli()));
         job.setNamespaceId(UserSessionUtils.currentUserSession().getNamespaceId());
         job.setId(null);
@@ -157,18 +160,18 @@ public class JobServiceImpl implements JobService {
             job.setNextTriggerAt(0L);
             // 非常驻任务 > 非常驻任务
         } else if (Objects.equals(job.getResident(), StatusEnum.NO.getStatus()) && Objects.equals(
-                updateJob.getResident(),
-                StatusEnum.NO.getStatus())) {
+            updateJob.getResident(),
+            StatusEnum.NO.getStatus())) {
             updateJob.setNextTriggerAt(calculateNextTriggerAt(jobRequestVO, DateUtils.toNowMilli()));
         } else if (Objects.equals(job.getResident(), StatusEnum.YES.getStatus()) && Objects.equals(
-                updateJob.getResident(), StatusEnum.NO.getStatus())) {
+            updateJob.getResident(), StatusEnum.NO.getStatus())) {
             // 常驻任务的触发时间
             long time = Optional.ofNullable(ResidentTaskCache.get(jobRequestVO.getId()))
-                    .orElse(DateUtils.toNowMilli());
+                .orElse(DateUtils.toNowMilli());
             updateJob.setNextTriggerAt(calculateNextTriggerAt(jobRequestVO, time));
             // 老的是不是常驻任务 新的是常驻任务 需要使用当前时间计算下次触发时间
         } else if (Objects.equals(job.getResident(), StatusEnum.NO.getStatus()) && Objects.equals(
-                updateJob.getResident(), StatusEnum.YES.getStatus())) {
+            updateJob.getResident(), StatusEnum.YES.getStatus())) {
             updateJob.setNextTriggerAt(DateUtils.toNowMilli());
         }
 
@@ -221,12 +224,13 @@ public class JobServiceImpl implements JobService {
         Assert.notNull(job, () -> new SnailJobServerException("job can not be null."));
 
         long count = accessTemplate.getGroupConfigAccess().count(new LambdaQueryWrapper<GroupConfig>()
-                .eq(GroupConfig::getGroupName, job.getGroupName())
-                .eq(GroupConfig::getNamespaceId, job.getNamespaceId())
-                .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus())
+            .eq(GroupConfig::getGroupName, job.getGroupName())
+            .eq(GroupConfig::getNamespaceId, job.getNamespaceId())
+            .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus())
         );
 
-        Assert.isTrue(count > 0, () -> new SnailJobServerException("组:[{}]已经关闭，不支持手动执行.", job.getGroupName()));
+        Assert.isTrue(count > 0,
+            () -> new SnailJobServerException("组:[{}]已经关闭，不支持手动执行.", job.getGroupName()));
         JobTaskPrepareDTO jobTaskPrepare = JobTaskConverter.INSTANCE.toJobTaskPrepare(job);
         // 设置now表示立即执行
         jobTaskPrepare.setNextTriggerAt(DateUtils.toNowMilli());
@@ -241,12 +245,12 @@ public class JobServiceImpl implements JobService {
     public List<JobResponseVO> getJobList(String groupName) {
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
         List<Job> jobs = jobMapper.selectList(
-                new LambdaQueryWrapper<Job>()
-                        .select(Job::getId, Job::getJobName)
-                        .eq(Job::getNamespaceId, namespaceId)
-                        .eq(Job::getGroupName, groupName)
-                        .eq(Job::getDeleted, StatusEnum.NO.getStatus())
-                        .orderByDesc(Job::getCreateDt));
+            new LambdaQueryWrapper<Job>()
+                .select(Job::getId, Job::getJobName)
+                .eq(Job::getNamespaceId, namespaceId)
+                .eq(Job::getGroupName, groupName)
+                .eq(Job::getDeleted, StatusEnum.NO.getStatus())
+                .orderByDesc(Job::getCreateDt));
         List<JobResponseVO> jobResponseList = JobResponseVOConverter.INSTANCE.convertList(jobs);
         return jobResponseList;
     }
@@ -254,6 +258,10 @@ public class JobServiceImpl implements JobService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void importJobs(List<JobRequestVO> requestList) {
+        String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
+        groupHandler.validateGroupExistence(
+            StreamUtils.toSet(requestList, JobRequestVO::getJobName), namespaceId
+        );
         requestList.forEach(this::saveJob);
     }
 
@@ -263,23 +271,25 @@ public class JobServiceImpl implements JobService {
 
         List<JobRequestVO> requestList = new ArrayList<>();
         PartitionTaskUtils.process(startId -> {
-                    List<Job> jobList = jobMapper.selectPage(new PageDTO<>(0, 100),
-                            new LambdaQueryWrapper<Job>()
-                                    .eq(Job::getNamespaceId, namespaceId)
-                                    .eq(StrUtil.isNotBlank(exportJobVO.getGroupName()), Job::getGroupName, exportJobVO.getGroupName())
-                                    .likeRight(StrUtil.isNotBlank(exportJobVO.getJobName()), Job::getJobName, StrUtil.trim(exportJobVO.getJobName()))
-                                    .eq(Objects.nonNull(exportJobVO.getJobStatus()), Job::getJobStatus, exportJobVO.getJobStatus())
-                                    .in(CollUtil.isNotEmpty(exportJobVO.getJobIds()), Job::getId, exportJobVO.getJobIds())
-                                    .eq(Job::getDeleted, StatusEnum.NO.getStatus())
-                                    .gt(Job::getId, startId)
-                                    .orderByAsc(Job::getId)
-                    ).getRecords();
-                    return StreamUtils.toList(jobList, JobPartitionTask::new);
-                },
-                partitionTasks -> {
-                    List<JobPartitionTask> jobPartitionTasks = (List<JobPartitionTask>) partitionTasks;
-                    requestList.addAll(JobConverter.INSTANCE.convertList(StreamUtils.toList(jobPartitionTasks, JobPartitionTask::getJob)));
-                }, 0);
+                List<Job> jobList = jobMapper.selectPage(new PageDTO<>(0, 100),
+                    new LambdaQueryWrapper<Job>()
+                        .eq(Job::getNamespaceId, namespaceId)
+                        .eq(StrUtil.isNotBlank(exportJobVO.getGroupName()), Job::getGroupName, exportJobVO.getGroupName())
+                        .likeRight(StrUtil.isNotBlank(exportJobVO.getJobName()), Job::getJobName,
+                            StrUtil.trim(exportJobVO.getJobName()))
+                        .eq(Objects.nonNull(exportJobVO.getJobStatus()), Job::getJobStatus, exportJobVO.getJobStatus())
+                        .in(CollUtil.isNotEmpty(exportJobVO.getJobIds()), Job::getId, exportJobVO.getJobIds())
+                        .eq(Job::getDeleted, StatusEnum.NO.getStatus())
+                        .gt(Job::getId, startId)
+                        .orderByAsc(Job::getId)
+                ).getRecords();
+                return StreamUtils.toList(jobList, JobPartitionTask::new);
+            },
+            partitionTasks -> {
+                List<JobPartitionTask> jobPartitionTasks = (List<JobPartitionTask>) partitionTasks;
+                requestList.addAll(
+                    JobConverter.INSTANCE.convertList(StreamUtils.toList(jobPartitionTasks, JobPartitionTask::getJob)));
+            }, 0);
 
         return JsonUtil.toJsonString(requestList);
     }
@@ -287,6 +297,7 @@ public class JobServiceImpl implements JobService {
     @EqualsAndHashCode(callSuper = true)
     @Getter
     private static class JobPartitionTask extends PartitionTask {
+
         // 这里就直接放GroupConfig为了后面若加字段不需要再这里在调整了
         private final Job job;
 

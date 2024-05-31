@@ -32,4 +32,7 @@ public interface NotifyRecipientConverter {
             @Mapping(target = "value", source = "id")
     })
     CommonLabelValueResponseVO convert(NotifyRecipient notifyRecipient);
+
+    List<NotifyRecipientRequestVO> toNotifyRecipientRequestVOs(List<NotifyRecipient> notifyRecipients);
+
 }

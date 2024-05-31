@@ -39,6 +39,7 @@ import com.aizuda.snailjob.server.web.model.response.WorkflowDetailResponseVO;
 import com.aizuda.snailjob.server.web.model.response.WorkflowResponseVO;
 import com.aizuda.snailjob.server.web.service.WorkflowService;
 import com.aizuda.snailjob.server.web.service.convert.WorkflowConverter;
+import com.aizuda.snailjob.server.web.service.handler.GroupHandler;
 import com.aizuda.snailjob.server.web.service.handler.WorkflowHandler;
 import com.aizuda.snailjob.server.web.util.UserSessionUtils;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
@@ -61,6 +62,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.*;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -74,16 +76,17 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@Validated
 public class WorkflowServiceImpl implements WorkflowService {
 
     private final WorkflowMapper workflowMapper;
     private final WorkflowNodeMapper workflowNodeMapper;
     private final SystemProperties systemProperties;
     private final WorkflowHandler workflowHandler;
-    @Lazy
     private final WorkflowPrePareHandler terminalWorkflowPrepareHandler;
     private final JobMapper jobMapper;
     private final AccessTemplate accessTemplate;
+    private final GroupHandler groupHandler;
 
     private static Long calculateNextTriggerAt(final WorkflowRequestVO workflowRequestVO, Long time) {
         checkExecuteInterval(workflowRequestVO);
@@ -315,6 +318,7 @@ public class WorkflowServiceImpl implements WorkflowService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void importWorkflowTask(List<WorkflowRequestVO> requests) {
+
         batchSaveWorkflowTask(requests, UserSessionUtils.currentUserSession().getNamespaceId());
     }
 
@@ -328,8 +332,10 @@ public class WorkflowServiceImpl implements WorkflowService {
                     .eq(Workflow::getNamespaceId, UserSessionUtils.currentUserSession().getNamespaceId())
                     .eq(Workflow::getDeleted, StatusEnum.NO.getStatus())
                     .eq(StrUtil.isNotBlank(exportVO.getGroupName()), Workflow::getGroupName, exportVO.getGroupName())
-                    .eq(Objects.nonNull(exportVO.getWorkflowStatus()), Workflow::getWorkflowStatus, exportVO.getWorkflowStatus())
-                    .likeRight(StrUtil.isNotBlank(exportVO.getWorkflowName()), Workflow::getWorkflowName, exportVO.getWorkflowName())
+                    .eq(Objects.nonNull(exportVO.getWorkflowStatus()), Workflow::getWorkflowStatus,
+                        exportVO.getWorkflowStatus())
+                    .likeRight(StrUtil.isNotBlank(exportVO.getWorkflowName()), Workflow::getWorkflowName,
+                        exportVO.getWorkflowName())
                     .in(CollUtil.isNotEmpty(exportVO.getWorkflowIds()), Workflow::getId, exportVO.getWorkflowIds())
                     .ge(Workflow::getId, startId)
                     .orderByAsc(Workflow::getId)
@@ -348,19 +354,8 @@ public class WorkflowServiceImpl implements WorkflowService {
 
     private void batchSaveWorkflowTask(final List<WorkflowRequestVO> workflowRequestVOList, final String namespaceId) {
 
-        Set<String> groupNameSet =StreamUtils.toSet(workflowRequestVOList, WorkflowRequestVO::getGroupName);
-        List<GroupConfig> groupConfigs = accessTemplate.getGroupConfigAccess()
-            .list(new LambdaQueryWrapper<GroupConfig>()
-                .select(GroupConfig::getGroupName)
-                .eq(GroupConfig::getNamespaceId, namespaceId)
-                .in(GroupConfig::getGroupName, groupNameSet)
-            );
-
-        Sets.SetView<String> notExistedGroupNameSet = Sets.difference(groupNameSet,
-            StreamUtils.toSet(groupConfigs, GroupConfig::getGroupName));
-
-        Assert.isTrue(CollUtil.isEmpty(notExistedGroupNameSet),
-            () -> new SnailJobServerException("导入失败. 原因: 组{}不存在", notExistedGroupNameSet));
+        Set<String> groupNameSet = StreamUtils.toSet(workflowRequestVOList, WorkflowRequestVO::getGroupName);
+        groupHandler.validateGroupExistence(groupNameSet, namespaceId);
 
         for (final WorkflowRequestVO workflowRequestVO : workflowRequestVOList) {
             checkExecuteInterval(workflowRequestVO);
@@ -412,7 +407,9 @@ public class WorkflowServiceImpl implements WorkflowService {
     @EqualsAndHashCode(callSuper = true)
     @Getter
     private static class WorkflowPartitionTask extends PartitionTask {
+
         private final WorkflowDetailResponseVO responseVO;
+
         public WorkflowPartitionTask(@NotNull WorkflowDetailResponseVO responseVO) {
             this.responseVO = responseVO;
             setId(responseVO.getId());
