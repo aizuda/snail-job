@@ -19,6 +19,7 @@ import com.aizuda.snailjob.server.web.model.response.SceneConfigResponseVO;
 import com.aizuda.snailjob.server.web.service.SceneConfigService;
 import com.aizuda.snailjob.server.web.service.convert.SceneConfigConverter;
 import com.aizuda.snailjob.server.web.service.convert.SceneConfigResponseVOConverter;
+import com.aizuda.snailjob.server.web.service.handler.GroupHandler;
 import com.aizuda.snailjob.server.web.service.handler.SyncConfigHandler;
 import com.aizuda.snailjob.server.web.util.UserSessionUtils;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
@@ -53,7 +54,7 @@ import java.util.*;
 public class SceneConfigServiceImpl implements SceneConfigService {
 
     private final AccessTemplate accessTemplate;
-    private final NamespaceMapper namespaceMapper;
+    private final GroupHandler groupHandler;
 
     private static void checkExecuteInterval(SceneConfigRequestVO requestVO) {
         if (Lists.newArrayList(WaitStrategies.WaitStrategyEnum.FIXED.getType(),
@@ -231,18 +232,7 @@ public class SceneConfigServiceImpl implements SceneConfigService {
             sceneNameSet.add(request.getSceneName());
         }
 
-        List<GroupConfig> groupConfigs = accessTemplate.getGroupConfigAccess()
-                .list(new LambdaQueryWrapper<GroupConfig>()
-                        .select(GroupConfig::getGroupName)
-                        .eq(GroupConfig::getNamespaceId, namespaceId)
-                        .in(GroupConfig::getGroupName, groupNameSet)
-                );
-
-        SetView<String> notExistedGroupNameSet = Sets.difference(groupNameSet,
-                StreamUtils.toSet(groupConfigs, GroupConfig::getGroupName));
-
-        Assert.isTrue(CollUtil.isEmpty(notExistedGroupNameSet),
-                () -> new SnailJobServerException("导入失败. 原因: 组{}不存在", notExistedGroupNameSet));
+        groupHandler.validateGroupExistence(groupNameSet, namespaceId);
 
         ConfigAccess<RetrySceneConfig> sceneConfigAccess = accessTemplate.getSceneConfigAccess();
         List<RetrySceneConfig> sceneConfigs = sceneConfigAccess.list(

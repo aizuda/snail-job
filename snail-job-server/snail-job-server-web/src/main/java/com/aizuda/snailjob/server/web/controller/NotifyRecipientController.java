@@ -1,16 +1,25 @@
 package com.aizuda.snailjob.server.web.controller;
 
+import com.aizuda.snailjob.common.core.annotation.OriginalControllerReturnValue;
 import com.aizuda.snailjob.server.web.annotation.LoginRequired;
+import com.aizuda.snailjob.server.web.annotation.RoleEnum;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
+import com.aizuda.snailjob.server.web.model.request.ExportNotifyRecipientVO;
 import com.aizuda.snailjob.server.web.model.request.NotifyRecipientQueryVO;
 import com.aizuda.snailjob.server.web.model.request.NotifyRecipientRequestVO;
 import com.aizuda.snailjob.server.web.model.response.CommonLabelValueResponseVO;
 import com.aizuda.snailjob.server.web.model.response.NotifyRecipientResponseVO;
 import com.aizuda.snailjob.server.web.service.NotifyRecipientService;
+import com.aizuda.snailjob.server.web.util.ExportUtils;
+import com.aizuda.snailjob.server.web.util.ImportUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
@@ -56,5 +65,18 @@ public class NotifyRecipientController {
     @LoginRequired
     public Boolean batchDeleteByIds(@RequestBody Set<Long> ids) {
         return notifyRecipientService.batchDeleteByIds(ids);
+    }
+
+    @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @LoginRequired(role = RoleEnum.ADMIN)
+    public void importScene(@RequestPart("file") MultipartFile file) throws IOException {
+        notifyRecipientService.importNotifyRecipient(ImportUtils.parseList(file, NotifyRecipientRequestVO.class));
+    }
+
+    @PostMapping("/export")
+    @LoginRequired
+    @OriginalControllerReturnValue
+    public ResponseEntity<String> exportGroup(@RequestBody ExportNotifyRecipientVO exportNotifyRecipientVO) {
+        return ExportUtils.doExport(notifyRecipientService.exportNotifyRecipient(exportNotifyRecipientVO));
     }
 }
