@@ -22,7 +22,8 @@ public abstract class AbstractTaskAccess<T> implements TaskAccess<T> {
             DbTypeEnum.MARIADB.getDb(),
             DbTypeEnum.POSTGRES.getDb(),
             DbTypeEnum.ORACLE.getDb(),
-            DbTypeEnum.SQLSERVER.getDb());
+            DbTypeEnum.SQLSERVER.getDb(),
+            DbTypeEnum.DM.getDb());
 
     protected DbTypeEnum getDbType() {
         return DbUtils.getDbType();

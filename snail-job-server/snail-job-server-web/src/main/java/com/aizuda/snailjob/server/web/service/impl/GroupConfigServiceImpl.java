@@ -355,42 +355,36 @@ public class GroupConfigServiceImpl implements GroupConfigService {
     @Override
     public List<Integer> getTablePartitionList() {
         DataSource dataSource = jdbcTemplate.getDataSource();
-        Connection connection = null;
-        try {
-            connection = dataSource.getConnection();
+        try (Connection connection = dataSource.getConnection()) {
             String catalog = connection.getCatalog();
             String schema = connection.getSchema();
 
             String tableNamePattern = "sj_retry_task_%";
             DbTypeEnum dbType = DbUtils.getDbType();
-            if (DbTypeEnum.ORACLE.getDb().equals(dbType.getDb())) {
+            // Oracle, DM 查询表名大写
+            if (DbTypeEnum.ORACLE.getDb().equals(dbType.getDb()) || DbTypeEnum.DM.getDb().equals(dbType.getDb())) {
                 tableNamePattern = tableNamePattern.toUpperCase();
             }
 
             DatabaseMetaData metaData = connection.getMetaData();
-            ResultSet tables = metaData.getTables(catalog, schema, tableNamePattern, new String[]{"TABLE"});
+            ResultSet tableRs = metaData.getTables(catalog, schema, tableNamePattern, new String[]{"TABLE"});
 
-            // 输出表名
+            // 获取表名
             List<String> tableList = new ArrayList<>();
-            while (tables.next()) {
-                String tableName = tables.getString("TABLE_NAME");
+            while (tableRs.next()) {
+                String tableName = tableRs.getString("TABLE_NAME");
                 tableList.add(tableName);
             }
 
-            return tableList.stream().map(ReUtil::getFirstNumber).filter(i ->
-                            !Objects.isNull(i)).distinct()
+            return tableList.stream()
+                    .map(ReUtil::getFirstNumber)
+                    .filter(Objects::nonNull)
+                    .distinct()
                     .collect(Collectors.toList());
         } catch (SQLException ignored) {
-        } finally {
-            if (Objects.nonNull(connection)) {
-                try {
-                    connection.close();
-                } catch (SQLException ignored) {
-                }
-            }
         }
 
-        return Lists.newArrayList();
+        return Collections.emptyList();
     }
 
     @Override
@@ -407,7 +401,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
                 .in(GroupConfig::getGroupName, groupSet));
 
         Assert.isTrue(CollUtil.isEmpty(configs),
-                () -> new SnailJobServerException("导入失败. 原因: 组{}已存在",  StreamUtils.toSet(configs, GroupConfig::getGroupName)));
+                () -> new SnailJobServerException("导入失败. 原因: 组{}已存在", StreamUtils.toSet(configs, GroupConfig::getGroupName)));
 
         for (final GroupConfigRequestVO groupConfigRequestVO : requestList) {
 
@@ -428,13 +422,13 @@ public class GroupConfigServiceImpl implements GroupConfigService {
         List<GroupConfigRequestVO> allRequestList = Lists.newArrayList();
         PartitionTaskUtils.process((startId -> {
             List<GroupConfig> groupConfigs = accessTemplate.getGroupConfigAccess().listPage(new PageDTO<>(0, 100),
-                new LambdaQueryWrapper<GroupConfig>()
-                    .ge(GroupConfig::getId, startId)
-                    .eq(GroupConfig::getNamespaceId, namespaceId)
-                    .eq(Objects.nonNull(exportGroupVO.getGroupStatus()), GroupConfig::getGroupStatus, exportGroupVO.getGroupStatus())
-                    .in(CollUtil.isNotEmpty(exportGroupVO.getGroupIds()), GroupConfig::getId, exportGroupVO.getGroupIds())
-                    .likeRight(StrUtil.isNotBlank(exportGroupVO.getGroupName()), GroupConfig::getGroupName, StrUtil.trim(exportGroupVO.getGroupName()))
-                    .orderByAsc(GroupConfig::getId)
+                    new LambdaQueryWrapper<GroupConfig>()
+                            .ge(GroupConfig::getId, startId)
+                            .eq(GroupConfig::getNamespaceId, namespaceId)
+                            .eq(Objects.nonNull(exportGroupVO.getGroupStatus()), GroupConfig::getGroupStatus, exportGroupVO.getGroupStatus())
+                            .in(CollUtil.isNotEmpty(exportGroupVO.getGroupIds()), GroupConfig::getId, exportGroupVO.getGroupIds())
+                            .likeRight(StrUtil.isNotBlank(exportGroupVO.getGroupName()), GroupConfig::getGroupName, StrUtil.trim(exportGroupVO.getGroupName()))
+                            .orderByAsc(GroupConfig::getId)
             ).getRecords();
             return groupConfigs.stream().map(GroupConfigPartitionTask::new).toList();
         }), partitionTasks -> {
@@ -451,6 +445,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
     private static class GroupConfigPartitionTask extends PartitionTask {
         // 这里就直接放GroupConfig为了后面若加字段不需要再这里在调整了
         private final GroupConfig config;
+
         public GroupConfigPartitionTask(@NotNull GroupConfig config) {
             this.config = config;
             setId(config.getId());
