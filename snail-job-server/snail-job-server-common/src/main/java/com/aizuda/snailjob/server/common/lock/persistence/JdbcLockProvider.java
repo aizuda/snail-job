@@ -45,7 +45,8 @@ public class JdbcLockProvider implements LockStorage, Lifecycle {
             DbTypeEnum.MARIADB.getDb(),
             DbTypeEnum.POSTGRES.getDb(),
             DbTypeEnum.ORACLE.getDb(),
-            DbTypeEnum.SQLSERVER.getDb());
+            DbTypeEnum.SQLSERVER.getDb(),
+            DbTypeEnum.DM.getDb());
 
     private final DistributedLockMapper distributedLockMapper;
     private final PlatformTransactionManager platformTransactionManager;

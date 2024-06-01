@@ -26,6 +26,7 @@
         <module>snail-job-postgres-datasource</module>
         <module>snail-job-oracle-datasource</module>
         <module>snail-job-sqlserver-datasource</module>
+        <module>snail-job-dm8-datasource</module>
         <module>snail-job-datasource-template</module>
     </modules>
 

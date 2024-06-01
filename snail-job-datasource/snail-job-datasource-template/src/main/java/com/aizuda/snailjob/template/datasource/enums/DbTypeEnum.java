@@ -19,7 +19,8 @@ public enum DbTypeEnum {
     MARIADB("mariadb", "MariaDB数据库", DbType.MARIADB),
     POSTGRES("postgresql", "Postgres数据库", DbType.POSTGRE_SQL),
     ORACLE("oracle", "Oracle数据库", DbType.ORACLE_12C),
-    SQLSERVER("sqlserver", "SQLServer数据库", DbType.SQL_SERVER);
+    SQLSERVER("sqlserver", "SQLServer数据库", DbType.SQL_SERVER),
+    DM("dm", "达梦数据库", DbType.DM);
 
     private final String db;
     private final String desc;

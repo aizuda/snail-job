@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aizuda.snailjob.template.datasource.persistence.mapper.JobSummaryMapper">
+
+    <insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="false" keyProperty="id">
+        INSERT INTO sj_job_summary (namespace_id, group_name, business_id, trigger_at, system_task_type,
+                                    success_num,fail_num,fail_reason,stop_num,stop_reason, cancel_num,cancel_reason)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+                #{item.namespaceId},
+                #{item.groupName},
+                #{item.businessId},
+                #{item.triggerAt},
+                #{item.systemTaskType},
+                #{item.successNum},
+                #{item.failNum},
+                #{item.failReason},
+                #{item.stopNum},
+                #{item.stopReason},
+                #{item.cancelNum},
+                #{item.cancelReason}
+            )
+        </foreach>
+    </insert>
+
+    <update id="updateBatch" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" open="BEGIN" separator=";" close=";END;">
+            UPDATE sj_job_summary
+               SET success_num = #{item.successNum},
+                   fail_num = #{item.failNum},
+                   fail_reason = #{item.failReason},
+                   stop_num = #{item.stopNum},
+                   stop_reason = #{item.stopReason},
+                   cancel_num = #{item.cancelNum},
+                   cancel_reason = #{item.cancelReason}
+             WHERE system_task_type = #{item.systemTaskType}
+               AND business_id = #{item.businessId}
+               AND trigger_at = #{item.triggerAt}
+        </foreach>
+    </update>
+
+    <select id="selectJobLineList"
+            resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardLineResponseDO">
+        SELECT createDt                                                     AS createDt,
+               NVL(SUM(success_num), 0)                                     AS success,
+               NVL(SUM(fail_num), 0)                                        AS failNum,
+               NVL(SUM(stop_num), 0)                                        AS stop,
+               NVL(SUM(cancel_num), 0)                                      AS cancel,
+               NVL(SUM(fail_num + stop_num + cancel_num), 0)                AS fail,
+               NVL(SUM(success_num + fail_num + stop_num + cancel_num), 0)  AS total
+          FROM (
+                SELECT
+                    TO_CHAR(trigger_at, #{dateFormat}) AS createDt,
+                    success_num,
+                    fail_num,
+                    stop_num,
+                    cancel_num
+                FROM sj_job_summary
+                ${ew.customSqlSegment}
+          )
+        GROUP BY createDt
+    </select>
+
+    <select id="selectJobTask"
+            resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardCardResponseDO$JobTask">
+        SELECT NVL(sum(success_num), 0)                                    AS successNum,
+               NVL(sum(stop_num), 0)                                       AS stopNum,
+               NVL(sum(cancel_num), 0)                                     AS cancelNum,
+               NVL(sum(fail_num), 0)                                       AS failNum,
+               NVL(sum(success_num + fail_num + stop_num + cancel_num), 0) AS totalNum
+        FROM sj_job_summary
+        ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectDashboardRankList"
+            resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO$Rank">
+        SELECT * FROM (
+                SELECT
+                    <if test="systemTaskType == 3">
+                        group_name || '/' || (SELECT job_name FROM sj_job WHERE id = business_id)           AS name,
+                    </if>
+                    <if test="systemTaskType == 4">
+                        group_name || '/' || (SELECT workflow_name FROM sj_workflow WHERE id = business_id) AS name,
+                    </if>
+                    SUM(fail_num) AS total
+                FROM sj_job_summary
+                ${ew.customSqlSegment}
+                HAVING SUM(fail_num) > 0
+                ORDER BY total DESC)
+        WHERE ROWNUM <![CDATA[ <= ]]> 10
+    </select>
+
+</mapper>
