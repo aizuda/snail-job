@@ -7,6 +7,7 @@ volumes:
     sqlserver: { }
     mariadb: { }
     dm8: { }
+    kingbase: { }
 
 services:
     mysql:
@@ -108,3 +109,19 @@ services:
             # docker compose exec dm8 bash -c "exec /opt/dmdbms/bin/disql SYSDBA/SYSDBA001 \`/tmp/schema.sql"
             - ../sql/snail_job_dm8.sql:/tmp/schema.sql:ro
 
+
+    kingbase:
+        # x86_64: https://kingbase.oss-cn-beijing.aliyuncs.com/KESV8R3/V009R001C001B0025-安装包-docker/x86_64/kdb_x86_64_V009R001C001B0025.tar
+        # aarch64: https://kingbase.oss-cn-beijing.aliyuncs.com/KESV8R3/V009R001C001B0025-安装包-docker/aarch64/kdb_aarch64_V009R001C001B0025.tar
+        # docker load -i kdb_x86_64_V009R001C001B0025.tar
+        image: kingbase_v009r001c001b0025_single_x86:v1
+        restart: unless-stopped
+        environment:
+            DB_USER: root
+            DB_PASSWORD: root
+        ports:
+            - "54321:54321"
+        volumes:
+            - kingbase:/home/kingbase/userdata/
+            # docker compose exec kingbase bash -c "exec ksql -Uroot -d test -f /tmp/schema.sql"
+            - ../sql/snail_job_kingbase.sql:/tmp/schema.sql:ro

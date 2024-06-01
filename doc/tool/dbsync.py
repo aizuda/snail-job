@@ -630,29 +630,6 @@ class DM8Convertor(Convertor):
     def __init__(self, src):
         super().__init__(src, "DM8")
 
-        # if type == "varchar":
-        #     return f"varchar2({size if size < 4000 else 4000})"
-        # if type in ("int", "int unsigned"):
-        #     return "number"
-        # if type == "bigint" or type == "bigint unsigned":
-        #     return "number"
-        # if type == "datetime":
-        #     return "date"
-        # if type == "timestamp":
-        #     return f"timestamp({size})"
-        # if type == "bit":
-        #     return "number(1,0)"
-        # if type in ("tinyint", "smallint"):
-        #     return "smallint"
-        # if type in ("text", "longtext"):
-        #     return "clob"
-        # if type in ("blob", "mediumblob"):
-        #     return "blob"
-        # if type == "decimal":
-        #     return (
-        #         f"number({','.join(str(s) for s in size)})" if len(size) else "number"
-        #     )
-
     def translate_type(self, type: str, size: Optional[Union[int, Tuple[int]]]):
         """类型转换"""
         type = type.lower()
@@ -769,13 +746,47 @@ CREATE TABLE {table_name} (
         return script
 
 
+class KingbaseConvertor(PostgreSQLConvertor):
+    def __init__(self, src):
+        super().__init__(src)
+        self.db_type = "KingbaseES"
+
+    def gen_create(self, ddl: Dict) -> str:
+        """生成 create"""
+
+        def _generate_column(col):
+            name = col["name"].lower()
+            if name == "id":
+                return "id bigserial PRIMARY KEY"
+
+            type = col["type"].lower()
+            full_type = self.translate_type(type, col["size"])
+            nullable = "NULL" if col["nullable"] else "NOT NULL"
+            if full_type == "text":
+                nullable = "NULL"
+            default = f"DEFAULT {col['default']}" if col["default"] is not None else ""
+            return f"{name} {full_type} {nullable} {default}"
+
+        table_name = ddl["table_name"].lower()
+        columns = [f"{_generate_column(col).strip()}" for col in ddl["columns"]]
+        filed_def_list = ",\n  ".join(columns)
+        script = f"""-- {table_name}
+CREATE TABLE {table_name} (
+    {filed_def_list}
+);"""
+        # kingbase INSERT '' 不能通过 NOT NULL 校验
+        script = script.replace("NOT NULL DEFAULT ''", "NULL DEFAULT ''")
+
+        return script
+
+
 def main():
     parser = argparse.ArgumentParser(description="Snail Job Database Transfer Tool")
     parser.add_argument(
         "type",
         type=str,
         help="Target database type",
-        choices=["postgre", "oracle", "sqlserver", "dm8"],
+        choices=["postgre", "oracle", "sqlserver", "dm8", "kingbase"],
     )
     args = parser.parse_args()
 
@@ -789,6 +800,8 @@ def main():
         convertor = SQLServerConvertor(sql_file)
     elif args.type ==  "dm8":
         convertor = DM8Convertor(sql_file)
+    elif args.type ==  "kingbase":
+        convertor = KingbaseConvertor(sql_file)
     else:
         raise NotImplementedError(f"Database type not supported: {args.type}")
 

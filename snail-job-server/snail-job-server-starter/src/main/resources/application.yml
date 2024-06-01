@@ -38,6 +38,11 @@ spring:
     #    url: jdbc:dm://127.0.0.1:5236
     #    username: SYSDBA
     #    password: SYSDBA001
+    ## kingbase 注意:MyBatis不兼容人大金仓官方驱动，官方推荐使用pg驱动
+    #    driver-class-name: org.postgresql.Driver
+    #    url: jdbc:postgresql://localhost:54321/test
+    #    username: root
+    #    password: root
     type: com.zaxxer.hikari.HikariDataSource
     hikari:
       connection-timeout: 30000
