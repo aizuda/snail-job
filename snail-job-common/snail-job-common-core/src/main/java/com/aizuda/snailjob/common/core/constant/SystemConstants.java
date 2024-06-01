@@ -177,4 +177,9 @@ public interface SystemConstants {
      * Webhook告警、工作流回调请求密钥
      */
     String SECRET = "secret";
+
+    /**
+     * 组名、场景名、空间ID通用正则
+     */
+    String REGEXP = "^[A-Za-z0-9_-]{1,64}$";
 }

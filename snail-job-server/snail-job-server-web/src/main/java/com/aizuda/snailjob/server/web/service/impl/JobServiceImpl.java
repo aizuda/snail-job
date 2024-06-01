@@ -40,7 +40,6 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -49,7 +48,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 
 /**
  * @author opensnail
@@ -199,7 +197,7 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public Boolean updateJobStatus(JobUpdateJobStatusRequestVO jobRequestVO) {
+    public Boolean updateJobStatus(JobStatusUpdateRequestVO jobRequestVO) {
         Assert.notNull(jobRequestVO.getId(), () -> new SnailJobServerException("id 不能为空"));
         Assert.isTrue(1 == jobMapper.selectCount(new LambdaQueryWrapper<Job>().eq(Job::getId, jobRequestVO.getId())));
 
@@ -260,7 +258,7 @@ public class JobServiceImpl implements JobService {
     public void importJobs(List<JobRequestVO> requestList) {
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
         groupHandler.validateGroupExistence(
-            StreamUtils.toSet(requestList, JobRequestVO::getJobName), namespaceId
+            StreamUtils.toSet(requestList, JobRequestVO::getGroupName), namespaceId
         );
         requestList.forEach(this::saveJob);
     }
