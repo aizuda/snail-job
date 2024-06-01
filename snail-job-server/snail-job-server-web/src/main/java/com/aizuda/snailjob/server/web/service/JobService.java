@@ -4,9 +4,8 @@ import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.ExportJobVO;
 import com.aizuda.snailjob.server.web.model.request.JobQueryVO;
 import com.aizuda.snailjob.server.web.model.request.JobRequestVO;
-import com.aizuda.snailjob.server.web.model.request.JobUpdateJobStatusRequestVO;
+import com.aizuda.snailjob.server.web.model.request.JobStatusUpdateRequestVO;
 import com.aizuda.snailjob.server.web.model.response.JobResponseVO;
-import com.aizuda.snailjob.template.datasource.persistence.po.Job;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 
@@ -26,7 +25,7 @@ public interface JobService {
 
     boolean updateJob(JobRequestVO jobRequestVO);
 
-    Boolean updateJobStatus(JobUpdateJobStatusRequestVO jobRequestVO);
+    Boolean updateJobStatus(JobStatusUpdateRequestVO jobRequestVO);
 
     Boolean deleteJobById(Long id);
 

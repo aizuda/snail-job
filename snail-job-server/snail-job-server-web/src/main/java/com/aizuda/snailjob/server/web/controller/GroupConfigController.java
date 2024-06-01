@@ -8,6 +8,7 @@ import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.ExportGroupVO;
 import com.aizuda.snailjob.server.web.model.request.GroupConfigQueryVO;
 import com.aizuda.snailjob.server.web.model.request.GroupConfigRequestVO;
+import com.aizuda.snailjob.server.web.model.request.GroupStatusUpdateRequestVO;
 import com.aizuda.snailjob.server.web.model.response.GroupConfigResponseVO;
 import com.aizuda.snailjob.server.web.service.GroupConfigService;
 import com.aizuda.snailjob.server.web.util.ExportUtils;
@@ -48,9 +49,9 @@ public class GroupConfigController {
 
     @LoginRequired(role = RoleEnum.ADMIN)
     @PutMapping("status")
-    public Boolean updateGroupStatus(@RequestBody @Validated GroupConfigRequestVO groupConfigRequestVO) {
-        String groupName = groupConfigRequestVO.getGroupName();
-        Integer groupStatus = groupConfigRequestVO.getGroupStatus();
+    public Boolean updateGroupStatus(@RequestBody @Validated GroupStatusUpdateRequestVO requestVO) {
+        String groupName = requestVO.getGroupName();
+        Integer groupStatus = requestVO.getGroupStatus();
         return groupConfigService.updateGroupStatus(groupName, groupStatus);
     }
 

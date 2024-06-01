@@ -9,7 +9,7 @@ import lombok.Data;
  * @since 2.4.0
  */
 @Data
-public class JobUpdateJobStatusRequestVO {
+public class JobStatusUpdateRequestVO {
 
     @NotNull(message = "id 不能为空")
     private Long id;

@@ -3,6 +3,7 @@ package com.aizuda.snailjob.server.web.service.impl;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
+import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
@@ -15,10 +16,13 @@ import com.aizuda.snailjob.template.datasource.persistence.mapper.NamespaceMappe
 import com.aizuda.snailjob.template.datasource.persistence.po.Namespace;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author: xiaowoniu
@@ -26,15 +30,19 @@ import java.util.List;
  * @since : 2.5.0
  */
 @Service
+@RequiredArgsConstructor
 public class NamespaceServiceImpl implements NamespaceService {
-
-    @Autowired
-    private NamespaceMapper namespaceMapper;
+    private final NamespaceMapper namespaceMapper;
 
     @Override
     public Boolean saveNamespace(final NamespaceRequestVO namespaceRequestVO) {
+        String uniqueId = namespaceRequestVO.getUniqueId();
 
         if (StrUtil.isNotBlank(namespaceRequestVO.getUniqueId())) {
+            Pattern pattern = Pattern.compile(SystemConstants.REGEXP);
+            Matcher matcher = pattern.matcher(uniqueId);
+            Assert.isTrue(matcher.matches(), () -> new SnailJobServerException("仅支持长度为1~64字符且类型为数字、字母、下划线和短横线"));
+
             Assert.isTrue(namespaceMapper.selectCount(
                             new LambdaQueryWrapper<Namespace>()
                                     .eq(Namespace::getUniqueId, namespaceRequestVO.getUniqueId())) == 0,
@@ -43,10 +51,10 @@ public class NamespaceServiceImpl implements NamespaceService {
 
         Namespace namespace = new Namespace();
         namespace.setName(namespaceRequestVO.getName());
-        if (StrUtil.isBlank(namespaceRequestVO.getUniqueId())) {
+        if (StrUtil.isBlank(uniqueId)) {
             namespace.setUniqueId(IdUtil.simpleUUID());
         } else {
-            namespace.setUniqueId(namespaceRequestVO.getUniqueId());
+            namespace.setUniqueId(uniqueId);
         }
         return 1 == namespaceMapper.insert(namespace);
     }
@@ -89,6 +97,7 @@ public class NamespaceServiceImpl implements NamespaceService {
         List<Namespace> namespaces = namespaceMapper.selectList(
                 new LambdaQueryWrapper<Namespace>()
                         .select(Namespace::getName, Namespace::getUniqueId)
+                        .orderByDesc(Namespace::getId)
         );
         return NamespaceResponseVOConverter.INSTANCE.convertList(namespaces);
     }
