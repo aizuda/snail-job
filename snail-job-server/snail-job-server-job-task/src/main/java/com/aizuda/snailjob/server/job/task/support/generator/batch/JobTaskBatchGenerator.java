@@ -9,12 +9,16 @@ import com.aizuda.snailjob.server.common.enums.JobTaskExecutorSceneEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.job.task.dto.JobTimerTaskDTO;
+import com.aizuda.snailjob.server.job.task.dto.TaskExecuteDTO;
 import com.aizuda.snailjob.server.job.task.dto.WorkflowNodeTaskExecuteDTO;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
+import com.aizuda.snailjob.server.job.task.support.handler.JobTaskBatchHandler;
 import com.aizuda.snailjob.server.job.task.support.handler.WorkflowBatchHandler;
 import com.aizuda.snailjob.server.job.task.support.timer.JobTimerTask;
 import com.aizuda.snailjob.server.job.task.support.timer.JobTimerWheel;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskBatchMapper;
+import com.aizuda.snailjob.template.datasource.persistence.po.Job;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +44,8 @@ public class JobTaskBatchGenerator {
 
     private final JobTaskBatchMapper jobTaskBatchMapper;
     private final WorkflowBatchHandler workflowBatchHandler;
+    private final JobTaskBatchHandler jobTaskBatchHandler;
+    private final JobMapper jobMapper;
 
     @Transactional
     public JobTaskBatch generateJobTaskBatch(JobTaskBatchGeneratorContext context) {
@@ -76,13 +82,12 @@ public class JobTaskBatchGenerator {
 
         // 非待处理状态无需进入时间轮中
         if (JobTaskBatchStatusEnum.WAITING.getStatus() != jobTaskBatch.getTaskBatchStatus()) {
-            WorkflowNodeTaskExecuteDTO taskExecuteDTO = new WorkflowNodeTaskExecuteDTO();
-            taskExecuteDTO.setWorkflowTaskBatchId(context.getWorkflowTaskBatchId());
-            taskExecuteDTO.setTaskExecutorScene(context.getTaskExecutorScene());
-            taskExecuteDTO.setParentId(context.getWorkflowNodeId());
-            taskExecuteDTO.setTaskBatchId(jobTaskBatch.getId());
-            workflowBatchHandler.openNextNode(taskExecuteDTO);
 
+            // 开启下一个工作流
+            openNextWorkflow(context, jobTaskBatch);
+
+            // 若是常驻任务则需要再次进入时间轮
+            openNextResidentTask(context, jobTaskBatch);
             return jobTaskBatch;
         }
 
@@ -95,10 +100,35 @@ public class JobTaskBatchGenerator {
         jobTimerTaskDTO.setWorkflowTaskBatchId(context.getWorkflowTaskBatchId());
         jobTimerTaskDTO.setWorkflowNodeId(context.getWorkflowNodeId());
         JobTimerWheel.registerWithJob(() -> new JobTimerTask(jobTimerTaskDTO), Duration.ofMillis(delay));
-//        JobTimerWheel.register(SyetemTaskTypeEnum.JOB.getType(), jobTaskBatch.getId(),
-//                new JobTimerTask(jobTimerTaskDTO), delay, TimeUnit.MILLISECONDS);
-
         return jobTaskBatch;
+    }
+
+    private void openNextResidentTask(JobTaskBatchGeneratorContext context, JobTaskBatch jobTaskBatch) {
+
+        // 手动触发的定时任务、工作流场景下不存在常驻任务，无需触发
+        if (JobTaskExecutorSceneEnum.MANUAL_JOB.getType().equals(context.getTaskExecutorScene())
+                || JobTaskExecutorSceneEnum.AUTO_WORKFLOW.getType().equals(context.getTaskExecutorScene())
+                || JobTaskExecutorSceneEnum.MANUAL_WORKFLOW.getType().equals(context.getTaskExecutorScene())) {
+            return;
+        }
+
+        TaskExecuteDTO taskExecuteDTO = new TaskExecuteDTO();
+        taskExecuteDTO.setTaskBatchId(jobTaskBatch.getId());
+        taskExecuteDTO.setJobId(context.getJobId());
+        taskExecuteDTO.setTaskExecutorScene(context.getTaskExecutorScene());
+        taskExecuteDTO.setWorkflowTaskBatchId(context.getWorkflowTaskBatchId());
+        taskExecuteDTO.setWorkflowNodeId(context.getWorkflowNodeId());
+        Job job = jobMapper.selectById(context.getJobId());
+        jobTaskBatchHandler.openResidentTask(job, taskExecuteDTO);
+    }
+
+    private void openNextWorkflow(JobTaskBatchGeneratorContext context, JobTaskBatch jobTaskBatch) {
+        WorkflowNodeTaskExecuteDTO taskExecuteDTO = new WorkflowNodeTaskExecuteDTO();
+        taskExecuteDTO.setWorkflowTaskBatchId(context.getWorkflowTaskBatchId());
+        taskExecuteDTO.setTaskExecutorScene(context.getTaskExecutorScene());
+        taskExecuteDTO.setParentId(context.getWorkflowNodeId());
+        taskExecuteDTO.setTaskBatchId(jobTaskBatch.getId());
+        workflowBatchHandler.openNextNode(taskExecuteDTO);
     }
 
 }
