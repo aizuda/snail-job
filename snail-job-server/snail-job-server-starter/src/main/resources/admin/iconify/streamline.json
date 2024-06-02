@@ -1,0 +1,17 @@
+{
+  "prefix": "streamline",
+  "lastModified": 1702314084,
+  "aliases": {},
+  "width": 14,
+  "height": 14,
+  "icons": {
+    "interface-arrows-synchronize-warning-arrow-fail-notification-sync-warning-failure-synchronize-error": {
+      "body": "<g fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m11 9l2-.5l.5 2\"/><path d=\"M13 8.5A6.6 6.6 0 0 1 7 13h0a6 6 0 0 1-5.64-3.95M3 5l-2 .5l-.5-2\"/><path d=\"M1 5.5A6.79 6.79 0 0 1 7 1h0a6 6 0 0 1 5.64 4M7 3.5v4\"/><circle cx=\"7\" cy=\"10\" r=\".5\"/></g>",
+      "hidden": true
+    },
+    "interface-user-multiple-close-geometric-human-multiple-person-up-user": {
+      "body": "<g fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"5\" cy=\"3.75\" r=\"2.25\"/><path d=\"M9.5 13.5h-9v-1a4.5 4.5 0 0 1 9 0ZM9 1.5A2.25 2.25 0 0 1 9 6m1.6 2.19a4.5 4.5 0 0 1 2.9 4.2v1.11H12\"/></g>",
+      "hidden": true
+    }
+  }
+}
