@@ -102,8 +102,11 @@ public class JobClearLogSchedule extends AbstractSchedule implements Lifecycle {
 
         List<JobTaskBatch> jobTaskBatchList = jobTaskBatchMapper.selectPage(
                 new Page<>(0, 1000),
-                new LambdaUpdateWrapper<JobTaskBatch>().ge(JobTaskBatch::getId, startId)
-                        .le(JobTaskBatch::getCreateDt, endTime)).getRecords();
+                new LambdaUpdateWrapper<JobTaskBatch>()
+                        .ge(JobTaskBatch::getId, startId)
+                        .le(JobTaskBatch::getCreateDt, endTime)
+                        .orderByAsc(JobTaskBatch::getId)
+                ).getRecords();
         return JobTaskConverter.INSTANCE.toJobTaskBatchPartitionTasks(jobTaskBatchList);
     }
 

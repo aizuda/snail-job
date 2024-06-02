@@ -109,7 +109,9 @@ public class RetryLogMergeSchedule extends AbstractSchedule implements Lifecycle
                         .in(RetryTaskLog::getRetryStatus, Lists.newArrayList(
                                 RetryStatusEnum.FINISH.getStatus(),
                                 RetryStatusEnum.MAX_COUNT.getStatus()))
-                        .le(RetryTaskLog::getCreateDt, endTime)).getRecords();
+                        .le(RetryTaskLog::getCreateDt, endTime)
+                        .orderByAsc(RetryTaskLog::getId)
+        ).getRecords();
         return RetryTaskLogConverter.INSTANCE.toRetryMergePartitionTaskDTOs(jobTaskBatchList);
     }
 

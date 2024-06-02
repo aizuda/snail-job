@@ -19,6 +19,14 @@ public class PartitionTaskUtils {
     private PartitionTaskUtils() {
     }
 
+    /**
+     * 使用此方法必须order id asc
+     *
+     * @param dataSource 数据来源
+     * @param task 执行任务
+     * @param startId 初始id
+     * @return 总任务数
+     */
     public static long process(LongFunction<List<? extends PartitionTask>> dataSource,
                                Consumer<List<? extends PartitionTask>> task,
                                long startId) {

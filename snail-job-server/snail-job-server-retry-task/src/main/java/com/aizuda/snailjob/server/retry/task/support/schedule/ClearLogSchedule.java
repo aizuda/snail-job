@@ -96,7 +96,11 @@ public class ClearLogSchedule extends AbstractSchedule implements Lifecycle {
 
         List<RetryTaskLog> retryTaskLogList = retryTaskLogMapper.selectPage(
                 new Page<>(0, 1000),
-                new LambdaUpdateWrapper<RetryTaskLog>().ge(RetryTaskLog::getId, startId).le(RetryTaskLog::getCreateDt, endTime)).getRecords();
+                new LambdaUpdateWrapper<RetryTaskLog>()
+                        .ge(RetryTaskLog::getId, startId)
+                        .le(RetryTaskLog::getCreateDt, endTime)
+                        .orderByAsc(RetryTaskLog::getId)
+                ).getRecords();
         return RetryTaskConverter.INSTANCE.toRetryTaskLogPartitionTasks(retryTaskLogList);
     }
 

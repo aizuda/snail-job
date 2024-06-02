@@ -123,10 +123,12 @@ public class RetryErrorMoreThresholdAlarmSchedule extends AbstractSchedule imple
     private List<NotifyConfigPartitionTask> getNotifyConfigPartitions(Long startId) {
 
         List<NotifyConfig> notifyConfigs = accessTemplate.getNotifyConfigAccess()
-                .listPage(new PageDTO<>(startId, 1000), new LambdaQueryWrapper<NotifyConfig>()
+                .listPage(new PageDTO<>(0, 1000), new LambdaQueryWrapper<NotifyConfig>()
+                        .gt(NotifyConfig::getId, startId)
                         .eq(NotifyConfig::getNotifyStatus, StatusEnum.YES.getStatus())
-                        .eq(NotifyConfig::getNotifyScene, RetryNotifySceneEnum.MAX_RETRY_ERROR.getNotifyScene()))
-                .getRecords();
+                        .eq(NotifyConfig::getNotifyScene, RetryNotifySceneEnum.MAX_RETRY_ERROR.getNotifyScene())
+                        .orderByAsc(NotifyConfig::getId)
+                ).getRecords();
 
         if (CollUtil.isEmpty(notifyConfigs)) {
             return Lists.newArrayList();
