@@ -138,6 +138,9 @@ public class GroupConfigServiceImpl implements GroupConfigService {
         groupConfig.setDescription(Optional.ofNullable(groupConfigRequestVO.getDescription()).orElse(StrUtil.EMPTY));
         // 使用@TableField(value = "version", update= "%s+1") 进行更新version, 这里必须初始化一个值
         groupConfig.setVersion(1);
+        // 不允许更新组
+        groupConfig.setGroupName(null);
+        // 不允许更新token
         groupConfig.setToken(null);
         Assert.isTrue(tablePartitionList.contains(groupConfigRequestVO.getGroupPartition()),
                 () -> new SnailJobServerException("分区不存在. [{}]", tablePartitionList));

@@ -173,6 +173,8 @@ public class JobServiceImpl implements JobService {
             updateJob.setNextTriggerAt(DateUtils.toNowMilli());
         }
 
+        // 禁止更新组
+        updateJob.setGroupName(null);
         return 1 == jobMapper.updateById(updateJob);
     }
 

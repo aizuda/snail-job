@@ -225,6 +225,8 @@ public class WorkflowServiceImpl implements WorkflowService {
         workflow.setVersion(version);
         workflow.setNextTriggerAt(calculateNextTriggerAt(workflowRequestVO, DateUtils.toNowMilli()));
         workflow.setFlowInfo(JsonUtil.toJsonString(GraphUtils.serializeGraphToJson(graph)));
+        // 不允许更新组
+        workflow.setGroupName(null);
         Assert.isTrue(
             workflowMapper.update(workflow,
                 new LambdaQueryWrapper<Workflow>()
