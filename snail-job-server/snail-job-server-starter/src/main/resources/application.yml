@@ -4,6 +4,8 @@ server:
     context-path: /snail-job
 
 spring:
+  main:
+    banner-mode: off
   profiles:
     active: dev
   datasource:
