@@ -55,6 +55,7 @@ public class RetryTaskLogServiceImpl implements RetryTaskLogService {
                 .eq(StrUtil.isNotBlank(queryVO.getBizNo()), RetryTaskLog::getBizNo, queryVO.getBizNo())
                 .eq(StrUtil.isNotBlank(queryVO.getUniqueId()), RetryTaskLog::getUniqueId, queryVO.getUniqueId())
                 .eq(StrUtil.isNotBlank(queryVO.getIdempotentId()), RetryTaskLog::getIdempotentId, queryVO.getIdempotentId())
+                .eq(queryVO.getRetryStatus() != null, RetryTaskLog::getRetryStatus, queryVO.getRetryStatus())
                 .select(RetryTaskLog::getGroupName, RetryTaskLog::getId,
                         RetryTaskLog::getSceneName,
                         RetryTaskLog::getIdempotentId, RetryTaskLog::getBizNo, RetryTaskLog::getRetryStatus,
