@@ -20,7 +20,7 @@
 > SnailJob 是一个灵活、可靠且高效的分布式任务重试和任务调度平台。其核心采用分区模式实现，具备高度可伸缩性和容错性的分布式系统。拥有完善的权限管理、强大的告警监控功能和友好的界面交互。欢迎大家接入并使用。
 
 # 开源地址
-- [snail-job-admin](https://gitee.com/opensnail/snail-job-admin.git)
+- [snail-job-admin](https://gitee.com/opensnail/snail-job-admin.git)(基于[soybean-admin](https://github.com/soybeanjs/soybean-admin)开源项目搭建)
 - [snail-job-demo](https://gitee.com/opensnail/snail-job-demo.git)
 
 # 预览地址
@@ -55,7 +55,6 @@ Aizuda/SnailJob 采用[APACHE LICENSE 2.0](https://gitee.com/aizuda/snail-job/bl
 开源协议，您在使用过程中，需要注意以下几点:
 
 1. 不得修改产品相关代码的源码头注释和出处;
-2. 不得进行简单修改包装声称是自己的产品;
-3. 不得应用于危害国家安全、荣誉和利益的行为，不能以任何形式用于非法目的;
+2. 不得应用于危害国家安全、荣誉和利益的行为，不能以任何形式用于非法目的;
 
 
