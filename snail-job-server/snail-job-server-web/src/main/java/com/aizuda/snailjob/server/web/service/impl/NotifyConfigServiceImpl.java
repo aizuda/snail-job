@@ -55,12 +55,13 @@ public class NotifyConfigServiceImpl implements NotifyConfigService {
     @Override
     public PageResult<List<NotifyConfigResponseVO>> getNotifyConfigList(NotifyConfigQueryVO queryVO) {
         PageDTO<NotifyConfig> pageDTO = new PageDTO<>();
+        List<String> groupNames = UserSessionUtils.getGroupNames(queryVO.getGroupName());
 
         UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
         List<NotifyConfig> notifyConfigs = accessTemplate.getNotifyConfigAccess().listPage(pageDTO,
                         new LambdaQueryWrapper<NotifyConfig>()
                                 .eq(NotifyConfig::getNamespaceId, userSessionVO.getNamespaceId())
-                                .in(userSessionVO.isUser(), NotifyConfig::getGroupName, userSessionVO.getGroupNames())
+                                .in(CollUtil.isNotEmpty(groupNames), NotifyConfig::getGroupName, groupNames)
                                 .eq(StrUtil.isNotBlank(queryVO.getGroupName()), NotifyConfig::getGroupName, queryVO.getGroupName())
                                 .eq(StrUtil.isNotBlank(queryVO.getSceneName()), NotifyConfig::getBusinessId, queryVO.getSceneName())
                                 .orderByDesc(NotifyConfig::getId))

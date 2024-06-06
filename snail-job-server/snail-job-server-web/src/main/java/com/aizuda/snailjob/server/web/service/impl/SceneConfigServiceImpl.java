@@ -75,14 +75,13 @@ public class SceneConfigServiceImpl implements SceneConfigService {
         PageDTO<RetrySceneConfig> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
 
         UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
-        String namespaceId = userSessionVO.getNamespaceId();
+        List<String> groupNames = UserSessionUtils.getGroupNames(queryVO.getGroupName());
+
         pageDTO = accessTemplate.getSceneConfigAccess().listPage(pageDTO,
                 new LambdaQueryWrapper<RetrySceneConfig>()
-                        .eq(RetrySceneConfig::getNamespaceId, namespaceId)
-                        .in(userSessionVO.isUser(), RetrySceneConfig::getGroupName, userSessionVO.getGroupNames())
+                        .eq(RetrySceneConfig::getNamespaceId, userSessionVO.getNamespaceId())
+                        .in(CollUtil.isNotEmpty(groupNames), RetrySceneConfig::getGroupName, groupNames)
                         .eq(Objects.nonNull(queryVO.getSceneStatus()), RetrySceneConfig::getSceneStatus, queryVO.getSceneStatus())
-                        .eq(StrUtil.isNotBlank(queryVO.getGroupName()),
-                                RetrySceneConfig::getGroupName, StrUtil.trim(queryVO.getGroupName()))
                         .likeRight(StrUtil.isNotBlank(queryVO.getSceneName()),
                                 RetrySceneConfig::getSceneName, StrUtil.trim(queryVO.getSceneName()))
                         .orderByDesc(RetrySceneConfig::getCreateDt));

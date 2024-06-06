@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.web.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.enums.RetryStatusEnum;
@@ -15,6 +16,7 @@ import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.BatchDeleteRetryDeadLetterVO;
 import com.aizuda.snailjob.server.web.model.request.BatchRollBackRetryDeadLetterVO;
 import com.aizuda.snailjob.server.web.model.request.RetryDeadLetterQueryVO;
+import com.aizuda.snailjob.server.web.model.request.UserSessionVO;
 import com.aizuda.snailjob.server.web.model.response.RetryDeadLetterResponseVO;
 import com.aizuda.snailjob.server.web.service.RetryDeadLetterService;
 import com.aizuda.snailjob.server.web.service.convert.RetryDeadLetterResponseVOConverter;
@@ -35,10 +37,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author: opensnail
@@ -59,13 +58,15 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
         if (StrUtil.isBlank(queryVO.getGroupName())) {
             return new PageResult<>(pageDTO, new ArrayList<>());
         }
-        String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
 
+        List<String> groupNames = UserSessionUtils.getGroupNames(queryVO.getGroupName());
+
+        String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
         PageDTO<RetryDeadLetter> retryDeadLetterPageDTO = accessTemplate.getRetryDeadLetterAccess()
                 .listPage(queryVO.getGroupName(), namespaceId, pageDTO,
                         new LambdaQueryWrapper<RetryDeadLetter>()
                                 .eq(RetryDeadLetter::getNamespaceId, namespaceId)
-                                .eq(RetryDeadLetter::getGroupName, queryVO.getGroupName())
+                                .in(CollUtil.isNotEmpty(groupNames), RetryDeadLetter::getGroupName, groupNames)
                                 .eq(StrUtil.isNotBlank(queryVO.getSceneName()), RetryDeadLetter::getSceneName, queryVO.getSceneName())
                                 .eq(StrUtil.isNotBlank(queryVO.getBizNo()), RetryDeadLetter::getBizNo, queryVO.getBizNo())
                                 .eq(StrUtil.isNotBlank(queryVO.getIdempotentId()), RetryDeadLetter::getIdempotentId, queryVO.getIdempotentId())

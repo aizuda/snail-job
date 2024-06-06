@@ -182,6 +182,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
 
         UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
         String namespaceId = userSessionVO.getNamespaceId();
+        List<String> groupNames = UserSessionUtils.getGroupNames(queryVO.getGroupName());
 
         ConfigAccess<GroupConfig> groupConfigAccess = accessTemplate.getGroupConfigAccess();
         PageDTO<GroupConfig> groupConfigPageDTO = groupConfigAccess.listPage(
@@ -189,7 +190,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
                 new LambdaQueryWrapper<GroupConfig>()
                         .eq(GroupConfig::getNamespaceId, namespaceId)
                         .eq(Objects.nonNull(queryVO.getGroupStatus()), GroupConfig::getGroupStatus, queryVO.getGroupStatus())
-                        .in(userSessionVO.isUser(), GroupConfig::getGroupName, userSessionVO.getGroupNames())
+                        .in(CollUtil.isNotEmpty(groupNames), GroupConfig::getGroupName, groupNames)
                         .likeRight(StrUtil.isNotBlank(queryVO.getGroupName()), GroupConfig::getGroupName,
                                 StrUtil.trim(queryVO.getGroupName()))
                         .orderByDesc(GroupConfig::getId));

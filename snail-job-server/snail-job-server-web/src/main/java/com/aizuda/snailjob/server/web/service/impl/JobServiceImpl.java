@@ -44,10 +44,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * @author opensnail
@@ -83,11 +80,12 @@ public class JobServiceImpl implements JobService {
 
         PageDTO<Job> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
         UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
+        List<String> groupNames = UserSessionUtils.getGroupNames(queryVO.getGroupName());
+
         PageDTO<Job> selectPage = jobMapper.selectPage(pageDTO,
             new LambdaQueryWrapper<Job>()
                 .eq(Job::getNamespaceId, userSessionVO.getNamespaceId())
-                .in(userSessionVO.isUser(), Job::getGroupName, userSessionVO.getGroupNames())
-                .eq(StrUtil.isNotBlank(queryVO.getGroupName()), Job::getGroupName, queryVO.getGroupName())
+                .in(CollUtil.isNotEmpty(groupNames), Job::getGroupName, groupNames)
                 .likeRight(StrUtil.isNotBlank(queryVO.getJobName()), Job::getJobName,
                     StrUtil.trim(queryVO.getJobName()))
                 .eq(Objects.nonNull(queryVO.getJobStatus()), Job::getJobStatus, queryVO.getJobStatus())

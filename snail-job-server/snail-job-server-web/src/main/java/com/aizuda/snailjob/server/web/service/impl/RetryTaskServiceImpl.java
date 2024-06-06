@@ -86,9 +86,11 @@ public class RetryTaskServiceImpl implements RetryTaskService {
             return new PageResult<>(pageDTO, new ArrayList<>());
         }
 
+        List<String> groupNames = UserSessionUtils.getGroupNames(queryVO.getGroupName());
+
         LambdaQueryWrapper<RetryTask> queryWrapper = new LambdaQueryWrapper<RetryTask>()
                 .eq(RetryTask::getNamespaceId, namespaceId)
-                .eq(RetryTask::getGroupName, queryVO.getGroupName())
+                .in(CollUtil.isNotEmpty(groupNames), RetryTask::getGroupName, groupNames)
                 .eq(StrUtil.isNotBlank(queryVO.getSceneName()), RetryTask::getSceneName, queryVO.getSceneName())
                 .eq(StrUtil.isNotBlank(queryVO.getBizNo()), RetryTask::getBizNo, queryVO.getBizNo())
                 .eq(StrUtil.isNotBlank(queryVO.getIdempotentId()), RetryTask::getIdempotentId, queryVO.getIdempotentId())

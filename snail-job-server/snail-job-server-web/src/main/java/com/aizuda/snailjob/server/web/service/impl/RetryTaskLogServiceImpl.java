@@ -43,14 +43,16 @@ public class RetryTaskLogServiceImpl implements RetryTaskLogService {
 
     @Override
     public PageResult<List<RetryTaskLogResponseVO>> getRetryTaskLogPage(RetryTaskLogQueryVO queryVO) {
+        PageDTO<RetryTaskLog> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
 
         UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
         String namespaceId = userSessionVO.getNamespaceId();
-        PageDTO<RetryTaskLog> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
+
+        List<String> groupNames = UserSessionUtils.getGroupNames(queryVO.getGroupName());
+
         LambdaQueryWrapper<RetryTaskLog> retryTaskLogLambdaQueryWrapper = new LambdaQueryWrapper<RetryTaskLog>()
                 .eq(RetryTaskLog::getNamespaceId, namespaceId)
-                .in(userSessionVO.isUser(), RetryTaskLog::getGroupName, userSessionVO.getGroupNames())
-                .eq(StrUtil.isNotBlank(queryVO.getGroupName()), RetryTaskLog::getGroupName, queryVO.getGroupName())
+                .in(CollUtil.isNotEmpty(groupNames), RetryTaskLog::getGroupName, groupNames)
                 .eq(StrUtil.isNotBlank(queryVO.getSceneName()), RetryTaskLog::getSceneName, queryVO.getSceneName())
                 .eq(StrUtil.isNotBlank(queryVO.getBizNo()), RetryTaskLog::getBizNo, queryVO.getBizNo())
                 .eq(StrUtil.isNotBlank(queryVO.getUniqueId()), RetryTaskLog::getUniqueId, queryVO.getUniqueId())

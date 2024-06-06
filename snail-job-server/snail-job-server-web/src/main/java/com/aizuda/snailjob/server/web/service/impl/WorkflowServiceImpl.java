@@ -178,11 +178,13 @@ public class WorkflowServiceImpl implements WorkflowService {
         PageDTO<Workflow> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
 
         UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
+        List<String> groupNames = UserSessionUtils.getGroupNames(queryVO.getGroupName());
+
         PageDTO<Workflow> page = workflowMapper.selectPage(pageDTO,
             new LambdaQueryWrapper<Workflow>()
                 .eq(Workflow::getDeleted, StatusEnum.NO.getStatus())
                 .eq(Workflow::getNamespaceId, userSessionVO.getNamespaceId())
-                .eq(StrUtil.isNotBlank(queryVO.getGroupName()), Workflow::getGroupName, queryVO.getGroupName())
+                .in(CollUtil.isNotEmpty(groupNames), Workflow::getGroupName, groupNames)
                 .like(StrUtil.isNotBlank(queryVO.getWorkflowName()), Workflow::getWorkflowName,
                     queryVO.getWorkflowName())
                 .eq(Objects.nonNull(queryVO.getWorkflowStatus()), Workflow::getWorkflowStatus,
