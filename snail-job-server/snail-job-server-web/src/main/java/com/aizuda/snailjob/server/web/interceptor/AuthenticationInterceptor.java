@@ -91,7 +91,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
 
             Long count = namespaceMapper.selectCount(
                     new LambdaQueryWrapper<Namespace>().eq(Namespace::getUniqueId, namespaceId));
-            Assert.isTrue(count > 0, () -> new SnailJobServerException("[{}] 命名空间不存在", namespaceId));
+            Assert.isTrue(count > 0, () -> new SnailJobAuthenticationException("[{}] 命名空间不存在", namespaceId));
             UserSessionVO userSessionVO = new UserSessionVO();
             userSessionVO.setId(systemUser.getId());
             userSessionVO.setUsername(systemUser.getUsername());
@@ -106,7 +106,9 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
                                 .eq(SystemUserPermission::getSystemUserId, systemUser.getId())
                                 .eq(SystemUserPermission::getNamespaceId, namespaceId)
                 );
-                userSessionVO.setGroupNames(StreamUtils.toList(systemUserPermissions, SystemUserPermission::getGroupName));
+                List<String> groupNames = StreamUtils.toList(systemUserPermissions, SystemUserPermission::getGroupName);
+                Assert.notEmpty(groupNames, () -> new SnailJobAuthenticationException("用户组权限为空"));
+                userSessionVO.setGroupNames(groupNames);
             }
 
             httpServletRequest.setAttribute("currentUser", userSessionVO);
