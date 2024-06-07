@@ -63,6 +63,11 @@ public class SnailDispatcherRequestHandler {
             RequestMethod requestMethod = RequestMethod.valueOf(request.getMethod().name());
 
             endPointInfo = EndPointInfoCache.get(builder.getPathStr(), requestMethod);
+            if (Objects.isNull(endPointInfo)) {
+                throw new SnailJobClientException("无法找到对应的处理请检查对应的包是否正确引入. " +
+                        "path:[{}] requestMethod:[{}]", builder.getPathStr(), requestMethod);
+            }
+
             Class<?>[] paramTypes = endPointInfo.getMethod().getParameterTypes();
             Object[] args = retryRequest.getArgs();
 
