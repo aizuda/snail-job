@@ -138,8 +138,6 @@ public class GroupConfigServiceImpl implements GroupConfigService {
         groupConfig.setDescription(Optional.ofNullable(groupConfigRequestVO.getDescription()).orElse(StrUtil.EMPTY));
         // 使用@TableField(value = "version", update= "%s+1") 进行更新version, 这里必须初始化一个值
         groupConfig.setVersion(1);
-        // 不允许更新组
-        groupConfig.setGroupName(null);
         // 不允许更新token
         groupConfig.setToken(null);
         Assert.isTrue(tablePartitionList.contains(groupConfigRequestVO.getGroupPartition()),
@@ -150,6 +148,8 @@ public class GroupConfigServiceImpl implements GroupConfigService {
         // 校验retry_task_x和retry_dead_letter_x是否存在
         checkGroupPartition(groupConfig, namespaceId);
 
+        // 不允许更新组
+        groupConfig.setGroupName(null);
         Assert.isTrue(1 == groupConfigAccess.update(groupConfig,
                         new LambdaUpdateWrapper<GroupConfig>()
                                 .eq(GroupConfig::getNamespaceId, namespaceId)
