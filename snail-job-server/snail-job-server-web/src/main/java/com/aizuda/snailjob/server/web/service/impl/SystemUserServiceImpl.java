@@ -9,16 +9,14 @@ import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.web.annotation.RoleEnum;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
-import com.aizuda.snailjob.server.web.model.request.SystemUserQueryVO;
-import com.aizuda.snailjob.server.web.model.request.SystemUserRequestVO;
-import com.aizuda.snailjob.server.web.model.request.UserPermissionRequestVO;
-import com.aizuda.snailjob.server.web.model.request.UserSessionVO;
+import com.aizuda.snailjob.server.web.model.request.*;
 import com.aizuda.snailjob.server.web.model.response.PermissionsResponseVO;
 import com.aizuda.snailjob.server.web.model.response.SystemUserResponseVO;
 import com.aizuda.snailjob.server.web.service.SystemUserService;
 import com.aizuda.snailjob.server.web.service.convert.NamespaceResponseVOConverter;
 import com.aizuda.snailjob.server.web.service.convert.PermissionsResponseVOConverter;
 import com.aizuda.snailjob.server.web.service.convert.SystemUserResponseVOConverter;
+import com.aizuda.snailjob.server.web.util.UserSessionUtils;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.NamespaceMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.SystemUserMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.SystemUserPermissionMapper;
@@ -289,6 +287,21 @@ public class SystemUserServiceImpl implements SystemUserService {
         });
 
         return response;
+    }
+
+    @Override
+    public void updateUserPassword(SystemUpdateUserPasswordRequestVO requestVO) {
+        Long userId = UserSessionUtils.currentUserSession().getId();
+        SystemUser systemUser = systemUserMapper.selectOne(
+                new LambdaQueryWrapper<SystemUser>().eq(SystemUser::getId, userId));
+        if (Objects.isNull(systemUser)) {
+            throw new SnailJobServerException("该用户不存在");
+        }
+        if (!SecureUtil.sha256(requestVO.getOldPassword()).equals(systemUser.getPassword())) {
+            throw new SnailJobServerException("用户原密码错误");
+        }
+        systemUser.setPassword(SecureUtil.sha256(requestVO.getNewPassword()));
+        Assert.isTrue(1 == systemUserMapper.updateById(systemUser), () -> new SnailJobServerException("更新用户密码失败"));
     }
 
     @Override

@@ -5,6 +5,7 @@ import com.aizuda.snailjob.server.web.annotation.LoginRequired;
 import com.aizuda.snailjob.server.web.annotation.LoginUser;
 import com.aizuda.snailjob.server.web.annotation.RoleEnum;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
+import com.aizuda.snailjob.server.web.model.request.SystemUpdateUserPasswordRequestVO;
 import com.aizuda.snailjob.server.web.model.request.SystemUserQueryVO;
 import com.aizuda.snailjob.server.web.model.request.SystemUserRequestVO;
 import com.aizuda.snailjob.server.web.model.request.UserSessionVO;
@@ -83,4 +84,11 @@ public class SystemUserController {
         }
         return systemUserService.delUser(id);
     }
+
+    @LoginRequired
+    @PutMapping("/update-user-password")
+    public void updateUserPassword(@RequestBody @Valid SystemUpdateUserPasswordRequestVO requestVO) {
+        systemUserService.updateUserPassword(requestVO);
+    }
+
 }

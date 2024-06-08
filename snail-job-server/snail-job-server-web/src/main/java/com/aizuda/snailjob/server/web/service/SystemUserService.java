@@ -1,6 +1,7 @@
 package com.aizuda.snailjob.server.web.service;
 
 import com.aizuda.snailjob.server.web.model.base.PageResult;
+import com.aizuda.snailjob.server.web.model.request.SystemUpdateUserPasswordRequestVO;
 import com.aizuda.snailjob.server.web.model.request.SystemUserQueryVO;
 import com.aizuda.snailjob.server.web.model.request.SystemUserRequestVO;
 import com.aizuda.snailjob.server.web.model.request.UserSessionVO;
@@ -34,4 +35,7 @@ public interface SystemUserService {
     boolean delUser(Long id);
 
     List<PermissionsResponseVO> getSystemUserPermissionByUserName(Long id);
+
+    void updateUserPassword(SystemUpdateUserPasswordRequestVO requestVO);
+
 }
