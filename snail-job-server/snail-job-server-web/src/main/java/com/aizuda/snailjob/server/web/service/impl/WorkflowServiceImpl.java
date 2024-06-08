@@ -130,6 +130,8 @@ public class WorkflowServiceImpl implements WorkflowService {
             HashUtil.bkdrHash(workflowRequestVO.getGroupName() + workflowRequestVO.getWorkflowName())
             % systemProperties.getBucketTotal());
         workflow.setNamespaceId(UserSessionUtils.currentUserSession().getNamespaceId());
+
+        workflow.setId(null);
         Assert.isTrue(1 == workflowMapper.insert(workflow), () -> new SnailJobServerException("新增工作流失败"));
 
         // 获取DAG节点配置
