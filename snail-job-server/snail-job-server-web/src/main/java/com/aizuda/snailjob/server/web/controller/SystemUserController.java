@@ -1,6 +1,5 @@
 package com.aizuda.snailjob.server.web.controller;
 
-import cn.hutool.core.lang.Assert;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.web.annotation.LoginRequired;
 import com.aizuda.snailjob.server.web.annotation.LoginUser;
@@ -12,9 +11,8 @@ import com.aizuda.snailjob.server.web.model.request.UserSessionVO;
 import com.aizuda.snailjob.server.web.model.response.PermissionsResponseVO;
 import com.aizuda.snailjob.server.web.model.response.SystemUserResponseVO;
 import com.aizuda.snailjob.server.web.service.SystemUserService;
-import com.aizuda.snailjob.server.web.util.UserSessionUtils;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,12 +24,11 @@ import java.util.List;
  * @since 2022-03-05
  */
 @RestController
+@RequiredArgsConstructor
 public class SystemUserController {
 
     private static final Long SUPER_ADMIN_ID = 1L;
-
-    @Autowired
-    private SystemUserService systemUserService;
+    private final SystemUserService systemUserService;
 
     @PostMapping("/auth/login")
     public SystemUserResponseVO login(@RequestBody SystemUserRequestVO requestVO) {
@@ -56,14 +53,10 @@ public class SystemUserController {
         return systemUserService.getSystemUserPageList(systemUserQueryVO);
     }
 
+    @LoginRequired(role = RoleEnum.ADMIN)
     @PutMapping("/user")
     public void update(@RequestBody @Valid SystemUserRequestVO requestVO) {
-        // 1. 普通用户不允许修改其他用户
-        if (!SUPER_ADMIN_ID.equals(requestVO.getId())) {
-            Assert.equals(UserSessionUtils.currentUserSession().getId(), requestVO.getId(),
-                    "普通用户不允许修改其他用户");
-        }
-        // 2. 超级管理员(id=1)不能变更为普通用户
+        // 1. 超级管理员(id=1)不能变更为普通用户
         if (SUPER_ADMIN_ID.equals(requestVO.getId()) && RoleEnum.isUser(requestVO.getRole())) {
             throw new SnailJobServerException("不允许修改超级管理员角色");
         }
