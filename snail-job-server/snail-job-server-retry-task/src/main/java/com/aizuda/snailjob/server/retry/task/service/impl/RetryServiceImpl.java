@@ -59,7 +59,8 @@ public class RetryServiceImpl implements RetryService {
                         .in(RetryTask::getRetryStatus, RetryStatusEnum.MAX_COUNT.getStatus(),
                                 RetryStatusEnum.FINISH.getStatus())
                         .eq(RetryTask::getTaskType, SyetemTaskTypeEnum.CALLBACK.getType())
-                        .eq(RetryTask::getGroupName, groupName)).getRecords();
+                        .eq(RetryTask::getGroupName, groupName)
+                        .orderByDesc(RetryTask::getId)).getRecords();
 
         if (CollUtil.isEmpty(callbackRetryTasks)) {
             return Boolean.TRUE;

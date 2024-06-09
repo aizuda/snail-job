@@ -16,7 +16,6 @@ import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.BatchDeleteRetryDeadLetterVO;
 import com.aizuda.snailjob.server.web.model.request.BatchRollBackRetryDeadLetterVO;
 import com.aizuda.snailjob.server.web.model.request.RetryDeadLetterQueryVO;
-import com.aizuda.snailjob.server.web.model.request.UserSessionVO;
 import com.aizuda.snailjob.server.web.model.response.RetryDeadLetterResponseVO;
 import com.aizuda.snailjob.server.web.service.RetryDeadLetterService;
 import com.aizuda.snailjob.server.web.service.convert.RetryDeadLetterResponseVOConverter;
@@ -37,7 +36,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author: opensnail
@@ -70,7 +72,8 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
                                 .eq(StrUtil.isNotBlank(queryVO.getSceneName()), RetryDeadLetter::getSceneName, queryVO.getSceneName())
                                 .eq(StrUtil.isNotBlank(queryVO.getBizNo()), RetryDeadLetter::getBizNo, queryVO.getBizNo())
                                 .eq(StrUtil.isNotBlank(queryVO.getIdempotentId()), RetryDeadLetter::getIdempotentId, queryVO.getIdempotentId())
-                                .eq(StrUtil.isNotBlank(queryVO.getUniqueId()), RetryDeadLetter::getUniqueId, queryVO.getUniqueId()));
+                                .eq(StrUtil.isNotBlank(queryVO.getUniqueId()), RetryDeadLetter::getUniqueId, queryVO.getUniqueId())
+                                .orderByDesc(RetryDeadLetter::getId));
 
         return new PageResult<>(retryDeadLetterPageDTO,
                 RetryDeadLetterResponseVOConverter.INSTANCE.convertList(retryDeadLetterPageDTO.getRecords()));
@@ -140,8 +143,7 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
                         new LambdaQueryWrapper<RetryDeadLetter>()
                                 .eq(RetryDeadLetter::getGroupName, groupName)
                                 .in(RetryDeadLetter::getId, waitDelRetryDeadLetterIdSet)),
-                () -> new SnailJobServerException("删除死信队列数据失败"))
-        ;
+                () -> new SnailJobServerException("删除死信队列数据失败"));
 
         // 变更日志的状态
         RetryTaskLog retryTaskLog = new RetryTaskLog();
