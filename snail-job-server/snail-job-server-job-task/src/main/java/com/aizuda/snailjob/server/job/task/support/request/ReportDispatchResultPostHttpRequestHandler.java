@@ -25,7 +25,6 @@ import static com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH
  * @date 2023-09-30 23:01:58
  * @since 2.4.0
  */
-@Slf4j
 @Component
 public class ReportDispatchResultPostHttpRequestHandler extends PostHttpRequestHandler {
 

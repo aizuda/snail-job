@@ -41,6 +41,11 @@ public class DispatchJobRequest {
     @NotNull(message = "executorTimeout 不能为空")
     private Integer executorTimeout;
 
+    /**
+     * 任务名称
+     */
+    private String taskName;
+
     private String argsStr;
 
     private Integer shardingTotal;

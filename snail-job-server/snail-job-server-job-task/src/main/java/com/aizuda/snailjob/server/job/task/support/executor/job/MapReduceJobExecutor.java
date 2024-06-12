@@ -7,35 +7,33 @@ import com.aizuda.snailjob.server.common.util.ClientInfoUtils;
 import com.aizuda.snailjob.server.job.task.dto.RealJobExecutorDTO;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTask;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 /**
- * @author opensnail
- * @date 2023-10-03 22:12:40
- * @since 2.4.0
+ * @author: opensnail
+ * @date : 2024-06-12
+ * @since : sj_1.1.0
  */
 @Component
-public class ClusterJobExecutor extends AbstractJobExecutor {
+public class MapReduceJobExecutor extends AbstractJobExecutor  {
 
     @Override
     public JobTaskTypeEnum getTaskInstanceType() {
-        return JobTaskTypeEnum.CLUSTER;
+        return JobTaskTypeEnum.MAP_REDUCE;
     }
 
     @Override
-    protected void doExecute(JobExecutorContext context) {
-
-        // 调度客户端
+    protected void doExecute(final JobExecutorContext context) {
         List<JobTask> taskList = context.getTaskList();
-        JobTask jobTask = taskList.get(0);
-        RealJobExecutorDTO realJobExecutor = JobTaskConverter.INSTANCE.toRealJobExecutorDTO(context, jobTask);
-        realJobExecutor.setClientId(ClientInfoUtils.clientId(jobTask.getClientInfo()));
-        ActorRef actorRef = ActorGenerator.jobRealTaskExecutorActor();
-        actorRef.tell(realJobExecutor, actorRef);
-
+        for (int i = 0; i < taskList.size(); i++) {
+            JobTask jobTask = taskList.get(i);
+            RealJobExecutorDTO realJobExecutor = JobTaskConverter.INSTANCE.toRealJobExecutorDTO(context, jobTask);
+            realJobExecutor.setClientId(ClientInfoUtils.clientId(jobTask.getClientInfo()));
+            ActorRef actorRef = ActorGenerator.jobRealTaskExecutorActor();
+            actorRef.tell(realJobExecutor, actorRef);
+        }
     }
 
 }

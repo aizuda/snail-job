@@ -2,6 +2,7 @@ package com.aizuda.snailjob.server.job.task.support;
 
 import com.aizuda.snailjob.client.model.request.DispatchJobRequest;
 import com.aizuda.snailjob.client.model.request.DispatchJobResultRequest;
+import com.aizuda.snailjob.client.model.request.MapTaskRequest;
 import com.aizuda.snailjob.server.common.dto.JobAlarmInfo;
 import com.aizuda.snailjob.server.common.dto.JobLogMetaDTO;
 import com.aizuda.snailjob.server.job.task.dto.*;
@@ -60,6 +61,8 @@ public interface JobTaskConverter {
             @Mapping(source = "id", target = "jobId")
     )
     JobTaskGenerateContext toJobTaskInstanceGenerateContext(Job job);
+
+    JobTaskGenerateContext toJobTaskInstanceGenerateContext(MapTaskRequest request);
 
     JobTask toJobTaskInstance(JobTaskGenerateContext context);
 

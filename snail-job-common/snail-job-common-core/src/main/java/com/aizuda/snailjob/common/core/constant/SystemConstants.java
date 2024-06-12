@@ -81,6 +81,16 @@ public interface SystemConstants {
         String JOB_STOP = "/job/stop/v1";
 
         /**
+         * 生成同步MAP任务
+         */
+        String JOB_MAP_TASK = "/job/map/task/v1";
+
+        /**
+         * 执行REDUCE任务
+         */
+        String JOB_REDUCE_TASK = "/job/reduce/task/v1";
+
+        /**
          * 同步配置
          */
         String SYNC_CONFIG = "/sync/version";
