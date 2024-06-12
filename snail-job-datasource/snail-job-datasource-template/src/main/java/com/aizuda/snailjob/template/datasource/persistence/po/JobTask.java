@@ -33,6 +33,11 @@ public class JobTask extends CreateUpdateDt {
     private String groupName;
 
     /**
+     * 任务名称
+     */
+    private String taskName;
+
+    /**
      * 任务信息id
      */
     private Long jobId;

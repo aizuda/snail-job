@@ -2,6 +2,8 @@ package com.aizuda.snailjob.server.job.task.support.generator.task;
 
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * @author opensnail
  * @date 2023-10-02 13:02:57
@@ -27,4 +29,14 @@ public class JobTaskGenerateContext {
      * 参数类型 text/json
      */
     private Integer argsType;
+
+    /**
+     * 动态分片的Map任务
+     */
+    private List<?> mapSubTask;
+
+    /**
+     * 任务名称
+     */
+    private String taskName;
 }

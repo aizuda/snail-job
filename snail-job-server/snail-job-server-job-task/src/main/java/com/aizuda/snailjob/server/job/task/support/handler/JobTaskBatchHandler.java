@@ -1,19 +1,25 @@
 package com.aizuda.snailjob.server.job.task.support.handler;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.context.SpringContext;
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskStatusEnum;
+import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
+import com.aizuda.snailjob.common.core.util.JsonUtil;
+import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.server.common.WaitStrategy;
 import com.aizuda.snailjob.server.common.dto.DistributeInstance;
 import com.aizuda.snailjob.server.common.enums.JobTaskExecutorSceneEnum;
 import com.aizuda.snailjob.server.common.strategy.WaitStrategies;
 import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.job.task.dto.CompleteJobBatchDTO;
+import com.aizuda.snailjob.server.job.task.dto.JobTaskExtAttrsDTO;
 import com.aizuda.snailjob.server.job.task.dto.JobTimerTaskDTO;
 import com.aizuda.snailjob.server.job.task.dto.TaskExecuteDTO;
 import com.aizuda.snailjob.server.job.task.dto.WorkflowNodeTaskExecuteDTO;
+import com.aizuda.snailjob.server.job.task.enums.MapReduceStageEnum;
 import com.aizuda.snailjob.server.job.task.support.alarm.event.JobTaskFailAlarmEvent;
 import com.aizuda.snailjob.server.job.task.support.cache.ResidentTaskCache;
 import com.aizuda.snailjob.server.job.task.support.timer.JobTimerWheel;
@@ -47,6 +53,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class JobTaskBatchHandler {
+
     private final JobTaskMapper jobTaskMapper;
     private final JobTaskBatchMapper jobTaskBatchMapper;
     private final WorkflowBatchHandler workflowBatchHandler;
@@ -57,9 +64,9 @@ public class JobTaskBatchHandler {
     public boolean complete(CompleteJobBatchDTO completeJobBatchDTO) {
 
         List<JobTask> jobTasks = jobTaskMapper.selectList(
-                new LambdaQueryWrapper<JobTask>()
-                        .select(JobTask::getTaskStatus, JobTask::getResultMessage)
-                        .eq(JobTask::getTaskBatchId, completeJobBatchDTO.getTaskBatchId()));
+            new LambdaQueryWrapper<JobTask>()
+                .select(JobTask::getTaskStatus, JobTask::getResultMessage)
+                .eq(JobTask::getTaskBatchId, completeJobBatchDTO.getTaskBatchId()));
 
         JobTaskBatch jobTaskBatch = new JobTaskBatch();
         jobTaskBatch.setId(completeJobBatchDTO.getTaskBatchId());
@@ -73,7 +80,7 @@ public class JobTaskBatchHandler {
         }
 
         Map<Integer, Long> statusCountMap = jobTasks.stream()
-                .collect(Collectors.groupingBy(JobTask::getTaskStatus, Collectors.counting()));
+            .collect(Collectors.groupingBy(JobTask::getTaskStatus, Collectors.counting()));
 
         long failCount = statusCountMap.getOrDefault(JobTaskBatchStatusEnum.FAIL.getStatus(), 0L);
         long stopCount = statusCountMap.getOrDefault(JobTaskBatchStatusEnum.STOP.getStatus(), 0L);
@@ -85,6 +92,20 @@ public class JobTaskBatchHandler {
             jobTaskBatch.setTaskBatchStatus(JobTaskBatchStatusEnum.STOP.getStatus());
         } else {
             jobTaskBatch.setTaskBatchStatus(JobTaskBatchStatusEnum.SUCCESS.getStatus());
+
+            // 判断是否是mapreduce任务
+            JobTask firstJobTask = jobTasks.get(0);
+            String extAttrs = firstJobTask.getExtAttrs();
+            if (StrUtil.isNotBlank(extAttrs)) {
+                JobTaskExtAttrsDTO jobTaskExtAttrsDTO = JsonUtil.parseObject(firstJobTask.getExtAttrs(),
+                    JobTaskExtAttrsDTO.class);
+                Integer taskType = jobTaskExtAttrsDTO.getTaskType();
+                if (Objects.nonNull(taskType) && JobTaskTypeEnum.MAP_REDUCE.getType() == taskType) {
+                    if (isAllMapTask(jobTasks)) {
+                        // TODO 开启reduce阶段
+                    }
+                }
+            }
         }
 
         if (Objects.nonNull(completeJobBatchDTO.getJobOperationReason())) {
@@ -100,11 +121,25 @@ public class JobTaskBatchHandler {
 
         jobTaskBatch.setUpdateDt(LocalDateTime.now());
         return 1 == jobTaskBatchMapper.update(jobTaskBatch,
-                new LambdaUpdateWrapper<JobTaskBatch>()
-                        .eq(JobTaskBatch::getId, completeJobBatchDTO.getTaskBatchId())
-                        .in(JobTaskBatch::getTaskBatchStatus, JobTaskBatchStatusEnum.NOT_COMPLETE)
+            new LambdaUpdateWrapper<JobTaskBatch>()
+                .eq(JobTaskBatch::getId, completeJobBatchDTO.getTaskBatchId())
+                .in(JobTaskBatch::getTaskBatchStatus, JobTaskBatchStatusEnum.NOT_COMPLETE)
         );
 
+    }
+
+    private static boolean isAllMapTask(final List<JobTask> jobTasks) {
+       return jobTasks.size() ==  jobTasks.stream()
+            .filter(jobTask -> StrUtil.isNotBlank(jobTask.getExtAttrs()))
+            .map(jobTask -> JsonUtil.parseObject(jobTask.getExtAttrs(), JobTaskExtAttrsDTO.class))
+            .filter(jobTaskExtAttrsDTO -> {
+                String mrStage = jobTaskExtAttrsDTO.getMrStage();
+                if (StrUtil.isNotBlank(mrStage) && MapReduceStageEnum.MAP.name().equals(mrStage)) {
+                    return true;
+                }
+
+                return false;
+            }).count();
     }
 
     /**
@@ -115,21 +150,21 @@ public class JobTaskBatchHandler {
      */
     public void openResidentTask(Job job, TaskExecuteDTO taskExecuteDTO) {
         if (Objects.isNull(job)
-                || JobTaskExecutorSceneEnum.MANUAL_JOB.getType().equals(taskExecuteDTO.getTaskExecutorScene())
-                || JobTaskExecutorSceneEnum.AUTO_WORKFLOW.getType().equals(taskExecuteDTO.getTaskExecutorScene())
-                || JobTaskExecutorSceneEnum.MANUAL_WORKFLOW.getType().equals(taskExecuteDTO.getTaskExecutorScene())
-                // 是否是常驻任务
-                || Objects.equals(StatusEnum.NO.getStatus(), job.getResident())
-                // 防止任务已经分配到其他节点导致的任务重复执行
-                || !DistributeInstance.INSTANCE.getConsumerBucket().contains(job.getBucketIndex())
+            || JobTaskExecutorSceneEnum.MANUAL_JOB.getType().equals(taskExecuteDTO.getTaskExecutorScene())
+            || JobTaskExecutorSceneEnum.AUTO_WORKFLOW.getType().equals(taskExecuteDTO.getTaskExecutorScene())
+            || JobTaskExecutorSceneEnum.MANUAL_WORKFLOW.getType().equals(taskExecuteDTO.getTaskExecutorScene())
+            // 是否是常驻任务
+            || Objects.equals(StatusEnum.NO.getStatus(), job.getResident())
+            // 防止任务已经分配到其他节点导致的任务重复执行
+            || !DistributeInstance.INSTANCE.getConsumerBucket().contains(job.getBucketIndex())
         ) {
             return;
         }
 
         long count = groupConfigMapper.selectCount(new LambdaQueryWrapper<GroupConfig>()
-                .eq(GroupConfig::getNamespaceId, job.getNamespaceId())
-                .eq(GroupConfig::getGroupName, job.getGroupName())
-                .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus()));
+            .eq(GroupConfig::getNamespaceId, job.getNamespaceId())
+            .eq(GroupConfig::getGroupName, job.getGroupName())
+            .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus()));
         if (count == 0) {
             return;
         }
@@ -155,7 +190,8 @@ public class JobTaskBatchHandler {
 
         Duration duration = Duration.ofMillis(milliseconds - DateUtils.toNowMilli() % 1000);
 
-        log.debug("常驻任务监控. [{}] 任务时间差:[{}] 取余:[{}]", duration, milliseconds, DateUtils.toNowMilli() % 1000);
+        log.debug("常驻任务监控. [{}] 任务时间差:[{}] 取余:[{}]", duration, milliseconds,
+            DateUtils.toNowMilli() % 1000);
         job.setNextTriggerAt(nextTriggerAt);
         JobTimerWheel.registerWithJob(() -> new ResidentJobTimerTask(jobTimerTaskDTO, job), duration);
         ResidentTaskCache.refresh(job.getId(), nextTriggerAt);
