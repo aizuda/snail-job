@@ -155,7 +155,7 @@ public class JobTaskBatchHandler {
 
         Duration duration = Duration.ofMillis(milliseconds - DateUtils.toNowMilli() % 1000);
 
-        log.info("常驻任务监控. [{}] 任务时间差:[{}] 取余:[{}]", duration, milliseconds, DateUtils.toNowMilli() % 1000);
+        log.debug("常驻任务监控. [{}] 任务时间差:[{}] 取余:[{}]", duration, milliseconds, DateUtils.toNowMilli() % 1000);
         job.setNextTriggerAt(nextTriggerAt);
         JobTimerWheel.registerWithJob(() -> new ResidentJobTimerTask(jobTimerTaskDTO, job), duration);
         ResidentTaskCache.refresh(job.getId(), nextTriggerAt);
