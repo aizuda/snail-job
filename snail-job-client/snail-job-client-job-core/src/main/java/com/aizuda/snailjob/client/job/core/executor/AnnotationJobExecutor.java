@@ -7,6 +7,8 @@ import com.aizuda.snailjob.client.model.ExecuteResult;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 
+import java.util.List;
+
 /**
  * 基于注解的执行器
  *
@@ -27,5 +29,10 @@ public class AnnotationJobExecutor extends AbstractJobExecutor {
         } else {
             return (ExecuteResult) ReflectionUtils.invokeMethod(jobExecutorInfo.getMethod(), jobExecutorInfo.getExecutor());
         }
+    }
+
+    @Override
+    protected void doMapExecute(List<?> taskList, String mapName) {
+
     }
 }
