@@ -19,6 +19,7 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -93,5 +94,7 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
     }
 
     protected abstract ExecuteResult doJobExecute(JobArgs jobArgs);
+
+    protected abstract void doMapExecute(List<?> taskList, String mapName);
 
 }

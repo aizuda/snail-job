@@ -11,5 +11,6 @@ import com.aizuda.snailjob.common.core.model.JobContext;
  * @since 2.4.0
  */
 public interface IJobExecutor {
+
     void jobExecute(JobContext jobContext);
 }
