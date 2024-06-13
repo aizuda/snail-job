@@ -1,6 +1,9 @@
 package com.aizuda.snailjob.server.common.allocate.server;
 
+import cn.hutool.core.collection.CollUtil;
+import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.ServerLoadBalance;
+import com.google.common.collect.Lists;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,10 +20,18 @@ public class AllocateMessageQueueAveragely implements ServerLoadBalance<Integer,
     @Override
     public List<Integer> allocate(String currentCID, List<Integer> bucketList, List<String> serverList) {
 
+        if (CollUtil.isEmpty(serverList)) {
+            return Lists.newArrayList();
+        }
+
         List<Integer> consumerBucket = new ArrayList<>();
 
         // 找到当前消费者在消费者队列里面的下标
         int index = serverList.indexOf(currentCID);
+        if (index < 0) {
+            SnailJobLog.LOCAL.warn("currentCID: [{}] not in serverList:[{}]", currentCID, serverList);
+            return Lists.newArrayList();
+        }
 
         // 此处取余是为了判断队列与总消费者数的是否是整数倍 mod=0则是整数倍，否则不是
         int mod = bucketList.size() % serverList.size();
