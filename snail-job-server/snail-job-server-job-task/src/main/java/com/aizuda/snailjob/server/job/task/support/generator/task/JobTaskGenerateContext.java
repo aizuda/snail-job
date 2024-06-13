@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.job.task.support.generator.task;
 
+import com.aizuda.snailjob.server.job.task.enums.MapReduceStageEnum;
 import lombok.Data;
 
 import java.util.List;
@@ -38,5 +39,10 @@ public class JobTaskGenerateContext {
     /**
      * 任务名称
      */
-    private String taskName;
+    private String mapName;
+
+    /**
+     * 动态分片的阶段
+     */
+    private MapReduceStageEnum mrStage;
 }

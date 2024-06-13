@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.job.task.support.handler;
 
+import akka.actor.ActorRef;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.context.SpringContext;
@@ -9,7 +10,9 @@ import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
+import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.WaitStrategy;
+import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.common.dto.DistributeInstance;
 import com.aizuda.snailjob.server.common.enums.JobTaskExecutorSceneEnum;
 import com.aizuda.snailjob.server.common.strategy.WaitStrategies;
@@ -17,9 +20,11 @@ import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.job.task.dto.CompleteJobBatchDTO;
 import com.aizuda.snailjob.server.job.task.dto.JobTaskExtAttrsDTO;
 import com.aizuda.snailjob.server.job.task.dto.JobTimerTaskDTO;
+import com.aizuda.snailjob.server.job.task.dto.ReduceTaskDTO;
 import com.aizuda.snailjob.server.job.task.dto.TaskExecuteDTO;
 import com.aizuda.snailjob.server.job.task.dto.WorkflowNodeTaskExecuteDTO;
 import com.aizuda.snailjob.server.job.task.enums.MapReduceStageEnum;
+import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
 import com.aizuda.snailjob.server.job.task.support.alarm.event.JobTaskFailAlarmEvent;
 import com.aizuda.snailjob.server.job.task.support.cache.ResidentTaskCache;
 import com.aizuda.snailjob.server.job.task.support.timer.JobTimerWheel;
@@ -94,6 +99,7 @@ public class JobTaskBatchHandler {
             jobTaskBatch.setTaskBatchStatus(JobTaskBatchStatusEnum.SUCCESS.getStatus());
 
             // 判断是否是mapreduce任务
+            // todo 此处待优化
             JobTask firstJobTask = jobTasks.get(0);
             String extAttrs = firstJobTask.getExtAttrs();
             if (StrUtil.isNotBlank(extAttrs)) {
@@ -102,7 +108,13 @@ public class JobTaskBatchHandler {
                 Integer taskType = jobTaskExtAttrsDTO.getTaskType();
                 if (Objects.nonNull(taskType) && JobTaskTypeEnum.MAP_REDUCE.getType() == taskType) {
                     if (isAllMapTask(jobTasks)) {
-                        // TODO 开启reduce阶段
+                        // 开启reduce阶段
+                        try {
+                            ActorRef actorRef = ActorGenerator.jobReduceActor();
+                            actorRef.tell(JobTaskConverter.INSTANCE.toReduceTaskDTO(completeJobBatchDTO), actorRef);
+                        } catch (Exception e) {
+                            SnailJobLog.LOCAL.error("tell reduce actor error", e);
+                        }
                     }
                 }
             }

@@ -136,6 +136,5 @@ public interface JobTaskConverter {
 
     JobLogMessage toJobLogMessage(JobLogMessage jobLogMessage);
 
-    List<JobAlarmInfo> toJobAlarmInfos(List<JobTaskFailAlarmEvent> events);
-
+    ReduceTaskDTO toReduceTaskDTO(CompleteJobBatchDTO jobBatchDTO);
 }
