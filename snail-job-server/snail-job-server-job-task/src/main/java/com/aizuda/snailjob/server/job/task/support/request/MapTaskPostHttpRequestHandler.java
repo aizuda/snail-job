@@ -3,6 +3,7 @@ package com.aizuda.snailjob.server.job.task.support.request;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.net.url.UrlQuery;
 import com.aizuda.snailjob.client.model.request.MapTaskRequest;
+import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.model.NettyResult;
@@ -31,7 +32,6 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Objects;
 
-import static com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH.JOB_MAP_TASK;
 
 /**
  * 动态分片客户端生成map任务
@@ -48,7 +48,7 @@ public class MapTaskPostHttpRequestHandler extends PostHttpRequestHandler {
 
     @Override
     public boolean supports(final String path) {
-        return JOB_MAP_TASK.equals(path);
+        return SystemConstants.HTTP_PATH.BATCH_REPORT_JOB_MAP_TASK.equals(path);
     }
 
     @Override

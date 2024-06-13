@@ -83,7 +83,7 @@ public interface SystemConstants {
         /**
          * 生成同步MAP任务
          */
-        String JOB_MAP_TASK = "/job/map/task/v1";
+        String BATCH_REPORT_JOB_MAP_TASK = "/batch/report/job/map/task/v1";
 
         /**
          * 执行REDUCE任务

@@ -16,7 +16,8 @@ public enum JobTaskTypeEnum {
     CLUSTER(1),
     BROADCAST(2),
     SHARDING(3),
-    MAP_REDUCE(4),
+    MAP(4),
+    MAP_REDUCE(5),
     ;
 
     private final int type;
