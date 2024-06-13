@@ -169,7 +169,10 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
                         // 节点数量不一致触发
                         || isNodeSizeNotEqual(concurrentMap.size(), remotePods.size())
                         // 判断远程节点是不是和本地节点一致的，如果不一致则重新分配
-                        || isNodeNotMatch(remoteHostIds, localHostIds)) {
+                        || isNodeNotMatch(remoteHostIds, localHostIds)
+                        // 检查当前节点的消费桶是否为空，为空则重新负载
+                        || checkConsumerBucket(remoteHostIds)
+                ) {
 
                     // 删除本地缓存以下线的节点信息
                     removeNode(concurrentMap, remoteHostIds, localHostIds);
@@ -226,7 +229,17 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
                     localHostIds,
                     remoteHostIds);
         }
+
+        // 若在线节点小于总的Bucket数量且当前节点无任何分桶，则需要重新负载
+        if (CollUtil.isEmpty(DistributeInstance.INSTANCE.getConsumerBucket()) && remoteHostIds.size() <= systemProperties.getBucketTotal()) {
+            return true;
+        }
+
         return b;
+    }
+
+    public boolean checkConsumerBucket(Set<String> remoteHostIds) {
+        return CollUtil.isEmpty(DistributeInstance.INSTANCE.getConsumerBucket()) && remoteHostIds.size() <= systemProperties.getBucketTotal();
     }
 
     private boolean isNodeSizeNotEqual(int localNodeSize, int remoteNodeSize) {
@@ -238,16 +251,5 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
         }
         return b;
     }
-
-    private boolean isGroupSizeNotEqual(List<GroupConfig> removeGroupConfig, Set<String> allGroup) {
-        boolean b = allGroup.size() != removeGroupConfig.size();
-        if (b) {
-            SnailJobLog.LOCAL.info("若存在远程和本地缓存的组的数量不一致则触发rebalance. localGroupSize:[{}] remoteGroupSize:[{}]",
-                    allGroup.size(),
-                    removeGroupConfig.size());
-        }
-        return b;
-    }
-
 
 }

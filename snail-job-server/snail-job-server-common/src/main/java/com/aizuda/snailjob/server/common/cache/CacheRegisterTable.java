@@ -82,7 +82,6 @@ public class CacheRegisterTable implements Lifecycle {
             ServerNodeMapper serverNodeMapper = SpringContext.getBeanByType(ServerNodeMapper.class);
             List<ServerNode> serverNodes = serverNodeMapper.selectList(
                     new LambdaQueryWrapper<ServerNode>()
-                            .eq(ServerNode::getNodeType, NodeTypeEnum.CLIENT.getType())
                             .eq(ServerNode::getNamespaceId, namespaceId)
                             .eq(ServerNode::getGroupName, groupName)
                             .eq(ServerNode::getHostId, hostId)
@@ -115,7 +114,6 @@ public class CacheRegisterTable implements Lifecycle {
             ServerNodeMapper serverNodeMapper = SpringContext.getBeanByType(ServerNodeMapper.class);
             List<ServerNode> serverNodes = serverNodeMapper.selectList(
                     new LambdaQueryWrapper<ServerNode>()
-                            .eq(ServerNode::getNodeType, NodeTypeEnum.CLIENT.getType())
                             .eq(ServerNode::getNamespaceId, namespaceId)
                             .eq(ServerNode::getGroupName, groupName));
             for (final ServerNode node : serverNodes) {

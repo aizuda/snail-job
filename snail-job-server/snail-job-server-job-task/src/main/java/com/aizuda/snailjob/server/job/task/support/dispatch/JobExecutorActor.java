@@ -16,6 +16,7 @@ import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.job.task.dto.TaskExecuteDTO;
 import com.aizuda.snailjob.server.job.task.dto.WorkflowNodeTaskExecuteDTO;
+import com.aizuda.snailjob.server.job.task.enums.MapReduceStageEnum;
 import com.aizuda.snailjob.server.job.task.support.JobExecutor;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
 import com.aizuda.snailjob.server.job.task.support.alarm.event.JobTaskFailAlarmEvent;
@@ -132,6 +133,8 @@ public class JobExecutorActor extends AbstractActor {
             JobTaskGenerateContext instanceGenerateContext = JobTaskConverter.INSTANCE.toJobTaskInstanceGenerateContext(job);
             instanceGenerateContext.setTaskBatchId(taskExecute.getTaskBatchId());
             instanceGenerateContext.setMapName("ROOT_TASK");
+            // TODO 此处需要判断任务类型
+            instanceGenerateContext.setMrStage(MapReduceStageEnum.MAP);
             List<JobTask> taskList = taskInstance.generate(instanceGenerateContext);
             if (CollUtil.isEmpty(taskList)) {
                 return;
