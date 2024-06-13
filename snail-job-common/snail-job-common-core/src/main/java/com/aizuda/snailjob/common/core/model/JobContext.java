@@ -2,6 +2,8 @@ package com.aizuda.snailjob.common.core.model;
 
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * @author: opensnail
  * @date : 2023-09-27 09:40
@@ -46,4 +48,14 @@ public class JobContext {
      * 是否是重试流量
      */
     private boolean isRetry;
+
+    /**
+     * Map集合列表
+     */
+    private List<Object> taskList;
+
+    /**
+     * Map名称
+     */
+    private String mapName;
 }

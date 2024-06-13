@@ -9,11 +9,14 @@ import com.aizuda.snailjob.client.job.core.cache.JobExecutorInfoCache;
 import com.aizuda.snailjob.client.job.core.cache.ThreadPoolCache;
 import com.aizuda.snailjob.client.job.core.dto.JobExecutorInfo;
 import com.aizuda.snailjob.client.job.core.executor.AbstractJobExecutor;
+import com.aizuda.snailjob.client.job.core.executor.AbstractMapExecutor;
+import com.aizuda.snailjob.client.job.core.executor.AbstractMapReduceExecutor;
 import com.aizuda.snailjob.client.job.core.executor.AnnotationJobExecutor;
 import com.aizuda.snailjob.client.job.core.log.JobLogMeta;
 import com.aizuda.snailjob.client.model.StopJobDTO;
 import com.aizuda.snailjob.client.model.request.DispatchJobRequest;
 import com.aizuda.snailjob.common.core.context.SpringContext;
+import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.snailjob.common.core.model.JobContext;
 import com.aizuda.snailjob.common.core.model.Result;
 import com.aizuda.snailjob.common.log.SnailJobLog;
@@ -60,7 +63,13 @@ public class JobEndPoint {
             Object executor = jobExecutorInfo.getExecutor();
             IJobExecutor jobExecutor;
             if (IJobExecutor.class.isAssignableFrom(executor.getClass())) {
-                jobExecutor = (AbstractJobExecutor) executor;
+                if (JobTaskTypeEnum.MAP.getType() == jobContext.getTaskType()) {
+                    jobExecutor = (AbstractMapExecutor) executor;
+                } else if (JobTaskTypeEnum.MAP_REDUCE.getType() == jobContext.getTaskId()) {
+                    jobExecutor = (AbstractMapReduceExecutor) executor;
+                } else {
+                    jobExecutor = (AbstractJobExecutor) executor;
+                }
             } else {
                 jobExecutor = SpringContext.getBeanByType(AnnotationJobExecutor.class);
             }
