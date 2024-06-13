@@ -69,7 +69,7 @@ public class JobEndPoint {
             if (IJobExecutor.class.isAssignableFrom(executor.getClass())) {
                 if (JobTaskTypeEnum.MAP.getType() == jobContext.getTaskType()) {
                     jobExecutor = (AbstractMapExecutor) executor;
-                } else if (JobTaskTypeEnum.MAP_REDUCE.getType() == jobContext.getTaskId()) {
+                } else if (JobTaskTypeEnum.MAP_REDUCE.getType() == jobContext.getTaskType()) {
                     jobExecutor = (AbstractMapReduceExecutor) executor;
                 } else {
                     jobExecutor = (AbstractJobExecutor) executor;
@@ -119,6 +119,7 @@ public class JobEndPoint {
         jobContext.setWorkflowTaskBatchId(dispatchJob.getWorkflowTaskBatchId());
         jobContext.setRetry(dispatchJob.isRetry());
         jobContext.setRetryScene(dispatchJob.getRetryScene());
+        jobContext.setMapName(dispatchJob.getMapName());
         return jobContext;
     }
 

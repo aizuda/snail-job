@@ -45,4 +45,9 @@ public class JobTaskGenerateContext {
      * 动态分片的阶段
      */
     private MapReduceStageEnum mrStage;
+
+    /**
+     * 父任务id
+     */
+    private Long parentId;
 }

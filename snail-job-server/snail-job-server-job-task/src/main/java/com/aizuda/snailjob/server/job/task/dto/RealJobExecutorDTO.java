@@ -33,7 +33,7 @@ public class RealJobExecutorDTO extends BaseDTO {
     /**
      * 任务名称
      */
-    private String taskName;
+    private String mapName;
 
     /**
      * 扩展字段

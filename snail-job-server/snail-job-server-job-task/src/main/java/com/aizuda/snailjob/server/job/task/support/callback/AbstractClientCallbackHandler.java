@@ -3,8 +3,10 @@ package com.aizuda.snailjob.server.job.task.support.callback;
 import akka.actor.ActorRef;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.enums.JobTaskStatusEnum;
+import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.common.util.ClientInfoUtils;
+import com.aizuda.snailjob.server.job.task.dto.JobTaskExtAttrsDTO;
 import com.aizuda.snailjob.server.job.task.dto.RealJobExecutorDTO;
 import com.aizuda.snailjob.server.job.task.enums.JobRetrySceneEnum;
 import com.aizuda.snailjob.server.job.task.support.ClientCallbackHandler;
@@ -51,6 +53,12 @@ public abstract class AbstractClientCallbackHandler implements ClientCallbackHan
                 realJobExecutor.setRetryCount(jobTask.getRetryCount() + 1);
                 realJobExecutor.setRetry(Boolean.TRUE);
                 realJobExecutor.setRetryScene(context.getRetryScene());
+                String extAttrs = jobTask.getExtAttrs();
+                // TODO 待优化
+                if (StrUtil.isNotBlank(extAttrs)) {
+                    JobTaskExtAttrsDTO extAttrsDTO = JsonUtil.parseObject(extAttrs, JobTaskExtAttrsDTO.class);
+                    realJobExecutor.setMapName(extAttrsDTO.getMapName());
+                }
                 ActorRef actorRef = ActorGenerator.jobRealTaskExecutorActor();
                 actorRef.tell(realJobExecutor, actorRef);
                 return;

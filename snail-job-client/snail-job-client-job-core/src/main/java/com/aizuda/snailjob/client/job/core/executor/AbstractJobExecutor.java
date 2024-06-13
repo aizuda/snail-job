@@ -5,6 +5,7 @@ import com.aizuda.snailjob.client.job.core.IJobExecutor;
 import com.aizuda.snailjob.client.job.core.cache.FutureCache;
 import com.aizuda.snailjob.client.job.core.cache.ThreadPoolCache;
 import com.aizuda.snailjob.client.job.core.dto.JobArgs;
+import com.aizuda.snailjob.client.job.core.dto.MapReduceArgs;
 import com.aizuda.snailjob.client.job.core.dto.ShardingJobArgs;
 import com.aizuda.snailjob.client.job.core.log.JobLogMeta;
 import com.aizuda.snailjob.client.job.core.timer.StopTaskTimerTask;
@@ -47,6 +48,8 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
             JobArgs jobArgs;
             if (jobContext.getTaskType() == JobTaskTypeEnum.SHARDING.getType()) {
                 jobArgs = buildShardingJobArgs(jobContext);
+            } else if (jobContext.getTaskType() == JobTaskTypeEnum.MAP_REDUCE.getType()) {
+                jobArgs = buildMapReduceJobArgs(jobContext);
             } else {
                 jobArgs = buildJobArgs(jobContext);
             }
@@ -73,6 +76,7 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
         logMeta.setJobId(jobContext.getJobId());
         logMeta.setTaskBatchId(jobContext.getTaskBatchId());
         SnailJobLogManager.initLogInfo(logMeta, LogTypeEnum.JOB);
+        JobContextManager.setJobContext(jobContext);
     }
 
     private static JobArgs buildJobArgs(JobContext jobContext) {
@@ -89,6 +93,15 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
         jobArgs.setExecutorInfo(jobContext.getExecutorInfo());
         jobArgs.setShardingIndex(jobContext.getShardingIndex());
         jobArgs.setShardingTotal(jobContext.getShardingTotal());
+        return jobArgs;
+    }
+
+    private static JobArgs buildMapReduceJobArgs(JobContext jobContext) {
+        MapReduceArgs jobArgs = new MapReduceArgs();
+        jobArgs.setArgsStr(jobContext.getArgsStr());
+        jobArgs.setExecutorInfo(jobContext.getExecutorInfo());
+        jobArgs.setMapName(jobContext.getMapName());
+        jobArgs.setTaskBatchId(jobContext.getTaskBatchId());
         return jobArgs;
     }
 

@@ -58,7 +58,7 @@ public class MapTaskPostHttpRequestHandler extends PostHttpRequestHandler {
 
     @Override
     public String doHandler(final String content, final UrlQuery query, final HttpHeaders headers) {
-        SnailJobLog.LOCAL.debug("map task Request. content:[{}]", content);
+        SnailJobLog.LOCAL.info("map task Request. content:[{}]", content);
         String groupName = HttpHeaderUtil.getGroupName(headers);
         String namespace = HttpHeaderUtil.getNamespace(headers);
 
@@ -72,10 +72,11 @@ public class MapTaskPostHttpRequestHandler extends PostHttpRequestHandler {
         context.setGroupName(HttpHeaderUtil.getGroupName(headers));
         context.setNamespaceId(HttpHeaderUtil.getNamespace(headers));
         context.setMrStage(MapReduceStageEnum.MAP);
+        context.setMapSubTask(mapTaskRequest.getSubTask());
         List<JobTask> taskList = taskInstance.generate(context);
         if (CollUtil.isEmpty(taskList)) {
             return JsonUtil.toJsonString(
-                new NettyResult(StatusEnum.NO.getStatus(), "Job task is empty", Boolean.TRUE, retryRequest.getReqId()));
+                new NettyResult(StatusEnum.NO.getStatus(), "Job task is empty", Boolean.FALSE, retryRequest.getReqId()));
         }
 
         Job job = jobMapper.selectOne(new LambdaQueryWrapper<Job>()
@@ -86,7 +87,7 @@ public class MapTaskPostHttpRequestHandler extends PostHttpRequestHandler {
 
         if (Objects.isNull(job)) {
             return JsonUtil.toJsonString(
-                new NettyResult(StatusEnum.NO.getStatus(), "Job config not existed", Boolean.TRUE,
+                new NettyResult(StatusEnum.NO.getStatus(), "Job config not existed", Boolean.FALSE,
                     retryRequest.getReqId()));
         }
 
@@ -106,6 +107,7 @@ public class MapTaskPostHttpRequestHandler extends PostHttpRequestHandler {
         context.setTaskBatchId(mapTaskRequest.getTaskBatchId());
         context.setWorkflowTaskBatchId(mapTaskRequest.getWorkflowTaskBatchId());
         context.setWorkflowNodeId(mapTaskRequest.getWorkflowNodeId());
+        context.setMapName(mapTaskRequest.getMapName());
         return context;
     }
 

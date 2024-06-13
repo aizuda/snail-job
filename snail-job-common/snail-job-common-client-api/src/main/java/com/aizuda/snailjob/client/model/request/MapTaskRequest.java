@@ -27,8 +27,8 @@ public class MapTaskRequest {
 
     private Long workflowNodeId;
 
-    @NotBlank(message = "taskName 不能为空")
-    private String taskName;
+    @NotBlank(message = "mapName 不能为空")
+    private String mapName;
 
     @NotEmpty(message = "subTask 不能为空")
     private List<Object> subTask;
