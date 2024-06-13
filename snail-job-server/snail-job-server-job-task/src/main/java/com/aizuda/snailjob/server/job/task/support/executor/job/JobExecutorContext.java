@@ -90,4 +90,6 @@ public class JobExecutorContext {
 
     private Long workflowNodeId;
 
+    private String mapName;
+
 }

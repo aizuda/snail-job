@@ -3,6 +3,7 @@ package com.aizuda.snailjob.server.job.task.support.dispatch;
 import akka.actor.AbstractActor;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
+import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.context.SpringContext;
 import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
@@ -36,6 +37,7 @@ import com.aizuda.snailjob.template.datasource.persistence.po.Job;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTask;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -133,6 +135,7 @@ public class JobExecutorActor extends AbstractActor {
             JobTaskGenerateContext instanceGenerateContext = JobTaskConverter.INSTANCE.toJobTaskInstanceGenerateContext(job);
             instanceGenerateContext.setTaskBatchId(taskExecute.getTaskBatchId());
             instanceGenerateContext.setMapName("ROOT_TASK");
+            instanceGenerateContext.setMapSubTask(Lists.newArrayList(StrUtil.EMPTY));
             // TODO 此处需要判断任务类型
             instanceGenerateContext.setMrStage(MapReduceStageEnum.MAP);
             List<JobTask> taskList = taskInstance.generate(instanceGenerateContext);
@@ -176,6 +179,7 @@ public class JobExecutorActor extends AbstractActor {
         context.setJobId(job.getId());
         context.setWorkflowTaskBatchId(taskExecute.getWorkflowTaskBatchId());
         context.setWorkflowNodeId(taskExecute.getWorkflowNodeId());
+        context.setMapName("ROOT_TASK");
         return context;
     }
 
