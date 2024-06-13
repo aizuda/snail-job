@@ -27,13 +27,11 @@ public class MapReduceJobExecutor extends AbstractJobExecutor  {
     @Override
     protected void doExecute(final JobExecutorContext context) {
         List<JobTask> taskList = context.getTaskList();
-        for (int i = 0; i < taskList.size(); i++) {
-            JobTask jobTask = taskList.get(i);
+        for (final JobTask jobTask : taskList) {
             RealJobExecutorDTO realJobExecutor = JobTaskConverter.INSTANCE.toRealJobExecutorDTO(context, jobTask);
             realJobExecutor.setClientId(ClientInfoUtils.clientId(jobTask.getClientInfo()));
             ActorRef actorRef = ActorGenerator.jobRealTaskExecutorActor();
             actorRef.tell(realJobExecutor, actorRef);
         }
     }
-
 }

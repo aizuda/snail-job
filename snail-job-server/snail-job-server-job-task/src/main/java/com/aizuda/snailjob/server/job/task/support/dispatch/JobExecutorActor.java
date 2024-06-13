@@ -131,7 +131,7 @@ public class JobExecutorActor extends AbstractActor {
             JobTaskGenerator taskInstance = JobTaskGeneratorFactory.getTaskInstance(job.getTaskType());
             JobTaskGenerateContext instanceGenerateContext = JobTaskConverter.INSTANCE.toJobTaskInstanceGenerateContext(job);
             instanceGenerateContext.setTaskBatchId(taskExecute.getTaskBatchId());
-            instanceGenerateContext.setTaskName("ROOT_TASK");
+            instanceGenerateContext.setMapName("ROOT_TASK");
             List<JobTask> taskList = taskInstance.generate(instanceGenerateContext);
             if (CollUtil.isEmpty(taskList)) {
                 return;

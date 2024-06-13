@@ -42,6 +42,7 @@ public class ActorGenerator {
     public static final String SCAN_JOB_ACTOR = "ScanJobActor";
     public static final String SCAN_WORKFLOW_ACTOR = "ScanWorkflowTaskActor";
     public static final String JOB_TASK_PREPARE_ACTOR = "JobTaskPrepareActor";
+    public static final String JOB_REDUCE_ACTOR = "JobReduceActor";
     public static final String WORKFLOW_TASK_PREPARE_ACTOR = "WorkflowTaskPrepareActor";
     public static final String JOB_EXECUTOR_ACTOR = "JobExecutorActor";
     public static final String WORKFLOW_EXECUTOR_ACTOR = "WorkflowExecutorActor";
@@ -197,6 +198,17 @@ public class ActorGenerator {
     public static ActorRef jobTaskPrepareActor() {
         return getJobActorSystem().actorOf(getSpringExtension().props(JOB_TASK_PREPARE_ACTOR)
                 .withDispatcher(JOB_TASK_DISPATCHER));
+    }
+
+
+    /**
+     * 动态分片任务处理reduce阶段actor
+     *
+     * @return actor 引用
+     */
+    public static ActorRef jobReduceActor() {
+        return getJobActorSystem().actorOf(getSpringExtension().props(JOB_REDUCE_ACTOR)
+            .withDispatcher(JOB_TASK_EXECUTOR_DISPATCHER));
     }
 
     /**
