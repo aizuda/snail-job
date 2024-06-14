@@ -108,6 +108,7 @@ public class MapTaskPostHttpRequestHandler extends PostHttpRequestHandler {
         context.setWorkflowTaskBatchId(mapTaskRequest.getWorkflowTaskBatchId());
         context.setWorkflowNodeId(mapTaskRequest.getWorkflowNodeId());
         context.setMapName(mapTaskRequest.getMapName());
+        context.setMrStage(MapReduceStageEnum.MAP.name());
         return context;
     }
 

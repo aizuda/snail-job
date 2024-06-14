@@ -46,6 +46,8 @@ public class DispatchJobRequest {
      */
     private String mapName;
 
+    private String mrStage;
+
     private String argsStr;
 
     private Integer shardingTotal;

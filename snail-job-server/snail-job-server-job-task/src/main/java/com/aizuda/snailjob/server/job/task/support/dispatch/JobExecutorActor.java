@@ -182,6 +182,7 @@ public class JobExecutorActor extends AbstractActor {
         context.setWorkflowTaskBatchId(taskExecute.getWorkflowTaskBatchId());
         context.setWorkflowNodeId(taskExecute.getWorkflowNodeId());
         context.setMapName(SystemConstants.MAP_ROOT);
+        context.setMrStage(MapReduceStageEnum.MAP.name());
         return context;
     }
 

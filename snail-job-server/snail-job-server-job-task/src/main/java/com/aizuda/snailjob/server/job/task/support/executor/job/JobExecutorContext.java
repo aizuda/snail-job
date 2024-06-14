@@ -92,4 +92,6 @@ public class JobExecutorContext {
 
     private String mapName;
 
+    private String mrStage;
+
 }
