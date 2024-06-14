@@ -126,13 +126,6 @@ public class JobEndPoint {
     @Mapping(path = JOB_STOP, method = RequestMethod.POST)
     public Result<Boolean> stopJob(@Valid StopJobDTO interruptJob) {
 
-        ValidatorFactory vf = Validation.buildDefaultValidatorFactory();
-        Validator validator = vf.getValidator();
-        Set<ConstraintViolation<StopJobDTO>> set = validator.validate(interruptJob);
-        for (final ConstraintViolation<StopJobDTO> violation : set) {
-            return new Result<>(violation.getMessage(), Boolean.FALSE);
-        }
-
         ThreadPoolExecutor threadPool = ThreadPoolCache.getThreadPool(interruptJob.getTaskBatchId());
         if (Objects.isNull(threadPool) || threadPool.isShutdown() || threadPool.isTerminated()) {
             return new Result<>(Boolean.TRUE);

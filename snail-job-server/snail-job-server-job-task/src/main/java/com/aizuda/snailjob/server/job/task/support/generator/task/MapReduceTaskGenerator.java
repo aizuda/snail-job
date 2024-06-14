@@ -114,6 +114,7 @@ public class MapReduceTaskGenerator extends AbstractJobTaskGenerator {
         final List<RegisterNodeInfo> nodeInfoList, final Set<RegisterNodeInfo> serverNodes) {
         List<?> mapSubTask = context.getMapSubTask();
         if (CollUtil.isEmpty(mapSubTask)) {
+            SnailJobLog.LOCAL.warn("Map sub task is empty. TaskBatchId:[{}]", context.getTaskBatchId());
             return Lists.newArrayList();
         }
 
@@ -138,6 +139,6 @@ public class MapReduceTaskGenerator extends AbstractJobTaskGenerator {
             jobTasks.add(jobTask);
         }
 
-        return Lists.newArrayList();
+        return jobTasks;
     }
 }
