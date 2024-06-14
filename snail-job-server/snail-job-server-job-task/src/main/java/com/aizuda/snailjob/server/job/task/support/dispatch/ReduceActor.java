@@ -14,7 +14,9 @@ import com.aizuda.snailjob.server.job.task.support.executor.job.JobExecutorFacto
 import com.aizuda.snailjob.server.job.task.support.generator.task.JobTaskGenerateContext;
 import com.aizuda.snailjob.server.job.task.support.generator.task.JobTaskGenerator;
 import com.aizuda.snailjob.server.job.task.support.generator.task.JobTaskGeneratorFactory;
+import com.aizuda.snailjob.server.job.task.support.handler.DistributedLockHandler;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobMapper;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.Job;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTask;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,8 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import java.text.MessageFormat;
+import java.time.Duration;
 import java.util.List;
 
 /**
@@ -35,14 +39,21 @@ import java.util.List;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @RequiredArgsConstructor
 public class ReduceActor extends AbstractActor {
+    private static final String KEY = "job_generate_reduce_{0}_{1}";
+    private final DistributedLockHandler distributedLockHandler;
     private final JobMapper jobMapper;
+
+
 
     @Override
     public Receive createReceive() {
         return receiveBuilder().match(ReduceTaskDTO.class, reduceTask -> {
 
             try {
-                doReduce(reduceTask);
+                distributedLockHandler.lockWithDisposableAndRetry(() -> {
+                    doReduce(reduceTask);
+                }, MessageFormat.format(KEY, reduceTask.getTaskBatchId(),
+                    reduceTask.getJobId()), Duration.ofSeconds(1), Duration.ofSeconds(1), 3);
             } catch (Exception e) {
                 SnailJobLog.LOCAL.error("Reduce processing exception. [{}]", reduceTask, e);
             }

@@ -22,6 +22,9 @@ import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +43,7 @@ import java.util.Set;
 public class MapReduceTaskGenerator extends AbstractJobTaskGenerator {
 
     private final JobTaskMapper jobTaskMapper;
+    private final TransactionTemplate transactionTemplate;
 
     @Override
     public JobTaskTypeEnum getTaskInstanceType() {
@@ -61,30 +65,38 @@ public class MapReduceTaskGenerator extends AbstractJobTaskGenerator {
         switch (context.getMrStage()) {
             case MAP -> {
                 // MAP任务
-                List<JobTask> newArrayList = createMapJobTasks(context, nodeInfoList, serverNodes);
-                if (newArrayList != null) {
-                    return newArrayList;
-                }
+                return createMapJobTasks(context, nodeInfoList, serverNodes);
             }
             case REDUCE -> {
-                createReduceJobTasks(context, nodeInfoList, serverNodes);
+                // REDUCE任务
+                return createReduceJobTasks(context, nodeInfoList, serverNodes);
             }
             default -> throw new SnailJobServerException("Map reduce stage is not existed");
         }
-
-        return Lists.newArrayList();
     }
 
-    private void createReduceJobTasks(JobTaskGenerateContext context, List<RegisterNodeInfo> nodeInfoList,
+    private List<JobTask> createReduceJobTasks(JobTaskGenerateContext context, List<RegisterNodeInfo> nodeInfoList,
         Set<RegisterNodeInfo> serverNodes) {
 
         // TODO  reduce阶段的并行度
         int reduceParallel = 10;
 
-        List<String> allMapJobTasks = StreamUtils.toList(jobTaskMapper.selectList(new LambdaQueryWrapper<JobTask>()
-            .select(JobTask::getResultMessage)
-            .eq(JobTask::getTaskBatchId, context.getTaskBatchId())
-        ), JobTask::getResultMessage);
+        List<JobTask> jobTasks = jobTaskMapper.selectList(new LambdaQueryWrapper<JobTask>()
+            .select(JobTask::getResultMessage, JobTask::getExtAttrs)
+            .eq(JobTask::getTaskBatchId, context.getTaskBatchId()));
+
+        // 若存在已经生成的reduce任务不需要重新生成
+        boolean existedReduce = jobTasks.stream()
+            .filter(jobTask -> StrUtil.isNotBlank(jobTask.getExtAttrs()))
+            .map(jobTask -> JsonUtil.parseObject(jobTask.getExtAttrs(), JobTaskExtAttrsDTO.class))
+            .anyMatch(jobTaskExtAttrsDTO -> MapReduceStageEnum.REDUCE.name().equals(jobTaskExtAttrsDTO.getMrStage()));
+        if (existedReduce) {
+            SnailJobLog.LOCAL.warn("The reduce task already exists. taskBatchId:[{}]", context.getTaskBatchId());
+            return Lists.newArrayList();
+        }
+
+        // 这里需要判断是否是map
+        List<String> allMapJobTasks = StreamUtils.toList(jobTasks, JobTask::getResultMessage);
 
         List<List<String>> partition = Lists.partition(allMapJobTasks, reduceParallel);
 
@@ -93,21 +105,30 @@ public class MapReduceTaskGenerator extends AbstractJobTaskGenerator {
         jobTaskExtAttrsDTO.setTaskType(JobTaskTypeEnum.MAP_REDUCE.getType());
         jobTaskExtAttrsDTO.setMrStage(MapReduceStageEnum.REDUCE.name());
 
-        List<JobTask> jobTasks = new ArrayList<>(partition.size());
-        for (int index = 0; index < partition.size(); index++) {
-            RegisterNodeInfo registerNodeInfo = nodeInfoList.get(index % serverNodes.size());
-            // 新增任务实例
-            JobTask jobTask = JobTaskConverter.INSTANCE.toJobTaskInstance(context);
-            jobTask.setClientInfo(ClientInfoUtils.generate(registerNodeInfo));
-            jobTask.setArgsType(context.getArgsType());
-            jobTask.setArgsStr(JsonUtil.toJsonString(partition.get(index)));
-            jobTask.setTaskStatus(JobTaskStatusEnum.RUNNING.getStatus());
-            jobTask.setResultMessage(Optional.ofNullable(jobTask.getResultMessage()).orElse(StrUtil.EMPTY));
-            jobTask.setExtAttrs(jobTaskExtAttrsDTO.toString());
-            Assert.isTrue(1 == jobTaskMapper.insert(jobTask),
-                () -> new SnailJobServerException("新增任务实例失败"));
-            jobTasks.add(jobTask);
-        }
+        jobTasks = new ArrayList<>(partition.size());
+
+        final List<JobTask> finalJobTasks = jobTasks;
+        transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+            @Override
+            protected void doInTransactionWithoutResult(final TransactionStatus status) {
+                for (int index = 0; index < partition.size(); index++) {
+                    RegisterNodeInfo registerNodeInfo = nodeInfoList.get(index % serverNodes.size());
+                    // 新增任务实例
+                    JobTask jobTask = JobTaskConverter.INSTANCE.toJobTaskInstance(context);
+                    jobTask.setClientInfo(ClientInfoUtils.generate(registerNodeInfo));
+                    jobTask.setArgsType(context.getArgsType());
+                    jobTask.setArgsStr(JsonUtil.toJsonString(partition.get(index)));
+                    jobTask.setTaskStatus(JobTaskStatusEnum.RUNNING.getStatus());
+                    jobTask.setResultMessage(Optional.ofNullable(jobTask.getResultMessage()).orElse(StrUtil.EMPTY));
+                    jobTask.setExtAttrs(jobTaskExtAttrsDTO.toString());
+                    Assert.isTrue(1 == jobTaskMapper.insert(jobTask),
+                        () -> new SnailJobServerException("新增任务实例失败"));
+                    finalJobTasks.add(jobTask);
+                }
+            }
+        });
+
+        return finalJobTasks;
     }
 
     private @Nullable List<JobTask> createMapJobTasks(final JobTaskGenerateContext context,
@@ -122,22 +143,29 @@ public class MapReduceTaskGenerator extends AbstractJobTaskGenerator {
         jobTaskExtAttrsDTO.setMapName(context.getMapName());
         jobTaskExtAttrsDTO.setTaskType(JobTaskTypeEnum.MAP_REDUCE.getType());
         jobTaskExtAttrsDTO.setMrStage(MapReduceStageEnum.MAP.name());
-
         List<JobTask> jobTasks = new ArrayList<>(mapSubTask.size());
-        for (int index = 0; index < mapSubTask.size(); index++) {
-            RegisterNodeInfo registerNodeInfo = nodeInfoList.get(index % serverNodes.size());
-            // 新增任务实例
-            JobTask jobTask = JobTaskConverter.INSTANCE.toJobTaskInstance(context);
-            jobTask.setClientInfo(ClientInfoUtils.generate(registerNodeInfo));
-            jobTask.setArgsType(context.getArgsType());
-            jobTask.setArgsStr(JsonUtil.toJsonString(mapSubTask.get(index)));
-            jobTask.setTaskStatus(JobTaskStatusEnum.RUNNING.getStatus());
-            jobTask.setResultMessage(Optional.ofNullable(jobTask.getResultMessage()).orElse(StrUtil.EMPTY));
-            jobTask.setExtAttrs(jobTaskExtAttrsDTO.toString());
-            Assert.isTrue(1 == jobTaskMapper.insert(jobTask),
-                () -> new SnailJobServerException("新增任务实例失败"));
-            jobTasks.add(jobTask);
-        }
+
+        transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+            @Override
+            protected void doInTransactionWithoutResult(final TransactionStatus status) {
+
+                for (int index = 0; index < mapSubTask.size(); index++) {
+                    RegisterNodeInfo registerNodeInfo = nodeInfoList.get(index % serverNodes.size());
+                    // 新增任务实例
+                    JobTask jobTask = JobTaskConverter.INSTANCE.toJobTaskInstance(context);
+                    jobTask.setClientInfo(ClientInfoUtils.generate(registerNodeInfo));
+                    jobTask.setArgsType(context.getArgsType());
+                    jobTask.setArgsStr(JsonUtil.toJsonString(mapSubTask.get(index)));
+                    jobTask.setTaskStatus(JobTaskStatusEnum.RUNNING.getStatus());
+                    jobTask.setResultMessage(Optional.ofNullable(jobTask.getResultMessage()).orElse(StrUtil.EMPTY));
+                    jobTask.setExtAttrs(jobTaskExtAttrsDTO.toString());
+                    Assert.isTrue(1 == jobTaskMapper.insert(jobTask),
+                        () -> new SnailJobServerException("新增任务实例失败"));
+                    jobTasks.add(jobTask);
+                }
+            }
+        });
+
 
         return jobTasks;
     }
