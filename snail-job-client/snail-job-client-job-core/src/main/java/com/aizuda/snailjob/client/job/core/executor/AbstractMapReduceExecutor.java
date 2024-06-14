@@ -1,8 +1,10 @@
 package com.aizuda.snailjob.client.job.core.executor;
 
-import com.aizuda.snailjob.client.job.core.dto.JobArgs;
+import com.aizuda.snailjob.client.job.core.dto.MapArgs;
 import com.aizuda.snailjob.client.model.ExecuteResult;
 import com.aizuda.snailjob.common.core.model.JobContext;
+
+import java.util.List;
 
 /**
  * @author zhengweilin
@@ -11,5 +13,5 @@ import com.aizuda.snailjob.common.core.model.JobContext;
  */
 public abstract class AbstractMapReduceExecutor extends AbstractMapExecutor {
 
-    protected abstract ExecuteResult doReduceExecute(JobContext jobContext, JobArgs jobArgs);
+    protected abstract ExecuteResult doReduceExecute(JobContext jobContext, List<MapArgs> mapArgsList);
 }

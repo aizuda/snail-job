@@ -27,6 +27,11 @@ public class JobBatchResponseVO {
     private String jobName;
 
     /**
+     * 任务类型
+     */
+    private String taskType;
+
+    /**
      * 工作流节点名称
      */
     private String nodeName;
