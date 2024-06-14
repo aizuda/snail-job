@@ -70,9 +70,10 @@ public class JobTaskBatchHandler {
 
         List<JobTask> jobTasks = jobTaskMapper.selectList(
             new LambdaQueryWrapper<JobTask>()
-                .select(JobTask::getTaskStatus, JobTask::getResultMessage)
+                .select(JobTask::getTaskStatus, JobTask::getResultMessage, JobTask::getExtAttrs)
                 .eq(JobTask::getTaskBatchId, completeJobBatchDTO.getTaskBatchId()));
 
+        SnailJobLog.LOCAL.info("尝试完成任务. taskBatchId:[{}] [{}]", completeJobBatchDTO.getTaskBatchId(), JsonUtil.toJsonString(jobTasks));
         JobTaskBatch jobTaskBatch = new JobTaskBatch();
         jobTaskBatch.setId(completeJobBatchDTO.getTaskBatchId());
 
@@ -106,15 +107,14 @@ public class JobTaskBatchHandler {
                 JobTaskExtAttrsDTO jobTaskExtAttrsDTO = JsonUtil.parseObject(firstJobTask.getExtAttrs(),
                     JobTaskExtAttrsDTO.class);
                 Integer taskType = jobTaskExtAttrsDTO.getTaskType();
-                if (Objects.nonNull(taskType) && JobTaskTypeEnum.MAP_REDUCE.getType() == taskType) {
-                    if (isAllMapTask(jobTasks)) {
-                        // 开启reduce阶段
-                        try {
-                            ActorRef actorRef = ActorGenerator.jobReduceActor();
-                            actorRef.tell(JobTaskConverter.INSTANCE.toReduceTaskDTO(completeJobBatchDTO), actorRef);
-                        } catch (Exception e) {
-                            SnailJobLog.LOCAL.error("tell reduce actor error", e);
-                        }
+                if (Objects.nonNull(taskType) && JobTaskTypeEnum.MAP_REDUCE.getType() == taskType && isAllMapTask(jobTasks)) {
+                    // 开启reduce阶段
+                    try {
+                        ActorRef actorRef = ActorGenerator.jobReduceActor();
+                        actorRef.tell(JobTaskConverter.INSTANCE.toReduceTaskDTO(completeJobBatchDTO), actorRef);
+                        return false;
+                    } catch (Exception e) {
+                        SnailJobLog.LOCAL.error("tell reduce actor error", e);
                     }
                 }
             }

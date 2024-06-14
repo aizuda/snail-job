@@ -18,6 +18,7 @@ import com.aizuda.snailjob.server.job.task.support.stop.TaskStopJobContext;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTask;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -35,20 +36,17 @@ import java.util.Objects;
  */
 @Component(ActorGenerator.JOB_EXECUTOR_RESULT_ACTOR)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-@Slf4j
+@RequiredArgsConstructor
 public class JobExecutorResultActor extends AbstractActor {
     private static final String KEY = "job_complete_{0}_{1}";
-    @Autowired
-    private JobTaskMapper jobTaskMapper;
-    @Autowired
-    private JobTaskBatchHandler jobTaskBatchHandler;
-    @Autowired
-    private DistributedLockHandler distributedLockHandler;
+    private final JobTaskMapper jobTaskMapper;
+    private final JobTaskBatchHandler jobTaskBatchHandler;
+    private final DistributedLockHandler distributedLockHandler;
 
     @Override
     public Receive createReceive() {
         return receiveBuilder().match(JobExecutorResultDTO.class, result -> {
-            log.debug("更新任务状态. 参数:[{}]", JsonUtil.toJsonString(result));
+            SnailJobLog.LOCAL.info("更新任务状态. 参数:[{}]", JsonUtil.toJsonString(result));
             try {
                 JobTask jobTask = new JobTask();
                 jobTask.setTaskStatus(result.getTaskStatus());

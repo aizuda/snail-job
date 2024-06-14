@@ -11,6 +11,7 @@ import lombok.Data;
 @Data
 public class CompleteJobBatchDTO {
 
+    private Long jobId;
     private Long workflowNodeId;
     private Long workflowTaskBatchId;
     private Long taskBatchId;

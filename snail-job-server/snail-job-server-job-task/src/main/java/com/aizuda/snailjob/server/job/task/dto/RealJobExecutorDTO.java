@@ -31,9 +31,14 @@ public class RealJobExecutorDTO extends BaseDTO {
     private String argsType;
 
     /**
-     * 任务名称
+     * MAP名称
      */
     private String mapName;
+
+    /**
+     * MAP名称
+     */
+    private String mrState;
 
     /**
      * 扩展字段

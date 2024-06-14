@@ -57,9 +57,11 @@ public class ReduceActor extends AbstractActor {
         // 创建reduce任务
         JobTaskGenerator taskInstance = JobTaskGeneratorFactory.getTaskInstance(JobTaskTypeEnum.MAP_REDUCE.getType());
         JobTaskGenerateContext context = JobTaskConverter.INSTANCE.toJobTaskInstanceGenerateContext(job);
+        context.setTaskBatchId(reduceTask.getTaskBatchId());
         context.setMrStage(MapReduceStageEnum.REDUCE);
         List<JobTask> taskList = taskInstance.generate(context);
         if (CollUtil.isEmpty(taskList)) {
+            SnailJobLog.LOCAL.warn("Job task is empty, taskBatchId:[{}]", reduceTask.getTaskBatchId());
             return;
         }
 
@@ -76,6 +78,7 @@ public class ReduceActor extends AbstractActor {
         context.setTaskBatchId(reduceTask.getTaskBatchId());
         context.setWorkflowTaskBatchId(reduceTask.getWorkflowTaskBatchId());
         context.setWorkflowNodeId(reduceTask.getWorkflowNodeId());
+        context.setMrStage(MapReduceStageEnum.REDUCE.name());
         return context;
     }
 }
