@@ -208,4 +208,9 @@ public interface SystemConstants {
      */
     String YYYY_MM_DD = "yyyy-MM-dd";
 
+
+    /**
+     * 动态分片的root节点
+     */
+    String MAP_ROOT = "MAP_ROOT";
 }

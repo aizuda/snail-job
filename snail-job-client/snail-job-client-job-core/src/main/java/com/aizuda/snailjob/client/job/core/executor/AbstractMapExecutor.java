@@ -8,6 +8,7 @@ import com.aizuda.snailjob.client.job.core.dto.JobArgs;
 import com.aizuda.snailjob.client.job.core.dto.MapReduceArgs;
 import com.aizuda.snailjob.client.model.ExecuteResult;
 import com.aizuda.snailjob.client.model.request.MapTaskRequest;
+import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.exception.SnailJobMapReduceException;
 import com.aizuda.snailjob.common.core.model.JobContext;
 import com.aizuda.snailjob.common.core.model.MapContext;
@@ -46,8 +47,8 @@ public abstract class AbstractMapExecutor extends AbstractJobExecutor implements
         }
 
         // mapName 任务命名和根任务名或者最终任务名称一致导致的问题（无限生成子任务或者直接失败）
-        if ("ROOT_TASK".equals(nextMapName)) {
-            throw new SnailJobMapReduceException("NextMapName can not be ROOT_TASK");
+        if (SystemConstants.MAP_ROOT.equals(nextMapName)) {
+            throw new SnailJobMapReduceException("The Next mapName can not be {}", SystemConstants.MAP_ROOT);
         }
 
         JobContext jobContext = JobContextManager.getJobContext();
