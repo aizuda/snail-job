@@ -70,7 +70,7 @@ public class JobTaskBatchHandler {
 
         List<JobTask> jobTasks = jobTaskMapper.selectList(
             new LambdaQueryWrapper<JobTask>()
-                .select(JobTask::getTaskStatus, JobTask::getResultMessage, JobTask::getExtAttrs)
+                .select(JobTask::getTaskStatus, JobTask::getExtAttrs)
                 .eq(JobTask::getTaskBatchId, completeJobBatchDTO.getTaskBatchId()));
 
         SnailJobLog.LOCAL.info("尝试完成任务. taskBatchId:[{}] [{}]", completeJobBatchDTO.getTaskBatchId(), JsonUtil.toJsonString(jobTasks));
@@ -99,24 +99,8 @@ public class JobTaskBatchHandler {
         } else {
             jobTaskBatch.setTaskBatchStatus(JobTaskBatchStatusEnum.SUCCESS.getStatus());
 
-            // 判断是否是mapreduce任务
-            // todo 此处待优化
-            JobTask firstJobTask = jobTasks.get(0);
-            String extAttrs = firstJobTask.getExtAttrs();
-            if (StrUtil.isNotBlank(extAttrs)) {
-                JobTaskExtAttrsDTO jobTaskExtAttrsDTO = JsonUtil.parseObject(firstJobTask.getExtAttrs(),
-                    JobTaskExtAttrsDTO.class);
-                Integer taskType = jobTaskExtAttrsDTO.getTaskType();
-                if (Objects.nonNull(taskType) && JobTaskTypeEnum.MAP_REDUCE.getType() == taskType && isAllMapTask(jobTasks)) {
-                    // 开启reduce阶段
-                    try {
-                        ActorRef actorRef = ActorGenerator.jobReduceActor();
-                        actorRef.tell(JobTaskConverter.INSTANCE.toReduceTaskDTO(completeJobBatchDTO), actorRef);
-                        return false;
-                    } catch (Exception e) {
-                        SnailJobLog.LOCAL.error("tell reduce actor error", e);
-                    }
-                }
+            if (needReduceTask(completeJobBatchDTO, jobTasks)) {
+                return false;
             }
         }
 
@@ -138,6 +122,36 @@ public class JobTaskBatchHandler {
                 .in(JobTaskBatch::getTaskBatchStatus, JobTaskBatchStatusEnum.NOT_COMPLETE)
         );
 
+    }
+
+    /**
+     * 若需要执行reduce则返回false 不需要更新批次状态， 否则需要更新批次状态
+     *
+     * @param completeJobBatchDTO 需要执行批次完成所需的参数信息
+     * @param jobTasks 任务项列表
+     * @return true-需要reduce false-不需要reduce
+     */
+    private boolean needReduceTask(final CompleteJobBatchDTO completeJobBatchDTO, final List<JobTask> jobTasks) {
+        // 判断是否是mapreduce任务
+        // todo 此处待优化
+        JobTask firstJobTask = jobTasks.get(0);
+        String extAttrs = firstJobTask.getExtAttrs();
+        if (StrUtil.isNotBlank(extAttrs)) {
+            JobTaskExtAttrsDTO jobTaskExtAttrsDTO = JsonUtil.parseObject(extAttrs, JobTaskExtAttrsDTO.class);
+            Integer taskType = jobTaskExtAttrsDTO.getTaskType();
+            if (Objects.nonNull(taskType) && JobTaskTypeEnum.MAP_REDUCE.getType() == taskType && isAllMapTask(jobTasks)) {
+                // 开启reduce阶段
+                try {
+                    ActorRef actorRef = ActorGenerator.jobReduceActor();
+                    actorRef.tell(JobTaskConverter.INSTANCE.toReduceTaskDTO(completeJobBatchDTO), actorRef);
+                    return true;
+                } catch (Exception e) {
+                    SnailJobLog.LOCAL.error("tell reduce actor error", e);
+                }
+            }
+        }
+
+        return false;
     }
 
     private static boolean isAllMapTask(final List<JobTask> jobTasks) {
