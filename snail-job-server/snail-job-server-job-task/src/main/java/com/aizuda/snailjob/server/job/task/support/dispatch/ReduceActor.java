@@ -6,7 +6,7 @@ import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.job.task.dto.ReduceTaskDTO;
-import com.aizuda.snailjob.server.job.task.enums.MapReduceStageEnum;
+import com.aizuda.snailjob.common.core.enums.MapReduceStageEnum;
 import com.aizuda.snailjob.server.job.task.support.JobExecutor;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
 import com.aizuda.snailjob.server.job.task.support.executor.job.JobExecutorContext;
@@ -16,7 +16,6 @@ import com.aizuda.snailjob.server.job.task.support.generator.task.JobTaskGenerat
 import com.aizuda.snailjob.server.job.task.support.generator.task.JobTaskGeneratorFactory;
 import com.aizuda.snailjob.server.job.task.support.handler.DistributedLockHandler;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobMapper;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.Job;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTask;
 import lombok.RequiredArgsConstructor;

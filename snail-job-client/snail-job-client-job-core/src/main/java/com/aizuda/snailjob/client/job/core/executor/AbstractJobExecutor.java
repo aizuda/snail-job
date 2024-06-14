@@ -4,16 +4,16 @@ import com.aizuda.snailjob.client.common.log.support.SnailJobLogManager;
 import com.aizuda.snailjob.client.job.core.IJobExecutor;
 import com.aizuda.snailjob.client.job.core.cache.FutureCache;
 import com.aizuda.snailjob.client.job.core.cache.ThreadPoolCache;
-import com.aizuda.snailjob.client.job.core.dto.JobArgs;
-import com.aizuda.snailjob.client.job.core.dto.MapReduceArgs;
-import com.aizuda.snailjob.client.job.core.dto.ShardingJobArgs;
+import com.aizuda.snailjob.client.job.core.dto.*;
 import com.aizuda.snailjob.client.job.core.log.JobLogMeta;
 import com.aizuda.snailjob.client.job.core.timer.StopTaskTimerTask;
 import com.aizuda.snailjob.client.job.core.timer.TimerManager;
 import com.aizuda.snailjob.client.model.ExecuteResult;
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
+import com.aizuda.snailjob.common.core.enums.MapReduceStageEnum;
 import com.aizuda.snailjob.common.core.model.JobContext;
 import com.aizuda.snailjob.common.log.enums.LogTypeEnum;
+import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
@@ -48,8 +48,14 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
             JobArgs jobArgs;
             if (jobContext.getTaskType() == JobTaskTypeEnum.SHARDING.getType()) {
                 jobArgs = buildShardingJobArgs(jobContext);
-            } else if (jobContext.getTaskType() == JobTaskTypeEnum.MAP_REDUCE.getType()) {
-                jobArgs = buildMapReduceJobArgs(jobContext);
+            } else if (Lists.newArrayList(JobTaskTypeEnum.MAP_REDUCE.getType(), JobTaskTypeEnum.MAP.getType())
+                    .contains(jobContext.getTaskType())) {
+                if (MapReduceStageEnum.MAP.name().equals(jobContext.getMrStage())) {
+                    jobArgs = buildMapJobArgs(jobContext);
+                } else {
+                    jobArgs = buildReduceJobArgs(jobContext);
+                }
+
             } else {
                 jobArgs = buildJobArgs(jobContext);
             }
@@ -96,11 +102,19 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
         return jobArgs;
     }
 
-    private static JobArgs buildMapReduceJobArgs(JobContext jobContext) {
-        MapReduceArgs jobArgs = new MapReduceArgs();
+    private static JobArgs buildMapJobArgs(JobContext jobContext) {
+        MapArgs jobArgs = new MapArgs();
         jobArgs.setArgsStr(jobContext.getArgsStr());
         jobArgs.setExecutorInfo(jobContext.getExecutorInfo());
         jobArgs.setMapName(jobContext.getMapName());
+        jobArgs.setTaskBatchId(jobContext.getTaskBatchId());
+        return jobArgs;
+    }
+
+    private static JobArgs buildReduceJobArgs(JobContext jobContext) {
+        ReduceArgs jobArgs = new ReduceArgs();
+        jobArgs.setArgsStr(jobContext.getArgsStr());
+        jobArgs.setExecutorInfo(jobContext.getExecutorInfo());
         jobArgs.setTaskBatchId(jobContext.getTaskBatchId());
         return jobArgs;
     }

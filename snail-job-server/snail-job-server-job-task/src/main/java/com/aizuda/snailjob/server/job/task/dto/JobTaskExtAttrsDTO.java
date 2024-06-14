@@ -2,7 +2,7 @@ package com.aizuda.snailjob.server.job.task.dto;
 
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
-import com.aizuda.snailjob.server.job.task.enums.MapReduceStageEnum;
+import com.aizuda.snailjob.common.core.enums.MapReduceStageEnum;
 import lombok.Data;
 
 /**

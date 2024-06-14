@@ -5,7 +5,7 @@ import com.aizuda.snailjob.client.common.rpc.client.RequestBuilder;
 import com.aizuda.snailjob.client.job.core.IJobExecutor;
 import com.aizuda.snailjob.client.job.core.client.JobNettyClient;
 import com.aizuda.snailjob.client.job.core.dto.JobArgs;
-import com.aizuda.snailjob.client.job.core.dto.MapReduceArgs;
+import com.aizuda.snailjob.client.job.core.dto.MapArgs;
 import com.aizuda.snailjob.client.model.ExecuteResult;
 import com.aizuda.snailjob.client.model.request.MapTaskRequest;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
@@ -33,11 +33,11 @@ public abstract class AbstractMapExecutor extends AbstractJobExecutor implements
 
     @Override
     protected ExecuteResult doJobExecute(final JobArgs jobArgs) {
-        MapReduceArgs mapReduceArgs = (MapReduceArgs) jobArgs;
-        return this.doJobExecute(mapReduceArgs);
+        MapArgs mapArgs = (MapArgs) jobArgs;
+        return this.doJobMapExecute(mapArgs);
     }
 
-    public abstract ExecuteResult doJobExecute(MapReduceArgs mapReduceArgs);
+    public abstract ExecuteResult doJobMapExecute(MapArgs mapArgs);
 
     public void doMapExecute(List<Object> taskList, String nextMapName) {
 
