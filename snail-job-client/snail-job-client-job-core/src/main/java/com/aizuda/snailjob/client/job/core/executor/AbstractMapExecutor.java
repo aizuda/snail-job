@@ -11,7 +11,6 @@ import com.aizuda.snailjob.client.model.request.MapTaskRequest;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.exception.SnailJobMapReduceException;
 import com.aizuda.snailjob.common.core.model.JobContext;
-import com.aizuda.snailjob.common.core.model.MapContext;
 import com.aizuda.snailjob.common.core.model.NettyResult;
 import com.aizuda.snailjob.common.core.model.Result;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +34,7 @@ public abstract class AbstractMapExecutor extends AbstractJobExecutor implements
     @Override
     protected ExecuteResult doJobExecute(final JobArgs jobArgs) {
         MapReduceArgs mapReduceArgs = (MapReduceArgs) jobArgs;
-        return doJobExecute(mapReduceArgs);
+        return this.doJobExecute(mapReduceArgs);
     }
 
     public abstract ExecuteResult doJobExecute(MapReduceArgs mapReduceArgs);

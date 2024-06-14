@@ -9,11 +9,11 @@ import lombok.Data;
  * @date : 2024-06-12 13:59
  */
 @Data
-public class MrTaskResult {
+public class MapArgs {
 
-    private String taskId;
+    private String mapName;
 
-    private boolean success;
+    private Boolean success;
 
     private String result;
 }
