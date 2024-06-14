@@ -1,4 +1,4 @@
-package com.aizuda.snailjob.server.job.task.enums;
+package com.aizuda.snailjob.common.core.enums;
 
 /**
  * @author: opensnail

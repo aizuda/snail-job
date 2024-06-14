@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.job.task.support.generator.task;
 
-import com.aizuda.snailjob.server.job.task.enums.MapReduceStageEnum;
+import com.aizuda.snailjob.common.core.enums.MapReduceStageEnum;
 import lombok.Data;
 
 import java.util.List;

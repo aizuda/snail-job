@@ -120,6 +120,7 @@ public class JobEndPoint {
         jobContext.setRetry(dispatchJob.isRetry());
         jobContext.setRetryScene(dispatchJob.getRetryScene());
         jobContext.setMapName(dispatchJob.getMapName());
+        jobContext.setMrStage(dispatchJob.getMrStage());
         return jobContext;
     }
 
