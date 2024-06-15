@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -19,6 +20,7 @@ import java.time.LocalDateTime;
 @TableName("sj_job_task")
 public class JobTask implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**
@@ -36,6 +38,11 @@ public class JobTask implements Serializable {
      * 组名称
      */
     private String groupName;
+
+    /**
+     * 任务名称
+     */
+    private String taskName;
 
     /**
      * 任务信息id
@@ -82,6 +89,17 @@ public class JobTask implements Serializable {
      * 参数类型 text/json
      */
     private Integer argsType;
+
+    /**
+     * 叶子节点(0:非叶子节点 1:叶子节点)
+     */
+    private Integer leaf;
+
+    /**
+     * 动态分片使用
+     * 1:map 2:reduce 3:mergeReduce
+     */
+    private Integer mrStage;
 
     /**
      * 扩展字段

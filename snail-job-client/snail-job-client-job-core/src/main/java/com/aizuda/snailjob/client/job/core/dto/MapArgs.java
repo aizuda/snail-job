@@ -13,6 +13,6 @@ import lombok.EqualsAndHashCode;
 @Data
 public class MapArgs extends JobArgs {
 
-    private String mapName;
+    private String taskName;
 
 }

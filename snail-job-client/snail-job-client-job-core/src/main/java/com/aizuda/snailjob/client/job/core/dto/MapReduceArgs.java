@@ -14,7 +14,7 @@ import java.util.List;
 @Data
 public class MapReduceArgs extends JobArgs {
 
-    private String mapName;
+    private String taskName;
 
     private List<MapArgs> mapArgsList;
 }

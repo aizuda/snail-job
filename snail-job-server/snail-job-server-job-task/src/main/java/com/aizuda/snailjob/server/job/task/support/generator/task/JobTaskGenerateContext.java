@@ -39,12 +39,12 @@ public class JobTaskGenerateContext {
     /**
      * 任务名称
      */
-    private String mapName;
+    private String taskName;
 
     /**
      * 动态分片的阶段
      */
-    private MapReduceStageEnum mrStage;
+    private Integer mrStage;
 
     /**
      * 父任务id

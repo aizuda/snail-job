@@ -50,7 +50,7 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
                 jobArgs = buildShardingJobArgs(jobContext);
             } else if (Lists.newArrayList(JobTaskTypeEnum.MAP_REDUCE.getType(), JobTaskTypeEnum.MAP.getType())
                     .contains(jobContext.getTaskType())) {
-                if (MapReduceStageEnum.MAP.name().equals(jobContext.getMrStage())) {
+                if (MapReduceStageEnum.MAP.getStage() == jobContext.getMrStage()) {
                     jobArgs = buildMapJobArgs(jobContext);
                 } else {
                     jobArgs = buildReduceJobArgs(jobContext);
@@ -106,7 +106,7 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
         MapArgs jobArgs = new MapArgs();
         jobArgs.setArgsStr(jobContext.getArgsStr());
         jobArgs.setExecutorInfo(jobContext.getExecutorInfo());
-        jobArgs.setMapName(jobContext.getMapName());
+        jobArgs.setTaskName(jobContext.getTaskName());
         jobArgs.setTaskBatchId(jobContext.getTaskBatchId());
         return jobArgs;
     }

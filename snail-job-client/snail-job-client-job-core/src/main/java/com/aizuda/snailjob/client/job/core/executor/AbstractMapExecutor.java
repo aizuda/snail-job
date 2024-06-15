@@ -13,6 +13,7 @@ import com.aizuda.snailjob.common.core.exception.SnailJobMapReduceException;
 import com.aizuda.snailjob.common.core.model.JobContext;
 import com.aizuda.snailjob.common.core.model.NettyResult;
 import com.aizuda.snailjob.common.core.model.Result;
+import com.aizuda.snailjob.common.log.SnailJobLog;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 
@@ -39,15 +40,19 @@ public abstract class AbstractMapExecutor extends AbstractJobExecutor implements
 
     public abstract ExecuteResult doJobMapExecute(MapArgs mapArgs);
 
-    public void doMapExecute(List<Object> taskList, String nextMapName) {
+    public ExecuteResult doMap(List<Object> taskList, String nextTaskName) {
 
-        if (CollectionUtils.isEmpty(taskList) || StrUtil.isBlank(nextMapName)) {
-            return;
+        if (StrUtil.isBlank(nextTaskName)) {
+            throw new SnailJobMapReduceException("The next task name can not blank or null {}", nextTaskName);
         }
 
-        // mapName 任务命名和根任务名或者最终任务名称一致导致的问题（无限生成子任务或者直接失败）
-        if (SystemConstants.MAP_ROOT.equals(nextMapName)) {
-            throw new SnailJobMapReduceException("The Next mapName can not be {}", SystemConstants.MAP_ROOT);
+        if (CollectionUtils.isEmpty(taskList)) {
+            throw new SnailJobMapReduceException("The task list can not empty {}", nextTaskName);
+        }
+
+        // taskName 任务命名和根任务名或者最终任务名称一致导致的问题（无限生成子任务或者直接失败）
+        if (SystemConstants.MAP_ROOT.equals(nextTaskName)) {
+            throw new SnailJobMapReduceException("The Next taskName can not be {}", SystemConstants.MAP_ROOT);
         }
 
         JobContext jobContext = JobContextManager.getJobContext();
@@ -56,17 +61,18 @@ public abstract class AbstractMapExecutor extends AbstractJobExecutor implements
         MapTaskRequest mapTaskRequest = new MapTaskRequest();
         mapTaskRequest.setJobId(jobContext.getJobId());
         mapTaskRequest.setTaskBatchId(jobContext.getTaskBatchId());
-        mapTaskRequest.setMapName(nextMapName);
+        mapTaskRequest.setTaskName(nextTaskName);
         mapTaskRequest.setSubTask(taskList);
         mapTaskRequest.setParentId(jobContext.getTaskId());
 
-        // 2. 可靠发送请求（任务不允许丢失，需要使用 ask 方法，失败抛异常）
-        Result<Boolean> booleanResult = CLIENT.batchReportMapTask(mapTaskRequest);
-
-        if (booleanResult.getData()) {
-            log.info("[Map-{}] map task[name={},num={}] successfully!", jobContext.getTaskId(), nextMapName, taskList.size());
+        // 2. 同步发送请求
+        Result<Boolean> result = CLIENT.batchReportMapTask(mapTaskRequest);
+        if (result.getData()) {
+            SnailJobLog.LOCAL.info("Map task create successfully!. taskName:[{}] TaskId:[{}] ", nextTaskName, jobContext.getTaskId());
         } else {
-            throw new SnailJobMapReduceException("map failed for task: " + nextMapName);
+            throw new SnailJobMapReduceException("map failed for task: " + nextTaskName);
         }
+
+        return ExecuteResult.success();
     }
 }

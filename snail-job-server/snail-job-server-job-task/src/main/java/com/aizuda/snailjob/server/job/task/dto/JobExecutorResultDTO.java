@@ -40,5 +40,6 @@ public class JobExecutorResultDTO {
 
     private Integer jobOperationReason;
 
+    private Integer isLeaf;
 
 }
