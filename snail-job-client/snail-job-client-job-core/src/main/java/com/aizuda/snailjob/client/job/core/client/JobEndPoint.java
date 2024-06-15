@@ -21,11 +21,10 @@ import com.aizuda.snailjob.common.core.model.JobContext;
 import com.aizuda.snailjob.common.core.model.Result;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.common.log.enums.LogTypeEnum;
-import jakarta.validation.*;
+import jakarta.validation.Valid;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import static com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH.JOB_DISPATCH;
@@ -115,7 +114,7 @@ public class JobEndPoint {
         jobContext.setWorkflowTaskBatchId(dispatchJob.getWorkflowTaskBatchId());
         jobContext.setRetry(dispatchJob.isRetry());
         jobContext.setRetryScene(dispatchJob.getRetryScene());
-        jobContext.setMapName(dispatchJob.getMapName());
+        jobContext.setTaskName(dispatchJob.getTaskName());
         jobContext.setMrStage(dispatchJob.getMrStage());
         return jobContext;
     }

@@ -3,6 +3,7 @@ package com.aizuda.snailjob.server.job.task.support.dispatch;
 import akka.actor.AbstractActor;
 import cn.hutool.core.lang.Assert;
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
+import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
@@ -57,6 +58,12 @@ public class JobExecutorResultActor extends AbstractActor {
                 Assert.isTrue(1 == jobTaskMapper.update(jobTask,
                                 new LambdaUpdateWrapper<JobTask>().eq(JobTask::getId, result.getTaskId())),
                         () -> new SnailJobServerException("更新任务实例失败"));
+
+                // 除MAP和MAP_REDUCE 任务之外，其他任务都是叶子节点
+                if (Objects.nonNull(result.getIsLeaf()) && StatusEnum.NO.getStatus().equals(result.getIsLeaf())) {
+                    return;
+                }
+
                 // 先尝试完成，若已完成则不需要通过获取分布式锁来完成
                 boolean tryCompleteAndStop = tryCompleteAndStop(result);
                 if (!tryCompleteAndStop) {

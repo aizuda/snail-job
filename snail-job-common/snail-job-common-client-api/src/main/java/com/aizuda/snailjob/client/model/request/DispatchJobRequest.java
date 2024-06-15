@@ -44,9 +44,9 @@ public class DispatchJobRequest {
     /**
      * 任务名称
      */
-    private String mapName;
+    private String taskName;
 
-    private String mrStage;
+    private Integer mrStage;
 
     private String argsStr;
 

@@ -20,7 +20,7 @@ public final class MapContext {
     /**
      * Map名称
      */
-    private String mapName;
+    private String taskName;
 
     private Long jobId;
 

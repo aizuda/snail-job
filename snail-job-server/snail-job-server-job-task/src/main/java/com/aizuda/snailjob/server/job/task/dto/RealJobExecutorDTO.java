@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.job.task.dto;
 
+import com.aizuda.snailjob.common.core.enums.MapReduceStageEnum;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -31,14 +32,15 @@ public class RealJobExecutorDTO extends BaseDTO {
     private String argsType;
 
     /**
-     * MAP名称
+     * 任务名称
      */
-    private String mapName;
+    private String taskName;
 
     /**
-     * MAP名称
+     * 动态分片的阶段
+     * {@link MapReduceStageEnum}
      */
-    private String mrState;
+    private Integer mrStage;
 
     /**
      * 扩展字段

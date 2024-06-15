@@ -71,7 +71,7 @@ public class MapTaskPostHttpRequestHandler extends PostHttpRequestHandler {
         JobTaskGenerateContext context = JobTaskConverter.INSTANCE.toJobTaskInstanceGenerateContext(mapTaskRequest);
         context.setGroupName(HttpHeaderUtil.getGroupName(headers));
         context.setNamespaceId(HttpHeaderUtil.getNamespace(headers));
-        context.setMrStage(MapReduceStageEnum.MAP);
+        context.setMrStage(MapReduceStageEnum.MAP.getStage());
         context.setMapSubTask(mapTaskRequest.getSubTask());
         List<JobTask> taskList = taskInstance.generate(context);
         if (CollUtil.isEmpty(taskList)) {
@@ -107,8 +107,6 @@ public class MapTaskPostHttpRequestHandler extends PostHttpRequestHandler {
         context.setTaskBatchId(mapTaskRequest.getTaskBatchId());
         context.setWorkflowTaskBatchId(mapTaskRequest.getWorkflowTaskBatchId());
         context.setWorkflowNodeId(mapTaskRequest.getWorkflowNodeId());
-        context.setMapName(mapTaskRequest.getMapName());
-        context.setMrStage(MapReduceStageEnum.MAP.name());
         return context;
     }
 

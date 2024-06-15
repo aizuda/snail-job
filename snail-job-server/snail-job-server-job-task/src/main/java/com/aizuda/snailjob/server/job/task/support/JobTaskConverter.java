@@ -104,7 +104,9 @@ public interface JobTaskConverter {
             @Mapping(source = "jobTask.argsStr", target = "argsStr"),
             @Mapping(source = "jobTask.argsType", target = "argsType"),
             @Mapping(source = "jobTask.extAttrs", target = "extAttrs"),
-            @Mapping(source = "jobTask.namespaceId", target = "namespaceId")
+            @Mapping(source = "jobTask.namespaceId", target = "namespaceId"),
+            @Mapping(source = "jobTask.taskName", target = "taskName"),
+            @Mapping(source = "jobTask.mrStage", target = "mrStage")
     })
     RealJobExecutorDTO toRealJobExecutorDTO(JobExecutorContext context, JobTask jobTask);
 
