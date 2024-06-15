@@ -2,17 +2,25 @@ package com.aizuda.snailjob.server.job.task.support.callback;
 
 import akka.actor.ActorRef;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.RandomUtil;
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
+import com.aizuda.snailjob.common.core.enums.StatusEnum;
+import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.common.cache.CacheRegisterTable;
 import com.aizuda.snailjob.server.common.dto.RegisterNodeInfo;
+import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.util.ClientInfoUtils;
 import com.aizuda.snailjob.server.job.task.dto.JobExecutorResultDTO;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
-import lombok.extern.slf4j.Slf4j;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskMapper;
+import com.aizuda.snailjob.template.datasource.persistence.po.JobTask;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -21,8 +29,9 @@ import java.util.Set;
  * @since : sj_1.1.0
  */
 @Component
-@Slf4j
+@RequiredArgsConstructor
 public class MapReduceClientCallbackHandler extends AbstractClientCallbackHandler {
+    private final JobTaskMapper jobTaskMapper;
 
     @Override
     public JobTaskTypeEnum getTaskInstanceType() {
@@ -31,13 +40,16 @@ public class MapReduceClientCallbackHandler extends AbstractClientCallbackHandle
 
     @Override
     protected void doCallback(final ClientCallbackContext context) {
+        JobTask jobTask = jobTaskMapper.selectOne(new LambdaQueryWrapper<JobTask>()
+                .eq(JobTask::getId, context.getTaskId()));
+        Assert.notNull(jobTask, () -> new SnailJobServerException("job task is null"));
 
         JobExecutorResultDTO jobExecutorResultDTO = JobTaskConverter.INSTANCE.toJobExecutorResultDTO(context);
         jobExecutorResultDTO.setTaskId(context.getTaskId());
         jobExecutorResultDTO.setMessage(context.getExecuteResult().getMessage());
         jobExecutorResultDTO.setResult(context.getExecuteResult().getResult());
         jobExecutorResultDTO.setTaskType(getTaskInstanceType().getType());
-
+        jobExecutorResultDTO.setIsLeaf(jobTask.getLeaf());
         ActorRef actorRef = ActorGenerator.jobTaskExecutorResultActor();
         actorRef.tell(jobExecutorResultDTO, actorRef);
     }
@@ -46,7 +58,7 @@ public class MapReduceClientCallbackHandler extends AbstractClientCallbackHandle
     protected String chooseNewClient(ClientCallbackContext context) {
         Set<RegisterNodeInfo> nodes = CacheRegisterTable.getServerNodeSet(context.getGroupName(), context.getNamespaceId());
         if (CollUtil.isEmpty(nodes)) {
-            log.error("无可执行的客户端信息. jobId:[{}]", context.getJobId());
+            SnailJobLog.LOCAL.error("无可执行的客户端信息. jobId:[{}]", context.getJobId());
             return null;
         }
 

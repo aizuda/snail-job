@@ -135,10 +135,10 @@ public class JobExecutorActor extends AbstractActor {
             JobTaskGenerator taskInstance = JobTaskGeneratorFactory.getTaskInstance(job.getTaskType());
             JobTaskGenerateContext instanceGenerateContext = JobTaskConverter.INSTANCE.toJobTaskInstanceGenerateContext(job);
             instanceGenerateContext.setTaskBatchId(taskExecute.getTaskBatchId());
-            instanceGenerateContext.setMapName(SystemConstants.MAP_ROOT);
+            instanceGenerateContext.setTaskName(SystemConstants.MAP_ROOT);
             instanceGenerateContext.setMapSubTask(Lists.newArrayList(StrUtil.EMPTY));
             // TODO 此处需要判断任务类型
-            instanceGenerateContext.setMrStage(MapReduceStageEnum.MAP);
+            instanceGenerateContext.setMrStage(MapReduceStageEnum.MAP.getStage());
             List<JobTask> taskList = taskInstance.generate(instanceGenerateContext);
             if (CollUtil.isEmpty(taskList)) {
                 SnailJobLog.LOCAL.warn("Generate job task is empty, taskBatchId:[{}]", taskExecute.getTaskBatchId());
@@ -181,8 +181,6 @@ public class JobExecutorActor extends AbstractActor {
         context.setJobId(job.getId());
         context.setWorkflowTaskBatchId(taskExecute.getWorkflowTaskBatchId());
         context.setWorkflowNodeId(taskExecute.getWorkflowNodeId());
-        context.setMapName(SystemConstants.MAP_ROOT);
-        context.setMrStage(MapReduceStageEnum.MAP.name());
         return context;
     }
 

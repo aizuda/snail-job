@@ -57,7 +57,7 @@ public class JobContext {
     /**
      * Map名称
      */
-    private String mapName;
+    private String taskName;
 
-    private String mrStage;
+    private Integer mrStage;
 }
