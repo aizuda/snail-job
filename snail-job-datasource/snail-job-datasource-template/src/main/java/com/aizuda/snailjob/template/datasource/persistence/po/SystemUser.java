@@ -16,9 +16,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @TableName("sj_system_user")
-public class SystemUser implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class SystemUser extends CreateUpdateDt {
 
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
@@ -28,9 +26,5 @@ public class SystemUser implements Serializable {
     private String password;
 
     private Integer role;
-
-    private LocalDateTime createDt;
-
-    private LocalDateTime updateDt;
 
 }
