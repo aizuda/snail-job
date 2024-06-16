@@ -2,6 +2,7 @@ package com.aizuda.snailjob.server.web.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
+import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.enums.RetryStatusEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
@@ -58,6 +59,8 @@ public class RetryTaskLogServiceImpl implements RetryTaskLogService {
                 .eq(StrUtil.isNotBlank(queryVO.getUniqueId()), RetryTaskLog::getUniqueId, queryVO.getUniqueId())
                 .eq(StrUtil.isNotBlank(queryVO.getIdempotentId()), RetryTaskLog::getIdempotentId, queryVO.getIdempotentId())
                 .eq(queryVO.getRetryStatus() != null, RetryTaskLog::getRetryStatus, queryVO.getRetryStatus())
+                .between(ObjUtil.isAllNotEmpty(queryVO.getBeginDate(), queryVO.getEndDate()),
+                        RetryTaskLog::getCreateDt, queryVO.getBeginDate(), queryVO.getEndDate())
                 .select(RetryTaskLog::getGroupName, RetryTaskLog::getId,
                         RetryTaskLog::getSceneName,
                         RetryTaskLog::getIdempotentId, RetryTaskLog::getBizNo, RetryTaskLog::getRetryStatus,

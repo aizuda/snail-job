@@ -2,6 +2,7 @@ package com.aizuda.snailjob.server.web.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
+import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
@@ -59,6 +60,11 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
     private final WorkflowBatchHandler workflowBatchHandler;
     private final JobMapper jobMapper;
 
+    private static boolean isNoOperation(JobTaskBatch i) {
+        return JobOperationReasonEnum.WORKFLOW_SUCCESSOR_SKIP_EXECUTION.contains(i.getOperationReason())
+                || i.getTaskBatchStatus() == JobTaskBatchStatusEnum.STOP.getStatus();
+    }
+
     @Override
     public PageResult<List<WorkflowBatchResponseVO>> listPage(WorkflowBatchQueryVO queryVO) {
         PageDTO<JobTaskBatch> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
@@ -77,6 +83,8 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
                 .in(CollUtil.isNotEmpty(groupNames), "batch.group_name", groupNames)
                 .eq(queryVO.getTaskBatchStatus() != null, "batch.task_batch_status", queryVO.getTaskBatchStatus())
                 .likeRight(StrUtil.isNotBlank(queryVO.getWorkflowName()), "flow.workflow_name", queryVO.getWorkflowName())
+                .between(ObjUtil.isAllNotEmpty(queryVO.getBeginDate(), queryVO.getEndDate()),
+                        "batch.create_dt", queryVO.getBeginDate(), queryVO.getEndDate())
                 .eq("batch.deleted", 0)
                 .orderByDesc("batch.id");
         List<WorkflowBatchResponseDO> batchResponseDOList = workflowTaskBatchMapper.selectWorkflowBatchPageList(pageDTO, wrapper);
@@ -200,11 +208,6 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
 
         workflowBatchHandler.stop(id, JobOperationReasonEnum.MANNER_STOP.getReason());
         return Boolean.TRUE;
-    }
-
-    private static boolean isNoOperation(JobTaskBatch i) {
-        return JobOperationReasonEnum.WORKFLOW_SUCCESSOR_SKIP_EXECUTION.contains(i.getOperationReason())
-                || i.getTaskBatchStatus() == JobTaskBatchStatusEnum.STOP.getStatus();
     }
 
 }
