@@ -1,9 +1,14 @@
 package com.aizuda.snailjob.template.datasource.persistence.po;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
  * 工作流批次
@@ -65,5 +70,16 @@ public class WorkflowTaskBatch extends CreateUpdateDt {
      * 逻辑删除 1、删除
      */
     private Integer deleted;
+
+    /**
+     * 版本号
+     */
+    @TableField(value = "version", update = "%s+1")
+    private Integer version;
+
+    /**
+     * 全局上下文
+     */
+    private String wfContext;
 
 }

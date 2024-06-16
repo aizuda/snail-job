@@ -42,4 +42,6 @@ public class JobExecutorResultDTO {
 
     private Integer isLeaf;
 
+    private String wfContext;
+
 }

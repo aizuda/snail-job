@@ -3,11 +3,13 @@ package com.aizuda.snailjob.server.job.task.support.handler;
 import akka.actor.ActorRef;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
+import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.context.SpringContext;
 import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskStatusEnum;
+import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
@@ -24,12 +26,16 @@ import com.aizuda.snailjob.server.job.task.support.stop.JobTaskStopFactory;
 import com.aizuda.snailjob.server.job.task.support.stop.TaskStopJobContext;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskBatchMapper;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowTaskBatchMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.Job;
+import com.aizuda.snailjob.template.datasource.persistence.po.JobTask;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch;
 import com.aizuda.snailjob.template.datasource.persistence.po.WorkflowTaskBatch;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.github.rholder.retry.*;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.graph.MutableGraph;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -38,6 +44,9 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum.WORKFLOW_SUCCESSOR_SKIP_EXECUTION;
 import static com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum.NOT_COMPLETE;
@@ -54,6 +63,7 @@ public class WorkflowBatchHandler {
     private final WorkflowTaskBatchMapper workflowTaskBatchMapper;
     private final JobMapper jobMapper;
     private final JobTaskBatchMapper jobTaskBatchMapper;
+    private final JobTaskMapper jobTaskMapper;
 
     private static boolean checkLeafCompleted(MutableGraph<Long> graph, Map<Long,
             List<JobTaskBatch>> currentWorkflowNodeMap, Set<Long> parentIds) {
@@ -303,6 +313,108 @@ public class WorkflowBatchHandler {
             actorRef.tell(taskExecuteDTO, actorRef);
         } catch (Exception e) {
             SnailJobLog.LOCAL.error("任务调度执行失败", e);
+        }
+    }
+
+    public void mergeWorkflowContextAndRetry(Long workflowTaskBatchId, String waitMergeContext) {
+        if (StrUtil.isBlank(waitMergeContext) || Objects.isNull(workflowTaskBatchId)) {
+            return;
+        }
+
+        Retryer<Boolean> retryer = RetryerBuilder.<Boolean>newBuilder()
+                .retryIfResult(result -> result.equals(Boolean.FALSE))
+                .retryIfException(ex -> true)
+                .withWaitStrategy(WaitStrategies.fixedWait(500, TimeUnit.MILLISECONDS))
+                // 重试3秒
+                .withStopStrategy(StopStrategies.stopAfterAttempt(6))
+                .withRetryListener(new RetryListener() {
+                    @Override
+                    public <V> void onRetry(final Attempt<V> attempt) {
+                        Object result = null;
+                        if (attempt.hasResult()) {
+                            try {
+                                result = attempt.get();
+                            } catch (ExecutionException ignored) {
+                            }
+                        }
+
+                        SnailJobLog.LOCAL.info("第【{}】次尝试更新上下文.  result:[{}] treadName:[{}]",
+                                attempt.getAttemptNumber(), result, Thread.currentThread().getName());
+                    }
+                }).build();
+
+        try {
+            retryer.call(() -> mergeWorkflowContext(workflowTaskBatchId, JsonUtil.parseHashMap(waitMergeContext, Object.class)));
+        } catch (Exception e) {
+            SnailJobLog.LOCAL.warn("update workflow global context error. workflowTaskBatchId:[{}] waitMergeContext:[{}]",
+                    workflowTaskBatchId, waitMergeContext, e);
+        }
+    }
+
+    public boolean mergeAllWorkflowContext(Long workflowTaskBatchId, Long taskBatchId) {
+        List<JobTask> jobTasks = jobTaskMapper.selectList(new LambdaQueryWrapper<JobTask>()
+                .select(JobTask::getResultMessage, JobTask::getId)
+                .eq(JobTask::getTaskBatchId, taskBatchId));
+        if (CollUtil.isEmpty(jobTasks)) {
+            return true;
+        }
+
+        Set<Map<String, Object>> maps = jobTasks.stream().map(r -> {
+            try {
+                return JsonUtil.parseHashMap(r.getResultMessage(), Object.class);
+            } catch (Exception e) {
+                SnailJobLog.LOCAL.warn("taskId:[{}] result value 不是一个json对象. result:[{}]", r.getId(), r.getResultMessage());
+            }
+            return new HashMap<String, Object>();
+        }).collect(Collectors.toSet());
+
+        Map<String, Object> mergeMap = Maps.newHashMap();
+        for (Map<String, Object> map : maps) {
+            mergeMaps(mergeMap, map);
+        }
+
+        return mergeWorkflowContext(workflowTaskBatchId, mergeMap);
+    }
+
+    /**
+     * 合并客户端上报的上下问题信息
+     *
+     * @param workflowTaskBatchId 工作流批次
+     * @param waitMergeContext    待合并的上下文
+     */
+    public boolean mergeWorkflowContext(Long workflowTaskBatchId, Map<String, Object> waitMergeContext) {
+        if (CollUtil.isEmpty(waitMergeContext) || Objects.isNull(workflowTaskBatchId)) {
+            return true;
+        }
+
+
+        WorkflowTaskBatch workflowTaskBatch = workflowTaskBatchMapper.selectOne(
+                new LambdaQueryWrapper<WorkflowTaskBatch>()
+                        .select(WorkflowTaskBatch::getWfContext, WorkflowTaskBatch::getVersion)
+                        .eq(WorkflowTaskBatch::getId, workflowTaskBatchId)
+        );
+
+        if (Objects.isNull(workflowTaskBatch)) {
+            return true;
+        }
+
+        String wfContext = workflowTaskBatch.getWfContext();
+        if (StrUtil.isNotBlank(wfContext)) {
+            mergeMaps(waitMergeContext, JsonUtil.parseHashMap(wfContext));
+        }
+
+        int version = workflowTaskBatch.getVersion();
+        workflowTaskBatch.setWfContext(JsonUtil.toJsonString(waitMergeContext));
+        workflowTaskBatch.setVersion(null);
+        return 1 == workflowTaskBatchMapper.update(workflowTaskBatch, new LambdaQueryWrapper<WorkflowTaskBatch>()
+                .eq(WorkflowTaskBatch::getId, workflowTaskBatchId)
+                .eq(WorkflowTaskBatch::getVersion, version)
+        );
+    }
+
+    public static void mergeMaps(Map<String, Object> mainMap, Map<String, Object> waitMergeMap) {
+        for (Map.Entry<String, Object> entry : waitMergeMap.entrySet()) {
+            mainMap.merge(entry.getKey(), entry.getValue(), (v1, v2) -> v2);
         }
     }
 }

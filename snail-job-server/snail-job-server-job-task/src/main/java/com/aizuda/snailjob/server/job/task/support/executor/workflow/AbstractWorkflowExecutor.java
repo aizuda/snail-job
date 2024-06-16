@@ -89,6 +89,9 @@ public abstract class AbstractWorkflowExecutor implements WorkflowExecutor, Init
                         return;
                     }
 
+                    // 合并job task的结果到全局上下文中
+                    workflowBatchHandler.mergeAllWorkflowContext(context.getWorkflowTaskBatchId(), context.getTaskBatchId());
+
                     transactionTemplate.execute(new TransactionCallbackWithoutResult() {
                         @Override
                         protected void doInTransactionWithoutResult(final TransactionStatus status) {

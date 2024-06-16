@@ -17,6 +17,8 @@ import com.aizuda.snailjob.server.common.enums.LogicalConditionEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.job.task.support.alarm.event.WorkflowTaskFailAlarmEvent;
 import com.aizuda.snailjob.server.job.task.support.expression.ExpressionInvocationHandler;
+import com.aizuda.snailjob.server.job.task.support.handler.WorkflowBatchHandler;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskBatchMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTask;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch;
@@ -40,6 +42,7 @@ import java.util.Optional;
 @Slf4j
 public class DecisionWorkflowExecutor extends AbstractWorkflowExecutor {
     private final JobTaskMapper jobTaskMapper;
+
 
     @Override
     public WorkflowNodeTypeEnum getWorkflowNodeType() {
@@ -77,6 +80,8 @@ public class DecisionWorkflowExecutor extends AbstractWorkflowExecutor {
                     List<JobTask> jobTasks = jobTaskMapper.selectList(new LambdaQueryWrapper<JobTask>()
                             .select(JobTask::getResultMessage)
                             .eq(JobTask::getTaskBatchId, context.getTaskBatchId()));
+
+
                     List<String> taskResult = Lists.newArrayList();
                     Boolean tempResult = null;
                     if (CollUtil.isEmpty(jobTasks)) {
