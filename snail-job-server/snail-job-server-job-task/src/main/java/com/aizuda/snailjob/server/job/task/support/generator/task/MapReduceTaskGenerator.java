@@ -28,6 +28,7 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 生成Map Reduce任务
@@ -72,8 +73,37 @@ public class MapReduceTaskGenerator extends AbstractJobTaskGenerator {
                 // REDUCE任务
                 return createReduceJobTasks(context, nodeInfoList, serverNodes);
             }
+            case MERGE_REDUCE -> {
+                // REDUCE任务
+                return createMergeReduceJobTasks(context, nodeInfoList, serverNodes);
+            }
             default -> throw new SnailJobServerException("Map reduce stage is not existed");
         }
+    }
+
+    private List<JobTask> createMergeReduceJobTasks(JobTaskGenerateContext context, List<RegisterNodeInfo> nodeInfoList, Set<RegisterNodeInfo> serverNodes) {
+
+        List<JobTask> jobTasks = jobTaskMapper.selectList(new LambdaQueryWrapper<JobTask>()
+                .select(JobTask::getResultMessage)
+                .eq(JobTask::getTaskBatchId, context.getTaskBatchId())
+                .eq(JobTask::getMrStage, MapReduceStageEnum.REDUCE.getStage())
+                .eq(JobTask::getLeaf, StatusEnum.YES.getStatus())
+        );
+
+        RegisterNodeInfo registerNodeInfo = nodeInfoList.get(0);
+        // 新增任务实例
+        JobTask jobTask = JobTaskConverter.INSTANCE.toJobTaskInstance(context);
+        jobTask.setClientInfo(ClientInfoUtils.generate(registerNodeInfo));
+        jobTask.setArgsType(context.getArgsType());
+        jobTask.setArgsStr(JsonUtil.toJsonString(StreamUtils.toSet(jobTasks, JobTask::getResultMessage)));
+        jobTask.setTaskStatus(JobTaskStatusEnum.RUNNING.getStatus());
+        jobTask.setResultMessage(Optional.ofNullable(jobTask.getResultMessage()).orElse(StrUtil.EMPTY));
+        jobTask.setMrStage(MapReduceStageEnum.MERGE_REDUCE.getStage());
+        jobTask.setTaskName("MERGE_REDUCE_TASK");
+        Assert.isTrue(1 == jobTaskMapper.insert(jobTask),
+                () -> new SnailJobServerException("新增任务实例失败"));
+
+        return Lists.newArrayList(jobTask);
     }
 
     private List<JobTask> createReduceJobTasks(JobTaskGenerateContext context, List<RegisterNodeInfo> nodeInfoList,

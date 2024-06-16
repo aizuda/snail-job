@@ -4,10 +4,7 @@ import akka.actor.ActorRef;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.context.SpringContext;
-import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
-import com.aizuda.snailjob.common.core.enums.JobTaskStatusEnum;
-import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
-import com.aizuda.snailjob.common.core.enums.StatusEnum;
+import com.aizuda.snailjob.common.core.enums.*;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.WaitStrategy;
@@ -43,7 +40,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static com.aizuda.snailjob.common.core.enums.MapReduceStageEnum.MAP;
+import static com.aizuda.snailjob.common.core.enums.MapReduceStageEnum.*;
 
 /**
  * @author: opensnail
@@ -92,6 +89,7 @@ public class JobTaskBatchHandler {
 
             jobTaskBatch.setTaskBatchStatus(JobTaskBatchStatusEnum.SUCCESS.getStatus());
             if (needReduceTask(completeJobBatchDTO, jobTasks)) {
+                // 此时中断批次完成，需要开启reduce任务
                 return false;
             }
         }
@@ -124,16 +122,26 @@ public class JobTaskBatchHandler {
      * @return true-需要reduce false-不需要reduce
      */
     private boolean needReduceTask(final CompleteJobBatchDTO completeJobBatchDTO, final List<JobTask> jobTasks) {
-        // 判断是否是mapreduce任务
+        Integer mrStage = null;
         if (isAllMapTask(jobTasks)) {
-            // 开启reduce阶段
-            try {
-                ActorRef actorRef = ActorGenerator.jobReduceActor();
-                actorRef.tell(JobTaskConverter.INSTANCE.toReduceTaskDTO(completeJobBatchDTO), actorRef);
-                return true;
-            } catch (Exception e) {
-                SnailJobLog.LOCAL.error("tell reduce actor error", e);
-            }
+            // 若都是MAP任务则开启Reduce任务
+            mrStage = REDUCE.getStage();
+        } else if (isALeastOneReduceTask(jobTasks)) {
+            // 若存在2个以上的reduce任务则开启merge reduce任务
+            mrStage = MERGE_REDUCE.getStage();
+        } else {
+            return false;
+        }
+
+        // 开启reduce or mergeReduce阶段
+        try {
+            ReduceTaskDTO reduceTaskDTO = JobTaskConverter.INSTANCE.toReduceTaskDTO(completeJobBatchDTO);
+            reduceTaskDTO.setMrStage(mrStage);
+            ActorRef actorRef = ActorGenerator.jobReduceActor();
+            actorRef.tell(reduceTaskDTO, actorRef);
+            return true;
+        } catch (Exception e) {
+            SnailJobLog.LOCAL.error("tell reduce actor error", e);
         }
 
         return false;
@@ -143,6 +151,12 @@ public class JobTaskBatchHandler {
         return jobTasks.size() == jobTasks.stream()
                 .filter(jobTask -> Objects.nonNull(jobTask.getMrStage()) && MAP.getStage() == jobTask.getMrStage())
                 .count();
+    }
+
+    private static boolean isALeastOneReduceTask(final List<JobTask> jobTasks) {
+        return jobTasks.stream()
+                .filter(jobTask -> Objects.nonNull(jobTask.getMrStage()) && REDUCE.getStage() == jobTask.getMrStage())
+                .count() > 1;
     }
 
     /**

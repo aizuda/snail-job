@@ -13,4 +13,5 @@ public class ReduceTaskDTO {
     private Long workflowTaskBatchId;
     private Long taskBatchId;
     private Long jobId;
+    private Integer mrStage;
 }

@@ -2,11 +2,13 @@ package com.aizuda.snailjob.server.job.task.support.dispatch;
 
 import akka.actor.AbstractActor;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.lang.Assert;
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.snailjob.common.core.enums.MapReduceStageEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
+import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.job.task.dto.ReduceTaskDTO;
 import com.aizuda.snailjob.server.job.task.support.JobExecutor;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
@@ -50,14 +52,17 @@ public class ReduceActor extends AbstractActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder().match(ReduceTaskDTO.class, reduceTask -> {
+
             SnailJobLog.LOCAL.info("执行Reduce, [{}]", JsonUtil.toJsonString(reduceTask));
             try {
+
+                Assert.notNull(reduceTask.getMrStage(), ()-> new SnailJobServerException("mrStage can not be null"));
+                Assert.notNull(reduceTask.getJobId(), ()-> new SnailJobServerException("jobId can not be null"));
+                Assert.notNull(reduceTask.getTaskBatchId(), ()-> new SnailJobServerException("taskBatchId can not be null"));
+                String key = MessageFormat.format(KEY, reduceTask.getTaskBatchId(), reduceTask.getJobId());
                 distributedLockHandler.lockWithDisposableAndRetry(() -> {
                             doReduce(reduceTask);
-                        }, MessageFormat.format(KEY, reduceTask.getTaskBatchId(), reduceTask.getJobId()),
-                        Duration.ofSeconds(1),
-                        Duration.ofSeconds(1),
-                        3);
+                        }, key, Duration.ofSeconds(1), Duration.ofSeconds(2), 3);
             } catch (Exception e) {
                 SnailJobLog.LOCAL.error("Reduce processing exception. [{}]", reduceTask, e);
             }
@@ -71,11 +76,11 @@ public class ReduceActor extends AbstractActor {
                 new LambdaQueryWrapper<JobTask>()
                         .select(JobTask::getId)
                         .eq(JobTask::getTaskBatchId, reduceTask.getTaskBatchId())
-                        .eq(JobTask::getMrStage, MapReduceStageEnum.REDUCE.getStage())
+                        .eq(JobTask::getMrStage, reduceTask.getMrStage())
         );
 
         if (CollUtil.isNotEmpty(jobTasks)) {
-            // 说明已经创建了reduce任务了
+            // 说明已经创建了reduce 或者 merge reduce 任务了
             return;
         }
 
@@ -89,7 +94,7 @@ public class ReduceActor extends AbstractActor {
         JobTaskGenerator taskInstance = JobTaskGeneratorFactory.getTaskInstance(JobTaskTypeEnum.MAP_REDUCE.getType());
         JobTaskGenerateContext context = JobTaskConverter.INSTANCE.toJobTaskInstanceGenerateContext(job);
         context.setTaskBatchId(reduceTask.getTaskBatchId());
-        context.setMrStage(MapReduceStageEnum.REDUCE.getStage());
+        context.setMrStage(reduceTask.getMrStage());
         List<JobTask> taskList = taskInstance.generate(context);
         if (CollUtil.isEmpty(taskList)) {
             SnailJobLog.LOCAL.warn("Job task is empty, taskBatchId:[{}]", reduceTask.getTaskBatchId());
