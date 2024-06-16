@@ -1,10 +1,12 @@
 package com.aizuda.snailjob.template.datasource.persistence.po;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -18,6 +20,7 @@ import java.time.LocalDateTime;
 @TableName("sj_workflow_task_batch")
 public class WorkflowTaskBatch implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**
@@ -80,5 +83,16 @@ public class WorkflowTaskBatch implements Serializable {
      * 修改时间
      */
     private LocalDateTime updateDt;
+
+    /**
+     * 版本号
+     */
+    @TableField(value = "version", update = "%s+1")
+    private Integer version;
+
+    /**
+     * 全局上下文
+     */
+    private String wfContext;
 
 }

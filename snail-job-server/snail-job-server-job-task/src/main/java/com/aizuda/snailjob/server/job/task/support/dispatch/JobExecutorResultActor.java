@@ -14,14 +14,13 @@ import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
 import com.aizuda.snailjob.server.job.task.support.JobTaskStopHandler;
 import com.aizuda.snailjob.server.job.task.support.handler.DistributedLockHandler;
 import com.aizuda.snailjob.server.job.task.support.handler.JobTaskBatchHandler;
+import com.aizuda.snailjob.server.job.task.support.handler.WorkflowBatchHandler;
 import com.aizuda.snailjob.server.job.task.support.stop.JobTaskStopFactory;
 import com.aizuda.snailjob.server.job.task.support.stop.TaskStopJobContext;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTask;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -42,6 +41,7 @@ public class JobExecutorResultActor extends AbstractActor {
     private static final String KEY = "job_complete_{0}_{1}";
     private final JobTaskMapper jobTaskMapper;
     private final JobTaskBatchHandler jobTaskBatchHandler;
+    private final WorkflowBatchHandler workflowBatchHandler;
     private final DistributedLockHandler distributedLockHandler;
 
     @Override
@@ -62,6 +62,9 @@ public class JobExecutorResultActor extends AbstractActor {
                 Assert.isTrue(1 == jobTaskMapper.update(jobTask,
                                 new LambdaUpdateWrapper<JobTask>().eq(JobTask::getId, result.getTaskId())),
                         () -> new SnailJobServerException("更新任务实例失败"));
+
+                // 更新工作流的全局上下文 如果并发更新失败则需要自旋重试更新
+//                workflowBatchHandler.mergeWorkflowContextAndRetry(result.getWorkflowTaskBatchId(), result.getWfContext());
 
                 // 除MAP和MAP_REDUCE 任务之外，其他任务都是叶子节点
                 if (Objects.nonNull(result.getIsLeaf()) && StatusEnum.NO.getStatus().equals(result.getIsLeaf())) {
