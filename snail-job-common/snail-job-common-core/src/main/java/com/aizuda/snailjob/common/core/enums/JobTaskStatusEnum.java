@@ -47,4 +47,6 @@ public enum JobTaskStatusEnum {
     public static final List<Integer> NOT_COMPLETE = Collections.singletonList(RUNNING.status);
 
     public static final List<Integer> COMPLETED = Arrays.asList(SUCCESS.status, FAIL.status, STOP.status);
+
+    public static final List<Integer> NOT_SUCCESS = Arrays.asList(FAIL.status, STOP.status);
 }
