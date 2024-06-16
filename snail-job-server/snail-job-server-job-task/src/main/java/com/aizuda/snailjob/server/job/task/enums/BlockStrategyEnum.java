@@ -14,7 +14,12 @@ import lombok.Getter;
 public enum BlockStrategyEnum {
     DISCARD(1),
     OVERLAY(2),
-    CONCURRENCY(3);
+    CONCURRENCY(3),
+    /**
+     * 丢弃新的并重新触发老的任务(失败的任务)
+     */
+    RECOVERY(4);
+    ;
 
     private final int blockStrategy;
 
