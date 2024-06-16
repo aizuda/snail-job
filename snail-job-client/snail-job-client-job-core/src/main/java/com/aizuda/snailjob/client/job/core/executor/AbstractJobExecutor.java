@@ -66,6 +66,7 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
                 return doJobExecute(jobArgs);
             } finally {
                 SnailJobLogManager.removeLogMeta();
+                JobContextManager.removeJobContext();
             }
 
         });
