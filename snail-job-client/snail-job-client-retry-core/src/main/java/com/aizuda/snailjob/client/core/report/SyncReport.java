@@ -29,6 +29,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+import static com.aizuda.snailjob.common.core.constant.SystemConstants.YYYY_MM_DD_HH_MM_SS;
+
 /**
  * 同步上报数据
  *
@@ -40,9 +42,9 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class SyncReport extends AbstractReport {
 
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(YYYY_MM_DD_HH_MM_SS);
 
-    private static String reportErrorTextMessageFormatter =
+    private static final String reportErrorTextMessageFormatter =
             "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 同步上报异常</font>  \n" +
                     "> IP:{}  \n" +
                     "> 空间ID:{}  \n" +

@@ -30,13 +30,14 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.AfterAdvice;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.core.env.StandardEnvironment;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+
+import static com.aizuda.snailjob.common.core.constant.SystemConstants.YYYY_MM_DD_HH_MM_SS;
 
 /**
  * @author opensnail
@@ -45,7 +46,7 @@ import java.util.*;
 @Slf4j
 public class SnailRetryInterceptor implements MethodInterceptor, AfterAdvice, Serializable, Ordered {
 
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(YYYY_MM_DD_HH_MM_SS);
     private static final String retryErrorMoreThresholdTextMessageFormatter =
             "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 重试组件异常</font>  \n" +
                     "> IP:{}  \n" +
@@ -56,6 +57,7 @@ public class SnailRetryInterceptor implements MethodInterceptor, AfterAdvice, Se
 
     private final RetryStrategy retryStrategy;
     private final int order;
+
     public SnailRetryInterceptor(int order, RetryStrategy localRetryStrategies) {
         this.order = order;
         this.retryStrategy = localRetryStrategies;
