@@ -49,6 +49,10 @@ public class JobExecutorResultActor extends AbstractActor {
         return receiveBuilder().match(JobExecutorResultDTO.class, result -> {
             SnailJobLog.LOCAL.info("更新任务状态. 参数:[{}]", JsonUtil.toJsonString(result));
             try {
+                Assert.notNull(result.getTaskId(), ()-> new SnailJobServerException("taskId can not be null"));
+                Assert.notNull(result.getJobId(), ()-> new SnailJobServerException("jobId can not be null"));
+                Assert.notNull(result.getTaskBatchId(), ()-> new SnailJobServerException("taskBatchId can not be null"));
+
                 JobTask jobTask = new JobTask();
                 jobTask.setTaskStatus(result.getTaskStatus());
                 if (Objects.nonNull(result.getResult())) {

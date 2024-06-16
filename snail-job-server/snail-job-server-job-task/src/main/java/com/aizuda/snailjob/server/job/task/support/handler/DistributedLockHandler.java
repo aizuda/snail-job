@@ -77,7 +77,7 @@ public class DistributedLockHandler {
                 }
             }
 
-            SnailJobLog.LOCAL.error("lock execute error. lockName:[{}]", lockName, throwable);
+            SnailJobLog.LOCAL.warn("lock execute error. lockName:[{}]", lockName, throwable);
         } finally {
             if (lock) {
                 lockProvider.unlock();
