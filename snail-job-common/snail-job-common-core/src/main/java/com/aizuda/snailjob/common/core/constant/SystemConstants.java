@@ -182,4 +182,20 @@ public interface SystemConstants {
      * 组名、场景名、空间ID通用正则
      */
     String REGEXP = "^[A-Za-z0-9_-]{1,64}$";
+
+    /**
+     * 长时间格式
+     */
+    String YYYY_MM_DD_HH_MM_SS = "yyyy-MM-dd HH:mm:ss";
+
+    /**
+     *
+     */
+    String YYYYMMDDHHMMSS = "yyyyMMddHHmmss";
+
+    /**
+     * 短时间格式
+     */
+    String YYYY_MM_DD = "yyyy-MM-dd";
+
 }
