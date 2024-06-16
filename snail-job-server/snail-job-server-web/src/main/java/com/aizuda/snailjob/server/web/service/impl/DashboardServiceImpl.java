@@ -2,6 +2,7 @@ package com.aizuda.snailjob.server.web.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
+import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.enums.NodeTypeEnum;
 import com.aizuda.snailjob.common.core.model.Result;
@@ -51,7 +52,6 @@ import org.springframework.web.client.RestTemplate;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -149,7 +149,7 @@ public class DashboardServiceImpl implements DashboardService {
     @Override
     public DashboardRetryLineResponseVO retryLineList(BaseQueryVO baseQueryVO,
                                                       String groupName, String type,
-                                                      String startTime, String endTime) {
+                                                      LocalDateTime startTime, LocalDateTime endTime) {
 
         // 查询登录用户权限
         UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
@@ -177,13 +177,9 @@ public class DashboardServiceImpl implements DashboardService {
         // 折线图
         DateTypeEnum dateTypeEnum = DateTypeEnum.valueOf(type);
         LocalDateTime startDateTime = dateTypeEnum.getStartTime().apply(
-                StrUtil.isNotBlank(startTime) ?
-                        LocalDateTime.parse(startTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) :
-                        LocalDateTime.now());
+                ObjUtil.isNotNull(startTime) ? startTime : LocalDateTime.now());
         LocalDateTime endDateTime = dateTypeEnum.getEndTime().apply(
-                StrUtil.isNotBlank(endTime) ?
-                        LocalDateTime.parse(endTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) :
-                        LocalDateTime.now());
+                ObjUtil.isNotNull(endTime) ? endTime : LocalDateTime.now());
         List<DashboardLineResponseDO> dashboardRetryLinkeResponseDOList = retrySummaryMapper.selectRetryLineList(
                 DashboardLineEnum.dateFormat(type),
                 new LambdaQueryWrapper<RetrySummary>()
@@ -213,7 +209,7 @@ public class DashboardServiceImpl implements DashboardService {
     @Override
     public DashboardRetryLineResponseVO jobLineList(BaseQueryVO baseQueryVO,
                                                     String mode, String groupName, String type,
-                                                    String startTime, String endTime) {
+                                                    LocalDateTime startTime, LocalDateTime endTime) {
 
         // 查询登录用户权限
         UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
@@ -248,13 +244,9 @@ public class DashboardServiceImpl implements DashboardService {
         // 折线图
         DateTypeEnum dateTypeEnum = DateTypeEnum.valueOf(type);
         LocalDateTime startDateTime = dateTypeEnum.getStartTime().apply(
-                StrUtil.isNotBlank(startTime) ?
-                        LocalDateTime.parse(startTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) :
-                        LocalDateTime.now());
+                ObjUtil.isNotNull(startTime) ? startTime : LocalDateTime.now());
         LocalDateTime endDateTime = dateTypeEnum.getEndTime().apply(
-                StrUtil.isNotBlank(endTime) ?
-                        LocalDateTime.parse(endTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) :
-                        LocalDateTime.now());
+                ObjUtil.isNotNull(endTime) ? endTime : LocalDateTime.now());
         List<DashboardLineResponseDO> dashboardLineResponseDOList = jobSummaryMapper.selectJobLineList(
                 DashboardLineEnum.dateFormat(type),
                 new LambdaQueryWrapper<JobSummary>()

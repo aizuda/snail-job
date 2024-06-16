@@ -7,6 +7,7 @@ import com.aizuda.snailjob.server.web.model.response.DashboardCardResponseVO;
 import com.aizuda.snailjob.server.web.model.response.DashboardRetryLineResponseVO;
 import com.aizuda.snailjob.server.web.model.response.ServerNodeResponseVO;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -17,9 +18,9 @@ public interface DashboardService {
 
     DashboardCardResponseVO taskRetryJob();
 
-    DashboardRetryLineResponseVO retryLineList(BaseQueryVO baseQueryVO, String groupName, String type, String startTime, String endTime);
+    DashboardRetryLineResponseVO retryLineList(BaseQueryVO baseQueryVO, String groupName, String type, LocalDateTime startTime, LocalDateTime endTime);
 
-    DashboardRetryLineResponseVO jobLineList(BaseQueryVO baseQueryVO, String mode, String groupName, String type, String startTime, String endTime);
+    DashboardRetryLineResponseVO jobLineList(BaseQueryVO baseQueryVO, String mode, String groupName, String type, LocalDateTime startTime, LocalDateTime endTime);
 
     PageResult<List<ServerNodeResponseVO>> pods(ServerNodeQueryVO serverNodeQueryVO);
 }

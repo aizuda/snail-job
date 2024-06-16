@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -42,8 +43,8 @@ public class DashboardController {
     public DashboardRetryLineResponseVO retryLineList(BaseQueryVO baseQueryVO,
                                                       @RequestParam(value = "groupName", required = false) String groupName,
                                                       @RequestParam(value = "type", required = false, defaultValue = "WEEK") String type,
-                                                      @RequestParam(value = "startTime", required = false) String startTime,
-                                                      @RequestParam(value = "endTime", required = false) String endTime) {
+                                                      @RequestParam(value = "startTime", required = false) LocalDateTime startTime,
+                                                      @RequestParam(value = "endTime", required = false) LocalDateTime endTime) {
         return dashBoardService.retryLineList(baseQueryVO, groupName, type, startTime, endTime);
     }
 
@@ -53,8 +54,8 @@ public class DashboardController {
                                                     @RequestParam(value = "mode", required = false) String mode,
                                                     @RequestParam(value = "groupName", required = false) String groupName,
                                                     @RequestParam(value = "type", required = false, defaultValue = "WEEK") String type,
-                                                    @RequestParam(value = "startTime", required = false) String startTime,
-                                                    @RequestParam(value = "endTime", required = false) String endTime) {
+                                                    @RequestParam(value = "startTime", required = false) LocalDateTime startTime,
+                                                    @RequestParam(value = "endTime", required = false) LocalDateTime endTime) {
         return dashBoardService.jobLineList(baseQueryVO, mode, groupName, type, startTime, endTime);
     }
 
