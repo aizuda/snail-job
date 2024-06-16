@@ -2,9 +2,11 @@ package com.aizuda.snailjob.template.datasource.config;
 
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.template.datasource.enums.DbTypeEnum;
+import com.aizuda.snailjob.template.datasource.handler.InjectionMetaObjectHandler;
 import com.aizuda.snailjob.template.datasource.utils.DbUtils;
 import com.aizuda.snailjob.template.datasource.utils.RequestDataHelper;
 import com.baomidou.mybatisplus.autoconfigure.MybatisPlusProperties;
+import com.baomidou.mybatisplus.core.config.GlobalConfig;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.DynamicTableNameInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
@@ -46,15 +48,24 @@ public class SnailJobTemplateAutoConfiguration {
         MybatisSqlSessionFactoryBean factoryBean = new MybatisSqlSessionFactoryBean();
         factoryBean.setDataSource(dataSource);
         DbTypeEnum dbTypeEnum = DbUtils.getDbType();
+
+        // 动态设置mapper资源: 通用 + 数据库专用
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-        Resource[] resources1 = resolver.getResources("classpath*:/template/mapper/*.xml");
-        Resource[] resources2 = resolver.getResources(MessageFormat.format("classpath*:/{0}/mapper/*.xml", dbTypeEnum.getDb()));
+        Resource[] templateMapperResource = resolver.getResources("classpath*:/template/mapper/*.xml");
+        Resource[] specificMapperResource = resolver.getResources(MessageFormat.format("classpath*:/{0}/mapper/*.xml", dbTypeEnum.getDb()));
         List<Resource> resources = new ArrayList<>();
-        resources.addAll(Arrays.asList(resources1));
-        resources.addAll(Arrays.asList(resources2));
+        resources.addAll(List.of(templateMapperResource));
+        resources.addAll(List.of(specificMapperResource));
         factoryBean.setMapperLocations(resources.toArray(new Resource[0]));
+
+        // 分页插件
         factoryBean.setPlugins(mybatisPlusInterceptor);
         factoryBean.setTypeAliasesPackage(mybatisPlusProperties.getTypeAliasesPackage());
+
+        // 自动填充
+        GlobalConfig globalConfig = mybatisPlusProperties.getGlobalConfig();
+        globalConfig.setMetaObjectHandler(new InjectionMetaObjectHandler());
+
         factoryBean.setGlobalConfig(mybatisPlusProperties.getGlobalConfig());
 
         return factoryBean.getObject();
@@ -91,4 +102,5 @@ public class SnailJobTemplateAutoConfiguration {
 
         return dynamicTableNameInnerInterceptor;
     }
+
 }
