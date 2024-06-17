@@ -16,9 +16,10 @@ import com.aizuda.snailjob.server.common.enums.DashboardLineEnum;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.enums.SystemModeEnum;
 import com.aizuda.snailjob.server.common.register.ServerRegister;
-import com.aizuda.snailjob.server.web.model.base.BaseQueryVO;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.enums.DateTypeEnum;
+import com.aizuda.snailjob.server.web.model.request.JobLineQueryVo;
+import com.aizuda.snailjob.server.web.model.request.LineQueryVO;
 import com.aizuda.snailjob.server.web.model.request.ServerNodeQueryVO;
 import com.aizuda.snailjob.server.web.model.request.UserSessionVO;
 import com.aizuda.snailjob.server.web.model.response.DashboardCardResponseVO;
@@ -147,10 +148,7 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     @Override
-    public DashboardRetryLineResponseVO retryLineList(BaseQueryVO baseQueryVO,
-                                                      String groupName, String type,
-                                                      LocalDateTime startTime, LocalDateTime endTime) {
-
+    public DashboardRetryLineResponseVO retryLineList(LineQueryVO queryVO) {
         // 查询登录用户权限
         UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
         String namespaceId = userSessionVO.getNamespaceId();
@@ -158,7 +156,7 @@ public class DashboardServiceImpl implements DashboardService {
         DashboardRetryLineResponseVO responseVO = new DashboardRetryLineResponseVO();
 
         // 重试任务列表
-        Page<Object> pager = new Page<>(baseQueryVO.getPage(), baseQueryVO.getSize());
+        Page<Object> pager = new Page<>(queryVO.getPage(), queryVO.getSize());
         LambdaQueryWrapper<RetrySceneConfig> wrapper = new LambdaQueryWrapper<RetrySceneConfig>()
                 .eq(RetrySceneConfig::getNamespaceId, namespaceId)
                 .in(CollUtil.isNotEmpty(groupNames), RetrySceneConfig::getGroupName, groupNames);
@@ -175,16 +173,16 @@ public class DashboardServiceImpl implements DashboardService {
         responseVO.setTaskList(pageResult);
 
         // 折线图
-        DateTypeEnum dateTypeEnum = DateTypeEnum.valueOf(type);
+        DateTypeEnum dateTypeEnum = DateTypeEnum.valueOf(queryVO.getType());
         LocalDateTime startDateTime = dateTypeEnum.getStartTime().apply(
-                ObjUtil.isNotNull(startTime) ? startTime : LocalDateTime.now());
+                ObjUtil.isNotNull(queryVO.getStartDt()) ? queryVO.getStartDt() : LocalDateTime.now());
         LocalDateTime endDateTime = dateTypeEnum.getEndTime().apply(
-                ObjUtil.isNotNull(endTime) ? endTime : LocalDateTime.now());
+                ObjUtil.isNotNull(queryVO.getEndDt()) ? queryVO.getEndDt() : LocalDateTime.now());
         List<DashboardLineResponseDO> dashboardRetryLinkeResponseDOList = retrySummaryMapper.selectRetryLineList(
-                DashboardLineEnum.dateFormat(type),
+                DashboardLineEnum.dateFormat(queryVO.getType()),
                 new LambdaQueryWrapper<RetrySummary>()
                         .in(CollUtil.isNotEmpty(groupNames), RetrySummary::getGroupName, groupNames)
-                        .eq(StrUtil.isNotBlank(groupName), RetrySummary::getGroupName, groupName)
+                        .eq(StrUtil.isNotBlank(queryVO.getGroupName()), RetrySummary::getGroupName, queryVO.getGroupName())
                         .eq(RetrySummary::getNamespaceId, namespaceId)
                         .between(RetrySummary::getTriggerAt, startDateTime, endDateTime));
         List<DashboardLineResponseVO> dashboardLineResponseVOList = DispatchQuantityResponseVOConverter.INSTANCE.convertList(dashboardRetryLinkeResponseDOList);
@@ -196,7 +194,7 @@ public class DashboardServiceImpl implements DashboardService {
         List<DashboardRetryLineResponseDO.Rank> rankList = retrySummaryMapper.selectDashboardRankList(
                 new LambdaQueryWrapper<RetrySummary>()
                         .in(CollUtil.isNotEmpty(groupNames), RetrySummary::getGroupName, groupNames)
-                        .eq(StrUtil.isNotBlank(groupName), RetrySummary::getGroupName, groupNames)
+                        .eq(StrUtil.isNotBlank(queryVO.getGroupName()), RetrySummary::getGroupName, groupNames)
                         .eq(RetrySummary::getNamespaceId, namespaceId)
                         .ge(RetrySummary::getTriggerAt, startDateTime)
                         .le(RetrySummary::getTriggerAt, endDateTime)
@@ -207,10 +205,7 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     @Override
-    public DashboardRetryLineResponseVO jobLineList(BaseQueryVO baseQueryVO,
-                                                    String mode, String groupName, String type,
-                                                    LocalDateTime startTime, LocalDateTime endTime) {
-
+    public DashboardRetryLineResponseVO jobLineList(JobLineQueryVo queryVO) {
         // 查询登录用户权限
         UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
         String namespaceId = userSessionVO.getNamespaceId();
@@ -218,22 +213,22 @@ public class DashboardServiceImpl implements DashboardService {
         DashboardRetryLineResponseVO responseVO = new DashboardRetryLineResponseVO();
 
         // 重试任务列表
-        Page<Object> pager = new Page<>(baseQueryVO.getPage(), baseQueryVO.getSize());
+        Page<Object> pager = new Page<>(queryVO.getPage(), queryVO.getSize());
 
         // 任务类型
-        Integer systemTaskType = SystemModeEnum.JOB.name().equals(mode) ? SyetemTaskTypeEnum.JOB.getType() : SyetemTaskTypeEnum.WORKFLOW.getType();
+        Integer systemTaskType = SystemModeEnum.JOB.name().equals(queryVO.getMode()) ? SyetemTaskTypeEnum.JOB.getType() : SyetemTaskTypeEnum.WORKFLOW.getType();
         LambdaQueryWrapper<Job> wrapper = new LambdaQueryWrapper<Job>()
                 .eq(Job::getDeleted, 0)
                 .eq(Job::getNamespaceId, namespaceId)
                 .in(CollUtil.isNotEmpty(groupNames), Job::getGroupName, groupNames);
 
-        // 针对 Group By 分页自定义countStatement
+        // 针对 Group By 分页自定义 countStatement
         pager.setSearchCount(false);
-        pager.setTotal(SystemModeEnum.JOB.name().equals(mode) ?
+        pager.setTotal(SystemModeEnum.JOB.name().equals(queryVO.getMode()) ?
                 jobSummaryMapper.selectJobTaskListCount(wrapper) :
                 jobSummaryMapper.selectWorkflowTaskListCount(wrapper));
 
-        IPage<DashboardRetryLineResponseDO.Task> taskIPage = SystemModeEnum.JOB.name().equals(mode) ?
+        IPage<DashboardRetryLineResponseDO.Task> taskIPage = SystemModeEnum.JOB.name().equals(queryVO.getMode()) ?
                 jobSummaryMapper.selectJobTaskList(wrapper, pager) : jobSummaryMapper.selectWorkflowTaskList(wrapper, pager);
         List<DashboardRetryLineResponseVO.Task> taskList = JobSummaryResponseVOConverter.INSTANCE.convertList(taskIPage.getRecords());
         PageResult<List<DashboardRetryLineResponseVO.Task>> pageResult = new PageResult<>(
@@ -242,16 +237,16 @@ public class DashboardServiceImpl implements DashboardService {
         responseVO.setTaskList(pageResult);
 
         // 折线图
-        DateTypeEnum dateTypeEnum = DateTypeEnum.valueOf(type);
+        DateTypeEnum dateTypeEnum = DateTypeEnum.valueOf(queryVO.getType());
         LocalDateTime startDateTime = dateTypeEnum.getStartTime().apply(
-                ObjUtil.isNotNull(startTime) ? startTime : LocalDateTime.now());
+                ObjUtil.isNotNull(queryVO.getStartDt()) ? queryVO.getStartDt() : LocalDateTime.now());
         LocalDateTime endDateTime = dateTypeEnum.getEndTime().apply(
-                ObjUtil.isNotNull(endTime) ? endTime : LocalDateTime.now());
+                ObjUtil.isNotNull(queryVO.getEndDt()) ? queryVO.getEndDt() : LocalDateTime.now());
         List<DashboardLineResponseDO> dashboardLineResponseDOList = jobSummaryMapper.selectJobLineList(
-                DashboardLineEnum.dateFormat(type),
+                DashboardLineEnum.dateFormat(queryVO.getType()),
                 new LambdaQueryWrapper<JobSummary>()
                         .in(CollUtil.isNotEmpty(groupNames), JobSummary::getGroupName, groupNames)
-                        .eq(StrUtil.isNotBlank(groupName), JobSummary::getGroupName, groupName)
+                        .eq(StrUtil.isNotBlank(queryVO.getGroupName()), JobSummary::getGroupName, queryVO.getGroupName())
                         .eq(JobSummary::getSystemTaskType, systemTaskType)
                         .eq(JobSummary::getNamespaceId, namespaceId)
                         .between(JobSummary::getTriggerAt, startDateTime, endDateTime));
@@ -265,7 +260,7 @@ public class DashboardServiceImpl implements DashboardService {
                 systemTaskType,
                 new LambdaQueryWrapper<JobSummary>()
                         .in(CollUtil.isNotEmpty(groupNames), JobSummary::getGroupName, groupNames)
-                        .eq(StrUtil.isNotBlank(groupName), JobSummary::getGroupName, groupName)
+                        .eq(StrUtil.isNotBlank(queryVO.getGroupName()), JobSummary::getGroupName, queryVO.getGroupName())
                         .ge(JobSummary::getTriggerAt, startDateTime).le(JobSummary::getTriggerAt, endDateTime)
                         .eq(JobSummary::getSystemTaskType, systemTaskType)
                         .eq(JobSummary::getNamespaceId, namespaceId)

@@ -66,8 +66,8 @@ public class JobBatchServiceImpl implements JobBatchService {
                 .in(CollUtil.isNotEmpty(groupNames), "batch.group_name", groupNames)
                 .eq(queryVO.getTaskBatchStatus() != null, "batch.task_batch_status", queryVO.getTaskBatchStatus())
                 .likeRight(StrUtil.isNotBlank(queryVO.getJobName()), "job.job_name", queryVO.getJobName())
-                .between(ObjUtil.isAllNotEmpty(queryVO.getBeginDate(), queryVO.getEndDate()),
-                        "batch.create_dt", queryVO.getBeginDate(), queryVO.getEndDate())
+                .between(ObjUtil.isAllNotEmpty(queryVO.getStartDt(), queryVO.getEndDt()),
+                        "batch.create_dt", queryVO.getStartDt(), queryVO.getEndDt())
                 .eq("batch.deleted", 0)
                 .orderByDesc("batch.id");
         List<JobBatchResponseDO> batchResponseDOList = jobTaskBatchMapper.selectJobBatchPageList(pageDTO, wrapper);

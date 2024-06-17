@@ -83,8 +83,8 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
                 .in(CollUtil.isNotEmpty(groupNames), "batch.group_name", groupNames)
                 .eq(queryVO.getTaskBatchStatus() != null, "batch.task_batch_status", queryVO.getTaskBatchStatus())
                 .likeRight(StrUtil.isNotBlank(queryVO.getWorkflowName()), "flow.workflow_name", queryVO.getWorkflowName())
-                .between(ObjUtil.isAllNotEmpty(queryVO.getBeginDate(), queryVO.getEndDate()),
-                        "batch.create_dt", queryVO.getBeginDate(), queryVO.getEndDate())
+                .between(ObjUtil.isNotNull(queryVO.getDatetimeRange()),
+                        "batch.create_dt", queryVO.getStartDt(), queryVO.getEndDt())
                 .eq("batch.deleted", 0)
                 .orderByDesc("batch.id");
         List<WorkflowBatchResponseDO> batchResponseDOList = workflowTaskBatchMapper.selectWorkflowBatchPageList(pageDTO, wrapper);

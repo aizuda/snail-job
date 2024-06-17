@@ -4,8 +4,6 @@ import com.aizuda.snailjob.server.web.model.base.BaseQueryVO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.time.LocalDateTime;
-
 /**
  * @author opensnail
  * @date 2023-10-11 22:28:07
@@ -18,6 +16,4 @@ public class JobBatchQueryVO extends BaseQueryVO {
     private String jobName;
     private Integer taskBatchStatus;
     private String groupName;
-    private LocalDateTime beginDate;
-    private LocalDateTime endDate;
 }

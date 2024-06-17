@@ -74,8 +74,8 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
                                 .eq(StrUtil.isNotBlank(queryVO.getBizNo()), RetryDeadLetter::getBizNo, queryVO.getBizNo())
                                 .eq(StrUtil.isNotBlank(queryVO.getIdempotentId()), RetryDeadLetter::getIdempotentId, queryVO.getIdempotentId())
                                 .eq(StrUtil.isNotBlank(queryVO.getUniqueId()), RetryDeadLetter::getUniqueId, queryVO.getUniqueId())
-                                .between(ObjUtil.isAllNotEmpty(queryVO.getBeginDate(), queryVO.getEndDate()),
-                                        RetryDeadLetter::getCreateDt, queryVO.getBeginDate(), queryVO.getEndDate())
+                                .between(ObjUtil.isAllNotEmpty(queryVO.getStartDt(), queryVO.getEndDt()),
+                                        RetryDeadLetter::getCreateDt, queryVO.getStartDt(), queryVO.getEndDt())
                                 .orderByDesc(RetryDeadLetter::getId));
 
         return new PageResult<>(retryDeadLetterPageDTO,

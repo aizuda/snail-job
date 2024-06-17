@@ -2,8 +2,9 @@ package com.aizuda.snailjob.server.web.controller;
 
 import com.aizuda.snailjob.server.common.dto.DistributeInstance;
 import com.aizuda.snailjob.server.web.annotation.LoginRequired;
-import com.aizuda.snailjob.server.web.model.base.BaseQueryVO;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
+import com.aizuda.snailjob.server.web.model.request.JobLineQueryVo;
+import com.aizuda.snailjob.server.web.model.request.LineQueryVO;
 import com.aizuda.snailjob.server.web.model.request.ServerNodeQueryVO;
 import com.aizuda.snailjob.server.web.model.response.DashboardCardResponseVO;
 import com.aizuda.snailjob.server.web.model.response.DashboardRetryLineResponseVO;
@@ -12,10 +13,8 @@ import com.aizuda.snailjob.server.web.service.DashboardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -40,23 +39,14 @@ public class DashboardController {
 
     @LoginRequired
     @GetMapping("/retry/line")
-    public DashboardRetryLineResponseVO retryLineList(BaseQueryVO baseQueryVO,
-                                                      @RequestParam(value = "groupName", required = false) String groupName,
-                                                      @RequestParam(value = "type", required = false, defaultValue = "WEEK") String type,
-                                                      @RequestParam(value = "startTime", required = false) LocalDateTime startTime,
-                                                      @RequestParam(value = "endTime", required = false) LocalDateTime endTime) {
-        return dashBoardService.retryLineList(baseQueryVO, groupName, type, startTime, endTime);
+    public DashboardRetryLineResponseVO retryLineList(LineQueryVO queryVO) {
+        return dashBoardService.retryLineList(queryVO);
     }
 
     @LoginRequired
     @GetMapping("/job/line")
-    public DashboardRetryLineResponseVO jobLineList(BaseQueryVO baseQueryVO,
-                                                    @RequestParam(value = "mode", required = false) String mode,
-                                                    @RequestParam(value = "groupName", required = false) String groupName,
-                                                    @RequestParam(value = "type", required = false, defaultValue = "WEEK") String type,
-                                                    @RequestParam(value = "startTime", required = false) LocalDateTime startTime,
-                                                    @RequestParam(value = "endTime", required = false) LocalDateTime endTime) {
-        return dashBoardService.jobLineList(baseQueryVO, mode, groupName, type, startTime, endTime);
+    public DashboardRetryLineResponseVO jobLineList(JobLineQueryVo queryVO) {
+        return dashBoardService.jobLineList(queryVO);
     }
 
     @LoginRequired
