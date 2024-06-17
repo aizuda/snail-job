@@ -90,4 +90,9 @@ public class JobExecutorContext {
 
     private Long workflowNodeId;
 
+    /**
+     * 工作流上下文
+     */
+    private String wkContext;
+
 }

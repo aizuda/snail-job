@@ -43,6 +43,8 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.io.IOException;
+import java.text.MessageFormat;
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -59,7 +61,9 @@ import static com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum.NOT_C
 @Component
 @RequiredArgsConstructor
 public class WorkflowBatchHandler {
+    private static final String KEY = "update_wf_context_{}";
 
+    private final DistributedLockHandler distributedLockHandler;
     private final WorkflowTaskBatchMapper workflowTaskBatchMapper;
     private final JobMapper jobMapper;
     private final JobTaskBatchMapper jobTaskBatchMapper;
@@ -321,12 +325,13 @@ public class WorkflowBatchHandler {
             return;
         }
 
+        // 自旋更新
         Retryer<Boolean> retryer = RetryerBuilder.<Boolean>newBuilder()
                 .retryIfResult(result -> result.equals(Boolean.FALSE))
                 .retryIfException(ex -> true)
                 .withWaitStrategy(WaitStrategies.fixedWait(500, TimeUnit.MILLISECONDS))
                 // 重试3秒
-                .withStopStrategy(StopStrategies.stopAfterAttempt(6))
+                .withStopStrategy(StopStrategies.stopAfterAttempt(3))
                 .withRetryListener(new RetryListener() {
                     @Override
                     public <V> void onRetry(final Attempt<V> attempt) {
@@ -348,12 +353,18 @@ public class WorkflowBatchHandler {
         } catch (Exception e) {
             SnailJobLog.LOCAL.warn("update workflow global context error. workflowTaskBatchId:[{}] waitMergeContext:[{}]",
                     workflowTaskBatchId, waitMergeContext, e);
+            if (e.getClass().isAssignableFrom(RetryException.class)) {
+                // 如果自旋失败，就使用悲观锁
+                distributedLockHandler.lockWithDisposableAndRetry(() -> {
+                    mergeWorkflowContext(workflowTaskBatchId, JsonUtil.parseHashMap(waitMergeContext, Object.class));
+                }, MessageFormat.format(KEY, workflowTaskBatchId), Duration.ofSeconds(1), Duration.ofSeconds(1), 3);
+            }
         }
     }
 
     public boolean mergeAllWorkflowContext(Long workflowTaskBatchId, Long taskBatchId) {
         List<JobTask> jobTasks = jobTaskMapper.selectList(new LambdaQueryWrapper<JobTask>()
-                .select(JobTask::getResultMessage, JobTask::getId)
+                .select(JobTask::getWfContext, JobTask::getId)
                 .eq(JobTask::getTaskBatchId, taskBatchId));
         if (CollUtil.isEmpty(jobTasks)) {
             return true;
@@ -361,7 +372,7 @@ public class WorkflowBatchHandler {
 
         Set<Map<String, Object>> maps = jobTasks.stream().map(r -> {
             try {
-                return JsonUtil.parseHashMap(r.getResultMessage(), Object.class);
+                return JsonUtil.parseHashMap(r.getWfContext(), Object.class);
             } catch (Exception e) {
                 SnailJobLog.LOCAL.warn("taskId:[{}] result value 不是一个json对象. result:[{}]", r.getId(), r.getResultMessage());
             }
@@ -386,7 +397,6 @@ public class WorkflowBatchHandler {
         if (CollUtil.isEmpty(waitMergeContext) || Objects.isNull(workflowTaskBatchId)) {
             return true;
         }
-
 
         WorkflowTaskBatch workflowTaskBatch = workflowTaskBatchMapper.selectOne(
                 new LambdaQueryWrapper<WorkflowTaskBatch>()

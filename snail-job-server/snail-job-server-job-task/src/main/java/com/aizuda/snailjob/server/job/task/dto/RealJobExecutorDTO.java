@@ -99,4 +99,8 @@ public class RealJobExecutorDTO extends BaseDTO {
      */
     private boolean isRetry;
 
+    /**
+     * 工作流上下文
+     */
+    private String wkContext;
 }

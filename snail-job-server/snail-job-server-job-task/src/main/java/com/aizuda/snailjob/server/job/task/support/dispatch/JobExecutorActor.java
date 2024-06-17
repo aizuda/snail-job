@@ -34,9 +34,11 @@ import com.aizuda.snailjob.server.job.task.support.timer.JobTimerTask;
 import com.aizuda.snailjob.server.job.task.support.timer.JobTimerWheel;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskBatchMapper;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowTaskBatchMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.Job;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTask;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch;
+import com.aizuda.snailjob.template.datasource.persistence.po.WorkflowTaskBatch;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
@@ -72,6 +74,7 @@ public class JobExecutorActor extends AbstractActor {
     private final TransactionTemplate transactionTemplate;
     private final WorkflowBatchHandler workflowBatchHandler;
     private final JobTaskBatchHandler jobTaskBatchHandler;
+    private final WorkflowTaskBatchMapper workflowTaskBatchMapper;
 
     @Override
     public Receive createReceive() {
@@ -145,9 +148,20 @@ public class JobExecutorActor extends AbstractActor {
                 return;
             }
 
+            // 获取工作流的上下文
+            WorkflowTaskBatch workflowTaskBatch = null;
+            Long workflowTaskBatchId = taskExecute.getWorkflowTaskBatchId();
+            if (Objects.nonNull(workflowTaskBatchId)) {
+                workflowTaskBatch = workflowTaskBatchMapper.selectOne(
+                    new LambdaQueryWrapper<WorkflowTaskBatch>()
+                        .select(WorkflowTaskBatch::getWfContext)
+                        .eq(WorkflowTaskBatch::getId, taskExecute.getWorkflowTaskBatchId())
+                );
+            }
+
             // 执行任务
             JobExecutor jobExecutor = JobExecutorFactory.getJobExecutor(job.getTaskType());
-            jobExecutor.execute(buildJobExecutorContext(taskExecute, job, taskList));
+            jobExecutor.execute(buildJobExecutorContext(taskExecute, job, taskList, workflowTaskBatch));
         } finally {
             log.debug("准备执行任务完成.[{}]", JsonUtil.toJsonString(taskExecute));
             final int finalTaskStatus = taskStatus;
@@ -174,13 +188,17 @@ public class JobExecutorActor extends AbstractActor {
     }
 
     @NotNull
-    private static JobExecutorContext buildJobExecutorContext(TaskExecuteDTO taskExecute, Job job, List<JobTask> taskList) {
+    private static JobExecutorContext buildJobExecutorContext(TaskExecuteDTO taskExecute, Job job, List<JobTask> taskList,
+        final WorkflowTaskBatch workflowTaskBatch) {
         JobExecutorContext context = JobTaskConverter.INSTANCE.toJobExecutorContext(job);
         context.setTaskList(taskList);
         context.setTaskBatchId(taskExecute.getTaskBatchId());
         context.setJobId(job.getId());
         context.setWorkflowTaskBatchId(taskExecute.getWorkflowTaskBatchId());
         context.setWorkflowNodeId(taskExecute.getWorkflowNodeId());
+        if (Objects.nonNull(workflowTaskBatch)) {
+            context.setWkContext(workflowTaskBatch.getWfContext());
+        }
         return context;
     }
 

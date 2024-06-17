@@ -182,7 +182,7 @@ public class WorkflowExecutorActor extends AbstractActor {
             context.setEvaluationResult(evaluationResult);
             context.setTaskBatchId(taskExecute.getTaskBatchId());
             context.setTaskExecutorScene(taskExecute.getTaskExecutorScene());
-
+            context.setWfContext(workflowTaskBatch.getWfContext());
             workflowExecutor.execute(context);
 
             evaluationResult = context.getEvaluationResult();

@@ -41,4 +41,8 @@ public class DispatchJobResultRequest {
      */
     private boolean isRetry;
 
+    /**
+     * 工作流上下文
+     */
+    private String wkContext;
 }
