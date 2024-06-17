@@ -6,9 +6,7 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.context.SpringContext;
-import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
-import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
-import com.aizuda.snailjob.common.core.enums.StatusEnum;
+import com.aizuda.snailjob.common.core.enums.*;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
@@ -18,7 +16,6 @@ import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.job.task.dto.TaskExecuteDTO;
 import com.aizuda.snailjob.server.job.task.dto.WorkflowNodeTaskExecuteDTO;
-import com.aizuda.snailjob.common.core.enums.MapReduceStageEnum;
 import com.aizuda.snailjob.server.job.task.support.JobExecutor;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
 import com.aizuda.snailjob.server.job.task.support.alarm.event.JobTaskFailAlarmEvent;
@@ -58,6 +55,9 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+
+import static com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum.MAP;
+import static com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum.MAP_REDUCE;
 
 /**
  * @author: opensnail
@@ -138,10 +138,11 @@ public class JobExecutorActor extends AbstractActor {
             JobTaskGenerator taskInstance = JobTaskGeneratorFactory.getTaskInstance(job.getTaskType());
             JobTaskGenerateContext instanceGenerateContext = JobTaskConverter.INSTANCE.toJobTaskInstanceGenerateContext(job);
             instanceGenerateContext.setTaskBatchId(taskExecute.getTaskBatchId());
-            instanceGenerateContext.setTaskName(SystemConstants.MAP_ROOT);
-            instanceGenerateContext.setMapSubTask(Lists.newArrayList(StrUtil.EMPTY));
-            // TODO 此处需要判断任务类型
-            instanceGenerateContext.setMrStage(MapReduceStageEnum.MAP.getStage());
+            if (Lists.newArrayList(MAP_REDUCE.getType(), MAP.getType()).contains(job.getTaskType())) {
+                instanceGenerateContext.setTaskName(SystemConstants.MAP_ROOT);
+                instanceGenerateContext.setMapSubTask(Lists.newArrayList(StrUtil.EMPTY));
+                instanceGenerateContext.setMrStage(MapReduceStageEnum.MAP.getStage());
+            }
             List<JobTask> taskList = taskInstance.generate(instanceGenerateContext);
             if (CollUtil.isEmpty(taskList)) {
                 SnailJobLog.LOCAL.warn("Generate job task is empty, taskBatchId:[{}]", taskExecute.getTaskBatchId());

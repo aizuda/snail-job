@@ -40,10 +40,7 @@ import org.springframework.stereotype.Component;
 import java.text.MessageFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -101,14 +98,22 @@ public class WorkflowExecutorActor extends AbstractActor {
         String flowInfo = workflowTaskBatch.getFlowInfo();
         MutableGraph<Long> graph = MutableGraphCache.getOrDefault(workflowTaskBatch.getId(), flowInfo);
 
-        Set<Long> successors = graph.successors(taskExecute.getParentId());
-        if (CollUtil.isEmpty(successors)) {
+        Set<Long> brotherNode = MutableGraphCache.getBrotherNode(graph, taskExecute.getParentId());
+        Sets.SetView<Long> setView = Sets.union(brotherNode, Sets.newHashSet(taskExecute.getParentId()));
+        // 查到当前节点【ParentId】的所有兄弟节点是否有后继节点，若有则不能直接完成任务
+        Set<Long> allSuccessors = Sets.newHashSet();
+        for (Long nodeId : setView.immutableCopy()) {
+            allSuccessors.addAll(graph.successors(nodeId));
+        }
+
+        // 若所有的兄弟节点的子节点都没有后继节点可以完成次任务
+        if (CollUtil.isEmpty(allSuccessors)) {
             workflowBatchHandler.complete(taskExecute.getWorkflowTaskBatchId(), workflowTaskBatch);
             return;
         }
 
-        Set<Long> brotherNode = MutableGraphCache.getBrotherNode(graph, taskExecute.getParentId());
-        Sets.SetView<Long> union = Sets.union(successors, brotherNode);
+        // TODO 暂时删除，待认证
+//        Sets.SetView<Long> union = Sets.union(allSuccessors, brotherNode);
 
         // 添加父节点，为了判断父节点的处理状态
         List<JobTaskBatch> allJobTaskBatchList = jobTaskBatchMapper.selectList(new LambdaQueryWrapper<JobTaskBatch>()
@@ -116,11 +121,11 @@ public class WorkflowExecutorActor extends AbstractActor {
                         JobTaskBatch::getTaskBatchStatus, JobTaskBatch::getOperationReason)
                 .eq(JobTaskBatch::getWorkflowTaskBatchId, workflowTaskBatch.getId())
                 .in(JobTaskBatch::getWorkflowNodeId,
-                        Sets.union(union, Sets.newHashSet(taskExecute.getParentId())))
+                        Sets.union(brotherNode, Sets.newHashSet(taskExecute.getParentId())))
         );
 
         List<WorkflowNode> workflowNodes = workflowNodeMapper.selectList(new LambdaQueryWrapper<WorkflowNode>()
-                .in(WorkflowNode::getId, Sets.union(successors, Sets.newHashSet(taskExecute.getParentId())))
+                .in(WorkflowNode::getId, Sets.union(allSuccessors, Sets.newHashSet(taskExecute.getParentId())))
                 .orderByAsc(WorkflowNode::getPriorityLevel));
 
         Map<Long, List<JobTaskBatch>> jobTaskBatchMap = StreamUtils.groupByKey(allJobTaskBatchList, JobTaskBatch::getWorkflowNodeId);
