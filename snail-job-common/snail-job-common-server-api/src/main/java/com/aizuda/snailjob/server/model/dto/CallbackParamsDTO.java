@@ -13,13 +13,8 @@ import lombok.Data;
 public class CallbackParamsDTO {
 
     /**
-     * 执行结果
+     * 工作流上下文
      */
-    private String resultMessage;
-
-    /**
-     * 客户端ID
-     */
-    private String clientInfo;
+    private String wfContext;
 
 }

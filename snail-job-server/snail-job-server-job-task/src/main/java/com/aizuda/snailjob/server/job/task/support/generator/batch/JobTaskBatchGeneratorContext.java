@@ -58,5 +58,10 @@ public class JobTaskBatchGeneratorContext {
      */
     private Long parentWorkflowNodeId;
 
+    /**
+     * 工作流上下文
+     */
+    private String wfContext;
+
 
 }

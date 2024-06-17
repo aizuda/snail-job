@@ -102,4 +102,9 @@ public class WorkflowExecutorContext {
      * 1、任务节点 2、条件节点 3、回调节点
      */
     private Integer nodeType;
+
+    /**
+     * 工作流全局上下文
+     */
+    private String wfContext;
 }

@@ -87,12 +87,8 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
         // 设置回调超时时间
         requestHeaders.set(RequestInterceptor.TIMEOUT_TIME, CALLBACK_TIMEOUT);
 
-        List<JobTask> jobTasks = jobTaskMapper.selectList(new LambdaQueryWrapper<JobTask>()
-                .select(JobTask::getResultMessage, JobTask::getClientInfo)
-                .eq(JobTask::getTaskBatchId, context.getTaskBatchId()));
-        List<CallbackParamsDTO> callbackParamsList = WorkflowTaskConverter.INSTANCE.toCallbackParamsDTO(jobTasks);
-
-        context.setTaskResult(JsonUtil.toJsonString(callbackParamsList));
+        CallbackParamsDTO callbackParamsDTO = new CallbackParamsDTO();
+        callbackParamsDTO.setWfContext(context.getWfContext());
 
         try {
             Map<String, String> uriVariables = new HashMap<>();
@@ -100,13 +96,13 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
 
             ResponseEntity<String> response = buildRetryer(decisionConfig).call(
                     () -> restTemplate.exchange(decisionConfig.getWebhook(), HttpMethod.POST,
-                            new HttpEntity<>(callbackParamsList, requestHeaders), String.class, uriVariables));
+                            new HttpEntity<>(callbackParamsDTO, requestHeaders), String.class, uriVariables));
 
             result = response.getBody();
             SnailJobLog.LOCAL.info("回调结果. webHook:[{}]，结果: [{}]", decisionConfig.getWebhook(), result);
         } catch (Exception e) {
             SnailJobLog.LOCAL.error("回调异常. webHook:[{}]，参数: [{}]", decisionConfig.getWebhook(),
-                    context.getTaskResult(), e);
+                    context.getWfContext(), e);
 
             context.setTaskBatchStatus(JobTaskBatchStatusEnum.FAIL.getStatus());
             context.setOperationReason(JobOperationReasonEnum.WORKFLOW_CALLBACK_NODE_EXECUTION_ERROR.getReason());
@@ -163,7 +159,7 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
         jobLogMetaDTO.setTaskId(jobTask.getId());
         if (jobTaskBatch.getTaskBatchStatus() == JobTaskStatusEnum.SUCCESS.getStatus()) {
             SnailJobLog.REMOTE.info("节点[{}]回调成功.\n回调参数:{} \n回调结果:[{}] <|>{}<|>",
-                    context.getWorkflowNodeId(), context.getTaskResult(), context.getEvaluationResult(), jobLogMetaDTO);
+                    context.getWorkflowNodeId(), context.getWfContext(), context.getEvaluationResult(), jobLogMetaDTO);
         } else if (jobTaskBatch.getTaskBatchStatus() == JobTaskStatusEnum.CANCEL.getStatus()) {
             SnailJobLog.REMOTE.warn("节点[{}]取消回调. 取消原因: 任务状态已关闭 <|>{}<|>",
                     context.getWorkflowNodeId(), jobLogMetaDTO);

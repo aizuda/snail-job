@@ -102,6 +102,12 @@ public class JobTask implements Serializable {
     private Integer mrStage;
 
     /**
+     * 冗余工作流上下文
+     * 注: 采用空间换时间的方式冗余部分上下文，减少更新并发
+     */
+    private String wfContext;
+
+    /**
      * 扩展字段
      */
     private String extAttrs;

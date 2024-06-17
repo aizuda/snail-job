@@ -46,4 +46,9 @@ public class ClientCallbackContext {
     private Integer retryScene;
 
     private boolean isRetry;
+
+    /**
+     * 工作流上下文
+     */
+    private String wkContext;
 }

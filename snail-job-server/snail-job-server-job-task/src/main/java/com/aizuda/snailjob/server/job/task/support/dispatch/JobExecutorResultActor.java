@@ -55,6 +55,7 @@ public class JobExecutorResultActor extends AbstractActor {
 
                 JobTask jobTask = new JobTask();
                 jobTask.setTaskStatus(result.getTaskStatus());
+                jobTask.setWfContext(result.getWfContext());
                 if (Objects.nonNull(result.getResult())) {
                     jobTask.setResultMessage(JsonUtil.toJsonString(result.getResult()));
                 }
