@@ -6,9 +6,6 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
-import java.io.Serializable;
-import java.time.LocalDateTime;
-
 /**
  * 组配置
  *
@@ -17,9 +14,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @TableName("sj_group_config")
-public class GroupConfig implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class GroupConfig extends CreateUpdateDt {
 
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
@@ -44,9 +39,5 @@ public class GroupConfig implements Serializable {
     private String token;
 
     private String description;
-
-    private LocalDateTime createDt;
-
-    private LocalDateTime updateDt;
 
 }

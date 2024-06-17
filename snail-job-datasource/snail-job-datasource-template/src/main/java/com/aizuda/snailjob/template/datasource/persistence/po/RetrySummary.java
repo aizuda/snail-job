@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
@@ -15,9 +14,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @TableName("sj_retry_summary")
-public class RetrySummary implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class RetrySummary extends CreateUpdateDt {
 
     /**
      * 主键
@@ -64,15 +61,5 @@ public class RetrySummary implements Serializable {
      * 暂停
      */
     private Integer suspendNum;
-
-    /**
-     * 创建时间
-     */
-    private LocalDateTime createDt;
-
-    /**
-     * 修改时间
-     */
-    private LocalDateTime updateDt;
 
 }

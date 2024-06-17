@@ -5,9 +5,6 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
-import java.io.Serializable;
-import java.time.LocalDateTime;
-
 /**
  * 调度日志
  *
@@ -16,9 +13,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @TableName("sj_job_log_message")
-public class JobLogMessage implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class JobLogMessage extends CreateDt {
 
     /**
      * 主键
@@ -65,10 +60,5 @@ public class JobLogMessage implements Serializable {
      * 真实上报时间
      */
     private Long realTime;
-
-    /**
-     * 创建时间
-     */
-    private LocalDateTime createDt;
 
 }

@@ -5,9 +5,6 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
-import java.io.Serializable;
-import java.time.LocalDateTime;
-
 /**
  * 场景配置
  *
@@ -17,9 +14,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @TableName("sj_retry_scene_config")
-public class RetrySceneConfig implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class RetrySceneConfig extends CreateUpdateDt {
 
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
@@ -46,9 +41,5 @@ public class RetrySceneConfig implements Serializable {
     private Integer routeKey;
 
     private Integer executorTimeout;
-
-    private LocalDateTime createDt;
-
-    private LocalDateTime updateDt;
 
 }

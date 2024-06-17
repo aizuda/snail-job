@@ -5,9 +5,6 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
-import java.io.Serializable;
-import java.time.LocalDateTime;
-
 
 /**
  * 调度任务
@@ -17,9 +14,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @TableName("sj_job_task_batch")
-public class JobTaskBatch implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class JobTaskBatch extends CreateUpdateDt {
 
     /**
      * 主键
@@ -83,15 +78,5 @@ public class JobTaskBatch implements Serializable {
      * 逻辑删除 1、删除
      */
     private Integer deleted;
-
-    /**
-     * 创建时间
-     */
-    private LocalDateTime createDt;
-
-    /**
-     * 修改时间
-     */
-    private LocalDateTime updateDt;
 
 }

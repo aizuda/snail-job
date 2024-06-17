@@ -5,9 +5,6 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
-import java.io.Serializable;
-import java.time.LocalDateTime;
-
 /**
  * 重试日志异常信息记录表
  *
@@ -16,9 +13,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @TableName("sj_retry_task_log_message")
-public class RetryTaskLogMessage implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class RetryTaskLogMessage extends CreateDt {
 
     /**
      * 主键
@@ -55,10 +50,5 @@ public class RetryTaskLogMessage implements Serializable {
      * 真实上报时间
      */
     private Long realTime;
-
-    /**
-     * 创建时间
-     */
-    private LocalDateTime createDt;
 
 }

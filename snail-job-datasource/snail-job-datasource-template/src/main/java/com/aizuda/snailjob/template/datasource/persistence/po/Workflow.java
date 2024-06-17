@@ -6,9 +6,6 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
-import java.io.Serializable;
-import java.time.LocalDateTime;
-
 /**
  * * 工作流
  * </p>
@@ -19,9 +16,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @TableName("sj_workflow")
-public class Workflow implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class Workflow extends CreateUpdateDt {
 
     /**
      * 主键
@@ -104,15 +99,5 @@ public class Workflow implements Serializable {
      * 逻辑删除 1、删除
      */
     private Integer deleted;
-
-    /**
-     * 创建时间
-     */
-    private LocalDateTime createDt;
-
-    /**
-     * 修改时间
-     */
-    private LocalDateTime updateDt;
 
 }
