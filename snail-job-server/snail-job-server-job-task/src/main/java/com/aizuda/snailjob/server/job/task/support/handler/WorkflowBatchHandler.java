@@ -61,7 +61,7 @@ import static com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum.NOT_C
 @Component
 @RequiredArgsConstructor
 public class WorkflowBatchHandler {
-    private static final String KEY = "update_wf_context_{}";
+    private static final String KEY = "update_wf_context_{0}";
 
     private final DistributedLockHandler distributedLockHandler;
     private final WorkflowTaskBatchMapper workflowTaskBatchMapper;
@@ -320,8 +320,14 @@ public class WorkflowBatchHandler {
         }
     }
 
-    public void mergeWorkflowContextAndRetry(Long workflowTaskBatchId, String waitMergeContext) {
-        if (StrUtil.isBlank(waitMergeContext) || Objects.isNull(workflowTaskBatchId)) {
+    /**
+     * 合并工作流上下文若合并失败先自旋3次1.5s, 若失败了升级到悲观锁
+     *
+     * @param workflowTaskBatch 工作流批次
+     * @param taskBatchIds 批次列表
+     */
+    public void mergeWorkflowContextAndRetry(WorkflowTaskBatch workflowTaskBatch, Set<Long> taskBatchIds) {
+        if (CollUtil.isEmpty(taskBatchIds)) {
             return;
         }
 
@@ -349,42 +355,62 @@ public class WorkflowBatchHandler {
                 }).build();
 
         try {
-            retryer.call(() -> mergeWorkflowContext(workflowTaskBatchId, JsonUtil.parseHashMap(waitMergeContext, Object.class)));
+            retryer.call(() -> mergeAllWorkflowContext(workflowTaskBatch, taskBatchIds));
         } catch (Exception e) {
-            SnailJobLog.LOCAL.warn("update workflow global context error. workflowTaskBatchId:[{}] waitMergeContext:[{}]",
-                    workflowTaskBatchId, waitMergeContext, e);
+            SnailJobLog.LOCAL.warn("update workflow global context error. workflowTaskBatchId:[{}] taskBatchIds:[{}]",
+                workflowTaskBatch.getId(), taskBatchIds, e);
             if (e.getClass().isAssignableFrom(RetryException.class)) {
                 // 如果自旋失败，就使用悲观锁
                 distributedLockHandler.lockWithDisposableAndRetry(() -> {
-                    mergeWorkflowContext(workflowTaskBatchId, JsonUtil.parseHashMap(waitMergeContext, Object.class));
-                }, MessageFormat.format(KEY, workflowTaskBatchId), Duration.ofSeconds(1), Duration.ofSeconds(1), 3);
+                    mergeAllWorkflowContext(workflowTaskBatch, taskBatchIds);
+                }, MessageFormat.format(KEY, workflowTaskBatch.getId()), Duration.ofSeconds(1), Duration.ofSeconds(1), 3);
             }
         }
     }
 
-    public boolean mergeAllWorkflowContext(Long workflowTaskBatchId, Long taskBatchId) {
+    public boolean mergeAllWorkflowContext(WorkflowTaskBatch workflowTaskBatch, Set<Long> taskBatchIds) {
+        if (CollUtil.isEmpty(taskBatchIds)) {
+            return true;
+        }
+
         List<JobTask> jobTasks = jobTaskMapper.selectList(new LambdaQueryWrapper<JobTask>()
                 .select(JobTask::getWfContext, JobTask::getId)
-                .eq(JobTask::getTaskBatchId, taskBatchId));
+                .in(JobTask::getTaskBatchId, taskBatchIds)
+        );
         if (CollUtil.isEmpty(jobTasks)) {
             return true;
         }
 
         Set<Map<String, Object>> maps = jobTasks.stream().map(r -> {
             try {
-                return JsonUtil.parseHashMap(r.getWfContext(), Object.class);
+                if (StrUtil.isNotBlank(r.getWfContext())) {
+                    return JsonUtil.parseHashMap(r.getWfContext(), Object.class);
+                }
             } catch (Exception e) {
-                SnailJobLog.LOCAL.warn("taskId:[{}] result value 不是一个json对象. result:[{}]", r.getId(), r.getResultMessage());
+                SnailJobLog.LOCAL.warn("taskId:[{}] result value is not a JSON object. result:[{}]", r.getId(), r.getResultMessage());
             }
             return new HashMap<String, Object>();
         }).collect(Collectors.toSet());
 
-        Map<String, Object> mergeMap = Maps.newHashMap();
+        Map<String, Object> mergeMap;
+        if (StrUtil.isBlank(workflowTaskBatch.getWfContext())) {
+            mergeMap = Maps.newHashMap();
+        } else {
+            mergeMap = JsonUtil.parseHashMap(workflowTaskBatch.getWfContext());
+        }
+
         for (Map<String, Object> map : maps) {
             mergeMaps(mergeMap, map);
         }
 
-        return mergeWorkflowContext(workflowTaskBatchId, mergeMap);
+        WorkflowTaskBatch waitUpdateWorkflowTaskBatch = new WorkflowTaskBatch();
+        waitUpdateWorkflowTaskBatch.setId(workflowTaskBatch.getId());
+        waitUpdateWorkflowTaskBatch.setWfContext(JsonUtil.toJsonString(mergeMap));
+        waitUpdateWorkflowTaskBatch.setVersion(1);
+        return 1 == workflowTaskBatchMapper.update(waitUpdateWorkflowTaskBatch, new LambdaQueryWrapper<WorkflowTaskBatch>()
+            .eq(WorkflowTaskBatch::getId, workflowTaskBatch.getId())
+            .eq(WorkflowTaskBatch::getVersion, workflowTaskBatch.getVersion())
+        );
     }
 
     /**

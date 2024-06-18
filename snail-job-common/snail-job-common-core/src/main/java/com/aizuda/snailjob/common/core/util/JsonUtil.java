@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author: byteblogs
@@ -67,6 +68,16 @@ public class JsonUtil {
      */
     public static <K, V> Map<K, V> parseHashMap(String jsonString) {
         return JsonMapper.toJavaObject(jsonString, HashMap.class);
+    }
+
+    /**
+     * 将JSON字符串转ConcurrentHashMap 对象
+     *
+     * @param jsonString
+     * @return
+     */
+    public static <K, V> Map<K, V> parseConcurrentHashMap(String jsonString) {
+        return JsonMapper.toJavaObject(jsonString, ConcurrentHashMap.class);
     }
 
     /**

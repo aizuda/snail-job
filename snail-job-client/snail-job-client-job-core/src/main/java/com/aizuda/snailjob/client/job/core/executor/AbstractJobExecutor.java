@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.client.job.core.executor;
 
+import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.client.common.log.support.SnailJobLogManager;
 import com.aizuda.snailjob.client.job.core.IJobExecutor;
 import com.aizuda.snailjob.client.job.core.cache.FutureCache;
@@ -12,6 +13,7 @@ import com.aizuda.snailjob.client.model.ExecuteResult;
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.snailjob.common.core.enums.MapReduceStageEnum;
 import com.aizuda.snailjob.common.core.model.JobContext;
+import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.enums.LogTypeEnum;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Futures;
@@ -59,6 +61,8 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
             } else {
                 jobArgs = buildJobArgs(jobContext);
             }
+
+            jobArgs.setWfContext(jobContext.getWfContext());
 
             try {
                 // 初始化调度信息（日志上报LogUtil）
@@ -117,6 +121,7 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
         jobArgs.setArgsStr(jobContext.getArgsStr());
         jobArgs.setExecutorInfo(jobContext.getExecutorInfo());
         jobArgs.setTaskBatchId(jobContext.getTaskBatchId());
+        jobArgs.setWfContext(jobContext.getWfContext());
         return jobArgs;
     }
 

@@ -3,6 +3,7 @@ package com.aizuda.snailjob.common.core.model;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author: opensnail
@@ -59,5 +60,15 @@ public class JobContext {
      */
     private String taskName;
 
+    /**
+     * 动态分片所处的阶段
+     */
     private Integer mrStage;
+
+    /**
+     * 工作流全局上下文
+     */
+    private Map<String, Object> wfContext;
+
+
 }

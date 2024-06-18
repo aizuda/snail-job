@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.client.job.core.executor;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DatePattern;
 import com.aizuda.snailjob.client.common.cache.GroupVersionCache;
 import com.aizuda.snailjob.client.common.config.SnailJobProperties;
@@ -32,6 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CancellationException;
@@ -160,6 +162,12 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
         dispatchJobRequest.setTaskStatus(status);
         dispatchJobRequest.setRetry(jobContext.isRetry());
         dispatchJobRequest.setRetryScene(jobContext.getRetryScene());
+        // 传递上下文
+        Map<String, Object> wfContext = jobContext.getWfContext();
+        if (CollUtil.isNotEmpty(wfContext)) {
+            dispatchJobRequest.setWfContext(JsonUtil.toJsonString(wfContext));
+        }
+
         return dispatchJobRequest;
     }
 

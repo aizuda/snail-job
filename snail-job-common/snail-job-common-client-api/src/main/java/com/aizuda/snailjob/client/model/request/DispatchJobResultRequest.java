@@ -44,5 +44,5 @@ public class DispatchJobResultRequest {
     /**
      * 工作流上下文
      */
-    private String wkContext;
+    private String wfContext;
 }
