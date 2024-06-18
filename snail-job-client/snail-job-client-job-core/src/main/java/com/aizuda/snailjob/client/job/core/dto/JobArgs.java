@@ -2,6 +2,7 @@ package com.aizuda.snailjob.client.job.core.dto;
 
 import cn.hutool.core.util.StrUtil;
 import lombok.Data;
+import lombok.Getter;
 
 import java.util.Map;
 import java.util.Objects;
@@ -22,12 +23,22 @@ public class JobArgs {
 
     private Map<String, Object> wfContext;
 
+    private Map<String, Object> changeWfContext;
+
     public void appendContext(String key, Object value) {
         if (Objects.isNull(wfContext) || StrUtil.isBlank(key) || Objects.isNull(value)) {
             return;
         }
 
-        wfContext.put(key, value);
+        changeWfContext.put(key, value);
+    }
+
+    public Object getWfContext(String key) {
+        if (Objects.isNull(wfContext) || StrUtil.isBlank(key)) {
+            return null;
+        }
+
+        return wfContext.get(key);
     }
 
 }

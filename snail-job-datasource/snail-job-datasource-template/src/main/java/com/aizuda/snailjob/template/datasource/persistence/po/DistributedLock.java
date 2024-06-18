@@ -21,14 +21,9 @@ public class DistributedLock implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-     * 主键
-     */
-    @TableId(value = "id", type = IdType.AUTO)
-    private Long id;
-
-    /**
      * 锁名称
      */
+    @TableId(value = "name")
     private String name;
 
     /**
