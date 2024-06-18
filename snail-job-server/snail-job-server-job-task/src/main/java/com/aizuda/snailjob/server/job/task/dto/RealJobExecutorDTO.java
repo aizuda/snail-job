@@ -102,5 +102,5 @@ public class RealJobExecutorDTO extends BaseDTO {
     /**
      * 工作流上下文
      */
-    private String wkContext;
+    private String wfContext;
 }

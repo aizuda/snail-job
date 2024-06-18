@@ -118,7 +118,7 @@ public class WorkflowExecutorActor extends AbstractActor {
         // 添加父节点，为了判断父节点的处理状态
         List<JobTaskBatch> allJobTaskBatchList = jobTaskBatchMapper.selectList(new LambdaQueryWrapper<JobTaskBatch>()
                 .select(JobTaskBatch::getWorkflowTaskBatchId, JobTaskBatch::getWorkflowNodeId,
-                        JobTaskBatch::getTaskBatchStatus, JobTaskBatch::getOperationReason)
+                        JobTaskBatch::getTaskBatchStatus, JobTaskBatch::getOperationReason, JobTaskBatch::getId)
                 .eq(JobTaskBatch::getWorkflowTaskBatchId, workflowTaskBatch.getId())
                 .in(JobTaskBatch::getWorkflowNodeId,
                         Sets.union(brotherNode, Sets.newHashSet(taskExecute.getParentId())))
@@ -166,6 +166,10 @@ public class WorkflowExecutorActor extends AbstractActor {
 
         List<Job> jobs = jobMapper.selectBatchIds(StreamUtils.toSet(workflowNodes, WorkflowNode::getJobId));
         Map<Long, Job> jobMap = StreamUtils.toIdentityMap(jobs, Job::getId);
+
+        // TODO 合并job task的结果到全局上下文中
+         workflowBatchHandler.mergeWorkflowContextAndRetry(workflowTaskBatch,
+            StreamUtils.toSet(allJobTaskBatchList, JobTaskBatch::getId));
 
         // 只会条件节点会使用
         Object evaluationResult = null;

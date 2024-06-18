@@ -5,6 +5,7 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.enums.JobArgsTypeEnum;
 import com.aizuda.snailjob.common.core.enums.WorkflowNodeTypeEnum;
+import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.job.task.dto.WorkflowNodeTaskExecuteDTO;
 import com.aizuda.snailjob.server.job.task.support.WorkflowExecutor;
@@ -56,6 +57,9 @@ public abstract class AbstractWorkflowExecutor implements WorkflowExecutor, Init
 
     @Override
     public void execute(WorkflowExecutorContext context) {
+
+        // 若多个兄弟节点的情况下，同时处理完成则每个节点都有可能来执行后继节点，
+        // 因此这里这里添加分布式锁
         distributedLockHandler.lockWithDisposableAndRetry(
                 () -> {
                     long total = 0;
@@ -69,6 +73,7 @@ public abstract class AbstractWorkflowExecutor implements WorkflowExecutor, Init
 
                         if (CollUtil.isNotEmpty(jobTaskBatches)) {
                             total = jobTaskBatches.size();
+                            // ToDo
                             JobTaskBatch jobTaskBatch = jobTaskBatches.get(0);
                             if (WORKFLOW_SUCCESSOR_SKIP_EXECUTION.contains(jobTaskBatch.getOperationReason())) {
                                 context.setEvaluationResult(Boolean.FALSE);
@@ -88,9 +93,6 @@ public abstract class AbstractWorkflowExecutor implements WorkflowExecutor, Init
                         log.warn("任务节点[{}]已被执行，请勿重复执行", context.getWorkflowNodeId());
                         return;
                     }
-
-                    // 合并job task的结果到全局上下文中
-                    workflowBatchHandler.mergeAllWorkflowContext(context.getWorkflowTaskBatchId(), context.getTaskBatchId());
 
                     transactionTemplate.execute(new TransactionCallbackWithoutResult() {
                         @Override

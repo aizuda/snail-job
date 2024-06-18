@@ -41,7 +41,6 @@ public class JobExecutorResultActor extends AbstractActor {
     private static final String KEY = "job_complete_{0}_{1}";
     private final JobTaskMapper jobTaskMapper;
     private final JobTaskBatchHandler jobTaskBatchHandler;
-    private final WorkflowBatchHandler workflowBatchHandler;
     private final DistributedLockHandler distributedLockHandler;
 
     @Override

@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static com.aizuda.snailjob.common.core.constant.SystemConstants.YYYY_MM_DD;
 import static com.aizuda.snailjob.common.core.constant.SystemConstants.YYYY_MM_DD_HH_MM_SS;
@@ -70,6 +71,16 @@ public class JsonUtil {
      */
     public static <K, V> Map<K, V> parseHashMap(String jsonString) {
         return JsonMapper.toJavaObject(jsonString, HashMap.class);
+    }
+
+    /**
+     * 将JSON字符串转ConcurrentHashMap 对象
+     *
+     * @param jsonString
+     * @return
+     */
+    public static <K, V> Map<K, V> parseConcurrentHashMap(String jsonString) {
+        return JsonMapper.toJavaObject(jsonString, ConcurrentHashMap.class);
     }
 
     /**

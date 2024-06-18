@@ -198,7 +198,7 @@ public class JobExecutorActor extends AbstractActor {
         context.setWorkflowTaskBatchId(taskExecute.getWorkflowTaskBatchId());
         context.setWorkflowNodeId(taskExecute.getWorkflowNodeId());
         if (Objects.nonNull(workflowTaskBatch)) {
-            context.setWkContext(workflowTaskBatch.getWfContext());
+            context.setWfContext(workflowTaskBatch.getWfContext());
         }
         return context;
     }

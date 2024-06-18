@@ -1,6 +1,10 @@
 package com.aizuda.snailjob.client.job.core.dto;
 
+import cn.hutool.core.util.StrUtil;
 import lombok.Data;
+
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author: opensnail
@@ -15,4 +19,15 @@ public class JobArgs {
     private String executorInfo;
 
     private Long taskBatchId;
+
+    private Map<String, Object> wfContext;
+
+    public void appendContext(String key, Object value) {
+        if (Objects.isNull(wfContext) || StrUtil.isBlank(key) || Objects.isNull(value)) {
+            return;
+        }
+
+        wfContext.put(key, value);
+    }
+
 }

@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.client.job.core.client;
 
+import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.client.common.annotation.Mapping;
 import com.aizuda.snailjob.client.common.annotation.SnailEndPoint;
 import com.aizuda.snailjob.client.common.log.support.SnailJobLogManager;
@@ -19,12 +20,15 @@ import com.aizuda.snailjob.common.core.context.SpringContext;
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.snailjob.common.core.model.JobContext;
 import com.aizuda.snailjob.common.core.model.Result;
+import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.common.log.enums.LogTypeEnum;
+import com.google.common.collect.Maps;
 import jakarta.validation.Valid;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import static com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH.JOB_DISPATCH;
@@ -116,6 +120,18 @@ public class JobEndPoint {
         jobContext.setRetryScene(dispatchJob.getRetryScene());
         jobContext.setTaskName(dispatchJob.getTaskName());
         jobContext.setMrStage(dispatchJob.getMrStage());
+
+        String wfContext = dispatchJob.getWfContext();
+        if (StrUtil.isNotBlank(wfContext)) {
+            try {
+                jobContext.setWfContext(JsonUtil.parseConcurrentHashMap(wfContext));
+            } catch (Exception e) {
+                SnailJobLog.REMOTE.warn("workflow context parse error", e);
+            }
+        } else {
+            jobContext.setWfContext(Maps.newConcurrentMap());
+        }
+
         return jobContext;
     }
 
