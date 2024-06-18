@@ -18,14 +18,9 @@ import java.time.LocalDateTime;
 public class DistributedLock extends CreateUpdateDt {
 
     /**
-     * 主键
-     */
-    @TableId(value = "id", type = IdType.AUTO)
-    private Long id;
-
-    /**
      * 锁名称
      */
+    @TableId(value = "name")
     private String name;
 
     /**

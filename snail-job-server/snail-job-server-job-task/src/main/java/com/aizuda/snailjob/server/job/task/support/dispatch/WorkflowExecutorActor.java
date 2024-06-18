@@ -168,6 +168,7 @@ public class WorkflowExecutorActor extends AbstractActor {
         Map<Long, Job> jobMap = StreamUtils.toIdentityMap(jobs, Job::getId);
 
         // TODO 合并job task的结果到全局上下文中
+        // 此次的并发数与当时父节点的兄弟节点的数量一致
          workflowBatchHandler.mergeWorkflowContextAndRetry(workflowTaskBatch,
             StreamUtils.toSet(allJobTaskBatchList, JobTaskBatch::getId));
 

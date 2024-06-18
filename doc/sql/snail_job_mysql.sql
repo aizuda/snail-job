@@ -235,15 +235,13 @@ CREATE TABLE `sj_server_node`
 
 CREATE TABLE `sj_distributed_lock`
 (
-    `id`         bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
     `name`       varchar(64)         NOT NULL COMMENT '锁名称',
     `lock_until` timestamp(3)        NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '锁定时长',
     `locked_at`  timestamp(3)        NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '锁定时间',
     `locked_by`  varchar(255)        NOT NULL COMMENT '锁定者',
     `create_dt`  datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_dt`  datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '修改时间',
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_name` (`name`)
+    PRIMARY KEY (`name`)
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 0
   DEFAULT CHARSET = utf8mb4 COMMENT ='锁定表'

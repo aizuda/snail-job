@@ -13,15 +13,16 @@ import com.aizuda.snailjob.client.model.ExecuteResult;
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.snailjob.common.core.enums.MapReduceStageEnum;
 import com.aizuda.snailjob.common.core.model.JobContext;
-import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.enums.LogTypeEnum;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Map;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -45,6 +46,8 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
         // 将任务添加到时间轮中，到期停止任务
         TimerManager.add(new StopTaskTimerTask(jobContext.getTaskBatchId()), jobContext.getExecutorTimeout(), TimeUnit.SECONDS);
 
+        Map<String, Object> changeWfContext = Maps.newConcurrentMap();
+
         // 执行任务
         ListenableFuture<ExecuteResult> submit = decorator.submit(() -> {
             JobArgs jobArgs;
@@ -63,6 +66,7 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
             }
 
             jobArgs.setWfContext(jobContext.getWfContext());
+            jobArgs.setChangeWfContext(changeWfContext);
 
             try {
                 // 初始化调度信息（日志上报LogUtil）
@@ -76,7 +80,7 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
         });
 
         FutureCache.addFuture(jobContext.getTaskBatchId(), submit);
-        Futures.addCallback(submit, new JobExecutorFutureCallback(jobContext), decorator);
+        Futures.addCallback(submit, new JobExecutorFutureCallback(jobContext, changeWfContext), decorator);
     }
 
     private void initLogContext(JobContext jobContext) {

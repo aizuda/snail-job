@@ -324,7 +324,7 @@ public class WorkflowBatchHandler {
      * 合并工作流上下文若合并失败先自旋3次1.5s, 若失败了升级到悲观锁
      *
      * @param workflowTaskBatch 工作流批次
-     * @param taskBatchIds 批次列表
+     * @param taskBatchIds      批次列表
      */
     public void mergeWorkflowContextAndRetry(WorkflowTaskBatch workflowTaskBatch, Set<Long> taskBatchIds) {
         if (CollUtil.isEmpty(taskBatchIds)) {
@@ -358,7 +358,7 @@ public class WorkflowBatchHandler {
             retryer.call(() -> mergeAllWorkflowContext(workflowTaskBatch, taskBatchIds));
         } catch (Exception e) {
             SnailJobLog.LOCAL.warn("update workflow global context error. workflowTaskBatchId:[{}] taskBatchIds:[{}]",
-                workflowTaskBatch.getId(), taskBatchIds, e);
+                    workflowTaskBatch.getId(), taskBatchIds, e);
             if (e.getClass().isAssignableFrom(RetryException.class)) {
                 // 如果自旋失败，就使用悲观锁
                 distributedLockHandler.lockWithDisposableAndRetry(() -> {
@@ -408,8 +408,8 @@ public class WorkflowBatchHandler {
         waitUpdateWorkflowTaskBatch.setWfContext(JsonUtil.toJsonString(mergeMap));
         waitUpdateWorkflowTaskBatch.setVersion(1);
         return 1 == workflowTaskBatchMapper.update(waitUpdateWorkflowTaskBatch, new LambdaQueryWrapper<WorkflowTaskBatch>()
-            .eq(WorkflowTaskBatch::getId, workflowTaskBatch.getId())
-            .eq(WorkflowTaskBatch::getVersion, workflowTaskBatch.getVersion())
+                .eq(WorkflowTaskBatch::getId, workflowTaskBatch.getId())
+                .eq(WorkflowTaskBatch::getVersion, workflowTaskBatch.getVersion())
         );
     }
 
