@@ -5,6 +5,8 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.enums.JobTaskStatusEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
+import com.aizuda.snailjob.common.core.model.JobArgsHolder;
+import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.server.common.cache.CacheRegisterTable;
 import com.aizuda.snailjob.server.common.dto.RegisterNodeInfo;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
@@ -57,14 +59,17 @@ public class BroadcastTaskGenerator extends AbstractJobTaskGenerator {
 
             JobTask jobTask = JobTaskConverter.INSTANCE.toJobTaskInstance(context);
             jobTask.setClientInfo(ClientInfoUtils.generate(serverNode));
+            JobArgsHolder jobArgsHolder = new JobArgsHolder();
+            jobArgsHolder.setJobParams(context.getArgsStr());
+            jobTask.setArgsStr(JsonUtil.toJsonString(jobArgsHolder));
             jobTask.setArgsType(context.getArgsType());
-            jobTask.setArgsStr(context.getArgsStr());
             jobTask.setTaskStatus(JobTaskStatusEnum.RUNNING.getStatus());
             jobTask.setResultMessage(Optional.ofNullable(jobTask.getResultMessage()).orElse(StrUtil.EMPTY));
-            Assert.isTrue(1 == jobTaskMapper.insert(jobTask), () -> new SnailJobServerException("新增任务实例失败"));
             clientInfoSet.add(address);
             jobTasks.add(jobTask);
         }
+
+        Assert.isTrue(jobTasks.size() == jobTaskMapper.insert(jobTasks).size(), () -> new SnailJobServerException("新增任务实例失败"));
 
         return jobTasks;
     }

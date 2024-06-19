@@ -5,7 +5,9 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.enums.JobTaskStatusEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
+import com.aizuda.snailjob.common.core.model.JobArgsHolder;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
+import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.cache.CacheRegisterTable;
 import com.aizuda.snailjob.server.common.dto.RegisterNodeInfo;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
@@ -15,6 +17,7 @@ import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTask;
 import com.google.common.collect.Lists;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -33,13 +36,10 @@ import java.util.Set;
  * @since 2.4.0
  */
 @Component
-@Slf4j
+@RequiredArgsConstructor
 public class ShardingTaskGenerator extends AbstractJobTaskGenerator {
-
-    @Autowired
-    protected ClientNodeAllocateHandler clientNodeAllocateHandler;
-    @Autowired
-    private JobTaskMapper jobTaskMapper;
+    private final ClientNodeAllocateHandler clientNodeAllocateHandler;
+    private final JobTaskMapper jobTaskMapper;
 
     @Override
     public JobTaskTypeEnum getTaskInstanceType() {
@@ -51,13 +51,13 @@ public class ShardingTaskGenerator extends AbstractJobTaskGenerator {
 
         Set<RegisterNodeInfo> serverNodes = CacheRegisterTable.getServerNodeSet(context.getGroupName(), context.getNamespaceId());
         if (CollUtil.isEmpty(serverNodes)) {
-            log.error("无可执行的客户端信息. jobId:[{}]", context.getJobId());
+            SnailJobLog.LOCAL.error("无可执行的客户端信息. jobId:[{}]", context.getJobId());
             return Lists.newArrayList();
         }
 
         String argsStr = context.getArgsStr();
         if (StrUtil.isBlank(argsStr)) {
-            log.error("切片参数为空. jobId:[{}]", context.getJobId());
+            SnailJobLog.LOCAL.error("切片参数为空. jobId:[{}]", context.getJobId());
             return Lists.newArrayList();
         }
 
@@ -65,7 +65,7 @@ public class ShardingTaskGenerator extends AbstractJobTaskGenerator {
         try {
             argsStrs = JsonUtil.parseList(argsStr, String.class);
         } catch (Exception e) {
-            log.error("切片参数解析失败. jobId:[{}]", context.getJobId(), e);
+            SnailJobLog.LOCAL.error("切片参数解析失败. jobId:[{}]", context.getJobId(), e);
             return Lists.newArrayList();
         }
 
@@ -77,12 +77,17 @@ public class ShardingTaskGenerator extends AbstractJobTaskGenerator {
             JobTask jobTask = JobTaskConverter.INSTANCE.toJobTaskInstance(context);
             jobTask.setClientInfo(ClientInfoUtils.generate(registerNodeInfo));
             jobTask.setArgsType(context.getArgsType());
-            jobTask.setArgsStr(argsStrs.get(index));
+            JobArgsHolder jobArgsHolder = new JobArgsHolder();
+            jobArgsHolder.setJobParams(argsStrs.get(index));
+            jobTask.setArgsStr(JsonUtil.toJsonString(jobArgsHolder));
             jobTask.setTaskStatus(JobTaskStatusEnum.RUNNING.getStatus());
             jobTask.setResultMessage(Optional.ofNullable(jobTask.getResultMessage()).orElse(StrUtil.EMPTY));
-            Assert.isTrue(1 == jobTaskMapper.insert(jobTask), () -> new SnailJobServerException("新增任务实例失败"));
+//            Assert.isTrue(1 == jobTaskMapper.insert(jobTask), () -> new SnailJobServerException("新增任务实例失败"));
             jobTasks.add(jobTask);
         }
+
+        Assert.isTrue(jobTasks.size() == jobTaskMapper.insert(jobTasks).size(), () -> new SnailJobServerException("新增任务实例失败"));
+
 
         return jobTasks;
     }
