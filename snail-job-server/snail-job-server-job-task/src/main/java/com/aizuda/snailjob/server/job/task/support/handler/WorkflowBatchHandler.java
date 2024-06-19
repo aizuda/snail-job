@@ -335,7 +335,7 @@ public class WorkflowBatchHandler {
         Retryer<Boolean> retryer = RetryerBuilder.<Boolean>newBuilder()
                 .retryIfResult(result -> result.equals(Boolean.FALSE))
                 .retryIfException(ex -> true)
-                .withWaitStrategy(WaitStrategies.fixedWait(500, TimeUnit.MILLISECONDS))
+                .withWaitStrategy(WaitStrategies.randomWait(1000, TimeUnit.MILLISECONDS))
                 // 重试3秒
                 .withStopStrategy(StopStrategies.stopAfterAttempt(3))
                 .withRetryListener(new RetryListener() {
