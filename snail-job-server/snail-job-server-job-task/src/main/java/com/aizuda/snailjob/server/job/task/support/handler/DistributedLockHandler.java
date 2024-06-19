@@ -43,7 +43,7 @@ public class DistributedLockHandler {
         Retryer<Boolean> retryer = RetryerBuilder.<Boolean>newBuilder()
                 .retryIfResult(result -> result.equals(Boolean.FALSE))
                 .retryIfException(ex -> true)
-                .withWaitStrategy(WaitStrategies.fixedWait(sleepTime.toMillis(), TimeUnit.MILLISECONDS))
+                .withWaitStrategy(WaitStrategies.randomWait(sleepTime.toMillis(), TimeUnit.MILLISECONDS))
                 .withStopStrategy(StopStrategies.stopAfterAttempt(maxRetryTimes))
                 .withRetryListener(new RetryListener() {
                     @Override

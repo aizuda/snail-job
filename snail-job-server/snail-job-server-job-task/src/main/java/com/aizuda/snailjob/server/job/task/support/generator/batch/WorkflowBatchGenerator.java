@@ -13,7 +13,6 @@ import com.aizuda.snailjob.template.datasource.persistence.po.WorkflowTaskBatch;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.util.Optional;
@@ -29,7 +28,6 @@ import java.util.Optional;
 public class WorkflowBatchGenerator {
     private final WorkflowTaskBatchMapper workflowTaskBatchMapper;
 
-    @Transactional
     public void generateJobTaskBatch(WorkflowTaskBatchGeneratorContext context) {
 
         // 生成任务批次
@@ -53,7 +51,5 @@ public class WorkflowBatchGenerator {
         workflowTimerTaskDTO.setTaskExecutorScene(context.getTaskExecutorScene());
 
         JobTimerWheel.registerWithWorkflow(() -> new WorkflowTimerTask(workflowTimerTaskDTO), Duration.ofMillis(delay));
-//        JobTimerWheel.register(SyetemTaskTypeEnum.WORKFLOW.getType(), workflowTaskBatch.getId(),
-//                new WorkflowTimerTask(workflowTimerTaskDTO), delay, TimeUnit.MILLISECONDS);
     }
 }
