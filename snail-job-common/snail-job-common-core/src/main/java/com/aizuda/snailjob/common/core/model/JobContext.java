@@ -38,7 +38,7 @@ public class JobContext {
 
     private Integer executorTimeout;
 
-    private String argsStr;
+//    private String argsStr;
 
     /**
      * 重试场景 auto、manual
@@ -70,5 +70,9 @@ public class JobContext {
      */
     private Map<String, Object> wfContext;
 
+    /**
+     * 定时任务参数
+     */
+    private JobArgsHolder jobArgsHolder;
 
 }

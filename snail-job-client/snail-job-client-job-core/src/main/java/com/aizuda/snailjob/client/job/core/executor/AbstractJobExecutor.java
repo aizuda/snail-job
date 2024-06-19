@@ -12,7 +12,9 @@ import com.aizuda.snailjob.client.job.core.timer.TimerManager;
 import com.aizuda.snailjob.client.model.ExecuteResult;
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.snailjob.common.core.enums.MapReduceStageEnum;
+import com.aizuda.snailjob.common.core.model.JobArgsHolder;
 import com.aizuda.snailjob.common.core.model.JobContext;
+import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.enums.LogTypeEnum;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -22,6 +24,7 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -96,7 +99,7 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
 
     private static JobArgs buildJobArgs(JobContext jobContext) {
         JobArgs jobArgs = new JobArgs();
-        jobArgs.setArgsStr(jobContext.getArgsStr());
+        jobArgs.setJobParams(jobContext.getJobArgsHolder().getJobParams());
         jobArgs.setExecutorInfo(jobContext.getExecutorInfo());
         jobArgs.setTaskBatchId(jobContext.getTaskBatchId());
         return jobArgs;
@@ -104,7 +107,7 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
 
     private static JobArgs buildShardingJobArgs(JobContext jobContext) {
         ShardingJobArgs jobArgs = new ShardingJobArgs();
-        jobArgs.setArgsStr(jobContext.getArgsStr());
+        jobArgs.setJobParams(jobContext.getJobArgsHolder().getJobParams());
         jobArgs.setExecutorInfo(jobContext.getExecutorInfo());
         jobArgs.setShardingIndex(jobContext.getShardingIndex());
         jobArgs.setShardingTotal(jobContext.getShardingTotal());
@@ -113,7 +116,9 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
 
     private static JobArgs buildMapJobArgs(JobContext jobContext) {
         MapArgs jobArgs = new MapArgs();
-        jobArgs.setArgsStr(jobContext.getArgsStr());
+        JobArgsHolder jobArgsHolder = jobContext.getJobArgsHolder();
+        jobArgs.setJobParams(jobArgsHolder.getJobParams());
+        jobArgs.setMapResult(jobArgsHolder.getMapResult());
         jobArgs.setExecutorInfo(jobContext.getExecutorInfo());
         jobArgs.setTaskName(jobContext.getTaskName());
         jobArgs.setTaskBatchId(jobContext.getTaskBatchId());
@@ -122,7 +127,9 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
 
     private static JobArgs buildReduceJobArgs(JobContext jobContext) {
         ReduceArgs jobArgs = new ReduceArgs();
-        jobArgs.setArgsStr(jobContext.getArgsStr());
+        JobArgsHolder jobArgsHolder = jobContext.getJobArgsHolder();
+        jobArgs.setJobParams(jobArgsHolder.getJobParams());
+        jobArgs.setMapResult(JsonUtil.parseList(jobArgsHolder.getMapResult(), List.class));
         jobArgs.setExecutorInfo(jobContext.getExecutorInfo());
         jobArgs.setTaskBatchId(jobContext.getTaskBatchId());
         jobArgs.setWfContext(jobContext.getWfContext());

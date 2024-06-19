@@ -15,7 +15,14 @@ import java.util.Objects;
 @Data
 public class JobArgs {
 
+    /**
+     * 此字段不在投递任何参数
+     * see: jobParams
+     */
+    @Deprecated
     private String argsStr;
+
+    private String jobParams;
 
     private String executorInfo;
 

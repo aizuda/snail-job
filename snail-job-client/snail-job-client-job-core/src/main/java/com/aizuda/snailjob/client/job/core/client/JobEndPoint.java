@@ -18,6 +18,7 @@ import com.aizuda.snailjob.client.model.StopJobDTO;
 import com.aizuda.snailjob.client.model.request.DispatchJobRequest;
 import com.aizuda.snailjob.common.core.context.SpringContext;
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
+import com.aizuda.snailjob.common.core.model.JobArgsHolder;
 import com.aizuda.snailjob.common.core.model.JobContext;
 import com.aizuda.snailjob.common.core.model.Result;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
@@ -113,13 +114,26 @@ public class JobEndPoint {
         jobContext.setParallelNum(dispatchJob.getParallelNum());
         jobContext.setTaskType(dispatchJob.getTaskType());
         jobContext.setExecutorTimeout(dispatchJob.getExecutorTimeout());
-        jobContext.setArgsStr(dispatchJob.getArgsStr());
         jobContext.setWorkflowNodeId(dispatchJob.getWorkflowNodeId());
         jobContext.setWorkflowTaskBatchId(dispatchJob.getWorkflowTaskBatchId());
         jobContext.setRetry(dispatchJob.isRetry());
         jobContext.setRetryScene(dispatchJob.getRetryScene());
         jobContext.setTaskName(dispatchJob.getTaskName());
         jobContext.setMrStage(dispatchJob.getMrStage());
+
+        if (StrUtil.isNotBlank(dispatchJob.getArgsStr())) {
+            try {
+                jobContext.setJobArgsHolder(JsonUtil.parseObject(dispatchJob.getArgsStr(), JobArgsHolder.class));
+            } catch (Exception e) {
+                SnailJobLog.REMOTE.warn("workflow context parse error", e);
+                JobArgsHolder jobArgsHolder = new JobArgsHolder();
+                jobArgsHolder.setJobParams(dispatchJob.getArgsStr());
+                jobContext.setJobArgsHolder(jobArgsHolder);
+            }
+        } else {
+            // 没有数据给个空对象，方便后面取参数
+            jobContext.setJobArgsHolder(new JobArgsHolder());
+        }
 
         String wfContext = dispatchJob.getWfContext();
         if (StrUtil.isNotBlank(wfContext)) {

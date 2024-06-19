@@ -15,4 +15,6 @@ public class MapArgs extends JobArgs {
 
     private String taskName;
 
+    private String mapResult;
+
 }

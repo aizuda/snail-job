@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @date 2023-10-02 13:04:09
  * @since 2.4.0
  */
-public class JobTaskGeneratorFactory {
+public final class JobTaskGeneratorFactory {
 
     private static final ConcurrentHashMap<JobTaskTypeEnum, JobTaskGenerator> CACHE = new ConcurrentHashMap<>();
 
