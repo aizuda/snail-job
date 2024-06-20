@@ -2,31 +2,6 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskMapper">
 
-    <!-- 定义批量新增的 SQL 映射 -->
-    <insert id="insertBatch" parameterType="java.util.List">
-        INSERT INTO sj_retry_task (namespace_id, unique_id, group_name, scene_name, idempotent_id, biz_no,
-                                   executor_name, args_str, ext_attrs, next_trigger_at, task_type, retry_status,
-                                   create_dt)
-        VALUES
-            <foreach collection="list" item="item" separator=",">
-                (
-                     #{item.namespaceId},
-                     #{item.uniqueId},
-                     #{item.groupName},
-                     #{item.sceneName},
-                     #{item.idempotentId},
-                     #{item.bizNo},
-                     #{item.executorName},
-                     #{item.argsStr},
-                     #{item.extAttrs},
-                     #{item.nextTriggerAt},
-                     #{item.taskType},
-                     #{item.retryStatus},
-                     #{item.createDt}
-                )
-            </foreach>
-    </insert>
-
     <update id="updateBatchNextTriggerAtById" parameterType="java.util.List">
         UPDATE sj_retry_task_${partition} rt,
                (
@@ -39,4 +14,5 @@
            SET rt.next_trigger_at = tt.next_trigger_at
          WHERE rt.id = tt.id
     </update>
+
 </mapper>
