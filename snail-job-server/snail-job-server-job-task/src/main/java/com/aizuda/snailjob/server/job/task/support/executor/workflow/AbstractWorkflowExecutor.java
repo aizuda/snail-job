@@ -148,8 +148,6 @@ public abstract class AbstractWorkflowExecutor implements WorkflowExecutor, Init
         jobTask.setClientInfo(StrUtil.EMPTY);
         jobTask.setTaskBatchId(jobTaskBatch.getId());
         jobTask.setArgsType(JobArgsTypeEnum.TEXT.getArgsType());
-        // TODO 待定是否删除
-        jobTask.setArgsStr(Optional.ofNullable(context.getTaskResult()).orElse(StrUtil.EMPTY));
         jobTask.setTaskStatus(context.getJobTaskStatus());
         jobTask.setResultMessage(String.valueOf(context.getEvaluationResult()));
         Assert.isTrue(1 == jobTaskMapper.insert(jobTask), () -> new SnailJobServerException("新增任务实例失败"));

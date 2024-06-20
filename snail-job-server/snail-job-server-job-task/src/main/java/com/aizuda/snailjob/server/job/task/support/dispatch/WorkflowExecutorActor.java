@@ -112,9 +112,6 @@ public class WorkflowExecutorActor extends AbstractActor {
             return;
         }
 
-        // TODO 暂时删除，待认证
-//        Sets.SetView<Long> union = Sets.union(allSuccessors, brotherNode);
-
         // 添加父节点，为了判断父节点的处理状态
         List<JobTaskBatch> allJobTaskBatchList = jobTaskBatchMapper.selectList(new LambdaQueryWrapper<JobTaskBatch>()
                 .select(JobTaskBatch::getWorkflowTaskBatchId, JobTaskBatch::getWorkflowNodeId,
@@ -155,22 +152,34 @@ public class WorkflowExecutorActor extends AbstractActor {
             }
         }
 
-        if (!brotherNodeIsComplete(taskExecute, brotherNode, jobTaskBatchMap, parentWorkflowNode)) {
-            return;
-        }
+        // 决策节点
+        if (Objects.nonNull(parentWorkflowNode) && WorkflowNodeTypeEnum.DECISION.getType() == parentWorkflowNode.getNodeType()) {
 
-        // 去掉父节点
-        workflowNodes = workflowNodes.stream()
-                .filter(workflowNode -> !workflowNode.getId().equals(taskExecute.getParentId()))
-                .collect(Collectors.toList());
+            // 获取决策节点子节点
+            Set<Long> successors = graph.successors(parentWorkflowNode.getId());
+            workflowNodes = workflowNodes.stream()
+                    // 去掉父节点
+                    .filter(workflowNode -> !workflowNode.getId().equals(taskExecute.getParentId())
+                            // 过滤掉非当前决策节点【ParentId】的子节点
+                            && successors.contains(workflowNode.getId())).collect(Collectors.toList());
+        } else {
+            if (!brotherNodeIsComplete(taskExecute, brotherNode, jobTaskBatchMap, parentWorkflowNode)) {
+                return;
+            }
+
+            workflowNodes = workflowNodes.stream()
+                    // 去掉父节点
+                    .filter(workflowNode -> !workflowNode.getId().equals(taskExecute.getParentId()))
+                    .collect(Collectors.toList());
+
+            // TODO 合并job task的结果到全局上下文中
+            // 此次的并发数与当时父节点的兄弟节点的数量一致
+            workflowBatchHandler.mergeWorkflowContextAndRetry(workflowTaskBatch,
+                    StreamUtils.toSet(allJobTaskBatchList, JobTaskBatch::getId));
+        }
 
         List<Job> jobs = jobMapper.selectBatchIds(StreamUtils.toSet(workflowNodes, WorkflowNode::getJobId));
         Map<Long, Job> jobMap = StreamUtils.toIdentityMap(jobs, Job::getId);
-
-        // TODO 合并job task的结果到全局上下文中
-        // 此次的并发数与当时父节点的兄弟节点的数量一致
-         workflowBatchHandler.mergeWorkflowContextAndRetry(workflowTaskBatch,
-            StreamUtils.toSet(allJobTaskBatchList, JobTaskBatch::getId));
 
         // 只会条件节点会使用
         Object evaluationResult = null;
