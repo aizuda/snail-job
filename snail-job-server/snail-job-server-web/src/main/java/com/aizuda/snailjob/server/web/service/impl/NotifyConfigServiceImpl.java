@@ -54,7 +54,7 @@ public class NotifyConfigServiceImpl implements NotifyConfigService {
 
     @Override
     public PageResult<List<NotifyConfigResponseVO>> getNotifyConfigList(NotifyConfigQueryVO queryVO) {
-        PageDTO<NotifyConfig> pageDTO = new PageDTO<>();
+        PageDTO<NotifyConfig> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
         List<String> groupNames = UserSessionUtils.getGroupNames(queryVO.getGroupName());
 
         UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
