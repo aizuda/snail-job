@@ -16,12 +16,16 @@ import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.job.task.support.alarm.event.WorkflowTaskFailAlarmEvent;
 import com.aizuda.snailjob.server.job.task.support.expression.ExpressionInvocationHandler;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskMapper;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowTaskBatchMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTask;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch;
+import com.aizuda.snailjob.template.datasource.persistence.po.WorkflowTaskBatch;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -33,8 +37,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Slf4j
 public class DecisionWorkflowExecutor extends AbstractWorkflowExecutor {
-    private final JobTaskMapper jobTaskMapper;
-
+    private final WorkflowTaskBatchMapper workflowTaskBatchMapper;
 
     @Override
     public WorkflowNodeTypeEnum getWorkflowNodeType() {
@@ -64,14 +67,24 @@ public class DecisionWorkflowExecutor extends AbstractWorkflowExecutor {
             DecisionConfig decisionConfig = JsonUtil.parseObject(context.getNodeInfo(), DecisionConfig.class);
             if (StatusEnum.NO.getStatus().equals(decisionConfig.getDefaultDecision())) {
                 try {
-                    ExpressionEngine realExpressionEngine = ExpressionTypeEnum.valueOf(decisionConfig.getExpressionType());
-                    Assert.notNull(realExpressionEngine, () -> new SnailJobServerException("表达式引擎不存在"));
-                    ExpressionInvocationHandler invocationHandler = new ExpressionInvocationHandler(realExpressionEngine);
-                    ExpressionEngine expressionEngine = ExpressionFactory.getExpressionEngine(invocationHandler);
-                    result = (Boolean) Optional.ofNullable(expressionEngine.eval(decisionConfig.getNodeExpression(), context.getWfContext())).orElse(Boolean.FALSE);
-                    if (!result) {
+                    // 这里重新加载一次最新的上下文
+                    WorkflowTaskBatch workflowTaskBatch = workflowTaskBatchMapper.selectOne(new LambdaQueryWrapper<WorkflowTaskBatch>()
+                            .select(WorkflowTaskBatch::getWfContext)
+                            .eq(WorkflowTaskBatch::getId, context.getWorkflowTaskBatchId())
+                    );
+                    if (Objects.isNull(workflowTaskBatch)) {
                         operationReason = JobOperationReasonEnum.WORKFLOW_DECISION_FAILED.getReason();
+                    } else {
+                        ExpressionEngine realExpressionEngine = ExpressionTypeEnum.valueOf(decisionConfig.getExpressionType());
+                        Assert.notNull(realExpressionEngine, () -> new SnailJobServerException("表达式引擎不存在"));
+                        ExpressionInvocationHandler invocationHandler = new ExpressionInvocationHandler(realExpressionEngine);
+                        ExpressionEngine expressionEngine = ExpressionFactory.getExpressionEngine(invocationHandler);
+                        result = (Boolean) Optional.ofNullable(expressionEngine.eval(decisionConfig.getNodeExpression(), workflowTaskBatch.getWfContext())).orElse(Boolean.FALSE);
+                        if (!result) {
+                            operationReason = JobOperationReasonEnum.WORKFLOW_DECISION_FAILED.getReason();
+                        }
                     }
+
                 } catch (Exception e) {
                     log.error("执行条件表达式解析异常. 表达式:[{}]，参数: [{}]", decisionConfig.getNodeExpression(), context.getWfContext(), e);
                     taskBatchStatus = JobTaskBatchStatusEnum.FAIL.getStatus();
@@ -85,9 +98,9 @@ public class DecisionWorkflowExecutor extends AbstractWorkflowExecutor {
             }
         }
 
-        if (JobTaskBatchStatusEnum.SUCCESS.getStatus() == taskBatchStatus && result) {
-            workflowTaskExecutor(context);
-        }
+//        if (JobTaskBatchStatusEnum.SUCCESS.getStatus() == taskBatchStatus && result) {
+//            workflowTaskExecutor(context);
+//        }
 
         // 回传执行结果
         context.setEvaluationResult(result);
