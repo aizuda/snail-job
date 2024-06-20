@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.web.service;
 
+import cn.hutool.core.lang.tree.Tree;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.JobTaskQueryVO;
 import com.aizuda.snailjob.server.web.model.response.JobTaskResponseVO;
@@ -14,4 +15,6 @@ import java.util.List;
 public interface JobTaskService {
 
     PageResult<List<JobTaskResponseVO>> getJobTaskPage(JobTaskQueryVO jobTaskQueryVO);
+
+    List<Tree<Long>> getTreeJobTask(JobTaskQueryVO jobTaskQueryVO);
 }

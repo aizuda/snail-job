@@ -1,5 +1,9 @@
 package com.aizuda.snailjob.server.web.service.impl;
 
+import cn.hutool.core.lang.tree.Tree;
+import cn.hutool.core.lang.tree.TreeNode;
+import cn.hutool.core.lang.tree.TreeUtil;
+import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.JobTaskQueryVO;
 import com.aizuda.snailjob.server.web.model.response.JobTaskResponseVO;
@@ -12,6 +16,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -45,5 +50,27 @@ public class JobTaskServiceImpl implements JobTaskService {
         }
 
         return new PageResult<>(pageDTO, jobTaskResponseVOs);
+    }
+
+    @Override
+    public List<Tree<Long>> getTreeJobTask(final JobTaskQueryVO queryVO) {
+        List<JobTask> jobTasks = jobTaskMapper.selectList(
+            new LambdaQueryWrapper<JobTask>()
+                .eq(JobTask::getParentId, queryVO.getParentId())
+                .eq(Objects.nonNull(queryVO.getJobId()), JobTask::getJobId, queryVO.getJobId())
+                .eq(Objects.nonNull(queryVO.getTaskBatchId()), JobTask::getTaskBatchId, queryVO.getTaskBatchId())
+                // SQLServer 分页必须 ORDER BY
+                .orderByAsc(JobTask::getJobId));
+
+        List<TreeNode<Long>> treeNodes = new ArrayList<>();
+        for (final JobTask jobTask : jobTasks) {
+            TreeNode<Long> treeNode = new TreeNode<>();
+            treeNode.setId(jobTask.getId());
+            treeNode.setName(jobTask.getTaskName());
+            treeNode.setExtra(JsonUtil.parseHashMap(JsonUtil.toJsonString(jobTask), Object.class));
+            treeNodes.add(treeNode);
+        }
+
+        return TreeUtil.build(treeNodes, 0L);
     }
 }
