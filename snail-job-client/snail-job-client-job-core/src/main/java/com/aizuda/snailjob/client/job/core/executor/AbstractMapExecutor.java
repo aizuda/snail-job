@@ -9,6 +9,7 @@ import com.aizuda.snailjob.client.job.core.dto.MapArgs;
 import com.aizuda.snailjob.client.model.ExecuteResult;
 import com.aizuda.snailjob.client.model.request.MapTaskRequest;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
+import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.exception.SnailJobMapReduceException;
 import com.aizuda.snailjob.common.core.model.JobContext;
 import com.aizuda.snailjob.common.core.model.NettyResult;
@@ -67,7 +68,7 @@ public abstract class AbstractMapExecutor extends AbstractJobExecutor implements
 
         // 2. 同步发送请求
         Result<Boolean> result = CLIENT.batchReportMapTask(mapTaskRequest);
-        if (result.getData()) {
+        if (StatusEnum.NO.getStatus() == result.getStatus() || result.getData()) {
             SnailJobLog.LOCAL.info("Map task create successfully!. taskName:[{}] TaskId:[{}] ", nextTaskName, jobContext.getTaskId());
         } else {
             throw new SnailJobMapReduceException("map failed for task: " + nextTaskName);

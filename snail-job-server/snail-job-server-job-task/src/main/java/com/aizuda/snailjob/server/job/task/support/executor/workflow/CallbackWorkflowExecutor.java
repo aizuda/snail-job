@@ -42,7 +42,6 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
 
     private static final String CALLBACK_TIMEOUT = "10";
     private final RestTemplate restTemplate;
-    private final JobTaskMapper jobTaskMapper;
 
     @Override
     public WorkflowNodeTypeEnum getWorkflowNodeType() {
@@ -70,8 +69,8 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
             invokeCallback(context);
         }
 
-        // 执行下一个节点
-        workflowTaskExecutor(context);
+        // ToDo 执行下一个节点
+//        workflowTaskExecutor(context);
 
     }
 

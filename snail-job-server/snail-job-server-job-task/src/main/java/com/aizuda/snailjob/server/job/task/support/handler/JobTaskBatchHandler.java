@@ -135,13 +135,39 @@ public class JobTaskBatchHandler {
      */
     private boolean needReduceTask(final CompleteJobBatchDTO completeJobBatchDTO, final List<JobTask> jobTasks) {
         Integer mrStage = null;
-        if (isAllMapTask(jobTasks)) {
+
+        int reduceCount = 0;
+        int mapCount = 0;
+        for (final JobTask jobTask : jobTasks) {
+            if (Objects.isNull(jobTask.getMrStage())) {
+                continue;
+            }
+
+            // 存在MERGE_REDUCE任务了不需要生成
+            if (MERGE_REDUCE.getStage() == jobTask.getMrStage()) {
+                return false;
+            }
+
+            // REDUCE任务累加
+            if (REDUCE.getStage() == jobTask.getMrStage()) {
+                reduceCount++;
+                continue;
+            }
+
+            // MAP任务累加
+            if (MAP.getStage() == jobTask.getMrStage()) {
+                mapCount++;
+            }
+        }
+
+        // 若存在2个以上的reduce任务则开启merge reduce任务
+        if (reduceCount > 1) {
+            mrStage = MERGE_REDUCE.getStage();
+        } else if (mapCount == jobTasks.size()) {
             // 若都是MAP任务则开启Reduce任务
             mrStage = REDUCE.getStage();
-        } else if (isALeastOneReduceTask(jobTasks)) {
-            // 若存在2个以上的reduce任务则开启merge reduce任务
-            mrStage = MERGE_REDUCE.getStage();
         } else {
+            // 若既不是MAP也是不REDUCE则是其他类型的任务，直接返回即可
             return false;
         }
 

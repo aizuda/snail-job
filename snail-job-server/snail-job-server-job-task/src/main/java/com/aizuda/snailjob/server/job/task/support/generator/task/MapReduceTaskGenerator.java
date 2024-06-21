@@ -3,6 +3,7 @@ package com.aizuda.snailjob.server.job.task.support.generator.task;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
+import com.aizuda.snailjob.common.core.enums.JobArgsTypeEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskStatusEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.snailjob.common.core.enums.MapReduceStageEnum;
@@ -28,6 +29,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -98,7 +100,7 @@ public class MapReduceTaskGenerator extends AbstractJobTaskGenerator {
 
         JobArgsHolder jobArgsHolder = new JobArgsHolder();
         jobArgsHolder.setJobParams(context.getArgsStr());
-        jobArgsHolder.setReduceResult(JsonUtil.toJsonString(StreamUtils.toSet(jobTasks, JobTask::getResultMessage)));
+        jobArgsHolder.setReduces(JsonUtil.toJsonString(StreamUtils.toSet(jobTasks, JobTask::getResultMessage)));
         jobTask.setArgsStr(JsonUtil.toJsonString(jobArgsHolder));
         jobTask.setTaskStatus(JobTaskStatusEnum.RUNNING.getStatus());
         jobTask.setResultMessage(Optional.ofNullable(jobTask.getResultMessage()).orElse(StrUtil.EMPTY));
@@ -139,22 +141,23 @@ public class MapReduceTaskGenerator extends AbstractJobTaskGenerator {
                     JobTask jobTask = JobTaskConverter.INSTANCE.toJobTaskInstance(context);
                     jobTask.setClientInfo(ClientInfoUtils.generate(registerNodeInfo));
                     jobTask.setArgsType(context.getArgsType());
-
                     JobArgsHolder jobArgsHolder = new JobArgsHolder();
-                    jobArgsHolder.setJobParams(context.getArgsStr());
-                    jobArgsHolder.setMapResult(JsonUtil.toJsonString(partition.get(index)));
-
+                    jobArgsHolder.setJobParams(StrUtil.isBlank(context.getArgsStr()) ? null : context.getArgsStr());
+                    jobArgsHolder.setMaps(JsonUtil.toJsonString(partition.get(index)));
                     jobTask.setArgsStr(JsonUtil.toJsonString(jobArgsHolder));
                     jobTask.setTaskStatus(JobTaskStatusEnum.RUNNING.getStatus());
                     jobTask.setResultMessage(Optional.ofNullable(jobTask.getResultMessage()).orElse(StrUtil.EMPTY));
                     jobTask.setMrStage(MapReduceStageEnum.REDUCE.getStage());
                     jobTask.setTaskName("REDUCE_TASK");
-//                    Assert.isTrue(1 == jobTaskMapper.insert(jobTask),
-//                            () -> new SnailJobServerException("新增任务实例失败"));
+                    jobTask.setParentId(0L);
+                    jobTask.setRetryCount(0);
+                    jobTask.setLeaf(StatusEnum.YES.getStatus());
+                    jobTask.setCreateDt(LocalDateTime.now());
+                    jobTask.setUpdateDt(LocalDateTime.now());
                     finalJobTasks.add(jobTask);
                 }
 
-                Assert.isTrue(finalJobTasks.size() == jobTaskMapper.insert(finalJobTasks).size(), () -> new SnailJobServerException("新增任务实例失败"));
+                Assert.isTrue(finalJobTasks.size() == jobTaskMapper.insertBatch(finalJobTasks), () -> new SnailJobServerException("新增任务实例失败"));
 
             }
         });
@@ -192,19 +195,22 @@ public class MapReduceTaskGenerator extends AbstractJobTaskGenerator {
                     jobTask.setArgsType(context.getArgsType());
                     JobArgsHolder jobArgsHolder = new JobArgsHolder();
                     jobArgsHolder.setJobParams(context.getArgsStr());
-                    jobArgsHolder.setMapResult(JsonUtil.toJsonString(mapSubTask.get(index)));
+                    jobArgsHolder.setMaps(JsonUtil.toJsonString(mapSubTask.get(index)));
                     jobTask.setArgsStr(JsonUtil.toJsonString(jobArgsHolder));
+                    jobTask.setArgsType(JobArgsTypeEnum.JSON.getArgsType());
                     jobTask.setTaskStatus(JobTaskStatusEnum.RUNNING.getStatus());
                     jobTask.setMrStage(MapReduceStageEnum.MAP.getStage());
                     jobTask.setTaskName(context.getTaskName());
                     jobTask.setLeaf(StatusEnum.YES.getStatus());
+                    jobTask.setParentId(Objects.isNull(context.getParentId()) ? 0L : context.getParentId());
+                    jobTask.setRetryCount(0);
+                    jobTask.setCreateDt(LocalDateTime.now());
+                    jobTask.setUpdateDt(LocalDateTime.now());
                     jobTask.setResultMessage(Optional.ofNullable(jobTask.getResultMessage()).orElse(StrUtil.EMPTY));
-//                    Assert.isTrue(1 == jobTaskMapper.insert(jobTask),
-//                            () -> new SnailJobServerException("新增任务实例失败"));
                     jobTasks.add(jobTask);
                 }
 
-                Assert.isTrue(jobTasks.size() == jobTaskMapper.insert(jobTasks).size(), () -> new SnailJobServerException("新增任务实例失败"));
+                Assert.isTrue(jobTasks.size() == jobTaskMapper.insertBatch(jobTasks), () -> new SnailJobServerException("新增任务实例失败"));
 
                 // 更新父节点的为非叶子节点
                 if (CollUtil.isNotEmpty(parentJobTasks)) {

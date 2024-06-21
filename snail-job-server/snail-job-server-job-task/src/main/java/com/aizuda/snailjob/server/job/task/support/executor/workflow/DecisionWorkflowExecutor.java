@@ -55,6 +55,7 @@ public class DecisionWorkflowExecutor extends AbstractWorkflowExecutor {
         int operationReason = JobOperationReasonEnum.NONE.getReason();
         int jobTaskStatus = JobTaskStatusEnum.SUCCESS.getStatus();
         String message = StrUtil.EMPTY;
+        String wfContext = "";
 
         Boolean result = (Boolean) Optional.ofNullable(context.getEvaluationResult()).orElse(Boolean.FALSE);
 
@@ -66,27 +67,30 @@ public class DecisionWorkflowExecutor extends AbstractWorkflowExecutor {
         } else {
             DecisionConfig decisionConfig = JsonUtil.parseObject(context.getNodeInfo(), DecisionConfig.class);
             if (StatusEnum.NO.getStatus().equals(decisionConfig.getDefaultDecision())) {
+
                 try {
                     // 这里重新加载一次最新的上下文
                     WorkflowTaskBatch workflowTaskBatch = workflowTaskBatchMapper.selectOne(new LambdaQueryWrapper<WorkflowTaskBatch>()
                             .select(WorkflowTaskBatch::getWfContext)
                             .eq(WorkflowTaskBatch::getId, context.getWorkflowTaskBatchId())
                     );
+
                     if (Objects.isNull(workflowTaskBatch)) {
                         operationReason = JobOperationReasonEnum.WORKFLOW_DECISION_FAILED.getReason();
                     } else {
+                        wfContext = workflowTaskBatch.getWfContext();
                         ExpressionEngine realExpressionEngine = ExpressionTypeEnum.valueOf(decisionConfig.getExpressionType());
                         Assert.notNull(realExpressionEngine, () -> new SnailJobServerException("表达式引擎不存在"));
                         ExpressionInvocationHandler invocationHandler = new ExpressionInvocationHandler(realExpressionEngine);
                         ExpressionEngine expressionEngine = ExpressionFactory.getExpressionEngine(invocationHandler);
-                        result = (Boolean) Optional.ofNullable(expressionEngine.eval(decisionConfig.getNodeExpression(), workflowTaskBatch.getWfContext())).orElse(Boolean.FALSE);
+                        result = (Boolean) Optional.ofNullable(expressionEngine.eval(decisionConfig.getNodeExpression(), wfContext)).orElse(Boolean.FALSE);
                         if (!result) {
                             operationReason = JobOperationReasonEnum.WORKFLOW_DECISION_FAILED.getReason();
                         }
                     }
 
                 } catch (Exception e) {
-                    log.error("执行条件表达式解析异常. 表达式:[{}]，参数: [{}]", decisionConfig.getNodeExpression(), context.getWfContext(), e);
+                    log.error("执行条件表达式解析异常. 表达式:[{}]，参数: [{}]", decisionConfig.getNodeExpression(), wfContext, e);
                     taskBatchStatus = JobTaskBatchStatusEnum.FAIL.getStatus();
                     operationReason = JobOperationReasonEnum.WORKFLOW_CONDITION_NODE_EXECUTION_ERROR.getReason();
                     jobTaskStatus = JobTaskStatusEnum.FAIL.getStatus();
@@ -98,16 +102,13 @@ public class DecisionWorkflowExecutor extends AbstractWorkflowExecutor {
             }
         }
 
-//        if (JobTaskBatchStatusEnum.SUCCESS.getStatus() == taskBatchStatus && result) {
-//            workflowTaskExecutor(context);
-//        }
-
         // 回传执行结果
         context.setEvaluationResult(result);
         context.setTaskBatchStatus(taskBatchStatus);
         context.setOperationReason(operationReason);
         context.setJobTaskStatus(jobTaskStatus);
         context.setLogMessage(message);
+        context.setWfContext(wfContext);
 
     }
 
