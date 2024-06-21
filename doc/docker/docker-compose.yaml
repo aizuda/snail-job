@@ -88,9 +88,9 @@ services:
 
 
     dm8:
-        # wget https://download.dameng.com/eco/dm8/dm8_20230808_rev197096_x86_rh6_64_single.tar
-        # docker load -i dm8_20230808_rev197096_x86_rh6_64_single.tar
-        image: dm8_single:dm8_20230808_rev197096_x86_rh6_64
+        # wget https://download.dameng.com/eco/dm8/dm8_20240613_x86_rh6_64_rq_ent_8.1.3.140_pack5.tar
+        # docker load -i dm8_20240613_x86_rh6_64_rq_ent_8.1.3.140_pack5.tar
+        image: dm8:dm8_20240613_rev229704_x86_rh6_64
         restart: unless-stopped
         environment:
             PAGE_SIZE: 16
@@ -105,6 +105,6 @@ services:
             - "5236:5236"
         volumes:
             - dm8:/opt/dmdbms/data
-            # docker compose exec dm8 bash -c "exec /opt/dmdbms/bin/disql SYSDBA/SYSDBA001 \`/tmp/schema.sql"
+            # docker compose exec dm8 bash -c 'exec /opt/dmdbms/bin/disql SYSDBA/SYSDBA001 \`/tmp/schema.sql'
             - ../sql/snail_job_dm8.sql:/tmp/schema.sql:ro
 
