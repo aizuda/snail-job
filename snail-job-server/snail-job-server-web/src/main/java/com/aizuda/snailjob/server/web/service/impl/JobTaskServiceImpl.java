@@ -35,11 +35,11 @@ public class JobTaskServiceImpl implements JobTaskService {
     public PageResult<List<JobTaskResponseVO>> getJobTaskPage(final JobTaskQueryVO queryVO) {
 
         PageDTO<JobTask> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
-
         PageDTO<JobTask> selectPage = jobTaskMapper.selectPage(pageDTO,
                 new LambdaQueryWrapper<JobTask>()
                         .eq(Objects.nonNull(queryVO.getJobId()), JobTask::getJobId, queryVO.getJobId())
                         .eq(Objects.nonNull(queryVO.getTaskBatchId()), JobTask::getTaskBatchId, queryVO.getTaskBatchId())
+                        .eq(Objects.nonNull(queryVO.getTaskStatus()), JobTask::getTaskStatus, queryVO.getTaskStatus())
                         // SQLServer 分页必须 ORDER BY
                         .orderByAsc(JobTask::getJobId));
 
@@ -55,12 +55,12 @@ public class JobTaskServiceImpl implements JobTaskService {
     @Override
     public List<Tree<Long>> getTreeJobTask(final JobTaskQueryVO queryVO) {
         List<JobTask> jobTasks = jobTaskMapper.selectList(
-            new LambdaQueryWrapper<JobTask>()
-                .eq(JobTask::getParentId, queryVO.getParentId())
-                .eq(Objects.nonNull(queryVO.getJobId()), JobTask::getJobId, queryVO.getJobId())
-                .eq(Objects.nonNull(queryVO.getTaskBatchId()), JobTask::getTaskBatchId, queryVO.getTaskBatchId())
-                // SQLServer 分页必须 ORDER BY
-                .orderByAsc(JobTask::getJobId));
+                new LambdaQueryWrapper<JobTask>()
+                        .eq(JobTask::getParentId, queryVO.getParentId())
+                        .eq(Objects.nonNull(queryVO.getJobId()), JobTask::getJobId, queryVO.getJobId())
+                        .eq(Objects.nonNull(queryVO.getTaskBatchId()), JobTask::getTaskBatchId, queryVO.getTaskBatchId())
+                        // SQLServer 分页必须 ORDER BY
+                        .orderByAsc(JobTask::getJobId));
 
         List<TreeNode<Long>> treeNodes = new ArrayList<>();
         for (final JobTask jobTask : jobTasks) {
