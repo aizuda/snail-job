@@ -15,4 +15,5 @@ public class JobTaskQueryVO extends BaseQueryVO {
     private Long jobId;
     private Long taskBatchId;
     private Long parentId;
+    private Integer taskStatus;
 }
