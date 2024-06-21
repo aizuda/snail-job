@@ -2,6 +2,7 @@ package com.aizuda.snailjob.server.job.task.support.generator.task;
 
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
+import com.aizuda.snailjob.common.core.enums.JobArgsTypeEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskStatusEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.snailjob.common.core.model.JobArgsHolder;
@@ -54,7 +55,7 @@ public class ClusterTaskGenerator extends AbstractJobTaskGenerator {
         // 新增任务实例
         JobTask jobTask = JobTaskConverter.INSTANCE.toJobTaskInstance(context);
         jobTask.setClientInfo(ClientInfoUtils.generate(serverNode));
-        jobTask.setArgsType(context.getArgsType());
+        jobTask.setArgsType(JobArgsTypeEnum.JSON.getArgsType());
         JobArgsHolder jobArgsHolder = new JobArgsHolder();
         jobArgsHolder.setJobParams(context.getArgsStr());
         jobTask.setArgsStr(JsonUtil.toJsonString(jobArgsHolder));

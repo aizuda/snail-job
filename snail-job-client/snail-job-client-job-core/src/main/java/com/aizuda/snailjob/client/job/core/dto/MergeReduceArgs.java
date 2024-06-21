@@ -13,8 +13,8 @@ import java.util.List;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class ReduceArgs extends JobArgs {
+public class MergeReduceArgs extends JobArgs {
 
-    private List<?> mapResult;
+    private List<?> reduces;
 
 }

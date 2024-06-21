@@ -24,7 +24,6 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -60,8 +59,10 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
                     .contains(jobContext.getTaskType())) {
                 if (MapReduceStageEnum.MAP.getStage() == jobContext.getMrStage()) {
                     jobArgs = buildMapJobArgs(jobContext);
-                } else {
+                } else if (MapReduceStageEnum.REDUCE.getStage() == jobContext.getMrStage()) {
                     jobArgs = buildReduceJobArgs(jobContext);
+                } else {
+                    jobArgs = buildMergeReduceJobArgs(jobContext);
                 }
 
             } else {
@@ -118,7 +119,7 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
         MapArgs jobArgs = new MapArgs();
         JobArgsHolder jobArgsHolder = jobContext.getJobArgsHolder();
         jobArgs.setJobParams(jobArgsHolder.getJobParams());
-        jobArgs.setMapResult(jobArgsHolder.getMapResult());
+        jobArgs.setMapResult(jobArgsHolder.getMaps());
         jobArgs.setExecutorInfo(jobContext.getExecutorInfo());
         jobArgs.setTaskName(jobContext.getTaskName());
         jobArgs.setTaskBatchId(jobContext.getTaskBatchId());
@@ -129,7 +130,24 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
         ReduceArgs jobArgs = new ReduceArgs();
         JobArgsHolder jobArgsHolder = jobContext.getJobArgsHolder();
         jobArgs.setJobParams(jobArgsHolder.getJobParams());
-        jobArgs.setMapResult(JsonUtil.parseList(jobArgsHolder.getMapResult(), List.class));
+        String maps = jobArgsHolder.getMaps();
+        if (StrUtil.isNotBlank(maps)) {
+            jobArgs.setMapResult(JsonUtil.parseList(maps, Object.class));
+        }
+        jobArgs.setExecutorInfo(jobContext.getExecutorInfo());
+        jobArgs.setTaskBatchId(jobContext.getTaskBatchId());
+        jobArgs.setWfContext(jobContext.getWfContext());
+        return jobArgs;
+    }
+
+    private static JobArgs buildMergeReduceJobArgs(JobContext jobContext) {
+        MergeReduceArgs jobArgs = new MergeReduceArgs();
+        JobArgsHolder jobArgsHolder = jobContext.getJobArgsHolder();
+        jobArgs.setJobParams(jobArgsHolder.getJobParams());
+        String reduces = jobArgsHolder.getReduces();
+        if (StrUtil.isNotBlank(reduces)) {
+            jobArgs.setReduces(JsonUtil.parseList(reduces, Object.class));
+        }
         jobArgs.setExecutorInfo(jobContext.getExecutorInfo());
         jobArgs.setTaskBatchId(jobContext.getTaskBatchId());
         jobArgs.setWfContext(jobContext.getWfContext());

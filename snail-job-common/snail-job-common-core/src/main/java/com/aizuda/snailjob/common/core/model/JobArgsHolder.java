@@ -21,11 +21,11 @@ public class JobArgsHolder {
     /**
      * 动态分片 map节点的结果
      */
-    private String mapResult;
+    private String maps;
 
     /**
      * 动态分片 reduce执行的结果
      */
-    private String reduceResult;
+    private String reduces;
 
 }
