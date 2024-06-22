@@ -10,7 +10,8 @@
                stop_num = src.stop_num,
                stop_reason = src.stop_reason,
                cancel_num = src.cancel_num,
-               cancel_reason = src.cancel_reason
+               cancel_reason = src.cancel_reason,
+               update_dt = CURRENT_TIMESTAMP
           FROM sj_job_summary AS dest
                JOIN (
                    <foreach collection="list" item="item" index="index" separator="UNION ALL">

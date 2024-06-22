@@ -4,7 +4,8 @@
 
     <update id="updateBatchNextTriggerAtById" parameterType="java.util.List">
         UPDATE sj_retry_task_${partition}
-           SET next_trigger_at = src.next_trigger_at
+           SET next_trigger_at = src.next_trigger_at,
+               update_dt = CURRENT_TIMESTAMP
           FROM sj_retry_task_${partition} AS target
                 JOIN (
                 <foreach collection="list" item="item" index="index" separator="UNION ALL">

@@ -5,7 +5,8 @@
     <update id="updateBatchNextTriggerAtById" parameterType="java.util.List">
         <foreach collection="list" item="item" open="BEGIN" separator=";" close=";END;">
             UPDATE sj_job
-               SET next_trigger_at = #{item.nextTriggerAt}
+               SET next_trigger_at = #{item.nextTriggerAt},
+                   update_dt = CURRENT_TIMESTAMP
              WHERE id = #{item.id}
         </foreach>
     </update>

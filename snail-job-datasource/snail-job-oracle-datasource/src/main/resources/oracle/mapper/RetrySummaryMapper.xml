@@ -8,7 +8,8 @@
                SET running_num = #{item.runningNum},
                    finish_num = #{item.finishNum},
                    max_count_num = #{item.maxCountNum},
-                   suspend_num = #{item.suspendNum}
+                   suspend_num = #{item.suspendNum},
+                   update_dt = CURRENT_TIMESTAMP
              WHERE trigger_at = #{item.triggerAt}
                AND group_name = #{item.groupName}
                AND namespace_id = #{item.namespaceId}

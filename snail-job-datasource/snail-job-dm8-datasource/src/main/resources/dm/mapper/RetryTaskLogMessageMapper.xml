@@ -5,7 +5,8 @@
     <update id="updateBatch" parameterType="java.util.List">
         <foreach collection="list" item="item" index="index" open="BEGIN" separator=";" close=";END;">
             UPDATE sj_retry_task_log_message
-               SET message = #{item.message}, log_num = #{item.logNum}
+               SET message = #{item.message}, log_num = #{item.logNum},
+                   update_dt = CURRENT_TIMESTAMP
              WHERE id = #{item.id}
         </foreach>
     </update>

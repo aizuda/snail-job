@@ -10,7 +10,8 @@
                stop_num = tt.stop_num,
                stop_reason = tt.stop_reason,
                cancel_num = tt.cancel_num,
-               cancel_reason = tt.cancel_reason
+               cancel_reason = tt.cancel_reason,
+               update_dt = CURRENT_TIMESTAMP
           FROM (
                 <foreach collection="list" item="item" index="index" separator="UNION ALL">
                     SELECT

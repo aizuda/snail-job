@@ -7,7 +7,8 @@
            SET running_num = src.running_num,
                finish_num = src.finish_num,
                max_count_num = src.max_count_num,
-               suspend_num = src.suspend_num
+               suspend_num = src.suspend_num,
+               update_dt = CURRENT_TIMESTAMP
           FROM sj_retry_summary AS dest
                 JOIN (
                 <foreach collection="list" item="item" index="index" separator="UNION ALL">

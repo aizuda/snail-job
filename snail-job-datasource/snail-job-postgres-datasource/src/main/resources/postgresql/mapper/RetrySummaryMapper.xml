@@ -7,7 +7,8 @@
            SET running_num = tt.running_num,
                finish_num = tt.finish_num,
                max_count_num = tt.max_count_num,
-               suspend_num = tt.suspend_num
+               suspend_num = tt.suspend_num,
+               update_dt = CURRENT_TIMESTAMP
           FROM (
                 <foreach collection="list" item="item" index="index" separator="UNION ALL">
                     SELECT

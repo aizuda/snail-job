@@ -4,7 +4,8 @@
 
     <update id="updateBatchExpireAt" parameterType="java.util.List">
         UPDATE sj_server_node AS rt
-           SET expire_at = tt.expire_at
+           SET expire_at = tt.expire_at,
+               update_dt = CURRENT_TIMESTAMP
           FROM (
                 <foreach collection="list" item="item" index="index" separator="UNION ALL">
                     SELECT

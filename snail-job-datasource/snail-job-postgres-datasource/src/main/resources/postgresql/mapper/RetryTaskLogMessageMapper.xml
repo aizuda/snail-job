@@ -13,7 +13,8 @@
                     </foreach>
                 ) tt
            SET rt.message = tt.message,
-               rt.log_num = tt.log_num
+               rt.log_num = tt.log_num,
+               rt.update_dt = CURRENT_TIMESTAMP
          WHERE rt.id = tt.id
     </update>
 
