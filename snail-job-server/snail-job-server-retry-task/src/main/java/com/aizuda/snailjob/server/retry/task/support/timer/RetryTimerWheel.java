@@ -32,8 +32,8 @@ public class RetryTimerWheel {
 
     static {
         timer = new HashedWheelTimer(
-            new CustomizableThreadFactory(THREAD_NAME_PREFIX), TICK_DURATION, TimeUnit.MILLISECONDS, 512,
-            true, -1, executor);
+                new CustomizableThreadFactory(THREAD_NAME_PREFIX), TICK_DURATION, TimeUnit.MILLISECONDS, 512,
+                true, -1, executor);
         timer.start();
     }
 

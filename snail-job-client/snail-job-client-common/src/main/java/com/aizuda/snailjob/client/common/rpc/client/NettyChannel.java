@@ -163,7 +163,7 @@ public class NettyChannel {
         }
 
         Assert.notBlank(snailJobProperties.getGroup(),
-            ()-> new SnailJobRemoteException("The group is null, please check if your configuration is correct."));
+                () -> new SnailJobRemoteException("The group is null, please check if your configuration is correct."));
 
         request.headers()
                 .set(HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON)

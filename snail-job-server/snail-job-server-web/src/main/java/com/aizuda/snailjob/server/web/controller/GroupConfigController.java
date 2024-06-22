@@ -1,7 +1,6 @@
 package com.aizuda.snailjob.server.web.controller;
 
 import com.aizuda.snailjob.common.core.annotation.OriginalControllerReturnValue;
-import com.aizuda.snailjob.common.core.exception.SnailJobCommonException;
 import com.aizuda.snailjob.server.web.annotation.LoginRequired;
 import com.aizuda.snailjob.server.web.annotation.RoleEnum;
 import com.aizuda.snailjob.server.web.model.base.PageResult;

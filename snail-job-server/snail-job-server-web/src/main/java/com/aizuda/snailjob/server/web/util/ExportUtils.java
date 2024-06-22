@@ -1,14 +1,15 @@
 package com.aizuda.snailjob.server.web.util;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 import java.nio.charset.StandardCharsets;
 
-
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ExportUtils {
-    private ExportUtils() {}
 
     public static ResponseEntity<String> doExport(String json) {
         HttpHeaders headers = new HttpHeaders();

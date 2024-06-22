@@ -109,7 +109,7 @@ public class JobLogMergeSchedule extends AbstractSchedule implements Lifecycle {
                         .in(JobTaskBatch::getTaskBatchStatus, JobTaskBatchStatusEnum.COMPLETED)
                         .le(JobTaskBatch::getCreateDt, endTime)
                         .orderByAsc(JobTaskBatch::getId)
-                ).getRecords();
+        ).getRecords();
         return JobTaskConverter.INSTANCE.toJobTaskBatchPartitionTasks(jobTaskBatchList);
     }
 

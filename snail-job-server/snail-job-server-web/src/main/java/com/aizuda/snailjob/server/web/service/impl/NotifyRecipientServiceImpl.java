@@ -51,15 +51,15 @@ public class NotifyRecipientServiceImpl implements NotifyRecipientService {
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
         PageDTO<NotifyRecipient> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
         PageDTO<NotifyRecipient> notifyRecipientPageDTO = notifyRecipientMapper.selectPage(pageDTO,
-            new LambdaQueryWrapper<NotifyRecipient>()
-                .eq(NotifyRecipient::getNamespaceId, namespaceId)
-                .eq(Objects.nonNull(queryVO.getNotifyType()), NotifyRecipient::getNotifyType, queryVO.getNotifyType())
-                .likeRight(StrUtil.isNotBlank(queryVO.getRecipientName()), NotifyRecipient::getRecipientName,
-                    queryVO.getRecipientName())
-                .orderByDesc(NotifyRecipient::getCreateDt));
+                new LambdaQueryWrapper<NotifyRecipient>()
+                        .eq(NotifyRecipient::getNamespaceId, namespaceId)
+                        .eq(Objects.nonNull(queryVO.getNotifyType()), NotifyRecipient::getNotifyType, queryVO.getNotifyType())
+                        .likeRight(StrUtil.isNotBlank(queryVO.getRecipientName()), NotifyRecipient::getRecipientName,
+                                queryVO.getRecipientName())
+                        .orderByDesc(NotifyRecipient::getCreateDt));
 
         return new PageResult<>(pageDTO,
-            NotifyRecipientConverter.INSTANCE.convertList(notifyRecipientPageDTO.getRecords()));
+                NotifyRecipientConverter.INSTANCE.convertList(notifyRecipientPageDTO.getRecords()));
     }
 
     @Override
@@ -83,9 +83,9 @@ public class NotifyRecipientServiceImpl implements NotifyRecipientService {
     public List<CommonLabelValueResponseVO> getNotifyRecipientList() {
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
         List<NotifyRecipient> notifyRecipients = notifyRecipientMapper.selectList(
-            new LambdaQueryWrapper<NotifyRecipient>()
-                .select(NotifyRecipient::getRecipientName, NotifyRecipient::getId)
-                .eq(NotifyRecipient::getNamespaceId, namespaceId)
+                new LambdaQueryWrapper<NotifyRecipient>()
+                        .select(NotifyRecipient::getRecipientName, NotifyRecipient::getId)
+                        .eq(NotifyRecipient::getNamespaceId, namespaceId)
         );
         return NotifyRecipientConverter.INSTANCE.convertListToCommonLabelValueList(notifyRecipients);
     }
@@ -110,21 +110,21 @@ public class NotifyRecipientServiceImpl implements NotifyRecipientService {
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
         PartitionTaskUtils.process(startId -> {
             List<NotifyRecipient> recipients = notifyRecipientMapper.selectPage(new PageDTO<>(0, 100),
-                new LambdaQueryWrapper<NotifyRecipient>()
-                    .eq(NotifyRecipient::getNamespaceId, namespaceId)
-                    .eq(Objects.nonNull(exportVO.getNotifyType()), NotifyRecipient::getNotifyType,
-                        exportVO.getNotifyType())
-                    .likeRight(StrUtil.isNotBlank(exportVO.getRecipientName()), NotifyRecipient::getRecipientName,
-                        exportVO.getRecipientName())
-                    .ge(NotifyRecipient::getId, startId)
-                    .in(CollUtil.isNotEmpty(exportVO.getNotifyRecipientIds()), NotifyRecipient::getId,
-                        exportVO.getNotifyRecipientIds())
-                    .orderByAsc(NotifyRecipient::getId)).getRecords();
+                    new LambdaQueryWrapper<NotifyRecipient>()
+                            .eq(NotifyRecipient::getNamespaceId, namespaceId)
+                            .eq(Objects.nonNull(exportVO.getNotifyType()), NotifyRecipient::getNotifyType,
+                                    exportVO.getNotifyType())
+                            .likeRight(StrUtil.isNotBlank(exportVO.getRecipientName()), NotifyRecipient::getRecipientName,
+                                    exportVO.getRecipientName())
+                            .ge(NotifyRecipient::getId, startId)
+                            .in(CollUtil.isNotEmpty(exportVO.getNotifyRecipientIds()), NotifyRecipient::getId,
+                                    exportVO.getNotifyRecipientIds())
+                            .orderByAsc(NotifyRecipient::getId)).getRecords();
             return StreamUtils.toList(recipients, NotifyRecipientPartitionTask::new);
         }, partitionTasks -> {
             List<NotifyRecipientPartitionTask> partitionTaskList = (List<NotifyRecipientPartitionTask>) partitionTasks;
             List<NotifyRecipientRequestVO> notifyRecipientRequestVOs = NotifyRecipientConverter.INSTANCE.toNotifyRecipientRequestVOs(
-                StreamUtils.toList(partitionTaskList, NotifyRecipientPartitionTask::getRecipient));
+                    StreamUtils.toList(partitionTaskList, NotifyRecipientPartitionTask::getRecipient));
             requestList.addAll(notifyRecipientRequestVOs);
         }, 0);
 

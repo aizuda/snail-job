@@ -110,7 +110,7 @@ public class JobTaskBatchHandler {
     /**
      * 开启常驻任务
      *
-     * @param job 定时任务配置信息
+     * @param job            定时任务配置信息
      * @param taskExecuteDTO 任务执行新
      */
     public void openResidentTask(Job job, TaskExecuteDTO taskExecuteDTO) {

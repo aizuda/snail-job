@@ -99,7 +99,8 @@ public class FailureActor extends AbstractActor {
             } finally {
                 // 清除幂等标识位
                 idempotentStrategy.clear(
-                    ImmutableTriple.of(retryTask.getGroupName(), retryTask.getNamespaceId(), retryTask.getId()).toString());                getContext().stop(getSelf());
+                        ImmutableTriple.of(retryTask.getGroupName(), retryTask.getNamespaceId(), retryTask.getId()).toString());
+                getContext().stop(getSelf());
             }
 
         }).build();

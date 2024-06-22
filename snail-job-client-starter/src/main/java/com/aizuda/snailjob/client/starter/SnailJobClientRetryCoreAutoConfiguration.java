@@ -31,7 +31,7 @@ public class SnailJobClientRetryCoreAutoConfiguration {
     public MethodInterceptor snailJobInterceptor(StandardEnvironment standardEnvironment,
                                                  @Lazy RetryStrategy localRetryStrategies) {
         Integer order = standardEnvironment
-            .getProperty(SnailJobClientsRegistrar.AOP_ORDER_CONFIG, Integer.class, Ordered.HIGHEST_PRECEDENCE);
+                .getProperty(SnailJobClientsRegistrar.AOP_ORDER_CONFIG, Integer.class, Ordered.HIGHEST_PRECEDENCE);
 
         return new SnailRetryInterceptor(order, localRetryStrategies);
     }

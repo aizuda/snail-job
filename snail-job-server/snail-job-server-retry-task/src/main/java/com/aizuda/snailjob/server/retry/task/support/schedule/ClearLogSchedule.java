@@ -38,6 +38,8 @@ import java.util.List;
 @Slf4j
 public class ClearLogSchedule extends AbstractSchedule implements Lifecycle {
 
+    // last clean log time
+    private static Long lastCleanLogTime = 0L;
     @Autowired
     private RetryTaskLogMapper retryTaskLogMapper;
     @Autowired
@@ -46,9 +48,6 @@ public class ClearLogSchedule extends AbstractSchedule implements Lifecycle {
     private RetryTaskLogMessageMapper retryTaskLogMessageMapper;
     @Autowired
     private TransactionTemplate transactionTemplate;
-
-    // last clean log time
-    private static Long lastCleanLogTime = 0L;
 
     @Override
     public String lockName() {
@@ -95,12 +94,12 @@ public class ClearLogSchedule extends AbstractSchedule implements Lifecycle {
     private List<RetryPartitionTask> retryTaskBatchList(Long startId, LocalDateTime endTime) {
 
         List<RetryTaskLog> retryTaskLogList = retryTaskLogMapper.selectPage(
-                new Page<>(0, 1000),
-                new LambdaUpdateWrapper<RetryTaskLog>()
-                        .ge(RetryTaskLog::getId, startId)
-                        .le(RetryTaskLog::getCreateDt, endTime)
-                        .orderByAsc(RetryTaskLog::getId)
-                ).getRecords();
+                        new Page<>(0, 1000),
+                        new LambdaUpdateWrapper<RetryTaskLog>()
+                                .ge(RetryTaskLog::getId, startId)
+                                .le(RetryTaskLog::getCreateDt, endTime)
+                                .orderByAsc(RetryTaskLog::getId))
+                .getRecords();
         return RetryTaskConverter.INSTANCE.toRetryTaskLogPartitionTasks(retryTaskLogList);
     }
 

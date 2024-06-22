@@ -39,7 +39,7 @@ public class JobTimerWheel {
     /**
      * 定时任务添加时间轮
      *
-     * @param task 任务
+     * @param task  任务
      * @param delay 延迟时间
      */
     public static synchronized void registerWithWorkflow(Supplier<TimerTask<String>> task, Duration delay) {
@@ -50,7 +50,8 @@ public class JobTimerWheel {
     /**
      * 工作流任务添加时间轮
      * 虽然job和Workflow 添加时间轮方法逻辑一样为了后面做一些不同的逻辑，这里兼容分开写
-     * @param task 任务
+     *
+     * @param task  任务
      * @param delay 延迟时间
      */
     public static synchronized void registerWithJob(Supplier<TimerTask<String>> task, Duration delay) {
