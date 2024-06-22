@@ -113,7 +113,7 @@ public class JobServiceImpl implements JobService {
 
         UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
         PageDTO<Job> selectPage = jobMapper.selectPage(
-            new PageDTO<>(1, 20),
+            new PageDTO<>(1, 100),
             new LambdaQueryWrapper<Job>()
                 .select(Job::getId, Job::getJobName)
                 .eq(Job::getNamespaceId, userSessionVO.getNamespaceId())
@@ -122,7 +122,7 @@ public class JobServiceImpl implements JobService {
                 .eq(Objects.nonNull(jobId), Job::getId, jobId)
                 .eq(Job::getDeleted, StatusEnum.NO.getStatus())
                 // SQLServer 分页必须 ORDER BY
-                .orderByAsc(Job::getId));
+                .orderByDesc(Job::getId));
         return JobResponseVOConverter.INSTANCE.convertList(selectPage.getRecords());
     }
 

@@ -35,7 +35,7 @@ public interface WorkflowService {
 
     Boolean trigger(Long id);
 
-    List<WorkflowResponseVO> getWorkflowNameList(String keywords, Long workflowId);
+    List<WorkflowResponseVO> getWorkflowNameList(String keywords, Long workflowId, String groupName);
 
     Pair<Integer, String> checkNodeExpression(DecisionConfig decisionConfig);
 

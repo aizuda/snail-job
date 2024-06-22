@@ -84,8 +84,9 @@ public class WorkflowController {
     @LoginRequired(role = RoleEnum.USER)
     public List<WorkflowResponseVO> getWorkflowNameList(
             @RequestParam(value = "keywords", required = false) String keywords,
-            @RequestParam(value = "workflowId", required = false) Long workflowId) {
-        return workflowService.getWorkflowNameList(keywords, workflowId);
+            @RequestParam(value = "workflowId", required = false) Long workflowId,
+            @RequestParam(value = "groupName", required = false) String groupName) {
+        return workflowService.getWorkflowNameList(keywords, workflowId, groupName);
     }
 
     @PostMapping("/check-node-expression")

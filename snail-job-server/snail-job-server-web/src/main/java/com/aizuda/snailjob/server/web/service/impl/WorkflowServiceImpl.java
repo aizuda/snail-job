@@ -292,15 +292,16 @@ public class WorkflowServiceImpl implements WorkflowService {
     }
 
     @Override
-    public List<WorkflowResponseVO> getWorkflowNameList(String keywords, Long workflowId) {
+    public List<WorkflowResponseVO> getWorkflowNameList(String keywords, Long workflowId, String groupName) {
         PageDTO<Workflow> selectPage = workflowMapper.selectPage(
-            new PageDTO<>(1, 20),
+            new PageDTO<>(1, 100),
             new LambdaQueryWrapper<Workflow>()
                 .select(Workflow::getId, Workflow::getWorkflowName)
                 .likeRight(StrUtil.isNotBlank(keywords), Workflow::getWorkflowName, StrUtil.trim(keywords))
                 .eq(Objects.nonNull(workflowId), Workflow::getId, workflowId)
+                .eq(StrUtil.isNotBlank(groupName), Workflow::getGroupName, groupName)
                 .eq(Workflow::getDeleted, StatusEnum.NO.getStatus())
-                .orderByAsc(Workflow::getId));
+                .orderByDesc(Workflow::getId));
 
         return WorkflowConverter.INSTANCE.convertListToWorkflowList(selectPage.getRecords());
     }
