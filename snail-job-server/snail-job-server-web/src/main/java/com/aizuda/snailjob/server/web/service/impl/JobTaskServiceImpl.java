@@ -54,20 +54,24 @@ public class JobTaskServiceImpl implements JobTaskService {
     }
 
     @Override
-    public List<Tree<Long>> getTreeJobTask(final JobTaskQueryVO queryVO) {
-        List<JobTask> jobTasks = jobTaskMapper.selectList(
+    public PageResult<List<Tree<Long>>> getTreeJobTask(final JobTaskQueryVO queryVO) {
+        List<JobTask> taskList = jobTaskMapper.selectList(
                 new LambdaQueryWrapper<JobTask>()
-                        .eq(JobTask::getParentId, queryVO.getParentId())
+                        .eq(Objects.nonNull(queryVO.getParentId()), JobTask::getParentId, queryVO.getParentId())
                         .eq(Objects.nonNull(queryVO.getJobId()), JobTask::getJobId, queryVO.getJobId())
                         .eq(Objects.nonNull(queryVO.getTaskBatchId()), JobTask::getTaskBatchId, queryVO.getTaskBatchId())
                         // SQLServer 分页必须 ORDER BY
                         .orderByAsc(JobTask::getJobId));
 
-        return TreeUtil.build(jobTasks, 0L, (jobTask, tree) -> {
+        TreeNodeConfig config = new TreeNodeConfig();
+        config.setNameKey("taskName");
+        config.setChildrenKey("children");
+        List<Tree<Long>> treeList = TreeUtil.build(taskList, Objects.nonNull(queryVO.getParentId()) ? queryVO.getParentId() : 0L, config, (jobTask, tree) -> {
+            tree.putAll(JsonUtil.parseHashMap(JsonUtil.toJsonString(jobTask), Object.class));
             tree.setId(jobTask.getId());
-            tree.setName(jobTask.getTaskName());
             tree.setParentId(jobTask.getParentId());
-            tree.putExtra("jobTask", jobTask);
         });
+
+        return new PageResult<>(new PageDTO<>(queryVO.getPage(), queryVO.getSize(), treeList.size()), treeList);
     }
 }

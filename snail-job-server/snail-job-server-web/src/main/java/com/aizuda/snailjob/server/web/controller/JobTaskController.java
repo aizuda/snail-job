@@ -32,7 +32,7 @@ public class JobTaskController {
 
     @GetMapping("/tree/list")
     @LoginRequired
-    public List<Tree<Long>> getTreeJobTask(JobTaskQueryVO jobTaskQueryVO) {
+    public PageResult<List<Tree<Long>>> getTreeJobTask(JobTaskQueryVO jobTaskQueryVO) {
         return jobTaskService.getTreeJobTask(jobTaskQueryVO);
     }
 
