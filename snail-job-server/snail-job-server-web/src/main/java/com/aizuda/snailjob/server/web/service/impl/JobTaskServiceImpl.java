@@ -1,10 +1,12 @@
 package com.aizuda.snailjob.server.web.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.tree.Tree;
 import cn.hutool.core.lang.tree.TreeNode;
 import cn.hutool.core.lang.tree.TreeNodeConfig;
 import cn.hutool.core.lang.tree.TreeUtil;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
+import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.JobTaskQueryVO;
 import com.aizuda.snailjob.server.web.model.response.JobTaskResponseVO;
@@ -19,7 +21,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author: opensnail
@@ -41,13 +46,23 @@ public class JobTaskServiceImpl implements JobTaskService {
                         .eq(Objects.nonNull(queryVO.getJobId()), JobTask::getJobId, queryVO.getJobId())
                         .eq(Objects.nonNull(queryVO.getTaskBatchId()), JobTask::getTaskBatchId, queryVO.getTaskBatchId())
                         .eq(Objects.nonNull(queryVO.getTaskStatus()), JobTask::getTaskStatus, queryVO.getTaskStatus())
+                        .eq(JobTask::getParentId, 0)
                         // SQLServer 分页必须 ORDER BY
-                        .orderByAsc(JobTask::getJobId));
+                        .orderByAsc(JobTask::getId));
 
         List<JobTaskResponseVO> jobTaskResponseVOs = JobTaskResponseVOConverter.INSTANCE.convertList(
                 selectPage.getRecords());
+        if (CollUtil.isEmpty(jobTaskResponseVOs)) {
+            return new PageResult<>(pageDTO, jobTaskResponseVOs);
+        }
+
+        Set<Long> parentIds = StreamUtils.toSet(jobTaskResponseVOs, JobTaskResponseVO::getId);
+        List<JobTask> jobTasks = jobTaskMapper.selectList(new LambdaQueryWrapper<JobTask>()
+            .select(JobTask::getId).in(JobTask::getId, parentIds));
+        Set<Long> jobTaskIds = StreamUtils.toSet(jobTasks, JobTask::getId);
         for (JobTaskResponseVO jobTaskResponseVO : jobTaskResponseVOs) {
             jobTaskResponseVO.setKey(jobTaskResponseVO.getId());
+            jobTaskResponseVO.setChildNode(jobTaskIds.contains(jobTaskResponseVO.getId()));
         }
 
         return new PageResult<>(pageDTO, jobTaskResponseVOs);
