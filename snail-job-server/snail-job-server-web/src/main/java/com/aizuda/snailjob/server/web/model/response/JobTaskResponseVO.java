@@ -81,5 +81,10 @@ public class JobTaskResponseVO {
      */
     private LocalDateTime updateDt;
 
+    /**
+     * 是否有子节点
+     */
+    private boolean isChildNode;
+
 
 }
