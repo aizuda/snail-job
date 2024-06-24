@@ -19,11 +19,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -50,20 +46,20 @@ public class JobTaskServiceImpl implements JobTaskService {
                         // SQLServer 分页必须 ORDER BY
                         .orderByAsc(JobTask::getId));
 
-        List<JobTaskResponseVO> jobTaskResponseVOs = JobTaskResponseVOConverter.INSTANCE.convertList(
-                selectPage.getRecords());
-        if (CollUtil.isEmpty(jobTaskResponseVOs)) {
-            return new PageResult<>(pageDTO, jobTaskResponseVOs);
+        List<JobTask> records = selectPage.getRecords();
+
+        if (CollUtil.isEmpty(records)) {
+            return new PageResult<>(pageDTO, new ArrayList<>());
         }
+
+        List<JobTaskResponseVO> jobTaskResponseVOs = JobTaskResponseVOConverter.INSTANCE.convertList(
+                records);
 
         Set<Long> parentIds = StreamUtils.toSet(jobTaskResponseVOs, JobTaskResponseVO::getId);
         List<JobTask> jobTasks = jobTaskMapper.selectList(new LambdaQueryWrapper<JobTask>()
-            .select(JobTask::getId).in(JobTask::getId, parentIds));
-        Set<Long> jobTaskIds = StreamUtils.toSet(jobTasks, JobTask::getId);
-        for (JobTaskResponseVO jobTaskResponseVO : jobTaskResponseVOs) {
-            jobTaskResponseVO.setKey(jobTaskResponseVO.getId());
-            jobTaskResponseVO.setChildNode(jobTaskIds.contains(jobTaskResponseVO.getId()));
-        }
+                .select(JobTask::getParentId).in(JobTask::getParentId, parentIds));
+        Set<Long> jobTaskParentIds = StreamUtils.toSet(jobTasks, JobTask::getParentId);
+        jobTaskResponseVOs.forEach(jobTask -> jobTask.setChildNode(!jobTaskParentIds.contains(jobTask.getId())));
 
         return new PageResult<>(pageDTO, jobTaskResponseVOs);
     }

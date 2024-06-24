@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.web.model.response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -84,6 +85,7 @@ public class JobTaskResponseVO {
     /**
      * 是否有子节点
      */
+    @JsonProperty("isLeaf")
     private boolean isChildNode;
 
 
