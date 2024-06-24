@@ -16,5 +16,5 @@ public interface JobTaskService {
 
     PageResult<List<JobTaskResponseVO>> getJobTaskPage(JobTaskQueryVO jobTaskQueryVO);
 
-    PageResult<List<Tree<Long>>> getTreeJobTask(JobTaskQueryVO jobTaskQueryVO);
+    List<JobTaskResponseVO> getTreeJobTask(JobTaskQueryVO jobTaskQueryVO);
 }
