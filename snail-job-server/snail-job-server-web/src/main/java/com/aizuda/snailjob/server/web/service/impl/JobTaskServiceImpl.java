@@ -48,24 +48,11 @@ public class JobTaskServiceImpl implements JobTaskService {
 
         List<JobTask> records = selectPage.getRecords();
 
-        if (CollUtil.isEmpty(records)) {
-            return new PageResult<>(pageDTO, new ArrayList<>());
-        }
-
-        List<JobTaskResponseVO> jobTaskResponseVOs = JobTaskResponseVOConverter.INSTANCE.convertList(
-                records);
-
-        Set<Long> parentIds = StreamUtils.toSet(jobTaskResponseVOs, JobTaskResponseVO::getId);
-        List<JobTask> jobTasks = jobTaskMapper.selectList(new LambdaQueryWrapper<JobTask>()
-                .select(JobTask::getParentId).in(JobTask::getParentId, parentIds));
-        Set<Long> jobTaskParentIds = StreamUtils.toSet(jobTasks, JobTask::getParentId);
-        jobTaskResponseVOs.forEach(jobTask -> jobTask.setChildNode(!jobTaskParentIds.contains(jobTask.getId())));
-
-        return new PageResult<>(pageDTO, jobTaskResponseVOs);
+        return new PageResult<>(pageDTO, convertJobTaskList(records));
     }
 
     @Override
-    public PageResult<List<Tree<Long>>> getTreeJobTask(final JobTaskQueryVO queryVO) {
+    public List<JobTaskResponseVO> getTreeJobTask(final JobTaskQueryVO queryVO) {
         List<JobTask> taskList = jobTaskMapper.selectList(
                 new LambdaQueryWrapper<JobTask>()
                         .eq(Objects.nonNull(queryVO.getParentId()), JobTask::getParentId, queryVO.getParentId())
@@ -74,15 +61,24 @@ public class JobTaskServiceImpl implements JobTaskService {
                         // SQLServer 分页必须 ORDER BY
                         .orderByAsc(JobTask::getJobId));
 
-        TreeNodeConfig config = new TreeNodeConfig();
-        config.setNameKey("taskName");
-        config.setChildrenKey("children");
-        List<Tree<Long>> treeList = TreeUtil.build(taskList, Objects.nonNull(queryVO.getParentId()) ? queryVO.getParentId() : 0L, config, (jobTask, tree) -> {
-            tree.putAll(JsonUtil.parseHashMap(JsonUtil.toJsonString(jobTask), Object.class));
-            tree.setId(jobTask.getId());
-            tree.setParentId(jobTask.getParentId());
-        });
-
-        return new PageResult<>(new PageDTO<>(queryVO.getPage(), queryVO.getSize(), treeList.size()), treeList);
+        return convertJobTaskList(taskList);
     }
+
+    private List<JobTaskResponseVO> convertJobTaskList(List<JobTask> taskList) {
+        if (CollUtil.isEmpty(taskList)) {
+            return new ArrayList<>();
+        }
+
+        List<JobTaskResponseVO> jobTaskResponseVOs = JobTaskResponseVOConverter.INSTANCE.convertList(
+                taskList);
+
+        Set<Long> parentIds = StreamUtils.toSet(jobTaskResponseVOs, JobTaskResponseVO::getId);
+        List<JobTask> jobTasks = jobTaskMapper.selectList(new LambdaQueryWrapper<JobTask>()
+                .select(JobTask::getParentId).in(JobTask::getParentId, parentIds));
+        Set<Long> jobTaskParentIds = StreamUtils.toSet(jobTasks, JobTask::getParentId);
+        jobTaskResponseVOs.forEach(jobTask -> jobTask.setChildNode(!jobTaskParentIds.contains(jobTask.getId())));
+
+        return jobTaskResponseVOs;
+    }
+
 }

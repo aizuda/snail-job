@@ -15,12 +15,15 @@ public class JobTaskResponseVO {
 
     private Long id;
 
-    private Long key;
-
     /**
      * 组名称
      */
     private String groupName;
+
+    /**
+     * 任务名称
+     */
+    private String taskName;
 
     /**
      * 任务信息id
