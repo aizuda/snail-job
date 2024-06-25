@@ -17,5 +17,6 @@ public class CompleteJobBatchDTO {
     private Long taskBatchId;
     private Integer jobOperationReason;
     private Object result;
+    private Integer taskType;
 
 }

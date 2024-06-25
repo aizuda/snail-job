@@ -1,10 +1,15 @@
 package com.aizuda.snailjob.server.job.task.support.block.job;
 
+import akka.actor.ActorRef;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import com.aizuda.snailjob.common.core.enums.JobTaskStatusEnum;
+import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
+import com.aizuda.snailjob.server.common.akka.ActorGenerator;
+import com.aizuda.snailjob.server.common.enums.JobTaskExecutorSceneEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
+import com.aizuda.snailjob.server.job.task.dto.TaskExecuteDTO;
 import com.aizuda.snailjob.server.job.task.enums.BlockStrategyEnum;
 import com.aizuda.snailjob.server.job.task.support.JobExecutor;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
@@ -19,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * 重新触发执行失败的任务
@@ -29,7 +35,7 @@ import java.util.List;
  */
 @Component
 @RequiredArgsConstructor
-public class DiscardRetryBlockStrategy extends AbstracJobBlockStrategy {
+public class RecoveryBlockStrategy extends AbstracJobBlockStrategy {
     private final JobTaskMapper jobTaskMapper;
     private final JobMapper jobMapper;
     @Override
@@ -42,18 +48,26 @@ public class DiscardRetryBlockStrategy extends AbstracJobBlockStrategy {
                 new LambdaQueryWrapper<JobTask>()
                         .select(JobTask::getId, JobTask::getTaskStatus)
                         .eq(JobTask::getTaskBatchId, context.getTaskBatchId())
-                        .eq(JobTask::getTaskStatus, JobTaskStatusEnum.NOT_SUCCESS)
         );
 
+        //  若任务项为空则生成任务项
         if (CollUtil.isEmpty(jobTasks)) {
-            SnailJobLog.LOCAL.warn("No executable job task. taskBatchId:[{}]", context.getTaskBatchId());
+            TaskExecuteDTO taskExecuteDTO = new TaskExecuteDTO();
+            taskExecuteDTO.setTaskBatchId(context.getTaskBatchId());
+            taskExecuteDTO.setJobId(context.getJobId());
+            taskExecuteDTO.setTaskExecutorScene(JobTaskExecutorSceneEnum.MANUAL_JOB.getType());
+            taskExecuteDTO.setWorkflowTaskBatchId(context.getWorkflowTaskBatchId());
+            taskExecuteDTO.setWorkflowNodeId(context.getWorkflowNodeId());
+            ActorRef actorRef = ActorGenerator.jobTaskExecutorActor();
+            actorRef.tell(taskExecuteDTO, actorRef);
             return;
         }
 
         Job job = jobMapper.selectById(context.getJobId());
-        // 执行任务
+        // 执行任务 Stop or Fail 任务
         JobExecutor jobExecutor = JobExecutorFactory.getJobExecutor(context.getTaskType());
-        jobExecutor.execute(buildJobExecutorContext(context, job, jobTasks));
+        jobExecutor.execute(buildJobExecutorContext(context, job,
+                StreamUtils.filter(jobTasks, (jobTask) -> JobTaskStatusEnum.NOT_SUCCESS.contains(jobTask.getTaskStatus()))));
     }
 
     @Override

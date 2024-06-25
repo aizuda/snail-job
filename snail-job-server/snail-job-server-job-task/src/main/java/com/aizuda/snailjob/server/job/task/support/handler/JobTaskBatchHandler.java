@@ -95,12 +95,10 @@ public class JobTaskBatchHandler {
         } else if (stopCount > 0) {
             jobTaskBatch.setTaskBatchStatus(JobTaskBatchStatusEnum.STOP.getStatus());
         } else {
-            // todo 调试完成删除
-            SnailJobLog.LOCAL.info("尝试完成任务. taskBatchId:[{}] [{}]", completeJobBatchDTO.getTaskBatchId(),
-                JsonUtil.toJsonString(jobTasks));
 
             jobTaskBatch.setTaskBatchStatus(JobTaskBatchStatusEnum.SUCCESS.getStatus());
-            if (needReduceTask(completeJobBatchDTO, jobTasks)) {
+            if (needReduceTask(completeJobBatchDTO, jobTasks)
+                    && JobTaskTypeEnum.MAP_REDUCE.getType() == completeJobBatchDTO.getTaskType()) {
                 // 此时中断批次完成，需要开启reduce任务
                 return false;
             }

@@ -51,6 +51,7 @@ public class JobExecutorResultActor extends AbstractActor {
                 Assert.notNull(result.getTaskId(), ()-> new SnailJobServerException("taskId can not be null"));
                 Assert.notNull(result.getJobId(), ()-> new SnailJobServerException("jobId can not be null"));
                 Assert.notNull(result.getTaskBatchId(), ()-> new SnailJobServerException("taskBatchId can not be null"));
+                Assert.notNull(result.getTaskType(), ()-> new SnailJobServerException("taskType can not be null"));
 
                 JobTask jobTask = new JobTask();
                 jobTask.setTaskStatus(result.getTaskStatus());
@@ -62,9 +63,6 @@ public class JobExecutorResultActor extends AbstractActor {
                 Assert.isTrue(1 == jobTaskMapper.update(jobTask,
                                 new LambdaUpdateWrapper<JobTask>().eq(JobTask::getId, result.getTaskId())),
                         () -> new SnailJobServerException("更新任务实例失败"));
-
-                // 更新工作流的全局上下文 如果并发更新失败则需要自旋重试更新
-//                workflowBatchHandler.mergeWorkflowContextAndRetry(result.getWorkflowTaskBatchId(), result.getWfContext());
 
                 // 除MAP和MAP_REDUCE 任务之外，其他任务都是叶子节点
                 if (Objects.nonNull(result.getIsLeaf()) && StatusEnum.NO.getStatus().equals(result.getIsLeaf())) {

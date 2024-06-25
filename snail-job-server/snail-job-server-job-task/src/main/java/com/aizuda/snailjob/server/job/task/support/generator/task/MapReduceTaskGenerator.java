@@ -16,6 +16,7 @@ import com.aizuda.snailjob.server.common.cache.CacheRegisterTable;
 import com.aizuda.snailjob.server.common.dto.RegisterNodeInfo;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.util.ClientInfoUtils;
+import com.aizuda.snailjob.server.job.task.dto.MapReduceArgsStrDTO;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTask;
@@ -43,6 +44,8 @@ import java.util.*;
 @RequiredArgsConstructor
 public class MapReduceTaskGenerator extends AbstractJobTaskGenerator {
 
+    private static final String MERGE_REDUCE_TASK = "MERGE_REDUCE_TASK";
+    private static final String REDUCE_TASK = "REDUCE_TASK";
     private final JobTaskMapper jobTaskMapper;
     private final TransactionTemplate transactionTemplate;
 
@@ -53,7 +56,6 @@ public class MapReduceTaskGenerator extends AbstractJobTaskGenerator {
 
     @Override
     protected List<JobTask> doGenerate(final JobTaskGenerateContext context) {
-        // TODO 若没有客户端节点JobTask是否需要创建????
         Set<RegisterNodeInfo> serverNodes = CacheRegisterTable.getServerNodeSet(context.getGroupName(),
                 context.getNamespaceId());
         if (CollUtil.isEmpty(serverNodes)) {
@@ -64,9 +66,7 @@ public class MapReduceTaskGenerator extends AbstractJobTaskGenerator {
         List<RegisterNodeInfo> nodeInfoList = new ArrayList<>(serverNodes);
         MapReduceStageEnum mapReduceStageEnum = MapReduceStageEnum.ofStage(context.getMrStage());
         Assert.notNull(mapReduceStageEnum, () -> new SnailJobServerException("Map reduce stage is not existed"));
-
-        // todo 待优化
-        switch (mapReduceStageEnum) {
+        switch (Objects.requireNonNull(mapReduceStageEnum)) {
             case MAP -> {
                 // MAP任务
                 return createMapJobTasks(context, nodeInfoList, serverNodes);
@@ -105,7 +105,7 @@ public class MapReduceTaskGenerator extends AbstractJobTaskGenerator {
         jobTask.setTaskStatus(JobTaskStatusEnum.RUNNING.getStatus());
         jobTask.setResultMessage(Optional.ofNullable(jobTask.getResultMessage()).orElse(StrUtil.EMPTY));
         jobTask.setMrStage(MapReduceStageEnum.MERGE_REDUCE.getStage());
-        jobTask.setTaskName("MERGE_REDUCE_TASK");
+        jobTask.setTaskName(MERGE_REDUCE_TASK);
         Assert.isTrue(1 == jobTaskMapper.insert(jobTask),
                 () -> new SnailJobServerException("新增任务实例失败"));
 
@@ -115,8 +115,15 @@ public class MapReduceTaskGenerator extends AbstractJobTaskGenerator {
     private List<JobTask> createReduceJobTasks(JobTaskGenerateContext context, List<RegisterNodeInfo> nodeInfoList,
                                                Set<RegisterNodeInfo> serverNodes) {
 
-        // TODO  reduce阶段的并行度
-        int reduceParallel = 2;
+        int reduceParallel = 1;
+        String jobParams = null;
+        try {
+            MapReduceArgsStrDTO mapReduceArgsStrDTO = JsonUtil.parseObject(context.getArgsStr(), MapReduceArgsStrDTO.class);
+            reduceParallel = Optional.ofNullable(mapReduceArgsStrDTO.getShardNum()).orElse(1);
+            jobParams = mapReduceArgsStrDTO.getArgsStr();
+        } catch (Exception e) {
+            SnailJobLog.LOCAL.error("map reduce args parse error. argsStr:[{}]", context.getArgsStr());
+        }
 
         List<JobTask> jobTasks = jobTaskMapper.selectList(new LambdaQueryWrapper<JobTask>()
                 .select(JobTask::getResultMessage)
@@ -132,6 +139,7 @@ public class MapReduceTaskGenerator extends AbstractJobTaskGenerator {
 
         jobTasks = new ArrayList<>(partition.size());
         final List<JobTask> finalJobTasks = jobTasks;
+        String finalJobParams = jobParams;
         transactionTemplate.execute(new TransactionCallbackWithoutResult() {
             @Override
             protected void doInTransactionWithoutResult(final TransactionStatus status) {
@@ -142,13 +150,13 @@ public class MapReduceTaskGenerator extends AbstractJobTaskGenerator {
                     jobTask.setClientInfo(ClientInfoUtils.generate(registerNodeInfo));
                     jobTask.setArgsType(context.getArgsType());
                     JobArgsHolder jobArgsHolder = new JobArgsHolder();
-                    jobArgsHolder.setJobParams(StrUtil.isBlank(context.getArgsStr()) ? null : context.getArgsStr());
+                    jobArgsHolder.setJobParams(finalJobParams);
                     jobArgsHolder.setMaps(JsonUtil.toJsonString(partition.get(index)));
                     jobTask.setArgsStr(JsonUtil.toJsonString(jobArgsHolder));
                     jobTask.setTaskStatus(JobTaskStatusEnum.RUNNING.getStatus());
                     jobTask.setResultMessage(Optional.ofNullable(jobTask.getResultMessage()).orElse(StrUtil.EMPTY));
                     jobTask.setMrStage(MapReduceStageEnum.REDUCE.getStage());
-                    jobTask.setTaskName("REDUCE_TASK");
+                    jobTask.setTaskName(REDUCE_TASK);
                     jobTask.setParentId(0L);
                     jobTask.setRetryCount(0);
                     jobTask.setLeaf(StatusEnum.YES.getStatus());
