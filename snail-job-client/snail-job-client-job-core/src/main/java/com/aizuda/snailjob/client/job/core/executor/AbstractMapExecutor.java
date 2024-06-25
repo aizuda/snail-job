@@ -35,8 +35,11 @@ public abstract class AbstractMapExecutor extends AbstractJobExecutor implements
 
     @Override
     protected ExecuteResult doJobExecute(final JobArgs jobArgs) {
-        MapArgs mapArgs = (MapArgs) jobArgs;
-        return this.doJobMapExecute(mapArgs);
+        if (jobArgs instanceof MapArgs) {
+            return this.doJobMapExecute((MapArgs) jobArgs);
+        }
+
+        throw new SnailJobMapReduceException("For tasks that are not of type map or map reduce, please do not use the AbstractMapExecutor class.");
     }
 
     public abstract ExecuteResult doJobMapExecute(MapArgs mapArgs);
