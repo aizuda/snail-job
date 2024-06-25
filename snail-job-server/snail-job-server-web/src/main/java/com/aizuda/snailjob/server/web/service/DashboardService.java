@@ -1,7 +1,8 @@
 package com.aizuda.snailjob.server.web.service;
 
-import com.aizuda.snailjob.server.web.model.base.BaseQueryVO;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
+import com.aizuda.snailjob.server.web.model.request.JobLineQueryVo;
+import com.aizuda.snailjob.server.web.model.request.LineQueryVO;
 import com.aizuda.snailjob.server.web.model.request.ServerNodeQueryVO;
 import com.aizuda.snailjob.server.web.model.response.DashboardCardResponseVO;
 import com.aizuda.snailjob.server.web.model.response.DashboardRetryLineResponseVO;
@@ -17,9 +18,9 @@ public interface DashboardService {
 
     DashboardCardResponseVO taskRetryJob();
 
-    DashboardRetryLineResponseVO retryLineList(BaseQueryVO baseQueryVO, String groupName, String type, String startTime, String endTime);
+    DashboardRetryLineResponseVO retryLineList(LineQueryVO queryVO);
 
-    DashboardRetryLineResponseVO jobLineList(BaseQueryVO baseQueryVO, String mode, String groupName, String type, String startTime, String endTime);
+    DashboardRetryLineResponseVO jobLineList(JobLineQueryVo queryVO);
 
     PageResult<List<ServerNodeResponseVO>> pods(ServerNodeQueryVO serverNodeQueryVO);
 }

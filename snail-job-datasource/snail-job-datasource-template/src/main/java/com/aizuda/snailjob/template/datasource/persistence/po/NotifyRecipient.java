@@ -6,14 +6,8 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.LocalDateTime;
-
 /**
- * <p>
  * 告警通知接收人
- * </p>
  *
  * @author opensnail
  * @since 2024-04-17
@@ -21,10 +15,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @TableName("sj_notify_recipient")
-public class NotifyRecipient implements Serializable {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
+public class NotifyRecipient extends CreateUpdateDt {
 
     /**
      * 主键
@@ -57,13 +48,4 @@ public class NotifyRecipient implements Serializable {
      */
     private String description;
 
-    /**
-     * 创建时间
-     */
-    private LocalDateTime createDt;
-
-    /**
-     * 修改时间
-     */
-    private LocalDateTime updateDt;
 }

@@ -46,6 +46,6 @@ public class WorkflowTimerTask implements TimerTask<String> {
 
     @Override
     public String idempotentKey() {
-        return MessageFormat.format(IDEMPOTENT_KEY_PREFIX,  workflowTimerTaskDTO.getWorkflowTaskBatchId());
+        return MessageFormat.format(IDEMPOTENT_KEY_PREFIX, workflowTimerTaskDTO.getWorkflowTaskBatchId());
     }
 }

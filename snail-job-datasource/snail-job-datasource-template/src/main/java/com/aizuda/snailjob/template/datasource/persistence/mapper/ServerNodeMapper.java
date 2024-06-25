@@ -12,9 +12,9 @@ import java.util.List;
 @Mapper
 public interface ServerNodeMapper extends BaseMapper<ServerNode> {
 
-    int updateBatchExpireAt(@Param("list") List<ServerNode> list);
+    int insertBatch(@Param("list") List<ServerNode> list);
 
-    int insertBatch(@Param("records") List<ServerNode> records);
+    int updateBatchExpireAt(@Param("list") List<ServerNode> list);
 
     List<ActivePodQuantityResponseDO> selectActivePodCount(@Param("ew") Wrapper<ServerNode> wrapper);
 

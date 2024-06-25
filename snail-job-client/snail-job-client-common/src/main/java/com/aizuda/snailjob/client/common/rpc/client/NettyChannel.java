@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.client.common.rpc.client;
 
+import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.client.common.cache.GroupVersionCache;
@@ -55,7 +56,7 @@ public class NettyChannel {
     private static final String HOST;
 
     static {
-        PORT = Integer.parseInt(System.getProperty(SNAIL_JOB_CLIENT_PORT, String.valueOf(8080)));
+        PORT = Integer.parseInt(System.getProperty(SNAIL_JOB_CLIENT_PORT, String.valueOf(1789)));
         HOST = System.getProperty(SNAIL_JOB_CLIENT_HOST, NetUtil.getLocalIpStr());
     }
 
@@ -161,6 +162,8 @@ public class NettyChannel {
             return;
         }
 
+        Assert.notBlank(snailJobProperties.getGroup(),
+                () -> new SnailJobRemoteException("The group is null, please check if your configuration is correct."));
 
         request.headers()
                 .set(HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON)

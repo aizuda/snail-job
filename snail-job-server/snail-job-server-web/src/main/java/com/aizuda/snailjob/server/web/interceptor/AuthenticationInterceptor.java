@@ -5,7 +5,6 @@ import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.exception.SnailJobAuthenticationException;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
-import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.web.annotation.LoginRequired;
 import com.aizuda.snailjob.server.web.annotation.RoleEnum;
 import com.aizuda.snailjob.server.web.model.request.UserSessionVO;

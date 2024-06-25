@@ -5,9 +5,6 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
-import java.io.Serializable;
-import java.time.LocalDateTime;
-
 /**
  * 任务通知配置
  *
@@ -16,9 +13,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @TableName("sj_job_notify_config")
-public class JobNotifyConfig implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class JobNotifyConfig extends CreateUpdateDt {
 
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
@@ -44,9 +39,5 @@ public class JobNotifyConfig implements Serializable {
     private Integer rateLimiterThreshold;
 
     private String description;
-
-    private LocalDateTime createDt;
-
-    private LocalDateTime updateDt;
 
 }

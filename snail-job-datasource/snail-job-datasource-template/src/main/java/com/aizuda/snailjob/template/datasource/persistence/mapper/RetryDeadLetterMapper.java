@@ -8,6 +8,6 @@ import java.util.List;
 
 public interface RetryDeadLetterMapper extends BaseMapper<RetryDeadLetter> {
 
-    int insertBatch(@Param("retryDeadLetters") List<RetryDeadLetter> retryDeadLetter);
+    int insertBatch(@Param("list") List<RetryDeadLetter> list);
 
 }

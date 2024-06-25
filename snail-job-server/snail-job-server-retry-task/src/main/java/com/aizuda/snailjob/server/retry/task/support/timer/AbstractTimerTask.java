@@ -1,6 +1,5 @@
 package com.aizuda.snailjob.server.retry.task.support.timer;
 
-import cn.hutool.core.lang.Pair;
 import com.aizuda.snailjob.server.common.TimerTask;
 import io.netty.util.Timeout;
 import lombok.extern.slf4j.Slf4j;

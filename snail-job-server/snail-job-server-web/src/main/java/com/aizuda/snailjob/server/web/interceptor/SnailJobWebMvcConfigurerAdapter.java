@@ -41,4 +41,5 @@ public class SnailJobWebMvcConfigurerAdapter implements WebMvcConfigurer {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/admin/**").addResourceLocations("classpath:/admin/");
     }
+
 }

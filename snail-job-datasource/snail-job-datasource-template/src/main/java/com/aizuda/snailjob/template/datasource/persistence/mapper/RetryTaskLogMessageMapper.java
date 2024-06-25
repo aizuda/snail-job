@@ -3,6 +3,7 @@ package com.aizuda.snailjob.template.datasource.persistence.mapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTaskLogMessage;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -17,7 +18,8 @@ import java.util.List;
 @Mapper
 public interface RetryTaskLogMessageMapper extends BaseMapper<RetryTaskLogMessage> {
 
-    int insertBatch(List<RetryTaskLogMessage> list);
+    int insertBatch(@Param("list") List<RetryTaskLogMessage> list);
 
-    int updateBatch(List<RetryTaskLogMessage> list);
+    int updateBatch(@Param("list") List<RetryTaskLogMessage> list);
+
 }

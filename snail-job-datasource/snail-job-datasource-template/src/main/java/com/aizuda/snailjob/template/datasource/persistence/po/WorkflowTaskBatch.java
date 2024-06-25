@@ -18,10 +18,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @TableName("sj_workflow_task_batch")
-public class WorkflowTaskBatch implements Serializable {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
+public class WorkflowTaskBatch extends CreateUpdateDt {
 
     /**
      * 主键
@@ -73,16 +70,6 @@ public class WorkflowTaskBatch implements Serializable {
      * 逻辑删除 1、删除
      */
     private Integer deleted;
-
-    /**
-     * 创建时间
-     */
-    private LocalDateTime createDt;
-
-    /**
-     * 修改时间
-     */
-    private LocalDateTime updateDt;
 
     /**
      * 版本号

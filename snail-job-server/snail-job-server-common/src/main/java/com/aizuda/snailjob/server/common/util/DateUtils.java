@@ -6,6 +6,9 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
+import static com.aizuda.snailjob.common.core.constant.SystemConstants.YYYYMMDDHHMMSS;
+import static com.aizuda.snailjob.common.core.constant.SystemConstants.YYYY_MM_DD_HH_MM_SS;
+
 /**
  * @author opensnail
  * @date 2023-11-02 23:42:53
@@ -13,9 +16,9 @@ import java.util.Date;
  */
 public class DateUtils {
 
-    public static final DateTimeFormatter NORM_DATETIME_PATTERN = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    public static final DateTimeFormatter NORM_DATETIME_PATTERN = DateTimeFormatter.ofPattern(YYYY_MM_DD_HH_MM_SS);
 
-    public static final DateTimeFormatter PURE_DATETIME_MS_PATTERN = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
+    public static final DateTimeFormatter PURE_DATETIME_MS_PATTERN = DateTimeFormatter.ofPattern(YYYYMMDDHHMMSS);
 
     private static final ZoneOffset zoneOffset = ZoneOffset.of("+8");
 

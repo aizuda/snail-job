@@ -40,6 +40,8 @@ import java.util.List;
 @Slf4j
 public class JobClearLogSchedule extends AbstractSchedule implements Lifecycle {
 
+    // last clean log time
+    private static Long lastCleanLogTime = 0L;
     @Autowired
     private SystemProperties systemProperties;
     @Autowired
@@ -50,9 +52,6 @@ public class JobClearLogSchedule extends AbstractSchedule implements Lifecycle {
     private JobLogMessageMapper jobLogMessageMapper;
     @Autowired
     private TransactionTemplate transactionTemplate;
-
-    // last clean log time
-    private static Long lastCleanLogTime = 0L;
 
     @Override
     public String lockName() {
@@ -101,12 +100,12 @@ public class JobClearLogSchedule extends AbstractSchedule implements Lifecycle {
     private List<JobPartitionTaskDTO> jobTaskBatchList(Long startId, LocalDateTime endTime) {
 
         List<JobTaskBatch> jobTaskBatchList = jobTaskBatchMapper.selectPage(
-                new Page<>(0, 1000),
-                new LambdaUpdateWrapper<JobTaskBatch>()
-                        .ge(JobTaskBatch::getId, startId)
-                        .le(JobTaskBatch::getCreateDt, endTime)
-                        .orderByAsc(JobTaskBatch::getId)
-                ).getRecords();
+                        new Page<>(0, 1000),
+                        new LambdaUpdateWrapper<JobTaskBatch>()
+                                .ge(JobTaskBatch::getId, startId)
+                                .le(JobTaskBatch::getCreateDt, endTime)
+                                .orderByAsc(JobTaskBatch::getId))
+                .getRecords();
         return JobTaskConverter.INSTANCE.toJobTaskBatchPartitionTasks(jobTaskBatchList);
     }
 

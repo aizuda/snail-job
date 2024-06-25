@@ -34,14 +34,16 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 
+import static com.aizuda.snailjob.common.core.constant.SystemConstants.YYYY_MM_DD_HH_MM_SS;
+
 /**
  * @author: opensnail
  * @date : 2022-03-04 14:40
  */
 @Slf4j
 public abstract class AbstractRetryStrategies implements RetryStrategy {
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    private static String TEXT_MESSAGE_FORMATTER =
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(YYYY_MM_DD_HH_MM_SS);
+    private static final String TEXT_MESSAGE_FORMATTER =
             "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 重试组件异常</font>  \n" +
                     "> IP:{}  \n" +
                     "> 空间ID:{}  \n" +

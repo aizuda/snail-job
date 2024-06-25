@@ -626,13 +626,156 @@ GO
         return script
 
 
+class DM8Convertor(Convertor):
+    def __init__(self, src):
+        super().__init__(src, "DM8")
+
+        # if type == "varchar":
+        #     return f"varchar2({size if size < 4000 else 4000})"
+        # if type in ("int", "int unsigned"):
+        #     return "number"
+        # if type == "bigint" or type == "bigint unsigned":
+        #     return "number"
+        # if type == "datetime":
+        #     return "date"
+        # if type == "timestamp":
+        #     return f"timestamp({size})"
+        # if type == "bit":
+        #     return "number(1,0)"
+        # if type in ("tinyint", "smallint"):
+        #     return "smallint"
+        # if type in ("text", "longtext"):
+        #     return "clob"
+        # if type in ("blob", "mediumblob"):
+        #     return "blob"
+        # if type == "decimal":
+        #     return (
+        #         f"number({','.join(str(s) for s in size)})" if len(size) else "number"
+        #     )
+
+    def translate_type(self, type: str, size: Optional[Union[int, Tuple[int]]]):
+        """类型转换"""
+        type = type.lower()
+
+        if type == "varchar":
+            return f"varchar({size})"
+        if type in ("int", "int unsigned"):
+            return "int"
+        if type in ("bigint", "bigint unsigned"):
+            return "bigint"
+        if type == "datetime":
+            return "datetime"
+        if type == "timestamp":
+            return f"timestamp({size})"
+        if type == "bit":
+            return "bit"
+        if type in ("tinyint", "smallint"):
+            return "smallint"
+        if type in ("text", "longtext"):
+            return "text"
+        if type in ("blob", "mediumblob"):
+            return "blob"
+        if type == "decimal":
+            return (
+                f"decimal({','.join(str(s) for s in size)})" if len(size) else "decimal"
+            )
+
+    def gen_create(self, ddl) -> str:
+        """生成 CREATE 语句"""
+
+        def generate_column(col):
+            name = col["name"].lower()
+            if name == "id":
+                return "id bigint NOT NULL PRIMARY KEY IDENTITY"
+
+            type = col["type"].lower()
+            full_type = self.translate_type(type, col["size"])
+            nullable = "NULL" if col["nullable"] else "NOT NULL"
+            # Oracle的 INSERT '' 不能通过NOT NULL校验，因此对文字类型字段覆写为 NULL
+            nullable = "NULL" if type in ("varchar", "text", "longtext") else nullable
+            default = f"DEFAULT {col['default']}" if col["default"] is not None else ""
+            # Oracle 中 size 不能作为字段名
+            field_name = '"size"' if name == "size" else name
+            # Oracle DEFAULT 定义在 NULLABLE 之前
+            return f"{field_name} {full_type} {default} {nullable}"
+
+        table_name = ddl["table_name"].lower()
+        columns = [f"{generate_column(col).strip()}" for col in ddl["columns"]]
+        field_def_list = ",\n    ".join(columns)
+        script = f"""-- {table_name}
+CREATE TABLE {table_name} (
+    {field_def_list}
+);"""
+
+        # oracle INSERT '' 不能通过 NOT NULL 校验
+        # script = script.replace("DEFAULT '' NOT NULL", "DEFAULT '' NULL")
+
+        return script
+
+    def gen_index(self, ddl: Dict) -> str:
+        return "\n".join(f"{script};" for script in self.index(ddl))
+
+    def gen_comment(self, table_ddl: Dict) -> str:
+        script = ""
+        for column in table_ddl["columns"]:
+            table_comment = column["comment"]
+            script += (
+                f"COMMENT ON COLUMN {table_ddl['table_name']}.{column['name']} IS '{table_comment}';"
+                + "\n"
+            )
+
+        table_comment = table_ddl["comment"]
+        if table_comment:
+            script += (
+                f"COMMENT ON TABLE {table_ddl['table_name']} IS '{table_comment}';\n"
+            )
+
+        return script
+
+    def gen_pk(self, table_name: str) -> str:
+        """生成主键定义"""
+        return ""
+
+    def gen_uk(self, table_ddl: Dict) -> str:
+        script = ""
+        uk_list = list(Convertor.unique_index(table_ddl))
+        for idx, (table_name, _, uk_columns) in enumerate(uk_list, 1):
+            uk_name = f"uk_{table_name}_{idx:02d}"
+            script += f"CREATE UNIQUE INDEX {uk_name} ON {table_name} ({', '.join(uk_columns)});\n"
+
+        return script
+
+    def gen_index(self, ddl: Dict) -> str:
+        return "\n".join(f"{script};" for script in self.index(ddl))
+
+    def gen_insert(self, table_name: str) -> str:
+        """拷贝 INSERT 语句"""
+        inserts = []
+        for insert_script in Convertor.inserts(table_name, self.content):
+            insert_script = (
+                insert_script.replace("(id,", "(")
+                .replace("VALUES (1,", "VALUES (")
+                .replace("now(),", "sysdate,")
+            )
+            inserts.append(insert_script)
+
+        ## 生成 insert 脚本
+        script = ""
+        if inserts:
+            inserts_lines = "\n".join(inserts)
+            script += f"""\n\n
+{inserts_lines}"""
+
+        return script
+
+
 def main():
     parser = argparse.ArgumentParser(description="Snail Job Database Transfer Tool")
     parser.add_argument(
         "type",
         type=str,
         help="Target database type",
-        choices=["postgre", "oracle", "sqlserver"],
+        choices=["postgre", "oracle", "sqlserver", "dm8"],
     )
     args = parser.parse_args()
 
@@ -644,6 +787,8 @@ def main():
         convertor = OracleConvertor(sql_file)
     elif args.type == "sqlserver":
         convertor = SQLServerConvertor(sql_file)
+    elif args.type ==  "dm8":
+        convertor = DM8Convertor(sql_file)
     else:
         raise NotImplementedError(f"Database type not supported: {args.type}")
 

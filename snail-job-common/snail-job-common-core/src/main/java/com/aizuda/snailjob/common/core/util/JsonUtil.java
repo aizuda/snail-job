@@ -19,6 +19,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static com.aizuda.snailjob.common.core.constant.SystemConstants.YYYY_MM_DD;
+import static com.aizuda.snailjob.common.core.constant.SystemConstants.YYYY_MM_DD_HH_MM_SS;
+
 /**
  * @author: byteblogs
  * @date: 2019/8/3 14:57
@@ -135,10 +138,8 @@ public class JsonUtil {
      * 内部类，处理Json
      */
     public static class JsonMapper {
-        private final static String YYYY_MM_DD_HH_MM_SS = "yyyy-MM-dd HH:mm:ss";
-        private final static String YYYY_MM_DD = "yyyy-MM-dd";
 
-        private static ObjectMapper objectMapper = jacksonObjectMapper();
+        private static final ObjectMapper objectMapper = jacksonObjectMapper();
 
         public static ObjectMapper jacksonObjectMapper() {
 

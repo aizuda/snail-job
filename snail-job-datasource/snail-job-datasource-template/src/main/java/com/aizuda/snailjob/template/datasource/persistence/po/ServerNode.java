@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
@@ -16,9 +15,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @TableName("sj_server_node")
-public class ServerNode implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class ServerNode extends CreateUpdateDt {
 
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
@@ -38,9 +35,5 @@ public class ServerNode implements Serializable {
     private Integer nodeType;
 
     private String extAttrs;
-
-    private LocalDateTime createDt;
-
-    private LocalDateTime updateDt;
 
 }

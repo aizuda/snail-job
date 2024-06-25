@@ -21,7 +21,7 @@
         <java.version>17</java.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <revision>1.0.0</revision>
+        <revision>1.1.0-beta2</revision>
         <dingding-talk.version>1.0.0</dingding-talk.version>
         <netty-all.version>4.1.94.Final</netty-all.version>
         <hutool-all.version>5.8.25</hutool-all.version>
@@ -99,6 +99,11 @@
             <dependency>
                 <groupId>com.aizuda</groupId>
                 <artifactId>snail-job-sqlserver-datasource</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.aizuda</groupId>
+                <artifactId>snail-job-dm8-datasource</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>

@@ -49,7 +49,7 @@ public class SnailJobProperties {
     /**
      * 指定客户端端口
      */
-    private int port = 1789;
+    private Integer port = 1789;
 
     /**
      * 重试、调度日志远程上报滑动窗口配置

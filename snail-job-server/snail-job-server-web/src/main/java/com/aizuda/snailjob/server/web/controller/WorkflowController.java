@@ -2,7 +2,6 @@ package com.aizuda.snailjob.server.web.controller;
 
 import cn.hutool.core.lang.Pair;
 import com.aizuda.snailjob.common.core.annotation.OriginalControllerReturnValue;
-import com.aizuda.snailjob.common.core.exception.SnailJobCommonException;
 import com.aizuda.snailjob.server.common.dto.DecisionConfig;
 import com.aizuda.snailjob.server.web.annotation.LoginRequired;
 import com.aizuda.snailjob.server.web.annotation.RoleEnum;
@@ -24,7 +23,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author xiaowoniu
@@ -84,8 +82,9 @@ public class WorkflowController {
     @LoginRequired(role = RoleEnum.USER)
     public List<WorkflowResponseVO> getWorkflowNameList(
             @RequestParam(value = "keywords", required = false) String keywords,
-            @RequestParam(value = "workflowId", required = false) Long workflowId) {
-        return workflowService.getWorkflowNameList(keywords, workflowId);
+            @RequestParam(value = "workflowId", required = false) Long workflowId,
+            @RequestParam(value = "groupName", required = false) String groupName) {
+        return workflowService.getWorkflowNameList(keywords, workflowId, groupName);
     }
 
     @PostMapping("/check-node-expression")

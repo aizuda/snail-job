@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface RetryTaskLogMapper extends BaseMapper<RetryTaskLog> {
 
-    int insertBatch(List<RetryTaskLog> list);
+    int insertBatch(@Param("list") List<RetryTaskLog> list);
 
     List<DashboardRetryResponseDO> selectRetryRetryTaskLogSummaryList(@Param("ew") Wrapper<RetryTaskLog> wrapper);
 }

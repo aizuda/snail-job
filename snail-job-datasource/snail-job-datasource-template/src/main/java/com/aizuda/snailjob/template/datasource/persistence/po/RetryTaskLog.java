@@ -5,9 +5,6 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
-import java.io.Serializable;
-import java.time.LocalDateTime;
-
 /**
  * 重试任务日志
  *
@@ -16,9 +13,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @TableName("sj_retry_task_log")
-public class RetryTaskLog implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class RetryTaskLog extends CreateUpdateDt {
 
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
@@ -44,9 +39,5 @@ public class RetryTaskLog implements Serializable {
     private Integer retryStatus;
 
     private Integer taskType;
-
-    private LocalDateTime createDt;
-
-    private LocalDateTime updateDt;
 
 }

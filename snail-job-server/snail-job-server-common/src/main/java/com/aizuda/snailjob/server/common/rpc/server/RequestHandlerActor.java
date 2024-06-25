@@ -16,6 +16,7 @@ import com.aizuda.snailjob.server.common.Register;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.common.cache.CacheToken;
 import com.aizuda.snailjob.server.common.dto.NettyHttpRequest;
+import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.register.ClientRegister;
 import com.aizuda.snailjob.server.common.register.RegisterContext;
 import io.netty.buffer.Unpooled;
@@ -114,7 +115,7 @@ public class RequestHandlerActor extends AbstractActor {
             }
         }
 
-        return JsonUtil.toJsonString(new Result<>());
+        throw new SnailJobServerException("No matching handler found. Path:[{}] method:[{}]", builder.getPathStr(), method.name());
     }
 
     /**

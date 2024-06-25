@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aizuda.snailjob.template.datasource.persistence.mapper.RetrySummaryMapper">
+
+    <update id="updateBatch" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" open="BEGIN" separator=";" close=";END;">
+            UPDATE sj_retry_summary
+               SET running_num = #{item.runningNum},
+                   finish_num = #{item.finishNum},
+                   max_count_num = #{item.maxCountNum},
+                   suspend_num = #{item.suspendNum},
+                   update_dt = CURRENT_TIMESTAMP
+             WHERE trigger_at = #{item.triggerAt}
+               AND group_name = #{item.groupName}
+               AND namespace_id = #{item.namespaceId}
+               AND scene_name = #{item.sceneName}
+        </foreach>
+    </update>
+
+    <select id="selectRetryTask"
+            resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardCardResponseDO$RetryTask">
+        SELECT NVL(SUM(running_num), 0)                                            AS runningNum,
+               NVL(SUM(finish_num), 0)                                             AS finishNum,
+               NVL(SUM(max_count_num), 0)                                          AS maxCountNum,
+               NVL(SUM(suspend_num), 0)                                            AS suspendNum,
+               NVL(SUM(running_num + finish_num + max_count_num + suspend_num), 0) AS totalNum
+        FROM sj_retry_summary
+        ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectRetryTaskBarList"
+            resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardCardResponseDO$RetryTask">
+        SELECT *
+          FROM
+            (
+                SELECT trigger_at,
+                       running_num,
+                       finish_num,
+                       max_count_num,
+                       suspend_num
+                  FROM sj_retry_summary
+                ${ew.customSqlSegment}
+            )
+         WHERE ROWNUM <![CDATA[ <= ]]> 7
+    </select>
+
+    <select id="selectRetryLineList"
+            resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardLineResponseDO">
+        SELECT createDt                                                             AS createDt,
+               NVL(SUM(finish_num), 0)                                              AS successNum,
+               NVL(SUM(running_num), 0)                                             AS runningNum,
+               NVL(SUM(max_count_num), 0)                                           AS maxCountNum,
+               NVL(SUM(suspend_num), 0)                                             AS suspendNum,
+               NVL(SUM(finish_num + running_num + max_count_num + suspend_num), 0)  AS total
+        FROM (
+            SELECT
+                TO_CHAR(create_dt, #{dateFormat}) AS createDt,
+                finish_num,
+                running_num,
+                max_count_num,
+                suspend_num
+            FROM sj_retry_summary
+            ${ew.customSqlSegment}
+        )
+        GROUP BY createDt
+    </select>
+
+    <select id="selectDashboardRankList"
+            resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO$Rank">
+        SELECT
+            *
+          FROM (
+                SELECT group_name || '/' || scene_name                              AS name,
+                       SUM(running_num + finish_num + max_count_num + suspend_num)  AS total
+                  FROM sj_retry_summary
+                ${ew.customSqlSegment}
+                HAVING SUM(running_num + finish_num + max_count_num + suspend_num) > 0
+                ORDER BY SUM(running_num + finish_num + max_count_num + suspend_num) DESC)
+        WHERE ROWNUM <![CDATA[ <= ]]> 10
+    </select>
+
+</mapper>

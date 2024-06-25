@@ -5,9 +5,6 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
-import java.io.Serializable;
-import java.time.LocalDateTime;
-
 /**
  * 系统用户权限表
  *
@@ -16,9 +13,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @TableName("sj_system_user_permission")
-public class SystemUserPermission implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class SystemUserPermission extends CreateDt {
 
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
@@ -28,7 +23,5 @@ public class SystemUserPermission implements Serializable {
     private String namespaceId;
 
     private Long systemUserId;
-
-    private LocalDateTime createDt;
 
 }

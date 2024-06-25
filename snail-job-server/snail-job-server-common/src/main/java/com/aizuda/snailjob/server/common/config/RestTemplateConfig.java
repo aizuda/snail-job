@@ -1,7 +1,5 @@
 package com.aizuda.snailjob.server.common.config;
 
-import com.aizuda.snailjob.server.common.rpc.okhttp.RequestInterceptor;
-import com.aizuda.snailjob.server.common.rpc.okhttp.OkHttp3ClientHttpRequestFactory;
 import com.aizuda.snailjob.server.common.rpc.okhttp.OkHttp3ClientHttpRequestFactory;
 import com.aizuda.snailjob.server.common.rpc.okhttp.RequestInterceptor;
 import okhttp3.ConnectionPool;

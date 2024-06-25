@@ -34,17 +34,17 @@ public class GroupHandler {
     public void validateGroupExistence(Set<String> groupNameSet, String namespaceId) {
         Assert.notEmpty(groupNameSet, () -> new SnailJobServerException("组不能为空"));
         List<GroupConfig> groupConfigs = accessTemplate.getGroupConfigAccess()
-            .list(new LambdaQueryWrapper<GroupConfig>()
-                .select(GroupConfig::getGroupName)
-                .eq(GroupConfig::getNamespaceId, namespaceId)
-                .in(GroupConfig::getGroupName, groupNameSet)
-            );
+                .list(new LambdaQueryWrapper<GroupConfig>()
+                        .select(GroupConfig::getGroupName)
+                        .eq(GroupConfig::getNamespaceId, namespaceId)
+                        .in(GroupConfig::getGroupName, groupNameSet)
+                );
 
-       Set<String> notExistedGroupNameSet =  Sets.difference(groupNameSet,
-            StreamUtils.toSet(groupConfigs, GroupConfig::getGroupName));
+        Set<String> notExistedGroupNameSet = Sets.difference(groupNameSet,
+                StreamUtils.toSet(groupConfigs, GroupConfig::getGroupName));
 
         Assert.isTrue(CollUtil.isEmpty(notExistedGroupNameSet),
-            () -> new SnailJobServerException("组:{}不存在", notExistedGroupNameSet));
+                () -> new SnailJobServerException("组:{}不存在", notExistedGroupNameSet));
     }
 
 }
