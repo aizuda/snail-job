@@ -32,3 +32,4 @@ target/
 .flattened-pom.xml
 
 data/
+rebel.xml

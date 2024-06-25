@@ -30,3 +30,6 @@ target/
 
 # Maven ignore
 .flattened-pom.xml
+
+# Frontend
+/snail-job-server-ui/src/main/frontend/

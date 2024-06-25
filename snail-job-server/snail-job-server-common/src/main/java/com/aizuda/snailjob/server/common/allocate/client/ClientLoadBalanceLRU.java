@@ -1,12 +1,11 @@
 package com.aizuda.snailjob.server.common.allocate.client;
 
+import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.server.common.ClientLoadBalance;
 import com.aizuda.snailjob.server.common.allocate.client.ClientLoadBalanceManager.AllocationAlgorithmEnum;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -43,9 +42,15 @@ public class ClientLoadBalanceLRU implements ClientLoadBalance {
         }
 
         // 删除已经下线的节点
+        List<String> delKeys = new ArrayList<>();
         for (String address : lruItem.keySet()) {
             if (!clientAllAddressSet.contains(address)) {
-                lruItem.remove(address);
+                delKeys.add(address);
+            }
+        }
+        if (CollectionUtil.isNotEmpty(delKeys)) {
+            for (String delKey : delKeys) {
+                lruItem.remove(delKey);
             }
         }
 
