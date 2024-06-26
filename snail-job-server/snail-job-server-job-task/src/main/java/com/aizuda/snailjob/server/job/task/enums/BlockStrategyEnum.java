@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
+ * 阻塞策略针对处于待处理 or 运行中的批次做了一种异常容错策略
+ *
  * @author: xiaowoniu
  * @date : 2024-01-18
  * @since : 2.6.0
@@ -12,11 +14,21 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum BlockStrategyEnum {
+
+    /**
+     * 不创建新的批次，等待当前批次执行完成
+     */
     DISCARD(1),
+    /**
+     * 停止当前的批次，然后新增一个新的批次
+     */
     OVERLAY(2),
+    /**
+     * 每次都创建一个新的批次
+     */
     CONCURRENCY(3),
     /**
-     * 丢弃新的并重新触发老的任务(失败的任务)
+     * 不创建新的批次, 重新执行当前的批次中已经失败的任务
      */
     RECOVERY(4);
     ;

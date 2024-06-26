@@ -41,7 +41,7 @@ import java.util.Set;
 @Component
 @RequiredArgsConstructor
 public class ShardingTaskGenerator extends AbstractJobTaskGenerator {
-    private final ClientNodeAllocateHandler clientNodeAllocateHandler;
+    private static final String TASK_NAME ="SHARDING_TASK";
     private final JobTaskMapper jobTaskMapper;
 
     @Override
@@ -90,12 +90,11 @@ public class ShardingTaskGenerator extends AbstractJobTaskGenerator {
             jobTask.setLeaf(StatusEnum.YES.getStatus());
             jobTask.setCreateDt(LocalDateTime.now());
             jobTask.setUpdateDt(LocalDateTime.now());
+            jobTask.setTaskName(TASK_NAME);
             jobTasks.add(jobTask);
         }
 
-        Assert.isTrue(jobTasks.size() == jobTaskMapper.insertBatch(jobTasks), () -> new SnailJobServerException("新增任务实例失败"));
-
-
+        batchSaveJobTasks(jobTasks);
         return jobTasks;
     }
 

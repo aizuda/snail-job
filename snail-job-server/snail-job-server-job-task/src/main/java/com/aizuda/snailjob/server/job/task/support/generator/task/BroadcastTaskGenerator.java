@@ -8,6 +8,7 @@ import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.model.JobArgsHolder;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
+import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.cache.CacheRegisterTable;
 import com.aizuda.snailjob.server.common.dto.RegisterNodeInfo;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
@@ -16,6 +17,7 @@ import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTask;
 import com.google.common.collect.Lists;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -30,11 +32,10 @@ import java.util.*;
  * @since 2.4.0
  */
 @Component
-@Slf4j
+@RequiredArgsConstructor
 public class BroadcastTaskGenerator extends AbstractJobTaskGenerator {
-
-    @Autowired
-    private JobTaskMapper jobTaskMapper;
+    private static final String TASK_NAME ="BROADCAST_TASK";
+    private final JobTaskMapper jobTaskMapper;
 
     @Override
     public JobTaskTypeEnum getTaskInstanceType() {
@@ -46,7 +47,7 @@ public class BroadcastTaskGenerator extends AbstractJobTaskGenerator {
     public List<JobTask> doGenerate(JobTaskGenerateContext context) {
         Set<RegisterNodeInfo> serverNodes = CacheRegisterTable.getServerNodeSet(context.getGroupName(), context.getNamespaceId());
         if (CollUtil.isEmpty(serverNodes)) {
-            log.error("无可执行的客户端信息. jobId:[{}]", context.getJobId());
+            SnailJobLog.LOCAL.error("无可执行的客户端信息. jobId:[{}]", context.getJobId());
             return Lists.newArrayList();
         }
 
@@ -70,13 +71,14 @@ public class BroadcastTaskGenerator extends AbstractJobTaskGenerator {
             jobTask.setParentId(0L);
             jobTask.setLeaf(StatusEnum.YES.getStatus());
             jobTask.setRetryCount(0);
+            jobTask.setTaskName(TASK_NAME);
             jobTask.setCreateDt(LocalDateTime.now());
             jobTask.setUpdateDt(LocalDateTime.now());
             clientInfoSet.add(address);
             jobTasks.add(jobTask);
         }
 
-        Assert.isTrue(jobTasks.size() == jobTaskMapper.insertBatch(jobTasks), () -> new SnailJobServerException("新增任务实例失败"));
+        batchSaveJobTasks(jobTasks);
 
         return jobTasks;
     }

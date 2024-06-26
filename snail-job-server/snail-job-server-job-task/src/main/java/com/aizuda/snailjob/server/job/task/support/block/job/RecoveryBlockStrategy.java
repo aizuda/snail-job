@@ -20,6 +20,7 @@ import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.Job;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTask;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -36,8 +37,10 @@ import java.util.stream.Stream;
 @Component
 @RequiredArgsConstructor
 public class RecoveryBlockStrategy extends AbstracJobBlockStrategy {
+
     private final JobTaskMapper jobTaskMapper;
     private final JobMapper jobMapper;
+
     @Override
     protected void doBlock(BlockStrategyContext context) {
         Assert.notNull(context.getJobId(), () -> new SnailJobServerException("job id can not be null"));
@@ -45,9 +48,8 @@ public class RecoveryBlockStrategy extends AbstracJobBlockStrategy {
         Assert.notNull(context.getTaskType(), () -> new SnailJobServerException("task type can not be null"));
 
         List<JobTask> jobTasks = jobTaskMapper.selectList(
-                new LambdaQueryWrapper<JobTask>()
-                        .select(JobTask::getId, JobTask::getTaskStatus)
-                        .eq(JobTask::getTaskBatchId, context.getTaskBatchId())
+            new LambdaQueryWrapper<JobTask>()
+                .eq(JobTask::getTaskBatchId, context.getTaskBatchId())
         );
 
         //  若任务项为空则生成任务项
@@ -67,7 +69,9 @@ public class RecoveryBlockStrategy extends AbstracJobBlockStrategy {
         // 执行任务 Stop or Fail 任务
         JobExecutor jobExecutor = JobExecutorFactory.getJobExecutor(context.getTaskType());
         jobExecutor.execute(buildJobExecutorContext(context, job,
-                StreamUtils.filter(jobTasks, (jobTask) -> JobTaskStatusEnum.NOT_SUCCESS.contains(jobTask.getTaskStatus()))));
+            StreamUtils.filter(jobTasks,
+                (jobTask) -> JobTaskStatusEnum.NOT_SUCCESS.contains(jobTask.getTaskStatus())
+                             || JobTaskStatusEnum.NOT_COMPLETE.contains(jobTask.getTaskStatus()))));
     }
 
     @Override
@@ -76,7 +80,7 @@ public class RecoveryBlockStrategy extends AbstracJobBlockStrategy {
     }
 
     private static JobExecutorContext buildJobExecutorContext(BlockStrategyContext strategyContext, Job job,
-                                                              List<JobTask> taskList) {
+        List<JobTask> taskList) {
         JobExecutorContext context = JobTaskConverter.INSTANCE.toJobExecutorContext(job);
         context.setTaskList(taskList);
         context.setTaskBatchId(strategyContext.getTaskBatchId());

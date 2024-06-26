@@ -140,6 +140,7 @@ public class MapReduceTaskGenerator extends AbstractJobTaskGenerator {
         jobTasks = new ArrayList<>(partition.size());
         final List<JobTask> finalJobTasks = jobTasks;
         String finalJobParams = jobParams;
+        final List<JobTask> finalJobTasks1 = jobTasks;
         transactionTemplate.execute(new TransactionCallbackWithoutResult() {
             @Override
             protected void doInTransactionWithoutResult(final TransactionStatus status) {
@@ -165,8 +166,7 @@ public class MapReduceTaskGenerator extends AbstractJobTaskGenerator {
                     finalJobTasks.add(jobTask);
                 }
 
-                Assert.isTrue(finalJobTasks.size() == jobTaskMapper.insertBatch(finalJobTasks), () -> new SnailJobServerException("新增任务实例失败"));
-
+                batchSaveJobTasks(finalJobTasks1);
             }
         });
 
@@ -218,7 +218,7 @@ public class MapReduceTaskGenerator extends AbstractJobTaskGenerator {
                     jobTasks.add(jobTask);
                 }
 
-                Assert.isTrue(jobTasks.size() == jobTaskMapper.insertBatch(jobTasks), () -> new SnailJobServerException("新增任务实例失败"));
+                batchSaveJobTasks(jobTasks);
 
                 // 更新父节点的为非叶子节点
                 if (CollUtil.isNotEmpty(parentJobTasks)) {
