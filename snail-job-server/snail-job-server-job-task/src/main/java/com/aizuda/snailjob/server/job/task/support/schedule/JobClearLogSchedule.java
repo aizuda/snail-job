@@ -18,12 +18,15 @@ import com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.google.common.collect.Lists;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.util.CollectionUtils;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -37,21 +40,16 @@ import java.util.List;
  * @since 2.1.0
  */
 @Component
-@Slf4j
+@RequiredArgsConstructor
 public class JobClearLogSchedule extends AbstractSchedule implements Lifecycle {
 
     // last clean log time
     private static Long lastCleanLogTime = 0L;
-    @Autowired
-    private SystemProperties systemProperties;
-    @Autowired
-    private JobTaskBatchMapper jobTaskBatchMapper;
-    @Autowired
-    private JobTaskMapper jobTaskMapper;
-    @Autowired
-    private JobLogMessageMapper jobLogMessageMapper;
-    @Autowired
-    private TransactionTemplate transactionTemplate;
+    private final SystemProperties systemProperties;
+    private final JobTaskBatchMapper jobTaskBatchMapper;
+    private final JobTaskMapper jobTaskMapper;
+    private final JobLogMessageMapper jobLogMessageMapper;
+    private final TransactionTemplate transactionTemplate;
 
     @Override
     public String lockName() {
@@ -122,26 +120,26 @@ public class JobClearLogSchedule extends AbstractSchedule implements Lifecycle {
 
                 // Waiting for deletion JobTaskBatchList
                 List<Long> ids = StreamUtils.toList(partitionTasks, PartitionTask::getId);
-                if (ids == null || ids.size() == 0) {
+                if (CollectionUtils.isEmpty(ids)) {
                     return;
                 }
-                jobTaskBatchMapper.deleteBatchIds(ids);
+                Lists.partition(ids, 500).forEach(partIds -> jobTaskBatchMapper.deleteByIds(ids));
 
                 // Waiting for deletion JobTaskList
                 List<JobTask> jobTaskList = jobTaskMapper.selectList(new LambdaQueryWrapper<JobTask>().in(JobTask::getTaskBatchId, ids));
-                if (jobTaskList == null || jobTaskList.size() == 0) {
+                if (CollectionUtils.isEmpty(jobTaskList)) {
                     return;
                 }
                 List<Long> jobTaskListIds = StreamUtils.toList(jobTaskList, JobTask::getId);
-                jobTaskMapper.deleteBatchIds(jobTaskListIds);
+                Lists.partition(jobTaskListIds, 500).forEach(partIds -> jobTaskMapper.deleteByIds(partIds));
 
                 // Waiting for deletion JobLogMessageList
                 List<JobLogMessage> jobLogMessageList = jobLogMessageMapper.selectList(new LambdaQueryWrapper<JobLogMessage>().in(JobLogMessage::getTaskBatchId, ids));
-                if (jobLogMessageList == null || jobLogMessageList.size() == 0) {
+                if (CollectionUtils.isEmpty(jobLogMessageList)) {
                     return;
                 }
                 List<Long> jobLogMessageListIds = StreamUtils.toList(jobLogMessageList, JobLogMessage::getId);
-                jobTaskMapper.deleteBatchIds(jobLogMessageListIds);
+                Lists.partition(jobLogMessageListIds, 500).forEach(partIds -> jobTaskMapper.deleteByIds(jobLogMessageListIds));
             }
         });
     }

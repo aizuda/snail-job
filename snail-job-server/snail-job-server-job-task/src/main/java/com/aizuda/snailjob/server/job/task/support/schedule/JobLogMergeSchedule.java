@@ -172,10 +172,17 @@ public class JobLogMergeSchedule extends AbstractSchedule implements Lifecycle {
 
                     // 批量删除、更新日志
                     if (CollUtil.isNotEmpty(jobLogMessageDeleteBatchIds)) {
-                        jobLogMessageMapper.deleteBatchIds(jobLogMessageDeleteBatchIds);
+                        List<List<Long>> partition = Lists.partition(jobLogMessageDeleteBatchIds, 500);
+                        for (List<Long> mid : partition) {
+                            jobLogMessageMapper.deleteByIds(mid);
+                        }
                     }
+
                     if (CollUtil.isNotEmpty(jobLogMessageInsertBatchIds)) {
-                        jobLogMessageMapper.insertBatch(jobLogMessageInsertBatchIds);
+                        List<List<JobLogMessage>> partition = Lists.partition(jobLogMessageInsertBatchIds, 500);
+                        for (List<JobLogMessage> jobLogMessages : partition) {
+                            jobLogMessageMapper.insertBatch(jobLogMessages);
+                        }
                     }
                 }
             });
