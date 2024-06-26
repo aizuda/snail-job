@@ -31,11 +31,12 @@ public class AnnotationMapReduceJobExecutor extends AbstractMapReduceExecutor {
     protected ExecuteResult doReduceExecute(final ReduceArgs reduceArgs) {
         JobExecutorInfo jobExecutorInfo = JobExecutorInfoCache.get(reduceArgs.getExecutorInfo());
         if (Objects.isNull(jobExecutorInfo)) {
-            throw new SnailJobMapReduceException("[{}]未发现", reduceArgs.getExecutorInfo());
+            throw new SnailJobMapReduceException("[{}] not found", reduceArgs.getExecutorInfo());
         }
 
         if (Objects.isNull(jobExecutorInfo.getReduceExecutor())) {
-            throw new SnailJobMapReduceException("未发现ReduceTask执行方法, 请配置@ReduceExecutor注解",
+            throw new SnailJobMapReduceException(
+                "[{}] MapTask execution method not found. Please configure the @ReduceExecutor annotation",
                 reduceArgs.getExecutorInfo());
         }
 
@@ -45,7 +46,7 @@ public class AnnotationMapReduceJobExecutor extends AbstractMapReduceExecutor {
                 jobExecutorInfo.getExecutor(), reduceArgs);
         }
 
-        throw new SnailJobMapReduceException("[{}]未发现ReduceTask执行方法", reduceArgs.getExecutorInfo());
+        throw new SnailJobMapReduceException("[{}] ReduceTask execution method not found", reduceArgs.getExecutorInfo());
     }
 
     @Override
@@ -53,11 +54,12 @@ public class AnnotationMapReduceJobExecutor extends AbstractMapReduceExecutor {
         JobExecutorInfo jobExecutorInfo = JobExecutorInfoCache.get(mergeReduceArgs.getExecutorInfo());
 
         if (Objects.isNull(jobExecutorInfo)) {
-            throw new SnailJobMapReduceException("[{}]未发现", mergeReduceArgs.getExecutorInfo());
+            throw new SnailJobMapReduceException("[{}] not found", mergeReduceArgs.getExecutorInfo());
         }
 
         if (Objects.isNull(jobExecutorInfo.getReduceExecutor())) {
-            throw new SnailJobMapReduceException("[{}]未发现ReduceTask执行方法, 请配置@MergeReduceExecutor注解",
+            throw new SnailJobMapReduceException(
+                "[{}] MapTask execution method not found. Please configure the @MergeReduceExecutor annotation",
                 mergeReduceArgs.getExecutorInfo());
         }
 
@@ -67,8 +69,9 @@ public class AnnotationMapReduceJobExecutor extends AbstractMapReduceExecutor {
                 jobExecutorInfo.getExecutor(), mergeReduceArgs);
         }
 
-        throw new SnailJobMapReduceException("[{}]未发现MergeReduceTask执行方法 [{}]",
+        throw new SnailJobMapReduceException("[{}] MergeReduceTask execution method not found [{}]",
             mergeReduceArgs.getExecutorInfo());
+
     }
 
     @Override
