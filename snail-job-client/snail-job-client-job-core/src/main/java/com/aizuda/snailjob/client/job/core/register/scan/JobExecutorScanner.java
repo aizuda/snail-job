@@ -4,9 +4,15 @@ import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.client.job.core.IJobExecutor;
 import com.aizuda.snailjob.client.job.core.Scanner;
 import com.aizuda.snailjob.client.job.core.annotation.JobExecutor;
+import com.aizuda.snailjob.client.job.core.annotation.MapExecutor;
+import com.aizuda.snailjob.client.job.core.annotation.MergeReduceExecutor;
+import com.aizuda.snailjob.client.job.core.annotation.ReduceExecutor;
 import com.aizuda.snailjob.client.job.core.cache.JobExecutorInfoCache;
 import com.aizuda.snailjob.client.job.core.dto.JobArgs;
 import com.aizuda.snailjob.client.job.core.dto.JobExecutorInfo;
+import com.aizuda.snailjob.client.job.core.dto.MapArgs;
+import com.aizuda.snailjob.client.job.core.dto.MergeReduceArgs;
+import com.aizuda.snailjob.client.job.core.dto.ReduceArgs;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.aop.framework.AopProxyUtils;
@@ -20,6 +26,7 @@ import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -49,8 +56,8 @@ public class JobExecutorScanner implements Scanner, ApplicationContextAware {
             Map<Method, JobExecutor> annotatedMethods = null;
             try {
                 annotatedMethods = MethodIntrospector.selectMethods(bean.getClass(),
-                        (MethodIntrospector.MetadataLookup<JobExecutor>) method -> AnnotatedElementUtils
-                                .findMergedAnnotation(method, JobExecutor.class));
+                    (MethodIntrospector.MetadataLookup<JobExecutor>) method -> AnnotatedElementUtils
+                        .findMergedAnnotation(method, JobExecutor.class));
             } catch (Throwable ex) {
                 SnailJobLog.LOCAL.error("{} JobExecutor加载异常：{}", beanDefinitionName, ex);
             }
@@ -61,7 +68,9 @@ public class JobExecutorScanner implements Scanner, ApplicationContextAware {
             // 通过实现接口进行注册
             if (IJobExecutor.class.isAssignableFrom(bean.getClass())) {
                 if (!JobExecutorInfoCache.isExisted(executorClassName)) {
-                    jobExecutorInfoList.add(new JobExecutorInfo(executorClassName, ReflectionUtils.findMethod(bean.getClass(), "jobExecute"), bean));
+                    jobExecutorInfoList.add(new JobExecutorInfo(executorClassName,
+                        ReflectionUtils.findMethod(bean.getClass(), "jobExecute"),
+                        null,null, null, bean));
                 }
             }
 
@@ -75,12 +84,45 @@ public class JobExecutorScanner implements Scanner, ApplicationContextAware {
                         method = ReflectionUtils.findMethod(bean.getClass(), jobExecutor.method());
                     }
 
+                    // 扫描MapExecutor、ReduceExecutor、MergeReduceExecutor注解
+                    Map<String, Method> mapExecutorMethodMap = new HashMap<>();
+                    Method reduceExecutor = null;
+                    Method mergeReduceExecutor = null;
+                    Method[] methods = bean.getClass().getMethods();
+                    for (final Method method1 : methods) {
+                        Class<?>[] parameterTypes = method1.getParameterTypes();
+                        MapExecutor mapExecutor = method1.getAnnotation(MapExecutor.class);
+                        if (Objects.nonNull(mapExecutor)
+                            && parameterTypes.length >0
+                            && parameterTypes[0].isAssignableFrom(MapArgs.class)) {
+                            mapExecutorMethodMap.put(mapExecutor.taskName(), method1);
+                        }
+
+                        ReduceExecutor reduceExecutorAnno = method1.getAnnotation(ReduceExecutor.class);
+                        if (Objects.nonNull(reduceExecutorAnno)
+                            && parameterTypes.length >0
+                            && parameterTypes[0].isAssignableFrom(ReduceArgs.class)) {
+                            reduceExecutor = method1;
+                            continue;
+                        }
+
+                        MergeReduceExecutor mergeReduceExecutorAnno = method1.getAnnotation(MergeReduceExecutor.class);
+                        if (Objects.nonNull(mergeReduceExecutorAnno)
+                            && parameterTypes.length >0
+                            && parameterTypes[0].isAssignableFrom(MergeReduceArgs.class)) {
+                            mergeReduceExecutor = method1;
+                        }
+                    }
+
                     JobExecutorInfo jobExecutorInfo =
-                            new JobExecutorInfo(
-                                    executorName,
-                                    method,
-                                    bean
-                            );
+                        new JobExecutorInfo(
+                            executorName,
+                            method,
+                            mapExecutorMethodMap,
+                            reduceExecutor,
+                            mergeReduceExecutor,
+                            bean
+                        );
                     jobExecutorInfoList.add(jobExecutorInfo);
                 }
 
@@ -99,11 +141,12 @@ public class JobExecutorScanner implements Scanner, ApplicationContextAware {
                 }
 
                 JobExecutorInfo jobExecutorInfo =
-                        new JobExecutorInfo(
-                                jobExecutor.name(),
-                                executeMethod,
-                                bean
-                        );
+                    new JobExecutorInfo(
+                        jobExecutor.name(),
+                        executeMethod,
+                        null,null, null,
+                        bean
+                    );
                 jobExecutorInfoList.add(jobExecutorInfo);
             }
         }

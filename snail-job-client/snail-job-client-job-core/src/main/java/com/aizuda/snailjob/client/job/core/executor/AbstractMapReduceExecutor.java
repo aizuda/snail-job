@@ -1,16 +1,12 @@
 package com.aizuda.snailjob.client.job.core.executor;
 
 import com.aizuda.snailjob.client.job.core.dto.JobArgs;
-import com.aizuda.snailjob.client.job.core.dto.MapArgs;
-import com.aizuda.snailjob.client.job.core.dto.MapReduceArgs;
 import com.aizuda.snailjob.client.job.core.dto.MergeReduceArgs;
 import com.aizuda.snailjob.client.job.core.dto.ReduceArgs;
 import com.aizuda.snailjob.client.model.ExecuteResult;
 import com.aizuda.snailjob.common.core.enums.MapReduceStageEnum;
 import com.aizuda.snailjob.common.core.exception.SnailJobMapReduceException;
 import com.aizuda.snailjob.common.core.model.JobContext;
-
-import java.util.List;
 
 /**
  * @author zhengweilin

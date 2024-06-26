@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.lang.reflect.Method;
+import java.util.Map;
 
 /**
  * @author opensnail
@@ -17,6 +18,12 @@ public class JobExecutorInfo {
     private final String executorName;
 
     private final Method method;
+
+    private final Map<String, Method> mapExecutorMap;
+
+    Method reduceExecutor;
+
+    Method mergeReduceExecutor;
 
     private Object executor;
 

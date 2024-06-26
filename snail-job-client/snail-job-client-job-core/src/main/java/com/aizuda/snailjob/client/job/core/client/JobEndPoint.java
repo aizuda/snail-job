@@ -13,6 +13,8 @@ import com.aizuda.snailjob.client.job.core.executor.AbstractJobExecutor;
 import com.aizuda.snailjob.client.job.core.executor.AbstractMapExecutor;
 import com.aizuda.snailjob.client.job.core.executor.AbstractMapReduceExecutor;
 import com.aizuda.snailjob.client.job.core.executor.AnnotationJobExecutor;
+import com.aizuda.snailjob.client.job.core.executor.AnnotationMapJobExecutor;
+import com.aizuda.snailjob.client.job.core.executor.AnnotationMapReduceJobExecutor;
 import com.aizuda.snailjob.client.job.core.log.JobLogMeta;
 import com.aizuda.snailjob.client.model.StopJobDTO;
 import com.aizuda.snailjob.client.model.request.DispatchJobRequest;
@@ -54,7 +56,7 @@ public class JobEndPoint {
 
             if (Objects.nonNull(dispatchJob.getRetryCount()) && dispatchJob.getRetryCount() > 0) {
                 SnailJobLog.REMOTE.info("任务执行/调度失败执行重试. 重试次数:[{}]",
-                        dispatchJob.getRetryCount());
+                    dispatchJob.getRetryCount());
             }
 
             JobExecutorInfo jobExecutorInfo = JobExecutorInfoCache.get(jobContext.getExecutorInfo());
@@ -75,7 +77,13 @@ public class JobEndPoint {
                     jobExecutor = (AbstractJobExecutor) executor;
                 }
             } else {
-                jobExecutor = SpringContext.getBeanByType(AnnotationJobExecutor.class);
+                if (JobTaskTypeEnum.MAP.getType() == jobContext.getTaskType()) {
+                    jobExecutor = SpringContext.getBeanByType(AnnotationMapJobExecutor.class);
+                } else if (JobTaskTypeEnum.MAP_REDUCE.getType() == jobContext.getTaskType()) {
+                    jobExecutor = SpringContext.getBeanByType(AnnotationMapReduceJobExecutor.class);
+                } else {
+                    jobExecutor = SpringContext.getBeanByType(AnnotationJobExecutor.class);
+                }
             }
 
             SnailJobLog.REMOTE.info("批次:[{}] 任务调度成功. ", dispatchJob.getTaskBatchId());

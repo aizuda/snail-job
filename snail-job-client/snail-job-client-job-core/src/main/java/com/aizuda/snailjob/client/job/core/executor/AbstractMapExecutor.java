@@ -1,10 +1,11 @@
 package com.aizuda.snailjob.client.job.core.executor;
 
 import cn.hutool.core.util.StrUtil;
-import com.aizuda.snailjob.client.common.rpc.client.RequestBuilder;
 import com.aizuda.snailjob.client.job.core.IJobExecutor;
-import com.aizuda.snailjob.client.job.core.client.JobNettyClient;
+import com.aizuda.snailjob.client.job.core.MapHandler;
+import com.aizuda.snailjob.client.job.core.cache.JobExecutorInfoCache;
 import com.aizuda.snailjob.client.job.core.dto.JobArgs;
+import com.aizuda.snailjob.client.job.core.dto.JobExecutorInfo;
 import com.aizuda.snailjob.client.job.core.dto.MapArgs;
 import com.aizuda.snailjob.client.model.ExecuteResult;
 import com.aizuda.snailjob.client.model.request.MapTaskRequest;
@@ -12,13 +13,19 @@ import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.exception.SnailJobMapReduceException;
 import com.aizuda.snailjob.common.core.model.JobContext;
-import com.aizuda.snailjob.common.core.model.NettyResult;
 import com.aizuda.snailjob.common.core.model.Result;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ReflectionUtils;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * @author zhengweilin
@@ -28,55 +35,48 @@ import java.util.List;
 @Slf4j
 public abstract class AbstractMapExecutor extends AbstractJobExecutor implements IJobExecutor {
 
-    private static final JobNettyClient CLIENT = RequestBuilder.<JobNettyClient, NettyResult>newBuilder()
-            .client(JobNettyClient.class)
-            .async(Boolean.FALSE)
-            .build();
-
     @Override
     protected ExecuteResult doJobExecute(final JobArgs jobArgs) {
         if (jobArgs instanceof MapArgs) {
-            return this.doJobMapExecute((MapArgs) jobArgs);
+            return this.doJobMapExecute((MapArgs) jobArgs, getMapHandler());
         }
 
         throw new SnailJobMapReduceException("For tasks that are not of type map or map reduce, please do not use the AbstractMapExecutor class.");
     }
 
-    public abstract ExecuteResult doJobMapExecute(MapArgs mapArgs);
+    public abstract ExecuteResult doJobMapExecute(MapArgs mapArgs, final MapHandler mapHandler);
 
-    public ExecuteResult doMap(List<Object> taskList, String nextTaskName) {
+    private MapHandler getMapHandler() {
+       return (MapHandler) Proxy.newProxyInstance(MapHandler.class.getClassLoader(),
+            new Class[]{MapHandler.class}, new MapInvokeHandler());
+    }
 
-        if (StrUtil.isBlank(nextTaskName)) {
-            throw new SnailJobMapReduceException("The next task name can not blank or null {}", nextTaskName);
+    protected ExecuteResult invokeMapExecute (MapArgs mapArgs, final MapHandler mapHandler) {
+        JobExecutorInfo jobExecutorInfo = JobExecutorInfoCache.get(mapArgs.getExecutorInfo());
+
+        if (Objects.isNull(jobExecutorInfo)) {
+            throw new SnailJobMapReduceException("[{}] not found", mapArgs.getExecutorInfo());
         }
 
-        if (CollectionUtils.isEmpty(taskList)) {
-            throw new SnailJobMapReduceException("The task list can not empty {}", nextTaskName);
+        Map<String, Method> mapExecutorMap = Optional.ofNullable(jobExecutorInfo.getMapExecutorMap())
+            .orElse(new HashMap<>());
+        Method method = mapExecutorMap.get(mapArgs.getTaskName());
+
+        if (Objects.isNull(method)) {
+            throw new SnailJobMapReduceException(
+                "[{}] MapTask execution method not found. Please configure the @MapExecutor annotation",
+                mapArgs.getExecutorInfo());
+
         }
 
-        // taskName 任务命名和根任务名或者最终任务名称一致导致的问题（无限生成子任务或者直接失败）
-        if (SystemConstants.MAP_ROOT.equals(nextTaskName)) {
-            throw new SnailJobMapReduceException("The Next taskName can not be {}", SystemConstants.MAP_ROOT);
+        Class<?>[] paramTypes = method.getParameterTypes();
+        if (paramTypes.length == 1) {
+            return (ExecuteResult) ReflectionUtils.invokeMethod(method, jobExecutorInfo.getExecutor(), mapArgs);
+        } else if (paramTypes.length == 2) {
+            return (ExecuteResult) ReflectionUtils.invokeMethod(method, jobExecutorInfo.getExecutor(), mapArgs,
+                mapHandler);
         }
 
-        JobContext jobContext = JobContextManager.getJobContext();
-
-        // 1. 构造请求
-        MapTaskRequest mapTaskRequest = new MapTaskRequest();
-        mapTaskRequest.setJobId(jobContext.getJobId());
-        mapTaskRequest.setTaskBatchId(jobContext.getTaskBatchId());
-        mapTaskRequest.setTaskName(nextTaskName);
-        mapTaskRequest.setSubTask(taskList);
-        mapTaskRequest.setParentId(jobContext.getTaskId());
-
-        // 2. 同步发送请求
-        Result<Boolean> result = CLIENT.batchReportMapTask(mapTaskRequest);
-        if (StatusEnum.NO.getStatus() == result.getStatus() || result.getData()) {
-            SnailJobLog.LOCAL.info("Map task create successfully!. taskName:[{}] TaskId:[{}] ", nextTaskName, jobContext.getTaskId());
-        } else {
-            throw new SnailJobMapReduceException("map failed for task: " + nextTaskName);
-        }
-
-        return ExecuteResult.success();
+        throw new SnailJobMapReduceException("Executor for [{}] not found", mapArgs.getTaskName());
     }
 }

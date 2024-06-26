@@ -11,7 +11,6 @@ public final class JobContextManager {
 
     private static final ThreadLocal<JobContext> JOB_CONTEXT_LOCAL = new ThreadLocal<>();
 
-
     public static void setJobContext(JobContext jobContext) {
         JOB_CONTEXT_LOCAL.set(jobContext);
     }
