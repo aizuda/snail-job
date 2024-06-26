@@ -25,11 +25,11 @@ public class ConcurrencyWorkflowBlockStrategy extends AbstractWorkflowBlockStrat
     @Override
     protected void doBlock(final WorkflowBlockStrategyContext workflowBlockStrategyContext) {
 
-        try {
-            workflowBatchHandler.checkWorkflowExecutor(workflowBlockStrategyContext.getWorkflowTaskBatchId(), null);
-        } catch (IOException e) {
-            throw new SnailJobServerException("校验工作流失败", e);
-        }
+//        try {
+//            workflowBatchHandler.recoveryWorkflowExecutor(workflowBlockStrategyContext.getWorkflowTaskBatchId(), null);
+//        } catch (IOException e) {
+//            throw new SnailJobServerException("校验工作流失败", e);
+//        }
 
         WorkflowTaskBatchGeneratorContext workflowTaskBatchGeneratorContext = WorkflowTaskConverter.INSTANCE.toWorkflowTaskBatchGeneratorContext(workflowBlockStrategyContext);
         workflowBatchGenerator.generateJobTaskBatch(workflowTaskBatchGeneratorContext);

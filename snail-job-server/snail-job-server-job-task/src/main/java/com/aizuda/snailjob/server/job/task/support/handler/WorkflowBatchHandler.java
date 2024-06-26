@@ -222,7 +222,14 @@ public class WorkflowBatchHandler {
         }
     }
 
-    public void checkWorkflowExecutor(Long workflowTaskBatchId, WorkflowTaskBatch workflowTaskBatch) throws IOException {
+    /**
+     * 重新触发未执行成功的工作流节点
+     *
+     * @param workflowTaskBatchId 工作流批次
+     * @param workflowTaskBatch 工作流批次信息(若为null, 则会通过workflowTaskBatchId查询)
+     * @throws IOException
+     */
+    public void recoveryWorkflowExecutor(Long workflowTaskBatchId, WorkflowTaskBatch workflowTaskBatch) throws IOException {
         workflowTaskBatch = Optional.ofNullable(workflowTaskBatch)
                 .orElseGet(() -> workflowTaskBatchMapper.selectById(workflowTaskBatchId));
         Assert.notNull(workflowTaskBatch, () -> new SnailJobServerException("任务不存在"));
@@ -241,10 +248,10 @@ public class WorkflowBatchHandler {
 
         Map<Long, JobTaskBatch> jobTaskBatchMap = StreamUtils.toIdentityMap(jobTaskBatches, JobTaskBatch::getWorkflowNodeId);
 
-        checkWorkflowExecutor(SystemConstants.ROOT, workflowTaskBatchId, graph, jobTaskBatchMap);
+        recoveryWorkflowExecutor(SystemConstants.ROOT, workflowTaskBatchId, graph, jobTaskBatchMap);
     }
 
-    private void checkWorkflowExecutor(Long parentId, Long workflowTaskBatchId, MutableGraph<Long> graph, Map<Long, JobTaskBatch> jobTaskBatchMap) {
+    private void recoveryWorkflowExecutor(Long parentId, Long workflowTaskBatchId, MutableGraph<Long> graph, Map<Long, JobTaskBatch> jobTaskBatchMap) {
 
         // 判定条件节点是否已经执行完成
         JobTaskBatch parentJobTaskBatch = jobTaskBatchMap.get(parentId);
@@ -289,7 +296,7 @@ public class WorkflowBatchHandler {
             }
 
             // 已经是终态的需要递归遍历后继节点是否正常执行
-            checkWorkflowExecutor(successor, workflowTaskBatchId, graph, jobTaskBatchMap);
+            recoveryWorkflowExecutor(successor, workflowTaskBatchId, graph, jobTaskBatchMap);
         }
     }
 

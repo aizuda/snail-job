@@ -27,11 +27,11 @@ public class DiscardWorkflowBlockStrategy extends AbstractWorkflowBlockStrategy 
     @Override
     protected void doBlock(final WorkflowBlockStrategyContext workflowBlockStrategyContext) {
 
-        try {
-            workflowBatchHandler.checkWorkflowExecutor(workflowBlockStrategyContext.getWorkflowTaskBatchId(), null);
-        } catch (IOException e) {
-            throw new SnailJobServerException("校验工作流失败", e);
-        }
+//        try {
+//            workflowBatchHandler.recoveryWorkflowExecutor(workflowBlockStrategyContext.getWorkflowTaskBatchId(), null);
+//        } catch (IOException e) {
+//            throw new SnailJobServerException("校验工作流失败", e);
+//        }
         // 生成状态为取消的工作流批次
         WorkflowTaskBatchGeneratorContext workflowTaskBatchGeneratorContext = WorkflowTaskConverter.INSTANCE.toWorkflowTaskBatchGeneratorContext(workflowBlockStrategyContext);
         workflowTaskBatchGeneratorContext.setTaskBatchStatus(JobTaskBatchStatusEnum.CANCEL.getStatus());
