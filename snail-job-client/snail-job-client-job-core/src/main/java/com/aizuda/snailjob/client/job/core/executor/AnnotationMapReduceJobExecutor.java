@@ -57,15 +57,16 @@ public class AnnotationMapReduceJobExecutor extends AbstractMapReduceExecutor {
             throw new SnailJobMapReduceException("[{}] not found", mergeReduceArgs.getExecutorInfo());
         }
 
-        if (Objects.isNull(jobExecutorInfo.getReduceExecutor())) {
+        Method mergeReduceExecutor = jobExecutorInfo.getMergeReduceExecutor();
+        if (Objects.isNull(mergeReduceExecutor)) {
             throw new SnailJobMapReduceException(
                 "[{}] MapTask execution method not found. Please configure the @MergeReduceExecutor annotation",
                 mergeReduceArgs.getExecutorInfo());
         }
 
-        Class<?>[] paramTypes = jobExecutorInfo.getMergeReduceExecutor().getParameterTypes();
+        Class<?>[] paramTypes = mergeReduceExecutor.getParameterTypes();
         if (paramTypes.length > 0) {
-            return (ExecuteResult) ReflectionUtils.invokeMethod(jobExecutorInfo.getReduceExecutor(),
+            return (ExecuteResult) ReflectionUtils.invokeMethod(mergeReduceExecutor,
                 jobExecutorInfo.getExecutor(), mergeReduceArgs);
         }
 
