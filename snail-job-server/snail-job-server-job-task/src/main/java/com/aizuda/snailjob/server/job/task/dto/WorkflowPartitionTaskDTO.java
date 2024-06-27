@@ -53,4 +53,9 @@ public class WorkflowPartitionTaskDTO extends PartitionTask {
      */
     private String flowInfo;
 
+    /**
+     * 工作流上下文
+     */
+    private String wfContext;
+
 }

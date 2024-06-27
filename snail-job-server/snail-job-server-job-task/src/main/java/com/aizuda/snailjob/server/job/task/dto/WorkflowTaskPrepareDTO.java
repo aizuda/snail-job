@@ -73,4 +73,9 @@ public class WorkflowTaskPrepareDTO {
      * 仅做超时检测
      */
     private boolean onlyTimeoutCheck;
+
+    /**
+     * 工作流上下文
+     */
+    private String wfContext;
 }

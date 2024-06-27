@@ -55,6 +55,7 @@ public class WorkflowTaskPrepareActor extends AbstractActor {
                 // 终态任务
                 if (workflowPrePareHandler.matches(null)) {
                     workflowPrePareHandler.handler(workflowTaskPrepareDTO);
+                    break;
                 }
             }
         } else {

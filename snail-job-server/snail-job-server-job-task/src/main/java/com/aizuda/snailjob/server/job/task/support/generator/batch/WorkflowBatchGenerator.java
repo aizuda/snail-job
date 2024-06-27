@@ -34,6 +34,7 @@ public class WorkflowBatchGenerator {
         WorkflowTaskBatch workflowTaskBatch = WorkflowTaskConverter.INSTANCE.toWorkflowTaskBatch(context);
         workflowTaskBatch.setTaskBatchStatus(Optional.ofNullable(context.getTaskBatchStatus()).orElse(JobTaskBatchStatusEnum.WAITING.getStatus()));
         workflowTaskBatch.setOperationReason(context.getOperationReason());
+        workflowTaskBatch.setWfContext(context.getWfContext());
 
         Assert.isTrue(1 == workflowTaskBatchMapper.insert(workflowTaskBatch), () -> new SnailJobServerException("新增调度任务失败. [{}]", context.getWorkflowId()));
 

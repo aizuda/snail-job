@@ -47,5 +47,10 @@ public class WorkflowTaskBatchGeneratorContext {
      */
     private String flowInfo;
 
+    /**
+     * 工作流上下文
+     */
+    private String wfContext;
+
 
 }
