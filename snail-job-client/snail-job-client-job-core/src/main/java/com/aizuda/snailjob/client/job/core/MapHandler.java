@@ -9,7 +9,14 @@ import java.util.List;
  * @date : 2024-06-26
  * @version : sj_1.1.0
  */
-public interface MapHandler {
+public interface MapHandler<T> {
 
-    ExecuteResult doMap(List<Object> taskList, String nextTaskName);
+    /**
+     * 执行MAP操作
+     *
+     * @param taskList 需要分片的集合(建议不超过200个, 超过500禁止分片.)
+     * @param nextTaskName 下一次需要处理MAP的节点名称 (不能是MAP_ROOT)
+     * @return ExecuteResult
+     */
+    ExecuteResult doMap(List<T> taskList, String nextTaskName);
 }
