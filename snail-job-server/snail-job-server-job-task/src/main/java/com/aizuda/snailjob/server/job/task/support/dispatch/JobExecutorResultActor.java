@@ -57,7 +57,12 @@ public class JobExecutorResultActor extends AbstractActor {
                 jobTask.setTaskStatus(result.getTaskStatus());
                 jobTask.setWfContext(result.getWfContext());
                 if (Objects.nonNull(result.getResult())) {
-                    jobTask.setResultMessage(JsonUtil.toJsonString(result.getResult()));
+                    if (result.getResult() instanceof String) {
+                        jobTask.setResultMessage((String) result.getResult());
+                    } else {
+                        jobTask.setResultMessage(JsonUtil.toJsonString(result.getResult()));
+                    }
+
                 }
 
                 Assert.isTrue(1 == jobTaskMapper.update(jobTask,

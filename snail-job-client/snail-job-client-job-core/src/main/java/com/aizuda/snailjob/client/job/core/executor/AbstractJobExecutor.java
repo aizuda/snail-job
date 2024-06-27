@@ -24,7 +24,9 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -100,6 +102,8 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
 
     private static JobArgs buildJobArgs(JobContext jobContext) {
         JobArgs jobArgs = new JobArgs();
+        // 下一个版本即将删除，本期兼容此问题
+        jobArgs.setArgsStr(JsonUtil.toJsonString(jobContext.getJobArgsHolder().getJobParams()));
         jobArgs.setJobParams(jobContext.getJobArgsHolder().getJobParams());
         jobArgs.setExecutorInfo(jobContext.getExecutorInfo());
         jobArgs.setTaskBatchId(jobContext.getTaskBatchId());
@@ -109,6 +113,8 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
     private static JobArgs buildShardingJobArgs(JobContext jobContext) {
         ShardingJobArgs jobArgs = new ShardingJobArgs();
         jobArgs.setJobParams(jobContext.getJobArgsHolder().getJobParams());
+        // 下一个版本即将删除，本期兼容此问题
+        jobArgs.setArgsStr(JsonUtil.toJsonString(jobContext.getJobArgsHolder().getJobParams()));
         jobArgs.setExecutorInfo(jobContext.getExecutorInfo());
         jobArgs.setShardingIndex(jobContext.getShardingIndex());
         jobArgs.setShardingTotal(jobContext.getShardingTotal());
@@ -118,6 +124,8 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
     private static JobArgs buildMapJobArgs(JobContext jobContext) {
         MapArgs jobArgs = new MapArgs();
         JobArgsHolder jobArgsHolder = jobContext.getJobArgsHolder();
+        // 下一个版本即将删除，本期兼容此问题
+        jobArgs.setArgsStr(JsonUtil.toJsonString(jobContext.getJobArgsHolder().getJobParams()));
         jobArgs.setJobParams(jobArgsHolder.getJobParams());
         jobArgs.setMapResult(jobArgsHolder.getMaps());
         jobArgs.setExecutorInfo(jobContext.getExecutorInfo());
@@ -130,9 +138,13 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
         ReduceArgs jobArgs = new ReduceArgs();
         JobArgsHolder jobArgsHolder = jobContext.getJobArgsHolder();
         jobArgs.setJobParams(jobArgsHolder.getJobParams());
-        String maps = jobArgsHolder.getMaps();
-        if (StrUtil.isNotBlank(maps)) {
-            jobArgs.setMapResult(JsonUtil.parseList(maps, Object.class));
+        Object maps = jobArgsHolder.getMaps();
+        if (Objects.nonNull(maps)) {
+            if (maps instanceof String) {
+                jobArgs.setMapResult(JsonUtil.parseList((String) maps, Object.class));
+            } else {
+                jobArgs.setMapResult((List<?>) maps);
+            }
         }
         jobArgs.setExecutorInfo(jobContext.getExecutorInfo());
         jobArgs.setTaskBatchId(jobContext.getTaskBatchId());
@@ -144,10 +156,15 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
         MergeReduceArgs jobArgs = new MergeReduceArgs();
         JobArgsHolder jobArgsHolder = jobContext.getJobArgsHolder();
         jobArgs.setJobParams(jobArgsHolder.getJobParams());
-        String reduces = jobArgsHolder.getReduces();
-        if (StrUtil.isNotBlank(reduces)) {
-            jobArgs.setReduces(JsonUtil.parseList(reduces, Object.class));
+        Object reduces = jobArgsHolder.getReduces();
+        if (Objects.nonNull(reduces)) {
+            if (reduces instanceof String) {
+                jobArgs.setReduces(JsonUtil.parseList((String) reduces, Object.class));
+            } else {
+                jobArgs.setReduces((List<?>) reduces);
+            }
         }
+
         jobArgs.setExecutorInfo(jobContext.getExecutorInfo());
         jobArgs.setTaskBatchId(jobContext.getTaskBatchId());
         jobArgs.setWfContext(jobContext.getWfContext());

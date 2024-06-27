@@ -16,13 +16,12 @@ import java.util.Objects;
 public class JobArgs {
 
     /**
-     * 此字段不在投递任何参数
-     * see: jobParams
+     * 此字段即将废弃，请使用see: jobParams
      */
     @Deprecated
     private String argsStr;
 
-    private String jobParams;
+    private Object jobParams;
 
     private String executorInfo;
 

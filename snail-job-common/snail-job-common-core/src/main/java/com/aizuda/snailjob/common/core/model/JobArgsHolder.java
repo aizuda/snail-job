@@ -16,16 +16,16 @@ public class JobArgsHolder {
     /**
      * sj_job表输入的参数
      */
-    private String jobParams;
+    private Object jobParams;
 
     /**
      * 动态分片 map节点的结果
      */
-    private String maps;
+    private Object maps;
 
     /**
      * 动态分片 reduce执行的结果
      */
-    private String reduces;
+    private Object reduces;
 
 }
