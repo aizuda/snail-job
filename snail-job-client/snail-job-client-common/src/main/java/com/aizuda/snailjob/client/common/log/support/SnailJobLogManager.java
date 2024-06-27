@@ -1,11 +1,13 @@
 package com.aizuda.snailjob.client.common.log.support;
 
 import cn.hutool.core.util.ServiceLoaderUtil;
-import com.aizuda.snailjob.client.common.SnailLogContext;
-import com.aizuda.snailjob.client.common.log.context.ThreadLocalLogContext;
+import com.aizuda.snailjob.client.common.SnailJobLogThreadLocal;
+import com.aizuda.snailjob.client.common.SnailThreadLocal;
 import com.aizuda.snailjob.client.common.log.report.LogMeta;
+import com.aizuda.snailjob.client.common.threadlocal.CommonThreadLocal;
 import com.aizuda.snailjob.common.log.enums.LogTypeEnum;
 
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -15,11 +17,15 @@ import java.util.Optional;
  */
 public final class SnailJobLogManager {
 
-    private static final SnailLogContext<LogTypeEnum> LOG_TYPE = snailJobLogContextLoader();
-    private static final SnailLogContext<LogMeta> LOG_META = snailJobLogContextLoader();
+    private static final SnailThreadLocal<LogTypeEnum> LOG_TYPE = snailJobLogContextLoader();
+    private static final SnailThreadLocal<LogMeta> LOG_META = snailJobLogContextLoader();
 
-    private static <T> SnailLogContext<T> snailJobLogContextLoader() {
-        return Optional.ofNullable(ServiceLoaderUtil.loadFirst(SnailLogContext.class)).orElse(new ThreadLocalLogContext<T>(new ThreadLocal<>()));
+    private static <T> SnailThreadLocal<T> snailJobLogContextLoader() {
+        SnailThreadLocal<T> snailThreadLocal = ServiceLoaderUtil.loadFirst(SnailJobLogThreadLocal.class);
+        if (Objects.isNull(snailThreadLocal)) {
+            snailThreadLocal = new CommonThreadLocal<>(new ThreadLocal<>());
+        }
+        return snailThreadLocal;
     }
 
     private SnailJobLogManager() {

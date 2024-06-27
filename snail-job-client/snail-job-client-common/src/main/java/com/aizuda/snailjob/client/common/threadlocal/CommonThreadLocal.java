@@ -1,21 +1,21 @@
-package com.aizuda.snailjob.client.common.log.context;
+package com.aizuda.snailjob.client.common.threadlocal;
 
 import cn.hutool.core.lang.Assert;
-import com.aizuda.snailjob.client.common.SnailLogContext;
+import com.aizuda.snailjob.client.common.SnailThreadLocal;
 import com.aizuda.snailjob.client.common.exception.SnailJobClientException;
 
 /**
  * ThreadLocal实现类
  *
- * @author: xiaowoniu
- * @date : 2023-08-09 16:34
- * @since 3.2.0
+ * @author: opensnail
+ * @date : 2024-06-27
+ * @since sj_1.1.0
  */
-public class ThreadLocalLogContext<T> implements SnailLogContext<T> {
+public class CommonThreadLocal<T> implements SnailThreadLocal<T> {
 
     private final ThreadLocal<T> threadLocal;
 
-    public ThreadLocalLogContext(ThreadLocal<T> threadLocal) {
+    public CommonThreadLocal(ThreadLocal<T> threadLocal) {
         Assert.notNull(threadLocal, () -> new SnailJobClientException("thread local can not be null"));
         this.threadLocal = threadLocal;
     }

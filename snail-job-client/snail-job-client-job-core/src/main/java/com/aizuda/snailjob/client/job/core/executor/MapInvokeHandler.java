@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.client.job.core.executor;
 
+import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.client.common.rpc.client.RequestBuilder;
 import com.aizuda.snailjob.client.job.core.client.JobNettyClient;
@@ -60,7 +61,9 @@ public final class MapInvokeHandler implements InvocationHandler {
             throw new SnailJobMapReduceException("The Next taskName can not be {}", SystemConstants.MAP_ROOT);
         }
 
+        // 使用ThreadLocal传递数据
         JobContext jobContext = JobContextManager.getJobContext();
+        Assert.notNull(jobContext, () -> new SnailJobMapReduceException("job context is null"));
 
         // 1. 构造请求
         MapTaskRequest mapTaskRequest = new MapTaskRequest();
