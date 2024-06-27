@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.client.common.log.report;
 
-import com.aizuda.snailjob.client.common.client.NettyClient;
+import com.aizuda.snailjob.client.common.NettyClient;
 import com.aizuda.snailjob.client.common.rpc.client.RequestBuilder;
 import com.aizuda.snailjob.common.core.model.NettyResult;
 import com.aizuda.snailjob.common.core.window.Listener;

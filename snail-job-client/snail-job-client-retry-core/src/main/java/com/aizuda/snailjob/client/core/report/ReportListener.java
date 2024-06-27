@@ -1,7 +1,7 @@
 package com.aizuda.snailjob.client.core.report;
 
+import com.aizuda.snailjob.client.common.NettyClient;
 import com.aizuda.snailjob.client.common.cache.GroupVersionCache;
-import com.aizuda.snailjob.client.common.client.NettyClient;
 import com.aizuda.snailjob.client.common.config.SnailJobProperties;
 import com.aizuda.snailjob.client.common.rpc.client.RequestBuilder;
 import com.aizuda.snailjob.client.core.RetryExecutor;

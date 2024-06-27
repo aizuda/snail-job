@@ -31,7 +31,7 @@ public class ConfigHttpRequestHandler extends GetHttpRequestHandler {
 
     @Override
     public HttpMethod method() {
-        return HttpMethod.GET;
+        return HttpMethod.POST;
     }
 
     @Override

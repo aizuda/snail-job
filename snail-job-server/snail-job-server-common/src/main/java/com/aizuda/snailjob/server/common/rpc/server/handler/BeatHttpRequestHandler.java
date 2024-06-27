@@ -30,7 +30,7 @@ public class BeatHttpRequestHandler extends GetHttpRequestHandler {
 
     @Override
     public HttpMethod method() {
-        return HttpMethod.GET;
+        return HttpMethod.POST;
     }
 
     @Override

@@ -16,5 +16,4 @@ public class ShardingJobArgs extends JobArgs {
 
     private Integer shardingIndex;
 
-
 }
