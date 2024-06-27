@@ -56,6 +56,11 @@ public class WorkflowDetailResponseVO {
     private Integer workflowStatus;
 
     /**
+     * 工作流上下文
+     */
+    private String wfContext;
+
+    /**
      * DAG节点配置
      */
     private NodeConfig nodeConfig;

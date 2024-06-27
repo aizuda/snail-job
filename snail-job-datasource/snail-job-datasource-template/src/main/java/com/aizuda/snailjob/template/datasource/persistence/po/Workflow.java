@@ -85,6 +85,11 @@ public class Workflow extends CreateUpdateDt {
     private String description;
 
     /**
+     * 工作流上下文
+     */
+    private String wfContext;
+
+    /**
      * 版本号
      */
     @TableField(value = "version", update = "%s+1")

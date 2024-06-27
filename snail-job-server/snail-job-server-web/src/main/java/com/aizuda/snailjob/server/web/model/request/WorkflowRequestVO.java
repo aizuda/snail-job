@@ -41,6 +41,11 @@ public class WorkflowRequestVO {
     private Integer blockStrategy;
 
     /**
+     * 工作流上下文
+     */
+    private String wfContext;
+
+    /**
      * 0、关闭、1、开启
      */
     @NotNull(message = "工作流状态")

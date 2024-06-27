@@ -462,6 +462,7 @@ CREATE TABLE `sj_workflow`
     `executor_timeout` int(11)             NOT NULL DEFAULT 0 COMMENT '任务执行超时时间，单位秒',
     `description`      varchar(256)        NOT NULL DEFAULT '' COMMENT '描述',
     `flow_info`        text                         DEFAULT NULL COMMENT '流程信息',
+    `wf_context`       text                         DEFAULT NULL COMMENT '上下文',
     `bucket_index`     int(11)             NOT NULL DEFAULT 0 COMMENT 'bucket',
     `version`          int(11)             NOT NULL COMMENT '版本号',
     `ext_attrs`        varchar(256)        NULL     DEFAULT '' COMMENT '扩展字段',
