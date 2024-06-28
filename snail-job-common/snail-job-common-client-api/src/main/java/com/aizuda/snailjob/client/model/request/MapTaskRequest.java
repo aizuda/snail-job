@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author: opensnail
@@ -26,6 +27,11 @@ public class MapTaskRequest {
     private Long workflowTaskBatchId;
 
     private Long workflowNodeId;
+
+    /**
+     * 当前节点变更的工作流上下文
+     */
+    private String wfContext;
 
     @NotBlank(message = "taskName 不能为空")
     private String taskName;

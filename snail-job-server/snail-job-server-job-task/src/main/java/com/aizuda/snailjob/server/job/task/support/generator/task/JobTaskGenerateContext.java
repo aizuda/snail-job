@@ -50,4 +50,7 @@ public class JobTaskGenerateContext {
      * 父任务id
      */
     private Long parentId;
+
+
+    private String wfContext;
 }

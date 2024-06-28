@@ -64,8 +64,8 @@ public abstract class AbstractMapExecutor extends AbstractJobExecutor implements
 
         if (Objects.isNull(method)) {
             throw new SnailJobMapReduceException(
-                "[{}] MapTask execution method not found. Please configure the @MapExecutor annotation",
-                mapArgs.getExecutorInfo());
+                "[{}#{}] MapTask execution method not found. Please configure the @MapExecutor annotation",
+                mapArgs.getExecutorInfo(), mapArgs.getTaskName());
 
         }
 

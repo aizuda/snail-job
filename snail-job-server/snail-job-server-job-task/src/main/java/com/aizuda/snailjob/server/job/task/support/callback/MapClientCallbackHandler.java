@@ -22,6 +22,6 @@ public class MapClientCallbackHandler extends MapReduceClientCallbackHandler {
 
     @Override
     public void callback(ClientCallbackContext context) {
-        super.callback(context);
+        super.doCallback(context);
     }
 }

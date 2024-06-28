@@ -12,12 +12,15 @@ import com.aizuda.snailjob.common.core.exception.SnailJobMapReduceException;
 import com.aizuda.snailjob.common.core.model.JobContext;
 import com.aizuda.snailjob.common.core.model.NettyResult;
 import com.aizuda.snailjob.common.core.model.Result;
+import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import org.springframework.util.CollectionUtils;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author: opensnail
@@ -72,6 +75,12 @@ public final class MapInvokeHandler implements InvocationHandler {
         mapTaskRequest.setTaskName(nextTaskName);
         mapTaskRequest.setSubTask(taskList);
         mapTaskRequest.setParentId(jobContext.getTaskId());
+        mapTaskRequest.setWorkflowTaskBatchId(jobContext.getWorkflowTaskBatchId());
+        mapTaskRequest.setWorkflowNodeId(jobContext.getWorkflowNodeId());
+        Map<String, Object> changeWfContext = jobContext.getChangeWfContext();
+        if (Objects.nonNull(changeWfContext)) {
+            mapTaskRequest.setWfContext(JsonUtil.toJsonString(changeWfContext));
+        }
 
         // 2. 同步发送请求
         Result<Boolean> result = CLIENT.batchReportMapTask(mapTaskRequest);

@@ -71,6 +71,11 @@ public class JobContext {
     private Map<String, Object> wfContext;
 
     /**
+     * 新增或者改动的上下文
+     */
+    private Map<String, Object> changeWfContext;
+
+    /**
      * 定时任务参数
      */
     private JobArgsHolder jobArgsHolder;

@@ -66,11 +66,9 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
             }).build();
 
     private final JobContext jobContext;
-    private final Map<String, Object> changeWfContext;
 
-    public JobExecutorFutureCallback(final JobContext jobContext, Map<String, Object> changeWfContext) {
+    public JobExecutorFutureCallback(final JobContext jobContext) {
         this.jobContext = jobContext;
-        this.changeWfContext = changeWfContext;
     }
 
     @Override
@@ -164,9 +162,9 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
         dispatchJobRequest.setTaskStatus(status);
         dispatchJobRequest.setRetry(jobContext.isRetry());
         dispatchJobRequest.setRetryScene(jobContext.getRetryScene());
-        // 传递上下文
-        if (CollUtil.isNotEmpty(changeWfContext)) {
-            dispatchJobRequest.setWfContext(JsonUtil.toJsonString(changeWfContext));
+        // 传递变更后的上下文
+        if (CollUtil.isNotEmpty(jobContext.getChangeWfContext())) {
+            dispatchJobRequest.setWfContext(JsonUtil.toJsonString(jobContext.getChangeWfContext()));
         }
 
         return dispatchJobRequest;

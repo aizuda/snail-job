@@ -50,8 +50,7 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
         // 将任务添加到时间轮中，到期停止任务
         TimerManager.add(new StopTaskTimerTask(jobContext.getTaskBatchId()), jobContext.getExecutorTimeout(), TimeUnit.SECONDS);
 
-        Map<String, Object> changeWfContext = Maps.newConcurrentMap();
-
+        jobContext.setChangeWfContext(Maps.newConcurrentMap());
         // 执行任务
         ListenableFuture<ExecuteResult> submit = decorator.submit(() -> {
             JobArgs jobArgs;
@@ -72,7 +71,7 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
             }
 
             jobArgs.setWfContext(jobContext.getWfContext());
-            jobArgs.setChangeWfContext(changeWfContext);
+            jobArgs.setChangeWfContext(jobContext.getChangeWfContext());
 
             try {
                 // 初始化调度信息（日志上报LogUtil）
@@ -86,7 +85,7 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
         });
 
         FutureCache.addFuture(jobContext.getTaskBatchId(), submit);
-        Futures.addCallback(submit, new JobExecutorFutureCallback(jobContext, changeWfContext), decorator);
+        Futures.addCallback(submit, new JobExecutorFutureCallback(jobContext), decorator);
     }
 
     private void initLogContext(JobContext jobContext) {

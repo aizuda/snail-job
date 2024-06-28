@@ -21,8 +21,10 @@ import com.aizuda.snailjob.server.job.task.support.generator.task.JobTaskGenerat
 import com.aizuda.snailjob.server.job.task.support.generator.task.JobTaskGenerator;
 import com.aizuda.snailjob.server.job.task.support.generator.task.JobTaskGeneratorFactory;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobMapper;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowTaskBatchMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.Job;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTask;
+import com.aizuda.snailjob.template.datasource.persistence.po.WorkflowTaskBatch;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
@@ -30,6 +32,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 
@@ -43,7 +46,7 @@ import java.util.Objects;
 @Component
 @RequiredArgsConstructor
 public class MapTaskPostHttpRequestHandler extends PostHttpRequestHandler {
-
+    private final WorkflowTaskBatchMapper workflowTaskBatchMapper;
     private final JobMapper jobMapper;
 
     @Override
@@ -73,10 +76,12 @@ public class MapTaskPostHttpRequestHandler extends PostHttpRequestHandler {
         context.setNamespaceId(HttpHeaderUtil.getNamespace(headers));
         context.setMrStage(MapReduceStageEnum.MAP.getStage());
         context.setMapSubTask(mapTaskRequest.getSubTask());
+        context.setWfContext(mapTaskRequest.getWfContext());
         List<JobTask> taskList = taskInstance.generate(context);
         if (CollUtil.isEmpty(taskList)) {
             return JsonUtil.toJsonString(
-                new NettyResult(StatusEnum.NO.getStatus(), "Job task is empty", Boolean.FALSE, retryRequest.getReqId()));
+                new NettyResult(StatusEnum.NO.getStatus(), "Job task is empty", Boolean.FALSE,
+                    retryRequest.getReqId()));
         }
 
         Job job = jobMapper.selectOne(new LambdaQueryWrapper<Job>()
@@ -91,9 +96,19 @@ public class MapTaskPostHttpRequestHandler extends PostHttpRequestHandler {
                     retryRequest.getReqId()));
         }
 
+        String newWfContext = null;
+        if (Objects.nonNull(mapTaskRequest.getWorkflowTaskBatchId())) {
+            WorkflowTaskBatch workflowTaskBatch = workflowTaskBatchMapper.selectOne(
+                new LambdaQueryWrapper<WorkflowTaskBatch>()
+                    .select(WorkflowTaskBatch::getWfContext)
+                    .eq(WorkflowTaskBatch::getId, mapTaskRequest.getWorkflowTaskBatchId())
+            );
+            newWfContext = workflowTaskBatch.getWfContext();
+        }
+
         // 执行任务
         JobExecutor jobExecutor = JobExecutorFactory.getJobExecutor(JobTaskTypeEnum.MAP_REDUCE.getType());
-        jobExecutor.execute(buildJobExecutorContext(mapTaskRequest, job, taskList));
+        jobExecutor.execute(buildJobExecutorContext(mapTaskRequest, job, taskList, newWfContext));
 
         return JsonUtil.toJsonString(
             new NettyResult(StatusEnum.YES.getStatus(), "Report Map Task Processed Successfully", Boolean.TRUE,
@@ -101,12 +116,13 @@ public class MapTaskPostHttpRequestHandler extends PostHttpRequestHandler {
     }
 
     private static JobExecutorContext buildJobExecutorContext(MapTaskRequest mapTaskRequest, Job job,
-        List<JobTask> taskList) {
+        List<JobTask> taskList, String newWfContext) {
         JobExecutorContext context = JobTaskConverter.INSTANCE.toJobExecutorContext(job);
         context.setTaskList(taskList);
         context.setTaskBatchId(mapTaskRequest.getTaskBatchId());
         context.setWorkflowTaskBatchId(mapTaskRequest.getWorkflowTaskBatchId());
         context.setWorkflowNodeId(mapTaskRequest.getWorkflowNodeId());
+        context.setWfContext(newWfContext);
         return context;
     }
 

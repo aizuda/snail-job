@@ -14,4 +14,5 @@ public class ReduceTaskDTO {
     private Long taskBatchId;
     private Long jobId;
     private Integer mrStage;
+    private String wfContext;
 }
