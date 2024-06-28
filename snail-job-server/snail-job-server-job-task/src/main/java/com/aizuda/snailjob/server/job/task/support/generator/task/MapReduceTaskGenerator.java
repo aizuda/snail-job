@@ -99,7 +99,7 @@ public class MapReduceTaskGenerator extends AbstractJobTaskGenerator {
         jobTask.setArgsType(context.getArgsType());
         JobArgsHolder jobArgsHolder = new JobArgsHolder();
         jobArgsHolder.setJobParams(context.getArgsStr());
-        jobArgsHolder.setReduces(JsonUtil.toJsonString(StreamUtils.toSet(jobTasks, JobTask::getResultMessage)));
+        jobArgsHolder.setReduces(JsonUtil.toJsonString(StreamUtils.toList(jobTasks, JobTask::getResultMessage)));
         jobTask.setArgsStr(JsonUtil.toJsonString(jobArgsHolder));
         jobTask.setTaskStatus(JobTaskStatusEnum.RUNNING.getStatus());
         jobTask.setResultMessage(Optional.ofNullable(jobTask.getResultMessage()).orElse(StrUtil.EMPTY));
