@@ -131,10 +131,15 @@ public class MapReduceTaskGenerator extends AbstractJobTaskGenerator {
                 .eq(JobTask::getLeaf, StatusEnum.YES.getStatus())
         );
 
-        // 这里需要判断是否是map
-        List<String> allMapJobTasks = StreamUtils.toList(jobTasks, JobTask::getResultMessage);
+        if (CollUtil.isEmpty(jobTasks)) {
+            return Lists.newArrayList();
+        }
 
-        List<List<String>> partition = Lists.partition(allMapJobTasks, reduceParallel);
+        // 这里需要判断是否是map
+        // 平均分配map集合, 若reduceParallel > allMapJobTasks.size(), 则取allMapJobTasks.size()作为分片数
+        List<String> allMapJobTasks = StreamUtils.toList(jobTasks, JobTask::getResultMessage);
+        int size = (allMapJobTasks.size() + reduceParallel - 1) / reduceParallel;
+        List<List<String>> partition = Lists.partition(allMapJobTasks, size);
 
         jobTasks = new ArrayList<>(partition.size());
         final List<JobTask> finalJobTasks = jobTasks;
