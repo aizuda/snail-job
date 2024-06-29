@@ -21,12 +21,16 @@ import com.aizuda.snailjob.template.datasource.persistence.po.JobTask;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch;
 import com.aizuda.snailjob.template.datasource.persistence.po.WorkflowTaskBatch;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.google.common.collect.Sets;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 import java.util.Optional;
+
+import static com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum.WORKFLOW_DECISION_FAILED;
+import static com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum.WORKFLOW_NODE_NO_REQUIRED;
 
 /**
  * @author xiaowoniu
@@ -59,7 +63,7 @@ public class DecisionWorkflowExecutor extends AbstractWorkflowExecutor {
 
         Boolean result = (Boolean) Optional.ofNullable(context.getEvaluationResult()).orElse(Boolean.FALSE);
 
-        if (result) {
+        if (result || (Sets.newHashSet(WORKFLOW_NODE_NO_REQUIRED.getReason(), WORKFLOW_DECISION_FAILED.getReason()).contains( context.getParentOperationReason()))) {
             // 多个条件节点直接是或的关系，只要一个成功其他节点就取消且是无需处理状态
             taskBatchStatus = JobTaskBatchStatusEnum.CANCEL.getStatus();
             jobTaskStatus = JobTaskStatusEnum.CANCEL.getStatus();

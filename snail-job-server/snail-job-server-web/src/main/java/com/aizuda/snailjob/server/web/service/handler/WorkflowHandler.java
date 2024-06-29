@@ -190,7 +190,7 @@ public class WorkflowHandler {
                             graph, version);
                 } else {
                     if (WorkflowNodeTypeEnum.DECISION.getType() == nodeConfig.getNodeType()) {
-                        throw new SnailJobServerException("决策节点不能作为叶子节点");
+                        throw new SnailJobServerException("决策节点或者决策节点的后继节点不能作为叶子节点");
                     }
 
                     // 叶子节点记录一下

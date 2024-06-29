@@ -46,7 +46,7 @@ public class JobExecutorResultActor extends AbstractActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder().match(JobExecutorResultDTO.class, result -> {
-            SnailJobLog.LOCAL.info("更新任务状态. 参数:[{}]", JsonUtil.toJsonString(result));
+            SnailJobLog.LOCAL.debug("更新任务状态. 参数:[{}]", JsonUtil.toJsonString(result));
             try {
                 Assert.notNull(result.getTaskId(), ()-> new SnailJobServerException("taskId can not be null"));
                 Assert.notNull(result.getJobId(), ()-> new SnailJobServerException("jobId can not be null"));

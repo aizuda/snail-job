@@ -10,10 +10,16 @@ import com.aizuda.snailjob.server.job.task.dto.JobTaskPrepareDTO;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTask;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch;
+import com.google.common.collect.Sets;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
+
+import static com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum.WORKFLOW_DECISION_FAILED;
+import static com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum.WORKFLOW_NODE_CLOSED_SKIP_EXECUTION;
+import static com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum.WORKFLOW_NODE_NO_REQUIRED;
+import static com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum.WORKFLOW_SUCCESSOR_SKIP_EXECUTION;
 
 /**
  * @author xiaowoniu
@@ -36,7 +42,8 @@ public class JobTaskWorkflowExecutor extends AbstractWorkflowExecutor {
 
     @Override
     protected void afterExecute(WorkflowExecutorContext context) {
-        if (Objects.equals(context.getWorkflowNodeStatus(), StatusEnum.YES.getStatus())) {
+        if (!Sets.newHashSet(WORKFLOW_NODE_CLOSED_SKIP_EXECUTION.getReason(), WORKFLOW_NODE_NO_REQUIRED.getReason(), WORKFLOW_DECISION_FAILED.getReason())
+            .contains(context.getOperationReason())) {
             return;
         }
 
@@ -51,7 +58,7 @@ public class JobTaskWorkflowExecutor extends AbstractWorkflowExecutor {
         jobLogMetaDTO.setTaskId(jobTask.getId());
 
         SnailJobLog.REMOTE.warn("节点[{}]已取消任务执行. 取消原因: 任务已关闭. <|>{}<|>",
-                context.getWorkflowNodeId(), jobLogMetaDTO);
+            context.getWorkflowNodeId(), jobLogMetaDTO);
     }
 
     @Override
@@ -64,11 +71,14 @@ public class JobTaskWorkflowExecutor extends AbstractWorkflowExecutor {
 
         if (Objects.equals(context.getWorkflowNodeStatus(), StatusEnum.NO.getStatus())) {
             context.setTaskBatchStatus(JobTaskBatchStatusEnum.CANCEL.getStatus());
-            context.setOperationReason(JobOperationReasonEnum.WORKFLOW_NODE_CLOSED_SKIP_EXECUTION.getReason());
+            context.setOperationReason(WORKFLOW_NODE_CLOSED_SKIP_EXECUTION.getReason());
             context.setJobTaskStatus(JobTaskStatusEnum.CANCEL.getStatus());
 
-            // 执行下一个节点
-            workflowTaskExecutor(context);
+        } else if (Sets.newHashSet(WORKFLOW_NODE_NO_REQUIRED.getReason(), WORKFLOW_DECISION_FAILED.getReason()).contains( context.getParentOperationReason())) {
+            // 针对无需处理的批次直接新增一个记录
+            context.setTaskBatchStatus(JobTaskBatchStatusEnum.CANCEL.getStatus());
+            context.setOperationReason(JobOperationReasonEnum.WORKFLOW_NODE_NO_REQUIRED.getReason());
+            context.setJobTaskStatus(JobTaskStatusEnum.CANCEL.getStatus());
         } else {
             invokeJobTask(context);
         }

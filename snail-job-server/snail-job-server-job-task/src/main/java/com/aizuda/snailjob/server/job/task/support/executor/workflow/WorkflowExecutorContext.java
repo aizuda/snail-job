@@ -39,6 +39,16 @@ public class WorkflowExecutorContext {
     private Long parentWorkflowNodeId;
 
     /**
+     * TODO 父节点批次状态
+     */
+    private Integer parentJobTaskStatus;
+
+    /**
+     * 父节点批次操作原因状态
+     */
+    private Integer parentOperationReason;
+
+    /**
      * 任务属性
      */
     private Job job;
@@ -107,4 +117,5 @@ public class WorkflowExecutorContext {
      * 工作流全局上下文
      */
     private String wfContext;
+
 }
