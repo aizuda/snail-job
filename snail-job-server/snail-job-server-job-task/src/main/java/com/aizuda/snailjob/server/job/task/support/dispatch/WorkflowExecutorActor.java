@@ -8,6 +8,7 @@ import com.aizuda.snailjob.common.core.context.SpringContext;
 import com.aizuda.snailjob.common.core.enums.FailStrategyEnum;
 import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
+import com.aizuda.snailjob.common.core.enums.NodeTypeEnum;
 import com.aizuda.snailjob.common.core.enums.WorkflowNodeTypeEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
@@ -212,7 +213,8 @@ public class WorkflowExecutorActor extends AbstractActor {
 
             // 决策当前节点要不要执行
             Set<Long> predecessors = graph.predecessors(workflowNode.getId());
-            boolean predecessorsComplete = arePredecessorsComplete(taskExecute, predecessors, jobTaskBatchMap, workflowNode, parentJobTaskBatchList);
+            boolean predecessorsComplete = arePredecessorsComplete(taskExecute, predecessors, jobTaskBatchMap,
+                workflowNode);
             if (!SystemConstants.ROOT.equals(taskExecute.getParentId()) && !predecessorsComplete) {
                 continue;
             }
@@ -230,7 +232,7 @@ public class WorkflowExecutorActor extends AbstractActor {
             context.setWfContext(workflowTaskBatch.getWfContext());
             // 这里父节点取最新的批次判断状态
             if (CollUtil.isNotEmpty(parentJobTaskBatchList)) {
-                context.setParentOperationReason(parentJobTaskBatchList.get(0).getOperationReason());
+                fillParentOperationReason(allJobTaskBatchList, parentJobTaskBatchList, parentWorkflowNode, context);
             }
 
             workflowExecutor.execute(context);
@@ -240,9 +242,33 @@ public class WorkflowExecutorActor extends AbstractActor {
 
     }
 
+    private static void fillParentOperationReason(final List<JobTaskBatch> allJobTaskBatchList,
+        final List<JobTaskBatch> parentJobTaskBatchList, final WorkflowNode parentWorkflowNode,
+        final WorkflowExecutorContext context) {
+        JobTaskBatch jobTaskBatch = allJobTaskBatchList.stream()
+            .filter(batch -> !WORKFLOW_SUCCESSOR_SKIP_EXECUTION.contains(batch.getOperationReason()))
+            .findFirst().orElse(null);
+
+        /*
+          若当前节点的父节点存在无需处理的节点(比如决策节点的某个未匹中的分支)，则需要等待正常的节点来执行此节点，若正常节点已经调度过了，
+          此时则没有能触发后继节点继续调度的节点存在了。 因此这里将改变parentOperationReason = 0使之能继续往后处理
+          基于性能的考虑这里在直接在parentJobTaskBatchList列表的头节点插入一个不是跳过的节点，这样就可以正常流转了
+          eg: {"-1":[480],"480":[481,488,490],"481":[482],"482":[483],"483":[484],"484":[485],"485":[486],"486":[487],"487":[497,498],"488":[489],"489":[497,498],"490":[491,493,495],"491":[492],"492":[497,498],"493":[494],"494":[497,498],"495":[496],"496":[497,498],"497":[499],"498":[499],"499":[]}
+        */
+        if (parentJobTaskBatchList.stream()
+                .map(JobTaskBatch::getOperationReason)
+                .filter(Objects::nonNull)
+                .anyMatch(JobOperationReasonEnum.WORKFLOW_SUCCESSOR_SKIP_EXECUTION::contains)
+            && Objects.nonNull(jobTaskBatch)
+            && parentWorkflowNode.getNodeType() != WorkflowNodeTypeEnum.DECISION.getType()) {
+            context.setParentOperationReason(JobOperationReasonEnum.NONE.getReason());
+        } else {
+            context.setParentOperationReason(parentJobTaskBatchList.get(0).getOperationReason());
+        }
+    }
+
     private boolean arePredecessorsComplete(final WorkflowNodeTaskExecuteDTO taskExecute, Set<Long> predecessors,
-        Map<Long, List<JobTaskBatch>> jobTaskBatchMap, WorkflowNode waitExecWorkflowNode,
-        List<JobTaskBatch> parentJobTaskBatchList) {
+        Map<Long, List<JobTaskBatch>> jobTaskBatchMap, WorkflowNode waitExecWorkflowNode) {
 
         // 是否存在无需处理的节点
         List<JobTaskBatch> isExistedNotSkipJobTaskBatches = new ArrayList<>();
@@ -263,35 +289,19 @@ public class WorkflowExecutorActor extends AbstractActor {
             boolean isCompleted = jobTaskBatches.stream().anyMatch(
                 jobTaskBatch -> JobTaskBatchStatusEnum.NOT_COMPLETE.contains(jobTaskBatch.getTaskBatchStatus()));
             if (isCompleted) {
-                SnailJobLog.LOCAL.info("存在未完成的兄弟节点. [{}] 待执行节点:[{}] parentId:[{}]", nodeId, taskExecute.getParentId(),
+                SnailJobLog.LOCAL.info("存在未完成的兄弟节点. [{}] 待执行节点:[{}] parentId:[{}]", nodeId,
+                    taskExecute.getParentId(),
                     waitExecWorkflowNode.getId());
                 return Boolean.FALSE;
             }
 
             if (CollUtil.isEmpty(isExistedNotSkipJobTaskBatches)) {
                 isExistedNotSkipJobTaskBatches = jobTaskBatches.stream().filter(
-                    jobTaskBatch -> !WORKFLOW_SUCCESSOR_SKIP_EXECUTION.contains(jobTaskBatch.getOperationReason())).toList();
+                        jobTaskBatch -> !WORKFLOW_SUCCESSOR_SKIP_EXECUTION.contains(jobTaskBatch.getOperationReason()))
+                    .toList();
 
             }
 
-        }
-
-        // 父节点是否存在无需处理的节点，若存在一个不是的则需要等待正常的节点处理
-        // 如果父节点是无需处理则不再继续执行
-        if (CollUtil.isNotEmpty(parentJobTaskBatchList) &&
-            parentJobTaskBatchList.stream()
-                .map(JobTaskBatch::getOperationReason)
-                .filter(Objects::nonNull)
-                .anyMatch(JobOperationReasonEnum.WORKFLOW_SUCCESSOR_SKIP_EXECUTION::contains)
-            && CollUtil.isNotEmpty(isExistedNotSkipJobTaskBatches)) {
-            /*
-             等待正常的节点来执行此节点，若正常节点已经调度过了，此时则没有能触发后继节点继续调度的节点存在了。
-             因此这里将重新选当前节点的前驱节点中选一个作为父节点来触发，使之能够继续往后执行
-             基于性能的考虑这里在直接在parentJobTaskBatchList列表的头节点插入一个不是跳过的节点，这样就可以正常流转了
-             eg: {"-1":[480],"480":[481,488,490],"481":[482],"482":[483],"483":[484],"484":[485],"485":[486],"486":[487],"487":[497,498],"488":[489],"489":[497,498],"490":[491,493,495],"491":[492],"492":[497,498],"493":[494],"494":[497,498],"495":[496],"496":[497,498],"497":[499],"498":[499],"499":[]}
-            */
-            log.warn("-->>> isExistedNotSkip:[{}] nodeId:[{}] parentId:[{}]",  CollUtil.isNotEmpty(isExistedNotSkipJobTaskBatches), waitExecWorkflowNode.getId(), taskExecute.getParentId());
-            parentJobTaskBatchList.add(0, isExistedNotSkipJobTaskBatches.get(0));
         }
 
         return Boolean.TRUE;

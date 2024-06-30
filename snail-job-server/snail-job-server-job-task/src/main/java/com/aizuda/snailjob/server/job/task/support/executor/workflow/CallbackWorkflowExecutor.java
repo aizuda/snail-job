@@ -9,14 +9,12 @@ import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.dto.CallbackConfig;
 import com.aizuda.snailjob.server.common.dto.JobLogMetaDTO;
 import com.aizuda.snailjob.server.common.rpc.okhttp.RequestInterceptor;
-import com.aizuda.snailjob.server.job.task.support.WorkflowTaskConverter;
 import com.aizuda.snailjob.server.job.task.support.alarm.event.WorkflowTaskFailAlarmEvent;
 import com.aizuda.snailjob.server.model.dto.CallbackParamsDTO;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTask;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.github.rholder.retry.*;
+import com.google.common.collect.Sets;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -26,10 +24,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+
+import static com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum.WORKFLOW_DECISION_FAILED;
+import static com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum.WORKFLOW_NODE_NO_REQUIRED;
 
 /**
  * @author xiaowoniu
@@ -39,7 +40,8 @@ import java.util.concurrent.TimeUnit;
 @Component
 @RequiredArgsConstructor
 public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
-
+    private static final Set<Integer> NO_REQUIRED_CONFIG = Sets.newHashSet(WORKFLOW_NODE_NO_REQUIRED.getReason(),
+        WORKFLOW_DECISION_FAILED.getReason());
     private static final String CALLBACK_TIMEOUT = "10";
     private final RestTemplate restTemplate;
 
@@ -61,16 +63,18 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
         context.setOperationReason(JobOperationReasonEnum.NONE.getReason());
         context.setJobTaskStatus(JobTaskStatusEnum.SUCCESS.getStatus());
 
-        if (Objects.equals(context.getWorkflowNodeStatus(), StatusEnum.NO.getStatus())) {
+        if (NO_REQUIRED_CONFIG.contains(context.getParentOperationReason())) {
+            // 针对无需处理的批次直接新增一个记录
+            context.setTaskBatchStatus(JobTaskBatchStatusEnum.CANCEL.getStatus());
+            context.setOperationReason(JobOperationReasonEnum.WORKFLOW_NODE_NO_REQUIRED.getReason());
+            context.setJobTaskStatus(JobTaskStatusEnum.CANCEL.getStatus());
+        } else if (Objects.equals(context.getWorkflowNodeStatus(), StatusEnum.NO.getStatus())) {
             context.setTaskBatchStatus(JobTaskBatchStatusEnum.CANCEL.getStatus());
             context.setOperationReason(JobOperationReasonEnum.WORKFLOW_NODE_CLOSED_SKIP_EXECUTION.getReason());
             context.setJobTaskStatus(JobTaskStatusEnum.CANCEL.getStatus());
         } else {
             invokeCallback(context);
         }
-
-        // ToDo 执行下一个节点
-//        workflowTaskExecutor(context);
 
     }
 
@@ -160,8 +164,14 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
             SnailJobLog.REMOTE.info("节点[{}]回调成功.\n回调参数:{} \n回调结果:[{}] <|>{}<|>",
                     context.getWorkflowNodeId(), context.getWfContext(), context.getEvaluationResult(), jobLogMetaDTO);
         } else if (jobTaskBatch.getTaskBatchStatus() == JobTaskStatusEnum.CANCEL.getStatus()) {
-            SnailJobLog.REMOTE.warn("节点[{}]取消回调. 取消原因: 任务状态已关闭 <|>{}<|>",
+            if (NO_REQUIRED_CONFIG.contains(context.getParentOperationReason())) {
+                SnailJobLog.REMOTE.warn("节点[{}]取消回调. 取消原因: 当前任务无需处理 <|>{}<|>",
                     context.getWorkflowNodeId(), jobLogMetaDTO);
+            } else {
+                SnailJobLog.REMOTE.warn("节点[{}]取消回调. 取消原因: 任务状态已关闭 <|>{}<|>",
+                    context.getWorkflowNodeId(), jobLogMetaDTO);
+            }
+
         } else {
             SnailJobLog.REMOTE.error("节点[{}]回调失败.\n失败原因:{} <|>{}<|>",
                     context.getWorkflowNodeId(),

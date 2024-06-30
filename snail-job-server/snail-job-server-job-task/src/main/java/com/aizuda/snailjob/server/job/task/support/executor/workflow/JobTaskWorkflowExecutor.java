@@ -63,8 +63,8 @@ public class JobTaskWorkflowExecutor extends AbstractWorkflowExecutor {
             context.setOperationReason(JobOperationReasonEnum.WORKFLOW_NODE_NO_REQUIRED.getReason());
             context.setJobTaskStatus(JobTaskStatusEnum.CANCEL.getStatus());
 
-            // 创建批次和任务节点
-            invokeCancelJobTask(context);
+            // 创建批次和任务节点4
+            invokeCancelJobTask(context, "当前节点无需处理");
         } else if (Objects.equals(context.getWorkflowNodeStatus(), StatusEnum.NO.getStatus())) {
             // 针对无需处理的批次直接新增一个记录
             context.setTaskBatchStatus(JobTaskBatchStatusEnum.CANCEL.getStatus());
@@ -72,7 +72,7 @@ public class JobTaskWorkflowExecutor extends AbstractWorkflowExecutor {
             context.setJobTaskStatus(JobTaskStatusEnum.CANCEL.getStatus());
 
             // 创建批次和任务节点
-            invokeCancelJobTask(context);
+            invokeCancelJobTask(context, "任务已关闭");
         } else {
             invokeJobTask(context);
         }
@@ -88,7 +88,7 @@ public class JobTaskWorkflowExecutor extends AbstractWorkflowExecutor {
         actorRef.tell(jobTaskPrepare, actorRef);
     }
 
-    private void invokeCancelJobTask(final WorkflowExecutorContext context) {
+    private void invokeCancelJobTask(final WorkflowExecutorContext context, String cancelReason) {
 
         JobTaskBatch jobTaskBatch = generateJobTaskBatch(context);
         JobTask jobTask = generateJobTask(context, jobTaskBatch);
@@ -100,7 +100,7 @@ public class JobTaskWorkflowExecutor extends AbstractWorkflowExecutor {
         jobLogMetaDTO.setJobId(context.getJobId());
         jobLogMetaDTO.setTaskId(jobTask.getId());
 
-        SnailJobLog.REMOTE.warn("节点[{}]已取消任务执行. 取消原因: 任务已关闭. <|>{}<|>",
-            context.getWorkflowNodeId(), jobLogMetaDTO);
+        SnailJobLog.REMOTE.warn("节点[{}]已取消任务执行. 取消原因: {}. <|>{}<|>",
+            context.getWorkflowNodeId(), cancelReason, jobLogMetaDTO);
     }
 }
