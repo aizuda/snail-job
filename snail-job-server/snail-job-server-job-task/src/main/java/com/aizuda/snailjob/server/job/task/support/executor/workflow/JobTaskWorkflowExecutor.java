@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
+import java.util.Set;
 
 import static com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum.WORKFLOW_DECISION_FAILED;
 import static com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum.WORKFLOW_NODE_CLOSED_SKIP_EXECUTION;
@@ -30,6 +31,9 @@ import static com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum.WORKF
 @RequiredArgsConstructor
 public class JobTaskWorkflowExecutor extends AbstractWorkflowExecutor {
 
+    private static final Set<Integer> NO_REQUIRED_CONFIG = Sets.newHashSet(WORKFLOW_NODE_NO_REQUIRED.getReason(),
+        WORKFLOW_DECISION_FAILED.getReason());
+
     @Override
     public WorkflowNodeTypeEnum getWorkflowNodeType() {
         return WorkflowNodeTypeEnum.JOB_TASK;
@@ -42,23 +46,7 @@ public class JobTaskWorkflowExecutor extends AbstractWorkflowExecutor {
 
     @Override
     protected void afterExecute(WorkflowExecutorContext context) {
-        if (!Sets.newHashSet(WORKFLOW_NODE_CLOSED_SKIP_EXECUTION.getReason(), WORKFLOW_NODE_NO_REQUIRED.getReason(), WORKFLOW_DECISION_FAILED.getReason())
-            .contains(context.getOperationReason())) {
-            return;
-        }
 
-        JobTaskBatch jobTaskBatch = generateJobTaskBatch(context);
-        JobTask jobTask = generateJobTask(context, jobTaskBatch);
-
-        JobLogMetaDTO jobLogMetaDTO = new JobLogMetaDTO();
-        jobLogMetaDTO.setNamespaceId(context.getNamespaceId());
-        jobLogMetaDTO.setGroupName(context.getGroupName());
-        jobLogMetaDTO.setTaskBatchId(jobTaskBatch.getId());
-        jobLogMetaDTO.setJobId(context.getJobId());
-        jobLogMetaDTO.setTaskId(jobTask.getId());
-
-        SnailJobLog.REMOTE.warn("节点[{}]已取消任务执行. 取消原因: 任务已关闭. <|>{}<|>",
-            context.getWorkflowNodeId(), jobLogMetaDTO);
     }
 
     @Override
@@ -69,16 +57,22 @@ public class JobTaskWorkflowExecutor extends AbstractWorkflowExecutor {
     @Override
     protected void doExecute(WorkflowExecutorContext context) {
 
-        if (Objects.equals(context.getWorkflowNodeStatus(), StatusEnum.NO.getStatus())) {
-            context.setTaskBatchStatus(JobTaskBatchStatusEnum.CANCEL.getStatus());
-            context.setOperationReason(WORKFLOW_NODE_CLOSED_SKIP_EXECUTION.getReason());
-            context.setJobTaskStatus(JobTaskStatusEnum.CANCEL.getStatus());
-
-        } else if (Sets.newHashSet(WORKFLOW_NODE_NO_REQUIRED.getReason(), WORKFLOW_DECISION_FAILED.getReason()).contains( context.getParentOperationReason())) {
+        if (NO_REQUIRED_CONFIG.contains(context.getParentOperationReason())) {
             // 针对无需处理的批次直接新增一个记录
             context.setTaskBatchStatus(JobTaskBatchStatusEnum.CANCEL.getStatus());
             context.setOperationReason(JobOperationReasonEnum.WORKFLOW_NODE_NO_REQUIRED.getReason());
             context.setJobTaskStatus(JobTaskStatusEnum.CANCEL.getStatus());
+
+            // 创建批次和任务节点
+            invokeCancelJobTask(context);
+        } else if (Objects.equals(context.getWorkflowNodeStatus(), StatusEnum.NO.getStatus())) {
+            // 针对无需处理的批次直接新增一个记录
+            context.setTaskBatchStatus(JobTaskBatchStatusEnum.CANCEL.getStatus());
+            context.setOperationReason(WORKFLOW_NODE_CLOSED_SKIP_EXECUTION.getReason());
+            context.setJobTaskStatus(JobTaskStatusEnum.CANCEL.getStatus());
+
+            // 创建批次和任务节点
+            invokeCancelJobTask(context);
         } else {
             invokeJobTask(context);
         }
@@ -92,5 +86,21 @@ public class JobTaskWorkflowExecutor extends AbstractWorkflowExecutor {
         // 执行预处理阶段
         ActorRef actorRef = ActorGenerator.jobTaskPrepareActor();
         actorRef.tell(jobTaskPrepare, actorRef);
+    }
+
+    private void invokeCancelJobTask(final WorkflowExecutorContext context) {
+
+        JobTaskBatch jobTaskBatch = generateJobTaskBatch(context);
+        JobTask jobTask = generateJobTask(context, jobTaskBatch);
+
+        JobLogMetaDTO jobLogMetaDTO = new JobLogMetaDTO();
+        jobLogMetaDTO.setNamespaceId(context.getNamespaceId());
+        jobLogMetaDTO.setGroupName(context.getGroupName());
+        jobLogMetaDTO.setTaskBatchId(jobTaskBatch.getId());
+        jobLogMetaDTO.setJobId(context.getJobId());
+        jobLogMetaDTO.setTaskId(jobTask.getId());
+
+        SnailJobLog.REMOTE.warn("节点[{}]已取消任务执行. 取消原因: 任务已关闭. <|>{}<|>",
+            context.getWorkflowNodeId(), jobLogMetaDTO);
     }
 }
