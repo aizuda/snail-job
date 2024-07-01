@@ -25,15 +25,18 @@ import com.aizuda.snailjob.server.job.task.support.timer.JobTimerWheel;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskBatchMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskMapper;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowTaskBatchMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.Job;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTask;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch;
+import com.aizuda.snailjob.template.datasource.persistence.po.WorkflowTaskBatch;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author: xiaowoniu
@@ -47,6 +50,8 @@ public class JobHandler {
     private final JobTaskBatchMapper jobTaskBatchMapper;
     private final JobMapper jobMapper;
     private final JobTaskMapper jobTaskMapper;
+    private WorkflowTaskBatchMapper workflowTaskBatchMapper;
+
 
     public Boolean retry(Long taskBatchId) {
         return retry(taskBatchId, null, null);
@@ -88,6 +93,9 @@ public class JobHandler {
             return Boolean.TRUE;
         }
 
+        // 获取工作流上下文
+        String wfContext = getWfContext(workflowTaskBatchId);
+
         for (JobTask jobTask : jobTasks) {
             if (jobTask.getTaskStatus() == JobTaskStatusEnum.RUNNING.getStatus()) {
                 continue;
@@ -105,6 +113,7 @@ public class JobHandler {
             context.setTaskId(jobTask.getId());
             context.setTaskStatus(JobTaskStatusEnum.FAIL.getStatus());
             context.setRetryScene(JobRetrySceneEnum.MANUAL.getRetryScene());
+            context.setWfContext(wfContext);
             context.setExecuteResult(ExecuteResult.failure(null, "手动重试"));
             clientCallback.callback(context);
         }
@@ -136,6 +145,30 @@ public class JobHandler {
         jobTaskStop.stop(taskStopJobContext);
 
         return Boolean.TRUE;
+    }
+
+    /**
+     * 获取工作流批次
+     *
+     * @param workflowTaskBatchId 工作流批次
+     * @return
+     */
+    private String getWfContext(Long workflowTaskBatchId) {
+        if (Objects.isNull(workflowTaskBatchId)) {
+            return null;
+        }
+
+        WorkflowTaskBatch workflowTaskBatch = workflowTaskBatchMapper.selectOne(
+            new LambdaQueryWrapper<WorkflowTaskBatch>()
+                .select(WorkflowTaskBatch::getWfContext)
+                .eq(WorkflowTaskBatch::getId, workflowTaskBatchId)
+        );
+
+        if (Objects.isNull(workflowTaskBatch)) {
+            return null;
+        }
+
+        return workflowTaskBatch.getWfContext();
     }
 
 }
