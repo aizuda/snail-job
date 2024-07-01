@@ -29,8 +29,10 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import static com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum.WORKFLOW_CONDITION_NODE_EXECUTION_ERROR;
 import static com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum.WORKFLOW_DECISION_FAILED;
 import static com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum.WORKFLOW_NODE_NO_REQUIRED;
+import static com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum.WORKFLOW_SUCCESSOR_SKIP_EXECUTION;
 
 /**
  * @author xiaowoniu
@@ -40,8 +42,7 @@ import static com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum.WORKF
 @Component
 @RequiredArgsConstructor
 public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
-    private static final Set<Integer> NO_REQUIRED_CONFIG = Sets.newHashSet(WORKFLOW_NODE_NO_REQUIRED.getReason(),
-        WORKFLOW_DECISION_FAILED.getReason());
+
     private static final String CALLBACK_TIMEOUT = "10";
     private final RestTemplate restTemplate;
 
@@ -63,7 +64,7 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
         context.setOperationReason(JobOperationReasonEnum.NONE.getReason());
         context.setJobTaskStatus(JobTaskStatusEnum.SUCCESS.getStatus());
 
-        if (NO_REQUIRED_CONFIG.contains(context.getParentOperationReason())) {
+        if (WORKFLOW_SUCCESSOR_SKIP_EXECUTION.contains(context.getParentOperationReason())) {
             // 针对无需处理的批次直接新增一个记录
             context.setTaskBatchStatus(JobTaskBatchStatusEnum.CANCEL.getStatus());
             context.setOperationReason(JobOperationReasonEnum.WORKFLOW_NODE_NO_REQUIRED.getReason());
@@ -164,7 +165,7 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
             SnailJobLog.REMOTE.info("节点[{}]回调成功.\n回调参数:{} \n回调结果:[{}] <|>{}<|>",
                     context.getWorkflowNodeId(), context.getWfContext(), context.getEvaluationResult(), jobLogMetaDTO);
         } else if (jobTaskBatch.getTaskBatchStatus() == JobTaskStatusEnum.CANCEL.getStatus()) {
-            if (NO_REQUIRED_CONFIG.contains(context.getParentOperationReason())) {
+            if (WORKFLOW_SUCCESSOR_SKIP_EXECUTION.contains(context.getParentOperationReason())) {
                 SnailJobLog.REMOTE.warn("节点[{}]取消回调. 取消原因: 当前任务无需处理 <|>{}<|>",
                     context.getWorkflowNodeId(), jobLogMetaDTO);
             } else {

@@ -2,6 +2,8 @@ package com.aizuda.snailjob.server.common.dto;
 
 import lombok.Data;
 
+import java.util.Map;
+
 /**
  * 决策节点配置
  *
@@ -31,5 +33,7 @@ public class DecisionConfig {
      * 是否为其他情况
      */
     private Integer defaultDecision;
+
+    private Map<String, Object> check;
 
 }
