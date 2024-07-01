@@ -50,7 +50,7 @@ public class JobHandler {
     private final JobTaskBatchMapper jobTaskBatchMapper;
     private final JobMapper jobMapper;
     private final JobTaskMapper jobTaskMapper;
-    private WorkflowTaskBatchMapper workflowTaskBatchMapper;
+    private final WorkflowTaskBatchMapper workflowTaskBatchMapper;
 
 
     public Boolean retry(Long taskBatchId) {
