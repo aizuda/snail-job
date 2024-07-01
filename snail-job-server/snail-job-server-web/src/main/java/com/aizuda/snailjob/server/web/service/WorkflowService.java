@@ -3,6 +3,7 @@ package com.aizuda.snailjob.server.web.service;
 import cn.hutool.core.lang.Pair;
 import com.aizuda.snailjob.server.common.dto.DecisionConfig;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
+import com.aizuda.snailjob.server.web.model.request.CheckDecisionVO;
 import com.aizuda.snailjob.server.web.model.request.ExportWorkflowVO;
 import com.aizuda.snailjob.server.web.model.request.WorkflowQueryVO;
 import com.aizuda.snailjob.server.web.model.request.WorkflowRequestVO;
@@ -37,7 +38,7 @@ public interface WorkflowService {
 
     List<WorkflowResponseVO> getWorkflowNameList(String keywords, Long workflowId, String groupName);
 
-    Pair<Integer, String> checkNodeExpression(DecisionConfig decisionConfig);
+    Pair<Integer, String> checkNodeExpression(CheckDecisionVO decisionVO);
 
     void importWorkflowTask(@Valid @NotEmpty(message = "导入数据不能为空") List<WorkflowRequestVO> requests);
 

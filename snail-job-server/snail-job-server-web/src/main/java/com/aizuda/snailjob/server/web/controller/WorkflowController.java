@@ -6,6 +6,7 @@ import com.aizuda.snailjob.server.common.dto.DecisionConfig;
 import com.aizuda.snailjob.server.web.annotation.LoginRequired;
 import com.aizuda.snailjob.server.web.annotation.RoleEnum;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
+import com.aizuda.snailjob.server.web.model.request.CheckDecisionVO;
 import com.aizuda.snailjob.server.web.model.request.ExportWorkflowVO;
 import com.aizuda.snailjob.server.web.model.request.WorkflowQueryVO;
 import com.aizuda.snailjob.server.web.model.request.WorkflowRequestVO;
@@ -89,8 +90,8 @@ public class WorkflowController {
 
     @PostMapping("/check-node-expression")
     @LoginRequired(role = RoleEnum.USER)
-    public Pair<Integer, String> checkNodeExpression(@RequestBody DecisionConfig decisionConfig) {
-        return workflowService.checkNodeExpression(decisionConfig);
+    public Pair<Integer, String> checkNodeExpression(@RequestBody @Validated CheckDecisionVO checkDecisionVO) {
+        return workflowService.checkNodeExpression(checkDecisionVO);
     }
 
     @LoginRequired

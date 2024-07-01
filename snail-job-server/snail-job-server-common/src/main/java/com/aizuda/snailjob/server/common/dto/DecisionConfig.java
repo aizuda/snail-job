@@ -24,19 +24,14 @@ public class DecisionConfig {
      */
     private String nodeExpression;
 
-    /**
-     * 判定逻辑 and 或者 or
-     */
-    private Integer logicalCondition;
+//    /**
+//     * 判定逻辑 and 或者 or
+//     */
+//    private Integer logicalCondition;
 
     /**
      * 是否为其他情况
      */
     private Integer defaultDecision;
-
-    /**
-     * 决策节点校验内容
-     */
-    private String checkContent;
 
 }

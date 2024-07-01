@@ -30,10 +30,7 @@ import com.aizuda.snailjob.server.job.task.support.WorkflowPrePareHandler;
 import com.aizuda.snailjob.server.job.task.support.WorkflowTaskConverter;
 import com.aizuda.snailjob.server.job.task.support.expression.ExpressionInvocationHandler;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
-import com.aizuda.snailjob.server.web.model.request.ExportWorkflowVO;
-import com.aizuda.snailjob.server.web.model.request.UserSessionVO;
-import com.aizuda.snailjob.server.web.model.request.WorkflowQueryVO;
-import com.aizuda.snailjob.server.web.model.request.WorkflowRequestVO;
+import com.aizuda.snailjob.server.web.model.request.*;
 import com.aizuda.snailjob.server.web.model.request.WorkflowRequestVO.NodeConfig;
 import com.aizuda.snailjob.server.web.model.response.WorkflowDetailResponseVO;
 import com.aizuda.snailjob.server.web.model.response.WorkflowResponseVO;
@@ -308,15 +305,15 @@ public class WorkflowServiceImpl implements WorkflowService {
     }
 
     @Override
-    public Pair<Integer, String> checkNodeExpression(DecisionConfig decisionConfig) {
+    public Pair<Integer, String> checkNodeExpression(CheckDecisionVO decisionVO) {
         try {
-            ExpressionEngine realExpressionEngine = ExpressionTypeEnum.valueOf(decisionConfig.getExpressionType());
+            ExpressionEngine realExpressionEngine = ExpressionTypeEnum.valueOf(decisionVO.getExpressionType());
             Assert.notNull(realExpressionEngine, () -> new SnailJobServerException("表达式引擎不存在"));
             ExpressionInvocationHandler invocationHandler = new ExpressionInvocationHandler(realExpressionEngine);
             ExpressionEngine expressionEngine = ExpressionFactory.getExpressionEngine(invocationHandler);
-            expressionEngine.eval(decisionConfig.getNodeExpression(), decisionConfig.getCheckContent());
+            expressionEngine.eval(decisionVO.getNodeExpression(), decisionVO.getCheckContent());
         } catch (Exception e) {
-            SnailJobLog.LOCAL.error("表达式异常. [{}]", decisionConfig.getNodeExpression(), e);
+            SnailJobLog.LOCAL.error("表达式异常. [{}]", decisionVO.getNodeExpression(), e);
             return Pair.of(StatusEnum.NO.getStatus(), e.getMessage());
         }
 
