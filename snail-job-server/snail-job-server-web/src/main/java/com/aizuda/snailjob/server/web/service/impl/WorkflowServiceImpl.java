@@ -314,7 +314,7 @@ public class WorkflowServiceImpl implements WorkflowService {
             Assert.notNull(realExpressionEngine, () -> new SnailJobServerException("表达式引擎不存在"));
             ExpressionInvocationHandler invocationHandler = new ExpressionInvocationHandler(realExpressionEngine);
             ExpressionEngine expressionEngine = ExpressionFactory.getExpressionEngine(invocationHandler);
-            expressionEngine.eval(decisionConfig.getNodeExpression(), StrUtil.EMPTY);
+            expressionEngine.eval(decisionConfig.getNodeExpression(), decisionConfig.getCheckContent());
         } catch (Exception e) {
             SnailJobLog.LOCAL.error("表达式异常. [{}]", decisionConfig.getNodeExpression(), e);
             return Pair.of(StatusEnum.NO.getStatus(), e.getMessage());

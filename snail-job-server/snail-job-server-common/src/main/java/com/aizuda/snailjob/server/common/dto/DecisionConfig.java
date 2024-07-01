@@ -34,6 +34,9 @@ public class DecisionConfig {
      */
     private Integer defaultDecision;
 
-    private Map<String, Object> check;
+    /**
+     * 决策节点校验内容
+     */
+    private String checkContent;
 
 }
