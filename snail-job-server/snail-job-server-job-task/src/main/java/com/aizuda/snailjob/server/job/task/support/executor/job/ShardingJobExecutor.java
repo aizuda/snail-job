@@ -1,6 +1,7 @@
 package com.aizuda.snailjob.server.job.task.support.executor.job;
 
 import akka.actor.ActorRef;
+import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.common.util.ClientInfoUtils;
@@ -31,6 +32,9 @@ public class ShardingJobExecutor extends AbstractJobExecutor {
         List<JobTask> taskList = context.getTaskList();
         for (int i = 0; i < taskList.size(); i++) {
             JobTask jobTask = taskList.get(i);
+            if (StrUtil.isBlank(jobTask.getClientInfo())) {
+                return;
+            }
             RealJobExecutorDTO realJobExecutor = JobTaskConverter.INSTANCE.toRealJobExecutorDTO(context, jobTask);
             realJobExecutor.setClientId(ClientInfoUtils.clientId(jobTask.getClientInfo()));
             realJobExecutor.setShardingIndex(i);

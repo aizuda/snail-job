@@ -67,7 +67,7 @@ public class ReduceActor extends AbstractActor {
                 String key = MessageFormat.format(KEY, reduceTask.getTaskBatchId(), reduceTask.getJobId());
                 distributedLockHandler.lockWithDisposableAndRetry(() -> {
                     doReduce(reduceTask);
-                }, key, Duration.ofSeconds(1), Duration.ofSeconds(2), 3);
+                }, key, Duration.ofSeconds(1), Duration.ofSeconds(2), 6);
             } catch (Exception e) {
                 SnailJobLog.LOCAL.error("Reduce processing exception. [{}]", reduceTask, e);
             }

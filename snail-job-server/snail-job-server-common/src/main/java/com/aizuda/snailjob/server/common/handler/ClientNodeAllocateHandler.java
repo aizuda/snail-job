@@ -22,7 +22,6 @@ import java.util.stream.Stream;
 @Component
 @RequiredArgsConstructor
 public class ClientNodeAllocateHandler {
-    private final AccessTemplate accessTemplate;
 
     /**
      * 获取分配的节点

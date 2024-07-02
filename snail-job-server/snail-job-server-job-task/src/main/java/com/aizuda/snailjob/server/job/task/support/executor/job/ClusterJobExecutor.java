@@ -2,6 +2,7 @@ package com.aizuda.snailjob.server.job.task.support.executor.job;
 
 import akka.actor.ActorRef;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
@@ -37,6 +38,9 @@ public class ClusterJobExecutor extends AbstractJobExecutor {
         }
 
         JobTask jobTask = taskList.get(0);
+        if (StrUtil.isBlank(jobTask.getClientInfo())) {
+           return;
+        }
         RealJobExecutorDTO realJobExecutor = JobTaskConverter.INSTANCE.toRealJobExecutorDTO(context, jobTask);
         realJobExecutor.setClientId(ClientInfoUtils.clientId(jobTask.getClientInfo()));
         ActorRef actorRef = ActorGenerator.jobRealTaskExecutorActor();

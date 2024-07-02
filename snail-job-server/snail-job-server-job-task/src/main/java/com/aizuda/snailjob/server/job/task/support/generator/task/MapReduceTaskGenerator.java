@@ -12,9 +12,12 @@ import com.aizuda.snailjob.common.core.model.JobArgsHolder;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
+import com.aizuda.snailjob.server.common.allocate.client.ClientLoadBalanceManager;
 import com.aizuda.snailjob.server.common.cache.CacheRegisterTable;
 import com.aizuda.snailjob.server.common.dto.RegisterNodeInfo;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
+import com.aizuda.snailjob.server.common.handler.ClientNodeAllocateHandler;
+import com.aizuda.snailjob.server.common.triple.Pair;
 import com.aizuda.snailjob.server.common.util.ClientInfoUtils;
 import com.aizuda.snailjob.server.job.task.dto.MapReduceArgsStrDTO;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
@@ -48,6 +51,7 @@ public class MapReduceTaskGenerator extends AbstractJobTaskGenerator {
     private static final String REDUCE_TASK = "REDUCE_TASK";
     private final JobTaskMapper jobTaskMapper;
     private final TransactionTemplate transactionTemplate;
+    private final ClientNodeAllocateHandler clientNodeAllocateHandler;
 
     @Override
     public JobTaskTypeEnum getTaskInstanceType() {
@@ -56,34 +60,34 @@ public class MapReduceTaskGenerator extends AbstractJobTaskGenerator {
 
     @Override
     protected List<JobTask> doGenerate(final JobTaskGenerateContext context) {
-        Set<RegisterNodeInfo> serverNodes = CacheRegisterTable.getServerNodeSet(context.getGroupName(),
-                context.getNamespaceId());
-        if (CollUtil.isEmpty(serverNodes)) {
-            SnailJobLog.LOCAL.error("无可执行的客户端信息. jobId:[{}]", context.getJobId());
-            return Lists.newArrayList();
-        }
+//        Set<RegisterNodeInfo> serverNodes = CacheRegisterTable.getServerNodeSet(context.getGroupName(),
+//                context.getNamespaceId());
+//        if (CollUtil.isEmpty(serverNodes)) {
+//            SnailJobLog.LOCAL.error("无可执行的客户端信息. jobId:[{}]", context.getJobId());
+//            return Lists.newArrayList();
+//        }
 
-        List<RegisterNodeInfo> nodeInfoList = new ArrayList<>(serverNodes);
+//        List<RegisterNodeInfo> nodeInfoList = new ArrayList<>(serverNodes);
         MapReduceStageEnum mapReduceStageEnum = MapReduceStageEnum.ofStage(context.getMrStage());
         Assert.notNull(mapReduceStageEnum, () -> new SnailJobServerException("Map reduce stage is not existed"));
         switch (Objects.requireNonNull(mapReduceStageEnum)) {
             case MAP -> {
                 // MAP任务
-                return createMapJobTasks(context, nodeInfoList, serverNodes);
+                return createMapJobTasks(context);
             }
             case REDUCE -> {
                 // REDUCE任务
-                return createReduceJobTasks(context, nodeInfoList, serverNodes);
+                return createReduceJobTasks(context);
             }
             case MERGE_REDUCE -> {
                 // REDUCE任务
-                return createMergeReduceJobTasks(context, nodeInfoList, serverNodes);
+                return createMergeReduceJobTasks(context);
             }
             default -> throw new SnailJobServerException("Map reduce stage is not existed");
         }
     }
 
-    private List<JobTask> createMergeReduceJobTasks(JobTaskGenerateContext context, List<RegisterNodeInfo> nodeInfoList, Set<RegisterNodeInfo> serverNodes) {
+    private List<JobTask> createMergeReduceJobTasks(JobTaskGenerateContext context) {
 
         List<JobTask> jobTasks = jobTaskMapper.selectList(new LambdaQueryWrapper<JobTask>()
                 .select(JobTask::getResultMessage)
@@ -92,16 +96,16 @@ public class MapReduceTaskGenerator extends AbstractJobTaskGenerator {
                 .eq(JobTask::getLeaf, StatusEnum.YES.getStatus())
         );
 
-        RegisterNodeInfo registerNodeInfo = nodeInfoList.get(0);
+        Pair<String, Integer> clientInfo = getClientNodeInfo(context);
         // 新增任务实例
         JobTask jobTask = JobTaskConverter.INSTANCE.toJobTaskInstance(context);
-        jobTask.setClientInfo(ClientInfoUtils.generate(registerNodeInfo));
+        jobTask.setClientInfo(clientInfo.getKey());
         jobTask.setArgsType(context.getArgsType());
         JobArgsHolder jobArgsHolder = new JobArgsHolder();
         jobArgsHolder.setJobParams(context.getArgsStr());
         jobArgsHolder.setReduces(JsonUtil.toJsonString(StreamUtils.toList(jobTasks, JobTask::getResultMessage)));
         jobTask.setArgsStr(JsonUtil.toJsonString(jobArgsHolder));
-        jobTask.setTaskStatus(JobTaskStatusEnum.RUNNING.getStatus());
+        jobTask.setTaskStatus(clientInfo.getValue());
         jobTask.setResultMessage(Optional.ofNullable(jobTask.getResultMessage()).orElse(StrUtil.EMPTY));
         jobTask.setMrStage(MapReduceStageEnum.MERGE_REDUCE.getStage());
         jobTask.setTaskName(MERGE_REDUCE_TASK);
@@ -111,8 +115,7 @@ public class MapReduceTaskGenerator extends AbstractJobTaskGenerator {
         return Lists.newArrayList(jobTask);
     }
 
-    private List<JobTask> createReduceJobTasks(JobTaskGenerateContext context, List<RegisterNodeInfo> nodeInfoList,
-                                               Set<RegisterNodeInfo> serverNodes) {
+    private List<JobTask> createReduceJobTasks(JobTaskGenerateContext context) {
 
         int reduceParallel = 1;
         String jobParams = null;
@@ -142,21 +145,21 @@ public class MapReduceTaskGenerator extends AbstractJobTaskGenerator {
         jobTasks = new ArrayList<>(partition.size());
         final List<JobTask> finalJobTasks = jobTasks;
         String finalJobParams = jobParams;
-        final List<JobTask> finalJobTasks1 = jobTasks;
         transactionTemplate.execute(new TransactionCallbackWithoutResult() {
             @Override
             protected void doInTransactionWithoutResult(final TransactionStatus status) {
                 for (int index = 0; index < partition.size(); index++) {
-                    RegisterNodeInfo registerNodeInfo = nodeInfoList.get(index % serverNodes.size());
+                    Pair<String, Integer> clientInfo = getClientNodeInfo(context);
+
                     // 新增任务实例
                     JobTask jobTask = JobTaskConverter.INSTANCE.toJobTaskInstance(context);
-                    jobTask.setClientInfo(ClientInfoUtils.generate(registerNodeInfo));
+                    jobTask.setClientInfo(clientInfo.getKey());
                     jobTask.setArgsType(context.getArgsType());
                     JobArgsHolder jobArgsHolder = new JobArgsHolder();
                     jobArgsHolder.setJobParams(finalJobParams);
                     jobArgsHolder.setMaps(partition.get(index));
                     jobTask.setArgsStr(JsonUtil.toJsonString(jobArgsHolder));
-                    jobTask.setTaskStatus(JobTaskStatusEnum.RUNNING.getStatus());
+                    jobTask.setTaskStatus(clientInfo.getValue());
                     jobTask.setResultMessage(Optional.ofNullable(jobTask.getResultMessage()).orElse(StrUtil.EMPTY));
                     jobTask.setMrStage(MapReduceStageEnum.REDUCE.getStage());
                     jobTask.setTaskName(REDUCE_TASK);
@@ -168,7 +171,7 @@ public class MapReduceTaskGenerator extends AbstractJobTaskGenerator {
                     finalJobTasks.add(jobTask);
                 }
 
-                batchSaveJobTasks(finalJobTasks1);
+                batchSaveJobTasks(finalJobTasks);
             }
         });
 
@@ -176,8 +179,7 @@ public class MapReduceTaskGenerator extends AbstractJobTaskGenerator {
     }
 
     @NotNull
-    private List<JobTask> createMapJobTasks(final JobTaskGenerateContext context,
-                                            final List<RegisterNodeInfo> nodeInfoList, final Set<RegisterNodeInfo> serverNodes) {
+    private List<JobTask> createMapJobTasks(final JobTaskGenerateContext context) {
         List<?> mapSubTask = context.getMapSubTask();
         if (CollUtil.isEmpty(mapSubTask)) {
             SnailJobLog.LOCAL.warn("Map sub task is empty. TaskBatchId:[{}]", context.getTaskBatchId());
@@ -198,17 +200,18 @@ public class MapReduceTaskGenerator extends AbstractJobTaskGenerator {
             protected void doInTransactionWithoutResult(final TransactionStatus status) {
 
                 for (int index = 0; index < mapSubTask.size(); index++) {
-                    RegisterNodeInfo registerNodeInfo = nodeInfoList.get(index % serverNodes.size());
+                    Pair<String, Integer> clientInfo = getClientNodeInfo(context);
+
                     // 新增任务实例
                     JobTask jobTask = JobTaskConverter.INSTANCE.toJobTaskInstance(context);
-                    jobTask.setClientInfo(ClientInfoUtils.generate(registerNodeInfo));
+                    jobTask.setClientInfo(clientInfo.getKey());
                     jobTask.setArgsType(context.getArgsType());
                     JobArgsHolder jobArgsHolder = new JobArgsHolder();
                     jobArgsHolder.setJobParams(context.getArgsStr());
                     jobArgsHolder.setMaps(mapSubTask.get(index));
                     jobTask.setArgsStr(JsonUtil.toJsonString(jobArgsHolder));
                     jobTask.setArgsType(JobArgsTypeEnum.JSON.getArgsType());
-                    jobTask.setTaskStatus(JobTaskStatusEnum.RUNNING.getStatus());
+                    jobTask.setTaskStatus(clientInfo.getValue());
                     jobTask.setMrStage(MapReduceStageEnum.MAP.getStage());
                     jobTask.setTaskName(context.getTaskName());
                     jobTask.setLeaf(StatusEnum.YES.getStatus());
@@ -236,6 +239,25 @@ public class MapReduceTaskGenerator extends AbstractJobTaskGenerator {
 
         return jobTasks;
     }
+
+    private Pair<String, Integer> getClientNodeInfo(JobTaskGenerateContext context) {
+        RegisterNodeInfo serverNode = clientNodeAllocateHandler.getServerNode(
+                context.getJobId().toString(),
+                context.getGroupName(),
+                context.getNamespaceId(),
+                ClientLoadBalanceManager.AllocationAlgorithmEnum.ROUND.getType()
+        );
+        String clientInfo = StrUtil.EMPTY;
+        int JobTaskStatus = JobTaskStatusEnum.RUNNING.getStatus();
+        if (Objects.isNull(serverNode)) {
+            JobTaskStatus = JobTaskStatusEnum.CANCEL.getStatus();
+        } else {
+            clientInfo = ClientInfoUtils.generate(serverNode);
+        }
+
+        return Pair.of(clientInfo, JobTaskStatus);
+    }
+
     private List<List<String>> averageAlgorithm(List<String> allMapJobTasks, int shard) {
 
         // 最多分片数为allMapJobTasks.size()

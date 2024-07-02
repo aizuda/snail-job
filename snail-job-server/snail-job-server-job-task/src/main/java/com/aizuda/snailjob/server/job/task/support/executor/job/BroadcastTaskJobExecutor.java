@@ -1,6 +1,7 @@
 package com.aizuda.snailjob.server.job.task.support.executor.job;
 
 import akka.actor.ActorRef;
+import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.common.util.ClientInfoUtils;
@@ -32,6 +33,9 @@ public class BroadcastTaskJobExecutor extends AbstractJobExecutor {
         List<JobTask> taskList = context.getTaskList();
 
         for (JobTask jobTask : taskList) {
+            if (StrUtil.isBlank(jobTask.getClientInfo())) {
+                continue;
+            }
             RealJobExecutorDTO realJobExecutor = JobTaskConverter.INSTANCE.toRealJobExecutorDTO(context, jobTask);
             realJobExecutor.setClientId(ClientInfoUtils.clientId(jobTask.getClientInfo()));
             ActorRef actorRef = ActorGenerator.jobRealTaskExecutorActor();
