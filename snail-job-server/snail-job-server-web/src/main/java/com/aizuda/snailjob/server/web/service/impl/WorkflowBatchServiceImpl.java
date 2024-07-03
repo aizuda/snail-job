@@ -111,6 +111,7 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
         Workflow workflow = workflowMapper.selectById(workflowTaskBatch.getWorkflowId());
 
         WorkflowDetailResponseVO responseVO = WorkflowConverter.INSTANCE.convert(workflow);
+        responseVO.setWorkflowBatchStatus(workflowTaskBatch.getTaskBatchStatus());
         List<WorkflowNode> workflowNodes = workflowNodeMapper.selectList(new LambdaQueryWrapper<WorkflowNode>()
             .eq(WorkflowNode::getDeleted, StatusEnum.NO.getStatus())
             .eq(WorkflowNode::getWorkflowId, workflow.getId()));
