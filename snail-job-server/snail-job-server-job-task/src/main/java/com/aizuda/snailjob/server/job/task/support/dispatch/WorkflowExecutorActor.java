@@ -263,7 +263,8 @@ public class WorkflowExecutorActor extends AbstractActor {
     }
 
     private boolean arePredecessorsComplete(final WorkflowNodeTaskExecuteDTO taskExecute, Set<Long> predecessors,
-        Map<Long, List<JobTaskBatch>> jobTaskBatchMap, WorkflowNode waitExecWorkflowNode,  Map<Long, WorkflowNode> workflowNodeMap) {
+        Map<Long, List<JobTaskBatch>> jobTaskBatchMap, WorkflowNode waitExecWorkflowNode,
+        Map<Long, WorkflowNode> workflowNodeMap) {
 
         // 判断所有节点是否都完成
         for (final Long nodeId : predecessors) {
@@ -290,12 +291,17 @@ public class WorkflowExecutorActor extends AbstractActor {
 
             // 父节点只要有一个是失败的且失败策略是阻塞的则当前节点不处理
             if (jobTaskBatches.stream()
-                .map(JobTaskBatch::getTaskBatchStatus)
-                .anyMatch(i -> i != JobTaskBatchStatusEnum.SUCCESS.getStatus())) {
+                .anyMatch(jobTaskBatch ->
+                    jobTaskBatch.getTaskBatchStatus() != JobTaskBatchStatusEnum.SUCCESS.getStatus()
+                    && !JobOperationReasonEnum.WORKFLOW_SUCCESSOR_SKIP_EXECUTION.contains(jobTaskBatch.getOperationReason()))
+            ) {
 
                 WorkflowNode preWorkflowNode = workflowNodeMap.get(nodeId);
                 // 根据失败策略判断是否继续处理
                 if (Objects.equals(preWorkflowNode.getFailStrategy(), FailStrategyEnum.BLOCK.getCode())) {
+                    SnailJobLog.LOCAL.warn("此节点执行失败且失败策略配置了【阻塞】中断执行 [{}] 待执行节点:[{}] parentId:[{}]", nodeId,
+                        taskExecute.getParentId(),
+                        waitExecWorkflowNode.getId() );
                     return Boolean.FALSE;
                 }
             }
