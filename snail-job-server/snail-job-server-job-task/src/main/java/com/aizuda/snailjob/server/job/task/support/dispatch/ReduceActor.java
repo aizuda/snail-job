@@ -111,7 +111,7 @@ public class ReduceActor extends AbstractActor {
         if (Objects.nonNull(reduceTask.getWorkflowTaskBatchId())) {
             WorkflowTaskBatch workflowTaskBatch = workflowTaskBatchMapper.selectOne(
                 new LambdaQueryWrapper<WorkflowTaskBatch>()
-                    .select(WorkflowTaskBatch::getWfContext)
+                    .select(WorkflowTaskBatch::getWfContext, WorkflowTaskBatch::getId)
                     .eq(WorkflowTaskBatch::getId, reduceTask.getWorkflowTaskBatchId())
             );
             wfContext = workflowTaskBatch.getWfContext();

@@ -197,9 +197,9 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
                     jobBatchResponseVO.setJobId(jobTask.getJobId());
                 }
                 // 只为前端展示提供
-                nodeInfo.setTaskBatchStatus(NOT_HANDLE_STATUS);
-                jobBatchResponseVO.setTaskBatchStatus(NOT_HANDLE_STATUS);
-                jobBatchResponseVO.setOperationReason(JobOperationReasonEnum.WORKFLOW_NODE_NO_REQUIRED.getReason());
+//                nodeInfo.setTaskBatchStatus(NOT_HANDLE_STATUS);
+//                jobBatchResponseVO.setTaskBatchStatus(NOT_HANDLE_STATUS);
+//                jobBatchResponseVO.setOperationReason(JobOperationReasonEnum.WORKFLOW_NODE_NO_REQUIRED.getReason());
                 nodeInfo.setJobBatchList(Lists.newArrayList(jobBatchResponseVO));
             }
         }

@@ -100,7 +100,7 @@ public class MapTaskPostHttpRequestHandler extends PostHttpRequestHandler {
         if (Objects.nonNull(mapTaskRequest.getWorkflowTaskBatchId())) {
             WorkflowTaskBatch workflowTaskBatch = workflowTaskBatchMapper.selectOne(
                 new LambdaQueryWrapper<WorkflowTaskBatch>()
-                    .select(WorkflowTaskBatch::getWfContext)
+                    .select(WorkflowTaskBatch::getWfContext, WorkflowTaskBatch::getId)
                     .eq(WorkflowTaskBatch::getId, mapTaskRequest.getWorkflowTaskBatchId())
             );
             newWfContext = workflowTaskBatch.getWfContext();

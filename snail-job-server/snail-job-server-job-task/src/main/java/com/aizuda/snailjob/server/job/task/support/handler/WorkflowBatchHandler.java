@@ -226,7 +226,7 @@ public class WorkflowBatchHandler {
      * 重新触发未执行成功的工作流节点
      *
      * @param workflowTaskBatchId 工作流批次
-     * @param workflowTaskBatch 工作流批次信息(若为null, 则会通过workflowTaskBatchId查询)
+     * @param workflowTaskBatch   工作流批次信息(若为null, 则会通过workflowTaskBatchId查询)
      * @throws IOException
      */
     public void recoveryWorkflowExecutor(Long workflowTaskBatchId, WorkflowTaskBatch workflowTaskBatch) throws IOException {
@@ -342,7 +342,7 @@ public class WorkflowBatchHandler {
         Retryer<Boolean> retryer = RetryerBuilder.<Boolean>newBuilder()
                 .retryIfResult(result -> result.equals(Boolean.FALSE))
                 .retryIfException(ex -> true)
-                .withWaitStrategy(WaitStrategies.randomWait(1000, TimeUnit.MILLISECONDS))
+                .withWaitStrategy(WaitStrategies.randomWait(800, TimeUnit.MILLISECONDS, 2000, TimeUnit.MILLISECONDS))
                 // 重试3秒
                 .withStopStrategy(StopStrategies.stopAfterAttempt(3))
                 .withRetryListener(new RetryListener() {
@@ -356,8 +356,8 @@ public class WorkflowBatchHandler {
                             }
                         }
 
-                        SnailJobLog.LOCAL.info("第【{}】次尝试更新上下文.  result:[{}] treadName:[{}]",
-                                attempt.getAttemptNumber(), result, Thread.currentThread().getName());
+                        SnailJobLog.LOCAL.info("第【{}】次尝试更新上下文.taskBatchIds:[{}]  result:[{}] treadName:[{}] ",
+                                attempt.getAttemptNumber(), taskBatchIds, result, Thread.currentThread().getName());
                     }
                 }).build();
 
