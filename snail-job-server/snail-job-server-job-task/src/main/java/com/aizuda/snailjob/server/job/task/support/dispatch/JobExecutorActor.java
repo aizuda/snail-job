@@ -149,20 +149,27 @@ public class JobExecutorActor extends AbstractActor {
                 return;
             }
 
-            // 获取工作流的上下文
-            WorkflowTaskBatch workflowTaskBatch = null;
-            Long workflowTaskBatchId = taskExecute.getWorkflowTaskBatchId();
-            if (Objects.nonNull(workflowTaskBatchId)) {
-                workflowTaskBatch = workflowTaskBatchMapper.selectOne(
-                    new LambdaQueryWrapper<WorkflowTaskBatch>()
-                        .select(WorkflowTaskBatch::getWfContext)
-                        .eq(WorkflowTaskBatch::getId, taskExecute.getWorkflowTaskBatchId())
-                );
-            }
+            // 事务提交以后再执行任务
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCompletion(final int status) {
+                    // 获取工作流的上下文
+                    WorkflowTaskBatch workflowTaskBatch = null;
+                    Long workflowTaskBatchId = taskExecute.getWorkflowTaskBatchId();
+                    if (Objects.nonNull(workflowTaskBatchId)) {
+                        workflowTaskBatch = workflowTaskBatchMapper.selectOne(
+                            new LambdaQueryWrapper<WorkflowTaskBatch>()
+                                .select(WorkflowTaskBatch::getWfContext)
+                                .eq(WorkflowTaskBatch::getId, taskExecute.getWorkflowTaskBatchId())
+                        );
+                    }
 
-            // 执行任务
-            JobExecutor jobExecutor = JobExecutorFactory.getJobExecutor(job.getTaskType());
-            jobExecutor.execute(buildJobExecutorContext(taskExecute, job, taskList, workflowTaskBatch));
+                    // 执行任务
+                    JobExecutor jobExecutor = JobExecutorFactory.getJobExecutor(job.getTaskType());
+                    jobExecutor.execute(buildJobExecutorContext(taskExecute, job, taskList, workflowTaskBatch));
+                }
+            });
+
         } finally {
             log.debug("准备执行任务完成.[{}]", JsonUtil.toJsonString(taskExecute));
             final int finalTaskStatus = taskStatus;
