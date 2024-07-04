@@ -1,5 +1,7 @@
 package com.aizuda.snailjob.server.job.task.support.executor.job;
 
+import cn.hutool.core.collection.CollUtil;
+import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.job.task.support.JobExecutor;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,8 +14,11 @@ import org.springframework.transaction.annotation.Transactional;
 public abstract class AbstractJobExecutor implements JobExecutor, InitializingBean {
 
     @Override
-    @Transactional
     public void execute(JobExecutorContext context) {
+        if (CollUtil.isEmpty(context.getTaskList())) {
+            SnailJobLog.LOCAL.warn("待执行的任务列表为空. taskBatchId:[{}]", context.getTaskBatchId());
+            return;
+        }
         doExecute(context);
     }
 

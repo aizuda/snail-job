@@ -152,7 +152,7 @@ public class JobExecutorActor extends AbstractActor {
             // 事务提交以后再执行任务
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                 @Override
-                public void afterCompletion(final int status) {
+                public void afterCommit() {
                     // 获取工作流的上下文
                     WorkflowTaskBatch workflowTaskBatch = null;
                     Long workflowTaskBatchId = taskExecute.getWorkflowTaskBatchId();
