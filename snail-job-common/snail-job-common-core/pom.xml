@@ -32,20 +32,6 @@
             <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>com.aliyun</groupId>
-            <artifactId>alibaba-dingtalk-service-sdk</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>log4j</artifactId>
-                    <groupId>log4j</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>commons-logging</artifactId>
-                    <groupId>commons-logging</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
             <groupId>commons-configuration</groupId>
             <artifactId>commons-configuration</artifactId>
             <version>1.10</version>

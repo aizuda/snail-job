@@ -2,15 +2,17 @@ package com.aizuda.snailjob.common.core.util;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.http.HttpRequest;
+import cn.hutool.http.HttpResponse;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.log.SnailJobLog;
-import com.dingtalk.api.DefaultDingTalkClient;
-import com.dingtalk.api.DingTalkClient;
-import com.dingtalk.api.request.OapiRobotSendRequest;
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
 
 import java.text.MessageFormat;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author: opensnail
@@ -22,28 +24,29 @@ public class DingDingUtils {
     public static final String atLabel = "@{0}";
 
     /**
-     * 组装OapiRobotSendRequest
+     * 组装 DingTalkRequest
      *
-     * @param title
-     * @param text
-     * @return
+     * @param title 标题
+     * @param text  内容
+     * @return DingTalkRequest
      */
-    public static OapiRobotSendRequest buildSendRequest(String title, String text, List<String> ats) {
-        OapiRobotSendRequest request = new OapiRobotSendRequest();
-        request.setMsgtype("markdown");
-        OapiRobotSendRequest.Markdown markdown = new OapiRobotSendRequest.Markdown();
-        markdown.setTitle(title);
-        // 防止文本过长钉钉限流，目前最大为4000
-        markdown.setText(StrUtil.sub(getAtText(ats, text, atLabel), 0, 4000));
-        request.setMarkdown(markdown);
+    public static String buildSendRequest(String title, String text, List<String> ats) {
+        Map<String, Object> message = new HashMap<>();
+        message.put("msgtype", "markdown");
+        Map<String, Object> markdown = new HashMap<>();
+        markdown.put("text", StrUtil.sub(getAtText(ats, text, atLabel), 0, 4000));
+        markdown.put("title", title);
+        message.put("markdown", markdown);
 
-        OapiRobotSendRequest.At at = new OapiRobotSendRequest.At();
-        at.setAtMobiles(ats);
-        request.setAt(at);
+        // 处理提到的人
+        Map<String, Object> at = new HashMap<>();
+        at.put("atMobiles", ats);
+        at.put("isAtAll", true);
         if (CollUtil.isNotEmpty(ats)) {
-            at.setIsAtAll(ats.stream().map(String::toLowerCase).anyMatch(SystemConstants.AT_ALL::equals));
+            at.put("isAtAll", ats.stream().map(String::toLowerCase).anyMatch(SystemConstants.AT_ALL::equals));
         }
-        return request;
+        message.put("at", at);
+        return JsonUtil.toJsonString(message);
     }
 
     public static String getAtText(List<String> ats, String text, String atLabel) {
@@ -57,24 +60,40 @@ public class DingDingUtils {
     }
 
     /**
-     * @param request
+     * @param request DingTalkRequest
      */
-    public static boolean sendMessage(OapiRobotSendRequest request, String url) {
+    public static boolean sendMessage(String request, String url) {
 
         try {
             if (StrUtil.isBlank(url)) {
                 return false;
             }
 
-            DingTalkClient client = new DefaultDingTalkClient(url);
-            client.execute(request);
+            // 发送POST请求
+            HttpResponse response = HttpRequest.post(url)
+                    .headerMap(getHeaders(), true)
+                    .body(request)
+                    .execute();
 
+            String body = response.body();
+            JsonNode bodyJson = JsonUtil.toJson(body);
+            int errCode = bodyJson.get("errcode").asInt();
+            if (errCode != 0) {
+                SnailJobLog.LOCAL.error("dingDingProcessNotify: 钉钉发送失败, 错误码:{}, 错误信息:{}", errCode, bodyJson.get("errmsg").asText());
+                return false;
+            }
             return true;
         } catch (Exception e) {
             SnailJobLog.LOCAL.error("dingDingProcessNotify", e);
         }
 
         return false;
+    }
+
+    public static Map<String, String> getHeaders() {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/json");
+        return headers;
     }
 
 }
