@@ -54,6 +54,7 @@ public class DingDingUtils {
             return text;
         }
         StringBuilder sb = new StringBuilder(text);
+        sb.append(StrUtil.CRLF);
         ats.stream().filter(StrUtil::isNotBlank)
                 .forEach(at -> sb.append(MessageFormat.format(atLabel, at)));
         return sb.toString();

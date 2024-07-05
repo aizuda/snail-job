@@ -32,6 +32,7 @@
         <log4j.version>1.2.17</log4j.version>
         <commons-logging.version>1.2</commons-logging.version>
         <jakarta-validation.version>3.0.2</jakarta-validation.version>
+        <guava.version>32.0.0-jre</guava.version>
     </properties>
 
     <modules>
@@ -148,6 +149,11 @@
                 <groupId>com.github.rholder</groupId>
                 <artifactId>guava-retrying</artifactId>
                 <version>${guava-retrying.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.jboss.logging</groupId>

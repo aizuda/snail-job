@@ -30,12 +30,6 @@
             <groupId>com.aizuda</groupId>
             <artifactId>snail-job-common-core</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-validation</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
     </dependencies>
 
     <build>
