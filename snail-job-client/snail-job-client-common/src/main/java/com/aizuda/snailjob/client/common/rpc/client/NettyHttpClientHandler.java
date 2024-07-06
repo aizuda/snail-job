@@ -36,7 +36,7 @@ public class NettyHttpClientHandler extends SimpleChannelInboundHandler<FullHttp
         client = RequestBuilder.<NettyClient, NettyResult>newBuilder()
                 .client(NettyClient.class)
                 .callback(
-                        nettyResult -> SnailJobLog.LOCAL.debug("heartbeat check requestId:[{}]", nettyResult.getRequestId()))
+                        nettyResult -> SnailJobLog.LOCAL.debug("heartbeat check requestId:[{}]", nettyResult.getReqId()))
                 .build();
 
         this.nettyHttpConnectClient = nettyHttpConnectClient;
@@ -51,7 +51,7 @@ public class NettyHttpClientHandler extends SimpleChannelInboundHandler<FullHttp
 
         SnailJobLog.LOCAL.debug("Receive server data content:[{}], headers:[{}]", content, headers);
         NettyResult nettyResult = JsonUtil.parseObject(content, NettyResult.class);
-        RpcContext.invoke(nettyResult.getRequestId(), nettyResult, false);
+        RpcContext.invoke(nettyResult.getReqId(), nettyResult, false);
 
     }
 

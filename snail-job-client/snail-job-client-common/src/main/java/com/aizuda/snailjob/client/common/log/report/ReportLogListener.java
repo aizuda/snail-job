@@ -22,7 +22,7 @@ public class ReportLogListener implements Listener<LogTaskDTO> {
 
     private static final NettyClient CLIENT = RequestBuilder.<NettyClient, NettyResult>newBuilder()
             .client(NettyClient.class)
-            .callback(nettyResult -> SnailJobLog.LOCAL.info("Data report log successfully requestId:[{}]", nettyResult.getRequestId())).build();
+            .callback(nettyResult -> SnailJobLog.LOCAL.info("Data report log successfully requestId:[{}]", nettyResult.getReqId())).build();
 
     @Override
     public void handler(List<LogTaskDTO> list) {

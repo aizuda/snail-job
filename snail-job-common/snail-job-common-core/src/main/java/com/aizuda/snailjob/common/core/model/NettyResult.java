@@ -13,18 +13,18 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class NettyResult extends Result<Object> {
 
-    private long requestId;
+    private long reqId;
 
-    public NettyResult(int status, String message, Object data, long requestId) {
+    public NettyResult(int status, String message, Object data, long reqId) {
         super(status, message, data);
-        this.requestId = requestId;
+        this.reqId = reqId;
     }
 
     public NettyResult() {
     }
 
-    public NettyResult(Object data, long requestId) {
+    public NettyResult(Object data, long reqId) {
         super(data);
-        this.requestId = requestId;
+        this.reqId = reqId;
     }
 }

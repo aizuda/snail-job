@@ -120,7 +120,7 @@ public class WorkflowExecutorActor extends AbstractActor {
             }
         }
 
-        log.warn("父节点:[{}] 所有的节点:[{}]", taskExecute.getParentId(), allSuccessors);
+        log.debug("父节点:[{}] 所有的节点:[{}]", taskExecute.getParentId(), allSuccessors);
 
         // 若所有的兄弟节点的子节点都没有后继节点可以完成次任务
         if (CollUtil.isEmpty(allSuccessors)) {

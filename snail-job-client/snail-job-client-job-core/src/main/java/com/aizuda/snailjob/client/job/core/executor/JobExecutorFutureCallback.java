@@ -33,7 +33,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CancellationException;
@@ -62,7 +61,7 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
                     sendMessage(nettyResult.getMessage());
                 }
                 SnailJobLog.LOCAL.debug("Job execute result report successfully requestId:[{}]",
-                        nettyResult.getRequestId());
+                        nettyResult.getReqId());
             }).build();
 
     private final JobContext jobContext;

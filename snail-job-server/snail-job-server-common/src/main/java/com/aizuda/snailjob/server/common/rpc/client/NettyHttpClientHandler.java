@@ -33,7 +33,7 @@ public class NettyHttpClientHandler extends SimpleChannelInboundHandler<FullHttp
 
         SnailJobLog.LOCAL.info("Receive server data content:[{}], headers:[{}]", content, headers);
         NettyResult nettyResult = JsonUtil.parseObject(content, NettyResult.class);
-        RpcContext.invoke(nettyResult.getRequestId(), nettyResult, false);
+        RpcContext.invoke(nettyResult.getReqId(), nettyResult, false);
 
     }
 

@@ -54,7 +54,7 @@ public class ReportListener implements Listener<RetryTaskDTO> {
 
     private static final NettyClient CLIENT = RequestBuilder.<NettyClient, NettyResult>newBuilder()
             .client(NettyClient.class)
-            .callback(nettyResult -> SnailJobLog.LOCAL.info("Data report successfully requestId:[{}]", nettyResult.getRequestId())).build();
+            .callback(nettyResult -> SnailJobLog.LOCAL.info("Data report successfully requestId:[{}]", nettyResult.getReqId())).build();
 
     @Override
     public void handler(List<RetryTaskDTO> list) {

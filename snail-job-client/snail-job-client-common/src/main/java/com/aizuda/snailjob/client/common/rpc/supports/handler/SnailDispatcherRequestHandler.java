@@ -96,7 +96,7 @@ public class SnailDispatcherRequestHandler {
             nettyResult.setMessage(ex.getMessage()).setStatus(StatusEnum.NO.getStatus());
             e = ex;
         } finally {
-            nettyResult.setRequestId(retryRequest.getReqId());
+            nettyResult.setReqId(retryRequest.getReqId());
             if (Objects.nonNull(resultObj)) {
                 nettyResult.setData(resultObj.getData())
                         .setMessage(resultObj.getMessage())
