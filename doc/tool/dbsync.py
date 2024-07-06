@@ -536,18 +536,18 @@ class SQLServerConvertor(Convertor):
             type = col["type"].lower()
             full_type = self.translate_type(type, col["size"])
             nullable = "NULL" if col["nullable"] else "NOT NULL"
-            default = f"DEFAULT {col["default"]}" if col["default"] is not None else ""
+            default = f"DEFAULT {col['default']}" if col["default"] is not None else ""
             default = re.sub(r"CURRENT_TIMESTAMP\(\d+\)", "CURRENT_TIMESTAMP", default)
             return f"{name} {full_type} {nullable} {default}"
 
         table_name = ddl["table_name"].lower()
         columns = [f"{_generate_column(col).strip()}" for col in ddl["columns"]]
         filed_def_list = ",\n    ".join(columns)
-        script = f"""-- {table_name}
-CREATE TABLE {table_name} (
-    {filed_def_list}
-)
-GO"""
+        script = (f"-- {table_name}\n"
+                  f"CREATE TABLE {table_name} (\n"
+                  f"    {filed_def_list}\n"
+                  f")\n"
+                  f"GO")
 
         return script
 

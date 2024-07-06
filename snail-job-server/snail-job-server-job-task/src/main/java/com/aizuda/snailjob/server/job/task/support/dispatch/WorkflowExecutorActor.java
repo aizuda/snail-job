@@ -146,28 +146,7 @@ public class WorkflowExecutorActor extends AbstractActor {
         Map<Long, WorkflowNode> workflowNodeMap = StreamUtils.toIdentityMap(workflowNodes, WorkflowNode::getId);
         List<JobTaskBatch> parentJobTaskBatchList = jobTaskBatchMap.get(taskExecute.getParentId());
 
-        // 如果父节点是无需处理则不再继续执行
-//        if (CollUtil.isNotEmpty(parentJobTaskBatchList) &&
-//            parentJobTaskBatchList.stream()
-//                .map(JobTaskBatch::getOperationReason)
-//                .filter(Objects::nonNull)
-//                .anyMatch(JobOperationReasonEnum.WORKFLOW_SUCCESSOR_SKIP_EXECUTION::contains)) {
-//            workflowBatchHandler.complete(taskExecute.getWorkflowTaskBatchId(), workflowTaskBatch);
-//            return;
-//        }
-
         WorkflowNode parentWorkflowNode = workflowNodeMap.get(taskExecute.getParentId());
-        // 失败策略处理
-//        if (CollUtil.isNotEmpty(parentJobTaskBatchList)
-//            && parentJobTaskBatchList.stream()
-//                .map(JobTaskBatch::getTaskBatchStatus)
-//                .anyMatch(i -> i != JobTaskBatchStatusEnum.SUCCESS.getStatus())) {
-//
-//            // 根据失败策略判断是否继续处理
-//            if (Objects.equals(parentWorkflowNode.getFailStrategy(), FailStrategyEnum.BLOCK.getCode())) {
-//                return;
-//            }
-//        }
 
         // 决策节点
         if (Objects.nonNull(parentWorkflowNode)
@@ -186,7 +165,6 @@ public class WorkflowExecutorActor extends AbstractActor {
                 .filter(workflowNode -> !workflowNode.getId().equals(taskExecute.getParentId()))
                 .collect(Collectors.toList());
 
-            // TODO 合并job task的结果到全局上下文中
             // 此次的并发数与当时父节点的兄弟节点的数量一致
             workflowBatchHandler.mergeWorkflowContextAndRetry(workflowTaskBatch,
                 StreamUtils.toSet(allJobTaskBatchList, JobTaskBatch::getId));
@@ -197,7 +175,7 @@ public class WorkflowExecutorActor extends AbstractActor {
 
         // 只会条件节点会使用
         Object evaluationResult = null;
-        log.info("待执行的节点为. workflowNodes:[{}]", StreamUtils.toList(workflowNodes, WorkflowNode::getId));
+        log.debug("待执行的节点为. workflowNodes:[{}]", StreamUtils.toList(workflowNodes, WorkflowNode::getId));
         for (WorkflowNode workflowNode : workflowNodes) {
 
             // 批次已经存在就不在重复生成
@@ -299,7 +277,7 @@ public class WorkflowExecutorActor extends AbstractActor {
                 WorkflowNode preWorkflowNode = workflowNodeMap.get(nodeId);
                 // 根据失败策略判断是否继续处理
                 if (Objects.equals(preWorkflowNode.getFailStrategy(), FailStrategyEnum.BLOCK.getCode())) {
-                    SnailJobLog.LOCAL.warn("此节点执行失败且失败策略配置了【阻塞】中断执行 [{}] 待执行节点:[{}] parentId:[{}]", nodeId,
+                    SnailJobLog.LOCAL.info("此节点执行失败且失败策略配置了【阻塞】中断执行 [{}] 待执行节点:[{}] parentId:[{}]", nodeId,
                         taskExecute.getParentId(),
                         waitExecWorkflowNode.getId() );
                     return Boolean.FALSE;
