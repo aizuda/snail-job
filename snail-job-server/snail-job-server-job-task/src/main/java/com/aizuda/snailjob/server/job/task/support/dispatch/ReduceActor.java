@@ -4,7 +4,6 @@ import akka.actor.AbstractActor;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
-import com.aizuda.snailjob.common.core.enums.MapReduceStageEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
@@ -63,7 +62,7 @@ public class ReduceActor extends AbstractActor {
                 Assert.notNull(reduceTask.getMrStage(), () -> new SnailJobServerException("mrStage can not be null"));
                 Assert.notNull(reduceTask.getJobId(), () -> new SnailJobServerException("jobId can not be null"));
                 Assert.notNull(reduceTask.getTaskBatchId(),
-                    () -> new SnailJobServerException("taskBatchId can not be null"));
+                        () -> new SnailJobServerException("taskBatchId can not be null"));
                 String key = MessageFormat.format(KEY, reduceTask.getTaskBatchId(), reduceTask.getJobId());
                 distributedLockHandler.lockWithDisposableAndRetry(() -> {
                     doReduce(reduceTask);
@@ -78,10 +77,11 @@ public class ReduceActor extends AbstractActor {
     private void doReduce(final ReduceTaskDTO reduceTask) {
 
         List<JobTask> jobTasks = jobTaskMapper.selectList(new PageDTO<>(1, 1),
-            new LambdaQueryWrapper<JobTask>()
-                .select(JobTask::getId)
-                .eq(JobTask::getTaskBatchId, reduceTask.getTaskBatchId())
-                .eq(JobTask::getMrStage, reduceTask.getMrStage())
+                new LambdaQueryWrapper<JobTask>()
+                        .select(JobTask::getId)
+                        .eq(JobTask::getTaskBatchId, reduceTask.getTaskBatchId())
+                        .eq(JobTask::getMrStage, reduceTask.getMrStage())
+                        .orderByAsc(JobTask::getId)
         );
 
         if (CollUtil.isNotEmpty(jobTasks)) {
@@ -110,9 +110,9 @@ public class ReduceActor extends AbstractActor {
         String wfContext = null;
         if (Objects.nonNull(reduceTask.getWorkflowTaskBatchId())) {
             WorkflowTaskBatch workflowTaskBatch = workflowTaskBatchMapper.selectOne(
-                new LambdaQueryWrapper<WorkflowTaskBatch>()
-                    .select(WorkflowTaskBatch::getWfContext, WorkflowTaskBatch::getId)
-                    .eq(WorkflowTaskBatch::getId, reduceTask.getWorkflowTaskBatchId())
+                    new LambdaQueryWrapper<WorkflowTaskBatch>()
+                            .select(WorkflowTaskBatch::getWfContext, WorkflowTaskBatch::getId)
+                            .eq(WorkflowTaskBatch::getId, reduceTask.getWorkflowTaskBatchId())
             );
             wfContext = workflowTaskBatch.getWfContext();
         }
@@ -124,10 +124,10 @@ public class ReduceActor extends AbstractActor {
     }
 
     private static JobExecutorContext buildJobExecutorContext(
-        ReduceTaskDTO reduceTask,
-        Job job,
-        List<JobTask> taskList,
-        String wfContext) {
+            ReduceTaskDTO reduceTask,
+            Job job,
+            List<JobTask> taskList,
+            String wfContext) {
         JobExecutorContext context = JobTaskConverter.INSTANCE.toJobExecutorContext(job);
         context.setTaskList(taskList);
         context.setTaskBatchId(reduceTask.getTaskBatchId());

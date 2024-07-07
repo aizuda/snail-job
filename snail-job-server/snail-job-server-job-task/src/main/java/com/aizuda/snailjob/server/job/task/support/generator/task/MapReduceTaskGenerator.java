@@ -124,6 +124,7 @@ public class MapReduceTaskGenerator extends AbstractJobTaskGenerator {
                 MapReduceArgsStrDTO.class);
             reduceParallel = Optional.ofNullable(mapReduceArgsStrDTO.getShardNum()).orElse(1);
             jobParams = mapReduceArgsStrDTO.getArgsStr();
+            reduceParallel = Math.max(1, reduceParallel);
         } catch (Exception e) {
             SnailJobLog.LOCAL.error("map reduce args parse error. argsStr:[{}]", context.getArgsStr());
         }
@@ -190,7 +191,7 @@ public class MapReduceTaskGenerator extends AbstractJobTaskGenerator {
         JobTask parentJobTask = jobTaskMapper.selectOne(
             new LambdaQueryWrapper<JobTask>()
                 .select(JobTask::getId)
-                .eq(JobTask::getId, context.getParentId())
+                .eq(JobTask::getId, Optional.ofNullable(context.getParentId()).orElse(0L))
                 .eq(JobTask::getLeaf, StatusEnum.YES.getStatus())
         );
 

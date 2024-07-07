@@ -7,6 +7,7 @@ import com.aizuda.snailjob.template.datasource.enums.DbTypeEnum;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTask;
 import com.aizuda.snailjob.template.datasource.utils.DbUtils;
+import com.google.common.collect.Sets;
 import org.apache.ibatis.executor.BatchResult;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,17 +40,14 @@ public abstract class AbstractJobTaskGenerator implements JobTaskGenerator, Init
     protected void batchSaveJobTasks(List<JobTask> jobTasks) {
         // ORACLE 批次插入不能直接返回id，因此此处特殊处理
         // 后期版本会对snail-job-datasource进行重构，在考虑此处的兼容逻辑
-        if (DbUtils.getDbType().getDb().equals(DbTypeEnum.ORACLE.getDb())) {
-            List<BatchResult> inserts = jobTaskMapper.insert(jobTasks);
-
-            if (CollUtil.isNotEmpty(inserts)) {
-                BatchResult batchResult = inserts.get(0);
-                Assert.isTrue(jobTasks.size() == Arrays.stream(batchResult.getUpdateCounts()).sum(), () -> new SnailJobServerException("新增任务实例失败"));
-            } else {
-                throw new SnailJobServerException("新增任务实例失败");
+        if (Sets.newHashSet(DbTypeEnum.ORACLE.getDb(), DbTypeEnum.SQLSERVER.getDb())
+                .contains(DbUtils.getDbType().getDb())) {
+            // sqlserver oracle 不支持返回批量id,故暂时先这样处理
+            for (JobTask jobTask : jobTasks) {
+                Assert.isTrue(1 == jobTaskMapper.insert(jobTask), () -> new SnailJobServerException("新增任务实例失败"));
             }
+        } else {
+            Assert.isTrue(jobTasks.size() == jobTaskMapper.insertBatch(jobTasks), () -> new SnailJobServerException("新增任务实例失败"));
         }
-
-        Assert.isTrue(jobTasks.size() == jobTaskMapper.insertBatch(jobTasks), () -> new SnailJobServerException("新增任务实例失败"));
     }
 }

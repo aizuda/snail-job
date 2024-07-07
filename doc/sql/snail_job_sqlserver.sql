@@ -1138,7 +1138,7 @@ GO
 -- sj_distributed_lock
 CREATE TABLE sj_distributed_lock
 (
-    name       nvarchar(64)  NOT NULL PRIMARY KEY IDENTITY,
+    name       nvarchar(64)  NOT NULL PRIMARY KEY,
     lock_until datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     locked_at  datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     locked_by  nvarchar(255) NOT NULL,
