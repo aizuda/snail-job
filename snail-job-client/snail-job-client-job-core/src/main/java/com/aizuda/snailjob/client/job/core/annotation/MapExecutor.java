@@ -25,6 +25,6 @@ public @interface MapExecutor {
      *
      * @return
      */
-    String taskName() default SystemConstants.MAP_ROOT;
+    String taskName() default SystemConstants.ROOT_MAP;
 
 }

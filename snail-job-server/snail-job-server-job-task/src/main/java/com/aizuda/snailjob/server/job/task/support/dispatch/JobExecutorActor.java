@@ -139,7 +139,7 @@ public class JobExecutorActor extends AbstractActor {
             JobTaskGenerateContext instanceGenerateContext = JobTaskConverter.INSTANCE.toJobTaskInstanceGenerateContext(job);
             instanceGenerateContext.setTaskBatchId(taskExecute.getTaskBatchId());
             if (Lists.newArrayList(MAP_REDUCE.getType(), MAP.getType()).contains(job.getTaskType())) {
-                instanceGenerateContext.setTaskName(SystemConstants.MAP_ROOT);
+                instanceGenerateContext.setTaskName(SystemConstants.ROOT_MAP);
                 instanceGenerateContext.setMapSubTask(Lists.newArrayList(StrUtil.EMPTY));
                 instanceGenerateContext.setMrStage(MapReduceStageEnum.MAP.getStage());
             }

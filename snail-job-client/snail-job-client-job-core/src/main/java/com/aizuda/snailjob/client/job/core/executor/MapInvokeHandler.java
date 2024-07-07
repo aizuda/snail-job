@@ -60,8 +60,8 @@ public final class MapInvokeHandler implements InvocationHandler {
         }
 
         // taskName 任务命名和根任务名或者最终任务名称一致导致的问题（无限生成子任务或者直接失败）
-        if (SystemConstants.MAP_ROOT.equals(nextTaskName)) {
-            throw new SnailJobMapReduceException("The Next taskName can not be {}", SystemConstants.MAP_ROOT);
+        if (SystemConstants.ROOT_MAP.equals(nextTaskName)) {
+            throw new SnailJobMapReduceException("The Next taskName can not be {}", SystemConstants.ROOT_MAP);
         }
 
         // 使用ThreadLocal传递数据
