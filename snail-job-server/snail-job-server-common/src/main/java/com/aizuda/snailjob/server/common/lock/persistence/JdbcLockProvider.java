@@ -72,7 +72,7 @@ public class JdbcLockProvider implements LockStorage, Lifecycle {
             } catch (DuplicateKeyException | ConcurrencyFailureException | TransactionSystemException e) {
                 return false;
             } catch (DataIntegrityViolationException | BadSqlGrammarException | UncategorizedSQLException e) {
-                SnailJobLog.LOCAL.error("Unexpected exception. lockName:[{}]", lockConfig.getLockName(), e);
+                SnailJobLog.LOCAL.debug("Unexpected exception. lockName:[{}]", lockConfig.getLockName(), e);
                 return false;
             }
         }));
