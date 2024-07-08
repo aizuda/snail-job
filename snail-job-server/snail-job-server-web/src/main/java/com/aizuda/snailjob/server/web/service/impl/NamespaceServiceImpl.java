@@ -96,6 +96,7 @@ public class NamespaceServiceImpl implements NamespaceService {
         List<Namespace> namespaces = namespaceMapper.selectList(
                 new LambdaQueryWrapper<Namespace>()
                         .select(Namespace::getName, Namespace::getUniqueId)
+                        .eq(Namespace::getDeleted, StatusEnum.NO.getStatus())
                         .orderByDesc(Namespace::getId)
         );
         return NamespaceResponseVOConverter.INSTANCE.convertList(namespaces);
