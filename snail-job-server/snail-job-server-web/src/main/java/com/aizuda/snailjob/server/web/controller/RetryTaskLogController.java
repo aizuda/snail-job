@@ -7,6 +7,8 @@ import com.aizuda.snailjob.server.web.model.request.RetryTaskLogQueryVO;
 import com.aizuda.snailjob.server.web.model.response.RetryTaskLogMessageResponseVO;
 import com.aizuda.snailjob.server.web.model.response.RetryTaskLogResponseVO;
 import com.aizuda.snailjob.server.web.service.RetryTaskLogService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -52,7 +54,7 @@ public class RetryTaskLogController {
 
     @LoginRequired
     @DeleteMapping("ids")
-    public Boolean batchDelete(@RequestBody Set<Long> ids) {
+    public Boolean batchDelete(@RequestBody  @Valid @NotEmpty(message = "ids不能为空") Set<Long> ids) {
         return retryTaskLogService.batchDelete(ids);
     }
 }

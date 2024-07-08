@@ -5,6 +5,7 @@ import com.aizuda.snailjob.server.web.model.request.JobBatchQueryVO;
 import com.aizuda.snailjob.server.web.model.response.JobBatchResponseVO;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author: opensnail
@@ -20,4 +21,6 @@ public interface JobBatchService {
     boolean stop(Long taskBatchId);
 
     Boolean retry(Long taskBatchId);
+
+    Boolean deleteJobBatchById(Set<Long> ids);
 }

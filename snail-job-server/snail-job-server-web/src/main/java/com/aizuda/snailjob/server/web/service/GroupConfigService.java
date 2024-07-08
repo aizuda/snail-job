@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author: opensnail
@@ -37,4 +38,6 @@ public interface GroupConfigService {
     void importGroup(@Valid @NotEmpty(message = "导入数据不能为空") List<GroupConfigRequestVO> requestVOS);
 
     String exportGroup(ExportGroupVO exportGroupVO);
+
+    boolean deleteByIds(Long id);
 }

@@ -205,6 +205,6 @@ public class RetryTaskLogServiceImpl implements RetryTaskLogService {
                             .eq(RetryTaskLogMessage::getGroupName, retryTaskLog.getGroupName())
                             .eq(RetryTaskLogMessage::getUniqueId, retryTaskLog.getUniqueId()));
         }
-        return 1 == retryTaskLogMapper.deleteBatchIds(ids);
+        return 1 == retryTaskLogMapper.deleteByIds(ids);
     }
 }

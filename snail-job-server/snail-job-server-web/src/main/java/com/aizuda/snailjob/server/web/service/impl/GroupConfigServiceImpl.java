@@ -5,6 +5,7 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.HashUtil;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
+import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.server.common.config.SystemProperties;
@@ -442,6 +443,26 @@ public class GroupConfigServiceImpl implements GroupConfigService {
         }, 0);
 
         return JsonUtil.toJsonString(allRequestList);
+    }
+
+    @Override
+    public boolean deleteByIds(Long id) {
+        // 前置检查
+        // 1. 定时任务是否删除
+        // 2. 工作流是否删除
+        // 3. 重试场景是否删除
+        // 4. 是否存在已分配的权限
+        // 5. 检查是否存活的客户端节点
+
+        String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
+        Assert.isTrue(1 == accessTemplate.getGroupConfigAccess().delete(
+                new LambdaQueryWrapper<GroupConfig>()
+                        .eq(GroupConfig::getNamespaceId, namespaceId)
+                        .eq(GroupConfig::getGroupStatus, StatusEnum.NO.getStatus())
+                        .eq(GroupConfig::getId, id)),
+        () -> new SnailJobServerException("删除组失败, 请检查状态是否关闭状态"));
+
+        return Boolean.TRUE;
     }
 
     @EqualsAndHashCode(callSuper = true)

@@ -11,6 +11,8 @@ import com.aizuda.snailjob.server.web.model.response.JobResponseVO;
 import com.aizuda.snailjob.server.web.service.JobService;
 import com.aizuda.snailjob.server.web.util.ExportUtils;
 import com.aizuda.snailjob.server.web.util.ImportUtils;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author opensnail
@@ -72,8 +75,15 @@ public class JobController {
 
     @DeleteMapping("{id}")
     @LoginRequired
+    @Deprecated
     public Boolean deleteJobById(@PathVariable("id") Long id) {
         return jobService.deleteJobById(id);
+    }
+
+    @DeleteMapping("/ids")
+    @LoginRequired
+    public Boolean deleteJobById(@RequestBody @Valid @NotEmpty(message = "ids不能为空") Set<Long> ids) {
+        return jobService.deleteJobByIds(ids);
     }
 
     @GetMapping("/cron")

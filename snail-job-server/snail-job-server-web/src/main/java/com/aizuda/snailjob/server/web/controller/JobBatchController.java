@@ -5,10 +5,13 @@ import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.JobBatchQueryVO;
 import com.aizuda.snailjob.server.web.model.response.JobBatchResponseVO;
 import com.aizuda.snailjob.server.web.service.JobBatchService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author: opensnail
@@ -46,4 +49,9 @@ public class JobBatchController {
         return jobBatchService.retry(taskBatchId);
     }
 
+    @DeleteMapping("/ids")
+    @LoginRequired
+    public Boolean deleteJobBatchById(@RequestBody @Valid @NotEmpty(message = "ids不能为空") Set<Long> ids) {
+        return jobBatchService.deleteJobBatchById(ids);
+    }
 }

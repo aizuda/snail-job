@@ -3,6 +3,7 @@ package com.aizuda.snailjob.server.web.service.impl;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
+import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.server.common.dto.PartitionTask;
@@ -216,6 +217,20 @@ public class SceneConfigServiceImpl implements SceneConfigService {
         }, 0);
 
         return JsonUtil.toJsonString(requestList);
+    }
+
+    @Override
+    public boolean deleteByIds(Set<Long> ids) {
+        String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
+
+        Assert.isTrue(ids.size() == accessTemplate.getSceneConfigAccess().delete(
+                new LambdaQueryWrapper<RetrySceneConfig>()
+                        .eq(RetrySceneConfig::getNamespaceId, namespaceId)
+                        .eq(RetrySceneConfig::getSceneStatus, StatusEnum.NO.getStatus())
+                        .in(RetrySceneConfig::getId, ids)
+        ), () -> new SnailJobServerException("删除重试场景失败, 请检查场景状态是否关闭状态"));
+
+        return Boolean.TRUE;
     }
 
     private void batchSaveSceneConfig(final List<SceneConfigRequestVO> requests, final String namespaceId) {

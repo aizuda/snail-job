@@ -68,7 +68,7 @@ public class WorkflowController {
     }
 
     @DeleteMapping("/{id}")
-    @LoginRequired(role = RoleEnum.ADMIN)
+    @LoginRequired(role = RoleEnum.USER)
     public Boolean deleteById(@PathVariable("id") Long id) {
         return workflowService.deleteById(id);
     }

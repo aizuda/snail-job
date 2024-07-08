@@ -33,6 +33,7 @@ import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.GroupConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.Job;
+import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import lombok.EqualsAndHashCode;
@@ -44,10 +45,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * @author opensnail
@@ -293,6 +291,20 @@ public class JobServiceImpl implements JobService {
                 }, 0);
 
         return JsonUtil.toJsonString(requestList);
+    }
+
+    @Override
+    public Boolean deleteJobByIds(Set<Long> ids) {
+        String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
+
+        Assert.isTrue(ids.size() == jobMapper.delete(
+                new LambdaQueryWrapper<Job>()
+                        .eq(Job::getNamespaceId, namespaceId)
+                        .eq(Job::getJobStatus, StatusEnum.NO.getStatus())
+                        .in(Job::getId, ids)
+        ), () -> new SnailJobServerException("删除定时任务失败, 请检查任务状态是否关闭状态"));
+
+        return Boolean.TRUE;
     }
 
     @EqualsAndHashCode(callSuper = true)

@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author: opensnail
@@ -32,4 +33,5 @@ public interface SceneConfigService {
 
     String exportSceneConfig(ExportSceneVO exportSceneVO);
 
+    boolean deleteByIds(Set<Long> ids);
 }

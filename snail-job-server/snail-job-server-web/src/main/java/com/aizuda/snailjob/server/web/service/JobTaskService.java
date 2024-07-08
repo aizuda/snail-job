@@ -6,6 +6,7 @@ import com.aizuda.snailjob.server.web.model.request.JobTaskQueryVO;
 import com.aizuda.snailjob.server.web.model.response.JobTaskResponseVO;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author: opensnail
@@ -17,4 +18,6 @@ public interface JobTaskService {
     PageResult<List<JobTaskResponseVO>> getJobTaskPage(JobTaskQueryVO jobTaskQueryVO);
 
     List<JobTaskResponseVO> getTreeJobTask(JobTaskQueryVO jobTaskQueryVO);
+
+    Boolean deleteJobTaskById(Set<Long> ids);
 }

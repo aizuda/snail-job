@@ -6,12 +6,13 @@ import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.JobTaskQueryVO;
 import com.aizuda.snailjob.server.web.model.response.JobTaskResponseVO;
 import com.aizuda.snailjob.server.web.service.JobTaskService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author: opensnail
@@ -36,4 +37,9 @@ public class JobTaskController {
         return jobTaskService.getTreeJobTask(jobTaskQueryVO);
     }
 
+    @DeleteMapping("/ids")
+    @LoginRequired
+    public Boolean deleteJobTaskById(@RequestBody @Valid @NotEmpty(message = "ids不能为空") Set<Long> ids) {
+        return jobTaskService.deleteJobTaskById(ids);
+    }
 }

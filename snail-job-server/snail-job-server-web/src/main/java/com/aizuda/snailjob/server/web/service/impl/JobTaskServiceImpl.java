@@ -1,26 +1,28 @@
 package com.aizuda.snailjob.server.web.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.lang.tree.Tree;
-import cn.hutool.core.lang.tree.TreeNode;
-import cn.hutool.core.lang.tree.TreeNodeConfig;
-import cn.hutool.core.lang.tree.TreeUtil;
-import com.aizuda.snailjob.common.core.util.JsonUtil;
+import cn.hutool.core.lang.Assert;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
+import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.JobTaskQueryVO;
 import com.aizuda.snailjob.server.web.model.response.JobTaskResponseVO;
 import com.aizuda.snailjob.server.web.service.JobTaskService;
 import com.aizuda.snailjob.server.web.service.convert.JobTaskResponseVOConverter;
+import com.aizuda.snailjob.server.web.util.UserSessionUtils;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.JobLogMessageMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskMapper;
+import com.aizuda.snailjob.template.datasource.persistence.po.JobLogMessage;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTask;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * @author: opensnail
@@ -28,10 +30,10 @@ import java.util.stream.Collectors;
  * @since ：2.4.0
  */
 @Service
+@RequiredArgsConstructor
 public class JobTaskServiceImpl implements JobTaskService {
-
-    @Autowired
-    private JobTaskMapper jobTaskMapper;
+    private final JobTaskMapper jobTaskMapper;
+    private final JobLogMessageMapper jobLogMessageMapper;
 
     @Override
     public PageResult<List<JobTaskResponseVO>> getJobTaskPage(final JobTaskQueryVO queryVO) {
@@ -62,6 +64,25 @@ public class JobTaskServiceImpl implements JobTaskService {
                         .orderByAsc(JobTask::getJobId));
 
         return convertJobTaskList(taskList);
+    }
+
+    @Override
+    public Boolean deleteJobTaskById(Set<Long> ids) {
+        String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
+
+        Assert.isTrue(ids.size() == jobTaskMapper.delete(
+                new LambdaQueryWrapper<JobTask>()
+                        .eq(JobTask::getNamespaceId, namespaceId)
+                        .in(JobTask::getId, ids)
+        ), () -> new SnailJobServerException("删除任务批次失败"));
+
+        // 删除日志信息
+        jobLogMessageMapper.delete(new LambdaQueryWrapper<JobLogMessage>()
+                .eq(JobLogMessage::getNamespaceId, namespaceId)
+                .eq(JobLogMessage::getTaskId, ids)
+        );
+
+        return Boolean.TRUE;
     }
 
     private List<JobTaskResponseVO> convertJobTaskList(List<JobTask> taskList) {

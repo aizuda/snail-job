@@ -1,6 +1,7 @@
 package com.aizuda.snailjob.server.web.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
@@ -8,6 +9,7 @@ import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.server.common.dto.CallbackConfig;
 import com.aizuda.snailjob.server.common.dto.DecisionConfig;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
+import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.JobBatchQueryVO;
 import com.aizuda.snailjob.server.web.model.request.UserSessionVO;
@@ -23,6 +25,7 @@ import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowNodeMa
 import com.aizuda.snailjob.template.datasource.persistence.po.Job;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch;
 import com.aizuda.snailjob.template.datasource.persistence.po.WorkflowNode;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * @author: opensnail
@@ -119,5 +123,15 @@ public class JobBatchServiceImpl implements JobBatchService {
         return jobHandler.retry(taskBatchId);
     }
 
+    @Override
+    public Boolean deleteJobBatchById(Set<Long> ids) {
+        String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
 
+        Assert.isTrue(ids.size() == jobTaskBatchMapper.delete(
+                new LambdaQueryWrapper<JobTaskBatch>()
+                        .eq(JobTaskBatch::getNamespaceId, namespaceId)
+                        .in(JobTaskBatch::getId, ids)
+        ), () -> new SnailJobServerException("删除任务批次失败"));
+        return Boolean.TRUE;
+    }
 }
