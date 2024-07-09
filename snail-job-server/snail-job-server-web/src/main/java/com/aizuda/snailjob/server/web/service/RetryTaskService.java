@@ -62,7 +62,7 @@ public interface RetryTaskService {
      * @param requestVO 批量删除重试数据
      * @return
      */
-    Integer deleteRetryTask(BatchDeleteRetryTaskVO requestVO);
+    boolean batchDeleteRetryTask(BatchDeleteRetryTaskVO requestVO);
 
     /**
      * 解析日志

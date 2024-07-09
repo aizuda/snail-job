@@ -20,5 +20,5 @@ public interface RetryDeadLetterService {
 
     int rollback(BatchRollBackRetryDeadLetterVO rollBackRetryDeadLetterVO);
 
-    int batchDelete(BatchDeleteRetryDeadLetterVO deadLetterVO);
+    boolean batchDelete(BatchDeleteRetryDeadLetterVO deadLetterVO);
 }

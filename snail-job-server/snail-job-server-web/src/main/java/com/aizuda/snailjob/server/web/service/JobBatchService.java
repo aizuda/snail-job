@@ -22,5 +22,5 @@ public interface JobBatchService {
 
     Boolean retry(Long taskBatchId);
 
-    Boolean deleteJobBatchById(Set<Long> ids);
+    Boolean deleteJobBatchByIds(Set<Long> ids);
 }

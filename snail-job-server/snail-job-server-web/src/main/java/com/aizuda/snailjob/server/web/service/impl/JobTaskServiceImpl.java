@@ -66,25 +66,6 @@ public class JobTaskServiceImpl implements JobTaskService {
         return convertJobTaskList(taskList);
     }
 
-    @Override
-    public Boolean deleteJobTaskById(Set<Long> ids) {
-        String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
-
-        Assert.isTrue(ids.size() == jobTaskMapper.delete(
-                new LambdaQueryWrapper<JobTask>()
-                        .eq(JobTask::getNamespaceId, namespaceId)
-                        .in(JobTask::getId, ids)
-        ), () -> new SnailJobServerException("删除任务批次失败"));
-
-        // 删除日志信息
-        jobLogMessageMapper.delete(new LambdaQueryWrapper<JobLogMessage>()
-                .eq(JobLogMessage::getNamespaceId, namespaceId)
-                .eq(JobLogMessage::getTaskId, ids)
-        );
-
-        return Boolean.TRUE;
-    }
-
     private List<JobTaskResponseVO> convertJobTaskList(List<JobTask> taskList) {
         if (CollUtil.isEmpty(taskList)) {
             return new ArrayList<>();

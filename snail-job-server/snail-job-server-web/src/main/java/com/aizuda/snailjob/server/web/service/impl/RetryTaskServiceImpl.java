@@ -39,10 +39,8 @@ import com.aizuda.snailjob.server.web.util.UserSessionUtils;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import com.aizuda.snailjob.template.datasource.access.TaskAccess;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskLogMapper;
-import com.aizuda.snailjob.template.datasource.persistence.po.GroupConfig;
-import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
-import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
-import com.aizuda.snailjob.template.datasource.persistence.po.RetryTaskLog;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskLogMessageMapper;
+import com.aizuda.snailjob.template.datasource.persistence.po.*;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
@@ -55,6 +53,8 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.aizuda.snailjob.common.core.enums.RetryStatusEnum.ALLOW_DELETE_STATUS;
 
 /**
  * @author opensnail
@@ -76,6 +76,8 @@ public class RetryTaskServiceImpl implements RetryTaskService {
     @Lazy
     @Autowired
     private List<TaskExecutor> taskExecutors;
+    @Autowired
+    private RetryTaskLogMessageMapper retryTaskLogMessageMapper;
 
     @Override
     public PageResult<List<RetryTaskResponseVO>> getRetryTaskPage(RetryTaskQueryVO queryVO) {
@@ -251,14 +253,44 @@ public class RetryTaskServiceImpl implements RetryTaskService {
     }
 
     @Override
-    public Integer deleteRetryTask(final BatchDeleteRetryTaskVO requestVO) {
+    @Transactional
+    public boolean batchDeleteRetryTask(final BatchDeleteRetryTaskVO requestVO) {
         TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
-        return retryTaskAccess.delete(requestVO.getGroupName(), namespaceId,
+
+        Assert.isTrue(requestVO.getIds().size() == retryTaskAccess.delete(requestVO.getGroupName(), namespaceId,
+                        new LambdaQueryWrapper<RetryTask>()
+                                .eq(RetryTask::getNamespaceId, namespaceId)
+                                .eq(RetryTask::getGroupName, requestVO.getGroupName())
+                                .in(RetryTask::getRetryStatus, ALLOW_DELETE_STATUS)
+                                .in(RetryTask::getId, requestVO.getIds()))
+                , () -> new SnailJobServerException("删除重试任务失败, 请检查任务状态是否为已完成或者最大次数"));
+
+        List<RetryTask> tasks = retryTaskAccess.list(requestVO.getGroupName(), namespaceId,
                 new LambdaQueryWrapper<RetryTask>()
+                        .select(RetryTask::getUniqueId)
                         .eq(RetryTask::getNamespaceId, namespaceId)
                         .eq(RetryTask::getGroupName, requestVO.getGroupName())
-                        .in(RetryTask::getId, requestVO.getIds()));
+                        .eq(RetryTask::getRetryStatus, ALLOW_DELETE_STATUS)
+                        .in(RetryTask::getId, requestVO.getIds())
+        );
+
+        if (CollUtil.isEmpty(tasks)) {
+            return Boolean.TRUE;
+        }
+
+        Set<String> uniqueIds = StreamUtils.toSet(tasks, RetryTask::getUniqueId);
+        retryTaskLogMapper.delete(new LambdaQueryWrapper<RetryTaskLog>()
+                .in(RetryTaskLog::getRetryStatus, ALLOW_DELETE_STATUS)
+                .eq(RetryTaskLog::getNamespaceId, namespaceId)
+                .in(RetryTaskLog::getUniqueId, uniqueIds));
+
+        retryTaskLogMessageMapper.delete(
+                new LambdaQueryWrapper<RetryTaskLogMessage>()
+                        .eq(RetryTaskLogMessage::getNamespaceId, namespaceId)
+                        .eq(RetryTaskLogMessage::getGroupName, requestVO.getGroupName())
+                        .in(RetryTaskLogMessage::getUniqueId, uniqueIds));
+        return Boolean.TRUE;
     }
 
     @Override

@@ -124,14 +124,9 @@ public class JobBatchServiceImpl implements JobBatchService {
     }
 
     @Override
-    public Boolean deleteJobBatchById(Set<Long> ids) {
+    public Boolean deleteJobBatchByIds(Set<Long> ids) {
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
-
-        Assert.isTrue(ids.size() == jobTaskBatchMapper.delete(
-                new LambdaQueryWrapper<JobTaskBatch>()
-                        .eq(JobTaskBatch::getNamespaceId, namespaceId)
-                        .in(JobTaskBatch::getId, ids)
-        ), () -> new SnailJobServerException("删除任务批次失败"));
+        jobHandler.deleteJobTaskBatchByIds(ids, namespaceId);
         return Boolean.TRUE;
     }
 }

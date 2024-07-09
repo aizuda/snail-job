@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.web.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
@@ -12,7 +13,9 @@ import com.aizuda.snailjob.server.web.model.request.NamespaceRequestVO;
 import com.aizuda.snailjob.server.web.model.response.NamespaceResponseVO;
 import com.aizuda.snailjob.server.web.service.NamespaceService;
 import com.aizuda.snailjob.server.web.service.convert.NamespaceResponseVOConverter;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.GroupConfigMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.NamespaceMapper;
+import com.aizuda.snailjob.template.datasource.persistence.po.GroupConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.Namespace;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
@@ -23,6 +26,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.aizuda.snailjob.common.core.constant.SystemConstants.DEFAULT_NAMESPACE;
+
 /**
  * @author: xiaowoniu
  * @date : 2023-11-21 15:42
@@ -32,6 +37,7 @@ import java.util.regex.Pattern;
 @RequiredArgsConstructor
 public class NamespaceServiceImpl implements NamespaceService {
     private final NamespaceMapper namespaceMapper;
+    private final GroupConfigMapper groupConfigMapper;
 
     @Override
     public Boolean saveNamespace(final NamespaceRequestVO namespaceRequestVO) {
@@ -87,8 +93,18 @@ public class NamespaceServiceImpl implements NamespaceService {
     }
 
     @Override
-    public Boolean deleteNamespace(Long id) {
-        return 1 == namespaceMapper.deleteById(id);
+    public Boolean deleteByUniqueId(String uniqueId) {
+
+        Assert.isFalse(DEFAULT_NAMESPACE.equals(uniqueId), ()-> new SnailJobServerException("默认空间禁止删除"));
+
+        Assert.isTrue(CollUtil.isEmpty(groupConfigMapper.selectList(new PageDTO<>(1, 1), new LambdaQueryWrapper<GroupConfig>()
+                        .eq(GroupConfig::getNamespaceId, uniqueId).orderByAsc(GroupConfig::getId))),
+                () -> new SnailJobServerException("存在未删除的组配置任务. 请先删除当前关联的组配置再重试删除"));
+
+        Assert.isTrue(1 == namespaceMapper.delete(new LambdaQueryWrapper<Namespace>().eq(Namespace::getUniqueId, uniqueId)),
+                () -> new SnailJobServerException("删除命名空间失败"));
+
+        return Boolean.TRUE;
     }
 
     @Override

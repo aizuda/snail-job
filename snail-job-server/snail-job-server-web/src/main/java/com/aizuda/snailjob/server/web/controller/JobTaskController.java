@@ -37,9 +37,4 @@ public class JobTaskController {
         return jobTaskService.getTreeJobTask(jobTaskQueryVO);
     }
 
-    @DeleteMapping("/ids")
-    @LoginRequired
-    public Boolean deleteJobTaskById(@RequestBody @Valid @NotEmpty(message = "ids不能为空") Set<Long> ids) {
-        return jobTaskService.deleteJobTaskById(ids);
-    }
 }

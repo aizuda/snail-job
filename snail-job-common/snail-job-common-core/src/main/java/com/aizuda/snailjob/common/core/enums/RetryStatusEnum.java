@@ -3,6 +3,7 @@ package com.aizuda.snailjob.common.core.enums;
 import lombok.Getter;
 import org.springframework.lang.NonNull;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -35,6 +36,9 @@ public enum RetryStatusEnum {
     SUSPEND(3);
 
     private final Integer status;
+
+    public static final List<Integer> ALLOW_DELETE_STATUS =
+            List.of(RetryStatusEnum.FINISH.getStatus(), RetryStatusEnum.MAX_COUNT.status, RetryStatusEnum.SUSPEND.status);
 
     RetryStatusEnum(int status) {
         this.status = status;

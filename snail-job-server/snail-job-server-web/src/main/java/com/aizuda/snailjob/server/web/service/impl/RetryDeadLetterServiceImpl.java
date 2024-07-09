@@ -25,10 +25,8 @@ import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import com.aizuda.snailjob.template.datasource.access.ConfigAccess;
 import com.aizuda.snailjob.template.datasource.access.TaskAccess;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskLogMapper;
-import com.aizuda.snailjob.template.datasource.persistence.po.RetryDeadLetter;
-import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
-import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
-import com.aizuda.snailjob.template.datasource.persistence.po.RetryTaskLog;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskLogMessageMapper;
+import com.aizuda.snailjob.template.datasource.persistence.po.*;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
@@ -42,6 +40,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static com.aizuda.snailjob.common.core.enums.RetryStatusEnum.ALLOW_DELETE_STATUS;
+
 /**
  * @author: opensnail
  * @date : 2022-02-28 09:46
@@ -53,6 +53,8 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
     private AccessTemplate accessTemplate;
     @Autowired
     private RetryTaskLogMapper retryTaskLogMapper;
+    @Autowired
+    private RetryTaskLogMessageMapper retryTaskLogMessageMapper;
 
     @Override
     public PageResult<List<RetryDeadLetterResponseVO>> getRetryDeadLetterPage(RetryDeadLetterQueryVO queryVO) {
@@ -164,13 +166,43 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
     }
 
     @Override
-    public int batchDelete(BatchDeleteRetryDeadLetterVO deadLetterVO) {
+    public boolean batchDelete(BatchDeleteRetryDeadLetterVO deadLetterVO) {
         TaskAccess<RetryDeadLetter> retryDeadLetterAccess = accessTemplate.getRetryDeadLetterAccess();
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
-        return retryDeadLetterAccess.delete(deadLetterVO.getGroupName(), namespaceId,
+
+        Assert.isTrue(deadLetterVO.getIds().size() == retryDeadLetterAccess.delete(deadLetterVO.getGroupName(), namespaceId,
+                        new LambdaQueryWrapper<RetryDeadLetter>()
+                                .eq(RetryDeadLetter::getNamespaceId, namespaceId)
+                                .eq(RetryDeadLetter::getGroupName, deadLetterVO.getGroupName())
+                                .in(RetryDeadLetter::getId, deadLetterVO.getIds())),
+                () -> new SnailJobServerException("删除死信任务失败"));
+
+        List<RetryDeadLetter> tasks = retryDeadLetterAccess.list(deadLetterVO.getGroupName(), namespaceId,
                 new LambdaQueryWrapper<RetryDeadLetter>()
+                        .select(RetryDeadLetter::getUniqueId)
                         .eq(RetryDeadLetter::getNamespaceId, namespaceId)
                         .eq(RetryDeadLetter::getGroupName, deadLetterVO.getGroupName())
-                        .in(RetryDeadLetter::getId, deadLetterVO.getIds()));
+                        .in(RetryDeadLetter::getId, deadLetterVO.getIds())
+        );
+
+        if (CollUtil.isEmpty(tasks)) {
+            return Boolean.TRUE;
+        }
+
+        Set<String> uniqueIds = StreamUtils.toSet(tasks, RetryDeadLetter::getUniqueId);
+
+        retryTaskLogMapper.delete(new LambdaQueryWrapper<RetryTaskLog>()
+                .in(RetryTaskLog::getRetryStatus, ALLOW_DELETE_STATUS)
+                .eq(RetryTaskLog::getNamespaceId, namespaceId)
+                .in(RetryTaskLog::getUniqueId, uniqueIds));
+
+        retryTaskLogMessageMapper.delete(
+                new LambdaQueryWrapper<RetryTaskLogMessage>()
+                        .eq(RetryTaskLogMessage::getNamespaceId, namespaceId)
+                        .eq(RetryTaskLogMessage::getGroupName, deadLetterVO.getGroupName())
+                        .in(RetryTaskLogMessage::getUniqueId, uniqueIds));
+
+        return Boolean.TRUE;
+
     }
 }

@@ -7,6 +7,7 @@ import com.aizuda.snailjob.server.web.model.response.JobBatchResponseVO;
 import com.aizuda.snailjob.server.web.service.JobBatchService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -51,7 +52,10 @@ public class JobBatchController {
 
     @DeleteMapping("/ids")
     @LoginRequired
-    public Boolean deleteJobBatchById(@RequestBody @Valid @NotEmpty(message = "ids不能为空") Set<Long> ids) {
-        return jobBatchService.deleteJobBatchById(ids);
+    public Boolean deleteJobBatchByIds(@RequestBody @Valid
+                                          @NotEmpty(message = "ids不能为空")
+                                          @Size(max = 100, message = "最多删除5个")
+                                          Set<Long> ids) {
+        return jobBatchService.deleteJobBatchByIds(ids);
     }
 }

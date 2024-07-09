@@ -39,5 +39,5 @@ public interface GroupConfigService {
 
     String exportGroup(ExportGroupVO exportGroupVO);
 
-    boolean deleteByIds(Long id);
+    boolean deleteByGroupName(String groupName);
 }

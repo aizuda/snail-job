@@ -64,8 +64,8 @@ public class RetryTaskController {
 
     @LoginRequired
     @DeleteMapping("/batch")
-    public Integer deleteRetryTask(@RequestBody @Validated BatchDeleteRetryTaskVO requestVO) {
-        return retryTaskService.deleteRetryTask(requestVO);
+    public boolean batchDeleteRetryTask(@RequestBody @Validated BatchDeleteRetryTaskVO requestVO) {
+        return retryTaskService.batchDeleteRetryTask(requestVO);
     }
 
     @LoginRequired

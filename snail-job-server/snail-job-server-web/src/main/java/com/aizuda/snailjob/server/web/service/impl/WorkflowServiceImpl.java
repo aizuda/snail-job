@@ -257,14 +257,6 @@ public class WorkflowServiceImpl implements WorkflowService {
     }
 
     @Override
-    public Boolean deleteById(Long id) {
-        Workflow workflow = new Workflow();
-        workflow.setId(id);
-        workflow.setDeleted(StatusEnum.YES.getStatus());
-        return 1 == workflowMapper.updateById(workflow);
-    }
-
-    @Override
     public Boolean trigger(Long id) {
         Workflow workflow = workflowMapper.selectById(id);
         Assert.notNull(workflow, () -> new SnailJobServerException("workflow can not be null."));
@@ -355,6 +347,20 @@ public class WorkflowServiceImpl implements WorkflowService {
         }, 0);
 
         return JsonUtil.toJsonString(resultList);
+    }
+
+    @Override
+    public Boolean deleteByIds(Set<Long> ids) {
+        String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
+
+        Assert.isTrue(ids.size() == workflowMapper.delete(
+                new LambdaQueryWrapper<Workflow>()
+                        .eq(Workflow::getNamespaceId, namespaceId)
+                        .eq(Workflow::getWorkflowStatus, StatusEnum.NO.getStatus())
+                        .in(Workflow::getId, ids)
+        ), () -> new SnailJobServerException("删除工作流任务失败, 请检查任务状态是否关闭状态"));
+
+        return Boolean.TRUE;
     }
 
     private void batchSaveWorkflowTask(final List<WorkflowRequestVO> workflowRequestVOList, final String namespaceId) {

@@ -3,6 +3,7 @@ package com.aizuda.snailjob.server.web.model.request;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.util.List;
@@ -27,5 +28,6 @@ public class BatchDeleteRetryTaskVO {
      * 重试表id
      */
     @NotEmpty(message = "至少选择一项")
+    @Size(max = 100, message = "最多只能删除100条")
     private List<Long> ids;
 }

@@ -22,21 +22,17 @@ import com.aizuda.snailjob.server.job.task.support.stop.JobTaskStopFactory;
 import com.aizuda.snailjob.server.job.task.support.stop.TaskStopJobContext;
 import com.aizuda.snailjob.server.job.task.support.timer.JobTimeoutCheckTask;
 import com.aizuda.snailjob.server.job.task.support.timer.JobTimerWheel;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.JobMapper;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskBatchMapper;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskMapper;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowTaskBatchMapper;
-import com.aizuda.snailjob.template.datasource.persistence.po.Job;
-import com.aizuda.snailjob.template.datasource.persistence.po.JobTask;
-import com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch;
-import com.aizuda.snailjob.template.datasource.persistence.po.WorkflowTaskBatch;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.*;
+import com.aizuda.snailjob.template.datasource.persistence.po.*;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * @author: xiaowoniu
@@ -51,7 +47,7 @@ public class JobHandler {
     private final JobMapper jobMapper;
     private final JobTaskMapper jobTaskMapper;
     private final WorkflowTaskBatchMapper workflowTaskBatchMapper;
-
+    private final JobLogMessageMapper jobLogMessageMapper;
 
     public Boolean retry(Long taskBatchId) {
         return retry(taskBatchId, null, null);
@@ -171,4 +167,32 @@ public class JobHandler {
         return workflowTaskBatch.getWfContext();
     }
 
+    /**
+     * 批次删除定时任务批次
+     *
+     * @param ids 任务批次id
+     * @param namespaceId 命名空间
+     */
+    @Transactional
+    public void deleteJobTaskBatchByIds(Set<Long> ids, String namespaceId) {
+
+        Assert.isTrue(ids.size() == jobTaskBatchMapper.delete(
+                new LambdaQueryWrapper<JobTaskBatch>()
+                        .in(JobTaskBatch::getId, ids)
+        ), () -> new SnailJobServerException("删除任务批次失败"));
+
+
+        Assert.isTrue(ids.size() == jobTaskMapper.delete(
+                new LambdaQueryWrapper<JobTask>()
+                        .eq(JobTask::getNamespaceId, namespaceId)
+                        .in(JobTask::getId, ids)
+        ), () -> new SnailJobServerException("删除任务批次失败"));
+
+        // 删除日志信息
+        jobLogMessageMapper.delete(new LambdaQueryWrapper<JobLogMessage>()
+                .eq(JobLogMessage::getNamespaceId, namespaceId)
+                .in(JobLogMessage::getTaskId, ids)
+        );
+
+    }
 }

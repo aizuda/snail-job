@@ -47,7 +47,7 @@ public class RetryDeadLetterController {
 
     @LoginRequired
     @DeleteMapping("/batch")
-    public int batchDelete(@RequestBody @Validated BatchDeleteRetryDeadLetterVO deadLetterVO) {
+    public boolean batchDelete(@RequestBody @Validated BatchDeleteRetryDeadLetterVO deadLetterVO) {
         return retryDeadLetterService.batchDelete(deadLetterVO);
     }
 }

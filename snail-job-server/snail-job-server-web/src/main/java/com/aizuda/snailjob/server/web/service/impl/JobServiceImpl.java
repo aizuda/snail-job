@@ -208,13 +208,6 @@ public class JobServiceImpl implements JobService {
         return 1 == jobMapper.updateById(job);
     }
 
-    @Override
-    public Boolean deleteJobById(Long id) {
-        Job job = new Job();
-        job.setId(id);
-        job.setDeleted(StatusEnum.YES.getStatus());
-        return 1 == jobMapper.updateById(job);
-    }
 
     @Override
     public boolean trigger(Long jobId) {

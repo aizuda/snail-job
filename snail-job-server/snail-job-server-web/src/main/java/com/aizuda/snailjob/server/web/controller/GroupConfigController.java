@@ -107,8 +107,8 @@ public class GroupConfigController {
     }
 
     @LoginRequired(role = RoleEnum.ADMIN)
-    @DeleteMapping("{id}")
-    public boolean deleteByIds(@PathVariable("id") Long id) {
-        return groupConfigService.deleteByIds(id);
+    @DeleteMapping("{groupName}")
+    public boolean deleteByGroupName(@PathVariable("groupName") String groupName) {
+        return groupConfigService.deleteByGroupName(groupName);
     }
 }

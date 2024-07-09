@@ -73,13 +73,6 @@ public class JobController {
         return jobService.updateJobStatus(jobRequestVO);
     }
 
-    @DeleteMapping("{id}")
-    @LoginRequired
-    @Deprecated
-    public Boolean deleteJobById(@PathVariable("id") Long id) {
-        return jobService.deleteJobById(id);
-    }
-
     @DeleteMapping("/ids")
     @LoginRequired
     public Boolean deleteJobById(@RequestBody @Valid @NotEmpty(message = "ids不能为空") Set<Long> ids) {

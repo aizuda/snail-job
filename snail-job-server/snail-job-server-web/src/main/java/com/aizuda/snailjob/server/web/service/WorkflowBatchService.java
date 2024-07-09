@@ -6,6 +6,7 @@ import com.aizuda.snailjob.server.web.model.response.WorkflowBatchResponseVO;
 import com.aizuda.snailjob.server.web.model.response.WorkflowDetailResponseVO;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author xiaowoniu
@@ -19,4 +20,6 @@ public interface WorkflowBatchService {
     WorkflowDetailResponseVO getWorkflowBatchDetail(Long id);
 
     Boolean stop(Long id);
+
+    Boolean deleteByIds(Set<Long> ids);
 }

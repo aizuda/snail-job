@@ -15,6 +15,8 @@ import com.aizuda.snailjob.server.web.model.response.WorkflowResponseVO;
 import com.aizuda.snailjob.server.web.service.WorkflowService;
 import com.aizuda.snailjob.server.web.util.ExportUtils;
 import com.aizuda.snailjob.server.web.util.ImportUtils;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author xiaowoniu
@@ -67,10 +70,10 @@ public class WorkflowController {
         return workflowService.updateStatus(id);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/ids")
     @LoginRequired(role = RoleEnum.USER)
-    public Boolean deleteById(@PathVariable("id") Long id) {
-        return workflowService.deleteById(id);
+    public Boolean deleteByIds(@RequestBody @Valid @NotEmpty(message = "ids不能为空") Set<Long> ids) {
+        return workflowService.deleteByIds(ids);
     }
 
     @PostMapping("/trigger/{id}")

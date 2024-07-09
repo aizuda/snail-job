@@ -19,5 +19,4 @@ public interface JobTaskService {
 
     List<JobTaskResponseVO> getTreeJobTask(JobTaskQueryVO jobTaskQueryVO);
 
-    Boolean deleteJobTaskById(Set<Long> ids);
 }

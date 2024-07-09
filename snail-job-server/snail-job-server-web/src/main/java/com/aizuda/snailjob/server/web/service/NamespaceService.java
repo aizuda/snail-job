@@ -20,7 +20,7 @@ public interface NamespaceService {
 
     PageResult<List<NamespaceResponseVO>> getNamespacePage(NamespaceQueryVO queryVO);
 
-    Boolean deleteNamespace(Long id);
+    Boolean deleteByUniqueId(String id);
 
     List<NamespaceResponseVO> getAllNamespace();
 

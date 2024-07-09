@@ -28,8 +28,6 @@ public interface JobService {
 
     Boolean updateJobStatus(JobStatusUpdateRequestVO jobRequestVO);
 
-    Boolean deleteJobById(Long id);
-
     List<String> getTimeByCron(String cron);
 
     List<JobResponseVO> getJobNameList(String keywords, Long jobId, String groupName);

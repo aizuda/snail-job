@@ -14,6 +14,7 @@ import jakarta.validation.constraints.NotEmpty;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author xiaowoniu
@@ -32,8 +33,6 @@ public interface WorkflowService {
 
     Boolean updateStatus(Long id);
 
-    Boolean deleteById(Long id);
-
     Boolean trigger(Long id);
 
     List<WorkflowResponseVO> getWorkflowNameList(String keywords, Long workflowId, String groupName);
@@ -44,4 +43,6 @@ public interface WorkflowService {
 
     String exportWorkflowTask(ExportWorkflowVO exportWorkflowVO
     );
+
+    Boolean deleteByIds(Set<Long> ids);
 }

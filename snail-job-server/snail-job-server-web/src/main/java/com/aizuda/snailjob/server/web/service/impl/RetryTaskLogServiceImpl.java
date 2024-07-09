@@ -31,6 +31,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.aizuda.snailjob.common.core.enums.RetryStatusEnum.ALLOW_DELETE_STATUS;
+
 /**
  * @author: opensnail
  * @date : 2022-02-28 09:10
@@ -192,7 +194,7 @@ public class RetryTaskLogServiceImpl implements RetryTaskLogService {
 
         List<RetryTaskLog> retryTaskLogs = retryTaskLogMapper.selectList(
                 new LambdaQueryWrapper<RetryTaskLog>()
-                        .eq(RetryTaskLog::getRetryStatus, RetryStatusEnum.FINISH.getStatus())
+                        .in(RetryTaskLog::getRetryStatus, ALLOW_DELETE_STATUS)
                         .eq(RetryTaskLog::getNamespaceId, namespaceId)
                         .in(RetryTaskLog::getId, ids));
         Assert.notEmpty(retryTaskLogs, () -> new SnailJobServerException("数据不存在"));

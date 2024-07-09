@@ -44,9 +44,9 @@ public class NamespaceController {
     }
 
     @LoginRequired(role = RoleEnum.ADMIN)
-    @DeleteMapping("{id}")
-    public Boolean deleteNamespace(@PathVariable("id") Long id) {
-        return namespaceService.deleteNamespace(id);
+    @DeleteMapping("{uniqueId}")
+    public Boolean deleteByUniqueId(@PathVariable("uniqueId") String uniqueId) {
+        return namespaceService.deleteByUniqueId(uniqueId);
     }
 
     @LoginRequired(role = RoleEnum.ADMIN)

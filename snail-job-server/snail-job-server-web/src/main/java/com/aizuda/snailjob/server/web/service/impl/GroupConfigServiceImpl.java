@@ -28,9 +28,7 @@ import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import com.aizuda.snailjob.template.datasource.access.ConfigAccess;
 import com.aizuda.snailjob.template.datasource.access.TaskAccess;
 import com.aizuda.snailjob.template.datasource.enums.DbTypeEnum;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.NamespaceMapper;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.SequenceAllocMapper;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.ServerNodeMapper;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.*;
 import com.aizuda.snailjob.template.datasource.persistence.po.*;
 import com.aizuda.snailjob.template.datasource.utils.DbUtils;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -75,6 +73,9 @@ public class GroupConfigServiceImpl implements GroupConfigService {
     private final SystemProperties systemProperties;
     private final JdbcTemplate jdbcTemplate;
     private final NamespaceMapper namespaceMapper;
+    private final JobMapper jobMapper;
+    private final WorkflowMapper workflowMapper;
+    private final SystemUserPermissionMapper systemUserPermissionMapper;
 
     @Override
     @Transactional
@@ -446,21 +447,41 @@ public class GroupConfigServiceImpl implements GroupConfigService {
     }
 
     @Override
-    public boolean deleteByIds(Long id) {
+    public boolean deleteByGroupName(String groupName) {
+        String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
         // 前置检查
         // 1. 定时任务是否删除
+        Assert.isTrue(CollUtil.isEmpty(jobMapper.selectList(new PageDTO<>(1, 1), new LambdaQueryWrapper<Job>()
+                        .eq(Job::getNamespaceId, namespaceId)
+                        .eq(Job::getGroupName, groupName).orderByAsc(Job::getId))),
+                () -> new SnailJobServerException("存在未删除的定时任务. 请先删除当前组的定时任务后再重试删除"));
         // 2. 工作流是否删除
+        Assert.isTrue(CollUtil.isEmpty(workflowMapper.selectList(new PageDTO<>(1, 1), new LambdaQueryWrapper<Workflow>()
+                        .eq(Workflow::getNamespaceId, namespaceId)
+                        .eq(Workflow::getGroupName, groupName).orderByAsc(Workflow::getId))),
+                () -> new SnailJobServerException("存在未删除的工作流任务. 请先删除当前组的工作流任务后再重试删除"));
         // 3. 重试场景是否删除
+        Assert.isTrue(CollUtil.isEmpty(accessTemplate.getSceneConfigAccess().listPage(new PageDTO<>(1, 1), new LambdaQueryWrapper<RetrySceneConfig>()
+                        .eq(RetrySceneConfig::getNamespaceId, namespaceId)
+                        .eq(RetrySceneConfig::getGroupName, groupName).orderByAsc(RetrySceneConfig::getId)).getRecords()),
+                () -> new SnailJobServerException("存在未删除的重试场景. 请先删除当前组的重试场景后再重试删除"));
         // 4. 是否存在已分配的权限
+        Assert.isTrue(CollUtil.isEmpty(systemUserPermissionMapper.selectList(new PageDTO<>(1, 1), new LambdaQueryWrapper<SystemUserPermission>()
+                        .eq(SystemUserPermission::getNamespaceId, namespaceId)
+                        .eq(SystemUserPermission::getGroupName, groupName).orderByAsc(SystemUserPermission::getId))),
+                () -> new SnailJobServerException("存在已分配组权限. 请先删除已分配的组权限后再重试删除"));
         // 5. 检查是否存活的客户端节点
+        Assert.isTrue(CollUtil.isEmpty(serverNodeMapper.selectList(new PageDTO<>(1, 1), new LambdaQueryWrapper<ServerNode>()
+                        .eq(ServerNode::getNamespaceId, namespaceId)
+                        .eq(ServerNode::getGroupName, groupName).orderByAsc(ServerNode::getId))),
+                () -> new SnailJobServerException("存在存活中客户端节点."));
 
-        String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
         Assert.isTrue(1 == accessTemplate.getGroupConfigAccess().delete(
-                new LambdaQueryWrapper<GroupConfig>()
-                        .eq(GroupConfig::getNamespaceId, namespaceId)
-                        .eq(GroupConfig::getGroupStatus, StatusEnum.NO.getStatus())
-                        .eq(GroupConfig::getId, id)),
-        () -> new SnailJobServerException("删除组失败, 请检查状态是否关闭状态"));
+                        new LambdaQueryWrapper<GroupConfig>()
+                                .eq(GroupConfig::getNamespaceId, namespaceId)
+                                .eq(GroupConfig::getGroupStatus, StatusEnum.NO.getStatus())
+                                .eq(GroupConfig::getGroupName, groupName)),
+                () -> new SnailJobServerException("删除组失败, 请检查状态是否关闭状态"));
 
         return Boolean.TRUE;
     }
