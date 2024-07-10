@@ -19,6 +19,7 @@ import com.aizuda.snailjob.client.job.core.log.JobLogMeta;
 import com.aizuda.snailjob.client.model.StopJobDTO;
 import com.aizuda.snailjob.client.model.request.DispatchJobRequest;
 import com.aizuda.snailjob.common.core.context.SpringContext;
+import com.aizuda.snailjob.common.core.enums.ExecutorTypeEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.snailjob.common.core.model.JobArgsHolder;
 import com.aizuda.snailjob.common.core.model.JobContext;
@@ -57,6 +58,11 @@ public class JobEndPoint {
             if (Objects.nonNull(dispatchJob.getRetryCount()) && dispatchJob.getRetryCount() > 0) {
                 SnailJobLog.REMOTE.info("任务执行/调度失败执行重试. 重试次数:[{}]",
                     dispatchJob.getRetryCount());
+            }
+
+            if (ExecutorTypeEnum.JAVA.getType() != dispatchJob.getExecutorType()) {
+                SnailJobLog.REMOTE.error("不支持非Java类型的执行器. executorType:[{}]", dispatchJob.getExecutorType());
+                return new Result<>("不支持非Java类型的执行器", Boolean.FALSE);
             }
 
             JobExecutorInfo jobExecutorInfo = JobExecutorInfoCache.get(jobContext.getExecutorInfo());

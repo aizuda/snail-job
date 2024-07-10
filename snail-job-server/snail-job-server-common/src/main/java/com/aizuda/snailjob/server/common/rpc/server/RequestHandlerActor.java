@@ -88,8 +88,7 @@ public class RequestHandlerActor extends AbstractActor {
         String token = headers.get(HeadersEnum.TOKEN.getKey());
 
         if (StrUtil.isBlank(token) || !CacheToken.get(groupName, namespace).equals(token)) {
-            SnailJobLog.LOCAL.error("Token authentication failed. [{}]", token);
-            return JsonUtil.toJsonString(new Result<>(0, "Token authentication failed"));
+            throw new SnailJobServerException("Token authentication failed. [{}]", token);
         }
 
         // 注册版本
