@@ -87,7 +87,7 @@ public class RequestHandlerActor extends AbstractActor {
         String namespace = headers.get(HeadersEnum.NAMESPACE.getKey());
         String token = headers.get(HeadersEnum.TOKEN.getKey());
 
-        if (!CacheToken.get(groupName, namespace).equals(token)) {
+        if (StrUtil.isBlank(token) || !CacheToken.get(groupName, namespace).equals(token)) {
             SnailJobLog.LOCAL.error("Token authentication failed. [{}]", token);
             return JsonUtil.toJsonString(new Result<>(0, "Token authentication failed"));
         }

@@ -37,7 +37,7 @@ public class CacheToken implements Lifecycle {
             AccessTemplate template = SpringContext.getBean(AccessTemplate.class);
             GroupConfig config = template.getGroupConfigAccess().getGroupConfigByGroupName(groupName, namespaceId);
             if (Objects.isNull(config)) {
-                return SystemConstants.DEFAULT_TOKEN;
+                return StrUtil.EMPTY;
             }
 
             token = config.getToken();
