@@ -1,5 +1,8 @@
 package com.aizuda.snailjob.template.datasource.persistence.po;
 
+import com.aizuda.snailjob.common.core.enums.ExecutorTypeEnum;
+import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
+import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -58,6 +61,7 @@ public class Job extends CreateUpdateDt {
 
     /**
      * 重试状态 0、关闭、1、开启
+     * {@link StatusEnum}
      */
     private Integer jobStatus;
 
@@ -68,6 +72,7 @@ public class Job extends CreateUpdateDt {
 
     /**
      * 执行器类型 1、Java
+     * {@link ExecutorTypeEnum}
      */
     private Integer executorType;
 
@@ -108,6 +113,7 @@ public class Job extends CreateUpdateDt {
 
     /**
      * 任务类型
+     * {@link JobTaskTypeEnum}
      */
     private Integer taskType;
 

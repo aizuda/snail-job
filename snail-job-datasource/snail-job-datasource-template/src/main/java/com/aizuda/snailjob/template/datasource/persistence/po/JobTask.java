@@ -1,14 +1,14 @@
 package com.aizuda.snailjob.template.datasource.persistence.po;
 
+import com.aizuda.snailjob.common.core.enums.JobArgsTypeEnum;
+import com.aizuda.snailjob.common.core.enums.JobTaskStatusEnum;
+import com.aizuda.snailjob.common.core.enums.MapReduceStageEnum;
+import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
-
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.LocalDateTime;
 
 /**
  * 任务实例
@@ -58,6 +58,7 @@ public class JobTask extends CreateUpdateDt {
 
     /**
      * 执行状态
+     * {@link JobTaskStatusEnum}
      */
     private Integer taskStatus;
 
@@ -83,18 +84,21 @@ public class JobTask extends CreateUpdateDt {
     private String argsStr;
 
     /**
-     * 参数类型 text/json
+     * 参数类型 text、json
+     * {@link JobArgsTypeEnum}
      */
     private Integer argsType;
 
     /**
      * 叶子节点(0:非叶子节点 1:叶子节点)
+     * {@link StatusEnum}
      */
     private Integer leaf;
 
     /**
      * 动态分片使用
      * 1:map 2:reduce 3:mergeReduce
+     * {@link MapReduceStageEnum}
      */
     private Integer mrStage;
 

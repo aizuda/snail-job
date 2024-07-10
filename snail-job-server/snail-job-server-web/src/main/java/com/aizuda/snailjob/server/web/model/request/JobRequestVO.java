@@ -1,5 +1,9 @@
 package com.aizuda.snailjob.server.web.model.request;
 
+import com.aizuda.snailjob.common.core.enums.ExecutorTypeEnum;
+import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
+import com.aizuda.snailjob.common.core.enums.StatusEnum;
+import com.aizuda.snailjob.server.job.task.enums.BlockStrategyEnum;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -30,6 +34,7 @@ public class JobRequestVO {
 
     /**
      * 重试状态 0、关闭、1、开启
+     * {@link StatusEnum}
      */
     @NotNull(message = "jobStatus 不能为空")
     private Integer jobStatus;
@@ -51,7 +56,8 @@ public class JobRequestVO {
     private Integer routeKey;
 
     /**
-     * 执行器类型 1、Java
+     * 执行器类型
+     * {@link ExecutorTypeEnum}
      */
     @NotNull(message = "executorType 不能为空")
     private Integer executorType;
@@ -76,6 +82,7 @@ public class JobRequestVO {
 
     /**
      * 阻塞策略 1、丢弃 2、覆盖 3、并行
+     * {@link BlockStrategyEnum}
      */
     @NotNull(message = "blockStrategy 不能为空")
     private Integer blockStrategy;
@@ -100,6 +107,7 @@ public class JobRequestVO {
 
     /**
      * 任务类型
+     * {@link JobTaskTypeEnum}
      */
     @NotNull(message = "taskType 不能为空")
     private Integer taskType;
