@@ -1,11 +1,13 @@
 package com.aizuda.snailjob.common.core.enums;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
  * @author: opensnail
  * @date : 2022-03-11 19:44
  */
+@AllArgsConstructor
 @Getter
 public enum HeadersEnum {
 
@@ -23,7 +25,4 @@ public enum HeadersEnum {
 
     private final String key;
 
-    HeadersEnum(String key) {
-        this.key = key;
-    }
 }

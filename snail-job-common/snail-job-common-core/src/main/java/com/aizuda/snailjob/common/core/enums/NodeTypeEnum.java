@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.common.core.enums;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
@@ -8,6 +9,7 @@ import lombok.Getter;
  * @author: opensnail
  * @date : 2021-11-26 18:01
  */
+@AllArgsConstructor
 @Getter
 public enum NodeTypeEnum {
 
@@ -23,9 +25,5 @@ public enum NodeTypeEnum {
     ;
 
     private final Integer type;
-
-    NodeTypeEnum(int type) {
-        this.type = type;
-    }
 
 }

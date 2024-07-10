@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.common.core.enums;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
@@ -9,6 +10,7 @@ import lombok.Getter;
  * @date 2023-12-24 08:13:43
  * @since 2.6.0
  */
+@AllArgsConstructor
 @Getter
 public enum WorkflowNodeTypeEnum {
     JOB_TASK(1, "JOB任务"),
@@ -18,19 +20,6 @@ public enum WorkflowNodeTypeEnum {
 
     private final int type;
     private final String desc;
-
-    WorkflowNodeTypeEnum(int type, String desc) {
-        this.type = type;
-        this.desc = desc;
-    }
-
-    public int getType() {
-        return type;
-    }
-
-    public String getDesc() {
-        return desc;
-    }
 
     public static WorkflowNodeTypeEnum valueOf(int type) {
         for (WorkflowNodeTypeEnum workflowNodeTypeEnum : WorkflowNodeTypeEnum.values()) {

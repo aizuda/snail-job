@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.common.core.enums;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
@@ -8,6 +9,7 @@ import lombok.Getter;
  * @author: opensnail
  * @date : 2021-11-03 11:05
  */
+@AllArgsConstructor
 @Getter
 public enum RetryResultStatusEnum {
 
@@ -16,10 +18,6 @@ public enum RetryResultStatusEnum {
     FAILURE(2);
 
     private final Integer status;
-
-    RetryResultStatusEnum(int status) {
-        this.status = status;
-    }
 
     public static RetryResultStatusEnum getRetryResultStatusEnum(int status) {
         for (RetryResultStatusEnum value : RetryResultStatusEnum.values()) {

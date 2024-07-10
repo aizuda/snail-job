@@ -1,5 +1,8 @@
 package com.aizuda.snailjob.server.web.annotation;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -7,6 +10,8 @@ import java.util.Map;
  * @author: byteblogs
  * @date: 2019/09/02 16:35
  */
+@AllArgsConstructor
+@Getter
 public enum RoleEnum {
 
     /**
@@ -31,11 +36,6 @@ public enum RoleEnum {
 
     private final String roleName;
 
-    RoleEnum(Integer roleId, String roleName) {
-        this.roleId = roleId;
-        this.roleName = roleName;
-    }
-
     public static Map<Integer, RoleEnum> getEnumTypeMap() {
         return enumTypeMap;
     }
@@ -46,14 +46,6 @@ public enum RoleEnum {
 
     public static boolean isUser(Integer roleId) {
         return USER.getRoleId().equals(roleId);
-    }
-
-    public Integer getRoleId() {
-        return roleId;
-    }
-
-    public String getRoleName() {
-        return roleName;
     }
 
 }

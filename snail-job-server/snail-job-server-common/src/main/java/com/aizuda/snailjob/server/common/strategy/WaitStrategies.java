@@ -7,6 +7,7 @@ import com.aizuda.snailjob.server.common.enums.DelayLevelEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.google.common.base.Preconditions;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 
@@ -57,6 +58,7 @@ public class WaitStrategies {
         }
     }
 
+    @AllArgsConstructor
     @Getter
     public enum WaitStrategyEnum {
         DELAY_LEVEL(1, delayLevelWait()),
@@ -66,11 +68,6 @@ public class WaitStrategies {
 
         private final int type;
         private final WaitStrategy waitStrategy;
-
-        WaitStrategyEnum(int type, WaitStrategy waitStrategy) {
-            this.type = type;
-            this.waitStrategy = waitStrategy;
-        }
 
         /**
          * 获取退避策略

@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.common.core.enums;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
@@ -8,6 +9,7 @@ import lombok.Getter;
  * @author: zuoJunLin
  * @date : 2023-12-02 18:18
  */
+@AllArgsConstructor
 @Getter
 public enum JobNotifySceneEnum {
 
@@ -24,20 +26,14 @@ public enum JobNotifySceneEnum {
     private final int notifyScene;
 
     /**
-     * 触发通知节点类型
-     */
-    private final NodeTypeEnum nodeType;
-
-    /**
      * 描述
      */
     private final String desc;
 
-    JobNotifySceneEnum(int notifyScene, String desc, NodeTypeEnum nodeType) {
-        this.notifyScene = notifyScene;
-        this.desc = desc;
-        this.nodeType = nodeType;
-    }
+    /**
+     * 触发通知节点类型
+     */
+    private final NodeTypeEnum nodeType;
 
     /**
      * 获取通知场景

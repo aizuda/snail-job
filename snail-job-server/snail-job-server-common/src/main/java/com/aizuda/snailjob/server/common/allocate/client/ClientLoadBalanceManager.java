@@ -2,6 +2,7 @@ package com.aizuda.snailjob.server.common.allocate.client;
 
 import com.aizuda.snailjob.server.common.ClientLoadBalance;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
@@ -21,6 +22,7 @@ public class ClientLoadBalanceManager {
         throw new SnailJobServerException("routeType is not existed. routeType:[{}]", routeType);
     }
 
+    @AllArgsConstructor
     @Getter
     public enum AllocationAlgorithmEnum {
 
@@ -32,10 +34,6 @@ public class ClientLoadBalanceManager {
         private final int type;
         private final ClientLoadBalance clientLoadBalance;
 
-        AllocationAlgorithmEnum(int type, ClientLoadBalance clientLoadBalance) {
-            this.type = type;
-            this.clientLoadBalance = clientLoadBalance;
-        }
     }
 
 }

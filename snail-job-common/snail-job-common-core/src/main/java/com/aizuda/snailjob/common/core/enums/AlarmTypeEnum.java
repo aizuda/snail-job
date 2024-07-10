@@ -1,11 +1,16 @@
 package com.aizuda.snailjob.common.core.enums;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
 /**
  * 预警类型
  *
  * @author: opensnail
  * @date : 2021-11-25 09:19
  */
+@AllArgsConstructor
+@Getter
 public enum AlarmTypeEnum {
 
     /**
@@ -36,11 +41,4 @@ public enum AlarmTypeEnum {
 
     private final int value;
 
-    AlarmTypeEnum(int value) {
-        this.value = value;
-    }
-
-    public int getValue() {
-        return value;
-    }
 }

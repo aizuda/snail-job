@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.common.core.enums;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.util.Objects;
@@ -10,6 +11,7 @@ import java.util.Objects;
  * @since 2.6.0
  */
 @Getter
+@AllArgsConstructor
 public enum FailStrategyEnum {
 
     SKIP(1, "跳过"),
@@ -17,19 +19,6 @@ public enum FailStrategyEnum {
 
     private final Integer code;
     private final String desc;
-
-    FailStrategyEnum(Integer code, String desc) {
-        this.code = code;
-        this.desc = desc;
-    }
-
-    public Integer getCode() {
-        return code;
-    }
-
-    public String getDesc() {
-        return desc;
-    }
 
     public static FailStrategyEnum valueOf(Integer code) {
         for (FailStrategyEnum failStrategyEnum : FailStrategyEnum.values()) {

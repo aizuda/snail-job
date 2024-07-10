@@ -3,6 +3,8 @@ package com.aizuda.snailjob.server.web.model.enums;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.server.web.model.response.DashboardLineResponseVO;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -17,6 +19,8 @@ import java.util.function.Function;
  * @author: byteblogs
  * @date: 2020/1/19 20:36
  */
+@AllArgsConstructor
+@Getter
 public enum DateTypeEnum {
     /**
      * 天（按小时）
@@ -105,14 +109,6 @@ public enum DateTypeEnum {
     private Function<LocalDateTime, LocalDateTime> startTime;
     private Function<LocalDateTime, LocalDateTime> endTime;
 
-    DateTypeEnum(Consumer<List<DashboardLineResponseVO>> consumer,
-                 Function<LocalDateTime, LocalDateTime> startTime,
-                 Function<LocalDateTime, LocalDateTime> endTime) {
-        this.consumer = consumer;
-        this.startTime = startTime;
-        this.endTime = endTime;
-    }
-
     private static DashboardLineResponseVO buildZeroedVoWithCreateDt(String createDt) {
         return new DashboardLineResponseVO()
                 .setTotal(0L)
@@ -129,15 +125,4 @@ public enum DateTypeEnum {
                 .setCreateDt(createDt);
     }
 
-    public Function<LocalDateTime, LocalDateTime> getStartTime() {
-        return startTime;
-    }
-
-    public Function<LocalDateTime, LocalDateTime> getEndTime() {
-        return endTime;
-    }
-
-    public Consumer<List<DashboardLineResponseVO>> getConsumer() {
-        return consumer;
-    }
 }

@@ -45,13 +45,11 @@ public enum RetryStatusEnum {
     }
 
     public static RetryStatusEnum getByStatus(@NonNull Integer status) {
-
         for (RetryStatusEnum value : RetryStatusEnum.values()) {
             if (Objects.equals(value.status, status)) {
                 return value;
             }
         }
-
         return null;
     }
 

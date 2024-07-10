@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.common.core.enums;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
@@ -8,6 +9,7 @@ import lombok.Getter;
  * @author: opensnail
  * @date : 2021-11-26 17:58
  */
+@AllArgsConstructor
 @Getter
 public enum StatusEnum {
 
@@ -15,10 +17,5 @@ public enum StatusEnum {
     YES(1);
 
     private final Integer status;
-
-    StatusEnum(int status) {
-        this.status = status;
-    }
-
 
 }

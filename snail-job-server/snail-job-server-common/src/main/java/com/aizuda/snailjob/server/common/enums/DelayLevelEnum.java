@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.common.enums;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.time.temporal.ChronoUnit;
@@ -10,6 +11,7 @@ import java.time.temporal.ChronoUnit;
  * @author: opensnail
  * @date : 2021-11-29 17:30
  */
+@AllArgsConstructor
 @Getter
 public enum DelayLevelEnum {
 
@@ -41,10 +43,6 @@ public enum DelayLevelEnum {
     _26(26, 12, ChronoUnit.HOURS),
     ;
 
-    /**
-     * 时间
-     */
-    private final int time;
 
     /**
      * 等级
@@ -52,15 +50,14 @@ public enum DelayLevelEnum {
     private final int level;
 
     /**
+     * 时间
+     */
+    private final int time;
+
+    /**
      * 单位
      */
     private final ChronoUnit unit;
-
-    DelayLevelEnum(int level, int time, ChronoUnit unit) {
-        this.time = time;
-        this.unit = unit;
-        this.level = level;
-    }
 
     /**
      * 根据等级获取延迟等级枚举

@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.common.core.enums;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
@@ -9,6 +10,7 @@ import lombok.Getter;
  * @date : 2021-11-24 18:18
  * @since : 1.0.0
  */
+@AllArgsConstructor
 @Getter
 public enum RetryNotifySceneEnum {
 
@@ -31,20 +33,14 @@ public enum RetryNotifySceneEnum {
     private final int notifyScene;
 
     /**
-     * 触发通知节点类型
-     */
-    private final NodeTypeEnum nodeType;
-
-    /**
      * 描述
      */
     private final String desc;
 
-    RetryNotifySceneEnum(int notifyScene, String desc, NodeTypeEnum nodeType) {
-        this.notifyScene = notifyScene;
-        this.desc = desc;
-        this.nodeType = nodeType;
-    }
+    /**
+     * 触发通知节点类型
+     */
+    private final NodeTypeEnum nodeType;
 
     /**
      * 获取通知场景
@@ -62,6 +58,5 @@ public enum RetryNotifySceneEnum {
 
         return null;
     }
-
 
 }
