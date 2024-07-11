@@ -113,6 +113,9 @@ public abstract class AbstractScanGroup extends AbstractActor {
     }
 
     private void processRetryPartitionTasks(List<? extends PartitionTask> partitionTasks, final ScanTask scanTask) {
+        if (CollUtil.isEmpty(partitionTasks)) {
+            return;
+        }
 
         // 批次查询场景
         Map<String, RetrySceneConfig> sceneConfigMap = getSceneConfigMap(partitionTasks, scanTask);

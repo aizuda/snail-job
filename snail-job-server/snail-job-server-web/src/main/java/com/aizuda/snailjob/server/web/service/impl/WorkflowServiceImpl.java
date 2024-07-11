@@ -14,11 +14,11 @@ import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.WaitStrategy;
 import com.aizuda.snailjob.server.common.config.SystemProperties;
-import com.aizuda.snailjob.server.common.dto.DecisionConfig;
 import com.aizuda.snailjob.server.common.dto.JobTaskConfig;
 import com.aizuda.snailjob.server.common.dto.PartitionTask;
 import com.aizuda.snailjob.server.common.enums.ExpressionTypeEnum;
 import com.aizuda.snailjob.server.common.enums.JobTaskExecutorSceneEnum;
+import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.strategy.WaitStrategies;
 import com.aizuda.snailjob.server.common.util.CronUtils;
@@ -41,12 +41,10 @@ import com.aizuda.snailjob.server.web.service.handler.WorkflowHandler;
 import com.aizuda.snailjob.server.web.util.UserSessionUtils;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobMapper;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.JobSummaryMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowNodeMapper;
-import com.aizuda.snailjob.template.datasource.persistence.po.GroupConfig;
-import com.aizuda.snailjob.template.datasource.persistence.po.Job;
-import com.aizuda.snailjob.template.datasource.persistence.po.Workflow;
-import com.aizuda.snailjob.template.datasource.persistence.po.WorkflowNode;
+import com.aizuda.snailjob.template.datasource.persistence.po.*;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.google.common.collect.Lists;
@@ -85,6 +83,7 @@ public class WorkflowServiceImpl implements WorkflowService {
     private final JobMapper jobMapper;
     private final AccessTemplate accessTemplate;
     private final GroupHandler groupHandler;
+    private final JobSummaryMapper jobSummaryMapper;
 
     private static Long calculateNextTriggerAt(final WorkflowRequestVO workflowRequestVO, Long time) {
         checkExecuteInterval(workflowRequestVO);
@@ -350,6 +349,7 @@ public class WorkflowServiceImpl implements WorkflowService {
     }
 
     @Override
+    @Transactional
     public Boolean deleteByIds(Set<Long> ids) {
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
 
@@ -360,6 +360,18 @@ public class WorkflowServiceImpl implements WorkflowService {
                         .in(Workflow::getId, ids)
         ), () -> new SnailJobServerException("删除工作流任务失败, 请检查任务状态是否关闭状态"));
 
+        List<JobSummary> jobSummaries = jobSummaryMapper.selectList(new LambdaQueryWrapper<JobSummary>()
+                .select(JobSummary::getId)
+                .in(JobSummary::getBusinessId, ids)
+                .eq(JobSummary::getNamespaceId, namespaceId)
+                .eq(JobSummary::getSystemTaskType, SyetemTaskTypeEnum.WORKFLOW.getType())
+        );
+        if (CollUtil.isNotEmpty(jobSummaries)) {
+            Assert.isTrue(jobSummaries.size() ==
+                            jobSummaryMapper.deleteByIds(StreamUtils.toSet(jobSummaries, JobSummary::getId)),
+                    () -> new SnailJobServerException("汇总表删除失败")
+            );
+        }
         return Boolean.TRUE;
     }
 

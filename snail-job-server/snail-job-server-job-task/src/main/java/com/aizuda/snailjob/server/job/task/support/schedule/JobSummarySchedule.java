@@ -12,12 +12,15 @@ import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.schedule.AbstractSchedule;
 import com.aizuda.snailjob.server.common.triple.Pair;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.JobBatchSummaryResponseDO;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobSummaryMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskBatchMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobSummary;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.common.collect.Lists;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -40,15 +43,12 @@ import java.util.stream.Collectors;
  * @since 2.5.0
  */
 @Component
-@Slf4j
+@RequiredArgsConstructor
 public class JobSummarySchedule extends AbstractSchedule implements Lifecycle {
-
-    @Autowired
-    private JobTaskBatchMapper jobTaskBatchMapper;
-    @Autowired
-    private JobSummaryMapper jobSummaryMapper;
-    @Autowired
-    private SystemProperties systemProperties;
+    private final JobTaskBatchMapper jobTaskBatchMapper;
+    private final JobSummaryMapper jobSummaryMapper;
+    private final JobMapper jobMapper;
+    private final SystemProperties systemProperties;
 
     @Override
     public String lockName() {
@@ -79,7 +79,7 @@ public class JobSummarySchedule extends AbstractSchedule implements Lifecycle {
                         .groupBy(JobTaskBatch::getNamespaceId, JobTaskBatch::getGroupName,
                                 JobTaskBatch::getJobId, JobTaskBatch::getTaskBatchStatus, JobTaskBatch::getOperationReason);
                 List<JobBatchSummaryResponseDO> summaryResponseDOList = jobTaskBatchMapper.selectJobBatchSummaryList(wrapper);
-                if (summaryResponseDOList == null || summaryResponseDOList.size() < 1) {
+                if (CollUtil.isEmpty(summaryResponseDOList)) {
                     continue;
                 }
 

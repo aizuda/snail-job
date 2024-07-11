@@ -29,7 +29,8 @@
                SUM(CASE WHEN (task_batch_status = 6) THEN 1 ELSE 0 END) AS cancelNum,
                SUM(CASE WHEN (task_batch_status = 5) THEN 1 ELSE 0 END) AS stopNum,
                SUM(CASE WHEN (task_batch_status = 4) THEN 1 ELSE 0 END) AS failNum
-        FROM sj_job_task_batch
+        FROM sj_job_task_batch batch
+             JOIN (select id as jobId from sj_job) job ON batch.job_id = job.jobId
         ${ew.customSqlSegment}
     </select>
 
@@ -45,7 +46,8 @@
                SUM(CASE WHEN (task_batch_status = 6) THEN 1 ELSE 0 END) AS cancelNum,
                SUM(CASE WHEN (task_batch_status = 5) THEN 1 ELSE 0 END) AS stopNum,
                SUM(CASE WHEN (task_batch_status = 4) THEN 1 ELSE 0 END) AS failNum
-        FROM sj_workflow_task_batch
+        FROM sj_workflow_task_batch batch
+        JOIN (select id as flowId from sj_workflow) flow ON batch.workflow_id = flow.flowId
         ${ew.customSqlSegment}
     </select>
 

@@ -25,7 +25,9 @@ import com.aizuda.snailjob.server.web.service.handler.SyncConfigHandler;
 import com.aizuda.snailjob.server.web.util.UserSessionUtils;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import com.aizuda.snailjob.template.datasource.access.ConfigAccess;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.RetrySummaryMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
+import com.aizuda.snailjob.template.datasource.persistence.po.RetrySummary;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
@@ -53,6 +55,7 @@ public class SceneConfigServiceImpl implements SceneConfigService {
 
     private final AccessTemplate accessTemplate;
     private final GroupHandler groupHandler;
+    private final RetrySummaryMapper retrySummaryMapper;
 
     private static void checkExecuteInterval(SceneConfigRequestVO requestVO) {
         if (Lists.newArrayList(WaitStrategies.WaitStrategyEnum.FIXED.getType(),
@@ -220,15 +223,35 @@ public class SceneConfigServiceImpl implements SceneConfigService {
     }
 
     @Override
+    @Transactional
     public boolean deleteByIds(Set<Long> ids) {
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
 
-        Assert.isTrue(ids.size() == accessTemplate.getSceneConfigAccess().delete(
-                new LambdaQueryWrapper<RetrySceneConfig>()
-                        .eq(RetrySceneConfig::getNamespaceId, namespaceId)
-                        .eq(RetrySceneConfig::getSceneStatus, StatusEnum.NO.getStatus())
-                        .in(RetrySceneConfig::getId, ids)
-        ), () -> new SnailJobServerException("删除重试场景失败, 请检查场景状态是否关闭状态"));
+        LambdaQueryWrapper<RetrySceneConfig> queryWrapper = new LambdaQueryWrapper<RetrySceneConfig>()
+                .select(RetrySceneConfig::getSceneName, RetrySceneConfig::getGroupName)
+                .eq(RetrySceneConfig::getNamespaceId, namespaceId)
+                .eq(RetrySceneConfig::getSceneStatus, StatusEnum.NO.getStatus())
+                .in(RetrySceneConfig::getId, ids);
+
+        List<RetrySceneConfig> sceneConfigs = accessTemplate.getSceneConfigAccess().list(queryWrapper);
+        Assert.notEmpty(sceneConfigs, () -> new SnailJobServerException("删除重试场景失败, 请检查场景状态是否关闭状态"));
+
+        Assert.isTrue(ids.size() == accessTemplate.getSceneConfigAccess().delete(queryWrapper),
+                () -> new SnailJobServerException("删除重试场景失败, 请检查场景状态是否关闭状态"));
+
+        Set<String> sceneNames = StreamUtils.toSet(sceneConfigs, RetrySceneConfig::getSceneName);
+        Set<String> groupNames = StreamUtils.toSet(sceneConfigs, RetrySceneConfig::getGroupName);
+        List<RetrySummary> retrySummaries = retrySummaryMapper.selectList(
+                new LambdaQueryWrapper<RetrySummary>()
+                        .select(RetrySummary::getId)
+                        .eq(RetrySummary::getNamespaceId, namespaceId)
+                        .in(RetrySummary::getGroupName, groupNames)
+                        .in(RetrySummary::getSceneName, sceneNames)
+        );
+        if (CollUtil.isNotEmpty(retrySummaries)) {
+            Assert.isTrue(retrySummaries.size() == retrySummaryMapper.deleteByIds(StreamUtils.toSet(retrySummaries, RetrySummary::getId))
+                    , () -> new SnailJobServerException("删除汇总表数据失败"));
+        }
 
         return Boolean.TRUE;
     }

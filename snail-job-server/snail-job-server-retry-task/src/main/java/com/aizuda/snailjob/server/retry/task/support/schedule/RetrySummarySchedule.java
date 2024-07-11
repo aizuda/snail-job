@@ -15,8 +15,7 @@ import com.aizuda.snailjob.template.datasource.persistence.po.RetryTaskLog;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
@@ -33,15 +32,11 @@ import java.util.*;
  * @since 2.1.0
  */
 @Component
-@Slf4j
+@RequiredArgsConstructor
 public class RetrySummarySchedule extends AbstractSchedule implements Lifecycle {
-
-    @Autowired
-    private RetryTaskLogMapper retryTaskLogMapper;
-    @Autowired
-    private RetrySummaryMapper retrySummaryMapper;
-    @Autowired
-    private SystemProperties systemProperties;
+    private final RetryTaskLogMapper retryTaskLogMapper;
+    private final RetrySummaryMapper retrySummaryMapper;
+    private final SystemProperties systemProperties;
 
     @Override
     public String lockName() {

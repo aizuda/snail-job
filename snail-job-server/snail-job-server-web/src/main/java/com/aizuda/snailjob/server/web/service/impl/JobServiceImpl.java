@@ -12,6 +12,7 @@ import com.aizuda.snailjob.server.common.WaitStrategy;
 import com.aizuda.snailjob.server.common.config.SystemProperties;
 import com.aizuda.snailjob.server.common.dto.PartitionTask;
 import com.aizuda.snailjob.server.common.enums.JobTaskExecutorSceneEnum;
+import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.strategy.WaitStrategies;
 import com.aizuda.snailjob.server.common.util.CronUtils;
@@ -31,9 +32,10 @@ import com.aizuda.snailjob.server.web.service.handler.GroupHandler;
 import com.aizuda.snailjob.server.web.util.UserSessionUtils;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobMapper;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.JobSummaryMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.GroupConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.Job;
-import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
+import com.aizuda.snailjob.template.datasource.persistence.po.JobSummary;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import lombok.EqualsAndHashCode;
@@ -63,6 +65,7 @@ public class JobServiceImpl implements JobService {
     private final JobPrepareHandler terminalJobPrepareHandler;
     private final AccessTemplate accessTemplate;
     private final GroupHandler groupHandler;
+    private final JobSummaryMapper jobSummaryMapper;
 
     private static Long calculateNextTriggerAt(final JobRequestVO jobRequestVO, Long time) {
         if (Objects.equals(jobRequestVO.getTriggerType(), SystemConstants.WORKFLOW_TRIGGER_TYPE)) {
@@ -287,6 +290,7 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
+    @Transactional
     public Boolean deleteJobByIds(Set<Long> ids) {
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
 
@@ -296,6 +300,16 @@ public class JobServiceImpl implements JobService {
                         .eq(Job::getJobStatus, StatusEnum.NO.getStatus())
                         .in(Job::getId, ids)
         ), () -> new SnailJobServerException("删除定时任务失败, 请检查任务状态是否关闭状态"));
+
+        List<JobSummary> jobSummaries = jobSummaryMapper.selectList(new LambdaQueryWrapper<JobSummary>()
+                .select(JobSummary::getId)
+                .in(JobSummary::getBusinessId, ids)
+                .eq(JobSummary::getNamespaceId, namespaceId)
+                .eq(JobSummary::getSystemTaskType, SyetemTaskTypeEnum.JOB.getType())
+        );
+        if (CollUtil.isNotEmpty(jobSummaries)) {
+            jobSummaryMapper.deleteByIds(StreamUtils.toSet(jobSummaries, JobSummary::getId));
+        }
 
         return Boolean.TRUE;
     }

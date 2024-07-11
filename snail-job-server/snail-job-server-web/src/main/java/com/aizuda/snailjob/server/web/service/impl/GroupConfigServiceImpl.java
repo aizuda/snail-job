@@ -483,6 +483,11 @@ public class GroupConfigServiceImpl implements GroupConfigService {
                                 .eq(GroupConfig::getGroupName, groupName)),
                 () -> new SnailJobServerException("删除组失败, 请检查状态是否关闭状态"));
 
+        Assert.isTrue(1 == sequenceAllocMapper.delete(new LambdaQueryWrapper<SequenceAlloc>()
+                .eq(SequenceAlloc::getNamespaceId, namespaceId)
+                .eq(SequenceAlloc::getGroupName, groupName)),
+                () -> new SnailJobServerException("删除分布式Id表数据失败"));
+
         return Boolean.TRUE;
     }
 
