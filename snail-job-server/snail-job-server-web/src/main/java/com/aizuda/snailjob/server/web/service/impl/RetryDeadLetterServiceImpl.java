@@ -194,6 +194,7 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
         retryTaskLogMapper.delete(new LambdaQueryWrapper<RetryTaskLog>()
                 .in(RetryTaskLog::getRetryStatus, ALLOW_DELETE_STATUS)
                 .eq(RetryTaskLog::getNamespaceId, namespaceId)
+                .eq(RetryTaskLog::getGroupName, deadLetterVO.getGroupName())
                 .in(RetryTaskLog::getUniqueId, uniqueIds));
 
         retryTaskLogMessageMapper.delete(

@@ -173,7 +173,8 @@ public class RetryTaskLogServiceImpl implements RetryTaskLogService {
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
 
         RetryTaskLog retryTaskLog = retryTaskLogMapper.selectOne(
-                new LambdaQueryWrapper<RetryTaskLog>().eq(RetryTaskLog::getRetryStatus, RetryStatusEnum.FINISH.getStatus())
+                new LambdaQueryWrapper<RetryTaskLog>()
+                        .in(RetryTaskLog::getRetryStatus, List.of(RetryStatusEnum.FINISH.getStatus(), RetryStatusEnum.MAX_COUNT.getStatus()))
                         .eq(RetryTaskLog::getNamespaceId, namespaceId)
                         .eq(RetryTaskLog::getId, id));
         Assert.notNull(retryTaskLog, () -> new SnailJobServerException("数据删除失败"));
@@ -194,7 +195,7 @@ public class RetryTaskLogServiceImpl implements RetryTaskLogService {
 
         List<RetryTaskLog> retryTaskLogs = retryTaskLogMapper.selectList(
                 new LambdaQueryWrapper<RetryTaskLog>()
-                        .in(RetryTaskLog::getRetryStatus, ALLOW_DELETE_STATUS)
+                        .in(RetryTaskLog::getRetryStatus, List.of(RetryStatusEnum.FINISH.getStatus(), RetryStatusEnum.MAX_COUNT.getStatus()))
                         .eq(RetryTaskLog::getNamespaceId, namespaceId)
                         .in(RetryTaskLog::getId, ids));
         Assert.notEmpty(retryTaskLogs, () -> new SnailJobServerException("数据不存在"));

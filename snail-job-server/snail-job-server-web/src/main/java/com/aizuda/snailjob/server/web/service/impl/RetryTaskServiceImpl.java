@@ -44,6 +44,7 @@ import com.aizuda.snailjob.template.datasource.persistence.po.*;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
+import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -258,6 +259,17 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
 
+        List<RetryTask> tasks = retryTaskAccess.list(requestVO.getGroupName(), namespaceId,
+                new LambdaQueryWrapper<RetryTask>()
+                        .eq(RetryTask::getNamespaceId, namespaceId)
+                        .eq(RetryTask::getGroupName, requestVO.getGroupName())
+                        .in(RetryTask::getRetryStatus, ALLOW_DELETE_STATUS)
+                        .in(RetryTask::getId, requestVO.getIds())
+        );
+
+        Assert.notEmpty(tasks,
+                () -> new SnailJobServerException("没有可删除的数据, 只有非【处理中】的数据可以删除"));
+
         Assert.isTrue(requestVO.getIds().size() == retryTaskAccess.delete(requestVO.getGroupName(), namespaceId,
                         new LambdaQueryWrapper<RetryTask>()
                                 .eq(RetryTask::getNamespaceId, namespaceId)
@@ -266,22 +278,10 @@ public class RetryTaskServiceImpl implements RetryTaskService {
                                 .in(RetryTask::getId, requestVO.getIds()))
                 , () -> new SnailJobServerException("删除重试任务失败, 请检查任务状态是否为已完成或者最大次数"));
 
-        List<RetryTask> tasks = retryTaskAccess.list(requestVO.getGroupName(), namespaceId,
-                new LambdaQueryWrapper<RetryTask>()
-                        .select(RetryTask::getUniqueId)
-                        .eq(RetryTask::getNamespaceId, namespaceId)
-                        .eq(RetryTask::getGroupName, requestVO.getGroupName())
-                        .eq(RetryTask::getRetryStatus, ALLOW_DELETE_STATUS)
-                        .in(RetryTask::getId, requestVO.getIds())
-        );
-
-        if (CollUtil.isEmpty(tasks)) {
-            return Boolean.TRUE;
-        }
-
         Set<String> uniqueIds = StreamUtils.toSet(tasks, RetryTask::getUniqueId);
         retryTaskLogMapper.delete(new LambdaQueryWrapper<RetryTaskLog>()
                 .in(RetryTaskLog::getRetryStatus, ALLOW_DELETE_STATUS)
+                .eq(RetryTaskLog::getGroupName, requestVO.getGroupName())
                 .eq(RetryTaskLog::getNamespaceId, namespaceId)
                 .in(RetryTaskLog::getUniqueId, uniqueIds));
 
