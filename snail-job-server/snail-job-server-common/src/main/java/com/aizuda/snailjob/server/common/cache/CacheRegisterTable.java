@@ -39,7 +39,16 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class CacheRegisterTable implements Lifecycle {
 
-    private static Cache<Pair<String/*groupName*/, String/*namespaceId*/>, ConcurrentMap<String, RegisterNodeInfo>> CACHE;
+    private static final Cache<Pair<String/*groupName*/, String/*namespaceId*/>, ConcurrentMap<String, RegisterNodeInfo>> CACHE;
+
+    static {
+        CACHE = CacheBuilder.newBuilder()
+                // 设置并发级别为cpu核心数
+                .concurrencyLevel(Runtime.getRuntime().availableProcessors())
+                // 设置写缓存后60秒过期
+                .expireAfterWrite(60, TimeUnit.SECONDS)
+                .build();
+    }
 
     /**
      * 获取所有缓存
@@ -225,12 +234,6 @@ public class CacheRegisterTable implements Lifecycle {
     @Override
     public void start() {
         SnailJobLog.LOCAL.info("CacheRegisterTable start");
-        CACHE = CacheBuilder.newBuilder()
-                // 设置并发级别为cpu核心数
-                .concurrencyLevel(Runtime.getRuntime().availableProcessors())
-                // 设置写缓存后60秒过期
-                .expireAfterWrite(60, TimeUnit.SECONDS)
-                .build();
     }
 
 
