@@ -1,1 +1,0 @@
-import{y as n}from"./index-D11HRvLC.js";function o(){const r=n();function u(t){return r.isLogin?typeof t=="string"?r.userInfo.roles.includes(t):t.some(e=>r.userInfo.roles.includes(e)):!1}return{hasAuth:u}}export{o as u};

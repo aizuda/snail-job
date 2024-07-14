@@ -12,6 +12,13 @@
     "interface-user-multiple-close-geometric-human-multiple-person-up-user": {
       "body": "<g fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"5\" cy=\"3.75\" r=\"2.25\"/><path d=\"M9.5 13.5h-9v-1a4.5 4.5 0 0 1 9 0ZM9 1.5A2.25 2.25 0 0 1 9 6m1.6 2.19a4.5 4.5 0 0 1 2.9 4.2v1.11H12\"/></g>",
       "hidden": true
+    },
+    "interface-arrows-vertical-scroll-point-move-scroll-vertical": {
+      "body": "<g fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M10.13 3.48L7.26.61a.36.36 0 0 0-.52 0L3.87 3.48m6.26 7.04l-2.87 2.87a.36.36 0 0 1-.52 0l-2.87-2.87\"/><circle cx=\"7\" cy=\"7\" r=\"1.25\"/></g>",
+      "hidden": true
+    },
+    "synchronize-disable": {
+      "body": "<g fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m5 11l.5 2l-2 .5\"/><path d=\"M5.5 13A6.76 6.76 0 0 1 1 7a6 6 0 0 1 .66-2.736M4.95 1.36a6 6 0 0 0-2.19 1.394M9 3l-.5-2l2-.5\"/><path d=\"M8.5 1c2.3.84 4.5 3.42 4.5 6a6 6 0 0 1-1.731 4.2M9 12.64c.22-.078.434-.168.642-.27M.5.5l13 13\"/></g>"
     }
   }
 }
