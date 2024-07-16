@@ -74,12 +74,21 @@ public abstract class AbstractRegister implements Register, Lifecycle {
             .map(serverNode -> Pair.of(serverNode.getHostId(), serverNode.getHostIp())).collect(
                 Collectors.toSet());
 
+        // 去重处理
+        Set<Pair<String, String>> existed = Sets.newHashSet();
         for (final ServerNode serverNode : serverNodes) {
-            if (pairs.contains(Pair.of(serverNode.getHostId(), serverNode.getHostIp()))) {
+            Pair<String, String> pair = Pair.of(serverNode.getHostId(), serverNode.getHostIp());
+            if (existed.contains(pair)) {
+                continue;
+            }
+
+            if (pairs.contains(pair)) {
                 updateDBs.add(serverNode);
             } else {
                 insertDBs.add(serverNode);
             }
+
+            existed.add(pair);
         }
 
         try {
