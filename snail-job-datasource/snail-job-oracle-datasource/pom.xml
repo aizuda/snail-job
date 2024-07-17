@@ -31,6 +31,10 @@
             <artifactId>ojdbc8</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.oracle.database.nls</groupId>
+            <artifactId>orai18n</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.aizuda</groupId>
             <artifactId>snail-job-datasource-template</artifactId>
         </dependency>
