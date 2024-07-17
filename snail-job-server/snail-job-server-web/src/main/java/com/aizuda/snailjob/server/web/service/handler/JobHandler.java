@@ -155,9 +155,9 @@ public class JobHandler {
         }
 
         WorkflowTaskBatch workflowTaskBatch = workflowTaskBatchMapper.selectOne(
-            new LambdaQueryWrapper<WorkflowTaskBatch>()
-                .select(WorkflowTaskBatch::getWfContext)
-                .eq(WorkflowTaskBatch::getId, workflowTaskBatchId)
+                new LambdaQueryWrapper<WorkflowTaskBatch>()
+                        .select(WorkflowTaskBatch::getWfContext)
+                        .eq(WorkflowTaskBatch::getId, workflowTaskBatchId)
         );
 
         if (Objects.isNull(workflowTaskBatch)) {
@@ -170,29 +170,24 @@ public class JobHandler {
     /**
      * 批次删除定时任务批次
      *
-     * @param ids 任务批次id
+     * @param ids         任务批次id
      * @param namespaceId 命名空间
      */
     @Transactional
     public void deleteJobTaskBatchByIds(Set<Long> ids, String namespaceId) {
+        // 1. 删除任务批次 job_task_batch
+        Assert.isTrue(jobTaskBatchMapper.deleteByIds(ids) > 0,
+                () -> new SnailJobServerException("删除任务批次失败"));
 
-        Assert.isTrue(ids.size() == jobTaskBatchMapper.delete(
-                new LambdaQueryWrapper<JobTaskBatch>()
-                        .in(JobTaskBatch::getId, ids)
-        ), () -> new SnailJobServerException("删除任务批次失败"));
+        // 2. 删除任务实例 job_task
+        jobTaskMapper.delete(new LambdaQueryWrapper<JobTask>()
+                .eq(JobTask::getNamespaceId, namespaceId)
+                .in(JobTask::getTaskBatchId, ids));
 
-
-        Assert.isTrue(ids.size() == jobTaskMapper.delete(
-                new LambdaQueryWrapper<JobTask>()
-                        .eq(JobTask::getNamespaceId, namespaceId)
-                        .in(JobTask::getId, ids)
-        ), () -> new SnailJobServerException("删除任务批次失败"));
-
-        // 删除日志信息
+        // 3. 删除调度日志 job_log_message
         jobLogMessageMapper.delete(new LambdaQueryWrapper<JobLogMessage>()
                 .eq(JobLogMessage::getNamespaceId, namespaceId)
-                .in(JobLogMessage::getTaskId, ids)
+                .in(JobLogMessage::getTaskBatchId, ids)
         );
-
     }
 }

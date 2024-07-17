@@ -20,6 +20,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
 import java.util.List;
 import java.util.Objects;
@@ -131,6 +132,23 @@ public class RestExceptionHandler {
         }
 
         return null;
+    }
+
+    /**
+     * Contrller 参数检验错误
+     *
+     * @param e 异常对象
+     * @return HttpResult
+     */
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public Result onHandlerMethodValidationException(HandlerMethodValidationException e) {
+        Object[] detailMessageArguments = e.getDetailMessageArguments();
+        if (detailMessageArguments != null && detailMessageArguments.length > 0) {
+            return new Result<String>(0, detailMessageArguments[0].toString());
+        }
+
+        return new Result<>("参数校验失败");
+
     }
 
     /**
