@@ -2,7 +2,7 @@
  SnailJob Database Transfer Tool
  Source Server Type    : MySQL
  Target Server Type    : Oracle
- Date: 2024-07-06 12:49:36
+ Date: 2024-07-17 15:26:08
 */
 
 
@@ -294,8 +294,8 @@ CREATE TABLE sj_retry_task_log_message
 ALTER TABLE sj_retry_task_log_message
     ADD CONSTRAINT pk_sj_retry_task_log_message PRIMARY KEY (id);
 
-CREATE INDEX idx_sj_retry_task_log_message_01 ON sj_retry_task_log_message (namespace_id, group_name, unique_id);
-CREATE INDEX idx_sj_retry_task_log_message_02 ON sj_retry_task_log_message (create_dt);
+CREATE INDEX idx_sj_rt_log_message_01 ON sj_retry_task_log_message (namespace_id, group_name, unique_id);
+CREATE INDEX idx_sj_rt_log_message_02 ON sj_retry_task_log_message (create_dt);
 
 COMMENT ON COLUMN sj_retry_task_log_message.id IS '主键';
 COMMENT ON COLUMN sj_retry_task_log_message.namespace_id IS '命名空间id';
@@ -445,7 +445,7 @@ CREATE TABLE sj_system_user_permission
 ALTER TABLE sj_system_user_permission
     ADD CONSTRAINT pk_sj_system_user_permission PRIMARY KEY (id);
 
-CREATE UNIQUE INDEX uk_sj_system_user_permission_01 ON sj_system_user_permission (namespace_id, group_name, system_user_id);
+CREATE UNIQUE INDEX uk_sj_su_permission_01 ON sj_system_user_permission (namespace_id, group_name, system_user_id);
 
 COMMENT ON COLUMN sj_system_user_permission.id IS '主键';
 COMMENT ON COLUMN sj_system_user_permission.group_name IS '组名称';
@@ -899,7 +899,3 @@ COMMENT ON COLUMN sj_workflow_task_batch.deleted IS '逻辑删除 1、删除';
 COMMENT ON COLUMN sj_workflow_task_batch.create_dt IS '创建时间';
 COMMENT ON COLUMN sj_workflow_task_batch.update_dt IS '修改时间';
 COMMENT ON TABLE sj_workflow_task_batch IS '工作流批次';
-
-
-Process finished
-with exit code 0
