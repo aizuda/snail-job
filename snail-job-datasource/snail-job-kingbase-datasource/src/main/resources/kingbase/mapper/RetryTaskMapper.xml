@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskMapper">
+
+    <update id="updateBatchNextTriggerAtById" parameterType="java.util.List">
+        UPDATE sj_retry_task_${partition} AS rt
+           SET next_trigger_at = tt.next_trigger_at,
+               update_dt = CURRENT_TIMESTAMP
+          FROM (
+                <foreach collection="list" item="item" index="index" separator="UNION ALL">
+                    SELECT
+                        #{item.id}              AS id,
+                        #{item.nextTriggerAt}   AS next_trigger_at
+                </foreach>
+                ) AS tt
+          WHERE rt.id = tt.id
+    </update>
+
+</mapper>

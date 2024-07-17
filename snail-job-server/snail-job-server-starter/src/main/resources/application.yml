@@ -40,6 +40,11 @@ spring:
     #    url: jdbc:dm://127.0.0.1:5236
     #    username: SYSDBA
     #    password: SYSDBA001
+    # kingbase
+    #    driver-class-name: com.kingbase8.Driver
+    #    url: jdbc:kingbase8://localhost:54321/test
+    #    username: root
+    #    password: root
     type: com.zaxxer.hikari.HikariDataSource
     hikari:
       connection-timeout: 30000

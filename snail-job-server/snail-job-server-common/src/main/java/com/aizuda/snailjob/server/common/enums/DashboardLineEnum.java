@@ -63,7 +63,7 @@ public enum DashboardLineEnum {
                 default:
                     return "yyyy-MM-dd";
             }
-        } else { // Oracle, Postgres, DM
+        } else { // Oracle, Postgres, DM, Kingbase
             switch (mode) {
                 case YEAR:
                     return "yyyy-MM";

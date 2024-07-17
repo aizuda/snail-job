@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskLogMessageMapper">
+
+    <update id="updateBatch" parameterType="java.util.List">
+        UPDATE sj_retry_task_log_message rt,
+                (
+                    <foreach collection="list" item="item" index="index" separator="UNION ALL">
+                        SELECT
+                            #{item.id} AS id,
+                            #{item.message} AS message,
+                            #{item.logNum} AS log_num
+                    </foreach>
+                ) tt
+           SET rt.message = tt.message,
+               rt.log_num = tt.log_num,
+               rt.update_dt = CURRENT_TIMESTAMP
+         WHERE rt.id = tt.id
+    </update>
+
+</mapper>

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aizuda.snailjob.template.datasource.persistence.mapper.RetrySummaryMapper">
+
+    <update id="updateBatch" parameterType="java.util.List">
+        UPDATE sj_retry_summary AS rt
+           SET running_num = tt.running_num,
+               finish_num = tt.finish_num,
+               max_count_num = tt.max_count_num,
+               suspend_num = tt.suspend_num,
+               update_dt = CURRENT_TIMESTAMP
+          FROM (
+                <foreach collection="list" item="item" index="index" separator="UNION ALL">
+                    SELECT
+                        #{item.runningNum}  AS running_num,
+                        #{item.finishNum}   AS finish_num,
+                        #{item.maxCountNum} AS max_count_num,
+                        #{item.suspendNum}  AS suspend_num,
+                        #{item.triggerAt}   AS trigger_at,
+                        #{item.sceneName}   AS scene_name,
+                        #{item.namespaceId} AS namespace_id,
+                        #{item.groupName}   AS group_name
+                </foreach>
+            ) AS tt
+        WHERE rt.trigger_at = tt.trigger_at
+          AND rt.group_name = tt.group_name
+          AND rt.namespace_id = tt.namespace_id
+          AND rt.scene_name = tt.scene_name
+    </update>
+
+    <select id="selectRetryTask"
+            resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardCardResponseDO$RetryTask">
+        SELECT COALESCE(sum(running_num), 0)                                            AS runningNum,
+               COALESCE(sum(finish_num), 0)                                             AS finishNum,
+               COALESCE(sum(max_count_num), 0)                                          AS maxCountNum,
+               COALESCE(sum(suspend_num), 0)                                            AS suspendNum,
+               COALESCE(sum(running_num + finish_num + max_count_num + suspend_num), 0) AS totalNum
+        FROM sj_retry_summary
+        ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectRetryTaskBarList"
+            resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardCardResponseDO$RetryTask">
+        SELECT trigger_at,
+               running_num,
+               finish_num,
+               max_count_num,
+               suspend_num
+          FROM sj_retry_summary
+        ${ew.customSqlSegment}
+        LIMIT 7
+    </select>
+
+    <select id="selectRetryLineList"
+            resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardLineResponseDO">
+        SELECT TO_CHAR(create_dt, #{dateFormat})                                        AS createDt,
+               COALESCE(SUM(finish_num), 0)                                             AS successNum,
+               COALESCE(SUM(running_num), 0)                                            AS runningNum,
+               COALESCE(SUM(max_count_num), 0)                                          AS maxCountNum,
+               COALESCE(SUM(suspend_num), 0)                                            AS suspendNum,
+               COALESCE(SUM(finish_num + running_num + max_count_num + suspend_num), 0) AS total
+          FROM sj_retry_summary
+        ${ew.customSqlSegment}
+         GROUP BY createDt
+    </select>
+
+    <select id="selectDashboardRankList"
+            resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO$Rank">
+        SELECT CONCAT(group_name, '/', scene_name)                          AS name,
+               SUM(running_num + finish_num + max_count_num + suspend_num)  AS total
+          FROM sj_retry_summary
+        ${ew.customSqlSegment}
+        HAVING SUM(running_num + finish_num + max_count_num + suspend_num) > 0
+         ORDER BY total DESC LIMIT 10
+    </select>
+
+</mapper>

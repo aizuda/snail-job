@@ -49,7 +49,8 @@ public abstract class AbstractConfigAccess<T> implements ConfigAccess<T> {
             DbTypeEnum.POSTGRES.getDb(),
             DbTypeEnum.ORACLE.getDb(),
             DbTypeEnum.SQLSERVER.getDb(),
-            DbTypeEnum.DM.getDb());
+            DbTypeEnum.DM.getDb(),
+            DbTypeEnum.KINGBASE.getDb());
 
     protected DbTypeEnum getDbType() {
         return DbUtils.getDbType();

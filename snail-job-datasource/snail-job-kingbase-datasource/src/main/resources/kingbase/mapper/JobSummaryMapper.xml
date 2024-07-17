@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aizuda.snailjob.template.datasource.persistence.mapper.JobSummaryMapper">
+
+    <update id="updateBatch" parameterType="java.util.List">
+        UPDATE sj_job_summary AS rt
+           SET success_num = tt.success_num,
+               fail_num = tt.fail_num,
+               fail_reason = tt.fail_reason,
+               stop_num = tt.stop_num,
+               stop_reason = tt.stop_reason,
+               cancel_num = tt.cancel_num,
+               cancel_reason = tt.cancel_reason,
+               update_dt = CURRENT_TIMESTAMP
+          FROM (
+                <foreach collection="list" item="item" index="index" separator="UNION ALL">
+                    SELECT
+                        #{item.successNum}          AS success_num,
+                        #{item.failNum}             AS fail_num,
+                        #{item.failReason}          AS fail_reason,
+                        #{item.stopNum}             AS stop_num,
+                        #{item.stopReason}          AS stop_reason,
+                        #{item.cancelNum}           AS cancel_num,
+                        #{item.cancelReason}        AS cancel_reason,
+                        #{item.systemTaskType}      AS system_task_type,
+                        #{item.businessId}          AS business_id,
+                        #{item.triggerAt}           AS trigger_at
+                </foreach>
+            ) AS tt
+        WHERE rt.system_task_type = tt.system_task_type
+          AND rt.business_id = tt.business_id
+          AND rt.trigger_at = tt.trigger_at
+    </update>
+
+    <select id="selectJobLineList"
+            resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardLineResponseDO">
+        SELECT TO_CHAR(trigger_at, #{dateFormat})                               AS createDt,
+               COALESCE(SUM(success_num), 0)                                    AS success,
+               COALESCE(SUM(fail_num), 0)                                       AS failNum,
+               COALESCE(SUM(stop_num), 0)                                       AS stop,
+               COALESCE(SUM(cancel_num), 0)                                     AS cancel,
+               COALESCE(SUM(fail_num + stop_num + cancel_num), 0)               AS fail,
+               COALESCE(SUM(success_num + fail_num + stop_num + cancel_num), 0) AS total
+        FROM sj_job_summary
+        ${ew.customSqlSegment}
+        GROUP BY createDt
+    </select>
+
+    <select id="selectJobTask"
+            resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardCardResponseDO$JobTask">
+        SELECT COALESCE(SUM(success_num), 0)                                    AS successNum,
+               COALESCE(SUM(stop_num), 0)                                       AS stopNum,
+               COALESCE(SUM(cancel_num), 0)                                     AS cancelNum,
+               COALESCE(SUM(fail_num), 0)                                       AS failNum,
+               COALESCE(SUM(success_num + fail_num + stop_num + cancel_num), 0) AS totalNum
+        FROM sj_job_summary
+        ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectDashboardRankList"
+            resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardRetryLineResponseDO$Rank">
+        SELECT
+            <if test="systemTaskType == 3">
+                CONCAT(group_name, '/', (SELECT job_name FROM sj_job WHERE id = business_id))           AS name,
+            </if>
+            <if test="systemTaskType == 4">
+                CONCAT(group_name, '/', (SELECT workflow_name FROM sj_workflow WHERE id = business_id)) AS name,
+            </if>
+            SUM(fail_num) AS total
+        FROM sj_job_summary
+        ${ew.customSqlSegment}
+        HAVING SUM(fail_num) > 0
+        ORDER BY total DESC LIMIT 10
+    </select>
+
+</mapper>

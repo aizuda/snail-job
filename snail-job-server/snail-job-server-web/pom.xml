@@ -68,6 +68,10 @@
             <artifactId>snail-job-dm8-datasource</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.aizuda</groupId>
+            <artifactId>snail-job-kingbase-datasource</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct</artifactId>
         </dependency>
