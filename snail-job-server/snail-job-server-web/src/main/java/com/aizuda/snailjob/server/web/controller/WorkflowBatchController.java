@@ -7,7 +7,6 @@ import com.aizuda.snailjob.server.web.model.request.WorkflowBatchQueryVO;
 import com.aizuda.snailjob.server.web.model.response.WorkflowBatchResponseVO;
 import com.aizuda.snailjob.server.web.model.response.WorkflowDetailResponseVO;
 import com.aizuda.snailjob.server.web.service.WorkflowBatchService;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
@@ -47,10 +46,10 @@ public class WorkflowBatchController {
 
     @DeleteMapping("/ids")
     @LoginRequired(role = RoleEnum.USER)
-    public Boolean deleteByIds(@RequestBody @Valid
-                                   @NotEmpty(message = "ids不能为空")
-                                   @Size(max = 100, message = "最多删除5个")
-                                   Set<Long> ids) {
+    public Boolean deleteByIds(@RequestBody
+                               @NotEmpty(message = "ids不能为空")
+                               @Size(max = 100, message = "最多删除 {max} 个")
+                               Set<Long> ids) {
         return workflowBatchService.deleteByIds(ids);
     }
 }

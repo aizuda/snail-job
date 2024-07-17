@@ -2,7 +2,6 @@ package com.aizuda.snailjob.server.web.controller;
 
 import cn.hutool.core.lang.Pair;
 import com.aizuda.snailjob.common.core.annotation.OriginalControllerReturnValue;
-import com.aizuda.snailjob.server.common.dto.DecisionConfig;
 import com.aizuda.snailjob.server.web.annotation.LoginRequired;
 import com.aizuda.snailjob.server.web.annotation.RoleEnum;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
@@ -15,7 +14,6 @@ import com.aizuda.snailjob.server.web.model.response.WorkflowResponseVO;
 import com.aizuda.snailjob.server.web.service.WorkflowService;
 import com.aizuda.snailjob.server.web.util.ExportUtils;
 import com.aizuda.snailjob.server.web.util.ImportUtils;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -72,7 +70,7 @@ public class WorkflowController {
 
     @DeleteMapping("/ids")
     @LoginRequired(role = RoleEnum.USER)
-    public Boolean deleteByIds(@RequestBody @Valid @NotEmpty(message = "ids不能为空") Set<Long> ids) {
+    public Boolean deleteByIds(@RequestBody @NotEmpty(message = "ids不能为空") Set<Long> ids) {
         return workflowService.deleteByIds(ids);
     }
 

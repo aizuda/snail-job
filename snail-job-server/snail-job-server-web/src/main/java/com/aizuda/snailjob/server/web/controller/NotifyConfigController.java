@@ -6,6 +6,7 @@ import com.aizuda.snailjob.server.web.model.request.NotifyConfigQueryVO;
 import com.aizuda.snailjob.server.web.model.request.NotifyConfigRequestVO;
 import com.aizuda.snailjob.server.web.model.response.NotifyConfigResponseVO;
 import com.aizuda.snailjob.server.web.service.NotifyConfigService;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -57,7 +58,7 @@ public class NotifyConfigController {
 
     @LoginRequired
     @DeleteMapping("ids")
-    public Boolean batchDeleteNotify(@RequestBody Set<Long> ids) {
+    public Boolean batchDeleteNotify(@RequestBody @NotEmpty(message = "ids不能为空") Set<Long> ids) {
         return notifyConfigService.batchDeleteNotify(ids);
     }
 }

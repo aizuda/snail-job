@@ -233,11 +233,10 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
     public Boolean deleteByIds(Set<Long> ids) {
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
 
-        Assert.isTrue(ids.size() == workflowTaskBatchMapper.delete(
-                new LambdaQueryWrapper<WorkflowTaskBatch>()
+        Assert.isTrue(ids.size() == workflowTaskBatchMapper.delete(new LambdaQueryWrapper<WorkflowTaskBatch>()
                         .eq(WorkflowTaskBatch::getNamespaceId, namespaceId)
-                        .in(WorkflowTaskBatch::getId, ids)
-        ), () -> new SnailJobServerException("删除工作流任务失败, 请检查任务状态是否关闭状态"));
+                        .in(WorkflowTaskBatch::getId, ids)),
+                () -> new SnailJobServerException("删除工作流任务失败, 请检查任务状态是否关闭状态"));
 
         List<JobTaskBatch> jobTaskBatches = jobTaskBatchMapper.selectList(new LambdaQueryWrapper<JobTaskBatch>()
                 .eq(JobTaskBatch::getNamespaceId, namespaceId)

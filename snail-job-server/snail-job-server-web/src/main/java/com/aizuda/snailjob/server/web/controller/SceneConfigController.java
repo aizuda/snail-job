@@ -10,7 +10,6 @@ import com.aizuda.snailjob.server.web.model.response.SceneConfigResponseVO;
 import com.aizuda.snailjob.server.web.service.SceneConfigService;
 import com.aizuda.snailjob.server.web.util.ExportUtils;
 import com.aizuda.snailjob.server.web.util.ImportUtils;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -87,7 +86,7 @@ public class SceneConfigController {
 
     @LoginRequired
     @DeleteMapping("/ids")
-    public boolean deleteByIds(@RequestBody @Valid @NotEmpty(message = "ids不能为空") Set<Long> ids) {
+    public boolean deleteByIds(@RequestBody @NotEmpty(message = "ids不能为空") Set<Long> ids) {
         return sceneConfigService.deleteByIds(ids);
     }
 }

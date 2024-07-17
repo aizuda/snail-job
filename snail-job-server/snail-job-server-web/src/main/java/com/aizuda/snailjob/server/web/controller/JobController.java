@@ -11,7 +11,6 @@ import com.aizuda.snailjob.server.web.model.response.JobResponseVO;
 import com.aizuda.snailjob.server.web.service.JobService;
 import com.aizuda.snailjob.server.web.util.ExportUtils;
 import com.aizuda.snailjob.server.web.util.ImportUtils;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -75,7 +74,7 @@ public class JobController {
 
     @DeleteMapping("/ids")
     @LoginRequired
-    public Boolean deleteJobById(@RequestBody @Valid @NotEmpty(message = "ids不能为空") Set<Long> ids) {
+    public Boolean deleteJobById(@RequestBody @NotEmpty(message = "ids不能为空") Set<Long> ids) {
         return jobService.deleteJobByIds(ids);
     }
 

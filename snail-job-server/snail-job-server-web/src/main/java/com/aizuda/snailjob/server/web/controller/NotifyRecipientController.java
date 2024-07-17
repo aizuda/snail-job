@@ -12,6 +12,7 @@ import com.aizuda.snailjob.server.web.model.response.NotifyRecipientResponseVO;
 import com.aizuda.snailjob.server.web.service.NotifyRecipientService;
 import com.aizuda.snailjob.server.web.util.ExportUtils;
 import com.aizuda.snailjob.server.web.util.ImportUtils;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -63,7 +64,7 @@ public class NotifyRecipientController {
 
     @DeleteMapping("/ids")
     @LoginRequired
-    public Boolean batchDeleteByIds(@RequestBody Set<Long> ids) {
+    public Boolean batchDeleteByIds(@RequestBody @NotEmpty(message = "ids不能为空") Set<Long> ids) {
         return notifyRecipientService.batchDeleteByIds(ids);
     }
 
