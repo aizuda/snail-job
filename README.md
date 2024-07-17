@@ -21,7 +21,8 @@
 
 # 开源地址
 - [snail-job-admin](https://gitee.com/opensnail/snail-job-admin.git)(基于[soybean-admin](https://github.com/soybeanjs/soybean-admin)开源项目搭建)
-- [snail-job-demo](https://gitee.com/opensnail/snail-job-demo.git)
+- [snail-job-demo (Java客户端示例程序)](https://gitee.com/opensnail/snail-job-demo.git)
+- [snail-job-python (Python客户端)](https://gitee.com/opensnail/snail-job-python.git)
 
 # 预览地址
  https://snailjob.opensnail.com/docs/preview.html
