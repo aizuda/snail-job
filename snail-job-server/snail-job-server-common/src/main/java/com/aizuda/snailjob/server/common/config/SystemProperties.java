@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.common.config;
 
-import com.aizuda.snailjob.common.core.alarm.email.MailProperties;
+import com.aizuda.snailjob.common.core.alarm.email.SnailJobMailProperties;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
@@ -109,6 +109,6 @@ public class SystemProperties {
      * 邮件配置
      */
     @NestedConfigurationProperty
-    private MailProperties mail = new MailProperties();
+    private SnailJobMailProperties mail = new SnailJobMailProperties();
 
 }

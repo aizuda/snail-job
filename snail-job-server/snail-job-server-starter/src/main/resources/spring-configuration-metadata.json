@@ -16,7 +16,7 @@
     },
     {
       "name": "snail-job.mail",
-      "type": "com.aizuda.snailjob.common.core.alarm.email.MailProperties",
+      "type": "com.aizuda.snailjob.common.core.alarm.email.SnailJobMailProperties",
       "description": "邮箱配置",
       "sourceType": "com.aizuda.snailjob.server.common.config.SystemProperties"
     }

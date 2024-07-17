@@ -102,7 +102,7 @@ public class ClientRegister extends AbstractRegister implements Runnable {
             } finally {
                 // 防止刷的过快
                 try {
-                    TimeUnit.MILLISECONDS.sleep(5000);
+                    TimeUnit.MILLISECONDS.sleep(2000);
                 } catch (InterruptedException ignored) {
                     Thread.currentThread().interrupt();
                 }

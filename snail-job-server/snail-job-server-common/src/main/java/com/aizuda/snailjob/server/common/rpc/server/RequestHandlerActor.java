@@ -88,10 +88,10 @@ public class RequestHandlerActor extends AbstractActor {
         String token = headers.get(HeadersEnum.TOKEN.getKey());
 
         if (StrUtil.isBlank(token) || !CacheToken.get(groupName, namespace).equals(token)) {
-            throw new SnailJobServerException("Token authentication failed. [{}]", token);
+            throw new SnailJobServerException("Token authentication failed. [namespace:{} groupName:{} token:{}]", namespace, groupName, token);
         }
 
-        // 注册版本
+        // 注册版本 此后后续版本将迁移至BeatHttpRequestHandler 只处理beat的心态注册
         RegisterContext registerContext = new RegisterContext();
         registerContext.setGroupName(groupName);
         registerContext.setHostPort(hostPort);

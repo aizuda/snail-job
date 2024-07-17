@@ -132,6 +132,10 @@ public abstract class AbstractScanGroup extends AbstractActor {
             waitUpdateRetryTasks.add(retryTask);
         }
 
+        if (CollUtil.isEmpty(waitUpdateRetryTasks)) {
+            return;
+        }
+
         // 批量更新
         retryTaskMapper.updateBatchNextTriggerAtById(scanTask.getGroupPartition(), waitUpdateRetryTasks);
 

@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.client.common.config;
 
-import com.aizuda.snailjob.common.core.alarm.email.MailProperties;
+import com.aizuda.snailjob.common.core.alarm.email.SnailJobMailProperties;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -75,7 +75,7 @@ public class SnailJobProperties {
      * 邮件配置
      */
     @NestedConfigurationProperty
-    private MailProperties mail = new MailProperties();
+    private SnailJobMailProperties mail = new SnailJobMailProperties();
 
     @Data
     public static class ServerConfig {

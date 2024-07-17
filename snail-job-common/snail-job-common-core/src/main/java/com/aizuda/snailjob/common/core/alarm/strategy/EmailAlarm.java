@@ -3,7 +3,7 @@ package com.aizuda.snailjob.common.core.alarm.strategy;
 import com.aizuda.snailjob.common.core.alarm.AlarmContext;
 import com.aizuda.snailjob.common.core.alarm.attribute.EmailAttribute;
 import com.aizuda.snailjob.common.core.alarm.email.MailAccount;
-import com.aizuda.snailjob.common.core.alarm.email.MailProperties;
+import com.aizuda.snailjob.common.core.alarm.email.SnailJobMailProperties;
 import com.aizuda.snailjob.common.core.enums.AlarmTypeEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.MailUtils;
@@ -22,7 +22,7 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 public class EmailAlarm extends AbstractAlarm<AlarmContext> {
-    private final MailProperties mailProperties;
+    private final SnailJobMailProperties snailJobMailProperties;
     private MailAccount mailAccount;
 
     @Override
@@ -63,28 +63,28 @@ public class EmailAlarm extends AbstractAlarm<AlarmContext> {
     @Override
     public void afterPropertiesSet() throws Exception {
         super.afterPropertiesSet();
-        Boolean enabled = mailProperties.getEnabled();
+        Boolean enabled = snailJobMailProperties.getEnabled();
         if (Objects.isNull(enabled) || Boolean.FALSE.equals(enabled)) {
             return;
         }
 
-        mailAccount = initMailAccount(mailProperties);
+        mailAccount = initMailAccount(snailJobMailProperties);
         MailUtils.setMailAccount(mailAccount);
     }
 
-    private MailAccount initMailAccount(MailProperties mailProperties) {
+    private MailAccount initMailAccount(SnailJobMailProperties snailJobMailProperties) {
         MailAccount account = new MailAccount();
-        account.setHost(mailProperties.getHost());
-        account.setPort(mailProperties.getPort());
-        account.setAuth(Optional.ofNullable(mailProperties.getAuth()).orElse(Boolean.FALSE));
-        account.setFrom(mailProperties.getFrom());
-        account.setUser(mailProperties.getUser());
-        account.setPass(mailProperties.getPass());
-        account.setSocketFactoryPort(Optional.ofNullable(mailProperties.getPort()).orElse(465));
-        account.setStarttlsEnable(Optional.ofNullable(mailProperties.getStarttlsEnable()).orElse(Boolean.FALSE));
-        account.setSslEnable(Optional.ofNullable(mailProperties.getSslEnable()).orElse(Boolean.FALSE));
-        account.setTimeout(Optional.ofNullable(mailProperties.getTimeout()).orElse(0L));
-        account.setConnectionTimeout(Optional.ofNullable(mailProperties.getConnectionTimeout()).orElse(0L));
+        account.setHost(snailJobMailProperties.getHost());
+        account.setPort(snailJobMailProperties.getPort());
+        account.setAuth(Optional.ofNullable(snailJobMailProperties.getAuth()).orElse(Boolean.FALSE));
+        account.setFrom(snailJobMailProperties.getFrom());
+        account.setUser(snailJobMailProperties.getUser());
+        account.setPass(snailJobMailProperties.getPass());
+        account.setSocketFactoryPort(Optional.ofNullable(snailJobMailProperties.getPort()).orElse(465));
+        account.setStarttlsEnable(Optional.ofNullable(snailJobMailProperties.getStarttlsEnable()).orElse(Boolean.FALSE));
+        account.setSslEnable(Optional.ofNullable(snailJobMailProperties.getSslEnable()).orElse(Boolean.FALSE));
+        account.setTimeout(Optional.ofNullable(snailJobMailProperties.getTimeout()).orElse(0L));
+        account.setConnectionTimeout(Optional.ofNullable(snailJobMailProperties.getConnectionTimeout()).orElse(0L));
         return account;
     }
 }

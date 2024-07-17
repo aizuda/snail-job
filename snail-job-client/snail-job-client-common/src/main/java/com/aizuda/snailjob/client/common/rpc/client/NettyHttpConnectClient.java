@@ -1,6 +1,7 @@
 package com.aizuda.snailjob.client.common.rpc.client;
 
 import com.aizuda.snailjob.client.common.Lifecycle;
+import com.aizuda.snailjob.client.common.handler.ClientRegister;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
@@ -48,7 +49,7 @@ public class NettyHttpConnectClient implements Lifecycle {
                         @Override
                         public void initChannel(SocketChannel channel) throws Exception {
                             channel.pipeline()
-                                    .addLast(new IdleStateHandler(0, 0, 30, TimeUnit.SECONDS))
+                                    .addLast(new IdleStateHandler(0, 0, 3 * ClientRegister.REGISTER_TIME, TimeUnit.SECONDS))
                                     .addLast(new HttpClientCodec())
                                     .addLast(new HttpObjectAggregator(5 * 1024 * 1024))
                                     .addLast(new NettyHttpClientHandler(thisClient));

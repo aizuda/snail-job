@@ -2,8 +2,10 @@ package com.aizuda.snailjob.client.common.rpc.client;
 
 import com.aizuda.snailjob.client.common.NettyClient;
 import com.aizuda.snailjob.client.common.event.SnailChannelReconnectEvent;
+import com.aizuda.snailjob.client.common.handler.ClientRegister;
 import com.aizuda.snailjob.common.core.constant.SystemConstants.BEAT;
 import com.aizuda.snailjob.common.core.context.SpringContext;
+import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.model.NettyResult;
 import com.aizuda.snailjob.common.core.rpc.RpcContext;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
@@ -28,17 +30,9 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class NettyHttpClientHandler extends SimpleChannelInboundHandler<FullHttpResponse> {
 
-    private NettyClient client;
     private NettyHttpConnectClient nettyHttpConnectClient;
 
     public NettyHttpClientHandler(NettyHttpConnectClient nettyHttpConnectClient) {
-
-        client = RequestBuilder.<NettyClient, NettyResult>newBuilder()
-                .client(NettyClient.class)
-                .callback(
-                        nettyResult -> SnailJobLog.LOCAL.debug("heartbeat check requestId:[{}]", nettyResult.getReqId()))
-                .build();
-
         this.nettyHttpConnectClient = nettyHttpConnectClient;
     }
 
@@ -112,7 +106,7 @@ public class NettyHttpClientHandler extends SimpleChannelInboundHandler<FullHttp
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
         SnailJobLog.LOCAL.debug("userEventTriggered");
         if (evt instanceof IdleStateEvent) {
-            client.beat(BEAT.PING);
+            ClientRegister.CLIENT.beat(BEAT.PING);
         } else {
             super.userEventTriggered(ctx, evt);
         }

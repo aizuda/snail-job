@@ -14,7 +14,7 @@ import java.io.Serializable;
 @Data
 @Configuration
 @ConfigurationProperties(value = "snail-job.mail")
-public class MailProperties implements Serializable {
+public class SnailJobMailProperties implements Serializable {
 
     /**
      * 过滤开关
