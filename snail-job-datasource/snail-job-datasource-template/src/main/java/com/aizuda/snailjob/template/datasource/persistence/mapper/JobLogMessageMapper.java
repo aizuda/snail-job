@@ -3,6 +3,7 @@ package com.aizuda.snailjob.template.datasource.persistence.mapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobLogMessage;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -17,5 +18,6 @@ import java.util.List;
 @Mapper
 public interface JobLogMessageMapper extends BaseMapper<JobLogMessage> {
 
-    int insertBatch(List<JobLogMessage> list);
+    int insertBatch(@Param("list") List<JobLogMessage> list);
+
 }
