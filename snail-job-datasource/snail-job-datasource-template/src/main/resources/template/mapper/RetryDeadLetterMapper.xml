@@ -2,43 +2,34 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.aizuda.snailjob.template.datasource.persistence.mapper.RetryDeadLetterMapper">
 
-  <insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="false">
-      INSERT INTO sj_retry_dead_letter (namespace_id, unique_id, group_name, scene_name,
-                                        idempotent_id, biz_no, executor_name, args_str,
-                                        ext_attrs, create_dt)
-      <if test="@com.aizuda.snailjob.template.datasource.utils.DbUtils@notOracle()">
-        VALUES
-          <foreach collection="list" item="item" separator=",">
-              (
-                  #{item.namespaceId,jdbcType=VARCHAR},
-                  #{item.uniqueId,jdbcType=VARCHAR},
-                  #{item.groupName,jdbcType=VARCHAR},
-                  #{item.sceneName,jdbcType=VARCHAR},
-                  #{item.idempotentId,jdbcType=VARCHAR},
-                  #{item.bizNo,jdbcType=VARCHAR},
-                  #{item.executorName,jdbcType=VARCHAR},
-                  #{item.argsStr,jdbcType=VARCHAR},
-                  #{item.extAttrs,jdbcType=VARCHAR},
-                  #{item.createDt,jdbcType=TIMESTAMP}
-              )
-          </foreach>
-      </if>
-      <if test="@com.aizuda.snailjob.template.datasource.utils.DbUtils@isOracle()">
-          <foreach collection="retryDeadLetters" item="retryDeadLetter" separator="UNION ALL">
-              SELECT
-                  #{item.namespaceId,jdbcType=VARCHAR},
-                  #{item.uniqueId,jdbcType=VARCHAR},
-                  #{item.groupName,jdbcType=VARCHAR},
-                  #{item.sceneName,jdbcType=VARCHAR},
-                  #{item.idempotentId,jdbcType=VARCHAR},
-                  #{item.bizNo,jdbcType=VARCHAR},
-                  #{item.executorName,jdbcType=VARCHAR},
-                  #{item.argsStr,jdbcType=VARCHAR},
-                  #{item.extAttrs,jdbcType=VARCHAR},
-                  #{item.createDt,jdbcType=TIMESTAMP}
-              FROM DUAL
-          </foreach>
-      </if>
-  </insert>
+    <sql id="insertBatch_Column_List">
+        #{item.namespaceId,jdbcType=VARCHAR},
+        #{item.uniqueId,jdbcType=VARCHAR},
+        #{item.groupName,jdbcType=VARCHAR},
+        #{item.sceneName,jdbcType=VARCHAR},
+        #{item.idempotentId,jdbcType=VARCHAR},
+        #{item.bizNo,jdbcType=VARCHAR},
+        #{item.executorName,jdbcType=VARCHAR},
+        #{item.argsStr,jdbcType=VARCHAR},
+        #{item.extAttrs,jdbcType=VARCHAR},
+        #{item.createDt,jdbcType=TIMESTAMP}
+    </sql>
+
+    <insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="false">
+        INSERT INTO sj_retry_dead_letter (namespace_id, unique_id, group_name, scene_name,
+                                          idempotent_id, biz_no, executor_name, args_str,
+                                          ext_attrs, create_dt)
+        <if test="@com.aizuda.snailjob.template.datasource.utils.DbUtils@notOracle()">
+            VALUES
+            <foreach collection="list" item="item" open="(" separator="," close=")">
+                <include refid="insertBatch_Column_List" />
+            </foreach>
+        </if>
+        <if test="@com.aizuda.snailjob.template.datasource.utils.DbUtils@isOracle()">
+            <foreach collection="list" item="item" open="SELECT" separator="UNION ALL" close="FROM DUAL">
+                <include refid="insertBatch_Column_List" />
+            </foreach>
+        </if>
+    </insert>
 
 </mapper>

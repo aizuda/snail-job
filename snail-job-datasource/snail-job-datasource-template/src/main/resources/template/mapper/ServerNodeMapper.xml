@@ -2,38 +2,30 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.aizuda.snailjob.template.datasource.persistence.mapper.ServerNodeMapper">
 
+    <sql id="insertBatch_Column_List" >
+        #{item.namespaceId,jdbcType=VARCHAR},
+        #{item.groupName,jdbcType=VARCHAR},
+        #{item.hostId,jdbcType=VARCHAR},
+        #{item.hostIp,jdbcType=VARCHAR},
+        #{item.hostPort,jdbcType=INTEGER},
+        #{item.expireAt,jdbcType=TIMESTAMP},
+        #{item.nodeType,jdbcType=TINYINT},
+        #{item.extAttrs,jdbcType=VARCHAR},
+        #{item.createDt,jdbcType=TIMESTAMP}
+    </sql>
+
     <insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="false">
         INSERT INTO sj_server_node (namespace_id, group_name, host_id, host_ip, host_port,
                                     expire_at, node_type, ext_attrs, create_dt)
-        VALUES
         <if test="@com.aizuda.snailjob.template.datasource.utils.DbUtils@notOracle()">
-            <foreach collection="list" item="item" index="index" separator=",">
-                (
-                    #{item.namespaceId,jdbcType=VARCHAR},
-                    #{item.groupName,jdbcType=VARCHAR},
-                    #{item.hostId,jdbcType=VARCHAR},
-                    #{item.hostIp,jdbcType=VARCHAR},
-                    #{item.hostPort,jdbcType=INTEGER},
-                    #{item.expireAt,jdbcType=TIMESTAMP},
-                    #{item.nodeType,jdbcType=TINYINT},
-                    #{item.extAttrs,jdbcType=VARCHAR},
-                    #{item.createDt,jdbcType=TIMESTAMP}
-                )
+            VALUES
+            <foreach collection="list" item="item" open="(" separator="," close=")">
+                <include refid="insertBatch_Column_List" />
             </foreach>
         </if>
         <if test="@com.aizuda.snailjob.template.datasource.utils.DbUtils@isOracle()">
-            <foreach collection="list" item="item" index="index" separator="UNION ALL">
-                SELECT
-                    #{item.namespaceId,jdbcType=VARCHAR},
-                    #{item.groupName,jdbcType=VARCHAR},
-                    #{item.hostId,jdbcType=VARCHAR},
-                    #{item.hostIp,jdbcType=VARCHAR},
-                    #{item.hostPort,jdbcType=INTEGER},
-                    #{item.expireAt,jdbcType=TIMESTAMP},
-                    #{item.nodeType,jdbcType=TINYINT},
-                    #{item.extAttrs,jdbcType=VARCHAR},
-                    #{item.createDt,jdbcType=TIMESTAMP}
-                FROM DUAL
+            <foreach collection="list" item="item" open="SELECT" separator="UNION ALL" close="FROM DUAL">
+                <include refid="insertBatch_Column_List" />
             </foreach>
         </if>
     </insert>
