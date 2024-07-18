@@ -93,16 +93,16 @@ public abstract class AbstractRegister implements Register, Lifecycle {
 
         try {
             // 批量更新
-            if (CollUtil.isNotEmpty(updateDBs) && updateDBs.size() != serverNodeMapper.updateBatchExpireAt(updateDBs)) {
-                SnailJobLog.LOCAL.warn("续租失败 [{}]", JsonUtil.toJsonString(updateDBs));
+            if (CollUtil.isNotEmpty(updateDBs)) {
+                serverNodeMapper.updateBatchExpireAt(updateDBs);
             }
         } catch (Exception e) {
             SnailJobLog.LOCAL.error("续租失败", e);
         }
 
         try {
-            if (CollUtil.isNotEmpty(insertDBs) && insertDBs.size() != serverNodeMapper.insertBatch(insertDBs)) {
-                SnailJobLog.LOCAL.warn("注册节点失败 [{}]", JsonUtil.toJsonString(insertDBs));
+            if (CollUtil.isNotEmpty(insertDBs)) {
+                serverNodeMapper.insertBatch(insertDBs);
             }
         } catch (DuplicateKeyException ignored) {
         } catch (Exception e) {
