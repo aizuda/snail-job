@@ -5,23 +5,43 @@
     <insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="false">
         INSERT INTO sj_job_summary (namespace_id, group_name, business_id, trigger_at, system_task_type,
                                     success_num,fail_num,fail_reason,stop_num,stop_reason, cancel_num,cancel_reason)
-        VALUES
-        <foreach collection="list" item="item" separator=",">
-            (
-                #{item.namespaceId},
-                #{item.groupName},
-                #{item.businessId},
-                #{item.triggerAt},
-                #{item.systemTaskType},
-                #{item.successNum},
-                #{item.failNum},
-                #{item.failReason},
-                #{item.stopNum},
-                #{item.stopReason},
-                #{item.cancelNum},
-                #{item.cancelReason}
-            )
-        </foreach>
+        <if test="@com.aizuda.snailjob.template.datasource.utils.DbUtils@notOracle()">
+            VALUES
+            <foreach collection="list" item="item" separator=",">
+                (
+                    #{item.namespaceId},
+                    #{item.groupName},
+                    #{item.businessId},
+                    #{item.triggerAt},
+                    #{item.systemTaskType},
+                    #{item.successNum},
+                    #{item.failNum},
+                    #{item.failReason},
+                    #{item.stopNum},
+                    #{item.stopReason},
+                    #{item.cancelNum},
+                    #{item.cancelReason}
+                )
+            </foreach>
+        </if>
+        <if test="@com.aizuda.snailjob.template.datasource.utils.DbUtils@isOracle()">
+            <foreach collection="list" item="item" separator="UNION ALL">
+                SELECT
+                    #{item.namespaceId},
+                    #{item.groupName},
+                    #{item.businessId},
+                    #{item.triggerAt},
+                    #{item.systemTaskType},
+                    #{item.successNum},
+                    #{item.failNum},
+                    #{item.failReason},
+                    #{item.stopNum},
+                    #{item.stopReason},
+                    #{item.cancelNum},
+                    #{item.cancelReason}
+                FROM DUAL
+            </foreach>
+        </if>
     </insert>
 
     <select id="selectJobTaskList"

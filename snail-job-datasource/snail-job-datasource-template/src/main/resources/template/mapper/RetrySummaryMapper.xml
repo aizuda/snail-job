@@ -5,19 +5,36 @@
     <insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="false">
         INSERT INTO sj_retry_summary (namespace_id, group_name, scene_name, trigger_at,
                                       running_num, finish_num, max_count_num, suspend_num)
-        VALUES
-        <foreach collection="list" item="item" separator=",">
-            (
-                #{item.namespaceId},
-                #{item.groupName},
-                #{item.sceneName},
-                #{item.triggerAt},
-                #{item.runningNum},
-                #{item.finishNum},
-                #{item.maxCountNum},
-                #{item.suspendNum}
-            )
-        </foreach>
+        <if test="@com.aizuda.snailjob.template.datasource.utils.DbUtils@notOracle()">
+            VALUES
+            <foreach collection="list" item="item" separator=",">
+                (
+                    #{item.namespaceId},
+                    #{item.groupName},
+                    #{item.sceneName},
+                    #{item.triggerAt},
+                    #{item.runningNum},
+                    #{item.finishNum},
+                    #{item.maxCountNum},
+                    #{item.suspendNum}
+                )
+            </foreach>
+        </if>
+        <if test="@com.aizuda.snailjob.template.datasource.utils.DbUtils@isOracle()">
+            <foreach collection="list" item="item" separator="UNION ALL">
+                SELECT
+                    #{item.namespaceId},
+                    #{item.groupName},
+                    #{item.sceneName},
+                    #{item.triggerAt},
+                    #{item.runningNum},
+                    #{item.finishNum},
+                    #{item.maxCountNum},
+                    #{item.suspendNum}
+                FROM DUAL
+            </foreach>
+        </if>
+
     </insert>
 
     <select id="selectRetryTaskList"

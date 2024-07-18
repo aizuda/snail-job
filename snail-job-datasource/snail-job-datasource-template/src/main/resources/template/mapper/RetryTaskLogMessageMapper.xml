@@ -5,9 +5,23 @@
     <insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="false">
         INSERT INTO sj_retry_task_log_message (namespace_id, group_name, unique_id, log_num, message,
                                                create_dt, real_time)
-        VALUES
-            <foreach collection="list" item="item" separator=",">
-                (
+        <if test="@com.aizuda.snailjob.template.datasource.utils.DbUtils@notOracle()">
+            VALUES
+                <foreach collection="list" item="item" separator=",">
+                    (
+                        #{item.namespaceId},
+                        #{item.groupName},
+                        #{item.uniqueId},
+                        #{item.logNum},
+                        #{item.message},
+                        #{item.createDt},
+                        #{item.realTime}
+                    )
+                </foreach>
+        </if>
+        <if test="@com.aizuda.snailjob.template.datasource.utils.DbUtils@isOracle()">
+            <foreach collection="list" item="item" separator="UNION ALL">
+                SELECT
                     #{item.namespaceId},
                     #{item.groupName},
                     #{item.uniqueId},
@@ -15,8 +29,9 @@
                     #{item.message},
                     #{item.createDt},
                     #{item.realTime}
-                )
+                FROM DUAL
             </foreach>
+        </if>
     </insert>
 
 </mapper>

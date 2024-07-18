@@ -5,14 +5,25 @@
     <insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="false">
         INSERT INTO sj_retry_task_log (unique_id, group_name, scene_name, idempotent_id, biz_no, executor_name,
                                        args_str, ext_attrs, task_type, create_dt, namespace_id)
-        VALUES
-        <foreach collection="list" item="item" separator=",">
-            (
-                #{item.uniqueId}, #{item.groupName}, #{item.sceneName}, #{item.idempotentId},
-                #{item.bizNo}, #{item.executorName}, #{item.argsStr}, #{item.extAttrs},
-                #{item.taskType}, #{item.createDt}, #{item.namespaceId}
-            )
-        </foreach>
+        <if test="@com.aizuda.snailjob.template.datasource.utils.DbUtils@notOracle()">
+            VALUES
+            <foreach collection="list" item="item" separator=",">
+                (
+                    #{item.uniqueId}, #{item.groupName}, #{item.sceneName}, #{item.idempotentId},
+                    #{item.bizNo}, #{item.executorName}, #{item.argsStr}, #{item.extAttrs},
+                    #{item.taskType}, #{item.createDt}, #{item.namespaceId}
+                )
+            </foreach>
+        </if>
+        <if test="@com.aizuda.snailjob.template.datasource.utils.DbUtils@isOracle()">
+            <foreach collection="list" item="item" separator="UNION ALL">
+                SELECT
+                    #{item.uniqueId}, #{item.groupName}, #{item.sceneName}, #{item.idempotentId},
+                    #{item.bizNo}, #{item.executorName}, #{item.argsStr}, #{item.extAttrs},
+                    #{item.taskType}, #{item.createDt}, #{item.namespaceId}
+                FROM DUAL
+            </foreach>
+        </if>
     </insert>
 
     <!-- 重试统计 -->

@@ -18,4 +18,11 @@ public class DbUtils {
         return DbTypeEnum.modeOf(url);
     }
 
+    public static boolean isOracle() {
+        return DbTypeEnum.ORACLE.equals(getDbType());
+    }
+
+    public static boolean notOracle() {
+        return !DbTypeEnum.ORACLE.equals(getDbType());
+    }
 }

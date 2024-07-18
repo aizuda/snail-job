@@ -6,6 +6,7 @@
         INSERT INTO sj_retry_task (namespace_id, unique_id, group_name, scene_name, idempotent_id, biz_no,
                                    executor_name, args_str, ext_attrs, next_trigger_at, task_type, retry_status,
                                    create_dt)
+        <if test="@com.aizuda.snailjob.template.datasource.utils.DbUtils@notOracle()">
         VALUES
             <foreach collection="list" item="item" separator=",">
                 (
@@ -24,6 +25,26 @@
                      #{item.createDt}
                 )
             </foreach>
+        </if>
+        <if test="@com.aizuda.snailjob.template.datasource.utils.DbUtils@isOracle()">
+            <foreach collection="list" item="item" separator="UNION ALL">
+                SELECT
+                    #{item.namespaceId},
+                    #{item.uniqueId},
+                    #{item.groupName},
+                    #{item.sceneName},
+                    #{item.idempotentId},
+                    #{item.bizNo},
+                    #{item.executorName},
+                    #{item.argsStr},
+                    #{item.extAttrs},
+                    #{item.nextTriggerAt},
+                    #{item.taskType},
+                    #{item.retryStatus},
+                    #{item.createDt}
+                FROM DUAL
+            </foreach>
+        </if>
     </insert>
 
 </mapper>
