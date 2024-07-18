@@ -22,8 +22,10 @@
             </foreach>
         </if>
         <if test="@com.aizuda.snailjob.template.datasource.utils.DbUtils@isOracle()">
-            <foreach collection="list" item="item" open="SELECT" separator="UNION ALL" close="FROM DUAL">
-                <include refid="insertBatch_Column_List" />
+            <foreach collection="list" item="item" separator="UNION ALL">
+                SELECT
+                    <include refid="insertBatch_Column_List" />
+                FROM DUAL
             </foreach>
         </if>
     </insert>
