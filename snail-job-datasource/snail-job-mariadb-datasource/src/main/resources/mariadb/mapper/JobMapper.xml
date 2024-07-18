@@ -11,8 +11,8 @@
                             #{item.nextTriggerAt}   AS next_trigger_at
                     </foreach>
                 ) tt
-          SET rt.next_trigger_at = tt.next_trigger_at
-        WHERE rt.id = tt.id
+           SET rt.next_trigger_at = tt.next_trigger_at
+         WHERE rt.id = tt.id
     </update>
 
 </mapper>

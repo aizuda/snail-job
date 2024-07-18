@@ -2,39 +2,6 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskLogMapper">
 
-    <sql id="insertBatch_Column_List">
-        #{item.uniqueId},
-        #{item.groupName},
-        #{item.sceneName},
-        #{item.idempotentId},
-        #{item.bizNo},
-        #{item.executorName},
-        #{item.argsStr},
-        #{item.extAttrs},
-        #{item.taskType},
-        #{item.createDt},
-        #{item.namespaceId}
-    </sql>
-
-    <insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="false">
-        INSERT INTO sj_retry_task_log (unique_id, group_name, scene_name, idempotent_id, biz_no, executor_name,
-                                       args_str, ext_attrs, task_type, create_dt, namespace_id)
-        <if test="@com.aizuda.snailjob.template.datasource.utils.DbUtils@notOracle()">
-            VALUES
-            <foreach collection="list" item="item" open="(" separator="," close=")">
-                <include refid="insertBatch_Column_List" />
-            </foreach>
-        </if>
-        <if test="@com.aizuda.snailjob.template.datasource.utils.DbUtils@isOracle()">
-            <foreach collection="list" item="item" separator="UNION ALL">
-                SELECT
-                    <include refid="insertBatch_Column_List" />
-                FROM DUAL
-            </foreach>
-        </if>
-    </insert>
-
-    <!-- 重试统计 -->
     <select id="selectRetryRetryTaskLogSummaryList"
             resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardRetryResponseDO">
         SELECT namespace_id                                          AS namespaceId,

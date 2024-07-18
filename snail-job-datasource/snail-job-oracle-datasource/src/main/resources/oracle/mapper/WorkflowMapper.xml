@@ -10,4 +10,5 @@
              WHERE id = #{item.id}
         </foreach>
     </update>
+
 </mapper>

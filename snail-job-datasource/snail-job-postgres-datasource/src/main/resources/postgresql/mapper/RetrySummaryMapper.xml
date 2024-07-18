@@ -2,6 +2,24 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.aizuda.snailjob.template.datasource.persistence.mapper.RetrySummaryMapper">
 
+    <insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sj_retry_summary (namespace_id, group_name, scene_name, trigger_at,
+                                   running_num, finish_num, max_count_num, suspend_num)
+        VALUES
+            <foreach collection="list" item="item" separator=",">
+                (
+                    #{item.namespaceId},
+                    #{item.groupName},
+                    #{item.sceneName},
+                    #{item.triggerAt},
+                    #{item.runningNum},
+                    #{item.finishNum},
+                    #{item.maxCountNum},
+                    #{item.suspendNum}
+                )
+        </foreach>
+    </insert>
+
     <update id="updateBatch" parameterType="java.util.List">
         UPDATE sj_retry_summary AS rt
            SET running_num = tt.running_num,

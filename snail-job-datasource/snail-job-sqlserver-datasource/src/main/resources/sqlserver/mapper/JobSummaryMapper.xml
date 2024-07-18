@@ -2,6 +2,28 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.aizuda.snailjob.template.datasource.persistence.mapper.JobSummaryMapper">
 
+    <insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sj_job_summary (namespace_id, group_name, business_id, trigger_at, system_task_type, success_num,
+                                    fail_num, fail_reason, stop_num, stop_reason, cancel_num, cancel_reason)
+        VALUES
+            <foreach collection="list" item="item" separator=",">
+                (
+                    #{item.namespaceId},
+                    #{item.groupName},
+                    #{item.businessId},
+                    #{item.triggerAt},
+                    #{item.systemTaskType},
+                    #{item.successNum},
+                    #{item.failNum},
+                    #{item.failReason},
+                    #{item.stopNum},
+                    #{item.stopReason},
+                    #{item.cancelNum},
+                    #{item.cancelReason}
+                )
+            </foreach>
+    </insert>
+
     <update id="updateBatch" parameterType="java.util.List">
         UPDATE sj_job_summary
            SET success_num = src.success_num,
