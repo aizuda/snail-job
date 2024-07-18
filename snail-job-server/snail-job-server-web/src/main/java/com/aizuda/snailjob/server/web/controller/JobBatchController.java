@@ -54,7 +54,7 @@ public class JobBatchController {
     public Boolean deleteJobBatchByIds(@RequestBody
                                        @NotEmpty(message = "ids不能为空")
                                        @Size(max = 100, message = "最多删除 {max} 个")
-                                       Long[] ids) {
-        return jobBatchService.deleteJobBatchByIds(Set.of(ids));
+                                       Set<Long> ids) {
+        return jobBatchService.deleteJobBatchByIds(ids);
     }
 }

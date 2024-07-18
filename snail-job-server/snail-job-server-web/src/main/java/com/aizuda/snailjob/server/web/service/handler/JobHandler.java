@@ -176,7 +176,7 @@ public class JobHandler {
     @Transactional
     public void deleteJobTaskBatchByIds(Set<Long> ids, String namespaceId) {
         // 1. 删除任务批次 job_task_batch
-        Assert.isTrue(jobTaskBatchMapper.deleteByIds(ids) > 0,
+        Assert.isTrue(ids.size() == jobTaskBatchMapper.deleteByIds(ids),
                 () -> new SnailJobServerException("删除任务批次失败"));
 
         // 2. 删除任务实例 job_task
