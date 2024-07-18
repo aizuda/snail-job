@@ -39,7 +39,6 @@ import org.springframework.validation.annotation.Validated;
 
 import java.lang.reflect.Method;
 import java.util.Objects;
-import java.util.Set;
 
 import static com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH.*;
 
@@ -141,14 +140,6 @@ public class SnailRetryEndPoint {
 
     @Mapping(path = RETRY_CALLBACK, method = RequestMethod.POST)
     public Result callback(@Valid RetryCallbackDTO callbackDTO) {
-
-        ValidatorFactory vf = Validation.buildDefaultValidatorFactory();
-        Validator validator = vf.getValidator();
-        Set<ConstraintViolation<RetryCallbackDTO>> set = validator.validate(callbackDTO);
-        for (final ConstraintViolation<RetryCallbackDTO> violation : set) {
-            return new Result<>(violation.getMessage(), null);
-        }
-
         RetryerInfo retryerInfo = null;
         Object[] deSerialize = null;
         try {
@@ -260,13 +251,6 @@ public class SnailRetryEndPoint {
     @Mapping(path = RETRY_GENERATE_IDEM_ID, method = RequestMethod.POST)
     public Result<String> idempotentIdGenerate(@Valid
                                                GenerateRetryIdempotentIdDTO generateRetryIdempotentIdDTO) {
-
-        ValidatorFactory vf = Validation.buildDefaultValidatorFactory();
-        Validator validator = vf.getValidator();
-        Set<ConstraintViolation<GenerateRetryIdempotentIdDTO>> set = validator.validate(generateRetryIdempotentIdDTO);
-        for (final ConstraintViolation<GenerateRetryIdempotentIdDTO> violation : set) {
-            return new Result<>(violation.getMessage(), null);
-        }
 
         String scene = generateRetryIdempotentIdDTO.getScene();
         String executorName = generateRetryIdempotentIdDTO.getExecutorName();
