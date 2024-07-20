@@ -1,11 +1,6 @@
 package com.aizuda.snailjob.template.datasource.handler;
 
-import com.aizuda.snailjob.template.datasource.persistence.mapper.JobLogMessageMapper;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.JobSummaryMapper;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.RetrySummaryMapper;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskLogMapper;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskLogMessageMapper;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskMapper;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.*;
 import com.baomidou.mybatisplus.core.MybatisConfiguration;
 import org.apache.ibatis.mapping.MappedStatement;
 
@@ -25,17 +20,22 @@ public class SnailJobMybatisConfiguration extends MybatisConfiguration {
      */
     static final Set<String> DUPLICATE_IDS = new HashSet<>();
 
+    private static final String BATCH_INSERT_ID = "insertBatch";
+
     static {
-        DUPLICATE_IDS.add(JobSummaryMapper.class.getName() + ".insertBatch");
-        DUPLICATE_IDS.add(RetryTaskLogMapper.class.getName() + ".insertBatch");
-        DUPLICATE_IDS.add(RetrySummaryMapper.class.getName() + ".insertBatch");
-        DUPLICATE_IDS.add(RetryTaskLogMessageMapper.class.getName() + ".insertBatch");
-        DUPLICATE_IDS.add(RetryTaskMapper.class.getName() + ".insertBatch");
-        DUPLICATE_IDS.add(JobLogMessageMapper.class.getName() + ".insertBatch");
+        DUPLICATE_IDS.add(RetryDeadLetterMapper.class.getName() + "." + BATCH_INSERT_ID);
+        DUPLICATE_IDS.add(ServerNodeMapper.class.getName() + "." + BATCH_INSERT_ID);
+        DUPLICATE_IDS.add(JobTaskMapper.class.getName() + "." + BATCH_INSERT_ID);
+        DUPLICATE_IDS.add(JobSummaryMapper.class.getName() + "." + BATCH_INSERT_ID);
+        DUPLICATE_IDS.add(RetryTaskLogMapper.class.getName() + "." + BATCH_INSERT_ID);
+        DUPLICATE_IDS.add(RetrySummaryMapper.class.getName() + "." + BATCH_INSERT_ID);
+        DUPLICATE_IDS.add(RetryTaskLogMessageMapper.class.getName() + "." + BATCH_INSERT_ID);
+        DUPLICATE_IDS.add(RetryTaskMapper.class.getName() + "." + BATCH_INSERT_ID);
+        DUPLICATE_IDS.add(JobLogMessageMapper.class.getName() + "." + BATCH_INSERT_ID);
     }
 
     @Override
-    public void addMappedStatement(final MappedStatement ms) {
+    public void addMappedStatement(MappedStatement ms) {
         if (mappedStatements.containsKey(ms.getId())) {
             if (!DUPLICATE_IDS.contains(ms.getId())) {
                 super.addMappedStatement(ms);
