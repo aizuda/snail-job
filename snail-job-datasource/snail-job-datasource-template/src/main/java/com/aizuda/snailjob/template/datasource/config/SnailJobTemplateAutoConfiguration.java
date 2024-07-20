@@ -3,6 +3,7 @@ package com.aizuda.snailjob.template.datasource.config;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.template.datasource.enums.DbTypeEnum;
 import com.aizuda.snailjob.template.datasource.handler.InjectionMetaObjectHandler;
+import com.aizuda.snailjob.template.datasource.handler.SnailJobMybatisConfiguration;
 import com.aizuda.snailjob.template.datasource.utils.DbUtils;
 import com.aizuda.snailjob.template.datasource.utils.RequestDataHelper;
 import com.baomidou.mybatisplus.autoconfigure.MybatisPlusProperties;
@@ -44,18 +45,21 @@ public class SnailJobTemplateAutoConfiguration {
     private static final List<String> TABLES_WITH_PARTITION = Arrays.asList("sj_retry_task", "sj_retry_dead_letter");
 
     @Bean("sqlSessionFactory")
-    public SqlSessionFactory sqlSessionFactory(DataSource dataSource, Environment environment, MybatisPlusInterceptor mybatisPlusInterceptor, MybatisPlusProperties mybatisPlusProperties) throws Exception {
+    public SqlSessionFactory sqlSessionFactory(DataSource dataSource, Environment environment,
+        MybatisPlusInterceptor mybatisPlusInterceptor,
+        MybatisPlusProperties mybatisPlusProperties,
+        SnailJobMybatisConfiguration snailJobMybatisConfiguration) throws Exception {
         MybatisSqlSessionFactoryBean factoryBean = new MybatisSqlSessionFactoryBean();
         factoryBean.setDataSource(dataSource);
         DbTypeEnum dbTypeEnum = DbUtils.getDbType();
 
         // 动态设置mapper资源: 通用 + 数据库专用
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-        Resource[] templateMapperResource = resolver.getResources("classpath*:/template/mapper/*.xml");
         Resource[] specificMapperResource = resolver.getResources(MessageFormat.format("classpath*:/{0}/mapper/*.xml", dbTypeEnum.getDb()));
+        Resource[] templateMapperResource = resolver.getResources("classpath*:/template/mapper/*.xml");
         List<Resource> resources = new ArrayList<>();
-        resources.addAll(List.of(templateMapperResource));
         resources.addAll(List.of(specificMapperResource));
+        resources.addAll(List.of(templateMapperResource));
         factoryBean.setMapperLocations(resources.toArray(new Resource[0]));
 
         // 分页插件
@@ -67,6 +71,7 @@ public class SnailJobTemplateAutoConfiguration {
         globalConfig.setMetaObjectHandler(new InjectionMetaObjectHandler());
 
         factoryBean.setGlobalConfig(mybatisPlusProperties.getGlobalConfig());
+        factoryBean.setConfiguration(snailJobMybatisConfiguration);
 
         return factoryBean.getObject();
     }
@@ -76,6 +81,10 @@ public class SnailJobTemplateAutoConfiguration {
         return new SqlSessionTemplate(sqlSessionFactory);
     }
 
+    @Bean
+    public SnailJobMybatisConfiguration snailJobMybatisConfiguration() {
+        return new SnailJobMybatisConfiguration();
+    }
 
     @Bean
     public MybatisPlusInterceptor mybatisPlusInterceptor(Environment environment) {
