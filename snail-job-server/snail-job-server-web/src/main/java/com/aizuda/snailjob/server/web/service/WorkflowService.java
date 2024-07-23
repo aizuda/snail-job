@@ -37,7 +37,7 @@ public interface WorkflowService {
 
     List<WorkflowResponseVO> getWorkflowNameList(String keywords, Long workflowId, String groupName);
 
-    Pair<Integer, String> checkNodeExpression(CheckDecisionVO decisionVO);
+    Pair<Integer, Object> checkNodeExpression(CheckDecisionVO decisionVO);
 
     void importWorkflowTask(@Valid @NotEmpty(message = "导入数据不能为空") List<WorkflowRequestVO> requests);
 

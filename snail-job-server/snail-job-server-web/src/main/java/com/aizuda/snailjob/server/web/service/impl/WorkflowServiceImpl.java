@@ -296,19 +296,18 @@ public class WorkflowServiceImpl implements WorkflowService {
     }
 
     @Override
-    public Pair<Integer, String> checkNodeExpression(CheckDecisionVO decisionVO) {
+    public Pair<Integer, Object> checkNodeExpression(CheckDecisionVO decisionVO) {
         try {
             ExpressionEngine realExpressionEngine = ExpressionTypeEnum.valueOf(decisionVO.getExpressionType());
             Assert.notNull(realExpressionEngine, () -> new SnailJobServerException("表达式引擎不存在"));
             ExpressionInvocationHandler invocationHandler = new ExpressionInvocationHandler(realExpressionEngine);
             ExpressionEngine expressionEngine = ExpressionFactory.getExpressionEngine(invocationHandler);
-            expressionEngine.eval(decisionVO.getNodeExpression(), decisionVO.getCheckContent());
+            Object eval = expressionEngine.eval(decisionVO.getNodeExpression(), decisionVO.getCheckContent());
+            return Pair.of(StatusEnum.YES.getStatus(), eval);
         } catch (Exception e) {
             SnailJobLog.LOCAL.error("表达式异常. [{}]", decisionVO.getNodeExpression(), e);
             return Pair.of(StatusEnum.NO.getStatus(), e.getMessage());
         }
-
-        return Pair.of(StatusEnum.YES.getStatus(), StrUtil.EMPTY);
     }
 
     @Override

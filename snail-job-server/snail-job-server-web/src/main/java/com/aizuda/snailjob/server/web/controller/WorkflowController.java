@@ -91,7 +91,7 @@ public class WorkflowController {
 
     @PostMapping("/check-node-expression")
     @LoginRequired(role = RoleEnum.USER)
-    public Pair<Integer, String> checkNodeExpression(@RequestBody @Validated CheckDecisionVO checkDecisionVO) {
+    public Pair<Integer, Object> checkNodeExpression(@RequestBody @Validated CheckDecisionVO checkDecisionVO) {
         return workflowService.checkNodeExpression(checkDecisionVO);
     }
 
