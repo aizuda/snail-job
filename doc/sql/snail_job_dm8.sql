@@ -830,7 +830,3 @@ COMMENT ON COLUMN sj_workflow_task_batch.deleted IS '逻辑删除 1、删除';
 COMMENT ON COLUMN sj_workflow_task_batch.create_dt IS '创建时间';
 COMMENT ON COLUMN sj_workflow_task_batch.update_dt IS '修改时间';
 COMMENT ON TABLE sj_workflow_task_batch IS '工作流批次';
-
-
-Process finished
-with exit code 0
