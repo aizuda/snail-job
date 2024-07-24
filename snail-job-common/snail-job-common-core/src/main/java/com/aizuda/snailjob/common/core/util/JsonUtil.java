@@ -228,7 +228,7 @@ public class JsonUtil {
             try {
                 return objectMapper.readValue(jsonString, clazz);
             } catch (Exception e) {
-                throw new SnailJobCommonException("Json转对象失败", jsonString, e);
+                throw new SnailJobCommonException("Json转对象失败 参数:{}", jsonString, e);
             }
         }
 
@@ -243,7 +243,7 @@ public class JsonUtil {
             try {
                 return objectMapper.readValue(jsonString, typeReference);
             } catch (Exception e) {
-                throw new SnailJobCommonException("Json转对象失败！", e);
+                throw new SnailJobCommonException("Json转对象失败 参数:{}", jsonString, e);
             }
         }
 
@@ -258,7 +258,7 @@ public class JsonUtil {
             try {
                 return objectMapper.readValue(jsonString, javaType);
             } catch (Exception e) {
-                throw new SnailJobCommonException("Json转对象失败！", e);
+                throw new SnailJobCommonException("Json转对象失败 参数:{}", jsonString, e);
             }
         }
 
@@ -272,7 +272,7 @@ public class JsonUtil {
             try {
                 return objectMapper.readTree(jsonString);
             } catch (Exception e) {
-                throw new SnailJobCommonException("Json转对象失败！", e);
+                throw new SnailJobCommonException("Json转对象失败 参数:{}", jsonString, e);
             }
         }
 
