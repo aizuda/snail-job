@@ -23,12 +23,10 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 public class NettyChannel {
-    private NettyChannel() {
-    }
-
     private static Bootstrap bootstrap;
     private static ConcurrentHashMap<Pair<String, String>, Channel> CHANNEL_MAP = new ConcurrentHashMap<>(16);
-
+    private NettyChannel() {
+    }
 
     public static void setChannel(String hostId, String ip, Channel channel) {
         CHANNEL_MAP.put(Pair.of(hostId, ip), channel);
@@ -70,10 +68,13 @@ public class NettyChannel {
                 HttpVersion.HTTP_1_1, method, url, Unpooled.wrappedBuffer(body.getBytes(StandardCharsets.UTF_8)));
 
         request.headers()
+                // Host
+                .set(HttpHeaderNames.HOST, hostIp)
+                // Content-Type
                 .set(HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON)
-                //开启长连接
+                // 开启长连接
                 .set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE)
-                //设置传递请求内容的长度
+                // 设置传递请求内容的长度
                 .set(HttpHeaderNames.CONTENT_LENGTH, request.content().readableBytes())
         ;
         request.headers().setAll(requestHeaders);
