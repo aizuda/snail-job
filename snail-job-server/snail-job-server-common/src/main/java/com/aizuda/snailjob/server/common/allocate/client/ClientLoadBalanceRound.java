@@ -16,9 +16,16 @@ public class ClientLoadBalanceRound implements ClientLoadBalance {
 
     private static final ConcurrentHashMap<String, AtomicInteger> COUNTER = new ConcurrentHashMap<>();
     private static final int THRESHOLD = Integer.MAX_VALUE - 10000;
+    private static long CACHE_VALID_TIME = 0;
 
     @Override
     public String route(final String allocKey, final TreeSet<String> clientAllAddressSet) {
+        // cache clear
+        if (System.currentTimeMillis() > CACHE_VALID_TIME) {
+            COUNTER.clear();
+            // 每12个小时定时清理一次数据
+            CACHE_VALID_TIME = System.currentTimeMillis() + 1000*60*60*12;
+        }
         String[] addressArr = clientAllAddressSet.toArray(new String[0]);
         AtomicInteger next = COUNTER.getOrDefault(allocKey, new AtomicInteger(1));
         String nextClientId = addressArr[next.get() % clientAllAddressSet.size()];

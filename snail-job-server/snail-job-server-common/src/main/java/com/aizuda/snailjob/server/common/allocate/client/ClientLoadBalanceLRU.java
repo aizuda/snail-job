@@ -21,9 +21,16 @@ public class ClientLoadBalanceLRU implements ClientLoadBalance {
     }
 
     private ConcurrentHashMap<String, LinkedHashMap<String, String>> LRU_CACHE = new ConcurrentHashMap<>();
+    private static long CACHE_VALID_TIME = 0;
 
     @Override
     public String route(String allocKey, TreeSet<String> clientAllAddressSet) {
+        // cache clear
+        if (System.currentTimeMillis() > CACHE_VALID_TIME) {
+            LRU_CACHE.clear();
+            // 每12个小时定时清理一次数据
+            CACHE_VALID_TIME = System.currentTimeMillis() + 1000*60*60*12;
+        }
         LinkedHashMap<String, String> lruItem = LRU_CACHE.get(allocKey);
         if (Objects.isNull(lruItem)) {
             lruItem = new LinkedHashMap<String, String>(16, 0.75f, true) {
