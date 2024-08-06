@@ -46,9 +46,9 @@ public class SnailJobTemplateAutoConfiguration {
 
     @Bean("sqlSessionFactory")
     public SqlSessionFactory sqlSessionFactory(DataSource dataSource, Environment environment,
-        MybatisPlusInterceptor mybatisPlusInterceptor,
-        MybatisPlusProperties mybatisPlusProperties,
-        SnailJobMybatisConfiguration snailJobMybatisConfiguration) throws Exception {
+                                               MybatisPlusInterceptor mybatisPlusInterceptor,
+                                               MybatisPlusProperties mybatisPlusProperties,
+                                               SnailJobMybatisConfiguration snailJobMybatisConfiguration) throws Exception {
         MybatisSqlSessionFactoryBean factoryBean = new MybatisSqlSessionFactoryBean();
         factoryBean.setDataSource(dataSource);
         DbTypeEnum dbTypeEnum = DbUtils.getDbType();
@@ -91,9 +91,7 @@ public class SnailJobTemplateAutoConfiguration {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
         String tablePrefix = Optional.ofNullable(environment.getProperty("mybatis-plus.global-config.db-config.table-prefix")).orElse(StrUtil.EMPTY);
         interceptor.addInnerInterceptor(dynamicTableNameInnerInterceptor(tablePrefix));
-        DbTypeEnum dbTypeEnum = DbUtils.getDbType();
-        interceptor.addInnerInterceptor(new PaginationInnerInterceptor(dbTypeEnum.getMpDbType()));
-
+        interceptor.addInnerInterceptor(new PaginationInnerInterceptor());
         return interceptor;
     }
 
