@@ -89,13 +89,12 @@ public class SnailJobTemplateAutoConfiguration {
     @Bean
     public MybatisPlusInterceptor mybatisPlusInterceptor(Environment environment) {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
-        String tablePrefix = Optional.ofNullable(environment.getProperty("mybatis-plus.global-config.db-config.table-prefix")).orElse(StrUtil.EMPTY);
-        interceptor.addInnerInterceptor(dynamicTableNameInnerInterceptor(tablePrefix));
+        interceptor.addInnerInterceptor(dynamicTableNameInnerInterceptor());
         interceptor.addInnerInterceptor(new PaginationInnerInterceptor());
         return interceptor;
     }
 
-    public DynamicTableNameInnerInterceptor dynamicTableNameInnerInterceptor(String tablePrefix) {
+    public DynamicTableNameInnerInterceptor dynamicTableNameInnerInterceptor() {
         DynamicTableNameInnerInterceptor dynamicTableNameInnerInterceptor = new DynamicTableNameInnerInterceptor();
         dynamicTableNameInnerInterceptor.setTableNameHandler((sql, tableName) -> {
             if (TABLES_WITH_PARTITION.contains(tableName)) {
@@ -104,7 +103,7 @@ public class SnailJobTemplateAutoConfiguration {
                 tableName = tableName + StrUtil.UNDERLINE + partition;
             }
 
-            return tableName.startsWith(tablePrefix) ? tableName : tablePrefix + tableName;
+            return tableName;
         });
 
         return dynamicTableNameInnerInterceptor;
