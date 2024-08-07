@@ -25,6 +25,7 @@ public enum DbTypeEnum {
 
     private final String db;
     private final String desc;
+    @Deprecated(since = "1.2.0-beta1")
     private final DbType mpDbType;
 
     public static DbTypeEnum modeOf(String db) {
