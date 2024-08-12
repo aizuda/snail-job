@@ -1,4 +1,4 @@
-package com.aizuda.snailjob.common.core.handler;
+package com.aizuda.snailjob.server.web.handler;
 
 import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.common.core.exception.AbstractError;

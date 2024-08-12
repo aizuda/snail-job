@@ -1,4 +1,4 @@
-package com.aizuda.snailjob.common.core.handler;
+package com.aizuda.snailjob.server.web.handler;
 
 import com.aizuda.snailjob.common.core.annotation.OriginalControllerReturnValue;
 import com.aizuda.snailjob.common.core.model.Result;
