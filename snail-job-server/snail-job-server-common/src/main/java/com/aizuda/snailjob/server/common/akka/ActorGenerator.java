@@ -2,7 +2,7 @@ package com.aizuda.snailjob.server.common.akka;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
-import com.aizuda.snailjob.common.core.context.SpringContext;
+import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 
 
 /**
@@ -208,7 +208,7 @@ public class ActorGenerator {
      */
     public static ActorRef jobReduceActor() {
         return getJobActorSystem().actorOf(getSpringExtension().props(JOB_REDUCE_ACTOR)
-            .withDispatcher(JOB_TASK_EXECUTOR_DISPATCHER));
+                .withDispatcher(JOB_TASK_EXECUTOR_DISPATCHER));
     }
 
     /**
@@ -290,7 +290,7 @@ public class ActorGenerator {
     }
 
     public static SpringExtension getSpringExtension() {
-        return SpringContext.getBeanByType(SpringExtension.class);
+        return SnailSpringContext.getBeanByType(SpringExtension.class);
     }
 
     /**
@@ -299,7 +299,7 @@ public class ActorGenerator {
      * @return
      */
     public static ActorSystem getRetryActorSystem() {
-        return SpringContext.getBean("retryActorSystem", ActorSystem.class);
+        return SnailSpringContext.getBean("retryActorSystem", ActorSystem.class);
     }
 
     /**
@@ -308,7 +308,7 @@ public class ActorGenerator {
      * @return
      */
     public static ActorSystem getCommonActorSystemSystem() {
-        return SpringContext.getBean("commonActorSystem", ActorSystem.class);
+        return SnailSpringContext.getBean("commonActorSystem", ActorSystem.class);
     }
 
 
@@ -318,7 +318,7 @@ public class ActorGenerator {
      * @return
      */
     public static ActorSystem getNettyActorSystem() {
-        return SpringContext.getBean("nettyActorSystem", ActorSystem.class);
+        return SnailSpringContext.getBean("nettyActorSystem", ActorSystem.class);
     }
 
     /**
@@ -327,7 +327,7 @@ public class ActorGenerator {
      * @return
      */
     public static ActorSystem getJobActorSystem() {
-        return SpringContext.getBean("jobActorSystem", ActorSystem.class);
+        return SnailSpringContext.getBean("jobActorSystem", ActorSystem.class);
     }
 
 }

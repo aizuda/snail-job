@@ -1,8 +1,7 @@
 package com.aizuda.snailjob.server.common.cache;
 
 import cn.hutool.core.util.StrUtil;
-import com.aizuda.snailjob.common.core.constant.SystemConstants;
-import com.aizuda.snailjob.common.core.context.SpringContext;
+import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.Lifecycle;
 import com.aizuda.snailjob.server.common.triple.Pair;
@@ -34,7 +33,7 @@ public class CacheToken implements Lifecycle {
         String token = CACHE.getIfPresent(Pair.of(groupName, namespaceId));
         if (StrUtil.isBlank(token)) {
             // 从DB获取数据
-            AccessTemplate template = SpringContext.getBean(AccessTemplate.class);
+            AccessTemplate template = SnailSpringContext.getBean(AccessTemplate.class);
             GroupConfig config = template.getGroupConfigAccess().getGroupConfigByGroupName(groupName, namespaceId);
             if (Objects.isNull(config)) {
                 return StrUtil.EMPTY;

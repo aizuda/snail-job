@@ -2,7 +2,7 @@ package com.aizuda.snailjob.template.datasource.utils;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
-import com.aizuda.snailjob.common.core.context.SpringContext;
+import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.template.datasource.exception.SnailJobDatasourceException;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.GroupConfigMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.GroupConfig;
@@ -62,7 +62,7 @@ public class RequestDataHelper {
             throw new SnailJobDatasourceException("组名称或者命名空间ID不能为空");
         }
 
-        GroupConfigMapper groupConfigMapper = SpringContext.getBeanByType(GroupConfigMapper.class);
+        GroupConfigMapper groupConfigMapper = SnailSpringContext.getBeanByType(GroupConfigMapper.class);
 
         GroupConfig groupConfig = groupConfigMapper.selectOne(
                 new LambdaQueryWrapper<GroupConfig>()

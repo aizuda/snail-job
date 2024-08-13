@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.job.task.support.prepare.workflow;
 
-import com.aizuda.snailjob.common.core.context.SpringContext;
+import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
@@ -57,7 +57,7 @@ public class RunningWorkflowPrepareHandler extends AbstractWorkflowPrePareHandle
                         prepare.getWorkflowTaskBatchId(), delay, DateUtils.toEpochMilli(prepare.getExecutorTimeout()));
                 // 超时停止任务
                 workflowBatchHandler.stop(prepare.getWorkflowTaskBatchId(), JobOperationReasonEnum.TASK_EXECUTION_TIMEOUT.getReason());
-                SpringContext.getContext().publishEvent(new WorkflowTaskFailAlarmEvent(prepare.getWorkflowTaskBatchId()));
+                SnailSpringContext.getContext().publishEvent(new WorkflowTaskFailAlarmEvent(prepare.getWorkflowTaskBatchId()));
             }
         }
 

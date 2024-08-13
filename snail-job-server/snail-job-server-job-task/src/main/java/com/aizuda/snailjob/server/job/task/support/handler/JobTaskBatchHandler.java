@@ -2,10 +2,11 @@ package com.aizuda.snailjob.server.job.task.support.handler;
 
 import akka.actor.ActorRef;
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.StrUtil;
-import com.aizuda.snailjob.common.core.context.SpringContext;
-import com.aizuda.snailjob.common.core.enums.*;
-import com.aizuda.snailjob.common.core.util.JsonUtil;
+import com.aizuda.snailjob.common.core.context.SnailSpringContext;
+import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
+import com.aizuda.snailjob.common.core.enums.JobTaskStatusEnum;
+import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
+import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.WaitStrategy;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
@@ -62,8 +63,8 @@ public class JobTaskBatchHandler {
 
         // 幂等处理
         Long countJobTaskBatch = jobTaskBatchMapper.selectCount(new LambdaQueryWrapper<JobTaskBatch>()
-            .eq(JobTaskBatch::getId, completeJobBatchDTO.getTaskBatchId())
-            .in(JobTaskBatch::getTaskBatchStatus, COMPLETED)
+                .eq(JobTaskBatch::getId, completeJobBatchDTO.getTaskBatchId())
+                .in(JobTaskBatch::getTaskBatchStatus, COMPLETED)
         );
         if (countJobTaskBatch > 0) {
             // 批次已经完成了，不需要重复更新
@@ -71,12 +72,12 @@ public class JobTaskBatchHandler {
         }
 
         List<JobTask> jobTasks = jobTaskMapper.selectList(
-            new LambdaQueryWrapper<JobTask>()
-                .select(JobTask::getTaskStatus, JobTask::getMrStage)
-                .eq(JobTask::getTaskBatchId, completeJobBatchDTO.getTaskBatchId()));
+                new LambdaQueryWrapper<JobTask>()
+                        .select(JobTask::getTaskStatus, JobTask::getMrStage)
+                        .eq(JobTask::getTaskBatchId, completeJobBatchDTO.getTaskBatchId()));
 
         if (CollUtil.isEmpty(jobTasks) ||
-            jobTasks.stream().anyMatch(jobTask -> JobTaskStatusEnum.NOT_COMPLETE.contains(jobTask.getTaskStatus()))) {
+                jobTasks.stream().anyMatch(jobTask -> JobTaskStatusEnum.NOT_COMPLETE.contains(jobTask.getTaskStatus()))) {
             return false;
         }
 
@@ -84,14 +85,14 @@ public class JobTaskBatchHandler {
         jobTaskBatch.setId(completeJobBatchDTO.getTaskBatchId());
 
         Map<Integer, Long> statusCountMap = jobTasks.stream()
-            .collect(Collectors.groupingBy(JobTask::getTaskStatus, Collectors.counting()));
+                .collect(Collectors.groupingBy(JobTask::getTaskStatus, Collectors.counting()));
 
         long failCount = statusCountMap.getOrDefault(JobTaskBatchStatusEnum.FAIL.getStatus(), 0L);
         long stopCount = statusCountMap.getOrDefault(JobTaskBatchStatusEnum.STOP.getStatus(), 0L);
 
         if (failCount > 0) {
             jobTaskBatch.setTaskBatchStatus(JobTaskBatchStatusEnum.FAIL.getStatus());
-            SpringContext.getContext().publishEvent(new JobTaskFailAlarmEvent(completeJobBatchDTO.getTaskBatchId()));
+            SnailSpringContext.getContext().publishEvent(new JobTaskFailAlarmEvent(completeJobBatchDTO.getTaskBatchId()));
         } else if (stopCount > 0) {
             jobTaskBatch.setTaskBatchStatus(JobTaskBatchStatusEnum.STOP.getStatus());
         } else {
@@ -117,9 +118,9 @@ public class JobTaskBatchHandler {
 
         jobTaskBatch.setUpdateDt(LocalDateTime.now());
         return 1 == jobTaskBatchMapper.update(jobTaskBatch,
-            new LambdaUpdateWrapper<JobTaskBatch>()
-                .eq(JobTaskBatch::getId, completeJobBatchDTO.getTaskBatchId())
-                .in(JobTaskBatch::getTaskBatchStatus, JobTaskBatchStatusEnum.NOT_COMPLETE)
+                new LambdaUpdateWrapper<JobTaskBatch>()
+                        .eq(JobTaskBatch::getId, completeJobBatchDTO.getTaskBatchId())
+                        .in(JobTaskBatch::getTaskBatchStatus, JobTaskBatchStatusEnum.NOT_COMPLETE)
         );
 
     }
@@ -185,15 +186,15 @@ public class JobTaskBatchHandler {
 
     private static boolean isAllMapTask(final List<JobTask> jobTasks) {
         return jobTasks.size() == jobTasks.stream()
-            .filter(jobTask -> Objects.nonNull(jobTask.getMrStage()) && MAP.getStage() == jobTask.getMrStage())
-            .count();
+                .filter(jobTask -> Objects.nonNull(jobTask.getMrStage()) && MAP.getStage() == jobTask.getMrStage())
+                .count();
     }
 
     private static boolean isALeastOneReduceTask(final List<JobTask> jobTasks) {
         return jobTasks.stream()
-                   .filter(
-                       jobTask -> Objects.nonNull(jobTask.getMrStage()) && REDUCE.getStage() == jobTask.getMrStage())
-                   .count() > 1;
+                .filter(
+                        jobTask -> Objects.nonNull(jobTask.getMrStage()) && REDUCE.getStage() == jobTask.getMrStage())
+                .count() > 1;
     }
 
     /**
@@ -204,21 +205,21 @@ public class JobTaskBatchHandler {
      */
     public void openResidentTask(Job job, TaskExecuteDTO taskExecuteDTO) {
         if (Objects.isNull(job)
-            || JobTaskExecutorSceneEnum.MANUAL_JOB.getType().equals(taskExecuteDTO.getTaskExecutorScene())
-            || JobTaskExecutorSceneEnum.AUTO_WORKFLOW.getType().equals(taskExecuteDTO.getTaskExecutorScene())
-            || JobTaskExecutorSceneEnum.MANUAL_WORKFLOW.getType().equals(taskExecuteDTO.getTaskExecutorScene())
-            // 是否是常驻任务
-            || Objects.equals(StatusEnum.NO.getStatus(), job.getResident())
-            // 防止任务已经分配到其他节点导致的任务重复执行
-            || !DistributeInstance.INSTANCE.getConsumerBucket().contains(job.getBucketIndex())
+                || JobTaskExecutorSceneEnum.MANUAL_JOB.getType().equals(taskExecuteDTO.getTaskExecutorScene())
+                || JobTaskExecutorSceneEnum.AUTO_WORKFLOW.getType().equals(taskExecuteDTO.getTaskExecutorScene())
+                || JobTaskExecutorSceneEnum.MANUAL_WORKFLOW.getType().equals(taskExecuteDTO.getTaskExecutorScene())
+                // 是否是常驻任务
+                || Objects.equals(StatusEnum.NO.getStatus(), job.getResident())
+                // 防止任务已经分配到其他节点导致的任务重复执行
+                || !DistributeInstance.INSTANCE.getConsumerBucket().contains(job.getBucketIndex())
         ) {
             return;
         }
 
         long count = groupConfigMapper.selectCount(new LambdaQueryWrapper<GroupConfig>()
-            .eq(GroupConfig::getNamespaceId, job.getNamespaceId())
-            .eq(GroupConfig::getGroupName, job.getGroupName())
-            .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus()));
+                .eq(GroupConfig::getNamespaceId, job.getNamespaceId())
+                .eq(GroupConfig::getGroupName, job.getGroupName())
+                .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus()));
         if (count == 0) {
             return;
         }
@@ -245,7 +246,7 @@ public class JobTaskBatchHandler {
         Duration duration = Duration.ofMillis(milliseconds - DateUtils.toNowMilli() % 1000);
 
         log.debug("常驻任务监控. [{}] 任务时间差:[{}] 取余:[{}]", duration, milliseconds,
-            DateUtils.toNowMilli() % 1000);
+                DateUtils.toNowMilli() % 1000);
         job.setNextTriggerAt(nextTriggerAt);
         JobTimerWheel.registerWithJob(() -> new ResidentJobTimerTask(jobTimerTaskDTO, job), duration);
         ResidentTaskCache.refresh(job.getId(), nextTriggerAt);

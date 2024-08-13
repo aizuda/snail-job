@@ -7,7 +7,7 @@ import com.aizuda.snailjob.client.common.cache.GroupVersionCache;
 import com.aizuda.snailjob.client.common.config.SnailJobProperties;
 import com.aizuda.snailjob.client.common.exception.SnailJobRemoteException;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
-import com.aizuda.snailjob.common.core.context.SpringContext;
+import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.enums.HeadersEnum;
 import com.aizuda.snailjob.common.core.util.NetUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
@@ -66,7 +66,7 @@ public class NettyChannel {
      * @return port
      */
     public static int getServerPort() {
-        SnailJobProperties snailJobProperties = SpringContext.getContext().getBean(SnailJobProperties.class);
+        SnailJobProperties snailJobProperties = SnailSpringContext.getContext().getBean(SnailJobProperties.class);
         SnailJobProperties.ServerConfig serverConfig = snailJobProperties.getServer();
 
         String port = System.getProperty(SNAIL_JOB_SERVER_PORT);
@@ -83,7 +83,7 @@ public class NettyChannel {
      * @return host
      */
     public static String getServerHost() {
-        SnailJobProperties snailJobProperties = SpringContext.getBean(SnailJobProperties.class);
+        SnailJobProperties snailJobProperties = SnailSpringContext.getBean(SnailJobProperties.class);
         SnailJobProperties.ServerConfig serverConfig = snailJobProperties.getServer();
 
         String host = System.getProperty(SNAIL_JOB_SERVER_HOST);
@@ -100,7 +100,7 @@ public class NettyChannel {
      * @return 客户端IP
      */
     public static String getClientHost() {
-        SnailJobProperties snailJobProperties = SpringContext.getBean(SnailJobProperties.class);
+        SnailJobProperties snailJobProperties = SnailSpringContext.getBean(SnailJobProperties.class);
 
         String host = snailJobProperties.getHost();
         // 获取客户端指定的IP地址
@@ -117,8 +117,8 @@ public class NettyChannel {
      * @return port 端口
      */
     public static Integer getClientPort() {
-        SnailJobProperties snailJobProperties = SpringContext.getBean(SnailJobProperties.class);
-        ServerProperties serverProperties = SpringContext.getBean(ServerProperties.class);
+        SnailJobProperties snailJobProperties = SnailSpringContext.getBean(SnailJobProperties.class);
+        ServerProperties serverProperties = SnailSpringContext.getBean(ServerProperties.class);
 
         Integer port = snailJobProperties.getPort();
         // 获取客户端指定的端口
@@ -153,7 +153,7 @@ public class NettyChannel {
         FullHttpRequest request = new DefaultFullHttpRequest(
                 HttpVersion.HTTP_1_1, method, url, Unpooled.wrappedBuffer(body.getBytes(StandardCharsets.UTF_8)));
 
-        SnailJobProperties snailJobProperties = SpringContext.getBean(SnailJobProperties.class);
+        SnailJobProperties snailJobProperties = SnailSpringContext.getBean(SnailJobProperties.class);
 
         // server配置不能为空
         SnailJobProperties.ServerConfig serverConfig = snailJobProperties.getServer();

@@ -9,16 +9,11 @@ import com.aizuda.snailjob.client.job.core.IJobExecutor;
 import com.aizuda.snailjob.client.job.core.cache.JobExecutorInfoCache;
 import com.aizuda.snailjob.client.job.core.cache.ThreadPoolCache;
 import com.aizuda.snailjob.client.job.core.dto.JobExecutorInfo;
-import com.aizuda.snailjob.client.job.core.executor.AbstractJobExecutor;
-import com.aizuda.snailjob.client.job.core.executor.AbstractMapExecutor;
-import com.aizuda.snailjob.client.job.core.executor.AbstractMapReduceExecutor;
-import com.aizuda.snailjob.client.job.core.executor.AnnotationJobExecutor;
-import com.aizuda.snailjob.client.job.core.executor.AnnotationMapJobExecutor;
-import com.aizuda.snailjob.client.job.core.executor.AnnotationMapReduceJobExecutor;
+import com.aizuda.snailjob.client.job.core.executor.*;
 import com.aizuda.snailjob.client.job.core.log.JobLogMeta;
 import com.aizuda.snailjob.client.model.StopJobDTO;
 import com.aizuda.snailjob.client.model.request.DispatchJobRequest;
-import com.aizuda.snailjob.common.core.context.SpringContext;
+import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.enums.ExecutorTypeEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.snailjob.common.core.model.JobArgsHolder;
@@ -32,7 +27,6 @@ import jakarta.validation.Valid;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import static com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH.JOB_DISPATCH;
@@ -57,7 +51,7 @@ public class JobEndPoint {
 
             if (Objects.nonNull(dispatchJob.getRetryCount()) && dispatchJob.getRetryCount() > 0) {
                 SnailJobLog.REMOTE.info("任务执行/调度失败执行重试. 重试次数:[{}]",
-                    dispatchJob.getRetryCount());
+                        dispatchJob.getRetryCount());
             }
 
             if (ExecutorTypeEnum.JAVA.getType() != dispatchJob.getExecutorType()) {
@@ -84,11 +78,11 @@ public class JobEndPoint {
                 }
             } else {
                 if (JobTaskTypeEnum.MAP.getType() == jobContext.getTaskType()) {
-                    jobExecutor = SpringContext.getBeanByType(AnnotationMapJobExecutor.class);
+                    jobExecutor = SnailSpringContext.getBeanByType(AnnotationMapJobExecutor.class);
                 } else if (JobTaskTypeEnum.MAP_REDUCE.getType() == jobContext.getTaskType()) {
-                    jobExecutor = SpringContext.getBeanByType(AnnotationMapReduceJobExecutor.class);
+                    jobExecutor = SnailSpringContext.getBeanByType(AnnotationMapReduceJobExecutor.class);
                 } else {
-                    jobExecutor = SpringContext.getBeanByType(AnnotationJobExecutor.class);
+                    jobExecutor = SnailSpringContext.getBeanByType(AnnotationJobExecutor.class);
                 }
             }
 

@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.job.task.support.prepare.job;
 
-import com.aizuda.snailjob.common.core.context.SpringContext;
+import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
@@ -64,7 +64,7 @@ public class RunningJobPrepareHandler extends AbstractJobPrepareHandler {
                 stopJobContext.setJobOperationReason(JobOperationReasonEnum.TASK_EXECUTION_TIMEOUT.getReason());
                 stopJobContext.setNeedUpdateTaskStatus(Boolean.TRUE);
                 instanceInterrupt.stop(stopJobContext);
-                SpringContext.getContext().publishEvent(new JobTaskFailAlarmEvent(prepare.getTaskBatchId()));
+                SnailSpringContext.getContext().publishEvent(new JobTaskFailAlarmEvent(prepare.getTaskBatchId()));
             }
         }
 

@@ -3,7 +3,7 @@ package com.aizuda.snailjob.server.job.task.support.executor.workflow;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
-import com.aizuda.snailjob.common.core.context.SpringContext;
+import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.enums.*;
 import com.aizuda.snailjob.common.core.expression.ExpressionEngine;
 import com.aizuda.snailjob.common.core.expression.ExpressionFactory;
@@ -15,24 +15,18 @@ import com.aizuda.snailjob.server.common.enums.ExpressionTypeEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.job.task.support.alarm.event.WorkflowTaskFailAlarmEvent;
 import com.aizuda.snailjob.server.job.task.support.expression.ExpressionInvocationHandler;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowTaskBatchMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTask;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch;
 import com.aizuda.snailjob.template.datasource.persistence.po.WorkflowTaskBatch;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.google.common.collect.Sets;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 
-import static com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum.WORKFLOW_CONDITION_NODE_EXECUTION_ERROR;
-import static com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum.WORKFLOW_DECISION_FAILED;
-import static com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum.WORKFLOW_NODE_NO_REQUIRED;
 import static com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum.WORKFLOW_SUCCESSOR_SKIP_EXECUTION;
 
 /**
@@ -66,7 +60,7 @@ public class DecisionWorkflowExecutor extends AbstractWorkflowExecutor {
 
         Boolean result = (Boolean) Optional.ofNullable(context.getEvaluationResult()).orElse(Boolean.FALSE);
 
-        if (result || (WORKFLOW_SUCCESSOR_SKIP_EXECUTION.contains( context.getParentOperationReason()))) {
+        if (result || (WORKFLOW_SUCCESSOR_SKIP_EXECUTION.contains(context.getParentOperationReason()))) {
             // 多个条件节点直接是或的关系，只要一个成功其他节点就取消且是无需处理状态
             taskBatchStatus = JobTaskBatchStatusEnum.CANCEL.getStatus();
             jobTaskStatus = JobTaskStatusEnum.CANCEL.getStatus();
@@ -102,7 +96,7 @@ public class DecisionWorkflowExecutor extends AbstractWorkflowExecutor {
                     operationReason = JobOperationReasonEnum.WORKFLOW_CONDITION_NODE_EXECUTION_ERROR.getReason();
                     jobTaskStatus = JobTaskStatusEnum.FAIL.getStatus();
                     message = e.getMessage();
-                    SpringContext.getContext().publishEvent(new WorkflowTaskFailAlarmEvent(context.getWorkflowTaskBatchId()));
+                    SnailSpringContext.getContext().publishEvent(new WorkflowTaskFailAlarmEvent(context.getWorkflowTaskBatchId()));
                 }
             } else {
                 result = Boolean.TRUE;

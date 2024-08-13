@@ -2,7 +2,7 @@ package com.aizuda.snailjob.server.job.task.support.dispatch;
 
 import akka.actor.AbstractActor;
 import cn.hutool.core.collection.CollUtil;
-import com.aizuda.snailjob.common.core.context.SpringContext;
+import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.common.enums.JobTaskExecutorSceneEnum;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
@@ -72,7 +72,7 @@ public class JobTaskPrepareActor extends AbstractActor {
 
         // 说明所以任务已经完成
         if (CollUtil.isEmpty(notCompleteJobTaskBatchList)) {
-            TerminalJobPrepareHandler terminalJobPrepareHandler = SpringContext.getBeanByType(TerminalJobPrepareHandler.class);
+            TerminalJobPrepareHandler terminalJobPrepareHandler = SnailSpringContext.getBeanByType(TerminalJobPrepareHandler.class);
             terminalJobPrepareHandler.handle(prepare);
         } else {
 

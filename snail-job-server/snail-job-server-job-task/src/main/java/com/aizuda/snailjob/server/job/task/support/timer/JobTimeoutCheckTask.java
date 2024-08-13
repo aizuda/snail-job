@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.job.task.support.timer;
 
-import com.aizuda.snailjob.common.core.context.SpringContext;
+import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.snailjob.common.log.SnailJobLog;
@@ -36,7 +36,7 @@ public class JobTimeoutCheckTask implements TimerTask<String> {
 
     @Override
     public void run(Timeout timeout) throws Exception {
-        JobTaskBatchMapper jobTaskBatchMapper = SpringContext.getBean(JobTaskBatchMapper.class);
+        JobTaskBatchMapper jobTaskBatchMapper = SnailSpringContext.getBean(JobTaskBatchMapper.class);
         JobTaskBatch jobTaskBatch = jobTaskBatchMapper.selectById(taskBatchId);
         if (Objects.isNull(jobTaskBatch)) {
             SnailJobLog.LOCAL.error("jobTaskBatch:[{}]不存在", taskBatchId);
@@ -48,7 +48,7 @@ public class JobTimeoutCheckTask implements TimerTask<String> {
             return;
         }
 
-        JobMapper jobMapper = SpringContext.getBean(JobMapper.class);
+        JobMapper jobMapper = SnailSpringContext.getBean(JobMapper.class);
         Job job = jobMapper.selectById(jobId);
         if (Objects.isNull(job)) {
             SnailJobLog.LOCAL.error("job:[{}]不存在", jobId);
@@ -64,7 +64,7 @@ public class JobTimeoutCheckTask implements TimerTask<String> {
         stopJobContext.setTaskBatchId(taskBatchId);
         instanceInterrupt.stop(stopJobContext);
 
-        SpringContext.getContext().publishEvent(new JobTaskFailAlarmEvent(taskBatchId));
+        SnailSpringContext.getContext().publishEvent(new JobTaskFailAlarmEvent(taskBatchId));
         SnailJobLog.LOCAL.info("超时中断.taskBatchId:[{}]", taskBatchId);
     }
 

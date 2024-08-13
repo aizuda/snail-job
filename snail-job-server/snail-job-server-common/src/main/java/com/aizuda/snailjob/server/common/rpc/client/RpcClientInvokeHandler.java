@@ -3,7 +3,7 @@ package com.aizuda.snailjob.server.common.rpc.client;
 import cn.hutool.core.date.StopWatch;
 import cn.hutool.core.lang.Assert;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
-import com.aizuda.snailjob.common.core.context.SpringContext;
+import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.exception.SnailJobRemotingTimeOutException;
 import com.aizuda.snailjob.common.core.model.Result;
 import com.aizuda.snailjob.common.core.model.SnailJobRequest;
@@ -176,7 +176,7 @@ public class RpcClientInvokeHandler implements InvocationHandler {
                 // 进行路由剔除处理
                 CacheRegisterTable.remove(groupName, namespaceId, hostId);
                 // 重新选一个可用的客户端节点
-                ClientNodeAllocateHandler clientNodeAllocateHandler = SpringContext.getBean(
+                ClientNodeAllocateHandler clientNodeAllocateHandler = SnailSpringContext.getBean(
                         ClientNodeAllocateHandler.class);
                 RegisterNodeInfo serverNode = clientNodeAllocateHandler.getServerNode(allocKey, groupName, namespaceId,
                         routeKey);

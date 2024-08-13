@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.retry.task.support.timer;
 
-import com.aizuda.snailjob.common.core.context.SpringContext;
+import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.enums.RetryStatusEnum;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.retry.task.support.dispatch.task.TaskActuatorFactory;
@@ -34,7 +34,7 @@ public class CallbackTimerTask extends AbstractTimerTask {
     @Override
     protected void doRun(final Timeout timeout) {
         SnailJobLog.LOCAL.debug("回调任务执行 {}", LocalDateTime.now());
-        AccessTemplate accessTemplate = SpringContext.getBeanByType(AccessTemplate.class);
+        AccessTemplate accessTemplate = SnailSpringContext.getBeanByType(AccessTemplate.class);
         TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();
         RetryTask retryTask = retryTaskAccess.one(context.getGroupName(), context.getNamespaceId(),
                 new LambdaQueryWrapper<RetryTask>()

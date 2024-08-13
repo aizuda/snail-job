@@ -4,7 +4,7 @@ import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import com.aizuda.snailjob.client.model.ExecuteResult;
 import com.aizuda.snailjob.client.model.request.DispatchJobRequest;
-import com.aizuda.snailjob.common.core.context.SpringContext;
+import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.enums.JobTaskStatusEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.model.Result;
@@ -116,14 +116,14 @@ public class RequestClientActor extends AbstractActor {
             }
 
             taskExecuteFailure(realJobExecutorDTO, throwable.getMessage());
-            SpringContext.getContext().publishEvent(new JobTaskFailAlarmEvent(dispatchJobRequest.getTaskBatchId()));
+            SnailSpringContext.getContext().publishEvent(new JobTaskFailAlarmEvent(dispatchJobRequest.getTaskBatchId()));
         }
 
     }
 
     public static class JobExecutorRetryListener implements RetryListener {
 
-        private RealJobExecutorDTO realJobExecutorDTO;
+        private final RealJobExecutorDTO realJobExecutorDTO;
 
         public JobExecutorRetryListener(final RealJobExecutorDTO realJobExecutorDTO) {
             this.realJobExecutorDTO = realJobExecutorDTO;

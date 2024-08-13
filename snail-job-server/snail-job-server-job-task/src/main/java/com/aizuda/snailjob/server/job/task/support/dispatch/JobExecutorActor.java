@@ -5,8 +5,11 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
-import com.aizuda.snailjob.common.core.context.SpringContext;
-import com.aizuda.snailjob.common.core.enums.*;
+import com.aizuda.snailjob.common.core.context.SnailSpringContext;
+import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
+import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
+import com.aizuda.snailjob.common.core.enums.MapReduceStageEnum;
+import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
@@ -91,7 +94,7 @@ public class JobExecutorActor extends AbstractActor {
             } catch (Exception e) {
                 SnailJobLog.LOCAL.error("job executor exception. [{}]", taskExecute, e);
                 handleTaskBatch(taskExecute, JobTaskBatchStatusEnum.FAIL.getStatus(), JobOperationReasonEnum.TASK_EXECUTION_ERROR.getReason());
-                SpringContext.getContext().publishEvent(new JobTaskFailAlarmEvent(taskExecute.getTaskBatchId()));
+                SnailSpringContext.getContext().publishEvent(new JobTaskFailAlarmEvent(taskExecute.getTaskBatchId()));
             } finally {
                 getContext().stop(getSelf());
             }
@@ -158,9 +161,9 @@ public class JobExecutorActor extends AbstractActor {
                     Long workflowTaskBatchId = taskExecute.getWorkflowTaskBatchId();
                     if (Objects.nonNull(workflowTaskBatchId)) {
                         workflowTaskBatch = workflowTaskBatchMapper.selectOne(
-                            new LambdaQueryWrapper<WorkflowTaskBatch>()
-                                .select(WorkflowTaskBatch::getWfContext)
-                                .eq(WorkflowTaskBatch::getId, taskExecute.getWorkflowTaskBatchId())
+                                new LambdaQueryWrapper<WorkflowTaskBatch>()
+                                        .select(WorkflowTaskBatch::getWfContext)
+                                        .eq(WorkflowTaskBatch::getId, taskExecute.getWorkflowTaskBatchId())
                         );
                     }
 
@@ -197,7 +200,7 @@ public class JobExecutorActor extends AbstractActor {
 
     @NotNull
     private static JobExecutorContext buildJobExecutorContext(TaskExecuteDTO taskExecute, Job job, List<JobTask> taskList,
-        final WorkflowTaskBatch workflowTaskBatch) {
+                                                              final WorkflowTaskBatch workflowTaskBatch) {
         JobExecutorContext context = JobTaskConverter.INSTANCE.toJobExecutorContext(job);
         context.setTaskList(taskList);
         context.setTaskBatchId(taskExecute.getTaskBatchId());
@@ -221,7 +224,7 @@ public class JobExecutorActor extends AbstractActor {
                 () -> new SnailJobServerException("更新任务失败"));
 
         if (JobTaskBatchStatusEnum.NOT_SUCCESS.contains(taskStatus)) {
-            SpringContext.getContext().publishEvent(new JobTaskFailAlarmEvent(taskExecute.getTaskBatchId()));
+            SnailSpringContext.getContext().publishEvent(new JobTaskFailAlarmEvent(taskExecute.getTaskBatchId()));
         }
 
     }

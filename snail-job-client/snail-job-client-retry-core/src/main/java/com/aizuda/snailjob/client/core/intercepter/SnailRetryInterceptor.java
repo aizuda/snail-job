@@ -13,7 +13,7 @@ import com.aizuda.snailjob.client.core.retryer.RetryerResultContext;
 import com.aizuda.snailjob.client.core.strategy.RetryStrategy;
 import com.aizuda.snailjob.common.core.alarm.AlarmContext;
 import com.aizuda.snailjob.common.core.alarm.SnailJobAlarmFactory;
-import com.aizuda.snailjob.common.core.context.SpringContext;
+import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.enums.RetryNotifySceneEnum;
 import com.aizuda.snailjob.common.core.enums.RetryResultStatusEnum;
 import com.aizuda.snailjob.common.core.model.SnailJobHeaders;
@@ -216,7 +216,7 @@ public class SnailRetryInterceptor implements MethodInterceptor, AfterAdvice, Se
             ConfigDTO.Notify notify = GroupVersionCache.getRetryNotifyAttribute(
                     RetryNotifySceneEnum.CLIENT_COMPONENT_ERROR.getNotifyScene());
             if (Objects.nonNull(notify)) {
-                SnailJobProperties snailJobProperties = SpringContext.getBean(SnailJobProperties.class);
+                SnailJobProperties snailJobProperties = SnailSpringContext.getBean(SnailJobProperties.class);
                 if (Objects.isNull(snailJobProperties)) {
                     return;
                 }
