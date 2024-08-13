@@ -1,6 +1,5 @@
 package com.aizuda.snailjob.client.common.rpc.client;
 
-import com.aizuda.snailjob.client.common.NettyClient;
 import com.aizuda.snailjob.client.common.event.SnailChannelReconnectEvent;
 import com.aizuda.snailjob.client.common.handler.ClientRegister;
 import com.aizuda.snailjob.common.core.constant.SystemConstants.BEAT;
