@@ -1,7 +1,7 @@
 package com.aizuda.snailjob.server.retry.task.support.strategy;
 
 import cn.hutool.core.lang.Pair;
-import com.aizuda.snailjob.common.core.context.SpringContext;
+import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.IdempotentStrategy;
 import com.aizuda.snailjob.server.common.cache.CacheRegisterTable;
@@ -190,7 +190,7 @@ public class FilterStrategies {
                 return Pair.of(Boolean.FALSE, description.append(MessageFormat.format("没有可执行的客户端节点. uniqueId:[{0}]", retryTask.getUniqueId())));
             }
 
-            ServerNodeMapper serverNodeMapper = SpringContext.getBeanByType(ServerNodeMapper.class);
+            ServerNodeMapper serverNodeMapper = SnailSpringContext.getBeanByType(ServerNodeMapper.class);
             boolean result = 1 == serverNodeMapper.selectCount(new LambdaQueryWrapper<ServerNode>().eq(ServerNode::getHostId, serverNode.getHostId()));
             if (!result) {
                 // 删除缓存中的失效节点

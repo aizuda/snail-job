@@ -8,7 +8,7 @@ import ch.qos.logback.core.CoreConstants;
 import ch.qos.logback.core.UnsynchronizedAppenderBase;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
-import com.aizuda.snailjob.common.core.context.SpringContext;
+import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.NetUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
@@ -40,15 +40,14 @@ public class SnailJobServerLogbackAppender<E> extends UnsynchronizedAppenderBase
     protected void append(E eventObject) {
 
         // Not job context
-        if (!(eventObject instanceof LoggingEvent) || Objects.isNull(
+        if (!(eventObject instanceof LoggingEvent event) || Objects.isNull(
                 MDC.getMDCAdapter().get(LogFieldConstants.MDC_REMOTE))) {
             return;
         }
 
         MDC.getMDCAdapter().remove(LogFieldConstants.MDC_REMOTE);
         // Prepare processing
-        ((LoggingEvent) eventObject).prepareForDeferredProcessing();
-        LoggingEvent event = (LoggingEvent) eventObject;
+        event.prepareForDeferredProcessing();
 
         LogContentDTO logContentDTO = new LogContentDTO();
         logContentDTO.addLevelField(event.getLevel().levelStr);
@@ -56,7 +55,7 @@ public class SnailJobServerLogbackAppender<E> extends UnsynchronizedAppenderBase
         logContentDTO.addLocationField(getLocationField(event));
         logContentDTO.addThrowableField(getThrowableField(event));
         logContentDTO.addHostField(NetUtil.getLocalIpStr());
-        logContentDTO.addPortField(SpringContext.getBean(SystemProperties.class).getNettyPort());
+        logContentDTO.addPortField(SnailSpringContext.getBean(SystemProperties.class).getNettyPort());
 
         LogMetaDTO logMetaDTO = null;
         try {

@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @Slf4j
-public class SpringContext implements BeanFactoryPostProcessor, ApplicationContextAware {
+public class SnailSpringContext implements BeanFactoryPostProcessor, ApplicationContextAware {
 
     private static ConfigurableListableBeanFactory FACTORY;
 
@@ -26,12 +26,12 @@ public class SpringContext implements BeanFactoryPostProcessor, ApplicationConte
 
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
-        SpringContext.FACTORY = beanFactory;
+        SnailSpringContext.FACTORY = beanFactory;
     }
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) {
-        SpringContext.CONTEXT = applicationContext;
+        SnailSpringContext.CONTEXT = applicationContext;
     }
 
     public static ListableBeanFactory getBeanFactory() {

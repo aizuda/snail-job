@@ -4,7 +4,7 @@ import com.aizuda.snailjob.client.common.Lifecycle;
 import com.aizuda.snailjob.client.common.event.SnailClientStartedEvent;
 import com.aizuda.snailjob.client.common.event.SnailClientStartingEvent;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
-import com.aizuda.snailjob.common.core.context.SpringContext;
+import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.util.SnailJobVersion;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import lombok.RequiredArgsConstructor;
@@ -36,9 +36,9 @@ public class SnailJobStartListener implements ApplicationRunner {
 
         System.out.println(MessageFormatter.format(SystemConstants.LOGO, SnailJobVersion.getVersion()).getMessage());
         SnailJobLog.LOCAL.info("snail-job client is preparing to start... v{}", SnailJobVersion.getVersion());
-        SpringContext.getContext().publishEvent(new SnailClientStartingEvent());
+        SnailSpringContext.getContext().publishEvent(new SnailClientStartingEvent());
         lifecycleList.forEach(Lifecycle::start);
-        SpringContext.getContext().publishEvent(new SnailClientStartedEvent());
+        SnailSpringContext.getContext().publishEvent(new SnailClientStartedEvent());
         isStarted = true;
         SnailJobLog.LOCAL.info("snail-job client started successfully v{}", SnailJobVersion.getVersion());
     }

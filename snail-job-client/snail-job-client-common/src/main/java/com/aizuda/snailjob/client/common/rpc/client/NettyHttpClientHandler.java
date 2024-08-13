@@ -4,7 +4,7 @@ import com.aizuda.snailjob.client.common.NettyClient;
 import com.aizuda.snailjob.client.common.event.SnailChannelReconnectEvent;
 import com.aizuda.snailjob.client.common.handler.ClientRegister;
 import com.aizuda.snailjob.common.core.constant.SystemConstants.BEAT;
-import com.aizuda.snailjob.common.core.context.SpringContext;
+import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.model.NettyResult;
 import com.aizuda.snailjob.common.core.rpc.RpcContext;
@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class NettyHttpClientHandler extends SimpleChannelInboundHandler<FullHttpResponse> {
 
-    private NettyHttpConnectClient nettyHttpConnectClient;
+    private final NettyHttpConnectClient nettyHttpConnectClient;
 
     public NettyHttpClientHandler(NettyHttpConnectClient nettyHttpConnectClient) {
         this.nettyHttpConnectClient = nettyHttpConnectClient;
@@ -61,7 +61,7 @@ public class NettyHttpClientHandler extends SimpleChannelInboundHandler<FullHttp
         ctx.channel().eventLoop().schedule(() -> {
             try {
                 // 抛出重连事件
-                SpringContext.getContext().publishEvent(new SnailChannelReconnectEvent());
+                SnailSpringContext.getContext().publishEvent(new SnailChannelReconnectEvent());
                 nettyHttpConnectClient.reconnect();
             } catch (Exception e) {
                 SnailJobLog.LOCAL.error("reconnect error ", e);

@@ -3,7 +3,7 @@ package com.aizuda.snailjob.client.common.init;
 import com.aizuda.snailjob.client.common.Lifecycle;
 import com.aizuda.snailjob.client.common.event.SnailClientClosedEvent;
 import com.aizuda.snailjob.client.common.event.SnailClientClosingEvent;
-import com.aizuda.snailjob.common.core.context.SpringContext;
+import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.util.SnailJobVersion;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,9 +29,9 @@ public class SnailJobCloseListener implements ApplicationListener<ContextClosedE
     @Override
     public void onApplicationEvent(ContextClosedEvent event) {
         log.info("snail-job client about to shutdown v{}", SnailJobVersion.getVersion());
-        SpringContext.getContext().publishEvent(new SnailClientClosingEvent());
+        SnailSpringContext.getContext().publishEvent(new SnailClientClosingEvent());
         lifecycleList.forEach(Lifecycle::close);
-        SpringContext.getContext().publishEvent(new SnailClientClosedEvent());
+        SnailSpringContext.getContext().publishEvent(new SnailClientClosedEvent());
         log.info("snail-job client closed successfully v{}", SnailJobVersion.getVersion());
     }
 }

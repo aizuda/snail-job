@@ -6,7 +6,7 @@ import com.aizuda.snailjob.client.common.event.SnailServerStartFailedEvent;
 import com.aizuda.snailjob.client.common.exception.SnailJobClientException;
 import com.aizuda.snailjob.client.common.rpc.supports.handler.NettyHttpServerHandler;
 import com.aizuda.snailjob.client.common.rpc.supports.handler.SnailDispatcherRequestHandler;
-import com.aizuda.snailjob.common.core.context.SpringContext;
+import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -84,7 +84,7 @@ public class SnailNettyHttpServer implements Runnable, Lifecycle {
             SnailJobLog.LOCAL.error("--------> snail-job client remoting server error.", e);
             started = false;
             // Snail Netty Server 未启动
-            SpringContext.getContext().publishEvent(new SnailServerStartFailedEvent());
+            SnailSpringContext.getContext().publishEvent(new SnailServerStartFailedEvent());
             throw new SnailJobClientException("snail-job client server start error");
         } finally {
             // 当服务器正常关闭时，关闭EventLoopGroups以释放资源。

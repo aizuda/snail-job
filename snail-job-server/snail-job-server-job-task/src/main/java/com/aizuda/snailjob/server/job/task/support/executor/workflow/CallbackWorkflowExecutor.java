@@ -2,7 +2,7 @@ package com.aizuda.snailjob.server.job.task.support.executor.workflow;
 
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
-import com.aizuda.snailjob.common.core.context.SpringContext;
+import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.enums.*;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
@@ -14,7 +14,6 @@ import com.aizuda.snailjob.server.model.dto.CallbackParamsDTO;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTask;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch;
 import com.github.rholder.retry.*;
-import com.google.common.collect.Sets;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -26,12 +25,8 @@ import org.springframework.web.client.RestTemplate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import static com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum.WORKFLOW_CONDITION_NODE_EXECUTION_ERROR;
-import static com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum.WORKFLOW_DECISION_FAILED;
-import static com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum.WORKFLOW_NODE_NO_REQUIRED;
 import static com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum.WORKFLOW_SUCCESSOR_SKIP_EXECUTION;
 
 /**
@@ -119,7 +114,7 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
             }
 
             message = throwable.getMessage();
-            SpringContext.getContext().publishEvent(new WorkflowTaskFailAlarmEvent(context.getWorkflowTaskBatchId()));
+            SnailSpringContext.getContext().publishEvent(new WorkflowTaskFailAlarmEvent(context.getWorkflowTaskBatchId()));
         }
 
         context.setEvaluationResult(result);
@@ -167,10 +162,10 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
         } else if (jobTaskBatch.getTaskBatchStatus() == JobTaskStatusEnum.CANCEL.getStatus()) {
             if (WORKFLOW_SUCCESSOR_SKIP_EXECUTION.contains(context.getParentOperationReason())) {
                 SnailJobLog.REMOTE.warn("节点[{}]取消回调. 取消原因: 当前任务无需处理 <|>{}<|>",
-                    context.getWorkflowNodeId(), jobLogMetaDTO);
+                        context.getWorkflowNodeId(), jobLogMetaDTO);
             } else {
                 SnailJobLog.REMOTE.warn("节点[{}]取消回调. 取消原因: 任务状态已关闭 <|>{}<|>",
-                    context.getWorkflowNodeId(), jobLogMetaDTO);
+                        context.getWorkflowNodeId(), jobLogMetaDTO);
             }
 
         } else {

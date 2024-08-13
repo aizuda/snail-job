@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.template.datasource.utils;
 
-import com.aizuda.snailjob.common.core.context.SpringContext;
+import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.template.datasource.enums.DbTypeEnum;
 import org.springframework.core.env.Environment;
 
@@ -13,7 +13,7 @@ import org.springframework.core.env.Environment;
 public class DbUtils {
 
     public static DbTypeEnum getDbType() {
-        Environment environment = SpringContext.getBean(Environment.class);
+        Environment environment = SnailSpringContext.getBean(Environment.class);
         String url = environment.getProperty("spring.datasource.url");
         return DbTypeEnum.modeOf(url);
     }

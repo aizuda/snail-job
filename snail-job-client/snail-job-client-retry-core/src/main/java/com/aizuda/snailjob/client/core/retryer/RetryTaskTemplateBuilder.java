@@ -3,7 +3,7 @@ package com.aizuda.snailjob.client.core.retryer;
 import com.aizuda.snailjob.client.core.strategy.ExecutorMethod;
 import com.aizuda.snailjob.client.core.strategy.ManualRetryStrategies;
 import com.aizuda.snailjob.client.core.strategy.RetryStrategy;
-import com.aizuda.snailjob.common.core.context.SpringContext;
+import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 
 /**
  * 构建重试模板对象
@@ -41,7 +41,7 @@ public class RetryTaskTemplateBuilder {
         snailJobTemplate.setParams(params);
         snailJobTemplate.setExecutorMethodClass(executorMethodClass);
         snailJobTemplate.setScene(scene);
-        RetryStrategy retryStrategy = SpringContext.getBeanByType(ManualRetryStrategies.class);
+        RetryStrategy retryStrategy = SnailSpringContext.getBeanByType(ManualRetryStrategies.class);
         snailJobTemplate.setRetryStrategy(retryStrategy);
         return snailJobTemplate;
     }

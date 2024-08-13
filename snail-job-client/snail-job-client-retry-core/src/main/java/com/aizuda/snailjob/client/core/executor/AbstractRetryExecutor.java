@@ -4,7 +4,7 @@ import com.aizuda.snailjob.client.core.RetryExecutor;
 import com.aizuda.snailjob.client.core.retryer.RetryerInfo;
 import com.aizuda.snailjob.client.core.strategy.ExecutorAnnotationMethod;
 import com.aizuda.snailjob.client.core.strategy.ExecutorMethod;
-import com.aizuda.snailjob.common.core.context.SpringContext;
+import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +32,7 @@ public abstract class AbstractRetryExecutor<BR, SR> implements RetryExecutor<BR,
             return retryAnnotationMethod.doExecute(params);
         } else {
             SnailJobLog.LOCAL.debug("执行自定义重试方法：{},参数为：{}", retryMethodClass.getName(), JsonUtil.toJsonString(params));
-            ExecutorMethod executorMethod = SpringContext.getBeanByType(retryMethodClass);
+            ExecutorMethod executorMethod = SnailSpringContext.getBeanByType(retryMethodClass);
             return executorMethod.doExecute(params);
         }
     }

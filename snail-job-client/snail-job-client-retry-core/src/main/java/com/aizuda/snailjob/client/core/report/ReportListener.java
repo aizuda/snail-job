@@ -9,7 +9,7 @@ import com.aizuda.snailjob.client.core.RetryExecutorParameter;
 import com.aizuda.snailjob.client.core.executor.GuavaRetryExecutor;
 import com.aizuda.snailjob.common.core.alarm.AlarmContext;
 import com.aizuda.snailjob.common.core.alarm.SnailJobAlarmFactory;
-import com.aizuda.snailjob.common.core.context.SpringContext;
+import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.enums.RetryNotifySceneEnum;
 import com.aizuda.snailjob.common.core.model.NettyResult;
 import com.aizuda.snailjob.common.core.util.EnvironmentUtils;
@@ -115,7 +115,7 @@ public class ReportListener implements Listener<RetryTaskDTO> {
                 return;
             }
 
-            SnailJobProperties properties = SpringContext.getBean(SnailJobProperties.class);
+            SnailJobProperties properties = SnailSpringContext.getBean(SnailJobProperties.class);
             if (Objects.isNull(properties)) {
                 return;
             }

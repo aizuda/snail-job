@@ -3,11 +3,10 @@ package com.aizuda.snailjob.server.common.rpc.server;
 import akka.actor.AbstractActor;
 import cn.hutool.core.net.url.UrlBuilder;
 import cn.hutool.core.util.StrUtil;
-import com.aizuda.snailjob.common.core.context.SpringContext;
+import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.enums.HeadersEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.model.NettyResult;
-import com.aizuda.snailjob.common.core.model.Result;
 import com.aizuda.snailjob.common.core.model.SnailJobRequest;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
@@ -78,7 +77,7 @@ public class RequestHandlerActor extends AbstractActor {
     private String doProcess(String uri, String content, HttpMethod method,
                              HttpHeaders headers) {
 
-        Register register = SpringContext.getBean(ClientRegister.BEAN_NAME, Register.class);
+        Register register = SnailSpringContext.getBean(ClientRegister.BEAN_NAME, Register.class);
 
         String hostId = headers.get(HeadersEnum.HOST_ID.getKey());
         String hostIp = headers.get(HeadersEnum.HOST_IP.getKey());
@@ -105,7 +104,7 @@ public class RequestHandlerActor extends AbstractActor {
         }
 
         UrlBuilder builder = UrlBuilder.ofHttp(uri);
-        Collection<HttpRequestHandler> httpRequestHandlers = SpringContext.getContext()
+        Collection<HttpRequestHandler> httpRequestHandlers = SnailSpringContext.getContext()
                 .getBeansOfType(HttpRequestHandler.class).values();
         for (HttpRequestHandler httpRequestHandler : httpRequestHandlers) {
             if (httpRequestHandler.supports(builder.getPathStr()) && method.name()

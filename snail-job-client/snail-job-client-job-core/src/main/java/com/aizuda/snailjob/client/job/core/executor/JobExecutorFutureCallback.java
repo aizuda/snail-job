@@ -13,7 +13,7 @@ import com.aizuda.snailjob.client.model.ExecuteResult;
 import com.aizuda.snailjob.client.model.request.DispatchJobResultRequest;
 import com.aizuda.snailjob.common.core.alarm.AlarmContext;
 import com.aizuda.snailjob.common.core.alarm.SnailJobAlarmFactory;
-import com.aizuda.snailjob.common.core.context.SpringContext;
+import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.enums.JobNotifySceneEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskStatusEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
@@ -172,7 +172,7 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
     private static void sendMessage(String message) {
 
         try {
-            SnailJobProperties snailJobProperties = SpringContext.getBean(SnailJobProperties.class);
+            SnailJobProperties snailJobProperties = SnailSpringContext.getBean(SnailJobProperties.class);
             if (Objects.isNull(snailJobProperties)) {
                 return;
             }

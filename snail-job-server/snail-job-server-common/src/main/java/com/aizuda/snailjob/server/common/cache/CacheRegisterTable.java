@@ -1,8 +1,7 @@
 package com.aizuda.snailjob.server.common.cache;
 
 import cn.hutool.core.collection.CollUtil;
-import com.aizuda.snailjob.common.core.context.SpringContext;
-import com.aizuda.snailjob.common.core.enums.NodeTypeEnum;
+import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.Lifecycle;
@@ -88,7 +87,7 @@ public class CacheRegisterTable implements Lifecycle {
         ConcurrentMap<String, RegisterNodeInfo> concurrentMap = CACHE.getIfPresent(getKey(groupName, namespaceId));
         if (Objects.isNull(concurrentMap)) {
             // 此处为了降级，若缓存中没有则取DB中查询
-            ServerNodeMapper serverNodeMapper = SpringContext.getBeanByType(ServerNodeMapper.class);
+            ServerNodeMapper serverNodeMapper = SnailSpringContext.getBeanByType(ServerNodeMapper.class);
             List<ServerNode> serverNodes = serverNodeMapper.selectList(
                     new LambdaQueryWrapper<ServerNode>()
                             .eq(ServerNode::getNamespaceId, namespaceId)
@@ -120,7 +119,7 @@ public class CacheRegisterTable implements Lifecycle {
         if (CollUtil.isEmpty(concurrentMap)) {
 
             // 此处为了降级，若缓存中没有则取DB中查询
-            ServerNodeMapper serverNodeMapper = SpringContext.getBeanByType(ServerNodeMapper.class);
+            ServerNodeMapper serverNodeMapper = SnailSpringContext.getBeanByType(ServerNodeMapper.class);
             List<ServerNode> serverNodes = serverNodeMapper.selectList(
                     new LambdaQueryWrapper<ServerNode>()
                             .eq(ServerNode::getNamespaceId, namespaceId)

@@ -21,7 +21,7 @@ import com.aizuda.snailjob.client.model.DispatchRetryDTO;
 import com.aizuda.snailjob.client.model.DispatchRetryResultDTO;
 import com.aizuda.snailjob.client.model.GenerateRetryIdempotentIdDTO;
 import com.aizuda.snailjob.client.model.RetryCallbackDTO;
-import com.aizuda.snailjob.common.core.context.SpringContext;
+import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.enums.RetryResultStatusEnum;
 import com.aizuda.snailjob.common.core.enums.RetryStatusEnum;
 import com.aizuda.snailjob.common.core.model.IdempotentIdContext;
@@ -225,7 +225,7 @@ public class SnailRetryEndPoint {
                                            Object[] deSerialize) {
         Class<? extends RetryCompleteCallback> retryCompleteCallbackClazz = retryerInfo.getRetryCompleteCallback();
 
-        RetryCompleteCallback retryCompleteCallback = SpringContext.getBeanByType(retryCompleteCallbackClazz);
+        RetryCompleteCallback retryCompleteCallback = SnailSpringContext.getBeanByType(retryCompleteCallbackClazz);
         switch (Objects.requireNonNull(RetryStatusEnum.getByStatus(callbackDTO.getRetryStatus()))) {
             case FINISH:
                 retryCompleteCallback.doSuccessCallback(retryerInfo.getScene(), retryerInfo.getExecutorClassName(),
