@@ -36,8 +36,8 @@ import java.util.Collection;
  * @date : 2023-07-24 09:20
  * @since 2.1.0
  */
-@Component(ActorGenerator.REQUEST_HANDLER_ACTOR)
-@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+//@Component(ActorGenerator.REQUEST_HANDLER_ACTOR)
+//@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Slf4j
 public class RequestHandlerActor extends AbstractActor {
 

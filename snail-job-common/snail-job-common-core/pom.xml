@@ -69,10 +69,69 @@
             <groupId>io.netty</groupId>
             <artifactId>netty-common</artifactId>
         </dependency>
+        <!-- 根据message定义，生成java的model类 -->
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-protobuf</artifactId>
+            <version>1.63.0</version>
+        </dependency>
+        <!-- 根据service定义，生成java的服务端代码和客户端代码 -->
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-stub</artifactId>
+            <version>1.63.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+            <version>3.25.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.api.grpc</groupId>
+            <artifactId>proto-google-common-protos</artifactId>
+            <version>2.43.0</version>
+        </dependency>
+        <!-- 生成的代码使用到了javax的注解 -->
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+            <version>1.3.2</version>
+        </dependency>
     </dependencies>
 
     <build>
+        <extensions>
+            <extension>
+                <groupId>kr.motd.maven</groupId>
+                <artifactId>os-maven-plugin</artifactId>
+                <version>1.6.2</version>
+            </extension>
+        </extensions>
         <plugins>
+            <!--  reuse when you need to update grpc model  -->
+<!--           <plugin>-->
+<!--                <groupId>org.xolstice.maven.plugins</groupId>-->
+<!--                <artifactId>protobuf-maven-plugin</artifactId>-->
+<!--               <version>0.6.1</version>-->
+<!--               <configuration>-->
+<!--                   <protocArtifact>com.google.protobuf:protoc:3.24.0:exe:${os.detected.classifier}</protocArtifact>-->
+<!--                   <pluginId>grpc-java</pluginId>-->
+<!--                   <pluginArtifact>io.grpc:protoc-gen-grpc-java:1.63.0:exe:${os.detected.classifier}</pluginArtifact>-->
+<!--                   <protoSourceRoot>${project.basedir}/src/main/proto</protoSourceRoot>-->
+<!--                   <clearOutputDirectory>false</clearOutputDirectory>-->
+<!--                   &lt;!&ndash;通过插件生成的协议代码存放地址&ndash;&gt;-->
+<!--                   <outputDirectory>${basedir}/src/main/java</outputDirectory>-->
+<!--               </configuration>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <goals>-->
+<!--                            <goal>compile</goal>-->
+<!--                            <goal>compile-custom</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>

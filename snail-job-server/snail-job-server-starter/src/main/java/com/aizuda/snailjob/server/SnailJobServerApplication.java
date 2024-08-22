@@ -36,7 +36,7 @@ public class SnailJobServerApplication {
         SpringApplication.run(SnailJobServerApplication.class, args);
     }
 
-    @Bean
+//    @Bean
     public ApplicationRunner nettyStartupChecker(NettyHttpServer nettyHttpServer, ServletWebServerFactory serverFactory) {
         return args -> {
             // 最长自旋10秒，保证nettyHttpServer启动完成

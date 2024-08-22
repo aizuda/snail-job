@@ -105,12 +105,17 @@ public class RequestBuilder<T, R> {
             throw new SnailJobServerException("class not found exception to: [{}]", clintInterface.getName());
         }
 
+        // todo 测试先注释
         RpcClientInvokeHandler clientInvokeHandler = new RpcClientInvokeHandler(
                 nodeInfo.getGroupName(), nodeInfo, failRetry, retryTimes, retryInterval,
                 retryListener, routeKey, allocKey, failover, executorTimeout, nodeInfo.getNamespaceId());
 
+        GrpcClientInvokeHandler grpcClientInvokeHandler = new GrpcClientInvokeHandler(
+            nodeInfo.getGroupName(), nodeInfo, failRetry, retryTimes, retryInterval,
+            retryListener, routeKey, allocKey, failover, executorTimeout, nodeInfo.getNamespaceId());
+
         return (T) Proxy.newProxyInstance(clintInterface.getClassLoader(),
-                new Class[]{clintInterface}, clientInvokeHandler);
+                new Class[]{clintInterface}, grpcClientInvokeHandler);
     }
 
 }

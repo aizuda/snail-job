@@ -31,7 +31,7 @@ import org.springframework.stereotype.Component;
  * @date : 2024-04-12 23:03
  * @since 3.3.0
  */
-@Component
+//@Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @RequiredArgsConstructor
 @Getter

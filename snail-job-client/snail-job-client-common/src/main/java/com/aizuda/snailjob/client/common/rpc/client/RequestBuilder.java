@@ -67,10 +67,10 @@ public class RequestBuilder<T, R extends Result<Object>> {
             throw new SnailJobClientException("class not found exception to: [{}]", clintInterface.getName());
         }
 
-        RpcClientInvokeHandler<R> rpcClientInvokeHandler = new RpcClientInvokeHandler<>(async, timeout, unit, callback);
-
+//        RpcClientInvokeHandler<R> rpcClientInvokeHandler = new RpcClientInvokeHandler<>(async, timeout, unit, callback);
+        GrpcClientInvokeHandler invokeHandler = new GrpcClientInvokeHandler(async, timeout, unit, callback);
         return (T) Proxy.newProxyInstance(clintInterface.getClassLoader(),
-                new Class[]{clintInterface}, rpcClientInvokeHandler);
+                new Class[]{clintInterface}, invokeHandler);
     }
 
 }

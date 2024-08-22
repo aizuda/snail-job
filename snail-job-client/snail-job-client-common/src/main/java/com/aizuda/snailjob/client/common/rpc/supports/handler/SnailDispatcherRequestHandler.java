@@ -13,6 +13,8 @@ import com.aizuda.snailjob.client.common.rpc.supports.http.HttpResponse;
 import com.aizuda.snailjob.client.common.rpc.supports.scan.EndPointInfo;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
+import com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest;
+import com.aizuda.snailjob.common.core.grpc.auto.Metadata;
 import com.aizuda.snailjob.common.core.model.NettyResult;
 import com.aizuda.snailjob.common.core.model.Result;
 import com.aizuda.snailjob.common.core.model.SnailJobRequest;
@@ -21,6 +23,8 @@ import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.util.ByteBufferBackedInputStream;
+import com.google.protobuf.Any;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
@@ -28,6 +32,7 @@ import org.springframework.util.ReflectionUtils;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
+import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -101,6 +106,80 @@ public class SnailDispatcherRequestHandler {
                 nettyResult.setData(resultObj.getData())
                         .setMessage(resultObj.getMessage())
                         .setStatus(resultObj.getStatus());
+            }
+
+            for (final HandlerInterceptor handlerInterceptor : handlerInterceptors) {
+                handlerInterceptor.afterCompletion(httpRequest, httpResponse, endPointInfo, e);
+            }
+        }
+
+        return nettyResult;
+    }
+
+    public NettyResult dispatch(GrpcRequest request) {
+        NettyResult nettyResult = new NettyResult();
+
+        HttpRequest httpRequest = request.getHttpRequest();
+        HttpResponse httpResponse = request.getHttpResponse();
+
+        List<HandlerInterceptor> handlerInterceptors = handlerInterceptors();
+
+        GrpcSnailJobRequest snailJobRequest = request.getSnailJobRequest();
+        EndPointInfo endPointInfo = null;
+        Result resultObj = null;
+        Exception e = null;
+        try {
+            Metadata metadata = snailJobRequest.getMetadata();
+            Map<String, String> headersMap = metadata.getHeadersMap();
+            String snailJobAuth = headersMap.get(SystemConstants.SNAIL_JOB_AUTH_TOKEN);
+            String configToken = Optional.ofNullable(snailJobProperties.getToken()).orElse(SystemConstants.DEFAULT_TOKEN);
+            if (!configToken.equals(snailJobAuth)) {
+                throw new SnailJobClientException("认证失败.【请检查配置的Token是否正确】");
+            }
+
+            UrlBuilder builder = UrlBuilder.ofHttp(httpRequest.getUri());
+            endPointInfo = EndPointInfoCache.get(builder.getPathStr(), RequestMethod.POST);
+            if (Objects.isNull(endPointInfo)) {
+                throw new SnailJobClientException("无法找到对应的处理请检查对应的包是否正确引入. " +
+                                                  "path:[{}] requestMethod:[{}]", builder.getPathStr());
+            }
+
+            Class<?>[] paramTypes = endPointInfo.getMethod().getParameterTypes();
+            GrpcSnailJobRequest grpcSnailJobRequest = request.getSnailJobRequest();
+            Any body = grpcSnailJobRequest.getBody();
+            ByteBuffer byteBuffer = body.getValue().asReadOnlyByteBuffer();
+            Object[] args = JsonUtil.parseObject(new ByteBufferBackedInputStream(byteBuffer), Object[].class);
+
+            Object[] deSerialize = (Object[]) deSerialize(JsonUtil.toJsonString(args), endPointInfo.getMethod(),
+                httpRequest, httpResponse);
+
+            for (final HandlerInterceptor handlerInterceptor : handlerInterceptors) {
+                if (!handlerInterceptor.preHandle(httpRequest, httpResponse, endPointInfo)) {
+                    return nettyResult;
+                }
+            }
+
+            if (paramTypes.length > 0) {
+                resultObj = (Result) ReflectionUtils.invokeMethod(endPointInfo.getMethod(),
+                    endPointInfo.getExecutor(), deSerialize);
+            } else {
+                resultObj = (Result) ReflectionUtils.invokeMethod(endPointInfo.getMethod(),
+                    endPointInfo.getExecutor());
+            }
+
+            for (final HandlerInterceptor handlerInterceptor : handlerInterceptors) {
+                handlerInterceptor.postHandle(httpRequest, httpResponse, endPointInfo);
+            }
+        } catch (Exception ex) {
+            SnailJobLog.LOCAL.error("http request error. [{}]", snailJobRequest, ex);
+            nettyResult.setMessage(ex.getMessage()).setStatus(StatusEnum.NO.getStatus());
+            e = ex;
+        } finally {
+            nettyResult.setReqId(0);
+            if (Objects.nonNull(resultObj)) {
+                nettyResult.setData(resultObj.getData())
+                    .setMessage(resultObj.getMessage())
+                    .setStatus(resultObj.getStatus());
             }
 
             for (final HandlerInterceptor handlerInterceptor : handlerInterceptors) {

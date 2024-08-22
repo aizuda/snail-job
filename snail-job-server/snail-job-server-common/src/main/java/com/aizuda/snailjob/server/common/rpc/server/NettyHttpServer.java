@@ -87,9 +87,9 @@ public class NettyHttpServer implements Runnable, Lifecycle {
 
     @Override
     public void start() {
-        thread = new Thread(this);
-        thread.setDaemon(true);
-        thread.start();
+//        thread = new Thread(this);
+//        thread.setDaemon(true);
+//        thread.start();
     }
 
     @Override

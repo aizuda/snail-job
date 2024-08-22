@@ -1,0 +1,53 @@
+
+/*
+ * Copyright 1999-2020 Alibaba Group Holding Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+
+import "google/protobuf/any.proto";
+import "google/protobuf/timestamp.proto";
+
+option java_multiple_files = true;
+option java_package = "com.aizuda.snailjob.common.core.grpc.auto";
+
+message Metadata {
+  string type = 3;
+  map<string, string> headers = 7;
+  string clientIp = 8;
+  string uri = 9;
+}
+
+message GrpcSnailJobRequest {
+  Metadata metadata = 2;
+  google.protobuf.Any body = 3;
+}
+
+message GrpcResult {
+  int32 status = 1;
+  string message = 2;
+  google.protobuf.Any data = 3;
+}
+
+service Request {
+  rpc request (GrpcSnailJobRequest) returns (GrpcResult) {
+  }
+}
+
+//service BiRequestStream {
+//  // Sends a biStreamRequest
+//  rpc requestBiStream (stream Payload) returns (stream Payload) {
+//  }
+//}

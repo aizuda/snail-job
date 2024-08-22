@@ -75,6 +75,9 @@ logging:
 #    level:
 #    ## 方便调试 SQL
 #        com.aizuda.snailjob.template.datasource.persistence.mapper: debug
+grpc:
+  server:
+    port: 1788
 
 snail-job:
   retry-pull-page-size: 1000 # 拉取重试数据的每批次的大小

@@ -14,7 +14,9 @@ import io.netty.handler.codec.http.*;
 import io.netty.util.CharsetUtil;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -46,6 +48,12 @@ public class NettyHttpServerHandler extends SimpleChannelInboundHandler<FullHttp
 
         String content = fullHttpRequest.content().toString(CharsetUtil.UTF_8);
         HttpHeaders headers = fullHttpRequest.headers();
+        Map<String, String> headerMap = new HashMap<>();
+
+        for (final Entry<String, String> header : headers) {
+            headerMap.put(header.getKey(), header.getValue());
+        }
+
         String uri = fullHttpRequest.uri();
         NettyHttpRequest nettyHttpRequest = NettyHttpRequest.builder()
                 .keepAlive(HttpUtil.isKeepAlive(fullHttpRequest))
@@ -55,7 +63,7 @@ public class NettyHttpServerHandler extends SimpleChannelInboundHandler<FullHttp
                 .headers(headers)
                 .content(content)
                 .httpResponse(new com.aizuda.snailjob.client.common.rpc.supports.http.HttpResponse())
-                .httpRequest(new com.aizuda.snailjob.client.common.rpc.supports.http.HttpRequest(headers, uri))
+                .httpRequest(new com.aizuda.snailjob.client.common.rpc.supports.http.HttpRequest(headerMap, uri))
                 .build();
 
         // 执行任务

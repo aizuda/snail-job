@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -50,6 +51,13 @@ public class JsonUtil {
     public static <T> T parseObject(String jsonString, Class<T> clazz) {
         return JsonMapper.toJavaObject(jsonString, clazz);
     }
+
+
+    public static <T> T parseObject(InputStream inputStream, Class<T> clazz) {
+        return JsonMapper.toJavaObject(inputStream, clazz);
+    }
+
+
 
     /**
      * 将JSON 数组字符串转Java 对象集合
@@ -262,6 +270,14 @@ public class JsonUtil {
                 return objectMapper.readValue(jsonString, clazz);
             } catch (Exception e) {
                 throw new SnailJobCommonException("Json转对象失败 参数:{}", jsonString, e);
+            }
+        }
+
+        public static <T> T toJavaObject(InputStream inputStream, Class<T> clazz) {
+            try {
+                return objectMapper.readValue(inputStream, clazz);
+            } catch (IOException e) {
+                throw new SnailJobCommonException("Json转对象失败", e);
             }
         }
 

@@ -1,7 +1,8 @@
 package com.aizuda.snailjob.client.common.rpc.supports.http;
 
-import io.netty.handler.codec.http.HttpHeaders;
 import lombok.Data;
+
+import java.util.Map;
 
 /**
  * @author: opensnail
@@ -10,10 +11,10 @@ import lombok.Data;
  */
 @Data
 public class HttpRequest {
-    private final HttpHeaders headers;
+    private final Map<String, String> headers;
     private final String uri;
 
-    public HttpRequest(HttpHeaders headers, String uri) {
+    public HttpRequest(Map<String, String> headers, String uri) {
         this.headers = headers;
         this.uri = uri;
     }
