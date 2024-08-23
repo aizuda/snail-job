@@ -15,7 +15,7 @@ import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest;
 import com.aizuda.snailjob.common.core.grpc.auto.Metadata;
-import com.aizuda.snailjob.common.core.model.NettyResult;
+import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
 import com.aizuda.snailjob.common.core.model.Result;
 import com.aizuda.snailjob.common.core.model.SnailJobRequest;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
@@ -46,9 +46,9 @@ import java.util.stream.Collectors;
 public class SnailDispatcherRequestHandler {
     private final SnailJobProperties snailJobProperties;
 
-    public NettyResult dispatch(NettyHttpRequest request) {
+    public SnailJobRpcResult dispatch(NettyHttpRequest request) {
 
-        NettyResult nettyResult = new NettyResult();
+        SnailJobRpcResult snailJobRpcResult = new SnailJobRpcResult();
 
         List<HandlerInterceptor> handlerInterceptors = handlerInterceptors();
         SnailJobRequest retryRequest = JsonUtil.parseObject(request.getContent(), SnailJobRequest.class);
@@ -81,7 +81,7 @@ public class SnailDispatcherRequestHandler {
 
             for (final HandlerInterceptor handlerInterceptor : handlerInterceptors) {
                 if (!handlerInterceptor.preHandle(httpRequest, httpResponse, endPointInfo)) {
-                    return nettyResult;
+                    return snailJobRpcResult;
                 }
             }
 
@@ -98,12 +98,12 @@ public class SnailDispatcherRequestHandler {
             }
         } catch (Exception ex) {
             SnailJobLog.LOCAL.error("http request error. [{}]", request.getContent(), ex);
-            nettyResult.setMessage(ex.getMessage()).setStatus(StatusEnum.NO.getStatus());
+            snailJobRpcResult.setMessage(ex.getMessage()).setStatus(StatusEnum.NO.getStatus());
             e = ex;
         } finally {
-            nettyResult.setReqId(retryRequest.getReqId());
+            snailJobRpcResult.setReqId(retryRequest.getReqId());
             if (Objects.nonNull(resultObj)) {
-                nettyResult.setData(resultObj.getData())
+                snailJobRpcResult.setData(resultObj.getData())
                         .setMessage(resultObj.getMessage())
                         .setStatus(resultObj.getStatus());
             }
@@ -113,11 +113,11 @@ public class SnailDispatcherRequestHandler {
             }
         }
 
-        return nettyResult;
+        return snailJobRpcResult;
     }
 
-    public NettyResult dispatch(GrpcRequest request) {
-        NettyResult nettyResult = new NettyResult();
+    public SnailJobRpcResult dispatch(GrpcRequest request) {
+        SnailJobRpcResult snailJobRpcResult = new SnailJobRpcResult();
 
         HttpRequest httpRequest = request.getHttpRequest();
         HttpResponse httpResponse = request.getHttpResponse();
@@ -155,7 +155,7 @@ public class SnailDispatcherRequestHandler {
 
             for (final HandlerInterceptor handlerInterceptor : handlerInterceptors) {
                 if (!handlerInterceptor.preHandle(httpRequest, httpResponse, endPointInfo)) {
-                    return nettyResult;
+                    return snailJobRpcResult;
                 }
             }
 
@@ -172,12 +172,12 @@ public class SnailDispatcherRequestHandler {
             }
         } catch (Exception ex) {
             SnailJobLog.LOCAL.error("http request error. [{}]", snailJobRequest, ex);
-            nettyResult.setMessage(ex.getMessage()).setStatus(StatusEnum.NO.getStatus());
+            snailJobRpcResult.setMessage(ex.getMessage()).setStatus(StatusEnum.NO.getStatus());
             e = ex;
         } finally {
-            nettyResult.setReqId(0);
+            snailJobRpcResult.setReqId(0);
             if (Objects.nonNull(resultObj)) {
-                nettyResult.setData(resultObj.getData())
+                snailJobRpcResult.setData(resultObj.getData())
                     .setMessage(resultObj.getMessage())
                     .setStatus(resultObj.getStatus());
             }
@@ -187,7 +187,7 @@ public class SnailDispatcherRequestHandler {
             }
         }
 
-        return nettyResult;
+        return snailJobRpcResult;
     }
 
     private static List<HandlerInterceptor> handlerInterceptors() {

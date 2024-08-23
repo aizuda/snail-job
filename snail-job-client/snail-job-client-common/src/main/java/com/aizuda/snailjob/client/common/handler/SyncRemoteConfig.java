@@ -4,7 +4,7 @@ import com.aizuda.snailjob.client.common.Lifecycle;
 import com.aizuda.snailjob.client.common.NettyClient;
 import com.aizuda.snailjob.client.common.cache.GroupVersionCache;
 import com.aizuda.snailjob.client.common.rpc.client.RequestBuilder;
-import com.aizuda.snailjob.common.core.model.NettyResult;
+import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.model.dto.ConfigDTO;
@@ -31,7 +31,7 @@ public class SyncRemoteConfig implements Lifecycle {
 
         SCHEDULE_EXECUTOR.scheduleAtFixedRate(() -> {
             try {
-                NettyClient client = RequestBuilder.<NettyClient, NettyResult>newBuilder()
+                NettyClient client = RequestBuilder.<NettyClient, SnailJobRpcResult>newBuilder()
                         .client(NettyClient.class)
                         .timeout(1000L)
                         .callback(nettyResult -> {

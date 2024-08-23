@@ -11,19 +11,19 @@ import lombok.experimental.Accessors;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Accessors(chain = true)
-public class NettyResult extends Result<Object> {
+public class SnailJobRpcResult extends Result<Object> {
 
     private long reqId;
 
-    public NettyResult(int status, String message, Object data, long reqId) {
+    public SnailJobRpcResult(int status, String message, Object data, long reqId) {
         super(status, message, data);
         this.reqId = reqId;
     }
 
-    public NettyResult() {
+    public SnailJobRpcResult() {
     }
 
-    public NettyResult(Object data, long reqId) {
+    public SnailJobRpcResult(Object data, long reqId) {
         super(data);
         this.reqId = reqId;
     }

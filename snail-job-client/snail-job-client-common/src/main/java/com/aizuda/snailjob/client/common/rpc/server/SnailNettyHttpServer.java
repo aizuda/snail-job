@@ -7,6 +7,7 @@ import com.aizuda.snailjob.client.common.exception.SnailJobClientException;
 import com.aizuda.snailjob.client.common.rpc.supports.handler.NettyHttpServerHandler;
 import com.aizuda.snailjob.client.common.rpc.supports.handler.SnailDispatcherRequestHandler;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
+import com.aizuda.snailjob.common.core.enums.RpcTypeEnum;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -95,6 +96,10 @@ public class SnailNettyHttpServer implements Runnable, Lifecycle {
 
     @Override
     public void start() {
+        if (RpcTypeEnum.NETTY != snailJobProperties.getRpcType()) {
+            return;
+        }
+
         thread = new Thread(this);
         thread.setDaemon(true);
         thread.start();

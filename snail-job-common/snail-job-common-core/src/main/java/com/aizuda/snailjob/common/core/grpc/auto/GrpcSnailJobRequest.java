@@ -39,6 +39,17 @@ private static final long serialVersionUID = 0L;
   }
 
   private int bitField0_;
+  public static final int REQID_FIELD_NUMBER = 1;
+  private long reqId_ = 0L;
+  /**
+   * <code>int64 reqId = 1;</code>
+   * @return The reqId.
+   */
+  @java.lang.Override
+  public long getReqId() {
+    return reqId_;
+  }
+
   public static final int METADATA_FIELD_NUMBER = 2;
   private com.aizuda.snailjob.common.core.grpc.auto.Metadata metadata_;
   /**
@@ -105,6 +116,9 @@ private static final long serialVersionUID = 0L;
   @java.lang.Override
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
+    if (reqId_ != 0L) {
+      output.writeInt64(1, reqId_);
+    }
     if (((bitField0_ & 0x00000001) != 0)) {
       output.writeMessage(2, getMetadata());
     }
@@ -120,6 +134,10 @@ private static final long serialVersionUID = 0L;
     if (size != -1) return size;
 
     size = 0;
+    if (reqId_ != 0L) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeInt64Size(1, reqId_);
+    }
     if (((bitField0_ & 0x00000001) != 0)) {
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(2, getMetadata());
@@ -143,6 +161,8 @@ private static final long serialVersionUID = 0L;
     }
     com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest other = (com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest) obj;
 
+    if (getReqId()
+        != other.getReqId()) return false;
     if (hasMetadata() != other.hasMetadata()) return false;
     if (hasMetadata()) {
       if (!getMetadata()
@@ -164,6 +184,9 @@ private static final long serialVersionUID = 0L;
     }
     int hash = 41;
     hash = (19 * hash) + getDescriptor().hashCode();
+    hash = (37 * hash) + REQID_FIELD_NUMBER;
+    hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+        getReqId());
     if (hasMetadata()) {
       hash = (37 * hash) + METADATA_FIELD_NUMBER;
       hash = (53 * hash) + getMetadata().hashCode();
@@ -310,6 +333,7 @@ private static final long serialVersionUID = 0L;
     public Builder clear() {
       super.clear();
       bitField0_ = 0;
+      reqId_ = 0L;
       metadata_ = null;
       if (metadataBuilder_ != null) {
         metadataBuilder_.dispose();
@@ -353,14 +377,17 @@ private static final long serialVersionUID = 0L;
 
     private void buildPartial0(com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest result) {
       int from_bitField0_ = bitField0_;
-      int to_bitField0_ = 0;
       if (((from_bitField0_ & 0x00000001) != 0)) {
+        result.reqId_ = reqId_;
+      }
+      int to_bitField0_ = 0;
+      if (((from_bitField0_ & 0x00000002) != 0)) {
         result.metadata_ = metadataBuilder_ == null
             ? metadata_
             : metadataBuilder_.build();
         to_bitField0_ |= 0x00000001;
       }
-      if (((from_bitField0_ & 0x00000002) != 0)) {
+      if (((from_bitField0_ & 0x00000004) != 0)) {
         result.body_ = bodyBuilder_ == null
             ? body_
             : bodyBuilder_.build();
@@ -413,6 +440,9 @@ private static final long serialVersionUID = 0L;
 
     public Builder mergeFrom(com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest other) {
       if (other == com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest.getDefaultInstance()) return this;
+      if (other.getReqId() != 0L) {
+        setReqId(other.getReqId());
+      }
       if (other.hasMetadata()) {
         mergeMetadata(other.getMetadata());
       }
@@ -445,18 +475,23 @@ private static final long serialVersionUID = 0L;
             case 0:
               done = true;
               break;
+            case 8: {
+              reqId_ = input.readInt64();
+              bitField0_ |= 0x00000001;
+              break;
+            } // case 8
             case 18: {
               input.readMessage(
                   getMetadataFieldBuilder().getBuilder(),
                   extensionRegistry);
-              bitField0_ |= 0x00000001;
+              bitField0_ |= 0x00000002;
               break;
             } // case 18
             case 26: {
               input.readMessage(
                   getBodyFieldBuilder().getBuilder(),
                   extensionRegistry);
-              bitField0_ |= 0x00000002;
+              bitField0_ |= 0x00000004;
               break;
             } // case 26
             default: {
@@ -476,6 +511,38 @@ private static final long serialVersionUID = 0L;
     }
     private int bitField0_;
 
+    private long reqId_ ;
+    /**
+     * <code>int64 reqId = 1;</code>
+     * @return The reqId.
+     */
+    @java.lang.Override
+    public long getReqId() {
+      return reqId_;
+    }
+    /**
+     * <code>int64 reqId = 1;</code>
+     * @param value The reqId to set.
+     * @return This builder for chaining.
+     */
+    public Builder setReqId(long value) {
+
+      reqId_ = value;
+      bitField0_ |= 0x00000001;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>int64 reqId = 1;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearReqId() {
+      bitField0_ = (bitField0_ & ~0x00000001);
+      reqId_ = 0L;
+      onChanged();
+      return this;
+    }
+
     private com.aizuda.snailjob.common.core.grpc.auto.Metadata metadata_;
     private com.google.protobuf.SingleFieldBuilderV3<
         com.aizuda.snailjob.common.core.grpc.auto.Metadata, com.aizuda.snailjob.common.core.grpc.auto.Metadata.Builder, com.aizuda.snailjob.common.core.grpc.auto.MetadataOrBuilder> metadataBuilder_;
@@ -484,7 +551,7 @@ private static final long serialVersionUID = 0L;
      * @return Whether the metadata field is set.
      */
     public boolean hasMetadata() {
-      return ((bitField0_ & 0x00000001) != 0);
+      return ((bitField0_ & 0x00000002) != 0);
     }
     /**
      * <code>.Metadata metadata = 2;</code>
@@ -509,7 +576,7 @@ private static final long serialVersionUID = 0L;
       } else {
         metadataBuilder_.setMessage(value);
       }
-      bitField0_ |= 0x00000001;
+      bitField0_ |= 0x00000002;
       onChanged();
       return this;
     }
@@ -523,7 +590,7 @@ private static final long serialVersionUID = 0L;
       } else {
         metadataBuilder_.setMessage(builderForValue.build());
       }
-      bitField0_ |= 0x00000001;
+      bitField0_ |= 0x00000002;
       onChanged();
       return this;
     }
@@ -532,7 +599,7 @@ private static final long serialVersionUID = 0L;
      */
     public Builder mergeMetadata(com.aizuda.snailjob.common.core.grpc.auto.Metadata value) {
       if (metadataBuilder_ == null) {
-        if (((bitField0_ & 0x00000001) != 0) &&
+        if (((bitField0_ & 0x00000002) != 0) &&
           metadata_ != null &&
           metadata_ != com.aizuda.snailjob.common.core.grpc.auto.Metadata.getDefaultInstance()) {
           getMetadataBuilder().mergeFrom(value);
@@ -543,7 +610,7 @@ private static final long serialVersionUID = 0L;
         metadataBuilder_.mergeFrom(value);
       }
       if (metadata_ != null) {
-        bitField0_ |= 0x00000001;
+        bitField0_ |= 0x00000002;
         onChanged();
       }
       return this;
@@ -552,7 +619,7 @@ private static final long serialVersionUID = 0L;
      * <code>.Metadata metadata = 2;</code>
      */
     public Builder clearMetadata() {
-      bitField0_ = (bitField0_ & ~0x00000001);
+      bitField0_ = (bitField0_ & ~0x00000002);
       metadata_ = null;
       if (metadataBuilder_ != null) {
         metadataBuilder_.dispose();
@@ -565,7 +632,7 @@ private static final long serialVersionUID = 0L;
      * <code>.Metadata metadata = 2;</code>
      */
     public com.aizuda.snailjob.common.core.grpc.auto.Metadata.Builder getMetadataBuilder() {
-      bitField0_ |= 0x00000001;
+      bitField0_ |= 0x00000002;
       onChanged();
       return getMetadataFieldBuilder().getBuilder();
     }
@@ -605,7 +672,7 @@ private static final long serialVersionUID = 0L;
      * @return Whether the body field is set.
      */
     public boolean hasBody() {
-      return ((bitField0_ & 0x00000002) != 0);
+      return ((bitField0_ & 0x00000004) != 0);
     }
     /**
      * <code>.google.protobuf.Any body = 3;</code>
@@ -630,7 +697,7 @@ private static final long serialVersionUID = 0L;
       } else {
         bodyBuilder_.setMessage(value);
       }
-      bitField0_ |= 0x00000002;
+      bitField0_ |= 0x00000004;
       onChanged();
       return this;
     }
@@ -644,7 +711,7 @@ private static final long serialVersionUID = 0L;
       } else {
         bodyBuilder_.setMessage(builderForValue.build());
       }
-      bitField0_ |= 0x00000002;
+      bitField0_ |= 0x00000004;
       onChanged();
       return this;
     }
@@ -653,7 +720,7 @@ private static final long serialVersionUID = 0L;
      */
     public Builder mergeBody(com.google.protobuf.Any value) {
       if (bodyBuilder_ == null) {
-        if (((bitField0_ & 0x00000002) != 0) &&
+        if (((bitField0_ & 0x00000004) != 0) &&
           body_ != null &&
           body_ != com.google.protobuf.Any.getDefaultInstance()) {
           getBodyBuilder().mergeFrom(value);
@@ -664,7 +731,7 @@ private static final long serialVersionUID = 0L;
         bodyBuilder_.mergeFrom(value);
       }
       if (body_ != null) {
-        bitField0_ |= 0x00000002;
+        bitField0_ |= 0x00000004;
         onChanged();
       }
       return this;
@@ -673,7 +740,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.Any body = 3;</code>
      */
     public Builder clearBody() {
-      bitField0_ = (bitField0_ & ~0x00000002);
+      bitField0_ = (bitField0_ & ~0x00000004);
       body_ = null;
       if (bodyBuilder_ != null) {
         bodyBuilder_.dispose();
@@ -686,7 +753,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.Any body = 3;</code>
      */
     public com.google.protobuf.Any.Builder getBodyBuilder() {
-      bitField0_ |= 0x00000002;
+      bitField0_ |= 0x00000004;
       onChanged();
       return getBodyFieldBuilder().getBuilder();
     }

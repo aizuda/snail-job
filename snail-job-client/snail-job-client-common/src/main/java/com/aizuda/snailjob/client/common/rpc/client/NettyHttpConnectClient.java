@@ -1,7 +1,9 @@
 package com.aizuda.snailjob.client.common.rpc.client;
 
 import com.aizuda.snailjob.client.common.Lifecycle;
+import com.aizuda.snailjob.client.common.config.SnailJobProperties;
 import com.aizuda.snailjob.client.common.handler.ClientRegister;
+import com.aizuda.snailjob.common.core.enums.RpcTypeEnum;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
@@ -12,6 +14,7 @@ import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.timeout.IdleStateHandler;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -30,15 +33,20 @@ import java.util.concurrent.TimeUnit;
  */
 @Getter
 @Component
+@RequiredArgsConstructor
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class NettyHttpConnectClient implements Lifecycle {
-
+    private final SnailJobProperties snailJobProperties;
     private static final NioEventLoopGroup nioEventLoopGroup = new NioEventLoopGroup();
     private static final Bootstrap bootstrap = new Bootstrap();
     private Channel channel;
 
     @Override
     public void start() {
+
+        if (RpcTypeEnum.NETTY != snailJobProperties.getRpcType()) {
+            return;
+        }
 
         try {
             final NettyHttpConnectClient thisClient = this;

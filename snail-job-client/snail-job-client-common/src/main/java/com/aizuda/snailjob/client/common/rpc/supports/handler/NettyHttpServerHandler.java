@@ -1,10 +1,11 @@
 package com.aizuda.snailjob.client.common.rpc.supports.handler;
 
 import com.aizuda.snailjob.client.common.config.SnailJobProperties;
-import com.aizuda.snailjob.client.common.config.SnailJobProperties.DispatcherThreadPool;
+import com.aizuda.snailjob.client.common.config.SnailJobProperties.RpcServerProperties;
+import com.aizuda.snailjob.client.common.config.SnailJobProperties.ThreadPoolConfig;
 import com.aizuda.snailjob.client.common.rpc.supports.http.HttpResponse;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
-import com.aizuda.snailjob.common.core.model.NettyResult;
+import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
 import com.aizuda.snailjob.common.core.model.SnailJobRequest;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import io.netty.buffer.Unpooled;
@@ -35,8 +36,8 @@ public class NettyHttpServerHandler extends SimpleChannelInboundHandler<FullHttp
         this.dispatcher = snailDispatcherRequestHandler;
 
         // 获取线程池配置
-        DispatcherThreadPool threadPool = snailJobProperties.getDispatcherThreadPool();
-
+        RpcServerProperties rpcServerProperties = snailJobProperties.getServerRpc();
+        ThreadPoolConfig threadPool = rpcServerProperties.getDispatcherTp();
         dispatcherThreadPool = new ThreadPoolExecutor(
                 threadPool.getCorePoolSize(), threadPool.getMaximumPoolSize(), threadPool.getKeepAliveTime(),
                 threadPool.getTimeUnit(), new LinkedBlockingQueue<>(threadPool.getQueueCapacity()),
@@ -68,17 +69,17 @@ public class NettyHttpServerHandler extends SimpleChannelInboundHandler<FullHttp
 
         // 执行任务
         dispatcherThreadPool.execute(() -> {
-            NettyResult nettyResult = null;
+            SnailJobRpcResult snailJobRpcResult = null;
             try {
-                nettyResult = dispatcher.dispatch(nettyHttpRequest);
+                snailJobRpcResult = dispatcher.dispatch(nettyHttpRequest);
             } catch (Exception e) {
                 SnailJobRequest retryRequest = JsonUtil.parseObject(content, SnailJobRequest.class);
-                nettyResult = new NettyResult(StatusEnum.NO.getStatus(), e.getMessage(), null, retryRequest.getReqId());
+                snailJobRpcResult = new SnailJobRpcResult(StatusEnum.NO.getStatus(), e.getMessage(), null, retryRequest.getReqId());
             } finally {
                 writeResponse(channelHandlerContext,
                         HttpUtil.isKeepAlive(fullHttpRequest),
                         nettyHttpRequest.getHttpResponse(),
-                        JsonUtil.toJsonString(nettyResult)
+                        JsonUtil.toJsonString(snailJobRpcResult)
                 );
             }
         });

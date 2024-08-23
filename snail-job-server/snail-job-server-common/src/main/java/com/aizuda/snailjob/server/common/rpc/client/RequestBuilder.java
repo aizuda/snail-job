@@ -1,10 +1,15 @@
 package com.aizuda.snailjob.server.common.rpc.client;
 
 import cn.hutool.core.lang.Assert;
+import com.aizuda.snailjob.common.core.constant.SystemConstants;
+import com.aizuda.snailjob.common.core.context.SnailSpringContext;
+import com.aizuda.snailjob.common.core.enums.RpcTypeEnum;
+import com.aizuda.snailjob.server.common.config.SystemProperties;
 import com.aizuda.snailjob.server.common.dto.RegisterNodeInfo;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.github.rholder.retry.RetryListener;
 
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 import java.util.Objects;
 
@@ -105,17 +110,22 @@ public class RequestBuilder<T, R> {
             throw new SnailJobServerException("class not found exception to: [{}]", clintInterface.getName());
         }
 
-        // todo 测试先注释
-        RpcClientInvokeHandler clientInvokeHandler = new RpcClientInvokeHandler(
+        SystemProperties properties = SnailSpringContext.getBean(SystemProperties.class);
+        RpcTypeEnum rpcType = properties.getRpcType();
+
+        InvocationHandler invocationHandler;
+        if (Objects.isNull(rpcType) || RpcTypeEnum.NETTY == rpcType) {
+            invocationHandler = new RpcClientInvokeHandler(
                 nodeInfo.getGroupName(), nodeInfo, failRetry, retryTimes, retryInterval,
                 retryListener, routeKey, allocKey, failover, executorTimeout, nodeInfo.getNamespaceId());
-
-        GrpcClientInvokeHandler grpcClientInvokeHandler = new GrpcClientInvokeHandler(
-            nodeInfo.getGroupName(), nodeInfo, failRetry, retryTimes, retryInterval,
-            retryListener, routeKey, allocKey, failover, executorTimeout, nodeInfo.getNamespaceId());
+        } else {
+            invocationHandler = new GrpcClientInvokeHandler(
+                nodeInfo.getGroupName(), nodeInfo, failRetry, retryTimes, retryInterval,
+                retryListener, routeKey, allocKey, failover, executorTimeout, nodeInfo.getNamespaceId());
+        }
 
         return (T) Proxy.newProxyInstance(clintInterface.getClassLoader(),
-                new Class[]{clintInterface}, grpcClientInvokeHandler);
+                new Class[]{clintInterface}, invocationHandler);
     }
 
 }

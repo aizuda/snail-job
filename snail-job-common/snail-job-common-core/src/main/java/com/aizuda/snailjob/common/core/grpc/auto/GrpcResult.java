@@ -40,10 +40,21 @@ private static final long serialVersionUID = 0L;
   }
 
   private int bitField0_;
-  public static final int STATUS_FIELD_NUMBER = 1;
+  public static final int REQID_FIELD_NUMBER = 1;
+  private long reqId_ = 0L;
+  /**
+   * <code>int64 reqId = 1;</code>
+   * @return The reqId.
+   */
+  @java.lang.Override
+  public long getReqId() {
+    return reqId_;
+  }
+
+  public static final int STATUS_FIELD_NUMBER = 2;
   private int status_ = 0;
   /**
-   * <code>int32 status = 1;</code>
+   * <code>int32 status = 2;</code>
    * @return The status.
    */
   @java.lang.Override
@@ -51,11 +62,11 @@ private static final long serialVersionUID = 0L;
     return status_;
   }
 
-  public static final int MESSAGE_FIELD_NUMBER = 2;
+  public static final int MESSAGE_FIELD_NUMBER = 3;
   @SuppressWarnings("serial")
   private volatile java.lang.Object message_ = "";
   /**
-   * <code>string message = 2;</code>
+   * <code>string message = 3;</code>
    * @return The message.
    */
   @java.lang.Override
@@ -72,7 +83,7 @@ private static final long serialVersionUID = 0L;
     }
   }
   /**
-   * <code>string message = 2;</code>
+   * <code>string message = 3;</code>
    * @return The bytes for message.
    */
   @java.lang.Override
@@ -90,10 +101,10 @@ private static final long serialVersionUID = 0L;
     }
   }
 
-  public static final int DATA_FIELD_NUMBER = 3;
+  public static final int DATA_FIELD_NUMBER = 4;
   private com.google.protobuf.Any data_;
   /**
-   * <code>.google.protobuf.Any data = 3;</code>
+   * <code>.google.protobuf.Any data = 4;</code>
    * @return Whether the data field is set.
    */
   @java.lang.Override
@@ -101,7 +112,7 @@ private static final long serialVersionUID = 0L;
     return ((bitField0_ & 0x00000001) != 0);
   }
   /**
-   * <code>.google.protobuf.Any data = 3;</code>
+   * <code>.google.protobuf.Any data = 4;</code>
    * @return The data.
    */
   @java.lang.Override
@@ -109,7 +120,7 @@ private static final long serialVersionUID = 0L;
     return data_ == null ? com.google.protobuf.Any.getDefaultInstance() : data_;
   }
   /**
-   * <code>.google.protobuf.Any data = 3;</code>
+   * <code>.google.protobuf.Any data = 4;</code>
    */
   @java.lang.Override
   public com.google.protobuf.AnyOrBuilder getDataOrBuilder() {
@@ -130,14 +141,17 @@ private static final long serialVersionUID = 0L;
   @java.lang.Override
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
+    if (reqId_ != 0L) {
+      output.writeInt64(1, reqId_);
+    }
     if (status_ != 0) {
-      output.writeInt32(1, status_);
+      output.writeInt32(2, status_);
     }
     if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(message_)) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 2, message_);
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 3, message_);
     }
     if (((bitField0_ & 0x00000001) != 0)) {
-      output.writeMessage(3, getData());
+      output.writeMessage(4, getData());
     }
     getUnknownFields().writeTo(output);
   }
@@ -148,16 +162,20 @@ private static final long serialVersionUID = 0L;
     if (size != -1) return size;
 
     size = 0;
+    if (reqId_ != 0L) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeInt64Size(1, reqId_);
+    }
     if (status_ != 0) {
       size += com.google.protobuf.CodedOutputStream
-        .computeInt32Size(1, status_);
+        .computeInt32Size(2, status_);
     }
     if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(message_)) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, message_);
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, message_);
     }
     if (((bitField0_ & 0x00000001) != 0)) {
       size += com.google.protobuf.CodedOutputStream
-        .computeMessageSize(3, getData());
+        .computeMessageSize(4, getData());
     }
     size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
@@ -174,6 +192,8 @@ private static final long serialVersionUID = 0L;
     }
     com.aizuda.snailjob.common.core.grpc.auto.GrpcResult other = (com.aizuda.snailjob.common.core.grpc.auto.GrpcResult) obj;
 
+    if (getReqId()
+        != other.getReqId()) return false;
     if (getStatus()
         != other.getStatus()) return false;
     if (!getMessage()
@@ -194,6 +214,9 @@ private static final long serialVersionUID = 0L;
     }
     int hash = 41;
     hash = (19 * hash) + getDescriptor().hashCode();
+    hash = (37 * hash) + REQID_FIELD_NUMBER;
+    hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+        getReqId());
     hash = (37 * hash) + STATUS_FIELD_NUMBER;
     hash = (53 * hash) + getStatus();
     hash = (37 * hash) + MESSAGE_FIELD_NUMBER;
@@ -339,6 +362,7 @@ private static final long serialVersionUID = 0L;
     public Builder clear() {
       super.clear();
       bitField0_ = 0;
+      reqId_ = 0L;
       status_ = 0;
       message_ = "";
       data_ = null;
@@ -380,13 +404,16 @@ private static final long serialVersionUID = 0L;
     private void buildPartial0(com.aizuda.snailjob.common.core.grpc.auto.GrpcResult result) {
       int from_bitField0_ = bitField0_;
       if (((from_bitField0_ & 0x00000001) != 0)) {
-        result.status_ = status_;
+        result.reqId_ = reqId_;
       }
       if (((from_bitField0_ & 0x00000002) != 0)) {
+        result.status_ = status_;
+      }
+      if (((from_bitField0_ & 0x00000004) != 0)) {
         result.message_ = message_;
       }
       int to_bitField0_ = 0;
-      if (((from_bitField0_ & 0x00000004) != 0)) {
+      if (((from_bitField0_ & 0x00000008) != 0)) {
         result.data_ = dataBuilder_ == null
             ? data_
             : dataBuilder_.build();
@@ -439,12 +466,15 @@ private static final long serialVersionUID = 0L;
 
     public Builder mergeFrom(com.aizuda.snailjob.common.core.grpc.auto.GrpcResult other) {
       if (other == com.aizuda.snailjob.common.core.grpc.auto.GrpcResult.getDefaultInstance()) return this;
+      if (other.getReqId() != 0L) {
+        setReqId(other.getReqId());
+      }
       if (other.getStatus() != 0) {
         setStatus(other.getStatus());
       }
       if (!other.getMessage().isEmpty()) {
         message_ = other.message_;
-        bitField0_ |= 0x00000002;
+        bitField0_ |= 0x00000004;
         onChanged();
       }
       if (other.hasData()) {
@@ -477,22 +507,27 @@ private static final long serialVersionUID = 0L;
               done = true;
               break;
             case 8: {
-              status_ = input.readInt32();
+              reqId_ = input.readInt64();
               bitField0_ |= 0x00000001;
               break;
             } // case 8
-            case 18: {
-              message_ = input.readStringRequireUtf8();
+            case 16: {
+              status_ = input.readInt32();
               bitField0_ |= 0x00000002;
               break;
-            } // case 18
+            } // case 16
             case 26: {
-              input.readMessage(
-                  getDataFieldBuilder().getBuilder(),
-                  extensionRegistry);
+              message_ = input.readStringRequireUtf8();
               bitField0_ |= 0x00000004;
               break;
             } // case 26
+            case 34: {
+              input.readMessage(
+                  getDataFieldBuilder().getBuilder(),
+                  extensionRegistry);
+              bitField0_ |= 0x00000008;
+              break;
+            } // case 34
             default: {
               if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                 done = true; // was an endgroup tag
@@ -510,9 +545,41 @@ private static final long serialVersionUID = 0L;
     }
     private int bitField0_;
 
+    private long reqId_ ;
+    /**
+     * <code>int64 reqId = 1;</code>
+     * @return The reqId.
+     */
+    @java.lang.Override
+    public long getReqId() {
+      return reqId_;
+    }
+    /**
+     * <code>int64 reqId = 1;</code>
+     * @param value The reqId to set.
+     * @return This builder for chaining.
+     */
+    public Builder setReqId(long value) {
+
+      reqId_ = value;
+      bitField0_ |= 0x00000001;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>int64 reqId = 1;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearReqId() {
+      bitField0_ = (bitField0_ & ~0x00000001);
+      reqId_ = 0L;
+      onChanged();
+      return this;
+    }
+
     private int status_ ;
     /**
-     * <code>int32 status = 1;</code>
+     * <code>int32 status = 2;</code>
      * @return The status.
      */
     @java.lang.Override
@@ -520,23 +587,23 @@ private static final long serialVersionUID = 0L;
       return status_;
     }
     /**
-     * <code>int32 status = 1;</code>
+     * <code>int32 status = 2;</code>
      * @param value The status to set.
      * @return This builder for chaining.
      */
     public Builder setStatus(int value) {
 
       status_ = value;
-      bitField0_ |= 0x00000001;
+      bitField0_ |= 0x00000002;
       onChanged();
       return this;
     }
     /**
-     * <code>int32 status = 1;</code>
+     * <code>int32 status = 2;</code>
      * @return This builder for chaining.
      */
     public Builder clearStatus() {
-      bitField0_ = (bitField0_ & ~0x00000001);
+      bitField0_ = (bitField0_ & ~0x00000002);
       status_ = 0;
       onChanged();
       return this;
@@ -544,7 +611,7 @@ private static final long serialVersionUID = 0L;
 
     private java.lang.Object message_ = "";
     /**
-     * <code>string message = 2;</code>
+     * <code>string message = 3;</code>
      * @return The message.
      */
     public java.lang.String getMessage() {
@@ -560,7 +627,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>string message = 2;</code>
+     * <code>string message = 3;</code>
      * @return The bytes for message.
      */
     public com.google.protobuf.ByteString
@@ -577,7 +644,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>string message = 2;</code>
+     * <code>string message = 3;</code>
      * @param value The message to set.
      * @return This builder for chaining.
      */
@@ -585,22 +652,22 @@ private static final long serialVersionUID = 0L;
         java.lang.String value) {
       if (value == null) { throw new NullPointerException(); }
       message_ = value;
-      bitField0_ |= 0x00000002;
+      bitField0_ |= 0x00000004;
       onChanged();
       return this;
     }
     /**
-     * <code>string message = 2;</code>
+     * <code>string message = 3;</code>
      * @return This builder for chaining.
      */
     public Builder clearMessage() {
       message_ = getDefaultInstance().getMessage();
-      bitField0_ = (bitField0_ & ~0x00000002);
+      bitField0_ = (bitField0_ & ~0x00000004);
       onChanged();
       return this;
     }
     /**
-     * <code>string message = 2;</code>
+     * <code>string message = 3;</code>
      * @param value The bytes for message to set.
      * @return This builder for chaining.
      */
@@ -609,7 +676,7 @@ private static final long serialVersionUID = 0L;
       if (value == null) { throw new NullPointerException(); }
       checkByteStringIsUtf8(value);
       message_ = value;
-      bitField0_ |= 0x00000002;
+      bitField0_ |= 0x00000004;
       onChanged();
       return this;
     }
@@ -618,14 +685,14 @@ private static final long serialVersionUID = 0L;
     private com.google.protobuf.SingleFieldBuilderV3<
         com.google.protobuf.Any, com.google.protobuf.Any.Builder, com.google.protobuf.AnyOrBuilder> dataBuilder_;
     /**
-     * <code>.google.protobuf.Any data = 3;</code>
+     * <code>.google.protobuf.Any data = 4;</code>
      * @return Whether the data field is set.
      */
     public boolean hasData() {
-      return ((bitField0_ & 0x00000004) != 0);
+      return ((bitField0_ & 0x00000008) != 0);
     }
     /**
-     * <code>.google.protobuf.Any data = 3;</code>
+     * <code>.google.protobuf.Any data = 4;</code>
      * @return The data.
      */
     public com.google.protobuf.Any getData() {
@@ -636,7 +703,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>.google.protobuf.Any data = 3;</code>
+     * <code>.google.protobuf.Any data = 4;</code>
      */
     public Builder setData(com.google.protobuf.Any value) {
       if (dataBuilder_ == null) {
@@ -647,12 +714,12 @@ private static final long serialVersionUID = 0L;
       } else {
         dataBuilder_.setMessage(value);
       }
-      bitField0_ |= 0x00000004;
+      bitField0_ |= 0x00000008;
       onChanged();
       return this;
     }
     /**
-     * <code>.google.protobuf.Any data = 3;</code>
+     * <code>.google.protobuf.Any data = 4;</code>
      */
     public Builder setData(
         com.google.protobuf.Any.Builder builderForValue) {
@@ -661,16 +728,16 @@ private static final long serialVersionUID = 0L;
       } else {
         dataBuilder_.setMessage(builderForValue.build());
       }
-      bitField0_ |= 0x00000004;
+      bitField0_ |= 0x00000008;
       onChanged();
       return this;
     }
     /**
-     * <code>.google.protobuf.Any data = 3;</code>
+     * <code>.google.protobuf.Any data = 4;</code>
      */
     public Builder mergeData(com.google.protobuf.Any value) {
       if (dataBuilder_ == null) {
-        if (((bitField0_ & 0x00000004) != 0) &&
+        if (((bitField0_ & 0x00000008) != 0) &&
           data_ != null &&
           data_ != com.google.protobuf.Any.getDefaultInstance()) {
           getDataBuilder().mergeFrom(value);
@@ -681,16 +748,16 @@ private static final long serialVersionUID = 0L;
         dataBuilder_.mergeFrom(value);
       }
       if (data_ != null) {
-        bitField0_ |= 0x00000004;
+        bitField0_ |= 0x00000008;
         onChanged();
       }
       return this;
     }
     /**
-     * <code>.google.protobuf.Any data = 3;</code>
+     * <code>.google.protobuf.Any data = 4;</code>
      */
     public Builder clearData() {
-      bitField0_ = (bitField0_ & ~0x00000004);
+      bitField0_ = (bitField0_ & ~0x00000008);
       data_ = null;
       if (dataBuilder_ != null) {
         dataBuilder_.dispose();
@@ -700,15 +767,15 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.google.protobuf.Any data = 3;</code>
+     * <code>.google.protobuf.Any data = 4;</code>
      */
     public com.google.protobuf.Any.Builder getDataBuilder() {
-      bitField0_ |= 0x00000004;
+      bitField0_ |= 0x00000008;
       onChanged();
       return getDataFieldBuilder().getBuilder();
     }
     /**
-     * <code>.google.protobuf.Any data = 3;</code>
+     * <code>.google.protobuf.Any data = 4;</code>
      */
     public com.google.protobuf.AnyOrBuilder getDataOrBuilder() {
       if (dataBuilder_ != null) {
@@ -719,7 +786,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>.google.protobuf.Any data = 3;</code>
+     * <code>.google.protobuf.Any data = 4;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
         com.google.protobuf.Any, com.google.protobuf.Any.Builder, com.google.protobuf.AnyOrBuilder> 

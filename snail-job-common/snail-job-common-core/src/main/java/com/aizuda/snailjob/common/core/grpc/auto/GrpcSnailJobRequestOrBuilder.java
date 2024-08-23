@@ -8,6 +8,12 @@ public interface GrpcSnailJobRequestOrBuilder extends
     com.google.protobuf.MessageOrBuilder {
 
   /**
+   * <code>int64 reqId = 1;</code>
+   * @return The reqId.
+   */
+  long getReqId();
+
+  /**
    * <code>.Metadata metadata = 2;</code>
    * @return Whether the metadata field is set.
    */

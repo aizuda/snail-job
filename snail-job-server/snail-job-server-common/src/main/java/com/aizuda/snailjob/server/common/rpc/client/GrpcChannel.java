@@ -1,28 +1,33 @@
 package com.aizuda.snailjob.server.common.rpc.client;
 
+import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.grpc.auto.GrpcResult;
 import com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest;
 import com.aizuda.snailjob.common.core.grpc.auto.Metadata;
 import com.aizuda.snailjob.common.log.SnailJobLog;
+import com.aizuda.snailjob.server.common.config.SystemProperties;
+import com.aizuda.snailjob.server.common.config.SystemProperties.RpcClientProperties;
+import com.aizuda.snailjob.server.common.config.SystemProperties.ThreadPoolConfig;
 import com.aizuda.snailjob.server.common.triple.Pair;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.protobuf.Any;
 import com.google.protobuf.UnsafeByteOperations;
+import io.grpc.DecompressorRegistry;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.MethodDescriptor;
 import io.grpc.protobuf.ProtoUtils;
-import io.netty.bootstrap.Bootstrap;
-import io.netty.handler.codec.http.HttpHeaders;
-import io.netty.handler.codec.http.HttpMethod;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.ConnectException;
 import java.nio.channels.ClosedChannelException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author opensnail
@@ -34,6 +39,7 @@ public class GrpcChannel {
     private GrpcChannel() {
     }
 
+    private static final ThreadPoolExecutor grpcExecutor = createGrpcExecutor();
     private static ConcurrentHashMap<Pair<String, String>, ManagedChannel> CHANNEL_MAP = new ConcurrentHashMap<>(16);
 
     public static void setChannel(String hostId, String ip, ManagedChannel channel) {
@@ -52,14 +58,17 @@ public class GrpcChannel {
     /**
      * 发送数据
      *
-     * @param url    url地址
-     * @param body   请求的消息体
+     * @param url   url地址
+     * @param body  请求的消息体
+     * @param reqId
      * @throws InterruptedException
      */
-    public static ListenableFuture<GrpcResult> send(String hostId, String hostIp, Integer port, String url, String body, Map<String, String> headersMap) throws InterruptedException {
+    public static ListenableFuture<GrpcResult> send(String hostId, String hostIp, Integer port, String url, String body, Map<String, String> headersMap,
+        final long reqId) {
 
         ManagedChannel channel = CHANNEL_MAP.get(Pair.of(hostId, hostIp));
         if (Objects.isNull(channel) || !channel.isShutdown() || !channel.isShutdown()) {
+            removeChannel(channel);
             channel = connect(hostId, hostIp, port);
             if (Objects.isNull(channel)) {
                 SnailJobLog.LOCAL.error("send message but channel is null url:[{}] method:[{}] body:[{}] ", url, body);
@@ -77,6 +86,7 @@ public class GrpcChannel {
         GrpcSnailJobRequest snailJobRequest = GrpcSnailJobRequest
             .newBuilder()
             .setMetadata(metadata)
+            .setReqId(reqId)
             .setBody(build)
             .build();
 
@@ -103,7 +113,13 @@ public class GrpcChannel {
     public static ManagedChannel connect(String hostId, String ip, Integer port) {
 
         try {
+            RpcClientProperties clientRpc = SnailSpringContext.getBean(SystemProperties.class).getClientRpc();
             ManagedChannel channel = ManagedChannelBuilder.forAddress(ip, port)
+                .executor(grpcExecutor)
+                .decompressorRegistry(DecompressorRegistry.getDefaultInstance())
+                .maxInboundMessageSize(clientRpc.getMaxInboundMessageSize())
+                .keepAliveTime(clientRpc.getKeepAliveTime().toMillis(), TimeUnit.MILLISECONDS)
+                .keepAliveTimeout(clientRpc.getKeepAliveTimeout().toMillis(), TimeUnit.MILLISECONDS)
                 .usePlaintext()
                 .build();
             GrpcChannel.setChannel(hostId, ip, channel);
@@ -114,6 +130,18 @@ public class GrpcChannel {
         }
 
         return null;
+    }
+
+    private static ThreadPoolExecutor createGrpcExecutor() {
+        RpcClientProperties clientRpc = SnailSpringContext.getBean(SystemProperties.class).getClientRpc();
+        ThreadPoolConfig clientTp = clientRpc.getClientTp();
+        ThreadPoolExecutor grpcExecutor = new ThreadPoolExecutor(clientTp.getCorePoolSize(),
+            clientTp.getMaximumPoolSize(), clientTp.getKeepAliveTime(), TimeUnit.MILLISECONDS,
+            new LinkedBlockingQueue<>(clientTp.getQueueCapacity()),
+            new ThreadFactoryBuilder().setDaemon(true).setNameFormat("snail-job-grpc-client-executor-%d")
+                .build());
+        grpcExecutor.allowCoreThreadTimeOut(true);
+        return grpcExecutor;
     }
 
     /**

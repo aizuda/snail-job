@@ -8,35 +8,41 @@ public interface GrpcResultOrBuilder extends
     com.google.protobuf.MessageOrBuilder {
 
   /**
-   * <code>int32 status = 1;</code>
+   * <code>int64 reqId = 1;</code>
+   * @return The reqId.
+   */
+  long getReqId();
+
+  /**
+   * <code>int32 status = 2;</code>
    * @return The status.
    */
   int getStatus();
 
   /**
-   * <code>string message = 2;</code>
+   * <code>string message = 3;</code>
    * @return The message.
    */
   java.lang.String getMessage();
   /**
-   * <code>string message = 2;</code>
+   * <code>string message = 3;</code>
    * @return The bytes for message.
    */
   com.google.protobuf.ByteString
       getMessageBytes();
 
   /**
-   * <code>.google.protobuf.Any data = 3;</code>
+   * <code>.google.protobuf.Any data = 4;</code>
    * @return Whether the data field is set.
    */
   boolean hasData();
   /**
-   * <code>.google.protobuf.Any data = 3;</code>
+   * <code>.google.protobuf.Any data = 4;</code>
    * @return The data.
    */
   com.google.protobuf.Any getData();
   /**
-   * <code>.google.protobuf.Any data = 3;</code>
+   * <code>.google.protobuf.Any data = 4;</code>
    */
   com.google.protobuf.AnyOrBuilder getDataOrBuilder();
 }

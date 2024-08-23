@@ -3,7 +3,7 @@ package com.aizuda.snailjob.server.common.rpc.server.handler;
 import cn.hutool.core.net.url.UrlQuery;
 import com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH;
 import com.aizuda.snailjob.common.core.enums.HeadersEnum;
-import com.aizuda.snailjob.common.core.model.NettyResult;
+import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
 import com.aizuda.snailjob.common.core.model.SnailJobRequest;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.server.common.handler.GetHttpRequestHandler;
@@ -35,11 +35,11 @@ public class ConfigHttpRequestHandler extends GetHttpRequestHandler {
     }
 
     @Override
-    public String doHandler(String content, UrlQuery urlQuery, HttpHeaders headers) {
+    public SnailJobRpcResult doHandler(String content, UrlQuery urlQuery, HttpHeaders headers) {
         SnailJobRequest retryRequest = JsonUtil.parseObject(content, SnailJobRequest.class);
         String groupName = headers.get(HeadersEnum.GROUP_NAME.getKey());
         String namespace = headers.get(HeadersEnum.NAMESPACE.getKey());
         ConfigDTO configDTO = accessTemplate.getGroupConfigAccess().getConfigInfo(groupName, namespace);
-        return JsonUtil.toJsonString(new NettyResult(JsonUtil.toJsonString(configDTO), retryRequest.getReqId()));
+        return new SnailJobRpcResult(JsonUtil.toJsonString(configDTO), retryRequest.getReqId());
     }
 }

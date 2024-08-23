@@ -6,7 +6,7 @@ import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.enums.HeadersEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
-import com.aizuda.snailjob.common.core.model.NettyResult;
+import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
 import com.aizuda.snailjob.common.core.model.SnailJobRequest;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
@@ -36,8 +36,8 @@ import java.util.Collection;
  * @date : 2023-07-24 09:20
  * @since 2.1.0
  */
-//@Component(ActorGenerator.REQUEST_HANDLER_ACTOR)
-//@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+@Component(ActorGenerator.REQUEST_HANDLER_ACTOR)
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Slf4j
 public class RequestHandlerActor extends AbstractActor {
 
@@ -58,15 +58,15 @@ public class RequestHandlerActor extends AbstractActor {
             final String content = nettyHttpRequest.getContent();
             final HttpHeaders headers = nettyHttpRequest.getHeaders();
 
-            String result = "";
+            SnailJobRpcResult result = null;
             try {
                 result = doProcess(uri, content, method, headers);
             } catch (Exception e) {
                 SnailJobLog.LOCAL.error("http request error. [{}]", nettyHttpRequest.getContent(), e);
                 SnailJobRequest retryRequest = JsonUtil.parseObject(content, SnailJobRequest.class);
-                result = JsonUtil.toJsonString(new NettyResult(StatusEnum.NO.getStatus(), e.getMessage(), null, retryRequest.getReqId()));
+                result = new SnailJobRpcResult(StatusEnum.NO.getStatus(), e.getMessage(), null, retryRequest.getReqId());
             } finally {
-                writeResponse(channelHandlerContext, keepAlive, result);
+                writeResponse(channelHandlerContext, keepAlive, JsonUtil.toJsonString(result));
                 getContext().stop(getSelf());
             }
 
@@ -74,7 +74,7 @@ public class RequestHandlerActor extends AbstractActor {
         }).build();
     }
 
-    private String doProcess(String uri, String content, HttpMethod method,
+    private SnailJobRpcResult doProcess(String uri, String content, HttpMethod method,
                              HttpHeaders headers) {
 
         Register register = SnailSpringContext.getBean(ClientRegister.BEAN_NAME, Register.class);

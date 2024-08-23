@@ -48,6 +48,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * 请求处理器
@@ -58,6 +59,8 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 public class GrpcClientInvokeHandler implements InvocationHandler {
+
+    public static final AtomicLong REQUEST_ID = new AtomicLong(0);
 
     private final String groupName;
     private String hostId;
@@ -143,19 +146,30 @@ public class GrpcClientInvokeHandler implements InvocationHandler {
             // 统一设置Token
             requestHeaders.put(SystemConstants.SNAIL_JOB_AUTH_TOKEN, CacheToken.get(groupName, namespaceId));
 
-//            SnailJobRequest snailJobRequest = new SnailJobRequest(args);
+            long reqId = newId();
             Result result = retryer.call(() -> {
 
-                ListenableFuture<GrpcResult> future = GrpcChannel.send(hostId, hostIp, hostPort,
-                    mapping.path(), JsonUtil.toJsonString(args), requestHeaders);
+                StopWatch sw = new StopWatch();
 
-                SnailJobLog.LOCAL.debug("request complete requestId:[{}] 耗时:[{}ms]", 0);
+                sw.start("request start " + reqId);
+
+                ListenableFuture<GrpcResult> future;
+                try {
+                    future = GrpcChannel.send(hostId, hostIp, hostPort,
+                        mapping.path(), JsonUtil.toJsonString(args), requestHeaders, reqId);
+                } finally {
+                    sw.stop();
+                }
+
+                SnailJobLog.LOCAL.debug("request complete requestId:[{}] 耗时:[{}ms]", reqId);
+
                 if (async) {
                     // 暂时不支持异步调用
                     return null;
                 } else {
                     Assert.notNull(future, () -> new SnailJobServerException("completableFuture is null"));
-                    GrpcResult grpcResult = future.get(Optional.ofNullable(executorTimeout).orElse(20), TimeUnit.SECONDS);
+                    GrpcResult grpcResult = future.get(Optional.ofNullable(executorTimeout).orElse(20),
+                        TimeUnit.SECONDS);
                     ByteBuffer byteBuffer = grpcResult.getData().getValue().asReadOnlyByteBuffer();
                     Object obj = JsonUtil.parseObject(new ByteBufferBackedInputStream(byteBuffer), Object.class);
                     return new Result(grpcResult.getStatus(), grpcResult.getMessage(), obj);
@@ -259,5 +273,9 @@ public class GrpcClientInvokeHandler implements InvocationHandler {
         private Object body = null;
         private Map<String, String> requestHeaders;
         private Map<String, Object> paramMap;
+    }
+
+    private static long newId() {
+        return REQUEST_ID.getAndIncrement();
     }
 }

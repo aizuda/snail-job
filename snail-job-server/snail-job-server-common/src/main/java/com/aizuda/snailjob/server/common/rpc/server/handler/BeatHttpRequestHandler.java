@@ -2,7 +2,7 @@ package com.aizuda.snailjob.server.common.rpc.server.handler;
 
 import cn.hutool.core.net.url.UrlQuery;
 import com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH;
-import com.aizuda.snailjob.common.core.model.NettyResult;
+import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
 import com.aizuda.snailjob.common.core.model.SnailJobRequest;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
@@ -34,9 +34,9 @@ public class BeatHttpRequestHandler extends GetHttpRequestHandler {
     }
 
     @Override
-    public String doHandler(String content, UrlQuery query, HttpHeaders headers) {
+    public SnailJobRpcResult doHandler(String content, UrlQuery query, HttpHeaders headers) {
         SnailJobLog.LOCAL.debug("Beat check content:[{}]", content);
         SnailJobRequest retryRequest = JsonUtil.parseObject(content, SnailJobRequest.class);
-        return JsonUtil.toJsonString(new NettyResult(PONG, retryRequest.getReqId()));
+        return new SnailJobRpcResult(PONG, retryRequest.getReqId());
     }
 }

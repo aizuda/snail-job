@@ -2,7 +2,7 @@ package com.aizuda.snailjob.common.core.rpc;
 
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.exception.SnailJobRemotingTimeOutException;
-import com.aizuda.snailjob.common.core.model.NettyResult;
+import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
 import com.aizuda.snailjob.common.core.model.Result;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import io.netty.util.HashedWheelTimer;
@@ -40,7 +40,7 @@ public final class RpcContext {
 
     private static final ConcurrentMap<Long, SnailJobFuture> COMPLETABLE_FUTURE = new ConcurrentHashMap<>();
 
-    public static void invoke(Long requestId, NettyResult nettyResult, boolean timeout) {
+    public static void invoke(Long requestId, SnailJobRpcResult snailJobRpcResult, boolean timeout) {
 
         try {
             // 同步请求同步返回
@@ -49,7 +49,7 @@ public final class RpcContext {
                         if (timeout) {
                             future.completeExceptionally(new SnailJobRemotingTimeOutException("Request to remote interface timed out."));
                         } else {
-                            future.complete(nettyResult);
+                            future.complete(snailJobRpcResult);
                         }
                     });
 
@@ -77,7 +77,7 @@ public final class RpcContext {
 
         @Override
         public void run(final Timeout timeout) throws Exception {
-            invoke(requestId, new NettyResult(StatusEnum.NO.getStatus(), "Request to remote interface timed out.", null, requestId), true);
+            invoke(requestId, new SnailJobRpcResult(StatusEnum.NO.getStatus(), "Request to remote interface timed out.", null, requestId), true);
         }
     }
 

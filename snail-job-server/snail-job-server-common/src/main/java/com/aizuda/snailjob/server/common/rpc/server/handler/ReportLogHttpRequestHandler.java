@@ -7,7 +7,7 @@ import cn.hutool.core.net.url.UrlQuery;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.enums.HeadersEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
-import com.aizuda.snailjob.common.core.model.NettyResult;
+import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
 import com.aizuda.snailjob.common.core.model.SnailJobRequest;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
@@ -50,7 +50,7 @@ public class ReportLogHttpRequestHandler extends PostHttpRequestHandler {
     }
 
     @Override
-    public String doHandler(String content, UrlQuery urlQuery, HttpHeaders headers) {
+    public SnailJobRpcResult doHandler(String content, UrlQuery urlQuery, HttpHeaders headers) {
 
         SnailJobLog.LOCAL.debug("Begin Handler Log Report Data. [{}]", content);
         SnailJobRequest retryRequest = JsonUtil.parseObject(content, SnailJobRequest.class);
@@ -84,17 +84,7 @@ public class ReportLogHttpRequestHandler extends PostHttpRequestHandler {
             actorRef.tell(retryTasks, actorRef);
         }
 
-        return JsonUtil.toJsonString(new NettyResult(StatusEnum.YES.getStatus(), "Batch Log Retry Data Upload Processed Successfully", Boolean.TRUE, retryRequest.getReqId()));
+        return new SnailJobRpcResult(StatusEnum.YES.getStatus(), "Batch Log Retry Data Upload Processed Successfully", Boolean.TRUE, retryRequest.getReqId());
     }
 
-    private String getClientInfo(final HttpHeaders headers) {
-        String hostId = headers.get(HeadersEnum.HOST_ID.getKey());
-        String hostIp = headers.get(HeadersEnum.HOST_IP.getKey());
-        Integer hostPort = headers.getInt(HeadersEnum.HOST_PORT.getKey());
-        RegisterNodeInfo registerNodeInfo = new RegisterNodeInfo();
-        registerNodeInfo.setHostIp(hostIp);
-        registerNodeInfo.setHostPort(hostPort);
-        registerNodeInfo.setHostId(hostId);
-        return ClientInfoUtils.generate(registerNodeInfo);
-    }
 }

@@ -17,6 +17,7 @@ public class ActorGenerator {
 
     public static final String SCAN_BUCKET_ACTOR = "ScanBucketActor";
     public static final String REQUEST_HANDLER_ACTOR = "RequestHandlerActor";
+    public static final String GRPC_REQUEST_HANDLER_ACTOR = "GrpcRequestHandlerActor";
     private static final String COMMON_LOG_DISPATCHER = "akka.actor.common-log-dispatcher";
     private static final String COMMON_SCAN_TASK_DISPATCHER = "akka.actor.common-scan-task-dispatcher";
     private static final String NETTY_RECEIVE_REQUEST_DISPATCHER = "akka.actor.netty-receive-request-dispatcher";
@@ -180,13 +181,23 @@ public class ActorGenerator {
     }
 
     /**
-     * 生成扫描重试数据的actor
+     * netty请求处理器
      *
      * @return actor 引用
      */
     public static ActorRef requestHandlerActor() {
         return getNettyActorSystem().actorOf(getSpringExtension().props(REQUEST_HANDLER_ACTOR)
                 .withDispatcher(NETTY_RECEIVE_REQUEST_DISPATCHER));
+    }
+
+    /**
+     * Grpc请求处理器
+     *
+     * @return actor 引用
+     */
+    public static ActorRef requestGrpcHandlerActor() {
+        return getNettyActorSystem().actorOf(getSpringExtension().props(GRPC_REQUEST_HANDLER_ACTOR)
+            .withDispatcher(NETTY_RECEIVE_REQUEST_DISPATCHER));
     }
 
 

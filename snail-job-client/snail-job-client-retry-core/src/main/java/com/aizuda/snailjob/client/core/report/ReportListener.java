@@ -11,7 +11,7 @@ import com.aizuda.snailjob.common.core.alarm.AlarmContext;
 import com.aizuda.snailjob.common.core.alarm.SnailJobAlarmFactory;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.enums.RetryNotifySceneEnum;
-import com.aizuda.snailjob.common.core.model.NettyResult;
+import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
 import com.aizuda.snailjob.common.core.util.EnvironmentUtils;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.NetUtil;
@@ -52,7 +52,7 @@ public class ReportListener implements Listener<RetryTaskDTO> {
                     "> 时间:{}  \n" +
                     "> 异常:{}  \n";
 
-    private static final NettyClient CLIENT = RequestBuilder.<NettyClient, NettyResult>newBuilder()
+    private static final NettyClient CLIENT = RequestBuilder.<NettyClient, SnailJobRpcResult>newBuilder()
             .client(NettyClient.class)
             .callback(nettyResult -> SnailJobLog.LOCAL.info("Data report successfully requestId:[{}]", nettyResult.getReqId())).build();
 

@@ -10,7 +10,7 @@ import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.exception.SnailJobMapReduceException;
 import com.aizuda.snailjob.common.core.model.JobContext;
-import com.aizuda.snailjob.common.core.model.NettyResult;
+import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
 import com.aizuda.snailjob.common.core.model.Result;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
@@ -29,7 +29,7 @@ import java.util.Objects;
  */
 public final class MapInvokeHandler implements InvocationHandler {
 
-    private static final JobNettyClient CLIENT = RequestBuilder.<JobNettyClient, NettyResult>newBuilder()
+    private static final JobNettyClient CLIENT = RequestBuilder.<JobNettyClient, SnailJobRpcResult>newBuilder()
         .client(JobNettyClient.class)
         .async(Boolean.FALSE)
         .build();

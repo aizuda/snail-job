@@ -19,7 +19,7 @@ import com.aizuda.snailjob.common.core.enums.JobTaskStatusEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.model.JobContext;
-import com.aizuda.snailjob.common.core.model.NettyResult;
+import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
 import com.aizuda.snailjob.common.core.util.EnvironmentUtils;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.NetUtil;
@@ -54,7 +54,7 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
              > 异常:{} \s
             \s""";
 
-    private static final JobNettyClient CLIENT = RequestBuilder.<JobNettyClient, NettyResult>newBuilder()
+    private static final JobNettyClient CLIENT = RequestBuilder.<JobNettyClient, SnailJobRpcResult>newBuilder()
             .client(JobNettyClient.class)
             .callback(nettyResult -> {
                 if (nettyResult.getStatus() == StatusEnum.NO.getStatus()) {

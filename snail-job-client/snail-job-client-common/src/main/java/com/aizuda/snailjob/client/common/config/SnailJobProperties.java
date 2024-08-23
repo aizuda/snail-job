@@ -1,13 +1,17 @@
 package com.aizuda.snailjob.client.common.config;
 
 import com.aizuda.snailjob.common.core.alarm.email.SnailJobMailProperties;
+import com.aizuda.snailjob.common.core.enums.RpcTypeEnum;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.context.annotation.Configuration;
 
+import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.TimeUnit;
 
@@ -49,7 +53,12 @@ public class SnailJobProperties {
     /**
      * 指定客户端端口
      */
-    private Integer port = 1789;
+    private Integer port = 17889;
+
+    /**
+     * rpc类型
+     */
+    private RpcTypeEnum rpcType = RpcTypeEnum.NETTY;
 
     /**
      * 重试、调度日志远程上报滑动窗口配置
@@ -60,11 +69,6 @@ public class SnailJobProperties {
      * 服务端配置
      */
     private ServerConfig server = new ServerConfig();
-
-    /**
-     * 调度线程池配置
-     */
-    private DispatcherThreadPool dispatcherThreadPool = new DispatcherThreadPool();
 
     /**
      * 重试模块配置
@@ -82,6 +86,16 @@ public class SnailJobProperties {
      */
     private String workspace;
 
+    /**
+     * 客户端Rpc配置
+     */
+    private RpcClientProperties clientRpc = new RpcClientProperties();
+
+    /**
+     * 服务端Rpc配置
+     */
+    private RpcServerProperties serverRpc = new RpcServerProperties();
+
     @Data
     public static class ServerConfig {
         /**
@@ -92,7 +106,7 @@ public class SnailJobProperties {
         /**
          * 服务端netty的端口号
          */
-        private int port = 1788;
+        private int port = 17888;
     }
 
     @Data
@@ -146,7 +160,47 @@ public class SnailJobProperties {
     }
 
     @Data
-    public static class DispatcherThreadPool {
+    public static class Retry {
+        /**
+         * 远程上报滑动窗口配置
+         */
+        private SlidingWindowConfig reportSlidingWindow = new SlidingWindowConfig();
+    }
+
+    @Data
+    public static class RpcServerProperties {
+
+        private int maxInboundMessageSize = 10 * 1024 * 1024;
+
+        private Duration keepAliveTime = Duration.of(2, ChronoUnit.HOURS);
+
+        private Duration keepAliveTimeout = Duration.of(20, ChronoUnit.SECONDS);
+
+        private Duration permitKeepAliveTime = Duration.of(5, ChronoUnit.MINUTES);
+
+        private ThreadPoolConfig dispatcherTp = new ThreadPoolConfig(16, 16, 1, TimeUnit.SECONDS , 10000);
+
+    }
+
+    @Data
+    public static class RpcClientProperties {
+
+        private int maxInboundMessageSize = 10 * 1024 * 1024;
+
+        private Duration keepAliveTime = Duration.of(2, ChronoUnit.HOURS);
+
+        private Duration keepAliveTimeout = Duration.of(20, ChronoUnit.SECONDS);
+
+        private Duration permitKeepAliveTime = Duration.of(5, ChronoUnit.MINUTES);
+
+        private ThreadPoolConfig clientTp = new ThreadPoolConfig(16, 16, 1, TimeUnit.SECONDS , 10000);
+
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class ThreadPoolConfig {
 
         /**
          * 核心线程池
@@ -161,7 +215,7 @@ public class SnailJobProperties {
         /**
          * 线程存活时间
          */
-        private long keepAliveTime;
+        private long keepAliveTime = 1;
 
         /**
          * 线程存活时间(单位)
@@ -173,13 +227,4 @@ public class SnailJobProperties {
          */
         private int queueCapacity = 10000;
     }
-
-    @Data
-    public static class Retry {
-        /**
-         * 远程上报滑动窗口配置
-         */
-        private SlidingWindowConfig reportSlidingWindow = new SlidingWindowConfig();
-    }
-
 }

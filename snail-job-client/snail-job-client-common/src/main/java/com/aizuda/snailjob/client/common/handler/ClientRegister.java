@@ -5,7 +5,7 @@ import com.aizuda.snailjob.client.common.NettyClient;
 import com.aizuda.snailjob.client.common.rpc.client.RequestBuilder;
 import com.aizuda.snailjob.common.core.constant.SystemConstants.BEAT;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
-import com.aizuda.snailjob.common.core.model.NettyResult;
+import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import org.springframework.stereotype.Component;
 
@@ -26,7 +26,7 @@ public class ClientRegister implements Lifecycle {
     public static final int REGISTER_TIME = 10;
 
     static {
-        CLIENT = RequestBuilder.<NettyClient, NettyResult>newBuilder()
+        CLIENT = RequestBuilder.<NettyClient, SnailJobRpcResult>newBuilder()
             .client(NettyClient.class)
             .callback(
                 nettyResult -> {

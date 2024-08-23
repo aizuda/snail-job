@@ -4,7 +4,7 @@ import cn.hutool.core.net.url.UrlQuery;
 import com.aizuda.snailjob.client.model.request.DispatchJobResultRequest;
 import com.aizuda.snailjob.common.core.enums.HeadersEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
-import com.aizuda.snailjob.common.core.model.NettyResult;
+import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
 import com.aizuda.snailjob.common.core.model.SnailJobRequest;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
@@ -15,7 +15,6 @@ import com.aizuda.snailjob.server.job.task.support.callback.ClientCallbackContex
 import com.aizuda.snailjob.server.job.task.support.callback.ClientCallbackFactory;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import static com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH.REPORT_JOB_DISPATCH_RESULT;
@@ -39,7 +38,7 @@ public class ReportDispatchResultPostHttpRequestHandler extends PostHttpRequestH
     }
 
     @Override
-    public String doHandler(String content, UrlQuery query, HttpHeaders headers) {
+    public SnailJobRpcResult doHandler(String content, UrlQuery query, HttpHeaders headers) {
         SnailJobLog.LOCAL.debug("Client Callback Request. content:[{}]", content);
 
         SnailJobRequest retryRequest = JsonUtil.parseObject(content, SnailJobRequest.class);
@@ -53,6 +52,6 @@ public class ReportDispatchResultPostHttpRequestHandler extends PostHttpRequestH
         context.setNamespaceId(headers.getAsString(HeadersEnum.NAMESPACE.getKey()));
         clientCallback.callback(context);
 
-        return JsonUtil.toJsonString(new NettyResult(StatusEnum.YES.getStatus(), "Report Dispatch Result Processed Successfully", Boolean.TRUE, retryRequest.getReqId()));
+        return new SnailJobRpcResult(StatusEnum.YES.getStatus(), "Report Dispatch Result Processed Successfully", Boolean.TRUE, retryRequest.getReqId());
     }
 }

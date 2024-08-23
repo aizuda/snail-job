@@ -4,7 +4,7 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.net.url.UrlQuery;
 import com.aizuda.snailjob.common.core.enums.HeadersEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
-import com.aizuda.snailjob.common.core.model.NettyResult;
+import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
 import com.aizuda.snailjob.common.core.model.SnailJobRequest;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
@@ -61,7 +61,7 @@ public class ReportRetryInfoHttpRequestHandler extends PostHttpRequestHandler {
 
     @Override
     @Transactional
-    public String doHandler(String content, UrlQuery urlQuery, HttpHeaders headers) {
+    public SnailJobRpcResult doHandler(String content, UrlQuery urlQuery, HttpHeaders headers) {
         SnailJobLog.LOCAL.debug("Batch Report Retry Data. content:[{}]", content);
 
         SnailJobRequest retryRequest = JsonUtil.parseObject(content, SnailJobRequest.class);
@@ -121,7 +121,7 @@ public class ReportRetryInfoHttpRequestHandler extends PostHttpRequestHandler {
                 return null;
             });
 
-            return JsonUtil.toJsonString(new NettyResult(StatusEnum.YES.getStatus(), "Batch Retry Data Upload Processed Successfully", Boolean.TRUE, retryRequest.getReqId()));
+            return new SnailJobRpcResult(StatusEnum.YES.getStatus(), "Batch Retry Data Upload Processed Successfully", Boolean.TRUE, retryRequest.getReqId());
         } catch (Exception e) {
 
             Throwable throwable = e;
@@ -131,7 +131,7 @@ public class ReportRetryInfoHttpRequestHandler extends PostHttpRequestHandler {
             }
 
             SnailJobLog.LOCAL.error("Batch Report Retry Data Error. <|>{}<|>", args[0], throwable);
-            return JsonUtil.toJsonString(new NettyResult(StatusEnum.YES.getStatus(), throwable.getMessage(), Boolean.FALSE, retryRequest.getReqId()));
+            return new SnailJobRpcResult(StatusEnum.YES.getStatus(), throwable.getMessage(), Boolean.FALSE, retryRequest.getReqId());
         }
     }
 

@@ -136,7 +136,7 @@ public final class GrpcChannel {
     }
 
 
-    public static ListenableFuture<GrpcResult> sendOfUnary(String path, String body) {
+    public static ListenableFuture<GrpcResult> sendOfUnary(String path, String body, final long reqId) {
         if (channel == null) {
             return null;
         }
@@ -176,6 +176,7 @@ public final class GrpcChannel {
         GrpcSnailJobRequest snailJobRequest = GrpcSnailJobRequest
             .newBuilder()
             .setMetadata(metadata)
+            .setReqId(reqId)
             .setBody(build)
             .build();
 

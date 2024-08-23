@@ -6,7 +6,7 @@ import com.aizuda.snailjob.client.model.request.MapTaskRequest;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
-import com.aizuda.snailjob.common.core.model.NettyResult;
+import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
 import com.aizuda.snailjob.common.core.model.SnailJobRequest;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
@@ -32,7 +32,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 
@@ -45,7 +44,7 @@ import java.util.Objects;
  */
 @Component
 @RequiredArgsConstructor
-public class MapTaskPostHttpRequestHandler extends PostHttpRequestHandler {
+public  class MapTaskPostHttpRequestHandler extends PostHttpRequestHandler {
     private final WorkflowTaskBatchMapper workflowTaskBatchMapper;
     private final JobMapper jobMapper;
 
@@ -60,7 +59,7 @@ public class MapTaskPostHttpRequestHandler extends PostHttpRequestHandler {
     }
 
     @Override
-    public String doHandler(final String content, final UrlQuery query, final HttpHeaders headers) {
+    public SnailJobRpcResult doHandler(final String content, final UrlQuery query, final HttpHeaders headers) {
         SnailJobLog.LOCAL.info("map task Request. content:[{}]", content);
         String groupName = HttpHeaderUtil.getGroupName(headers);
         String namespace = HttpHeaderUtil.getNamespace(headers);
@@ -92,9 +91,8 @@ public class MapTaskPostHttpRequestHandler extends PostHttpRequestHandler {
         context.setWfContext(mapTaskRequest.getWfContext());
         List<JobTask> taskList = taskInstance.generate(context);
         if (CollUtil.isEmpty(taskList)) {
-            return JsonUtil.toJsonString(
-                new NettyResult(StatusEnum.NO.getStatus(), "Job task is empty", Boolean.FALSE,
-                    retryRequest.getReqId()));
+            return new SnailJobRpcResult(StatusEnum.NO.getStatus(), "Job task is empty", Boolean.FALSE,
+                    retryRequest.getReqId());
         }
 
         String newWfContext = null;
@@ -111,9 +109,8 @@ public class MapTaskPostHttpRequestHandler extends PostHttpRequestHandler {
         JobExecutor jobExecutor = JobExecutorFactory.getJobExecutor(JobTaskTypeEnum.MAP_REDUCE.getType());
         jobExecutor.execute(buildJobExecutorContext(mapTaskRequest, job, taskList, newWfContext));
 
-        return JsonUtil.toJsonString(
-            new NettyResult(StatusEnum.YES.getStatus(), "Report Map Task Processed Successfully", Boolean.TRUE,
-                retryRequest.getReqId()));
+        return new SnailJobRpcResult(StatusEnum.YES.getStatus(), "Report Map Task Processed Successfully", Boolean.TRUE,
+                retryRequest.getReqId());
     }
 
     private static JobExecutorContext buildJobExecutorContext(MapTaskRequest mapTaskRequest, Job job,

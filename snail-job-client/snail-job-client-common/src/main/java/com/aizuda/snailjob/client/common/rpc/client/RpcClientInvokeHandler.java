@@ -6,7 +6,7 @@ import com.aizuda.snailjob.client.common.annotation.Mapping;
 import com.aizuda.snailjob.client.common.exception.SnailJobClientException;
 import com.aizuda.snailjob.client.common.exception.SnailJobClientTimeOutException;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
-import com.aizuda.snailjob.common.core.model.NettyResult;
+import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
 import com.aizuda.snailjob.common.core.model.Result;
 import com.aizuda.snailjob.common.core.model.SnailJobRequest;
 import com.aizuda.snailjob.common.core.rpc.RpcContext;
@@ -67,7 +67,7 @@ public class RpcClientInvokeHandler<R extends Result<Object>> implements Invocat
             newFuture.whenComplete((r, t) -> {
                 if (Objects.nonNull(t)) {
                     consumer.accept(
-                            (R) new NettyResult(StatusEnum.NO.getStatus(), t.getMessage(), null, snailJobRequest.getReqId()));
+                            (R) new SnailJobRpcResult(StatusEnum.NO.getStatus(), t.getMessage(), null, snailJobRequest.getReqId()));
                 } else {
                     consumer.accept(r);
                 }

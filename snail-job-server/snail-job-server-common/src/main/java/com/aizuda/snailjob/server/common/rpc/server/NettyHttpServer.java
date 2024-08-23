@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.common.rpc.server;
 
+import com.aizuda.snailjob.common.core.enums.RpcTypeEnum;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.Lifecycle;
 import com.aizuda.snailjob.server.common.config.SystemProperties;
@@ -63,7 +64,7 @@ public class NettyHttpServer implements Runnable, Lifecycle {
                         }
                     });
 
-            // 在特定端口绑定并启动服务器 默认是1788
+            // 在特定端口绑定并启动服务器 默认是17888
             ChannelFuture future = bootstrap.bind(systemProperties.getNettyPort()).sync();
 
             SnailJobLog.LOCAL.info("------> snail-job remoting server start success, nettype = {}, port = {}",
@@ -87,9 +88,12 @@ public class NettyHttpServer implements Runnable, Lifecycle {
 
     @Override
     public void start() {
-//        thread = new Thread(this);
-//        thread.setDaemon(true);
-//        thread.start();
+        if (RpcTypeEnum.NETTY != systemProperties.getRpcType()) {
+            return;
+        }
+        thread = new Thread(this);
+        thread.setDaemon(true);
+        thread.start();
     }
 
     @Override

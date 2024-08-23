@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.common.rpc.client;
 
-import com.aizuda.snailjob.common.core.model.NettyResult;
+import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
 import com.aizuda.snailjob.common.core.rpc.RpcContext;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
@@ -32,8 +32,8 @@ public class NettyHttpClientHandler extends SimpleChannelInboundHandler<FullHttp
         HttpHeaders headers = response.headers();
 
         SnailJobLog.LOCAL.info("Receive server data content:[{}], headers:[{}]", content, headers);
-        NettyResult nettyResult = JsonUtil.parseObject(content, NettyResult.class);
-        RpcContext.invoke(nettyResult.getReqId(), nettyResult, false);
+        SnailJobRpcResult snailJobRpcResult = JsonUtil.parseObject(content, SnailJobRpcResult.class);
+        RpcContext.invoke(snailJobRpcResult.getReqId(), snailJobRpcResult, false);
 
     }
 

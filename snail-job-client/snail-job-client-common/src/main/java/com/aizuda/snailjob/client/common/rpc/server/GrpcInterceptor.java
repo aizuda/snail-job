@@ -1,7 +1,5 @@
 package com.aizuda.snailjob.client.common.rpc.server;
 
-import io.grpc.Context;
-import io.grpc.Contexts;
 import io.grpc.Metadata;
 import io.grpc.ServerCall;
 import io.grpc.ServerCall.Listener;
@@ -21,10 +19,9 @@ public class GrpcInterceptor implements ServerInterceptor {
         final ServerCallHandler<ReqT, RespT> serverCallHandler) {
         String fullMethodName = serverCall.getMethodDescriptor().getFullMethodName();
         long start = System.currentTimeMillis();
-        Context context = Context.current();
 
         try {
-            return Contexts.interceptCall(context, serverCall, metadata, serverCallHandler);
+            return serverCallHandler.startCall(serverCall, metadata);
         } finally {
             log.info("method invoked: {} cast:{}ms", fullMethodName, System.currentTimeMillis() - start);
         }

@@ -9,7 +9,7 @@ import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.grpc.auto.GrpcResult;
 import com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest;
 import com.aizuda.snailjob.common.core.grpc.auto.Metadata;
-import com.aizuda.snailjob.common.core.model.NettyResult;
+import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
 import com.aizuda.snailjob.common.core.model.SnailJobRequest;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
@@ -33,8 +33,6 @@ import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaderValues;
-import io.netty.handler.codec.http.HttpHeaders;
-import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.util.CharsetUtil;
@@ -46,9 +44,8 @@ import org.springframework.stereotype.Component;
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
-
-import static com.aizuda.snailjob.common.core.alarm.AlarmContext.build;
 
 /**
  * 处理netty客户端请求
@@ -57,7 +54,7 @@ import static com.aizuda.snailjob.common.core.alarm.AlarmContext.build;
  * @date : 2023-07-24 09:20
  * @since 2.1.0
  */
-@Component(ActorGenerator.REQUEST_HANDLER_ACTOR)
+@Component(ActorGenerator.GRPC_REQUEST_HANDLER_ACTOR)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Slf4j
 public class GrpcRequestHandlerActor extends AbstractActor {
@@ -74,7 +71,7 @@ public class GrpcRequestHandlerActor extends AbstractActor {
             }
 
             Map<String, String> headersMap = metadata.getHeadersMap();
-            String result = "";
+            SnailJobRpcResult snailJobRpcResult = null;
             try {
                 SnailJobRequest request = new SnailJobRequest();
                 Any body = grpcSnailJobRequest.getBody();
@@ -82,22 +79,26 @@ public class GrpcRequestHandlerActor extends AbstractActor {
                 ByteBuffer byteBuffer = byteString.asReadOnlyByteBuffer();
                 Object[] objects = JsonUtil.parseObject(new ByteBufferBackedInputStream(byteBuffer), Object[].class);
                 request.setArgs(objects);
-                result = doProcess(uri, JsonUtil.toJsonString(request), headersMap);
+                snailJobRpcResult = doProcess(uri, JsonUtil.toJsonString(request), headersMap);
+                if (Objects.isNull(snailJobRpcResult)) {
+                    snailJobRpcResult = new SnailJobRpcResult(StatusEnum.NO.getStatus(), "服务端异常", null,
+                        grpcSnailJobRequest.getReqId());
+                }
             } catch (Exception e) {
-                SnailJobLog.LOCAL.error("http request error. [{}]",grpcSnailJobRequest, e);
-                result = JsonUtil.toJsonString(new NettyResult(StatusEnum.NO.getStatus(), e.getMessage(), null, 0));
+                SnailJobLog.LOCAL.error("http request error. [{}]", grpcSnailJobRequest, e);
+                snailJobRpcResult = new SnailJobRpcResult(StatusEnum.NO.getStatus(), e.getMessage(), null,
+                    grpcSnailJobRequest.getReqId());
             } finally {
-
-                NettyResult nettyResult = JsonUtil.parseObject(result, NettyResult.class);
                 StreamObserver<GrpcResult> streamObserver = grpcRequest.getStreamObserver();
                 GrpcResult grpcResult = GrpcResult.newBuilder()
-                    .setStatus(nettyResult.getStatus())
-                    .setMessage(Optional.ofNullable(nettyResult.getMessage()).orElse(StrUtil.EMPTY))
+                    .setReqId(snailJobRpcResult.getReqId())
+                    .setStatus(snailJobRpcResult.getStatus())
+                    .setMessage(Optional.ofNullable(snailJobRpcResult.getMessage()).orElse(StrUtil.EMPTY))
                     .setData(Any.newBuilder()
-                        .setValue(UnsafeByteOperations.unsafeWrap(JsonUtil.toJsonString(nettyResult.getData()).getBytes()))
-                            .build())
+                        .setValue(UnsafeByteOperations.unsafeWrap(
+                            JsonUtil.toJsonString(snailJobRpcResult.getData()).getBytes()))
+                        .build())
                     .build();
-
                 streamObserver.onNext(grpcResult);
                 streamObserver.onCompleted();
                 getContext().stop(getSelf());
@@ -107,7 +108,7 @@ public class GrpcRequestHandlerActor extends AbstractActor {
         }).build();
     }
 
-    private String doProcess(String uri, String content, Map<String, String> headersMap) {
+    private SnailJobRpcResult doProcess(String uri, String content, Map<String, String> headersMap) {
 
         Register register = SnailSpringContext.getBean(ClientRegister.BEAN_NAME, Register.class);
 

@@ -8,7 +8,7 @@ import com.aizuda.snailjob.client.core.retryer.RetryerInfo;
 import com.aizuda.snailjob.common.core.alarm.AlarmContext;
 import com.aizuda.snailjob.common.core.alarm.SnailJobAlarmFactory;
 import com.aizuda.snailjob.common.core.enums.RetryNotifySceneEnum;
-import com.aizuda.snailjob.common.core.model.NettyResult;
+import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
 import com.aizuda.snailjob.common.core.util.EnvironmentUtils;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.NetUtil;
@@ -73,7 +73,7 @@ public class SyncReport extends AbstractReport {
 
         RetryTaskDTO retryTaskDTO = buildRetryTaskDTO(scene, targetClassName, args);
 
-        NettyClient client = RequestBuilder.<NettyClient, NettyResult>newBuilder()
+        NettyClient client = RequestBuilder.<NettyClient, SnailJobRpcResult>newBuilder()
                 .client(NettyClient.class)
                 .async(Boolean.FALSE)
                 .timeout(timeout)
@@ -81,7 +81,7 @@ public class SyncReport extends AbstractReport {
                 .build();
 
         try {
-            NettyResult result = client.reportRetryInfo(Collections.singletonList(retryTaskDTO));
+            SnailJobRpcResult result = client.reportRetryInfo(Collections.singletonList(retryTaskDTO));
             SnailJobLog.LOCAL.debug("Data report result result:[{}]", JsonUtil.toJsonString(result));
             return (Boolean) result.getData();
         } catch (Exception e) {

@@ -1,6 +1,7 @@
 package com.aizuda.snailjob.server.common;
 
 import cn.hutool.core.net.url.UrlBuilder;
+import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 
@@ -17,6 +18,6 @@ public interface HttpRequestHandler {
 
     HttpMethod method();
 
-    String doHandler(String content, UrlBuilder urlBuilder, HttpHeaders headers);
+    SnailJobRpcResult doHandler(String content, UrlBuilder urlBuilder, HttpHeaders headers);
 
 }

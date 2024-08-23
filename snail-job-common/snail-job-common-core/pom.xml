@@ -69,28 +69,21 @@
             <groupId>io.netty</groupId>
             <artifactId>netty-common</artifactId>
         </dependency>
-        <!-- 根据message定义，生成java的model类 -->
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-protobuf</artifactId>
-            <version>1.63.0</version>
         </dependency>
-        <!-- 根据service定义，生成java的服务端代码和客户端代码 -->
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-stub</artifactId>
-            <version>1.63.0</version>
         </dependency>
-
         <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java</artifactId>
-            <version>3.25.4</version>
         </dependency>
         <dependency>
             <groupId>com.google.api.grpc</groupId>
             <artifactId>proto-google-common-protos</artifactId>
-            <version>2.43.0</version>
         </dependency>
         <!-- 生成的代码使用到了javax的注解 -->
         <dependency>
