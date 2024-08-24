@@ -26,7 +26,7 @@ public class GrpcInterceptor implements ServerInterceptor {
         try {
             return Contexts.interceptCall(context, serverCall, metadata, serverCallHandler);
         } finally {
-            log.info("method invoked: {} cast:{}ms", fullMethodName, System.currentTimeMillis() - start);
+            log.debug("method invoked: {} cast:{}ms", fullMethodName, System.currentTimeMillis() - start);
         }
     }
 

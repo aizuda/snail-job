@@ -67,7 +67,7 @@ public class GrpcChannel {
         final long reqId) {
 
         ManagedChannel channel = CHANNEL_MAP.get(Pair.of(hostId, hostIp));
-        if (Objects.isNull(channel) || !channel.isShutdown() || !channel.isShutdown()) {
+        if (Objects.isNull(channel) || channel.isShutdown() || channel.isTerminated()) {
             removeChannel(channel);
             channel = connect(hostId, hostIp, port);
             if (Objects.isNull(channel)) {

@@ -68,21 +68,20 @@ public class GrpcClientInvokeHandler<R extends Result<Object>> implements Invoca
         ListenableFuture<GrpcResult> future = GrpcChannel.sendOfUnary(annotation.path(), JsonUtil.toJsonString(args),
             reqId);
         SnailJobLog.LOCAL.debug("request complete requestId:[{}] 耗时:[{}ms]", sw.getTotalTimeMillis(), reqId);
+        if (future == null) {
+            return (R) new SnailJobRpcResult(StatusEnum.NO.getStatus(), "future is nulll", null, reqId);
+        }
 
         if (async) {
-            if (future == null) {
-                return null;
-            }
-
             Futures.addCallback(future, new FutureCallback<>() {
 
                 @Override
                 public void onSuccess(final GrpcResult result) {
 
                     ByteBuffer byteBuffer = result.getData().getValue().asReadOnlyByteBuffer();
-                    String str = JsonUtil.parseObject(new ByteBufferBackedInputStream(byteBuffer), String.class);
+                    Object obj = JsonUtil.parseObject(new ByteBufferBackedInputStream(byteBuffer), Object.class);
                     consumer.accept(
-                        (R) new SnailJobRpcResult(result.getStatus(), result.getMessage(), str, result.getReqId()));
+                            (R) new SnailJobRpcResult(result.getStatus(), result.getMessage(), obj, result.getReqId()));
                 }
 
                 @Override
@@ -96,10 +95,10 @@ public class GrpcClientInvokeHandler<R extends Result<Object>> implements Invoca
         } else {
 
             try {
-                GrpcResult result = future.get(Integer.MAX_VALUE, TimeUnit.MILLISECONDS);
+                GrpcResult result = future.get(timeout, unit);
                 ByteBuffer byteBuffer = result.getData().getValue().asReadOnlyByteBuffer();
-                String str = JsonUtil.parseObject(new ByteBufferBackedInputStream(byteBuffer), String.class);
-                return (R) new Result(result.getStatus(), result.getMessage(), str);
+                Object obj = JsonUtil.parseObject(new ByteBufferBackedInputStream(byteBuffer), Object.class);
+                return (R) new SnailJobRpcResult(result.getStatus(), result.getMessage(), obj, result.getReqId());
             } catch (ExecutionException e) {
                 throw e.getCause();
             } catch (TimeoutException e) {
