@@ -93,7 +93,9 @@ public class JobHandler {
         String wfContext = getWfContext(workflowTaskBatchId);
 
         for (JobTask jobTask : jobTasks) {
-            if (jobTask.getTaskStatus() == JobTaskStatusEnum.RUNNING.getStatus()) {
+            // 增加Map及MapReduce重试任务的状态判断，防止重复执行
+            if (jobTask.getTaskStatus() == JobTaskStatusEnum.RUNNING.getStatus()
+                    || jobTask.getTaskStatus() == JobTaskStatusEnum.SUCCESS.getStatus()) {
                 continue;
             }
 

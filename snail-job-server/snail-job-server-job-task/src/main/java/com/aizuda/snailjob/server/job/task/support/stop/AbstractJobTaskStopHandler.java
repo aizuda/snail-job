@@ -60,6 +60,9 @@ public abstract class AbstractJobTaskStopHandler implements JobTaskStopHandler, 
 
         if (context.isNeedUpdateTaskStatus()) {
             for (final JobTask jobTask : jobTasks) {
+                if (jobTask.getTaskStatus() == JobTaskStatusEnum.SUCCESS.getStatus()){
+                    continue;
+                }
                 JobExecutorResultDTO jobExecutorResultDTO = JobTaskConverter.INSTANCE.toJobExecutorResultDTO(jobTask);
                 jobExecutorResultDTO.setTaskStatus(JobTaskStatusEnum.STOP.getStatus());
                 jobExecutorResultDTO.setMessage("任务停止成功");
