@@ -25,6 +25,21 @@ public interface SystemConstants {
     String SNAIL_JOB_STATUS_CODE = "519";
 
     /**
+     * 客户端组名
+     */
+    String SNAIL_JOB_CLIENT_GROUP = "group";
+
+    /**
+     * 客户端组对应token
+     */
+    String SNAIL_JOB_CLIENT_GROUP_TOKEN = "token";
+
+    /**
+     * 命名空间
+     */
+    String SNAIL_JOB_CLIENT_NAMESPACE = "namespace";
+
+    /**
      * 默认的调用链超时时间 单位毫秒(ms)
      */
     long DEFAULT_DDL = 60000L;

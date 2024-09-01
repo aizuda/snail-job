@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import java.io.IOException;
@@ -132,6 +133,38 @@ public class JsonUtil {
      */
     public static JsonNode toJson(byte[] jsonBytes) {
         return JsonMapper.toJson(jsonBytes);
+    }
+
+    /**
+     * 验证 JSON 字符串是否有效。
+     *
+     * @param jsonString JSON 字符串
+     * @return 如果 JSON 字符串有效，则返回 true；否则返回 false
+     */
+    public static boolean isValidJson(String jsonString) {
+        try {
+            JsonMapper.objectMapper.readTree(jsonString);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * 创建一个空的json
+     *
+     * @return String
+     */
+    public static String toJSONString() {
+        // 创建一个空的 ObjectNode
+        ObjectNode objectNode = JsonMapper.objectMapper.createObjectNode();
+        try {
+            // 将 ObjectNode 序列化为 JSON 字符串
+            return JsonMapper.objectMapper.writeValueAsString(objectNode);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     /**

@@ -77,6 +77,11 @@ public class SnailJobProperties {
     @NestedConfigurationProperty
     private SnailJobMailProperties mail = new SnailJobMailProperties();
 
+    /**
+     * 客户端脚本存储位置
+     */
+    private String workspace;
+
     @Data
     public static class ServerConfig {
         /**
