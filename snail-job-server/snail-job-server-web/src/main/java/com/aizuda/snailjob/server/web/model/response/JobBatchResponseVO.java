@@ -52,6 +52,11 @@ public class JobBatchResponseVO {
     private LocalDateTime createDt;
 
     /**
+     * 更新时间
+     */
+    private LocalDateTime updateDt;
+
+    /**
      * 任务执行时间
      */
     private LocalDateTime executionAt;

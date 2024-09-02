@@ -42,6 +42,7 @@ public interface JobBatchResponseVOConverter {
             @Mapping(source = "jobBatch.groupName", target = "groupName"),
             @Mapping(source = "jobBatch.id", target = "id"),
             @Mapping(source = "jobBatch.createDt", target = "createDt"),
+            @Mapping(source = "jobBatch.updateDt", target = "updateDt"),
             @Mapping(target = "executionAt", expression = "java(JobBatchResponseVOConverter.toLocalDateTime(jobBatch.getExecutionAt()))")
     })
     JobBatchResponseVO convert(JobTaskBatch jobBatch, Job job);
