@@ -27,6 +27,8 @@ public class JobArgs {
 
     private Long taskBatchId;
 
+    private Long jobId;
+
     private Map<String, Object> wfContext;
 
     private Map<String, Object> changeWfContext;

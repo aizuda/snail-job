@@ -118,7 +118,9 @@ public abstract class AbstractHttpExecutor {
             httpParams.getHeaders().forEach(request::header);
         }
 
-        if (httpParams.getBody() != null && (httpParams.getMethod().equals(POST_REQUEST_METHOD) || httpParams.getMethod().equals(PUT_REQUEST_METHOD) || httpParams.getMethod().equals(DELETE_REQUEST_METHOD))) {
+        if (httpParams.getBody() != null && (httpParams.getMethod().equals(POST_REQUEST_METHOD)
+                || httpParams.getMethod().equals(PUT_REQUEST_METHOD)
+                || httpParams.getMethod().equals(DELETE_REQUEST_METHOD))) {
             request.body(httpParams.getBody(), httpParams.getMediaType());
         }
 

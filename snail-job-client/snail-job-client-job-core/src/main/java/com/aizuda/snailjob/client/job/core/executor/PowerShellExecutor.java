@@ -6,8 +6,8 @@ import java.nio.charset.Charset;
 public class PowerShellExecutor extends AbstractScriptExecutor {
 
     @Override
-    protected String getScriptName(Long taskBatchId) {
-        return String.format("powershell_%d.ps1", taskBatchId);
+    protected String getScriptName(Long jobId) {
+        return String.format("powershell_%d.ps1", jobId);
     }
 
     @Override
@@ -18,5 +18,10 @@ public class PowerShellExecutor extends AbstractScriptExecutor {
     @Override
     protected Charset getCharset() {
         return Charset.defaultCharset();
+    }
+
+    @Override
+    protected ProcessBuilder getScriptProcessBuilder(String scriptPath) {
+        return new ProcessBuilder(getRunCommand(), "-ExecutionPolicy", "Bypass", "-File", scriptPath);
     }
 }

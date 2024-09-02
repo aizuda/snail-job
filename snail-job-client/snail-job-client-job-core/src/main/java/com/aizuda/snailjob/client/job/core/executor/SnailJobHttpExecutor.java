@@ -18,6 +18,7 @@ public class SnailJobHttpExecutor extends AbstractHttpExecutor {
     public ExecuteResult jobExecute(JobArgs jobArgs) {
         Object jobParams = jobArgs.getJobParams();
         HttpParams httpParams = JsonUtil.parseObject((String) jobParams, HttpParams.class);
+        httpParams.setMethod(httpParams.getMethod().toUpperCase());
         Map<String, String> hashMap = new HashMap<>(3);
         hashMap.put(SystemConstants.SNAIL_JOB_CLIENT_GROUP, snailJobProperties.getGroup());
         hashMap.put(SystemConstants.SNAIL_JOB_CLIENT_GROUP_TOKEN, snailJobProperties.getToken());
