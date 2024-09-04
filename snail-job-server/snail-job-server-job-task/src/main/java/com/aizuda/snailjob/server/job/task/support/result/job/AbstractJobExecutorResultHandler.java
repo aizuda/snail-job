@@ -54,6 +54,9 @@ public abstract class AbstractJobExecutorResultHandler implements JobExecutorRes
             return;
         }
 
+        // 放入任务项, 子类会用到
+        context.setJobTaskList(jobTasks);
+
         Map<Integer, Long> statusCountMap = jobTasks.stream()
             .collect(Collectors.groupingBy(JobTask::getTaskStatus, Collectors.counting()));
 
