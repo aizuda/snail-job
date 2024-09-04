@@ -18,5 +18,6 @@ public class CompleteJobBatchDTO {
     private Integer jobOperationReason;
     private Object result;
     private Integer taskType;
+    private boolean isRetry;
 
 }

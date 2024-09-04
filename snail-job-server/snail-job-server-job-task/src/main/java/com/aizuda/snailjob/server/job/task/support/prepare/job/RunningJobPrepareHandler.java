@@ -49,7 +49,7 @@ public class RunningJobPrepareHandler extends AbstractJobPrepareHandler {
         JobOperationReasonEnum jobOperationReasonEnum = JobOperationReasonEnum.NONE;
         CompleteJobBatchDTO completeJobBatchDTO = JobTaskConverter.INSTANCE.completeJobBatchDTO(prepare);
         completeJobBatchDTO.setJobOperationReason(jobOperationReasonEnum.getReason());
-        if (jobTaskBatchHandler.complete(completeJobBatchDTO)) {
+        if (jobTaskBatchHandler.handleResult(completeJobBatchDTO)) {
             blockStrategy = BlockStrategyEnum.CONCURRENCY.getBlockStrategy();
         } else {
             // 计算超时时间

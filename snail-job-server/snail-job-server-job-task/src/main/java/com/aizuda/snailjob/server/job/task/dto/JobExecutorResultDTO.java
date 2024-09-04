@@ -44,4 +44,6 @@ public class JobExecutorResultDTO {
 
     private String wfContext;
 
+    private boolean isRetry;
+
 }

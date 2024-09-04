@@ -13,6 +13,7 @@ import com.aizuda.snailjob.server.job.task.support.executor.job.JobExecutorConte
 import com.aizuda.snailjob.server.job.task.support.executor.workflow.WorkflowExecutorContext;
 import com.aizuda.snailjob.server.job.task.support.generator.batch.JobTaskBatchGeneratorContext;
 import com.aizuda.snailjob.server.job.task.support.generator.task.JobTaskGenerateContext;
+import com.aizuda.snailjob.server.job.task.support.result.job.JobExecutorResultContext;
 import com.aizuda.snailjob.server.job.task.support.stop.TaskStopJobContext;
 import com.aizuda.snailjob.server.model.dto.LogTaskDTO;
 import com.aizuda.snailjob.template.datasource.persistence.po.Job;
@@ -69,6 +70,8 @@ public interface JobTaskConverter {
     BlockStrategyContext toBlockStrategyContext(JobTaskPrepareDTO prepareDTO);
 
     TaskStopJobContext toStopJobContext(BlockStrategyContext context);
+
+    TaskStopJobContext toStopJobContext(JobExecutorResultContext context);
 
     TaskStopJobContext toStopJobContext(JobExecutorResultDTO context);
 
@@ -140,4 +143,8 @@ public interface JobTaskConverter {
     JobLogMessage toJobLogMessage(JobLogMessage jobLogMessage);
 
     ReduceTaskDTO toReduceTaskDTO(CompleteJobBatchDTO jobBatchDTO);
+
+    ReduceTaskDTO toReduceTaskDTO(JobExecutorResultContext context);
+
+    JobExecutorResultContext toJobExecutorResultContext(CompleteJobBatchDTO completeJobBatchDTO);
 }

@@ -2,7 +2,6 @@ package com.aizuda.snailjob.server.job.task.support.dispatch;
 
 import akka.actor.AbstractActor;
 import cn.hutool.core.lang.Assert;
-import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
@@ -11,12 +10,8 @@ import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.job.task.dto.CompleteJobBatchDTO;
 import com.aizuda.snailjob.server.job.task.dto.JobExecutorResultDTO;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
-import com.aizuda.snailjob.server.job.task.support.JobTaskStopHandler;
 import com.aizuda.snailjob.server.job.task.support.handler.DistributedLockHandler;
 import com.aizuda.snailjob.server.job.task.support.handler.JobTaskBatchHandler;
-import com.aizuda.snailjob.server.job.task.support.handler.WorkflowBatchHandler;
-import com.aizuda.snailjob.server.job.task.support.stop.JobTaskStopFactory;
-import com.aizuda.snailjob.server.job.task.support.stop.TaskStopJobContext;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTask;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -62,7 +57,6 @@ public class JobExecutorResultActor extends AbstractActor {
                     } else {
                         jobTask.setResultMessage(JsonUtil.toJsonString(result.getResult()));
                     }
-
                 }
 
                 Assert.isTrue(1 == jobTaskMapper.update(jobTask,
@@ -95,19 +89,6 @@ public class JobExecutorResultActor extends AbstractActor {
 
     private boolean tryCompleteAndStop(JobExecutorResultDTO result) {
         CompleteJobBatchDTO completeJobBatchDTO = JobTaskConverter.INSTANCE.toCompleteJobBatchDTO(result);
-        boolean complete = jobTaskBatchHandler.complete(completeJobBatchDTO);
-        if (complete) {
-            // 尝试停止任务
-            // 若是集群任务则客户端会主动关闭
-            if (result.getTaskType() != JobTaskTypeEnum.CLUSTER.getType()) {
-                JobTaskStopHandler instanceInterrupt = JobTaskStopFactory.getJobTaskStop(result.getTaskType());
-                TaskStopJobContext stopJobContext = JobTaskConverter.INSTANCE.toStopJobContext(result);
-                stopJobContext.setNeedUpdateTaskStatus(Boolean.FALSE);
-                stopJobContext.setForceStop(Boolean.TRUE);
-                instanceInterrupt.stop(stopJobContext);
-            }
-        }
-
-        return complete;
+        return jobTaskBatchHandler.handleResult(completeJobBatchDTO);
     }
 }
