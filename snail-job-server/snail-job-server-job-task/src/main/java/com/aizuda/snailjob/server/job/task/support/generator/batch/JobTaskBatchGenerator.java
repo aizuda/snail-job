@@ -26,6 +26,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -99,7 +101,16 @@ public class JobTaskBatchGenerator {
         jobTimerTaskDTO.setTaskExecutorScene(context.getTaskExecutorScene());
         jobTimerTaskDTO.setWorkflowTaskBatchId(context.getWorkflowTaskBatchId());
         jobTimerTaskDTO.setWorkflowNodeId(context.getWorkflowNodeId());
-        JobTimerWheel.registerWithJob(() -> new JobTimerTask(jobTimerTaskDTO), Duration.ofMillis(delay));
+        if (TransactionSynchronizationManager.isActualTransactionActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCompletion(int status) {
+                    JobTimerWheel.registerWithJob(() -> new JobTimerTask(jobTimerTaskDTO), Duration.ofMillis(delay));
+                }
+            });
+        } else {
+            JobTimerWheel.registerWithJob(() -> new JobTimerTask(jobTimerTaskDTO), Duration.ofMillis(delay));
+        }
         return jobTaskBatch;
     }
 
@@ -119,7 +130,17 @@ public class JobTaskBatchGenerator {
         taskExecuteDTO.setWorkflowTaskBatchId(context.getWorkflowTaskBatchId());
         taskExecuteDTO.setWorkflowNodeId(context.getWorkflowNodeId());
         Job job = jobMapper.selectById(context.getJobId());
-        jobTaskBatchHandler.openResidentTask(job, taskExecuteDTO);
+        if (TransactionSynchronizationManager.isActualTransactionActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCompletion(int status) {
+                    jobTaskBatchHandler.openResidentTask(job, taskExecuteDTO);
+                }
+            });
+        } else {
+            jobTaskBatchHandler.openResidentTask(job, taskExecuteDTO);
+        }
+
     }
 
     private void openNextWorkflow(JobTaskBatchGeneratorContext context, JobTaskBatch jobTaskBatch) {
