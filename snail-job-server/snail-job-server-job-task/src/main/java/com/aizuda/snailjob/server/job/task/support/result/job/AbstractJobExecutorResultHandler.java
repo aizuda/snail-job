@@ -2,6 +2,7 @@ package com.aizuda.snailjob.server.job.task.support.result.job;
 
 import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
+import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskStatusEnum;
 import com.aizuda.snailjob.server.common.enums.JobTaskExecutorSceneEnum;
@@ -25,7 +26,7 @@ import lombok.RequiredArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -45,12 +46,12 @@ public abstract class AbstractJobExecutorResultHandler implements JobExecutorRes
     public void handleResult(final JobExecutorResultContext context) {
 
         List<JobTask> jobTasks = jobTaskMapper.selectList(
-            new LambdaQueryWrapper<JobTask>()
-                .select(JobTask::getTaskStatus, JobTask::getMrStage)
-                .eq(JobTask::getTaskBatchId, context.getTaskBatchId()));
+                new LambdaQueryWrapper<JobTask>()
+                        .select(JobTask::getTaskStatus, JobTask::getMrStage)
+                        .eq(JobTask::getTaskBatchId, context.getTaskBatchId()));
 
         if (CollUtil.isEmpty(jobTasks) ||
-            jobTasks.stream().anyMatch(jobTask -> JobTaskStatusEnum.NOT_COMPLETE.contains(jobTask.getTaskStatus()))) {
+                jobTasks.stream().anyMatch(jobTask -> JobTaskStatusEnum.NOT_COMPLETE.contains(jobTask.getTaskStatus()))) {
             return;
         }
 
@@ -58,7 +59,7 @@ public abstract class AbstractJobExecutorResultHandler implements JobExecutorRes
         context.setJobTaskList(jobTasks);
 
         Map<Integer, Long> statusCountMap = jobTasks.stream()
-            .collect(Collectors.groupingBy(JobTask::getTaskStatus, Collectors.counting()));
+                .collect(Collectors.groupingBy(JobTask::getTaskStatus, Collectors.counting()));
 
         long failCount = statusCountMap.getOrDefault(JobTaskBatchStatusEnum.FAIL.getStatus(), 0L);
         long stopCount = statusCountMap.getOrDefault(JobTaskBatchStatusEnum.STOP.getStatus(), 0L);
@@ -101,13 +102,21 @@ public abstract class AbstractJobExecutorResultHandler implements JobExecutorRes
         jobTaskBatch.setId(context.getTaskBatchId());
         jobTaskBatch.setTaskBatchStatus(taskBatchStatus);
         jobTaskBatch.setUpdateDt(LocalDateTime.now());
-        if (Objects.nonNull(context.getJobOperationReason())) {
-            jobTaskBatch.setOperationReason(context.getJobOperationReason());
+        jobTaskBatch.setOperationReason(
+                Optional.ofNullable(context.getJobOperationReason()).orElse(JobOperationReasonEnum.NONE.getReason())
+        );
+
+        if (JobTaskBatchStatusEnum.NOT_SUCCESS.contains(taskBatchStatus) && context.isRetry()) {
+            jobTaskBatchMapper.update(jobTaskBatch,
+                    new LambdaUpdateWrapper<JobTaskBatch>()
+                            .eq(JobTaskBatch::getId, context.getTaskBatchId()));
+            return false;
         }
+
         return 1 == jobTaskBatchMapper.update(jobTaskBatch,
-            new LambdaUpdateWrapper<JobTaskBatch>()
-                .eq(JobTaskBatch::getId, context.getTaskBatchId())
-                .in(JobTaskBatch::getTaskBatchStatus, JobTaskBatchStatusEnum.NOT_COMPLETE)
+                new LambdaUpdateWrapper<JobTaskBatch>()
+                        .eq(JobTaskBatch::getId, context.getTaskBatchId())
+                        .in(!context.isRetry(), JobTaskBatch::getTaskBatchStatus, JobTaskBatchStatusEnum.NOT_COMPLETE)
         );
     }
 

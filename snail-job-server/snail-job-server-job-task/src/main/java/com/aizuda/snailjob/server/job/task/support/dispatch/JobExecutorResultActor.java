@@ -68,15 +68,14 @@ public class JobExecutorResultActor extends AbstractActor {
                     return;
                 }
 
-                // 先尝试完成，若已完成则不需要通过获取分布式锁来完成
                 boolean tryCompleteAndStop = tryCompleteAndStop(result);
-                if (!tryCompleteAndStop) {
-                    // 存在并发问题
-                    distributedLockHandler.lockWithDisposableAndRetry(() -> {
-                        tryCompleteAndStop(result);
-                    }, MessageFormat.format(KEY, result.getTaskBatchId(),
-                            result.getJobId()), Duration.ofSeconds(1), Duration.ofSeconds(1), 3);
-                }
+//                if (!tryCompleteAndStop) {
+//                    // 存在并发问题
+//                    distributedLockHandler.lockWithDisposableAndRetry(() -> {
+//                        tryCompleteAndStop(result);
+//                    }, MessageFormat.format(KEY, result.getTaskBatchId(),
+//                            result.getJobId()), Duration.ofSeconds(1), Duration.ofSeconds(1), 3);
+//                }
             } catch (Exception e) {
                 SnailJobLog.LOCAL.error(" job executor result exception. [{}]", result, e);
             } finally {

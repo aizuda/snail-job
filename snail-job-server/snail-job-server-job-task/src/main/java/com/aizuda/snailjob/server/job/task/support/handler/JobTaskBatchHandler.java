@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Objects;
 
 import static com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum.COMPLETED;
-import static com.aizuda.snailjob.common.core.enums.MapReduceStageEnum.*;
 
 /**
  * @author: opensnail
