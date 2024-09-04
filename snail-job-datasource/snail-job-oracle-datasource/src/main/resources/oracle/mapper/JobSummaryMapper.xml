@@ -3,10 +3,10 @@
 <mapper namespace="com.aizuda.snailjob.template.datasource.persistence.mapper.JobSummaryMapper">
 
     <insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="false">
-        INSERT INTO sj_job_summary (namespace_id, group_name, business_id, trigger_at, system_task_type, success_num,
-                                    fail_num, fail_reason, stop_num, stop_reason, cancel_num, cancel_reason)
-        <foreach collection="list" item="item" separator="UNION ALL">
-            SELECT
+        <foreach collection="list" item="item" open="BEGIN" separator=";" close=";END;">
+            INSERT INTO sj_job_summary (namespace_id, group_name, business_id, trigger_at, system_task_type, success_num,
+                                        fail_num, fail_reason, stop_num, stop_reason, cancel_num, cancel_reason)
+            VALUES (
                 #{item.namespaceId},
                 #{item.groupName},
                 #{item.businessId},
@@ -19,12 +19,12 @@
                 #{item.stopReason},
                 #{item.cancelNum},
                 #{item.cancelReason}
-            FROM DUAL
+            )
         </foreach>
     </insert>
 
     <update id="updateBatch" parameterType="java.util.List">
-        <foreach collection="list" item="item" index="index" open="BEGIN" separator=";" close=";END;">
+        <foreach collection="list" item="item" open="BEGIN" separator=";" close=";END;">
             UPDATE sj_job_summary
                SET success_num = #{item.successNum},
                    fail_num = #{item.failNum},

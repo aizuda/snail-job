@@ -3,10 +3,10 @@
 <mapper namespace="com.aizuda.snailjob.template.datasource.persistence.mapper.JobLogMessageMapper">
 
     <insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="false">
-        INSERT INTO sj_job_log_message (namespace_id, group_name, job_id, task_batch_id, task_id,
-                                        log_num, message, create_dt, real_time)
-        <foreach collection="list" item="item" separator="UNION ALL">
-            SELECT
+        <foreach collection="list" item="item" open="BEGIN" separator=";" close=";END;">
+            INSERT INTO sj_job_log_message (namespace_id, group_name, job_id, task_batch_id, task_id,
+                        log_num, message, create_dt, real_time)
+            VALUES (
                 #{item.namespaceId},
                 #{item.groupName},
                 #{item.jobId},
@@ -16,7 +16,7 @@
                 #{item.message},
                 #{item.createDt},
                 #{item.realTime}
-            FROM DUAL
+            )
         </foreach>
     </insert>
 
