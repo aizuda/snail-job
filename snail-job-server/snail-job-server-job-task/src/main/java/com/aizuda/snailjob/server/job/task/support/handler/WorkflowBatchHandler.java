@@ -188,9 +188,6 @@ public class WorkflowBatchHandler {
                 .in(JobTaskBatch::getTaskBatchStatus, NOT_COMPLETE)
                 .eq(JobTaskBatch::getWorkflowTaskBatchId, workflowTaskBatchId));
 
-        if (CollUtil.isEmpty(jobTaskBatches)) {
-            return;
-        }
 
         WorkflowTaskBatch workflowTaskBatch = new WorkflowTaskBatch();
         workflowTaskBatch.setTaskBatchStatus(JobTaskBatchStatusEnum.STOP.getStatus());
@@ -202,6 +199,9 @@ public class WorkflowBatchHandler {
                         workflowTaskBatchId));
         SnailSpringContext.getContext().publishEvent(new WorkflowTaskFailAlarmEvent(workflowTaskBatchId));
 
+        if (CollUtil.isEmpty(jobTaskBatches)) {
+            return;
+        }
         List<Job> jobs = jobMapper.selectBatchIds(StreamUtils.toSet(jobTaskBatches, JobTaskBatch::getJobId));
 
         Map<Long, Job> jobMap = StreamUtils.toIdentityMap(jobs, Job::getId);
