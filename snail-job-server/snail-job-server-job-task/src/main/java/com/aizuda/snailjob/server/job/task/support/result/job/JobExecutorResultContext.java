@@ -1,7 +1,9 @@
 package com.aizuda.snailjob.server.job.task.support.result.job;
 
+import com.aizuda.snailjob.server.job.task.dto.BaseDTO;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTask;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.List;
 
@@ -10,15 +12,13 @@ import java.util.List;
  * @date : 2024-09-04
  * @since :1.2.0
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
-public class JobExecutorResultContext {
+public class JobExecutorResultContext extends BaseDTO {
 
-    private Long jobId;
     private Long workflowNodeId;
     private Long workflowTaskBatchId;
-    private Long taskBatchId;
     private Integer jobOperationReason;
-    private Integer taskType;
     private boolean isRetry;
     private List<JobTask> jobTaskList;
 
@@ -31,5 +31,6 @@ public class JobExecutorResultContext {
      * 是否更新批次完成
      */
     private boolean taskBatchComplete;
+
 
 }

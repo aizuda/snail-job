@@ -223,6 +223,8 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
     public Boolean stop(Long id) {
         WorkflowTaskBatch workflowTaskBatch = workflowTaskBatchMapper.selectById(id);
         Assert.notNull(workflowTaskBatch, () -> new SnailJobServerException("workflow batch can not be null."));
+        Assert.isTrue(JobTaskBatchStatusEnum.NOT_COMPLETE.contains(workflowTaskBatch.getTaskBatchStatus()),
+            () -> new SnailJobServerException("workflow batch status completed."));
 
         workflowBatchHandler.stop(id, JobOperationReasonEnum.MANNER_STOP.getReason());
         return Boolean.TRUE;

@@ -12,9 +12,4 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class RealStopTaskInstanceDTO extends BaseDTO {
-
-    /**
-     * 下次触发时间
-     */
-    private LocalDateTime nextTriggerAt;
 }

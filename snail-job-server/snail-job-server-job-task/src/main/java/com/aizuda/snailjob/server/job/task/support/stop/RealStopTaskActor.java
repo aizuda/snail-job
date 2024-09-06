@@ -3,6 +3,7 @@ package com.aizuda.snailjob.server.job.task.support.stop;
 import akka.actor.AbstractActor;
 import com.aizuda.snailjob.client.model.StopJobDTO;
 import com.aizuda.snailjob.common.core.model.Result;
+import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.common.cache.CacheRegisterTable;
 import com.aizuda.snailjob.server.common.dto.RegisterNodeInfo;
@@ -32,7 +33,7 @@ public class RealStopTaskActor extends AbstractActor {
             try {
                 doStop(realStopTaskInstanceDTO);
             } catch (Exception e) {
-                log.error("停止任务执行失败", e);
+                log.error("停止任务执行失败. [{}]", JsonUtil.toJsonString(realStopTaskInstanceDTO), e);
             }
         }).build();
     }
