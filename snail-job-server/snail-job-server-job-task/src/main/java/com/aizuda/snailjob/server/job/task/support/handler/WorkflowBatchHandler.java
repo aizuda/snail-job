@@ -183,12 +183,6 @@ public class WorkflowBatchHandler {
             operationReason = JobOperationReasonEnum.JOB_OVERLAY.getReason();
         }
 
-        // 关闭已经触发的任务
-        List<JobTaskBatch> jobTaskBatches = jobTaskBatchMapper.selectList(new LambdaQueryWrapper<JobTaskBatch>()
-                .in(JobTaskBatch::getTaskBatchStatus, NOT_COMPLETE)
-                .eq(JobTaskBatch::getWorkflowTaskBatchId, workflowTaskBatchId));
-
-
         WorkflowTaskBatch workflowTaskBatch = new WorkflowTaskBatch();
         workflowTaskBatch.setTaskBatchStatus(JobTaskBatchStatusEnum.STOP.getStatus());
         workflowTaskBatch.setOperationReason(operationReason);
@@ -199,9 +193,15 @@ public class WorkflowBatchHandler {
                         workflowTaskBatchId));
         SnailSpringContext.getContext().publishEvent(new WorkflowTaskFailAlarmEvent(workflowTaskBatchId));
 
+        // 关闭已经触发的任务
+        List<JobTaskBatch> jobTaskBatches = jobTaskBatchMapper.selectList(new LambdaQueryWrapper<JobTaskBatch>()
+                .in(JobTaskBatch::getTaskBatchStatus, NOT_COMPLETE)
+                .eq(JobTaskBatch::getWorkflowTaskBatchId, workflowTaskBatchId));
+
         if (CollUtil.isEmpty(jobTaskBatches)) {
             return;
         }
+
         List<Job> jobs = jobMapper.selectBatchIds(StreamUtils.toSet(jobTaskBatches, JobTaskBatch::getJobId));
 
         Map<Long, Job> jobMap = StreamUtils.toIdentityMap(jobs, Job::getId);
