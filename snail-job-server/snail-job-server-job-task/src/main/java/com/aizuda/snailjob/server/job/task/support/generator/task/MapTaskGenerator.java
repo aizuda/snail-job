@@ -2,6 +2,7 @@ package com.aizuda.snailjob.server.job.task.support.generator.task;
 
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.snailjob.server.common.handler.ClientNodeAllocateHandler;
+import com.aizuda.snailjob.server.job.task.dto.MapReduceArgsStrDTO;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTask;
 import org.springframework.stereotype.Component;
@@ -31,5 +32,13 @@ public class MapTaskGenerator extends MapReduceTaskGenerator {
     @Override
     protected List<JobTask> doGenerate(final JobTaskGenerateContext context) {
         return super.doGenerate(context);
+    }
+
+    @Override
+    protected MapReduceArgsStrDTO getJobParams(JobTaskGenerateContext context) {
+        // 这里复用map reduce的参数能力
+        MapReduceArgsStrDTO mapReduceArgsStrDTO = new MapReduceArgsStrDTO();
+        mapReduceArgsStrDTO.setArgsStr(context.getArgsStr());
+        return mapReduceArgsStrDTO;
     }
 }

@@ -69,10 +69,23 @@ public class MapTaskPostHttpRequestHandler extends PostHttpRequestHandler {
         Object[] args = retryRequest.getArgs();
         MapTaskRequest mapTaskRequest = JsonUtil.parseObject(JsonUtil.toJsonString(args[0]), MapTaskRequest.class);
 
+        Job job = jobMapper.selectOne(new LambdaQueryWrapper<Job>()
+                .eq(Job::getId, mapTaskRequest.getJobId())
+                .eq(Job::getGroupName, groupName)
+                .eq(Job::getNamespaceId, namespace)
+        );
+
+        if (Objects.isNull(job)) {
+            return JsonUtil.toJsonString(
+                    new NettyResult(StatusEnum.NO.getStatus(), "Job config not existed", Boolean.FALSE,
+                            retryRequest.getReqId()));
+        }
+
         // 创建map任务
-        JobTaskGenerator taskInstance = JobTaskGeneratorFactory.getTaskInstance(JobTaskTypeEnum.MAP_REDUCE.getType());
+        JobTaskGenerator taskInstance = JobTaskGeneratorFactory.getTaskInstance(job.getTaskType());
         JobTaskGenerateContext context = JobTaskConverter.INSTANCE.toJobTaskInstanceGenerateContext(mapTaskRequest);
         context.setGroupName(HttpHeaderUtil.getGroupName(headers));
+        context.setArgsStr(job.getArgsStr());
         context.setNamespaceId(HttpHeaderUtil.getNamespace(headers));
         context.setMrStage(MapReduceStageEnum.MAP.getStage());
         context.setMapSubTask(mapTaskRequest.getSubTask());
@@ -81,18 +94,6 @@ public class MapTaskPostHttpRequestHandler extends PostHttpRequestHandler {
         if (CollUtil.isEmpty(taskList)) {
             return JsonUtil.toJsonString(
                 new NettyResult(StatusEnum.NO.getStatus(), "Job task is empty", Boolean.FALSE,
-                    retryRequest.getReqId()));
-        }
-
-        Job job = jobMapper.selectOne(new LambdaQueryWrapper<Job>()
-            .eq(Job::getId, mapTaskRequest.getJobId())
-            .eq(Job::getGroupName, groupName)
-            .eq(Job::getNamespaceId, namespace)
-        );
-
-        if (Objects.isNull(job)) {
-            return JsonUtil.toJsonString(
-                new NettyResult(StatusEnum.NO.getStatus(), "Job config not existed", Boolean.FALSE,
                     retryRequest.getReqId()));
         }
 

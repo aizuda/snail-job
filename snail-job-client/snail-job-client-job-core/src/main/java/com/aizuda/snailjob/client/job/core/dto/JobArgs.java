@@ -15,12 +15,6 @@ import java.util.Objects;
 @Data
 public class JobArgs {
 
-    /**
-     * 此字段即将废弃，请使用see: jobParams
-     */
-    @Deprecated
-    private String argsStr;
-
     private Object jobParams;
 
     private String executorInfo;

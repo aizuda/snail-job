@@ -101,13 +101,6 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
 
     private static JobArgs buildJobArgs(JobContext jobContext) {
         JobArgs jobArgs = new JobArgs();
-        // 下一个版本即将删除，本期兼容此问题
-        Object jobParams = jobContext.getJobArgsHolder().getJobParams();
-        if (jobParams instanceof String) {
-            jobArgs.setArgsStr((String) jobParams);
-        } else {
-            jobArgs.setArgsStr(JsonUtil.toJsonString(jobParams));
-        }
         jobArgs.setJobParams(jobContext.getJobArgsHolder().getJobParams());
         jobArgs.setExecutorInfo(jobContext.getExecutorInfo());
         jobArgs.setTaskBatchId(jobContext.getTaskBatchId());
@@ -117,14 +110,6 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
     private static JobArgs buildShardingJobArgs(JobContext jobContext) {
         ShardingJobArgs jobArgs = new ShardingJobArgs();
         jobArgs.setJobParams(jobContext.getJobArgsHolder().getJobParams());
-        // 下一个版本即将删除，本期兼容此问题
-        Object jobParams = jobContext.getJobArgsHolder().getJobParams();
-        if (jobParams instanceof String) {
-            jobArgs.setArgsStr((String) jobParams);
-        } else {
-            jobArgs.setArgsStr(JsonUtil.toJsonString(jobParams));
-        }
-
         jobArgs.setExecutorInfo(jobContext.getExecutorInfo());
         jobArgs.setShardingIndex(jobContext.getShardingIndex());
         jobArgs.setShardingTotal(jobContext.getShardingTotal());
@@ -134,13 +119,6 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
     private static JobArgs buildMapJobArgs(JobContext jobContext) {
         MapArgs jobArgs = new MapArgs();
         JobArgsHolder jobArgsHolder = jobContext.getJobArgsHolder();
-        // 下一个版本即将删除，本期兼容此问题
-        Object jobParams = jobContext.getJobArgsHolder().getJobParams();
-        if (jobParams instanceof String) {
-            jobArgs.setArgsStr((String) jobParams);
-        } else {
-            jobArgs.setArgsStr(JsonUtil.toJsonString(jobParams));
-        }
         jobArgs.setJobParams(jobArgsHolder.getJobParams());
         jobArgs.setMapResult(jobArgsHolder.getMaps());
         jobArgs.setExecutorInfo(jobContext.getExecutorInfo());
@@ -152,13 +130,6 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
     private static JobArgs buildReduceJobArgs(JobContext jobContext) {
         ReduceArgs jobArgs = new ReduceArgs();
         JobArgsHolder jobArgsHolder = jobContext.getJobArgsHolder();
-        // 下一个版本即将删除，本期兼容此问题
-        Object jobParams = jobContext.getJobArgsHolder().getJobParams();
-        if (jobParams instanceof String) {
-            jobArgs.setArgsStr((String) jobParams);
-        } else {
-            jobArgs.setArgsStr(JsonUtil.toJsonString(jobParams));
-        }
         jobArgs.setJobParams(jobArgsHolder.getJobParams());
         Object maps = jobArgsHolder.getMaps();
         if (Objects.nonNull(maps)) {
