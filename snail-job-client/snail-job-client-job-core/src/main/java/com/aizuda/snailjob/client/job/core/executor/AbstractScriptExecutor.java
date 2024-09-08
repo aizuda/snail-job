@@ -1,13 +1,13 @@
 package com.aizuda.snailjob.client.job.core.executor;
 
+import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.client.common.config.SnailJobProperties;
-import com.aizuda.snailjob.common.core.util.SnailJobFileUtil;
-import com.aizuda.snailjob.common.core.util.SnailJobSystemUtil;
 import com.aizuda.snailjob.client.model.ExecuteResult;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.exception.SnailJobInnerExecutorException;
+import com.aizuda.snailjob.common.core.util.SnailJobFileUtil;
+import com.aizuda.snailjob.common.core.util.SnailJobSystemUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
-import io.micrometer.common.util.StringUtils;
 import lombok.Data;
 
 import java.io.*;
@@ -246,7 +246,7 @@ public abstract class AbstractScriptExecutor {
         SnailJobLog.REMOTE.warn("[snail-job] " + msg, params);
     }
 
-    public class SnailFileUtils {
+    public static class SnailFileUtils {
 
         /**
          * 获取工作目录
@@ -256,7 +256,7 @@ public abstract class AbstractScriptExecutor {
         public static String workspace() {
             SnailJobProperties snailJobProperties = SnailSpringContext.getBean(SnailJobProperties.class);
             String workspaceByDKey = snailJobProperties.getWorkspace();
-            if (StringUtils.isNotEmpty(workspaceByDKey)) {
+            if (StrUtil.isNotEmpty(workspaceByDKey)) {
                 SnailJobLog.LOCAL.info("[FileUtils] [workspace] use custom workspace: {}", workspaceByDKey);
                 return workspaceByDKey;
             }
