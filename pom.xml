@@ -21,7 +21,7 @@
         <java.version>17</java.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <revision>1.2.0-beta1</revision>
+        <revision>1.2.0-beta1.1</revision>
         <netty-all.version>4.1.94.Final</netty-all.version>
         <hutool-all.version>5.8.25</hutool-all.version>
         <mybatis-plus.version>3.5.7</mybatis-plus.version>
