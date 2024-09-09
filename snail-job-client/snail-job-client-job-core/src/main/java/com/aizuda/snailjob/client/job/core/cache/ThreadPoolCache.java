@@ -25,20 +25,20 @@ public class ThreadPoolCache {
     public static ThreadPoolExecutor createThreadPool(Long taskBatchId, int parallelNum) {
         if (CACHE_THREAD_POOL.containsKey(taskBatchId)) {
             ThreadPoolExecutor cacheThreadPool = CACHE_THREAD_POOL.get(taskBatchId);
-            if (cacheThreadPool.getCorePoolSize() == parallelNum) {
+            // 大于1说明已经更新了线程池的线程数，为了防止后面任务执行过程任务并行度改变影响已经产生的批次，这里不再做更新操作
+            if (cacheThreadPool.getCorePoolSize() > 1) {
                 return cacheThreadPool;
             }
 
             // 若能执行到这里只有分片任务(静态分片、MAP、MapReduce)才会需要多线程支持
-            cacheThreadPool.setCorePoolSize(parallelNum);
-            cacheThreadPool.setMaximumPoolSize(parallelNum);
+            cacheThreadPool.setCorePoolSize(Math.min(parallelNum, cacheThreadPool.getMaximumPoolSize()));
             return cacheThreadPool;
         }
 
         Supplier<ThreadPoolExecutor> supplier = () -> {
             ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(
                     // 默认情况先只设置一个线程, 只有分片任务(静态分片、MAP、MapReduce)才会需要多线程支持
-                    1, 1, 10, TimeUnit.SECONDS, new LinkedBlockingQueue<>(),
+                    1, parallelNum, 10, TimeUnit.SECONDS, new LinkedBlockingQueue<>(),
                     new CustomizableThreadFactory(MessageFormat.format("snail-job-job-{0}-", taskBatchId)));
             threadPoolExecutor.allowCoreThreadTimeOut(true);
             return threadPoolExecutor;

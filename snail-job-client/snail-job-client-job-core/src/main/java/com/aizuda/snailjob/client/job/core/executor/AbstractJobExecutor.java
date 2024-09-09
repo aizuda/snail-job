@@ -26,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -43,7 +44,8 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
     public void jobExecute(JobContext jobContext) {
 
         // 创建可执行的任务
-        ThreadPoolExecutor threadPool = ThreadPoolCache.createThreadPool(jobContext.getTaskBatchId(), jobContext.getParallelNum());
+        Integer parallelNum = Optional.ofNullable(jobContext.getParallelNum()).orElse(1);
+        ThreadPoolExecutor threadPool = ThreadPoolCache.createThreadPool(jobContext.getTaskBatchId(), Math.max(1, parallelNum));
         ListeningExecutorService decorator = MoreExecutors.listeningDecorator(threadPool);
 
         // 将任务添加到时间轮中，到期停止任务
