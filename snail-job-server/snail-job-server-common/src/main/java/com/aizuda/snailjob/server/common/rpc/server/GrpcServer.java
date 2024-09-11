@@ -58,7 +58,7 @@ public class GrpcServer implements Lifecycle {
             return;
         }
 
-        if (RpcTypeEnum.GPRC != systemProperties.getRpcType()) {
+        if (RpcTypeEnum.GRPC != systemProperties.getRpcType()) {
             return;
         }
 

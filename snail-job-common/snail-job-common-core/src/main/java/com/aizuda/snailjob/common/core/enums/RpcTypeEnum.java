@@ -6,6 +6,6 @@ package com.aizuda.snailjob.common.core.enums;
  */
 public enum RpcTypeEnum {
 
-    GPRC,
+    GRPC,
     NETTY
 }

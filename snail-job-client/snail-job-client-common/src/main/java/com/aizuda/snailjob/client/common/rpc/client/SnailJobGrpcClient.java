@@ -32,7 +32,7 @@ public class SnailJobGrpcClient implements Lifecycle {
 
     @Override
     public void start() {
-        if (RpcTypeEnum.GPRC != snailJobProperties.getRpcType()) {
+        if (RpcTypeEnum.GRPC != snailJobProperties.getRpcType()) {
             return;
         }
 
