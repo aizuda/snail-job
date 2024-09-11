@@ -75,9 +75,8 @@ public  class MapTaskPostHttpRequestHandler extends PostHttpRequestHandler {
         );
 
         if (Objects.isNull(job)) {
-            return JsonUtil.toJsonString(
-                    new NettyResult(StatusEnum.NO.getStatus(), "Job config not existed", Boolean.FALSE,
-                            retryRequest.getReqId()));
+            return new SnailJobRpcResult(StatusEnum.NO.getStatus(), "Job config not existed", Boolean.FALSE,
+                    retryRequest.getReqId());
         }
 
         // 创建map任务

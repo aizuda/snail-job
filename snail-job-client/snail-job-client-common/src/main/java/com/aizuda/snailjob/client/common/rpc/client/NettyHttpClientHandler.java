@@ -4,8 +4,6 @@ import com.aizuda.snailjob.client.common.event.SnailChannelReconnectEvent;
 import com.aizuda.snailjob.client.common.handler.ClientRegister;
 import com.aizuda.snailjob.common.core.constant.SystemConstants.BEAT;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
-import com.aizuda.snailjob.common.core.enums.StatusEnum;
-import com.aizuda.snailjob.common.core.model.NettyResult;
 import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
 import com.aizuda.snailjob.common.core.rpc.RpcContext;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
