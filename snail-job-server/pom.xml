@@ -27,6 +27,7 @@
         <java.version>17</java.version>
         <org.mapstruct.version>1.5.3.Final</org.mapstruct.version>
         <akka.version>2.6.21</akka.version>
+        <scala.version>2.13.9</scala.version>
         <java-jwt.version>4.4.0</java-jwt.version>
         <perf4j.version>0.9.16</perf4j.version>
         <guava.version>33.2.0-jre</guava.version>
@@ -63,12 +64,29 @@
                 <groupId>com.typesafe.akka</groupId>
                 <artifactId>akka-actor-typed_2.13</artifactId>
                 <version>${akka.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>scala-library</artifactId>
+                        <groupId>org.scala-lang</groupId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>com.typesafe.akka</groupId>
                 <artifactId>akka-actor-testkit-typed_2.13</artifactId>
                 <version>${akka.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>scala-library</artifactId>
+                        <groupId>org.scala-lang</groupId>
+                    </exclusion>
+                </exclusions>
                 <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.scala-lang</groupId>
+                <artifactId>scala-library</artifactId>
+                <version>${scala.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.google.guava</groupId>
