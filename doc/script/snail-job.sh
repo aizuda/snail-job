@@ -5,7 +5,6 @@ AppName=snail-job-server-exec.jar
 # JVM参数
 JVM_OPTS="-Dname=$AppName  -Duser.timezone=Asia/Shanghai -XX:+HeapDumpOnOutOfMemoryError -XX:+UseZGC"
 APP_HOME=`pwd`
-LOG_PATH=$APP_HOME/logs/$AppName.log
 
 # 检查传入的操作名参数，如果为空则默认设置为 "start"
 if [ "$1" = "" ]; then
