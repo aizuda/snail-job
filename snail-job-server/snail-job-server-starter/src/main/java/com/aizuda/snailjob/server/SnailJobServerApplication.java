@@ -14,6 +14,7 @@
  */
 package com.aizuda.snailjob.server;
 
+import com.aizuda.snailjob.server.common.rpc.server.GrpcServer;
 import com.aizuda.snailjob.server.common.rpc.server.NettyHttpServer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationRunner;
@@ -36,19 +37,23 @@ public class SnailJobServerApplication {
         SpringApplication.run(SnailJobServerApplication.class, args);
     }
 
-//    @Bean
-    public ApplicationRunner nettyStartupChecker(NettyHttpServer nettyHttpServer, ServletWebServerFactory serverFactory) {
+    @Bean
+    public ApplicationRunner nettyStartupChecker(NettyHttpServer nettyHttpServer, GrpcServer grpcServer,
+                                                 ServletWebServerFactory serverFactory) {
         return args -> {
+            // 判定Grpc或者Netty服务端是否正常启动
+            boolean started = nettyHttpServer.isStarted() || grpcServer.isStarted();
             // 最长自旋10秒，保证nettyHttpServer启动完成
             int waitCount = 0;
-            while (!nettyHttpServer.isStarted() && waitCount < 100) {
-                log.info("--------> snail-job netty server is staring....");
+            while (!started && waitCount < 100) {
+                log.info("--------> snail-job server is staring....");
                 TimeUnit.MILLISECONDS.sleep(100);
                 waitCount++;
+                started = nettyHttpServer.isStarted() || grpcServer.isStarted();
             }
 
-            if (!nettyHttpServer.isStarted()) {
-                log.error("--------> snail-job netty server startup failure.");
+            if (!started) {
+                log.error("--------> snail-job server startup failure.");
                 // Netty启动失败，停止Web服务和Spring Boot应用程序
                 serverFactory.getWebServer().stop();
                 SpringApplication.exit(SpringApplication.run(SnailJobServerApplication.class));
