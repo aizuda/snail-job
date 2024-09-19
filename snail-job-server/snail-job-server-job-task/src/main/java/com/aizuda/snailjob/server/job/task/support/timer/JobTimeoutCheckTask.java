@@ -5,7 +5,6 @@ import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.TimerTask;
-import com.aizuda.snailjob.server.job.task.dto.TaskExecuteDTO;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
 import com.aizuda.snailjob.server.job.task.support.JobTaskStopHandler;
 import com.aizuda.snailjob.server.job.task.support.alarm.event.JobTaskFailAlarmEvent;
@@ -32,14 +31,15 @@ import java.util.Objects;
 public class JobTimeoutCheckTask implements TimerTask<String> {
     private static final String IDEMPOTENT_KEY_PREFIX = "job_timeout_check_{0}";
 
-    private final TaskExecuteDTO taskExecuteDTO;
+    private final Long taskBatchId;
+    private final Long jobId;
 
     @Override
     public void run(Timeout timeout) throws Exception {
         JobTaskBatchMapper jobTaskBatchMapper = SnailSpringContext.getBean(JobTaskBatchMapper.class);
-        JobTaskBatch jobTaskBatch = jobTaskBatchMapper.selectById(taskExecuteDTO.getTaskBatchId());
+        JobTaskBatch jobTaskBatch = jobTaskBatchMapper.selectById(taskBatchId);
         if (Objects.isNull(jobTaskBatch)) {
-            SnailJobLog.LOCAL.error("jobTaskBatch:[{}]不存在", taskExecuteDTO.getTaskBatchId());
+            SnailJobLog.LOCAL.error("jobTaskBatch:[{}]不存在", taskBatchId);
             return;
         }
 
@@ -49,9 +49,9 @@ public class JobTimeoutCheckTask implements TimerTask<String> {
         }
 
         JobMapper jobMapper = SnailSpringContext.getBean(JobMapper.class);
-        Job job = jobMapper.selectById(taskExecuteDTO.getJobId());
+        Job job = jobMapper.selectById(jobId);
         if (Objects.isNull(job)) {
-            SnailJobLog.LOCAL.error("job:[{}]不存在", taskExecuteDTO.getJobId());
+            SnailJobLog.LOCAL.error("job:[{}]不存在", jobId);
             return;
         }
 
@@ -61,17 +61,17 @@ public class JobTimeoutCheckTask implements TimerTask<String> {
         stopJobContext.setJobOperationReason(JobOperationReasonEnum.TASK_EXECUTION_TIMEOUT.getReason());
         stopJobContext.setNeedUpdateTaskStatus(Boolean.TRUE);
         stopJobContext.setForceStop(Boolean.TRUE);
-        stopJobContext.setTaskBatchId(taskExecuteDTO.getTaskBatchId());
-        stopJobContext.setWorkflowNodeId(taskExecuteDTO.getWorkflowNodeId());
-        stopJobContext.setWorkflowTaskBatchId(taskExecuteDTO.getWorkflowTaskBatchId());
+        stopJobContext.setTaskBatchId(taskBatchId);
+        stopJobContext.setWorkflowNodeId(jobTaskBatch.getWorkflowNodeId());
+        stopJobContext.setWorkflowTaskBatchId(jobTaskBatch.getWorkflowTaskBatchId());
         instanceInterrupt.stop(stopJobContext);
 
-        SnailSpringContext.getContext().publishEvent(new JobTaskFailAlarmEvent(taskExecuteDTO.getTaskBatchId()));
-        SnailJobLog.LOCAL.info("超时中断.taskBatchId:[{}]", taskExecuteDTO.getTaskBatchId());
+        SnailSpringContext.getContext().publishEvent(new JobTaskFailAlarmEvent(taskBatchId));
+        SnailJobLog.LOCAL.info("超时中断.taskBatchId:[{}]", taskBatchId);
     }
 
     @Override
     public String idempotentKey() {
-        return MessageFormat.format(IDEMPOTENT_KEY_PREFIX, taskExecuteDTO.getTaskBatchId());
+        return MessageFormat.format(IDEMPOTENT_KEY_PREFIX, taskBatchId);
     }
 }

@@ -185,7 +185,7 @@ public class JobExecutorActor extends AbstractActor {
                     if (JobTaskBatchStatusEnum.RUNNING.getStatus() == finalTaskStatus) {
 
                         // 运行中的任务，需要进行超时检查
-                        JobTimerWheel.registerWithJob(() -> new JobTimeoutCheckTask(taskExecute),
+                        JobTimerWheel.registerWithJob(() -> new JobTimeoutCheckTask(taskExecute.getTaskBatchId(), job.getId()),
                                 // 加500ms是为了让尽量保证客户端自己先超时中断，防止客户端上报成功但是服务端已触发超时中断
                                 Duration.ofMillis(DateUtils.toEpochMilli(job.getExecutorTimeout()) + 500));
                     }
