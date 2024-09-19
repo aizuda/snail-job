@@ -49,6 +49,13 @@ public class TaskStopJobContext {
 
     private boolean forceStop;
 
+    /**
+     * 工作流任务批次id
+     */
+    private Long workflowTaskBatchId;
+
+    private Long workflowNodeId;
+
     protected List<JobTask> getJobTasks() {
         return jobTasks;
     }

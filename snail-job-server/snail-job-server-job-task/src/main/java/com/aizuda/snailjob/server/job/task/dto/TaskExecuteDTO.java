@@ -22,4 +22,15 @@ public class TaskExecuteDTO {
      */
     private Integer taskExecutorScene;
 
+    public TaskExecuteDTO() {
+    }
+
+    public TaskExecuteDTO(Long jobId, Long taskBatchId, Long workflowTaskBatchId, Long workflowNodeId, Integer taskExecutorScene) {
+        this.jobId = jobId;
+        this.taskBatchId = taskBatchId;
+        this.workflowTaskBatchId = workflowTaskBatchId;
+        this.workflowNodeId = workflowNodeId;
+        this.taskExecutorScene = taskExecutorScene;
+    }
+
 }

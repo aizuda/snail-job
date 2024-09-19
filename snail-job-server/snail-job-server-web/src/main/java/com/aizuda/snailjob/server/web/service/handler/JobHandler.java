@@ -117,7 +117,7 @@ public class JobHandler {
         }
 
         // 运行中的任务，需要进行超时检查
-        JobTimerWheel.registerWithJob(() -> new JobTimeoutCheckTask(taskBatchId, job.getId()),
+        JobTimerWheel.registerWithJob(() -> new JobTimeoutCheckTask(new TaskExecuteDTO(job.getId(), taskBatchId, workflowTaskBatchId, workflowNodeId, JobTaskExecutorSceneEnum.MANUAL_JOB.getType())),
                 // 加500ms是为了让尽量保证客户端自己先超时中断，防止客户端上报成功但是服务端已触发超时中断
                 Duration.ofMillis(DateUtils.toEpochMilli(job.getExecutorTimeout()) + 500));
 
