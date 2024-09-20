@@ -1,7 +1,10 @@
 package com.aizuda.snailjob.server.job.task.support.callback;
 
+import akka.actor.ActorRef;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.enums.JobTaskStatusEnum;
+import com.aizuda.snailjob.common.log.SnailJobLog;
+import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.common.util.ClientInfoUtils;
 import com.aizuda.snailjob.server.job.task.dto.RealJobExecutorDTO;
 import com.aizuda.snailjob.server.job.task.enums.JobRetrySceneEnum;
@@ -62,9 +65,15 @@ public abstract class AbstractClientCallbackHandler implements ClientCallbackHan
             if (StrUtil.isBlank(realJobExecutor.getWfContext())) {
                 realJobExecutor.setWfContext(getWfContext(realJobExecutor.getWorkflowTaskBatchId()));
             }
-            // 注册重试任务重试间隔时间轮
-            JobTimerWheel.registerWithJob(() -> new RetryJobTimerTask(realJobExecutor), Duration.ofSeconds(job.getRetryInterval()));
-            return;
+            if (JobRetrySceneEnum.MANUAL.getRetryScene().equals(context.getRetryScene())) {
+                // 手动重试, 则即时重试
+                ActorRef actorRef = ActorGenerator.jobRealTaskExecutorActor();
+                actorRef.tell(realJobExecutor, actorRef);
+            } else {
+                // 注册重试任务，重试间隔时间轮
+                JobTimerWheel.registerWithJob(() -> new RetryJobTimerTask(realJobExecutor), Duration.ofSeconds(job.getRetryInterval()));
+                return;
+            }
         }
 
         // 不需要重试执行回调

@@ -28,6 +28,7 @@ public class WorkflowTimeoutCheckTask implements TimerTask<String> {
 
     @Override
     public void run(Timeout timeout) throws Exception {
+        JobTimerWheel.clearCache(idempotentKey());
         WorkflowTaskBatchMapper workflowTaskBatchMapper = SnailSpringContext.getBean(WorkflowTaskBatchMapper.class);
         WorkflowTaskBatch workflowTaskBatch = workflowTaskBatchMapper.selectById(workflowTaskBatchId);
         // 幂等检查

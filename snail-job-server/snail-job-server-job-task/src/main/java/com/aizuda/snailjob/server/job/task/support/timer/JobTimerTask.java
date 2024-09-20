@@ -1,13 +1,13 @@
 package com.aizuda.snailjob.server.job.task.support.timer;
 
 import akka.actor.ActorRef;
+import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.TimerTask;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.job.task.dto.JobTimerTaskDTO;
 import com.aizuda.snailjob.server.job.task.dto.TaskExecuteDTO;
 import io.netty.util.Timeout;
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
@@ -18,7 +18,6 @@ import java.time.LocalDateTime;
  * @since 2.4.0
  */
 @AllArgsConstructor
-@Slf4j
 public class JobTimerTask implements TimerTask<String> {
     public static final String IDEMPOTENT_KEY_PREFIX = "job_{0}";
     private JobTimerTaskDTO jobTimerTaskDTO;
@@ -26,7 +25,7 @@ public class JobTimerTask implements TimerTask<String> {
     @Override
     public void run(final Timeout timeout) throws Exception {
         // 执行任务调度
-        log.debug("开始执行任务调度. 当前时间:[{}] taskId:[{}]", LocalDateTime.now(), jobTimerTaskDTO.getTaskBatchId());
+        SnailJobLog.LOCAL.debug("开始执行任务调度. 当前时间:[{}] taskId:[{}]", LocalDateTime.now(), jobTimerTaskDTO.getTaskBatchId());
 
         try {
             TaskExecuteDTO taskExecuteDTO = new TaskExecuteDTO();
@@ -39,7 +38,7 @@ public class JobTimerTask implements TimerTask<String> {
             actorRef.tell(taskExecuteDTO, actorRef);
 
         } catch (Exception e) {
-            log.error("任务调度执行失败", e);
+            SnailJobLog.LOCAL.error("任务调度执行失败", e);
         }
     }
 

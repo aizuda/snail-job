@@ -36,6 +36,7 @@ public class JobTimeoutCheckTask implements TimerTask<String> {
 
     @Override
     public void run(Timeout timeout) throws Exception {
+        JobTimerWheel.clearCache(idempotentKey());
         JobTaskBatchMapper jobTaskBatchMapper = SnailSpringContext.getBean(JobTaskBatchMapper.class);
         JobTaskBatch jobTaskBatch = jobTaskBatchMapper.selectById(taskBatchId);
         if (Objects.isNull(jobTaskBatch)) {
