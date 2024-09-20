@@ -3,7 +3,6 @@ package com.aizuda.snailjob.server.job.task.support.callback;
 import akka.actor.ActorRef;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.enums.JobTaskStatusEnum;
-import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.common.util.ClientInfoUtils;
 import com.aizuda.snailjob.server.job.task.dto.RealJobExecutorDTO;
@@ -72,8 +71,9 @@ public abstract class AbstractClientCallbackHandler implements ClientCallbackHan
             } else {
                 // 注册重试任务，重试间隔时间轮
                 JobTimerWheel.registerWithJob(() -> new RetryJobTimerTask(realJobExecutor), Duration.ofSeconds(job.getRetryInterval()));
-                return;
             }
+
+            return;
         }
 
         // 不需要重试执行回调
