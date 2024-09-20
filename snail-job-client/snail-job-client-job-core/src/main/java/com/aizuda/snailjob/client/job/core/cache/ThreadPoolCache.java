@@ -45,7 +45,11 @@ public class ThreadPoolCache {
         };
 
         ThreadPoolExecutor threadPoolExecutor = supplier.get();
-        CACHE_THREAD_POOL.putIfAbsent(taskBatchId, threadPoolExecutor);
+        ThreadPoolExecutor cacheThreadPoolExecutor = CACHE_THREAD_POOL.putIfAbsent(taskBatchId, threadPoolExecutor);
+        if (Objects.nonNull(cacheThreadPoolExecutor) && cacheThreadPoolExecutor != threadPoolExecutor) {
+            cacheThreadPoolExecutor.setCorePoolSize(Math.min(parallelNum, cacheThreadPoolExecutor.getMaximumPoolSize()));
+            return cacheThreadPoolExecutor;
+        }
         return threadPoolExecutor;
     }
 
