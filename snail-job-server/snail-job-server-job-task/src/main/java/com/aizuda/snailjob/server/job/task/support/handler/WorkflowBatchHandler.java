@@ -301,7 +301,7 @@ public class WorkflowBatchHandler {
     }
 
     public void openNextNode(WorkflowNodeTaskExecuteDTO taskExecuteDTO) {
-        if (Objects.isNull(taskExecuteDTO.getParentId()) || Objects.isNull(taskExecuteDTO.getWorkflowTaskBatchId())) {
+        if (Objects.isNull(taskExecuteDTO.getParentId()) || Objects.isNull(taskExecuteDTO.getWorkflowTaskBatchId()) || Long.valueOf(0).equals(taskExecuteDTO.getWorkflowTaskBatchId())) {
             return;
         }
 
