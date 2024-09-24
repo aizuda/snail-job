@@ -17,13 +17,6 @@ public class GlobalLogFactory {
 
     private static volatile LogFactory currentLogFactory;
     private static final Object lock = new Object();
-
-    private static Environment environment;
-
-    public static void setEnvironment(final Environment environment) {
-        GlobalLogFactory.environment = environment;
-    }
-
     /**
      * 获取单例日志工厂类，如果不存在创建之
      *
@@ -72,17 +65,4 @@ public class GlobalLogFactory {
         return currentLogFactory;
     }
 
-    /**
-     * 获取全局的日志开关
-     *
-     * @return
-     */
-    public static Boolean logSwitch() {
-
-        if (Objects.nonNull(environment)) {
-            return environment.getProperty("snail-job.log.status", Boolean.class, Boolean.TRUE);
-        }
-
-        return Boolean.TRUE;
-    }
 }

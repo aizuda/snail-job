@@ -30,10 +30,6 @@ public abstract class AbstractLog {
      * @param arguments 变量对应的参数
      */
     public void trace(String format, Object... arguments) {
-        if (!GlobalLogFactory.logSwitch()) {
-            return;
-        }
-
         trace(LogFactory.get(LogCaller.getCallerCaller()), format, arguments);
     }
 
@@ -45,10 +41,6 @@ public abstract class AbstractLog {
      * @param arguments 变量对应的参数
      */
     public void trace(Log log, String format, Object... arguments) {
-        if (!GlobalLogFactory.logSwitch()) {
-            return;
-        }
-
         log.trace(isRemote, FQCN, format, arguments);
     }
 
@@ -61,10 +53,6 @@ public abstract class AbstractLog {
      * @param arguments 变量对应的参数
      */
     public void debug(String format, Object... arguments) {
-        if (!GlobalLogFactory.logSwitch()) {
-            return;
-        }
-
         debug(LogFactory.get(LogCaller.getCallerCaller()), format, arguments);
     }
 
@@ -76,10 +64,6 @@ public abstract class AbstractLog {
      * @param arguments 变量对应的参数
      */
     public void debug(Log log, String format, Object... arguments) {
-        if (!GlobalLogFactory.logSwitch()) {
-            return;
-        }
-
         log.debug(isRemote, FQCN, format, arguments);
     }
 
@@ -92,10 +76,6 @@ public abstract class AbstractLog {
      * @param arguments 变量对应的参数
      */
     public void info(String format, Object... arguments) {
-        if (!GlobalLogFactory.logSwitch()) {
-            return;
-        }
-
         info(LogFactory.get(LogCaller.getCallerCaller()), format, arguments);
     }
 
@@ -107,10 +87,6 @@ public abstract class AbstractLog {
      * @param arguments 变量对应的参数
      */
     public void info(Log log, String format, Object... arguments) {
-        if (!GlobalLogFactory.logSwitch()) {
-            return;
-        }
-
         log.info(isRemote, FQCN, format, arguments);
     }
 
@@ -123,10 +99,6 @@ public abstract class AbstractLog {
      * @param arguments 变量对应的参数
      */
     public void warn(String format, Object... arguments) {
-        if (!GlobalLogFactory.logSwitch()) {
-            return;
-        }
-
         warn(LogFactory.get(LogCaller.getCallerCaller()), format, arguments);
     }
 
@@ -138,10 +110,6 @@ public abstract class AbstractLog {
      * @param arguments 变量对应的参数
      */
     public void warn(Log log, String format, Object... arguments) {
-        if (!GlobalLogFactory.logSwitch()) {
-            return;
-        }
-
         log.warn(isRemote, FQCN, format, arguments);
     }
 
@@ -153,10 +121,6 @@ public abstract class AbstractLog {
      * @param e 需在日志中堆栈打印的异常
      */
     public void error(Throwable e) {
-        if (!GlobalLogFactory.logSwitch()) {
-            return;
-        }
-
         error(LogFactory.get(LogCaller.getCallerCaller()), e);
     }
 
@@ -167,10 +131,6 @@ public abstract class AbstractLog {
      * @param arguments 变量对应的参数
      */
     public void error(String format, Object... arguments) {
-        if (!GlobalLogFactory.logSwitch()) {
-            return;
-        }
-
         error(LogFactory.get(LogCaller.getCallerCaller()), format, arguments);
     }
 
@@ -181,10 +141,6 @@ public abstract class AbstractLog {
      * @param e   需在日志中堆栈打印的异常
      */
     public void error(Log log, Throwable e) {
-        if (!GlobalLogFactory.logSwitch()) {
-            return;
-        }
-
         log.error(false, e);
     }
 
@@ -196,10 +152,6 @@ public abstract class AbstractLog {
      * @param arguments 变量对应的参数
      */
     public void error(Log log, String format, Object... arguments) {
-        if (!GlobalLogFactory.logSwitch()) {
-            return;
-        }
-
         log.error(isRemote, FQCN, format, arguments);
     }
 
@@ -213,10 +165,6 @@ public abstract class AbstractLog {
      * @param arguments 变量对应的参数
      */
     public void log(Level level, Boolean remote, String format, Object... arguments) {
-        if (!GlobalLogFactory.logSwitch()) {
-            return;
-        }
-
         LogFactory.get(LogCaller.getCallerCaller()).log(level, remote, FQCN, format, arguments);
     }
 }
