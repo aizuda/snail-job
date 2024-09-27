@@ -71,6 +71,8 @@
                 <configuration>
                     <installDirectory>target</installDirectory>
                     <workingDirectory>src/main/frontend</workingDirectory>
+                    <nodeDownloadRoot>https://cdn.npmmirror.com/binaries/node/</nodeDownloadRoot>
+                    <pnpmDownloadRoot>https://registry.npmmirror.com/pnpm/-/</pnpmDownloadRoot>
                 </configuration>
                 <executions>
                     <execution>
@@ -91,7 +93,6 @@
                         <phase>generate-resources</phase>
                         <configuration>
                             <arguments>install</arguments>
-                            <pnpmRegistryURL>https://registry.npmmirror.com</pnpmRegistryURL>
                             <pnpmInheritsProxyConfigFromMaven>true</pnpmInheritsProxyConfigFromMaven>
                         </configuration>
                     </execution>
