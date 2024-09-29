@@ -104,6 +104,10 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
 
     @Override
     public void onFailure(final Throwable t) {
+        if (t instanceof CancellationException) {
+            SnailJobLog.LOCAL.debug("任务已经被取消，不做状态回传");
+            return;
+        }
         ExecuteResult failure = ExecuteResult.failure();
         try {
             // 初始化调度信息（日志上报LogUtil）
@@ -111,12 +115,7 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
 
             // 上报执行失败
             SnailJobLog.REMOTE.error("任务执行失败 taskBatchId:[{}]", jobContext.getTaskBatchId(), t);
-
-            if (t instanceof CancellationException) {
-                failure.setMessage("任务被取消");
-            } else {
-                failure.setMessage(t.getMessage());
-            }
+            failure.setMessage(t.getMessage());
 
             CLIENT.dispatchResult(
                     buildDispatchJobResultRequest(failure, JobTaskStatusEnum.FAIL.getStatus())
