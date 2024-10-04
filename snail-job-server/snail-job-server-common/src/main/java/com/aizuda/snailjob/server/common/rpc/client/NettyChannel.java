@@ -52,7 +52,7 @@ public class NettyChannel {
      * @param body   请求的消息体
      * @throws InterruptedException
      */
-    public static void send(String hostId, String hostIp, Integer port, HttpMethod method, String url, String body, HttpHeaders requestHeaders) throws InterruptedException {
+    public static synchronized void send(String hostId, String hostIp, Integer port, HttpMethod method, String url, String body, HttpHeaders requestHeaders) throws InterruptedException {
 
         Channel channel = CHANNEL_MAP.get(Pair.of(hostId, hostIp));
         if (Objects.isNull(channel) || !channel.isActive()) {
@@ -100,7 +100,8 @@ public class NettyChannel {
             if (notTimeout) {
                 // 连接成功
                 if (channel != null && channel.isActive()) {
-                    SnailJobLog.LOCAL.info("netty client started {} connect to server", channel.localAddress());
+                    SnailJobLog.LOCAL.info("netty client started {} connect to server id:[{}] ip:[{}] channel:[{}]",
+                            channel.localAddress(), hostId, ip, channel);
                     NettyChannel.setChannel(hostId, ip, channel);
                     return channel;
                 }
