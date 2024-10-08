@@ -123,4 +123,12 @@ public class MapReduceJobExecutorHandler extends AbstractJobExecutorResultHandle
         return false;
     }
 
+    @Override
+    protected void openNextWorkflowNode(JobExecutorResultContext context) {
+        if (context.isCreateReduceTask()){
+            // 任务暂未完成，无需开启后续节点；更新上下文
+            return;
+        }
+        super.openNextWorkflowNode(context);
+    }
 }

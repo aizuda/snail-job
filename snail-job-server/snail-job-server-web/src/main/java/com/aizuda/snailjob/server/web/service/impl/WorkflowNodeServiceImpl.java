@@ -52,14 +52,6 @@ public class WorkflowNodeServiceImpl implements WorkflowNodeService {
             jobHandler.stop(jobTaskBatch.getId());
         }
 
-        // 继续执行后续的任务
-        WorkflowNodeTaskExecuteDTO taskExecuteDTO = new WorkflowNodeTaskExecuteDTO();
-        taskExecuteDTO.setWorkflowTaskBatchId(workflowTaskBatchId);
-        taskExecuteDTO.setTaskExecutorScene(JobTaskExecutorSceneEnum.MANUAL_WORKFLOW.getType());
-        taskExecuteDTO.setParentId(nodeId);
-
-        workflowBatchHandler.openNextNode(taskExecuteDTO);
-
         return Boolean.TRUE;
     }
 
