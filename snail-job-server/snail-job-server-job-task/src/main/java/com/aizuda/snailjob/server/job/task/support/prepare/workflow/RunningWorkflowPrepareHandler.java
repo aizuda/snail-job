@@ -6,7 +6,7 @@ import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.job.task.dto.WorkflowTaskPrepareDTO;
-import com.aizuda.snailjob.server.job.task.enums.BlockStrategyEnum;
+import com.aizuda.snailjob.common.core.enums.BlockStrategyEnum;
 import com.aizuda.snailjob.server.job.task.support.BlockStrategy;
 import com.aizuda.snailjob.server.job.task.support.WorkflowTaskConverter;
 import com.aizuda.snailjob.server.job.task.support.alarm.event.WorkflowTaskFailAlarmEvent;

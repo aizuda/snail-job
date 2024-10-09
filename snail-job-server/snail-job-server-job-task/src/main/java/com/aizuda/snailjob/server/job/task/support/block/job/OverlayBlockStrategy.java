@@ -1,7 +1,7 @@
 package com.aizuda.snailjob.server.job.task.support.block.job;
 
 import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
-import com.aizuda.snailjob.server.job.task.enums.BlockStrategyEnum;
+import com.aizuda.snailjob.common.core.enums.BlockStrategyEnum;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
 import com.aizuda.snailjob.server.job.task.support.JobTaskStopHandler;
 import com.aizuda.snailjob.server.job.task.support.generator.batch.JobTaskBatchGenerator;

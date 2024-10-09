@@ -1,6 +1,6 @@
-package com.aizuda.snailjob.server.job.task.enums;
+package com.aizuda.snailjob.common.core.enums;
 
-import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
+import com.aizuda.snailjob.common.core.exception.SnailJobCommonException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -43,7 +43,7 @@ public enum BlockStrategyEnum {
             }
         }
 
-        throw new SnailJobServerException("不符合的阻塞策略. blockStrategy:[{}]", blockStrategy);
+        throw new SnailJobCommonException("不符合的阻塞策略. blockStrategy:[{}]", blockStrategy);
     }
 
 }

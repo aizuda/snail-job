@@ -125,6 +125,20 @@ public interface SystemConstants {
          */
         String RETRY_GENERATE_IDEM_ID = "/retry/generate/idempotent-id/v1";
 
+        String OPENAPI_ADD_JOB = "/api/job/add";
+
+        String OPENAPI_UPDATE_JOB = "/api/job/update";
+
+        String OPENAPI_GET_JOB_DETAIL = "/api/job/getJobDetail";
+
+        String OPENAPI_TRIGGER_JOB = "/api/job/triggerJob";
+
+        String OPENAPI_TRIGGER_WORKFLOW = "/api/job/triggerWorkFlow";
+
+        String OPENAPI_UPDATE_JOB_STATUS = "/api/job/updateJobStatus";
+
+        String OPENAPI_UPDATE_WORKFLOW_STATUS = "/api/job/updateWorkFlowStatus";
+
     }
 
     String LOGO = """

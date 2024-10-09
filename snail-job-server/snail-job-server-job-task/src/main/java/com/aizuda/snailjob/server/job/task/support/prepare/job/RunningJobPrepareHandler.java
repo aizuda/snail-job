@@ -7,7 +7,7 @@ import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.job.task.dto.CompleteJobBatchDTO;
 import com.aizuda.snailjob.server.job.task.dto.JobTaskPrepareDTO;
-import com.aizuda.snailjob.server.job.task.enums.BlockStrategyEnum;
+import com.aizuda.snailjob.common.core.enums.BlockStrategyEnum;
 import com.aizuda.snailjob.server.job.task.support.BlockStrategy;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
 import com.aizuda.snailjob.server.job.task.support.JobTaskStopHandler;

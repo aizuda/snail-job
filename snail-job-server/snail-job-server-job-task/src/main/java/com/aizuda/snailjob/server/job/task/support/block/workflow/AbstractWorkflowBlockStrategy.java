@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.job.task.support.block.workflow;
 
-import com.aizuda.snailjob.server.job.task.enums.BlockStrategyEnum;
+import com.aizuda.snailjob.common.core.enums.BlockStrategyEnum;
 import com.aizuda.snailjob.server.job.task.support.BlockStrategy;
 import com.aizuda.snailjob.server.job.task.support.block.job.BlockStrategyContext;
 import org.springframework.beans.factory.InitializingBean;
