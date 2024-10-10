@@ -1,23 +1,24 @@
 package com.aizuda.snailjob.client.job.core.handler;
 
 import com.aizuda.snailjob.client.common.exception.SnailJobClientException;
+import com.aizuda.snailjob.client.job.core.enums.JobTypeEnum;
 
 public class RequestTriggerJobHandler extends AbstractRequestHandler<Boolean>{
-    private Long triggerJobId;
+    private final Long triggerJobId;
     // 1: job; 2: workflow
-    private int triggerType;
+    private final int triggerType;
 
-    public RequestTriggerJobHandler(Long tiggerJobId, int triggerType) {
-        this.triggerJobId = tiggerJobId;
+    public RequestTriggerJobHandler(Long triggerJobId, int triggerType) {
+        this.triggerJobId = triggerJobId;
         this.triggerType = triggerType;
     }
 
     @Override
     protected Boolean doExecute() {
-        if (triggerType == 1) {
+        if (triggerType == JobTypeEnum.JOB.getType()) {
             return (Boolean) client.triggerJob(triggerJobId).getData();
         }
-        if (triggerType == 2) {
+        if (triggerType == JobTypeEnum.WORKFLOW.getType()) {
             return (Boolean) client.triggerWorkFlow(triggerJobId).getData();
         }
         throw new SnailJobClientException("snail job openapi check error");

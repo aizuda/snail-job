@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.client.job.core.openapi;
 
+import com.aizuda.snailjob.client.job.core.enums.JobTypeEnum;
 import com.aizuda.snailjob.client.job.core.handler.*;
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 
@@ -85,7 +86,7 @@ public final class SnailJobOpenApi {
      * @return
      */
     public static RequestTriggerJobHandler triggerJob(Long jobId) {
-        return new RequestTriggerJobHandler(jobId, 1);
+        return new RequestTriggerJobHandler(jobId, JobTypeEnum.JOB.getType());
     }
 
     /**
@@ -95,7 +96,7 @@ public final class SnailJobOpenApi {
      * @return
      */
     public static RequestTriggerJobHandler triggerWorkFlow(Long id) {
-        return new RequestTriggerJobHandler(id, 2);
+        return new RequestTriggerJobHandler(id, JobTypeEnum.WORKFLOW.getType());
     }
 
     /**
@@ -105,7 +106,7 @@ public final class SnailJobOpenApi {
      * @return
      */
     public static RequestUpdateStatusHandler updateJobStatus(Long jobId) {
-        return new RequestUpdateStatusHandler(jobId, 1);
+        return new RequestUpdateStatusHandler(jobId, JobTypeEnum.JOB.getType());
     }
 
     /**
@@ -115,6 +116,6 @@ public final class SnailJobOpenApi {
      * @return
      */
     public static RequestUpdateStatusHandler updateWorkFlowStatus(Long workFlowId) {
-        return new RequestUpdateStatusHandler(workFlowId, 2);
+        return new RequestUpdateStatusHandler(workFlowId, JobTypeEnum.WORKFLOW.getType());
     }
 }

@@ -8,6 +8,7 @@ import com.aizuda.snailjob.client.job.core.enums.TriggerTypeEnum;
 import com.aizuda.snailjob.client.job.core.util.ValidatorUtils;
 import com.aizuda.snailjob.common.core.enums.BlockStrategyEnum;
 import com.aizuda.snailjob.common.core.enums.ExecutorTypeEnum;
+import com.aizuda.snailjob.common.core.enums.JobArgsTypeEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
@@ -16,7 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class RequestUpdateHandler extends AbstractRequestHandler<Boolean> {
-    private RequestUpdateJobDTO requestUpdateJobDTO;
+    private final RequestUpdateJobDTO requestUpdateJobDTO;
 
     public RequestUpdateHandler(Long jobId) {
         this.requestUpdateJobDTO = new RequestUpdateJobDTO();
@@ -67,7 +68,7 @@ public class RequestUpdateHandler extends AbstractRequestHandler<Boolean> {
             // 设置分片
             if (shardNum != null){
                 Map<String, Object> map = new HashMap<>(1);
-                map.put("shardNum", shardNum);
+                map.put(SHARD_NUM, shardNum);
                 requestUpdateJobDTO.setArgsStr(JsonUtil.toJsonString(map));
             }
         }else {
@@ -99,7 +100,7 @@ public class RequestUpdateHandler extends AbstractRequestHandler<Boolean> {
         }
         args.putAll(argsStr);
         requestUpdateJobDTO.setArgsStr(JsonUtil.toJsonString(args));
-        requestUpdateJobDTO.setArgsType(2);
+        requestUpdateJobDTO.setArgsType(JobArgsTypeEnum.JSON.getArgsType());
         return this;
     }
 
@@ -123,7 +124,7 @@ public class RequestUpdateHandler extends AbstractRequestHandler<Boolean> {
         }
         map.put(argsKey, argsValue);
         requestUpdateJobDTO.setArgsStr(JsonUtil.toJsonString(map));
-        requestUpdateJobDTO.setArgsType(2);
+        requestUpdateJobDTO.setArgsType(JobArgsTypeEnum.JSON.getArgsType());
         return this;
     }
 
@@ -139,7 +140,7 @@ public class RequestUpdateHandler extends AbstractRequestHandler<Boolean> {
             return this;
         }
         requestUpdateJobDTO.setArgsStr(JsonUtil.toJsonString(shardingValue));
-        requestUpdateJobDTO.setArgsType(1);
+        requestUpdateJobDTO.setArgsType(JobArgsTypeEnum.TEXT.getArgsType());
         return this;
     }
 

@@ -9,7 +9,7 @@ import com.aizuda.snailjob.common.core.util.JsonUtil;
 import java.util.Objects;
 
 public class RequestQueryHandler extends AbstractRequestHandler<JobResponseVO> {
-    private Long queryJobId;
+    private final Long queryJobId;
 
     public RequestQueryHandler(Long queryJobId) {
         this.queryJobId = queryJobId;

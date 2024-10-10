@@ -2,14 +2,15 @@ package com.aizuda.snailjob.client.job.core.handler;
 
 import com.aizuda.snailjob.client.common.exception.SnailJobClientException;
 import com.aizuda.snailjob.client.job.core.dto.RequestUpdateStatusDTO;
+import com.aizuda.snailjob.client.job.core.enums.JobTypeEnum;
 import com.aizuda.snailjob.client.job.core.util.ValidatorUtils;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 
 
 public class RequestUpdateStatusHandler extends AbstractRequestHandler<Boolean>{
-    private RequestUpdateStatusDTO statusDTO;
+    private final RequestUpdateStatusDTO statusDTO;
     // 1: job; 2: workflow
-    private int type;
+    private final int type;
 
     public RequestUpdateStatusHandler(Long id, int type) {
         this.statusDTO = new RequestUpdateStatusDTO();
@@ -19,10 +20,10 @@ public class RequestUpdateStatusHandler extends AbstractRequestHandler<Boolean>{
 
     @Override
     protected Boolean doExecute() {
-        if (type == 1){
+        if (type == JobTypeEnum.JOB.getType()){
             return (Boolean) client.updateJobStatus(statusDTO).getData();
         }
-        if (type == 2){
+        if (type == JobTypeEnum.WORKFLOW.getType()){
             return (Boolean) client.updateWorkFlowStatus(statusDTO).getData();
         }
         throw new SnailJobClientException("snail job openapi check error");

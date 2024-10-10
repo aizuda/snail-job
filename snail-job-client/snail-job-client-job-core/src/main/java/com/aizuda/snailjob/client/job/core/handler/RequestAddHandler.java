@@ -6,10 +6,7 @@ import com.aizuda.snailjob.client.job.core.dto.RequestAddJobDTO;
 import com.aizuda.snailjob.client.job.core.enums.AllocationAlgorithmEnum;
 import com.aizuda.snailjob.client.job.core.enums.TriggerTypeEnum;
 import com.aizuda.snailjob.client.job.core.util.ValidatorUtils;
-import com.aizuda.snailjob.common.core.enums.BlockStrategyEnum;
-import com.aizuda.snailjob.common.core.enums.ExecutorTypeEnum;
-import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
-import com.aizuda.snailjob.common.core.enums.StatusEnum;
+import com.aizuda.snailjob.common.core.enums.*;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 
@@ -17,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class RequestAddHandler extends AbstractRequestHandler<Long> {
-    private RequestAddJobDTO requestAddJobDTO;
+    private final RequestAddJobDTO requestAddJobDTO;
 
     public RequestAddHandler(JobTaskTypeEnum taskType, Integer shardNum) {
         this.requestAddJobDTO = new RequestAddJobDTO();
@@ -28,9 +25,9 @@ public class RequestAddHandler extends AbstractRequestHandler<Long> {
         // 默认java
         requestAddJobDTO.setExecutorType(ExecutorTypeEnum.JAVA.getType());
         // 设置分片
-        if (shardNum != null){
+        if (shardNum != null) {
             Map<String, Object> map = new HashMap<>(1);
-            map.put("shardNum", shardNum);
+            map.put(SHARD_NUM, shardNum);
             requestAddJobDTO.setArgsStr(JsonUtil.toJsonString(map));
         }
     }
@@ -47,11 +44,11 @@ public class RequestAddHandler extends AbstractRequestHandler<Long> {
         boolean validated = ValidatorUtils.validateEntity(requestAddJobDTO);
         // 如果校验正确，则正对进行相关筛选
         if (validated) {
-            if (requestAddJobDTO.getTaskType() == JobTaskTypeEnum.CLUSTER.getType()){
+            if (requestAddJobDTO.getTaskType() == JobTaskTypeEnum.CLUSTER.getType()) {
                 // 集群模式只允许并发为 1
                 setParallelNum(1);
             }
-            if (requestAddJobDTO.getTriggerType() == TriggerTypeEnum.WORK_FLOW.getType()){
+            if (requestAddJobDTO.getTriggerType() == TriggerTypeEnum.WORK_FLOW.getType()) {
                 // 工作流没有调度时间
                 setTriggerInterval("*");
             }
@@ -61,6 +58,7 @@ public class RequestAddHandler extends AbstractRequestHandler<Long> {
 
     /**
      * 设置任务名
+     *
      * @param jobName 任务名
      * @return
      */
@@ -71,65 +69,69 @@ public class RequestAddHandler extends AbstractRequestHandler<Long> {
 
     /**
      * 设置参数
+     *
      * @param argsStr
      * @return
      */
     private RequestAddHandler setArgsStr(Map<String, Object> argsStr) {
         Map<String, Object> args = new HashMap<>();
-        if (StrUtil.isNotBlank(requestAddJobDTO.getArgsStr())){
+        if (StrUtil.isNotBlank(requestAddJobDTO.getArgsStr())) {
             args = JsonUtil.parseHashMap(requestAddJobDTO.getArgsStr());
         }
         args.putAll(argsStr);
         requestAddJobDTO.setArgsStr(JsonUtil.toJsonString(args));
-        requestAddJobDTO.setArgsType(2);
+        requestAddJobDTO.setArgsType(JobArgsTypeEnum.JSON.getArgsType());
         return this;
     }
 
     /**
      * 添加参数，可支持多次添加
      * 静态分片不可使用该方法
-     * @param argsKey 参数名
+     *
+     * @param argsKey   参数名
      * @param argsValue 参数值
      * @return
      */
     public RequestAddHandler addArgsStr(String argsKey, Object argsValue) {
-        if (requestAddJobDTO.getTaskType().equals(JobTaskTypeEnum.SHARDING.getType())){
+        if (requestAddJobDTO.getTaskType().equals(JobTaskTypeEnum.SHARDING.getType())) {
             SnailJobLog.LOCAL.warn("静态分片任务，不可使用该方法添加相关任务参数，请使用addShardingArgs");
             return this;
         }
         Map<String, Object> map = new HashMap<>();
-        if (StrUtil.isNotBlank(requestAddJobDTO.getArgsStr())){
+        if (StrUtil.isNotBlank(requestAddJobDTO.getArgsStr())) {
             map = JsonUtil.parseHashMap(requestAddJobDTO.getArgsStr());
         }
         map.put(argsKey, argsValue);
         requestAddJobDTO.setArgsStr(JsonUtil.toJsonString(map));
-        requestAddJobDTO.setArgsType(2);
+        requestAddJobDTO.setArgsType(JobArgsTypeEnum.JSON.getArgsType());
         return this;
     }
 
     /**
      * 添加静态分片相关参数
+     *
      * @param shardingValue
      * @return
      */
-    public RequestAddHandler addShardingArgs(String[] shardingValue){
-        if (!requestAddJobDTO.getTaskType().equals(JobTaskTypeEnum.SHARDING.getType())){
+    public RequestAddHandler addShardingArgs(String[] shardingValue) {
+        if (!requestAddJobDTO.getTaskType().equals(JobTaskTypeEnum.SHARDING.getType())) {
             SnailJobLog.LOCAL.warn("非静态分片任务，不可使用该方法添加相关任务参数，请使用addArgsStr");
             return this;
         }
         requestAddJobDTO.setArgsStr(JsonUtil.toJsonString(shardingValue));
-        requestAddJobDTO.setArgsType(1);
+        requestAddJobDTO.setArgsType(JobArgsTypeEnum.TEXT.getArgsType());
         return this;
     }
 
     /**
      * 设置路由
+     *
      * @param algorithmEnum 路由算法
      * @return
      */
     public RequestAddHandler setRouteKey(AllocationAlgorithmEnum algorithmEnum) {
         // 非集群模式 路由策略只能为轮询
-        if (requestAddJobDTO.getTaskType() != JobTaskTypeEnum.CLUSTER.getType()){
+        if (requestAddJobDTO.getTaskType() != JobTaskTypeEnum.CLUSTER.getType()) {
             setRouteKey(AllocationAlgorithmEnum.ROUND);
             SnailJobLog.LOCAL.warn("非集群模式 路由策略只能为轮询");
             return this;
@@ -140,6 +142,7 @@ public class RequestAddHandler extends AbstractRequestHandler<Long> {
 
     /**
      * 设置执行器信息
+     *
      * @param executorInfo
      * @return
      */
@@ -150,12 +153,13 @@ public class RequestAddHandler extends AbstractRequestHandler<Long> {
 
     /**
      * 设置调度类型
+     *
      * @param triggerType
      * @return
      */
     public RequestAddHandler setTriggerType(TriggerTypeEnum triggerType) {
         requestAddJobDTO.setTriggerType(triggerType.getType());
-        if (requestAddJobDTO.getTriggerType() == TriggerTypeEnum.WORK_FLOW.getType()){
+        if (requestAddJobDTO.getTriggerType() == TriggerTypeEnum.WORK_FLOW.getType()) {
             // 工作流没有调度时间
             setTriggerInterval("*");
         }
@@ -166,6 +170,7 @@ public class RequestAddHandler extends AbstractRequestHandler<Long> {
      * 设置触发间隔；
      * 单位：秒
      * 工作流无需配置
+     *
      * @param triggerInterval
      * @return
      */
@@ -176,14 +181,15 @@ public class RequestAddHandler extends AbstractRequestHandler<Long> {
 
     /**
      * 设置阻塞策略
+     *
      * @param blockStrategy
      * @return
      */
     public RequestAddHandler setBlockStrategy(BlockStrategyEnum blockStrategy) {
         // 非集群模式 路由策略只能为轮询
         if (requestAddJobDTO.getTaskType() == JobTaskTypeEnum.CLUSTER.getType()
-                &&  blockStrategy.getBlockStrategy() == BlockStrategyEnum.CONCURRENCY.getBlockStrategy()){
-           throw new SnailJobClientException("集群模式不能使用并行阻塞策略");
+                && blockStrategy.getBlockStrategy() == BlockStrategyEnum.CONCURRENCY.getBlockStrategy()) {
+            throw new SnailJobClientException("集群模式不能使用并行阻塞策略");
         }
         requestAddJobDTO.setBlockStrategy(blockStrategy.getBlockStrategy());
         return this;
@@ -191,6 +197,7 @@ public class RequestAddHandler extends AbstractRequestHandler<Long> {
 
     /**
      * 设置执行器超时时间
+     *
      * @param executorTimeout
      * @return
      */
@@ -201,6 +208,7 @@ public class RequestAddHandler extends AbstractRequestHandler<Long> {
 
     /**
      * 设置任务最大重试次数
+     *
      * @param maxRetryTimes
      * @return
      */
@@ -211,6 +219,7 @@ public class RequestAddHandler extends AbstractRequestHandler<Long> {
 
     /**
      * 设置重试间隔
+     *
      * @param retryInterval
      * @return
      */
@@ -221,6 +230,7 @@ public class RequestAddHandler extends AbstractRequestHandler<Long> {
 
     /**
      * 设置并发数量
+     *
      * @param parallelNum
      * @return
      */
@@ -231,6 +241,7 @@ public class RequestAddHandler extends AbstractRequestHandler<Long> {
 
     /**
      * 设置定时任务描述
+     *
      * @param description
      * @return
      */
