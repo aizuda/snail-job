@@ -68,7 +68,7 @@ public class RecoveryBlockStrategy extends AbstracJobBlockStrategy {
         jobExecutor.execute(buildJobExecutorContext(context, job,
             StreamUtils.filter(jobTasks,
                 (jobTask) -> JobTaskStatusEnum.NOT_SUCCESS.contains(jobTask.getTaskStatus())
-                             || JobTaskStatusEnum.NOT_COMPLETE.contains(jobTask.getTaskStatus()))));
+                             )));
     }
 
     @Override
