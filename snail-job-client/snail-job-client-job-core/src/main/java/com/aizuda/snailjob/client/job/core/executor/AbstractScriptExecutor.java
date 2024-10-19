@@ -50,7 +50,7 @@ public abstract class AbstractScriptExecutor {
             setScriptPermissions(scriptPath);
         }
 
-        return executeScript(scriptPath);
+        return executeScript(scriptPath, scriptParams);
     }
 
     private String prepareScriptFile(Long jobId, ScriptParams scriptParams) {
@@ -76,7 +76,7 @@ public abstract class AbstractScriptExecutor {
             case SCRIPT_SCRIPT_CODE_METHOD:
                 // 是否直接写入代码
                 try {
-                    writeScriptContent(script, scriptParams.getScriptParams());
+                    writeScriptContent(script, scriptParams);
                 } catch (IOException e) {
                     throw new SnailJobInnerExecutorException("[snail-job] Failed to write script", e);
                 }
@@ -121,11 +121,23 @@ public abstract class AbstractScriptExecutor {
         }
     }
 
-    private void writeScriptContent(File script, String processorInfo) throws IOException {
-        try (BufferedWriter writer = Files.newBufferedWriter(script.toPath(), getCharset())) {
-            writer.write(processorInfo);
+    private void writeScriptContent(File script, ScriptParams scriptParams) throws IOException {
+        try (BufferedWriter writer = Files.newBufferedWriter(script.toPath(), getScriptChartset(scriptParams))) {
+            writer.write(scriptParams.getScriptParams());
             logInfo("Script content written successfully to: {}", script.getAbsolutePath());
         }
+    }
+
+    private Charset getScriptChartset(ScriptParams scriptParams) {
+        String charsetName = scriptParams.getCharset();
+        if (StrUtil.isNotBlank(charsetName)) {
+            try {
+                return Charset.forName(charsetName);
+            } catch (Exception e) {
+                logWarn("[snail-job] Invalid charset:{} . Using default charset.", charsetName);
+            }
+        }
+        return getCharset();
     }
 
     private void setScriptPermissions(String scriptPath) {
@@ -138,14 +150,14 @@ public abstract class AbstractScriptExecutor {
         logInfo("chmod 755 authorization complete, ready to start execution~");
     }
 
-    private ExecuteResult executeScript(String scriptPath) {
+    private ExecuteResult executeScript(String scriptPath, ScriptParams scriptParams) {
         ProcessBuilder pb = getScriptProcessBuilder(scriptPath);
 
         Process process = null;
         ExecuteResult executeResult;
         try {
             process = pb.start();
-            executeResult = captureOutput(process);
+            executeResult = captureOutput(process, scriptParams);
         } catch (IOException | InterruptedException e) {
             throw new SnailJobInnerExecutorException("[snail-job] Script execution failed", e);
         } finally {
@@ -170,21 +182,22 @@ public abstract class AbstractScriptExecutor {
 
     }
 
-    private ExecuteResult captureOutput(Process process) throws InterruptedException {
+    private ExecuteResult captureOutput(Process process, ScriptParams scriptParams) throws InterruptedException {
         StringBuilder inputBuilder = new StringBuilder();
         StringBuilder errorBuilder = new StringBuilder();
         // 使用CountDownLatch来确保输入流和错误流被捕获后再进行判断
         CountDownLatch latch = new CountDownLatch(2);
 
+        Charset scriptChartset = getScriptChartset(scriptParams);
         // 启动线程捕获标准输出
         new Thread(() -> {
-            captureStream(process.getInputStream(), inputBuilder);
+            captureStream(process.getInputStream(), inputBuilder, scriptChartset);
             latch.countDown();
         }).start();
 
         // 启动线程捕获错误输出
         new Thread(() -> {
-            captureStream(process.getErrorStream(), errorBuilder);
+            captureStream(process.getErrorStream(), errorBuilder, scriptChartset);
             latch.countDown();
         }).start();
 
@@ -200,8 +213,8 @@ public abstract class AbstractScriptExecutor {
         return success ? ExecuteResult.success("Script executed successfully.") : ExecuteResult.failure("Script execution failed.");
     }
 
-    private void captureStream(InputStream is, StringBuilder sb) {
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(is, getCharset()))) {
+    private void captureStream(InputStream is, StringBuilder sb, Charset charset) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(is, charset))) {
             String line;
             while ((line = br.readLine()) != null) {
                 sb.append(line).append(System.lineSeparator());
@@ -275,5 +288,6 @@ public abstract class AbstractScriptExecutor {
          */
         private String method;
         private String scriptParams;
+        private String charset;
     }
 }

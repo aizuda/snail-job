@@ -11,7 +11,9 @@ import com.aizuda.snailjob.common.log.SnailJobLog;
 import lombok.Data;
 import org.springframework.util.StringUtils;
 
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 
 
 public abstract class AbstractHttpExecutor {
@@ -93,7 +95,7 @@ public abstract class AbstractHttpExecutor {
 
     private void setDefaultTimeout(HttpParams httpParams) {
         // 使用milliseconds
-        httpParams.setTimeout(httpParams.getTimeout() == null ? DEFAULT_TIMEOUT * 1000 : httpParams.getTimeout() * 1000);
+        httpParams.setTimeout(Objects.isNull(httpParams.getTimeout()) ? DEFAULT_TIMEOUT * 1000 : httpParams.getTimeout() * 1000);
     }
 
 
@@ -114,11 +116,18 @@ public abstract class AbstractHttpExecutor {
                 break;
         }
 
-        if (httpParams.getHeaders() != null) {
+        if (Objects.nonNull(httpParams.getHeaders())) {
             httpParams.getHeaders().forEach(request::header);
         }
+        // 有上下文时，在请求中透传上下文;即工作流中支持上下文的传递
+        if ( Objects.nonNull(httpParams.getWfContext())) {
+            httpParams.getWfContext().forEach((key, value) -> {
+                String headerValue = (value instanceof String) ? (String) value : JsonUtil.toJsonString(value);
+                request.header(key, headerValue);
+            });
+        }
 
-        if (httpParams.getBody() != null && (httpParams.getMethod().equals(POST_REQUEST_METHOD)
+        if (Objects.nonNull(httpParams.getBody()) && (httpParams.getMethod().equals(POST_REQUEST_METHOD)
                 || httpParams.getMethod().equals(PUT_REQUEST_METHOD)
                 || httpParams.getMethod().equals(DELETE_REQUEST_METHOD))) {
             request.body(httpParams.getBody(), httpParams.getMediaType());
@@ -137,6 +146,7 @@ public abstract class AbstractHttpExecutor {
         private String body;
         private Map<String, String> headers;
         private Integer timeout;
+        private Map<String, Object> wfContext;
     }
 
     // Logging methods
