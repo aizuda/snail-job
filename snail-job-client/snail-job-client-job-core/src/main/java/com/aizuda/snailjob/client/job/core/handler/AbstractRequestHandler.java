@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.client.job.core.handler;
 
+import cn.hutool.core.lang.Pair;
 import com.aizuda.snailjob.client.common.exception.SnailJobClientException;
 
 /**
@@ -16,14 +17,22 @@ public abstract class AbstractRequestHandler<R> implements RequestHandler<R> {
      */
     @Override
     public R execute() {
-        if (checkRequest()) {
-            return doExecute();
+        Pair<Boolean, String> checked = checkRequest();
+        if (checked.getKey()) {
+            beforeExecute();
+            R r = doExecute();
+            afterExecute(r);
+            return r;
         } else {
-            throw new SnailJobClientException("snail job openapi check error");
+            throw new SnailJobClientException("snail job openapi check error. [{}]", checked.getValue());
         }
     }
 
+    protected abstract void afterExecute(R r);
+
+    protected abstract void beforeExecute();
+
     protected abstract R doExecute();
 
-    protected abstract boolean checkRequest();
+    protected abstract Pair<Boolean, String> checkRequest();
 }
