@@ -21,8 +21,8 @@ public class MapAddHandler extends AddHandler<MapAddHandler> {
     }
 
     @Override
-    public MapAddHandler addShardingArgs(String... shardingValue) {
-        return super.addShardingArgs(shardingValue);
+    public MapAddHandler addArgsStr(String argsKey, Object argsValue) {
+        return super.addArgsStr(argsKey, argsValue);
     }
 
     @Override

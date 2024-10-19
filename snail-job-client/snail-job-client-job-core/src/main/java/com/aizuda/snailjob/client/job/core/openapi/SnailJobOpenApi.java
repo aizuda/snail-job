@@ -2,11 +2,9 @@ package com.aizuda.snailjob.client.job.core.openapi;
 
 import com.aizuda.snailjob.client.job.core.enums.JobTypeEnum;
 import com.aizuda.snailjob.client.job.core.handler.add.*;
-import com.aizuda.snailjob.client.job.core.handler.quert.RequestQueryHandler;
+import com.aizuda.snailjob.client.job.core.handler.query.RequestQueryHandler;
 import com.aizuda.snailjob.client.job.core.handler.trigger.RequestTriggerJobHandler;
-import com.aizuda.snailjob.client.job.core.handler.update.RequestUpdateHandler;
-import com.aizuda.snailjob.client.job.core.handler.update.RequestUpdateStatusHandler;
-import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
+import com.aizuda.snailjob.client.job.core.handler.update.*;
 
 /**
  * @author opensnail
@@ -23,7 +21,7 @@ public final class SnailJobOpenApi {
      * @return {@link ClusterAddHandler}
      */
     public static ClusterAddHandler addClusterJob() {
-        return new ClusterAddHandler(JobTaskTypeEnum.CLUSTER);
+        return new ClusterAddHandler();
     }
 
     /**
@@ -64,13 +62,53 @@ public final class SnailJobOpenApi {
     }
 
     /**
-     * 更新定时任务
+     * 更新广播定时任务
      *
      * @param jobId 定时任务ID
-     * @return {@link RequestUpdateHandler}
+     * @return {@link BroadcastUpdateHandler}
      */
-    public static RequestUpdateHandler updateJob(Long jobId) {
-        return new RequestUpdateHandler(jobId);
+    public static BroadcastUpdateHandler updateBroadcastJob(Long jobId) {
+        return new BroadcastUpdateHandler(jobId);
+    }
+
+    /**
+     * 更新集群定时任务
+     *
+     * @param jobId 定时任务ID
+     * @return {@link ClusterUpdateHandler}
+     */
+    public static ClusterUpdateHandler updateClusterJob(Long jobId) {
+        return new ClusterUpdateHandler(jobId);
+    }
+
+    /**
+     * 更新MapReduce定时任务
+     *
+     * @param jobId 定时任务ID
+     * @return {@link MapReduceUpdateHandler}
+     */
+    public static MapReduceUpdateHandler updateMapReduceJob(Long jobId) {
+        return new MapReduceUpdateHandler(jobId);
+    }
+
+    /**
+     * 更新Map定时任务
+     *
+     * @param jobId 定时任务ID
+     * @return {@link MapUpdateHandler}
+     */
+    public static MapUpdateHandler updateMapJob(Long jobId) {
+        return new MapUpdateHandler(jobId);
+    }
+
+    /**
+     * 更新静态分片定时任务
+     *
+     * @param jobId 定时任务ID
+     * @return {@link ShardingUpdateHandler}
+     */
+    public static ShardingUpdateHandler updateShardingJob(Long jobId) {
+        return new ShardingUpdateHandler(jobId);
     }
 
     /**

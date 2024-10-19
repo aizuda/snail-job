@@ -1,4 +1,4 @@
-package com.aizuda.snailjob.client.job.core.handler.quert;
+package com.aizuda.snailjob.client.job.core.handler.query;
 
 
 import cn.hutool.core.lang.Assert;

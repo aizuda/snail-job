@@ -10,8 +10,8 @@ import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
  */
 public class ClusterAddHandler extends AddHandler<ClusterAddHandler> {
 
-    public ClusterAddHandler(JobTaskTypeEnum taskType) {
-        this(taskType, null);
+    public ClusterAddHandler() {
+        this(JobTaskTypeEnum.CLUSTER, null);
     }
 
     public ClusterAddHandler(JobTaskTypeEnum taskType, Integer shardNum) {

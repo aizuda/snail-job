@@ -2,34 +2,29 @@ package com.aizuda.snailjob.client.job.core.handler.update;
 
 import cn.hutool.core.lang.Pair;
 import cn.hutool.core.util.StrUtil;
-import com.aizuda.snailjob.client.common.exception.SnailJobClientException;
 import com.aizuda.snailjob.client.job.core.dto.RequestUpdateJobDTO;
 import com.aizuda.snailjob.client.job.core.enums.AllocationAlgorithmEnum;
 import com.aizuda.snailjob.client.job.core.enums.TriggerTypeEnum;
 import com.aizuda.snailjob.client.job.core.handler.AbstractRequestHandler;
 import com.aizuda.snailjob.client.job.core.util.ValidatorUtils;
 import com.aizuda.snailjob.common.core.enums.BlockStrategyEnum;
-import com.aizuda.snailjob.common.core.enums.ExecutorTypeEnum;
 import com.aizuda.snailjob.common.core.enums.JobArgsTypeEnum;
-import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
-import com.aizuda.snailjob.common.log.SnailJobLog;
+import lombok.Setter;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
-import static com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum.CLUSTER;
 
-public class RequestUpdateHandler extends AbstractRequestHandler<Boolean> {
+public abstract class UpdateHandler<R> extends AbstractRequestHandler<Boolean> {
     private final RequestUpdateJobDTO reqDTO;
+    @Setter
+    private R r;
 
-    public RequestUpdateHandler(Long jobId) {
+    public UpdateHandler(Long jobId) {
         this.reqDTO = new RequestUpdateJobDTO();
         // 更新必须要id
         reqDTO.setId(jobId);
-        // 默认java
-        reqDTO.setExecutorType(ExecutorTypeEnum.JAVA.getType());
     }
 
     @Override
@@ -39,7 +34,10 @@ public class RequestUpdateHandler extends AbstractRequestHandler<Boolean> {
 
     @Override
     protected void beforeExecute() {
-
+        if (reqDTO.getTriggerType() == TriggerTypeEnum.WORK_FLOW.getType()) {
+            // 工作流没有调度时间
+            setTriggerInterval("*");
+        }
     }
 
     @Override
@@ -49,30 +47,7 @@ public class RequestUpdateHandler extends AbstractRequestHandler<Boolean> {
 
     @Override
     protected Pair<Boolean, String> checkRequest() {
-        Pair<Boolean, String> validated = ValidatorUtils.validateEntity(reqDTO);
-        if (!validated.getKey()) {
-            return validated;
-        }
-
-        // 如果校验正确，下面则进行相关参数填充
-        Optional.ofNullable(reqDTO.getTaskType()).ifPresent(taskType -> {
-            if (reqDTO.getTaskType() == CLUSTER.getType()) {
-                // 集群模式只允许并发为 1
-                setParallelNum(1);
-            } else {
-                // 非集群模式 路由策略只能为轮询
-                setRouteKey(AllocationAlgorithmEnum.ROUND);
-            }
-        });
-
-        Optional.ofNullable(reqDTO.getTriggerType()).ifPresent((triggerType) -> {
-            if (reqDTO.getTriggerType() == TriggerTypeEnum.WORK_FLOW.getType()) {
-                // 工作流没有调度时间
-                setTriggerInterval("*");
-            }
-        });
-
-        return validated;
+        return ValidatorUtils.validateEntity(reqDTO);
     }
 
     /**
@@ -82,19 +57,14 @@ public class RequestUpdateHandler extends AbstractRequestHandler<Boolean> {
      * @param shardNum
      * @return
      */
-    public RequestUpdateHandler setShardNum(Integer shardNum) {
-        Integer taskType = reqDTO.getTaskType();
-        if (taskType != null && taskType.equals(JobTaskTypeEnum.MAP_REDUCE.getType())) {
-            // 设置分片
-            if (shardNum != null) {
-                Map<String, Object> map = new HashMap<>(1);
-                map.put(SHARD_NUM, shardNum);
-                reqDTO.setArgsStr(JsonUtil.toJsonString(map));
-            }
-        } else {
-            throw new SnailJobClientException("非MapReduce模式不能设置分片数");
+    protected R setShardNum(Integer shardNum) {
+        // 设置分片
+        if (shardNum != null) {
+            Map<String, Object> map = new HashMap<>(1);
+            map.put(SHARD_NUM, shardNum);
+            setArgsStr(map);
         }
-        return this;
+        return r;
     }
 
     /**
@@ -103,9 +73,9 @@ public class RequestUpdateHandler extends AbstractRequestHandler<Boolean> {
      * @param jobName
      * @return
      */
-    public RequestUpdateHandler setJobName(String jobName) {
+    public R setJobName(String jobName) {
         reqDTO.setJobName(jobName);
-        return this;
+        return r;
     }
 
     /**
@@ -115,7 +85,7 @@ public class RequestUpdateHandler extends AbstractRequestHandler<Boolean> {
      * @param argsStr
      * @return
      */
-    private RequestUpdateHandler setArgsStr(Map<String, Object> argsStr) {
+    private R setArgsStr(Map<String, Object> argsStr) {
         Map<String, Object> args = new HashMap<>();
         if (StrUtil.isNotBlank(reqDTO.getArgsStr())) {
             args = JsonUtil.parseHashMap(reqDTO.getArgsStr());
@@ -123,7 +93,7 @@ public class RequestUpdateHandler extends AbstractRequestHandler<Boolean> {
         args.putAll(argsStr);
         reqDTO.setArgsStr(JsonUtil.toJsonString(args));
         reqDTO.setArgsType(JobArgsTypeEnum.JSON.getArgsType());
-        return this;
+        return r;
     }
 
     /**
@@ -135,12 +105,7 @@ public class RequestUpdateHandler extends AbstractRequestHandler<Boolean> {
      * @param argsValue 参数值
      * @return
      */
-    public RequestUpdateHandler addArgsStr(String argsKey, Object argsValue) {
-        if (reqDTO.getTaskType() != null
-                && reqDTO.getTaskType().equals(JobTaskTypeEnum.SHARDING.getType())) {
-            SnailJobLog.LOCAL.warn("静态分片任务，不可使用该方法添加相关任务参数，请使用addShardingArgs");
-            return this;
-        }
+    protected R addArgsStr(String argsKey, Object argsValue) {
         Map<String, Object> map = new HashMap<>();
         if (StrUtil.isNotBlank(reqDTO.getArgsStr())) {
             map = JsonUtil.parseHashMap(reqDTO.getArgsStr());
@@ -148,24 +113,20 @@ public class RequestUpdateHandler extends AbstractRequestHandler<Boolean> {
         map.put(argsKey, argsValue);
         reqDTO.setArgsStr(JsonUtil.toJsonString(map));
         reqDTO.setArgsType(JobArgsTypeEnum.JSON.getArgsType());
-        return this;
+        return r;
     }
 
     /**
      * 添加静态分片相关参数
+     * 只有静态分片任务可用
      *
      * @param shardingValue
      * @return
      */
-    public RequestUpdateHandler addShardingArgs(String[] shardingValue) {
-        if (reqDTO.getTaskType() != null
-                && !reqDTO.getTaskType().equals(JobTaskTypeEnum.SHARDING.getType())) {
-            SnailJobLog.LOCAL.warn("非静态分片任务，不可使用该方法添加相关任务参数，请使用addArgsStr");
-            return this;
-        }
+    protected R addShardingArgs(String[] shardingValue) {
         reqDTO.setArgsStr(JsonUtil.toJsonString(shardingValue));
         reqDTO.setArgsType(JobArgsTypeEnum.TEXT.getArgsType());
-        return this;
+        return r;
     }
 
     /**
@@ -174,9 +135,9 @@ public class RequestUpdateHandler extends AbstractRequestHandler<Boolean> {
      * @param algorithmEnum
      * @return
      */
-    public RequestUpdateHandler setRouteKey(AllocationAlgorithmEnum algorithmEnum) {
+    protected R setRouteKey(AllocationAlgorithmEnum algorithmEnum) {
         reqDTO.setRouteKey(algorithmEnum.getType());
-        return this;
+        return r;
     }
 
     /**
@@ -185,9 +146,9 @@ public class RequestUpdateHandler extends AbstractRequestHandler<Boolean> {
      * @param executorInfo
      * @return
      */
-    public RequestUpdateHandler setExecutorInfo(String executorInfo) {
+    public R setExecutorInfo(String executorInfo) {
         reqDTO.setExecutorInfo(executorInfo);
-        return this;
+        return r;
     }
 
     /**
@@ -196,9 +157,9 @@ public class RequestUpdateHandler extends AbstractRequestHandler<Boolean> {
      * @param triggerType
      * @return
      */
-    public RequestUpdateHandler setTriggerType(TriggerTypeEnum triggerType) {
+    public R setTriggerType(TriggerTypeEnum triggerType) {
         reqDTO.setTriggerType(triggerType.getType());
-        return this;
+        return r;
     }
 
     /**
@@ -209,9 +170,9 @@ public class RequestUpdateHandler extends AbstractRequestHandler<Boolean> {
      * @param triggerInterval
      * @return
      */
-    public RequestUpdateHandler setTriggerInterval(String triggerInterval) {
+    public R setTriggerInterval(String triggerInterval) {
         reqDTO.setTriggerInterval(triggerInterval);
-        return this;
+        return r;
     }
 
     /**
@@ -220,9 +181,9 @@ public class RequestUpdateHandler extends AbstractRequestHandler<Boolean> {
      * @param blockStrategy
      * @return
      */
-    public RequestUpdateHandler setBlockStrategy(BlockStrategyEnum blockStrategy) {
+    public R setBlockStrategy(BlockStrategyEnum blockStrategy) {
         reqDTO.setBlockStrategy(blockStrategy.getBlockStrategy());
-        return this;
+        return r;
     }
 
     /**
@@ -231,9 +192,9 @@ public class RequestUpdateHandler extends AbstractRequestHandler<Boolean> {
      * @param executorTimeout
      * @return
      */
-    public RequestUpdateHandler setExecutorTimeout(Integer executorTimeout) {
+    public R setExecutorTimeout(Integer executorTimeout) {
         reqDTO.setExecutorTimeout(executorTimeout);
-        return this;
+        return r;
     }
 
     /**
@@ -242,9 +203,9 @@ public class RequestUpdateHandler extends AbstractRequestHandler<Boolean> {
      * @param maxRetryTimes
      * @return
      */
-    public RequestUpdateHandler setMaxRetryTimes(Integer maxRetryTimes) {
+    public R setMaxRetryTimes(Integer maxRetryTimes) {
         reqDTO.setMaxRetryTimes(maxRetryTimes);
-        return this;
+        return r;
     }
 
     /**
@@ -253,9 +214,9 @@ public class RequestUpdateHandler extends AbstractRequestHandler<Boolean> {
      * @param retryInterval
      * @return
      */
-    public RequestUpdateHandler setRetryInterval(Integer retryInterval) {
+    public R setRetryInterval(Integer retryInterval) {
         reqDTO.setRetryInterval(retryInterval);
-        return this;
+        return r;
     }
 
     /**
@@ -264,9 +225,9 @@ public class RequestUpdateHandler extends AbstractRequestHandler<Boolean> {
      * @param parallelNum
      * @return
      */
-    public RequestUpdateHandler setParallelNum(Integer parallelNum) {
+    protected R setParallelNum(Integer parallelNum) {
         reqDTO.setParallelNum(parallelNum);
-        return this;
+        return r;
     }
 
     /**
@@ -275,9 +236,9 @@ public class RequestUpdateHandler extends AbstractRequestHandler<Boolean> {
      * @param description
      * @return
      */
-    public RequestUpdateHandler setDescription(String description) {
+    public R setDescription(String description) {
         reqDTO.setDescription(description);
-        return this;
+        return r;
     }
 
 

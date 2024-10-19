@@ -11,7 +11,7 @@ import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 public class BroadcastAddHandler extends AddHandler<BroadcastAddHandler> {
 
     public BroadcastAddHandler() {
-        this(JobTaskTypeEnum.CLUSTER, null);
+        this(JobTaskTypeEnum.BROADCAST, null);
     }
 
     public BroadcastAddHandler(JobTaskTypeEnum taskType, Integer shardNum) {
