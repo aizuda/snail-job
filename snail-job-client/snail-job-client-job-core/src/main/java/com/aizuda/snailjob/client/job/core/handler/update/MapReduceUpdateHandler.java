@@ -1,9 +1,11 @@
 package com.aizuda.snailjob.client.job.core.handler.update;
 
+import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
+
 public class MapReduceUpdateHandler extends UpdateHandler<MapReduceUpdateHandler> {
 
     public MapReduceUpdateHandler(Long jobId) {
-        super(jobId);
+        super(JobTaskTypeEnum.MAP_REDUCE, jobId);
         setR(this);
     }
 

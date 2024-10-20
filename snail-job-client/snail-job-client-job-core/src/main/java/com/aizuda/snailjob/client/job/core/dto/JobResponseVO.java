@@ -30,11 +30,6 @@ public class JobResponseVO {
     private String argsStr;
 
     /**
-     * 参数类型 text/json
-     */
-    private String argsType;
-
-    /**
      * 扩展字段
      */
     private String extAttrs;
@@ -105,11 +100,6 @@ public class JobResponseVO {
     private Integer parallelNum;
 
     /**
-     * bucket
-     */
-    private Integer bucketIndex;
-
-    /**
      * 描述
      */
     private String description;
@@ -123,10 +113,5 @@ public class JobResponseVO {
      * 修改时间
      */
     private LocalDateTime updateDt;
-
-    /**
-     * 逻辑删除 1、删除
-     */
-    private Integer deleted;
 
 }

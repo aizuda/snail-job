@@ -2,17 +2,16 @@ package com.aizuda.snailjob.client.job.core.openapi;
 
 import com.aizuda.snailjob.client.common.annotation.Mapping;
 import com.aizuda.snailjob.client.common.rpc.client.RequestMethod;
-import com.aizuda.snailjob.client.job.core.dto.RequestAddJobDTO;
-import com.aizuda.snailjob.client.job.core.dto.RequestUpdateJobDTO;
+import com.aizuda.snailjob.client.job.core.dto.RequestAddOrUpdateJobDTO;
 import com.aizuda.snailjob.client.job.core.dto.RequestUpdateStatusDTO;
 import com.aizuda.snailjob.common.core.model.Result;
 
 public interface OpenApiClient {
     @Mapping(method = RequestMethod.POST, path = "/api/job/add")
-    Result<Object> addJob(RequestAddJobDTO requestAddJobDTO);
+    Result<Object> addJob(RequestAddOrUpdateJobDTO requestAddOrUpdateJobDTO);
 
     @Mapping(method = RequestMethod.POST, path = "/api/job/update")
-    Result<Object> updateJob(RequestUpdateJobDTO requestUpdateJobDTO);
+    Result<Object> updateJob(RequestAddOrUpdateJobDTO requestUpdateJobDTO);
 
     @Mapping(method = RequestMethod.POST, path = "/api/job/getJobDetail")
     Result<Object> getJobDetail(Long jobId);

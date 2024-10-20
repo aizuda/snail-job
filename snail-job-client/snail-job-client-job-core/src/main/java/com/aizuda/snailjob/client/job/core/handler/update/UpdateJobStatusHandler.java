@@ -1,22 +1,20 @@
 package com.aizuda.snailjob.client.job.core.handler.update;
 
+import cn.hutool.core.lang.Assert;
 import cn.hutool.core.lang.Pair;
 import com.aizuda.snailjob.client.common.exception.SnailJobClientException;
 import com.aizuda.snailjob.client.job.core.dto.RequestUpdateStatusDTO;
-import com.aizuda.snailjob.client.job.core.enums.JobTypeEnum;
 import com.aizuda.snailjob.client.job.core.handler.AbstractRequestHandler;
 import com.aizuda.snailjob.client.job.core.util.ValidatorUtils;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
+import com.aizuda.snailjob.common.core.model.Result;
 
 
-public class RequestUpdateStatusHandler extends AbstractRequestHandler<Boolean> {
+public class UpdateJobStatusHandler extends AbstractRequestHandler<Boolean> {
     private final RequestUpdateStatusDTO statusDTO;
-    // 1: job; 2: workflow
-    private final int type;
 
-    public RequestUpdateStatusHandler(Long id, int type) {
+    public UpdateJobStatusHandler(Long id) {
         this.statusDTO = new RequestUpdateStatusDTO();
-        this.type = type;
         setId(id);
     }
 
@@ -32,13 +30,10 @@ public class RequestUpdateStatusHandler extends AbstractRequestHandler<Boolean> 
 
     @Override
     protected Boolean doExecute() {
-        if (type == JobTypeEnum.JOB.getType()) {
-            return (Boolean) client.updateJobStatus(statusDTO).getData();
-        }
-        if (type == JobTypeEnum.WORKFLOW.getType()) {
-            return (Boolean) client.updateWorkFlowStatus(statusDTO).getData();
-        }
-        throw new SnailJobClientException("snail job openapi check error");
+        Result<Object> result = client.updateJobStatus(statusDTO);
+        Assert.isTrue(StatusEnum.YES.getStatus() == result.getStatus(),
+                () -> new SnailJobClientException(result.getMessage()));
+        return (Boolean) result.getData();
     }
 
     @Override
@@ -52,7 +47,7 @@ public class RequestUpdateStatusHandler extends AbstractRequestHandler<Boolean> 
      * @param id
      * @return
      */
-    private RequestUpdateStatusHandler setId(Long id) {
+    private UpdateJobStatusHandler setId(Long id) {
         this.statusDTO.setId(id);
         return this;
     }
@@ -63,7 +58,7 @@ public class RequestUpdateStatusHandler extends AbstractRequestHandler<Boolean> 
      * @param status
      * @return
      */
-    public RequestUpdateStatusHandler setStatus(StatusEnum status) {
+    public UpdateJobStatusHandler setStatus(StatusEnum status) {
         this.statusDTO.setJobStatus(status.getStatus());
         return this;
     }

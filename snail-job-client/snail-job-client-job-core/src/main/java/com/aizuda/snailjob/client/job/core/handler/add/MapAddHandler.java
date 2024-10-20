@@ -11,11 +11,11 @@ import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 public class MapAddHandler extends AddHandler<MapAddHandler> {
 
     public MapAddHandler() {
-        this(JobTaskTypeEnum.MAP, null);
+        this(JobTaskTypeEnum.MAP);
     }
 
-    public MapAddHandler(JobTaskTypeEnum taskType, Integer shardNum) {
-        super(taskType, shardNum);
+    public MapAddHandler(JobTaskTypeEnum taskType) {
+        super(taskType);
         setRouteKey(AllocationAlgorithmEnum.ROUND);
         setR(this);
     }

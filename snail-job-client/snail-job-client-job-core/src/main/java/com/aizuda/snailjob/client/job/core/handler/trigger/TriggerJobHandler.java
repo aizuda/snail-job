@@ -1,18 +1,18 @@
 package com.aizuda.snailjob.client.job.core.handler.trigger;
 
+import cn.hutool.core.lang.Assert;
 import cn.hutool.core.lang.Pair;
 import com.aizuda.snailjob.client.common.exception.SnailJobClientException;
-import com.aizuda.snailjob.client.job.core.enums.JobTypeEnum;
 import com.aizuda.snailjob.client.job.core.handler.AbstractRequestHandler;
+import com.aizuda.snailjob.common.core.enums.StatusEnum;
+import com.aizuda.snailjob.common.core.model.Result;
 
-public class RequestTriggerJobHandler extends AbstractRequestHandler<Boolean> {
+public class TriggerJobHandler extends AbstractRequestHandler<Boolean> {
     private final Long triggerJobId;
-    // 1: job; 2: workflow
-    private final int triggerType;
 
-    public RequestTriggerJobHandler(Long triggerJobId, int triggerType) {
+
+    public TriggerJobHandler(Long triggerJobId) {
         this.triggerJobId = triggerJobId;
-        this.triggerType = triggerType;
     }
 
     @Override
@@ -27,13 +27,10 @@ public class RequestTriggerJobHandler extends AbstractRequestHandler<Boolean> {
 
     @Override
     protected Boolean doExecute() {
-        if (triggerType == JobTypeEnum.JOB.getType()) {
-            return (Boolean) client.triggerJob(triggerJobId).getData();
-        }
-        if (triggerType == JobTypeEnum.WORKFLOW.getType()) {
-            return (Boolean) client.triggerWorkFlow(triggerJobId).getData();
-        }
-        throw new SnailJobClientException("snail job openapi check error");
+        Result<Object> result = client.triggerJob(triggerJobId);
+        Assert.isTrue(StatusEnum.YES.getStatus() == result.getStatus(),
+                () -> new SnailJobClientException(result.getMessage()));
+        return (Boolean)result.getData();
     }
 
     @Override

@@ -11,11 +11,11 @@ import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 public class ClusterAddHandler extends AddHandler<ClusterAddHandler> {
 
     public ClusterAddHandler() {
-        this(JobTaskTypeEnum.CLUSTER, null);
+        this(JobTaskTypeEnum.CLUSTER);
     }
 
-    public ClusterAddHandler(JobTaskTypeEnum taskType, Integer shardNum) {
-        super(taskType, shardNum);
+    public ClusterAddHandler(JobTaskTypeEnum taskType) {
+        super(taskType);
         // 集群模式只允许并发为 1
         setParallelNum(1);
         setR(this);

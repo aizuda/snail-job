@@ -1,9 +1,11 @@
 package com.aizuda.snailjob.client.job.core.handler.update;
 
+import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
+
 public class BroadcastUpdateHandler extends UpdateHandler<BroadcastUpdateHandler>{
 
     public BroadcastUpdateHandler(Long jobId) {
-        super(jobId);
+        super(JobTaskTypeEnum.BROADCAST, jobId);
         setR(this);
     }
 

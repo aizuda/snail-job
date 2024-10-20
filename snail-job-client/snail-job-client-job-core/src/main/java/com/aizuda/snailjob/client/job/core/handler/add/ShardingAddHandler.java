@@ -11,11 +11,11 @@ import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 public class ShardingAddHandler extends AddHandler<ShardingAddHandler> {
 
     public ShardingAddHandler() {
-        this(JobTaskTypeEnum.SHARDING, null);
+        this(JobTaskTypeEnum.SHARDING);
     }
 
-    public ShardingAddHandler(JobTaskTypeEnum taskType, Integer shardNum) {
-        super(taskType, shardNum);
+    public ShardingAddHandler(JobTaskTypeEnum taskType) {
+        super(taskType);
         setRouteKey(AllocationAlgorithmEnum.ROUND);
         setR(this);
     }

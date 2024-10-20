@@ -1,6 +1,8 @@
 package com.aizuda.snailjob.server.common.util;
 
+import cn.hutool.core.lang.Assert;
 import com.aizuda.snailjob.common.core.util.CronExpression;
+import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 
 import java.text.ParseException;
 import java.time.Duration;
@@ -38,6 +40,7 @@ public class CronUtils {
 
     public static long getExecuteInterval(String cron) {
         List<String> executeTimeByCron = getExecuteTimeByCron(cron, 2);
+        Assert.isTrue(!executeTimeByCron.isEmpty(), () -> new SnailJobServerException("[{}]表达式解析有误", cron));
         LocalDateTime first = LocalDateTime.parse(executeTimeByCron.get(0), DateUtils.NORM_DATETIME_PATTERN);
         LocalDateTime second = LocalDateTime.parse(executeTimeByCron.get(1), DateUtils.NORM_DATETIME_PATTERN);
         Duration duration = Duration.between(first, second);

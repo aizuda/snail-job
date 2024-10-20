@@ -1,9 +1,9 @@
 package com.aizuda.snailjob.client.job.core.openapi;
 
-import com.aizuda.snailjob.client.job.core.enums.JobTypeEnum;
 import com.aizuda.snailjob.client.job.core.handler.add.*;
 import com.aizuda.snailjob.client.job.core.handler.query.RequestQueryHandler;
-import com.aizuda.snailjob.client.job.core.handler.trigger.RequestTriggerJobHandler;
+import com.aizuda.snailjob.client.job.core.handler.trigger.TriggerJobHandler;
+import com.aizuda.snailjob.client.job.core.handler.trigger.TriggerWorkflowHandler;
 import com.aizuda.snailjob.client.job.core.handler.update.*;
 
 /**
@@ -54,11 +54,10 @@ public final class SnailJobOpenApi {
     /**
      * 添加MapReduce定时任务
      *
-     * @param shardNum Reduce数量
      * @return {@link MapReduceAddHandler}
      */
-    public static MapReduceAddHandler addMapReduceJob(Integer shardNum) {
-        return new MapReduceAddHandler(shardNum);
+    public static MapReduceAddHandler addMapReduceJob() {
+        return new MapReduceAddHandler();
     }
 
     /**
@@ -125,39 +124,39 @@ public final class SnailJobOpenApi {
      * 手动触发定时任务
      *
      * @param jobId 定时任务ID
-     * @return {@link RequestTriggerJobHandler}
+     * @return {@link TriggerJobHandler}
      */
-    public static RequestTriggerJobHandler triggerJob(Long jobId) {
-        return new RequestTriggerJobHandler(jobId, JobTypeEnum.JOB.getType());
+    public static TriggerJobHandler triggerJob(Long jobId) {
+        return new TriggerJobHandler(jobId);
     }
 
     /**
      * 手动触发工作流任务
      *
      * @param id 工作流任务ID
-     * @return {@link RequestTriggerJobHandler}
+     * @return {@link TriggerWorkflowHandler}
      */
-    public static RequestTriggerJobHandler triggerWorkFlow(Long id) {
-        return new RequestTriggerJobHandler(id, JobTypeEnum.WORKFLOW.getType());
+    public static TriggerWorkflowHandler triggerWorkFlow(Long id) {
+        return new TriggerWorkflowHandler(id);
     }
 
     /**
      * 更新定时任务状态
      *
      * @param jobId 任务ID
-     * @return {@link RequestUpdateStatusHandler}
+     * @return {@link UpdateJobStatusHandler}
      */
-    public static RequestUpdateStatusHandler updateJobStatus(Long jobId) {
-        return new RequestUpdateStatusHandler(jobId, JobTypeEnum.JOB.getType());
+    public static UpdateJobStatusHandler updateJobStatus(Long jobId) {
+        return new UpdateJobStatusHandler(jobId);
     }
 
     /**
      * 更新工作流任务状态
      *
      * @param workFlowId 工作流ID
-     * @return {@link RequestUpdateStatusHandler}
+     * @return {@link UpdateJobStatusHandler}
      */
-    public static RequestUpdateStatusHandler updateWorkFlowStatus(Long workFlowId) {
-        return new RequestUpdateStatusHandler(workFlowId, JobTypeEnum.WORKFLOW.getType());
+    public static UpdateWorkflowStatusHandler updateWorkFlowStatus(Long workFlowId) {
+        return new UpdateWorkflowStatusHandler(workFlowId);
     }
 }

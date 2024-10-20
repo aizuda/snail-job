@@ -11,11 +11,11 @@ import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 public class BroadcastAddHandler extends AddHandler<BroadcastAddHandler> {
 
     public BroadcastAddHandler() {
-        this(JobTaskTypeEnum.BROADCAST, null);
+        this(JobTaskTypeEnum.BROADCAST);
     }
 
-    public BroadcastAddHandler(JobTaskTypeEnum taskType, Integer shardNum) {
-        super(taskType, shardNum);
+    public BroadcastAddHandler(JobTaskTypeEnum taskType) {
+        super(taskType);
         // 广播模式只允许并发为 1
         setParallelNum(1);
         // 广播模式采用轮询模式
