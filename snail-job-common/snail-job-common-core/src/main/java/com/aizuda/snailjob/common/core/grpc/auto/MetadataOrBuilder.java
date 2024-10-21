@@ -8,16 +8,16 @@ public interface MetadataOrBuilder extends
     com.google.protobuf.MessageOrBuilder {
 
   /**
-   * <code>string type = 3;</code>
-   * @return The type.
+   * <code>string uri = 3;</code>
+   * @return The uri.
    */
-  java.lang.String getType();
+  java.lang.String getUri();
   /**
-   * <code>string type = 3;</code>
-   * @return The bytes for type.
+   * <code>string uri = 3;</code>
+   * @return The bytes for uri.
    */
   com.google.protobuf.ByteString
-      getTypeBytes();
+      getUriBytes();
 
   /**
    * <code>map&lt;string, string&gt; headers = 7;</code>
@@ -52,28 +52,4 @@ java.lang.String defaultValue);
    */
   java.lang.String getHeadersOrThrow(
       java.lang.String key);
-
-  /**
-   * <code>string clientIp = 8;</code>
-   * @return The clientIp.
-   */
-  java.lang.String getClientIp();
-  /**
-   * <code>string clientIp = 8;</code>
-   * @return The bytes for clientIp.
-   */
-  com.google.protobuf.ByteString
-      getClientIpBytes();
-
-  /**
-   * <code>string uri = 9;</code>
-   * @return The uri.
-   */
-  java.lang.String getUri();
-  /**
-   * <code>string uri = 9;</code>
-   * @return The bytes for uri.
-   */
-  com.google.protobuf.ByteString
-      getUriBytes();
 }

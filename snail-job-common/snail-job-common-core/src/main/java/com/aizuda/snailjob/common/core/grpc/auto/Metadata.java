@@ -16,8 +16,6 @@ private static final long serialVersionUID = 0L;
     super(builder);
   }
   private Metadata() {
-    type_ = "";
-    clientIp_ = "";
     uri_ = "";
   }
 
@@ -53,39 +51,39 @@ private static final long serialVersionUID = 0L;
             com.aizuda.snailjob.common.core.grpc.auto.Metadata.class, com.aizuda.snailjob.common.core.grpc.auto.Metadata.Builder.class);
   }
 
-  public static final int TYPE_FIELD_NUMBER = 3;
+  public static final int URI_FIELD_NUMBER = 3;
   @SuppressWarnings("serial")
-  private volatile java.lang.Object type_ = "";
+  private volatile java.lang.Object uri_ = "";
   /**
-   * <code>string type = 3;</code>
-   * @return The type.
+   * <code>string uri = 3;</code>
+   * @return The uri.
    */
   @java.lang.Override
-  public java.lang.String getType() {
-    java.lang.Object ref = type_;
+  public java.lang.String getUri() {
+    java.lang.Object ref = uri_;
     if (ref instanceof java.lang.String) {
       return (java.lang.String) ref;
     } else {
       com.google.protobuf.ByteString bs = 
           (com.google.protobuf.ByteString) ref;
       java.lang.String s = bs.toStringUtf8();
-      type_ = s;
+      uri_ = s;
       return s;
     }
   }
   /**
-   * <code>string type = 3;</code>
-   * @return The bytes for type.
+   * <code>string uri = 3;</code>
+   * @return The bytes for uri.
    */
   @java.lang.Override
   public com.google.protobuf.ByteString
-      getTypeBytes() {
-    java.lang.Object ref = type_;
+      getUriBytes() {
+    java.lang.Object ref = uri_;
     if (ref instanceof java.lang.String) {
       com.google.protobuf.ByteString b = 
           com.google.protobuf.ByteString.copyFromUtf8(
               (java.lang.String) ref);
-      type_ = b;
+      uri_ = b;
       return b;
     } else {
       return (com.google.protobuf.ByteString) ref;
@@ -171,84 +169,6 @@ java.lang.String defaultValue) {
     return map.get(key);
   }
 
-  public static final int CLIENTIP_FIELD_NUMBER = 8;
-  @SuppressWarnings("serial")
-  private volatile java.lang.Object clientIp_ = "";
-  /**
-   * <code>string clientIp = 8;</code>
-   * @return The clientIp.
-   */
-  @java.lang.Override
-  public java.lang.String getClientIp() {
-    java.lang.Object ref = clientIp_;
-    if (ref instanceof java.lang.String) {
-      return (java.lang.String) ref;
-    } else {
-      com.google.protobuf.ByteString bs = 
-          (com.google.protobuf.ByteString) ref;
-      java.lang.String s = bs.toStringUtf8();
-      clientIp_ = s;
-      return s;
-    }
-  }
-  /**
-   * <code>string clientIp = 8;</code>
-   * @return The bytes for clientIp.
-   */
-  @java.lang.Override
-  public com.google.protobuf.ByteString
-      getClientIpBytes() {
-    java.lang.Object ref = clientIp_;
-    if (ref instanceof java.lang.String) {
-      com.google.protobuf.ByteString b = 
-          com.google.protobuf.ByteString.copyFromUtf8(
-              (java.lang.String) ref);
-      clientIp_ = b;
-      return b;
-    } else {
-      return (com.google.protobuf.ByteString) ref;
-    }
-  }
-
-  public static final int URI_FIELD_NUMBER = 9;
-  @SuppressWarnings("serial")
-  private volatile java.lang.Object uri_ = "";
-  /**
-   * <code>string uri = 9;</code>
-   * @return The uri.
-   */
-  @java.lang.Override
-  public java.lang.String getUri() {
-    java.lang.Object ref = uri_;
-    if (ref instanceof java.lang.String) {
-      return (java.lang.String) ref;
-    } else {
-      com.google.protobuf.ByteString bs = 
-          (com.google.protobuf.ByteString) ref;
-      java.lang.String s = bs.toStringUtf8();
-      uri_ = s;
-      return s;
-    }
-  }
-  /**
-   * <code>string uri = 9;</code>
-   * @return The bytes for uri.
-   */
-  @java.lang.Override
-  public com.google.protobuf.ByteString
-      getUriBytes() {
-    java.lang.Object ref = uri_;
-    if (ref instanceof java.lang.String) {
-      com.google.protobuf.ByteString b = 
-          com.google.protobuf.ByteString.copyFromUtf8(
-              (java.lang.String) ref);
-      uri_ = b;
-      return b;
-    } else {
-      return (com.google.protobuf.ByteString) ref;
-    }
-  }
-
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -263,8 +183,8 @@ java.lang.String defaultValue) {
   @java.lang.Override
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
-    if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(type_)) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 3, type_);
+    if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(uri_)) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 3, uri_);
     }
     com.google.protobuf.GeneratedMessageV3
       .serializeStringMapTo(
@@ -272,12 +192,6 @@ java.lang.String defaultValue) {
         internalGetHeaders(),
         HeadersDefaultEntryHolder.defaultEntry,
         7);
-    if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(clientIp_)) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 8, clientIp_);
-    }
-    if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(uri_)) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 9, uri_);
-    }
     getUnknownFields().writeTo(output);
   }
 
@@ -287,8 +201,8 @@ java.lang.String defaultValue) {
     if (size != -1) return size;
 
     size = 0;
-    if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(type_)) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, type_);
+    if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(uri_)) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, uri_);
     }
     for (java.util.Map.Entry<java.lang.String, java.lang.String> entry
          : internalGetHeaders().getMap().entrySet()) {
@@ -299,12 +213,6 @@ java.lang.String defaultValue) {
           .build();
       size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(7, headers__);
-    }
-    if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(clientIp_)) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, clientIp_);
-    }
-    if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(uri_)) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, uri_);
     }
     size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
@@ -321,14 +229,10 @@ java.lang.String defaultValue) {
     }
     com.aizuda.snailjob.common.core.grpc.auto.Metadata other = (com.aizuda.snailjob.common.core.grpc.auto.Metadata) obj;
 
-    if (!getType()
-        .equals(other.getType())) return false;
-    if (!internalGetHeaders().equals(
-        other.internalGetHeaders())) return false;
-    if (!getClientIp()
-        .equals(other.getClientIp())) return false;
     if (!getUri()
         .equals(other.getUri())) return false;
+    if (!internalGetHeaders().equals(
+        other.internalGetHeaders())) return false;
     if (!getUnknownFields().equals(other.getUnknownFields())) return false;
     return true;
   }
@@ -340,16 +244,12 @@ java.lang.String defaultValue) {
     }
     int hash = 41;
     hash = (19 * hash) + getDescriptor().hashCode();
-    hash = (37 * hash) + TYPE_FIELD_NUMBER;
-    hash = (53 * hash) + getType().hashCode();
+    hash = (37 * hash) + URI_FIELD_NUMBER;
+    hash = (53 * hash) + getUri().hashCode();
     if (!internalGetHeaders().getMap().isEmpty()) {
       hash = (37 * hash) + HEADERS_FIELD_NUMBER;
       hash = (53 * hash) + internalGetHeaders().hashCode();
     }
-    hash = (37 * hash) + CLIENTIP_FIELD_NUMBER;
-    hash = (53 * hash) + getClientIp().hashCode();
-    hash = (37 * hash) + URI_FIELD_NUMBER;
-    hash = (53 * hash) + getUri().hashCode();
     hash = (29 * hash) + getUnknownFields().hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -503,10 +403,8 @@ java.lang.String defaultValue) {
     public Builder clear() {
       super.clear();
       bitField0_ = 0;
-      type_ = "";
-      internalGetMutableHeaders().clear();
-      clientIp_ = "";
       uri_ = "";
+      internalGetMutableHeaders().clear();
       return this;
     }
 
@@ -541,17 +439,11 @@ java.lang.String defaultValue) {
     private void buildPartial0(com.aizuda.snailjob.common.core.grpc.auto.Metadata result) {
       int from_bitField0_ = bitField0_;
       if (((from_bitField0_ & 0x00000001) != 0)) {
-        result.type_ = type_;
+        result.uri_ = uri_;
       }
       if (((from_bitField0_ & 0x00000002) != 0)) {
         result.headers_ = internalGetHeaders();
         result.headers_.makeImmutable();
-      }
-      if (((from_bitField0_ & 0x00000004) != 0)) {
-        result.clientIp_ = clientIp_;
-      }
-      if (((from_bitField0_ & 0x00000008) != 0)) {
-        result.uri_ = uri_;
       }
     }
 
@@ -599,24 +491,14 @@ java.lang.String defaultValue) {
 
     public Builder mergeFrom(com.aizuda.snailjob.common.core.grpc.auto.Metadata other) {
       if (other == com.aizuda.snailjob.common.core.grpc.auto.Metadata.getDefaultInstance()) return this;
-      if (!other.getType().isEmpty()) {
-        type_ = other.type_;
+      if (!other.getUri().isEmpty()) {
+        uri_ = other.uri_;
         bitField0_ |= 0x00000001;
         onChanged();
       }
       internalGetMutableHeaders().mergeFrom(
           other.internalGetHeaders());
       bitField0_ |= 0x00000002;
-      if (!other.getClientIp().isEmpty()) {
-        clientIp_ = other.clientIp_;
-        bitField0_ |= 0x00000004;
-        onChanged();
-      }
-      if (!other.getUri().isEmpty()) {
-        uri_ = other.uri_;
-        bitField0_ |= 0x00000008;
-        onChanged();
-      }
       this.mergeUnknownFields(other.getUnknownFields());
       onChanged();
       return this;
@@ -644,7 +526,7 @@ java.lang.String defaultValue) {
               done = true;
               break;
             case 26: {
-              type_ = input.readStringRequireUtf8();
+              uri_ = input.readStringRequireUtf8();
               bitField0_ |= 0x00000001;
               break;
             } // case 26
@@ -657,16 +539,6 @@ java.lang.String defaultValue) {
               bitField0_ |= 0x00000002;
               break;
             } // case 58
-            case 66: {
-              clientIp_ = input.readStringRequireUtf8();
-              bitField0_ |= 0x00000004;
-              break;
-            } // case 66
-            case 74: {
-              uri_ = input.readStringRequireUtf8();
-              bitField0_ |= 0x00000008;
-              break;
-            } // case 74
             default: {
               if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                 done = true; // was an endgroup tag
@@ -684,73 +556,73 @@ java.lang.String defaultValue) {
     }
     private int bitField0_;
 
-    private java.lang.Object type_ = "";
+    private java.lang.Object uri_ = "";
     /**
-     * <code>string type = 3;</code>
-     * @return The type.
+     * <code>string uri = 3;</code>
+     * @return The uri.
      */
-    public java.lang.String getType() {
-      java.lang.Object ref = type_;
+    public java.lang.String getUri() {
+      java.lang.Object ref = uri_;
       if (!(ref instanceof java.lang.String)) {
         com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
-        type_ = s;
+        uri_ = s;
         return s;
       } else {
         return (java.lang.String) ref;
       }
     }
     /**
-     * <code>string type = 3;</code>
-     * @return The bytes for type.
+     * <code>string uri = 3;</code>
+     * @return The bytes for uri.
      */
     public com.google.protobuf.ByteString
-        getTypeBytes() {
-      java.lang.Object ref = type_;
+        getUriBytes() {
+      java.lang.Object ref = uri_;
       if (ref instanceof String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
-        type_ = b;
+        uri_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
       }
     }
     /**
-     * <code>string type = 3;</code>
-     * @param value The type to set.
+     * <code>string uri = 3;</code>
+     * @param value The uri to set.
      * @return This builder for chaining.
      */
-    public Builder setType(
+    public Builder setUri(
         java.lang.String value) {
       if (value == null) { throw new NullPointerException(); }
-      type_ = value;
+      uri_ = value;
       bitField0_ |= 0x00000001;
       onChanged();
       return this;
     }
     /**
-     * <code>string type = 3;</code>
+     * <code>string uri = 3;</code>
      * @return This builder for chaining.
      */
-    public Builder clearType() {
-      type_ = getDefaultInstance().getType();
+    public Builder clearUri() {
+      uri_ = getDefaultInstance().getUri();
       bitField0_ = (bitField0_ & ~0x00000001);
       onChanged();
       return this;
     }
     /**
-     * <code>string type = 3;</code>
-     * @param value The bytes for type to set.
+     * <code>string uri = 3;</code>
+     * @param value The bytes for uri to set.
      * @return This builder for chaining.
      */
-    public Builder setTypeBytes(
+    public Builder setUriBytes(
         com.google.protobuf.ByteString value) {
       if (value == null) { throw new NullPointerException(); }
       checkByteStringIsUtf8(value);
-      type_ = value;
+      uri_ = value;
       bitField0_ |= 0x00000001;
       onChanged();
       return this;
@@ -880,150 +752,6 @@ java.lang.String defaultValue) {
       internalGetMutableHeaders().getMutableMap()
           .putAll(values);
       bitField0_ |= 0x00000002;
-      return this;
-    }
-
-    private java.lang.Object clientIp_ = "";
-    /**
-     * <code>string clientIp = 8;</code>
-     * @return The clientIp.
-     */
-    public java.lang.String getClientIp() {
-      java.lang.Object ref = clientIp_;
-      if (!(ref instanceof java.lang.String)) {
-        com.google.protobuf.ByteString bs =
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        clientIp_ = s;
-        return s;
-      } else {
-        return (java.lang.String) ref;
-      }
-    }
-    /**
-     * <code>string clientIp = 8;</code>
-     * @return The bytes for clientIp.
-     */
-    public com.google.protobuf.ByteString
-        getClientIpBytes() {
-      java.lang.Object ref = clientIp_;
-      if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        clientIp_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-    /**
-     * <code>string clientIp = 8;</code>
-     * @param value The clientIp to set.
-     * @return This builder for chaining.
-     */
-    public Builder setClientIp(
-        java.lang.String value) {
-      if (value == null) { throw new NullPointerException(); }
-      clientIp_ = value;
-      bitField0_ |= 0x00000004;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>string clientIp = 8;</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearClientIp() {
-      clientIp_ = getDefaultInstance().getClientIp();
-      bitField0_ = (bitField0_ & ~0x00000004);
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>string clientIp = 8;</code>
-     * @param value The bytes for clientIp to set.
-     * @return This builder for chaining.
-     */
-    public Builder setClientIpBytes(
-        com.google.protobuf.ByteString value) {
-      if (value == null) { throw new NullPointerException(); }
-      checkByteStringIsUtf8(value);
-      clientIp_ = value;
-      bitField0_ |= 0x00000004;
-      onChanged();
-      return this;
-    }
-
-    private java.lang.Object uri_ = "";
-    /**
-     * <code>string uri = 9;</code>
-     * @return The uri.
-     */
-    public java.lang.String getUri() {
-      java.lang.Object ref = uri_;
-      if (!(ref instanceof java.lang.String)) {
-        com.google.protobuf.ByteString bs =
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        uri_ = s;
-        return s;
-      } else {
-        return (java.lang.String) ref;
-      }
-    }
-    /**
-     * <code>string uri = 9;</code>
-     * @return The bytes for uri.
-     */
-    public com.google.protobuf.ByteString
-        getUriBytes() {
-      java.lang.Object ref = uri_;
-      if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        uri_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-    /**
-     * <code>string uri = 9;</code>
-     * @param value The uri to set.
-     * @return This builder for chaining.
-     */
-    public Builder setUri(
-        java.lang.String value) {
-      if (value == null) { throw new NullPointerException(); }
-      uri_ = value;
-      bitField0_ |= 0x00000008;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>string uri = 9;</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearUri() {
-      uri_ = getDefaultInstance().getUri();
-      bitField0_ = (bitField0_ & ~0x00000008);
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>string uri = 9;</code>
-     * @param value The bytes for uri to set.
-     * @return This builder for chaining.
-     */
-    public Builder setUriBytes(
-        com.google.protobuf.ByteString value) {
-      if (value == null) { throw new NullPointerException(); }
-      checkByteStringIsUtf8(value);
-      uri_ = value;
-      bitField0_ |= 0x00000008;
-      onChanged();
       return this;
     }
     @java.lang.Override
