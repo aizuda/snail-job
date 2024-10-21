@@ -11,12 +11,12 @@ public class MapUpdateHandler extends UpdateHandler<MapUpdateHandler> {
     }
 
     @Override
-    protected MapUpdateHandler addArgsStr(String argsKey, Object argsValue) {
+    public MapUpdateHandler addArgsStr(String argsKey, Object argsValue) {
         return super.addArgsStr(argsKey, argsValue);
     }
 
     @Override
-    protected MapUpdateHandler setParallelNum(Integer parallelNum) {
+    public MapUpdateHandler setParallelNum(Integer parallelNum) {
         return super.setParallelNum(parallelNum);
     }
 }

@@ -10,12 +10,12 @@ public class ShardingUpdateHandler extends UpdateHandler<ShardingUpdateHandler>{
     }
 
     @Override
-    protected ShardingUpdateHandler addShardingArgs(String[] shardingValue) {
+    public ShardingUpdateHandler addShardingArgs(String... shardingValue) {
         return super.addShardingArgs(shardingValue);
     }
 
     @Override
-    protected ShardingUpdateHandler setParallelNum(Integer parallelNum) {
+    public ShardingUpdateHandler setParallelNum(Integer parallelNum) {
         return super.setParallelNum(parallelNum);
     }
 }
