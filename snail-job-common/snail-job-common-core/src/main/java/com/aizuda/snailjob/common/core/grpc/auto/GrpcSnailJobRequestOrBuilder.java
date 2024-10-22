@@ -29,17 +29,14 @@ public interface GrpcSnailJobRequestOrBuilder extends
   com.aizuda.snailjob.common.core.grpc.auto.MetadataOrBuilder getMetadataOrBuilder();
 
   /**
-   * <code>.google.protobuf.Any body = 3;</code>
-   * @return Whether the body field is set.
-   */
-  boolean hasBody();
-  /**
-   * <code>.google.protobuf.Any body = 3;</code>
+   * <code>string body = 3;</code>
    * @return The body.
    */
-  com.google.protobuf.Any getBody();
+  java.lang.String getBody();
   /**
-   * <code>.google.protobuf.Any body = 3;</code>
+   * <code>string body = 3;</code>
+   * @return The bytes for body.
    */
-  com.google.protobuf.AnyOrBuilder getBodyOrBuilder();
+  com.google.protobuf.ByteString
+      getBodyBytes();
 }

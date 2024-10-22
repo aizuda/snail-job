@@ -146,9 +146,7 @@ public class SnailDispatcherRequestHandler {
 
             Class<?>[] paramTypes = endPointInfo.getMethod().getParameterTypes();
             GrpcSnailJobRequest grpcSnailJobRequest = request.getSnailJobRequest();
-            Any body = grpcSnailJobRequest.getBody();
-            ByteBuffer byteBuffer = body.getValue().asReadOnlyByteBuffer();
-            Object[] args = JsonUtil.parseObject(new ByteBufferBackedInputStream(byteBuffer), Object[].class);
+            Object[] args = JsonUtil.parseObject(grpcSnailJobRequest.getBody(), Object[].class);
 
             Object[] deSerialize = (Object[]) deSerialize(JsonUtil.toJsonString(args), endPointInfo.getMethod(),
                 httpRequest, httpResponse);

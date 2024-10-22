@@ -32,17 +32,14 @@ public interface GrpcResultOrBuilder extends
       getMessageBytes();
 
   /**
-   * <code>.google.protobuf.Any data = 4;</code>
-   * @return Whether the data field is set.
-   */
-  boolean hasData();
-  /**
-   * <code>.google.protobuf.Any data = 4;</code>
+   * <code>string data = 4;</code>
    * @return The data.
    */
-  com.google.protobuf.Any getData();
+  java.lang.String getData();
   /**
-   * <code>.google.protobuf.Any data = 4;</code>
+   * <code>string data = 4;</code>
+   * @return The bytes for data.
    */
-  com.google.protobuf.AnyOrBuilder getDataOrBuilder();
+  com.google.protobuf.ByteString
+      getDataBytes();
 }

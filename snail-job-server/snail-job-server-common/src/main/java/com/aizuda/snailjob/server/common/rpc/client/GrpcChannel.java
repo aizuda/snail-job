@@ -81,13 +81,11 @@ public class GrpcChannel {
             .setUri(url)
             .putAllHeaders(headersMap)
             .build();
-        Any build = Any.newBuilder().setValue(UnsafeByteOperations.unsafeWrap(body.getBytes()))
-            .build();
         GrpcSnailJobRequest snailJobRequest = GrpcSnailJobRequest
             .newBuilder()
             .setMetadata(metadata)
             .setReqId(reqId)
-            .setBody(build)
+            .setBody(body)
             .build();
 
         MethodDescriptor<GrpcSnailJobRequest, GrpcResult> methodDescriptor =

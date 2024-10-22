@@ -170,8 +170,7 @@ public class GrpcClientInvokeHandler implements InvocationHandler {
                     Assert.notNull(future, () -> new SnailJobServerException("completableFuture is null"));
                     GrpcResult grpcResult = future.get(Optional.ofNullable(executorTimeout).orElse(20),
                         TimeUnit.SECONDS);
-                    ByteBuffer byteBuffer = grpcResult.getData().getValue().asReadOnlyByteBuffer();
-                    Object obj = JsonUtil.parseObject(new ByteBufferBackedInputStream(byteBuffer), Object.class);
+                    Object obj = JsonUtil.parseObject(grpcResult.getData(), Object.class);
                     return new Result(grpcResult.getStatus(), grpcResult.getMessage(), obj);
                 }
 

@@ -62,10 +62,7 @@ public class UnaryRequestHandler implements ServerCalls.UnaryMethod<GrpcSnailJob
                 GrpcResult grpcResult = GrpcResult.newBuilder()
                     .setStatus(snailJobRpcResult.getStatus())
                     .setMessage(Optional.ofNullable(snailJobRpcResult.getMessage()).orElse(StrUtil.EMPTY))
-                    .setData(Any.newBuilder()
-                        .setValue(UnsafeByteOperations.unsafeWrap(
-                            JsonUtil.toJsonString(snailJobRpcResult.getData()).getBytes()))
-                        .build())
+                    .setData(JsonUtil.toJsonString(snailJobRpcResult.getData()))
                     .build();
 
                 streamObserver.onNext(grpcResult);

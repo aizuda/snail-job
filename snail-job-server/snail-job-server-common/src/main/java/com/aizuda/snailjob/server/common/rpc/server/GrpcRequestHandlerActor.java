@@ -74,10 +74,8 @@ public class GrpcRequestHandlerActor extends AbstractActor {
             SnailJobRpcResult snailJobRpcResult = null;
             try {
                 SnailJobRequest request = new SnailJobRequest();
-                Any body = grpcSnailJobRequest.getBody();
-                ByteString byteString = body.getValue();
-                ByteBuffer byteBuffer = byteString.asReadOnlyByteBuffer();
-                Object[] objects = JsonUtil.parseObject(new ByteBufferBackedInputStream(byteBuffer), Object[].class);
+                String body = grpcSnailJobRequest.getBody();
+                Object[] objects = JsonUtil.parseObject(body, Object[].class);
                 request.setArgs(objects);
                 snailJobRpcResult = doProcess(uri, JsonUtil.toJsonString(request), headersMap);
                 if (Objects.isNull(snailJobRpcResult)) {
@@ -94,10 +92,7 @@ public class GrpcRequestHandlerActor extends AbstractActor {
                     .setReqId(snailJobRpcResult.getReqId())
                     .setStatus(snailJobRpcResult.getStatus())
                     .setMessage(Optional.ofNullable(snailJobRpcResult.getMessage()).orElse(StrUtil.EMPTY))
-                    .setData(Any.newBuilder()
-                        .setValue(UnsafeByteOperations.unsafeWrap(
-                            JsonUtil.toJsonString(snailJobRpcResult.getData()).getBytes()))
-                        .build())
+                    .setData(JsonUtil.toJsonString(snailJobRpcResult.getData()))
                     .build();
                 streamObserver.onNext(grpcResult);
                 streamObserver.onCompleted();

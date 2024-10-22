@@ -78,8 +78,7 @@ public class GrpcClientInvokeHandler<R extends Result<Object>> implements Invoca
                 @Override
                 public void onSuccess(final GrpcResult result) {
 
-                    ByteBuffer byteBuffer = result.getData().getValue().asReadOnlyByteBuffer();
-                    Object obj = JsonUtil.parseObject(new ByteBufferBackedInputStream(byteBuffer), Object.class);
+                    Object obj = JsonUtil.parseObject( result.getData(), Object.class);
                     consumer.accept(
                             (R) new SnailJobRpcResult(result.getStatus(), result.getMessage(), obj, result.getReqId()));
                 }
@@ -96,8 +95,7 @@ public class GrpcClientInvokeHandler<R extends Result<Object>> implements Invoca
 
             try {
                 GrpcResult result = future.get(timeout, unit);
-                ByteBuffer byteBuffer = result.getData().getValue().asReadOnlyByteBuffer();
-                Object obj = JsonUtil.parseObject(new ByteBufferBackedInputStream(byteBuffer), Object.class);
+                Object obj = JsonUtil.parseObject(result.getData(), Object.class);
                 return (R) new SnailJobRpcResult(result.getStatus(), result.getMessage(), obj, result.getReqId());
             } catch (ExecutionException e) {
                 throw e.getCause();

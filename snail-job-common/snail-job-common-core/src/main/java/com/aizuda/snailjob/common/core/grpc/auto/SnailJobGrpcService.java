@@ -48,13 +48,12 @@ public final class SnailJobGrpcService {
       "tamp.proto\"p\n\010Metadata\022\013\n\003uri\030\003 \001(\t\022\'\n\007h" +
       "eaders\030\007 \003(\0132\026.Metadata.HeadersEntry\032.\n\014" +
       "HeadersEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t" +
-      ":\0028\001\"e\n\023GrpcSnailJobRequest\022\r\n\005reqId\030\001 \001" +
-      "(\003\022\033\n\010metadata\030\002 \001(\0132\t.Metadata\022\"\n\004body\030" +
-      "\003 \001(\0132\024.google.protobuf.Any\"`\n\nGrpcResul" +
-      "t\022\r\n\005reqId\030\001 \001(\003\022\016\n\006status\030\002 \001(\005\022\017\n\007mess" +
-      "age\030\003 \001(\t\022\"\n\004data\030\004 \001(\0132\024.google.protobu" +
-      "f.AnyB-\n)com.aizuda.snailjob.common.core" +
-      ".grpc.autoP\001b\006proto3"
+      ":\0028\001\"O\n\023GrpcSnailJobRequest\022\r\n\005reqId\030\001 \001" +
+      "(\003\022\033\n\010metadata\030\002 \001(\0132\t.Metadata\022\014\n\004body\030" +
+      "\003 \001(\t\"J\n\nGrpcResult\022\r\n\005reqId\030\001 \001(\003\022\016\n\006st" +
+      "atus\030\002 \001(\005\022\017\n\007message\030\003 \001(\t\022\014\n\004data\030\004 \001(" +
+      "\tB-\n)com.aizuda.snailjob.common.core.grp" +
+      "c.autoP\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

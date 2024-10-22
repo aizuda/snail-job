@@ -14,12 +14,12 @@ message Metadata {
 message GrpcSnailJobRequest {
   int64 reqId = 1;
   Metadata metadata = 2;
-  google.protobuf.Any body = 3;
+  string body = 3;
 }
 
 message GrpcResult {
   int64 reqId = 1;
   int32 status = 2;
   string message = 3;
-  google.protobuf.Any data = 4;
+  string data = 4;
 }

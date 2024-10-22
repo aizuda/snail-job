@@ -16,6 +16,7 @@ private static final long serialVersionUID = 0L;
     super(builder);
   }
   private GrpcSnailJobRequest() {
+    body_ = "";
   }
 
   @java.lang.Override
@@ -77,29 +78,42 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int BODY_FIELD_NUMBER = 3;
-  private com.google.protobuf.Any body_;
+  @SuppressWarnings("serial")
+  private volatile java.lang.Object body_ = "";
   /**
-   * <code>.google.protobuf.Any body = 3;</code>
-   * @return Whether the body field is set.
-   */
-  @java.lang.Override
-  public boolean hasBody() {
-    return ((bitField0_ & 0x00000002) != 0);
-  }
-  /**
-   * <code>.google.protobuf.Any body = 3;</code>
+   * <code>string body = 3;</code>
    * @return The body.
    */
   @java.lang.Override
-  public com.google.protobuf.Any getBody() {
-    return body_ == null ? com.google.protobuf.Any.getDefaultInstance() : body_;
+  public java.lang.String getBody() {
+    java.lang.Object ref = body_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      body_ = s;
+      return s;
+    }
   }
   /**
-   * <code>.google.protobuf.Any body = 3;</code>
+   * <code>string body = 3;</code>
+   * @return The bytes for body.
    */
   @java.lang.Override
-  public com.google.protobuf.AnyOrBuilder getBodyOrBuilder() {
-    return body_ == null ? com.google.protobuf.Any.getDefaultInstance() : body_;
+  public com.google.protobuf.ByteString
+      getBodyBytes() {
+    java.lang.Object ref = body_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      body_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
   }
 
   private byte memoizedIsInitialized = -1;
@@ -122,8 +136,8 @@ private static final long serialVersionUID = 0L;
     if (((bitField0_ & 0x00000001) != 0)) {
       output.writeMessage(2, getMetadata());
     }
-    if (((bitField0_ & 0x00000002) != 0)) {
-      output.writeMessage(3, getBody());
+    if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(body_)) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 3, body_);
     }
     getUnknownFields().writeTo(output);
   }
@@ -142,9 +156,8 @@ private static final long serialVersionUID = 0L;
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(2, getMetadata());
     }
-    if (((bitField0_ & 0x00000002) != 0)) {
-      size += com.google.protobuf.CodedOutputStream
-        .computeMessageSize(3, getBody());
+    if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(body_)) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, body_);
     }
     size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
@@ -168,11 +181,8 @@ private static final long serialVersionUID = 0L;
       if (!getMetadata()
           .equals(other.getMetadata())) return false;
     }
-    if (hasBody() != other.hasBody()) return false;
-    if (hasBody()) {
-      if (!getBody()
-          .equals(other.getBody())) return false;
-    }
+    if (!getBody()
+        .equals(other.getBody())) return false;
     if (!getUnknownFields().equals(other.getUnknownFields())) return false;
     return true;
   }
@@ -191,10 +201,8 @@ private static final long serialVersionUID = 0L;
       hash = (37 * hash) + METADATA_FIELD_NUMBER;
       hash = (53 * hash) + getMetadata().hashCode();
     }
-    if (hasBody()) {
-      hash = (37 * hash) + BODY_FIELD_NUMBER;
-      hash = (53 * hash) + getBody().hashCode();
-    }
+    hash = (37 * hash) + BODY_FIELD_NUMBER;
+    hash = (53 * hash) + getBody().hashCode();
     hash = (29 * hash) + getUnknownFields().hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -326,7 +334,6 @@ private static final long serialVersionUID = 0L;
       if (com.google.protobuf.GeneratedMessageV3
               .alwaysUseFieldBuilders) {
         getMetadataFieldBuilder();
-        getBodyFieldBuilder();
       }
     }
     @java.lang.Override
@@ -339,11 +346,7 @@ private static final long serialVersionUID = 0L;
         metadataBuilder_.dispose();
         metadataBuilder_ = null;
       }
-      body_ = null;
-      if (bodyBuilder_ != null) {
-        bodyBuilder_.dispose();
-        bodyBuilder_ = null;
-      }
+      body_ = "";
       return this;
     }
 
@@ -388,10 +391,7 @@ private static final long serialVersionUID = 0L;
         to_bitField0_ |= 0x00000001;
       }
       if (((from_bitField0_ & 0x00000004) != 0)) {
-        result.body_ = bodyBuilder_ == null
-            ? body_
-            : bodyBuilder_.build();
-        to_bitField0_ |= 0x00000002;
+        result.body_ = body_;
       }
       result.bitField0_ |= to_bitField0_;
     }
@@ -446,8 +446,10 @@ private static final long serialVersionUID = 0L;
       if (other.hasMetadata()) {
         mergeMetadata(other.getMetadata());
       }
-      if (other.hasBody()) {
-        mergeBody(other.getBody());
+      if (!other.getBody().isEmpty()) {
+        body_ = other.body_;
+        bitField0_ |= 0x00000004;
+        onChanged();
       }
       this.mergeUnknownFields(other.getUnknownFields());
       onChanged();
@@ -488,9 +490,7 @@ private static final long serialVersionUID = 0L;
               break;
             } // case 18
             case 26: {
-              input.readMessage(
-                  getBodyFieldBuilder().getBuilder(),
-                  extensionRegistry);
+              body_ = input.readStringRequireUtf8();
               bitField0_ |= 0x00000004;
               break;
             } // case 26
@@ -664,125 +664,76 @@ private static final long serialVersionUID = 0L;
       return metadataBuilder_;
     }
 
-    private com.google.protobuf.Any body_;
-    private com.google.protobuf.SingleFieldBuilderV3<
-        com.google.protobuf.Any, com.google.protobuf.Any.Builder, com.google.protobuf.AnyOrBuilder> bodyBuilder_;
+    private java.lang.Object body_ = "";
     /**
-     * <code>.google.protobuf.Any body = 3;</code>
-     * @return Whether the body field is set.
-     */
-    public boolean hasBody() {
-      return ((bitField0_ & 0x00000004) != 0);
-    }
-    /**
-     * <code>.google.protobuf.Any body = 3;</code>
+     * <code>string body = 3;</code>
      * @return The body.
      */
-    public com.google.protobuf.Any getBody() {
-      if (bodyBuilder_ == null) {
-        return body_ == null ? com.google.protobuf.Any.getDefaultInstance() : body_;
+    public java.lang.String getBody() {
+      java.lang.Object ref = body_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        body_ = s;
+        return s;
       } else {
-        return bodyBuilder_.getMessage();
+        return (java.lang.String) ref;
       }
     }
     /**
-     * <code>.google.protobuf.Any body = 3;</code>
+     * <code>string body = 3;</code>
+     * @return The bytes for body.
      */
-    public Builder setBody(com.google.protobuf.Any value) {
-      if (bodyBuilder_ == null) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
-        body_ = value;
+    public com.google.protobuf.ByteString
+        getBodyBytes() {
+      java.lang.Object ref = body_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        body_ = b;
+        return b;
       } else {
-        bodyBuilder_.setMessage(value);
+        return (com.google.protobuf.ByteString) ref;
       }
-      bitField0_ |= 0x00000004;
-      onChanged();
-      return this;
     }
     /**
-     * <code>.google.protobuf.Any body = 3;</code>
+     * <code>string body = 3;</code>
+     * @param value The body to set.
+     * @return This builder for chaining.
      */
     public Builder setBody(
-        com.google.protobuf.Any.Builder builderForValue) {
-      if (bodyBuilder_ == null) {
-        body_ = builderForValue.build();
-      } else {
-        bodyBuilder_.setMessage(builderForValue.build());
-      }
+        java.lang.String value) {
+      if (value == null) { throw new NullPointerException(); }
+      body_ = value;
       bitField0_ |= 0x00000004;
       onChanged();
       return this;
     }
     /**
-     * <code>.google.protobuf.Any body = 3;</code>
-     */
-    public Builder mergeBody(com.google.protobuf.Any value) {
-      if (bodyBuilder_ == null) {
-        if (((bitField0_ & 0x00000004) != 0) &&
-          body_ != null &&
-          body_ != com.google.protobuf.Any.getDefaultInstance()) {
-          getBodyBuilder().mergeFrom(value);
-        } else {
-          body_ = value;
-        }
-      } else {
-        bodyBuilder_.mergeFrom(value);
-      }
-      if (body_ != null) {
-        bitField0_ |= 0x00000004;
-        onChanged();
-      }
-      return this;
-    }
-    /**
-     * <code>.google.protobuf.Any body = 3;</code>
+     * <code>string body = 3;</code>
+     * @return This builder for chaining.
      */
     public Builder clearBody() {
+      body_ = getDefaultInstance().getBody();
       bitField0_ = (bitField0_ & ~0x00000004);
-      body_ = null;
-      if (bodyBuilder_ != null) {
-        bodyBuilder_.dispose();
-        bodyBuilder_ = null;
-      }
       onChanged();
       return this;
     }
     /**
-     * <code>.google.protobuf.Any body = 3;</code>
+     * <code>string body = 3;</code>
+     * @param value The bytes for body to set.
+     * @return This builder for chaining.
      */
-    public com.google.protobuf.Any.Builder getBodyBuilder() {
+    public Builder setBodyBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) { throw new NullPointerException(); }
+      checkByteStringIsUtf8(value);
+      body_ = value;
       bitField0_ |= 0x00000004;
       onChanged();
-      return getBodyFieldBuilder().getBuilder();
-    }
-    /**
-     * <code>.google.protobuf.Any body = 3;</code>
-     */
-    public com.google.protobuf.AnyOrBuilder getBodyOrBuilder() {
-      if (bodyBuilder_ != null) {
-        return bodyBuilder_.getMessageOrBuilder();
-      } else {
-        return body_ == null ?
-            com.google.protobuf.Any.getDefaultInstance() : body_;
-      }
-    }
-    /**
-     * <code>.google.protobuf.Any body = 3;</code>
-     */
-    private com.google.protobuf.SingleFieldBuilderV3<
-        com.google.protobuf.Any, com.google.protobuf.Any.Builder, com.google.protobuf.AnyOrBuilder> 
-        getBodyFieldBuilder() {
-      if (bodyBuilder_ == null) {
-        bodyBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-            com.google.protobuf.Any, com.google.protobuf.Any.Builder, com.google.protobuf.AnyOrBuilder>(
-                getBody(),
-                getParentForChildren(),
-                isClean());
-        body_ = null;
-      }
-      return bodyBuilder_;
+      return this;
     }
     @java.lang.Override
     public final Builder setUnknownFields(
