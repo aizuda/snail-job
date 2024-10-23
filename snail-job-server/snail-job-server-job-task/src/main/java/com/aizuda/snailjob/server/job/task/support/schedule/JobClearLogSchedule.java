@@ -123,7 +123,7 @@ public class JobClearLogSchedule extends AbstractSchedule implements Lifecycle {
                 if (CollectionUtils.isEmpty(ids)) {
                     return;
                 }
-                Lists.partition(ids, 500).forEach(partIds -> jobTaskBatchMapper.deleteByIds(ids));
+                Lists.partition(ids, 500).forEach(jobTaskBatchMapper::deleteByIds);
 
                 // Waiting for deletion JobTaskList
                 List<JobTask> jobTaskList = jobTaskMapper.selectList(new LambdaQueryWrapper<JobTask>().in(JobTask::getTaskBatchId, ids));
@@ -131,7 +131,7 @@ public class JobClearLogSchedule extends AbstractSchedule implements Lifecycle {
                     return;
                 }
                 List<Long> jobTaskListIds = StreamUtils.toList(jobTaskList, JobTask::getId);
-                Lists.partition(jobTaskListIds, 500).forEach(partIds -> jobTaskMapper.deleteByIds(partIds));
+                Lists.partition(jobTaskListIds, 500).forEach(jobTaskMapper::deleteByIds);
 
                 // Waiting for deletion JobLogMessageList
                 List<JobLogMessage> jobLogMessageList = jobLogMessageMapper.selectList(new LambdaQueryWrapper<JobLogMessage>().in(JobLogMessage::getTaskBatchId, ids));
@@ -139,7 +139,7 @@ public class JobClearLogSchedule extends AbstractSchedule implements Lifecycle {
                     return;
                 }
                 List<Long> jobLogMessageListIds = StreamUtils.toList(jobLogMessageList, JobLogMessage::getId);
-                Lists.partition(jobLogMessageListIds, 500).forEach(partIds -> jobTaskMapper.deleteByIds(jobLogMessageListIds));
+                Lists.partition(jobLogMessageListIds, 500).forEach(jobLogMessageMapper::deleteByIds);
             }
         });
     }
