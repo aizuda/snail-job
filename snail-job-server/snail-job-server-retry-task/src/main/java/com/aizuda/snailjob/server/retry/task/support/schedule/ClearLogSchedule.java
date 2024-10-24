@@ -115,21 +115,21 @@ public class ClearLogSchedule extends AbstractSchedule implements Lifecycle {
             protected void doInTransactionWithoutResult(final TransactionStatus status) {
 
                 List<String> uniqueIdIds = StreamUtils.toList(partitionTasks, PartitionTask::getUniqueId);
-                if (uniqueIdIds == null || uniqueIdIds.size() == 0) {
+                if (uniqueIdIds == null || uniqueIdIds.isEmpty()) {
                     return;
                 }
                 // Waiting for deletion RetryLog
                 List<RetryTaskLog> retryTaskLogList = retryTaskLogMapper.selectList(new LambdaQueryWrapper<RetryTaskLog>().in(RetryTaskLog::getUniqueId, uniqueIdIds));
-                if (retryTaskLogList != null && retryTaskLogList.size() > 0) {
+                if (retryTaskLogList != null && !retryTaskLogList.isEmpty()) {
                     List<Long> retryTaskListIds = StreamUtils.toList(retryTaskLogList, RetryTaskLog::getId);
-                    retryTaskLogMapper.deleteBatchIds(retryTaskListIds);
+                    retryTaskLogMapper.deleteByIds(retryTaskListIds);
                 }
 
                 // Waiting for deletion RetryTaskLogMessage
                 List<RetryTaskLogMessage> retryTaskLogMessageList = retryTaskLogMessageMapper.selectList(new LambdaQueryWrapper<RetryTaskLogMessage>().in(RetryTaskLogMessage::getUniqueId, uniqueIdIds));
-                if (retryTaskLogMessageList != null && retryTaskLogMessageList.size() > 0) {
+                if (retryTaskLogMessageList != null && !retryTaskLogMessageList.isEmpty()) {
                     List<Long> retryTaskListIds = StreamUtils.toList(retryTaskLogMessageList, RetryTaskLogMessage::getId);
-                    retryTaskLogMessageMapper.deleteBatchIds(retryTaskListIds);
+                    retryTaskLogMessageMapper.deleteByIds(retryTaskListIds);
                 }
             }
         });
