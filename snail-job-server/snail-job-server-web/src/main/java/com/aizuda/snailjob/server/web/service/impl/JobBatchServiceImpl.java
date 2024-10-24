@@ -68,7 +68,7 @@ public class JobBatchServiceImpl implements JobBatchService {
                 .eq("batch.system_task_type", SyetemTaskTypeEnum.JOB.getType())
                 .eq(queryVO.getJobId() != null, "batch.job_id", queryVO.getJobId())
                 .in(CollUtil.isNotEmpty(groupNames), "batch.group_name", groupNames)
-                .eq(queryVO.getTaskBatchStatus() != null, "batch.task_batch_status", queryVO.getTaskBatchStatus())
+                .in(ObjUtil.isNotEmpty(queryVO.getTaskBatchStatus()), "batch.task_batch_status", queryVO.getTaskBatchStatus())
                 .likeRight(StrUtil.isNotBlank(queryVO.getJobName()), "job.job_name", queryVO.getJobName())
                 .between(ObjUtil.isAllNotEmpty(queryVO.getStartDt(), queryVO.getEndDt()),
                         "batch.create_dt", queryVO.getStartDt(), queryVO.getEndDt())
