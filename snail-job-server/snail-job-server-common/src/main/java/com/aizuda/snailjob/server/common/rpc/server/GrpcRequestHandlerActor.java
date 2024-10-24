@@ -77,6 +77,7 @@ public class GrpcRequestHandlerActor extends AbstractActor {
                 String body = grpcSnailJobRequest.getBody();
                 Object[] objects = JsonUtil.parseObject(body, Object[].class);
                 request.setArgs(objects);
+                request.setReqId(grpcSnailJobRequest.getReqId());
                 snailJobRpcResult = doProcess(uri, JsonUtil.toJsonString(request), headersMap);
                 if (Objects.isNull(snailJobRpcResult)) {
                     snailJobRpcResult = new SnailJobRpcResult(StatusEnum.NO.getStatus(), "服务端异常", null,
@@ -147,19 +148,5 @@ public class GrpcRequestHandlerActor extends AbstractActor {
         throw new SnailJobServerException("No matching handler found. Path:[{}] method:[{}]", builder.getPathStr());
     }
 
-    /**
-     * write response
-     */
-    private void writeResponse(ChannelHandlerContext ctx, boolean keepAlive, String responseJson) {
-        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK,
-            Unpooled.copiedBuffer(responseJson, CharsetUtil.UTF_8));
-        response.headers().set(HttpHeaderNames.CONTENT_TYPE,
-            HttpHeaderValues.APPLICATION_JSON);
-        response.headers().set(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
-        if (keepAlive) {
-            response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
-        }
-        ctx.writeAndFlush(response);
-    }
 
 }
