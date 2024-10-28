@@ -43,23 +43,19 @@ public final class SnailJobGrpcService {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\034snail_job_grpc_service.proto\032\031google/p" +
-      "rotobuf/any.proto\032\037google/protobuf/times" +
-      "tamp.proto\"p\n\010Metadata\022\013\n\003uri\030\003 \001(\t\022\'\n\007h" +
-      "eaders\030\007 \003(\0132\026.Metadata.HeadersEntry\032.\n\014" +
-      "HeadersEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t" +
-      ":\0028\001\"O\n\023GrpcSnailJobRequest\022\r\n\005reqId\030\001 \001" +
-      "(\003\022\033\n\010metadata\030\002 \001(\0132\t.Metadata\022\014\n\004body\030" +
-      "\003 \001(\t\"J\n\nGrpcResult\022\r\n\005reqId\030\001 \001(\003\022\016\n\006st" +
-      "atus\030\002 \001(\005\022\017\n\007message\030\003 \001(\t\022\014\n\004data\030\004 \001(" +
-      "\tB-\n)com.aizuda.snailjob.common.core.grp" +
-      "c.autoP\001b\006proto3"
+      "\n\034snail_job_grpc_service.proto\"p\n\010Metada" +
+      "ta\022\013\n\003uri\030\003 \001(\t\022\'\n\007headers\030\007 \003(\0132\026.Metad" +
+      "ata.HeadersEntry\032.\n\014HeadersEntry\022\013\n\003key\030" +
+      "\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"O\n\023GrpcSnailJob" +
+      "Request\022\r\n\005reqId\030\001 \001(\003\022\033\n\010metadata\030\002 \001(\013" +
+      "2\t.Metadata\022\014\n\004body\030\003 \001(\t\"J\n\nGrpcResult\022" +
+      "\r\n\005reqId\030\001 \001(\003\022\016\n\006status\030\002 \001(\005\022\017\n\007messag" +
+      "e\030\003 \001(\t\022\014\n\004data\030\004 \001(\tB-\n)com.aizuda.snai" +
+      "ljob.common.core.grpc.autoP\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
-          com.google.protobuf.AnyProto.getDescriptor(),
-          com.google.protobuf.TimestampProto.getDescriptor(),
         });
     internal_static_Metadata_descriptor =
       getDescriptor().getMessageTypes().get(0);
@@ -85,8 +81,6 @@ public final class SnailJobGrpcService {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_GrpcResult_descriptor,
         new java.lang.String[] { "ReqId", "Status", "Message", "Data", });
-    com.google.protobuf.AnyProto.getDescriptor();
-    com.google.protobuf.TimestampProto.getDescriptor();
   }
 
   // @@protoc_insertion_point(outer_class_scope)

@@ -1,8 +1,5 @@
 syntax = "proto3";
 
-import "google/protobuf/any.proto";
-import "google/protobuf/timestamp.proto";
-
 option java_multiple_files = true;
 option java_package = "com.aizuda.snailjob.common.core.grpc.auto";
 
