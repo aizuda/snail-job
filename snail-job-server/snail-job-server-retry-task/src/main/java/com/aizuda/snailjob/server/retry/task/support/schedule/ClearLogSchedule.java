@@ -56,7 +56,7 @@ public class ClearLogSchedule extends AbstractSchedule implements Lifecycle {
 
     @Override
     public String lockAtMost() {
-        return "PT1H";
+        return "PT4H";
     }
 
     @Override
@@ -67,7 +67,9 @@ public class ClearLogSchedule extends AbstractSchedule implements Lifecycle {
     @Override
     protected void doExecute() {
         try {
-            if (systemProperties.getLogStorage() <= 0 || System.currentTimeMillis() - lastCleanLogTime < 24 * 60 * 60 * 1000) {
+            // 清除日志默认保存天数大于零、最少保留最近一天的日志数据
+            if (systemProperties.getLogStorage() <= 1 && System.currentTimeMillis() - lastCleanLogTime < 24 * 60 * 60 * 1000) {
+                SnailJobLog.LOCAL.error("retry clear log storage error", systemProperties.getLogStorage());
                 return;
             }
             // clean retry log
@@ -76,11 +78,10 @@ public class ClearLogSchedule extends AbstractSchedule implements Lifecycle {
                     this::processRetryLogPartitionTasks, 0);
 
             SnailJobLog.LOCAL.debug("Retry clear success total:[{}]", total);
-        } catch (Exception e) {
-            SnailJobLog.LOCAL.error("clear log error", e);
-        } finally {
             // update clean time
             lastCleanLogTime = System.currentTimeMillis();
+        } catch (Exception e) {
+            SnailJobLog.LOCAL.error("clear log error", e);
         }
     }
 
@@ -137,7 +138,7 @@ public class ClearLogSchedule extends AbstractSchedule implements Lifecycle {
 
     @Override
     public void start() {
-        taskScheduler.scheduleAtFixedRate(this::execute, Duration.parse("PT1H"));
+        taskScheduler.scheduleAtFixedRate(this::execute, Duration.parse("PT4H"));
     }
 
     @Override

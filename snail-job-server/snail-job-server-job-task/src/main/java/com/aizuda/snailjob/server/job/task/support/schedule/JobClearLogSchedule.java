@@ -20,8 +20,6 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
@@ -58,7 +56,7 @@ public class JobClearLogSchedule extends AbstractSchedule implements Lifecycle {
 
     @Override
     public String lockAtMost() {
-        return "PT1H";
+        return "PT4H";
     }
 
     @Override
@@ -69,8 +67,9 @@ public class JobClearLogSchedule extends AbstractSchedule implements Lifecycle {
     @Override
     protected void doExecute() {
         try {
-            // 清楚日志默认保存天数大于零、最少保留最近一天的日志数据
-            if (systemProperties.getLogStorage() <= 0 || System.currentTimeMillis() - lastCleanLogTime < 24 * 60 * 60 * 1000) {
+            // 清除日志默认保存天数大于零、最少保留最近一天的日志数据
+            if (systemProperties.getLogStorage() <= 1 && System.currentTimeMillis() - lastCleanLogTime < 24 * 60 * 60 * 1000) {
+                SnailJobLog.LOCAL.error("job clear log storage error", systemProperties.getLogStorage());
                 return;
             }
             // clean job log
@@ -80,11 +79,10 @@ public class JobClearLogSchedule extends AbstractSchedule implements Lifecycle {
                     this::processJobLogPartitionTasks, 0);
 
             SnailJobLog.LOCAL.debug("Job clear success total:[{}]", total);
-        } catch (Exception e) {
-            SnailJobLog.LOCAL.error("job clear log error", e);
-        } finally {
             // update clean time
             lastCleanLogTime = System.currentTimeMillis();
+        } catch (Exception e) {
+            SnailJobLog.LOCAL.error("job clear log error", e);
         }
     }
 
@@ -146,7 +144,7 @@ public class JobClearLogSchedule extends AbstractSchedule implements Lifecycle {
 
     @Override
     public void start() {
-        taskScheduler.scheduleAtFixedRate(this::execute, Duration.parse("PT1H"));
+        taskScheduler.scheduleAtFixedRate(this::execute, Duration.parse("PT4H"));
     }
 
     @Override
