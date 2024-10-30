@@ -1,9 +1,9 @@
-package com.aizuda.snailjob.server.job.task.support.handler;
+package com.aizuda.snailjob.server.job.task.support.request;
 
 import cn.hutool.core.net.url.UrlQuery;
 import com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH;
-import com.aizuda.snailjob.common.core.model.NettyResult;
 import com.aizuda.snailjob.common.core.model.SnailJobRequest;
+import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.handler.PostHttpRequestHandler;
@@ -36,20 +36,20 @@ public class OpenApiUpdateJobStatusRequestHandler extends PostHttpRequestHandler
     }
 
     @Override
-    public String doHandler(String content, UrlQuery query, HttpHeaders headers) {
+    public SnailJobRpcResult doHandler(String content, UrlQuery query, HttpHeaders headers) {
         SnailJobRequest retryRequest = JsonUtil.parseObject(content, SnailJobRequest.class);
         Object[] args = retryRequest.getArgs();
         JobStatusUpdateRequestVO jobRequestVO = JsonUtil.parseObject(JsonUtil.toJsonString(args[0]), JobStatusUpdateRequestVO.class);
         Long count = jobMapper.selectCount(new LambdaQueryWrapper<Job>().eq(Job::getId, jobRequestVO.getId()));
         if (1 != count){
             SnailJobLog.LOCAL.warn("更新任务失败");
-            return JsonUtil.toJsonString(new NettyResult(false, retryRequest.getReqId()));
+            return new SnailJobRpcResult(false, retryRequest.getReqId());
         }
         Job job = new Job();
         job.setId(jobRequestVO.getId());
         job.setJobStatus(jobRequestVO.getJobStatus());
         boolean update = 1 == jobMapper.updateById(job);
-        return JsonUtil.toJsonString(new NettyResult(update, retryRequest.getReqId()));
+        return new SnailJobRpcResult(update, retryRequest.getReqId());
 
     }
 }

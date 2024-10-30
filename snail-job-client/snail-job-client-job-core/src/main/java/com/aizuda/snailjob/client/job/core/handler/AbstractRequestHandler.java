@@ -10,7 +10,6 @@ import com.aizuda.snailjob.client.common.exception.SnailJobClientException;
  */
 public abstract class AbstractRequestHandler<R> implements RequestHandler<R> {
 
-    protected static final String SHARD_NUM = "shardNum";
     /**
      * 具体调用
      * @return

@@ -1,10 +1,10 @@
-package com.aizuda.snailjob.server.job.task.support.handler;
+package com.aizuda.snailjob.server.job.task.support.request;
 
 import cn.hutool.core.net.url.UrlQuery;
 import com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
-import com.aizuda.snailjob.common.core.model.NettyResult;
 import com.aizuda.snailjob.common.core.model.SnailJobRequest;
+import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.enums.JobTaskExecutorSceneEnum;
@@ -47,7 +47,7 @@ public class OpenApiTriggerJobRequestHandler extends PostHttpRequestHandler {
     }
 
     @Override
-    public String doHandler(String content, UrlQuery query, HttpHeaders headers) {
+    public SnailJobRpcResult doHandler(String content, UrlQuery query, HttpHeaders headers) {
         SnailJobLog.LOCAL.debug("Trigger job content:[{}]", content);
         SnailJobRequest retryRequest = JsonUtil.parseObject(content, SnailJobRequest.class);
         Object[] args = retryRequest.getArgs();
@@ -55,7 +55,7 @@ public class OpenApiTriggerJobRequestHandler extends PostHttpRequestHandler {
         Job job = jobMapper.selectById(jobId);
         if (Objects.isNull(job)){
             SnailJobLog.LOCAL.warn("job can not be null.");
-            return JsonUtil.toJsonString(new NettyResult(false, retryRequest.getReqId()));
+            return new SnailJobRpcResult(false, retryRequest.getReqId());
         }
 
         long count = accessTemplate.getGroupConfigAccess().count(new LambdaQueryWrapper<GroupConfig>()
@@ -66,7 +66,7 @@ public class OpenApiTriggerJobRequestHandler extends PostHttpRequestHandler {
 
         if (count <= 0){
             SnailJobLog.LOCAL.warn("组:[{}]已经关闭，不支持手动执行.", job.getGroupName());
-            return JsonUtil.toJsonString(new NettyResult(false, retryRequest.getReqId()));
+            return new SnailJobRpcResult(false, retryRequest.getReqId());
         }
         JobTaskPrepareDTO jobTaskPrepare = JobTaskConverter.INSTANCE.toJobTaskPrepare(job);
         // 设置now表示立即执行
@@ -75,6 +75,6 @@ public class OpenApiTriggerJobRequestHandler extends PostHttpRequestHandler {
         // 创建批次
         terminalJobPrepareHandler.handle(jobTaskPrepare);
 
-        return JsonUtil.toJsonString(new NettyResult(true, retryRequest.getReqId()));
+        return new SnailJobRpcResult(true, retryRequest.getReqId());
     }
 }

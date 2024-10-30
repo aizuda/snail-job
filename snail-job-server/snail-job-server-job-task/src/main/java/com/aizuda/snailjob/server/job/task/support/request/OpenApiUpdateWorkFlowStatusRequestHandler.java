@@ -1,9 +1,9 @@
-package com.aizuda.snailjob.server.job.task.support.handler;
+package com.aizuda.snailjob.server.job.task.support.request;
 
 import cn.hutool.core.net.url.UrlQuery;
 import com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH;
-import com.aizuda.snailjob.common.core.model.NettyResult;
 import com.aizuda.snailjob.common.core.model.SnailJobRequest;
+import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.handler.PostHttpRequestHandler;
@@ -38,7 +38,7 @@ public class OpenApiUpdateWorkFlowStatusRequestHandler extends PostHttpRequestHa
     }
 
     @Override
-    public String doHandler(String content, UrlQuery query, HttpHeaders headers) {
+    public SnailJobRpcResult doHandler(String content, UrlQuery query, HttpHeaders headers) {
         SnailJobRequest retryRequest = JsonUtil.parseObject(content, SnailJobRequest.class);
         Object[] args = retryRequest.getArgs();
         JobStatusUpdateRequestVO jobRequestVO = JsonUtil.parseObject(JsonUtil.toJsonString(args[0]), JobStatusUpdateRequestVO.class);
@@ -49,12 +49,12 @@ public class OpenApiUpdateWorkFlowStatusRequestHandler extends PostHttpRequestHa
 
         if (Objects.isNull(workflow)){
             SnailJobLog.LOCAL.warn("工作流不存在");
-            return JsonUtil.toJsonString(new NettyResult(false, retryRequest.getReqId()));
+            return new SnailJobRpcResult(false, retryRequest.getReqId());
         }
         workflow.setWorkflowStatus(jobRequestVO.getJobStatus());
         boolean update = 1 == workflowMapper.updateById(workflow);
 
-        return JsonUtil.toJsonString(new NettyResult(update, retryRequest.getReqId()));
+        return new SnailJobRpcResult(update, retryRequest.getReqId());
 
     }
 }

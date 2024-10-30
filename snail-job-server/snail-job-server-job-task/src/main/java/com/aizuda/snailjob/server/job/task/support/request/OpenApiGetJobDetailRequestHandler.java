@@ -1,10 +1,10 @@
-package com.aizuda.snailjob.server.job.task.support.handler;
+package com.aizuda.snailjob.server.job.task.support.request;
 
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.net.url.UrlQuery;
 import com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH;
-import com.aizuda.snailjob.common.core.model.NettyResult;
 import com.aizuda.snailjob.common.core.model.SnailJobRequest;
+import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.convert.JobResponseVOConverter;
@@ -38,7 +38,7 @@ public class OpenApiGetJobDetailRequestHandler extends PostHttpRequestHandler {
     }
 
     @Override
-    public String doHandler(String content, UrlQuery query, HttpHeaders headers) {
+    public SnailJobRpcResult doHandler(String content, UrlQuery query, HttpHeaders headers) {
         SnailJobLog.LOCAL.debug("Update job content:[{}]", content);
         SnailJobRequest retryRequest = JsonUtil.parseObject(content, SnailJobRequest.class);
         Object[] args = retryRequest.getArgs();
@@ -47,7 +47,7 @@ public class OpenApiGetJobDetailRequestHandler extends PostHttpRequestHandler {
 
         Job job = jobMapper.selectById(jobId);
         JobResponseVO convert = JobResponseVOConverter.INSTANCE.convert(job);
-        return JsonUtil.toJsonString(new NettyResult(convert, retryRequest.getReqId()));
+        return new SnailJobRpcResult(convert, retryRequest.getReqId());
 
     }
 }

@@ -1,12 +1,12 @@
-package com.aizuda.snailjob.server.job.task.support.handler;
+package com.aizuda.snailjob.server.job.task.support.request;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.net.url.UrlQuery;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
-import com.aizuda.snailjob.common.core.model.NettyResult;
 import com.aizuda.snailjob.common.core.model.SnailJobRequest;
+import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.enums.JobTaskExecutorSceneEnum;
@@ -52,7 +52,7 @@ public class OpenApiTriggerWorkFlowRequestHandler extends PostHttpRequestHandler
     }
 
     @Override
-    public String doHandler(String content, UrlQuery query, HttpHeaders headers) {
+    public SnailJobRpcResult doHandler(String content, UrlQuery query, HttpHeaders headers) {
         SnailJobLog.LOCAL.debug("Trigger job content:[{}]", content);
         SnailJobRequest retryRequest = JsonUtil.parseObject(content, SnailJobRequest.class);
         Object[] args = retryRequest.getArgs();
@@ -60,7 +60,7 @@ public class OpenApiTriggerWorkFlowRequestHandler extends PostHttpRequestHandler
         Workflow workflow = workflowMapper.selectById(id);
         if (Objects.isNull(workflow)){
             SnailJobLog.LOCAL.warn("workflow can not be null.");
-            return JsonUtil.toJsonString(new NettyResult(false, retryRequest.getReqId()));
+            return new SnailJobRpcResult(false, retryRequest.getReqId());
         }
         // 将字符串反序列化为 Set
         if (StrUtil.isNotBlank(workflow.getGroupName())) {
@@ -78,7 +78,7 @@ public class OpenApiTriggerWorkFlowRequestHandler extends PostHttpRequestHandler
 
                     if (count <= 0){
                         SnailJobLog.LOCAL.warn("组:[{}]已经关闭，不支持手动执行.", workflow.getGroupName());
-                        return JsonUtil.toJsonString(new NettyResult(false, retryRequest.getReqId()));
+                        return new SnailJobRpcResult(false, retryRequest.getReqId());
                     }
                 }
             }
@@ -91,7 +91,7 @@ public class OpenApiTriggerWorkFlowRequestHandler extends PostHttpRequestHandler
 
         terminalWorkflowPrepareHandler.handler(prepareDTO);
 
-        return JsonUtil.toJsonString(new NettyResult(true, retryRequest.getReqId()));
+        return new SnailJobRpcResult(true, retryRequest.getReqId());
 
     }
 }
