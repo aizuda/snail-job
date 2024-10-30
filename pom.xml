@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.2</version>
+        <version>3.3.5</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -22,7 +22,7 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <revision>1.2.0-beta2</revision>
-        <netty-all.version>4.1.94.Final</netty-all.version>
+        <netty-all.version>4.1.114.Final</netty-all.version>
         <hutool-all.version>5.8.25</hutool-all.version>
         <mybatis-plus.version>3.5.8</mybatis-plus.version>
         <guava-retrying.version>2.0.0</guava-retrying.version>
