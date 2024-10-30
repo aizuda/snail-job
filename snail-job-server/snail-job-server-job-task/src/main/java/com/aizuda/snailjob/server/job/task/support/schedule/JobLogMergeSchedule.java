@@ -53,8 +53,6 @@ public class JobLogMergeSchedule extends AbstractSchedule implements Lifecycle {
     private final JobLogMessageMapper jobLogMessageMapper;
     private final TransactionTemplate transactionTemplate;
 
-    // last merge log time
-    private static Long lastMergeLogTime = 0L;
 
     @Override
     public String lockName() {
@@ -74,10 +72,6 @@ public class JobLogMergeSchedule extends AbstractSchedule implements Lifecycle {
     @Override
     protected void doExecute() {
         try {
-            // 合并日志数据最少保留最近一天的日志数据
-            if (System.currentTimeMillis() - lastMergeLogTime < 24 * 60 * 60 * 1000) {
-                return;
-            }
             // merge job log
             long total;
             LocalDateTime endTime = LocalDateTime.now().minusDays(systemProperties.getMergeLogDays());
@@ -87,9 +81,6 @@ public class JobLogMergeSchedule extends AbstractSchedule implements Lifecycle {
             SnailJobLog.LOCAL.debug("job merge success total:[{}]", total);
         } catch (Exception e) {
             SnailJobLog.LOCAL.error("job merge log error", e);
-        } finally {
-            // update merge time
-            lastMergeLogTime = System.currentTimeMillis();
         }
     }
 
@@ -192,7 +183,7 @@ public class JobLogMergeSchedule extends AbstractSchedule implements Lifecycle {
 
     @Override
     public void start() {
-        taskScheduler.scheduleAtFixedRate(this::execute, Duration.parse("PT1H"));
+        taskScheduler.scheduleAtFixedRate(this::execute, Duration.parse("PT1M"));
     }
 
     @Override
