@@ -11,9 +11,10 @@ import com.aizuda.snailjob.common.log.SnailJobLog;
 import lombok.Data;
 import org.springframework.util.StringUtils;
 
-import java.util.Iterator;
+import java.util.Base64;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 
 public abstract class AbstractHttpExecutor {
@@ -27,6 +28,7 @@ public abstract class AbstractHttpExecutor {
     private static final String HTTP = "http";
     private static final String HTTP_PREFIX = "http://";
     private static final int HTTP_SUCCESS_CODE = 200;
+    private static final Pattern pattern = Pattern.compile("[\\u4e00-\\u9fa5]");
 
     public ExecuteResult process(HttpParams httpParams) {
         if (httpParams == null) {
@@ -123,6 +125,11 @@ public abstract class AbstractHttpExecutor {
         if ( Objects.nonNull(httpParams.getWfContext())) {
             httpParams.getWfContext().forEach((key, value) -> {
                 String headerValue = (value instanceof String) ? (String) value : JsonUtil.toJsonString(value);
+                // 正则表达式匹配中文字符
+                if (pattern.matcher(headerValue).find()) {
+                    // 如果包含中文字符，则进行Base64编码
+                    headerValue = Base64.getEncoder().encodeToString(headerValue.getBytes());
+                }
                 request.header(key, headerValue);
             });
         }
