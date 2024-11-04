@@ -4,11 +4,11 @@ import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.log.constant.LogFieldConstants;
 import com.aizuda.snailjob.common.log.dialect.AbstractLog;
 import com.aizuda.snailjob.common.log.factory.LogFactory;
-import org.apache.log4j.MDC;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.spi.AbstractLogger;
+import org.slf4j.MDC;
 
 import java.io.Serial;
 

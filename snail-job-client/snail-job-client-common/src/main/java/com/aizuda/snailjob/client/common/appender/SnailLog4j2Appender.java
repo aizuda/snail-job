@@ -19,7 +19,6 @@ import com.aizuda.snailjob.client.common.log.support.SnailJobLogManager;
 import com.aizuda.snailjob.client.common.rpc.client.NettyChannel;
 import com.aizuda.snailjob.common.log.constant.LogFieldConstants;
 import com.aizuda.snailjob.common.log.dto.LogContentDTO;
-import org.apache.log4j.MDC;
 import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.Layout;
 import org.apache.logging.log4j.core.LogEvent;
@@ -30,6 +29,7 @@ import org.apache.logging.log4j.core.config.plugins.PluginElement;
 import org.apache.logging.log4j.core.config.plugins.PluginFactory;
 import org.apache.logging.log4j.core.util.Booleans;
 import org.apache.logging.log4j.core.util.Throwables;
+import org.slf4j.MDC;
 
 import java.io.Serializable;
 import java.util.Objects;
