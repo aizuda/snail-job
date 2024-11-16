@@ -21,7 +21,7 @@
         <java.version>17</java.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <revision>1.2.0-beta3</revision>
+        <revision>1.2.0</revision>
         <netty-all.version>4.1.114.Final</netty-all.version>
         <hutool-all.version>5.8.32</hutool-all.version>
         <mybatis-plus.version>3.5.9</mybatis-plus.version>
@@ -118,11 +118,6 @@
             </dependency>
             <dependency>
                 <groupId>cn.hutool</groupId>
-                <artifactId>hutool-extra</artifactId>
-                <version>${hutool-all.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>cn.hutool</groupId>
                 <artifactId>hutool-crypto</artifactId>
                 <version>${hutool-all.version}</version>
             </dependency>
@@ -166,30 +161,6 @@
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>${guava.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss.logging</groupId>
-                <artifactId>jboss-logging</artifactId>
-                <version>${jboss-logging.version}</version>
-                <optional>true</optional>
-            </dependency>
-            <dependency>
-                <groupId>io.github.logtube</groupId>
-                <artifactId>logtube</artifactId>
-                <version>${logtube.version}</version>
-                <optional>true</optional>
-            </dependency>
-            <dependency>
-                <groupId>org.tinylog</groupId>
-                <artifactId>tinylog</artifactId>
-                <version>${tinylog.version}</version>
-                <optional>true</optional>
-            </dependency>
-            <dependency>
-                <groupId>org.tinylog</groupId>
-                <artifactId>tinylog-api</artifactId>
-                <version>${tinylog2.version}</version>
-                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>log4j</groupId>
