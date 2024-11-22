@@ -120,7 +120,9 @@ public class JobClearLogSchedule extends AbstractSchedule implements Lifecycle {
                 Lists.partition(ids, 500).forEach(jobTaskBatchMapper::deleteByIds);
 
                 // Waiting for deletion JobTaskList
-                List<JobTask> jobTaskList = jobTaskMapper.selectList(new LambdaQueryWrapper<JobTask>().in(JobTask::getTaskBatchId, ids));
+                List<JobTask> jobTaskList = jobTaskMapper.selectList(new LambdaQueryWrapper<JobTask>()
+                        .select(JobTask::getId)
+                        .in(JobTask::getTaskBatchId, ids));
                 if (CollectionUtils.isEmpty(jobTaskList)) {
                     return;
                 }
@@ -128,7 +130,9 @@ public class JobClearLogSchedule extends AbstractSchedule implements Lifecycle {
                 Lists.partition(jobTaskListIds, 500).forEach(jobTaskMapper::deleteByIds);
 
                 // Waiting for deletion JobLogMessageList
-                List<JobLogMessage> jobLogMessageList = jobLogMessageMapper.selectList(new LambdaQueryWrapper<JobLogMessage>().in(JobLogMessage::getTaskBatchId, ids));
+                List<JobLogMessage> jobLogMessageList = jobLogMessageMapper.selectList(new LambdaQueryWrapper<JobLogMessage>()
+                        .select(JobLogMessage::getId)
+                        .in(JobLogMessage::getTaskBatchId, ids));
                 if (CollectionUtils.isEmpty(jobLogMessageList)) {
                     return;
                 }
