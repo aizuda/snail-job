@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.common.core.alarm.strategy;
 
+import cn.hutool.core.util.ObjUtil;
 import com.aizuda.snailjob.common.core.alarm.AlarmContext;
 import com.aizuda.snailjob.common.core.alarm.attribute.EmailAttribute;
 import com.aizuda.snailjob.common.core.alarm.email.MailAccount;
@@ -85,6 +86,11 @@ public class EmailAlarm extends AbstractAlarm<AlarmContext> {
         account.setSslEnable(Optional.ofNullable(snailJobMailProperties.getSslEnable()).orElse(Boolean.FALSE));
         account.setTimeout(Optional.ofNullable(snailJobMailProperties.getTimeout()).orElse(0L));
         account.setConnectionTimeout(Optional.ofNullable(snailJobMailProperties.getConnectionTimeout()).orElse(0L));
+
+        if (ObjUtil.isNotEmpty(snailJobMailProperties.getProperties())) {
+            snailJobMailProperties.getProperties().forEach(account::setCustomProperty);
+        }
+
         return account;
     }
 }

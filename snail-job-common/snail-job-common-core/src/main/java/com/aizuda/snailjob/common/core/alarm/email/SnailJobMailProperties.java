@@ -5,6 +5,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * @author: opensnail
@@ -70,5 +71,11 @@ public class SnailJobMailProperties implements Serializable {
      * Socket连接超时值，单位毫秒，缺省值不超时
      */
     private Long connectionTimeout;
+
+    /**
+     * 额外的会话属性
+     * eg: mail.smtp.ssl.trust
+     */
+    private Map<String,String> properties;
 
 }
