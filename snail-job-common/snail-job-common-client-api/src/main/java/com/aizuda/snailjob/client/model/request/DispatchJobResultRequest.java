@@ -39,7 +39,13 @@ public class DispatchJobResultRequest {
     /**
      * 是否是重试流量
      */
+    @Deprecated
     private boolean isRetry;
+
+    /**
+     * 是否是重试流量
+     */
+    private Boolean retryStatus = Boolean.FALSE;
 
     /**
      * 工作流上下文

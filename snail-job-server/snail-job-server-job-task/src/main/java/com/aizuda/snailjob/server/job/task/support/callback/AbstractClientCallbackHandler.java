@@ -57,7 +57,7 @@ public abstract class AbstractClientCallbackHandler implements ClientCallbackHan
             realJobExecutor.setWorkflowNodeId(context.getWorkflowNodeId());
             realJobExecutor.setWorkflowTaskBatchId(context.getWorkflowTaskBatchId());
             realJobExecutor.setRetryCount(jobTask.getRetryCount() + 1);
-            realJobExecutor.setRetry(Boolean.TRUE);
+            realJobExecutor.setRetryStatus(Boolean.TRUE);
             realJobExecutor.setRetryScene(context.getRetryScene());
             realJobExecutor.setTaskName(jobTask.getTaskName());
             // 这里统一收口传递上下文
@@ -141,7 +141,7 @@ public abstract class AbstractClientCallbackHandler implements ClientCallbackHan
         // 手动重试策略
         if (Objects.nonNull(context.getRetryScene())
             && Objects.equals(JobRetrySceneEnum.MANUAL.getRetryScene(), context.getRetryScene())
-            && !context.isRetry()) {
+            && !context.getRetryStatus()) {
             return Boolean.TRUE;
         }
 

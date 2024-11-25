@@ -97,7 +97,7 @@ public class RealJobExecutorDTO extends BaseDTO {
     /**
      * 是否是重试流量
      */
-    private boolean isRetry;
+    private Boolean retryStatus = Boolean.FALSE;
 
     /**
      * 工作流上下文

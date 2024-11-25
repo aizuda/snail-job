@@ -58,7 +58,7 @@ public class JobTaskBatchHandler {
         Assert.notNull(completeJobBatchDTO.getTaskType(), ()-> new SnailJobServerException("taskType can not be null"));
 
         // 非重试流量幂等处理
-        if(!completeJobBatchDTO.isRetry()) {
+        if(!completeJobBatchDTO.getRetryStatus()) {
             // 幂等处理
             Long countJobTaskBatch = jobTaskBatchMapper.selectCount(new LambdaQueryWrapper<JobTaskBatch>()
                 .eq(JobTaskBatch::getId, completeJobBatchDTO.getTaskBatchId())

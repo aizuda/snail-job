@@ -66,7 +66,7 @@ public class RequestClientActor extends AbstractActor {
             taskExecuteFailure(realJobExecutorDTO, "客户端不存在");
             JobLogMetaDTO jobLogMetaDTO = JobTaskConverter.INSTANCE.toJobLogDTO(realJobExecutorDTO);
             jobLogMetaDTO.setTimestamp(nowMilli);
-            if (realJobExecutorDTO.isRetry()) {
+            if (realJobExecutorDTO.getRetryStatus()) {
                 SnailJobLog.REMOTE.error("taskId:[{}] 任务调度失败执行重试. 失败原因: 无可执行的客户端. 重试次数:[{}]. <|>{}<|>",
                         realJobExecutorDTO.getTaskId(), realJobExecutorDTO.getRetryCount(), jobLogMetaDTO);
             } else {
@@ -77,6 +77,9 @@ public class RequestClientActor extends AbstractActor {
         }
 
         DispatchJobRequest dispatchJobRequest = JobTaskConverter.INSTANCE.toDispatchJobRequest(realJobExecutorDTO);
+
+        // 兼容历史客户端版本正式版本即可删除
+        dispatchJobRequest.setRetry(realJobExecutorDTO.getRetryStatus());
 
         try {
             // 构建请求客户端对象
@@ -107,7 +110,7 @@ public class RequestClientActor extends AbstractActor {
 
             JobLogMetaDTO jobLogMetaDTO = JobTaskConverter.INSTANCE.toJobLogDTO(realJobExecutorDTO);
             jobLogMetaDTO.setTimestamp(nowMilli);
-            if (realJobExecutorDTO.isRetry()) {
+            if (realJobExecutorDTO.getRetryStatus()) {
                 SnailJobLog.REMOTE.error("taskId:[{}] 任务调度失败执行重试 重试次数:[{}]. <|>{}<|>", jobLogMetaDTO.getTaskId(),
                         realJobExecutorDTO.getRetryCount(), jobLogMetaDTO, throwable);
             } else {
@@ -147,7 +150,7 @@ public class RequestClientActor extends AbstractActor {
     private JobRpcClient buildRpcClient(RegisterNodeInfo registerNodeInfo, RealJobExecutorDTO realJobExecutorDTO) {
 
         int maxRetryTimes = realJobExecutorDTO.getMaxRetryTimes();
-        boolean retry = realJobExecutorDTO.isRetry();
+        boolean retry = realJobExecutorDTO.getRetryStatus();
         return RequestBuilder.<JobRpcClient, Result>newBuilder()
                 .nodeInfo(registerNodeInfo)
                 .failRetry(maxRetryTimes > 0 && !retry)

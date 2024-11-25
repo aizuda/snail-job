@@ -1,6 +1,7 @@
 package com.aizuda.snailjob.server.job.task.support.request;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.lang.Assert;
 import cn.hutool.core.net.url.UrlQuery;
 import com.aizuda.snailjob.client.model.request.MapTaskRequest;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
@@ -10,6 +11,7 @@ import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
 import com.aizuda.snailjob.common.core.model.SnailJobRequest;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
+import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.handler.PostHttpRequestHandler;
 import com.aizuda.snailjob.server.common.util.HttpHeaderUtil;
 import com.aizuda.snailjob.common.core.enums.MapReduceStageEnum;
@@ -95,12 +97,13 @@ public  class MapTaskPostHttpRequestHandler extends PostHttpRequestHandler {
         }
 
         String newWfContext = null;
-        if (Objects.nonNull(mapTaskRequest.getWorkflowTaskBatchId())) {
+        if (Objects.nonNull(mapTaskRequest.getWorkflowTaskBatchId()) && mapTaskRequest.getWorkflowTaskBatchId() > 0) {
             WorkflowTaskBatch workflowTaskBatch = workflowTaskBatchMapper.selectOne(
                 new LambdaQueryWrapper<WorkflowTaskBatch>()
                     .select(WorkflowTaskBatch::getWfContext, WorkflowTaskBatch::getId)
                     .eq(WorkflowTaskBatch::getId, mapTaskRequest.getWorkflowTaskBatchId())
             );
+            Assert.notNull(workflowTaskBatch, ()-> new SnailJobServerException("workflowTaskBatch is null. id:[{}]", mapTaskRequest.getWorkflowTaskBatchId()));
             newWfContext = workflowTaskBatch.getWfContext();
         }
 

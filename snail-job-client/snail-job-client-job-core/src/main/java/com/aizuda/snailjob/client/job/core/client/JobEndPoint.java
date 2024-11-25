@@ -126,7 +126,7 @@ public class JobEndPoint {
         jobContext.setExecutorTimeout(dispatchJob.getExecutorTimeout());
         jobContext.setWorkflowNodeId(dispatchJob.getWorkflowNodeId());
         jobContext.setWorkflowTaskBatchId(dispatchJob.getWorkflowTaskBatchId());
-        jobContext.setRetry(dispatchJob.isRetry());
+        jobContext.setRetryStatus(dispatchJob.getRetryStatus());
         jobContext.setRetryScene(dispatchJob.getRetryScene());
         jobContext.setTaskName(dispatchJob.getTaskName());
         jobContext.setMrStage(dispatchJob.getMrStage());

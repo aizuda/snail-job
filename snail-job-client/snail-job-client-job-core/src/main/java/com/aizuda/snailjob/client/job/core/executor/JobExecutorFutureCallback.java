@@ -158,7 +158,7 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
         dispatchJobRequest.setTaskType(jobContext.getTaskType());
         dispatchJobRequest.setExecuteResult(executeResult);
         dispatchJobRequest.setTaskStatus(status);
-        dispatchJobRequest.setRetry(jobContext.isRetry());
+        dispatchJobRequest.setRetryStatus(jobContext.getRetryStatus());
         dispatchJobRequest.setRetryScene(jobContext.getRetryScene());
         // 传递变更后的上下文
         if (CollUtil.isNotEmpty(jobContext.getChangeWfContext())) {

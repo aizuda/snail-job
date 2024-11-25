@@ -48,7 +48,7 @@ public class JobContext {
     /**
      * 是否是重试流量
      */
-    private boolean isRetry;
+    private Boolean retryStatus = Boolean.FALSE;
 
     /**
      * Map集合列表

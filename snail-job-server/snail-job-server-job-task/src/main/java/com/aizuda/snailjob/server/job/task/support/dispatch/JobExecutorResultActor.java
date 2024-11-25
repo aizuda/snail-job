@@ -10,7 +10,6 @@ import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.job.task.dto.CompleteJobBatchDTO;
 import com.aizuda.snailjob.server.job.task.dto.JobExecutorResultDTO;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
-import com.aizuda.snailjob.server.job.task.support.handler.DistributedLockHandler;
 import com.aizuda.snailjob.server.job.task.support.handler.JobTaskBatchHandler;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTask;
@@ -20,8 +19,6 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import java.text.MessageFormat;
-import java.time.Duration;
 import java.util.Objects;
 
 /**
@@ -33,10 +30,8 @@ import java.util.Objects;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @RequiredArgsConstructor
 public class JobExecutorResultActor extends AbstractActor {
-    private static final String KEY = "job_complete_{0}_{1}";
     private final JobTaskMapper jobTaskMapper;
     private final JobTaskBatchHandler jobTaskBatchHandler;
-    private final DistributedLockHandler distributedLockHandler;
 
     @Override
     public Receive createReceive() {
@@ -68,14 +63,7 @@ public class JobExecutorResultActor extends AbstractActor {
                     return;
                 }
 
-                boolean tryCompleteAndStop = tryCompleteAndStop(result);
-//                if (!tryCompleteAndStop) {
-//                    // 存在并发问题
-//                    distributedLockHandler.lockWithDisposableAndRetry(() -> {
-//                        tryCompleteAndStop(result);
-//                    }, MessageFormat.format(KEY, result.getTaskBatchId(),
-//                            result.getJobId()), Duration.ofSeconds(1), Duration.ofSeconds(1), 3);
-//                }
+                tryCompleteAndStop(result);
             } catch (Exception e) {
                 SnailJobLog.LOCAL.error(" job executor result exception. [{}]", result, e);
             } finally {
@@ -86,8 +74,8 @@ public class JobExecutorResultActor extends AbstractActor {
 
     }
 
-    private boolean tryCompleteAndStop(JobExecutorResultDTO result) {
+    private void tryCompleteAndStop(JobExecutorResultDTO result) {
         CompleteJobBatchDTO completeJobBatchDTO = JobTaskConverter.INSTANCE.toCompleteJobBatchDTO(result);
-        return jobTaskBatchHandler.handleResult(completeJobBatchDTO);
+        jobTaskBatchHandler.handleResult(completeJobBatchDTO);
     }
 }
