@@ -139,6 +139,10 @@ public interface SystemConstants {
 
         String OPENAPI_UPDATE_WORKFLOW_STATUS = "/api/job/updateWorkFlowStatus";
 
+        String OPENAPI_DELETE_JOB = "/api/job/deleteJob";
+
+        String OPENAPI_DELETE_WORKFLOW = "/api/job/deleteWorkFlow";
+
     }
 
     String LOGO = """

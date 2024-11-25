@@ -6,6 +6,8 @@ import com.aizuda.snailjob.client.job.core.dto.RequestAddOrUpdateJobDTO;
 import com.aizuda.snailjob.client.job.core.dto.RequestUpdateStatusDTO;
 import com.aizuda.snailjob.common.core.model.Result;
 
+import java.util.Set;
+
 public interface OpenApiClient {
     @Mapping(method = RequestMethod.POST, path = "/api/job/add")
     Result<Object> addJob(RequestAddOrUpdateJobDTO requestAddOrUpdateJobDTO);
@@ -27,4 +29,10 @@ public interface OpenApiClient {
 
     @Mapping(method = RequestMethod.POST, path = "/api/job/updateWorkFlowStatus")
     Result<Object> updateWorkFlowStatus(RequestUpdateStatusDTO statusDTO);
+
+    @Mapping(method = RequestMethod.POST, path = "/api/job/deleteJob")
+    Result<Object> deleteJob(Set<Long> toDeleteIds);
+
+    @Mapping(method = RequestMethod.POST, path = "/api/job/deleteWorkFlow")
+    Result<Object> deleteWorkflow(Set<Long> toDeleteIds);
 }

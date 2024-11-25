@@ -1,10 +1,14 @@
 package com.aizuda.snailjob.client.job.core.openapi;
 
 import com.aizuda.snailjob.client.job.core.handler.add.*;
+import com.aizuda.snailjob.client.job.core.handler.delete.DeleteJobHandler;
+import com.aizuda.snailjob.client.job.core.handler.delete.DeleteWorkflowHandler;
 import com.aizuda.snailjob.client.job.core.handler.query.RequestQueryHandler;
 import com.aizuda.snailjob.client.job.core.handler.trigger.TriggerJobHandler;
 import com.aizuda.snailjob.client.job.core.handler.trigger.TriggerWorkflowHandler;
 import com.aizuda.snailjob.client.job.core.handler.update.*;
+
+import java.util.Set;
 
 /**
  * @author opensnail
@@ -158,5 +162,25 @@ public final class SnailJobOpenApi {
      */
     public static UpdateWorkflowStatusHandler updateWorkFlowStatus(Long workFlowId) {
         return new UpdateWorkflowStatusHandler(workFlowId);
+    }
+
+    /**
+     * 删除任务
+     *
+     * @param toDeleteIds 待删除任务IDS
+     * @return {@link DeleteJobHandler}
+     */
+    public static DeleteJobHandler deleteJob(Set<Long> toDeleteIds){
+        return new DeleteJobHandler(toDeleteIds);
+    }
+
+    /**
+     * 删除工作流任务
+     *
+     * @param toDeleteIds 待删除工作流任务IDS
+     * @return {@link DeleteWorkflowHandler}
+     */
+    public static DeleteWorkflowHandler deleteWorkflow(Set<Long> toDeleteIds){
+        return new DeleteWorkflowHandler(toDeleteIds);
     }
 }
