@@ -1,5 +1,5 @@
 # 贝尔实验室 Spring 官方推荐镜像, 能解决arm芯片国产操作系统运行问题
-FROM bellsoft/liberica-openjdk-debian:17.0.11-cds
+FROM --platform=$BUILDPLATFORM bellsoft/liberica-openjdk-debian:17.0.11-cds
 
 LABEL maintainer="opensnail"
 LABEL app-name="snail-job-server"
