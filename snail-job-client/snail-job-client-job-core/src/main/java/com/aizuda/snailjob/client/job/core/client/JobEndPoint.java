@@ -135,7 +135,7 @@ public class JobEndPoint {
             try {
                 jobContext.setJobArgsHolder(JsonUtil.parseObject(dispatchJob.getArgsStr(), JobArgsHolder.class));
             } catch (Exception e) {
-                SnailJobLog.REMOTE.warn("workflow context parse error", e);
+                SnailJobLog.REMOTE.warn("argsStr parse error", e);
                 JobArgsHolder jobArgsHolder = new JobArgsHolder();
                 jobArgsHolder.setJobParams(dispatchJob.getArgsStr());
                 jobContext.setJobArgsHolder(jobArgsHolder);
