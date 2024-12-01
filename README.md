@@ -23,6 +23,7 @@
 - [snail-job-admin](https://gitee.com/opensnail/snail-job-admin.git)(基于[soybean-admin](https://github.com/soybeanjs/soybean-admin)开源项目搭建)
 - [snail-job-demo (Java客户端示例程序)](https://gitee.com/opensnail/snail-job-demo.git)
 - [snail-job-python (Python客户端)](https://gitee.com/opensnail/snail-job-python.git)
+- [snail-job-go (Go客户端)](https://gitee.com/opensnail/snail-job-go.git)
 
 # 预览地址
  https://snailjob.opensnail.com/docs/preview.html
@@ -44,7 +45,11 @@
 ## 快速入门
 
 - [服务部署](https://snailjob.opensnail.com/docs/guide/service_deployment.html)
-- [HelloWorld](https://snailjob.opensnail.com/docs/guide/hello_world.html)
+- [QuickStart](https://snailjob.opensnail.com/docs/quickstart/quick_start.html)
+- [xxljob迁移脚本](https://snailjob.opensnail.com/docs/guide/migration_tool.html)
+- [OpenApi](https://snailjob.opensnail.com/docs/guide/openapi/openapi_overview.html)
+- [Python客户端](https://snailjob.opensnail.com/docs/guide/client/python/python.html)
+- [Go客户端](https://snailjob.opensnail.com/docs/guide/client/go/go.html)
 
 ## 系统截图
 
