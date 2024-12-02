@@ -1,7 +1,7 @@
-package com.aizuda.snailjob.client.job.core.executor;
+package com.aizuda.snailjob.client.job.core.executor.builtin;
 
 
-public class ShellExecutor extends AbstractScriptExecutor {
+public abstract class AbstractShellExecutor extends AbstractScriptExecutor {
 
     @Override
     protected String getScriptName(Long jobId) {

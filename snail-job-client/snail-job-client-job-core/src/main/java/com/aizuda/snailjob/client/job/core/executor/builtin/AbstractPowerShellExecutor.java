@@ -1,18 +1,18 @@
-package com.aizuda.snailjob.client.job.core.executor;
+package com.aizuda.snailjob.client.job.core.executor.builtin;
 
 import java.nio.charset.Charset;
 
 
-public class CMDExecutor extends AbstractScriptExecutor {
+public abstract class AbstractPowerShellExecutor extends AbstractScriptExecutor {
 
     @Override
     protected String getScriptName(Long jobId) {
-        return String.format("cmd_%d.bat", jobId);
+        return String.format("powershell_%d.ps1", jobId);
     }
 
     @Override
     protected String getRunCommand() {
-        return "cmd.exe";
+        return "powershell.exe";
     }
 
     @Override
@@ -22,6 +22,6 @@ public class CMDExecutor extends AbstractScriptExecutor {
 
     @Override
     protected ProcessBuilder getScriptProcessBuilder(String scriptPath) {
-        return  new ProcessBuilder(getRunCommand(), "/c", scriptPath);
+        return new ProcessBuilder(getRunCommand(), "-ExecutionPolicy", "Bypass", "-File", scriptPath);
     }
 }

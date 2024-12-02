@@ -1,4 +1,4 @@
-package com.aizuda.snailjob.client.job.core.executor;
+package com.aizuda.snailjob.client.job.core.executor.builtin;
 
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.client.common.config.SnailJobProperties;

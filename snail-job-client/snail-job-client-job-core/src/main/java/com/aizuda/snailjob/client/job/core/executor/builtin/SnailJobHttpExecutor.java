@@ -1,4 +1,4 @@
-package com.aizuda.snailjob.client.job.core.executor;
+package com.aizuda.snailjob.client.job.core.executor.builtin;
 
 
 import com.aizuda.snailjob.client.job.core.annotation.JobExecutor;
@@ -19,7 +19,7 @@ public class SnailJobHttpExecutor extends AbstractHttpExecutor {
     public ExecuteResult jobExecute(JobArgs jobArgs) {
         Object jobParams = jobArgs.getJobParams();
         HttpParams httpParams = JsonUtil.parseObject((String) jobParams, HttpParams.class);
-        if (Objects.nonNull(jobArgs.getWfContext())){
+        if (Objects.nonNull(jobArgs.getWfContext())) {
             httpParams.setWfContext(jobArgs.getWfContext());
         }
         httpParams.setMethod(httpParams.getMethod().toUpperCase());
