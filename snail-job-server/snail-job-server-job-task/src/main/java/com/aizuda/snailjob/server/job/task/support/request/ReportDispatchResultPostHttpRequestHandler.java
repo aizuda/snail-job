@@ -18,6 +18,7 @@ import io.netty.handler.codec.http.HttpMethod;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
+import java.util.Optional;
 
 import static com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH.REPORT_JOB_DISPATCH_RESULT;
 
@@ -51,10 +52,6 @@ public class ReportDispatchResultPostHttpRequestHandler extends PostHttpRequestH
         ClientCallbackHandler clientCallback = ClientCallbackFactory.getClientCallback(dispatchJobResultRequest.getTaskType());
 
         ClientCallbackContext context = JobTaskConverter.INSTANCE.toClientCallbackContext(dispatchJobResultRequest);
-        // 兼容过度版本
-        if (Objects.isNull(context.getRetryStatus())) {
-            context.setRetryStatus(context.isRetry());
-        }
         context.setNamespaceId(headers.getAsString(HeadersEnum.NAMESPACE.getKey()));
         clientCallback.callback(context);
 

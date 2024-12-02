@@ -51,10 +51,23 @@ public class ClientCallbackContext {
     /**
      * 是否是重试流量
      */
-    private Boolean retryStatus = Boolean.FALSE;
-
+    private Boolean retryStatus;
     /**
      * 工作流上下文
      */
     private String wfContext;
+
+    // 兼容isRetry/retryStatus并存
+    @Deprecated
+    public Boolean getRetryStatus() {
+        return Boolean.TRUE.equals(retryStatus) || isRetry;
+    }
+
+    // 兼容isRetry/retryStatus并存
+    @Deprecated
+    public void setRetryStatus(boolean value) {
+        this.retryStatus = Boolean.valueOf(value);
+        isRetry = value;
+    }
+
 }
