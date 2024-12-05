@@ -4,6 +4,7 @@ import com.aizuda.snailjob.client.common.Lifecycle;
 import com.aizuda.snailjob.client.common.config.SnailJobProperties;
 import com.aizuda.snailjob.client.common.event.SnailServerStartFailedEvent;
 import com.aizuda.snailjob.client.common.exception.SnailJobClientException;
+import com.aizuda.snailjob.client.common.rpc.client.NettyChannel;
 import com.aizuda.snailjob.client.common.rpc.supports.handler.NettyHttpServerHandler;
 import com.aizuda.snailjob.client.common.rpc.supports.handler.SnailDispatcherRequestHandler;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
@@ -32,7 +33,7 @@ import org.springframework.stereotype.Component;
  * @date : 2024-04-12 23:03
  * @since 3.3.0
  */
-//@Component
+@Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @RequiredArgsConstructor
 @Getter
@@ -70,7 +71,7 @@ public class SnailNettyHttpServer implements Runnable, Lifecycle {
                     });
 
             // 在特定端口绑定并启动服务器 默认是1789
-            ChannelFuture future = bootstrap.bind(snailJobProperties.getPort()).sync();
+            ChannelFuture future = bootstrap.bind(NettyChannel.getClientPort()).sync();
 
             SnailJobLog.LOCAL.info("------> snail-job client remoting server start success, nettype = {}, port = {}",
                     SnailNettyHttpServer.class.getName(), snailJobProperties.getPort());
