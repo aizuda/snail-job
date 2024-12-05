@@ -22,28 +22,30 @@ import java.util.concurrent.TimeUnit;
  */
 @Component
 public class SyncRemoteConfig implements Lifecycle {
-
+    private static final NettyClient CLIENT;
     private static final ScheduledExecutorService SCHEDULE_EXECUTOR = Executors.newSingleThreadScheduledExecutor(
             r -> new Thread(r, "sync-remote-config"));
 
+    static {
+        CLIENT = RequestBuilder.<NettyClient, SnailJobRpcResult>newBuilder()
+                .client(NettyClient.class)
+                .timeout(1000L)
+                .callback(nettyResult -> {
+                    if (Objects.isNull(nettyResult.getData())) {
+                        SnailJobLog.LOCAL.debug("获取配置结果为null");
+                        return;
+                    }
+
+                    GroupVersionCache.setConfig(
+                            JsonUtil.parseObject(nettyResult.getData().toString(), ConfigDTO.class));
+                }).build();
+    }
+
     @Override
     public void start() {
-
         SCHEDULE_EXECUTOR.scheduleAtFixedRate(() -> {
             try {
-                NettyClient client = RequestBuilder.<NettyClient, SnailJobRpcResult>newBuilder()
-                        .client(NettyClient.class)
-                        .timeout(1000L)
-                        .callback(nettyResult -> {
-                            if (Objects.isNull(nettyResult.getData())) {
-                                SnailJobLog.LOCAL.debug("获取配置结果为null");
-                                return;
-                            }
-
-                            GroupVersionCache.setConfig(
-                                    JsonUtil.parseObject(nettyResult.getData().toString(), ConfigDTO.class));
-                        }).build();
-                client.syncRemoteConfig();
+                CLIENT.syncRemoteConfig();
             } catch (Exception e) {
                 SnailJobLog.LOCAL.error("通知配置失败", e);
             }
