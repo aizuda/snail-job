@@ -76,5 +76,6 @@ public class JobBatchResponseDO {
 
     private String argsStr;
 
+    private String notifyIds;
 
 }

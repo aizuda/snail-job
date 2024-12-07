@@ -4,6 +4,7 @@ import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.NotifyConfigQueryVO;
 import com.aizuda.snailjob.server.web.model.request.NotifyConfigRequestVO;
 import com.aizuda.snailjob.server.web.model.response.NotifyConfigResponseVO;
+import com.aizuda.snailjob.template.datasource.persistence.po.NotifyConfig;
 
 import java.util.List;
 import java.util.Set;
@@ -15,6 +16,8 @@ import java.util.Set;
 public interface NotifyConfigService {
 
     PageResult<List<NotifyConfigResponseVO>> getNotifyConfigList(NotifyConfigQueryVO queryVO);
+
+    List<NotifyConfig> getNotifyConfigBySystemTaskTypeList(Integer systemTaskType);
 
     Boolean saveNotify(NotifyConfigRequestVO requestVO);
 

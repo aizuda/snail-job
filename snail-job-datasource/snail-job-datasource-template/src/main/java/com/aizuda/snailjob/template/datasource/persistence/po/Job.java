@@ -142,4 +142,9 @@ public class Job extends CreateUpdateDt {
      */
     private Integer deleted;
 
+    /**
+     * 通知告警场景配置id列表
+     */
+    private String notifyIds;
+
 }

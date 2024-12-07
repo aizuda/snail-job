@@ -1,4 +1,4 @@
-package com.aizuda.snailjob.server.common.alarm;
+package com.aizuda.snailjob.client.common.annotation;
 
 import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.common.core.alarm.Alarm;
@@ -69,15 +69,13 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
             // 获取所有的组名称
             Set<String> groupNames = new HashSet<>();
             // 获取所有的场景名称
-            Set<String> businessIds = new HashSet<>();
+            Set<Long> notifyIds = new HashSet<>();
 
             // 转换AlarmDTO 为了下面循环发送使用
-            Map<Triple<String, String, String>, List<A>> waitSendAlarmInfos = convertAlarmDTO(
-                    alarmInfos, namespaceIds, groupNames, businessIds);
+            Map<Triple<String, String, Set<Long>>, List<A>> waitSendAlarmInfos = convertAlarmDTO(alarmInfos, namespaceIds, groupNames, notifyIds);
 
             // 批量获取通知配置
-            Map<Triple<String, String, String>, List<NotifyConfigInfo>> notifyConfig = obtainNotifyConfig(namespaceIds,
-                    groupNames, businessIds);
+            Map<Triple<String, String, Set<Long>>, List<NotifyConfigInfo>> notifyConfig = obtainNotifyConfig(namespaceIds, groupNames, notifyIds);
 
             // 循环发送消息
             waitSendAlarmInfos.forEach((key, list) -> {
@@ -95,18 +93,17 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
 
     }
 
-    protected Map<Triple<String, String, String>, List<NotifyConfigInfo>> obtainNotifyConfig(Set<String> namespaceIds,
-                                                                                             Set<String> groupNames, Set<String> businessIds) {
+    protected Map<Triple<String, String, Set<Long>>, List<NotifyConfigInfo>> obtainNotifyConfig(Set<String> namespaceIds,
+                                                                                             Set<String> groupNames, Set<Long> notifyIds) {
 
         // 批量获取所需的通知配置
         List<NotifyConfig> notifyConfigs = accessTemplate.getNotifyConfigAccess().list(
                 new LambdaQueryWrapper<NotifyConfig>()
                         .eq(NotifyConfig::getNotifyStatus, StatusEnum.YES.getStatus())
                         .in(NotifyConfig::getSystemTaskType, StreamUtils.toList(getSystemTaskType(), SyetemTaskTypeEnum::getType))
-                        .eq(NotifyConfig::getNotifyScene, getNotifyScene())
                         .in(NotifyConfig::getNamespaceId, namespaceIds)
                         .in(NotifyConfig::getGroupName, groupNames)
-                        .in(NotifyConfig::getBusinessId, businessIds)
+                        .in(NotifyConfig::getId, notifyIds)
         );
         if (CollUtil.isEmpty(notifyConfigs)) {
             return Maps.newHashMap();
@@ -139,17 +136,15 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
             });
             configInfo.setRecipientInfos(recipients);
 
-            return ImmutableTriple.of(configInfo.getNamespaceId(),
-                    configInfo.getGroupName(),
-                    configInfo.getBusinessId());
+            return ImmutableTriple.of(configInfo.getNamespaceId(), configInfo.getGroupName(), notifyIds);
         });
 
     }
 
     protected abstract List<SyetemTaskTypeEnum> getSystemTaskType();
 
-    protected abstract Map<Triple<String, String, String>, List<A>> convertAlarmDTO(List<A> alarmData,
-                                                                                    Set<String> namespaceIds, Set<String> groupNames, Set<String> sceneNames);
+    protected abstract Map<Triple<String, String, Set<Long>>, List<A>> convertAlarmDTO(List<A> alarmData,
+                                                                                    Set<String> namespaceIds, Set<String> groupNames, Set<Long> notifyIds);
 
     protected abstract List<A> poll() throws InterruptedException;
 
@@ -212,5 +207,3 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
 
     protected abstract void doOnApplicationEvent(E event);
 }
-
-

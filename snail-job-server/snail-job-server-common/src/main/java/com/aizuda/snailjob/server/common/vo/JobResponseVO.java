@@ -3,6 +3,7 @@ package com.aizuda.snailjob.server.common.vo;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 /**
  * @author opensnail
@@ -128,5 +129,10 @@ public class JobResponseVO {
      * 逻辑删除 1、删除
      */
     private Integer deleted;
+
+    /**
+     * 通知告警场景
+     */
+    private Set<Long> notifyIds;
 
 }

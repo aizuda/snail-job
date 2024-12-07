@@ -1,5 +1,7 @@
 package com.aizuda.snailjob.server.common.convert;
 
+import cn.hutool.core.util.StrUtil;
+import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.common.vo.JobResponseVO;
 import com.aizuda.snailjob.template.datasource.persistence.po.Job;
@@ -9,8 +11,10 @@ import org.mapstruct.Mappings;
 import org.mapstruct.factory.Mappers;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * @author opensnail
@@ -28,7 +32,8 @@ public interface JobResponseVOConverter {
     List<JobResponseVO> convertList(List<Job> jobs);
 
     @Mappings({
-            @Mapping(target = "nextTriggerAt", expression = "java(JobResponseVOConverter.toLocalDateTime(job.getNextTriggerAt()))")
+            @Mapping(target = "nextTriggerAt", expression = "java(JobResponseVOConverter.toLocalDateTime(job.getNextTriggerAt()))"),
+            @Mapping(target = "notifyIds", expression = "java(JobResponseVOConverter.toJobNotifyIds(job.getNotifyIds()))")
     })
     JobResponseVO convert(Job job);
 
@@ -38,5 +43,13 @@ public interface JobResponseVOConverter {
         }
 
         return DateUtils.toLocalDateTime(nextTriggerAt);
+    }
+
+    static Set<Long> toJobNotifyIds(String notifyIds) {
+        if (StrUtil.isBlank(notifyIds)) {
+            return new HashSet<>();
+        }
+
+        return new HashSet<>(JsonUtil.parseList(notifyIds, Long.class));
     }
 }

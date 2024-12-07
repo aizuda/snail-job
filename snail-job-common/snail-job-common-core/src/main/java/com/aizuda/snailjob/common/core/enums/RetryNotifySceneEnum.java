@@ -24,8 +24,9 @@ public enum RetryNotifySceneEnum {
 
     RETRY_TASK_REACH_THRESHOLD(5, "任务重试次数超过阈值", NodeTypeEnum.SERVER),
 
-    RETRY_TASK_ENTER_DEAD_LETTER(6, "任务重试失败进入死信队列", NodeTypeEnum.SERVER);
+    RETRY_TASK_ENTER_DEAD_LETTER(6, "任务重试失败进入死信队列", NodeTypeEnum.SERVER),
 
+    RETRY_NO_CLIENT_NODES_ERROR(7, "没有可执行的客户端节点", NodeTypeEnum.CLIENT);
 
     /**
      * 通知场景

@@ -78,8 +78,7 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
             initLogContext();
 
             // 上报执行成功
-            SnailJobLog.REMOTE.info("任务执行成功 taskBatchId:[{}] [{}]", jobContext.getTaskBatchId(),
-                    JsonUtil.toJsonString(result));
+            SnailJobLog.REMOTE.info("任务执行成功 taskBatchId:[{}] [{}]", jobContext.getTaskBatchId(), JsonUtil.toJsonString(result));
 
             if (Objects.isNull(result)) {
                 result = ExecuteResult.success();
@@ -197,7 +196,5 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
         } catch (Exception e1) {
             SnailJobLog.LOCAL.error("Client failed to send component exception alert.", e1);
         }
-
     }
-
 }

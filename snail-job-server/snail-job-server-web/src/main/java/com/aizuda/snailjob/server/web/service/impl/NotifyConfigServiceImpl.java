@@ -4,8 +4,6 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
-import com.aizuda.snailjob.common.core.util.StreamUtils;
-import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.NotifyConfigQueryVO;
@@ -19,25 +17,17 @@ import com.aizuda.snailjob.server.web.service.handler.SyncConfigHandler;
 import com.aizuda.snailjob.server.web.util.UserSessionUtils;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import com.aizuda.snailjob.template.datasource.access.ConfigAccess;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.JobMapper;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.NotifyRecipientMapper;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowMapper;
-import com.aizuda.snailjob.template.datasource.persistence.po.Job;
 import com.aizuda.snailjob.template.datasource.persistence.po.NotifyConfig;
-import com.aizuda.snailjob.template.datasource.persistence.po.NotifyRecipient;
-import com.aizuda.snailjob.template.datasource.persistence.po.Workflow;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author: opensnail
@@ -48,9 +38,6 @@ import java.util.stream.Collectors;
 public class NotifyConfigServiceImpl implements NotifyConfigService {
 
     private final AccessTemplate accessTemplate;
-    private final NotifyRecipientMapper notifyRecipientMapper;
-    private final JobMapper jobMapper;
-    private final WorkflowMapper workflowMapper;
 
     @Override
     public PageResult<List<NotifyConfigResponseVO>> getNotifyConfigList(NotifyConfigQueryVO queryVO) {
@@ -74,66 +61,19 @@ public class NotifyConfigServiceImpl implements NotifyConfigService {
         List<NotifyConfigResponseVO> notifyConfigResponseVOS = NotifyConfigResponseVOConverter.INSTANCE.convertList(
                 notifyConfigs);
 
-        Map<Long, String> recipientNameMap = getRecipientNameMap(notifyConfigResponseVOS);
-        Map<Long, String> jobNameMap = getJobNameMap(notifyConfigResponseVOS);
-        Map<Long, String> workflowNameMap = getWorkflowNameMap(notifyConfigResponseVOS);
-        for (final NotifyConfigResponseVO notifyConfigResponseVO : notifyConfigResponseVOS) {
-            notifyConfigResponseVO.setRecipientNames(StreamUtils.toSet(notifyConfigResponseVO.getRecipientIds(),
-                    recipientId -> recipientNameMap.getOrDefault(recipientId, StrUtil.EMPTY)));
-
-            if (Objects.equals(notifyConfigResponseVO.getSystemTaskType(), SyetemTaskTypeEnum.RETRY.getType()) ||
-                    Objects.equals(notifyConfigResponseVO.getSystemTaskType(), SyetemTaskTypeEnum.CALLBACK.getType())) {
-                notifyConfigResponseVO.setBusinessName(notifyConfigResponseVO.getBusinessId());
-            } else if (Objects.equals(notifyConfigResponseVO.getSystemTaskType(), SyetemTaskTypeEnum.JOB.getType())) {
-                notifyConfigResponseVO.setBusinessName(
-                        jobNameMap.get(Long.parseLong(notifyConfigResponseVO.getBusinessId())));
-            } else if (Objects.equals(notifyConfigResponseVO.getSystemTaskType(),
-                    SyetemTaskTypeEnum.WORKFLOW.getType())) {
-                notifyConfigResponseVO.setBusinessName(
-                        workflowNameMap.get(Long.parseLong(notifyConfigResponseVO.getBusinessId())));
-            }
-        }
-
         return new PageResult<>(pageDTO, notifyConfigResponseVOS);
     }
 
-    private Map<Long, String> getWorkflowNameMap(final List<NotifyConfigResponseVO> notifyConfigResponseVOS) {
-        Set<Long> workflowIds = notifyConfigResponseVOS.stream().filter(responseVO ->
-                        responseVO.getSystemTaskType().equals(SyetemTaskTypeEnum.WORKFLOW.getType()))
-                .map(responseVO -> Long.parseLong(responseVO.getBusinessId()))
-                .collect(Collectors.toSet());
-        if (CollUtil.isNotEmpty(workflowIds)) {
-            List<Workflow> workflows = workflowMapper.selectBatchIds(workflowIds);
-            return StreamUtils.toMap(workflows, Workflow::getId, Workflow::getWorkflowName);
-        }
-
-        return new HashMap<>();
-    }
-
-    private Map<Long, String> getJobNameMap(final List<NotifyConfigResponseVO> notifyConfigResponseVOS) {
-        Set<Long> jobIds = notifyConfigResponseVOS.stream().filter(responseVO ->
-                        responseVO.getSystemTaskType().equals(SyetemTaskTypeEnum.JOB.getType()))
-                .map(responseVO -> Long.parseLong(responseVO.getBusinessId()))
-                .collect(Collectors.toSet());
-        if (CollUtil.isNotEmpty(jobIds)) {
-            List<Job> jobs = jobMapper.selectBatchIds(jobIds);
-            return StreamUtils.toMap(jobs, Job::getId, Job::getJobName);
-        }
-
-        return new HashMap<>();
-    }
-
-    @NotNull
-    private Map<Long, String> getRecipientNameMap(final List<NotifyConfigResponseVO> notifyConfigResponseVOS) {
-        Set<Long> recipientIds = StreamUtils.toSetByFlatMap(notifyConfigResponseVOS,
-                NotifyConfigResponseVO::getRecipientIds, Collection::stream);
-
-        if (CollUtil.isEmpty(recipientIds)) {
-            return Maps.newHashMap();
-        }
-
-        List<NotifyRecipient> notifyRecipients = notifyRecipientMapper.selectBatchIds(recipientIds);
-        return StreamUtils.toMap(notifyRecipients, NotifyRecipient::getId, NotifyRecipient::getRecipientName);
+    @Override
+    public List<NotifyConfig> getNotifyConfigBySystemTaskTypeList(Integer systemTaskType) {
+        String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
+        List<NotifyConfig> notifyConfigList = accessTemplate.getNotifyConfigAccess().list(new LambdaQueryWrapper<NotifyConfig>()
+                .select(NotifyConfig::getId, NotifyConfig::getNotifyName)
+                .eq(NotifyConfig::getNamespaceId, namespaceId)
+                .eq(NotifyConfig::getSystemTaskType, systemTaskType)
+                .orderByDesc(NotifyConfig::getId)
+        );
+        return notifyConfigList;
     }
 
     @Override

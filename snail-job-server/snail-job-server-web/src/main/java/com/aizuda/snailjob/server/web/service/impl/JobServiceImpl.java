@@ -152,6 +152,7 @@ public class JobServiceImpl implements JobService {
 
         // 判断常驻任务
         Job updateJob = JobConverter.INSTANCE.convert(jobRequestVO);
+        updateJob.setNotifyIds(JsonUtil.toJsonString(jobRequestVO.getNotifyIds()));
         updateJob.setResident(isResident(jobRequestVO));
         updateJob.setNamespaceId(job.getNamespaceId());
 
@@ -270,8 +271,7 @@ public class JobServiceImpl implements JobService {
                             new LambdaQueryWrapper<Job>()
                                     .eq(Job::getNamespaceId, namespaceId)
                                     .eq(StrUtil.isNotBlank(exportJobVO.getGroupName()), Job::getGroupName, exportJobVO.getGroupName())
-                                    .likeRight(StrUtil.isNotBlank(exportJobVO.getJobName()), Job::getJobName,
-                                            StrUtil.trim(exportJobVO.getJobName()))
+                                    .likeRight(StrUtil.isNotBlank(exportJobVO.getJobName()), Job::getJobName, StrUtil.trim(exportJobVO.getJobName()))
                                     .eq(Objects.nonNull(exportJobVO.getJobStatus()), Job::getJobStatus, exportJobVO.getJobStatus())
                                     .in(CollUtil.isNotEmpty(exportJobVO.getJobIds()), Job::getId, exportJobVO.getJobIds())
                                     .eq(Job::getDeleted, StatusEnum.NO.getStatus())

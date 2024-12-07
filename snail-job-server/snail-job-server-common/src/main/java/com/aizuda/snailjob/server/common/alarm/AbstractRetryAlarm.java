@@ -1,14 +1,14 @@
 package com.aizuda.snailjob.server.common.alarm;
 
+import com.aizuda.snailjob.client.common.annotation.AbstractAlarm;
+import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.server.common.dto.RetryAlarmInfo;
 import com.aizuda.snailjob.server.common.triple.ImmutableTriple;
 import com.aizuda.snailjob.server.common.triple.Triple;
 import org.springframework.context.ApplicationEvent;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author xiaowoniu
@@ -17,24 +17,21 @@ import java.util.Set;
  */
 public abstract class AbstractRetryAlarm<E extends ApplicationEvent> extends AbstractAlarm<E, RetryAlarmInfo> {
     @Override
-    protected Map<Triple<String, String, String>, List<RetryAlarmInfo>> convertAlarmDTO(
-            List<RetryAlarmInfo> alarmDataList,
+    protected Map<Triple<String, String, Set<Long>>, List<RetryAlarmInfo>> convertAlarmDTO(
+            List<RetryAlarmInfo> retryAlarmInfoList,
             Set<String> namespaceIds,
             Set<String> groupNames,
-            Set<String> sceneNames) {
+            Set<Long> notifyIds) {
 
-        return StreamUtils.groupByKey(alarmDataList, alarmData -> {
-
-            String namespaceId = alarmData.getNamespaceId();
-            String groupName = alarmData.getGroupName();
-            String sceneName = alarmData.getSceneName();
+        return StreamUtils.groupByKey(retryAlarmInfoList, retryAlarmInfo -> {
+            String namespaceId = retryAlarmInfo.getNamespaceId();
+            String groupName = retryAlarmInfo.getGroupName();
+            HashSet<Long> notifyIdsSet = Objects.isNull(retryAlarmInfo.getNotifyIds()) ? new HashSet<>() : new HashSet<>(JsonUtil.parseList(retryAlarmInfo.getNotifyIds(), Long.class));
 
             namespaceIds.add(namespaceId);
             groupNames.add(groupName);
-            sceneNames.add(sceneName);
-
-            return ImmutableTriple.of(namespaceId, groupName, sceneName);
+            notifyIds.addAll(notifyIdsSet);
+            return ImmutableTriple.of(namespaceId, groupName, notifyIdsSet);
         });
     }
-
 }

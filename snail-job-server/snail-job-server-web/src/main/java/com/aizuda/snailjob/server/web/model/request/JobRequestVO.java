@@ -9,6 +9,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
+import java.util.Set;
+
 /**
  * @author opensnail
  * @date 2023-10-11 22:37:55
@@ -122,5 +124,10 @@ public class JobRequestVO {
      * 描述
      */
     private String description;
+
+    /**
+     * 通知告警场景配置id列表
+     */
+    private Set<Long> notifyIds;
 
 }

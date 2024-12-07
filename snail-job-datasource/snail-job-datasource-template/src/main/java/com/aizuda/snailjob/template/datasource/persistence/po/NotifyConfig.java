@@ -34,6 +34,11 @@ public class NotifyConfig extends CreateUpdateDt {
 
     private Integer notifyThreshold;
 
+    /**
+     * 通知告警场景名
+     */
+    private String notifyName;
+
     private Integer notifyScene;
 
     private Integer rateLimiterStatus;

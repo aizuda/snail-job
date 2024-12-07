@@ -6,6 +6,7 @@ import com.aizuda.snailjob.server.web.model.request.NotifyConfigQueryVO;
 import com.aizuda.snailjob.server.web.model.request.NotifyConfigRequestVO;
 import com.aizuda.snailjob.server.web.model.response.NotifyConfigResponseVO;
 import com.aizuda.snailjob.server.web.service.NotifyConfigService;
+import com.aizuda.snailjob.template.datasource.persistence.po.NotifyConfig;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
@@ -30,6 +31,12 @@ public class NotifyConfigController {
     @GetMapping("list")
     public PageResult<List<NotifyConfigResponseVO>> getNotifyConfigList(NotifyConfigQueryVO queryVO) {
         return notifyConfigService.getNotifyConfigList(queryVO);
+    }
+
+    @LoginRequired
+    @GetMapping("/all/{systemTaskType}")
+    public List<NotifyConfig> getNotifyConfigBySystemTaskTypeList(@PathVariable("systemTaskType") Integer systemTaskType) {
+        return notifyConfigService.getNotifyConfigBySystemTaskTypeList(systemTaskType);
     }
 
     @LoginRequired

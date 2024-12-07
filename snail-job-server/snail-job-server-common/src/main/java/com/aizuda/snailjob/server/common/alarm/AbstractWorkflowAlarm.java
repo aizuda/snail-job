@@ -1,13 +1,13 @@
 package com.aizuda.snailjob.server.common.alarm;
 
+import com.aizuda.snailjob.client.common.annotation.AbstractAlarm;
+import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.server.common.dto.WorkflowAlarmInfo;
 import com.aizuda.snailjob.server.common.triple.ImmutableTriple;
 import com.aizuda.snailjob.server.common.triple.Triple;
 import org.springframework.context.ApplicationEvent;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -18,16 +18,17 @@ import java.util.stream.Collectors;
 public abstract class AbstractWorkflowAlarm<E extends ApplicationEvent> extends AbstractAlarm<E, WorkflowAlarmInfo> {
 
     @Override
-    protected Map<Triple<String, String, String>, List<WorkflowAlarmInfo>> convertAlarmDTO(List<WorkflowAlarmInfo> alarmInfos, Set<String> namespaceIds, Set<String> groupNames, Set<String> jobIds) {
+    protected Map<Triple<String, String, Set<Long>>, List<WorkflowAlarmInfo>> convertAlarmDTO(List<WorkflowAlarmInfo> alarmInfos, Set<String> namespaceIds, Set<String> groupNames, Set<Long> notifyIds) {
 
-        return alarmInfos.stream().collect(Collectors.groupingBy(i -> {
-            String namespaceId = i.getNamespaceId();
-            String groupName = i.getGroupName();
-            String jobId = String.valueOf(i.getWorkflowId());
+        return alarmInfos.stream().collect(Collectors.groupingBy(workflowAlarmInfo -> {
+            String namespaceId = workflowAlarmInfo.getNamespaceId();
+            String groupName = workflowAlarmInfo.getGroupName();
+            HashSet<Long> notifyIdsSet = Objects.isNull(workflowAlarmInfo.getNotifyIds()) ? new HashSet<>() : new HashSet<>(JsonUtil.parseList(workflowAlarmInfo.getNotifyIds(), Long.class));
+
             namespaceIds.add(namespaceId);
             groupNames.add(groupName);
-            jobIds.add(jobId);
-            return ImmutableTriple.of(namespaceId, groupName, jobId);
+            notifyIds.addAll(notifyIdsSet);
+            return ImmutableTriple.of(namespaceId, groupName, notifyIdsSet);
         }));
     }
 }

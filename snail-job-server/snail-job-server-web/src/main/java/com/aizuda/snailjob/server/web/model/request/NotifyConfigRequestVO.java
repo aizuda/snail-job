@@ -25,7 +25,8 @@ public class NotifyConfigRequestVO {
     /**
      * 业务id (scene_name或job_id或workflow_id)
      */
-    @NotBlank(message = "业务id不能为空")
+    //@NotBlank(message = "业务id不能为空")
+    @Deprecated
     private String businessId;
 
     /**
@@ -36,6 +37,9 @@ public class NotifyConfigRequestVO {
 
     @NotNull(message = "通知状态不能为空")
     private Integer notifyStatus;
+
+    @NotNull(message = "通知告警场景名不能为空")
+    private String notifyName;
 
     @NotEmpty(message = "通知人列表")
     private Set<Long> recipientIds;

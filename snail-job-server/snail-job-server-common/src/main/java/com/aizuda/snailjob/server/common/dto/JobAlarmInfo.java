@@ -37,4 +37,9 @@ public class JobAlarmInfo extends AlarmInfo {
      */
     private Integer operationReason;
 
+    /**
+     * 通知告警场景
+     */
+    private String notifyIds;
+
 }
