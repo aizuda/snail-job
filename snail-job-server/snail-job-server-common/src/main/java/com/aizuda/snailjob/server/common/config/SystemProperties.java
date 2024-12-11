@@ -45,6 +45,10 @@ public class SystemProperties {
     private int nettyPort = 1788;
 
     /**
+     * server token
+     */
+    private String serverToken = "SJ_H9HGGmrX3QBVTfsAAG2mcKH3SR7bCLsK";
+    /**
      * 一个客户端每秒最多接收的重试数量指令
      */
     private int limiter = 100;

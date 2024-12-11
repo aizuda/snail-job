@@ -120,6 +120,8 @@ public interface SystemConstants {
          */
         String RETRY_CALLBACK = "/retry/callback/v1";
 
+        String GET_REG_NODES_AND_REFRESH = "/server/regAndRefresh/v1";
+
         /**
          * 获取重试幂等id
          */

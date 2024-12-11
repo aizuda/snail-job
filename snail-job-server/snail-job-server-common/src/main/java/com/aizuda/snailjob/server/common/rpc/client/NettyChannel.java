@@ -1,6 +1,13 @@
 package com.aizuda.snailjob.server.common.rpc.client;
 
+import cn.hutool.core.util.IdUtil;
+import com.aizuda.snailjob.common.core.constant.SystemConstants;
+import com.aizuda.snailjob.common.core.context.SnailSpringContext;
+import com.aizuda.snailjob.common.core.enums.HeadersEnum;
+import com.aizuda.snailjob.common.core.util.NetUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
+import com.aizuda.snailjob.server.common.config.SystemProperties;
+import com.aizuda.snailjob.server.common.register.ServerRegister;
 import com.aizuda.snailjob.server.common.triple.Pair;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.Unpooled;
@@ -13,6 +20,7 @@ import java.net.ConnectException;
 import java.nio.channels.ClosedChannelException;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -24,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class NettyChannel {
     private static Bootstrap bootstrap;
+    private static final String HOST_ID = IdUtil.getSnowflake().nextIdStr();
     private static ConcurrentHashMap<Pair<String, String>, Channel> CHANNEL_MAP = new ConcurrentHashMap<>(16);
     private NettyChannel() {
     }
@@ -76,11 +85,27 @@ public class NettyChannel {
                 .set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE)
                 // 设置传递请求内容的长度
                 .set(HttpHeaderNames.CONTENT_LENGTH, request.content().readableBytes())
+                .set(HeadersEnum.HOST_ID.getKey(), HOST_ID)
+                .set(HeadersEnum.HOST_IP.getKey(), NetUtil.getLocalIpStr())
+                .set(HeadersEnum.GROUP_NAME.getKey(), ServerRegister.GROUP_NAME)
+                .set(HeadersEnum.HOST_PORT.getKey(), getServerPort())
+                .set(HeadersEnum.NAMESPACE.getKey(), SystemConstants.DEFAULT_NAMESPACE)
+                .set(HeadersEnum.TOKEN.getKey(), getServerToken())
         ;
         request.headers().setAll(requestHeaders);
 
         //发送数据
         channel.writeAndFlush(request).sync();
+    }
+
+    private static String getServerToken() {
+        SystemProperties properties = SnailSpringContext.getBean(SystemProperties.class);
+        return properties.getServerToken();
+    }
+
+    private static String getServerPort() {
+        SystemProperties properties = SnailSpringContext.getBean(SystemProperties.class);
+        return String.valueOf(properties.getNettyPort());
     }
 
     /**

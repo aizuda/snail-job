@@ -83,30 +83,44 @@ public class ClientRegister extends AbstractRegister implements Runnable {
         }
     }
 
+    public static List<ServerNode> getExpireNodes(){
+        try {
+            ServerNode serverNode = QUEUE.poll(5L, TimeUnit.SECONDS);
+            if (Objects.nonNull(serverNode)) {
+                List<ServerNode> lists = Lists.newArrayList(serverNode);
+                QUEUE.drainTo(lists, 256);
+                return lists;
+            }
+        } catch (InterruptedException e) {
+            SnailJobLog.LOCAL.error("client get expireNodes error.");
+        }
+        return null;
+    }
+
     @Override
     public void run() {
-        while (!Thread.currentThread().isInterrupted()) {
-            try {
-                ServerNode serverNode = QUEUE.poll(5L, TimeUnit.SECONDS);
-                if (Objects.nonNull(serverNode)) {
-                    List<ServerNode> lists = Lists.newArrayList(serverNode);
-                    QUEUE.drainTo(lists, 256);
-
-                    // 注册或续租
-                    refreshExpireAt(lists);
-                }
-            } catch (InterruptedException ignored) {
-                Thread.currentThread().interrupt();
-            } catch (Exception e) {
-                SnailJobLog.LOCAL.error("client refresh expireAt error.");
-            } finally {
-                // 防止刷的过快
-                try {
-                    TimeUnit.MILLISECONDS.sleep(2000);
-                } catch (InterruptedException ignored) {
-                    Thread.currentThread().interrupt();
-                }
-            }
-        }
+//        while (!Thread.currentThread().isInterrupted()) {
+//            try {
+//                ServerNode serverNode = QUEUE.poll(5L, TimeUnit.SECONDS);
+//                if (Objects.nonNull(serverNode)) {
+//                    List<ServerNode> lists = Lists.newArrayList(serverNode);
+//                    QUEUE.drainTo(lists, 256);
+//
+//                    // 注册或续租
+//                    refreshExpireAt(lists);
+//                }
+//            } catch (InterruptedException ignored) {
+//                Thread.currentThread().interrupt();
+//            } catch (Exception e) {
+//                SnailJobLog.LOCAL.error("client refresh expireAt error.");
+//            } finally {
+//                // 防止刷的过快
+//                try {
+//                    TimeUnit.MILLISECONDS.sleep(2000);
+//                } catch (InterruptedException ignored) {
+//                    Thread.currentThread().interrupt();
+//                }
+//            }
+//        }
     }
 }

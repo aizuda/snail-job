@@ -1,18 +1,21 @@
 package com.aizuda.snailjob.server.common.rpc.client;
 
+import cn.hutool.core.util.IdUtil;
+import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
+import com.aizuda.snailjob.common.core.enums.HeadersEnum;
 import com.aizuda.snailjob.common.core.grpc.auto.GrpcResult;
 import com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest;
 import com.aizuda.snailjob.common.core.grpc.auto.Metadata;
+import com.aizuda.snailjob.common.core.util.NetUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.config.SystemProperties;
 import com.aizuda.snailjob.server.common.config.SystemProperties.RpcClientProperties;
 import com.aizuda.snailjob.server.common.config.SystemProperties.ThreadPoolConfig;
+import com.aizuda.snailjob.server.common.register.ServerRegister;
 import com.aizuda.snailjob.server.common.triple.Pair;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.google.protobuf.Any;
-import com.google.protobuf.UnsafeByteOperations;
 import io.grpc.DecompressorRegistry;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -29,6 +32,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+
 /**
  * @author opensnail
  * @date 2023-05-13
@@ -38,7 +42,7 @@ import java.util.concurrent.TimeUnit;
 public class GrpcChannel {
     private GrpcChannel() {
     }
-
+    private static final String HOST_ID = IdUtil.getSnowflake().nextIdStr();
     private static final ThreadPoolExecutor grpcExecutor = createGrpcExecutor();
     private static ConcurrentHashMap<Pair<String, String>, ManagedChannel> CHANNEL_MAP = new ConcurrentHashMap<>(16);
 
@@ -75,6 +79,12 @@ public class GrpcChannel {
                 return null;
             }
         }
+        headersMap.put(HeadersEnum.HOST_ID.getKey(), HOST_ID);
+        headersMap.put(HeadersEnum.HOST_IP.getKey(), NetUtil.getLocalIpStr());
+        headersMap.put(HeadersEnum.GROUP_NAME.getKey(), ServerRegister.GROUP_NAME);
+        headersMap.put(HeadersEnum.HOST_PORT.getKey(), getServerPort());
+        headersMap.put(HeadersEnum.NAMESPACE.getKey(), SystemConstants.DEFAULT_NAMESPACE);
+        headersMap.put(HeadersEnum.TOKEN.getKey(), getServerToken());
 
         Metadata metadata = Metadata
             .newBuilder()
@@ -101,6 +111,16 @@ public class GrpcChannel {
             channel.newCall(methodDescriptor, io.grpc.CallOptions.DEFAULT),
             snailJobRequest);
 
+    }
+
+    private static String getServerToken() {
+        SystemProperties properties = SnailSpringContext.getBean(SystemProperties.class);
+        return properties.getServerToken();
+    }
+
+    private static String getServerPort() {
+        SystemProperties properties = SnailSpringContext.getBean(SystemProperties.class);
+        return String.valueOf(properties.getNettyPort());
     }
 
     /**

@@ -4,6 +4,8 @@ import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.Lifecycle;
+import com.aizuda.snailjob.server.common.config.SystemProperties;
+import com.aizuda.snailjob.server.common.register.ServerRegister;
 import com.aizuda.snailjob.server.common.triple.Pair;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import com.aizuda.snailjob.template.datasource.persistence.po.GroupConfig;
@@ -29,7 +31,9 @@ public class CacheToken implements Lifecycle {
     }
 
     public static String get(String groupName, String namespaceId) {
-
+        if (groupName.equals(ServerRegister.GROUP_NAME)){
+            return getServerToken();
+        }
         String token = CACHE.getIfPresent(Pair.of(groupName, namespaceId));
         if (StrUtil.isBlank(token)) {
             // 从DB获取数据
@@ -44,6 +48,11 @@ public class CacheToken implements Lifecycle {
         }
 
         return token;
+    }
+
+    private static String getServerToken() {
+        SystemProperties properties = SnailSpringContext.getBean(SystemProperties.class);
+        return properties.getServerToken();
     }
 
     @Override

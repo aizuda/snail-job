@@ -105,12 +105,6 @@ public class GrpcRequestHandlerActor extends AbstractActor {
     }
 
     private SnailJobRpcResult doProcess(String uri, String content, Map<String, String> headersMap) {
-
-        Register register = SnailSpringContext.getBean(ClientRegister.BEAN_NAME, Register.class);
-
-        String hostId = headersMap.get(HeadersEnum.HOST_ID.getKey());
-        String hostIp = headersMap.get(HeadersEnum.HOST_IP.getKey());
-        Integer hostPort = Integer.valueOf(headersMap.get(HeadersEnum.HOST_PORT.getKey()));
         String groupName = headersMap.get(HeadersEnum.GROUP_NAME.getKey());
         String namespace = headersMap.get(HeadersEnum.NAMESPACE.getKey());
         String token = headersMap.get(HeadersEnum.TOKEN.getKey());
@@ -118,19 +112,6 @@ public class GrpcRequestHandlerActor extends AbstractActor {
         if (StrUtil.isBlank(token) || !CacheToken.get(groupName, namespace).equals(token)) {
             throw new SnailJobServerException("Token authentication failed. [namespace:{} groupName:{} token:{}]",
                 namespace, groupName, token);
-        }
-
-        // 注册版本 此后后续版本将迁移至BeatHttpRequestHandler 只处理beat的心态注册
-        RegisterContext registerContext = new RegisterContext();
-        registerContext.setGroupName(groupName);
-        registerContext.setHostPort(hostPort);
-        registerContext.setHostIp(hostIp);
-        registerContext.setHostId(hostId);
-        registerContext.setUri(uri);
-        registerContext.setNamespaceId(namespace);
-        boolean result = register.register(registerContext);
-        if (!result) {
-            SnailJobLog.LOCAL.warn("client register error. groupName:[{}]", groupName);
         }
 
         DefaultHttpHeaders headers = new DefaultHttpHeaders();
