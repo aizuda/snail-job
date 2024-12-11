@@ -42,7 +42,6 @@ import java.util.concurrent.TimeUnit;
 public class GrpcChannel {
     private GrpcChannel() {
     }
-    private static final String HOST_ID = IdUtil.getSnowflake().nextIdStr();
     private static final ThreadPoolExecutor grpcExecutor = createGrpcExecutor();
     private static ConcurrentHashMap<Pair<String, String>, ManagedChannel> CHANNEL_MAP = new ConcurrentHashMap<>(16);
 
@@ -79,7 +78,7 @@ public class GrpcChannel {
                 return null;
             }
         }
-        headersMap.put(HeadersEnum.HOST_ID.getKey(), HOST_ID);
+        headersMap.put(HeadersEnum.HOST_ID.getKey(), ServerRegister.CURRENT_CID);
         headersMap.put(HeadersEnum.HOST_IP.getKey(), NetUtil.getLocalIpStr());
         headersMap.put(HeadersEnum.GROUP_NAME.getKey(), ServerRegister.GROUP_NAME);
         headersMap.put(HeadersEnum.HOST_PORT.getKey(), getServerPort());

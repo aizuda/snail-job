@@ -32,7 +32,6 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class NettyChannel {
     private static Bootstrap bootstrap;
-    private static final String HOST_ID = IdUtil.getSnowflake().nextIdStr();
     private static ConcurrentHashMap<Pair<String, String>, Channel> CHANNEL_MAP = new ConcurrentHashMap<>(16);
     private NettyChannel() {
     }
@@ -85,7 +84,7 @@ public class NettyChannel {
                 .set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE)
                 // 设置传递请求内容的长度
                 .set(HttpHeaderNames.CONTENT_LENGTH, request.content().readableBytes())
-                .set(HeadersEnum.HOST_ID.getKey(), HOST_ID)
+                .set(HeadersEnum.HOST_ID.getKey(), ServerRegister.CURRENT_CID)
                 .set(HeadersEnum.HOST_IP.getKey(), NetUtil.getLocalIpStr())
                 .set(HeadersEnum.GROUP_NAME.getKey(), ServerRegister.GROUP_NAME)
                 .set(HeadersEnum.HOST_PORT.getKey(), getServerPort())

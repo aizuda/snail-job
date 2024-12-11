@@ -15,6 +15,6 @@ import static com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH
  * @Filename：ServerRpcClient
  */
 public interface ServerRpcClient {
-    @Mapping(path = GET_REG_NODES_AND_REFRESH, method = RequestMethod.GET)
+    @Mapping(path = GET_REG_NODES_AND_REFRESH, method = RequestMethod.POST)
     Result<String> getRegNodesAndFlush();
 }
