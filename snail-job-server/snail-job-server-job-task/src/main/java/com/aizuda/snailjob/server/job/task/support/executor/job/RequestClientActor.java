@@ -17,6 +17,7 @@ import com.aizuda.snailjob.server.common.rpc.client.RequestBuilder;
 import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.job.task.client.JobRpcClient;
 import com.aizuda.snailjob.server.job.task.dto.JobExecutorResultDTO;
+import com.aizuda.snailjob.server.job.task.dto.JobTaskFailAlarmEventDTO;
 import com.aizuda.snailjob.server.job.task.dto.RealJobExecutorDTO;
 import com.aizuda.snailjob.server.job.task.support.ClientCallbackHandler;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
@@ -114,12 +115,14 @@ public class RequestClientActor extends AbstractActor {
                 SnailJobLog.REMOTE.error("taskId:[{}] 任务调度失败执行重试 重试次数:[{}]. <|>{}<|>", jobLogMetaDTO.getTaskId(),
                         realJobExecutorDTO.getRetryCount(), jobLogMetaDTO, throwable);
             } else {
-                SnailJobLog.REMOTE.error("taskId:[{}] 任务调度失败. <|>{}<|>", jobLogMetaDTO.getTaskId(),
+                SnailJobLog.REMOTE.error("taskId:[{}] 任务调度失败. <|>{}<|>",
+                        jobLogMetaDTO.getTaskId(),
                         jobLogMetaDTO, throwable);
             }
 
             taskExecuteFailure(realJobExecutorDTO, throwable.getMessage());
-            SnailSpringContext.getContext().publishEvent(new JobTaskFailAlarmEvent(dispatchJobRequest.getTaskBatchId()));
+            SnailSpringContext.getContext().publishEvent(
+                    new JobTaskFailAlarmEvent(JobTaskFailAlarmEventDTO.builder().jobTaskBatchId(dispatchJobRequest.getTaskBatchId()).build()));
         }
 
     }

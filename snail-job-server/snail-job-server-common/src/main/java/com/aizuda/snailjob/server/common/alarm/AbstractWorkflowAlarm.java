@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.common.alarm;
 
-import com.aizuda.snailjob.client.common.annotation.AbstractAlarm;
+import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.server.common.dto.WorkflowAlarmInfo;
 import com.aizuda.snailjob.server.common.triple.ImmutableTriple;
@@ -23,7 +23,7 @@ public abstract class AbstractWorkflowAlarm<E extends ApplicationEvent> extends 
         return alarmInfos.stream().collect(Collectors.groupingBy(workflowAlarmInfo -> {
             String namespaceId = workflowAlarmInfo.getNamespaceId();
             String groupName = workflowAlarmInfo.getGroupName();
-            HashSet<Long> notifyIdsSet = Objects.isNull(workflowAlarmInfo.getNotifyIds()) ? new HashSet<>() : new HashSet<>(JsonUtil.parseList(workflowAlarmInfo.getNotifyIds(), Long.class));
+            HashSet<Long> notifyIdsSet = StrUtil.isBlank(workflowAlarmInfo.getNotifyIds()) ? new HashSet<>() : new HashSet<>(JsonUtil.parseList(workflowAlarmInfo.getNotifyIds(), Long.class));
 
             namespaceIds.add(namespaceId);
             groupNames.add(groupName);

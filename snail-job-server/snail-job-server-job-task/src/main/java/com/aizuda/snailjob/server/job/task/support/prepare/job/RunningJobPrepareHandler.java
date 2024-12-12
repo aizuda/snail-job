@@ -1,17 +1,17 @@
 package com.aizuda.snailjob.server.job.task.support.prepare.job;
 
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
+import com.aizuda.snailjob.common.core.enums.BlockStrategyEnum;
 import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.job.task.dto.CompleteJobBatchDTO;
+import com.aizuda.snailjob.server.job.task.dto.JobTaskFailAlarmEventDTO;
 import com.aizuda.snailjob.server.job.task.dto.JobTaskPrepareDTO;
-import com.aizuda.snailjob.common.core.enums.BlockStrategyEnum;
 import com.aizuda.snailjob.server.job.task.support.BlockStrategy;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
 import com.aizuda.snailjob.server.job.task.support.JobTaskStopHandler;
-import com.aizuda.snailjob.server.job.task.support.alarm.event.JobTaskFailAlarmEvent;
 import com.aizuda.snailjob.server.job.task.support.block.job.BlockStrategyContext;
 import com.aizuda.snailjob.server.job.task.support.block.job.JobBlockStrategyFactory;
 import com.aizuda.snailjob.server.job.task.support.handler.JobTaskBatchHandler;
@@ -64,7 +64,9 @@ public class RunningJobPrepareHandler extends AbstractJobPrepareHandler {
                 stopJobContext.setJobOperationReason(JobOperationReasonEnum.TASK_EXECUTION_TIMEOUT.getReason());
                 stopJobContext.setNeedUpdateTaskStatus(Boolean.TRUE);
                 instanceInterrupt.stop(stopJobContext);
-                SnailSpringContext.getContext().publishEvent(new JobTaskFailAlarmEvent(prepare.getTaskBatchId()));
+
+                SnailSpringContext.getContext().publishEvent(
+                        JobTaskFailAlarmEventDTO.builder().jobTaskBatchId(prepare.getTaskBatchId()));
             }
         }
 

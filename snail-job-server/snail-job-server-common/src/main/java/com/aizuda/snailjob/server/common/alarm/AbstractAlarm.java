@@ -1,4 +1,4 @@
-package com.aizuda.snailjob.client.common.annotation;
+package com.aizuda.snailjob.server.common.alarm;
 
 import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.common.core.alarm.Alarm;
@@ -90,12 +90,10 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
         } catch (Exception e) {
             SnailJobLog.LOCAL.error("RetryTaskFailDeadLetterAlarmListener queue poll Exception", e);
         }
-
     }
 
     protected Map<Triple<String, String, Set<Long>>, List<NotifyConfigInfo>> obtainNotifyConfig(Set<String> namespaceIds,
-                                                                                             Set<String> groupNames, Set<Long> notifyIds) {
-
+                                                                                                Set<String> groupNames, Set<Long> notifyIds) {
         // 批量获取所需的通知配置
         List<NotifyConfig> notifyConfigs = accessTemplate.getNotifyConfigAccess().list(
                 new LambdaQueryWrapper<NotifyConfig>()
@@ -138,13 +136,12 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
 
             return ImmutableTriple.of(configInfo.getNamespaceId(), configInfo.getGroupName(), notifyIds);
         });
-
     }
 
     protected abstract List<SyetemTaskTypeEnum> getSystemTaskType();
 
     protected abstract Map<Triple<String, String, Set<Long>>, List<A>> convertAlarmDTO(List<A> alarmData,
-                                                                                    Set<String> namespaceIds, Set<String> groupNames, Set<Long> notifyIds);
+                                                                                       Set<String> namespaceIds, Set<String> groupNames, Set<Long> notifyIds);
 
     protected abstract List<A> poll() throws InterruptedException;
 
@@ -186,11 +183,9 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
                 }
                 AlarmContext context = buildAlarmContext(alarmDTO, notifyConfig);
                 context.setNotifyAttribute(recipientInfo.getNotifyAttribute());
-                Alarm<AlarmContext> alarm = SnailJobAlarmFactory.getAlarmType(
-                        recipientInfo.getNotifyType());
+                Alarm<AlarmContext> alarm = SnailJobAlarmFactory.getAlarmType(recipientInfo.getNotifyType());
                 alarm.asyncSendMessage(context);
             }
-
         }
     }
 

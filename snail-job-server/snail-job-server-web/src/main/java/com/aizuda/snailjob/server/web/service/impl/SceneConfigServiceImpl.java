@@ -86,12 +86,10 @@ public class SceneConfigServiceImpl implements SceneConfigService {
                         .eq(RetrySceneConfig::getNamespaceId, userSessionVO.getNamespaceId())
                         .in(CollUtil.isNotEmpty(groupNames), RetrySceneConfig::getGroupName, groupNames)
                         .eq(Objects.nonNull(queryVO.getSceneStatus()), RetrySceneConfig::getSceneStatus, queryVO.getSceneStatus())
-                        .likeRight(StrUtil.isNotBlank(queryVO.getSceneName()),
-                                RetrySceneConfig::getSceneName, StrUtil.trim(queryVO.getSceneName()))
+                        .likeRight(StrUtil.isNotBlank(queryVO.getSceneName()), RetrySceneConfig::getSceneName, StrUtil.trim(queryVO.getSceneName()))
                         .orderByDesc(RetrySceneConfig::getCreateDt));
 
         return new PageResult<>(pageDTO, SceneConfigResponseVOConverter.INSTANCE.convertList(pageDTO.getRecords()));
-
     }
 
     @Override
@@ -127,6 +125,7 @@ public class SceneConfigServiceImpl implements SceneConfigService {
         RetrySceneConfig retrySceneConfig = SceneConfigConverter.INSTANCE.toRetrySceneConfig(requestVO);
         retrySceneConfig.setCreateDt(LocalDateTime.now());
         retrySceneConfig.setNamespaceId(namespaceId);
+        retrySceneConfig.setNotifyIds(JsonUtil.toJsonString(requestVO.getNotifyIds()));
         if (requestVO.getBackOff() == WaitStrategies.WaitStrategyEnum.DELAY_LEVEL.getType()) {
             retrySceneConfig.setTriggerInterval(StrUtil.EMPTY);
         }
@@ -154,6 +153,7 @@ public class SceneConfigServiceImpl implements SceneConfigService {
 
         retrySceneConfig.setTriggerInterval(
                 Optional.ofNullable(retrySceneConfig.getTriggerInterval()).orElse(StrUtil.EMPTY));
+        retrySceneConfig.setNotifyIds(JsonUtil.toJsonString(requestVO.getNotifyIds()));
         Assert.isTrue(1 == accessTemplate.getSceneConfigAccess().update(retrySceneConfig,
                         new LambdaUpdateWrapper<RetrySceneConfig>()
                                 .eq(RetrySceneConfig::getNamespaceId, namespaceId)

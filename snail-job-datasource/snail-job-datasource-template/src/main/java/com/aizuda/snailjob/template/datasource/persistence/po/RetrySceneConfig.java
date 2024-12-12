@@ -42,4 +42,8 @@ public class RetrySceneConfig extends CreateUpdateDt {
 
     private Integer executorTimeout;
 
+    /**
+     * 通知告警场景配置id列表
+     */
+    private String notifyIds;
 }

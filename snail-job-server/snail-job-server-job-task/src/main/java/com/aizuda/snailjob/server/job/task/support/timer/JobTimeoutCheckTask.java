@@ -5,6 +5,7 @@ import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.TimerTask;
+import com.aizuda.snailjob.server.job.task.dto.JobTaskFailAlarmEventDTO;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
 import com.aizuda.snailjob.server.job.task.support.JobTaskStopHandler;
 import com.aizuda.snailjob.server.job.task.support.alarm.event.JobTaskFailAlarmEvent;
@@ -67,7 +68,8 @@ public class JobTimeoutCheckTask implements TimerTask<String> {
         stopJobContext.setWorkflowTaskBatchId(jobTaskBatch.getWorkflowTaskBatchId());
         instanceInterrupt.stop(stopJobContext);
 
-        SnailSpringContext.getContext().publishEvent(new JobTaskFailAlarmEvent(taskBatchId));
+        SnailSpringContext.getContext().publishEvent(
+                new JobTaskFailAlarmEvent(JobTaskFailAlarmEventDTO.builder().jobTaskBatchId(taskBatchId).build()));
         SnailJobLog.LOCAL.info("超时中断.taskBatchId:[{}]", taskBatchId);
     }
 

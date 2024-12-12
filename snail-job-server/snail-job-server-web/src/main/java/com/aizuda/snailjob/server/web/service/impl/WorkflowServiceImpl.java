@@ -127,6 +127,7 @@ public class WorkflowServiceImpl implements WorkflowService {
                 HashUtil.bkdrHash(workflowRequestVO.getGroupName() + workflowRequestVO.getWorkflowName())
                         % systemProperties.getBucketTotal());
         workflow.setNamespaceId(UserSessionUtils.currentUserSession().getNamespaceId());
+        workflow.setNotifyIds(JsonUtil.toJsonString(workflowRequestVO.getNotifyIds()));
 
         workflow.setId(null);
         Assert.isTrue(1 == workflowMapper.insert(workflow), () -> new SnailJobServerException("新增工作流失败"));
@@ -190,8 +191,7 @@ public class WorkflowServiceImpl implements WorkflowService {
                                 queryVO.getWorkflowStatus())
                         .orderByDesc(Workflow::getId));
 
-        List<WorkflowResponseVO> jobResponseList = WorkflowConverter.INSTANCE.convertListToWorkflowList(
-                page.getRecords());
+        List<WorkflowResponseVO> jobResponseList = WorkflowConverter.INSTANCE.convertListToWorkflowList(page.getRecords());
 
         return new PageResult<>(pageDTO, jobResponseList);
     }
@@ -226,6 +226,7 @@ public class WorkflowServiceImpl implements WorkflowService {
         workflow.setVersion(version);
         workflow.setNextTriggerAt(calculateNextTriggerAt(workflowRequestVO, DateUtils.toNowMilli()));
         workflow.setFlowInfo(JsonUtil.toJsonString(GraphUtils.serializeGraphToJson(graph)));
+        workflow.setNotifyIds(JsonUtil.toJsonString(workflowRequestVO.getNotifyIds()));
         // 不允许更新组
         workflow.setGroupName(null);
         Assert.isTrue(

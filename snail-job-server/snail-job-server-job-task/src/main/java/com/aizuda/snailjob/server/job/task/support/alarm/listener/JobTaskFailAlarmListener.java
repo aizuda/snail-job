@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.job.task.support.alarm.listener;
 
+import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.alarm.AlarmContext;
 import com.aizuda.snailjob.common.core.enums.JobNotifySceneEnum;
 import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
@@ -11,6 +12,7 @@ import com.aizuda.snailjob.server.common.dto.JobAlarmInfo;
 import com.aizuda.snailjob.server.common.dto.NotifyConfigInfo;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.util.DateUtils;
+import com.aizuda.snailjob.server.job.task.dto.JobTaskFailAlarmEventDTO;
 import com.aizuda.snailjob.server.job.task.support.alarm.event.JobTaskFailAlarmEvent;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.JobBatchResponseDO;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskBatchMapper;
@@ -22,6 +24,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -44,7 +47,7 @@ public class JobTaskFailAlarmListener extends AbstractJobAlarm<JobTaskFailAlarmE
     /**
      * job任务失败数据
      */
-    private final LinkedBlockingQueue<Long> queue = new LinkedBlockingQueue<>(1000);
+    private final LinkedBlockingQueue<JobTaskFailAlarmEventDTO> queue = new LinkedBlockingQueue<>(1000);
 
     private static final String MESSAGES_FORMATTER = """
                <font face=微软雅黑 color=#ff0000 size=4>{}环境 Job任务执行失败</font>\s
@@ -60,24 +63,26 @@ public class JobTaskFailAlarmListener extends AbstractJobAlarm<JobTaskFailAlarmE
     @Override
     protected List<JobAlarmInfo> poll() throws InterruptedException {
         // 无数据时阻塞线程
-        Long jobTaskBatchId = queue.poll(100, TimeUnit.MILLISECONDS);
-        if (Objects.isNull(jobTaskBatchId)) {
+        JobTaskFailAlarmEventDTO jobTaskFailAlarmEventDTO = queue.poll(100, TimeUnit.MILLISECONDS);
+        if (Objects.isNull(jobTaskFailAlarmEventDTO)) {
             return Lists.newArrayList();
         }
 
         // 拉取200条
-        List<Long> jobTaskBatchIds = Lists.newArrayList(jobTaskBatchId);
-        queue.drainTo(jobTaskBatchIds, 200);
+        List<Long> jobTaskBatchIds = Lists.newArrayList(jobTaskFailAlarmEventDTO.getJobTaskBatchId());
+        queue.drainTo(Collections.singleton(jobTaskBatchIds), 200);
         QueryWrapper<JobTaskBatch> wrapper = new QueryWrapper<JobTaskBatch>()
                 .in("batch.id", jobTaskBatchIds)
                 .eq("batch.deleted", 0);
         List<JobBatchResponseDO> jobTaskBatchList = jobTaskBatchMapper.selectJobBatchListByIds(wrapper);
-        return AlarmInfoConverter.INSTANCE.toJobAlarmInfos(jobTaskBatchList);
+        List<JobAlarmInfo> jobAlarmInfos = AlarmInfoConverter.INSTANCE.toJobAlarmInfos(jobTaskBatchList);
+        jobAlarmInfos.stream().forEach(i -> i.setReason(jobTaskFailAlarmEventDTO.getReason()));
+        return jobAlarmInfos;
     }
 
     @Override
     protected AlarmContext buildAlarmContext(JobAlarmInfo alarmDTO, NotifyConfigInfo notifyConfig) {
-        String desc = JobOperationReasonEnum.getByReason(alarmDTO.getOperationReason()).getDesc();
+        String desc = StrUtil.isNotBlank(alarmDTO.getReason()) ? alarmDTO.getReason() : JobOperationReasonEnum.getByReason(alarmDTO.getOperationReason()).getDesc();
         // 预警
         return AlarmContext.build()
                 .text(MESSAGES_FORMATTER,
@@ -109,8 +114,8 @@ public class JobTaskFailAlarmListener extends AbstractJobAlarm<JobTaskFailAlarmE
 
     @Override
     @TransactionalEventListener(fallbackExecution = true, phase = TransactionPhase.AFTER_COMPLETION)
-    public void doOnApplicationEvent(JobTaskFailAlarmEvent event) {
-        if (!queue.offer(event.getJobTaskBatchId())) {
+    public void doOnApplicationEvent(JobTaskFailAlarmEvent jobTaskFailAlarmEvent) {
+        if (!queue.offer(jobTaskFailAlarmEvent.getJobTaskFailAlarmEventDTO())) {
             SnailJobLog.LOCAL.warn("JOB任务执行失败告警队列已满");
         }
     }

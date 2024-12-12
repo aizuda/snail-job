@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.common.alarm;
 
-import com.aizuda.snailjob.client.common.annotation.AbstractAlarm;
+import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.server.common.dto.RetryAlarmInfo;
@@ -17,16 +17,12 @@ import java.util.*;
  */
 public abstract class AbstractRetryAlarm<E extends ApplicationEvent> extends AbstractAlarm<E, RetryAlarmInfo> {
     @Override
-    protected Map<Triple<String, String, Set<Long>>, List<RetryAlarmInfo>> convertAlarmDTO(
-            List<RetryAlarmInfo> retryAlarmInfoList,
-            Set<String> namespaceIds,
-            Set<String> groupNames,
-            Set<Long> notifyIds) {
+    protected Map<Triple<String, String, Set<Long>>, List<RetryAlarmInfo>> convertAlarmDTO(List<RetryAlarmInfo> retryAlarmInfoList, Set<String> namespaceIds, Set<String> groupNames, Set<Long> notifyIds) {
 
         return StreamUtils.groupByKey(retryAlarmInfoList, retryAlarmInfo -> {
             String namespaceId = retryAlarmInfo.getNamespaceId();
             String groupName = retryAlarmInfo.getGroupName();
-            HashSet<Long> notifyIdsSet = Objects.isNull(retryAlarmInfo.getNotifyIds()) ? new HashSet<>() : new HashSet<>(JsonUtil.parseList(retryAlarmInfo.getNotifyIds(), Long.class));
+            HashSet<Long> notifyIdsSet = StrUtil.isBlank(retryAlarmInfo.getNotifyIds()) ? new HashSet<>() : new HashSet<>(JsonUtil.parseList(retryAlarmInfo.getNotifyIds(), Long.class));
 
             namespaceIds.add(namespaceId);
             groupNames.add(groupName);

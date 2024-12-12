@@ -9,6 +9,7 @@ import com.aizuda.snailjob.server.common.cache.CacheRegisterTable;
 import com.aizuda.snailjob.server.common.enums.JobTaskExecutorSceneEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.util.DateUtils;
+import com.aizuda.snailjob.server.job.task.dto.JobTaskFailAlarmEventDTO;
 import com.aizuda.snailjob.server.job.task.dto.JobTimerTaskDTO;
 import com.aizuda.snailjob.server.job.task.dto.TaskExecuteDTO;
 import com.aizuda.snailjob.server.job.task.dto.WorkflowNodeTaskExecuteDTO;
@@ -82,9 +83,10 @@ public class JobTaskBatchGenerator {
             );
         }
 
-        // 无执行的节点-告警通知
-        if (JobTaskBatchStatusEnum.CANCEL.getStatus() == jobTaskBatch.getTaskBatchStatus()) {
-            SnailSpringContext.getContext().publishEvent(new JobTaskFailAlarmEvent(jobTaskBatch.getId()));
+        // 无客户端节点-告警通知
+        if (JobTaskBatchStatusEnum.CANCEL.getStatus() == jobTaskBatch.getTaskBatchStatus() && JobOperationReasonEnum.NOT_CLIENT.getReason() == jobTaskBatch.getOperationReason()) {
+            SnailSpringContext.getContext().publishEvent(
+                    new JobTaskFailAlarmEvent(JobTaskFailAlarmEventDTO.builder().jobTaskBatchId(jobTaskBatch.getId()).build()));
         }
 
         // 非待处理状态无需进入时间轮中

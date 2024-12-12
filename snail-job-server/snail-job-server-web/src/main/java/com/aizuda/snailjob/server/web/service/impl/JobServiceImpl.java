@@ -139,6 +139,7 @@ public class JobServiceImpl implements JobService {
                 % systemProperties.getBucketTotal());
         job.setNextTriggerAt(calculateNextTriggerAt(jobRequestVO, DateUtils.toNowMilli()));
         job.setNamespaceId(UserSessionUtils.currentUserSession().getNamespaceId());
+        job.setNotifyIds(JsonUtil.toJsonString(jobRequestVO.getNotifyIds()));
         job.setId(null);
         return 1 == jobMapper.insert(job);
     }

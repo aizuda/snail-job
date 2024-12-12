@@ -6,6 +6,7 @@ import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskStatusEnum;
 import com.aizuda.snailjob.server.common.enums.JobTaskExecutorSceneEnum;
+import com.aizuda.snailjob.server.job.task.dto.JobTaskFailAlarmEventDTO;
 import com.aizuda.snailjob.server.job.task.dto.WorkflowNodeTaskExecuteDTO;
 import com.aizuda.snailjob.server.job.task.support.JobExecutorResultHandler;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
@@ -67,7 +68,8 @@ public abstract class AbstractJobExecutorResultHandler implements JobExecutorRes
         int taskBatchStatus;
         if (failCount > 0) {
             taskBatchStatus = JobTaskBatchStatusEnum.FAIL.getStatus();
-            SnailSpringContext.getContext().publishEvent(new JobTaskFailAlarmEvent(context.getTaskBatchId()));
+            SnailSpringContext.getContext().publishEvent(
+                    new JobTaskFailAlarmEvent(JobTaskFailAlarmEventDTO.builder().jobTaskBatchId(context.getTaskBatchId()).reason(context.getMessage()).build()));
             doHandleFail(context);
         } else if (stopCount > 0) {
             taskBatchStatus = JobTaskBatchStatusEnum.STOP.getStatus();

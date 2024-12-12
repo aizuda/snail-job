@@ -74,8 +74,8 @@ public class JobExecutorResultActor extends AbstractActor {
 
     }
 
-    private void tryCompleteAndStop(JobExecutorResultDTO result) {
-        CompleteJobBatchDTO completeJobBatchDTO = JobTaskConverter.INSTANCE.toCompleteJobBatchDTO(result);
+    private void tryCompleteAndStop(JobExecutorResultDTO jobExecutorResultDTO) {
+        CompleteJobBatchDTO completeJobBatchDTO = JobTaskConverter.INSTANCE.toCompleteJobBatchDTO(jobExecutorResultDTO);
         jobTaskBatchHandler.handleResult(completeJobBatchDTO);
     }
 }

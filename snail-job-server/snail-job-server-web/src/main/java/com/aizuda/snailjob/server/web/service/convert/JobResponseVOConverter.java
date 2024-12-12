@@ -22,13 +22,14 @@ public interface JobResponseVOConverter {
 
     JobResponseVOConverter INSTANCE = Mappers.getMapper(JobResponseVOConverter.class);
 
-    //    @Mappings({
-//        @Mapping(source = "nextTriggerAt", target = "nextTriggerAt", expression = "java(DateUtils.toLocalDateTime())")
-//    })
+    @Mappings({
+            @Mapping(target = "notifyIds", expression = "java(JobConverter.toNotifyIds(job.getNotifyIds()))")
+    })
     List<JobResponseVO> convertList(List<Job> jobs);
 
     @Mappings({
-            @Mapping(target = "nextTriggerAt", expression = "java(JobResponseVOConverter.toLocalDateTime(job.getNextTriggerAt()))")
+            @Mapping(target = "nextTriggerAt", expression = "java(JobResponseVOConverter.toLocalDateTime(job.getNextTriggerAt()))"),
+            @Mapping(target = "notifyIds", expression = "java(JobConverter.toNotifyIds(job.getNotifyIds()))")
     })
     JobResponseVO convert(Job job);
 

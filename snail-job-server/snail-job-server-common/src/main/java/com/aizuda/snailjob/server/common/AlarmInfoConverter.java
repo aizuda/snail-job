@@ -8,7 +8,6 @@ import com.aizuda.snailjob.server.common.dto.RetryAlarmInfo;
 import com.aizuda.snailjob.server.common.dto.WorkflowAlarmInfo;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.JobBatchResponseDO;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.WorkflowBatchResponseDO;
-import com.aizuda.snailjob.template.datasource.persistence.po.JobNotifyConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.NotifyConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryDeadLetter;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
@@ -57,8 +56,6 @@ public interface AlarmInfoConverter {
 
         return new HashSet<>(JsonUtil.parseList(notifyRecipientIdsStr, Long.class));
     }
-
-    List<NotifyConfigInfo> jobToNotifyConfigInfos(List<JobNotifyConfig> notifyConfigs);
 
     List<JobAlarmInfo> toJobAlarmInfos(List<JobBatchResponseDO> jobBatchResponse);
 

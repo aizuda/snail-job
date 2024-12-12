@@ -10,6 +10,7 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author xiaowoniu
@@ -131,4 +132,8 @@ public class WorkflowRequestVO {
         private CallbackConfig callback;
     }
 
+    /**
+     * 通知告警场景配置id列表
+     */
+    private Set<Long> notifyIds;
 }

@@ -1,5 +1,7 @@
 package com.aizuda.snailjob.server.web.service.convert;
 
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.enums.WorkflowNodeTypeEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.server.common.dto.CallbackConfig;
@@ -20,8 +22,10 @@ import org.mapstruct.Mappings;
 import org.mapstruct.factory.Mappers;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * @author: xiaowoniu
@@ -37,6 +41,9 @@ public interface WorkflowConverter {
 
     WorkflowNode convert(WorkflowRequestVO.NodeInfo nodeInfo);
 
+    @Mappings({
+            @Mapping(target = "notifyIds", expression = "java(WorkflowConverter.toNotifyIds(workflow.getNotifyIds()))")
+    })
     WorkflowDetailResponseVO convert(Workflow workflow);
 
     List<WorkflowDetailResponseVO.NodeInfo> convertList(List<WorkflowNode> workflowNodes);
@@ -51,7 +58,8 @@ public interface WorkflowConverter {
     List<WorkflowResponseVO> convertListToWorkflowList(List<Workflow> workflowList);
 
     @Mappings({
-            @Mapping(target = "nextTriggerAt", expression = "java(WorkflowConverter.toLocalDateTime(workflow.getNextTriggerAt()))")
+            @Mapping(target = "nextTriggerAt", expression = "java(WorkflowConverter.toLocalDateTime(workflow.getNextTriggerAt()))"),
+            @Mapping(target = "notifyIds", expression = "java(WorkflowConverter.toNotifyIds(workflow.getNotifyIds()))")
     })
     WorkflowResponseVO convertToWorkflow(Workflow workflow);
 
@@ -99,5 +107,20 @@ public interface WorkflowConverter {
         return null;
     }
 
+    static Set<Long> toNotifyIds(String notifyIds) {
+        if (StrUtil.isBlank(notifyIds)) {
+            return new HashSet<>();
+        }
+
+        return new HashSet<>(JsonUtil.parseList(notifyIds, Long.class));
+    }
+
+    static String toNotifyIdsStr(Set<Long> notifyIds) {
+        if (CollUtil.isEmpty(notifyIds)) {
+            return null;
+        }
+
+        return JsonUtil.toJsonString(notifyIds);
+    }
 
 }

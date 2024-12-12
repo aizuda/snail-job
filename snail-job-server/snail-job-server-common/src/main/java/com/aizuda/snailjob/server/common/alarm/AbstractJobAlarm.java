@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.common.alarm;
 
-import com.aizuda.snailjob.client.common.annotation.AbstractAlarm;
+import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.server.common.dto.JobAlarmInfo;
@@ -23,7 +23,7 @@ public abstract class AbstractJobAlarm<E extends ApplicationEvent> extends Abstr
         return StreamUtils.groupByKey(alarmInfos, alarmInfo -> {
             String namespaceId = alarmInfo.getNamespaceId();
             String groupName = alarmInfo.getGroupName();
-            HashSet<Long> notifyIdsSet = Objects.isNull(alarmInfo.getNotifyIds()) ? new HashSet<>() : new HashSet<>(JsonUtil.parseList(alarmInfo.getNotifyIds(), Long.class));
+            HashSet<Long> notifyIdsSet = StrUtil.isBlank(alarmInfo.getNotifyIds()) ? new HashSet<>() : new HashSet<>(JsonUtil.parseList(alarmInfo.getNotifyIds(), Long.class));
 
             namespaceIds.add(namespaceId);
             groupNames.add(groupName);

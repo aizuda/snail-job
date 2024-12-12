@@ -6,6 +6,7 @@ import com.aizuda.snailjob.server.common.dto.JobTaskConfig;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author xiaowoniu
@@ -154,5 +155,10 @@ public class WorkflowDetailResponseVO {
         private NodeConfig childNode;
 
     }
+
+    /**
+     * 通知告警场景配置id列表
+     */
+    private Set<Long> notifyIds;
 
 }

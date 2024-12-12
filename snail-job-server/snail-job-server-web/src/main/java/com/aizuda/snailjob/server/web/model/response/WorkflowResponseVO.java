@@ -3,6 +3,7 @@ package com.aizuda.snailjob.server.web.model.response;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 /**
  * @author: xiaowoniu
@@ -59,4 +60,8 @@ public class WorkflowResponseVO {
      */
     private LocalDateTime updateDt;
 
+    /**
+     * 通知告警场景配置id列表
+     */
+    private Set<Long> notifyIds;
 }

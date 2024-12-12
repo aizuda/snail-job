@@ -17,6 +17,7 @@ import com.aizuda.snailjob.server.common.cache.CacheRegisterTable;
 import com.aizuda.snailjob.server.common.enums.JobTaskExecutorSceneEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.util.DateUtils;
+import com.aizuda.snailjob.server.job.task.dto.JobTaskFailAlarmEventDTO;
 import com.aizuda.snailjob.server.job.task.dto.TaskExecuteDTO;
 import com.aizuda.snailjob.server.job.task.dto.WorkflowNodeTaskExecuteDTO;
 import com.aizuda.snailjob.server.job.task.support.JobExecutor;
@@ -94,7 +95,8 @@ public class JobExecutorActor extends AbstractActor {
             } catch (Exception e) {
                 SnailJobLog.LOCAL.error("job executor exception. [{}]", taskExecute, e);
                 handleTaskBatch(taskExecute, JobTaskBatchStatusEnum.FAIL.getStatus(), JobOperationReasonEnum.TASK_EXECUTION_ERROR.getReason());
-                SnailSpringContext.getContext().publishEvent(new JobTaskFailAlarmEvent(taskExecute.getTaskBatchId()));
+                SnailSpringContext.getContext().publishEvent(
+                        new JobTaskFailAlarmEvent(JobTaskFailAlarmEventDTO.builder().jobTaskBatchId(taskExecute.getTaskBatchId()).build()));
             } finally {
                 getContext().stop(getSelf());
             }
@@ -126,6 +128,12 @@ public class JobExecutorActor extends AbstractActor {
                 taskExecuteDTO.setParentId(taskExecute.getWorkflowNodeId());
                 taskExecuteDTO.setTaskBatchId(taskExecute.getTaskBatchId());
                 workflowBatchHandler.openNextNode(taskExecuteDTO);
+            }
+
+            // 无客户端节点-告警通知
+            if (JobTaskBatchStatusEnum.CANCEL.getStatus() == taskStatus && JobOperationReasonEnum.NOT_CLIENT.getReason() == operationReason) {
+                SnailSpringContext.getContext().publishEvent(
+                        new JobTaskFailAlarmEvent(JobTaskFailAlarmEventDTO.builder().jobTaskBatchId(taskExecute.getTaskBatchId()).build()));
             }
 
             // 更新状态
@@ -223,7 +231,8 @@ public class JobExecutorActor extends AbstractActor {
                 () -> new SnailJobServerException("更新任务失败"));
 
         if (JobTaskBatchStatusEnum.NOT_SUCCESS.contains(taskStatus)) {
-            SnailSpringContext.getContext().publishEvent(new JobTaskFailAlarmEvent(taskExecute.getTaskBatchId()));
+            SnailSpringContext.getContext().publishEvent(
+                    new JobTaskFailAlarmEvent(JobTaskFailAlarmEventDTO.builder().jobTaskBatchId(taskExecute.getTaskBatchId()).build()));
         }
 
     }

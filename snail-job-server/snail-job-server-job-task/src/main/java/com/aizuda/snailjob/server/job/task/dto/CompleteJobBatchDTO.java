@@ -19,6 +19,7 @@ public class CompleteJobBatchDTO extends BaseDTO {
     private Long taskBatchId;
     private Integer jobOperationReason;
     private Object result;
+    private String message;
     private Integer taskType;
     private Boolean retryStatus;
 

@@ -4,6 +4,8 @@ import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
+import java.util.Set;
+
 /**
  * @author opensnail
  * @date 2023-10-25 08:40:57
@@ -62,4 +64,8 @@ public class SceneConfigRequestVO {
      */
     private Integer isDeleted;
 
+    /**
+     * 通知告警场景配置id列表
+     */
+    private Set<Long> notifyIds;
 }

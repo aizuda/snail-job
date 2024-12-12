@@ -32,5 +32,9 @@ public class JobExecutorResultContext extends BaseDTO {
      */
     private boolean taskBatchComplete;
 
+    /**
+     * 原因
+     */
+    private String message;
 
 }
