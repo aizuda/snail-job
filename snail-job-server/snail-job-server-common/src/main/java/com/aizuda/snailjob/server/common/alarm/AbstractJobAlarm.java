@@ -18,12 +18,12 @@ import java.util.*;
 public abstract class AbstractJobAlarm<E extends ApplicationEvent> extends AbstractAlarm<E, JobAlarmInfo> {
 
     @Override
-    protected Map<Triple<String, String, Set<Long>>, List<JobAlarmInfo>> convertAlarmDTO(List<JobAlarmInfo> alarmInfos, Set<String> namespaceIds, Set<String> groupNames, Set<Long> notifyIds) {
+    protected Map<Triple<String, String, Set<Long>>, List<JobAlarmInfo>> convertAlarmDTO(List<JobAlarmInfo> jobAlarmInfoList, Set<String> namespaceIds, Set<String> groupNames, Set<Long> notifyIds) {
 
-        return StreamUtils.groupByKey(alarmInfos, alarmInfo -> {
-            String namespaceId = alarmInfo.getNamespaceId();
-            String groupName = alarmInfo.getGroupName();
-            HashSet<Long> notifyIdsSet = StrUtil.isBlank(alarmInfo.getNotifyIds()) ? new HashSet<>() : new HashSet<>(JsonUtil.parseList(alarmInfo.getNotifyIds(), Long.class));
+        return StreamUtils.groupByKey(jobAlarmInfoList, jobAlarmInfo -> {
+            String namespaceId = jobAlarmInfo.getNamespaceId();
+            String groupName = jobAlarmInfo.getGroupName();
+            HashSet<Long> notifyIdsSet = StrUtil.isBlank(jobAlarmInfo.getNotifyIds()) ? new HashSet<>() : new HashSet<>(JsonUtil.parseList(jobAlarmInfo.getNotifyIds(), Long.class));
 
             namespaceIds.add(namespaceId);
             groupNames.add(groupName);

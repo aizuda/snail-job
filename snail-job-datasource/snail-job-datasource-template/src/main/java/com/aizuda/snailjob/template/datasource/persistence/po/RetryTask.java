@@ -42,5 +42,4 @@ public class RetryTask extends CreateUpdateDt {
     private Integer retryStatus;
 
     private Integer taskType;
-
 }

@@ -93,11 +93,17 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
     }
 
     protected Map<Triple<String, String, Set<Long>>, List<NotifyConfigInfo>> obtainNotifyConfig(Set<String> namespaceIds,
-                                                                                                Set<String> groupNames, Set<Long> notifyIds) {
+                                                                                                Set<String> groupNames,
+                                                                                                Set<Long> notifyIds) {
+
+        if (CollUtil.isEmpty(notifyIds)) {
+            return Maps.newHashMap();
+        }
         // 批量获取所需的通知配置
         List<NotifyConfig> notifyConfigs = accessTemplate.getNotifyConfigAccess().list(
                 new LambdaQueryWrapper<NotifyConfig>()
                         .eq(NotifyConfig::getNotifyStatus, StatusEnum.YES.getStatus())
+                        .eq(NotifyConfig::getNotifyScene, getNotifyScene())
                         .in(NotifyConfig::getSystemTaskType, StreamUtils.toList(getSystemTaskType(), SyetemTaskTypeEnum::getType))
                         .in(NotifyConfig::getNamespaceId, namespaceIds)
                         .in(NotifyConfig::getGroupName, groupNames)

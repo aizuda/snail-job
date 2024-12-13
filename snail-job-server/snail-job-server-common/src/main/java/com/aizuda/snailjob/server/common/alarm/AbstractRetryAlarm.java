@@ -6,9 +6,13 @@ import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.server.common.dto.RetryAlarmInfo;
 import com.aizuda.snailjob.server.common.triple.ImmutableTriple;
 import com.aizuda.snailjob.server.common.triple.Triple;
+import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
 import org.springframework.context.ApplicationEvent;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author xiaowoniu
@@ -22,12 +26,15 @@ public abstract class AbstractRetryAlarm<E extends ApplicationEvent> extends Abs
         return StreamUtils.groupByKey(retryAlarmInfoList, retryAlarmInfo -> {
             String namespaceId = retryAlarmInfo.getNamespaceId();
             String groupName = retryAlarmInfo.getGroupName();
-            HashSet<Long> notifyIdsSet = StrUtil.isBlank(retryAlarmInfo.getNotifyIds()) ? new HashSet<>() : new HashSet<>(JsonUtil.parseList(retryAlarmInfo.getNotifyIds(), Long.class));
+
+            // 重试任务查询场景告警通知
+            RetrySceneConfig retrySceneConfig = accessTemplate.getSceneConfigAccess().getSceneConfigByGroupNameAndSceneName(retryAlarmInfo.getGroupName(), retryAlarmInfo.getSceneName(), retryAlarmInfo.getNamespaceId());
+            HashSet<Long> retrySceneConfigNotifyIds = StrUtil.isBlank(retrySceneConfig.getNotifyIds()) ? new HashSet<>() : new HashSet<>(JsonUtil.parseList(retrySceneConfig.getNotifyIds(), Long.class));
 
             namespaceIds.add(namespaceId);
             groupNames.add(groupName);
-            notifyIds.addAll(notifyIdsSet);
-            return ImmutableTriple.of(namespaceId, groupName, notifyIdsSet);
+            notifyIds.addAll(retrySceneConfigNotifyIds);
+            return ImmutableTriple.of(namespaceId, groupName, retrySceneConfigNotifyIds);
         });
     }
 }

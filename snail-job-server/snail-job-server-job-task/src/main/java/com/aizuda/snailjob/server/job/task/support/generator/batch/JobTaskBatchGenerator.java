@@ -3,6 +3,7 @@ package com.aizuda.snailjob.server.job.task.support.generator.batch;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
+import com.aizuda.snailjob.common.core.enums.JobNotifySceneEnum;
 import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.snailjob.server.common.cache.CacheRegisterTable;
@@ -14,7 +15,7 @@ import com.aizuda.snailjob.server.job.task.dto.JobTimerTaskDTO;
 import com.aizuda.snailjob.server.job.task.dto.TaskExecuteDTO;
 import com.aizuda.snailjob.server.job.task.dto.WorkflowNodeTaskExecuteDTO;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
-import com.aizuda.snailjob.server.job.task.support.alarm.event.JobTaskFailAlarmEvent;
+import com.aizuda.snailjob.server.job.task.support.alarm.event.JobTaskFailNodeAlarmEvent;
 import com.aizuda.snailjob.server.job.task.support.handler.JobTaskBatchHandler;
 import com.aizuda.snailjob.server.job.task.support.handler.WorkflowBatchHandler;
 import com.aizuda.snailjob.server.job.task.support.timer.JobTimerTask;
@@ -86,7 +87,9 @@ public class JobTaskBatchGenerator {
         // 无客户端节点-告警通知
         if (JobTaskBatchStatusEnum.CANCEL.getStatus() == jobTaskBatch.getTaskBatchStatus() && JobOperationReasonEnum.NOT_CLIENT.getReason() == jobTaskBatch.getOperationReason()) {
             SnailSpringContext.getContext().publishEvent(
-                    new JobTaskFailAlarmEvent(JobTaskFailAlarmEventDTO.builder().jobTaskBatchId(jobTaskBatch.getId()).build()));
+                    new JobTaskFailNodeAlarmEvent(JobTaskFailAlarmEventDTO.builder()
+                            .jobTaskBatchId(jobTaskBatch.getId())
+                            .reason(JobNotifySceneEnum.JOB_NO_CLIENT_NODES_ERROR.getDesc()).build()));
         }
 
         // 非待处理状态无需进入时间轮中

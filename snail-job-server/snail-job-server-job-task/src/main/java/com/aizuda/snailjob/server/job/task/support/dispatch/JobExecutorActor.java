@@ -6,10 +6,7 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
-import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
-import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
-import com.aizuda.snailjob.common.core.enums.MapReduceStageEnum;
-import com.aizuda.snailjob.common.core.enums.StatusEnum;
+import com.aizuda.snailjob.common.core.enums.*;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
@@ -23,6 +20,7 @@ import com.aizuda.snailjob.server.job.task.dto.WorkflowNodeTaskExecuteDTO;
 import com.aizuda.snailjob.server.job.task.support.JobExecutor;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
 import com.aizuda.snailjob.server.job.task.support.alarm.event.JobTaskFailAlarmEvent;
+import com.aizuda.snailjob.server.job.task.support.alarm.event.JobTaskFailNodeAlarmEvent;
 import com.aizuda.snailjob.server.job.task.support.executor.job.JobExecutorContext;
 import com.aizuda.snailjob.server.job.task.support.executor.job.JobExecutorFactory;
 import com.aizuda.snailjob.server.job.task.support.generator.task.JobTaskGenerateContext;
@@ -133,7 +131,9 @@ public class JobExecutorActor extends AbstractActor {
             // 无客户端节点-告警通知
             if (JobTaskBatchStatusEnum.CANCEL.getStatus() == taskStatus && JobOperationReasonEnum.NOT_CLIENT.getReason() == operationReason) {
                 SnailSpringContext.getContext().publishEvent(
-                        new JobTaskFailAlarmEvent(JobTaskFailAlarmEventDTO.builder().jobTaskBatchId(taskExecute.getTaskBatchId()).build()));
+                        new JobTaskFailNodeAlarmEvent(JobTaskFailAlarmEventDTO.builder()
+                                .jobTaskBatchId(taskExecute.getTaskBatchId())
+                                .reason(JobNotifySceneEnum.JOB_NO_CLIENT_NODES_ERROR.getDesc()).build()));
             }
 
             // 更新状态
