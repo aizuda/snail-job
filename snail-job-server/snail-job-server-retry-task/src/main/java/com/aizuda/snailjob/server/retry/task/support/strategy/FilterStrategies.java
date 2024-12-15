@@ -8,9 +8,11 @@ import com.aizuda.snailjob.server.common.cache.CacheRegisterTable;
 import com.aizuda.snailjob.server.common.dto.DistributeInstance;
 import com.aizuda.snailjob.server.common.dto.RegisterNodeInfo;
 import com.aizuda.snailjob.server.common.triple.ImmutableTriple;
+import com.aizuda.snailjob.server.retry.task.dto.RetryTaskFailAlarmEventDTO;
 import com.aizuda.snailjob.server.retry.task.support.FilterStrategy;
 import com.aizuda.snailjob.server.retry.task.support.RetryContext;
 import com.aizuda.snailjob.server.retry.task.support.cache.CacheGroupRateLimiter;
+import com.aizuda.snailjob.server.retry.task.support.event.RetryTaskFailAlarmEvent;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.ServerNodeMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
 import com.aizuda.snailjob.template.datasource.persistence.po.ServerNode;
@@ -185,17 +187,27 @@ public class FilterStrategies {
             RetryTask retryTask = retryContext.getRetryTask();
             RegisterNodeInfo serverNode = retryContext.getServerNode();
 
+            boolean result;
             StringBuilder description = new StringBuilder();
             if (Objects.isNull(serverNode)) {
-                return Pair.of(Boolean.FALSE, description.append(MessageFormat.format("没有可执行的客户端节点. uniqueId:[{0}]", retryTask.getUniqueId())));
+                result = false;
+                description.append(MessageFormat.format("没有可执行的客户端节点. uniqueId:[{0}]", retryTask.getUniqueId()));
+            } else {
+                ServerNodeMapper serverNodeMapper = SnailSpringContext.getBeanByType(ServerNodeMapper.class);
+                result = 1 == serverNodeMapper.selectCount(new LambdaQueryWrapper<ServerNode>().eq(ServerNode::getHostId, serverNode.getHostId()));
+                if (!result) {
+                    // 删除缓存中的失效节点
+                    CacheRegisterTable.remove(retryTask.getGroupName(), retryTask.getNamespaceId(), serverNode.getHostId());
+                    description.append(MessageFormat.format("DB中未查询到客户端节点. hostId:[{0}] uniqueId:[{1}]", serverNode.getHostId(), retryTask.getUniqueId()));
+                }
             }
 
-            ServerNodeMapper serverNodeMapper = SnailSpringContext.getBeanByType(ServerNodeMapper.class);
-            boolean result = 1 == serverNodeMapper.selectCount(new LambdaQueryWrapper<ServerNode>().eq(ServerNode::getHostId, serverNode.getHostId()));
-            if (!result) {
-                // 删除缓存中的失效节点
-                CacheRegisterTable.remove(retryTask.getGroupName(), retryTask.getNamespaceId(), serverNode.getHostId());
-                description.append(MessageFormat.format("DB中未查询到客户端节点. hostId:[{0}] uniqueId:[{1}]", serverNode.getHostId(), retryTask.getUniqueId()));
+            if (result == false) {
+                SnailSpringContext.getContext().publishEvent(
+                        new RetryTaskFailAlarmEvent(RetryTaskFailAlarmEventDTO.builder()
+                                .retryTaskId(retryTask.getId())
+                                .reason(description.toString())
+                                .build()));
             }
 
             return Pair.of(result, description);

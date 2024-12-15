@@ -89,7 +89,8 @@ public class JobTaskBatchGenerator {
             SnailSpringContext.getContext().publishEvent(
                     new JobTaskFailNodeAlarmEvent(JobTaskFailAlarmEventDTO.builder()
                             .jobTaskBatchId(jobTaskBatch.getId())
-                            .reason(JobNotifySceneEnum.JOB_NO_CLIENT_NODES_ERROR.getDesc()).build()));
+                            .reason(JobNotifySceneEnum.JOB_NO_CLIENT_NODES_ERROR.getDesc())
+                            .build()));
         }
 
         // 非待处理状态无需进入时间轮中

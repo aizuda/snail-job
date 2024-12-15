@@ -66,7 +66,9 @@ public class RunningJobPrepareHandler extends AbstractJobPrepareHandler {
                 instanceInterrupt.stop(stopJobContext);
 
                 SnailSpringContext.getContext().publishEvent(
-                        JobTaskFailAlarmEventDTO.builder().jobTaskBatchId(prepare.getTaskBatchId()));
+                        JobTaskFailAlarmEventDTO.builder()
+                                .jobTaskBatchId(prepare.getTaskBatchId())
+                                .build());
             }
         }
 

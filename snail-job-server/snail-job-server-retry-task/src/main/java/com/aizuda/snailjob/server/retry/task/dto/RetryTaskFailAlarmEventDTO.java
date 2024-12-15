@@ -4,9 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 
 /**
- * @author zhengweilin
- * @version 1.0.0
- * @date 2024/12/12
+ * 重试任务失败告警
  */
 @Data
 @Builder
@@ -15,4 +13,5 @@ public class RetryTaskFailAlarmEventDTO {
     private Long retryTaskId;
 
     private String reason;
+
 }

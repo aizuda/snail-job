@@ -2,6 +2,7 @@ package com.aizuda.snailjob.server.retry.task.support.dispatch.actor.result;
 
 import akka.actor.AbstractActor;
 import cn.hutool.core.lang.Assert;
+import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.enums.RetryStatusEnum;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.IdempotentStrategy;
@@ -91,7 +92,7 @@ public class FailureActor extends AbstractActor {
                                 .eq(RetryTaskLog::getUniqueId, retryTask.getUniqueId())
                                 .eq(RetryTaskLog::getGroupName, retryTask.getGroupName()));
 
-                        context.publishEvent(new RetryTaskFailMoreThresholdAlarmEvent(retryTask));
+                        SnailSpringContext.getContext().publishEvent(new RetryTaskFailMoreThresholdAlarmEvent(retryTask));
                     }
                 });
             } catch (Exception e) {

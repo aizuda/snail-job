@@ -122,7 +122,9 @@ public class RequestClientActor extends AbstractActor {
 
             taskExecuteFailure(realJobExecutorDTO, throwable.getMessage());
             SnailSpringContext.getContext().publishEvent(
-                    new JobTaskFailAlarmEvent(JobTaskFailAlarmEventDTO.builder().jobTaskBatchId(dispatchJobRequest.getTaskBatchId()).build()));
+                    new JobTaskFailAlarmEvent(JobTaskFailAlarmEventDTO.builder()
+                            .jobTaskBatchId(dispatchJobRequest.getTaskBatchId())
+                            .build()));
         }
 
     }

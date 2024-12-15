@@ -78,8 +78,8 @@ public class WorkflowExecutorActor extends AbstractActor {
                 SnailJobLog.LOCAL.error("workflow executor exception. [{}]", taskExecute, e);
                 handlerTaskBatch(taskExecute, JobTaskBatchStatusEnum.FAIL.getStatus(),
                         JobOperationReasonEnum.TASK_EXECUTION_ERROR.getReason());
-                SnailSpringContext.getContext()
-                        .publishEvent(new WorkflowTaskFailAlarmEvent(taskExecute.getWorkflowTaskBatchId()));
+                SnailSpringContext.getContext().publishEvent(
+                        new WorkflowTaskFailAlarmEvent(taskExecute.getWorkflowTaskBatchId()));
             } finally {
                 getContext().stop(getSelf());
             }

@@ -11,6 +11,7 @@ import com.aizuda.snailjob.server.retry.task.support.FilterStrategy;
 import com.aizuda.snailjob.server.retry.task.support.RetryContext;
 import com.aizuda.snailjob.server.retry.task.support.RetryTaskConverter;
 import com.aizuda.snailjob.server.retry.task.support.StopStrategy;
+import com.aizuda.snailjob.server.retry.task.support.strategy.FilterStrategies;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;

@@ -2,6 +2,7 @@ package com.aizuda.snailjob.server.retry.task.support.dispatch.task;
 
 import akka.actor.ActorRef;
 import cn.hutool.core.lang.Pair;
+import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.config.SystemProperties;
 import com.aizuda.snailjob.server.common.dto.RetryLogMetaDTO;
@@ -10,6 +11,8 @@ import com.aizuda.snailjob.server.common.triple.ImmutableTriple;
 import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.retry.task.support.RetryContext;
 import com.aizuda.snailjob.server.retry.task.support.RetryTaskConverter;
+import com.aizuda.snailjob.server.retry.task.support.event.RetryTaskFailAlarmEvent;
+import com.aizuda.snailjob.server.retry.task.support.event.RetryTaskFailDeadLetterAlarmEvent;
 import com.aizuda.snailjob.server.retry.task.support.idempotent.IdempotentHolder;
 import com.aizuda.snailjob.server.retry.task.support.idempotent.RetryIdempotentStrategyHandler;
 import com.aizuda.snailjob.server.retry.task.support.retry.RetryExecutor;
@@ -64,7 +67,6 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, Initializing
             RetryLogMetaDTO retryLogMetaDTO = RetryTaskConverter.INSTANCE.toLogMetaDTO(retryTask);
             retryLogMetaDTO.setTimestamp(DateUtils.toNowMilli());
             SnailJobLog.REMOTE.error("触发条件不满足 原因: [{}] <|>{}<|>", pair.getValue().toString(), retryLogMetaDTO);
-
 
             return false;
         }

@@ -58,7 +58,7 @@ public class RetryTaskFailMoreThresholdAlarmListener extends
             return Lists.newArrayList();
         }
 
-        // 拉取100条
+        // 拉取200条
         List<RetryTask> lists = Lists.newArrayList(retryTask);
         queue.drainTo(lists, 200);
 

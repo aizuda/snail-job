@@ -69,7 +69,10 @@ public abstract class AbstractJobExecutorResultHandler implements JobExecutorRes
         if (failCount > 0) {
             taskBatchStatus = JobTaskBatchStatusEnum.FAIL.getStatus();
             SnailSpringContext.getContext().publishEvent(
-                    new JobTaskFailAlarmEvent(JobTaskFailAlarmEventDTO.builder().jobTaskBatchId(context.getTaskBatchId()).reason(context.getMessage()).build()));
+                    new JobTaskFailAlarmEvent(JobTaskFailAlarmEventDTO.builder()
+                            .jobTaskBatchId(context.getTaskBatchId())
+                            .reason(context.getMessage())
+                            .build()));
             doHandleFail(context);
         } else if (stopCount > 0) {
             taskBatchStatus = JobTaskBatchStatusEnum.STOP.getStatus();
