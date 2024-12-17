@@ -77,7 +77,14 @@ public class WorkflowController {
     @PostMapping("/trigger/{id}")
     @LoginRequired(role = RoleEnum.USER)
     public Boolean trigger(@PathVariable("id") Long id) {
-        return workflowService.trigger(id);
+        return workflowService.trigger(id,null);
+    }
+
+    @PostMapping("/trigger")
+    @LoginRequired(role = RoleEnum.USER)
+    public Boolean trigger(@RequestParam(value = "id") Long id,
+                           @RequestParam(value = "tmpWfContext", required = false) String tmpWfContext) {
+        return workflowService.trigger(id, tmpWfContext);
     }
 
     @GetMapping("/workflow-name/list")

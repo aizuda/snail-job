@@ -257,7 +257,7 @@ public class WorkflowServiceImpl implements WorkflowService {
     }
 
     @Override
-    public Boolean trigger(Long id) {
+    public Boolean trigger(Long id, String tmpWfContext) {
         Workflow workflow = workflowMapper.selectById(id);
         Assert.notNull(workflow, () -> new SnailJobServerException("workflow can not be null."));
 
@@ -275,7 +275,9 @@ public class WorkflowServiceImpl implements WorkflowService {
         // 设置now表示立即执行
         prepareDTO.setNextTriggerAt(DateUtils.toNowMilli());
         prepareDTO.setTaskExecutorScene(JobTaskExecutorSceneEnum.MANUAL_WORKFLOW.getType());
-
+        if (Objects.nonNull(tmpWfContext)){
+            prepareDTO.setWfContext(tmpWfContext);
+        }
         terminalWorkflowPrepareHandler.handler(prepareDTO);
 
         return Boolean.TRUE;

@@ -70,5 +70,8 @@ public class JobTaskPrepareDTO {
      */
     private Long parentWorkflowNodeId;
 
-
+    /**
+     * 临时任务参数
+     */
+    private String tmpArgsStr;
 }

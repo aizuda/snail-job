@@ -94,10 +94,18 @@ public class JobController {
         return jobService.getJobNameList(keywords, jobId, groupName);
     }
 
+    @PostMapping("/trigger")
+    @LoginRequired
+    public Boolean trigger(@RequestParam(value = "jobId") Long jobId,
+                           @RequestParam(value = "tmpArgsStr", required = false) String tmpArgsStr) {
+        return jobService.trigger(jobId, tmpArgsStr);
+    }
+
+
     @PostMapping("/trigger/{jobId}")
     @LoginRequired
     public Boolean trigger(@PathVariable("jobId") Long jobId) {
-        return jobService.trigger(jobId);
+        return jobService.trigger(jobId, null);
     }
 
     @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

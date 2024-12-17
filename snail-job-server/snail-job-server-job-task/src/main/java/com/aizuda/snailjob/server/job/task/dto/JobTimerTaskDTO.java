@@ -22,4 +22,9 @@ public class JobTimerTaskDTO {
      * 执行策略 1、auto 2、manual 3、workflow
      */
     private Integer taskExecutorScene;
+
+    /**
+     * 临时任务参数
+     */
+    private String tmpArgsStr;
 }

@@ -112,6 +112,7 @@ public class JobTaskBatchGenerator {
         jobTimerTaskDTO.setTaskExecutorScene(context.getTaskExecutorScene());
         jobTimerTaskDTO.setWorkflowTaskBatchId(context.getWorkflowTaskBatchId());
         jobTimerTaskDTO.setWorkflowNodeId(context.getWorkflowNodeId());
+        jobTimerTaskDTO.setTmpArgsStr(context.getTmpArgsStr());
         if (TransactionSynchronizationManager.isActualTransactionActive()) {
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                 @Override

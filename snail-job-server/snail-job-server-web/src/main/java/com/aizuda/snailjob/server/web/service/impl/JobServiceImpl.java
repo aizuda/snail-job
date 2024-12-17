@@ -215,8 +215,7 @@ public class JobServiceImpl implements JobService {
 
 
     @Override
-    public boolean trigger(Long jobId) {
-
+    public boolean trigger(Long jobId, String tmpArgsStr) {
         Job job = jobMapper.selectById(jobId);
         Assert.notNull(job, () -> new SnailJobServerException("job can not be null."));
 
@@ -232,6 +231,7 @@ public class JobServiceImpl implements JobService {
         // 设置now表示立即执行
         jobTaskPrepare.setNextTriggerAt(DateUtils.toNowMilli());
         jobTaskPrepare.setTaskExecutorScene(JobTaskExecutorSceneEnum.MANUAL_JOB.getType());
+        jobTaskPrepare.setTmpArgsStr(tmpArgsStr);
         // 创建批次
         terminalJobPrepareHandler.handle(jobTaskPrepare);
 

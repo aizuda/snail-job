@@ -32,7 +32,7 @@ public interface JobService {
 
     List<JobResponseVO> getJobNameList(String keywords, Long jobId, String groupName);
 
-    boolean trigger(Long jobId);
+    boolean trigger(Long jobId, String tmpArgsStr);
 
     List<JobResponseVO> getJobList(String groupName);
 

@@ -33,7 +33,7 @@ public interface WorkflowService {
 
     Boolean updateStatus(Long id);
 
-    Boolean trigger(Long id);
+    Boolean trigger(Long id, String tmpWfContext);
 
     List<WorkflowResponseVO> getWorkflowNameList(String keywords, Long workflowId, String groupName);
 

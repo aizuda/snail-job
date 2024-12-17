@@ -63,5 +63,8 @@ public class JobTaskBatchGeneratorContext {
      */
     private String wfContext;
 
-
+    /**
+     * 临时任务参数
+     */
+    private String tmpArgsStr;
 }

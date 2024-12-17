@@ -22,6 +22,11 @@ public class TaskExecuteDTO {
      */
     private Integer taskExecutorScene;
 
+    /**
+     * 临时任务参数
+     */
+    private String tmpArgsStr;
+
     public TaskExecuteDTO() {
     }
 
