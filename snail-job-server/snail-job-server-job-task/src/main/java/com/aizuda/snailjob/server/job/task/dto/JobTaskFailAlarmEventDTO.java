@@ -12,7 +12,19 @@ import lombok.Data;
 @Builder
 public class JobTaskFailAlarmEventDTO {
 
+    /**
+     * 任务批次id
+     */
     private Long jobTaskBatchId;
 
+    /**
+     * 通知场景
+     */
+    private Integer notifyScene;
+
+    /**
+     * 原因
+     */
     private String reason;
+
 }

@@ -7,6 +7,7 @@ import com.aizuda.snailjob.server.common.dto.NotifyConfigInfo;
 import com.aizuda.snailjob.server.common.dto.RetryAlarmInfo;
 import com.aizuda.snailjob.server.common.dto.WorkflowAlarmInfo;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.JobBatchResponseDO;
+import com.aizuda.snailjob.template.datasource.persistence.dataobject.RetryTaskFailAlarmEventDO;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.WorkflowBatchResponseDO;
 import com.aizuda.snailjob.template.datasource.persistence.po.NotifyConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryDeadLetter;
@@ -33,12 +34,18 @@ public interface AlarmInfoConverter {
     @Mappings(
             @Mapping(source = "retryCount", target = "count")
     )
-    List<RetryAlarmInfo> retryTaskToAlarmInfo(List<RetryTask> retryTasks);
+    List<RetryAlarmInfo> retryTaskToAlarmInfo(List<RetryTaskFailAlarmEventDO> retryTaskFailAlarmEventDOList);
 
     @Mappings(
             @Mapping(source = "retryCount", target = "count")
     )
-    RetryAlarmInfo retryTaskToAlarmInfo(RetryTask retryTask);
+    RetryAlarmInfo retryTaskToAlarmInfo(RetryTaskFailAlarmEventDO retryTaskFailAlarmEventDO);
+
+    @Mappings({
+            @Mapping(source = "notifyScene", target = "notifyScene"),
+            @Mapping(source = "reason", target = "reason")
+    })
+    RetryTaskFailAlarmEventDO toRetryTaskFailAlarmEventDTO(RetryTask retryTask, String reason, Integer notifyScene);
 
     List<RetryAlarmInfo> deadLetterToAlarmInfo(List<RetryDeadLetter> retryDeadLetters);
 

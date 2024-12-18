@@ -1,7 +1,11 @@
 package com.aizuda.snailjob.common.core.enums;
 
+import cn.hutool.core.util.StrUtil;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+
+import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * 通知场景枚举
@@ -14,6 +18,8 @@ import lombok.Getter;
 @Getter
 public enum RetryNotifySceneEnum {
 
+    NONE(0, StrUtil.EMPTY, NodeTypeEnum.SERVER),
+
     MAX_RETRY(1, "场景重试数量超过阈值", NodeTypeEnum.SERVER),
 
     MAX_RETRY_ERROR(2, "场景重试失败数量超过阈值", NodeTypeEnum.SERVER),
@@ -22,16 +28,17 @@ public enum RetryNotifySceneEnum {
 
     CLIENT_COMPONENT_ERROR(4, "客户端组件异常", NodeTypeEnum.CLIENT),
 
-    RETRY_TASK_REACH_THRESHOLD(5, "任务重试次数超过阈值", NodeTypeEnum.SERVER),
+    RETRY_TASK_FAIL_ERROR(5, "任务重试失败", NodeTypeEnum.SERVER),
 
     RETRY_TASK_ENTER_DEAD_LETTER(6, "任务重试失败进入死信队列", NodeTypeEnum.SERVER),
 
-    RETRY_NO_CLIENT_NODES_ERROR(7, "任务重试失败（没有可执行的客户端节点）", NodeTypeEnum.SERVER);
+    RETRY_NO_CLIENT_NODES_ERROR(7, "任务重试失败（没有可执行的客户端节点）", NodeTypeEnum.SERVER)
+    ;
 
     /**
      * 通知场景
      */
-    private final int notifyScene;
+    private final Integer notifyScene;
 
     /**
      * 描述
@@ -58,6 +65,13 @@ public enum RetryNotifySceneEnum {
         }
 
         return null;
+    }
+
+    public static RetryNotifySceneEnum getByDesc(Integer notifyScene) {
+        if (Objects.isNull(notifyScene)) {
+            return NONE;
+        }
+        return Arrays.stream(values()).filter(e -> notifyScene.equals(e.getNotifyScene())).findFirst().orElse(NONE);
     }
 
 }

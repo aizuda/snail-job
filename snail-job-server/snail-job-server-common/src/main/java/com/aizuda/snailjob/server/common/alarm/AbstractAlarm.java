@@ -15,13 +15,12 @@ import com.aizuda.snailjob.server.common.dto.AlarmInfo;
 import com.aizuda.snailjob.server.common.dto.NotifyConfigInfo;
 import com.aizuda.snailjob.server.common.dto.NotifyConfigInfo.RecipientInfo;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
-import com.aizuda.snailjob.server.common.triple.ImmutableTriple;
-import com.aizuda.snailjob.server.common.triple.Triple;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.NotifyRecipientMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.NotifyConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.NotifyRecipient;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.RateLimiter;
@@ -64,18 +63,17 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
                 return;
             }
 
-            // 获取所有的命名空间
-            Set<String> namespaceIds = new HashSet<>();
-            // 获取所有的组名称
-            Set<String> groupNames = new HashSet<>();
-            // 获取所有的场景名称
+            // 通知场景
+            Set<Integer> notifyScene = new HashSet<>();
+
+            // 通知配置
             Set<Long> notifyIds = new HashSet<>();
 
             // 转换AlarmDTO 为了下面循环发送使用
-            Map<Triple<String, String, Set<Long>>, List<A>> waitSendAlarmInfos = convertAlarmDTO(alarmInfos, namespaceIds, groupNames, notifyIds);
+            Map<Set<Long>, List<A>> waitSendAlarmInfos = convertAlarmDTO(alarmInfos, notifyScene, notifyIds);
 
             // 批量获取通知配置
-            Map<Triple<String, String, Set<Long>>, List<NotifyConfigInfo>> notifyConfig = obtainNotifyConfig(namespaceIds, groupNames, notifyIds);
+            Map<Set<Long>, List<NotifyConfigInfo>> notifyConfig = obtainNotifyConfig(notifyScene, notifyIds);
 
             // 循环发送消息
             waitSendAlarmInfos.forEach((key, list) -> {
@@ -92,9 +90,8 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
         }
     }
 
-    protected Map<Triple<String, String, Set<Long>>, List<NotifyConfigInfo>> obtainNotifyConfig(Set<String> namespaceIds,
-                                                                                                Set<String> groupNames,
-                                                                                                Set<Long> notifyIds) {
+    protected Map<Set<Long>, List<NotifyConfigInfo>> obtainNotifyConfig(Set<Integer> notifyScene,
+                                                                        Set<Long> notifyIds) {
 
         if (CollUtil.isEmpty(notifyIds)) {
             return Maps.newHashMap();
@@ -103,10 +100,8 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
         List<NotifyConfig> notifyConfigs = accessTemplate.getNotifyConfigAccess().list(
                 new LambdaQueryWrapper<NotifyConfig>()
                         .eq(NotifyConfig::getNotifyStatus, StatusEnum.YES.getStatus())
-                        .eq(NotifyConfig::getNotifyScene, getNotifyScene())
+                        .in(NotifyConfig::getNotifyScene, notifyScene)
                         .in(NotifyConfig::getSystemTaskType, StreamUtils.toList(getSystemTaskType(), SyetemTaskTypeEnum::getType))
-                        .in(NotifyConfig::getNamespaceId, namespaceIds)
-                        .in(NotifyConfig::getGroupName, groupNames)
                         .in(NotifyConfig::getId, notifyIds)
         );
         if (CollUtil.isEmpty(notifyConfigs)) {
@@ -125,29 +120,26 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
         }
 
         List<NotifyConfigInfo> notifyConfigInfos = AlarmInfoConverter.INSTANCE.retryToNotifyConfigInfos(notifyConfigs);
-
-        return StreamUtils.groupByKey(notifyConfigInfos, configInfo -> {
-            List<RecipientInfo> recipients = StreamUtils.toList(configInfo.getRecipientIds(), recipientId -> {
+        for (NotifyConfigInfo notifyConfigInfo : notifyConfigInfos) {
+            List<RecipientInfo> recipients = StreamUtils.toList(notifyConfigInfo.getRecipientIds(), recipientId -> {
                 NotifyRecipient notifyRecipient = recipientMap.get(recipientId);
                 if (Objects.isNull(notifyRecipient)) {
                     return null;
                 }
 
-                RecipientInfo notifyConfigInfo = new RecipientInfo();
-                notifyConfigInfo.setNotifyAttribute(notifyRecipient.getNotifyAttribute());
-                notifyConfigInfo.setNotifyType(notifyRecipient.getNotifyType());
-                return notifyConfigInfo;
+                RecipientInfo recipientInfo = new RecipientInfo();
+                recipientInfo.setNotifyAttribute(notifyRecipient.getNotifyAttribute());
+                recipientInfo.setNotifyType(notifyRecipient.getNotifyType());
+                return recipientInfo;
             });
-            configInfo.setRecipientInfos(recipients);
-
-            return ImmutableTriple.of(configInfo.getNamespaceId(), configInfo.getGroupName(), notifyIds);
-        });
+            notifyConfigInfo.setRecipientInfos(recipients);
+        }
+        return ImmutableMap.of(notifyIds, notifyConfigInfos);
     }
 
     protected abstract List<SyetemTaskTypeEnum> getSystemTaskType();
 
-    protected abstract Map<Triple<String, String, Set<Long>>, List<A>> convertAlarmDTO(List<A> alarmData,
-                                                                                       Set<String> namespaceIds, Set<String> groupNames, Set<Long> notifyIds);
+    protected abstract Map<Set<Long>, List<A>> convertAlarmDTO(List<A> alarmData, Set<Integer> notifyScene, Set<Long> notifyIds);
 
     protected abstract List<A> poll() throws InterruptedException;
 
@@ -169,18 +161,18 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
         for (final NotifyConfigInfo notifyConfig : notifyConfigsList) {
             if (Objects.equals(notifyConfig.getRateLimiterStatus(), StatusEnum.YES.getStatus())) {
                 // 限流
-                RateLimiter rateLimiter = getRateLimiter(String.valueOf(notifyConfig.getId()),
-                        notifyConfig.getRateLimiterThreshold());
+                RateLimiter rateLimiter = getRateLimiter(String.valueOf(notifyConfig.getId()), notifyConfig.getRateLimiterThreshold());
                 // 每秒发送rateLimiterThreshold个告警
                 if (Objects.nonNull(rateLimiter) && !rateLimiter.tryAcquire(1, TimeUnit.SECONDS)) {
                     continue;
                 }
             }
 
-            if (Objects.nonNull(alarmDTO.getCount()) && Objects.nonNull(notifyConfig.getNotifyThreshold())) {
-                if (notifyConfig.getNotifyThreshold() >= alarmDTO.getCount()) {
-                    continue;
-                }
+            // 重试通知阈值
+            if (Objects.nonNull(alarmDTO.getCount())
+                    && Objects.nonNull(notifyConfig.getNotifyThreshold())
+                    && alarmDTO.getCount() < notifyConfig.getNotifyThreshold()) {
+                continue;
             }
 
             for (final RecipientInfo recipientInfo : notifyConfig.getRecipientInfos()) {

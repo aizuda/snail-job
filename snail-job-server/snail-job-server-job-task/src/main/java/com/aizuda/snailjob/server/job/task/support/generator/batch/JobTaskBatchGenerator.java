@@ -15,7 +15,7 @@ import com.aizuda.snailjob.server.job.task.dto.JobTimerTaskDTO;
 import com.aizuda.snailjob.server.job.task.dto.TaskExecuteDTO;
 import com.aizuda.snailjob.server.job.task.dto.WorkflowNodeTaskExecuteDTO;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
-import com.aizuda.snailjob.server.job.task.support.alarm.event.JobTaskFailNodeAlarmEvent;
+import com.aizuda.snailjob.server.job.task.support.alarm.event.JobTaskFailAlarmEvent;
 import com.aizuda.snailjob.server.job.task.support.handler.JobTaskBatchHandler;
 import com.aizuda.snailjob.server.job.task.support.handler.WorkflowBatchHandler;
 import com.aizuda.snailjob.server.job.task.support.timer.JobTimerTask;
@@ -87,9 +87,10 @@ public class JobTaskBatchGenerator {
         // 无客户端节点-告警通知
         if (JobTaskBatchStatusEnum.CANCEL.getStatus() == jobTaskBatch.getTaskBatchStatus() && JobOperationReasonEnum.NOT_CLIENT.getReason() == jobTaskBatch.getOperationReason()) {
             SnailSpringContext.getContext().publishEvent(
-                    new JobTaskFailNodeAlarmEvent(JobTaskFailAlarmEventDTO.builder()
+                    new JobTaskFailAlarmEvent(JobTaskFailAlarmEventDTO.builder()
                             .jobTaskBatchId(jobTaskBatch.getId())
                             .reason(JobNotifySceneEnum.JOB_NO_CLIENT_NODES_ERROR.getDesc())
+                            .notifyScene(JobNotifySceneEnum.JOB_NO_CLIENT_NODES_ERROR.getNotifyScene())
                             .build()));
         }
 

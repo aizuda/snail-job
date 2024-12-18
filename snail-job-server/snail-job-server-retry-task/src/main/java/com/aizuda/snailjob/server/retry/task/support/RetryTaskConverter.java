@@ -9,6 +9,7 @@ import com.aizuda.snailjob.server.retry.task.dto.NotifyConfigPartitionTask;
 import com.aizuda.snailjob.server.retry.task.dto.RetryPartitionTask;
 import com.aizuda.snailjob.server.retry.task.generator.task.TaskContext;
 import com.aizuda.snailjob.server.retry.task.support.timer.RetryTimerContext;
+import com.aizuda.snailjob.template.datasource.persistence.dataobject.RetryTaskFailAlarmEventDO;
 import com.aizuda.snailjob.template.datasource.persistence.po.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -29,6 +30,8 @@ public interface RetryTaskConverter {
     RetryTaskConverter INSTANCE = Mappers.getMapper(RetryTaskConverter.class);
 
     RetryTask toRetryTask(RetryTaskDTO retryTaskDTO);
+
+    RetryTask toRetryTask(RetryTaskFailAlarmEventDO retryTaskFailAlarmEventDO);
 
     RetryTask toRetryTask(RetryTask retryTask);
 

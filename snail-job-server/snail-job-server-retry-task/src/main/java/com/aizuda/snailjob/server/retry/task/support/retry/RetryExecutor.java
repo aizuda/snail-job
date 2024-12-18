@@ -2,7 +2,10 @@ package com.aizuda.snailjob.server.retry.task.support.retry;
 
 import akka.actor.ActorRef;
 import cn.hutool.core.lang.Pair;
+import com.aizuda.snailjob.common.core.enums.RetryNotifySceneEnum;
+import com.aizuda.snailjob.common.core.model.Result;
 import com.aizuda.snailjob.common.log.SnailJobLog;
+import com.aizuda.snailjob.server.common.AlarmInfoConverter;
 import com.aizuda.snailjob.server.common.WaitStrategy;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.common.dto.RetryLogMetaDTO;
@@ -11,7 +14,7 @@ import com.aizuda.snailjob.server.retry.task.support.FilterStrategy;
 import com.aizuda.snailjob.server.retry.task.support.RetryContext;
 import com.aizuda.snailjob.server.retry.task.support.RetryTaskConverter;
 import com.aizuda.snailjob.server.retry.task.support.StopStrategy;
-import com.aizuda.snailjob.server.retry.task.support.strategy.FilterStrategies;
+import com.aizuda.snailjob.template.datasource.persistence.dataobject.RetryTaskFailAlarmEventDO;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -95,7 +98,12 @@ public class RetryExecutor<V> {
             actorRef = ActorGenerator.failureActor();
         }
 
-        actorRef.tell(retryContext.getRetryTask(), actorRef);
+        RetryTaskFailAlarmEventDO retryTaskFailAlarmEventDO =
+                AlarmInfoConverter.INSTANCE.toRetryTaskFailAlarmEventDTO(
+                        retryContext.getRetryTask(),
+                        ((Result) call).getMessage(),
+                        RetryNotifySceneEnum.RETRY_TASK_FAIL_ERROR.getNotifyScene());
+        actorRef.tell(retryTaskFailAlarmEventDO, actorRef);
 
         return call;
     }

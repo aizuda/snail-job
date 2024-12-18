@@ -61,8 +61,7 @@
                job.executor_info,
                job.args_str,
                job.notify_ids
-          FROM sj_job_task_batch batch
-                JOIN sj_job job ON batch.job_id = job.id
+          FROM sj_job_task_batch batch JOIN sj_job job ON batch.job_id = job.id
         ${ew.customSqlSegment}
     </select>
 

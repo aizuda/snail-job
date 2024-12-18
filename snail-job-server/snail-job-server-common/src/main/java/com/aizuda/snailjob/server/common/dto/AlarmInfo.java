@@ -15,4 +15,20 @@ public class AlarmInfo {
     private String groupName;
 
     private Integer count;
+
+    /**
+     * 通知配置
+     */
+    private String notifyIds;
+
+    /**
+     * 失败原因
+     */
+    private String reason;
+
+    /**
+     * 通知场景
+     */
+    private Integer notifyScene;
+
 }

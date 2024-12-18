@@ -78,4 +78,9 @@ public class JobBatchResponseDO {
 
     private String notifyIds;
 
+    /**
+     * 通知场景
+     */
+    private Integer notifyScene;
+
 }

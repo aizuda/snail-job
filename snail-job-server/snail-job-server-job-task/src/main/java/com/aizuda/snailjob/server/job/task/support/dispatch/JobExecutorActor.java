@@ -20,7 +20,6 @@ import com.aizuda.snailjob.server.job.task.dto.WorkflowNodeTaskExecuteDTO;
 import com.aizuda.snailjob.server.job.task.support.JobExecutor;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
 import com.aizuda.snailjob.server.job.task.support.alarm.event.JobTaskFailAlarmEvent;
-import com.aizuda.snailjob.server.job.task.support.alarm.event.JobTaskFailNodeAlarmEvent;
 import com.aizuda.snailjob.server.job.task.support.executor.job.JobExecutorContext;
 import com.aizuda.snailjob.server.job.task.support.executor.job.JobExecutorFactory;
 import com.aizuda.snailjob.server.job.task.support.generator.task.JobTaskGenerateContext;
@@ -133,9 +132,10 @@ public class JobExecutorActor extends AbstractActor {
             // 无客户端节点-告警通知
             if (JobTaskBatchStatusEnum.CANCEL.getStatus() == taskStatus && JobOperationReasonEnum.NOT_CLIENT.getReason() == operationReason) {
                 SnailSpringContext.getContext().publishEvent(
-                        new JobTaskFailNodeAlarmEvent(JobTaskFailAlarmEventDTO.builder()
+                        new JobTaskFailAlarmEvent(JobTaskFailAlarmEventDTO.builder()
                                 .jobTaskBatchId(taskExecute.getTaskBatchId())
                                 .reason(JobNotifySceneEnum.JOB_NO_CLIENT_NODES_ERROR.getDesc())
+                                .notifyScene(JobNotifySceneEnum.JOB_NO_CLIENT_NODES_ERROR.getNotifyScene())
                                 .build()));
             }
 

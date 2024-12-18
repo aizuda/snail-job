@@ -34,6 +34,4 @@ public class RetryAlarmInfo extends AlarmInfo {
 
     private LocalDateTime createDt;
 
-    private String notifyIds;
-
 }

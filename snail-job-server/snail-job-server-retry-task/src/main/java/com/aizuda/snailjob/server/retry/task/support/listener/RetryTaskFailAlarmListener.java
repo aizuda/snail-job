@@ -1,6 +1,8 @@
 package com.aizuda.snailjob.server.retry.task.support.listener;
 
+import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.alarm.AlarmContext;
+import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.snailjob.common.core.enums.RetryNotifySceneEnum;
 import com.aizuda.snailjob.common.core.util.EnvironmentUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
@@ -11,8 +13,8 @@ import com.aizuda.snailjob.server.common.dto.NotifyConfigInfo;
 import com.aizuda.snailjob.server.common.dto.RetryAlarmInfo;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.util.DateUtils;
-import com.aizuda.snailjob.server.retry.task.dto.RetryTaskFailAlarmEventDTO;
 import com.aizuda.snailjob.server.retry.task.support.event.RetryTaskFailAlarmEvent;
+import com.aizuda.snailjob.template.datasource.persistence.dataobject.RetryTaskFailAlarmEventDO;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -39,16 +41,19 @@ public class RetryTaskFailAlarmListener extends
     /**
      * 死信告警数据
      */
-    private final LinkedBlockingQueue<RetryTaskFailAlarmEventDTO> queue = new LinkedBlockingQueue<>(1000);
+    private final LinkedBlockingQueue<RetryTaskFailAlarmEventDO> queue = new LinkedBlockingQueue<>(1000);
 
     private static final String retryTaskDeadTextMessagesFormatter =
             "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 重试任务执行失败</font>  \n" +
+                    "> 任务重试次数:{}  \n" +
+                    "> 通知场景:{}  \n" +
                     "> 空间ID:{}  \n" +
                     "> 组名称:{}  \n" +
                     "> 执行器名称:{}  \n" +
                     "> 场景名称:{}  \n" +
                     "> 业务数据:{}  \n" +
-                    "> 时间:{}  \n";
+                    "> 时间:{}  \n" +
+                    "> 失败原因:{}  \n";
 
     @Override
     protected List<SyetemTaskTypeEnum> getSystemTaskType() {
@@ -58,23 +63,22 @@ public class RetryTaskFailAlarmListener extends
     @Override
     protected List<RetryAlarmInfo> poll() throws InterruptedException {
         // 无数据时阻塞线程
-        RetryTaskFailAlarmEventDTO retryTaskFailAlarmEventDTO = queue.poll(100, TimeUnit.MILLISECONDS);
-        if (Objects.isNull(retryTaskFailAlarmEventDTO)) {
+        RetryTaskFailAlarmEventDO retryTaskFailAlarmEventDO = queue.poll(100, TimeUnit.MILLISECONDS);
+        if (Objects.isNull(retryTaskFailAlarmEventDO)) {
             return Lists.newArrayList();
         }
 
         // 拉取200条
-        /*List<RetryTask> lists = Lists.newArrayList(retryTask);
+        List<RetryTaskFailAlarmEventDO> lists = Lists.newArrayList(retryTaskFailAlarmEventDO);
         queue.drainTo(lists, 200);
 
-        return AlarmInfoConverter.INSTANCE.retryTaskToAlarmInfo(lists);*/
-        return null;
+        return AlarmInfoConverter.INSTANCE.retryTaskToAlarmInfo(lists);
     }
 
     @Override
     @TransactionalEventListener(fallbackExecution = true, phase = TransactionPhase.AFTER_COMPLETION)
     public void doOnApplicationEvent(RetryTaskFailAlarmEvent retryTaskFailAlarmEvent) {
-        if (!queue.offer(retryTaskFailAlarmEvent.getRetryTaskFailAlarmEventDTO())) {
+        if (!queue.offer(retryTaskFailAlarmEvent.getRetryTaskFailAlarmEventDO())) {
             SnailJobLog.LOCAL.warn("任务重试失败告警队列已满");
         }
     }
@@ -85,12 +89,15 @@ public class RetryTaskFailAlarmListener extends
         // 预警
         return AlarmContext.build().text(retryTaskDeadTextMessagesFormatter,
                         EnvironmentUtils.getActiveProfile(),
+                        notifyConfig.getNotifyThreshold(),
+                        RetryNotifySceneEnum.getByDesc(retryAlarmInfo.getNotifyScene()).getDesc(),
                         retryAlarmInfo.getNamespaceId(),
                         retryAlarmInfo.getGroupName(),
                         retryAlarmInfo.getExecutorName(),
                         retryAlarmInfo.getSceneName(),
                         retryAlarmInfo.getArgsStr(),
-                        DateUtils.format(retryAlarmInfo.getCreateDt(), DateUtils.NORM_DATETIME_PATTERN))
+                        DateUtils.format(retryAlarmInfo.getCreateDt(), DateUtils.NORM_DATETIME_PATTERN),
+                        retryAlarmInfo.getReason())
                 .title("组:[{}] 场景:[{}] 环境重试任务失败",
                         retryAlarmInfo.getGroupName(), retryAlarmInfo.getSceneName());
     }
@@ -102,6 +109,6 @@ public class RetryTaskFailAlarmListener extends
 
     @Override
     protected int getNotifyScene() {
-        return RetryNotifySceneEnum.RETRY_NO_CLIENT_NODES_ERROR.getNotifyScene();
+        return RetryNotifySceneEnum.RETRY_TASK_FAIL_ERROR.getNotifyScene();
     }
 }

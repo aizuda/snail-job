@@ -1,6 +1,5 @@
 package com.aizuda.snailjob.server.job.task.support.alarm.listener;
 
-import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.alarm.AlarmContext;
 import com.aizuda.snailjob.common.core.enums.JobNotifySceneEnum;
 import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
@@ -55,6 +54,7 @@ public class JobTaskFailAlarmListener extends AbstractJobAlarm<JobTaskFailAlarmE
                         > 组名称:{} \s
                         > 任务名称:{} \s
                         > 执行器名称:{} \s
+                        > 通知场景:{} \s
                         > 失败原因:{} \s
                         > 方法参数:{} \s
                         > 时间:{};
@@ -75,14 +75,12 @@ public class JobTaskFailAlarmListener extends AbstractJobAlarm<JobTaskFailAlarmE
                 .in("batch.id", jobTaskBatchIds)
                 .eq("batch.deleted", 0);
         List<JobBatchResponseDO> jobTaskBatchList = jobTaskBatchMapper.selectJobBatchListByIds(wrapper);
-        List<JobAlarmInfo> jobAlarmInfos = AlarmInfoConverter.INSTANCE.toJobAlarmInfos(jobTaskBatchList);
-        jobAlarmInfos.stream().forEach(i -> i.setReason(jobTaskFailAlarmEventDTO.getReason()));
-        return jobAlarmInfos;
+        return AlarmInfoConverter.INSTANCE.toJobAlarmInfos(jobTaskBatchList);
     }
 
     @Override
     protected AlarmContext buildAlarmContext(JobAlarmInfo alarmDTO, NotifyConfigInfo notifyConfig) {
-        String desc = StrUtil.isNotBlank(alarmDTO.getReason()) ? alarmDTO.getReason() : JobOperationReasonEnum.getByReason(alarmDTO.getOperationReason()).getDesc();
+
         // 预警
         return AlarmContext.build()
                 .text(MESSAGES_FORMATTER,
@@ -91,7 +89,8 @@ public class JobTaskFailAlarmListener extends AbstractJobAlarm<JobTaskFailAlarmE
                         alarmDTO.getGroupName(),
                         alarmDTO.getJobName(),
                         alarmDTO.getExecutorInfo(),
-                        desc,
+                        JobOperationReasonEnum.getByReason(alarmDTO.getOperationReason()).getDesc(),
+                        alarmDTO.getReason(),
                         alarmDTO.getArgsStr(),
                         DateUtils.toNowFormat(DateUtils.NORM_DATETIME_PATTERN))
                 .title("{}环境 JOB任务失败", EnvironmentUtils.getActiveProfile());

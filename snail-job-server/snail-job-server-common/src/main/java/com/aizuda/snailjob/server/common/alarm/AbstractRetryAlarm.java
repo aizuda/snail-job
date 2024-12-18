@@ -4,8 +4,6 @@ import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.server.common.dto.RetryAlarmInfo;
-import com.aizuda.snailjob.server.common.triple.ImmutableTriple;
-import com.aizuda.snailjob.server.common.triple.Triple;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
 import org.springframework.context.ApplicationEvent;
 
@@ -20,21 +18,22 @@ import java.util.Set;
  * @since 2.5.0
  */
 public abstract class AbstractRetryAlarm<E extends ApplicationEvent> extends AbstractAlarm<E, RetryAlarmInfo> {
+
     @Override
-    protected Map<Triple<String, String, Set<Long>>, List<RetryAlarmInfo>> convertAlarmDTO(List<RetryAlarmInfo> retryAlarmInfoList, Set<String> namespaceIds, Set<String> groupNames, Set<Long> notifyIds) {
+    protected Map<Set<Long>, List<RetryAlarmInfo>> convertAlarmDTO(List<RetryAlarmInfo> retryAlarmInfoList, Set<Integer> notifyScene, Set<Long> notifyIds) {
 
         return StreamUtils.groupByKey(retryAlarmInfoList, retryAlarmInfo -> {
-            String namespaceId = retryAlarmInfo.getNamespaceId();
-            String groupName = retryAlarmInfo.getGroupName();
 
             // 重试任务查询场景告警通知
-            RetrySceneConfig retrySceneConfig = accessTemplate.getSceneConfigAccess().getSceneConfigByGroupNameAndSceneName(retryAlarmInfo.getGroupName(), retryAlarmInfo.getSceneName(), retryAlarmInfo.getNamespaceId());
-            HashSet<Long> retrySceneConfigNotifyIds = StrUtil.isBlank(retrySceneConfig.getNotifyIds()) ? new HashSet<>() : new HashSet<>(JsonUtil.parseList(retrySceneConfig.getNotifyIds(), Long.class));
+            RetrySceneConfig retrySceneConfig = accessTemplate.getSceneConfigAccess().getSceneConfigByGroupNameAndSceneName(
+                    retryAlarmInfo.getGroupName(),
+                    retryAlarmInfo.getSceneName(),
+                    retryAlarmInfo.getNamespaceId());
+            Set<Long> retryNotifyIds = StrUtil.isBlank(retrySceneConfig.getNotifyIds()) ? new HashSet<>() : new HashSet<>(JsonUtil.parseList(retrySceneConfig.getNotifyIds(), Long.class));
 
-            namespaceIds.add(namespaceId);
-            groupNames.add(groupName);
-            notifyIds.addAll(retrySceneConfigNotifyIds);
-            return ImmutableTriple.of(namespaceId, groupName, retrySceneConfigNotifyIds);
+            notifyScene.add(retryAlarmInfo.getNotifyScene());
+            notifyIds.addAll(retryNotifyIds);
+            return retryNotifyIds;
         });
     }
 }
