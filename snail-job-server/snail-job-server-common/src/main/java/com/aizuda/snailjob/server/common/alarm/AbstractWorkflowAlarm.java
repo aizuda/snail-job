@@ -27,10 +27,10 @@ public abstract class AbstractWorkflowAlarm<E extends ApplicationEvent> extends 
     private WorkflowTaskBatchMapper workflowTaskBatchMapper;
 
     @Override
-    protected Map<Set<Long>, List<WorkflowAlarmInfo>> convertAlarmDTO(List<WorkflowAlarmInfo> workflowAlarmInfoList, Set<Integer> notifyScene) {
+    protected Map<Long, List<WorkflowAlarmInfo>> convertAlarmDTO(List<WorkflowAlarmInfo> workflowAlarmInfoList, Set<Integer> notifyScene) {
 
-        Map<Set<Long>, List<WorkflowAlarmInfo>> workflowAlarmInfoMap = new HashMap<>();
-        workflowAlarmInfoList.stream().forEach(i -> notifyScene.add(i.getNotifyScene()));
+        Map<Long, List<WorkflowAlarmInfo>> workflowAlarmInfoMap = new HashMap<>();
+        workflowAlarmInfoList.forEach(i -> notifyScene.add(i.getNotifyScene()));
 
         Map<Long, WorkflowAlarmInfo> workflowAlarmInfoGroupMap = workflowAlarmInfoList.stream().collect(Collectors.toMap(i -> i.getId(), Function.identity()));
 
@@ -46,7 +46,10 @@ public abstract class AbstractWorkflowAlarm<E extends ApplicationEvent> extends 
                 WorkflowAlarmInfo workflowAlarmInfo = AlarmInfoConverter.INSTANCE.toWorkflowAlarmInfo(workflowBatchResponseDO);
                 WorkflowAlarmInfo alarmInfo = workflowAlarmInfoGroupMap.get(workflowAlarmInfo.getId());
                 workflowAlarmInfo.setReason(alarmInfo.getReason());
-                workflowAlarmInfoMap.put(Collections.singleton(workflowNotifyId), Lists.newArrayList(workflowAlarmInfo));
+
+                List<WorkflowAlarmInfo> workflowAlarmInfos = workflowAlarmInfoMap.getOrDefault(workflowNotifyId, Lists.newArrayList());
+                workflowAlarmInfos.add(workflowAlarmInfo);
+                workflowAlarmInfoMap.put(workflowNotifyId ,workflowAlarmInfos);
             }
         }
 

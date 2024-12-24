@@ -20,9 +20,9 @@ import java.util.stream.Collectors;
 public abstract class AbstractRetryAlarm<E extends ApplicationEvent> extends AbstractAlarm<E, RetryAlarmInfo> {
 
     @Override
-    protected Map<Set<Long>, List<RetryAlarmInfo>> convertAlarmDTO(List<RetryAlarmInfo> retryAlarmInfoList, Set<Integer> notifyScene) {
+    protected Map<Long, List<RetryAlarmInfo>> convertAlarmDTO(List<RetryAlarmInfo> retryAlarmInfoList, Set<Integer> notifyScene) {
 
-        Map<Set<Long>, List<RetryAlarmInfo>> retryAlarmInfoMap = new HashMap<>();
+        Map<Long, List<RetryAlarmInfo>> retryAlarmInfoMap = new HashMap<>();
         // 重试任务查询场景告警通知
         Set<String> groupNames = new HashSet<>(), sceneNames = new HashSet<>(), namespaceIds = new HashSet<>();
         for (RetryAlarmInfo retryAlarmInfo : retryAlarmInfoList) {
@@ -33,10 +33,10 @@ public abstract class AbstractRetryAlarm<E extends ApplicationEvent> extends Abs
         }
 
         // 按组名、场景名、命名空间分组
-        Map<ImmutableTriple<String, String, String>, RetrySceneConfig> retrySceneConfigMap = accessTemplate.getSceneConfigAccess().getSceneConfigByGroupNameAndSceneNameList(
-                groupNames,
-                sceneNames,
-                namespaceIds).stream().collect(Collectors.toMap(i -> ImmutableTriple.of(
+        Map<ImmutableTriple<String, String, String>, RetrySceneConfig> retrySceneConfigMap = accessTemplate.getSceneConfigAccess()
+                .getSceneConfigByGroupNameAndSceneNameList(
+                groupNames, sceneNames, namespaceIds)
+                .stream().collect(Collectors.toMap(i -> ImmutableTriple.of(
                         i.getGroupName(),
                         i.getSceneName(),
                         i.getNamespaceId()),
@@ -51,8 +51,9 @@ public abstract class AbstractRetryAlarm<E extends ApplicationEvent> extends Abs
             Set<Long> retryNotifyIds = StrUtil.isBlank(retrySceneConfig.getNotifyIds()) ? new HashSet<>() : new HashSet<>(JsonUtil.parseList(retrySceneConfig.getNotifyIds(), Long.class));
 
             for (Long retryNotifyId : retryNotifyIds) {
-
-                retryAlarmInfoMap.put(Collections.singleton(retryNotifyId), Lists.newArrayList(retryAlarmInfo));
+                List<RetryAlarmInfo> retryAlarmInfos = retryAlarmInfoMap.getOrDefault(retryNotifyId, Lists.newArrayList());
+                retryAlarmInfos.add(retryAlarmInfo);
+                retryAlarmInfoMap.put(retryNotifyId, retryAlarmInfos);
             }
         }
 

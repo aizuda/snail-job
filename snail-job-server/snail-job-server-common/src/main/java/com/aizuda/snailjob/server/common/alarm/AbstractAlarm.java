@@ -64,22 +64,21 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
 
             // 通知场景
             Set<Integer> notifyScene = new HashSet<>();
-            // 通知配置
-            Set<Long> notifyIds = new HashSet<>();
 
             // 转换AlarmDTO 为了下面循环发送使用
-            Map<Set<Long>, List<A>> waitSendAlarmInfos = convertAlarmDTO(alarmInfos, notifyScene);
-            waitSendAlarmInfos.keySet().stream().map(i -> notifyIds.addAll(i)).collect(Collectors.toSet());
+            Map<Long, List<A>> waitSendAlarmInfos = convertAlarmDTO(alarmInfos, notifyScene);
+            Set<Long> notifyIds = waitSendAlarmInfos.keySet();
 
             // 批量获取通知配置
-            Map<Set<Long>, List<NotifyConfigInfo>> notifyConfig = obtainNotifyConfig(notifyScene, notifyIds);
+            Map<Long, NotifyConfigInfo> notifyConfigMap = obtainNotifyConfig(notifyScene, notifyIds);
 
             // 循环发送消息
             waitSendAlarmInfos.forEach((key, list) -> {
-                List<NotifyConfigInfo> notifyConfigsList = notifyConfig.getOrDefault(key, Lists.newArrayList());
-                for (A alarmDTO : list) {
-                    sendAlarm(notifyConfigsList, alarmDTO);
-                }
+                Optional.ofNullable(notifyConfigMap.get(key)).ifPresent(notifyConfig -> {
+                    for (A alarmDTO : list) {
+                        sendAlarm(notifyConfig, alarmDTO);
+                    }
+                });
             });
         } catch (InterruptedException e) {
             SnailJobLog.LOCAL.info("retry task fail dead letter alarm stop");
@@ -89,12 +88,12 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
         }
     }
 
-    protected Map<Set<Long>, List<NotifyConfigInfo>> obtainNotifyConfig(Set<Integer> notifyScene,
-                                                                        Set<Long> notifyIds) {
-
-        if (CollUtil.isEmpty(notifyIds)) {
+    protected Map<Long, NotifyConfigInfo> obtainNotifyConfig(Set<Integer> notifyScene,
+                                                             Set<Long> notifyIds) {
+        if (CollUtil.isEmpty(notifyIds) || CollUtil.isEmpty(notifyScene)) {
             return Maps.newHashMap();
         }
+
         // 批量获取所需的通知配置
         List<NotifyConfig> notifyConfigs = accessTemplate.getNotifyConfigAccess().list(
                 new LambdaQueryWrapper<NotifyConfig>()
@@ -111,7 +110,7 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
                 .flatMap(config -> JsonUtil.parseList(config.getRecipientIds(), Long.class).stream())
                 .collect(Collectors.toSet());
 
-        List<NotifyRecipient> notifyRecipients = recipientMapper.selectBatchIds(recipientIds);
+        List<NotifyRecipient> notifyRecipients = recipientMapper.selectByIds(recipientIds);
         Map<Long, NotifyRecipient> recipientMap = StreamUtils.toIdentityMap(notifyRecipients, NotifyRecipient::getId);
 
         if (CollUtil.isEmpty(recipientIds)) {
@@ -133,16 +132,13 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
             });
             notifyConfigInfo.setRecipientInfos(recipients);
         }
-        Map<Set<Long>, List<NotifyConfigInfo>> notifyConfigInfo = new HashMap<>();
-        for (Long notifyId : notifyIds) {
-            notifyConfigInfo.put(Collections.singleton(notifyId), notifyConfigInfos);
-        }
-        return notifyConfigInfo;
+
+        return StreamUtils.toIdentityMap(notifyConfigInfos, NotifyConfigInfo::getId);
     }
 
     protected abstract List<SyetemTaskTypeEnum> getSystemTaskType();
 
-    protected abstract Map<Set<Long>, List<A>> convertAlarmDTO(List<A> alarmData, Set<Integer> notifyScene);
+    protected abstract Map<Long, List<A>> convertAlarmDTO(List<A> alarmData, Set<Integer> notifyScene);
 
     protected abstract List<A> poll() throws InterruptedException;
 
@@ -160,34 +156,33 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
     public void close() {
     }
 
-    protected void sendAlarm(List<NotifyConfigInfo> notifyConfigsList, A alarmDTO) {
-        for (final NotifyConfigInfo notifyConfig : notifyConfigsList) {
-            if (Objects.equals(notifyConfig.getRateLimiterStatus(), StatusEnum.YES.getStatus())) {
-                // 限流
-                RateLimiter rateLimiter = getRateLimiter(String.valueOf(notifyConfig.getId()), notifyConfig.getRateLimiterThreshold());
-                // 每秒发送rateLimiterThreshold个告警
-                if (Objects.nonNull(rateLimiter) && !rateLimiter.tryAcquire(1, TimeUnit.SECONDS)) {
-                    continue;
-                }
-            }
-
-            // 重试通知阈值
-            if (Objects.nonNull(alarmDTO.getCount())
-                    && Objects.nonNull(notifyConfig.getNotifyThreshold())
-                    && alarmDTO.getCount() < notifyConfig.getNotifyThreshold()) {
-                continue;
-            }
-
-            for (final RecipientInfo recipientInfo : notifyConfig.getRecipientInfos()) {
-                if (Objects.isNull(recipientInfo)) {
-                    continue;
-                }
-                AlarmContext context = buildAlarmContext(alarmDTO, notifyConfig);
-                context.setNotifyAttribute(recipientInfo.getNotifyAttribute());
-                Alarm<AlarmContext> alarm = SnailJobAlarmFactory.getAlarmType(recipientInfo.getNotifyType());
-                alarm.asyncSendMessage(context);
+    protected void sendAlarm(NotifyConfigInfo notifyConfig, A alarmDTO) {
+        if (Objects.equals(notifyConfig.getRateLimiterStatus(), StatusEnum.YES.getStatus())) {
+            // 限流
+            RateLimiter rateLimiter = getRateLimiter(String.valueOf(notifyConfig.getId()), notifyConfig.getRateLimiterThreshold());
+            // 每秒发送rateLimiterThreshold个告警
+            if (Objects.nonNull(rateLimiter) && !rateLimiter.tryAcquire(1, TimeUnit.SECONDS)) {
+                return;
             }
         }
+
+        // 重试通知阈值
+        if (Objects.nonNull(alarmDTO.getCount())
+                && Objects.nonNull(notifyConfig.getNotifyThreshold())
+                && alarmDTO.getCount() < notifyConfig.getNotifyThreshold()) {
+            return;
+        }
+
+        for (final RecipientInfo recipientInfo : notifyConfig.getRecipientInfos()) {
+            if (Objects.isNull(recipientInfo)) {
+                continue;
+            }
+            AlarmContext context = buildAlarmContext(alarmDTO, notifyConfig);
+            context.setNotifyAttribute(recipientInfo.getNotifyAttribute());
+            Alarm<AlarmContext> alarm = SnailJobAlarmFactory.getAlarmType(recipientInfo.getNotifyType());
+            alarm.asyncSendMessage(context);
+        }
+
     }
 
     protected RateLimiter getRateLimiter(String key, double rateLimiterThreshold) {

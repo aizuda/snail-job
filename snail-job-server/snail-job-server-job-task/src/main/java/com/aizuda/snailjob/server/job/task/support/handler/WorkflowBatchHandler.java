@@ -161,7 +161,7 @@ public class WorkflowBatchHandler {
                             SnailSpringContext.getContext().publishEvent(new WorkflowTaskFailAlarmEvent(WorkflowTaskFailAlarmEventDTO.builder()
                                     .workflowTaskBatchId(workflowTaskBatchId)
                                     .notifyScene(JobNotifySceneEnum.WORKFLOW_TASK_ERROR.getNotifyScene())
-                                    .reason("只要叶子节点不是无需处理的都是失败")
+                                    .reason("任务执行失败 jobTaskBatchId:" + jobTaskBatch.getId())
                                     .build()));
                         }
                     }

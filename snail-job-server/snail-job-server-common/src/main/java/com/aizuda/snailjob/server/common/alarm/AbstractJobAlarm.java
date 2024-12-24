@@ -2,6 +2,7 @@ package com.aizuda.snailjob.server.common.alarm;
 
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
+import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.server.common.AlarmInfoConverter;
 import com.aizuda.snailjob.server.common.dto.JobAlarmInfo;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.JobBatchResponseDO;
@@ -27,16 +28,15 @@ public abstract class AbstractJobAlarm<E extends ApplicationEvent> extends Abstr
     private JobTaskBatchMapper jobTaskBatchMapper;
 
     @Override
-    protected Map<Set<Long>, List<JobAlarmInfo>> convertAlarmDTO(List<JobAlarmInfo> jobAlarmInfoList, Set<Integer> notifyScene) {
+    protected Map<Long, List<JobAlarmInfo>> convertAlarmDTO(List<JobAlarmInfo> jobAlarmInfoList, Set<Integer> notifyScene) {
 
-        Map<Set<Long>, List<JobAlarmInfo>> jobAlarmInfoMap = new HashMap<>();
-        jobAlarmInfoList.stream().forEach(i -> notifyScene.add(i.getNotifyScene()));
+        Map<Long, List<JobAlarmInfo>> jobAlarmInfoMap = new HashMap<>();
+        jobAlarmInfoList.forEach(i -> notifyScene.add(i.getNotifyScene()));
 
-        Map<Long, JobAlarmInfo> jobAlarmInfoGroupMap = jobAlarmInfoList.stream().collect(Collectors.toMap(i -> i.getId(), Function.identity()));
-
+        Map<Long, JobAlarmInfo> jobAlarmInfoGroupMap = StreamUtils.toIdentityMap(jobAlarmInfoList, JobAlarmInfo::getId);
         // 查询数据库
         QueryWrapper<JobTaskBatch> wrapper = new QueryWrapper<JobTaskBatch>()
-                .in("batch.id", jobAlarmInfoList.stream().map(i -> i.getId()).collect(Collectors.toSet()))
+                .in("batch.id", StreamUtils.toSet(jobAlarmInfoList, JobAlarmInfo::getId))
                 .eq("batch.deleted", 0);
 
         List<JobBatchResponseDO> jobBatchResponseDOList = jobTaskBatchMapper.selectJobBatchListByIds(wrapper);
@@ -47,7 +47,10 @@ public abstract class AbstractJobAlarm<E extends ApplicationEvent> extends Abstr
                 JobAlarmInfo jobAlarmInfo = AlarmInfoConverter.INSTANCE.toJobAlarmInfo(jobBatchResponseDO);
                 JobAlarmInfo alarmInfo = jobAlarmInfoGroupMap.get(jobBatchResponseDO.getId());
                 jobAlarmInfo.setReason(alarmInfo.getReason());
-                jobAlarmInfoMap.put(Collections.singleton(jobNotifyId), Lists.newArrayList(jobAlarmInfo));
+
+                List<JobAlarmInfo> jobAlarmInfos = jobAlarmInfoMap.getOrDefault(jobNotifyId, Lists.newArrayList());
+                jobAlarmInfos.add(jobAlarmInfo);
+                jobAlarmInfoMap.put(jobNotifyId, jobAlarmInfos);
             }
         }
 
