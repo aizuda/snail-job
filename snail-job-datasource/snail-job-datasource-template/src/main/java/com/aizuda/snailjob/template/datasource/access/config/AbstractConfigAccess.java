@@ -63,6 +63,13 @@ public abstract class AbstractConfigAccess<T> implements ConfigAccess<T> {
                 .eq(RetrySceneConfig::getSceneName, sceneName));
     }
 
+    protected List<RetrySceneConfig> getByGroupNameAndSceneNameList(Set<String> groupNames, Set<String> sceneNames, Set<String> namespaceIds) {
+        return sceneConfigMapper.selectList(new LambdaQueryWrapper<RetrySceneConfig>()
+                .in(RetrySceneConfig::getNamespaceId, namespaceIds)
+                .in(RetrySceneConfig::getGroupName, groupNames)
+                .in(RetrySceneConfig::getSceneName, sceneNames));
+    }
+
     protected List<RetrySceneConfig> getSceneConfigs(String groupName) {
         return sceneConfigMapper.selectList(new LambdaQueryWrapper<RetrySceneConfig>()
                 .eq(RetrySceneConfig::getGroupName, groupName));
@@ -92,6 +99,11 @@ public abstract class AbstractConfigAccess<T> implements ConfigAccess<T> {
     @Override
     public RetrySceneConfig getSceneConfigByGroupNameAndSceneName(String groupName, String sceneName, String namespaceId) {
         return getByGroupNameAndSceneName(groupName, sceneName, namespaceId);
+    }
+
+    @Override
+    public List<RetrySceneConfig> getSceneConfigByGroupNameAndSceneNameList(Set<String> groupNames, Set<String> sceneNames, Set<String> namespaceIds) {
+        return getByGroupNameAndSceneNameList(groupNames, sceneNames, namespaceIds);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.job.task.support.alarm.event;
 
+import com.aizuda.snailjob.server.job.task.dto.WorkflowTaskFailAlarmEventDTO;
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
 
@@ -13,11 +14,11 @@ import org.springframework.context.ApplicationEvent;
 @Getter
 public class WorkflowTaskFailAlarmEvent extends ApplicationEvent {
 
-    private final Long workflowTaskBatchId;
+    private WorkflowTaskFailAlarmEventDTO workflowTaskFailAlarmEventDTO;
 
-    public WorkflowTaskFailAlarmEvent(Long workflowTaskBatchId) {
-        super(workflowTaskBatchId);
-        this.workflowTaskBatchId = workflowTaskBatchId;
+    public WorkflowTaskFailAlarmEvent(WorkflowTaskFailAlarmEventDTO workflowTaskFailAlarmEventDTO) {
+        super(workflowTaskFailAlarmEventDTO);
+        this.workflowTaskFailAlarmEventDTO = workflowTaskFailAlarmEventDTO;
     }
 
 }

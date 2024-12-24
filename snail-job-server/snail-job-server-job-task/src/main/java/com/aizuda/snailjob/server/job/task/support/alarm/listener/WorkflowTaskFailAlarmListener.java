@@ -5,23 +5,21 @@ import com.aizuda.snailjob.common.core.enums.JobNotifySceneEnum;
 import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.snailjob.common.core.util.EnvironmentUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
-import com.aizuda.snailjob.server.common.AlarmInfoConverter;
 import com.aizuda.snailjob.server.common.alarm.AbstractWorkflowAlarm;
 import com.aizuda.snailjob.server.common.dto.NotifyConfigInfo;
 import com.aizuda.snailjob.server.common.dto.WorkflowAlarmInfo;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.util.DateUtils;
+import com.aizuda.snailjob.server.job.task.dto.WorkflowTaskFailAlarmEventDTO;
+import com.aizuda.snailjob.server.job.task.support.WorkflowTaskConverter;
 import com.aizuda.snailjob.server.job.task.support.alarm.event.WorkflowTaskFailAlarmEvent;
-import com.aizuda.snailjob.template.datasource.persistence.dataobject.WorkflowBatchResponseDO;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowTaskBatchMapper;
-import com.aizuda.snailjob.template.datasource.persistence.po.WorkflowTaskBatch;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -39,13 +37,13 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class WorkflowTaskFailAlarmListener extends AbstractWorkflowAlarm<WorkflowTaskFailAlarmEvent> {
 
-    private final WorkflowTaskBatchMapper workflowTaskBatchMapper;
-    private final LinkedBlockingQueue<Long> queue = new LinkedBlockingQueue<>(1000);
+    private final LinkedBlockingQueue<WorkflowTaskFailAlarmEventDTO> queue = new LinkedBlockingQueue<>(1000);
     private static final String MESSAGES_FORMATTER = """
                <font face=微软雅黑 color=#ff0000 size=4>{}环境 Workflow任务执行失败</font>\s
                         > 空间ID:{} \s
                         > 组名称:{} \s
                         > 工作流名称:{} \s
+                        > 通知场景:{} \s
                         > 失败原因:{} \s
                         > 时间:{};
             """;
@@ -53,25 +51,21 @@ public class WorkflowTaskFailAlarmListener extends AbstractWorkflowAlarm<Workflo
     @Override
     protected List<WorkflowAlarmInfo> poll() throws InterruptedException {
         // 无数据时阻塞线程
-        Long workflowTaskBatchId = queue.poll(100, TimeUnit.MILLISECONDS);
-        if (Objects.isNull(workflowTaskBatchId)) {
+        WorkflowTaskFailAlarmEventDTO workflowTaskFailAlarmEventDTO = queue.poll(100, TimeUnit.MILLISECONDS);
+        if (Objects.isNull(workflowTaskFailAlarmEventDTO)) {
             return Lists.newArrayList();
         }
 
         // 拉取200条
-        List<Long> workflowTaskBatchIds = Lists.newArrayList(workflowTaskBatchId);
-        queue.drainTo(workflowTaskBatchIds, 200);
+        ArrayList<WorkflowTaskFailAlarmEventDTO> lists = Lists.newArrayList(workflowTaskFailAlarmEventDTO);
+        queue.drainTo(lists, 200);
 
-        List<WorkflowBatchResponseDO> workflowTaskBatches = workflowTaskBatchMapper.selectWorkflowBatchList(
-                new QueryWrapper<WorkflowTaskBatch>()
-                        .in("batch.id", workflowTaskBatchIds)
-                        .eq("batch.deleted", 0));
-        return AlarmInfoConverter.INSTANCE.toWorkflowAlarmInfos(workflowTaskBatches);
+        // 数据类型转换
+        return WorkflowTaskConverter.INSTANCE.toWorkflowTaskFailAlarmEventDTO(lists);
     }
 
     @Override
     protected AlarmContext buildAlarmContext(WorkflowAlarmInfo alarmDTO, NotifyConfigInfo notifyConfig) {
-        String desc = JobOperationReasonEnum.getByReason(alarmDTO.getOperationReason()).getDesc();
 
         // 预警
         return AlarmContext.build()
@@ -80,7 +74,8 @@ public class WorkflowTaskFailAlarmListener extends AbstractWorkflowAlarm<Workflo
                         alarmDTO.getNamespaceId(),
                         alarmDTO.getGroupName(),
                         alarmDTO.getWorkflowName(),
-                        desc,
+                        JobOperationReasonEnum.getByReason(alarmDTO.getOperationReason()).getDesc(),
+                        alarmDTO.getReason(),
                         DateUtils.toNowFormat(DateUtils.NORM_DATETIME_PATTERN))
                 .title("{}环境 Workflow任务执行失败", EnvironmentUtils.getActiveProfile());
     }
@@ -103,7 +98,7 @@ public class WorkflowTaskFailAlarmListener extends AbstractWorkflowAlarm<Workflo
     @Override
     @TransactionalEventListener(fallbackExecution = true, phase = TransactionPhase.AFTER_COMPLETION)
     public void doOnApplicationEvent(WorkflowTaskFailAlarmEvent event) {
-        if (!queue.offer(event.getWorkflowTaskBatchId())) {
+        if (!queue.offer(event.getWorkflowTaskFailAlarmEventDTO())) {
             SnailJobLog.LOCAL.warn("Workflow任务执行失败告警队列已满");
         }
     }

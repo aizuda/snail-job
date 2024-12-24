@@ -8,6 +8,8 @@ import com.aizuda.snailjob.server.common.IdempotentStrategy;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.triple.ImmutableTriple;
+import com.aizuda.snailjob.server.retry.task.dto.RetryTaskExecutorDTO;
+import com.aizuda.snailjob.server.retry.task.support.RetryTaskConverter;
 import com.aizuda.snailjob.server.retry.task.support.handler.CallbackRetryTaskHandler;
 import com.aizuda.snailjob.server.retry.task.support.idempotent.IdempotentHolder;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
@@ -46,11 +48,11 @@ public class FinishActor extends AbstractActor {
 
     @Override
     public Receive createReceive() {
-        return receiveBuilder().match(RetryTask.class, retryTask -> {
-            SnailJobLog.LOCAL.debug("FinishActor params:[{}]", retryTask);
+        return receiveBuilder().match(RetryTaskExecutorDTO.class, retryTaskExecutorDTO -> {
 
+            SnailJobLog.LOCAL.debug("FinishActor params:[{}]", retryTaskExecutorDTO);
+            RetryTask retryTask = RetryTaskConverter.INSTANCE.toRetryTask(retryTaskExecutorDTO);
             retryTask.setRetryStatus(RetryStatusEnum.FINISH.getStatus());
-
             try {
                 transactionTemplate.execute(new TransactionCallbackWithoutResult() {
                     @Override
@@ -85,7 +87,6 @@ public class FinishActor extends AbstractActor {
                 getContext().stop(getSelf());
 
             }
-
 
         }).build();
     }

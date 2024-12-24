@@ -1,20 +1,18 @@
 package com.aizuda.snailjob.server.retry.task.support.listener;
 
-import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.alarm.AlarmContext;
-import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.snailjob.common.core.enums.RetryNotifySceneEnum;
 import com.aizuda.snailjob.common.core.util.EnvironmentUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
-import com.aizuda.snailjob.server.common.AlarmInfoConverter;
 import com.aizuda.snailjob.server.common.Lifecycle;
 import com.aizuda.snailjob.server.common.alarm.AbstractRetryAlarm;
 import com.aizuda.snailjob.server.common.dto.NotifyConfigInfo;
 import com.aizuda.snailjob.server.common.dto.RetryAlarmInfo;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.util.DateUtils;
+import com.aizuda.snailjob.server.retry.task.dto.RetryTaskFailAlarmEventDTO;
+import com.aizuda.snailjob.server.retry.task.support.RetryTaskConverter;
 import com.aizuda.snailjob.server.retry.task.support.event.RetryTaskFailAlarmEvent;
-import com.aizuda.snailjob.template.datasource.persistence.dataobject.RetryTaskFailAlarmEventDO;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -41,7 +39,7 @@ public class RetryTaskFailAlarmListener extends
     /**
      * 死信告警数据
      */
-    private final LinkedBlockingQueue<RetryTaskFailAlarmEventDO> queue = new LinkedBlockingQueue<>(1000);
+    private final LinkedBlockingQueue<RetryTaskFailAlarmEventDTO> queue = new LinkedBlockingQueue<>(1000);
 
     private static final String retryTaskDeadTextMessagesFormatter =
             "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 重试任务执行失败</font>  \n" +
@@ -63,22 +61,23 @@ public class RetryTaskFailAlarmListener extends
     @Override
     protected List<RetryAlarmInfo> poll() throws InterruptedException {
         // 无数据时阻塞线程
-        RetryTaskFailAlarmEventDO retryTaskFailAlarmEventDO = queue.poll(100, TimeUnit.MILLISECONDS);
+        RetryTaskFailAlarmEventDTO retryTaskFailAlarmEventDO = queue.poll(100, TimeUnit.MILLISECONDS);
         if (Objects.isNull(retryTaskFailAlarmEventDO)) {
             return Lists.newArrayList();
         }
 
         // 拉取200条
-        List<RetryTaskFailAlarmEventDO> lists = Lists.newArrayList(retryTaskFailAlarmEventDO);
+        List<RetryTaskFailAlarmEventDTO> lists = Lists.newArrayList(retryTaskFailAlarmEventDO);
         queue.drainTo(lists, 200);
 
-        return AlarmInfoConverter.INSTANCE.retryTaskToAlarmInfo(lists);
+        // 数据类型转换
+        return RetryTaskConverter.INSTANCE.toRetryTaskFailAlarmEventDTO(lists);
     }
 
     @Override
     @TransactionalEventListener(fallbackExecution = true, phase = TransactionPhase.AFTER_COMPLETION)
     public void doOnApplicationEvent(RetryTaskFailAlarmEvent retryTaskFailAlarmEvent) {
-        if (!queue.offer(retryTaskFailAlarmEvent.getRetryTaskFailAlarmEventDO())) {
+        if (!queue.offer(retryTaskFailAlarmEvent.getRetryTaskFailAlarmEventDTO())) {
             SnailJobLog.LOCAL.warn("任务重试失败告警队列已满");
         }
     }

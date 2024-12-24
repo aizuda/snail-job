@@ -2,14 +2,16 @@ package com.aizuda.snailjob.server.retry.task.support;
 
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
+import com.aizuda.snailjob.server.common.dto.RetryAlarmInfo;
 import com.aizuda.snailjob.server.common.dto.RetryLogMetaDTO;
 import com.aizuda.snailjob.server.model.dto.RetryLogTaskDTO;
 import com.aizuda.snailjob.server.model.dto.RetryTaskDTO;
 import com.aizuda.snailjob.server.retry.task.dto.NotifyConfigPartitionTask;
 import com.aizuda.snailjob.server.retry.task.dto.RetryPartitionTask;
+import com.aizuda.snailjob.server.retry.task.dto.RetryTaskExecutorDTO;
+import com.aizuda.snailjob.server.retry.task.dto.RetryTaskFailAlarmEventDTO;
 import com.aizuda.snailjob.server.retry.task.generator.task.TaskContext;
 import com.aizuda.snailjob.server.retry.task.support.timer.RetryTimerContext;
-import com.aizuda.snailjob.template.datasource.persistence.dataobject.RetryTaskFailAlarmEventDO;
 import com.aizuda.snailjob.template.datasource.persistence.po.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -29,9 +31,9 @@ public interface RetryTaskConverter {
 
     RetryTaskConverter INSTANCE = Mappers.getMapper(RetryTaskConverter.class);
 
-    RetryTask toRetryTask(RetryTaskDTO retryTaskDTO);
+    RetryTask toRetryTask(RetryTaskExecutorDTO retryTaskExecutorDTO);
 
-    RetryTask toRetryTask(RetryTaskFailAlarmEventDO retryTaskFailAlarmEventDO);
+    RetryTask toRetryTask(RetryTaskDTO retryTaskDTO);
 
     RetryTask toRetryTask(RetryTask retryTask);
 
@@ -68,5 +70,19 @@ public interface RetryTaskConverter {
     RetryTaskLogMessage toRetryTaskLogMessage(RetryLogTaskDTO retryLogTaskDTO);
 
     RetryLogMetaDTO toLogMetaDTO(RetryTask retryTask);
+
+    @Mappings({
+            @Mapping(source = "reason", target = "reason"),
+            @Mapping(source = "notifyScene", target = "notifyScene")
+    })
+    RetryTaskExecutorDTO toRetryTaskExecutorDTO(RetryTask retryTask, String reason, Integer notifyScene);
+
+    @Mappings({
+            @Mapping(source = "reason", target = "reason"),
+            @Mapping(source = "notifyScene", target = "notifyScene")
+    })
+    RetryTaskFailAlarmEventDTO toRetryTaskFailAlarmEventDTO(RetryTask retryTask, String reason, Integer notifyScene);
+
+    List<RetryAlarmInfo> toRetryTaskFailAlarmEventDTO(List<RetryTaskFailAlarmEventDTO> retryTaskFailAlarmEventDTOList);
 
 }

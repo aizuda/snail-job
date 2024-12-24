@@ -1,12 +1,13 @@
 package com.aizuda.snailjob.server.job.task.support.prepare.workflow;
 
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
-import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
+import com.aizuda.snailjob.common.core.enums.BlockStrategyEnum;
+import com.aizuda.snailjob.common.core.enums.JobNotifySceneEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.server.common.util.DateUtils;
+import com.aizuda.snailjob.server.job.task.dto.WorkflowTaskFailAlarmEventDTO;
 import com.aizuda.snailjob.server.job.task.dto.WorkflowTaskPrepareDTO;
-import com.aizuda.snailjob.common.core.enums.BlockStrategyEnum;
 import com.aizuda.snailjob.server.job.task.support.BlockStrategy;
 import com.aizuda.snailjob.server.job.task.support.WorkflowTaskConverter;
 import com.aizuda.snailjob.server.job.task.support.alarm.event.WorkflowTaskFailAlarmEvent;
@@ -53,11 +54,15 @@ public class RunningWorkflowPrepareHandler extends AbstractWorkflowPrePareHandle
             // 2. 判断DAG是否已经支持超时
             // 计算超时时间，到达超时时间中断任务
             if (delay > DateUtils.toEpochMilli(prepare.getExecutorTimeout())) {
-                log.info("任务执行超时.workflowTaskBatchId:[{}] delay:[{}] executorTimeout:[{}]",
-                        prepare.getWorkflowTaskBatchId(), delay, DateUtils.toEpochMilli(prepare.getExecutorTimeout()));
+
                 // 超时停止任务
-                workflowBatchHandler.stop(prepare.getWorkflowTaskBatchId(), JobOperationReasonEnum.TASK_EXECUTION_TIMEOUT.getReason());
-                SnailSpringContext.getContext().publishEvent(new WorkflowTaskFailAlarmEvent(prepare.getWorkflowTaskBatchId()));
+                String reason = String.format("任务执行超时.workflowTaskBatchId:[%s] delay:[%s] executorTimeout:[%s]", prepare.getWorkflowTaskBatchId(), delay, DateUtils.toEpochMilli(prepare.getExecutorTimeout()));
+                SnailSpringContext.getContext().publishEvent(new WorkflowTaskFailAlarmEvent(WorkflowTaskFailAlarmEventDTO.builder()
+                        .workflowTaskBatchId(prepare.getWorkflowTaskBatchId())
+                        .notifyScene(JobNotifySceneEnum.WORKFLOW_TASK_ERROR.getNotifyScene())
+                        .reason(reason)
+                        .build()));
+                log.info(reason);
             }
         }
 

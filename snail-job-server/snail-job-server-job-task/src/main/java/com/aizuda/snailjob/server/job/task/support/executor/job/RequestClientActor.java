@@ -5,6 +5,7 @@ import akka.actor.ActorRef;
 import com.aizuda.snailjob.client.model.ExecuteResult;
 import com.aizuda.snailjob.client.model.request.DispatchJobRequest;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
+import com.aizuda.snailjob.common.core.enums.JobNotifySceneEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskStatusEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.model.Result;
@@ -124,6 +125,8 @@ public class RequestClientActor extends AbstractActor {
             SnailSpringContext.getContext().publishEvent(
                     new JobTaskFailAlarmEvent(JobTaskFailAlarmEventDTO.builder()
                             .jobTaskBatchId(dispatchJobRequest.getTaskBatchId())
+                            .reason(throwable.getMessage())
+                            .notifyScene(JobNotifySceneEnum.JOB_TASK_ERROR.getNotifyScene())
                             .build()));
         }
 

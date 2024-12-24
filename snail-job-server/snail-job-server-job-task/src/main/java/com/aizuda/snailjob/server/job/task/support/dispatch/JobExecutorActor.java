@@ -92,10 +92,6 @@ public class JobExecutorActor extends AbstractActor {
             } catch (Exception e) {
                 SnailJobLog.LOCAL.error("job executor exception. [{}]", taskExecute, e);
                 handleTaskBatch(taskExecute, JobTaskBatchStatusEnum.FAIL.getStatus(), JobOperationReasonEnum.TASK_EXECUTION_ERROR.getReason());
-                SnailSpringContext.getContext().publishEvent(
-                        new JobTaskFailAlarmEvent(JobTaskFailAlarmEventDTO.builder()
-                                .jobTaskBatchId(taskExecute.getTaskBatchId())
-                                .build()));
             } finally {
                 getContext().stop(getSelf());
             }
@@ -137,6 +133,7 @@ public class JobExecutorActor extends AbstractActor {
                                 .reason(JobNotifySceneEnum.JOB_NO_CLIENT_NODES_ERROR.getDesc())
                                 .notifyScene(JobNotifySceneEnum.JOB_NO_CLIENT_NODES_ERROR.getNotifyScene())
                                 .build()));
+                return;
             }
 
             // 更新状态
@@ -240,9 +237,10 @@ public class JobExecutorActor extends AbstractActor {
             SnailSpringContext.getContext().publishEvent(
                     new JobTaskFailAlarmEvent(JobTaskFailAlarmEventDTO.builder()
                             .jobTaskBatchId(taskExecute.getTaskBatchId())
+                            .reason(JobOperationReasonEnum.TASK_EXECUTION_ERROR.getDesc())
+                            .notifyScene(JobNotifySceneEnum.JOB_TASK_ERROR.getNotifyScene())
                             .build()));
         }
-
     }
 
 }

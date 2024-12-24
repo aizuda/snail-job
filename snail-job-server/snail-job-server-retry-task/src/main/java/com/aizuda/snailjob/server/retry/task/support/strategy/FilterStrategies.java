@@ -4,17 +4,17 @@ import cn.hutool.core.lang.Pair;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.enums.RetryNotifySceneEnum;
 import com.aizuda.snailjob.common.log.SnailJobLog;
-import com.aizuda.snailjob.server.common.AlarmInfoConverter;
 import com.aizuda.snailjob.server.common.IdempotentStrategy;
 import com.aizuda.snailjob.server.common.cache.CacheRegisterTable;
 import com.aizuda.snailjob.server.common.dto.DistributeInstance;
 import com.aizuda.snailjob.server.common.dto.RegisterNodeInfo;
 import com.aizuda.snailjob.server.common.triple.ImmutableTriple;
+import com.aizuda.snailjob.server.retry.task.dto.RetryTaskFailAlarmEventDTO;
 import com.aizuda.snailjob.server.retry.task.support.FilterStrategy;
 import com.aizuda.snailjob.server.retry.task.support.RetryContext;
+import com.aizuda.snailjob.server.retry.task.support.RetryTaskConverter;
 import com.aizuda.snailjob.server.retry.task.support.cache.CacheGroupRateLimiter;
 import com.aizuda.snailjob.server.retry.task.support.event.RetryTaskFailAlarmEvent;
-import com.aizuda.snailjob.template.datasource.persistence.dataobject.RetryTaskFailAlarmEventDO;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.ServerNodeMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
 import com.aizuda.snailjob.template.datasource.persistence.po.ServerNode;
@@ -205,12 +205,12 @@ public class FilterStrategies {
             }
 
             if (result == false) {
-                RetryTaskFailAlarmEventDO retryTaskFailAlarmEventDO =
-                        AlarmInfoConverter.INSTANCE.toRetryTaskFailAlarmEventDTO(
+                RetryTaskFailAlarmEventDTO toRetryTaskFailAlarmEventDTO =
+                        RetryTaskConverter.INSTANCE.toRetryTaskFailAlarmEventDTO(
                                 retryTask,
                                 description.toString(),
                                 RetryNotifySceneEnum.RETRY_NO_CLIENT_NODES_ERROR.getNotifyScene());
-                SnailSpringContext.getContext().publishEvent(new RetryTaskFailAlarmEvent(retryTaskFailAlarmEventDO));
+                SnailSpringContext.getContext().publishEvent(new RetryTaskFailAlarmEvent(toRetryTaskFailAlarmEventDTO));
             }
 
             return Pair.of(result, description);

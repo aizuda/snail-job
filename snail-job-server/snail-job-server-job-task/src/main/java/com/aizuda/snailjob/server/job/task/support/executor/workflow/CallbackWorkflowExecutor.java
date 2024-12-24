@@ -9,6 +9,7 @@ import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.dto.CallbackConfig;
 import com.aizuda.snailjob.server.common.dto.JobLogMetaDTO;
 import com.aizuda.snailjob.server.common.rpc.okhttp.RequestInterceptor;
+import com.aizuda.snailjob.server.job.task.dto.WorkflowTaskFailAlarmEventDTO;
 import com.aizuda.snailjob.server.job.task.support.alarm.event.WorkflowTaskFailAlarmEvent;
 import com.aizuda.snailjob.server.model.dto.CallbackParamsDTO;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTask;
@@ -114,7 +115,11 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
             }
 
             message = throwable.getMessage();
-            SnailSpringContext.getContext().publishEvent(new WorkflowTaskFailAlarmEvent(context.getWorkflowTaskBatchId()));
+            SnailSpringContext.getContext().publishEvent(new WorkflowTaskFailAlarmEvent(WorkflowTaskFailAlarmEventDTO.builder()
+                    .workflowTaskBatchId(context.getWorkflowTaskBatchId())
+                    .notifyScene(JobNotifySceneEnum.WORKFLOW_TASK_ERROR.getNotifyScene())
+                    .reason(message)
+                    .build()));
         }
 
         context.setEvaluationResult(result);

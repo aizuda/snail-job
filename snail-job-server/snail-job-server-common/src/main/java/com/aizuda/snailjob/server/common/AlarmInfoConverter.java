@@ -7,11 +7,9 @@ import com.aizuda.snailjob.server.common.dto.NotifyConfigInfo;
 import com.aizuda.snailjob.server.common.dto.RetryAlarmInfo;
 import com.aizuda.snailjob.server.common.dto.WorkflowAlarmInfo;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.JobBatchResponseDO;
-import com.aizuda.snailjob.template.datasource.persistence.dataobject.RetryTaskFailAlarmEventDO;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.WorkflowBatchResponseDO;
 import com.aizuda.snailjob.template.datasource.persistence.po.NotifyConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryDeadLetter;
-import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
@@ -31,22 +29,6 @@ public interface AlarmInfoConverter {
 
     AlarmInfoConverter INSTANCE = Mappers.getMapper(AlarmInfoConverter.class);
 
-    @Mappings(
-            @Mapping(source = "retryCount", target = "count")
-    )
-    List<RetryAlarmInfo> retryTaskToAlarmInfo(List<RetryTaskFailAlarmEventDO> retryTaskFailAlarmEventDOList);
-
-    @Mappings(
-            @Mapping(source = "retryCount", target = "count")
-    )
-    RetryAlarmInfo retryTaskToAlarmInfo(RetryTaskFailAlarmEventDO retryTaskFailAlarmEventDO);
-
-    @Mappings({
-            @Mapping(source = "notifyScene", target = "notifyScene"),
-            @Mapping(source = "reason", target = "reason")
-    })
-    RetryTaskFailAlarmEventDO toRetryTaskFailAlarmEventDTO(RetryTask retryTask, String reason, Integer notifyScene);
-
     List<RetryAlarmInfo> deadLetterToAlarmInfo(List<RetryDeadLetter> retryDeadLetters);
 
     List<NotifyConfigInfo> retryToNotifyConfigInfos(List<NotifyConfig> notifyConfigs);
@@ -64,8 +46,8 @@ public interface AlarmInfoConverter {
         return new HashSet<>(JsonUtil.parseList(notifyRecipientIdsStr, Long.class));
     }
 
-    List<JobAlarmInfo> toJobAlarmInfos(List<JobBatchResponseDO> jobBatchResponse);
+    JobAlarmInfo toJobAlarmInfo(JobBatchResponseDO jobBatchResponseDO);
 
-    List<WorkflowAlarmInfo> toWorkflowAlarmInfos(List<WorkflowBatchResponseDO> workflowBatchResponses);
+    WorkflowAlarmInfo toWorkflowAlarmInfo(WorkflowBatchResponseDO workflowBatchResponseDO);
 
 }

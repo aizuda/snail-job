@@ -37,6 +37,15 @@ public interface ConfigAccess<T> extends Access<T> {
      */
     RetrySceneConfig getSceneConfigByGroupNameAndSceneName(String groupName, String sceneName, String namespaceId);
 
+    /**
+     * 获取场景配置集合
+     *
+     * @param groupNames   组名称
+     * @param sceneNames   场景名称
+     * @param namespaceIds 命名空间
+     * @return {@link RetrySceneConfig} 场景配置
+     */
+    List<RetrySceneConfig> getSceneConfigByGroupNameAndSceneNameList(Set<String> groupNames, Set<String> sceneNames, Set<String> namespaceIds);
 
     /**
      * 获取通知配置

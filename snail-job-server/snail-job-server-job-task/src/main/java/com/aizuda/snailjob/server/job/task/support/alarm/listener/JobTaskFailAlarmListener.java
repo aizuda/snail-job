@@ -5,25 +5,21 @@ import com.aizuda.snailjob.common.core.enums.JobNotifySceneEnum;
 import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.snailjob.common.core.util.EnvironmentUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
-import com.aizuda.snailjob.server.common.AlarmInfoConverter;
 import com.aizuda.snailjob.server.common.alarm.AbstractJobAlarm;
 import com.aizuda.snailjob.server.common.dto.JobAlarmInfo;
 import com.aizuda.snailjob.server.common.dto.NotifyConfigInfo;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.job.task.dto.JobTaskFailAlarmEventDTO;
+import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
 import com.aizuda.snailjob.server.job.task.support.alarm.event.JobTaskFailAlarmEvent;
-import com.aizuda.snailjob.template.datasource.persistence.dataobject.JobBatchResponseDO;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskBatchMapper;
-import com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -40,8 +36,6 @@ import java.util.concurrent.TimeUnit;
 @Component
 @RequiredArgsConstructor
 public class JobTaskFailAlarmListener extends AbstractJobAlarm<JobTaskFailAlarmEvent> {
-
-    private final JobTaskBatchMapper jobTaskBatchMapper;
 
     /**
      * job任务失败数据
@@ -69,13 +63,11 @@ public class JobTaskFailAlarmListener extends AbstractJobAlarm<JobTaskFailAlarmE
         }
 
         // 拉取200条
-        List<Long> jobTaskBatchIds = Lists.newArrayList(jobTaskFailAlarmEventDTO.getJobTaskBatchId());
-        queue.drainTo(Collections.singleton(jobTaskBatchIds), 200);
-        QueryWrapper<JobTaskBatch> wrapper = new QueryWrapper<JobTaskBatch>()
-                .in("batch.id", jobTaskBatchIds)
-                .eq("batch.deleted", 0);
-        List<JobBatchResponseDO> jobTaskBatchList = jobTaskBatchMapper.selectJobBatchListByIds(wrapper);
-        return AlarmInfoConverter.INSTANCE.toJobAlarmInfos(jobTaskBatchList);
+        ArrayList<JobTaskFailAlarmEventDTO> lists = Lists.newArrayList(jobTaskFailAlarmEventDTO);
+        queue.drainTo(lists, 200);
+
+        // 数据类型转换
+        return JobTaskConverter.INSTANCE.toJobTaskFailAlarmEventDTO(lists);
     }
 
     @Override

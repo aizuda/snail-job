@@ -53,4 +53,9 @@ public class WorkflowBatchResponseDO {
      * 创建时间
      */
     private LocalDateTime createDt;
+
+    /**
+     * 通知配置
+     */
+    private String notifyIds;
 }

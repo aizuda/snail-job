@@ -1,15 +1,12 @@
-package com.aizuda.snailjob.template.datasource.persistence.dataobject;
+package com.aizuda.snailjob.server.retry.task.dto;
 
 import com.aizuda.snailjob.template.datasource.persistence.po.CreateUpdateDt;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
-/**
- * 重试任务失败告警
- */
 @Data
-public class RetryTaskFailAlarmEventDO extends CreateUpdateDt {
+public class RetryTaskExecutorDTO extends CreateUpdateDt {
 
     private Long id;
 

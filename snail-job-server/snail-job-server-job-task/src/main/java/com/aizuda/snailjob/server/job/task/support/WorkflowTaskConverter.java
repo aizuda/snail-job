@@ -1,13 +1,13 @@
 package com.aizuda.snailjob.server.job.task.support;
 
+import com.aizuda.snailjob.server.common.dto.WorkflowAlarmInfo;
 import com.aizuda.snailjob.server.job.task.dto.WorkflowPartitionTaskDTO;
+import com.aizuda.snailjob.server.job.task.dto.WorkflowTaskFailAlarmEventDTO;
 import com.aizuda.snailjob.server.job.task.dto.WorkflowTaskPrepareDTO;
 import com.aizuda.snailjob.server.job.task.support.block.workflow.WorkflowBlockStrategyContext;
 import com.aizuda.snailjob.server.job.task.support.executor.workflow.WorkflowExecutorContext;
 import com.aizuda.snailjob.server.job.task.support.generator.batch.JobTaskBatchGeneratorContext;
 import com.aizuda.snailjob.server.job.task.support.generator.batch.WorkflowTaskBatchGeneratorContext;
-import com.aizuda.snailjob.server.model.dto.CallbackParamsDTO;
-import com.aizuda.snailjob.template.datasource.persistence.po.JobTask;
 import com.aizuda.snailjob.template.datasource.persistence.po.Workflow;
 import com.aizuda.snailjob.template.datasource.persistence.po.WorkflowNode;
 import com.aizuda.snailjob.template.datasource.persistence.po.WorkflowTaskBatch;
@@ -54,5 +54,10 @@ public interface WorkflowTaskConverter {
 
     WorkflowBlockStrategyContext toWorkflowBlockStrategyContext(WorkflowTaskPrepareDTO prepareDTO);
 
-    List<CallbackParamsDTO> toCallbackParamsDTO(List<JobTask> tasks);
+    List<WorkflowAlarmInfo> toWorkflowTaskFailAlarmEventDTO(List<WorkflowTaskFailAlarmEventDTO> workflowTaskFailAlarmEventDTOList);
+
+    @Mappings(
+            @Mapping(source = "workflowTaskBatchId", target = "id")
+    )
+    WorkflowAlarmInfo toWorkflowTaskFailAlarmEventDTO(WorkflowTaskFailAlarmEventDTO workflowTaskFailAlarmEventDTO);
 }

@@ -20,7 +20,6 @@ import com.aizuda.snailjob.template.datasource.persistence.mapper.NotifyRecipien
 import com.aizuda.snailjob.template.datasource.persistence.po.NotifyConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.NotifyRecipient;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.RateLimiter;
@@ -65,12 +64,12 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
 
             // 通知场景
             Set<Integer> notifyScene = new HashSet<>();
-
             // 通知配置
             Set<Long> notifyIds = new HashSet<>();
 
             // 转换AlarmDTO 为了下面循环发送使用
-            Map<Set<Long>, List<A>> waitSendAlarmInfos = convertAlarmDTO(alarmInfos, notifyScene, notifyIds);
+            Map<Set<Long>, List<A>> waitSendAlarmInfos = convertAlarmDTO(alarmInfos, notifyScene);
+            waitSendAlarmInfos.keySet().stream().map(i -> notifyIds.addAll(i)).collect(Collectors.toSet());
 
             // 批量获取通知配置
             Map<Set<Long>, List<NotifyConfigInfo>> notifyConfig = obtainNotifyConfig(notifyScene, notifyIds);
@@ -134,12 +133,16 @@ public abstract class AbstractAlarm<E extends ApplicationEvent, A extends AlarmI
             });
             notifyConfigInfo.setRecipientInfos(recipients);
         }
-        return ImmutableMap.of(notifyIds, notifyConfigInfos);
+        Map<Set<Long>, List<NotifyConfigInfo>> notifyConfigInfo = new HashMap<>();
+        for (Long notifyId : notifyIds) {
+            notifyConfigInfo.put(Collections.singleton(notifyId), notifyConfigInfos);
+        }
+        return notifyConfigInfo;
     }
 
     protected abstract List<SyetemTaskTypeEnum> getSystemTaskType();
 
-    protected abstract Map<Set<Long>, List<A>> convertAlarmDTO(List<A> alarmData, Set<Integer> notifyScene, Set<Long> notifyIds);
+    protected abstract Map<Set<Long>, List<A>> convertAlarmDTO(List<A> alarmData, Set<Integer> notifyScene);
 
     protected abstract List<A> poll() throws InterruptedException;
 

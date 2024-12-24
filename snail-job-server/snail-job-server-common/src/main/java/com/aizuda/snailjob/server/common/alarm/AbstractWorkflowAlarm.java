@@ -2,14 +2,19 @@ package com.aizuda.snailjob.server.common.alarm;
 
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
-import com.aizuda.snailjob.common.core.util.StreamUtils;
+import com.aizuda.snailjob.server.common.AlarmInfoConverter;
 import com.aizuda.snailjob.server.common.dto.WorkflowAlarmInfo;
+import com.aizuda.snailjob.template.datasource.persistence.dataobject.WorkflowBatchResponseDO;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowTaskBatchMapper;
+import com.aizuda.snailjob.template.datasource.persistence.po.WorkflowTaskBatch;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.google.common.collect.Lists;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEvent;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @author xiaowoniu
@@ -18,16 +23,33 @@ import java.util.Set;
  */
 public abstract class AbstractWorkflowAlarm<E extends ApplicationEvent> extends AbstractAlarm<E, WorkflowAlarmInfo> {
 
+    @Autowired
+    private WorkflowTaskBatchMapper workflowTaskBatchMapper;
+
     @Override
-    protected Map<Set<Long>, List<WorkflowAlarmInfo>> convertAlarmDTO(List<WorkflowAlarmInfo> workflowAlarmInfoList, Set<Integer> notifyScene, Set<Long> notifyIds) {
+    protected Map<Set<Long>, List<WorkflowAlarmInfo>> convertAlarmDTO(List<WorkflowAlarmInfo> workflowAlarmInfoList, Set<Integer> notifyScene) {
 
-        return StreamUtils.groupByKey(workflowAlarmInfoList, workflowAlarmInfo -> {
+        Map<Set<Long>, List<WorkflowAlarmInfo>> workflowAlarmInfoMap = new HashMap<>();
+        workflowAlarmInfoList.stream().forEach(i -> notifyScene.add(i.getNotifyScene()));
 
-            Set<Long> workflowNotifyIds =  StrUtil.isBlank(workflowAlarmInfo.getNotifyIds()) ? new HashSet<>() : new HashSet<>(JsonUtil.parseList(workflowAlarmInfo.getNotifyIds(), Long.class));
+        Map<Long, WorkflowAlarmInfo> workflowAlarmInfoGroupMap = workflowAlarmInfoList.stream().collect(Collectors.toMap(i -> i.getId(), Function.identity()));
 
-            notifyScene.add(workflowAlarmInfo.getNotifyScene());
-            notifyIds.addAll(workflowNotifyIds);
-            return workflowNotifyIds;
-        });
+        List<WorkflowBatchResponseDO> workflowBatchResponseDOList = workflowTaskBatchMapper.selectWorkflowBatchList(
+                new QueryWrapper<WorkflowTaskBatch>()
+                        .in("batch.id", workflowAlarmInfoList.stream().map(i -> i.getId()).collect(Collectors.toSet()))
+                        .eq("batch.deleted", 0));
+
+        for (WorkflowBatchResponseDO workflowBatchResponseDO : workflowBatchResponseDOList) {
+            Set<Long> workflowNotifyIds = StrUtil.isBlank(workflowBatchResponseDO.getNotifyIds()) ? new HashSet<>() : new HashSet<>(JsonUtil.parseList(workflowBatchResponseDO.getNotifyIds(), Long.class));
+            for (Long workflowNotifyId : workflowNotifyIds) {
+
+                WorkflowAlarmInfo workflowAlarmInfo = AlarmInfoConverter.INSTANCE.toWorkflowAlarmInfo(workflowBatchResponseDO);
+                WorkflowAlarmInfo alarmInfo = workflowAlarmInfoGroupMap.get(workflowAlarmInfo.getId());
+                workflowAlarmInfo.setReason(alarmInfo.getReason());
+                workflowAlarmInfoMap.put(Collections.singleton(workflowNotifyId), Lists.newArrayList(workflowAlarmInfo));
+            }
+        }
+
+        return workflowAlarmInfoMap;
     }
 }

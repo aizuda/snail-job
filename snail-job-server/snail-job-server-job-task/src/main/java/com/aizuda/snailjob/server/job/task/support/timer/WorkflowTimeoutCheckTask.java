@@ -1,10 +1,12 @@
 package com.aizuda.snailjob.server.job.task.support.timer;
 
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
+import com.aizuda.snailjob.common.core.enums.JobNotifySceneEnum;
 import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.TimerTask;
+import com.aizuda.snailjob.server.job.task.dto.WorkflowTaskFailAlarmEventDTO;
 import com.aizuda.snailjob.server.job.task.support.alarm.event.WorkflowTaskFailAlarmEvent;
 import com.aizuda.snailjob.server.job.task.support.handler.WorkflowBatchHandler;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowTaskBatchMapper;
@@ -40,8 +42,15 @@ public class WorkflowTimeoutCheckTask implements TimerTask<String> {
 
         // 超时停止任务
         workflowBatchHandler.stop(workflowTaskBatchId, JobOperationReasonEnum.TASK_EXECUTION_TIMEOUT.getReason());
-        SnailSpringContext.getContext().publishEvent(new WorkflowTaskFailAlarmEvent(workflowTaskBatchId));
-        SnailJobLog.LOCAL.info("超时中断.workflowTaskBatchId:[{}]", workflowTaskBatchId);
+
+        String reason = String.format("超时中断.workflowTaskBatchId:[%s]", workflowTaskBatchId);
+        SnailSpringContext.getContext().publishEvent(new WorkflowTaskFailAlarmEvent(WorkflowTaskFailAlarmEventDTO.builder()
+                .workflowTaskBatchId(workflowTaskBatchId)
+                .notifyScene(JobNotifySceneEnum.WORKFLOW_TASK_ERROR.getNotifyScene())
+                .reason(reason)
+                .build()));
+
+        SnailJobLog.LOCAL.info(reason);
     }
 
     @Override

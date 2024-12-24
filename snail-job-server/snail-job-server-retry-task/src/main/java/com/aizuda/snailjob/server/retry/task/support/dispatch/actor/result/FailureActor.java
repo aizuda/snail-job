@@ -11,12 +11,13 @@ import com.aizuda.snailjob.server.common.config.SystemProperties;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.triple.ImmutableTriple;
+import com.aizuda.snailjob.server.retry.task.dto.RetryTaskExecutorDTO;
+import com.aizuda.snailjob.server.retry.task.dto.RetryTaskFailAlarmEventDTO;
 import com.aizuda.snailjob.server.retry.task.support.RetryTaskConverter;
 import com.aizuda.snailjob.server.retry.task.support.event.RetryTaskFailAlarmEvent;
 import com.aizuda.snailjob.server.retry.task.support.handler.CallbackRetryTaskHandler;
 import com.aizuda.snailjob.server.retry.task.support.idempotent.IdempotentHolder;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
-import com.aizuda.snailjob.template.datasource.persistence.dataobject.RetryTaskFailAlarmEventDO;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskLogMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
@@ -43,6 +44,7 @@ import java.time.LocalDateTime;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @RequiredArgsConstructor
 public class FailureActor extends AbstractActor {
+
     private final IdempotentStrategy<String> idempotentStrategy = IdempotentHolder.getRetryIdempotent();
     private final AccessTemplate accessTemplate;
     private final CallbackRetryTaskHandler callbackRetryTaskHandler;
@@ -52,10 +54,10 @@ public class FailureActor extends AbstractActor {
 
     @Override
     public Receive createReceive() {
-        return receiveBuilder().match(RetryTaskFailAlarmEventDO.class, retryTaskFailAlarmEventDO -> {
+        return receiveBuilder().match(RetryTaskExecutorDTO.class, retryTaskExecutorDTO -> {
 
-            RetryTask retryTask = RetryTaskConverter.INSTANCE.toRetryTask(retryTaskFailAlarmEventDO);
-            SnailJobLog.LOCAL.debug("FailureActor params:[{}]", retryTask);
+            SnailJobLog.LOCAL.debug("FailureActor params:[{}]", retryTaskExecutorDTO);
+            RetryTask retryTask = RetryTaskConverter.INSTANCE.toRetryTask(retryTaskExecutorDTO);
             try {
                 // 超过最大等级
                 RetrySceneConfig retrySceneConfig =
@@ -93,7 +95,12 @@ public class FailureActor extends AbstractActor {
                                 .eq(RetryTaskLog::getUniqueId, retryTask.getUniqueId())
                                 .eq(RetryTaskLog::getGroupName, retryTask.getGroupName()));
 
-                        SnailSpringContext.getContext().publishEvent(new RetryTaskFailAlarmEvent(retryTaskFailAlarmEventDO));
+                        RetryTaskFailAlarmEventDTO retryTaskFailAlarmEventDTO =
+                                RetryTaskConverter.INSTANCE.toRetryTaskFailAlarmEventDTO(
+                                        retryTask,
+                                        retryTaskExecutorDTO.getReason(),
+                                        retryTaskExecutorDTO.getNotifyScene());
+                        SnailSpringContext.getContext().publishEvent(new RetryTaskFailAlarmEvent(retryTaskFailAlarmEventDTO));
                     }
                 });
             } catch (Exception e) {

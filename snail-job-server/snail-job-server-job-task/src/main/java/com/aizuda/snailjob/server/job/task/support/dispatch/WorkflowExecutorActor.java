@@ -5,10 +5,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
-import com.aizuda.snailjob.common.core.enums.FailStrategyEnum;
-import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
-import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
-import com.aizuda.snailjob.common.core.enums.WorkflowNodeTypeEnum;
+import com.aizuda.snailjob.common.core.enums.*;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
@@ -16,6 +13,7 @@ import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.job.task.dto.WorkflowNodeTaskExecuteDTO;
+import com.aizuda.snailjob.server.job.task.dto.WorkflowTaskFailAlarmEventDTO;
 import com.aizuda.snailjob.server.job.task.support.WorkflowExecutor;
 import com.aizuda.snailjob.server.job.task.support.WorkflowTaskConverter;
 import com.aizuda.snailjob.server.job.task.support.alarm.event.WorkflowTaskFailAlarmEvent;
@@ -76,10 +74,15 @@ public class WorkflowExecutorActor extends AbstractActor {
 
             } catch (Exception e) {
                 SnailJobLog.LOCAL.error("workflow executor exception. [{}]", taskExecute, e);
-                handlerTaskBatch(taskExecute, JobTaskBatchStatusEnum.FAIL.getStatus(),
+                handlerTaskBatch(taskExecute,
+                        JobTaskBatchStatusEnum.FAIL.getStatus(),
                         JobOperationReasonEnum.TASK_EXECUTION_ERROR.getReason());
-                SnailSpringContext.getContext().publishEvent(
-                        new WorkflowTaskFailAlarmEvent(taskExecute.getWorkflowTaskBatchId()));
+
+                SnailSpringContext.getContext().publishEvent(new WorkflowTaskFailAlarmEvent(WorkflowTaskFailAlarmEventDTO.builder()
+                        .workflowTaskBatchId(taskExecute.getWorkflowTaskBatchId())
+                        .notifyScene(JobNotifySceneEnum.WORKFLOW_TASK_ERROR.getNotifyScene())
+                        .reason(e.getMessage())
+                        .build()));
             } finally {
                 getContext().stop(getSelf());
             }

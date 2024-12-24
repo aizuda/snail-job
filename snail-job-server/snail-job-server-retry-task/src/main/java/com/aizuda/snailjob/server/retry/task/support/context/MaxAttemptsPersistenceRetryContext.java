@@ -72,6 +72,11 @@ public class MaxAttemptsPersistenceRetryContext<V> implements RetryContext<V> {
     }
 
     @Override
+    public Exception getException() {
+        return exception;
+    }
+
+    @Override
     public RetrySceneConfig sceneConfig() {
         return retrySceneConfig;
     }

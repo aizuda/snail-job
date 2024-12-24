@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.retry.task.support.event;
 
-import com.aizuda.snailjob.template.datasource.persistence.dataobject.RetryTaskFailAlarmEventDO;
+import com.aizuda.snailjob.server.retry.task.dto.RetryTaskFailAlarmEventDTO;
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
 
@@ -14,10 +14,10 @@ import org.springframework.context.ApplicationEvent;
 @Getter
 public class RetryTaskFailAlarmEvent extends ApplicationEvent {
 
-    private RetryTaskFailAlarmEventDO retryTaskFailAlarmEventDO;
+    private RetryTaskFailAlarmEventDTO retryTaskFailAlarmEventDTO;
 
-    public RetryTaskFailAlarmEvent(RetryTaskFailAlarmEventDO retryTaskFailAlarmEventDO) {
-        super(retryTaskFailAlarmEventDO);
-        this.retryTaskFailAlarmEventDO = retryTaskFailAlarmEventDO;
+    public RetryTaskFailAlarmEvent(RetryTaskFailAlarmEventDTO retryTaskFailAlarmEventDTO) {
+        super(retryTaskFailAlarmEventDTO);
+        this.retryTaskFailAlarmEventDTO = retryTaskFailAlarmEventDTO;
     }
 }

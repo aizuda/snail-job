@@ -42,6 +42,13 @@ public interface RetryContext<V> {
     void setException(Exception e);
 
     /**
+     * 获取客户端发送异常信息
+     *
+     * @return
+     */
+    Exception getException();
+
+    /**
      * 是否发生异常
      *
      * @return

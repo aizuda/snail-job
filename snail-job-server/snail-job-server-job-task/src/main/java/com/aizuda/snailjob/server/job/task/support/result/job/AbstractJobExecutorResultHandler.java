@@ -2,6 +2,7 @@ package com.aizuda.snailjob.server.job.task.support.result.job;
 
 import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
+import com.aizuda.snailjob.common.core.enums.JobNotifySceneEnum;
 import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskStatusEnum;
@@ -72,6 +73,7 @@ public abstract class AbstractJobExecutorResultHandler implements JobExecutorRes
                     new JobTaskFailAlarmEvent(JobTaskFailAlarmEventDTO.builder()
                             .jobTaskBatchId(context.getTaskBatchId())
                             .reason(context.getMessage())
+                            .notifyScene(JobNotifySceneEnum.JOB_TASK_ERROR.getNotifyScene())
                             .build()));
             doHandleFail(context);
         } else if (stopCount > 0) {

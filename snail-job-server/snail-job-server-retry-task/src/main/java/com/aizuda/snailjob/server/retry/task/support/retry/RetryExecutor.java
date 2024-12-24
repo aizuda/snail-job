@@ -2,19 +2,19 @@ package com.aizuda.snailjob.server.retry.task.support.retry;
 
 import akka.actor.ActorRef;
 import cn.hutool.core.lang.Pair;
+import com.aizuda.snailjob.client.model.DispatchRetryResultDTO;
 import com.aizuda.snailjob.common.core.enums.RetryNotifySceneEnum;
 import com.aizuda.snailjob.common.core.model.Result;
 import com.aizuda.snailjob.common.log.SnailJobLog;
-import com.aizuda.snailjob.server.common.AlarmInfoConverter;
 import com.aizuda.snailjob.server.common.WaitStrategy;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.common.dto.RetryLogMetaDTO;
 import com.aizuda.snailjob.server.common.util.DateUtils;
+import com.aizuda.snailjob.server.retry.task.dto.RetryTaskExecutorDTO;
 import com.aizuda.snailjob.server.retry.task.support.FilterStrategy;
 import com.aizuda.snailjob.server.retry.task.support.RetryContext;
 import com.aizuda.snailjob.server.retry.task.support.RetryTaskConverter;
 import com.aizuda.snailjob.server.retry.task.support.StopStrategy;
-import com.aizuda.snailjob.template.datasource.persistence.dataobject.RetryTaskFailAlarmEventDO;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -98,12 +98,12 @@ public class RetryExecutor<V> {
             actorRef = ActorGenerator.failureActor();
         }
 
-        RetryTaskFailAlarmEventDO retryTaskFailAlarmEventDO =
-                AlarmInfoConverter.INSTANCE.toRetryTaskFailAlarmEventDTO(
+        RetryTaskExecutorDTO retryTaskExecutorDTO =
+                RetryTaskConverter.INSTANCE.toRetryTaskExecutorDTO(
                         retryContext.getRetryTask(),
-                        ((Result) call).getMessage(),
+                        retryContext.hasException() ? retryContext.getException().getCause().getMessage() : ((DispatchRetryResultDTO) ((Result) call).getData()).getExceptionMsg(),
                         RetryNotifySceneEnum.RETRY_TASK_FAIL_ERROR.getNotifyScene());
-        actorRef.tell(retryTaskFailAlarmEventDO, actorRef);
+        actorRef.tell(retryTaskExecutorDTO, actorRef);
 
         return call;
     }

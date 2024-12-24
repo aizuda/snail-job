@@ -1,6 +1,7 @@
 package com.aizuda.snailjob.server.job.task.support.timer;
 
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
+import com.aizuda.snailjob.common.core.enums.JobNotifySceneEnum;
 import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.snailjob.common.log.SnailJobLog;
@@ -71,6 +72,8 @@ public class JobTimeoutCheckTask implements TimerTask<String> {
         SnailSpringContext.getContext().publishEvent(
                 new JobTaskFailAlarmEvent(JobTaskFailAlarmEventDTO.builder()
                         .jobTaskBatchId(taskBatchId)
+                        .reason("超时中断.taskBatchId:[" + taskBatchId + "]")
+                        .notifyScene(JobNotifySceneEnum.JOB_TASK_ERROR.getNotifyScene())
                         .build()));
         SnailJobLog.LOCAL.info("超时中断.taskBatchId:[{}]", taskBatchId);
     }

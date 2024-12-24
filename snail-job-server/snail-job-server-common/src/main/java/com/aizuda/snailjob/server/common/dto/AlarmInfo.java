@@ -22,13 +22,13 @@ public class AlarmInfo {
     private String notifyIds;
 
     /**
-     * 失败原因
-     */
-    private String reason;
-
-    /**
      * 通知场景
      */
     private Integer notifyScene;
+
+    /**
+     * 失败原因
+     */
+    private String reason;
 
 }

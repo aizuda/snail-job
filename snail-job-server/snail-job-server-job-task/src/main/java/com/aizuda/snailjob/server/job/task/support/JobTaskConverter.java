@@ -6,7 +6,6 @@ import com.aizuda.snailjob.client.model.request.MapTaskRequest;
 import com.aizuda.snailjob.server.common.dto.JobAlarmInfo;
 import com.aizuda.snailjob.server.common.dto.JobLogMetaDTO;
 import com.aizuda.snailjob.server.job.task.dto.*;
-import com.aizuda.snailjob.server.job.task.support.alarm.event.JobTaskFailAlarmEvent;
 import com.aizuda.snailjob.server.job.task.support.block.job.BlockStrategyContext;
 import com.aizuda.snailjob.server.job.task.support.callback.ClientCallbackContext;
 import com.aizuda.snailjob.server.job.task.support.executor.job.JobExecutorContext;
@@ -72,8 +71,6 @@ public interface JobTaskConverter {
     TaskStopJobContext toStopJobContext(BlockStrategyContext context);
 
     TaskStopJobContext toStopJobContext(JobExecutorResultContext context);
-
-    TaskStopJobContext toStopJobContext(JobExecutorResultDTO context);
 
     @Mappings(
             @Mapping(source = "id", target = "jobId")
@@ -142,9 +139,14 @@ public interface JobTaskConverter {
 
     JobLogMessage toJobLogMessage(JobLogMessage jobLogMessage);
 
-    ReduceTaskDTO toReduceTaskDTO(CompleteJobBatchDTO jobBatchDTO);
-
     ReduceTaskDTO toReduceTaskDTO(JobExecutorResultContext context);
 
     JobExecutorResultContext toJobExecutorResultContext(CompleteJobBatchDTO completeJobBatchDTO);
+
+    List<JobAlarmInfo> toJobTaskFailAlarmEventDTO(List<JobTaskFailAlarmEventDTO> jobTaskFailAlarmEventDTOList);
+
+    @Mappings(
+            @Mapping(source = "jobTaskBatchId", target = "id")
+    )
+    JobAlarmInfo toJobAlarmInfo(JobTaskFailAlarmEventDTO jobTaskFailAlarmEventDTO);
 }
