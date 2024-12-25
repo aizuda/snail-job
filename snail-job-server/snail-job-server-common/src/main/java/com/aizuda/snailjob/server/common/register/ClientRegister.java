@@ -22,6 +22,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
 
@@ -43,14 +45,13 @@ import java.util.stream.Collectors;
  */
 @Component(ClientRegister.BEAN_NAME)
 @Slf4j
-@RequiredArgsConstructor
 public class ClientRegister extends AbstractRegister {
-    ExecutorService executorService = Executors.newFixedThreadPool(5);
-    private final RefreshNodeSchedule refreshNodeSchedule;
     public static final String BEAN_NAME = "clientRegister";
-
     public static final int DELAY_TIME = 30;
     protected static final LinkedBlockingDeque<ServerNode> QUEUE = new LinkedBlockingDeque<>(1000);
+    @Autowired
+    @Lazy
+    private RefreshNodeSchedule refreshNodeSchedule;
 
     @Override
     public boolean supports(int type) {
@@ -124,9 +125,8 @@ public class ClientRegister extends AbstractRegister {
     }
 
     @Component
-    @Slf4j
-    @RequiredArgsConstructor
     public class RefreshNodeSchedule extends AbstractSchedule {
+        private final ExecutorService executorService = Executors.newFixedThreadPool(5);
 
         @Override
         protected void doExecute() {
@@ -161,7 +161,7 @@ public class ClientRegister extends AbstractRegister {
                     return;
                 }
 
-                SnailJobLog.LOCAL.info("start refresh client nodes：{}", waitRefreshDBClientNodes);
+                SnailJobLog.LOCAL.debug("start refresh client nodes：{}", waitRefreshDBClientNodes);
 
                 // 刷新DB
                 refreshExpireAt(waitRefreshDBClientNodes);
