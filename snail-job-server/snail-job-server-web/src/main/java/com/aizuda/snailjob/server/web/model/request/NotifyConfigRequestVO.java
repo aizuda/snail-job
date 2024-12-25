@@ -23,13 +23,6 @@ public class NotifyConfigRequestVO {
     private String groupName;
 
     /**
-     * 业务id (scene_name或job_id或workflow_id)
-     */
-    //@NotBlank(message = "业务id不能为空")
-    @Deprecated
-    private String businessId;
-
-    /**
      * 任务类型 1、重试任务 2、回调任务、 3、JOB任务 4、WORKFLOW任务
      */
     @NotNull(message = "任务类型不能为空")

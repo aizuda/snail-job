@@ -50,7 +50,6 @@ public class NotifyConfigServiceImpl implements NotifyConfigService {
                                 .eq(NotifyConfig::getNamespaceId, userSessionVO.getNamespaceId())
                                 .in(CollUtil.isNotEmpty(groupNames), NotifyConfig::getGroupName, groupNames)
                                 .eq(StrUtil.isNotBlank(queryVO.getGroupName()), NotifyConfig::getGroupName, queryVO.getGroupName())
-                                .eq(StrUtil.isNotBlank(queryVO.getSceneName()), NotifyConfig::getBusinessId, queryVO.getSceneName())
                                 .orderByDesc(NotifyConfig::getId))
                 .getRecords();
 
