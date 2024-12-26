@@ -92,6 +92,8 @@ public class JobServiceImpl implements JobService {
                         .in(CollUtil.isNotEmpty(groupNames), Job::getGroupName, groupNames)
                         .likeRight(StrUtil.isNotBlank(queryVO.getJobName()), Job::getJobName,
                                 StrUtil.trim(queryVO.getJobName()))
+                        .like(StrUtil.isNotBlank(queryVO.getExecutorInfo()), Job::getExecutorInfo,
+                                StrUtil.trim(queryVO.getExecutorInfo()))
                         .eq(Objects.nonNull(queryVO.getJobStatus()), Job::getJobStatus, queryVO.getJobStatus())
                         .eq(Job::getDeleted, StatusEnum.NO.getStatus())
                         .orderByDesc(Job::getId));
