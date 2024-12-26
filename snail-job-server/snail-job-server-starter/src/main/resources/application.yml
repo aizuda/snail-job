@@ -87,4 +87,4 @@ snail-job:
     max-count: 288 #回调最大执行次数
     trigger-interval: 900 #间隔时间
   retry-max-pull-count: 10
-  rpc-type: grpc
+  rpc-type: netty
