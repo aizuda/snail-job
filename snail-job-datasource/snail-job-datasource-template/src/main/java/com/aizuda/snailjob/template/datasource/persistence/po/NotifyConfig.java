@@ -17,6 +17,7 @@ public class NotifyConfig extends CreateUpdateDt {
     private String namespaceId;
 
     private String groupName;
+
 //
 //    /**
 //     * 业务id (scene_name或job_id或workflow_id)

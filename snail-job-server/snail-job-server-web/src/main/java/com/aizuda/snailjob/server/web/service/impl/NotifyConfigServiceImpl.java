@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -50,6 +51,9 @@ public class NotifyConfigServiceImpl implements NotifyConfigService {
                                 .eq(NotifyConfig::getNamespaceId, userSessionVO.getNamespaceId())
                                 .in(CollUtil.isNotEmpty(groupNames), NotifyConfig::getGroupName, groupNames)
                                 .eq(StrUtil.isNotBlank(queryVO.getGroupName()), NotifyConfig::getGroupName, queryVO.getGroupName())
+                                .eq(Objects.nonNull(queryVO.getNotifyStatus()), NotifyConfig::getNotifyStatus, queryVO.getNotifyStatus())
+                                .eq(Objects.nonNull(queryVO.getSystemTaskType()), NotifyConfig::getSystemTaskType, queryVO.getSystemTaskType())
+                                .like(StrUtil.isNotBlank(queryVO.getNotifyName()), NotifyConfig::getNotifyName, queryVO.getNotifyName())
                                 .orderByDesc(NotifyConfig::getId))
                 .getRecords();
 
