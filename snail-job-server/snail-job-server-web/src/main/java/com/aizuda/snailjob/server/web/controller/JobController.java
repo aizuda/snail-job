@@ -3,10 +3,7 @@ package com.aizuda.snailjob.server.web.controller;
 import com.aizuda.snailjob.common.core.annotation.OriginalControllerReturnValue;
 import com.aizuda.snailjob.server.web.annotation.LoginRequired;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
-import com.aizuda.snailjob.server.web.model.request.ExportJobVO;
-import com.aizuda.snailjob.server.web.model.request.JobQueryVO;
-import com.aizuda.snailjob.server.web.model.request.JobRequestVO;
-import com.aizuda.snailjob.server.web.model.request.JobStatusUpdateRequestVO;
+import com.aizuda.snailjob.server.web.model.request.*;
 import com.aizuda.snailjob.server.web.model.response.JobResponseVO;
 import com.aizuda.snailjob.server.web.service.JobService;
 import com.aizuda.snailjob.server.web.util.ExportUtils;
@@ -96,16 +93,8 @@ public class JobController {
 
     @PostMapping("/trigger")
     @LoginRequired
-    public Boolean trigger(@RequestParam(value = "jobId") Long jobId,
-                           @RequestParam(value = "tmpArgsStr", required = false) String tmpArgsStr) {
-        return jobService.trigger(jobId, tmpArgsStr);
-    }
-
-
-    @PostMapping("/trigger/{jobId}")
-    @LoginRequired
-    public Boolean trigger(@PathVariable("jobId") Long jobId) {
-        return jobService.trigger(jobId, null);
+    public Boolean trigger(@RequestBody @Validated JobTriggerVO jobTrigger) {
+        return jobService.trigger(jobTrigger);
     }
 
     @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

@@ -3,10 +3,7 @@ package com.aizuda.snailjob.server.web.service;
 import cn.hutool.core.lang.Pair;
 import com.aizuda.snailjob.server.common.dto.DecisionConfig;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
-import com.aizuda.snailjob.server.web.model.request.CheckDecisionVO;
-import com.aizuda.snailjob.server.web.model.request.ExportWorkflowVO;
-import com.aizuda.snailjob.server.web.model.request.WorkflowQueryVO;
-import com.aizuda.snailjob.server.web.model.request.WorkflowRequestVO;
+import com.aizuda.snailjob.server.web.model.request.*;
 import com.aizuda.snailjob.server.web.model.response.WorkflowDetailResponseVO;
 import com.aizuda.snailjob.server.web.model.response.WorkflowResponseVO;
 import jakarta.validation.Valid;
@@ -33,7 +30,7 @@ public interface WorkflowService {
 
     Boolean updateStatus(Long id);
 
-    Boolean trigger(Long id, String tmpWfContext);
+    Boolean trigger(WorkflowTriggerVO triggerVO);
 
     List<WorkflowResponseVO> getWorkflowNameList(String keywords, Long workflowId, String groupName);
 

@@ -5,10 +5,7 @@ import com.aizuda.snailjob.common.core.annotation.OriginalControllerReturnValue;
 import com.aizuda.snailjob.server.web.annotation.LoginRequired;
 import com.aizuda.snailjob.server.web.annotation.RoleEnum;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
-import com.aizuda.snailjob.server.web.model.request.CheckDecisionVO;
-import com.aizuda.snailjob.server.web.model.request.ExportWorkflowVO;
-import com.aizuda.snailjob.server.web.model.request.WorkflowQueryVO;
-import com.aizuda.snailjob.server.web.model.request.WorkflowRequestVO;
+import com.aizuda.snailjob.server.web.model.request.*;
 import com.aizuda.snailjob.server.web.model.response.WorkflowDetailResponseVO;
 import com.aizuda.snailjob.server.web.model.response.WorkflowResponseVO;
 import com.aizuda.snailjob.server.web.service.WorkflowService;
@@ -74,17 +71,10 @@ public class WorkflowController {
         return workflowService.deleteByIds(ids);
     }
 
-    @PostMapping("/trigger/{id}")
-    @LoginRequired(role = RoleEnum.USER)
-    public Boolean trigger(@PathVariable("id") Long id) {
-        return workflowService.trigger(id,null);
-    }
-
     @PostMapping("/trigger")
     @LoginRequired(role = RoleEnum.USER)
-    public Boolean trigger(@RequestParam(value = "id") Long id,
-                           @RequestParam(value = "tmpWfContext", required = false) String tmpWfContext) {
-        return workflowService.trigger(id, tmpWfContext);
+    public Boolean trigger(@RequestBody @Validated WorkflowTriggerVO triggerVO) {
+        return workflowService.trigger(triggerVO);
     }
 
     @GetMapping("/workflow-name/list")

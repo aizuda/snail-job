@@ -1,10 +1,7 @@
 package com.aizuda.snailjob.server.web.service;
 
 import com.aizuda.snailjob.server.web.model.base.PageResult;
-import com.aizuda.snailjob.server.web.model.request.ExportJobVO;
-import com.aizuda.snailjob.server.web.model.request.JobQueryVO;
-import com.aizuda.snailjob.server.web.model.request.JobRequestVO;
-import com.aizuda.snailjob.server.web.model.request.JobStatusUpdateRequestVO;
+import com.aizuda.snailjob.server.web.model.request.*;
 import com.aizuda.snailjob.server.web.model.response.JobResponseVO;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
@@ -32,7 +29,7 @@ public interface JobService {
 
     List<JobResponseVO> getJobNameList(String keywords, Long jobId, String groupName);
 
-    boolean trigger(Long jobId, String tmpArgsStr);
+    boolean trigger(JobTriggerVO jobTrigger);
 
     List<JobResponseVO> getJobList(String groupName);
 

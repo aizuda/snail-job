@@ -239,8 +239,8 @@ public class JobServiceImpl implements JobService {
 
 
     @Override
-    public boolean trigger(Long jobId, String tmpArgsStr) {
-        Job job = jobMapper.selectById(jobId);
+    public boolean trigger(JobTriggerVO jobTrigger) {
+        Job job = jobMapper.selectById(jobTrigger.getJobId());
         Assert.notNull(job, () -> new SnailJobServerException("job can not be null."));
 
         long count = accessTemplate.getGroupConfigAccess().count(new LambdaQueryWrapper<GroupConfig>()
@@ -255,7 +255,9 @@ public class JobServiceImpl implements JobService {
         // 设置now表示立即执行
         jobTaskPrepare.setNextTriggerAt(DateUtils.toNowMilli());
         jobTaskPrepare.setTaskExecutorScene(JobTaskExecutorSceneEnum.MANUAL_JOB.getType());
-        jobTaskPrepare.setTmpArgsStr(tmpArgsStr);
+        if (StrUtil.isNotBlank(jobTrigger.getTmpArgsStr())){
+            jobTaskPrepare.setTmpArgsStr(jobTrigger.getTmpArgsStr());
+        }
         // 创建批次
         terminalJobPrepareHandler.handle(jobTaskPrepare);
 
