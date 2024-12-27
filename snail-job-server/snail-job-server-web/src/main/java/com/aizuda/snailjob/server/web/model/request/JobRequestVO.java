@@ -130,4 +130,9 @@ public class JobRequestVO {
      */
     private Set<Long> notifyIds;
 
+    /**
+     * 负责人id
+     */
+    private Long owerId;
+
 }

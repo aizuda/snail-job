@@ -147,4 +147,9 @@ public class Job extends CreateUpdateDt {
      */
     private String notifyIds;
 
+    /**
+     * 负责人id
+     */
+    private Long owerId;
+
 }

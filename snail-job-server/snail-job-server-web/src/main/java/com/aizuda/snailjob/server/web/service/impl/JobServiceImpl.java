@@ -33,11 +33,14 @@ import com.aizuda.snailjob.server.web.util.UserSessionUtils;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobSummaryMapper;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.SystemUserMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.GroupConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.Job;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobSummary;
+import com.aizuda.snailjob.template.datasource.persistence.po.SystemUser;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
+import com.google.common.collect.Lists;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -48,6 +51,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author opensnail
@@ -66,6 +70,7 @@ public class JobServiceImpl implements JobService {
     private final AccessTemplate accessTemplate;
     private final GroupHandler groupHandler;
     private final JobSummaryMapper jobSummaryMapper;
+    private final SystemUserMapper systemUserMapper;
 
     private static Long calculateNextTriggerAt(final JobRequestVO jobRequestVO, Long time) {
         if (Objects.equals(jobRequestVO.getTriggerType(), SystemConstants.WORKFLOW_TRIGGER_TYPE)) {
@@ -86,20 +91,35 @@ public class JobServiceImpl implements JobService {
         UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
         List<String> groupNames = UserSessionUtils.getGroupNames(queryVO.getGroupName());
 
+        Set<Long> owerIds = systemUserMapper.selectList(new LambdaQueryWrapper<SystemUser>()
+                        .select(SystemUser::getId)
+                        .likeRight(SystemUser::getUsername, queryVO.getOwerName()))
+                .stream()
+                .map(i -> i.getId())
+                .collect(Collectors.toSet());
+        if (CollUtil.isEmpty(owerIds) && StrUtil.isNotBlank(queryVO.getOwerName())) {
+            return new PageResult<>(pageDTO, Lists.newArrayList());
+        }
+
         PageDTO<Job> selectPage = jobMapper.selectPage(pageDTO,
                 new LambdaQueryWrapper<Job>()
                         .eq(Job::getNamespaceId, userSessionVO.getNamespaceId())
                         .in(CollUtil.isNotEmpty(groupNames), Job::getGroupName, groupNames)
-                        .likeRight(StrUtil.isNotBlank(queryVO.getJobName()), Job::getJobName,
-                                StrUtil.trim(queryVO.getJobName()))
+                        .likeRight(StrUtil.isNotBlank(queryVO.getJobName()), Job::getJobName, StrUtil.trim(queryVO.getJobName()))
                         .like(StrUtil.isNotBlank(queryVO.getExecutorInfo()), Job::getExecutorInfo,
                                 StrUtil.trim(queryVO.getExecutorInfo()))
                         .eq(Objects.nonNull(queryVO.getJobStatus()), Job::getJobStatus, queryVO.getJobStatus())
                         .eq(Job::getDeleted, StatusEnum.NO.getStatus())
+                        .in(CollUtil.isNotEmpty(owerIds), Job::getOwerId, owerIds)
                         .orderByDesc(Job::getId));
-
         List<JobResponseVO> jobResponseList = JobResponseVOConverter.INSTANCE.convertList(selectPage.getRecords());
 
+        for (JobResponseVO jobResponseVO : jobResponseList) {
+            SystemUser systemUser = systemUserMapper.selectById(jobResponseVO.getOwerId());
+            if (Objects.nonNull(systemUser)) {
+                jobResponseVO.setOwerName(systemUser.getUsername());
+            }
+        }
         return new PageResult<>(pageDTO, jobResponseList);
     }
 
@@ -142,6 +162,7 @@ public class JobServiceImpl implements JobService {
         job.setNextTriggerAt(calculateNextTriggerAt(jobRequestVO, DateUtils.toNowMilli()));
         job.setNamespaceId(UserSessionUtils.currentUserSession().getNamespaceId());
         job.setNotifyIds(JsonUtil.toJsonString(jobRequestVO.getNotifyIds()));
+        job.setOwerId(jobRequestVO.getOwerId());
         job.setId(null);
         return 1 == jobMapper.insert(job);
     }
@@ -156,6 +177,7 @@ public class JobServiceImpl implements JobService {
         // 判断常驻任务
         Job updateJob = JobConverter.INSTANCE.convert(jobRequestVO);
         updateJob.setNotifyIds(JsonUtil.toJsonString(jobRequestVO.getNotifyIds()));
+        updateJob.setOwerId(jobRequestVO.getOwerId());
         updateJob.setResident(isResident(jobRequestVO));
         updateJob.setNamespaceId(job.getNamespaceId());
 

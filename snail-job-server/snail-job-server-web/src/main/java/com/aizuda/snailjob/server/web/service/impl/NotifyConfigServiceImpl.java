@@ -53,7 +53,7 @@ public class NotifyConfigServiceImpl implements NotifyConfigService {
                                 .eq(StrUtil.isNotBlank(queryVO.getGroupName()), NotifyConfig::getGroupName, queryVO.getGroupName())
                                 .eq(Objects.nonNull(queryVO.getNotifyStatus()), NotifyConfig::getNotifyStatus, queryVO.getNotifyStatus())
                                 .eq(Objects.nonNull(queryVO.getSystemTaskType()), NotifyConfig::getSystemTaskType, queryVO.getSystemTaskType())
-                                .like(StrUtil.isNotBlank(queryVO.getNotifyName()), NotifyConfig::getNotifyName, queryVO.getNotifyName())
+                                .likeRight(StrUtil.isNotBlank(queryVO.getNotifyName()), NotifyConfig::getNotifyName, queryVO.getNotifyName())
                                 .orderByDesc(NotifyConfig::getId))
                 .getRecords();
 

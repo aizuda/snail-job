@@ -134,4 +134,12 @@ public class JobResponseVO {
      * 通知告警场景配置id列表
      */
     private Set<Long> notifyIds;
+
+    /**
+     * 负责人名称
+     */
+    private String owerName;
+
+    private Long owerId;
+
 }
