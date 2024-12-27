@@ -138,8 +138,8 @@ public class JobResponseVO {
     /**
      * 负责人名称
      */
-    private String owerName;
-
-    private Long owerId;
+    private String ownerName;
+    
+    private Long ownerId;
 
 }

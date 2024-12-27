@@ -91,13 +91,13 @@ public class JobServiceImpl implements JobService {
         UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
         List<String> groupNames = UserSessionUtils.getGroupNames(queryVO.getGroupName());
 
-        Set<Long> owerIds = systemUserMapper.selectList(new LambdaQueryWrapper<SystemUser>()
+        Set<Long> ownerIds = systemUserMapper.selectList(new LambdaQueryWrapper<SystemUser>()
                         .select(SystemUser::getId)
                         .likeRight(SystemUser::getUsername, queryVO.getOwerName()))
                 .stream()
                 .map(i -> i.getId())
                 .collect(Collectors.toSet());
-        if (CollUtil.isEmpty(owerIds) && StrUtil.isNotBlank(queryVO.getOwerName())) {
+        if (CollUtil.isEmpty(ownerIds) && StrUtil.isNotBlank(queryVO.getOwerName())) {
             return new PageResult<>(pageDTO, Lists.newArrayList());
         }
 
@@ -110,14 +110,14 @@ public class JobServiceImpl implements JobService {
                                 StrUtil.trim(queryVO.getExecutorInfo()))
                         .eq(Objects.nonNull(queryVO.getJobStatus()), Job::getJobStatus, queryVO.getJobStatus())
                         .eq(Job::getDeleted, StatusEnum.NO.getStatus())
-                        .in(CollUtil.isNotEmpty(owerIds), Job::getOwerId, owerIds)
+                        .in(CollUtil.isNotEmpty(ownerIds), Job::getOwnerId, ownerIds)
                         .orderByDesc(Job::getId));
         List<JobResponseVO> jobResponseList = JobResponseVOConverter.INSTANCE.convertList(selectPage.getRecords());
 
         for (JobResponseVO jobResponseVO : jobResponseList) {
-            SystemUser systemUser = systemUserMapper.selectById(jobResponseVO.getOwerId());
+            SystemUser systemUser = systemUserMapper.selectById(jobResponseVO.getOwnerId());
             if (Objects.nonNull(systemUser)) {
-                jobResponseVO.setOwerName(systemUser.getUsername());
+                jobResponseVO.setOwnerName(systemUser.getUsername());
             }
         }
         return new PageResult<>(pageDTO, jobResponseList);
@@ -162,7 +162,7 @@ public class JobServiceImpl implements JobService {
         job.setNextTriggerAt(calculateNextTriggerAt(jobRequestVO, DateUtils.toNowMilli()));
         job.setNamespaceId(UserSessionUtils.currentUserSession().getNamespaceId());
         job.setNotifyIds(JsonUtil.toJsonString(jobRequestVO.getNotifyIds()));
-        job.setOwerId(jobRequestVO.getOwerId());
+        job.setOwnerId(jobRequestVO.getOwnerId());
         job.setId(null);
         return 1 == jobMapper.insert(job);
     }
@@ -177,7 +177,7 @@ public class JobServiceImpl implements JobService {
         // 判断常驻任务
         Job updateJob = JobConverter.INSTANCE.convert(jobRequestVO);
         updateJob.setNotifyIds(JsonUtil.toJsonString(jobRequestVO.getNotifyIds()));
-        updateJob.setOwerId(jobRequestVO.getOwerId());
+        updateJob.setOwnerId(jobRequestVO.getOwnerId());
         updateJob.setResident(isResident(jobRequestVO));
         updateJob.setNamespaceId(job.getNamespaceId());
 

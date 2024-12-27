@@ -150,6 +150,6 @@ public class Job extends CreateUpdateDt {
     /**
      * 负责人id
      */
-    private Long owerId;
+    private Long ownerId;
 
 }

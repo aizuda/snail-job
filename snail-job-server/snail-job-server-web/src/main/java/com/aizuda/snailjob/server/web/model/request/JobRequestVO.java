@@ -133,6 +133,6 @@ public class JobRequestVO {
     /**
      * 负责人id
      */
-    private Long owerId;
+    private Long ownerId;
 
 }
