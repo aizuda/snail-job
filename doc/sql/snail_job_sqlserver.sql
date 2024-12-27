@@ -2,7 +2,7 @@
  SnailJob Database Transfer Tool
  Source Server Type    : MySQL
  Target Server Type    : Microsoft SQL Server
- Date: 2024-07-06 12:55:47
+ Date: 2024-12-27 22:24:37
 */
 
 
@@ -206,7 +206,7 @@ CREATE TABLE sj_notify_config
     id                     bigint        NOT NULL PRIMARY KEY IDENTITY,
     namespace_id           nvarchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
     group_name             nvarchar(64)  NOT NULL,
-    business_id            nvarchar(64)  NOT NULL,
+    notify_name            nvarchar(64)  NOT NULL DEFAULT '',
     system_task_type       tinyint       NOT NULL DEFAULT 3,
     notify_status          tinyint       NOT NULL DEFAULT 0,
     recipient_ids          nvarchar(128) NOT NULL,
@@ -245,10 +245,10 @@ EXEC sp_addextendedproperty
 GO
 
 EXEC sp_addextendedproperty
-     'MS_Description', N'业务id  ( job_id或workflow_id或scene_name ) ',
+     'MS_Description', N'通知名称',
      'SCHEMA', N'dbo',
      'TABLE', N'sj_notify_config',
-     'COLUMN', N'business_id'
+     'COLUMN', N'notify_name'
 GO
 
 EXEC sp_addextendedproperty
@@ -911,6 +911,7 @@ CREATE TABLE sj_retry_scene_config
     max_retry_count  int           NOT NULL DEFAULT 5,
     back_off         tinyint       NOT NULL DEFAULT 1,
     trigger_interval nvarchar(16)  NOT NULL DEFAULT '',
+    notify_ids       nvarchar(128) NOT NULL DEFAULT '',
     deadline_request bigint        NOT NULL DEFAULT 60000,
     executor_timeout int           NOT NULL DEFAULT 5,
     route_key        tinyint       NOT NULL DEFAULT 4,
@@ -977,6 +978,13 @@ EXEC sp_addextendedproperty
      'SCHEMA', N'dbo',
      'TABLE', N'sj_retry_scene_config',
      'COLUMN', N'trigger_interval'
+GO
+
+EXEC sp_addextendedproperty
+     'MS_Description', N'通知告警场景配置id列表',
+     'SCHEMA', N'dbo',
+     'TABLE', N'sj_retry_scene_config',
+     'COLUMN', N'notify_ids'
 GO
 
 EXEC sp_addextendedproperty
@@ -1409,6 +1417,8 @@ CREATE TABLE sj_job
     retry_interval   int           NOT NULL DEFAULT 0,
     bucket_index     int           NOT NULL DEFAULT 0,
     resident         tinyint       NOT NULL DEFAULT 0,
+    notify_ids       nvarchar(128) NOT NULL DEFAULT '',
+    owner_id         bigint        NULL,
     description      nvarchar(256) NOT NULL DEFAULT '',
     ext_attrs        nvarchar(256) NULL     DEFAULT '',
     deleted          tinyint       NOT NULL DEFAULT 0,
@@ -1569,6 +1579,20 @@ EXEC sp_addextendedproperty
      'SCHEMA', N'dbo',
      'TABLE', N'sj_job',
      'COLUMN', N'resident'
+GO
+
+EXEC sp_addextendedproperty
+     'MS_Description', N'通知告警场景配置id列表',
+     'SCHEMA', N'dbo',
+     'TABLE', N'sj_job',
+     'COLUMN', N'notify_ids'
+GO
+
+EXEC sp_addextendedproperty
+     'MS_Description', N'负责人id',
+     'SCHEMA', N'dbo',
+     'TABLE', N'sj_job',
+     'COLUMN', N'owner_id'
 GO
 
 EXEC sp_addextendedproperty
@@ -2299,6 +2323,7 @@ CREATE TABLE sj_workflow
     description      nvarchar(256) NOT NULL DEFAULT '',
     flow_info        nvarchar(max) NULL     DEFAULT NULL,
     wf_context       nvarchar(max) NULL     DEFAULT NULL,
+    notify_ids       nvarchar(128) NOT NULL DEFAULT '',
     bucket_index     int           NOT NULL DEFAULT 0,
     version          int           NOT NULL,
     ext_attrs        nvarchar(256) NULL     DEFAULT '',
@@ -2402,6 +2427,13 @@ EXEC sp_addextendedproperty
      'SCHEMA', N'dbo',
      'TABLE', N'sj_workflow',
      'COLUMN', N'wf_context'
+GO
+
+EXEC sp_addextendedproperty
+     'MS_Description', N'通知告警场景配置id列表',
+     'SCHEMA', N'dbo',
+     'TABLE', N'sj_workflow',
+     'COLUMN', N'notify_ids'
 GO
 
 EXEC sp_addextendedproperty
@@ -2735,4 +2767,3 @@ EXEC sp_addextendedproperty
      'SCHEMA', N'dbo',
      'TABLE', N'sj_workflow_task_batch'
 GO
-
