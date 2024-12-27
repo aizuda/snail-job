@@ -48,6 +48,7 @@ import com.aizuda.snailjob.template.datasource.persistence.po.*;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.common.graph.ElementOrder;
 import com.google.common.graph.GraphBuilder;
 import com.google.common.graph.MutableGraph;
@@ -127,7 +128,7 @@ public class WorkflowServiceImpl implements WorkflowService {
                 HashUtil.bkdrHash(workflowRequestVO.getGroupName() + workflowRequestVO.getWorkflowName())
                         % systemProperties.getBucketTotal());
         workflow.setNamespaceId(UserSessionUtils.currentUserSession().getNamespaceId());
-        workflow.setNotifyIds(JsonUtil.toJsonString(workflowRequestVO.getNotifyIds()));
+        workflow.setNotifyIds(JsonUtil.toJsonString(Optional.ofNullable(workflowRequestVO.getNotifyIds()).orElse(Sets.newHashSet())));
 
         workflow.setId(null);
         Assert.isTrue(1 == workflowMapper.insert(workflow), () -> new SnailJobServerException("新增工作流失败"));
@@ -226,7 +227,7 @@ public class WorkflowServiceImpl implements WorkflowService {
         workflow.setVersion(version);
         workflow.setNextTriggerAt(calculateNextTriggerAt(workflowRequestVO, DateUtils.toNowMilli()));
         workflow.setFlowInfo(JsonUtil.toJsonString(GraphUtils.serializeGraphToJson(graph)));
-        workflow.setNotifyIds(JsonUtil.toJsonString(workflowRequestVO.getNotifyIds()));
+        workflow.setNotifyIds(JsonUtil.toJsonString(Optional.ofNullable(workflowRequestVO.getNotifyIds()).orElse(Sets.newHashSet())));
         // 不允许更新组
         workflow.setGroupName(null);
         Assert.isTrue(

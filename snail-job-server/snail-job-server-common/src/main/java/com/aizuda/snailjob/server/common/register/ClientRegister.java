@@ -157,7 +157,7 @@ public class ClientRegister extends AbstractRegister {
                 }
 
                 if (CollUtil.isEmpty(waitRefreshDBClientNodes)) {
-                    SnailJobLog.LOCAL.warn("clientNodes is empty");
+                    SnailJobLog.LOCAL.debug("clientNodes is empty");
                     return;
                 }
 
