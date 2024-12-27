@@ -25,7 +25,7 @@ spring:
     #    url: jdbc:oracle:thin:@//localhost:1521/XEPDB1
     #    username: snail_job
     #    password: SnailJob
-    ## SQL Server 注意:由于system_user为SQLServer系统函数，因此SQLServer需要启用前缀配置，请配置mybatis-plus.global-config.db-config.table-prefix: er_
+    ## SQL Server
     #    driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
     #    url: jdbc:sqlserver://localhost:1433;DatabaseName=snail_job;SelectMethod=cursor;encrypt=false;rewriteBatchedStatements=true
     #    username: SA
