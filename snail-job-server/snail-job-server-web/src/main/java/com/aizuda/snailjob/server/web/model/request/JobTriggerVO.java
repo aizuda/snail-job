@@ -1,13 +1,14 @@
 package com.aizuda.snailjob.server.web.model.request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 
 @Data
 public class JobTriggerVO {
 
-    @NotBlank(message = "jobId 不能为空")
+    @NotNull(message = "jobId 不能为空")
     private Long jobId;
 
     /**

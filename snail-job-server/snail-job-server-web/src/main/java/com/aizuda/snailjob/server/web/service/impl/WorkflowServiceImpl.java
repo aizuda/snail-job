@@ -276,8 +276,9 @@ public class WorkflowServiceImpl implements WorkflowService {
         // 设置now表示立即执行
         prepareDTO.setNextTriggerAt(DateUtils.toNowMilli());
         prepareDTO.setTaskExecutorScene(JobTaskExecutorSceneEnum.MANUAL_WORKFLOW.getType());
-        if (StrUtil.isNotBlank(triggerVO.getTmpWfContext())){
-            prepareDTO.setWfContext(triggerVO.getTmpWfContext());
+        String tmpWfContext = triggerVO.getTmpWfContext();
+        if (StrUtil.isNotBlank(tmpWfContext) && !JsonUtil.isEmptyJson(tmpWfContext)){
+            prepareDTO.setWfContext(tmpWfContext);
         }
         terminalWorkflowPrepareHandler.handler(prepareDTO);
 

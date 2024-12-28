@@ -5,6 +5,7 @@ import com.aizuda.snailjob.common.core.exception.SnailJobCommonException;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -172,6 +173,18 @@ public class JsonUtil {
         } catch (Exception e) {
             e.printStackTrace();
             return null;
+        }
+    }
+
+    /**
+     * 判断 Json 是否为空
+     */
+    public static boolean isEmptyJson(String json){
+        try {
+            JsonNode jsonNode = JsonMapper.objectMapper.readTree(json);
+            return jsonNode.isEmpty();
+        } catch (JsonProcessingException e) {
+            throw new SnailJobCommonException("Json校验异常！", e);
         }
     }
 
