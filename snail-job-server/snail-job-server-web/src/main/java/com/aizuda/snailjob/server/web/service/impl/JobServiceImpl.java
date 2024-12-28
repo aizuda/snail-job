@@ -91,16 +91,6 @@ public class JobServiceImpl implements JobService {
         UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
         List<String> groupNames = UserSessionUtils.getGroupNames(queryVO.getGroupName());
 
-        Set<Long> ownerIds = systemUserMapper.selectList(new LambdaQueryWrapper<SystemUser>()
-                        .select(SystemUser::getId)
-                        .likeRight(SystemUser::getUsername, queryVO.getOwerName()))
-                .stream()
-                .map(i -> i.getId())
-                .collect(Collectors.toSet());
-        if (CollUtil.isEmpty(ownerIds) && StrUtil.isNotBlank(queryVO.getOwerName())) {
-            return new PageResult<>(pageDTO, Lists.newArrayList());
-        }
-
         PageDTO<Job> selectPage = jobMapper.selectPage(pageDTO,
                 new LambdaQueryWrapper<Job>()
                         .eq(Job::getNamespaceId, userSessionVO.getNamespaceId())
@@ -110,7 +100,7 @@ public class JobServiceImpl implements JobService {
                                 StrUtil.trim(queryVO.getExecutorInfo()))
                         .eq(Objects.nonNull(queryVO.getJobStatus()), Job::getJobStatus, queryVO.getJobStatus())
                         .eq(Job::getDeleted, StatusEnum.NO.getStatus())
-                        .in(CollUtil.isNotEmpty(ownerIds), Job::getOwnerId, ownerIds)
+                        .eq(Objects.nonNull(queryVO.getOwnerId()), Job::getOwnerId, queryVO.getOwnerId())
                         .orderByDesc(Job::getId));
         List<JobResponseVO> jobResponseList = JobResponseVOConverter.INSTANCE.convertList(selectPage.getRecords());
 
