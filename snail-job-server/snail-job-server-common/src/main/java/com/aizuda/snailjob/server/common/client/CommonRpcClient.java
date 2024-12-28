@@ -1,6 +1,7 @@
 package com.aizuda.snailjob.server.common.client;
 
 import com.aizuda.snailjob.common.core.model.Result;
+import com.aizuda.snailjob.server.common.dto.PullRemoteNodeClientRegisterInfoDTO;
 import com.aizuda.snailjob.server.common.rpc.client.RequestMethod;
 import com.aizuda.snailjob.server.common.rpc.client.annotation.Body;
 import com.aizuda.snailjob.server.common.rpc.client.annotation.Mapping;
@@ -22,5 +23,5 @@ public interface CommonRpcClient {
     Result syncConfig(@Body ConfigDTO configDTO);
 
     @Mapping(path = GET_REG_NODES_AND_REFRESH, method = RequestMethod.POST)
-    Result<String> getRegNodesAndFlush();
+    Result<String> pullRemoteNodeClientRegisterInfo(@Body PullRemoteNodeClientRegisterInfoDTO registerInfo);
 }

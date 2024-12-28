@@ -130,7 +130,7 @@ public class RpcClientInvokeHandler implements InvocationHandler {
             // 统一设置Token
             requestHeaders.set(SystemConstants.SNAIL_JOB_AUTH_TOKEN, CacheToken.get(groupName, namespaceId));
 
-            SnailJobRequest snailJobRequest = new SnailJobRequest(args);
+            SnailJobRequest snailJobRequest = new SnailJobRequest(parasResult.body);
             Result result = retryer.call(() -> {
 
                 StopWatch sw = new StopWatch();

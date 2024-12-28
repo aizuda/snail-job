@@ -1,15 +1,12 @@
 package com.aizuda.snailjob.server.job.task.support.handler;
 
 import cn.hutool.core.lang.Assert;
+import cn.hutool.core.util.StrUtil;
+import com.aizuda.snailjob.common.core.constant.SystemConstants;
+import com.aizuda.snailjob.common.core.enums.*;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
-import akka.actor.ActorRef;
-import cn.hutool.core.collection.CollUtil;
-import com.aizuda.snailjob.common.core.context.SnailSpringContext;
-import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
-import com.aizuda.snailjob.common.core.enums.JobTaskStatusEnum;
-import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
-import com.aizuda.snailjob.common.core.enums.StatusEnum;
-import com.aizuda.snailjob.common.log.SnailJobLog;
+import com.aizuda.snailjob.common.core.model.JobArgsHolder;
+import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.server.common.WaitStrategy;
 import com.aizuda.snailjob.server.common.dto.DistributeInstance;
 import com.aizuda.snailjob.server.common.enums.JobTaskExecutorSceneEnum;
@@ -25,10 +22,13 @@ import com.aizuda.snailjob.server.job.task.support.timer.JobTimerWheel;
 import com.aizuda.snailjob.server.job.task.support.timer.ResidentJobTimerTask;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.GroupConfigMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskBatchMapper;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.GroupConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.Job;
+import com.aizuda.snailjob.template.datasource.persistence.po.JobTask;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -50,6 +50,7 @@ import static com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum.COMPL
 public class JobTaskBatchHandler {
 
     private final JobTaskBatchMapper jobTaskBatchMapper;
+    private final JobTaskMapper jobTaskMapper;
     private final GroupConfigMapper groupConfigMapper;
     private final List<JobExecutorResultHandler> resultHandlerList;
 
@@ -136,4 +137,41 @@ public class JobTaskBatchHandler {
         JobTimerWheel.registerWithJob(() -> new ResidentJobTimerTask(jobTimerTaskDTO, job), duration);
         ResidentTaskCache.refresh(job.getId(), nextTriggerAt);
     }
+
+    /**
+     * 这里为了兼容MAP或者MAP_REDUCE场景下手动执行任务的时候参数丢失问题，
+     * 需要从JobTask中获取任务类型为MAP的且是taskName是ROOT_MAP的任务的参数作为执行参数下发给客户端
+     *
+     * @param taskBatchId 任务批次
+     * @param job 任务
+     * @return 需要给客户端下发的参数
+     */
+    public String getArgStr(Long taskBatchId, Job job) {
+        JobTask rootMapTask = jobTaskMapper.selectList(new PageDTO<>(1, 1),
+                new LambdaQueryWrapper<JobTask>()
+                        .select(JobTask::getId, JobTask::getArgsStr)
+                        .eq(JobTask::getTaskBatchId, taskBatchId)
+                        .eq(JobTask::getMrStage,  MapReduceStageEnum.MAP.getStage())
+                        .eq(JobTask::getTaskName, SystemConstants.ROOT_MAP)
+                        .orderByAsc(JobTask::getId)
+        ).stream().findFirst().orElse(null);
+
+        // {"jobParams":"测试参数传递","maps":""}
+        String argsStr = job.getArgsStr();
+        if (Objects.nonNull(rootMapTask) && StrUtil.isNotBlank(rootMapTask.getArgsStr())) {
+            JobArgsHolder jobArgsHolder = JsonUtil.parseObject(rootMapTask.getArgsStr(), JobArgsHolder.class);
+            // MAP_REDUCE的参数: {"shardNum":2,"argsStr":"测试参数传递"} 这里得解析出来覆盖argsStr
+            if (JobTaskTypeEnum.MAP_REDUCE.getType() == job.getTaskType()) {
+                MapReduceArgsStrDTO mapReduceArgsStrDTO = JsonUtil.parseObject(argsStr, MapReduceArgsStrDTO.class);
+                mapReduceArgsStrDTO.setArgsStr((String) jobArgsHolder.getJobParams());
+                argsStr = JsonUtil.toJsonString(mapReduceArgsStrDTO);
+            } else {
+                // MAP的参数: 测试参数传递 直接覆盖即可
+                argsStr = (String) jobArgsHolder.getJobParams();
+            }
+        }
+
+        return argsStr;
+    }
+
 }

@@ -22,6 +22,7 @@ import com.aizuda.snailjob.server.job.task.support.executor.job.JobExecutorFacto
 import com.aizuda.snailjob.server.job.task.support.generator.task.JobTaskGenerateContext;
 import com.aizuda.snailjob.server.job.task.support.generator.task.JobTaskGenerator;
 import com.aizuda.snailjob.server.job.task.support.generator.task.JobTaskGeneratorFactory;
+import com.aizuda.snailjob.server.job.task.support.handler.JobTaskBatchHandler;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowTaskBatchMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.Job;
@@ -49,6 +50,7 @@ import java.util.Objects;
 public  class MapTaskPostHttpRequestHandler extends PostHttpRequestHandler {
     private final WorkflowTaskBatchMapper workflowTaskBatchMapper;
     private final JobMapper jobMapper;
+    private final JobTaskBatchHandler jobTaskBatchHandler;
 
     @Override
     public boolean supports(final String path) {
@@ -81,11 +83,13 @@ public  class MapTaskPostHttpRequestHandler extends PostHttpRequestHandler {
                     retryRequest.getReqId());
         }
 
+        String argStr = jobTaskBatchHandler.getArgStr(mapTaskRequest.getTaskBatchId(), job);
+
         // 创建map任务
         JobTaskGenerator taskInstance = JobTaskGeneratorFactory.getTaskInstance(job.getTaskType());
         JobTaskGenerateContext context = JobTaskConverter.INSTANCE.toJobTaskInstanceGenerateContext(mapTaskRequest);
         context.setGroupName(HttpHeaderUtil.getGroupName(headers));
-        context.setArgsStr(job.getArgsStr());
+        context.setArgsStr(argStr);
         context.setNamespaceId(HttpHeaderUtil.getNamespace(headers));
         context.setMrStage(MapReduceStageEnum.MAP.getStage());
         context.setMapSubTask(mapTaskRequest.getSubTask());

@@ -17,6 +17,7 @@ import com.aizuda.snailjob.server.job.task.support.generator.task.JobTaskGenerat
 import com.aizuda.snailjob.server.job.task.support.generator.task.JobTaskGenerator;
 import com.aizuda.snailjob.server.job.task.support.generator.task.JobTaskGeneratorFactory;
 import com.aizuda.snailjob.server.job.task.support.handler.DistributedLockHandler;
+import com.aizuda.snailjob.server.job.task.support.handler.JobTaskBatchHandler;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowTaskBatchMapper;
@@ -52,6 +53,7 @@ public class ReduceActor extends AbstractActor {
     private final JobMapper jobMapper;
     private final JobTaskMapper jobTaskMapper;
     private final WorkflowTaskBatchMapper workflowTaskBatchMapper;
+    private final JobTaskBatchHandler jobTaskBatchHandler;
 
     @Override
     public Receive createReceive() {
@@ -95,12 +97,15 @@ public class ReduceActor extends AbstractActor {
             return;
         }
 
+        String argStr = jobTaskBatchHandler.getArgStr(reduceTask.getTaskBatchId(), job);
+
         // 创建reduce任务
         JobTaskGenerator taskInstance = JobTaskGeneratorFactory.getTaskInstance(JobTaskTypeEnum.MAP_REDUCE.getType());
         JobTaskGenerateContext context = JobTaskConverter.INSTANCE.toJobTaskInstanceGenerateContext(job);
         context.setTaskBatchId(reduceTask.getTaskBatchId());
         context.setMrStage(reduceTask.getMrStage());
         context.setWfContext(reduceTask.getWfContext());
+        context.setArgsStr(argStr);
         List<JobTask> taskList = taskInstance.generate(context);
         if (CollUtil.isEmpty(taskList)) {
             SnailJobLog.LOCAL.warn("Job task is empty, taskBatchId:[{}]", reduceTask.getTaskBatchId());

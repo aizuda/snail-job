@@ -6,25 +6,21 @@ import com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH;
 import com.aizuda.snailjob.common.core.enums.NodeTypeEnum;
 import com.aizuda.snailjob.common.core.model.Result;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
-import com.aizuda.snailjob.common.core.util.NetUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.cache.CacheConsumerGroup;
 import com.aizuda.snailjob.server.common.cache.CacheRegisterTable;
 import com.aizuda.snailjob.server.common.client.CommonRpcClient;
+import com.aizuda.snailjob.server.common.dto.PullRemoteNodeClientRegisterInfoDTO;
 import com.aizuda.snailjob.server.common.dto.RegisterNodeInfo;
 import com.aizuda.snailjob.server.common.rpc.client.RequestBuilder;
 import com.aizuda.snailjob.server.common.schedule.AbstractSchedule;
-import com.aizuda.snailjob.server.common.triple.Pair;
 import com.aizuda.snailjob.template.datasource.persistence.po.ServerNode;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Lists;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
@@ -34,7 +30,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.*;
-import java.util.stream.Collectors;
 
 /**
  * 客户端注册
@@ -189,7 +184,8 @@ public class ClientRegister extends AbstractRegister {
                         nodeInfo.setHostPort(serverNode.getHostPort());
                         nodeInfo.setHostIp(serverNode.getHostIp());
                         CommonRpcClient serverRpcClient = buildRpcClient(nodeInfo);
-                        Result<String> regNodesAndFlush = serverRpcClient.getRegNodesAndFlush();
+                        Result<String> regNodesAndFlush =
+                                serverRpcClient.pullRemoteNodeClientRegisterInfo(new PullRemoteNodeClientRegisterInfoDTO());
                         return regNodesAndFlush.getData();
                     } catch (Exception e) {
                         return StrUtil.EMPTY;
