@@ -71,7 +71,7 @@ public class RetryErrorMoreThresholdAlarmSchedule extends AbstractSchedule imple
 
     @Override
     protected void doExecute() {
-        SnailJobLog.LOCAL.info("retryErrorMoreThreshold time[{}] ip:[{}]", LocalDateTime.now(),
+        SnailJobLog.LOCAL.debug("retryErrorMoreThreshold time[{}] ip:[{}]", LocalDateTime.now(),
                 NetUtil.getLocalIpStr());
         PartitionTaskUtils.process(this::getNotifyConfigPartitions, this::doHandler, 0);
     }

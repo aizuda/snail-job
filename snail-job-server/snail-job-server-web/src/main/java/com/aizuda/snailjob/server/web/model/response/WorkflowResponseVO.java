@@ -64,4 +64,9 @@ public class WorkflowResponseVO {
      * 通知告警场景配置id列表
      */
     private Set<Long> notifyIds;
+
+    /**
+     * 工作流上下文
+     */
+    private String wfContext;
 }
