@@ -66,7 +66,7 @@ public class GrpcServer implements Lifecycle {
 
         final MutableHandlerRegistry handlerRegistry = new MutableHandlerRegistry();
         addServices(handlerRegistry, new GrpcInterceptor());
-        NettyServerBuilder builder = NettyServerBuilder.forPort(systemProperties.getNettyPort())
+        NettyServerBuilder builder = NettyServerBuilder.forPort(systemProperties.getServerPort())
             .executor(createGrpcExecutor(grpc.getDispatcherTp()));
 
         Duration keepAliveTime = grpc.getKeepAliveTime();
@@ -84,7 +84,7 @@ public class GrpcServer implements Lifecycle {
             server.start();
             this.started = true;
             SnailJobLog.LOCAL.info("------> snail-job remoting server start success, grpc = {}, port = {}",
-                GrpcServer.class.getName(), systemProperties.getNettyPort());
+                GrpcServer.class.getName(), systemProperties.getServerPort());
         } catch (IOException e) {
             SnailJobLog.LOCAL.error("--------> snail-job remoting server error.", e);
             started = false;

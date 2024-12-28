@@ -65,10 +65,10 @@ public class NettyHttpServer implements Runnable, Lifecycle {
                     });
 
             // 在特定端口绑定并启动服务器 默认是17888
-            ChannelFuture future = bootstrap.bind(systemProperties.getNettyPort()).sync();
+            ChannelFuture future = bootstrap.bind(systemProperties.getServerPort()).sync();
 
             SnailJobLog.LOCAL.info("------> snail-job remoting server start success, nettype = {}, port = {}",
-                    NettyHttpServer.class.getName(), systemProperties.getNettyPort());
+                    NettyHttpServer.class.getName(), systemProperties.getServerPort());
 
             started = true;
             future.channel().closeFuture().sync();

@@ -1,6 +1,5 @@
 package com.aizuda.snailjob.server.common.rpc.client;
 
-import cn.hutool.core.util.IdUtil;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.enums.HeadersEnum;
@@ -119,7 +118,7 @@ public class GrpcChannel {
 
     private static String getServerPort() {
         SystemProperties properties = SnailSpringContext.getBean(SystemProperties.class);
-        return String.valueOf(properties.getNettyPort());
+        return String.valueOf(properties.getServerPort());
     }
 
     /**

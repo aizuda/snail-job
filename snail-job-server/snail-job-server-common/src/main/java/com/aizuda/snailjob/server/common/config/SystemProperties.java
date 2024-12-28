@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -41,8 +42,23 @@ public class SystemProperties {
 
     /**
      * netty 端口
+     * see: serverPort
      */
-    private int nettyPort = 1788;
+    @Deprecated
+    private Integer nettyPort;
+
+    /**
+     * 服务端端口
+     */
+    private int serverPort = 17888;
+
+    /**
+     * 获取服务端端口
+     */
+    public int getServerPort() {
+        // since: 1.3.0-beta1 兼容nettyPort
+        return Objects.isNull(nettyPort) ? serverPort : nettyPort;
+    }
 
     /**
      * server token

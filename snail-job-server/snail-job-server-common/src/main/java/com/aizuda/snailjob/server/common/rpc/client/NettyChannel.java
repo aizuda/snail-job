@@ -1,6 +1,5 @@
 package com.aizuda.snailjob.server.common.rpc.client;
 
-import cn.hutool.core.util.IdUtil;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.enums.HeadersEnum;
@@ -20,7 +19,6 @@ import java.net.ConnectException;
 import java.nio.channels.ClosedChannelException;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -104,7 +102,7 @@ public class NettyChannel {
 
     private static String getServerPort() {
         SystemProperties properties = SnailSpringContext.getBean(SystemProperties.class);
-        return String.valueOf(properties.getNettyPort());
+        return String.valueOf(properties.getServerPort());
     }
 
     /**

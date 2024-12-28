@@ -55,7 +55,7 @@ public class SnailJobServerLogbackAppender<E> extends UnsynchronizedAppenderBase
         logContentDTO.addLocationField(getLocationField(event));
         logContentDTO.addThrowableField(getThrowableField(event));
         logContentDTO.addHostField(NetUtil.getLocalIpStr());
-        logContentDTO.addPortField(SnailSpringContext.getBean(SystemProperties.class).getNettyPort());
+        logContentDTO.addPortField(SnailSpringContext.getBean(SystemProperties.class).getServerPort());
 
         LogMetaDTO logMetaDTO = null;
         try {
