@@ -31,7 +31,7 @@ public class NettyHttpClientHandler extends SimpleChannelInboundHandler<FullHttp
         String content = response.content().toString(CharsetUtil.UTF_8);
         HttpHeaders headers = response.headers();
 
-        SnailJobLog.LOCAL.info("Receive server data content:[{}], headers:[{}]", content, headers);
+        SnailJobLog.LOCAL.debug("Receive server data content:[{}], headers:[{}]", content, headers);
         SnailJobRpcResult snailJobRpcResult = JsonUtil.parseObject(content, SnailJobRpcResult.class);
         RpcContext.invoke(snailJobRpcResult.getReqId(), snailJobRpcResult, false);
 
