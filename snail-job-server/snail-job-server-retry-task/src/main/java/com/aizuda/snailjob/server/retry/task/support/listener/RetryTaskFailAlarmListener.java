@@ -89,7 +89,7 @@ public class RetryTaskFailAlarmListener extends
         return AlarmContext.build().text(retryTaskDeadTextMessagesFormatter,
                         EnvironmentUtils.getActiveProfile(),
                         notifyConfig.getNotifyThreshold(),
-                        RetryNotifySceneEnum.getByDesc(retryAlarmInfo.getNotifyScene()).getDesc(),
+                        RetryNotifySceneEnum.getRetryNotifyScene(retryAlarmInfo.getNotifyScene()).getDesc(),
                         retryAlarmInfo.getNamespaceId(),
                         retryAlarmInfo.getGroupName(),
                         retryAlarmInfo.getExecutorName(),

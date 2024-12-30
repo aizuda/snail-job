@@ -46,6 +46,7 @@ public abstract class AbstractWorkflowAlarm<E extends ApplicationEvent> extends 
                 WorkflowAlarmInfo workflowAlarmInfo = AlarmInfoConverter.INSTANCE.toWorkflowAlarmInfo(workflowBatchResponseDO);
                 WorkflowAlarmInfo alarmInfo = workflowAlarmInfoGroupMap.get(workflowAlarmInfo.getId());
                 workflowAlarmInfo.setReason(alarmInfo.getReason());
+                workflowAlarmInfo.setNotifyScene(alarmInfo.getNotifyScene());
 
                 List<WorkflowAlarmInfo> workflowAlarmInfos = workflowAlarmInfoMap.getOrDefault(workflowNotifyId, Lists.newArrayList());
                 workflowAlarmInfos.add(workflowAlarmInfo);

@@ -4,9 +4,6 @@ import cn.hutool.core.util.StrUtil;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import java.util.Arrays;
-import java.util.Objects;
-
 /**
  * 通知场景枚举
  *
@@ -38,7 +35,7 @@ public enum RetryNotifySceneEnum {
     /**
      * 通知场景
      */
-    private final Integer notifyScene;
+    private final int notifyScene;
 
     /**
      * 描述
@@ -67,11 +64,14 @@ public enum RetryNotifySceneEnum {
         return null;
     }
 
-    public static RetryNotifySceneEnum getByDesc(Integer notifyScene) {
-        if (Objects.isNull(notifyScene)) {
-            return NONE;
+    public static RetryNotifySceneEnum getRetryNotifyScene(Integer notifyScene) {
+        for (RetryNotifySceneEnum sceneEnum : RetryNotifySceneEnum.values()) {
+            if (sceneEnum.getNotifyScene() == notifyScene) {
+                return sceneEnum;
+            }
         }
-        return Arrays.stream(values()).filter(e -> notifyScene.equals(e.getNotifyScene())).findFirst().orElse(NONE);
+
+        return NONE;
     }
 
 }

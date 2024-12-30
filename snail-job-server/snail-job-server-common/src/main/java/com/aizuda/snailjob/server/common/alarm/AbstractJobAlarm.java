@@ -47,6 +47,7 @@ public abstract class AbstractJobAlarm<E extends ApplicationEvent> extends Abstr
                 JobAlarmInfo jobAlarmInfo = AlarmInfoConverter.INSTANCE.toJobAlarmInfo(jobBatchResponseDO);
                 JobAlarmInfo alarmInfo = jobAlarmInfoGroupMap.get(jobBatchResponseDO.getId());
                 jobAlarmInfo.setReason(alarmInfo.getReason());
+                jobAlarmInfo.setNotifyScene(alarmInfo.getNotifyScene());
 
                 List<JobAlarmInfo> jobAlarmInfos = jobAlarmInfoMap.getOrDefault(jobNotifyId, Lists.newArrayList());
                 jobAlarmInfos.add(jobAlarmInfo);

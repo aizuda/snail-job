@@ -2,7 +2,6 @@ package com.aizuda.snailjob.server.job.task.support.alarm.listener;
 
 import com.aizuda.snailjob.common.core.alarm.AlarmContext;
 import com.aizuda.snailjob.common.core.enums.JobNotifySceneEnum;
-import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.snailjob.common.core.util.EnvironmentUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.alarm.AbstractJobAlarm;
@@ -81,7 +80,7 @@ public class JobTaskFailAlarmListener extends AbstractJobAlarm<JobTaskFailAlarmE
                         alarmDTO.getGroupName(),
                         alarmDTO.getJobName(),
                         alarmDTO.getExecutorInfo(),
-                        JobOperationReasonEnum.getByReason(alarmDTO.getOperationReason()).getDesc(),
+                        JobNotifySceneEnum.getJobNotifyScene(alarmDTO.getNotifyScene()).getDesc(),
                         alarmDTO.getReason(),
                         alarmDTO.getArgsStr(),
                         DateUtils.toNowFormat(DateUtils.NORM_DATETIME_PATTERN))

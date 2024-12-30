@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.common.core.enums;
 
+import cn.hutool.core.util.StrUtil;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -14,6 +15,7 @@ import lombok.Getter;
 public enum JobNotifySceneEnum {
 
     /********************************Job****************************************/
+    NONE(0, StrUtil.EMPTY, NodeTypeEnum.SERVER),
     JOB_TASK_ERROR(1, "JOB任务执行失败", NodeTypeEnum.SERVER),
     JOB_CLIENT_ERROR(2, "客户端执行失败", NodeTypeEnum.CLIENT),
     JOB_NO_CLIENT_NODES_ERROR(3, "没有可执行的客户端节点", NodeTypeEnum.SERVER),
@@ -50,8 +52,22 @@ public enum JobNotifySceneEnum {
             }
         }
 
-        return null;
+        return NONE;
     }
 
+    /**
+     * 获取通知场景描述
+     *
+     * @param notifyScene
+     * @return
+     */
+    public static JobNotifySceneEnum getJobNotifyScene(Integer notifyScene) {
+        for (JobNotifySceneEnum sceneEnum : JobNotifySceneEnum.values()) {
+            if (sceneEnum.getNotifyScene() == notifyScene) {
+                return sceneEnum;
+            }
+        }
 
+        return NONE;
+    }
 }

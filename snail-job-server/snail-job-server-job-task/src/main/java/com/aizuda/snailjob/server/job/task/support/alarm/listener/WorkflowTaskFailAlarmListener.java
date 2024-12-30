@@ -74,7 +74,7 @@ public class WorkflowTaskFailAlarmListener extends AbstractWorkflowAlarm<Workflo
                         alarmDTO.getNamespaceId(),
                         alarmDTO.getGroupName(),
                         alarmDTO.getWorkflowName(),
-                        JobOperationReasonEnum.getByReason(alarmDTO.getOperationReason()).getDesc(),
+                        JobOperationReasonEnum.getWorkflowNotifyScene(alarmDTO.getOperationReason()).getDesc(),
                         alarmDTO.getReason(),
                         DateUtils.toNowFormat(DateUtils.NORM_DATETIME_PATTERN))
                 .title("{}环境 Workflow任务执行失败", EnvironmentUtils.getActiveProfile());

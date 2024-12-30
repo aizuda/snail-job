@@ -69,13 +69,14 @@ public class JobTimeoutCheckTask implements TimerTask<String> {
         stopJobContext.setWorkflowTaskBatchId(jobTaskBatch.getWorkflowTaskBatchId());
         instanceInterrupt.stop(stopJobContext);
 
+        String reason = "超时中断.taskBatchId:[" + taskBatchId + "]";
         SnailSpringContext.getContext().publishEvent(
                 new JobTaskFailAlarmEvent(JobTaskFailAlarmEventDTO.builder()
                         .jobTaskBatchId(taskBatchId)
-                        .reason("超时中断.taskBatchId:[" + taskBatchId + "]")
+                        .reason(reason)
                         .notifyScene(JobNotifySceneEnum.JOB_TASK_ERROR.getNotifyScene())
                         .build()));
-        SnailJobLog.LOCAL.info("超时中断.taskBatchId:[{}]", taskBatchId);
+        SnailJobLog.LOCAL.info(reason);
     }
 
     @Override
