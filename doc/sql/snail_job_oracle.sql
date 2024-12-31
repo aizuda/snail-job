@@ -95,7 +95,7 @@ CREATE TABLE sj_notify_config
 ALTER TABLE sj_notify_config
     ADD CONSTRAINT pk_sj_notify_config PRIMARY KEY (id);
 
-CREATE INDEX idx_sj_notify_config_01 ON sj_notify_config (namespace_id, group_name, business_id);
+CREATE INDEX idx_sj_notify_config_01 ON sj_notify_config (namespace_id, group_name);
 
 COMMENT ON COLUMN sj_notify_config.id IS '主键';
 COMMENT ON COLUMN sj_notify_config.namespace_id IS '命名空间id';

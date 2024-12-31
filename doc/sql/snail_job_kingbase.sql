@@ -86,7 +86,7 @@ CREATE TABLE sj_notify_config
     update_dt              timestamp    NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_sj_notify_config_01 ON sj_notify_config (namespace_id, group_name, business_id);
+CREATE INDEX idx_sj_notify_config_01 ON sj_notify_config (namespace_id, group_name);
 
 COMMENT ON COLUMN sj_notify_config.id IS '主键';
 COMMENT ON COLUMN sj_notify_config.namespace_id IS '命名空间id';

@@ -220,7 +220,7 @@ CREATE TABLE sj_notify_config
 )
 GO
 
-CREATE INDEX idx_sj_notify_config_01 ON sj_notify_config (namespace_id, group_name, business_id)
+CREATE INDEX idx_sj_notify_config_01 ON sj_notify_config (namespace_id, group_name)
 GO
 
 EXEC sp_addextendedproperty
