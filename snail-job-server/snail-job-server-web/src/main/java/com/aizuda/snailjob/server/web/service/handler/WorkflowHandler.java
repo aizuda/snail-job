@@ -129,17 +129,21 @@ public class WorkflowHandler {
      * @param graph      图
      * @param version    版本号
      */
-    public void buildGraph(List<Long> parentIds, LinkedBlockingDeque<Long> deque,
-                           String groupName, Long workflowId,
+    public void buildGraph(List<Long> parentIds, LinkedBlockingDeque<Long> deque, String groupName, Long workflowId,
                            WorkflowRequestVO.NodeConfig nodeConfig, MutableGraph<Long> graph, Integer version) {
 
         if (Objects.isNull(nodeConfig)) {
             return;
         }
 
+        LinkedBlockingDeque<Long> tempDeque = null;
         // 获取节点信息
         List<WorkflowRequestVO.NodeInfo> conditionNodes = nodeConfig.getConditionNodes();
         if (CollUtil.isNotEmpty(conditionNodes)) {
+            // 一定存在汇合的子节点
+            if (Objects.nonNull(nodeConfig.getChildNode())) {
+                tempDeque = new LinkedBlockingDeque<>();
+            }
             conditionNodes = conditionNodes.stream()
                     .sorted(Comparator.comparing(WorkflowRequestVO.NodeInfo::getPriorityLevel))
                     .collect(Collectors.toList());
@@ -186,24 +190,35 @@ public class WorkflowHandler {
                 }
                 WorkflowRequestVO.NodeConfig childNode = nodeInfo.getChildNode();
                 if (Objects.nonNull(childNode) && CollUtil.isNotEmpty(childNode.getConditionNodes())) {
-                    buildGraph(Lists.newArrayList(workflowNode.getId()), deque, groupName, workflowId, childNode,
-                            graph, version);
+                    buildGraph(Lists.newArrayList(workflowNode.getId()),
+                            tempDeque,
+                            groupName, workflowId, childNode, graph, version);
                 } else {
                     if (WorkflowNodeTypeEnum.DECISION.getType() == nodeConfig.getNodeType()) {
                         throw new SnailJobServerException("决策节点或者决策节点的后继节点不能作为叶子节点");
                     }
 
-                    // 叶子节点记录一下
-                    deque.add(workflowNode.getId());
+                    // 若当前节点无子任何子节点记录一下, 后续存在公共子节点时需要用到
+                    if (Objects.nonNull(tempDeque)) {
+                        tempDeque.add(workflowNode.getId());
+                    } else {
+                        // 当前节点无汇合的子节点放到公共的队列
+                        deque.add(workflowNode.getId());
+                    }
+
                 }
             }
         }
 
         WorkflowRequestVO.NodeConfig childNode = nodeConfig.getChildNode();
+        // 如果存在公共子节点则在这里处理
         if (Objects.nonNull(childNode) && CollUtil.isNotEmpty(childNode.getConditionNodes())) {
-            //  应该是conditionNodes里面叶子节点的选择
+            //  是conditionNodes里面叶子节点的
             List<Long> list = Lists.newArrayList();
-            deque.drainTo(list);
+            if (Objects.nonNull(tempDeque)) {
+                tempDeque.drainTo(list);
+            }
+
             buildGraph(list, deque, groupName, workflowId, childNode, graph, version);
         }
     }
