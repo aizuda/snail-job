@@ -9,7 +9,6 @@ ENV TZ=Asia/Shanghai LANG=C.UTF-8 LC_ALL=C.UTF-8
 
 WORKDIR /snailjob/server
 ADD ./target/snail-job-server-exec.jar app.jar
-ADD ../../doc/sql /snailjob/server/data
 
 # 对外暴漏的端口号
 EXPOSE 8080
