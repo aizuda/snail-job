@@ -125,7 +125,9 @@ public class SceneConfigServiceImpl implements SceneConfigService {
         RetrySceneConfig retrySceneConfig = SceneConfigConverter.INSTANCE.toRetrySceneConfig(requestVO);
         retrySceneConfig.setCreateDt(LocalDateTime.now());
         retrySceneConfig.setNamespaceId(namespaceId);
-        retrySceneConfig.setNotifyIds(JsonUtil.toJsonString(requestVO.getNotifyIds()));
+
+        retrySceneConfig.setNotifyIds(JsonUtil.toJsonString(Optional.ofNullable(requestVO.getNotifyIds()).orElse(Sets.newHashSet())));
+
         if (requestVO.getBackOff() == WaitStrategies.WaitStrategyEnum.DELAY_LEVEL.getType()) {
             retrySceneConfig.setTriggerInterval(StrUtil.EMPTY);
         }
@@ -153,7 +155,7 @@ public class SceneConfigServiceImpl implements SceneConfigService {
 
         retrySceneConfig.setTriggerInterval(
                 Optional.ofNullable(retrySceneConfig.getTriggerInterval()).orElse(StrUtil.EMPTY));
-        retrySceneConfig.setNotifyIds(JsonUtil.toJsonString(requestVO.getNotifyIds()));
+        retrySceneConfig.setNotifyIds(JsonUtil.toJsonString(Optional.ofNullable(requestVO.getNotifyIds()).orElse(Sets.newHashSet())));
         Assert.isTrue(1 == accessTemplate.getSceneConfigAccess().update(retrySceneConfig,
                         new LambdaUpdateWrapper<RetrySceneConfig>()
                                 .eq(RetrySceneConfig::getNamespaceId, namespaceId)

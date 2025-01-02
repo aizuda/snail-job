@@ -191,7 +191,7 @@ public class WorkflowHandler {
                 WorkflowRequestVO.NodeConfig childNode = nodeInfo.getChildNode();
                 if (Objects.nonNull(childNode) && CollUtil.isNotEmpty(childNode.getConditionNodes())) {
                     buildGraph(Lists.newArrayList(workflowNode.getId()),
-                            tempDeque,
+                            Objects.isNull(tempDeque) ? deque : tempDeque,
                             groupName, workflowId, childNode, graph, version);
                 } else {
                     if (WorkflowNodeTypeEnum.DECISION.getType() == nodeConfig.getNodeType()) {
