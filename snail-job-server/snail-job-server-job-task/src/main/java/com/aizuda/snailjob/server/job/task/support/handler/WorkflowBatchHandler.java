@@ -469,6 +469,10 @@ public class WorkflowBatchHandler {
 
     public static void mergeMaps(Map<String, Object> mainMap, Map<String, Object> waitMergeMap) {
         for (Map.Entry<String, Object> entry : waitMergeMap.entrySet()) {
+            if (Objects.isNull(entry.getKey()) || Objects.isNull(entry.getValue())) {
+                SnailJobLog.LOCAL.warn("上下文的key和value不支持NULl");
+                continue;
+            }
             mainMap.merge(entry.getKey(), entry.getValue(), (v1, v2) -> v2);
         }
     }
