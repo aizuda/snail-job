@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 
 /**
@@ -14,6 +15,7 @@ import lombok.Data;
  */
 @Data
 @TableName("sj_job_task_batch")
+@EqualsAndHashCode(callSuper=true)
 public class JobTaskBatch extends CreateUpdateDt {
 
     /**

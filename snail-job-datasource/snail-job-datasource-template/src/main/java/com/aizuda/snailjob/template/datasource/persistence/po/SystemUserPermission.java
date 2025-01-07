@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * 系统用户权限表
@@ -13,6 +14,7 @@ import lombok.Data;
  */
 @Data
 @TableName("sj_system_user_permission")
+@EqualsAndHashCode(callSuper=true)
 public class SystemUserPermission extends CreateDt {
 
     @TableId(value = "id", type = IdType.AUTO)

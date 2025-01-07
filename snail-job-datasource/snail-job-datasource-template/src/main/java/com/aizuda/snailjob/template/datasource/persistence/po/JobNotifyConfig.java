@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * 任务通知配置
@@ -13,6 +14,7 @@ import lombok.Data;
  */
 @Data
 @TableName("sj_job_notify_config")
+@EqualsAndHashCode(callSuper=true)
 public class JobNotifyConfig extends CreateUpdateDt {
 
     @TableId(value = "id", type = IdType.AUTO)

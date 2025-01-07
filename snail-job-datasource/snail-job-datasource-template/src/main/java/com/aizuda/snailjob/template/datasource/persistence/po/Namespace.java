@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * 命名空间
@@ -13,6 +14,7 @@ import lombok.Data;
  */
 @Data
 @TableName("sj_namespace")
+@EqualsAndHashCode(callSuper=true)
 public class Namespace extends CreateUpdateDt {
 
     /**

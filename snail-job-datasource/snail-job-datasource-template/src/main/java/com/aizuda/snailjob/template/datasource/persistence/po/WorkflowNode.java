@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * 工作流节点
@@ -13,6 +14,7 @@ import lombok.Data;
  */
 @Data
 @TableName("sj_workflow_node")
+@EqualsAndHashCode(callSuper=true)
 public class WorkflowNode extends CreateUpdateDt {
 
     /**

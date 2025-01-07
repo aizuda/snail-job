@@ -2,8 +2,10 @@ package com.aizuda.snailjob.server.web.model.request;
 
 import com.aizuda.snailjob.server.web.model.base.BaseQueryVO;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class LineQueryVO extends BaseQueryVO {
     /**
      * 组名称

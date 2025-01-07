@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * 重试任务日志
@@ -13,6 +14,7 @@ import lombok.Data;
  */
 @Data
 @TableName("sj_retry_task_log")
+@EqualsAndHashCode(callSuper=true)
 public class RetryTaskLog extends CreateUpdateDt {
 
     @TableId(value = "id", type = IdType.AUTO)

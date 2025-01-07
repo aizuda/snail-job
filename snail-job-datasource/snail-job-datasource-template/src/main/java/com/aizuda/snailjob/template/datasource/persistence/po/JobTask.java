@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * 任务实例
@@ -18,6 +19,7 @@ import lombok.Data;
  */
 @Data
 @TableName("sj_job_task")
+@EqualsAndHashCode(callSuper=true)
 public class JobTask extends CreateUpdateDt {
 
     /**

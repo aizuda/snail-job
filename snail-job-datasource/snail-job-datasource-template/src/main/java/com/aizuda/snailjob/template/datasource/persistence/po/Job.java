@@ -5,6 +5,7 @@ import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * 任务信息
@@ -14,6 +15,7 @@ import lombok.Data;
  */
 @Data
 @TableName("sj_job")
+@EqualsAndHashCode(callSuper=true)
 public class Job extends CreateUpdateDt {
 
     /**

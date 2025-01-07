@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * 组配置
@@ -14,6 +15,7 @@ import lombok.Data;
  */
 @Data
 @TableName("sj_group_config")
+@EqualsAndHashCode(callSuper=true)
 public class GroupConfig extends CreateUpdateDt {
 
     @TableId(value = "id", type = IdType.AUTO)

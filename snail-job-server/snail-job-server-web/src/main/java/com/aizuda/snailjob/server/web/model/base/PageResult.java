@@ -4,12 +4,14 @@ import com.aizuda.snailjob.common.core.model.Result;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * @author: opensnail
  * @date : 2022-02-16 14:07
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
 public class PageResult<T> extends Result<T> {
 

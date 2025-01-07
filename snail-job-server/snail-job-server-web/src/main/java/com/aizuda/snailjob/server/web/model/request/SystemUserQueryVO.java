@@ -2,6 +2,7 @@ package com.aizuda.snailjob.server.web.model.request;
 
 import com.aizuda.snailjob.server.web.model.base.BaseQueryVO;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * @author opensnail
@@ -9,6 +10,7 @@ import lombok.Data;
  * @since 2.0
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class SystemUserQueryVO extends BaseQueryVO {
 
     private String username;
