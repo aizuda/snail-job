@@ -24,7 +24,6 @@ import com.google.common.util.concurrent.MoreExecutors;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -112,6 +111,7 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
     private static JobArgs buildShardingJobArgs(JobContext jobContext) {
         ShardingJobArgs jobArgs = new ShardingJobArgs();
         jobArgs.setJobParams(jobContext.getJobArgsHolder().getJobParams());
+        jobArgs.setTaskBatchId(jobContext.getTaskBatchId());
         jobArgs.setExecutorInfo(jobContext.getExecutorInfo());
         jobArgs.setShardingIndex(jobContext.getShardingIndex());
         jobArgs.setShardingTotal(jobContext.getShardingTotal());
