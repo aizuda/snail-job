@@ -1,4 +1,4 @@
-package com.aizuda.snailjob.server.common;
+package com.aizuda.snailjob.server.common.convert;
 
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.util.JsonUtil;

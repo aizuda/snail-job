@@ -1,4 +1,4 @@
-package com.aizuda.snailjob.server.common;
+package com.aizuda.snailjob.server.common.convert;
 
 import com.aizuda.snailjob.server.common.dto.RegisterNodeInfo;
 import com.aizuda.snailjob.template.datasource.persistence.po.ServerNode;

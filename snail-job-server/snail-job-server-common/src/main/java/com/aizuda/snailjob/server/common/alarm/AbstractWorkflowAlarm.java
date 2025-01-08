@@ -2,7 +2,7 @@ package com.aizuda.snailjob.server.common.alarm;
 
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
-import com.aizuda.snailjob.server.common.AlarmInfoConverter;
+import com.aizuda.snailjob.server.common.convert.AlarmInfoConverter;
 import com.aizuda.snailjob.server.common.dto.WorkflowAlarmInfo;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.WorkflowBatchResponseDO;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowTaskBatchMapper;
@@ -50,7 +50,7 @@ public abstract class AbstractWorkflowAlarm<E extends ApplicationEvent> extends 
 
                 List<WorkflowAlarmInfo> workflowAlarmInfos = workflowAlarmInfoMap.getOrDefault(workflowNotifyId, Lists.newArrayList());
                 workflowAlarmInfos.add(workflowAlarmInfo);
-                workflowAlarmInfoMap.put(workflowNotifyId ,workflowAlarmInfos);
+                workflowAlarmInfoMap.put(workflowNotifyId, workflowAlarmInfos);
             }
         }
 
