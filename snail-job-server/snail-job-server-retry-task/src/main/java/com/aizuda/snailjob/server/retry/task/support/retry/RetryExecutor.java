@@ -10,7 +10,6 @@ import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.WaitStrategy;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.common.dto.RetryLogMetaDTO;
-import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.retry.task.dto.RetryTaskExecutorDTO;
 import com.aizuda.snailjob.server.retry.task.support.FilterStrategy;
 import com.aizuda.snailjob.server.retry.task.support.RetryContext;
@@ -74,7 +73,6 @@ public class RetryExecutor<V> {
             retryContext.setCallResult(call);
         } catch (Exception e) {
             RetryLogMetaDTO retryLogMetaDTO = RetryTaskConverter.INSTANCE.toLogMetaDTO(retryContext.getRetryTask());
-            retryLogMetaDTO.setTimestamp(DateUtils.toNowMilli());
             SnailJobLog.REMOTE.error("请求客户端执行失败. uniqueId:[{}] <|>{}<|>", retryContext.getRetryTask().getUniqueId(), e);
             retryContext.setException(e);
         }

@@ -7,7 +7,6 @@ import com.aizuda.snailjob.server.common.config.SystemProperties;
 import com.aizuda.snailjob.server.common.dto.RetryLogMetaDTO;
 import com.aizuda.snailjob.server.common.handler.ClientNodeAllocateHandler;
 import com.aizuda.snailjob.server.common.triple.ImmutableTriple;
-import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.retry.task.support.RetryContext;
 import com.aizuda.snailjob.server.retry.task.support.RetryTaskConverter;
 import com.aizuda.snailjob.server.retry.task.support.idempotent.IdempotentHolder;
@@ -62,7 +61,6 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, Initializing
                     pair.getValue().toString());
 
             RetryLogMetaDTO retryLogMetaDTO = RetryTaskConverter.INSTANCE.toLogMetaDTO(retryTask);
-            retryLogMetaDTO.setTimestamp(DateUtils.toNowMilli());
             SnailJobLog.REMOTE.error("触发条件不满足 原因: [{}] <|>{}<|>", pair.getValue().toString(), retryLogMetaDTO);
 
             return false;

@@ -12,7 +12,6 @@ import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.common.dto.RegisterNodeInfo;
 import com.aizuda.snailjob.server.common.dto.RetryLogMetaDTO;
 import com.aizuda.snailjob.server.common.rpc.client.RequestBuilder;
-import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.retry.task.client.RetryRpcClient;
 import com.aizuda.snailjob.server.retry.task.support.RetryTaskConverter;
 import com.aizuda.snailjob.server.retry.task.support.context.MaxAttemptsPersistenceRetryContext;
@@ -69,7 +68,6 @@ public class ExecUnitActor extends AbstractActor {
 
             } catch (Exception e) {
                 RetryLogMetaDTO retryLogMetaDTO = RetryTaskConverter.INSTANCE.toLogMetaDTO(retryTask);
-                retryLogMetaDTO.setTimestamp(DateUtils.toNowMilli());
                 SnailJobLog.REMOTE.error("请求客户端异常. <|>{}<|>", retryTask.getUniqueId(), retryLogMetaDTO, e);
             } finally {
                 getContext().stop(getSelf());

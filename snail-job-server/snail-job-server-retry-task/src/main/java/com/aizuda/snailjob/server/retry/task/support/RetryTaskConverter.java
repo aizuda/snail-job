@@ -23,7 +23,7 @@ import java.util.Set;
  * @author: opensnail
  * @date : 2021-11-26 15:22
  */
-@Mapper
+@Mapper(imports = {com.aizuda.snailjob.server.common.util.DateUtils.class})
 public interface RetryTaskConverter {
 
     RetryTaskConverter INSTANCE = Mappers.getMapper(RetryTaskConverter.class);
@@ -81,6 +81,7 @@ public interface RetryTaskConverter {
 
     RetryTaskLogMessage toRetryTaskLogMessage(RetryLogTaskDTO retryLogTaskDTO);
 
+    @Mapping(target = "timestamp", expression = "java(DateUtils.toNowMilli())")
     RetryLogMetaDTO toLogMetaDTO(RetryTask retryTask);
 
     @Mappings({
