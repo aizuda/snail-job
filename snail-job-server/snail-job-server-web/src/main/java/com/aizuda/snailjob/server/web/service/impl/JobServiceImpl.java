@@ -151,7 +151,6 @@ public class JobServiceImpl implements JobService {
                 % systemProperties.getBucketTotal());
         job.setNextTriggerAt(calculateNextTriggerAt(jobRequestVO, DateUtils.toNowMilli()));
         job.setNamespaceId(UserSessionUtils.currentUserSession().getNamespaceId());
-        job.setNotifyIds(JsonUtil.toJsonString(jobRequestVO.getNotifyIds()));
         job.setOwnerId(jobRequestVO.getOwnerId());
         job.setId(null);
         return 1 == jobMapper.insert(job);
@@ -166,7 +165,6 @@ public class JobServiceImpl implements JobService {
 
         // 判断常驻任务
         Job updateJob = JobConverter.INSTANCE.convert(jobRequestVO);
-        updateJob.setNotifyIds(JsonUtil.toJsonString(jobRequestVO.getNotifyIds()));
         updateJob.setOwnerId(jobRequestVO.getOwnerId());
         updateJob.setResident(isResident(jobRequestVO));
         updateJob.setNamespaceId(job.getNamespaceId());

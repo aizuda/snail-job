@@ -126,8 +126,6 @@ public class SceneConfigServiceImpl implements SceneConfigService {
         retrySceneConfig.setCreateDt(LocalDateTime.now());
         retrySceneConfig.setNamespaceId(namespaceId);
 
-        retrySceneConfig.setNotifyIds(JsonUtil.toJsonString(Optional.ofNullable(requestVO.getNotifyIds()).orElse(Sets.newHashSet())));
-
         if (requestVO.getBackOff() == WaitStrategies.WaitStrategyEnum.DELAY_LEVEL.getType()) {
             retrySceneConfig.setTriggerInterval(StrUtil.EMPTY);
         }

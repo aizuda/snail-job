@@ -37,6 +37,9 @@ public interface WorkflowConverter {
 
     WorkflowConverter INSTANCE = Mappers.getMapper(WorkflowConverter.class);
 
+    @Mappings({
+            @Mapping(target = "notifyIds", expression = "java(WorkflowConverter.toNotifyIdsStr(workflowRequestVO.getNotifyIds()))")
+    })
     Workflow convert(WorkflowRequestVO workflowRequestVO);
 
     WorkflowNode convert(WorkflowRequestVO.NodeInfo nodeInfo);
