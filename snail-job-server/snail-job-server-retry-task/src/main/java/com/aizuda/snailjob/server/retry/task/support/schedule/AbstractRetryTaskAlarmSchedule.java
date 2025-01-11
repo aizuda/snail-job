@@ -3,7 +3,6 @@ package com.aizuda.snailjob.server.retry.task.support.schedule;
 import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.common.core.enums.RetryNotifySceneEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
-import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.server.common.Lifecycle;
 import com.aizuda.snailjob.server.common.dto.PartitionTask;
@@ -21,6 +20,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
@@ -30,6 +30,7 @@ import java.util.*;
  * @date 2025-01-11
  * @since 1.3.0-beta1.1
  */
+@Slf4j
 public abstract class AbstractRetryTaskAlarmSchedule extends AbstractSchedule implements Lifecycle {
     @Autowired
     protected AccessTemplate accessTemplate;
@@ -61,6 +62,7 @@ public abstract class AbstractRetryTaskAlarmSchedule extends AbstractSchedule im
 
     protected abstract void doSendAlarm(RetrySceneConfigPartitionTask partitionTask, Map<Long, NotifyConfigDTO> notifyConfigInfo);
 
+    protected abstract RetryNotifySceneEnum getNotifyScene();
 
     /**
      * 获取需要处理的配置信息
@@ -107,7 +109,7 @@ public abstract class AbstractRetryTaskAlarmSchedule extends AbstractSchedule im
                 .list(new LambdaQueryWrapper<NotifyConfig>()
                         .in(NotifyConfig::getId, retryNotifyIds)
                         .eq(NotifyConfig::getNotifyStatus, StatusEnum.YES.getStatus())
-                        .eq(NotifyConfig::getNotifyScene, RetryNotifySceneEnum.MAX_RETRY_ERROR.getNotifyScene())
+                        .eq(NotifyConfig::getNotifyScene, getNotifyScene().getNotifyScene())
                         .orderByAsc(NotifyConfig::getId)));
         if (CollUtil.isEmpty(notifyConfigs)) {
             return Maps.newHashMap();

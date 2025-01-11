@@ -2,6 +2,7 @@ package com.aizuda.snailjob.server.retry.task.support.schedule;
 
 import com.aizuda.snailjob.common.core.alarm.AlarmContext;
 import com.aizuda.snailjob.common.core.alarm.SnailJobAlarmFactory;
+import com.aizuda.snailjob.common.core.enums.RetryNotifySceneEnum;
 import com.aizuda.snailjob.common.core.enums.RetryStatusEnum;
 import com.aizuda.snailjob.common.core.util.EnvironmentUtils;
 import com.aizuda.snailjob.server.common.Lifecycle;
@@ -90,6 +91,11 @@ public class RetryTaskMoreThresholdAlarmSchedule extends AbstractRetryTaskAlarmS
             }
         }
 
+    }
+
+    @Override
+    protected RetryNotifySceneEnum getNotifyScene() {
+        return RetryNotifySceneEnum.MAX_RETRY;
     }
 
     @Override

@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.common.core.alarm.Alarm;
 import com.aizuda.snailjob.common.core.alarm.AlarmContext;
 import com.aizuda.snailjob.common.core.alarm.SnailJobAlarmFactory;
+import com.aizuda.snailjob.common.core.enums.RetryNotifySceneEnum;
 import com.aizuda.snailjob.common.core.util.EnvironmentUtils;
 import com.aizuda.snailjob.server.common.Lifecycle;
 import com.aizuda.snailjob.server.common.util.DateUtils;
@@ -96,6 +97,11 @@ public class RetryErrorMoreThresholdAlarmSchedule extends AbstractRetryTaskAlarm
 
             }
         }
+    }
+
+    @Override
+    protected RetryNotifySceneEnum getNotifyScene() {
+        return RetryNotifySceneEnum.MAX_RETRY_ERROR;
     }
 
 
