@@ -1,6 +1,7 @@
 package com.aizuda.snailjob.server.retry.task.support.schedule;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.alarm.Alarm;
 import com.aizuda.snailjob.common.core.alarm.AlarmContext;
 import com.aizuda.snailjob.common.core.alarm.SnailJobAlarmFactory;
@@ -25,6 +26,7 @@ import com.aizuda.snailjob.template.datasource.persistence.mapper.NotifyRecipien
 import com.aizuda.snailjob.template.datasource.persistence.po.NotifyConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.NotifyRecipient;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryDeadLetter;
+import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.google.common.collect.Lists;
@@ -71,7 +73,8 @@ public class RetryErrorMoreThresholdAlarmSchedule extends AbstractSchedule imple
 
     @Override
     protected void doExecute() {
-        SnailJobLog.LOCAL.debug("retryErrorMoreThreshold time[{}] ip:[{}]", LocalDateTime.now(),
+        SnailJobLog.LOCAL.debug("retryErrorMoreThreshold time[{}] ip:[{}]",
+                LocalDateTime.now(),
                 NetUtil.getLocalIpStr());
         PartitionTaskUtils.process(this::getNotifyConfigPartitions, this::doHandler, 0);
     }
@@ -84,6 +87,7 @@ public class RetryErrorMoreThresholdAlarmSchedule extends AbstractSchedule imple
     }
 
     private void doSendAlarm(NotifyConfigPartitionTask partitionTask) {
+
         // x分钟内、x组、x场景进入死信队列的数据量
         LocalDateTime now = LocalDateTime.now();
         TaskAccess<RetryDeadLetter> retryDeadLetterAccess = accessTemplate.getRetryDeadLetterAccess();
@@ -93,7 +97,7 @@ public class RetryErrorMoreThresholdAlarmSchedule extends AbstractSchedule imple
                         between(RetryDeadLetter::getCreateDt, now.minusMinutes(30), now)
                         .eq(RetryDeadLetter::getGroupName, partitionTask.getGroupName())
                         .eq(RetryDeadLetter::getSceneName, partitionTask.getBusinessId()));
-        if (count >= partitionTask.getNotifyThreshold()) {
+        if (partitionTask.getNotifyThreshold() > 0 && count >= partitionTask.getNotifyThreshold()) {
             List<RecipientInfo> recipientInfos = partitionTask.getRecipientInfos();
             for (final RecipientInfo recipientInfo : recipientInfos) {
                 if (Objects.isNull(recipientInfo)) {
@@ -120,19 +124,33 @@ public class RetryErrorMoreThresholdAlarmSchedule extends AbstractSchedule imple
         }
     }
 
+    // 1.拿500场景
+    // 2.获取通知配置ids并查询通知配置
+    // 3.Map<通知ID, 通知DTO>
+    // 4.循环场景查询死信数据量
+    // 5.场景对应的通知ids
     private List<NotifyConfigPartitionTask> getNotifyConfigPartitions(Long startId) {
 
-        List<NotifyConfig> notifyConfigs = accessTemplate.getNotifyConfigAccess()
-                .listPage(new PageDTO<>(0, 1000), new LambdaQueryWrapper<NotifyConfig>()
-                        .gt(NotifyConfig::getId, startId)
-                        .eq(NotifyConfig::getNotifyStatus, StatusEnum.YES.getStatus())
-                        .eq(NotifyConfig::getNotifyScene, RetryNotifySceneEnum.MAX_RETRY_ERROR.getNotifyScene())
-                        .orderByAsc(NotifyConfig::getId)
-                ).getRecords();
+        List<RetrySceneConfig> retrySceneConfigList = accessTemplate.getSceneConfigAccess()
+                .listPage(new PageDTO<>(0, 500), new LambdaQueryWrapper<>())
+                .getRecords();
 
-        if (CollUtil.isEmpty(notifyConfigs)) {
+        Set<Long> retryNotifyIds = new HashSet<>();
+        for (RetrySceneConfig retrySceneConfig : retrySceneConfigList) {
+            HashSet<Long> notifyIds = StrUtil.isBlank(retrySceneConfig.getNotifyIds()) ? new HashSet<>() : new HashSet<>(JsonUtil.parseList(retrySceneConfig.getNotifyIds(), Long.class));
+            retryNotifyIds.addAll(notifyIds);
+        }
+        if (CollUtil.isEmpty(retryNotifyIds)) {
             return Lists.newArrayList();
         }
+
+        List<NotifyConfig> notifyConfigs = accessTemplate.getNotifyConfigAccess()
+                .list(new LambdaQueryWrapper<NotifyConfig>()
+                        .gt(NotifyConfig::getId, startId)
+                        .in(NotifyConfig::getId, retryNotifyIds)
+                        .eq(NotifyConfig::getNotifyStatus, StatusEnum.YES.getStatus())
+                        .eq(NotifyConfig::getNotifyScene, RetryNotifySceneEnum.MAX_RETRY_ERROR.getNotifyScene())
+                        .orderByAsc(NotifyConfig::getId));
 
         Set<Long> recipientIds = notifyConfigs.stream()
                 .map(config -> new HashSet<>(JsonUtil.parseList(config.getRecipientIds(), Long.class)))
