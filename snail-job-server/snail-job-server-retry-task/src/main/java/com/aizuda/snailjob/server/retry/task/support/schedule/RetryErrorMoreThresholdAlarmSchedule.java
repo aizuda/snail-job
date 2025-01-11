@@ -1,36 +1,17 @@
 package com.aizuda.snailjob.server.retry.task.support.schedule;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.alarm.Alarm;
 import com.aizuda.snailjob.common.core.alarm.AlarmContext;
 import com.aizuda.snailjob.common.core.alarm.SnailJobAlarmFactory;
-import com.aizuda.snailjob.common.core.enums.RetryNotifySceneEnum;
-import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.util.EnvironmentUtils;
-import com.aizuda.snailjob.common.core.util.JsonUtil;
-import com.aizuda.snailjob.common.core.util.NetUtil;
-import com.aizuda.snailjob.common.core.util.StreamUtils;
-import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.Lifecycle;
-import com.aizuda.snailjob.server.common.dto.PartitionTask;
-import com.aizuda.snailjob.server.common.schedule.AbstractSchedule;
 import com.aizuda.snailjob.server.common.util.DateUtils;
-import com.aizuda.snailjob.server.common.util.PartitionTaskUtils;
-import com.aizuda.snailjob.server.retry.task.dto.NotifyConfigPartitionTask;
-import com.aizuda.snailjob.server.retry.task.dto.NotifyConfigPartitionTask.RecipientInfo;
-import com.aizuda.snailjob.server.retry.task.support.RetryTaskConverter;
-import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
+import com.aizuda.snailjob.server.retry.task.dto.NotifyConfigDTO;
+import com.aizuda.snailjob.server.retry.task.dto.RetrySceneConfigPartitionTask;
 import com.aizuda.snailjob.template.datasource.access.TaskAccess;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.NotifyRecipientMapper;
-import com.aizuda.snailjob.template.datasource.persistence.po.NotifyConfig;
-import com.aizuda.snailjob.template.datasource.persistence.po.NotifyRecipient;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryDeadLetter;
-import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -48,7 +29,7 @@ import java.util.*;
  */
 @Component
 @RequiredArgsConstructor
-public class RetryErrorMoreThresholdAlarmSchedule extends AbstractSchedule implements Lifecycle {
+public class RetryErrorMoreThresholdAlarmSchedule extends AbstractRetryTaskAlarmSchedule implements Lifecycle {
 
     private static final String retryErrorMoreThresholdTextMessageFormatter =
             "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 场景重试失败数量超过{}个</font>  \n" +
@@ -58,9 +39,6 @@ public class RetryErrorMoreThresholdAlarmSchedule extends AbstractSchedule imple
                     "> 时间窗口:{} ~ {}  \n" +
                     "> **共计:{}**  \n";
 
-    private final AccessTemplate accessTemplate;
-    private final NotifyRecipientMapper recipientMapper;
-
     @Override
     public void start() {
         taskScheduler.scheduleWithFixedDelay(this::execute, Instant.now(), Duration.parse("PT10M"));
@@ -68,25 +46,13 @@ public class RetryErrorMoreThresholdAlarmSchedule extends AbstractSchedule imple
 
     @Override
     public void close() {
-
     }
 
     @Override
-    protected void doExecute() {
-        SnailJobLog.LOCAL.debug("retryErrorMoreThreshold time[{}] ip:[{}]",
-                LocalDateTime.now(),
-                NetUtil.getLocalIpStr());
-        PartitionTaskUtils.process(this::getNotifyConfigPartitions, this::doHandler, 0);
-    }
-
-    private void doHandler(List<? extends PartitionTask> partitionTasks) {
-
-        for (PartitionTask partitionTask : partitionTasks) {
-            doSendAlarm((NotifyConfigPartitionTask) partitionTask);
+    protected void doSendAlarm(RetrySceneConfigPartitionTask partitionTask, Map<Long, NotifyConfigDTO> notifyConfigInfo) {
+        if (CollUtil.isEmpty(partitionTask.getNotifyIds())) {
+            return;
         }
-    }
-
-    private void doSendAlarm(NotifyConfigPartitionTask partitionTask) {
 
         // x分钟内、x组、x场景进入死信队列的数据量
         LocalDateTime now = LocalDateTime.now();
@@ -95,102 +61,43 @@ public class RetryErrorMoreThresholdAlarmSchedule extends AbstractSchedule imple
                 partitionTask.getNamespaceId(),
                 new LambdaQueryWrapper<RetryDeadLetter>().
                         between(RetryDeadLetter::getCreateDt, now.minusMinutes(30), now)
+                        .eq(RetryDeadLetter::getNamespaceId, partitionTask.getNamespaceId())
                         .eq(RetryDeadLetter::getGroupName, partitionTask.getGroupName())
-                        .eq(RetryDeadLetter::getSceneName, partitionTask.getBusinessId()));
-        if (partitionTask.getNotifyThreshold() > 0 && count >= partitionTask.getNotifyThreshold()) {
-            List<RecipientInfo> recipientInfos = partitionTask.getRecipientInfos();
-            for (final RecipientInfo recipientInfo : recipientInfos) {
-                if (Objects.isNull(recipientInfo)) {
-                    continue;
-                }
-                // 预警
-                AlarmContext context = AlarmContext.build()
-                        .text(retryErrorMoreThresholdTextMessageFormatter,
-                                EnvironmentUtils.getActiveProfile(),
-                                count,
-                                partitionTask.getNamespaceId(),
-                                partitionTask.getGroupName(),
-                                partitionTask.getBusinessId(),
-                                DateUtils.format(now.minusMinutes(30),
-                                        DateUtils.NORM_DATETIME_PATTERN),
-                                DateUtils.toNowFormat(DateUtils.NORM_DATETIME_PATTERN), count)
-                        .title("{}环境 场景重试失败数量超过阈值", EnvironmentUtils.getActiveProfile())
-                        .notifyAttribute(recipientInfo.getNotifyAttribute());
-                Alarm<AlarmContext> alarmType = SnailJobAlarmFactory.getAlarmType(
-                        recipientInfo.getNotifyType());
-                alarmType.asyncSendMessage(context);
+                        .eq(RetryDeadLetter::getSceneName, partitionTask.getSceneName()));
+
+        for (Long notifyId : partitionTask.getNotifyIds()) {
+            NotifyConfigDTO notifyConfigDTO = notifyConfigInfo.get(notifyId);
+            if (notifyConfigDTO == null) {
+                continue;
             }
+            if (notifyConfigDTO.getNotifyThreshold() > 0 && count >= notifyConfigDTO.getNotifyThreshold()) {
+                List<NotifyConfigDTO.RecipientInfo> recipientInfos = notifyConfigDTO.getRecipientInfos();
+                for (final NotifyConfigDTO.RecipientInfo recipientInfo : recipientInfos) {
+                    if (Objects.isNull(recipientInfo)) {
+                        continue;
+                    }
+                    // 预警
+                    AlarmContext context = AlarmContext.build()
+                            .text(retryErrorMoreThresholdTextMessageFormatter,
+                                    EnvironmentUtils.getActiveProfile(),
+                                    count,
+                                    partitionTask.getNamespaceId(),
+                                    partitionTask.getGroupName(),
+                                    partitionTask.getSceneName(),
+                                    DateUtils.format(now.minusMinutes(30),
+                                            DateUtils.NORM_DATETIME_PATTERN),
+                                    DateUtils.toNowFormat(DateUtils.NORM_DATETIME_PATTERN), count)
+                            .title("{}环境 场景重试失败数量超过阈值", EnvironmentUtils.getActiveProfile())
+                            .notifyAttribute(recipientInfo.getNotifyAttribute());
+                    Alarm<AlarmContext> alarmType = SnailJobAlarmFactory.getAlarmType(
+                            recipientInfo.getNotifyType());
+                    alarmType.asyncSendMessage(context);
+                }
 
+            }
         }
     }
 
-    // 1.拿500场景
-    // 2.获取通知配置ids并查询通知配置
-    // 3.Map<通知ID, 通知DTO>
-    // 4.循环场景查询死信数据量
-    // 5.场景对应的通知ids
-    private List<NotifyConfigPartitionTask> getNotifyConfigPartitions(Long startId) {
-
-        List<RetrySceneConfig> retrySceneConfigList = accessTemplate.getSceneConfigAccess()
-                .listPage(new PageDTO<>(0, 500), new LambdaQueryWrapper<>())
-                .getRecords();
-
-        Set<Long> retryNotifyIds = new HashSet<>();
-        for (RetrySceneConfig retrySceneConfig : retrySceneConfigList) {
-            HashSet<Long> notifyIds = StrUtil.isBlank(retrySceneConfig.getNotifyIds()) ? new HashSet<>() : new HashSet<>(JsonUtil.parseList(retrySceneConfig.getNotifyIds(), Long.class));
-            retryNotifyIds.addAll(notifyIds);
-        }
-        if (CollUtil.isEmpty(retryNotifyIds)) {
-            return Lists.newArrayList();
-        }
-
-        List<NotifyConfig> notifyConfigs = accessTemplate.getNotifyConfigAccess()
-                .list(new LambdaQueryWrapper<NotifyConfig>()
-                        .gt(NotifyConfig::getId, startId)
-                        .in(NotifyConfig::getId, retryNotifyIds)
-                        .eq(NotifyConfig::getNotifyStatus, StatusEnum.YES.getStatus())
-                        .eq(NotifyConfig::getNotifyScene, RetryNotifySceneEnum.MAX_RETRY_ERROR.getNotifyScene())
-                        .orderByAsc(NotifyConfig::getId));
-
-        Set<Long> recipientIds = notifyConfigs.stream()
-                .map(config -> new HashSet<>(JsonUtil.parseList(config.getRecipientIds(), Long.class)))
-                .reduce((a, b) -> {
-                    HashSet<Long> set = Sets.newHashSet();
-                    set.addAll(a);
-                    set.addAll(b);
-                    return set;
-                }).orElse(new HashSet<>());
-
-        if (CollUtil.isEmpty(recipientIds)) {
-            return Lists.newArrayList();
-        }
-
-        List<NotifyRecipient> notifyRecipients = recipientMapper.selectBatchIds(recipientIds);
-        Map<Long, NotifyRecipient> recipientMap = StreamUtils.toIdentityMap(notifyRecipients, NotifyRecipient::getId);
-
-        List<NotifyConfigPartitionTask> notifyConfigPartitionTasks = RetryTaskConverter.INSTANCE.toNotifyConfigPartitionTask(
-                notifyConfigs);
-        for (final NotifyConfigPartitionTask notifyConfigPartitionTask : notifyConfigPartitionTasks) {
-
-            List<RecipientInfo> recipientList = StreamUtils.toList(notifyConfigPartitionTask.getRecipientIds(),
-                    recipientId -> {
-                        NotifyRecipient notifyRecipient = recipientMap.get(recipientId);
-                        if (Objects.isNull(notifyRecipient)) {
-                            return null;
-                        }
-
-                        RecipientInfo recipientInfo = new RecipientInfo();
-                        recipientInfo.setNotifyType(notifyRecipient.getNotifyType());
-                        recipientInfo.setNotifyAttribute(notifyRecipient.getNotifyAttribute());
-
-                        return recipientInfo;
-                    });
-
-            notifyConfigPartitionTask.setRecipientInfos(recipientList);
-        }
-
-        return notifyConfigPartitionTasks;
-    }
 
     @Override
     public String lockName() {

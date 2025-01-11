@@ -1,31 +1,21 @@
 package com.aizuda.snailjob.server.retry.task.dto;
 
-import com.aizuda.snailjob.server.common.dto.PartitionTask;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import java.util.List;
 import java.util.Set;
 
 /**
- * @author xiaowoniu
- * @date 2023-10-25 22:23:24
- * @since 2.5.0
+ * @author opensnail
+ * @date 2025-01-11
+ * @since 1.3.0-beta1.1
  */
-@EqualsAndHashCode(callSuper = true)
 @Data
-@Deprecated
-public class NotifyConfigPartitionTask extends PartitionTask {
+public class NotifyConfigDTO {
 
-    private String namespaceId;
-
-    private String groupName;
-
-    private String businessId;
+    private Long id;
 
     private Set<Long> recipientIds;
-
-    private Integer notifyStatus;
 
     private Integer notifyThreshold;
 
@@ -44,5 +34,4 @@ public class NotifyConfigPartitionTask extends PartitionTask {
 
         private String notifyAttribute;
     }
-
 }

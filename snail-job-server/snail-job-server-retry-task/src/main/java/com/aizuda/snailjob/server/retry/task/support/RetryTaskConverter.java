@@ -6,10 +6,7 @@ import com.aizuda.snailjob.server.common.dto.RetryAlarmInfo;
 import com.aizuda.snailjob.server.common.dto.RetryLogMetaDTO;
 import com.aizuda.snailjob.server.model.dto.RetryLogTaskDTO;
 import com.aizuda.snailjob.server.model.dto.RetryTaskDTO;
-import com.aizuda.snailjob.server.retry.task.dto.NotifyConfigPartitionTask;
-import com.aizuda.snailjob.server.retry.task.dto.RetryPartitionTask;
-import com.aizuda.snailjob.server.retry.task.dto.RetryTaskExecutorDTO;
-import com.aizuda.snailjob.server.retry.task.dto.RetryTaskFailAlarmEventDTO;
+import com.aizuda.snailjob.server.retry.task.dto.*;
 import com.aizuda.snailjob.server.retry.task.generator.task.TaskContext;
 import com.aizuda.snailjob.server.retry.task.support.timer.RetryTimerContext;
 import com.aizuda.snailjob.template.datasource.persistence.po.*;
@@ -52,12 +49,27 @@ public interface RetryTaskConverter {
 
     RetryTimerContext toRetryTimerContext(RetryPartitionTask retryPartitionTask);
 
-    List<NotifyConfigPartitionTask> toNotifyConfigPartitionTask(List<NotifyConfig> notifyConfigs);
+    List<NotifyConfigDTO> toNotifyConfigDTO(List<NotifyConfig> notifyConfigs);
+
+    List<RetrySceneConfigPartitionTask> toRetrySceneConfigPartitionTask(List<RetrySceneConfig> retrySceneConfigs);
+
+    @Mappings({
+            @Mapping(target = "notifyIds", expression = "java(RetryTaskConverter.toNotifyIds(retrySceneConfig.getNotifyIds()))")
+    })
+    RetrySceneConfigPartitionTask toRetrySceneConfigPartitionTask(RetrySceneConfig retrySceneConfig);
 
     @Mappings({
             @Mapping(target = "recipientIds", expression = "java(RetryTaskConverter.toNotifyRecipientIds(notifyConfig.getRecipientIds()))")
     })
-    NotifyConfigPartitionTask toNotifyConfigPartitionTask(NotifyConfig notifyConfig);
+    NotifyConfigDTO toNotifyConfigDTO(NotifyConfig notifyConfig);
+
+    static Set<Long> toNotifyIds(String notifyIdsStr) {
+        if (StrUtil.isBlank(notifyIdsStr)) {
+            return new HashSet<>();
+        }
+
+        return new HashSet<>(JsonUtil.parseList(notifyIdsStr, Long.class));
+    }
 
     static Set<Long> toNotifyRecipientIds(String notifyRecipientIdsStr) {
         if (StrUtil.isBlank(notifyRecipientIdsStr)) {
