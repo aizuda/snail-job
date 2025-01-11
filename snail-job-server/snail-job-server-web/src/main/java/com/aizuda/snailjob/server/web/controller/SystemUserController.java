@@ -48,6 +48,12 @@ public class SystemUserController {
         systemUserService.addUser(requestVO);
     }
 
+    @LoginRequired(role = RoleEnum.USER)
+    @GetMapping("/user/simple/list")
+    public List<SystemUserResponseVO> getSystemUserList() {
+        return systemUserService.getSystemUserList();
+    }
+
     @LoginRequired(role = RoleEnum.ADMIN)
     @GetMapping("/user/page/list")
     public PageResult<List<SystemUserResponseVO>> getSystemUserPageList(SystemUserQueryVO systemUserQueryVO) {

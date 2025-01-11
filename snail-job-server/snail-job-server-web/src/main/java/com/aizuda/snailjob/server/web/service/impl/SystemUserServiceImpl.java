@@ -305,6 +305,12 @@ public class SystemUserServiceImpl implements SystemUserService {
     }
 
     @Override
+    public List<SystemUserResponseVO> getSystemUserList() {
+        List<SystemUser> systemUsers = systemUserMapper.selectList(new LambdaQueryWrapper<SystemUser>().select(SystemUser::getId, SystemUser::getUsername));
+        return SystemUserResponseVOConverter.INSTANCE.convertList(systemUsers);
+    }
+
+    @Override
     @Transactional
     public boolean delUser(final Long id) {
         systemUserPermissionMapper.delete(

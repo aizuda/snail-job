@@ -38,4 +38,5 @@ public interface SystemUserService {
 
     void updateUserPassword(SystemUpdateUserPasswordRequestVO requestVO);
 
+    List<SystemUserResponseVO> getSystemUserList();
 }
