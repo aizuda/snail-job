@@ -153,7 +153,6 @@ public class SceneConfigServiceImpl implements SceneConfigService {
 
         retrySceneConfig.setTriggerInterval(
                 Optional.ofNullable(retrySceneConfig.getTriggerInterval()).orElse(StrUtil.EMPTY));
-        retrySceneConfig.setNotifyIds(JsonUtil.toJsonString(Optional.ofNullable(requestVO.getNotifyIds()).orElse(Sets.newHashSet())));
         Assert.isTrue(1 == accessTemplate.getSceneConfigAccess().update(retrySceneConfig,
                         new LambdaUpdateWrapper<RetrySceneConfig>()
                                 .eq(RetrySceneConfig::getNamespaceId, namespaceId)

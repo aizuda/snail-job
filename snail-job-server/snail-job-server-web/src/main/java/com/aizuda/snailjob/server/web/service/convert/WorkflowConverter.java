@@ -120,7 +120,7 @@ public interface WorkflowConverter {
 
     static String toNotifyIdsStr(Set<Long> notifyIds) {
         if (CollUtil.isEmpty(notifyIds)) {
-            return null;
+            return StrUtil.EMPTY;
         }
 
         return JsonUtil.toJsonString(notifyIds);

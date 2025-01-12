@@ -3,9 +3,7 @@ package com.aizuda.snailjob.template.datasource.persistence.po;
 import com.aizuda.snailjob.common.core.enums.ExecutorTypeEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 
 /**
@@ -150,6 +148,7 @@ public class Job extends CreateUpdateDt {
     /**
      * 负责人id
      */
+    @TableField(updateStrategy = FieldStrategy.ALWAYS)
     private Long ownerId;
 
 }
