@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.common.strategy;
 
+import cn.hutool.core.lang.Assert;
 import com.aizuda.snailjob.common.core.exception.SnailJobCommonException;
 import com.aizuda.snailjob.common.core.util.CronExpression;
 import com.aizuda.snailjob.server.common.WaitStrategy;
@@ -179,6 +180,7 @@ public class WaitStrategies {
 
             try {
                 Date nextValidTime = new CronExpression(context.getTriggerInterval()).getNextValidTimeAfter(new Date(context.getNextTriggerAt()));
+                Assert.notNull(nextValidTime, () -> new SnailJobServerException("表达式错误:{}", context.getTriggerInterval()));
                 return DateUtils.toEpochMilli(nextValidTime);
             } catch (ParseException e) {
                 throw new SnailJobServerException("解析CRON表达式异常 [{}]", context.getTriggerInterval(), e);

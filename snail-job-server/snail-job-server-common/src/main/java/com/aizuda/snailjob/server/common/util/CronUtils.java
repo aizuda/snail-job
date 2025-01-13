@@ -12,6 +12,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author opensnail
@@ -29,6 +30,9 @@ public class CronUtils {
             try {
                 ZonedDateTime zdt = now.atZone(ZoneOffset.ofHours(8));
                 nextValidTime = new CronExpression(cron).getNextValidTimeAfter(Date.from(zdt.toInstant()));
+                if (Objects.isNull(nextValidTime)) {
+                    continue;
+                }
                 now = LocalDateTime.ofEpochSecond(nextValidTime.getTime() / 1000, 0, ZoneOffset.ofHours(8));
                 list.add(DateUtils.format(now, DateUtils.NORM_DATETIME_PATTERN));
             } catch (ParseException ignored) {
@@ -40,7 +44,8 @@ public class CronUtils {
 
     public static long getExecuteInterval(String cron) {
         List<String> executeTimeByCron = getExecuteTimeByCron(cron, 2);
-        Assert.isTrue(!executeTimeByCron.isEmpty(), () -> new SnailJobServerException("[{}]表达式解析有误", cron));
+        Assert.isTrue(!executeTimeByCron.isEmpty(), () -> new SnailJobServerException("表达式解析有误.[{}]", cron));
+        Assert.isTrue(executeTimeByCron.size() == 2, () -> new SnailJobServerException("表达式必须支持多次执行.[{}]", cron));
         LocalDateTime first = LocalDateTime.parse(executeTimeByCron.get(0), DateUtils.NORM_DATETIME_PATTERN);
         LocalDateTime second = LocalDateTime.parse(executeTimeByCron.get(1), DateUtils.NORM_DATETIME_PATTERN);
         Duration duration = Duration.between(first, second);
