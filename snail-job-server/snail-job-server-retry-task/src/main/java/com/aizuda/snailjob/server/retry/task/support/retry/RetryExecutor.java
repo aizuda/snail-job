@@ -2,6 +2,7 @@ package com.aizuda.snailjob.server.retry.task.support.retry;
 
 import akka.actor.ActorRef;
 import cn.hutool.core.lang.Pair;
+import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.client.model.DispatchRetryResultDTO;
 import com.aizuda.snailjob.common.core.enums.RetryNotifySceneEnum;
 import com.aizuda.snailjob.common.core.model.Result;
@@ -18,6 +19,7 @@ import com.aizuda.snailjob.server.retry.task.support.StopStrategy;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 
 /**
@@ -98,10 +100,29 @@ public class RetryExecutor<V> {
             actorRef = ActorGenerator.failureActor();
         }
 
+        // 获取失败原因
+        String reason = StrUtil.EMPTY;
+        if (retryContext.hasException()) {
+            Exception exception = retryContext.getException();
+            if (Objects.nonNull(exception)) {
+                reason = exception.getCause().getMessage();
+            }
+
+        } else {
+            if (Objects.nonNull(call)) {
+                Result<DispatchRetryResultDTO> result = (Result<DispatchRetryResultDTO>) call;
+                DispatchRetryResultDTO data = result.getData();
+                if (StrUtil.isBlank(result.getMessage()) && Objects.nonNull(data)) {
+                    reason = data.getExceptionMsg();
+                } else {
+                    reason = result.getMessage();
+                }
+            }
+        }
+
         RetryTaskExecutorDTO retryTaskExecutorDTO =
                 RetryTaskConverter.INSTANCE.toRetryTaskExecutorDTO(
-                        retryContext.getRetryTask(),
-                        retryContext.hasException() ? retryContext.getException().getCause().getMessage() : ((DispatchRetryResultDTO) ((Result) call).getData()).getExceptionMsg(),
+                        retryContext.getRetryTask(), reason,
                         RetryNotifySceneEnum.RETRY_TASK_FAIL_ERROR.getNotifyScene());
         actorRef.tell(retryTaskExecutorDTO, actorRef);
 

@@ -1,12 +1,11 @@
 package com.aizuda.snailjob.server.retry.task.dto;
 
-import com.aizuda.snailjob.template.datasource.persistence.po.CreateUpdateDt;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
 @Data
-public class RetryTaskExecutorDTO extends CreateUpdateDt {
+public class RetryTaskExecutorDTO {
 
     private Long id;
 
@@ -39,5 +38,9 @@ public class RetryTaskExecutorDTO extends CreateUpdateDt {
     private Integer notifyScene;
 
     private String reason;
+
+    private LocalDateTime updateDt;
+
+    private LocalDateTime createDt;
 
 }

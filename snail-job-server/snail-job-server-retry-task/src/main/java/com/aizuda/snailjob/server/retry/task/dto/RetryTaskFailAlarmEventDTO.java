@@ -1,6 +1,5 @@
 package com.aizuda.snailjob.server.retry.task.dto;
 
-import com.aizuda.snailjob.template.datasource.persistence.po.CreateUpdateDt;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -11,7 +10,7 @@ import java.time.LocalDateTime;
  * @date 2024/12/23
  */
 @Data
-public class RetryTaskFailAlarmEventDTO extends CreateUpdateDt {
+public class RetryTaskFailAlarmEventDTO {
 
     private Long id;
 

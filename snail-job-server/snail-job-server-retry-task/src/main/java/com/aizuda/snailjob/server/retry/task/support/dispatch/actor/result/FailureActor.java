@@ -57,6 +57,7 @@ public class FailureActor extends AbstractActor {
         return receiveBuilder().match(RetryTaskExecutorDTO.class, retryTaskExecutorDTO -> {
 
             SnailJobLog.LOCAL.debug("FailureActor params:[{}]", retryTaskExecutorDTO);
+            // 这里先这样后面重构统一调整
             RetryTask retryTask = RetryTaskConverter.INSTANCE.toRetryTask(retryTaskExecutorDTO);
             try {
                 // 超过最大等级
