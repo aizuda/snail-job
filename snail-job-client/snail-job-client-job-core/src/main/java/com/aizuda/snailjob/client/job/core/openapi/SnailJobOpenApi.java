@@ -4,8 +4,7 @@ import com.aizuda.snailjob.client.job.core.handler.add.*;
 import com.aizuda.snailjob.client.job.core.handler.delete.DeleteJobHandler;
 import com.aizuda.snailjob.client.job.core.handler.delete.DeleteWorkflowHandler;
 import com.aizuda.snailjob.client.job.core.handler.query.RequestQueryHandler;
-import com.aizuda.snailjob.client.job.core.handler.trigger.TriggerJobHandler;
-import com.aizuda.snailjob.client.job.core.handler.trigger.TriggerWorkflowHandler;
+import com.aizuda.snailjob.client.job.core.handler.trigger.*;
 import com.aizuda.snailjob.client.job.core.handler.update.*;
 
 import java.util.Set;
@@ -125,14 +124,57 @@ public final class SnailJobOpenApi {
     }
 
     /**
-     * 手动触发定时任务
+     * 手动触发广播定时任务
      *
      * @param jobId 定时任务ID
-     * @return {@link TriggerJobHandler}
+     * @return {@link BroadcastTriggerHandler}
      */
-    public static TriggerJobHandler triggerJob(Long jobId) {
-        return new TriggerJobHandler(jobId);
+    public static BroadcastTriggerHandler triggerBroadcastJob(Long jobId) {
+        return new BroadcastTriggerHandler(jobId);
     }
+
+    /**
+     * 手动触发集群定时任务
+     *
+     * @param jobId 定时任务ID
+     * @return {@link ClusterTriggerHandler}
+     */
+    public static ClusterTriggerHandler triggerClusterJob(Long jobId) {
+        return new ClusterTriggerHandler(jobId);
+    }
+
+    /**
+     * 手动触发MapReduce定时任务
+     *
+     * @param jobId 定时任务ID
+     * @return {@link MapReduceTriggerHandler}
+     */
+    public static MapReduceTriggerHandler triggerMapReduceJob(Long jobId) {
+        return new MapReduceTriggerHandler(jobId);
+    }
+
+    /**
+     * 手动触发Map定时任务
+     *
+     * @param jobId 定时任务ID
+     * @return {@link MapTriggerHandler}
+     */
+    public static MapTriggerHandler triggerMapJob(Long jobId) {
+        return new MapTriggerHandler(jobId);
+    }
+
+
+    /**
+     * 手动触发静态分片定时任务
+     *
+     * @param jobId 定时任务ID
+     * @return {@link ShardingTriggerHandler}
+     */
+    public static ShardingTriggerHandler triggerShardingJob(Long jobId) {
+        return new ShardingTriggerHandler(jobId);
+    }
+
+
 
     /**
      * 手动触发工作流任务

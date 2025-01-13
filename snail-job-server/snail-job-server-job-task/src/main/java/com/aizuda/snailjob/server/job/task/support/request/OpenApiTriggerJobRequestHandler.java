@@ -1,13 +1,17 @@
 package com.aizuda.snailjob.server.job.task.support.request;
 
+import cn.hutool.core.lang.Assert;
 import cn.hutool.core.net.url.UrlQuery;
+import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.model.SnailJobRequest;
 import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
+import com.aizuda.snailjob.server.common.dto.JobTriggerDTO;
 import com.aizuda.snailjob.server.common.enums.JobTaskExecutorSceneEnum;
+import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.handler.PostHttpRequestHandler;
 import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.job.task.dto.JobTaskPrepareDTO;
@@ -23,7 +27,6 @@ import io.netty.handler.codec.http.HttpMethod;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.Objects;
 
 /**
  * OPENAPI
@@ -51,12 +54,9 @@ public class OpenApiTriggerJobRequestHandler extends PostHttpRequestHandler {
         SnailJobLog.LOCAL.debug("Trigger job content:[{}]", content);
         SnailJobRequest retryRequest = JsonUtil.parseObject(content, SnailJobRequest.class);
         Object[] args = retryRequest.getArgs();
-        Long jobId = JsonUtil.parseObject(JsonUtil.toJsonString(args[0]), Long.class);
-        Job job = jobMapper.selectById(jobId);
-        if (Objects.isNull(job)){
-            SnailJobLog.LOCAL.warn("job can not be null.");
-            return new SnailJobRpcResult(false, retryRequest.getReqId());
-        }
+        JobTriggerDTO jobTriggerDTO = JsonUtil.parseObject(JsonUtil.toJsonString(args[0]), JobTriggerDTO.class);
+        Job job = jobMapper.selectById(jobTriggerDTO.getJobId());
+        Assert.notNull(job, () -> new SnailJobServerException("job can not be null."));
 
         long count = accessTemplate.getGroupConfigAccess().count(new LambdaQueryWrapper<GroupConfig>()
                 .eq(GroupConfig::getGroupName, job.getGroupName())
@@ -72,6 +72,10 @@ public class OpenApiTriggerJobRequestHandler extends PostHttpRequestHandler {
         // 设置now表示立即执行
         jobTaskPrepare.setNextTriggerAt(DateUtils.toNowMilli());
         jobTaskPrepare.setTaskExecutorScene(JobTaskExecutorSceneEnum.MANUAL_JOB.getType());
+        // 设置手动参数
+        if (StrUtil.isNotBlank(jobTriggerDTO.getTmpArgsStr())) {
+            jobTaskPrepare.setTmpArgsStr(jobTriggerDTO.getTmpArgsStr());
+        }
         // 创建批次
         terminalJobPrepareHandler.handle(jobTaskPrepare);
 

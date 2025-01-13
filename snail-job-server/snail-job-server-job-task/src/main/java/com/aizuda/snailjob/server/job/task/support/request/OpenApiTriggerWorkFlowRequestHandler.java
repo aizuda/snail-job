@@ -1,6 +1,7 @@
 package com.aizuda.snailjob.server.job.task.support.request;
 
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.lang.Assert;
 import cn.hutool.core.net.url.UrlQuery;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH;
@@ -9,7 +10,9 @@ import com.aizuda.snailjob.common.core.model.SnailJobRequest;
 import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
+import com.aizuda.snailjob.server.common.dto.JobTriggerDTO;
 import com.aizuda.snailjob.server.common.enums.JobTaskExecutorSceneEnum;
+import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.handler.PostHttpRequestHandler;
 import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.job.task.dto.WorkflowTaskPrepareDTO;
@@ -27,7 +30,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -56,12 +58,10 @@ public class OpenApiTriggerWorkFlowRequestHandler extends PostHttpRequestHandler
         SnailJobLog.LOCAL.debug("Trigger job content:[{}]", content);
         SnailJobRequest retryRequest = JsonUtil.parseObject(content, SnailJobRequest.class);
         Object[] args = retryRequest.getArgs();
-        Long id = JsonUtil.parseObject(JsonUtil.toJsonString(args[0]), Long.class);
-        Workflow workflow = workflowMapper.selectById(id);
-        if (Objects.isNull(workflow)){
-            SnailJobLog.LOCAL.warn("workflow can not be null.");
-            return new SnailJobRpcResult(false, retryRequest.getReqId());
-        }
+        JobTriggerDTO workflowDTO = JsonUtil.parseObject(JsonUtil.toJsonString(args[0]), JobTriggerDTO.class);
+        Workflow workflow = workflowMapper.selectById(workflowDTO.getJobId());
+        Assert.notNull(workflow, () -> new SnailJobServerException("workflow can not be null."));
+
         // 将字符串反序列化为 Set
         if (StrUtil.isNotBlank(workflow.getGroupName())) {
             Set<String> namesSet = new HashSet<>(Arrays.asList(workflow.getGroupName().split(", ")));
@@ -88,7 +88,11 @@ public class OpenApiTriggerWorkFlowRequestHandler extends PostHttpRequestHandler
         // 设置now表示立即执行
         prepareDTO.setNextTriggerAt(DateUtils.toNowMilli());
         prepareDTO.setTaskExecutorScene(JobTaskExecutorSceneEnum.MANUAL_WORKFLOW.getType());
-
+//        设置工作流上下文
+        String tmpWfContext = workflowDTO.getTmpArgsStr();
+        if (StrUtil.isNotBlank(tmpWfContext) && !JsonUtil.isEmptyJson(tmpWfContext)){
+            prepareDTO.setWfContext(tmpWfContext);
+        }
         terminalWorkflowPrepareHandler.handler(prepareDTO);
 
         return new SnailJobRpcResult(true, retryRequest.getReqId());

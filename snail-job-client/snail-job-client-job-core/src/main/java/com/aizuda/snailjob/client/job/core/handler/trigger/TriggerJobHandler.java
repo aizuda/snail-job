@@ -3,16 +3,14 @@ package com.aizuda.snailjob.client.job.core.handler.trigger;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.lang.Pair;
 import com.aizuda.snailjob.client.common.exception.SnailJobClientException;
-import com.aizuda.snailjob.client.job.core.handler.AbstractRequestHandler;
+import com.aizuda.snailjob.client.job.core.handler.AbstractTriggerHandler;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.model.Result;
 
-public class TriggerJobHandler extends AbstractRequestHandler<Boolean> {
-    private final Long triggerJobId;
-
+public abstract class TriggerJobHandler<H> extends AbstractTriggerHandler<H, Boolean> {
 
     public TriggerJobHandler(Long triggerJobId) {
-        this.triggerJobId = triggerJobId;
+        super(triggerJobId);
     }
 
     @Override
@@ -27,7 +25,7 @@ public class TriggerJobHandler extends AbstractRequestHandler<Boolean> {
 
     @Override
     protected Boolean doExecute() {
-        Result<Object> result = client.triggerJob(triggerJobId);
+        Result<Object> result = client.triggerJob(getReqDTO());
         Assert.isTrue(StatusEnum.YES.getStatus() == result.getStatus(),
                 () -> new SnailJobClientException(result.getMessage()));
         return (Boolean)result.getData();
@@ -35,6 +33,6 @@ public class TriggerJobHandler extends AbstractRequestHandler<Boolean> {
 
     @Override
     protected Pair<Boolean, String> checkRequest() {
-        return Pair.of(triggerJobId != null && !Long.valueOf(0).equals(triggerJobId),  "triggerJobId不能为null并且必须大于0");
+        return Pair.of(getReqDTO().getJobId() != null && !Long.valueOf(0).equals(getReqDTO().getJobId()),  "triggerJobId不能为null并且必须大于0");
     }
 }

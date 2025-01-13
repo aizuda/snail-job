@@ -2,6 +2,7 @@ package com.aizuda.snailjob.client.job.core.openapi;
 
 import com.aizuda.snailjob.client.common.annotation.Mapping;
 import com.aizuda.snailjob.client.common.rpc.client.RequestMethod;
+import com.aizuda.snailjob.client.job.core.dto.JobTriggerDTO;
 import com.aizuda.snailjob.client.job.core.dto.RequestAddOrUpdateJobDTO;
 import com.aizuda.snailjob.client.job.core.dto.RequestUpdateStatusDTO;
 import com.aizuda.snailjob.common.core.model.Result;
@@ -19,10 +20,10 @@ public interface OpenApiClient {
     Result<Object> getJobDetail(Long jobId);
 
     @Mapping(method = RequestMethod.POST, path = "/api/job/triggerJob")
-    Result<Object> triggerJob(Long triggerId);
+    Result<Object> triggerJob(JobTriggerDTO jobTriggerDTO);
 
     @Mapping(method = RequestMethod.POST, path = "/api/job/triggerWorkFlow")
-    Result<Object> triggerWorkFlow(Long triggerId);
+    Result<Object> triggerWorkFlow(JobTriggerDTO jobTriggerDTO);
 
     @Mapping(method = RequestMethod.POST, path = "/api/job/updateJobStatus")
     Result<Object> updateJobStatus(RequestUpdateStatusDTO statusDTO);
