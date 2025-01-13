@@ -49,6 +49,7 @@ public class RunningJobPrepareHandler extends AbstractJobPrepareHandler {
         JobOperationReasonEnum jobOperationReasonEnum = JobOperationReasonEnum.NONE;
         CompleteJobBatchDTO completeJobBatchDTO = JobTaskConverter.INSTANCE.completeJobBatchDTO(prepare);
         completeJobBatchDTO.setJobOperationReason(jobOperationReasonEnum.getReason());
+        completeJobBatchDTO.setRetryStatus(Boolean.FALSE);
         if (jobTaskBatchHandler.handleResult(completeJobBatchDTO)) {
             blockStrategy = BlockStrategyEnum.CONCURRENCY.getBlockStrategy();
         } else {
