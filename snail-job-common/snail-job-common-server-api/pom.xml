@@ -14,18 +14,13 @@
     <description>snail-job-common-server-api</description>
     <packaging>jar</packaging>
 
-    <properties>
-        <java.version>17</java.version>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
+
         <dependency>
             <groupId>com.aizuda</groupId>
             <artifactId>snail-job-common-core</artifactId>

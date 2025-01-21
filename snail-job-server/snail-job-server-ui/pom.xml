@@ -14,16 +14,7 @@
     <name>snail-job-server-ui</name>
     <description>snail-job-server-ui</description>
     <packaging>jar</packaging>
-
-    <properties>
-        <java.version>17</java.version>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <node.version>v18.20.2</node.version>
-        <pnpm.version>9.4.0</pnpm.version>
-    </properties>
-
+    
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>

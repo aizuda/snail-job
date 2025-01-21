@@ -14,25 +14,23 @@
     <description>snail-job-mariadb-datasource</description>
     <packaging>jar</packaging>
 
-    <properties>
-        <java.version>17</java.version>
-        <mariadb.version>3.1.4</mariadb.version>
-    </properties>
-
     <dependencies>
+        <!--    preprocessor    -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
-        <dependency>
-            <groupId>com.aizuda</groupId>
-            <artifactId>snail-job-datasource-template</artifactId>
-        </dependency>
+
         <dependency>
             <groupId>org.mariadb.jdbc</groupId>
             <artifactId>mariadb-java-client</artifactId>
             <version>${mariadb.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.aizuda</groupId>
+            <artifactId>snail-job-datasource-template</artifactId>
         </dependency>
     </dependencies>
 

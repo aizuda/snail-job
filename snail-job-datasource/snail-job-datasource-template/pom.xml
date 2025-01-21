@@ -14,20 +14,21 @@
     <description>snail-datasource-template</description>
     <packaging>jar</packaging>
 
-    <properties>
-        <java.version>17</java.version>
-    </properties>
-
     <dependencies>
+        <!--    preprocessor    -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
+
+        <!--   springboot     -->
         <dependency>
-            <groupId>com.aizuda</groupId>
-            <artifactId>snail-job-common-core</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
         </dependency>
+
+        <!--    MyBatis-Plus    -->
         <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
@@ -36,9 +37,11 @@
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-jsqlparser</artifactId>
         </dependency>
+
+        <!--   SnailJob     -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-jdbc</artifactId>
+            <groupId>com.aizuda</groupId>
+            <artifactId>snail-job-common-core</artifactId>
         </dependency>
         <dependency>
             <groupId>com.aizuda</groupId>

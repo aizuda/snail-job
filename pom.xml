@@ -13,46 +13,59 @@
     <artifactId>snail-job</artifactId>
     <version>${revision}</version>
     <name>snail-job</name>
-    <packaging>pom</packaging>
-
     <description>snail-job</description>
 
     <properties>
         <java.version>17</java.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <revision>1.4.0-beta1</revision>
+        <skipTests>true</skipTests>
+
         <netty-all.version>4.1.114.Final</netty-all.version>
-        <hutool-all.version>5.8.32</hutool-all.version>
+        <hutool.version>5.8.32</hutool.version>
+        <mybatis-spring.version>3.0.3</mybatis-spring.version>
         <mybatis-plus.version>3.5.9</mybatis-plus.version>
-        <guava-retrying.version>2.0.0</guava-retrying.version>
         <tinylog.version>1.3.6</tinylog.version>
         <tinylog2.version>2.6.2</tinylog2.version>
         <logtube.version>0.45.0</logtube.version>
         <log4j.version>1.2.17</log4j.version>
         <commons-logging.version>1.3.4</commons-logging.version>
-        <jakarta-validation.version>3.0.2</jakarta-validation.version>
         <guava.version>33.3.0-jre</guava.version>
+        <guava-retrying.version>2.0.0</guava-retrying.version>
+        <mapstruct.version>1.5.3.Final</mapstruct.version>
+        <akka.version>2.6.21</akka.version>
+        <scala.version>2.13.9</scala.version>
+        <java-jwt.version>4.4.0</java-jwt.version>
+        <perf4j.version>0.9.16</perf4j.version>
+        <aviator.version>5.3.3</aviator.version>
+        <hessian.version>4.0.66</hessian.version>
+        <QLExpress.version>3.3.4</QLExpress.version>
+
+        <!--    grpc & protobuf    -->
         <grpc-java.version>1.66.0</grpc-java.version>
         <proto-google-common-protos.version>2.41.0</proto-google-common-protos.version>
         <protobuf-java.version>3.25.3</protobuf-java.version>
-    </properties>
 
-    <modules>
-        <module>snail-job-common</module>
-        <module>snail-job-server</module>
-        <module>snail-job-client-starter</module>
-        <module>snail-job-datasource</module>
-        <module>snail-job-client</module>
-    </modules>
+        <!--   non-springboot database connectors  -->
+        <mariadb.version>3.1.4</mariadb.version>
+        <kingbase.version>8.6.0</kingbase.version>
+        <dameng.version>8.1.3.62</dameng.version>
+
+        <!--   server-ui build tool     -->
+        <node.version>v18.20.2</node.version>
+        <pnpm.version>9.4.0</pnpm.version>
+
+        <!--    plugins    -->
+        <central-publishing-maven-plugin.version>0.5.0</central-publishing-maven-plugin.version>
+        <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
+        <flatten-maven-plugin.version>1.1.0</flatten-maven-plugin.version>
+    </properties>
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>io.netty</groupId>
-                <artifactId>netty-all</artifactId>
-                <version>${netty-all.version}</version>
-            </dependency>
+            <!--      SnailJob common      -->
             <dependency>
                 <groupId>com.aizuda</groupId>
                 <artifactId>snail-job-common-core</artifactId>
@@ -60,7 +73,7 @@
             </dependency>
             <dependency>
                 <groupId>com.aizuda</groupId>
-                <artifactId>snail-job-common-server-api</artifactId>
+                <artifactId>snail-job-common-log</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
@@ -70,9 +83,11 @@
             </dependency>
             <dependency>
                 <groupId>com.aizuda</groupId>
-                <artifactId>snail-job-common-log</artifactId>
+                <artifactId>snail-job-common-server-api</artifactId>
                 <version>${revision}</version>
             </dependency>
+
+            <!--      SnailJob datasource      -->
             <dependency>
                 <groupId>com.aizuda</groupId>
                 <artifactId>snail-job-datasource-template</artifactId>
@@ -113,21 +128,8 @@
                 <artifactId>snail-job-kingbase-datasource</artifactId>
                 <version>${revision}</version>
             </dependency>
-            <dependency>
-                <groupId>cn.hutool</groupId>
-                <artifactId>hutool-http</artifactId>
-                <version>${hutool-all.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>cn.hutool</groupId>
-                <artifactId>hutool-crypto</artifactId>
-                <version>${hutool-all.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>cn.hutool</groupId>
-                <artifactId>hutool-core</artifactId>
-                <version>${hutool-all.version}</version>
-            </dependency>
+
+            <!--      SnailJob client      -->
             <dependency>
                 <groupId>com.aizuda</groupId>
                 <artifactId>snail-job-client-retry-core</artifactId>
@@ -138,21 +140,37 @@
                 <artifactId>snail-job-client-job-core</artifactId>
                 <version>${revision}</version>
             </dependency>
+
+            <!--     MyBatis & Plus       -->
+            <dependency>
+                <groupId>org.mybatis</groupId>
+                <artifactId>mybatis-spring</artifactId>
+                <version>${mybatis-spring.version}</version>
+            </dependency>
             <dependency>
                 <groupId>com.baomidou</groupId>
                 <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
                 <version>${mybatis-plus.version}</version>
             </dependency>
+            <!-- >= 3.5.9 PaginationInnerInterceptor 需要单独引入 -->
             <dependency>
-                <!-- >= 3.5.9 PaginationInnerInterceptor 需要单独引入 -->
                 <groupId>com.baomidou</groupId>
                 <artifactId>mybatis-plus-jsqlparser</artifactId>
                 <version>${mybatis-plus.version}</version>
             </dependency>
+
+            <!--    utils        -->
             <dependency>
-                <groupId>jakarta.validation</groupId>
-                <artifactId>jakarta.validation-api</artifactId>
-                <version>${jakarta-validation.version}</version>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-all</artifactId>
+                <version>${netty-all.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.hutool</groupId>
+                <artifactId>hutool-bom</artifactId>
+                <version>${hutool.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>com.github.rholder</groupId>
@@ -165,6 +183,58 @@
                 <version>${guava.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.caucho</groupId>
+                <artifactId>hessian</artifactId>
+                <version>${hessian.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.googlecode.aviator</groupId>
+                <artifactId>aviator</artifactId>
+                <version>${aviator.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>QLExpress</artifactId>
+                <version>${QLExpress.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct</artifactId>
+                <version>${mapstruct.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct-processor</artifactId>
+                <version>${mapstruct.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.auth0</groupId>
+                <artifactId>java-jwt</artifactId>
+                <version>${java-jwt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.typesafe.akka</groupId>
+                <artifactId>akka-actor-typed_2.13</artifactId>
+                <version>${akka.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.typesafe.akka</groupId>
+                <artifactId>akka-actor-testkit-typed_2.13</artifactId>
+                <version>${akka.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.scala-lang</groupId>
+                <artifactId>scala-library</artifactId>
+                <version>${scala.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.perf4j</groupId>
+                <artifactId>perf4j</artifactId>
+                <version>${perf4j.version}</version>
+            </dependency>
+
+            <!--     logging       -->
+            <dependency>
                 <groupId>log4j</groupId>
                 <artifactId>log4j</artifactId>
                 <version>${log4j.version}</version>
@@ -176,7 +246,8 @@
                 <version>${commons-logging.version}</version>
                 <optional>true</optional>
             </dependency>
-            <!-- gRPC dependency start -->
+
+            <!--  gRPC  -->
             <dependency>
                 <groupId>io.grpc</groupId>
                 <artifactId>grpc-netty-shaded</artifactId>
@@ -212,9 +283,17 @@
                 <artifactId>protobuf-java</artifactId>
                 <version>${protobuf-java.version}</version>
             </dependency>
-            <!-- gRPC dependency end -->
         </dependencies>
     </dependencyManagement>
+
+    <modules>
+        <module>snail-job-common</module>
+        <module>snail-job-server</module>
+        <module>snail-job-client-starter</module>
+        <module>snail-job-datasource</module>
+        <module>snail-job-client</module>
+    </modules>
+    <packaging>pom</packaging>
 
     <licenses>
         <license>
@@ -242,7 +321,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.11.0</version>
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
@@ -252,7 +330,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
-                <version>1.1.0</version>
+                <version>${flatten-maven-plugin.version}</version>
                 <configuration>
                     <updatePomFile>true</updatePomFile>
                     <flattenMode>oss</flattenMode>
@@ -277,7 +355,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.2.1</version>
             </plugin>
         </plugins>
     </build>
@@ -290,7 +367,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.6</version>
+                        <version>${maven-gpg-plugin.version}</version>
                         <executions>
                             <execution>
                                 <phase>verify</phase>
@@ -311,7 +388,6 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-source-plugin</artifactId>
-                        <version>3.2.1</version>
                         <executions>
                             <execution>
                                 <id>attach-sources</id>
@@ -325,7 +401,6 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>3.2.0</version>
                         <executions>
                             <execution>
                                 <id>attach-javadocs</id>
@@ -342,7 +417,7 @@
                     <plugin>
                         <groupId>org.sonatype.central</groupId>
                         <artifactId>central-publishing-maven-plugin</artifactId>
-                        <version>0.5.0</version>
+                        <version>${central-publishing-maven-plugin.version}</version>
                         <extensions>true</extensions>
                         <configuration>
                             <publishingServerId>ossrh</publishingServerId>

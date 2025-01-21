@@ -14,22 +14,19 @@
     <description>snail-job-sqlserver-datasource</description>
     <packaging>jar</packaging>
 
-    <properties>
-        <java.version>17</java.version>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-    </properties>
-
     <dependencies>
+        <!--    preprocessor    -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
+
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>mssql-jdbc</artifactId>
         </dependency>
+
         <dependency>
             <groupId>com.aizuda</groupId>
             <artifactId>snail-job-datasource-template</artifactId>

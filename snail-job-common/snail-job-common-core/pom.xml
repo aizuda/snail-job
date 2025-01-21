@@ -21,16 +21,21 @@
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-            <scope>provided</scope>
-        </dependency>
+        <!--    preprocessor    -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
+
+        <!--    springboot    -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!--    libs    -->
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-http</artifactId>
@@ -50,20 +55,14 @@
         <dependency>
             <groupId>com.googlecode.aviator</groupId>
             <artifactId>aviator</artifactId>
-            <version>5.3.3</version>
             <scope>provided</scope>
             <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>QLExpress</artifactId>
-            <version>3.3.4</version>
             <scope>provided</scope>
             <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>com.aizuda</groupId>
-            <artifactId>snail-job-common-log</artifactId>
         </dependency>
         <dependency>
             <groupId>io.netty</groupId>
@@ -85,6 +84,12 @@
             <groupId>com.google.api.grpc</groupId>
             <artifactId>proto-google-common-protos</artifactId>
         </dependency>
+
+        <!--    SnailJob    -->
+        <dependency>
+            <groupId>com.aizuda</groupId>
+            <artifactId>snail-job-common-log</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -97,28 +102,28 @@
         </extensions>
         <plugins>
             <!--  reuse when you need to update grpc model  -->
-<!--           <plugin>-->
-<!--                <groupId>org.xolstice.maven.plugins</groupId>-->
-<!--                <artifactId>protobuf-maven-plugin</artifactId>-->
-<!--               <version>0.6.1</version>-->
-<!--               <configuration>-->
-<!--                   <protocArtifact>com.google.protobuf:protoc:3.24.0:exe:${os.detected.classifier}</protocArtifact>-->
-<!--                   <pluginId>grpc-java</pluginId>-->
-<!--                   <pluginArtifact>io.grpc:protoc-gen-grpc-java:1.63.0:exe:${os.detected.classifier}</pluginArtifact>-->
-<!--                   <protoSourceRoot>${project.basedir}/src/main/proto</protoSourceRoot>-->
-<!--                   <clearOutputDirectory>false</clearOutputDirectory>-->
-<!--                   &lt;!&ndash;通过插件生成的协议代码存放地址&ndash;&gt;-->
-<!--                   <outputDirectory>${basedir}/src/main/java</outputDirectory>-->
-<!--               </configuration>-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <goals>-->
-<!--                            <goal>compile</goal>-->
-<!--                            <goal>compile-custom</goal>-->
-<!--                        </goals>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--            </plugin>-->
+            <!--           <plugin>-->
+            <!--                <groupId>org.xolstice.maven.plugins</groupId>-->
+            <!--                <artifactId>protobuf-maven-plugin</artifactId>-->
+            <!--               <version>0.6.1</version>-->
+            <!--               <configuration>-->
+            <!--                   <protocArtifact>com.google.protobuf:protoc:${protobuf-java.version}:exe:${os.detected.classifier}</protocArtifact>-->
+            <!--                   <pluginId>grpc-java</pluginId>-->
+            <!--                   <pluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc-java.version}:exe:${os.detected.classifier}</pluginArtifact>-->
+            <!--                   <protoSourceRoot>${project.basedir}/src/main/proto</protoSourceRoot>-->
+            <!--                   <clearOutputDirectory>false</clearOutputDirectory>-->
+            <!--                   &lt;!&ndash;通过插件生成的协议代码存放地址&ndash;&gt;-->
+            <!--                   <outputDirectory>${basedir}/src/main/java</outputDirectory>-->
+            <!--               </configuration>-->
+            <!--                <executions>-->
+            <!--                    <execution>-->
+            <!--                        <goals>-->
+            <!--                            <goal>compile</goal>-->
+            <!--                            <goal>compile-custom</goal>-->
+            <!--                        </goals>-->
+            <!--                    </execution>-->
+            <!--                </executions>-->
+            <!--            </plugin>-->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>

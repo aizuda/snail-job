@@ -14,25 +14,23 @@
     <description>snail-job-kingbase-datasource</description>
     <packaging>jar</packaging>
 
-    <properties>
-        <java.version>17</java.version>
-        <kingbase.version>8.6.0</kingbase.version>
-    </properties>
-
     <dependencies>
+        <!--    preprocessor    -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
-        <dependency>
-            <groupId>com.aizuda</groupId>
-            <artifactId>snail-job-datasource-template</artifactId>
-        </dependency>
+
         <dependency>
             <groupId>cn.com.kingbase</groupId>
             <artifactId>kingbase8</artifactId>
             <version>${kingbase.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.aizuda</groupId>
+            <artifactId>snail-job-datasource-template</artifactId>
         </dependency>
     </dependencies>
 

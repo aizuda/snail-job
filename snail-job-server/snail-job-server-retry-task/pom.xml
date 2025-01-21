@@ -15,24 +15,37 @@
     <description>snail-job-server-retry-task</description>
     <packaging>jar</packaging>
 
-    <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
-
     <dependencies>
+        <!--    preprocessor    -->
         <dependency>
-            <groupId>com.aizuda</groupId>
-            <artifactId>snail-job-server-common</artifactId>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId> <!--    !!! lombok goes BEFORE mapstruct    -->
         </dependency>
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct-processor</artifactId>
+        </dependency>
+
+        <!--    springboot    -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
+
+        <!--    libs    -->
         <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
+            <groupId>com.github.rholder</groupId>
+            <artifactId>guava-retrying</artifactId>
+        </dependency>
+
+        <!--    SnailJob    -->
+        <dependency>
+            <groupId>com.aizuda</groupId>
+            <artifactId>snail-job-server-common</artifactId>
         </dependency>
         <dependency>
             <groupId>com.aizuda</groupId>
@@ -46,20 +59,8 @@
             <groupId>com.aizuda</groupId>
             <artifactId>snail-job-common-client-api</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.mapstruct</groupId>
-            <artifactId>mapstruct</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.mapstruct</groupId>
-            <artifactId>mapstruct-processor</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.github.rholder</groupId>
-            <artifactId>guava-retrying</artifactId>
-        </dependency>
-
     </dependencies>
+
     <build>
         <plugins>
             <plugin>

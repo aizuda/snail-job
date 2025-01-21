@@ -14,18 +14,12 @@
     <name>snail-job-client</name>
     <description>snail-job-client</description>
 
-    <packaging>pom</packaging>
     <modules>
         <module>snail-job-client-common</module>
         <module>snail-job-client-job-core</module>
         <module>snail-job-client-retry-core</module>
     </modules>
-
-    <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
+    <packaging>pom</packaging>
 
     <dependencyManagement>
         <dependencies>

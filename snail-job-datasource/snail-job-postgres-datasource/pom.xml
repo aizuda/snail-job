@@ -14,25 +14,22 @@
     <description>snail-job-postgres-datasource</description>
     <packaging>jar</packaging>
 
-    <properties>
-        <java.version>17</java.version>
-        <postgresql.version>42.7.2</postgresql.version>
-    </properties>
-
     <dependencies>
+        <!--    preprocessor    -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
-        <dependency>
-            <groupId>com.aizuda</groupId>
-            <artifactId>snail-job-datasource-template</artifactId>
-        </dependency>
+
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>${postgresql.version}</version> <!-- 使用最新版本 -->
+        </dependency>
+
+        <dependency>
+            <groupId>com.aizuda</groupId>
+            <artifactId>snail-job-datasource-template</artifactId>
         </dependency>
     </dependencies>
 

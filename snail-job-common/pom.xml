@@ -14,12 +14,6 @@
     <description>snail-job-common</description>
     <packaging>pom</packaging>
 
-    <properties>
-        <java.version>17</java.version>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-    </properties>
-
     <modules>
         <module>snail-job-common-server-api</module>
         <module>snail-job-common-client-api</module>
