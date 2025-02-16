@@ -92,6 +92,7 @@ public class JobTaskBatchHandler {
      */
     public void openResidentTask(Job job, TaskExecuteDTO taskExecuteDTO) {
         if (Objects.isNull(job)
+                || Objects.equals(StatusEnum.NO.getStatus(), job.getJobStatus())
                 || JobTaskExecutorSceneEnum.MANUAL_JOB.getType().equals(taskExecuteDTO.getTaskExecutorScene())
                 || JobTaskExecutorSceneEnum.AUTO_WORKFLOW.getType().equals(taskExecuteDTO.getTaskExecutorScene())
                 || JobTaskExecutorSceneEnum.MANUAL_WORKFLOW.getType().equals(taskExecuteDTO.getTaskExecutorScene())
