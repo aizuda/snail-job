@@ -39,11 +39,9 @@ import java.util.Objects;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @RequiredArgsConstructor
 public class ConsumerBucketActor extends AbstractActor {
-    private final AccessTemplate accessTemplate;
-    private final ServerNodeMapper serverNodeMapper;
-    private final SystemProperties systemProperties;
     private static final String DEFAULT_JOB_KEY = "DEFAULT_JOB_KEY";
     private static final String DEFAULT_WORKFLOW_KEY = "DEFAULT_JOB_KEY";
+    private static final String DEFAULT_RETRY_KEY = "DEFAULT_RETRY_KEY";
 
     @Override
     public Receive createReceive() {
@@ -71,30 +69,10 @@ public class ConsumerBucketActor extends AbstractActor {
     }
 
     private void doScanRetry(final ConsumerBucket consumerBucket) {
-        List<GroupConfig> groupConfigs = null;
-        try {
-            // 查询桶对应组信息
-            groupConfigs = accessTemplate.getGroupConfigAccess().list(
-                    new LambdaQueryWrapper<GroupConfig>()
-                            .select(GroupConfig::getGroupName, GroupConfig::getGroupPartition, GroupConfig::getNamespaceId)
-                            .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus())
-                            .in(GroupConfig::getBucketIndex, consumerBucket.getBuckets())
-            );
-        } catch (Exception e) {
-            SnailJobLog.LOCAL.error("生成重试任务异常.", e);
-        }
-
-        if (CollUtil.isNotEmpty(groupConfigs)) {
-            for (final GroupConfig groupConfig : groupConfigs) {
-                CacheConsumerGroup.addOrUpdate(groupConfig.getGroupName(), groupConfig.getNamespaceId());
-                ScanTask scanTask = new ScanTask();
-                scanTask.setNamespaceId(groupConfig.getNamespaceId());
-                scanTask.setGroupName(groupConfig.getGroupName());
-                scanTask.setBuckets(consumerBucket.getBuckets());
-                scanTask.setGroupPartition(groupConfig.getGroupPartition());
-                produceScanActorTask(scanTask);
-            }
-        }
+        ScanTask scanTask = new ScanTask();
+        scanTask.setBuckets(consumerBucket.getBuckets());
+        ActorRef scanRetryActorRef = cacheActorRef(DEFAULT_RETRY_KEY, SyetemTaskTypeEnum.RETRY);
+        scanRetryActorRef.tell(scanTask, scanRetryActorRef);
     }
 
     private void doScanJobAndWorkflow(final ConsumerBucket consumerBucket) {
@@ -108,44 +86,6 @@ public class ConsumerBucketActor extends AbstractActor {
         // 扫描DAG工作流任务数据
         ActorRef scanWorkflowActorRef = cacheActorRef(DEFAULT_WORKFLOW_KEY, SyetemTaskTypeEnum.WORKFLOW);
         scanWorkflowActorRef.tell(scanTask, scanWorkflowActorRef);
-    }
-
-    /**
-     * 扫描任务生成器
-     *
-     * @param scanTask {@link  ScanTask} 组上下文
-     */
-    private void produceScanActorTask(ScanTask scanTask) {
-
-        String groupName = scanTask.getGroupName();
-
-        // 缓存按照
-        cacheRateLimiter(groupName);
-
-        // 扫描重试数据
-        ActorRef scanRetryActorRef = cacheActorRef(groupName, SyetemTaskTypeEnum.RETRY);
-        scanRetryActorRef.tell(scanTask, scanRetryActorRef);
-
-        // 扫描回调数据
-        ActorRef scanCallbackActorRef = cacheActorRef(groupName, SyetemTaskTypeEnum.CALLBACK);
-        scanCallbackActorRef.tell(scanTask, scanCallbackActorRef);
-
-    }
-
-    /**
-     * 缓存限流对象
-     */
-    private void cacheRateLimiter(String groupName) {
-        List<ServerNode> serverNodes = serverNodeMapper.selectList(new LambdaQueryWrapper<ServerNode>()
-                .eq(ServerNode::getGroupName, groupName));
-        Cache<String, RateLimiter> rateLimiterCache = CacheGroupRateLimiter.getAll();
-        for (ServerNode serverNode : serverNodes) {
-            RateLimiter rateLimiter = rateLimiterCache.getIfPresent(serverNode.getHostId());
-            if (Objects.isNull(rateLimiter)) {
-                rateLimiterCache.put(serverNode.getHostId(), RateLimiter.create(systemProperties.getLimiter()));
-            }
-        }
-
     }
 
     /**

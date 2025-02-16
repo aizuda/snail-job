@@ -16,7 +16,7 @@ import com.aizuda.snailjob.server.retry.task.support.RetryTaskConverter;
 import com.aizuda.snailjob.server.retry.task.support.cache.CacheGroupRateLimiter;
 import com.aizuda.snailjob.server.retry.task.support.event.RetryTaskFailAlarmEvent;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.ServerNodeMapper;
-import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
+import com.aizuda.snailjob.template.datasource.persistence.po.Retry;
 import com.aizuda.snailjob.template.datasource.persistence.po.ServerNode;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.google.common.util.concurrent.RateLimiter;
@@ -34,6 +34,7 @@ import java.util.concurrent.TimeUnit;
  * @date : 2021-11-30 10:03
  */
 @Slf4j
+@Deprecated
 public class FilterStrategies {
 
     private FilterStrategies() {
@@ -103,16 +104,16 @@ public class FilterStrategies {
 
         @Override
         public Pair<Boolean /*是否符合条件*/, StringBuilder/*描述信息*/> filter(RetryContext retryContext) {
-            RetryTask retryTask = retryContext.getRetryTask();
-            LocalDateTime nextTriggerAt = retryTask.getNextTriggerAt();
+            Retry retry = retryContext.getRetryTask();
+            Long nextTriggerAt = retry.getNextTriggerAt();
 
-            boolean result = nextTriggerAt.isBefore(LocalDateTime.now());
-            StringBuilder description = new StringBuilder();
-            if (!result) {
-                description.append(MessageFormat.format("未到触发时间. uniqueId:[{0}]", retryTask.getUniqueId()));
-            }
+//            boolean result = nextTriggerAt.isBefore(LocalDateTime.now());
+//            StringBuilder description = new StringBuilder();
+//            if (!result) {
+//                description.append(MessageFormat.format("未到触发时间. uniqueId:[{0}]", retry.getId()));
+//            }
 
-            return Pair.of(result, description);
+            return null;
         }
 
         @Override
@@ -136,11 +137,11 @@ public class FilterStrategies {
 
         @Override
         public Pair<Boolean /*是否符合条件*/, StringBuilder/*描述信息*/> filter(RetryContext retryContext) {
-            RetryTask retryTask = retryContext.getRetryTask();
-            boolean result = !idempotentStrategy.isExist(ImmutableTriple.of(retryTask.getGroupName(), retryTask.getNamespaceId(), retryTask.getId()).toString());
+            Retry retry = retryContext.getRetryTask();
+            boolean result = !idempotentStrategy.isExist(ImmutableTriple.of(retry.getGroupName(), retry.getNamespaceId(), retry.getId()).toString());
             StringBuilder description = new StringBuilder();
             if (!result) {
-                description.append(MessageFormat.format("存在执行中的任务.uniqueId:[{0}]", retryTask.getUniqueId()));
+                description.append(MessageFormat.format("存在执行中的任务.uniqueId:[{0}]", retry.getId()));
             }
 
             return Pair.of(result, description);
@@ -161,13 +162,13 @@ public class FilterStrategies {
 
         @Override
         public Pair<Boolean /*是否符合条件*/, StringBuilder/*描述信息*/> filter(RetryContext retryContext) {
-            RetryTask retryTask = retryContext.getRetryTask();
+            Retry retry = retryContext.getRetryTask();
 
-            boolean result = !retryContext.getSceneBlacklist().contains(retryTask.getSceneName());
+            boolean result = !retryContext.getSceneBlacklist().contains(retry.getSceneName());
 
             StringBuilder description = new StringBuilder();
             if (!result) {
-                description.append(MessageFormat.format("场景:[{0}]在黑名单中, 不允许执行.", retryTask.getSceneName()));
+                description.append(MessageFormat.format("场景:[{0}]在黑名单中, 不允许执行.", retry.getSceneName()));
             }
 
             return Pair.of(result, description);
@@ -186,28 +187,28 @@ public class FilterStrategies {
 
         @Override
         public Pair<Boolean /*是否符合条件*/, StringBuilder/*描述信息*/> filter(RetryContext retryContext) {
-            RetryTask retryTask = retryContext.getRetryTask();
+            Retry retry = retryContext.getRetryTask();
             RegisterNodeInfo serverNode = retryContext.getServerNode();
 
             boolean result;
             StringBuilder description = new StringBuilder();
             if (Objects.isNull(serverNode)) {
                 result = false;
-                description.append(MessageFormat.format("没有可执行的客户端节点. uniqueId:[{0}]", retryTask.getUniqueId()));
+                description.append(MessageFormat.format("没有可执行的客户端节点. uniqueId:[{0}]", retry.getId()));
             } else {
                 ServerNodeMapper serverNodeMapper = SnailSpringContext.getBeanByType(ServerNodeMapper.class);
                 result = 1 == serverNodeMapper.selectCount(new LambdaQueryWrapper<ServerNode>().eq(ServerNode::getHostId, serverNode.getHostId()));
                 if (!result) {
                     // 删除缓存中的失效节点
-                    CacheRegisterTable.remove(retryTask.getGroupName(), retryTask.getNamespaceId(), serverNode.getHostId());
-                    description.append(MessageFormat.format("DB中未查询到客户端节点. hostId:[{0}] uniqueId:[{1}]", serverNode.getHostId(), retryTask.getUniqueId()));
+                    CacheRegisterTable.remove(retry.getGroupName(), retry.getNamespaceId(), serverNode.getHostId());
+                    description.append(MessageFormat.format("DB中未查询到客户端节点. hostId:[{0}] uniqueId:[{1}]", serverNode.getHostId(), retry.getId()));
                 }
             }
 
             if (result == false) {
                 RetryTaskFailAlarmEventDTO toRetryTaskFailAlarmEventDTO =
                         RetryTaskConverter.INSTANCE.toRetryTaskFailAlarmEventDTO(
-                                retryTask,
+                                retry,
                                 description.toString(),
                                 RetryNotifySceneEnum.RETRY_NO_CLIENT_NODES_ERROR.getNotifyScene());
                 SnailSpringContext.getContext().publishEvent(new RetryTaskFailAlarmEvent(toRetryTaskFailAlarmEventDTO));
@@ -230,14 +231,14 @@ public class FilterStrategies {
         @Override
         public Pair<Boolean /*是否符合条件*/, StringBuilder/*描述信息*/> filter(RetryContext retryContext) {
             RegisterNodeInfo serverNode = retryContext.getServerNode();
-            RetryTask retryTask = retryContext.getRetryTask();
+            Retry retry = retryContext.getRetryTask();
 
             StringBuilder description = new StringBuilder();
             Boolean result = Boolean.TRUE;
             RateLimiter rateLimiter = CacheGroupRateLimiter.getRateLimiterByKey(serverNode.getHostId());
             if (Objects.nonNull(rateLimiter) && !rateLimiter.tryAcquire(100, TimeUnit.MILLISECONDS)) {
                 SnailJobLog.LOCAL.error("该POD:[{}]已到达最大限流阈值，本次重试不执行", serverNode.getHostId());
-                description.append(MessageFormat.format("该POD:[{0}]已到达最大限流阈值，本次重试不执行.uniqueId:[{1}]", serverNode.getHostId(), retryTask.getUniqueId()));
+                description.append(MessageFormat.format("该POD:[{0}]已到达最大限流阈值，本次重试不执行.uniqueId:[{1}]", serverNode.getHostId(), retry.getId()));
                 result = Boolean.FALSE;
             }
 
@@ -257,11 +258,11 @@ public class FilterStrategies {
 
         @Override
         public Pair<Boolean /*是否符合条件*/, StringBuilder/*描述信息*/> filter(RetryContext retryContext) {
-            RetryTask retryTask = retryContext.getRetryTask();
+            Retry retry = retryContext.getRetryTask();
             boolean result = !DistributeInstance.RE_BALANCE_ING.get();
             StringBuilder description = new StringBuilder();
             if (!result) {
-                description.append(MessageFormat.format("系统Rebalancing中数据无法重试.uniqueId:[{0}]", retryTask.getUniqueId()));
+                description.append(MessageFormat.format("系统Rebalancing中数据无法重试.uniqueId:[{0}]", retry.getId()));
             }
             return Pair.of(result, description);
         }

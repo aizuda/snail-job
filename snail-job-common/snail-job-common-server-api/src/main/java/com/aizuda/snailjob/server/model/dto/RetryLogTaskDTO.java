@@ -12,7 +12,9 @@ import lombok.EqualsAndHashCode;
 @Data
 public class RetryLogTaskDTO extends LogTaskDTO {
 
-    private String uniqueId;
+    private Long retryTaskId;
+
+    private Long retryId;
 
     private String clientInfo;
 }

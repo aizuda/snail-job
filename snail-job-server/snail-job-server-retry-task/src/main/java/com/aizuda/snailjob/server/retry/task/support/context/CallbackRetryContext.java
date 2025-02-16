@@ -3,8 +3,8 @@ package com.aizuda.snailjob.server.retry.task.support.context;
 import com.aizuda.snailjob.server.common.WaitStrategy;
 import com.aizuda.snailjob.server.common.dto.RegisterNodeInfo;
 import com.aizuda.snailjob.server.retry.task.support.RetryContext;
+import com.aizuda.snailjob.template.datasource.persistence.po.Retry;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
-import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
 import lombok.Data;
 
 import java.util.Objects;
@@ -36,7 +36,7 @@ public class CallbackRetryContext<V> implements RetryContext<V> {
     /**
      * 当前重试数据
      */
-    private RetryTask retryTask;
+    private Retry retry;
 
     /**
      * 目前处理关闭的场景
@@ -52,6 +52,11 @@ public class CallbackRetryContext<V> implements RetryContext<V> {
      * 场景配置
      */
     private RetrySceneConfig retrySceneConfig;
+
+    @Override
+    public Retry getRetryTask() {
+        return null;
+    }
 
     @Override
     public boolean hasException() {

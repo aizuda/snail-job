@@ -22,7 +22,7 @@ import java.util.Objects;
  * @date : 2023-10-07 10:45
  * @since : 2.4.0
  */
-@Component(ActorGenerator.REAL_STOP_TASK_INSTANCE_ACTOR)
+@Component(ActorGenerator.JOB_REAL_STOP_TASK_INSTANCE_ACTOR)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Slf4j
 public class RealStopTaskActor extends AbstractActor {

@@ -1,7 +1,7 @@
 package com.aizuda.snailjob.server.job.task.support.prepare.workflow;
 
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
-import com.aizuda.snailjob.common.core.enums.BlockStrategyEnum;
+import com.aizuda.snailjob.common.core.enums.JobBlockStrategyEnum;
 import com.aizuda.snailjob.common.core.enums.JobNotifySceneEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
@@ -46,7 +46,7 @@ public class RunningWorkflowPrepareHandler extends AbstractWorkflowPrePareHandle
         int blockStrategy = prepare.getBlockStrategy();
         if (workflowBatchHandler.complete(prepare.getWorkflowTaskBatchId())) {
             // 开启新的任务
-            blockStrategy = BlockStrategyEnum.CONCURRENCY.getBlockStrategy();
+            blockStrategy = JobBlockStrategyEnum.CONCURRENCY.getBlockStrategy();
         } else {
             // 计算超时时间
             long delay = DateUtils.toNowMilli() - prepare.getExecutionAt();

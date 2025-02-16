@@ -13,6 +13,7 @@ import lombok.EqualsAndHashCode;
 @Data
 public class RetryLogMeta extends LogMeta {
 
-    private String uniqueId;
+    private Long retryTaskId;
 
+    private Long retryId;
 }

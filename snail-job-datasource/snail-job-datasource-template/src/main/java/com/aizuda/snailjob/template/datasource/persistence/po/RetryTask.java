@@ -5,11 +5,13 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-import java.time.LocalDateTime;
+import lombok.EqualsAndHashCode;
 
 /**
- * 重试任务
+ * 重试任务表
+ * todo
+ * @author opensnail
+ * @since 2023-01-14
  */
 @Data
 @TableName("sj_retry_task")
@@ -21,28 +23,23 @@ public class RetryTask extends CreateUpdateDt {
 
     private String namespaceId;
 
-    private String uniqueId;
-
     private String groupName;
 
     private String sceneName;
 
-    private String idempotentId;
-
-    private String bizNo;
-
-    private String argsStr;
+    private Long retryId;
 
     private String extAttrs;
 
-    private String executorName;
-
-    private LocalDateTime nextTriggerAt;
-
-    private Integer retryCount;
-
-    private Integer retryStatus;
+    private Integer taskStatus;
 
     private Integer taskType;
+
+    private Integer operationReason;
+
+    /**
+     * 客户端ID
+     */
+    private String clientInfo;
 
 }

@@ -1,7 +1,7 @@
 package com.aizuda.snailjob.server.retry.task.service;
 
 import com.aizuda.snailjob.server.model.dto.RetryTaskDTO;
-import com.aizuda.snailjob.server.retry.task.generator.task.TaskContext;
+import com.aizuda.snailjob.server.retry.task.support.generator.retry.TaskContext;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 

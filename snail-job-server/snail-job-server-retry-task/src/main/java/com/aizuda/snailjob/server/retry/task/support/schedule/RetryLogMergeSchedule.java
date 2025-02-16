@@ -13,9 +13,9 @@ import com.aizuda.snailjob.server.common.triple.Triple;
 import com.aizuda.snailjob.server.common.util.PartitionTaskUtils;
 import com.aizuda.snailjob.server.retry.task.dto.RetryMergePartitionTaskDTO;
 import com.aizuda.snailjob.server.retry.task.support.RetryTaskLogConverter;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskLogMapper;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskLogMessageMapper;
-import com.aizuda.snailjob.template.datasource.persistence.po.RetryTaskLog;
+import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTaskLogMessage;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -50,7 +50,7 @@ import static java.util.stream.Collectors.toList;
 public class RetryLogMergeSchedule extends AbstractSchedule implements Lifecycle {
 
     private final SystemProperties systemProperties;
-    private final RetryTaskLogMapper retryTaskLogMapper;
+    private final RetryTaskMapper retryTaskMapper;
     private final RetryTaskLogMessageMapper retryTaskLogMessageMapper;
     private final TransactionTemplate transactionTemplate;
 
@@ -93,15 +93,15 @@ public class RetryLogMergeSchedule extends AbstractSchedule implements Lifecycle
      */
     private List<RetryMergePartitionTaskDTO> retryLogList(Long startId, LocalDateTime endTime) {
 
-        List<RetryTaskLog> jobTaskBatchList = retryTaskLogMapper.selectPage(
+        List<RetryTask> jobTaskBatchList = retryTaskMapper.selectPage(
                 new Page<>(0, 1000),
-                new LambdaUpdateWrapper<RetryTaskLog>()
-                        .ge(RetryTaskLog::getId, startId)
-                        .in(RetryTaskLog::getRetryStatus, Lists.newArrayList(
+                new LambdaUpdateWrapper<RetryTask>()
+                        .ge(RetryTask::getId, startId)
+                        .in(RetryTask::getTaskStatus, Lists.newArrayList(
                                 RetryStatusEnum.FINISH.getStatus(),
                                 RetryStatusEnum.MAX_COUNT.getStatus()))
-                        .le(RetryTaskLog::getCreateDt, endTime)
-                        .orderByAsc(RetryTaskLog::getId)
+                        .le(RetryTask::getCreateDt, endTime)
+                        .orderByAsc(RetryTask::getId)
         ).getRecords();
         return RetryTaskLogConverter.INSTANCE.toRetryMergePartitionTaskDTOs(jobTaskBatchList);
     }
@@ -114,26 +114,27 @@ public class RetryLogMergeSchedule extends AbstractSchedule implements Lifecycle
     public void processJobLogPartitionTasks(List<? extends PartitionTask> partitionTasks) {
 
         // Waiting for merge RetryTaskLog
-        List<String> ids = StreamUtils.toList(partitionTasks, PartitionTask::getUniqueId);
+        List<Long> ids = StreamUtils.toList(partitionTasks, PartitionTask::getId);
         if (CollUtil.isEmpty(ids)) {
             return;
         }
 
         // Waiting for deletion RetryTaskLogMessage
         List<RetryTaskLogMessage> retryLogMessageList = retryTaskLogMessageMapper.selectList(
-                new LambdaQueryWrapper<RetryTaskLogMessage>().in(RetryTaskLogMessage::getUniqueId, ids));
+                new LambdaQueryWrapper<RetryTaskLogMessage>()
+                        .in(RetryTaskLogMessage::getRetryTaskId, ids));
         if (CollUtil.isEmpty(retryLogMessageList)) {
             return;
         }
 
-        List<Map.Entry<Triple<String, String, String>, List<RetryTaskLogMessage>>> jobLogMessageGroupList = retryLogMessageList.stream()
+        List<Map.Entry<Triple<String, String, Long>, List<RetryTaskLogMessage>>> jobLogMessageGroupList = retryLogMessageList.stream()
                 .collect(
                         groupingBy(message -> Triple.of(message.getNamespaceId(), message.getGroupName(),
-                                message.getUniqueId())))
+                                message.getRetryTaskId())))
                 .entrySet().stream()
-                .filter(entry -> entry.getValue().size() >= 2).collect(toList());
+                .filter(entry -> entry.getValue().size() >= 2).toList();
 
-        for (Map.Entry<Triple<String, String, String>/*taskId*/, List<RetryTaskLogMessage>> jobLogMessageMap : jobLogMessageGroupList) {
+        for (Map.Entry<Triple<String, String, Long>/*taskId*/, List<RetryTaskLogMessage>> jobLogMessageMap : jobLogMessageGroupList) {
             List<Long> jobLogMessageDeleteBatchIds = new ArrayList<>();
 
             List<String> mergeMessages = jobLogMessageMap.getValue().stream().map(k -> {

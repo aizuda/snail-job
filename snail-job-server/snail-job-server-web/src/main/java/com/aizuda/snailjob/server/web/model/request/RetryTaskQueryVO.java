@@ -23,5 +23,5 @@ public class RetryTaskQueryVO extends BaseQueryVO {
 
     private Integer retryStatus;
 
-    private String uniqueId;
+    private Long retryId;
 }

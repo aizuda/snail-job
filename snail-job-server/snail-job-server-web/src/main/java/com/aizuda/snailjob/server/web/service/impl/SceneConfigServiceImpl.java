@@ -30,7 +30,7 @@ import com.aizuda.snailjob.template.datasource.persistence.mapper.RetrySummaryMa
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryDeadLetter;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetrySummary;
-import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
+import com.aizuda.snailjob.template.datasource.persistence.po.Retry;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
@@ -240,15 +240,15 @@ public class SceneConfigServiceImpl implements SceneConfigService {
         Set<String> sceneNames = StreamUtils.toSet(sceneConfigs, RetrySceneConfig::getSceneName);
         Set<String> groupNames = StreamUtils.toSet(sceneConfigs, RetrySceneConfig::getGroupName);
 
-        TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();
+        TaskAccess<Retry> retryTaskAccess = accessTemplate.getRetryAccess();
         TaskAccess<RetryDeadLetter> retryTaskTaskAccess = accessTemplate.getRetryDeadLetterAccess();
         for (String groupName : groupNames) {
-            List<RetryTask> retryTasks = retryTaskAccess.listPage(groupName, namespaceId, new PageDTO<>(1, 1),
-                    new LambdaQueryWrapper<RetryTask>().in(RetryTask::getSceneName, sceneNames).orderByAsc(RetryTask::getId)).getRecords();
-            Assert.isTrue(CollUtil.isEmpty(retryTasks),
+            List<Retry> retries = retryTaskAccess.listPage(new PageDTO<>(1, 1),
+                    new LambdaQueryWrapper<Retry>().in(Retry::getSceneName, sceneNames).orderByAsc(Retry::getId)).getRecords();
+            Assert.isTrue(CollUtil.isEmpty(retries),
                     () -> new SnailJobServerException("删除重试场景失败, 存在【重试任务】请先删除【重试任务】在重试"));
 
-            List<RetryDeadLetter> retryDeadLetters = retryTaskTaskAccess.listPage(groupName, namespaceId, new PageDTO<>(1, 1),
+            List<RetryDeadLetter> retryDeadLetters = retryTaskTaskAccess.listPage(new PageDTO<>(1, 1),
                     new LambdaQueryWrapper<RetryDeadLetter>().in(RetryDeadLetter::getSceneName, sceneNames).orderByAsc(RetryDeadLetter::getId)).getRecords();
             Assert.isTrue(CollUtil.isEmpty(retryDeadLetters),
                     () -> new SnailJobServerException("删除重试场景失败, 存在【死信任务】请先删除【死信任务】在重试"));

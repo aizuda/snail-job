@@ -12,5 +12,6 @@ public enum OperationTypeEnum {
     SCENE,
     GROUP,
     RETRY_TASK,
+    RETRY,
     RETRY_DEAD_LETTER
 }

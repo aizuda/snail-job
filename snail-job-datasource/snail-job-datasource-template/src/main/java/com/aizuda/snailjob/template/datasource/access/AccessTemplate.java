@@ -49,6 +49,16 @@ public class AccessTemplate {
     }
 
     /**
+     * 获取重试任务操作类
+     *
+     * @return {@link RetryTaskAccess} 重试任务操作类
+     */
+    public TaskAccess<Retry> getRetryAccess() {
+        return (TaskAccess<Retry>) Optional.ofNullable(REGISTER_ACCESS.get(OperationTypeEnum.RETRY.name()))
+                .orElseThrow(() -> new SnailJobDatasourceException("not supports operation type"));
+    }
+
+    /**
      * 获取死信任务操作类
      *
      * @return {@link RetryDeadLetterTaskAccess} 获取死信任务操作类

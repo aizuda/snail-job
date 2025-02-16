@@ -13,8 +13,8 @@ import com.aizuda.snailjob.server.retry.task.service.RetryService;
 import com.aizuda.snailjob.server.retry.task.support.event.RetryTaskFailDeadLetterAlarmEvent;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import com.aizuda.snailjob.template.datasource.access.TaskAccess;
+import com.aizuda.snailjob.template.datasource.persistence.po.Retry;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryDeadLetter;
-import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
 import com.aizuda.snailjob.template.datasource.utils.RequestDataHelper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 
 /**
  * 重试服务层实现
- *
+ * todo 重新设计
  * @author: opensnail
  * @date : 2021-11-26 15:19
  */
@@ -51,65 +51,62 @@ public class RetryServiceImpl implements RetryService {
     @Override
     public Boolean moveDeadLetterAndDelFinish(String groupName, String namespaceId) {
 
-        TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();
+        TaskAccess<Retry> retryTaskAccess = accessTemplate.getRetryAccess();
         RequestDataHelper.setPartition(groupName, namespaceId);
-        List<RetryTask> callbackRetryTasks = retryTaskAccess.listPage(groupName, namespaceId, new PageDTO<>(0, 100),
-                new LambdaQueryWrapper<RetryTask>()
-                        .eq(RetryTask::getNamespaceId, namespaceId)
-                        .in(RetryTask::getRetryStatus, RetryStatusEnum.MAX_COUNT.getStatus(),
+        List<Retry> callbackRetries = retryTaskAccess.listPage(new PageDTO<>(0, 100),
+                new LambdaQueryWrapper<Retry>()
+                        .eq(Retry::getNamespaceId, namespaceId)
+                        .in(Retry::getRetryStatus, RetryStatusEnum.MAX_COUNT.getStatus(),
                                 RetryStatusEnum.FINISH.getStatus())
-                        .eq(RetryTask::getTaskType, SyetemTaskTypeEnum.CALLBACK.getType())
-                        .eq(RetryTask::getGroupName, groupName)
-                        .orderByDesc(RetryTask::getId)).getRecords();
+                        .eq(Retry::getTaskType, SyetemTaskTypeEnum.CALLBACK.getType())
+                        .eq(Retry::getGroupName, groupName)
+                        .orderByDesc(Retry::getId)).getRecords();
 
-        if (CollUtil.isEmpty(callbackRetryTasks)) {
+        if (CollUtil.isEmpty(callbackRetries)) {
             return Boolean.TRUE;
         }
 
-        Set<String> uniqueIdSet = StreamUtils.toSet(callbackRetryTasks, callbackTask -> {
-            String callbackTaskUniqueId = callbackTask.getUniqueId();
-            return callbackTaskUniqueId.substring(callbackTaskUniqueId.lastIndexOf(StrUtil.UNDERLINE) + 1);
-        });
+        Set<Long> uniqueIdSet = StreamUtils.toSet(callbackRetries, Retry::getId);
 
-        List<RetryTask> retryTasks = accessTemplate.getRetryTaskAccess()
-                .list(groupName, namespaceId, new LambdaQueryWrapper<RetryTask>()
-                        .eq(RetryTask::getNamespaceId, namespaceId)
-                        .eq(RetryTask::getTaskType, SyetemTaskTypeEnum.RETRY.getType())
-                        .in(RetryTask::getUniqueId, uniqueIdSet)
+        List<Retry> retries = accessTemplate.getRetryAccess()
+                .list(new LambdaQueryWrapper<Retry>()
+                        .eq(Retry::getNamespaceId, namespaceId)
+                        .eq(Retry::getTaskType, SyetemTaskTypeEnum.RETRY.getType())
+//                        .in(Retry::getUniqueId, uniqueIdSet)
                 );
 
         // 迁移重试失败的数据
-        List<RetryTask> waitMoveDeadLetters = new ArrayList<>();
-        List<RetryTask> maxCountRetryTaskList = retryTasks.stream()
+        List<Retry> waitMoveDeadLetters = new ArrayList<>();
+        List<Retry> maxCountRetryList = retries.stream()
                 .filter(retryTask -> retryTask.getRetryStatus().equals(RetryStatusEnum.MAX_COUNT.getStatus())).collect(
                         Collectors.toList());
-        if (CollUtil.isNotEmpty(maxCountRetryTaskList)) {
-            waitMoveDeadLetters.addAll(maxCountRetryTaskList);
+        if (CollUtil.isNotEmpty(maxCountRetryList)) {
+            waitMoveDeadLetters.addAll(maxCountRetryList);
         }
 
-        List<RetryTask> maxCountCallbackRetryTaskList = callbackRetryTasks.stream()
+        List<Retry> maxCountCallbackRetryList = callbackRetries.stream()
                 .filter(retryTask -> retryTask.getRetryStatus().equals(RetryStatusEnum.MAX_COUNT.getStatus())).collect(
                         Collectors.toList());
 
-        if (CollUtil.isNotEmpty(maxCountRetryTaskList)) {
-            waitMoveDeadLetters.addAll(maxCountCallbackRetryTaskList);
+        if (CollUtil.isNotEmpty(maxCountRetryList)) {
+            waitMoveDeadLetters.addAll(maxCountCallbackRetryList);
         }
 
         moveDeadLetters(groupName, namespaceId, waitMoveDeadLetters);
 
         // 删除重试完成的数据
         Set<Long> waitDelRetryFinishSet = new HashSet<>();
-        Set<Long> finishRetryIdList = retryTasks.stream()
+        Set<Long> finishRetryIdList = retries.stream()
                 .filter(retryTask -> retryTask.getRetryStatus().equals(RetryStatusEnum.FINISH.getStatus()))
-                .map(RetryTask::getId)
+                .map(Retry::getId)
                 .collect(Collectors.toSet());
         if (CollUtil.isNotEmpty(finishRetryIdList)) {
             waitDelRetryFinishSet.addAll(finishRetryIdList);
         }
 
-        Set<Long> finishCallbackRetryIdList = callbackRetryTasks.stream()
+        Set<Long> finishCallbackRetryIdList = callbackRetries.stream()
                 .filter(retryTask -> retryTask.getRetryStatus().equals(RetryStatusEnum.FINISH.getStatus()))
-                .map(RetryTask::getId)
+                .map(Retry::getId)
                 .collect(Collectors.toSet());
 
         // 迁移重试失败的数据
@@ -121,12 +118,12 @@ public class RetryServiceImpl implements RetryService {
             return Boolean.TRUE;
         }
 
-        Assert.isTrue(waitDelRetryFinishSet.size() == accessTemplate.getRetryTaskAccess()
-                        .delete(groupName, namespaceId, new LambdaQueryWrapper<RetryTask>()
-                                .eq(RetryTask::getNamespaceId, namespaceId)
-                                .eq(RetryTask::getGroupName, groupName)
-                                .in(RetryTask::getId, waitDelRetryFinishSet)),
-                () -> new SnailJobServerException("删除重试数据失败 [{}]", JsonUtil.toJsonString(retryTasks)));
+        Assert.isTrue(waitDelRetryFinishSet.size() == accessTemplate.getRetryAccess()
+                        .delete(new LambdaQueryWrapper<Retry>()
+                                .eq(Retry::getNamespaceId, namespaceId)
+                                .eq(Retry::getGroupName, groupName)
+                                .in(Retry::getId, waitDelRetryFinishSet)),
+                () -> new SnailJobServerException("删除重试数据失败 [{}]", JsonUtil.toJsonString(retries)));
         return Boolean.TRUE;
     }
 
@@ -134,29 +131,28 @@ public class RetryServiceImpl implements RetryService {
      * 迁移死信队列数据
      *
      * @param groupName  组id
-     * @param retryTasks 待迁移数据
+     * @param retries 待迁移数据
      */
-    private void moveDeadLetters(String groupName, String namespaceId, List<RetryTask> retryTasks) {
-        if (CollUtil.isEmpty(retryTasks)) {
+    private void moveDeadLetters(String groupName, String namespaceId, List<Retry> retries) {
+        if (CollUtil.isEmpty(retries)) {
             return;
         }
 
-        List<RetryDeadLetter> retryDeadLetters = RetryDeadLetterConverter.INSTANCE.toRetryDeadLetter(retryTasks);
+        List<RetryDeadLetter> retryDeadLetters = RetryDeadLetterConverter.INSTANCE.toRetryDeadLetter(retries);
         LocalDateTime now = LocalDateTime.now();
         for (RetryDeadLetter retryDeadLetter : retryDeadLetters) {
             retryDeadLetter.setCreateDt(now);
         }
         Assert.isTrue(retryDeadLetters.size() == accessTemplate
-                        .getRetryDeadLetterAccess().insertBatch(groupName, namespaceId, retryDeadLetters),
+                        .getRetryDeadLetterAccess().insertBatch(retryDeadLetters),
                 () -> new SnailJobServerException("插入死信队列失败 [{}]", JsonUtil.toJsonString(retryDeadLetters)));
 
-        TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();
-        Assert.isTrue(retryTasks.size() == retryTaskAccess.delete(groupName, namespaceId,
-                        new LambdaQueryWrapper<RetryTask>()
-                                .eq(RetryTask::getNamespaceId, namespaceId)
-                                .eq(RetryTask::getGroupName, groupName)
-                                .in(RetryTask::getId, StreamUtils.toList(retryTasks, RetryTask::getId))),
-                () -> new SnailJobServerException("删除重试数据失败 [{}]", JsonUtil.toJsonString(retryTasks)));
+        TaskAccess<Retry> retryTaskAccess = accessTemplate.getRetryAccess();
+        Assert.isTrue(retries.size() == retryTaskAccess.delete(new LambdaQueryWrapper<Retry>()
+                                .eq(Retry::getNamespaceId, namespaceId)
+                                .eq(Retry::getGroupName, groupName)
+                                .in(Retry::getId, StreamUtils.toList(retries, Retry::getId))),
+                () -> new SnailJobServerException("删除重试数据失败 [{}]", JsonUtil.toJsonString(retries)));
 
         context.publishEvent(new RetryTaskFailDeadLetterAlarmEvent(retryDeadLetters));
     }

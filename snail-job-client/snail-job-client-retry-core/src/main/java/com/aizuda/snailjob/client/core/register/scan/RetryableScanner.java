@@ -3,7 +3,7 @@ package com.aizuda.snailjob.client.core.register.scan;
 import com.aizuda.snailjob.client.core.IdempotentIdGenerate;
 import com.aizuda.snailjob.client.core.Scanner;
 import com.aizuda.snailjob.client.core.annotation.Retryable;
-import com.aizuda.snailjob.client.core.callback.RetryCompleteCallback;
+import com.aizuda.snailjob.client.core.callback.complete.RetryCompleteCallback;
 import com.aizuda.snailjob.client.core.retryer.RetryType;
 import com.aizuda.snailjob.client.core.retryer.RetryerInfo;
 import com.aizuda.snailjob.client.core.strategy.ExecutorMethod;

@@ -36,8 +36,6 @@ public class GroupConfig extends CreateUpdateDt {
 
     private Integer initScene;
 
-    private Integer bucketIndex;
-
     private String token;
 
     private String description;

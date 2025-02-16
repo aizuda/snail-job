@@ -30,65 +30,47 @@ public abstract class AbstractTaskAccess<T> implements TaskAccess<T> {
         return DbUtils.getDbType();
     }
 
-    /**
-     * 设置分区
-     *
-     * @param groupName   组名称
-     * @param namespaceId 命名空间id
-     */
-    public void setPartition(String groupName, String namespaceId) {
-        RequestDataHelper.setPartition(groupName, namespaceId);
-    }
-
     @Override
-    public List<T> list(String groupName, String namespaceId, LambdaQueryWrapper<T> query) {
-        setPartition(groupName, namespaceId);
+    public List<T> list(LambdaQueryWrapper<T> query) {
         return doList(query);
     }
 
     @Override
-    public int update(String groupName, String namespaceId, T t, LambdaUpdateWrapper<T> query) {
-        setPartition(groupName, namespaceId);
+    public int update(T t, LambdaUpdateWrapper<T> query) {
         return doUpdate(t, query);
     }
 
     protected abstract int doUpdate(T t, LambdaUpdateWrapper<T> query);
 
     @Override
-    public int updateById(String groupName, String namespaceId, T t) {
-        setPartition(groupName, namespaceId);
+    public int updateById(T t) {
         return doUpdateById(t);
     }
 
     @Override
-    public int delete(String groupName, String namespaceId, LambdaQueryWrapper<T> query) {
-        setPartition(groupName, namespaceId);
+    public int delete(LambdaQueryWrapper<T> query) {
         return doDelete(query);
     }
 
     @Override
-    public int insert(String groupName, String namespaceId, T t) {
-        setPartition(groupName, namespaceId);
+    public int insert(T t) {
         return doInsert(t);
     }
 
     @Override
-    public int insertBatch(String groupName, String namespaceId, List<T> list) {
-        setPartition(groupName, namespaceId);
+    public int insertBatch(List<T> list) {
         return doInsertBatch(list);
     }
 
     protected abstract int doInsertBatch(List<T> list);
 
     @Override
-    public PageDTO<T> listPage(String groupName, String namespaceId, final PageDTO<T> iPage, final LambdaQueryWrapper<T> query) {
-        setPartition(groupName, namespaceId);
+    public PageDTO<T> listPage(final PageDTO<T> iPage, final LambdaQueryWrapper<T> query) {
         return doListPage(iPage, query);
     }
 
     @Override
-    public T one(String groupName, String namespaceId, LambdaQueryWrapper<T> query) {
-        setPartition(groupName, namespaceId);
+    public T one(LambdaQueryWrapper<T> query) {
         return doOne(query);
     }
 
@@ -97,8 +79,7 @@ public abstract class AbstractTaskAccess<T> implements TaskAccess<T> {
     protected abstract PageDTO<T> doListPage(final PageDTO<T> iPage, final LambdaQueryWrapper<T> query);
 
     @Override
-    public long count(String groupName, String namespaceId, final LambdaQueryWrapper<T> query) {
-        setPartition(groupName, namespaceId);
+    public long count(final LambdaQueryWrapper<T> query) {
         return doCount(query);
     }
 

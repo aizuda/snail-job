@@ -13,16 +13,15 @@ import lombok.EqualsAndHashCode;
  * @date 2023-11-19 22:05:25
  * @since 2.5.0
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @TableName("sj_retry_scene_config")
-@EqualsAndHashCode(callSuper=true)
 public class RetrySceneConfig extends CreateUpdateDt {
 
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
     private String namespaceId;
-
 
     private String groupName;
 
@@ -48,4 +47,25 @@ public class RetrySceneConfig extends CreateUpdateDt {
      * 通知告警场景配置id列表
      */
     private String notifyIds;
+
+    /**
+     * 回调状态 0、不开启 1、开启
+     */
+    private Integer cbStatus;
+
+    /**
+     * 回调触发类型
+     */
+    private Integer cbTriggerType;
+
+    /**
+     * 回调的最大执行次数
+     */
+    private int cbMaxCount = 288;
+
+    /**
+     * 回调间隔时间
+     */
+    private String cbTriggerInterval;
+
 }

@@ -19,7 +19,8 @@ public class RetryLogReport extends AbstractLogReport<RetryLogTaskDTO> {
         RetryLogMeta context = (RetryLogMeta) SnailJobLogManager.getLogMeta();
         RetryLogTaskDTO logTaskDTO = new RetryLogTaskDTO();
         logTaskDTO.setLogType(LogTypeEnum.RETRY.name());
-        logTaskDTO.setUniqueId(context.getUniqueId());
+        logTaskDTO.setRetryId(context.getRetryId());
+        logTaskDTO.setRetryTaskId(context.getRetryTaskId());
         logTaskDTO.setRealTime(logContentDTO.getTimeStamp());
         logTaskDTO.setNamespaceId(context.getNamespaceId());
         logTaskDTO.setGroupName(context.getGroupName());

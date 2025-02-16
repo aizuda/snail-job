@@ -11,6 +11,6 @@ public class PartitionTask {
 
     protected Long id;
 
-    protected String uniqueId;
+//    protected String uniqueId;
 
 }

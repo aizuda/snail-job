@@ -24,7 +24,7 @@ import com.aizuda.snailjob.server.web.util.UserSessionUtils;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import com.aizuda.snailjob.template.datasource.access.ConfigAccess;
 import com.aizuda.snailjob.template.datasource.access.TaskAccess;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskLogMapper;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskLogMessageMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.*;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -52,7 +52,7 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
     @Autowired
     private AccessTemplate accessTemplate;
     @Autowired
-    private RetryTaskLogMapper retryTaskLogMapper;
+    private RetryTaskMapper retryTaskMapper;
     @Autowired
     private RetryTaskLogMessageMapper retryTaskLogMessageMapper;
 
@@ -68,8 +68,7 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
 
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
         PageDTO<RetryDeadLetter> retryDeadLetterPageDTO = accessTemplate.getRetryDeadLetterAccess()
-                .listPage(queryVO.getGroupName(), namespaceId, pageDTO,
-                        new LambdaQueryWrapper<RetryDeadLetter>()
+                .listPage(pageDTO, new LambdaQueryWrapper<RetryDeadLetter>()
                                 .eq(RetryDeadLetter::getNamespaceId, namespaceId)
                                 .in(CollUtil.isNotEmpty(groupNames), RetryDeadLetter::getGroupName, groupNames)
                                 .eq(StrUtil.isNotBlank(queryVO.getSceneName()), RetryDeadLetter::getSceneName, queryVO.getSceneName())
@@ -89,8 +88,7 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
 
         TaskAccess<RetryDeadLetter> retryDeadLetterAccess = accessTemplate.getRetryDeadLetterAccess();
-        RetryDeadLetter retryDeadLetter = retryDeadLetterAccess.one(groupName, namespaceId,
-                new LambdaQueryWrapper<RetryDeadLetter>().eq(RetryDeadLetter::getId, id));
+        RetryDeadLetter retryDeadLetter = retryDeadLetterAccess.one(new LambdaQueryWrapper<RetryDeadLetter>().eq(RetryDeadLetter::getId, id));
         return RetryDeadLetterResponseVOConverter.INSTANCE.convert(retryDeadLetter);
     }
 
@@ -103,7 +101,7 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
         String groupName = rollBackRetryDeadLetterVO.getGroupName();
         List<Long> ids = rollBackRetryDeadLetterVO.getIds();
         TaskAccess<RetryDeadLetter> retryDeadLetterAccess = accessTemplate.getRetryDeadLetterAccess();
-        List<RetryDeadLetter> retryDeadLetterList = retryDeadLetterAccess.list(groupName, namespaceId,
+        List<RetryDeadLetter> retryDeadLetterList = retryDeadLetterAccess.list(
                 new LambdaQueryWrapper<RetryDeadLetter>().in(RetryDeadLetter::getId, ids));
 
         Assert.notEmpty(retryDeadLetterList, () -> new SnailJobServerException("数据不存在"));
@@ -118,51 +116,51 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
         Map<String, RetrySceneConfig> sceneConfigMap = StreamUtils.toIdentityMap(retrySceneConfigs,
                 (sceneConfig) -> sceneConfig.getGroupName() + sceneConfig.getSceneName());
 
-        List<RetryTask> waitRollbackList = new ArrayList<>();
+        List<Retry> waitRollbackList = new ArrayList<>();
         for (RetryDeadLetter retryDeadLetter : retryDeadLetterList) {
             RetrySceneConfig retrySceneConfig = sceneConfigMap.get(
                     retryDeadLetter.getGroupName() + retryDeadLetter.getSceneName());
             Assert.notNull(retrySceneConfig,
                     () -> new SnailJobServerException("未查询到场景. [{}]", retryDeadLetter.getSceneName()));
 
-            RetryTask retryTask = RetryTaskConverter.INSTANCE.toRetryTask(retryDeadLetter);
-            retryTask.setRetryStatus(RetryStatusEnum.RUNNING.getStatus());
-            retryTask.setTaskType(SyetemTaskTypeEnum.RETRY.getType());
+            Retry retry = RetryTaskConverter.INSTANCE.toRetryTask(retryDeadLetter);
+            retry.setRetryStatus(RetryStatusEnum.RUNNING.getStatus());
+            retry.setTaskType(SyetemTaskTypeEnum.RETRY.getType());
 
             WaitStrategyContext waitStrategyContext = new WaitStrategyContext();
             waitStrategyContext.setNextTriggerAt(LocalDateTime.now());
             waitStrategyContext.setTriggerInterval(retrySceneConfig.getTriggerInterval());
             waitStrategyContext.setDelayLevel(1);
             WaitStrategy waitStrategy = WaitStrategyEnum.getWaitStrategy(retrySceneConfig.getBackOff());
-            retryTask.setNextTriggerAt(DateUtils.toLocalDateTime(waitStrategy.computeTriggerTime(waitStrategyContext)));
-            retryTask.setCreateDt(LocalDateTime.now());
-            waitRollbackList.add(retryTask);
+            retry.setNextTriggerAt(waitStrategy.computeTriggerTime(waitStrategyContext));
+            retry.setCreateDt(LocalDateTime.now());
+            waitRollbackList.add(retry);
         }
 
-        TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();
-        Assert.isTrue(waitRollbackList.size() == retryTaskAccess.insertBatch(groupName, namespaceId, waitRollbackList),
+        TaskAccess<Retry> retryTaskAccess = accessTemplate.getRetryAccess();
+        Assert.isTrue(waitRollbackList.size() == retryTaskAccess.insertBatch( waitRollbackList),
                 () -> new SnailJobServerException("新增重试任务失败"));
 
         Set<Long> waitDelRetryDeadLetterIdSet = StreamUtils.toSet(retryDeadLetterList, RetryDeadLetter::getId);
-        Assert.isTrue(waitDelRetryDeadLetterIdSet.size() == retryDeadLetterAccess.delete(groupName, namespaceId,
+        Assert.isTrue(waitDelRetryDeadLetterIdSet.size() == retryDeadLetterAccess.delete(
                         new LambdaQueryWrapper<RetryDeadLetter>()
                                 .eq(RetryDeadLetter::getGroupName, groupName)
                                 .in(RetryDeadLetter::getId, waitDelRetryDeadLetterIdSet)),
                 () -> new SnailJobServerException("删除死信队列数据失败"));
 
         // 变更日志的状态
-        RetryTaskLog retryTaskLog = new RetryTaskLog();
-        retryTaskLog.setRetryStatus(RetryStatusEnum.RUNNING.getStatus());
+        RetryTask retryTask = new RetryTask();
+        retryTask.setTaskStatus(RetryStatusEnum.RUNNING.getStatus());
 
-        Set<String> uniqueIdSet = StreamUtils.toSet(waitRollbackList, RetryTask::getUniqueId);
-        int update = retryTaskLogMapper.update(retryTaskLog, new LambdaUpdateWrapper<RetryTaskLog>()
-                .eq(RetryTaskLog::getNamespaceId, namespaceId)
-                .in(RetryTaskLog::getUniqueId, uniqueIdSet)
-                .eq(RetryTaskLog::getGroupName, groupName));
-        Assert.isTrue(update == uniqueIdSet.size(),
-                () -> new SnailJobServerException("回滚日志状态失败, 可能原因: 日志信息缺失或存在多个相同uniqueId"));
+//        Set<String> uniqueIdSet = StreamUtils.toSet(waitRollbackList, Retry::getId);
+//        int update = retryTaskMapper.update(retryTask, new LambdaUpdateWrapper<RetryTask>()
+//                .eq(RetryTask::getNamespaceId, namespaceId)
+//                .in(RetryTask::getUniqueId, uniqueIdSet)
+//                .eq(RetryTask::getGroupName, groupName));
+//        Assert.isTrue(update == uniqueIdSet.size(),
+//                () -> new SnailJobServerException("回滚日志状态失败, 可能原因: 日志信息缺失或存在多个相同uniqueId"));
 
-        return update;
+        return 1;
     }
 
     @Override
@@ -170,14 +168,14 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
         TaskAccess<RetryDeadLetter> retryDeadLetterAccess = accessTemplate.getRetryDeadLetterAccess();
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
 
-        Assert.isTrue(deadLetterVO.getIds().size() == retryDeadLetterAccess.delete(deadLetterVO.getGroupName(), namespaceId,
+        Assert.isTrue(deadLetterVO.getIds().size() == retryDeadLetterAccess.delete(
                         new LambdaQueryWrapper<RetryDeadLetter>()
                                 .eq(RetryDeadLetter::getNamespaceId, namespaceId)
                                 .eq(RetryDeadLetter::getGroupName, deadLetterVO.getGroupName())
                                 .in(RetryDeadLetter::getId, deadLetterVO.getIds())),
                 () -> new SnailJobServerException("删除死信任务失败"));
 
-        List<RetryDeadLetter> tasks = retryDeadLetterAccess.list(deadLetterVO.getGroupName(), namespaceId,
+        List<RetryDeadLetter> tasks = retryDeadLetterAccess.list(
                 new LambdaQueryWrapper<RetryDeadLetter>()
                         .select(RetryDeadLetter::getUniqueId)
                         .eq(RetryDeadLetter::getNamespaceId, namespaceId)
@@ -189,19 +187,18 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
             return Boolean.TRUE;
         }
 
-        Set<String> uniqueIds = StreamUtils.toSet(tasks, RetryDeadLetter::getUniqueId);
 
-        retryTaskLogMapper.delete(new LambdaQueryWrapper<RetryTaskLog>()
-                .in(RetryTaskLog::getRetryStatus, ALLOW_DELETE_STATUS)
-                .eq(RetryTaskLog::getNamespaceId, namespaceId)
-                .eq(RetryTaskLog::getGroupName, deadLetterVO.getGroupName())
-                .in(RetryTaskLog::getUniqueId, uniqueIds));
+//        retryTaskMapper.delete(new LambdaQueryWrapper<RetryTask>()
+//                .in(RetryTask::getTaskStatus, ALLOW_DELETE_STATUS)
+//                .eq(RetryTask::getNamespaceId, namespaceId)
+//                .eq(RetryTask::getGroupName, deadLetterVO.getGroupName())
+//                .in(RetryTask::getUniqueId, uniqueIds));
 
         retryTaskLogMessageMapper.delete(
                 new LambdaQueryWrapper<RetryTaskLogMessage>()
                         .eq(RetryTaskLogMessage::getNamespaceId, namespaceId)
                         .eq(RetryTaskLogMessage::getGroupName, deadLetterVO.getGroupName())
-                        .in(RetryTaskLogMessage::getUniqueId, uniqueIds));
+                        .in(RetryTaskLogMessage::getRetryId, deadLetterVO.getIds()));
 
         return Boolean.TRUE;
 

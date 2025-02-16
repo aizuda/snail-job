@@ -3,14 +3,15 @@
 <mapper namespace="com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskLogMessageMapper">
 
     <insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO sj_retry_task_log_message (namespace_id, group_name, unique_id, log_num, message,
+        INSERT INTO sj_retry_task_log_message (namespace_id, group_name, retry_task_id, retry_id, log_num, message,
                                                create_dt, real_time)
         VALUES
         <foreach collection="list" item="item" separator=",">
             (
                 #{item.namespaceId},
                 #{item.groupName},
-                #{item.uniqueId},
+                #{item.retryTaskId},
+                #{item.retryId},
                 #{item.logNum},
                 #{item.message},
                 #{item.createDt},

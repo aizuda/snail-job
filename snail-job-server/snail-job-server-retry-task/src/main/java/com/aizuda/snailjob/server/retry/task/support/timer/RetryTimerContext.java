@@ -1,6 +1,5 @@
 package com.aizuda.snailjob.server.retry.task.support.timer;
 
-import com.aizuda.snailjob.server.retry.task.support.dispatch.task.TaskExecutorSceneEnum;
 import lombok.Data;
 
 /**
@@ -15,8 +14,10 @@ public class RetryTimerContext {
 
     private String groupName;
 
-    private String uniqueId;
+    private Long retryId;
 
-    private TaskExecutorSceneEnum scene;
+    private Long retryTaskId;
+
+//    private TaskExecutorSceneEnum scene;
 
 }

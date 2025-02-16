@@ -13,9 +13,9 @@ import lombok.EqualsAndHashCode;
  * @author opensnail
  * @since 2023-09-24
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @TableName("sj_job")
-@EqualsAndHashCode(callSuper=true)
 public class Job extends CreateUpdateDt {
 
     /**

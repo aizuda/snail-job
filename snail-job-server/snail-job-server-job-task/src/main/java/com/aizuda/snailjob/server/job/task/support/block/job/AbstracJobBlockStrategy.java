@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.job.task.support.block.job;
 
-import com.aizuda.snailjob.common.core.enums.BlockStrategyEnum;
+import com.aizuda.snailjob.common.core.enums.JobBlockStrategyEnum;
 import com.aizuda.snailjob.server.job.task.support.BlockStrategy;
 import org.springframework.beans.factory.InitializingBean;
 
@@ -19,7 +19,7 @@ public abstract class AbstracJobBlockStrategy implements BlockStrategy, Initiali
     protected abstract void doBlock(final BlockStrategyContext context);
 
 
-    protected abstract BlockStrategyEnum blockStrategyEnum();
+    protected abstract JobBlockStrategyEnum blockStrategyEnum();
 
     @Override
     public void afterPropertiesSet() throws Exception {

@@ -10,7 +10,7 @@ import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.common.dto.LogMetaDTO;
 import com.aizuda.snailjob.server.common.dto.RetryLogMetaDTO;
 import com.aizuda.snailjob.server.common.log.LogStorageFactory;
-import com.aizuda.snailjob.server.retry.task.support.dispatch.actor.log.RetryTaskLogDTO;
+import com.aizuda.snailjob.server.retry.task.dto.RetryTaskLogDTO;
 import com.google.common.collect.Lists;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
@@ -43,7 +43,8 @@ public class RetryLogStorage implements LogStorage, InitializingBean {
         retryTaskLogDTO.setMessage(JsonUtil.toJsonString(Lists.newArrayList(messageMap)));
         retryTaskLogDTO.setGroupName(retryLogMetaDTO.getGroupName());
         retryTaskLogDTO.setNamespaceId(retryLogMetaDTO.getNamespaceId());
-        retryTaskLogDTO.setUniqueId(retryLogMetaDTO.getUniqueId());
+        retryTaskLogDTO.setRetryId(retryLogMetaDTO.getRetryId());
+        retryTaskLogDTO.setRetryTaskId(retryLogMetaDTO.getRetryTaskId());
         retryTaskLogDTO.setRealTime(retryLogMetaDTO.getTimestamp());
         ActorRef actorRef = ActorGenerator.logActor();
         actorRef.tell(retryTaskLogDTO, actorRef);

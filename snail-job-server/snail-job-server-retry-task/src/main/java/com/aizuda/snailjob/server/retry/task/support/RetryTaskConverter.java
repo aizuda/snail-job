@@ -1,13 +1,20 @@
 package com.aizuda.snailjob.server.retry.task.support;
 
 import cn.hutool.core.util.StrUtil;
+import com.aizuda.snailjob.client.model.DispatchRetryResultDTO;
+import com.aizuda.snailjob.client.model.request.DispatchRetryRequest;
+import com.aizuda.snailjob.client.model.request.StopRetryRequest;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
+import com.aizuda.snailjob.server.common.dto.JobLogMetaDTO;
 import com.aizuda.snailjob.server.common.dto.RetryAlarmInfo;
 import com.aizuda.snailjob.server.common.dto.RetryLogMetaDTO;
 import com.aizuda.snailjob.server.model.dto.RetryLogTaskDTO;
 import com.aizuda.snailjob.server.model.dto.RetryTaskDTO;
 import com.aizuda.snailjob.server.retry.task.dto.*;
-import com.aizuda.snailjob.server.retry.task.generator.task.TaskContext;
+import com.aizuda.snailjob.server.retry.task.support.generator.retry.TaskContext;
+import com.aizuda.snailjob.server.retry.task.dto.RetryTaskGeneratorDTO;
+import com.aizuda.snailjob.server.retry.task.support.block.BlockStrategyContext;
+import com.aizuda.snailjob.server.retry.task.support.result.RetryResultContext;
 import com.aizuda.snailjob.server.retry.task.support.timer.RetryTimerContext;
 import com.aizuda.snailjob.template.datasource.persistence.po.*;
 import org.mapstruct.Mapper;
@@ -28,26 +35,27 @@ public interface RetryTaskConverter {
 
     RetryTaskConverter INSTANCE = Mappers.getMapper(RetryTaskConverter.class);
 
-    RetryTask toRetryTask(RetryTaskExecutorDTO retryTaskExecutorDTO);
-
-    RetryTask toRetryTask(RetryTaskDTO retryTaskDTO);
-
-    RetryTask toRetryTask(RetryTask retryTask);
+    @Mappings({
+            @Mapping(target = "id", ignore = true),
+    })
+    Retry toRetryTask(Retry retry);
 
     @Mappings({
             @Mapping(target = "id", ignore = true),
     })
-    RetryTask toRetryTask(RetryDeadLetter retryDeadLetter);
+    Retry toRetryTask(RetryDeadLetter retryDeadLetter);
 
-    List<RetryTask> toRetryTaskList(List<RetryTaskDTO> retryTaskDTOList);
+    List<Retry> toRetryTaskList(List<RetryTaskDTO> retryTaskDTOList);
 
-    RetryTask toRetryTask(TaskContext.TaskInfo taskInfo);
+    Retry toRetryTask(TaskContext.TaskInfo taskInfo);
 
-    List<RetryPartitionTask> toRetryPartitionTasks(List<RetryTask> retryTasks);
+    List<RetryPartitionTask> toRetryPartitionTasks(List<Retry> retries);
 
-    List<RetryPartitionTask> toRetryTaskLogPartitionTasks(List<RetryTaskLog> retryTaskLogList);
+    List<RetryPartitionTask> toRetryTaskLogPartitionTasks(List<Retry> retries);
 
-    RetryTimerContext toRetryTimerContext(RetryPartitionTask retryPartitionTask);
+    RetryTimerContext toRetryTimerContext(RetryTaskPrepareDTO retryTaskPrepareDTO);
+
+    RetryTimerContext toRetryTimerContext(RetryTaskGeneratorDTO retryPartitionTask);
 
     List<NotifyConfigDTO> toNotifyConfigDTO(List<NotifyConfig> notifyConfigs);
 
@@ -82,20 +90,64 @@ public interface RetryTaskConverter {
     RetryTaskLogMessage toRetryTaskLogMessage(RetryLogTaskDTO retryLogTaskDTO);
 
     @Mapping(target = "timestamp", expression = "java(DateUtils.toNowMilli())")
-    RetryLogMetaDTO toLogMetaDTO(RetryTask retryTask);
+    RetryLogMetaDTO toLogMetaDTO(Retry retry);
 
     @Mappings({
             @Mapping(source = "reason", target = "reason"),
             @Mapping(source = "notifyScene", target = "notifyScene")
     })
-    RetryTaskExecutorDTO toRetryTaskExecutorDTO(RetryTask retryTask, String reason, Integer notifyScene);
+    RetryTaskExecutorDTO toRetryTaskExecutorDTO(Retry retry, String reason, Integer notifyScene);
 
     @Mappings({
             @Mapping(source = "reason", target = "reason"),
             @Mapping(source = "notifyScene", target = "notifyScene")
     })
-    RetryTaskFailAlarmEventDTO toRetryTaskFailAlarmEventDTO(RetryTask retryTask, String reason, Integer notifyScene);
+    RetryTaskFailAlarmEventDTO toRetryTaskFailAlarmEventDTO(Retry retry, String reason, Integer notifyScene);
 
     List<RetryAlarmInfo> toRetryTaskFailAlarmEventDTO(List<RetryTaskFailAlarmEventDTO> retryTaskFailAlarmEventDTOList);
 
+    RetryTaskGeneratorDTO toRetryTaskGeneratorContext(RetryTaskPrepareDTO prepareDTO);
+
+    RetryTask toRetryTask(RetryTaskGeneratorDTO context);
+
+    DispatchRetryRequest toDispatchRetryRequest(RealRetryExecutorDTO executorDTO);
+
+    @Mappings({
+            @Mapping(target = "namespaceId", source = "retry.namespaceId"),
+            @Mapping(target = "groupName", source = "retry.groupName"),
+            @Mapping(target = "sceneName", source = "retry.sceneName"),
+            @Mapping(target = "retryId", source = "retry.id"),
+            @Mapping(target = "taskType", source = "retry.taskType"),
+    })
+    RealRetryExecutorDTO toRealRetryExecutorDTO(RetrySceneConfig execute, Retry retry);
+
+    RealRetryExecutorDTO toRealRetryExecutorDTO(TaskStopJobDTO stopJobDTO);
+
+    RetryExecutorResultDTO toRetryExecutorResultDTO(DispatchRetryResultDTO resultDTO);
+
+    RetryTaskGeneratorDTO toRetryTaskGeneratorDTO(RetryTaskPrepareDTO jobPrepareDTO);
+
+    RetryTaskGeneratorDTO toRetryTaskGeneratorDTO(BlockStrategyContext context);
+
+    BlockStrategyContext toBlockStrategyContext(RetryTaskPrepareDTO prepare);
+
+    TaskStopJobDTO toTaskStopJobDTO(BlockStrategyContext context);
+
+    StopRetryRequest toStopRetryRequest(RealRetryExecutorDTO executorDTO);
+
+    @Mappings({
+            @Mapping(source = "retry.id", target = "retryId"),
+    })
+    RetryTaskPrepareDTO toRetryTaskPrepareDTO(Retry retry);
+
+    @Mappings({
+            @Mapping(source = "partitionTask.id", target = "retryId"),
+    })
+    RetryTaskPrepareDTO toRetryTaskPrepareDTO(RetryPartitionTask partitionTask);
+
+    RetryTaskExecuteDTO toRetryTaskExecuteDTO(RetryTimerContext context);
+
+    JobLogMetaDTO toJobLogDTO(RealRetryExecutorDTO executorDTO);
+
+    RetryResultContext toRetryResultContext(RetryExecutorResultDTO resultDTO);
 }

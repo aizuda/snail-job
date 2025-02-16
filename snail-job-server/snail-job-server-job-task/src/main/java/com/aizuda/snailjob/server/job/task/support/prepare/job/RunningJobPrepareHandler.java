@@ -1,7 +1,7 @@
 package com.aizuda.snailjob.server.job.task.support.prepare.job;
 
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
-import com.aizuda.snailjob.common.core.enums.BlockStrategyEnum;
+import com.aizuda.snailjob.common.core.enums.JobBlockStrategyEnum;
 import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
@@ -51,7 +51,7 @@ public class RunningJobPrepareHandler extends AbstractJobPrepareHandler {
         completeJobBatchDTO.setJobOperationReason(jobOperationReasonEnum.getReason());
         completeJobBatchDTO.setRetryStatus(Boolean.FALSE);
         if (jobTaskBatchHandler.handleResult(completeJobBatchDTO)) {
-            blockStrategy = BlockStrategyEnum.CONCURRENCY.getBlockStrategy();
+            blockStrategy = JobBlockStrategyEnum.CONCURRENCY.getBlockStrategy();
         } else {
             // 计算超时时间
             long delay = DateUtils.toNowMilli() - prepare.getExecutionAt();

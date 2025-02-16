@@ -62,7 +62,7 @@ public class JobTimerWheel {
     public static synchronized void register(String idempotentKey, TimerTask<String> task, Duration delay) {
 
         register(idempotentKey, hashedWheelTimer -> {
-            SnailJobLog.LOCAL.debug("加入时间轮. delay:[{}ms] taskType:[{}] uniqueId:[{}]", delay, idempotentKey);
+            SnailJobLog.LOCAL.debug("加入时间轮. delay:[{}ms] idempotentKey:[{}]", delay, idempotentKey);
             timer.newTimeout(task, Math.max(delay.toMillis(), 0), TimeUnit.MILLISECONDS);
         });
     }

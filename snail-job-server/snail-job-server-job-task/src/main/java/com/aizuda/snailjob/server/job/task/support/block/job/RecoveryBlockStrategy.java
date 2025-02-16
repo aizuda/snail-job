@@ -9,7 +9,7 @@ import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.common.enums.JobTaskExecutorSceneEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.job.task.dto.TaskExecuteDTO;
-import com.aizuda.snailjob.common.core.enums.BlockStrategyEnum;
+import com.aizuda.snailjob.common.core.enums.JobBlockStrategyEnum;
 import com.aizuda.snailjob.server.job.task.support.JobExecutor;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
 import com.aizuda.snailjob.server.job.task.support.executor.job.JobExecutorContext;
@@ -72,8 +72,8 @@ public class RecoveryBlockStrategy extends AbstracJobBlockStrategy {
     }
 
     @Override
-    protected BlockStrategyEnum blockStrategyEnum() {
-        return BlockStrategyEnum.RECOVERY;
+    protected JobBlockStrategyEnum blockStrategyEnum() {
+        return JobBlockStrategyEnum.RECOVERY;
     }
 
     private static JobExecutorContext buildJobExecutorContext(BlockStrategyContext strategyContext, Job job,

@@ -3,7 +3,7 @@ package com.aizuda.snailjob.server.web.model.request;
 import com.aizuda.snailjob.common.core.enums.ExecutorTypeEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
-import com.aizuda.snailjob.common.core.enums.BlockStrategyEnum;
+import com.aizuda.snailjob.common.core.enums.JobBlockStrategyEnum;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -84,7 +84,7 @@ public class JobRequestVO {
 
     /**
      * 阻塞策略 1、丢弃 2、覆盖 3、并行
-     * {@link BlockStrategyEnum}
+     * {@link JobBlockStrategyEnum}
      */
     @NotNull(message = "blockStrategy 不能为空")
     private Integer blockStrategy;

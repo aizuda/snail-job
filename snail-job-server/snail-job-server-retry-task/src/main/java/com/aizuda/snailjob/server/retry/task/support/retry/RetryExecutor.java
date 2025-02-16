@@ -73,7 +73,7 @@ public class RetryExecutor<V> {
             retryContext.setCallResult(call);
         } catch (Exception e) {
             RetryLogMetaDTO retryLogMetaDTO = RetryTaskConverter.INSTANCE.toLogMetaDTO(retryContext.getRetryTask());
-            SnailJobLog.REMOTE.error("请求客户端执行失败. uniqueId:[{}] <|>{}<|>", retryContext.getRetryTask().getUniqueId(), e);
+            SnailJobLog.REMOTE.error("请求客户端执行失败. uniqueId:[{}] <|>{}<|>", e);
             retryContext.setException(e);
         }
 

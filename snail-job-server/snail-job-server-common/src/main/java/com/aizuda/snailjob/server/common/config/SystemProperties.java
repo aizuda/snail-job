@@ -99,33 +99,6 @@ public class SystemProperties {
      */
     private int bucketTotal = 128;
 
-    /**
-     * 回调配置
-     */
-    private Callback callback = new Callback();
-
-    /**
-     * 回调配置
-     */
-    @Data
-    public static class Callback {
-
-        /**
-         * 回调uniqueId前缀
-         */
-        String prefix = "CB";
-
-        /**
-         * 回调的最大执行次数
-         */
-        private int maxCount = 288;
-
-        /**
-         * 间隔时间
-         */
-        private long triggerInterval = 15 * 60;
-
-    }
 
     /**
      * Dashboard 任务容错天数

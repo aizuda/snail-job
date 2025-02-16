@@ -1,7 +1,7 @@
 package com.aizuda.snailjob.server.retry.task.service;
 
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryDeadLetter;
-import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
+import com.aizuda.snailjob.template.datasource.persistence.po.Retry;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 
@@ -22,9 +22,9 @@ public interface RetryDeadLetterConverter {
             @Mapping(target = "id", ignore = true),
             @Mapping(target = "createDt", ignore = true)
     })
-    RetryDeadLetter toRetryDeadLetter(RetryTask retryTasks);
+    RetryDeadLetter toRetryDeadLetter(Retry retryTasks);
 
     @IterableMapping(qualifiedByName = "ignoreId")
-    List<RetryDeadLetter> toRetryDeadLetter(List<RetryTask> retryTasks);
+    List<RetryDeadLetter> toRetryDeadLetter(List<Retry> retries);
 
 }

@@ -1,7 +1,7 @@
 package com.aizuda.snailjob.server.job.task.support.block.workflow;
 
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
-import com.aizuda.snailjob.common.core.enums.BlockStrategyEnum;
+import com.aizuda.snailjob.common.core.enums.JobBlockStrategyEnum;
 import com.aizuda.snailjob.server.job.task.support.handler.WorkflowBatchHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -29,7 +29,7 @@ public class RecoveryWorkflowBlockStrategy extends AbstractWorkflowBlockStrategy
     }
 
     @Override
-    protected BlockStrategyEnum blockStrategyEnum() {
-        return BlockStrategyEnum.RECOVERY;
+    protected JobBlockStrategyEnum blockStrategyEnum() {
+        return JobBlockStrategyEnum.RECOVERY;
     }
 }

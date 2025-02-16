@@ -34,9 +34,14 @@ public class RetryTaskLogMessage extends CreateDt {
     private String groupName;
 
     /**
-     * 同组下id唯一
+     * 重试任务id
      */
-    private String uniqueId;
+    private Long retryTaskId;
+
+    /**
+     * 重试信息Id
+     */
+    private Long retryId;
 
     /**
      * 异常信息

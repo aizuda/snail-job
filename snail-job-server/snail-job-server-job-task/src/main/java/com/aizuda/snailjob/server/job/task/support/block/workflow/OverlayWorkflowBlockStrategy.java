@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.job.task.support.block.workflow;
 
-import com.aizuda.snailjob.common.core.enums.BlockStrategyEnum;
+import com.aizuda.snailjob.common.core.enums.JobBlockStrategyEnum;
 import com.aizuda.snailjob.server.job.task.support.WorkflowTaskConverter;
 import com.aizuda.snailjob.server.job.task.support.generator.batch.WorkflowBatchGenerator;
 import com.aizuda.snailjob.server.job.task.support.generator.batch.WorkflowTaskBatchGeneratorContext;
@@ -34,7 +34,7 @@ public class OverlayWorkflowBlockStrategy extends AbstractWorkflowBlockStrategy 
     }
 
     @Override
-    protected BlockStrategyEnum blockStrategyEnum() {
-        return BlockStrategyEnum.OVERLAY;
+    protected JobBlockStrategyEnum blockStrategyEnum() {
+        return JobBlockStrategyEnum.OVERLAY;
     }
 }

@@ -10,7 +10,6 @@ import com.aizuda.snailjob.common.core.enums.*;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import lombok.Getter;
 import lombok.Setter;
-import org.checkerframework.checker.units.qual.C;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -191,7 +190,7 @@ public abstract class AbstractParamsHandler<H, R> extends AbstractRequestHandler
      * @param blockStrategy 阻塞策略
      * @return r
      */
-    public H setBlockStrategy(BlockStrategyEnum blockStrategy) {
+    public H setBlockStrategy(JobBlockStrategyEnum blockStrategy) {
         reqDTO.setBlockStrategy(blockStrategy.getBlockStrategy());
         return r;
     }

@@ -76,6 +76,16 @@ public interface SystemConstants {
         String BATCH_REPORT = "/batch/report";
 
         /**
+         * 上报retry的运行结果
+         */
+        String REPORT_RETRY_DISPATCH_RESULT = "/report/retry/dispatch/result";
+
+        /**
+         * 上报retry callback的运行结果
+         */
+        String REPORT_RETRY_CALLBACK_RESULT = "/report/retry/callback/result";
+
+        /**
          * 批量日志上报
          */
         String BATCH_LOG_REPORT = "/batch/server/report/log";
@@ -114,6 +124,11 @@ public interface SystemConstants {
          * 重试分发
          */
         String RETRY_DISPATCH = "/retry/dispatch/v1";
+
+        /**
+         * 重试停止
+         */
+        String RETRY_STOP = "/retry/stop/v1";
 
         /**
          * 重试回调

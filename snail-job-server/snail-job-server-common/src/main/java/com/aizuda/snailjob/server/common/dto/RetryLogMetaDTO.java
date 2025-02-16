@@ -19,9 +19,14 @@ public class RetryLogMetaDTO extends LogMetaDTO {
     }
 
     /**
-     * 组名称
+     * 重试任务id
      */
-    private String uniqueId;
+    private Long retryTaskId;
+
+    /**
+     * 重试信息Id
+     */
+    private Long retryId;
 
     @Override
     public String toString() {

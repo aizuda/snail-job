@@ -1,10 +1,10 @@
 package com.aizuda.snailjob.server.retry.task.support.timer;
 
 import com.aizuda.snailjob.common.log.SnailJobLog;
+import com.aizuda.snailjob.server.common.TimerTask;
 import com.aizuda.snailjob.server.retry.task.support.idempotent.IdempotentHolder;
 import com.aizuda.snailjob.server.retry.task.support.idempotent.TimerIdempotent;
 import io.netty.util.HashedWheelTimer;
-import io.netty.util.TimerTask;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
@@ -13,6 +13,8 @@ import java.time.Duration;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * @author: opensnail
@@ -37,11 +39,31 @@ public class RetryTimerWheel {
         timer.start();
     }
 
-    public static void register(String idempotentKey, TimerTask task, Duration delay) {
+    /**
+     * 工作流任务添加时间轮
+     * 虽然job和Workflow 添加时间轮方法逻辑一样为了后面做一些不同的逻辑，这里兼容分开写
+     *
+     * @param task  任务
+     * @param delay 延迟时间
+     */
+    public static synchronized void registerWithRetry(Supplier<TimerTask<String>> task, Duration delay) {
+        TimerTask<String> timerTask = task.get();
+        register(timerTask.idempotentKey(), timerTask, delay);
+    }
+
+    public static synchronized void register(String idempotentKey, TimerTask<String> task, Duration delay) {
+
+        register(idempotentKey, hashedWheelTimer -> {
+            SnailJobLog.LOCAL.info("加入时间轮. delay:[{}ms] taskType:[{}]", delay, idempotentKey);
+            timer.newTimeout(task, Math.max(delay.toMillis(), 0), TimeUnit.MILLISECONDS);
+        });
+    }
+
+    public static synchronized void register(String idempotentKey, Consumer<HashedWheelTimer> consumer) {
 
         if (!isExisted(idempotentKey)) {
             try {
-                timer.newTimeout(task, Math.max(delay.toMillis(), 0), TimeUnit.MILLISECONDS);
+                consumer.accept(timer);
                 idempotent.set(idempotentKey);
             } catch (Exception e) {
                 SnailJobLog.LOCAL.error("加入时间轮失败. uniqueId:[{}]", idempotentKey, e);

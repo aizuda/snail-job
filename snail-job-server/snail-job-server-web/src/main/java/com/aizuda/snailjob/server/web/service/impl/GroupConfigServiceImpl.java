@@ -93,7 +93,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
         Boolean isSuccess = doSaveGroupConfig(namespaceId, groupConfigRequestVO);
 
         // 保存生成唯一id配置
-        doSaveSequenceAlloc(namespaceId, groupConfigRequestVO);
+//        doSaveSequenceAlloc(namespaceId, groupConfigRequestVO);
 
         return isSuccess;
     }
@@ -146,9 +146,6 @@ public class GroupConfigServiceImpl implements GroupConfigService {
                 () -> new SnailJobServerException("分区不存在. [{}]", tablePartitionList));
         Assert.isTrue(groupConfigRequestVO.getGroupPartition() >= 0,
                 () -> new SnailJobServerException("分区不能是负数."));
-
-        // 校验retry_task_x和retry_dead_letter_x是否存在
-        checkGroupPartition(groupConfig, namespaceId);
 
         // 不允许更新组
         groupConfig.setGroupName(null);
@@ -221,10 +218,10 @@ public class GroupConfigServiceImpl implements GroupConfigService {
     }
 
     private boolean doSaveGroupConfig(final String namespaceId, GroupConfigRequestVO groupConfigRequestVO) {
-        List<Integer> tablePartitionList = getTablePartitionList();
-        if (CollUtil.isEmpty(tablePartitionList)) {
-            return Boolean.FALSE;
-        }
+//        List<Integer> tablePartitionList = getTablePartitionList();
+//        if (CollUtil.isEmpty(tablePartitionList)) {
+//            return Boolean.FALSE;
+//        }
 
         GroupConfig groupConfig = GroupConfigConverter.INSTANCE.toGroupConfig(groupConfigRequestVO);
         groupConfig.setCreateDt(LocalDateTime.now());
@@ -233,24 +230,24 @@ public class GroupConfigServiceImpl implements GroupConfigService {
         groupConfig.setGroupName(groupConfigRequestVO.getGroupName());
         groupConfig.setToken(groupConfigRequestVO.getToken());
         groupConfig.setDescription(Optional.ofNullable(groupConfigRequestVO.getDescription()).orElse(StrUtil.EMPTY));
-        if (Objects.isNull(groupConfigRequestVO.getGroupPartition())) {
-            groupConfig.setGroupPartition(
-                    HashUtil.bkdrHash(groupConfigRequestVO.getGroupName()) % tablePartitionList.size());
-        } else {
-            Assert.isTrue(tablePartitionList.contains(groupConfigRequestVO.getGroupPartition()),
-                    () -> new SnailJobServerException("分区不存在. [{}]", tablePartitionList));
-            Assert.isTrue(groupConfigRequestVO.getGroupPartition() >= 0,
-                    () -> new SnailJobServerException("分区不能是负数."));
-        }
+//        if (Objects.isNull(groupConfigRequestVO.getGroupPartition())) {
+//            groupConfig.setGroupPartition(
+//                    HashUtil.bkdrHash(groupConfigRequestVO.getGroupName()) % tablePartitionList.size());
+//        } else {
+//            Assert.isTrue(tablePartitionList.contains(groupConfigRequestVO.getGroupPartition()),
+//                    () -> new SnailJobServerException("分区不存在. [{}]", tablePartitionList));
+//            Assert.isTrue(groupConfigRequestVO.getGroupPartition() >= 0,
+//                    () -> new SnailJobServerException("分区不能是负数."));
+//        }
 
-        groupConfig.setBucketIndex(
-                HashUtil.bkdrHash(groupConfigRequestVO.getGroupName()) % systemProperties.getBucketTotal());
+//        groupConfig.setBucketIndex(
+//                HashUtil.bkdrHash(groupConfigRequestVO.getGroupName()) % systemProperties.getBucketTotal());
         ConfigAccess<GroupConfig> groupConfigAccess = accessTemplate.getGroupConfigAccess();
         Assert.isTrue(1 == groupConfigAccess.insert(groupConfig),
                 () -> new SnailJobServerException("新增组异常异常 groupConfigVO[{}]", groupConfigRequestVO));
 
         // 校验retry_task_x和retry_dead_letter_x是否存在
-        checkGroupPartition(groupConfig, namespaceId);
+//        checkGroupPartition(groupConfig, namespaceId);
 
         return Boolean.TRUE;
     }
@@ -260,9 +257,8 @@ public class GroupConfigServiceImpl implements GroupConfigService {
      */
     private void checkGroupPartition(GroupConfig groupConfig, String namespaceId) {
         try {
-            TaskAccess<RetryTask> retryTaskAccess = accessTemplate.getRetryTaskAccess();
-            retryTaskAccess.count(groupConfig.getGroupName(), namespaceId,
-                    new LambdaQueryWrapper<RetryTask>().eq(RetryTask::getId, 1));
+            TaskAccess<Retry> retryTaskAccess = accessTemplate.getRetryAccess();
+            retryTaskAccess.count(new LambdaQueryWrapper<Retry>().eq(Retry::getId, 1));
         } catch (BadSqlGrammarException e) {
             Optional.ofNullable(e.getMessage()).ifPresent(s -> {
                 if (s.contains("retry_task_" + groupConfig.getGroupPartition()) && s.contains("doesn't exist")) {
@@ -274,8 +270,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
 
         try {
             TaskAccess<RetryDeadLetter> retryTaskAccess = accessTemplate.getRetryDeadLetterAccess();
-            retryTaskAccess.one(groupConfig.getGroupName(), namespaceId,
-                    new LambdaQueryWrapper<RetryDeadLetter>().eq(RetryDeadLetter::getId, 1));
+            retryTaskAccess.one(new LambdaQueryWrapper<RetryDeadLetter>().eq(RetryDeadLetter::getId, 1));
         } catch (BadSqlGrammarException e) {
             Optional.ofNullable(e.getMessage()).ifPresent(s -> {
                 if (s.contains("retry_dead_letter_" + groupConfig.getGroupPartition()) && s.contains("doesn't exist")) {

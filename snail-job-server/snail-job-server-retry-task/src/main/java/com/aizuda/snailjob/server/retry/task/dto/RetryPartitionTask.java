@@ -21,10 +21,12 @@ public class RetryPartitionTask extends PartitionTask {
 
     private String sceneName;
 
+    private Integer taskType;
+
     /**
      * 下次触发时间
      */
-    private LocalDateTime nextTriggerAt;
+    private Long nextTriggerAt;
 
     private Integer retryCount;
 

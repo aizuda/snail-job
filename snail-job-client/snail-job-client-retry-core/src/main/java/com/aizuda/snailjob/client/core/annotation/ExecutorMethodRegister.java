@@ -15,8 +15,8 @@
 package com.aizuda.snailjob.client.core.annotation;
 
 import com.aizuda.snailjob.client.core.IdempotentIdGenerate;
-import com.aizuda.snailjob.client.core.callback.RetryCompleteCallback;
-import com.aizuda.snailjob.client.core.callback.SimpleRetryCompleteCallback;
+import com.aizuda.snailjob.client.core.callback.complete.RetryCompleteCallback;
+import com.aizuda.snailjob.client.core.callback.complete.SimpleRetryCompleteCallback;
 import com.aizuda.snailjob.client.core.generator.SimpleIdempotentIdGenerate;
 import org.springframework.stereotype.Component;
 

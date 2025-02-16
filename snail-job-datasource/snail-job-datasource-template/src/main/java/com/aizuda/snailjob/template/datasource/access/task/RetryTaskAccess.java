@@ -2,8 +2,8 @@ package com.aizuda.snailjob.template.datasource.access.task;
 
 import com.aizuda.snailjob.template.datasource.enums.DbTypeEnum;
 import com.aizuda.snailjob.template.datasource.enums.OperationTypeEnum;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskMapper;
-import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryMapper;
+import com.aizuda.snailjob.template.datasource.persistence.po.Retry;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
@@ -20,10 +20,10 @@ import java.util.List;
  * @since 2.2.0
  */
 @Component
-public class RetryTaskAccess extends AbstractTaskAccess<RetryTask> {
+public class RetryTaskAccess extends AbstractTaskAccess<Retry> {
 
     @Autowired
-    private RetryTaskMapper retryTaskMapper;
+    private RetryMapper retryMapper;
 
     @Override
     public boolean supports(String operationType) {
@@ -33,47 +33,47 @@ public class RetryTaskAccess extends AbstractTaskAccess<RetryTask> {
     }
 
     @Override
-    protected int doUpdate(RetryTask retryTask, LambdaUpdateWrapper<RetryTask> query) {
-        return retryTaskMapper.update(retryTask, query);
+    protected int doUpdate(Retry retry, LambdaUpdateWrapper<Retry> query) {
+        return retryMapper.update(retry, query);
     }
 
     @Override
-    protected int doInsertBatch(List<RetryTask> list) {
-        return retryTaskMapper.insertBatch(list);
+    protected int doInsertBatch(List<Retry> list) {
+        return retryMapper.insertBatch(list);
     }
 
     @Override
-    protected RetryTask doOne(LambdaQueryWrapper<RetryTask> query) {
-        return retryTaskMapper.selectOne(query);
+    protected Retry doOne(LambdaQueryWrapper<Retry> query) {
+        return retryMapper.selectOne(query);
     }
 
     @Override
-    protected PageDTO<RetryTask> doListPage(final PageDTO<RetryTask> iPage, final LambdaQueryWrapper<RetryTask> query) {
-        return retryTaskMapper.selectPage(iPage, query);
+    protected PageDTO<Retry> doListPage(final PageDTO<Retry> iPage, final LambdaQueryWrapper<Retry> query) {
+        return retryMapper.selectPage(iPage, query);
     }
 
     @Override
-    protected long doCount(final LambdaQueryWrapper<RetryTask> query) {
-        return retryTaskMapper.selectCount(query);
+    protected long doCount(final LambdaQueryWrapper<Retry> query) {
+        return retryMapper.selectCount(query);
     }
 
     @Override
-    protected int doInsert(RetryTask retryTask) {
-        return retryTaskMapper.insert(retryTask);
+    protected int doInsert(Retry retry) {
+        return retryMapper.insert(retry);
     }
 
     @Override
-    protected int doDelete(LambdaQueryWrapper<RetryTask> query) {
-        return retryTaskMapper.delete(query);
+    protected int doDelete(LambdaQueryWrapper<Retry> query) {
+        return retryMapper.delete(query);
     }
 
     @Override
-    protected int doUpdateById(RetryTask retryTask) {
-        return retryTaskMapper.updateById(retryTask);
+    protected int doUpdateById(Retry retry) {
+        return retryMapper.updateById(retry);
     }
 
     @Override
-    protected List<RetryTask> doList(LambdaQueryWrapper<RetryTask> query) {
-        return retryTaskMapper.selectList(query);
+    protected List<Retry> doList(LambdaQueryWrapper<Retry> query) {
+        return retryMapper.selectList(query);
     }
 }

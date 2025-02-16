@@ -9,7 +9,7 @@ import com.aizuda.snailjob.server.common.Lifecycle;
 import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.retry.task.dto.NotifyConfigDTO;
 import com.aizuda.snailjob.server.retry.task.dto.RetrySceneConfigPartitionTask;
-import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
+import com.aizuda.snailjob.template.datasource.persistence.po.Retry;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -53,13 +53,12 @@ public class RetryTaskMoreThresholdAlarmSchedule extends AbstractRetryTaskAlarmS
     protected void doSendAlarm(RetrySceneConfigPartitionTask partitionTask, Map<Long, NotifyConfigDTO> notifyConfigInfo) {
 
         // x分钟内、x组、x场景进入重试任务的数据量
-        long count = accessTemplate.getRetryTaskAccess()
-                .count(partitionTask.getGroupName(), partitionTask.getNamespaceId(),
-                        new LambdaQueryWrapper<RetryTask>()
-                                .eq(RetryTask::getNamespaceId, partitionTask.getNamespaceId())
-                                .eq(RetryTask::getGroupName, partitionTask.getGroupName())
-                                .eq(RetryTask::getSceneName, partitionTask.getSceneName())
-                                .eq(RetryTask::getRetryStatus, RetryStatusEnum.RUNNING.getStatus()));
+        long count = accessTemplate.getRetryAccess()
+                .count(new LambdaQueryWrapper<Retry>()
+                                .eq(Retry::getNamespaceId, partitionTask.getNamespaceId())
+                                .eq(Retry::getGroupName, partitionTask.getGroupName())
+                                .eq(Retry::getSceneName, partitionTask.getSceneName())
+                                .eq(Retry::getRetryStatus, RetryStatusEnum.RUNNING.getStatus()));
         for (Long notifyId : partitionTask.getNotifyIds()) {
             NotifyConfigDTO notifyConfigDTO = notifyConfigInfo.get(notifyId);
             if (notifyConfigDTO == null) {

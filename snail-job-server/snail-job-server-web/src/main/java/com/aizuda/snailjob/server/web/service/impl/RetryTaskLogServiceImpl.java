@@ -17,9 +17,9 @@ import com.aizuda.snailjob.server.web.model.response.RetryTaskLogResponseVO;
 import com.aizuda.snailjob.server.web.service.RetryTaskLogService;
 import com.aizuda.snailjob.server.web.service.convert.RetryTaskLogResponseVOConverter;
 import com.aizuda.snailjob.server.web.util.UserSessionUtils;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskLogMapper;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskLogMessageMapper;
-import com.aizuda.snailjob.template.datasource.persistence.po.RetryTaskLog;
+import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTaskLogMessage;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
@@ -31,8 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.aizuda.snailjob.common.core.enums.RetryStatusEnum.ALLOW_DELETE_STATUS;
-
 /**
  * @author: opensnail
  * @date : 2022-02-28 09:10
@@ -41,45 +39,47 @@ import static com.aizuda.snailjob.common.core.enums.RetryStatusEnum.ALLOW_DELETE
 @RequiredArgsConstructor
 public class RetryTaskLogServiceImpl implements RetryTaskLogService {
 
-    private final RetryTaskLogMapper retryTaskLogMapper;
+    private final RetryTaskMapper retryTaskMapper;
     private final RetryTaskLogMessageMapper retryTaskLogMessageMapper;
 
     @Override
     public PageResult<List<RetryTaskLogResponseVO>> getRetryTaskLogPage(RetryTaskLogQueryVO queryVO) {
-        PageDTO<RetryTaskLog> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
+        PageDTO<RetryTask> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
 
-        UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
-        String namespaceId = userSessionVO.getNamespaceId();
+//        UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
+//        String namespaceId = userSessionVO.getNamespaceId();
+//
+//        List<String> groupNames = UserSessionUtils.getGroupNames(queryVO.getGroupName());
+//
+//        LambdaQueryWrapper<RetryTask> retryTaskLogLambdaQueryWrapper = new LambdaQueryWrapper<RetryTask>()
+//                .eq(RetryTask::getNamespaceId, namespaceId)
+//                .in(CollUtil.isNotEmpty(groupNames), RetryTask::getGroupName, groupNames)
+//                .eq(StrUtil.isNotBlank(queryVO.getSceneName()), RetryTask::getSceneName, queryVO.getSceneName())
+//                .eq(StrUtil.isNotBlank(queryVO.getBizNo()), RetryTask::getBizNo, queryVO.getBizNo())
+//                .eq(StrUtil.isNotBlank(queryVO.getUniqueId()), RetryTask::getUniqueId, queryVO.getUniqueId())
+//                .eq(StrUtil.isNotBlank(queryVO.getIdempotentId()), RetryTask::getIdempotentId, queryVO.getIdempotentId())
+//                .eq(queryVO.getRetryStatus() != null, RetryTask::getTaskStatus, queryVO.getRetryStatus())
+//                .between(ObjUtil.isNotNull(queryVO.getDatetimeRange()),
+//                        RetryTask::getCreateDt, queryVO.getStartDt(), queryVO.getEndDt())
+//                .select(RetryTask::getGroupName, RetryTask::getId,
+//                        RetryTask::getSceneName,
+//                        RetryTask::getIdempotentId, RetryTask::getBizNo, RetryTask::getTaskStatus,
+//                        RetryTask::getCreateDt, RetryTask::getUniqueId, RetryTask::getTaskType)
+//                .orderByDesc(RetryTask::getCreateDt);
+//        PageDTO<RetryTask> retryTaskLogPageDTO = retryTaskMapper.selectPage(pageDTO,
+//                retryTaskLogLambdaQueryWrapper);
 
-        List<String> groupNames = UserSessionUtils.getGroupNames(queryVO.getGroupName());
+//        return new PageResult<>(
+//                retryTaskLogPageDTO,
+//                RetryTaskLogResponseVOConverter.INSTANCE.convertList(retryTaskLogPageDTO.getRecords()));
 
-        LambdaQueryWrapper<RetryTaskLog> retryTaskLogLambdaQueryWrapper = new LambdaQueryWrapper<RetryTaskLog>()
-                .eq(RetryTaskLog::getNamespaceId, namespaceId)
-                .in(CollUtil.isNotEmpty(groupNames), RetryTaskLog::getGroupName, groupNames)
-                .eq(StrUtil.isNotBlank(queryVO.getSceneName()), RetryTaskLog::getSceneName, queryVO.getSceneName())
-                .eq(StrUtil.isNotBlank(queryVO.getBizNo()), RetryTaskLog::getBizNo, queryVO.getBizNo())
-                .eq(StrUtil.isNotBlank(queryVO.getUniqueId()), RetryTaskLog::getUniqueId, queryVO.getUniqueId())
-                .eq(StrUtil.isNotBlank(queryVO.getIdempotentId()), RetryTaskLog::getIdempotentId, queryVO.getIdempotentId())
-                .eq(queryVO.getRetryStatus() != null, RetryTaskLog::getRetryStatus, queryVO.getRetryStatus())
-                .between(ObjUtil.isNotNull(queryVO.getDatetimeRange()),
-                        RetryTaskLog::getCreateDt, queryVO.getStartDt(), queryVO.getEndDt())
-                .select(RetryTaskLog::getGroupName, RetryTaskLog::getId,
-                        RetryTaskLog::getSceneName,
-                        RetryTaskLog::getIdempotentId, RetryTaskLog::getBizNo, RetryTaskLog::getRetryStatus,
-                        RetryTaskLog::getCreateDt, RetryTaskLog::getUniqueId, RetryTaskLog::getTaskType)
-                .orderByDesc(RetryTaskLog::getCreateDt);
-        PageDTO<RetryTaskLog> retryTaskLogPageDTO = retryTaskLogMapper.selectPage(pageDTO,
-                retryTaskLogLambdaQueryWrapper);
-
-        return new PageResult<>(
-                retryTaskLogPageDTO,
-                RetryTaskLogResponseVOConverter.INSTANCE.convertList(retryTaskLogPageDTO.getRecords()));
+        return null;
     }
 
     @Override
     public RetryTaskLogMessageResponseVO getRetryTaskLogMessagePage(
             RetryTaskLogMessageQueryVO queryVO) {
-        if (StrUtil.isBlank(queryVO.getUniqueId()) || StrUtil.isBlank(queryVO.getGroupName())) {
+        if (queryVO.getRetryId() == null || StrUtil.isBlank(queryVO.getGroupName())) {
             RetryTaskLogMessageResponseVO jobLogResponseVO = new RetryTaskLogMessageResponseVO();
             jobLogResponseVO.setNextStartId(0L);
             jobLogResponseVO.setFromIndex(0);
@@ -94,7 +94,8 @@ public class RetryTaskLogServiceImpl implements RetryTaskLogService {
                         .select(RetryTaskLogMessage::getId, RetryTaskLogMessage::getLogNum)
                         .ge(RetryTaskLogMessage::getId, queryVO.getStartId())
                         .eq(RetryTaskLogMessage::getNamespaceId, namespaceId)
-                        .eq(RetryTaskLogMessage::getUniqueId, queryVO.getUniqueId())
+                        .eq(RetryTaskLogMessage::getRetryId, queryVO.getRetryId())
+                        .eq(RetryTaskLogMessage::getRetryTaskId, queryVO.getRetryTaskId())
                         .eq(RetryTaskLogMessage::getGroupName, queryVO.getGroupName())
                         .orderByAsc(RetryTaskLogMessage::getId).orderByAsc(RetryTaskLogMessage::getRealTime)
                         .orderByDesc(RetryTaskLogMessage::getCreateDt));
@@ -163,8 +164,8 @@ public class RetryTaskLogServiceImpl implements RetryTaskLogService {
 
     @Override
     public RetryTaskLogResponseVO getRetryTaskLogById(Long id) {
-        RetryTaskLog retryTaskLog = retryTaskLogMapper.selectById(id);
-        return RetryTaskLogResponseVOConverter.INSTANCE.convert(retryTaskLog);
+        RetryTask retryTask = retryTaskMapper.selectById(id);
+        return RetryTaskLogResponseVOConverter.INSTANCE.convert(retryTask);
     }
 
     @Override
@@ -172,20 +173,20 @@ public class RetryTaskLogServiceImpl implements RetryTaskLogService {
     public boolean deleteById(final Long id) {
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
 
-        RetryTaskLog retryTaskLog = retryTaskLogMapper.selectOne(
-                new LambdaQueryWrapper<RetryTaskLog>()
-                        .in(RetryTaskLog::getRetryStatus, List.of(RetryStatusEnum.FINISH.getStatus(), RetryStatusEnum.MAX_COUNT.getStatus()))
-                        .eq(RetryTaskLog::getNamespaceId, namespaceId)
-                        .eq(RetryTaskLog::getId, id));
-        Assert.notNull(retryTaskLog, () -> new SnailJobServerException("数据删除失败"));
+        RetryTask retryTask = retryTaskMapper.selectOne(
+                new LambdaQueryWrapper<RetryTask>()
+                        .in(RetryTask::getTaskStatus, List.of(RetryStatusEnum.FINISH.getStatus(), RetryStatusEnum.MAX_COUNT.getStatus()))
+                        .eq(RetryTask::getNamespaceId, namespaceId)
+                        .eq(RetryTask::getId, id));
+        Assert.notNull(retryTask, () -> new SnailJobServerException("数据删除失败"));
 
         retryTaskLogMessageMapper.delete(new LambdaQueryWrapper<RetryTaskLogMessage>()
                 .eq(RetryTaskLogMessage::getNamespaceId, namespaceId)
-                .eq(RetryTaskLogMessage::getGroupName, retryTaskLog.getGroupName())
-                .eq(RetryTaskLogMessage::getUniqueId, retryTaskLog.getUniqueId())
+                .eq(RetryTaskLogMessage::getGroupName, retryTask.getGroupName())
+                .eq(RetryTaskLogMessage::getRetryTaskId, id)
         );
 
-        return 1 == retryTaskLogMapper.deleteById(id);
+        return 1 == retryTaskMapper.deleteById(id);
     }
 
     @Override
@@ -193,21 +194,21 @@ public class RetryTaskLogServiceImpl implements RetryTaskLogService {
     public boolean batchDelete(final Set<Long> ids) {
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
 
-        List<RetryTaskLog> retryTaskLogs = retryTaskLogMapper.selectList(
-                new LambdaQueryWrapper<RetryTaskLog>()
-                        .in(RetryTaskLog::getRetryStatus, List.of(RetryStatusEnum.FINISH.getStatus(), RetryStatusEnum.MAX_COUNT.getStatus()))
-                        .eq(RetryTaskLog::getNamespaceId, namespaceId)
-                        .in(RetryTaskLog::getId, ids));
-        Assert.notEmpty(retryTaskLogs, () -> new SnailJobServerException("数据不存在"));
-        Assert.isTrue(retryTaskLogs.size() == ids.size(), () -> new SnailJobServerException("数据不存在"));
+        List<RetryTask> retryTasks = retryTaskMapper.selectList(
+                new LambdaQueryWrapper<RetryTask>()
+                        .in(RetryTask::getTaskStatus, List.of(RetryStatusEnum.FINISH.getStatus(), RetryStatusEnum.MAX_COUNT.getStatus()))
+                        .eq(RetryTask::getNamespaceId, namespaceId)
+                        .in(RetryTask::getId, ids));
+        Assert.notEmpty(retryTasks, () -> new SnailJobServerException("数据不存在"));
+        Assert.isTrue(retryTasks.size() == ids.size(), () -> new SnailJobServerException("数据不存在"));
 
-        for (final RetryTaskLog retryTaskLog : retryTaskLogs) {
+        for (final RetryTask retryTask : retryTasks) {
             retryTaskLogMessageMapper.delete(
                     new LambdaQueryWrapper<RetryTaskLogMessage>()
                             .eq(RetryTaskLogMessage::getNamespaceId, namespaceId)
-                            .eq(RetryTaskLogMessage::getGroupName, retryTaskLog.getGroupName())
-                            .eq(RetryTaskLogMessage::getUniqueId, retryTaskLog.getUniqueId()));
+                            .eq(RetryTaskLogMessage::getGroupName, retryTask.getGroupName())
+                            .eq(RetryTaskLogMessage::getRetryTaskId, retryTask.getId()));
         }
-        return 1 == retryTaskLogMapper.deleteByIds(ids);
+        return 1 == retryTaskMapper.deleteByIds(ids);
     }
 }

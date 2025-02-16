@@ -165,6 +165,11 @@ public class SnailJobProperties {
          * 远程上报滑动窗口配置
          */
         private SlidingWindowConfig reportSlidingWindow = new SlidingWindowConfig();
+
+        /**
+         * 本地执行重试或者回调配置
+         */
+        private ThreadPoolConfig dispatcherThreadPool = new ThreadPoolConfig(32, 32, 1, TimeUnit.SECONDS , 10000);
     }
 
     @Data

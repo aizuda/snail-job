@@ -3,6 +3,7 @@ package com.aizuda.snailjob.server.job.task.support.dispatch;
 import akka.actor.AbstractActor;
 import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
+import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.common.enums.JobTaskExecutorSceneEnum;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
@@ -12,6 +13,8 @@ import com.aizuda.snailjob.server.job.task.support.prepare.job.TerminalJobPrepar
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskBatchMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.google.common.collect.Lists;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -32,12 +35,10 @@ import static com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum.NOT_C
 @Component(ActorGenerator.JOB_TASK_PREPARE_ACTOR)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Slf4j
+@RequiredArgsConstructor
 public class JobTaskPrepareActor extends AbstractActor {
-
-    @Autowired
-    private JobTaskBatchMapper jobTaskBatchMapper;
-    @Autowired
-    private List<JobPrepareHandler> prepareHandlers;
+    private final JobTaskBatchMapper jobTaskBatchMapper;
+    private final List<JobPrepareHandler> prepareHandlers;
 
     @Override
     public Receive createReceive() {
@@ -72,27 +73,30 @@ public class JobTaskPrepareActor extends AbstractActor {
 
         // 说明所以任务已经完成
         if (CollUtil.isEmpty(notCompleteJobTaskBatchList)) {
-            TerminalJobPrepareHandler terminalJobPrepareHandler = SnailSpringContext.getBeanByType(TerminalJobPrepareHandler.class);
-            terminalJobPrepareHandler.handle(prepare);
-        } else {
+            JobTaskBatch jobTaskBatch = new JobTaskBatch();
+            // 模拟完成情况
+            jobTaskBatch.setTaskBatchStatus(JobTaskBatchStatusEnum.SUCCESS.getStatus());
+            notCompleteJobTaskBatchList = Lists.newArrayList(jobTaskBatch);
+//            TerminalJobPrepareHandler terminalJobPrepareHandler = SnailSpringContext.getBeanByType(TerminalJobPrepareHandler.class);
+//            terminalJobPrepareHandler.handle(prepare);
+        }
 
-            boolean onlyTimeoutCheck = false;
-            for (JobTaskBatch jobTaskBatch : notCompleteJobTaskBatchList) {
-                prepare.setExecutionAt(jobTaskBatch.getExecutionAt());
-                prepare.setTaskBatchId(jobTaskBatch.getId());
-                prepare.setWorkflowTaskBatchId(prepare.getWorkflowTaskBatchId());
-                prepare.setWorkflowNodeId(jobTaskBatch.getWorkflowNodeId());
-                prepare.setOnlyTimeoutCheck(onlyTimeoutCheck);
-                for (JobPrepareHandler prepareHandler : prepareHandlers) {
-                    if (prepareHandler.matches(jobTaskBatch.getTaskBatchStatus())) {
-                        prepareHandler.handle(prepare);
-                        break;
-                    }
+        boolean onlyTimeoutCheck = false;
+        for (JobTaskBatch jobTaskBatch : notCompleteJobTaskBatchList) {
+            prepare.setExecutionAt(jobTaskBatch.getExecutionAt());
+            prepare.setTaskBatchId(jobTaskBatch.getId());
+            prepare.setWorkflowTaskBatchId(prepare.getWorkflowTaskBatchId());
+            prepare.setWorkflowNodeId(jobTaskBatch.getWorkflowNodeId());
+            prepare.setOnlyTimeoutCheck(onlyTimeoutCheck);
+            for (JobPrepareHandler prepareHandler : prepareHandlers) {
+                if (prepareHandler.matches(jobTaskBatch.getTaskBatchStatus())) {
+                    prepareHandler.handle(prepare);
+                    break;
                 }
-
-                // 当存在大量待处理任务时，除了第一个任务需要执行阻塞策略，其他任务只做任务检查
-                onlyTimeoutCheck = true;
             }
+
+            // 当存在大量待处理任务时，除了第一个任务需要执行阻塞策略，其他任务只做任务检查
+            onlyTimeoutCheck = true;
         }
     }
 }

@@ -27,7 +27,7 @@ public class RetryTaskExecutorDTO {
 
     private String executorName;
 
-    private LocalDateTime nextTriggerAt;
+    private Long nextTriggerAt;
 
     private Integer retryCount;
 

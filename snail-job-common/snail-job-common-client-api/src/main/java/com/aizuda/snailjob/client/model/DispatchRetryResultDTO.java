@@ -10,9 +10,15 @@ import lombok.Data;
  */
 @Data
 public class DispatchRetryResultDTO {
+
+    private String namespaceId;
+    private String groupName;
+    private String sceneName;
+    private Long retryId;
+    private Long retryTaskId;
+
     private String resultJson;
     private Integer statusCode;
-    private String idempotentId;
     private String exceptionMsg;
-    private String uniqueId;
+
 }

@@ -116,7 +116,6 @@ public abstract class AbstractConfigAccess<T> implements ConfigAccess<T> {
         return getSceneConfigs(groupName);
     }
 
-
     @Override
     public Set<String> getBlacklist(String groupName, String namespaceId) {
 

@@ -1,44 +1,51 @@
 package com.aizuda.snailjob.client.core.client;
 
 import cn.hutool.core.lang.Assert;
+import com.aizuda.snailjob.client.common.Lifecycle;
 import com.aizuda.snailjob.client.common.annotation.Mapping;
 import com.aizuda.snailjob.client.common.annotation.SnailEndPoint;
-import com.aizuda.snailjob.client.common.log.support.SnailJobLogManager;
+import com.aizuda.snailjob.client.common.config.SnailJobProperties;
 import com.aizuda.snailjob.client.common.rpc.client.RequestMethod;
 import com.aizuda.snailjob.client.core.IdempotentIdGenerate;
 import com.aizuda.snailjob.client.core.RetryArgSerializer;
+import com.aizuda.snailjob.client.core.cache.FutureCache;
 import com.aizuda.snailjob.client.core.cache.RetryerInfoCache;
-import com.aizuda.snailjob.client.core.callback.RetryCompleteCallback;
+import com.aizuda.snailjob.client.core.callback.future.CallbackTaskExecutorFutureCallback;
+import com.aizuda.snailjob.client.core.callback.future.RetryTaskExecutorFutureCallback;
+import com.aizuda.snailjob.client.core.context.CallbackContext;
+import com.aizuda.snailjob.client.core.context.RemoteRetryContext;
 import com.aizuda.snailjob.client.core.exception.SnailRetryClientException;
-import com.aizuda.snailjob.client.core.intercepter.RetrySiteSnapshot;
+import com.aizuda.snailjob.client.core.executor.RemoteCallbackExecutor;
+import com.aizuda.snailjob.client.core.executor.RemoteRetryExecutor;
 import com.aizuda.snailjob.client.core.loader.SnailRetrySpiLoader;
-import com.aizuda.snailjob.client.core.log.RetryLogMeta;
 import com.aizuda.snailjob.client.core.retryer.RetryerInfo;
-import com.aizuda.snailjob.client.core.retryer.RetryerResultContext;
 import com.aizuda.snailjob.client.core.serializer.JacksonSerializer;
-import com.aizuda.snailjob.client.core.strategy.RetryStrategy;
-import com.aizuda.snailjob.client.model.DispatchRetryDTO;
 import com.aizuda.snailjob.client.model.DispatchRetryResultDTO;
 import com.aizuda.snailjob.client.model.GenerateRetryIdempotentIdDTO;
 import com.aizuda.snailjob.client.model.RetryCallbackDTO;
-import com.aizuda.snailjob.common.core.context.SnailSpringContext;
-import com.aizuda.snailjob.common.core.enums.RetryResultStatusEnum;
-import com.aizuda.snailjob.common.core.enums.RetryStatusEnum;
+import com.aizuda.snailjob.client.model.request.DispatchRetryRequest;
+import com.aizuda.snailjob.client.model.request.StopRetryRequest;
+import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.model.IdempotentIdContext;
 import com.aizuda.snailjob.common.core.model.Result;
-import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
-import com.aizuda.snailjob.common.log.enums.LogTypeEnum;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 import jakarta.validation.*;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.validation.annotation.Validated;
 
 import java.lang.reflect.Method;
+import java.text.MessageFormat;
 import java.util.Objects;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import static com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH.*;
 
@@ -50,197 +57,95 @@ import static com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH
  */
 @SnailEndPoint
 @Validated
-public class SnailRetryEndPoint {
-
-    @Autowired
-    @Qualifier("remoteRetryStrategies")
-    private RetryStrategy retryStrategy;
+@RequiredArgsConstructor
+public class SnailRetryEndPoint implements Lifecycle {
+    private final RemoteRetryExecutor remoteRetryExecutor;
+    private final RemoteCallbackExecutor remoteCallbackExecutor;
+    private final SnailJobProperties snailJobProperties;
+    private ThreadPoolExecutor dispatcherThreadPool = null;
 
     /**
      * 服务端调度重试入口
      */
     @Mapping(path = RETRY_DISPATCH, method = RequestMethod.POST)
-    public Result<DispatchRetryResultDTO> dispatch(@Valid DispatchRetryDTO executeReqDto) {
+    public Result<Boolean> dispatch(@Valid DispatchRetryRequest request) {
 
-        RetryerInfo retryerInfo = RetryerInfoCache.get(executeReqDto.getScene(), executeReqDto.getExecutorName());
+        RetryerInfo retryerInfo = RetryerInfoCache.get(request.getSceneName(), request.getExecutorName());
         if (Objects.isNull(retryerInfo)) {
-            SnailJobLog.REMOTE.error("场景:[{}]配置不存在, 请检查您的场景和执行器是否存在", executeReqDto.getScene());
-            throw new SnailRetryClientException("场景:[{}]配置不存在, 请检查您的场景和执行器是否存在",
-                    executeReqDto.getScene());
+            SnailJobLog.REMOTE.error("场景:[{}]配置不存在, 请检查您的场景和执行器是否存在", request.getSceneName());
+            return new Result<>(StatusEnum.NO.getStatus(), MessageFormat.format("场景:[{0}]配置不存在, 请检查您的场景和执行器是否存在", request.getSceneName()));
         }
 
         RetryArgSerializer retryArgSerializer = SnailRetrySpiLoader.loadRetryArgSerializer();
 
         Object[] deSerialize;
         try {
-            deSerialize = (Object[]) retryArgSerializer.deSerialize(executeReqDto.getArgsStr(),
+            deSerialize = (Object[]) retryArgSerializer.deSerialize(request.getArgsStr(),
                     retryerInfo.getExecutor().getClass(), retryerInfo.getMethod());
         } catch (JsonProcessingException e) {
-            SnailJobLog.REMOTE.error("参数解析异常", e);
-            throw new SnailRetryClientException("参数解析异常", e);
+            SnailJobLog.REMOTE.error("参数解析异常 args:[{}]", request.getArgsStr(), e);
+            return new Result<>(StatusEnum.NO.getStatus(), MessageFormat.format("参数解析异常 args:[{0}]", request.getArgsStr()));
         }
 
-        DispatchRetryResultDTO executeRespDto = new DispatchRetryResultDTO();
+        RemoteRetryContext retryContext = new RemoteRetryContext();
+        retryContext.setDeSerialize(deSerialize);
+        retryContext.setRetryTaskId(request.getRetryTaskId());
+        retryContext.setRetryId(request.getRetryId());
+        retryContext.setRetryCount(request.getRetryCount());
+        retryContext.setArgsStr(request.getArgsStr());
+        retryContext.setGroupName(request.getGroupName());
+        retryContext.setNamespaceId(request.getNamespaceId());
+        retryContext.setScene(request.getSceneName());
+        retryContext.setExecutorName(request.getExecutorName());
 
-        try {
-            RetrySiteSnapshot.setAttemptNumber(executeReqDto.getRetryCount());
+        ListeningExecutorService decorator = MoreExecutors.listeningDecorator(dispatcherThreadPool);
+        ListenableFuture<DispatchRetryResultDTO> submit = decorator.submit(() -> {
+            return remoteRetryExecutor.doRetry(retryContext);
+        });
 
-            // 初始化实时日志上下文
-            RetryLogMeta retryLogMeta = new RetryLogMeta();
-            retryLogMeta.setGroupName(executeReqDto.getGroupName());
-            retryLogMeta.setNamespaceId(executeReqDto.getNamespaceId());
-            retryLogMeta.setUniqueId(executeReqDto.getUniqueId());
-            SnailJobLogManager.initLogInfo(retryLogMeta, LogTypeEnum.RETRY);
+        FutureCache.addFuture(request.getRetryTaskId(), submit);
+        Futures.addCallback(submit, new RetryTaskExecutorFutureCallback(retryContext), decorator);
 
-            RetryerResultContext retryerResultContext = retryStrategy.openRetry(executeReqDto.getScene(),
-                    executeReqDto.getExecutorName(), deSerialize);
-
-            if (RetrySiteSnapshot.isRetryForStatusCode()) {
-                executeRespDto.setStatusCode(RetryResultStatusEnum.STOP.getStatus());
-                executeRespDto.setExceptionMsg("下游标记不需要重试");
-            } else {
-                RetryResultStatusEnum retryResultStatusEnum = retryerResultContext.getRetryResultStatusEnum();
-                if (Objects.isNull(retryResultStatusEnum)) {
-                    retryResultStatusEnum = RetryResultStatusEnum.STOP;
-                    retryerResultContext.setMessage("未获取重试状态. 任务停止");
-                }
-
-                executeRespDto.setStatusCode(retryResultStatusEnum.getStatus());
-                executeRespDto.setExceptionMsg(retryerResultContext.getMessage());
-            }
-
-            executeRespDto.setIdempotentId(executeReqDto.getIdempotentId());
-            executeRespDto.setUniqueId(executeReqDto.getUniqueId());
-            if (Objects.nonNull(retryerResultContext.getResult())) {
-                executeRespDto.setResultJson(JsonUtil.toJsonString(retryerResultContext.getResult()));
-            }
-
-            if (Objects.equals(RetryResultStatusEnum.SUCCESS.getStatus(), executeRespDto.getStatusCode())) {
-                SnailJobLog.REMOTE.info("remote retry【SUCCESS】. count:[{}] result:[{}]", executeReqDto.getRetryCount(),
-                        executeRespDto.getResultJson());
-            } else if (Objects.equals(RetryResultStatusEnum.STOP.getStatus(), executeRespDto.getStatusCode())) {
-                SnailJobLog.REMOTE.warn("remote retry 【STOP】. count:[{}] exceptionMsg:[{}]",
-                        executeReqDto.getRetryCount(), executeRespDto.getExceptionMsg());
-            } else if (Objects.equals(RetryResultStatusEnum.FAILURE.getStatus(), executeRespDto.getStatusCode())) {
-                SnailJobLog.REMOTE.error("remote retry 【FAILURE】. count:[{}] ", executeReqDto.getRetryCount(),
-                        retryerResultContext.getThrowable());
-            } else {
-                SnailJobLog.REMOTE.error("remote retry 【UNKNOWN】. count:[{}] result:[{}]", executeReqDto.getRetryCount(),
-                        executeRespDto.getResultJson(), retryerResultContext.getThrowable());
-            }
-
-        } finally {
-            RetrySiteSnapshot.removeAll();
-            SnailJobLogManager.removeAll();
-        }
-
-        return new Result<>(executeRespDto);
+        return new Result<>(Boolean.TRUE);
     }
 
 
     @Mapping(path = RETRY_CALLBACK, method = RequestMethod.POST)
-    public Result callback(@Valid RetryCallbackDTO callbackDTO) {
-        RetryerInfo retryerInfo = null;
-        Object[] deSerialize = null;
+    public Result<Boolean> callback(@Valid RetryCallbackDTO callbackDTO) {
+        CallbackContext callbackContext = new CallbackContext();
         try {
-
-            // 初始化实时日志上下文
-            RetryLogMeta retryLogMeta = new RetryLogMeta();
-            retryLogMeta.setGroupName(callbackDTO.getGroup());
-            retryLogMeta.setNamespaceId(callbackDTO.getNamespaceId());
-            retryLogMeta.setUniqueId(callbackDTO.getUniqueId());
-            SnailJobLogManager.initLogInfo(retryLogMeta, LogTypeEnum.RETRY);
-
-            retryerInfo = RetryerInfoCache.get(callbackDTO.getScene(), callbackDTO.getExecutorName());
+            RetryerInfo retryerInfo = RetryerInfoCache.get(callbackDTO.getScene(), callbackDTO.getExecutorName());
             if (Objects.isNull(retryerInfo)) {
                 SnailJobLog.REMOTE.error("场景:[{}]配置不存在, 请检查您的场景和执行器是否存在", callbackDTO.getScene());
-                return new Result(0, "回调失败");
+                return new Result<>(0, "回调失败", Boolean.FALSE);
             }
 
             RetryArgSerializer retryArgSerializer = SnailRetrySpiLoader.loadRetryArgSerializer();
 
-            deSerialize = (Object[]) retryArgSerializer.deSerialize(callbackDTO.getArgsStr(),
+            Object[] deSerialize  = (Object[]) retryArgSerializer.deSerialize(callbackDTO.getArgsStr(),
                     retryerInfo.getExecutor().getClass(), retryerInfo.getMethod());
-
-            // 以Spring Bean模式回调
-            return doCallbackForSpringBean(callbackDTO, retryerInfo, deSerialize);
+            callbackContext.setDeSerialize(deSerialize);
+            callbackContext.setRetryerInfo(retryerInfo);
         } catch (JsonProcessingException e) {
             SnailJobLog.REMOTE.error("参数解析异常", e);
-            return new Result(0, "回调失败");
-        } catch (NoSuchBeanDefinitionException e) {
-            // 若不是SpringBean 则直接反射以普通类调用
-            return doCallbackForOrdinaryClass(callbackDTO, retryerInfo, deSerialize);
-        } finally {
-            SnailJobLogManager.removeAll();
-        }
-    }
-
-    /**
-     * 以普通类进行回调
-     *
-     * @param callbackDTO {@link RetryCallbackDTO} 服务端调度重试入参
-     * @param retryerInfo {@link RetryerInfo} 定义重试场景的信息
-     * @param deSerialize 参数信息
-     * @return Result
-     */
-    private Result doCallbackForOrdinaryClass(RetryCallbackDTO callbackDTO, RetryerInfo retryerInfo,
-                                              Object[] deSerialize) {
-        Class<? extends RetryCompleteCallback> retryCompleteCallbackClazz = retryerInfo.getRetryCompleteCallback();
-
-        try {
-            RetryCompleteCallback retryCompleteCallback = retryCompleteCallbackClazz.newInstance();
-            Method method;
-            switch (Objects.requireNonNull(RetryStatusEnum.getByStatus(callbackDTO.getRetryStatus()))) {
-                case FINISH:
-                    method = retryCompleteCallbackClazz.getMethod("doSuccessCallback", String.class, String.class,
-                            Object[].class);
-                    break;
-                case MAX_COUNT:
-                    method = retryCompleteCallbackClazz.getMethod("doMaxRetryCallback", String.class, String.class,
-                            Object[].class);
-                    break;
-                default:
-                    throw new SnailRetryClientException("回调状态异常");
-            }
-
-            Assert.notNull(method, () -> new SnailRetryClientException("no such method"));
-            ReflectionUtils.invokeMethod(method, retryCompleteCallback, retryerInfo.getScene(),
-                    retryerInfo.getExecutorClassName(), deSerialize);
-            return new Result(1, "回调成功");
-        } catch (Exception ex) {
-            return new Result(0, ex.getMessage());
+            return new Result<>(0, "回调失败", Boolean.FALSE);
         }
 
+        callbackContext.setRetryTaskId(callbackDTO.getRetryTaskId());
+        callbackContext.setRetryId(callbackDTO.getRetryId());
+
+        ListeningExecutorService decorator = MoreExecutors.listeningDecorator(dispatcherThreadPool);
+        ListenableFuture<Boolean> submit = decorator.submit(() -> {
+            remoteCallbackExecutor.doRetryCallback(callbackContext);
+            return Boolean.TRUE;
+        });
+
+        FutureCache.addFuture(callbackDTO.getRetryTaskId(), submit);
+        Futures.addCallback(submit, new CallbackTaskExecutorFutureCallback(callbackContext), decorator);
+
+        return new Result<>(Boolean.TRUE);
     }
 
-    /**
-     * 以Spring Bean模式回调
-     *
-     * @param callbackDTO {@link RetryCallbackDTO} 服务端调度重试入参
-     * @param retryerInfo {@link RetryerInfo} 定义重试场景的信息
-     * @param deSerialize 参数信息
-     * @return Result
-     */
-    private Result doCallbackForSpringBean(RetryCallbackDTO callbackDTO, RetryerInfo retryerInfo,
-                                           Object[] deSerialize) {
-        Class<? extends RetryCompleteCallback> retryCompleteCallbackClazz = retryerInfo.getRetryCompleteCallback();
-
-        RetryCompleteCallback retryCompleteCallback = SnailSpringContext.getBeanByType(retryCompleteCallbackClazz);
-        switch (Objects.requireNonNull(RetryStatusEnum.getByStatus(callbackDTO.getRetryStatus()))) {
-            case FINISH:
-                retryCompleteCallback.doSuccessCallback(retryerInfo.getScene(), retryerInfo.getExecutorClassName(),
-                        deSerialize);
-                break;
-            case MAX_COUNT:
-                retryCompleteCallback.doMaxRetryCallback(retryerInfo.getScene(), retryerInfo.getExecutorClassName(),
-                        deSerialize);
-                break;
-            default:
-                throw new SnailRetryClientException("回调状态异常");
-        }
-
-        return new Result(1, "回调成功");
-    }
 
     /**
      * 手动新增重试数据，模拟生成idempotentId
@@ -286,5 +191,34 @@ public class SnailRetryEndPoint {
         }
 
         return new Result<>(idempotentId);
+    }
+
+    @Mapping(path = RETRY_STOP, method = RequestMethod.POST)
+    public Result<Boolean> stop(@Valid StopRetryRequest stopRetryRequest) {
+        FutureCache.remove(stopRetryRequest.getRetryTaskId());
+        return new Result<>(Boolean.TRUE);
+    }
+
+    @Override
+    public void start() {
+        if (Objects.nonNull(dispatcherThreadPool)) {
+            return;
+        }
+
+        SnailJobProperties.ThreadPoolConfig threadPoolConfig = snailJobProperties.getRetry().getDispatcherThreadPool();
+        this.dispatcherThreadPool = new ThreadPoolExecutor(
+                threadPoolConfig.getCorePoolSize(),
+                threadPoolConfig.getMaximumPoolSize(),
+                threadPoolConfig.getKeepAliveTime(),
+                threadPoolConfig.getTimeUnit(),
+                new LinkedBlockingQueue<>(threadPoolConfig.getQueueCapacity()),
+                new CustomizableThreadFactory("snail-retry-dispatcher-"));
+    }
+
+    @Override
+    public void close() {
+        if (Objects.nonNull(dispatcherThreadPool)) {
+            dispatcherThreadPool.shutdown();
+        }
     }
 }

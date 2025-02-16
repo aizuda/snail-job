@@ -9,9 +9,11 @@ import com.aizuda.snailjob.server.common.schedule.AbstractSchedule;
 import com.aizuda.snailjob.server.common.util.PartitionTaskUtils;
 import com.aizuda.snailjob.server.retry.task.dto.RetryPartitionTask;
 import com.aizuda.snailjob.server.retry.task.support.RetryTaskConverter;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskLogMapper;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryMapper;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskLogMessageMapper;
-import com.aizuda.snailjob.template.datasource.persistence.po.RetryTaskLog;
+import com.aizuda.snailjob.template.datasource.persistence.po.Retry;
+import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTaskLogMessage;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -39,7 +41,7 @@ import java.util.List;
 public class ClearLogSchedule extends AbstractSchedule implements Lifecycle {
 
     @Autowired
-    private RetryTaskLogMapper retryTaskLogMapper;
+    private RetryMapper retryMapper;
     @Autowired
     private SystemProperties systemProperties;
     @Autowired
@@ -90,14 +92,14 @@ public class ClearLogSchedule extends AbstractSchedule implements Lifecycle {
      */
     private List<RetryPartitionTask> retryTaskBatchList(Long startId, LocalDateTime endTime) {
 
-        List<RetryTaskLog> retryTaskLogList = retryTaskLogMapper.selectPage(
+        List<Retry> retryTaskList = retryMapper.selectPage(
                         new Page<>(0, 1000),
-                        new LambdaUpdateWrapper<RetryTaskLog>()
-                                .ge(RetryTaskLog::getId, startId)
-                                .le(RetryTaskLog::getCreateDt, endTime)
-                                .orderByAsc(RetryTaskLog::getId))
+                        new LambdaUpdateWrapper<Retry>()
+                                .ge(Retry::getId, startId)
+                                .le(Retry::getCreateDt, endTime)
+                                .orderByAsc(Retry::getId))
                 .getRecords();
-        return RetryTaskConverter.INSTANCE.toRetryTaskLogPartitionTasks(retryTaskLogList);
+        return RetryTaskConverter.INSTANCE.toRetryTaskLogPartitionTasks(retryTaskList);
     }
 
     /**
@@ -111,19 +113,20 @@ public class ClearLogSchedule extends AbstractSchedule implements Lifecycle {
             @Override
             protected void doInTransactionWithoutResult(final TransactionStatus status) {
 
-                List<String> uniqueIdIds = StreamUtils.toList(partitionTasks, PartitionTask::getUniqueId);
+                List<Long> uniqueIdIds = StreamUtils.toList(partitionTasks, PartitionTask::getId);
                 if (uniqueIdIds == null || uniqueIdIds.isEmpty()) {
                     return;
                 }
                 // Waiting for deletion RetryLog
-                List<RetryTaskLog> retryTaskLogList = retryTaskLogMapper.selectList(new LambdaQueryWrapper<RetryTaskLog>().in(RetryTaskLog::getUniqueId, uniqueIdIds));
-                if (retryTaskLogList != null && !retryTaskLogList.isEmpty()) {
-                    List<Long> retryTaskListIds = StreamUtils.toList(retryTaskLogList, RetryTaskLog::getId);
-                    retryTaskLogMapper.deleteByIds(retryTaskListIds);
-                }
+//                List<RetryTask> retryTaskList = retryMapper.selectList(new LambdaQueryWrapper<RetryTask>().in(RetryTask::getId, uniqueIdIds));
+//                if (retryTaskList != null && !retryTaskList.isEmpty()) {
+//                    List<Long> retryTaskListIds = StreamUtils.toList(retryTaskList, RetryTask::getId);
+//                    retryTaskMapper.deleteByIds(retryTaskListIds);
+//                }
 
                 // Waiting for deletion RetryTaskLogMessage
-                List<RetryTaskLogMessage> retryTaskLogMessageList = retryTaskLogMessageMapper.selectList(new LambdaQueryWrapper<RetryTaskLogMessage>().in(RetryTaskLogMessage::getUniqueId, uniqueIdIds));
+                List<RetryTaskLogMessage> retryTaskLogMessageList = retryTaskLogMessageMapper.selectList(new LambdaQueryWrapper<RetryTaskLogMessage>()
+                        .in(RetryTaskLogMessage::getRetryId, uniqueIdIds));
                 if (retryTaskLogMessageList != null && !retryTaskLogMessageList.isEmpty()) {
                     List<Long> retryTaskListIds = StreamUtils.toList(retryTaskLogMessageList, RetryTaskLogMessage::getId);
                     retryTaskLogMessageMapper.deleteByIds(retryTaskListIds);

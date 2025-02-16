@@ -4,12 +4,13 @@
 
     <insert id="insertBatch" parameterType="java.util.List">
         <foreach collection="list" item="item" open="BEGIN" separator=";" close=";END;">
-            INSERT INTO sj_retry_task_log_message (namespace_id, group_name, unique_id, log_num, message,
+            INSERT INTO sj_retry_task_log_message (namespace_id, group_name, retry_task_id, retry_id, log_num, message,
                                                    create_dt, real_time)
             VALUES (
                 #{item.namespaceId},
                 #{item.groupName},
-                #{item.uniqueId},
+                #{item.retryTaskId},
+                #{item.retryId},
                 #{item.logNum},
                 #{item.message},
                 #{item.createDt},

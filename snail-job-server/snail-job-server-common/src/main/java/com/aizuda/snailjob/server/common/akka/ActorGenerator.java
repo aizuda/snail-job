@@ -26,16 +26,23 @@ public class ActorGenerator {
 
     /*----------------------------------------分布式重试任务 START----------------------------------------*/
     public static final String SCAN_CALLBACK_GROUP_ACTOR = "ScanCallbackGroupActor";
-    public static final String SCAN_RETRY_GROUP_ACTOR = "ScanGroupActor";
+    public static final String SCAN_RETRY_ACTOR = "ScanRetryActor";
     public static final String FINISH_ACTOR = "FinishActor";
     public static final String FAILURE_ACTOR = "FailureActor";
     public static final String NO_RETRY_ACTOR = "NoRetryActor";
     public static final String EXEC_CALLBACK_UNIT_ACTOR = "ExecCallbackUnitActor";
     public static final String EXEC_UNIT_ACTOR = "ExecUnitActor";
+    public static final String RETRY_EXECUTOR_ACTOR = "RetryExecutorActor";
+    public static final String RETRY_TASK_PREPARE_ACTOR = "RetryTaskPrepareActor";
     public static final String LOG_ACTOR = "RetryLogActor";
+    public static final String REAL_RETRY_EXECUTOR_ACTOR = "RealRetryExecutorActor";
+    public static final String RETRY_EXECUTOR_RESULT_ACTOR = "RetryExecutorResultActor";
+    public static final String RETRY_REAL_STOP_TASK_INSTANCE_ACTOR = "RetryRealStopTaskInstanceActor";
+
 
     private static final String RETRY_TASK_EXECUTOR_DISPATCHER = "akka.actor.retry-task-executor-dispatcher";
     private static final String RETRY_TASK_EXECUTOR_RESULT_DISPATCHER = "akka.actor.retry-task-executor-result-dispatcher";
+    private static final String RETRY_TASK_EXECUTOR_CALL_CLIENT_DISPATCHER = "akka.actor.retry-task-executor-call-client-dispatcher";
 
     /*----------------------------------------分布式重试任务 END----------------------------------------*/
 
@@ -50,7 +57,7 @@ public class ActorGenerator {
     public static final String JOB_EXECUTOR_RESULT_ACTOR = "JobExecutorResultActor";
     public static final String JOB_LOG_ACTOR = "JobLogActor";
     public static final String REAL_JOB_EXECUTOR_ACTOR = "RealJobExecutorActor";
-    public static final String REAL_STOP_TASK_INSTANCE_ACTOR = "RealStopTaskInstanceActor";
+    public static final String JOB_REAL_STOP_TASK_INSTANCE_ACTOR = "JobRealStopTaskInstanceActor";
 
     /*----------------------------------------dispatcher----------------------------------------*/
     private static final String JOB_TASK_DISPATCHER = "akka.actor.job-task-prepare-dispatcher";
@@ -70,6 +77,8 @@ public class ActorGenerator {
      *
      * @return actor 引用
      */
+    @Deprecated
+
     public static ActorRef finishActor() {
         return getRetryActorSystem().actorOf(getSpringExtension().props(FINISH_ACTOR).withDispatcher(RETRY_TASK_EXECUTOR_RESULT_DISPATCHER));
     }
@@ -79,24 +88,19 @@ public class ActorGenerator {
      *
      * @return actor 引用
      */
+    @Deprecated
+
     public static ActorRef failureActor() {
         return getRetryActorSystem().actorOf(getSpringExtension().props(FAILURE_ACTOR).withDispatcher(RETRY_TASK_EXECUTOR_RESULT_DISPATCHER));
     }
 
-    /**
-     * 不触发重试actor
-     *
-     * @return actor 引用
-     */
-    public static ActorRef noRetryActor() {
-        return getRetryActorSystem().actorOf(getSpringExtension().props(NO_RETRY_ACTOR).withDispatcher(RETRY_TASK_EXECUTOR_RESULT_DISPATCHER));
-    }
 
     /**
      * 回调处理
      *
      * @return actor 引用
      */
+    @Deprecated
     public static ActorRef execCallbackUnitActor() {
         return getRetryActorSystem().actorOf(getSpringExtension()
                 .props(EXEC_CALLBACK_UNIT_ACTOR)
@@ -108,6 +112,7 @@ public class ActorGenerator {
      *
      * @return actor 引用
      */
+    @Deprecated
     public static ActorRef execUnitActor() {
         return getRetryActorSystem().actorOf(getSpringExtension()
                 .props(EXEC_UNIT_ACTOR)
@@ -115,21 +120,80 @@ public class ActorGenerator {
     }
 
     /**
+     * 生成重试执行的actor
+     *
+     * @return actor 引用
+     */
+    public static ActorRef stopRetryTaskActor() {
+        return getRetryActorSystem().actorOf(getSpringExtension()
+                .props(RETRY_REAL_STOP_TASK_INSTANCE_ACTOR)
+                .withDispatcher(RETRY_TASK_EXECUTOR_CALL_CLIENT_DISPATCHER));
+    }
+
+    /**
+     * Retry任务执行结果actor
+     *
+     * @return actor 引用
+     */
+    public static ActorRef retryTaskExecutorResultActor() {
+        return getJobActorSystem().actorOf(getSpringExtension()
+                .props(RETRY_EXECUTOR_RESULT_ACTOR)
+                .withDispatcher(RETRY_TASK_EXECUTOR_RESULT_DISPATCHER));
+    }
+
+
+    /**
      * 生成扫描重试数据的actor
      *
      * @return actor 引用
      */
-    public static ActorRef scanGroupActor() {
+    public static ActorRef scanRetryActor() {
         return getCommonActorSystemSystem().actorOf(getSpringExtension()
-                .props(SCAN_RETRY_GROUP_ACTOR)
+                .props(SCAN_RETRY_ACTOR)
                 .withDispatcher(COMMON_SCAN_TASK_DISPATCHER));
     }
+
+    /**
+     * actor
+     *
+     * @return actor 引用
+     */
+    public static ActorRef retryTaskExecutorActor() {
+        return getCommonActorSystemSystem().actorOf(getSpringExtension()
+                .props(RETRY_EXECUTOR_ACTOR)
+                .withDispatcher(COMMON_SCAN_TASK_DISPATCHER));
+    }
+
+
+    /**
+     * actor
+     *
+     * @return actor 引用
+     */
+    public static ActorRef retryTaskPrepareActor() {
+        return getCommonActorSystemSystem().actorOf(getSpringExtension()
+                .props(RETRY_TASK_PREPARE_ACTOR)
+                .withDispatcher(RETRY_TASK_EXECUTOR_DISPATCHER));
+    }
+
+    /**
+     * 调用客户端执行重试
+     * @return
+     */
+    public static ActorRef retryRealTaskExecutorActor() {
+        return getRetryActorSystem().actorOf(getSpringExtension()
+                .props(REAL_RETRY_EXECUTOR_ACTOR)
+                .withDispatcher(RETRY_TASK_EXECUTOR_CALL_CLIENT_DISPATCHER));
+    }
+
+
 
     /**
      * 生成扫描回调数据的actor
      *
      * @return actor 引用
      */
+    @Deprecated
     public static ActorRef scanCallbackGroupActor() {
         return getRetryActorSystem().actorOf(getSpringExtension()
                 .props(SCAN_CALLBACK_GROUP_ACTOR)
@@ -286,7 +350,7 @@ public class ActorGenerator {
      * @return actor 引用
      */
     public static ActorRef jobRealStopTaskInstanceActor() {
-        return getJobActorSystem().actorOf(getSpringExtension().props(REAL_STOP_TASK_INSTANCE_ACTOR)
+        return getJobActorSystem().actorOf(getSpringExtension().props(JOB_REAL_STOP_TASK_INSTANCE_ACTOR)
                 .withDispatcher(JOB_TASK_EXECUTOR_CALL_CLIENT_DISPATCHER));
     }
 

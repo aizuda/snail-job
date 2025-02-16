@@ -15,7 +15,7 @@ import java.util.function.Supplier;
 @AllArgsConstructor
 @Getter
 public enum SyetemTaskTypeEnum {
-    RETRY(1, ActorGenerator::scanGroupActor),
+    RETRY(1, ActorGenerator::scanRetryActor),
     CALLBACK(2, ActorGenerator::scanCallbackGroupActor),
     JOB(3, ActorGenerator::scanJobActor),
     WORKFLOW(4, ActorGenerator::scanWorkflowActor),

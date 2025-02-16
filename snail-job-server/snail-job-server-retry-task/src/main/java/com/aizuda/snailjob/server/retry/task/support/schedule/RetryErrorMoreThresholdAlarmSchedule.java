@@ -58,9 +58,7 @@ public class RetryErrorMoreThresholdAlarmSchedule extends AbstractRetryTaskAlarm
         // x分钟内、x组、x场景进入死信队列的数据量
         LocalDateTime now = LocalDateTime.now();
         TaskAccess<RetryDeadLetter> retryDeadLetterAccess = accessTemplate.getRetryDeadLetterAccess();
-        long count = retryDeadLetterAccess.count(partitionTask.getGroupName(),
-                partitionTask.getNamespaceId(),
-                new LambdaQueryWrapper<RetryDeadLetter>().
+        long count = retryDeadLetterAccess.count(new LambdaQueryWrapper<RetryDeadLetter>().
                         between(RetryDeadLetter::getCreateDt, now.minusMinutes(30), now)
                         .eq(RetryDeadLetter::getNamespaceId, partitionTask.getNamespaceId())
                         .eq(RetryDeadLetter::getGroupName, partitionTask.getGroupName())

@@ -27,10 +27,10 @@ public class SnailJobMybatisConfiguration extends MybatisConfiguration {
         DUPLICATE_IDS.add(ServerNodeMapper.class.getName() + "." + BATCH_INSERT_ID);
         DUPLICATE_IDS.add(JobTaskMapper.class.getName() + "." + BATCH_INSERT_ID);
         DUPLICATE_IDS.add(JobSummaryMapper.class.getName() + "." + BATCH_INSERT_ID);
-        DUPLICATE_IDS.add(RetryTaskLogMapper.class.getName() + "." + BATCH_INSERT_ID);
+        DUPLICATE_IDS.add(RetryTaskMapper.class.getName() + "." + BATCH_INSERT_ID);
         DUPLICATE_IDS.add(RetrySummaryMapper.class.getName() + "." + BATCH_INSERT_ID);
         DUPLICATE_IDS.add(RetryTaskLogMessageMapper.class.getName() + "." + BATCH_INSERT_ID);
-        DUPLICATE_IDS.add(RetryTaskMapper.class.getName() + "." + BATCH_INSERT_ID);
+        DUPLICATE_IDS.add(RetryMapper.class.getName() + "." + BATCH_INSERT_ID);
         DUPLICATE_IDS.add(JobLogMessageMapper.class.getName() + "." + BATCH_INSERT_ID);
     }
 
