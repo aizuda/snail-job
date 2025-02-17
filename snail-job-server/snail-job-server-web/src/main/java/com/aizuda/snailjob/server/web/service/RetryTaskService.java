@@ -2,7 +2,7 @@ package com.aizuda.snailjob.server.web.service;
 
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.*;
-import com.aizuda.snailjob.server.web.model.response.RetryTaskResponseVO;
+import com.aizuda.snailjob.server.web.model.response.RetryResponseVO;
 
 import java.util.List;
 
@@ -13,7 +13,7 @@ import java.util.List;
  */
 public interface RetryTaskService {
 
-    PageResult<List<RetryTaskResponseVO>> getRetryTaskPage(RetryTaskQueryVO queryVO);
+    PageResult<List<RetryResponseVO>> getRetryPage(RetryQueryVO queryVO);
 
     /**
      * 通过重试任务表id获取重试任务信息
@@ -22,23 +22,23 @@ public interface RetryTaskService {
      * @param id        重试任务表id
      * @return 重试任务
      */
-    RetryTaskResponseVO getRetryTaskById(String groupName, Long id);
+    RetryResponseVO getRetryById(String groupName, Long id);
 
     /**
      * 更新重试任务状态
      *
-     * @param retryTaskUpdateStatusRequestVO 更新重试任务状态请求模型
+     * @param retryUpdateStatusRequestVO 更新重试任务状态请求模型
      * @return
      */
-    int updateRetryTaskStatus(RetryTaskUpdateStatusRequestVO retryTaskUpdateStatusRequestVO);
+    int updateRetryTaskStatus(RetryUpdateStatusRequestVO retryUpdateStatusRequestVO);
 
     /**
      * 手动新增重试任务
      *
-     * @param retryTaskRequestVO {@link RetryTaskSaveRequestVO} 重试数据模型
+     * @param retryTaskRequestVO {@link RetrySaveRequestVO} 重试数据模型
      * @return
      */
-    int saveRetryTask(RetryTaskSaveRequestVO retryTaskRequestVO);
+    int saveRetryTask(RetrySaveRequestVO retryTaskRequestVO);
 
     /**
      * 委托客户端生成idempotentId
@@ -54,7 +54,7 @@ public interface RetryTaskService {
      * @param requestVO 更新执行器变更模型
      * @return 更新条数
      */
-    int updateRetryTaskExecutorName(RetryTaskUpdateExecutorNameRequestVO requestVO);
+    int updateRetryExecutorName(RetryUpdateExecutorNameRequestVO requestVO);
 
     /**
      * 批量删除重试数据
@@ -62,7 +62,7 @@ public interface RetryTaskService {
      * @param requestVO 批量删除重试数据
      * @return
      */
-    boolean batchDeleteRetryTask(BatchDeleteRetryTaskVO requestVO);
+    boolean batchDeleteRetry(BatchDeleteRetryTaskVO requestVO);
 
     /**
      * 解析日志
@@ -78,7 +78,7 @@ public interface RetryTaskService {
      * @param requestVO
      * @return
      */
-    boolean manualTriggerRetryTask(ManualTriggerTaskRequestVO requestVO);
+    boolean manualTriggerRetry(ManualTriggerTaskRequestVO requestVO);
 
     /**
      * 手动执行回调任务
@@ -86,5 +86,5 @@ public interface RetryTaskService {
      * @param requestVO
      * @return
      */
-    boolean manualTriggerCallbackTask(ManualTriggerTaskRequestVO requestVO);
+    boolean manualTriggerCallback(ManualTriggerTaskRequestVO requestVO);
 }

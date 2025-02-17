@@ -5,7 +5,7 @@ import cn.hutool.core.lang.Assert;
 import com.aizuda.snailjob.common.core.enums.RetryTaskStatusEnum;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
-import com.aizuda.snailjob.server.retry.task.dto.RealRetryExecutorDTO;
+import com.aizuda.snailjob.server.retry.task.dto.RequestRetryExecutorDTO;
 import com.aizuda.snailjob.server.retry.task.dto.TaskStopJobDTO;
 import com.aizuda.snailjob.server.retry.task.support.RetryTaskConverter;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskMapper;
@@ -39,7 +39,7 @@ public class RetryTaskStopHandler {
         retryTask.setOperationReason(stopJobDTO.getOperationReason());
         Assert.isTrue(1 == retryTaskMapper.updateById(retryTask), () -> new SnailJobServerException("update retry task failed"));
 
-        RealRetryExecutorDTO executorDTO = RetryTaskConverter.INSTANCE.toRealRetryExecutorDTO(stopJobDTO);
+        RequestRetryExecutorDTO executorDTO = RetryTaskConverter.INSTANCE.toRealRetryExecutorDTO(stopJobDTO);
         ActorRef actorRef = ActorGenerator.stopRetryTaskActor();
         actorRef.tell(executorDTO, actorRef);
     }

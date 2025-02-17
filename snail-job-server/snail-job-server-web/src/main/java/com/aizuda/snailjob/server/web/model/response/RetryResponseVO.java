@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
  * @since 2.0
  */
 @Data
-public class RetryTaskResponseVO {
+public class RetryResponseVO {
 
     private Long id;
 
@@ -41,5 +41,7 @@ public class RetryTaskResponseVO {
     private LocalDateTime createDt;
 
     private LocalDateTime updateDt;
+
+    private RetryResponseVO children;
 
 }

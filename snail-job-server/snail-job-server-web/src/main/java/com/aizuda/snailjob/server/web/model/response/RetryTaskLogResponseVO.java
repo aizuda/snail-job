@@ -13,28 +13,24 @@ public class RetryTaskLogResponseVO {
 
     private Long id;
 
-    private String uniqueId;
-
     private String groupName;
 
     private String sceneName;
 
-    private String idempotentId;
+    private Integer taskStatus;
 
-    private String bizNo;
+    private Long retryId;
 
-    private String executorName;
-
-    private String argsStr;
-
-    private String extAttrs;
-
-    private LocalDateTime nextTriggerAt;
-
-    private Integer retryStatus;
 
     private Integer taskType;
 
     private LocalDateTime createDt;
+
+    private Integer operationReason;
+
+    /**
+     * 客户端ID
+     */
+    private String clientInfo;
 
 }

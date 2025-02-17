@@ -2,10 +2,9 @@ package com.aizuda.snailjob.server.retry.task.support.dispatch;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
-import com.aizuda.snailjob.client.model.request.DispatchRetryRequest;
+import com.aizuda.snailjob.client.model.request.StopRetryRequest;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.model.Result;
-import com.aizuda.snailjob.common.core.model.SnailJobHeaders;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.common.cache.CacheRegisterTable;
@@ -17,14 +16,17 @@ import com.aizuda.snailjob.server.common.rpc.client.SnailJobRetryListener;
 import com.aizuda.snailjob.server.common.util.ClientInfoUtils;
 import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.retry.task.client.RetryRpcClient;
+import com.aizuda.snailjob.server.retry.task.dto.RequestCallbackExecutorDTO;
 import com.aizuda.snailjob.server.retry.task.dto.RequestRetryExecutorDTO;
 import com.aizuda.snailjob.server.retry.task.dto.RetryExecutorResultDTO;
+import com.aizuda.snailjob.server.retry.task.dto.RetryTaskLogDTO;
 import com.aizuda.snailjob.server.retry.task.support.RetryTaskConverter;
 import com.aizuda.snailjob.server.retry.task.support.RetryTaskLogConverter;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
 import com.github.rholder.retry.Attempt;
 import com.github.rholder.retry.RetryException;
+import com.github.rholder.retry.RetryListener;
 import com.google.common.collect.Maps;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,25 +43,25 @@ import java.util.Objects;
  * @date 2023-10-06 16:42:08
  * @since 2.4.0
  */
-@Component(ActorGenerator.REAL_RETRY_EXECUTOR_ACTOR)
+@Component(ActorGenerator.REAL_CALLBACK_EXECUTOR_ACTOR)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Slf4j
 @RequiredArgsConstructor
-public class RequestRetryClientActor extends AbstractActor {
+public class RequestCallbackClientActor extends AbstractActor {
     private final RetryTaskMapper retryTaskMapper;
 
     @Override
     public Receive createReceive() {
-        return receiveBuilder().match(RequestRetryExecutorDTO.class, realRetryExecutorDTO -> {
+        return receiveBuilder().match(RequestCallbackExecutorDTO.class, executorDTO -> {
             try {
-                doExecute(realRetryExecutorDTO);
+                doCallback(executorDTO);
             } catch (Exception e) {
                 log.error("请求客户端发生异常", e);
             }
         }).build();
     }
 
-    private void doExecute(RequestRetryExecutorDTO executorDTO) {
+    private void doCallback(RequestCallbackExecutorDTO executorDTO) {
         long nowMilli = DateUtils.toNowMilli();
         // 检查客户端是否存在
         RegisterNodeInfo registerNodeInfo = CacheRegisterTable.getServerNode(
@@ -67,7 +69,6 @@ public class RequestRetryClientActor extends AbstractActor {
                 executorDTO.getNamespaceId(),
                 executorDTO.getClientId()
         );
-
         if (Objects.isNull(registerNodeInfo)) {
             taskExecuteFailure(executorDTO, "客户端不存在");
             JobLogMetaDTO jobLogMetaDTO = RetryTaskConverter.INSTANCE.toJobLogDTO(executorDTO);
@@ -77,25 +78,18 @@ public class RequestRetryClientActor extends AbstractActor {
             return;
         }
 
-        DispatchRetryRequest dispatchJobRequest = RetryTaskConverter.INSTANCE.toDispatchRetryRequest(executorDTO);
+        StopRetryRequest stopRetryRequest = RetryTaskConverter.INSTANCE.toStopRetryRequest(executorDTO);
 
         try {
 
-            // 设置header
-            SnailJobHeaders snailJobHeaders = new SnailJobHeaders();
-            snailJobHeaders.setRetry(Boolean.TRUE);
-            snailJobHeaders.setRetryId(String.valueOf(executorDTO.getRetryId()));
-            snailJobHeaders.setDdl(executorDTO.getExecutorTimeout());
-
             // 构建请求客户端对象
             RetryRpcClient rpcClient = buildRpcClient(registerNodeInfo, executorDTO);
-            Result<Boolean> dispatch = rpcClient.dispatch(dispatchJobRequest, snailJobHeaders);
-            Boolean data = dispatch.getData();
-            if (dispatch.getStatus() == StatusEnum.YES.getStatus() && Objects.nonNull(data) && data) {
+            Result<Boolean> dispatch = rpcClient.stop(stopRetryRequest);
+            if (dispatch.getStatus() == StatusEnum.YES.getStatus()) {
                 SnailJobLog.LOCAL.info("retryTaskId:[{}] 任务调度成功.", executorDTO.getRetryTaskId());
             } else {
-                SnailJobLog.LOCAL.error("retryTaskId:[{}] 任务调度失败. msg:[{}]", executorDTO.getRetryTaskId(), dispatch.getMessage());
                 // 客户端返回失败，则认为任务执行失败
+                SnailJobLog.LOCAL.error("retryTaskId:[{}] 任务调度失败. msg:[{}]", executorDTO.getRetryTaskId(), dispatch.getMessage());
                 taskExecuteFailure(executorDTO, dispatch.getMessage());
             }
 
@@ -117,6 +111,7 @@ public class RequestRetryClientActor extends AbstractActor {
                     retryTaskLogDTO, throwable);
 
             taskExecuteFailure(executorDTO, throwable.getMessage());
+
         }
 
     }
@@ -124,20 +119,20 @@ public class RequestRetryClientActor extends AbstractActor {
     public class RetryExecutorRetryListener implements SnailJobRetryListener {
 
         private final Map<String, Object> properties;
-        private final RequestRetryExecutorDTO executorDTO;
+        private final RequestCallbackExecutorDTO executorDTO;
 
-        public RetryExecutorRetryListener(final RequestRetryExecutorDTO realJobExecutorDTO) {
-            this.executorDTO = realJobExecutorDTO;
+        public RetryExecutorRetryListener(final RequestCallbackExecutorDTO executorDTO) {
+            this.executorDTO = executorDTO;
             this.properties = Maps.newHashMap();
         }
 
         @Override
         public <V> void onRetry(final Attempt<V> attempt) {
-            if (attempt.getAttemptNumber() > 1) {
+            if (attempt.getAttemptNumber() > 0) {
                 // 更新最新负载节点
                 String hostId = (String) properties.get("HOST_ID");
                 String hostIp = (String) properties.get("HOST_IP");
-                Integer hostPort = (Integer) properties.get("HOST_PORT");
+                String hostPort = (String) properties.get("HOST_PORT");
 
                 RetryTask retryTask = new RetryTask();
                 retryTask.setId(executorDTO.getRetryTaskId());
@@ -157,7 +152,7 @@ public class RequestRetryClientActor extends AbstractActor {
         }
     }
 
-    private RetryRpcClient buildRpcClient(RegisterNodeInfo registerNodeInfo, RequestRetryExecutorDTO executorDTO) {
+    private RetryRpcClient buildRpcClient(RegisterNodeInfo registerNodeInfo, RequestCallbackExecutorDTO executorDTO) {
         return RequestBuilder.<RetryRpcClient, Result>newBuilder()
                 .nodeInfo(registerNodeInfo)
                 .failRetry(true)
@@ -177,7 +172,7 @@ public class RequestRetryClientActor extends AbstractActor {
      * @param executorDTO RequestRetryExecutorDTO
      * @param message 失败原因
      */
-    private static void taskExecuteFailure(RequestRetryExecutorDTO executorDTO, String message) {
+    private static void taskExecuteFailure(RequestCallbackExecutorDTO executorDTO, String message) {
         ActorRef actorRef = ActorGenerator.retryTaskExecutorResultActor();
         RetryExecutorResultDTO executorResultDTO = RetryTaskConverter.INSTANCE.toRetryExecutorResultDTO(executorDTO);
         executorResultDTO.setExceptionMsg(message);

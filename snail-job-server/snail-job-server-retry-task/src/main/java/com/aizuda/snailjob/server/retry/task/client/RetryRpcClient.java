@@ -30,7 +30,7 @@ public interface RetryRpcClient {
     Result<Boolean> stop(@Body StopRetryRequest stopRetryRequest);
 
     @Mapping(path = RETRY_CALLBACK, method = RequestMethod.POST)
-    Result callback(@Body RetryCallbackDTO retryCallbackDTO);
+    Result<Boolean> callback(@Body RetryCallbackDTO retryCallbackDTO);
 
     @Mapping(path = RETRY_GENERATE_IDEM_ID, method = RequestMethod.POST)
     Result generateIdempotentId(@Body GenerateRetryIdempotentIdDTO retryCallbackDTO);

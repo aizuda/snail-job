@@ -12,6 +12,7 @@ import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.common.config.SystemProperties;
 import com.aizuda.snailjob.server.common.dto.PartitionTask;
 import com.aizuda.snailjob.server.common.dto.ScanTask;
+import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.strategy.WaitStrategies;
 import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.common.util.PartitionTaskUtils;
@@ -147,11 +148,16 @@ public class ScanRetryActor extends AbstractActor {
         }
 
         waitStrategyContext.setNextTriggerAt(DateUtils.toEpochMilli(nextTriggerAt));
-        // todo 这里区分一下是重试还是回调任务即可
         waitStrategyContext.setTriggerInterval(retrySceneConfig.getTriggerInterval());
         waitStrategyContext.setDelayLevel(partitionTask.getRetryCount() + 1);
         // 更新触发时间, 任务进入时间轮
-        WaitStrategy waitStrategy = WaitStrategies.WaitStrategyEnum.getWaitStrategy(retrySceneConfig.getBackOff());
+        WaitStrategy waitStrategy;
+        if (SyetemTaskTypeEnum.CALLBACK.getType().equals(partitionTask.getTaskType())) {
+            waitStrategy = WaitStrategies.WaitStrategyEnum.getWaitStrategy(retrySceneConfig.getCbTriggerType());
+        } else {
+            waitStrategy = WaitStrategies.WaitStrategyEnum.getWaitStrategy(retrySceneConfig.getBackOff());
+        }
+
         return waitStrategy.computeTriggerTime(waitStrategyContext);
     }
 
@@ -162,8 +168,6 @@ public class ScanRetryActor extends AbstractActor {
                                 .select(Retry::getId, Retry::getNextTriggerAt, Retry::getGroupName, Retry::getRetryCount,
                                         Retry::getSceneName, Retry::getNamespaceId, Retry::getTaskType)
                                 .eq(Retry::getRetryStatus, RetryStatusEnum.RUNNING.getStatus())
-                                // todo
-//                                .eq(Retry::getTaskType, taskActuatorScene().getTaskType().getType())
                                 .in(Retry::getBucketIndex, buckets)
                                 .le(Retry::getNextTriggerAt, DateUtils.toNowMilli() + DateUtils.toEpochMilli(SystemConstants.SCHEDULE_PERIOD))
                                 .gt(Retry::getId, startId)

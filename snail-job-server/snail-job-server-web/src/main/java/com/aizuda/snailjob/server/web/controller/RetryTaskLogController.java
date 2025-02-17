@@ -3,7 +3,7 @@ package com.aizuda.snailjob.server.web.controller;
 import com.aizuda.snailjob.server.web.annotation.LoginRequired;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.RetryTaskLogMessageQueryVO;
-import com.aizuda.snailjob.server.web.model.request.RetryTaskLogQueryVO;
+import com.aizuda.snailjob.server.web.model.request.RetryTaskQueryVO;
 import com.aizuda.snailjob.server.web.model.response.RetryTaskLogMessageResponseVO;
 import com.aizuda.snailjob.server.web.model.response.RetryTaskLogResponseVO;
 import com.aizuda.snailjob.server.web.service.RetryTaskLogService;
@@ -21,7 +21,7 @@ import java.util.Set;
  * @date 2022-02-27
  */
 @RestController
-@RequestMapping("/retry-task-log")
+@RequestMapping("/retry-task")
 public class RetryTaskLogController {
 
     @Autowired
@@ -29,7 +29,7 @@ public class RetryTaskLogController {
 
     @LoginRequired
     @GetMapping("list")
-    public PageResult<List<RetryTaskLogResponseVO>> getRetryTaskLogPage(RetryTaskLogQueryVO queryVO) {
+    public PageResult<List<RetryTaskLogResponseVO>> getRetryTaskLogPage(RetryTaskQueryVO queryVO) {
         return retryTaskLogService.getRetryTaskLogPage(queryVO);
     }
 

@@ -15,7 +15,7 @@ import java.util.List;
  * @date 2022-09-29
  */
 @Data
-public class RetryTaskUpdateExecutorNameRequestVO {
+public class RetryUpdateExecutorNameRequestVO {
 
     /**
      * 组名称

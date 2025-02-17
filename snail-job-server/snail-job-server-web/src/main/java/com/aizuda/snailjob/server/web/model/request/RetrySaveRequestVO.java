@@ -12,7 +12,7 @@ import org.hibernate.validator.constraints.NotBlank;
  * @since 2.0
  */
 @Data
-public class RetryTaskSaveRequestVO {
+public class RetrySaveRequestVO {
 
     /**
      * 组名称

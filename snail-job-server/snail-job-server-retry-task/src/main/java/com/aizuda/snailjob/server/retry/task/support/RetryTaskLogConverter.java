@@ -1,6 +1,8 @@
 package com.aizuda.snailjob.server.retry.task.support;
 
-import com.aizuda.snailjob.server.retry.task.dto.RealRetryExecutorDTO;
+import com.aizuda.snailjob.server.common.dto.RetryLogMetaDTO;
+import com.aizuda.snailjob.server.retry.task.dto.RequestCallbackExecutorDTO;
+import com.aizuda.snailjob.server.retry.task.dto.RequestRetryExecutorDTO;
 import com.aizuda.snailjob.server.retry.task.dto.RetryMergePartitionTaskDTO;
 import com.aizuda.snailjob.server.retry.task.dto.RetryTaskLogDTO;
 import com.aizuda.snailjob.template.datasource.persistence.po.Retry;
@@ -29,9 +31,13 @@ public interface RetryTaskLogConverter {
 
     RetryTaskLogDTO toRetryTaskLogDTO(Retry retry);
 
-    RetryTaskLogDTO toRetryTaskLogDTO(RealRetryExecutorDTO retry);
+    RetryTaskLogDTO toRetryTaskLogDTO(RequestRetryExecutorDTO retry);
 
     List<RetryMergePartitionTaskDTO> toRetryMergePartitionTaskDTOs(List<RetryTask> retryTaskList);
 
     RetryTaskLogMessage toRetryTaskLogMessage(RetryTaskLogMessage message);
+
+    RetryLogMetaDTO toRetryLogMetaDTO(RequestRetryExecutorDTO executorDTO);
+
+    RetryLogMetaDTO toRetryLogMetaDTO(RequestCallbackExecutorDTO executorDTO);
 }

@@ -4,7 +4,7 @@ import com.aizuda.snailjob.common.core.model.Result;
 import com.aizuda.snailjob.server.web.annotation.LoginRequired;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.*;
-import com.aizuda.snailjob.server.web.model.response.RetryTaskResponseVO;
+import com.aizuda.snailjob.server.web.model.response.RetryResponseVO;
 import com.aizuda.snailjob.server.web.service.RetryTaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -19,34 +19,34 @@ import java.util.List;
  * @date 2022-02-27
  */
 @RestController
-@RequestMapping("/retry-task")
-public class RetryTaskController {
+@RequestMapping("/retry")
+public class RetryController {
 
     @Autowired
     private RetryTaskService retryTaskService;
 
     @LoginRequired
     @GetMapping("list")
-    public PageResult<List<RetryTaskResponseVO>> getRetryTaskPage(RetryTaskQueryVO queryVO) {
-        return retryTaskService.getRetryTaskPage(queryVO);
+    public PageResult<List<RetryResponseVO>> getRetryTaskPage(RetryQueryVO queryVO) {
+        return retryTaskService.getRetryPage(queryVO);
     }
 
     @LoginRequired
     @GetMapping("{id}")
-    public RetryTaskResponseVO getRetryTaskById(@RequestParam("groupName") String groupName,
-                                                @PathVariable("id") Long id) {
-        return retryTaskService.getRetryTaskById(groupName, id);
+    public RetryResponseVO getRetryTaskById(@RequestParam("groupName") String groupName,
+                                            @PathVariable("id") Long id) {
+        return retryTaskService.getRetryById(groupName, id);
     }
 
     @LoginRequired
     @PutMapping("status")
-    public int updateRetryTaskStatus(@RequestBody RetryTaskUpdateStatusRequestVO retryTaskUpdateStatusRequestVO) {
-        return retryTaskService.updateRetryTaskStatus(retryTaskUpdateStatusRequestVO);
+    public int updateRetryTaskStatus(@RequestBody RetryUpdateStatusRequestVO retryUpdateStatusRequestVO) {
+        return retryTaskService.updateRetryTaskStatus(retryUpdateStatusRequestVO);
     }
 
     @LoginRequired
     @PostMapping
-    public int saveRetryTask(@RequestBody @Validated RetryTaskSaveRequestVO retryTaskRequestVO) {
+    public int saveRetryTask(@RequestBody @Validated RetrySaveRequestVO retryTaskRequestVO) {
         return retryTaskService.saveRetryTask(retryTaskRequestVO);
     }
 
@@ -58,14 +58,14 @@ public class RetryTaskController {
 
     @LoginRequired
     @PutMapping("/batch")
-    public Integer updateRetryTaskExecutorName(@RequestBody @Validated RetryTaskUpdateExecutorNameRequestVO requestVO) {
-        return retryTaskService.updateRetryTaskExecutorName(requestVO);
+    public Integer updateRetryTaskExecutorName(@RequestBody @Validated RetryUpdateExecutorNameRequestVO requestVO) {
+        return retryTaskService.updateRetryExecutorName(requestVO);
     }
 
     @LoginRequired
     @DeleteMapping("/batch")
     public boolean batchDeleteRetryTask(@RequestBody @Validated BatchDeleteRetryTaskVO requestVO) {
-        return retryTaskService.batchDeleteRetryTask(requestVO);
+        return retryTaskService.batchDeleteRetry(requestVO);
     }
 
     @LoginRequired
@@ -77,12 +77,12 @@ public class RetryTaskController {
     @LoginRequired
     @PostMapping("/manual/trigger/retry/task")
     public boolean manualTriggerRetryTask(@RequestBody @Validated ManualTriggerTaskRequestVO requestVO) {
-        return retryTaskService.manualTriggerRetryTask(requestVO);
+        return retryTaskService.manualTriggerRetry(requestVO);
     }
 
     @LoginRequired
     @PostMapping("/manual/trigger/callback/task")
     public boolean manualTriggerCallbackTask(@RequestBody @Validated ManualTriggerTaskRequestVO requestVO) {
-        return retryTaskService.manualTriggerCallbackTask(requestVO);
+        return retryTaskService.manualTriggerCallback(requestVO);
     }
 }

@@ -10,7 +10,7 @@ import com.aizuda.snailjob.common.log.constant.LogFieldConstants;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.RetryTaskLogMessageQueryVO;
-import com.aizuda.snailjob.server.web.model.request.RetryTaskLogQueryVO;
+import com.aizuda.snailjob.server.web.model.request.RetryTaskQueryVO;
 import com.aizuda.snailjob.server.web.model.request.UserSessionVO;
 import com.aizuda.snailjob.server.web.model.response.RetryTaskLogMessageResponseVO;
 import com.aizuda.snailjob.server.web.model.response.RetryTaskLogResponseVO;
@@ -43,37 +43,30 @@ public class RetryTaskLogServiceImpl implements RetryTaskLogService {
     private final RetryTaskLogMessageMapper retryTaskLogMessageMapper;
 
     @Override
-    public PageResult<List<RetryTaskLogResponseVO>> getRetryTaskLogPage(RetryTaskLogQueryVO queryVO) {
+    public PageResult<List<RetryTaskLogResponseVO>> getRetryTaskLogPage(RetryTaskQueryVO queryVO) {
         PageDTO<RetryTask> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
 
-//        UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
-//        String namespaceId = userSessionVO.getNamespaceId();
-//
-//        List<String> groupNames = UserSessionUtils.getGroupNames(queryVO.getGroupName());
-//
-//        LambdaQueryWrapper<RetryTask> retryTaskLogLambdaQueryWrapper = new LambdaQueryWrapper<RetryTask>()
-//                .eq(RetryTask::getNamespaceId, namespaceId)
-//                .in(CollUtil.isNotEmpty(groupNames), RetryTask::getGroupName, groupNames)
-//                .eq(StrUtil.isNotBlank(queryVO.getSceneName()), RetryTask::getSceneName, queryVO.getSceneName())
-//                .eq(StrUtil.isNotBlank(queryVO.getBizNo()), RetryTask::getBizNo, queryVO.getBizNo())
-//                .eq(StrUtil.isNotBlank(queryVO.getUniqueId()), RetryTask::getUniqueId, queryVO.getUniqueId())
-//                .eq(StrUtil.isNotBlank(queryVO.getIdempotentId()), RetryTask::getIdempotentId, queryVO.getIdempotentId())
-//                .eq(queryVO.getRetryStatus() != null, RetryTask::getTaskStatus, queryVO.getRetryStatus())
-//                .between(ObjUtil.isNotNull(queryVO.getDatetimeRange()),
-//                        RetryTask::getCreateDt, queryVO.getStartDt(), queryVO.getEndDt())
-//                .select(RetryTask::getGroupName, RetryTask::getId,
-//                        RetryTask::getSceneName,
-//                        RetryTask::getIdempotentId, RetryTask::getBizNo, RetryTask::getTaskStatus,
-//                        RetryTask::getCreateDt, RetryTask::getUniqueId, RetryTask::getTaskType)
-//                .orderByDesc(RetryTask::getCreateDt);
-//        PageDTO<RetryTask> retryTaskLogPageDTO = retryTaskMapper.selectPage(pageDTO,
-//                retryTaskLogLambdaQueryWrapper);
+        UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
+        String namespaceId = userSessionVO.getNamespaceId();
 
-//        return new PageResult<>(
-//                retryTaskLogPageDTO,
-//                RetryTaskLogResponseVOConverter.INSTANCE.convertList(retryTaskLogPageDTO.getRecords()));
+        List<String> groupNames = UserSessionUtils.getGroupNames(queryVO.getGroupName());
 
-        return null;
+        LambdaQueryWrapper<RetryTask> wrapper = new LambdaQueryWrapper<RetryTask>()
+                .eq(RetryTask::getNamespaceId, namespaceId)
+                .in(CollUtil.isNotEmpty(groupNames), RetryTask::getGroupName, groupNames)
+                .eq(StrUtil.isNotBlank(queryVO.getSceneName()), RetryTask::getSceneName, queryVO.getSceneName())
+                .eq(queryVO.getRetryStatus() != null, RetryTask::getTaskStatus, queryVO.getRetryStatus())
+                .eq(Objects.nonNull(queryVO.getRetryId()), RetryTask::getRetryId, queryVO.getRetryId())
+                .between(ObjUtil.isNotNull(queryVO.getDatetimeRange()),
+                        RetryTask::getCreateDt, queryVO.getStartDt(), queryVO.getEndDt())
+                .select(RetryTask::getGroupName, RetryTask::getId, RetryTask::getSceneName, RetryTask::getTaskStatus,
+                        RetryTask::getCreateDt, RetryTask::getTaskType, RetryTask::getOperationReason)
+                .orderByDesc(RetryTask::getCreateDt);
+
+        PageDTO<RetryTask> retryTaskPageDTO = retryTaskMapper.selectPage(pageDTO, wrapper);
+        return new PageResult<>(retryTaskPageDTO,
+                RetryTaskLogResponseVOConverter.INSTANCE.convertList(retryTaskPageDTO.getRecords()));
+
     }
 
     @Override

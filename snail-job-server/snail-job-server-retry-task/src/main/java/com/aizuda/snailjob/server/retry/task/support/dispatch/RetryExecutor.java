@@ -12,11 +12,13 @@ import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.common.cache.CacheRegisterTable;
 import com.aizuda.snailjob.server.common.dto.RegisterNodeInfo;
-import com.aizuda.snailjob.server.common.dto.ScanTask;
+import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.handler.ClientNodeAllocateHandler;
+import com.aizuda.snailjob.server.common.strategy.WaitStrategies;
 import com.aizuda.snailjob.server.common.util.ClientInfoUtils;
-import com.aizuda.snailjob.server.retry.task.dto.RealRetryExecutorDTO;
+import com.aizuda.snailjob.server.retry.task.dto.RequestCallbackExecutorDTO;
+import com.aizuda.snailjob.server.retry.task.dto.RequestRetryExecutorDTO;
 import com.aizuda.snailjob.server.retry.task.dto.RetryTaskExecuteDTO;
 import com.aizuda.snailjob.server.retry.task.support.RetryTaskConverter;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryMapper;
@@ -101,13 +103,26 @@ public class RetryExecutor extends AbstractActor {
         updateRetryTaskStatus(execute.getRetryTaskId(), RetryTaskStatusEnum.RUNNING.getStatus(),
                 ClientInfoUtils.generate(serverNode));
 
-        // 请求客户端
-        RealRetryExecutorDTO realJobExecutor = RetryTaskConverter.INSTANCE.toRealRetryExecutorDTO(retrySceneConfig, retry);
-        realJobExecutor.setClientId(serverNode.getHostId());
-        realJobExecutor.setRetryTaskId(execute.getRetryTaskId());
-        ActorRef actorRef = ActorGenerator.retryRealTaskExecutorActor();
-        actorRef.tell(realJobExecutor, actorRef);
+        Object executorDTO;
+        if (SyetemTaskTypeEnum.CALLBACK.getType().equals(retry.getTaskType())) {
+            // 请求客户端
+            RequestCallbackExecutorDTO callbackExecutorDTO = RetryTaskConverter.INSTANCE.toRequestCallbackExecutorDTO(retrySceneConfig, retry);
+            callbackExecutorDTO.setClientId(serverNode.getHostId());
+            callbackExecutorDTO.setRetryTaskId(execute.getRetryTaskId());
 
+            executorDTO = callbackExecutorDTO;
+        } else {
+
+            // 请求客户端
+            RequestRetryExecutorDTO retryExecutorDTO = RetryTaskConverter.INSTANCE.toRealRetryExecutorDTO(retrySceneConfig, retry);
+            retryExecutorDTO.setClientId(serverNode.getHostId());
+            retryExecutorDTO.setRetryTaskId(execute.getRetryTaskId());
+
+            executorDTO = retryExecutorDTO;
+        }
+
+        ActorRef actorRef = ActorGenerator.retryRealTaskExecutorActor();
+        actorRef.tell(executorDTO, actorRef);
     }
 
     private void updateRetryTaskStatus(Long retryTaskId, Integer taskStatus, String clientInfo) {

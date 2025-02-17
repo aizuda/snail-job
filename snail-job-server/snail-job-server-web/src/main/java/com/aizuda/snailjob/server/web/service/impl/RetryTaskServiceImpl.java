@@ -29,7 +29,7 @@ import com.aizuda.snailjob.server.retry.task.support.generator.retry.TaskGenerat
 import com.aizuda.snailjob.server.retry.task.support.RetryTaskConverter;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.*;
-import com.aizuda.snailjob.server.web.model.response.RetryTaskResponseVO;
+import com.aizuda.snailjob.server.web.model.response.RetryResponseVO;
 import com.aizuda.snailjob.server.web.service.RetryTaskService;
 import com.aizuda.snailjob.server.web.service.convert.RetryTaskResponseVOConverter;
 import com.aizuda.snailjob.server.web.service.convert.TaskContextConverter;
@@ -71,14 +71,11 @@ public class RetryTaskServiceImpl implements RetryTaskService {
     @Autowired
     @Lazy
     private List<TaskGenerator> taskGenerators;
-//    @Lazy
-//    @Autowired
-//    private List<TaskExecutor> taskExecutors;
     @Autowired
     private RetryTaskLogMessageMapper retryTaskLogMessageMapper;
 
     @Override
-    public PageResult<List<RetryTaskResponseVO>> getRetryTaskPage(RetryTaskQueryVO queryVO) {
+    public PageResult<List<RetryResponseVO>> getRetryPage(RetryQueryVO queryVO) {
 
         PageDTO<Retry> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
@@ -102,12 +99,22 @@ public class RetryTaskServiceImpl implements RetryTaskService {
                         Retry::getTaskType)
                 .orderByDesc(Retry::getCreateDt);
         pageDTO = accessTemplate.getRetryAccess().listPage(pageDTO, queryWrapper);
-        return new PageResult<>(pageDTO,
-                RetryTaskResponseVOConverter.INSTANCE.convertList(pageDTO.getRecords()));
+
+        Set<Long> ids = StreamUtils.toSet(pageDTO.getRecords(), Retry::getId);
+        List<Retry> callbackTaskList = accessTemplate.getRetryAccess().list(new LambdaQueryWrapper<Retry>().eq(Retry::getParentId, ids));
+
+        Map<Long, Retry> callbackMap = StreamUtils.toIdentityMap(callbackTaskList, Retry::getParentId);
+
+        List<RetryResponseVO> retryResponseList = RetryTaskResponseVOConverter.INSTANCE.convertList(pageDTO.getRecords());
+        for (RetryResponseVO retryResponseVO : retryResponseList) {
+            retryResponseVO.setChildren(RetryTaskResponseVOConverter.INSTANCE.convert(callbackMap.get(retryResponseVO.getId())));
+        }
+
+        return new PageResult<>(pageDTO, retryResponseList);
     }
 
     @Override
-    public RetryTaskResponseVO getRetryTaskById(String groupName, Long id) {
+    public RetryResponseVO getRetryById(String groupName, Long id) {
         TaskAccess<Retry> retryTaskAccess = accessTemplate.getRetryAccess();
         Retry retry = retryTaskAccess.one(new LambdaQueryWrapper<Retry>().eq(Retry::getId, id));
         return RetryTaskResponseVOConverter.INSTANCE.convert(retry);
@@ -115,7 +122,7 @@ public class RetryTaskServiceImpl implements RetryTaskService {
 
     @Override
     @Transactional
-    public int updateRetryTaskStatus(RetryTaskUpdateStatusRequestVO requestVO) {
+    public int updateRetryTaskStatus(RetryUpdateStatusRequestVO requestVO) {
 
         RetryStatusEnum retryStatusEnum = RetryStatusEnum.getByStatus(requestVO.getRetryStatus());
         if (Objects.isNull(retryStatusEnum)) {
@@ -166,7 +173,7 @@ public class RetryTaskServiceImpl implements RetryTaskService {
     }
 
     @Override
-    public int saveRetryTask(final RetryTaskSaveRequestVO retryTaskRequestVO) {
+    public int saveRetryTask(final RetrySaveRequestVO retryTaskRequestVO) {
         RetryStatusEnum retryStatusEnum = RetryStatusEnum.getByStatus(retryTaskRequestVO.getRetryStatus());
         if (Objects.isNull(retryStatusEnum)) {
             throw new SnailJobServerException("重试状态错误");
@@ -230,7 +237,7 @@ public class RetryTaskServiceImpl implements RetryTaskService {
     }
 
     @Override
-    public int updateRetryTaskExecutorName(final RetryTaskUpdateExecutorNameRequestVO requestVO) {
+    public int updateRetryExecutorName(final RetryUpdateExecutorNameRequestVO requestVO) {
 
         Retry retry = new Retry();
         retry.setExecutorName(requestVO.getExecutorName());
@@ -248,7 +255,7 @@ public class RetryTaskServiceImpl implements RetryTaskService {
 
     @Override
     @Transactional
-    public boolean batchDeleteRetryTask(final BatchDeleteRetryTaskVO requestVO) {
+    public boolean batchDeleteRetry(final BatchDeleteRetryTaskVO requestVO) {
         TaskAccess<Retry> retryTaskAccess = accessTemplate.getRetryAccess();
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
 
@@ -342,7 +349,7 @@ public class RetryTaskServiceImpl implements RetryTaskService {
     }
 
     @Override
-    public boolean manualTriggerRetryTask(ManualTriggerTaskRequestVO requestVO) {
+    public boolean manualTriggerRetry(ManualTriggerTaskRequestVO requestVO) {
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
 
         long count = accessTemplate.getGroupConfigAccess().count(new LambdaQueryWrapper<GroupConfig>()
@@ -375,7 +382,7 @@ public class RetryTaskServiceImpl implements RetryTaskService {
     }
 
     @Override
-    public boolean manualTriggerCallbackTask(ManualTriggerTaskRequestVO requestVO) {
+    public boolean manualTriggerCallback(ManualTriggerTaskRequestVO requestVO) {
         List<String> uniqueIds = requestVO.getUniqueIds();
 
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();

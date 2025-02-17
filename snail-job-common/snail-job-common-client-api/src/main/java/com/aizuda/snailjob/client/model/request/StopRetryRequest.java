@@ -19,16 +19,8 @@ public class StopRetryRequest {
     private String groupName;
     @NotBlank(message = "scene 不能为空")
     private String scene;
-    @NotBlank(message = "参数 不能为空")
-    private String argsStr;
-    @NotBlank(message = "idempotentId 不能为空")
-    private String idempotentId;
-    @NotBlank(message = "executorName 不能为空")
-    private String executorName;
     @NotNull(message = "retryTaskId 不能为空")
     private Long retryTaskId;
     @NotNull(message = "retryId 不能为空")
     private Long retryId;
-    @NotNull(message = "retryCount 不能为空")
-    private Integer retryCount;
 }

@@ -2,7 +2,7 @@ package com.aizuda.snailjob.server.web.service;
 
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.RetryTaskLogMessageQueryVO;
-import com.aizuda.snailjob.server.web.model.request.RetryTaskLogQueryVO;
+import com.aizuda.snailjob.server.web.model.request.RetryTaskQueryVO;
 import com.aizuda.snailjob.server.web.model.response.RetryTaskLogMessageResponseVO;
 import com.aizuda.snailjob.server.web.model.response.RetryTaskLogResponseVO;
 
@@ -16,7 +16,7 @@ import java.util.Set;
  */
 public interface RetryTaskLogService {
 
-    PageResult<List<RetryTaskLogResponseVO>> getRetryTaskLogPage(RetryTaskLogQueryVO queryVO);
+    PageResult<List<RetryTaskLogResponseVO>> getRetryTaskLogPage(RetryTaskQueryVO queryVO);
 
     RetryTaskLogMessageResponseVO getRetryTaskLogMessagePage(RetryTaskLogMessageQueryVO queryVO);
 

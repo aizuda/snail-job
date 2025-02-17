@@ -2,7 +2,7 @@ package com.aizuda.snailjob.server.web.service.convert;
 
 import com.aizuda.snailjob.server.model.dto.RetryTaskDTO;
 import com.aizuda.snailjob.server.retry.task.support.generator.retry.TaskContext;
-import com.aizuda.snailjob.server.web.model.request.RetryTaskSaveRequestVO;
+import com.aizuda.snailjob.server.web.model.request.RetrySaveRequestVO;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
@@ -17,7 +17,7 @@ import java.util.List;
 public interface TaskContextConverter {
     TaskContextConverter INSTANCE = Mappers.getMapper(TaskContextConverter.class);
 
-    TaskContext.TaskInfo convert(RetryTaskSaveRequestVO retryTaskSaveRequestVO);
+    TaskContext.TaskInfo convert(RetrySaveRequestVO retrySaveRequestVO);
 
     List<TaskContext.TaskInfo> convert(List<RetryTaskDTO> retryTasks);
 }

@@ -110,7 +110,7 @@ public interface RetryTaskConverter {
 
     RetryTask toRetryTask(RetryTaskGeneratorDTO context);
 
-    DispatchRetryRequest toDispatchRetryRequest(RealRetryExecutorDTO executorDTO);
+    DispatchRetryRequest toDispatchRetryRequest(RequestRetryExecutorDTO executorDTO);
 
     @Mappings({
             @Mapping(target = "namespaceId", source = "retry.namespaceId"),
@@ -119,11 +119,15 @@ public interface RetryTaskConverter {
             @Mapping(target = "retryId", source = "retry.id"),
             @Mapping(target = "taskType", source = "retry.taskType"),
     })
-    RealRetryExecutorDTO toRealRetryExecutorDTO(RetrySceneConfig execute, Retry retry);
+    RequestRetryExecutorDTO toRealRetryExecutorDTO(RetrySceneConfig execute, Retry retry);
 
-    RealRetryExecutorDTO toRealRetryExecutorDTO(TaskStopJobDTO stopJobDTO);
+    RequestRetryExecutorDTO toRealRetryExecutorDTO(TaskStopJobDTO stopJobDTO);
 
     RetryExecutorResultDTO toRetryExecutorResultDTO(DispatchRetryResultDTO resultDTO);
+
+    RetryExecutorResultDTO toRetryExecutorResultDTO(RequestRetryExecutorDTO resultDTO);
+
+    RetryExecutorResultDTO toRetryExecutorResultDTO(RequestCallbackExecutorDTO resultDTO);
 
     RetryTaskGeneratorDTO toRetryTaskGeneratorDTO(RetryTaskPrepareDTO jobPrepareDTO);
 
@@ -133,7 +137,9 @@ public interface RetryTaskConverter {
 
     TaskStopJobDTO toTaskStopJobDTO(BlockStrategyContext context);
 
-    StopRetryRequest toStopRetryRequest(RealRetryExecutorDTO executorDTO);
+    StopRetryRequest toStopRetryRequest(RequestCallbackExecutorDTO executorDTO);
+
+    StopRetryRequest toStopRetryRequest(RequestStopRetryTaskExecutorDTO executorDTO);
 
     @Mappings({
             @Mapping(source = "retry.id", target = "retryId"),
@@ -147,7 +153,18 @@ public interface RetryTaskConverter {
 
     RetryTaskExecuteDTO toRetryTaskExecuteDTO(RetryTimerContext context);
 
-    JobLogMetaDTO toJobLogDTO(RealRetryExecutorDTO executorDTO);
+    JobLogMetaDTO toJobLogDTO(RequestRetryExecutorDTO executorDTO);
+
+    JobLogMetaDTO toJobLogDTO(RequestCallbackExecutorDTO executorDTO);
 
     RetryResultContext toRetryResultContext(RetryExecutorResultDTO resultDTO);
+
+    @Mappings({
+            @Mapping(target = "namespaceId", source = "retry.namespaceId"),
+            @Mapping(target = "groupName", source = "retry.groupName"),
+            @Mapping(target = "sceneName", source = "retry.sceneName"),
+            @Mapping(target = "retryId", source = "retry.id"),
+            @Mapping(target = "taskType", source = "retry.taskType"),
+    })
+    RequestCallbackExecutorDTO toRequestCallbackExecutorDTO(RetrySceneConfig retrySceneConfig, Retry retry);
 }

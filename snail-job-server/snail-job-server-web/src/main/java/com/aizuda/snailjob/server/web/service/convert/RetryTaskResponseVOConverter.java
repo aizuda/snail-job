@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.web.service.convert;
 
-import com.aizuda.snailjob.server.web.model.response.RetryTaskResponseVO;
+import com.aizuda.snailjob.server.web.model.response.RetryResponseVO;
 import com.aizuda.snailjob.template.datasource.persistence.po.Retry;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
@@ -17,7 +17,7 @@ public interface RetryTaskResponseVOConverter {
 
     RetryTaskResponseVOConverter INSTANCE = Mappers.getMapper(RetryTaskResponseVOConverter.class);
 
-    RetryTaskResponseVO convert(Retry retry);
+    RetryResponseVO convert(Retry retry);
 
-    List<RetryTaskResponseVO> convertList(List<Retry> retries);
+    List<RetryResponseVO> convertList(List<Retry> retries);
 }

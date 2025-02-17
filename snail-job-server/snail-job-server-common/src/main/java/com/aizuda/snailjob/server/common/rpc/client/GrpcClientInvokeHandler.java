@@ -119,6 +119,15 @@ public class GrpcClientInvokeHandler implements InvocationHandler {
         for (int count = 1; count <= size; count++) {
             log.debug("Start request client. count:[{}] clientId:[{}] clientAddr:[{}:{}] serverIp:[{}]", count, hostId,
                 hostIp, hostPort, NetUtil.getLocalIpStr());
+            if (retryListener instanceof SnailJobRetryListener) {
+                // 传递修改之后的客户端节点信息
+                SnailJobRetryListener listener = (SnailJobRetryListener) retryListener;
+                Map<String, Object> properties = listener.properties();
+                properties.put("HOST_ID", hostId);
+                properties.put("HOST_IP", hostIp);
+                properties.put("HOST_PORT", hostPort);
+            }
+
             Result result = requestRemote(method, args, annotation, count);
             if (Objects.nonNull(result)) {
                 return result;

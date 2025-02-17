@@ -82,7 +82,7 @@ public class SceneConfigRequestVO {
     /**
      * 回调的最大执行次数
      */
-    private int cbMaxCount = 288;
+    private int cbMaxCount;
 
     /**
      * 回调间隔时间

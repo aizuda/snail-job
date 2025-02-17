@@ -4,15 +4,14 @@ import com.aizuda.snailjob.server.web.model.base.BaseQueryVO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.time.LocalDateTime;
-
 /**
- * @author: opensnail
- * @date : 2022-02-28 09:08
+ * @author opensnail
+ * @date 2022-02-27
+ * @since 2.0
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class RetryTaskLogQueryVO extends BaseQueryVO {
+public class RetryQueryVO extends BaseQueryVO {
 
     private String groupName;
 
@@ -22,11 +21,7 @@ public class RetryTaskLogQueryVO extends BaseQueryVO {
 
     private String idempotentId;
 
-    private String uniqueId;
-
     private Integer retryStatus;
 
-    private LocalDateTime beginDate;
-
-    private LocalDateTime endDate;
+    private Long retryId;
 }

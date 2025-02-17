@@ -12,7 +12,7 @@ import lombok.Data;
  * @date 2022-09-29
  */
 @Data
-public class RetryTaskUpdateStatusRequestVO {
+public class RetryUpdateStatusRequestVO {
 
     /**
      * 重试状态 {@link RetryStatusEnum}

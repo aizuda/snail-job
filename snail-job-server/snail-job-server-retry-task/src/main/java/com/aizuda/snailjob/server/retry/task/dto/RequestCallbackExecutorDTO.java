@@ -13,7 +13,7 @@ import lombok.EqualsAndHashCode;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class RealRetryExecutorDTO extends BaseDTO {
+public class RequestCallbackExecutorDTO extends BaseDTO {
 
     private String clientId;
 
