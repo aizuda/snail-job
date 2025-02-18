@@ -147,7 +147,7 @@ public class ScanRetryActor extends AbstractActor {
             partitionTask.setNextTriggerAt(nextTriggerAt);
         }
 
-        waitStrategyContext.setNextTriggerAt(DateUtils.toEpochMilli(nextTriggerAt));
+        waitStrategyContext.setNextTriggerAt(nextTriggerAt);
         waitStrategyContext.setTriggerInterval(retrySceneConfig.getTriggerInterval());
         waitStrategyContext.setDelayLevel(partitionTask.getRetryCount() + 1);
         // 更新触发时间, 任务进入时间轮
