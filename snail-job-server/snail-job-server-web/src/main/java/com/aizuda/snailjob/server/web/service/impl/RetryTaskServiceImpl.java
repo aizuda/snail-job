@@ -42,6 +42,7 @@ import com.aizuda.snailjob.template.datasource.persistence.po.*;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
+import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -93,21 +94,28 @@ public class RetryTaskServiceImpl implements RetryTaskService {
                 .eq(StrUtil.isNotBlank(queryVO.getIdempotentId()), Retry::getIdempotentId, queryVO.getIdempotentId())
                 .eq(Objects.nonNull(queryVO.getRetryId()), Retry::getId, queryVO.getRetryId())
                 .eq(Objects.nonNull(queryVO.getRetryStatus()), Retry::getRetryStatus, queryVO.getRetryStatus())
+                .eq(Retry::getTaskType,  SyetemTaskTypeEnum.RETRY.getType())
                 .select(Retry::getId, Retry::getBizNo, Retry::getIdempotentId,
                         Retry::getGroupName, Retry::getNextTriggerAt, Retry::getRetryCount,
                         Retry::getRetryStatus, Retry::getUpdateDt, Retry::getSceneName,
-                        Retry::getTaskType)
+                        Retry::getTaskType, Retry::getParentId)
                 .orderByDesc(Retry::getCreateDt);
         pageDTO = accessTemplate.getRetryAccess().listPage(pageDTO, queryWrapper);
 
         Set<Long> ids = StreamUtils.toSet(pageDTO.getRecords(), Retry::getId);
-        List<Retry> callbackTaskList = accessTemplate.getRetryAccess().list(new LambdaQueryWrapper<Retry>().eq(Retry::getParentId, ids));
+        List<Retry> callbackTaskList = accessTemplate.getRetryAccess().list(new LambdaQueryWrapper<Retry>()
+                .in(Retry::getParentId, ids));
 
         Map<Long, Retry> callbackMap = StreamUtils.toIdentityMap(callbackTaskList, Retry::getParentId);
 
         List<RetryResponseVO> retryResponseList = RetryTaskResponseVOConverter.INSTANCE.convertList(pageDTO.getRecords());
         for (RetryResponseVO retryResponseVO : retryResponseList) {
-            retryResponseVO.setChildren(RetryTaskResponseVOConverter.INSTANCE.convert(callbackMap.get(retryResponseVO.getId())));
+            RetryResponseVO responseVO = RetryTaskResponseVOConverter.INSTANCE.convert(callbackMap.get(retryResponseVO.getId()));
+            if (Objects.isNull(responseVO)) {
+                retryResponseVO.setChildren(Lists.newArrayList());
+            } else {
+                retryResponseVO.setChildren(Lists.newArrayList(responseVO));
+            }
         }
 
         return new PageResult<>(pageDTO, retryResponseList);

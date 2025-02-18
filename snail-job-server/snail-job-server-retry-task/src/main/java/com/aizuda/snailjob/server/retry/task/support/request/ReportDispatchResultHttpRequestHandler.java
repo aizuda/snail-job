@@ -60,7 +60,7 @@ public class ReportDispatchResultHttpRequestHandler extends PostHttpRequestHandl
             RetryResultStatusEnum statusEnum = RetryResultStatusEnum.getRetryResultStatusEnum(resultDTO.getStatusCode());
             Assert.notNull(statusEnum, () -> new SnailJobServerException("status code is invalid"));
             executorResultDTO.setResultStatus(statusEnum);
-
+            executorResultDTO.setIncrementRetryCount(true);
             ActorRef actorRef = ActorGenerator.retryTaskExecutorResultActor();
             actorRef.tell(executorResultDTO, actorRef);
 

@@ -3,6 +3,7 @@ package com.aizuda.snailjob.server.web.model.response;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * @author opensnail
@@ -30,7 +31,7 @@ public class RetryResponseVO {
 
     private String executorName;
 
-    private Long nextTriggerAt;
+    private LocalDateTime nextTriggerAt;
 
     private Integer retryCount;
 
@@ -42,6 +43,6 @@ public class RetryResponseVO {
 
     private LocalDateTime updateDt;
 
-    private RetryResponseVO children;
+    private List<RetryResponseVO> children;
 
 }

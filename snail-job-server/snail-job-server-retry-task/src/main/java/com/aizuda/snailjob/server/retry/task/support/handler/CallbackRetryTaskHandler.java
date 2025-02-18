@@ -19,6 +19,7 @@ import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskMappe
 import com.aizuda.snailjob.template.datasource.persistence.po.Retry;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.helpers.FormattingTuple;
 import org.slf4j.helpers.MessageFormatter;
@@ -40,16 +41,9 @@ import java.util.Objects;
  */
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class CallbackRetryTaskHandler {
-
-    private static final String CALLBACK_UNIQUE_ID_RULE = "{}_{}";
-
-    @Autowired
-    protected AccessTemplate accessTemplate;
-    @Autowired
-    private RetryTaskMapper retryTaskMapper;
-    @Autowired
-    private SystemProperties systemProperties;
+    private final AccessTemplate accessTemplate;
 
     /**
      * 创建回调数据
@@ -79,6 +73,7 @@ public class CallbackRetryTaskHandler {
         WaitStrategy waitStrategy = WaitStrategyEnum.getWaitStrategy(retrySceneConfig.getCbTriggerType());
         WaitStrategyContext waitStrategyContext = new WaitStrategyContext();
         waitStrategyContext.setNextTriggerAt(DateUtils.toNowMilli());
+        waitStrategyContext.setDelayLevel(1);
         waitStrategyContext.setTriggerInterval(String.valueOf(triggerInterval));
 
         callbackRetry.setNextTriggerAt(waitStrategy.computeTriggerTime(waitStrategyContext));

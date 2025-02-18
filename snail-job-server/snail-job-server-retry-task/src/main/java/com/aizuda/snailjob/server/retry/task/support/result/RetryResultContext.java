@@ -19,6 +19,8 @@ public class RetryResultContext extends BaseDTO {
 
     private RetryResultStatusEnum resultStatus;
 
+    private boolean incrementRetryCount;
+
     private String resultJson;
     private String idempotentId;
     private String exceptionMsg;

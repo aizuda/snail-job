@@ -14,10 +14,6 @@ public class RetryTaskLogMessageQueryVO extends BaseQueryVO {
 
     private String groupName;
 
-//    private String uniqueId;
-
-    private Long retryId;
-
     private Long retryTaskId;
 
     private Long startId;

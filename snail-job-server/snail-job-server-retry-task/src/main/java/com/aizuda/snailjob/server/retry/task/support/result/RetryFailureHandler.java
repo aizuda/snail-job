@@ -18,6 +18,7 @@ import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskMappe
 import com.aizuda.snailjob.template.datasource.persistence.po.Retry;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -58,7 +59,9 @@ public class RetryFailureHandler extends AbstractRetryResultHandler {
                 accessTemplate.getSceneConfigAccess().getSceneConfigByGroupNameAndSceneName(
                         context.getGroupName(), context.getSceneName(), context.getNamespaceId());
 
-        Retry retry = retryMapper.selectById(context.getRetryId());
+        Retry retry = retryMapper.selectOne(new LambdaQueryWrapper<Retry>()
+                .select(Retry::getId, Retry::getRetryCount)
+                .eq(Retry::getId, context.getRetryId()));
         transactionTemplate.execute(new TransactionCallbackWithoutResult() {
             @Override
             protected void doInTransactionWithoutResult(TransactionStatus status) {
@@ -70,16 +73,21 @@ public class RetryFailureHandler extends AbstractRetryResultHandler {
                     maxRetryCount = retrySceneConfig.getMaxRetryCount();
                 }
 
-                if (maxRetryCount <= retry.getRetryCount()) {
+                if (maxRetryCount <= retry.getRetryCount() + 1) {
                     retry.setRetryStatus(RetryStatusEnum.MAX_COUNT.getStatus());
+                    retry.setUpdateDt(LocalDateTime.now());
+                    Assert.isTrue(1 == retryMapper.updateById(retry),
+                            () -> new SnailJobServerException("更新重试任务失败. groupName:[{}]", retry.getGroupName()));
                     // 创建一个回调任务
                     callbackRetryTaskHandler.create(retry, retrySceneConfig);
+                } else if (context.isIncrementRetryCount()) {
+                    retry.setRetryCount(retry.getRetryCount() + 1);
+                    retry.setUpdateDt(LocalDateTime.now());
+                    Assert.isTrue(1 == retryMapper.updateById(retry),
+                            () -> new SnailJobServerException("更新重试任务失败. groupName:[{}]", retry.getGroupName()));
+
                 }
 
-                retry.setRetryCount(retry.getRetryCount() + 1);
-                retry.setUpdateDt(LocalDateTime.now());
-                Assert.isTrue(1 == retryMapper.updateById(retry),
-                        () -> new SnailJobServerException("更新重试任务失败. groupName:[{}]", retry.getGroupName()));
 
                 RetryTask retryTask = new RetryTask();
                 retryTask.setId(context.getRetryTaskId());

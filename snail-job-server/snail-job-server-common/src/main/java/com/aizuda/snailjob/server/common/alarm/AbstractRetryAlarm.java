@@ -48,6 +48,10 @@ public abstract class AbstractRetryAlarm<E extends ApplicationEvent> extends Abs
                     retryAlarmInfo.getGroupName(),
                     retryAlarmInfo.getSceneName(),
                     retryAlarmInfo.getNamespaceId()));
+            if (Objects.isNull(retrySceneConfig)) {
+                continue;
+            }
+
             Set<Long> retryNotifyIds = StrUtil.isBlank(retrySceneConfig.getNotifyIds()) ? new HashSet<>() : new HashSet<>(JsonUtil.parseList(retrySceneConfig.getNotifyIds(), Long.class));
 
             for (Long retryNotifyId : retryNotifyIds) {

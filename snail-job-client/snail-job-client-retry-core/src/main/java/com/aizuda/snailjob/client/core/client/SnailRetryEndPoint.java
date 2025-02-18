@@ -111,6 +111,8 @@ public class SnailRetryEndPoint implements Lifecycle {
         // 将任务添加到时间轮中，到期停止任务
         TimerManager.add(new StopTaskTimerTask(request.getRetryTaskId()), request.getExecutorTimeout(), TimeUnit.SECONDS);
 
+        SnailJobLog.REMOTE.info("重试任务:[{}] 任务调度成功. ", request.getRetryTaskId());
+
         return new Result<>(Boolean.TRUE);
     }
 

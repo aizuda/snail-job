@@ -72,7 +72,7 @@ public class RetryTaskLogServiceImpl implements RetryTaskLogService {
     @Override
     public RetryTaskLogMessageResponseVO getRetryTaskLogMessagePage(
             RetryTaskLogMessageQueryVO queryVO) {
-        if (queryVO.getRetryId() == null || StrUtil.isBlank(queryVO.getGroupName())) {
+        if (queryVO.getRetryTaskId() == null || StrUtil.isBlank(queryVO.getGroupName())) {
             RetryTaskLogMessageResponseVO jobLogResponseVO = new RetryTaskLogMessageResponseVO();
             jobLogResponseVO.setNextStartId(0L);
             jobLogResponseVO.setFromIndex(0);
@@ -87,7 +87,6 @@ public class RetryTaskLogServiceImpl implements RetryTaskLogService {
                         .select(RetryTaskLogMessage::getId, RetryTaskLogMessage::getLogNum)
                         .ge(RetryTaskLogMessage::getId, queryVO.getStartId())
                         .eq(RetryTaskLogMessage::getNamespaceId, namespaceId)
-                        .eq(RetryTaskLogMessage::getRetryId, queryVO.getRetryId())
                         .eq(RetryTaskLogMessage::getRetryTaskId, queryVO.getRetryTaskId())
                         .eq(RetryTaskLogMessage::getGroupName, queryVO.getGroupName())
                         .orderByAsc(RetryTaskLogMessage::getId).orderByAsc(RetryTaskLogMessage::getRealTime)
