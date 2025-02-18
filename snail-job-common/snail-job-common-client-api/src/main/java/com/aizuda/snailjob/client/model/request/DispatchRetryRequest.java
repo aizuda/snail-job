@@ -29,4 +29,6 @@ public class DispatchRetryRequest {
     private Long retryTaskId;
     @NotNull(message = "retryId 不能为空")
     private Long retryId;
+    @NotNull(message = "executorTimeout 不能为空")
+    private Integer executorTimeout;
 }

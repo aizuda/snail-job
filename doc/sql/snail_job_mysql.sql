@@ -120,24 +120,23 @@ CREATE TABLE `sj_retry`
     `executor_name`   varchar(512)        NOT NULL DEFAULT '' COMMENT '执行器名称',
     `args_str`        text                NOT NULL COMMENT '执行方法参数',
     `ext_attrs`       text                NOT NULL COMMENT '扩展字段',
-    `next_trigger_at` bigint(13)                 NOT NULL COMMENT '下次触发时间',
+    `next_trigger_at` bigint(13)          NOT NULL COMMENT '下次触发时间',
     `retry_count`     int(11)             NOT NULL DEFAULT 0 COMMENT '重试次数',
     `retry_status`    tinyint(4)          NOT NULL DEFAULT 0 COMMENT '重试状态 0、重试中 1、成功 2、最大重试次数',
     `task_type`       tinyint(4)          NOT NULL DEFAULT 1 COMMENT '任务类型 1、重试数据 2、回调数据',
     `bucket_index`    int(11)             NOT NULL DEFAULT 0 COMMENT 'bucket',
     `parent_id`       bigint(20)          NOT NULL DEFAULT 0 COMMENT '父节点id',
-    `deleted`          tinyint(4)         NOT NULL DEFAULT 0 COMMENT '逻辑删除',
+    `deleted`         tinyint(4)         NOT NULL DEFAULT 0 COMMENT '逻辑删除',
     `create_dt`       datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_dt`       datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     PRIMARY KEY (`id`),
     KEY `idx_namespace_id_group_name_scene_name` (`namespace_id`, `group_name`, `scene_name`),
-    KEY `idx_namespace_id_group_name_task_type` (`namespace_id`, `group_name`, `task_type`),
     KEY `idx_namespace_id_group_name_retry_status` (`namespace_id`, `group_name`, `retry_status`),
     KEY `idx_idempotent_id` (`idempotent_id`),
     KEY `idx_biz_no` (`biz_no`),
     KEY `idx_parent_id` (`parent_id`),
     KEY `idx_create_dt` (`create_dt`),
-    UNIQUE KEY `uk_name_unique_id_deleted` (`namespace_id`, `group_name`, `idempotent_id`, `deleted`)
+    UNIQUE KEY `uk_name_task_type_idempotent_id_deleted` (`namespace_id`, `group_name`, `task_type`, `idempotent_id`, `deleted`)
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 0
   DEFAULT CHARSET = utf8mb4 COMMENT ='重试信息表'

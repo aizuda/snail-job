@@ -2,6 +2,7 @@ package com.aizuda.snailjob.server.retry.task.support;
 
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.client.model.DispatchRetryResultDTO;
+import com.aizuda.snailjob.client.model.request.RetryCallbackRequest;
 import com.aizuda.snailjob.client.model.request.DispatchRetryRequest;
 import com.aizuda.snailjob.client.model.request.StopRetryRequest;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
@@ -125,6 +126,8 @@ public interface RetryTaskConverter {
 
     RetryExecutorResultDTO toRetryExecutorResultDTO(DispatchRetryResultDTO resultDTO);
 
+    RetryExecutorResultDTO toRetryExecutorResultDTO(TaskStopJobDTO resultDTO);
+
     RetryExecutorResultDTO toRetryExecutorResultDTO(RequestRetryExecutorDTO resultDTO);
 
     RetryExecutorResultDTO toRetryExecutorResultDTO(RequestCallbackExecutorDTO resultDTO);
@@ -137,7 +140,9 @@ public interface RetryTaskConverter {
 
     TaskStopJobDTO toTaskStopJobDTO(BlockStrategyContext context);
 
-    StopRetryRequest toStopRetryRequest(RequestCallbackExecutorDTO executorDTO);
+    TaskStopJobDTO toTaskStopJobDTO(Retry retry);
+
+    TaskStopJobDTO toTaskStopJobDTO(RetryTaskPrepareDTO context);
 
     StopRetryRequest toStopRetryRequest(RequestStopRetryTaskExecutorDTO executorDTO);
 
@@ -167,4 +172,6 @@ public interface RetryTaskConverter {
             @Mapping(target = "taskType", source = "retry.taskType"),
     })
     RequestCallbackExecutorDTO toRequestCallbackExecutorDTO(RetrySceneConfig retrySceneConfig, Retry retry);
+
+    RetryCallbackRequest toRetryCallbackDTO(RequestCallbackExecutorDTO executorDTO);
 }

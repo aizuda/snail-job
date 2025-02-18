@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
+import java.util.Objects;
 
 /**
  * <p>
@@ -38,9 +39,19 @@ public class RetryTaskGeneratorHandler {
     public void generateRetryTask(RetryTaskGeneratorDTO generator) {
 
         RetryTask retryTask = RetryTaskConverter.INSTANCE.toRetryTask(generator);
-        retryTask.setTaskStatus(RetryTaskStatusEnum.WAITING.getStatus());
+        Integer taskStatus = generator.getTaskStatus();
+        if (Objects.isNull(taskStatus)) {
+            taskStatus = RetryTaskStatusEnum.WAITING.getStatus();
+        }
+        retryTask.setTaskStatus(taskStatus);
+        retryTask.setOperationReason(generator.getOperationReason());
+
         retryTask.setExtAttrs(StrUtil.EMPTY);
         Assert.isTrue(1 == retryTaskMapper.insert(retryTask), () -> new SnailJobServerException("插入重试任务失败"));
+
+        if (!RetryTaskStatusEnum.WAITING.getStatus().equals(taskStatus)) {
+            return;
+        }
 
         // 放到到时间轮
         long delay = generator.getNextTriggerAt() - DateUtils.toNowMilli();

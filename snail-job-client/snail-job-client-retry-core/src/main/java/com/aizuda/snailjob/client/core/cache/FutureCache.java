@@ -1,7 +1,5 @@
 package com.aizuda.snailjob.client.core.cache;
 
-import com.aizuda.snailjob.client.model.DispatchRetryResultDTO;
-import com.aizuda.snailjob.client.model.ExecuteResult;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.util.Optional;
@@ -20,10 +18,10 @@ public class FutureCache {
         futureCache.put(retryTaskId, future);
     }
 
-    public static void remove(Long taskBatchId) {
-        Optional.ofNullable(futureCache.get(taskBatchId)).ifPresent(future -> {
+    public static void remove(Long retryTaskId) {
+        Optional.ofNullable(futureCache.get(retryTaskId)).ifPresent(future -> {
             future.cancel(true);
-            futureCache.remove(taskBatchId);
+            futureCache.remove(retryTaskId);
         });
     }
 

@@ -3,6 +3,7 @@ package com.aizuda.snailjob.server.retry.task.support.generator.retry;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.lang.Pair;
+import cn.hutool.core.util.HashUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.enums.RetryStatusEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
@@ -10,6 +11,7 @@ import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.WaitStrategy;
+import com.aizuda.snailjob.server.common.config.SystemProperties;
 import com.aizuda.snailjob.server.common.enums.DelayLevelEnum;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
@@ -49,7 +51,7 @@ public abstract class AbstractGenerator implements TaskGenerator {
     @Autowired
     private List<IdGenerator> idGeneratorList;
     @Autowired
-    private RetryTaskMapper retryTaskMapper;
+    private SystemProperties systemProperties;
 
     @Override
     @Transactional
@@ -79,13 +81,11 @@ public abstract class AbstractGenerator implements TaskGenerator {
         Map<String/*幂等ID*/, List<Retry>> retryTaskMap = StreamUtils.groupByKey(retries, Retry::getIdempotentId);
 
         List<Retry> waitInsertTasks = new ArrayList<>();
-        List<RetryTask> waitInsertTaskLogs = new ArrayList<>();
         LocalDateTime now = LocalDateTime.now();
         for (TaskContext.TaskInfo taskInfo : taskInfos) {
             Pair<List<Retry>, List<RetryTask>> pair = doConvertTask(retryTaskMap, taskContext, now, taskInfo,
                     retrySceneConfig);
             waitInsertTasks.addAll(pair.getKey());
-            waitInsertTaskLogs.addAll(pair.getValue());
         }
 
         if (CollUtil.isEmpty(waitInsertTasks)) {
@@ -95,8 +95,6 @@ public abstract class AbstractGenerator implements TaskGenerator {
         Assert.isTrue(
                 waitInsertTasks.size() == retryTaskAccess.insertBatch(waitInsertTasks),
                 () -> new SnailJobServerException("failed to report data"));
-        /*Assert.isTrue(waitInsertTaskLogs.size() == retryTaskMapper.insertBatch(waitInsertTaskLogs),
-                () -> new SnailJobServerException("新增重试日志失败"));*/
     }
 
     /**
@@ -130,6 +128,12 @@ public abstract class AbstractGenerator implements TaskGenerator {
         retry.setSceneName(taskContext.getSceneName());
         retry.setRetryStatus(initStatus(taskContext));
         retry.setBizNo(Optional.ofNullable(retry.getBizNo()).orElse(StrUtil.EMPTY));
+        // 计算分桶逻辑
+        retry.setBucketIndex(
+                HashUtil.bkdrHash(taskContext.getGroupName() + taskContext.getSceneName() + taskInfo.getIdempotentId())
+                        % systemProperties.getBucketTotal()
+        );
+
         retry.setCreateDt(now);
         retry.setUpdateDt(now);
 

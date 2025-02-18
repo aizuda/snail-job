@@ -119,7 +119,8 @@ public class ScanRetryActor extends AbstractActor {
                 partitionTask -> ((RetryPartitionTask) partitionTask).getSceneName());
         List<RetrySceneConfig> retrySceneConfigs = accessTemplate.getSceneConfigAccess()
                 .list(new LambdaQueryWrapper<RetrySceneConfig>()
-                        .select(RetrySceneConfig::getBackOff, RetrySceneConfig::getTriggerInterval, RetrySceneConfig::getSceneName)
+                        .select(RetrySceneConfig::getBackOff, RetrySceneConfig::getTriggerInterval, RetrySceneConfig::getSceneName,
+                                RetrySceneConfig::getCbTriggerType, RetrySceneConfig::getCbTriggerInterval)
                         .in(RetrySceneConfig::getSceneName, sceneNameSet));
         return StreamUtils.toIdentityMap(retrySceneConfigs, RetrySceneConfig::getSceneName);
     }
@@ -132,6 +133,7 @@ public class ScanRetryActor extends AbstractActor {
 
         RetryTaskPrepareDTO retryTaskPrepareDTO = RetryTaskConverter.INSTANCE.toRetryTaskPrepareDTO(partitionTask);
         retryTaskPrepareDTO.setBlockStrategy(retrySceneConfig.getBackOff());
+        retryTaskPrepareDTO.setExecutorTimeout(retrySceneConfig.getExecutorTimeout());
         waitExecRetries.add(retryTaskPrepareDTO);
     }
 
@@ -148,13 +150,15 @@ public class ScanRetryActor extends AbstractActor {
         }
 
         waitStrategyContext.setNextTriggerAt(nextTriggerAt);
-        waitStrategyContext.setTriggerInterval(retrySceneConfig.getTriggerInterval());
         waitStrategyContext.setDelayLevel(partitionTask.getRetryCount() + 1);
+
         // 更新触发时间, 任务进入时间轮
         WaitStrategy waitStrategy;
         if (SyetemTaskTypeEnum.CALLBACK.getType().equals(partitionTask.getTaskType())) {
+            waitStrategyContext.setTriggerInterval(retrySceneConfig.getCbTriggerInterval());
             waitStrategy = WaitStrategies.WaitStrategyEnum.getWaitStrategy(retrySceneConfig.getCbTriggerType());
         } else {
+            waitStrategyContext.setTriggerInterval(retrySceneConfig.getTriggerInterval());
             waitStrategy = WaitStrategies.WaitStrategyEnum.getWaitStrategy(retrySceneConfig.getBackOff());
         }
 

@@ -15,12 +15,15 @@ import com.aizuda.snailjob.server.common.dto.RegisterNodeInfo;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.handler.ClientNodeAllocateHandler;
-import com.aizuda.snailjob.server.common.strategy.WaitStrategies;
 import com.aizuda.snailjob.server.common.util.ClientInfoUtils;
+import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.retry.task.dto.RequestCallbackExecutorDTO;
 import com.aizuda.snailjob.server.retry.task.dto.RequestRetryExecutorDTO;
 import com.aizuda.snailjob.server.retry.task.dto.RetryTaskExecuteDTO;
 import com.aizuda.snailjob.server.retry.task.support.RetryTaskConverter;
+import com.aizuda.snailjob.server.retry.task.support.handler.RetryTaskStopHandler;
+import com.aizuda.snailjob.server.retry.task.support.timer.RetryTimeoutCheckTask;
+import com.aizuda.snailjob.server.retry.task.support.timer.RetryTimerWheel;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.SceneConfigMapper;
@@ -34,6 +37,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.util.Objects;
 
 /**
@@ -53,6 +57,7 @@ public class RetryExecutor extends AbstractActor {
     private final RetryTaskMapper retryTaskMapper;
     private final SceneConfigMapper sceneConfigMapper;
     private final ClientNodeAllocateHandler clientNodeAllocateHandler;
+    private final RetryTaskStopHandler retryTaskStopHandler;
 
     @Override
     public Receive createReceive() {
@@ -103,14 +108,14 @@ public class RetryExecutor extends AbstractActor {
         updateRetryTaskStatus(execute.getRetryTaskId(), RetryTaskStatusEnum.RUNNING.getStatus(),
                 ClientInfoUtils.generate(serverNode));
 
-        Object executorDTO;
         if (SyetemTaskTypeEnum.CALLBACK.getType().equals(retry.getTaskType())) {
             // 请求客户端
             RequestCallbackExecutorDTO callbackExecutorDTO = RetryTaskConverter.INSTANCE.toRequestCallbackExecutorDTO(retrySceneConfig, retry);
             callbackExecutorDTO.setClientId(serverNode.getHostId());
             callbackExecutorDTO.setRetryTaskId(execute.getRetryTaskId());
 
-            executorDTO = callbackExecutorDTO;
+            ActorRef actorRef = ActorGenerator.callbackRealTaskExecutorActor();
+            actorRef.tell(callbackExecutorDTO, actorRef);
         } else {
 
             // 请求客户端
@@ -118,19 +123,19 @@ public class RetryExecutor extends AbstractActor {
             retryExecutorDTO.setClientId(serverNode.getHostId());
             retryExecutorDTO.setRetryTaskId(execute.getRetryTaskId());
 
-            executorDTO = retryExecutorDTO;
+            ActorRef actorRef = ActorGenerator.retryRealTaskExecutorActor();
+            actorRef.tell(retryExecutorDTO, actorRef);
         }
 
-        ActorRef actorRef = ActorGenerator.retryRealTaskExecutorActor();
-        actorRef.tell(executorDTO, actorRef);
+        // 运行中的任务，需要进行超时检查
+        RetryTimerWheel.registerWithRetry(() -> new RetryTimeoutCheckTask(
+                execute.getRetryTaskId(), execute.getRetryId(), retryTaskStopHandler, retryMapper, retryTaskMapper),
+                // 加500ms是为了让尽量保证客户端自己先超时中断，防止客户端上报成功但是服务端已触发超时中断
+                Duration.ofMillis(DateUtils.toEpochMilli(retrySceneConfig.getExecutorTimeout()) + 500));
     }
 
     private void updateRetryTaskStatus(Long retryTaskId, Integer taskStatus, String clientInfo) {
         updateRetryTaskStatus(retryTaskId, taskStatus, RetryOperationReasonEnum.NONE, clientInfo);
-    }
-
-    private void updateRetryTaskStatus(Long retryTaskId, Integer taskStatus) {
-        updateRetryTaskStatus(retryTaskId, taskStatus, RetryOperationReasonEnum.NONE, null);
     }
 
     private void updateRetryTaskStatus(Long retryTaskId, Integer taskStatus, RetryOperationReasonEnum reasonEnum) {

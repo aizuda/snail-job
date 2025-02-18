@@ -36,9 +36,10 @@ public class OverlayRetryBlockStrategy extends AbstracJobBlockStrategy {
 
         TaskStopJobDTO stopJobDTO = RetryTaskConverter.INSTANCE.toTaskStopJobDTO(context);
         if (Objects.isNull(context.getOperationReason()) || context.getOperationReason() == JobOperationReasonEnum.NONE.getReason()) {
-            stopJobDTO.setOperationReason(RetryOperationReasonEnum.JOB_DISCARD.getReason());
+            stopJobDTO.setOperationReason(RetryOperationReasonEnum.JOB_OVERLAY.getReason());
         }
 
+        stopJobDTO.setNeedUpdateTaskStatus(true);
         retryTaskStopHandler.stop(stopJobDTO);
 
     }

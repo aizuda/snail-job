@@ -2,10 +2,12 @@ package com.aizuda.snailjob.server.retry.task.support.handler;
 
 import akka.actor.ActorRef;
 import cn.hutool.core.lang.Assert;
+import com.aizuda.snailjob.common.core.enums.RetryResultStatusEnum;
 import com.aizuda.snailjob.common.core.enums.RetryTaskStatusEnum;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.retry.task.dto.RequestRetryExecutorDTO;
+import com.aizuda.snailjob.server.retry.task.dto.RetryExecutorResultDTO;
 import com.aizuda.snailjob.server.retry.task.dto.TaskStopJobDTO;
 import com.aizuda.snailjob.server.retry.task.support.RetryTaskConverter;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskMapper;
@@ -42,6 +44,20 @@ public class RetryTaskStopHandler {
         RequestRetryExecutorDTO executorDTO = RetryTaskConverter.INSTANCE.toRealRetryExecutorDTO(stopJobDTO);
         ActorRef actorRef = ActorGenerator.stopRetryTaskActor();
         actorRef.tell(executorDTO, actorRef);
+
+        // 更新结果为失败
+        doHandleResult(stopJobDTO);
+    }
+
+    private static void doHandleResult(TaskStopJobDTO stopJobDTO) {
+        if (!stopJobDTO.isNeedUpdateTaskStatus()) {
+            return;
+        }
+        RetryExecutorResultDTO executorResultDTO = RetryTaskConverter.INSTANCE.toRetryExecutorResultDTO(stopJobDTO);
+        executorResultDTO.setExceptionMsg(stopJobDTO.getMessage());
+        executorResultDTO.setResultStatus(RetryResultStatusEnum.FAILURE);
+        ActorRef actorRef = ActorGenerator.retryTaskExecutorResultActor();
+        actorRef.tell(executorResultDTO, actorRef);
     }
 
 

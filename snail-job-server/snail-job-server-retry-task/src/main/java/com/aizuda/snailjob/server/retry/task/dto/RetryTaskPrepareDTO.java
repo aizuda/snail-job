@@ -32,4 +32,6 @@ public class RetryTaskPrepareDTO {
     private Integer blockStrategy;
 
     private boolean onlyTimeoutCheck;
+
+    private Integer executorTimeout;
 }

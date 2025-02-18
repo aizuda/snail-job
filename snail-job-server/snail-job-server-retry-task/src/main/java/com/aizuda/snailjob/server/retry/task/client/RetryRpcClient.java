@@ -1,8 +1,7 @@
 package com.aizuda.snailjob.server.retry.task.client;
 
-import com.aizuda.snailjob.client.model.DispatchRetryResultDTO;
 import com.aizuda.snailjob.client.model.GenerateRetryIdempotentIdDTO;
-import com.aizuda.snailjob.client.model.RetryCallbackDTO;
+import com.aizuda.snailjob.client.model.request.RetryCallbackRequest;
 import com.aizuda.snailjob.client.model.request.DispatchRetryRequest;
 import com.aizuda.snailjob.client.model.request.StopRetryRequest;
 import com.aizuda.snailjob.common.core.model.Result;
@@ -30,7 +29,7 @@ public interface RetryRpcClient {
     Result<Boolean> stop(@Body StopRetryRequest stopRetryRequest);
 
     @Mapping(path = RETRY_CALLBACK, method = RequestMethod.POST)
-    Result<Boolean> callback(@Body RetryCallbackDTO retryCallbackDTO);
+    Result<Boolean> callback(@Body RetryCallbackRequest retryCallbackRequest);
 
     @Mapping(path = RETRY_GENERATE_IDEM_ID, method = RequestMethod.POST)
     Result generateIdempotentId(@Body GenerateRetryIdempotentIdDTO retryCallbackDTO);

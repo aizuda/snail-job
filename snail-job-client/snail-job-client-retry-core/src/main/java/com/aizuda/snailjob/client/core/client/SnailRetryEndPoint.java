@@ -20,9 +20,11 @@ import com.aizuda.snailjob.client.core.executor.RemoteRetryExecutor;
 import com.aizuda.snailjob.client.core.loader.SnailRetrySpiLoader;
 import com.aizuda.snailjob.client.core.retryer.RetryerInfo;
 import com.aizuda.snailjob.client.core.serializer.JacksonSerializer;
+import com.aizuda.snailjob.client.core.timer.StopTaskTimerTask;
+import com.aizuda.snailjob.client.core.timer.TimerManager;
 import com.aizuda.snailjob.client.model.DispatchRetryResultDTO;
 import com.aizuda.snailjob.client.model.GenerateRetryIdempotentIdDTO;
-import com.aizuda.snailjob.client.model.RetryCallbackDTO;
+import com.aizuda.snailjob.client.model.request.RetryCallbackRequest;
 import com.aizuda.snailjob.client.model.request.DispatchRetryRequest;
 import com.aizuda.snailjob.client.model.request.StopRetryRequest;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
@@ -106,17 +108,20 @@ public class SnailRetryEndPoint implements Lifecycle {
         FutureCache.addFuture(request.getRetryTaskId(), submit);
         Futures.addCallback(submit, new RetryTaskExecutorFutureCallback(retryContext), decorator);
 
+        // 将任务添加到时间轮中，到期停止任务
+        TimerManager.add(new StopTaskTimerTask(request.getRetryTaskId()), request.getExecutorTimeout(), TimeUnit.SECONDS);
+
         return new Result<>(Boolean.TRUE);
     }
 
 
     @Mapping(path = RETRY_CALLBACK, method = RequestMethod.POST)
-    public Result<Boolean> callback(@Valid RetryCallbackDTO callbackDTO) {
+    public Result<Boolean> callback(@Valid RetryCallbackRequest callbackDTO) {
         CallbackContext callbackContext = new CallbackContext();
         try {
-            RetryerInfo retryerInfo = RetryerInfoCache.get(callbackDTO.getScene(), callbackDTO.getExecutorName());
+            RetryerInfo retryerInfo = RetryerInfoCache.get(callbackDTO.getSceneName(), callbackDTO.getExecutorName());
             if (Objects.isNull(retryerInfo)) {
-                SnailJobLog.REMOTE.error("场景:[{}]配置不存在, 请检查您的场景和执行器是否存在", callbackDTO.getScene());
+                SnailJobLog.REMOTE.error("场景:[{}]配置不存在, 请检查您的场景和执行器是否存在", callbackDTO.getSceneName());
                 return new Result<>(0, "回调失败", Boolean.FALSE);
             }
 
@@ -142,6 +147,9 @@ public class SnailRetryEndPoint implements Lifecycle {
 
         FutureCache.addFuture(callbackDTO.getRetryTaskId(), submit);
         Futures.addCallback(submit, new CallbackTaskExecutorFutureCallback(callbackContext), decorator);
+
+        // 将任务添加到时间轮中，到期停止任务
+        TimerManager.add(new StopTaskTimerTask(callbackDTO.getRetryTaskId()), callbackDTO.getExecutorTimeout(), TimeUnit.SECONDS);
 
         return new Result<>(Boolean.TRUE);
     }
