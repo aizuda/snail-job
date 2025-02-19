@@ -5,6 +5,7 @@ import com.aizuda.snailjob.client.core.context.RemoteRetryContext;
 import com.aizuda.snailjob.client.core.client.RetryClient;
 import com.aizuda.snailjob.client.model.DispatchRetryResultDTO;
 import com.aizuda.snailjob.client.model.request.DispatchRetryResultRequest;
+import com.aizuda.snailjob.common.core.enums.RetryResultStatusEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
 import com.aizuda.snailjob.common.log.SnailJobLog;
@@ -61,6 +62,7 @@ public class RetryTaskExecutorFutureCallback implements FutureCallback<DispatchR
         try {
             DispatchRetryResultRequest request = buildDispatchRetryResultRequest(null);
             request.setExceptionMsg(t.getMessage());
+            request.setStatusCode(RetryResultStatusEnum.FAILURE.getStatus());
             CLIENT.dispatchResult(request);
         } catch (Exception e) {
             SnailJobLog.REMOTE.error("执行结果上报异常.[{}]", retryContext.getRetryTaskId(), e);

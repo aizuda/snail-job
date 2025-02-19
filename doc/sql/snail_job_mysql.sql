@@ -88,7 +88,6 @@ CREATE TABLE `sj_retry_dead_letter`
 (
     `id`            bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
     `namespace_id`  varchar(64)         NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' COMMENT '命名空间id',
-    `unique_id`     varchar(64)         NOT NULL COMMENT '同组下id唯一',
     `group_name`    varchar(64)         NOT NULL COMMENT '组名称',
     `scene_name`    varchar(64)         NOT NULL COMMENT '场景名称',
     `idempotent_id` varchar(64)         NOT NULL COMMENT '幂等id',
@@ -96,14 +95,12 @@ CREATE TABLE `sj_retry_dead_letter`
     `executor_name` varchar(512)        NOT NULL DEFAULT '' COMMENT '执行器名称',
     `args_str`      text                NOT NULL COMMENT '执行方法参数',
     `ext_attrs`     text                NOT NULL COMMENT '扩展字段',
-    `task_type`     tinyint(4)          NOT NULL DEFAULT 1 COMMENT '任务类型 1、重试数据 2、回调数据',
     `create_dt`     datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     PRIMARY KEY (`id`),
     KEY `idx_namespace_id_group_name_scene_name` (`namespace_id`, `group_name`, `scene_name`),
     KEY `idx_idempotent_id` (`idempotent_id`),
     KEY `idx_biz_no` (`biz_no`),
-    KEY `idx_create_dt` (`create_dt`),
-    UNIQUE KEY `uk_namespace_id_group_name_unique_id` (`namespace_id`, `group_name`, `unique_id`)
+    KEY `idx_create_dt` (`create_dt`)
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 0
   DEFAULT CHARSET = utf8mb4 COMMENT ='死信队列表'
@@ -126,7 +123,7 @@ CREATE TABLE `sj_retry`
     `task_type`       tinyint(4)          NOT NULL DEFAULT 1 COMMENT '任务类型 1、重试数据 2、回调数据',
     `bucket_index`    int(11)             NOT NULL DEFAULT 0 COMMENT 'bucket',
     `parent_id`       bigint(20)          NOT NULL DEFAULT 0 COMMENT '父节点id',
-    `deleted`         tinyint(4)         NOT NULL DEFAULT 0 COMMENT '逻辑删除',
+    `deleted`         bigint(20)          NOT NULL DEFAULT 0 COMMENT '逻辑删除',
     `create_dt`       datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_dt`       datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     PRIMARY KEY (`id`),

@@ -15,4 +15,6 @@ public class RetryCallbackResultRequest {
     private Long retryId;
     private Long retryTaskId;
     private Boolean result;
+    private Integer statusCode;
+    private String message;
 }

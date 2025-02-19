@@ -81,11 +81,6 @@ public interface SystemConstants {
         String REPORT_RETRY_DISPATCH_RESULT = "/report/retry/dispatch/result";
 
         /**
-         * 上报retry callback的运行结果
-         */
-        String REPORT_RETRY_CALLBACK_RESULT = "/report/retry/callback/result";
-
-        /**
          * 批量日志上报
          */
         String BATCH_LOG_REPORT = "/batch/server/report/log";

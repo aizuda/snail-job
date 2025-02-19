@@ -20,8 +20,6 @@ public class RetryCallbackRequest {
     private String sceneName;
     @NotBlank(message = "参数 不能为空")
     private String argsStr;
-    @NotBlank(message = "idempotentId 不能为空")
-    private String idempotentId;
     @NotBlank(message = "executorName 不能为空")
     private String executorName;
     @NotNull(message = "retryStatus 不能为空")

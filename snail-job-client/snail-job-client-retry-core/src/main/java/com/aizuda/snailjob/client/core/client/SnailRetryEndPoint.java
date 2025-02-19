@@ -140,6 +140,10 @@ public class SnailRetryEndPoint implements Lifecycle {
 
         callbackContext.setRetryTaskId(callbackDTO.getRetryTaskId());
         callbackContext.setRetryId(callbackDTO.getRetryId());
+        callbackContext.setGroupName(callbackDTO.getGroupName());
+        callbackContext.setNamespaceId(callbackDTO.getNamespaceId());
+        callbackContext.setSceneName(callbackDTO.getSceneName());
+        callbackContext.setRetryStatus(callbackDTO.getRetryStatus());
 
         ListeningExecutorService decorator = MoreExecutors.listeningDecorator(dispatcherThreadPool);
         ListenableFuture<Boolean> submit = decorator.submit(() -> {

@@ -21,8 +21,11 @@ import com.aizuda.snailjob.server.retry.task.dto.RequestCallbackExecutorDTO;
 import com.aizuda.snailjob.server.retry.task.dto.RetryExecutorResultDTO;
 import com.aizuda.snailjob.server.retry.task.support.RetryTaskConverter;
 import com.aizuda.snailjob.server.retry.task.support.RetryTaskLogConverter;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskMapper;
+import com.aizuda.snailjob.template.datasource.persistence.po.Retry;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.github.rholder.retry.Attempt;
 import com.github.rholder.retry.RetryException;
 import com.google.common.collect.Maps;
@@ -47,6 +50,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class RequestCallbackClientActor extends AbstractActor {
     private final RetryTaskMapper retryTaskMapper;
+    private final RetryMapper retryMapper;
 
     @Override
     public Receive createReceive() {
@@ -77,7 +81,17 @@ public class RequestCallbackClientActor extends AbstractActor {
         }
 
         RetryCallbackRequest retryCallbackRequest = RetryTaskConverter.INSTANCE.toRetryCallbackDTO(executorDTO);
-
+        Retry retry = retryMapper.selectOne(new LambdaQueryWrapper<Retry>()
+                .select(Retry::getRetryStatus, Retry::getId)
+                .eq(Retry::getId, executorDTO.getParentId()));
+        if (Objects.isNull(retry)) {
+            JobLogMetaDTO jobLogMetaDTO = RetryTaskConverter.INSTANCE.toJobLogDTO(executorDTO);
+            jobLogMetaDTO.setTimestamp(nowMilli);
+            SnailJobLog.REMOTE.error("retryTaskId:[{}] 任务调度失败. 失败原因: 重试任务不存在 <|>{}<|>", executorDTO.getRetryTaskId(),
+                    jobLogMetaDTO);
+            return;
+        }
+        retryCallbackRequest.setRetryStatus(retry.getRetryStatus());
         try {
 
             // 构建请求客户端对象
@@ -130,7 +144,7 @@ public class RequestCallbackClientActor extends AbstractActor {
                 // 更新最新负载节点
                 String hostId = (String) properties.get("HOST_ID");
                 String hostIp = (String) properties.get("HOST_IP");
-                String hostPort = (String) properties.get("HOST_PORT");
+                Integer hostPort = (Integer) properties.get("HOST_PORT");
 
                 RetryTask retryTask = new RetryTask();
                 retryTask.setId(executorDTO.getRetryTaskId());

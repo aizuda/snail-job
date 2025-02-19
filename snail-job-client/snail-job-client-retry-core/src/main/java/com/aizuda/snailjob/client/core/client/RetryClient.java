@@ -21,7 +21,4 @@ public interface RetryClient {
     @Mapping(method = RequestMethod.POST, path = HTTP_PATH.REPORT_RETRY_DISPATCH_RESULT)
     Result dispatchResult(DispatchRetryResultRequest request);
 
-    @Mapping(method = RequestMethod.POST, path = HTTP_PATH.REPORT_RETRY_CALLBACK_RESULT)
-    Result callbaclResult(RetryCallbackResultRequest request);
-
 }

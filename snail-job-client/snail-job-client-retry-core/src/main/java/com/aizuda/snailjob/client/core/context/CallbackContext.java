@@ -16,7 +16,7 @@ public final class CallbackContext {
 
     private String namespaceId;
     private String groupName;
-    private String scene;
+    private String sceneName;
     private Long retryTaskId;
     private Long retryId;
     private Integer retryStatus;

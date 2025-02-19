@@ -50,4 +50,6 @@ public class Retry extends CreateUpdateDt {
 
     private Integer bucketIndex;
 
+    private Long deleted;
+
 }

@@ -59,15 +59,13 @@ public class RetryFailureHandler extends AbstractRetryResultHandler {
                 accessTemplate.getSceneConfigAccess().getSceneConfigByGroupNameAndSceneName(
                         context.getGroupName(), context.getSceneName(), context.getNamespaceId());
 
-        Retry retry = retryMapper.selectOne(new LambdaQueryWrapper<Retry>()
-                .select(Retry::getId, Retry::getRetryCount)
-                .eq(Retry::getId, context.getRetryId()));
+        Retry retry = retryMapper.selectById(context.getRetryId());
         transactionTemplate.execute(new TransactionCallbackWithoutResult() {
             @Override
             protected void doInTransactionWithoutResult(TransactionStatus status) {
 
                 Integer maxRetryCount;
-                if (SyetemTaskTypeEnum.CALLBACK.getType().equals(context.getTaskType())) {
+                if (SyetemTaskTypeEnum.CALLBACK.getType().equals(retry.getTaskType())) {
                     maxRetryCount = retrySceneConfig.getCbMaxCount();
                 } else {
                     maxRetryCount = retrySceneConfig.getMaxRetryCount();
@@ -75,7 +73,9 @@ public class RetryFailureHandler extends AbstractRetryResultHandler {
 
                 if (maxRetryCount <= retry.getRetryCount() + 1) {
                     retry.setRetryStatus(RetryStatusEnum.MAX_COUNT.getStatus());
+                    retry.setRetryCount(retry.getRetryCount() + 1);
                     retry.setUpdateDt(LocalDateTime.now());
+                    retry.setDeleted(retry.getId());
                     Assert.isTrue(1 == retryMapper.updateById(retry),
                             () -> new SnailJobServerException("更新重试任务失败. groupName:[{}]", retry.getGroupName()));
                     // 创建一个回调任务
@@ -83,11 +83,11 @@ public class RetryFailureHandler extends AbstractRetryResultHandler {
                 } else if (context.isIncrementRetryCount()) {
                     retry.setRetryCount(retry.getRetryCount() + 1);
                     retry.setUpdateDt(LocalDateTime.now());
+                    retry.setDeleted(retry.getId());
                     Assert.isTrue(1 == retryMapper.updateById(retry),
                             () -> new SnailJobServerException("更新重试任务失败. groupName:[{}]", retry.getGroupName()));
 
                 }
-
 
                 RetryTask retryTask = new RetryTask();
                 retryTask.setId(context.getRetryTaskId());

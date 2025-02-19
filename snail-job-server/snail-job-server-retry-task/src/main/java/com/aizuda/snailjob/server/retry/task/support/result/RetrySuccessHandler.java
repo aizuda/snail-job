@@ -56,6 +56,8 @@ public class RetrySuccessHandler extends AbstractRetryResultHandler {
             protected void doInTransactionWithoutResult(TransactionStatus status) {
                 retry.setRetryStatus(RetryStatusEnum.FINISH.getStatus());
                 retry.setUpdateDt(LocalDateTime.now());
+                retry.setRetryCount(retry.getRetryCount() + 1);
+                retry.setDeleted(retry.getId());
                 Assert.isTrue(1 == retryMapper.updateById(retry),
                         () -> new SnailJobServerException("更新重试任务失败. groupName:[{}]",
                                 retry.getGroupName()));

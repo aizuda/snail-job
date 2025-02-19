@@ -43,6 +43,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -50,6 +51,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -103,10 +105,12 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         pageDTO = accessTemplate.getRetryAccess().listPage(pageDTO, queryWrapper);
 
         Set<Long> ids = StreamUtils.toSet(pageDTO.getRecords(), Retry::getId);
-        List<Retry> callbackTaskList = accessTemplate.getRetryAccess().list(new LambdaQueryWrapper<Retry>()
-                .in(Retry::getParentId, ids));
-
-        Map<Long, Retry> callbackMap = StreamUtils.toIdentityMap(callbackTaskList, Retry::getParentId);
+        Map<Long, Retry> callbackMap = Maps.newHashMap();
+        if (CollUtil.isNotEmpty(ids)) {
+            List<Retry> callbackTaskList = accessTemplate.getRetryAccess()
+                    .list(new LambdaQueryWrapper<Retry>().in(Retry::getParentId, ids));
+           callbackMap = StreamUtils.toIdentityMap(callbackTaskList, Retry::getParentId);
+        }
 
         List<RetryResponseVO> retryResponseList = RetryTaskResponseVOConverter.INSTANCE.convertList(pageDTO.getRecords());
         for (RetryResponseVO retryResponseVO : retryResponseList) {

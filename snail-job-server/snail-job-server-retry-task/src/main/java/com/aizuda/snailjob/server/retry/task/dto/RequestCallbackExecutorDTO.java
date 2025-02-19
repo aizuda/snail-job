@@ -21,12 +21,10 @@ public class RequestCallbackExecutorDTO extends BaseDTO {
 
     private Integer executorTimeout;
 
-    private Long deadlineRequest;
-
     private String argsStr;
 
     private String executorName;
 
-    private Integer retryCount;
+    private Long parentId;
 
 }
