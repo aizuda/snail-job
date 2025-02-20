@@ -25,6 +25,7 @@ import com.aizuda.snailjob.template.datasource.persistence.po.Retry;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
+import com.google.common.util.concurrent.RateLimiter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -32,6 +33,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * <p>
@@ -49,10 +51,16 @@ public class ScanRetryActor extends AbstractActor {
     private final SystemProperties systemProperties;
     private final AccessTemplate accessTemplate;
     private final RetryMapper retryMapper;
+    private final static RateLimiter rateLimiter = RateLimiter.create(1000, 1, TimeUnit.SECONDS);
 
     @Override
     public Receive createReceive() {
         return receiveBuilder().match(ScanTask.class, config -> {
+            // 覆盖每秒产生多少个令牌的值
+            double permitsPerSecond = systemProperties.getMaxDispatchCapacity();
+            if (permitsPerSecond >= 1 && permitsPerSecond != rateLimiter.getRate()) {
+                rateLimiter.setRate(permitsPerSecond);
+            }
 
             try {
                 doScan(config);
@@ -68,7 +76,13 @@ public class ScanRetryActor extends AbstractActor {
         PartitionTaskUtils.process(startId ->
                         listAvailableTasks(startId, scanTask.getBuckets()),
                 partitionTasks -> processRetryPartitionTasks(partitionTasks, scanTask),
-                0);
+                partitionTasks -> {
+                    if (!rateLimiter.tryAcquire(partitionTasks.size())) {
+                        log.warn("当前节点触发限流 [{}]", rateLimiter.getRate());
+                        return false;
+                    }
+                    return true;
+                }, 0);
 
     }
 

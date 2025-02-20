@@ -30,4 +30,20 @@ public class RetryPartitionTask extends PartitionTask {
 
     private Integer retryCount;
 
+    private String idempotentId;
+
+    private String bizNo;
+
+    private String argsStr;
+
+    private String extAttrs;
+
+    private String executorName;
+
+    private Integer retryStatus;
+
+    private Long parentId;
+
+    private Integer bucketIndex;
+
 }

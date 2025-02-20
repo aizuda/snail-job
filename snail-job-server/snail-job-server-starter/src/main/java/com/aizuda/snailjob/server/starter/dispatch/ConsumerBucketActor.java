@@ -6,13 +6,18 @@ import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.common.cache.CacheGroupScanActor;
+import com.aizuda.snailjob.server.common.config.SystemProperties;
 import com.aizuda.snailjob.server.common.dto.ScanTask;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
+import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -29,7 +34,7 @@ import java.util.Objects;
 public class ConsumerBucketActor extends AbstractActor {
     private static final String DEFAULT_JOB_KEY = "DEFAULT_JOB_KEY";
     private static final String DEFAULT_WORKFLOW_KEY = "DEFAULT_JOB_KEY";
-    private static final String DEFAULT_RETRY_KEY = "DEFAULT_RETRY_KEY";
+    private final SystemProperties systemProperties;
 
     @Override
     public Receive createReceive() {
@@ -58,9 +63,13 @@ public class ConsumerBucketActor extends AbstractActor {
 
     private void doScanRetry(final ConsumerBucket consumerBucket) {
         ScanTask scanTask = new ScanTask();
-        scanTask.setBuckets(consumerBucket.getBuckets());
-        ActorRef scanRetryActorRef = cacheActorRef(DEFAULT_RETRY_KEY, SyetemTaskTypeEnum.RETRY);
-        scanRetryActorRef.tell(scanTask, scanRetryActorRef);
+        // 通过并行度配置计算拉取范围
+        List<List<Integer>> partitions = Lists.partition(new ArrayList<>(consumerBucket.getBuckets()), systemProperties.getRetryMaxPullParallel());
+        for (List<Integer> buckets : partitions) {
+            scanTask.setBuckets(new HashSet<>(buckets));
+            ActorRef scanRetryActorRef = SyetemTaskTypeEnum.RETRY.getActorRef().get();
+            scanRetryActorRef.tell(scanTask, scanRetryActorRef);
+        }
     }
 
     private void doScanJobAndWorkflow(final ConsumerBucket consumerBucket) {
