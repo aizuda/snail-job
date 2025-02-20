@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskMapper">
+<mapper namespace="com.aizuda.snailjob.template.datasource.persistence.mapper.RetryMapper">
 
-    <select id="selectRetryRetryTaskLogSummaryList"
+    <select id="selectRetrySummaryList"
             resultType="com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardRetryResponseDO">
         SELECT namespace_id                                          AS namespaceId,
                group_name                                            AS groupName,
@@ -11,7 +11,7 @@
                SUM(CASE WHEN (retry_status = 1) THEN 1 ELSE 0 END)   AS finishNum,
                SUM(CASE WHEN (retry_status = 2) THEN 1 ELSE 0 END)   AS maxCountNum,
                SUM(CASE WHEN (retry_status = 3) THEN 1 ELSE 0 END)   AS suspendNum
-        FROM sj_retry_task a
+        FROM sj_retry a
                  join (SELECT namespace_id AS namespaceId, group_name AS groupName, scene_name AS sceneName
                        FROM sj_retry_scene_config) b
                      on a.namespace_id = b.namespaceId and a.group_name = b.groupName and a.scene_name = b.sceneName

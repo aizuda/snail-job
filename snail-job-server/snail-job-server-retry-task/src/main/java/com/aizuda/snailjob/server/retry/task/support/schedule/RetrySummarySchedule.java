@@ -8,8 +8,8 @@ import com.aizuda.snailjob.server.common.config.SystemProperties;
 import com.aizuda.snailjob.server.common.schedule.AbstractSchedule;
 import com.aizuda.snailjob.server.common.triple.Triple;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardRetryResponseDO;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.RetrySummaryMapper;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetrySummary;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -34,7 +34,7 @@ import java.util.*;
 @Component
 @RequiredArgsConstructor
 public class RetrySummarySchedule extends AbstractSchedule implements Lifecycle {
-    private final RetryTaskMapper retryTaskMapper;
+    private final RetryMapper retryMapper;
     private final RetrySummaryMapper retrySummaryMapper;
     private final SystemProperties systemProperties;
 
@@ -64,7 +64,7 @@ public class RetrySummarySchedule extends AbstractSchedule implements Lifecycle 
                 LambdaQueryWrapper<RetryTask> wrapper = new LambdaQueryWrapper<RetryTask>()
                         .between(RetryTask::getCreateDt, todayFrom, todayTo)
                         .groupBy(RetryTask::getNamespaceId, RetryTask::getGroupName, RetryTask::getSceneName);
-                List<DashboardRetryResponseDO> dashboardRetryResponseDOList = retryTaskMapper.selectRetryRetryTaskLogSummaryList(wrapper);
+                List<DashboardRetryResponseDO> dashboardRetryResponseDOList = retryMapper.selectRetrySummaryList(wrapper);
                 if (CollUtil.isEmpty(dashboardRetryResponseDOList)) {
                     continue;
                 }
@@ -142,8 +142,7 @@ public class RetrySummarySchedule extends AbstractSchedule implements Lifecycle 
 
     @Override
     public void start() {
-        // todo 待处理
-//        taskScheduler.scheduleAtFixedRate(this::execute, Duration.parse("PT1M"));
+        taskScheduler.scheduleAtFixedRate(this::execute, Duration.parse("PT1M"));
     }
 
     @Override
