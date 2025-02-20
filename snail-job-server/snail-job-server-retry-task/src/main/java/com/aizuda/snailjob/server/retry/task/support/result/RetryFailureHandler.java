@@ -27,6 +27,7 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 import static com.aizuda.snailjob.common.core.enums.RetryNotifySceneEnum.RETRY_TASK_FAIL_ERROR;
 
@@ -50,7 +51,7 @@ public class RetryFailureHandler extends AbstractRetryResultHandler {
 
     @Override
     public boolean supports(RetryResultContext context) {
-        return RetryResultStatusEnum.FAILURE == context.getResultStatus();
+        return Objects.equals(RetryResultStatusEnum.FAILURE.getStatus(), context.getResultStatus());
     }
 
     @Override
@@ -92,6 +93,7 @@ public class RetryFailureHandler extends AbstractRetryResultHandler {
                 RetryTask retryTask = new RetryTask();
                 retryTask.setId(context.getRetryTaskId());
                 retryTask.setTaskStatus(RetryTaskStatusEnum.FAIL.getStatus());
+                retryTask.setOperationReason(context.getOperationReason());
                 Assert.isTrue(1 == retryTaskMapper.updateById(retryTask),
                         () -> new SnailJobServerException("更新重试任务失败. groupName:[{}]", retry.getGroupName()));
 

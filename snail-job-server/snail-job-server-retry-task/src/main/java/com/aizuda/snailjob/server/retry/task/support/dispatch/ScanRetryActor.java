@@ -5,6 +5,7 @@ import akka.actor.ActorRef;
 import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.enums.RetryStatusEnum;
+import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.WaitStrategy;
@@ -19,8 +20,12 @@ import com.aizuda.snailjob.server.common.util.PartitionTaskUtils;
 import com.aizuda.snailjob.server.retry.task.dto.RetryPartitionTask;
 import com.aizuda.snailjob.server.retry.task.dto.RetryTaskPrepareDTO;
 import com.aizuda.snailjob.server.retry.task.support.RetryTaskConverter;
+import com.aizuda.snailjob.server.retry.task.support.handler.RateLimiterHandler;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.GroupConfigMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryMapper;
+import com.aizuda.snailjob.template.datasource.persistence.po.GroupConfig;
+import com.aizuda.snailjob.template.datasource.persistence.po.Job;
 import com.aizuda.snailjob.template.datasource.persistence.po.Retry;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -34,6 +39,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -51,16 +57,12 @@ public class ScanRetryActor extends AbstractActor {
     private final SystemProperties systemProperties;
     private final AccessTemplate accessTemplate;
     private final RetryMapper retryMapper;
-    private final static RateLimiter rateLimiter = RateLimiter.create(1000, 1, TimeUnit.SECONDS);
+    private final GroupConfigMapper groupConfigMapper;
+    private final RateLimiterHandler rateLimiterHandler;
 
     @Override
     public Receive createReceive() {
         return receiveBuilder().match(ScanTask.class, config -> {
-            // 覆盖每秒产生多少个令牌的值
-            double permitsPerSecond = systemProperties.getMaxDispatchCapacity();
-            if (permitsPerSecond >= 1 && permitsPerSecond != rateLimiter.getRate()) {
-                rateLimiter.setRate(permitsPerSecond);
-            }
 
             try {
                 doScan(config);
@@ -77,8 +79,8 @@ public class ScanRetryActor extends AbstractActor {
                         listAvailableTasks(startId, scanTask.getBuckets()),
                 partitionTasks -> processRetryPartitionTasks(partitionTasks, scanTask),
                 partitionTasks -> {
-                    if (!rateLimiter.tryAcquire(partitionTasks.size())) {
-                        log.warn("当前节点触发限流 [{}]", rateLimiter.getRate());
+                    if (CollUtil.isNotEmpty(partitionTasks) && !rateLimiterHandler.tryAcquire(partitionTasks.size())) {
+                        log.warn("当前节点触发限流");
                         return false;
                     }
                     return true;
@@ -136,6 +138,7 @@ public class ScanRetryActor extends AbstractActor {
                         .select(RetrySceneConfig::getBackOff, RetrySceneConfig::getTriggerInterval,
                                 RetrySceneConfig::getSceneName, RetrySceneConfig::getCbTriggerType,
                                 RetrySceneConfig::getCbTriggerInterval, RetrySceneConfig::getExecutorTimeout)
+                        .eq(RetrySceneConfig::getSceneStatus, StatusEnum.YES.getStatus())
                         .in(RetrySceneConfig::getSceneName, sceneNameSet));
         return StreamUtils.toIdentityMap(retrySceneConfigs, RetrySceneConfig::getSceneName);
     }
@@ -192,6 +195,16 @@ public class ScanRetryActor extends AbstractActor {
                                 .gt(Retry::getId, startId)
                                 .orderByAsc(Retry::getId))
                 .getRecords();
+
+        // 过滤已关闭的组
+        if (CollUtil.isNotEmpty(retries)) {
+            List<String> groupConfigs = StreamUtils.toList(groupConfigMapper.selectList(new LambdaQueryWrapper<GroupConfig>()
+                            .select(GroupConfig::getGroupName)
+                            .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus())
+                            .in(GroupConfig::getGroupName, StreamUtils.toSet(retries, Retry::getGroupName))),
+                    GroupConfig::getGroupName);
+            retries = retries.stream().filter(retry -> groupConfigs.contains(retry.getGroupName())).collect(Collectors.toList());
+        }
 
         return RetryTaskConverter.INSTANCE.toRetryPartitionTasks(retries);
     }

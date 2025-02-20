@@ -2,6 +2,7 @@ package com.aizuda.snailjob.server.retry.task.support.handler;
 
 import akka.actor.ActorRef;
 import cn.hutool.core.lang.Assert;
+import com.aizuda.snailjob.common.core.enums.RetryOperationReasonEnum;
 import com.aizuda.snailjob.common.core.enums.RetryResultStatusEnum;
 import com.aizuda.snailjob.common.core.enums.RetryTaskStatusEnum;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
@@ -35,11 +36,11 @@ public class RetryTaskStopHandler {
      */
     public void stop(TaskStopJobDTO stopJobDTO) {
 
-        RetryTask retryTask = new RetryTask();
-        retryTask.setId(stopJobDTO.getRetryTaskId());
-        retryTask.setTaskStatus(RetryTaskStatusEnum.STOP.getStatus());
-        retryTask.setOperationReason(stopJobDTO.getOperationReason());
-        Assert.isTrue(1 == retryTaskMapper.updateById(retryTask), () -> new SnailJobServerException("update retry task failed"));
+//        RetryTask retryTask = new RetryTask();
+//        retryTask.setId(stopJobDTO.getRetryTaskId());
+//        retryTask.setTaskStatus(RetryTaskStatusEnum.STOP.getStatus());
+//        retryTask.setOperationReason(stopJobDTO.getOperationReason());
+//        Assert.isTrue(1 == retryTaskMapper.updateById(retryTask), () -> new SnailJobServerException("update retry task failed"));
 
         RequestRetryExecutorDTO executorDTO = RetryTaskConverter.INSTANCE.toRealRetryExecutorDTO(stopJobDTO);
         ActorRef actorRef = ActorGenerator.stopRetryTaskActor();
@@ -55,7 +56,8 @@ public class RetryTaskStopHandler {
         }
         RetryExecutorResultDTO executorResultDTO = RetryTaskConverter.INSTANCE.toRetryExecutorResultDTO(stopJobDTO);
         executorResultDTO.setExceptionMsg(stopJobDTO.getMessage());
-        executorResultDTO.setResultStatus(RetryResultStatusEnum.FAILURE);
+        executorResultDTO.setResultStatus(RetryResultStatusEnum.FAILURE.getStatus());
+        executorResultDTO.setOperationReason(stopJobDTO.getOperationReason());
         ActorRef actorRef = ActorGenerator.retryTaskExecutorResultActor();
         actorRef.tell(executorResultDTO, actorRef);
     }

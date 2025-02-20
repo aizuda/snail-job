@@ -188,7 +188,7 @@ public class RequestCallbackClientActor extends AbstractActor {
         ActorRef actorRef = ActorGenerator.retryTaskExecutorResultActor();
         RetryExecutorResultDTO executorResultDTO = RetryTaskConverter.INSTANCE.toRetryExecutorResultDTO(executorDTO);
         executorResultDTO.setExceptionMsg(message);
-        executorResultDTO.setResultStatus(RetryResultStatusEnum.FAILURE);
+        executorResultDTO.setResultStatus(RetryResultStatusEnum.FAILURE.getStatus());
         actorRef.tell(executorResultDTO, actorRef);
     }
 }

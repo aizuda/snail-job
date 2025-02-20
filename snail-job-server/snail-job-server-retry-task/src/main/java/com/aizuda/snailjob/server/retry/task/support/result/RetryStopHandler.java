@@ -21,6 +21,7 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * <p>
@@ -43,7 +44,7 @@ public class RetryStopHandler extends AbstractRetryResultHandler {
 
     @Override
     public boolean supports(RetryResultContext context) {
-        return RetryResultStatusEnum.STOP == context.getResultStatus();
+        return Objects.equals(RetryResultStatusEnum.STOP.getStatus(), context.getResultStatus());
     }
 
     @Override
@@ -67,6 +68,7 @@ public class RetryStopHandler extends AbstractRetryResultHandler {
 
                 RetryTask retryTask = new RetryTask();
                 retryTask.setId(context.getRetryTaskId());
+                retryTask.setOperationReason(context.getOperationReason());
                 retryTask.setTaskStatus(RetryTaskStatusEnum.STOP.getStatus());
                 Assert.isTrue(1 == retryTaskMapper.updateById(retryTask),
                         () -> new SnailJobServerException("更新重试任务失败. groupName:[{}]", retry.getGroupName()));

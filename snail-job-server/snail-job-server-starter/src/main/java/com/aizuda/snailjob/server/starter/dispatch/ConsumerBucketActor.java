@@ -9,6 +9,7 @@ import com.aizuda.snailjob.server.common.cache.CacheGroupScanActor;
 import com.aizuda.snailjob.server.common.config.SystemProperties;
 import com.aizuda.snailjob.server.common.dto.ScanTask;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
+import com.aizuda.snailjob.server.retry.task.support.handler.RateLimiterHandler;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -35,6 +36,7 @@ public class ConsumerBucketActor extends AbstractActor {
     private static final String DEFAULT_JOB_KEY = "DEFAULT_JOB_KEY";
     private static final String DEFAULT_WORKFLOW_KEY = "DEFAULT_JOB_KEY";
     private final SystemProperties systemProperties;
+    private final RateLimiterHandler rateLimiterHandler;
 
     @Override
     public Receive createReceive() {
@@ -62,6 +64,10 @@ public class ConsumerBucketActor extends AbstractActor {
     }
 
     private void doScanRetry(final ConsumerBucket consumerBucket) {
+
+        // 刷新最新的配置
+        rateLimiterHandler.refreshRate();
+
         ScanTask scanTask = new ScanTask();
         // 通过并行度配置计算拉取范围
         List<List<Integer>> partitions = Lists.partition(new ArrayList<>(consumerBucket.getBuckets()), systemProperties.getRetryMaxPullParallel());

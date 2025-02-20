@@ -28,6 +28,8 @@ public enum RetryOperationReasonEnum {
     MANNER_STOP(7, "手动停止"),
     NOT_RUNNING_RETRY(8, "当前重试非运行中"),
     SCENE_CLOSED(9, "当前场景已关闭"),
+    RETRY_FAIL(10, "重试失败"),
+    CLIENT_TRIGGER_RETRY_STOP(11, "客户端触发任务停止"),
     ;
 
     private final int reason;

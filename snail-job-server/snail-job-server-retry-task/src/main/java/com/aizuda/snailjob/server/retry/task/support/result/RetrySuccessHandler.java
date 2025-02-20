@@ -20,6 +20,7 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * <p>
@@ -40,7 +41,7 @@ public class RetrySuccessHandler extends AbstractRetryResultHandler {
 
     @Override
     public boolean supports(RetryResultContext context) {
-        return RetryResultStatusEnum.SUCCESS == context.getResultStatus();
+        return Objects.equals(RetryResultStatusEnum.SUCCESS.getStatus(), context.getResultStatus());
     }
 
     @Override

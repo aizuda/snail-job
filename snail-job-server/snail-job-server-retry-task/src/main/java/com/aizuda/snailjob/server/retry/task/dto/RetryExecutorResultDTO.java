@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.retry.task.dto;
 
+import com.aizuda.snailjob.common.core.enums.RetryOperationReasonEnum;
 import com.aizuda.snailjob.common.core.enums.RetryResultStatusEnum;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -16,7 +17,8 @@ import lombok.EqualsAndHashCode;
 @Data
 public class RetryExecutorResultDTO extends BaseDTO  {
 
-    private RetryResultStatusEnum resultStatus;
+    private Integer resultStatus;
+    private Integer operationReason;
     private boolean incrementRetryCount;
     private String resultJson;
     private Integer statusCode;

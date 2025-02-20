@@ -17,10 +17,9 @@ import lombok.EqualsAndHashCode;
 @Data
 public class RetryResultContext extends BaseDTO {
 
-    private RetryResultStatusEnum resultStatus;
-
+    private Integer resultStatus;
+    private Integer operationReason;
     private boolean incrementRetryCount;
-
     private String resultJson;
     private String idempotentId;
     private String exceptionMsg;

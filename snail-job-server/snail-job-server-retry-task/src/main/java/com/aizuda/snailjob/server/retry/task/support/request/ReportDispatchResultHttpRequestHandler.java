@@ -4,6 +4,7 @@ import akka.actor.ActorRef;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.net.url.UrlQuery;
 import com.aizuda.snailjob.client.model.DispatchRetryResultDTO;
+import com.aizuda.snailjob.common.core.enums.RetryOperationReasonEnum;
 import com.aizuda.snailjob.common.core.enums.RetryResultStatusEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.model.SnailJobRequest;
@@ -59,8 +60,14 @@ public class ReportDispatchResultHttpRequestHandler extends PostHttpRequestHandl
             RetryExecutorResultDTO executorResultDTO = RetryTaskConverter.INSTANCE.toRetryExecutorResultDTO(resultDTO);
             RetryResultStatusEnum statusEnum = RetryResultStatusEnum.getRetryResultStatusEnum(resultDTO.getStatusCode());
             Assert.notNull(statusEnum, () -> new SnailJobServerException("status code is invalid"));
-            executorResultDTO.setResultStatus(statusEnum);
+            executorResultDTO.setResultStatus(statusEnum.getStatus());
             executorResultDTO.setIncrementRetryCount(true);
+            if (RetryResultStatusEnum.FAILURE.getStatus().equals(statusEnum.getStatus())) {
+                executorResultDTO.setOperationReason(RetryOperationReasonEnum.RETRY_FAIL.getReason());
+            } else if (RetryResultStatusEnum.STOP.getStatus().equals(statusEnum.getStatus())) {
+                executorResultDTO.setOperationReason(RetryOperationReasonEnum.CLIENT_TRIGGER_RETRY_STOP.getReason());
+            }
+
             ActorRef actorRef = ActorGenerator.retryTaskExecutorResultActor();
             actorRef.tell(executorResultDTO, actorRef);
 
