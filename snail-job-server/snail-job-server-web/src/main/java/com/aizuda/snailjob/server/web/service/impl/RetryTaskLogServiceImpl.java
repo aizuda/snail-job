@@ -19,6 +19,7 @@ import com.aizuda.snailjob.server.web.service.convert.RetryTaskLogResponseVOConv
 import com.aizuda.snailjob.server.web.util.UserSessionUtils;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskLogMessageMapper;
+import com.aizuda.snailjob.template.datasource.persistence.po.Retry;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTaskLogMessage;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -60,7 +61,7 @@ public class RetryTaskLogServiceImpl implements RetryTaskLogService {
                 .between(ObjUtil.isNotNull(queryVO.getDatetimeRange()),
                         RetryTask::getCreateDt, queryVO.getStartDt(), queryVO.getEndDt())
                 .select(RetryTask::getGroupName, RetryTask::getId, RetryTask::getSceneName, RetryTask::getTaskStatus,
-                        RetryTask::getCreateDt, RetryTask::getTaskType, RetryTask::getOperationReason)
+                        RetryTask::getCreateDt, RetryTask::getTaskType, RetryTask::getOperationReason, RetryTask::getRetryId)
                 .orderByDesc(RetryTask::getCreateDt);
 
         PageDTO<RetryTask> retryTaskPageDTO = retryTaskMapper.selectPage(pageDTO, wrapper);

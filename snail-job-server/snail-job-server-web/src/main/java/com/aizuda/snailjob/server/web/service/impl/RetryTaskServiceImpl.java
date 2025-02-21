@@ -99,7 +99,7 @@ public class RetryTaskServiceImpl implements RetryTaskService {
                 .eq(Retry::getTaskType,  SyetemTaskTypeEnum.RETRY.getType())
                 .select(Retry::getId, Retry::getBizNo, Retry::getIdempotentId,
                         Retry::getGroupName, Retry::getNextTriggerAt, Retry::getRetryCount,
-                        Retry::getRetryStatus, Retry::getUpdateDt, Retry::getSceneName,
+                        Retry::getRetryStatus, Retry::getUpdateDt, Retry::getCreateDt, Retry::getSceneName,
                         Retry::getTaskType, Retry::getParentId)
                 .orderByDesc(Retry::getCreateDt);
         pageDTO = accessTemplate.getRetryAccess().listPage(pageDTO, queryWrapper);

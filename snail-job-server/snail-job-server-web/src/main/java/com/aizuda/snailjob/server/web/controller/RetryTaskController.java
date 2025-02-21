@@ -22,7 +22,7 @@ import java.util.Set;
  */
 @RestController
 @RequestMapping("/retry-task")
-public class RetryTaskLogController {
+public class RetryTaskController {
 
     @Autowired
     private RetryTaskLogService retryTaskLogService;
