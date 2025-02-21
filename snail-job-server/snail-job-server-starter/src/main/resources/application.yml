@@ -80,11 +80,6 @@ snail-job:
   retry-pull-page-size: 1000 # 拉取重试数据的每批次的大小
   job-pull-page-size: 1000 # 拉取重试数据的每批次的大小
   server-port: 17888  # 服务器端口
-  limiter: 1000 # 一个客户端每秒最多接收的重试数量指令
   step: 100 # 号段模式下步长配置
   log-storage: 45 # 日志保存时间(单位: day)
-  callback: # 回调配置
-    max-count: 288 #回调最大执行次数
-    trigger-interval: 900 #间隔时间
-  retry-max-pull-count: 10
   rpc-type: grpc
