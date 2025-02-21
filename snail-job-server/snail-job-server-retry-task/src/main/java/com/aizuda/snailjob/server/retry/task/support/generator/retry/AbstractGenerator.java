@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.lang.Pair;
 import cn.hutool.core.util.HashUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.enums.RetryStatusEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
@@ -49,12 +50,9 @@ public abstract class AbstractGenerator implements TaskGenerator {
     @Autowired
     protected AccessTemplate accessTemplate;
     @Autowired
-    private List<IdGenerator> idGeneratorList;
-    @Autowired
     private SystemProperties systemProperties;
 
     @Override
-    @Transactional
     public void taskGenerator(TaskContext taskContext) {
         SnailJobLog.LOCAL.debug("received report data. {}", JsonUtil.toJsonString(taskContext));
 
@@ -127,7 +125,13 @@ public abstract class AbstractGenerator implements TaskGenerator {
         retry.setGroupName(taskContext.getGroupName());
         retry.setSceneName(taskContext.getSceneName());
         retry.setRetryStatus(initStatus(taskContext));
-        retry.setBizNo(Optional.ofNullable(retry.getBizNo()).orElse(StrUtil.EMPTY));
+        if (StrUtil.isBlank(retry.getBizNo())) {
+            // 默认生成一个业务单据号方便用户查询
+            retry.setBizNo(IdUtil.fastSimpleUUID());
+        } else {
+            retry.setBizNo(retry.getBizNo());
+        }
+
         // 计算分桶逻辑
         retry.setBucketIndex(
                 HashUtil.bkdrHash(taskContext.getGroupName() + taskContext.getSceneName() + taskInfo.getIdempotentId())
@@ -208,21 +212,4 @@ public abstract class AbstractGenerator implements TaskGenerator {
         return retrySceneConfig;
     }
 
-    /**
-     * 获取分布式id
-     *
-     * @param groupName 组id
-     * @return 分布式id
-     */
-    private String getIdGenerator(String groupName, String namespaceId) {
-
-        GroupConfig groupConfig = accessTemplate.getGroupConfigAccess().getGroupConfigByGroupName(groupName, namespaceId);
-        for (final IdGenerator idGenerator : idGeneratorList) {
-            if (idGenerator.supports(groupConfig.getIdGeneratorMode())) {
-                return idGenerator.idGenerator(groupName, namespaceId);
-            }
-        }
-
-        throw new SnailJobServerException("id generator mode not configured. [{}]", groupName);
-    }
 }

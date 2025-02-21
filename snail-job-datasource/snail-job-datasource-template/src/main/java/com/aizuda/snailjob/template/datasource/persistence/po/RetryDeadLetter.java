@@ -19,8 +19,6 @@ public class RetryDeadLetter extends CreateDt {
 
     private String namespaceId;
 
-    private String uniqueId;
-
     private String groupName;
 
     private String sceneName;

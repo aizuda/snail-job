@@ -23,7 +23,7 @@ public class RateLimiterHandler implements InitializingBean {
     private RateLimiter rateLimiter;
 
     public boolean tryAcquire(int permits) {
-        return rateLimiter.tryAcquire(permits, 0L, TimeUnit.MICROSECONDS);
+        return rateLimiter.tryAcquire(permits, 500L, TimeUnit.MILLISECONDS);
     }
 
 
@@ -44,6 +44,7 @@ public class RateLimiterHandler implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        rateLimiter  = RateLimiter.create(systemProperties.getMaxDispatchCapacity(), 1, TimeUnit.SECONDS);
+        rateLimiter  = RateLimiter.create(systemProperties.getMaxDispatchCapacity());
     }
+
 }

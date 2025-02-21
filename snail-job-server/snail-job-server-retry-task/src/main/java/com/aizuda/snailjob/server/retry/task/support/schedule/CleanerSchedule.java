@@ -152,11 +152,12 @@ public class CleanerSchedule extends AbstractSchedule implements Lifecycle {
 
         // 删除重试任务
         List<RetryTask> retryTaskList = retryTaskMapper.selectList(new LambdaQueryWrapper<RetryTask>()
-                .in(RetryTask::getId, totalWaitRetryIds));
+                .in(RetryTask::getRetryId, totalWaitRetryIds));
 
         // 删除重试日志信息
         List<RetryTaskLogMessage> retryTaskLogMessageList = retryTaskLogMessageMapper.selectList(
-                new LambdaQueryWrapper<RetryTaskLogMessage>().in(RetryTaskLogMessage::getRetryId, retryIds));
+                new LambdaQueryWrapper<RetryTaskLogMessage>()
+                        .in(RetryTaskLogMessage::getRetryId, totalWaitRetryIds));
 
         List<Long> finalCbRetryIds = cbRetryIds;
         transactionTemplate.execute(new TransactionCallbackWithoutResult() {
@@ -184,8 +185,10 @@ public class CleanerSchedule extends AbstractSchedule implements Lifecycle {
         });
 
         // 重试最大次数迁移死信表
-        List<RetryPartitionTask> maxCountRetries = retryPartitionTasks.stream().filter(retryPartitionTask ->
-                        RetryStatusEnum.MAX_COUNT.getStatus().equals(retryPartitionTask.getRetryStatus())).toList();
+        List<RetryPartitionTask> maxCountRetries = retryPartitionTasks.stream()
+                .filter(retryPartitionTask ->
+                        RetryStatusEnum.MAX_COUNT.getStatus().equals(retryPartitionTask.getRetryStatus()))
+                .toList();
         moveDeadLetters(maxCountRetries);
     }
 

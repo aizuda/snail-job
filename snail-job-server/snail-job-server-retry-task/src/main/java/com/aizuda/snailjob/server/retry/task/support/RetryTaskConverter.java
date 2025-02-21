@@ -38,6 +38,7 @@ public interface RetryTaskConverter {
 
     @Mappings({
             @Mapping(target = "id", ignore = true),
+            @Mapping(target = "deleted", ignore = true),
     })
     Retry toRetryTask(Retry retry);
 

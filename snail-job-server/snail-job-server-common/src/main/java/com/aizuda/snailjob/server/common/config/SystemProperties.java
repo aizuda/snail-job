@@ -1,6 +1,7 @@
 package com.aizuda.snailjob.server.common.config;
 
 import com.aizuda.snailjob.common.core.alarm.email.SnailJobMailProperties;
+import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.enums.RpcTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -33,7 +34,7 @@ public class SystemProperties {
     /**
      * 重试任务拉取的并行度
      */
-    private int retryMaxPullParallel = 10;
+    private int retryMaxPullParallel = 2;
 
     /**
      * 任务调度每次拉取的条数
@@ -68,7 +69,7 @@ public class SystemProperties {
     /**
      * 单个节点支持的最大调度量
      */
-    private int maxDispatchCapacity = 5000;
+    private int maxDispatchCapacity = 10000;
 
     /**
      * 号段模式下步长配置 默认100

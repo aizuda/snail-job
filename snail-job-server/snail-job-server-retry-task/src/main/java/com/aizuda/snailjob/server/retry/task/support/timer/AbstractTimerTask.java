@@ -21,7 +21,7 @@ public abstract class AbstractTimerTask implements TimerTask<String> {
 
     @Override
     public void run(Timeout timeout) throws Exception {
-        log.info("开始执行重试任务. 当前时间:[{}] groupName:[{}] retryId:[{}] retryTaskId:[{}] namespaceId:[{}]",
+        log.debug("开始执行重试任务. 当前时间:[{}] groupName:[{}] retryId:[{}] retryTaskId:[{}] namespaceId:[{}]",
                 LocalDateTime.now(), groupName, retryId, retryTaskId, namespaceId);
         try {
             doRun(timeout);

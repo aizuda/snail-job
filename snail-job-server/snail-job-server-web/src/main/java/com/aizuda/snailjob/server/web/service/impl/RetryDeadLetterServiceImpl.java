@@ -74,7 +74,6 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
                                 .eq(StrUtil.isNotBlank(queryVO.getSceneName()), RetryDeadLetter::getSceneName, queryVO.getSceneName())
                                 .eq(StrUtil.isNotBlank(queryVO.getBizNo()), RetryDeadLetter::getBizNo, queryVO.getBizNo())
                                 .eq(StrUtil.isNotBlank(queryVO.getIdempotentId()), RetryDeadLetter::getIdempotentId, queryVO.getIdempotentId())
-                                .eq(StrUtil.isNotBlank(queryVO.getUniqueId()), RetryDeadLetter::getUniqueId, queryVO.getUniqueId())
                                 .between(ObjUtil.isAllNotEmpty(queryVO.getStartDt(), queryVO.getEndDt()),
                                         RetryDeadLetter::getCreateDt, queryVO.getStartDt(), queryVO.getEndDt())
                                 .orderByDesc(RetryDeadLetter::getId));
@@ -177,7 +176,7 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
 
         List<RetryDeadLetter> tasks = retryDeadLetterAccess.list(
                 new LambdaQueryWrapper<RetryDeadLetter>()
-                        .select(RetryDeadLetter::getUniqueId)
+                        .select(RetryDeadLetter::getId)
                         .eq(RetryDeadLetter::getNamespaceId, namespaceId)
                         .eq(RetryDeadLetter::getGroupName, deadLetterVO.getGroupName())
                         .in(RetryDeadLetter::getId, deadLetterVO.getIds())

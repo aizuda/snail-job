@@ -16,10 +16,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * 消费当前节点分配的bucket并生成扫描任务
@@ -68,12 +65,15 @@ public class ConsumerBucketActor extends AbstractActor {
         // 刷新最新的配置
         rateLimiterHandler.refreshRate();
 
-        ScanTask scanTask = new ScanTask();
         // 通过并行度配置计算拉取范围
-        List<List<Integer>> partitions = Lists.partition(new ArrayList<>(consumerBucket.getBuckets()), systemProperties.getRetryMaxPullParallel());
+        Set<Integer> totalBuckets = consumerBucket.getBuckets();
+        int retryMaxPullParallel = systemProperties.getRetryMaxPullParallel();
+        List<List<Integer>> partitions = Lists.partition(new ArrayList<>(totalBuckets),
+                (totalBuckets.size() + retryMaxPullParallel - 1) / retryMaxPullParallel);
         for (List<Integer> buckets : partitions) {
+            ScanTask scanTask = new ScanTask();
             scanTask.setBuckets(new HashSet<>(buckets));
-            ActorRef scanRetryActorRef = SyetemTaskTypeEnum.RETRY.getActorRef().get();
+            ActorRef scanRetryActorRef = ActorGenerator.scanRetryActor();
             scanRetryActorRef.tell(scanTask, scanRetryActorRef);
         }
     }

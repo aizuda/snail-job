@@ -6,6 +6,7 @@ import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.enums.RetryStatusEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
+import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.WaitStrategy;
@@ -36,6 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -75,20 +77,32 @@ public class ScanRetryActor extends AbstractActor {
     }
 
     private void doScan(final ScanTask scanTask) {
-        PartitionTaskUtils.process(startId ->
-                        listAvailableTasks(startId, scanTask.getBuckets()),
-                partitionTasks -> processRetryPartitionTasks(partitionTasks, scanTask),
-                partitionTasks -> {
-                    if (CollUtil.isNotEmpty(partitionTasks) && !rateLimiterHandler.tryAcquire(partitionTasks.size())) {
-                        log.warn("当前节点触发限流");
-                        return false;
-                    }
-                    return true;
-                }, 0);
-
+        PartitionTaskUtils.process(startId -> listAvailableTasks(startId, scanTask.getBuckets()),
+                this::processRetryPartitionTasks, this::stopCondition, 0);
     }
 
-    private void processRetryPartitionTasks(List<? extends PartitionTask> partitionTasks, final ScanTask scanTask) {
+    /**
+     * 拉取任务停止判断
+     *
+     * @param partitionTasks RetryPartitionTask
+     * @return true-停止拉取 false-继续拉取
+     */
+    private boolean stopCondition(List<? extends PartitionTask> partitionTasks) {
+        if (CollectionUtils.isEmpty(partitionTasks)) {
+            return true;
+        }
+
+        boolean b = rateLimiterHandler.tryAcquire(partitionTasks.size());
+        log.warn("获取令牌, b:[{}] size:[{}]", b, partitionTasks.size());
+        if (!b) {
+            log.warn("当前节点触发限流");
+            return true;
+        }
+
+        return false;
+    }
+
+    private void processRetryPartitionTasks(List<? extends PartitionTask> partitionTasks) {
         if (CollUtil.isEmpty(partitionTasks)) {
             return;
         }
