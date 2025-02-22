@@ -3,18 +3,13 @@ package com.aizuda.snailjob.client.core.callback.future;
 import com.aizuda.snailjob.client.common.rpc.client.RequestBuilder;
 import com.aizuda.snailjob.client.core.context.CallbackContext;
 import com.aizuda.snailjob.client.core.client.RetryClient;
-import com.aizuda.snailjob.client.model.DispatchRetryResultDTO;
 import com.aizuda.snailjob.client.model.request.DispatchCallbackResultRequest;
-import com.aizuda.snailjob.client.model.request.DispatchRetryResultRequest;
-import com.aizuda.snailjob.client.model.request.RetryCallbackResultRequest;
-import com.aizuda.snailjob.common.core.enums.RetryResultStatusEnum;
 import com.aizuda.snailjob.common.core.enums.RetryTaskStatusEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.google.common.util.concurrent.FutureCallback;
 
-import java.util.Objects;
 import java.util.concurrent.CancellationException;
 
 /**

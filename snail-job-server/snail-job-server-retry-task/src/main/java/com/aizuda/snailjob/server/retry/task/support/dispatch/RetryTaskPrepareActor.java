@@ -2,6 +2,7 @@ package com.aizuda.snailjob.server.retry.task.support.dispatch;
 
 import akka.actor.AbstractActor;
 import cn.hutool.core.collection.CollUtil;
+import com.aizuda.snailjob.server.common.enums.RetryTaskExecutorSceneEnum;
 import com.aizuda.snailjob.server.retry.task.dto.RetryTaskPrepareDTO;
 import com.aizuda.snailjob.server.retry.task.support.RetryPrePareHandler;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskMapper;
@@ -15,6 +16,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Objects;
 
 import static com.aizuda.snailjob.common.core.enums.RetryTaskStatusEnum.NOT_COMPLETE;
 import static com.aizuda.snailjob.common.core.enums.RetryTaskStatusEnum.SUCCESS;
@@ -66,7 +68,9 @@ public class RetryTaskPrepareActor extends AbstractActor {
                         .orderByAsc(RetryTask::getRetryId)
         );
 
-        if (CollUtil.isEmpty(retryTasks)) {
+        if (CollUtil.isEmpty(retryTasks)
+                || Objects.isNull(prepareDTO.getRetryTaskExecutorScene())
+                || RetryTaskExecutorSceneEnum.MANUAL_RETRY.getScene() == prepareDTO.getRetryTaskExecutorScene()) {
             RetryTask retryTask = new RetryTask();
             retryTask.setTaskStatus(SUCCESS.getStatus());
             retryTasks = Lists.newArrayList(retryTask);

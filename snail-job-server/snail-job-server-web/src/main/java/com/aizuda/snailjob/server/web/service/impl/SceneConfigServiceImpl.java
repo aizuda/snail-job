@@ -60,19 +60,7 @@ public class SceneConfigServiceImpl implements SceneConfigService {
     private final GroupHandler groupHandler;
     private final RetrySummaryMapper retrySummaryMapper;
 
-    private static void checkExecuteInterval(SceneConfigRequestVO requestVO) {
-        if (Lists.newArrayList(WaitStrategies.WaitStrategyEnum.FIXED.getType(),
-                        WaitStrategies.WaitStrategyEnum.RANDOM.getType())
-                .contains(requestVO.getBackOff())) {
-            if (Integer.parseInt(requestVO.getTriggerInterval()) < 10) {
-                throw new SnailJobServerException("间隔时间不得小于10");
-            }
-        } else if (requestVO.getBackOff() == WaitStrategies.WaitStrategyEnum.CRON.getType()) {
-            if (CronUtils.getExecuteInterval(requestVO.getTriggerInterval()) < 10 * 1000) {
-                throw new SnailJobServerException("间隔时间不得小于10");
-            }
-        }
-    }
+
 
     @Override
     public PageResult<List<SceneConfigResponseVO>> getSceneConfigPageList(SceneConfigQueryVO queryVO) {
@@ -111,7 +99,7 @@ public class SceneConfigServiceImpl implements SceneConfigService {
     @Override
     public Boolean saveSceneConfig(SceneConfigRequestVO requestVO) {
 
-        checkExecuteInterval(requestVO);
+        checkExecuteInterval(requestVO.getBackOff(), requestVO.getTriggerInterval());
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
         ConfigAccess<RetrySceneConfig> sceneConfigAccess = accessTemplate.getSceneConfigAccess();
         Assert.isTrue(0 == sceneConfigAccess.count(
@@ -130,6 +118,13 @@ public class SceneConfigServiceImpl implements SceneConfigService {
             retrySceneConfig.setTriggerInterval(StrUtil.EMPTY);
         }
 
+        if (Objects.equals(requestVO.getCbStatus(), StatusEnum.YES.getStatus())) {
+            checkExecuteInterval(requestVO.getCbTriggerType(), requestVO.getCbTriggerInterval());
+            if (requestVO.getCbTriggerType() == WaitStrategies.WaitStrategyEnum.DELAY_LEVEL.getType()) {
+                retrySceneConfig.setCbTriggerInterval(StrUtil.EMPTY);
+            }
+        }
+
         Assert.isTrue(1 == sceneConfigAccess.insert(retrySceneConfig),
                 () -> new SnailJobServerException("failed to insert scene. retrySceneConfig:[{}]",
                         JsonUtil.toJsonString(retrySceneConfig)));
@@ -142,7 +137,7 @@ public class SceneConfigServiceImpl implements SceneConfigService {
 
     @Override
     public Boolean updateSceneConfig(SceneConfigRequestVO requestVO) {
-        checkExecuteInterval(requestVO);
+        checkExecuteInterval(requestVO.getBackOff(), requestVO.getTriggerInterval());
         RetrySceneConfig retrySceneConfig = SceneConfigConverter.INSTANCE.toRetrySceneConfig(requestVO);
         // 防止更新
         retrySceneConfig.setSceneName(null);
@@ -150,6 +145,13 @@ public class SceneConfigServiceImpl implements SceneConfigService {
         retrySceneConfig.setNamespaceId(null);
 
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
+
+        if (Objects.equals(requestVO.getCbStatus(), StatusEnum.YES.getStatus())) {
+            checkExecuteInterval(requestVO.getCbTriggerType(), requestVO.getCbTriggerInterval());
+            if (requestVO.getCbTriggerType() == WaitStrategies.WaitStrategyEnum.DELAY_LEVEL.getType()) {
+                retrySceneConfig.setCbTriggerInterval(StrUtil.EMPTY);
+            }
+        }
 
         retrySceneConfig.setTriggerInterval(
                 Optional.ofNullable(retrySceneConfig.getTriggerInterval()).orElse(StrUtil.EMPTY));
@@ -160,6 +162,8 @@ public class SceneConfigServiceImpl implements SceneConfigService {
                                 .eq(RetrySceneConfig::getSceneName, requestVO.getSceneName())),
                 () -> new SnailJobServerException("failed to update scene. retrySceneConfig:[{}]",
                         JsonUtil.toJsonString(retrySceneConfig)));
+
+
 
         // 同步配置到客户端
         SyncConfigHandler.addSyncTask(requestVO.getGroupName(), namespaceId);
@@ -244,19 +248,24 @@ public class SceneConfigServiceImpl implements SceneConfigService {
         TaskAccess<RetryDeadLetter> retryTaskTaskAccess = accessTemplate.getRetryDeadLetterAccess();
         for (String groupName : groupNames) {
             List<Retry> retries = retryTaskAccess.listPage(new PageDTO<>(1, 1),
-                    new LambdaQueryWrapper<Retry>().in(Retry::getSceneName, sceneNames).orderByAsc(Retry::getId)).getRecords();
+                    new LambdaQueryWrapper<Retry>()
+                            .eq(Retry::getGroupName, groupName)
+                            .in(Retry::getSceneName, sceneNames)
+                            .orderByAsc(Retry::getId)).getRecords();
             Assert.isTrue(CollUtil.isEmpty(retries),
                     () -> new SnailJobServerException("删除重试场景失败, 存在【重试任务】请先删除【重试任务】在重试"));
 
             List<RetryDeadLetter> retryDeadLetters = retryTaskTaskAccess.listPage(new PageDTO<>(1, 1),
-                    new LambdaQueryWrapper<RetryDeadLetter>().in(RetryDeadLetter::getSceneName, sceneNames).orderByAsc(RetryDeadLetter::getId)).getRecords();
+                    new LambdaQueryWrapper<RetryDeadLetter>()
+                            .eq(RetryDeadLetter::getGroupName, groupName)
+                            .in(RetryDeadLetter::getSceneName, sceneNames)
+                            .orderByAsc(RetryDeadLetter::getId)).getRecords();
             Assert.isTrue(CollUtil.isEmpty(retryDeadLetters),
                     () -> new SnailJobServerException("删除重试场景失败, 存在【死信任务】请先删除【死信任务】在重试"));
         }
 
         Assert.isTrue(ids.size() == accessTemplate.getSceneConfigAccess().delete(queryWrapper),
                 () -> new SnailJobServerException("删除重试场景失败, 请检查场景状态是否关闭状态"));
-
 
         List<RetrySummary> retrySummaries = retrySummaryMapper.selectList(
                 new LambdaQueryWrapper<RetrySummary>()
@@ -265,6 +274,7 @@ public class SceneConfigServiceImpl implements SceneConfigService {
                         .in(RetrySummary::getGroupName, groupNames)
                         .in(RetrySummary::getSceneName, sceneNames)
         );
+
         if (CollUtil.isNotEmpty(retrySummaries)) {
             Assert.isTrue(retrySummaries.size() == retrySummaryMapper.deleteByIds(StreamUtils.toSet(retrySummaries, RetrySummary::getId))
                     , () -> new SnailJobServerException("删除汇总表数据失败"));
@@ -277,10 +287,13 @@ public class SceneConfigServiceImpl implements SceneConfigService {
 
         Set<String> groupNameSet = Sets.newHashSet();
         Set<String> sceneNameSet = Sets.newHashSet();
-        for (final SceneConfigRequestVO request : requests) {
-            checkExecuteInterval(request);
-            groupNameSet.add(request.getGroupName());
-            sceneNameSet.add(request.getSceneName());
+        for (final SceneConfigRequestVO requestVO : requests) {
+            checkExecuteInterval(requestVO.getBackOff(), requestVO.getTriggerInterval());
+            if (Objects.equals(requestVO.getCbStatus(), StatusEnum.YES.getStatus())) {
+                checkExecuteInterval(requestVO.getCbTriggerType(), requestVO.getCbTriggerInterval());
+            }
+            groupNameSet.add(requestVO.getGroupName());
+            sceneNameSet.add(requestVO.getSceneName());
         }
 
         groupHandler.validateGroupExistence(groupNameSet, namespaceId);
@@ -305,6 +318,12 @@ public class SceneConfigServiceImpl implements SceneConfigService {
                 retrySceneConfig.setTriggerInterval(StrUtil.EMPTY);
             }
 
+            if (Objects.equals(retrySceneConfig.getCbStatus(), StatusEnum.YES.getStatus())) {
+                if (retrySceneConfig.getCbTriggerType() == WaitStrategies.WaitStrategyEnum.DELAY_LEVEL.getType()) {
+                    retrySceneConfig.setCbTriggerInterval(StrUtil.EMPTY);
+                }
+            }
+
             Assert.isTrue(1 == sceneConfigAccess.insert(retrySceneConfig),
                     () -> new SnailJobServerException("failed to insert scene. retrySceneConfig:[{}]",
                             JsonUtil.toJsonString(retrySceneConfig)));
@@ -323,4 +342,18 @@ public class SceneConfigServiceImpl implements SceneConfigService {
             setId(config.getId());
         }
     }
+
+    private static void checkExecuteInterval(Integer backOff, String triggerInterval) {
+        if (Lists.newArrayList(WaitStrategies.WaitStrategyEnum.FIXED.getType(),
+                        WaitStrategies.WaitStrategyEnum.RANDOM.getType()).contains(backOff)) {
+            if (Integer.parseInt(triggerInterval) < 10) {
+                throw new SnailJobServerException("间隔时间不得小于10");
+            }
+        } else if (backOff == WaitStrategies.WaitStrategyEnum.CRON.getType()) {
+            if (CronUtils.getExecuteInterval(triggerInterval) < 10 * 1000) {
+                throw new SnailJobServerException("间隔时间不得小于10");
+            }
+        }
+    }
+
 }

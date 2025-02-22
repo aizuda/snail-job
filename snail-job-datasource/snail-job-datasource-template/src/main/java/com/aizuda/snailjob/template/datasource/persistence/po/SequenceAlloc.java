@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @TableName("sj_sequence_alloc")
+@Deprecated
 public class SequenceAlloc implements Serializable {
 
     private static final long serialVersionUID = 1L;

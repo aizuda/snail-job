@@ -32,6 +32,8 @@ public class SceneConfigResponseVO {
 
     private Integer routeKey;
 
+    private Integer blockStrategy;
+
     private Integer executorTimeout;
 
     private LocalDateTime createDt;

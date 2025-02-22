@@ -52,7 +52,7 @@ public class RunningRetryPrepareHandler implements RetryPrePareHandler {
             log.info("任务执行超时.retryTaskId:[{}] delay:[{}] executorTimeout:[{}]", prepare.getRetryTaskId(), delay, DateUtils.toEpochMilli(prepare.getExecutorTimeout()));
             // 超时停止任务
             TaskStopJobDTO stopJobDTO = RetryTaskConverter.INSTANCE.toTaskStopJobDTO(prepare);
-            stopJobDTO.setOperationReason(JobOperationReasonEnum.TASK_EXECUTION_TIMEOUT.getReason());
+            stopJobDTO.setOperationReason(RetryOperationReasonEnum.TASK_EXECUTION_TIMEOUT.getReason());
             stopJobDTO.setNeedUpdateTaskStatus(true);
             retryTaskStopHandler.stop(stopJobDTO);
         }

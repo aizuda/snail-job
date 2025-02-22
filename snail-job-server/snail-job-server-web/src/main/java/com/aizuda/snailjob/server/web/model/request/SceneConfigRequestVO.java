@@ -36,6 +36,12 @@ public class SceneConfigRequestVO {
     private Integer routeKey;
 
     /**
+     * @see: RetryBlockStrategyEnum
+     */
+    @NotNull(message = "阻塞策略不能为空")
+    private Integer blockStrategy;
+
+    /**
      * 描述
      */
     private String description;
@@ -72,16 +78,19 @@ public class SceneConfigRequestVO {
     /**
      * 回调状态 0、不开启 1、开启
      */
+    @NotNull(message = "回调状态不能为空")
     private Integer cbStatus;
 
     /**
      * 回调触发类型
      */
+    @NotNull(message = "回调触发类型不能为空")
     private Integer cbTriggerType;
 
     /**
      * 回调的最大执行次数
      */
+    @NotNull(message = "回调的最大执行次数不能为空")
     private int cbMaxCount;
 
     /**

@@ -27,6 +27,8 @@ public class RetrySceneConfig extends CreateUpdateDt {
 
     private String sceneName;
 
+    private Integer blockStrategy;
+
     private Integer sceneStatus;
 
     private Integer maxRetryCount;
@@ -61,7 +63,7 @@ public class RetrySceneConfig extends CreateUpdateDt {
     /**
      * 回调的最大执行次数
      */
-    private int cbMaxCount = 288;
+    private int cbMaxCount;
 
     /**
      * 回调间隔时间

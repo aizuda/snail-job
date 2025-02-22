@@ -27,7 +27,7 @@ public class DiscardRetryBlockStrategy extends AbstracJobBlockStrategy {
     }
 
     @Override
-    protected JobBlockStrategyEnum blockStrategyEnum() {
-        return JobBlockStrategyEnum.DISCARD;
+    protected RetryBlockStrategyEnum blockStrategyEnum() {
+        return RetryBlockStrategyEnum.DISCARD;
     }
 }

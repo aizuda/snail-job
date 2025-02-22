@@ -206,6 +206,8 @@ public abstract class AbstractGenerator implements TaskGenerator {
         retrySceneConfig.setSceneStatus(StatusEnum.YES.getStatus());
         retrySceneConfig.setBackOff(WaitStrategies.WaitStrategyEnum.DELAY_LEVEL.getType());
         retrySceneConfig.setMaxRetryCount(DelayLevelEnum._21.getLevel());
+        retrySceneConfig.setCbStatus(StatusEnum.NO.getStatus());
+        retrySceneConfig.setCbMaxCount(DelayLevelEnum._16.getLevel());
         retrySceneConfig.setDescription("自动初始化场景");
         Assert.isTrue(1 == accessTemplate.getSceneConfigAccess().insert(retrySceneConfig),
                 () -> new SnailJobServerException("init scene error"));

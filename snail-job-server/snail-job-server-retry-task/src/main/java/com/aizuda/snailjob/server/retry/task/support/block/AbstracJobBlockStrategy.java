@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.retry.task.support.block;
 
-import com.aizuda.snailjob.common.core.enums.JobBlockStrategyEnum;
+import com.aizuda.snailjob.common.core.enums.RetryBlockStrategyEnum;
 import com.aizuda.snailjob.server.retry.task.support.BlockStrategy;
 import org.springframework.beans.factory.InitializingBean;
 
@@ -18,7 +18,7 @@ public abstract class AbstracJobBlockStrategy implements BlockStrategy, Initiali
 
     protected abstract void doBlock(final BlockStrategyContext context);
 
-    protected abstract JobBlockStrategyEnum blockStrategyEnum();
+    protected abstract RetryBlockStrategyEnum blockStrategyEnum();
 
     @Override
     public void afterPropertiesSet() throws Exception {

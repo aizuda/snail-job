@@ -1,9 +1,6 @@
 package com.aizuda.snailjob.server.retry.task.support.block;
 
-import com.aizuda.snailjob.common.core.enums.JobBlockStrategyEnum;
-import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
-import com.aizuda.snailjob.common.core.enums.RetryOperationReasonEnum;
-import com.aizuda.snailjob.common.core.enums.RetryTaskStatusEnum;
+import com.aizuda.snailjob.common.core.enums.*;
 import com.aizuda.snailjob.server.retry.task.dto.RetryTaskGeneratorDTO;
 import com.aizuda.snailjob.server.retry.task.dto.TaskStopJobDTO;
 import com.aizuda.snailjob.server.retry.task.support.RetryTaskConverter;
@@ -45,7 +42,7 @@ public class OverlayRetryBlockStrategy extends AbstracJobBlockStrategy {
     }
 
     @Override
-    protected JobBlockStrategyEnum blockStrategyEnum() {
-        return JobBlockStrategyEnum.OVERLAY;
+    protected RetryBlockStrategyEnum blockStrategyEnum() {
+        return RetryBlockStrategyEnum.OVERLAY;
     }
 }
