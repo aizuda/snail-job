@@ -20,6 +20,9 @@ public class TaskStopJobDTO extends BaseDTO {
      */
     private Integer operationReason;
 
+    /**
+     * 若是失败补充失败信息
+     */
     private String message;
 
     /**

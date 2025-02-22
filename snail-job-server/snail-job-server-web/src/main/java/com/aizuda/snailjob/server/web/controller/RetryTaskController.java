@@ -5,8 +5,8 @@ import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.RetryTaskLogMessageQueryVO;
 import com.aizuda.snailjob.server.web.model.request.RetryTaskQueryVO;
 import com.aizuda.snailjob.server.web.model.response.RetryTaskLogMessageResponseVO;
-import com.aizuda.snailjob.server.web.model.response.RetryTaskLogResponseVO;
-import com.aizuda.snailjob.server.web.service.RetryTaskLogService;
+import com.aizuda.snailjob.server.web.model.response.RetryTaskResponseVO;
+import com.aizuda.snailjob.server.web.service.RetryTaskService;
 import jakarta.validation.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -25,35 +25,43 @@ import java.util.Set;
 public class RetryTaskController {
 
     @Autowired
-    private RetryTaskLogService retryTaskLogService;
+    private RetryTaskService retryTaskService;
 
     @LoginRequired
     @GetMapping("list")
-    public PageResult<List<RetryTaskLogResponseVO>> getRetryTaskLogPage(RetryTaskQueryVO queryVO) {
-        return retryTaskLogService.getRetryTaskLogPage(queryVO);
+    public PageResult<List<RetryTaskResponseVO>> getRetryTaskPage(RetryTaskQueryVO queryVO) {
+        return retryTaskService.getRetryTaskLogPage(queryVO);
     }
 
     @LoginRequired
     @GetMapping("/message/list")
-    public RetryTaskLogMessageResponseVO getRetryTaskLogPage(RetryTaskLogMessageQueryVO queryVO) {
-        return retryTaskLogService.getRetryTaskLogMessagePage(queryVO);
+    public RetryTaskLogMessageResponseVO getRetryTaskLogMessagePage(RetryTaskLogMessageQueryVO queryVO) {
+        return retryTaskService.getRetryTaskLogMessagePage(queryVO);
     }
 
     @LoginRequired
     @GetMapping("{id}")
-    public RetryTaskLogResponseVO getRetryTaskLogById(@PathVariable("id") Long id) {
-        return retryTaskLogService.getRetryTaskLogById(id);
+    public RetryTaskResponseVO getRetryTaskById(@PathVariable("id") Long id) {
+        return retryTaskService.getRetryTaskById(id);
+    }
+
+    @LoginRequired
+    @PostMapping("/stop/{id}")
+    public Boolean stopById(@PathVariable("id") Long id) {
+        return retryTaskService.stopById(id);
     }
 
     @LoginRequired
     @DeleteMapping("{id}")
     public Boolean deleteById(@PathVariable("id") Long id) {
-        return retryTaskLogService.deleteById(id);
+        return retryTaskService.deleteById(id);
     }
 
     @LoginRequired
     @DeleteMapping("ids")
     public Boolean batchDelete(@RequestBody @NotEmpty(message = "ids不能为空") Set<Long> ids) {
-        return retryTaskLogService.batchDelete(ids);
+        return retryTaskService.batchDelete(ids);
     }
+
+
 }

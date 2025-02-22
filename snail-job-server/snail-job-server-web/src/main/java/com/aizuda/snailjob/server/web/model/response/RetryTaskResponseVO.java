@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
  * @date : 2022-02-28 09:09
  */
 @Data
-public class RetryTaskLogResponseVO {
+public class RetryTaskResponseVO {
 
     private Long id;
 
@@ -20,7 +20,6 @@ public class RetryTaskLogResponseVO {
     private Integer taskStatus;
 
     private Long retryId;
-
 
     private Integer taskType;
 

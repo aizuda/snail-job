@@ -14,6 +14,7 @@ import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.common.config.SystemProperties;
 import com.aizuda.snailjob.server.common.dto.PartitionTask;
 import com.aizuda.snailjob.server.common.dto.ScanTask;
+import com.aizuda.snailjob.server.common.enums.RetryTaskExecutorSceneEnum;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.strategy.WaitStrategies;
 import com.aizuda.snailjob.server.common.util.DateUtils;
@@ -166,6 +167,7 @@ public class ScanRetryActor extends AbstractActor {
         RetryTaskPrepareDTO retryTaskPrepareDTO = RetryTaskConverter.INSTANCE.toRetryTaskPrepareDTO(partitionTask);
         retryTaskPrepareDTO.setBlockStrategy(retrySceneConfig.getBackOff());
         retryTaskPrepareDTO.setExecutorTimeout(retrySceneConfig.getExecutorTimeout());
+        retryTaskPrepareDTO.setRetryTaskExecutorScene(RetryTaskExecutorSceneEnum.AUTO_RETRY.getScene());
         waitExecRetries.add(retryTaskPrepareDTO);
     }
 

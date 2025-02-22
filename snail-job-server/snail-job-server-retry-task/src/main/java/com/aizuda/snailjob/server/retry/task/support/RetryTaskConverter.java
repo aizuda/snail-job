@@ -2,9 +2,7 @@ package com.aizuda.snailjob.server.retry.task.support;
 
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.client.model.DispatchRetryResultDTO;
-import com.aizuda.snailjob.client.model.request.RetryCallbackRequest;
-import com.aizuda.snailjob.client.model.request.DispatchRetryRequest;
-import com.aizuda.snailjob.client.model.request.StopRetryRequest;
+import com.aizuda.snailjob.client.model.request.*;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.server.common.dto.JobLogMetaDTO;
 import com.aizuda.snailjob.server.common.dto.RetryAlarmInfo;
@@ -125,7 +123,9 @@ public interface RetryTaskConverter {
 
     RequestRetryExecutorDTO toRealRetryExecutorDTO(TaskStopJobDTO stopJobDTO);
 
-    RetryExecutorResultDTO toRetryExecutorResultDTO(DispatchRetryResultDTO resultDTO);
+    RetryExecutorResultDTO toRetryExecutorResultDTO(DispatchRetryResultRequest resultDTO);
+
+    RetryExecutorResultDTO toRetryExecutorResultDTO(DispatchCallbackResultRequest resultDTO);
 
     RetryExecutorResultDTO toRetryExecutorResultDTO(TaskStopJobDTO resultDTO);
 

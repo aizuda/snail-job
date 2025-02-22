@@ -59,6 +59,8 @@ public enum RetryTaskStatusEnum {
     public static final Set<Integer> TERMINAL_STATUS_SET = Sets.newHashSet(SUCCESS.getStatus(), FAIL.getStatus(),
             STOP.getStatus(), CANCEL.getStatus());
 
+    public static final Set<Integer> NOT_SUCCESS = Sets.newHashSet(FAIL.getStatus(), STOP.getStatus(), CANCEL.getStatus());
+
     public static RetryTaskStatusEnum getByStatus(@NonNull Integer status) {
         for (RetryTaskStatusEnum value : RetryTaskStatusEnum.values()) {
             if (Objects.equals(value.status, status)) {

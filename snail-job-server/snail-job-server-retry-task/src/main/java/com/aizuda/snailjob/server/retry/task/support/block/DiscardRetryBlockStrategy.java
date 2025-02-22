@@ -22,7 +22,7 @@ public class DiscardRetryBlockStrategy extends AbstracJobBlockStrategy {
         // 重新生成任务
         RetryTaskGeneratorDTO generatorDTO = RetryTaskConverter.INSTANCE.toRetryTaskGeneratorDTO(context);
         generatorDTO.setTaskStatus(RetryTaskStatusEnum.CANCEL.getStatus());
-        generatorDTO.setOperationReason(RetryOperationReasonEnum.JOB_DISCARD.getReason());
+        generatorDTO.setOperationReason(RetryOperationReasonEnum.RETRY_TASK_DISCARD.getReason());
         retryTaskGeneratorHandler.generateRetryTask(generatorDTO);
     }
 

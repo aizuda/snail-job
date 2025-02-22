@@ -7,7 +7,7 @@ import lombok.Data;
  * @date : 2023-09-26 15:10
  */
 @Data
-public class DispatchRetryResultRequest {
+public class DispatchCallbackResultRequest {
 
     private String namespaceId;
     private String groupName;
@@ -16,6 +16,5 @@ public class DispatchRetryResultRequest {
     private Long retryTaskId;
     private Integer taskStatus;
 
-    private String result;
     private String exceptionMsg;
 }

@@ -31,12 +31,12 @@ public class OverlayRetryBlockStrategy extends AbstracJobBlockStrategy {
         // 重新生成任务
         RetryTaskGeneratorDTO generatorDTO = RetryTaskConverter.INSTANCE.toRetryTaskGeneratorDTO(context);
         generatorDTO.setTaskStatus(RetryTaskStatusEnum.CANCEL.getStatus());
-        generatorDTO.setOperationReason(RetryOperationReasonEnum.JOB_DISCARD.getReason());
+        generatorDTO.setOperationReason(RetryOperationReasonEnum.RETRY_TASK_DISCARD.getReason());
         retryTaskGeneratorHandler.generateRetryTask(generatorDTO);
 
         TaskStopJobDTO stopJobDTO = RetryTaskConverter.INSTANCE.toTaskStopJobDTO(context);
         if (Objects.isNull(context.getOperationReason()) || context.getOperationReason() == JobOperationReasonEnum.NONE.getReason()) {
-            stopJobDTO.setOperationReason(RetryOperationReasonEnum.JOB_OVERLAY.getReason());
+            stopJobDTO.setOperationReason(RetryOperationReasonEnum.RETRY_TASK_OVERLAY.getReason());
         }
 
         stopJobDTO.setNeedUpdateTaskStatus(true);

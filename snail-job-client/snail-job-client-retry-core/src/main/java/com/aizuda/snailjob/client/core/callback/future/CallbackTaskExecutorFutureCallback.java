@@ -4,9 +4,11 @@ import com.aizuda.snailjob.client.common.rpc.client.RequestBuilder;
 import com.aizuda.snailjob.client.core.context.CallbackContext;
 import com.aizuda.snailjob.client.core.client.RetryClient;
 import com.aizuda.snailjob.client.model.DispatchRetryResultDTO;
+import com.aizuda.snailjob.client.model.request.DispatchCallbackResultRequest;
 import com.aizuda.snailjob.client.model.request.DispatchRetryResultRequest;
 import com.aizuda.snailjob.client.model.request.RetryCallbackResultRequest;
 import com.aizuda.snailjob.common.core.enums.RetryResultStatusEnum;
+import com.aizuda.snailjob.common.core.enums.RetryTaskStatusEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
 import com.aizuda.snailjob.common.log.SnailJobLog;
@@ -44,9 +46,9 @@ public class CallbackTaskExecutorFutureCallback implements FutureCallback<Boolea
     @Override
     public void onSuccess(Boolean result) {
         try {
-            DispatchRetryResultRequest request = buildDispatchRetryResultRequest();
-            request.setStatusCode(RetryResultStatusEnum.SUCCESS.getStatus());
-            CLIENT.dispatchResult(request);
+            DispatchCallbackResultRequest request = buildDispatchRetryResultRequest();
+            request.setTaskStatus(RetryTaskStatusEnum.SUCCESS.getStatus());
+            CLIENT.callbackResult(request);
         } catch (Exception e) {
             SnailJobLog.REMOTE.error("回调执行结果上报异常.[{}]", context.getRetryTaskId(), e);
 
@@ -61,17 +63,17 @@ public class CallbackTaskExecutorFutureCallback implements FutureCallback<Boolea
             return;
         }
         try {
-            DispatchRetryResultRequest request = buildDispatchRetryResultRequest();
-            request.setStatusCode(RetryResultStatusEnum.FAILURE.getStatus());
+            DispatchCallbackResultRequest request = buildDispatchRetryResultRequest();
+            request.setTaskStatus(RetryTaskStatusEnum.FAIL.getStatus());
             request.setExceptionMsg(t.getMessage());
-            CLIENT.dispatchResult(request);
+            CLIENT.callbackResult(request);
         } catch (Exception e) {
             SnailJobLog.REMOTE.error("回调执行结果上报异常.[{}]", context.getRetryTaskId(), e);
         }
     }
 
-    private DispatchRetryResultRequest buildDispatchRetryResultRequest() {
-        DispatchRetryResultRequest request = new DispatchRetryResultRequest();
+    private DispatchCallbackResultRequest buildDispatchRetryResultRequest() {
+        DispatchCallbackResultRequest request = new DispatchCallbackResultRequest();
         request.setRetryTaskId(context.getRetryTaskId());
         request.setNamespaceId(context.getNamespaceId());
         request.setGroupName(context.getGroupName());

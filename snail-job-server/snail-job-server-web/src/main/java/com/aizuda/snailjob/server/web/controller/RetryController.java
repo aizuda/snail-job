@@ -5,7 +5,7 @@ import com.aizuda.snailjob.server.web.annotation.LoginRequired;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.*;
 import com.aizuda.snailjob.server.web.model.response.RetryResponseVO;
-import com.aizuda.snailjob.server.web.service.RetryTaskService;
+import com.aizuda.snailjob.server.web.service.RetryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -23,66 +23,61 @@ import java.util.List;
 public class RetryController {
 
     @Autowired
-    private RetryTaskService retryTaskService;
+    private RetryService retryService;
 
     @LoginRequired
     @GetMapping("list")
     public PageResult<List<RetryResponseVO>> getRetryTaskPage(RetryQueryVO queryVO) {
-        return retryTaskService.getRetryPage(queryVO);
+        return retryService.getRetryPage(queryVO);
     }
 
     @LoginRequired
     @GetMapping("{id}")
     public RetryResponseVO getRetryTaskById(@RequestParam("groupName") String groupName,
                                             @PathVariable("id") Long id) {
-        return retryTaskService.getRetryById(groupName, id);
+        return retryService.getRetryById(groupName, id);
     }
 
     @LoginRequired
     @PutMapping("status")
     public int updateRetryTaskStatus(@RequestBody RetryUpdateStatusRequestVO retryUpdateStatusRequestVO) {
-        return retryTaskService.updateRetryTaskStatus(retryUpdateStatusRequestVO);
+        return retryService.updateRetryTaskStatus(retryUpdateStatusRequestVO);
     }
 
     @LoginRequired
     @PostMapping
     public int saveRetryTask(@RequestBody @Validated RetrySaveRequestVO retryTaskRequestVO) {
-        return retryTaskService.saveRetryTask(retryTaskRequestVO);
+        return retryService.saveRetryTask(retryTaskRequestVO);
     }
 
     @LoginRequired
     @PostMapping("/generate/idempotent-id")
     public Result<String> idempotentIdGenerate(@RequestBody @Validated GenerateRetryIdempotentIdVO generateRetryIdempotentIdVO) {
-        return new Result<>(retryTaskService.idempotentIdGenerate(generateRetryIdempotentIdVO));
+        return new Result<>(retryService.idempotentIdGenerate(generateRetryIdempotentIdVO));
     }
 
     @LoginRequired
     @PutMapping("/batch")
     public Integer updateRetryTaskExecutorName(@RequestBody @Validated RetryUpdateExecutorNameRequestVO requestVO) {
-        return retryTaskService.updateRetryExecutorName(requestVO);
+        return retryService.updateRetryExecutorName(requestVO);
     }
 
     @LoginRequired
     @DeleteMapping("/batch")
-    public boolean batchDeleteRetryTask(@RequestBody @Validated BatchDeleteRetryTaskVO requestVO) {
-        return retryTaskService.batchDeleteRetry(requestVO);
+    public boolean batchDeleteRetry(@RequestBody @Validated BatchDeleteRetryTaskVO requestVO) {
+        return retryService.batchDeleteRetry(requestVO);
     }
 
     @LoginRequired
     @PostMapping("/batch")
     public Integer parseLogs(@RequestBody @Validated ParseLogsVO parseLogsVO) {
-        return retryTaskService.parseLogs(parseLogsVO);
+        return retryService.parseLogs(parseLogsVO);
     }
 
     @LoginRequired
     @PostMapping("/manual/trigger/retry/task")
     public boolean manualTriggerRetryTask(@RequestBody @Validated ManualTriggerTaskRequestVO requestVO) {
-        return retryTaskService.manualTriggerRetry(requestVO);
+        return retryService.manualTriggerRetryTask(requestVO);
     }
 
-    @LoginRequired
-    @PostMapping("/manual/trigger/callback/task")
-    public boolean manualTriggerCallbackTask(@RequestBody @Validated ManualTriggerTaskRequestVO requestVO) {
-        return retryTaskService.manualTriggerCallback(requestVO);
-    }
 }

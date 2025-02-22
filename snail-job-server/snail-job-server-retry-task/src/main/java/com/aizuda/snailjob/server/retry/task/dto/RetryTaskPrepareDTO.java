@@ -34,4 +34,6 @@ public class RetryTaskPrepareDTO {
     private boolean onlyTimeoutCheck;
 
     private Integer executorTimeout;
+
+    private Integer retryTaskExecutorScene;
 }

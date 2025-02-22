@@ -4,9 +4,6 @@ import cn.hutool.core.util.StrUtil;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import java.util.Arrays;
-import java.util.List;
-
 /**
  * 标识某个操作的具体原因
  *
@@ -21,9 +18,9 @@ public enum RetryOperationReasonEnum {
     NONE(0, StrUtil.EMPTY),
     TASK_EXECUTION_TIMEOUT(1, "任务执行超时"),
     NOT_CLIENT(2, "无客户端节点"),
-    JOB_CLOSED(3, "JOB已关闭"),
-    JOB_DISCARD(4, "任务丢弃"),
-    JOB_OVERLAY(5, "任务被覆盖"),
+    RETRY_SUSPEND(3, "重试已暂停"),
+    RETRY_TASK_DISCARD(4, "任务丢弃"),
+    RETRY_TASK_OVERLAY(5, "任务被覆盖"),
     TASK_EXECUTION_ERROR(6, "任务执行期间发生非预期异常"),
     MANNER_STOP(7, "手动停止"),
     NOT_RUNNING_RETRY(8, "当前重试非运行中"),
@@ -35,9 +32,13 @@ public enum RetryOperationReasonEnum {
     private final int reason;
     private final String desc;
 
-    public static RetryOperationReasonEnum getWorkflowNotifyScene(Integer notifyScene) {
+    public static RetryOperationReasonEnum of(Integer operationReason) {
+        if (operationReason == null) {
+            return NONE;
+        }
+
         for (RetryOperationReasonEnum sceneEnum : RetryOperationReasonEnum.values()) {
-            if (sceneEnum.getReason() == notifyScene) {
+            if (sceneEnum.getReason() == operationReason) {
                 return sceneEnum;
             }
         }

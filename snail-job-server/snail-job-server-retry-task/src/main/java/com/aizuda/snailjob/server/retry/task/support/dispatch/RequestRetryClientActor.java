@@ -3,7 +3,7 @@ package com.aizuda.snailjob.server.retry.task.support.dispatch;
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import com.aizuda.snailjob.client.model.request.DispatchRetryRequest;
-import com.aizuda.snailjob.common.core.enums.RetryResultStatusEnum;
+import com.aizuda.snailjob.common.core.enums.RetryTaskStatusEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.model.Result;
 import com.aizuda.snailjob.common.core.model.SnailJobHeaders;
@@ -182,7 +182,7 @@ public class RequestRetryClientActor extends AbstractActor {
         ActorRef actorRef = ActorGenerator.retryTaskExecutorResultActor();
         RetryExecutorResultDTO executorResultDTO = RetryTaskConverter.INSTANCE.toRetryExecutorResultDTO(executorDTO);
         executorResultDTO.setExceptionMsg(message);
-        executorResultDTO.setResultStatus(RetryResultStatusEnum.FAILURE.getStatus());
+        executorResultDTO.setTaskStatus(RetryTaskStatusEnum.FAIL.getStatus());
         actorRef.tell(executorResultDTO, actorRef);
     }
 }
