@@ -11,7 +11,6 @@ import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.strategy.WaitStrategies.WaitStrategyContext;
 import com.aizuda.snailjob.server.common.strategy.WaitStrategies.WaitStrategyEnum;
-import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.retry.task.support.RetryTaskConverter;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.BatchDeleteRetryDeadLetterVO;
@@ -24,13 +23,10 @@ import com.aizuda.snailjob.server.web.util.UserSessionUtils;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import com.aizuda.snailjob.template.datasource.access.ConfigAccess;
 import com.aizuda.snailjob.template.datasource.access.TaskAccess;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskMapper;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskLogMessageMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.*;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,21 +36,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static com.aizuda.snailjob.common.core.enums.RetryStatusEnum.ALLOW_DELETE_STATUS;
-
 /**
  * @author: opensnail
  * @date : 2022-02-28 09:46
  */
 @Service
+@RequiredArgsConstructor
 public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
-
-    @Autowired
-    private AccessTemplate accessTemplate;
-    @Autowired
-    private RetryTaskMapper retryTaskMapper;
-    @Autowired
-    private RetryTaskLogMessageMapper retryTaskLogMessageMapper;
+    private final AccessTemplate accessTemplate;
 
     @Override
     public PageResult<List<RetryDeadLetterResponseVO>> getRetryDeadLetterPage(RetryDeadLetterQueryVO queryVO) {

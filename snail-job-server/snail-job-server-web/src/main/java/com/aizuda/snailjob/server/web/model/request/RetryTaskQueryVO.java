@@ -24,7 +24,7 @@ public class RetryTaskQueryVO extends BaseQueryVO {
 
     private Long retryId;
 
-    private Integer retryStatus;
+    private Integer taskStatus;
 
     private LocalDateTime beginDate;
 

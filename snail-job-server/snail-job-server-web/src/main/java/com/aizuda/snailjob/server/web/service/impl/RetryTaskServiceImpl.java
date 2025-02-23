@@ -5,7 +5,6 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.enums.RetryOperationReasonEnum;
-import com.aizuda.snailjob.common.core.enums.RetryStatusEnum;
 import com.aizuda.snailjob.common.core.enums.RetryTaskStatusEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.constant.LogFieldConstants;
@@ -64,7 +63,7 @@ public class RetryTaskServiceImpl implements RetryTaskService {
                 .eq(RetryTask::getNamespaceId, namespaceId)
                 .in(CollUtil.isNotEmpty(groupNames), RetryTask::getGroupName, groupNames)
                 .eq(StrUtil.isNotBlank(queryVO.getSceneName()), RetryTask::getSceneName, queryVO.getSceneName())
-                .eq(queryVO.getRetryStatus() != null, RetryTask::getTaskStatus, queryVO.getRetryStatus())
+                .eq(queryVO.getTaskStatus() != null, RetryTask::getTaskStatus, queryVO.getTaskStatus())
                 .eq(Objects.nonNull(queryVO.getRetryId()), RetryTask::getRetryId, queryVO.getRetryId())
                 .between(ObjUtil.isNotNull(queryVO.getDatetimeRange()),
                         RetryTask::getCreateDt, queryVO.getStartDt(), queryVO.getEndDt())
