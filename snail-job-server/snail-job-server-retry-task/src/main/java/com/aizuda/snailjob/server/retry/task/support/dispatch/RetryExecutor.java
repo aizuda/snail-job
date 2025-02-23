@@ -79,9 +79,9 @@ public class RetryExecutor extends AbstractActor {
 
     private void doExecute(RetryTaskExecuteDTO execute) {
         LambdaQueryWrapper<Retry> wrapper = new LambdaQueryWrapper<>();
-
+        wrapper.eq(Retry::getId, execute.getRetryId());
         if (RetryTaskExecutorSceneEnum.MANUAL_RETRY.getScene() != execute.getRetryTaskExecutorScene()) {
-            wrapper.eq(Retry::getId, execute.getRetryId()).eq(Retry::getRetryStatus, RetryStatusEnum.RUNNING.getStatus());
+            wrapper.eq(Retry::getRetryStatus, RetryStatusEnum.RUNNING.getStatus());
         }
 
         Retry retry = retryMapper.selectOne(wrapper);

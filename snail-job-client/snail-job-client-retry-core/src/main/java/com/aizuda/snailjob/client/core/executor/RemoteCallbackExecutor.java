@@ -9,6 +9,8 @@ import com.aizuda.snailjob.client.core.log.RetryLogMeta;
 import com.aizuda.snailjob.client.core.retryer.RetryerInfo;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.enums.RetryStatusEnum;
+import com.aizuda.snailjob.common.core.util.JsonUtil;
+import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.common.log.enums.LogTypeEnum;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -47,6 +49,8 @@ public class RemoteCallbackExecutor {
             // 以Spring Bean模式回调
             doCallbackForSpringBean(context);
 
+            // 上报执行成功
+            SnailJobLog.REMOTE.info("任务执行成功 taskId:[{}]", context.getRetryTaskId());
         } catch (NoSuchBeanDefinitionException e) {
             // 若不是SpringBean 则直接反射以普通类调用
             doCallbackForOrdinaryClass(context);
@@ -120,7 +124,7 @@ public class RemoteCallbackExecutor {
         ReflectionUtils.invokeMethod(method, retryCompleteCallback, retryerInfo.getScene(),
                 retryerInfo.getExecutorClassName(), deSerialize);
 
-
+        SnailJobLog.REMOTE.info("任务执行成功 taskId:[{}] [{}]", context.getRetryTaskId());
 
     }
 
