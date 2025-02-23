@@ -16,5 +16,7 @@ import lombok.EqualsAndHashCode;
 public class RetryTaskExecuteDTO extends BaseDTO {
 
     private Integer routeKey;
+
+    private Integer retryTaskExecutorScene;
 }
 

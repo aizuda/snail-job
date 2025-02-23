@@ -159,7 +159,6 @@ public class RetryServiceImpl implements RetryService {
         }
 
         retry.setRetryStatus(requestVO.getRetryStatus());
-        retry.setGroupName(requestVO.getGroupName());
 
         // 若恢复重试则需要重新计算下次触发时间
         if (RetryStatusEnum.RUNNING.getStatus().equals(retryStatusEnum.getStatus())) {
@@ -393,7 +392,7 @@ public class RetryServiceImpl implements RetryService {
             // 设置now表示立即执行
             retryTaskPrepareDTO.setNextTriggerAt(DateUtils.toNowMilli());
             retryTaskPrepareDTO.setRetryTaskExecutorScene(RetryTaskExecutorSceneEnum.MANUAL_RETRY.getScene());
-
+            retryTaskPrepareDTO.setRetryId(retry.getId());
             // 准备阶段执行
             ActorRef actorRef = ActorGenerator.retryTaskPrepareActor();
             actorRef.tell(retryTaskPrepareDTO, actorRef);

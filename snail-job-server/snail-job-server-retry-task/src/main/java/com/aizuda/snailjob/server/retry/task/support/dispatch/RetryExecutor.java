@@ -12,6 +12,7 @@ import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.common.cache.CacheRegisterTable;
 import com.aizuda.snailjob.server.common.dto.RegisterNodeInfo;
+import com.aizuda.snailjob.server.common.enums.RetryTaskExecutorSceneEnum;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.handler.ClientNodeAllocateHandler;
@@ -78,13 +79,21 @@ public class RetryExecutor extends AbstractActor {
 
     private void doExecute(RetryTaskExecuteDTO execute) {
         LambdaQueryWrapper<Retry> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Retry::getId, execute.getRetryId()).eq(Retry::getRetryStatus, RetryStatusEnum.RUNNING.getStatus());
+
+        if (RetryTaskExecutorSceneEnum.MANUAL_RETRY.getScene() != execute.getRetryTaskExecutorScene()) {
+            wrapper.eq(Retry::getId, execute.getRetryId()).eq(Retry::getRetryStatus, RetryStatusEnum.RUNNING.getStatus());
+        }
+
         Retry retry = retryMapper.selectOne(wrapper);
         if (Objects.isNull(retry)) {
             // 没有执行中的任务不执行调度
             updateRetryTaskStatus(execute.getRetryTaskId(), RetryTaskStatusEnum.CANCEL.getStatus(),  RetryOperationReasonEnum.NOT_RUNNING_RETRY);
             return;
         }
+
+        execute.setNamespaceId(retry.getNamespaceId());
+        execute.setGroupName(retry.getGroupName());
+        execute.setTaskType(retry.getTaskType());
 
         if (CollUtil.isEmpty(CacheRegisterTable.getServerNodeSet(retry.getGroupName(), retry.getNamespaceId()))) {
             // 无客户端不执行调度
@@ -104,8 +113,8 @@ public class RetryExecutor extends AbstractActor {
         }
 
         // 获取执行的客户端
-        RegisterNodeInfo serverNode = clientNodeAllocateHandler.getServerNode(execute.getRetryId().toString(),
-                execute.getGroupName(), execute.getNamespaceId(), retrySceneConfig.getRouteKey());
+        RegisterNodeInfo serverNode = clientNodeAllocateHandler.getServerNode(retry.getId().toString(),
+                retry.getGroupName(), retry.getNamespaceId(), retrySceneConfig.getRouteKey());
         updateRetryTaskStatus(execute.getRetryTaskId(), RetryTaskStatusEnum.RUNNING.getStatus(),
                 ClientInfoUtils.generate(serverNode));
 

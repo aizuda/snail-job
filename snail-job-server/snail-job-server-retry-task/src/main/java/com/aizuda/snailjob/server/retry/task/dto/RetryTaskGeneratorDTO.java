@@ -22,4 +22,6 @@ public class RetryTaskGeneratorDTO extends BaseDTO {
     private Integer taskType;
 
     private long nextTriggerAt;
+
+    private Integer retryTaskExecutorScene;
 }

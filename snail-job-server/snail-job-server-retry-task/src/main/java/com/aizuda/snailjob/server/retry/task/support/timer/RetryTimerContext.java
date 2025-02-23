@@ -10,14 +10,10 @@ import lombok.Data;
 @Data
 public class RetryTimerContext {
 
-    private String namespaceId;
-
-    private String groupName;
-
     private Long retryId;
 
     private Long retryTaskId;
 
-//    private TaskExecutorSceneEnum scene;
+    private Integer retryTaskExecutorScene;
 
 }

@@ -6,6 +6,7 @@ import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.enums.RetryOperationReasonEnum;
 import com.aizuda.snailjob.common.core.enums.RetryStatusEnum;
+import com.aizuda.snailjob.common.core.enums.RetryTaskStatusEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.constant.LogFieldConstants;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
@@ -175,7 +176,7 @@ public class RetryTaskServiceImpl implements RetryTaskService {
 
         RetryTask retryTask = retryTaskMapper.selectOne(
                 new LambdaQueryWrapper<RetryTask>()
-                        .in(RetryTask::getTaskStatus, List.of(RetryStatusEnum.FINISH.getStatus(), RetryStatusEnum.MAX_COUNT.getStatus()))
+                        .in(RetryTask::getTaskStatus, RetryTaskStatusEnum.TERMINAL_STATUS_SET)
                         .eq(RetryTask::getNamespaceId, namespaceId)
                         .eq(RetryTask::getId, id));
         Assert.notNull(retryTask, () -> new SnailJobServerException("数据删除失败"));
