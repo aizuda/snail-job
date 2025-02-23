@@ -41,13 +41,8 @@ public class RemoteCallbackExecutor {
     public void doRetryCallback(CallbackContext context) throws NoSuchMethodException, InstantiationException,
             IllegalAccessException {
         try {
-            // 初始化实时日志上下文
-            RetryLogMeta retryLogMeta = new RetryLogMeta();
-            retryLogMeta.setGroupName(context.getGroupName());
-            retryLogMeta.setNamespaceId(context.getNamespaceId());
-            retryLogMeta.setRetryTaskId(context.getRetryTaskId());
-            retryLogMeta.setRetryId(context.getRetryId());
-            SnailJobLogManager.initLogInfo(retryLogMeta, LogTypeEnum.RETRY);
+
+            initLogContext(context);
 
             // 以Spring Bean模式回调
             doCallbackForSpringBean(context);
@@ -58,6 +53,16 @@ public class RemoteCallbackExecutor {
         } finally {
             SnailJobLogManager.removeAll();
         }
+    }
+
+    private static void initLogContext(CallbackContext context) {
+        // 初始化实时日志上下文
+        RetryLogMeta retryLogMeta = new RetryLogMeta();
+        retryLogMeta.setGroupName(context.getGroupName());
+        retryLogMeta.setNamespaceId(context.getNamespaceId());
+        retryLogMeta.setRetryTaskId(context.getRetryTaskId());
+        retryLogMeta.setRetryId(context.getRetryId());
+        SnailJobLogManager.initLogInfo(retryLogMeta, LogTypeEnum.RETRY);
     }
 
     /**

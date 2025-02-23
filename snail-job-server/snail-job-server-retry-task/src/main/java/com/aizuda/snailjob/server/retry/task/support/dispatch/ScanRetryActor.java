@@ -151,8 +151,9 @@ public class ScanRetryActor extends AbstractActor {
         List<RetrySceneConfig> retrySceneConfigs = accessTemplate.getSceneConfigAccess()
                 .list(new LambdaQueryWrapper<RetrySceneConfig>()
                         .select(RetrySceneConfig::getBackOff, RetrySceneConfig::getTriggerInterval,
-                                RetrySceneConfig::getSceneName, RetrySceneConfig::getCbTriggerType,
-                                RetrySceneConfig::getCbTriggerInterval, RetrySceneConfig::getExecutorTimeout)
+                                RetrySceneConfig::getBlockStrategy, RetrySceneConfig::getSceneName,
+                                RetrySceneConfig::getCbTriggerType, RetrySceneConfig::getCbTriggerInterval,
+                                RetrySceneConfig::getExecutorTimeout)
                         .eq(RetrySceneConfig::getSceneStatus, StatusEnum.YES.getStatus())
                         .in(RetrySceneConfig::getSceneName, sceneNameSet));
         return StreamUtils.toIdentityMap(retrySceneConfigs, RetrySceneConfig::getSceneName);

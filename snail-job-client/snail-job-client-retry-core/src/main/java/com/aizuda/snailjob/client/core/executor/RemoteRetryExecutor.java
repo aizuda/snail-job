@@ -47,12 +47,7 @@ public class RemoteRetryExecutor {
             RetrySiteSnapshot.setAttemptNumber(context.getRetryCount());
 
             // 初始化实时日志上下文
-            RetryLogMeta retryLogMeta = new RetryLogMeta();
-            retryLogMeta.setGroupName(context.getGroupName());
-            retryLogMeta.setNamespaceId(context.getNamespaceId());
-            retryLogMeta.setRetryId(context.getRetryId());
-            retryLogMeta.setRetryTaskId(context.getRetryTaskId());
-            SnailJobLogManager.initLogInfo(retryLogMeta, LogTypeEnum.RETRY);
+            initLogContext(context);
 
             RetryerResultContext retryerResultContext = remoteRetryStrategies.openRetry(context.getScene(),
                     context.getExecutorName(), context.getDeSerialize());
@@ -95,5 +90,14 @@ public class RemoteRetryExecutor {
         }
 
         return executeRespDto;
+    }
+
+    private static void initLogContext(RemoteRetryContext context) {
+        RetryLogMeta retryLogMeta = new RetryLogMeta();
+        retryLogMeta.setGroupName(context.getGroupName());
+        retryLogMeta.setNamespaceId(context.getNamespaceId());
+        retryLogMeta.setRetryId(context.getRetryId());
+        retryLogMeta.setRetryTaskId(context.getRetryTaskId());
+        SnailJobLogManager.initLogInfo(retryLogMeta, LogTypeEnum.RETRY);
     }
 }

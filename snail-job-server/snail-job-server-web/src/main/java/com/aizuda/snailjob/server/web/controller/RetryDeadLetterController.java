@@ -7,6 +7,7 @@ import com.aizuda.snailjob.server.web.model.request.BatchRollBackRetryDeadLetter
 import com.aizuda.snailjob.server.web.model.request.RetryDeadLetterQueryVO;
 import com.aizuda.snailjob.server.web.model.response.RetryDeadLetterResponseVO;
 import com.aizuda.snailjob.server.web.service.RetryDeadLetterService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -21,10 +22,9 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/retry-dead-letter")
+@RequiredArgsConstructor
 public class RetryDeadLetterController {
-
-    @Autowired
-    private RetryDeadLetterService retryDeadLetterService;
+    private final RetryDeadLetterService retryDeadLetterService;
 
     @LoginRequired
     @GetMapping("list")

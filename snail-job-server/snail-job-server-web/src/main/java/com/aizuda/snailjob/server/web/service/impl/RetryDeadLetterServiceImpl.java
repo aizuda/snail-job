@@ -60,10 +60,6 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
     public PageResult<List<RetryDeadLetterResponseVO>> getRetryDeadLetterPage(RetryDeadLetterQueryVO queryVO) {
 
         PageDTO<RetryDeadLetter> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
-        if (StrUtil.isBlank(queryVO.getGroupName())) {
-            return new PageResult<>(pageDTO, new ArrayList<>());
-        }
-
         List<String> groupNames = UserSessionUtils.getGroupNames(queryVO.getGroupName());
 
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
@@ -97,7 +93,6 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
 
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
 
-        String groupName = rollBackRetryDeadLetterVO.getGroupName();
         List<Long> ids = rollBackRetryDeadLetterVO.getIds();
         TaskAccess<RetryDeadLetter> retryDeadLetterAccess = accessTemplate.getRetryDeadLetterAccess();
         List<RetryDeadLetter> retryDeadLetterList = retryDeadLetterAccess.list(
@@ -143,22 +138,12 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
         Set<Long> waitDelRetryDeadLetterIdSet = StreamUtils.toSet(retryDeadLetterList, RetryDeadLetter::getId);
         Assert.isTrue(waitDelRetryDeadLetterIdSet.size() == retryDeadLetterAccess.delete(
                         new LambdaQueryWrapper<RetryDeadLetter>()
-                                .eq(RetryDeadLetter::getGroupName, groupName)
                                 .in(RetryDeadLetter::getId, waitDelRetryDeadLetterIdSet)),
                 () -> new SnailJobServerException("删除死信队列数据失败"));
 
         // 变更日志的状态
         RetryTask retryTask = new RetryTask();
         retryTask.setTaskStatus(RetryStatusEnum.RUNNING.getStatus());
-
-//        Set<String> uniqueIdSet = StreamUtils.toSet(waitRollbackList, Retry::getId);
-//        int update = retryTaskMapper.update(retryTask, new LambdaUpdateWrapper<RetryTask>()
-//                .eq(RetryTask::getNamespaceId, namespaceId)
-//                .in(RetryTask::getUniqueId, uniqueIdSet)
-//                .eq(RetryTask::getGroupName, groupName));
-//        Assert.isTrue(update == uniqueIdSet.size(),
-//                () -> new SnailJobServerException("回滚日志状态失败, 可能原因: 日志信息缺失或存在多个相同uniqueId"));
-
         return 1;
     }
 
@@ -170,36 +155,9 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
         Assert.isTrue(deadLetterVO.getIds().size() == retryDeadLetterAccess.delete(
                         new LambdaQueryWrapper<RetryDeadLetter>()
                                 .eq(RetryDeadLetter::getNamespaceId, namespaceId)
-                                .eq(RetryDeadLetter::getGroupName, deadLetterVO.getGroupName())
                                 .in(RetryDeadLetter::getId, deadLetterVO.getIds())),
                 () -> new SnailJobServerException("删除死信任务失败"));
 
-        List<RetryDeadLetter> tasks = retryDeadLetterAccess.list(
-                new LambdaQueryWrapper<RetryDeadLetter>()
-                        .select(RetryDeadLetter::getId)
-                        .eq(RetryDeadLetter::getNamespaceId, namespaceId)
-                        .eq(RetryDeadLetter::getGroupName, deadLetterVO.getGroupName())
-                        .in(RetryDeadLetter::getId, deadLetterVO.getIds())
-        );
-
-        if (CollUtil.isEmpty(tasks)) {
-            return Boolean.TRUE;
-        }
-
-
-//        retryTaskMapper.delete(new LambdaQueryWrapper<RetryTask>()
-//                .in(RetryTask::getTaskStatus, ALLOW_DELETE_STATUS)
-//                .eq(RetryTask::getNamespaceId, namespaceId)
-//                .eq(RetryTask::getGroupName, deadLetterVO.getGroupName())
-//                .in(RetryTask::getUniqueId, uniqueIds));
-
-        retryTaskLogMessageMapper.delete(
-                new LambdaQueryWrapper<RetryTaskLogMessage>()
-                        .eq(RetryTaskLogMessage::getNamespaceId, namespaceId)
-                        .eq(RetryTaskLogMessage::getGroupName, deadLetterVO.getGroupName())
-                        .in(RetryTaskLogMessage::getRetryId, deadLetterVO.getIds()));
-
         return Boolean.TRUE;
-
     }
 }
