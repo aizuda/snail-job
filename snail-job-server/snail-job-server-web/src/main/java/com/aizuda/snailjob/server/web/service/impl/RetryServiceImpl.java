@@ -93,10 +93,6 @@ public class RetryServiceImpl implements RetryService {
 
         PageDTO<Retry> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
-        if (StrUtil.isBlank(queryVO.getGroupName())) {
-            return new PageResult<>(pageDTO, new ArrayList<>());
-        }
-
         List<String> groupNames = UserSessionUtils.getGroupNames(queryVO.getGroupName());
 
         LambdaQueryWrapper<Retry> queryWrapper = new LambdaQueryWrapper<Retry>()

@@ -32,7 +32,4 @@ public class RetryDeadLetter extends CreateDt {
     private String argsStr;
 
     private String extAttrs;
-
-    private Integer taskType;
-
 }

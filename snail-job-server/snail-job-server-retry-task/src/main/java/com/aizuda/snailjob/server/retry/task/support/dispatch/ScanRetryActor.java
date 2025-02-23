@@ -165,7 +165,7 @@ public class ScanRetryActor extends AbstractActor {
         waitUpdateRetries.add(retry);
 
         RetryTaskPrepareDTO retryTaskPrepareDTO = RetryTaskConverter.INSTANCE.toRetryTaskPrepareDTO(partitionTask);
-        retryTaskPrepareDTO.setBlockStrategy(retrySceneConfig.getBackOff());
+        retryTaskPrepareDTO.setBlockStrategy(retrySceneConfig.getBlockStrategy());
         retryTaskPrepareDTO.setExecutorTimeout(retrySceneConfig.getExecutorTimeout());
         retryTaskPrepareDTO.setRetryTaskExecutorScene(RetryTaskExecutorSceneEnum.AUTO_RETRY.getScene());
         waitExecRetries.add(retryTaskPrepareDTO);
