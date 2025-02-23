@@ -150,7 +150,7 @@ CREATE TABLE `sj_retry_task`
     `task_status`      tinyint(4)          NOT NULL DEFAULT 1 COMMENT '重试状态',
     `task_type`        tinyint(4)          NOT NULL DEFAULT 1 COMMENT '任务类型 1、重试数据 2、回调数据',
     `operation_reason` tinyint(4)          NOT NULL DEFAULT 0 COMMENT '操作原因',
-    `client_info`      varchar(128)          DEFAULT NULL COMMENT '客户端地址 clientId#ip:port',
+    `client_info`      varchar(128)        DEFAULT NULL COMMENT '客户端地址 clientId#ip:port',
     `create_dt`        datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_dt`        datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     PRIMARY KEY (`id`),

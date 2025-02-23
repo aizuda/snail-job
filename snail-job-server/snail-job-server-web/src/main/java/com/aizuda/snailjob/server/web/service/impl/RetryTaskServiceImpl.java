@@ -197,7 +197,7 @@ public class RetryTaskServiceImpl implements RetryTaskService {
 
         List<RetryTask> retryTasks = retryTaskMapper.selectList(
                 new LambdaQueryWrapper<RetryTask>()
-                        .in(RetryTask::getTaskStatus, List.of(RetryStatusEnum.FINISH.getStatus(), RetryStatusEnum.MAX_COUNT.getStatus()))
+                        .in(RetryTask::getTaskStatus, RetryTaskStatusEnum.TERMINAL_STATUS_SET)
                         .eq(RetryTask::getNamespaceId, namespaceId)
                         .in(RetryTask::getId, ids));
         Assert.notEmpty(retryTasks, () -> new SnailJobServerException("数据不存在"));
@@ -216,8 +216,11 @@ public class RetryTaskServiceImpl implements RetryTaskService {
     @Override
     public Boolean stopById(Long id) {
 
-        Retry retry = retryMapper.selectById(id);
-        Assert.notNull(retry, () -> new SnailJobServerException("没有可执行的任务"));
+        RetryTask retryTask = retryTaskMapper.selectById(id);
+        Assert.notNull(retryTask, () -> new SnailJobServerException("没有可执行的任务"));
+
+        Retry retry = retryMapper.selectById(retryTask.getRetryId());
+        Assert.notNull(retry, () -> new SnailJobServerException("任务不存在"));
 
         TaskStopJobDTO taskStopJobDTO = RetryConverter.INSTANCE.toTaskStopJobDTO(retry);
         taskStopJobDTO.setOperationReason(RetryOperationReasonEnum.MANNER_STOP.getReason());

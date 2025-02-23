@@ -54,8 +54,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -83,6 +85,8 @@ public class RetryServiceImpl implements RetryService {
     private List<TaskGenerator> taskGenerators;
     @Autowired
     private RetryTaskLogMessageMapper retryTaskLogMessageMapper;
+    @Autowired
+    private TransactionTemplate transactionTemplate;
 
     @Override
     public PageResult<List<RetryResponseVO>> getRetryPage(RetryQueryVO queryVO) {
@@ -141,7 +145,7 @@ public class RetryServiceImpl implements RetryService {
 
     @Override
     @Transactional
-    public int updateRetryTaskStatus(RetryUpdateStatusRequestVO requestVO) {
+    public int updateRetryStatus(RetryUpdateStatusRequestVO requestVO) {
 
         RetryStatusEnum retryStatusEnum = RetryStatusEnum.getByStatus(requestVO.getRetryStatus());
         if (Objects.isNull(retryStatusEnum)) {
@@ -178,13 +182,6 @@ public class RetryServiceImpl implements RetryService {
             retryLogMetaDTO.setTimestamp(DateUtils.toNowMilli());
             SnailJobLog.REMOTE.info("=============手动操作完成============. <|>{}<|>", retryLogMetaDTO);
         }
-//
-//        RetryTask retryTask = new RetryTask();
-//        retryTask.setTaskStatus(requestVO.getRetryStatus());
-//        retryTaskMapper.update(retryTask, new LambdaUpdateWrapper<RetryTask>()
-//                .eq(RetryTask::getNamespaceId, namespaceId)
-//                .eq(RetryTask::getUniqueId, retry.getUniqueId())
-//                .eq(RetryTask::getGroupName, retry.getGroupName()));
 
         retry.setUpdateDt(LocalDateTime.now());
         return retryTaskAccess.updateById(retry);
@@ -351,16 +348,25 @@ public class RetryServiceImpl implements RetryService {
 
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
 
-        map.forEach(((sceneName, retryTaskDTOS) -> {
-            TaskContext taskContext = new TaskContext();
-            taskContext.setSceneName(sceneName);
-            taskContext.setGroupName(parseLogsVO.getGroupName());
-            taskContext.setNamespaceId(namespaceId);
-            taskContext.setInitStatus(parseLogsVO.getRetryStatus());
-            taskContext.setTaskInfos(TaskContextConverter.INSTANCE.convert(retryTaskDTOS));
+        transactionTemplate.execute((status -> {
+            map.forEach(((sceneName, retryTaskDTOS) -> {
+                TaskContext taskContext = new TaskContext();
+                taskContext.setSceneName(sceneName);
+                taskContext.setGroupName(parseLogsVO.getGroupName());
+                taskContext.setNamespaceId(namespaceId);
+                taskContext.setInitStatus(parseLogsVO.getRetryStatus());
+                taskContext.setTaskInfos(TaskContextConverter.INSTANCE.convert(retryTaskDTOS));
 
-            // 生成任务
-            taskGenerator.taskGenerator(taskContext);
+                // 生成任务
+                try {
+                    taskGenerator.taskGenerator(taskContext);
+                } catch (DuplicateKeyException e) {
+                    throw new SnailJobServerException("namespaceId:[{}] groupName:[{}] sceneName:[{}] 任务已经存在",
+                            namespaceId, parseLogsVO.getGroupName(), sceneName);
+                }
+
+            }));
+            return Boolean.TRUE;
         }));
 
         return waitInsertList.size();

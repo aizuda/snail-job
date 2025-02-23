@@ -1,8 +1,8 @@
 package com.aizuda.snailjob.server.web.model.request;
 
 import com.aizuda.snailjob.common.core.enums.RetryStatusEnum;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
-import org.hibernate.validator.constraints.NotBlank;
 
 /**
  * 重试数据模型

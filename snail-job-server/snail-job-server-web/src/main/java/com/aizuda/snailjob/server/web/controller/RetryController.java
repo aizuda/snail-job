@@ -41,7 +41,7 @@ public class RetryController {
     @LoginRequired
     @PutMapping("status")
     public int updateRetryTaskStatus(@RequestBody RetryUpdateStatusRequestVO retryUpdateStatusRequestVO) {
-        return retryService.updateRetryTaskStatus(retryUpdateStatusRequestVO);
+        return retryService.updateRetryStatus(retryUpdateStatusRequestVO);
     }
 
     @LoginRequired

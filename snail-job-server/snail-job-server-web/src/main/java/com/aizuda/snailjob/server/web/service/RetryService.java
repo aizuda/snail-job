@@ -30,7 +30,7 @@ public interface RetryService {
      * @param retryUpdateStatusRequestVO 更新重试任务状态请求模型
      * @return
      */
-    int updateRetryTaskStatus(RetryUpdateStatusRequestVO retryUpdateStatusRequestVO);
+    int updateRetryStatus(RetryUpdateStatusRequestVO retryUpdateStatusRequestVO);
 
     /**
      * 手动新增重试任务
