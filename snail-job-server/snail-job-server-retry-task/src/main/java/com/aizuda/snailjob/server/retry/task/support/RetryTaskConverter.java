@@ -175,4 +175,8 @@ public interface RetryTaskConverter {
     RequestCallbackExecutorDTO toRequestCallbackExecutorDTO(RetrySceneConfig retrySceneConfig, Retry retry);
 
     RetryCallbackRequest toRetryCallbackDTO(RequestCallbackExecutorDTO executorDTO);
+
+    List<RetryTaskFailDeadLetterAlarmEventDTO> toRetryTaskFailDeadLetterAlarmEventDTO(List<RetryDeadLetter> retryDeadLetters);
+
+    List<RetryAlarmInfo> toRetryAlarmInfos(List<RetryTaskFailDeadLetterAlarmEventDTO> letterAlarmEventDTOS);
 }

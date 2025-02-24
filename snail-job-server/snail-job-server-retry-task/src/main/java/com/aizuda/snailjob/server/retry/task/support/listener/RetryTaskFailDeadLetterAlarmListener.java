@@ -12,6 +12,8 @@ import com.aizuda.snailjob.server.common.dto.NotifyConfigInfo;
 import com.aizuda.snailjob.server.common.dto.RetryAlarmInfo;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.util.DateUtils;
+import com.aizuda.snailjob.server.retry.task.dto.RetryTaskFailDeadLetterAlarmEventDTO;
+import com.aizuda.snailjob.server.retry.task.support.RetryTaskConverter;
 import com.aizuda.snailjob.server.retry.task.support.event.RetryTaskFailDeadLetterAlarmEvent;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryDeadLetter;
 import com.google.common.collect.Lists;
@@ -39,7 +41,7 @@ public class RetryTaskFailDeadLetterAlarmListener extends
     /**
      * 死信告警数据
      */
-    private final LinkedBlockingQueue<List<RetryDeadLetter>> queue = new LinkedBlockingQueue<>(1000);
+    private final LinkedBlockingQueue<List<RetryTaskFailDeadLetterAlarmEventDTO>> queue = new LinkedBlockingQueue<>(1000);
 
     private static final String retryTaskDeadTextMessagesFormatter =
             "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 重试任务失败进入死信队列</font>  \n" +
@@ -58,12 +60,12 @@ public class RetryTaskFailDeadLetterAlarmListener extends
     @Override
     protected List<RetryAlarmInfo> poll() throws InterruptedException {
         // 无数据时阻塞线程
-        List<RetryDeadLetter> allRetryDeadLetterList = queue.poll(100, TimeUnit.MILLISECONDS);
+        List<RetryTaskFailDeadLetterAlarmEventDTO> allRetryDeadLetterList = queue.poll(100, TimeUnit.MILLISECONDS);
         if (CollUtil.isEmpty(allRetryDeadLetterList)) {
             return Lists.newArrayList();
         }
 
-        return AlarmInfoConverter.INSTANCE.deadLetterToAlarmInfo(allRetryDeadLetterList);
+        return RetryTaskConverter.INSTANCE.toRetryAlarmInfos(allRetryDeadLetterList);
     }
 
     @Override

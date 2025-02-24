@@ -2,6 +2,7 @@ package com.aizuda.snailjob.server.retry.task.support.schedule;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
+import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.enums.RetryStatusEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
@@ -17,6 +18,7 @@ import com.aizuda.snailjob.server.common.util.PartitionTaskUtils;
 import com.aizuda.snailjob.server.retry.task.dto.RetryPartitionTask;
 import com.aizuda.snailjob.server.retry.task.service.RetryDeadLetterConverter;
 import com.aizuda.snailjob.server.retry.task.support.RetryTaskConverter;
+import com.aizuda.snailjob.server.retry.task.support.event.RetryTaskFailDeadLetterAlarmEvent;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import com.aizuda.snailjob.template.datasource.access.TaskAccess;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryMapper;
@@ -217,6 +219,9 @@ public class CleanerSchedule extends AbstractSchedule implements Lifecycle {
                         .in(Retry::getId, StreamUtils.toList(retries, RetryPartitionTask::getId))),
                 () -> new SnailJobServerException("删除重试数据失败 [{}]", JsonUtil.toJsonString(retries)));
 
+        SnailSpringContext.getContext().publishEvent(new RetryTaskFailDeadLetterAlarmEvent(
+                RetryTaskConverter.INSTANCE.toRetryTaskFailDeadLetterAlarmEventDTO(retryDeadLetters)
+        ));
     }
 
 

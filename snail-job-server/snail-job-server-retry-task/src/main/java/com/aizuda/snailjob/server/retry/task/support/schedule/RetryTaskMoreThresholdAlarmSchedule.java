@@ -49,7 +49,7 @@ public class RetryTaskMoreThresholdAlarmSchedule extends AbstractRetryTaskAlarmS
     public void close() {
     }
 
-
+    @Override
     protected void doSendAlarm(RetrySceneConfigPartitionTask partitionTask, Map<Long, NotifyConfigDTO> notifyConfigInfo) {
 
         // x分钟内、x组、x场景进入重试任务的数据量

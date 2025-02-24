@@ -98,8 +98,8 @@ public class RetryFailureHandler extends AbstractRetryResultHandler {
                     RetryTaskConverter.INSTANCE.toRetryTaskFailAlarmEventDTO(
                             retry, context.getExceptionMsg(), RETRY_TASK_FAIL_ERROR.getNotifyScene());
             SnailSpringContext.getContext().publishEvent(new RetryTaskFailAlarmEvent(retryTaskFailAlarmEventDTO));
-            return null;
 
+            return null;
         });
     }
 }

@@ -5,12 +5,14 @@ import com.aizuda.snailjob.common.core.alarm.Alarm;
 import com.aizuda.snailjob.common.core.alarm.AlarmContext;
 import com.aizuda.snailjob.common.core.alarm.SnailJobAlarmFactory;
 import com.aizuda.snailjob.common.core.enums.RetryNotifySceneEnum;
+import com.aizuda.snailjob.common.core.enums.RetryStatusEnum;
 import com.aizuda.snailjob.common.core.util.EnvironmentUtils;
 import com.aizuda.snailjob.server.common.Lifecycle;
 import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.retry.task.dto.NotifyConfigDTO;
 import com.aizuda.snailjob.server.retry.task.dto.RetrySceneConfigPartitionTask;
 import com.aizuda.snailjob.template.datasource.access.TaskAccess;
+import com.aizuda.snailjob.template.datasource.persistence.po.Retry;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryDeadLetter;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
@@ -55,14 +57,17 @@ public class RetryErrorMoreThresholdAlarmSchedule extends AbstractRetryTaskAlarm
             return;
         }
 
-        // x分钟内、x组、x场景进入死信队列的数据量
         LocalDateTime now = LocalDateTime.now();
-        TaskAccess<RetryDeadLetter> retryDeadLetterAccess = accessTemplate.getRetryDeadLetterAccess();
-        long count = retryDeadLetterAccess.count(new LambdaQueryWrapper<RetryDeadLetter>().
-                        between(RetryDeadLetter::getCreateDt, now.minusMinutes(30), now)
-                        .eq(RetryDeadLetter::getNamespaceId, partitionTask.getNamespaceId())
-                        .eq(RetryDeadLetter::getGroupName, partitionTask.getGroupName())
-                        .eq(RetryDeadLetter::getSceneName, partitionTask.getSceneName()));
+
+        // x分钟内、x组、x场景进入任务到达最大重试次数的数据量
+        long count = accessTemplate.getRetryAccess()
+                .count(new LambdaQueryWrapper<Retry>()
+                        .eq(Retry::getNamespaceId, partitionTask.getNamespaceId())
+                        .between(Retry::getUpdateDt, now.minusMinutes(30), now)
+                        .eq(Retry::getGroupName, partitionTask.getGroupName())
+                        .eq(Retry::getSceneName, partitionTask.getSceneName())
+                        .eq(Retry::getRetryStatus, RetryStatusEnum.MAX_COUNT.getStatus())
+                );
 
         for (Long notifyId : partitionTask.getNotifyIds()) {
             NotifyConfigDTO notifyConfigDTO = notifyConfigInfo.get(notifyId);

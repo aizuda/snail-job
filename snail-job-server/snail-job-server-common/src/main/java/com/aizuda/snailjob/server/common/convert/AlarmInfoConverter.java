@@ -29,8 +29,6 @@ public interface AlarmInfoConverter {
 
     AlarmInfoConverter INSTANCE = Mappers.getMapper(AlarmInfoConverter.class);
 
-    List<RetryAlarmInfo> deadLetterToAlarmInfo(List<RetryDeadLetter> retryDeadLetters);
-
     List<NotifyConfigInfo> retryToNotifyConfigInfos(List<NotifyConfig> notifyConfigs);
 
     @Mappings({

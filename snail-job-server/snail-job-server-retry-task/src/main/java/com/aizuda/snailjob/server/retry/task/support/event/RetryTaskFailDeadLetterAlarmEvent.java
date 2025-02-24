@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.retry.task.support.event;
 
+import com.aizuda.snailjob.server.retry.task.dto.RetryTaskFailDeadLetterAlarmEventDTO;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryDeadLetter;
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
@@ -16,9 +17,9 @@ import java.util.List;
 @Getter
 public class RetryTaskFailDeadLetterAlarmEvent extends ApplicationEvent {
 
-    private List<RetryDeadLetter> retryDeadLetters;
+    private List<RetryTaskFailDeadLetterAlarmEventDTO> retryDeadLetters;
 
-    public RetryTaskFailDeadLetterAlarmEvent(List<RetryDeadLetter> retryDeadLetters) {
+    public RetryTaskFailDeadLetterAlarmEvent(List<RetryTaskFailDeadLetterAlarmEventDTO> retryDeadLetters) {
         super(retryDeadLetters);
         this.retryDeadLetters = retryDeadLetters;
     }
