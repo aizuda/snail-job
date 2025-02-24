@@ -4,10 +4,8 @@ import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
-import com.aizuda.snailjob.common.core.enums.RetryOperationReasonEnum;
-import com.aizuda.snailjob.common.core.enums.RetryStatusEnum;
-import com.aizuda.snailjob.common.core.enums.RetryTaskStatusEnum;
-import com.aizuda.snailjob.common.core.enums.StatusEnum;
+import com.aizuda.snailjob.common.core.context.SnailSpringContext;
+import com.aizuda.snailjob.common.core.enums.*;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.common.cache.CacheRegisterTable;
@@ -21,7 +19,9 @@ import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.retry.task.dto.RequestCallbackExecutorDTO;
 import com.aizuda.snailjob.server.retry.task.dto.RequestRetryExecutorDTO;
 import com.aizuda.snailjob.server.retry.task.dto.RetryTaskExecuteDTO;
+import com.aizuda.snailjob.server.retry.task.dto.RetryTaskFailAlarmEventDTO;
 import com.aizuda.snailjob.server.retry.task.support.RetryTaskConverter;
+import com.aizuda.snailjob.server.retry.task.support.event.RetryTaskFailAlarmEvent;
 import com.aizuda.snailjob.server.retry.task.support.handler.RetryTaskStopHandler;
 import com.aizuda.snailjob.server.retry.task.support.timer.RetryTimeoutCheckTask;
 import com.aizuda.snailjob.server.retry.task.support.timer.RetryTimerWheel;
@@ -98,6 +98,10 @@ public class RetryExecutor extends AbstractActor {
         if (CollUtil.isEmpty(CacheRegisterTable.getServerNodeSet(retry.getGroupName(), retry.getNamespaceId()))) {
             // 无客户端不执行调度
             updateRetryTaskStatus(execute.getRetryTaskId(), RetryTaskStatusEnum.CANCEL.getStatus(), RetryOperationReasonEnum.NOT_CLIENT);
+            RetryTaskFailAlarmEventDTO toRetryTaskFailAlarmEventDTO =
+                    RetryTaskConverter.INSTANCE.toRetryTaskFailAlarmEventDTO(retry, "无客户端节点",
+                            RetryNotifySceneEnum.RETRY_NO_CLIENT_NODES_ERROR.getNotifyScene());
+            SnailSpringContext.getContext().publishEvent(new RetryTaskFailAlarmEvent(toRetryTaskFailAlarmEventDTO));
             return;
         }
 
@@ -108,7 +112,7 @@ public class RetryExecutor extends AbstractActor {
         );
         if (StatusEnum.NO.getStatus().equals(retrySceneConfig.getSceneStatus())) {
             // 场景已经关闭不执行调度
-            updateRetryTaskStatus(execute.getRetryTaskId(), RetryTaskStatusEnum.CANCEL.getStatus(), RetryOperationReasonEnum.NOT_CLIENT);
+            updateRetryTaskStatus(execute.getRetryTaskId(), RetryTaskStatusEnum.CANCEL.getStatus(), RetryOperationReasonEnum.SCENE_CLOSED);
             return;
         }
 

@@ -14,7 +14,7 @@ import org.springframework.context.ApplicationEvent;
 @Getter
 public class RetryTaskFailAlarmEvent extends ApplicationEvent {
 
-    private RetryTaskFailAlarmEventDTO retryTaskFailAlarmEventDTO;
+    private final RetryTaskFailAlarmEventDTO retryTaskFailAlarmEventDTO;
 
     public RetryTaskFailAlarmEvent(RetryTaskFailAlarmEventDTO retryTaskFailAlarmEventDTO) {
         super(retryTaskFailAlarmEventDTO);
