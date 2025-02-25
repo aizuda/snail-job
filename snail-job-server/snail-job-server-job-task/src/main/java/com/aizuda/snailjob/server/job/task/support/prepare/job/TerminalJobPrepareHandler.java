@@ -12,6 +12,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
+import static com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum.COMPLETED;
+
 /**
  * 处理处于已完成 {@link JobTaskBatchStatusEnum::COMPLETED} 状态的任务
  *
@@ -29,7 +31,7 @@ public class TerminalJobPrepareHandler extends AbstractJobPrepareHandler {
 
     @Override
     public boolean matches(Integer status) {
-        return Objects.isNull(status);
+        return COMPLETED.contains(status);
     }
 
     @Override

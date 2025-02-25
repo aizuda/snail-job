@@ -77,8 +77,6 @@ public class JobTaskPrepareActor extends AbstractActor {
             // 模拟完成情况
             jobTaskBatch.setTaskBatchStatus(JobTaskBatchStatusEnum.SUCCESS.getStatus());
             notCompleteJobTaskBatchList = Lists.newArrayList(jobTaskBatch);
-//            TerminalJobPrepareHandler terminalJobPrepareHandler = SnailSpringContext.getBeanByType(TerminalJobPrepareHandler.class);
-//            terminalJobPrepareHandler.handle(prepare);
         }
 
         boolean onlyTimeoutCheck = false;
