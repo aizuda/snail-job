@@ -87,7 +87,7 @@ public class RetryTaskFailDeadLetterAlarmListener extends
                         retryAlarmInfo.getExecutorName(),
                         retryAlarmInfo.getSceneName(),
                         retryAlarmInfo.getArgsStr(),
-                        DateUtils.format(retryAlarmInfo.getCreateDt(), DateUtils.NORM_DATETIME_PATTERN))
+                        DateUtils.toNowFormat(DateUtils.NORM_DATETIME_PATTERN))
                 .title("组:[{}] 场景:[{}] 环境重试任务失败进入死信队列",
                         retryAlarmInfo.getGroupName(), retryAlarmInfo.getSceneName());
     }

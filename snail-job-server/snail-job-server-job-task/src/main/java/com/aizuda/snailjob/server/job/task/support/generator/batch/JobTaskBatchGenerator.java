@@ -92,6 +92,7 @@ public class JobTaskBatchGenerator {
                             .reason(JobNotifySceneEnum.JOB_NO_CLIENT_NODES_ERROR.getDesc())
                             .notifyScene(JobNotifySceneEnum.JOB_NO_CLIENT_NODES_ERROR.getNotifyScene())
                             .build()));
+            return jobTaskBatch;
         }
 
         // 非待处理状态无需进入时间轮中

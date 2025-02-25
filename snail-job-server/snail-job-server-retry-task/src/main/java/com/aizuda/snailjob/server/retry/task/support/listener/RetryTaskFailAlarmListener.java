@@ -95,7 +95,7 @@ public class RetryTaskFailAlarmListener extends
                         retryAlarmInfo.getExecutorName(),
                         retryAlarmInfo.getSceneName(),
                         retryAlarmInfo.getArgsStr(),
-                        DateUtils.format(retryAlarmInfo.getCreateDt(), DateUtils.NORM_DATETIME_PATTERN),
+                        DateUtils.toNowFormat(DateUtils.NORM_DATETIME_PATTERN),
                         retryAlarmInfo.getReason())
                 .title("组:[{}] 场景:[{}] 环境重试任务失败",
                         retryAlarmInfo.getGroupName(), retryAlarmInfo.getSceneName());

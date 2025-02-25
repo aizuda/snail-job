@@ -213,9 +213,7 @@ public class Slf4jLog extends AbstractLog {
      */
     private void setContextMap(Boolean remote) {
         if (remote) {
-            Map<String, String> map = new LinkedHashMap<>();
-            map.put(LogFieldConstants.MDC_REMOTE, remote.toString());
-            MDC.setContextMap(map);
+            MDC.put(LogFieldConstants.MDC_REMOTE, remote.toString());
         }
     }
 }

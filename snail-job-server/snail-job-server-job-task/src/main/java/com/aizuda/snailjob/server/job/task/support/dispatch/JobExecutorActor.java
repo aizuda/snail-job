@@ -126,7 +126,7 @@ public class JobExecutorActor extends AbstractActor {
             }
 
             // 无客户端节点-告警通知
-            if (JobTaskBatchStatusEnum.CANCEL.getStatus() == taskStatus && JobOperationReasonEnum.NOT_CLIENT.getReason() == operationReason) {
+            if (CollUtil.isEmpty(CacheRegisterTable.getServerNodeSet(job.getGroupName(), job.getNamespaceId()))) {
                 SnailSpringContext.getContext().publishEvent(
                         new JobTaskFailAlarmEvent(JobTaskFailAlarmEventDTO.builder()
                                 .jobTaskBatchId(taskExecute.getTaskBatchId())
@@ -148,7 +148,7 @@ public class JobExecutorActor extends AbstractActor {
             JobTaskGenerator taskInstance = JobTaskGeneratorFactory.getTaskInstance(job.getTaskType());
             JobTaskGenerateContext instanceGenerateContext = JobTaskConverter.INSTANCE.toJobTaskInstanceGenerateContext(job);
             instanceGenerateContext.setTaskBatchId(taskExecute.getTaskBatchId());
-            if (Objects.nonNull(taskExecute.getTmpArgsStr())){
+            if (Objects.nonNull(taskExecute.getTmpArgsStr())) {
                 instanceGenerateContext.setArgsStr(taskExecute.getTmpArgsStr());
             }
             if (Lists.newArrayList(MAP_REDUCE.getType(), MAP.getType()).contains(job.getTaskType())) {
