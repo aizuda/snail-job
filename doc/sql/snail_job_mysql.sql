@@ -166,17 +166,17 @@ CREATE TABLE `sj_retry_task`
 CREATE TABLE `sj_retry_task_log_message`
 (
     `id`            bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `namespace_id`  varchar(64) NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' COMMENT '命名空间id',
-    `group_name`    varchar(64) NOT NULL COMMENT '组名称',
-    `retry_id`      bigint(20)     NOT NULL COMMENT '重试信息Id',
-    `retry_task_id` bigint(20)     NOT NULL COMMENT '重试任务Id',
-    `message`       longtext    NOT NULL COMMENT '异常信息',
+    `namespace_id`  varchar(64)         NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' COMMENT '命名空间id',
+    `group_name`    varchar(64)         NOT NULL COMMENT '组名称',
+    `retry_id`      bigint(20)          NOT NULL COMMENT '重试信息Id',
+    `retry_task_id` bigint(20)          NOT NULL COMMENT '重试任务Id',
+    `message`       longtext            NOT NULL COMMENT '异常信息',
     `log_num`       int(11)             NOT NULL DEFAULT 1 COMMENT '日志数量',
     `real_time`     bigint(13)          NOT NULL DEFAULT 0 COMMENT '上报时间',
-    `create_dt`     datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `create_dt`     datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     PRIMARY KEY (`id`),
-    KEY             `idx_namespace_id_group_name_retry_task_id` (`namespace_id`, `group_name`, `retry_task_id`),
-    KEY             `idx_create_dt` (`create_dt`)
+    KEY `idx_namespace_id_group_name_retry_task_id` (`namespace_id`, `group_name`, `retry_task_id`),
+    KEY `idx_create_dt` (`create_dt`)
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 0
   DEFAULT CHARSET = utf8mb4 COMMENT ='任务调度日志信息记录表'

@@ -4,21 +4,23 @@
 
     <!-- 定义批量新增的 SQL 映射 -->
     <insert id="insertBatch" parameterType="java.util.List">
-        INSERT INTO sj_retry_task (namespace_id, unique_id, group_name, scene_name,
-                                   idempotent_id, biz_no, executor_name, args_str, ext_attrs,
-                                   next_trigger_at, task_type, retry_status, create_dt)
+        INSERT INTO sj_retry (namespace_id, unique_id, group_name, scene_name,
+        idempotent_id, biz_no, executor_name, args_str, ext_attrs,
+        next_trigger_at, task_type, retry_status, create_dt, bucket_index, parent_id, deleted)
         VALUES
         <foreach collection="list" item="item" separator=",">
             (
-                #{item.namespaceId}, #{item.uniqueId}, #{item.groupName},
-                #{item.sceneName}, #{item.idempotentId}, #{item.bizNo}, #{item.executorName}, #{item.argsStr},
-                #{item.extAttrs}, #{item.nextTriggerAt}, #{item.taskType}, #{item.retryStatus}, #{item.createDt}
+            #{item.namespaceId}, #{item.uniqueId}, #{item.groupName},
+            #{item.sceneName}, #{item.idempotentId}, #{item.bizNo}, #{item.executorName}, #{item.argsStr},
+            #{item.extAttrs}, #{item.nextTriggerAt}, #{item.taskType}, #{item.retryStatus}, #{item.createDt},
+            #{item.bucketIndex}, #{item.parentId},
+            #{item.deleted}
             )
         </foreach>
     </insert>
 
     <update id="updateBatchNextTriggerAtById" parameterType="java.util.List">
-        UPDATE sj_retry_task_${partition} AS rt
+        UPDATE sj_retry AS rt
            SET next_trigger_at = tt.next_trigger_at,
                update_dt = CURRENT_TIMESTAMP
           FROM (

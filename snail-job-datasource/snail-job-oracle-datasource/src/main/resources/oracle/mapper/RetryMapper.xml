@@ -3,20 +3,22 @@
 <mapper namespace="com.aizuda.snailjob.template.datasource.persistence.mapper.RetryMapper">
 
     <insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="false">
-        INSERT INTO sj_retry_task (namespace_id, unique_id, group_name, scene_name, idempotent_id, biz_no,
-                                   executor_name, args_str, ext_attrs, next_trigger_at, task_type, retry_status, create_dt)
+        INSERT INTO sj_retry (namespace_id, unique_id, group_name, scene_name, idempotent_id, biz_no,
+        executor_name, args_str, ext_attrs, next_trigger_at, task_type, retry_status, create_dt
+        , bucket_index, parent_id, deleted)
         <foreach collection="list" item="item" separator="UNION ALL">
             SELECT
-                #{item.namespaceId}, #{item.uniqueId}, #{item.groupName}, #{item.sceneName}, #{item.idempotentId},
-                #{item.bizNo}, #{item.executorName}, #{item.argsStr}, #{item.extAttrs}, #{item.nextTriggerAt},
-                #{item.taskType}, #{item.retryStatus}, #{item.createDt}
+            #{item.namespaceId}, #{item.uniqueId}, #{item.groupName}, #{item.sceneName}, #{item.idempotentId},
+            #{item.bizNo}, #{item.executorName}, #{item.argsStr}, #{item.extAttrs}, #{item.nextTriggerAt},
+            #{item.taskType}, #{item.retryStatus}, #{item.createDt}, #{item.bucketIndex}, #{item.parentId},
+            #{item.deleted}
             FROM DUAL
         </foreach>
     </insert>
 
     <update id="updateBatchNextTriggerAtById" parameterType="java.util.List">
         <foreach collection="list" item="item" index="index" open="BEGIN" separator=";" close=";END;">
-            UPDATE sj_retry_task_${partition}
+            UPDATE sj_retry
                SET next_trigger_at = #{item.nextTriggerAt},
                    update_dt = CURRENT_TIMESTAMP
              WHERE id = #{item.id}
