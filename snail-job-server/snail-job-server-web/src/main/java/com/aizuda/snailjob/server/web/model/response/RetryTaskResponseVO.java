@@ -32,4 +32,6 @@ public class RetryTaskResponseVO {
      */
     private String clientInfo;
 
+    private RetryResponseVO responseVO;
+
 }

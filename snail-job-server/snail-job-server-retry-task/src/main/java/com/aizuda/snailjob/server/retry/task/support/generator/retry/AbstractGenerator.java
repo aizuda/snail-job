@@ -125,6 +125,8 @@ public abstract class AbstractGenerator implements TaskGenerator {
         retry.setGroupName(taskContext.getGroupName());
         retry.setSceneName(taskContext.getSceneName());
         retry.setRetryStatus(initStatus(taskContext));
+        retry.setParentId(0L);
+        retry.setDeleted(0L);
         if (StrUtil.isBlank(retry.getBizNo())) {
             // 默认生成一个业务单据号方便用户查询
             retry.setBizNo(IdUtil.fastSimpleUUID());

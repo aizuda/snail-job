@@ -15,11 +15,13 @@ import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.RetryTaskLogMessageQueryVO;
 import com.aizuda.snailjob.server.web.model.request.RetryTaskQueryVO;
 import com.aizuda.snailjob.server.web.model.request.UserSessionVO;
+import com.aizuda.snailjob.server.web.model.response.RetryResponseVO;
 import com.aizuda.snailjob.server.web.model.response.RetryTaskLogMessageResponseVO;
 import com.aizuda.snailjob.server.web.model.response.RetryTaskResponseVO;
 import com.aizuda.snailjob.server.web.service.RetryTaskService;
 import com.aizuda.snailjob.server.web.service.convert.RetryConverter;
 import com.aizuda.snailjob.server.web.service.convert.RetryTaskLogResponseVOConverter;
+import com.aizuda.snailjob.server.web.service.convert.RetryTaskResponseVOConverter;
 import com.aizuda.snailjob.server.web.util.UserSessionUtils;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskMapper;
@@ -165,7 +167,15 @@ public class RetryTaskServiceImpl implements RetryTaskService {
     @Override
     public RetryTaskResponseVO getRetryTaskById(Long id) {
         RetryTask retryTask = retryTaskMapper.selectById(id);
-        return RetryTaskLogResponseVOConverter.INSTANCE.convert(retryTask);
+
+        if (retryTask == null) {
+            return null;
+        }
+
+        Retry retry = retryMapper.selectById(retryTask.getRetryId());
+        RetryTaskResponseVO responseVO = RetryTaskLogResponseVOConverter.INSTANCE.convert(retryTask);
+        responseVO.setResponseVO(RetryTaskResponseVOConverter.INSTANCE.convert(retry));
+        return responseVO;
     }
 
     @Override
