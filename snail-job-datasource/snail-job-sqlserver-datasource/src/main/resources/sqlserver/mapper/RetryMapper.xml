@@ -32,7 +32,7 @@
         UPDATE sj_retry
            SET next_trigger_at = src.next_trigger_at,
                update_dt = CURRENT_TIMESTAMP
-          FROM sj_retry_task_${partition} AS target
+          FROM sj_retry AS target
                 JOIN (
                 <foreach collection="list" item="item" index="index" separator="UNION ALL">
                     SELECT
