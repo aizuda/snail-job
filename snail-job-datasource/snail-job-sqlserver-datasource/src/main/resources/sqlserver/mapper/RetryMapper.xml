@@ -3,7 +3,7 @@
 <mapper namespace="com.aizuda.snailjob.template.datasource.persistence.mapper.RetryMapper">
 
     <insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO sj_retry_task (namespace_id, group_name, scene_name, idempotent_id, biz_no,
+        INSERT INTO sj_retry (namespace_id, group_name, scene_name, idempotent_id, biz_no,
         executor_name, args_str, ext_attrs, next_trigger_at, task_type, retry_status,
         create_dt, bucket_index, parent_id, deleted)
         VALUES
@@ -29,7 +29,7 @@
     </insert>
 
     <update id="updateBatchNextTriggerAtById" parameterType="java.util.List">
-        UPDATE sj_retry_task_${partition}
+        UPDATE sj_retry
            SET next_trigger_at = src.next_trigger_at,
                update_dt = CURRENT_TIMESTAMP
           FROM sj_retry_task_${partition} AS target

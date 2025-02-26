@@ -4,7 +4,7 @@
 
     <!-- 定义批量新增的 SQL 映射 -->
     <insert id="insertBatch" parameterType="java.util.List">
-        INSERT INTO sj_retry (namespace_id, unique_id, group_name, scene_name,
+        INSERT INTO sj_retry (namespace_id, group_name, scene_name,
         idempotent_id, biz_no, executor_name, args_str, ext_attrs,
         next_trigger_at, task_type, retry_status, create_dt, bucket_index, parent_id, deleted)
         VALUES
