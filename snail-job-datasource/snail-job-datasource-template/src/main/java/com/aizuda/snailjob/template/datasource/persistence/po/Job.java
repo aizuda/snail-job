@@ -6,6 +6,7 @@ import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.apache.ibatis.type.JdbcType;
 
 /**
  * 任务信息
@@ -150,7 +151,7 @@ public class Job extends CreateUpdateDt {
     /**
      * 负责人id
      */
-    @TableField(updateStrategy = FieldStrategy.ALWAYS)
+    @TableField(updateStrategy = FieldStrategy.ALWAYS , jdbcType= JdbcType.BIGINT )
     private Long ownerId;
 
 }
