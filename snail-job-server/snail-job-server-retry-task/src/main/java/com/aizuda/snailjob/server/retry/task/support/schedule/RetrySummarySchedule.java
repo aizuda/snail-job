@@ -10,6 +10,7 @@ import com.aizuda.snailjob.server.common.triple.Triple;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.DashboardRetryResponseDO;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.RetrySummaryMapper;
+import com.aizuda.snailjob.template.datasource.persistence.po.Retry;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetrySummary;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -61,9 +62,9 @@ public class RetrySummarySchedule extends AbstractSchedule implements Lifecycle 
                 // 重试按日实时查询统计数据（00:00:00 - 23:59:59）
                 LocalDateTime todayFrom = LocalDateTime.of(LocalDate.now(), LocalTime.MIN).plusDays(-i);
                 LocalDateTime todayTo = LocalDateTime.of(LocalDate.now(), LocalTime.MAX).plusDays(-i);
-                LambdaQueryWrapper<RetryTask> wrapper = new LambdaQueryWrapper<RetryTask>()
-                        .between(RetryTask::getCreateDt, todayFrom, todayTo)
-                        .groupBy(RetryTask::getNamespaceId, RetryTask::getGroupName, RetryTask::getSceneName);
+                LambdaQueryWrapper<Retry> wrapper = new LambdaQueryWrapper<Retry>()
+                        .between(Retry::getCreateDt, todayFrom, todayTo)
+                        .groupBy(Retry::getNamespaceId, Retry::getGroupName, Retry::getSceneName);
                 List<DashboardRetryResponseDO> dashboardRetryResponseDOList = retryMapper.selectRetrySummaryList(wrapper);
                 if (CollUtil.isEmpty(dashboardRetryResponseDOList)) {
                     continue;
