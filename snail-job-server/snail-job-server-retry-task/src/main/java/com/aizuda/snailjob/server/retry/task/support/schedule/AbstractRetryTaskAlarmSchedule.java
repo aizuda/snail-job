@@ -76,7 +76,7 @@ public abstract class AbstractRetryTaskAlarmSchedule extends AbstractSchedule im
                         new LambdaQueryWrapper<RetrySceneConfig>()
                                 .gt(RetrySceneConfig::getId, startId)
                                 .eq(RetrySceneConfig::getSceneStatus, StatusEnum.YES.getStatus())
-                                .orderByDesc(RetrySceneConfig::getId)
+                                .orderByAsc(RetrySceneConfig::getId)
                 ).getRecords();
         return RetryTaskConverter.INSTANCE.toRetrySceneConfigPartitionTask(retrySceneConfigList);
     }
