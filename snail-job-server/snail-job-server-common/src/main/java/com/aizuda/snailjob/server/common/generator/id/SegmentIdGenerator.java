@@ -29,6 +29,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 @Component
 @Slf4j
+@Deprecated
 public class SegmentIdGenerator implements IdGenerator, Lifecycle {
 
     /**

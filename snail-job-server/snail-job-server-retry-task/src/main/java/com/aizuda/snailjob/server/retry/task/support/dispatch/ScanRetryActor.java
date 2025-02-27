@@ -93,9 +93,7 @@ public class ScanRetryActor extends AbstractActor {
             return true;
         }
 
-        boolean b = rateLimiterHandler.tryAcquire(partitionTasks.size());
-        log.warn("获取令牌, b:[{}] size:[{}]", b, partitionTasks.size());
-        if (!b) {
+        if (!rateLimiterHandler.tryAcquire(partitionTasks.size())) {
             log.warn("当前节点触发限流");
             return true;
         }

@@ -105,7 +105,7 @@ services:
             - "5236:5236"
         volumes:
             - dm8:/opt/dmdbms/data
-            # docker compose exec dm8 bash -c "/opt/dmdbms/bin/disql SYSDBA/SYSDBA001 \`/tmp/schema.sql"
+            # docker compose exec dm8 bash -c "/opt/dmdbms/bin/disql SYSDBA/SYSDBA_dm001 \`/tmp/schema.sql"
             - ../sql/snail_job_dm8.sql:/tmp/schema.sql:ro
 
     kingbase:
