@@ -72,7 +72,7 @@ public class ExecutorMethodScanner implements Scanner, ApplicationContextAware {
                     1,
                     1,
                     idempotentIdGenerate,
-                    StrUtil.EMPTY,
+                    retryable.bizNo(),
                     (Class<? extends ExecutorMethod>) executor.getClass(),
                     Boolean.TRUE,
                     retryCompleteCallback,
