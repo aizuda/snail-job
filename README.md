@@ -45,7 +45,7 @@
 
 ## 快速入门
 
-- [服务部署](https://snailjob.opensnail.com/docs/guide/service_deployment.html)
+- [服务部署](https://snailjob.opensnail.com/docs/guide/server/service_deployment.html)
 - [QuickStart](https://snailjob.opensnail.com/docs/quickstart/quick_start.html)
 - [xxljob迁移脚本](https://snailjob.opensnail.com/docs/guide/migration_tool.html)
 - [OpenApi](https://snailjob.opensnail.com/docs/guide/openapi/openapi_overview.html)
