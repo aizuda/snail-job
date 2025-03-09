@@ -2,6 +2,7 @@ package com.aizuda.snailjob.server.common.alarm;
 
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
+import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.server.common.convert.AlarmInfoConverter;
 import com.aizuda.snailjob.server.common.dto.WorkflowAlarmInfo;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.WorkflowBatchResponseDO;
@@ -32,8 +33,8 @@ public abstract class AbstractWorkflowAlarm<E extends ApplicationEvent> extends 
         Map<Long, List<WorkflowAlarmInfo>> workflowAlarmInfoMap = new HashMap<>();
         workflowAlarmInfoList.forEach(i -> notifyScene.add(i.getNotifyScene()));
 
-        Map<Long, WorkflowAlarmInfo> workflowAlarmInfoGroupMap = workflowAlarmInfoList.stream().collect(Collectors.toMap(i -> i.getId(), Function.identity()));
-
+        Map<Long, WorkflowAlarmInfo> workflowAlarmInfoGroupMap = StreamUtils.toIdentityMap(workflowAlarmInfoList, WorkflowAlarmInfo::getId);
+        // 查询数据库
         List<WorkflowBatchResponseDO> workflowBatchResponseDOList = workflowTaskBatchMapper.selectWorkflowBatchList(
                 new QueryWrapper<WorkflowTaskBatch>()
                         .in("batch.id", workflowAlarmInfoList.stream().map(i -> i.getId()).collect(Collectors.toSet()))
