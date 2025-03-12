@@ -1,7 +1,7 @@
 package com.aizuda.snailjob.server.job.task.support.executor.job;
 
-import akka.actor.AbstractActor;
-import akka.actor.ActorRef;
+import  org.apache.pekko.actor.AbstractActor;
+import  org.apache.pekko.actor.ActorRef;
 import com.aizuda.snailjob.client.model.ExecuteResult;
 import com.aizuda.snailjob.client.model.request.DispatchJobRequest;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;

@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.common.enums;
 
-import akka.actor.ActorRef;
+import  org.apache.pekko.actor.ActorRef;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

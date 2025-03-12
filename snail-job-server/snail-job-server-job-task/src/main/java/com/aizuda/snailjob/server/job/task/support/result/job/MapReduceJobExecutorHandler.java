@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.job.task.support.result.job;
 
-import akka.actor.ActorRef;
+import  org.apache.pekko.actor.ActorRef;
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;

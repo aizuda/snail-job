@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.job.task.support.dispatch;
 
-import akka.actor.AbstractActor;
+import  org.apache.pekko.actor.AbstractActor;
 import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;

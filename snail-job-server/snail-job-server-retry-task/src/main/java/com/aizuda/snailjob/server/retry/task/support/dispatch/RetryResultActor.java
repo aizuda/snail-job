@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.retry.task.support.dispatch;
 
-import akka.actor.AbstractActor;
+import  org.apache.pekko.actor.AbstractActor;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.retry.task.dto.RetryExecutorResultDTO;

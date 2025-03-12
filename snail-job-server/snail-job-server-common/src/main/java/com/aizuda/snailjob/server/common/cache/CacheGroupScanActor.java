@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.common.cache;
 
-import akka.actor.ActorRef;
+import  org.apache.pekko.actor.ActorRef;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.Lifecycle;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;

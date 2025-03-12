@@ -1,7 +1,7 @@
 package com.aizuda.snailjob.server.common.akka;
 
-import akka.actor.Extension;
-import akka.actor.Props;
+import org.apache.pekko.actor.Extension;
+import org.apache.pekko.actor.Props;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 

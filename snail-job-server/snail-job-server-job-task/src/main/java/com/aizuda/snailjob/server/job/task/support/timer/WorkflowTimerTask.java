@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.job.task.support.timer;
 
-import akka.actor.ActorRef;
+import  org.apache.pekko.actor.ActorRef;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.TimerTask;

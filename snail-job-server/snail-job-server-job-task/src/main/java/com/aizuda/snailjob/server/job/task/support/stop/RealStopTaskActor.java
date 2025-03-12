@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.job.task.support.stop;
 
-import akka.actor.AbstractActor;
+import  org.apache.pekko.actor.AbstractActor;
 import com.aizuda.snailjob.client.model.StopJobDTO;
 import com.aizuda.snailjob.common.core.model.Result;
 import com.aizuda.snailjob.common.core.util.JsonUtil;

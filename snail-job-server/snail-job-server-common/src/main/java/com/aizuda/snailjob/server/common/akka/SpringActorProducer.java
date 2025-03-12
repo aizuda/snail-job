@@ -1,7 +1,7 @@
 package com.aizuda.snailjob.server.common.akka;
 
-import akka.actor.Actor;
-import akka.actor.IndirectActorProducer;
+import org.apache.pekko.actor.Actor;
+import org.apache.pekko.actor.IndirectActorProducer;
 import org.springframework.context.ApplicationContext;
 
 /**

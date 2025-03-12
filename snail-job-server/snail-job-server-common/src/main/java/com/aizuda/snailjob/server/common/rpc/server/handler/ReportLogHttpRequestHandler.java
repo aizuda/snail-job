@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.common.rpc.server.handler;
 
-import akka.actor.ActorRef;
+import  org.apache.pekko.actor.ActorRef;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.net.url.UrlQuery;

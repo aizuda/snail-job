@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.retry.task.support.timer;
 
-import akka.actor.ActorRef;
+import  org.apache.pekko.actor.ActorRef;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.enums.RetryStatusEnum;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;

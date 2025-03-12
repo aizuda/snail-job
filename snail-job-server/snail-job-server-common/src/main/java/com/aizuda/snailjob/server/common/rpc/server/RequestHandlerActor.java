@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.common.rpc.server;
 
-import akka.actor.AbstractActor;
+import  org.apache.pekko.actor.AbstractActor;
 import cn.hutool.core.net.url.UrlBuilder;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;

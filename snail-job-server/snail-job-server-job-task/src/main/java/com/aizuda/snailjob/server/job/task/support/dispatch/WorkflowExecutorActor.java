@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.job.task.support.dispatch;
 
-import akka.actor.AbstractActor;
+import  org.apache.pekko.actor.AbstractActor;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;

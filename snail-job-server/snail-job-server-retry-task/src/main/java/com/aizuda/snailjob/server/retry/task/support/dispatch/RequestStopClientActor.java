@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.retry.task.support.dispatch;
 
-import akka.actor.AbstractActor;
+import  org.apache.pekko.actor.AbstractActor;
 import com.aizuda.snailjob.client.model.request.StopRetryRequest;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.model.Result;

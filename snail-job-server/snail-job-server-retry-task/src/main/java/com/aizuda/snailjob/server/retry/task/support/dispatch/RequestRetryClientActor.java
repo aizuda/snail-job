@@ -1,7 +1,7 @@
 package com.aizuda.snailjob.server.retry.task.support.dispatch;
 
-import akka.actor.AbstractActor;
-import akka.actor.ActorRef;
+import  org.apache.pekko.actor.AbstractActor;
+import  org.apache.pekko.actor.ActorRef;
 import com.aizuda.snailjob.client.model.request.DispatchRetryRequest;
 import com.aizuda.snailjob.common.core.enums.RetryTaskStatusEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;

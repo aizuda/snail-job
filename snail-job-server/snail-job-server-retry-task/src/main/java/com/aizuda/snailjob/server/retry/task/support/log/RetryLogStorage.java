@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.retry.task.support.log;
 
-import akka.actor.ActorRef;
+import  org.apache.pekko.actor.ActorRef;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.dto.LogContentDTO;
 import com.aizuda.snailjob.common.log.dto.TaskLogFieldDTO;

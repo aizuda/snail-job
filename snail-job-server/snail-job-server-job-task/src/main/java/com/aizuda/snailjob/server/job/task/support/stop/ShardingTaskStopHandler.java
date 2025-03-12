@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.job.task.support.stop;
 
-import akka.actor.ActorRef;
+import  org.apache.pekko.actor.ActorRef;
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.common.util.ClientInfoUtils;

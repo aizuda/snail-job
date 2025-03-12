@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.common.rpc.server;
 
-import akka.actor.ActorRef;
+import  org.apache.pekko.actor.ActorRef;
 import com.aizuda.snailjob.common.core.grpc.auto.GrpcResult;
 import com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest;
 import com.aizuda.snailjob.common.core.grpc.auto.Metadata;

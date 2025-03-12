@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.retry.task.support.dispatch;
 
-import akka.actor.AbstractActor;
+import  org.apache.pekko.actor.AbstractActor;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.util.JsonUtil;

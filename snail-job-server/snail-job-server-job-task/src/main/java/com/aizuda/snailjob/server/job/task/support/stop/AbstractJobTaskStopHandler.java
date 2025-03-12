@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.job.task.support.stop;
 
-import akka.actor.ActorRef;
+import  org.apache.pekko.actor.ActorRef;
 import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskStatusEnum;

@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.retry.task.support.handler;
 
-import akka.actor.ActorRef;
+import  org.apache.pekko.actor.ActorRef;
 import com.aizuda.snailjob.common.core.enums.RetryTaskStatusEnum;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;
 import com.aizuda.snailjob.server.retry.task.dto.RequestRetryExecutorDTO;

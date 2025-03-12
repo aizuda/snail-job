@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.retry.task.support.request;
 
-import akka.actor.ActorRef;
+import  org.apache.pekko.actor.ActorRef;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.net.url.UrlQuery;
 import com.aizuda.snailjob.client.model.request.DispatchCallbackResultRequest;

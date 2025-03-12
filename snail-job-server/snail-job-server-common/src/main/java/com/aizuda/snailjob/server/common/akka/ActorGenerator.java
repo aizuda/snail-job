@@ -1,8 +1,8 @@
 package com.aizuda.snailjob.server.common.akka;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSystem;
 
 
 /**
@@ -18,20 +18,15 @@ public class ActorGenerator {
     public static final String SCAN_BUCKET_ACTOR = "ScanBucketActor";
     public static final String REQUEST_HANDLER_ACTOR = "RequestHandlerActor";
     public static final String GRPC_REQUEST_HANDLER_ACTOR = "GrpcRequestHandlerActor";
-    private static final String COMMON_LOG_DISPATCHER = "akka.actor.common-log-dispatcher";
-    private static final String COMMON_SCAN_TASK_DISPATCHER = "akka.actor.common-scan-task-dispatcher";
-    private static final String NETTY_RECEIVE_REQUEST_DISPATCHER = "akka.actor.netty-receive-request-dispatcher";
+    private static final String COMMON_LOG_DISPATCHER = "pekko.actor.common-log-dispatcher";
+    private static final String COMMON_SCAN_TASK_DISPATCHER = "pekko.actor.common-scan-task-dispatcher";
+    private static final String NETTY_RECEIVE_REQUEST_DISPATCHER = "pekko.actor.netty-receive-request-dispatcher";
 
     /*----------------------------------------系统通用配置 END----------------------------------------*/
 
     /*----------------------------------------分布式重试任务 START----------------------------------------*/
     public static final String SCAN_CALLBACK_GROUP_ACTOR = "ScanCallbackGroupActor";
     public static final String SCAN_RETRY_ACTOR = "ScanRetryActor";
-    public static final String FINISH_ACTOR = "FinishActor";
-    public static final String FAILURE_ACTOR = "FailureActor";
-    public static final String NO_RETRY_ACTOR = "NoRetryActor";
-    public static final String EXEC_CALLBACK_UNIT_ACTOR = "ExecCallbackUnitActor";
-    public static final String EXEC_UNIT_ACTOR = "ExecUnitActor";
     public static final String RETRY_EXECUTOR_ACTOR = "RetryExecutorActor";
     public static final String RETRY_TASK_PREPARE_ACTOR = "RetryTaskPrepareActor";
     public static final String LOG_ACTOR = "RetryLogActor";
@@ -41,9 +36,9 @@ public class ActorGenerator {
     public static final String RETRY_REAL_STOP_TASK_INSTANCE_ACTOR = "RetryRealStopTaskInstanceActor";
 
 
-    private static final String RETRY_TASK_EXECUTOR_DISPATCHER = "akka.actor.retry-task-executor-dispatcher";
-    private static final String RETRY_TASK_EXECUTOR_RESULT_DISPATCHER = "akka.actor.retry-task-executor-result-dispatcher";
-    private static final String RETRY_TASK_EXECUTOR_CALL_CLIENT_DISPATCHER = "akka.actor.retry-task-executor-call-client-dispatcher";
+    private static final String RETRY_TASK_EXECUTOR_DISPATCHER = "pekko.actor.retry-task-executor-dispatcher";
+    private static final String RETRY_TASK_EXECUTOR_RESULT_DISPATCHER = "pekko.actor.retry-task-executor-result-dispatcher";
+    private static final String RETRY_TASK_EXECUTOR_CALL_CLIENT_DISPATCHER = "pekko.actor.retry-task-executor-call-client-dispatcher";
 
     /*----------------------------------------分布式重试任务 END----------------------------------------*/
 
@@ -61,12 +56,12 @@ public class ActorGenerator {
     public static final String JOB_REAL_STOP_TASK_INSTANCE_ACTOR = "JobRealStopTaskInstanceActor";
 
     /*----------------------------------------dispatcher----------------------------------------*/
-    private static final String JOB_TASK_DISPATCHER = "akka.actor.job-task-prepare-dispatcher";
-    private static final String JOB_TASK_EXECUTOR_DISPATCHER = "akka.actor.job-task-executor-dispatcher";
-    private static final String JOB_TASK_EXECUTOR_RESULT_DISPATCHER = "akka.actor.job-task-executor-result-dispatcher";
-    private static final String JOB_TASK_EXECUTOR_CALL_CLIENT_DISPATCHER = "akka.actor.job-task-executor-call-client-dispatcher";
-    private static final String WORKFLOW_TASK_DISPATCHER = "akka.actor.workflow-task-prepare-dispatcher";
-    private static final String WORKFLOW_TASK_EXECUTOR_DISPATCHER = "akka.actor.workflow-task-executor-dispatcher";
+    private static final String JOB_TASK_DISPATCHER = "pekko.actor.job-task-prepare-dispatcher";
+    private static final String JOB_TASK_EXECUTOR_DISPATCHER = "pekko.actor.job-task-executor-dispatcher";
+    private static final String JOB_TASK_EXECUTOR_RESULT_DISPATCHER = "pekko.actor.job-task-executor-result-dispatcher";
+    private static final String JOB_TASK_EXECUTOR_CALL_CLIENT_DISPATCHER = "pekko.actor.job-task-executor-call-client-dispatcher";
+    private static final String WORKFLOW_TASK_DISPATCHER = "pekko.actor.workflow-task-prepare-dispatcher";
+    private static final String WORKFLOW_TASK_EXECUTOR_DISPATCHER = "pekko.actor.workflow-task-executor-dispatcher";
 
     /*----------------------------------------分布式任务调度 END----------------------------------------*/
 
@@ -171,6 +166,7 @@ public class ActorGenerator {
      *
      * @return actor 引用
      */
+    @Deprecated
     public static ActorRef scanJobActor() {
         return getCommonActorSystemSystem().actorOf(getSpringExtension()
                 .props(SCAN_JOB_ACTOR)

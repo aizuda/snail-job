@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.job.task.support.block.job;
 
-import akka.actor.ActorRef;
+import  org.apache.pekko.actor.ActorRef;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import com.aizuda.snailjob.common.core.enums.JobTaskStatusEnum;

@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.job.task.support.callback;
 
-import akka.actor.ActorRef;
+import  org.apache.pekko.actor.ActorRef;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.enums.JobTaskStatusEnum;
 import com.aizuda.snailjob.server.common.akka.ActorGenerator;

@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.common.akka;
 
-import akka.actor.ActorSystem;
+import org.apache.pekko.actor.ActorSystem;
 import com.typesafe.config.ConfigFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
