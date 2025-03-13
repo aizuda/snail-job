@@ -30,7 +30,7 @@ COMMENT ON COLUMN sj_namespace.update_dt IS '修改时间';
 COMMENT ON TABLE sj_namespace IS '命名空间';
 
 INSERT INTO sj_namespace (id, name, unique_id, create_dt, update_dt, deleted)
-VALUES (1, 'Default', '764d604ec6fc45f68cd92514c40e9e1a', now(), now(), 0);
+VALUES (0, 'Default', '764d604ec6fc45f68cd92514c40e9e1a', now(), now(), 0);
 
 -- sj_group_config
 CREATE TABLE sj_group_config
