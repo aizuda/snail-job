@@ -83,8 +83,6 @@ public class JobTaskPrepareActor extends AbstractActor {
         for (JobTaskBatch jobTaskBatch : notCompleteJobTaskBatchList) {
             prepare.setExecutionAt(jobTaskBatch.getExecutionAt());
             prepare.setTaskBatchId(jobTaskBatch.getId());
-            prepare.setWorkflowTaskBatchId(prepare.getWorkflowTaskBatchId());
-            prepare.setWorkflowNodeId(jobTaskBatch.getWorkflowNodeId());
             prepare.setOnlyTimeoutCheck(onlyTimeoutCheck);
             for (JobPrepareHandler prepareHandler : prepareHandlers) {
                 if (prepareHandler.matches(jobTaskBatch.getTaskBatchStatus())) {
