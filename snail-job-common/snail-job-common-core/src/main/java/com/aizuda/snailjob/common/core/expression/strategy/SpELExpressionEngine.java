@@ -5,7 +5,7 @@ import com.aizuda.snailjob.common.core.util.JsonUtil;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.expression.spel.support.SimpleEvaluationContext;
 
 import java.util.Map;
 
@@ -24,7 +24,7 @@ public class SpELExpressionEngine extends AbstractExpressionEngine {
     protected Object doEval(String expression, Map<String, Object> context) {
 
         try {
-            final EvaluationContext evaluationContext = new StandardEvaluationContext();
+            final EvaluationContext evaluationContext = SimpleEvaluationContext.forReadOnlyDataBinding().build();
             context.forEach(evaluationContext::setVariable);
             return ENGINE.parseExpression(expression).getValue(evaluationContext, Object.class);
         } catch (Exception e) {
