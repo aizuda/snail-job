@@ -47,7 +47,7 @@
                 <configuration>
                     <filesets>
                         <fileset>
-                            <directory>src/main/frontend/</directory>
+                            <directory>src/main/frontend/snail-job-admin/</directory>
                             <followSymlinks>false</followSymlinks>
                             <includes>
                                 <include>dist/**</include>
@@ -61,7 +61,7 @@
                 <artifactId>frontend-maven-plugin</artifactId>
                 <configuration>
                     <installDirectory>target</installDirectory>
-                    <workingDirectory>src/main/frontend</workingDirectory>
+                    <workingDirectory>src/main/frontend/snail-job-admin</workingDirectory>
                     <nodeDownloadRoot>https://cdn.npmmirror.com/binaries/node/</nodeDownloadRoot>
                     <pnpmDownloadRoot>https://registry.npmmirror.com/pnpm/-/</pnpmDownloadRoot>
                 </configuration>
@@ -102,7 +102,7 @@
         </plugins>
         <resources>
             <resource>
-                <directory>src/main/frontend/dist</directory>
+                <directory>src/main/frontend/snail-job-admin/dist</directory>
                 <targetPath>admin</targetPath>
             </resource>
             <resource>
@@ -124,7 +124,7 @@
                     <plugin>
                         <groupId>com.github.eirslett</groupId>
                         <artifactId>frontend-maven-plugin</artifactId>
-                        <version>1.15.0</version>
+                        <version>1.15.1</version>
                         <configuration>
                             <skip>true</skip>
                         </configuration>

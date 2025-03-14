@@ -11,6 +11,7 @@ snail-job-server-ui/
 └─ src/
    └─ main/
       └─ frontend/  # 新建的前端目录
+         └─ snail-job-admin/  # 拉取的前端代码
 ```
 
 ### 2. 拉取前端代码
