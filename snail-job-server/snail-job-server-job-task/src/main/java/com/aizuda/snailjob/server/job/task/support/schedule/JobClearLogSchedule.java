@@ -28,7 +28,10 @@ import org.springframework.util.CollectionUtils;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Job清理日志 一小时运行一次
@@ -108,36 +111,46 @@ public class JobClearLogSchedule extends AbstractSchedule implements Lifecycle {
      */
     public void processJobLogPartitionTasks(List<? extends PartitionTask> partitionTasks) {
 
+        // Waiting for deletion JobTaskBatchList
+        List<Long> partitionTasksIds = StreamUtils.toList(partitionTasks, PartitionTask::getId);
+        if (CollectionUtils.isEmpty(partitionTasksIds)) {
+            return;
+        }
+        List<List<Long>> idsPartition = Lists.partition(partitionTasksIds, 500);
+
+        Set<Long> jobTaskListIds = new HashSet<>();
+        Set<Long> jobLogMessageListIds = new HashSet<>();
+        for (List<Long> ids : idsPartition) {
+
+            // Waiting for deletion JobTaskList
+            List<JobTask> jobTaskList = jobTaskMapper.selectList(new LambdaQueryWrapper<JobTask>()
+                    .select(JobTask::getId)
+                    .in(JobTask::getTaskBatchId, ids));
+            if (!CollectionUtils.isEmpty(jobTaskList)) {
+                Set<Long> jobTask = jobTaskList.stream().map(i -> i.getId()).collect(Collectors.toSet());
+                jobTaskListIds.addAll(jobTask);
+            }
+            // Waiting for deletion JobLogMessageList
+            List<JobLogMessage> jobLogMessageList = jobLogMessageMapper.selectList(new LambdaQueryWrapper<JobLogMessage>()
+                    .select(JobLogMessage::getId)
+                    .in(JobLogMessage::getTaskBatchId, ids));
+            if (!CollectionUtils.isEmpty(jobLogMessageList)) {
+                Set<Long> jobLogMessage = jobLogMessageList.stream().map(i -> i.getId()).collect(Collectors.toSet());
+                jobLogMessageListIds.addAll(jobLogMessage);
+            }
+        }
+
         transactionTemplate.execute(new TransactionCallbackWithoutResult() {
             @Override
             protected void doInTransactionWithoutResult(final TransactionStatus status) {
 
-                // Waiting for deletion JobTaskBatchList
-                List<Long> ids = StreamUtils.toList(partitionTasks, PartitionTask::getId);
-                if (CollectionUtils.isEmpty(ids)) {
-                    return;
+                idsPartition.forEach(jobTaskMapper::deleteByIds);
+                if (!CollectionUtils.isEmpty(jobTaskListIds)) {
+                    Lists.partition(jobTaskListIds.stream().toList(), 500).forEach(jobTaskMapper::deleteByIds);
                 }
-                Lists.partition(ids, 500).forEach(jobTaskBatchMapper::deleteByIds);
-
-                // Waiting for deletion JobTaskList
-                List<JobTask> jobTaskList = jobTaskMapper.selectList(new LambdaQueryWrapper<JobTask>()
-                        .select(JobTask::getId)
-                        .in(JobTask::getTaskBatchId, ids));
-                if (CollectionUtils.isEmpty(jobTaskList)) {
-                    return;
+                if (!CollectionUtils.isEmpty(jobLogMessageListIds)) {
+                    Lists.partition(jobLogMessageListIds.stream().toList(), 500).forEach(jobLogMessageMapper::deleteByIds);
                 }
-                List<Long> jobTaskListIds = StreamUtils.toList(jobTaskList, JobTask::getId);
-                Lists.partition(jobTaskListIds, 500).forEach(jobTaskMapper::deleteByIds);
-
-                // Waiting for deletion JobLogMessageList
-                List<JobLogMessage> jobLogMessageList = jobLogMessageMapper.selectList(new LambdaQueryWrapper<JobLogMessage>()
-                        .select(JobLogMessage::getId)
-                        .in(JobLogMessage::getTaskBatchId, ids));
-                if (CollectionUtils.isEmpty(jobLogMessageList)) {
-                    return;
-                }
-                List<Long> jobLogMessageListIds = StreamUtils.toList(jobLogMessageList, JobLogMessage::getId);
-                Lists.partition(jobLogMessageListIds, 500).forEach(jobLogMessageMapper::deleteByIds);
             }
         });
     }

@@ -49,7 +49,7 @@ spring:
     hikari:
       connection-timeout: 30000
       minimum-idle: 5
-      maximum-pool-size: 20
+      maximum-pool-size: 100
       auto-commit: true
       idle-timeout: 30000
       pool-name: snail_job
