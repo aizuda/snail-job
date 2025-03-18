@@ -144,7 +144,7 @@ public class JobClearLogSchedule extends AbstractSchedule implements Lifecycle {
             @Override
             protected void doInTransactionWithoutResult(final TransactionStatus status) {
 
-                idsPartition.forEach(jobTaskMapper::deleteByIds);
+                idsPartition.forEach(jobTaskBatchMapper::deleteByIds);
                 if (!CollectionUtils.isEmpty(jobTaskListIds)) {
                     Lists.partition(jobTaskListIds.stream().toList(), 500).forEach(jobTaskMapper::deleteByIds);
                 }
