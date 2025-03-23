@@ -1,4 +1,4 @@
-package com.aizuda.snailjob.server.common.akka;
+package com.aizuda.snailjob.server.common.pekko;
 
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import org.apache.pekko.actor.ActorRef;

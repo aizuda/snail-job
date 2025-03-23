@@ -35,7 +35,7 @@
         <guava.version>33.3.0-jre</guava.version>
         <guava-retrying.version>2.0.0</guava-retrying.version>
         <mapstruct.version>1.5.3.Final</mapstruct.version>
-        <akka.version>2.6.21</akka.version>
+        <pekko.version>1.2.0-M1</pekko.version>
         <scala.version>2.13.9</scala.version>
         <java-jwt.version>4.4.0</java-jwt.version>
         <perf4j.version>0.9.16</perf4j.version>
@@ -213,14 +213,14 @@
                 <version>${java-jwt.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.typesafe.akka</groupId>
-                <artifactId>akka-actor-typed_2.13</artifactId>
-                <version>${akka.version}</version>
+                <groupId>org.apache.pekko</groupId>
+                <artifactId>pekko-actor-typed_2.13</artifactId>
+                <version>${pekko.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.typesafe.akka</groupId>
-                <artifactId>akka-actor-testkit-typed_2.13</artifactId>
-                <version>${akka.version}</version>
+                <groupId>org.apache.pekko</groupId>
+                <artifactId>pekko-actor-testkit-typed_2.13</artifactId>
+                <version>${pekko.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.scala-lang</groupId>

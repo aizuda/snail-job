@@ -3,7 +3,7 @@ package com.aizuda.snailjob.server.job.task.support.executor.job;
 import  org.apache.pekko.actor.ActorRef;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
-import com.aizuda.snailjob.server.common.akka.ActorGenerator;
+import com.aizuda.snailjob.server.common.pekko.ActorGenerator;
 import com.aizuda.snailjob.server.common.util.ClientInfoUtils;
 import com.aizuda.snailjob.server.job.task.dto.RealJobExecutorDTO;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;

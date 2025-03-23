@@ -5,7 +5,7 @@ import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.Lifecycle;
-import com.aizuda.snailjob.server.common.akka.ActorGenerator;
+import com.aizuda.snailjob.server.common.pekko.ActorGenerator;
 import com.aizuda.snailjob.server.common.dto.DistributeInstance;
 import com.aizuda.snailjob.template.datasource.persistence.po.GroupConfig;
 import lombok.extern.slf4j.Slf4j;

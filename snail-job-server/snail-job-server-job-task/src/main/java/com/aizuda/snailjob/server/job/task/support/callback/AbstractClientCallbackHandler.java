@@ -3,7 +3,7 @@ package com.aizuda.snailjob.server.job.task.support.callback;
 import  org.apache.pekko.actor.ActorRef;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.enums.JobTaskStatusEnum;
-import com.aizuda.snailjob.server.common.akka.ActorGenerator;
+import com.aizuda.snailjob.server.common.pekko.ActorGenerator;
 import com.aizuda.snailjob.server.common.util.ClientInfoUtils;
 import com.aizuda.snailjob.server.job.task.dto.RealJobExecutorDTO;
 import com.aizuda.snailjob.server.job.task.enums.JobRetrySceneEnum;

@@ -3,7 +3,7 @@ package com.aizuda.snailjob.server.job.task.support.result.job;
 import  org.apache.pekko.actor.ActorRef;
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.snailjob.common.log.SnailJobLog;
-import com.aizuda.snailjob.server.common.akka.ActorGenerator;
+import com.aizuda.snailjob.server.common.pekko.ActorGenerator;
 import com.aizuda.snailjob.server.job.task.dto.ReduceTaskDTO;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
 import com.aizuda.snailjob.server.job.task.support.handler.WorkflowBatchHandler;

@@ -1,7 +1,7 @@
 package com.aizuda.snailjob.server.common.rpc.server;
 
 import  org.apache.pekko.actor.ActorRef;
-import com.aizuda.snailjob.server.common.akka.ActorGenerator;
+import com.aizuda.snailjob.server.common.pekko.ActorGenerator;
 import com.aizuda.snailjob.server.common.dto.NettyHttpRequest;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;

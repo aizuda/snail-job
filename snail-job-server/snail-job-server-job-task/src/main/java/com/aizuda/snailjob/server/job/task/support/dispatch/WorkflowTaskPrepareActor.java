@@ -2,7 +2,7 @@ package com.aizuda.snailjob.server.job.task.support.dispatch;
 
 import  org.apache.pekko.actor.AbstractActor;
 import cn.hutool.core.collection.CollUtil;
-import com.aizuda.snailjob.server.common.akka.ActorGenerator;
+import com.aizuda.snailjob.server.common.pekko.ActorGenerator;
 import com.aizuda.snailjob.server.job.task.dto.WorkflowTaskPrepareDTO;
 import com.aizuda.snailjob.server.job.task.support.WorkflowPrePareHandler;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowTaskBatchMapper;

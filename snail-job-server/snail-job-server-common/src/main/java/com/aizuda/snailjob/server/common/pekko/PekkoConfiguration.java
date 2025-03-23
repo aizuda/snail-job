@@ -1,4 +1,4 @@
-package com.aizuda.snailjob.server.common.akka;
+package com.aizuda.snailjob.server.common.pekko;
 
 import org.apache.pekko.actor.ActorSystem;
 import com.typesafe.config.ConfigFactory;
@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
  * @date 2021-11-20
  */
 @Configuration
-public class AkkaConfiguration {
+public class PekkoConfiguration {
 
     private static final String CONFIG_NAME = "snailjob";
     private static final String NETTY_ACTOR_SYSTEM = "NETTY_ACTOR_SYSTEM";

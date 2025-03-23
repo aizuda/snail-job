@@ -68,9 +68,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
 
     private final ServerNodeMapper serverNodeMapper;
     private final AccessTemplate accessTemplate;
-    private final SequenceAllocMapper sequenceAllocMapper;
     private final ConfigVersionSyncHandler configVersionSyncHandler;
-    private final SystemProperties systemProperties;
     private final JdbcTemplate jdbcTemplate;
     private final NamespaceMapper namespaceMapper;
     private final JobMapper jobMapper;
@@ -90,30 +88,9 @@ public class GroupConfigServiceImpl implements GroupConfigService {
                 () -> new SnailJobServerException("GroupName已经存在 {}", groupConfigRequestVO.getGroupName()));
 
         // 保存组配置
-        Boolean isSuccess = doSaveGroupConfig(namespaceId, groupConfigRequestVO);
-
-        // 保存生成唯一id配置
-//        doSaveSequenceAlloc(namespaceId, groupConfigRequestVO);
-
-        return isSuccess;
+        return doSaveGroupConfig(namespaceId, groupConfigRequestVO);
     }
 
-    /**
-     * 保存序号生成规则配置失败
-     *
-     * @param namespaceId          命名空间
-     * @param groupConfigRequestVO 组、场景、通知配置类
-     */
-    private void doSaveSequenceAlloc(final String namespaceId, final GroupConfigRequestVO groupConfigRequestVO) {
-        SequenceAlloc sequenceAlloc = new SequenceAlloc();
-        sequenceAlloc.setGroupName(groupConfigRequestVO.getGroupName());
-        sequenceAlloc.setNamespaceId(namespaceId);
-        sequenceAlloc.setStep(systemProperties.getStep());
-        sequenceAlloc.setUpdateDt(LocalDateTime.now());
-        Assert.isTrue(1 == sequenceAllocMapper.insert(sequenceAlloc),
-                () -> new SnailJobServerException("failed to save sequence generation rule configuration [{}].",
-                        groupConfigRequestVO.getGroupName()));
-    }
 
     @Override
     @Transactional
@@ -218,10 +195,6 @@ public class GroupConfigServiceImpl implements GroupConfigService {
     }
 
     private boolean doSaveGroupConfig(final String namespaceId, GroupConfigRequestVO groupConfigRequestVO) {
-//        List<Integer> tablePartitionList = getTablePartitionList();
-//        if (CollUtil.isEmpty(tablePartitionList)) {
-//            return Boolean.FALSE;
-//        }
 
         GroupConfig groupConfig = GroupConfigConverter.INSTANCE.toGroupConfig(groupConfigRequestVO);
         groupConfig.setCreateDt(LocalDateTime.now());
@@ -230,55 +203,11 @@ public class GroupConfigServiceImpl implements GroupConfigService {
         groupConfig.setGroupName(groupConfigRequestVO.getGroupName());
         groupConfig.setToken(groupConfigRequestVO.getToken());
         groupConfig.setDescription(Optional.ofNullable(groupConfigRequestVO.getDescription()).orElse(StrUtil.EMPTY));
-//        if (Objects.isNull(groupConfigRequestVO.getGroupPartition())) {
-//            groupConfig.setGroupPartition(
-//                    HashUtil.bkdrHash(groupConfigRequestVO.getGroupName()) % tablePartitionList.size());
-//        } else {
-//            Assert.isTrue(tablePartitionList.contains(groupConfigRequestVO.getGroupPartition()),
-//                    () -> new SnailJobServerException("分区不存在. [{}]", tablePartitionList));
-//            Assert.isTrue(groupConfigRequestVO.getGroupPartition() >= 0,
-//                    () -> new SnailJobServerException("分区不能是负数."));
-//        }
-
-//        groupConfig.setBucketIndex(
-//                HashUtil.bkdrHash(groupConfigRequestVO.getGroupName()) % systemProperties.getBucketTotal());
         ConfigAccess<GroupConfig> groupConfigAccess = accessTemplate.getGroupConfigAccess();
         Assert.isTrue(1 == groupConfigAccess.insert(groupConfig),
                 () -> new SnailJobServerException("新增组异常异常 groupConfigVO[{}]", groupConfigRequestVO));
 
-        // 校验retry_task_x和retry_dead_letter_x是否存在
-//        checkGroupPartition(groupConfig, namespaceId);
-
         return Boolean.TRUE;
-    }
-
-    /**
-     * 校验retry_task_x和retry_dead_letter_x是否存在
-     */
-    private void checkGroupPartition(GroupConfig groupConfig, String namespaceId) {
-        try {
-            TaskAccess<Retry> retryTaskAccess = accessTemplate.getRetryAccess();
-            retryTaskAccess.count(new LambdaQueryWrapper<Retry>().eq(Retry::getId, 1));
-        } catch (BadSqlGrammarException e) {
-            Optional.ofNullable(e.getMessage()).ifPresent(s -> {
-                if (s.contains("retry_task_" + groupConfig.getGroupPartition()) && s.contains("doesn't exist")) {
-                    throw new SnailJobServerException("分区:[{}] '未配置表retry_task_{}', 请联系管理员进行配置",
-                            groupConfig.getGroupPartition(), groupConfig.getGroupPartition());
-                }
-            });
-        }
-
-        try {
-            TaskAccess<RetryDeadLetter> retryTaskAccess = accessTemplate.getRetryDeadLetterAccess();
-            retryTaskAccess.one(new LambdaQueryWrapper<RetryDeadLetter>().eq(RetryDeadLetter::getId, 1));
-        } catch (BadSqlGrammarException e) {
-            Optional.ofNullable(e.getMessage()).ifPresent(s -> {
-                if (s.contains("retry_dead_letter_" + groupConfig.getGroupPartition()) && s.contains("doesn't exist")) {
-                    throw new SnailJobServerException("分区:[{}] '未配置表retry_dead_letter_{}', 请联系管理员进行配置",
-                            groupConfig.getGroupPartition(), groupConfig.getGroupPartition());
-                }
-            });
-        }
     }
 
     @Override
@@ -409,9 +338,6 @@ public class GroupConfigServiceImpl implements GroupConfigService {
             // 保存组配置
             doSaveGroupConfig(namespaceId, groupConfigRequestVO);
 
-            // 保存生成唯一id配置
-            doSaveSequenceAlloc(namespaceId, groupConfigRequestVO);
-
         }
 
     }
@@ -478,14 +404,6 @@ public class GroupConfigServiceImpl implements GroupConfigService {
                                 .eq(GroupConfig::getGroupName, groupName)),
                 () -> new SnailJobServerException("删除组失败, 请检查状态是否关闭状态"));
 
-        //-----解决issues-IBTAFZ 删除之前查询一下避免sj_sequence_alloc表为空仍然删除
-        LambdaQueryWrapper<SequenceAlloc> sequenceAllocQueryWrapper = new LambdaQueryWrapper<SequenceAlloc>()
-                .eq(SequenceAlloc::getNamespaceId, namespaceId)
-                .eq(SequenceAlloc::getGroupName, groupName);
-        if (!sequenceAllocMapper.selectList(sequenceAllocQueryWrapper).isEmpty()) {
-            Assert.isTrue(sequenceAllocMapper.delete(sequenceAllocQueryWrapper) >= 1,
-                    () -> new SnailJobServerException("删除分布式Id表数据失败"));
-        }
         return Boolean.TRUE;
     }
 

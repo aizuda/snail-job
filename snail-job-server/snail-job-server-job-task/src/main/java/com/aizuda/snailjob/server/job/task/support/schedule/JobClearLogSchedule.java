@@ -127,7 +127,7 @@ public class JobClearLogSchedule extends AbstractSchedule implements Lifecycle {
                     .select(JobTask::getId)
                     .in(JobTask::getTaskBatchId, ids));
             if (!CollectionUtils.isEmpty(jobTaskList)) {
-                Set<Long> jobTask = jobTaskList.stream().map(i -> i.getId()).collect(Collectors.toSet());
+                Set<Long> jobTask = jobTaskList.stream().map(JobTask::getId).collect(Collectors.toSet());
                 jobTaskListIds.addAll(jobTask);
             }
             // Waiting for deletion JobLogMessageList
@@ -135,7 +135,7 @@ public class JobClearLogSchedule extends AbstractSchedule implements Lifecycle {
                     .select(JobLogMessage::getId)
                     .in(JobLogMessage::getTaskBatchId, ids));
             if (!CollectionUtils.isEmpty(jobLogMessageList)) {
-                Set<Long> jobLogMessage = jobLogMessageList.stream().map(i -> i.getId()).collect(Collectors.toSet());
+                Set<Long> jobLogMessage = jobLogMessageList.stream().map(JobLogMessage::getId).collect(Collectors.toSet());
                 jobLogMessageListIds.addAll(jobLogMessage);
             }
         }

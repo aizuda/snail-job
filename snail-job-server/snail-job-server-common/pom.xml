@@ -46,21 +46,11 @@
         <dependency>
             <groupId>org.apache.pekko</groupId>
             <artifactId>pekko-actor-typed_2.13</artifactId>
-            <version>1.2.0-M1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.pekko</groupId>
             <artifactId>pekko-actor-testkit-typed_2.13</artifactId>
-            <version>1.2.0-M1</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>com.typesafe.akka</groupId>-->
-<!--            <artifactId>akka-actor-typed_2.13</artifactId>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>com.typesafe.akka</groupId>-->
-<!--            <artifactId>pekko-actor-testkit-typed_2.13</artifactId>-->
-<!--        </dependency>-->
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>

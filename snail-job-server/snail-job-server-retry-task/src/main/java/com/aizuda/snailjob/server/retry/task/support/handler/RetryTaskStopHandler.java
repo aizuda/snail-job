@@ -2,7 +2,7 @@ package com.aizuda.snailjob.server.retry.task.support.handler;
 
 import  org.apache.pekko.actor.ActorRef;
 import com.aizuda.snailjob.common.core.enums.RetryTaskStatusEnum;
-import com.aizuda.snailjob.server.common.akka.ActorGenerator;
+import com.aizuda.snailjob.server.common.pekko.ActorGenerator;
 import com.aizuda.snailjob.server.retry.task.dto.RequestRetryExecutorDTO;
 import com.aizuda.snailjob.server.retry.task.dto.RetryExecutorResultDTO;
 import com.aizuda.snailjob.server.retry.task.dto.TaskStopJobDTO;

@@ -2,7 +2,7 @@ package com.aizuda.snailjob.server.retry.task.support.dispatch;
 
 import  org.apache.pekko.actor.AbstractActor;
 import com.aizuda.snailjob.common.log.SnailJobLog;
-import com.aizuda.snailjob.server.common.akka.ActorGenerator;
+import com.aizuda.snailjob.server.common.pekko.ActorGenerator;
 import com.aizuda.snailjob.server.retry.task.dto.RetryExecutorResultDTO;
 import com.aizuda.snailjob.server.retry.task.support.RetryTaskConverter;
 import com.aizuda.snailjob.server.retry.task.support.result.RetryResultContext;

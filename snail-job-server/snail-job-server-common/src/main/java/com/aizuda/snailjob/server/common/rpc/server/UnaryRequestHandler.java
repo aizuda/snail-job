@@ -4,7 +4,7 @@ import  org.apache.pekko.actor.ActorRef;
 import com.aizuda.snailjob.common.core.grpc.auto.GrpcResult;
 import com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest;
 import com.aizuda.snailjob.common.core.grpc.auto.Metadata;
-import com.aizuda.snailjob.server.common.akka.ActorGenerator;
+import com.aizuda.snailjob.server.common.pekko.ActorGenerator;
 import com.aizuda.snailjob.server.common.dto.GrpcRequest;
 import io.grpc.stub.ServerCalls;
 import io.grpc.stub.StreamObserver;

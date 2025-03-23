@@ -2,7 +2,7 @@ package com.aizuda.snailjob.server.job.task.support.stop;
 
 import  org.apache.pekko.actor.ActorRef;
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
-import com.aizuda.snailjob.server.common.akka.ActorGenerator;
+import com.aizuda.snailjob.server.common.pekko.ActorGenerator;
 import com.aizuda.snailjob.server.common.util.ClientInfoUtils;
 import com.aizuda.snailjob.server.job.task.dto.RealStopTaskInstanceDTO;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;

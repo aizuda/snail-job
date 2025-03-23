@@ -1,4 +1,4 @@
-package com.aizuda.snailjob.server.common.akka;
+package com.aizuda.snailjob.server.common.pekko;
 
 import org.apache.pekko.actor.Extension;
 import org.apache.pekko.actor.Props;

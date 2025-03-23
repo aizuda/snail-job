@@ -6,7 +6,7 @@ import com.aizuda.snailjob.common.log.dto.LogContentDTO;
 import com.aizuda.snailjob.common.log.dto.TaskLogFieldDTO;
 import com.aizuda.snailjob.common.log.enums.LogTypeEnum;
 import com.aizuda.snailjob.server.common.LogStorage;
-import com.aizuda.snailjob.server.common.akka.ActorGenerator;
+import com.aizuda.snailjob.server.common.pekko.ActorGenerator;
 import com.aizuda.snailjob.server.common.dto.LogMetaDTO;
 import com.aizuda.snailjob.server.common.dto.RetryLogMetaDTO;
 import com.aizuda.snailjob.server.common.log.LogStorageFactory;

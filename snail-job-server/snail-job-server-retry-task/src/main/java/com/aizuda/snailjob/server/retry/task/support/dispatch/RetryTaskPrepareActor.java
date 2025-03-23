@@ -20,7 +20,7 @@ import java.util.Objects;
 
 import static com.aizuda.snailjob.common.core.enums.RetryTaskStatusEnum.NOT_COMPLETE;
 import static com.aizuda.snailjob.common.core.enums.RetryTaskStatusEnum.SUCCESS;
-import static com.aizuda.snailjob.server.common.akka.ActorGenerator.RETRY_TASK_PREPARE_ACTOR;
+import static com.aizuda.snailjob.server.common.pekko.ActorGenerator.RETRY_TASK_PREPARE_ACTOR;
 
 /**
  * <p>
