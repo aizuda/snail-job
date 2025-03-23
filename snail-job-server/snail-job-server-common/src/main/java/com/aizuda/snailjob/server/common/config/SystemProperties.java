@@ -105,7 +105,7 @@ public class SystemProperties {
     /**
      * rpc类型
      */
-    private RpcTypeEnum rpcType = RpcTypeEnum.NETTY;
+    private RpcTypeEnum rpcType = RpcTypeEnum.GRPC;
 
     /**
      * 邮件配置

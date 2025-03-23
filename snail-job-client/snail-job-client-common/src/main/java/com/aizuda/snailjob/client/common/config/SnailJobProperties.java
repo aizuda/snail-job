@@ -58,7 +58,7 @@ public class SnailJobProperties {
     /**
      * rpc类型
      */
-    private RpcTypeEnum rpcType = RpcTypeEnum.NETTY;
+    private RpcTypeEnum rpcType = RpcTypeEnum.GRPC;
 
     /**
      * 重试、调度日志远程上报滑动窗口配置
