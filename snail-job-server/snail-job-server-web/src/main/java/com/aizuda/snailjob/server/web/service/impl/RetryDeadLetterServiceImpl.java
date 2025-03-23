@@ -2,11 +2,13 @@ package com.aizuda.snailjob.server.web.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
+import cn.hutool.core.util.HashUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.enums.RetryStatusEnum;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.server.common.WaitStrategy;
+import com.aizuda.snailjob.server.common.config.SystemProperties;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.strategy.WaitStrategies.WaitStrategyContext;
@@ -44,6 +46,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
     private final AccessTemplate accessTemplate;
+    private final SystemProperties systemProperties;
 
     @Override
     public PageResult<List<RetryDeadLetterResponseVO>> getRetryDeadLetterPage(RetryDeadLetterQueryVO queryVO) {
@@ -69,8 +72,6 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
 
     @Override
     public RetryDeadLetterResponseVO getRetryDeadLetterById(String groupName, Long id) {
-        String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
-
         TaskAccess<RetryDeadLetter> retryDeadLetterAccess = accessTemplate.getRetryDeadLetterAccess();
         RetryDeadLetter retryDeadLetter = retryDeadLetterAccess.one(new LambdaQueryWrapper<RetryDeadLetter>().eq(RetryDeadLetter::getId, id));
         return RetryDeadLetterResponseVOConverter.INSTANCE.convert(retryDeadLetter);
@@ -109,6 +110,10 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
             Retry retry = RetryTaskConverter.INSTANCE.toRetryTask(retryDeadLetter);
             retry.setRetryStatus(RetryStatusEnum.RUNNING.getStatus());
             retry.setTaskType(SyetemTaskTypeEnum.RETRY.getType());
+            retry.setBucketIndex(HashUtil.bkdrHash(retryDeadLetter.getGroupName() + retryDeadLetter.getSceneName() + retryDeadLetter.getIdempotentId())
+                    % systemProperties.getBucketTotal());
+            retry.setParentId(0L);
+            retry.setDeleted(0L);
 
             WaitStrategyContext waitStrategyContext = new WaitStrategyContext();
             waitStrategyContext.setNextTriggerAt(LocalDateTime.now());
@@ -129,10 +134,6 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
                         new LambdaQueryWrapper<RetryDeadLetter>()
                                 .in(RetryDeadLetter::getId, waitDelRetryDeadLetterIdSet)),
                 () -> new SnailJobServerException("删除死信队列数据失败"));
-
-        // 变更日志的状态
-        RetryTask retryTask = new RetryTask();
-        retryTask.setTaskStatus(RetryStatusEnum.RUNNING.getStatus());
         return 1;
     }
 

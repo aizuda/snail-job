@@ -104,8 +104,8 @@ public abstract class AbstractGenerator implements TaskGenerator {
     private Pair<List<Retry>, List<RetryTask>> doConvertTask(Map<String/*幂等ID*/, List<Retry>> retryTaskMap,
                                                              TaskContext taskContext, LocalDateTime now,
                                                              TaskContext.TaskInfo taskInfo, RetrySceneConfig retrySceneConfig) {
-        List<Retry> waitInsertTasks = new ArrayList<>();
-        List<RetryTask> waitInsertTaskLogs = new ArrayList<>();
+        List<Retry> waitInsertRetryList = new ArrayList<>();
+        List<RetryTask> waitInsertTaskList = new ArrayList<>();
 
         // 判断是否存在与幂等ID相同的任务
         List<Retry> list = retryTaskMap.getOrDefault(taskInfo.getIdempotentId(), new ArrayList<>()).stream()
@@ -116,7 +116,7 @@ public abstract class AbstractGenerator implements TaskGenerator {
         // 说明存在相同的任务
         if (CollUtil.isNotEmpty(list)) {
             SnailJobLog.LOCAL.warn("interrupted reporting in retrying task. [{}]", JsonUtil.toJsonString(taskInfo));
-            return Pair.of(waitInsertTasks, waitInsertTaskLogs);
+            return Pair.of(waitInsertRetryList, waitInsertTaskList);
         }
 
         Retry retry = RetryTaskConverter.INSTANCE.toRetryTask(taskInfo);
@@ -153,15 +153,14 @@ public abstract class AbstractGenerator implements TaskGenerator {
         waitStrategyContext.setDelayLevel(1);
         WaitStrategy waitStrategy = WaitStrategyEnum.getWaitStrategy(retrySceneConfig.getBackOff());
         retry.setNextTriggerAt(waitStrategy.computeTriggerTime(waitStrategyContext));
-        waitInsertTasks.add(retry);
+        waitInsertRetryList.add(retry);
 
-        // 初始化日志
         RetryTask retryTask = RetryTaskLogConverter.INSTANCE.toRetryTask(retry);
         retryTask.setTaskType(SyetemTaskTypeEnum.RETRY.getType());
         retryTask.setCreateDt(now);
-        waitInsertTaskLogs.add(retryTask);
+        waitInsertTaskList.add(retryTask);
 
-        return Pair.of(waitInsertTasks, waitInsertTaskLogs);
+        return Pair.of(waitInsertRetryList, waitInsertTaskList);
     }
 
     protected abstract Integer initStatus(TaskContext taskContext);
