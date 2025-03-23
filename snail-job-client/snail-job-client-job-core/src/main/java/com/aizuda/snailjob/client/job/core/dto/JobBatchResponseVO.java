@@ -1,7 +1,5 @@
-package com.aizuda.snailjob.server.web.model.response;
+package com.aizuda.snailjob.client.job.core.dto;
 
-import com.aizuda.snailjob.server.common.dto.CallbackConfig;
-import com.aizuda.snailjob.server.common.dto.DecisionConfig;
 import lombok.Data;
 
 import java.time.LocalDateTime;

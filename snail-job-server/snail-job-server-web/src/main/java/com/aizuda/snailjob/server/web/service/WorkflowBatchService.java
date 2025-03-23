@@ -2,8 +2,8 @@ package com.aizuda.snailjob.server.web.service;
 
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.WorkflowBatchQueryVO;
-import com.aizuda.snailjob.server.web.model.response.WorkflowBatchResponseVO;
-import com.aizuda.snailjob.server.web.model.response.WorkflowDetailResponseVO;
+import com.aizuda.snailjob.server.common.vo.WorkflowBatchResponseVO;
+import com.aizuda.snailjob.server.common.vo.WorkflowDetailResponseVO;
 
 import java.util.List;
 import java.util.Set;

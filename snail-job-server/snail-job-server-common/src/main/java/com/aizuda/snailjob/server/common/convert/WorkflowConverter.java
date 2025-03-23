@@ -1,4 +1,4 @@
-package com.aizuda.snailjob.server.web.service.convert;
+package com.aizuda.snailjob.server.common.convert;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
@@ -8,10 +8,10 @@ import com.aizuda.snailjob.server.common.dto.CallbackConfig;
 import com.aizuda.snailjob.server.common.dto.DecisionConfig;
 import com.aizuda.snailjob.server.common.dto.JobTaskConfig;
 import com.aizuda.snailjob.server.common.util.DateUtils;
-import com.aizuda.snailjob.server.web.model.request.WorkflowRequestVO;
-import com.aizuda.snailjob.server.web.model.response.WorkflowBatchResponseVO;
-import com.aizuda.snailjob.server.web.model.response.WorkflowDetailResponseVO;
-import com.aizuda.snailjob.server.web.model.response.WorkflowResponseVO;
+import com.aizuda.snailjob.server.common.vo.WorkflowBatchResponseVO;
+import com.aizuda.snailjob.server.common.vo.WorkflowResponseVO;
+import com.aizuda.snailjob.server.common.vo.request.WorkflowRequestVO;
+import com.aizuda.snailjob.server.common.vo.WorkflowDetailResponseVO;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.WorkflowBatchResponseDO;
 import com.aizuda.snailjob.template.datasource.persistence.po.Workflow;
 import com.aizuda.snailjob.template.datasource.persistence.po.WorkflowNode;

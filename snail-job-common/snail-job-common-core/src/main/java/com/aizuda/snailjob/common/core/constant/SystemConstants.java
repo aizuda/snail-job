@@ -151,6 +151,10 @@ public interface SystemConstants {
 
         String OPENAPI_GET_JOB_DETAIL = "/api/job/getJobDetail";
 
+        String OPENAPI_GET_JOB_BATCH_DETAIL = "/api/job/getJobBatchDetail";
+
+        String OPENAPI_GET_WORKFLOW_BATCH_DETAIL = "/api/job/getWorkflowBatchDetail";
+
         String OPENAPI_TRIGGER_JOB = "/api/job/triggerJob";
 
         String OPENAPI_TRIGGER_WORKFLOW = "/api/job/triggerWorkFlow";

@@ -1,11 +1,11 @@
 package com.aizuda.snailjob.server.web.service;
 
 import cn.hutool.core.lang.Pair;
-import com.aizuda.snailjob.server.common.dto.DecisionConfig;
+import com.aizuda.snailjob.server.common.vo.request.WorkflowRequestVO;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.*;
-import com.aizuda.snailjob.server.web.model.response.WorkflowDetailResponseVO;
-import com.aizuda.snailjob.server.web.model.response.WorkflowResponseVO;
+import com.aizuda.snailjob.server.common.vo.WorkflowDetailResponseVO;
+import com.aizuda.snailjob.server.common.vo.WorkflowResponseVO;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 

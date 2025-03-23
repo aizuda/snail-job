@@ -19,6 +19,12 @@ public interface OpenApiClient {
     @Mapping(method = RequestMethod.POST, path = "/api/job/getJobDetail")
     Result<Object> getJobDetail(Long jobId);
 
+    @Mapping(method = RequestMethod.POST, path = "/api/job/getJobBatchDetail")
+    Result<Object> getJobBatchDetail(Long jobBatchId);
+
+    @Mapping(method = RequestMethod.POST, path = "/api/job/getWorkflowBatchDetail")
+    Result<Object> getWorkflowBatchDetail(Long jobBatchId);
+
     @Mapping(method = RequestMethod.POST, path = "/api/job/triggerJob")
     Result<Object> triggerJob(JobTriggerDTO jobTriggerDTO);
 

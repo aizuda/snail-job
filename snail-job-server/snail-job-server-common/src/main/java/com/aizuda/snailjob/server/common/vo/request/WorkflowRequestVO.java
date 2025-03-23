@@ -1,4 +1,4 @@
-package com.aizuda.snailjob.server.web.model.request;
+package com.aizuda.snailjob.server.common.vo.request;
 
 import com.aizuda.snailjob.server.common.dto.CallbackConfig;
 import com.aizuda.snailjob.server.common.dto.DecisionConfig;

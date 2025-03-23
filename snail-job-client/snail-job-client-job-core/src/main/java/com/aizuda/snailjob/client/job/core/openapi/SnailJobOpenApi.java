@@ -4,6 +4,8 @@ import com.aizuda.snailjob.client.job.core.handler.add.*;
 import com.aizuda.snailjob.client.job.core.handler.delete.DeleteJobHandler;
 import com.aizuda.snailjob.client.job.core.handler.delete.DeleteWorkflowHandler;
 import com.aizuda.snailjob.client.job.core.handler.query.RequestQueryHandler;
+import com.aizuda.snailjob.client.job.core.handler.query.RequestQueryJobBatchHandler;
+import com.aizuda.snailjob.client.job.core.handler.query.RequestQueryWorkflowBatchHandler;
 import com.aizuda.snailjob.client.job.core.handler.trigger.*;
 import com.aizuda.snailjob.client.job.core.handler.update.*;
 
@@ -121,6 +123,26 @@ public final class SnailJobOpenApi {
      */
     public static RequestQueryHandler getJobDetail(Long jobId) {
         return new RequestQueryHandler(jobId);
+    }
+
+    /**
+     * 获取任务批次详情
+     *
+     * @param jobBatchId 任务批次 ID
+     * @return {@link RequestQueryJobBatchHandler}
+     */
+    public static RequestQueryJobBatchHandler getJobBatchDetail(Long jobBatchId){
+        return new RequestQueryJobBatchHandler(jobBatchId);
+    }
+
+    /**
+     * 获取工作流任务批次详情
+     *
+     * @param workflowBatchId 工作流任务批次 ID
+     * @return {@link RequestQueryWorkflowBatchHandler}
+     */
+    public static RequestQueryWorkflowBatchHandler getWorkflowBatchDetail(Long workflowBatchId){
+        return new RequestQueryWorkflowBatchHandler(workflowBatchId);
     }
 
     /**

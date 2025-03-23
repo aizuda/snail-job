@@ -1,18 +1,14 @@
 package com.aizuda.snailjob.server.web.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.lang.Assert;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
-import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.JobTaskQueryVO;
 import com.aizuda.snailjob.server.web.model.response.JobTaskResponseVO;
 import com.aizuda.snailjob.server.web.service.JobTaskService;
 import com.aizuda.snailjob.server.web.service.convert.JobTaskResponseVOConverter;
-import com.aizuda.snailjob.server.web.util.UserSessionUtils;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobLogMessageMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskMapper;
-import com.aizuda.snailjob.template.datasource.persistence.po.JobLogMessage;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTask;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;

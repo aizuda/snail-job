@@ -3,7 +3,7 @@ package com.aizuda.snailjob.server.web.controller;
 import com.aizuda.snailjob.server.web.annotation.LoginRequired;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.JobBatchQueryVO;
-import com.aizuda.snailjob.server.web.model.response.JobBatchResponseVO;
+import com.aizuda.snailjob.server.common.vo.JobBatchResponseVO;
 import com.aizuda.snailjob.server.web.service.JobBatchService;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;

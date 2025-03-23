@@ -1,7 +1,7 @@
-package com.aizuda.snailjob.server.web.service.convert;
+package com.aizuda.snailjob.server.common.convert;
 
 import com.aizuda.snailjob.server.common.util.DateUtils;
-import com.aizuda.snailjob.server.web.model.response.JobBatchResponseVO;
+import com.aizuda.snailjob.server.common.vo.JobBatchResponseVO;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.JobBatchResponseDO;
 import com.aizuda.snailjob.template.datasource.persistence.po.Job;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch;
