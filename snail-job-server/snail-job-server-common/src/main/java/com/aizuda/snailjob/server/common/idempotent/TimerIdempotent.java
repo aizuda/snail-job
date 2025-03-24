@@ -1,4 +1,4 @@
-package com.aizuda.snailjob.server.job.task.support.idempotent;
+package com.aizuda.snailjob.server.common.idempotent;
 
 import com.aizuda.snailjob.server.common.IdempotentStrategy;
 import com.google.common.cache.Cache;

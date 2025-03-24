@@ -1,4 +1,4 @@
-package com.aizuda.snailjob.server.job.task.support.timer;
+package com.aizuda.snailjob.server.common.timer;
 
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.TimerTask;
@@ -14,17 +14,19 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
- * @author: opensnail
- * @date : 2023-09-22 17:03
- * @since : 2.4.0
+ * @Author：srzou
+ * @Package：com.aizuda.snailjob.server.job.task.support.timer
+ * @Project：snail-job
+ * @Date：2025/3/24 14:00
+ * @Filename：LogTimerWheel
+ * @since 1.5.0
  */
-public class JobTimerWheel {
-
+public class LogTimerWheel {
     private static final int TICK_DURATION = 100;
-    private static final String THREAD_NAME_PREFIX = "job-task-timer-wheel-";
+    private static final String THREAD_NAME_PREFIX = "log-timer-wheel-";
     private static HashedWheelTimer timer = null;
     private static final ThreadPoolExecutor executor =
-            new ThreadPoolExecutor(32, 32, 10, TimeUnit.SECONDS,
+            new ThreadPoolExecutor(16, 16, 10, TimeUnit.SECONDS,
                     new LinkedBlockingQueue<>(), new CustomizableThreadFactory(THREAD_NAME_PREFIX));
 
     private static final TimerIdempotent idempotent = new TimerIdempotent();
@@ -37,24 +39,12 @@ public class JobTimerWheel {
     }
 
     /**
-     * 定时任务添加时间轮
+     * 定时任务批次日志添加时间轮
      *
      * @param task  任务
      * @param delay 延迟时间
      */
-    public static synchronized void registerWithWorkflow(Supplier<TimerTask<String>> task, Duration delay) {
-        TimerTask<String> timerTask = task.get();
-        register(timerTask.idempotentKey(), timerTask, delay);
-    }
-
-    /**
-     * 工作流任务添加时间轮
-     * 虽然job和Workflow 添加时间轮方法逻辑一样为了后面做一些不同的逻辑，这里兼容分开写
-     *
-     * @param task  任务
-     * @param delay 延迟时间
-     */
-    public static synchronized void registerWithJob(Supplier<TimerTask<String>> task, Duration delay) {
+    public static synchronized void registerWithJobTaskLog(Supplier<TimerTask<String>> task, Duration delay) {
         TimerTask<String> timerTask = task.get();
         register(timerTask.idempotentKey(), timerTask, delay);
     }
@@ -86,5 +76,4 @@ public class JobTimerWheel {
     public static void clearCache(String idempotentKey) {
         idempotent.clear(idempotentKey);
     }
-
 }

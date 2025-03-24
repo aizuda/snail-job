@@ -9,6 +9,8 @@ import com.aizuda.snailjob.common.log.dto.TaskLogFieldDTO;
 import com.aizuda.snailjob.server.common.dto.JobLogDTO;
 import com.aizuda.snailjob.server.common.service.LogService;
 import com.aizuda.snailjob.server.common.convert.JobLogMessageConverter;
+import com.aizuda.snailjob.server.common.timer.JobTaskLogTimerTask;
+import com.aizuda.snailjob.server.common.timer.LogTimerWheel;
 import com.aizuda.snailjob.server.common.vo.JobLogQueryVO;
 import com.aizuda.snailjob.server.common.vo.JobLogResponseVO;
 import com.aizuda.snailjob.server.model.dto.JobLogTaskDTO;
@@ -22,13 +24,13 @@ import com.google.common.collect.Lists;
 import jakarta.websocket.Session;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum.COMPLETED;
@@ -41,14 +43,12 @@ import static com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum.COMPL
  * @Filename：DatabaseLogService
  * @since 1.5.0
  */
-
 @Slf4j
 @RequiredArgsConstructor
 public class DatabaseLogService implements LogService {
+    private static final Long DELAY_MILLS = 5000L;
     private final JobLogMessageMapper jobLogMessageMapper;
     private final JobTaskBatchMapper jobTaskBatchMapper;
-    // 创建一个调度线程池
-    ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     /**
      * 保存单调日志
@@ -95,7 +95,7 @@ public class DatabaseLogService implements LogService {
     @Override
     public void getJobLogPage(JobLogQueryVO queryVO, Session session) throws IOException {
         Boolean taskBatchComplete = false;
-        while (!taskBatchComplete){
+        while (!taskBatchComplete) {
             PageDTO<JobLogMessage> pageDTO = new PageDTO<>(1, queryVO.getSize());
 
             PageDTO<JobLogMessage> selectPage = jobLogMessageMapper.selectPage(pageDTO,
@@ -116,18 +116,15 @@ public class DatabaseLogService implements LogService {
                 JobLogResponseVO jobLogResponseVO = new JobLogResponseVO();
 
                 if (Objects.isNull(jobTaskBatch)
-                        ||  (COMPLETED.contains(jobTaskBatch.getTaskBatchStatus()) &&
+                        || (COMPLETED.contains(jobTaskBatch.getTaskBatchStatus()) &&
                         jobTaskBatch.getUpdateDt().plusSeconds(15).isBefore(LocalDateTime.now()))
                 ) {
                     jobLogResponseVO.setFinished(Boolean.TRUE);
                     jobLogResponseVO.setNextStartId(queryVO.getStartId());
                     jobLogResponseVO.setFromIndex(0);
                     session.getBasicRemote().sendText(JsonUtil.toJsonString(jobLogResponseVO));
-                    System.out.println("结束了");
                     return;
-                }else {
-                    // 如果没有完成，就等五秒执行
-                    System.out.println("异步执行");
+                } else {
                     scheduleNextAttempt(queryVO, session);
                     return;
                 }
@@ -191,15 +188,22 @@ public class DatabaseLogService implements LogService {
 
     }
 
+    /**
+     * 使用时间轮5秒再进行日志查询
+     *
+     * @param queryVO
+     * @param session
+     */
     private void scheduleNextAttempt(JobLogQueryVO queryVO, Session session) {
-        scheduler.schedule(() -> {
-            try {
-                // 再次调用查询
-                getJobLogPage(queryVO, session);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            // 5秒后执行
-        }, 5, TimeUnit.SECONDS);
+        if (TransactionSynchronizationManager.isActualTransactionActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCompletion(int status) {
+                    LogTimerWheel.registerWithJobTaskLog(() -> new JobTaskLogTimerTask(queryVO, session), Duration.ofMillis(DELAY_MILLS));
+                }
+            });
+        } else {
+            LogTimerWheel.registerWithJobTaskLog(() -> new JobTaskLogTimerTask(queryVO, session), Duration.ofMillis(DELAY_MILLS));
+        }
     }
 }
