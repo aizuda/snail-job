@@ -1,5 +1,10 @@
 package com.aizuda.snailjob.server.common.config;
 
+import com.aizuda.snailjob.server.common.service.LogService;
+import com.aizuda.snailjob.server.common.service.impl.DatabaseLogService;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.JobLogMessageMapper;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskBatchMapper;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -31,5 +36,11 @@ public class SnailJobServerCommonAutoConfiguration {
         scheduler.setPoolSize(4);
         scheduler.setThreadNamePrefix("snail-job-alarm-thread-");
         return scheduler;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(LogService.class)
+    public LogService logService(JobLogMessageMapper jobLogMessageMapper, JobTaskBatchMapper jobTaskBatchMapper){
+        return new DatabaseLogService(jobLogMessageMapper, jobTaskBatchMapper);
     }
 }

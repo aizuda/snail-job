@@ -4,6 +4,7 @@ import com.aizuda.snailjob.client.model.request.DispatchJobRequest;
 import com.aizuda.snailjob.client.model.request.DispatchJobResultRequest;
 import com.aizuda.snailjob.client.model.request.MapTaskRequest;
 import com.aizuda.snailjob.server.common.dto.JobAlarmInfo;
+import com.aizuda.snailjob.server.common.dto.JobLogDTO;
 import com.aizuda.snailjob.server.common.dto.JobLogMetaDTO;
 import com.aizuda.snailjob.server.job.task.dto.*;
 import com.aizuda.snailjob.server.job.task.support.block.job.BlockStrategyContext;

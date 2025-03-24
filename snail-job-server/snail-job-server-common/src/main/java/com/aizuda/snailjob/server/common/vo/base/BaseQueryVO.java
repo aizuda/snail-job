@@ -1,4 +1,4 @@
-package com.aizuda.snailjob.server.web.model.base;
+package com.aizuda.snailjob.server.common.vo.base;
 
 import cn.hutool.core.util.ObjUtil;
 import lombok.Data;

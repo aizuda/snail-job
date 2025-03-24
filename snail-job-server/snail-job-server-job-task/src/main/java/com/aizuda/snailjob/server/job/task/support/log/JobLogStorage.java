@@ -10,7 +10,7 @@ import com.aizuda.snailjob.server.common.pekko.ActorGenerator;
 import com.aizuda.snailjob.server.common.dto.JobLogMetaDTO;
 import com.aizuda.snailjob.server.common.dto.LogMetaDTO;
 import com.aizuda.snailjob.server.common.log.LogStorageFactory;
-import com.aizuda.snailjob.server.job.task.dto.JobLogDTO;
+import com.aizuda.snailjob.server.common.dto.JobLogDTO;
 import com.google.common.collect.Lists;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;

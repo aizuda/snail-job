@@ -3,8 +3,8 @@ package com.aizuda.snailjob.server.web.service.impl;
 import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.constant.LogFieldConstants;
-import com.aizuda.snailjob.server.web.model.request.JobLogQueryVO;
-import com.aizuda.snailjob.server.web.model.response.JobLogResponseVO;
+import com.aizuda.snailjob.server.common.vo.JobLogQueryVO;
+import com.aizuda.snailjob.server.common.vo.JobLogResponseVO;
 import com.aizuda.snailjob.server.web.service.JobLogService;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobLogMessageMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskBatchMapper;
@@ -19,6 +19,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum.COMPLETED;
 
 /**
  * @author: opensnail
@@ -40,8 +42,8 @@ public class JobLogServiceImpl implements JobLogService {
                 new LambdaQueryWrapper<JobLogMessage>()
                         .select(JobLogMessage::getId, JobLogMessage::getLogNum)
                         .ge(JobLogMessage::getId, queryVO.getStartId())
-                        .ge(JobLogMessage::getTaskBatchId, queryVO.getTaskBatchId())
-                        .ge(JobLogMessage::getJobId, queryVO.getJobId())
+                        .eq(JobLogMessage::getTaskBatchId, queryVO.getTaskBatchId())
+//                        .ge(JobLogMessage::getJobId, queryVO.getJobId())
                         .eq(JobLogMessage::getTaskId, queryVO.getTaskId())
                         .orderByAsc(JobLogMessage::getId).orderByAsc(JobLogMessage::getRealTime));
         List<JobLogMessage> records = selectPage.getRecords();
@@ -55,7 +57,9 @@ public class JobLogServiceImpl implements JobLogService {
             JobLogResponseVO jobLogResponseVO = new JobLogResponseVO();
 
             if (Objects.isNull(jobTaskBatch)
-                    || jobTaskBatch.getUpdateDt().plusSeconds(15).isBefore(LocalDateTime.now())
+                    ||  (COMPLETED.contains(jobTaskBatch.getTaskBatchStatus()) &&
+            jobTaskBatch.getUpdateDt().plusSeconds(15).isBefore(LocalDateTime.now()))
+
             ) {
                 jobLogResponseVO.setFinished(Boolean.TRUE);
             }

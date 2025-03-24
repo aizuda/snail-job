@@ -1,6 +1,6 @@
-package com.aizuda.snailjob.server.web.model.request;
+package com.aizuda.snailjob.server.common.vo;
 
-import com.aizuda.snailjob.server.web.model.base.BaseQueryVO;
+import com.aizuda.snailjob.server.common.vo.base.BaseQueryVO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

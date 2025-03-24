@@ -1,8 +1,8 @@
 package com.aizuda.snailjob.server.web.controller;
 
 import com.aizuda.snailjob.server.web.annotation.LoginRequired;
-import com.aizuda.snailjob.server.web.model.request.JobLogQueryVO;
-import com.aizuda.snailjob.server.web.model.response.JobLogResponseVO;
+import com.aizuda.snailjob.server.common.vo.JobLogQueryVO;
+import com.aizuda.snailjob.server.common.vo.JobLogResponseVO;
 import com.aizuda.snailjob.server.web.service.JobLogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
