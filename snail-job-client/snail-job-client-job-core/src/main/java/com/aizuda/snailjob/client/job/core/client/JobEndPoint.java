@@ -86,7 +86,11 @@ public class JobEndPoint {
                 }
             }
 
-            SnailJobLog.REMOTE.info("批次:[{}] 任务调度成功. ", dispatchJob.getTaskBatchId());
+            SnailJobLog.REMOTE.info("任务调度方:[{}] 任务ID:[{}] 任务批次:[{}] 工作流批次:[{}] 任务调度成功. ",
+                    Objects.isNull(dispatchJob.getWorkflowTaskBatchId()) ? "job" : "workflow",
+                    dispatchJob.getJobId(),
+                    dispatchJob.getTaskBatchId(),
+                    dispatchJob.getWorkflowTaskBatchId());
 
             jobExecutor.jobExecute(jobContext);
 
