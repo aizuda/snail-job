@@ -11,4 +11,7 @@ import com.aizuda.snailjob.server.common.vo.JobLogResponseVO;
 public interface JobLogService {
 
     JobLogResponseVO getJobLogPage(JobLogQueryVO jobQueryVO);
+
+    void getJobLogPageV2(JobLogQueryVO jobQueryVO);
+
 }

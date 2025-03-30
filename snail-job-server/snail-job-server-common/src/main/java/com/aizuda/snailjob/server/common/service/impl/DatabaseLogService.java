@@ -9,8 +9,6 @@ import com.aizuda.snailjob.common.log.dto.TaskLogFieldDTO;
 import com.aizuda.snailjob.server.common.dto.JobLogDTO;
 import com.aizuda.snailjob.server.common.service.LogService;
 import com.aizuda.snailjob.server.common.convert.JobLogMessageConverter;
-import com.aizuda.snailjob.server.common.timer.JobTaskLogTimerTask;
-import com.aizuda.snailjob.server.common.timer.LogTimerWheel;
 import com.aizuda.snailjob.server.common.vo.JobLogQueryVO;
 import com.aizuda.snailjob.server.common.vo.JobLogResponseVO;
 import com.aizuda.snailjob.server.model.dto.JobLogTaskDTO;
@@ -21,13 +19,9 @@ import com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.google.common.collect.Lists;
-import jakarta.websocket.Session;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -93,8 +87,8 @@ public class DatabaseLogService implements LogService {
     }
 
     @Override
-    public void getJobLogPage(JobLogQueryVO queryVO, Session session) throws IOException {
-        Boolean taskBatchComplete = false;
+    public void getJobLogPage(JobLogQueryVO queryVO, String sid) {
+        boolean taskBatchComplete = false;
         while (!taskBatchComplete) {
             PageDTO<JobLogMessage> pageDTO = new PageDTO<>(1, queryVO.getSize());
 
@@ -104,7 +98,8 @@ public class DatabaseLogService implements LogService {
                             .ge(JobLogMessage::getId, queryVO.getStartId())
                             .eq(JobLogMessage::getTaskBatchId, queryVO.getTaskBatchId())
                             .eq(JobLogMessage::getTaskId, queryVO.getTaskId())
-                            .orderByAsc(JobLogMessage::getId).orderByAsc(JobLogMessage::getRealTime));
+                            .orderByAsc(JobLogMessage::getId)
+                            .orderByAsc(JobLogMessage::getRealTime));
             List<JobLogMessage> records = selectPage.getRecords();
             if (CollUtil.isEmpty(records)) {
 
@@ -122,10 +117,9 @@ public class DatabaseLogService implements LogService {
                     jobLogResponseVO.setFinished(Boolean.TRUE);
                     jobLogResponseVO.setNextStartId(queryVO.getStartId());
                     jobLogResponseVO.setFromIndex(0);
-                    session.getBasicRemote().sendText(JsonUtil.toJsonString(jobLogResponseVO));
                     return;
                 } else {
-                    scheduleNextAttempt(queryVO, session);
+//                    scheduleNextAttempt(queryVO, sid);
                     return;
                 }
             }
@@ -180,7 +174,7 @@ public class DatabaseLogService implements LogService {
             jobLogResponseVO.setMessage(messages);
             jobLogResponseVO.setNextStartId(nextStartId);
             jobLogResponseVO.setFromIndex(fromIndex);
-            session.getBasicRemote().sendText(JsonUtil.toJsonString(jobLogResponseVO));
+//            session.getBasicRemote().sendText(JsonUtil.toJsonString(jobLogResponseVO));
 
             queryVO.setFromIndex(fromIndex);
             queryVO.setStartId(nextStartId);
@@ -188,22 +182,4 @@ public class DatabaseLogService implements LogService {
 
     }
 
-    /**
-     * 使用时间轮5秒再进行日志查询
-     *
-     * @param queryVO
-     * @param session
-     */
-    private void scheduleNextAttempt(JobLogQueryVO queryVO, Session session) {
-        if (TransactionSynchronizationManager.isActualTransactionActive()) {
-            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-                @Override
-                public void afterCompletion(int status) {
-                    LogTimerWheel.registerWithJobTaskLog(() -> new JobTaskLogTimerTask(queryVO, session), Duration.ofMillis(DELAY_MILLS));
-                }
-            });
-        } else {
-            LogTimerWheel.registerWithJobTaskLog(() -> new JobTaskLogTimerTask(queryVO, session), Duration.ofMillis(DELAY_MILLS));
-        }
-    }
 }

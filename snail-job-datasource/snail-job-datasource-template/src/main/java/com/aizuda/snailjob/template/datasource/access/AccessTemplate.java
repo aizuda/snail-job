@@ -7,6 +7,8 @@ import com.aizuda.snailjob.template.datasource.access.task.RetryDeadLetterTaskAc
 import com.aizuda.snailjob.template.datasource.access.task.RetryTaskAccess;
 import com.aizuda.snailjob.template.datasource.enums.OperationTypeEnum;
 import com.aizuda.snailjob.template.datasource.exception.SnailJobDatasourceException;
+import com.aizuda.snailjob.template.datasource.persistence.dataobject.log.JobLogMessageDO;
+import com.aizuda.snailjob.template.datasource.persistence.dataobject.log.RetryTaskLogMessageDO;
 import com.aizuda.snailjob.template.datasource.persistence.po.*;
 import org.springframework.stereotype.Component;
 
@@ -99,6 +101,29 @@ public class AccessTemplate {
      */
     public ConfigAccess<NotifyConfig> getNotifyConfigAccess() {
         return (ConfigAccess<NotifyConfig>) Optional.ofNullable(REGISTER_ACCESS.get(OperationTypeEnum.NOTIFY.name()))
+                .orElseThrow(() -> new SnailJobDatasourceException("not supports operation type"));
+
+    }
+
+    /**
+     * 获取通知配置操作类
+     *
+     * @return {@link NotifyConfigAccess} 获取通知配置操作类
+     */
+    public LogAccess<RetryTaskLogMessageDO> getRetryTaskLogMessageAccess() {
+        return (LogAccess<RetryTaskLogMessageDO>) Optional.ofNullable(REGISTER_ACCESS.get(OperationTypeEnum.RETRY_LOG.name()))
+                .orElseThrow(() -> new SnailJobDatasourceException("not supports operation type"));
+
+    }
+
+
+    /**
+     * 获取通知配置操作类
+     *
+     * @return {@link NotifyConfigAccess} 获取通知配置操作类
+     */
+    public LogAccess<JobLogMessageDO> getJobLogMessageAccess() {
+        return (LogAccess<JobLogMessageDO>) Optional.ofNullable(REGISTER_ACCESS.get(OperationTypeEnum.JOB_LOG.name()))
                 .orElseThrow(() -> new SnailJobDatasourceException("not supports operation type"));
 
     }

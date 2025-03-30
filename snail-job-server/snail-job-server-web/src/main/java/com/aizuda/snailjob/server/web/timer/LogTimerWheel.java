@@ -1,4 +1,4 @@
-package com.aizuda.snailjob.server.common.timer;
+package com.aizuda.snailjob.server.web.timer;
 
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.TimerTask;

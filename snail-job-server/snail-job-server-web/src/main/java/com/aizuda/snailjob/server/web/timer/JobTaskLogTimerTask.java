@@ -1,17 +1,17 @@
-package com.aizuda.snailjob.server.common.timer;
+package com.aizuda.snailjob.server.web.timer;
 
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.TimerTask;
+import com.aizuda.snailjob.server.common.enums.WebSocketSceneEnum;
 import com.aizuda.snailjob.server.common.service.LogService;
 import com.aizuda.snailjob.server.common.vo.JobLogQueryVO;
+import com.aizuda.snailjob.server.web.service.JobLogService;
 import io.netty.util.Timeout;
-import jakarta.websocket.Session;
 import lombok.AllArgsConstructor;
 
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
-import java.util.Map;
 
 /**
  * @Author：srzou
@@ -23,11 +23,9 @@ import java.util.Map;
  */
 @AllArgsConstructor
 public class JobTaskLogTimerTask implements TimerTask<String> {
-    private static final String SID = "sid";
-    private static final String SCENE = "scene";
     private static final String IDEMPOTENT_KEY_PREFIX = "jobTaskLog_{0}_{1}_{2}";
     private JobLogQueryVO logQueryVO;
-    private Session session;
+    private String sid;
 
     @Override
     public void run(final Timeout timeout) throws Exception {
@@ -35,8 +33,8 @@ public class JobTaskLogTimerTask implements TimerTask<String> {
 
         try {
             LogTimerWheel.clearCache(idempotentKey());
-            LogService logService = SnailSpringContext.getBean(LogService.class);
-            logService.getJobLogPage(logQueryVO, session);
+            JobLogService logService = SnailSpringContext.getBean(JobLogService.class);
+            logService.getJobLogPageV2(logQueryVO);
 
         } catch (Exception e) {
             SnailJobLog.LOCAL.error("定时任务日志查询执行失败", e);
@@ -45,10 +43,8 @@ public class JobTaskLogTimerTask implements TimerTask<String> {
 
     @Override
     public String idempotentKey() {
-        Map<String, Object> userProperties = session.getUserProperties();
-        String sid = (String) userProperties.get(SID);
-        String scene = (String) userProperties.get(SCENE);
+
         Long jobTaskId = logQueryVO.getTaskBatchId();
-        return MessageFormat.format(IDEMPOTENT_KEY_PREFIX, sid, scene, jobTaskId);
+        return MessageFormat.format(IDEMPOTENT_KEY_PREFIX, sid, WebSocketSceneEnum.JOB_LOG_SCENE, jobTaskId);
     }
 }

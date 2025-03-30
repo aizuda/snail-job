@@ -1,21 +1,23 @@
-package com.aizuda.snailjob.server.common.vo;
+package com.aizuda.snailjob.template.datasource.persistence.dataobject.log;
 
-import com.aizuda.snailjob.server.common.vo.base.BaseQueryVO;
+import com.aizuda.snailjob.template.datasource.persistence.dataobject.common.PageQueryDO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
+ * <p>
+ *
+ * </p>
+ *
  * @author opensnail
- * @date 2023-10-11 22:28:07
- * @since 2.4.0
+ * @date 2025-03-29
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class JobLogQueryVO extends BaseQueryVO {
+public class LogPageQueryDO extends PageQueryDO {
     private Long startId;
     private Long jobId;
     private Long taskBatchId;
     private Long taskId;
     private Integer fromIndex;
-    private String sid;
 }

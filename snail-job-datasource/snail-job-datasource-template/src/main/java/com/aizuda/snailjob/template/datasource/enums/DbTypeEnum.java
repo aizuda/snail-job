@@ -5,6 +5,9 @@ import com.baomidou.mybatisplus.annotation.DbType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * DB数据库类型
  *
@@ -36,5 +39,9 @@ public enum DbTypeEnum {
         }
 
         throw new SnailJobDatasourceException("暂不支持此数据库 [{}]", db);
+    }
+
+    public static List<DbTypeEnum> all() {
+        return Arrays.asList(DbTypeEnum.values());
     }
 }

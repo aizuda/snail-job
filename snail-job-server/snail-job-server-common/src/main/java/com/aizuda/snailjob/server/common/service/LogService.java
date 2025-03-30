@@ -3,7 +3,6 @@ package com.aizuda.snailjob.server.common.service;
 import com.aizuda.snailjob.server.common.dto.JobLogDTO;
 import com.aizuda.snailjob.server.common.vo.JobLogQueryVO;
 import com.aizuda.snailjob.server.model.dto.JobLogTaskDTO;
-import jakarta.websocket.Session;
 
 import java.io.IOException;
 import java.util.List;
@@ -19,5 +18,5 @@ import java.util.List;
 public interface LogService {
     void saveLog(JobLogDTO jobLogDTO);
     void batchSaveLogs(List<JobLogTaskDTO> jobLogTasks);
-    void getJobLogPage(JobLogQueryVO queryVO, Session session) throws IOException;
+    void getJobLogPage(JobLogQueryVO queryVO, String sid) throws IOException;
 }

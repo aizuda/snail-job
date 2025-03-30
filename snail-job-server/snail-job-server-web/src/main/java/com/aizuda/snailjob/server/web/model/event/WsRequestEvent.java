@@ -1,7 +1,10 @@
-package com.aizuda.snailjob.server.common.vo;
+package com.aizuda.snailjob.server.web.model.event;
 
 import com.aizuda.snailjob.server.common.enums.WebSocketSceneEnum;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.context.ApplicationEvent;
 
 /**
  * @Author：srzou
@@ -11,8 +14,9 @@ import lombok.Data;
  * @Filename：WebSocketRequestVO
  * @since 1.5.0
  */
-@Data
-public class WsRequestVO {
+@Setter
+@Getter
+public class WsRequestEvent extends ApplicationEvent {
     /**
      * wb类型
      */
@@ -24,4 +28,8 @@ public class WsRequestVO {
     private String message;
 
     private WebSocketSceneEnum sceneEnum;
+
+    public WsRequestEvent(Object source) {
+        super(source);
+    }
 }

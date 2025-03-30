@@ -13,5 +13,7 @@ public enum OperationTypeEnum {
     GROUP,
     RETRY_TASK,
     RETRY,
-    RETRY_DEAD_LETTER
+    RETRY_DEAD_LETTER,
+    RETRY_LOG,
+    JOB_LOG,
 }
