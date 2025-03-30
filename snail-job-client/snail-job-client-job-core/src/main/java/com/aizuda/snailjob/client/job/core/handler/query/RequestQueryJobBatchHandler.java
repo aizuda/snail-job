@@ -5,7 +5,7 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.lang.Pair;
 import com.aizuda.snailjob.client.common.exception.SnailJobClientException;
 import com.aizuda.snailjob.client.job.core.dto.JobBatchResponseVO;
-import com.aizuda.snailjob.client.job.core.handler.AbstractRequestHandler;
+import com.aizuda.snailjob.client.job.core.handler.AbstractJobRequestHandler;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.model.Result;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
@@ -15,7 +15,7 @@ import java.util.Objects;
 /**
  * @since 1.5.0
  */
-public class RequestQueryJobBatchHandler extends AbstractRequestHandler<JobBatchResponseVO> {
+public class RequestQueryJobBatchHandler extends AbstractJobRequestHandler<JobBatchResponseVO> {
     private final Long queryJobBatchId;
 
     public RequestQueryJobBatchHandler(Long queryJobBatchId) {

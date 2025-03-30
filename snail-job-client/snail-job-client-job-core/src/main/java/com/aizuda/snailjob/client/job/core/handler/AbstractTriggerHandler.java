@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public abstract class AbstractTriggerHandler<H, R> extends AbstractRequestHandler<R> {
+public abstract class AbstractTriggerHandler<H, R> extends AbstractJobRequestHandler<R> {
     @Getter
     private final JobTriggerDTO reqDTO;
     @Setter

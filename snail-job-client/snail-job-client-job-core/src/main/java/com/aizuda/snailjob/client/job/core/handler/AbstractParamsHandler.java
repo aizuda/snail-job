@@ -21,7 +21,7 @@ import static com.aizuda.snailjob.client.job.core.enums.TriggerTypeEnum.*;
  * @date 2024-10-19 22:34:38
  * @since sj_1.2.0
  */
-public abstract class AbstractParamsHandler<H, R> extends AbstractRequestHandler<R> {
+public abstract class AbstractParamsHandler<H, R> extends AbstractJobRequestHandler<R> {
     protected static final String SHARD_NUM = "shardNum";
     @Getter
     private final RequestAddOrUpdateJobDTO reqDTO;

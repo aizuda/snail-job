@@ -4,13 +4,13 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.lang.Pair;
 import com.aizuda.snailjob.client.common.exception.SnailJobClientException;
 import com.aizuda.snailjob.client.job.core.dto.RequestUpdateStatusDTO;
-import com.aizuda.snailjob.client.job.core.handler.AbstractRequestHandler;
-import com.aizuda.snailjob.client.job.core.util.ValidatorUtils;
+import com.aizuda.snailjob.client.job.core.handler.AbstractJobRequestHandler;
+import com.aizuda.snailjob.client.common.util.ValidatorUtils;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.model.Result;
 
 
-public class UpdateJobStatusHandler extends AbstractRequestHandler<Boolean> {
+public class UpdateJobStatusHandler extends AbstractJobRequestHandler<Boolean> {
     private final RequestUpdateStatusDTO statusDTO;
 
     public UpdateJobStatusHandler(Long id) {

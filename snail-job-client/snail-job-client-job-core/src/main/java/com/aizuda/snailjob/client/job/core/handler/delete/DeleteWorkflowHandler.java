@@ -3,7 +3,7 @@ package com.aizuda.snailjob.client.job.core.handler.delete;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.lang.Pair;
 import com.aizuda.snailjob.client.common.exception.SnailJobClientException;
-import com.aizuda.snailjob.client.job.core.handler.AbstractRequestHandler;
+import com.aizuda.snailjob.client.job.core.handler.AbstractJobRequestHandler;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.model.Result;
 
@@ -16,7 +16,7 @@ import java.util.Set;
  * @Date：2024/11/21 22:42
  * @Filename：DeleteWorkflowHandler
  */
-public class DeleteWorkflowHandler extends AbstractRequestHandler<Boolean> {
+public class DeleteWorkflowHandler extends AbstractJobRequestHandler<Boolean> {
     private final Set<Long> toDeleteIds;
 
     public DeleteWorkflowHandler(Set<Long> toDeleteIds) {

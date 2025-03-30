@@ -9,7 +9,7 @@ import com.aizuda.snailjob.common.core.model.Result;
 
 import java.util.Set;
 
-public interface OpenApiClient {
+public interface JobOpenApiClient {
     @Mapping(method = RequestMethod.POST, path = "/api/job/add")
     Result<Object> addJob(RequestAddOrUpdateJobDTO requestAddOrUpdateJobDTO);
 

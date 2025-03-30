@@ -167,6 +167,12 @@ public interface SystemConstants {
 
         String OPENAPI_DELETE_WORKFLOW = "/api/job/deleteWorkFlow";
 
+        String OPENAPI_ADD_RETRY = "/api/retry/query";
+
+        String OPENAPI_UPDATE_RETRY_STATUS = "/api/retry/updateRetryStatus";
+
+        String OPENAPI_TRIGGER_RETRY = "/api/retry/triggerRetry";
+
     }
 
     String LOGO = """

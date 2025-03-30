@@ -1,4 +1,4 @@
-package com.aizuda.snailjob.client.job.core.util;
+package com.aizuda.snailjob.client.common.util;
 
 import cn.hutool.core.lang.Pair;
 import com.aizuda.snailjob.client.common.exception.SnailJobClientException;

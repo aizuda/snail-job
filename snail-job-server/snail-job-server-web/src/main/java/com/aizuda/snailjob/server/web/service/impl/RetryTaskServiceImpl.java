@@ -18,7 +18,7 @@ import com.aizuda.snailjob.server.web.model.request.UserSessionVO;
 import com.aizuda.snailjob.server.web.model.response.RetryTaskLogMessageResponseVO;
 import com.aizuda.snailjob.server.web.model.response.RetryTaskResponseVO;
 import com.aizuda.snailjob.server.web.service.RetryTaskService;
-import com.aizuda.snailjob.server.web.service.convert.RetryConverter;
+import com.aizuda.snailjob.server.retry.task.convert.RetryConverter;
 import com.aizuda.snailjob.server.web.service.convert.RetryTaskLogResponseVOConverter;
 import com.aizuda.snailjob.server.web.service.convert.RetryTaskResponseVOConverter;
 import com.aizuda.snailjob.server.web.util.UserSessionUtils;

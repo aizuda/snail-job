@@ -1,10 +1,9 @@
-package com.aizuda.snailjob.server.web.service.convert;
+package com.aizuda.snailjob.server.retry.task.convert;
 
 import com.aizuda.snailjob.server.retry.task.dto.RetryTaskPrepareDTO;
 import com.aizuda.snailjob.server.retry.task.dto.TaskStopJobDTO;
 import com.aizuda.snailjob.template.datasource.persistence.po.Retry;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
 /**

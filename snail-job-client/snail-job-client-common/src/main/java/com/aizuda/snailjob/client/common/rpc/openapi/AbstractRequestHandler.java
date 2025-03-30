@@ -1,4 +1,4 @@
-package com.aizuda.snailjob.client.job.core.handler;
+package com.aizuda.snailjob.client.common.rpc.openapi;
 
 import cn.hutool.core.lang.Pair;
 import com.aizuda.snailjob.client.common.exception.SnailJobClientException;
@@ -12,6 +12,7 @@ public abstract class AbstractRequestHandler<R> implements RequestHandler<R> {
 
     /**
      * 具体调用
+     *
      * @return
      */
     @Override
@@ -27,9 +28,11 @@ public abstract class AbstractRequestHandler<R> implements RequestHandler<R> {
         }
     }
 
-    protected abstract void afterExecute(R r);
+    protected void afterExecute(R r) {
+    }
 
-    protected abstract void beforeExecute();
+    protected void beforeExecute() {
+    }
 
     protected abstract R doExecute();
 
