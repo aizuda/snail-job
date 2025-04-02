@@ -131,6 +131,7 @@ CREATE TABLE `sj_retry`
     KEY `idx_namespace_id_group_name_retry_status` (`namespace_id`, `group_name`, `retry_status`),
     KEY `idx_idempotent_id` (`idempotent_id`),
     KEY `idx_biz_no` (`biz_no`),
+    KEY `idx_retry_status_bucket_index` (`retry_status`, `bucket_index`),
     KEY `idx_parent_id` (`parent_id`),
     KEY `idx_create_dt` (`create_dt`),
     UNIQUE KEY `uk_name_task_type_idempotent_id_deleted` (`namespace_id`, `group_name`, `task_type`, `idempotent_id`, `deleted`)
