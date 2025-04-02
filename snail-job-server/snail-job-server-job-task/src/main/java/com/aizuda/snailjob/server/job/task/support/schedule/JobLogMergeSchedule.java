@@ -94,7 +94,7 @@ public class JobLogMergeSchedule extends AbstractSchedule implements Lifecycle {
     private List<JobPartitionTaskDTO> jobTaskBatchList(Long startId, LocalDateTime endTime) {
 
         List<JobTaskBatch> jobTaskBatchList = jobTaskBatchMapper.selectPage(
-                new Page<>(0, 1000),
+                new Page<>(0, 1000, Boolean.FALSE),
                 new LambdaUpdateWrapper<JobTaskBatch>()
                         .ge(JobTaskBatch::getId, startId)
                         .in(JobTaskBatch::getTaskBatchStatus, JobTaskBatchStatusEnum.COMPLETED)

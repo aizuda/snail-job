@@ -94,7 +94,7 @@ public class RetryLogMergeSchedule extends AbstractSchedule implements Lifecycle
     private List<RetryMergePartitionTaskDTO> retryLogList(Long startId, LocalDateTime endTime) {
 
         List<RetryTask> jobTaskBatchList = retryTaskMapper.selectPage(
-                new Page<>(0, 1000),
+                new Page<>(0, 1000, Boolean.FALSE),
                 new LambdaUpdateWrapper<RetryTask>()
                         .ge(RetryTask::getId, startId)
                         .in(RetryTask::getTaskStatus, Lists.newArrayList(

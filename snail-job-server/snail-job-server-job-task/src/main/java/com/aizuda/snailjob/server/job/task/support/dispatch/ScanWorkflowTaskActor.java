@@ -130,7 +130,7 @@ public class ScanWorkflowTaskActor extends AbstractActor {
             return Collections.emptyList();
         }
 
-        List<Workflow> workflows = workflowMapper.selectPage(new PageDTO<>(0, systemProperties.getJobPullPageSize()),
+        List<Workflow> workflows = workflowMapper.selectPage(new PageDTO<>(0, systemProperties.getJobPullPageSize(), Boolean.FALSE),
                 new LambdaQueryWrapper<Workflow>()
                         .select(Workflow::getId, Workflow::getGroupName, Workflow::getNextTriggerAt, Workflow::getTriggerType,
                                 Workflow::getTriggerInterval, Workflow::getExecutorTimeout, Workflow::getNamespaceId,

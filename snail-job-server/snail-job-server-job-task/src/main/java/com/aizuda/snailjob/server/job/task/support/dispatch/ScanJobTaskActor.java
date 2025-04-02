@@ -163,7 +163,7 @@ public class ScanJobTaskActor extends AbstractActor {
             return Collections.emptyList();
         }
 
-        List<Job> jobs = jobMapper.selectPage(new PageDTO<>(0, systemProperties.getJobPullPageSize()),
+        List<Job> jobs = jobMapper.selectPage(new PageDTO<>(0, systemProperties.getJobPullPageSize(), Boolean.FALSE),
                 new LambdaQueryWrapper<Job>()
                         .select(Job::getGroupName, Job::getNextTriggerAt, Job::getBlockStrategy, Job::getTriggerType,
                                 Job::getTriggerInterval, Job::getExecutorTimeout, Job::getTaskType, Job::getResident,

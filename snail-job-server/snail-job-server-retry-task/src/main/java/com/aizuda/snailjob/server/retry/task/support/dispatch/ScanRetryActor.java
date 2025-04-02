@@ -196,7 +196,7 @@ public class ScanRetryActor extends AbstractActor {
 
     public List<RetryPartitionTask> listAvailableTasks(Long startId, Set<Integer> buckets) {
         List<Retry> retries = accessTemplate.getRetryAccess()
-                .listPage(new PageDTO<>(0, systemProperties.getRetryPullPageSize()),
+                .listPage(new PageDTO<>(0, systemProperties.getRetryPullPageSize(), Boolean.FALSE),
                         new LambdaQueryWrapper<Retry>()
                                 .select(Retry::getId, Retry::getNextTriggerAt, Retry::getGroupName, Retry::getRetryCount,
                                         Retry::getSceneName, Retry::getNamespaceId, Retry::getTaskType)

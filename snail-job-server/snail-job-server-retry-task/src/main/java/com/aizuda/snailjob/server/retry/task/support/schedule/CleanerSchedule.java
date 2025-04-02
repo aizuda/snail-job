@@ -112,7 +112,7 @@ public class CleanerSchedule extends AbstractSchedule implements Lifecycle {
     private List<RetryPartitionTask> retryTaskBatchList(Long startId, LocalDateTime endTime) {
 
         List<Retry> retryTaskList = retryMapper.selectPage(
-                        new Page<>(0, 500),
+                        new Page<>(0, 500, Boolean.FALSE),
                         new LambdaUpdateWrapper<Retry>()
                                 .ge(Retry::getId, startId)
                                 .le(Retry::getCreateDt, endTime)
