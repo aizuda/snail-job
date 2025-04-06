@@ -1,5 +1,7 @@
 package com.aizuda.snailjob.server.starter.dispatch;
 
+import cn.hutool.core.util.StrUtil;
+import com.aizuda.snailjob.server.retry.task.support.dispatch.ScanRetryActor;
 import  org.apache.pekko.actor.AbstractActor;
 import  org.apache.pekko.actor.ActorRef;
 import cn.hutool.core.collection.CollUtil;
@@ -71,10 +73,17 @@ public class ConsumerBucketActor extends AbstractActor {
         List<List<Integer>> partitions = Lists.partition(new ArrayList<>(totalBuckets),
                 (totalBuckets.size() + retryMaxPullParallel - 1) / retryMaxPullParallel);
         for (List<Integer> buckets : partitions) {
+            String key = StrUtil.join(StrUtil.COMMA, new TreeSet<>(buckets));
+            if (ScanRetryActor.REPEATED_PULL.contains(key)) {
+                SnailJobLog.LOCAL.warn("Discard the current scanning task because there are ongoing tasks in the current batch.[{}]", key);
+                continue;
+            }
             ScanTask scanTask = new ScanTask();
+            scanTask.setBucketStr(key);
             scanTask.setBuckets(new HashSet<>(buckets));
             ActorRef scanRetryActorRef = ActorGenerator.scanRetryActor();
             scanRetryActorRef.tell(scanTask, scanRetryActorRef);
+            ScanRetryActor.REPEATED_PULL.add(key);
         }
     }
 

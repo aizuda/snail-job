@@ -38,6 +38,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.stream.Collectors;
 
 /**
@@ -53,6 +54,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 public class ScanRetryActor extends AbstractActor {
+    public static final ConcurrentSkipListSet<String> REPEATED_PULL= new ConcurrentSkipListSet<>(new ArrayList<>());
     private final SystemProperties systemProperties;
     private final AccessTemplate accessTemplate;
     private final RetryMapper retryMapper;
@@ -67,6 +69,8 @@ public class ScanRetryActor extends AbstractActor {
                 doScan(config);
             } catch (Exception e) {
                 SnailJobLog.LOCAL.error("Data scanner processing exception. [{}]", config, e);
+            } finally {
+                REPEATED_PULL.remove(config.getBucketStr());
             }
 
         }).build();
