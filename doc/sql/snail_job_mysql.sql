@@ -130,7 +130,7 @@ CREATE TABLE `sj_retry`
     `update_dt`       datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     PRIMARY KEY (`id`),
     KEY `idx_namespace_id_group_name_scene_name` (`namespace_id`, `group_name`, `scene_name`),
-    KEY `idx_namespace_id_group_name_retry_status` (`namespace_id`, `group_name`, `retry_status`),
+    KEY `idx_namespace_id_group_name_retry_status` (`namespace_id`, `retry_status`),
     KEY `idx_idempotent_id` (`idempotent_id`),
     KEY `idx_biz_no` (`biz_no`),
     KEY `idx_retry_status_bucket_index` (`retry_status`, `bucket_index`),
