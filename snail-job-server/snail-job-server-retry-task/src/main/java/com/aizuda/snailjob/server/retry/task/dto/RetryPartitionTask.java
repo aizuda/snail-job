@@ -19,7 +19,11 @@ public class RetryPartitionTask extends PartitionTask {
 
     private String groupName;
 
+    private Long groupId;
+
     private String sceneName;
+
+    private Long sceneId;
 
     private Integer taskType;
 

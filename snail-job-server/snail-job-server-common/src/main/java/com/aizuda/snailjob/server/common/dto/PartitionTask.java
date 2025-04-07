@@ -10,7 +10,4 @@ import lombok.Data;
 public class PartitionTask {
 
     protected Long id;
-
-//    protected String uniqueId;
-
 }

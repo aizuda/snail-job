@@ -94,7 +94,7 @@ public class ScanRetryActor extends AbstractActor {
         }
 
         if (!rateLimiterHandler.tryAcquire(partitionTasks.size())) {
-            log.warn("当前节点触发限流");
+            log.warn("Current node triggers current limit");
             return true;
         }
 
@@ -107,13 +107,13 @@ public class ScanRetryActor extends AbstractActor {
         }
 
         // 批次查询场景
-        Map<String, RetrySceneConfig> sceneConfigMap = getSceneConfigMap(partitionTasks);
+        Map<Long, RetrySceneConfig> sceneConfigMap = getSceneConfigMap(partitionTasks);
 
         List<Retry> waitUpdateRetries = new ArrayList<>();
         List<RetryTaskPrepareDTO> waitExecRetries = new ArrayList<>();
         for (PartitionTask task : partitionTasks) {
             RetryPartitionTask retryPartitionTask = (RetryPartitionTask) task;
-            RetrySceneConfig retrySceneConfig = sceneConfigMap.get(retryPartitionTask.getSceneName());
+            RetrySceneConfig retrySceneConfig = sceneConfigMap.get(retryPartitionTask.getSceneId());
             if (Objects.isNull(retrySceneConfig)) {
                 continue;
             }
@@ -141,11 +141,11 @@ public class ScanRetryActor extends AbstractActor {
      * 查询场景配置或者退避策略
      *
      * @param partitionTasks 待处理任务列表
-     * @return <SceneName, RetrySceneConfig>
+     * @return <SceneId, RetrySceneConfig>
      */
-    private Map<String, RetrySceneConfig> getSceneConfigMap(final List<? extends PartitionTask> partitionTasks) {
-        Set<String> sceneNameSet = StreamUtils.toSet(partitionTasks,
-                partitionTask -> ((RetryPartitionTask) partitionTask).getSceneName());
+    private Map<Long, RetrySceneConfig> getSceneConfigMap(final List<? extends PartitionTask> partitionTasks) {
+        Set<Long> sceneIdSet = StreamUtils.toSet(partitionTasks,
+                partitionTask -> ((RetryPartitionTask) partitionTask).getSceneId());
         List<RetrySceneConfig> retrySceneConfigs = accessTemplate.getSceneConfigAccess()
                 .list(new LambdaQueryWrapper<RetrySceneConfig>()
                         .select(RetrySceneConfig::getBackOff, RetrySceneConfig::getTriggerInterval,
@@ -153,8 +153,8 @@ public class ScanRetryActor extends AbstractActor {
                                 RetrySceneConfig::getCbTriggerType, RetrySceneConfig::getCbTriggerInterval,
                                 RetrySceneConfig::getExecutorTimeout)
                         .eq(RetrySceneConfig::getSceneStatus, StatusEnum.YES.getStatus())
-                        .in(RetrySceneConfig::getSceneName, sceneNameSet));
-        return StreamUtils.toIdentityMap(retrySceneConfigs, RetrySceneConfig::getSceneName);
+                        .in(RetrySceneConfig::getId, sceneIdSet));
+        return StreamUtils.toIdentityMap(retrySceneConfigs, RetrySceneConfig::getId);
     }
 
     private void processRetry(RetryPartitionTask partitionTask, RetrySceneConfig retrySceneConfig, List<RetryTaskPrepareDTO> waitExecRetries, List<Retry> waitUpdateRetries) {
@@ -213,12 +213,13 @@ public class ScanRetryActor extends AbstractActor {
 
         // 过滤已关闭的组
         if (CollUtil.isNotEmpty(retries)) {
-            List<String> groupConfigs = StreamUtils.toList(groupConfigMapper.selectList(new LambdaQueryWrapper<GroupConfig>()
-                            .select(GroupConfig::getGroupName)
+            List<Long> groupConfigs = StreamUtils.toList(
+                    groupConfigMapper.selectList(new LambdaQueryWrapper<GroupConfig>()
+                            .select(GroupConfig::getId)
                             .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus())
-                            .in(GroupConfig::getGroupName, StreamUtils.toSet(retries, Retry::getGroupName))),
-                    GroupConfig::getGroupName);
-            retries = retries.stream().filter(retry -> groupConfigs.contains(retry.getGroupName())).collect(Collectors.toList());
+                            .in(GroupConfig::getId, StreamUtils.toSet(retries, Retry::getGroupId))),
+                    GroupConfig::getId);
+            retries = retries.stream().filter(retry -> groupConfigs.contains(retry.getId())).collect(Collectors.toList());
         }
 
         return RetryTaskConverter.INSTANCE.toRetryPartitionTasks(retries);
