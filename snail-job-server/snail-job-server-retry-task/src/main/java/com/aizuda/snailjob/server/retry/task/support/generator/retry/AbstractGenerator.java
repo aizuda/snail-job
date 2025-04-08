@@ -170,15 +170,7 @@ public abstract class AbstractGenerator implements TaskGenerator {
                 .getSceneConfigByGroupNameAndSceneName(taskContext.getGroupName(), taskContext.getSceneName(),
                         taskContext.getNamespaceId());
         if (Objects.isNull(retrySceneConfig)) {
-
-            GroupConfig groupConfig = accessTemplate.getGroupConfigAccess()
-                    .getGroupConfigByGroupName(taskContext.getGroupName(), taskContext.getNamespaceId());
-            if (Objects.isNull(groupConfig)) {
-                throw new SnailJobServerException(
-                        "failed to report data, no group configuration found. groupName:[{}]", taskContext.getGroupName());
-            }
-
-            if (groupConfig.getInitScene().equals(StatusEnum.NO.getStatus())) {
+            if (taskContext.getInitScene().equals(StatusEnum.NO.getStatus())) {
                 throw new SnailJobServerException(
                         "failed to report data, no scene configuration found. groupName:[{}] sceneName:[{}]",
                         taskContext.getGroupName(), taskContext.getSceneName());
@@ -188,6 +180,7 @@ public abstract class AbstractGenerator implements TaskGenerator {
             }
         }
 
+        taskContext.setSceneId(retrySceneConfig.getId());
         return retrySceneConfig;
 
     }

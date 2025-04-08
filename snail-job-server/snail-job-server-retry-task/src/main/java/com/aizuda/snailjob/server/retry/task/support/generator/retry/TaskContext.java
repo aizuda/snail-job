@@ -25,14 +25,29 @@ public class TaskContext {
     private String groupName;
 
     /**
+     * groupId
+     */
+    private Long groupId;
+
+    /**
      * sceneName
      */
     private String sceneName;
 
     /**
+     * sceneId
+     */
+    private Long sceneId;
+
+    /**
      * 任务的初始状态
      */
     private Integer initStatus;
+
+    /**
+     * 是否初始化场景
+     */
+    private Integer initScene;
 
     /**
      * 任务信息
