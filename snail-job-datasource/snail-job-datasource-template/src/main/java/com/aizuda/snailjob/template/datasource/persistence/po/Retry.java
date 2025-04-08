@@ -23,11 +23,11 @@ public class Retry extends CreateUpdateDt {
 
     private String groupName;
 
-    private String groupId;
+    private Long groupId;
 
     private String sceneName;
 
-    private String sceneId;
+    private Long sceneId;
 
     private String idempotentId;
 

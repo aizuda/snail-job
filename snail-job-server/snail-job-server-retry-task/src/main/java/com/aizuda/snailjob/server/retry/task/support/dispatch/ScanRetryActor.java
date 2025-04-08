@@ -151,7 +151,7 @@ public class ScanRetryActor extends AbstractActor {
                         .select(RetrySceneConfig::getBackOff, RetrySceneConfig::getTriggerInterval,
                                 RetrySceneConfig::getBlockStrategy, RetrySceneConfig::getSceneName,
                                 RetrySceneConfig::getCbTriggerType, RetrySceneConfig::getCbTriggerInterval,
-                                RetrySceneConfig::getExecutorTimeout)
+                                RetrySceneConfig::getExecutorTimeout, RetrySceneConfig::getId)
                         .eq(RetrySceneConfig::getSceneStatus, StatusEnum.YES.getStatus())
                         .in(RetrySceneConfig::getId, sceneIdSet));
         return StreamUtils.toIdentityMap(retrySceneConfigs, RetrySceneConfig::getId);
@@ -203,7 +203,8 @@ public class ScanRetryActor extends AbstractActor {
                 .listPage(new PageDTO<>(0, systemProperties.getRetryPullPageSize(), Boolean.FALSE),
                         new LambdaQueryWrapper<Retry>()
                                 .select(Retry::getId, Retry::getNextTriggerAt, Retry::getGroupName, Retry::getRetryCount,
-                                        Retry::getSceneName, Retry::getNamespaceId, Retry::getTaskType)
+                                        Retry::getSceneName, Retry::getNamespaceId, Retry::getTaskType,
+                                        Retry::getSceneId, Retry::getGroupId)
                                 .eq(Retry::getRetryStatus, RetryStatusEnum.RUNNING.getStatus())
                                 .in(Retry::getBucketIndex, buckets)
                                 .le(Retry::getNextTriggerAt, DateUtils.toNowMilli() + DateUtils.toEpochMilli(SystemConstants.SCHEDULE_PERIOD))
@@ -219,7 +220,7 @@ public class ScanRetryActor extends AbstractActor {
                             .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus())
                             .in(GroupConfig::getId, StreamUtils.toSet(retries, Retry::getGroupId))),
                     GroupConfig::getId);
-            retries = retries.stream().filter(retry -> groupConfigs.contains(retry.getId())).collect(Collectors.toList());
+            retries = retries.stream().filter(retry -> groupConfigs.contains(retry.getGroupId())).collect(Collectors.toList());
         }
 
         return RetryTaskConverter.INSTANCE.toRetryPartitionTasks(retries);

@@ -43,6 +43,7 @@ public class RetryTaskStopHandler {
         RetryExecutorResultDTO executorResultDTO = RetryTaskConverter.INSTANCE.toRetryExecutorResultDTO(stopJobDTO);
         executorResultDTO.setExceptionMsg(stopJobDTO.getMessage());
         executorResultDTO.setTaskStatus(RetryTaskStatusEnum.FAIL.getStatus());
+        executorResultDTO.setIncrementRetryCount(true);
         executorResultDTO.setOperationReason(stopJobDTO.getOperationReason());
         ActorRef actorRef = ActorGenerator.retryTaskExecutorResultActor();
         actorRef.tell(executorResultDTO, actorRef);
