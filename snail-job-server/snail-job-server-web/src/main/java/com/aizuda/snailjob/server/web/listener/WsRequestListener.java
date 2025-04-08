@@ -5,16 +5,11 @@ import com.aizuda.snailjob.server.common.enums.WebSocketSceneEnum;
 import com.aizuda.snailjob.server.common.vo.JobLogQueryVO;
 import com.aizuda.snailjob.server.web.model.event.WsRequestEvent;
 import com.aizuda.snailjob.server.web.service.JobLogService;
-import jakarta.websocket.Session;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-
-import java.io.IOException;
-
-import static com.aizuda.snailjob.server.web.socket.LogServer.USER_SESSION;
 
 /**
  * @Author：srzou
@@ -30,7 +25,7 @@ import static com.aizuda.snailjob.server.web.socket.LogServer.USER_SESSION;
 public class WsRequestListener {
     private final JobLogService jobLogService;
 
-    @Async
+    @Async("logQueryExecutor")
     @EventListener(classes = WsRequestEvent.class)
     public void getJobLogs(WsRequestEvent requestVO) {
         if (!WebSocketSceneEnum.JOB_LOG_SCENE.equals(requestVO.getSceneEnum())) {
