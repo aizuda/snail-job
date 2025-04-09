@@ -3,13 +3,15 @@
 <mapper namespace="com.aizuda.snailjob.template.datasource.persistence.mapper.RetryDeadLetterMapper">
 
     <insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="false">
-        INSERT INTO sj_retry_dead_letter (namespace_id, group_name, scene_name, idempotent_id, biz_no,
+        INSERT INTO sj_retry_dead_letter (namespace_id, group_name, group_id, scene_name, scene_id, idempotent_id, biz_no,
                                           executor_name, args_str, ext_attrs, create_dt)
         <foreach collection="list" item="item" separator="UNION ALL">
             SELECT
                 #{item.namespaceId,jdbcType=VARCHAR},
                 #{item.groupName,jdbcType=VARCHAR},
+                #{item.groupId,jdbcType=BIGINT},
                 #{item.sceneName,jdbcType=VARCHAR},
+                #{item.sceneId,jdbcType=BIGINT},
                 #{item.idempotentId,jdbcType=VARCHAR},
                 #{item.bizNo,jdbcType=VARCHAR},
                 #{item.executorName,jdbcType=VARCHAR},

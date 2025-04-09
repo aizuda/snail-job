@@ -3,7 +3,7 @@
 <mapper namespace="com.aizuda.snailjob.template.datasource.persistence.mapper.RetryMapper">
 
     <insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO sj_retry (namespace_id, group_name, scene_name, idempotent_id, biz_no,
+        INSERT INTO sj_retry (namespace_id, group_name, group_id, scene_name, scene_id, idempotent_id, biz_no,
                                    executor_name, args_str, ext_attrs, next_trigger_at, task_type, retry_status,
                                    create_dt, bucket_index, parent_id, deleted)
         VALUES
@@ -11,7 +11,9 @@
             (
                  #{item.namespaceId},
                  #{item.groupName},
+                 #{item.groupId},
                  #{item.sceneName},
+                 #{item.sceneId},
                  #{item.idempotentId},
                  #{item.bizNo},
                  #{item.executorName},
