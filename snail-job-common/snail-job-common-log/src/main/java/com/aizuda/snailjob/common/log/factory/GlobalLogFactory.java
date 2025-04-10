@@ -1,11 +1,8 @@
 package com.aizuda.snailjob.common.log.factory;
 
-import com.aizuda.snailjob.common.log.dialect.log4j.Log4jLogFactory;
 import com.aizuda.snailjob.common.log.dialect.log4j2.Log4j2LogFactory;
 import com.aizuda.snailjob.common.log.dialect.slf4j.Slf4jLogFactory;
-import org.springframework.core.env.Environment;
 
-import java.util.Objects;
 
 /**
  * 全局日志工厂类<br>
@@ -39,7 +36,6 @@ public class GlobalLogFactory {
      * @param logFactoryClass 日志工厂类
      * @return 自定义的日志工厂类
      * @see Slf4jLogFactory
-     * @see Log4jLogFactory
      * @see Log4j2LogFactory
      */
     public static LogFactory set(Class<? extends LogFactory> logFactoryClass) {
@@ -56,7 +52,6 @@ public class GlobalLogFactory {
      * @param logFactory 日志工厂类对象
      * @return 自定义的日志工厂类
      * @see Slf4jLogFactory
-     * @see Log4jLogFactory
      * @see Log4j2LogFactory
      */
     public static LogFactory set(LogFactory logFactory) {
