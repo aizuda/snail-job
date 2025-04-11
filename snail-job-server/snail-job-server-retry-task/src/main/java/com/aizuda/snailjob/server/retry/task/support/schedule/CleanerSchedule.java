@@ -86,7 +86,7 @@ public class CleanerSchedule extends AbstractSchedule implements Lifecycle {
     protected void doExecute() {
         try {
             // 清除日志默认保存天数大于零、最少保留最近一天的日志数据
-            if (systemProperties.getLogStorage() <= 1) {
+            if (systemProperties.getLogStorage() < 1) {
                 SnailJobLog.LOCAL.error("retry clear log storage error", systemProperties.getLogStorage());
                 return;
             }
