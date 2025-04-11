@@ -1,4 +1,4 @@
-package com.aizuda.snailjob.server.common.rpc.client;
+package com.aizuda.snailjob.server.common.rpc.client.netty;
 
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;

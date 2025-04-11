@@ -1,4 +1,4 @@
-package com.aizuda.snailjob.client.common.rpc.client;
+package com.aizuda.snailjob.client.common.rpc.client.grpc;
 
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.IdUtil;
@@ -9,33 +9,37 @@ import com.aizuda.snailjob.client.common.exception.SnailJobRemoteException;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.enums.HeadersEnum;
+import com.aizuda.snailjob.common.core.grpc.auto.GrpcResult;
+import com.aizuda.snailjob.common.core.grpc.auto.SnailJobGrpcRequest;
+import com.aizuda.snailjob.common.core.grpc.auto.Metadata;
 import com.aizuda.snailjob.common.core.util.NetUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
-import io.netty.buffer.Unpooled;
-import io.netty.channel.Channel;
-import io.netty.handler.codec.http.*;
-import lombok.extern.slf4j.Slf4j;
+import com.google.common.util.concurrent.ListenableFuture;
+import io.grpc.ManagedChannel;
+import io.grpc.MethodDescriptor;
+import io.grpc.protobuf.ProtoUtils;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
-import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * @author opensnail
- * @date 2023-05-13
- * @since 1.3.0
+ * @author: opensnail
+ * @date : 2024-08-22
  */
-@Slf4j
-public class NettyChannel {
-    private NettyChannel() {
-    }
+public final class GrpcChannel {
 
-    private static Channel CHANNEL;
+    private static ManagedChannel channel;
+
+    public static void setChannel(ManagedChannel channel) {
+        GrpcChannel.channel = channel;
+    }
 
     /**
      * 服务端端口
@@ -155,6 +159,7 @@ public class NettyChannel {
         return port;
     }
 
+
     /**
      * 获取随机可用的端口
      *
@@ -163,8 +168,8 @@ public class NettyChannel {
     private static Integer getAvailablePort() {
         int port;
         do {
-            port = MIN_PORT + (int) (Math.random() * (MAX_PORT - MIN_PORT));
-        } while (!isPortAvailable(port));
+            port = MIN_PORT + (int) (Math.random()*(MAX_PORT - MIN_PORT));
+        }while (!isPortAvailable(port));
 
         return port;
     }
@@ -188,28 +193,10 @@ public class NettyChannel {
     }
 
 
-    public static void setChannel(Channel channel) {
-        NettyChannel.CHANNEL = channel;
-    }
-
-    /**
-     * 发送数据
-     *
-     * @param method 请求方式
-     * @param url    url地址
-     * @param body   请求的消息体
-     * @throws InterruptedException
-     */
-    public static void send(HttpMethod method, String url, String body) throws InterruptedException {
-
-        if (Objects.isNull(CHANNEL)) {
-            SnailJobLog.LOCAL.error("send message but channel is null url:[{}] method:[{}] body:[{}] ", url, method, body);
-            return;
+    public static ListenableFuture<GrpcResult> sendOfUnary(String path, String body, final long reqId) {
+        if (channel == null) {
+            return null;
         }
-
-        // 配置HttpRequest的请求数据和一些配置信息
-        FullHttpRequest request = new DefaultFullHttpRequest(
-                HttpVersion.HTTP_1_1, method, url, Unpooled.wrappedBuffer(body.getBytes(StandardCharsets.UTF_8)));
 
         SnailJobProperties snailJobProperties = SnailSpringContext.getBean(SnailJobProperties.class);
 
@@ -217,35 +204,49 @@ public class NettyChannel {
         SnailJobProperties.ServerConfig serverConfig = snailJobProperties.getServer();
         if (Objects.isNull(serverConfig)) {
             SnailJobLog.LOCAL.error("snail job server config is null");
-            return;
+            return null;
         }
 
         Assert.notBlank(snailJobProperties.getGroup(),
-                () -> new SnailJobRemoteException("The group is null, please check if your configuration is correct."));
+            () -> new SnailJobRemoteException("The group is null, please check if your configuration is correct."));
 
-        request.headers()
-                .set(HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON)
-                //开启长连接
-                .set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE)
-                //设置传递请求内容的长度
-                .set(HttpHeaderNames.CONTENT_LENGTH, request.content().readableBytes())
-                .set(HeadersEnum.HOST_ID.getKey(), HOST_ID)
-                .set(HeadersEnum.HOST_IP.getKey(), getClientHost())
-                .set(HeadersEnum.GROUP_NAME.getKey(), snailJobProperties.getGroup())
-                .set(HeadersEnum.HOST_PORT.getKey(), getClientPort())
-                .set(HeadersEnum.VERSION.getKey(), GroupVersionCache.getVersion())
-                .set(HeadersEnum.HOST.getKey(), serverConfig.getHost())
-                .set(HeadersEnum.NAMESPACE.getKey(), Optional.ofNullable(snailJobProperties.getNamespace()).orElse(
-                        SystemConstants.DEFAULT_NAMESPACE))
-                .set(HeadersEnum.TOKEN.getKey(), Optional.ofNullable(snailJobProperties.getToken()).orElse(
-                        SystemConstants.DEFAULT_TOKEN))
-        ;
+        Map<String, String> headersMap = new HashMap<>();
 
-        //发送数据
-        try {
-            CHANNEL.writeAndFlush(request).sync();
-        } catch (Exception exception) {
-            throw new SnailJobRemoteException("网络异常");
-        }
+        headersMap.put(HeadersEnum.HOST_ID.getKey(), HOST_ID);
+        headersMap.put(HeadersEnum.HOST_IP.getKey(), getClientHost());
+        headersMap.put(HeadersEnum.GROUP_NAME.getKey(), snailJobProperties.getGroup());
+        headersMap.put(HeadersEnum.HOST_PORT.getKey(), String.valueOf(getClientPort()));
+        headersMap.put(HeadersEnum.VERSION.getKey(), String.valueOf(GroupVersionCache.getVersion()));
+        headersMap.put(HeadersEnum.HOST.getKey(), serverConfig.getHost());
+        headersMap.put(HeadersEnum.NAMESPACE.getKey(), Optional.ofNullable(snailJobProperties.getNamespace()).orElse(
+            SystemConstants.DEFAULT_NAMESPACE));
+        headersMap.put(HeadersEnum.TOKEN.getKey(), Optional.ofNullable(snailJobProperties.getToken()).orElse(
+            SystemConstants.DEFAULT_TOKEN));
+
+        Metadata metadata = Metadata
+            .newBuilder()
+            .setUri(path)
+            .putAllHeaders(headersMap)
+            .build();
+        SnailJobGrpcRequest snailJobRequest = SnailJobGrpcRequest
+            .newBuilder()
+            .setMetadata(metadata)
+            .setReqId(reqId)
+            .setBody(body)
+            .build();
+
+        MethodDescriptor<SnailJobGrpcRequest, GrpcResult> methodDescriptor =
+            MethodDescriptor.<SnailJobGrpcRequest, GrpcResult>newBuilder()
+                .setType(MethodDescriptor.MethodType.UNARY)
+                .setFullMethodName(MethodDescriptor.generateFullMethodName("UnaryRequest", "unaryRequest"))
+                .setRequestMarshaller(ProtoUtils.marshaller(SnailJobGrpcRequest.getDefaultInstance()))
+                .setResponseMarshaller(ProtoUtils.marshaller(GrpcResult.getDefaultInstance()))
+                .build();
+
+        // 创建动态代理调用方法
+        return io.grpc.stub.ClientCalls.futureUnaryCall(
+            channel.newCall(methodDescriptor, io.grpc.CallOptions.DEFAULT),
+            snailJobRequest);
     }
+
 }

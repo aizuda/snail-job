@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.client.common.log.report;
 
-import com.aizuda.snailjob.client.common.NettyClient;
+import com.aizuda.snailjob.client.common.RpcClient;
 import com.aizuda.snailjob.client.common.rpc.client.RequestBuilder;
 import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
 import com.aizuda.snailjob.common.core.window.Listener;
@@ -20,9 +20,10 @@ import java.util.List;
 @Slf4j
 public class ReportLogListener implements Listener<LogTaskDTO> {
 
-    private static final NettyClient CLIENT = RequestBuilder.<NettyClient, SnailJobRpcResult>newBuilder()
-            .client(NettyClient.class)
-            .callback(nettyResult -> SnailJobLog.LOCAL.info("Data report log successfully requestId:[{}]", nettyResult.getReqId())).build();
+    private static final RpcClient CLIENT = RequestBuilder.<RpcClient, SnailJobRpcResult>newBuilder()
+            .client(RpcClient.class)
+            .callback(rpcResult -> SnailJobLog.LOCAL.info("Data report log successfully requestId:[{}]",
+                    rpcResult.getReqId())).build();
 
     @Override
     public void handler(List<LogTaskDTO> list) {

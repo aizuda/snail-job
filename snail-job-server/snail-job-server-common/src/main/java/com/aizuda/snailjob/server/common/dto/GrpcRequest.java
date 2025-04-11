@@ -2,7 +2,7 @@ package com.aizuda.snailjob.server.common.dto;
 
 
 import com.aizuda.snailjob.common.core.grpc.auto.GrpcResult;
-import com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest;
+import com.aizuda.snailjob.common.core.grpc.auto.SnailJobGrpcRequest;
 import io.grpc.stub.StreamObserver;
 import lombok.Builder;
 import lombok.Data;
@@ -17,7 +17,7 @@ import lombok.Data;
 @Builder
 public class GrpcRequest {
 
-    private GrpcSnailJobRequest snailJobRequest;
+    private SnailJobGrpcRequest snailJobRequest;
 
     private StreamObserver<GrpcResult> streamObserver;
 

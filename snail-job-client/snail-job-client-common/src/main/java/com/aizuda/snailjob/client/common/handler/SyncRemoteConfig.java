@@ -1,7 +1,7 @@
 package com.aizuda.snailjob.client.common.handler;
 
 import com.aizuda.snailjob.client.common.Lifecycle;
-import com.aizuda.snailjob.client.common.NettyClient;
+import com.aizuda.snailjob.client.common.RpcClient;
 import com.aizuda.snailjob.client.common.cache.GroupVersionCache;
 import com.aizuda.snailjob.client.common.rpc.client.RequestBuilder;
 import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
@@ -22,22 +22,22 @@ import java.util.concurrent.TimeUnit;
  */
 @Component
 public class SyncRemoteConfig implements Lifecycle {
-    private static final NettyClient CLIENT;
+    private static final RpcClient CLIENT;
     private static final ScheduledExecutorService SCHEDULE_EXECUTOR = Executors.newSingleThreadScheduledExecutor(
             r -> new Thread(r, "sync-remote-config"));
 
     static {
-        CLIENT = RequestBuilder.<NettyClient, SnailJobRpcResult>newBuilder()
-                .client(NettyClient.class)
+        CLIENT = RequestBuilder.<RpcClient, SnailJobRpcResult>newBuilder()
+                .client(RpcClient.class)
                 .timeout(1000L)
-                .callback(nettyResult -> {
-                    if (Objects.isNull(nettyResult.getData())) {
+                .callback(rpcResult -> {
+                    if (Objects.isNull(rpcResult.getData())) {
                         SnailJobLog.LOCAL.debug("获取配置结果为null");
                         return;
                     }
 
                     GroupVersionCache.setConfig(
-                            JsonUtil.parseObject(nettyResult.getData().toString(), ConfigDTO.class));
+                            JsonUtil.parseObject(rpcResult.getData().toString(), ConfigDTO.class));
                 }).build();
     }
 

@@ -2,6 +2,7 @@ package com.aizuda.snailjob.client.common.rpc.client;
 
 import com.aizuda.snailjob.client.common.config.SnailJobProperties;
 import com.aizuda.snailjob.client.common.exception.SnailJobClientException;
+import com.aizuda.snailjob.client.common.rpc.client.grpc.GrpcClientInvokeHandler;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.enums.RpcTypeEnum;
 import com.aizuda.snailjob.common.core.model.Result;

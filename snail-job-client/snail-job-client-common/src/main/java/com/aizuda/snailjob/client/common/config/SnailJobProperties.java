@@ -104,7 +104,7 @@ public class SnailJobProperties {
         private String host = "127.0.0.1";
 
         /**
-         * 服务端netty的端口号
+         * 服务端 rpc 的端口号
          */
         private int port = 17888;
     }

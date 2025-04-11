@@ -1,4 +1,4 @@
-package com.aizuda.snailjob.server.common.rpc.server;
+package com.aizuda.snailjob.server.common.rpc.server.netty;
 
 import  org.apache.pekko.actor.ActorRef;
 import com.aizuda.snailjob.server.common.pekko.ActorGenerator;

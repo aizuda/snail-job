@@ -1,4 +1,4 @@
-package com.aizuda.snailjob.server.common.rpc.server;
+package com.aizuda.snailjob.server.common.rpc.server.netty;
 
 import com.aizuda.snailjob.common.core.enums.RpcTypeEnum;
 import com.aizuda.snailjob.common.log.SnailJobLog;

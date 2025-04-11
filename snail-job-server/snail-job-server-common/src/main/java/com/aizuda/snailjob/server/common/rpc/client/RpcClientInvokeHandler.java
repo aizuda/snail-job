@@ -21,6 +21,7 @@ import com.aizuda.snailjob.server.common.rpc.client.annotation.Body;
 import com.aizuda.snailjob.server.common.rpc.client.annotation.Header;
 import com.aizuda.snailjob.server.common.rpc.client.annotation.Mapping;
 import com.aizuda.snailjob.server.common.rpc.client.annotation.Param;
+import com.aizuda.snailjob.server.common.rpc.client.netty.NettyChannel;
 import com.github.rholder.retry.*;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.HttpHeaders;

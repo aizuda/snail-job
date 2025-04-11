@@ -5,13 +5,13 @@ import com.aizuda.snailjob.client.common.config.SnailJobProperties;
 import com.aizuda.snailjob.client.common.config.SnailJobProperties.RpcServerProperties;
 import com.aizuda.snailjob.client.common.config.SnailJobProperties.ThreadPoolConfig;
 import com.aizuda.snailjob.client.common.exception.SnailJobClientException;
-import com.aizuda.snailjob.client.common.rpc.client.GrpcChannel;
+import com.aizuda.snailjob.client.common.rpc.client.grpc.GrpcChannel;
 import com.aizuda.snailjob.client.common.rpc.supports.handler.SnailDispatcherRequestHandler;
-import com.aizuda.snailjob.client.common.rpc.supports.handler.UnaryRequestHandler;
+import com.aizuda.snailjob.client.common.rpc.supports.handler.grpc.UnaryRequestHandler;
 import com.aizuda.snailjob.common.core.constant.GrpcServerConstants;
 import com.aizuda.snailjob.common.core.enums.RpcTypeEnum;
 import com.aizuda.snailjob.common.core.grpc.auto.GrpcResult;
-import com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest;
+import com.aizuda.snailjob.common.core.grpc.auto.SnailJobGrpcRequest;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.grpc.CompressorRegistry;
@@ -110,13 +110,13 @@ public class SnailGrpcServer implements Lifecycle {
     public static ServerServiceDefinition createUnaryServiceDefinition(
         String serviceName,
         String methodName,
-        ServerCalls.UnaryMethod<GrpcSnailJobRequest, GrpcResult> unaryMethod) {
+        ServerCalls.UnaryMethod<SnailJobGrpcRequest, GrpcResult> unaryMethod) {
 
-        MethodDescriptor<GrpcSnailJobRequest, GrpcResult> methodDescriptor =
-            MethodDescriptor.<GrpcSnailJobRequest, GrpcResult>newBuilder()
+        MethodDescriptor<SnailJobGrpcRequest, GrpcResult> methodDescriptor =
+            MethodDescriptor.<SnailJobGrpcRequest, GrpcResult>newBuilder()
                 .setType(MethodDescriptor.MethodType.UNARY)
                 .setFullMethodName(MethodDescriptor.generateFullMethodName(serviceName, methodName))
-                .setRequestMarshaller(ProtoUtils.marshaller(GrpcSnailJobRequest.getDefaultInstance()))
+                .setRequestMarshaller(ProtoUtils.marshaller(SnailJobGrpcRequest.getDefaultInstance()))
                 .setResponseMarshaller(ProtoUtils.marshaller(GrpcResult.getDefaultInstance()))
                 .build();
 

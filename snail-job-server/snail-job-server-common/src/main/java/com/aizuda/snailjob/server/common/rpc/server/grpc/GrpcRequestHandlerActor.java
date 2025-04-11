@@ -1,4 +1,4 @@
-package com.aizuda.snailjob.server.common.rpc.server;
+package com.aizuda.snailjob.server.common.rpc.server.grpc;
 
 import  org.apache.pekko.actor.AbstractActor;
 import cn.hutool.core.net.url.UrlBuilder;
@@ -7,7 +7,7 @@ import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.enums.HeadersEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.grpc.auto.GrpcResult;
-import com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest;
+import com.aizuda.snailjob.common.core.grpc.auto.SnailJobGrpcRequest;
 import com.aizuda.snailjob.common.core.grpc.auto.Metadata;
 import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
 import com.aizuda.snailjob.common.core.model.SnailJobRequest;
@@ -45,8 +45,8 @@ public class GrpcRequestHandlerActor extends AbstractActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder().match(GrpcRequest.class, grpcRequest -> {
-            GrpcSnailJobRequest grpcSnailJobRequest = grpcRequest.getSnailJobRequest();
-            Metadata metadata = grpcSnailJobRequest.getMetadata();
+            SnailJobGrpcRequest snailJobGrpcRequest = grpcRequest.getSnailJobRequest();
+            Metadata metadata = snailJobGrpcRequest.getMetadata();
             final String uri = metadata.getUri();
             if (StrUtil.isBlank(uri)) {
                 SnailJobLog.LOCAL.error("uri can not be null");
@@ -57,19 +57,19 @@ public class GrpcRequestHandlerActor extends AbstractActor {
             SnailJobRpcResult snailJobRpcResult = null;
             try {
                 SnailJobRequest request = new SnailJobRequest();
-                String body = grpcSnailJobRequest.getBody();
+                String body = snailJobGrpcRequest.getBody();
                 Object[] objects = JsonUtil.parseObject(body, Object[].class);
                 request.setArgs(objects);
-                request.setReqId(grpcSnailJobRequest.getReqId());
+                request.setReqId(snailJobGrpcRequest.getReqId());
                 snailJobRpcResult = doProcess(uri, JsonUtil.toJsonString(request), headersMap);
                 if (Objects.isNull(snailJobRpcResult)) {
                     snailJobRpcResult = new SnailJobRpcResult(StatusEnum.NO.getStatus(), "服务端异常", null,
-                        grpcSnailJobRequest.getReqId());
+                        snailJobGrpcRequest.getReqId());
                 }
             } catch (Exception e) {
-                SnailJobLog.LOCAL.error("http request error. [{}]", grpcSnailJobRequest, e);
+                SnailJobLog.LOCAL.error("http request error. [{}]", snailJobGrpcRequest, e);
                 snailJobRpcResult = new SnailJobRpcResult(StatusEnum.NO.getStatus(), e.getMessage(), null,
-                    grpcSnailJobRequest.getReqId());
+                    snailJobGrpcRequest.getReqId());
             } finally {
                 StreamObserver<GrpcResult> streamObserver = grpcRequest.getStreamObserver();
                 GrpcResult grpcResult = GrpcResult.newBuilder()

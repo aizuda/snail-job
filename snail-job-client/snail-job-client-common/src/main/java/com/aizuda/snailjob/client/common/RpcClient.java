@@ -12,13 +12,13 @@ import java.util.List;
 
 
 /**
- * netty 客户端请求类
+ * rpc 客户端请求类
  *
  * @author: opensnail
  * @date : 2023-05-11 21:28
  * @since 1.3.0
  */
-public interface NettyClient {
+public interface RpcClient {
 
     @Mapping(method = RequestMethod.POST, path = HTTP_PATH.BATCH_REPORT)
     SnailJobRpcResult reportRetryInfo(List<RetryTaskDTO> list);

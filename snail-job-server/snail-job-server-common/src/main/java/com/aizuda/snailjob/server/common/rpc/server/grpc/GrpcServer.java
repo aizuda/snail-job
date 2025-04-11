@@ -1,9 +1,9 @@
-package com.aizuda.snailjob.server.common.rpc.server;
+package com.aizuda.snailjob.server.common.rpc.server.grpc;
 
 import com.aizuda.snailjob.common.core.constant.GrpcServerConstants;
 import com.aizuda.snailjob.common.core.enums.RpcTypeEnum;
 import com.aizuda.snailjob.common.core.grpc.auto.GrpcResult;
-import com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest;
+import com.aizuda.snailjob.common.core.grpc.auto.SnailJobGrpcRequest;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.Lifecycle;
 import com.aizuda.snailjob.server.common.config.SystemProperties;
@@ -114,13 +114,13 @@ public class GrpcServer implements Lifecycle {
     public static ServerServiceDefinition createUnaryServiceDefinition(
         String serviceName,
         String methodName,
-        ServerCalls.UnaryMethod<GrpcSnailJobRequest, GrpcResult> unaryMethod) {
+        ServerCalls.UnaryMethod<SnailJobGrpcRequest, GrpcResult> unaryMethod) {
 
-        MethodDescriptor<GrpcSnailJobRequest, GrpcResult> methodDescriptor =
-            MethodDescriptor.<GrpcSnailJobRequest, GrpcResult>newBuilder()
+        MethodDescriptor<SnailJobGrpcRequest, GrpcResult> methodDescriptor =
+            MethodDescriptor.<SnailJobGrpcRequest, GrpcResult>newBuilder()
                 .setType(MethodDescriptor.MethodType.UNARY)
                 .setFullMethodName(MethodDescriptor.generateFullMethodName(serviceName, methodName))
-                .setRequestMarshaller(ProtoUtils.marshaller(GrpcSnailJobRequest.getDefaultInstance()))
+                .setRequestMarshaller(ProtoUtils.marshaller(SnailJobGrpcRequest.getDefaultInstance()))
                 .setResponseMarshaller(ProtoUtils.marshaller(GrpcResult.getDefaultInstance()))
                 .build();
 

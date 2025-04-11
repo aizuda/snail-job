@@ -1,17 +1,16 @@
-package com.aizuda.snailjob.client.common.rpc.supports.handler;
+package com.aizuda.snailjob.client.common.rpc.supports.handler.grpc;
 
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.client.common.config.SnailJobProperties.ThreadPoolConfig;
+import com.aizuda.snailjob.client.common.rpc.supports.handler.SnailDispatcherRequestHandler;
 import com.aizuda.snailjob.client.common.rpc.supports.http.HttpRequest;
 import com.aizuda.snailjob.client.common.rpc.supports.http.HttpResponse;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.grpc.auto.GrpcResult;
-import com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest;
+import com.aizuda.snailjob.common.core.grpc.auto.SnailJobGrpcRequest;
 import com.aizuda.snailjob.common.core.grpc.auto.Metadata;
 import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
-import com.google.protobuf.Any;
-import com.google.protobuf.UnsafeByteOperations;
 import io.grpc.stub.ServerCalls;
 import io.grpc.stub.StreamObserver;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
@@ -24,7 +23,7 @@ import java.util.concurrent.ThreadPoolExecutor;
  * @author: opensnail
  * @date : 2024-08-22
  */
-public class UnaryRequestHandler implements ServerCalls.UnaryMethod<GrpcSnailJobRequest, GrpcResult> {
+public class UnaryRequestHandler implements ServerCalls.UnaryMethod<SnailJobGrpcRequest, GrpcResult> {
 
 
     private final ThreadPoolExecutor dispatcherThreadPool;
@@ -41,7 +40,7 @@ public class UnaryRequestHandler implements ServerCalls.UnaryMethod<GrpcSnailJob
     }
 
     @Override
-    public void invoke(final GrpcSnailJobRequest snailJobRequest, final StreamObserver<GrpcResult> streamObserver) {
+    public void invoke(final SnailJobGrpcRequest snailJobRequest, final StreamObserver<GrpcResult> streamObserver) {
 
         Metadata metadata = snailJobRequest.getMetadata();
 

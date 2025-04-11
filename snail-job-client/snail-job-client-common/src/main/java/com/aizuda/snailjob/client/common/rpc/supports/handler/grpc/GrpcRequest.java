@@ -1,11 +1,9 @@
-package com.aizuda.snailjob.client.common.rpc.supports.handler;
+package com.aizuda.snailjob.client.common.rpc.supports.handler.grpc;
 
 
 import com.aizuda.snailjob.client.common.rpc.supports.http.HttpRequest;
 import com.aizuda.snailjob.client.common.rpc.supports.http.HttpResponse;
-import com.aizuda.snailjob.common.core.grpc.auto.GrpcResult;
-import com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest;
-import io.grpc.stub.StreamObserver;
+import com.aizuda.snailjob.common.core.grpc.auto.SnailJobGrpcRequest;
 import lombok.Builder;
 import lombok.Data;
 
@@ -19,7 +17,7 @@ import lombok.Data;
 @Builder
 public class GrpcRequest {
 
-    private GrpcSnailJobRequest snailJobRequest;
+    private SnailJobGrpcRequest snailJobRequest;
     private final HttpResponse httpResponse;
     private final HttpRequest httpRequest;
 

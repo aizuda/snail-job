@@ -6,16 +6,16 @@ package com.aizuda.snailjob.common.core.grpc.auto;
 /**
  * Protobuf type {@code GrpcSnailJobRequest}
  */
-public final class GrpcSnailJobRequest extends
+public final class SnailJobGrpcRequest extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:GrpcSnailJobRequest)
     GrpcSnailJobRequestOrBuilder {
 private static final long serialVersionUID = 0L;
   // Use GrpcSnailJobRequest.newBuilder() to construct.
-  private GrpcSnailJobRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+  private SnailJobGrpcRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
     super(builder);
   }
-  private GrpcSnailJobRequest() {
+  private SnailJobGrpcRequest() {
     body_ = "";
   }
 
@@ -23,7 +23,7 @@ private static final long serialVersionUID = 0L;
   @SuppressWarnings({"unused"})
   protected java.lang.Object newInstance(
       UnusedPrivateParameter unused) {
-    return new GrpcSnailJobRequest();
+    return new SnailJobGrpcRequest();
   }
 
   public static final com.google.protobuf.Descriptors.Descriptor
@@ -36,7 +36,7 @@ private static final long serialVersionUID = 0L;
       internalGetFieldAccessorTable() {
     return com.aizuda.snailjob.common.core.grpc.auto.SnailJobGrpcService.internal_static_GrpcSnailJobRequest_fieldAccessorTable
         .ensureFieldAccessorsInitialized(
-            com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest.class, com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest.Builder.class);
+            SnailJobGrpcRequest.class, SnailJobGrpcRequest.Builder.class);
   }
 
   private int bitField0_;
@@ -169,10 +169,10 @@ private static final long serialVersionUID = 0L;
     if (obj == this) {
      return true;
     }
-    if (!(obj instanceof com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest)) {
+    if (!(obj instanceof SnailJobGrpcRequest)) {
       return super.equals(obj);
     }
-    com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest other = (com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest) obj;
+    SnailJobGrpcRequest other = (SnailJobGrpcRequest) obj;
 
     if (getReqId()
         != other.getReqId()) return false;
@@ -208,44 +208,44 @@ private static final long serialVersionUID = 0L;
     return hash;
   }
 
-  public static com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest parseFrom(
+  public static SnailJobGrpcRequest parseFrom(
       java.nio.ByteBuffer data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest parseFrom(
+  public static SnailJobGrpcRequest parseFrom(
       java.nio.ByteBuffer data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest parseFrom(
+  public static SnailJobGrpcRequest parseFrom(
       com.google.protobuf.ByteString data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest parseFrom(
+  public static SnailJobGrpcRequest parseFrom(
       com.google.protobuf.ByteString data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest parseFrom(byte[] data)
+  public static SnailJobGrpcRequest parseFrom(byte[] data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest parseFrom(
+  public static SnailJobGrpcRequest parseFrom(
       byte[] data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest parseFrom(java.io.InputStream input)
+  public static SnailJobGrpcRequest parseFrom(java.io.InputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input);
   }
-  public static com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest parseFrom(
+  public static SnailJobGrpcRequest parseFrom(
       java.io.InputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
@@ -253,26 +253,26 @@ private static final long serialVersionUID = 0L;
         .parseWithIOException(PARSER, input, extensionRegistry);
   }
 
-  public static com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest parseDelimitedFrom(java.io.InputStream input)
+  public static SnailJobGrpcRequest parseDelimitedFrom(java.io.InputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseDelimitedWithIOException(PARSER, input);
   }
 
-  public static com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest parseDelimitedFrom(
+  public static SnailJobGrpcRequest parseDelimitedFrom(
       java.io.InputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
   }
-  public static com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest parseFrom(
+  public static SnailJobGrpcRequest parseFrom(
       com.google.protobuf.CodedInputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input);
   }
-  public static com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest parseFrom(
+  public static SnailJobGrpcRequest parseFrom(
       com.google.protobuf.CodedInputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
@@ -285,7 +285,7 @@ private static final long serialVersionUID = 0L;
   public static Builder newBuilder() {
     return DEFAULT_INSTANCE.toBuilder();
   }
-  public static Builder newBuilder(com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest prototype) {
+  public static Builder newBuilder(SnailJobGrpcRequest prototype) {
     return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
   }
   @java.lang.Override
@@ -317,7 +317,7 @@ private static final long serialVersionUID = 0L;
         internalGetFieldAccessorTable() {
       return com.aizuda.snailjob.common.core.grpc.auto.SnailJobGrpcService.internal_static_GrpcSnailJobRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest.class, com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest.Builder.class);
+              SnailJobGrpcRequest.class, SnailJobGrpcRequest.Builder.class);
     }
 
     // Construct using com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest.newBuilder()
@@ -357,13 +357,13 @@ private static final long serialVersionUID = 0L;
     }
 
     @java.lang.Override
-    public com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest getDefaultInstanceForType() {
-      return com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest.getDefaultInstance();
+    public SnailJobGrpcRequest getDefaultInstanceForType() {
+      return SnailJobGrpcRequest.getDefaultInstance();
     }
 
     @java.lang.Override
-    public com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest build() {
-      com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest result = buildPartial();
+    public SnailJobGrpcRequest build() {
+      SnailJobGrpcRequest result = buildPartial();
       if (!result.isInitialized()) {
         throw newUninitializedMessageException(result);
       }
@@ -371,14 +371,14 @@ private static final long serialVersionUID = 0L;
     }
 
     @java.lang.Override
-    public com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest buildPartial() {
-      com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest result = new com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest(this);
+    public SnailJobGrpcRequest buildPartial() {
+      SnailJobGrpcRequest result = new SnailJobGrpcRequest(this);
       if (bitField0_ != 0) { buildPartial0(result); }
       onBuilt();
       return result;
     }
 
-    private void buildPartial0(com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest result) {
+    private void buildPartial0(SnailJobGrpcRequest result) {
       int from_bitField0_ = bitField0_;
       if (((from_bitField0_ & 0x00000001) != 0)) {
         result.reqId_ = reqId_;
@@ -430,16 +430,16 @@ private static final long serialVersionUID = 0L;
     }
     @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
-      if (other instanceof com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest) {
-        return mergeFrom((com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest)other);
+      if (other instanceof SnailJobGrpcRequest) {
+        return mergeFrom((SnailJobGrpcRequest)other);
       } else {
         super.mergeFrom(other);
         return this;
       }
     }
 
-    public Builder mergeFrom(com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest other) {
-      if (other == com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest.getDefaultInstance()) return this;
+    public Builder mergeFrom(SnailJobGrpcRequest other) {
+      if (other == SnailJobGrpcRequest.getDefaultInstance()) return this;
       if (other.getReqId() != 0L) {
         setReqId(other.getReqId());
       }
@@ -752,19 +752,19 @@ private static final long serialVersionUID = 0L;
   }
 
   // @@protoc_insertion_point(class_scope:GrpcSnailJobRequest)
-  private static final com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest DEFAULT_INSTANCE;
+  private static final SnailJobGrpcRequest DEFAULT_INSTANCE;
   static {
-    DEFAULT_INSTANCE = new com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest();
+    DEFAULT_INSTANCE = new SnailJobGrpcRequest();
   }
 
-  public static com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest getDefaultInstance() {
+  public static SnailJobGrpcRequest getDefaultInstance() {
     return DEFAULT_INSTANCE;
   }
 
-  private static final com.google.protobuf.Parser<GrpcSnailJobRequest>
-      PARSER = new com.google.protobuf.AbstractParser<GrpcSnailJobRequest>() {
+  private static final com.google.protobuf.Parser<SnailJobGrpcRequest>
+      PARSER = new com.google.protobuf.AbstractParser<SnailJobGrpcRequest>() {
     @java.lang.Override
-    public GrpcSnailJobRequest parsePartialFrom(
+    public SnailJobGrpcRequest parsePartialFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -783,17 +783,17 @@ private static final long serialVersionUID = 0L;
     }
   };
 
-  public static com.google.protobuf.Parser<GrpcSnailJobRequest> parser() {
+  public static com.google.protobuf.Parser<SnailJobGrpcRequest> parser() {
     return PARSER;
   }
 
   @java.lang.Override
-  public com.google.protobuf.Parser<GrpcSnailJobRequest> getParserForType() {
+  public com.google.protobuf.Parser<SnailJobGrpcRequest> getParserForType() {
     return PARSER;
   }
 
   @java.lang.Override
-  public com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest getDefaultInstanceForType() {
+  public SnailJobGrpcRequest getDefaultInstanceForType() {
     return DEFAULT_INSTANCE;
   }
 

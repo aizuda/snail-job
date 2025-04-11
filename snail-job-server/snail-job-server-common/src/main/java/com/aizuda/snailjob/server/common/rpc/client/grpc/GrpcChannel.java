@@ -1,10 +1,10 @@
-package com.aizuda.snailjob.server.common.rpc.client;
+package com.aizuda.snailjob.server.common.rpc.client.grpc;
 
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.enums.HeadersEnum;
 import com.aizuda.snailjob.common.core.grpc.auto.GrpcResult;
-import com.aizuda.snailjob.common.core.grpc.auto.GrpcSnailJobRequest;
+import com.aizuda.snailjob.common.core.grpc.auto.SnailJobGrpcRequest;
 import com.aizuda.snailjob.common.core.grpc.auto.Metadata;
 import com.aizuda.snailjob.common.core.util.NetUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
@@ -89,18 +89,18 @@ public class GrpcChannel {
             .setUri(url)
             .putAllHeaders(headersMap)
             .build();
-        GrpcSnailJobRequest snailJobRequest = GrpcSnailJobRequest
+        SnailJobGrpcRequest snailJobRequest = SnailJobGrpcRequest
             .newBuilder()
             .setMetadata(metadata)
             .setReqId(reqId)
             .setBody(body)
             .build();
 
-        MethodDescriptor<GrpcSnailJobRequest, GrpcResult> methodDescriptor =
-            MethodDescriptor.<GrpcSnailJobRequest, GrpcResult>newBuilder()
+        MethodDescriptor<SnailJobGrpcRequest, GrpcResult> methodDescriptor =
+            MethodDescriptor.<SnailJobGrpcRequest, GrpcResult>newBuilder()
                 .setType(MethodDescriptor.MethodType.UNARY)
                 .setFullMethodName(MethodDescriptor.generateFullMethodName("UnaryRequest", "unaryRequest"))
-                .setRequestMarshaller(ProtoUtils.marshaller(GrpcSnailJobRequest.getDefaultInstance()))
+                .setRequestMarshaller(ProtoUtils.marshaller(SnailJobGrpcRequest.getDefaultInstance()))
                 .setResponseMarshaller(ProtoUtils.marshaller(GrpcResult.getDefaultInstance()))
                 .build();
 

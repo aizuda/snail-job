@@ -1,4 +1,4 @@
-package com.aizuda.snailjob.client.common.rpc.client;
+package com.aizuda.snailjob.client.common.rpc.client.netty;
 
 import com.aizuda.snailjob.client.common.Lifecycle;
 import com.aizuda.snailjob.client.common.config.SnailJobProperties;

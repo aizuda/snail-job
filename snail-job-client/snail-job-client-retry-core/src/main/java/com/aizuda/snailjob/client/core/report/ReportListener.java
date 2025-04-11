@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.client.core.report;
 
-import com.aizuda.snailjob.client.common.NettyClient;
+import com.aizuda.snailjob.client.common.RpcClient;
 import com.aizuda.snailjob.client.common.cache.GroupVersionCache;
 import com.aizuda.snailjob.client.common.config.SnailJobProperties;
 import com.aizuda.snailjob.client.common.rpc.client.RequestBuilder;
@@ -52,8 +52,8 @@ public class ReportListener implements Listener<RetryTaskDTO> {
                     "> 时间:{}  \n" +
                     "> 异常:{}  \n";
 
-    private static final NettyClient CLIENT = RequestBuilder.<NettyClient, SnailJobRpcResult>newBuilder()
-            .client(NettyClient.class)
+    private static final RpcClient CLIENT = RequestBuilder.<RpcClient, SnailJobRpcResult>newBuilder()
+            .client(RpcClient.class)
             .callback(nettyResult -> SnailJobLog.LOCAL.info("Data report successfully requestId:[{}]", nettyResult.getReqId())).build();
 
     @Override

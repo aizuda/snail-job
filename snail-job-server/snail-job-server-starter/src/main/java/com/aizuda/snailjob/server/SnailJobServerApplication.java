@@ -14,8 +14,8 @@
  */
 package com.aizuda.snailjob.server;
 
-import com.aizuda.snailjob.server.common.rpc.server.GrpcServer;
-import com.aizuda.snailjob.server.common.rpc.server.NettyHttpServer;
+import com.aizuda.snailjob.server.common.rpc.server.grpc.GrpcServer;
+import com.aizuda.snailjob.server.common.rpc.server.netty.NettyHttpServer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;

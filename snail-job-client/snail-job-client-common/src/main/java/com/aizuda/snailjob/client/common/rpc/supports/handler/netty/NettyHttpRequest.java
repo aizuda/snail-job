@@ -1,4 +1,4 @@
-package com.aizuda.snailjob.client.common.rpc.supports.handler;
+package com.aizuda.snailjob.client.common.rpc.supports.handler.netty;
 
 import com.aizuda.snailjob.client.common.rpc.supports.http.HttpRequest;
 import com.aizuda.snailjob.client.common.rpc.supports.http.HttpResponse;
@@ -9,7 +9,7 @@ import lombok.Builder;
 import lombok.Data;
 
 /**
- * netty客户端请求模型
+ * rpc 客户端请求模型
  *
  * @author: opensnail
  * @date : 2023-07-24 09:32

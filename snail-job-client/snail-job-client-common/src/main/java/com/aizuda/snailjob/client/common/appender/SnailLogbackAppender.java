@@ -22,7 +22,7 @@ import ch.qos.logback.core.CoreConstants;
 import ch.qos.logback.core.UnsynchronizedAppenderBase;
 import com.aizuda.snailjob.client.common.log.report.LogReportFactory;
 import com.aizuda.snailjob.client.common.log.support.SnailJobLogManager;
-import com.aizuda.snailjob.client.common.rpc.client.NettyChannel;
+import com.aizuda.snailjob.client.common.rpc.client.netty.NettyChannel;
 import com.aizuda.snailjob.common.log.constant.LogFieldConstants;
 import com.aizuda.snailjob.common.log.dto.LogContentDTO;
 import org.slf4j.MDC;

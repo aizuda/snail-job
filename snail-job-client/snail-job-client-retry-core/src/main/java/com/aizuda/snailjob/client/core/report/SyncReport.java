@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.client.core.report;
 
-import com.aizuda.snailjob.client.common.NettyClient;
+import com.aizuda.snailjob.client.common.RpcClient;
 import com.aizuda.snailjob.client.common.cache.GroupVersionCache;
 import com.aizuda.snailjob.client.common.config.SnailJobProperties;
 import com.aizuda.snailjob.client.common.rpc.client.RequestBuilder;
@@ -73,8 +73,8 @@ public class SyncReport extends AbstractReport {
 
         RetryTaskDTO retryTaskDTO = buildRetryTaskDTO(scene, targetClassName, args);
 
-        NettyClient client = RequestBuilder.<NettyClient, SnailJobRpcResult>newBuilder()
-                .client(NettyClient.class)
+        RpcClient client = RequestBuilder.<RpcClient, SnailJobRpcResult>newBuilder()
+                .client(RpcClient.class)
                 .async(Boolean.FALSE)
                 .timeout(timeout)
                 .unit(unit)

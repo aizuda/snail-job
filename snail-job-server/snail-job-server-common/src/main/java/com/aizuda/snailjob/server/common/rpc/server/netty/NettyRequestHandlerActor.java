@@ -1,4 +1,4 @@
-package com.aizuda.snailjob.server.common.rpc.server;
+package com.aizuda.snailjob.server.common.rpc.server.netty;
 
 import  org.apache.pekko.actor.AbstractActor;
 import cn.hutool.core.net.url.UrlBuilder;
@@ -36,7 +36,7 @@ import java.util.Collection;
 @Component(ActorGenerator.REQUEST_HANDLER_ACTOR)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Slf4j
-public class RequestHandlerActor extends AbstractActor {
+public class NettyRequestHandlerActor extends AbstractActor {
 
     @Override
     public Receive createReceive() {

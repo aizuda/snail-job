@@ -1,4 +1,4 @@
-package com.aizuda.snailjob.server.common.rpc.server;
+package com.aizuda.snailjob.server.common.rpc.server.grpc;
 
 import io.grpc.Context;
 import io.grpc.Contexts;
