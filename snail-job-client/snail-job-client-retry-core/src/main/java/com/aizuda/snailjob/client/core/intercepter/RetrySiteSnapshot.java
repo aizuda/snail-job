@@ -50,19 +50,6 @@ public class RetrySiteSnapshot {
      * 进入方法入口时间标记
      */
     private static final RetrySiteSnapshotContext<Long> ENTRY_METHOD_TIME = SnailRetrySpiLoader.loadRetrySiteSnapshotContext();
-    private static final RetrySiteSnapshotContext<Integer> ATTEMPT_NUMBER = SnailRetrySpiLoader.loadRetrySiteSnapshotContext();
-
-    public static Integer getAttemptNumber() {
-        return ATTEMPT_NUMBER.get();
-    }
-
-    public static void setAttemptNumber(Integer attemptNumber) {
-        ATTEMPT_NUMBER.set(attemptNumber);
-    }
-
-    public static void removeAttemptNumber() {
-        ATTEMPT_NUMBER.remove();
-    }
 
     public static Integer getStage() {
         return RETRY_STAGE.get();
@@ -214,7 +201,6 @@ public class RetrySiteSnapshot {
 
         removeStatus();
         removeStage();
-        removeAttemptNumber();
         removeEntryMethodTime();
         removeRetryHeader();
         removeRetryStatusCode();

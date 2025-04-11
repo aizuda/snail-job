@@ -86,7 +86,7 @@ public class RemoteRetryStrategies extends AbstractRetryStrategies {
 
     @Override
     protected RetryExecutorParameter<WaitStrategy, StopStrategy> getRetryExecutorParameter(RetryerInfo retryerInfo) {
-        return new RetryExecutorParameter<WaitStrategy, StopStrategy>() {
+        return new RetryExecutorParameter<>() {
 
             @Override
             public WaitStrategy backOff() {
@@ -100,20 +100,7 @@ public class RemoteRetryStrategies extends AbstractRetryStrategies {
 
             @Override
             public List<RetryListener> getRetryListeners() {
-                return Collections.singletonList(new RetryListener() {
-                    @Override
-                    public <V> void onRetry(Attempt<V> attempt) {
-                        Integer attemptNumber = RetrySiteSnapshot.getAttemptNumber();
-                        if (attempt.hasResult()) {
-                            SnailJobLog.LOCAL.info("snail-job 远程重试成功，第[{}]次调度", attemptNumber);
-                        }
-
-                        if (attempt.hasException()) {
-                            SnailJobLog.LOCAL.error("snail-job 远程重试失败，第[{}]次调度 ", attemptNumber, attempt.getExceptionCause());
-                        }
-
-                    }
-                });
+                return Collections.emptyList();
             }
         };
     }
