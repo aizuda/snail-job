@@ -1,4 +1,2 @@
 com.aizuda.snailjob.common.log.dialect.slf4j.Slf4jLogFactory
 com.aizuda.snailjob.common.log.dialect.log4j2.Log4j2LogFactory
-com.aizuda.snailjob.common.log.dialect.log4j.Log4jLogFactory
-
