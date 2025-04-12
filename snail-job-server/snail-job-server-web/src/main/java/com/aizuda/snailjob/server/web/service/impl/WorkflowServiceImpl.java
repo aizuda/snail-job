@@ -289,7 +289,7 @@ public class WorkflowServiceImpl implements WorkflowService {
                 new PageDTO<>(1, 100),
                 new LambdaQueryWrapper<Workflow>()
                         .select(Workflow::getId, Workflow::getWorkflowName)
-                        .likeRight(StrUtil.isNotBlank(keywords), Workflow::getWorkflowName, StrUtil.trim(keywords))
+                        .like(StrUtil.isNotBlank(keywords), Workflow::getWorkflowName, StrUtil.trim(keywords))
                         .eq(Objects.nonNull(workflowId), Workflow::getId, workflowId)
                         .eq(StrUtil.isNotBlank(groupName), Workflow::getGroupName, groupName)
                         .eq(Workflow::getDeleted, StatusEnum.NO.getStatus())

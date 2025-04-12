@@ -15,7 +15,6 @@ import java.util.List;
 @Data
 public class JobBatchQueryVO extends BaseQueryVO {
     private Long jobId;
-    private String jobName;
     private List<Integer> taskBatchStatus;
     private String groupName;
 }

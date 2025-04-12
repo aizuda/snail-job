@@ -13,7 +13,6 @@ import lombok.EqualsAndHashCode;
 @Data
 public class WorkflowBatchQueryVO extends BaseQueryVO {
     private String groupName;
-    private String workflowName;
     private Long workflowId;
     private Integer taskBatchStatus;
 }
