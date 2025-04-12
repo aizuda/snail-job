@@ -207,7 +207,7 @@ public class WaitStrategies {
         }
 
         public RandomWaitStrategy() {
-            this.minimum = 0;
+            this.minimum = 10;
         }
 
         @Override
