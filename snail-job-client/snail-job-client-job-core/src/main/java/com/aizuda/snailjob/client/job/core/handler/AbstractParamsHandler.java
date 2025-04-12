@@ -163,7 +163,7 @@ public abstract class AbstractParamsHandler<H, R> extends AbstractJobRequestHand
      */
     public H setTriggerInterval(Integer triggerInterval) {
         Assert.isTrue(reqDTO.getTriggerType() == SCHEDULED_TIME.getType(),
-                () -> new SnailJobClientException("此方法只限制固定时间使用"));
+                () -> new SnailJobClientException("This method is only limited to fixed time usage"));
         setTriggerInterval(String.valueOf(triggerInterval));
         return r;
     }
@@ -179,7 +179,7 @@ public abstract class AbstractParamsHandler<H, R> extends AbstractJobRequestHand
     public H setTriggerInterval(String triggerInterval) {
         // 若是工作流则没有调度时间
         Assert.isFalse(reqDTO.getTriggerType() == WORK_FLOW.getType(),
-                () -> new SnailJobClientException("工作流无需配置"));
+                () -> new SnailJobClientException("No need to configure workflow"));
         reqDTO.setTriggerInterval(triggerInterval);
         return r;
     }

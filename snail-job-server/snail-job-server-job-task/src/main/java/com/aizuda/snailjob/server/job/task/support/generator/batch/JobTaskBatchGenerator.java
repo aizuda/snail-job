@@ -75,7 +75,7 @@ public class JobTaskBatchGenerator {
         }
 
         try {
-            Assert.isTrue(1 == jobTaskBatchMapper.insert(jobTaskBatch), () -> new SnailJobServerException("新增调度任务失败.jobId:[{}]", context.getJobId()));
+            Assert.isTrue(1 == jobTaskBatchMapper.insert(jobTaskBatch), () -> new SnailJobServerException("Adding new scheduling task failed. Job ID:[{}]", context.getJobId()));
         } catch (DuplicateKeyException ignored) {
             // 忽略重复的DAG任务
             return jobTaskBatchMapper.selectOne(new LambdaQueryWrapper<JobTaskBatch>()

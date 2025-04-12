@@ -64,7 +64,7 @@ public class GrpcClientInvokeHandler<R extends Result<Object>> implements Invoca
         long reqId = newId();
         ListenableFuture<GrpcResult> future = GrpcChannel.sendOfUnary(annotation.path(), JsonUtil.toJsonString(args),
             reqId);
-        SnailJobLog.LOCAL.debug("request complete requestId:[{}] 耗时:[{}ms]", sw.getTotalTimeMillis(), reqId);
+        SnailJobLog.LOCAL.debug("Request complete requestId:[{}] took [{}ms]", sw.getTotalTimeMillis(), reqId);
         if (future == null) {
             return (R) new SnailJobRpcResult(StatusEnum.NO.getStatus(), "future is nulll", null, reqId);
         }

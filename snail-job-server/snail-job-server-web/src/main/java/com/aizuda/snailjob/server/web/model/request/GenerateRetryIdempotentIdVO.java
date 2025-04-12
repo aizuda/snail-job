@@ -14,24 +14,24 @@ public class GenerateRetryIdempotentIdVO {
     /**
      * 组名称
      */
-    @NotBlank(message = "组名称不能为空")
+    @NotBlank(message = "Group name cannot be null")
     private String groupName;
 
     /**
      * 场景名称
      */
-    @NotBlank(message = "场景名称不能为空")
+    @NotBlank(message = "Scene name cannot be null")
     private String sceneName;
 
     /**
      * 执行参数
      */
-    @NotBlank(message = "参数不能为空")
+    @NotBlank(message = "Parameters cannot be null")
     private String argsStr;
 
     /**
      * 执行器名称
      */
-    @NotBlank(message = "执行器不能为空")
+    @NotBlank(message = "Executor cannot be null")
     private String executorName;
 }

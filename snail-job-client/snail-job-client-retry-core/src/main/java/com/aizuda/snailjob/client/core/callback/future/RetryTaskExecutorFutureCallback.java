@@ -55,7 +55,7 @@ public class RetryTaskExecutorFutureCallback implements FutureCallback<DispatchR
             }
             CLIENT.dispatchResult(request);
         } catch (Exception e) {
-            SnailJobLog.REMOTE.error("执行结果上报异常.[{}]", retryContext.getRetryTaskId(), e);
+            SnailJobLog.REMOTE.error("Execution result reporting exception.[{}]", retryContext.getRetryTaskId(), e);
         }
 
     }
@@ -64,7 +64,7 @@ public class RetryTaskExecutorFutureCallback implements FutureCallback<DispatchR
     @Override
     public void onFailure(Throwable t) {
         if (t instanceof CancellationException) {
-            SnailJobLog.LOCAL.debug("任务已经被取消，不做状态回传");
+            SnailJobLog.LOCAL.debug("The task has been canceled, no status feedback will be made");
             return;
         }
 
@@ -74,7 +74,7 @@ public class RetryTaskExecutorFutureCallback implements FutureCallback<DispatchR
             request.setTaskStatus(RetryTaskStatusEnum.FAIL.getStatus());
             CLIENT.dispatchResult(request);
         } catch (Exception e) {
-            SnailJobLog.REMOTE.error("执行结果上报异常.[{}]", retryContext.getRetryTaskId(), e);
+            SnailJobLog.REMOTE.error("Execution result reporting exception.[{}]", retryContext.getRetryTaskId(), e);
         }
 
     }

@@ -13,10 +13,10 @@ import lombok.Data;
 @Data
 public class GroupStatusUpdateRequestVO {
 
-    @NotBlank(message = "组名称不能为空")
-    @Pattern(regexp = "^[A-Za-z0-9_-]{1,64}$", message = "仅支持长度为1~64字符且类型为数字、字母和下划线")
+    @NotBlank(message = "Group name cannot be null")
+    @Pattern(regexp = "^[A-Za-z0-9_-]{1,64}$", message = "Only supports 1~64 characters, including numbers, letters, and underscores")
     private String groupName;
 
-    @NotNull(message = "组状态不能为空")
+    @NotNull(message = "Group status cannot be null")
     private Integer groupStatus;
 }

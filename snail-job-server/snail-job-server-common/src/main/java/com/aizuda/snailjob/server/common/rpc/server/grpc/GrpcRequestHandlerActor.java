@@ -63,7 +63,7 @@ public class GrpcRequestHandlerActor extends AbstractActor {
                 request.setReqId(snailJobGrpcRequest.getReqId());
                 snailJobRpcResult = doProcess(uri, JsonUtil.toJsonString(request), headersMap);
                 if (Objects.isNull(snailJobRpcResult)) {
-                    snailJobRpcResult = new SnailJobRpcResult(StatusEnum.NO.getStatus(), "服务端异常", null,
+                    snailJobRpcResult = new SnailJobRpcResult(StatusEnum.NO.getStatus(), "Server-side exception", null,
                         snailJobGrpcRequest.getReqId());
                 }
             } catch (Exception e) {

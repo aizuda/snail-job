@@ -43,7 +43,7 @@ public class ClientRegister implements Lifecycle {
             try {
                 CLIENT.beat(BEAT.PING);
             } catch (Exception e) {
-                SnailJobLog.LOCAL.error("发送心跳失败", e);
+                SnailJobLog.LOCAL.error("Heartbeat sending failed", e);
             }
         }, 0, REGISTER_TIME, TimeUnit.SECONDS);
     }

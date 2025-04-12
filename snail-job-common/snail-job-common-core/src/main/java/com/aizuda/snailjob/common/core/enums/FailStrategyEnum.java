@@ -14,8 +14,8 @@ import java.util.Objects;
 @AllArgsConstructor
 public enum FailStrategyEnum {
 
-    SKIP(1, "跳过"),
-    BLOCK(2, "阻塞");
+    SKIP(1, "Skip"),
+    BLOCK(2, "Block");
 
     private final Integer code;
     private final String desc;

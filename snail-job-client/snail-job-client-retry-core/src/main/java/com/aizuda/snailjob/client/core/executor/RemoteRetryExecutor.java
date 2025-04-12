@@ -54,12 +54,12 @@ public class RemoteRetryExecutor {
 
             if (RetrySiteSnapshot.isRetryForStatusCode()) {
                 executeRespDto.setStatusCode(RetryResultStatusEnum.STOP.getStatus());
-                executeRespDto.setExceptionMsg("下游标记不需要重试");
+                executeRespDto.setExceptionMsg("Downstream marks no need for retry");
             } else {
                 RetryResultStatusEnum retryResultStatusEnum = retryerResultContext.getRetryResultStatusEnum();
                 if (Objects.isNull(retryResultStatusEnum)) {
                     retryResultStatusEnum = RetryResultStatusEnum.STOP;
-                    retryerResultContext.setMessage("未获取重试状态. 任务停止");
+                    retryerResultContext.setMessage("No retry status obtained. Task stopped");
                 }
 
                 executeRespDto.setStatusCode(retryResultStatusEnum.getStatus());

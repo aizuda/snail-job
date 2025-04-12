@@ -39,7 +39,7 @@ public class RunningWorkflowPrepareHandler extends AbstractWorkflowPrePareHandle
 
     @Override
     protected void doHandler(WorkflowTaskPrepareDTO prepare) {
-        log.debug("存在运行中的任务. prepare:[{}]", JsonUtil.toJsonString(prepare));
+        log.debug("Running tasks exist. Prepare:[{}]", JsonUtil.toJsonString(prepare));
 
 
         // 1. 若DAG已经支持完成了，由于异常原因导致的没有更新成终态此次进行一次更新操作
@@ -56,7 +56,7 @@ public class RunningWorkflowPrepareHandler extends AbstractWorkflowPrePareHandle
             if (delay > DateUtils.toEpochMilli(prepare.getExecutorTimeout())) {
 
                 // 超时停止任务
-                String reason = String.format("任务执行超时.workflowTaskBatchId:[%s] delay:[%s] executorTimeout:[%s]", prepare.getWorkflowTaskBatchId(), delay, DateUtils.toEpochMilli(prepare.getExecutorTimeout()));
+                String reason = String.format("Task execution timeout. Workflow task batch ID:[%s] Delay:[%s] Executor timeout:[%s]", prepare.getWorkflowTaskBatchId(), delay, DateUtils.toEpochMilli(prepare.getExecutorTimeout()));
                 SnailSpringContext.getContext().publishEvent(new WorkflowTaskFailAlarmEvent(WorkflowTaskFailAlarmEventDTO.builder()
                         .workflowTaskBatchId(prepare.getWorkflowTaskBatchId())
                         .notifyScene(JobNotifySceneEnum.WORKFLOW_TASK_ERROR.getNotifyScene())

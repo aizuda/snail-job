@@ -18,13 +18,13 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 public enum DbTypeEnum {
-    MYSQL("mysql", "MySql数据库", DbType.MYSQL),
-    MARIADB("mariadb", "MariaDB数据库", DbType.MARIADB),
-    POSTGRES("postgresql", "Postgres数据库", DbType.POSTGRE_SQL),
-    ORACLE("oracle", "Oracle数据库", DbType.ORACLE_12C),
-    SQLSERVER("sqlserver", "SQLServer数据库", DbType.SQL_SERVER),
-    DM("dm", "达梦数据库", DbType.DM),
-    KINGBASE("kingbase", "人大金仓", DbType.KINGBASE_ES);
+    MYSQL("mysql", "MySql database", DbType.MYSQL),
+    MARIADB("mariadb", "MariaDB database", DbType.MARIADB),
+    POSTGRES("postgresql", "Postgres database", DbType.POSTGRE_SQL),
+    ORACLE("oracle", "Oracle database", DbType.ORACLE_12C),
+    SQLSERVER("sqlserver", "SQL Server database", DbType.SQL_SERVER),
+    DM("dm", "Dameng database", DbType.DM),
+    KINGBASE("kingbase", "Renmin University of China Golden Warehouse", DbType.KINGBASE_ES);
 
     private final String db;
     private final String desc;
@@ -38,7 +38,7 @@ public enum DbTypeEnum {
             }
         }
 
-        throw new SnailJobDatasourceException("暂不支持此数据库 [{}]", db);
+        throw new SnailJobDatasourceException("This database is not supported yet [{}]", db);
     }
 
     public static List<DbTypeEnum> all() {

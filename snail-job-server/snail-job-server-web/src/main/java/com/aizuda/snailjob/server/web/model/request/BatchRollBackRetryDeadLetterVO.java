@@ -17,6 +17,6 @@ public class BatchRollBackRetryDeadLetterVO {
     /**
      * 重试表id
      */
-    @NotEmpty(message = "至少选择一项")
+    @NotEmpty(message = "At least one item must be selected")
     private List<Long> ids;
 }

@@ -27,7 +27,7 @@ public class WorkflowTimerTask implements TimerTask<String> {
     @Override
     public void run(final Timeout timeout) throws Exception {
         // 执行任务调度
-        SnailJobLog.LOCAL.debug("开始执行任务调度. 当前时间:[{}] taskId:[{}]", LocalDateTime.now(), workflowTimerTaskDTO.getWorkflowTaskBatchId());
+        SnailJobLog.LOCAL.debug("Start task scheduling. Current time:[{}] Task ID:[{}]", LocalDateTime.now(), workflowTimerTaskDTO.getWorkflowTaskBatchId());
 
         try {
 
@@ -39,7 +39,7 @@ public class WorkflowTimerTask implements TimerTask<String> {
             actorRef.tell(taskExecuteDTO, actorRef);
 
         } catch (Exception e) {
-            SnailJobLog.LOCAL.error("任务调度执行失败", e);
+            SnailJobLog.LOCAL.error("Task scheduling execution failed", e);
         }
     }
 

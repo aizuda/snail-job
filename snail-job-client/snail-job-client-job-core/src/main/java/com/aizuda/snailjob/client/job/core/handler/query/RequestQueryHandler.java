@@ -35,13 +35,13 @@ public class RequestQueryHandler extends AbstractJobRequestHandler<JobResponseVO
         Assert.isTrue(StatusEnum.YES.getStatus() == result.getStatus(),
                 () -> new SnailJobClientException(result.getMessage()));
         Object data = result.getData();
-        Assert.isTrue(Objects.nonNull(data), () -> new SnailJobClientException("获取[{}]任务详情失败", queryJobId));
+        Assert.isTrue(Objects.nonNull(data), () -> new SnailJobClientException("Failed to get details of task [{}]", queryJobId));
         return JsonUtil.parseObject(JsonUtil.toJsonString(data), JobResponseVO.class);
     }
 
     @Override
     protected Pair<Boolean, String> checkRequest() {
-        return Pair.of(queryJobId != null && !Long.valueOf(0).equals(queryJobId), "queryJobId不能为null并且必须大于0");
+        return Pair.of(queryJobId != null && !Long.valueOf(0).equals(queryJobId), "queryJobId cannot be null and must be greater than 0");
     }
 
 }

@@ -33,7 +33,7 @@ public interface JobService {
 
     List<JobResponseVO> getJobList(String groupName);
 
-    void importJobs(@Valid @NotEmpty(message = "导入数据不能为空") List<JobRequestVO> requestList);
+    void importJobs(@Valid @NotEmpty(message = "Import data cannot be empty") List<JobRequestVO> requestList);
 
     String exportJobs(ExportJobVO exportJobVO);
 

@@ -75,15 +75,15 @@ public class ReportRetryInfoHttpRequestHandler extends PostHttpRequestHandler {
 
             TaskGenerator taskGenerator = taskGenerators.stream()
                     .filter(t -> t.supports(TaskGeneratorSceneEnum.CLIENT_REPORT.getScene()))
-                    .findFirst().orElseThrow(() -> new SnailJobServerException("没有匹配的任务生成器"));
+                    .findFirst().orElseThrow(() -> new SnailJobServerException("No matching task generator found"));
 
-            Assert.notEmpty(args, () -> new SnailJobServerException("上报的数据不能为空. reqId:[{}]", retryRequest.getReqId()));
+            Assert.notEmpty(args, () -> new SnailJobServerException("The reported data cannot be empty. ReqId:[{}]", retryRequest.getReqId()));
             List<RetryTaskDTO> retryTaskList = JsonUtil.parseList(JsonUtil.toJsonString(args[0]), RetryTaskDTO.class);
 
             SnailJobLog.LOCAL.info("begin handler report data. <|>{}<|>", JsonUtil.toJsonString(retryTaskList));
 
             Set<String> set = StreamUtils.toSet(retryTaskList, RetryTaskDTO::getGroupName);
-            Assert.isTrue(set.size() <= 1, () -> new SnailJobServerException("批量上报数据,同一批次只能是相同的组. reqId:[{}]", retryRequest.getReqId()));
+            Assert.isTrue(set.size() <= 1, () -> new SnailJobServerException("Batch report data, the same batch can only be the same group. ReqId:[{}]", retryRequest.getReqId()));
 
             Map<String, List<RetryTaskDTO>> map = StreamUtils.groupByKey(retryTaskList, RetryTaskDTO::getSceneName);
 
@@ -101,7 +101,7 @@ public class ReportRetryInfoHttpRequestHandler extends PostHttpRequestHandler {
                         @Override
                         public <V> void onRetry(final Attempt<V> attempt) {
                             if (attempt.hasException()) {
-                                SnailJobLog.LOCAL.error("数据上报发生异常执行重试. reqId:[{}] count:[{}]",
+                                SnailJobLog.LOCAL.error("Data reporting exception occurred, execute retry. ReqId:[{}] Count:[{}]",
                                         retryRequest.getReqId(), attempt.getAttemptNumber(), attempt.getExceptionCause());
                             }
                         }

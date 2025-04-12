@@ -42,7 +42,7 @@ public class QiYeWechatAlarm extends AbstractAlarm<AlarmContext> {
             QiYeWechatAttribute qiYeWechatAttribute = JsonUtil.parseObject(context.getNotifyAttribute(), QiYeWechatAttribute.class);
             String webhookUrl = qiYeWechatAttribute.getWebhookUrl();
             if (StrUtil.isBlank(webhookUrl)) {
-                log.error("请先配置微信机器人 webhookUrl");
+                log.error("Please configure the WeChat robot webhookUrl first");
                 return false;
             }
             Map<String, Object> map = MapUtil.newHashMap();
@@ -57,10 +57,10 @@ public class QiYeWechatAlarm extends AbstractAlarm<AlarmContext> {
             if (execute.isOk()) {
                 return true;
             }
-            SnailJobLog.LOCAL.error("发送企业微信消息失败:{}", execute.body());
+            SnailJobLog.LOCAL.error("Sending Enterprise WeChat message failed: {}", execute.body());
             return false;
         } catch (Exception e) {
-            log.error("发送企业微信消息失败", e);
+            log.error("Sending Enterprise WeChat message failed", e);
             return false;
         }
     }

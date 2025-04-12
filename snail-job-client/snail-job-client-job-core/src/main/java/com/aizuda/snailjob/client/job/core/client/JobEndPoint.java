@@ -50,19 +50,19 @@ public class JobEndPoint {
             initLogContext(jobContext);
 
             if (Objects.nonNull(dispatchJob.getRetryCount()) && dispatchJob.getRetryCount() > 0) {
-                SnailJobLog.REMOTE.info("任务执行/调度失败执行重试. 重试次数:[{}]",
+                SnailJobLog.REMOTE.info("Task execution/scheduling failed, executing retry. Retry count:[{}]",
                         dispatchJob.getRetryCount());
             }
 
             if (ExecutorTypeEnum.JAVA.getType() != dispatchJob.getExecutorType()) {
-                SnailJobLog.REMOTE.error("不支持非Java类型的执行器. executorType:[{}]", dispatchJob.getExecutorType());
-                return new Result<>("不支持非Java类型的执行器", Boolean.FALSE);
+                SnailJobLog.REMOTE.error("Non-Java type executors are not supported. executorType:[{}]", dispatchJob.getExecutorType());
+                return new Result<>("Non-Java type executors are not supported", Boolean.FALSE);
             }
 
             JobExecutorInfo jobExecutorInfo = JobExecutorInfoCache.get(jobContext.getExecutorInfo());
             if (Objects.isNull(jobExecutorInfo)) {
-                SnailJobLog.REMOTE.error("执行器配置有误. executorInfo:[{}]", dispatchJob.getExecutorInfo());
-                return new Result<>("执行器配置有误", Boolean.FALSE);
+                SnailJobLog.REMOTE.error("Executor configuration is incorrect. executorInfo:[{}]", dispatchJob.getExecutorInfo());
+                return new Result<>("Executor configuration is incorrect", Boolean.FALSE);
             }
 
             // 选择执行器
@@ -86,7 +86,7 @@ public class JobEndPoint {
                 }
             }
 
-            SnailJobLog.REMOTE.info("任务调度方:[{}] 任务ID:[{}] 任务批次:[{}] 工作流批次:[{}] 任务调度成功. ",
+            SnailJobLog.REMOTE.info(" Task scheduler:[{}] Task ID:[{}] Task batch:[{}] Workflow batch:[{}] Task scheduled successfully.",
                     Objects.isNull(dispatchJob.getWorkflowTaskBatchId()) ? "job" : "workflow",
                     dispatchJob.getJobId(),
                     dispatchJob.getTaskBatchId(),
@@ -95,7 +95,7 @@ public class JobEndPoint {
             jobExecutor.jobExecute(jobContext);
 
         } catch (Exception e) {
-            SnailJobLog.REMOTE.error("客户端发生非预期异常. taskBatchId:[{}]", dispatchJob.getTaskBatchId());
+            SnailJobLog.REMOTE.error("Client encountered an unexpected exception. taskBatchId:[{}]", dispatchJob.getTaskBatchId());
             throw e;
         } finally {
             SnailJobLogManager.removeLogMeta();

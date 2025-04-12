@@ -77,7 +77,7 @@ public class OpenApiTriggerWorkFlowRequestHandler extends PostHttpRequestHandler
                     );
 
                     if (count <= 0){
-                        SnailJobLog.LOCAL.warn("组:[{}]已经关闭，不支持手动执行.", workflow.getGroupName());
+                        SnailJobLog.LOCAL.warn("Group [{}] is closed, manual execution is not supported.", workflow.getGroupName());
                         return new SnailJobRpcResult(false, retryRequest.getReqId());
                     }
                 }

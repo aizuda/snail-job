@@ -43,10 +43,10 @@ public class OpenApiUpdateRetryStatusRequestHandler extends PostHttpRequestHandl
         RequestUpdateRetryStatusVO updateRetryStatusVO = JsonUtil.parseObject(JsonUtil.toJsonString(args[0]), RequestUpdateRetryStatusVO.class);
 
         RetryStatusEnum retryStatusEnum = RetryStatusEnum.getByStatus(updateRetryStatusVO.getRetryStatus());
-        Assert.notNull(retryStatusEnum, () -> new SnailJobServerException("重试状态错误. [{}]", updateRetryStatusVO.getRetryStatus()));
+        Assert.notNull(retryStatusEnum, () -> new SnailJobServerException("Retry status error. [{}]", updateRetryStatusVO.getRetryStatus()));
 
         Retry retry = retryMapper.selectById(updateRetryStatusVO.getId());
-        Assert.notNull(retry, () -> new SnailJobServerException("未查询到重试任务:[{}].", retry.getId()));
+        Assert.notNull(retry, () -> new SnailJobServerException("Retry task not found:[{}].", retry.getId()));
 
         retry.setRetryStatus(updateRetryStatusVO.getRetryStatus());
 
@@ -64,7 +64,7 @@ public class OpenApiUpdateRetryStatusRequestHandler extends PostHttpRequestHandl
 
         retry.setUpdateDt(LocalDateTime.now());
 
-        Assert.isTrue(retryMapper.updateById(retry) == 1, () -> new SnailJobServerException("重试任务状态更新失败:[{}].", retry.getId()));
+        Assert.isTrue(retryMapper.updateById(retry) == 1, () -> new SnailJobServerException("Update status of retry task failed:[{}].", retry.getId()));
 
         return new SnailJobRpcResult(true, retryRequest.getReqId());
     }

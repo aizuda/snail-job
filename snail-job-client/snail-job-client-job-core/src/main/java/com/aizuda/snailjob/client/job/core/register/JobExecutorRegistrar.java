@@ -22,7 +22,7 @@ public class JobExecutorRegistrar implements Lifecycle {
     public void registerRetryHandler(JobExecutorInfo jobExecutorInfo) {
 
         if (JobExecutorInfoCache.isExisted(jobExecutorInfo.getExecutorName())) {
-            throw new SnailJobClientException("不允许执行器名称重复: {}", jobExecutorInfo.getExecutorName());
+            throw new SnailJobClientException("Duplicate executor names are not allowed: {}", jobExecutorInfo.getExecutorName());
         }
 
         JobExecutorInfoCache.put(jobExecutorInfo);

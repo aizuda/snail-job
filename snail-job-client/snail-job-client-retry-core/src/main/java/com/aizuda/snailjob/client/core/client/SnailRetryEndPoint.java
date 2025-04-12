@@ -79,8 +79,8 @@ public class SnailRetryEndPoint implements Lifecycle {
 
         RetryerInfo retryerInfo = RetryerInfoCache.get(request.getSceneName(), request.getExecutorName());
         if (Objects.isNull(retryerInfo)) {
-            SnailJobLog.REMOTE.error("场景:[{}]配置不存在, 请检查您的场景和执行器是否存在", request.getSceneName());
-            return new Result<>(StatusEnum.NO.getStatus(), MessageFormat.format("场景:[{0}]配置不存在, 请检查您的场景和执行器是否存在", request.getSceneName()));
+            SnailJobLog.REMOTE.error("Scene [{}] configuration does not exist, please check if your scene and executor exist", request.getSceneName());
+            return new Result<>(StatusEnum.NO.getStatus(), MessageFormat.format("Scene [{0}] configuration does not exist, please check if your scene and executor exist", request.getSceneName()));
         }
 
         // 初始化实时日志上下文
@@ -93,8 +93,8 @@ public class SnailRetryEndPoint implements Lifecycle {
             deSerialize = (Object[]) retryArgSerializer.deSerialize(request.getArgsStr(),
                     retryerInfo.getExecutor().getClass(), retryerInfo.getMethod());
         } catch (JsonProcessingException e) {
-            SnailJobLog.REMOTE.error("参数解析异常 args:[{}]", request.getArgsStr(), e);
-            return new Result<>(StatusEnum.NO.getStatus(), MessageFormat.format("参数解析异常 args:[{0}]", request.getArgsStr()));
+            SnailJobLog.REMOTE.error("Parameter parsing exception args:[{}]", request.getArgsStr(), e);
+            return new Result<>(StatusEnum.NO.getStatus(), MessageFormat.format("Parameter parsing exception args:[{0}]", request.getArgsStr()));
         }
 
         retryContext.setDeSerialize(deSerialize);
@@ -108,7 +108,7 @@ public class SnailRetryEndPoint implements Lifecycle {
         // 将任务添加到时间轮中，到期停止任务
         TimerManager.add(new StopTaskTimerTask(request.getRetryTaskId()), request.getExecutorTimeout(), TimeUnit.SECONDS);
 
-        SnailJobLog.REMOTE.info("重试任务:[{}] 调度成功. ", request.getRetryTaskId());
+        SnailJobLog.REMOTE.info(" Retry task:[{}] scheduled successfully.", request.getRetryTaskId());
 
         return new Result<>(Boolean.TRUE);
     }
@@ -144,8 +144,8 @@ public class SnailRetryEndPoint implements Lifecycle {
 
             RetryerInfo retryerInfo = RetryerInfoCache.get(callbackDTO.getSceneName(), callbackDTO.getExecutorName());
             if (Objects.isNull(retryerInfo)) {
-                SnailJobLog.REMOTE.error("场景:[{}]配置不存在, 请检查您的场景和执行器是否存在", callbackDTO.getSceneName());
-                return new Result<>(0, "回调失败", Boolean.FALSE);
+                SnailJobLog.REMOTE.error("Scene [{}] configuration does not exist, please check if your scene and executor exist", callbackDTO.getSceneName());
+                return new Result<>(0, "Callback failed", Boolean.FALSE);
             }
 
             RetryArgSerializer retryArgSerializer = SnailRetrySpiLoader.loadRetryArgSerializer();
@@ -155,8 +155,8 @@ public class SnailRetryEndPoint implements Lifecycle {
             callbackContext.setDeSerialize(deSerialize);
             callbackContext.setRetryerInfo(retryerInfo);
         } catch (JsonProcessingException e) {
-            SnailJobLog.REMOTE.error("参数解析异常", e);
-            return new Result<>(0, "回调失败", Boolean.FALSE);
+            SnailJobLog.REMOTE.error("Parameter parsing exception", e);
+            return new Result<>(0, "Callback failed", Boolean.FALSE);
         }
 
         ListeningExecutorService decorator = MoreExecutors.listeningDecorator(dispatcherThreadPool);
@@ -171,7 +171,7 @@ public class SnailRetryEndPoint implements Lifecycle {
         // 将任务添加到时间轮中，到期停止任务
         TimerManager.add(new StopTaskTimerTask(callbackDTO.getRetryTaskId()), callbackDTO.getExecutorTimeout(), TimeUnit.SECONDS);
 
-        SnailJobLog.REMOTE.info("回调任务:[{}] 调度成功. ", callbackDTO.getRetryTaskId());
+        SnailJobLog.REMOTE.info(" Callback task:[{}] scheduled successfully.", callbackDTO.getRetryTaskId());
         return new Result<>(Boolean.TRUE);
     }
 
@@ -213,7 +213,7 @@ public class SnailRetryEndPoint implements Lifecycle {
 
         RetryerInfo retryerInfo = RetryerInfoCache.get(scene, executorName);
         Assert.notNull(retryerInfo,
-                () -> new SnailRetryClientException("重试信息不存在 scene:[{}] executorName:[{}]", scene, executorName));
+                () -> new SnailRetryClientException("Retry information does not exist for scene:[{}] executorName:[{}]", scene, executorName));
 
         Method executorMethod = retryerInfo.getMethod();
 
@@ -224,7 +224,7 @@ public class SnailRetryEndPoint implements Lifecycle {
             deSerialize = (Object[]) retryArgSerializer.deSerialize(argsStr, retryerInfo.getExecutor().getClass(),
                     retryerInfo.getMethod());
         } catch (JsonProcessingException e) {
-            throw new SnailRetryClientException("参数解析异常", e);
+            throw new SnailRetryClientException("Parameter parsing exception", e);
         }
 
         String idempotentId;
@@ -236,8 +236,8 @@ public class SnailRetryEndPoint implements Lifecycle {
                     executorMethod.getName());
             idempotentId = (String) ReflectionUtils.invokeMethod(method, generate, idempotentIdContext);
         } catch (Exception exception) {
-            SnailJobLog.LOCAL.error("幂等id生成异常：{},{}", scene, argsStr, exception);
-            throw new SnailRetryClientException("idempotentId生成异常：{},{}", scene, argsStr);
+            SnailJobLog.LOCAL.error("Idempotent ID generation exception: {}, {}", scene, argsStr, exception);
+            throw new SnailRetryClientException("idempotentId generation exception: {}, {}", scene, argsStr);
         }
 
         return new Result<>(idempotentId);

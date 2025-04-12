@@ -159,7 +159,7 @@ public class ClientRegister extends AbstractRegister {
                 refreshExpireAt(waitRefreshDBClientNodes);
 
             } catch (Exception e) {
-                SnailJobLog.LOCAL.error("refresh 失败", e);
+                SnailJobLog.LOCAL.error("Refresh failed", e);
             }
         }
 

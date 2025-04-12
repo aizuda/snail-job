@@ -81,7 +81,7 @@ public class JobExecutorActor extends AbstractActor {
     public Receive createReceive() {
         return receiveBuilder().match(TaskExecuteDTO.class, taskExecute -> {
             try {
-                log.debug("准备执行任务. [{}] [{}]", LocalDateTime.now(), JsonUtil.toJsonString(taskExecute));
+                log.debug("Preparing to execute task. [{}] [{}]", LocalDateTime.now(), JsonUtil.toJsonString(taskExecute));
                 transactionTemplate.execute(new TransactionCallbackWithoutResult() {
                     @Override
                     protected void doInTransactionWithoutResult(final TransactionStatus status) {
@@ -184,7 +184,7 @@ public class JobExecutorActor extends AbstractActor {
             });
 
         } finally {
-            log.debug("准备执行任务完成.[{}]", JsonUtil.toJsonString(taskExecute));
+            log.debug("Task preparation complete.[{}]", JsonUtil.toJsonString(taskExecute));
             final int finalTaskStatus = taskStatus;
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                 @Override
@@ -231,7 +231,7 @@ public class JobExecutorActor extends AbstractActor {
         jobTaskBatch.setTaskBatchStatus(taskStatus);
         jobTaskBatch.setOperationReason(operationReason);
         Assert.isTrue(1 == jobTaskBatchMapper.updateById(jobTaskBatch),
-                () -> new SnailJobServerException("更新任务失败"));
+                () -> new SnailJobServerException("Updating task failed"));
 
         if (JobTaskBatchStatusEnum.NOT_SUCCESS.contains(taskStatus)) {
             SnailSpringContext.getContext().publishEvent(

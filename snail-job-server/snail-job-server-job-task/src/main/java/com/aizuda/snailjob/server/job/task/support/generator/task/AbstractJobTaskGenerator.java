@@ -44,10 +44,10 @@ public abstract class AbstractJobTaskGenerator implements JobTaskGenerator, Init
                 .contains(DbUtils.getDbType().getDb())) {
             // sqlserver oracle 不支持返回批量id,故暂时先这样处理
             for (JobTask jobTask : jobTasks) {
-                Assert.isTrue(1 == jobTaskMapper.insert(jobTask), () -> new SnailJobServerException("新增任务实例失败"));
+                Assert.isTrue(1 == jobTaskMapper.insert(jobTask), () -> new SnailJobServerException("Adding new task instance failed"));
             }
         } else {
-            Assert.isTrue(jobTasks.size() == jobTaskMapper.insertBatch(jobTasks), () -> new SnailJobServerException("新增任务实例失败"));
+            Assert.isTrue(jobTasks.size() == jobTaskMapper.insertBatch(jobTasks), () -> new SnailJobServerException("Adding new task instance failed"));
         }
     }
 }

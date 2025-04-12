@@ -54,7 +54,7 @@ public final class RpcContext {
                     });
 
         } catch (Exception e) {
-            SnailJobLog.LOCAL.error("回调处理失败 requestId:[{}]", requestId, e);
+            SnailJobLog.LOCAL.error("Callback processing failed requestId:[{}]", requestId, e);
         }
     }
 

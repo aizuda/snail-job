@@ -82,7 +82,7 @@ public class ExecutorMethodScanner implements Scanner, ApplicationContextAware {
                     unit
             );
         } catch (Exception e) {
-            SnailJobLog.LOCAL.error("{}重试信息加载报错：{}", executor.getClass().getName(), e);
+            SnailJobLog.LOCAL.error("Error loading retry information for {}: {}", executor.getClass().getName(), e);
         }
 
         return null;

@@ -47,8 +47,8 @@ public class RestExceptionHandler {
      */
     @ExceptionHandler({Exception.class})
     public Result onException(Exception ex) {
-        log.error("异常类 onException,", ex);
-        return new Result<String>(0, "系统异常");
+        log.error("Exception class onException,", ex);
+        return new Result<String>(0, "System exception");
     }
 
     /**
@@ -59,7 +59,7 @@ public class RestExceptionHandler {
      */
     @ExceptionHandler({BaseSnailJobException.class})
     public Result onBusinessException(BaseSnailJobException ex) {
-        log.error("异常类 businessException", ex);
+        log.error("Exception class businessException", ex);
         if (ex instanceof final SnailJobAuthenticationException authenticationException) {
             return new Result<String>(authenticationException.getErrorCode(), ex.getMessage());
         }
@@ -75,7 +75,7 @@ public class RestExceptionHandler {
      */
     @ExceptionHandler({HttpMessageNotReadableException.class})
     public Result requestNotReadable(HttpMessageNotReadableException ex) {
-        log.error("异常类 HttpMessageNotReadableException,", ex);
+        log.error("Exception class HttpMessageNotReadableException,", ex);
         return new Result<String>(0, AbstractError.PARAM_INCORRECT.toString());
     }
 
@@ -147,7 +147,7 @@ public class RestExceptionHandler {
             return new Result<String>(0, detailMessageArguments[0].toString());
         }
 
-        return new Result<>("参数校验失败");
+        return new Result<>("Parameter validation failed");
 
     }
 
@@ -156,7 +156,7 @@ public class RestExceptionHandler {
      */
     @ExceptionHandler({TypeMismatchException.class})
     public Result requestTypeMismatch(TypeMismatchException ex) {
-        log.error("异常类 TypeMismatchException {},", ex.getMessage());
+        log.error("Exception class TypeMismatchException {},", ex.getMessage());
         return new Result<String>(0, AbstractError.PARAM_INCORRECT.toString());
     }
 
@@ -165,7 +165,7 @@ public class RestExceptionHandler {
      */
     @ExceptionHandler({MissingServletRequestParameterException.class})
     public Result requestMissingServletRequest(MissingServletRequestParameterException ex) {
-        log.error("异常类 MissingServletRequestParameterException {},", ex.getMessage());
+        log.error("Exception class MissingServletRequestParameterException {},", ex.getMessage());
         return new Result<String>(0, AbstractError.PARAM_INCORRECT.toString());
     }
 
@@ -175,7 +175,7 @@ public class RestExceptionHandler {
     @ExceptionHandler({HttpRequestMethodNotSupportedException.class})
     @ResponseBody
     public Result request405() {
-        log.error("异常类 HttpRequestMethodNotSupportedException ");
+        log.error(" Exception class HttpRequestMethodNotSupportedException");
         return new Result<String>(0, AbstractError.PARAM_INCORRECT.toString());
     }
 
@@ -184,7 +184,7 @@ public class RestExceptionHandler {
      */
     @ExceptionHandler({HttpMediaTypeNotSupportedException.class})
     public Result request415(HttpMediaTypeNotSupportedException ex) {
-        log.error("异常类 HttpMediaTypeNotSupportedException {}", ex.getMessage());
+        log.error("Exception class HttpMediaTypeNotSupportedException {}", ex.getMessage());
         return new Result<String>(0, AbstractError.PARAM_INCORRECT.toString());
     }
 }

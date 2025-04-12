@@ -27,11 +27,11 @@ public abstract class AbstractRetryExecutor<BR, SR> implements RetryExecutor<BR,
 
         Class<? extends ExecutorMethod> retryMethodClass = retryerInfo.getExecutorMethod();
         if (retryMethodClass.isAssignableFrom(ExecutorAnnotationMethod.class)) {
-            SnailJobLog.LOCAL.debug("执行注解重试方法：{},参数为：{}", retryMethodClass.getName(), JsonUtil.toJsonString(params));
+            SnailJobLog.LOCAL.debug("Executing annotated retry method: {}, parameters: {}", retryMethodClass.getName(), JsonUtil.toJsonString(params));
             ExecutorAnnotationMethod retryAnnotationMethod = new ExecutorAnnotationMethod(retryerInfo);
             return retryAnnotationMethod.doExecute(params);
         } else {
-            SnailJobLog.LOCAL.debug("执行自定义重试方法：{},参数为：{}", retryMethodClass.getName(), JsonUtil.toJsonString(params));
+            SnailJobLog.LOCAL.debug("Executing custom retry method: {}, parameters: {}", retryMethodClass.getName(), JsonUtil.toJsonString(params));
             ExecutorMethod executorMethod = SnailSpringContext.getBeanByType(retryMethodClass);
             return executorMethod.doExecute(params);
         }

@@ -24,7 +24,7 @@ public class AviatorExpressionEngine extends AbstractExpressionEngine {
         try {
             return ENGINE.execute(expression, context);
         } catch (Exception e) {
-            throw new SnailJobCommonException("Aviator表达式解析异常. expression:[{}] context:[{}]",
+            throw new SnailJobCommonException("Aviator expression parsing exception. expression:[{}] context:[{}]",
                     expression, JsonUtil.toJsonString(context), e);
         }
     }

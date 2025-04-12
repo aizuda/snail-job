@@ -81,7 +81,7 @@ public class RetryTaskMoreThresholdAlarmSchedule extends AbstractRetryTaskAlarmS
                                     partitionTask.getSceneName(),
                                     DateUtils.toNowFormat(DateUtils.NORM_DATETIME_PATTERN),
                                     count)
-                            .title("{}环境 场景重试数量超过阈值", EnvironmentUtils.getActiveProfile())
+                            .title("{} environment scenario retry count exceeds threshold", EnvironmentUtils.getActiveProfile())
                             .notifyAttribute(recipientInfo.getNotifyAttribute());
                     Optional.ofNullable(SnailJobAlarmFactory.getAlarmType(recipientInfo.getNotifyType()))
                             .ifPresent(alarmType -> alarmType.asyncSendMessage(context));

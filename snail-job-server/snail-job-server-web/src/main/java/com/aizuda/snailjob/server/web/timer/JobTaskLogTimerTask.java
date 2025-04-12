@@ -28,14 +28,14 @@ public class JobTaskLogTimerTask implements TimerTask<String> {
 
     @Override
     public void run(final Timeout timeout) throws Exception {
-        SnailJobLog.LOCAL.debug("开始执行定时任务日志查询. 当前时间:[{}] jobTaskId:[{}]", LocalDateTime.now(), logQueryVO.getTaskBatchId());
+        SnailJobLog.LOCAL.debug("Start querying scheduled task logs. Current time:[{}] jobTaskId:[{}]", LocalDateTime.now(), logQueryVO.getTaskBatchId());
 
         try {
             LogTimerWheel.clearCache(idempotentKey());
             JobLogService logService = SnailSpringContext.getBean(JobLogService.class);
             logService.getJobLogPageV2(logQueryVO);
         } catch (Exception e) {
-            SnailJobLog.LOCAL.error("定时任务日志查询执行失败", e);
+            SnailJobLog.LOCAL.error("Scheduled task log query execution failed", e);
         }
     }
 

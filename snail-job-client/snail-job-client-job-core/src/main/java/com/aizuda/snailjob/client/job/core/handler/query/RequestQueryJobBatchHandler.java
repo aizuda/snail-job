@@ -38,13 +38,13 @@ public class RequestQueryJobBatchHandler extends AbstractJobRequestHandler<JobBa
         Assert.isTrue(StatusEnum.YES.getStatus() == result.getStatus(),
                 () -> new SnailJobClientException(result.getMessage()));
         Object data = result.getData();
-        Assert.isTrue(Objects.nonNull(data), () -> new SnailJobClientException("获取[{}]任务批次详情失败", queryJobBatchId));
+        Assert.isTrue(Objects.nonNull(data), () -> new SnailJobClientException("Failed to get task batch details for [{}]", queryJobBatchId));
         return JsonUtil.parseObject(JsonUtil.toJsonString(data), JobBatchResponseVO.class);
     }
 
     @Override
     protected Pair<Boolean, String> checkRequest() {
-        return Pair.of(queryJobBatchId != null && !Long.valueOf(0).equals(queryJobBatchId), "queryJobBatchId不能为null并且必须大于0");
+        return Pair.of(queryJobBatchId != null && !Long.valueOf(0).equals(queryJobBatchId), "queryJobBatchId cannot be null and must be greater than 0");
     }
 
 }

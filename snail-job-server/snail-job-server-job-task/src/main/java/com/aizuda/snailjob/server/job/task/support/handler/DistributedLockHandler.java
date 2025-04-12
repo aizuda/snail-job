@@ -56,7 +56,7 @@ public class DistributedLockHandler {
                             }
                         }
 
-                        SnailJobLog.LOCAL.debug("第【{}】次尝试获取锁. lockName:[{}] result:[{}] treadName:[{}]",
+                        SnailJobLog.LOCAL.debug("Attempt [{}] to acquire lock. Lock name:[{}] Result:[{}] Thread name:[{}]",
                                 attempt.getAttemptNumber(), lockName, result, Thread.currentThread().getName());
                     }
                 }).build();
@@ -81,7 +81,7 @@ public class DistributedLockHandler {
         } finally {
             if (lock) {
                 lockProvider.unlock();
-                SnailJobLog.LOCAL.debug("[{}] 锁已释放", lockName);
+                SnailJobLog.LOCAL.debug("[{}] Lock has been released", lockName);
             } else {
                 // 未获取到锁直接清除线程中存储的锁信息
                 LockManager.clear();
@@ -114,7 +114,7 @@ public class DistributedLockHandler {
         } finally {
             if (lock) {
                 lockProvider.unlock();
-                SnailJobLog.LOCAL.debug("[{}] 锁已释放", lockName);
+                SnailJobLog.LOCAL.debug("[{}] Lock has been released", lockName);
             } else {
                 // 未获取到锁直接清除线程中存储的锁信息
                 LockManager.clear();

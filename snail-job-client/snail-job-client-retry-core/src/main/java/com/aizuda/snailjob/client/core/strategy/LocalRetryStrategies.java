@@ -50,7 +50,7 @@ public class LocalRetryStrategies extends AbstractRetryStrategies {
                 // 这里标志结果为失败，是表示数据并未重试成功，等待服务端重试
                 context.setRetryResultStatusEnum(RetryResultStatusEnum.FAILURE);
             } else {
-                SnailJobLog.LOCAL.debug("doRetrySuccessConsumer 重试成功");
+                SnailJobLog.LOCAL.debug("doRetrySuccessConsumer retry successful");
             }
         };
     }
@@ -64,13 +64,13 @@ public class LocalRetryStrategies extends AbstractRetryStrategies {
     protected boolean preValidator(RetryerInfo retryerInfo, RetryerResultContext resultContext) {
         if (RetrySiteSnapshot.isRunning()) {
             resultContext.setRetryResultStatusEnum(RetryResultStatusEnum.FAILURE);
-            resultContext.setMessage("执行重试检验不通过 原因: 存在正在运行的重试任务");
+            resultContext.setMessage("Retry validation failed: reason: there is an ongoing retry task");
             return false;
         }
 
         if (RetrySiteSnapshot.isRetryForStatusCode()) {
             resultContext.setRetryResultStatusEnum(RetryResultStatusEnum.FAILURE);
-            resultContext.setMessage("执行重试检验不通过 原因: 下游标志禁止重试");
+            resultContext.setMessage("Retry validation failed: reason: downstream flag prohibits retry");
             return false;
         }
 
@@ -91,11 +91,11 @@ public class LocalRetryStrategies extends AbstractRetryStrategies {
     public Consumer<Throwable> doGetRetryErrorConsumer(RetryerInfo retryerInfo, Object[] params) {
         return throwable -> {
             // 执行上报服务端
-            log.info("内存重试完成且异常未被解决 scene:[{}]", retryerInfo.getScene());
+            log.info("Memory retry completed but the exception was not resolved scene:[{}]", retryerInfo.getScene());
             // 上报服务端异常
             if (RetryType.LOCAL_REMOTE.name().equals(retryerInfo.getRetryType().name())) {
                 // 上报
-                log.debug("上报 scene:[{}]", retryerInfo.getScene());
+                log.debug("Report scene:[{}]", retryerInfo.getScene());
                 doReport(retryerInfo, params);
             }
         };
@@ -117,12 +117,12 @@ public class LocalRetryStrategies extends AbstractRetryStrategies {
                 return () -> retryExecutor.execute(params);
             case ONLY_REMOTE:
                 // 仅仅是远程重试则直接上报
-                log.debug("上报 scene:[{}]", retryerInfo.getScene());
+                log.debug("Report scene:[{}]", retryerInfo.getScene());
                 doReport(retryerInfo, params);
                 RetrySiteSnapshot.setStage(RetrySiteSnapshot.EnumStage.REMOTE.getStage());
                 return () -> null;
             default:
-                throw new SnailRetryClientException("异常重试模式 [{}]", retryType.name());
+                throw new SnailRetryClientException("Exception retry mode [{}]", retryType.name());
         }
 
     }
@@ -152,13 +152,13 @@ public class LocalRetryStrategies extends AbstractRetryStrategies {
                             switch (retryType) {
                                 case ONLY_LOCAL:
                                 case LOCAL_REMOTE:
-                                    SnailJobLog.LOCAL.error("[{}] 本地重试执行失败，第[{}]次重试", retryerInfo.getScene(), attempt.getAttemptNumber());
+                                    SnailJobLog.LOCAL.error("Local retry for [{}] failed, retry number [{}]", retryerInfo.getScene(), attempt.getAttemptNumber());
                                     break;
                                 case ONLY_REMOTE:
-                                    SnailJobLog.LOCAL.error("[{}] 上报服务端执行失败，第[{}]次重试", retryerInfo.getScene(), attempt.getAttemptNumber());
+                                    SnailJobLog.LOCAL.error("Report service end execution for [{}] failed, retry number [{}]", retryerInfo.getScene(), attempt.getAttemptNumber());
                                     break;
                                 default:
-                                    throw new SnailRetryClientException("异常重试模式 [{}]", retryType.name());
+                                    throw new SnailRetryClientException("Exception retry mode [{}]", retryType.name());
 
                             }
                         } else {
@@ -166,13 +166,13 @@ public class LocalRetryStrategies extends AbstractRetryStrategies {
                             switch (retryType) {
                                 case ONLY_LOCAL:
                                 case LOCAL_REMOTE:
-                                    SnailJobLog.LOCAL.info("[{}] 本地重试执行成功.", retryerInfo.getScene());
+                                    SnailJobLog.LOCAL.info("Local retry for [{}] successful.", retryerInfo.getScene());
                                     break;
                                 case ONLY_REMOTE:
-                                    SnailJobLog.LOCAL.info("[{}] 上报服务端执行成功.", retryerInfo.getScene());
+                                    SnailJobLog.LOCAL.info("Report service end execution for [{}] successful.", retryerInfo.getScene());
                                     break;
                                 default:
-                                    throw new SnailRetryClientException("异常重试模式 [{}]", retryType.name());
+                                    throw new SnailRetryClientException("Exception retry mode [{}]", retryType.name());
 
                             }
                         }

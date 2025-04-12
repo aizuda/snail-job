@@ -42,7 +42,7 @@ public class OpenApiUpdateJobStatusRequestHandler extends PostHttpRequestHandler
         JobStatusUpdateRequestVO jobRequestVO = JsonUtil.parseObject(JsonUtil.toJsonString(args[0]), JobStatusUpdateRequestVO.class);
         Long count = jobMapper.selectCount(new LambdaQueryWrapper<Job>().eq(Job::getId, jobRequestVO.getId()));
         if (1 != count){
-            SnailJobLog.LOCAL.warn("更新任务失败");
+            SnailJobLog.LOCAL.warn("Updating task failed");
             return new SnailJobRpcResult(false, retryRequest.getReqId());
         }
         Job job = new Job();

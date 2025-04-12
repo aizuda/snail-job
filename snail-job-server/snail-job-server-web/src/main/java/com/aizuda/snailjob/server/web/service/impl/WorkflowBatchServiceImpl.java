@@ -211,8 +211,8 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
                     new HashMap<>(), workflowNodeMap);
             responseVO.setNodeConfig(config);
         } catch (Exception e) {
-            log.error("反序列化失败. json:[{}]", flowInfo, e);
-            throw new SnailJobServerException("查询工作流批次详情失败");
+            log.error("Deserialization failed. json:[{}]", flowInfo, e);
+            throw new SnailJobServerException("Failed to query workflow batch details");
         }
 
         return responseVO;
@@ -237,7 +237,7 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
         Assert.isTrue(ids.size() == workflowTaskBatchMapper.delete(new LambdaQueryWrapper<WorkflowTaskBatch>()
                         .eq(WorkflowTaskBatch::getNamespaceId, namespaceId)
                         .in(WorkflowTaskBatch::getId, ids)),
-                () -> new SnailJobServerException("删除工作流任务失败, 请检查任务状态是否关闭状态"));
+                () -> new SnailJobServerException("Failed to delete workflow task, please check if the task status is closed"));
 
         List<JobTaskBatch> jobTaskBatches = jobTaskBatchMapper.selectList(new LambdaQueryWrapper<JobTaskBatch>()
                 .eq(JobTaskBatch::getNamespaceId, namespaceId)

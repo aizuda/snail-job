@@ -11,7 +11,7 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum JobArgsTypeEnum {
-    TEXT(1, "文本"),
+    TEXT(1, "Text"),
     JSON(2, "JSON");
 
     private final Integer argsType;

@@ -84,7 +84,7 @@ public class JobTaskFailAlarmListener extends AbstractJobAlarm<JobTaskFailAlarmE
                         alarmDTO.getReason(),
                         alarmDTO.getArgsStr(),
                         DateUtils.toNowFormat(DateUtils.NORM_DATETIME_PATTERN))
-                .title("{}环境 JOB任务失败", EnvironmentUtils.getActiveProfile());
+                .title("{} environment JOB task failed", EnvironmentUtils.getActiveProfile());
     }
 
     @Override
@@ -106,7 +106,7 @@ public class JobTaskFailAlarmListener extends AbstractJobAlarm<JobTaskFailAlarmE
     @TransactionalEventListener(fallbackExecution = true, phase = TransactionPhase.AFTER_COMPLETION)
     public void doOnApplicationEvent(JobTaskFailAlarmEvent jobTaskFailAlarmEvent) {
         if (!queue.offer(jobTaskFailAlarmEvent.getJobTaskFailAlarmEventDTO())) {
-            SnailJobLog.LOCAL.warn("JOB任务执行失败告警队列已满");
+            SnailJobLog.LOCAL.warn("JOB task execution failure, alert queue is full");
         }
     }
 }

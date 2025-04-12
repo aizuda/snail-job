@@ -45,7 +45,7 @@ public class ExpressionInvocationHandler implements InvocationHandler {
             Throwable targetException = e.getTargetException();
             throw new SnailJobServerException(targetException.getMessage());
         } catch (Exception e) {
-            throw new SnailJobServerException("表达式执行失败", e);
+            throw new SnailJobServerException("Expression execution failed", e);
         }
     }
 }

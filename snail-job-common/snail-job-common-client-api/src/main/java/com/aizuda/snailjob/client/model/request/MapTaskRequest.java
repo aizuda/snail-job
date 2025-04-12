@@ -15,13 +15,13 @@ import java.util.Map;
 @Data
 public class MapTaskRequest {
 
-    @NotNull(message = "jobId 不能为空")
+    @NotNull(message = "jobId cannot be null")
     private Long jobId;
 
-    @NotNull(message = "taskBatchId 不能为空")
+    @NotNull(message = "taskBatchId cannot be null")
     private Long taskBatchId;
 
-    @NotNull(message = "parentId 不能为空")
+    @NotNull(message = "parentId cannot be null")
     private Long parentId;
 
     private Long workflowTaskBatchId;
@@ -33,10 +33,10 @@ public class MapTaskRequest {
      */
     private String wfContext;
 
-    @NotBlank(message = "taskName 不能为空")
+    @NotBlank(message = "taskName cannot be null")
     private String taskName;
 
-    @NotEmpty(message = "subTask 不能为空")
+    @NotEmpty(message = "subTask cannot be null")
     private List<Object> subTask;
 
 }

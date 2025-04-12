@@ -42,7 +42,7 @@ public class JobTimeoutCheckTask implements TimerTask<String> {
         JobTaskBatchMapper jobTaskBatchMapper = SnailSpringContext.getBean(JobTaskBatchMapper.class);
         JobTaskBatch jobTaskBatch = jobTaskBatchMapper.selectById(taskBatchId);
         if (Objects.isNull(jobTaskBatch)) {
-            SnailJobLog.LOCAL.error("jobTaskBatch:[{}]不存在", taskBatchId);
+            SnailJobLog.LOCAL.error("jobTaskBatch:[{}] does not exist", taskBatchId);
             return;
         }
 
@@ -54,7 +54,7 @@ public class JobTimeoutCheckTask implements TimerTask<String> {
         JobMapper jobMapper = SnailSpringContext.getBean(JobMapper.class);
         Job job = jobMapper.selectById(jobId);
         if (Objects.isNull(job)) {
-            SnailJobLog.LOCAL.error("job:[{}]不存在", jobId);
+            SnailJobLog.LOCAL.error("job:[{}] does not exist", jobId);
             return;
         }
 
@@ -69,7 +69,7 @@ public class JobTimeoutCheckTask implements TimerTask<String> {
         stopJobContext.setWorkflowTaskBatchId(jobTaskBatch.getWorkflowTaskBatchId());
         instanceInterrupt.stop(stopJobContext);
 
-        String reason = "超时中断.taskBatchId:[" + taskBatchId + "]";
+        String reason = "Timeout interruption. Task batch ID:[" + taskBatchId + "]";
         SnailSpringContext.getContext().publishEvent(
                 new JobTaskFailAlarmEvent(JobTaskFailAlarmEventDTO.builder()
                         .jobTaskBatchId(taskBatchId)

@@ -83,7 +83,7 @@ public class LogServer {
     //错误时调用
     @OnError
     public void onError(Session session, Throwable throwable) {
-        log.error("发生错误{}", throwable);
+        log.error("Error occurred {}", throwable);
     }
 
 }

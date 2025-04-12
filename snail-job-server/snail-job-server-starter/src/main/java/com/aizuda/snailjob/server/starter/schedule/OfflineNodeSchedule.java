@@ -64,7 +64,7 @@ public class OfflineNodeSchedule extends AbstractSchedule implements Lifecycle {
             }
 
         } catch (Exception e) {
-            SnailJobLog.LOCAL.error("clearOfflineNode 失败", e);
+            SnailJobLog.LOCAL.error("Clear offline node failed", e);
         }
     }
 

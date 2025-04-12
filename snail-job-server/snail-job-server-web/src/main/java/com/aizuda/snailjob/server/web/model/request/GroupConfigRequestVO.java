@@ -16,17 +16,17 @@ import lombok.Data;
 @Data
 public class GroupConfigRequestVO {
 
-    @NotBlank(message = "组名称不能为空")
-    @Pattern(regexp = "^[A-Za-z0-9_-]{1,64}$", message = "仅支持长度为1~64字符且类型为数字、字母、下划线和短横线")
+    @NotBlank(message = "Group name cannot be null")
+    @Pattern(regexp = "^[A-Za-z0-9_-]{1,64}$", message = "Only supports 1~64 characters, including numbers, letters, underscores, and hyphens")
     private String groupName;
 
-    @NotNull(message = "组状态不能为空")
+    @NotNull(message = "Group status cannot be null")
     private Integer groupStatus;
 
     /**
      * 令牌
      */
-    @NotBlank(message = "令牌不能为空")
+    @NotBlank(message = "Token cannot be null")
     private String token;
 
     /**
@@ -37,20 +37,20 @@ public class GroupConfigRequestVO {
     /**
      * 分区
      */
-    @NotNull(message = "分区不能为空")
+    @NotNull(message = "Partition cannot be null")
     private Integer groupPartition;
 
     /**
      * 唯一id生成模式
      * {@link IdGeneratorModeEnum}
      */
-    @NotNull(message = "id生成模式不能为空")
+    @NotNull(message = "ID generation mode cannot be null")
     private Integer idGeneratorMode;
 
     /**
      * 是否初始化场景
      */
-    @NotNull(message = "初始化场不能为空")
+    @NotNull(message = "Initialization field cannot be null")
     private Integer initScene;
 
 }

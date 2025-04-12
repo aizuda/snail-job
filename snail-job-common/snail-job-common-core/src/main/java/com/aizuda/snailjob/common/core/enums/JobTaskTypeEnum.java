@@ -29,6 +29,6 @@ public enum JobTaskTypeEnum {
             }
         }
 
-        throw new SnailJobCommonException("未知类型");
+        throw new SnailJobCommonException("Unknown type");
     }
 }

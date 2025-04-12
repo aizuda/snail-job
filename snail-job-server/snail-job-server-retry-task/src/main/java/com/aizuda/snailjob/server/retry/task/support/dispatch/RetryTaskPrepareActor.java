@@ -46,7 +46,7 @@ public class RetryTaskPrepareActor extends AbstractActor {
             try {
                 doPrepare(prepareDTO);
             } catch (Exception e) {
-                log.error("预处理节点异常", e);
+                log.error("Preprocessing node exception", e);
             } finally {
                 getContext().stop(getSelf());
             }

@@ -49,7 +49,7 @@ public class RunningRetryPrepareHandler implements RetryPrePareHandler {
 
         // 计算超时时间，到达超时时间中断任务
         if (delay > DateUtils.toEpochMilli(prepare.getExecutorTimeout())) {
-            log.info("任务执行超时.retryTaskId:[{}] delay:[{}] executorTimeout:[{}]", prepare.getRetryTaskId(), delay, DateUtils.toEpochMilli(prepare.getExecutorTimeout()));
+            log.info("Task execution timeout. RetryTaskId:[{}] Delay:[{}] ExecutorTimeout:[{}]", prepare.getRetryTaskId(), delay, DateUtils.toEpochMilli(prepare.getExecutorTimeout()));
             // 超时停止任务
             TaskStopJobDTO stopJobDTO = RetryTaskConverter.INSTANCE.toTaskStopJobDTO(prepare);
             stopJobDTO.setOperationReason(RetryOperationReasonEnum.TASK_EXECUTION_TIMEOUT.getReason());

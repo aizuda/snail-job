@@ -49,7 +49,7 @@ public class WebSocketConfigurator extends ServerEndpointConfig.Configurator {
             String token = parameterMap.get(AUTHENTICATION).get(0);
             systemUser = JsonUtil.parseObject(JWT.decode(token).getAudience().get(0), SystemUser.class);
         } catch (JWTDecodeException j) {
-            throw new SnailJobAuthenticationException("登陆过期，请重新登陆");
+            throw new SnailJobAuthenticationException("Login expired, please login again");
         }
 
         String sid = parameterMap.get(SID).get(0);

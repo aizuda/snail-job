@@ -15,28 +15,28 @@ public class JobNotifyConfigRequestVO {
 
     private Long id;
 
-    @NotBlank(message = "组名称 不能为空")
-    @Pattern(regexp = "^[A-Za-z0-9_-]{1,64}$", message = "仅支持长度为1~64字符且类型为数字、字母、下划线和短横线")
+    @NotBlank(message = "Group name cannot be null")
+    @Pattern(regexp = "^[A-Za-z0-9_-]{1,64}$", message = "Only supports 1~64 characters, including numbers, letters, underscores, and hyphens")
     private String groupName;
 
-    @NotNull(message = "任务不能为空")
+    @NotNull(message = "Task cannot be empty")
     private Long jobId;
 
-    @NotNull(message = "通知状态不能为空")
+    @NotNull(message = "Notification status cannot be empty")
     private Integer notifyStatus;
 
-    @NotNull(message = "通知类型不能为空")
+    @NotNull(message = "Notification type cannot be empty")
     private Integer notifyType;
 
-    @NotBlank(message = "通知属性不能为空")
+    @NotBlank(message = "Notification attributes cannot be empty")
     private String notifyAttribute;
 
     private Integer notifyThreshold;
 
-    @NotNull(message = "通知场景不能为空")
+    @NotNull(message = "Notification scene cannot be empty")
     private Integer notifyScene;
 
-    @NotNull(message = "限流状态不能为空")
+    @NotNull(message = "Rate limiting status cannot be empty")
     private Integer rateLimiterStatus;
 
     private Integer rateLimiterThreshold;

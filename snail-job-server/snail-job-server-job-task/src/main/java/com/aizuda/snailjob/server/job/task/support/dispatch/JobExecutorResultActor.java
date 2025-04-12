@@ -36,7 +36,7 @@ public class JobExecutorResultActor extends AbstractActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder().match(JobExecutorResultDTO.class, result -> {
-            SnailJobLog.LOCAL.debug("更新任务状态. 参数:[{}]", JsonUtil.toJsonString(result));
+            SnailJobLog.LOCAL.debug("Update task status. Parameters:[{}]", JsonUtil.toJsonString(result));
             try {
                 Assert.notNull(result.getTaskId(), ()-> new SnailJobServerException("taskId can not be null"));
                 Assert.notNull(result.getJobId(), ()-> new SnailJobServerException("jobId can not be null"));
@@ -56,7 +56,7 @@ public class JobExecutorResultActor extends AbstractActor {
 
                 Assert.isTrue(1 == jobTaskMapper.update(jobTask,
                                 new LambdaUpdateWrapper<JobTask>().eq(JobTask::getId, result.getTaskId())),
-                        () -> new SnailJobServerException("更新任务实例失败"));
+                        () -> new SnailJobServerException("Updating task instance failed"));
 
                 // 除MAP和MAP_REDUCE 任务之外，其他任务都是叶子节点
                 if (Objects.nonNull(result.getIsLeaf()) && StatusEnum.NO.getStatus().equals(result.getIsLeaf())) {

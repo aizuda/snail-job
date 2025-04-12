@@ -29,7 +29,7 @@ public interface SceneConfigService {
 
     boolean updateStatus(Long id, final Integer status);
 
-    void importSceneConfig(@Valid @NotEmpty(message = "导入数据不能为空") List<SceneConfigRequestVO> requests);
+    void importSceneConfig(@Valid @NotEmpty(message = "Import data cannot be empty") List<SceneConfigRequestVO> requests);
 
     String exportSceneConfig(ExportSceneVO exportSceneVO);
 

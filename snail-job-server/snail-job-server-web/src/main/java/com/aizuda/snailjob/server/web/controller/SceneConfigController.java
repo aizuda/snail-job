@@ -86,7 +86,7 @@ public class SceneConfigController {
 
     @LoginRequired
     @DeleteMapping("/ids")
-    public boolean deleteByIds(@RequestBody @NotEmpty(message = "ids不能为空") Set<Long> ids) {
+    public boolean deleteByIds(@RequestBody @NotEmpty(message = "ids cannot be null") Set<Long> ids) {
         return sceneConfigService.deleteByIds(ids);
     }
 }

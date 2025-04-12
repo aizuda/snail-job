@@ -37,7 +37,7 @@ public class ResidentJobTimerTask implements TimerTask<String> {
             ActorRef actorRef = ActorGenerator.jobTaskPrepareActor();
             actorRef.tell(jobTaskPrepare, actorRef);
         } catch (Exception e) {
-            SnailJobLog.LOCAL.error("任务调度执行失败", e);
+            SnailJobLog.LOCAL.error("Task scheduling execution failed", e);
         }
     }
 

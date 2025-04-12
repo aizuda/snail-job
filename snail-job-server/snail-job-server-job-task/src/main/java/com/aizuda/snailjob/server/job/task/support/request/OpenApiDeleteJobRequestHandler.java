@@ -61,7 +61,7 @@ public class OpenApiDeleteJobRequestHandler extends PostHttpRequestHandler {
                         .eq(Job::getNamespaceId, namespaceId)
                         .eq(Job::getJobStatus, StatusEnum.NO.getStatus())
                         .in(Job::getId, ids)
-        ), () -> new SnailJobServerException("删除定时任务失败, 请检查任务状态是否关闭状态"));
+        ), () -> new SnailJobServerException("Failed to delete scheduled task, please check if the task status is closed"));
 
         List<JobSummary> jobSummaries = jobSummaryMapper.selectList(new LambdaQueryWrapper<JobSummary>()
                 .select(JobSummary::getId)

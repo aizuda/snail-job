@@ -15,9 +15,9 @@ import lombok.Getter;
 @Getter
 public enum TaskGeneratorSceneEnum {
 
-    CLIENT_REPORT(1, "客户端匹配上报"),
-    MANA_BATCH(2, "控制台手动批量新增"),
-    MANA_SINGLE(3, "控制台手动单个新增"),
+    CLIENT_REPORT(1, "Client matching report"),
+    MANA_BATCH(2, "Console manual batch addition"),
+    MANA_SINGLE(3, "Console manual single addition"),
     ;
 
     private final int scene;
@@ -31,7 +31,7 @@ public enum TaskGeneratorSceneEnum {
             }
         }
 
-        throw new SnailJobServerException("不支持的任务生成场景 [{}]", scene);
+        throw new SnailJobServerException("Unsupported task generation scenario [{}]", scene);
     }
 
 }

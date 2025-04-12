@@ -100,7 +100,7 @@ public class MapReduceTaskGenerator extends AbstractJobTaskGenerator {
         jobTask.setMrStage(MapReduceStageEnum.MERGE_REDUCE.getStage());
         jobTask.setTaskName(MERGE_REDUCE_TASK);
         Assert.isTrue(1 == jobTaskMapper.insert(jobTask),
-                () -> new SnailJobServerException("新增任务实例失败"));
+                () -> new SnailJobServerException("Adding new task instance failed"));
 
         return Lists.newArrayList(jobTask);
     }
@@ -212,7 +212,7 @@ public class MapReduceTaskGenerator extends AbstractJobTaskGenerator {
                 parentJobTask1.setId(context.getParentId());
                 parentJobTask1.setLeaf(StatusEnum.NO.getStatus());
                 Assert.isTrue(1 == jobTaskMapper.updateById(parentJobTask1),
-                        () -> new SnailJobMapReduceException("更新父节点失败"));
+                        () -> new SnailJobMapReduceException("Updating parent node failed"));
             }
 
             return jobTasks;

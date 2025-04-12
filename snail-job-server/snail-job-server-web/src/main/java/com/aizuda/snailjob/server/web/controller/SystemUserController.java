@@ -65,7 +65,7 @@ public class SystemUserController {
     public void update(@RequestBody @Valid SystemUserRequestVO requestVO) {
         // 1. 超级管理员(id=1)不能变更为普通用户
         if (SUPER_ADMIN_ID.equals(requestVO.getId()) && RoleEnum.isUser(requestVO.getRole())) {
-            throw new SnailJobServerException("不允许修改超级管理员角色");
+            throw new SnailJobServerException("Super admin role cannot be modified");
         }
         systemUserService.update(requestVO);
     }
@@ -86,7 +86,7 @@ public class SystemUserController {
     @DeleteMapping("/user/{id}")
     public boolean delUser(@PathVariable("id") Long id) {
         if (SUPER_ADMIN_ID.equals(id)) {
-            throw new SnailJobServerException("不允许删除超级管理员");
+            throw new SnailJobServerException("Super admin cannot be deleted");
         }
         return systemUserService.delUser(id);
     }

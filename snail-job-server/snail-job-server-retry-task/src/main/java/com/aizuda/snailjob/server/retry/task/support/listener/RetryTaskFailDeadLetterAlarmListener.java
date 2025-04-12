@@ -72,7 +72,7 @@ public class RetryTaskFailDeadLetterAlarmListener extends
     @TransactionalEventListener(fallbackExecution = true, phase = TransactionPhase.AFTER_COMPLETION)
     public void doOnApplicationEvent(RetryTaskFailDeadLetterAlarmEvent event) {
         if (!queue.offer(event.getRetryDeadLetters())) {
-            SnailJobLog.LOCAL.warn("任务重试失败进入死信队列告警队列已满");
+            SnailJobLog.LOCAL.warn("Task retry failure enters dead letter queue, alert queue is full");
         }
     }
 
@@ -88,7 +88,7 @@ public class RetryTaskFailDeadLetterAlarmListener extends
                         retryAlarmInfo.getSceneName(),
                         retryAlarmInfo.getArgsStr(),
                         DateUtils.toNowFormat(DateUtils.NORM_DATETIME_PATTERN))
-                .title("组:[{}] 场景:[{}] 环境重试任务失败进入死信队列",
+                .title("Group:[{}] Scenario:[{}] Environment retry task fails and enters dead letter queue",
                         retryAlarmInfo.getGroupName(), retryAlarmInfo.getSceneName());
     }
 

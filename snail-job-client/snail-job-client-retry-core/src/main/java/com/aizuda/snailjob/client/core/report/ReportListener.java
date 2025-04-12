@@ -97,7 +97,7 @@ public class ReportListener implements Listener<RetryTaskDTO> {
                     public <V> void onRetry(Attempt<V> attempt) {
 
                         if (attempt.hasException()) {
-                            SnailJobLog.LOCAL.error("SnailJob上报异常数据时接口发生异常，第[{}]次尝试上报 ", attempt.getAttemptNumber(), attempt.getExceptionCause());
+                            SnailJobLog.LOCAL.error(" SnailJob reports an exception when reporting abnormal data, attempt [{}]", attempt.getAttemptNumber(), attempt.getExceptionCause());
                         }
 
                     }
@@ -129,13 +129,13 @@ public class ReportListener implements Listener<RetryTaskDTO> {
                                 properties.getGroup(),
                                 LocalDateTime.now().format(formatter),
                                 e.getMessage())
-                        .title("上报异常:[{}]", properties.getGroup())
+                        .title("Reporting exception: [{}]", properties.getGroup())
                         .notifyAttribute(recipient.getNotifyAttribute());
                 Optional.ofNullable(SnailJobAlarmFactory.getAlarmType(recipient.getNotifyType())).ifPresent(alarm -> alarm.asyncSendMessage(context));
             }
 
         } catch (Exception e1) {
-            SnailJobLog.LOCAL.error("客户端发送组件异常告警失败", e1);
+            SnailJobLog.LOCAL.error("Client failed to send component exception alarm", e1);
         }
 
     }

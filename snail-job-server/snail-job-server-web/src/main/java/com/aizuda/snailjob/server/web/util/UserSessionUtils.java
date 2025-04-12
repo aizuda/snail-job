@@ -48,7 +48,7 @@ public final class UserSessionUtils {
             return Collections.emptyList();
         } else {
             List<String> groupNames = userSessionVO.getGroupNames();
-            Assert.notEmpty(groupNames, () -> new SnailJobAuthenticationException("普通用户组权限为空"));
+            Assert.notEmpty(groupNames, () -> new SnailJobAuthenticationException("Normal user group permissions are empty"));
             // 若是普通用户且权限包括查询条件
             if (StrUtil.isNotBlank(groupNameQuery) && groupNames.contains(groupNameQuery)) {
                 return Lists.newArrayList(groupNameQuery);

@@ -58,7 +58,7 @@ public class RequestCallbackClientActor extends AbstractActor {
             try {
                 doCallback(executorDTO);
             } catch (Exception e) {
-                log.error("请求客户端发生异常", e);
+                log.error("Client request exception occurred", e);
             }
         }).build();
     }
@@ -72,10 +72,10 @@ public class RequestCallbackClientActor extends AbstractActor {
                 executorDTO.getClientId()
         );
         if (Objects.isNull(registerNodeInfo)) {
-            taskExecuteFailure(executorDTO, "客户端不存在");
+            taskExecuteFailure(executorDTO, "Client does not exist");
             JobLogMetaDTO jobLogMetaDTO = RetryTaskConverter.INSTANCE.toJobLogDTO(executorDTO);
             jobLogMetaDTO.setTimestamp(nowMilli);
-            SnailJobLog.REMOTE.error("retryTaskId:[{}] 任务调度失败. 失败原因: 无可执行的客户端 <|>{}<|>", executorDTO.getRetryTaskId(),
+            SnailJobLog.REMOTE.error("RetryTaskId:[{}] Task scheduling failed. Reason: No executable client <|>{}<|>", executorDTO.getRetryTaskId(),
                     jobLogMetaDTO);
             return;
         }
@@ -87,7 +87,7 @@ public class RequestCallbackClientActor extends AbstractActor {
         if (Objects.isNull(retry)) {
             JobLogMetaDTO jobLogMetaDTO = RetryTaskConverter.INSTANCE.toJobLogDTO(executorDTO);
             jobLogMetaDTO.setTimestamp(nowMilli);
-            SnailJobLog.REMOTE.error("retryTaskId:[{}] 任务调度失败. 失败原因: 重试任务不存在 <|>{}<|>", executorDTO.getRetryTaskId(),
+            SnailJobLog.REMOTE.error("RetryTaskId:[{}] Task scheduling failed. Reason: Retry task does not exist <|>{}<|>", executorDTO.getRetryTaskId(),
                     jobLogMetaDTO);
             return;
         }
@@ -98,10 +98,10 @@ public class RequestCallbackClientActor extends AbstractActor {
             RetryRpcClient rpcClient = buildRpcClient(registerNodeInfo, executorDTO);
             Result<Boolean> dispatch = rpcClient.callback(retryCallbackRequest);
             if (dispatch.getStatus() == StatusEnum.YES.getStatus()) {
-                SnailJobLog.LOCAL.info("retryTaskId:[{}] 任务调度成功.", executorDTO.getRetryTaskId());
+                SnailJobLog.LOCAL.info("RetryTaskId:[{}] Task scheduled successfully.", executorDTO.getRetryTaskId());
             } else {
                 // 客户端返回失败，则认为任务执行失败
-                SnailJobLog.LOCAL.error("retryTaskId:[{}] 任务调度失败. msg:[{}]", executorDTO.getRetryTaskId(), dispatch.getMessage());
+                SnailJobLog.LOCAL.error("RetryTaskId:[{}] Task scheduling failed. Msg:[{}]", executorDTO.getRetryTaskId(), dispatch.getMessage());
                 taskExecuteFailure(executorDTO, dispatch.getMessage());
             }
 
@@ -119,7 +119,7 @@ public class RequestCallbackClientActor extends AbstractActor {
 
             RetryLogMetaDTO retryTaskLogDTO = RetryTaskLogConverter.INSTANCE.toRetryLogMetaDTO(executorDTO);
             retryTaskLogDTO.setTimestamp(nowMilli);
-            SnailJobLog.REMOTE.error("retryTaskId:[{}] 任务调度失败. <|>{}<|>", retryTaskLogDTO.getRetryTaskId(),
+            SnailJobLog.REMOTE.error("RetryTaskId:[{}] Task scheduling failed. <|>{}<|>", retryTaskLogDTO.getRetryTaskId(),
                     retryTaskLogDTO, throwable);
 
             taskExecuteFailure(executorDTO, throwable.getMessage());

@@ -19,10 +19,10 @@ public class SystemUserRequestVO {
     @NotNull(groups = {PutMapping.class})
     private Long id;
 
-    @NotBlank(message = "用户名不能为空", groups = PostMapping.class)
+    @NotBlank(message = "Username cannot be empty", groups = PostMapping.class)
     private String username;
 
-    @NotBlank(message = "密码不能为空", groups = PostMapping.class)
+    @NotBlank(message = "Password cannot be empty", groups = PostMapping.class)
     private String password;
 
     @NotNull(groups = {PutMapping.class, PostMapping.class})

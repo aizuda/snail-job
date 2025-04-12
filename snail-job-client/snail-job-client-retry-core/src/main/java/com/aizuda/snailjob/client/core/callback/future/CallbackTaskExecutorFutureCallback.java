@@ -45,7 +45,7 @@ public class CallbackTaskExecutorFutureCallback implements FutureCallback<Boolea
             request.setTaskStatus(RetryTaskStatusEnum.SUCCESS.getStatus());
             CLIENT.callbackResult(request);
         } catch (Exception e) {
-            SnailJobLog.REMOTE.error("回调执行结果上报异常.[{}]", context.getRetryTaskId(), e);
+            SnailJobLog.REMOTE.error("Callback execution result reporting exception.[{}]", context.getRetryTaskId(), e);
 
         }
 
@@ -54,7 +54,7 @@ public class CallbackTaskExecutorFutureCallback implements FutureCallback<Boolea
     @Override
     public void onFailure(Throwable t) {
         if (t instanceof CancellationException) {
-            SnailJobLog.LOCAL.debug("任务已经被取消，不做状态回传");
+            SnailJobLog.LOCAL.debug("The task has been canceled, no status feedback will be made");
             return;
         }
         try {
@@ -63,7 +63,7 @@ public class CallbackTaskExecutorFutureCallback implements FutureCallback<Boolea
             request.setExceptionMsg(t.getMessage());
             CLIENT.callbackResult(request);
         } catch (Exception e) {
-            SnailJobLog.REMOTE.error("回调执行结果上报异常.[{}]", context.getRetryTaskId(), e);
+            SnailJobLog.REMOTE.error("Callback execution result reporting exception.[{}]", context.getRetryTaskId(), e);
         }
     }
 

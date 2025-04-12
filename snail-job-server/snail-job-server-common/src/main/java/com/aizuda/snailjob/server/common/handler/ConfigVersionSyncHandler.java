@@ -65,7 +65,7 @@ public class ConfigVersionSyncHandler implements Lifecycle, Runnable {
                         .nodeInfo(registerNodeInfo)
                         .client(CommonRpcClient.class)
                         .build();
-                SnailJobLog.LOCAL.info("同步结果 [{}]", rpcClient.syncConfig(configDTO));
+                SnailJobLog.LOCAL.info("Synchronization result [{}]", rpcClient.syncConfig(configDTO));
             }
         } catch (Exception e) {
             SnailJobLog.LOCAL.error("version sync error. groupName:[{}]", groupName, e);

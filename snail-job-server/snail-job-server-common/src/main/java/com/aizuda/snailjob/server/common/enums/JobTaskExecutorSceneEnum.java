@@ -37,7 +37,7 @@ public enum JobTaskExecutorSceneEnum {
             }
         }
 
-        throw new SnailJobServerException("无效枚举类型.[{}]", type);
+        throw new SnailJobServerException("Invalid enumeration type.[{}]", type);
     }
 
 }

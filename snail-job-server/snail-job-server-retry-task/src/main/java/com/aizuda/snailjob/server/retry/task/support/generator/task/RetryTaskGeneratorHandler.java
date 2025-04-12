@@ -47,7 +47,7 @@ public class RetryTaskGeneratorHandler {
         retryTask.setOperationReason(generator.getOperationReason());
 
         retryTask.setExtAttrs(StrUtil.EMPTY);
-        Assert.isTrue(1 == retryTaskMapper.insert(retryTask), () -> new SnailJobServerException("插入重试任务失败"));
+        Assert.isTrue(1 == retryTaskMapper.insert(retryTask), () -> new SnailJobServerException("Inserting retry task failed"));
 
         if (!RetryTaskStatusEnum.WAITING.getStatus().equals(taskStatus)) {
             return;

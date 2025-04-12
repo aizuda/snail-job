@@ -60,7 +60,7 @@ public class SnailDispatcherRequestHandler {
             String snailJobAuth = request.getHeaders().getAsString(SystemConstants.SNAIL_JOB_AUTH_TOKEN);
             String configToken = Optional.ofNullable(snailJobProperties.getToken()).orElse(SystemConstants.DEFAULT_TOKEN);
             if (!configToken.equals(snailJobAuth)) {
-                throw new SnailJobClientException("认证失败.【请检查配置的Token是否正确】");
+                throw new SnailJobClientException("Authentication failed. [Please check if the configured Token is correct]");
             }
 
             UrlBuilder builder = UrlBuilder.ofHttp(request.getUri());
@@ -68,7 +68,7 @@ public class SnailDispatcherRequestHandler {
 
             endPointInfo = EndPointInfoCache.get(builder.getPathStr(), requestMethod);
             if (Objects.isNull(endPointInfo)) {
-                throw new SnailJobClientException("无法找到对应的处理请检查对应的包是否正确引入. " +
+                throw new SnailJobClientException(" Cannot find corresponding processing, please check if the corresponding package is correctly introduced." +
                         "path:[{}] requestMethod:[{}]", builder.getPathStr(), requestMethod);
             }
 
@@ -133,13 +133,13 @@ public class SnailDispatcherRequestHandler {
             String snailJobAuth = headersMap.get(SystemConstants.SNAIL_JOB_AUTH_TOKEN);
             String configToken = Optional.ofNullable(snailJobProperties.getToken()).orElse(SystemConstants.DEFAULT_TOKEN);
             if (!configToken.equals(snailJobAuth)) {
-                throw new SnailJobClientException("认证失败.【请检查配置的Token是否正确】");
+                throw new SnailJobClientException("Authentication failed. [Please check if the configured Token is correct]");
             }
 
             UrlBuilder builder = UrlBuilder.ofHttp(httpRequest.getUri());
             endPointInfo = EndPointInfoCache.get(builder.getPathStr(), RequestMethod.POST);
             if (Objects.isNull(endPointInfo)) {
-                throw new SnailJobClientException("无法找到对应的处理请检查对应的包是否正确引入. " +
+                throw new SnailJobClientException(" Cannot find corresponding processing, please check if the corresponding package is correctly introduced." +
                                                   "path:[{}] requestMethod:[{}]", builder.getPathStr());
             }
 

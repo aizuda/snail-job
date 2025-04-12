@@ -43,7 +43,7 @@ public class OpenApiGetJobDetailRequestHandler extends PostHttpRequestHandler {
         SnailJobRequest retryRequest = JsonUtil.parseObject(content, SnailJobRequest.class);
         Object[] args = retryRequest.getArgs();
         Long jobId = JsonUtil.parseObject(JsonUtil.toJsonString(args[0]), Long.class);
-        Assert.notNull(jobId, () -> new SnailJobServerException("id 不能为空"));
+        Assert.notNull(jobId, () -> new SnailJobServerException("id cannot be null"));
 
         Job job = jobMapper.selectById(jobId);
         JobResponseVO convert = JobResponseVOConverter.INSTANCE.convert(job);

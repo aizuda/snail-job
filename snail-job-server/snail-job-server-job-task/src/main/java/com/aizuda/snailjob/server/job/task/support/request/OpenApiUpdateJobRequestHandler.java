@@ -55,13 +55,13 @@ public class OpenApiUpdateJobRequestHandler extends PostHttpRequestHandler {
         String namespace = HttpHeaderUtil.getNamespace(headers);
         JobRequestVO jobRequestVO = JsonUtil.parseObject(JsonUtil.toJsonString(args[0]), JobRequestVO.class);
         if (Objects.isNull(jobRequestVO.getId())){
-            SnailJobLog.LOCAL.warn("id不能为空，更新失败");
+            SnailJobLog.LOCAL.warn("ID cannot be empty, update failed");
             return new SnailJobRpcResult(false, retryRequest.getReqId());
         }
 
         Job job = jobMapper.selectById(jobRequestVO.getId());
         if (Objects.isNull(job)){
-            SnailJobLog.LOCAL.warn("job为空，更新失败");
+            SnailJobLog.LOCAL.warn("Job is null, update failed");
             return new SnailJobRpcResult(false, retryRequest.getReqId());
         }
 
@@ -111,7 +111,7 @@ public class OpenApiUpdateJobRequestHandler extends PostHttpRequestHandler {
                 return StatusEnum.YES.getStatus();
             }
         } else {
-            throw new SnailJobServerException("未知触发类型");
+            throw new SnailJobServerException("Unknown trigger type");
         }
 
         return StatusEnum.NO.getStatus();

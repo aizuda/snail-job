@@ -108,7 +108,7 @@ public class SceneConfigServiceImpl implements SceneConfigService {
                         .eq(RetrySceneConfig::getGroupName, requestVO.getGroupName())
                         .eq(RetrySceneConfig::getSceneName, requestVO.getSceneName())
 
-        ), () -> new SnailJobServerException("场景名称重复. {}", requestVO.getSceneName()));
+        ), () -> new SnailJobServerException("Scene name duplicate. {}", requestVO.getSceneName()));
 
         RetrySceneConfig retrySceneConfig = SceneConfigConverter.INSTANCE.toRetrySceneConfig(requestVO);
         retrySceneConfig.setCreateDt(LocalDateTime.now());
@@ -239,7 +239,7 @@ public class SceneConfigServiceImpl implements SceneConfigService {
                 .in(RetrySceneConfig::getId, ids);
 
         List<RetrySceneConfig> sceneConfigs = accessTemplate.getSceneConfigAccess().list(queryWrapper);
-        Assert.notEmpty(sceneConfigs, () -> new SnailJobServerException("删除重试场景失败, 请检查场景状态是否关闭状态"));
+        Assert.notEmpty(sceneConfigs, () -> new SnailJobServerException("Failed to delete retry scene, please check if the scene status is closed"));
 
         Set<String> sceneNames = StreamUtils.toSet(sceneConfigs, RetrySceneConfig::getSceneName);
         Set<String> groupNames = StreamUtils.toSet(sceneConfigs, RetrySceneConfig::getGroupName);
@@ -253,7 +253,7 @@ public class SceneConfigServiceImpl implements SceneConfigService {
                             .in(Retry::getSceneName, sceneNames)
                             .orderByAsc(Retry::getId)).getRecords();
             Assert.isTrue(CollUtil.isEmpty(retries),
-                    () -> new SnailJobServerException("删除重试场景失败, 存在【重试任务】请先删除【重试任务】在重试"));
+                    () -> new SnailJobServerException("Failed to delete retry scene, retry tasks exist. Please delete the retry tasks before retrying"));
 
             List<RetryDeadLetter> retryDeadLetters = retryTaskTaskAccess.listPage(new PageDTO<>(1, 1),
                     new LambdaQueryWrapper<RetryDeadLetter>()
@@ -261,11 +261,11 @@ public class SceneConfigServiceImpl implements SceneConfigService {
                             .in(RetryDeadLetter::getSceneName, sceneNames)
                             .orderByAsc(RetryDeadLetter::getId)).getRecords();
             Assert.isTrue(CollUtil.isEmpty(retryDeadLetters),
-                    () -> new SnailJobServerException("删除重试场景失败, 存在【死信任务】请先删除【死信任务】在重试"));
+                    () -> new SnailJobServerException("Failed to delete retry scene, dead letter tasks exist. Please delete the dead letter tasks before retrying"));
         }
 
         Assert.isTrue(ids.size() == accessTemplate.getSceneConfigAccess().delete(queryWrapper),
-                () -> new SnailJobServerException("删除重试场景失败, 请检查场景状态是否关闭状态"));
+                () -> new SnailJobServerException("Failed to delete retry scene, please check if the scene status is closed"));
 
         List<RetrySummary> retrySummaries = retrySummaryMapper.selectList(
                 new LambdaQueryWrapper<RetrySummary>()
@@ -277,7 +277,7 @@ public class SceneConfigServiceImpl implements SceneConfigService {
 
         if (CollUtil.isNotEmpty(retrySummaries)) {
             Assert.isTrue(retrySummaries.size() == retrySummaryMapper.deleteByIds(StreamUtils.toSet(retrySummaries, RetrySummary::getId))
-                    , () -> new SnailJobServerException("删除汇总表数据失败"));
+                    , () -> new SnailJobServerException("Failed to delete summary table data"));
         }
 
         return Boolean.TRUE;
@@ -306,7 +306,7 @@ public class SceneConfigServiceImpl implements SceneConfigService {
                         .in(RetrySceneConfig::getGroupName, groupNameSet)
                         .in(RetrySceneConfig::getSceneName, sceneNameSet));
 
-        Assert.isTrue(CollUtil.isEmpty(sceneConfigs), () -> new SnailJobServerException("导入失败. 原因:场景{}已存在",
+        Assert.isTrue(CollUtil.isEmpty(sceneConfigs), () -> new SnailJobServerException("Import failed. Reason: Scene {} already exists",
                 StreamUtils.toSet(sceneConfigs, RetrySceneConfig::getSceneName)));
 
         LocalDateTime now = LocalDateTime.now();
@@ -347,11 +347,11 @@ public class SceneConfigServiceImpl implements SceneConfigService {
         if (Lists.newArrayList(WaitStrategies.WaitStrategyEnum.FIXED.getType(),
                         WaitStrategies.WaitStrategyEnum.RANDOM.getType()).contains(backOff)) {
             if (Integer.parseInt(triggerInterval) < 10) {
-                throw new SnailJobServerException("间隔时间不得小于10");
+                throw new SnailJobServerException("Interval time must not be less than 10");
             }
         } else if (backOff == WaitStrategies.WaitStrategyEnum.CRON.getType()) {
             if (CronUtils.getExecuteInterval(triggerInterval) < 10 * 1000) {
-                throw new SnailJobServerException("间隔时间不得小于10");
+                throw new SnailJobServerException("Interval time must not be less than 10");
             }
         }
     }

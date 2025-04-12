@@ -33,6 +33,6 @@ public abstract class TriggerJobHandler<H> extends AbstractTriggerHandler<H, Boo
 
     @Override
     protected Pair<Boolean, String> checkRequest() {
-        return Pair.of(getReqDTO().getJobId() != null && !Long.valueOf(0).equals(getReqDTO().getJobId()),  "triggerJobId不能为null并且必须大于0");
+        return Pair.of(getReqDTO().getJobId() != null && !Long.valueOf(0).equals(getReqDTO().getJobId()),  "triggerJobId cannot be null and must be greater than 0");
     }
 }

@@ -56,7 +56,7 @@ public class MapReduceClientCallbackHandler extends AbstractClientCallbackHandle
     protected String chooseNewClient(ClientCallbackContext context) {
         Set<RegisterNodeInfo> nodes = CacheRegisterTable.getServerNodeSet(context.getGroupName(), context.getNamespaceId());
         if (CollUtil.isEmpty(nodes)) {
-            SnailJobLog.LOCAL.error("无可执行的客户端信息. jobId:[{}]", context.getJobId());
+            SnailJobLog.LOCAL.error("No executable client information. Job ID:[{}]", context.getJobId());
             return null;
         }
 

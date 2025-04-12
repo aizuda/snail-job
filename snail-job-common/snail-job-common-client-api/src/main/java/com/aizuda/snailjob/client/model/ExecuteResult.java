@@ -22,7 +22,7 @@ public class ExecuteResult {
     }
 
     public static ExecuteResult success(Object result) {
-        return new ExecuteResult(StatusEnum.YES.getStatus(), result, "任务执行成功");
+        return new ExecuteResult(StatusEnum.YES.getStatus(), result, "Task executed successfully");
     }
 
     public static ExecuteResult success() {
@@ -34,7 +34,7 @@ public class ExecuteResult {
     }
 
     public static ExecuteResult failure(Object result) {
-        return new ExecuteResult(StatusEnum.NO.getStatus(), result, "任务执行失败");
+        return new ExecuteResult(StatusEnum.NO.getStatus(), result, "Task execution failed");
     }
 
     public static ExecuteResult failure(Object result, String message) {

@@ -55,14 +55,14 @@ public class RetrySuccessHandler extends AbstractRetryResultHandler {
             retry.setRetryCount(retry.getRetryCount() + 1);
             retry.setDeleted(retry.getId());
             Assert.isTrue(1 == retryMapper.updateById(retry),
-                    () -> new SnailJobServerException("更新重试任务失败. groupName:[{}]",
+                    () -> new SnailJobServerException("Update retry task failed. Group name:[{}]",
                             retry.getGroupName()));
 
             RetryTask retryTask = new RetryTask();
             retryTask.setId(context.getRetryTaskId());
             retryTask.setTaskStatus(RetryTaskStatusEnum.SUCCESS.getStatus());
             Assert.isTrue(1 == retryTaskMapper.updateById(retryTask),
-                    () -> new SnailJobServerException("更新重试任务失败. groupName:[{}]", retry.getGroupName()));
+                    () -> new SnailJobServerException("Update retry task failed. Group name:[{}]", retry.getGroupName()));
 
             // 创建一个回调任务
             callbackRetryTaskHandler.create(retry, retrySceneConfig);

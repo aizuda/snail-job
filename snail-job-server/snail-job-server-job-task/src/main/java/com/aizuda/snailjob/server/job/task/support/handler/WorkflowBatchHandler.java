@@ -106,7 +106,7 @@ public class WorkflowBatchHandler {
     public boolean complete(Long workflowTaskBatchId, WorkflowTaskBatch workflowTaskBatch) {
         workflowTaskBatch = Optional.ofNullable(workflowTaskBatch)
                 .orElseGet(() -> workflowTaskBatchMapper.selectById(workflowTaskBatchId));
-        Assert.notNull(workflowTaskBatch, () -> new SnailJobServerException("任务不存在"));
+        Assert.notNull(workflowTaskBatch, () -> new SnailJobServerException("Task does not exist"));
 
         String flowInfo = workflowTaskBatch.getFlowInfo();
         MutableGraph<Long> graph = MutableGraphCache.getOrDefault(workflowTaskBatchId, flowInfo);
@@ -161,7 +161,7 @@ public class WorkflowBatchHandler {
                             SnailSpringContext.getContext().publishEvent(new WorkflowTaskFailAlarmEvent(WorkflowTaskFailAlarmEventDTO.builder()
                                     .workflowTaskBatchId(workflowTaskBatchId)
                                     .notifyScene(JobNotifySceneEnum.WORKFLOW_TASK_ERROR.getNotifyScene())
-                                    .reason("任务执行失败 jobTaskBatchId:" + jobTaskBatch.getId())
+                                    .reason("Task execution failed jobTaskBatchId:" + jobTaskBatch.getId())
                                     .build()));
                         }
                     }
@@ -196,13 +196,13 @@ public class WorkflowBatchHandler {
         workflowTaskBatch.setId(workflowTaskBatchId);
         // 先停止执行中的批次
         Assert.isTrue(1 == workflowTaskBatchMapper.updateById(workflowTaskBatch),
-                () -> new SnailJobServerException("停止工作流批次失败. id:[{}]",
+                () -> new SnailJobServerException("Stopping workflow batch failed. ID:[{}]",
                         workflowTaskBatchId));
 
         SnailSpringContext.getContext().publishEvent(new WorkflowTaskFailAlarmEvent(WorkflowTaskFailAlarmEventDTO.builder()
                 .workflowTaskBatchId(workflowTaskBatchId)
                 .notifyScene(JobNotifySceneEnum.WORKFLOW_TASK_ERROR.getNotifyScene())
-                .reason("停止工作流批次失败")
+                .reason("Stopping workflow batch failed")
                 .build()));
 
         // 关闭已经触发的任务
@@ -244,7 +244,7 @@ public class WorkflowBatchHandler {
     public void recoveryWorkflowExecutor(Long workflowTaskBatchId, WorkflowTaskBatch workflowTaskBatch) throws IOException {
         workflowTaskBatch = Optional.ofNullable(workflowTaskBatch)
                 .orElseGet(() -> workflowTaskBatchMapper.selectById(workflowTaskBatchId));
-        Assert.notNull(workflowTaskBatch, () -> new SnailJobServerException("任务不存在"));
+        Assert.notNull(workflowTaskBatch, () -> new SnailJobServerException("Task does not exist"));
         String flowInfo = workflowTaskBatch.getFlowInfo();
         MutableGraph<Long> graph = MutableGraphCache.getOrDefault(workflowTaskBatchId, flowInfo);
         Set<Long> successors = graph.successors(SystemConstants.ROOT);
@@ -335,7 +335,7 @@ public class WorkflowBatchHandler {
             ActorRef actorRef = ActorGenerator.workflowTaskExecutorActor();
             actorRef.tell(taskExecuteDTO, actorRef);
         } catch (Exception e) {
-            SnailJobLog.LOCAL.error("任务调度执行失败", e);
+            SnailJobLog.LOCAL.error("Task scheduling execution failed", e);
         }
     }
 
@@ -368,7 +368,7 @@ public class WorkflowBatchHandler {
                             }
                         }
 
-                        SnailJobLog.LOCAL.info("第【{}】次尝试更新上下文.taskBatchIds:[{}]  result:[{}] treadName:[{}] ",
+                        SnailJobLog.LOCAL.info(" Attempt [{}] to update context. Task batch IDs:[{}] Result:[{}] Thread name:[{}]",
                                 attempt.getAttemptNumber(), taskBatchIds, result, Thread.currentThread().getName());
                     }
                 }).build();
@@ -470,7 +470,7 @@ public class WorkflowBatchHandler {
     public static void mergeMaps(Map<String, Object> mainMap, Map<String, Object> waitMergeMap) {
         for (Map.Entry<String, Object> entry : waitMergeMap.entrySet()) {
             if (Objects.isNull(entry.getKey()) || Objects.isNull(entry.getValue())) {
-                SnailJobLog.LOCAL.warn("上下文的key和value不支持NULl");
+                SnailJobLog.LOCAL.warn("Context key and value do not support NULL");
                 continue;
             }
             mainMap.merge(entry.getKey(), entry.getValue(), (v1, v2) -> v2);

@@ -112,7 +112,7 @@ public class JobHandler {
             context.setTaskStatus(JobTaskStatusEnum.FAIL.getStatus());
             context.setRetryScene(JobRetrySceneEnum.MANUAL.getRetryScene());
             context.setWfContext(wfContext);
-            context.setExecuteResult(ExecuteResult.failure(null, "手动重试"));
+            context.setExecuteResult(ExecuteResult.failure(null, "Manual retry"));
             clientCallback.callback(context);
         }
 
@@ -179,7 +179,7 @@ public class JobHandler {
     public void deleteJobTaskBatchByIds(Set<Long> ids, String namespaceId) {
         // 1. 删除任务批次 job_task_batch
         Assert.isTrue(ids.size() == jobTaskBatchMapper.deleteByIds(ids),
-                () -> new SnailJobServerException("删除任务批次失败"));
+                () -> new SnailJobServerException("Failed to delete task batches"));
 
         // 2. 删除任务实例 job_task
         jobTaskMapper.delete(new LambdaQueryWrapper<JobTask>()

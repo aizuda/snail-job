@@ -32,7 +32,7 @@ public class InjectionMetaObjectHandler implements MetaObjectHandler {
                 baseEntity.setUpdateDt(current);
             }
         } catch (Exception e) {
-            throw new SnailJobDatasourceException("自动注入异常 => " + e.getMessage(), HttpStatus.HTTP_UNAUTHORIZED);
+            throw new SnailJobDatasourceException(" Automatic injection exception =>" + e.getMessage(), HttpStatus.HTTP_UNAUTHORIZED);
         }
     }
 
@@ -45,7 +45,7 @@ public class InjectionMetaObjectHandler implements MetaObjectHandler {
                 baseEntity.setUpdateDt(current);
             }
         } catch (Exception e) {
-            throw new SnailJobDatasourceException("自动注入异常 => " + e.getMessage(), HttpStatus.HTTP_UNAUTHORIZED);
+            throw new SnailJobDatasourceException(" Automatic injection exception =>" + e.getMessage(), HttpStatus.HTTP_UNAUTHORIZED);
         }
     }
 

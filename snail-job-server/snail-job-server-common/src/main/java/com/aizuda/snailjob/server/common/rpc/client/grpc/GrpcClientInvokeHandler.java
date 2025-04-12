@@ -164,7 +164,7 @@ public class GrpcClientInvokeHandler implements InvocationHandler {
                     sw.stop();
                 }
 
-                SnailJobLog.LOCAL.debug("request complete requestId:[{}] 耗时:[{}ms]", reqId);
+                SnailJobLog.LOCAL.debug("Request complete requestId:[{}] took [{}ms]", reqId);
 
                 if (async) {
                     // 暂时不支持异步调用

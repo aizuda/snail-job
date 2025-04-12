@@ -28,7 +28,7 @@ public class SpELExpressionEngine extends AbstractExpressionEngine {
             context.forEach(evaluationContext::setVariable);
             return ENGINE.parseExpression(expression).getValue(evaluationContext, Object.class);
         } catch (Exception e) {
-            throw new SnailJobCommonException("SpEL表达式解析异常. expression:[{}] context:[{}]",
+            throw new SnailJobCommonException("SpEL expression parsing exception. expression:[{}] context:[{}]",
                     expression, JsonUtil.toJsonString(context), e);
         }
 

@@ -41,12 +41,12 @@ public class WebhookAlarm extends AbstractAlarm<AlarmContext> {
             HttpRequest request = post.body(JsonUtil.toJsonString(webhookMessage), ContentTypeEnum.valueOf(webhookAttribute.getContentType()).getMediaType().toString())
                     .header(SystemConstants.SECRET, webhookAttribute.getSecret());
             HttpResponse execute = request.execute();
-            SnailJobLog.LOCAL.info("发送Webhook告警结果. webHook:[{}]，结果: [{}]", webhookAttribute.getWebhookUrl(), execute.body());
+            SnailJobLog.LOCAL.info("Sending Webhook alert result. webHook:[{}], result: [{}]", webhookAttribute.getWebhookUrl(), execute.body());
             if (execute.isOk()) {
                 return true;
             }
         } catch (Exception e) {
-            SnailJobLog.LOCAL.error("发送Webhook告警异常. webHook:[{}]", webhookAttribute, e);
+            SnailJobLog.LOCAL.error("Sending Webhook alert exception. webHook:[{}]", webhookAttribute, e);
             return false;
         }
         return true;

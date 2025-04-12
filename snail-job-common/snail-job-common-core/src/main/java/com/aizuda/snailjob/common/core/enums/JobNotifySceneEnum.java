@@ -16,12 +16,12 @@ public enum JobNotifySceneEnum {
 
     /********************************Job****************************************/
     NONE(0, StrUtil.EMPTY, NodeTypeEnum.SERVER),
-    JOB_TASK_ERROR(1, "JOB任务执行失败", NodeTypeEnum.SERVER),
-    JOB_CLIENT_ERROR(2, "客户端执行失败", NodeTypeEnum.CLIENT),
-    JOB_NO_CLIENT_NODES_ERROR(3, "没有可执行的客户端节点", NodeTypeEnum.SERVER),
+    JOB_TASK_ERROR(1, "JOB task execution failed", NodeTypeEnum.SERVER),
+    JOB_CLIENT_ERROR(2, "Client execution failed", NodeTypeEnum.CLIENT),
+    JOB_NO_CLIENT_NODES_ERROR(3, "No executable client nodes", NodeTypeEnum.SERVER),
 
     /********************************Workflow****************************************/
-    WORKFLOW_TASK_ERROR(100, "Workflow任务执行失败", NodeTypeEnum.SERVER);
+    WORKFLOW_TASK_ERROR(100, "Workflow task execution failed", NodeTypeEnum.SERVER);
 
     /**
      * 通知场景

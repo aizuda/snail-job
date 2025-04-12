@@ -40,13 +40,13 @@ public class RequestHeaderPlugins {
                 SnailJobLog.LOCAL.warn("entry method time is null. retryId:[{}]", retryHeader.getRetryId());
             } else {
                 long transmitTime = retryHeader.getDdl() - (callRemoteTime - entryMethodTime);
-                SnailJobLog.LOCAL.info("RPC传递header头 callRemoteTime:[{}] - entryMethodTime:[{}] = transmitTime:[{}]", callRemoteTime, entryMethodTime, transmitTime);
+                SnailJobLog.LOCAL.info("RPC passes header: callRemoteTime:[{}] - entryMethodTime:[{}] = transmitTime:[{}]", callRemoteTime, entryMethodTime, transmitTime);
                 if (transmitTime > 0) {
                     retryHeader.setDdl(transmitTime);
                     // 重新刷新进入时间
                     RetrySiteSnapshot.setEntryMethodTime(System.currentTimeMillis());
                 } else {
-                    throw new SnailRetryClientException("调用链超时, 不在继续调用后面请求");
+                    throw new SnailRetryClientException("The call chain has timed out, no further requests will be made");
                 }
             }
 

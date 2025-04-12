@@ -67,7 +67,7 @@ public class OpenApiAddJobRequestHandler extends PostHttpRequestHandler {
         job.setNextTriggerAt(calculateNextTriggerAt(jobRequestVO, DateUtils.toNowMilli()));
         job.setNamespaceId(HttpHeaderUtil.getNamespace(headers));
         job.setId(null);
-        Assert.isTrue(1 == jobMapper.insert(job), ()-> new SnailJobServerException("新增任务失败"));
+        Assert.isTrue(1 == jobMapper.insert(job), ()-> new SnailJobServerException("Adding new task failed"));
         return new SnailJobRpcResult(job.getId(), retryRequest.getReqId());
     }
 
@@ -85,7 +85,7 @@ public class OpenApiAddJobRequestHandler extends PostHttpRequestHandler {
                 return StatusEnum.YES.getStatus();
             }
         } else {
-            throw new SnailJobServerException("未知触发类型");
+            throw new SnailJobServerException("Unknown trigger type");
         }
 
         return StatusEnum.NO.getStatus();

@@ -26,7 +26,7 @@ public class QLExpressEngine extends AbstractExpressionEngine {
         try {
             return ENGINE.execute(expression, defaultContext, null, true, false);
         } catch (Exception e) {
-            throw new SnailJobCommonException("QL表达式解析异常. expression:[{}] context:[{}]",
+            throw new SnailJobCommonException("QL expression parsing exception. expression:[{}] context:[{}]",
                     expression, JsonUtil.toJsonString(context), e);
         }
 

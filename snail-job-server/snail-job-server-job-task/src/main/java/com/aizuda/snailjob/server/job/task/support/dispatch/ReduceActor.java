@@ -58,7 +58,7 @@ public class ReduceActor extends AbstractActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder().match(ReduceTaskDTO.class, reduceTask -> {
-            SnailJobLog.LOCAL.info("执行Reduce, [{}]", JsonUtil.toJsonString(reduceTask));
+            SnailJobLog.LOCAL.info("Executing Reduce, [{}]", JsonUtil.toJsonString(reduceTask));
             try {
 
                 Assert.notNull(reduceTask.getMrStage(), () -> new SnailJobServerException("mrStage can not be null"));

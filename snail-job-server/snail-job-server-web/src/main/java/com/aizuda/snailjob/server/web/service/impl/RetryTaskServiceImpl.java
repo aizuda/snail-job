@@ -187,7 +187,7 @@ public class RetryTaskServiceImpl implements RetryTaskService {
                         .in(RetryTask::getTaskStatus, RetryTaskStatusEnum.TERMINAL_STATUS_SET)
                         .eq(RetryTask::getNamespaceId, namespaceId)
                         .eq(RetryTask::getId, id));
-        Assert.notNull(retryTask, () -> new SnailJobServerException("数据删除失败"));
+        Assert.notNull(retryTask, () -> new SnailJobServerException("Data deletion failed"));
 
         retryTaskLogMessageMapper.delete(new LambdaQueryWrapper<RetryTaskLogMessage>()
                 .eq(RetryTaskLogMessage::getNamespaceId, namespaceId)
@@ -208,8 +208,8 @@ public class RetryTaskServiceImpl implements RetryTaskService {
                         .in(RetryTask::getTaskStatus, RetryTaskStatusEnum.TERMINAL_STATUS_SET)
                         .eq(RetryTask::getNamespaceId, namespaceId)
                         .in(RetryTask::getId, ids));
-        Assert.notEmpty(retryTasks, () -> new SnailJobServerException("数据不存在"));
-        Assert.isTrue(retryTasks.size() == ids.size(), () -> new SnailJobServerException("数据不存在"));
+        Assert.notEmpty(retryTasks, () -> new SnailJobServerException("Data does not exist"));
+        Assert.isTrue(retryTasks.size() == ids.size(), () -> new SnailJobServerException("Data does not exist"));
 
         for (final RetryTask retryTask : retryTasks) {
             retryTaskLogMessageMapper.delete(
@@ -225,15 +225,15 @@ public class RetryTaskServiceImpl implements RetryTaskService {
     public Boolean stopById(Long id) {
 
         RetryTask retryTask = retryTaskMapper.selectById(id);
-        Assert.notNull(retryTask, () -> new SnailJobServerException("没有可执行的任务"));
+        Assert.notNull(retryTask, () -> new SnailJobServerException("No executable tasks"));
 
         Retry retry = retryMapper.selectById(retryTask.getRetryId());
-        Assert.notNull(retry, () -> new SnailJobServerException("任务不存在"));
+        Assert.notNull(retry, () -> new SnailJobServerException("Task does not exist"));
 
         TaskStopJobDTO taskStopJobDTO = RetryConverter.INSTANCE.toTaskStopJobDTO(retry);
         taskStopJobDTO.setOperationReason(RetryOperationReasonEnum.MANNER_STOP.getReason());
         taskStopJobDTO.setNeedUpdateTaskStatus(true);
-        taskStopJobDTO.setMessage("用户手动触发停止");
+        taskStopJobDTO.setMessage("User manually triggered stop");
         retryTaskStopHandler.stop(taskStopJobDTO);
 
         return true;

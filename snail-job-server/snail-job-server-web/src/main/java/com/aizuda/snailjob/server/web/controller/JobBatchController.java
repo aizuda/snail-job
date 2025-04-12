@@ -52,8 +52,8 @@ public class JobBatchController {
     @DeleteMapping("/ids")
     @LoginRequired
     public Boolean deleteJobBatchByIds(@RequestBody
-                                       @NotEmpty(message = "ids不能为空")
-                                       @Size(max = 100, message = "最多删除 {max} 个")
+                                       @NotEmpty(message = "ids cannot be null")
+                                       @Size(max = 100, message = "Maximum {max} deletions")
                                        Set<Long> ids) {
         return jobBatchService.deleteJobBatchByIds(ids);
     }

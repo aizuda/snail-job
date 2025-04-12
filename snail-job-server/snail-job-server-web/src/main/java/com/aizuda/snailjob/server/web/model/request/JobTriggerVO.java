@@ -8,7 +8,7 @@ import lombok.Data;
 @Data
 public class JobTriggerVO {
 
-    @NotNull(message = "jobId 不能为空")
+    @NotNull(message = "jobId cannot be null")
     private Long jobId;
 
     /**

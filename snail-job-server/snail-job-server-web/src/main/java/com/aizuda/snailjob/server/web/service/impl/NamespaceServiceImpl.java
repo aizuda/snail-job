@@ -46,12 +46,12 @@ public class NamespaceServiceImpl implements NamespaceService {
         if (StrUtil.isNotBlank(namespaceRequestVO.getUniqueId())) {
             Pattern pattern = Pattern.compile(SystemConstants.REGEXP);
             Matcher matcher = pattern.matcher(uniqueId);
-            Assert.isTrue(matcher.matches(), () -> new SnailJobServerException("仅支持长度为1~64字符且类型为数字、字母、下划线和短横线"));
+            Assert.isTrue(matcher.matches(), () -> new SnailJobServerException("Only supports 1~64 characters, including numbers, letters, underscores, and hyphens"));
 
             Assert.isTrue(namespaceMapper.selectCount(
                             new LambdaQueryWrapper<Namespace>()
                                     .eq(Namespace::getUniqueId, namespaceRequestVO.getUniqueId())) == 0,
-                    () -> new SnailJobServerException("空间唯一标记已经存在 {}", namespaceRequestVO.getUniqueId()));
+                    () -> new SnailJobServerException("Namespace already exists {}", namespaceRequestVO.getUniqueId()));
         }
 
         Namespace namespace = new Namespace();
@@ -67,7 +67,7 @@ public class NamespaceServiceImpl implements NamespaceService {
     @Override
     public Boolean updateNamespace(final NamespaceRequestVO namespaceRequestVO) {
         Long id = namespaceRequestVO.getId();
-        Assert.notNull(id, () -> new SnailJobServerException("参数错误"));
+        Assert.notNull(id, () -> new SnailJobServerException("Parameter error"));
 
         Namespace namespace = new Namespace();
         namespace.setName(namespaceRequestVO.getName());
@@ -95,14 +95,14 @@ public class NamespaceServiceImpl implements NamespaceService {
     @Override
     public Boolean deleteByUniqueId(String uniqueId) {
 
-        Assert.isFalse(DEFAULT_NAMESPACE.equals(uniqueId), ()-> new SnailJobServerException("默认空间禁止删除"));
+        Assert.isFalse(DEFAULT_NAMESPACE.equals(uniqueId), ()-> new SnailJobServerException("Default space cannot be deleted"));
 
         Assert.isTrue(CollUtil.isEmpty(groupConfigMapper.selectList(new PageDTO<>(1, 1), new LambdaQueryWrapper<GroupConfig>()
                         .eq(GroupConfig::getNamespaceId, uniqueId).orderByAsc(GroupConfig::getId))),
-                () -> new SnailJobServerException("存在未删除的组配置任务. 请先删除当前关联的组配置再重试删除"));
+                () -> new SnailJobServerException("There are undeleted group configuration tasks. Please delete the associated group configurations before retrying deletion"));
 
         Assert.isTrue(1 == namespaceMapper.delete(new LambdaQueryWrapper<Namespace>().eq(Namespace::getUniqueId, uniqueId)),
-                () -> new SnailJobServerException("删除命名空间失败"));
+                () -> new SnailJobServerException("Failed to delete namespace"));
 
         return Boolean.TRUE;
     }

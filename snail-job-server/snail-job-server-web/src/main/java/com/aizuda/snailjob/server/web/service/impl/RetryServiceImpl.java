@@ -142,7 +142,7 @@ public class RetryServiceImpl implements RetryService {
 
         RetryStatusEnum retryStatusEnum = RetryStatusEnum.getByStatus(requestVO.getRetryStatus());
         if (Objects.isNull(retryStatusEnum)) {
-            throw new SnailJobServerException("重试状态错误. [{}]", requestVO.getRetryStatus());
+            throw new SnailJobServerException("Retry status error. [{}]", requestVO.getRetryStatus());
         }
 
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
@@ -152,7 +152,7 @@ public class RetryServiceImpl implements RetryService {
                         .eq(Retry::getNamespaceId, namespaceId)
                         .eq(Retry::getId, requestVO.getId()));
         if (Objects.isNull(retry)) {
-            throw new SnailJobServerException("未查询到重试任务");
+            throw new SnailJobServerException("Retry task not found");
         }
 
         retry.setRetryStatus(requestVO.getRetryStatus());
@@ -173,7 +173,7 @@ public class RetryServiceImpl implements RetryService {
         if (RetryStatusEnum.FINISH.getStatus().equals(retryStatusEnum.getStatus())) {
             RetryLogMetaDTO retryLogMetaDTO = RetryTaskConverter.INSTANCE.toLogMetaDTO(retry);
             retryLogMetaDTO.setTimestamp(DateUtils.toNowMilli());
-            SnailJobLog.REMOTE.info("=============手动操作完成============. <|>{}<|>", retryLogMetaDTO);
+            SnailJobLog.REMOTE.info("============Manual operation completed============. <|>{}<|>", retryLogMetaDTO);
         }
 
         retry.setUpdateDt(LocalDateTime.now());
@@ -184,12 +184,12 @@ public class RetryServiceImpl implements RetryService {
     public int saveRetryTask(final RetrySaveRequestVO retryTaskRequestVO) {
         RetryStatusEnum retryStatusEnum = RetryStatusEnum.getByStatus(retryTaskRequestVO.getRetryStatus());
         if (Objects.isNull(retryStatusEnum)) {
-            throw new SnailJobServerException("重试状态错误");
+            throw new SnailJobServerException("Retry status error");
         }
 
         TaskGenerator taskGenerator = taskGenerators.stream()
                 .filter(t -> t.supports(TaskGeneratorSceneEnum.MANA_SINGLE.getScene()))
-                .findFirst().orElseThrow(() -> new SnailJobServerException("没有匹配的任务生成器"));
+                .findFirst().orElseThrow(() -> new SnailJobServerException("No matching task generator found"));
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
 
         TaskContext taskContext = new TaskContext();
@@ -214,7 +214,7 @@ public class RetryServiceImpl implements RetryService {
                 generateRetryIdempotentIdVO.getGroupName(),
                 namespaceId);
         Assert.notEmpty(serverNodes,
-                () -> new SnailJobServerException("生成idempotentId失败: 不存在活跃的客户端节点"));
+                () -> new SnailJobServerException("Failed to generate idempotentId: No active client nodes exist"));
 
         RetrySceneConfig retrySceneConfig = accessTemplate.getSceneConfigAccess()
                 .getSceneConfigByGroupNameAndSceneName(generateRetryIdempotentIdVO.getGroupName(),
@@ -237,9 +237,9 @@ public class RetryServiceImpl implements RetryService {
 
         Result result = rpcClient.generateIdempotentId(generateRetryIdempotentIdDTO);
 
-        Assert.notNull(result, () -> new SnailJobServerException("idempotentId生成失败"));
+        Assert.notNull(result, () -> new SnailJobServerException("idempotentId generation failed"));
         Assert.isTrue(1 == result.getStatus(),
-                () -> new SnailJobServerException("idempotentId生成失败:请确保参数与执行器名称正确"));
+                () -> new SnailJobServerException("idempotentId generation failed: Ensure that the parameters and executor name are correct"));
 
         return (String) result.getData();
     }
@@ -275,7 +275,7 @@ public class RetryServiceImpl implements RetryService {
         );
 
         Assert.notEmpty(retries,
-                () -> new SnailJobServerException("没有可删除的数据, 只有非【处理中】的数据可以删除"));
+                () -> new SnailJobServerException("No deletable data, only non-[Processing] data can be deleted"));
 
         Set<Long> retryIds = StreamUtils.toSet(retries, Retry::getId);
         retryTaskMapper.delete(new LambdaQueryWrapper<RetryTask>()
@@ -294,7 +294,7 @@ public class RetryServiceImpl implements RetryService {
                                 .eq(Retry::getGroupName, requestVO.getGroupName())
                                 .in(Retry::getRetryStatus, ALLOW_DELETE_STATUS)
                                 .in(Retry::getId, requestVO.getIds()))
-                , () -> new SnailJobServerException("删除重试任务失败, 请检查任务状态是否为已完成或者最大次数"));
+                , () -> new SnailJobServerException("Failed to delete retry task, please check if the task status is completed or at maximum attempts"));
 
         return Boolean.TRUE;
     }
@@ -303,7 +303,7 @@ public class RetryServiceImpl implements RetryService {
     public Integer parseLogs(ParseLogsVO parseLogsVO) {
         RetryStatusEnum retryStatusEnum = RetryStatusEnum.getByStatus(parseLogsVO.getRetryStatus());
         if (Objects.isNull(retryStatusEnum)) {
-            throw new SnailJobServerException("重试状态错误");
+            throw new SnailJobServerException("Retry status error");
         }
 
         String logStr = parseLogsVO.getLogStr();
@@ -326,16 +326,16 @@ public class RetryServiceImpl implements RetryService {
             }
         }
 
-        Assert.isFalse(waitInsertList.isEmpty(), () -> new SnailJobServerException("未找到匹配的数据"));
-        Assert.isTrue(waitInsertList.size() <= 500, () -> new SnailJobServerException("最多只能处理500条数据"));
+        Assert.isFalse(waitInsertList.isEmpty(), () -> new SnailJobServerException("No matching data found"));
+        Assert.isTrue(waitInsertList.size() <= 500, () -> new SnailJobServerException("A maximum of 500 data entries can be processed"));
 
         TaskGenerator taskGenerator = taskGenerators.stream()
                 .filter(t -> t.supports(TaskGeneratorSceneEnum.MANA_BATCH.getScene()))
-                .findFirst().orElseThrow(() -> new SnailJobServerException("没有匹配的任务生成器"));
+                .findFirst().orElseThrow(() -> new SnailJobServerException("No matching task generator found"));
 
         boolean allMatch = waitInsertList.stream()
                 .allMatch(retryTaskDTO -> retryTaskDTO.getGroupName().equals(parseLogsVO.getGroupName()));
-        Assert.isTrue(allMatch, () -> new SnailJobServerException("存在数据groupName不匹配，请检查您的数据"));
+        Assert.isTrue(allMatch, () -> new SnailJobServerException("Data groupName mismatch, please check your data"));
 
         Map<String, List<RetryTaskDTO>> map = StreamUtils.groupByKey(waitInsertList, RetryTaskDTO::getSceneName);
 
@@ -354,7 +354,7 @@ public class RetryServiceImpl implements RetryService {
                 try {
                     taskGenerator.taskGenerator(taskContext);
                 } catch (DuplicateKeyException e) {
-                    throw new SnailJobServerException("namespaceId:[{}] groupName:[{}] sceneName:[{}] 任务已经存在",
+                    throw new SnailJobServerException("namespaceId:[{}] groupName:[{}] sceneName:[{}] Task already exists",
                             namespaceId, parseLogsVO.getGroupName(), sceneName);
                 }
 
@@ -375,7 +375,7 @@ public class RetryServiceImpl implements RetryService {
                 .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus())
         );
 
-        Assert.isTrue(count > 0, () -> new SnailJobServerException("组:[{}]已经关闭，不支持手动执行.", requestVO.getGroupName()));
+        Assert.isTrue(count > 0, () -> new SnailJobServerException("Group [{}] is closed, manual execution is not supported.", requestVO.getGroupName()));
 
         List<Long> retryIds = requestVO.getRetryIds();
 
@@ -384,7 +384,7 @@ public class RetryServiceImpl implements RetryService {
                         .eq(Retry::getTaskType, SyetemTaskTypeEnum.RETRY.getType())
                         .in(Retry::getId, retryIds)
         );
-        Assert.notEmpty(list, () -> new SnailJobServerException("没有可执行的任务"));
+        Assert.notEmpty(list, () -> new SnailJobServerException("No executable tasks"));
 
         for (Retry retry : list) {
             RetryTaskPrepareDTO retryTaskPrepareDTO = RetryConverter.INSTANCE.toRetryTaskPrepareDTO(retry);

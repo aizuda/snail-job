@@ -48,7 +48,7 @@ public class OpenApiUpdateWorkFlowStatusRequestHandler extends PostHttpRequestHa
                         .eq(Workflow::getId, jobRequestVO.getId()));
 
         if (Objects.isNull(workflow)){
-            SnailJobLog.LOCAL.warn("工作流不存在");
+            SnailJobLog.LOCAL.warn("Workflow does not exist");
             return new SnailJobRpcResult(false, retryRequest.getReqId());
         }
         workflow.setWorkflowStatus(jobRequestVO.getJobStatus());

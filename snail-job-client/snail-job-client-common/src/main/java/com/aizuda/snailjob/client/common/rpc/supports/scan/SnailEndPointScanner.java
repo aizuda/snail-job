@@ -49,7 +49,7 @@ public class SnailEndPointScanner implements ApplicationContextAware {
                             (MethodIntrospector.MetadataLookup<Mapping>) method -> AnnotatedElementUtils
                                     .findMergedAnnotation(method, Mapping.class));
                 } catch (Throwable ex) {
-                    SnailJobLog.LOCAL.error("{} Mapping加载异常：{}", beanDefinitionName, ex);
+                    SnailJobLog.LOCAL.error("Mapping load exception for {}: {}", beanDefinitionName, ex);
                 }
 
                 for (Map.Entry<Method, Mapping> entry : annotatedMethods.entrySet()) {

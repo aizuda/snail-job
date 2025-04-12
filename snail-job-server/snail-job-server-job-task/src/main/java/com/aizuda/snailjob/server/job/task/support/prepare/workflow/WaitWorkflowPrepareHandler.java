@@ -31,11 +31,11 @@ public class WaitWorkflowPrepareHandler extends AbstractWorkflowPrePareHandler {
 
     @Override
     protected void doHandler(WorkflowTaskPrepareDTO workflowTaskPrepareDTO) {
-        log.debug("存在待处理任务. workflowTaskBatchId:[{}]", workflowTaskPrepareDTO.getWorkflowTaskBatchId());
+        log.debug("Pending tasks exist. Workflow task batch ID:[{}]", workflowTaskPrepareDTO.getWorkflowTaskBatchId());
 
         // 若时间轮中数据不存在则重新加入
         if (!JobTimerWheel.isExisted(MessageFormat.format(WorkflowTimerTask.IDEMPOTENT_KEY_PREFIX, workflowTaskPrepareDTO.getWorkflowTaskBatchId()))) {
-            log.info("存在待处理任务且时间轮中不存在 workflowTaskBatchId:[{}]", workflowTaskPrepareDTO.getWorkflowTaskBatchId());
+            log.info("Pending tasks exist and workflowTaskBatchId:[{}] does not exist in the time wheel", workflowTaskPrepareDTO.getWorkflowTaskBatchId());
 
             // 进入时间轮
             long delay = workflowTaskPrepareDTO.getNextTriggerAt() - DateUtils.toNowMilli();

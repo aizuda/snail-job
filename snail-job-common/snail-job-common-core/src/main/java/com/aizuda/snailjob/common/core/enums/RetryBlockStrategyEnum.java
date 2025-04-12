@@ -38,7 +38,7 @@ public enum RetryBlockStrategyEnum {
             }
         }
 
-        throw new SnailJobCommonException("不符合的阻塞策略. blockStrategy:[{}]", blockStrategy);
+        throw new SnailJobCommonException("Incompatible blocking strategy. blockStrategy:[{}]", blockStrategy);
     }
 
 }

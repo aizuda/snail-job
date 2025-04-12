@@ -24,7 +24,7 @@ public class RecoveryWorkflowBlockStrategy extends AbstractWorkflowBlockStrategy
         try {
             workflowBatchHandler.recoveryWorkflowExecutor(workflowBlockStrategyContext.getWorkflowTaskBatchId(), null);
         } catch (IOException e) {
-            throw new SnailJobServerException("校验工作流失败", e);
+            throw new SnailJobServerException("Workflow validation failed", e);
         }
     }
 

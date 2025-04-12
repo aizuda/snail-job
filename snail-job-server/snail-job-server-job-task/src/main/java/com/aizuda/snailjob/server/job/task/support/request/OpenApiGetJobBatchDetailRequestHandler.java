@@ -57,7 +57,7 @@ public class OpenApiGetJobBatchDetailRequestHandler extends PostHttpRequestHandl
         SnailJobRequest jobRequest = JsonUtil.parseObject(content, SnailJobRequest.class);
         Object[] args = jobRequest.getArgs();
         Long jobBatchId = JsonUtil.parseObject(JsonUtil.toJsonString(args[0]), Long.class);
-        Assert.notNull(jobBatchId, () -> new SnailJobServerException("id 不能为空"));
+        Assert.notNull(jobBatchId, () -> new SnailJobServerException("id cannot be null"));
 
 
 

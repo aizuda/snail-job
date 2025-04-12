@@ -14,31 +14,31 @@ import java.util.Set;
 @Data
 public class SceneConfigRequestVO {
 
-    @NotBlank(message = "组名称 不能为空")
-    @Pattern(regexp = "^[A-Za-z0-9_-]{1,64}$", message = "仅支持长度为1~64字符且类型为数字、字母、下划线和短横线")
+    @NotBlank(message = "Group name cannot be null")
+    @Pattern(regexp = "^[A-Za-z0-9_-]{1,64}$", message = "Only supports 1~64 characters, including numbers, letters, underscores, and hyphens")
     private String groupName;
 
-    @NotBlank(message = "场景名称不能为空")
-    @Pattern(regexp = "^[A-Za-z0-9_-]{1,64}$", message = "仅支持长度为1~64字符且类型为数字、字母、下划线和短横线")
+    @NotBlank(message = "Scene name cannot be null")
+    @Pattern(regexp = "^[A-Za-z0-9_-]{1,64}$", message = "Only supports 1~64 characters, including numbers, letters, underscores, and hyphens")
     private String sceneName;
 
-    @NotNull(message = "场景状态不能为空")
+    @NotNull(message = "Scene status cannot be null")
     private Integer sceneStatus;
 
-    @Max(message = "最大重试次数", value = 9999999)
-    @Min(message = "最小重试次数", value = 0)
+    @Max(message = "Maximum retry times", value = 9999999)
+    @Min(message = "Minimum retry times", value = 0)
     private Integer maxRetryCount;
 
-    @NotNull(message = "退避策略不能为空 1、默认等级 2、固定间隔时间 3、CRON 表达式")
+    @NotNull(message = "Backoff strategy cannot be null 1. Default level 2. Fixed interval 3. CRON expression")
     private Integer backOff;
 
-    @NotNull(message = "路由策略不能为空")
+    @NotNull(message = "Routing strategy cannot be null")
     private Integer routeKey;
 
     /**
      * @see: RetryBlockStrategyEnum
      */
-    @NotNull(message = "阻塞策略不能为空")
+    @NotNull(message = "Blocking strategy cannot be null")
     private Integer blockStrategy;
 
     /**
@@ -55,14 +55,14 @@ public class SceneConfigRequestVO {
      * Deadline Request 调用链超时 单位毫秒
      * 默认值为 60*10*1000
      */
-    @Max(message = "最大60000毫秒", value = SystemConstants.DEFAULT_DDL)
-    @Min(message = "最小100ms", value = 100)
-    @NotNull(message = "调用链超时不能为空")
+    @Max(message = "Maximum 60000 milliseconds", value = SystemConstants.DEFAULT_DDL)
+    @Min(message = "Minimum 100ms", value = 100)
+    @NotNull(message = "Call chain timeout cannot be null")
     private Long deadlineRequest;
 
-    @Max(message = "最大60(秒)", value = 60)
-    @Min(message = "最小1(秒)", value = 1)
-    @NotNull(message = "执行超时不能为空")
+    @Max(message = "Maximum 60 seconds", value = 60)
+    @Min(message = "Minimum 1 second", value = 1)
+    @NotNull(message = "Execution timeout cannot be null")
     private Integer executorTimeout;
 
     /**
@@ -78,19 +78,19 @@ public class SceneConfigRequestVO {
     /**
      * 回调状态 0、不开启 1、开启
      */
-    @NotNull(message = "回调状态不能为空")
+    @NotNull(message = "Callback status cannot be null")
     private Integer cbStatus;
 
     /**
      * 回调触发类型
      */
-    @NotNull(message = "回调触发类型不能为空")
+    @NotNull(message = "Callback trigger type cannot be null")
     private Integer cbTriggerType;
 
     /**
      * 回调的最大执行次数
      */
-    @NotNull(message = "回调的最大执行次数不能为空")
+    @NotNull(message = "Maximum callback execution times cannot be null")
     private int cbMaxCount;
 
     /**

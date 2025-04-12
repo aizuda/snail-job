@@ -38,13 +38,13 @@ public class RequestQueryWorkflowBatchHandler extends AbstractJobRequestHandler<
         Assert.isTrue(StatusEnum.YES.getStatus() == result.getStatus(),
                 () -> new SnailJobClientException(result.getMessage()));
         Object data = result.getData();
-        Assert.isTrue(Objects.nonNull(data), () -> new SnailJobClientException("获取[{}]工作流任务批次详情失败", workflowBatchId));
+        Assert.isTrue(Objects.nonNull(data), () -> new SnailJobClientException("Failed to get workflow task batch details for [{}]", workflowBatchId));
         return JsonUtil.parseObject(JsonUtil.toJsonString(data), WorkflowDetailResponseVO.class);
     }
 
     @Override
     protected Pair<Boolean, String> checkRequest() {
-        return Pair.of(workflowBatchId != null && !Long.valueOf(0).equals(workflowBatchId), "queryJobBatchId不能为null并且必须大于0");
+        return Pair.of(workflowBatchId != null && !Long.valueOf(0).equals(workflowBatchId), "queryJobBatchId cannot be null and must be greater than 0");
     }
 
 }

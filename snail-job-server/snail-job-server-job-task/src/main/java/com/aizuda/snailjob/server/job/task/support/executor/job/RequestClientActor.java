@@ -52,7 +52,7 @@ public class RequestClientActor extends AbstractActor {
             try {
                 doExecute(realJobExecutorDTO);
             } catch (Exception e) {
-                log.error("请求客户端发生异常", e);
+                log.error("Client request exception occurred", e);
             }
         }).build();
     }
@@ -65,14 +65,14 @@ public class RequestClientActor extends AbstractActor {
                 realJobExecutorDTO.getNamespaceId(),
                 realJobExecutorDTO.getClientId());
         if (Objects.isNull(registerNodeInfo)) {
-            taskExecuteFailure(realJobExecutorDTO, "客户端不存在");
+            taskExecuteFailure(realJobExecutorDTO, "Client does not exist");
             JobLogMetaDTO jobLogMetaDTO = JobTaskConverter.INSTANCE.toJobLogDTO(realJobExecutorDTO);
             jobLogMetaDTO.setTimestamp(nowMilli);
             if (realJobExecutorDTO.getRetryStatus()) {
-                SnailJobLog.REMOTE.error("taskId:[{}] 任务调度失败执行重试. 失败原因: 无可执行的客户端. 重试次数:[{}]. <|>{}<|>",
+                SnailJobLog.REMOTE.error("Task ID:[{}] Task scheduling failed, executing retry. Reason: No executable client. Retry count:[{}]. <|>{}<|>",
                         realJobExecutorDTO.getTaskId(), realJobExecutorDTO.getRetryCount(), jobLogMetaDTO);
             } else {
-                SnailJobLog.REMOTE.error("taskId:[{}] 任务调度失败. 失败原因: 无可执行的客户端 <|>{}<|>", realJobExecutorDTO.getTaskId(),
+                SnailJobLog.REMOTE.error("Task ID:[{}] Task scheduling failed. Reason: No executable client <|>{}<|>", realJobExecutorDTO.getTaskId(),
                         jobLogMetaDTO);
             }
             return;
@@ -88,7 +88,7 @@ public class RequestClientActor extends AbstractActor {
             JobRpcClient rpcClient = buildRpcClient(registerNodeInfo, realJobExecutorDTO);
             Result<Boolean> dispatch = rpcClient.dispatch(dispatchJobRequest);
             if (dispatch.getStatus() == StatusEnum.YES.getStatus() && Objects.equals(dispatch.getData(), Boolean.TRUE)) {
-                SnailJobLog.LOCAL.info("taskId:[{}] 任务调度成功.", realJobExecutorDTO.getTaskId());
+                SnailJobLog.LOCAL.info("Task ID:[{}] Task scheduled successfully.", realJobExecutorDTO.getTaskId());
             } else {
                 // 客户端返回失败，则认为任务执行失败
                 ClientCallbackHandler clientCallback = ClientCallbackFactory.getClientCallback(realJobExecutorDTO.getTaskType());
@@ -113,10 +113,10 @@ public class RequestClientActor extends AbstractActor {
             JobLogMetaDTO jobLogMetaDTO = JobTaskConverter.INSTANCE.toJobLogDTO(realJobExecutorDTO);
             jobLogMetaDTO.setTimestamp(nowMilli);
             if (realJobExecutorDTO.getRetryStatus()) {
-                SnailJobLog.REMOTE.error("taskId:[{}] 任务调度失败执行重试 重试次数:[{}]. <|>{}<|>", jobLogMetaDTO.getTaskId(),
+                SnailJobLog.REMOTE.error("Task ID:[{}] Task scheduling failed, executing retry. Retry count:[{}]. <|>{}<|>", jobLogMetaDTO.getTaskId(),
                         realJobExecutorDTO.getRetryCount(), jobLogMetaDTO, throwable);
             } else {
-                SnailJobLog.REMOTE.error("taskId:[{}] 任务调度失败. <|>{}<|>",
+                SnailJobLog.REMOTE.error("Task ID:[{}] Task scheduling failed. <|>{}<|>",
                         jobLogMetaDTO.getTaskId(),
                         jobLogMetaDTO, throwable);
             }
@@ -144,12 +144,12 @@ public class RequestClientActor extends AbstractActor {
         public <V> void onRetry(final Attempt<V> attempt) {
             // 负载节点
             if (attempt.hasException()) {
-                SnailJobLog.LOCAL.error("任务调度失败. taskInstanceId:[{}] count:[{}]",
+                SnailJobLog.LOCAL.error("Task scheduling failed. Task instance ID:[{}] Count:[{}]",
                         realJobExecutorDTO.getTaskBatchId(), attempt.getAttemptNumber(), attempt.getExceptionCause());
                 ClientCallbackHandler clientCallback = ClientCallbackFactory.getClientCallback(realJobExecutorDTO.getTaskType());
                 ClientCallbackContext context = JobTaskConverter.INSTANCE.toClientCallbackContext(realJobExecutorDTO);
                 context.setTaskStatus(JobTaskStatusEnum.FAIL.getStatus());
-                context.setExecuteResult(ExecuteResult.failure(null, "网络请求失败"));
+                context.setExecuteResult(ExecuteResult.failure(null, "Network request failed"));
                 clientCallback.callback(context);
             }
         }

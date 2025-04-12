@@ -55,7 +55,7 @@ public class RemoteRetryStrategies extends AbstractRetryStrategies {
     protected boolean preValidator(RetryerInfo retryerInfo, RetryerResultContext resultContext) {
         if (RetrySiteSnapshot.isRunning()) {
             resultContext.setRetryResultStatusEnum(RetryResultStatusEnum.FAILURE);
-            resultContext.setMessage("执行重试检验不通过 原因: 存在正在运行的重试任务");
+            resultContext.setMessage("Retry validation failed: reason: there is an ongoing retry task");
             return false;
         }
 

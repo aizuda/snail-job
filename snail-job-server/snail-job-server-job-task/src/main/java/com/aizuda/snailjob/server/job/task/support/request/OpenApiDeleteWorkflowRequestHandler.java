@@ -61,7 +61,7 @@ public class OpenApiDeleteWorkflowRequestHandler extends PostHttpRequestHandler 
                         .eq(Workflow::getNamespaceId, namespaceId)
                         .eq(Workflow::getWorkflowStatus, StatusEnum.NO.getStatus())
                         .in(Workflow::getId, ids)
-        ), () -> new SnailJobServerException("删除工作流任务失败, 请检查任务状态是否关闭状态"));
+        ), () -> new SnailJobServerException("Failed to delete workflow task, please check if the task status is closed"));
 
         List<JobSummary> jobSummaries = jobSummaryMapper.selectList(new LambdaQueryWrapper<JobSummary>()
                 .select(JobSummary::getId)
@@ -72,7 +72,7 @@ public class OpenApiDeleteWorkflowRequestHandler extends PostHttpRequestHandler 
         if (CollUtil.isNotEmpty(jobSummaries)) {
             Assert.isTrue(jobSummaries.size() ==
                             jobSummaryMapper.deleteByIds(StreamUtils.toSet(jobSummaries, JobSummary::getId)),
-                    () -> new SnailJobServerException("汇总表删除失败")
+                    () -> new SnailJobServerException("Summary table deletion failed")
             );
         }
         return new SnailJobRpcResult(true, request.getReqId());

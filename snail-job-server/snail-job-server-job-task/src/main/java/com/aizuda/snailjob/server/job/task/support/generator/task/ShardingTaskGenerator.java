@@ -54,13 +54,13 @@ public class ShardingTaskGenerator extends AbstractJobTaskGenerator {
 
         Set<RegisterNodeInfo> serverNodes = CacheRegisterTable.getServerNodeSet(context.getGroupName(), context.getNamespaceId());
         if (CollUtil.isEmpty(serverNodes)) {
-            SnailJobLog.LOCAL.error("无可执行的客户端信息. jobId:[{}]", context.getJobId());
+            SnailJobLog.LOCAL.error("No executable client information. Job ID:[{}]", context.getJobId());
             return Lists.newArrayList();
         }
 
         String argsStr = context.getArgsStr();
         if (StrUtil.isBlank(argsStr)) {
-            SnailJobLog.LOCAL.error("切片参数为空. jobId:[{}]", context.getJobId());
+            SnailJobLog.LOCAL.error("Slice parameters are empty. Job ID:[{}]", context.getJobId());
             return Lists.newArrayList();
         }
 
@@ -68,7 +68,7 @@ public class ShardingTaskGenerator extends AbstractJobTaskGenerator {
         try {
             argsStrs = JsonUtil.parseList(argsStr, String.class);
         } catch (Exception e) {
-            SnailJobLog.LOCAL.error("切片参数解析失败. jobId:[{}]", context.getJobId(), e);
+            SnailJobLog.LOCAL.error("Slice parameter parsing failed. Job ID:[{}]", context.getJobId(), e);
             return Lists.newArrayList();
         }
 

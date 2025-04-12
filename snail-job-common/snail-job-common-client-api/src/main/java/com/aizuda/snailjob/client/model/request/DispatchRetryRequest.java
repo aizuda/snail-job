@@ -13,22 +13,22 @@ import lombok.Data;
  */
 @Data
 public class DispatchRetryRequest {
-    @NotBlank(message = "namespaceId 不能为空")
+    @NotBlank(message = "namespaceId cannot be null")
     private String namespaceId;
-    @NotBlank(message = "groupName 不能为空")
+    @NotBlank(message = "groupName cannot be null")
     private String groupName;
-    @NotBlank(message = "sceneName 不能为空")
+    @NotBlank(message = "sceneName cannot be null")
     private String sceneName;
-    @NotBlank(message = "参数 不能为空")
+    @NotBlank(message = "parameters cannot be null")
     private String argsStr;
-    @NotBlank(message = "executorName 不能为空")
+    @NotBlank(message = "executorName cannot be null")
     private String executorName;
-    @NotNull(message = "retryCount 不能为空")
+    @NotNull(message = "retryCount cannot be null")
     private Integer retryCount;
-    @NotNull(message = "retryTaskId 不能为空")
+    @NotNull(message = "retryTaskId cannot be null")
     private Long retryTaskId;
-    @NotNull(message = "retryId 不能为空")
+    @NotNull(message = "retryId cannot be null")
     private Long retryId;
-    @NotNull(message = "executorTimeout 不能为空")
+    @NotNull(message = "executorTimeout cannot be null")
     private Integer executorTimeout;
 }

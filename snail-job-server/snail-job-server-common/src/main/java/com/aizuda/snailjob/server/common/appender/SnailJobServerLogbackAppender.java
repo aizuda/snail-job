@@ -96,7 +96,7 @@ public class SnailJobServerLogbackAppender<E> extends UnsynchronizedAppenderBase
             saveLog(logContentDTO, logMetaDTO);
 
         } catch (Exception e) {
-            SnailJobLog.LOCAL.error("日志解析失败. msg:[{}]", event.getFormattedMessage(), e);
+            SnailJobLog.LOCAL.error("Log parsing failed. Msg:[{}]", event.getFormattedMessage(), e);
         }
 
     }

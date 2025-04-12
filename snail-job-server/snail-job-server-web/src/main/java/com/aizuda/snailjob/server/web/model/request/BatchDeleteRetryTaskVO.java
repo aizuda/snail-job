@@ -20,14 +20,14 @@ public class BatchDeleteRetryTaskVO {
     /**
      * 组名称
      */
-    @NotBlank(message = "groupName 不能为空")
-    @Pattern(regexp = "^[A-Za-z0-9_-]{1,64}$", message = "仅支持长度为1~64字符且类型为数字、字母、下划线和短横线")
+    @NotBlank(message = "groupName cannot be null")
+    @Pattern(regexp = "^[A-Za-z0-9_-]{1,64}$", message = "Only supports 1~64 characters, including numbers, letters, underscores, and hyphens")
     private String groupName;
 
     /**
      * 重试表id
      */
-    @NotEmpty(message = "至少选择一项")
-    @Size(max = 100, message = "最多只能删除100条")
+    @NotEmpty(message = "At least one item must be selected")
+    @Size(max = 100, message = "A maximum of 100 can be deleted")
     private List<Long> ids;
 }

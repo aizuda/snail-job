@@ -97,7 +97,7 @@ public abstract class AbstractRegister implements Register, Lifecycle {
                 serverNodeMapper.updateBatchExpireAt(updateDBs);
             }
         } catch (Exception e) {
-            SnailJobLog.LOCAL.error("续租失败", e);
+            SnailJobLog.LOCAL.error("Lease renewal failed", e);
         }
 
         try {
@@ -106,7 +106,7 @@ public abstract class AbstractRegister implements Register, Lifecycle {
             }
         } catch (DuplicateKeyException ignored) {
         } catch (Exception e) {
-            SnailJobLog.LOCAL.error("注册节点失败", e);
+            SnailJobLog.LOCAL.error("Node registration failed", e);
         }
 
         for (final ServerNode serverNode : serverNodes) {

@@ -44,8 +44,8 @@ public class CronUtils {
 
     public static long getExecuteInterval(String cron) {
         List<String> executeTimeByCron = getExecuteTimeByCron(cron, 2);
-        Assert.isTrue(!executeTimeByCron.isEmpty(), () -> new SnailJobServerException("表达式解析有误.[{}]", cron));
-        Assert.isTrue(executeTimeByCron.size() == 2, () -> new SnailJobServerException("表达式必须支持多次执行.[{}]", cron));
+        Assert.isTrue(!executeTimeByCron.isEmpty(), () -> new SnailJobServerException("Expression parsing error.[{}]", cron));
+        Assert.isTrue(executeTimeByCron.size() == 2, () -> new SnailJobServerException("Expression must support multiple executions.[{}]", cron));
         LocalDateTime first = LocalDateTime.parse(executeTimeByCron.get(0), DateUtils.NORM_DATETIME_PATTERN);
         LocalDateTime second = LocalDateTime.parse(executeTimeByCron.get(1), DateUtils.NORM_DATETIME_PATTERN);
         Duration duration = Duration.between(first, second);

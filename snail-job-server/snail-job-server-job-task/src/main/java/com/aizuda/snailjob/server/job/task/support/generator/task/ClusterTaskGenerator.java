@@ -48,7 +48,7 @@ public class ClusterTaskGenerator extends AbstractJobTaskGenerator {
         RegisterNodeInfo serverNode = clientNodeAllocateHandler.getServerNode(context.getJobId().toString(),
                 context.getGroupName(), context.getNamespaceId(), context.getRouteKey());
         if (Objects.isNull(serverNode)) {
-            SnailJobLog.LOCAL.error("无可执行的客户端信息. jobId:[{}]", context.getJobId());
+            SnailJobLog.LOCAL.error("No executable client information. Job ID:[{}]", context.getJobId());
             return Lists.newArrayList();
         }
 
@@ -62,7 +62,7 @@ public class ClusterTaskGenerator extends AbstractJobTaskGenerator {
         jobTask.setTaskStatus(JobTaskStatusEnum.RUNNING.getStatus());
         jobTask.setTaskName(TASK_NAME);
         jobTask.setResultMessage(Optional.ofNullable(jobTask.getResultMessage()).orElse(StrUtil.EMPTY));
-        Assert.isTrue(1 == jobTaskMapper.insert(jobTask), () -> new SnailJobServerException("新增任务实例失败"));
+        Assert.isTrue(1 == jobTaskMapper.insert(jobTask), () -> new SnailJobServerException("Adding new task instance failed"));
 
         return Lists.newArrayList(jobTask);
     }

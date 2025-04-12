@@ -184,7 +184,7 @@ public class JsonUtil {
             JsonNode jsonNode = JsonMapper.objectMapper.readTree(json);
             return jsonNode.isEmpty();
         } catch (JsonProcessingException e) {
-            throw new SnailJobCommonException("Json校验异常！", e);
+            throw new SnailJobCommonException("Json validation exception!", e);
         }
     }
 
@@ -266,7 +266,7 @@ public class JsonUtil {
             try {
                 return objectMapper.writeValueAsString(object);
             } catch (Exception e) {
-                throw new SnailJobCommonException("对象转Json失败！", e);
+                throw new SnailJobCommonException("Object to Json conversion failed!", e);
             }
         }
 
@@ -282,7 +282,7 @@ public class JsonUtil {
             try {
                 return objectMapper.readValue(jsonString, clazz);
             } catch (Exception e) {
-                throw new SnailJobCommonException("Json转对象失败 参数:{}", jsonString, e);
+                throw new SnailJobCommonException("Json to object conversion failed Parameters: {}", jsonString, e);
             }
         }
 
@@ -290,7 +290,7 @@ public class JsonUtil {
             try {
                 return objectMapper.readValue(inputStream, clazz);
             } catch (IOException e) {
-                throw new SnailJobCommonException("Json转对象失败", e);
+                throw new SnailJobCommonException("Json to object conversion failed", e);
             }
         }
 
@@ -305,7 +305,7 @@ public class JsonUtil {
             try {
                 return objectMapper.readValue(jsonString, typeReference);
             } catch (Exception e) {
-                throw new SnailJobCommonException("Json转对象失败 参数:{}", jsonString, e);
+                throw new SnailJobCommonException("Json to object conversion failed Parameters: {}", jsonString, e);
             }
         }
 
@@ -320,7 +320,7 @@ public class JsonUtil {
             try {
                 return objectMapper.readValue(jsonString, javaType);
             } catch (Exception e) {
-                throw new SnailJobCommonException("Json转对象失败 参数:{}", jsonString, e);
+                throw new SnailJobCommonException("Json to object conversion failed Parameters: {}", jsonString, e);
             }
         }
 
@@ -334,7 +334,7 @@ public class JsonUtil {
             try {
                 return objectMapper.readTree(jsonString);
             } catch (Exception e) {
-                throw new SnailJobCommonException("Json转对象失败 参数:{}", jsonString, e);
+                throw new SnailJobCommonException("Json to object conversion failed Parameters: {}", jsonString, e);
             }
         }
 
@@ -348,7 +348,7 @@ public class JsonUtil {
             try {
                 return objectMapper.readTree(jsonBytes);
             } catch (Exception e) {
-                throw new SnailJobCommonException("Json转对象失败！", e);
+                throw new SnailJobCommonException("Json to object conversion failed!", e);
             }
         }
 
@@ -362,7 +362,7 @@ public class JsonUtil {
             try {
                 return objectMapper.valueToTree(object);
             } catch (Exception e) {
-                throw new SnailJobCommonException("Json转对象失败！", e);
+                throw new SnailJobCommonException("Json to object conversion failed!", e);
             }
         }
     }

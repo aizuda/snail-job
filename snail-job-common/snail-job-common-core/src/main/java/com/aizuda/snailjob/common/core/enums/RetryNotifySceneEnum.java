@@ -17,19 +17,19 @@ public enum RetryNotifySceneEnum {
 
     NONE(0, StrUtil.EMPTY, NodeTypeEnum.SERVER),
 
-    MAX_RETRY(1, "场景重试数量超过阈值", NodeTypeEnum.SERVER),
+    MAX_RETRY(1, "Scene retry count exceeds threshold", NodeTypeEnum.SERVER),
 
-    MAX_RETRY_ERROR(2, "场景重试失败数量超过阈值", NodeTypeEnum.SERVER),
+    MAX_RETRY_ERROR(2, "Scene retry failure count exceeds threshold", NodeTypeEnum.SERVER),
 
-    CLIENT_REPORT_ERROR(3, "客户端上报失败", NodeTypeEnum.CLIENT),
+    CLIENT_REPORT_ERROR(3, "Client report failed", NodeTypeEnum.CLIENT),
 
-    CLIENT_COMPONENT_ERROR(4, "客户端组件异常", NodeTypeEnum.CLIENT),
+    CLIENT_COMPONENT_ERROR(4, "Client component exception", NodeTypeEnum.CLIENT),
 
-    RETRY_TASK_FAIL_ERROR(5, "任务重试失败", NodeTypeEnum.SERVER),
+    RETRY_TASK_FAIL_ERROR(5, "Task retry failed", NodeTypeEnum.SERVER),
 
-    RETRY_TASK_ENTER_DEAD_LETTER(6, "任务重试失败进入死信队列", NodeTypeEnum.SERVER),
+    RETRY_TASK_ENTER_DEAD_LETTER(6, "Task retry failed and entered dead letter queue", NodeTypeEnum.SERVER),
 
-    RETRY_NO_CLIENT_NODES_ERROR(7, "任务重试失败（没有可执行的客户端节点）", NodeTypeEnum.SERVER)
+    RETRY_NO_CLIENT_NODES_ERROR(7, "Task retry failed (no executable client nodes)", NodeTypeEnum.SERVER)
     ;
 
     /**

@@ -29,7 +29,7 @@ public interface NotifyRecipientService {
 
     Boolean batchDeleteByIds(Set<Long> ids);
 
-    void importNotifyRecipient(@Valid @NotEmpty(message = "导入数据不能为空") List<NotifyRecipientRequestVO> notifyRecipientRequestVOS);
+    void importNotifyRecipient(@Valid @NotEmpty(message = "Import data cannot be empty") List<NotifyRecipientRequestVO> notifyRecipientRequestVOS);
 
     String exportNotifyRecipient(ExportNotifyRecipientVO exportNotifyRecipientVO);
 }

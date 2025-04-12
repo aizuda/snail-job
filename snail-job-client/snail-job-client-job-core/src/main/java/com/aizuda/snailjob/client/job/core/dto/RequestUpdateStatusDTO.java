@@ -11,10 +11,10 @@ import lombok.Data;
 @Data
 public class RequestUpdateStatusDTO {
 
-    @NotNull(message = "id 不能为空")
+    @NotNull(message = "id cannot be null")
     private Long id;
 
-    @NotNull(message = "jobStatus 不能为空")
+    @NotNull(message = "jobStatus cannot be null")
     private Integer jobStatus;
 
 }

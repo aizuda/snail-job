@@ -95,7 +95,7 @@ public class NotifyConfigServiceImpl implements NotifyConfigService {
 
     @Override
     public Boolean updateNotify(NotifyConfigRequestVO requestVO) {
-        Assert.notNull(requestVO.getId(), () -> new SnailJobServerException("参数异常"));
+        Assert.notNull(requestVO.getId(), () -> new SnailJobServerException("Parameter exception"));
         NotifyConfig notifyConfig = NotifyConfigConverter.INSTANCE.convert(requestVO);
         notifyConfig.setRecipientIds(JsonUtil.toJsonString(requestVO.getRecipientIds()));
 
@@ -123,7 +123,7 @@ public class NotifyConfigServiceImpl implements NotifyConfigService {
                         .eq(NotifyConfig::getId, id)
                         .eq(NotifyConfig::getNamespaceId, namespaceId)
         );
-        Assert.notNull(notifyConfig, () -> new SnailJobServerException("通知配置不存在"));
+        Assert.notNull(notifyConfig, () -> new SnailJobServerException("Notification configuration does not exist"));
 
         // 同步配置到客户端
         SyncConfigHandler.addSyncTask(notifyConfig.getGroupName(), namespaceId);

@@ -99,7 +99,7 @@ public class Mail implements Builder<MimeMessage> {
      * @param mailAccount 邮件帐户
      */
     public Mail(MailAccount mailAccount) {
-        Assert.notNull(mailAccount, () -> new MailException("邮件账号不能为空"));
+        Assert.notNull(mailAccount, () -> new MailException("Email account cannot be empty"));
         this.mailAccount = mailAccount;
     }
     // --------------------------------------------------------------- Constructor end

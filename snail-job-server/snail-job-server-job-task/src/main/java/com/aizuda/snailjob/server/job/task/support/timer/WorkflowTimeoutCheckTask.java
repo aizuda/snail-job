@@ -43,7 +43,7 @@ public class WorkflowTimeoutCheckTask implements TimerTask<String> {
         // 超时停止任务
         workflowBatchHandler.stop(workflowTaskBatchId, JobOperationReasonEnum.TASK_EXECUTION_TIMEOUT.getReason());
 
-        String reason = String.format("超时中断.workflowTaskBatchId:[%s]", workflowTaskBatchId);
+        String reason = String.format("Timeout interruption. Workflow task batch ID:[%s]", workflowTaskBatchId);
         SnailSpringContext.getContext().publishEvent(new WorkflowTaskFailAlarmEvent(WorkflowTaskFailAlarmEventDTO.builder()
                 .workflowTaskBatchId(workflowTaskBatchId)
                 .notifyScene(JobNotifySceneEnum.WORKFLOW_TASK_ERROR.getNotifyScene())

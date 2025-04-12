@@ -35,7 +35,7 @@ public class RequestStopClientActor extends AbstractActor {
             try {
                 doStop(taskExecutorDTO);
             } catch (Exception e) {
-                log.error("请求客户端发生异常", e);
+                log.error("Client request exception occurred", e);
             }
         }).build();
     }
@@ -58,14 +58,14 @@ public class RequestStopClientActor extends AbstractActor {
             RetryRpcClient rpcClient = buildRpcClient(registerNodeInfo);
             Result<Boolean> dispatch = rpcClient.stop(stopRetryRequest);
             if (dispatch.getStatus() == StatusEnum.YES.getStatus()) {
-                SnailJobLog.LOCAL.info("retryTaskId:[{}] 任务停止成功.", executorDTO.getRetryTaskId());
+                SnailJobLog.LOCAL.info("RetryTaskId:[{}] Task stopped successfully.", executorDTO.getRetryTaskId());
             } else {
                 // 客户端返回失败，则认为任务执行失败
-                SnailJobLog.LOCAL.warn("retryTaskId:[{}] 任务停止失败.", executorDTO.getRetryTaskId());
+                SnailJobLog.LOCAL.warn("RetryTaskId:[{}] Task stop failed.", executorDTO.getRetryTaskId());
             }
 
         } catch (Exception e) {
-            SnailJobLog.LOCAL.error("retryTaskId:[{}] 任务停止失败.", executorDTO.getRetryTaskId(), e);
+            SnailJobLog.LOCAL.error("RetryTaskId:[{}] Task stop failed.", executorDTO.getRetryTaskId(), e);
         }
 
     }

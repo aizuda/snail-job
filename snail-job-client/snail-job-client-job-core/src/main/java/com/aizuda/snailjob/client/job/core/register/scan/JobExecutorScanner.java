@@ -52,7 +52,7 @@ public class JobExecutorScanner implements Scanner, ApplicationContextAware {
                         (MethodIntrospector.MetadataLookup<JobExecutor>) method -> AnnotatedElementUtils
                                 .findMergedAnnotation(method, JobExecutor.class));
             } catch (Throwable ex) {
-                SnailJobLog.LOCAL.error("{} JobExecutor加载异常：{}", beanDefinitionName, ex);
+                SnailJobLog.LOCAL.error("JobExecutor load exception for {}: {}", beanDefinitionName, ex);
             }
 
             Class executorNotProxy = AopProxyUtils.ultimateTargetClass(bean);

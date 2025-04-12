@@ -89,8 +89,8 @@ public abstract class AbstractRetryStrategies implements RetryStrategy {
             retryerResultContext.setResult(result);
 
         } catch (Exception e) {
-            log.error("重试期间发生非预期异常, sceneName:[{}] executorClassName:[{}]", sceneName, executorClassName, e);
-            retryerResultContext.setMessage("非预期异常" + e.getMessage());
+            log.error("Unexpected exception occurred during retry, sceneName:[{}] executorClassName:[{}]", sceneName, executorClassName, e);
+            retryerResultContext.setMessage("Unexpected exception" + e.getMessage());
             // 本地重试状态为失败 远程重试状态为成功
             unexpectedError(e, retryerResultContext);
 
@@ -139,7 +139,7 @@ public abstract class AbstractRetryStrategies implements RetryStrategy {
                             .failureOnRetry(retryerInfo.getScene(), retryerInfo.getExecutorClassName(), throwable);
                 }
             } catch (Exception e) {
-                log.error("失败监听者模式 处理失败 ", e);
+                log.error(" Failure listener mode processing failed", e);
                 throw e;
             }
 

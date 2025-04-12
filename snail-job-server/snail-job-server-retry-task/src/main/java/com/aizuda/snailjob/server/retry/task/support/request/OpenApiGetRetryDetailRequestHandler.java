@@ -33,7 +33,7 @@ public class OpenApiGetRetryDetailRequestHandler extends PostHttpRequestHandler 
 
         Retry retry = retryMapper.selectById(retryId);
 
-        Assert.notNull(retry, () -> new SnailJobServerException("未查询到重试任务:[{}].", retryId));
+        Assert.notNull(retry, () -> new SnailJobServerException("Retry task not found:[{}].", retryId));
 
         RetryResponseVO retryResponseVO = RetryResponseVOConverter.INSTANCE.convert(retry);
         return new SnailJobRpcResult(retryResponseVO, retryRequest.getReqId());

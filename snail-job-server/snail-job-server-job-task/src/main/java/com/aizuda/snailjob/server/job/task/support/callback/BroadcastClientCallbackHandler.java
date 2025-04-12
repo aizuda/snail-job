@@ -52,7 +52,7 @@ public class BroadcastClientCallbackHandler extends AbstractClientCallbackHandle
     protected String chooseNewClient(ClientCallbackContext context) {
         Set<RegisterNodeInfo> nodes = CacheRegisterTable.getServerNodeSet(context.getGroupName(), context.getNamespaceId());
         if (CollUtil.isEmpty(nodes)) {
-            log.error("无可执行的客户端信息. jobId:[{}]", context.getJobId());
+            log.error("No executable client information. Job ID:[{}]", context.getJobId());
             return null;
         }
 

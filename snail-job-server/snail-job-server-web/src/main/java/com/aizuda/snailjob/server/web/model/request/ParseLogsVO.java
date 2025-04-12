@@ -17,16 +17,16 @@ public class ParseLogsVO {
     /**
      * 客户端打印的上报日志信息
      */
-    @NotBlank(message = "组名称不能为空")
+    @NotBlank(message = "Group name cannot be null")
     private String logStr;
 
     /**
      * 组名称
      */
-    @NotBlank(message = "组名称不能为空")
-    @Pattern(regexp = "^[A-Za-z0-9_-]{1,64}$", message = "仅支持长度为1~64字符且类型为数字、字母、下划线和短横线")
+    @NotBlank(message = "Group name cannot be null")
+    @Pattern(regexp = "^[A-Za-z0-9_-]{1,64}$", message = "Only supports 1~64 characters, including numbers, letters, underscores, and hyphens")
     private String groupName;
 
-    @NotNull(message = "重试状态不能为空")
+    @NotNull(message = "Retry status cannot be null")
     private Integer retryStatus;
 }

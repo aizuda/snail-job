@@ -68,11 +68,11 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         if (loginRequired.required()) {
             // 执行认证
             if (token == null) {
-                throw new SnailJobAuthenticationException("登陆过期，请重新登陆");
+                throw new SnailJobAuthenticationException("Login expired, please login again");
             }
 
             if (StrUtil.isBlank(namespaceId)) {
-                throw new SnailJobAuthenticationException("{} 命名空间不存在", namespaceId);
+                throw new SnailJobAuthenticationException("Namespace {} does not exist", namespaceId);
             }
 
             // 获取 token 中的 user id
@@ -80,17 +80,17 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
             try {
                 systemUser = JsonUtil.parseObject(JWT.decode(token).getAudience().get(0), SystemUser.class);
             } catch (JWTDecodeException j) {
-                throw new SnailJobAuthenticationException("登陆过期，请重新登陆");
+                throw new SnailJobAuthenticationException("Login expired, please login again");
             }
 
             systemUser = systemUserMapper.selectById(systemUser.getId());
             if (Objects.isNull(systemUser)) {
-                throw new SnailJobAuthenticationException("用户不存在");
+                throw new SnailJobAuthenticationException("User does not exist");
             }
 
             Long count = namespaceMapper.selectCount(
                     new LambdaQueryWrapper<Namespace>().eq(Namespace::getUniqueId, namespaceId));
-            Assert.isTrue(count > 0, () -> new SnailJobAuthenticationException("[{}] 命名空间不存在", namespaceId));
+            Assert.isTrue(count > 0, () -> new SnailJobAuthenticationException("Namespace [{}] does not exist", namespaceId));
             UserSessionVO userSessionVO = new UserSessionVO();
             userSessionVO.setId(systemUser.getId());
             userSessionVO.setUsername(systemUser.getUsername());
@@ -106,7 +106,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
                                 .eq(SystemUserPermission::getNamespaceId, namespaceId)
                 );
                 List<String> groupNames = StreamUtils.toList(systemUserPermissions, SystemUserPermission::getGroupName);
-                Assert.notEmpty(groupNames, () -> new SnailJobAuthenticationException("用户组权限为空"));
+                Assert.notEmpty(groupNames, () -> new SnailJobAuthenticationException("User group permissions are empty"));
                 userSessionVO.setGroupNames(groupNames);
             }
 
@@ -117,7 +117,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
             try {
                 jwtVerifier.verify(token);
             } catch (JWTVerificationException e) {
-                throw new SnailJobAuthenticationException("登陆过期，请重新登陆");
+                throw new SnailJobAuthenticationException("Login expired, please log in again");
             }
 
             RoleEnum role = loginRequired.role();
@@ -127,7 +127,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
 
             if (role == RoleEnum.ADMIN) {
                 if (role != RoleEnum.getEnumTypeMap().get(systemUser.getRole())) {
-                    throw new SnailJobAuthenticationException("不具备访问权限");
+                    throw new SnailJobAuthenticationException("Lack of access permission");
                 }
             }
 

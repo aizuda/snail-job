@@ -13,14 +13,14 @@ import lombok.Data;
  */
 @Data
 public class StopRetryRequest {
-    @NotBlank(message = "namespaceId 不能为空")
+    @NotBlank(message = "namespaceId cannot be null")
     private String namespaceId;
-    @NotBlank(message = "group 不能为空")
+    @NotBlank(message = "group cannot be null")
     private String groupName;
-    @NotBlank(message = "scene 不能为空")
+    @NotBlank(message = "scene cannot be null")
     private String scene;
-    @NotNull(message = "retryTaskId 不能为空")
+    @NotNull(message = "retryTaskId cannot be null")
     private Long retryTaskId;
-    @NotNull(message = "retryId 不能为空")
+    @NotNull(message = "retryId cannot be null")
     private Long retryId;
 }

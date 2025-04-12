@@ -24,12 +24,12 @@ public class QueryRetryHandler extends AbstractRetryRequestHandler<RetryDTO> {
         Assert.isTrue(StatusEnum.YES.getStatus() == result.getStatus(),
                 () -> new SnailJobClientException(result.getMessage()));
         Object data = result.getData();
-        Assert.isTrue(Objects.nonNull(data), () -> new SnailJobClientException("获取[{}]任务详情失败", retryId));
+        Assert.isTrue(Objects.nonNull(data), () -> new SnailJobClientException("Failed to get details of task [{}]", retryId));
         return JsonUtil.parseObject(JsonUtil.toJsonString(data), RetryDTO.class);
     }
 
     @Override
     protected Pair<Boolean, String> checkRequest() {
-        return Pair.of(retryId != null && retryId > 0, "retryId不能为null并且必须大于0");
+        return Pair.of(retryId != null && retryId > 0, "retryId cannot be null and must be greater than 0");
     }
 }

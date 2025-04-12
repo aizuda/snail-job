@@ -54,7 +54,7 @@ public class ManualRetryStrategies extends AbstractRetryStrategies {
 
         if (RetrySiteSnapshot.isRunning()) {
             resultContext.setRetryResultStatusEnum(RetryResultStatusEnum.FAILURE);
-            resultContext.setMessage("执行重试检验不通过 原因: 存在正在运行的重试任务");
+            resultContext.setMessage("Retry validation failed: reason: there is an ongoing retry task");
             return false;
         }
 
@@ -105,11 +105,11 @@ public class ManualRetryStrategies extends AbstractRetryStrategies {
                     @Override
                     public <V> void onRetry(Attempt<V> attempt) {
                         if (attempt.hasResult()) {
-                            SnailJobLog.LOCAL.info("snail-job 手动创建重试数据成功，第[{}]次调度", attempt.getAttemptNumber());
+                            SnailJobLog.LOCAL.info("snail-job manually created retry data successfully, scheduled for the [{}] time", attempt.getAttemptNumber());
                         }
 
                         if (attempt.hasException()) {
-                            SnailJobLog.LOCAL.error("snail-job 手动创建重试数据失败，第[{}]次调度 ", attempt.getAttemptNumber(),
+                            SnailJobLog.LOCAL.error(" Manually creating retry data for snail-job failed, attempt [{}]", attempt.getAttemptNumber(),
                                     attempt.getExceptionCause());
                         }
 

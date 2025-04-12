@@ -15,11 +15,11 @@ import java.util.List;
 @Data
 public class ManualTriggerTaskRequestVO {
 
-    @NotBlank(message = "groupName 不能为空")
-    @Pattern(regexp = "^[A-Za-z0-9_-]{1,64}$", message = "仅支持长度为1~64字符且类型为数字、字母、下划线和短横线")
+    @NotBlank(message = "groupName cannot be null")
+    @Pattern(regexp = "^[A-Za-z0-9_-]{1,64}$", message = "Only supports 1~64 characters, including numbers, letters, underscores, and hyphens")
     private String groupName;
 
-    @NotEmpty(message = "retryIds 不能为空")
+    @NotEmpty(message = "retryIds cannot be null")
     private List<Long> retryIds;
 
 }

@@ -82,7 +82,7 @@ public class DecisionWorkflowExecutor extends AbstractWorkflowExecutor {
                     } else {
                         wfContext = workflowTaskBatch.getWfContext();
                         ExpressionEngine realExpressionEngine = ExpressionTypeEnum.valueOf(decisionConfig.getExpressionType());
-                        Assert.notNull(realExpressionEngine, () -> new SnailJobServerException("表达式引擎不存在"));
+                        Assert.notNull(realExpressionEngine, () -> new SnailJobServerException("Expression engine does not exist"));
                         ExpressionInvocationHandler invocationHandler = new ExpressionInvocationHandler(realExpressionEngine);
                         ExpressionEngine expressionEngine = ExpressionFactory.getExpressionEngine(invocationHandler);
                         result = (Boolean) Optional.ofNullable(expressionEngine.eval(decisionConfig.getNodeExpression(), wfContext)).orElse(Boolean.FALSE);
@@ -92,7 +92,7 @@ public class DecisionWorkflowExecutor extends AbstractWorkflowExecutor {
                     }
 
                 } catch (Exception e) {
-                    log.error("执行条件表达式解析异常. 表达式:[{}]，参数: [{}]", decisionConfig.getNodeExpression(), wfContext, e);
+                    log.error("Condition expression execution parsing exception. Expression:[{}], Parameter: [{}]", decisionConfig.getNodeExpression(), wfContext, e);
                     taskBatchStatus = JobTaskBatchStatusEnum.FAIL.getStatus();
                     operationReason = JobOperationReasonEnum.WORKFLOW_CONDITION_NODE_EXECUTION_ERROR.getReason();
                     jobTaskStatus = JobTaskStatusEnum.FAIL.getStatus();
@@ -139,10 +139,10 @@ public class DecisionWorkflowExecutor extends AbstractWorkflowExecutor {
         jobLogMetaDTO.setTaskId(jobTask.getId());
         if (jobTaskBatch.getTaskBatchStatus() == JobTaskStatusEnum.SUCCESS.getStatus()
                 || JobOperationReasonEnum.WORKFLOW_NODE_NO_REQUIRED.getReason() == context.getOperationReason()) {
-            SnailJobLog.REMOTE.info("节点Id:[{}] 决策完成. 上下文:[{}] 决策结果:[{}] <|>{}<|>",
+            SnailJobLog.REMOTE.info("Node ID:[{}] Decision completed. Context:[{}] Decision result:[{}] <|>{}<|>",
                     context.getWorkflowNodeId(), context.getWfContext(), context.getEvaluationResult(), jobLogMetaDTO);
         } else {
-            SnailJobLog.REMOTE.error("节点Id:[{}] 决策失败. 上下文:[{}] 失败原因:[{}] <|>{}<|>",
+            SnailJobLog.REMOTE.error("Node ID:[{}] Decision failed. Context:[{}] Failure reason:[{}] <|>{}<|>",
                     context.getWorkflowNodeId(), context.getWfContext(), context.getLogMessage(), jobLogMetaDTO);
 
         }

@@ -62,10 +62,10 @@ public class LarkAlarm extends AbstractAlarm<AlarmContext> {
             if (execute.isOk()) {
                 return true;
             }
-            SnailJobLog.LOCAL.error("发送lark消息失败:{}", execute.body());
+            SnailJobLog.LOCAL.error("Sending Lark message failed: {}", execute.body());
             return false;
         } catch (Exception e) {
-            log.error("发送lark消息失败", e);
+            log.error("Sending Lark message failed", e);
             return false;
         }
     }

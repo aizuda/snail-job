@@ -99,9 +99,9 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
                             new HttpEntity<>(callbackParamsDTO, requestHeaders), String.class, uriVariables));
 
             result = response.getBody();
-            SnailJobLog.LOCAL.info("回调结果. webHook:[{}]，结果: [{}]", decisionConfig.getWebhook(), result);
+            SnailJobLog.LOCAL.info("Callback result. WebHook:[{}], Result: [{}]", decisionConfig.getWebhook(), result);
         } catch (Exception e) {
-            SnailJobLog.LOCAL.error("回调异常. webHook:[{}]，参数: [{}]", decisionConfig.getWebhook(),
+            SnailJobLog.LOCAL.error("Callback exception. WebHook:[{}], Parameter: [{}]", decisionConfig.getWebhook(),
                     context.getWfContext(), e);
 
             context.setTaskBatchStatus(JobTaskBatchStatusEnum.FAIL.getStatus());
@@ -136,7 +136,7 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
                     @Override
                     public <V> void onRetry(final Attempt<V> attempt) {
                         if (attempt.hasException()) {
-                            SnailJobLog.LOCAL.error("回调接口第 【{}】 重试. 回调配置信息: [{}]",
+                            SnailJobLog.LOCAL.error("Callback interface attempt [{}]. Callback configuration information: [{}]",
                                     attempt.getAttemptNumber(), JsonUtil.toJsonString(decisionConfig));
                         }
                     }
@@ -162,19 +162,19 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
         jobLogMetaDTO.setJobId(SystemConstants.CALLBACK_JOB_ID);
         jobLogMetaDTO.setTaskId(jobTask.getId());
         if (jobTaskBatch.getTaskBatchStatus() == JobTaskStatusEnum.SUCCESS.getStatus()) {
-            SnailJobLog.REMOTE.info("节点[{}]回调成功.\n回调参数:{} \n回调结果:[{}] <|>{}<|>",
+            SnailJobLog.REMOTE.info("Node [{}] callback success.\nCallback params: {} \nCallback result: [{}] <|>{}<|>",
                     context.getWorkflowNodeId(), context.getWfContext(), context.getEvaluationResult(), jobLogMetaDTO);
         } else if (jobTaskBatch.getTaskBatchStatus() == JobTaskStatusEnum.CANCEL.getStatus()) {
             if (WORKFLOW_SUCCESSOR_SKIP_EXECUTION.contains(context.getParentOperationReason())) {
-                SnailJobLog.REMOTE.warn("节点[{}]取消回调. 取消原因: 当前任务无需处理 <|>{}<|>",
+                SnailJobLog.REMOTE.warn("Node [{}] cancels callback. Cancellation reason: Current task does not require processing <|>{}<|>",
                         context.getWorkflowNodeId(), jobLogMetaDTO);
             } else {
-                SnailJobLog.REMOTE.warn("节点[{}]取消回调. 取消原因: 任务状态已关闭 <|>{}<|>",
+                SnailJobLog.REMOTE.warn("Node [{}] cancels callback. Cancellation reason: Task status is closed <|>{}<|>",
                         context.getWorkflowNodeId(), jobLogMetaDTO);
             }
 
         } else {
-            SnailJobLog.REMOTE.error("节点[{}]回调失败.\n失败原因:{} <|>{}<|>",
+            SnailJobLog.REMOTE.error("Node [{}] fail to callback.\nReason: {} <|>{}<|>",
                     context.getWorkflowNodeId(),
                     context.getLogMessage(), jobLogMetaDTO);
         }

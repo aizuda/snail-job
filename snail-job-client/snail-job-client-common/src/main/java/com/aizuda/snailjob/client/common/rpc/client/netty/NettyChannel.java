@@ -245,7 +245,7 @@ public class NettyChannel {
         try {
             CHANNEL.writeAndFlush(request).sync();
         } catch (Exception exception) {
-            throw new SnailJobRemoteException("网络异常");
+            throw new SnailJobRemoteException("Network exception");
         }
     }
 }

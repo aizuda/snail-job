@@ -12,10 +12,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 @Data
 public class SystemUpdateUserPasswordRequestVO {
 
-    @NotBlank(message = "原密码不能为空", groups = PutMapping.class)
+    @NotBlank(message = "Original password cannot be empty", groups = PutMapping.class)
     private String oldPassword;
 
-    @NotBlank(message = "新密码不能为空", groups = PutMapping.class)
+    @NotBlank(message = "New password cannot be empty", groups = PutMapping.class)
     private String newPassword;
 
 }

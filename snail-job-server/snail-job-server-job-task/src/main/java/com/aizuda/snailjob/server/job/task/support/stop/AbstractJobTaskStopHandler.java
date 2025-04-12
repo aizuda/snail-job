@@ -65,7 +65,7 @@ public abstract class AbstractJobTaskStopHandler implements JobTaskStopHandler, 
                 }
                 JobExecutorResultDTO jobExecutorResultDTO = JobTaskConverter.INSTANCE.toJobExecutorResultDTO(jobTask);
                 jobExecutorResultDTO.setTaskStatus(JobTaskStatusEnum.STOP.getStatus());
-                jobExecutorResultDTO.setMessage("任务停止成功");
+                jobExecutorResultDTO.setMessage("Task stopped successfully");
                 jobExecutorResultDTO.setJobOperationReason(context.getJobOperationReason());
                 jobExecutorResultDTO.setTaskType(getTaskType().getType());
                 jobExecutorResultDTO.setWorkflowNodeId(context.getWorkflowNodeId());

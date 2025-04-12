@@ -43,6 +43,6 @@ public class DeleteWorkflowHandler extends AbstractJobRequestHandler<Boolean> {
 
     @Override
     protected Pair<Boolean, String> checkRequest() {
-        return Pair.of(toDeleteIds != null && !toDeleteIds.isEmpty() && !toDeleteIds.contains(0L),  "toDeleteId不能为null或0");
+        return Pair.of(toDeleteIds != null && !toDeleteIds.isEmpty() && !toDeleteIds.contains(0L),  "toDeleteId cannot be null or 0");
     }
 }

@@ -32,7 +32,7 @@ public class SyncRemoteConfig implements Lifecycle {
                 .timeout(1000L)
                 .callback(rpcResult -> {
                     if (Objects.isNull(rpcResult.getData())) {
-                        SnailJobLog.LOCAL.debug("获取配置结果为null");
+                        SnailJobLog.LOCAL.debug("Configuration retrieval result is null");
                         return;
                     }
 
@@ -47,7 +47,7 @@ public class SyncRemoteConfig implements Lifecycle {
             try {
                 CLIENT.syncRemoteConfig();
             } catch (Exception e) {
-                SnailJobLog.LOCAL.error("通知配置失败", e);
+                SnailJobLog.LOCAL.error("Notification configuration failed", e);
             }
         }, 0, 1, TimeUnit.MINUTES);
     }

@@ -59,7 +59,7 @@ public class JobLogActor extends AbstractActor {
 
                         accessTemplate.getJobLogMessageAccess().insertBatch(jobLogMessageList);
                     } catch (Exception e) {
-                        log.error("保存客户端日志异常.", e);
+                        log.error("Saving client logs failed.", e);
                     } finally {
                         getContext().stop(getSelf());
                     }
@@ -68,7 +68,7 @@ public class JobLogActor extends AbstractActor {
                     try {
                         saveLogMessage(jobLogDTO);
                     } catch (Exception e) {
-                        log.error("保存日志异常.", e);
+                        log.error("Saving logs failed.", e);
                     } finally {
                         getContext().stop(getSelf());
                     }

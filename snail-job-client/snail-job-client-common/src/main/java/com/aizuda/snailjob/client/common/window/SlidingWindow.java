@@ -103,7 +103,7 @@ public class SlidingWindow<T> {
                     ConcurrentLinkedQueue<T> list = new ConcurrentLinkedQueue<>();
                     list.add(data);
 
-                    SnailJobLog.LOCAL.debug("添加新数据 [{}] [{}] size:[{}]", windowPeriod, Thread.currentThread().getName(), list.size());
+                    SnailJobLog.LOCAL.debug("Adding new data [{}] [{}] size:[{}]", windowPeriod, Thread.currentThread().getName(), list.size());
                     saveData.put(windowPeriod, list);
 
                     // 扫描n-1个窗口，是否过期，过期则删除
@@ -128,7 +128,7 @@ public class SlidingWindow<T> {
      */
     private void alarmWindowTotal() {
         if (saveData.size() > windowTotalThreshold) {
-            SnailJobLog.LOCAL.warn("当前存活的窗口数量过多 总量:[{}] > 阈值:[{}] ", saveData.size(), windowTotalThreshold);
+            SnailJobLog.LOCAL.warn(" The number of currently active windows is too high Total:[{}] > Threshold:[{}]", saveData.size(), windowTotalThreshold);
         }
     }
 
@@ -233,7 +233,7 @@ public class SlidingWindow<T> {
         try {
             return saveData.firstKey();
         } catch (NoSuchElementException e) {
-            SnailJobLog.LOCAL.error("第一个窗口异常. saveData:[{}]", JsonUtil.toJsonString(saveData));
+            SnailJobLog.LOCAL.error("First window exception. saveData:[{}]", JsonUtil.toJsonString(saveData));
             return null;
         }
 
@@ -248,7 +248,7 @@ public class SlidingWindow<T> {
         try {
             return saveData.lastKey();
         } catch (NoSuchElementException e) {
-            SnailJobLog.LOCAL.error("第后一个窗口异常. saveData:[{}]", JsonUtil.toJsonString(saveData));
+            SnailJobLog.LOCAL.error("The last window is abnormal. SaveData:[{}]", JsonUtil.toJsonString(saveData));
             return null;
         }
     }
@@ -308,7 +308,7 @@ public class SlidingWindow<T> {
         alarmWindowTotal();
 
         if (windowPeriod.isBefore(condition)) {
-            SnailJobLog.LOCAL.debug("到达时间窗口期 [{}] [{}]", windowPeriod, JsonUtil.toJsonString(saveData));
+            SnailJobLog.LOCAL.debug("Time window reached [{}] [{}]", windowPeriod, JsonUtil.toJsonString(saveData));
             doHandlerListener(windowPeriod);
         }
     }
@@ -331,7 +331,7 @@ public class SlidingWindow<T> {
             try {
                 extract(LocalDateTime.now().minus(duration, chronoUnit));
             } catch (Exception e) {
-                SnailJobLog.LOCAL.error("滑动窗口异常", e);
+                SnailJobLog.LOCAL.error("Sliding window exception", e);
             }
         }, 1, 1, TimeUnit.SECONDS);
     }
@@ -399,7 +399,7 @@ public class SlidingWindow<T> {
          * @return this
          */
         public Builder<T> withTotalThreshold(int totalThreshold) {
-            Assert.isTrue(totalThreshold > 0, "总量窗口期阈值不能小于0");
+            Assert.isTrue(totalThreshold > 0, "Total window period threshold cannot be less than 0");
             this.totalThreshold = totalThreshold;
             return this;
         }
@@ -411,7 +411,7 @@ public class SlidingWindow<T> {
          * @return this
          */
         public Builder<T> withWindowTotalThreshold(int windowTotalThreshold) {
-            Assert.isTrue(windowTotalThreshold > 0, "窗口数量阈值不能小于0");
+            Assert.isTrue(windowTotalThreshold > 0, "Window quantity threshold cannot be less than 0");
             this.windowTotalThreshold = windowTotalThreshold;
             return this;
         }
@@ -440,7 +440,7 @@ public class SlidingWindow<T> {
          * @return this
          */
         public Builder<T> withDuration(long duration, ChronoUnit chronoUnit) {
-            Assert.isTrue(duration > 0, "窗口期不能小于0");
+            Assert.isTrue(duration > 0, "Window period cannot be less than 0");
             this.duration = duration;
             this.chronoUnit = chronoUnit;
             return this;

@@ -19,13 +19,13 @@ public class RetryJobTimerTask implements TimerTask<String> {
     @Override
     public void run(final Timeout timeout) throws Exception {
         // 执行任务调度
-        SnailJobLog.LOCAL.debug("开始执行重试任务调度. 当前时间:[{}] taskId:[{}]", LocalDateTime.now(), jobExecutorDTO.getTaskBatchId());
+        SnailJobLog.LOCAL.debug("Start retry task scheduling. Current time:[{}] Task ID:[{}]", LocalDateTime.now(), jobExecutorDTO.getTaskBatchId());
         JobTimerWheel.clearCache(idempotentKey());
         try {
             ActorRef actorRef = ActorGenerator.jobRealTaskExecutorActor();
             actorRef.tell(jobExecutorDTO, actorRef);
         } catch (Exception e) {
-            SnailJobLog.LOCAL.error("重试任务调度执行失败", e);
+            SnailJobLog.LOCAL.error("Retry task scheduling execution failed", e);
         }
     }
 

@@ -11,13 +11,13 @@ import lombok.Data;
 @Data
 public class StopJobDTO {
 
-    @NotNull(message = "jobId 不能为空")
+    @NotNull(message = "jobId cannot be null")
     private Long jobId;
 
-    @NotNull(message = "taskBatchId 不能为空")
+    @NotNull(message = "taskBatchId cannot be null")
     private Long taskBatchId;
 
-    @NotBlank(message = "group 不能为空")
+    @NotBlank(message = "group cannot be null")
     private String groupName;
 
 }

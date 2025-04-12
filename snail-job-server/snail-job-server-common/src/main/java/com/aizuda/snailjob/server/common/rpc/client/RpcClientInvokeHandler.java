@@ -151,7 +151,7 @@ public class RpcClientInvokeHandler implements InvocationHandler {
                     sw.stop();
                 }
 
-                SnailJobLog.LOCAL.debug("request complete requestId:[{}] 耗时:[{}ms]", snailJobRequest.getReqId(),
+                SnailJobLog.LOCAL.debug("Request complete requestId:[{}] took [{}ms]", snailJobRequest.getReqId(),
                         sw.getTotalTimeMillis());
                 if (async) {
                     // 暂时不支持异步调用

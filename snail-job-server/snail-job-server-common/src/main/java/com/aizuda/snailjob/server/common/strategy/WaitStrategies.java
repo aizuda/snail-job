@@ -96,7 +96,7 @@ public class WaitStrategies {
             }
 
             // 兜底为默认等级策略
-            throw new SnailJobCommonException("等待策略类型不存在. [{}]", type);
+            throw new SnailJobCommonException("Wait strategy type does not exist. [{}]", type);
         }
 
     }
@@ -180,10 +180,10 @@ public class WaitStrategies {
 
             try {
                 Date nextValidTime = new CronExpression(context.getTriggerInterval()).getNextValidTimeAfter(new Date(context.getNextTriggerAt()));
-                Assert.notNull(nextValidTime, () -> new SnailJobServerException("表达式错误:{}", context.getTriggerInterval()));
+                Assert.notNull(nextValidTime, () -> new SnailJobServerException("Expression error: {}", context.getTriggerInterval()));
                 return DateUtils.toEpochMilli(nextValidTime);
             } catch (ParseException e) {
-                throw new SnailJobServerException("解析CRON表达式异常 [{}]", context.getTriggerInterval(), e);
+                throw new SnailJobServerException("Parsing CRON expression exception [{}]", context.getTriggerInterval(), e);
             }
 
         }

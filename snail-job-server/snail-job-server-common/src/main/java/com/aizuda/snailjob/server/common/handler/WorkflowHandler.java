@@ -156,32 +156,32 @@ public class WorkflowHandler {
                 if (WorkflowNodeTypeEnum.DECISION.getType() == nodeConfig.getNodeType()) {
                     workflowNode.setJobId(SystemConstants.DECISION_JOB_ID);
                     DecisionConfig decision = nodeInfo.getDecision();
-                    Assert.notNull(decision, () -> new SnailJobServerException("【{}】配置信息不能为空", nodeInfo.getNodeName()));
-                    Assert.notBlank(decision.getNodeExpression(), () -> new SnailJobServerException("【{}】表达式不能为空", nodeInfo.getNodeName()));
-                    Assert.notNull(decision.getDefaultDecision(), () -> new SnailJobServerException("【{}】默认决策不能为空", nodeInfo.getNodeName()));
-                    Assert.notNull(decision.getExpressionType(), () -> new SnailJobServerException("【{}】表达式类型不能为空", nodeInfo.getNodeName()));
+                    Assert.notNull(decision, () -> new SnailJobServerException("Configuration information for [{}] cannot be empty", nodeInfo.getNodeName()));
+                    Assert.notBlank(decision.getNodeExpression(), () -> new SnailJobServerException("Expression for [{}] cannot be empty", nodeInfo.getNodeName()));
+                    Assert.notNull(decision.getDefaultDecision(), () -> new SnailJobServerException("Default decision for [{}] cannot be empty", nodeInfo.getNodeName()));
+                    Assert.notNull(decision.getExpressionType(), () -> new SnailJobServerException("Expression type for [{}] cannot be empty", nodeInfo.getNodeName()));
                     workflowNode.setNodeInfo(JsonUtil.toJsonString(decision));
                 }
 
                 if (WorkflowNodeTypeEnum.CALLBACK.getType() == nodeConfig.getNodeType()) {
                     workflowNode.setJobId(SystemConstants.CALLBACK_JOB_ID);
                     CallbackConfig callback = nodeInfo.getCallback();
-                    Assert.notNull(callback, () -> new SnailJobServerException("【{}】配置信息不能为空", nodeInfo.getNodeName()));
-                    Assert.notBlank(callback.getWebhook(), () -> new SnailJobServerException("【{}】webhook不能为空", nodeInfo.getNodeName()));
-                    Assert.notNull(callback.getContentType(), () -> new SnailJobServerException("【{}】请求类型不能为空", nodeInfo.getNodeName()));
-                    Assert.notBlank(callback.getSecret(), () -> new SnailJobServerException("【{}】秘钥不能为空", nodeInfo.getNodeName()));
+                    Assert.notNull(callback, () -> new SnailJobServerException("Configuration information for [{}] cannot be empty", nodeInfo.getNodeName()));
+                    Assert.notBlank(callback.getWebhook(), () -> new SnailJobServerException("Webhook for [{}] cannot be empty", nodeInfo.getNodeName()));
+                    Assert.notNull(callback.getContentType(), () -> new SnailJobServerException("Request type for [{}] cannot be empty", nodeInfo.getNodeName()));
+                    Assert.notBlank(callback.getSecret(), () -> new SnailJobServerException("Secret key for [{}] cannot be empty", nodeInfo.getNodeName()));
                     workflowNode.setNodeInfo(JsonUtil.toJsonString(callback));
                 }
 
                 if (WorkflowNodeTypeEnum.JOB_TASK.getType() == nodeConfig.getNodeType()) {
                     JobTaskConfig jobTask = nodeInfo.getJobTask();
-                    Assert.notNull(jobTask, () -> new SnailJobServerException("【{}】配置信息不能为空", nodeInfo.getNodeName()));
-                    Assert.notNull(jobTask.getJobId(), () -> new SnailJobServerException("【{}】所属任务不能为空", nodeInfo.getNodeName()));
+                    Assert.notNull(jobTask, () -> new SnailJobServerException("Configuration information for [{}] cannot be empty", nodeInfo.getNodeName()));
+                    Assert.notNull(jobTask.getJobId(), () -> new SnailJobServerException("Associated task for [{}] cannot be empty", nodeInfo.getNodeName()));
                     workflowNode.setJobId(jobTask.getJobId());
                 }
 
                 Assert.isTrue(1 == workflowNodeMapper.insert(workflowNode),
-                        () -> new SnailJobServerException("新增工作流节点失败"));
+                        () -> new SnailJobServerException("Adding new workflow node failed"));
                 // 添加节点
                 graph.addNode(workflowNode.getId());
                 for (final Long parentId : parentIds) {
@@ -195,7 +195,7 @@ public class WorkflowHandler {
                             groupName, workflowId, childNode, graph, version);
                 } else {
                     if (WorkflowNodeTypeEnum.DECISION.getType() == nodeConfig.getNodeType()) {
-                        throw new SnailJobServerException("决策节点或者决策节点的后继节点不能作为叶子节点");
+                        throw new SnailJobServerException("Decision nodes or successor nodes of decision nodes cannot be leaf nodes");
                     }
 
                     // 若当前节点无子任何子节点记录一下, 后续存在公共子节点时需要用到

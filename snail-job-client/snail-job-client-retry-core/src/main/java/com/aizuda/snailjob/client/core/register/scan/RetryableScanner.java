@@ -49,7 +49,7 @@ public class RetryableScanner implements Scanner, ApplicationContextAware {
                         (MethodIntrospector.MetadataLookup<Retryable>) method -> AnnotatedElementUtils
                                 .findMergedAnnotation(method, Retryable.class));
             } catch (Throwable ex) {
-                SnailJobLog.LOCAL.error("{}重试信息加载报错：{}", beanDefinitionName, ex);
+                SnailJobLog.LOCAL.error("Error loading retry information for {}: {}", beanDefinitionName, ex);
             }
             if (annotatedMethods == null || annotatedMethods.isEmpty()) {
                 continue;

@@ -47,7 +47,7 @@ public class BroadcastTaskGenerator extends AbstractJobTaskGenerator {
     public List<JobTask> doGenerate(JobTaskGenerateContext context) {
         Set<RegisterNodeInfo> serverNodes = CacheRegisterTable.getServerNodeSet(context.getGroupName(), context.getNamespaceId());
         if (CollUtil.isEmpty(serverNodes)) {
-            SnailJobLog.LOCAL.error("无可执行的客户端信息. jobId:[{}]", context.getJobId());
+            SnailJobLog.LOCAL.error("No executable client information. Job ID:[{}]", context.getJobId());
             return Lists.newArrayList();
         }
 

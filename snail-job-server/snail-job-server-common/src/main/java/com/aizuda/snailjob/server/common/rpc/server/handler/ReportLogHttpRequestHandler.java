@@ -53,7 +53,7 @@ public class ReportLogHttpRequestHandler extends PostHttpRequestHandler {
         SnailJobRequest retryRequest = JsonUtil.parseObject(content, SnailJobRequest.class);
         Object[] args = retryRequest.getArgs();
 
-        Assert.notEmpty(args, () -> new SnailJobServerException("日志上报的数据不能为空. ReqId:[{}]", retryRequest.getReqId()));
+        Assert.notEmpty(args, () -> new SnailJobServerException("The log data to be reported cannot be empty. ReqId:[{}]", retryRequest.getReqId()));
 
         JsonNode jsonNode = JsonUtil.toJson(args[0]);
         List<RetryLogTaskDTO> retryTasks = Lists.newArrayList();

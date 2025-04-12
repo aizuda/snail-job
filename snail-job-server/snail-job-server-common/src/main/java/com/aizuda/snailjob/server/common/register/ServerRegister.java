@@ -109,7 +109,7 @@ public class ServerRegister extends AbstractRegister {
                 }
             }
         } catch (Exception e) {
-            SnailJobLog.LOCAL.error("刷新客户端失败", e);
+            SnailJobLog.LOCAL.error("Client refresh failed", e);
         }
     }
 
@@ -126,7 +126,7 @@ public class ServerRegister extends AbstractRegister {
             try {
                 this.register(new RegisterContext());
             } catch (Exception e) {
-                SnailJobLog.LOCAL.error("服务端注册失败", e);
+                SnailJobLog.LOCAL.error("Server-side registration failed", e);
             }
         }, 0, DELAY_TIME * 2 / 3, TimeUnit.SECONDS);
 

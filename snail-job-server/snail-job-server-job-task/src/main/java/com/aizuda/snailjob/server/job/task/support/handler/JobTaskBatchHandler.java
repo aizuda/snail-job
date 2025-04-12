@@ -133,7 +133,7 @@ public class JobTaskBatchHandler {
 
         Duration duration = Duration.ofMillis(milliseconds - DateUtils.toNowMilli() % 1000);
 
-        log.debug("常驻任务监控. [{}] 任务时间差:[{}] 取余:[{}]", duration, milliseconds,
+        log.debug("Resident task monitoring. [{}] Task time difference:[{}] Modulus:[{}]", duration, milliseconds,
                 DateUtils.toNowMilli() % 1000);
         job.setNextTriggerAt(nextTriggerAt);
         JobTimerWheel.registerWithJob(() -> new ResidentJobTimerTask(jobTimerTaskDTO, job), duration);
@@ -158,11 +158,11 @@ public class JobTaskBatchHandler {
                         .orderByAsc(JobTask::getId)
         ).stream().findFirst().orElse(null);
 
-        // {"jobParams":"测试参数传递","maps":""}
+        // {"jobParams":"Test parameter passing","maps":""}
         String argsStr = job.getArgsStr();
         if (Objects.nonNull(rootMapTask) && StrUtil.isNotBlank(rootMapTask.getArgsStr())) {
             JobArgsHolder jobArgsHolder = JsonUtil.parseObject(rootMapTask.getArgsStr(), JobArgsHolder.class);
-            // MAP_REDUCE的参数: {"shardNum":2,"argsStr":"测试参数传递"} 这里得解析出来覆盖argsStr
+            // MAP_REDUCE的参数: {"shardNum":2,"argsStr":"Test parameter passing"} 这里得解析出来覆盖argsStr
             if (JobTaskTypeEnum.MAP_REDUCE.getType() == job.getTaskType()) {
                 MapReduceArgsStrDTO mapReduceArgsStrDTO = JsonUtil.parseObject(argsStr, MapReduceArgsStrDTO.class);
                 mapReduceArgsStrDTO.setArgsStr((String) jobArgsHolder.getJobParams());

@@ -64,7 +64,7 @@ public class NotifyRecipientController {
 
     @DeleteMapping("/ids")
     @LoginRequired
-    public Boolean batchDeleteByIds(@RequestBody @NotEmpty(message = "ids不能为空") Set<Long> ids) {
+    public Boolean batchDeleteByIds(@RequestBody @NotEmpty(message = "ids cannot be null") Set<Long> ids) {
         return notifyRecipientService.batchDeleteByIds(ids);
     }
 

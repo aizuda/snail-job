@@ -5,6 +5,6 @@ import lombok.Data;
 
 @Data
 public class RequestTriggerRetryDTO {
-    @NotNull(message = "id 不能为空")
+    @NotNull(message = "id cannot be null")
     private Long id;
 }

@@ -42,7 +42,7 @@ public class RunningJobPrepareHandler extends AbstractJobPrepareHandler {
 
     @Override
     protected void doHandle(JobTaskPrepareDTO prepare) {
-        log.debug("存在运行中的任务. prepare:[{}]", JsonUtil.toJsonString(prepare));
+        log.debug("Running tasks exist. Prepare:[{}]", JsonUtil.toJsonString(prepare));
 
         // 若存在所有的任务都是完成，但是批次上的状态为运行中，则是并发导致的未把批次状态变成为终态，此处做一次兜底处理
         int blockStrategy = prepare.getBlockStrategy();
@@ -58,7 +58,7 @@ public class RunningJobPrepareHandler extends AbstractJobPrepareHandler {
 
             // 计算超时时间，到达超时时间中断任务
             if (delay > DateUtils.toEpochMilli(prepare.getExecutorTimeout())) {
-                log.info("任务执行超时.taskBatchId:[{}] delay:[{}] executorTimeout:[{}]", prepare.getTaskBatchId(), delay, DateUtils.toEpochMilli(prepare.getExecutorTimeout()));
+                log.info("Task execution timeout. Task batch ID:[{}] Delay:[{}] Executor timeout:[{}]", prepare.getTaskBatchId(), delay, DateUtils.toEpochMilli(prepare.getExecutorTimeout()));
                 // 超时停止任务
                 JobTaskStopHandler instanceInterrupt = JobTaskStopFactory.getJobTaskStop(prepare.getTaskType());
                 TaskStopJobContext stopJobContext = JobTaskConverter.INSTANCE.toStopJobContext(prepare);

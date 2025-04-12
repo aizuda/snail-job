@@ -109,14 +109,14 @@ public class SyncReport extends AbstractReport {
                                 snailJobProperties.getGroup(),
                                 LocalDateTime.now().format(formatter),
                                 e.getMessage())
-                        .title("同步上报异常:[{}]", snailJobProperties.getGroup())
+                        .title("Sync reporting exception: [{}]", snailJobProperties.getGroup())
                         .notifyAttribute(recipient.getNotifyAttribute());
 
                 Optional.ofNullable(SnailJobAlarmFactory.getAlarmType(recipient.getNotifyType())).ifPresent(alarm -> alarm.asyncSendMessage(context));
             }
 
         } catch (Exception e1) {
-            SnailJobLog.LOCAL.error("客户端发送组件异常告警失败", e1);
+            SnailJobLog.LOCAL.error("Client failed to send component exception alarm", e1);
         }
 
     }

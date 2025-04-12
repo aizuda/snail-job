@@ -88,14 +88,14 @@ public class RetryFailureHandler extends AbstractRetryResultHandler {
                 retry.setUpdateDt(LocalDateTime.now());
                 retry.setDeleted(retry.getId());
                 Assert.isTrue(1 == retryMapper.updateById(retry),
-                        () -> new SnailJobServerException("更新重试任务失败. groupName:[{}]", retry.getGroupName()));
+                        () -> new SnailJobServerException("Update retry task failed. Group name:[{}]", retry.getGroupName()));
                 // 创建一个回调任务
                 callbackRetryTaskHandler.create(retry, retrySceneConfig);
             } else if (context.isIncrementRetryCount()) {
                 retry.setRetryCount(current);
                 retry.setUpdateDt(LocalDateTime.now());
                 Assert.isTrue(1 == retryMapper.updateById(retry),
-                        () -> new SnailJobServerException("更新重试任务失败. groupName:[{}]", retry.getGroupName()));
+                        () -> new SnailJobServerException("Update retry task failed. Group name:[{}]", retry.getGroupName()));
 
             }
 

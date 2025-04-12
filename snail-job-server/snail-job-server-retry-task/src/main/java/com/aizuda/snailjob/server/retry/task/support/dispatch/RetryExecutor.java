@@ -98,7 +98,7 @@ public class RetryExecutor extends AbstractActor {
             // 无客户端不执行调度
             updateRetryTaskStatus(execute.getRetryTaskId(), RetryTaskStatusEnum.CANCEL.getStatus(), RetryOperationReasonEnum.NOT_CLIENT);
             RetryTaskFailAlarmEventDTO toRetryTaskFailAlarmEventDTO =
-                    RetryTaskConverter.INSTANCE.toRetryTaskFailAlarmEventDTO(retry, "无客户端节点",
+                    RetryTaskConverter.INSTANCE.toRetryTaskFailAlarmEventDTO(retry, "No client nodes",
                             RetryNotifySceneEnum.RETRY_NO_CLIENT_NODES_ERROR.getNotifyScene());
             SnailSpringContext.getContext().publishEvent(new RetryTaskFailAlarmEvent(toRetryTaskFailAlarmEventDTO));
             return;

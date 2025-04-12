@@ -30,11 +30,11 @@ public class WaitJobPrepareHandler extends AbstractJobPrepareHandler {
 
     @Override
     protected void doHandle(JobTaskPrepareDTO jobPrepareDTO) {
-        log.debug("存在待处理任务. taskBatchId:[{}]", jobPrepareDTO.getTaskBatchId());
+        log.debug("Pending tasks exist. Task batch ID:[{}]", jobPrepareDTO.getTaskBatchId());
 
         // 若时间轮中数据不存在则重新加入
         if (!JobTimerWheel.isExisted(MessageFormat.format(JobTimerTask.IDEMPOTENT_KEY_PREFIX, jobPrepareDTO.getTaskBatchId()))) {
-            log.info("存在待处理任务且时间轮中不存在 taskBatchId:[{}]", jobPrepareDTO.getTaskBatchId());
+            log.info("Pending tasks exist and taskBatchId:[{}] does not exist in the time wheel", jobPrepareDTO.getTaskBatchId());
 
             // 进入时间轮
             long delay = jobPrepareDTO.getNextTriggerAt() - DateUtils.toNowMilli();

@@ -52,7 +52,7 @@ public class LogTimerWheel {
     public static synchronized void register(String idempotentKey, TimerTask<String> task, Duration delay) {
 
         register(idempotentKey, hashedWheelTimer -> {
-            SnailJobLog.LOCAL.debug("加入时间轮. delay:[{}ms] idempotentKey:[{}]", delay, idempotentKey);
+            SnailJobLog.LOCAL.debug("Joining time wheel. delay:[{}ms] idempotentKey:[{}]", delay, idempotentKey);
             timer.newTimeout(task, Math.max(delay.toMillis(), 0), TimeUnit.MILLISECONDS);
         });
     }
@@ -64,7 +64,7 @@ public class LogTimerWheel {
                 consumer.accept(timer);
                 idempotent.set(idempotentKey);
             } catch (Exception e) {
-                SnailJobLog.LOCAL.error("加入时间轮失败. uniqueId:[{}]", idempotentKey, e);
+                SnailJobLog.LOCAL.error("Failed to join time wheel. uniqueId:[{}]", idempotentKey, e);
             }
         }
     }

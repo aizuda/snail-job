@@ -156,10 +156,10 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public boolean updateJob(JobRequestVO jobRequestVO) {
-        Assert.notNull(jobRequestVO.getId(), () -> new SnailJobServerException("id 不能为空"));
+        Assert.notNull(jobRequestVO.getId(), () -> new SnailJobServerException("id cannot be null"));
 
         Job job = jobMapper.selectById(jobRequestVO.getId());
-        Assert.notNull(job, () -> new SnailJobServerException("更新失败"));
+        Assert.notNull(job, () -> new SnailJobServerException("Update failed"));
 
         // 判断常驻任务
         Job updateJob = JobConverter.INSTANCE.convert(jobRequestVO);
@@ -205,7 +205,7 @@ public class JobServiceImpl implements JobService {
                 return StatusEnum.YES.getStatus();
             }
         } else {
-            throw new SnailJobServerException("未知触发类型");
+            throw new SnailJobServerException("Unknown trigger type");
         }
 
         return StatusEnum.NO.getStatus();
@@ -213,7 +213,7 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public Boolean updateJobStatus(JobStatusUpdateRequestVO jobRequestVO) {
-        Assert.notNull(jobRequestVO.getId(), () -> new SnailJobServerException("id 不能为空"));
+        Assert.notNull(jobRequestVO.getId(), () -> new SnailJobServerException("id cannot be null"));
         Assert.isTrue(1 == jobMapper.selectCount(new LambdaQueryWrapper<Job>().eq(Job::getId, jobRequestVO.getId())));
 
         Job job = new Job();
@@ -235,7 +235,7 @@ public class JobServiceImpl implements JobService {
         );
 
         Assert.isTrue(count > 0,
-                () -> new SnailJobServerException("组:[{}]已经关闭，不支持手动执行.", job.getGroupName()));
+                () -> new SnailJobServerException("Group [{}] is closed, manual execution is not supported.", job.getGroupName()));
         JobTaskPrepareDTO jobTaskPrepare = JobTaskConverter.INSTANCE.toJobTaskPrepare(job);
         // 设置now表示立即执行
         jobTaskPrepare.setNextTriggerAt(DateUtils.toNowMilli());
@@ -311,7 +311,7 @@ public class JobServiceImpl implements JobService {
                         .eq(Job::getNamespaceId, namespaceId)
                         .eq(Job::getJobStatus, StatusEnum.NO.getStatus())
                         .in(Job::getId, ids)
-        ), () -> new SnailJobServerException("删除定时任务失败, 请检查任务状态是否关闭状态"));
+        ), () -> new SnailJobServerException("Failed to delete scheduled task, please check if the task status is closed"));
 
         List<JobSummary> jobSummaries = jobSummaryMapper.selectList(new LambdaQueryWrapper<JobSummary>()
                 .select(JobSummary::getId)

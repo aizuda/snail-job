@@ -34,7 +34,7 @@ public class EmailAlarm extends AbstractAlarm<AlarmContext> {
     @Override
     public boolean syncSendMessage(AlarmContext alarmContext) {
         if (Objects.isNull(mailAccount)) {
-            SnailJobLog.LOCAL.warn("请检查邮件配置是否开启");
+            SnailJobLog.LOCAL.warn("Please check if the email configuration is enabled");
             return false;
         }
 
@@ -45,7 +45,7 @@ public class EmailAlarm extends AbstractAlarm<AlarmContext> {
             text = text.replaceAll("\n", "<br/>");
             MailUtils.send(mailAccount, emailAttribute.getTos(), alarmContext.getTitle(), text, true);
         } catch (Exception e) {
-            SnailJobLog.LOCAL.error("发送email消息失败:", e);
+            SnailJobLog.LOCAL.error("Sending email message failed:", e);
             return false;
         }
 

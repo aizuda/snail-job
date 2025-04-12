@@ -78,7 +78,7 @@ public class RetryTaskFailAlarmListener extends
     @TransactionalEventListener(fallbackExecution = true, phase = TransactionPhase.AFTER_COMPLETION)
     public void doOnApplicationEvent(RetryTaskFailAlarmEvent retryTaskFailAlarmEvent) {
         if (!queue.offer(retryTaskFailAlarmEvent.getRetryTaskFailAlarmEventDTO())) {
-            SnailJobLog.LOCAL.warn("任务重试失败告警队列已满");
+            SnailJobLog.LOCAL.warn("Task retry failure, alert queue is full");
         }
     }
 
@@ -97,7 +97,7 @@ public class RetryTaskFailAlarmListener extends
                         retryAlarmInfo.getArgsStr(),
                         DateUtils.toNowFormat(DateUtils.NORM_DATETIME_PATTERN),
                         retryAlarmInfo.getReason())
-                .title("组:[{}] 场景:[{}] 环境重试任务失败",
+                .title("Group:[{}] Scenario:[{}] Environment retry task fails",
                         retryAlarmInfo.getGroupName(), retryAlarmInfo.getSceneName());
     }
 

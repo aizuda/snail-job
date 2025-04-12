@@ -42,7 +42,7 @@ public final class ImmutablePair<L, R> extends Pair<L, R> {
 
     @Override
     public R setValue(final R value) {
-        throw new SnailJobCommonException("非法操作");
+        throw new SnailJobCommonException("Illegal operation");
 
     }
 }

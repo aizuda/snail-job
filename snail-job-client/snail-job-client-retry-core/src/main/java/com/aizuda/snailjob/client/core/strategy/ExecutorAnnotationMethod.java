@@ -22,7 +22,7 @@ public class ExecutorAnnotationMethod implements ExecutorMethod {
     @Override
     public Object doExecute(Object params) {
         Class<?>[] paramTypes = retryerInfo.getMethod().getParameterTypes();
-        SnailJobLog.LOCAL.info("执行原重试方法：[{}],参数为：[{}]", retryerInfo.getExecutorClassName(), JsonUtil.toJsonString(params));
+        SnailJobLog.LOCAL.info("Executing original retry method: [{}], parameters: [{}]", retryerInfo.getExecutorClassName(), JsonUtil.toJsonString(params));
 
         if (paramTypes.length > 0) {
             return ReflectionUtils.invokeMethod(retryerInfo.getMethod(), retryerInfo.getExecutor(), (Object[]) params);

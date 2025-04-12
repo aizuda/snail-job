@@ -63,7 +63,7 @@ public class RpcClientInvokeHandler<R extends Result<Object>> implements Invocat
             sw.stop();
         }
 
-        SnailJobLog.LOCAL.debug("request complete requestId:[{}] 耗时:[{}ms]", snailJobRequest.getReqId(), sw.getTotalTimeMillis());
+        SnailJobLog.LOCAL.debug("Request complete requestId:[{}] took [{}ms]", snailJobRequest.getReqId(), sw.getTotalTimeMillis());
         if (async) {
             newFuture.whenComplete((r, t) -> {
                 if (Objects.nonNull(t)) {

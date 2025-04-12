@@ -69,7 +69,7 @@ public class OpenApiGetWorkflowBatchDetailRequestHandler extends PostHttpRequest
         SnailJobRequest jobRequest = JsonUtil.parseObject(content, SnailJobRequest.class);
         Object[] args = jobRequest.getArgs();
         Long workflowBatchId = JsonUtil.parseObject(JsonUtil.toJsonString(args[0]), Long.class);
-        Assert.notNull(workflowBatchId, () -> new SnailJobServerException("id 不能为空"));
+        Assert.notNull(workflowBatchId, () -> new SnailJobServerException("id cannot be null"));
 
 
 
@@ -182,8 +182,8 @@ public class OpenApiGetWorkflowBatchDetailRequestHandler extends PostHttpRequest
                     new HashMap<>(), workflowNodeMap);
             responseVO.setNodeConfig(config);
         } catch (Exception e) {
-            SnailJobLog.LOCAL.error("反序列化失败. json:[{}]", flowInfo, e);
-            throw new SnailJobServerException("查询工作流批次详情失败");
+            SnailJobLog.LOCAL.error("Deserialization failed. json:[{}]", flowInfo, e);
+            throw new SnailJobServerException("Failed to query workflow batch details");
         }
 
         return new SnailJobRpcResult(responseVO, jobRequest.getReqId());

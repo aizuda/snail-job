@@ -67,7 +67,7 @@ public class WorkflowExecutorActor extends AbstractActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder().match(WorkflowNodeTaskExecuteDTO.class, taskExecute -> {
-            log.info("工作流开始执行. [{}]", JsonUtil.toJsonString(taskExecute));
+            log.info("Workflow started execution. [{}]", JsonUtil.toJsonString(taskExecute));
             try {
 
                 doExecutor(taskExecute);
@@ -91,7 +91,7 @@ public class WorkflowExecutorActor extends AbstractActor {
 
     private void doExecutor(WorkflowNodeTaskExecuteDTO taskExecute) {
         WorkflowTaskBatch workflowTaskBatch = workflowTaskBatchMapper.selectById(taskExecute.getWorkflowTaskBatchId());
-        Assert.notNull(workflowTaskBatch, () -> new SnailJobServerException("任务不存在"));
+        Assert.notNull(workflowTaskBatch, () -> new SnailJobServerException("Task does not exist"));
 
         if (SystemConstants.ROOT.equals(taskExecute.getParentId())
                 && JobTaskBatchStatusEnum.WAITING.getStatus() == workflowTaskBatch.getTaskBatchStatus()) {
@@ -125,7 +125,7 @@ public class WorkflowExecutorActor extends AbstractActor {
             }
         }
 
-        log.debug("父节点:[{}] 所有的节点:[{}]", taskExecute.getParentId(), allSuccessors);
+        log.debug("Parent node:[{}] All nodes:[{}]", taskExecute.getParentId(), allSuccessors);
 
         // 若所有的兄弟节点的子节点都没有后继节点可以完成次任务
         if (CollUtil.isEmpty(allSuccessors)) {
@@ -180,7 +180,7 @@ public class WorkflowExecutorActor extends AbstractActor {
 
         // 只会条件节点会使用
         Object evaluationResult = null;
-        log.debug("待执行的节点为. workflowNodes:[{}]", StreamUtils.toList(workflowNodes, WorkflowNode::getId));
+        log.debug("Nodes to be executed. Workflow nodes:[{}]", StreamUtils.toList(workflowNodes, WorkflowNode::getId));
         for (WorkflowNode workflowNode : workflowNodes) {
 
             // 批次已经存在就不在重复生成
@@ -258,7 +258,7 @@ public class WorkflowExecutorActor extends AbstractActor {
             List<JobTaskBatch> jobTaskBatches = jobTaskBatchMap.get(nodeId);
             // 说明此节点未执行, 继续等待执行完成
             if (CollUtil.isEmpty(jobTaskBatches)) {
-                SnailJobLog.LOCAL.info("批次为空存在未完成的兄弟节点. [{}] 待执行节点:[{}]", nodeId,
+                SnailJobLog.LOCAL.info("Batch is empty but there are unfinished sibling nodes. [{}] Nodes to be executed:[{}]", nodeId,
                         waitExecWorkflowNode.getId());
                 return Boolean.FALSE;
             }
@@ -266,7 +266,7 @@ public class WorkflowExecutorActor extends AbstractActor {
             boolean isCompleted = jobTaskBatches.stream().anyMatch(
                     jobTaskBatch -> JobTaskBatchStatusEnum.NOT_COMPLETE.contains(jobTaskBatch.getTaskBatchStatus()));
             if (isCompleted) {
-                SnailJobLog.LOCAL.info("存在未完成的兄弟节点. [{}] 待执行节点:[{}] parentId:[{}]", nodeId,
+                SnailJobLog.LOCAL.info("Unfinished sibling nodes exist. [{}] Nodes to be executed:[{}] Parent ID:[{}]", nodeId,
                         taskExecute.getParentId(),
                         waitExecWorkflowNode.getId());
                 return Boolean.FALSE;
@@ -282,7 +282,7 @@ public class WorkflowExecutorActor extends AbstractActor {
                 WorkflowNode preWorkflowNode = workflowNodeMap.get(nodeId);
                 // 根据失败策略判断是否继续处理
                 if (Objects.equals(preWorkflowNode.getFailStrategy(), FailStrategyEnum.BLOCK.getCode())) {
-                    SnailJobLog.LOCAL.info("此节点执行失败且失败策略配置了【阻塞】中断执行 [{}] 待执行节点:[{}] parentId:[{}]", nodeId,
+                    SnailJobLog.LOCAL.info("This node execution failed and the failure strategy is set to [Block], interrupting execution [{}] Nodes to be executed:[{}] Parent ID:[{}]", nodeId,
                             taskExecute.getParentId(),
                             waitExecWorkflowNode.getId());
                     return Boolean.FALSE;
@@ -302,7 +302,7 @@ public class WorkflowExecutorActor extends AbstractActor {
         jobTaskBatch.setOperationReason(operationReason);
         jobTaskBatch.setUpdateDt(LocalDateTime.now());
         Assert.isTrue(1 == workflowTaskBatchMapper.updateById(jobTaskBatch),
-                () -> new SnailJobServerException("更新任务失败"));
+                () -> new SnailJobServerException("Updating task failed"));
 
     }
 

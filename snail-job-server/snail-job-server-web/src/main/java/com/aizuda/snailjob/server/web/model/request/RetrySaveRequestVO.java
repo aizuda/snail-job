@@ -17,19 +17,19 @@ public class RetrySaveRequestVO {
     /**
      * 组名称
      */
-    @NotBlank(message = "组名称不能为空")
+    @NotBlank(message = "Group name cannot be null")
     private String groupName;
 
     /**
      * 场景名称
      */
-    @NotBlank(message = "场景名称不能为空")
+    @NotBlank(message = "Scene name cannot be null")
     private String sceneName;
 
     /**
      * 幂等id(同一个场景下正在重试中的idempotentId不能重复)
      */
-    @NotBlank(message = "幂等id不能为空")
+    @NotBlank(message = "Idempotent ID cannot be empty")
     private String idempotentId;
 
     /**
@@ -50,7 +50,7 @@ public class RetrySaveRequestVO {
     /**
      * 执行器名称(全类路径)
      */
-    @NotBlank(message = "执行器名称不能为空")
+    @NotBlank(message = "Executor name cannot be empty")
     private String executorName;
 
     /**

@@ -80,7 +80,7 @@ public class DingDingUtils {
             JsonNode bodyJson = JsonUtil.toJson(body);
             int errCode = bodyJson.get("errcode").asInt();
             if (errCode != 0) {
-                SnailJobLog.LOCAL.error("dingDingProcessNotify: 钉钉发送失败, 错误码:{}, 错误信息:{}", errCode, bodyJson.get("errmsg").asText());
+                SnailJobLog.LOCAL.error("dingDingProcessNotify: DingTalk message sending failed, error code: {}, error message: {}", errCode, bodyJson.get("errmsg").asText());
                 return false;
             }
             return true;

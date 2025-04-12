@@ -19,13 +19,13 @@ public final class ImportUtils {
 
     public static @NotNull <VO> List<VO> parseList(MultipartFile file, Class<VO> clazz) throws IOException {
         if (file.isEmpty()) {
-            throw new SnailJobCommonException("请选择一个文件上传");
+            throw new SnailJobCommonException("Please select a file to upload");
         }
 
         // 保存文件到服务器
         String suffix = FileUtil.getSuffix(file.getOriginalFilename());
         if (!FILE_EXTENSIONS.contains(suffix)) {
-            throw new SnailJobCommonException("文件类型错误");
+            throw new SnailJobCommonException("File type error");
         }
 
         JsonNode node = JsonUtil.toJson(file.getBytes());

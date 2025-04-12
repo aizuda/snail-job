@@ -82,7 +82,7 @@ public class CallbackRetryTaskHandler {
             Assert.isTrue(1 == accessTemplate.getRetryAccess().insert(callbackRetry),
                     () -> new SnailJobServerException("failed to report data"));
         } catch (DuplicateKeyException e) {
-            log.warn("回调数据重复新增. [{}]", JsonUtil.toJsonString(callbackRetry));
+            log.warn("Callback data duplicate insertion. [{}]", JsonUtil.toJsonString(callbackRetry));
         }
     }
 

@@ -71,7 +71,7 @@ public class JobController {
 
     @DeleteMapping("/ids")
     @LoginRequired
-    public Boolean deleteJobById(@RequestBody @NotEmpty(message = "ids不能为空") Set<Long> ids) {
+    public Boolean deleteJobById(@RequestBody @NotEmpty(message = "ids cannot be null") Set<Long> ids) {
         return jobService.deleteJobByIds(ids);
     }
 

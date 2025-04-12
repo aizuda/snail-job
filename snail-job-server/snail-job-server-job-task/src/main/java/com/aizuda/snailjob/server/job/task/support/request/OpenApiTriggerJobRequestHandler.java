@@ -65,7 +65,7 @@ public class OpenApiTriggerJobRequestHandler extends PostHttpRequestHandler {
         );
 
         if (count <= 0){
-            SnailJobLog.LOCAL.warn("组:[{}]已经关闭，不支持手动执行.", job.getGroupName());
+            SnailJobLog.LOCAL.warn("Group [{}] is closed, manual execution is not supported.", job.getGroupName());
             return new SnailJobRpcResult(false, retryRequest.getReqId());
         }
         JobTaskPrepareDTO jobTaskPrepare = JobTaskConverter.INSTANCE.toJobTaskPrepare(job);

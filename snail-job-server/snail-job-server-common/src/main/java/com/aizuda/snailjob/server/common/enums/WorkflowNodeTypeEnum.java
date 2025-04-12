@@ -11,9 +11,9 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum WorkflowNodeTypeEnum {
-    TASK(1, "任务节点"),
-    CONDITION(2, "条件节点"),
-    CALLBACK(3, "回调节点");
+    TASK(1, "Task node"),
+    CONDITION(2, "Condition node"),
+    CALLBACK(3, "Callback node");
 
     private final Integer nodeType;
     private final String desc;

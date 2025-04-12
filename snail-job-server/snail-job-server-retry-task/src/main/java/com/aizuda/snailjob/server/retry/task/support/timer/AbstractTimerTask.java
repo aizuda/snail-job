@@ -21,12 +21,12 @@ public abstract class AbstractTimerTask implements TimerTask<String> {
 
     @Override
     public void run(Timeout timeout) throws Exception {
-        log.debug("开始执行重试任务. 当前时间:[{}] groupName:[{}] retryId:[{}] retryTaskId:[{}] namespaceId:[{}]",
+        log.debug("Start executing retry task. Current time:[{}] Group name:[{}] Retry ID:[{}] RetryTaskId:[{}] Namespace ID:[{}]",
                 LocalDateTime.now(), groupName, retryId, retryTaskId, namespaceId);
         try {
             doRun(timeout);
         } catch (Exception e) {
-            log.error("重试任务执行失败 groupName:[{}] retryId:[{}] retryTaskId:[{}] namespaceId:[{}]",
+            log.error("Retry task execution failed Group name:[{}] Retry ID:[{}] RetryTaskId:[{}] Namespace ID:[{}]",
                     groupName, retryId, retryTaskId, namespaceId, e);
         } finally {
             // 先清除时间轮的缓存

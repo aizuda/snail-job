@@ -37,7 +37,7 @@ public class WorkflowTaskPrepareActor extends AbstractActor {
             try {
                 doPrepare(workflowTaskPrepareDTO);
             } catch (Exception e) {
-                log.error("预处理节点异常", e);
+                log.error("Preprocessing node exception", e);
             } finally {
                 getContext().stop(getSelf());
             }

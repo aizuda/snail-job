@@ -36,7 +36,7 @@ public class WorkflowBatchGenerator {
         workflowTaskBatch.setOperationReason(context.getOperationReason());
         workflowTaskBatch.setWfContext(context.getWfContext());
 
-        Assert.isTrue(1 == workflowTaskBatchMapper.insert(workflowTaskBatch), () -> new SnailJobServerException("新增调度任务失败. [{}]", context.getWorkflowId()));
+        Assert.isTrue(1 == workflowTaskBatchMapper.insert(workflowTaskBatch), () -> new SnailJobServerException("Adding new scheduling task failed. [{}]", context.getWorkflowId()));
 
         // 非待处理状态无需进入时间轮中
         if (JobTaskBatchStatusEnum.WAITING.getStatus() != workflowTaskBatch.getTaskBatchStatus()) {

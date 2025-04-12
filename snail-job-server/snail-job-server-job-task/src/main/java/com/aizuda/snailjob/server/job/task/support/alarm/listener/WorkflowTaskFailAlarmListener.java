@@ -77,7 +77,7 @@ public class WorkflowTaskFailAlarmListener extends AbstractWorkflowAlarm<Workflo
                         JobOperationReasonEnum.getWorkflowNotifyScene(alarmDTO.getOperationReason()).getDesc(),
                         alarmDTO.getReason(),
                         DateUtils.toNowFormat(DateUtils.NORM_DATETIME_PATTERN))
-                .title("{}环境 Workflow任务执行失败", EnvironmentUtils.getActiveProfile());
+                .title("{} environment Workflow task execution failed", EnvironmentUtils.getActiveProfile());
     }
 
     @Override
@@ -99,7 +99,7 @@ public class WorkflowTaskFailAlarmListener extends AbstractWorkflowAlarm<Workflo
     @TransactionalEventListener(fallbackExecution = true, phase = TransactionPhase.AFTER_COMPLETION)
     public void doOnApplicationEvent(WorkflowTaskFailAlarmEvent event) {
         if (!queue.offer(event.getWorkflowTaskFailAlarmEventDTO())) {
-            SnailJobLog.LOCAL.warn("Workflow任务执行失败告警队列已满");
+            SnailJobLog.LOCAL.warn("Workflow task execution failure, alert queue is full");
         }
     }
 }

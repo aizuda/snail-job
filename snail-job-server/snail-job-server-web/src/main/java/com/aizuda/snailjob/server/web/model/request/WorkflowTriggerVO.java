@@ -8,7 +8,7 @@ import lombok.Data;
 @Data
 public class WorkflowTriggerVO {
 
-    @NotNull(message = "workflowId 不能为空")
+    @NotNull(message = "workflowId cannot be null")
     private Long workflowId;
 
     /**

@@ -11,12 +11,12 @@ import lombok.Data;
  */
 @Data
 public class GenerateRetryIdempotentIdDTO {
-    @NotBlank(message = "group 不能为空")
+    @NotBlank(message = "group cannot be null")
     private String group;
-    @NotBlank(message = "scene 不能为空")
+    @NotBlank(message = "scene cannot be null")
     private String scene;
-    @NotBlank(message = "参数 不能为空")
+    @NotBlank(message = "parameters cannot be null")
     private String argsStr;
-    @NotBlank(message = "executorName 不能为空")
+    @NotBlank(message = "executorName cannot be null")
     private String executorName;
 }

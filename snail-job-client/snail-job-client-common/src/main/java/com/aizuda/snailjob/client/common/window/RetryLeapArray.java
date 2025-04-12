@@ -54,7 +54,7 @@ public class RetryLeapArray extends LeapArray<ConcurrentLinkedQueue<RetryTaskDTO
                 }
             }
         } catch (Exception e) {
-            log.error("滑动窗口监听器处理失败 data:[{}]", JsonUtil.toJsonString(windowWrap.value()), e);
+            log.error("Sliding window listener processing failed data:[{}]", JsonUtil.toJsonString(windowWrap.value()), e);
         }
 
         windowWrap.value().removeAll(deepCopy);

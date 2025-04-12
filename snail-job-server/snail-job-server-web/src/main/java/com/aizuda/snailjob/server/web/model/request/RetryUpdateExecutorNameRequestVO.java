@@ -20,8 +20,8 @@ public class RetryUpdateExecutorNameRequestVO {
     /**
      * 组名称
      */
-    @NotBlank(message = "组名称不能为空")
-    @Pattern(regexp = "^[A-Za-z0-9_-]{1,64}$", message = "仅支持长度为1~64字符且类型为数字、字母、下划线和短横线")
+    @NotBlank(message = "Group name cannot be null")
+    @Pattern(regexp = "^[A-Za-z0-9_-]{1,64}$", message = "Only supports 1~64 characters, including numbers, letters, underscores, and hyphens")
     private String groupName;
 
     /**
@@ -37,7 +37,7 @@ public class RetryUpdateExecutorNameRequestVO {
     /**
      * 重试表id
      */
-    @NotEmpty(message = "至少选择一项")
+    @NotEmpty(message = "At least one item must be selected")
     private List<Long> ids;
 
 }

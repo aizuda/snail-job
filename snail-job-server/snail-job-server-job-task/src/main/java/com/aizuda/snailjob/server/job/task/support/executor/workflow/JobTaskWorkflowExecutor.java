@@ -58,7 +58,7 @@ public class JobTaskWorkflowExecutor extends AbstractWorkflowExecutor {
             context.setJobTaskStatus(JobTaskStatusEnum.CANCEL.getStatus());
 
             // 创建批次和任务节点4
-            invokeCancelJobTask(context, "当前节点无需处理");
+            invokeCancelJobTask(context, "Current node does not require processing");
         } else if (Objects.equals(context.getWorkflowNodeStatus(), StatusEnum.NO.getStatus())) {
             // 针对无需处理的批次直接新增一个记录
             context.setTaskBatchStatus(JobTaskBatchStatusEnum.CANCEL.getStatus());
@@ -66,7 +66,7 @@ public class JobTaskWorkflowExecutor extends AbstractWorkflowExecutor {
             context.setJobTaskStatus(JobTaskStatusEnum.CANCEL.getStatus());
 
             // 创建批次和任务节点
-            invokeCancelJobTask(context, "任务已关闭");
+            invokeCancelJobTask(context, "Task is closed");
         } else {
             invokeJobTask(context);
         }
@@ -94,7 +94,7 @@ public class JobTaskWorkflowExecutor extends AbstractWorkflowExecutor {
         jobLogMetaDTO.setJobId(context.getJobId());
         jobLogMetaDTO.setTaskId(jobTask.getId());
 
-        SnailJobLog.REMOTE.warn("节点[{}]已取消任务执行. 取消原因: {}. <|>{}<|>",
+        SnailJobLog.REMOTE.warn("Node [{}] has canceled task execution. Cancellation reason: {}. <|>{}<|>",
             context.getWorkflowNodeId(), cancelReason, jobLogMetaDTO);
     }
 }

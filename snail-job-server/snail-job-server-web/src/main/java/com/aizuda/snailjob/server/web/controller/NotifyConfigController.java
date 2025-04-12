@@ -65,7 +65,7 @@ public class NotifyConfigController {
 
     @LoginRequired
     @DeleteMapping("ids")
-    public Boolean batchDeleteNotify(@RequestBody @NotEmpty(message = "ids不能为空") Set<Long> ids) {
+    public Boolean batchDeleteNotify(@RequestBody @NotEmpty(message = "ids cannot be null") Set<Long> ids) {
         return notifyConfigService.batchDeleteNotify(ids);
     }
 }

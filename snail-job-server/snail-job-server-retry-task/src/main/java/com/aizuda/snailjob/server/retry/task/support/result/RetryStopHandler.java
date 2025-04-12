@@ -50,7 +50,7 @@ public class RetryStopHandler extends AbstractRetryResultHandler {
             retry.setUpdateDt(LocalDateTime.now());
             retry.setRetryCount(retry.getRetryCount() + 1);
             Assert.isTrue(1 == retryMapper.updateById(retry),
-                    () -> new SnailJobServerException("更新重试任务失败. groupName:[{}]",
+                    () -> new SnailJobServerException("Update retry task failed. Group name:[{}]",
                             retry.getGroupName()));
 
             RetryTask retryTask = new RetryTask();
@@ -58,7 +58,7 @@ public class RetryStopHandler extends AbstractRetryResultHandler {
             retryTask.setOperationReason(context.getOperationReason());
             retryTask.setTaskStatus(STOP.getStatus());
             Assert.isTrue(1 == retryTaskMapper.updateById(retryTask),
-                    () -> new SnailJobServerException("更新重试任务失败. groupName:[{}]", retry.getGroupName()));
+                    () -> new SnailJobServerException("Update retry task failed. Group name:[{}]", retry.getGroupName()));
 
             return null;
         });

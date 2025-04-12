@@ -35,7 +35,7 @@ public interface GroupConfigService {
 
     List<Integer> getTablePartitionList();
 
-    void importGroup(@Valid @NotEmpty(message = "导入数据不能为空") List<GroupConfigRequestVO> requestVOS);
+    void importGroup(@Valid @NotEmpty(message = "Import data cannot be empty") List<GroupConfigRequestVO> requestVOS);
 
     String exportGroup(ExportGroupVO exportGroupVO);
 

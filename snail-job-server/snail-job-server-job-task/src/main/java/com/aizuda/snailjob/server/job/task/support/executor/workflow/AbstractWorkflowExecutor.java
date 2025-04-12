@@ -90,7 +90,7 @@ public abstract class AbstractWorkflowExecutor implements WorkflowExecutor, Init
                     }
 
                     if (total > 0) {
-                        log.warn("任务节点[{}]已被执行，请勿重复执行", context.getWorkflowNodeId());
+                        log.warn("Task node [{}] has already been executed, do not repeat execution", context.getWorkflowNodeId());
                         return;
                     }
 
@@ -150,7 +150,7 @@ public abstract class AbstractWorkflowExecutor implements WorkflowExecutor, Init
         jobTask.setArgsType(JobArgsTypeEnum.TEXT.getArgsType());
         jobTask.setTaskStatus(context.getJobTaskStatus());
         jobTask.setResultMessage(String.valueOf(context.getEvaluationResult()));
-        Assert.isTrue(1 == jobTaskMapper.insert(jobTask), () -> new SnailJobServerException("新增任务实例失败"));
+        Assert.isTrue(1 == jobTaskMapper.insert(jobTask), () -> new SnailJobServerException("Adding new task instance failed"));
         return jobTask;
     }
 

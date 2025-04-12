@@ -36,7 +36,7 @@ public interface WorkflowService {
 
     Pair<Integer, Object> checkNodeExpression(CheckDecisionVO decisionVO);
 
-    void importWorkflowTask(@Valid @NotEmpty(message = "导入数据不能为空") List<WorkflowRequestVO> requests);
+    void importWorkflowTask(@Valid @NotEmpty(message = "Import data cannot be empty") List<WorkflowRequestVO> requests);
 
     String exportWorkflowTask(ExportWorkflowVO exportWorkflowVO
     );

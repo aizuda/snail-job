@@ -69,8 +69,8 @@ public abstract class AbstractReport implements Report {
             IdempotentIdContext idempotentIdContext = new IdempotentIdContext(scene, targetClassName, args, executorMethod.getName());
             idempotentId = (String) ReflectionUtils.invokeMethod(method, generate, idempotentIdContext);
         } catch (Exception exception) {
-            SnailJobLog.LOCAL.error("幂等id生成异常：{},{}", scene, args, exception);
-            throw new SnailRetryClientException("idempotentId生成异常：{},{}", scene, args);
+            SnailJobLog.LOCAL.error("Idempotent ID generation exception: {}, {}", scene, args, exception);
+            throw new SnailRetryClientException("idempotentId generation exception: {}, {}", scene, args);
         }
 
         RetryArgSerializer retryArgSerializer = SnailRetrySpiLoader.loadRetryArgSerializer();

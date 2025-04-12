@@ -16,7 +16,7 @@ public abstract class AbstractJobExecutor implements JobExecutor, InitializingBe
     @Override
     public void execute(JobExecutorContext context) {
         if (CollUtil.isEmpty(context.getTaskList())) {
-            SnailJobLog.LOCAL.warn("待执行的任务列表为空. taskBatchId:[{}]", context.getTaskBatchId());
+            SnailJobLog.LOCAL.warn("List of tasks to be executed is empty. Task batch ID:[{}]", context.getTaskBatchId());
             return;
         }
         doExecute(context);

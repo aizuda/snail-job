@@ -212,12 +212,12 @@ public class CleanerSchedule extends AbstractSchedule implements Lifecycle {
 
         Assert.isTrue(retryDeadLetters.size() == accessTemplate
                         .getRetryDeadLetterAccess().insertBatch(retryDeadLetters),
-                () -> new SnailJobServerException("插入死信队列失败 [{}]", JsonUtil.toJsonString(retryDeadLetters)));
+                () -> new SnailJobServerException("Failed to insert into dead letter queue [{}]", JsonUtil.toJsonString(retryDeadLetters)));
 
         TaskAccess<Retry> retryTaskAccess = accessTemplate.getRetryAccess();
         Assert.isTrue(retries.size() == retryTaskAccess.delete(new LambdaQueryWrapper<Retry>()
                         .in(Retry::getId, StreamUtils.toList(retries, RetryPartitionTask::getId))),
-                () -> new SnailJobServerException("删除重试数据失败 [{}]", JsonUtil.toJsonString(retries)));
+                () -> new SnailJobServerException("Failed to delete retry data [{}]", JsonUtil.toJsonString(retries)));
 
         SnailSpringContext.getContext().publishEvent(new RetryTaskFailDeadLetterAlarmEvent(
                 RetryTaskConverter.INSTANCE.toRetryTaskFailDeadLetterAlarmEventDTO(retryDeadLetters)

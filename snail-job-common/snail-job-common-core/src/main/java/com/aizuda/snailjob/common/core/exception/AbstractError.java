@@ -9,13 +9,13 @@ import lombok.Data;
 @Data
 public abstract class AbstractError {
 
-    public static final AbstractError SUCCESS = new AbstractError("操作成功", "success") {
+    public static final AbstractError SUCCESS = new AbstractError("Operation succeeded", "success") {
     };
 
-    public static final AbstractError ERROR = new AbstractError("操作失败", "error") {
+    public static final AbstractError ERROR = new AbstractError("Operation failed", "error") {
     };
 
-    public static final AbstractError PARAM_INCORRECT = new AbstractError("参数异常", "param incorrect") {
+    public static final AbstractError PARAM_INCORRECT = new AbstractError("Parameter exception", "param incorrect") {
     };
 
     private final String zhMsg;

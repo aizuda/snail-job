@@ -11,34 +11,34 @@ import lombok.Data;
 @Data
 public class DispatchJobRequest {
 
-    @NotBlank(message = "namespaceId 不能为空")
+    @NotBlank(message = "namespaceId cannot be null")
     private String namespaceId;
 
-    @NotNull(message = "jobId 不能为空")
+    @NotNull(message = "jobId cannot be null")
     private Long jobId;
 
-    @NotNull(message = "taskBatchId 不能为空")
+    @NotNull(message = "taskBatchId cannot be null")
     private Long taskBatchId;
 
-    @NotNull(message = "taskId 不能为空")
+    @NotNull(message = "taskId cannot be null")
     private Long taskId;
 
-    @NotNull(message = "taskType 不能为空")
+    @NotNull(message = "taskType cannot be null")
     private Integer taskType;
 
-    @NotBlank(message = "group 不能为空")
+    @NotBlank(message = "group cannot be null")
     private String groupName;
 
-    @NotNull(message = "parallelNum 不能为空")
+    @NotNull(message = "parallelNum cannot be null")
     private Integer parallelNum;
 
-    @NotNull(message = "executorType 不能为空")
+    @NotNull(message = "executorType cannot be null")
     private Integer executorType;
 
-    @NotBlank(message = "executorInfo 不能为空")
+    @NotBlank(message = "executorInfo cannot be null")
     private String executorInfo;
 
-    @NotNull(message = "executorTimeout 不能为空")
+    @NotNull(message = "executorTimeout cannot be null")
     private Integer executorTimeout;
 
     /**

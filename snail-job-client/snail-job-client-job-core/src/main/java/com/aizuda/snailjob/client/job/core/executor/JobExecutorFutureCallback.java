@@ -46,7 +46,7 @@ import java.util.concurrent.CancellationException;
 public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> {
 
     private static final String TEXT_MESSAGE_FORMATTER = """
-            <font face="微软雅黑" color=#ff0000 size=4>{}环境 定时任务上报异常</font> \s
+            <font face="Microsoft YaHei" color=#ff0000 size=4>{}环境 定时任务上报异常</font> \s
              > IP:{}   \s
              > 空间ID:{}  \s
              > 名称:{}   \s
@@ -78,7 +78,7 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
             initLogContext();
 
             // 上报执行成功
-            SnailJobLog.REMOTE.info("任务执行成功 taskBatchId:[{}] [{}]", jobContext.getTaskBatchId(), JsonUtil.toJsonString(result));
+            SnailJobLog.REMOTE.info("Task executed successfully taskBatchId:[{}] [{}]", jobContext.getTaskBatchId(), JsonUtil.toJsonString(result));
 
             if (Objects.isNull(result)) {
                 result = ExecuteResult.success();
@@ -93,7 +93,7 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
 
             CLIENT.dispatchResult(buildDispatchJobResultRequest(result, taskStatus));
         } catch (Exception e) {
-            SnailJobLog.REMOTE.error("执行结果上报异常.[{}]", jobContext.getTaskId(), e);
+            SnailJobLog.REMOTE.error("Execution result reporting exception.[{}]", jobContext.getTaskId(), e);
             sendMessage(e.getMessage());
         } finally {
             SnailJobLogManager.removeLogMeta();
@@ -104,7 +104,7 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
     @Override
     public void onFailure(final Throwable t) {
         if (t instanceof CancellationException) {
-            SnailJobLog.LOCAL.debug("任务已经被取消，不做状态回传");
+            SnailJobLog.LOCAL.debug("The task has been canceled, no status feedback will be made");
             return;
         }
         ExecuteResult failure = ExecuteResult.failure();
@@ -113,14 +113,14 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
             initLogContext();
 
             // 上报执行失败
-            SnailJobLog.REMOTE.error("任务执行失败 taskBatchId:[{}]", jobContext.getTaskBatchId(), t);
+            SnailJobLog.REMOTE.error("Task execution failed taskBatchId:[{}]", jobContext.getTaskBatchId(), t);
             failure.setMessage(t.getMessage());
 
             CLIENT.dispatchResult(
                     buildDispatchJobResultRequest(failure, JobTaskStatusEnum.FAIL.getStatus())
             );
         } catch (Exception e) {
-            SnailJobLog.REMOTE.error("执行结果上报异常.[{}]", jobContext.getTaskId(), e);
+            SnailJobLog.REMOTE.error("Execution result reporting exception.[{}]", jobContext.getTaskId(), e);
             sendMessage(e.getMessage());
         } finally {
             SnailJobLogManager.removeLogMeta();
@@ -187,7 +187,7 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
                                     snailJobProperties.getGroup(),
                                     LocalDateTime.now().format(DatePattern.NORM_DATETIME_FORMATTER),
                                     message)
-                            .title("定时任务执行结果上报异常:[{}]", snailJobProperties.getGroup())
+                            .title("Scheduled task execution result reporting exception:[{}]", snailJobProperties.getGroup())
                             .notifyAttribute(recipient.getNotifyAttribute());
 
                     Optional.ofNullable(SnailJobAlarmFactory.getAlarmType(recipient.getNotifyType())).ifPresent(alarm -> alarm.asyncSendMessage(context));

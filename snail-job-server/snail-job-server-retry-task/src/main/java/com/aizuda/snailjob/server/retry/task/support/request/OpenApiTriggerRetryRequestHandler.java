@@ -48,7 +48,7 @@ public class OpenApiTriggerRetryRequestHandler extends PostHttpRequestHandler {
 
         Retry retry = retryMapper.selectById(triggerRetryVO.getId());
 
-        Assert.notNull(retry, () -> new SnailJobServerException("未查询到重试任务:[{}].", triggerRetryVO.getId()));
+        Assert.notNull(retry, () -> new SnailJobServerException("Retry task not found:[{}].", triggerRetryVO.getId()));
 
         long count = accessTemplate.getGroupConfigAccess().count(new LambdaQueryWrapper<GroupConfig>()
                 .eq(GroupConfig::getGroupName, retry.getGroupName())
@@ -56,9 +56,9 @@ public class OpenApiTriggerRetryRequestHandler extends PostHttpRequestHandler {
                 .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus())
         );
 
-        Assert.isTrue(count > 0, () -> new SnailJobServerException("组:[{}]已经关闭，不支持手动执行.", retry.getGroupName()));
+        Assert.isTrue(count > 0, () -> new SnailJobServerException("Group [{}] is closed, manual execution is not supported.", retry.getGroupName()));
 
-        Assert.isTrue(Objects.equals(retry.getTaskType(), SyetemTaskTypeEnum.RETRY.getType()), () -> new SnailJobServerException("没有可执行的任务"));
+        Assert.isTrue(Objects.equals(retry.getTaskType(), SyetemTaskTypeEnum.RETRY.getType()), () -> new SnailJobServerException("No executable tasks"));
 
         RetryTaskPrepareDTO retryTaskPrepareDTO = RetryConverter.INSTANCE.toRetryTaskPrepareDTO(retry);
         // 设置now表示立即执行

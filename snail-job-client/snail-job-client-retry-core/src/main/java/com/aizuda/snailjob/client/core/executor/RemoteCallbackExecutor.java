@@ -50,7 +50,7 @@ public class RemoteCallbackExecutor {
             doCallbackForSpringBean(context);
 
             // 上报执行成功
-            SnailJobLog.REMOTE.info("任务执行成功 taskId:[{}]", context.getRetryTaskId());
+            SnailJobLog.REMOTE.info("Task executed successfully taskId:[{}]", context.getRetryTaskId());
         } catch (NoSuchBeanDefinitionException e) {
             // 若不是SpringBean 则直接反射以普通类调用
             doCallbackForOrdinaryClass(context);
@@ -90,7 +90,7 @@ public class RemoteCallbackExecutor {
                         deSerialize);
                 break;
             default:
-                throw new SnailRetryClientException("回调状态异常");
+                throw new SnailRetryClientException("Callback status exception");
         }
 
     }
@@ -117,14 +117,14 @@ public class RemoteCallbackExecutor {
                         Object[].class);
                 break;
             default:
-                throw new SnailRetryClientException("回调状态异常");
+                throw new SnailRetryClientException("Callback status exception");
         }
 
         Assert.notNull(method, () -> new SnailRetryClientException("no such method"));
         ReflectionUtils.invokeMethod(method, retryCompleteCallback, retryerInfo.getScene(),
                 retryerInfo.getExecutorClassName(), deSerialize);
 
-        SnailJobLog.REMOTE.info("任务执行成功 taskId:[{}] [{}]", context.getRetryTaskId());
+        SnailJobLog.REMOTE.info("Task executed successfully taskId:[{}] [{}]", context.getRetryTaskId());
 
     }
 

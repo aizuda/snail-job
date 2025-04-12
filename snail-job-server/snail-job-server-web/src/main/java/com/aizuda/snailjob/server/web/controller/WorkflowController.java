@@ -68,7 +68,7 @@ public class WorkflowController {
 
     @DeleteMapping("/ids")
     @LoginRequired(role = RoleEnum.USER)
-    public Boolean deleteByIds(@RequestBody @NotEmpty(message = "ids不能为空") Set<Long> ids) {
+    public Boolean deleteByIds(@RequestBody @NotEmpty(message = "ids cannot be null") Set<Long> ids) {
         return workflowService.deleteByIds(ids);
     }
 

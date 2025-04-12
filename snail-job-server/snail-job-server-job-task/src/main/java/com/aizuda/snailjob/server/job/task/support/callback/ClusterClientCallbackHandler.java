@@ -37,7 +37,7 @@ public class ClusterClientCallbackHandler extends AbstractClientCallbackHandler 
         RegisterNodeInfo serverNode = clientNodeAllocateHandler.getServerNode(context.getJobId().toString(),
                 context.getGroupName(), context.getNamespaceId(), context.getJob().getRouteKey());
         if (Objects.isNull(serverNode)) {
-            log.error("无可执行的客户端信息. jobId:[{}]", context.getJobId());
+            log.error("No executable client information. Job ID:[{}]", context.getJobId());
             return null;
         }
 

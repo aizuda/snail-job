@@ -222,7 +222,7 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
     private boolean isNodeNotMatch(Set<String> remoteHostIds, Set<String> localHostIds) {
         boolean b = !remoteHostIds.containsAll(localHostIds);
         if (b) {
-            SnailJobLog.LOCAL.info("判断远程节点是不是和本地节点一致. remoteHostIds:[{}] localHostIds:[{}]",
+            SnailJobLog.LOCAL.info("Determine if remote nodes match local nodes. Remote host IDs:[{}] Local host IDs:[{}]",
                     localHostIds,
                     remoteHostIds);
         }
@@ -242,7 +242,7 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
     private boolean isNodeSizeNotEqual(int localNodeSize, int remoteNodeSize) {
         boolean b = localNodeSize != remoteNodeSize;
         if (b) {
-            SnailJobLog.LOCAL.info("存在远程和本地缓存的节点的数量不一致则触发rebalance. localNodeSize:[{}] remoteNodeSize:[{}]",
+            SnailJobLog.LOCAL.info("If the number of nodes cached remotely and locally is inconsistent, trigger rebalance. Local node size:[{}] Remote node size:[{}]",
                     localNodeSize,
                     remoteNodeSize);
         }

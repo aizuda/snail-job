@@ -39,7 +39,7 @@ public class RetryTimeoutCheckTask implements TimerTask<String> {
         RetryTimerWheel.clearCache(idempotentKey());
         RetryTask retryTask = retryTaskMapper.selectById(retryTaskId);
         if (Objects.isNull(retryTask)) {
-            SnailJobLog.LOCAL.error("retryTaskId:[{}] 不存在", retryTaskId);
+            SnailJobLog.LOCAL.error("RetryTaskId:[{}] does not exist", retryTaskId);
             return;
         }
 
@@ -50,12 +50,12 @@ public class RetryTimeoutCheckTask implements TimerTask<String> {
 
         Retry retry = retryMapper.selectById(retryId);
         if (Objects.isNull(retry)) {
-            SnailJobLog.LOCAL.error("retryId:[{}]不存在", retryId);
+            SnailJobLog.LOCAL.error("RetryId:[{}] does not exist", retryId);
             return;
         }
 
         // 超时停止任务
-        String reason = "超时中断.retryTaskId:[" + retryTaskId + "]";
+        String reason = "Timeout interrupt. RetryTaskId:[" + retryTaskId + "]";
 
         TaskStopJobDTO stopJobDTO = RetryTaskConverter.INSTANCE.toTaskStopJobDTO(retry);
         stopJobDTO.setRetryTaskId(retryTaskId);
