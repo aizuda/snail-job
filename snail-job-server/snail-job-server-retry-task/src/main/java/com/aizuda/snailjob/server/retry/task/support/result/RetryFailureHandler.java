@@ -17,6 +17,7 @@ import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskMappe
 import com.aizuda.snailjob.template.datasource.persistence.po.Retry;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -26,6 +27,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static com.aizuda.snailjob.common.core.enums.RetryNotifySceneEnum.RETRY_TASK_FAIL_ERROR;
+import static com.aizuda.snailjob.common.core.enums.RetryTaskStatusEnum.NOT_COMPLETE;
 import static com.aizuda.snailjob.common.core.enums.RetryTaskStatusEnum.NOT_SUCCESS;
 
 /**
@@ -62,6 +64,16 @@ public class RetryFailureHandler extends AbstractRetryResultHandler {
         Retry retry = retryMapper.selectById(context.getRetryId());
         transactionTemplate.execute(status -> {
 
+            RetryTask retryTask = new RetryTask();
+            retryTask.setTaskStatus(Optional.ofNullable(context.getTaskStatus()).orElse(RetryTaskStatusEnum.FAIL.getStatus()));
+            retryTask.setOperationReason(Optional.ofNullable(context.getOperationReason()).orElse(RetryOperationReasonEnum.NONE.getReason()));
+            int update = retryTaskMapper.update(retryTask, new LambdaQueryWrapper<RetryTask>()
+                    .eq(RetryTask::getId, context.getRetryTaskId())
+                    .in(RetryTask::getTaskStatus, NOT_COMPLETE));
+            if (update <= 0) {
+                return null;
+            }
+
             Integer maxRetryCount;
             if (SyetemTaskTypeEnum.CALLBACK.getType().equals(retry.getTaskType())) {
                 maxRetryCount = retrySceneConfig.getCbMaxCount();
@@ -69,9 +81,10 @@ public class RetryFailureHandler extends AbstractRetryResultHandler {
                 maxRetryCount = retrySceneConfig.getMaxRetryCount();
             }
 
-            if (maxRetryCount <= retry.getRetryCount() + 1) {
+            int current = retry.getRetryCount() + 1;
+            if (maxRetryCount <= current) {
                 retry.setRetryStatus(RetryStatusEnum.MAX_COUNT.getStatus());
-                retry.setRetryCount(retry.getRetryCount() + 1);
+                retry.setRetryCount(current);
                 retry.setUpdateDt(LocalDateTime.now());
                 retry.setDeleted(retry.getId());
                 Assert.isTrue(1 == retryMapper.updateById(retry),
@@ -79,19 +92,12 @@ public class RetryFailureHandler extends AbstractRetryResultHandler {
                 // 创建一个回调任务
                 callbackRetryTaskHandler.create(retry, retrySceneConfig);
             } else if (context.isIncrementRetryCount()) {
-                retry.setRetryCount(retry.getRetryCount() + 1);
+                retry.setRetryCount(current);
                 retry.setUpdateDt(LocalDateTime.now());
                 Assert.isTrue(1 == retryMapper.updateById(retry),
                         () -> new SnailJobServerException("更新重试任务失败. groupName:[{}]", retry.getGroupName()));
 
             }
-
-            RetryTask retryTask = new RetryTask();
-            retryTask.setId(context.getRetryTaskId());
-            retryTask.setTaskStatus(Optional.ofNullable(context.getTaskStatus()).orElse(RetryTaskStatusEnum.FAIL.getStatus()));
-            retryTask.setOperationReason(Optional.ofNullable(context.getOperationReason()).orElse(RetryOperationReasonEnum.NONE.getReason()));
-            Assert.isTrue(1 == retryTaskMapper.updateById(retryTask),
-                    () -> new SnailJobServerException("更新重试任务失败. groupName:[{}]", retry.getGroupName()));
 
             RetryTaskFailAlarmEventDTO retryTaskFailAlarmEventDTO =
                     RetryTaskConverter.INSTANCE.toRetryTaskFailAlarmEventDTO(
