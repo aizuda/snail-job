@@ -69,7 +69,7 @@ public class RetryTaskServiceImpl implements RetryTaskService {
                 .between(ObjUtil.isNotNull(queryVO.getDatetimeRange()),
                         RetryTask::getCreateDt, queryVO.getStartDt(), queryVO.getEndDt())
                 .select(RetryTask::getGroupName, RetryTask::getId, RetryTask::getSceneName, RetryTask::getTaskStatus,
-                        RetryTask::getCreateDt, RetryTask::getTaskType, RetryTask::getOperationReason, RetryTask::getRetryId)
+                        RetryTask::getCreateDt, RetryTask::getUpdateDt, RetryTask::getTaskType, RetryTask::getOperationReason, RetryTask::getRetryId)
                 .orderByDesc(RetryTask::getCreateDt);
 
         PageDTO<RetryTask> retryTaskPageDTO = retryTaskMapper.selectPage(pageDTO, wrapper);

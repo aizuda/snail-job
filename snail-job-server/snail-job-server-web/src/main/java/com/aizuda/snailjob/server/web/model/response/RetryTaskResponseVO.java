@@ -25,6 +25,8 @@ public class RetryTaskResponseVO {
 
     private LocalDateTime createDt;
 
+    private LocalDateTime updateDt;
+
     private Integer operationReason;
 
     /**
