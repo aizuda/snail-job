@@ -21,7 +21,11 @@ public class RetryDeadLetter extends CreateDt {
 
     private String groupName;
 
+    private Long groupId;
+
     private String sceneName;
+
+    private Long sceneId;
 
     private String idempotentId;
 
