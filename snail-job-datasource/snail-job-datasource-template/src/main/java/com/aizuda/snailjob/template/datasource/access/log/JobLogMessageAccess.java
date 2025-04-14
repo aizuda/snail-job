@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.template.datasource.access.log;
 
-import com.aizuda.snailjob.template.datasource.access.LogAccess;
+import com.aizuda.snailjob.template.datasource.access.JobLogAccess;
 import com.aizuda.snailjob.template.datasource.enums.DbTypeEnum;
 import com.aizuda.snailjob.template.datasource.enums.OperationTypeEnum;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.common.*;
@@ -13,8 +13,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
 import java.util.*;
@@ -29,11 +27,9 @@ import static com.aizuda.snailjob.template.datasource.utils.DbUtils.getDbType;
  * @author opensnail
  * @date 2025-03-30
  */
-@Component
 @Slf4j
-//@ConditionalOnMissingBean(LogAccess.class)
 @RequiredArgsConstructor
-public class JobLogMessageAccess extends AbstractLogAccess<JobLogMessageDO> {
+public class JobLogMessageAccess implements JobLogAccess<JobLogMessageDO> {
     private final JobLogMessageMapper jobLogMessageMapper;
     private final JobTaskBatchMapper jobTaskBatchMapper;
 

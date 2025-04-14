@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.template.datasource.access.log;
 
+import com.aizuda.snailjob.template.datasource.access.RetryLogAccess;
 import com.aizuda.snailjob.template.datasource.enums.DbTypeEnum;
 import com.aizuda.snailjob.template.datasource.enums.OperationTypeEnum;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.common.*;
@@ -20,8 +21,7 @@ import static com.aizuda.snailjob.template.datasource.utils.DbUtils.getDbType;
  * @author opensnail
  * @date 2025-03-29
  */
-@Component
-public class RetryTaskLogMessageAccess extends AbstractLogAccess<RetryTaskLogMessageDO> {
+public class RetryTaskLogMessageAccess implements RetryLogAccess<RetryTaskLogMessageDO> {
 
 
     @Override
