@@ -135,7 +135,7 @@ CREATE TABLE `sj_retry`
     KEY `idx_retry_status_bucket_index` (`retry_status`, `bucket_index`),
     KEY `idx_parent_id` (`parent_id`),
     KEY `idx_create_dt` (`create_dt`),
-    UNIQUE KEY `uk_namespace_group_scene_tasktype_idempotentid_deleted` (`namespace_id`, `group_name`, `scene_name`, `task_type`, `idempotent_id`, `deleted`)
+    UNIQUE KEY `uk_scene_tasktype_idempotentid_deleted` (`scene_id`, `task_type`, `idempotent_id`, `deleted`)
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 0
   DEFAULT CHARSET = utf8mb4 COMMENT ='重试信息表'
