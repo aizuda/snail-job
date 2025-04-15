@@ -1,17 +1,12 @@
-package com.aizuda.snailjob.server.web.model.request;
+package com.aizuda.snailjob.template.datasource.persistence.dataobject.log;
 
-import com.aizuda.snailjob.server.common.vo.base.BaseQueryVO;
+import com.aizuda.snailjob.template.datasource.persistence.dataobject.common.PageQueryDO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * @author: opensnail
- * @date : 2022-02-28 09:08
- */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class RetryTaskLogMessageQueryVO extends BaseQueryVO {
-
+public class RetryTaskLogMessageQueryDO extends PageQueryDO {
     private String groupName;
 
     private Long retryTaskId;

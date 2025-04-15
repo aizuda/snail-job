@@ -8,6 +8,7 @@ import com.aizuda.snailjob.template.datasource.persistence.dataobject.log.JobLog
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.log.RetryTaskLogMessageDO;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobLogMessageMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskBatchMapper;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskLogMessageMapper;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,7 +24,7 @@ public class LogConfig {
 
     @ConditionalOnMissingBean
     @Bean
-    public RetryLogAccess<RetryTaskLogMessageDO> defaultRetryLogAccess() {
-        return new RetryTaskLogMessageAccess();
+    public RetryLogAccess<RetryTaskLogMessageDO> defaultRetryLogAccess(RetryTaskLogMessageMapper retryTaskLogMessageMapper) {
+        return new RetryTaskLogMessageAccess(retryTaskLogMessageMapper);
     }
 }

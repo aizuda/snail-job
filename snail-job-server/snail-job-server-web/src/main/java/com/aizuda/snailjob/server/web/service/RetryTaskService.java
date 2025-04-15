@@ -20,6 +20,8 @@ public interface RetryTaskService {
 
     RetryTaskLogMessageResponseVO getRetryTaskLogMessagePage(RetryTaskLogMessageQueryVO queryVO);
 
+    void getRetryTaskLogMessagePageV2(RetryTaskLogMessageQueryVO queryVO);
+
     RetryTaskResponseVO getRetryTaskById(Long id);
 
     boolean deleteById(Long id);

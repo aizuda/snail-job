@@ -4,14 +4,19 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
+import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.enums.RetryOperationReasonEnum;
 import com.aizuda.snailjob.common.core.enums.RetryTaskStatusEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.constant.LogFieldConstants;
+import com.aizuda.snailjob.server.common.dto.PartitionTask;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
+import com.aizuda.snailjob.server.common.util.PartitionTaskUtils;
 import com.aizuda.snailjob.server.retry.task.dto.TaskStopJobDTO;
 import com.aizuda.snailjob.server.retry.task.support.handler.RetryTaskStopHandler;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
+import com.aizuda.snailjob.server.web.model.dto.LogMessagePartitionTask;
+import com.aizuda.snailjob.server.web.model.event.WsSendEvent;
 import com.aizuda.snailjob.server.web.model.request.RetryTaskLogMessageQueryVO;
 import com.aizuda.snailjob.server.web.model.request.RetryTaskQueryVO;
 import com.aizuda.snailjob.server.web.model.request.UserSessionVO;
@@ -19,9 +24,16 @@ import com.aizuda.snailjob.server.web.model.response.RetryTaskLogMessageResponse
 import com.aizuda.snailjob.server.web.model.response.RetryTaskResponseVO;
 import com.aizuda.snailjob.server.web.service.RetryTaskService;
 import com.aizuda.snailjob.server.retry.task.convert.RetryConverter;
+import com.aizuda.snailjob.server.web.service.convert.LogMessagePartitionTaskConverter;
 import com.aizuda.snailjob.server.web.service.convert.RetryTaskLogResponseVOConverter;
 import com.aizuda.snailjob.server.web.service.convert.RetryTaskResponseVOConverter;
+import com.aizuda.snailjob.server.web.timer.LogTimerWheel;
+import com.aizuda.snailjob.server.web.timer.RetryTaskLogTimerTask;
 import com.aizuda.snailjob.server.web.util.UserSessionUtils;
+import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
+import com.aizuda.snailjob.template.datasource.persistence.dataobject.common.PageResponseDO;
+import com.aizuda.snailjob.template.datasource.persistence.dataobject.log.RetryTaskLogMessageDO;
+import com.aizuda.snailjob.template.datasource.persistence.dataobject.log.RetryTaskLogMessageQueryDO;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskLogMessageMapper;
@@ -30,12 +42,16 @@ import com.aizuda.snailjob.template.datasource.persistence.po.RetryTask;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTaskLogMessage;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
+import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -45,11 +61,12 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class RetryTaskServiceImpl implements RetryTaskService {
-
+    private static final Long DELAY_MILLS = 5000L;
     private final RetryTaskMapper retryTaskMapper;
     private final RetryMapper retryMapper;
     private final RetryTaskLogMessageMapper retryTaskLogMessageMapper;
     private final RetryTaskStopHandler retryTaskStopHandler;
+    private final AccessTemplate accessTemplate;
 
     @Override
     public PageResult<List<RetryTaskResponseVO>> getRetryTaskLogPage(RetryTaskQueryVO queryVO) {
@@ -161,6 +178,86 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         responseVO.setFromIndex(fromIndex);
 
         return responseVO;
+    }
+
+    @Override
+    public void getRetryTaskLogMessagePageV2(RetryTaskLogMessageQueryVO queryVO) {
+        String sid = queryVO.getSid();
+        RetryTaskLogMessageQueryDO pageQueryDO = new RetryTaskLogMessageQueryDO();
+        pageQueryDO.setPage(1);
+        pageQueryDO.setSize(queryVO.getSize());
+        pageQueryDO.setRetryTaskId(queryVO.getRetryTaskId());
+        pageQueryDO.setStartId(queryVO.getStartId());
+        PartitionTaskUtils.process(startId -> {
+            // 记录下次起始时间
+            queryVO.setStartId(startId);
+            pageQueryDO.setStartId(startId);
+            // 拉去数据
+            PageResponseDO<RetryTaskLogMessageDO> pageResponseDO = accessTemplate.getRetryTaskLogMessageAccess()
+                    .listPage(pageQueryDO);
+            List<RetryTaskLogMessageDO> rows = pageResponseDO.getRows();
+            return LogMessagePartitionTaskConverter.INSTANCE.toLogMessagePartitionTask(rows);
+        }, new Consumer<>() {
+            @Override
+            public void accept(List<? extends PartitionTask> partitionTasks) {
+
+                List<LogMessagePartitionTask> partitionTaskList = (List<LogMessagePartitionTask>) partitionTasks;
+
+                for (LogMessagePartitionTask logMessagePartitionTask : partitionTaskList) {
+                    // 发生日志内容到前端
+                    String message = logMessagePartitionTask.getMessage();
+                    List<Map<String, String>> logContents = JsonUtil.parseObject(message, List.class);
+                    logContents = logContents.stream()
+                            .sorted(Comparator.comparingLong(o -> Long.parseLong(o.get(LogFieldConstants.TIME_STAMP))))
+                            .toList();
+                    for (Map<String, String> logContent : logContents) {
+                        // send发消息
+                        WsSendEvent sendEvent = new WsSendEvent(this);
+                        sendEvent.setSid(sid);
+                        sendEvent.setMessage(JsonUtil.toJsonString(logContent));
+                        SnailSpringContext.getContext().publishEvent(sendEvent);
+                    }
+                }
+
+            }
+        }, new Predicate<>() {
+            @Override
+            public boolean apply(List<? extends PartitionTask> rows) {
+
+                // 决策是否完成
+                if (!CollUtil.isEmpty(rows)) {
+                    return false;
+                }
+
+                RetryTask retryTask = retryTaskMapper.selectOne(
+                        new LambdaQueryWrapper<RetryTask>().eq(RetryTask::getId, queryVO.getRetryTaskId()));
+
+                if (Objects.isNull(retryTask)
+                        || (RetryTaskStatusEnum.TERMINAL_STATUS_SET.contains(retryTask.getTaskStatus()) &&
+                        retryTask.getUpdateDt().plusSeconds(15).isBefore(LocalDateTime.now()))) {
+                    // 发生完成标识
+                    WsSendEvent sendEvent = new WsSendEvent(this);
+                    sendEvent.setMessage("END");
+                    sendEvent.setSid(sid);
+                    SnailSpringContext.getContext().publishEvent(sendEvent);
+                    return true;
+                } else {
+                    scheduleNextAttempt(queryVO, sid);
+                    return true;
+                }
+            }
+        }, queryVO.getStartId());
+
+    }
+
+    /**
+     * 使用时间轮5秒再进行日志查询
+     *
+     * @param queryVO
+     * @param sid
+     */
+    private void scheduleNextAttempt(RetryTaskLogMessageQueryVO queryVO, String sid) {
+        LogTimerWheel.registerWithJobTaskLog(() -> new RetryTaskLogTimerTask(queryVO, sid), Duration.ofMillis(DELAY_MILLS));
     }
 
     @Override

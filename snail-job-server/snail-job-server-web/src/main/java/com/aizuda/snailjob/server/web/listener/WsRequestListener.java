@@ -4,7 +4,9 @@ import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.server.common.enums.WebSocketSceneEnum;
 import com.aizuda.snailjob.server.common.vo.JobLogQueryVO;
 import com.aizuda.snailjob.server.web.model.event.WsRequestEvent;
+import com.aizuda.snailjob.server.web.model.request.RetryTaskLogMessageQueryVO;
 import com.aizuda.snailjob.server.web.service.JobLogService;
+import com.aizuda.snailjob.server.web.service.RetryTaskService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
@@ -24,6 +26,8 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class WsRequestListener {
     private final JobLogService jobLogService;
+
+    private final RetryTaskService retryTaskService;
 
     @Async("logQueryExecutor")
     @EventListener(classes = WsRequestEvent.class)
@@ -45,4 +49,24 @@ public class WsRequestListener {
 
     }
 
+
+    @Async("logQueryExecutor")
+    @EventListener(classes = WsRequestEvent.class)
+    public void getRetryLogs(WsRequestEvent requestVO) {
+        if (!WebSocketSceneEnum.RETRY_LOG_SCENE.equals(requestVO.getSceneEnum())) {
+            return;
+        }
+
+        log.info("getRetryLogs {}", requestVO.getSid());
+        String message = requestVO.getMessage();
+        RetryTaskLogMessageQueryVO retryTaskLogMessageQueryVO = JsonUtil.parseObject(message, RetryTaskLogMessageQueryVO.class);
+        retryTaskLogMessageQueryVO.setSid(requestVO.getSid());
+        retryTaskLogMessageQueryVO.setStartId(0L);
+        try {
+            retryTaskService.getRetryTaskLogMessagePageV2(retryTaskLogMessageQueryVO);
+        } catch (Exception e) {
+            log.warn("send log error", e);
+        }
+
+    }
 }
