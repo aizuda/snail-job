@@ -29,6 +29,7 @@ import com.aizuda.snailjob.template.datasource.persistence.po.*;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -125,9 +126,13 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
             waitRollbackList.add(retry);
         }
 
-        TaskAccess<Retry> retryTaskAccess = accessTemplate.getRetryAccess();
-        Assert.isTrue(waitRollbackList.size() == retryTaskAccess.insertBatch( waitRollbackList),
-                () -> new SnailJobServerException("Failed to add retry task"));
+        try {
+            TaskAccess<Retry> retryTaskAccess = accessTemplate.getRetryAccess();
+            Assert.isTrue(waitRollbackList.size() == retryTaskAccess.insertBatch( waitRollbackList),
+                    () -> new SnailJobServerException("Failed to add retry task"));
+        } catch (DuplicateKeyException e) {
+            throw new SnailJobServerException("Duplicate retry task");
+        }
 
         Set<Long> waitDelRetryDeadLetterIdSet = StreamUtils.toSet(retryDeadLetterList, RetryDeadLetter::getId);
         Assert.isTrue(waitDelRetryDeadLetterIdSet.size() == retryDeadLetterAccess.delete(
