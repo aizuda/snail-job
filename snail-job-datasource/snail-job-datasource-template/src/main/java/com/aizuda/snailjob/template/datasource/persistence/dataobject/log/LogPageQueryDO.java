@@ -15,9 +15,9 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class LogPageQueryDO extends PageQueryDO {
-    private Long startId;
+    private Long startRealTime;
     private Long jobId;
     private Long taskBatchId;
     private Long taskId;
-    private Integer fromIndex;
+    private boolean searchCount;
 }

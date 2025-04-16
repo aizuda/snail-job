@@ -12,10 +12,9 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class JobLogQueryVO extends BaseQueryVO {
-    private Long startId;
     private Long jobId;
     private Long taskBatchId;
     private Long taskId;
-    private Integer fromIndex;
     private String sid;
+    private Long startRealTime;
 }

@@ -40,9 +40,9 @@ public class WsRequestListener {
         String message = requestVO.getMessage();
         JobLogQueryVO jobLogQueryVO = JsonUtil.parseObject(message, JobLogQueryVO.class);
         jobLogQueryVO.setSid(requestVO.getSid());
-        jobLogQueryVO.setStartId(0L);
+        jobLogQueryVO.setStartRealTime(0L);
         try {
-            jobLogService.getJobLogPageV2(jobLogQueryVO);
+            jobLogService.getJobLogPage(jobLogQueryVO);
         } catch (Exception e) {
             log.warn("send log error", e);
         }

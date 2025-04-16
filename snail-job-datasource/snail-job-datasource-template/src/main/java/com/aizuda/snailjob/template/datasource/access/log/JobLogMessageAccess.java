@@ -31,7 +31,6 @@ import static com.aizuda.snailjob.template.datasource.utils.DbUtils.getDbType;
 @RequiredArgsConstructor
 public class JobLogMessageAccess implements JobLogAccess<JobLogMessageDO> {
     private final JobLogMessageMapper jobLogMessageMapper;
-    private final JobTaskBatchMapper jobTaskBatchMapper;
 
     @Override
     public boolean supports(String operationType) {
@@ -55,12 +54,13 @@ public class JobLogMessageAccess implements JobLogAccess<JobLogMessageDO> {
         LogPageQueryDO logPageQueryDO = (LogPageQueryDO) queryDO;
 
         PageDTO<JobLogMessage> selectPage = jobLogMessageMapper.selectPage(
-                new PageDTO<>(queryDO.getPage(), logPageQueryDO.getSize()),
+                new PageDTO<>(queryDO.getPage(), logPageQueryDO.getSize(), logPageQueryDO.isSearchCount()),
                 new LambdaQueryWrapper<JobLogMessage>()
-                        .ge(JobLogMessage::getId, logPageQueryDO.getStartId())
+                        .ge(JobLogMessage::getRealTime, logPageQueryDO.getStartRealTime())
                         .eq(JobLogMessage::getTaskBatchId, logPageQueryDO.getTaskBatchId())
                         .eq(JobLogMessage::getTaskId, logPageQueryDO.getTaskId())
-                        .orderByAsc(JobLogMessage::getId).orderByAsc(JobLogMessage::getRealTime));
+                        .orderByAsc(JobLogMessage::getId)
+                        .orderByAsc(JobLogMessage::getRealTime));
         List<JobLogMessage> records = selectPage.getRecords();
 
         PageResponseDO<JobLogMessageDO> responseDO = new PageResponseDO<>();

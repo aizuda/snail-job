@@ -33,7 +33,7 @@ public class JobTaskLogTimerTask implements TimerTask<String> {
         try {
             LogTimerWheel.clearCache(idempotentKey());
             JobLogService logService = SnailSpringContext.getBean(JobLogService.class);
-            logService.getJobLogPageV2(logQueryVO);
+            logService.getJobLogPage(logQueryVO);
         } catch (Exception e) {
             SnailJobLog.LOCAL.error("Scheduled task log query execution failed", e);
         }

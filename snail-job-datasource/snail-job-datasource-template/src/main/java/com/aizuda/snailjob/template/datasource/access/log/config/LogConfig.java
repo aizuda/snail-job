@@ -18,8 +18,8 @@ public class LogConfig {
 
     @ConditionalOnMissingBean
     @Bean
-    public JobLogAccess<JobLogMessageDO> defaultJobLogAccess(JobLogMessageMapper jobLogMessageMapper, JobTaskBatchMapper jobTaskBatchMapper) {
-        return new JobLogMessageAccess(jobLogMessageMapper, jobTaskBatchMapper);
+    public JobLogAccess<JobLogMessageDO> defaultJobLogAccess(JobLogMessageMapper jobLogMessageMapper) {
+        return new JobLogMessageAccess(jobLogMessageMapper);
     }
 
     @ConditionalOnMissingBean
