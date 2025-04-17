@@ -56,7 +56,7 @@ public class JobLogMessageAccess implements JobLogAccess<JobLogMessageDO> {
         PageDTO<JobLogMessage> selectPage = jobLogMessageMapper.selectPage(
                 new PageDTO<>(queryDO.getPage(), logPageQueryDO.getSize(), logPageQueryDO.isSearchCount()),
                 new LambdaQueryWrapper<JobLogMessage>()
-                        .ge(JobLogMessage::getRealTime, logPageQueryDO.getStartRealTime())
+                        .gt(JobLogMessage::getRealTime, logPageQueryDO.getStartRealTime())
                         .eq(JobLogMessage::getTaskBatchId, logPageQueryDO.getTaskBatchId())
                         .eq(JobLogMessage::getTaskId, logPageQueryDO.getTaskId())
                         .orderByAsc(JobLogMessage::getId)

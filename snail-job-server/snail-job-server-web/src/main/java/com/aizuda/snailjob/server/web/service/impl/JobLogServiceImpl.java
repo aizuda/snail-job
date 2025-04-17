@@ -53,8 +53,8 @@ public class JobLogServiceImpl implements JobLogService {
 
         int totalPage = (int) ((total + queryVO.getSize() - 1) / queryVO.getSize());
 
-        Long lastRealTime = null;
-        for (int i = 1; i < totalPage; i++) {
+        Long lastRealTime = 0L;
+        for (int i = 1; i <= totalPage;) {
             for (JobLogMessageDO jobLogMessageDO : pageResponseDO.getRows()) {
                 // 循环覆盖，最后一个肯定是最大的
                 lastRealTime = jobLogMessageDO.getRealTime();
@@ -75,7 +75,7 @@ public class JobLogServiceImpl implements JobLogService {
 
             // 继续查询下一页
             pageQueryDO.setSearchCount(false);
-            pageQueryDO.setPage((i - 1) * queryVO.getSize());
+            pageQueryDO.setPage(++i);
             pageResponseDO = accessTemplate.getJobLogMessageAccess()
                     .listPage(pageQueryDO);
         }
@@ -96,7 +96,7 @@ public class JobLogServiceImpl implements JobLogService {
             SnailSpringContext.getContext().publishEvent(sendEvent);
         } else {
             // 覆盖作为下次查询的起始条件
-            pageQueryDO.setStartRealTime(lastRealTime);
+            queryVO.setStartRealTime(lastRealTime);
             // 继续查询
             scheduleNextAttempt(queryVO, sid);
         }
