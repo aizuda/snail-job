@@ -54,6 +54,11 @@ public class JobLogServiceImpl implements JobLogService {
         int totalPage = (int) ((total + queryVO.getSize() - 1) / queryVO.getSize());
 
         Long lastRealTime = 0L;
+
+        if (0 == totalPage &&
+                (null != pageQueryDO.getStartRealTime() && 0 != pageQueryDO.getStartRealTime())){
+            lastRealTime = pageQueryDO.getStartRealTime();
+        }
         for (int i = 1; i <= totalPage;) {
             for (JobLogMessageDO jobLogMessageDO : pageResponseDO.getRows()) {
                 // 循环覆盖，最后一个肯定是最大的
