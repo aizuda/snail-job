@@ -8,9 +8,7 @@ import com.aizuda.snailjob.common.core.model.SnailJobHeaders;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import java.util.Deque;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.LinkedBlockingDeque;
 
 /**
@@ -20,6 +18,10 @@ import java.util.concurrent.LinkedBlockingDeque;
  * @date : 2022-03-03 13:42
  */
 public class RetrySiteSnapshot {
+
+    private static final String RETRY_STAGE_KEY = "RETRY_STAGE";
+    private static final String RETRY_CLASS_METHOD_ENTRANCE_KEY = "RETRY_CLASS_METHOD_ENTRANCE";
+    private static final String RETRY_STATUS_KEY = "RETRY_STATUS";
 
     /**
      * 重试阶段，1-内存重试阶段，2-服务端重试阶段
@@ -47,9 +49,31 @@ public class RetrySiteSnapshot {
     private static final RetrySiteSnapshotContext<String> RETRY_STATUS_CODE = SnailRetrySpiLoader.loadRetrySiteSnapshotContext();
 
     /**
+     * 挂起重试的内存状态
+     */
+    private static final RetrySiteSnapshotContext<Map<String, Object>> SUSPEND = SnailRetrySpiLoader.loadRetrySiteSnapshotContext();
+
+    /**
      * 进入方法入口时间标记
      */
     private static final RetrySiteSnapshotContext<Long> ENTRY_METHOD_TIME = SnailRetrySpiLoader.loadRetrySiteSnapshotContext();
+
+    public static void suspend() {
+        SUSPEND.set(new HashMap<>(){{
+            put(RETRY_STAGE_KEY, RETRY_STAGE.get());
+            put(RETRY_STATUS_KEY, RETRY_STATUS.get());
+            put(RETRY_CLASS_METHOD_ENTRANCE_KEY, RETRY_CLASS_METHOD_ENTRANCE.get());
+        }});
+    }
+
+    public static void restore() {
+        Optional.ofNullable(SUSPEND.get()).ifPresent(map -> {
+            RETRY_STAGE.set((Integer) map.get(RETRY_STAGE_KEY));
+            RETRY_STATUS.set((Integer) map.get(RETRY_STATUS_KEY));
+            RETRY_CLASS_METHOD_ENTRANCE.set((Deque<MethodEntranceMeta>) map.get(RETRY_CLASS_METHOD_ENTRANCE_KEY));
+            SUSPEND.remove();
+        });
+    }
 
     public static Integer getStage() {
         return RETRY_STAGE.get();

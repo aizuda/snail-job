@@ -74,7 +74,18 @@ public class SnailRetryInterceptor implements MethodInterceptor, AfterAdvice, Se
         String methodEntrance = getMethodEntrance(retryable, executorClassName);
 
         if (Propagation.REQUIRES_NEW.equals(retryable.propagation())) {
-            RetrySiteSnapshot.setMethodEntrance(methodEntrance);
+            // 如果已经是入口了就不需要继续添加入口了
+            if (!RetrySiteSnapshot.isMethodEntrance(methodEntrance)) {
+                // 这里需要挂起外部重试的内存的信息
+                if (RetrySiteSnapshot.isRunning()
+                        && RetrySiteSnapshot.getStage() == RetrySiteSnapshot.EnumStage.LOCAL.getStage()) {
+                    RetrySiteSnapshot.suspend();
+                    // 清除线程信息
+                    RetrySiteSnapshot.removeAll();
+                }
+                // 设置新的内容信息
+                RetrySiteSnapshot.setMethodEntrance(methodEntrance);
+            }
         } else if (!RetrySiteSnapshot.existedMethodEntrance()) {
             RetrySiteSnapshot.setMethodEntrance(methodEntrance);
         } else {
@@ -195,7 +206,11 @@ public class SnailRetryInterceptor implements MethodInterceptor, AfterAdvice, Se
             sendMessage(e);
 
         } finally {
+            // 清除当前重试的信息
             RetrySiteSnapshot.removeAll();
+            // 还原挂起的信息
+            RetrySiteSnapshot.restore();
+
         }
 
         return null;
