@@ -11,9 +11,9 @@ public class RetryTaskLogMessageQueryDO extends PageQueryDO {
 
     private Long retryTaskId;
 
-    private Long startId;
+    private Long startRealTime;
 
-    private Integer fromIndex;
+    private boolean searchCount;
 
     private String sid;
 }

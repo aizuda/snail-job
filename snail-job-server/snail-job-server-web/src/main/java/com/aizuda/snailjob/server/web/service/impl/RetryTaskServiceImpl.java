@@ -96,158 +96,69 @@ public class RetryTaskServiceImpl implements RetryTaskService {
     }
 
     @Override
-    public RetryTaskLogMessageResponseVO getRetryTaskLogMessagePage(
-            RetryTaskLogMessageQueryVO queryVO) {
-        if (queryVO.getRetryTaskId() == null || StrUtil.isBlank(queryVO.getGroupName())) {
-            RetryTaskLogMessageResponseVO jobLogResponseVO = new RetryTaskLogMessageResponseVO();
-            jobLogResponseVO.setNextStartId(0L);
-            jobLogResponseVO.setFromIndex(0);
-            return jobLogResponseVO;
-        }
-
-        String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
-
-        PageDTO<RetryTaskLogMessage> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
-        PageDTO<RetryTaskLogMessage> selectPage = retryTaskLogMessageMapper.selectPage(pageDTO,
-                new LambdaQueryWrapper<RetryTaskLogMessage>()
-                        .select(RetryTaskLogMessage::getId, RetryTaskLogMessage::getLogNum)
-                        .ge(RetryTaskLogMessage::getId, queryVO.getStartId())
-                        .eq(RetryTaskLogMessage::getNamespaceId, namespaceId)
-                        .eq(RetryTaskLogMessage::getRetryTaskId, queryVO.getRetryTaskId())
-                        .eq(RetryTaskLogMessage::getGroupName, queryVO.getGroupName())
-                        .orderByAsc(RetryTaskLogMessage::getId).orderByAsc(RetryTaskLogMessage::getRealTime)
-                        .orderByDesc(RetryTaskLogMessage::getCreateDt));
-
-        List<RetryTaskLogMessage> records = selectPage.getRecords();
-
-        if (CollUtil.isEmpty(records)) {
-            return new RetryTaskLogMessageResponseVO()
-                    .setFinished(Boolean.TRUE)
-                    .setNextStartId(queryVO.getStartId())
-                    .setFromIndex(0);
-        }
-
-        Integer fromIndex = Optional.ofNullable(queryVO.getFromIndex()).orElse(0);
-        RetryTaskLogMessage firstRecord = records.get(0);
-        List<Long> ids = Lists.newArrayList(firstRecord.getId());
-        int total = firstRecord.getLogNum() - fromIndex;
-        for (int i = 1; i < records.size(); i++) {
-            RetryTaskLogMessage record = records.get(i);
-            if (total + record.getLogNum() > queryVO.getSize()) {
-                break;
-            }
-
-            total += record.getLogNum();
-            ids.add(record.getId());
-        }
-
-        long nextStartId = 0;
-        List<Map<String, String>> messages = Lists.newArrayList();
-        List<RetryTaskLogMessage> jobLogMessages = retryTaskLogMessageMapper.selectList(
-                new LambdaQueryWrapper<RetryTaskLogMessage>()
-                        .in(RetryTaskLogMessage::getId, ids)
-                        .orderByAsc(RetryTaskLogMessage::getId)
-                        .orderByAsc(RetryTaskLogMessage::getRealTime)
-        );
-
-        for (final RetryTaskLogMessage retryTaskLogMessage : jobLogMessages) {
-
-            List<Map<String, String>> originalList = JsonUtil.parseObject(retryTaskLogMessage.getMessage(), List.class);
-            int size = originalList.size() - fromIndex;
-            List<Map<String, String>> pageList = originalList.stream().skip(fromIndex).limit(queryVO.getSize())
-                    .collect(Collectors.toList());
-            if (messages.size() + size >= queryVO.getSize()) {
-                messages.addAll(pageList);
-                nextStartId = retryTaskLogMessage.getId();
-                fromIndex = Math.min(fromIndex + queryVO.getSize(), originalList.size() - 1) + 1;
-                break;
-            }
-
-            messages.addAll(pageList);
-            nextStartId = retryTaskLogMessage.getId() + 1;
-            fromIndex = 0;
-        }
-
-        messages = messages.stream()
-                .sorted(Comparator.comparingLong(o -> Long.parseLong(o.get(LogFieldConstants.TIME_STAMP))))
-                .collect(Collectors.toList());
-
-        RetryTaskLogMessageResponseVO responseVO = new RetryTaskLogMessageResponseVO();
-        responseVO.setMessage(messages);
-        responseVO.setNextStartId(nextStartId);
-        responseVO.setFromIndex(fromIndex);
-
-        return responseVO;
-    }
-
-    @Override
-    public void getRetryTaskLogMessagePageV2(RetryTaskLogMessageQueryVO queryVO) {
+    public void getRetryTaskLogMessagePage(RetryTaskLogMessageQueryVO queryVO) {
         String sid = queryVO.getSid();
         RetryTaskLogMessageQueryDO pageQueryDO = new RetryTaskLogMessageQueryDO();
         pageQueryDO.setPage(1);
         pageQueryDO.setSize(queryVO.getSize());
         pageQueryDO.setRetryTaskId(queryVO.getRetryTaskId());
-        pageQueryDO.setStartId(queryVO.getStartId());
-        PartitionTaskUtils.process(startId -> {
-            // 记录下次起始时间
-            queryVO.setStartId(startId);
-            pageQueryDO.setStartId(startId);
-            // 拉去数据
-            PageResponseDO<RetryTaskLogMessageDO> pageResponseDO = accessTemplate.getRetryTaskLogMessageAccess()
-                    .listPage(pageQueryDO);
-            List<RetryTaskLogMessageDO> rows = pageResponseDO.getRows();
-            return LogMessagePartitionTaskConverter.INSTANCE.toLogMessagePartitionTask(rows);
-        }, new Consumer<>() {
-            @Override
-            public void accept(List<? extends PartitionTask> partitionTasks) {
+        pageQueryDO.setStartRealTime(queryVO.getStartRealTime());
+        pageQueryDO.setSearchCount(true);
+        // 拉取数据
+        PageResponseDO<RetryTaskLogMessageDO> pageResponseDO = accessTemplate.getRetryTaskLogMessageAccess()
+                .listPage(pageQueryDO);
 
-                List<LogMessagePartitionTask> partitionTaskList = (List<LogMessagePartitionTask>) partitionTasks;
+        long total = pageResponseDO.getTotal();
 
-                for (LogMessagePartitionTask logMessagePartitionTask : partitionTaskList) {
-                    // 发生日志内容到前端
-                    String message = logMessagePartitionTask.getMessage();
-                    List<Map<String, String>> logContents = JsonUtil.parseObject(message, List.class);
-                    logContents = logContents.stream()
-                            .sorted(Comparator.comparingLong(o -> Long.parseLong(o.get(LogFieldConstants.TIME_STAMP))))
-                            .toList();
-                    for (Map<String, String> logContent : logContents) {
-                        // send发消息
-                        WsSendEvent sendEvent = new WsSendEvent(this);
-                        sendEvent.setSid(sid);
-                        sendEvent.setMessage(JsonUtil.toJsonString(logContent));
-                        SnailSpringContext.getContext().publishEvent(sendEvent);
-                    }
-                }
+        int totalPage = (int) ((total + queryVO.getSize() - 1) / queryVO.getSize());
 
-            }
-        }, new Predicate<>() {
-            @Override
-            public boolean apply(List<? extends PartitionTask> rows) {
+        Long lastRealTime = 0L;
 
-                // 决策是否完成
-                if (!CollUtil.isEmpty(rows)) {
-                    return false;
-                }
+        if (0 == totalPage &&
+                (null != pageQueryDO.getStartRealTime() && 0 != pageQueryDO.getStartRealTime())){
+            lastRealTime = pageQueryDO.getStartRealTime();
+        }
 
-                RetryTask retryTask = retryTaskMapper.selectOne(
-                        new LambdaQueryWrapper<RetryTask>().eq(RetryTask::getId, queryVO.getRetryTaskId()));
-
-                if (Objects.isNull(retryTask)
-                        || (RetryTaskStatusEnum.TERMINAL_STATUS_SET.contains(retryTask.getTaskStatus()) &&
-                        retryTask.getUpdateDt().plusSeconds(15).isBefore(LocalDateTime.now()))) {
-                    // 发生完成标识
+        for (int i = 1; i <= totalPage;) {
+            for (RetryTaskLogMessageDO retryTaskLogMessageDO : pageResponseDO.getRows()) {
+                // 发生日志内容到前端
+                String message = retryTaskLogMessageDO.getMessage();
+                List<Map<String, String>> logContents = JsonUtil.parseObject(message, List.class);
+                logContents = logContents.stream()
+                        .sorted(Comparator.comparingLong(o -> Long.parseLong(o.get(LogFieldConstants.TIME_STAMP))))
+                        .toList();
+                for (Map<String, String> logContent : logContents) {
+                    // send发消息
                     WsSendEvent sendEvent = new WsSendEvent(this);
-                    sendEvent.setMessage("END");
                     sendEvent.setSid(sid);
+                    sendEvent.setMessage(JsonUtil.toJsonString(logContent));
                     SnailSpringContext.getContext().publishEvent(sendEvent);
-                    return true;
-                } else {
-                    scheduleNextAttempt(queryVO, sid);
-                    return true;
                 }
             }
-        }, queryVO.getStartId());
 
+            // 继续查询下一页
+            pageQueryDO.setSearchCount(false);
+            pageQueryDO.setPage(++i);
+            pageResponseDO = accessTemplate.getRetryTaskLogMessageAccess()
+                    .listPage(pageQueryDO);
+        }
+
+        RetryTask retryTask = retryTaskMapper.selectOne(
+                new LambdaQueryWrapper<RetryTask>().eq(RetryTask::getId, queryVO.getRetryTaskId()));
+
+        if (Objects.isNull(retryTask)
+                || (RetryTaskStatusEnum.TERMINAL_STATUS_SET.contains(retryTask.getTaskStatus()) &&
+                retryTask.getUpdateDt().plusSeconds(15).isBefore(LocalDateTime.now()))) {
+            // 发生完成标识
+            WsSendEvent sendEvent = new WsSendEvent(this);
+            sendEvent.setMessage("END");
+            sendEvent.setSid(sid);
+            SnailSpringContext.getContext().publishEvent(sendEvent);
+        } else {
+            // 覆盖作为下次查询的起始条件
+            queryVO.setStartRealTime(lastRealTime);
+            scheduleNextAttempt(queryVO, sid);
+        }
     }
 
     /**

@@ -34,12 +34,6 @@ public class RetryTaskController {
     }
 
     @LoginRequired
-    @GetMapping("/message/list")
-    public RetryTaskLogMessageResponseVO getRetryTaskLogMessagePage(RetryTaskLogMessageQueryVO queryVO) {
-        return retryTaskService.getRetryTaskLogMessagePage(queryVO);
-    }
-
-    @LoginRequired
     @GetMapping("{id}")
     public RetryTaskResponseVO getRetryTaskById(@PathVariable("id") Long id) {
         return retryTaskService.getRetryTaskById(id);

@@ -13,12 +13,8 @@ import lombok.EqualsAndHashCode;
 public class RetryTaskLogMessageQueryVO extends BaseQueryVO {
 
     private String groupName;
-
     private Long retryTaskId;
-
-    private Long startId;
-
-    private Integer fromIndex;
-
+    private Long startRealTime;
     private String sid;
+
 }

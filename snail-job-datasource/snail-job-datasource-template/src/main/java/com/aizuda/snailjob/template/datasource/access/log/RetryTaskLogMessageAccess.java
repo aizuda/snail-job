@@ -7,12 +7,12 @@ import com.aizuda.snailjob.template.datasource.persistence.dataobject.common.*;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.log.RetryTaskLogMessageDO;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.log.RetryTaskLogMessageQueryDO;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskLogMessageMapper;
+import com.aizuda.snailjob.template.datasource.persistence.po.JobLogMessage;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetryTaskLogMessage;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
 import java.util.List;
@@ -51,14 +51,15 @@ public class RetryTaskLogMessageAccess implements RetryLogAccess<RetryTaskLogMes
     }
 
     @Override
-    public PageResponseDO listPage(PageQueryDO queryDO) {
+    public PageResponseDO<RetryTaskLogMessageDO> listPage(PageQueryDO queryDO) {
         RetryTaskLogMessageQueryDO logPageQueryDO = (RetryTaskLogMessageQueryDO) queryDO;
         PageDTO<RetryTaskLogMessage> selectPage = retryTaskLogMessageMapper.selectPage(
-                new PageDTO<>(queryDO.getPage(), logPageQueryDO.getSize()),
+                new PageDTO<>(queryDO.getPage(), logPageQueryDO.getSize(), logPageQueryDO.isSearchCount()),
                 new LambdaQueryWrapper<RetryTaskLogMessage>()
-                        .ge(RetryTaskLogMessage::getId, logPageQueryDO.getStartId())
+                        .gt(RetryTaskLogMessage::getRealTime, logPageQueryDO.getStartRealTime())
                         .eq(RetryTaskLogMessage::getRetryTaskId, logPageQueryDO.getRetryTaskId())
-                        .orderByAsc(RetryTaskLogMessage::getId).orderByAsc(RetryTaskLogMessage::getRealTime));
+                        .orderByAsc(RetryTaskLogMessage::getId)
+                        .orderByAsc(RetryTaskLogMessage::getRealTime));
         List<RetryTaskLogMessage> records = selectPage.getRecords();
 
         PageResponseDO<RetryTaskLogMessageDO> responseDO = new PageResponseDO<>();

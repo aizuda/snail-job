@@ -33,7 +33,7 @@ public class RetryTaskLogTimerTask implements TimerTask<String> {
         try {
             LogTimerWheel.clearCache(idempotentKey());
             RetryTaskService logService = SnailSpringContext.getBean(RetryTaskService.class);
-            logService.getRetryTaskLogMessagePageV2(logQueryVO);
+            logService.getRetryTaskLogMessagePage(logQueryVO);
         } catch (Exception e) {
             SnailJobLog.LOCAL.error("Scheduled task log query execution failed", e);
         }
@@ -41,7 +41,6 @@ public class RetryTaskLogTimerTask implements TimerTask<String> {
 
     @Override
     public String idempotentKey() {
-
         Long taskId = logQueryVO.getRetryTaskId();
         return MessageFormat.format(IDEMPOTENT_KEY_PREFIX, sid, WebSocketSceneEnum.JOB_LOG_SCENE, taskId);
     }

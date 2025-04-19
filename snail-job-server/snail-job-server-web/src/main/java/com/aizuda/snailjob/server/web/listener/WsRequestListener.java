@@ -61,9 +61,9 @@ public class WsRequestListener {
         String message = requestVO.getMessage();
         RetryTaskLogMessageQueryVO retryTaskLogMessageQueryVO = JsonUtil.parseObject(message, RetryTaskLogMessageQueryVO.class);
         retryTaskLogMessageQueryVO.setSid(requestVO.getSid());
-        retryTaskLogMessageQueryVO.setStartId(0L);
+        retryTaskLogMessageQueryVO.setStartRealTime(0L);
         try {
-            retryTaskService.getRetryTaskLogMessagePageV2(retryTaskLogMessageQueryVO);
+            retryTaskService.getRetryTaskLogMessagePage(retryTaskLogMessageQueryVO);
         } catch (Exception e) {
             log.warn("send log error", e);
         }
