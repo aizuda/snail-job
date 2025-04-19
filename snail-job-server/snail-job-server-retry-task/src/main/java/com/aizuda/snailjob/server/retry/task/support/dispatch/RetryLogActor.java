@@ -1,5 +1,7 @@
 package com.aizuda.snailjob.server.retry.task.support.dispatch;
 
+import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
+import com.aizuda.snailjob.template.datasource.persistence.dataobject.log.RetryTaskLogMessageDO;
 import  org.apache.pekko.actor.AbstractActor;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
@@ -31,7 +33,7 @@ import java.util.stream.Collectors;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @RequiredArgsConstructor
 public class RetryLogActor extends AbstractActor {
-    private final RetryTaskLogMessageMapper retryTaskLogMessageMapper;
+    private final AccessTemplate accessTemplate;
 
     @Override
     public Receive createReceive() {
@@ -54,9 +56,9 @@ public class RetryLogActor extends AbstractActor {
         List<RetryLogTaskDTO> jobLogTasks = list;
         Map<Long, List<RetryLogTaskDTO>> logTaskDTOMap = jobLogTasks.
                 stream().collect(Collectors.groupingBy(RetryLogTaskDTO::getRetryTaskId, Collectors.toList()));
-        List<RetryTaskLogMessage> retryTaskLogMessages = new ArrayList<>();
+        List<RetryTaskLogMessageDO> retryTaskLogMessages = new ArrayList<>();
         for (List<RetryLogTaskDTO> logTaskDTOList : logTaskDTOMap.values()) {
-            RetryTaskLogMessage retryTaskLogMessage = RetryTaskConverter.INSTANCE.toRetryTaskLogMessage(
+            RetryTaskLogMessageDO retryTaskLogMessage = RetryTaskConverter.INSTANCE.toRetryTaskLogMessage(
                     logTaskDTOList.get(0));
             retryTaskLogMessage.setCreateDt(LocalDateTime.now());
             retryTaskLogMessage.setLogNum(logTaskDTOList.size());
@@ -70,7 +72,7 @@ public class RetryLogActor extends AbstractActor {
             retryTaskLogMessages.add(retryTaskLogMessage);
         }
 
-        retryTaskLogMessageMapper.insertBatch(retryTaskLogMessages);
+        accessTemplate.getRetryTaskLogMessageAccess().insertBatch(retryTaskLogMessages);
     }
 
     /**
@@ -79,7 +81,7 @@ public class RetryLogActor extends AbstractActor {
     private void saveRetryTaskLogMessage(final RetryTaskLogDTO retryTaskLogDTO) {
 
         // 记录重试日志
-        RetryTaskLogMessage retryTaskLogMessage = new RetryTaskLogMessage();
+        RetryTaskLogMessageDO retryTaskLogMessage = new RetryTaskLogMessageDO();
         retryTaskLogMessage.setRetryId(retryTaskLogDTO.getRetryId());
         retryTaskLogMessage.setRetryTaskId(retryTaskLogDTO.getRetryTaskId());
         retryTaskLogMessage.setGroupName(retryTaskLogDTO.getGroupName());
@@ -90,7 +92,7 @@ public class RetryLogActor extends AbstractActor {
         retryTaskLogMessage.setMessage(
                 StrUtil.isBlank(errorMessage) ? StrUtil.EMPTY : errorMessage);
         retryTaskLogMessage.setCreateDt(Optional.ofNullable(retryTaskLogDTO.getTriggerTime()).orElse(LocalDateTime.now()));
-        retryTaskLogMessageMapper.insert(retryTaskLogMessage);
+        accessTemplate.getRetryTaskLogMessageAccess().insert(retryTaskLogMessage);
 
     }
 }

@@ -15,6 +15,7 @@ import com.aizuda.snailjob.server.retry.task.dto.RetryTaskGeneratorDTO;
 import com.aizuda.snailjob.server.retry.task.support.block.BlockStrategyContext;
 import com.aizuda.snailjob.server.retry.task.support.result.RetryResultContext;
 import com.aizuda.snailjob.server.retry.task.support.timer.RetryTimerContext;
+import com.aizuda.snailjob.template.datasource.persistence.dataobject.log.RetryTaskLogMessageDO;
 import com.aizuda.snailjob.template.datasource.persistence.po.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -87,7 +88,7 @@ public interface RetryTaskConverter {
         return new HashSet<>(JsonUtil.parseList(notifyRecipientIdsStr, Long.class));
     }
 
-    RetryTaskLogMessage toRetryTaskLogMessage(RetryLogTaskDTO retryLogTaskDTO);
+    RetryTaskLogMessageDO toRetryTaskLogMessage(RetryLogTaskDTO retryLogTaskDTO);
 
     @Mapping(target = "timestamp", expression = "java(DateUtils.toNowMilli())")
     RetryLogMetaDTO toLogMetaDTO(Retry retry);
