@@ -71,6 +71,11 @@ public class SnailJobProperties {
     private ServerConfig server = new ServerConfig();
 
     /**
+     * 内置http执行器自定义响应结果配置
+     */
+    private HttpResponse httpResponse;
+
+    /**
      * 重试模块配置
      */
     private Retry retry = new Retry();
@@ -107,6 +112,24 @@ public class SnailJobProperties {
          * 服务端 rpc 的端口号
          */
         private int port = 17888;
+    }
+
+    @Data
+    public static class HttpResponse {
+        /**
+         * 内置http执行器响应成功状态码，默认值200
+         */
+        private Integer code = 200;
+
+        /**
+         * 内置http执行器状态码字段名称，默认值code，只针对responseType等于json生效
+         */
+        private String field = "code";
+
+        /**
+         * 内置http执行器响应类型，可选值json或者text，默认值json
+         */
+        private String responseType = "json";
     }
 
     @Data

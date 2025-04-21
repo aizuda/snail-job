@@ -14,6 +14,7 @@ import org.springframework.util.StringUtils;
 import java.util.Base64;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 
@@ -29,7 +30,10 @@ public abstract class AbstractHttpExecutor {
     private static final String HTTP_PREFIX = "http://";
     private static final int HTTP_SUCCESS_CODE = 200;
     private static final Pattern pattern = Pattern.compile("[\\u4e00-\\u9fa5]");
-
+    private static final int RESPONSE_SUCCESS_CODE = 200;
+    private static final String RESPONSE_CODE_FIELD = "code";
+    private static final String JSON_RESPONSE_TYPE = "json";
+    private static final String TEXT_RESPONSE_TYPE = "text";
     public ExecuteResult process(HttpParams httpParams) {
         if (httpParams == null) {
             String message = "HttpParams is null. Verify jobParam configuration.";
@@ -55,14 +59,7 @@ public abstract class AbstractHttpExecutor {
 
     private ExecuteResult executeRequestAndHandleResponse(HttpRequest httpRequest) {
         try (HttpResponse response = httpRequest.execute()) {
-            int errCode = response.getStatus();
-            String body = response.body();
-            if (errCode != HTTP_SUCCESS_CODE) {
-                SnailJobLog.LOCAL.error("{} request to URL: {} failed with code: {}, response body: {}",
-                        httpRequest.getMethod(), httpRequest.getUrl(), errCode, body);
-                return ExecuteResult.failure("HTTP request failed");
-            }
-            return ExecuteResult.success(body);
+            return validateResponse(response, httpRequest, snailJobProperties.getHttpResponse());
         } catch (Exception e) {
             throw new SnailJobInnerExecutorException("[snail-job] HTTP internal executor failed", e);
         }
@@ -73,6 +70,98 @@ public abstract class AbstractHttpExecutor {
             throw new SnailJobInnerExecutorException("URL cannot be empty.");
         }
         httpParams.setUrl(httpParams.getUrl().startsWith(HTTP) ? httpParams.getUrl() : HTTP_PREFIX + httpParams.getUrl());
+    }
+
+    /**
+     * 验证http响应是否有效，并根据响应类型进行进一步验证
+     *
+     * @param response
+     * @param httpRequest
+     * @param httpResponse
+     * @return
+     */
+    private ExecuteResult validateResponse(HttpResponse response, HttpRequest httpRequest, SnailJobProperties.HttpResponse httpResponse) {
+        int errCode = response.getStatus();
+        String body = response.body();
+        // 检查http响应状态码是否为成功状态码
+        if (errCode != HTTP_SUCCESS_CODE) {
+            SnailJobLog.LOCAL.error("{} request to URL: {} failed with code: {}, response body: {}",
+                    httpRequest.getMethod(), httpRequest.getUrl(), errCode, body);
+            return ExecuteResult.failure("HTTP request failed");
+        }
+        // 如果配置了httpResponse，则根据响应类型进行进一步验证
+        if (Objects.nonNull(httpResponse)) {
+            // 防止显示声明字段但是未配置值
+            int code = Optional.ofNullable(httpResponse.getCode()).orElse(RESPONSE_SUCCESS_CODE);
+            String field = Optional.ofNullable(httpResponse.getField())
+                    .filter(StringUtils::hasLength)
+                    .orElse(RESPONSE_CODE_FIELD);
+            String responseType = Optional.ofNullable(httpResponse.getField())
+                    .filter(StringUtils::hasLength)
+                    .orElse(JSON_RESPONSE_TYPE);
+            // 根据不同的响应类型进行验证
+            if (JSON_RESPONSE_TYPE.equalsIgnoreCase(responseType)) {
+                return validateJsonResponse(body, code, field, httpRequest);
+            } else if (TEXT_RESPONSE_TYPE.equalsIgnoreCase(responseType)) {
+                return validateTextResponse(body, code, httpRequest);
+            } else {
+                return ExecuteResult.failure("the responseType is not json or text");
+            }
+        }
+        return ExecuteResult.success(body);
+    }
+
+    /**
+     * 验证json响应类型
+     *
+     * @param body
+     * @param code
+     * @param field
+     * @param httpRequest
+     * @return
+     */
+    private ExecuteResult validateJsonResponse(String body, int code, String field, HttpRequest httpRequest) {
+        // 检查响应体是否为json格式
+        if (!JsonUtil.isValidJson(body) || JsonUtil.isEmptyJson(body)) {
+            SnailJobLog.LOCAL.error("the responseType is json，but the response body fails to validate json or json is empty");
+            return ExecuteResult.failure("the responseType is json，but the response body fails to validate json or json is empty");
+        }
+        // 检查响应体是否包含指定的状态码字段
+        Map<String, Object> objectObjectMap = JsonUtil.parseHashMap(body);
+        if (!objectObjectMap.containsKey(field)) {
+            SnailJobLog.LOCAL.error("the responseType is json，but there is no status code field：" + field);
+            return ExecuteResult.failure("the responseType is json，but there is no status code field：" + field);
+        }
+        // 检查响应体中状态码是否与指定的状态码是否一致
+        if (!Objects.equals(code, objectObjectMap.get(field))) {
+            SnailJobLog.LOCAL.error("{} request to URL: {} failed with code: {}, response body: {}",
+                    httpRequest.getMethod(), httpRequest.getUrl(), code, body);
+            return ExecuteResult.failure("the response status code is not equal to the specified status code");
+        }
+        return ExecuteResult.success(body);
+    }
+
+    /**
+     * 验证text响应类型
+     *
+     * @param body
+     * @param code
+     * @param httpRequest
+     * @return
+     */
+    private ExecuteResult validateTextResponse(String body, int code, HttpRequest httpRequest) {
+        // 检查响应体是否为空
+        if (!StringUtils.hasLength(body)) {
+            SnailJobLog.LOCAL.error("the responseType is text，but the response body is empty");
+            return ExecuteResult.failure("the responseType is text，but the response body is empty");
+        }
+        // 检查响应体是否与指定的状态码是否一致
+        if (!Objects.equals(code + "", body)) {
+            SnailJobLog.LOCAL.error("{} request to URL: {} failed with code: {}, response body: {}",
+                    httpRequest.getMethod(), httpRequest.getUrl(), code, body);
+            return ExecuteResult.failure("the response status code is not equal to the specified status code");
+        }
+        return ExecuteResult.success(body);
     }
 
     private void setDefaultMethodAndBody(HttpParams httpParams) {
