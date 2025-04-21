@@ -100,7 +100,7 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         String sid = queryVO.getSid();
         RetryTaskLogMessageQueryDO pageQueryDO = new RetryTaskLogMessageQueryDO();
         pageQueryDO.setPage(1);
-        pageQueryDO.setSize(queryVO.getSize());
+        pageQueryDO.setSize(50);
         pageQueryDO.setRetryTaskId(queryVO.getRetryTaskId());
         pageQueryDO.setStartRealTime(queryVO.getStartRealTime());
         pageQueryDO.setSearchCount(true);

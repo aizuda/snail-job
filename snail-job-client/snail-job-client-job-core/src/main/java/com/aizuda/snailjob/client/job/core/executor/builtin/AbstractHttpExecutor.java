@@ -129,7 +129,7 @@ public abstract class AbstractHttpExecutor {
         // 检查响应体是否包含指定的状态码字段
         Map<String, Object> objectObjectMap = JsonUtil.parseHashMap(body);
         if (!objectObjectMap.containsKey(field)) {
-            SnailJobLog.LOCAL.error("the responseType is json，but there is no status code field：" + field);
+            SnailJobLog.LOCAL.error("the responseType is json，but there is no status code field：{}", field);
             return ExecuteResult.failure("the responseType is json，but there is no status code field：" + field);
         }
         // 检查响应体中状态码是否与指定的状态码是否一致

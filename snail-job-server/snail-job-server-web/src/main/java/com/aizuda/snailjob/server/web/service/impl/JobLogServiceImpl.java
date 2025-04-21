@@ -41,7 +41,7 @@ public class JobLogServiceImpl implements JobLogService {
         String sid = queryVO.getSid();
         LogPageQueryDO pageQueryDO = new LogPageQueryDO();
         pageQueryDO.setPage(1);
-        pageQueryDO.setSize(queryVO.getSize());
+        pageQueryDO.setSize(50);
         pageQueryDO.setTaskBatchId(queryVO.getTaskBatchId());
         pageQueryDO.setTaskId(queryVO.getTaskId());
         pageQueryDO.setStartRealTime(queryVO.getStartRealTime());
