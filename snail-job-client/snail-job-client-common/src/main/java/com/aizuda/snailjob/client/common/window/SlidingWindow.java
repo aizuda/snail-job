@@ -329,7 +329,7 @@ public class SlidingWindow<T> {
 
         threadPoolExecutor.scheduleAtFixedRate(() -> {
             try {
-                extract(LocalDateTime.now().minus(duration, chronoUnit));
+                extract(LocalDateTime.now());
             } catch (Exception e) {
                 SnailJobLog.LOCAL.error("Sliding window exception", e);
             }

@@ -168,12 +168,14 @@ public class RetryServiceImpl implements RetryService {
             waitStrategyContext.setDelayLevel(retry.getRetryCount() + 1);
             WaitStrategy waitStrategy = WaitStrategyEnum.getWaitStrategy(retrySceneConfig.getBackOff());
             retry.setNextTriggerAt(waitStrategy.computeTriggerTime(waitStrategyContext));
+            retry.setDeleted(0L);
         }
 
         if (RetryStatusEnum.FINISH.getStatus().equals(retryStatusEnum.getStatus())) {
             RetryLogMetaDTO retryLogMetaDTO = RetryTaskConverter.INSTANCE.toLogMetaDTO(retry);
             retryLogMetaDTO.setTimestamp(DateUtils.toNowMilli());
             SnailJobLog.REMOTE.info("============Manual operation completed============. <|>{}<|>", retryLogMetaDTO);
+            retry.setDeleted(retry.getId());
         }
 
         retry.setUpdateDt(LocalDateTime.now());
