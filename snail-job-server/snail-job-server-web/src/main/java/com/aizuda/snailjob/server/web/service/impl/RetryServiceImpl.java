@@ -172,9 +172,6 @@ public class RetryServiceImpl implements RetryService {
         }
 
         if (RetryStatusEnum.FINISH.getStatus().equals(retryStatusEnum.getStatus())) {
-            RetryLogMetaDTO retryLogMetaDTO = RetryTaskConverter.INSTANCE.toLogMetaDTO(retry);
-            retryLogMetaDTO.setTimestamp(DateUtils.toNowMilli());
-            SnailJobLog.REMOTE.info("============Manual operation completed============. <|>{}<|>", retryLogMetaDTO);
             retry.setDeleted(retry.getId());
         }
 
