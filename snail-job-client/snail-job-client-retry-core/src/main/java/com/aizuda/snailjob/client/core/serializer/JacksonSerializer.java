@@ -33,7 +33,7 @@ public class JacksonSerializer implements RetryArgSerializer {
 
         Object[] params = new Object[paramTypes.length];
 
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = JsonUtil.JsonMapper.jacksonObjectMapper();
         JsonNode jsonNode = JsonUtil.toJson(infoStr);
         if (Objects.isNull(jsonNode)) {
             SnailJobLog.LOCAL.warn("jsonNode is null. infoStr:[{}]", infoStr);
