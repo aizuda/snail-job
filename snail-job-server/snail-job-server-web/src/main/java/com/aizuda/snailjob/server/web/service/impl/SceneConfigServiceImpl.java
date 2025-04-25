@@ -205,7 +205,7 @@ public class SceneConfigServiceImpl implements SceneConfigService {
 
         PartitionTaskUtils.process(startId -> {
             List<RetrySceneConfig> sceneConfigs = accessTemplate.getSceneConfigAccess()
-                    .listPage(new PageDTO<>(0, 500), new LambdaQueryWrapper<RetrySceneConfig>()
+                    .listPage(new PageDTO<>(0, 500, Boolean.FALSE), new LambdaQueryWrapper<RetrySceneConfig>()
                             .eq(RetrySceneConfig::getNamespaceId, UserSessionUtils.currentUserSession().getNamespaceId())
                             .eq(Objects.nonNull(exportSceneVO.getSceneStatus()), RetrySceneConfig::getSceneStatus, exportSceneVO.getSceneStatus())
                             .eq(StrUtil.isNotBlank(exportSceneVO.getGroupName()),

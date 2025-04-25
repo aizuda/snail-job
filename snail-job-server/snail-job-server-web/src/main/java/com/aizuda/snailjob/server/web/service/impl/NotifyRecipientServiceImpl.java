@@ -109,7 +109,7 @@ public class NotifyRecipientServiceImpl implements NotifyRecipientService {
         List<NotifyRecipientRequestVO> requestList = new ArrayList<>();
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
         PartitionTaskUtils.process(startId -> {
-            List<NotifyRecipient> recipients = notifyRecipientMapper.selectPage(new PageDTO<>(0, 100),
+            List<NotifyRecipient> recipients = notifyRecipientMapper.selectPage(new PageDTO<>(0, 100, Boolean.FALSE),
                     new LambdaQueryWrapper<NotifyRecipient>()
                             .eq(NotifyRecipient::getNamespaceId, namespaceId)
                             .eq(Objects.nonNull(exportVO.getNotifyType()), NotifyRecipient::getNotifyType,

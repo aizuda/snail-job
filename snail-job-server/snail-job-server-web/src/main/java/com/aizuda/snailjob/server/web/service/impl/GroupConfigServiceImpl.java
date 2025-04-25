@@ -347,7 +347,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
 
         List<GroupConfigRequestVO> allRequestList = Lists.newArrayList();
         PartitionTaskUtils.process((startId -> {
-            List<GroupConfig> groupConfigs = accessTemplate.getGroupConfigAccess().listPage(new PageDTO<>(0, 100),
+            List<GroupConfig> groupConfigs = accessTemplate.getGroupConfigAccess().listPage(new PageDTO<>(0, 100, Boolean.FALSE),
                     new LambdaQueryWrapper<GroupConfig>()
                             .ge(GroupConfig::getId, startId)
                             .eq(GroupConfig::getNamespaceId, namespaceId)

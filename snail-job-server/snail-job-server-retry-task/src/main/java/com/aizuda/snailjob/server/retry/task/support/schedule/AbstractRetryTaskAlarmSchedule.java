@@ -72,7 +72,7 @@ public abstract class AbstractRetryTaskAlarmSchedule extends AbstractSchedule im
      */
     protected List<RetrySceneConfigPartitionTask> queryPartitionList(Long startId) {
         List<RetrySceneConfig> retrySceneConfigList = accessTemplate.getSceneConfigAccess()
-                .listPage(new PageDTO<>(0, 500),
+                .listPage(new PageDTO<>(0, 500, Boolean.FALSE),
                         new LambdaQueryWrapper<RetrySceneConfig>()
                                 .gt(RetrySceneConfig::getId, startId)
                                 .eq(RetrySceneConfig::getSceneStatus, StatusEnum.YES.getStatus())

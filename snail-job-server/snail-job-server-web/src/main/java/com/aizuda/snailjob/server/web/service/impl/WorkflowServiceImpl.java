@@ -325,7 +325,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 
         List<WorkflowDetailResponseVO> resultList = new ArrayList<>();
         PartitionTaskUtils.process(startId -> {
-            List<Workflow> workflowList = workflowMapper.selectPage(new PageDTO<>(0, 100),
+            List<Workflow> workflowList = workflowMapper.selectPage(new PageDTO<>(0, 100, Boolean.FALSE),
                     new LambdaQueryWrapper<Workflow>()
                             .eq(Workflow::getNamespaceId, UserSessionUtils.currentUserSession().getNamespaceId())
                             .eq(Workflow::getDeleted, StatusEnum.NO.getStatus())

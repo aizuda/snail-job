@@ -279,7 +279,7 @@ public class JobServiceImpl implements JobService {
 
         List<JobRequestVO> requestList = new ArrayList<>();
         PartitionTaskUtils.process(startId -> {
-                    List<Job> jobList = jobMapper.selectPage(new PageDTO<>(0, 100),
+                    List<Job> jobList = jobMapper.selectPage(new PageDTO<>(0, 100, Boolean.FALSE),
                             new LambdaQueryWrapper<Job>()
                                     .eq(Job::getNamespaceId, namespaceId)
                                     .eq(StrUtil.isNotBlank(exportJobVO.getGroupName()), Job::getGroupName, exportJobVO.getGroupName())
