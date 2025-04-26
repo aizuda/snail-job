@@ -194,6 +194,7 @@ CREATE INDEX idx_sj_retry_01 ON sj_retry (biz_no);
 CREATE INDEX idx_sj_retry_02 ON sj_retry (retry_status, bucket_index);
 CREATE INDEX idx_sj_retry_03 ON sj_retry (parent_id);
 CREATE INDEX idx_sj_retry_04 ON sj_retry (create_dt);
+CREATE INDEX idx_sj_retry_05 ON sj_retry (idempotent_id);
 
 COMMENT ON COLUMN sj_retry.id IS '主键';
 COMMENT ON COLUMN sj_retry.namespace_id IS '命名空间id';

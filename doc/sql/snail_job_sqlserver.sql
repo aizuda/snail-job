@@ -552,6 +552,8 @@ CREATE INDEX idx_sj_retry_03 ON sj_retry (parent_id)
 GO
 CREATE INDEX idx_sj_retry_04 ON sj_retry (create_dt)
 GO
+CREATE INDEX idx_sj_retry_05 ON sj_retry (idempotent_id)
+GO
 
 EXEC sp_addextendedproperty
      'MS_Description', N'主键',

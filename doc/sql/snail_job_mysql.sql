@@ -132,6 +132,7 @@ CREATE TABLE `sj_retry`
     `update_dt`       datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     PRIMARY KEY (`id`),
     KEY `idx_biz_no` (`biz_no`),
+    KEY `idx_idempotent_id` (`idempotent_id`),
     KEY `idx_retry_status_bucket_index` (`retry_status`, `bucket_index`),
     KEY `idx_parent_id` (`parent_id`),
     KEY `idx_create_dt` (`create_dt`),
