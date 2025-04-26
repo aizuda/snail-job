@@ -2,7 +2,7 @@
  SnailJob Database Transfer Tool
  Source Server Type    : MySQL
  Target Server Type    : Microsoft SQL Server
- Date: 2025-02-25 22:16:48
+ Date: 2025-04-26 10:03:23
 */
 
 
@@ -404,7 +404,9 @@ CREATE TABLE sj_retry_dead_letter
     id            bigint        NOT NULL PRIMARY KEY IDENTITY,
     namespace_id  nvarchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
     group_name    nvarchar(64)  NOT NULL,
+    group_id      bigint        NOT NULL,
     scene_name    nvarchar(64)  NOT NULL,
+    scene_id      bigint        NOT NULL,
     idempotent_id nvarchar(64)  NOT NULL,
     biz_no        nvarchar(64)  NOT NULL DEFAULT '',
     executor_name nvarchar(512) NOT NULL DEFAULT '',
@@ -445,10 +447,24 @@ EXEC sp_addextendedproperty
 GO
 
 EXEC sp_addextendedproperty
+     'MS_Description', N'组Id',
+     'SCHEMA', N'dbo',
+     'TABLE', N'sj_retry_dead_letter',
+     'COLUMN', N'group_id'
+GO
+
+EXEC sp_addextendedproperty
      'MS_Description', N'场景名称',
      'SCHEMA', N'dbo',
      'TABLE', N'sj_retry_dead_letter',
      'COLUMN', N'scene_name'
+GO
+
+EXEC sp_addextendedproperty
+     'MS_Description', N'场景ID',
+     'SCHEMA', N'dbo',
+     'TABLE', N'sj_retry_dead_letter',
+     'COLUMN', N'scene_id'
 GO
 
 EXEC sp_addextendedproperty
@@ -505,7 +521,9 @@ CREATE TABLE sj_retry
     id              bigint        NOT NULL PRIMARY KEY IDENTITY,
     namespace_id    nvarchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
     group_name      nvarchar(64)  NOT NULL,
+    group_id        bigint        NOT NULL,
     scene_name      nvarchar(64)  NOT NULL,
+    scene_id        bigint        NOT NULL,
     idempotent_id   nvarchar(64)  NOT NULL,
     biz_no          nvarchar(64)  NOT NULL DEFAULT '',
     executor_name   nvarchar(512) NOT NULL DEFAULT '',
@@ -523,20 +541,16 @@ CREATE TABLE sj_retry
 )
 GO
 
-CREATE UNIQUE INDEX uk_sj_retry_01 ON sj_retry (namespace_id, group_name, task_type, idempotent_id, deleted)
+CREATE UNIQUE INDEX uk_sj_retry_01 ON sj_retry (scene_id, task_type, idempotent_id, deleted)
 GO
 
-CREATE INDEX idx_sj_retry_01 ON sj_retry (namespace_id, group_name, scene_name)
+CREATE INDEX idx_sj_retry_01 ON sj_retry (biz_no)
 GO
-CREATE INDEX idx_sj_retry_02 ON sj_retry (namespace_id, group_name, retry_status)
+CREATE INDEX idx_sj_retry_02 ON sj_retry (retry_status, bucket_index)
 GO
-CREATE INDEX idx_sj_retry_03 ON sj_retry (idempotent_id)
+CREATE INDEX idx_sj_retry_03 ON sj_retry (parent_id)
 GO
-CREATE INDEX idx_sj_retry_04 ON sj_retry (biz_no)
-GO
-CREATE INDEX idx_sj_retry_05 ON sj_retry (parent_id)
-GO
-CREATE INDEX idx_sj_retry_06 ON sj_retry (create_dt)
+CREATE INDEX idx_sj_retry_04 ON sj_retry (create_dt)
 GO
 
 EXEC sp_addextendedproperty
@@ -561,10 +575,24 @@ EXEC sp_addextendedproperty
 GO
 
 EXEC sp_addextendedproperty
+     'MS_Description', N'组Id',
+     'SCHEMA', N'dbo',
+     'TABLE', N'sj_retry',
+     'COLUMN', N'group_id'
+GO
+
+EXEC sp_addextendedproperty
      'MS_Description', N'场景名称',
      'SCHEMA', N'dbo',
      'TABLE', N'sj_retry',
      'COLUMN', N'scene_name'
+GO
+
+EXEC sp_addextendedproperty
+     'MS_Description', N'场景ID',
+     'SCHEMA', N'dbo',
+     'TABLE', N'sj_retry',
+     'COLUMN', N'scene_id'
 GO
 
 EXEC sp_addextendedproperty

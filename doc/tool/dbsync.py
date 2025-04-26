@@ -4,6 +4,10 @@
 Author: dhb52
 
 pip install simple-ddl-parser
+
+OR install uv and using with command:
+
+uv run --with simple-ddl-parser dbsync.py postgre
 """
 
 import argparse

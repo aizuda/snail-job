@@ -2,7 +2,7 @@
  SnailJob Database Transfer Tool
  Source Server Type    : MySQL
  Target Server Type    : DM8
- Date: 2025-02-25 22:17:15
+ Date: 2025-04-26 09:59:32
 */
 
 
@@ -133,7 +133,9 @@ CREATE TABLE sj_retry_dead_letter
     id            bigint                                                  NOT NULL PRIMARY KEY IDENTITY,
     namespace_id  varchar(64)  DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' NULL,
     group_name    varchar(64)                                             NULL,
+    group_id      bigint                                                  NOT NULL,
     scene_name    varchar(64)                                             NULL,
+    scene_id      bigint                                                  NOT NULL,
     idempotent_id varchar(64)                                             NULL,
     biz_no        varchar(64)  DEFAULT ''                                 NULL,
     executor_name varchar(512) DEFAULT ''                                 NULL,
@@ -150,7 +152,9 @@ CREATE INDEX idx_sj_retry_dead_letter_04 ON sj_retry_dead_letter (create_dt);
 COMMENT ON COLUMN sj_retry_dead_letter.id IS '主键';
 COMMENT ON COLUMN sj_retry_dead_letter.namespace_id IS '命名空间id';
 COMMENT ON COLUMN sj_retry_dead_letter.group_name IS '组名称';
+COMMENT ON COLUMN sj_retry_dead_letter.group_id IS '组Id';
 COMMENT ON COLUMN sj_retry_dead_letter.scene_name IS '场景名称';
+COMMENT ON COLUMN sj_retry_dead_letter.scene_id IS '场景ID';
 COMMENT ON COLUMN sj_retry_dead_letter.idempotent_id IS '幂等id';
 COMMENT ON COLUMN sj_retry_dead_letter.biz_no IS '业务编号';
 COMMENT ON COLUMN sj_retry_dead_letter.executor_name IS '执行器名称';
@@ -165,7 +169,9 @@ CREATE TABLE sj_retry
     id              bigint                                                  NOT NULL PRIMARY KEY IDENTITY,
     namespace_id    varchar(64)  DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' NULL,
     group_name      varchar(64)                                             NULL,
+    group_id        bigint                                                  NOT NULL,
     scene_name      varchar(64)                                             NULL,
+    scene_id        bigint                                                  NOT NULL,
     idempotent_id   varchar(64)                                             NULL,
     biz_no          varchar(64)  DEFAULT ''                                 NULL,
     executor_name   varchar(512) DEFAULT ''                                 NULL,
@@ -182,19 +188,19 @@ CREATE TABLE sj_retry
     update_dt       datetime     DEFAULT CURRENT_TIMESTAMP                  NOT NULL
 );
 
-CREATE UNIQUE INDEX uk_sj_retry_01 ON sj_retry (namespace_id, group_name, task_type, idempotent_id, deleted);
+CREATE UNIQUE INDEX uk_sj_retry_01 ON sj_retry (scene_id, task_type, idempotent_id, deleted);
 
-CREATE INDEX idx_sj_retry_01 ON sj_retry (namespace_id, group_name, scene_name);
-CREATE INDEX idx_sj_retry_02 ON sj_retry (namespace_id, group_name, retry_status);
-CREATE INDEX idx_sj_retry_03 ON sj_retry (idempotent_id);
-CREATE INDEX idx_sj_retry_04 ON sj_retry (biz_no);
-CREATE INDEX idx_sj_retry_05 ON sj_retry (parent_id);
-CREATE INDEX idx_sj_retry_06 ON sj_retry (create_dt);
+CREATE INDEX idx_sj_retry_01 ON sj_retry (biz_no);
+CREATE INDEX idx_sj_retry_02 ON sj_retry (retry_status, bucket_index);
+CREATE INDEX idx_sj_retry_03 ON sj_retry (parent_id);
+CREATE INDEX idx_sj_retry_04 ON sj_retry (create_dt);
 
 COMMENT ON COLUMN sj_retry.id IS '主键';
 COMMENT ON COLUMN sj_retry.namespace_id IS '命名空间id';
 COMMENT ON COLUMN sj_retry.group_name IS '组名称';
+COMMENT ON COLUMN sj_retry.group_id IS '组Id';
 COMMENT ON COLUMN sj_retry.scene_name IS '场景名称';
+COMMENT ON COLUMN sj_retry.scene_id IS '场景ID';
 COMMENT ON COLUMN sj_retry.idempotent_id IS '幂等id';
 COMMENT ON COLUMN sj_retry.biz_no IS '业务编号';
 COMMENT ON COLUMN sj_retry.executor_name IS '执行器名称';
