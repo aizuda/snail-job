@@ -9,6 +9,7 @@ import com.aizuda.snailjob.common.core.util.SnailJobFileUtil;
 import com.aizuda.snailjob.common.core.util.SnailJobSystemUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import lombok.Data;
+import org.springframework.beans.factory.InitializingBean;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -17,11 +18,11 @@ import java.nio.file.Files;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-public abstract class AbstractScriptExecutor {
+public abstract class AbstractScriptExecutor implements InitializingBean {
 
     protected static final String SH_SHELL = "/bin/sh";
 
-    private static final String WORKER_DIR = SnailFileUtils.workspace() + "/script_processor/";
+    private static String WORKER_DIR;
 
     // 下载脚本模式
     private static final String SCRIPT_DOWNLOAD_METHOD = "DOWNLOAD";
@@ -289,5 +290,10 @@ public abstract class AbstractScriptExecutor {
         private String method;
         private String scriptParams;
         private String charset;
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        WORKER_DIR = SnailFileUtils.workspace() + "/script_processor/";
     }
 }
