@@ -18,7 +18,6 @@ import com.aizuda.snailjob.server.common.strategy.WaitStrategies;
 import com.aizuda.snailjob.server.common.util.CronUtils;
 import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.common.util.PartitionTaskUtils;
-import com.aizuda.snailjob.server.web.model.request.UserSessionVO;
 import com.aizuda.snailjob.server.job.task.dto.JobTaskPrepareDTO;
 import com.aizuda.snailjob.server.job.task.support.JobPrepareHandler;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
@@ -254,7 +253,7 @@ public class JobServiceImpl implements JobService {
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
         List<Job> jobs = jobMapper.selectList(
                 new LambdaQueryWrapper<Job>()
-                        .select(Job::getId, Job::getJobName)
+                        .select(Job::getId, Job::getJobName, Job::getExecutorInfo, Job::getTaskType)
                         .eq(Job::getNamespaceId, namespaceId)
                         .eq(Job::getGroupName, groupName)
                         .eq(Job::getDeleted, StatusEnum.NO.getStatus())
