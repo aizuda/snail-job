@@ -9,6 +9,7 @@ import com.aizuda.snailjob.common.core.exception.SnailJobInnerExecutorException;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import lombok.Data;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.StringUtils;
 
 import java.util.Base64;
@@ -18,10 +19,10 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 
-public abstract class AbstractHttpExecutor {
+public abstract class AbstractHttpExecutor implements InitializingBean {
 
     private static final int DEFAULT_TIMEOUT = 60;
-    public static final SnailJobProperties snailJobProperties = SnailSpringContext.getBean(SnailJobProperties.class);
+    private static SnailJobProperties snailJobProperties;
     private static final String DEFAULT_REQUEST_METHOD = "GET";
     private static final String POST_REQUEST_METHOD = "POST";
     private static final String PUT_REQUEST_METHOD = "PUT";
@@ -252,5 +253,10 @@ public abstract class AbstractHttpExecutor {
 
     private void logWarn(String msg, Object... params) {
         SnailJobLog.REMOTE.warn("[snail-job] " + msg, params);
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        snailJobProperties =  SnailSpringContext.getBean(SnailJobProperties.class);
     }
 }
