@@ -7,6 +7,7 @@ import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
+import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.config.SystemProperties;
 import com.aizuda.snailjob.server.common.dto.PartitionTask;
 import com.aizuda.snailjob.server.common.enums.IdGeneratorModeEnum;
@@ -94,12 +95,6 @@ public class GroupConfigServiceImpl implements GroupConfigService {
     @Override
     @Transactional
     public Boolean updateGroup(GroupConfigRequestVO groupConfigRequestVO) {
-
-        List<Integer> tablePartitionList = getTablePartitionList();
-        if (CollUtil.isEmpty(tablePartitionList)) {
-            return Boolean.FALSE;
-        }
-
         String groupName = groupConfigRequestVO.getGroupName();
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
 
@@ -113,16 +108,12 @@ public class GroupConfigServiceImpl implements GroupConfigService {
         }
 
         GroupConfig groupConfig = GroupConfigConverter.INSTANCE.toGroupConfig(groupConfigRequestVO);
+        //描述
         groupConfig.setDescription(Optional.ofNullable(groupConfigRequestVO.getDescription()).orElse(StrUtil.EMPTY));
         // 使用@TableField(value = "version", update= "%s+1") 进行更新version, 这里必须初始化一个值
         groupConfig.setVersion(1);
         // 不允许更新token
         groupConfig.setToken(null);
-        Assert.isTrue(tablePartitionList.contains(groupConfigRequestVO.getGroupPartition()),
-                () -> new SnailJobServerException("Partition does not exist. [{}]", tablePartitionList));
-        Assert.isTrue(groupConfigRequestVO.getGroupPartition() >= 0,
-                () -> new SnailJobServerException("Partition cannot be negative."));
-
         // 不允许更新组
         groupConfig.setGroupName(null);
         Assert.isTrue(1 == groupConfigAccess.update(groupConfig,
@@ -311,6 +302,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
                     .distinct()
                     .collect(Collectors.toList());
         } catch (SQLException ignored) {
+            SnailJobLog.LOCAL.error("getTablePartitionList method error", ignored);
         }
 
         return Collections.emptyList();

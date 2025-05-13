@@ -213,11 +213,13 @@ public class JobServiceImpl implements JobService {
     @Override
     public Boolean updateJobStatus(JobStatusUpdateRequestVO jobRequestVO) {
         Assert.notNull(jobRequestVO.getId(), () -> new SnailJobServerException("id cannot be null"));
-        Assert.isTrue(1 == jobMapper.selectCount(new LambdaQueryWrapper<Job>().eq(Job::getId, jobRequestVO.getId())));
-
+        //解决IC76WG 状态停用启用后，因为是实体中设置了 @TableField(updateStrategy = FieldStrategy.ALWAYS , jdbcType= JdbcType.BIGINT ) 所以负责人字段要从新赋值。
+        Job oldJob = jobMapper.selectOne(new LambdaQueryWrapper<Job>().eq(Job::getId, jobRequestVO.getId()));
+        Assert.notNull(oldJob, () -> new SnailJobServerException("job task is find not"));
         Job job = new Job();
         job.setId(jobRequestVO.getId());
         job.setJobStatus(jobRequestVO.getJobStatus());
+        job.setOwnerId(oldJob.getOwnerId());
         return 1 == jobMapper.updateById(job);
     }
 
