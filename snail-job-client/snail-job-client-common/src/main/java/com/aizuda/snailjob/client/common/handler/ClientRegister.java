@@ -22,23 +22,21 @@ import java.util.concurrent.TimeUnit;
 public class ClientRegister implements Lifecycle {
     private static final ScheduledExecutorService SCHEDULE_EXECUTOR = Executors.newSingleThreadScheduledExecutor(
         r -> new Thread(r, "sj-client-register"));
-    public static final RpcClient CLIENT;
+    public static RpcClient CLIENT;
     public static final int REGISTER_TIME = 10;
-
-    static {
-        CLIENT = RequestBuilder.<RpcClient, SnailJobRpcResult>newBuilder()
-            .client(RpcClient.class)
-            .callback(
-                rpcResult -> {
-                    if (StatusEnum.NO.getStatus().equals(rpcResult.getStatus())) {
-                        SnailJobLog.LOCAL.error("heartbeat check requestId:[{}] message:[{}]", rpcResult.getReqId(), rpcResult.getMessage());
-                    }
-                })
-            .build();
-    }
 
     @Override
     public void start() {
+        CLIENT = RequestBuilder.<RpcClient, SnailJobRpcResult>newBuilder()
+                .client(RpcClient.class)
+                .callback(
+                        rpcResult -> {
+                            if (StatusEnum.NO.getStatus().equals(rpcResult.getStatus())) {
+                                SnailJobLog.LOCAL.error("heartbeat check requestId:[{}] message:[{}]", rpcResult.getReqId(), rpcResult.getMessage());
+                            }
+                        })
+                .build();
+
         SCHEDULE_EXECUTOR.scheduleAtFixedRate(() -> {
             try {
                 CLIENT.beat(BEAT.PING);
