@@ -22,11 +22,12 @@ import java.util.concurrent.TimeUnit;
  */
 @Component
 public class SyncRemoteConfig implements Lifecycle {
-    private static final RpcClient CLIENT;
+    private static RpcClient CLIENT;
     private static final ScheduledExecutorService SCHEDULE_EXECUTOR = Executors.newSingleThreadScheduledExecutor(
             r -> new Thread(r, "sync-remote-config"));
 
-    static {
+    @Override
+    public void start() {
         CLIENT = RequestBuilder.<RpcClient, SnailJobRpcResult>newBuilder()
                 .client(RpcClient.class)
                 .timeout(1000L)
@@ -39,10 +40,7 @@ public class SyncRemoteConfig implements Lifecycle {
                     GroupVersionCache.setConfig(
                             JsonUtil.parseObject(rpcResult.getData().toString(), ConfigDTO.class));
                 }).build();
-    }
 
-    @Override
-    public void start() {
         SCHEDULE_EXECUTOR.scheduleAtFixedRate(() -> {
             try {
                 CLIENT.syncRemoteConfig();
