@@ -48,6 +48,8 @@ public class SnailJobGrpcClient implements Lifecycle {
                 try {
                     // 抛出重连事件
                     SnailSpringContext.getContext().publishEvent(new SnailChannelReconnectEvent());
+                    channel = connection();
+                    GrpcChannel.setChannel(channel);
                 } catch (Exception e) {
                     SnailJobLog.LOCAL.error("reconnect error ", e);
                 }
