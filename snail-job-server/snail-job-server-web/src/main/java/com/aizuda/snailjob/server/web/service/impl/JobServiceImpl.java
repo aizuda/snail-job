@@ -39,6 +39,7 @@ import com.aizuda.snailjob.template.datasource.persistence.po.Job;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobSummary;
 import com.aizuda.snailjob.template.datasource.persistence.po.SystemUser;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -187,7 +188,11 @@ public class JobServiceImpl implements JobService {
 
         // 禁止更新组
         updateJob.setGroupName(null);
-        return 1 == jobMapper.updateById(updateJob);
+
+        LambdaUpdateWrapper<Job> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.set(Job::getId, jobRequestVO.getId());
+        updateWrapper.set(Job::getOwnerId, jobRequestVO.getOwnerId());
+        return 1 == jobMapper.update(updateJob, updateWrapper);
     }
 
     private Integer isResident(JobRequestVO jobRequestVO) {
@@ -213,13 +218,9 @@ public class JobServiceImpl implements JobService {
     @Override
     public Boolean updateJobStatus(JobStatusUpdateRequestVO jobRequestVO) {
         Assert.notNull(jobRequestVO.getId(), () -> new SnailJobServerException("id cannot be null"));
-        //解决IC76WG 状态停用启用后，因为是实体中设置了 @TableField(updateStrategy = FieldStrategy.ALWAYS , jdbcType= JdbcType.BIGINT ) 所以负责人字段要从新赋值。
-        Job oldJob = jobMapper.selectOne(new LambdaQueryWrapper<Job>().eq(Job::getId, jobRequestVO.getId()));
-        Assert.notNull(oldJob, () -> new SnailJobServerException("job task is find not"));
         Job job = new Job();
         job.setId(jobRequestVO.getId());
         job.setJobStatus(jobRequestVO.getJobStatus());
-        job.setOwnerId(oldJob.getOwnerId());
         return 1 == jobMapper.updateById(job);
     }
 

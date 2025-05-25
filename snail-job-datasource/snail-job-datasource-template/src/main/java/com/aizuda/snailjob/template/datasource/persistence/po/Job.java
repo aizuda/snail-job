@@ -151,7 +151,7 @@ public class Job extends CreateUpdateDt {
     /**
      * 负责人id
      */
-    @TableField(updateStrategy = FieldStrategy.ALWAYS , jdbcType= JdbcType.BIGINT )
+    //@TableField(updateStrategy = FieldStrategy.ALWAYS , jdbcType= JdbcType.BIGINT )
     private Long ownerId;
 
 }
