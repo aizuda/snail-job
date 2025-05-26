@@ -1,5 +1,8 @@
 package com.aizuda.snailjob.server.common.config;
 
+import com.aizuda.snailjob.server.common.Register;
+import com.aizuda.snailjob.server.common.Schedule;
+import com.aizuda.snailjob.server.common.register.ClientRegister;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -32,5 +35,17 @@ public class SnailJobServerCommonAutoConfiguration {
         scheduler.setThreadNamePrefix("snail-job-alarm-thread-");
         return scheduler;
     }
+//
+//
+//    @Bean
+//    public Schedule refreshNodeSchedule() {
+//        return new ClientRegister.RefreshNodeSchedule();
+//    }
+//
+//    @Bean(ClientRegister.BEAN_NAME)
+//    public Register clientRegister() {
+//        return new ClientRegister();
+//    }
+
 
 }

@@ -126,7 +126,7 @@ public class JobExecutorActor extends AbstractActor {
             }
 
             // 无客户端节点-告警通知
-            if (CollUtil.isEmpty(CacheRegisterTable.getServerNodeSet(job.getGroupName(), job.getNamespaceId()))) {
+            if (Objects.nonNull(job) && CollUtil.isEmpty(CacheRegisterTable.getServerNodeSet(job.getGroupName(), job.getNamespaceId()))) {
                 SnailSpringContext.getContext().publishEvent(
                         new JobTaskFailAlarmEvent(JobTaskFailAlarmEventDTO.builder()
                                 .jobTaskBatchId(taskExecute.getTaskBatchId())

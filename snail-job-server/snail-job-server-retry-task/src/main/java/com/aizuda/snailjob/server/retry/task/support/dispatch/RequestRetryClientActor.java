@@ -1,5 +1,7 @@
 package com.aizuda.snailjob.server.retry.task.support.dispatch;
 
+import com.aizuda.snailjob.server.common.dto.*;
+import com.aizuda.snailjob.server.common.handler.InstanceManager;
 import  org.apache.pekko.actor.AbstractActor;
 import  org.apache.pekko.actor.ActorRef;
 import com.aizuda.snailjob.client.model.request.DispatchRetryRequest;
@@ -10,9 +12,6 @@ import com.aizuda.snailjob.common.core.model.SnailJobHeaders;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.pekko.ActorGenerator;
 import com.aizuda.snailjob.server.common.cache.CacheRegisterTable;
-import com.aizuda.snailjob.server.common.dto.JobLogMetaDTO;
-import com.aizuda.snailjob.server.common.dto.RegisterNodeInfo;
-import com.aizuda.snailjob.server.common.dto.RetryLogMetaDTO;
 import com.aizuda.snailjob.server.common.rpc.client.RequestBuilder;
 import com.aizuda.snailjob.server.common.rpc.client.SnailJobRetryListener;
 import com.aizuda.snailjob.server.common.util.ClientInfoUtils;
@@ -48,6 +47,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class RequestRetryClientActor extends AbstractActor {
     private final RetryTaskMapper retryTaskMapper;
+    private final InstanceManager instanceManager;
 
     @Override
     public Receive createReceive() {
@@ -63,13 +63,12 @@ public class RequestRetryClientActor extends AbstractActor {
     private void doExecute(RequestRetryExecutorDTO executorDTO) {
         long nowMilli = DateUtils.toNowMilli();
         // 检查客户端是否存在
-        RegisterNodeInfo registerNodeInfo = CacheRegisterTable.getServerNode(
-                executorDTO.getGroupName(),
-                executorDTO.getNamespaceId(),
-                executorDTO.getClientId()
-        );
-
-        if (Objects.isNull(registerNodeInfo)) {
+        InstanceLiveInfo instanceLiveInfo = instanceManager.getInstanceALiveInfoSet(InstanceKey.builder()
+                .namespaceId(executorDTO.getNamespaceId())
+                .groupName(executorDTO.getGroupName())
+                .hostId(executorDTO.getClientId())
+                .build());
+        if (Objects.isNull(instanceLiveInfo)) {
             taskExecuteFailure(executorDTO, "Client does not exist");
             JobLogMetaDTO jobLogMetaDTO = RetryTaskConverter.INSTANCE.toJobLogDTO(executorDTO);
             jobLogMetaDTO.setTimestamp(nowMilli);
@@ -89,7 +88,7 @@ public class RequestRetryClientActor extends AbstractActor {
             snailJobHeaders.setDdl(executorDTO.getExecutorTimeout());
 
             // 构建请求客户端对象
-            RetryRpcClient rpcClient = buildRpcClient(registerNodeInfo, executorDTO);
+            RetryRpcClient rpcClient = buildRpcClient(instanceLiveInfo, executorDTO);
             Result<Boolean> dispatch = rpcClient.dispatch(dispatchJobRequest, snailJobHeaders);
             Boolean data = dispatch.getData();
             if (dispatch.getStatus() == StatusEnum.YES.getStatus() && Objects.nonNull(data) && data) {
@@ -158,9 +157,9 @@ public class RequestRetryClientActor extends AbstractActor {
         }
     }
 
-    private RetryRpcClient buildRpcClient(RegisterNodeInfo registerNodeInfo, RequestRetryExecutorDTO executorDTO) {
+    private RetryRpcClient buildRpcClient(InstanceLiveInfo instanceLiveInfo, RequestRetryExecutorDTO executorDTO) {
         return RequestBuilder.<RetryRpcClient, Result>newBuilder()
-                .nodeInfo(registerNodeInfo)
+                .nodeInfo(instanceLiveInfo)
                 .failRetry(true)
                 .failover(true)
                 .retryTimes(3)

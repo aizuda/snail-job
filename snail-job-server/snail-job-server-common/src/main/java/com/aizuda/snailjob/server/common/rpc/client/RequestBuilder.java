@@ -4,9 +4,12 @@ import cn.hutool.core.lang.Assert;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.enums.RpcTypeEnum;
 import com.aizuda.snailjob.server.common.config.SystemProperties;
+import com.aizuda.snailjob.server.common.dto.GrpcClientInvokeConfig;
+import com.aizuda.snailjob.server.common.dto.InstanceLiveInfo;
 import com.aizuda.snailjob.server.common.dto.RegisterNodeInfo;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.rpc.client.grpc.GrpcClientInvokeHandler;
+import com.aizuda.snailjob.server.common.rpc.client.grpc.GrpcClientInvokeHandlerV2;
 import com.github.rholder.retry.RetryListener;
 
 import java.lang.reflect.InvocationHandler;
@@ -24,10 +27,11 @@ public class RequestBuilder<T, R> {
 
     private Class<T> clintInterface;
     private RegisterNodeInfo nodeInfo;
+    private InstanceLiveInfo instanceLiveInfo;
     private boolean failRetry;
     private int retryTimes = 3;
     private int retryInterval = 1;
-    private RetryListener retryListener = new SimpleRetryListener();
+    private SnailJobRetryListener retryListener = new SimpleRetryListener();
     private boolean failover;
     private int routeKey;
     private String allocKey;
@@ -42,8 +46,14 @@ public class RequestBuilder<T, R> {
         return this;
     }
 
+    @Deprecated
     public RequestBuilder<T, R> nodeInfo(RegisterNodeInfo nodeInfo) {
         this.nodeInfo = nodeInfo;
+        return this;
+    }
+
+    public RequestBuilder<T, R> nodeInfo(InstanceLiveInfo nodeInfo) {
+        this.instanceLiveInfo = nodeInfo;
         return this;
     }
 
@@ -72,7 +82,7 @@ public class RequestBuilder<T, R> {
         return this;
     }
 
-    public RequestBuilder<T, R> retryListener(RetryListener retryListener) {
+    public RequestBuilder<T, R> retryListener(SnailJobRetryListener retryListener) {
         this.retryListener = retryListener;
         return this;
     }
@@ -97,8 +107,9 @@ public class RequestBuilder<T, R> {
             throw new SnailJobServerException("clintInterface cannot be null");
         }
 
-        Assert.notNull(nodeInfo, () -> new SnailJobServerException("nodeInfo cannot be null"));
-        Assert.notBlank(nodeInfo.getNamespaceId(), () -> new SnailJobServerException("namespaceId cannot be null"));
+        Assert.notNull(instanceLiveInfo, () -> new SnailJobServerException("instanceLiveInfo cannot be null"));
+        Assert.notNull(instanceLiveInfo.getNodeInfo(), () -> new SnailJobServerException("nodeInfo cannot be null"));
+        Assert.notBlank(instanceLiveInfo.getNodeInfo().getNamespaceId(), () -> new SnailJobServerException("namespaceId cannot be null"));
 
         if (failover) {
             Assert.isTrue(routeKey > 0, () -> new SnailJobServerException("routeKey cannot be null"));
@@ -110,19 +121,20 @@ public class RequestBuilder<T, R> {
             throw new SnailJobServerException("class not found exception to: [{}]", clintInterface.getName());
         }
 
-        SystemProperties properties = SnailSpringContext.getBean(SystemProperties.class);
-        RpcTypeEnum rpcType = properties.getRpcType();
-
-        InvocationHandler invocationHandler;
-        if (Objects.isNull(rpcType) || RpcTypeEnum.NETTY == rpcType) {
-            invocationHandler = new RpcClientInvokeHandler(
-                nodeInfo.getGroupName(), nodeInfo, failRetry, retryTimes, retryInterval,
-                retryListener, routeKey, allocKey, failover, executorTimeout, nodeInfo.getNamespaceId());
-        } else {
-            invocationHandler = new GrpcClientInvokeHandler(
-                nodeInfo.getGroupName(), nodeInfo, failRetry, retryTimes, retryInterval,
-                retryListener, routeKey, allocKey, failover, executorTimeout, nodeInfo.getNamespaceId());
-        }
+        InvocationHandler invocationHandler = new GrpcClientInvokeHandlerV2(
+                GrpcClientInvokeConfig.builder()
+                .instanceLiveInfo(instanceLiveInfo)
+                .failRetry(failRetry)
+                .retryTimes(retryTimes)
+                .retryInterval(retryInterval)
+                .retryListener(retryListener)
+                .routeKey(routeKey)
+                .allocKey(allocKey)
+                .failover(failover)
+                .executorTimeout(executorTimeout)
+                 .async(false)
+                .build()
+        );
 
         return (T) Proxy.newProxyInstance(clintInterface.getClassLoader(),
                 new Class[]{clintInterface}, invocationHandler);

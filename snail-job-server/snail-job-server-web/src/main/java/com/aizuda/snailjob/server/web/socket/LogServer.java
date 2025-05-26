@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -36,7 +37,11 @@ public class LogServer {
     @EventListener
     public void sendMessage(WsSendEvent message) throws IOException {
         Session session = USER_SESSION.get(message.getSid());
-        Assert.notNull(session, () -> new SnailJobServerException("ws session not exist"));
+        if (Objects.isNull(session)) {
+            log.warn("{} ws session not exist", message.getSid());
+            return;
+        }
+
         if (session.isOpen()) {
             synchronized (session) {
                 session.getBasicRemote().sendText(message.getMessage());

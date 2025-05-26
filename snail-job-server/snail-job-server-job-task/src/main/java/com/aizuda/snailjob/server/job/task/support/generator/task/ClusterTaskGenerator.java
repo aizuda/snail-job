@@ -8,9 +8,12 @@ import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.snailjob.common.core.model.JobArgsHolder;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
+import com.aizuda.snailjob.server.common.dto.InstanceLiveInfo;
+import com.aizuda.snailjob.server.common.dto.InstanceSelectCondition;
 import com.aizuda.snailjob.server.common.dto.RegisterNodeInfo;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.handler.ClientNodeAllocateHandler;
+import com.aizuda.snailjob.server.common.handler.InstanceManager;
 import com.aizuda.snailjob.server.common.util.ClientInfoUtils;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskMapper;
@@ -34,7 +37,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ClusterTaskGenerator extends AbstractJobTaskGenerator {
     private static final String TASK_NAME ="CLUSTER_TASK";
-    private final ClientNodeAllocateHandler clientNodeAllocateHandler;
+    private final InstanceManager instanceManager;
     private final JobTaskMapper jobTaskMapper;
 
     @Override
@@ -45,16 +48,22 @@ public class ClusterTaskGenerator extends AbstractJobTaskGenerator {
     @Override
     public List<JobTask> doGenerate(JobTaskGenerateContext context) {
         // 生成可执行任务
-        RegisterNodeInfo serverNode = clientNodeAllocateHandler.getServerNode(context.getJobId().toString(),
-                context.getGroupName(), context.getNamespaceId(), context.getRouteKey());
-        if (Objects.isNull(serverNode)) {
+        InstanceSelectCondition condition = InstanceSelectCondition
+                .builder()
+                .namespaceId(context.getNamespaceId())
+                .groupName(context.getGroupName())
+                .routeKey(context.getRouteKey())
+                .allocKey(String.valueOf(context.getJobId()))
+                .build();
+        InstanceLiveInfo routeKey = instanceManager.getALiveInstanceByRouteKey(condition);
+        if (Objects.isNull(routeKey)) {
             SnailJobLog.LOCAL.error("No executable client information. Job ID:[{}]", context.getJobId());
             return Lists.newArrayList();
         }
 
         // 新增任务实例
         JobTask jobTask = JobTaskConverter.INSTANCE.toJobTaskInstance(context);
-        jobTask.setClientInfo(ClientInfoUtils.generate(serverNode));
+        jobTask.setClientInfo(ClientInfoUtils.generate(routeKey.getNodeInfo()));
         jobTask.setArgsType(JobArgsTypeEnum.JSON.getArgsType());
         JobArgsHolder jobArgsHolder = new JobArgsHolder();
         jobArgsHolder.setJobParams(context.getArgsStr());

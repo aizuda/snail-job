@@ -6,7 +6,9 @@ import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.Lifecycle;
 import com.aizuda.snailjob.server.common.convert.RegisterNodeInfoConverter;
+import com.aizuda.snailjob.server.common.dto.InstanceLiveInfo;
 import com.aizuda.snailjob.server.common.dto.RegisterNodeInfo;
+import com.aizuda.snailjob.server.common.handler.InstanceManager;
 import com.aizuda.snailjob.server.common.register.ServerRegister;
 import com.aizuda.snailjob.server.common.triple.Pair;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.ServerNodeMapper;
@@ -15,6 +17,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Sets;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -36,7 +39,9 @@ import java.util.concurrent.TimeUnit;
  */
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class CacheRegisterTable implements Lifecycle {
+    private final InstanceManager instanceManager;
 
     private static final Cache<Pair<String/*groupName*/, String/*namespaceId*/>, ConcurrentMap<String, RegisterNodeInfo>> CACHE;
 
@@ -68,74 +73,78 @@ public class CacheRegisterTable implements Lifecycle {
                 }).orElse(new TreeSet<>());
 
     }
+//
+//    /**
+//     * 获取所有缓存
+//     *
+//     * @return 缓存对象
+//     */
+//    public static ConcurrentMap<String, RegisterNodeInfo> get(String groupName, String namespaceId) {
+//        return CACHE.getIfPresent(getKey(groupName, namespaceId));
+//    }
 
-    /**
-     * 获取所有缓存
-     *
-     * @return 缓存对象
-     */
-    public static ConcurrentMap<String, RegisterNodeInfo> get(String groupName, String namespaceId) {
-        return CACHE.getIfPresent(getKey(groupName, namespaceId));
-    }
-
-    /**
-     * 获取所有缓存
-     *
-     * @return 缓存对象
-     */
-    public static RegisterNodeInfo getServerNode(String groupName, String namespaceId, String hostId) {
-        ConcurrentMap<String, RegisterNodeInfo> concurrentMap = CACHE.getIfPresent(getKey(groupName, namespaceId));
-        if (Objects.isNull(concurrentMap)) {
-            // 此处为了降级，若缓存中没有则取DB中查询
-            ServerNodeMapper serverNodeMapper = SnailSpringContext.getBeanByType(ServerNodeMapper.class);
-            List<ServerNode> serverNodes = serverNodeMapper.selectList(
-                    new LambdaQueryWrapper<ServerNode>()
-                            .eq(ServerNode::getNamespaceId, namespaceId)
-                            .eq(ServerNode::getGroupName, groupName)
-                            .eq(ServerNode::getHostId, hostId)
-                            .orderByDesc(ServerNode::getExpireAt));
-            if (CollUtil.isEmpty(serverNodes)) {
-                return null;
-            }
-
-            CacheRegisterTable.addOrUpdate(serverNodes.get(0));
-
-            concurrentMap = CACHE.getIfPresent(getKey(groupName, namespaceId));
-            if (CollUtil.isEmpty(concurrentMap)) {
-                return null;
-            }
-        }
-
-        return concurrentMap.get(hostId);
-    }
+//    /**
+//     * 获取所有缓存
+//     *
+//     * @return 缓存对象
+//     */
+//    public static RegisterNodeInfo getServerNode(String groupName, String namespaceId, String hostId) {
+//        ConcurrentMap<String, RegisterNodeInfo> concurrentMap = CACHE.getIfPresent(getKey(groupName, namespaceId));
+//        if (Objects.isNull(concurrentMap)) {
+//            // 此处为了降级，若缓存中没有则取DB中查询
+//            ServerNodeMapper serverNodeMapper = SnailSpringContext.getBeanByType(ServerNodeMapper.class);
+//            List<ServerNode> serverNodes = serverNodeMapper.selectList(
+//                    new LambdaQueryWrapper<ServerNode>()
+//                            .eq(ServerNode::getNamespaceId, namespaceId)
+//                            .eq(ServerNode::getGroupName, groupName)
+//                            .eq(ServerNode::getHostId, hostId)
+//                            .orderByDesc(ServerNode::getExpireAt));
+//            if (CollUtil.isEmpty(serverNodes)) {
+//                return null;
+//            }
+//
+//            CacheRegisterTable.addOrUpdate(serverNodes.get(0));
+//
+//            concurrentMap = CACHE.getIfPresent(getKey(groupName, namespaceId));
+//            if (CollUtil.isEmpty(concurrentMap)) {
+//                return null;
+//            }
+//        }
+//
+//        return concurrentMap.get(hostId);
+//    }
 
     /**
      * 获取排序的ServerNode
      *
      * @return 缓存对象
      */
+    @Deprecated
     public static Set<RegisterNodeInfo> getServerNodeSet(String groupName, String namespaceId) {
-        ConcurrentMap<String, RegisterNodeInfo> concurrentMap = CACHE.getIfPresent(getKey(groupName, namespaceId));
-        if (CollUtil.isEmpty(concurrentMap)) {
-
-            // 此处为了降级，若缓存中没有则取DB中查询
-            ServerNodeMapper serverNodeMapper = SnailSpringContext.getBeanByType(ServerNodeMapper.class);
-            List<ServerNode> serverNodes = serverNodeMapper.selectList(
-                    new LambdaQueryWrapper<ServerNode>()
-                            .eq(ServerNode::getNamespaceId, namespaceId)
-                            .eq(ServerNode::getGroupName, groupName));
-            for (final ServerNode node : serverNodes) {
-                // 刷新全量本地缓存
-                CacheRegisterTable.addOrUpdate(node);
-            }
-
-            concurrentMap = CACHE.getIfPresent(getKey(groupName, namespaceId));
-            if (CollUtil.isEmpty(serverNodes) || CollUtil.isEmpty(concurrentMap)) {
-                return Sets.newHashSet();
-            }
-        }
-
-        return new TreeSet<>(concurrentMap.values());
+        InstanceManager instanceManager = SnailSpringContext.getBeanByType(InstanceManager.class);
+        Set<InstanceLiveInfo> instanceALiveInfoSet = instanceManager.getInstanceALiveInfoSet(namespaceId, groupName);
+        return StreamUtils.toSet(instanceALiveInfoSet, InstanceLiveInfo::getNodeInfo);
+//        ConcurrentMap<String, RegisterNodeInfo> concurrentMap = CACHE.getIfPresent(getKey(groupName, namespaceId));
+//        if (CollUtil.isEmpty(concurrentMap)) {
+//
+//            // 此处为了降级，若缓存中没有则取DB中查询
+//            ServerNodeMapper serverNodeMapper = SnailSpringContext.getBeanByType(ServerNodeMapper.class);
+//            List<ServerNode> serverNodes = serverNodeMapper.selectList(
+//                    new LambdaQueryWrapper<ServerNode>()
+//                            .eq(ServerNode::getNamespaceId, namespaceId)
+//                            .eq(ServerNode::getGroupName, groupName));
+//            for (final ServerNode node : serverNodes) {
+//                // 刷新全量本地缓存
+//                CacheRegisterTable.addOrUpdate(node);
+//            }
+//
+//            concurrentMap = CACHE.getIfPresent(getKey(groupName, namespaceId));
+//            if (CollUtil.isEmpty(serverNodes) || CollUtil.isEmpty(concurrentMap)) {
+//                return Sets.newHashSet();
+//            }
+//        }
+//
+//        return new TreeSet<>(concurrentMap.values());
     }
 
     private static Pair<String, String> getKey(final String groupName, final String namespaceId) {
@@ -152,23 +161,23 @@ public class CacheRegisterTable implements Lifecycle {
     }
 
 
-    /**
-     * 刷新过期时间若不存在则初始化
-     *
-     * @param serverNode 服务节点
-     */
-    public static synchronized void refreshExpireAt(ServerNode serverNode) {
-        RegisterNodeInfo registerNodeInfo = getServerNode(serverNode.getGroupName(), serverNode.getNamespaceId(),
-                serverNode.getHostId());
-        // 不存在则初始化
-        if (Objects.isNull(registerNodeInfo)) {
-            SnailJobLog.LOCAL.warn("node not exists. groupName:[{}] hostId:[{}]", serverNode.getGroupName(),
-                    serverNode.getHostId());
-        } else {
-            // 存在则刷新过期时间
-            registerNodeInfo.setExpireAt(serverNode.getExpireAt());
-        }
-    }
+//    /**
+//     * 刷新过期时间若不存在则初始化
+//     *
+//     * @param serverNode 服务节点
+//     */
+//    public static synchronized void refreshExpireAt(ServerNode serverNode) {
+//        RegisterNodeInfo registerNodeInfo = getServerNode(serverNode.getGroupName(), serverNode.getNamespaceId(),
+//                serverNode.getHostId());
+//        // 不存在则初始化
+//        if (Objects.isNull(registerNodeInfo)) {
+//            SnailJobLog.LOCAL.warn("node not exists. groupName:[{}] hostId:[{}]", serverNode.getGroupName(),
+//                    serverNode.getHostId());
+//        } else {
+//            // 存在则刷新过期时间
+//            registerNodeInfo.setExpireAt(serverNode.getExpireAt());
+//        }
+//    }
 
     /**
      * 无缓存时添加 有缓存时更新

@@ -6,27 +6,22 @@ import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.Lifecycle;
 import com.aizuda.snailjob.server.common.allocate.server.AllocateMessageQueueAveragely;
-import com.aizuda.snailjob.server.common.cache.CacheRegisterTable;
 import com.aizuda.snailjob.server.common.config.SystemProperties;
+import com.aizuda.snailjob.server.common.convert.RegisterNodeInfoConverter;
 import com.aizuda.snailjob.server.common.dto.DistributeInstance;
+import com.aizuda.snailjob.server.common.dto.InstanceKey;
+import com.aizuda.snailjob.server.common.dto.InstanceLiveInfo;
 import com.aizuda.snailjob.server.common.dto.RegisterNodeInfo;
 import com.aizuda.snailjob.server.common.register.ServerRegister;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.ServerNodeMapper;
-import com.aizuda.snailjob.template.datasource.persistence.po.GroupConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.ServerNode;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * 负责处理组或者节点变化时，重新分配组在不同的节点上消费
@@ -38,6 +33,7 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 public class ServerNodeBalance implements Lifecycle, Runnable {
+    private final InstanceManager instanceManager;
 
     /**
      * 延迟10s为了尽可能保障集群节点都启动完成在进行rebalance
@@ -55,8 +51,10 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
 
         try {
 
+            Set<InstanceLiveInfo> instanceALiveInfoSet = instanceManager.getInstanceALiveInfoSet(ServerRegister.NAMESPACE_ID, ServerRegister.GROUP_NAME);
+            Set<RegisterNodeInfo> registerNodeInfoSet = StreamUtils.toSet(instanceALiveInfoSet, InstanceLiveInfo::getNodeInfo);
             // 为了保证客户端分配算法的一致性,serverNodes 从数据库从数据获取
-            Set<String> podIpSet = CacheRegisterTable.getPodIdSet(ServerRegister.GROUP_NAME, ServerRegister.NAMESPACE_ID);
+            Set<String> podIpSet = StreamUtils.toSet(registerNodeInfoSet, RegisterNodeInfo::getHostId);
 
             if (CollUtil.isEmpty(podIpSet)) {
                 SnailJobLog.LOCAL.error("server node is empty");
@@ -97,13 +95,17 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
         thread.start();
     }
 
-    private void removeNode(ConcurrentMap<String, RegisterNodeInfo> concurrentMap, Set<String> remoteHostIds, Set<String> localHostIds) {
+    private void removeNode(Set<String> remoteHostIds, Set<String> localHostIds) {
 
         localHostIds.removeAll(remoteHostIds);
         for (String localHostId : localHostIds) {
-            RegisterNodeInfo registerNodeInfo = concurrentMap.get(localHostId);
+            InstanceKey instanceKey = InstanceKey.builder()
+                    .namespaceId(ServerRegister.NAMESPACE_ID)
+                    .groupName(ServerRegister.GROUP_NAME)
+                    .hostId(localHostId)
+                    .build();
             // 删除过期的节点信息
-            CacheRegisterTable.remove(registerNodeInfo.getGroupName(), registerNodeInfo.getNamespaceId(), registerNodeInfo.getHostId());
+            instanceManager.remove(instanceKey);
         }
     }
 
@@ -116,7 +118,7 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
 
         // 刷新最新的节点注册信息
         for (ServerNode node : remotePods) {
-            CacheRegisterTable.addOrUpdate(node);
+            instanceManager.registerOrUpdate(RegisterNodeInfoConverter.INSTANCE.toRegisterNodeInfo(node));
         }
     }
 
@@ -154,17 +156,19 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
                         .eq(ServerNode::getNodeType, NodeTypeEnum.SERVER.getType()));
 
                 // 获取缓存中的节点
-                ConcurrentMap<String/*hostId*/, RegisterNodeInfo> concurrentMap = Optional.ofNullable(CacheRegisterTable
-                        .get(ServerRegister.GROUP_NAME, ServerRegister.NAMESPACE_ID)).orElse(new ConcurrentHashMap<>());
+                Set<InstanceLiveInfo> instanceALiveInfoSet = instanceManager
+                        .getInstanceALiveInfoSet(ServerRegister.NAMESPACE_ID, ServerRegister.GROUP_NAME);
 
                 Set<String> remoteHostIds = StreamUtils.toSet(remotePods, ServerNode::getHostId);
 
-                Set<String> localHostIds = StreamUtils.toSet(concurrentMap.values(), RegisterNodeInfo::getHostId);
+                Set<String> localHostIds = StreamUtils.toSet(
+                        StreamUtils.toSet(instanceALiveInfoSet, InstanceLiveInfo::getNodeInfo),
+                        RegisterNodeInfo::getHostId);
 
                 // 无缓存的节点触发refreshCache
-                if (CollUtil.isEmpty(concurrentMap)
+                if (CollUtil.isEmpty(instanceALiveInfoSet)
                         // 节点数量不一致触发
-                        || isNodeSizeNotEqual(concurrentMap.size(), remotePods.size())
+                        || isNodeSizeNotEqual(instanceALiveInfoSet.size(), remotePods.size())
                         // 判断远程节点是不是和本地节点一致的，如果不一致则重新分配
                         || isNodeNotMatch(remoteHostIds, localHostIds)
                         // 检查当前节点的消费桶是否为空，为空则重新负载
@@ -172,7 +176,7 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
                 ) {
 
                     // 删除本地缓存以下线的节点信息
-                    removeNode(concurrentMap, remoteHostIds, localHostIds);
+                    removeNode(remoteHostIds, localHostIds);
 
                     // 重新获取DB中最新的服务信息
                     refreshCache(remotePods);
@@ -188,18 +192,19 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
                     // 刷新过期时间
                     refreshExpireAtCache(remotePods);
 
+                    // todo 已经有过期节点监控
                     // 再次获取最新的节点信息
-                    concurrentMap = CacheRegisterTable
-                            .get(ServerRegister.GROUP_NAME, ServerRegister.NAMESPACE_ID);
+//                    instanceALiveInfoSet = instanceManager.getInstanceALiveInfoSet(ServerRegister.NAMESPACE_ID, ServerRegister.GROUP_NAME);
 
-                    // 找出过期的节点
-                    Set<RegisterNodeInfo> expireNodeSet = concurrentMap.values().stream()
-                            .filter(registerNodeInfo -> registerNodeInfo.getExpireAt().isBefore(LocalDateTime.now()))
-                            .collect(Collectors.toSet());
-                    for (final RegisterNodeInfo registerNodeInfo : expireNodeSet) {
-                        // 删除过期的节点信息
-                        CacheRegisterTable.remove(registerNodeInfo.getGroupName(), registerNodeInfo.getNamespaceId(), registerNodeInfo.getHostId());
-                    }
+//                    // 找出过期的节点
+//                    Set<RegisterNodeInfo> expireNodeSet = instanceALiveInfoSet.stream()
+//                            .map(InstanceLiveInfo::getNodeInfo)
+//                            .filter(registerNodeInfo -> registerNodeInfo.getExpireAt().isBefore(LocalDateTime.now()))
+//                            .collect(Collectors.toSet());
+//                    for (final RegisterNodeInfo registerNodeInfo : expireNodeSet) {
+//                        // 删除过期的节点信息
+//                        CacheRegisterTable.remove(registerNodeInfo.getGroupName(), registerNodeInfo.getNamespaceId(), registerNodeInfo.getHostId());
+//                    }
 
                 }
 

@@ -8,11 +8,14 @@ import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.cache.CacheConsumerGroup;
 import com.aizuda.snailjob.server.common.cache.CacheRegisterTable;
+import com.aizuda.snailjob.server.common.convert.RegisterNodeInfoConverter;
 import com.aizuda.snailjob.server.common.handler.GetHttpRequestHandler;
+import com.aizuda.snailjob.server.common.handler.InstanceManager;
 import com.aizuda.snailjob.server.common.register.ClientRegister;
 import com.aizuda.snailjob.template.datasource.persistence.po.ServerNode;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -27,8 +30,9 @@ import static com.aizuda.snailjob.server.common.register.ClientRegister.DELAY_TI
  *
  */
 @Component
+@RequiredArgsConstructor
 public class GetRegNodesPostHttpRequestHandler extends GetHttpRequestHandler {
-
+    private final InstanceManager instanceManager;
     @Override
     public boolean supports(String path) {
         return GET_REG_NODES_AND_REFRESH.equals(path);
@@ -54,7 +58,7 @@ public class GetRegNodesPostHttpRequestHandler extends GetHttpRequestHandler {
         return new SnailJobRpcResult(json, retryRequest.getReqId());
     }
 
-    public static List<ServerNode> getAndRefreshCache() {
+    public  List<ServerNode> getAndRefreshCache() {
         // 获取当前所有需要续签的node
         List<ServerNode> expireNodes = ClientRegister.getExpireNodes();
         if (Objects.nonNull(expireNodes)) {
@@ -62,7 +66,7 @@ public class GetRegNodesPostHttpRequestHandler extends GetHttpRequestHandler {
             for (final ServerNode serverNode : expireNodes) {
                 serverNode.setExpireAt(LocalDateTime.now().plusSeconds(DELAY_TIME));
                 // 刷新全量本地缓存
-                CacheRegisterTable.addOrUpdate(serverNode);
+                instanceManager.registerOrUpdate(RegisterNodeInfoConverter.INSTANCE.toRegisterNodeInfo(serverNode));
                 // 刷新过期时间
                 CacheConsumerGroup.addOrUpdate(serverNode.getGroupName(), serverNode.getNamespaceId());
             }

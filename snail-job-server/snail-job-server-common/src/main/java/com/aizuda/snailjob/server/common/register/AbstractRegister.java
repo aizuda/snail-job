@@ -1,11 +1,11 @@
 package com.aizuda.snailjob.server.common.register;
 
 import cn.hutool.core.collection.CollUtil;
-import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.Lifecycle;
 import com.aizuda.snailjob.server.common.Register;
-import com.aizuda.snailjob.server.common.cache.CacheRegisterTable;
+import com.aizuda.snailjob.server.common.convert.RegisterNodeInfoConverter;
+import com.aizuda.snailjob.server.common.handler.InstanceManager;
 import com.aizuda.snailjob.server.common.triple.Pair;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.ServerNodeMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.ServerNode;
@@ -31,6 +31,8 @@ public abstract class AbstractRegister implements Register, Lifecycle {
 
     @Autowired
     protected ServerNodeMapper serverNodeMapper;
+    @Autowired
+    protected InstanceManager instanceManager;
 
     @Override
     public boolean register(RegisterContext context) {
@@ -111,7 +113,7 @@ public abstract class AbstractRegister implements Register, Lifecycle {
 
         for (final ServerNode serverNode : serverNodes) {
             // 刷新本地缓存过期时间
-            CacheRegisterTable.refreshExpireAt(serverNode);
+            instanceManager.registerOrUpdate(RegisterNodeInfoConverter.INSTANCE.toRegisterNodeInfo(serverNode));
         }
 
     }

@@ -1,5 +1,9 @@
 package com.aizuda.snailjob.server.retry.task.support.dispatch;
 
+import com.aizuda.snailjob.server.common.dto.InstanceKey;
+import com.aizuda.snailjob.server.common.dto.InstanceLiveInfo;
+import com.aizuda.snailjob.server.common.handler.InstanceManager;
+import lombok.RequiredArgsConstructor;
 import  org.apache.pekko.actor.AbstractActor;
 import com.aizuda.snailjob.client.model.request.StopRetryRequest;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
@@ -27,7 +31,9 @@ import java.util.Objects;
 @Component(ActorGenerator.RETRY_REAL_STOP_TASK_INSTANCE_ACTOR)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Slf4j
+@RequiredArgsConstructor
 public class RequestStopClientActor extends AbstractActor {
+    private final InstanceManager instanceManager;
 
     @Override
     public Receive createReceive() {
@@ -42,11 +48,12 @@ public class RequestStopClientActor extends AbstractActor {
 
     private void doStop(RequestStopRetryTaskExecutorDTO executorDTO) {
         // 检查客户端是否存在
-        RegisterNodeInfo registerNodeInfo = CacheRegisterTable.getServerNode(
-                executorDTO.getGroupName(),
-                executorDTO.getNamespaceId(),
-                executorDTO.getClientId());
-        if (Objects.isNull(registerNodeInfo)) {
+        InstanceLiveInfo instanceLiveInfo = instanceManager.getInstanceALiveInfoSet(InstanceKey.builder()
+                .namespaceId(executorDTO.getNamespaceId())
+                .groupName(executorDTO.getGroupName())
+                .hostId(executorDTO.getClientId())
+                .build());
+        if (Objects.isNull(instanceLiveInfo)) {
             return;
         }
 
@@ -55,7 +62,7 @@ public class RequestStopClientActor extends AbstractActor {
 
         try {
             // 构建请求客户端对象
-            RetryRpcClient rpcClient = buildRpcClient(registerNodeInfo);
+            RetryRpcClient rpcClient = buildRpcClient(instanceLiveInfo.getNodeInfo());
             Result<Boolean> dispatch = rpcClient.stop(stopRetryRequest);
             if (dispatch.getStatus() == StatusEnum.YES.getStatus()) {
                 SnailJobLog.LOCAL.info("RetryTaskId:[{}] Task stopped successfully.", executorDTO.getRetryTaskId());

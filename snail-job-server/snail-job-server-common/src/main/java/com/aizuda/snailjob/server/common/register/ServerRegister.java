@@ -11,11 +11,14 @@ import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.cache.CacheConsumerGroup;
 import com.aizuda.snailjob.server.common.cache.CacheRegisterTable;
 import com.aizuda.snailjob.server.common.config.SystemProperties;
+import com.aizuda.snailjob.server.common.convert.RegisterNodeInfoConverter;
 import com.aizuda.snailjob.server.common.dto.ServerNodeExtAttrs;
+import com.aizuda.snailjob.server.common.handler.InstanceManager;
 import com.aizuda.snailjob.template.datasource.persistence.po.ServerNode;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.stereotype.Component;
 
@@ -44,7 +47,7 @@ public class ServerRegister extends AbstractRegister {
     public static final String CURRENT_CID;
     public static final String GROUP_NAME = "DEFAULT_SERVER";
     public static final String NAMESPACE_ID = "DEFAULT_SERVER_NAMESPACE_ID";
-
+    private final InstanceManager instanceManager;
     private final SystemProperties systemProperties;
     private final ServerProperties serverProperties;
 
@@ -103,7 +106,7 @@ public class ServerRegister extends AbstractRegister {
                                 .in(ServerNode::getGroupName, allConsumerGroupName.keySet()));
                 for (final ServerNode node : serverNodes) {
                     // 刷新全量本地缓存
-                    CacheRegisterTable.addOrUpdate(node);
+                    instanceManager.registerOrUpdate(RegisterNodeInfoConverter.INSTANCE.toRegisterNodeInfo(node));
                     // 刷新过期时间
                     CacheConsumerGroup.addOrUpdate(node.getGroupName(), node.getNamespaceId());
                 }

@@ -128,9 +128,9 @@ public class SystemProperties {
 
         private int maxInboundMessageSize = 10 * 1024 * 1024;
 
-        private Duration keepAliveTime = Duration.of(2, ChronoUnit.HOURS);
+        private Duration keepAliveTime = Duration.of(30, ChronoUnit.SECONDS);
 
-        private Duration keepAliveTimeout = Duration.of(20, ChronoUnit.SECONDS);
+        private Duration keepAliveTimeout = Duration.of(10, ChronoUnit.SECONDS);
 
         private Duration permitKeepAliveTime = Duration.of(5, ChronoUnit.MINUTES);
 
@@ -143,11 +143,11 @@ public class SystemProperties {
 
         private int maxInboundMessageSize = 10 * 1024 * 1024;
 
-        private Duration keepAliveTime = Duration.of(2, ChronoUnit.HOURS);
+        private Duration keepAliveTime = Duration.of(30, ChronoUnit.SECONDS);
 
-        private Duration keepAliveTimeout = Duration.of(20, ChronoUnit.SECONDS);
+        private Duration keepAliveTimeout = Duration.of(10, ChronoUnit.SECONDS);
 
-        private Duration permitKeepAliveTime = Duration.of(5, ChronoUnit.MINUTES);
+        private Duration idleTimeout = Duration.of(5, ChronoUnit.MINUTES);
 
         private ThreadPoolConfig clientTp = new ThreadPoolConfig(16, 16, 1, TimeUnit.SECONDS, 10000);
 

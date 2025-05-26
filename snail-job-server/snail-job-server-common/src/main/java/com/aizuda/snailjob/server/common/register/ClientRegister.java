@@ -11,8 +11,10 @@ import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.cache.CacheConsumerGroup;
 import com.aizuda.snailjob.server.common.cache.CacheRegisterTable;
 import com.aizuda.snailjob.server.common.client.CommonRpcClient;
+import com.aizuda.snailjob.server.common.convert.RegisterNodeInfoConverter;
 import com.aizuda.snailjob.server.common.dto.PullRemoteNodeClientRegisterInfoDTO;
 import com.aizuda.snailjob.server.common.dto.RegisterNodeInfo;
+import com.aizuda.snailjob.server.common.handler.InstanceManager;
 import com.aizuda.snailjob.server.common.rpc.client.RequestBuilder;
 import com.aizuda.snailjob.server.common.schedule.AbstractSchedule;
 import com.aizuda.snailjob.template.datasource.persistence.po.ServerNode;
@@ -44,6 +46,8 @@ public class ClientRegister extends AbstractRegister {
     public static final String BEAN_NAME = "clientRegister";
     public static final int DELAY_TIME = 30;
     protected static final LinkedBlockingDeque<ServerNode> QUEUE = new LinkedBlockingDeque<>(1000);
+    @Autowired
+    private InstanceManager instanceManager;
     @Autowired
     @Lazy
     private RefreshNodeSchedule refreshNodeSchedule;
@@ -101,7 +105,7 @@ public class ClientRegister extends AbstractRegister {
         return null;
     }
 
-    public static List<ServerNode> refreshLocalCache() {
+    public  List<ServerNode> refreshLocalCache() {
         // 获取当前所有需要续签的node
         List<ServerNode> expireNodes = ClientRegister.getExpireNodes();
         if (Objects.nonNull(expireNodes)) {
@@ -109,7 +113,7 @@ public class ClientRegister extends AbstractRegister {
             for (final ServerNode serverNode : expireNodes) {
                 serverNode.setExpireAt(LocalDateTime.now().plusSeconds(DELAY_TIME));
                 // 刷新全量本地缓存
-                CacheRegisterTable.addOrUpdate(serverNode);
+                instanceManager.registerOrUpdate(RegisterNodeInfoConverter.INSTANCE.toRegisterNodeInfo(serverNode));
                 // 刷新过期时间
                 CacheConsumerGroup.addOrUpdate(serverNode.getGroupName(), serverNode.getNamespaceId());
             }

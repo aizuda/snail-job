@@ -75,6 +75,7 @@ public class SnailJobGrpcClient implements Lifecycle {
                 .maxInboundMessageSize(clientRpc.getMaxInboundMessageSize())
                 .keepAliveTime(clientRpc.getKeepAliveTime().toMillis(), TimeUnit.MILLISECONDS)
                 .keepAliveTimeout(clientRpc.getKeepAliveTimeout().toMillis(), TimeUnit.MILLISECONDS)
+                .idleTimeout(clientRpc.getIdleTimeout().toMillis(), TimeUnit.MILLISECONDS)
                 .usePlaintext().enableRetry().maxRetryAttempts(16)
                 .build();
     }

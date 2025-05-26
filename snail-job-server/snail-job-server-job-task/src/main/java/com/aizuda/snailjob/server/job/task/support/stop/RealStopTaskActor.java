@@ -1,5 +1,9 @@
 package com.aizuda.snailjob.server.job.task.support.stop;
 
+import com.aizuda.snailjob.server.common.dto.InstanceKey;
+import com.aizuda.snailjob.server.common.dto.InstanceLiveInfo;
+import com.aizuda.snailjob.server.common.handler.InstanceManager;
+import lombok.RequiredArgsConstructor;
 import  org.apache.pekko.actor.AbstractActor;
 import com.aizuda.snailjob.client.model.StopJobDTO;
 import com.aizuda.snailjob.common.core.model.Result;
@@ -25,7 +29,9 @@ import java.util.Objects;
 @Component(ActorGenerator.JOB_REAL_STOP_TASK_INSTANCE_ACTOR)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Slf4j
+@RequiredArgsConstructor
 public class RealStopTaskActor extends AbstractActor {
+    private final InstanceManager instanceManager;
 
     @Override
     public Receive createReceive() {
@@ -41,19 +47,20 @@ public class RealStopTaskActor extends AbstractActor {
     private void doStop(final RealStopTaskInstanceDTO realStopTaskInstanceDTO) {
 
         // 检查客户端是否存在
-        RegisterNodeInfo registerNodeInfo = CacheRegisterTable.getServerNode(
-                realStopTaskInstanceDTO.getGroupName(),
-                realStopTaskInstanceDTO.getNamespaceId(),
-                realStopTaskInstanceDTO.getClientId());
-        if (Objects.nonNull(registerNodeInfo)) {
+        InstanceLiveInfo instanceLiveInfo = instanceManager.getInstanceALiveInfoSet(InstanceKey.builder()
+                .namespaceId(realStopTaskInstanceDTO.getNamespaceId())
+                .groupName(realStopTaskInstanceDTO.getGroupName())
+                .hostId(realStopTaskInstanceDTO.getClientId())
+                .build());
+        if (Objects.nonNull(instanceLiveInfo)) {
             // 不用关心停止的结果，若服务端尝试终止失败,客户端会兜底进行关闭
-            requestClient(realStopTaskInstanceDTO, registerNodeInfo);
+            requestClient(realStopTaskInstanceDTO, instanceLiveInfo);
         }
     }
 
-    private Result<Boolean> requestClient(RealStopTaskInstanceDTO realStopTaskInstanceDTO, RegisterNodeInfo registerNodeInfo) {
+    private Result<Boolean> requestClient(RealStopTaskInstanceDTO realStopTaskInstanceDTO, InstanceLiveInfo instanceLiveInfo) {
         JobRpcClient rpcClient = RequestBuilder.<JobRpcClient, Result>newBuilder()
-                .nodeInfo(registerNodeInfo)
+                .nodeInfo(instanceLiveInfo)
                 .failRetry(Boolean.TRUE)
                 .retryTimes(3)
                 .retryInterval(1)

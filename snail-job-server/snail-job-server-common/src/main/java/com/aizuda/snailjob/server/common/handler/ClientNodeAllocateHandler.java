@@ -21,6 +21,7 @@ import java.util.stream.Stream;
  */
 @Component
 @RequiredArgsConstructor
+@Deprecated
 public class ClientNodeAllocateHandler {
 
     /**

@@ -76,6 +76,7 @@ public class SnailGrpcServer implements Lifecycle {
             .decompressorRegistry(DecompressorRegistry.getDefaultInstance())
             .keepAliveTime(keepAliveTime.toMillis(), TimeUnit.MILLISECONDS)
             .keepAliveTimeout(keepAliveTimeOut.toMillis(), TimeUnit.MILLISECONDS)
+            .permitKeepAliveWithoutCalls(true)
             .permitKeepAliveTime(permitKeepAliveTime.toMillis(), TimeUnit.MILLISECONDS)
             .build();
         try {

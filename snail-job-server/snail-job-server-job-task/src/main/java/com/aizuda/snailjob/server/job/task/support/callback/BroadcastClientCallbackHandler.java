@@ -1,5 +1,9 @@
 package com.aizuda.snailjob.server.job.task.support.callback;
 
+import com.aizuda.snailjob.server.common.dto.InstanceKey;
+import com.aizuda.snailjob.server.common.dto.InstanceLiveInfo;
+import com.aizuda.snailjob.server.common.handler.InstanceManager;
+import lombok.RequiredArgsConstructor;
 import  org.apache.pekko.actor.ActorRef;
 import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
@@ -27,7 +31,9 @@ import java.util.Set;
  */
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class BroadcastClientCallbackHandler extends AbstractClientCallbackHandler {
+    private final InstanceManager instanceManager;
 
     @Override
     public JobTaskTypeEnum getTaskInstanceType() {
@@ -59,25 +65,38 @@ public class BroadcastClientCallbackHandler extends AbstractClientCallbackHandle
         JobTask jobTask = context.getJobTask();
         String clientInfo = jobTask.getClientInfo();
         String clientId = ClientInfoUtils.clientId(clientInfo);
-        RegisterNodeInfo serverNode = CacheRegisterTable.getServerNode(context.getGroupName(), context.getNamespaceId(), clientId);
-        if (Objects.isNull(serverNode)) {
+        InstanceKey instanceKey = InstanceKey.builder()
+                .groupName(context.getGroupName())
+                .namespaceId(context.getNamespaceId())
+                .hostId(clientId)
+                .build();
+        InstanceLiveInfo instanceLiveInfo = instanceManager.getInstanceALiveInfoSet(instanceKey);
+        if (Objects.isNull(instanceLiveInfo)) {
             List<JobTask> jobTasks = jobTaskMapper.selectList(new LambdaQueryWrapper<JobTask>()
                     .eq(JobTask::getTaskBatchId, context.getTaskBatchId()));
 
-            Set<String> clientIdList = StreamUtils.toSet(jobTasks, jobTask1 -> ClientInfoUtils.clientId(jobTask1.getClientInfo()));
             Set<String> remoteClientIdSet = StreamUtils.toSet(nodes, RegisterNodeInfo::getHostId);
-            Sets.SetView<String> diff = Sets.difference(remoteClientIdSet, clientIdList);
+            Sets.SetView<String> diff = Sets.difference(remoteClientIdSet, getClientIdList(jobTasks));
 
             String newClientId = CollUtil.getFirst(diff.stream().iterator());
-            RegisterNodeInfo registerNodeInfo = CacheRegisterTable.getServerNode(context.getGroupName(), context.getNamespaceId(), newClientId);
-            if (Objects.isNull(registerNodeInfo)) {
+            instanceKey = InstanceKey.builder()
+                    .groupName(context.getGroupName())
+                    .namespaceId(context.getNamespaceId())
+                    .hostId(newClientId)
+                    .build();
+            InstanceLiveInfo newInstanceLiveInfo = instanceManager.getInstanceALiveInfoSet(instanceKey);
+            if (Objects.isNull(newInstanceLiveInfo)) {
                 // 如果找不到新的客户端信息，则返回原来的客户端信息
                 return clientInfo;
             }
 
-            return ClientInfoUtils.generate(registerNodeInfo);
+            return ClientInfoUtils.generate(newInstanceLiveInfo.getNodeInfo());
         }
 
         return clientInfo;
+    }
+
+    private static Set<String> getClientIdList(List<JobTask> jobTasks) {
+        return StreamUtils.toSet(jobTasks, jobTask -> ClientInfoUtils.clientId(jobTask.getClientInfo()));
     }
 }

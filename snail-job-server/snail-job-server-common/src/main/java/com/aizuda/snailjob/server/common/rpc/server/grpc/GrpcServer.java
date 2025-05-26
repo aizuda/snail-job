@@ -67,24 +67,25 @@ public class GrpcServer implements Lifecycle {
         final MutableHandlerRegistry handlerRegistry = new MutableHandlerRegistry();
         addServices(handlerRegistry, new GrpcInterceptor());
         NettyServerBuilder builder = NettyServerBuilder.forPort(systemProperties.getServerPort())
-            .executor(createGrpcExecutor(grpc.getDispatcherTp()));
+                .executor(createGrpcExecutor(grpc.getDispatcherTp()));
 
         Duration keepAliveTime = grpc.getKeepAliveTime();
         Duration keepAliveTimeOut = grpc.getKeepAliveTimeout();
         Duration permitKeepAliveTime = grpc.getPermitKeepAliveTime();
 
         server = builder.maxInboundMessageSize(grpc.getMaxInboundMessageSize()).fallbackHandlerRegistry(handlerRegistry)
-            .compressorRegistry(CompressorRegistry.getDefaultInstance())
-            .decompressorRegistry(DecompressorRegistry.getDefaultInstance())
-            .keepAliveTime(keepAliveTime.toMillis(), TimeUnit.MILLISECONDS)
-            .keepAliveTimeout(keepAliveTimeOut.toMillis(), TimeUnit.MILLISECONDS)
-            .permitKeepAliveTime(permitKeepAliveTime.toMillis(), TimeUnit.MILLISECONDS)
-            .build();
+                .compressorRegistry(CompressorRegistry.getDefaultInstance())
+                .decompressorRegistry(DecompressorRegistry.getDefaultInstance())
+                .keepAliveTime(keepAliveTime.toMillis(), TimeUnit.MILLISECONDS)
+                .keepAliveTimeout(keepAliveTimeOut.toMillis(), TimeUnit.MILLISECONDS)
+                .permitKeepAliveTime(permitKeepAliveTime.toMillis(), TimeUnit.MILLISECONDS)
+                .permitKeepAliveWithoutCalls(true)
+                .build();
         try {
             server.start();
             this.started = true;
             SnailJobLog.LOCAL.info("------> snail-job remoting server start success, grpc = {}, port = {}",
-                GrpcServer.class.getName(), systemProperties.getServerPort());
+                    GrpcServer.class.getName(), systemProperties.getServerPort());
         } catch (IOException e) {
             SnailJobLog.LOCAL.error("--------> snail-job remoting server error.", e);
             started = false;
@@ -103,8 +104,8 @@ public class GrpcServer implements Lifecycle {
 
         // 创建服务UNARY类型定义
         ServerServiceDefinition serviceDefinition = createUnaryServiceDefinition(
-            GrpcServerConstants.UNARY_SERVICE_NAME, GrpcServerConstants.UNARY_METHOD_NAME,
-            new UnaryRequestHandler());
+                GrpcServerConstants.UNARY_SERVICE_NAME, GrpcServerConstants.UNARY_METHOD_NAME,
+                new UnaryRequestHandler());
         handlerRegistry.addService(serviceDefinition);
         // unary common call register.
 
@@ -112,29 +113,29 @@ public class GrpcServer implements Lifecycle {
     }
 
     public static ServerServiceDefinition createUnaryServiceDefinition(
-        String serviceName,
-        String methodName,
-        ServerCalls.UnaryMethod<SnailJobGrpcRequest, GrpcResult> unaryMethod) {
+            String serviceName,
+            String methodName,
+            ServerCalls.UnaryMethod<SnailJobGrpcRequest, GrpcResult> unaryMethod) {
 
         MethodDescriptor<SnailJobGrpcRequest, GrpcResult> methodDescriptor =
-            MethodDescriptor.<SnailJobGrpcRequest, GrpcResult>newBuilder()
-                .setType(MethodDescriptor.MethodType.UNARY)
-                .setFullMethodName(MethodDescriptor.generateFullMethodName(serviceName, methodName))
-                .setRequestMarshaller(ProtoUtils.marshaller(SnailJobGrpcRequest.getDefaultInstance()))
-                .setResponseMarshaller(ProtoUtils.marshaller(GrpcResult.getDefaultInstance()))
-                .build();
+                MethodDescriptor.<SnailJobGrpcRequest, GrpcResult>newBuilder()
+                        .setType(MethodDescriptor.MethodType.UNARY)
+                        .setFullMethodName(MethodDescriptor.generateFullMethodName(serviceName, methodName))
+                        .setRequestMarshaller(ProtoUtils.marshaller(SnailJobGrpcRequest.getDefaultInstance()))
+                        .setResponseMarshaller(ProtoUtils.marshaller(GrpcResult.getDefaultInstance()))
+                        .build();
 
         return ServerServiceDefinition.builder(serviceName)
-            .addMethod(methodDescriptor, ServerCalls.asyncUnaryCall(unaryMethod))
-            .build();
+                .addMethod(methodDescriptor, ServerCalls.asyncUnaryCall(unaryMethod))
+                .build();
     }
 
     private ThreadPoolExecutor createGrpcExecutor(final ThreadPoolConfig threadPool) {
         ThreadPoolExecutor grpcExecutor = new ThreadPoolExecutor(threadPool.getCorePoolSize(),
-            threadPool.getMaximumPoolSize(), threadPool.getKeepAliveTime(), TimeUnit.MILLISECONDS,
-            new LinkedBlockingQueue<>(threadPool.getQueueCapacity()),
-            new ThreadFactoryBuilder().setDaemon(true).setNameFormat("snail-job-grpc-server-executor-%d")
-                .build());
+                threadPool.getMaximumPoolSize(), threadPool.getKeepAliveTime(), TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<>(threadPool.getQueueCapacity()),
+                new ThreadFactoryBuilder().setDaemon(true).setNameFormat("snail-job-grpc-server-executor-%d")
+                        .build());
         grpcExecutor.allowCoreThreadTimeOut(true);
         return grpcExecutor;
     }
