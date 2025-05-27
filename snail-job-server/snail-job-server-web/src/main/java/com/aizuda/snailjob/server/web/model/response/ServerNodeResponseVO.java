@@ -30,4 +30,6 @@ public class ServerNodeResponseVO {
     private String extAttrs;
 
     private Set<Integer> consumerBuckets;
+
+    private String labels;
 }

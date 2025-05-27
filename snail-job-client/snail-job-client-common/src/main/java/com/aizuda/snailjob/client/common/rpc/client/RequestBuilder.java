@@ -1,10 +1,7 @@
 package com.aizuda.snailjob.client.common.rpc.client;
 
-import com.aizuda.snailjob.client.common.config.SnailJobProperties;
 import com.aizuda.snailjob.client.common.exception.SnailJobClientException;
 import com.aizuda.snailjob.client.common.rpc.client.grpc.GrpcClientInvokeHandler;
-import com.aizuda.snailjob.common.core.context.SnailSpringContext;
-import com.aizuda.snailjob.common.core.enums.RpcTypeEnum;
 import com.aizuda.snailjob.common.core.model.Result;
 
 import java.lang.reflect.InvocationHandler;
@@ -72,18 +69,10 @@ public class RequestBuilder<T, R extends Result<Object>> {
             throw new SnailJobClientException("class not found exception to: [{}]", clintInterface.getName());
         }
 
-        InvocationHandler invocationHandler;
-        SnailJobProperties properties = SnailSpringContext.getBean(SnailJobProperties.class);
-        RpcTypeEnum rpcType = properties.getRpcType();
-        if (Objects.isNull(rpcType) || RpcTypeEnum.NETTY == rpcType) {
-            invocationHandler= new RpcClientInvokeHandler<>(async, timeout, unit,
-                callback);
-        } else {
-            invocationHandler = new GrpcClientInvokeHandler<>(async, timeout, unit, callback);
-        }
+        InvocationHandler invocationHandler = new GrpcClientInvokeHandler<>(async, timeout, unit, callback);
 
         return (T) Proxy.newProxyInstance(clintInterface.getClassLoader(),
-            new Class[]{clintInterface}, invocationHandler);
+                new Class[]{clintInterface}, invocationHandler);
     }
 
 }

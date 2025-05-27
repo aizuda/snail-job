@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component;
  * @date : 2022-03-07 15:54
  * @since 1.0.0
  */
-@Component
+//@Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @RequiredArgsConstructor
 @Getter
@@ -88,12 +88,12 @@ public class NettyHttpServer implements Runnable, Lifecycle {
 
     @Override
     public void start() {
-        if (RpcTypeEnum.NETTY != systemProperties.getRpcType()) {
-            return;
-        }
-        thread = new Thread(this);
-        thread.setDaemon(true);
-        thread.start();
+//        if (RpcTypeEnum.NETTY != systemProperties.getRpcType()) {
+//            return;
+//        }
+//        thread = new Thread(this);
+//        thread.setDaemon(true);
+//        thread.start();
     }
 
     @Override

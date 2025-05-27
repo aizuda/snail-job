@@ -49,6 +49,7 @@ public class BeatHttpRequestHandler extends GetHttpRequestHandler {
         registerContext.setHostId(headers.get(HeadersEnum.HOST_ID.getKey()));
         registerContext.setUri(HTTP_PATH.BEAT);
         registerContext.setNamespaceId(headers.get(HeadersEnum.NAMESPACE.getKey()));
+        registerContext.setLabels(headers.get(HeadersEnum.LABEL.getKey()));
         boolean result = register.register(registerContext);
         if (!result) {
             SnailJobLog.LOCAL.warn("client register error. groupName:[{}]", headers.get(HeadersEnum.GROUP_NAME.getKey()));

@@ -2,6 +2,7 @@ package com.aizuda.snailjob.server.retry.task.support.dispatch;
 
 import com.aizuda.snailjob.server.common.dto.*;
 import com.aizuda.snailjob.server.common.handler.InstanceManager;
+import com.aizuda.snailjob.server.common.rpc.client.grpc.GrpcClientInvokeHandlerV2;
 import  org.apache.pekko.actor.AbstractActor;
 import  org.apache.pekko.actor.ActorRef;
 import com.aizuda.snailjob.client.model.request.DispatchRetryRequest;
@@ -133,20 +134,31 @@ public class RequestRetryClientActor extends AbstractActor {
 
         @Override
         public <V> void onRetry(final Attempt<V> attempt) {
-            if (attempt.getAttemptNumber() > 1) {
-                // 更新最新负载节点
-                String hostId = (String) properties.get("HOST_ID");
-                String hostIp = (String) properties.get("HOST_IP");
-                Integer hostPort = (Integer) properties.get("HOST_PORT");
+            // 负载节点
+            if (attempt.hasException()) {
+                JobLogMetaDTO jobLogMetaDTO = RetryTaskConverter.INSTANCE.toJobLogDTO(executorDTO);
+                jobLogMetaDTO.setTimestamp(DateUtils.toNowMilli());
+                SnailJobLog.REMOTE.error("Task scheduling failed attempt retry. Task instance ID:[{}] retryCount:[{}]. <|>{}<|>",
+                        executorDTO.getRetryTaskId(), attempt.getAttemptNumber(), jobLogMetaDTO, attempt.getExceptionCause());
+                return;
+            }
 
-                RetryTask retryTask = new RetryTask();
-                retryTask.setId(executorDTO.getRetryTaskId());
-                RegisterNodeInfo realNodeInfo = new RegisterNodeInfo();
-                realNodeInfo.setHostIp(hostIp);
-                realNodeInfo.setHostPort(Integer.valueOf(hostPort));
-                realNodeInfo.setHostId(hostId);
-                retryTask.setClientInfo(ClientInfoUtils.generate(realNodeInfo));
-                retryTaskMapper.updateById(retryTask);
+            // 更新最新负载节点
+            if (attempt.hasResult() && attempt.getAttemptNumber() > 1) {
+                Map<String, Object> properties = properties();
+                InstanceLiveInfo instanceLiveInfo = (InstanceLiveInfo) properties.get(GrpcClientInvokeHandlerV2.NEW_INSTANCE_LIVE_INFO);
+                if (Objects.nonNull(instanceLiveInfo)) {
+                    RegisterNodeInfo nodeInfo = instanceLiveInfo.getNodeInfo();
+                    RetryTask retryTask = new RetryTask();
+                    retryTask.setId(executorDTO.getRetryTaskId());
+                    RegisterNodeInfo realNodeInfo = new RegisterNodeInfo();
+                    realNodeInfo.setHostIp(nodeInfo.getHostIp());
+                    realNodeInfo.setHostPort(nodeInfo.getHostPort());
+                    realNodeInfo.setHostId(nodeInfo.getHostId());
+                    retryTask.setClientInfo(ClientInfoUtils.generate(realNodeInfo));
+                    retryTaskMapper.updateById(retryTask);
+                }
+
             }
 
         }

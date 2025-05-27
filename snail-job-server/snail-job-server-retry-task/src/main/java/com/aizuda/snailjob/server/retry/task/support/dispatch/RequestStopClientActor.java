@@ -62,7 +62,7 @@ public class RequestStopClientActor extends AbstractActor {
 
         try {
             // 构建请求客户端对象
-            RetryRpcClient rpcClient = buildRpcClient(instanceLiveInfo.getNodeInfo());
+            RetryRpcClient rpcClient = buildRpcClient(instanceLiveInfo);
             Result<Boolean> dispatch = rpcClient.stop(stopRetryRequest);
             if (dispatch.getStatus() == StatusEnum.YES.getStatus()) {
                 SnailJobLog.LOCAL.info("RetryTaskId:[{}] Task stopped successfully.", executorDTO.getRetryTaskId());
@@ -77,9 +77,9 @@ public class RequestStopClientActor extends AbstractActor {
 
     }
 
-    private RetryRpcClient buildRpcClient(RegisterNodeInfo registerNodeInfo) {
+    private RetryRpcClient buildRpcClient(InstanceLiveInfo instanceLiveInfo) {
         return RequestBuilder.<RetryRpcClient, Result>newBuilder()
-                .nodeInfo(registerNodeInfo)
+                .nodeInfo(instanceLiveInfo)
                 .failRetry(true)
                 .retryTimes(3)
                 .retryInterval(1)

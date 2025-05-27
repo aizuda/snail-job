@@ -186,10 +186,7 @@ public class RequestClientActor extends AbstractActor {
                     jobTaskMapper.updateById(task);
                 }
             }
-
         }
-
-
     }
 
     private JobRpcClient buildRpcClient(InstanceLiveInfo registerNodeInfo, RealJobExecutorDTO realJobExecutorDTO) {

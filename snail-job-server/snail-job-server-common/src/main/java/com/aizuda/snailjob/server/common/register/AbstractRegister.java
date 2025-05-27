@@ -130,6 +130,7 @@ public abstract class AbstractRegister implements Register, Lifecycle {
         serverNode.setHostPort(context.getHostPort());
         serverNode.setNodeType(getNodeType());
         serverNode.setCreateDt(LocalDateTime.now());
+        serverNode.setLabels(context.getLabels());
         serverNode.setExtAttrs(context.getExtAttrs());
 
         return serverNode;

@@ -32,6 +32,8 @@ public class ServerNode extends CreateUpdateDt {
 
     private Integer hostPort;
 
+    private String labels;
+
     private LocalDateTime expireAt;
 
     private Integer nodeType;

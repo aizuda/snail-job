@@ -236,7 +236,7 @@ public class InstanceManager implements Lifecycle {
                 SnailJobLog.LOCAL.error("instance timeout check is error", e);
             }
 
-        }, 0, SystemConstants.SCHEDULE_PERIOD / 2, TimeUnit.SECONDS);
+        }, 0, SystemConstants.SCHEDULE_PERIOD, TimeUnit.SECONDS);
     }
 
     @Override
@@ -258,12 +258,12 @@ public class InstanceManager implements Lifecycle {
 
         nodeLabels = Optional.ofNullable(nodeLabels).orElse(Collections.emptyMap());
         for (Map.Entry<String, String> entry : targetLabels.entrySet()) {
-            if (entry.getValue().equals(nodeLabels.get(entry.getKey()))) {
-                return true;
+            if (!entry.getValue().equals(nodeLabels.get(entry.getKey()))) {
+                return false;
             }
         }
 
-        return false;
+        return true;
     }
 
 }

@@ -15,7 +15,6 @@
 package com.aizuda.snailjob.server;
 
 import com.aizuda.snailjob.server.common.rpc.server.grpc.GrpcServer;
-import com.aizuda.snailjob.server.common.rpc.server.netty.NettyHttpServer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
@@ -38,18 +37,18 @@ public class SnailJobServerApplication {
     }
 
     @Bean
-    public ApplicationRunner nettyStartupChecker(NettyHttpServer nettyHttpServer, GrpcServer grpcServer,
+    public ApplicationRunner nettyStartupChecker(GrpcServer grpcServer,
                                                  ServletWebServerFactory serverFactory) {
         return args -> {
-            // 判定Grpc或者Netty服务端是否正常启动
-            boolean started = nettyHttpServer.isStarted() || grpcServer.isStarted();
-            // 最长自旋10秒，保证nettyHttpServer启动完成
+            // 判定Grpc
+            boolean started =  grpcServer.isStarted();
+            // 最长自旋10秒，保证 grpcHttpServer启动完成
             int waitCount = 0;
             while (!started && waitCount < 100) {
                 log.info("--------> snail-job server is staring....");
                 TimeUnit.MILLISECONDS.sleep(100);
                 waitCount++;
-                started = nettyHttpServer.isStarted() || grpcServer.isStarted();
+                started = grpcServer.isStarted();
             }
 
             if (!started) {

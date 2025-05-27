@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.client.common.rpc.client.grpc;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
@@ -12,6 +13,7 @@ import com.aizuda.snailjob.common.core.enums.HeadersEnum;
 import com.aizuda.snailjob.common.core.grpc.auto.GrpcResult;
 import com.aizuda.snailjob.common.core.grpc.auto.SnailJobGrpcRequest;
 import com.aizuda.snailjob.common.core.grpc.auto.Metadata;
+import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.NetUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -36,6 +38,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public final class GrpcChannel {
 
     private static ManagedChannel channel;
+    private static final String LANGUAGE = "Java_";
 
     public static void setChannel(ManagedChannel channel) {
         GrpcChannel.channel = channel;
@@ -64,7 +67,7 @@ public final class GrpcChannel {
     private static final ReentrantLock PORT_LOCK = new ReentrantLock();
     private static final Integer RANDOM_CLIENT_PORT = -1;
 
-    private static final String HOST_ID = IdUtil.getSnowflake().nextIdStr();
+    private static final String HOST_ID = LANGUAGE + IdUtil.getSnowflake().nextIdStr();
     private static final int PORT;
     private static final String HOST;
 
@@ -222,6 +225,12 @@ public final class GrpcChannel {
             SystemConstants.DEFAULT_NAMESPACE));
         headersMap.put(HeadersEnum.TOKEN.getKey(), Optional.ofNullable(snailJobProperties.getToken()).orElse(
             SystemConstants.DEFAULT_TOKEN));
+        headersMap.put(HeadersEnum.TOKEN.getKey(), Optional.ofNullable(snailJobProperties.getToken()).orElse(
+                SystemConstants.DEFAULT_TOKEN));
+        Map<String, String> labels = snailJobProperties.getLabels();
+        if (CollUtil.isNotEmpty(labels)) {
+            headersMap.put(HeadersEnum.LABEL.getKey(), JsonUtil.toJsonString(labels));
+        }
 
         Metadata metadata = Metadata
             .newBuilder()

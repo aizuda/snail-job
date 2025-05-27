@@ -13,6 +13,8 @@ import org.springframework.context.annotation.Configuration;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -59,6 +61,11 @@ public class SnailJobProperties {
      * rpc类型
      */
     private RpcTypeEnum rpcType = RpcTypeEnum.GRPC;
+
+    /**
+     * 标签
+     */
+    private Map<String, String> labels = new HashMap<>();
 
     /**
      * 重试、调度日志远程上报滑动窗口配置

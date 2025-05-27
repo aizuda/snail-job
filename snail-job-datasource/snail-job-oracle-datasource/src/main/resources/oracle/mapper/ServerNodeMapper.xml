@@ -4,7 +4,7 @@
 
     <insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="false">
         INSERT INTO sj_server_node (namespace_id, group_name, host_id, host_ip, host_port,
-                                    expire_at, node_type, ext_attrs, create_dt)
+                                    expire_at, node_type, ext_attrs, create_dt, labels)
         <foreach collection="list" item="item" index="index" separator="UNION ALL">
             SELECT
                 #{item.namespaceId,jdbcType=VARCHAR},
@@ -15,7 +15,8 @@
                 #{item.expireAt,jdbcType=TIMESTAMP},
                 #{item.nodeType,jdbcType=TINYINT},
                 #{item.extAttrs,jdbcType=VARCHAR},
-                #{item.createDt,jdbcType=TIMESTAMP}
+                #{item.createDt,jdbcType=TIMESTAMP},
+                #{item.labels,jdbcType=VARCHAR}
             FROM DUAL
         </foreach>
     </insert>

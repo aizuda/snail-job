@@ -32,4 +32,6 @@ public class RegisterContext {
 
     private String uri;
 
+    private String labels;
+
 }

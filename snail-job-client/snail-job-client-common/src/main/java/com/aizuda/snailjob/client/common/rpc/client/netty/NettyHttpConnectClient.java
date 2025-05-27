@@ -25,14 +25,14 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Netty 客户端
+ * Netty 客户端（下线）
  *
  * @author: opensnail
  * @date : 2022-03-07 18:24
  * @since 1.0.0
  */
 @Getter
-@Component
+//@Component
 @RequiredArgsConstructor
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class NettyHttpConnectClient implements Lifecycle {
@@ -44,9 +44,9 @@ public class NettyHttpConnectClient implements Lifecycle {
     @Override
     public void start() {
 
-        if (RpcTypeEnum.NETTY != snailJobProperties.getRpcType()) {
-            return;
-        }
+//        if (RpcTypeEnum.NETTY != snailJobProperties.getRpcType()) {
+//            return;
+//        }
 
         try {
             final NettyHttpConnectClient thisClient = this;
