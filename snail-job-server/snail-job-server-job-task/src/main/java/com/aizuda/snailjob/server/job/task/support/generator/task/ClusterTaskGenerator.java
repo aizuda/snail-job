@@ -54,6 +54,7 @@ public class ClusterTaskGenerator extends AbstractJobTaskGenerator {
                 .groupName(context.getGroupName())
                 .routeKey(context.getRouteKey())
                 .allocKey(String.valueOf(context.getJobId()))
+                .targetLabel(context.getLabels() != null ? JsonUtil.parseHashMap(context.getLabels()) : null)
                 .build();
         InstanceLiveInfo routeKey = instanceManager.getALiveInstanceByRouteKey(condition);
         if (Objects.isNull(routeKey)) {

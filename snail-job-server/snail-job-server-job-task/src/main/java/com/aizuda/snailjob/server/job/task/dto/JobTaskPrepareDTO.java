@@ -74,4 +74,10 @@ public class JobTaskPrepareDTO {
      * 临时任务参数
      */
     private String tmpArgsStr;
+
+    /**
+     * 标签
+     * json格式，如：{"key1":"value1","key2":"value2"}
+     */
+    private String labels;
 }
