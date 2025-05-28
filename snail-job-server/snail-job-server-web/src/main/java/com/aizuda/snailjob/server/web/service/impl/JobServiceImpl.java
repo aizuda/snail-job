@@ -190,7 +190,7 @@ public class JobServiceImpl implements JobService {
         updateJob.setGroupName(null);
 
         LambdaUpdateWrapper<Job> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.set(Job::getId, jobRequestVO.getId());
+        updateWrapper.eq(Job::getId, jobRequestVO.getId());
         updateWrapper.set(Job::getOwnerId, jobRequestVO.getOwnerId());
         return 1 == jobMapper.update(updateJob, updateWrapper);
     }
@@ -256,7 +256,7 @@ public class JobServiceImpl implements JobService {
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
         List<Job> jobs = jobMapper.selectList(
                 new LambdaQueryWrapper<Job>()
-                        .select(Job::getId, Job::getJobName, Job::getExecutorInfo, Job::getTaskType)
+                        .select(Job::getId, Job::getJobName, Job::getExecutorInfo, Job::getTaskType, Job::getLabels)
                         .eq(Job::getNamespaceId, namespaceId)
                         .eq(Job::getGroupName, groupName)
                         .eq(Job::getDeleted, StatusEnum.NO.getStatus())
