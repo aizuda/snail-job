@@ -45,10 +45,6 @@ public class GrpcChannel {
     private static final ThreadPoolExecutor grpcExecutor = createGrpcExecutor();
     private static ConcurrentHashMap<Pair<String, String>, ManagedChannel> CHANNEL_MAP = new ConcurrentHashMap<>(16);
 
-    public static void setChannel(String hostId, String ip, ManagedChannel channel) {
-        CHANNEL_MAP.put(Pair.of(hostId, ip), channel);
-    }
-
     public static void removeChannel(ManagedChannel channel) {
         CHANNEL_MAP.forEach((key, value) -> {
             if (value.equals(channel)) {
@@ -104,61 +100,6 @@ public class GrpcChannel {
 
     }
 
-
-    /**
-     * 发送数据
-     *
-     * @param url   url地址
-     * @param body  请求的消息体
-     * @param reqId
-     * @throws InterruptedException
-     */
-    public static synchronized ListenableFuture<GrpcResult> send(String hostId, String hostIp, Integer port, String url, String body, Map<String, String> headersMap,
-                                                                 final long reqId) {
-
-        ManagedChannel channel = CHANNEL_MAP.get(Pair.of(hostId, hostIp));
-        if (Objects.isNull(channel) || channel.isShutdown() || channel.isTerminated()) {
-            removeChannel(channel);
-            channel = connect(hostId, hostIp, port);
-            if (Objects.isNull(channel)) {
-                SnailJobLog.LOCAL.error("send message but channel is null url:[{}] method:[{}] body:[{}] ", url, body);
-                return null;
-            }
-        }
-        headersMap.put(HeadersEnum.HOST_ID.getKey(), ServerRegister.CURRENT_CID);
-        headersMap.put(HeadersEnum.HOST_IP.getKey(), NetUtil.getLocalIpStr());
-        headersMap.put(HeadersEnum.GROUP_NAME.getKey(), ServerRegister.GROUP_NAME);
-        headersMap.put(HeadersEnum.HOST_PORT.getKey(), getServerPort());
-        headersMap.put(HeadersEnum.NAMESPACE.getKey(), SystemConstants.DEFAULT_NAMESPACE);
-        headersMap.put(HeadersEnum.TOKEN.getKey(), getServerToken());
-
-        Metadata metadata = Metadata
-                .newBuilder()
-                .setUri(url)
-                .putAllHeaders(headersMap)
-                .build();
-        SnailJobGrpcRequest snailJobRequest = SnailJobGrpcRequest
-                .newBuilder()
-                .setMetadata(metadata)
-                .setReqId(reqId)
-                .setBody(body)
-                .build();
-
-        MethodDescriptor<SnailJobGrpcRequest, GrpcResult> methodDescriptor =
-                MethodDescriptor.<SnailJobGrpcRequest, GrpcResult>newBuilder()
-                        .setType(MethodDescriptor.MethodType.UNARY)
-                        .setFullMethodName(MethodDescriptor.generateFullMethodName("UnaryRequest", "unaryRequest"))
-                        .setRequestMarshaller(ProtoUtils.marshaller(SnailJobGrpcRequest.getDefaultInstance()))
-                        .setResponseMarshaller(ProtoUtils.marshaller(GrpcResult.getDefaultInstance()))
-                        .build();
-
-        // 创建动态代理调用方法
-        return io.grpc.stub.ClientCalls.futureUnaryCall(
-                channel.newCall(methodDescriptor, io.grpc.CallOptions.DEFAULT),
-                snailJobRequest);
-
-    }
-
     private static String getServerToken() {
         SystemProperties properties = SnailSpringContext.getBean(SystemProperties.class);
         return properties.getServerToken();
@@ -174,7 +115,7 @@ public class GrpcChannel {
      *
      * @return
      */
-    public static ManagedChannel connect(String hostId, String ip, Integer port) {
+    public static ManagedChannel connect(String ip, Integer port) {
 
         try {
             RpcClientProperties clientRpc = SnailSpringContext.getBean(SystemProperties.class).getClientRpc();

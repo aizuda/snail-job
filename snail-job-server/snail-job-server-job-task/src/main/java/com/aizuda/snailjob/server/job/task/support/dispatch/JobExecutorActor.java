@@ -1,6 +1,8 @@
 package com.aizuda.snailjob.server.job.task.support.dispatch;
 
-import  org.apache.pekko.actor.AbstractActor;
+import com.aizuda.snailjob.server.common.dto.InstanceLiveInfo;
+import com.aizuda.snailjob.server.common.handler.InstanceManager;
+import org.apache.pekko.actor.AbstractActor;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
@@ -10,7 +12,6 @@ import com.aizuda.snailjob.common.core.enums.*;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.pekko.ActorGenerator;
-import com.aizuda.snailjob.server.common.cache.CacheRegisterTable;
 import com.aizuda.snailjob.server.common.enums.JobTaskExecutorSceneEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.util.DateUtils;
@@ -56,6 +57,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import static com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum.MAP;
 import static com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum.MAP_REDUCE;
@@ -76,6 +78,7 @@ public class JobExecutorActor extends AbstractActor {
     private final WorkflowBatchHandler workflowBatchHandler;
     private final JobTaskBatchHandler jobTaskBatchHandler;
     private final WorkflowTaskBatchMapper workflowTaskBatchMapper;
+    private final InstanceManager instanceManager;
 
     @Override
     public Receive createReceive() {
@@ -113,27 +116,31 @@ public class JobExecutorActor extends AbstractActor {
             if (Objects.isNull(job)) {
                 taskStatus = JobTaskBatchStatusEnum.CANCEL.getStatus();
                 operationReason = JobOperationReasonEnum.JOB_CLOSED.getReason();
-            } else if (CollUtil.isEmpty(CacheRegisterTable.getServerNodeSet(job.getGroupName(), job.getNamespaceId()))) {
-                taskStatus = JobTaskBatchStatusEnum.CANCEL.getStatus();
-                operationReason = JobOperationReasonEnum.NOT_CLIENT.getReason();
+            } else {
+                Set<InstanceLiveInfo> liveInfoSet = instanceManager.getInstanceALiveInfoSet(
+                        job.getGroupName(), job.getNamespaceId(), job.getLabels());
 
-                WorkflowNodeTaskExecuteDTO taskExecuteDTO = new WorkflowNodeTaskExecuteDTO();
-                taskExecuteDTO.setWorkflowTaskBatchId(taskExecute.getWorkflowTaskBatchId());
-                taskExecuteDTO.setTaskExecutorScene(taskExecute.getTaskExecutorScene());
-                taskExecuteDTO.setParentId(taskExecute.getWorkflowNodeId());
-                taskExecuteDTO.setTaskBatchId(taskExecute.getTaskBatchId());
-                workflowBatchHandler.openNextNode(taskExecuteDTO);
-            }
+                // 空节点处理
+                if (CollUtil.isEmpty(liveInfoSet)) {
 
-            // 无客户端节点-告警通知
-            if (Objects.nonNull(job) && CollUtil.isEmpty(CacheRegisterTable.getServerNodeSet(job.getGroupName(), job.getNamespaceId()))) {
-                SnailSpringContext.getContext().publishEvent(
-                        new JobTaskFailAlarmEvent(JobTaskFailAlarmEventDTO.builder()
-                                .jobTaskBatchId(taskExecute.getTaskBatchId())
-                                .reason(JobNotifySceneEnum.JOB_NO_CLIENT_NODES_ERROR.getDesc())
-                                .notifyScene(JobNotifySceneEnum.JOB_NO_CLIENT_NODES_ERROR.getNotifyScene())
-                                .build()));
-                return;
+                    taskStatus = JobTaskBatchStatusEnum.CANCEL.getStatus();
+                    operationReason = JobOperationReasonEnum.NOT_CLIENT.getReason();
+
+                    WorkflowNodeTaskExecuteDTO taskExecuteDTO = new WorkflowNodeTaskExecuteDTO();
+                    taskExecuteDTO.setWorkflowTaskBatchId(taskExecute.getWorkflowTaskBatchId());
+                    taskExecuteDTO.setTaskExecutorScene(taskExecute.getTaskExecutorScene());
+                    taskExecuteDTO.setParentId(taskExecute.getWorkflowNodeId());
+                    taskExecuteDTO.setTaskBatchId(taskExecute.getTaskBatchId());
+                    workflowBatchHandler.openNextNode(taskExecuteDTO);
+
+                    // 无客户端节点-告警通知
+                    SnailSpringContext.getContext().publishEvent(
+                            new JobTaskFailAlarmEvent(JobTaskFailAlarmEventDTO.builder()
+                                    .jobTaskBatchId(taskExecute.getTaskBatchId())
+                                    .reason(JobNotifySceneEnum.JOB_NO_CLIENT_NODES_ERROR.getDesc())
+                                    .notifyScene(JobNotifySceneEnum.JOB_NO_CLIENT_NODES_ERROR.getNotifyScene())
+                                    .build()));
+                }
             }
 
             // 更新状态

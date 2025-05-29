@@ -1,7 +1,7 @@
 package com.aizuda.snailjob.server.job.task.support.generator.task;
 
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
-import com.aizuda.snailjob.server.common.handler.ClientNodeAllocateHandler;
+import com.aizuda.snailjob.server.common.handler.InstanceManager;
 import com.aizuda.snailjob.server.job.task.dto.MapReduceArgsStrDTO;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTask;
@@ -20,8 +20,8 @@ public class MapTaskGenerator extends MapReduceTaskGenerator {
 
     public MapTaskGenerator(final JobTaskMapper jobTaskMapper,
                             final TransactionTemplate transactionTemplate,
-                            final ClientNodeAllocateHandler clientNodeAllocateHandler) {
-        super(jobTaskMapper, transactionTemplate, clientNodeAllocateHandler);
+                            final InstanceManager instanceManager) {
+        super(jobTaskMapper, transactionTemplate, instanceManager);
     }
 
     @Override

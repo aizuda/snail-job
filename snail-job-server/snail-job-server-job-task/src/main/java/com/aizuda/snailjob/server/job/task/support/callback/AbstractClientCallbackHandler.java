@@ -134,9 +134,12 @@ public abstract class AbstractClientCallbackHandler implements ClientCallbackHan
         Job job = jobMapper.selectById(context.getJobId());
         context.setJob(job);
         context.setJobTask(jobTask);
+
         if (Objects.isNull(jobTask) || Objects.isNull(job)) {
             return Boolean.FALSE;
         }
+
+        context.setLabels(job.getLabels());
 
         // 手动重试策略
         if (Objects.nonNull(context.getRetryScene())

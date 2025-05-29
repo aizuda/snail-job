@@ -3,10 +3,9 @@ package com.aizuda.snailjob.server.common.handler;
 import com.aizuda.snailjob.common.core.model.Result;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.Lifecycle;
-import com.aizuda.snailjob.server.common.cache.CacheRegisterTable;
 import com.aizuda.snailjob.server.common.client.CommonRpcClient;
 import com.aizuda.snailjob.server.common.dto.ConfigSyncTask;
-import com.aizuda.snailjob.server.common.dto.RegisterNodeInfo;
+import com.aizuda.snailjob.server.common.dto.InstanceLiveInfo;
 import com.aizuda.snailjob.server.common.rpc.client.RequestBuilder;
 import com.aizuda.snailjob.server.model.dto.ConfigDTO;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
@@ -30,7 +29,8 @@ import java.util.concurrent.TimeUnit;
 public class ConfigVersionSyncHandler implements Lifecycle, Runnable {
     private static final LinkedBlockingQueue<ConfigSyncTask> QUEUE = new LinkedBlockingQueue<>(256);
     public Thread THREAD = null;
-    protected final AccessTemplate accessTemplate;
+    private final AccessTemplate accessTemplate;
+    private final InstanceManager instanceManager;
 
     /**
      * 添加任务
@@ -57,12 +57,16 @@ public class ConfigVersionSyncHandler implements Lifecycle, Runnable {
     public void syncVersion(String groupName, final String namespaceId) {
 
         try {
-            Set<RegisterNodeInfo> serverNodeSet = CacheRegisterTable.getServerNodeSet(groupName, namespaceId);
+            Set<InstanceLiveInfo> instanceALiveInfoSet = instanceManager.getInstanceALiveInfoSet(namespaceId, groupName);
             // 同步版本到每个客户端节点
-            for (final RegisterNodeInfo registerNodeInfo : serverNodeSet) {
+            for (final InstanceLiveInfo instanceLiveInfo : instanceALiveInfoSet) {
                 ConfigDTO configDTO = accessTemplate.getGroupConfigAccess().getConfigInfo(groupName, namespaceId);
                 CommonRpcClient rpcClient = RequestBuilder.<CommonRpcClient, Result>newBuilder()
-                        .nodeInfo(registerNodeInfo)
+                        .failover(false)
+                        .failRetry(true)
+                        .retryTimes(3)
+                        .retryInterval(1)
+                        .nodeInfo(instanceLiveInfo)
                         .client(CommonRpcClient.class)
                         .build();
                 SnailJobLog.LOCAL.info("Synchronization result [{}]", rpcClient.syncConfig(configDTO));

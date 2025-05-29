@@ -4,7 +4,6 @@ import cn.hutool.core.date.StopWatch;
 import cn.hutool.core.lang.Assert;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
-import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.grpc.auto.GrpcResult;
 import com.aizuda.snailjob.common.core.model.Result;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
@@ -173,7 +172,7 @@ public class GrpcClientInvokeHandlerV2 implements InvocationHandler {
                 .routeKey(routeKey)
                 .namespaceId(nodeInfo.getNamespaceId())
                 .groupName(nodeInfo.getGroupName())
-                .targetLabel(nodeInfo.getLabelMap())
+                .targetLabels(JsonUtil.toJsonString(nodeInfo.getLabelMap()))
                 .build();
 
         this.instanceLiveInfo = instanceManager.getALiveInstanceByRouteKey(condition);

@@ -1,7 +1,9 @@
 package com.aizuda.snailjob.server.common.handler;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
+import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.ClientLoadBalance;
@@ -82,14 +84,24 @@ public class InstanceManager implements Lifecycle {
                 existing = new InstanceLiveInfo();
                 existing.setNodeInfo(info);
                 // 创建连接通道
-                existing.setChannel(GrpcChannel.connect(info.getHostId(), info.getHostIp(), info.getHostPort()));
+                existing.setChannel(GrpcChannel.connect(info.getHostIp(), info.getHostPort()));
+            } else {
+                if (!existing.isAlive()) {
+                    ConnectivityState channelState = existing.getChannel().getState(true);
+                    if (STATES.contains(channelState)) {
+                        // 连接已经失败，先置为false,也有可能重新连接上
+                        SnailJobLog.LOCAL.warn("Node channel state check {}. {}", existing.getNodeInfo().address(), channelState);
+                        // 直接返回等下下线即可
+                        return existing;
+                    }
+                }
             }
+
             existing.setLastUpdateAt(System.currentTimeMillis());
             existing.setAlive(true);
             return existing;
         });
     }
-
 
     public InstanceLiveInfo getInstanceALiveInfoSet(InstanceKey instanceKey) {
         Set<InstanceLiveInfo> instanceALiveInfoSet = getInstanceALiveInfoSet(instanceKey.getNamespaceId(), instanceKey.getGroupName());
@@ -99,6 +111,31 @@ public class InstanceManager implements Lifecycle {
                 return instanceLiveInfo.getNodeInfo().getHostId().equals(instanceKey.getHostId());
             }
         }).stream().findFirst().orElse(null);
+    }
+
+    public Set<InstanceLiveInfo> getInstanceALiveInfoSet(String namespaceId, String groupName, String targetLabels) {
+        Map<String, String> targetLabelsMap;
+        if (StrUtil.isNotBlank(targetLabels)) {
+            targetLabelsMap = JsonUtil.parseHashMap(targetLabels);
+        } else {
+            targetLabelsMap = Collections.emptyMap();
+        }
+
+        Set<InstanceLiveInfo> instanceALiveInfoSet = getInstanceALiveInfoSet(namespaceId, groupName);
+        Map<String, String> finalTargetLabelsMap = targetLabelsMap;
+        return new HashSet<>(StreamUtils.filter(instanceALiveInfoSet, instanceLiveInfo -> {
+            RegisterNodeInfo nodeInfo = instanceLiveInfo.getNodeInfo();
+            return matchLabels(nodeInfo.getLabelMap(), finalTargetLabelsMap);
+        }));
+    }
+
+
+    public Set<InstanceLiveInfo> getInstanceALiveInfoSet(String namespaceId, String groupName,  Map<String, String> targetLabels) {
+        Set<InstanceLiveInfo> instanceALiveInfoSet = getInstanceALiveInfoSet(namespaceId, groupName);
+        return new HashSet<>(StreamUtils.filter(instanceALiveInfoSet, instanceLiveInfo -> {
+            RegisterNodeInfo nodeInfo = instanceLiveInfo.getNodeInfo();
+            return matchLabels(nodeInfo.getLabelMap(), targetLabels);
+        }));
     }
 
     /**
@@ -162,7 +199,7 @@ public class InstanceManager implements Lifecycle {
 
         Set<RegisterNodeInfo> registerNodeInfos = instanceLiveInfos.stream()
                 .map(InstanceLiveInfo::getNodeInfo)
-                .filter(node -> matchLabels(node.getLabelMap(), conditionDTO.getTargetLabel()))
+                .filter(node -> matchLabels(node.getLabelMap(), conditionDTO.getTargetLabels()))
                 .collect(Collectors.toSet());
 
         ClientLoadBalance clientLoadBalanceRandom = ClientLoadBalanceManager.getClientLoadBalance(conditionDTO.getRouteKey());

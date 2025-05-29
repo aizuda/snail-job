@@ -1,5 +1,8 @@
 package com.aizuda.snailjob.server.common.dto;
 
+import cn.hutool.core.util.StrUtil;
+import com.aizuda.snailjob.common.core.util.JsonUtil;
+import com.google.common.collect.Maps;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -20,5 +23,9 @@ public class InstanceSelectCondition {
     private String groupName;
     private String namespaceId;
     private Integer routeKey;
-    private Map<String, String> targetLabel;
+    private String targetLabels;
+
+    public Map<String, String> getTargetLabels() {
+        return StrUtil.isNotBlank(targetLabels) ? JsonUtil.parseHashMap(targetLabels) : Maps.newHashMap();
+    }
 }

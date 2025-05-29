@@ -10,9 +10,10 @@ import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.allocate.client.ClientLoadBalanceManager;
-import com.aizuda.snailjob.server.common.dto.RegisterNodeInfo;
+import com.aizuda.snailjob.server.common.dto.InstanceLiveInfo;
+import com.aizuda.snailjob.server.common.dto.InstanceSelectCondition;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
-import com.aizuda.snailjob.server.common.handler.ClientNodeAllocateHandler;
+import com.aizuda.snailjob.server.common.handler.InstanceManager;
 import com.aizuda.snailjob.server.common.triple.Pair;
 import com.aizuda.snailjob.server.common.util.ClientInfoUtils;
 import com.aizuda.snailjob.server.job.task.dto.MapReduceArgsStrDTO;
@@ -48,7 +49,7 @@ public class MapReduceTaskGenerator extends AbstractJobTaskGenerator {
     private static final String REDUCE_TASK = "REDUCE_TASK";
     private final JobTaskMapper jobTaskMapper;
     private final TransactionTemplate transactionTemplate;
-    private final ClientNodeAllocateHandler clientNodeAllocateHandler;
+    private final InstanceManager instanceManager;
 
     @Override
     public JobTaskTypeEnum getTaskInstanceType() {
@@ -231,18 +232,24 @@ public class MapReduceTaskGenerator extends AbstractJobTaskGenerator {
     }
 
     private Pair<String, Integer> getClientNodeInfo(JobTaskGenerateContext context) {
-        RegisterNodeInfo serverNode = clientNodeAllocateHandler.getServerNode(
-                context.getJobId().toString(),
-                context.getGroupName(),
-                context.getNamespaceId(),
-                ClientLoadBalanceManager.AllocationAlgorithmEnum.ROUND.getType()
-        );
+
+        InstanceSelectCondition condition = InstanceSelectCondition
+                .builder()
+                .allocKey(String.valueOf(context.getJobId()))
+                .groupName(context.getGroupName())
+                .namespaceId(context.getNamespaceId())
+                .routeKey(ClientLoadBalanceManager.AllocationAlgorithmEnum.ROUND.getType())
+                .targetLabels(context.getLabels())
+                .build();
+
+        InstanceLiveInfo instance = instanceManager.getALiveInstanceByRouteKey(condition);
+
         String clientInfo = StrUtil.EMPTY;
         int JobTaskStatus = JobTaskStatusEnum.RUNNING.getStatus();
-        if (Objects.isNull(serverNode)) {
+        if (Objects.isNull(instance)) {
             JobTaskStatus = JobTaskStatusEnum.CANCEL.getStatus();
         } else {
-            clientInfo = ClientInfoUtils.generate(serverNode);
+            clientInfo = ClientInfoUtils.generate(instance.getNodeInfo());
         }
 
         return Pair.of(clientInfo, JobTaskStatus);

@@ -7,7 +7,6 @@ import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.cache.CacheConsumerGroup;
-import com.aizuda.snailjob.server.common.cache.CacheRegisterTable;
 import com.aizuda.snailjob.server.common.convert.RegisterNodeInfoConverter;
 import com.aizuda.snailjob.server.common.handler.GetHttpRequestHandler;
 import com.aizuda.snailjob.server.common.handler.InstanceManager;

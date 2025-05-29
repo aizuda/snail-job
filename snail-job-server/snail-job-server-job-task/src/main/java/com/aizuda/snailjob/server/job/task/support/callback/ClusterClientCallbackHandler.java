@@ -1,10 +1,11 @@
 package com.aizuda.snailjob.server.job.task.support.callback;
 
+import com.aizuda.snailjob.server.common.dto.InstanceLiveInfo;
+import com.aizuda.snailjob.server.common.dto.InstanceSelectCondition;
+import com.aizuda.snailjob.server.common.handler.InstanceManager;
 import  org.apache.pekko.actor.ActorRef;
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.snailjob.server.common.pekko.ActorGenerator;
-import com.aizuda.snailjob.server.common.dto.RegisterNodeInfo;
-import com.aizuda.snailjob.server.common.handler.ClientNodeAllocateHandler;
 import com.aizuda.snailjob.server.common.util.ClientInfoUtils;
 import com.aizuda.snailjob.server.job.task.dto.JobExecutorResultDTO;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
@@ -23,7 +24,7 @@ import java.util.Objects;
 @Slf4j
 @RequiredArgsConstructor
 public class ClusterClientCallbackHandler extends AbstractClientCallbackHandler {
-    private final ClientNodeAllocateHandler clientNodeAllocateHandler;
+    private final InstanceManager instanceManager;
 
     @Override
     public JobTaskTypeEnum getTaskInstanceType() {
@@ -34,14 +35,23 @@ public class ClusterClientCallbackHandler extends AbstractClientCallbackHandler 
     protected String chooseNewClient(ClientCallbackContext context) {
 
         // 选择重试的节点
-        RegisterNodeInfo serverNode = clientNodeAllocateHandler.getServerNode(context.getJobId().toString(),
-                context.getGroupName(), context.getNamespaceId(), context.getJob().getRouteKey());
-        if (Objects.isNull(serverNode)) {
+        InstanceSelectCondition condition = InstanceSelectCondition
+                .builder()
+                .allocKey(String.valueOf(context.getJobId()))
+                .groupName(context.getGroupName())
+                .namespaceId(context.getNamespaceId())
+                .routeKey(context.getJob().getRouteKey())
+                .targetLabels(context.getJob().getLabels())
+                .build();
+        InstanceLiveInfo instance = instanceManager.getALiveInstanceByRouteKey(condition);
+
+        if (Objects.isNull(instance)) {
             log.error("No executable client information. Job ID:[{}]", context.getJobId());
             return null;
         }
 
-        return ClientInfoUtils.generate(serverNode);
+        return ClientInfoUtils.generate(instance.getNodeInfo());
+
     }
 
     @Override

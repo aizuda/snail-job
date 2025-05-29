@@ -1,5 +1,8 @@
 package com.aizuda.snailjob.server.job.task.support.callback;
 
+import com.aizuda.snailjob.common.core.util.StreamUtils;
+import com.aizuda.snailjob.server.common.dto.InstanceLiveInfo;
+import com.aizuda.snailjob.server.common.handler.InstanceManager;
 import  org.apache.pekko.actor.ActorRef;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
@@ -7,7 +10,6 @@ import cn.hutool.core.util.RandomUtil;
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.pekko.ActorGenerator;
-import com.aizuda.snailjob.server.common.cache.CacheRegisterTable;
 import com.aizuda.snailjob.server.common.dto.RegisterNodeInfo;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.util.ClientInfoUtils;
@@ -30,6 +32,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class MapReduceClientCallbackHandler extends AbstractClientCallbackHandler {
     private final JobTaskMapper jobTaskMapper;
+    private final InstanceManager instanceManager;
 
     @Override
     public JobTaskTypeEnum getTaskInstanceType() {
@@ -54,7 +57,9 @@ public class MapReduceClientCallbackHandler extends AbstractClientCallbackHandle
 
     @Override
     protected String chooseNewClient(ClientCallbackContext context) {
-        Set<RegisterNodeInfo> nodes = CacheRegisterTable.getServerNodeSet(context.getGroupName(), context.getNamespaceId());
+        Set<InstanceLiveInfo> instanceALiveInfoSet = instanceManager.getInstanceALiveInfoSet(
+                context.getNamespaceId(), context.getGroupName(), context.getLabels());
+        Set<RegisterNodeInfo> nodes = StreamUtils.toSet(instanceALiveInfoSet, InstanceLiveInfo::getNodeInfo);
         if (CollUtil.isEmpty(nodes)) {
             SnailJobLog.LOCAL.error("No executable client information. Job ID:[{}]", context.getJobId());
             return null;

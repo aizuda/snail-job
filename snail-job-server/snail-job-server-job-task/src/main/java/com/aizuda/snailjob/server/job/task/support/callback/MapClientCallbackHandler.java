@@ -1,6 +1,7 @@
 package com.aizuda.snailjob.server.job.task.support.callback;
 
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
+import com.aizuda.snailjob.server.common.handler.InstanceManager;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskMapper;
 import org.springframework.stereotype.Component;
 
@@ -11,8 +12,8 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class MapClientCallbackHandler extends MapReduceClientCallbackHandler {
-    public MapClientCallbackHandler(JobTaskMapper jobTaskMapper) {
-        super(jobTaskMapper);
+    public MapClientCallbackHandler(JobTaskMapper jobTaskMapper, InstanceManager instanceManager) {
+        super(jobTaskMapper, instanceManager);
     }
 
     @Override

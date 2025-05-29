@@ -9,7 +9,6 @@ import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.server.common.pekko.ActorGenerator;
-import com.aizuda.snailjob.server.common.cache.CacheRegisterTable;
 import com.aizuda.snailjob.server.common.dto.RegisterNodeInfo;
 import com.aizuda.snailjob.server.common.util.ClientInfoUtils;
 import com.aizuda.snailjob.server.job.task.dto.JobExecutorResultDTO;
@@ -56,7 +55,8 @@ public class BroadcastClientCallbackHandler extends AbstractClientCallbackHandle
 
     @Override
     protected String chooseNewClient(ClientCallbackContext context) {
-        Set<RegisterNodeInfo> nodes = CacheRegisterTable.getServerNodeSet(context.getGroupName(), context.getNamespaceId());
+        Set<RegisterNodeInfo> nodes = StreamUtils.toSet(instanceManager.getInstanceALiveInfoSet(
+                context.getNamespaceId(), context.getGroupName()), InstanceLiveInfo::getNodeInfo);
         if (CollUtil.isEmpty(nodes)) {
             log.error("No executable client information. Job ID:[{}]", context.getJobId());
             return null;

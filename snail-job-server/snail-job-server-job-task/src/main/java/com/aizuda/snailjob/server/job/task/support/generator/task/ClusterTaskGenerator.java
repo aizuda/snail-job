@@ -10,9 +10,7 @@ import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.dto.InstanceLiveInfo;
 import com.aizuda.snailjob.server.common.dto.InstanceSelectCondition;
-import com.aizuda.snailjob.server.common.dto.RegisterNodeInfo;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
-import com.aizuda.snailjob.server.common.handler.ClientNodeAllocateHandler;
 import com.aizuda.snailjob.server.common.handler.InstanceManager;
 import com.aizuda.snailjob.server.common.util.ClientInfoUtils;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
@@ -20,8 +18,6 @@ import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTask;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -54,7 +50,7 @@ public class ClusterTaskGenerator extends AbstractJobTaskGenerator {
                 .groupName(context.getGroupName())
                 .routeKey(context.getRouteKey())
                 .allocKey(String.valueOf(context.getJobId()))
-                .targetLabel(context.getLabels() != null ? JsonUtil.parseHashMap(context.getLabels()) : null)
+                .targetLabels(context.getLabels())
                 .build();
         InstanceLiveInfo routeKey = instanceManager.getALiveInstanceByRouteKey(condition);
         if (Objects.isNull(routeKey)) {

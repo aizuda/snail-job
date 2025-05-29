@@ -70,4 +70,9 @@ public class RetrySceneConfig extends CreateUpdateDt {
      */
     private String cbTriggerInterval;
 
+    /**
+     * 标签
+     */
+    private String labels;
+
 }

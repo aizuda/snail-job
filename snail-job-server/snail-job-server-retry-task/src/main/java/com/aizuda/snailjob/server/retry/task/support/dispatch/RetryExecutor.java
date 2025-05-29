@@ -1,19 +1,19 @@
 package com.aizuda.snailjob.server.retry.task.support.dispatch;
 
-import  org.apache.pekko.actor.AbstractActor;
-import  org.apache.pekko.actor.ActorRef;
-import cn.hutool.core.collection.CollUtil;
+import com.aizuda.snailjob.server.common.dto.InstanceLiveInfo;
+import com.aizuda.snailjob.server.common.dto.InstanceSelectCondition;
+import com.aizuda.snailjob.server.common.handler.InstanceManager;
+import org.apache.pekko.actor.AbstractActor;
+import org.apache.pekko.actor.ActorRef;
 import cn.hutool.core.lang.Assert;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.enums.*;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.pekko.ActorGenerator;
-import com.aizuda.snailjob.server.common.cache.CacheRegisterTable;
 import com.aizuda.snailjob.server.common.dto.RegisterNodeInfo;
 import com.aizuda.snailjob.server.common.enums.RetryTaskExecutorSceneEnum;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
-import com.aizuda.snailjob.server.common.handler.ClientNodeAllocateHandler;
 import com.aizuda.snailjob.server.common.util.ClientInfoUtils;
 import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.retry.task.dto.RequestCallbackExecutorDTO;
@@ -57,8 +57,8 @@ public class RetryExecutor extends AbstractActor {
     private final RetryMapper retryMapper;
     private final RetryTaskMapper retryTaskMapper;
     private final SceneConfigMapper sceneConfigMapper;
-    private final ClientNodeAllocateHandler clientNodeAllocateHandler;
     private final RetryTaskStopHandler retryTaskStopHandler;
+    private final InstanceManager instanceManager;
 
     @Override
     public Receive createReceive() {
@@ -86,23 +86,13 @@ public class RetryExecutor extends AbstractActor {
         Retry retry = retryMapper.selectOne(wrapper);
         if (Objects.isNull(retry)) {
             // 没有执行中的任务不执行调度
-            updateRetryTaskStatus(execute.getRetryTaskId(), RetryTaskStatusEnum.CANCEL.getStatus(),  RetryOperationReasonEnum.NOT_RUNNING_RETRY);
+            updateRetryTaskStatus(execute.getRetryTaskId(), RetryTaskStatusEnum.CANCEL.getStatus(), RetryOperationReasonEnum.NOT_RUNNING_RETRY);
             return;
         }
 
         execute.setNamespaceId(retry.getNamespaceId());
         execute.setGroupName(retry.getGroupName());
         execute.setTaskType(retry.getTaskType());
-
-        if (CollUtil.isEmpty(CacheRegisterTable.getServerNodeSet(retry.getGroupName(), retry.getNamespaceId()))) {
-            // 无客户端不执行调度
-            updateRetryTaskStatus(execute.getRetryTaskId(), RetryTaskStatusEnum.CANCEL.getStatus(), RetryOperationReasonEnum.NOT_CLIENT);
-            RetryTaskFailAlarmEventDTO toRetryTaskFailAlarmEventDTO =
-                    RetryTaskConverter.INSTANCE.toRetryTaskFailAlarmEventDTO(retry, "No client nodes",
-                            RetryNotifySceneEnum.RETRY_NO_CLIENT_NODES_ERROR.getNotifyScene());
-            SnailSpringContext.getContext().publishEvent(new RetryTaskFailAlarmEvent(toRetryTaskFailAlarmEventDTO));
-            return;
-        }
 
         RetrySceneConfig retrySceneConfig = sceneConfigMapper.selectOne(new LambdaQueryWrapper<RetrySceneConfig>()
                 .eq(RetrySceneConfig::getSceneName, retry.getSceneName())
@@ -116,15 +106,33 @@ public class RetryExecutor extends AbstractActor {
         }
 
         // 获取执行的客户端
-        RegisterNodeInfo serverNode = clientNodeAllocateHandler.getServerNode(retry.getId().toString(),
-                retry.getGroupName(), retry.getNamespaceId(), retrySceneConfig.getRouteKey());
+        InstanceSelectCondition condition = InstanceSelectCondition.builder()
+                .targetLabels(retrySceneConfig.getLabels())
+                .namespaceId(retry.getNamespaceId())
+                .groupName(retry.getGroupName())
+                .routeKey(retrySceneConfig.getRouteKey())
+                .allocKey(String.valueOf(retry.getId()))
+                .build();
+
+        InstanceLiveInfo instance = instanceManager.getALiveInstanceByRouteKey(condition);
+        if (Objects.isNull(instance)) {
+            // 无客户端不执行调度
+            updateRetryTaskStatus(execute.getRetryTaskId(), RetryTaskStatusEnum.CANCEL.getStatus(), RetryOperationReasonEnum.NOT_CLIENT);
+            RetryTaskFailAlarmEventDTO toRetryTaskFailAlarmEventDTO =
+                    RetryTaskConverter.INSTANCE.toRetryTaskFailAlarmEventDTO(retry, "No client nodes",
+                            RetryNotifySceneEnum.RETRY_NO_CLIENT_NODES_ERROR.getNotifyScene());
+            SnailSpringContext.getContext().publishEvent(new RetryTaskFailAlarmEvent(toRetryTaskFailAlarmEventDTO));
+            return;
+        }
+
+        RegisterNodeInfo nodeInfo = instance.getNodeInfo();
         updateRetryTaskStatus(execute.getRetryTaskId(), RetryTaskStatusEnum.RUNNING.getStatus(),
-                ClientInfoUtils.generate(serverNode));
+                ClientInfoUtils.generate(nodeInfo));
 
         if (SyetemTaskTypeEnum.CALLBACK.getType().equals(retry.getTaskType())) {
             // 请求客户端
             RequestCallbackExecutorDTO callbackExecutorDTO = RetryTaskConverter.INSTANCE.toRequestCallbackExecutorDTO(retrySceneConfig, retry);
-            callbackExecutorDTO.setClientId(serverNode.getHostId());
+            callbackExecutorDTO.setClientId(nodeInfo.getHostId());
             callbackExecutorDTO.setRetryTaskId(execute.getRetryTaskId());
 
             ActorRef actorRef = ActorGenerator.callbackRealTaskExecutorActor();
@@ -133,7 +141,7 @@ public class RetryExecutor extends AbstractActor {
 
             // 请求客户端
             RequestRetryExecutorDTO retryExecutorDTO = RetryTaskConverter.INSTANCE.toRealRetryExecutorDTO(retrySceneConfig, retry);
-            retryExecutorDTO.setClientId(serverNode.getHostId());
+            retryExecutorDTO.setClientId(nodeInfo.getHostId());
             retryExecutorDTO.setRetryTaskId(execute.getRetryTaskId());
 
             ActorRef actorRef = ActorGenerator.retryRealTaskExecutorActor();
@@ -142,7 +150,7 @@ public class RetryExecutor extends AbstractActor {
 
         // 运行中的任务，需要进行超时检查
         RetryTimerWheel.registerWithRetry(() -> new RetryTimeoutCheckTask(
-                execute.getRetryTaskId(), execute.getRetryId(), retryTaskStopHandler, retryMapper, retryTaskMapper),
+                        execute.getRetryTaskId(), execute.getRetryId(), retryTaskStopHandler, retryMapper, retryTaskMapper),
                 // 加500ms是为了让尽量保证客户端自己先超时中断，防止客户端上报成功但是服务端已触发超时中断
                 Duration.ofMillis(DateUtils.toEpochMilli(retrySceneConfig.getExecutorTimeout()) + 500));
     }
