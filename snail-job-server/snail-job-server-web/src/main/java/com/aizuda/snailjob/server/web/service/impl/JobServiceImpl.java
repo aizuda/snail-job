@@ -11,6 +11,7 @@ import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.server.common.WaitStrategy;
 import com.aizuda.snailjob.server.common.config.SystemProperties;
 import com.aizuda.snailjob.server.common.dto.PartitionTask;
+import com.aizuda.snailjob.server.common.dto.PointInTimeDTO;
 import com.aizuda.snailjob.server.common.enums.JobTaskExecutorSceneEnum;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
@@ -50,7 +51,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author opensnail
@@ -146,12 +151,37 @@ public class JobServiceImpl implements JobService {
         // 判断常驻任务
         Job job = JobConverter.INSTANCE.convert(jobRequestVO);
         job.setResident(isResident(jobRequestVO));
+
+        // check triggerInterval
+        checkTriggerInterval(jobRequestVO);
+
         job.setBucketIndex(HashUtil.bkdrHash(jobRequestVO.getGroupName() + jobRequestVO.getJobName())
                 % systemProperties.getBucketTotal());
         job.setNextTriggerAt(calculateNextTriggerAt(jobRequestVO, DateUtils.toNowMilli()));
         job.setNamespaceId(UserSessionUtils.currentUserSession().getNamespaceId());
         job.setId(null);
         return 1 == jobMapper.insert(job);
+    }
+
+    private static void checkTriggerInterval(JobRequestVO jobRequestVO) {
+        if (jobRequestVO.getTriggerType() == WaitStrategies.WaitStrategyEnum.POINT_IN_TIME.getType()) {
+            String triggerInterval = jobRequestVO.getTriggerInterval();
+            List<String> pointInTimeDTOS = JsonUtil.parseList(triggerInterval, String.class);
+            LocalDateTime now = LocalDateTime.now();
+            List<LocalDateTime> localDateTimes = pointInTimeDTOS
+                    .stream()
+                    .map(DateUtils::toLocalDateTime)
+                    .sorted(Comparator.naturalOrder())
+                    .toList();
+            LocalDateTime first = localDateTimes.get(0);
+            if (first.isBefore(now)) {
+                throw new SnailJobServerException("The submission time is less than the current time. triggerTime:{} now:{}", first, now);
+            }
+
+            // 判断间隔是否大于10秒
+            Assert.isTrue(areAllIntervalsLessThan(localDateTimes, Duration.ofSeconds(10)),
+                    () -> new SnailJobServerException("There are combinations with intervals less than 10(s)"));
+        }
     }
 
     @Override
@@ -165,6 +195,9 @@ public class JobServiceImpl implements JobService {
         Job updateJob = JobConverter.INSTANCE.convert(jobRequestVO);
         updateJob.setResident(isResident(jobRequestVO));
         updateJob.setNamespaceId(job.getNamespaceId());
+
+        // check triggerInterval
+        checkTriggerInterval(jobRequestVO);
 
         // 工作流任务
         if (Objects.equals(jobRequestVO.getTriggerType(), SystemConstants.WORKFLOW_TRIGGER_TYPE)) {
@@ -208,12 +241,27 @@ public class JobServiceImpl implements JobService {
             if (CronUtils.getExecuteInterval(jobRequestVO.getTriggerInterval()) < 10 * 1000) {
                 return StatusEnum.YES.getStatus();
             }
+        } else if (jobRequestVO.getTriggerType() == WaitStrategies.WaitStrategyEnum.POINT_IN_TIME.getType()) {
+            return StatusEnum.NO.getStatus();
         } else {
             throw new SnailJobServerException("Unknown trigger type");
         }
 
         return StatusEnum.NO.getStatus();
     }
+
+    private static boolean areAllIntervalsLessThan(List<LocalDateTime> times, Duration maxGap) {
+        if (times.size() < 2) return true;
+
+        for (int i = 1; i < times.size(); i++) {
+            Duration gap = Duration.between(times.get(i - 1), times.get(i));
+            if (gap.compareTo(maxGap) >= 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 
     @Override
     public Boolean updateJobStatus(JobStatusUpdateRequestVO jobRequestVO) {

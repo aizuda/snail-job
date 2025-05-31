@@ -29,6 +29,10 @@ public class DateUtils {
         return toLocalDateTime(date.getTime()).toInstant(zoneOffset).toEpochMilli();
     }
 
+    public static LocalDateTime toLocalDateTime(String dateTime) {
+        return LocalDateTime.parse(dateTime, NORM_DATETIME_PATTERN);
+    }
+
     public static long toEpochMilli(LocalDateTime date) {
         return date.toInstant(zoneOffset).toEpochMilli();
     }
