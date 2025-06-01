@@ -18,4 +18,6 @@ public class WorkflowQueryVO extends BaseQueryVO {
     private String workflowName;
 
     private Integer workflowStatus;
+
+    private Long ownerId;
 }

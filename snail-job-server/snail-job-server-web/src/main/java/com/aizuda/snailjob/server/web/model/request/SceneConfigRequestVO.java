@@ -97,4 +97,9 @@ public class SceneConfigRequestVO {
      * 回调间隔时间
      */
     private String cbTriggerInterval;
+
+    /**
+     * 负责人id
+     */
+    private Long ownerId;
 }

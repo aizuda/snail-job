@@ -12,7 +12,12 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class SceneConfigQueryVO extends BaseQueryVO {
+
     private String groupName;
+
     private String sceneName;
+
     private Integer sceneStatus;
+
+    private Long ownerId;
 }

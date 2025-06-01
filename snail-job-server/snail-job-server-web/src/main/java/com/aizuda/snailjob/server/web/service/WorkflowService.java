@@ -38,8 +38,7 @@ public interface WorkflowService {
 
     void importWorkflowTask(@Valid @NotEmpty(message = "Import data cannot be empty") List<WorkflowRequestVO> requests);
 
-    String exportWorkflowTask(ExportWorkflowVO exportWorkflowVO
-    );
+    String exportWorkflowTask(ExportWorkflowVO exportWorkflowVO);
 
     Boolean deleteByIds(Set<Long> ids);
 }

@@ -118,7 +118,7 @@ public class JobExecutorActor extends AbstractActor {
                 operationReason = JobOperationReasonEnum.JOB_CLOSED.getReason();
             } else {
                 Set<InstanceLiveInfo> liveInfoSet = instanceManager.getInstanceALiveInfoSet(
-                        job.getGroupName(), job.getNamespaceId(), job.getLabels());
+                        job.getNamespaceId(), job.getGroupName(), job.getLabels());
 
                 // 空节点处理
                 if (CollUtil.isEmpty(liveInfoSet)) {

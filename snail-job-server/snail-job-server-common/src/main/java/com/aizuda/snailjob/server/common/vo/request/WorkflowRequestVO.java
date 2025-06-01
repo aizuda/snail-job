@@ -136,4 +136,9 @@ public class WorkflowRequestVO {
      * 通知告警场景配置id列表
      */
     private Set<Long> notifyIds;
+
+    /**
+     * 负责人id
+     */
+    private Long ownerId;
 }

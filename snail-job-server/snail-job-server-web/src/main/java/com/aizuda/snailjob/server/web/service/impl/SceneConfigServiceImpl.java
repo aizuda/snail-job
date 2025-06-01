@@ -27,10 +27,8 @@ import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import com.aizuda.snailjob.template.datasource.access.ConfigAccess;
 import com.aizuda.snailjob.template.datasource.access.TaskAccess;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.RetrySummaryMapper;
-import com.aizuda.snailjob.template.datasource.persistence.po.RetryDeadLetter;
-import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
-import com.aizuda.snailjob.template.datasource.persistence.po.RetrySummary;
-import com.aizuda.snailjob.template.datasource.persistence.po.Retry;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.SystemUserMapper;
+import com.aizuda.snailjob.template.datasource.persistence.po.*;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
@@ -59,8 +57,7 @@ public class SceneConfigServiceImpl implements SceneConfigService {
     private final AccessTemplate accessTemplate;
     private final GroupHandler groupHandler;
     private final RetrySummaryMapper retrySummaryMapper;
-
-
+    private final SystemUserMapper systemUserMapper;
 
     @Override
     public PageResult<List<SceneConfigResponseVO>> getSceneConfigPageList(SceneConfigQueryVO queryVO) {
@@ -75,9 +72,17 @@ public class SceneConfigServiceImpl implements SceneConfigService {
                         .in(CollUtil.isNotEmpty(groupNames), RetrySceneConfig::getGroupName, groupNames)
                         .eq(Objects.nonNull(queryVO.getSceneStatus()), RetrySceneConfig::getSceneStatus, queryVO.getSceneStatus())
                         .likeRight(StrUtil.isNotBlank(queryVO.getSceneName()), RetrySceneConfig::getSceneName, StrUtil.trim(queryVO.getSceneName()))
+                        .eq(Objects.nonNull(queryVO.getOwnerId()), RetrySceneConfig::getOwnerId, queryVO.getOwnerId())
                         .orderByDesc(RetrySceneConfig::getCreateDt));
 
-        return new PageResult<>(pageDTO, SceneConfigResponseVOConverter.INSTANCE.convertList(pageDTO.getRecords()));
+        List<SceneConfigResponseVO> sceneConfigResponseVOList = SceneConfigResponseVOConverter.INSTANCE.convertList(pageDTO.getRecords());
+        for (SceneConfigResponseVO responseVO : sceneConfigResponseVOList) {
+            if (Objects.nonNull(responseVO.getOwnerId())) {
+                SystemUser systemUser = systemUserMapper.selectById(responseVO.getOwnerId());
+                responseVO.setOwnerName(systemUser.getUsername());
+            }
+        }
+        return new PageResult<>(pageDTO, sceneConfigResponseVOList);
     }
 
     @Override
@@ -155,15 +160,16 @@ public class SceneConfigServiceImpl implements SceneConfigService {
 
         retrySceneConfig.setTriggerInterval(
                 Optional.ofNullable(retrySceneConfig.getTriggerInterval()).orElse(StrUtil.EMPTY));
-        Assert.isTrue(1 == accessTemplate.getSceneConfigAccess().update(retrySceneConfig,
-                        new LambdaUpdateWrapper<RetrySceneConfig>()
-                                .eq(RetrySceneConfig::getNamespaceId, namespaceId)
-                                .eq(RetrySceneConfig::getGroupName, requestVO.getGroupName())
-                                .eq(RetrySceneConfig::getSceneName, requestVO.getSceneName())),
+
+        LambdaUpdateWrapper<RetrySceneConfig> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(RetrySceneConfig::getNamespaceId, namespaceId);
+        updateWrapper.eq(RetrySceneConfig::getGroupName, requestVO.getGroupName());
+        updateWrapper.eq(RetrySceneConfig::getSceneName, requestVO.getSceneName());
+        updateWrapper.set(RetrySceneConfig::getOwnerId, requestVO.getOwnerId());
+
+        Assert.isTrue(1 == accessTemplate.getSceneConfigAccess().update(retrySceneConfig, updateWrapper),
                 () -> new SnailJobServerException("failed to update scene. retrySceneConfig:[{}]",
                         JsonUtil.toJsonString(retrySceneConfig)));
-
-
 
         // 同步配置到客户端
         SyncConfigHandler.addSyncTask(requestVO.getGroupName(), namespaceId);
@@ -345,7 +351,7 @@ public class SceneConfigServiceImpl implements SceneConfigService {
 
     private static void checkExecuteInterval(Integer backOff, String triggerInterval) {
         if (Lists.newArrayList(WaitStrategies.WaitStrategyEnum.FIXED.getType(),
-                        WaitStrategies.WaitStrategyEnum.RANDOM.getType()).contains(backOff)) {
+                WaitStrategies.WaitStrategyEnum.RANDOM.getType()).contains(backOff)) {
             if (Integer.parseInt(triggerInterval) < 10) {
                 throw new SnailJobServerException("Interval time must not be less than 10");
             }

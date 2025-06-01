@@ -75,4 +75,8 @@ public class RetrySceneConfig extends CreateUpdateDt {
      */
     private String labels;
 
+    /**
+     * 负责人id
+     */
+    private Long ownerId;
 }

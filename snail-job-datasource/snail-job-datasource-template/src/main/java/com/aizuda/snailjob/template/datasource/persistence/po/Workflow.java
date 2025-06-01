@@ -111,4 +111,9 @@ public class Workflow extends CreateUpdateDt {
      * 通知告警场景配置id列表
      */
     private String notifyIds;
+
+    /**
+     * 负责人id
+     */
+    private Long ownerId;
 }

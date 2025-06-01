@@ -69,4 +69,11 @@ public class WorkflowResponseVO {
      * 工作流上下文
      */
     private String wfContext;
+
+    /**
+     * 负责人名称
+     */
+    private String ownerName;
+
+    private Long ownerId;
 }

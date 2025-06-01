@@ -64,4 +64,11 @@ public class SceneConfigResponseVO {
      * 回调间隔时间
      */
     private String cbTriggerInterval;
+
+    /**
+     * 负责人名称
+     */
+    private String ownerName;
+
+    private Long ownerId;
 }
