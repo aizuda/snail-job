@@ -1,14 +1,14 @@
 package com.aizuda.snailjob.client.common.window;
 
-import cn.hutool.core.thread.NamedThreadFactory;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReferenceArray;
@@ -61,7 +61,28 @@ public class SlidingRingWindow<T> {
         this.ringArray = new AtomicReferenceArray<>(ringSize);
         this.listener = listener;
         this.scheduler = scheduler;
+
+        // 开启主动巡检
+        scheduler.scheduleAtFixedRate(() -> {
+            long now = System.currentTimeMillis();
+            for (int i = 0; i < ringSize; i++) {
+                Window<T> window = getWindow(i);
+                if (window.isOutWindow(now)) {
+                    emit(window);
+                }
+            }
+        }, duration.toMillis(), duration.toMillis(), TimeUnit.MILLISECONDS);
+
+        // jvm退出时提取窗口的所有数据
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            log.info("JVM is about to exit, emitting data in the Window");
+            for (int i = 0; i < ringSize; i++) {
+                emit(getWindow(i));
+            }
+        }));
     }
+
+
 
     /**
      * Adds an element to the current window.
@@ -74,7 +95,7 @@ public class SlidingRingWindow<T> {
      * @param data the element to be added to the window
      */
     public void add(T data) {
-        final var now = LocalDateTime.now();
+        final var now = System.currentTimeMillis();
 
         for (; ; ) {
             final long currentSequence = sequencer.get();
@@ -87,12 +108,11 @@ public class SlidingRingWindow<T> {
                  *   ^
                  *  从第一个槽位(sequence=0)开始创建窗口
                  */
-                final Window<T> newWindow = new Window<>(now.plus(duration), ConcurrentLinkedQueue::new);
+                final Window<T> newWindow = new Window<>(now + duration.toMillis(), ConcurrentLinkedQueue::new);
                 if (createNewWindow(currentSequence, null, newWindow)) {
                     // add new
                     newWindow.getQueue().add(data);
                     // schedule time window emit after add new window
-                    scheduleWindowEmit(newWindow, now);
                     return;
                 }
             } else if (currentWindow.isOutWindow(now)) {
@@ -111,7 +131,11 @@ public class SlidingRingWindow<T> {
                  *   在原本W2的位置创建W6
                  *   并清理过期的W5
                  */
-                final Window<T> newWindow = new Window<>(now.plus(duration), ConcurrentLinkedQueue::new);
+
+                // clear old
+                emit(currentWindow);
+
+                final Window<T> newWindow = new Window<>(now + duration.toMillis(), ConcurrentLinkedQueue::new);
                 final long nextSequence = currentSequence + 1;
                 // maybe next is old
                 final Window<T> nextWindow = getWindow(nextSequence);
@@ -143,7 +167,7 @@ public class SlidingRingWindow<T> {
                  *     ^
                  *  立即触发emit
                  */
-                final var queue = currentWindow.getQueue();
+                final ConcurrentLinkedQueue<T> queue = currentWindow.getQueue();
                 queue.add(data);
                 if (queue.size() >= totalThreshold) {
                     emit(currentWindow);
@@ -153,10 +177,9 @@ public class SlidingRingWindow<T> {
         }
     }
 
-
-    private void scheduleWindowEmit(Window<T> window, LocalDateTime now) {
+    private void scheduleWindowEmit(Window<T> window, long now) {
         scheduler.schedule(() -> emit(window)
-                , now.until(window.windowTime, ChronoUnit.MILLIS), TimeUnit.MILLISECONDS);
+                , Math.max(window.windowTime - now, 100), TimeUnit.MILLISECONDS);
     }
 
 
@@ -205,7 +228,7 @@ public class SlidingRingWindow<T> {
      */
     private static final class Window<T> {
 
-        private final LocalDateTime windowTime;
+        private final long windowTime;
 
         private final Supplier<ConcurrentLinkedQueue<T>> dataQueueSupplier;
 
@@ -213,14 +236,14 @@ public class SlidingRingWindow<T> {
 
         private final AtomicInteger wip = new AtomicInteger();
 
-        private Window(LocalDateTime windowTime, Supplier<ConcurrentLinkedQueue<T>> dataQueueSupplier) {
+        private Window(long windowTime, Supplier<ConcurrentLinkedQueue<T>> dataQueueSupplier) {
             this.windowTime = windowTime;
             this.dataQueueSupplier = dataQueueSupplier;
         }
 
 
-        public boolean isOutWindow(LocalDateTime now) {
-            return windowTime.isBefore(now);
+        public boolean isOutWindow(long now) {
+            return windowTime < now;
         }
 
         public ConcurrentLinkedQueue<T> getQueue() {
