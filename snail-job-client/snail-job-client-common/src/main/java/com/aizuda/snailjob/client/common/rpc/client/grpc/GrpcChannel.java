@@ -196,7 +196,7 @@ public final class GrpcChannel {
     }
 
 
-    public static ListenableFuture<GrpcResult> sendOfUnary(String path, String body, final long reqId) {
+    public static ListenableFuture<GrpcResult> sendOfUnary(String path, String body, long reqId, Map<String, String> map) {
         if (channel == null) {
             return null;
         }
@@ -227,9 +227,8 @@ public final class GrpcChannel {
             SystemConstants.DEFAULT_TOKEN));
         headersMap.put(HeadersEnum.TOKEN.getKey(), Optional.ofNullable(snailJobProperties.getToken()).orElse(
                 SystemConstants.DEFAULT_TOKEN));
-        Map<String, String> labels = snailJobProperties.getLabels();
-        if (CollUtil.isNotEmpty(labels)) {
-            headersMap.put(HeadersEnum.LABEL.getKey(), JsonUtil.toJsonString(labels));
+        if (CollUtil.isNotEmpty(map)) {
+            headersMap.putAll(map);
         }
 
         Metadata metadata = Metadata

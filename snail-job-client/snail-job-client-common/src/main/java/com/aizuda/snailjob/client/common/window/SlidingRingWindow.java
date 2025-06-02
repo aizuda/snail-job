@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -197,6 +198,10 @@ public class SlidingRingWindow<T> {
      * @param window the window whose elements should be emitted
      */
     private void emit(Window<T> window) {
+        if (Objects.isNull(window)) {
+            return;
+        }
+
         final List<T> drainList = window.drain();
         if (drainList.isEmpty()) {
             return;

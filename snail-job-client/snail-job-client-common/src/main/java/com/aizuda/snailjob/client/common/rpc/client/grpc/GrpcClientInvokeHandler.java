@@ -1,6 +1,7 @@
 package com.aizuda.snailjob.client.common.rpc.client.grpc;
 
 import cn.hutool.core.date.StopWatch;
+import com.aizuda.snailjob.client.common.annotation.Header;
 import com.aizuda.snailjob.client.common.annotation.Mapping;
 import com.aizuda.snailjob.client.common.config.SnailJobProperties;
 import com.aizuda.snailjob.client.common.config.SnailJobProperties.RpcClientProperties;
@@ -20,6 +21,10 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -63,7 +68,7 @@ public class GrpcClientInvokeHandler<R extends Result<Object>> implements Invoca
 
         long reqId = newId();
         ListenableFuture<GrpcResult> future = GrpcChannel.sendOfUnary(annotation.path(), JsonUtil.toJsonString(args),
-            reqId);
+            reqId, getHeaderInfo(method, args));
         SnailJobLog.LOCAL.debug("Request complete requestId:[{}] took [{}ms]", sw.getTotalTimeMillis(), reqId);
         if (future == null) {
             return (R) new SnailJobRpcResult(StatusEnum.NO.getStatus(), "future is nulll", null, reqId);
@@ -106,6 +111,23 @@ public class GrpcClientInvokeHandler<R extends Result<Object>> implements Invoca
 
     private static long newId() {
         return REQUEST_ID.getAndIncrement();
+    }
+
+    private Map<String, String> getHeaderInfo(Method method, Object[] args) {
+        Map<String, String> map = new HashMap<>();
+        Parameter[] parameters = method.getParameters();
+        for (int i = 0; i < parameters.length; i++) {
+            Parameter parameter = parameters[i];
+            if (parameter.isAnnotationPresent(Header.class)) {
+                Header header = parameter.getAnnotation(Header.class);
+                Object o = args[i];
+                if (Objects.nonNull(o)) {
+                    map.put(header.name().getKey(), JsonUtil.toJsonString(o));
+                }
+            }
+        }
+
+        return map;
     }
 
     protected static ThreadPoolExecutor createGrpcExecutor() {

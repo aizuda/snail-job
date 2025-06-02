@@ -1,5 +1,7 @@
 package com.aizuda.snailjob.common.core.constant;
 
+import cn.hutool.core.lang.Pair;
+
 /**
  * 系统通用常量
  *
@@ -276,4 +278,9 @@ public interface SystemConstants {
      * 动态分片的root节点
      */
     String ROOT_MAP = "ROOT_MAP";
+
+    /**
+     * 默认的标签
+     */
+    Pair<String, String> DEFAULT_LABEL = Pair.of("state", "running");
 }

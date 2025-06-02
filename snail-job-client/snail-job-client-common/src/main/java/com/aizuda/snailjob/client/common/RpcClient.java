@@ -1,14 +1,17 @@
 package com.aizuda.snailjob.client.common;
 
+import com.aizuda.snailjob.client.common.annotation.Header;
 import com.aizuda.snailjob.client.common.annotation.Mapping;
 import com.aizuda.snailjob.client.common.rpc.client.RequestMethod;
 import com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH;
+import com.aizuda.snailjob.common.core.enums.HeadersEnum;
 import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
 import com.aizuda.snailjob.common.core.model.Result;
 import com.aizuda.snailjob.server.model.dto.LogTaskDTO;
 import com.aizuda.snailjob.server.model.dto.RetryTaskDTO;
 
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -30,6 +33,6 @@ public interface RpcClient {
     Result syncRemoteConfig();
 
     @Mapping(method = RequestMethod.POST, path = HTTP_PATH.BEAT)
-    Result beat(String mark);
+    Result beat(String mark, @Header(name = HeadersEnum.LABEL) Map<String, String> labels);
 
 }

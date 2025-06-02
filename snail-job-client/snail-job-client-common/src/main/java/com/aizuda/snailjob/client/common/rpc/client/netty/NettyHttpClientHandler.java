@@ -104,7 +104,7 @@ public class NettyHttpClientHandler extends SimpleChannelInboundHandler<FullHttp
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
         SnailJobLog.LOCAL.debug("userEventTriggered");
         if (evt instanceof IdleStateEvent) {
-            ClientRegister.CLIENT.beat(BEAT.PING);
+            ClientRegister.CLIENT.beat(BEAT.PING, null);
         } else {
             super.userEventTriggered(ctx, evt);
         }

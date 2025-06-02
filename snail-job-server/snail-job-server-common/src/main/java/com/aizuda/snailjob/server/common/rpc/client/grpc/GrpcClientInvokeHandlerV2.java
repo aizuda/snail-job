@@ -212,9 +212,9 @@ public class GrpcClientInvokeHandlerV2 implements InvocationHandler {
             Parameter parameter = parameters[i];
             if (parameter.isAnnotationPresent(Body.class)) {
                 body = args[i];
-            } else if ((parameter.isAnnotationPresent(Header.class))) {
+            } else if (parameter.isAnnotationPresent(Header.class)) {
                 requestHeaders.put(SystemConstants.SNAIL_JOB_HEAD_KEY, JsonUtil.toJsonString(args[i]));
-            } else if ((parameter.isAnnotationPresent(Param.class))) {
+            } else if (parameter.isAnnotationPresent(Param.class)) {
                 paramMap.put(parameter.getAnnotation(Param.class).name(), args[i]);
             } else {
                 throw new SnailJobServerException("parameter error");
