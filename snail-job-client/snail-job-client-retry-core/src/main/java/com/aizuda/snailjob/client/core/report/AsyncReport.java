@@ -2,12 +2,15 @@ package com.aizuda.snailjob.client.core.report;
 
 import com.aizuda.snailjob.client.common.Lifecycle;
 import com.aizuda.snailjob.client.common.config.SnailJobProperties;
-import com.aizuda.snailjob.client.common.window.SlidingWindow;
+import com.aizuda.snailjob.client.common.window.SlidingRingWindow;
 import com.aizuda.snailjob.client.core.retryer.RetryerInfo;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.model.dto.RetryTaskDTO;
+import com.google.common.collect.Lists;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -20,7 +23,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Component
 public class AsyncReport extends AbstractReport implements Lifecycle {
-    private SlidingWindow<RetryTaskDTO> slidingWindow;
+    private SlidingRingWindow<RetryTaskDTO> slidingWindow;
 
     @Override
     public boolean supports(boolean async) {
@@ -49,23 +52,17 @@ public class AsyncReport extends AbstractReport implements Lifecycle {
 
         SnailJobProperties.SlidingWindowConfig slidingWindowConfig = snailJobProperties.getRetry().getReportSlidingWindow();
 
-        slidingWindow = SlidingWindow
-                .Builder
-                .<RetryTaskDTO>newBuilder()
-                .withTotalThreshold(slidingWindowConfig.getTotalThreshold())
-                .withWindowTotalThreshold(slidingWindowConfig.getWindowTotalThreshold())
-                .withDuration(slidingWindowConfig.getDuration(), slidingWindowConfig.getChronoUnit())
-                .withListener(new ReportListener())
-                .build();
+        ChronoUnit chronoUnit = slidingWindowConfig.getChronoUnit();
+        Duration duration = Duration.of(slidingWindowConfig.getDuration(), chronoUnit);
+        slidingWindow= new SlidingRingWindow<>(duration, slidingWindowConfig.getTotalThreshold(), Lists.newArrayList(new ReportListener()));
 
-        slidingWindow.start();
     }
 
     @Override
     public void close() {
         SnailJobLog.LOCAL.info("AsyncReport about to shutdown");
         if (Objects.nonNull(slidingWindow)) {
-            slidingWindow.end();
+            slidingWindow.shutdown();
         }
         SnailJobLog.LOCAL.info("AsyncReport has been shutdown");
     }

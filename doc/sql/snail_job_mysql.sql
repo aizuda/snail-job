@@ -204,6 +204,8 @@ CREATE TABLE `sj_retry_scene_config`
     `cb_trigger_type`     tinyint(4)          NOT NULL DEFAULT 1 COMMENT '1、默认等级 2、固定间隔时间 3、CRON 表达式',
     `cb_max_count`        int(11)             NOT NULL DEFAULT 16 COMMENT '回调的最大执行次数',
     `cb_trigger_interval` varchar(16)         NOT NULL DEFAULT '' COMMENT '回调的最大执行次数',
+    `owner_id`            bigint(20)          NULL     DEFAULT NULL COMMENT '负责人id',
+    `labels`              varchar(512)        NULL     DEFAULT '' COMMENT '标签',
     `description`         varchar(256)        NOT NULL DEFAULT '' COMMENT '描述',
     `create_dt`           datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_dt`           datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
@@ -225,6 +227,7 @@ CREATE TABLE `sj_server_node`
     `expire_at`    datetime            NOT NULL COMMENT '过期时间',
     `node_type`    tinyint(4)          NOT NULL COMMENT '节点类型 1、客户端 2、是服务端',
     `ext_attrs`    varchar(256)        NULL     DEFAULT '' COMMENT '扩展字段',
+    `labels`       varchar(512)        NULL     DEFAULT '' COMMENT '标签',
     `create_dt`    datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_dt`    datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     PRIMARY KEY (`id`),
@@ -238,12 +241,12 @@ CREATE TABLE `sj_server_node`
 
 CREATE TABLE `sj_distributed_lock`
 (
-    `name`       varchar(64)         NOT NULL COMMENT '锁名称',
-    `lock_until` timestamp(3)        NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '锁定时长',
-    `locked_at`  timestamp(3)        NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '锁定时间',
-    `locked_by`  varchar(255)        NOT NULL COMMENT '锁定者',
-    `create_dt`  datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_dt`  datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '修改时间',
+    `name`       varchar(64)  NOT NULL COMMENT '锁名称',
+    `lock_until` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '锁定时长',
+    `locked_at`  timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '锁定时间',
+    `locked_by`  varchar(255) NOT NULL COMMENT '锁定者',
+    `create_dt`  datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_dt`  datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '修改时间',
     PRIMARY KEY (`name`)
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 0
@@ -280,19 +283,6 @@ CREATE TABLE `sj_system_user_permission`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4 COMMENT ='系统用户权限表';
 
-CREATE TABLE `sj_sequence_alloc`
-(
-    `id`           bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `namespace_id` varchar(64)         NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' COMMENT '命名空间id',
-    `group_name`   varchar(64)         NOT NULL DEFAULT '' COMMENT '组名称',
-    `max_id`       bigint(20)          NOT NULL DEFAULT 1 COMMENT '最大id',
-    `step`         int(11)             NOT NULL DEFAULT 100 COMMENT '步长',
-    `update_dt`    datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_namespace_id_group_name` (`namespace_id`, `group_name`)
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4 COMMENT ='号段模式序号ID分配表';
-
 -- 分布式调度DDL
 CREATE TABLE `sj_job`
 (
@@ -318,7 +308,8 @@ CREATE TABLE `sj_job`
     `bucket_index`     int(11)             NOT NULL DEFAULT 0 COMMENT 'bucket',
     `resident`         tinyint(4)          NOT NULL DEFAULT 0 COMMENT '是否是常驻任务',
     `notify_ids`       varchar(128)        NOT NULL DEFAULT '' COMMENT '通知告警场景配置id列表',
-    `owner_id`         bigint(20)          NULL                 COMMENT '负责人id',
+    `owner_id`         bigint(20)          NULL     DEFAULT NULL COMMENT '负责人id',
+    `labels`           varchar(512)        NULL     DEFAULT '' COMMENT '标签',
     `description`      varchar(256)        NOT NULL DEFAULT '' COMMENT '描述',
     `ext_attrs`        varchar(256)        NULL     DEFAULT '' COMMENT '扩展字段',
     `deleted`          tinyint(4)          NOT NULL DEFAULT 0 COMMENT '逻辑删除 1、删除',
@@ -471,6 +462,7 @@ CREATE TABLE `sj_workflow`
     `notify_ids`       varchar(128)        NOT NULL DEFAULT '' COMMENT '通知告警场景配置id列表',
     `bucket_index`     int(11)             NOT NULL DEFAULT 0 COMMENT 'bucket',
     `version`          int(11)             NOT NULL COMMENT '版本号',
+    `owner_id`         bigint(20)          NULL     DEFAULT NULL COMMENT '负责人id',
     `ext_attrs`        varchar(256)        NULL     DEFAULT '' COMMENT '扩展字段',
     `deleted`          tinyint(4)          NOT NULL DEFAULT 0 COMMENT '逻辑删除 1、删除',
     `create_dt`        datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
@@ -520,7 +512,7 @@ CREATE TABLE `sj_workflow_task_batch`
     `wf_context`        text                         DEFAULT NULL COMMENT '全局上下文',
     `execution_at`      bigint(13)          NOT NULL DEFAULT 0 COMMENT '任务执行时间',
     `ext_attrs`         varchar(256)        NULL     DEFAULT '' COMMENT '扩展字段',
-    `version`           int(11)              NOT NULL DEFAULT 1 COMMENT '版本号',
+    `version`           int(11)             NOT NULL DEFAULT 1 COMMENT '版本号',
     `deleted`           tinyint(4)          NOT NULL DEFAULT 0 COMMENT '逻辑删除 1、删除',
     `create_dt`         datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_dt`         datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',

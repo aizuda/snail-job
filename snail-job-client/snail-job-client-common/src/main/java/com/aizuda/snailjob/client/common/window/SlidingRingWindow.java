@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.client.common.window;
 
+import com.aizuda.snailjob.common.core.window.Listener;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
@@ -38,7 +39,7 @@ public class SlidingRingWindow<T> {
 
     private final Integer totalThreshold;
 
-    private final List<Consumer<List<T>>> listener;
+    private final List<Listener<T>> listener;
 
     private final AtomicLong sequencer = new AtomicLong();
 
@@ -46,16 +47,16 @@ public class SlidingRingWindow<T> {
 
     private static final int DEFAULT_RING_SIZE = 4;
 
-    public SlidingRingWindow(Duration duration, Integer totalThreshold, List<Consumer<List<T>>> listener) {
+    public SlidingRingWindow(Duration duration, Integer totalThreshold, List<Listener<T>> listener) {
         this(DEFAULT_RING_SIZE, duration, totalThreshold, listener, new ScheduledThreadPoolExecutor(1));
     }
 
 
-    public SlidingRingWindow(int ringSize, Duration duration, Integer totalThreshold, List<Consumer<List<T>>> listener) {
+    public SlidingRingWindow(int ringSize, Duration duration, Integer totalThreshold, List<Listener<T>> listener) {
         this(ringSize, duration, totalThreshold, listener, new ScheduledThreadPoolExecutor(1));
     }
 
-    public SlidingRingWindow(int ringSize, Duration duration, Integer totalThreshold, List<Consumer<List<T>>> listener, ScheduledExecutorService scheduler) {
+    public SlidingRingWindow(int ringSize, Duration duration, Integer totalThreshold, List<Listener<T>> listener, ScheduledExecutorService scheduler) {
         this.duration = duration;
         this.totalThreshold = totalThreshold;
         this.ringArray = new AtomicReferenceArray<>(ringSize);
@@ -82,7 +83,12 @@ public class SlidingRingWindow<T> {
         }));
     }
 
-
+    public void shutdown() {
+        log.info("Sliding window is about to exit, emitting data in the Window");
+        for (int i = 0; i < ringArray.length(); i++) {
+            emit(getWindow(i));
+        }
+    }
 
     /**
      * Adds an element to the current window.
@@ -191,12 +197,12 @@ public class SlidingRingWindow<T> {
      * @param window the window whose elements should be emitted
      */
     private void emit(Window<T> window) {
-        final var drainList = window.drain();
+        final List<T> drainList = window.drain();
         if (drainList.isEmpty()) {
             return;
         }
         try {
-            listener.forEach(consumer -> consumer.accept(drainList));
+            listener.forEach(consumer -> consumer.handler(drainList));
         } catch (Throwable e) {
             log.error("sliding window emit is error", e);
         }

@@ -8,6 +8,7 @@ import java.util.List;
  * @author: opensnail
  * @date : 2021-12-02 14:36
  */
+@FunctionalInterface
 public interface Listener<T> {
 
     /**

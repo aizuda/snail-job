@@ -3,14 +3,17 @@ package com.aizuda.snailjob.client.common.log.report;
 import com.aizuda.snailjob.client.common.Lifecycle;
 import com.aizuda.snailjob.client.common.LogReport;
 import com.aizuda.snailjob.client.common.config.SnailJobProperties;
-import com.aizuda.snailjob.client.common.window.SlidingWindow;
+import com.aizuda.snailjob.client.common.window.SlidingRingWindow;
 import com.aizuda.snailjob.common.core.window.Listener;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.common.log.dto.LogContentDTO;
 import com.aizuda.snailjob.server.model.dto.LogTaskDTO;
+import com.google.common.collect.Lists;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
 /**
@@ -22,7 +25,7 @@ public abstract class AbstractLogReport<T extends LogTaskDTO> implements Lifecyc
 
     @Autowired
     private SnailJobProperties snailJobProperties;
-    private SlidingWindow<LogTaskDTO> slidingWindow;
+    private SlidingRingWindow<LogTaskDTO> slidingWindow;
 
     @Override
     public void report(LogContentDTO logContentDTO) {
@@ -40,16 +43,9 @@ public abstract class AbstractLogReport<T extends LogTaskDTO> implements Lifecyc
         SnailJobProperties.LogSlidingWindowConfig logSlidingWindow = snailJobProperties.getLogSlidingWindow();
 
         Listener<LogTaskDTO> reportLogListener = new ReportLogListener();
-        slidingWindow = SlidingWindow
-                .Builder
-                .<LogTaskDTO>newBuilder()
-                .withTotalThreshold(logSlidingWindow.getTotalThreshold())
-                .withWindowTotalThreshold(logSlidingWindow.getWindowTotalThreshold())
-                .withDuration(logSlidingWindow.getDuration(), logSlidingWindow.getChronoUnit())
-                .withListener(reportLogListener)
-                .build();
-
-        slidingWindow.start();
+        ChronoUnit chronoUnit = logSlidingWindow.getChronoUnit();
+        Duration duration = Duration.of(logSlidingWindow.getDuration(), chronoUnit);
+        slidingWindow= new SlidingRingWindow<>(duration, logSlidingWindow.getTotalThreshold(), Lists.newArrayList(reportLogListener));
     }
 
     @Override
@@ -59,7 +55,7 @@ public abstract class AbstractLogReport<T extends LogTaskDTO> implements Lifecyc
         }
 
         SnailJobLog.LOCAL.info("AsyncReport Log about to shutdown");
-        slidingWindow.end();
+        slidingWindow.shutdown();
         SnailJobLog.LOCAL.info("AsyncReport Log has been shutdown");
     }
 

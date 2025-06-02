@@ -22,7 +22,9 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author: opensnail
  * @date : 2023-07-23 13:38
  * @since 2.1.0
+ * @see: SlidingRingWindow
  */
+@Deprecated
 public class SlidingWindow<T> {
 
     /**

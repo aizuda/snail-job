@@ -12,9 +12,13 @@ import java.util.List;
 public interface MapHandler<T> {
 
     /**
-     * 执行MAP操作
+     * 执行 MAP 操作时需注意：
+     * 1. 建议待分片的集合不超过 200 个，严禁超过 500 个；
+     * 2. taskList 参数仅传递必要信息：
+     *    - 数据过多可能导致数据库字段超长；
+     *    - 服务端与客户端频繁交互，过大数据会影响 RPC 性能。
      *
-     * @param taskList 需要分片的集合(建议不超过200个, 超过500禁止分片.)
+     * @param taskList 需要分片的集合
      * @param nextTaskName 下一次需要处理MAP的节点名称 (不能是ROOT_MAP)
      * @return ExecuteResult
      */
