@@ -84,10 +84,10 @@ public final class MapInvokeHandler implements InvocationHandler {
 
         // 2. 同步发送请求
         Result<Boolean> result = CLIENT.batchReportMapTask(mapTaskRequest);
-        if (StatusEnum.YES.getStatus() == result.getStatus() || result.getData()) {
+        if (StatusEnum.YES.getStatus() == result.getStatus() || (Objects.nonNull(result.getData()) && result.getData())) {
             SnailJobLog.LOCAL.info("Map task create successfully!. taskName:[{}] TaskId:[{}] ", nextTaskName, jobContext.getTaskId());
         } else {
-            throw new SnailJobMapReduceException("map failed for task: " + nextTaskName);
+            throw new SnailJobMapReduceException("map failed for task: {} errorMsg:{}", nextTaskName, result.getMessage());
         }
 
         return ExecuteResult.success();

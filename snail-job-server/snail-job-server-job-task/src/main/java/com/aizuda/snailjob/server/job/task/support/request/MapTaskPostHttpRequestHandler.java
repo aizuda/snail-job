@@ -32,6 +32,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -69,6 +70,18 @@ public  class MapTaskPostHttpRequestHandler extends PostHttpRequestHandler {
         String namespace = HttpHeaderUtil.getNamespace(headers);
 
         SnailJobRequest retryRequest = JsonUtil.parseObject(content, SnailJobRequest.class);
+
+        try {
+            return doHandlerMapTask(retryRequest, namespace, groupName);
+        } catch (Exception e) {
+            SnailJobLog.LOCAL.error("map task Request error. content:[{}]", content, e);
+            return new SnailJobRpcResult(StatusEnum.NO.getStatus(), e.getMessage(), Boolean.FALSE,
+                    retryRequest.getReqId());
+        }
+
+    }
+
+    private SnailJobRpcResult doHandlerMapTask(SnailJobRequest retryRequest, String namespace, String groupName) {
         Object[] args = retryRequest.getArgs();
         MapTaskRequest mapTaskRequest = JsonUtil.parseObject(JsonUtil.toJsonString(args[0]), MapTaskRequest.class);
 
@@ -88,9 +101,9 @@ public  class MapTaskPostHttpRequestHandler extends PostHttpRequestHandler {
         // 创建map任务
         JobTaskGenerator taskInstance = JobTaskGeneratorFactory.getTaskInstance(job.getTaskType());
         JobTaskGenerateContext context = JobTaskConverter.INSTANCE.toJobTaskInstanceGenerateContext(mapTaskRequest);
-        context.setGroupName(HttpHeaderUtil.getGroupName(headers));
+        context.setGroupName(groupName);
         context.setArgsStr(argStr);
-        context.setNamespaceId(HttpHeaderUtil.getNamespace(headers));
+        context.setNamespaceId(namespace);
         context.setMrStage(MapReduceStageEnum.MAP.getStage());
         context.setMapSubTask(mapTaskRequest.getSubTask());
         context.setWfContext(mapTaskRequest.getWfContext());
