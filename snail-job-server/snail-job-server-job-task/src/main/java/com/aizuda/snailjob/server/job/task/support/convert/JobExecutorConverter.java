@@ -1,0 +1,23 @@
+package com.aizuda.snailjob.server.job.task.support.convert;
+
+import com.aizuda.snailjob.server.model.dto.JobExecutorDTO;
+import com.aizuda.snailjob.template.datasource.persistence.po.JobExecutors;
+import org.mapstruct.Mapper;
+import org.mapstruct.factory.Mappers;
+
+import java.util.List;
+
+/**
+ * @Author：srzou
+ * @Project：snail-job
+ * @since 1.6.0
+ */
+@Mapper
+public interface JobExecutorConverter {
+
+    JobExecutorConverter INSTANCE = Mappers.getMapper(JobExecutorConverter.class);
+
+
+    List<JobExecutors> toJobExecutors(List<JobExecutorDTO>  jobExecutorDTOS);
+
+}

@@ -14,4 +14,8 @@ import lombok.EqualsAndHashCode;
 public class JobExecutorQueryVO extends BaseQueryVO {
     private String groupName;
     private String executorInfo;
+    /**
+     * 1:java; 2:python; 3:go;
+     */
+    private String executorType;
 }

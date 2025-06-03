@@ -7,6 +7,7 @@ import com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH;
 import com.aizuda.snailjob.common.core.enums.HeadersEnum;
 import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
 import com.aizuda.snailjob.common.core.model.Result;
+import com.aizuda.snailjob.server.model.dto.JobExecutorDTO;
 import com.aizuda.snailjob.server.model.dto.LogTaskDTO;
 import com.aizuda.snailjob.server.model.dto.RetryTaskDTO;
 
@@ -36,6 +37,6 @@ public interface RpcClient {
     Result beat(String mark, @Header(name = HeadersEnum.LABEL) Map<String, String> labels);
 
     @Mapping(method = RequestMethod.POST, path = HTTP_PATH.REGISTER_JOB_EXECUTORS)
-    Result registryExecutors(List<String> contextList);
+    Result registryExecutors(List<JobExecutorDTO> contextList);
 
 }

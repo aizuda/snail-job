@@ -41,6 +41,7 @@ public class JobExecutorServiceImpl implements JobExecutorService {
         PageDTO<JobExecutors> selectPage = jobExecutorsMapper.selectPage(pageDTO,
                 new LambdaQueryWrapper<JobExecutors>()
                         .eq(JobExecutors::getNamespaceId, userSessionVO.getNamespaceId())
+                        .eq(StrUtil.isNotBlank(jobQueryVO.getExecutorType()), JobExecutors::getExecutorType, jobQueryVO.getExecutorType())
                         .in(CollUtil.isNotEmpty(groupNames), JobExecutors::getGroupName, groupNames)
                         .like(StrUtil.isNotBlank(jobQueryVO.getExecutorInfo()), JobExecutors::getJobExecutorsName, StrUtil.trim(jobQueryVO.getExecutorInfo()))
                         .orderByDesc(JobExecutors::getId));
@@ -61,6 +62,7 @@ public class JobExecutorServiceImpl implements JobExecutorService {
         return jobExecutorsMapper.selectList(
                 new LambdaQueryWrapper<JobExecutors>()
                         .eq(JobExecutors::getNamespaceId, userSessionVO.getNamespaceId())
+                        .eq(StrUtil.isNotBlank(jobQueryVO.getExecutorType()), JobExecutors::getExecutorType, jobQueryVO.getExecutorType())
                         .in(CollUtil.isNotEmpty(groupNames), JobExecutors::getGroupName, groupNames)
                         .like(StrUtil.isNotBlank(jobQueryVO.getExecutorInfo()), JobExecutors::getJobExecutorsName, StrUtil.trim(jobQueryVO.getExecutorInfo()))
                         .orderByDesc(JobExecutors::getId));

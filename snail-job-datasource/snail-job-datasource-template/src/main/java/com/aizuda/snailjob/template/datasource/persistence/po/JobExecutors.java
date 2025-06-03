@@ -32,4 +32,9 @@ public class JobExecutors extends CreateUpdateDt {
      * 定时任务执行器名称
      */
     private String jobExecutorsName;
+
+    /**
+     * 1:java; 2:python; 3:go;
+     */
+    private String executorType;
 }
