@@ -48,4 +48,8 @@ public class RetryTaskDTO implements Serializable {
      */
     private String extAttrs;
 
+    /**
+     * 序列化类型 {@link com.aizuda.snailjob.client.core.serializer.SerializerType SerializerType}
+     */
+    private int argsSerializerType;
 }

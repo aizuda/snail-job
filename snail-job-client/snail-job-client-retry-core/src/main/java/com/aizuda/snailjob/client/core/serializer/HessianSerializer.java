@@ -21,6 +21,11 @@ import java.util.Objects;
 public class HessianSerializer implements RetryArgSerializer {
 
     @Override
+    public SerializerType type() {
+        return SerializerType.HESSIAN;
+    }
+
+    @Override
     public String serialize(Object t) {
         if (Objects.isNull(t)) {
             return StrUtil.EMPTY;

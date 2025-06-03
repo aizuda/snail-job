@@ -41,6 +41,7 @@
         <aviator.version>5.3.3</aviator.version>
         <hessian.version>4.0.66</hessian.version>
         <QLExpress.version>3.3.4</QLExpress.version>
+        <fury.version>0.10.2</fury.version>
 
         <!--    grpc & protobuf    -->
         <grpc-java.version>1.71.0</grpc-java.version>
@@ -275,6 +276,11 @@
                 <groupId>com.google.protobuf</groupId>
                 <artifactId>protobuf-java</artifactId>
                 <version>${protobuf-java.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.fury</groupId>
+                <artifactId>fury-core</artifactId>
+                <version>${fury.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

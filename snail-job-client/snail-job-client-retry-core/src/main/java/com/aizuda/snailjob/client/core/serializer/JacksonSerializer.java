@@ -22,6 +22,11 @@ import java.util.Objects;
 public class JacksonSerializer implements RetryArgSerializer {
 
     @Override
+    public SerializerType type() {
+        return SerializerType.JACKSON;
+    }
+
+    @Override
     public String serialize(Object serializeInfo) {
         return JsonUtil.toJsonString(serializeInfo);
     }
