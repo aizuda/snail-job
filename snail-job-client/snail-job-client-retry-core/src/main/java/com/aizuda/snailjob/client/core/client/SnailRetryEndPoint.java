@@ -217,7 +217,7 @@ public class SnailRetryEndPoint implements Lifecycle {
 
         Method executorMethod = retryerInfo.getMethod();
 
-        RetryArgSerializer retryArgSerializer = new JacksonSerializer();
+        RetryArgSerializer retryArgSerializer = SnailRetrySpiLoader.loadRetryArgSerializer();
 
         Object[] deSerialize = null;
         try {
