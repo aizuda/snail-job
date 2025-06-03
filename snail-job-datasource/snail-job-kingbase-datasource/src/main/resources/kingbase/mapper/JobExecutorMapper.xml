@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aizuda.snailjob.template.datasource.persistence.mapper.JobExecutorsMapper">
+
+    <insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sj_job_executors (namespace_id, group_name, job_executors_name, create_dt)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.namespaceId},
+            #{item.groupName},
+            #{item.jobExecutorsName},
+            #{item.createDt}
+            )
+        </foreach>
+    </insert>
+
+</mapper>

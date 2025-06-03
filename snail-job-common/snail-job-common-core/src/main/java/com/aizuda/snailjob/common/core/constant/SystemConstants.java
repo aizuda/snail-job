@@ -73,6 +73,10 @@ public interface SystemConstants {
         String BEAT = "/beat";
 
         /**
+         * 注册定时任务执行器
+         */
+        String REGISTER_JOB_EXECUTORS = "/register/job/executors";
+        /**
          * 批量上报
          */
         String BATCH_REPORT = "/batch/report";

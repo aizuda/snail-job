@@ -35,4 +35,7 @@ public interface RpcClient {
     @Mapping(method = RequestMethod.POST, path = HTTP_PATH.BEAT)
     Result beat(String mark, @Header(name = HeadersEnum.LABEL) Map<String, String> labels);
 
+    @Mapping(method = RequestMethod.POST, path = HTTP_PATH.REGISTER_JOB_EXECUTORS)
+    Result registryExecutors(List<String> contextList);
+
 }

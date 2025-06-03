@@ -3,6 +3,7 @@ package com.aizuda.snailjob.template.datasource.access;
 import com.aizuda.snailjob.template.datasource.access.config.GroupConfigAccess;
 import com.aizuda.snailjob.template.datasource.access.config.NotifyConfigAccess;
 import com.aizuda.snailjob.template.datasource.access.config.SceneConfigAccess;
+import com.aizuda.snailjob.template.datasource.access.job.JobExecutorAccess;
 import com.aizuda.snailjob.template.datasource.access.task.RetryDeadLetterTaskAccess;
 import com.aizuda.snailjob.template.datasource.access.task.RetryTaskAccess;
 import com.aizuda.snailjob.template.datasource.enums.OperationTypeEnum;
@@ -124,6 +125,18 @@ public class AccessTemplate {
      */
     public LogAccess<JobLogMessageDO> getJobLogMessageAccess() {
         return (LogAccess<JobLogMessageDO>) Optional.ofNullable(REGISTER_ACCESS.get(OperationTypeEnum.JOB_LOG.name()))
+                .orElseThrow(() -> new SnailJobDatasourceException("not supports operation type"));
+
+    }
+
+
+    /**
+     * 获取定时任务执行器操作类
+     *
+     * @return {@link JobExecutorAccess} 获取定时任务执行器操作类
+     */
+    public JobAccess<JobExecutors> getJobExecutorAccess() {
+        return (JobAccess<JobExecutors>) Optional.ofNullable(REGISTER_ACCESS.get(OperationTypeEnum.JOB_EXECUTORS.name()))
                 .orElseThrow(() -> new SnailJobDatasourceException("not supports operation type"));
 
     }

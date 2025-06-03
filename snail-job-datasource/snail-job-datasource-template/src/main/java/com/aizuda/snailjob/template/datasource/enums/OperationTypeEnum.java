@@ -16,4 +16,5 @@ public enum OperationTypeEnum {
     RETRY_DEAD_LETTER,
     RETRY_LOG,
     JOB_LOG,
+    JOB_EXECUTORS,
 }
