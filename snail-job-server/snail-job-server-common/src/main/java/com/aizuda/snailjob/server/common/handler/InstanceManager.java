@@ -121,6 +121,8 @@ public class InstanceManager implements Lifecycle {
             targetLabelsMap = Collections.emptyMap();
         }
 
+        // 默认匹配在线客户端实例（不匹配人为剥离流量的节点）
+        targetLabelsMap.put(SystemConstants.DEFAULT_LABEL.getKey(), SystemConstants.DEFAULT_LABEL.getValue());
         Set<InstanceLiveInfo> instanceALiveInfoSet = getInstanceALiveInfoSet(namespaceId, groupName);
         Map<String, String> finalTargetLabelsMap = targetLabelsMap;
         return new HashSet<>(StreamUtils.filter(instanceALiveInfoSet, instanceLiveInfo -> {
