@@ -1,11 +1,12 @@
 package com.aizuda.snailjob.common.core.util;
 
+import com.github.luben.zstd.Zstd;
 import org.apache.fury.Fury;
 import org.apache.fury.ThreadSafeFury;
 import org.apache.fury.config.CompatibleMode;
 import org.apache.fury.config.Language;
 
-import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.concurrent.TimeUnit;
 
 public class FuryUtil {
@@ -26,7 +27,8 @@ public class FuryUtil {
         }
 
         byte[] bytes = SERIALIZER.serialize(object);
-        return new String(bytes);
+        bytes = Zstd.compress(bytes);
+        return Base64.getEncoder().encodeToString(bytes);
     }
 
 
@@ -34,7 +36,9 @@ public class FuryUtil {
         if (content == null || content.isEmpty()) {
             return null;
         }
+        byte[] bytes = Base64.getDecoder().decode(content);
+        bytes = Zstd.decompress(bytes, (int) Zstd.decompressedSize(bytes));
         //noinspection unchecked
-        return (T) SERIALIZER.deserialize(content.getBytes(StandardCharsets.UTF_8));
+        return (T) SERIALIZER.deserialize(bytes);
     }
 }
