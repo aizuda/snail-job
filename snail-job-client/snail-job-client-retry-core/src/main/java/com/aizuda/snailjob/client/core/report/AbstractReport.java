@@ -81,6 +81,7 @@ public abstract class AbstractReport implements Report {
         retryTaskDTO.setArgsStr(serialize);
         retryTaskDTO.setGroupName(snailJobProperties.getGroup());
         retryTaskDTO.setSceneName(scene);
+        retryTaskDTO.setArgsSerializer(retryArgSerializer.name());
 
         String expression = retryerInfo.getBizNo();
         ExpressionEngine expressionEngine = SnailRetrySpiLoader.loadExpressionEngine();

@@ -40,6 +40,19 @@ public class SnailRetrySpiLoader {
     }
 
     /**
+     * 加载指定名称的参数序列化SPI类
+     *
+     * @return {@link JacksonSerializer} 默认序列化类为JacksonSerializer
+     */
+    public static RetryArgSerializer loadRetryArgSerializer(String name) {
+        return ServiceLoaderUtil.loadList(RetryArgSerializer.class)
+                .stream()
+                .filter(retryArgSerializer -> retryArgSerializer.name().equals(name))
+                .findAny()
+                .orElse(new JacksonSerializer());
+    }
+
+    /**
      * 加载重试监听器SPI类
      * 执行顺序按照文件中定义的实现类的先后顺序
      *

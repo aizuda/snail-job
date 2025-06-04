@@ -1,6 +1,5 @@
 package com.aizuda.snailjob.client.core;
 
-import com.aizuda.snailjob.client.core.serializer.SerializerType;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import java.lang.reflect.Method;
@@ -11,7 +10,7 @@ import java.lang.reflect.Method;
  */
 public interface RetryArgSerializer {
 
-    SerializerType type();
+    String name();
 
     String serialize(Object serializeInfo);
 

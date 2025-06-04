@@ -22,8 +22,8 @@ import java.util.Objects;
 public class JacksonSerializer implements RetryArgSerializer {
 
     @Override
-    public SerializerType type() {
-        return SerializerType.JACKSON;
+    public String name() {
+        return "jackson";
     }
 
     @Override

@@ -9,8 +9,8 @@ import java.lang.reflect.Method;
 public class FurySerializer implements RetryArgSerializer {
 
     @Override
-    public SerializerType type() {
-        return SerializerType.FURY;
+    public String name() {
+        return "fury";
     }
 
     @Override
