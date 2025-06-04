@@ -151,6 +151,12 @@ public interface SystemConstants {
          */
         String RETRY_GENERATE_IDEM_ID = "/retry/generate/idempotent-id/v1";
 
+
+        /**
+         * 反序列化重试参数
+         */
+        String RETRY_DESERIALIZE_ARGS = "/retry/deserialize/args/v1";
+
         String OPENAPI_ADD_JOB = "/api/job/add";
 
         String OPENAPI_UPDATE_JOB = "/api/job/update";

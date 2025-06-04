@@ -15,26 +15,26 @@ import com.aizuda.snailjob.client.core.callback.future.CallbackTaskExecutorFutur
 import com.aizuda.snailjob.client.core.callback.future.RetryTaskExecutorFutureCallback;
 import com.aizuda.snailjob.client.core.context.CallbackContext;
 import com.aizuda.snailjob.client.core.context.RemoteRetryContext;
+import com.aizuda.snailjob.client.core.exception.RetryArgSerializeException;
 import com.aizuda.snailjob.client.core.exception.SnailRetryClientException;
 import com.aizuda.snailjob.client.core.executor.RemoteCallbackExecutor;
 import com.aizuda.snailjob.client.core.executor.RemoteRetryExecutor;
 import com.aizuda.snailjob.client.core.loader.SnailRetrySpiLoader;
 import com.aizuda.snailjob.client.core.log.RetryLogMeta;
 import com.aizuda.snailjob.client.core.retryer.RetryerInfo;
-import com.aizuda.snailjob.client.core.serializer.JacksonSerializer;
 import com.aizuda.snailjob.client.core.timer.StopTaskTimerTask;
 import com.aizuda.snailjob.client.core.timer.TimerManager;
 import com.aizuda.snailjob.client.model.DispatchRetryResultDTO;
 import com.aizuda.snailjob.client.model.GenerateRetryIdempotentIdDTO;
 import com.aizuda.snailjob.client.model.request.RetryCallbackRequest;
 import com.aizuda.snailjob.client.model.request.DispatchRetryRequest;
+import com.aizuda.snailjob.client.model.request.RetryDeserializeRequest;
 import com.aizuda.snailjob.client.model.request.StopRetryRequest;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.model.IdempotentIdContext;
 import com.aizuda.snailjob.common.core.model.Result;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.common.log.enums.LogTypeEnum;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
@@ -92,7 +92,7 @@ public class SnailRetryEndPoint implements Lifecycle {
         try {
             deSerialize = (Object[]) retryArgSerializer.deSerialize(request.getArgsStr(),
                     retryerInfo.getExecutor().getClass(), retryerInfo.getMethod());
-        } catch (JsonProcessingException e) {
+        } catch (RetryArgSerializeException e) {
             SnailJobLog.REMOTE.error("Parameter parsing exception args:[{}]", request.getArgsStr(), e);
             return new Result<>(StatusEnum.NO.getStatus(), MessageFormat.format("Parameter parsing exception args:[{0}]", request.getArgsStr()));
         }
@@ -150,11 +150,11 @@ public class SnailRetryEndPoint implements Lifecycle {
 
             RetryArgSerializer retryArgSerializer = SnailRetrySpiLoader.loadRetryArgSerializer();
 
-            Object[] deSerialize  = (Object[]) retryArgSerializer.deSerialize(callbackDTO.getArgsStr(),
+            Object[] deSerialize = (Object[]) retryArgSerializer.deSerialize(callbackDTO.getArgsStr(),
                     retryerInfo.getExecutor().getClass(), retryerInfo.getMethod());
             callbackContext.setDeSerialize(deSerialize);
             callbackContext.setRetryerInfo(retryerInfo);
-        } catch (JsonProcessingException e) {
+        } catch (RetryArgSerializeException e) {
             SnailJobLog.REMOTE.error("Parameter parsing exception", e);
             return new Result<>(0, "Callback failed", Boolean.FALSE);
         }
@@ -223,7 +223,7 @@ public class SnailRetryEndPoint implements Lifecycle {
         try {
             deSerialize = (Object[]) retryArgSerializer.deSerialize(argsStr, retryerInfo.getExecutor().getClass(),
                     retryerInfo.getMethod());
-        } catch (JsonProcessingException e) {
+        } catch (RetryArgSerializeException e) {
             throw new SnailRetryClientException("Parameter parsing exception", e);
         }
 
@@ -241,6 +241,25 @@ public class SnailRetryEndPoint implements Lifecycle {
         }
 
         return new Result<>(idempotentId);
+    }
+
+    @Mapping(path = RETRY_DESERIALIZE_ARGS, method = RequestMethod.POST)
+    public Result<Object> deserialize(@Valid RetryDeserializeRequest retryDeserializeRequest) {
+        String scene = retryDeserializeRequest.getScene();
+        String executorName = retryDeserializeRequest.getExecutorName();
+        String argsStr = retryDeserializeRequest.getArgsStr();
+
+        RetryerInfo retryerInfo = RetryerInfoCache.get(scene, executorName);
+        RetryArgSerializer retryArgSerializer = SnailRetrySpiLoader.loadRetryArgSerializer(retryDeserializeRequest.getRetryArgSerializerName());
+
+        Object result;
+        try {
+            result = retryArgSerializer.deSerialize(argsStr, retryerInfo.getExecutor().getClass(), retryerInfo.getMethod());
+        } catch (RetryArgSerializeException e) {
+            throw new SnailRetryClientException("Parameter parsing exception", e);
+        }
+
+        return new Result<>(result);
     }
 
     @Mapping(path = RETRY_STOP, method = RequestMethod.POST)

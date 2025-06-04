@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.client.core;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.aizuda.snailjob.client.core.exception.RetryArgSerializeException;
 
 import java.lang.reflect.Method;
 
@@ -14,5 +14,5 @@ public interface RetryArgSerializer {
 
     String serialize(Object serializeInfo);
 
-    Object deSerialize(String infoStr, Class tClass, Method method) throws JsonProcessingException;
+    Object deSerialize(String infoStr, Class tClass, Method method) throws RetryArgSerializeException;
 }

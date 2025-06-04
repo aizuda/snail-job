@@ -1,8 +1,8 @@
 package com.aizuda.snailjob.client.core.serializer;
 
 import com.aizuda.snailjob.client.core.RetryArgSerializer;
+import com.aizuda.snailjob.client.core.exception.RetryArgSerializeException;
 import com.aizuda.snailjob.common.core.util.FuryUtil;
-import com.fasterxml.jackson.core.JsonProcessingException;
 
 import java.lang.reflect.Method;
 
@@ -19,7 +19,11 @@ public class FurySerializer implements RetryArgSerializer {
     }
 
     @Override
-    public Object deSerialize(String infoStr, Class tClass, Method method) throws JsonProcessingException {
-        return FuryUtil.deserialize(infoStr);
+    public Object deSerialize(String infoStr, Class tClass, Method method) throws RetryArgSerializeException {
+        try {
+            return FuryUtil.deserialize(infoStr);
+        } catch (Exception e) {
+            throw new RetryArgSerializeException(e);
+        }
     }
 }
