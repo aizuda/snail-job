@@ -20,6 +20,8 @@ import io.netty.handler.codec.http.HttpMethod;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.MessageFormat;
 import java.time.Duration;
 import java.util.List;
@@ -36,7 +38,7 @@ public class RegisterJobExecutorsHttpRequestHandler extends GetHttpRequestHandle
     // 分布式锁
     private DistributedLockHandler distributedLockHandler;
 
-    private static final String KEY = "register_job_execute_{0}_{1}";
+    private static final String KEY = "register_{0}_{1}";
 
     private final AccessTemplate accessTemplate;
 
@@ -60,9 +62,10 @@ public class RegisterJobExecutorsHttpRequestHandler extends GetHttpRequestHandle
         }
         String groupName = headers.get(HeadersEnum.GROUP_NAME.getKey());
         String namespace = headers.get(HeadersEnum.NAMESPACE.getKey());
+        String lockName = processLockName(MessageFormat.format(KEY, groupName, namespace));
         distributedLockHandler.lockWithDisposableAndRetry(() -> {
 
-            List<JobExecutorDTO> executors = (List<JobExecutorDTO>) arg;
+            List<JobExecutorDTO> executors = JsonUtil.parseList(JsonUtil.toJsonString(arg), JobExecutorDTO.class);
             LambdaQueryWrapper<JobExecutors> queryWrapper = new LambdaQueryWrapper<>();
             queryWrapper.eq(JobExecutors::getGroupName, groupName)
                     .eq(JobExecutors::getNamespaceId, namespace);
@@ -77,7 +80,34 @@ public class RegisterJobExecutorsHttpRequestHandler extends GetHttpRequestHandle
             accessTemplate.getJobExecutorAccess().insertBatch(jobExecutors);
 
 
-        }, MessageFormat.format(KEY, groupName, namespace), Duration.ofSeconds(1), Duration.ofSeconds(1), 3);
+        }, lockName, Duration.ofSeconds(2), Duration.ofSeconds(2), 3);
         return new SnailJobRpcResult(StatusEnum.YES.getStatus(), "Batch Register Job Executors Processed Successfully", Boolean.TRUE, retryRequest.getReqId());
+    }
+
+    /**
+     * 处理分布式锁名称
+     * @param input     锁名称
+     * @return          处理后的锁名称
+     */
+    public static String processLockName(String input) {
+        if (input.length() <= 64) {
+            return input;
+        }
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] messageDigest = md.digest(input.getBytes());
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : messageDigest) {
+                String hex = Integer.toHexString(0xFF & b);
+                if (hex.length() == 1) {
+                    hexString.append('0');
+                }
+                hexString.append(hex);
+            }
+            // 返回完整的 64 位 SHA-256 哈希值
+            return hexString.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
