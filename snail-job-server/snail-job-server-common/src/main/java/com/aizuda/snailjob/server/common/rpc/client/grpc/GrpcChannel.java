@@ -119,7 +119,7 @@ public class GrpcChannel {
 
         try {
             RpcClientProperties clientRpc = SnailSpringContext.getBean(SystemProperties.class).getClientRpc();
-            ManagedChannel channel = ManagedChannelBuilder.forAddress(ip, port)
+            return ManagedChannelBuilder.forAddress(ip, port)
                     .usePlaintext()
                     .executor(grpcExecutor)
                     .decompressorRegistry(DecompressorRegistry.getDefaultInstance())
@@ -129,9 +129,6 @@ public class GrpcChannel {
                     .idleTimeout(clientRpc.getIdleTimeout().toMillis(), TimeUnit.MILLISECONDS)
                     .keepAliveWithoutCalls(true)
                     .build();
-//            GrpcChannel.setChannel(hostId, ip, channel);
-
-            return channel;
         } catch (Exception e) {
             exceptionHandler(e);
         }

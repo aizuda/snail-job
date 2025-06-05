@@ -15,11 +15,14 @@ import com.aizuda.snailjob.server.model.dto.JobExecutorDTO;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobExecutor;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.google.common.hash.HashFunction;
+import com.google.common.hash.Hashing;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.MessageFormat;
@@ -86,28 +89,16 @@ public class RegisterJobExecutorsHttpRequestHandler extends GetHttpRequestHandle
 
     /**
      * 处理分布式锁名称
-     * @param input     锁名称
-     * @return          处理后的锁名称
+     *
+     * @param input 锁名称
+     * @return 处理后的锁名称
      */
     public static String processLockName(String input) {
         if (input.length() <= 64) {
             return input;
         }
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] messageDigest = md.digest(input.getBytes());
-            StringBuilder hexString = new StringBuilder();
-            for (byte b : messageDigest) {
-                String hex = Integer.toHexString(0xFF & b);
-                if (hex.length() == 1) {
-                    hexString.append('0');
-                }
-                hexString.append(hex);
-            }
-            // 返回完整的 64 位 SHA-256 哈希值
-            return hexString.toString();
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
+
+        HashFunction hashFunction = Hashing.sha256();
+        return hashFunction.hashBytes(input.getBytes(StandardCharsets.UTF_8)).toString();
     }
 }
