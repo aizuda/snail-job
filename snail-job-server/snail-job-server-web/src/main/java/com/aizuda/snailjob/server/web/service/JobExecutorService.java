@@ -2,7 +2,7 @@ package com.aizuda.snailjob.server.web.service;
 
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.*;
-import com.aizuda.snailjob.template.datasource.persistence.po.JobExecutors;
+import com.aizuda.snailjob.template.datasource.persistence.po.JobExecutor;
 
 import java.util.List;
 import java.util.Set;
@@ -15,11 +15,11 @@ import java.util.Set;
  * @Filename：JobExecutorService
  */
 public interface JobExecutorService {
-    PageResult<List<JobExecutors>> getJobExecutorPage(JobExecutorQueryVO jobQueryVO);
+    PageResult<List<JobExecutor>> getJobExecutorPage(JobExecutorQueryVO jobQueryVO);
 
-    JobExecutors getJobExecutorDetail(Long id);
+    JobExecutor getJobExecutorDetail(Long id);
 
-    List<JobExecutors> getJobExecutorList(JobExecutorQueryVO jobQueryVO);
+    List<JobExecutor> getJobExecutorList(JobExecutorQueryVO jobQueryVO);
 
     Boolean deleteJobExecutorByIds(Set<Long> ids);
 }

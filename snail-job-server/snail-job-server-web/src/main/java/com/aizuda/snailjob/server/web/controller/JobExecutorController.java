@@ -4,7 +4,7 @@ import com.aizuda.snailjob.server.web.annotation.LoginRequired;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.JobExecutorQueryVO;
 import com.aizuda.snailjob.server.web.service.JobExecutorService;
-import com.aizuda.snailjob.template.datasource.persistence.po.JobExecutors;
+import com.aizuda.snailjob.template.datasource.persistence.po.JobExecutor;
 import jakarta.validation.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -28,19 +28,19 @@ public class JobExecutorController {
 
     @GetMapping("/page/list")
     @LoginRequired
-    public PageResult<List<JobExecutors>> getJobPage(JobExecutorQueryVO executorQueryVO) {
+    public PageResult<List<JobExecutor>> getJobPage(JobExecutorQueryVO executorQueryVO) {
         return jobExecutorService.getJobExecutorPage(executorQueryVO);
     }
 
     @GetMapping("/list")
     @LoginRequired
-    public List<JobExecutors> getJobList(JobExecutorQueryVO executorQueryVO) {
+    public List<JobExecutor> getJobList(JobExecutorQueryVO executorQueryVO) {
         return jobExecutorService.getJobExecutorList(executorQueryVO);
     }
 
     @GetMapping("{id}")
     @LoginRequired
-    public JobExecutors getJobExecutorsDetail(@PathVariable("id") Long id) {
+    public JobExecutor getJobExecutorsDetail(@PathVariable("id") Long id) {
         return jobExecutorService.getJobExecutorDetail(id);
     }
 

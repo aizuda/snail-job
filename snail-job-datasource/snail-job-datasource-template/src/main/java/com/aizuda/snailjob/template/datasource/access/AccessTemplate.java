@@ -135,8 +135,8 @@ public class AccessTemplate {
      *
      * @return {@link JobExecutorAccess} 获取定时任务执行器操作类
      */
-    public JobAccess<JobExecutors> getJobExecutorAccess() {
-        return (JobAccess<JobExecutors>) Optional.ofNullable(REGISTER_ACCESS.get(OperationTypeEnum.JOB_EXECUTORS.name()))
+    public JobAccess<JobExecutor> getJobExecutorAccess() {
+        return (JobAccess<JobExecutor>) Optional.ofNullable(REGISTER_ACCESS.get(OperationTypeEnum.JOB_EXECUTORS.name()))
                 .orElseThrow(() -> new SnailJobDatasourceException("not supports operation type"));
 
     }

@@ -13,7 +13,7 @@ import com.aizuda.snailjob.server.job.task.support.convert.JobExecutorConverter;
 import com.aizuda.snailjob.server.job.task.support.handler.DistributedLockHandler;
 import com.aizuda.snailjob.server.model.dto.JobExecutorDTO;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
-import com.aizuda.snailjob.template.datasource.persistence.po.JobExecutors;
+import com.aizuda.snailjob.template.datasource.persistence.po.JobExecutor;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
@@ -66,17 +66,17 @@ public class RegisterJobExecutorsHttpRequestHandler extends GetHttpRequestHandle
         distributedLockHandler.lockWithDisposableAndRetry(() -> {
 
             List<JobExecutorDTO> executors = JsonUtil.parseList(JsonUtil.toJsonString(arg), JobExecutorDTO.class);
-            LambdaQueryWrapper<JobExecutors> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(JobExecutors::getGroupName, groupName)
-                    .eq(JobExecutors::getNamespaceId, namespace);
-            List<JobExecutors> dbExecutors = accessTemplate.getJobExecutorAccess().list(queryWrapper);
-            List<String> dbExecutorsList = dbExecutors.stream().map(JobExecutors::getJobExecutorsName).toList();
-            List<JobExecutorDTO> toAddExecutors = executors.stream().filter(e -> !dbExecutorsList.contains(e.getJobExecutorsName())).toList();
+            LambdaQueryWrapper<JobExecutor> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(JobExecutor::getGroupName, groupName)
+                    .eq(JobExecutor::getNamespaceId, namespace);
+            List<JobExecutor> dbExecutors = accessTemplate.getJobExecutorAccess().list(queryWrapper);
+            List<String> dbExecutorsList = dbExecutors.stream().map(JobExecutor::getExecutorInfo).toList();
+            List<JobExecutorDTO> toAddExecutors = executors.stream().filter(e -> !dbExecutorsList.contains(e.getExecutorInfo())).toList();
             if (toAddExecutors.isEmpty()) {
                 SnailJobLog.LOCAL.warn("Beat register job executors toAddExecutors is empty");
                 return;
             }
-            List<JobExecutors> jobExecutors = JobExecutorConverter.INSTANCE.toJobExecutors(toAddExecutors);
+            List<JobExecutor> jobExecutors = JobExecutorConverter.INSTANCE.toJobExecutor(toAddExecutors);
             accessTemplate.getJobExecutorAccess().insertBatch(jobExecutors);
 
 

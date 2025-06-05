@@ -3,8 +3,8 @@ package com.aizuda.snailjob.template.datasource.access.job;
 import com.aizuda.snailjob.template.datasource.access.JobAccess;
 import com.aizuda.snailjob.template.datasource.enums.DbTypeEnum;
 import com.aizuda.snailjob.template.datasource.enums.OperationTypeEnum;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.JobExecutorsMapper;
-import com.aizuda.snailjob.template.datasource.persistence.po.JobExecutors;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.JobExecutorMapper;
+import com.aizuda.snailjob.template.datasource.persistence.po.JobExecutor;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
@@ -23,10 +23,10 @@ import static com.aizuda.snailjob.template.datasource.utils.DbUtils.getDbType;
  * @Filename：JobExecutorAccess
  */
 @Component
-public class JobExecutorAccess implements JobAccess<JobExecutors> {
+public class JobExecutorAccess implements JobAccess<JobExecutor> {
 
     @Autowired
-    private JobExecutorsMapper jobExecutorsMapper;
+    private JobExecutorMapper jobExecutorMapper;
 
     @Override
     public boolean supports(String operationType) {
@@ -34,48 +34,48 @@ public class JobExecutorAccess implements JobAccess<JobExecutors> {
     }
 
     @Override
-    public int insert(JobExecutors jobExecutors) {
-        return jobExecutorsMapper.insert(jobExecutors);
+    public int insert(JobExecutor jobExecutor) {
+        return jobExecutorMapper.insert(jobExecutor);
     }
 
     @Override
-    public int insertBatch(List<JobExecutors> list) {
-        return jobExecutorsMapper.insertBatch(list);
+    public int insertBatch(List<JobExecutor> list) {
+        return jobExecutorMapper.insertBatch(list);
     }
 
     @Override
-    public PageDTO<JobExecutors> listPage(PageDTO<JobExecutors> queryDO, LambdaQueryWrapper<JobExecutors> query) {
-        return jobExecutorsMapper.selectPage(queryDO, query);
+    public PageDTO<JobExecutor> listPage(PageDTO<JobExecutor> queryDO, LambdaQueryWrapper<JobExecutor> query) {
+        return jobExecutorMapper.selectPage(queryDO, query);
     }
 
 
     @Override
-    public List<JobExecutors> list(LambdaQueryWrapper<JobExecutors> query) {
-        return jobExecutorsMapper.selectList(query);
+    public List<JobExecutor> list(LambdaQueryWrapper<JobExecutor> query) {
+        return jobExecutorMapper.selectList(query);
     }
 
     @Override
-    public JobExecutors one(LambdaQueryWrapper<JobExecutors> query) {
-        return jobExecutorsMapper.selectOne(query);
+    public JobExecutor one(LambdaQueryWrapper<JobExecutor> query) {
+        return jobExecutorMapper.selectOne(query);
     }
 
     @Override
-    public int update(JobExecutors jobExecutors, LambdaUpdateWrapper<JobExecutors> query) {
-        return jobExecutorsMapper.update(jobExecutors, query);
+    public int update(JobExecutor jobExecutor, LambdaUpdateWrapper<JobExecutor> query) {
+        return jobExecutorMapper.update(jobExecutor, query);
     }
 
     @Override
-    public int updateById(JobExecutors jobExecutors) {
-        return jobExecutorsMapper.updateById(jobExecutors);
+    public int updateById(JobExecutor jobExecutor) {
+        return jobExecutorMapper.updateById(jobExecutor);
     }
 
     @Override
-    public int delete(LambdaQueryWrapper<JobExecutors> query) {
-        return jobExecutorsMapper.delete(query);
+    public int delete(LambdaQueryWrapper<JobExecutor> query) {
+        return jobExecutorMapper.delete(query);
     }
 
     @Override
-    public long count(LambdaQueryWrapper<JobExecutors> query) {
-        return jobExecutorsMapper.selectCount(query);
+    public long count(LambdaQueryWrapper<JobExecutor> query) {
+        return jobExecutorMapper.selectCount(query);
     }
 }

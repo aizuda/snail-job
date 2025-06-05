@@ -9,8 +9,8 @@ import lombok.EqualsAndHashCode;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-@TableName("sj_job_executors")
-public class JobExecutors extends CreateUpdateDt {
+@TableName("sj_job_executor")
+public class JobExecutor extends CreateUpdateDt {
 
     /**
      * 主键
@@ -31,7 +31,7 @@ public class JobExecutors extends CreateUpdateDt {
     /**
      * 定时任务执行器名称
      */
-    private String jobExecutorsName;
+    private String executorInfo;
 
     /**
      * 1:java; 2:python; 3:go;

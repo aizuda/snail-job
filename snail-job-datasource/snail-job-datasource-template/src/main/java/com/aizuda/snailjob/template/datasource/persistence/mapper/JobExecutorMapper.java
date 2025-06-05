@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.template.datasource.persistence.mapper;
 
-import com.aizuda.snailjob.template.datasource.persistence.po.JobExecutors;
+import com.aizuda.snailjob.template.datasource.persistence.po.JobExecutor;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -17,7 +17,7 @@ import java.util.List;
  * @since 2023-09-24
  */
 @Mapper
-public interface JobExecutorsMapper extends BaseMapper<JobExecutors> {
+public interface JobExecutorMapper extends BaseMapper<JobExecutor> {
 
-    int insertBatch(@Param("list") List<JobExecutors> list);
+    int insertBatch(@Param("list") List<JobExecutor> list);
 }

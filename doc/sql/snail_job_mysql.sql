@@ -524,12 +524,13 @@ CREATE TABLE `sj_workflow_task_batch`
   AUTO_INCREMENT = 0
   DEFAULT CHARSET = utf8mb4 COMMENT ='工作流批次';
 
-CREATE TABLE `sj_job_executors`
+CREATE TABLE `sj_job_executor`
 (
     `id`                 bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
     `namespace_id`       varchar(64)         NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' COMMENT '命名空间id',
     `group_name`         varchar(64)         NOT NULL COMMENT '组名称',
-    `job_executors_name` varchar(256)        NOT NULL COMMENT '任务执行器名称',
+    `executor_info`      varchar(256)        NOT NULL COMMENT '任务执行器名称',
+    `executor_type`      varchar(3)          NOT NULL COMMENT '1:java; 2:python; 3:go;',
     `create_dt`          datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_dt`          datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     PRIMARY KEY (`id`),

@@ -9,8 +9,8 @@ import com.aizuda.snailjob.server.web.model.request.JobExecutorQueryVO;
 import com.aizuda.snailjob.server.web.model.request.UserSessionVO;
 import com.aizuda.snailjob.server.web.service.JobExecutorService;
 import com.aizuda.snailjob.server.web.util.UserSessionUtils;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.JobExecutorsMapper;
-import com.aizuda.snailjob.template.datasource.persistence.po.JobExecutors;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.JobExecutorMapper;
+import com.aizuda.snailjob.template.datasource.persistence.po.JobExecutor;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import lombok.RequiredArgsConstructor;
@@ -30,52 +30,52 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 public class JobExecutorServiceImpl implements JobExecutorService {
-    private JobExecutorsMapper jobExecutorsMapper;
+    private final JobExecutorMapper jobExecutorMapper;
 
     @Override
-    public PageResult<List<JobExecutors>> getJobExecutorPage(JobExecutorQueryVO jobQueryVO) {
-        PageDTO<JobExecutors> pageDTO = new PageDTO<>(jobQueryVO.getPage(), jobQueryVO.getSize());
+    public PageResult<List<JobExecutor>> getJobExecutorPage(JobExecutorQueryVO jobQueryVO) {
+        PageDTO<JobExecutor> pageDTO = new PageDTO<>(jobQueryVO.getPage(), jobQueryVO.getSize());
         UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
         List<String> groupNames = UserSessionUtils.getGroupNames(jobQueryVO.getGroupName());
 
-        PageDTO<JobExecutors> selectPage = jobExecutorsMapper.selectPage(pageDTO,
-                new LambdaQueryWrapper<JobExecutors>()
-                        .eq(JobExecutors::getNamespaceId, userSessionVO.getNamespaceId())
-                        .eq(StrUtil.isNotBlank(jobQueryVO.getExecutorType()), JobExecutors::getExecutorType, jobQueryVO.getExecutorType())
-                        .in(CollUtil.isNotEmpty(groupNames), JobExecutors::getGroupName, groupNames)
-                        .like(StrUtil.isNotBlank(jobQueryVO.getExecutorInfo()), JobExecutors::getJobExecutorsName, StrUtil.trim(jobQueryVO.getExecutorInfo()))
-                        .orderByDesc(JobExecutors::getId));
+        PageDTO<JobExecutor> selectPage = jobExecutorMapper.selectPage(pageDTO,
+                new LambdaQueryWrapper<JobExecutor>()
+                        .eq(JobExecutor::getNamespaceId, userSessionVO.getNamespaceId())
+                        .eq(StrUtil.isNotBlank(jobQueryVO.getExecutorType()), JobExecutor::getExecutorType, jobQueryVO.getExecutorType())
+                        .in(CollUtil.isNotEmpty(groupNames), JobExecutor::getGroupName, groupNames)
+                        .like(StrUtil.isNotBlank(jobQueryVO.getExecutorInfo()), JobExecutor::getExecutorInfo, StrUtil.trim(jobQueryVO.getExecutorInfo()))
+                        .orderByAsc(JobExecutor::getId));
 
         return new PageResult<>(pageDTO, selectPage.getRecords());
     }
 
     @Override
-    public JobExecutors getJobExecutorDetail(Long id) {
-        return jobExecutorsMapper.selectById(id);
+    public JobExecutor getJobExecutorDetail(Long id) {
+        return jobExecutorMapper.selectById(id);
     }
 
     @Override
-    public List<JobExecutors> getJobExecutorList(JobExecutorQueryVO jobQueryVO) {
+    public List<JobExecutor> getJobExecutorList(JobExecutorQueryVO jobQueryVO) {
         UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
         List<String> groupNames = UserSessionUtils.getGroupNames(jobQueryVO.getGroupName());
 
-        return jobExecutorsMapper.selectList(
-                new LambdaQueryWrapper<JobExecutors>()
-                        .eq(JobExecutors::getNamespaceId, userSessionVO.getNamespaceId())
-                        .eq(StrUtil.isNotBlank(jobQueryVO.getExecutorType()), JobExecutors::getExecutorType, jobQueryVO.getExecutorType())
-                        .in(CollUtil.isNotEmpty(groupNames), JobExecutors::getGroupName, groupNames)
-                        .like(StrUtil.isNotBlank(jobQueryVO.getExecutorInfo()), JobExecutors::getJobExecutorsName, StrUtil.trim(jobQueryVO.getExecutorInfo()))
-                        .orderByDesc(JobExecutors::getId));
+            return jobExecutorMapper.selectList(
+                    new LambdaQueryWrapper<JobExecutor>()
+                            .eq(JobExecutor::getNamespaceId, userSessionVO.getNamespaceId())
+                            .eq(StrUtil.isNotBlank(jobQueryVO.getExecutorType()), JobExecutor::getExecutorType, jobQueryVO.getExecutorType())
+                            .in(CollUtil.isNotEmpty(groupNames), JobExecutor::getGroupName, groupNames)
+                            .like(StrUtil.isNotBlank(jobQueryVO.getExecutorInfo()), JobExecutor::getExecutorInfo, StrUtil.trim(jobQueryVO.getExecutorInfo()))
+                            .orderByDesc(JobExecutor::getId));
     }
 
     @Override
     @Transactional
     public Boolean deleteJobExecutorByIds(Set<Long> ids) {
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
-        Assert.isTrue(ids.size() == jobExecutorsMapper.delete(
-                new LambdaQueryWrapper<JobExecutors>()
-                        .eq(JobExecutors::getNamespaceId, namespaceId)
-                        .in(JobExecutors::getId, ids)
+        Assert.isTrue(ids.size() == jobExecutorMapper.delete(
+                new LambdaQueryWrapper<JobExecutor>()
+                        .eq(JobExecutor::getNamespaceId, namespaceId)
+                        .in(JobExecutor::getId, ids)
         ), () -> new SnailJobServerException("Failed to delete job executor"));
         return Boolean.TRUE;
     }
