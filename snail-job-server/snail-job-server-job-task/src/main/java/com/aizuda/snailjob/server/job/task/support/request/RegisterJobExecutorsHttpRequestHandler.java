@@ -9,7 +9,6 @@ import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.handler.GetHttpRequestHandler;
-import com.aizuda.snailjob.server.job.task.support.convert.JobExecutorConverter;
 import com.aizuda.snailjob.server.job.task.support.handler.DistributedLockHandler;
 import com.aizuda.snailjob.server.model.dto.JobExecutorDTO;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
@@ -23,8 +22,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.text.MessageFormat;
 import java.time.Duration;
 import java.util.List;
@@ -65,6 +62,7 @@ public class RegisterJobExecutorsHttpRequestHandler extends GetHttpRequestHandle
         }
         String groupName = headers.get(HeadersEnum.GROUP_NAME.getKey());
         String namespace = headers.get(HeadersEnum.NAMESPACE.getKey());
+        String executorType = headers.get(HeadersEnum.EXECUTOR_TYPE.getKey());
         String lockName = processLockName(MessageFormat.format(KEY, groupName, namespace));
         distributedLockHandler.lockWithDisposableAndRetry(() -> {
 
@@ -79,8 +77,15 @@ public class RegisterJobExecutorsHttpRequestHandler extends GetHttpRequestHandle
                 SnailJobLog.LOCAL.warn("Beat register job executors toAddExecutors is empty");
                 return;
             }
-            List<JobExecutor> jobExecutors = JobExecutorConverter.INSTANCE.toJobExecutor(toAddExecutors);
-            accessTemplate.getJobExecutorAccess().insertBatch(jobExecutors);
+            List<JobExecutor> jobExecutorList = toAddExecutors.stream().map(e -> {
+                JobExecutor jobExecutor = new JobExecutor();
+                jobExecutor.setGroupName(groupName);
+                jobExecutor.setNamespaceId(namespace);
+                jobExecutor.setExecutorType(executorType);
+                jobExecutor.setExecutorInfo(e.getExecutorInfo());
+                return jobExecutor;
+            }).toList();
+            accessTemplate.getJobExecutorAccess().insertBatch(jobExecutorList);
 
 
         }, lockName, Duration.ofSeconds(2), Duration.ofSeconds(2), 3);

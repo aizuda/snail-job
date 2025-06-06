@@ -16,6 +16,8 @@ import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
+
 import static com.aizuda.snailjob.common.core.constant.SystemConstants.BEAT.PONG;
 
 /**
@@ -50,6 +52,10 @@ public class BeatHttpRequestHandler extends GetHttpRequestHandler {
         registerContext.setUri(HTTP_PATH.BEAT);
         registerContext.setNamespaceId(headers.get(HeadersEnum.NAMESPACE.getKey()));
         registerContext.setLabels(headers.get(HeadersEnum.LABEL.getKey()));
+        HashMap<String, Object> hashMap = new HashMap<>();
+        hashMap.put(HeadersEnum.SYSTEM_VERSION.getKey(), headers.get(HeadersEnum.SYSTEM_VERSION.getKey()));
+        hashMap.put(HeadersEnum.EXECUTOR_TYPE.getKey(), headers.get(HeadersEnum.EXECUTOR_TYPE.getKey()));
+        registerContext.setExtAttrs(JsonUtil.toJsonString(hashMap));
         boolean result = register.register(registerContext);
         if (!result) {
             SnailJobLog.LOCAL.warn("client register error. groupName:[{}]", headers.get(HeadersEnum.GROUP_NAME.getKey()));

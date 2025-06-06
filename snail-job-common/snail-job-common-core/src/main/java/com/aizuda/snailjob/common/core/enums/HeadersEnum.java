@@ -22,6 +22,8 @@ public enum HeadersEnum {
     NAMESPACE("namespace"),
     TOKEN("token"),
     LABEL("label"),
+    EXECUTOR_TYPE("executor-type"),
+    SYSTEM_VERSION("system-version")
     ;
 
     private final String key;

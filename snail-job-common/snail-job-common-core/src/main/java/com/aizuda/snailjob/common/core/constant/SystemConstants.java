@@ -218,6 +218,11 @@ public interface SystemConstants {
     String DEFAULT_TOKEN = "SJ_Wyz3dmsdbDOkDujOTSSoBjGQP1BMsVnj";
 
     /**
+     * 默认version
+     */
+    String DEFAULT_CLIENT_VERSION = "local";
+
+    /**
      * AT 所有人
      */
     String AT_ALL = "all";

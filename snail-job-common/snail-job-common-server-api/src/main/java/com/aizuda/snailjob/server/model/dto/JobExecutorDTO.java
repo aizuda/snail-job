@@ -8,23 +8,9 @@ import lombok.Data;
  */
 @Data
 public class JobExecutorDTO {
-    /**
-     * 命名空间id
-     */
-    private String namespaceId;
-
-    /**
-     * 组名称
-     */
-    private String groupName;
 
     /**
      * 定时任务执行器名称
      */
     private String executorInfo;
-
-    /**
-     * 1:java; 2:python; 3:go;
-     */
-    private String executorType;
 }

@@ -62,10 +62,7 @@ public class JobExecutorRegistrar implements Lifecycle {
             return;
         }
         JobExecutorDTO jobExecutorDTO = new JobExecutorDTO();
-        jobExecutorDTO.setExecutorType("1");
         jobExecutorDTO.setExecutorInfo(executorName);
-        jobExecutorDTO.setGroupName(properties.getGroup());
-        jobExecutorDTO.setNamespaceId(properties.getNamespace());
         contextList.add(jobExecutorDTO);
     }
 

@@ -16,6 +16,7 @@ public enum ExecutorTypeEnum {
 
     JAVA(1),
     PYTHON(2),
+    GO(3),
     ;
 
     private final int type;

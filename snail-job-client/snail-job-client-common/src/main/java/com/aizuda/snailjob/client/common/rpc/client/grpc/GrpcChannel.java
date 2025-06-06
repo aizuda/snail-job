@@ -9,12 +9,13 @@ import com.aizuda.snailjob.client.common.config.SnailJobProperties;
 import com.aizuda.snailjob.client.common.exception.SnailJobRemoteException;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
+import com.aizuda.snailjob.common.core.enums.ExecutorTypeEnum;
 import com.aizuda.snailjob.common.core.enums.HeadersEnum;
 import com.aizuda.snailjob.common.core.grpc.auto.GrpcResult;
 import com.aizuda.snailjob.common.core.grpc.auto.SnailJobGrpcRequest;
 import com.aizuda.snailjob.common.core.grpc.auto.Metadata;
-import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.NetUtil;
+import com.aizuda.snailjob.common.core.util.SnailJobVersion;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.google.common.util.concurrent.ListenableFuture;
 import io.grpc.ManagedChannel;
@@ -227,6 +228,9 @@ public final class GrpcChannel {
             SystemConstants.DEFAULT_TOKEN));
         headersMap.put(HeadersEnum.TOKEN.getKey(), Optional.ofNullable(snailJobProperties.getToken()).orElse(
                 SystemConstants.DEFAULT_TOKEN));
+        headersMap.put(HeadersEnum.SYSTEM_VERSION.getKey(), Optional.ofNullable(SnailJobVersion.getVersion()).orElse(
+                SystemConstants.DEFAULT_CLIENT_VERSION));
+        headersMap.put(HeadersEnum.EXECUTOR_TYPE.getKey(), String.valueOf(ExecutorTypeEnum.JAVA.getType()));
         if (CollUtil.isNotEmpty(map)) {
             headersMap.putAll(map);
         }
