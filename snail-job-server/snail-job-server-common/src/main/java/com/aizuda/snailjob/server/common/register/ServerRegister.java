@@ -6,6 +6,7 @@ import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.enums.NodeTypeEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.NetUtil;
+import com.aizuda.snailjob.common.core.util.SnailJobVersion;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.cache.CacheConsumerGroup;
@@ -63,6 +64,7 @@ public class ServerRegister extends AbstractRegister {
         // 新增扩展参数
         ServerNodeExtAttrs serverNodeExtAttrs = new ServerNodeExtAttrs();
         serverNodeExtAttrs.setWebPort(serverProperties.getPort());
+        serverNodeExtAttrs.setSystemVersion(SnailJobVersion.getVersion());
 
         context.setGroupName(GROUP_NAME);
         context.setHostId(CURRENT_CID);

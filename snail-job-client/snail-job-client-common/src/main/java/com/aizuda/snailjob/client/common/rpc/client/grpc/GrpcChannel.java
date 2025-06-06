@@ -39,8 +39,6 @@ import java.util.concurrent.locks.ReentrantLock;
 public final class GrpcChannel {
 
     private static ManagedChannel channel;
-    private static final String LANGUAGE = "Java_";
-
     public static void setChannel(ManagedChannel channel) {
         GrpcChannel.channel = channel;
     }
@@ -68,7 +66,7 @@ public final class GrpcChannel {
     private static final ReentrantLock PORT_LOCK = new ReentrantLock();
     private static final Integer RANDOM_CLIENT_PORT = -1;
 
-    private static final String HOST_ID = LANGUAGE + IdUtil.getSnowflake().nextIdStr();
+    private static final String HOST_ID = IdUtil.getSnowflake().nextIdStr();
     private static final int PORT;
     private static final String HOST;
 

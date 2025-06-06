@@ -9,6 +9,7 @@ import com.aizuda.snailjob.common.core.model.SnailJobRequest;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.Register;
+import com.aizuda.snailjob.server.common.dto.ServerNodeExtAttrs;
 import com.aizuda.snailjob.server.common.handler.GetHttpRequestHandler;
 import com.aizuda.snailjob.server.common.register.ClientRegister;
 import com.aizuda.snailjob.server.common.register.RegisterContext;
@@ -17,6 +18,7 @@ import io.netty.handler.codec.http.HttpMethod;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import static com.aizuda.snailjob.common.core.constant.SystemConstants.BEAT.PONG;
 
@@ -52,10 +54,12 @@ public class BeatHttpRequestHandler extends GetHttpRequestHandler {
         registerContext.setUri(HTTP_PATH.BEAT);
         registerContext.setNamespaceId(headers.get(HeadersEnum.NAMESPACE.getKey()));
         registerContext.setLabels(headers.get(HeadersEnum.LABEL.getKey()));
-        HashMap<String, Object> hashMap = new HashMap<>();
-        hashMap.put(HeadersEnum.SYSTEM_VERSION.getKey(), headers.get(HeadersEnum.SYSTEM_VERSION.getKey()));
-        hashMap.put(HeadersEnum.EXECUTOR_TYPE.getKey(), headers.get(HeadersEnum.EXECUTOR_TYPE.getKey()));
-        registerContext.setExtAttrs(JsonUtil.toJsonString(hashMap));
+
+        ServerNodeExtAttrs serverNodeExtAttrs = new ServerNodeExtAttrs();
+        serverNodeExtAttrs.setExecutorType(headers.get(HeadersEnum.EXECUTOR_TYPE.getKey()));
+        serverNodeExtAttrs.setSystemVersion(headers.get(HeadersEnum.SYSTEM_VERSION.getKey()));
+        registerContext.setExtAttrs(JsonUtil.toJsonString(serverNodeExtAttrs));
+
         boolean result = register.register(registerContext);
         if (!result) {
             SnailJobLog.LOCAL.warn("client register error. groupName:[{}]", headers.get(HeadersEnum.GROUP_NAME.getKey()));

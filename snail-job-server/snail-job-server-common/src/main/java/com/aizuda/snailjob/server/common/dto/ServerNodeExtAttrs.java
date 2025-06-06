@@ -15,4 +15,14 @@ public class ServerNodeExtAttrs {
      * web容器port
      */
     private Integer webPort;
+
+    /**
+     * 系统版本
+     */
+    private String systemVersion;
+
+    /**
+     * 执行器类型
+     */
+    private String executorType;
 }
