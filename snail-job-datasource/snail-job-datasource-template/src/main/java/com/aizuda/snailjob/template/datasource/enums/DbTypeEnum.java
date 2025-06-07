@@ -315,11 +315,11 @@ public enum DbTypeEnum {
     }
 
     public boolean oracleSameType() {
-        return this == ORACLE || this == DM || this == GAUSS;
+        return this == ORACLE || this == DM;
     }
 
     public boolean postgresqlSameType() {
-        return this == POSTGRE_SQL || this == H2 || this == LEALONE || this == SQLITE || this == HSQL || this == KINGBASE_ES || this == PHOENIX || this == SAP_HANA || this == IMPALA || this == HIGH_GO || this == VERTICA || this == REDSHIFT || this == OPENGAUSS || this == TDENGINE || this == UXDB || this == GBASE_8S_PG || this == GBASE_8C || this == VASTBASE || this == DUCKDB;
+        return this == POSTGRE_SQL || this == H2 || this == LEALONE || this == SQLITE || this == HSQL || this == KINGBASE_ES || this == PHOENIX || this == SAP_HANA || this == IMPALA || this == HIGH_GO || this == VERTICA || this == REDSHIFT || this == GAUSS || this == OPENGAUSS || this == TDENGINE || this == UXDB || this == GBASE_8S_PG || this == GBASE_8C || this == VASTBASE || this == DUCKDB;
     }
 
     public boolean isAllowDb() {

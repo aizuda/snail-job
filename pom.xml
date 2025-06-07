@@ -127,6 +127,11 @@
                 <artifactId>snail-job-kingbase-datasource</artifactId>
                 <version>${revision}</version>
             </dependency>
+            <dependency>
+                <groupId>com.aizuda</groupId>
+                <artifactId>snail-job-gauss-datasource</artifactId>
+                <version>${revision}</version>
+            </dependency>
 
             <!--      SnailJob client      -->
             <dependency>

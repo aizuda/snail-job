@@ -45,15 +45,24 @@ public class SnailJobTemplateAutoConfiguration {
 
         // 动态设置mapper资源: 通用 + 数据库专用
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-        String dbCompatibilityType = dbTypeEnum.getName();
-        if (dbTypeEnum.mysqlSameType()) {
+
+        String dbCompatibilityType = null;
+        if (dbTypeEnum.equals(DbTypeEnum.OPENGAUSS)) {
+            dbCompatibilityType = "gauss";
+        } else if (dbTypeEnum.mysqlSameType()) {
             dbCompatibilityType = "mysql";
         } else if (dbTypeEnum.oracleSameType()) {
             dbCompatibilityType = "oracle";
         } else if (dbTypeEnum.postgresqlSameType()) {
             dbCompatibilityType = "postgresql";
         }
-        Resource[] specificMapperResource = resolver.getResources(MessageFormat.format("classpath*:/{0}/mapper/*.xml", dbCompatibilityType));
+
+        // 先尝试寻找枚举名称匹配的mapper定义，如果未找到尝试使用兼容的数据库mapper兜底
+        Resource[] specificMapperResource = resolver.getResources(MessageFormat.format("classpath*:/{0}/mapper/*.xml", dbTypeEnum.getName()));
+        if (specificMapperResource.length == 0 && dbCompatibilityType != null) {
+            specificMapperResource = resolver.getResources(MessageFormat.format("classpath*:/{0}/mapper/*.xml", dbCompatibilityType));
+        }
+
         Resource[] templateMapperResource = resolver.getResources("classpath*:/template/mapper/*.xml");
         List<Resource> resources = new ArrayList<>();
         resources.addAll(List.of(specificMapperResource));
