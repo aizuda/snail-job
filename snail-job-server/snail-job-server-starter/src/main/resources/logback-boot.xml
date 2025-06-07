@@ -83,6 +83,8 @@
               class="com.aizuda.snailjob.server.common.appender.SnailJobServerLogbackAppender">
     </appender>
 
+    <logger name="io.grpc.internal.AtomicBackoff" level="ERROR"/>
+
     <!-- 控制台输出日志级别 -->
     <root level="info">
         <appender-ref ref="stdout"/>

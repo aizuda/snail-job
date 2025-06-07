@@ -84,7 +84,11 @@ public class InstanceManager implements Lifecycle {
                 existing = new InstanceLiveInfo();
                 existing.setNodeInfo(info);
                 // 创建连接通道
-                existing.setChannel(GrpcChannel.connect(info.getHostIp(), info.getHostPort()));
+                ManagedChannel channel = GrpcChannel.connect(info.getHostIp(), info.getHostPort());
+                existing.setAlive(Objects.nonNull(channel));
+                existing.setChannel(channel);
+                existing.setLastUpdateAt(System.currentTimeMillis());
+                return existing;
             } else {
                 if (!existing.isAlive()) {
                     ConnectivityState channelState = existing.getChannel().getState(true);
@@ -151,8 +155,7 @@ public class InstanceManager implements Lifecycle {
         Set<InstanceLiveInfo> allPods = getAllInstances().stream()
                 .filter(instanceLiveInfo -> {
                     RegisterNodeInfo nodeInfo = instanceLiveInfo.getNodeInfo();
-                    return instanceLiveInfo.isAlive()
-                            && nodeInfo.getGroupName().equals(groupName)
+                    return nodeInfo.getGroupName().equals(groupName)
                             && nodeInfo.getNamespaceId().equals(namespaceId);
                 }).collect(Collectors.toSet());
         if (CollUtil.isEmpty(allPods)) {
@@ -173,7 +176,7 @@ public class InstanceManager implements Lifecycle {
             return getInstanceALiveInfoSet(namespaceId, groupName);
         }
 
-        return allPods;
+        return allPods.stream().filter(InstanceLiveInfo::isAlive).collect(Collectors.toSet());
     }
 
     /**
@@ -254,7 +257,7 @@ public class InstanceManager implements Lifecycle {
                 for (Map.Entry<InstanceKey, InstanceLiveInfo> entry : INSTANCE_MAP.entrySet()) {
                     InstanceLiveInfo info = entry.getValue();
                     ManagedChannel channel = info.getChannel();
-                    ConnectivityState channelState = channel.getState(true);
+                    ConnectivityState channelState = channel.getState(!info.isAlive());
                     if (STATES.contains(channelState)) {
                         // 连接已经失败，先置为false,也有可能重新连接上
                         SnailJobLog.LOCAL.warn("Node channel state check {}. {}", info.getNodeInfo().address(), channelState);

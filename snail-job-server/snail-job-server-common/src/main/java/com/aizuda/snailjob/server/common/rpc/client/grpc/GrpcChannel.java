@@ -127,7 +127,7 @@ public class GrpcChannel {
                     .keepAliveTime(clientRpc.getKeepAliveTime().toMillis(), TimeUnit.MILLISECONDS)
                     .keepAliveTimeout(clientRpc.getKeepAliveTimeout().toMillis(), TimeUnit.MILLISECONDS)
                     .idleTimeout(clientRpc.getIdleTimeout().toMillis(), TimeUnit.MILLISECONDS)
-                    .keepAliveWithoutCalls(true)
+                    .keepAliveWithoutCalls(false)
                     .build();
         } catch (Exception e) {
             exceptionHandler(e);
