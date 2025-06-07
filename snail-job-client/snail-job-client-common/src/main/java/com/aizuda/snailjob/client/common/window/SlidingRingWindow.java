@@ -49,12 +49,11 @@ public class SlidingRingWindow<T> {
     private static final int DEFAULT_RING_SIZE = 4;
 
     public SlidingRingWindow(Duration duration, Integer totalThreshold, List<Listener<T>> listener) {
-        this(DEFAULT_RING_SIZE, duration, totalThreshold, listener, new ScheduledThreadPoolExecutor(1));
+        this(DEFAULT_RING_SIZE, duration, totalThreshold, listener, new ScheduledThreadPoolExecutor(3));
     }
 
-
     public SlidingRingWindow(int ringSize, Duration duration, Integer totalThreshold, List<Listener<T>> listener) {
-        this(ringSize, duration, totalThreshold, listener, new ScheduledThreadPoolExecutor(1));
+        this(ringSize, duration, totalThreshold, listener, new ScheduledThreadPoolExecutor(3));
     }
 
     public SlidingRingWindow(int ringSize, Duration duration, Integer totalThreshold, List<Listener<T>> listener, ScheduledExecutorService scheduler) {
@@ -63,17 +62,6 @@ public class SlidingRingWindow<T> {
         this.ringArray = new AtomicReferenceArray<>(ringSize);
         this.listener = listener;
         this.scheduler = scheduler;
-
-        // 开启主动巡检
-        scheduler.scheduleAtFixedRate(() -> {
-            long now = System.currentTimeMillis();
-            for (int i = 0; i < ringSize; i++) {
-                Window<T> window = getWindow(i);
-                if (window.isOutWindow(now)) {
-                    emit(window);
-                }
-            }
-        }, duration.toMillis(), duration.toMillis(), TimeUnit.MILLISECONDS);
 
         // jvm退出时提取窗口的所有数据
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -102,7 +90,7 @@ public class SlidingRingWindow<T> {
      * @param data the element to be added to the window
      */
     public void add(T data) {
-        final var now = System.currentTimeMillis();
+        final long now = System.currentTimeMillis();
 
         for (; ; ) {
             final long currentSequence = sequencer.get();
@@ -115,8 +103,8 @@ public class SlidingRingWindow<T> {
                  *   ^
                  *  从第一个槽位(sequence=0)开始创建窗口
                  */
-                final Window<T> newWindow = new Window<>(now + duration.toMillis(), ConcurrentLinkedQueue::new);
-                if (createNewWindow(currentSequence, null, newWindow)) {
+                Window<T> newWindow;
+                if ((newWindow = createNewWindow(currentSequence, null, now)) != null) {
                     // add new
                     newWindow.getQueue().add(data);
                     // schedule time window emit after add new window
@@ -139,15 +127,12 @@ public class SlidingRingWindow<T> {
                  *   并清理过期的W5
                  */
 
-                // clear old
-                emit(currentWindow);
-
-                final Window<T> newWindow = new Window<>(now + duration.toMillis(), ConcurrentLinkedQueue::new);
+                Window<T> newWindow;
                 final long nextSequence = currentSequence + 1;
                 // maybe next is old
                 final Window<T> nextWindow = getWindow(nextSequence);
                 // next window might be swapped(is new window now), so must verify it
-                if ((nextWindow == null || nextWindow.isOutWindow(now)) && createNewWindow(nextSequence, nextWindow, newWindow)) {
+                if ((nextWindow == null || nextWindow.isOutWindow(now)) && (newWindow = createNewWindow(nextSequence, nextWindow, now)) != null) {
                     //update sequence, must increase first
                     sequencer.incrementAndGet();
                     // add new
@@ -158,6 +143,10 @@ public class SlidingRingWindow<T> {
                     if (nextWindow != null) {
                         emit(nextWindow);
                     }
+
+                    // 如果A线程刚刚完成queue.add(data);此时B线程进入这里开启新窗口，
+                    // 若此时没有新的数据进来则currentWindow的数据没有线程来提取
+                    emit(currentWindow);
                     return;
                 }
             } else {
@@ -176,9 +165,12 @@ public class SlidingRingWindow<T> {
                  */
                 final ConcurrentLinkedQueue<T> queue = currentWindow.getQueue();
                 queue.add(data);
-                if (queue.size() >= totalThreshold) {
+                // 如果A线程进入的时候当前是没有过期，那么进行queue.add(data);
+                // 但是add完成后其实已经过期了, 没有线程进行添加数据则currentWindow的数据没有线程来提取
+                if (queue.size() >= totalThreshold || (currentWindow.isOutWindow(System.currentTimeMillis()) && !queue.isEmpty())) {
                     emit(currentWindow);
                 }
+
                 return;
             }
         }
@@ -214,9 +206,13 @@ public class SlidingRingWindow<T> {
 
     }
 
-    private boolean createNewWindow(long sequence, Window<T> oldWindow, Window<T> newWindow) {
+    private Window<T> createNewWindow(long sequence, Window<T> oldWindow, long now) {
         final var index = getIndex(sequence);
-        return ringArray.compareAndSet(index, oldWindow, newWindow);
+        Window<T> newWindow = new Window<>(now + duration.toMillis(), ConcurrentLinkedQueue::new);
+        if (ringArray.compareAndSet(index, oldWindow, newWindow)) {
+            return newWindow;
+        }
+        return null;
     }
 
     private Window<T> getWindow(long sequence) {
