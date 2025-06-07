@@ -80,5 +80,10 @@ public class TaskContext {
          * 额外扩展参数
          */
         private String extAttrs;
+
+        /**
+         * 参数序列化器名称
+         */
+        private String serializerName;
     }
 }

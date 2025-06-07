@@ -51,5 +51,5 @@ public class RetryTaskDTO implements Serializable {
     /**
      * 序列化器名称
      */
-    private String argsSerializer;
+    private String serializerName;
 }

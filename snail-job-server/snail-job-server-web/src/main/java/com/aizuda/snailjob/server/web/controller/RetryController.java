@@ -57,6 +57,13 @@ public class RetryController {
     }
 
     @LoginRequired
+    @PostMapping("/deserialize")
+    public Result<Object> deserialize(@RequestBody @Validated RetryArgsDeserializeVO retryArgsDeserializeVO) {
+        return new Result<>(retryService.deserialize(retryArgsDeserializeVO));
+    }
+
+
+    @LoginRequired
     @PutMapping("/batch")
     public Integer updateRetryTaskExecutorName(@RequestBody @Validated RetryUpdateExecutorNameRequestVO requestVO) {
         return retryService.updateRetryExecutorName(requestVO);

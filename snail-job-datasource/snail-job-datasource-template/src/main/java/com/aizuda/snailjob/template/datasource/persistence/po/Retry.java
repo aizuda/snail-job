@@ -39,6 +39,8 @@ public class Retry extends CreateUpdateDt {
 
     private String executorName;
 
+    private String serializerName;
+
     /**
      * 下次触发时间
      */

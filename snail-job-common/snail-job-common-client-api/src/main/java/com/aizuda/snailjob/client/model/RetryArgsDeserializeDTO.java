@@ -10,7 +10,7 @@ import lombok.Data;
  * @date 2022/03/25 10:06
  */
 @Data
-public class GenerateRetryIdempotentIdDTO {
+public class RetryArgsDeserializeDTO {
     @NotBlank(message = "group cannot be null")
     private String group;
     @NotBlank(message = "scene cannot be null")

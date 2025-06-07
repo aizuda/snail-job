@@ -30,4 +30,6 @@ public class RetryCallbackRequest {
     private Long retryId;
     @NotNull(message = "executorTimeout cannot be null")
     private Integer executorTimeout;
+    @NotBlank(message = "serializerName cannot be null")
+    private String serializerName;
 }

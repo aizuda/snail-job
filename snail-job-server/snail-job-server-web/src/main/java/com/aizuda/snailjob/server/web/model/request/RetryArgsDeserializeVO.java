@@ -10,7 +10,7 @@ import org.hibernate.validator.constraints.NotBlank;
  * @date 2022/03/25 10:06
  */
 @Data
-public class GenerateRetryIdempotentIdVO {
+public class RetryArgsDeserializeVO {
     /**
      * 组名称
      */
