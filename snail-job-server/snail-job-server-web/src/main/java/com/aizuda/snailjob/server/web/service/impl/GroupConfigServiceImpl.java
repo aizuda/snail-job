@@ -282,7 +282,7 @@ public class GroupConfigServiceImpl implements GroupConfigService {
             String tableNamePattern = "sj_retry_task_%";
             DbTypeEnum dbType = DbUtils.getDbType();
             // Oracle, DM 查询表名大写
-            if (DbTypeEnum.ORACLE.getDb().equals(dbType.getDb()) || DbTypeEnum.DM.getDb().equals(dbType.getDb())) {
+            if (DbTypeEnum.ORACLE.getName().equals(dbType.getName()) || DbTypeEnum.DM.getName().equals(dbType.getName())) {
                 tableNamePattern = tableNamePattern.toUpperCase();
             }
 

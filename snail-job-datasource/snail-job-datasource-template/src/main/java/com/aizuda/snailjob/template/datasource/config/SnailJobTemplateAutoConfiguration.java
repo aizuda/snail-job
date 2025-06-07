@@ -45,7 +45,15 @@ public class SnailJobTemplateAutoConfiguration {
 
         // 动态设置mapper资源: 通用 + 数据库专用
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-        Resource[] specificMapperResource = resolver.getResources(MessageFormat.format("classpath*:/{0}/mapper/*.xml", dbTypeEnum.getDb()));
+        String dbCompatibilityType = dbTypeEnum.getName();
+        if (dbTypeEnum.mysqlSameType()) {
+            dbCompatibilityType = "mysql";
+        } else if (dbTypeEnum.oracleSameType()) {
+            dbCompatibilityType = "oracle";
+        } else if (dbTypeEnum.postgresqlSameType()) {
+            dbCompatibilityType = "postgresql";
+        }
+        Resource[] specificMapperResource = resolver.getResources(MessageFormat.format("classpath*:/{0}/mapper/*.xml", dbCompatibilityType));
         Resource[] templateMapperResource = resolver.getResources("classpath*:/template/mapper/*.xml");
         List<Resource> resources = new ArrayList<>();
         resources.addAll(List.of(specificMapperResource));
