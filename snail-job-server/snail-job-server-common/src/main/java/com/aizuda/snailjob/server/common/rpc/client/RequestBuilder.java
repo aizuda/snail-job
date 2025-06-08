@@ -41,12 +41,6 @@ public class RequestBuilder<T, R> {
         return this;
     }
 
-    @Deprecated
-    public RequestBuilder<T, R> nodeInfo(RegisterNodeInfo nodeInfo) {
-        this.nodeInfo = nodeInfo;
-        return this;
-    }
-
     public RequestBuilder<T, R> nodeInfo(InstanceLiveInfo nodeInfo) {
         this.instanceLiveInfo = nodeInfo;
         return this;

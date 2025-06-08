@@ -20,6 +20,9 @@ public class ClientLoadBalanceRound implements ClientLoadBalance {
 
     @Override
     public String route(final String allocKey, final TreeSet<String> clientAllAddressSet) {
+        if (clientAllAddressSet.isEmpty()) {
+            return "";
+        }
         // cache clear
         if (System.currentTimeMillis() > CACHE_VALID_TIME) {
             COUNTER.clear();

@@ -2,10 +2,13 @@ package com.aizuda.snailjob.server.common.config;
 
 import com.aizuda.snailjob.server.common.Register;
 import com.aizuda.snailjob.server.common.Schedule;
+import com.aizuda.snailjob.server.common.handler.InstanceManager;
 import com.aizuda.snailjob.server.common.register.ClientRegister;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.ServerNodeMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
@@ -35,17 +38,18 @@ public class SnailJobServerCommonAutoConfiguration {
         scheduler.setThreadNamePrefix("snail-job-alarm-thread-");
         return scheduler;
     }
-//
-//
-//    @Bean
-//    public Schedule refreshNodeSchedule() {
-//        return new ClientRegister.RefreshNodeSchedule();
-//    }
-//
-//    @Bean(ClientRegister.BEAN_NAME)
-//    public Register clientRegister() {
-//        return new ClientRegister();
-//    }
+
+    @DependsOn(value = ClientRegister.BEAN_NAME)
+    @Bean
+    public Schedule refreshNodeSchedule(ClientRegister clientRegister, ServerNodeMapper serverNodeMapper,
+                                        InstanceManager instanceManager) {
+        return clientRegister.newRefreshNodeSchedule(serverNodeMapper, instanceManager);
+    }
+
+    @Bean(ClientRegister.BEAN_NAME)
+    public Register clientRegister() {
+        return new ClientRegister();
+    }
 
 
 }

@@ -134,7 +134,7 @@ public class GrpcClientInvokeHandlerV2 implements InvocationHandler {
                         return new Result(grpcResult.getStatus(), grpcResult.getMessage(), obj);
                     } catch (Exception ex) {
                         log.error("request client I/O error, clientId:[{}] clientAddr:[{}:{}] serverIp:[{}]",
-                                nodeInfo.getHostId(), nodeInfo.getHostIp(), nodeInfo.getHostIp(),
+                                nodeInfo.getHostId(), nodeInfo.getHostIp(), nodeInfo.getHostPort(),
                                 NetUtil.getLocalIpStr(), ex);
                         InstanceManager instanceManager = SnailSpringContext.getBean(InstanceManager.class);
                         instanceLiveInfo.setAlive(Boolean.FALSE);
