@@ -22,7 +22,7 @@ public class Job extends CreateUpdateDt {
     /**
      * 主键
      */
-    @TableId(value = "id", type = IdType.AUTO)
+    @TableId(value = "id")
     private Long id;
 
     /**

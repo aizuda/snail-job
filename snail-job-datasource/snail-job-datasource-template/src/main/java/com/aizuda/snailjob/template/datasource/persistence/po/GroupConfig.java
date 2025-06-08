@@ -1,6 +1,5 @@
 package com.aizuda.snailjob.template.datasource.persistence.po;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -18,7 +17,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper=true)
 public class GroupConfig extends CreateUpdateDt {
 
-    @TableId(value = "id", type = IdType.AUTO)
+    @TableId(value = "id")
     private Long id;
 
     private String namespaceId;

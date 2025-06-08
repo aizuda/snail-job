@@ -4,7 +4,9 @@ import com.aizuda.snailjob.template.datasource.enums.DbTypeEnum;
 import com.aizuda.snailjob.template.datasource.handler.InjectionMetaObjectHandler;
 import com.aizuda.snailjob.template.datasource.handler.SnailJobMybatisConfiguration;
 import com.aizuda.snailjob.template.datasource.utils.DbUtils;
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.autoconfigure.MybatisPlusProperties;
+import com.baomidou.mybatisplus.autoconfigure.MybatisPlusPropertiesCustomizer;
 import com.baomidou.mybatisplus.core.config.GlobalConfig;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
@@ -35,7 +37,7 @@ import java.util.List;
 public class SnailJobTemplateAutoConfiguration {
 
     @Bean("sqlSessionFactory")
-    public SqlSessionFactory sqlSessionFactory(DataSource dataSource, Environment environment,
+    public SqlSessionFactory sqlSessionFactory(DataSource dataSource,
                                                MybatisPlusInterceptor mybatisPlusInterceptor,
                                                MybatisPlusProperties mybatisPlusProperties,
                                                SnailJobMybatisConfiguration snailJobMybatisConfiguration) throws Exception {
@@ -91,6 +93,24 @@ public class SnailJobTemplateAutoConfiguration {
     @Bean
     public SnailJobMybatisConfiguration snailJobMybatisConfiguration() {
         return new SnailJobMybatisConfiguration();
+    }
+
+    @Bean
+    public MybatisPlusPropertiesCustomizer mybatisPlusPropertiesCustomizer(DataSource dataSource) {
+        return properties -> {
+            GlobalConfig.DbConfig dbConfig = new GlobalConfig.DbConfig();
+            DbTypeEnum dbType = DbUtils.getDbType(dataSource);
+            switch (dbType) {
+                // 高斯数据库不支持 RETURNING 语法，再此处设置使用MP内置的雪花ID
+                case GAUSS, OPENGAUSS -> {
+                    dbConfig.setIdType(IdType.ASSIGN_ID);
+                }
+                default -> {
+                    dbConfig.setIdType(IdType.AUTO);
+                }
+            }
+            properties.getGlobalConfig().setDbConfig(dbConfig);
+        };
     }
 
     @Bean

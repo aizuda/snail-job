@@ -4,7 +4,6 @@ import com.aizuda.snailjob.common.core.enums.JobArgsTypeEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskStatusEnum;
 import com.aizuda.snailjob.common.core.enums.MapReduceStageEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -25,7 +24,7 @@ public class JobTask extends CreateUpdateDt {
     /**
      * 主键
      */
-    @TableId(value = "id", type = IdType.AUTO)
+    @TableId(value = "id")
     private Long id;
 
     /**
