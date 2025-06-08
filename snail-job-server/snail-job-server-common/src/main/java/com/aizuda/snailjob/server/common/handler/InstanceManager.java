@@ -42,6 +42,7 @@ import java.util.stream.Stream;
  *
  * @author opensnail
  * @date 2025-05-24
+ * @since 1.6.0-beta1
  */
 @Component
 @RequiredArgsConstructor
@@ -289,6 +290,11 @@ public class InstanceManager implements Lifecycle {
     /**
      * 匹配到了一个就可以
      * 节点注册时的标签必须是全包含任务的标签
+     * <p>
+     * [] [] true
+     * [] [A] true
+     * [A] [] false
+     * <p>
      * [A,B] [A] true
      * [A,B] [A, B] true
      * <p>
@@ -300,11 +306,11 @@ public class InstanceManager implements Lifecycle {
      * @return
      */
     private boolean matchLabels(Map<String, String> nodeLabels, Map<String, String> targetLabels) {
-        if (CollUtil.isEmpty(targetLabels)) {
+        // 兼容客户端无标签的问题
+        if (CollUtil.isEmpty(nodeLabels)) {
             return true;
         }
 
-        nodeLabels = Optional.ofNullable(nodeLabels).orElse(Collections.emptyMap());
         for (Map.Entry<String, String> entry : targetLabels.entrySet()) {
             if (!entry.getValue().equals(nodeLabels.get(entry.getKey()))) {
                 return false;
