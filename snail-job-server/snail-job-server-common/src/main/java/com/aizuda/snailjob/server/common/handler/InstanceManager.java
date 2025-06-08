@@ -288,6 +288,12 @@ public class InstanceManager implements Lifecycle {
 
     /**
      * 匹配到了一个就可以
+     * 节点注册时的标签必须是全包含任务的标签
+     * [A,B] [A] true
+     * [A,B] [A, B] true
+     * <p>
+     * [A,B] [A,C] false
+     * [A,B] [E] false
      *
      * @param nodeLabels   节点注册时的标签
      * @param targetLabels 任务的标签
