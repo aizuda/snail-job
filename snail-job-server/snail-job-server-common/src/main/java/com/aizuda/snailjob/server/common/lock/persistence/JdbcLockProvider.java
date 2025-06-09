@@ -27,6 +27,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 基于DB实现的分布式锁
@@ -40,21 +41,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class JdbcLockProvider implements LockStorage, Lifecycle {
 
-    protected static final List<String> ALLOW_DB = Arrays.asList(
-            DbTypeEnum.MYSQL.getDb(),
-            DbTypeEnum.MARIADB.getDb(),
-            DbTypeEnum.POSTGRES.getDb(),
-            DbTypeEnum.ORACLE.getDb(),
-            DbTypeEnum.SQLSERVER.getDb(),
-            DbTypeEnum.DM.getDb(),
-            DbTypeEnum.KINGBASE.getDb());
-
     private final DistributedLockMapper distributedLockMapper;
     private final PlatformTransactionManager platformTransactionManager;
 
     @Override
     public boolean supports(final String storageMedium) {
-        return ALLOW_DB.contains(storageMedium);
+        return Objects.requireNonNull(DbTypeEnum.findByName(storageMedium)).isAllowDb();
     }
 
     @Override

@@ -22,7 +22,7 @@ public class SceneConfigAccess extends AbstractConfigAccess<RetrySceneConfig> {
     public boolean supports(String operationType) {
         DbTypeEnum dbType = getDbType();
         return OperationTypeEnum.SCENE.name().equals(operationType)
-                && ALLOW_DB.contains(dbType.getDb());
+                && dbType.isAllowDb();
     }
 
     @Override

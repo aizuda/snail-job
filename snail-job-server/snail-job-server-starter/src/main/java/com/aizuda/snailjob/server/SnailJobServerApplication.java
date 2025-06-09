@@ -14,6 +14,7 @@
  */
 package com.aizuda.snailjob.server;
 
+import com.aizuda.snailjob.common.core.model.LongToStringModule;
 import com.aizuda.snailjob.server.common.rpc.server.grpc.GrpcServer;
 import com.aizuda.snailjob.server.common.rpc.server.netty.NettyHttpServer;
 import lombok.extern.slf4j.Slf4j;
@@ -59,5 +60,10 @@ public class SnailJobServerApplication {
                 SpringApplication.exit(SpringApplication.run(SnailJobServerApplication.class));
             }
         };
+    }
+
+    @Bean
+    public LongToStringModule longToStringModule() {
+        return new LongToStringModule();
     }
 }

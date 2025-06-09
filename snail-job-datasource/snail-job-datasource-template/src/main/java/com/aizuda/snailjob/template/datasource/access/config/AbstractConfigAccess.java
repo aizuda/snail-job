@@ -43,15 +43,6 @@ public abstract class AbstractConfigAccess<T> implements ConfigAccess<T> {
     @Autowired
     protected NotifyRecipientMapper notifyRecipientMapper;
 
-    protected static final List<String> ALLOW_DB = Arrays.asList(
-            DbTypeEnum.MYSQL.getDb(),
-            DbTypeEnum.MARIADB.getDb(),
-            DbTypeEnum.POSTGRES.getDb(),
-            DbTypeEnum.ORACLE.getDb(),
-            DbTypeEnum.SQLSERVER.getDb(),
-            DbTypeEnum.DM.getDb(),
-            DbTypeEnum.KINGBASE.getDb());
-
     protected DbTypeEnum getDbType() {
         return DbUtils.getDbType();
     }

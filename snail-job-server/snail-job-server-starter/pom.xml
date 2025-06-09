@@ -113,6 +113,8 @@
                 <configuration>
                     <mainClass>com.aizuda.snailjob.server.SnailJobServerApplication</mainClass>
                     <classifier>exec</classifier>
+                    <!-- 使用 PropertiesLauncher 启动器，镜像中可以使用-Dloader.path=/drivers/path/ 需要额外加载的驱动jar -->
+                    <layout>ZIP</layout>
                 </configuration>
                 <executions>
                     <execution>
