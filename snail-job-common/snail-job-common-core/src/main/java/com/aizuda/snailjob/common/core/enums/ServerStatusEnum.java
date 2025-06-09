@@ -20,4 +20,12 @@ public enum ServerStatusEnum {
     private final Integer type;
     private final String status;
 
+    public static ServerStatusEnum getByType(Integer type) {
+        for (ServerStatusEnum serverStatusEnum : ServerStatusEnum.values()) {
+            if (serverStatusEnum.getType().equals(type)) {
+                return serverStatusEnum;
+            }
+        }
+        return null;
+    }
 }

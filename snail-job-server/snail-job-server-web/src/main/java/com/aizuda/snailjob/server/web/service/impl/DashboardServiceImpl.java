@@ -2,6 +2,7 @@ package com.aizuda.snailjob.server.web.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
+import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
@@ -17,6 +18,7 @@ import com.aizuda.snailjob.server.common.dto.ServerNodeExtAttrs;
 import com.aizuda.snailjob.server.common.enums.DashboardLineEnum;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.enums.SystemModeEnum;
+import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.register.ServerRegister;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.enums.DateTypeEnum;
@@ -319,14 +321,14 @@ public class DashboardServiceImpl implements DashboardService {
         if (serverNode.getNodeType().equals(NodeTypeEnum.SERVER.getType())){
             return false;
         }
+
         String labels = serverNode.getLabels();
-        Map<Object, Object> map = JsonUtil.parseConcurrentHashMap(labels);
-        if (Objects.equals(updateRequestVO.getServerNodeStatus(), ServerStatusEnum.RUNNING.getType())) {
-            map.put(SystemConstants.DEFAULT_LABEL.getKey(), ServerStatusEnum.RUNNING.getType());
-        }else if (Objects.equals(updateRequestVO.getServerNodeStatus(), ServerStatusEnum.DOWN.getType())){
-            map.put(SystemConstants.DEFAULT_LABEL.getKey(), ServerStatusEnum.DOWN.getType());
-        }
+        Map<String, String> map = JsonUtil.parseConcurrentHashMap(labels);
+        ServerStatusEnum statusEnum = ServerStatusEnum.getByType(updateRequestVO.getServerNodeStatus());
+        Assert.notNull(statusEnum, () -> new SnailJobServerException("ServerNodeStatus not existed"));
+        map.put(SystemConstants.DEFAULT_LABEL.getKey(), statusEnum.getStatus());
         serverNode.setLabels(JsonUtil.toJsonString(map));
+
         return serverNodeMapper.updateById(serverNode) > 0;
     }
 
@@ -337,9 +339,9 @@ public class DashboardServiceImpl implements DashboardService {
             return false;
         }
         String labels = serverNode.getLabels();
-        Map<Object, Object> dbMap = JsonUtil.parseConcurrentHashMap(labels);
+        Map<String, String> dbMap = JsonUtil.parseConcurrentHashMap(labels);
 
-        Map<Object, Object> toUpdateMap = JsonUtil.parseConcurrentHashMap(updateRequestVO.getLabels());
+        Map<String, String> toUpdateMap = JsonUtil.parseConcurrentHashMap(updateRequestVO.getLabels());
         // 移除默认标签，默认标签不允许更新
         toUpdateMap.remove(SystemConstants.DEFAULT_LABEL.getKey());
         dbMap.putAll(toUpdateMap);
