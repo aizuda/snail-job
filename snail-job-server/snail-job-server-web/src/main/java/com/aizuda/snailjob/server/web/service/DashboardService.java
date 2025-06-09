@@ -1,9 +1,7 @@
 package com.aizuda.snailjob.server.web.service;
 
 import com.aizuda.snailjob.server.web.model.base.PageResult;
-import com.aizuda.snailjob.server.web.model.request.JobLineQueryVo;
-import com.aizuda.snailjob.server.web.model.request.LineQueryVO;
-import com.aizuda.snailjob.server.web.model.request.ServerNodeQueryVO;
+import com.aizuda.snailjob.server.web.model.request.*;
 import com.aizuda.snailjob.server.web.model.response.DashboardCardResponseVO;
 import com.aizuda.snailjob.server.web.model.response.DashboardRetryLineResponseVO;
 import com.aizuda.snailjob.server.web.model.response.ServerNodeResponseVO;
@@ -23,4 +21,8 @@ public interface DashboardService {
     DashboardRetryLineResponseVO jobLineList(JobLineQueryVo queryVO);
 
     PageResult<List<ServerNodeResponseVO>> pods(ServerNodeQueryVO serverNodeQueryVO);
+
+    Boolean updatePodsStatus(ServerNodeStatusUpdateRequestVO updateRequestVO);
+
+    Boolean updatePodsLabels(ServerNodeLabelsUpdateRequestVO updateRequestVO);
 }

@@ -4,7 +4,9 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
+import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.enums.NodeTypeEnum;
+import com.aizuda.snailjob.common.core.enums.ServerStatusEnum;
 import com.aizuda.snailjob.common.core.model.Result;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.NetUtil;
@@ -18,10 +20,7 @@ import com.aizuda.snailjob.server.common.enums.SystemModeEnum;
 import com.aizuda.snailjob.server.common.register.ServerRegister;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.enums.DateTypeEnum;
-import com.aizuda.snailjob.server.web.model.request.JobLineQueryVo;
-import com.aizuda.snailjob.server.web.model.request.LineQueryVO;
-import com.aizuda.snailjob.server.web.model.request.ServerNodeQueryVO;
-import com.aizuda.snailjob.server.web.model.request.UserSessionVO;
+import com.aizuda.snailjob.server.web.model.request.*;
 import com.aizuda.snailjob.server.web.model.response.DashboardCardResponseVO;
 import com.aizuda.snailjob.server.web.model.response.DashboardLineResponseVO;
 import com.aizuda.snailjob.server.web.model.response.DashboardRetryLineResponseVO;
@@ -312,6 +311,40 @@ public class DashboardServiceImpl implements DashboardService {
             }
         }
         return new PageResult<>(serverNodePageDTO, responseVOList);
+    }
+
+    @Override
+    public Boolean updatePodsStatus(ServerNodeStatusUpdateRequestVO updateRequestVO) {
+        ServerNode serverNode = serverNodeMapper.selectById(updateRequestVO.getId());
+        if (serverNode.getNodeType().equals(NodeTypeEnum.SERVER.getType())){
+            return false;
+        }
+        String labels = serverNode.getLabels();
+        Map<Object, Object> map = JsonUtil.parseConcurrentHashMap(labels);
+        if (Objects.equals(updateRequestVO.getServerNodeStatus(), ServerStatusEnum.RUNNING.getType())) {
+            map.put(SystemConstants.DEFAULT_LABEL.getKey(), ServerStatusEnum.RUNNING.getType());
+        }else if (Objects.equals(updateRequestVO.getServerNodeStatus(), ServerStatusEnum.DOWN.getType())){
+            map.put(SystemConstants.DEFAULT_LABEL.getKey(), ServerStatusEnum.DOWN.getType());
+        }
+        serverNode.setLabels(JsonUtil.toJsonString(map));
+        return serverNodeMapper.updateById(serverNode) > 0;
+    }
+
+    @Override
+    public Boolean updatePodsLabels(ServerNodeLabelsUpdateRequestVO updateRequestVO) {
+        ServerNode serverNode = serverNodeMapper.selectById(updateRequestVO.getId());
+        if (serverNode.getNodeType().equals(NodeTypeEnum.SERVER.getType())){
+            return false;
+        }
+        String labels = serverNode.getLabels();
+        Map<Object, Object> dbMap = JsonUtil.parseConcurrentHashMap(labels);
+
+        Map<Object, Object> toUpdateMap = JsonUtil.parseConcurrentHashMap(updateRequestVO.getLabels());
+        // 移除默认标签，默认标签不允许更新
+        toUpdateMap.remove(SystemConstants.DEFAULT_LABEL.getKey());
+        dbMap.putAll(toUpdateMap);
+        serverNode.setLabels(JsonUtil.toJsonString(dbMap));
+        return serverNodeMapper.updateById(serverNode) > 0;
     }
 
 }

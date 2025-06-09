@@ -3,15 +3,14 @@ package com.aizuda.snailjob.server.web.controller;
 import com.aizuda.snailjob.server.common.dto.DistributeInstance;
 import com.aizuda.snailjob.server.web.annotation.LoginRequired;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
-import com.aizuda.snailjob.server.web.model.request.JobLineQueryVo;
-import com.aizuda.snailjob.server.web.model.request.LineQueryVO;
-import com.aizuda.snailjob.server.web.model.request.ServerNodeQueryVO;
+import com.aizuda.snailjob.server.web.model.request.*;
 import com.aizuda.snailjob.server.web.model.response.DashboardCardResponseVO;
 import com.aizuda.snailjob.server.web.model.response.DashboardRetryLineResponseVO;
 import com.aizuda.snailjob.server.web.model.response.ServerNodeResponseVO;
 import com.aizuda.snailjob.server.web.service.DashboardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -53,6 +52,18 @@ public class DashboardController {
     @GetMapping("/pods")
     public PageResult<List<ServerNodeResponseVO>> pods(ServerNodeQueryVO serverNodeQueryVO) {
         return dashBoardService.pods(serverNodeQueryVO);
+    }
+
+    @LoginRequired
+    @PutMapping("/pods/status")
+    public Boolean updatePodsStatus(ServerNodeStatusUpdateRequestVO updateRequestVO) {
+        return dashBoardService.updatePodsStatus(updateRequestVO);
+    }
+
+    @LoginRequired
+    @PutMapping("/pods/labels")
+    public Boolean updatePodsLabels(ServerNodeLabelsUpdateRequestVO updateRequestVO) {
+        return dashBoardService.updatePodsLabels(updateRequestVO);
     }
 
     @GetMapping("/consumer/bucket")
