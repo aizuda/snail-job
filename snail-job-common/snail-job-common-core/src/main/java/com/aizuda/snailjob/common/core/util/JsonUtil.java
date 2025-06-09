@@ -2,6 +2,7 @@ package com.aizuda.snailjob.common.core.util;
 
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.exception.SnailJobCommonException;
+import com.aizuda.snailjob.common.core.model.LongToStringModule;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -242,6 +243,7 @@ public class JsonUtil {
 
             // 注册JAVA 时间序列化器
             objectMapper.registerModule(javaTimeModule);
+            objectMapper.registerModule(new LongToStringModule());
             return objectMapper;
         }
 

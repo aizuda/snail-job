@@ -14,12 +14,9 @@
  */
 package com.aizuda.snailjob.server;
 
+import com.aizuda.snailjob.common.core.model.LongToStringModule;
 import com.aizuda.snailjob.server.common.rpc.server.grpc.GrpcServer;
 import com.aizuda.snailjob.server.common.rpc.server.netty.NettyHttpServer;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
@@ -28,7 +25,6 @@ import org.springframework.boot.web.servlet.server.ServletWebServerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import java.io.IOException;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
@@ -67,20 +63,7 @@ public class SnailJobServerApplication {
     }
 
     @Bean
-    public SimpleModule longToStringModule() {
-        SimpleModule module = new SimpleModule();
-        module.addSerializer(Long.class, new JsonSerializer<>() {
-            @Override
-            public void serialize(Long value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-                gen.writeString(value.toString());
-            }
-        });
-        module.addSerializer(Long.TYPE, new JsonSerializer<>() {
-            @Override
-            public void serialize(Long value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-                gen.writeString(value.toString());
-            }
-        });
-        return module;
+    public LongToStringModule longToStringModule() {
+        return new LongToStringModule();
     }
 }
