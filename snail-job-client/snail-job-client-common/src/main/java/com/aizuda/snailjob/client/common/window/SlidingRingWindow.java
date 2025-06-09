@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReferenceArray;
@@ -108,6 +109,7 @@ public class SlidingRingWindow<T> {
                     // add new
                     newWindow.getQueue().add(data);
                     // schedule time window emit after add new window
+                    scheduleWindowEmit(newWindow, now);
                     return;
                 }
             } else if (currentWindow.isOutWindow(now)) {
@@ -139,14 +141,6 @@ public class SlidingRingWindow<T> {
                     newWindow.getQueue().add(data);
                     // schedule time window emit after add new window
                     scheduleWindowEmit(newWindow, now);
-                    // clear old
-                    if (nextWindow != null) {
-                        emit(nextWindow);
-                    }
-
-                    // 如果A线程刚刚完成queue.add(data);此时B线程进入这里开启新窗口，
-                    // 若此时没有新的数据进来则currentWindow的数据没有线程来提取
-                    emit(currentWindow);
                     return;
                 }
             } else {
@@ -165,9 +159,7 @@ public class SlidingRingWindow<T> {
                  */
                 final ConcurrentLinkedQueue<T> queue = currentWindow.getQueue();
                 queue.add(data);
-                // 如果A线程进入的时候当前是没有过期，那么进行queue.add(data);
-                // 但是add完成后其实已经过期了, 没有线程进行添加数据则currentWindow的数据没有线程来提取
-                if (queue.size() >= totalThreshold || (currentWindow.isOutWindow(System.currentTimeMillis()) && !queue.isEmpty())) {
+                if (queue.size() >= totalThreshold || currentWindow.getEmitStatus()) {
                     emit(currentWindow);
                 }
 
@@ -177,7 +169,10 @@ public class SlidingRingWindow<T> {
     }
 
     private void scheduleWindowEmit(Window<T> window, long now) {
-        scheduler.schedule(() -> emit(window)
+        scheduler.schedule(() -> {
+                    window.setEmitted();
+                    emit(window);
+                }
                 , Math.max(window.windowTime - now, 100), TimeUnit.MILLISECONDS);
     }
 
@@ -237,6 +232,8 @@ public class SlidingRingWindow<T> {
 
         private final long windowTime;
 
+        private final AtomicBoolean emitStatus = new AtomicBoolean(false);
+
         private final Supplier<ConcurrentLinkedQueue<T>> dataQueueSupplier;
 
         private volatile ConcurrentLinkedQueue<T> dataQueue;
@@ -248,6 +245,13 @@ public class SlidingRingWindow<T> {
             this.dataQueueSupplier = dataQueueSupplier;
         }
 
+        public void setEmitted() {
+            emitStatus.set(true);
+        }
+
+        public boolean getEmitStatus() {
+            return emitStatus.get();
+        }
 
         public boolean isOutWindow(long now) {
             return windowTime < now;
