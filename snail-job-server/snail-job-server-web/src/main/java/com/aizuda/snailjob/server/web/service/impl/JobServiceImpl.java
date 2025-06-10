@@ -76,14 +76,14 @@ public class JobServiceImpl implements JobService {
     private final JobSummaryMapper jobSummaryMapper;
     private final SystemUserMapper systemUserMapper;
 
-    private static Long calculateNextTriggerAt(final JobRequestVO jobRequestVO, Long time) {
-        if (Objects.equals(jobRequestVO.getTriggerType(), SystemConstants.WORKFLOW_TRIGGER_TYPE)) {
+    private static Long calculateNextTriggerAt(final Job job, Long time) {
+        if (Objects.equals(job.getTriggerType(), SystemConstants.WORKFLOW_TRIGGER_TYPE)) {
             return 0L;
         }
 
-        WaitStrategy waitStrategy = WaitStrategies.WaitStrategyEnum.getWaitStrategy(jobRequestVO.getTriggerType());
+        WaitStrategy waitStrategy = WaitStrategies.WaitStrategyEnum.getWaitStrategy(job.getTriggerType());
         WaitStrategies.WaitStrategyContext waitStrategyContext = new WaitStrategies.WaitStrategyContext();
-        waitStrategyContext.setTriggerInterval(jobRequestVO.getTriggerInterval());
+        waitStrategyContext.setTriggerInterval(job.getTriggerInterval());
         waitStrategyContext.setNextTriggerAt(time);
         return waitStrategy.computeTriggerTime(waitStrategyContext);
     }
@@ -157,7 +157,7 @@ public class JobServiceImpl implements JobService {
 
         job.setBucketIndex(HashUtil.bkdrHash(jobRequestVO.getGroupName() + jobRequestVO.getJobName())
                 % systemProperties.getBucketTotal());
-        job.setNextTriggerAt(calculateNextTriggerAt(jobRequestVO, DateUtils.toNowMilli()));
+        job.setNextTriggerAt(calculateNextTriggerAt(job, DateUtils.toNowMilli()));
         job.setNamespaceId(UserSessionUtils.currentUserSession().getNamespaceId());
         job.setId(null);
         return 1 == jobMapper.insert(job);
@@ -206,13 +206,13 @@ public class JobServiceImpl implements JobService {
         } else if (Objects.equals(job.getResident(), StatusEnum.NO.getStatus()) && Objects.equals(
                 updateJob.getResident(),
                 StatusEnum.NO.getStatus())) {
-            updateJob.setNextTriggerAt(calculateNextTriggerAt(jobRequestVO, DateUtils.toNowMilli()));
+            updateJob.setNextTriggerAt(calculateNextTriggerAt(job, DateUtils.toNowMilli()));
         } else if (Objects.equals(job.getResident(), StatusEnum.YES.getStatus()) && Objects.equals(
                 updateJob.getResident(), StatusEnum.NO.getStatus())) {
             // 常驻任务的触发时间
             long time = Optional.ofNullable(ResidentTaskCache.get(jobRequestVO.getId()))
                     .orElse(DateUtils.toNowMilli());
-            updateJob.setNextTriggerAt(calculateNextTriggerAt(jobRequestVO, time));
+            updateJob.setNextTriggerAt(calculateNextTriggerAt(job, time));
             // 老的是不是常驻任务 新的是常驻任务 需要使用当前时间计算下次触发时间
         } else if (Objects.equals(job.getResident(), StatusEnum.NO.getStatus()) && Objects.equals(
                 updateJob.getResident(), StatusEnum.YES.getStatus())) {
@@ -255,7 +255,7 @@ public class JobServiceImpl implements JobService {
 
         for (int i = 1; i < times.size(); i++) {
             Duration gap = Duration.between(times.get(i - 1), times.get(i));
-            if (gap.compareTo(maxGap) >= 0) {
+            if (gap.compareTo(maxGap) < 0) {
                 return false;
             }
         }

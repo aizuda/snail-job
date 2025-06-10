@@ -247,7 +247,7 @@ public class WaitStrategies {
             String triggerInterval = context.getTriggerInterval();
             List<PointInTimeDTO> pointInTimeList = JsonUtil.parseList(triggerInterval, PointInTimeDTO.class);
             Optional<Long> nextTrigger = getNextTrigger(pointInTimeList);
-            return nextTrigger.orElse(DateUtils.toEpochMilli(LocalDateTime.MAX));
+            return nextTrigger.orElseGet(() -> DateUtils.toEpochMilli(LocalDateTime.MAX));
         }
 
         public Optional<Long> getNextTrigger(List<PointInTimeDTO> pointInTimeList) {

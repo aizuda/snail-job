@@ -49,6 +49,10 @@ public class DateUtils {
         return LocalDateTime.now();
     }
 
+    public static String format(LocalDateTime time) {
+        return format(time, NORM_DATETIME_PATTERN);
+    }
+
     public static String format(LocalDateTime time, DateTimeFormatter dateFormatter) {
         return time.format(dateFormatter);
     }
