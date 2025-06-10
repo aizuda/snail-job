@@ -19,7 +19,7 @@ public interface JobExecutorService {
 
     JobExecutor getJobExecutorDetail(Long id);
 
-    List<JobExecutor> getJobExecutorList(JobExecutorQueryVO jobQueryVO);
+    Set<String> getJobExecutorList(JobExecutorQueryVO jobQueryVO);
 
     Boolean deleteJobExecutorByIds(Set<Long> ids);
 }

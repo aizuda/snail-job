@@ -172,8 +172,7 @@ public class SlidingRingWindow<T> {
         scheduler.schedule(() -> {
                     window.setEmitted();
                     emit(window);
-                }
-                , Math.max(window.windowTime - now, 100), TimeUnit.MILLISECONDS);
+                }, Math.max(window.windowTime - now, 100), TimeUnit.MILLISECONDS);
     }
 
 

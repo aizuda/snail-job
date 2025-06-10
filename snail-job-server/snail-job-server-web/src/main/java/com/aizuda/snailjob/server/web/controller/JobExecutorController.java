@@ -34,7 +34,7 @@ public class JobExecutorController {
 
     @GetMapping("/list")
     @LoginRequired
-    public List<JobExecutor> getJobList(JobExecutorQueryVO executorQueryVO) {
+    public Set<String> getJobList(JobExecutorQueryVO executorQueryVO) {
         return jobExecutorService.getJobExecutorList(executorQueryVO);
     }
 

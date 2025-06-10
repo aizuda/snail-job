@@ -3,6 +3,7 @@ package com.aizuda.snailjob.server.web.service.impl;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
+import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.JobExecutorQueryVO;
@@ -55,17 +56,18 @@ public class JobExecutorServiceImpl implements JobExecutorService {
     }
 
     @Override
-    public List<JobExecutor> getJobExecutorList(JobExecutorQueryVO jobQueryVO) {
+    public Set<String> getJobExecutorList(JobExecutorQueryVO jobQueryVO) {
         UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
         List<String> groupNames = UserSessionUtils.getGroupNames(jobQueryVO.getGroupName());
 
-            return jobExecutorMapper.selectList(
+            return StreamUtils.toSet(jobExecutorMapper.selectList(
                     new LambdaQueryWrapper<JobExecutor>()
+                            .select(JobExecutor::getExecutorInfo)
                             .eq(JobExecutor::getNamespaceId, userSessionVO.getNamespaceId())
                             .eq(StrUtil.isNotBlank(jobQueryVO.getExecutorType()), JobExecutor::getExecutorType, jobQueryVO.getExecutorType())
                             .in(CollUtil.isNotEmpty(groupNames), JobExecutor::getGroupName, groupNames)
                             .like(StrUtil.isNotBlank(jobQueryVO.getExecutorInfo()), JobExecutor::getExecutorInfo, StrUtil.trim(jobQueryVO.getExecutorInfo()))
-                            .orderByDesc(JobExecutor::getId));
+                            .orderByDesc(JobExecutor::getId)), JobExecutor::getExecutorInfo);
     }
 
     @Override
