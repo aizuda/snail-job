@@ -201,18 +201,18 @@ public class JobServiceImpl implements JobService {
 
         // 工作流任务
         if (Objects.equals(jobRequestVO.getTriggerType(), SystemConstants.WORKFLOW_TRIGGER_TYPE)) {
-            job.setNextTriggerAt(0L);
+            updateJob.setNextTriggerAt(0L);
             // 非常驻任务 > 非常驻任务
         } else if (Objects.equals(job.getResident(), StatusEnum.NO.getStatus()) && Objects.equals(
                 updateJob.getResident(),
                 StatusEnum.NO.getStatus())) {
-            updateJob.setNextTriggerAt(calculateNextTriggerAt(job, DateUtils.toNowMilli()));
+            updateJob.setNextTriggerAt(calculateNextTriggerAt(updateJob, DateUtils.toNowMilli()));
         } else if (Objects.equals(job.getResident(), StatusEnum.YES.getStatus()) && Objects.equals(
                 updateJob.getResident(), StatusEnum.NO.getStatus())) {
             // 常驻任务的触发时间
             long time = Optional.ofNullable(ResidentTaskCache.get(jobRequestVO.getId()))
                     .orElse(DateUtils.toNowMilli());
-            updateJob.setNextTriggerAt(calculateNextTriggerAt(job, time));
+            updateJob.setNextTriggerAt(calculateNextTriggerAt(updateJob, time));
             // 老的是不是常驻任务 新的是常驻任务 需要使用当前时间计算下次触发时间
         } else if (Objects.equals(job.getResident(), StatusEnum.NO.getStatus()) && Objects.equals(
                 updateJob.getResident(), StatusEnum.YES.getStatus())) {

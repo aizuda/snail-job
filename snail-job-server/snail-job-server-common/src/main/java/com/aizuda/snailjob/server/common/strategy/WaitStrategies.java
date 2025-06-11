@@ -19,6 +19,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 /**
  * 生成 {@link WaitStrategy} 实例.
@@ -242,20 +243,27 @@ public class WaitStrategies {
      */
     private static final class PointInTimeWaitStrategy implements WaitStrategy {
 
+        private static final LocalDateTime MAX_DATE_TIME = LocalDateTime.of(2999, 12, 31, 23, 59, 59);
         @Override
         public Long computeTriggerTime(WaitStrategyContext context) {
             String triggerInterval = context.getTriggerInterval();
             List<PointInTimeDTO> pointInTimeList = JsonUtil.parseList(triggerInterval, PointInTimeDTO.class);
-            Optional<Long> nextTrigger = getNextTrigger(pointInTimeList);
-            return nextTrigger.orElseGet(() -> DateUtils.toEpochMilli(LocalDateTime.MAX));
+            Optional<Long> nextTrigger = getNextTrigger(pointInTimeList, context.getNextTriggerAt());
+            return nextTrigger.orElseGet(() -> DateUtils.toEpochMilli(MAX_DATE_TIME));
         }
 
-        public Optional<Long> getNextTrigger(List<PointInTimeDTO> pointInTimeList) {
-            return pointInTimeList.stream()
+        public Optional<Long> getNextTrigger(List<PointInTimeDTO> pointInTimeList, Long nextTriggerAt) {
+            Stream<Long> stream = pointInTimeList.stream()
                     .filter(Objects::nonNull)
                     .map(PointInTimeDTO::getTime)
-                    .filter(t -> t > DateUtils.toNowMilli())
-                    .min(Comparator.naturalOrder());
+                    .filter(t -> t > DateUtils.toNowMilli());
+
+            // 下次执行时间需要大于当前任务的执行时间
+            if (nextTriggerAt != null) {
+                stream = stream.filter(t -> t > nextTriggerAt);
+            }
+            return stream.min(Comparator.naturalOrder());
+
         }
 
     }
