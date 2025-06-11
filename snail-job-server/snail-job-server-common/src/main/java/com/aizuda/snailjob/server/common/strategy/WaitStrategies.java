@@ -253,16 +253,13 @@ public class WaitStrategies {
         }
 
         public Optional<Long> getNextTrigger(List<PointInTimeDTO> pointInTimeList, Long nextTriggerAt) {
-            Stream<Long> stream = pointInTimeList.stream()
+            // 下次执行时间需要大于当前任务的执行时间
+            return pointInTimeList.stream()
                     .filter(Objects::nonNull)
                     .map(PointInTimeDTO::getTime)
-                    .filter(t -> t > DateUtils.toNowMilli());
-
-            // 下次执行时间需要大于当前任务的执行时间
-            if (nextTriggerAt != null) {
-                stream = stream.filter(t -> t > nextTriggerAt);
-            }
-            return stream.min(Comparator.naturalOrder());
+                    // 下次执行时间需要大于当前任务的执行时间
+                    .filter(t -> t > Optional.ofNullable(nextTriggerAt).orElse(DateUtils.toNowMilli()))
+                    .min(Comparator.naturalOrder());
 
         }
 
