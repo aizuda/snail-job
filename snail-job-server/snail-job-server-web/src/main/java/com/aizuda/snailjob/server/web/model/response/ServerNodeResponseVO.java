@@ -13,6 +13,8 @@ import java.util.Set;
 @Data
 public class ServerNodeResponseVO {
 
+    private Long id;
+
     private String groupName;
 
     private String hostId;

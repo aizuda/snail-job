@@ -297,5 +297,5 @@ public interface SystemConstants {
     /**
      * 默认的标签
      */
-    Pair<String, String> DEFAULT_LABEL = Pair.of("state", "running");
+    Pair<String, String> DEFAULT_LABEL = Pair.of("state", "up");
 }

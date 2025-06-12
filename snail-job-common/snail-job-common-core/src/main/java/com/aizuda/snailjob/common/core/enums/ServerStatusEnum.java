@@ -11,9 +11,7 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum ServerStatusEnum {
-
-
-    RUNNING(1,"running"),
+    UP(1,"up"),
     DOWN(2, "down"),
     ;
 

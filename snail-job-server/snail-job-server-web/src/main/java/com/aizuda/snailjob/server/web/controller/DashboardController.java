@@ -9,10 +9,7 @@ import com.aizuda.snailjob.server.web.model.response.DashboardRetryLineResponseV
 import com.aizuda.snailjob.server.web.model.response.ServerNodeResponseVO;
 import com.aizuda.snailjob.server.web.service.DashboardService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Set;
@@ -56,13 +53,13 @@ public class DashboardController {
 
     @LoginRequired
     @PutMapping("/pods/status")
-    public Boolean updatePodsStatus(ServerNodeStatusUpdateRequestVO updateRequestVO) {
+    public Boolean updatePodsStatus(@RequestBody ServerNodeStatusUpdateRequestVO updateRequestVO) {
         return dashBoardService.updatePodsStatus(updateRequestVO);
     }
 
     @LoginRequired
     @PutMapping("/pods/labels")
-    public Boolean updatePodsLabels(ServerNodeLabelsUpdateRequestVO updateRequestVO) {
+    public Boolean updatePodsLabels(@RequestBody ServerNodeLabelsUpdateRequestVO updateRequestVO) {
         return dashBoardService.updatePodsLabels(updateRequestVO);
     }
 
