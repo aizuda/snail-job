@@ -20,6 +20,7 @@ import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.enums.SystemModeEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.register.ServerRegister;
+import com.aizuda.snailjob.server.common.register.UpdateClientRegister;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.enums.DateTypeEnum;
 import com.aizuda.snailjob.server.web.model.request.*;
@@ -74,6 +75,7 @@ public class DashboardServiceImpl implements DashboardService {
     private final JobSummaryMapper jobSummaryMapper;
     private final RetrySummaryMapper retrySummaryMapper;
     private final ServerProperties serverProperties;
+    private final UpdateClientRegister  updateClientRegister;
 
     @Override
     public DashboardCardResponseVO taskRetryJob() {
@@ -329,7 +331,12 @@ public class DashboardServiceImpl implements DashboardService {
         map.put(SystemConstants.DEFAULT_LABEL.getKey(), statusEnum.getStatus());
         serverNode.setLabels(JsonUtil.toJsonString(map));
 
-        return serverNodeMapper.updateById(serverNode) > 0;
+        if (serverNodeMapper.updateById(serverNode) > 0){
+            updateClientRegister.updateClientInfo(serverNode);
+            return true;
+        }else {
+            return false;
+        }
     }
 
     @Override
@@ -346,7 +353,13 @@ public class DashboardServiceImpl implements DashboardService {
         toUpdateMap.remove(SystemConstants.DEFAULT_LABEL.getKey());
         dbMap.putAll(toUpdateMap);
         serverNode.setLabels(JsonUtil.toJsonString(dbMap));
-        return serverNodeMapper.updateById(serverNode) > 0;
+
+        if (serverNodeMapper.updateById(serverNode) > 0){
+            updateClientRegister.updateClientInfo(serverNode);
+            return true;
+        }else {
+            return false;
+        }
     }
 
 }

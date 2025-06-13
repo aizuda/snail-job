@@ -24,6 +24,7 @@ import com.google.common.collect.Sets;
 import io.grpc.ConnectivityState;
 import io.grpc.ManagedChannel;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -44,6 +45,7 @@ import java.util.stream.Stream;
  * @date 2025-05-24
  * @since 1.6.0-beta1
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class InstanceManager implements Lifecycle {
@@ -319,5 +321,35 @@ public class InstanceManager implements Lifecycle {
 
         return true;
     }
+
+    /**
+     * 更新单个服务器节点标签信息
+     *
+     * @param serverNode 服务器节点
+     */
+    public void updateInstanceLabels(ServerNode serverNode) {
+        if (serverNode == null) {
+            return;
+        }
+
+        InstanceKey instanceKey = InstanceKey.builder()
+                .namespaceId(serverNode.getNamespaceId())
+                .groupName(serverNode.getGroupName())
+                .hostId(serverNode.getHostId())
+                .build();
+        InstanceLiveInfo instanceLiveInfo = INSTANCE_MAP.get(instanceKey);
+        if (Objects.isNull(instanceLiveInfo)){
+            // 本地不存在则新增
+            registerOrUpdate(RegisterNodeInfoConverter.INSTANCE.toRegisterNodeInfo(serverNode));
+            return;
+        }
+        // 本地有数据则更新标签
+        if (StrUtil.isNotBlank(serverNode.getLabels())){
+            instanceLiveInfo.getNodeInfo().setLabels(serverNode.getLabels());
+            instanceLiveInfo.getNodeInfo().setLabelMap(JsonUtil.parseHashMap(serverNode.getLabels()));
+        }
+    }
+
+
 
 }

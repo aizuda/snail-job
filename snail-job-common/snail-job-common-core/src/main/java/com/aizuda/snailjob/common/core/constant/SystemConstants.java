@@ -147,6 +147,11 @@ public interface SystemConstants {
         String GET_REG_NODES_AND_REFRESH = "/pull/register/queue/v1";
 
         /**
+         * 更新客户端信息
+         */
+        String UPDATE_CLIENT_INFO = "/update/client/info/v1";
+
+        /**
          * 获取重试幂等id
          */
         String RETRY_GENERATE_IDEM_ID = "/retry/generate/idempotent-id/v1";
