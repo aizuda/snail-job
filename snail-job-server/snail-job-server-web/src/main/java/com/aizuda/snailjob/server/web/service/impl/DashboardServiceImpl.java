@@ -15,6 +15,7 @@ import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.dto.DistributeInstance;
 import com.aizuda.snailjob.server.common.dto.ServerNodeExtAttrs;
+import com.aizuda.snailjob.server.common.dto.UpdateClientInfoDTO;
 import com.aizuda.snailjob.server.common.enums.DashboardLineEnum;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.enums.SystemModeEnum;
@@ -48,6 +49,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -75,7 +77,7 @@ public class DashboardServiceImpl implements DashboardService {
     private final JobSummaryMapper jobSummaryMapper;
     private final RetrySummaryMapper retrySummaryMapper;
     private final ServerProperties serverProperties;
-    private final UpdateClientRegister  updateClientRegister;
+    private final UpdateClientRegister updateClientRegister;
 
     @Override
     public DashboardCardResponseVO taskRetryJob() {
@@ -320,7 +322,8 @@ public class DashboardServiceImpl implements DashboardService {
     @Override
     public Boolean updatePodsStatus(ServerNodeStatusUpdateRequestVO updateRequestVO) {
         ServerNode serverNode = serverNodeMapper.selectById(updateRequestVO.getId());
-        if (serverNode.getNodeType().equals(NodeTypeEnum.SERVER.getType())){
+        Assert.notNull(serverNode, () -> new SnailJobServerException("ServerNode not found."));
+        if (serverNode.getNodeType().equals(NodeTypeEnum.SERVER.getType())) {
             return false;
         }
 
@@ -330,21 +333,20 @@ public class DashboardServiceImpl implements DashboardService {
         Assert.notNull(statusEnum, () -> new SnailJobServerException("ServerNodeStatus not existed"));
         map.put(SystemConstants.DEFAULT_LABEL.getKey(), statusEnum.getStatus());
         serverNode.setLabels(JsonUtil.toJsonString(map));
+        Boolean updated = updateLabel(serverNode);
 
-        if (serverNodeMapper.updateById(serverNode) > 0){
-            updateClientRegister.updateClientInfo(serverNode);
-            return true;
-        }else {
-            return false;
-        }
+        Assert.isTrue(updated, () -> new SnailJobServerException("update labels error"));
+        return updated;
     }
+
 
     @Override
     public Boolean updatePodsLabels(ServerNodeLabelsUpdateRequestVO updateRequestVO) {
         ServerNode serverNode = serverNodeMapper.selectById(updateRequestVO.getId());
-        if (serverNode.getNodeType().equals(NodeTypeEnum.SERVER.getType())){
+        if (serverNode.getNodeType().equals(NodeTypeEnum.SERVER.getType())) {
             return false;
         }
+
         String labels = serverNode.getLabels();
         Map<String, String> dbMap = JsonUtil.parseConcurrentHashMap(labels);
 
@@ -354,10 +356,20 @@ public class DashboardServiceImpl implements DashboardService {
         dbMap.putAll(toUpdateMap);
         serverNode.setLabels(JsonUtil.toJsonString(dbMap));
 
-        if (serverNodeMapper.updateById(serverNode) > 0){
-            updateClientRegister.updateClientInfo(serverNode);
-            return true;
-        }else {
+        return updateLabel(serverNode);
+    }
+
+    private Boolean updateLabel(ServerNode serverNode) {
+        if (serverNodeMapper.updateById(serverNode) > 0) {
+            UpdateClientInfoDTO clientInfoDTO = UpdateClientInfoDTO.builder()
+                    .hostId(serverNode.getHostId())
+                    .hostIp(serverNode.getHostIp())
+                    .namespaceId(serverNode.getNamespaceId())
+                    .groupName(serverNode.getGroupName())
+                    .labels(serverNode.getLabels())
+                    .build();
+            return updateClientRegister.updateClientInfo(clientInfoDTO);
+        } else {
             return false;
         }
     }

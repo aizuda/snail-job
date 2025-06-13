@@ -10,10 +10,7 @@ import com.aizuda.snailjob.server.common.ClientLoadBalance;
 import com.aizuda.snailjob.server.common.Lifecycle;
 import com.aizuda.snailjob.server.common.allocate.client.ClientLoadBalanceManager;
 import com.aizuda.snailjob.server.common.convert.RegisterNodeInfoConverter;
-import com.aizuda.snailjob.server.common.dto.InstanceKey;
-import com.aizuda.snailjob.server.common.dto.InstanceLiveInfo;
-import com.aizuda.snailjob.server.common.dto.InstanceSelectCondition;
-import com.aizuda.snailjob.server.common.dto.RegisterNodeInfo;
+import com.aizuda.snailjob.server.common.dto.*;
 import com.aizuda.snailjob.server.common.register.ServerRegister;
 import com.aizuda.snailjob.server.common.rpc.client.grpc.GrpcChannel;
 import com.aizuda.snailjob.server.common.util.DateUtils;
@@ -325,31 +322,38 @@ public class InstanceManager implements Lifecycle {
     /**
      * 更新单个服务器节点标签信息
      *
-     * @param serverNode 服务器节点
+     * @param clientInfoDTO 服务器节点
      */
-    public void updateInstanceLabels(ServerNode serverNode) {
-        if (serverNode == null) {
+    public void updateInstanceLabels(UpdateClientInfoDTO clientInfoDTO) {
+        if (clientInfoDTO == null) {
             return;
         }
 
         InstanceKey instanceKey = InstanceKey.builder()
-                .namespaceId(serverNode.getNamespaceId())
-                .groupName(serverNode.getGroupName())
-                .hostId(serverNode.getHostId())
+                .namespaceId(clientInfoDTO.getNamespaceId())
+                .groupName(clientInfoDTO.getGroupName())
+                .hostId(clientInfoDTO.getHostId())
                 .build();
         InstanceLiveInfo instanceLiveInfo = INSTANCE_MAP.get(instanceKey);
         if (Objects.isNull(instanceLiveInfo)){
             // 本地不存在则新增
+            ServerNode serverNode = serverNodeMapper.selectOne(
+                    new LambdaQueryWrapper<ServerNode>()
+                            .eq(ServerNode::getNamespaceId, clientInfoDTO.getNamespaceId())
+                            .eq(ServerNode::getGroupName, clientInfoDTO.getGroupName())
+                            .eq(ServerNode::getHostId, clientInfoDTO.getHostId())
+                            .eq(ServerNode::getHostIp, clientInfoDTO.getHostIp()));
+            if (Objects.isNull(serverNode)) {
+                return;
+            }
+
             registerOrUpdate(RegisterNodeInfoConverter.INSTANCE.toRegisterNodeInfo(serverNode));
             return;
         }
         // 本地有数据则更新标签
-        if (StrUtil.isNotBlank(serverNode.getLabels())){
-            instanceLiveInfo.getNodeInfo().setLabels(serverNode.getLabels());
-            instanceLiveInfo.getNodeInfo().setLabelMap(JsonUtil.parseHashMap(serverNode.getLabels()));
+        if (StrUtil.isNotBlank(clientInfoDTO.getLabels())){
+            instanceLiveInfo.getNodeInfo().setLabels(clientInfoDTO.getLabels());
+            instanceLiveInfo.getNodeInfo().setLabelMap(JsonUtil.parseHashMap(clientInfoDTO.getLabels()));
         }
     }
-
-
-
 }
