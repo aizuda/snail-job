@@ -49,15 +49,18 @@ public interface JobResponseVOConverter {
 
     static String toTriggerInterval(Job job) {
         String triggerInterval = job.getTriggerInterval();
-        if (job.getTriggerType() != WaitStrategies.WaitStrategyEnum.POINT_IN_TIME.getType()) {
-            return triggerInterval;
+        Integer triggerType = job.getTriggerType();
+
+        if (WaitStrategies.WaitStrategyEnum.POINT_IN_TIME.getType().equals(triggerType)) {
+            List<PointInTimeDTO> pointInTimeDTOS = JsonUtil.parseList(triggerInterval, PointInTimeDTO.class);
+            List<String> timeStrList = pointInTimeDTOS
+                    .stream()
+                    .map(time -> DateUtils.format(DateUtils.toLocalDateTime(time.getTime())))
+                    .toList();
+            return JsonUtil.toJsonString(timeStrList);
         }
 
-        List<PointInTimeDTO> pointInTimeDTOS = JsonUtil.parseList(triggerInterval, PointInTimeDTO.class);
-        List<String> timeStrList = pointInTimeDTOS
-                .stream()
-                .map(time -> DateUtils.format(DateUtils.toLocalDateTime(time.getTime())))
-                .toList();
-        return JsonUtil.toJsonString(timeStrList);
+        return triggerInterval;
+
     }
 }

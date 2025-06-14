@@ -70,7 +70,7 @@ public class WaitStrategies {
         POINT_IN_TIME(5, pointInTimeWait()),
         ;
 
-        private final int type;
+        private final Integer type;
         private final WaitStrategy waitStrategy;
 
         /**
