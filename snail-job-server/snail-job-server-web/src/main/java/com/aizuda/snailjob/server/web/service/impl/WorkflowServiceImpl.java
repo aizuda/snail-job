@@ -122,6 +122,7 @@ public class WorkflowServiceImpl implements WorkflowService {
         // 组装工作流信息
         Workflow workflow = WorkflowConverter.INSTANCE.convert(workflowRequestVO);
         workflow.setVersion(1);
+        workflowRequestVO.setTriggerInterval(workflow.getTriggerInterval());
         workflow.setNextTriggerAt(calculateNextTriggerAt(workflowRequestVO, DateUtils.toNowMilli()));
         workflow.setFlowInfo(StrUtil.EMPTY);
         workflow.setBucketIndex(
@@ -227,6 +228,7 @@ public class WorkflowServiceImpl implements WorkflowService {
         workflow = WorkflowConverter.INSTANCE.convert(workflowRequestVO);
         workflow.setId(workflowRequestVO.getId());
         workflow.setVersion(version);
+        workflowRequestVO.setTriggerInterval(workflow.getTriggerInterval());
         workflow.setNextTriggerAt(calculateNextTriggerAt(workflowRequestVO, DateUtils.toNowMilli()));
         workflow.setFlowInfo(JsonUtil.toJsonString(GraphUtils.serializeGraphToJson(graph)));
         // 不允许更新组
