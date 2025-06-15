@@ -9,7 +9,10 @@ import com.aizuda.snailjob.server.common.dto.DecisionConfig;
 import com.aizuda.snailjob.server.common.dto.JobTaskConfig;
 import com.aizuda.snailjob.server.common.dto.PointInTimeDTO;
 import com.aizuda.snailjob.server.common.strategy.WaitStrategies;
+import com.aizuda.snailjob.server.common.dto.PointInTimeDTO;
+import com.aizuda.snailjob.server.common.strategy.WaitStrategies;
 import com.aizuda.snailjob.server.common.util.DateUtils;
+import com.aizuda.snailjob.server.common.util.TriggerIntervalUtils;
 import com.aizuda.snailjob.server.common.vo.WorkflowBatchResponseVO;
 import com.aizuda.snailjob.server.common.vo.WorkflowResponseVO;
 import com.aizuda.snailjob.server.common.vo.request.WorkflowRequestVO;
@@ -131,27 +134,12 @@ public interface WorkflowConverter {
         return JsonUtil.toJsonString(notifyIds);
     }
 
-    static String toTriggerInterval(WorkflowRequestVO workflowRequestVO) {
-        String triggerInterval = workflowRequestVO.getTriggerInterval();
-        if (StrUtil.isBlank(triggerInterval) || Objects.isNull(workflowRequestVO.getTriggerType())) {
+    static String toTriggerInterval(WorkflowRequestVO requestVO) {
+        String triggerInterval = requestVO.getTriggerInterval();
+        if (StrUtil.isBlank(triggerInterval) || Objects.isNull(requestVO.getTriggerType())) {
             return StrUtil.EMPTY;
         }
-
-        if (workflowRequestVO.getTriggerType().equals(WaitStrategies.WaitStrategyEnum.POINT_IN_TIME.getType())) {
-            List<String> pointInTimes = JsonUtil.parseList(triggerInterval, String.class);
-            List<PointInTimeDTO> localDateTimes = pointInTimes
-                    .stream()
-                    .map(DateUtils::toLocalDateTime)
-                    .map(DateUtils::toEpochMilli)
-                    .map(time -> {
-                        PointInTimeDTO pointInTimeDTO = new PointInTimeDTO();
-                        pointInTimeDTO.setTime(time);
-                        return pointInTimeDTO;
-                    }).toList();
-            return JsonUtil.toJsonString(localDateTimes);
-        }
-
-        return triggerInterval;
+        return TriggerIntervalUtils.getPointInTimeStr(triggerInterval, requestVO.getTriggerType());
     }
 
     static String toTriggerInterval(Workflow workflow) {
@@ -170,5 +158,4 @@ public interface WorkflowConverter {
         return triggerInterval;
 
     }
-
 }

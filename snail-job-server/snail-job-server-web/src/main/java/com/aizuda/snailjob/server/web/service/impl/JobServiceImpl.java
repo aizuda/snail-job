@@ -19,6 +19,7 @@ import com.aizuda.snailjob.server.common.strategy.WaitStrategies;
 import com.aizuda.snailjob.server.common.util.CronUtils;
 import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.common.util.PartitionTaskUtils;
+import com.aizuda.snailjob.server.common.util.TriggerIntervalUtils;
 import com.aizuda.snailjob.server.job.task.dto.JobTaskPrepareDTO;
 import com.aizuda.snailjob.server.job.task.support.JobPrepareHandler;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
@@ -163,25 +164,8 @@ public class JobServiceImpl implements JobService {
         return 1 == jobMapper.insert(job);
     }
 
-    private static void checkTriggerInterval(JobRequestVO jobRequestVO) {
-        if (jobRequestVO.getTriggerType() == WaitStrategies.WaitStrategyEnum.POINT_IN_TIME.getType()) {
-            String triggerInterval = jobRequestVO.getTriggerInterval();
-            List<String> pointInTimeDTOS = JsonUtil.parseList(triggerInterval, String.class);
-            LocalDateTime now = LocalDateTime.now();
-            List<LocalDateTime> localDateTimes = pointInTimeDTOS
-                    .stream()
-                    .map(DateUtils::toLocalDateTime)
-                    .sorted(Comparator.naturalOrder())
-                    .toList();
-            LocalDateTime first = localDateTimes.get(0);
-            if (first.isBefore(now)) {
-                throw new SnailJobServerException("The submission time is less than the current time. triggerTime:{} now:{}", first, now);
-            }
-
-            // 判断间隔是否大于10秒
-            Assert.isTrue(areAllIntervalsLessThan(localDateTimes, Duration.ofSeconds(10)),
-                    () -> new SnailJobServerException("There are combinations with intervals less than 10(s)"));
-        }
+    private void checkTriggerInterval(JobRequestVO jobRequestVO) {
+        TriggerIntervalUtils.checkTriggerInterval(jobRequestVO.getTriggerInterval(), jobRequestVO.getTriggerType());
     }
 
     @Override
@@ -233,15 +217,15 @@ public class JobServiceImpl implements JobService {
             return StatusEnum.NO.getStatus();
         }
 
-        if (jobRequestVO.getTriggerType() == WaitStrategies.WaitStrategyEnum.FIXED.getType()) {
+        if (Objects.equals(jobRequestVO.getTriggerType(), WaitStrategies.WaitStrategyEnum.FIXED.getType())) {
             if (Integer.parseInt(jobRequestVO.getTriggerInterval()) < 10) {
                 return StatusEnum.YES.getStatus();
             }
-        } else if (jobRequestVO.getTriggerType() == WaitStrategies.WaitStrategyEnum.CRON.getType()) {
+        } else if (Objects.equals(jobRequestVO.getTriggerType(), WaitStrategies.WaitStrategyEnum.CRON.getType())) {
             if (CronUtils.getExecuteInterval(jobRequestVO.getTriggerInterval()) < 10 * 1000) {
                 return StatusEnum.YES.getStatus();
             }
-        } else if (jobRequestVO.getTriggerType() == WaitStrategies.WaitStrategyEnum.POINT_IN_TIME.getType()) {
+        } else if (Objects.equals(jobRequestVO.getTriggerType(), WaitStrategies.WaitStrategyEnum.POINT_IN_TIME.getType())) {
             return StatusEnum.NO.getStatus();
         } else {
             throw new SnailJobServerException("Unknown trigger type");

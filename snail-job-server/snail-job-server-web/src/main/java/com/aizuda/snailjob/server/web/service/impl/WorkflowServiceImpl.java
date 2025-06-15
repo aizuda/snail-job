@@ -21,10 +21,7 @@ import com.aizuda.snailjob.server.common.enums.JobTaskExecutorSceneEnum;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.strategy.WaitStrategies;
-import com.aizuda.snailjob.server.common.util.CronUtils;
-import com.aizuda.snailjob.server.common.util.DateUtils;
-import com.aizuda.snailjob.server.common.util.GraphUtils;
-import com.aizuda.snailjob.server.common.util.PartitionTaskUtils;
+import com.aizuda.snailjob.server.common.util.*;
 import com.aizuda.snailjob.server.web.model.request.UserSessionVO;
 import com.aizuda.snailjob.server.common.vo.request.WorkflowRequestVO;
 import com.aizuda.snailjob.server.job.task.dto.WorkflowTaskPrepareDTO;
@@ -103,7 +100,7 @@ public class WorkflowServiceImpl implements WorkflowService {
             if (Integer.parseInt(requestVO.getTriggerInterval()) < 10) {
                 throw new SnailJobServerException("Trigger interval must not be less than 10");
             }
-        } else if (requestVO.getTriggerType() == WaitStrategies.WaitStrategyEnum.CRON.getType()) {
+        } else if (Objects.equals(requestVO.getTriggerType(), WaitStrategies.WaitStrategyEnum.CRON.getType())) {
             if (CronUtils.getExecuteInterval(requestVO.getTriggerInterval()) < 10 * 1000) {
                 throw new SnailJobServerException("Trigger interval must not be less than 10");
             }
@@ -121,6 +118,9 @@ public class WorkflowServiceImpl implements WorkflowService {
 
         // 组装工作流信息
         Workflow workflow = WorkflowConverter.INSTANCE.convert(workflowRequestVO);
+
+        checkTriggerInterval(workflowRequestVO);
+
         workflow.setVersion(1);
         workflowRequestVO.setTriggerInterval(workflow.getTriggerInterval());
         workflow.setNextTriggerAt(calculateNextTriggerAt(workflowRequestVO, DateUtils.toNowMilli()));
@@ -148,6 +148,10 @@ public class WorkflowServiceImpl implements WorkflowService {
         workflow.setFlowInfo(JsonUtil.toJsonString(GraphUtils.serializeGraphToJson(graph)));
         Assert.isTrue(1 == workflowMapper.updateById(workflow), () -> new SnailJobServerException("Failed to save workflow graph"));
         return true;
+    }
+
+    private void checkTriggerInterval(WorkflowRequestVO workflowRequestVO) {
+        TriggerIntervalUtils.checkTriggerInterval(workflowRequestVO.getTriggerInterval(), workflowRequestVO.getTriggerType());
     }
 
     private MutableGraph<Long> createGraph() {
@@ -226,6 +230,9 @@ public class WorkflowServiceImpl implements WorkflowService {
 
         // 保存图信息
         workflow = WorkflowConverter.INSTANCE.convert(workflowRequestVO);
+
+        checkTriggerInterval(workflowRequestVO);
+
         workflow.setId(workflowRequestVO.getId());
         workflow.setVersion(version);
         workflowRequestVO.setTriggerInterval(workflow.getTriggerInterval());
