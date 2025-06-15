@@ -154,7 +154,7 @@ CREATE TABLE `sj_retry_task`
     `task_status`      tinyint(4)          NOT NULL DEFAULT 1 COMMENT '重试状态',
     `task_type`        tinyint(4)          NOT NULL DEFAULT 1 COMMENT '任务类型 1、重试数据 2、回调数据',
     `operation_reason` tinyint(4)          NOT NULL DEFAULT 0 COMMENT '操作原因',
-    `client_info`      varchar(128)        DEFAULT NULL COMMENT '客户端地址 clientId#ip:port',
+    `client_info`      varchar(128)                 DEFAULT NULL COMMENT '客户端地址 clientId#ip:port',
     `create_dt`        datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_dt`        datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     PRIMARY KEY (`id`),
@@ -527,15 +527,16 @@ CREATE TABLE `sj_workflow_task_batch`
 
 CREATE TABLE `sj_job_executor`
 (
-    `id`                 bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `namespace_id`       varchar(64)         NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' COMMENT '命名空间id',
-    `group_name`         varchar(64)         NOT NULL COMMENT '组名称',
-    `executor_info`      varchar(256)        NOT NULL COMMENT '任务执行器名称',
-    `executor_type`      varchar(3)          NOT NULL COMMENT '1:java; 2:python; 3:go;',
-    `create_dt`          datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_dt`          datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+    `id`            bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `namespace_id`  varchar(64)         NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' COMMENT '命名空间id',
+    `group_name`    varchar(64)         NOT NULL COMMENT '组名称',
+    `executor_info` varchar(256)        NOT NULL COMMENT '任务执行器名称',
+    `executor_type` varchar(3)          NOT NULL COMMENT '1:java 2:python 3:go',
+    `create_dt`     datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_dt`     datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     PRIMARY KEY (`id`),
     KEY `idx_namespace_id_group_name` (`namespace_id`, `group_name`),
     KEY `idx_create_dt` (`create_dt`)
 ) ENGINE = InnoDB
-  AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='任务执行器信息';
+  AUTO_INCREMENT = 0
+  DEFAULT CHARSET = utf8mb4 COMMENT ='任务执行器信息';
