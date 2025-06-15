@@ -4,7 +4,7 @@
 
     <insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="false">
         INSERT INTO sj_retry (namespace_id, group_name, group_id, scene_name, scene_id, idempotent_id, biz_no,
-        executor_name, args_str, ext_attrs, next_trigger_at, task_type, retry_status, create_dt
+        executor_name, args_str, serializer_name, ext_attrs, next_trigger_at, task_type, retry_status, create_dt
         , bucket_index, parent_id, deleted)
         <foreach collection="list" item="item" separator="UNION ALL">
             SELECT
@@ -12,7 +12,7 @@
             #{item.idempotentId},
             #{item.bizNo}, #{item.executorName}, #{item.argsStr}, #{item.extAttrs}, #{item.nextTriggerAt},
             #{item.taskType}, #{item.retryStatus}, #{item.createDt}, #{item.bucketIndex}, #{item.parentId},
-            #{item.deleted}
+            #{item.deleted}, #{item.serializerName}
             FROM DUAL
         </foreach>
     </insert>

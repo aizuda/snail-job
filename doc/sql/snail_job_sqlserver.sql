@@ -529,6 +529,7 @@ CREATE TABLE sj_retry
     executor_name   nvarchar(512) NOT NULL DEFAULT '',
     args_str        nvarchar(max) NOT NULL,
     ext_attrs       nvarchar(max) NOT NULL,
+    serializer_name nvarchar(64)  NOT NULL,
     next_trigger_at bigint        NOT NULL,
     retry_count     int           NOT NULL DEFAULT 0,
     retry_status    tinyint       NOT NULL DEFAULT 0,

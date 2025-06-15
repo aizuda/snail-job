@@ -192,6 +192,7 @@ CREATE TABLE sj_retry
     executor_name   varchar2(512) DEFAULT ''                                 NULL,
     args_str        clob                                                     NULL,
     ext_attrs       clob                                                     NULL,
+    serializer_name varchar2(64)                                             NOT NULL,
     next_trigger_at number                                                   NOT NULL,
     retry_count     number        DEFAULT 0                                  NOT NULL,
     retry_status    smallint      DEFAULT 0                                  NOT NULL,
