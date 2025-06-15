@@ -27,6 +27,8 @@ public class RetryResponseVO {
 
     private String argsStr;
 
+    private String serializerName;
+
     private String extAttrs;
 
     private String executorName;
