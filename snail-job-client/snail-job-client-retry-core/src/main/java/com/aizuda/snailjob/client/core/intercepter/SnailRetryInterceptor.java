@@ -6,9 +6,11 @@ import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.client.common.cache.GroupVersionCache;
 import com.aizuda.snailjob.client.common.config.SnailJobProperties;
 import com.aizuda.snailjob.client.core.MethodResult;
+import com.aizuda.snailjob.client.core.RetryCondition;
 import com.aizuda.snailjob.client.core.annotation.Propagation;
 import com.aizuda.snailjob.client.core.annotation.Retryable;
 import com.aizuda.snailjob.client.core.cache.RetryerInfoCache;
+import com.aizuda.snailjob.client.core.exception.RetryConditionException;
 import com.aizuda.snailjob.client.core.retryer.RetryerInfo;
 import com.aizuda.snailjob.client.core.retryer.RetryerResultContext;
 import com.aizuda.snailjob.client.core.strategy.RetryStrategy;
@@ -98,6 +100,9 @@ public class SnailRetryInterceptor implements MethodInterceptor, AfterAdvice, Se
         RetryerResultContext retryerResultContext;
         try {
             result = invocation.proceed();
+            if (retryIf(result, retryable, traceId, executorClassName)) {
+                throw new RetryConditionException("The current return value needs to be retried");
+            }
         } catch (Throwable t) {
             throwable = t;
         } finally {
@@ -113,11 +118,13 @@ public class SnailRetryInterceptor implements MethodInterceptor, AfterAdvice, Se
 
         // 若是重试完成了, 则判断是否返回重试完成后的数据
         if (Objects.nonNull(retryerResultContext)) {
-            // 重试成功直接返回结果 若注解配置了isThrowException=false 则不抛出异常
+            // 重试成功直接返回结果
             if (retryerResultContext.getRetryResultStatusEnum().getStatus()
                     .equals(RetryResultStatusEnum.SUCCESS.getStatus())) {
                 return retryerResultContext.getResult();
-            } else if (!retryable.isThrowException()) {
+            }
+            // 若注解配置了isThrowException=false 则不抛出异常
+            else if (!retryable.isThrowException()) {
                 Method method = invocation.getMethod();
 
                 // 如果存在用户自定义MethodResult，返回用户自定义值
@@ -131,7 +138,7 @@ public class SnailRetryInterceptor implements MethodInterceptor, AfterAdvice, Se
                         }
                     }
                 } catch (Throwable e) {
-                    SnailJobLog.LOCAL.debug("Get method result is error. traceId:[{}]", traceId, throwable);
+                    SnailJobLog.LOCAL.debug("Get method result is error. traceId:[{}] scene:[{}] executorClassName:[{}]", traceId, retryable.scene(), executorClassName, throwable);
                 }
 
                 // 若返回值是NULL且是基本类型则返回默认值
@@ -153,6 +160,20 @@ public class SnailRetryInterceptor implements MethodInterceptor, AfterAdvice, Se
             return result;
         }
 
+    }
+
+    private boolean retryIf(Object result, Retryable retryable, String traceId, String executorClassName) {
+        try {
+            Class<? extends RetryCondition> retryConditionClass = retryable.retryIf();
+            if (Objects.nonNull(retryConditionClass) && !retryConditionClass.isAssignableFrom(RetryCondition.NoRetry.class)) {
+                RetryCondition retryCondition = retryConditionClass.getDeclaredConstructor().newInstance();
+                return retryCondition.shouldRetry(result);
+            }
+        } catch (Throwable e) {
+            SnailJobLog.LOCAL.debug("Retry condition fail. traceId:[{}] scene:[{}] executorClassName:[{}]", traceId,
+                    retryable.scene(), executorClassName);
+        }
+        return false;
     }
 
 
