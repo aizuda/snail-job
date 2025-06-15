@@ -47,6 +47,7 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -347,14 +348,18 @@ public class DashboardServiceImpl implements DashboardService {
             return false;
         }
 
-        String labels = serverNode.getLabels();
-        Map<String, String> dbMap = JsonUtil.parseConcurrentHashMap(labels);
+        Map<String, String> toUpdateMap = JsonUtil.parseHashMap(updateRequestVO.getLabels());
 
-        Map<String, String> toUpdateMap = JsonUtil.parseConcurrentHashMap(updateRequestVO.getLabels());
-        // 移除默认标签，默认标签不允许更新
-        toUpdateMap.remove(SystemConstants.DEFAULT_LABEL.getKey());
-        dbMap.putAll(toUpdateMap);
-        serverNode.setLabels(JsonUtil.toJsonString(dbMap));
+        String labels = serverNode.getLabels();
+        Map<String, String> dbMap;
+        if(StrUtil.isNotBlank(labels)) {
+            dbMap = JsonUtil.parseHashMap(labels);
+            // 重新放入DEFAULT_LABEL
+            toUpdateMap.put(SystemConstants.DEFAULT_LABEL.getKey(),
+                    dbMap.get(SystemConstants.DEFAULT_LABEL.getKey()));
+        }
+
+        serverNode.setLabels(JsonUtil.toJsonString(toUpdateMap));
 
         return updateLabel(serverNode);
     }
