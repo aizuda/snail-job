@@ -122,7 +122,7 @@ public class InstanceManager implements Lifecycle {
         if (StrUtil.isNotBlank(targetLabels)) {
             targetLabelsMap = JsonUtil.parseHashMap(targetLabels);
         } else {
-            targetLabelsMap = Collections.emptyMap();
+            targetLabelsMap = new HashMap<>(1);
         }
 
         // 默认匹配在线客户端实例（不匹配人为剥离流量的节点）
