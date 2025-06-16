@@ -366,13 +366,12 @@ public class DashboardServiceImpl implements DashboardService {
 
     private Boolean updateLabel(ServerNode serverNode) {
         if (serverNodeMapper.updateById(serverNode) > 0) {
-            UpdateClientInfoDTO clientInfoDTO = UpdateClientInfoDTO.builder()
-                    .hostId(serverNode.getHostId())
-                    .hostIp(serverNode.getHostIp())
-                    .namespaceId(serverNode.getNamespaceId())
-                    .groupName(serverNode.getGroupName())
-                    .labels(serverNode.getLabels())
-                    .build();
+            UpdateClientInfoDTO clientInfoDTO = new UpdateClientInfoDTO();
+            clientInfoDTO.setHostId(serverNode.getHostId());
+            clientInfoDTO.setHostIp(serverNode.getHostIp());
+            clientInfoDTO.setNamespaceId(serverNode.getNamespaceId());
+            clientInfoDTO.setGroupName(serverNode.getGroupName());
+            clientInfoDTO.setLabels(serverNode.getLabels());
             return updateClientRegister.updateClientInfo(clientInfoDTO);
         } else {
             return false;

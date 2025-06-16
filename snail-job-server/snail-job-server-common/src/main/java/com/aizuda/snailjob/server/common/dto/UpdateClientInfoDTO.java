@@ -1,6 +1,5 @@
 package com.aizuda.snailjob.server.common.dto;
 
-import lombok.Builder;
 import lombok.Data;
 
 /**
@@ -12,7 +11,6 @@ import lombok.Data;
  * @date 2025-06-13
  */
 @Data
-@Builder
 public class UpdateClientInfoDTO {
 
     private String groupName;
