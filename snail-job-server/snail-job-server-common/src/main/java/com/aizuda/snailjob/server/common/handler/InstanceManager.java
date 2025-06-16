@@ -125,8 +125,6 @@ public class InstanceManager implements Lifecycle {
             targetLabelsMap = new HashMap<>(1);
         }
 
-        // 默认匹配在线客户端实例（不匹配人为剥离流量的节点）
-        targetLabelsMap.put(SystemConstants.DEFAULT_LABEL.getKey(), SystemConstants.DEFAULT_LABEL.getValue());
         Set<InstanceLiveInfo> instanceALiveInfoSet = getInstanceALiveInfoSet(namespaceId, groupName);
         Map<String, String> finalTargetLabelsMap = targetLabelsMap;
         return new HashSet<>(StreamUtils.filter(instanceALiveInfoSet, instanceLiveInfo -> {
@@ -309,6 +307,8 @@ public class InstanceManager implements Lifecycle {
         if (CollUtil.isEmpty(nodeLabels)) {
             return true;
         }
+        // 默认匹配在线客户端实例（不匹配人为剥离流量的节点）
+        targetLabels.put(SystemConstants.DEFAULT_LABEL.getKey(), SystemConstants.DEFAULT_LABEL.getValue());
 
         for (Map.Entry<String, String> entry : targetLabels.entrySet()) {
             if (!entry.getValue().equals(nodeLabels.get(entry.getKey()))) {
