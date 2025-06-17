@@ -30,6 +30,11 @@ public class IdempotentIdContext {
     private Object[] args;
 
     /**
+     * 序列化后的参数信息
+     */
+    private String serializeArgs;
+
+    /**
      * 执行的方法名称
      */
     private String methodName;

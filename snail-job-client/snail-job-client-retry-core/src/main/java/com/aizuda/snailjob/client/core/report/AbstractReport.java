@@ -60,22 +60,23 @@ public abstract class AbstractReport implements Report {
         RetryerInfo retryerInfo = RetryerInfoCache.get(scene, targetClassName);
         Method executorMethod = retryerInfo.getMethod();
 
+        RetryArgSerializer retryArgSerializer = SnailRetrySpiLoader.loadRetryArgSerializer();
+
+        String serialize = retryArgSerializer.serialize(args);
+
         RetryTaskDTO retryTaskDTO = new RetryTaskDTO();
         String idempotentId;
         try {
             Class<? extends IdempotentIdGenerate> idempotentIdGenerate = retryerInfo.getIdempotentIdGenerate();
             IdempotentIdGenerate generate = idempotentIdGenerate.newInstance();
             Method method = idempotentIdGenerate.getMethod("idGenerate", IdempotentIdContext.class);
-            IdempotentIdContext idempotentIdContext = new IdempotentIdContext(scene, targetClassName, args, executorMethod.getName());
+            IdempotentIdContext idempotentIdContext = new IdempotentIdContext(scene, targetClassName, args, executorMethod.getName(), serialize);
             idempotentId = (String) ReflectionUtils.invokeMethod(method, generate, idempotentIdContext);
         } catch (Exception exception) {
             SnailJobLog.LOCAL.error("Idempotent ID generation exception: {}, {}", scene, args, exception);
             throw new SnailRetryClientException("idempotentId generation exception: {}, {}", scene, args);
         }
 
-        RetryArgSerializer retryArgSerializer = SnailRetrySpiLoader.loadRetryArgSerializer();
-
-        String serialize = retryArgSerializer.serialize(args);
         retryTaskDTO.setIdempotentId(idempotentId);
         retryTaskDTO.setExecutorName(targetClassName);
         retryTaskDTO.setArgsStr(serialize);

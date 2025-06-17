@@ -233,7 +233,7 @@ public class SnailRetryEndPoint implements Lifecycle {
             IdempotentIdGenerate generate = idempotentIdGenerate.newInstance();
             Method method = idempotentIdGenerate.getMethod("idGenerate", IdempotentIdContext.class);
             IdempotentIdContext idempotentIdContext = new IdempotentIdContext(scene, executorName, deSerialize,
-                    executorMethod.getName());
+                    executorMethod.getName(), argsStr);
             idempotentId = (String) ReflectionUtils.invokeMethod(method, generate, idempotentIdContext);
         } catch (Exception exception) {
             SnailJobLog.LOCAL.error("Idempotent ID generation exception: {}, {}", scene, argsStr, exception);
