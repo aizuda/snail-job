@@ -30,6 +30,7 @@ public class RequestBuilder<T, R> {
     private boolean failover;
     private int routeKey;
     private String allocKey;
+    private String targetLabels;
     private Integer executorTimeout;
 
     public static <T, R> RequestBuilder<T, R> newBuilder() {
@@ -91,6 +92,11 @@ public class RequestBuilder<T, R> {
         return this;
     }
 
+    public RequestBuilder<T, R> targetLabels(String targetLabels) {
+        this.targetLabels = targetLabels;
+        return this;
+    }
+
     public T build() {
         if (Objects.isNull(clintInterface)) {
             throw new SnailJobServerException("clintInterface cannot be null");
@@ -112,17 +118,18 @@ public class RequestBuilder<T, R> {
 
         InvocationHandler invocationHandler = new GrpcClientInvokeHandlerV2(
                 GrpcClientInvokeConfig.builder()
-                .instanceLiveInfo(instanceLiveInfo)
-                .failRetry(failRetry)
-                .retryTimes(retryTimes)
-                .retryInterval(retryInterval)
-                .retryListener(retryListener)
-                .routeKey(routeKey)
-                .allocKey(allocKey)
-                .failover(failover)
-                .executorTimeout(executorTimeout)
-                 .async(false)
-                .build()
+                        .instanceLiveInfo(instanceLiveInfo)
+                        .failRetry(failRetry)
+                        .retryTimes(retryTimes)
+                        .retryInterval(retryInterval)
+                        .retryListener(retryListener)
+                        .routeKey(routeKey)
+                        .allocKey(allocKey)
+                        .failover(failover)
+                        .executorTimeout(executorTimeout)
+                        .async(false)
+                        .targetLabels(targetLabels)
+                        .build()
         );
 
         return (T) Proxy.newProxyInstance(clintInterface.getClassLoader(),

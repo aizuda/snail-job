@@ -30,4 +30,6 @@ public class RequestRetryExecutorDTO extends BaseDTO {
     private Integer retryCount;
 
     private String serializerName;
+
+    private String labels;
 }

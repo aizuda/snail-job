@@ -105,4 +105,6 @@ public class RealJobExecutorDTO extends BaseDTO {
     private String wfContext;
 
     private Integer routeKey;
+
+    private String labels;
 }

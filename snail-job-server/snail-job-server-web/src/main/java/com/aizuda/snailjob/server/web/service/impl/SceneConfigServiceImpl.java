@@ -119,13 +119,13 @@ public class SceneConfigServiceImpl implements SceneConfigService {
         retrySceneConfig.setCreateDt(LocalDateTime.now());
         retrySceneConfig.setNamespaceId(namespaceId);
 
-        if (requestVO.getBackOff() == WaitStrategies.WaitStrategyEnum.DELAY_LEVEL.getType()) {
+        if (Objects.equals(requestVO.getBackOff(), WaitStrategies.WaitStrategyEnum.DELAY_LEVEL.getType())) {
             retrySceneConfig.setTriggerInterval(StrUtil.EMPTY);
         }
 
         if (Objects.equals(requestVO.getCbStatus(), StatusEnum.YES.getStatus())) {
             checkExecuteInterval(requestVO.getCbTriggerType(), requestVO.getCbTriggerInterval());
-            if (requestVO.getCbTriggerType() == WaitStrategies.WaitStrategyEnum.DELAY_LEVEL.getType()) {
+            if (Objects.equals(requestVO.getCbTriggerType(), WaitStrategies.WaitStrategyEnum.DELAY_LEVEL.getType())) {
                 retrySceneConfig.setCbTriggerInterval(StrUtil.EMPTY);
             }
         }
@@ -153,7 +153,7 @@ public class SceneConfigServiceImpl implements SceneConfigService {
 
         if (Objects.equals(requestVO.getCbStatus(), StatusEnum.YES.getStatus())) {
             checkExecuteInterval(requestVO.getCbTriggerType(), requestVO.getCbTriggerInterval());
-            if (requestVO.getCbTriggerType() == WaitStrategies.WaitStrategyEnum.DELAY_LEVEL.getType()) {
+            if (Objects.equals(requestVO.getCbTriggerType(), WaitStrategies.WaitStrategyEnum.DELAY_LEVEL.getType())) {
                 retrySceneConfig.setCbTriggerInterval(StrUtil.EMPTY);
             }
         }

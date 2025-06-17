@@ -121,7 +121,7 @@ CREATE TABLE `sj_retry`
     `executor_name`   varchar(512)        NOT NULL DEFAULT '' COMMENT '执行器名称',
     `args_str`        text                NOT NULL COMMENT '执行方法参数',
     `ext_attrs`       text                NOT NULL COMMENT '扩展字段',
-    `serializer_name` varchar(64)         NOT NULL COMMENT '执行方法参数序列化器名称',
+    `serializer_name` varchar(32)         NOT NULL COMMENT '执行方法参数序列化器名称',
     `next_trigger_at` bigint(13)          NOT NULL COMMENT '下次触发时间',
     `retry_count`     int(11)             NOT NULL DEFAULT 0 COMMENT '重试次数',
     `retry_status`    tinyint(4)          NOT NULL DEFAULT 0 COMMENT '重试状态 0、重试中 1、成功 2、最大重试次数',

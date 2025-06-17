@@ -64,6 +64,7 @@ public class GrpcClientInvokeHandlerV2 implements InvocationHandler {
     private final boolean async;
     private final String groupName;
     private final String namespaceId;
+    private final String targetLabels;
 
     public GrpcClientInvokeHandlerV2(GrpcClientInvokeConfig config) {
         this.instanceLiveInfo = config.getInstanceLiveInfo();
@@ -79,6 +80,7 @@ public class GrpcClientInvokeHandlerV2 implements InvocationHandler {
         this.failover = config.isFailover();
         this.executorTimeout = config.getExecutorTimeout();
         this.async = config.isAsync();
+        this.targetLabels = config.getTargetLabels();
     }
 
     @Override
@@ -172,7 +174,7 @@ public class GrpcClientInvokeHandlerV2 implements InvocationHandler {
                 .routeKey(routeKey)
                 .namespaceId(nodeInfo.getNamespaceId())
                 .groupName(nodeInfo.getGroupName())
-                .targetLabels(JsonUtil.toJsonString(nodeInfo.getLabelMap()))
+                .targetLabels(targetLabels)
                 .build();
 
         this.instanceLiveInfo = instanceManager.getALiveInstanceByRouteKey(condition);

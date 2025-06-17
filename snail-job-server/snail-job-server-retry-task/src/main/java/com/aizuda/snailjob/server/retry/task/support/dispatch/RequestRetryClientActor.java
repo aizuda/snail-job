@@ -179,6 +179,7 @@ public class RequestRetryClientActor extends AbstractActor {
                 .allocKey(String.valueOf(executorDTO.getRetryTaskId()))
                 .retryListener(new RetryExecutorRetryListener(executorDTO))
                 .client(RetryRpcClient.class)
+                .targetLabels(executorDTO.getLabels())
                 .build();
     }
 

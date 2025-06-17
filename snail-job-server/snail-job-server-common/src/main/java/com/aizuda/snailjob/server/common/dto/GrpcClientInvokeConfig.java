@@ -30,4 +30,5 @@ public class GrpcClientInvokeConfig {
     private Integer executorTimeout;
     private String namespaceId;
     private boolean async; // 默认 false，可忽略设置
+    private String targetLabels;
 }

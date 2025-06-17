@@ -203,6 +203,7 @@ public class RequestClientActor extends AbstractActor {
                 .retryInterval(realJobExecutorDTO.getRetryInterval())
                 .retryListener(new JobExecutorRetryListener(realJobExecutorDTO, jobTaskMapper))
                 .client(JobRpcClient.class)
+                .targetLabels(realJobExecutorDTO.getLabels())
                 .build();
     }
 

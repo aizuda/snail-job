@@ -110,6 +110,7 @@ public class RetryExecutor extends AbstractActor {
                 .targetLabels(retrySceneConfig.getLabels())
                 .namespaceId(retry.getNamespaceId())
                 .groupName(retry.getGroupName())
+                .targetLabels(retrySceneConfig.getLabels())
                 .routeKey(retrySceneConfig.getRouteKey())
                 .allocKey(String.valueOf(retry.getId()))
                 .build();

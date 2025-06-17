@@ -95,4 +95,5 @@ public class JobExecutorContext {
      */
     private String wfContext;
 
+    private String labels;
 }

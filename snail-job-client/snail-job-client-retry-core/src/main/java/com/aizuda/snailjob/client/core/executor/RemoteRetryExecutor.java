@@ -44,8 +44,6 @@ public class RemoteRetryExecutor {
         executeRespDto.setSceneName(context.getScene());
 
         try {
-//            RetrySiteSnapshot.setAttemptNumber(context.getRetryCount() + 1);
-
             // 初始化实时日志上下文
             initLogContext(context);
 
