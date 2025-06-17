@@ -2,7 +2,7 @@
  SnailJob Database Transfer Tool
  Source Server Type    : MySQL
  Target Server Type    : Oracle
- Date: 2025-04-26 10:01:54
+ Date: 2025-06-17 08:45:26
 */
 
 
@@ -192,7 +192,7 @@ CREATE TABLE sj_retry
     executor_name   varchar2(512) DEFAULT ''                                 NULL,
     args_str        clob                                                     NULL,
     ext_attrs       clob                                                     NULL,
-    serializer_name varchar2(64)                                             NOT NULL,
+    serializer_name varchar2(64)                                             NULL,
     next_trigger_at number                                                   NOT NULL,
     retry_count     number        DEFAULT 0                                  NOT NULL,
     retry_status    smallint      DEFAULT 0                                  NOT NULL,
@@ -210,10 +210,10 @@ ALTER TABLE sj_retry
 CREATE UNIQUE INDEX uk_sj_retry_01 ON sj_retry (scene_id, task_type, idempotent_id, deleted);
 
 CREATE INDEX idx_sj_retry_01 ON sj_retry (biz_no);
-CREATE INDEX idx_sj_retry_02 ON sj_retry (retry_status, bucket_index);
-CREATE INDEX idx_sj_retry_03 ON sj_retry (parent_id);
-CREATE INDEX idx_sj_retry_04 ON sj_retry (create_dt);
-CREATE INDEX idx_sj_retry_05 ON sj_retry (idempotent_id);
+CREATE INDEX idx_sj_retry_02 ON sj_retry (idempotent_id);
+CREATE INDEX idx_sj_retry_03 ON sj_retry (retry_status, bucket_index);
+CREATE INDEX idx_sj_retry_04 ON sj_retry (parent_id);
+CREATE INDEX idx_sj_retry_05 ON sj_retry (create_dt);
 
 COMMENT ON COLUMN sj_retry.id IS '主键';
 COMMENT ON COLUMN sj_retry.namespace_id IS '命名空间id';
@@ -226,6 +226,7 @@ COMMENT ON COLUMN sj_retry.biz_no IS '业务编号';
 COMMENT ON COLUMN sj_retry.executor_name IS '执行器名称';
 COMMENT ON COLUMN sj_retry.args_str IS '执行方法参数';
 COMMENT ON COLUMN sj_retry.ext_attrs IS '扩展字段';
+COMMENT ON COLUMN sj_retry.serializer_name IS '执行方法参数序列化器名称';
 COMMENT ON COLUMN sj_retry.next_trigger_at IS '下次触发时间';
 COMMENT ON COLUMN sj_retry.retry_count IS '重试次数';
 COMMENT ON COLUMN sj_retry.retry_status IS '重试状态 0、重试中 1、成功 2、最大重试次数';
@@ -327,6 +328,8 @@ CREATE TABLE sj_retry_scene_config
     cb_trigger_type     smallint      DEFAULT 1                                  NOT NULL,
     cb_max_count        number        DEFAULT 16                                 NOT NULL,
     cb_trigger_interval varchar2(16)  DEFAULT ''                                 NULL,
+    owner_id            number        DEFAULT NULL                               NULL,
+    labels              varchar2(512) DEFAULT ''                                 NULL,
     description         varchar2(256) DEFAULT ''                                 NULL,
     create_dt           date          DEFAULT CURRENT_TIMESTAMP                  NOT NULL,
     update_dt           date          DEFAULT CURRENT_TIMESTAMP                  NOT NULL
@@ -354,6 +357,8 @@ COMMENT ON COLUMN sj_retry_scene_config.cb_status IS '回调状态 0、不开启
 COMMENT ON COLUMN sj_retry_scene_config.cb_trigger_type IS '1、默认等级 2、固定间隔时间 3、CRON 表达式';
 COMMENT ON COLUMN sj_retry_scene_config.cb_max_count IS '回调的最大执行次数';
 COMMENT ON COLUMN sj_retry_scene_config.cb_trigger_interval IS '回调的最大执行次数';
+COMMENT ON COLUMN sj_retry_scene_config.owner_id IS '负责人id';
+COMMENT ON COLUMN sj_retry_scene_config.labels IS '标签';
 COMMENT ON COLUMN sj_retry_scene_config.description IS '描述';
 COMMENT ON COLUMN sj_retry_scene_config.create_dt IS '创建时间';
 COMMENT ON COLUMN sj_retry_scene_config.update_dt IS '修改时间';
@@ -371,6 +376,7 @@ CREATE TABLE sj_server_node
     expire_at    date                                                     NOT NULL,
     node_type    smallint                                                 NOT NULL,
     ext_attrs    varchar2(256) DEFAULT ''                                 NULL,
+    labels       varchar2(512) DEFAULT ''                                 NULL,
     create_dt    date          DEFAULT CURRENT_TIMESTAMP                  NOT NULL,
     update_dt    date          DEFAULT CURRENT_TIMESTAMP                  NOT NULL
 );
@@ -392,6 +398,7 @@ COMMENT ON COLUMN sj_server_node.host_port IS '机器端口';
 COMMENT ON COLUMN sj_server_node.expire_at IS '过期时间';
 COMMENT ON COLUMN sj_server_node.node_type IS '节点类型 1、客户端 2、是服务端';
 COMMENT ON COLUMN sj_server_node.ext_attrs IS '扩展字段';
+COMMENT ON COLUMN sj_server_node.labels IS '标签';
 COMMENT ON COLUMN sj_server_node.create_dt IS '创建时间';
 COMMENT ON COLUMN sj_server_node.update_dt IS '修改时间';
 COMMENT ON TABLE sj_server_node IS '服务器节点';
@@ -399,7 +406,7 @@ COMMENT ON TABLE sj_server_node IS '服务器节点';
 -- sj_distributed_lock
 CREATE TABLE sj_distributed_lock
 (
-    name       varchar2(64)                              NULL,
+    name       varchar2(64)                              NOT NULL,
     lock_until timestamp(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
     locked_at  timestamp(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
     locked_by  varchar2(255)                             NULL,
@@ -408,7 +415,7 @@ CREATE TABLE sj_distributed_lock
 );
 
 ALTER TABLE sj_distributed_lock
-    ADD CONSTRAINT pk_sj_distributed_lock PRIMARY KEY (id);
+    ADD CONSTRAINT pk_sj_distributed_lock PRIMARY KEY (name);
 
 COMMENT ON COLUMN sj_distributed_lock.name IS '锁名称';
 COMMENT ON COLUMN sj_distributed_lock.lock_until IS '锁定时长';
@@ -467,30 +474,6 @@ COMMENT ON COLUMN sj_system_user_permission.create_dt IS '创建时间';
 COMMENT ON COLUMN sj_system_user_permission.update_dt IS '修改时间';
 COMMENT ON TABLE sj_system_user_permission IS '系统用户权限表';
 
--- sj_sequence_alloc
-CREATE TABLE sj_sequence_alloc
-(
-    id           number GENERATED ALWAYS AS IDENTITY,
-    namespace_id varchar2(64) DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' NULL,
-    group_name   varchar2(64) DEFAULT ''                                 NULL,
-    max_id       number       DEFAULT 1                                  NOT NULL,
-    step         number       DEFAULT 100                                NOT NULL,
-    update_dt    date         DEFAULT CURRENT_TIMESTAMP                  NOT NULL
-);
-
-ALTER TABLE sj_sequence_alloc
-    ADD CONSTRAINT pk_sj_sequence_alloc PRIMARY KEY (id);
-
-CREATE UNIQUE INDEX uk_sj_sequence_alloc_01 ON sj_sequence_alloc (namespace_id, group_name);
-
-COMMENT ON COLUMN sj_sequence_alloc.id IS '主键';
-COMMENT ON COLUMN sj_sequence_alloc.namespace_id IS '命名空间id';
-COMMENT ON COLUMN sj_sequence_alloc.group_name IS '组名称';
-COMMENT ON COLUMN sj_sequence_alloc.max_id IS '最大id';
-COMMENT ON COLUMN sj_sequence_alloc.step IS '步长';
-COMMENT ON COLUMN sj_sequence_alloc.update_dt IS '更新时间';
-COMMENT ON TABLE sj_sequence_alloc IS '号段模式序号ID分配表';
-
 -- sj_job
 CREATE TABLE sj_job
 (
@@ -516,7 +499,8 @@ CREATE TABLE sj_job
     bucket_index     number        DEFAULT 0                                  NOT NULL,
     resident         smallint      DEFAULT 0                                  NOT NULL,
     notify_ids       varchar2(128) DEFAULT ''                                 NULL,
-    owner_id         number                                                   NULL,
+    owner_id         number        DEFAULT NULL                               NULL,
+    labels           varchar2(512) DEFAULT ''                                 NULL,
     description      varchar2(256) DEFAULT ''                                 NULL,
     ext_attrs        varchar2(256) DEFAULT ''                                 NULL,
     deleted          smallint      DEFAULT 0                                  NOT NULL,
@@ -554,6 +538,7 @@ COMMENT ON COLUMN sj_job.bucket_index IS 'bucket';
 COMMENT ON COLUMN sj_job.resident IS '是否是常驻任务';
 COMMENT ON COLUMN sj_job.notify_ids IS '通知告警场景配置id列表';
 COMMENT ON COLUMN sj_job.owner_id IS '负责人id';
+COMMENT ON COLUMN sj_job.labels IS '标签';
 COMMENT ON COLUMN sj_job.description IS '描述';
 COMMENT ON COLUMN sj_job.ext_attrs IS '扩展字段';
 COMMENT ON COLUMN sj_job.deleted IS '逻辑删除 1、删除';
@@ -795,6 +780,7 @@ CREATE TABLE sj_workflow
     notify_ids       varchar2(128) DEFAULT ''                                 NULL,
     bucket_index     number        DEFAULT 0                                  NOT NULL,
     version          number                                                   NOT NULL,
+    owner_id         number        DEFAULT NULL                               NULL,
     ext_attrs        varchar2(256) DEFAULT ''                                 NULL,
     deleted          smallint      DEFAULT 0                                  NOT NULL,
     create_dt        date          DEFAULT CURRENT_TIMESTAMP                  NOT NULL,
@@ -823,6 +809,7 @@ COMMENT ON COLUMN sj_workflow.wf_context IS '上下文';
 COMMENT ON COLUMN sj_workflow.notify_ids IS '通知告警场景配置id列表';
 COMMENT ON COLUMN sj_workflow.bucket_index IS 'bucket';
 COMMENT ON COLUMN sj_workflow.version IS '版本号';
+COMMENT ON COLUMN sj_workflow.owner_id IS '负责人id';
 COMMENT ON COLUMN sj_workflow.ext_attrs IS '扩展字段';
 COMMENT ON COLUMN sj_workflow.deleted IS '逻辑删除 1、删除';
 COMMENT ON COLUMN sj_workflow.create_dt IS '创建时间';
@@ -917,3 +904,30 @@ COMMENT ON COLUMN sj_workflow_task_batch.deleted IS '逻辑删除 1、删除';
 COMMENT ON COLUMN sj_workflow_task_batch.create_dt IS '创建时间';
 COMMENT ON COLUMN sj_workflow_task_batch.update_dt IS '修改时间';
 COMMENT ON TABLE sj_workflow_task_batch IS '工作流批次';
+
+-- sj_job_executor
+CREATE TABLE sj_job_executor
+(
+    id            number GENERATED ALWAYS AS IDENTITY,
+    namespace_id  varchar2(64) DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' NULL,
+    group_name    varchar2(64)                                            NULL,
+    executor_info varchar2(256)                                           NULL,
+    executor_type varchar2(3)                                             NULL,
+    create_dt     date         DEFAULT CURRENT_TIMESTAMP                  NOT NULL,
+    update_dt     date         DEFAULT CURRENT_TIMESTAMP                  NOT NULL
+);
+
+ALTER TABLE sj_job_executor
+    ADD CONSTRAINT pk_sj_job_executor PRIMARY KEY (id);
+
+CREATE INDEX idx_sj_job_executor_01 ON sj_job_executor (namespace_id, group_name);
+CREATE INDEX idx_sj_job_executor_02 ON sj_job_executor (create_dt);
+
+COMMENT ON COLUMN sj_job_executor.id IS '主键';
+COMMENT ON COLUMN sj_job_executor.namespace_id IS '命名空间id';
+COMMENT ON COLUMN sj_job_executor.group_name IS '组名称';
+COMMENT ON COLUMN sj_job_executor.executor_info IS '任务执行器名称';
+COMMENT ON COLUMN sj_job_executor.executor_type IS '1:java 2:python 3:go';
+COMMENT ON COLUMN sj_job_executor.create_dt IS '创建时间';
+COMMENT ON COLUMN sj_job_executor.update_dt IS '修改时间';
+COMMENT ON TABLE sj_job_executor IS '任务执行器信息';

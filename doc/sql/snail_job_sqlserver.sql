@@ -2,7 +2,7 @@
  SnailJob Database Transfer Tool
  Source Server Type    : MySQL
  Target Server Type    : Microsoft SQL Server
- Date: 2025-04-26 10:03:23
+ Date: 2025-06-17 08:52:14
 */
 
 
@@ -547,13 +547,13 @@ GO
 
 CREATE INDEX idx_sj_retry_01 ON sj_retry (biz_no)
 GO
-CREATE INDEX idx_sj_retry_02 ON sj_retry (retry_status, bucket_index)
+CREATE INDEX idx_sj_retry_02 ON sj_retry (idempotent_id)
 GO
-CREATE INDEX idx_sj_retry_03 ON sj_retry (parent_id)
+CREATE INDEX idx_sj_retry_03 ON sj_retry (retry_status, bucket_index)
 GO
-CREATE INDEX idx_sj_retry_04 ON sj_retry (create_dt)
+CREATE INDEX idx_sj_retry_04 ON sj_retry (parent_id)
 GO
-CREATE INDEX idx_sj_retry_05 ON sj_retry (idempotent_id)
+CREATE INDEX idx_sj_retry_05 ON sj_retry (create_dt)
 GO
 
 EXEC sp_addextendedproperty
@@ -631,6 +631,13 @@ EXEC sp_addextendedproperty
      'SCHEMA', N'dbo',
      'TABLE', N'sj_retry',
      'COLUMN', N'ext_attrs'
+GO
+
+EXEC sp_addextendedproperty
+     'MS_Description', N'执行方法参数序列化器名称',
+     'SCHEMA', N'dbo',
+     'TABLE', N'sj_retry',
+     'COLUMN', N'serializer_name'
 GO
 
 EXEC sp_addextendedproperty
@@ -928,6 +935,8 @@ CREATE TABLE sj_retry_scene_config
     cb_trigger_type     tinyint       NOT NULL DEFAULT 1,
     cb_max_count        int           NOT NULL DEFAULT 16,
     cb_trigger_interval nvarchar(16)  NOT NULL DEFAULT '',
+    owner_id            bigint        NULL     DEFAULT NULL,
+    labels              nvarchar(512) NULL     DEFAULT '',
     description         nvarchar(256) NOT NULL DEFAULT '',
     create_dt           datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_dt           datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -1057,6 +1066,20 @@ EXEC sp_addextendedproperty
 GO
 
 EXEC sp_addextendedproperty
+     'MS_Description', N'负责人id',
+     'SCHEMA', N'dbo',
+     'TABLE', N'sj_retry_scene_config',
+     'COLUMN', N'owner_id'
+GO
+
+EXEC sp_addextendedproperty
+     'MS_Description', N'标签',
+     'SCHEMA', N'dbo',
+     'TABLE', N'sj_retry_scene_config',
+     'COLUMN', N'labels'
+GO
+
+EXEC sp_addextendedproperty
      'MS_Description', N'描述',
      'SCHEMA', N'dbo',
      'TABLE', N'sj_retry_scene_config',
@@ -1095,6 +1118,7 @@ CREATE TABLE sj_server_node
     expire_at    datetime2     NOT NULL,
     node_type    tinyint       NOT NULL,
     ext_attrs    nvarchar(256) NULL     DEFAULT '',
+    labels       nvarchar(512) NULL     DEFAULT '',
     create_dt    datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_dt    datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP
 )
@@ -1172,6 +1196,13 @@ EXEC sp_addextendedproperty
 GO
 
 EXEC sp_addextendedproperty
+     'MS_Description', N'标签',
+     'SCHEMA', N'dbo',
+     'TABLE', N'sj_server_node',
+     'COLUMN', N'labels'
+GO
+
+EXEC sp_addextendedproperty
      'MS_Description', N'创建时间',
      'SCHEMA', N'dbo',
      'TABLE', N'sj_server_node',
@@ -1194,7 +1225,7 @@ GO
 -- sj_distributed_lock
 CREATE TABLE sj_distributed_lock
 (
-    name       nvarchar(64)  NOT NULL,
+    name       nvarchar(64)  NOT NULL PRIMARY KEY,
     lock_until datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     locked_at  datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     locked_by  nvarchar(255) NOT NULL,
@@ -1378,69 +1409,6 @@ EXEC sp_addextendedproperty
      'TABLE', N'sj_system_user_permission'
 GO
 
--- sj_sequence_alloc
-CREATE TABLE sj_sequence_alloc
-(
-    id           bigint       NOT NULL PRIMARY KEY IDENTITY,
-    namespace_id nvarchar(64) NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
-    group_name   nvarchar(64) NOT NULL DEFAULT '',
-    max_id       bigint       NOT NULL DEFAULT 1,
-    step         int          NOT NULL DEFAULT 100,
-    update_dt    datetime2    NOT NULL DEFAULT CURRENT_TIMESTAMP
-)
-GO
-
-CREATE UNIQUE INDEX uk_sj_sequence_alloc_01 ON sj_sequence_alloc (namespace_id, group_name)
-GO
-
-EXEC sp_addextendedproperty
-     'MS_Description', N'主键',
-     'SCHEMA', N'dbo',
-     'TABLE', N'sj_sequence_alloc',
-     'COLUMN', N'id'
-GO
-
-EXEC sp_addextendedproperty
-     'MS_Description', N'命名空间id',
-     'SCHEMA', N'dbo',
-     'TABLE', N'sj_sequence_alloc',
-     'COLUMN', N'namespace_id'
-GO
-
-EXEC sp_addextendedproperty
-     'MS_Description', N'组名称',
-     'SCHEMA', N'dbo',
-     'TABLE', N'sj_sequence_alloc',
-     'COLUMN', N'group_name'
-GO
-
-EXEC sp_addextendedproperty
-     'MS_Description', N'最大id',
-     'SCHEMA', N'dbo',
-     'TABLE', N'sj_sequence_alloc',
-     'COLUMN', N'max_id'
-GO
-
-EXEC sp_addextendedproperty
-     'MS_Description', N'步长',
-     'SCHEMA', N'dbo',
-     'TABLE', N'sj_sequence_alloc',
-     'COLUMN', N'step'
-GO
-
-EXEC sp_addextendedproperty
-     'MS_Description', N'更新时间',
-     'SCHEMA', N'dbo',
-     'TABLE', N'sj_sequence_alloc',
-     'COLUMN', N'update_dt'
-GO
-
-EXEC sp_addextendedproperty
-     'MS_Description', N'号段模式序号ID分配表',
-     'SCHEMA', N'dbo',
-     'TABLE', N'sj_sequence_alloc'
-GO
-
 -- sj_job
 CREATE TABLE sj_job
 (
@@ -1466,7 +1434,8 @@ CREATE TABLE sj_job
     bucket_index     int           NOT NULL DEFAULT 0,
     resident         tinyint       NOT NULL DEFAULT 0,
     notify_ids       nvarchar(128) NOT NULL DEFAULT '',
-    owner_id         bigint        NULL,
+    owner_id         bigint        NULL     DEFAULT NULL,
+    labels           nvarchar(512) NULL     DEFAULT '',
     description      nvarchar(256) NOT NULL DEFAULT '',
     ext_attrs        nvarchar(256) NULL     DEFAULT '',
     deleted          tinyint       NOT NULL DEFAULT 0,
@@ -1641,6 +1610,13 @@ EXEC sp_addextendedproperty
      'SCHEMA', N'dbo',
      'TABLE', N'sj_job',
      'COLUMN', N'owner_id'
+GO
+
+EXEC sp_addextendedproperty
+     'MS_Description', N'标签',
+     'SCHEMA', N'dbo',
+     'TABLE', N'sj_job',
+     'COLUMN', N'labels'
 GO
 
 EXEC sp_addextendedproperty
@@ -2374,6 +2350,7 @@ CREATE TABLE sj_workflow
     notify_ids       nvarchar(128) NOT NULL DEFAULT '',
     bucket_index     int           NOT NULL DEFAULT 0,
     version          int           NOT NULL,
+    owner_id         bigint        NULL     DEFAULT NULL,
     ext_attrs        nvarchar(256) NULL     DEFAULT '',
     deleted          tinyint       NOT NULL DEFAULT 0,
     create_dt        datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -2496,6 +2473,13 @@ EXEC sp_addextendedproperty
      'SCHEMA', N'dbo',
      'TABLE', N'sj_workflow',
      'COLUMN', N'version'
+GO
+
+EXEC sp_addextendedproperty
+     'MS_Description', N'负责人id',
+     'SCHEMA', N'dbo',
+     'TABLE', N'sj_workflow',
+     'COLUMN', N'owner_id'
 GO
 
 EXEC sp_addextendedproperty
@@ -2815,3 +2799,77 @@ EXEC sp_addextendedproperty
      'SCHEMA', N'dbo',
      'TABLE', N'sj_workflow_task_batch'
 GO
+
+-- sj_job_executor
+CREATE TABLE sj_job_executor
+(
+    id            bigint        NOT NULL PRIMARY KEY IDENTITY,
+    namespace_id  nvarchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
+    group_name    nvarchar(64)  NOT NULL,
+    executor_info nvarchar(256) NOT NULL,
+    executor_type nvarchar(3)   NOT NULL,
+    create_dt     datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_dt     datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP
+)
+GO
+
+CREATE INDEX idx_sj_job_executor_01 ON sj_job_executor (namespace_id, group_name)
+GO
+CREATE INDEX idx_sj_job_executor_02 ON sj_job_executor (create_dt)
+GO
+
+EXEC sp_addextendedproperty
+     'MS_Description', N'主键',
+     'SCHEMA', N'dbo',
+     'TABLE', N'sj_job_executor',
+     'COLUMN', N'id'
+GO
+
+EXEC sp_addextendedproperty
+     'MS_Description', N'命名空间id',
+     'SCHEMA', N'dbo',
+     'TABLE', N'sj_job_executor',
+     'COLUMN', N'namespace_id'
+GO
+
+EXEC sp_addextendedproperty
+     'MS_Description', N'组名称',
+     'SCHEMA', N'dbo',
+     'TABLE', N'sj_job_executor',
+     'COLUMN', N'group_name'
+GO
+
+EXEC sp_addextendedproperty
+     'MS_Description', N'任务执行器名称',
+     'SCHEMA', N'dbo',
+     'TABLE', N'sj_job_executor',
+     'COLUMN', N'executor_info'
+GO
+
+EXEC sp_addextendedproperty
+     'MS_Description', N'1:java 2:python 3:go',
+     'SCHEMA', N'dbo',
+     'TABLE', N'sj_job_executor',
+     'COLUMN', N'executor_type'
+GO
+
+EXEC sp_addextendedproperty
+     'MS_Description', N'创建时间',
+     'SCHEMA', N'dbo',
+     'TABLE', N'sj_job_executor',
+     'COLUMN', N'create_dt'
+GO
+
+EXEC sp_addextendedproperty
+     'MS_Description', N'修改时间',
+     'SCHEMA', N'dbo',
+     'TABLE', N'sj_job_executor',
+     'COLUMN', N'update_dt'
+GO
+
+EXEC sp_addextendedproperty
+     'MS_Description', N'任务执行器信息',
+     'SCHEMA', N'dbo',
+     'TABLE', N'sj_job_executor'
+GO
+
