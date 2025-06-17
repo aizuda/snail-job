@@ -1,6 +1,7 @@
 package com.aizuda.snailjob.server.web.model.request;
 
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 /**
@@ -15,6 +16,7 @@ public class ServerNodeLabelsUpdateRequestVO {
     private Long id;
 
     @NotNull(message = "labels cannot be null")
+    @Size(max = 512, message = "labels length must be less than or equal to 512")
     private String labels;
 
 }
