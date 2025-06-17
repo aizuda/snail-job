@@ -30,6 +30,7 @@ import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.apache.commons.lang.ClassUtils;
 import org.springframework.aop.AfterAdvice;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -125,27 +126,7 @@ public class SnailRetryInterceptor implements MethodInterceptor, AfterAdvice, Se
             }
             // 若注解配置了isThrowException=false 则不抛出异常
             else if (!retryable.isThrowException()) {
-                Method method = invocation.getMethod();
-
-                // 如果存在用户自定义MethodResult，返回用户自定义值
-                try {
-                    Class<? extends MethodResult> methodResultClass = retryable.methodResult();
-                    if (Objects.nonNull(methodResultClass) && !methodResultClass.isAssignableFrom(MethodResult.NoMethodResult.class)) {
-                        MethodResult methodResult = methodResultClass.getDeclaredConstructor().newInstance();
-                        Object resultObj = methodResult.result(retryable.scene(), executorClassName, invocation.getArguments(), throwable);
-                        if (Objects.nonNull(resultObj) && method.getReturnType().isAssignableFrom(resultObj.getClass())) {
-                            return resultObj;
-                        }
-                    }
-                } catch (Throwable e) {
-                    SnailJobLog.LOCAL.debug("Get method result is error. traceId:[{}] scene:[{}] executorClassName:[{}]", traceId, retryable.scene(), executorClassName, throwable);
-                }
-
-                // 若返回值是NULL且是基本类型则返回默认值
-                if (Objects.isNull(retryerResultContext.getResult()) && method.getReturnType().isPrimitive()) {
-                    return Defaults.defaultValue(method.getReturnType());
-                }
-                return retryerResultContext.getResult();
+                return retryFailHandle(invocation, retryable, executorClassName, throwable, traceId, retryerResultContext);
             }
         }
 
@@ -176,6 +157,30 @@ public class SnailRetryInterceptor implements MethodInterceptor, AfterAdvice, Se
         return false;
     }
 
+    private static Object retryFailHandle(MethodInvocation invocation, Retryable retryable, String executorClassName, Throwable throwable, String traceId, RetryerResultContext retryerResultContext) {
+        Method method = invocation.getMethod();
+
+        // 如果存在用户自定义MethodResult，返回用户自定义值
+        try {
+            Class<? extends MethodResult> methodResultClass = retryable.methodResult();
+            if (Objects.nonNull(methodResultClass) && !methodResultClass.isAssignableFrom(MethodResult.NoMethodResult.class)) {
+                MethodResult methodResult = methodResultClass.getDeclaredConstructor().newInstance();
+                Object resultObj = methodResult.result(retryable.scene(), executorClassName, invocation.getArguments(), throwable);
+                Class<?> returnType = ClassUtils.primitiveToWrapper(method.getReturnType());
+                if (Objects.nonNull(resultObj) && returnType.isAssignableFrom(resultObj.getClass())) {
+                    return resultObj;
+                }
+            }
+        } catch (Throwable e) {
+            SnailJobLog.LOCAL.debug("Get method result is error. traceId:[{}] scene:[{}] executorClassName:[{}]", traceId, retryable.scene(), executorClassName, throwable);
+        }
+
+        // 若返回值是NULL且是基本类型则返回默认值
+        if (Objects.isNull(retryerResultContext.getResult()) && method.getReturnType().isPrimitive()) {
+            return Defaults.defaultValue(method.getReturnType());
+        }
+        return retryerResultContext.getResult();
+    }
 
     private RetryerResultContext doHandlerRetry(MethodInvocation invocation, String traceId, Retryable retryable,
                                                 String executorClassName, String methodEntrance, Throwable throwable) {
@@ -188,7 +193,7 @@ public class SnailRetryInterceptor implements MethodInterceptor, AfterAdvice, Se
                 // 下游响应不重试码，不开启重试
                 || RetrySiteSnapshot.isRetryForStatusCode()
                 // 匹配异常信息
-                || !validate(throwable, RetryerInfoCache.get(retryable.scene(), executorClassName))
+                || !retryIfException(throwable, RetryerInfoCache.get(retryable.scene(), executorClassName))
         ) {
             if (!RetrySiteSnapshot.isMethodEntrance(methodEntrance)) {
                 SnailJobLog.LOCAL.debug("Non-method entry does not enable local retries. traceId:[{}] [{}]", traceId,
@@ -204,7 +209,7 @@ public class SnailRetryInterceptor implements MethodInterceptor, AfterAdvice, Se
             } else if (RetrySiteSnapshot.isRetryForStatusCode()) {
                 SnailJobLog.LOCAL.debug("Existing exception retry codes do not enable local retries. traceId:[{}]",
                         traceId);
-            } else if (!validate(throwable, RetryerInfoCache.get(retryable.scene(), executorClassName))) {
+            } else if (!retryIfException(throwable, RetryerInfoCache.get(retryable.scene(), executorClassName))) {
                 SnailJobLog.LOCAL.debug("Exception mismatch. traceId:[{}]", traceId);
             } else {
                 SnailJobLog.LOCAL.debug("Unknown situations do not enable local retry scenarios. traceId:[{}]",
@@ -326,7 +331,7 @@ public class SnailRetryInterceptor implements MethodInterceptor, AfterAdvice, Se
     }
 
 
-    private boolean validate(Throwable throwable, RetryerInfo retryerInfo) {
+    private boolean retryIfException(Throwable throwable, RetryerInfo retryerInfo) {
 
         Set<Class<? extends Throwable>> exclude = retryerInfo.getExclude();
         Set<Class<? extends Throwable>> include = retryerInfo.getInclude();
