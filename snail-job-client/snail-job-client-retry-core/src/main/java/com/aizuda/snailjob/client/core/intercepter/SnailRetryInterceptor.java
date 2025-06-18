@@ -10,7 +10,6 @@ import com.aizuda.snailjob.client.core.RetryCondition;
 import com.aizuda.snailjob.client.core.annotation.Propagation;
 import com.aizuda.snailjob.client.core.annotation.Retryable;
 import com.aizuda.snailjob.client.core.cache.RetryerInfoCache;
-import com.aizuda.snailjob.client.core.exception.RetryConditionException;
 import com.aizuda.snailjob.client.core.retryer.RetryerInfo;
 import com.aizuda.snailjob.client.core.retryer.RetryerResultContext;
 import com.aizuda.snailjob.client.core.strategy.RetryStrategy;
@@ -101,9 +100,6 @@ public class SnailRetryInterceptor implements MethodInterceptor, AfterAdvice, Se
         RetryerResultContext retryerResultContext;
         try {
             result = invocation.proceed();
-            if (retryIf(result, retryable, traceId, executorClassName)) {
-                throw new RetryConditionException("The current return value needs to be retried");
-            }
         } catch (Throwable t) {
             throwable = t;
         } finally {
@@ -112,7 +108,7 @@ public class SnailRetryInterceptor implements MethodInterceptor, AfterAdvice, Se
                     retryable.scene(), executorClassName);
             // 入口则开始处理重试
             retryerResultContext = doHandlerRetry(invocation, traceId, retryable, executorClassName, methodEntrance,
-                    throwable);
+                    throwable, result);
         }
 
         SnailJobLog.LOCAL.debug("Method return value is [{}]. traceId:[{}]", result, traceId, throwable);
@@ -145,7 +141,7 @@ public class SnailRetryInterceptor implements MethodInterceptor, AfterAdvice, Se
 
     private boolean retryIf(Object result, Retryable retryable, String traceId, String executorClassName) {
         try {
-            Class<? extends RetryCondition> retryConditionClass = retryable.retryIf();
+            Class<? extends RetryCondition> retryConditionClass = retryable.retryIfResult();
             if (Objects.nonNull(retryConditionClass) && !retryConditionClass.isAssignableFrom(RetryCondition.NoRetry.class)) {
                 RetryCondition retryCondition = retryConditionClass.getDeclaredConstructor().newInstance();
                 return retryCondition.shouldRetry(result);
@@ -183,11 +179,11 @@ public class SnailRetryInterceptor implements MethodInterceptor, AfterAdvice, Se
     }
 
     private RetryerResultContext doHandlerRetry(MethodInvocation invocation, String traceId, Retryable retryable,
-                                                String executorClassName, String methodEntrance, Throwable throwable) {
+                                                String executorClassName, String methodEntrance, Throwable throwable, Object result) {
 
         if (!RetrySiteSnapshot.isMethodEntrance(methodEntrance)
                 || RetrySiteSnapshot.isRunning()
-                || Objects.isNull(throwable)
+                || (Objects.isNull(throwable) && !retryIf(result, retryable, traceId, executorClassName))
                 // 重试流量不开启重试
                 || RetrySiteSnapshot.isRetryFlow()
                 // 下游响应不重试码，不开启重试

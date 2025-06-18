@@ -1,6 +1,7 @@
 package com.aizuda.snailjob.client.core.retryer;
 
 import com.aizuda.snailjob.client.core.IdempotentIdGenerate;
+import com.aizuda.snailjob.client.core.RetryCondition;
 import com.aizuda.snailjob.client.core.callback.complete.RetryCompleteCallback;
 import com.aizuda.snailjob.client.core.strategy.ExecutorMethod;
 import lombok.AllArgsConstructor;
@@ -39,6 +40,7 @@ public class RetryerInfo {
     private final boolean forceReport;
     private final long timeout;
     private final TimeUnit unit;
+    private final Class<? extends RetryCondition> retryCondition;
 
 
 }

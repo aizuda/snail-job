@@ -79,7 +79,8 @@ public class ExecutorMethodScanner implements Scanner, ApplicationContextAware {
                     async,
                     forceReport,
                     timeout,
-                    unit
+                    unit,
+                    null
             );
         } catch (Exception e) {
             SnailJobLog.LOCAL.error("Error loading retry information for {}: {}", executor.getClass().getName(), e);

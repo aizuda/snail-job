@@ -177,11 +177,12 @@ public class GrpcClientInvokeHandlerV2 implements InvocationHandler {
                 .targetLabels(targetLabels)
                 .build();
 
-        this.instanceLiveInfo = instanceManager.getALiveInstanceByRouteKey(condition);
-        if (instanceLiveInfo == null) {
+        InstanceLiveInfo newInstanceLiveInfo = instanceManager.getALiveInstanceByRouteKey(condition);
+        if (newInstanceLiveInfo == null) {
             return;
         }
 
+        this.instanceLiveInfo = newInstanceLiveInfo;
         if (Objects.nonNull(retryListener)) {
             Map<String, Object> properties = retryListener.properties();
             properties.put(NEW_INSTANCE_LIVE_INFO, instanceLiveInfo);

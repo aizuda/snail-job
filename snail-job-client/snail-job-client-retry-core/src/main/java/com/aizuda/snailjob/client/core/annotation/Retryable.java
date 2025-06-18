@@ -152,6 +152,6 @@ public @interface Retryable {
      * 当方法正常返回结果时，允许用户针对返回结果判断是否需要开启重试
      * @return RetryCondition
      */
-    Class<? extends RetryCondition> retryIf() default RetryCondition.NoRetry.class;
+    Class<? extends RetryCondition> retryIfResult() default RetryCondition.NoRetry.class;
 }
 

@@ -1,6 +1,7 @@
 package com.aizuda.snailjob.client.core.register.scan;
 
 import com.aizuda.snailjob.client.core.IdempotentIdGenerate;
+import com.aizuda.snailjob.client.core.RetryCondition;
 import com.aizuda.snailjob.client.core.Scanner;
 import com.aizuda.snailjob.client.core.annotation.Retryable;
 import com.aizuda.snailjob.client.core.callback.complete.RetryCompleteCallback;
@@ -85,7 +86,7 @@ public class RetryableScanner implements Scanner, ApplicationContextAware {
         boolean async = retryable.async();
         long timeout = retryable.timeout();
         TimeUnit unit = retryable.unit();
-
+        Class<? extends RetryCondition> retryIf = retryable.retryIfResult();
         return new RetryerInfo(retryable.scene(),
                 executorClassName,
                 new HashSet<>(Arrays.asList(include)),
@@ -103,7 +104,8 @@ public class RetryableScanner implements Scanner, ApplicationContextAware {
                 async,
                 Boolean.FALSE, // 基于注解的上报不允许强制上报
                 timeout,
-                unit
+                unit,
+                retryIf
         );
     }
 

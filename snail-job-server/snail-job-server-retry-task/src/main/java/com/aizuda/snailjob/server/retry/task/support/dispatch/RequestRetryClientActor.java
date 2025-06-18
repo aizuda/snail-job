@@ -70,10 +70,10 @@ public class RequestRetryClientActor extends AbstractActor {
                 .build());
         if (Objects.isNull(instanceLiveInfo)) {
             taskExecuteFailure(executorDTO, "Client does not exist");
-            JobLogMetaDTO jobLogMetaDTO = RetryTaskConverter.INSTANCE.toJobLogDTO(executorDTO);
-            jobLogMetaDTO.setTimestamp(nowMilli);
+            RetryLogMetaDTO retryTaskLogDTO = RetryTaskLogConverter.INSTANCE.toRetryLogMetaDTO(executorDTO);
+            retryTaskLogDTO.setTimestamp(nowMilli);
             SnailJobLog.REMOTE.error("RetryTaskId:[{}] Task scheduling failed. Reason: No executable client <|>{}<|>", executorDTO.getRetryTaskId(),
-                    jobLogMetaDTO);
+                    retryTaskLogDTO);
             return;
         }
 
