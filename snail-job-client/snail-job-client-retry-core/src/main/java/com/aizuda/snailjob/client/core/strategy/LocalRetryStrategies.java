@@ -152,10 +152,10 @@ public class LocalRetryStrategies extends AbstractRetryStrategies {
                             switch (retryType) {
                                 case ONLY_LOCAL:
                                 case LOCAL_REMOTE:
-                                    SnailJobLog.LOCAL.error("Local retry for [{}] failed, retry number [{}]", retryerInfo.getScene(), attempt.getAttemptNumber());
+                                    SnailJobLog.LOCAL.error("Local retry for [{}], retry number [{}]", retryerInfo.getScene(), attempt.getAttemptNumber());
                                     break;
                                 case ONLY_REMOTE:
-                                    SnailJobLog.LOCAL.error("Report service end execution for [{}] failed, retry number [{}]", retryerInfo.getScene(), attempt.getAttemptNumber());
+                                    SnailJobLog.LOCAL.error("Report service end execution for [{}], retry number [{}]", retryerInfo.getScene(), attempt.getAttemptNumber());
                                     break;
                                 default:
                                     throw new SnailRetryClientException("Exception retry mode [{}]", retryType.name());
@@ -166,10 +166,10 @@ public class LocalRetryStrategies extends AbstractRetryStrategies {
                             switch (retryType) {
                                 case ONLY_LOCAL:
                                 case LOCAL_REMOTE:
-                                    SnailJobLog.LOCAL.info("Local retry for [{}] successful. retry number [{}]", retryerInfo.getScene(), attempt.getAttemptNumber());
+                                    SnailJobLog.LOCAL.info("Local retry for [{}]. retry number [{}]", retryerInfo.getScene(), attempt.getAttemptNumber());
                                     break;
                                 case ONLY_REMOTE:
-                                    SnailJobLog.LOCAL.info("Report service end execution for [{}] successful. retry number [{}]", retryerInfo.getScene(), attempt.getAttemptNumber());
+                                    SnailJobLog.LOCAL.info("Report service end execution for [{}]. retry number [{}]", retryerInfo.getScene(), attempt.getAttemptNumber());
                                     break;
                                 default:
                                     throw new SnailRetryClientException("Exception retry mode [{}]. retry number [{}]", retryType.name(), attempt.getAttemptNumber());
