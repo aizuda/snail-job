@@ -54,7 +54,6 @@ public class JobTaskBatchHandler {
     private final GroupConfigMapper groupConfigMapper;
     private final List<JobExecutorResultHandler> resultHandlerList;
 
-    @Transactional
     public boolean handleResult(CompleteJobBatchDTO completeJobBatchDTO) {
         Assert.notNull(completeJobBatchDTO.getTaskType(), ()-> new SnailJobServerException("taskType can not be null"));
         Assert.notNull(completeJobBatchDTO.getRetryStatus(), ()-> new SnailJobServerException("retryStatus can not be null"));

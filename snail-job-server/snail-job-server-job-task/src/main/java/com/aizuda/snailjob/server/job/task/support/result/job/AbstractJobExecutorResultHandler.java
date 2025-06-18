@@ -6,6 +6,7 @@ import com.aizuda.snailjob.common.core.enums.JobNotifySceneEnum;
 import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskStatusEnum;
+import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.enums.JobTaskExecutorSceneEnum;
 import com.aizuda.snailjob.server.job.task.dto.JobTaskFailAlarmEventDTO;
 import com.aizuda.snailjob.server.job.task.dto.WorkflowNodeTaskExecuteDTO;
@@ -84,15 +85,20 @@ public abstract class AbstractJobExecutorResultHandler implements JobExecutorRes
             doHandleSuccess(context);
         }
 
-        // 开启下一个工作流节点
-        openNextWorkflowNode(context);
-
-        boolean res = updateStatus(context, taskBatchStatus);
-        context.setTaskBatchComplete(res);
-        if (res) {
-            // 停止客户端的任务
-            stop(context);
+        try {
+            boolean res = updateStatus(context, taskBatchStatus);
+            context.setTaskBatchComplete(res);
+            if (res) {
+                // 停止客户端的任务
+                stop(context);
+            }
+        } catch (Exception e) {
+            SnailJobLog.LOCAL.error("update job task status failed", e);
+        } finally {
+            // 开启下一个工作流节点
+            openNextWorkflowNode(context);
         }
+
     }
 
     protected void openNextWorkflowNode(final JobExecutorResultContext context) {
