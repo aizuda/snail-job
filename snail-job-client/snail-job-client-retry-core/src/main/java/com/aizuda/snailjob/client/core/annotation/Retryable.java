@@ -143,6 +143,8 @@ public @interface Retryable {
     Propagation propagation() default Propagation.REQUIRED;
 
     /**
+     * 基于异常重试时生效
+     * <p>
      * 当isThrowException=false时，允许用户返回一个自定义值
      * @return MethodResult
      */
@@ -150,6 +152,7 @@ public @interface Retryable {
 
     /**
      * 当方法正常返回结果时，允许用户针对返回结果判断是否需要开启重试
+     *
      * @return RetryCondition
      */
     Class<? extends RetryCondition> retryIfResult() default RetryCondition.NoRetry.class;

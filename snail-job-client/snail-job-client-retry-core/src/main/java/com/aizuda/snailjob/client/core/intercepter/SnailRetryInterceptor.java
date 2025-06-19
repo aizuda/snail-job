@@ -26,7 +26,6 @@ import com.aizuda.snailjob.server.model.dto.ConfigDTO;
 import com.aizuda.snailjob.server.model.dto.ConfigDTO.Notify.Recipient;
 import com.google.common.base.Defaults;
 import com.google.common.collect.Lists;
-import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.lang.ClassUtils;
@@ -46,7 +45,6 @@ import static com.aizuda.snailjob.common.core.constant.SystemConstants.YYYY_MM_D
  * @author opensnail
  * @date 2023-08-23
  */
-@Slf4j
 public class SnailRetryInterceptor implements MethodInterceptor, AfterAdvice, Serializable, Ordered {
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(YYYY_MM_DD_HH_MM_SS);
@@ -120,8 +118,8 @@ public class SnailRetryInterceptor implements MethodInterceptor, AfterAdvice, Se
                     .equals(RetryResultStatusEnum.SUCCESS.getStatus())) {
                 return retryerResultContext.getResult();
             }
-            // 若注解配置了isThrowException=false 则不抛出异常
-            else if (!retryable.isThrowException()) {
+            // 若注解配置了isThrowException=false 则不抛出异常, 必须存在异常的情况
+            else if (!retryable.isThrowException() && Objects.nonNull(throwable)) {
                 return retryFailHandle(invocation, retryable, executorClassName, throwable, traceId, retryerResultContext);
             }
         }
@@ -139,7 +137,7 @@ public class SnailRetryInterceptor implements MethodInterceptor, AfterAdvice, Se
 
     }
 
-    private boolean retryIf(Object result, Retryable retryable, String traceId, String executorClassName) {
+    private boolean retryIfResult(Object result, Retryable retryable, String traceId, String executorClassName) {
         try {
             Class<? extends RetryCondition> retryConditionClass = retryable.retryIfResult();
             if (Objects.nonNull(retryConditionClass) && !retryConditionClass.isAssignableFrom(RetryCondition.NoRetry.class)) {
@@ -183,7 +181,7 @@ public class SnailRetryInterceptor implements MethodInterceptor, AfterAdvice, Se
 
         if (!RetrySiteSnapshot.isMethodEntrance(methodEntrance)
                 || RetrySiteSnapshot.isRunning()
-                || (Objects.isNull(throwable) && !retryIf(result, retryable, traceId, executorClassName))
+                || (Objects.isNull(throwable) && !retryIfResult(result, retryable, traceId, executorClassName))
                 // 重试流量不开启重试
                 || RetrySiteSnapshot.isRetryFlow()
                 // 下游响应不重试码，不开启重试
