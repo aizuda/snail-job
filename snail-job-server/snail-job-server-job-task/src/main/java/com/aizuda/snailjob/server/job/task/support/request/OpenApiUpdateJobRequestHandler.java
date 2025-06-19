@@ -16,10 +16,12 @@ import com.aizuda.snailjob.server.common.strategy.WaitStrategies;
 import com.aizuda.snailjob.server.common.util.CronUtils;
 import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.common.util.HttpHeaderUtil;
+import com.aizuda.snailjob.server.common.util.TriggerIntervalUtils;
 import com.aizuda.snailjob.server.common.vo.JobRequestVO;
 import com.aizuda.snailjob.server.job.task.support.cache.ResidentTaskCache;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.Job;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import lombok.RequiredArgsConstructor;
@@ -70,20 +72,23 @@ public class OpenApiUpdateJobRequestHandler extends PostHttpRequestHandler {
         updateJob.setResident(isResident(jobRequestVO));
         updateJob.setNamespaceId(namespace);
 
+        // check triggerInterval
+        checkTriggerInterval(jobRequestVO);
+
         // 工作流任务
         if (Objects.equals(jobRequestVO.getTriggerType(), SystemConstants.WORKFLOW_TRIGGER_TYPE)) {
-            job.setNextTriggerAt(0L);
+            updateJob.setNextTriggerAt(0L);
             // 非常驻任务 > 非常驻任务
         } else if (Objects.equals(job.getResident(), StatusEnum.NO.getStatus()) && Objects.equals(
                 updateJob.getResident(),
                 StatusEnum.NO.getStatus())) {
-            updateJob.setNextTriggerAt(calculateNextTriggerAt(jobRequestVO, DateUtils.toNowMilli()));
+            updateJob.setNextTriggerAt(calculateNextTriggerAt(updateJob, DateUtils.toNowMilli()));
         } else if (Objects.equals(job.getResident(), StatusEnum.YES.getStatus()) && Objects.equals(
                 updateJob.getResident(), StatusEnum.NO.getStatus())) {
             // 常驻任务的触发时间
             long time = Optional.ofNullable(ResidentTaskCache.get(jobRequestVO.getId()))
                     .orElse(DateUtils.toNowMilli());
-            updateJob.setNextTriggerAt(calculateNextTriggerAt(jobRequestVO, time));
+            updateJob.setNextTriggerAt(calculateNextTriggerAt(updateJob, time));
             // 老的是不是常驻任务 新的是常驻任务 需要使用当前时间计算下次触发时间
         } else if (Objects.equals(job.getResident(), StatusEnum.NO.getStatus()) && Objects.equals(
                 updateJob.getResident(), StatusEnum.YES.getStatus())) {
@@ -92,9 +97,17 @@ public class OpenApiUpdateJobRequestHandler extends PostHttpRequestHandler {
 
         // 禁止更新组
         updateJob.setGroupName(null);
-        boolean insert =  1 == jobMapper.updateById(updateJob);
-        return new SnailJobRpcResult(insert, retryRequest.getReqId());
 
+        LambdaUpdateWrapper<Job> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(Job::getId, jobRequestVO.getId());
+        updateWrapper.set(Job::getOwnerId, jobRequestVO.getOwnerId());
+        boolean update = 1 == jobMapper.update(updateJob, updateWrapper);
+        return new SnailJobRpcResult(update, retryRequest.getReqId());
+
+    }
+
+    private void checkTriggerInterval(JobRequestVO jobRequestVO) {
+        TriggerIntervalUtils.checkTriggerInterval(jobRequestVO.getTriggerInterval(), jobRequestVO.getTriggerType());
     }
 
     private Integer isResident(JobRequestVO jobRequestVO) {
@@ -102,14 +115,16 @@ public class OpenApiUpdateJobRequestHandler extends PostHttpRequestHandler {
             return StatusEnum.NO.getStatus();
         }
 
-        if (jobRequestVO.getTriggerType() == WaitStrategies.WaitStrategyEnum.FIXED.getType()) {
+        if (Objects.equals(jobRequestVO.getTriggerType(), WaitStrategies.WaitStrategyEnum.FIXED.getType())) {
             if (Integer.parseInt(jobRequestVO.getTriggerInterval()) < 10) {
                 return StatusEnum.YES.getStatus();
             }
-        } else if (jobRequestVO.getTriggerType() == WaitStrategies.WaitStrategyEnum.CRON.getType()) {
+        } else if (Objects.equals(jobRequestVO.getTriggerType(), WaitStrategies.WaitStrategyEnum.CRON.getType())) {
             if (CronUtils.getExecuteInterval(jobRequestVO.getTriggerInterval()) < 10 * 1000) {
                 return StatusEnum.YES.getStatus();
             }
+        } else if (Objects.equals(jobRequestVO.getTriggerType(), WaitStrategies.WaitStrategyEnum.POINT_IN_TIME.getType())) {
+            return StatusEnum.NO.getStatus();
         } else {
             throw new SnailJobServerException("Unknown trigger type");
         }
@@ -117,14 +132,14 @@ public class OpenApiUpdateJobRequestHandler extends PostHttpRequestHandler {
         return StatusEnum.NO.getStatus();
     }
 
-    private static Long calculateNextTriggerAt(final JobRequestVO jobRequestVO, Long time) {
-        if (Objects.equals(jobRequestVO.getTriggerType(), SystemConstants.WORKFLOW_TRIGGER_TYPE)) {
+    private static Long calculateNextTriggerAt(final Job job, Long time) {
+        if (Objects.equals(job.getTriggerType(), SystemConstants.WORKFLOW_TRIGGER_TYPE)) {
             return 0L;
         }
 
-        WaitStrategy waitStrategy = WaitStrategies.WaitStrategyEnum.getWaitStrategy(jobRequestVO.getTriggerType());
+        WaitStrategy waitStrategy = WaitStrategies.WaitStrategyEnum.getWaitStrategy(job.getTriggerType());
         WaitStrategies.WaitStrategyContext waitStrategyContext = new WaitStrategies.WaitStrategyContext();
-        waitStrategyContext.setTriggerInterval(jobRequestVO.getTriggerInterval());
+        waitStrategyContext.setTriggerInterval(job.getTriggerInterval());
         waitStrategyContext.setNextTriggerAt(time);
         return waitStrategy.computeTriggerTime(waitStrategyContext);
     }

@@ -1,11 +1,20 @@
 package com.aizuda.snailjob.server.common.convert;
 
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.StrUtil;
+import com.aizuda.snailjob.common.core.util.JsonUtil;
+import com.aizuda.snailjob.server.common.util.TriggerIntervalUtils;
 import com.aizuda.snailjob.server.common.vo.JobRequestVO;
 import com.aizuda.snailjob.template.datasource.persistence.po.Job;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Mappings;
 import org.mapstruct.factory.Mappers;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * @author: opensnail
@@ -16,9 +25,36 @@ import java.util.List;
 public interface JobConverter {
 
     JobConverter INSTANCE = Mappers.getMapper(JobConverter.class);
-
+    @Mappings({
+            @Mapping(target = "notifyIds", expression = "java(JobConverter.toNotifyIdsStr(jobRequestVO.getNotifyIds()))"),
+            @Mapping(target = "triggerInterval", expression = "java(JobConverter.toTriggerInterval(jobRequestVO))")
+    })
     Job convert(JobRequestVO jobRequestVO);
 
     List<JobRequestVO> convertList(List<Job> jobs);
 
+    static Set<Long> toNotifyIds(String notifyIds) {
+        if (StrUtil.isBlank(notifyIds)) {
+            return new HashSet<>();
+        }
+
+        return new HashSet<>(JsonUtil.parseList(notifyIds, Long.class));
+    }
+
+    static String toNotifyIdsStr(Set<Long> notifyIds) {
+        if (CollUtil.isEmpty(notifyIds)) {
+            return StrUtil.EMPTY;
+        }
+
+        return JsonUtil.toJsonString(notifyIds);
+    }
+
+    static String toTriggerInterval(JobRequestVO jobRequestVO) {
+        String triggerInterval = jobRequestVO.getTriggerInterval();
+        if (StrUtil.isBlank(triggerInterval) || Objects.isNull(jobRequestVO.getTriggerType())) {
+            return StrUtil.EMPTY;
+        }
+
+        return TriggerIntervalUtils.getPointInTimeStr(triggerInterval, jobRequestVO.getTriggerType());
+    }
 }

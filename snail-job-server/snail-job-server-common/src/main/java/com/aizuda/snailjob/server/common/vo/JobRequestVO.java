@@ -1,12 +1,15 @@
 package com.aizuda.snailjob.server.common.vo;
 
 import com.aizuda.snailjob.common.core.enums.ExecutorTypeEnum;
+import com.aizuda.snailjob.common.core.enums.JobBlockStrategyEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
+
+import java.util.Set;
 
 /**
  * @author opensnail
@@ -81,6 +84,7 @@ public class JobRequestVO {
 
     /**
      * 阻塞策略 1、丢弃 2、覆盖 3、并行
+     * {@link JobBlockStrategyEnum}
      */
     @NotNull(message = "blockStrategy cannot be null")
     private Integer blockStrategy;
@@ -120,5 +124,21 @@ public class JobRequestVO {
      * 描述
      */
     private String description;
+
+    /**
+     * 通知告警场景配置id列表
+     */
+    private Set<Long> notifyIds;
+
+    /**
+     * 负责人id
+     */
+    private Long ownerId;
+
+    /**
+     * 标签
+     * json格式，如：{"key1":"value1","key2":"value2"}
+     */
+    private String labels;
 
 }

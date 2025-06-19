@@ -6,13 +6,14 @@ import com.aizuda.snailjob.client.common.exception.SnailJobClientException;
 import com.aizuda.snailjob.client.job.core.dto.RequestAddOrUpdateJobDTO;
 import com.aizuda.snailjob.client.job.core.enums.AllocationAlgorithmEnum;
 import com.aizuda.snailjob.client.job.core.enums.TriggerTypeEnum;
+import com.aizuda.snailjob.client.job.core.util.TriggerIntervalUtils;
 import com.aizuda.snailjob.common.core.enums.*;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.util.*;
 
 import static com.aizuda.snailjob.client.job.core.enums.TriggerTypeEnum.*;
 
@@ -164,7 +165,28 @@ public abstract class AbstractParamsHandler<H, R> extends AbstractJobRequestHand
     public H setTriggerInterval(Integer triggerInterval) {
         Assert.isTrue(reqDTO.getTriggerType() == SCHEDULED_TIME.getType(),
                 () -> new SnailJobClientException("This method is only limited to fixed time usage"));
+        // 延时任务不可使用
+        Assert.isFalse(reqDTO.getTriggerType() == POINT_IN_TIME.getType(),
+                () -> new SnailJobClientException("This configuration is not available for delay tasks"));
         setTriggerInterval(String.valueOf(triggerInterval));
+        return r;
+    }
+
+    /**
+     * 设置触发时间；
+     * 单位：秒
+     * 注意: 此方法必须满足【triggerType==POINT_IN_TIME】
+     *
+     * @param triggerTime 触发时间 使用时间戳
+     * @return r
+     */
+    public H setTriggerTime(Set<LocalDateTime> triggerTime) {
+        Assert.isTrue(reqDTO.getTriggerType() == POINT_IN_TIME.getType(),
+                () -> new SnailJobClientException("This method can only be used for delay tasks"));
+        // 校验间隔需要大于十秒
+        String parseJson = TriggerIntervalUtils.checkTriggerTimeAndParseJson(triggerTime);
+
+        setTriggerInterval(parseJson);
         return r;
     }
 
@@ -247,6 +269,24 @@ public abstract class AbstractParamsHandler<H, R> extends AbstractJobRequestHand
      */
     public H setDescription(String description) {
         reqDTO.setDescription(description);
+        return r;
+    }
+
+    /**
+     * 设置定时任务调度标签
+     *
+     * @param labels 任务调度标签
+     * @return r
+     */
+    public H setLabels(Map<String, String> labels) {
+        if (labels == null) {
+            return r;
+        }
+        // 校验 key 不能为 state
+        if (labels.containsKey("state")) {
+            throw new SnailJobClientException("Label key cannot be 'state'");
+        }
+        reqDTO.setLabels(JsonUtil.toJsonString(labels));
         return r;
     }
 
