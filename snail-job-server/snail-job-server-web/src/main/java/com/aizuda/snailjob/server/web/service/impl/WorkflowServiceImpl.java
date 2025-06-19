@@ -424,6 +424,7 @@ public class WorkflowServiceImpl implements WorkflowService {
                     JobTaskConfig jobTask = nodeInfo.getJobTask();
                     if (Objects.nonNull(jobTask)) {
                         jobTask.setJobName(jobMap.getOrDefault(jobTask.getJobId(), new Job()).getJobName());
+                        jobTask.setLabels(jobMap.getOrDefault(jobTask.getJobId(), new Job()).getLabels());
                     }
                 }).collect(Collectors.toMap(WorkflowDetailResponseVO.NodeInfo::getId, i -> i));
 
