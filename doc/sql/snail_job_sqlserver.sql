@@ -2,7 +2,7 @@
  SnailJob Database Transfer Tool
  Source Server Type    : MySQL
  Target Server Type    : Microsoft SQL Server
- Date: 2025-06-17 08:52:14
+ Date: 2025-06-21 23:34:44
 */
 
 
@@ -401,18 +401,19 @@ GO
 -- sj_retry_dead_letter
 CREATE TABLE sj_retry_dead_letter
 (
-    id            bigint        NOT NULL PRIMARY KEY IDENTITY,
-    namespace_id  nvarchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
-    group_name    nvarchar(64)  NOT NULL,
-    group_id      bigint        NOT NULL,
-    scene_name    nvarchar(64)  NOT NULL,
-    scene_id      bigint        NOT NULL,
-    idempotent_id nvarchar(64)  NOT NULL,
-    biz_no        nvarchar(64)  NOT NULL DEFAULT '',
-    executor_name nvarchar(512) NOT NULL DEFAULT '',
-    args_str      nvarchar(max) NOT NULL,
-    ext_attrs     nvarchar(max) NOT NULL,
-    create_dt     datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP
+    id              bigint        NOT NULL PRIMARY KEY IDENTITY,
+    namespace_id    nvarchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
+    group_name      nvarchar(64)  NOT NULL,
+    group_id        bigint        NOT NULL,
+    scene_name      nvarchar(64)  NOT NULL,
+    scene_id        bigint        NOT NULL,
+    idempotent_id   nvarchar(64)  NOT NULL,
+    biz_no          nvarchar(64)  NOT NULL DEFAULT '',
+    executor_name   nvarchar(512) NOT NULL DEFAULT '',
+    serializer_name nvarchar(32)  NOT NULL DEFAULT 'jackson',
+    args_str        nvarchar(max) NOT NULL,
+    ext_attrs       nvarchar(max) NOT NULL,
+    create_dt       datetime2     NOT NULL DEFAULT CURRENT_TIMESTAMP
 )
 GO
 
@@ -489,6 +490,13 @@ EXEC sp_addextendedproperty
 GO
 
 EXEC sp_addextendedproperty
+     'MS_Description', N'执行方法参数序列化器名称',
+     'SCHEMA', N'dbo',
+     'TABLE', N'sj_retry_dead_letter',
+     'COLUMN', N'serializer_name'
+GO
+
+EXEC sp_addextendedproperty
      'MS_Description', N'执行方法参数',
      'SCHEMA', N'dbo',
      'TABLE', N'sj_retry_dead_letter',
@@ -529,7 +537,7 @@ CREATE TABLE sj_retry
     executor_name   nvarchar(512) NOT NULL DEFAULT '',
     args_str        nvarchar(max) NOT NULL,
     ext_attrs       nvarchar(max) NOT NULL,
-    serializer_name nvarchar(64)  NOT NULL,
+    serializer_name nvarchar(32)  NOT NULL DEFAULT 'jackson',
     next_trigger_at bigint        NOT NULL,
     retry_count     int           NOT NULL DEFAULT 0,
     retry_status    tinyint       NOT NULL DEFAULT 0,
@@ -2872,4 +2880,3 @@ EXEC sp_addextendedproperty
      'SCHEMA', N'dbo',
      'TABLE', N'sj_job_executor'
 GO
-

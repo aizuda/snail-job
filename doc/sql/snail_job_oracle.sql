@@ -2,7 +2,7 @@
  SnailJob Database Transfer Tool
  Source Server Type    : MySQL
  Target Server Type    : Oracle
- Date: 2025-06-17 08:45:26
+ Date: 2025-06-21 23:33:11
 */
 
 
@@ -142,18 +142,19 @@ COMMENT ON TABLE sj_notify_recipient IS '告警通知接收人';
 -- sj_retry_dead_letter
 CREATE TABLE sj_retry_dead_letter
 (
-    id            number GENERATED ALWAYS AS IDENTITY,
-    namespace_id  varchar2(64)  DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' NULL,
-    group_name    varchar2(64)                                             NULL,
-    group_id      number                                                   NOT NULL,
-    scene_name    varchar2(64)                                             NULL,
-    scene_id      number                                                   NOT NULL,
-    idempotent_id varchar2(64)                                             NULL,
-    biz_no        varchar2(64)  DEFAULT ''                                 NULL,
-    executor_name varchar2(512) DEFAULT ''                                 NULL,
-    args_str      clob                                                     NULL,
-    ext_attrs     clob                                                     NULL,
-    create_dt     date          DEFAULT CURRENT_TIMESTAMP                  NOT NULL
+    id              number GENERATED ALWAYS AS IDENTITY,
+    namespace_id    varchar2(64)  DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' NULL,
+    group_name      varchar2(64)                                             NULL,
+    group_id        number                                                   NOT NULL,
+    scene_name      varchar2(64)                                             NULL,
+    scene_id        number                                                   NOT NULL,
+    idempotent_id   varchar2(64)                                             NULL,
+    biz_no          varchar2(64)  DEFAULT ''                                 NULL,
+    executor_name   varchar2(512) DEFAULT ''                                 NULL,
+    serializer_name varchar2(32)  DEFAULT 'jackson'                          NULL,
+    args_str        clob                                                     NULL,
+    ext_attrs       clob                                                     NULL,
+    create_dt       date          DEFAULT CURRENT_TIMESTAMP                  NOT NULL
 );
 
 ALTER TABLE sj_retry_dead_letter
@@ -173,6 +174,7 @@ COMMENT ON COLUMN sj_retry_dead_letter.scene_id IS '场景ID';
 COMMENT ON COLUMN sj_retry_dead_letter.idempotent_id IS '幂等id';
 COMMENT ON COLUMN sj_retry_dead_letter.biz_no IS '业务编号';
 COMMENT ON COLUMN sj_retry_dead_letter.executor_name IS '执行器名称';
+COMMENT ON COLUMN sj_retry_dead_letter.serializer_name IS '执行方法参数序列化器名称';
 COMMENT ON COLUMN sj_retry_dead_letter.args_str IS '执行方法参数';
 COMMENT ON COLUMN sj_retry_dead_letter.ext_attrs IS '扩展字段';
 COMMENT ON COLUMN sj_retry_dead_letter.create_dt IS '创建时间';
@@ -192,7 +194,7 @@ CREATE TABLE sj_retry
     executor_name   varchar2(512) DEFAULT ''                                 NULL,
     args_str        clob                                                     NULL,
     ext_attrs       clob                                                     NULL,
-    serializer_name varchar2(64)                                             NULL,
+    serializer_name varchar2(32)  DEFAULT 'jackson'                          NULL,
     next_trigger_at number                                                   NOT NULL,
     retry_count     number        DEFAULT 0                                  NOT NULL,
     retry_status    smallint      DEFAULT 0                                  NOT NULL,

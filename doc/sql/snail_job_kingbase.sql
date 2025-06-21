@@ -2,7 +2,7 @@
  SnailJob Database Transfer Tool
  Source Server Type    : MySQL
  Target Server Type    : KingbaseES
- Date: 2025-06-17 08:50:19
+ Date: 2025-06-21 23:27:33
 */
 
 
@@ -130,18 +130,19 @@ COMMENT ON TABLE sj_notify_recipient IS '告警通知接收人';
 -- sj_retry_dead_letter
 CREATE TABLE sj_retry_dead_letter
 (
-    id            bigserial PRIMARY KEY,
-    namespace_id  varchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
-    group_name    varchar(64)  NOT NULL,
-    group_id      bigint       NOT NULL,
-    scene_name    varchar(64)  NOT NULL,
-    scene_id      bigint       NOT NULL,
-    idempotent_id varchar(64)  NOT NULL,
-    biz_no        varchar(64)  NULL     DEFAULT '',
-    executor_name varchar(512) NULL     DEFAULT '',
-    args_str      text         NULL,
-    ext_attrs     text         NULL,
-    create_dt     timestamp    NOT NULL DEFAULT CURRENT_TIMESTAMP
+    id              bigserial PRIMARY KEY,
+    namespace_id    varchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
+    group_name      varchar(64)  NOT NULL,
+    group_id        bigint       NOT NULL,
+    scene_name      varchar(64)  NOT NULL,
+    scene_id        bigint       NOT NULL,
+    idempotent_id   varchar(64)  NOT NULL,
+    biz_no          varchar(64)  NULL     DEFAULT '',
+    executor_name   varchar(512) NULL     DEFAULT '',
+    serializer_name varchar(32)  NOT NULL DEFAULT 'jackson',
+    args_str        text         NULL,
+    ext_attrs       text         NULL,
+    create_dt       timestamp    NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX idx_sj_retry_dead_letter_01 ON sj_retry_dead_letter (namespace_id, group_name, scene_name);
@@ -158,6 +159,7 @@ COMMENT ON COLUMN sj_retry_dead_letter.scene_id IS '场景ID';
 COMMENT ON COLUMN sj_retry_dead_letter.idempotent_id IS '幂等id';
 COMMENT ON COLUMN sj_retry_dead_letter.biz_no IS '业务编号';
 COMMENT ON COLUMN sj_retry_dead_letter.executor_name IS '执行器名称';
+COMMENT ON COLUMN sj_retry_dead_letter.serializer_name IS '执行方法参数序列化器名称';
 COMMENT ON COLUMN sj_retry_dead_letter.args_str IS '执行方法参数';
 COMMENT ON COLUMN sj_retry_dead_letter.ext_attrs IS '扩展字段';
 COMMENT ON COLUMN sj_retry_dead_letter.create_dt IS '创建时间';
@@ -177,7 +179,7 @@ CREATE TABLE sj_retry
     executor_name   varchar(512) NULL     DEFAULT '',
     args_str        text         NULL,
     ext_attrs       text         NULL,
-    serializer_name varchar(64)  NOT NULL,
+    serializer_name varchar(32)  NOT NULL DEFAULT 'jackson',
     next_trigger_at bigint       NOT NULL,
     retry_count     int          NOT NULL DEFAULT 0,
     retry_status    smallint     NOT NULL DEFAULT 0,
